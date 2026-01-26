@@ -1,0 +1,74 @@
+{
+  "name": "@digelo/signal",
+  "version": "1.0.0",
+  "description": "Production-grade backend framework for serverless environments. Meteor-like DX, stateless & database-agnostic.",
+  "homepage": "https://github.com/DiogoAngelim/signal",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DiogoAngelim/signal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DiogoAngelim/signal/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Diogo Angelim"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "build:clean": "npm run clean && npm run build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:production": "ts-node test/production.test.ts",
+    "clean": "rm -rf dist coverage",
+    "type-check": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "backend",
+    "framework",
+    "serverless",
+    "meteor",
+    "database-agnostic",
+    "typescript",
+    "queries",
+    "mutations",
+    "events",
+    "production-ready",
+    "stateless",
+    "event-driven"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.0"
+  }
+}
