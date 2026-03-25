@@ -11,6 +11,8 @@ dist/
 coverage/
 .nyc_output/
 *.tsbuildinfo
+landing/.next/
+landing/out/
 
 # Env & credentials
 .env
