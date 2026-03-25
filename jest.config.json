@@ -1,0 +1,41 @@
+{
+  "preset": "ts-jest",
+  "testEnvironment": "node",
+  "roots": [
+    "<rootDir>/test"
+  ],
+  "testMatch": [
+    "**/*.test.ts"
+  ],
+  "moduleFileExtensions": [
+    "ts",
+    "js"
+  ],
+  "collectCoverageFrom": [
+    "packages/**/*.ts",
+    "!packages/**/*.d.ts",
+    "!packages/**/index.ts",
+    "!packages/db/adapters/SqlAdapterBase.ts"
+  ],
+  "coverageThreshold": {
+    "global": {
+      "lines": 90,
+      "functions": 90,
+      "branches": 85,
+      "statements": 90
+    }
+  },
+  "coverageReporters": [
+    "text",
+    "text-summary",
+    "html"
+  ],
+  "globals": {
+    "ts-jest": {
+      "tsconfig": {
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true
+      }
+    }
+  }
+}

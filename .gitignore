@@ -1,0 +1,38 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Builds & coverage
+dist/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+landing/.next/
+landing/out/
+
+# Env & credentials
+.env
+.env.*
+!.env.example
+.npmrc
+
+# IDE/editor
+.vscode/
+.idea/
+.DS_Store
+
+# Tests
+jest-cache/
+jest-test-results.json
+
+# Packages
+*.tgz
+
+# Temp
+.tmp/
+tmp/
+temp/
