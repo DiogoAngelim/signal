@@ -1,102 +1,123 @@
-# Signal - Quick Reference
+# Quick Reference
 
-## Setup & Usage
-```typescript
-import { Signal, MemoryAdapter } from "./index";
+Use this page when you already know what you need and just want the API names.
+
+## Basic Setup
+
+```ts
+import { Signal, MemoryAdapter, InMemoryTransport } from "./index";
 
 const signal = new Signal();
-signal.configure({ db: new MemoryAdapter() });
 
-signal.collection("posts")
-  .access({ query: { list: "public" }, mutation: { create: "auth" } })
-  .query("list", async (params, ctx) => await ctx.db.find("posts", {}))
-  .mutation("create", async (params, ctx) => {
-    const id = await ctx.db.insert("posts", params);
-    await ctx.emit("posts.created", { id });
-    return { id };
-  });
-
-await signal.start();
+signal.configure({
+  db: new MemoryAdapter(),
+  transport: new InMemoryTransport(),
+});
 ```
 
-## Documentation Map
-- **START_HERE.md** - Navigation guide
-- **README.md** - Full user guide
-- **ARCHITECTURE.md** - System design
-- **DESIGN.md** - Design rationale
-- **EXTENDING.md** - Extension patterns
-- **FEATURES.md** - Feature inventory
-- **EXAMPLE.ts** - Quick example
-- **QUICK_REFERENCE.md** - This file
+## Collections
+
+```ts
+signal
+  .collection("posts")
+  .access({
+    query: { list: "public" },
+    mutation: { create: "auth" },
+  })
+  .query("list", handler)
+  .mutation("create", handler);
+```
 
 ## Core APIs
-- `signal.configure(config)` - Configure with db & transport
-- `signal.collection(name)` - Create collection builder
-- `signal.start()` - Start framework
-- `signal.query(key, params, ctx)` - Execute query
-- `signal.mutation(key, params, ctx)` - Execute mutation
+
+- `signal.configure(config)` configures the framework
+- `signal.collection(name)` starts a collection builder
+- `signal.start()` locks registration and starts the app
+- `signal.query(key, params, ctx)` runs a named query
+- `signal.mutation(key, params, ctx)` runs a named mutation
+
+## Context
+
+The context is request-scoped and immutable.
+
+Common fields:
+
+- `ctx.db`
+- `ctx.auth`
+- `ctx.emit`
+- `ctx.request`
+- `ctx.env`
 
 ## Access Control
-```typescript
+
+```ts
 .access({
-  query: { list: "public", mine: "auth" },
-  mutation: { create: "auth", delete: "admin" }
-})
+  query: {
+    list: "public",
+    mine: "auth",
+  },
+  mutation: {
+    create: "auth",
+    delete: "admin",
+  },
+});
 ```
 
-Built-in rules: `"public"`, `"auth"`, `"admin"`
-Custom: `(ctx) => boolean | Promise<boolean>`
+Rules:
 
-## HTTP Interface
-```typescript
-import { createHandler } from "./index";
-app.post("/signal/query", createHandler(signal));
-app.post("/signal/mutation", createHandler(signal));
-```
+- `"public"` means anyone can run it
+- `"auth"` means the user must be logged in
+- `"admin"` means the user must have the admin role
+- custom rules can be a function that returns `boolean` or `Promise<boolean>`
 
-Request: `POST /signal/query` with `{ key, params }`
-Response: `{ ok: true, data: ... }` or `{ ok: false, error: {...} }`
+## Database Methods
 
-## Database
-```typescript
+```ts
 ctx.db.find(collection, query)
 ctx.db.findOne(collection, query)
+ctx.db.findById(collection, id)
+ctx.db.count(collection, query)
 ctx.db.insert(collection, doc)
 ctx.db.update(collection, id, update)
 ctx.db.delete(collection, id)
 ```
 
 ## Events
-```typescript
+
+```ts
 await ctx.emit("posts.created", { id, title });
-transport.getEventBus().subscribe("posts.*", (event) => {
-  // Matches: posts.created, posts.updated, etc.
-});
+```
+
+Pattern matching examples:
+
+- `posts.created`
+- `posts.*`
+- `*`
+
+## HTTP
+
+```ts
+import { createHandler } from "./index";
+
+app.post("/signal/query", createHandler(signal));
+app.post("/signal/mutation", createHandler(signal));
 ```
 
 ## Authentication
-```typescript
+
+```ts
 import { AuthProvider } from "./index";
+
 const auth = AuthProvider.fromHeaders(req.headers);
-if (AuthProvider.isAuthenticated(auth)) { ... }
 ```
 
-## Common Tasks
-| Task | How |
-|------|-----|
-| Deploy to Vercel | `export default createHandler(signal)` |
-| Use with Express | `app.post("/signal/query", createHandler(signal))` |
-| Custom database | Extend `SignalDB` interface |
-| Production logging | Implement `SignalLogger` |
-| Custom events | Implement `SignalTransport` |
+## Errors
 
-## Error Handling
-```typescript
+```ts
 import { SignalValidationError, SignalAuthError } from "./index";
-throw new SignalValidationError("message", { field: ["error"] });
+
+throw new SignalValidationError("Invalid input");
 ```
 
-All errors have: `code`, `message`, `statusCode`, safe serialization
+All framework errors are safe to serialize and include a stable `code`, `message`, and `statusCode`.
 
----
-**Run `npm run test` to see full example. See START_HERE.md for complete guide.**
