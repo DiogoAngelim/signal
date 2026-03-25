@@ -61,7 +61,13 @@
     "stateless",
     "event-driven"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.6.0",
+    "next": "^16.2.1",
+    "react": "^19.2.4",
+    "tailwind-merge": "^3.5.0"
+  },
   "devDependencies": {
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",

@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #0a0a12;
+  --color-foreground: #f0f0f5;
+  --color-muted: #1a1a2e;
+  --color-muted-foreground: #9898b0;
+  --color-primary: #f59e0b;
+  --color-primary-foreground: #0a0a12;
+  --color-secondary: #312e81;
+  --color-secondary-foreground: #e0e7ff;
+  --color-accent: #ff7b00;
+  --color-accent-foreground: #0a0a12;
+  --color-border: #2a2a40;
+  --color-card: #12121e;
+  --color-card-foreground: #f0f0f5;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+/* Cosmic glow effect */
+.glow-amber {
+  box-shadow: 0 0 40px rgba(245, 158, 11, 0.3), 0 0 80px rgba(245, 158, 11, 0.1);
+}
+
+.glow-text {
+  text-shadow: 0 0 30px rgba(245, 158, 11, 0.5);
+}
+
+/* Animated gradient border */
+@keyframes gradient-rotate {
+  0% { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+
+/* Star animation */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+/* Pulse glow */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
