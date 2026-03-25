@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Menu, X, Github } from "lucide-react";
+import { Menu, X, Github, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -35,6 +35,10 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-6 py-4">
         <nav className="flex items-center justify-between">
           <a href="#" className="flex items-center gap-2 group">
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary via-secondary to-accent">
+              <Zap className="w-5 h-5 text-white" />
+              <div className="absolute inset-0 rounded-xl bg-primary/20 blur-xl group-hover:bg-primary/30 transition-colors" />
+            </div>
             <span className="text-xl font-bold tracking-tight">Signal</span>
           </a>
 

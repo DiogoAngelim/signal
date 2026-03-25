@@ -1,4 +1,4 @@
-import { Github, Heart } from "lucide-react";
+import { Zap, Github, Heart } from "lucide-react";
 
 export function Footer() {
   return (
@@ -6,6 +6,9 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary via-secondary to-accent">
+              <Zap className="w-4 h-4 text-white" />
+            </div>
             <span className="font-semibold">Signal</span>
             <span className="text-muted-foreground text-sm">v1.0.0</span>
           </div>
