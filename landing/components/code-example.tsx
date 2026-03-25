@@ -158,13 +158,13 @@ export function CodeExample() {
 
 function highlightSyntax(line: string): string {
   return line
-    // Comments
-    .replace(/(\/\/.*$)/g, '<span class="text-muted-foreground/60">$1</span>')
     // Strings
     .replace(
       /("[^"]*"|'[^']*')/g,
       '<span class="text-brain-tissue">$1</span>'
     )
+    // Comments
+    .replace(/(\/\/.*$)/g, '<span class="text-muted-foreground/60">$1</span>')
     // Keywords
     .replace(
       /\b(import|from|const|await|async|return|new)\b/g,
