@@ -36,6 +36,7 @@
     "npm": ">=9.0.0"
   },
   "scripts": {
+    "dev": "cd landing && npm run dev",
     "build": "tsc",
     "build:clean": "npm run clean && npm run build",
     "test": "jest",

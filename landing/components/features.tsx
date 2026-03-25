@@ -70,7 +70,7 @@ export function Features() {
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
             Built for{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
               production
             </span>
           </h2>
@@ -84,14 +84,14 @@ export function Features() {
           {features.map((feature, index) => (
             <div
               key={feature.title}
-              className="group relative p-6 rounded-2xl bg-card/50 border border-border hover:border-primary/30 transition-all duration-300 hover:bg-card"
+              className="group relative p-6 rounded-2xl bg-card/50 border border-border hover:border-brain-core-glow/30 transition-all duration-300 hover:bg-card"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               {/* Hover glow */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-brain-core-light/6 via-brain-core-glow/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
               <div className="relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center mb-4 group-hover:from-primary/30 group-hover:to-accent/20 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brain-core-light/20 via-brain-core-glow/10 to-brain-core-rose/10 flex items-center justify-center mb-4 group-hover:from-brain-core-light/30 group-hover:to-brain-core-rose/20 transition-colors">
                   <feature.icon className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>

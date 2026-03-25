@@ -75,7 +75,7 @@ export function CodeExample() {
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
             Get started in{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
               minutes
             </span>
           </h2>
@@ -91,9 +91,9 @@ export function CodeExample() {
             <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-brain-core-light/80" />
+                  <div className="w-3 h-3 rounded-full bg-brain-core-glow/80" />
+                  <div className="w-3 h-3 rounded-full bg-brain-core-rose/80" />
                 </div>
                 <div className="ml-4 flex gap-1">
                   {tabs.map((tab) => (
@@ -118,7 +118,7 @@ export function CodeExample() {
               >
                 {copied ? (
                   <>
-                    <Check className="w-4 h-4 text-green-500" />
+                    <Check className="w-4 h-4 text-brain-core-glow" />
                     <span>Copied!</span>
                   </>
                 ) : (
@@ -163,7 +163,7 @@ function highlightSyntax(line: string): string {
     // Strings
     .replace(
       /("[^"]*"|'[^']*')/g,
-      '<span class="text-green-400">$1</span>'
+      '<span class="text-brain-tissue">$1</span>'
     )
     // Keywords
     .replace(
@@ -178,6 +178,6 @@ function highlightSyntax(line: string): string {
     // Types/classes
     .replace(
       /\b(Signal|MemoryAdapter|InMemoryTransport)\b/g,
-      '<span class="text-secondary-foreground">$1</span>'
+      '<span class="text-brain-core-light">$1</span>'
     );
 }

@@ -4,32 +4,32 @@ const packages = [
   {
     name: "core",
     description: "Signal.ts, Registry, Collection, Lifecycle, Context",
-    color: "from-primary to-accent",
+    color: "from-brain-core-light via-brain-core-glow to-brain-core-rose",
   },
   {
     name: "db",
     description: "Database abstraction + adapters",
-    color: "from-accent to-primary",
+    color: "from-brain-core-rose via-brain-core-root to-brain-core-light",
   },
   {
     name: "transport",
     description: "Event bus + transport adapters",
-    color: "from-primary/80 to-accent/80",
+    color: "from-brain-core-light/80 via-brain-core-glow/80 to-brain-core-rose/80",
   },
   {
     name: "http",
     description: "HTTP handler, router, validation",
-    color: "from-accent/80 to-primary/80",
+    color: "from-brain-core-rose/80 via-brain-core-root/80 to-brain-core-light/80",
   },
   {
     name: "security",
     description: "Auth, access control",
-    color: "from-primary to-accent",
+    color: "from-brain-core-light via-brain-core-glow to-brain-core-rose",
   },
   {
     name: "utils",
     description: "Utilities (freeze, hash, logger)",
-    color: "from-accent to-primary",
+    color: "from-brain-core-rose via-brain-core-glow to-brain-core-light",
   },
 ];
 
@@ -49,7 +49,7 @@ export function Architecture() {
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
             Modular{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
               architecture
             </span>
           </h2>
@@ -67,7 +67,7 @@ export function Architecture() {
               {packages.map((pkg) => (
                 <div
                   key={pkg.name}
-                  className="group flex items-start gap-4 p-4 rounded-xl bg-card/50 border border-border hover:border-primary/30 transition-all"
+                  className="group flex items-start gap-4 p-4 rounded-xl bg-card/50 border border-border hover:border-brain-core-glow/30 transition-all"
                 >
                   <div
                     className={cn(
@@ -97,7 +97,7 @@ export function Architecture() {
             <h3 className="text-xl font-semibold mb-6">Lifecycle Phases</h3>
             <div className="relative">
               {/* Connection line */}
-              <div className="absolute left-5 top-8 bottom-8 w-0.5 bg-gradient-to-b from-primary via-accent to-muted" />
+              <div className="absolute left-5 top-8 bottom-8 w-0.5 bg-gradient-to-b from-primary via-secondary to-muted" />
 
               <div className="space-y-4">
                 {lifecycle.map((item, index) => (
@@ -109,7 +109,7 @@ export function Architecture() {
                         index === 2
                           ? "border-primary bg-primary/20"
                           : index === 3
-                          ? "border-red-500/50 bg-red-500/10"
+                          ? "border-brain-core-rose/50 bg-brain-core-rose/10"
                           : "border-border bg-card"
                       )}
                     >
@@ -123,7 +123,7 @@ export function Architecture() {
                           index === 2
                             ? "text-primary"
                             : index === 3
-                            ? "text-red-400"
+                            ? "text-brain-core-rose"
                             : "text-foreground"
                         )}
                       >

@@ -5,17 +5,17 @@ export function CTA() {
     <section className="relative py-32">
       {/* Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-primary/20 via-accent/10 to-primary/20 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-primary/20 via-secondary/10 to-accent/20 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-accent mb-8 glow-amber">
-          <Zap className="w-10 h-10 text-background" />
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary via-secondary to-accent mb-8 glow-amber">
+          <Zap className="w-10 h-10 text-white" />
         </div>
 
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-balance">
           Ready to build{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
             production-grade
           </span>{" "}
           backends?
@@ -31,7 +31,7 @@ export function CTA() {
             href="https://github.com/DiogoAngelim/signal"
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-accent text-background font-semibold rounded-xl hover:opacity-90 transition-all glow-amber"
+            className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-primary via-secondary to-accent text-white font-semibold rounded-xl hover:opacity-90 transition-all glow-amber"
           >
             <Github className="w-5 h-5" />
             Star on GitHub

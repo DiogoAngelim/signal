@@ -28,7 +28,7 @@ export function Deployment() {
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
             Deploy{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
               anywhere
             </span>
           </h2>
@@ -45,8 +45,8 @@ export function Deployment() {
               className={cn(
                 "group relative p-6 rounded-2xl border transition-all duration-300",
                 index === 0
-                  ? "bg-gradient-to-br from-primary/10 to-accent/5 border-primary/30"
-                  : "bg-card/50 border-border hover:border-primary/20"
+                  ? "bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/8 border-primary/30"
+                  : "bg-card/50 border-border hover:border-brain-core-glow/20"
               )}
             >
               {index === 0 && (
@@ -76,7 +76,7 @@ export function Deployment() {
           </h3>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-400 font-mono text-sm mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brain-core-light/10 text-brain-core-light font-mono text-sm mb-3">
                 POST
               </div>
               <p className="font-mono text-sm">/signal/query</p>
@@ -85,7 +85,7 @@ export function Deployment() {
               </p>
             </div>
             <div className="text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 font-mono text-sm mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brain-core-glow/10 text-brain-core-glow font-mono text-sm mb-3">
                 POST
               </div>
               <p className="font-mono text-sm">/signal/mutation</p>
@@ -94,7 +94,7 @@ export function Deployment() {
               </p>
             </div>
             <div className="text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-400 font-mono text-sm mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brain-core-rose/10 text-brain-core-rose font-mono text-sm mb-3">
                 GET
               </div>
               <p className="font-mono text-sm">/signal/introspect</p>

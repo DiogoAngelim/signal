@@ -6,12 +6,12 @@ import { Architecture } from "@/components/architecture";
 import { Deployment } from "@/components/deployment";
 import { CTA } from "@/components/cta";
 import { Footer } from "@/components/footer";
-import { StarField } from "@/components/star-field";
+import { CosmicBackground } from "@/components/cosmic-background";
 
 export default function HomePage() {
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
-      <StarField />
+      <CosmicBackground />
       <Header />
       <main>
         <Hero />
