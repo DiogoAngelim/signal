@@ -37,7 +37,6 @@ const lifecycle = [
   { phase: "CONFIGURING", description: "Initial state, configure with configure()" },
   { phase: "REGISTERING", description: "Register collections, queries, mutations" },
   { phase: "RUNNING", description: "Operational, registry immutable" },
-  { phase: "FAILED", description: "Unrecoverable error" },
 ];
 
 export function Architecture() {
@@ -106,11 +105,7 @@ export function Architecture() {
                     <div
                       className={cn(
                         "relative z-10 flex-shrink-0 w-10 h-10 rounded-full border-2 flex items-center justify-center",
-                        index === 2
-                          ? "border-primary bg-primary/20"
-                          : index === 3
-                          ? "border-brain-core-rose/50 bg-brain-core-rose/10"
-                          : "border-border bg-card"
+                        index === 2 ? "border-primary bg-primary/20" : "border-border bg-card"
                       )}
                     >
                       <span className="text-xs font-bold">{index + 1}</span>
@@ -120,11 +115,7 @@ export function Architecture() {
                       <p
                         className={cn(
                           "font-mono text-sm font-semibold",
-                          index === 2
-                            ? "text-primary"
-                            : index === 3
-                            ? "text-brain-core-rose"
-                            : "text-foreground"
+                          index === 2 ? "text-primary" : "text-foreground"
                         )}
                       >
                         {item.phase}
