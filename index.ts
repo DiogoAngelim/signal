@@ -37,6 +37,14 @@ export type {
   SignalTransport,
   SignalLogger,
   ValidationResult,
+  SignalRequestContext,
+  SignalWriteOptions,
+  SignalTransportSubscribeOptions,
+  SignalMutationRecord,
+  SignalOutboxRecord,
+  SignalInboxRecord,
+  SignalAuditEntry,
+  SignalAuditHook,
 } from "./packages/core/Types";
 
 // Errors
@@ -47,6 +55,8 @@ export {
   SignalValidationError,
   SignalNotFoundError,
   SignalConflictError,
+  SignalIdempotencyConflictError,
+  SignalVersionMismatchError,
   SignalInternalError,
   SignalLifecycleError,
   SignalRegistryError,

@@ -6,6 +6,7 @@
  */
 
 import type { SignalDB, DocumentId } from "../../core/Types";
+import { SignalConflictError, SignalVersionMismatchError } from "../../core/Errors";
 
 interface Document {
   _id: DocumentId;
@@ -74,10 +75,14 @@ export class MemoryAdapter implements SignalDB {
     const docs = this.collections.get(collection)!;
 
     const id = ((doc as any)?._id as DocumentId) || this.generateId();
+    if (docs.has(id)) {
+      throw new SignalConflictError(`Document already exists: ${id}`);
+    }
     const fullDoc: Document = {
       ...doc,
       _id: id,
       _createdAt: Date.now(),
+      _version: 1,
     } as Document;
 
     docs.set(id, fullDoc);
@@ -90,17 +95,30 @@ export class MemoryAdapter implements SignalDB {
   async update<T = any>(
     collection: string,
     id: DocumentId,
-    update: Partial<T>
+    update: Partial<T>,
+    options?: { expectedVersion?: number }
   ): Promise<void> {
     this.initCollection(collection);
     const docs = this.collections.get(collection)!;
     const doc = docs.get(id);
 
     if (!doc) {
-      throw new Error(`Document not found: ${id}`);
+      throw new SignalConflictError(`Document not found: ${collection}.${id}`);
     }
 
-    Object.assign(doc, update, { _updatedAt: Date.now() });
+    const currentVersion = (doc as any)._version ?? 0;
+    if (options?.expectedVersion != null && currentVersion !== options.expectedVersion) {
+      throw new SignalVersionMismatchError(
+        `Version mismatch for ${collection}.${id}`,
+        options.expectedVersion,
+        currentVersion
+      );
+    }
+
+    Object.assign(doc, update, {
+      _updatedAt: Date.now(),
+      _version: currentVersion + 1,
+    });
   }
 
   /**

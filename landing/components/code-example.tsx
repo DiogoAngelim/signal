@@ -25,35 +25,43 @@ signal.configure({
 signal
   .collection("posts")
   .access({
-    query: { public: "public" },
+    query: { list: "public" },
     mutation: { create: "auth" },
   })
-  .query("public", async (params, ctx) => {
-    return await ctx.db.find("posts", { published: true });
+  .query("list", async (_, ctx) => {
+    return ctx.db.find("posts", { published: true });
   })
   .mutation("create", async (params, ctx) => {
     const postId = await ctx.db.insert("posts", {
       title: params.title,
       authorId: ctx.auth.user?.id,
     });
+    // ctx.emit writes to the outbox and stays replay-safe.
     await ctx.emit("posts.created", { postId });
     return { postId };
   });`,
   },
   {
     id: "execute",
-    label: "Execute",
+    label: "Replay",
     code: `// 3. Start the framework
 await signal.start();
 
-// 4. Execute queries and mutations
-const posts = await signal.query("posts.public", {}, context);
+// 4. Retry-safe writes use an idempotency key and expected version.
+const request = {
+  idempotencyKey: "req_123",
+  expectedVersion: 7,
+};
 
-const result = await signal.mutation("posts.create", {
+const first = await signal.mutation("posts.create", {
   title: "Hello, Signal!",
-}, context);
+}, { ...context, request });
 
-console.log(result); // { postId: "..." }`,
+const replay = await signal.mutation("posts.create", {
+  title: "Hello, Signal!",
+}, { ...context, request });
+
+console.log(first, replay); // same stored result, no duplicate write`,
   },
 ];
 
@@ -81,7 +89,7 @@ export function CodeExample() {
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
             Clean, explicit API that feels familiar. Configure once, register
-            your collections, and you&apos;re ready for production.
+            your collections, and keep retries, duplicates, and version checks explicit.
           </p>
         </div>
 
@@ -173,6 +181,10 @@ function highlightSyntax(line: string): string {
     // Functions and methods
     .replace(
       /\b(configure|collection|access|query|mutation|start|find|insert|emit)\b/g,
+      '<span class="text-accent">$1</span>'
+    )
+    .replace(
+      /\b(update|registerAuditHook|getAuditTrail|getResourceVersion)\b/g,
       '<span class="text-accent">$1</span>'
     )
     // Types/classes

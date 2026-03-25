@@ -1,146 +1,75 @@
 /**
  * Signal Transport Interface
- * 
- * Abstract transport for event delivery.
- * Supports wildcard subscriptions and at-least-once semantics.
+ *
+ * Compatibility wrappers for transport implementations.
+ * The shared EventBus lives in `./EventBus`.
  */
 
-import { SignalEvent, SignalTransport, EventSubscriber } from "../core/Types";
+import { SignalEvent, SignalTransport, EventSubscriber, SignalTransportSubscribeOptions } from "../core/Types";
+import { EventBus as SharedEventBus } from "./EventBus";
 
 /**
  * No-op transport (default)
  */
 export class NoOpTransport implements SignalTransport {
-  async emit(event: SignalEvent): Promise<void> {
+  async emit(_event: SignalEvent): Promise<void> {
     // Events are dropped
   }
 
-  async subscribe(pattern: string, handler: EventSubscriber): Promise<() => void> {
-    // Return unsubscribe function (no-op)
-    return () => { };
+  async subscribe(
+    _pattern: string,
+    _handler: EventSubscriber,
+    _options?: SignalTransportSubscribeOptions
+  ): Promise<() => void> {
+    return () => {};
   }
 
-  async unsubscribe(pattern: string): Promise<void> {
+  async unsubscribe(_pattern: string): Promise<void> {
     // no-op
   }
 }
 
 /**
- * EventBus for coordinating multiple transports
+ * Transport wrapper around the shared EventBus.
+ * Preserves the async SignalTransport contract.
  */
 export class EventBus implements SignalTransport {
-  private transports: SignalTransport[] = [];
-  private subscribers = new Map<string, Set<EventSubscriber>>();
+  private bus = new SharedEventBus();
 
-  /**
-   * Add a transport
-   */
-  addTransport(transport: SignalTransport): void {
-    this.transports.push(transport);
-  }
-
-  /**
-   * Emit event to all transports
-   */
   async emit(event: SignalEvent): Promise<void> {
-    // First notify local subscribers
-    await this.notifyLocalSubscribers(event);
-
-    // Then emit to all registered transports
-    const results = await Promise.allSettled(
-      this.transports.map((t) => t.emit(event))
-    );
-
-    // Log failures but don't throw (at-least-once semantics)
-    for (const result of results) {
-      if (result.status === "rejected") {
-        console.error("Transport emit failed:", result.reason);
-      }
-    }
+    await this.bus.publish(event);
   }
 
-  /**
-   * Subscribe to events locally (without transport)
-   */
-  async subscribe(pattern: string, handler: EventSubscriber): Promise<() => void> {
-    if (!this.subscribers.has(pattern)) {
-      this.subscribers.set(pattern, new Set());
-    }
-
-    const handlers = this.subscribers.get(pattern)!;
-    handlers.add(handler);
-
-    // Return unsubscribe function
-    return () => {
-      handlers.delete(handler);
-    };
+  async subscribe(
+    pattern: string,
+    handler: EventSubscriber,
+    options?: SignalTransportSubscribeOptions
+  ): Promise<() => void> {
+    return this.bus.subscribe(pattern, handler, options);
   }
 
-  /**
-   * Unsubscribe from events
-   */
   async unsubscribe(pattern: string): Promise<void> {
-    this.subscribers.delete(pattern);
-
-    // Also unsubscribe from all transports
-    await Promise.all(this.transports.map((t) => t.unsubscribe(pattern)));
+    // Pattern-level unsubscribe remains a compatibility no-op here.
+    void pattern;
   }
 
-  /**
-   * Notify local subscribers
-   */
-  private async notifyLocalSubscribers(event: SignalEvent): Promise<void> {
-    // Notify exact pattern subscribers
-    const exactHandlers = this.subscribers.get(event.name);
-    if (exactHandlers) {
-      const results = await Promise.allSettled(
-        Array.from(exactHandlers).map((h) => h(event))
-      );
-
-      for (const result of results) {
-        if (result.status === "rejected") {
-          console.error("Subscriber failed:", result.reason);
-        }
-      }
-    }
-
-    // Notify wildcard subscribers (e.g., "posts.*", "*")
-    for (const [pattern, handlers] of this.subscribers.entries()) {
-      if (this.matchesPattern(event.name, pattern)) {
-        const results = await Promise.allSettled(
-          Array.from(handlers).map((h) => h(event))
-        );
-
-        for (const result of results) {
-          if (result.status === "rejected") {
-            console.error("Subscriber failed:", result.reason);
-          }
-        }
-      }
-    }
+  getHistory(): SignalEvent[] {
+    return this.bus.getHistory();
   }
 
-  /**
-   * Check if event name matches pattern
-   * Patterns: "exact.match", "prefix.*", "*"
-   */
-  private matchesPattern(eventName: string, pattern: string): boolean {
-    if (pattern === "*") {
-      return true;
-    }
-
-    if (pattern.endsWith(".*")) {
-      const prefix = pattern.slice(0, -2);
-      return eventName.startsWith(prefix + ".");
-    }
-
-    return eventName === pattern;
+  getHistoryByPattern(pattern: string): SignalEvent[] {
+    return this.bus.getHistoryByPattern(pattern);
   }
 
-  /**
-   * Get all subscribers (for testing)
-   */
-  getSubscribers(): Map<string, Set<EventSubscriber>> {
-    return this.subscribers;
+  getSubscriberCount(pattern?: string): number {
+    return this.bus.getSubscriberCount(pattern);
+  }
+
+  getInboxLedger(consumerId: string) {
+    return this.bus.getInboxLedger(consumerId);
+  }
+
+  clearHistory(): void {
+    this.bus.clearHistory();
   }
 }

@@ -27,7 +27,9 @@ This document explains the choices behind Signal.
 ### 4. Deterministic and safe
 
 - Same input should produce the same result
+- Idempotency keys can replay stored mutation results
 - Queries stay read-only
+- Writes can enforce expected versions explicitly
 - Errors are stable and serializable
 - Configuration is frozen after setup
 
@@ -37,6 +39,7 @@ This document explains the choices behind Signal.
 - Access control runs before handlers
 - Validation rejects bad input early
 - Events follow explicit rules
+- Event execution is replay-safe and out-of-order tolerant
 
 ## Architectural Choices
 
@@ -47,6 +50,7 @@ The core package owns the public framework behavior. Everything else plugs into 
 ### Separate transport
 
 Events are separated from database writes so transport can change without changing app logic.
+This is also where inbox/outbox style delivery and per-consumer dedupe can live.
 
 ### Separate security
 
@@ -104,6 +108,17 @@ Why:
 - it avoids hidden side effects
 - it fits serverless retry behavior
 - it encourages idempotent handlers
+- it makes replay-safe execution possible
+
+## Reliability Model
+
+Signal keeps reliability features explicit instead of hiding them behind framework magic.
+
+- idempotent mutations use an idempotency key plus payload fingerprint
+- repeated requests can replay stored results instead of re-running the handler
+- optimistic concurrency surfaces version mismatch errors early
+- transports can dedupe events per consumer
+- audit hooks append to history instead of mutating it
 
 ## Extensibility
 
@@ -132,4 +147,3 @@ Think of Signal as:
 - a registry for named operations
 - a guardrail around request handling
 - a stable contract between HTTP, auth, database, and events
-

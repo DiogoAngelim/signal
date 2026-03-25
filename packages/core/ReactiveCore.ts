@@ -60,6 +60,7 @@ export class ReactiveCore {
   private subscriptions = new Map<string, Set<QuerySubscription>>();
   private resourceVersions = new Map<string, ResourceVersion>();
   private eventHistory: SignalEvent[] = [];
+  private processedEvents = new Map<string, SignalEvent>();
   private maxEventHistory = 10000; // Prevent unbounded growth
 
   /**
@@ -113,7 +114,38 @@ export class ReactiveCore {
    * ARCHITECTURAL: Event originates from Signal.mutation() only
    */
   async emitSignal(event: SignalEvent): Promise<SignalEvent> {
+    const existing = this.processedEvents.get(event.id);
+    if (existing) {
+      return existing;
+    }
+
     const enrichedEvent = this.enrichEvent(event);
+    const resourceKey = enrichedEvent._metadata?.resourceKey;
+    const incomingVersion = enrichedEvent.version ?? enrichedEvent._metadata?.resourceVersion;
+    const currentVersion = resourceKey ? this.resourceVersions.get(resourceKey)?._version : undefined;
+    const isStale =
+      resourceKey != null &&
+      incomingVersion != null &&
+      currentVersion != null &&
+      incomingVersion < currentVersion;
+
+    if (isStale) {
+      const staleEvent: SignalEvent = {
+        ...enrichedEvent,
+        _metadata: {
+          ...(enrichedEvent._metadata || {}),
+          stale: true,
+        },
+      };
+
+      this.eventHistory.push(staleEvent);
+      if (this.eventHistory.length > this.maxEventHistory) {
+        this.eventHistory.shift();
+      }
+
+      this.processedEvents.set(staleEvent.id, staleEvent);
+      return staleEvent;
+    }
 
     // Add to history for at-least-once semantics
     this.eventHistory.push(enrichedEvent);
@@ -121,11 +153,13 @@ export class ReactiveCore {
       this.eventHistory.shift();
     }
 
+    this.processedEvents.set(enrichedEvent.id, enrichedEvent);
+
+    // Update resource versions before fan-out so subscribers observe the latest version.
+    this.updateResourceVersion(enrichedEvent);
+
     // Fan-out to all interested subscriptions
     await this.fanOutToSubscriptions(enrichedEvent);
-
-    // Update resource versions
-    this.updateResourceVersion(enrichedEvent);
 
     return enrichedEvent;
   }
@@ -207,7 +241,10 @@ export class ReactiveCore {
       const resource = event.resource || event.name.split(".")[0];
       const resourceKey = `${resource}:${id}`;
 
-      const version = (this.resourceVersions.get(resourceKey)?._version || 0) + 1;
+      const version =
+        event.version ??
+        event._metadata?.resourceVersion ??
+        (this.resourceVersions.get(resourceKey)?._version || 0) + 1;
       this.resourceVersions.set(resourceKey, {
         resourceKey,
         _version: version,
@@ -224,9 +261,10 @@ export class ReactiveCore {
     const [resource, action] = event.name.split(".");
     const resourceId =
       event.resourceId || event.payload?.id || event.payload?._id || event.payload?.result?._id;
-    const currentVersion = resourceId
-      ? (this.resourceVersions.get(`${resource}:${resourceId}`)?._version || 0) + 1
-      : undefined;
+    const resourceKey = resourceId ? `${resource}:${resourceId}` : undefined;
+    const currentVersion = resourceKey ? this.resourceVersions.get(resourceKey)?._version : undefined;
+    const nextVersion =
+      event.version ?? event._metadata?.resourceVersion ?? (resourceId ? (currentVersion || 0) + 1 : undefined);
 
     // Create a new object with copied metadata to avoid frozen object issues
     const newEvent: SignalEvent = {
@@ -234,11 +272,11 @@ export class ReactiveCore {
       resource,
       action,
       resourceId,
-      version: currentVersion,
+      version: nextVersion,
       _metadata: {
         ...(event._metadata || {}),
-        resourceKey: resourceId ? `${resource}:${resourceId}` : undefined,
-        resourceVersion: currentVersion,
+        resourceKey,
+        resourceVersion: nextVersion,
       },
     };
 
@@ -285,5 +323,6 @@ export class ReactiveCore {
     this.subscriptions.clear();
     this.resourceVersions.clear();
     this.eventHistory = [];
+    this.processedEvents.clear();
   }
 }

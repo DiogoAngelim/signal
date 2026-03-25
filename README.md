@@ -1,14 +1,16 @@
 # Signal
 
-Signal is a backend framework for explicit named queries, named mutations, and stateless events.
+Signal is a backend framework for explicit named queries, named mutations, and replay-safe events.
 
-It is designed for serverless and horizontally scaled environments where predictability matters more than hidden magic.
+It is designed for serverless and horizontally scaled environments where predictability, idempotency, and clear failure modes matter more than hidden magic.
 
 ## Why Signal
 
 - Named queries and mutations only
 - Mutations are the only write path
-- Events are stateless and emitted from mutations
+- Mutations can be idempotent with request keys, payload fingerprints, and stored result replay
+- Events are replay-safe and emitted from mutations
+- Per-consumer event deduplication is supported when a transport provides a stable consumer id
 - Configuration is immutable after startup
 - Database and transport layers are swappable
 - Works well in serverless, edge, and traditional Node.js apps
@@ -87,6 +89,17 @@ const result = await signal.mutation("posts.create", { title: "Hello" }, ctx);
 - **Context**: immutable request-scoped data passed into handlers
 - **Access control**: declarative rules that run before handlers
 
+## Reliability Model
+
+Signal adds a few small primitives so the framework stays explicit without becoming fragile:
+
+- idempotent mutations use an idempotency key plus a payload fingerprint
+- repeated mutation requests can replay the stored result instead of re-running handlers
+- stale writes can fail fast with explicit version mismatch errors
+- event execution is replay-safe and out-of-order tolerant
+- transports can dedupe events per consumer when they have a stable consumer id
+- audit hooks append to a read-only trail instead of mutating prior entries
+
 ## Public Packages
 
 Signal is split into a few focused layers:
@@ -119,4 +132,5 @@ Signal works well with:
 - Safe error serialization
 - Request-scoped context
 - Input validation before execution
-
+- Explicit optimistic concurrency checks
+- Append-only mutation and audit records

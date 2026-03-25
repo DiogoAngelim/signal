@@ -10,6 +10,7 @@ This page lists what Signal gives you out of the box.
 - explicit lifecycle management
 - immutable configuration
 - registry locking after startup
+- adapter-friendly reliability primitives
 
 ## Data Operations
 
@@ -17,6 +18,8 @@ This page lists what Signal gives you out of the box.
 - write-only mutations
 - request-scoped context
 - context-based execution with no globals
+- idempotent mutation replay with stored results
+- explicit optimistic concurrency checks
 
 ## Database
 
@@ -24,6 +27,7 @@ This page lists what Signal gives you out of the box.
 - in-memory adapter for development and tests
 - SQL base adapter for custom implementations
 - CRUD-style methods for common operations
+- update guards with expected version checks
 
 ## Events
 
@@ -32,6 +36,9 @@ This page lists what Signal gives you out of the box.
 - pattern matching for subscribers
 - in-memory transport for local use
 - custom transport support
+- replay-safe event execution
+- per-consumer event deduplication
+- inbox and outbox support
 
 ## Security
 
@@ -63,6 +70,7 @@ This page lists what Signal gives you out of the box.
 - deterministic hashing and ID generation
 - runtime assertions
 - safe error serialization
+- append-only audit hooks
 
 ## Type Safety
 
@@ -79,6 +87,7 @@ This page lists what Signal gives you out of the box.
 - custom access rules
 - custom loggers
 - middleware-style wrappers
+- replay-aware adapters without hidden framework state
 
 ## Testing And Development
 
@@ -93,4 +102,3 @@ This page lists what Signal gives you out of the box.
 - works in edge runtimes
 - works on traditional Node.js servers
 - no server affinity required
-

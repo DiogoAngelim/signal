@@ -6,6 +6,7 @@
  */
 
 import { SignalDB, DocumentId } from "../core/Types";
+import { SignalConflictError, SignalVersionMismatchError } from "../core/Errors";
 
 /**
  * Base SignalDB interface (already in Types)
@@ -104,7 +105,18 @@ export abstract class SqlAdapterBase implements SignalDB {
    * Insert document
    */
   async insert<T = any>(collection: string, doc: Partial<T>): Promise<DocumentId> {
-    const doc_ = { ...doc, _id: (doc as any)?._id || generateDocId(), _createdAt: Date.now() };
+    const doc_ = {
+      ...doc,
+      _id: (doc as any)?._id || generateDocId(),
+      _createdAt: Date.now(),
+      _version: 1,
+    };
+    if ((doc as any)?._id) {
+      const existing = await this.findById(collection, (doc as any)._id);
+      if (existing) {
+        throw new SignalConflictError(`Document already exists: ${(doc as any)._id}`);
+      }
+    }
     const keys = Object.keys(doc_);
     const placeholders = keys.map(() => "?").join(",");
     const sql = `INSERT INTO ${collection} (${keys.join(",")}) VALUES (${placeholders})`;
@@ -120,11 +132,35 @@ export abstract class SqlAdapterBase implements SignalDB {
   async update<T = any>(
     collection: string,
     id: DocumentId,
-    update: Partial<T>
+    update: Partial<T>,
+    options?: { expectedVersion?: number }
   ): Promise<void> {
-    const keys = Object.keys(update);
-    const setClause = keys.map((k) => `${k} = ?`).join(",");
-    const values = keys.map((k) => update[k as keyof typeof update]);
+    const current = await this.findById<any>(collection, id);
+    if (!current) {
+      throw new SignalConflictError(`Document not found: ${collection}.${id}`);
+    }
+
+    if (options?.expectedVersion != null) {
+      const actualVersion = current._version ?? 0;
+      if (actualVersion !== options.expectedVersion) {
+        throw new SignalVersionMismatchError(
+          `Version mismatch for ${collection}.${id}`,
+          options.expectedVersion,
+          actualVersion
+        );
+      }
+    }
+
+    const nextVersion = (current._version ?? 0) + 1;
+    const mergedUpdate: Record<string, any> = {
+      ...update,
+      _updatedAt: Date.now(),
+      _version: nextVersion,
+    };
+
+    const mergedKeys = Object.keys(mergedUpdate);
+    const setClause = mergedKeys.map((k) => `${k} = ?`).join(",");
+    const values = mergedKeys.map((k) => mergedUpdate[k]);
 
     const sql = `UPDATE ${collection} SET ${setClause} WHERE _id = ?`;
     await this.executeSql(sql, [...values, id]);

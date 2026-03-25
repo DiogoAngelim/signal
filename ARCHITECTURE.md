@@ -12,6 +12,7 @@ HTTP handler
       -> access control
       -> database adapter
       -> transport / events
+      -> mutation ledger / audit hooks
 ```
 
 ## Layers
@@ -36,11 +37,13 @@ HTTP handler
 - `SignalDB.ts` defines the database contract
 - `MemoryAdapter.ts` is the built-in development adapter
 - `SqlAdapterBase.ts` is a base class for SQL databases
+- write operations can opt into explicit version checks
 
 ### Transport
 
 - `EventBus.ts` stores and dispatches events
 - `InMemoryTransport.ts` is the built-in transport for local use
+- consumers can dedupe work when they provide a stable consumer id
 
 ### Security
 
@@ -61,8 +64,9 @@ HTTP handler
 3. The router resolves the operation key.
 4. Access control runs before the handler.
 5. The handler receives an immutable context.
-6. Mutations can write to the database and emit events.
+6. Mutations can write to the database, record outbox entries, and emit events.
 7. The response is serialized and returned.
+8. Audit hooks and mutation records stay append-only.
 
 ## Lifecycle
 
@@ -81,11 +85,12 @@ Operations are addressed as `collection.operation`, such as `posts.list` or `pos
 
 ### Context
 
-Each request gets its own immutable context with database access, auth data, event emission, and optional request metadata.
+Each request gets its own immutable context with database access, auth data, event emission, and optional request metadata such as idempotency keys and expected versions.
 
 ### Events
 
 Events are emitted only from mutations and use stable names like `posts.created`.
+The core keeps replay-safe execution, while transports can add inbox/outbox semantics and per-consumer dedupe.
 
 ## Guarantees
 
@@ -96,6 +101,9 @@ Events are emitted only from mutations and use stable names like `posts.created`
 - Queries are read-only
 - Mutations are the only write path
 - The framework is stateless across requests
+- Idempotent mutations can replay stored results
+- Stale writes fail with explicit version mismatch errors
+- Audit hooks append to a durable trail instead of rewriting history
 
 ## Deployment Fit
 
@@ -107,4 +115,3 @@ Good fits:
 - edge runtimes
 - containers
 - traditional Node.js servers
-

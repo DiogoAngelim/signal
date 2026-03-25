@@ -35,13 +35,23 @@ export interface SignalContext {
   readonly db: SignalDB;
   readonly auth: SignalAuth;
   readonly emit: (name: string, payload: any) => Promise<void>;
-  readonly request?: {
-    readonly method?: string;
-    readonly url?: string;
-    readonly headers?: Record<string, string>;
-    [key: string]: any;
-  };
+  readonly request?: SignalRequestContext;
   readonly env?: Record<string, any>;
+}
+
+/**
+ * Request-scoped execution metadata.
+ * Keep this explicit so idempotency and replay controls remain visible.
+ */
+export interface SignalRequestContext {
+  readonly method?: string;
+  readonly url?: string;
+  readonly headers?: Record<string, string>;
+  readonly idempotencyKey?: string;
+  readonly expectedVersion?: number;
+  readonly consumerId?: string;
+  readonly replay?: boolean;
+  [key: string]: any;
 }
 
 /**
@@ -135,6 +145,13 @@ export interface SignalEvent {
   readonly _metadata?: {
     readonly correlationId?: string;
     readonly causationId?: string;
+    readonly mutationKey?: string;
+    readonly idempotencyKey?: string;
+    readonly payloadFingerprint?: string;
+    readonly consumerId?: string;
+    readonly outboxId?: string;
+    readonly replayed?: boolean;
+    readonly stale?: boolean;
     /** Resource version snapshot for resync */
     readonly resourceVersion?: number;
     /** Resource key used by ReactiveCore for consistency */
@@ -162,7 +179,12 @@ export interface SignalDB {
 
   // Write operations (invoked only via Signal mutations)
   insert<T = any>(collection: string, doc: Partial<T>): Promise<DocumentId>;
-  update<T = any>(collection: string, id: DocumentId, update: Partial<T>): Promise<void>;
+  update<T = any>(
+    collection: string,
+    id: DocumentId,
+    update: Partial<T>,
+    options?: SignalWriteOptions
+  ): Promise<void>;
   remove(collection: string, id: DocumentId): Promise<void>;
   /** @deprecated Use remove(); kept for backward compatibility */
   delete(collection: string, id: DocumentId): Promise<void>;
@@ -209,13 +231,97 @@ export interface SignalConfig {
 }
 
 /**
+ * Optional write controls for optimistic concurrency.
+ */
+export interface SignalWriteOptions {
+  readonly expectedVersion?: number;
+}
+
+/**
  * Transport interface for events
  */
 export interface SignalTransport {
   emit(event: SignalEvent): Promise<void>;
-  subscribe(pattern: string, handler: EventSubscriber): Promise<() => void>;
+  subscribe(
+    pattern: string,
+    handler: EventSubscriber,
+    options?: SignalTransportSubscribeOptions
+  ): Promise<() => void>;
   unsubscribe(pattern: string): Promise<void>;
 }
+
+/**
+ * Transport subscription options.
+ */
+export interface SignalTransportSubscribeOptions {
+  readonly consumerId?: string;
+  readonly dedupe?: boolean;
+  readonly replay?: boolean;
+}
+
+/**
+ * Append-only mutation ledger entry.
+ */
+export interface SignalMutationRecord {
+  readonly id: string;
+  readonly mutationKey: string;
+  readonly idempotencyKey: string;
+  readonly payloadFingerprint: string;
+  readonly status: "pending" | "completed" | "failed";
+  readonly result?: any;
+  readonly error?: {
+    readonly code?: string;
+    readonly message: string;
+    readonly statusCode?: number;
+  };
+  readonly eventId?: string;
+  readonly createdAt: number;
+  readonly updatedAt: number;
+  readonly version?: number;
+}
+
+/**
+ * Append-only outbox entry.
+ */
+export interface SignalOutboxRecord {
+  readonly id: string;
+  readonly eventId: string;
+  readonly event: SignalEvent;
+  readonly mutationKey?: string;
+  readonly payloadFingerprint?: string;
+  readonly createdAt: number;
+  readonly publishedAt?: number;
+}
+
+/**
+ * Per-consumer inbox entry.
+ */
+export interface SignalInboxRecord {
+  readonly id: string;
+  readonly consumerId: string;
+  readonly eventId: string;
+  readonly eventName: string;
+  readonly resourceKey?: string;
+  readonly eventVersion?: number;
+  readonly processedAt: number;
+}
+
+/**
+ * Append-only audit trail entry.
+ */
+export interface SignalAuditEntry {
+  readonly id: string;
+  readonly type: string;
+  readonly timestamp: number;
+  readonly key?: string;
+  readonly resourceKey?: string;
+  readonly consumerId?: string;
+  readonly eventId?: string;
+  readonly mutationKey?: string;
+  readonly details?: Record<string, any>;
+}
+
+export type SignalAuditHook = (entry: SignalAuditEntry) => Promise<void> | void;
 
 /**
  * Logger interface

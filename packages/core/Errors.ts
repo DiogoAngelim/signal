@@ -123,6 +123,40 @@ export class SignalConflictError extends SignalError {
 }
 
 /**
+ * Idempotency conflict error.
+ * Raised when a request repeats an idempotency key with a different payload fingerprint.
+ */
+export class SignalIdempotencyConflictError extends SignalError {
+  constructor(message = "Idempotency conflict", cause?: Error) {
+    super("IDEMPOTENCY_CONFLICT", message, 409, cause);
+    this.name = "SignalIdempotencyConflictError";
+    Object.setPrototypeOf(this, SignalIdempotencyConflictError.prototype);
+  }
+}
+
+/**
+ * Optimistic concurrency error.
+ * Raised when an expected version does not match the stored version.
+ */
+export class SignalVersionMismatchError extends SignalError {
+  readonly expectedVersion?: number;
+  readonly actualVersion?: number;
+
+  constructor(
+    message = "Version mismatch",
+    expectedVersion?: number,
+    actualVersion?: number,
+    cause?: Error
+  ) {
+    super("VERSION_MISMATCH", message, 409, cause);
+    this.name = "SignalVersionMismatchError";
+    this.expectedVersion = expectedVersion;
+    this.actualVersion = actualVersion;
+    Object.setPrototypeOf(this, SignalVersionMismatchError.prototype);
+  }
+}
+
+/**
  * Internal error (not exposed to clients in production)
  */
 export class SignalInternalError extends SignalError {

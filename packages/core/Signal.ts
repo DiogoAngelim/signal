@@ -12,25 +12,38 @@
  *   const result = await signal.query("posts.list", params, context);
  */
 
-import { SignalConfig, SignalPhase, SignalEvent, EventSubscriber } from "./Types";
+import {
+  SignalConfig,
+  SignalPhase,
+  SignalEvent,
+  EventSubscriber,
+  SignalAuditEntry,
+  SignalAuditHook,
+  SignalMutationRecord,
+  SignalOutboxRecord,
+} from "./Types";
 import { Lifecycle } from "./Lifecycle";
 import { Registry } from "./Registry";
 import { Collection } from "./Collection";
 import { Config } from "./Config";
-import { ContextBuilder } from "./Context";
 import {
   SignalError,
   SignalRegistryError,
-  SignalAuthError,
   SignalForbiddenError,
   SignalInternalError,
+  SignalConflictError,
+  SignalIdempotencyConflictError,
   isSignalError,
 } from "./Errors";
-import { deepFreeze, isDeepFrozen } from "../utils/deepFreeze";
+import { deepFreeze } from "../utils/deepFreeze";
 import { ConsoleLogger, SignalLogger, NoOpLogger } from "../utils/logger";
 import { invariant } from "../utils/invariant";
-import { generateId } from "../utils/stableHash";
+import { generateId, stableHash } from "../utils/stableHash";
 import { ReactiveCore } from "./ReactiveCore";
+
+const MUTATION_LEDGER = "__signal_mutations__";
+const OUTBOX_LEDGER = "__signal_outbox__";
+const AUDIT_LEDGER = "__signal_audit__";
 
 export class Signal {
   private static instance?: Signal;
@@ -41,6 +54,8 @@ export class Signal {
   private logger: SignalLogger;
   private reactiveCore: ReactiveCore;
   private eventBuffer: SignalEvent[] = [];
+  private auditTrail: SignalAuditEntry[] = [];
+  private auditHooks = new Set<SignalAuditHook>();
 
   constructor() {
     if (Signal.instance) {
@@ -250,15 +265,220 @@ export class Signal {
     // Validate input
     this.validateInput(params);
 
-    // Execute handler
+    const fingerprint = stableHash(params);
+    const idempotencyKey = this.resolveIdempotencyKey(ctx);
+    const mutationRecordId = this.getMutationRecordId(key, idempotencyKey);
+    const hasIdempotencyKey = idempotencyKey.length > 0;
+
+    let mutationRecord: SignalMutationRecord | undefined;
+    let createdMutationRecord = false;
+    if (hasIdempotencyKey) {
+      mutationRecord = await this.getMutationRecord(ctx.db, mutationRecordId);
+
+      if (mutationRecord) {
+        if (mutationRecord.payloadFingerprint !== fingerprint) {
+          const error = new SignalIdempotencyConflictError(
+            `Mutation ${key} already executed with a different payload fingerprint`
+          );
+          await this.recordAudit({
+            type: "mutation.idempotency_conflict",
+            timestamp: Date.now(),
+            key,
+            mutationKey: key,
+            details: {
+              idempotencyKey,
+              expectedFingerprint: mutationRecord.payloadFingerprint,
+              actualFingerprint: fingerprint,
+            },
+          });
+          throw error;
+        }
+
+        if (mutationRecord.status === "completed") {
+          await this.recordAudit({
+            type: "mutation.replayed",
+            timestamp: Date.now(),
+            key,
+            mutationKey: key,
+            details: {
+              idempotencyKey,
+              fingerprint,
+              eventId: mutationRecord.eventId,
+            },
+          });
+          return this.cloneValue(mutationRecord.result) as Result;
+        }
+
+        if (mutationRecord.status === "pending") {
+          const error = new SignalConflictError(
+            `Mutation ${key} is already in progress for idempotency key ${idempotencyKey}`
+          );
+          await this.recordAudit({
+            type: "mutation.pending",
+            timestamp: Date.now(),
+            key,
+            mutationKey: key,
+            details: { idempotencyKey, fingerprint },
+          });
+          throw error;
+        }
+
+        if (mutationRecord.status === "failed" && mutationRecord.error) {
+          await this.recordAudit({
+            type: "mutation.replayed_failure",
+            timestamp: Date.now(),
+            key,
+            mutationKey: key,
+            details: {
+              idempotencyKey,
+              fingerprint,
+              message: mutationRecord.error.message,
+            },
+          });
+          throw new SignalError(
+            mutationRecord.error.code || "INTERNAL_ERROR",
+            mutationRecord.error.message,
+            mutationRecord.error.statusCode || 500
+          );
+        }
+      } else {
+        const created = await this.createMutationRecord(ctx.db, {
+          id: mutationRecordId,
+          mutationKey: key,
+          idempotencyKey,
+          payloadFingerprint: fingerprint,
+          status: "pending",
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+        mutationRecord = created.record;
+        createdMutationRecord = created.created;
+      }
+    }
+
+    if (hasIdempotencyKey && mutationRecord && (!createdMutationRecord || mutationRecord.status !== "pending")) {
+      if (mutationRecord.payloadFingerprint !== fingerprint) {
+        const error = new SignalIdempotencyConflictError(
+          `Mutation ${key} already executed with a different payload fingerprint`
+        );
+        await this.recordAudit({
+          type: "mutation.idempotency_conflict",
+          timestamp: Date.now(),
+          key,
+          mutationKey: key,
+          details: {
+            idempotencyKey,
+            expectedFingerprint: mutationRecord.payloadFingerprint,
+            actualFingerprint: fingerprint,
+          },
+        });
+        throw error;
+      }
+
+      if (mutationRecord.status === "pending") {
+        const error = new SignalConflictError(
+          `Mutation ${key} is already in progress for idempotency key ${idempotencyKey}`
+        );
+        await this.recordAudit({
+          type: "mutation.pending",
+          timestamp: Date.now(),
+          key,
+          mutationKey: key,
+          details: { idempotencyKey, fingerprint },
+        });
+        throw error;
+      }
+
+      if (mutationRecord.status === "completed") {
+        await this.recordAudit({
+          type: "mutation.replayed",
+          timestamp: Date.now(),
+          key,
+          mutationKey: key,
+          details: {
+            idempotencyKey,
+            fingerprint,
+            eventId: mutationRecord.eventId,
+          },
+        });
+        return this.cloneValue(mutationRecord.result) as Result;
+      }
+
+      if (mutationRecord.status === "failed" && mutationRecord.error) {
+        await this.recordAudit({
+          type: "mutation.replayed_failure",
+          timestamp: Date.now(),
+          key,
+          mutationKey: key,
+          details: {
+            idempotencyKey,
+            fingerprint,
+            message: mutationRecord.error.message,
+          },
+        });
+        throw new SignalError(
+          mutationRecord.error.code || "INTERNAL_ERROR",
+          mutationRecord.error.message,
+          mutationRecord.error.statusCode || 500
+        );
+      }
+    }
+
+    await this.recordAudit({
+      type: "mutation.started",
+      timestamp: Date.now(),
+      key,
+      mutationKey: key,
+      details: hasIdempotencyKey
+        ? { idempotencyKey, fingerprint }
+        : { fingerprint },
+    });
+
     try {
       const result = await mutationDef.handler(params, ctx);
 
-      // Emit event (at-least-once semantics)
-      await this.emitEvent(collectionName, mutationName, params, result);
+      // Emit event (replay-safe via ledger + reactive core)
+      const emittedEvent = await this.emitEvent(collectionName, mutationName, params, result, {
+        mutationKey: key,
+        idempotencyKey: hasIdempotencyKey ? idempotencyKey : undefined,
+        payloadFingerprint: fingerprint,
+      });
+
+      if (mutationRecord) {
+        await this.completeMutationRecord(ctx.db, mutationRecord.id, {
+          result,
+          eventId: emittedEvent.id,
+        });
+      }
+
+      await this.recordAudit({
+        type: "mutation.completed",
+        timestamp: Date.now(),
+        key,
+        mutationKey: key,
+        eventId: emittedEvent.id,
+        details: {
+          fingerprint,
+          idempotencyKey: hasIdempotencyKey ? idempotencyKey : undefined,
+        },
+      });
 
       return result;
     } catch (error) {
+      if (mutationRecord) {
+        await this.failMutationRecord(ctx.db, mutationRecord.id, error);
+      }
+      await this.recordAudit({
+        type: "mutation.failed",
+        timestamp: Date.now(),
+        key,
+        mutationKey: key,
+        details: {
+          fingerprint,
+          idempotencyKey: hasIdempotencyKey ? idempotencyKey : undefined,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      });
       this.logger.error(`Mutation ${key} failed`, { error: String(error) });
       if (isSignalError(error)) {
         throw error;
@@ -336,20 +556,209 @@ export class Signal {
   }
 
   /**
+   * Resolve an idempotency key from the request context.
+   */
+  private resolveIdempotencyKey(ctx: any): string {
+    const headers = ctx?.request?.headers || {};
+    return String(
+      ctx?.request?.idempotencyKey ||
+      headers["idempotency-key"] ||
+      headers["x-idempotency-key"] ||
+      ""
+    );
+  }
+
+  /**
+   * Build a deterministic mutation record ID.
+   */
+  private getMutationRecordId(key: string, idempotencyKey: string): string {
+    return `mutation:${key}:${idempotencyKey}`;
+  }
+
+  /**
+   * Read a mutation ledger record.
+   */
+  private async getMutationRecord(db: any, id: string): Promise<SignalMutationRecord | undefined> {
+    const record = await db.findOne?.(MUTATION_LEDGER, { _id: id });
+    return record || undefined;
+  }
+
+  /**
+   * Create a pending mutation record.
+   */
+  private async createMutationRecord(
+    db: any,
+    record: SignalMutationRecord
+  ): Promise<{ record: SignalMutationRecord; created: boolean }> {
+    const stored: Record<string, any> = {
+      ...record,
+      _id: record.id,
+      _createdAt: record.createdAt,
+      _updatedAt: record.updatedAt,
+      _version: 1,
+    };
+
+    try {
+      await db.insert(MUTATION_LEDGER, stored);
+      return { record: stored as SignalMutationRecord, created: true };
+    } catch (error) {
+      if (error instanceof SignalConflictError) {
+        const existing = await this.getMutationRecord(db, record.id);
+        if (existing) {
+          return { record: existing, created: false };
+        }
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Mark a mutation record completed.
+   */
+  private async completeMutationRecord(
+    db: any,
+    id: string,
+    input: { result: any; eventId?: string }
+  ): Promise<void> {
+    await db.update(MUTATION_LEDGER, id, {
+      status: "completed",
+      result: this.cloneValue(input.result),
+      eventId: input.eventId,
+      updatedAt: Date.now(),
+    });
+  }
+
+  /**
+   * Mark a mutation record failed.
+   */
+  private async failMutationRecord(db: any, id: string, error: unknown): Promise<void> {
+    await db.update(MUTATION_LEDGER, id, {
+      status: "failed",
+      error: {
+        message: error instanceof Error ? error.message : String(error),
+        code: isSignalError(error) ? error.code : undefined,
+        statusCode: isSignalError(error) ? error.statusCode : undefined,
+      },
+      updatedAt: Date.now(),
+    });
+  }
+
+  /**
+   * Append an event to the outbox.
+   */
+  private async appendOutbox(event: SignalEvent): Promise<void> {
+    const record: SignalOutboxRecord = {
+      id: event.id,
+      eventId: event.id,
+      event: this.cloneValue(event),
+      mutationKey: event._metadata?.mutationKey,
+      payloadFingerprint: event._metadata?.payloadFingerprint,
+      createdAt: event.timestamp,
+    };
+
+    this.eventBuffer.push(event);
+
+    try {
+      await this.config?.db.insert(OUTBOX_LEDGER, {
+        ...record,
+        _id: record.id,
+        _createdAt: record.createdAt,
+      });
+    } catch (error) {
+      this.logger.warn("Failed to persist outbox record", {
+        eventId: event.id,
+        error: String(error),
+      });
+    }
+  }
+
+  /**
+   * Update an outbox record after transport publication.
+   */
+  private async markOutboxPublished(eventId: string): Promise<void> {
+    try {
+      await this.config?.db.update(OUTBOX_LEDGER, eventId, {
+        publishedAt: Date.now(),
+      });
+    } catch (error) {
+      this.logger.warn("Failed to update outbox record", {
+        eventId,
+        error: String(error),
+      });
+    }
+  }
+
+  /**
+   * Append an immutable audit record and fan it out to hooks.
+   */
+  private async recordAudit(entry: Omit<SignalAuditEntry, "id">): Promise<void> {
+    const auditEntry: SignalAuditEntry = deepFreeze({
+      id: generateId("audit"),
+      ...entry,
+    }) as SignalAuditEntry;
+
+    this.auditTrail.push(auditEntry);
+
+    try {
+      await this.config?.db.insert(AUDIT_LEDGER, {
+        ...auditEntry,
+        _id: auditEntry.id,
+        _createdAt: auditEntry.timestamp,
+      });
+    } catch (error) {
+      this.logger.warn("Failed to persist audit entry", {
+        type: auditEntry.type,
+        error: String(error),
+      });
+    }
+
+    for (const hook of this.auditHooks) {
+      try {
+        await hook(auditEntry);
+      } catch (error) {
+        this.logger.warn("Audit hook failed", {
+          type: auditEntry.type,
+          error: String(error),
+        });
+      }
+    }
+  }
+
+  /**
+   * Clone values for safe storage and replay.
+   */
+  private cloneValue<T>(value: T): T {
+    if (value === null || value === undefined) {
+      return value;
+    }
+
+    if (typeof value !== "object") {
+      return value;
+    }
+
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  /**
    * Emit event from mutation
    */
   private async emitEvent(
     collection: string,
     action: string,
     params: any,
-    result: any
-  ): Promise<void> {
+    result: any,
+    metadata: {
+      mutationKey?: string;
+      idempotencyKey?: string;
+      payloadFingerprint?: string;
+    } = {}
+  ): Promise<SignalEvent> {
     const resourceId =
       result?._id || params?._id || params?.id || (typeof result === "string" ? result : undefined);
 
     // Make copies of params and result to avoid issues with frozen objects
-    const paramsCopy = params && typeof params === "object" ? JSON.parse(JSON.stringify(params)) : params;
-    const resultCopy = result && typeof result === "object" ? JSON.parse(JSON.stringify(result)) : result;
+    const paramsCopy = this.cloneValue(params);
+    const resultCopy = this.cloneValue(result);
 
     const event: SignalEvent = {
       id: generateId("evt"),
@@ -359,21 +768,37 @@ export class Signal {
       resource: collection,
       action,
       resourceId,
+      _metadata: {
+        mutationKey: metadata.mutationKey,
+        idempotencyKey: metadata.idempotencyKey,
+        payloadFingerprint: metadata.payloadFingerprint,
+      },
     };
 
     const enrichedEvent = await this.reactiveCore.emitSignal(event);
+    await this.appendOutbox(enrichedEvent);
     await this.dispatchToTransport(enrichedEvent);
-
-    // Buffer for in-memory consumers (used for testing/replay)
-    this.eventBuffer.push(enrichedEvent);
+    await this.recordAudit({
+      type: "event.emitted",
+      timestamp: enrichedEvent.timestamp,
+      key: enrichedEvent.name,
+      mutationKey: metadata.mutationKey,
+      eventId: enrichedEvent.id,
+      resourceKey: enrichedEvent._metadata?.resourceKey,
+      details: {
+        idempotencyKey: metadata.idempotencyKey,
+        payloadFingerprint: metadata.payloadFingerprint,
+      },
+    });
+    return enrichedEvent;
   }
 
   /**
    * Emit a domain-level signal outside mutation helpers (still framework-owned)
    */
-  private async emitDomainEvent(name: string, payload: any): Promise<void> {
+  private async emitDomainEvent(name: string, payload: any): Promise<SignalEvent> {
     // Make a copy of the payload to avoid issues with frozen objects
-    const payloadCopy = payload && typeof payload === "object" ? JSON.parse(JSON.stringify(payload)) : payload;
+    const payloadCopy = this.cloneValue(payload);
 
     const event: SignalEvent = {
       id: generateId("evt"),
@@ -383,8 +808,16 @@ export class Signal {
     };
 
     const enrichedEvent = await this.reactiveCore.emitSignal(event);
+    await this.appendOutbox(enrichedEvent);
     await this.dispatchToTransport(enrichedEvent);
-    this.eventBuffer.push(enrichedEvent);
+    await this.recordAudit({
+      type: "event.emitted",
+      timestamp: enrichedEvent.timestamp,
+      key: enrichedEvent.name,
+      eventId: enrichedEvent.id,
+      resourceKey: enrichedEvent._metadata?.resourceKey,
+    });
+    return enrichedEvent;
   }
 
   /**
@@ -394,6 +827,7 @@ export class Signal {
     if (this.config?.transport) {
       try {
         await this.config.transport.emit(event);
+        await this.markOutboxPublished(event.id);
       } catch (error) {
         this.logger.error("Failed to emit event", { event, error: String(error) });
         // Don't fail caller if transport delivery fails (at-least-once guarantee)
@@ -419,7 +853,7 @@ export class Signal {
    * Get event buffer (for testing)
    */
   getEventBuffer(): SignalEvent[] {
-    return this.eventBuffer;
+    return [...this.eventBuffer];
   }
 
   /**
@@ -439,7 +873,31 @@ export class Signal {
   /**
    * Inspect resource version (used by transports/clients for consistency checks)
    */
-  getResourceVersion(resourceKey: string) {
+  getResourceVersion(resourceKey: string): number | undefined {
+    return this.reactiveCore.getResourceVersion(resourceKey)?._version;
+  }
+
+  /**
+   * Inspect full resource version details.
+   */
+  getResourceVersionInfo(resourceKey: string) {
     return this.reactiveCore.getResourceVersion(resourceKey);
+  }
+
+  /**
+   * Register an append-only audit hook.
+   */
+  registerAuditHook(hook: SignalAuditHook): () => void {
+    this.auditHooks.add(hook);
+    return () => {
+      this.auditHooks.delete(hook);
+    };
+  }
+
+  /**
+   * Get the in-memory audit trail.
+   */
+  getAuditTrail(): SignalAuditEntry[] {
+    return [...this.auditTrail];
   }
 }

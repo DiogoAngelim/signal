@@ -35,6 +35,10 @@ signal
 - `signal.start()` locks registration and starts the app
 - `signal.query(key, params, ctx)` runs a named query
 - `signal.mutation(key, params, ctx)` runs a named mutation
+- `signal.getResourceVersion(resourceKey)` returns the current resource version
+- `signal.getResourceVersionInfo(resourceKey)` returns the full version record
+- `signal.registerAuditHook(hook)` registers an append-only audit hook
+- `signal.getAuditTrail()` returns the audit trail
 
 ## Context
 
@@ -47,6 +51,13 @@ Common fields:
 - `ctx.emit`
 - `ctx.request`
 - `ctx.env`
+
+Request metadata:
+
+- `ctx.request.idempotencyKey`
+- `ctx.request.expectedVersion`
+- `ctx.request.consumerId`
+- `ctx.request.replay`
 
 ## Access Control
 
@@ -79,6 +90,7 @@ ctx.db.findById(collection, id)
 ctx.db.count(collection, query)
 ctx.db.insert(collection, doc)
 ctx.db.update(collection, id, update)
+ctx.db.update(collection, id, update, { expectedVersion: 12 })
 ctx.db.delete(collection, id)
 ```
 
@@ -93,6 +105,15 @@ Pattern matching examples:
 - `posts.created`
 - `posts.*`
 - `*`
+
+Transport subscriptions can opt into inbox dedupe:
+
+```ts
+transport.subscribe("posts.*", handler, {
+  consumerId: "billing-worker",
+  dedupe: true,
+});
+```
 
 ## HTTP
 
@@ -114,10 +135,16 @@ const auth = AuthProvider.fromHeaders(req.headers);
 ## Errors
 
 ```ts
-import { SignalValidationError, SignalAuthError } from "./index";
+import {
+  SignalValidationError,
+  SignalAuthError,
+  SignalIdempotencyConflictError,
+  SignalVersionMismatchError,
+} from "./index";
 
 throw new SignalValidationError("Invalid input");
 ```
 
 All framework errors are safe to serialize and include a stable `code`, `message`, and `statusCode`.
 
+Idempotency and concurrency failures use explicit error types so callers can distinguish retries from stale writes.

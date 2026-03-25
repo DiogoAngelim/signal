@@ -54,6 +54,9 @@ npm run test
 - **Collections**: group related queries and mutations
 - **Queries**: read-only operations
 - **Mutations**: write operations and event emission
+- **Idempotency**: repeated mutation requests can replay stored results
+- **Versioning**: explicit expected versions prevent stale writes
+- **Events**: replay-safe and dedupable per consumer
 - **Context**: immutable data passed into handlers
 - **Access rules**: declarative checks run before execution
 
@@ -72,4 +75,5 @@ npm run test
 - **Can I swap databases?** Yes. The database layer is abstracted.
 - **Can I use my own transport?** Yes. The transport layer is swappable.
 - **Can I deploy serverless?** Yes. That is a primary target.
-
+- **Can I retry writes safely?** Yes, if you provide an idempotency key.
+- **Can I avoid duplicate event work?** Yes, with per-consumer dedupe support in the transport.

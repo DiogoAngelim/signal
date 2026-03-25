@@ -14,49 +14,49 @@ const features = [
     icon: Database,
     title: "Database Agnostic",
     description:
-      "Works with any database. Pluggable adapters for Postgres, MySQL, MongoDB, and more.",
+      "Works with any database. Signal keeps policy in the core and storage in adapters.",
   },
   {
     icon: Cloud,
     title: "Serverless-First",
     description:
-      "Built for Vercel, AWS Lambda, Fly.io, and Edge runtimes. No long-lived connections.",
+      "Built for Vercel, AWS Lambda, Fly.io, and edge runtimes with no long-lived state.",
+  },
+  {
+    icon: Zap,
+    title: "Named Operations",
+    description:
+      "Every query and mutation is explicit, named, and easy to trace end to end.",
   },
   {
     icon: Shield,
     title: "Declarative Access Control",
     description:
-      "Define access rules at the collection level. Enforced before execution, every time.",
-  },
-  {
-    icon: Zap,
-    title: "Named Queries & Mutations",
-    description:
-      "No implicit queries. All operations are explicit, named, and deterministic.",
-  },
-  {
-    icon: Lock,
-    title: "Runtime Immutability",
-    description:
-      "Configuration frozen after startup. Registry integrity guaranteed. No surprises.",
+      "Define access rules at the collection level. They run before handlers every time.",
   },
   {
     icon: RefreshCcw,
-    title: "Stateless Events",
+    title: "Idempotent Mutations",
     description:
-      "At-least-once delivery. Stable naming. No server-side observers or DB triggers.",
+      "Use an idempotency key plus payload fingerprint to replay stored results or detect conflicts.",
   },
   {
     icon: Layers,
-    title: "Explicit Lifecycle",
+    title: "Replay-Safe Events",
     description:
-      "Clear phases: configure() → register() → start(). Predictable initialization.",
+      "Event handlers stay safe under retries and out-of-order delivery.",
+  },
+  {
+    icon: Lock,
+    title: "Inbox / Outbox",
+    description:
+      "Per-consumer dedupe and append-only audit hooks keep delivery explicit and adapter-friendly.",
   },
   {
     icon: Code2,
-    title: "Full TypeScript",
+    title: "Optimistic Concurrency",
     description:
-      "Complete type safety with strict mode. Interfaces for everything.",
+      "Expected versions raise explicit mismatch errors instead of silently overwriting data.",
   },
 ];
 
@@ -75,7 +75,7 @@ export function Features() {
             </span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Every design decision made with production guarantees in mind. 
+            Every design decision is made with production guarantees in mind.
             No compromises on reliability, security, or developer experience.
           </p>
         </div>

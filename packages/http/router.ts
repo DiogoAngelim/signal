@@ -83,11 +83,7 @@ export class SignalRouter {
         .withDB(this.signal.getConfig().db)
         .withAuth(AuthProvider.fromHeaders(req.headers))
         .withEmit(this.signal.getEmitFn())
-        .withRequest({
-          method: req.method,
-          url: req.path,
-          headers: req.headers,
-        })
+        .withRequest(this.buildRequestContext(req))
         .withEnv(this.signal.getConfig().env || {})
         .build();
 
@@ -121,11 +117,7 @@ export class SignalRouter {
         .withDB(this.signal.getConfig().db)
         .withAuth(AuthProvider.fromHeaders(req.headers))
         .withEmit(this.signal.getEmitFn())
-        .withRequest({
-          method: req.method,
-          url: req.path,
-          headers: req.headers,
-        })
+        .withRequest(this.buildRequestContext(req))
         .withEnv(this.signal.getConfig().env || {})
         .build();
 
@@ -150,6 +142,30 @@ export class SignalRouter {
     return {
       ok: true,
       data: registry.introspect(),
+    };
+  }
+
+  /**
+   * Build request metadata with reliability hints.
+   */
+  private buildRequestContext(req: HTTPRequest): Record<string, any> {
+    const headers = req.headers || {};
+    const expectedVersionHeader =
+      headers["if-match"] ||
+      headers["x-expected-version"] ||
+      headers["x-resource-version"];
+
+    return {
+      method: req.method,
+      url: req.path,
+      headers,
+      idempotencyKey: headers["idempotency-key"] || headers["x-idempotency-key"],
+      expectedVersion:
+        expectedVersionHeader != null && expectedVersionHeader !== ""
+          ? Number(expectedVersionHeader)
+          : undefined,
+      consumerId: headers["x-consumer-id"],
+      replay: headers["x-replay"] === "true",
     };
   }
 }

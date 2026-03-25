@@ -31,14 +31,14 @@ export function Hero() {
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-balance">
               <span className="text-foreground">Backend framework for the </span>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
-                serverless era
+                reliable execution layer
               </span>
             </h1>
 
             <p className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 text-pretty leading-relaxed">
               Meteor-like developer experience redesigned for stateless, serverless,
-              database-agnostic environments. No magic, no long-lived connections -
-              just explicit, deterministic backend code.
+              database-agnostic environments. Mutations can be idempotent, writes can
+              enforce versions, and events stay replay-safe under retries.
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">

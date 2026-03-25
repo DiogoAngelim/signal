@@ -30,13 +30,14 @@ class PostgresAdapter implements SignalDB {
     return "id";
   }
 
-  async update(collection, id, update) {}
+  async update(collection, id, update, options) {}
 
   async delete(collection, id) {}
 }
 ```
 
 Keep the adapter focused on persistence, not framework policy.
+If your adapter can enforce version checks or persist mutation ledgers, do that there without adding hidden framework state.
 
 ## Custom Transport
 
@@ -50,11 +51,17 @@ class RedisTransport implements TransportInterface {
     // Publish to Redis or another broker
   }
 
-  async subscribe(pattern: string, handler: EventSubscriber): Promise<() => void> {
+  async subscribe(pattern: string, handler: EventSubscriber, options?: {
+    consumerId?: string;
+    dedupe?: boolean;
+    replay?: boolean;
+  }): Promise<() => void> {
     return () => {};
   }
 }
 ```
+
+If your transport persists inbox or outbox state, keep the behavior adapter-friendly and avoid coupling it to app-specific policies.
 
 ## Custom Logger
 

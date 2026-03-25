@@ -4,20 +4,20 @@ const platforms = [
   {
     name: "Vercel",
     code: `export default createHandler(signal);`,
-    description: "Deploy as serverless functions",
+    description: "Deploy as serverless functions with request metadata forwarded",
   },
   {
     name: "Fly.io",
     code: `const handler = createHandler(signal);
 Deno.serve({ port: 3000 }, handler);`,
-    description: "Run on edge locations worldwide",
+    description: "Run on edge locations worldwide without server affinity",
   },
   {
     name: "Express",
     code: `const handler = createHandler(signal);
 app.post("/signal/query", handler);
 app.post("/signal/mutation", handler);`,
-    description: "Integrate with existing apps",
+    description: "Integrate with existing apps while keeping the core rules intact",
   },
 ];
 
@@ -74,6 +74,10 @@ export function Deployment() {
           <h3 className="text-xl font-semibold mb-6 text-center">
             HTTP Endpoints
           </h3>
+          <p className="text-center text-sm text-muted-foreground mb-6">
+            Request metadata such as idempotency keys, expected versions, and consumer ids
+            can flow through the handler layer.
+          </p>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brain-core-light/10 text-brain-core-light font-mono text-sm mb-3">

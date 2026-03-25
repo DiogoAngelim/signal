@@ -5,7 +5,7 @@
  * Stores events in memory with event bus support.
  */
 
-import { SignalEvent, SignalTransport, EventSubscriber } from "../../core/Types";
+import { SignalEvent, SignalTransport, EventSubscriber, SignalTransportSubscribeOptions } from "../../core/Types";
 import { EventBus } from "../EventBus";
 
 /**
@@ -28,8 +28,12 @@ export class InMemoryTransport implements SignalTransport {
   /**
    * Subscribe to events
    */
-  async subscribe(pattern: string, handler: EventSubscriber): Promise<() => void> {
-    return this.eventBus.subscribe(pattern, handler);
+  async subscribe(
+    pattern: string,
+    handler: EventSubscriber,
+    options?: SignalTransportSubscribeOptions
+  ): Promise<() => void> {
+    return this.eventBus.subscribe(pattern, handler, options);
   }
 
   /**

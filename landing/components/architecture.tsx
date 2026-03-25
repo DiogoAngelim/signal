@@ -3,22 +3,22 @@ import { cn } from "@/lib/utils";
 const packages = [
   {
     name: "core",
-    description: "Signal.ts, Registry, Collection, Lifecycle, Context",
+    description: "Signal.ts, Registry, Collection, Lifecycle, Context, audit hooks",
     color: "from-brain-core-light via-brain-core-glow to-brain-core-rose",
   },
   {
     name: "db",
-    description: "Database abstraction + adapters",
+    description: "Database abstraction, optimistic writes, adapters",
     color: "from-brain-core-rose via-brain-core-root to-brain-core-light",
   },
   {
     name: "transport",
-    description: "Event bus + transport adapters",
+    description: "Event bus, inbox/outbox, transport adapters",
     color: "from-brain-core-light/80 via-brain-core-glow/80 to-brain-core-rose/80",
   },
   {
     name: "http",
-    description: "HTTP handler, router, validation",
+    description: "HTTP handler, router, validation, request metadata",
     color: "from-brain-core-rose/80 via-brain-core-root/80 to-brain-core-light/80",
   },
   {
@@ -53,8 +53,8 @@ export function Architecture() {
             </span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Clean separation of concerns. Each package handles one responsibility.
-            Extend or replace any component.
+            Clean separation of concerns. Each package handles one responsibility,
+            and reliability behavior stays adapter-friendly.
           </p>
         </div>
 
@@ -145,6 +145,20 @@ export function Architecture() {
                 <span className="text-primary">await</span> signal.
                 <span className="text-accent">start</span>();{" "}
                 <span className="text-muted-foreground/60">{"// RUNNING"}</span>
+              </div>
+              <div className="text-muted-foreground mt-1">
+                <span className="text-primary">const</span> request ={" "}
+                <span className="text-brain-tissue">"req_123"</span>;{" "}
+                <span className="text-muted-foreground/60">
+                  {"// idempotency key"}
+                </span>
+              </div>
+              <div className="text-muted-foreground mt-1">
+                <span className="text-primary">await</span> signal.
+                <span className="text-accent">mutation</span>("posts.create", payload, request);{" "}
+                <span className="text-muted-foreground/60">
+                  {"// replay-safe write with stored result replay"}
+                </span>
               </div>
             </div>
           </div>
