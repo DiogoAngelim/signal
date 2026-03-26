@@ -124,7 +124,7 @@ runtime.registerQuery(
     // String: protocol name in the form <domain>.<action>.<version>.
     // Example possibilities: "payment.status.v1", "user.profile.v1".
     name: "payment.status.v1",
-    // Variable value: the operation kind must be "query" for read-only reads; other supported kind values are "mutation" and "event".
+    // Variable value: the operation kind must be "query" for read-only reads; if the operation changes state, use "mutation"; if it publishes an immutable fact, use "event".
     kind: "query",
     inputSchema: paymentStatusInputSchema,
     resultSchema: paymentStatusResultSchema,
