@@ -84,11 +84,6 @@ Examples are documented in:
 
 ### Variables
 
-Variables are named values you define before you pass them into Signal.
-Use `const` when the value should not change, and prefer descriptive names.
-
-Example:
-
 ```ts
 const runtimeName = "signal-reference";
 const dispatcher = createMemoryDispatcher();
@@ -116,11 +111,11 @@ const dispatcher = createMemoryDispatcher();
 const repository = createPaymentRepository();
 
 const runtime = createSignalRuntime({
-  // String: any stable runtime label used in logs and capability output.
+  // String: any stable runtime label, for example "signal-reference" or "signal-local".
   runtimeName,
-  // Variable: a dispatcher implementation that can publish events.
+  // Variable: a dispatcher implementation, for example a memory dispatcher or Kafka adapter.
   dispatcher,
-  // Variable value: memory store for local runs and tests.
+  // Variable value: memory store for local runs and tests, or a PostgreSQL-backed store in advanced setups.
   idempotencyStore: createMemoryIdempotencyStore(),
 });
 
@@ -129,7 +124,7 @@ runtime.registerQuery(
     // String: protocol name in the form <domain>.<action>.<version>.
     // Example possibilities: "payment.status.v1", "user.profile.v1".
     name: "payment.status.v1",
-    // Variable value: the operation kind must be "query" for read-only reads.
+    // Variable value: the operation kind must be "query" for read-only reads; other supported kind values are "mutation" and "event".
     kind: "query",
     inputSchema: paymentStatusInputSchema,
     resultSchema: paymentStatusResultSchema,
@@ -144,9 +139,9 @@ runtime.registerMutation(
     // String: protocol name in the same <domain>.<action>.<version> form.
     // Example possibilities: "payment.capture.v1", "order.cancel.v1".
     name: "payment.capture.v1",
-    // Variable value: the operation kind must be "mutation" for state-changing commands.
+    // Variable value: the operation kind must be "mutation" for state-changing commands; other supported kind values are "query" and "event".
     kind: "mutation",
-    // Variable value: "required" means the caller must send an idempotency key.
+    // Variable value: "required" means the caller must send an idempotency key; the other idempotency modes are "optional" and "none".
     idempotency: "required",
     inputSchema: paymentCaptureInputSchema,
     resultSchema: paymentStatusResultSchema,
@@ -185,14 +180,13 @@ const dispatcher = createKafkaDispatcher();
 const connectionString = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/signal";
 
 const runtime = createSignalRuntime({
-  // String: any stable runtime label used by logs and capability output.
+  // String: any stable runtime label, for example "signal-reference" or "signal-http".
   runtimeName,
   // Variable: the dispatcher can be a Kafka adapter, an in-process bus, or another binding.
   dispatcher,
-  // Variable value: PostgreSQL-backed idempotency store for retry-safe mutations.
+  // Variable value: PostgreSQL-backed idempotency store for retry-safe mutations, or an in-memory store for local runs.
   idempotencyStore: createPostgresIdempotencyStore({
-    // String: a PostgreSQL connection string.
-    // Example possibilities: "postgresql://user:pass@localhost:5432/signal".
+    // String: a PostgreSQL connection string, for example "postgresql://postgres:postgres@localhost:5432/signal".
     connectionString,
   }),
 });
