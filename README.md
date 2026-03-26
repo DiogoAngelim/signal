@@ -88,39 +88,57 @@ In the examples below, each value is defined once with `const` and then reused b
 
 ```ts
 const runtimeName = "signal-reference";
-const dispatcher = createMemoryDispatcher();
+const dispatcher = createInProcessDispatcher();
 const repository = createPaymentRepository();
 const databaseUrl = process.env.DATABASE_URL;
 ```
 
 - `runtimeName` is a string variable. Use a stable label such as `"signal-reference"` for this repo, `"signal-local"` for local development, or `"signal-http"` for an HTTP server.
-- `dispatcher` is a variable that points to the event publisher. Common choices are `createMemoryDispatcher()` for local tests, a Kafka dispatcher for a broker-backed app, or another adapter that matches your transport.
+- `dispatcher` is a variable that points to the event publisher. The current options in this repo are `createInProcessDispatcher()` from `@signal/runtime`, `createKafkaSignalDispatcher()` from `@signal/examples/kafka-postgresql`, or your own object that implements `SignalDispatcher`.
 - `repository` is a variable that points to your domain storage layer. In this example it reads and writes payment data, but the same pattern can use a user repository, order repository, or any other domain store.
 - `databaseUrl` is a string variable that may be `undefined` until configured. A typical value is `"postgresql://postgres:postgres@localhost:5432/signal"`.
 
 When a callback receives variables, the input is usually a validated payload object and the output is usually a result object, a domain record, or a protocol error.
 
+### Imports
+
+The current public package entry points in this repo are:
+
+- `@signal/sdk-node`: `createSignalRuntime`, `defineQuery`, `defineMutation`, `defineEvent`
+- `@signal/runtime`: `createInProcessDispatcher`, `createMemoryIdempotencyStore`, `createReplaySafeSubscriber`, `SignalRuntime`, `SignalRegistry`, `SignalDispatcher`
+- `@signal/protocol`: `createSignalEnvelope`, `validateSignalEnvelope`, `createSignalName`, `parseSignalName`, `createSignalError`, `createProtocolError`, `ok`, `fail`, `createSignalCapabilities`, `signalEnvelopeSchema`, `signalNameSchema`, `signalErrorSchema`, `signalResultSchema`, `signalCapabilitiesSchema`
+- `@signal/idempotency-postgres`: `createPostgresIdempotencyStore`
+- `@signal/binding-http`: `createSignalHttpServer`, `registerSignalHttpRoutes`, `handleQueryRequest`, `handleMutationRequest`, `handleCapabilitiesRequest`
+- `@signal/examples`: `createExampleRuntime`, `createReplaySafeSubscriber`, and the runnable example entry points
+- `@signal/examples/payment-capture`, `@signal/examples/escrow-release`, `@signal/examples/user-onboarding`: the three runnable domain examples
+- `@signal/examples/kafka-postgresql`: `createKafkaSignalDispatcher`, `createKafkaPostgresExample`, `runKafkaPostgresDemo`
+
+If you need a dispatcher that is not listed here, implement `SignalDispatcher` yourself.
+
 ### 4.1 Minimal
 
-The smallest useful setup is an in-process runtime with one query, one mutation, and one event.
+The smallest useful setup is an in-process runtime with one query, one mutation, and one emitted event.
 
 ```ts
 import { createSignalRuntime, defineMutation, defineQuery } from "@signal/sdk-node";
-import { createMemoryIdempotencyStore } from "@signal/runtime";
+import {
+  createInProcessDispatcher,
+  createMemoryIdempotencyStore,
+} from "@signal/runtime";
 
 const runtimeName = "signal-reference";
-const dispatcher = createMemoryDispatcher();
+const dispatcher = createInProcessDispatcher();
 const repository = createPaymentRepository();
 
 const runtime = createSignalRuntime({
-  // String value: a stable runtime label. Use a name such as "signal-reference" for this repo,
-  // "signal-local" for local runs, or "signal-http" for a server process.
+  // String value: a stable runtime label. Example options are "signal-reference",
+  // "signal-local", or "signal-http".
   runtimeName,
-  // Variable choice: the event dispatcher. Use createMemoryDispatcher() for local demos,
-  // a Kafka adapter for a broker-backed deployment, or another transport adapter if you add one.
+  // Variable choice: the event dispatcher. Use createInProcessDispatcher() for local runs,
+  // createKafkaSignalDispatcher() for a broker-backed deployment, or a custom SignalDispatcher.
   dispatcher,
   // Variable choice: the idempotency store. Use createMemoryIdempotencyStore() for tests and
-  // local development, or a PostgreSQL-backed store when you need persistent retry handling.
+  // local development, or createPostgresIdempotencyStore() when you need persistent retry handling.
   idempotencyStore: createMemoryIdempotencyStore(),
 });
 
@@ -178,33 +196,42 @@ This mode is useful when you want:
 - fast tests for protocol behavior
 - a simple way to prove envelope validation and idempotency handling
 
+Schema note: `inputSchema` and `resultSchema` are Zod schemas in code. They validate plain JSON objects before the handler runs. The public schema artifacts in `/schemas` use JSON Schema Draft 2020-12. For example, `payment.status.v1` accepts `{ paymentId: "pay_123" }` because `paymentId` is a required non-empty string.
+
 ### 4.2 Advanced
 
-The advanced setup uses the PostgreSQL idempotency store, the HTTP binding, and the runnable reference server.
+The advanced setup uses the PostgreSQL idempotency store, the Kafka example dispatcher, the HTTP binding, and the runnable reference server.
 
 ```ts
 import { createPostgresIdempotencyStore } from "@signal/idempotency-postgres";
 import { createSignalRuntime } from "@signal/sdk-node";
+import { createKafkaSignalDispatcher } from "@signal/examples/kafka-postgresql";
 
-const runtimeName = "signal-reference";
-const dispatcher = createKafkaDispatcher();
-const connectionString = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/signal";
+async function main() {
+  const runtimeName = "signal-reference";
+  const dispatcher = await createKafkaSignalDispatcher({
+    brokers: ["localhost:9092"], // one or more Kafka brokers
+    topic: "signal.events", // the topic used for Signal event envelopes
+  });
+  const connectionString =
+    process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/signal";
 
-const runtime = createSignalRuntime({
-  // String value: a stable runtime label. Common choices are "signal-reference",
-  // "signal-http", or another name that matches the service you are running.
-  runtimeName,
-  // Variable choice: the dispatcher. Use a Kafka adapter for a broker-backed app,
-  // an in-process bus for local runs, or another adapter if your transport differs.
-  dispatcher,
-  // Variable choice: the idempotency store. Use PostgreSQL when you need persistence
-  // across restarts, or an in-memory store for quick local experiments.
-  idempotencyStore: createPostgresIdempotencyStore({
-    // String value: a PostgreSQL connection string.
-    // Example: "postgresql://postgres:postgres@localhost:5432/signal".
-    connectionString,
-  }),
-});
+  const runtime = createSignalRuntime({
+    // String value: a stable runtime label. Common choices are "signal-reference",
+    // "signal-http", or another name that matches the service you are running.
+    runtimeName,
+    // Variable choice: the dispatcher. Use the Kafka example adapter for a broker-backed app,
+    // createInProcessDispatcher() for local runs, or another SignalDispatcher implementation.
+    dispatcher,
+    // Variable choice: the idempotency store. Use PostgreSQL when you need persistence
+    // across restarts, or an in-memory store for quick local experiments.
+    idempotencyStore: createPostgresIdempotencyStore({
+      // String value: a PostgreSQL connection string.
+      // Example: "postgresql://postgres:postgres@localhost:5432/signal".
+      connectionString,
+    }),
+  });
+}
 ```
 
 In this mode, query callbacks receive validated input and return a result value, while mutation callbacks receive validated input plus an execution context and return the stored result after any event emission.
