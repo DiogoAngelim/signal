@@ -29,7 +29,7 @@ export function CTA() {
 
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href="/docs/guides/quickstart"
+            href="https://github.com/DiogoAngelim/signal/blob/main/docs/docs/introduction.md"
             className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-primary via-secondary to-accent text-white font-semibold rounded-xl hover:opacity-90 transition-all glow-amber"
           >
             <BookOpen className="w-5 h-5" />

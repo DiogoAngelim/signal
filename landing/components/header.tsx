@@ -65,7 +65,9 @@ export function Header() {
               <span className="text-sm">Repository</span>
             </a>
             <a
-              href="#code"
+              href="https://github.com/DiogoAngelim/signal/blob/main/docs/docs/introduction.md"
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-4 py-2 bg-gradient-to-r from-primary via-secondary to-accent text-white font-semibold text-sm rounded-lg hover:opacity-90 transition-opacity"
             >
               Quickstart
