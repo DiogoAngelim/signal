@@ -34,11 +34,7 @@ export function Hero() {
             </h1>
 
             <p className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 text-pretty leading-relaxed">
-              Signal defines the envelope, naming rules, result model,
-              idempotency behavior, and binding surface for application
-              messages. It is designed for real flows like payment capture,
-              escrow release, user onboarding, and read-model queries. The Node
-              reference runtime shows one way to implement the contract.
+              A universal coordination layer for real-world operations
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
