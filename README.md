@@ -82,6 +82,27 @@ Examples are documented in:
 
 ## 4. Usage
 
+### Variables
+
+Variables are named values you define before you pass them into Signal.
+Use `const` when the value should not change, and prefer descriptive names.
+
+Example:
+
+```ts
+const runtimeName = "signal-reference";
+const dispatcher = createMemoryDispatcher();
+const repository = createPaymentRepository();
+const databaseUrl = process.env.DATABASE_URL;
+```
+
+- `runtimeName` is a string variable.
+- `dispatcher` is an object variable that can publish events.
+- `repository` is an object variable that reads and writes domain state.
+- `databaseUrl` is a string variable that may be `undefined` until configured.
+
+When a callback receives variables, the callback input is usually a validated payload and the callback output is usually a result object.
+
 ### 4.1 Minimal
 
 The smallest useful setup is an in-process runtime with one query, one mutation, and one event.
@@ -90,9 +111,13 @@ The smallest useful setup is an in-process runtime with one query, one mutation,
 import { createSignalRuntime, defineMutation, defineQuery } from "@signal/sdk-node";
 import { createMemoryIdempotencyStore } from "@signal/runtime";
 
+const runtimeName = "signal-reference";
+const dispatcher = createMemoryDispatcher();
+const repository = createPaymentRepository();
+
 const runtime = createSignalRuntime({
   // String: any stable runtime label used in logs and capability output.
-  runtimeName: "signal-reference",
+  runtimeName,
   // Variable: a dispatcher implementation that can publish events.
   dispatcher,
   // Variable value: memory store for local runs and tests.
@@ -155,16 +180,20 @@ The advanced setup uses the PostgreSQL idempotency store, the HTTP binding, and 
 import { createPostgresIdempotencyStore } from "@signal/idempotency-postgres";
 import { createSignalRuntime } from "@signal/sdk-node";
 
+const runtimeName = "signal-reference";
+const dispatcher = createKafkaDispatcher();
+const connectionString = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/signal";
+
 const runtime = createSignalRuntime({
   // String: any stable runtime label used by logs and capability output.
-  runtimeName: "signal-reference",
+  runtimeName,
   // Variable: the dispatcher can be a Kafka adapter, an in-process bus, or another binding.
   dispatcher,
   // Variable value: PostgreSQL-backed idempotency store for retry-safe mutations.
   idempotencyStore: createPostgresIdempotencyStore({
     // String: a PostgreSQL connection string.
     // Example possibilities: "postgresql://user:pass@localhost:5432/signal".
-    connectionString: process.env.DATABASE_URL!,
+    connectionString,
   }),
 });
 ```
