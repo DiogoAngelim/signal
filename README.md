@@ -80,7 +80,7 @@ Examples are documented in:
 - [`apps/reference-server/.env.example`](apps/reference-server/.env.example)
 - [`packages/examples/kafka-postgresql/.env.example`](packages/examples/kafka-postgresql/.env.example)
 
-## 4. Using
+## 4. Usage
 
 ### 4.1 Minimal
 
@@ -91,18 +91,52 @@ import { createSignalRuntime, defineMutation, defineQuery } from "@signal/sdk-no
 import { createMemoryIdempotencyStore } from "@signal/runtime";
 
 const runtime = createSignalRuntime({
+  // String: any stable runtime label used in logs and capability output.
   runtimeName: "signal-reference",
+  // Variable: a dispatcher implementation that can publish events.
   dispatcher,
+  // Variable value: memory store for local runs and tests.
   idempotencyStore: createMemoryIdempotencyStore(),
 });
 
 runtime.registerQuery(
   defineQuery({
+    // String: protocol name in the form <domain>.<action>.<version>.
+    // Example possibilities: "payment.status.v1", "user.profile.v1".
     name: "payment.status.v1",
+    // Variable value: the operation kind must be "query" for read-only reads.
     kind: "query",
     inputSchema: paymentStatusInputSchema,
     resultSchema: paymentStatusResultSchema,
+    // Callback input: a validated query payload.
+    // Callback output: the query result, or a protocol error if the record is missing.
     handler: async (input) => repository.getPayment(input.paymentId),
+  })
+);
+
+runtime.registerMutation(
+  defineMutation({
+    // String: protocol name in the same <domain>.<action>.<version> form.
+    // Example possibilities: "payment.capture.v1", "order.cancel.v1".
+    name: "payment.capture.v1",
+    // Variable value: the operation kind must be "mutation" for state-changing commands.
+    kind: "mutation",
+    // Variable value: "required" means the caller must send an idempotency key.
+    idempotency: "required",
+    inputSchema: paymentCaptureInputSchema,
+    resultSchema: paymentStatusResultSchema,
+    // Callback input: validated mutation payload plus an execution context.
+    // Callback output: the stored mutation result, plus any emitted events through context.emit().
+    handler: async (input, context) => {
+      const captured = await repository.capturePayment(input);
+      await context.emit("payment.captured.v1", {
+        paymentId: captured.paymentId,
+        amount: captured.amount,
+        currency: captured.currency,
+        capturedAt: captured.capturedAt ?? new Date().toISOString(),
+      });
+      return captured;
+    },
   })
 );
 ```
@@ -122,13 +156,20 @@ import { createPostgresIdempotencyStore } from "@signal/idempotency-postgres";
 import { createSignalRuntime } from "@signal/sdk-node";
 
 const runtime = createSignalRuntime({
+  // String: any stable runtime label used by logs and capability output.
   runtimeName: "signal-reference",
+  // Variable: the dispatcher can be a Kafka adapter, an in-process bus, or another binding.
   dispatcher,
+  // Variable value: PostgreSQL-backed idempotency store for retry-safe mutations.
   idempotencyStore: createPostgresIdempotencyStore({
+    // String: a PostgreSQL connection string.
+    // Example possibilities: "postgresql://user:pass@localhost:5432/signal".
     connectionString: process.env.DATABASE_URL!,
   }),
 });
 ```
+
+In this mode, query callbacks receive validated input and return a result value, while mutation callbacks receive validated input plus an execution context and return the stored result after any event emission.
 
 For a full example that includes Kafka, PostgreSQL, queries, mutations, and replay-safe event handling, see:
 
