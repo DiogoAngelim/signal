@@ -84,6 +84,8 @@ Examples are documented in:
 
 ### Variables
 
+In the examples below, each value is defined once with `const` and then reused by the runtime. If you are new to the library, read them in this order: define the variables, create the runtime, register the handlers, then run the runtime from HTTP or in-process code.
+
 ```ts
 const runtimeName = "signal-reference";
 const dispatcher = createMemoryDispatcher();
@@ -91,12 +93,12 @@ const repository = createPaymentRepository();
 const databaseUrl = process.env.DATABASE_URL;
 ```
 
-- `runtimeName` is a string variable.
-- `dispatcher` is an object variable that can publish events.
-- `repository` is an object variable that reads and writes domain state.
-- `databaseUrl` is a string variable that may be `undefined` until configured.
+- `runtimeName` is a string variable. Use a stable label such as `"signal-reference"` for this repo, `"signal-local"` for local development, or `"signal-http"` for an HTTP server.
+- `dispatcher` is a variable that points to the event publisher. Common choices are `createMemoryDispatcher()` for local tests, a Kafka dispatcher for a broker-backed app, or another adapter that matches your transport.
+- `repository` is a variable that points to your domain storage layer. In this example it reads and writes payment data, but the same pattern can use a user repository, order repository, or any other domain store.
+- `databaseUrl` is a string variable that may be `undefined` until configured. A typical value is `"postgresql://postgres:postgres@localhost:5432/signal"`.
 
-When a callback receives variables, the callback input is usually a validated payload and the callback output is usually a result object.
+When a callback receives variables, the input is usually a validated payload object and the output is usually a result object, a domain record, or a protocol error.
 
 ### 4.1 Minimal
 
@@ -111,42 +113,51 @@ const dispatcher = createMemoryDispatcher();
 const repository = createPaymentRepository();
 
 const runtime = createSignalRuntime({
-  // String: any stable runtime label, for example "signal-reference" or "signal-local".
+  // String value: a stable runtime label. Use a name such as "signal-reference" for this repo,
+  // "signal-local" for local runs, or "signal-http" for a server process.
   runtimeName,
-  // Variable: a dispatcher implementation, for example a memory dispatcher or Kafka adapter.
+  // Variable choice: the event dispatcher. Use createMemoryDispatcher() for local demos,
+  // a Kafka adapter for a broker-backed deployment, or another transport adapter if you add one.
   dispatcher,
-  // Variable value: memory store for local runs and tests, or a PostgreSQL-backed store in advanced setups.
+  // Variable choice: the idempotency store. Use createMemoryIdempotencyStore() for tests and
+  // local development, or a PostgreSQL-backed store when you need persistent retry handling.
   idempotencyStore: createMemoryIdempotencyStore(),
 });
 
 runtime.registerQuery(
   defineQuery({
-    // String: protocol name in the form <domain>.<action>.<version>.
-    // Example possibilities: "payment.status.v1", "user.profile.v1".
+    // String value: the operation name in <domain>.<action>.<version> form.
+    // Examples: "payment.status.v1", "user.profile.v1", "order.summary.v1".
     name: "payment.status.v1",
-    // Variable value: the operation kind must be "query" for read-only reads; if the operation changes state, use "mutation"; if it publishes an immutable fact, use "event".
+    // Variable value: the operation kind. Use "query" for read-only reads,
+    // "mutation" for state-changing commands, and "event" for immutable facts.
     kind: "query",
     inputSchema: paymentStatusInputSchema,
     resultSchema: paymentStatusResultSchema,
-    // Callback input: a validated query payload.
-    // Callback output: the query result, or a protocol error if the record is missing.
+    // Callback input: a validated query payload, for example { paymentId: "pay_123" }.
+    // Callback output: the matching result, such as a payment record, or a protocol error if your
+    // implementation reports missing data that way.
     handler: async (input) => repository.getPayment(input.paymentId),
   })
 );
 
 runtime.registerMutation(
   defineMutation({
-    // String: protocol name in the same <domain>.<action>.<version> form.
-    // Example possibilities: "payment.capture.v1", "order.cancel.v1".
+    // String value: the operation name in the same <domain>.<action>.<version> form.
+    // Examples: "payment.capture.v1", "order.cancel.v1", "user.activate.v1".
     name: "payment.capture.v1",
-    // Variable value: the operation kind must be "mutation" for state-changing commands; other supported kind values are "query" and "event".
+    // Variable value: the operation kind. Use "mutation" here because this handler changes state.
+    // Other valid values are "query" and "event".
     kind: "mutation",
-    // Variable value: "required" means the caller must send an idempotency key; the other idempotency modes are "optional" and "none".
+    // Variable value: the idempotency mode. Use "required" when callers must send an idempotency
+    // key, "optional" when callers may send one, and "none" when no idempotency key is used.
     idempotency: "required",
     inputSchema: paymentCaptureInputSchema,
     resultSchema: paymentStatusResultSchema,
-    // Callback input: validated mutation payload plus an execution context.
-    // Callback output: the stored mutation result, plus any emitted events through context.emit().
+    // Callback input: a validated mutation payload plus an execution context. The context gives you
+    // helpers such as emit(), message metadata, and correlation data.
+    // Callback output: the stored mutation result. Use context.emit() to publish follow-up events,
+    // such as "payment.captured.v1", during the same operation.
     handler: async (input, context) => {
       const captured = await repository.capturePayment(input);
       await context.emit("payment.captured.v1", {
@@ -180,13 +191,17 @@ const dispatcher = createKafkaDispatcher();
 const connectionString = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/signal";
 
 const runtime = createSignalRuntime({
-  // String: any stable runtime label, for example "signal-reference" or "signal-http".
+  // String value: a stable runtime label. Common choices are "signal-reference",
+  // "signal-http", or another name that matches the service you are running.
   runtimeName,
-  // Variable: the dispatcher can be a Kafka adapter, an in-process bus, or another binding.
+  // Variable choice: the dispatcher. Use a Kafka adapter for a broker-backed app,
+  // an in-process bus for local runs, or another adapter if your transport differs.
   dispatcher,
-  // Variable value: PostgreSQL-backed idempotency store for retry-safe mutations, or an in-memory store for local runs.
+  // Variable choice: the idempotency store. Use PostgreSQL when you need persistence
+  // across restarts, or an in-memory store for quick local experiments.
   idempotencyStore: createPostgresIdempotencyStore({
-    // String: a PostgreSQL connection string, for example "postgresql://postgres:postgres@localhost:5432/signal".
+    // String value: a PostgreSQL connection string.
+    // Example: "postgresql://postgres:postgres@localhost:5432/signal".
     connectionString,
   }),
 });
