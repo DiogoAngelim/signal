@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2022",
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@site/*": ["./*"]
+    },
+    "types": ["node"]
+  },
+  "include": ["src/**/*", "docusaurus.config.ts", "sidebars.ts"],
+  "exclude": ["build", "node_modules"]
+}

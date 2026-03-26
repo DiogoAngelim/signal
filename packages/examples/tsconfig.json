@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "outDir": "dist",
+    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "types": ["node"]
+  },
+  "include": [
+    "index.ts",
+    "support.ts",
+    "payment-capture/**/*.ts",
+    "escrow-release/**/*.ts",
+    "user-onboarding/**/*.ts",
+    "kafka-postgresql/**/*.ts"
+  ],
+  "exclude": ["dist", "node_modules"]
+}

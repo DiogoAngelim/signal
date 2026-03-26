@@ -1,0 +1,26 @@
+{
+  "id": "concepts/events",
+  "title": "Events",
+  "description": "What It Is",
+  "source": "@site/docs/concepts/events.md",
+  "sourceDirName": "concepts",
+  "slug": "/concepts/events",
+  "permalink": "/signal/docs/concepts/events",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/concepts/events.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Events"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Mutations",
+    "permalink": "/signal/docs/concepts/mutations"
+  },
+  "next": {
+    "title": "Idempotency",
+    "permalink": "/signal/docs/concepts/idempotency"
+  }
+}

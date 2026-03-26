@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signal.dev/schemas/payment-captured.event.schema.json",
+  "title": "Payment Captured Event",
+  "type": "object",
+  "required": ["paymentId", "amount", "currency", "capturedAt"],
+  "properties": {
+    "paymentId": { "type": "string" },
+    "amount": { "type": "number", "exclusiveMinimum": 0 },
+    "currency": { "type": "string", "minLength": 3, "maxLength": 3 },
+    "capturedAt": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}

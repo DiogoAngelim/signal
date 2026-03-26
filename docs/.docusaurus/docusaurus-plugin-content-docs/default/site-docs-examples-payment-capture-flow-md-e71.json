@@ -1,0 +1,26 @@
+{
+  "id": "examples/payment-capture-flow",
+  "title": "Payment Capture Flow",
+  "description": "1. A client sends payment.capture.v1 with an idempotency key.",
+  "source": "@site/docs/examples/payment-capture-flow.md",
+  "sourceDirName": "examples",
+  "slug": "/examples/payment-capture-flow",
+  "permalink": "/signal/docs/examples/payment-capture-flow",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/examples/payment-capture-flow.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Payment Capture Flow"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "In-Process Runtime",
+    "permalink": "/signal/docs/guides/in-process-runtime"
+  },
+  "next": {
+    "title": "Escrow Release Flow",
+    "permalink": "/signal/docs/examples/escrow-release-flow"
+  }
+}

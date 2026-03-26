@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signal.dev/schemas/error.schema.json",
+  "title": "Signal Error",
+  "type": "object",
+  "required": ["code", "message"],
+  "properties": {
+    "code": {
+      "enum": [
+        "BAD_REQUEST",
+        "VALIDATION_ERROR",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "CONFLICT",
+        "IDEMPOTENCY_CONFLICT",
+        "INTERNAL_ERROR",
+        "RETRYABLE_ERROR",
+        "UNSUPPORTED_OPERATION"
+      ]
+    },
+    "message": { "type": "string" },
+    "retryable": { "type": "boolean" },
+    "details": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": true
+}

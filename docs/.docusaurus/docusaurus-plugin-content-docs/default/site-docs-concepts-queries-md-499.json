@@ -1,0 +1,26 @@
+{
+  "id": "concepts/queries",
+  "title": "Queries",
+  "description": "What It Is",
+  "source": "@site/docs/concepts/queries.md",
+  "sourceDirName": "concepts",
+  "slug": "/concepts/queries",
+  "permalink": "/signal/docs/concepts/queries",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/concepts/queries.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Queries"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Introduction",
+    "permalink": "/signal/docs/introduction"
+  },
+  "next": {
+    "title": "Mutations",
+    "permalink": "/signal/docs/concepts/mutations"
+  }
+}

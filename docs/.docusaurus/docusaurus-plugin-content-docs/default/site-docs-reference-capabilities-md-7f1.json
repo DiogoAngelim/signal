@@ -1,0 +1,26 @@
+{
+  "id": "reference/capabilities",
+  "title": "Capabilities",
+  "description": "Shape",
+  "source": "@site/docs/reference/capabilities.md",
+  "sourceDirName": "reference",
+  "slug": "/reference/capabilities",
+  "permalink": "/signal/docs/reference/capabilities",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/reference/capabilities.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Capabilities"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Envelope",
+    "permalink": "/signal/docs/reference/envelope"
+  },
+  "next": {
+    "title": "Errors",
+    "permalink": "/signal/docs/reference/errors"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "guides/http-binding",
+  "title": "HTTP Binding",
+  "description": "Steps",
+  "source": "@site/docs/guides/http-binding.md",
+  "sourceDirName": "guides",
+  "slug": "/guides/http-binding",
+  "permalink": "/signal/docs/guides/http-binding",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/guides/http-binding.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "HTTP Binding"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Emit and Consume Events",
+    "permalink": "/signal/docs/guides/emit-and-consume-events"
+  },
+  "next": {
+    "title": "In-Process Runtime",
+    "permalink": "/signal/docs/guides/in-process-runtime"
+  }
+}

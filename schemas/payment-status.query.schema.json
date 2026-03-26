@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signal.dev/schemas/payment-status.query.schema.json",
+  "title": "Payment Status Query",
+  "type": "object",
+  "required": ["paymentId"],
+  "properties": {
+    "paymentId": { "type": "string" }
+  },
+  "additionalProperties": false
+}

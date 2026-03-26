@@ -1,0 +1,26 @@
+{
+  "id": "reference/conformance",
+  "title": "Conformance",
+  "description": "Must Implement",
+  "source": "@site/docs/reference/conformance.md",
+  "sourceDirName": "reference",
+  "slug": "/reference/conformance",
+  "permalink": "/signal/docs/reference/conformance",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/reference/conformance.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Conformance"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Errors",
+    "permalink": "/signal/docs/reference/errors"
+  },
+  "next": {
+    "title": "Quickstart",
+    "permalink": "/signal/docs/guides/quickstart"
+  }
+}

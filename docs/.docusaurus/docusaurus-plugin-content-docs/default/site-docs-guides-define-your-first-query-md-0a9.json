@@ -1,0 +1,26 @@
+{
+  "id": "guides/define-your-first-query",
+  "title": "Define Your First Query",
+  "description": "Use a versioned name, an input schema, and a result schema.",
+  "source": "@site/docs/guides/define-your-first-query.md",
+  "sourceDirName": "guides",
+  "slug": "/guides/define-your-first-query",
+  "permalink": "/signal/docs/guides/define-your-first-query",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/guides/define-your-first-query.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Define Your First Query"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Quickstart",
+    "permalink": "/signal/docs/guides/quickstart"
+  },
+  "next": {
+    "title": "Define Your First Mutation",
+    "permalink": "/signal/docs/guides/define-your-first-mutation"
+  }
+}

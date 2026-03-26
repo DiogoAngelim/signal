@@ -1,0 +1,22 @@
+{
+  "id": "introduction",
+  "title": "Introduction",
+  "description": "Signal is a transport-agnostic application protocol for queries, mutations, and events.",
+  "source": "@site/docs/introduction.md",
+  "sourceDirName": ".",
+  "slug": "/introduction",
+  "permalink": "/signal/docs/introduction",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/introduction.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Introduction"
+  },
+  "sidebar": "tutorialSidebar",
+  "next": {
+    "title": "Queries",
+    "permalink": "/signal/docs/concepts/queries"
+  }
+}

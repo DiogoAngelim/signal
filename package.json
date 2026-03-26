@@ -1,81 +1,24 @@
 {
-  "name": "@digelo/signal",
+  "name": "signal-workspace",
+  "private": true,
   "version": "1.0.0",
-  "description": "Production-grade backend framework for serverless environments. Meteor-like DX, stateless & database-agnostic.",
-  "homepage": "https://github.com/DiogoAngelim/signal",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/DiogoAngelim/signal.git"
-  },
-  "bugs": {
-    "url": "https://github.com/DiogoAngelim/signal/issues"
-  },
-  "license": "MIT",
-  "author": {
-    "name": "Diogo Angelim"
-  },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
-  },
+  "packageManager": "pnpm@9.9.0",
   "scripts": {
-    "dev": "cd landing && npm run dev",
-    "build": "tsc",
-    "build:clean": "npm run clean && npm run build",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:production": "ts-node test/production.test.ts",
-    "clean": "rm -rf dist coverage",
-    "type-check": "tsc --noEmit",
-    "lint": "tsc --noEmit",
-    "prepare": "npm run build"
-  },
-  "keywords": [
-    "backend",
-    "framework",
-    "serverless",
-    "meteor",
-    "database-agnostic",
-    "typescript",
-    "queries",
-    "mutations",
-    "events",
-    "production-ready",
-    "stateless",
-    "event-driven"
-  ],
-  "dependencies": {
-    "clsx": "^2.1.1",
-    "lucide-react": "^1.6.0",
-    "next": "^16.2.1",
-    "react": "^19.2.4",
-    "tailwind-merge": "^3.5.0"
+    "build": "pnpm -r --sort run build",
+    "dev": "pnpm --filter @signal/landing dev",
+    "dev:docs": "pnpm --filter @signal/docs dev",
+    "dev:server": "pnpm --filter @signal/reference-server dev",
+    "test": "pnpm build && pnpm -r --sort run test",
+    "coverage": "pnpm --filter @signal/protocol run test:coverage && pnpm --filter @signal/runtime run test:coverage && pnpm --filter @signal/binding-http run test:coverage && pnpm --filter @signal/sdk-node run test:coverage && pnpm --filter @signal/idempotency-postgres run test:coverage && pnpm --filter @signal/examples run test:coverage && pnpm --filter @signal/reference-server run test:coverage",
+    "lint": "pnpm -r --sort run lint",
+    "format": "biome format --write .",
+    "check": "biome check .",
+    "typecheck": "pnpm -r --sort run typecheck"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.0",
-    "@types/node": "^20.0.0",
-    "jest": "^29.5.0",
-    "ts-jest": "^29.1.0",
-    "ts-node": "^10.9.0",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.3.0"
+    "@biomejs/biome": "^1.9.4",
+    "@vitest/coverage-v8": "^2.1.9",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.9"
   }
 }

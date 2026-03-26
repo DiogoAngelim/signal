@@ -2,22 +2,22 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Signal - Production-Grade Backend Framework",
+  title: "Signal",
   description:
-    "A Meteor-like backend framework redesigned for stateless, serverless, database-agnostic environments. No magic, just explicit, deterministic backend code.",
+    "Signal is a transport-agnostic application protocol for queries, mutations, and events.",
   keywords: [
-    "backend framework",
-    "serverless",
+    "application protocol",
+    "queries",
+    "mutations",
+    "events",
     "typescript",
-    "meteor",
-    "database-agnostic",
-    "production-ready",
+    "node",
   ],
   authors: [{ name: "Diogo Angelim" }],
   openGraph: {
-    title: "Signal - Production-Grade Backend Framework",
+    title: "Signal",
     description:
-      "Meteor-like DX for modern serverless architectures. Stateless, database-agnostic, production-ready.",
+      "Signal defines envelopes, semantics, and bindings for versioned queries, mutations, and events.",
     type: "website",
   },
 };
@@ -34,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">{children}</body>
     </html>
   );

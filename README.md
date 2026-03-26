@@ -1,136 +1,69 @@
 # Signal
 
-Signal is a backend framework for explicit named queries, named mutations, and replay-safe events.
+Signal is a transport-agnostic application protocol for versioned queries, explicit mutations, and immutable events.
 
-It is designed for serverless and horizontally scaled environments where predictability, idempotency, and clear failure modes matter more than hidden magic.
+## What Lives Where
 
-## Why Signal
+- [Protocol specs](spec/) define the contract.
+- [Reference packages](packages/) implement the contract in TypeScript.
+- [Reference server](apps/reference-server/) shows the HTTP binding and the runtime together.
+- [Docs site](docs/) explains the protocol for adoption.
+- [Examples](packages/examples/) show the domain flows end to end.
 
-- Named queries and mutations only
-- Mutations are the only write path
-- Mutations can be idempotent with request keys, payload fingerprints, and stored result replay
-- Events are replay-safe and emitted from mutations
-- Per-consumer event deduplication is supported when a transport provides a stable consumer id
-- Configuration is immutable after startup
-- Database and transport layers are swappable
-- Works well in serverless, edge, and traditional Node.js apps
+## Protocol In One Envelope
 
-## Core Flow
-
-1. Create a `Signal` instance.
-2. Configure it with a database adapter and optional transport.
-3. Register collections, queries, mutations, and access rules.
-4. Call `start()`.
-5. Execute `query()` and `mutation()` with a request context.
-
-## Quick Start
-
-```ts
-import {
-  Signal,
-  MemoryAdapter,
-  InMemoryTransport,
-  AuthProvider,
-  createContext,
-} from "./index";
-
-const signal = new Signal();
-
-signal.configure({
-  db: new MemoryAdapter(),
-  transport: new InMemoryTransport(),
-});
-
-signal
-  .collection("posts")
-  .access({
-    query: { list: "public" },
-    mutation: { create: "auth" },
-  })
-  .query("list", async (_, ctx) => {
-    return ctx.db.find("posts", { published: true });
-  })
-  .mutation("create", async (params, ctx) => {
-    const id = await ctx.db.insert("posts", {
-      title: params.title,
-      authorId: ctx.auth.user?.id,
-    });
-
-    await ctx.emit("posts.created", { id });
-    return { id };
-  });
-
-await signal.start();
-
-const ctx = createContext()
-  .withDB(signal.getConfig().db)
-  .withAuth(AuthProvider.authenticated("user123"))
-  .withEmit(async () => {})
-  .build();
-
-const posts = await signal.query("posts.list", {}, ctx);
-const result = await signal.mutation("posts.create", { title: "Hello" }, ctx);
+```json
+{
+  "protocol": "signal.v1",
+  "kind": "mutation",
+  "name": "payment.capture.v1",
+  "messageId": "7c1f2a6f-7ec1-4f89-8e0f-9d0f4a97c9a1",
+  "timestamp": "2026-03-25T12:00:00.000Z",
+  "payload": {
+    "paymentId": "pay_1001",
+    "amount": 120,
+    "currency": "USD"
+  }
+}
 ```
 
-## What To Read Next
+## Mutation Flow
 
-- `START_HERE.md` for the best reading order
-- `QUICK_REFERENCE.md` for the API cheat sheet
-- `ARCHITECTURE.md` for how the system fits together
-- `DESIGN.md` for the design trade-offs
-- `EXTENDING.md` for custom adapters and integrations
+1. A client sends `payment.capture.v1` with an idempotency key.
+2. The runtime validates the input and checks the idempotency store.
+3. The mutation either executes once or replays the stored result.
+4. The mutation emits `payment.captured.v1` with causation metadata.
 
-## Main Concepts
+## Start Reading
 
-- **Signal instance**: the framework entry point
-- **Collection**: a namespace for related operations
-- **Query**: a read-only named operation
-- **Mutation**: a write operation and the only place events should be emitted
-- **Context**: immutable request-scoped data passed into handlers
-- **Access control**: declarative rules that run before handlers
+- [Introduction](docs/docs/introduction.md)
+- [Envelope reference](docs/docs/reference/envelope.md)
+- [Quickstart](docs/docs/guides/quickstart.md)
+- [RFC-0001: Protocol core](spec/RFC-0001-signal-protocol-core.md)
+- [RFC-0002: HTTP binding](spec/RFC-0002-signal-http-binding.md)
+- [Reference server runbook](apps/reference-server/README.md)
+- [Payment capture example](packages/examples/payment-capture/README.md)
 
-## Reliability Model
+## Repository Layout
 
-Signal adds a few small primitives so the framework stays explicit without becoming fragile:
+- `spec/` holds the public RFCs.
+- `schemas/` holds JSON Schema artifacts for public protocol documents.
+- `packages/protocol` holds envelope, naming, result, capability, and error validation.
+- `packages/runtime` holds the Node reference runtime.
+- `packages/binding-http` holds the HTTP binding.
+- `packages/idempotency-postgres` holds the PostgreSQL idempotency store.
+- `packages/sdk-node` holds convenience helpers for Node applications.
+- `packages/examples` holds runnable example flows.
+- `apps/reference-server` holds the runnable HTTP reference server.
+- `docs/` holds the Docusaurus documentation site.
+- `landing/` holds the public homepage.
 
-- idempotent mutations use an idempotency key plus a payload fingerprint
-- repeated mutation requests can replay the stored result instead of re-running handlers
-- stale writes can fail fast with explicit version mismatch errors
-- event execution is replay-safe and out-of-order tolerant
-- transports can dedupe events per consumer when they have a stable consumer id
-- audit hooks append to a read-only trail instead of mutating prior entries
+## Local Development
 
-## Public Packages
+```bash
+pnpm install
+pnpm build
+pnpm --filter @signal/reference-server start
+```
 
-Signal is split into a few focused layers:
-
-- `core` for orchestration, registry, lifecycle, and types
-- `db` for the database abstraction and adapters
-- `transport` for event delivery
-- `http` for request handling and validation
-- `security` for auth and access control
-- `utils` for immutability, hashing, logging, and assertions
-
-## Platform Fit
-
-Signal works well with:
-
-- Vercel
-- Fly.io
-- AWS Lambda
-- Cloudflare Workers
-- Express
-- Fastify
-- Hono
-- Raw Node.js HTTP servers
-
-## Safety Guarantees
-
-- Immutable configuration
-- Registry locked after startup
-- Deterministic error codes
-- Safe error serialization
-- Request-scoped context
-- Input validation before execution
-- Explicit optimistic concurrency checks
-- Append-only mutation and audit records
+The reference server uses the PostgreSQL-backed idempotency store when `DATABASE_URL` is set. Without it, the server falls back to the in-memory store so the protocol flow can still be exercised locally.

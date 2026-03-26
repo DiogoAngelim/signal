@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signal.dev/schemas/signal-envelope.schema.json",
+  "title": "Signal Envelope",
+  "type": "object",
+  "required": ["protocol", "kind", "name", "messageId", "timestamp", "payload"],
+  "properties": {
+    "protocol": { "const": "signal.v1" },
+    "kind": { "enum": ["query", "mutation", "event"] },
+    "name": { "type": "string", "pattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*\\.[a-z][a-z0-9-]*\\.v[1-9][0-9]*$" },
+    "messageId": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "source": {
+      "type": "object",
+      "properties": {
+        "system": { "type": "string" },
+        "transport": { "type": "string" },
+        "runtime": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "correlationId": { "type": "string" },
+        "causationId": { "type": "string" },
+        "traceId": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "delivery": {
+      "type": "object",
+      "properties": {
+        "mode": { "enum": ["in-process", "at-least-once", "exactly-once"] },
+        "attempt": { "type": "integer", "minimum": 0 },
+        "consumerId": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "auth": { "type": "object", "additionalProperties": true },
+    "payload": {},
+    "meta": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": true
+}

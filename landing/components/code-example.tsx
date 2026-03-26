@@ -8,60 +8,65 @@ const tabs = [
   {
     id: "setup",
     label: "Setup",
-    code: `import { Signal, MemoryAdapter, InMemoryTransport } from "@digelo/signal";
+    code: `import { createSignalRuntime, defineQuery, defineMutation } from "@signal/sdk-node";
+import { createMemoryIdempotencyStore } from "@signal/runtime";
 
-// 1. Create and configure
-const signal = new Signal();
+const runtime = createSignalRuntime({
+  runtimeName: "signal-reference",
+  dispatcher,
+  idempotencyStore: createMemoryIdempotencyStore(),
+});
 
-signal.configure({
-  db: new MemoryAdapter(),
-  transport: new InMemoryTransport(),
-});`,
+runtime.registerQuery(
+  defineQuery({
+    name: "payment.status.v1",
+    kind: "query",
+    inputSchema: paymentStatusInputSchema,
+    resultSchema: paymentStatusResultSchema,
+    handler: async (input) => repository.getPayment(input.paymentId),
+  })
+);`,
   },
   {
-    id: "collection",
-    label: "Collection",
-    code: `// 2. Register collection with access control
-signal
-  .collection("posts")
-  .access({
-    query: { list: "public" },
-    mutation: { create: "auth" },
+    id: "mutation",
+    label: "Mutation",
+    code: `runtime.registerMutation(
+  defineMutation({
+    name: "payment.capture.v1",
+    kind: "mutation",
+    idempotency: "required",
+    inputSchema: paymentCaptureInputSchema,
+    resultSchema: paymentStatusResultSchema,
+    handler: async (input, context) => {
+      const captured = await repository.capturePayment(input);
+      await context.emit("payment.captured.v1", {
+        paymentId: captured.paymentId,
+        amount: captured.amount,
+        currency: captured.currency,
+        capturedAt: captured.capturedAt ?? new Date().toISOString(),
+      });
+      return captured;
+    },
   })
-  .query("list", async (_, ctx) => {
-    return ctx.db.find("posts", { published: true });
-  })
-  .mutation("create", async (params, ctx) => {
-    const postId = await ctx.db.insert("posts", {
-      title: params.title,
-      authorId: ctx.auth.user?.id,
-    });
-    // ctx.emit writes to the outbox and stays replay-safe.
-    await ctx.emit("posts.created", { postId });
-    return { postId };
-  });`,
+);`,
   },
   {
     id: "execute",
     label: "Replay",
-    code: `// 3. Start the framework
-await signal.start();
+    code: `const first = await runtime.mutation(
+  "payment.capture.v1",
+  { paymentId: "pay_1001", amount: 120, currency: "USD" },
+  { idempotencyKey: "capture-pay_1001-001" }
+);
 
-// 4. Retry-safe writes use an idempotency key and expected version.
-const request = {
-  idempotencyKey: "req_123",
-  expectedVersion: 7,
-};
+const replay = await runtime.mutation(
+  "payment.capture.v1",
+  { paymentId: "pay_1001", amount: 120, currency: "USD" },
+  { idempotencyKey: "capture-pay_1001-001" }
+);
 
-const first = await signal.mutation("posts.create", {
-  title: "Hello, Signal!",
-}, { ...context, request });
-
-const replay = await signal.mutation("posts.create", {
-  title: "Hello, Signal!",
-}, { ...context, request });
-
-console.log(first, replay); // same stored result, no duplicate write`,
+// The second call returns the stored logical result.
+console.log(first.ok, replay.ok);`,
   },
 ];
 
@@ -82,14 +87,14 @@ export function CodeExample() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
-            Get started in{" "}
+            Register, execute, and replay in{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
-              minutes
+              one flow
             </span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Clean, explicit API that feels familiar. Configure once, register
-            your collections, and keep retries, duplicates, and version checks explicit.
+            The example keeps the contract visible from registration to retry.
+            The code shown here is intentionally small and explicit.
           </p>
         </div>
 
@@ -166,30 +171,21 @@ export function CodeExample() {
 
 function highlightSyntax(line: string): string {
   return line
-    // Strings
     .replace(
       /("[^"]*"|'[^']*')/g,
       '<span class="text-brain-tissue">$1</span>'
     )
-    // Comments
     .replace(/(\/\/.*$)/g, '<span class="text-muted-foreground/60">$1</span>')
-    // Keywords
     .replace(
       /\b(import|from|const|await|async|return|new)\b/g,
       '<span class="text-primary">$1</span>'
     )
-    // Functions and methods
     .replace(
-      /\b(configure|collection|access|query|mutation|start|find|insert|emit)\b/g,
+      /\b(defineQuery|defineMutation|defineEvent|createSignalRuntime|registerQuery|registerMutation|registerEvent|mutation|query|emit|start|close)\b/g,
       '<span class="text-accent">$1</span>'
     )
     .replace(
-      /\b(update|registerAuditHook|getAuditTrail|getResourceVersion)\b/g,
-      '<span class="text-accent">$1</span>'
-    )
-    // Types/classes
-    .replace(
-      /\b(Signal|MemoryAdapter|InMemoryTransport)\b/g,
+      /\b(SignalRuntime|SignalDispatcher|createMemoryIdempotencyStore)\b/g,
       '<span class="text-brain-core-light">$1</span>'
     );
 }

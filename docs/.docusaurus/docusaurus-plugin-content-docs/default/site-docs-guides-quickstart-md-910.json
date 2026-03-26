@@ -1,0 +1,26 @@
+{
+  "id": "guides/quickstart",
+  "title": "Quickstart",
+  "description": "1. Install dependencies.",
+  "source": "@site/docs/guides/quickstart.md",
+  "sourceDirName": "guides",
+  "slug": "/guides/quickstart",
+  "permalink": "/signal/docs/guides/quickstart",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/guides/quickstart.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Quickstart"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Conformance",
+    "permalink": "/signal/docs/reference/conformance"
+  },
+  "next": {
+    "title": "Define Your First Query",
+    "permalink": "/signal/docs/guides/define-your-first-query"
+  }
+}
