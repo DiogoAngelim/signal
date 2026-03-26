@@ -1,4 +1,4 @@
-import { ArrowRight, Copy, Terminal } from "lucide-react";
+import { ArrowRight, Book, Copy, Terminal } from "lucide-react";
 import { NeuralIllustration } from "./neural-illustration";
 
 export function Hero() {
@@ -8,7 +8,7 @@ export function Hero() {
       <div className="absolute inset-0 noise-texture" />
 
       {/* Gradient mesh background */}
-      <div className="absolute inset-0 cosmic-gradient" />
+      <div className="absolute inset-0" />
 
       {/* Ambient glow spots */}
       <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] bg-[radial-gradient(circle,rgba(223,114,71,0.09)_0%,transparent_60%)] blur-2xl animate-pulse-glow" />
@@ -34,25 +34,44 @@ export function Hero() {
             </h1>
 
             <p className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 text-pretty leading-relaxed">
-              Signal defines the envelope, naming rules, result model, idempotency
-              behavior, and binding surface for application messages. The Node
+              Signal defines the envelope, naming rules, result model,
+              idempotency behavior, and binding surface for application
+              messages. It is designed for real flows like payment capture,
+              escrow release, user onboarding, and read-model queries. The Node
               reference runtime shows one way to implement the contract.
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <a
-                href="#code"
+                href="#use-cases"
                 className="group inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-primary via-secondary to-accent text-white font-semibold rounded-lg hover:opacity-90 transition-all glow-amber"
               >
-                Get Started
+                Explore use cases
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </a>
               <a
-                href="/docs/reference/envelope"
+                href="https://github.com/DiogoAngelim/signal"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-border/60 bg-card/40 backdrop-blur-sm text-foreground font-semibold rounded-lg hover:bg-card/70 hover:border-brain-core-glow/50 transition-all"
-              >
-                View the envelope
+              > <Book> </Book>
+                View the Repository
               </a>
+            </div>
+
+            <div className="mt-8 flex flex-wrap justify-center lg:justify-start gap-2 text-xs text-muted-foreground">
+              <span className="px-3 py-1 rounded-full bg-card/60 border border-border/50 backdrop-blur-sm">
+                Payment capture
+              </span>
+              <span className="px-3 py-1 rounded-full bg-card/60 border border-border/50 backdrop-blur-sm">
+                Escrow release
+              </span>
+              <span className="px-3 py-1 rounded-full bg-card/60 border border-border/50 backdrop-blur-sm">
+                User onboarding
+              </span>
+              <span className="px-3 py-1 rounded-full bg-card/60 border border-border/50 backdrop-blur-sm">
+                Read-model queries
+              </span>
             </div>
 
             {/* Install command */}

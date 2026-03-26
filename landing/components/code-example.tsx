@@ -87,14 +87,15 @@ export function CodeExample() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
-            Register, execute, and replay in{" "}
+            Register, execute, and replay the same rules in{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
               one flow
             </span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            The example keeps the contract visible from registration to retry.
-            The code shown here is intentionally small and explicit.
+            Payment capture, escrow release, and onboarding all follow the same
+            pattern: define the schema, register the operation, and replay the
+            same request safely.
           </p>
         </div>
 

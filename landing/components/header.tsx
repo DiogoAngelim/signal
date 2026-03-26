@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Menu, X, BookOpen, Zap } from "lucide-react";
+import { Menu, X, BookOpen, Zap, Book } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "#features", label: "Primitives" },
-  { href: "#code", label: "Example" },
-  { href: "#architecture", label: "Architecture" },
+  { href: "#use-cases", label: "Use cases" },
+  { href: "#code", label: "Flow" },
   { href: "#deployment", label: "Bindings" },
+  { href: "#architecture", label: "Architecture" },
 ];
 
 export function Header() {
@@ -104,8 +104,8 @@ export function Header() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
               >
-                <BookOpen className="w-5 h-5" />
-                <span>Repository</span>
+                <Book />
+                <span>View the Repository</span>
               </a>
             </div>
           </div>

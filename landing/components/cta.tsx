@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Zap } from "lucide-react";
+import { ArrowRight, Book, BookOpen, Zap } from "lucide-react";
 
 export function CTA() {
   return (
@@ -16,14 +16,15 @@ export function CTA() {
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-balance">
           Read the protocol,{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
-            then run it locally
+            then map it to your own flow
           </span>{" "}
           .
         </h2>
 
         <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
           Start with the quickstart, inspect the envelope, and compare the
-          reference runtime with your own implementation.
+          payment capture, escrow release, and onboarding examples with your
+          own implementation.
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
@@ -41,8 +42,8 @@ export function CTA() {
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-border bg-card/50 text-foreground font-semibold rounded-xl hover:bg-card hover:border-muted-foreground/30 transition-all"
           >
-            <BookOpen className="w-5 h-5" />
-            Repository
+            <Book />
+            View the Repository
           </a>
         </div>
       </div>

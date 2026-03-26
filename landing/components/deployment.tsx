@@ -16,7 +16,8 @@ GET /signal/capabilities`,
   {
     name: "Reference server",
     code: `pnpm --filter @signal/reference-server dev`,
-    description: "Run the Node.js implementation that demonstrates the contract end to end",
+    description:
+      "Run the Node.js implementation that demonstrates payment capture, escrow release, and onboarding end to end",
   },
 ];
 
@@ -33,7 +34,8 @@ export function Deployment() {
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
             The first release includes an in-process binding and an HTTP binding.
-            Both execute the same protocol surface.
+            Both execute the same protocol surface for the real examples in the
+            repository.
           </p>
         </div>
 
@@ -74,7 +76,7 @@ export function Deployment() {
             HTTP Endpoints
           </h3>
           <p className="text-center text-sm text-muted-foreground mb-6">
-            The HTTP binding carries protocol fields, request context, and capability data.
+            The HTTP binding carries protocol fields, request context, capability data, and retry metadata.
           </p>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center">

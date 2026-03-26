@@ -41,7 +41,7 @@ const lifecycle = [
 
 export function Architecture() {
   return (
-    <section id="architecture" className="relative py-32">
+    <section id="architecture" className="relative pt-32">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/5 to-transparent" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6">

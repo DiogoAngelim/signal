@@ -1,4 +1,4 @@
-import { Zap, BookOpen, Heart } from "lucide-react";
+import { Zap, BookOpen, Heart, Book } from "lucide-react";
 
 export function Footer() {
   return (
@@ -20,14 +20,8 @@ export function Footer() {
               rel="noopener noreferrer"
               className="flex items-center gap-2 hover:text-foreground transition-colors"
             >
-              <BookOpen className="w-4 h-4" />
-              Repository
-            </a>
-            <a
-              href="/docs/reference/envelope"
-              className="hover:text-foreground transition-colors"
-            >
-              Envelope
+              <Book />
+              View the Repository
             </a>
           </div>
 
