@@ -1,0 +1,128 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/signal/docs",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/signal/docs",
+          "mainDocId": "introduction",
+          "docs": [
+            {
+              "id": "concepts/events",
+              "path": "/signal/docs/concepts/events",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "concepts/idempotency",
+              "path": "/signal/docs/concepts/idempotency",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "concepts/mutations",
+              "path": "/signal/docs/concepts/mutations",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "concepts/order-and-replay",
+              "path": "/signal/docs/concepts/order-and-replay",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "concepts/queries",
+              "path": "/signal/docs/concepts/queries",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "concepts/versioning",
+              "path": "/signal/docs/concepts/versioning",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "examples/escrow-release-flow",
+              "path": "/signal/docs/examples/escrow-release-flow",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "examples/payment-capture-flow",
+              "path": "/signal/docs/examples/payment-capture-flow",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "examples/user-onboarding-flow",
+              "path": "/signal/docs/examples/user-onboarding-flow",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "guides/define-your-first-mutation",
+              "path": "/signal/docs/guides/define-your-first-mutation",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "guides/define-your-first-query",
+              "path": "/signal/docs/guides/define-your-first-query",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "guides/emit-and-consume-events",
+              "path": "/signal/docs/guides/emit-and-consume-events",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "guides/http-binding",
+              "path": "/signal/docs/guides/http-binding",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "guides/in-process-runtime",
+              "path": "/signal/docs/guides/in-process-runtime",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "guides/quickstart",
+              "path": "/signal/docs/guides/quickstart",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "introduction",
+              "path": "/signal/docs/introduction",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "reference/capabilities",
+              "path": "/signal/docs/reference/capabilities",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "reference/conformance",
+              "path": "/signal/docs/reference/conformance",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "reference/envelope",
+              "path": "/signal/docs/reference/envelope",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "reference/errors",
+              "path": "/signal/docs/reference/errors",
+              "sidebar": "tutorialSidebar"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "tutorialSidebar": {
+              "link": {
+                "path": "/signal/docs/introduction",
+                "label": "introduction"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

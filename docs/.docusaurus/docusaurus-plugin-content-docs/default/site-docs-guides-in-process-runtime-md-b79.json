@@ -1,0 +1,26 @@
+{
+  "id": "guides/in-process-runtime",
+  "title": "In-Process Runtime",
+  "description": "Steps",
+  "source": "@site/docs/guides/in-process-runtime.md",
+  "sourceDirName": "guides",
+  "slug": "/guides/in-process-runtime",
+  "permalink": "/signal/docs/guides/in-process-runtime",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/guides/in-process-runtime.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "In-Process Runtime"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "HTTP Binding",
+    "permalink": "/signal/docs/guides/http-binding"
+  },
+  "next": {
+    "title": "Payment Capture Flow",
+    "permalink": "/signal/docs/examples/payment-capture-flow"
+  }
+}

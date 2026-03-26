@@ -3,40 +3,40 @@ import { cn } from "@/lib/utils";
 const packages = [
   {
     name: "core",
-    description: "Signal.ts, Registry, Collection, Lifecycle, Context, audit hooks",
+    description: "Envelope, naming, result model, errors, and capability documents",
     color: "from-brain-core-light via-brain-core-glow to-brain-core-rose",
   },
   {
     name: "db",
-    description: "Database abstraction, optimistic writes, adapters",
+    description: "PostgreSQL idempotency store and replay-safe projections",
     color: "from-brain-core-rose via-brain-core-root to-brain-core-light",
   },
   {
     name: "transport",
-    description: "Event bus, inbox/outbox, transport adapters",
+    description: "HTTP binding, in-process execution, and event dispatch",
     color: "from-brain-core-light/80 via-brain-core-glow/80 to-brain-core-rose/80",
   },
   {
     name: "http",
-    description: "HTTP handler, router, validation, request metadata",
+    description: "Query and mutation routes plus capability declaration",
     color: "from-brain-core-rose/80 via-brain-core-root/80 to-brain-core-light/80",
   },
   {
     name: "security",
-    description: "Auth, access control",
+    description: "Extension points for auth and request context",
     color: "from-brain-core-light via-brain-core-glow to-brain-core-rose",
   },
   {
     name: "utils",
-    description: "Utilities (freeze, hash, logger)",
+    description: "Helpers used by the runtime and example packages",
     color: "from-brain-core-rose via-brain-core-glow to-brain-core-light",
   },
 ];
 
 const lifecycle = [
-  { phase: "CONFIGURING", description: "Initial state, configure with configure()" },
-  { phase: "REGISTERING", description: "Register collections, queries, mutations" },
-  { phase: "RUNNING", description: "Operational, registry immutable" },
+  { phase: "SPECIFIED", description: "RFCs define names, envelope fields, and semantics" },
+  { phase: "REGISTERED", description: "Operations are added to the runtime with schemas" },
+  { phase: "RUNNING", description: "Queries execute, mutations can emit, events can replay" },
 ];
 
 export function Architecture() {
@@ -47,14 +47,14 @@ export function Architecture() {
       <div className="relative z-10 mx-auto max-w-7xl px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
-            Modular{" "}
+            Separation of{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
-              architecture
+              protocol concerns
             </span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Clean separation of concerns. Each package handles one responsibility,
-            and reliability behavior stays adapter-friendly.
+            The protocol, runtime, bindings, and docs are kept separate so each
+            layer can be read and implemented on its own.
           </p>
         </div>
 
@@ -132,33 +132,25 @@ export function Architecture() {
             {/* Code example */}
             <div className="mt-8 p-4 rounded-xl bg-card border border-border font-mono text-sm">
               <div className="text-muted-foreground">
-                <span className="text-primary">const</span> signal ={" "}
+                <span className="text-primary">const</span> runtime ={" "}
                 <span className="text-primary">new</span>{" "}
-                <span className="text-secondary-foreground">Signal</span>();{" "}
-                <span className="text-muted-foreground/60">{"// CONFIGURING"}</span>
+                <span className="text-secondary-foreground">SignalRuntime</span>();{" "}
+                <span className="text-muted-foreground/60">{"// SPECIFIED"}</span>
               </div>
               <div className="text-muted-foreground mt-1">
-                signal.<span className="text-accent">configure</span>({"{"} ... {"}"});{" "}
-                <span className="text-muted-foreground/60">{"// REGISTERING"}</span>
+                runtime.<span className="text-accent">registerMutation</span>("payment.capture.v1", mutation);{" "}
+                <span className="text-muted-foreground/60">{"// REGISTERED"}</span>
               </div>
               <div className="text-muted-foreground mt-1">
-                <span className="text-primary">await</span> signal.
-                <span className="text-accent">start</span>();{" "}
+                <span className="text-primary">await</span> runtime.
+                <span className="text-accent">mutation</span>("payment.capture.v1", payload, {"{ idempotencyKey }"});{" "}
                 <span className="text-muted-foreground/60">{"// RUNNING"}</span>
               </div>
               <div className="text-muted-foreground mt-1">
-                <span className="text-primary">const</span> request ={" "}
-                <span className="text-brain-tissue">"req_123"</span>;{" "}
-                <span className="text-muted-foreground/60">
-                  {"// idempotency key"}
-                </span>
-              </div>
-              <div className="text-muted-foreground mt-1">
-                <span className="text-primary">await</span> signal.
-                <span className="text-accent">mutation</span>("posts.create", payload, request);{" "}
-                <span className="text-muted-foreground/60">
-                  {"// replay-safe write with stored result replay"}
-                </span>
+                <span className="text-primary">const</span> replay ={" "}
+                <span className="text-primary">await</span> runtime.
+                <span className="text-accent">mutation</span>("payment.capture.v1", payload, {"{ idempotencyKey }"});{" "}
+                <span className="text-muted-foreground/60">{"// same logical result"}</span>
               </div>
             </div>
           </div>

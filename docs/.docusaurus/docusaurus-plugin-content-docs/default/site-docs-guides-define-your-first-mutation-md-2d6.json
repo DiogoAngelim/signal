@@ -1,0 +1,26 @@
+{
+  "id": "guides/define-your-first-mutation",
+  "title": "Define Your First Mutation",
+  "description": "Use a versioned command name and declare idempotency.",
+  "source": "@site/docs/guides/define-your-first-mutation.md",
+  "sourceDirName": "guides",
+  "slug": "/guides/define-your-first-mutation",
+  "permalink": "/signal/docs/guides/define-your-first-mutation",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/guides/define-your-first-mutation.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Define Your First Mutation"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Define Your First Query",
+    "permalink": "/signal/docs/guides/define-your-first-query"
+  },
+  "next": {
+    "title": "Emit and Consume Events",
+    "permalink": "/signal/docs/guides/emit-and-consume-events"
+  }
+}

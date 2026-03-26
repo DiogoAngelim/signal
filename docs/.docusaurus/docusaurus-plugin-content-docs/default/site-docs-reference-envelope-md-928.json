@@ -1,0 +1,26 @@
+{
+  "id": "reference/envelope",
+  "title": "Envelope",
+  "description": "Shape",
+  "source": "@site/docs/reference/envelope.md",
+  "sourceDirName": "reference",
+  "slug": "/reference/envelope",
+  "permalink": "/signal/docs/reference/envelope",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/reference/envelope.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Envelope"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Order and Replay",
+    "permalink": "/signal/docs/concepts/order-and-replay"
+  },
+  "next": {
+    "title": "Capabilities",
+    "permalink": "/signal/docs/reference/capabilities"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signal.dev/schemas/result.schema.json",
+  "title": "Signal Result",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["ok", "result"],
+      "properties": {
+        "ok": { "const": true },
+        "result": {},
+        "meta": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": true
+    },
+    {
+      "type": "object",
+      "required": ["ok", "error"],
+      "properties": {
+        "ok": { "const": false },
+        "error": { "$ref": "https://signal.dev/schemas/error.schema.json" }
+      },
+      "additionalProperties": true
+    }
+  ]
+}

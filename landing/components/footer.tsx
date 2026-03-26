@@ -1,4 +1,4 @@
-import { Zap, Github, Heart } from "lucide-react";
+import { Zap, BookOpen, Heart } from "lucide-react";
 
 export function Footer() {
   return (
@@ -10,7 +10,7 @@ export function Footer() {
               <Zap className="w-4 h-4 text-white" />
             </div>
             <span className="font-semibold">Signal</span>
-            <span className="text-muted-foreground text-sm">v1.0.0</span>
+            <span className="text-muted-foreground text-sm">Protocol v1</span>
           </div>
 
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
@@ -20,23 +20,20 @@ export function Footer() {
               rel="noopener noreferrer"
               className="flex items-center gap-2 hover:text-foreground transition-colors"
             >
-              <Github className="w-4 h-4" />
-              GitHub
+              <BookOpen className="w-4 h-4" />
+              Repository
             </a>
             <a
-              href="https://github.com/DiogoAngelim/signal/blob/main/LICENSE"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/docs/reference/envelope"
               className="hover:text-foreground transition-colors"
             >
-              MIT License
+              Envelope
             </a>
           </div>
 
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <span>Made with</span>
+            <span>Maintained by</span>
             <Heart className="w-4 h-4 text-brain-core-rose fill-brain-core-rose" />
-            <span>by</span>
             <a
               href="https://github.com/DiogoAngelim"
               target="_blank"

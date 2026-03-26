@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 
 interface Node {
   id: number;
@@ -20,136 +20,153 @@ interface Connection {
   delay: number;
 }
 
-export function NeuralIllustration() {
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [connections, setConnections] = useState<Connection[]>([]);
-  const [draggedNode, setDraggedNode] = useState<number | null>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
+const CENTER_X = 250;
+const CENTER_Y = 250;
 
-  useEffect(() => {
-    // Generate nodes in a brain-like pattern
-    const centerX = 250;
-    const centerY = 250;
-    const newNodes: Node[] = [];
-    const colors = [
-      "rgba(223, 114, 71, 0.92)", // warm orange core
-      "rgba(225, 220, 205, 0.82)", // warm beige tissue
-      "rgba(85, 156, 205, 0.76)",  // soft sky blue
-      "rgba(127, 86, 120, 0.64)",   // muted mauve
-      "rgba(39, 102, 166, 0.58)",   // strong azure
-    ];
+function round(value: number) {
+  return Math.round(value * 1000) / 1000;
+}
 
-    // Core bright node
-    newNodes.push({
-      id: 0,
-      cx: centerX,
-      cy: centerY,
-      baseCx: centerX,
-      baseCy: centerY,
-      r: 8,
-      delay: 0,
-      color: colors[0],
+function buildNodes(): Node[] {
+  const nodes: Node[] = [];
+  const colors = [
+    "rgba(223, 114, 71, 0.92)",
+    "rgba(225, 220, 205, 0.82)",
+    "rgba(85, 156, 205, 0.76)",
+    "rgba(127, 86, 120, 0.64)",
+    "rgba(39, 102, 166, 0.58)",
+  ];
+
+  nodes.push({
+    id: 0,
+    cx: CENTER_X,
+    cy: CENTER_Y,
+    baseCx: CENTER_X,
+    baseCy: CENTER_Y,
+    r: 8,
+    delay: 0,
+    color: colors[0],
+  });
+
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    const cx = round(CENTER_X + Math.cos(angle) * 60);
+    const cy = round(CENTER_Y + Math.sin(angle) * 50);
+    nodes.push({
+      id: i + 1,
+      cx,
+      cy,
+      baseCx: cx,
+      baseCy: cy,
+      r: 5,
+      delay: round(i * 0.3),
+      color: colors[1],
     });
+  }
 
-    // Inner ring
-    for (let i = 0; i < 6; i++) {
-      const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
-      const cx = centerX + Math.cos(angle) * 60;
-      const cy = centerY + Math.sin(angle) * 50;
-      newNodes.push({
-        id: i + 1,
-        cx,
-        cy,
-        baseCx: cx,
-        baseCy: cy,
-        r: 4 + Math.random() * 2,
-        delay: i * 0.3,
-        color: colors[1],
-      });
-    }
+  for (let i = 0; i < 10; i++) {
+    const angle = (i / 10) * Math.PI * 2 + Math.PI / 10;
+    const radius = 110 + (i % 3) * 4;
+    const cx = round(CENTER_X + Math.cos(angle) * radius);
+    const cy = round(CENTER_Y + Math.sin(angle) * (radius * 0.8));
+    nodes.push({
+      id: i + 7,
+      cx,
+      cy,
+      baseCx: cx,
+      baseCy: cy,
+      r: 4,
+      delay: round(i * 0.2),
+      color: colors[2],
+    });
+  }
 
-    // Middle ring
-    for (let i = 0; i < 10; i++) {
-      const angle = (i / 10) * Math.PI * 2 + Math.PI / 10;
-      const radius = 100 + Math.random() * 20;
-      const cx = centerX + Math.cos(angle) * radius;
-      const cy = centerY + Math.sin(angle) * (radius * 0.8);
-      newNodes.push({
-        id: i + 7,
-        cx,
-        cy,
-        baseCx: cx,
-        baseCy: cy,
-        r: 3 + Math.random() * 2,
-        delay: i * 0.2,
-        color: colors[2],
-      });
-    }
+  const outerPoints = [
+    [320, 120],
+    [356, 148],
+    [386, 192],
+    [402, 245],
+    [388, 304],
+    [360, 352],
+    [314, 385],
+    [252, 398],
+    [190, 386],
+    [142, 358],
+    [110, 312],
+    [96, 256],
+    [108, 198],
+    [140, 146],
+    [190, 112],
+    [248, 100],
+    [304, 110],
+    [350, 134],
+    [370, 180],
+    [364, 236],
+  ] as const;
 
-    // Outer scattered nodes
-    for (let i = 0; i < 20; i++) {
-      const angle = (i / 20) * Math.PI * 2;
-      const radius = 300 + Math.random() * 60;
-      const cx = centerX + Math.cos(angle) * radius + (Math.random() - 0.5) * 40;
-      const cy = centerY + Math.sin(angle) * (radius * 0.7) + (Math.random() - 0.5) * 30;
-      newNodes.push({
-        id: i + 17,
-        cx,
-        cy,
-        baseCx: cx,
-        baseCy: cy,
-        r: 1.5 + Math.random() * 2,
-        delay: i * 0.15,
-        color: colors[3 + Math.floor(Math.random() * 2)],
-      });
-    }
+  outerPoints.forEach(([cx, cy], index) => {
+    nodes.push({
+      id: index + 17,
+      cx,
+      cy,
+      baseCx: cx,
+      baseCy: cy,
+      r: 2.5,
+      delay: round(index * 0.15),
+      color: colors[3 + (index % 2)],
+    });
+  });
 
-    setNodes(newNodes);
+  return nodes;
+}
 
-    // Generate connections
-    const newConnections: Connection[] = [];
-    let connId = 0;
+function buildConnections(): Connection[] {
+  const connections: Connection[] = [];
+  let connId = 0;
 
-    // Connect core to inner ring
-    for (let i = 1; i <= 6; i++) {
-      newConnections.push({
-        id: connId++,
-        fromId: 0,
-        toId: i,
-        delay: i * 0.2,
-      });
-    }
+  for (let i = 1; i <= 6; i++) {
+    connections.push({
+      id: connId++,
+      fromId: 0,
+      toId: i,
+      delay: round(i * 0.2),
+    });
+  }
 
-    // Connect inner to middle
-    for (let i = 1; i <= 6; i++) {
-      const targets = [7 + ((i - 1) * 2) % 10, 7 + ((i - 1) * 2 + 1) % 10];
-      targets.forEach((t) => {
-        if (t < 17) {
-          newConnections.push({
-            id: connId++,
-            fromId: i,
-            toId: t,
-            delay: i * 0.15,
-          });
-        }
-      });
-    }
-
-    // Some middle to outer connections
-    for (let i = 7; i < 17; i++) {
-      const target = 17 + Math.floor(Math.random() * 20);
-      if (target < 37) {
-        newConnections.push({
+  for (let i = 1; i <= 6; i++) {
+    const targets = [7 + ((i - 1) * 2) % 10, 7 + ((i - 1) * 2 + 1) % 10];
+    targets.forEach((target) => {
+      if (target < 17) {
+        connections.push({
           id: connId++,
           fromId: i,
           toId: target,
-          delay: (i - 7) * 0.1,
+          delay: round(i * 0.15),
         });
       }
-    }
+    });
+  }
 
-    setConnections(newConnections);
-  }, []);
+  for (let i = 7; i < 17; i++) {
+    connections.push({
+      id: connId++,
+      fromId: i,
+      toId: 17 + ((i - 7) * 2) % 20,
+      delay: round((i - 7) * 0.1),
+    });
+  }
+
+  return connections;
+}
+
+const INITIAL_NODES = buildNodes();
+const INITIAL_CONNECTIONS = buildConnections();
+
+export function NeuralIllustration() {
+  const [nodes, setNodes] = useState<Node[]>(INITIAL_NODES);
+  const [connections] = useState<Connection[]>(INITIAL_CONNECTIONS);
+  const [draggedNode, setDraggedNode] = useState<number | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
 
   const getSVGCoordinates = useCallback((clientX: number, clientY: number) => {
     if (!svgRef.current) return { x: 0, y: 0 };
@@ -365,8 +382,8 @@ export function NeuralIllustration() {
         <g opacity="0.4">
           {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle) => {
             const coreNode = getNodeById(0);
-            const cx = coreNode?.cx ?? 250;
-            const cy = coreNode?.cy ?? 250;
+            const cx = coreNode?.cx ?? CENTER_X;
+            const cy = coreNode?.cy ?? CENTER_Y;
             return (
               <line
                 key={angle}
