@@ -1,0 +1,26 @@
+{
+  "id": "examples/http-post-publication-flow",
+  "title": "HTTP Post Publication",
+  "description": "See packages/examples/http-post-publication/ for a thin HTTP binding over the same post publication runtime.",
+  "source": "@site/docs/examples/http-post-publication-flow.md",
+  "sourceDirName": "examples",
+  "slug": "/examples/http-post-publication-flow",
+  "permalink": "/signal/docs/examples/http-post-publication-flow",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/examples/http-post-publication-flow.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "HTTP Post Publication"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Post Publication Flow",
+    "permalink": "/signal/docs/examples/post-publication-flow"
+  },
+  "next": {
+    "title": "Storage-Backed Idempotency",
+    "permalink": "/signal/docs/examples/storage-backed-idempotency-flow"
+  }
+}

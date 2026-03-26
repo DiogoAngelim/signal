@@ -1,42 +1,22 @@
 # Documentation Index
 
-Use this as the table of contents for the repo.
+## Root Docs
 
-## Where To Start
+- `README.md`: overview and quick start
+- `START_HERE.md`: reading order
+- `QUICK_REFERENCE.md`: API and contract cheat sheet
+- `ARCHITECTURE.md`: layering and execution flow
+- `DESIGN.md`: design principles
+- `EXTENDING.md`: extension seams
+- `CONFORMANCE.md`: compatibility boundaries
 
-1. `START_HERE.md` - best first stop
-2. `EXAMPLE.ts` - runnable example
-3. `README.md` - overview and quick start
-4. `QUICK_REFERENCE.md` - API cheat sheet
+## Protocol Artifacts
 
-## Learn The System
+- `spec/`: RFCs and fixtures
+- `schemas/`: JSON-schema artifacts
 
-5. `ARCHITECTURE.md` - how the layers fit together
-6. `DESIGN.md` - design principles and trade-offs
-7. `FEATURES.md` - full feature list
+## Implementation
 
-## Build And Extend
-
-8. `EXTENDING.md` - custom adapters, transport, logger, and middleware patterns
-9. `IMPLEMENTATION.md` - what is currently built
-10. `DELIVERY.md` - delivery summary and project status
-11. `COMPLETION_SUMMARY.md` - final wrap-up
-12. `WELCOME.md` - short project overview
-
-## Code Layout
-
-- `index.ts` exposes the public API
-- `packages/core` contains orchestration, registry, lifecycle, and types
-- `packages/db` contains the database abstraction and adapters
-- `packages/transport` contains event transport and the event bus
-- `packages/http` contains request handling and validation
-- `packages/security` contains authentication and access control
-- `packages/utils` contains shared utilities
-
-## Fast Paths
-
-- Need to ship something: read `EXAMPLE.ts`, then `README.md`
-- Need to look up an API: open `QUICK_REFERENCE.md`
-- Need to understand behavior: read `ARCHITECTURE.md`
-- Need to add a custom adapter: read `EXTENDING.md`
-
+- `packages/`: protocol, runtime, bindings, storage, examples
+- `apps/reference-server/`: runnable reference server
+- `docs/`: Docusaurus documentation

@@ -1,7 +1,7 @@
 {
   "id": "guides/emit-and-consume-events",
   "title": "Emit and Consume Events",
-  "description": "Steps",
+  "description": "Use versioned event names and replay-safe subscribers.",
   "source": "@site/docs/guides/emit-and-consume-events.md",
   "sourceDirName": "guides",
   "slug": "/guides/emit-and-consume-events",

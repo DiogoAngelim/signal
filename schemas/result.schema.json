@@ -5,20 +5,67 @@
   "oneOf": [
     {
       "type": "object",
-      "required": ["ok", "result"],
+      "required": [
+        "ok",
+        "result"
+      ],
       "properties": {
-        "ok": { "const": true },
+        "ok": {
+          "const": true
+        },
         "result": {},
-        "meta": { "type": "object", "additionalProperties": true }
+        "meta": {
+          "type": "object",
+          "properties": {
+            "outcome": {
+              "enum": [
+                "completed",
+                "replayed"
+              ]
+            },
+            "durationMs": {
+              "type": "number",
+              "minimum": 0
+            },
+            "context": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "idempotency": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "replay": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "deadline": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "delivery": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        }
       },
       "additionalProperties": true
     },
     {
       "type": "object",
-      "required": ["ok", "error"],
+      "required": [
+        "ok",
+        "error"
+      ],
       "properties": {
-        "ok": { "const": false },
-        "error": { "$ref": "https://signal.dev/schemas/error.schema.json" }
+        "ok": {
+          "const": false
+        },
+        "error": {
+          "$ref": "https://signal.dev/schemas/error.schema.json"
+        }
       },
       "additionalProperties": true
     }

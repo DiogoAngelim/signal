@@ -16,7 +16,18 @@ export const signalEnvelopeJsonSchema = {
     source: { type: "object", additionalProperties: true },
     context: { type: "object", additionalProperties: true },
     delivery: { type: "object", additionalProperties: true },
-    auth: { type: "object", additionalProperties: true },
+    auth: {
+      type: "object",
+      properties: {
+        actor: { type: "object", additionalProperties: true },
+        subject: { type: "string" },
+        scopes: {
+          type: "array",
+          items: { type: "string" },
+        },
+      },
+      additionalProperties: true,
+    },
     payload: {},
     meta: { type: "object", additionalProperties: true },
   },
@@ -28,7 +39,7 @@ export const signalErrorJsonSchema = {
   $id: "https://signal.dev/schemas/error.schema.json",
   title: "Signal Error",
   type: "object",
-  required: ["code", "message"],
+  required: ["code", "category", "message"],
   properties: {
     code: {
       enum: [
@@ -38,10 +49,27 @@ export const signalErrorJsonSchema = {
         "FORBIDDEN",
         "NOT_FOUND",
         "CONFLICT",
+        "BUSINESS_REJECTION",
         "IDEMPOTENCY_CONFLICT",
+        "DEADLINE_EXCEEDED",
+        "CANCELLED",
+        "TRANSPORT_ERROR",
         "INTERNAL_ERROR",
         "RETRYABLE_ERROR",
         "UNSUPPORTED_OPERATION",
+      ],
+    },
+    category: {
+      enum: [
+        "validation",
+        "authorization",
+        "business",
+        "idempotency",
+        "deadline",
+        "cancellation",
+        "transport",
+        "runtime",
+        "capability",
       ],
     },
     message: { type: "string" },
@@ -62,7 +90,24 @@ export const signalResultJsonSchema = {
       properties: {
         ok: { const: true },
         result: {},
-        meta: { type: "object", additionalProperties: true },
+        meta: {
+          type: "object",
+          properties: {
+            outcome: {
+              enum: ["completed", "replayed"],
+            },
+            durationMs: {
+              type: "number",
+              minimum: 0,
+            },
+            context: { type: "object", additionalProperties: true },
+            idempotency: { type: "object", additionalProperties: true },
+            replay: { type: "object", additionalProperties: true },
+            deadline: { type: "object", additionalProperties: true },
+            delivery: { type: "object", additionalProperties: true },
+          },
+          additionalProperties: true,
+        },
       },
       additionalProperties: true,
     },
@@ -98,6 +143,7 @@ export const signalCapabilitiesJsonSchema = {
     mutations: { type: "array" },
     publishedEvents: { type: "array" },
     subscribedEvents: { type: "array" },
+    features: { type: "object", additionalProperties: true },
     bindings: { type: "object", additionalProperties: true },
   },
   additionalProperties: true,

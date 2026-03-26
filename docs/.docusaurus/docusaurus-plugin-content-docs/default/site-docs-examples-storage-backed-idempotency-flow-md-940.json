@@ -1,0 +1,26 @@
+{
+  "id": "examples/storage-backed-idempotency-flow",
+  "title": "Storage-Backed Idempotency",
+  "description": "See packages/examples/storage-backed-idempotency/ for the PostgreSQL idempotency-store variant of the post publication flow.",
+  "source": "@site/docs/examples/storage-backed-idempotency-flow.md",
+  "sourceDirName": "examples",
+  "slug": "/examples/storage-backed-idempotency-flow",
+  "permalink": "/signal/docs/examples/storage-backed-idempotency-flow",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/examples/storage-backed-idempotency-flow.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Storage-Backed Idempotency"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "HTTP Post Publication",
+    "permalink": "/signal/docs/examples/http-post-publication-flow"
+  },
+  "next": {
+    "title": "Custom Transport Skeleton",
+    "permalink": "/signal/docs/examples/custom-transport-skeleton"
+  }
+}

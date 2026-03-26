@@ -116,12 +116,57 @@ describe("http binding", () => {
     expect(capabilitiesResponse.statusCode).toBe(200);
     expect(queryResponse.statusCode).toBe(200);
     expect(queryWithContextResponse.statusCode).toBe(200);
-    expect(missingQueryResponse.statusCode).toBe(400);
+    expect(missingQueryResponse.statusCode).toBe(404);
     expect(mutationResponse.statusCode).toBe(200);
     expect(mutationWithContextResponse.statusCode).toBe(200);
     expect(replayResponse.statusCode).toBe(409);
     expect(healthResponse.statusCode).toBe(200);
     expect(JSON.parse(mutationResponse.body).result.value).toBe(2);
     expect(JSON.parse(capabilitiesResponse.body).protocol).toBe("signal.v1");
+    expect(JSON.parse(missingQueryResponse.body).error.code).toBe(
+      "UNSUPPORTED_OPERATION"
+    );
+    expect(JSON.parse(replayResponse.body).error.code).toBe(
+      "IDEMPOTENCY_CONFLICT"
+    );
+  });
+
+  it("returns structured failures for malformed request bodies", async () => {
+    const runtime = new SignalRuntime();
+
+    runtime.registerQuery(
+      defineQuery({
+        name: "note.get.v1",
+        kind: "query",
+        inputSchema: z.object({
+          noteId: z.string().min(1),
+        }),
+        resultSchema: z.object({
+          noteId: z.string().min(1),
+        }),
+        handler: (input) => input,
+      })
+    );
+
+    const app = createSignalHttpServer(runtime);
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/signal/query/note.get.v1",
+      payload: {
+        context: {
+          correlationId: "corr-invalid",
+        },
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(JSON.parse(response.body)).toMatchObject({
+      ok: false,
+      error: {
+        code: "VALIDATION_ERROR",
+        category: "validation",
+      },
+    });
   });
 });

@@ -1,7 +1,7 @@
 {
   "id": "introduction",
-  "title": "Introduction",
-  "description": "Signal is a transport-agnostic application protocol for queries, mutations, and events.",
+  "title": "Signal Protocol v1",
+  "description": "Signal is a transport-independent application protocol and reference runtime for versioned queries, mutations, and events.",
   "source": "@site/docs/introduction.md",
   "sourceDirName": ".",
   "slug": "/introduction",
@@ -12,7 +12,7 @@
   "tags": [],
   "version": "current",
   "frontMatter": {
-    "title": "Introduction"
+    "title": "Signal Protocol v1"
   },
   "sidebar": "tutorialSidebar",
   "next": {

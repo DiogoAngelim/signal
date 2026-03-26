@@ -1,0 +1,26 @@
+{
+  "id": "examples/post-publication-flow",
+  "title": "Post Publication Flow",
+  "description": "See packages/examples/post-publication/ for:",
+  "source": "@site/docs/examples/post-publication-flow.md",
+  "sourceDirName": "examples",
+  "slug": "/examples/post-publication-flow",
+  "permalink": "/signal/docs/examples/post-publication-flow",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/examples/post-publication-flow.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Post Publication Flow"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Minimal Runtime",
+    "permalink": "/signal/docs/examples/minimal-runtime-flow"
+  },
+  "next": {
+    "title": "HTTP Post Publication",
+    "permalink": "/signal/docs/examples/http-post-publication-flow"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "result": {
+    "postId": "post_1001",
+    "status": "published"
+  },
+  "meta": {
+    "outcome": "replayed",
+    "context": {
+      "messageId": "msg-post-1001",
+      "correlationId": "corr-post-1001"
+    },
+    "idempotency": {
+      "key": "publish-post_1001-001",
+      "status": "replayed",
+      "fingerprint": "fingerprint-post-1001"
+    },
+    "replay": {
+      "replayed": true,
+      "reason": "idempotency",
+      "originalMessageId": "msg-post-0001"
+    }
+  }
+}

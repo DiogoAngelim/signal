@@ -1,7 +1,7 @@
 {
   "id": "reference/envelope",
   "title": "Envelope",
-  "description": "Shape",
+  "description": "Every public Signal message uses the standard envelope.",
   "source": "@site/docs/reference/envelope.md",
   "sourceDirName": "reference",
   "slug": "/reference/envelope",

@@ -1,7 +1,7 @@
 {
   "id": "reference/errors",
   "title": "Errors",
-  "description": "Shape",
+  "description": "Signal failures are structured and categorized.",
   "source": "@site/docs/reference/errors.md",
   "sourceDirName": "reference",
   "slug": "/reference/errors",

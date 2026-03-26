@@ -1,0 +1,22 @@
+{
+  "id": "examples/custom-transport-skeleton",
+  "title": "Custom Transport Skeleton",
+  "description": "See packages/examples/custom-transport-skeleton/ for an explicit dispatcher skeleton for future broker-backed adapters.",
+  "source": "@site/docs/examples/custom-transport-skeleton.md",
+  "sourceDirName": "examples",
+  "slug": "/examples/custom-transport-skeleton",
+  "permalink": "/signal/docs/examples/custom-transport-skeleton",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/examples/custom-transport-skeleton.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Custom Transport Skeleton"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Storage-Backed Idempotency",
+    "permalink": "/signal/docs/examples/storage-backed-idempotency-flow"
+  }
+}

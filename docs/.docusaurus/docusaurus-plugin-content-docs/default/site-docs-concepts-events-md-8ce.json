@@ -1,7 +1,7 @@
 {
   "id": "concepts/events",
   "title": "Events",
-  "description": "What It Is",
+  "description": "Events are immutable facts.",
   "source": "@site/docs/concepts/events.md",
   "sourceDirName": "concepts",
   "slug": "/concepts/events",

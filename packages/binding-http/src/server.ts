@@ -12,7 +12,7 @@ export function createSignalHttpServer(
   options: CreateSignalHttpServerOptions = {}
 ): FastifyInstance {
   const app = fastify({ logger: options.logger ?? false });
-  registerSignalHttpRoutes(app, runtime);
+  registerSignalHttpRoutes(app, runtime, { basePath: options.basePath });
 
   app.get("/health", async () => ({ ok: true }));
 

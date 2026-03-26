@@ -1,0 +1,46 @@
+{
+  "protocol": "signal.v1",
+  "version": "v1",
+  "queries": [
+    {
+      "name": "note.get.v1",
+      "kind": "query",
+      "description": "Read a single note."
+    }
+  ],
+  "mutations": [
+    {
+      "name": "post.publish.v1",
+      "kind": "mutation",
+      "description": "Publish a post.",
+      "idempotency": "required",
+      "emits": ["post.published.v1"]
+    }
+  ],
+  "publishedEvents": [
+    {
+      "name": "post.published.v1",
+      "kind": "event"
+    }
+  ],
+  "subscribedEvents": [
+    {
+      "name": "post.published.v1",
+      "kind": "event",
+      "consumerId": "post-projection",
+      "replaySafe": true
+    }
+  ],
+  "features": {
+    "deadlines": true,
+    "cancellation": true,
+    "idempotency": true,
+    "replaySafety": true
+  },
+  "bindings": {
+    "inProcess": true,
+    "http": {
+      "basePath": "/signal"
+    }
+  }
+}

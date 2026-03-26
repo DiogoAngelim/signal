@@ -3,6 +3,13 @@ import {
   createExampleRuntime,
   createReplaySafeSubscriber,
 } from "../support";
+import { runMinimalRuntimeDemo } from "../minimal-runtime";
+import {
+  registerPostPublication,
+  runPostPublicationDemo,
+} from "../post-publication";
+import { runHttpPostPublicationDemo } from "../http-post-publication";
+import { runCapabilitiesInspectionDemo } from "../capabilities-inspection";
 import {
   registerPaymentCapture,
   runPaymentCaptureDemo,
@@ -18,6 +25,42 @@ import {
 import * as examples from "../index";
 
 describe("example flow", () => {
+  it("keeps the minimal runtime example explicit and inspectable", async () => {
+    const result = await runMinimalRuntimeDemo();
+
+    expect(result.result.ok).toBe(true);
+    expect(result.capabilities.queries.map((entry) => entry.name)).toEqual([
+      "note.get.v1",
+    ]);
+  });
+
+  it("keeps post publication replay-safe and conflict-aware", async () => {
+    const result = await runPostPublicationDemo();
+
+    expect(result.before.ok).toBe(true);
+    expect(result.first.ok).toBe(true);
+    expect(result.replay.ok).toBe(true);
+    expect(result.replay.ok && result.replay.meta.outcome).toBe("replayed");
+    expect(result.conflict.ok).toBe(false);
+    expect(result.conflict.ok === false && result.conflict.error.code).toBe(
+      "IDEMPOTENCY_CONFLICT"
+    );
+    expect(result.state.deliveredEventIds).toHaveLength(1);
+    expect(result.capabilities.mutations[0]?.emits).toEqual(["post.published.v1"]);
+  });
+
+  it("supports the HTTP example and capability inspection example", async () => {
+    const http = await runHttpPostPublicationDemo();
+    const capabilities = runCapabilitiesInspectionDemo();
+
+    expect(http.query.ok).toBe(true);
+    expect(http.mutation.ok).toBe(true);
+    expect(http.capabilities.protocol).toBe("signal.v1");
+    expect(capabilities.publication.mutations.map((entry) => entry.name)).toEqual([
+      "post.publish.v1",
+    ]);
+  });
+
   it("keeps payment capture replay-safe", async () => {
     const result = await runPaymentCaptureDemo();
 
@@ -61,10 +104,17 @@ describe("example flow", () => {
   });
 
   it("supports direct registrations for the flow examples", async () => {
+    const post = registerPostPublication();
     const payment = registerPaymentCapture();
     const escrow = registerEscrowRelease();
     const user = registerUserOnboarding();
 
+    const existingPost = await post.runtime.query("post.get.v1", {
+      postId: "post_1001",
+    });
+    const missingPost = await post.runtime.query("post.get.v1", {
+      postId: "missing",
+    });
     const existingPayment = await payment.runtime.query("payment.status.v1", {
       paymentId: "pay_1001",
     });
@@ -84,6 +134,8 @@ describe("example flow", () => {
       userId: "missing",
     });
 
+    expect(existingPost.ok).toBe(true);
+    expect(missingPost.ok).toBe(false);
     expect(existingPayment.ok).toBe(true);
     expect(missingPayment.ok).toBe(false);
     expect(existingEscrow.ok).toBe(true);

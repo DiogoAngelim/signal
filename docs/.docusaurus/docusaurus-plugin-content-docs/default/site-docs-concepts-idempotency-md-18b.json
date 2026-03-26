@@ -1,7 +1,7 @@
 {
   "id": "concepts/idempotency",
   "title": "Idempotency",
-  "description": "What It Is",
+  "description": "Signal makes mutation idempotency explicit.",
   "source": "@site/docs/concepts/idempotency.md",
   "sourceDirName": "concepts",
   "slug": "/concepts/idempotency",

@@ -1,7 +1,7 @@
 {
   "id": "concepts/versioning",
   "title": "Versioning",
-  "description": "What It Is",
+  "description": "Versioning is part of every public Signal operation name.",
   "source": "@site/docs/concepts/versioning.md",
   "sourceDirName": "concepts",
   "slug": "/concepts/versioning",

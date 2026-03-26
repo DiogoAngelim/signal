@@ -1,7 +1,7 @@
 import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import type { SignalErrorEnvelope } from "@signal/protocol";
+import type { SignalErrorEnvelope, SignalResultMeta } from "@signal/protocol";
 import type {
   SignalIdempotencyRecord,
   SignalIdempotencyReservation,
@@ -20,6 +20,9 @@ function toRecord(row: typeof signalIdempotencyRecords.$inferSelect): SignalIdem
     payloadFingerprint: row.payloadFingerprint,
     status: row.status,
     result: row.result ?? undefined,
+    resultMeta: row.resultMeta
+      ? (row.resultMeta as SignalResultMeta)
+      : undefined,
     error: row.error ? (row.error as SignalErrorEnvelope) : undefined,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -112,6 +115,7 @@ export function createPostgresIdempotencyStore(
         .set({
           status: "completed",
           result: input.result as unknown,
+          resultMeta: input.resultMeta as unknown,
           /* c8 ignore next */
           messageId: input.messageId ?? null,
           updatedAt: new Date(),

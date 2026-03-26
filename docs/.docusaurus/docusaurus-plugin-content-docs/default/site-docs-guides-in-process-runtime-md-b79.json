@@ -1,7 +1,7 @@
 {
   "id": "guides/in-process-runtime",
   "title": "In-Process Runtime",
-  "description": "Steps",
+  "description": "The in-process runtime is the simplest way to exercise the Signal contract.",
   "source": "@site/docs/guides/in-process-runtime.md",
   "sourceDirName": "guides",
   "slug": "/guides/in-process-runtime",
@@ -20,7 +20,7 @@
     "permalink": "/signal/docs/guides/http-binding"
   },
   "next": {
-    "title": "Payment Capture Flow",
-    "permalink": "/signal/docs/examples/payment-capture-flow"
+    "title": "Minimal Runtime",
+    "permalink": "/signal/docs/examples/minimal-runtime-flow"
   }
 }

@@ -1,7 +1,7 @@
 {
   "id": "concepts/mutations",
   "title": "Mutations",
-  "description": "What It Is",
+  "description": "Mutations are explicit state-changing commands.",
   "source": "@site/docs/concepts/mutations.md",
   "sourceDirName": "concepts",
   "slug": "/concepts/mutations",

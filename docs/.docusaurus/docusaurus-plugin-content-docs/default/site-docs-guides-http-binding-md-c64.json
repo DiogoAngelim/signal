@@ -1,7 +1,7 @@
 {
   "id": "guides/http-binding",
   "title": "HTTP Binding",
-  "description": "Steps",
+  "description": "The HTTP binding transports Signal messages without redefining the protocol.",
   "source": "@site/docs/guides/http-binding.md",
   "sourceDirName": "guides",
   "slug": "/guides/http-binding",

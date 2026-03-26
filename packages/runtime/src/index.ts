@@ -1,5 +1,6 @@
 export * from "./capabilities";
 export * from "./dispatcher";
+export * from "./execution";
 export * from "./event";
 export * from "./hash";
 export * from "./idempotency";

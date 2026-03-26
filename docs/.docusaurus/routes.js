@@ -4,15 +4,15 @@ import ComponentCreator from '@docusaurus/ComponentCreator';
 export default [
   {
     path: '/signal/docs',
-    component: ComponentCreator('/signal/docs', 'b53'),
+    component: ComponentCreator('/signal/docs', '650'),
     routes: [
       {
         path: '/signal/docs',
-        component: ComponentCreator('/signal/docs', '2df'),
+        component: ComponentCreator('/signal/docs', 'bb1'),
         routes: [
           {
             path: '/signal/docs',
-            component: ComponentCreator('/signal/docs', '679'),
+            component: ComponentCreator('/signal/docs', 'c7f'),
             routes: [
               {
                 path: '/signal/docs/concepts/events',
@@ -51,20 +51,32 @@ export default [
                 sidebar: "tutorialSidebar"
               },
               {
-                path: '/signal/docs/examples/escrow-release-flow',
-                component: ComponentCreator('/signal/docs/examples/escrow-release-flow', 'aad'),
+                path: '/signal/docs/examples/custom-transport-skeleton',
+                component: ComponentCreator('/signal/docs/examples/custom-transport-skeleton', 'aad'),
                 exact: true,
                 sidebar: "tutorialSidebar"
               },
               {
-                path: '/signal/docs/examples/payment-capture-flow',
-                component: ComponentCreator('/signal/docs/examples/payment-capture-flow', '409'),
+                path: '/signal/docs/examples/http-post-publication-flow',
+                component: ComponentCreator('/signal/docs/examples/http-post-publication-flow', 'd39'),
                 exact: true,
                 sidebar: "tutorialSidebar"
               },
               {
-                path: '/signal/docs/examples/user-onboarding-flow',
-                component: ComponentCreator('/signal/docs/examples/user-onboarding-flow', 'c2d'),
+                path: '/signal/docs/examples/minimal-runtime-flow',
+                component: ComponentCreator('/signal/docs/examples/minimal-runtime-flow', 'b03'),
+                exact: true,
+                sidebar: "tutorialSidebar"
+              },
+              {
+                path: '/signal/docs/examples/post-publication-flow',
+                component: ComponentCreator('/signal/docs/examples/post-publication-flow', 'c1d'),
+                exact: true,
+                sidebar: "tutorialSidebar"
+              },
+              {
+                path: '/signal/docs/examples/storage-backed-idempotency-flow',
+                component: ComponentCreator('/signal/docs/examples/storage-backed-idempotency-flow', 'd6a'),
                 exact: true,
                 sidebar: "tutorialSidebar"
               },

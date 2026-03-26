@@ -1,7 +1,7 @@
 {
   "id": "reference/capabilities",
   "title": "Capabilities",
-  "description": "Shape",
+  "description": "Capability documents describe the actual runtime surface.",
   "source": "@site/docs/reference/capabilities.md",
   "sourceDirName": "reference",
   "slug": "/reference/capabilities",

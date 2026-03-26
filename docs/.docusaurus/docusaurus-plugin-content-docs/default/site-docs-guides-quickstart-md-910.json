@@ -1,7 +1,7 @@
 {
   "id": "guides/quickstart",
   "title": "Quickstart",
-  "description": "1. Install dependencies.",
+  "description": "Inspect capabilities:",
   "source": "@site/docs/guides/quickstart.md",
   "sourceDirName": "guides",
   "slug": "/guides/quickstart",

@@ -1,7 +1,7 @@
 {
   "id": "guides/define-your-first-mutation",
   "title": "Define Your First Mutation",
-  "description": "Use a versioned command name and declare idempotency.",
+  "description": "",
   "source": "@site/docs/guides/define-your-first-mutation.md",
   "sourceDirName": "guides",
   "slug": "/guides/define-your-first-mutation",

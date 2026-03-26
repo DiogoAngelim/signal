@@ -1,7 +1,7 @@
 {
   "id": "reference/conformance",
   "title": "Conformance",
-  "description": "Must Implement",
+  "description": "A Signal-compatible implementation preserves the public contract, not the internal Node.js implementation details.",
   "source": "@site/docs/reference/conformance.md",
   "sourceDirName": "reference",
   "slug": "/reference/conformance",

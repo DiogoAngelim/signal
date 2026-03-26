@@ -10,7 +10,7 @@ Signal Protocol v1 defines a transport-independent application protocol for quer
 - **Mutation**: an explicit state-changing command that MAY emit events after the state change is established.
 - **Event**: an immutable fact that records that something happened.
 - **Envelope**: the normalized wrapper around every Signal message.
-- **Operation name**: the versioned name that identifies a public operation, such as `payment.capture.v1`.
+- **Operation name**: the versioned name that identifies a public operation, such as `post.publish.v1`.
 - **Normalized payload**: the canonical payload used when comparing idempotency requests.
 - **Idempotency key**: a caller-provided key that allows a mutation to be replayed safely.
 - **Binding**: a transport-specific way to carry Signal messages, such as HTTP or an in-process runtime.
@@ -64,10 +64,10 @@ All operations MUST follow the pattern `<domain>.<action>.<version>`.
 
 ### 4.2 Examples
 
-- `payment.capture.v1`
-- `payment.status.v1`
-- `payment.captured.v1`
-- `user.onboarded.v1`
+- `post.publish.v1`
+- `note.get.v1`
+- `post.published.v1`
+- `document.archived.v1`
 
 ### 4.3 Naming Guidance
 
@@ -128,7 +128,7 @@ The `code` MUST be stable and machine-readable. The `retryable` flag SHOULD be s
 
 ## 8. Versioning
 
-Breaking changes MUST use a new version suffix in the operation name. `payment.capture.v1` and `payment.capture.v2` are distinct public operations. A runtime MAY support both versions at the same time. A change that alters input shape, result shape, or semantics in a breaking way MUST introduce a new version.
+Breaking changes MUST use a new version suffix in the operation name. `post.publish.v1` and `post.publish.v2` are distinct public operations. A runtime MAY support both versions at the same time. A change that alters input shape, result shape, or semantics in a breaking way MUST introduce a new version.
 
 ## 9. Security Considerations
 

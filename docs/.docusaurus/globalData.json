@@ -41,18 +41,28 @@
               "sidebar": "tutorialSidebar"
             },
             {
-              "id": "examples/escrow-release-flow",
-              "path": "/signal/docs/examples/escrow-release-flow",
+              "id": "examples/custom-transport-skeleton",
+              "path": "/signal/docs/examples/custom-transport-skeleton",
               "sidebar": "tutorialSidebar"
             },
             {
-              "id": "examples/payment-capture-flow",
-              "path": "/signal/docs/examples/payment-capture-flow",
+              "id": "examples/http-post-publication-flow",
+              "path": "/signal/docs/examples/http-post-publication-flow",
               "sidebar": "tutorialSidebar"
             },
             {
-              "id": "examples/user-onboarding-flow",
-              "path": "/signal/docs/examples/user-onboarding-flow",
+              "id": "examples/minimal-runtime-flow",
+              "path": "/signal/docs/examples/minimal-runtime-flow",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "examples/post-publication-flow",
+              "path": "/signal/docs/examples/post-publication-flow",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "examples/storage-backed-idempotency-flow",
+              "path": "/signal/docs/examples/storage-backed-idempotency-flow",
               "sidebar": "tutorialSidebar"
             },
             {

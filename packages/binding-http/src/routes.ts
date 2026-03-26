@@ -8,17 +8,22 @@ import { handleCapabilitiesRequest } from "./capabilities-route";
 
 export function registerSignalHttpRoutes(
   app: FastifyInstance,
-  runtime: SignalRuntime
+  runtime: SignalRuntime,
+  options: {
+    basePath?: string;
+  } = {}
 ): FastifyInstance {
-  app.get("/signal/capabilities", async (request, reply) =>
+  const basePath = options.basePath ?? "/signal";
+
+  app.get(`${basePath}/capabilities`, async (request, reply) =>
     handleCapabilitiesRequest(runtime, request, reply)
   );
 
-  app.post("/signal/query/:name", async (request, reply) =>
+  app.post(`${basePath}/query/:name`, async (request, reply) =>
     handleQueryRequest(runtime, request as never, reply)
   );
 
-  app.post("/signal/mutation/:name", async (request, reply) =>
+  app.post(`${basePath}/mutation/:name`, async (request, reply) =>
     handleMutationRequest(runtime, request as never, reply)
   );
 

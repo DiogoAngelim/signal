@@ -7,25 +7,56 @@ export const signalProtocolVersion = "signal.v1" as const;
 
 export const signalProtocolSchema = z.literal(signalProtocolVersion);
 
-const signalContextSchema = z
+export const signalTraceSchema = z
+  .object({
+    traceId: z.string().min(1).optional(),
+    spanId: z.string().min(1).optional(),
+    parentSpanId: z.string().min(1).optional(),
+    state: z.string().min(1).optional(),
+  })
+  .passthrough()
+  .optional();
+
+export const signalContextSchema = z
   .object({
     correlationId: z.string().min(1).optional(),
     causationId: z.string().min(1).optional(),
+    idempotencyKey: z.string().min(1).optional(),
+    deadlineAt: z.string().datetime().optional(),
     traceId: z.string().min(1).optional(),
+    trace: signalTraceSchema,
   })
   .passthrough()
   .optional();
 
-const signalDeliverySchema = z
+export const signalDeliverySchema = z
   .object({
     mode: z.enum(["in-process", "at-least-once", "exactly-once"]).optional(),
-    attempt: z.number().int().nonnegative().optional(),
+    attempt: z.number().int().positive().optional(),
     consumerId: z.string().min(1).optional(),
+    replayed: z.boolean().optional(),
+    subscription: z.string().min(1).optional(),
+    transportMessageId: z.string().min(1).optional(),
   })
   .passthrough()
   .optional();
 
-const signalAuthSchema = z.record(z.unknown()).optional();
+export const signalActorSchema = z
+  .object({
+    id: z.string().min(1),
+    type: z.string().min(1).optional(),
+    roles: z.array(z.string().min(1)).optional(),
+  })
+  .passthrough();
+
+export const signalAuthSchema = z
+  .object({
+    actor: z.union([signalActorSchema, z.string().min(1)]).optional(),
+    subject: z.string().min(1).optional(),
+    scopes: z.array(z.string().min(1)).optional(),
+  })
+  .passthrough()
+  .optional();
 
 export const signalEnvelopeSchema = z.object({
   protocol: signalProtocolSchema,
@@ -54,6 +85,10 @@ export type SignalEnvelope<TPayload = unknown> = Omit<
 > & {
   payload: TPayload;
 };
+
+export type SignalContext = z.infer<typeof signalContextSchema>;
+export type SignalDelivery = z.infer<typeof signalDeliverySchema>;
+export type SignalAuth = z.infer<typeof signalAuthSchema>;
 
 export type SignalEnvelopeInput<TPayload = unknown> = Omit<
   SignalEnvelope<TPayload>,

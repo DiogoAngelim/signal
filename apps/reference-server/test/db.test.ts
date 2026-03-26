@@ -19,8 +19,8 @@ describe("reference db", () => {
     const store = createReferenceIdempotencyStore();
 
     const reservation = await store.reserve({
-      operationName: "payment.capture.v1",
-      idempotencyKey: "capture-1",
+      operationName: "post.publish.v1",
+      idempotencyKey: "publish-1",
       payloadFingerprint: "fingerprint-a",
     });
 

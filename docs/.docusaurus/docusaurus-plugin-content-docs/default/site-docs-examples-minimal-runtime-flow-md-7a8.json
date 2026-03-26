@@ -1,0 +1,26 @@
+{
+  "id": "examples/minimal-runtime-flow",
+  "title": "Minimal Runtime",
+  "description": "See packages/examples/minimal-runtime/ for the smallest useful Signal runtime.",
+  "source": "@site/docs/examples/minimal-runtime-flow.md",
+  "sourceDirName": "examples",
+  "slug": "/examples/minimal-runtime-flow",
+  "permalink": "/signal/docs/examples/minimal-runtime-flow",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/examples/minimal-runtime-flow.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Minimal Runtime"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "In-Process Runtime",
+    "permalink": "/signal/docs/guides/in-process-runtime"
+  },
+  "next": {
+    "title": "Post Publication Flow",
+    "permalink": "/signal/docs/examples/post-publication-flow"
+  }
+}

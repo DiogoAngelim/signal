@@ -47,6 +47,7 @@ export function createMemoryIdempotencyStore(): SignalIdempotencyStore {
 
       record.status = "completed";
       record.result = input.result;
+      record.resultMeta = input.resultMeta;
       record.messageId = input.messageId;
       record.updatedAt = new Date().toISOString();
     },

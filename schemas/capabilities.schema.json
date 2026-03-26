@@ -3,40 +3,39 @@
   "$id": "https://signal.dev/schemas/capabilities.schema.json",
   "title": "Signal Capabilities",
   "type": "object",
-  "required": ["protocol", "version", "queries", "mutations", "publishedEvents", "subscribedEvents"],
+  "required": [
+    "protocol",
+    "version",
+    "queries",
+    "mutations",
+    "publishedEvents",
+    "subscribedEvents"
+  ],
   "properties": {
-    "protocol": { "const": "signal.v1" },
-    "version": { "const": "v1" },
-    "queries": { "type": "array", "items": { "$ref": "#/definitions/operationCapability" } },
-    "mutations": { "type": "array", "items": { "$ref": "#/definitions/operationCapability" } },
-    "publishedEvents": { "type": "array", "items": { "$ref": "#/definitions/operationCapability" } },
-    "subscribedEvents": { "type": "array", "items": { "$ref": "#/definitions/operationCapability" } },
+    "protocol": {
+      "const": "signal.v1"
+    },
+    "version": {
+      "const": "v1"
+    },
+    "queries": {
+      "type": "array"
+    },
+    "mutations": {
+      "type": "array"
+    },
+    "publishedEvents": {
+      "type": "array"
+    },
+    "subscribedEvents": {
+      "type": "array"
+    },
+    "features": {
+      "type": "object",
+      "additionalProperties": true
+    },
     "bindings": {
       "type": "object",
-      "properties": {
-        "inProcess": { "type": "boolean" },
-        "http": {
-          "type": "object",
-          "properties": {
-            "basePath": { "type": "string" }
-          },
-          "additionalProperties": true
-        }
-      },
-      "additionalProperties": true
-    }
-  },
-  "definitions": {
-    "operationCapability": {
-      "type": "object",
-      "required": ["name", "kind"],
-      "properties": {
-        "name": { "type": "string" },
-        "kind": { "enum": ["query", "mutation", "event"] },
-        "inputSchemaId": { "type": "string" },
-        "resultSchemaId": { "type": "string" },
-        "idempotency": { "enum": ["required", "optional", "none"] }
-      },
       "additionalProperties": true
     }
   },

@@ -14,9 +14,8 @@ describe("reference runtime", () => {
       subscribers: runtimeSubscribers,
     } = createReferenceRuntime();
 
-    expect(runtimeOperations.payment).toBeDefined();
-    expect(runtimeOperations.escrow).toBeDefined();
-    expect(runtimeOperations.user).toBeDefined();
+    expect(runtimeOperations.minimal).toBeDefined();
+    expect(runtimeOperations.publication).toBeDefined();
     expect(runtimeSubscribers.seen).toHaveLength(0);
     expect(operations.registerReferenceOperations).toBeDefined();
     expect(routes.registerHealthRoute).toBeDefined();
@@ -24,50 +23,24 @@ describe("reference runtime", () => {
 
     const capabilities = runtime.capabilities();
     expect(capabilities.queries.map((entry) => entry.name)).toEqual([
-      "payment.status.v1",
-      "escrow.status.v1",
-      "user.profile.v1",
+      "note.get.v1",
+      "post.get.v1",
     ]);
     expect(capabilities.mutations.map((entry) => entry.name)).toEqual([
-      "payment.capture.v1",
-      "escrow.release.v1",
-      "user.onboard.v1",
+      "post.publish.v1",
     ]);
     expect(capabilities.subscribedEvents.map((entry) => entry.name)).toEqual([
-      "payment.captured.v1",
-      "escrow.released.v1",
-      "user.onboarded.v1",
+      "post.published.v1",
     ]);
 
-    const event = await runtime.publish("payment.captured.v1", {
-      paymentId: "pay_1001",
-      amount: 120,
-      currency: "USD",
-      capturedAt: "2026-03-25T12:00:00.000Z",
+    const event = await runtime.publish("post.published.v1", {
+      postId: "post_1001",
+      title: "Protocol first",
+      publishedAt: "2026-03-25T12:00:00.000Z",
     });
-
     await runtime.dispatcher.dispatch(event);
-    const escrowEvent = await runtime.publish("escrow.released.v1", {
-      escrowId: "esc_2001",
-      beneficiaryId: "acct_beneficiary_1",
-      amount: 300,
-      currency: "USD",
-      releasedAt: "2026-03-25T12:00:00.000Z",
-    });
-    await runtime.dispatcher.dispatch(escrowEvent);
-    const userEvent = await runtime.publish("user.onboarded.v1", {
-      userId: "user_3001",
-      email: "ada@example.com",
-      plan: "pro",
-      onboardedAt: "2026-03-25T12:00:00.000Z",
-    });
-    await runtime.dispatcher.dispatch(userEvent);
 
-    expect(runtimeSubscribers.seen).toEqual([
-      event.messageId,
-      escrowEvent.messageId,
-      userEvent.messageId,
-    ]);
+    expect(runtimeSubscribers.seen).toEqual([event.messageId]);
   });
 
   it("creates a fastify server with the signal binding", async () => {

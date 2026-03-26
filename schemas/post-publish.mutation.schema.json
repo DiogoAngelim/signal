@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signal.dev/schemas/post-publish.mutation.schema.json",
+  "title": "Post Publish Mutation",
+  "type": "object",
+  "required": ["postId", "title", "body"],
+  "properties": {
+    "postId": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "body": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

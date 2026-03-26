@@ -12,6 +12,12 @@
   "include": [
     "index.ts",
     "support.ts",
+    "minimal-runtime/**/*.ts",
+    "post-publication/**/*.ts",
+    "http-post-publication/**/*.ts",
+    "capabilities-inspection/**/*.ts",
+    "storage-backed-idempotency/**/*.ts",
+    "custom-transport-skeleton/**/*.ts",
     "payment-capture/**/*.ts",
     "escrow-release/**/*.ts",
     "user-onboarding/**/*.ts",

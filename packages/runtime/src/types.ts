@@ -3,8 +3,11 @@ import type {
   SignalCapabilities,
   SignalEnvelope,
   SignalErrorEnvelope,
+  SignalResultMeta,
   SignalKind,
-  SignalResult,
+  SignalDelivery,
+  SignalContext,
+  SignalAuth,
 } from "@signal/protocol";
 
 export type { SignalErrorEnvelope } from "@signal/protocol";
@@ -13,12 +16,15 @@ export type SignalOperationKind = SignalKind;
 
 export type SignalSchema<T> = z.ZodType<T>;
 
-export type SignalAuth = Record<string, unknown> | undefined;
-
 export interface SignalRequestContext {
   correlationId?: string;
   causationId?: string;
   traceId?: string;
+  trace?: NonNullable<SignalContext>["trace"];
+  idempotencyKey?: string;
+  deadlineAt?: string;
+  abortSignal?: AbortSignal;
+  delivery?: SignalDelivery;
   source?: {
     system?: string;
     transport?: string;
@@ -31,6 +37,7 @@ export interface SignalRequestContext {
 export interface SignalExecutionContext {
   readonly request: SignalRequestContext;
   readonly envelope?: SignalEnvelope;
+  readonly startedAt?: number;
   emit<TPayload>(
     name: string,
     payload: TPayload,
@@ -48,6 +55,8 @@ export interface SignalOperationDefinition<TInput = unknown, TResult = unknown> 
   description?: string;
   inputSchemaId?: string;
   resultSchemaId?: string;
+  emits?: string[];
+  normalizeIdempotencyInput?(input: TInput): unknown;
 }
 
 export interface SignalQueryDefinition<TInput = unknown, TResult = unknown>
@@ -70,6 +79,7 @@ export interface SignalExecutionOutcome<TResult = unknown> {
   ok: true;
   result: TResult;
   envelope: SignalEnvelope;
+  meta: SignalResultMeta;
 }
 
 export interface SignalExecutionFailure {
@@ -87,6 +97,7 @@ export interface SignalIdempotencyRecord {
   payloadFingerprint: string;
   status: "pending" | "completed" | "failed";
   result?: unknown;
+  resultMeta?: SignalResultMeta;
   error?: SignalErrorEnvelope;
   createdAt: string;
   updatedAt: string;
@@ -109,6 +120,7 @@ export interface SignalIdempotencyStore {
     idempotencyKey: string;
     payloadFingerprint: string;
     result: unknown;
+    resultMeta?: SignalResultMeta;
     messageId?: string;
   }): Promise<void>;
   fail(input: {
@@ -127,11 +139,27 @@ export interface SignalDispatcher {
   ): () => void;
 }
 
+export interface SignalConsumerDeduper {
+  remember(input: {
+    consumerId: string;
+    messageId: string;
+    envelope: SignalEnvelope;
+  }): Promise<boolean>;
+}
+
+export interface SignalSubscriptionOptions {
+  consumerId?: string;
+  description?: string;
+  replaySafe?: boolean;
+  deduper?: SignalConsumerDeduper;
+}
+
 export interface SignalRuntimeOptions {
   protocol?: string;
   idempotencyStore?: SignalIdempotencyStore;
   dispatcher?: SignalDispatcher;
   runtimeName?: string;
+  bindings?: SignalCapabilities["bindings"];
 }
 
 export interface SignalCapabilityProvider {

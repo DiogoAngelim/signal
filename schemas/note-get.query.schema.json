@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signal.dev/schemas/note-get.query.schema.json",
+  "title": "Note Get Query",
+  "type": "object",
+  "required": ["noteId"],
+  "properties": {
+    "noteId": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

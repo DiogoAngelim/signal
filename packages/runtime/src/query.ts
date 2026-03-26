@@ -1,11 +1,17 @@
 import {
   createSignalEnvelope,
   createSignalError,
-  type SignalErrorCode,
 } from "@signal/protocol";
 import type { SignalExecutionContext, SignalExecutionResult } from "./types";
 import type { SignalRegistry } from "./registry";
 import { ZodError } from "zod";
+import {
+  createExecutionSuccessMeta,
+  throwIfExecutionBlocked,
+  toEnvelopeContext,
+  toEnvelopeDelivery,
+  toSignalFailure,
+} from "./execution";
 
 export async function executeQuery<TInput, TResult>(
   registry: SignalRegistry,
@@ -14,17 +20,16 @@ export async function executeQuery<TInput, TResult>(
   context: SignalExecutionContext
 ): Promise<SignalExecutionResult<TResult>> {
   try {
+    throwIfExecutionBlocked(context.request);
+
     const definition = registry.getQuery(name);
     const validatedInput = definition.inputSchema.parse(input);
     const envelope = createSignalEnvelope({
       kind: "query",
       name,
       payload: validatedInput,
-      context: {
-        correlationId: context.request.correlationId,
-        causationId: context.request.causationId,
-        traceId: context.request.traceId,
-      },
+      context: toEnvelopeContext(context.request),
+      delivery: toEnvelopeDelivery(context.request),
       source: context.request.source,
       auth: context.request.auth,
     });
@@ -37,6 +42,15 @@ export async function executeQuery<TInput, TResult>(
     return {
       ok: true,
       result: validatedResult,
+      meta: createExecutionSuccessMeta({
+        outcome: "completed",
+        envelope,
+        request: context.request,
+        startedAt: context.startedAt,
+        idempotency: {
+          status: "not-applicable",
+        },
+      }),
       envelope,
     } as SignalExecutionResult<TResult>;
   } catch (error) {
@@ -50,36 +64,9 @@ export async function executeQuery<TInput, TResult>(
       } as SignalExecutionResult<TResult>;
     }
 
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      typeof (error as { code?: unknown }).code === "string"
-    ) {
-      const retryableValue = (error as { retryable?: unknown }).retryable;
-      const detailsValue = (error as { details?: unknown }).details;
-
-      return {
-        ok: false,
-        error: createSignalError(
-          (error as { code: SignalErrorCode }).code,
-          error instanceof Error ? error.message : "Query failed",
-          {
-            retryable: typeof retryableValue === "boolean" ? retryableValue : undefined,
-            details:
-              typeof detailsValue === "object" && detailsValue !== null
-                ? (detailsValue as Record<string, unknown>)
-                : undefined,
-          }
-        ),
-      } as SignalExecutionResult<TResult>;
-    }
-
     return {
       ok: false,
-      error: createSignalError("INTERNAL_ERROR", "Query failed", {
-        retryable: true,
-      }),
+      error: toSignalFailure(error, "INTERNAL_ERROR", "Query failed"),
     } as SignalExecutionResult<TResult>;
   }
 }

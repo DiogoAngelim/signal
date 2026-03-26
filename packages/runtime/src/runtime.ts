@@ -1,10 +1,14 @@
 import { type SignalCapabilities, type SignalEnvelope } from "@signal/protocol";
 import { buildCapabilities } from "./capabilities";
-import { createInProcessDispatcher } from "./dispatcher";
+import {
+  createInProcessDispatcher,
+  createReplaySafeSubscriber,
+} from "./dispatcher";
 import { dispatchEvent } from "./event";
 import { executeMutation } from "./mutation";
 import { executeQuery } from "./query";
 import { SignalRegistry } from "./registry";
+import { normalizeRequestContext } from "./execution";
 import type {
   SignalBinding,
   SignalDispatcher,
@@ -15,6 +19,7 @@ import type {
   SignalOperationDefinition,
   SignalQueryDefinition,
   SignalRuntimeOptions,
+  SignalSubscriptionOptions,
 } from "./types";
 
 function createDefaultContext(
@@ -22,8 +27,9 @@ function createDefaultContext(
   envelope?: SignalEnvelope
 ): SignalExecutionContext {
   return {
-    request,
+    request: normalizeRequestContext(request),
     envelope,
+    startedAt: Date.now(),
     emit: async () => {
       throw new Error("emit is only available inside mutation handlers");
     },
@@ -35,12 +41,24 @@ export class SignalRuntime implements SignalBinding {
   readonly dispatcher: SignalDispatcher;
   readonly idempotencyStore?: SignalIdempotencyStore;
   readonly runtimeName: string;
-  private readonly subscribedEventNames = new Set<string>();
+  private readonly bindings: SignalCapabilities["bindings"];
+  private readonly subscriptions: Array<{
+    name: string;
+    consumerId?: string;
+    replaySafe?: boolean;
+    description?: string;
+  }> = [];
 
   constructor(options: SignalRuntimeOptions = {}) {
     this.dispatcher = options.dispatcher ?? createInProcessDispatcher();
     this.idempotencyStore = options.idempotencyStore;
     this.runtimeName = options.runtimeName ?? "signal-node-reference";
+    this.bindings = options.bindings ?? {
+      inProcess: true,
+      http: {
+        basePath: "/signal",
+      },
+    };
   }
 
   registerQuery<TInput, TResult>(
@@ -63,10 +81,25 @@ export class SignalRuntime implements SignalBinding {
 
   subscribe(
     name: string,
-    handler: (envelope: SignalEnvelope) => void | Promise<void>
+    handler: (envelope: SignalEnvelope) => void | Promise<void>,
+    options: SignalSubscriptionOptions = {}
   ): () => void {
-    this.subscribedEventNames.add(name);
-    return this.dispatcher.subscribe(name, handler);
+    this.subscriptions.push({
+      name,
+      consumerId: options.consumerId,
+      replaySafe: options.replaySafe,
+      description: options.description,
+    });
+
+    const subscriber =
+      options.replaySafe || options.deduper
+        ? createReplaySafeSubscriber(handler, {
+            consumerId: options.consumerId,
+            deduper: options.deduper,
+          })
+        : handler;
+
+    return this.dispatcher.subscribe(name, subscriber);
   }
 
   async query<TInput, TResult>(
@@ -82,6 +115,10 @@ export class SignalRuntime implements SignalBinding {
         correlationId: request.correlationId,
         causationId: request.causationId,
         traceId: request.traceId,
+        trace: request.trace,
+        deadlineAt: request.deadlineAt,
+        abortSignal: request.abortSignal,
+        delivery: request.delivery,
         source: request.source,
         auth: request.auth,
         meta: request.meta,
@@ -106,6 +143,11 @@ export class SignalRuntime implements SignalBinding {
         correlationId: request.correlationId,
         causationId: request.causationId,
         traceId: request.traceId,
+        trace: request.trace,
+        idempotencyKey: request.idempotencyKey,
+        deadlineAt: request.deadlineAt,
+        abortSignal: request.abortSignal,
+        delivery: request.delivery,
         source: request.source,
         auth: request.auth,
         meta: request.meta,
@@ -128,6 +170,11 @@ export class SignalRuntime implements SignalBinding {
         correlationId: request.correlationId,
         causationId: request.causationId,
         traceId: request.traceId,
+        trace: request.trace,
+        idempotencyKey: request.idempotencyKey,
+        deadlineAt: request.deadlineAt,
+        abortSignal: request.abortSignal,
+        delivery: request.delivery,
         source: request.source,
         auth: request.auth,
         meta: request.meta,
@@ -137,12 +184,7 @@ export class SignalRuntime implements SignalBinding {
   }
 
   capabilities(): SignalCapabilities {
-    return buildCapabilities(this.registry, {
-      inProcess: true,
-      http: {
-        basePath: "/signal",
-      },
-    }, [...this.subscribedEventNames]);
+    return buildCapabilities(this.registry, this.bindings, [...this.subscriptions]);
   }
 
   lock(): void {

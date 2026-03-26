@@ -3,7 +3,11 @@
   "$id": "https://signal.dev/schemas/error.schema.json",
   "title": "Signal Error",
   "type": "object",
-  "required": ["code", "message"],
+  "required": [
+    "code",
+    "category",
+    "message"
+  ],
   "properties": {
     "code": {
       "enum": [
@@ -13,15 +17,39 @@
         "FORBIDDEN",
         "NOT_FOUND",
         "CONFLICT",
+        "BUSINESS_REJECTION",
         "IDEMPOTENCY_CONFLICT",
+        "DEADLINE_EXCEEDED",
+        "CANCELLED",
+        "TRANSPORT_ERROR",
         "INTERNAL_ERROR",
         "RETRYABLE_ERROR",
         "UNSUPPORTED_OPERATION"
       ]
     },
-    "message": { "type": "string" },
-    "retryable": { "type": "boolean" },
-    "details": { "type": "object", "additionalProperties": true }
+    "category": {
+      "enum": [
+        "validation",
+        "authorization",
+        "business",
+        "idempotency",
+        "deadline",
+        "cancellation",
+        "transport",
+        "runtime",
+        "capability"
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "retryable": {
+      "type": "boolean"
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": true
+    }
   },
   "additionalProperties": true
 }

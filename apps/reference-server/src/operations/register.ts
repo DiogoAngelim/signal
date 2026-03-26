@@ -1,12 +1,12 @@
-import { registerEscrowRelease } from "@signal/examples/escrow-release";
-import { registerPaymentCapture } from "@signal/examples/payment-capture";
-import { registerUserOnboarding } from "@signal/examples/user-onboarding";
+import { registerMinimalRuntime } from "@signal/examples/minimal-runtime";
+import { registerPostPublication } from "@signal/examples/post-publication";
 import type { SignalRuntime } from "@signal/runtime";
 
 export function registerReferenceOperations(runtime: SignalRuntime) {
-  const payment = registerPaymentCapture(runtime);
-  const escrow = registerEscrowRelease(runtime);
-  const user = registerUserOnboarding(runtime);
+  const minimal = registerMinimalRuntime(runtime);
+  const publication = registerPostPublication(runtime, undefined, {
+    registerSubscriber: false,
+  });
 
-  return { payment, escrow, user };
+  return { minimal, publication };
 }

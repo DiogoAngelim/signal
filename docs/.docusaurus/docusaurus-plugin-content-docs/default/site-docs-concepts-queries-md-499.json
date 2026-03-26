@@ -1,7 +1,7 @@
 {
   "id": "concepts/queries",
   "title": "Queries",
-  "description": "What It Is",
+  "description": "Queries are read-only operations.",
   "source": "@site/docs/concepts/queries.md",
   "sourceDirName": "concepts",
   "slug": "/concepts/queries",
@@ -16,7 +16,7 @@
   },
   "sidebar": "tutorialSidebar",
   "previous": {
-    "title": "Introduction",
+    "title": "Signal Protocol v1",
     "permalink": "/signal/docs/introduction"
   },
   "next": {

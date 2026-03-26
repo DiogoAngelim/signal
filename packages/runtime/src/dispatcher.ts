@@ -1,5 +1,5 @@
 import { createSignalEnvelope, type SignalEnvelope } from "@signal/protocol";
-import type { SignalDispatcher } from "./types";
+import type { SignalConsumerDeduper, SignalDispatcher } from "./types";
 
 export function createInProcessDispatcher(): SignalDispatcher {
   const subscribers = new Map<
@@ -33,15 +33,43 @@ export function createInProcessDispatcher(): SignalDispatcher {
 }
 
 export function createReplaySafeSubscriber(
-  handler: (envelope: SignalEnvelope) => void | Promise<void>
+  handler: (envelope: SignalEnvelope) => void | Promise<void>,
+  options: {
+    consumerId?: string;
+    deduper?: SignalConsumerDeduper;
+  } = {}
 ): (envelope: SignalEnvelope) => Promise<void> {
-  const seen = new Set<string>();
+  const consumerId = options.consumerId ?? "signal-replay-safe-consumer";
+  const deduper = options.deduper ?? createInMemoryConsumerDeduper();
+
   return async (envelope: SignalEnvelope) => {
-    if (seen.has(envelope.messageId)) {
+    const accepted = await deduper.remember({
+      consumerId,
+      messageId: envelope.messageId,
+      envelope,
+    });
+
+    if (!accepted) {
       return;
     }
-    seen.add(envelope.messageId);
+
     await handler(envelope);
+  };
+}
+
+export function createInMemoryConsumerDeduper(): SignalConsumerDeduper {
+  const seen = new Set<string>();
+
+  return {
+    async remember(input): Promise<boolean> {
+      const key = `${input.consumerId}:${input.messageId}`;
+      if (seen.has(key)) {
+        return false;
+      }
+
+      seen.add(key);
+      return true;
+    },
   };
 }
 

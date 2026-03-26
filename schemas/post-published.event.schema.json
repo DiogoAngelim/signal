@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signal.dev/schemas/post-published.event.schema.json",
+  "title": "Post Published Event",
+  "type": "object",
+  "required": ["postId", "title", "publishedAt"],
+  "properties": {
+    "postId": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "publishedAt": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}

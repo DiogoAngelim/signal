@@ -46,7 +46,7 @@ Subscriber failures SHOULD be surfaced as structured errors. Retryable errors MA
 
 ## 6. Versioning
 
-Event names MUST be versioned. A breaking change to event payload shape or meaning MUST use a new event version, such as `payment.captured.v2`. Consumers SHOULD subscribe to the version they understand instead of assuming that new fields make a breaking change safe.
+Event names MUST be versioned. A breaking change to event payload shape or meaning MUST use a new event version, such as `post.published.v2`. Consumers SHOULD subscribe to the version they understand instead of assuming that new fields make a breaking change safe.
 
 ## 7. Security Considerations
 

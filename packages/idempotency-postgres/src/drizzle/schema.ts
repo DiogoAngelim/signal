@@ -21,6 +21,7 @@ export const signalIdempotencyRecords = pgTable(
     payloadFingerprint: text("payload_fingerprint").notNull(),
     status: signalIdempotencyStatus("status").notNull().default("pending"),
     result: jsonb("result"),
+    resultMeta: jsonb("result_meta"),
     error: jsonb("error"),
     messageId: text("message_id"),
     createdAt: timestamp("created_at", { withTimezone: true })

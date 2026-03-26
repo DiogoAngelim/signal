@@ -1,0 +1,30 @@
+{
+  "protocol": "signal.v1",
+  "kind": "query",
+  "name": "note.get.v1",
+  "messageId": "msg-note-1001",
+  "timestamp": "2026-03-26T12:00:00.000Z",
+  "context": {
+    "correlationId": "corr-note-1001",
+    "causationId": "cause-note-1000",
+    "deadlineAt": "2026-03-26T12:05:00.000Z",
+    "trace": {
+      "traceId": "trace-note-1",
+      "spanId": "span-note-1"
+    }
+  },
+  "delivery": {
+    "mode": "in-process",
+    "attempt": 1
+  },
+  "auth": {
+    "actor": {
+      "id": "user_123",
+      "type": "user",
+      "roles": ["reader"]
+    }
+  },
+  "payload": {
+    "noteId": "note_1001"
+  }
+}

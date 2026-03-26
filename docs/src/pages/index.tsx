@@ -5,7 +5,7 @@ export default function Home(): JSX.Element {
   return (
     <Layout
       title="Signal Protocol v1"
-      description="A transport-independent application protocol for queries, mutations, and events."
+      description="A transport-independent application protocol and Node.js reference runtime for versioned queries, mutations, and events."
     >
       <main className="hero hero--signal">
         <div className="container margin-vert--xl">
@@ -13,14 +13,14 @@ export default function Home(): JSX.Element {
             <h1>Signal Protocol v1</h1>
             <p>
               Signal defines how application messages are structured, versioned,
-              executed, and replayed. The protocol covers the envelope, naming,
-              response shape, idempotence behavior, events, capability documents,
-              and bindings.
+              executed, replayed, and exposed across bindings without becoming
+              coupled to HTTP, brokers, or a business domain.
             </p>
             <ul>
               <li>Public RFCs describe the contract before the code exists.</li>
-              <li>Operations use explicit names such as `payment.capture.v1`.</li>
-              <li>Mutations declare idempotence behavior explicitly.</li>
+              <li>Operations use explicit names such as `post.publish.v1`.</li>
+              <li>Mutations declare idempotency behavior explicitly.</li>
+              <li>Successful replays surface logical replay metadata.</li>
               <li>Capability documents show exactly what a runtime supports.</li>
             </ul>
             <div className="margin-top--lg">

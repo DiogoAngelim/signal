@@ -1,7 +1,6 @@
 import {
   createSignalEnvelope,
   createSignalError,
-  type SignalErrorCode,
   type SignalEnvelope,
   type SignalErrorEnvelope,
 } from "@signal/protocol";
@@ -15,6 +14,14 @@ import type {
   SignalIdempotencyStore,
 } from "./types";
 import type { SignalRegistry } from "./registry";
+import {
+  createExecutionSuccessMeta,
+  createNestedExecutionContext,
+  throwIfExecutionBlocked,
+  toEnvelopeContext,
+  toEnvelopeDelivery,
+  toSignalFailure,
+} from "./execution";
 
 function toFailure<TResult>(error: SignalErrorEnvelope): SignalExecutionResult<TResult> {
   return { ok: false, error } as SignalExecutionResult<TResult>;
@@ -31,26 +38,30 @@ export async function executeMutation<TInput, TResult>(
 ): Promise<SignalExecutionResult<TResult>> {
   let definition: ReturnType<SignalRegistry["getMutation"]> | undefined;
   let payloadFingerprint = "";
+  let reservedRecord = false;
 
   try {
+    throwIfExecutionBlocked(context.request);
+
     definition = registry.getMutation(name);
     const validatedInput = definition.inputSchema.parse(input);
+    const normalizedIdempotencyInput = definition.normalizeIdempotencyInput
+      ? definition.normalizeIdempotencyInput(validatedInput)
+      : validatedInput;
+
     const envelope = createSignalEnvelope({
       kind: "mutation",
       name,
       payload: validatedInput,
-      context: {
-        correlationId: context.request.correlationId,
-        causationId: context.request.causationId,
-        traceId: context.request.traceId,
-      },
+      context: toEnvelopeContext(context.request),
+      delivery: toEnvelopeDelivery(context.request),
       source: context.request.source,
       auth: context.request.auth,
-    });
+    }) as SignalEnvelope<TInput>;
     payloadFingerprint = fingerprint({
       kind: "mutation",
       name,
-      payload: validatedInput,
+      payload: normalizedIdempotencyInput,
       auth: context.request.auth ?? null,
     });
 
@@ -76,7 +87,6 @@ export async function executeMutation<TInput, TResult>(
       if (reservation.state === "inflight") {
         return toFailure<TResult>(
           createSignalError("RETRYABLE_ERROR", "The same mutation is already in flight", {
-            retryable: true,
             details: {
               idempotencyKey,
               operationName: name,
@@ -90,6 +100,22 @@ export async function executeMutation<TInput, TResult>(
           return {
             ok: true,
             result: reservation.record.result as TResult,
+            meta: createExecutionSuccessMeta({
+              outcome: "replayed",
+              envelope,
+              request: context.request,
+              startedAt: context.startedAt,
+              idempotency: {
+                key: idempotencyKey,
+                status: "replayed",
+                fingerprint: reservation.record.payloadFingerprint,
+              },
+              replay: {
+                replayed: true,
+                reason: "idempotency",
+                originalMessageId: reservation.record.messageId,
+              },
+            }),
             envelope,
           };
         }
@@ -98,12 +124,15 @@ export async function executeMutation<TInput, TResult>(
           return toFailure<TResult>(reservation.record.error);
         }
       }
+
+      reservedRecord = reservation.state === "reserved";
     }
 
     const emittedEvents: SignalEnvelope[] = [];
     const executionContext: SignalExecutionContext = {
       request: context.request,
       envelope,
+      startedAt: context.startedAt,
       emit: async <TPayload>(
         eventName: string,
         payload: TPayload,
@@ -114,17 +143,7 @@ export async function executeMutation<TInput, TResult>(
           undefined,
           eventName,
           payload,
-          {
-            request: {
-              ...context.request,
-              causationId: envelope.messageId,
-            },
-            envelope,
-            /* c8 ignore next 3 */
-            emit: async () => {
-              throw new Error("Nested emit is not supported");
-            },
-          },
+          createNestedExecutionContext(context, envelope),
           meta
         );
         emittedEvents.push(eventEnvelope);
@@ -140,38 +159,72 @@ export async function executeMutation<TInput, TResult>(
     }
 
     if (idempotencyStore && idempotencyKey && definition && definition.idempotency !== "none") {
+      const meta = createExecutionSuccessMeta({
+        outcome: "completed",
+        envelope,
+        request: context.request,
+        startedAt: context.startedAt,
+        idempotency: {
+          key: idempotencyKey,
+          status: "recorded",
+          fingerprint: payloadFingerprint,
+        },
+        replay: {
+          replayed: false,
+        },
+      });
+
       await idempotencyStore.complete({
         operationName: name,
         idempotencyKey,
         payloadFingerprint,
         result: validatedResult,
-        /* c8 ignore next */
-        messageId: context.envelope?.messageId,
+        resultMeta: meta,
+        messageId: envelope.messageId,
       });
+
+      return {
+        ok: true,
+        result: validatedResult as TResult,
+        meta,
+        envelope,
+      };
     }
 
     return {
       ok: true,
       result: validatedResult as TResult,
+      meta: createExecutionSuccessMeta({
+        outcome: "completed",
+        envelope,
+        request: context.request,
+        startedAt: context.startedAt,
+        idempotency: {
+          status: "not-applicable",
+        },
+        replay: {
+          replayed: false,
+        },
+      }),
       envelope,
     };
   } catch (error) {
     if (error instanceof ZodError) {
       const failure = createSignalError("VALIDATION_ERROR", error.message, {
-        retryable: false,
         details: { issues: error.issues },
       });
 
-      if (idempotencyStore && idempotencyKey && definition) {
+      if (
+        reservedRecord &&
+        idempotencyStore &&
+        idempotencyKey &&
+        definition &&
+        definition.idempotency !== "none"
+      ) {
         await idempotencyStore.fail({
           operationName: name,
           idempotencyKey,
-          payloadFingerprint: fingerprint({
-            kind: "mutation",
-            name,
-            payload: input,
-            auth: context.request.auth ?? null,
-          }),
+          payloadFingerprint,
           error: failure,
         });
       }
@@ -179,34 +232,15 @@ export async function executeMutation<TInput, TResult>(
       return toFailure<TResult>(failure);
     }
 
-    const failure =
-      typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      typeof (error as { code?: unknown }).code === "string" &&
-      (error as { code?: unknown }).code
-        ? createSignalError(
-            (error as { code: SignalErrorCode }).code,
-            error instanceof Error ? error.message : "Mutation failed",
-            {
-              retryable:
-                typeof (error as { retryable?: unknown }).retryable === "boolean"
-                  ? ((error as { retryable?: unknown }).retryable as boolean)
-                  : undefined,
-              details:
-                typeof (error as { details?: unknown }).details === "object" &&
-                (error as { details?: unknown }).details !== null
-                  ? ((error as { details?: unknown }).details as Record<string, unknown>)
-                  : undefined,
-            }
-          )
-        : error instanceof Error
-          ? createSignalError("INTERNAL_ERROR", error.message, { retryable: true })
-          : createSignalError("INTERNAL_ERROR", "Unknown mutation failure", {
-              retryable: true,
-            });
+    const failure = toSignalFailure(error, "INTERNAL_ERROR", "Mutation failed");
 
-    if (idempotencyStore && idempotencyKey && definition && definition.idempotency !== "none") {
+    if (
+      reservedRecord &&
+      idempotencyStore &&
+      idempotencyKey &&
+      definition &&
+      definition.idempotency !== "none"
+    ) {
       await idempotencyStore.fail({
         operationName: name,
         idempotencyKey,

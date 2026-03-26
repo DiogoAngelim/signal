@@ -150,6 +150,9 @@ importers:
 
   packages/examples:
     dependencies:
+      '@signal/binding-http':
+        specifier: workspace:*
+        version: link:../binding-http
       '@signal/idempotency-postgres':
         specifier: workspace:*
         version: link:../idempotency-postgres

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signal.dev/schemas/post-get.query.schema.json",
+  "title": "Post Get Query",
+  "type": "object",
+  "required": ["postId"],
+  "properties": {
+    "postId": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

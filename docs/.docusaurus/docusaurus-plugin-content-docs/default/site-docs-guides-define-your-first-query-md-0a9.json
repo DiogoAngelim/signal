@@ -1,7 +1,7 @@
 {
   "id": "guides/define-your-first-query",
   "title": "Define Your First Query",
-  "description": "Use a versioned name, an input schema, and a result schema.",
+  "description": "",
   "source": "@site/docs/guides/define-your-first-query.md",
   "sourceDirName": "guides",
   "slug": "/guides/define-your-first-query",
