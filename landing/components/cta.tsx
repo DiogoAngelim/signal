@@ -1,4 +1,4 @@
-import { ArrowRight, Github, BookOpen, Zap } from "lucide-react";
+import { ArrowRight, BookOpen, Zap } from "lucide-react";
 
 export function CTA() {
   return (
@@ -14,37 +14,35 @@ export function CTA() {
         </div>
 
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-balance">
-          Ready to build{" "}
+          Read the protocol,{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
-            production-grade
+            then run it locally
           </span>{" "}
-          backends?
+          .
         </h2>
 
         <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-          Join developers who are shipping faster with Signal. Explicit,
-          deterministic, and built for the serverless era.
+          Start with the quickstart, inspect the envelope, and compare the
+          reference runtime with your own implementation.
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href="https://github.com/DiogoAngelim/signal"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/docs/guides/quickstart"
             className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-primary via-secondary to-accent text-white font-semibold rounded-xl hover:opacity-90 transition-all glow-amber"
           >
-            <Github className="w-5 h-5" />
-            Star on GitHub
+            <BookOpen className="w-5 h-5" />
+            Quickstart
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
           <a
-            href="https://github.com/DiogoAngelim/signal#-quick-start"
+            href="https://github.com/DiogoAngelim/signal"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-border bg-card/50 text-foreground font-semibold rounded-xl hover:bg-card hover:border-muted-foreground/30 transition-all"
           >
             <BookOpen className="w-5 h-5" />
-            Read the Docs
+            Repository
           </a>
         </div>
       </div>

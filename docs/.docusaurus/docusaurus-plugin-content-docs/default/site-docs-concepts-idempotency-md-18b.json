@@ -1,0 +1,26 @@
+{
+  "id": "concepts/idempotency",
+  "title": "Idempotency",
+  "description": "What It Is",
+  "source": "@site/docs/concepts/idempotency.md",
+  "sourceDirName": "concepts",
+  "slug": "/concepts/idempotency",
+  "permalink": "/signal/docs/concepts/idempotency",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/concepts/idempotency.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Idempotency"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Events",
+    "permalink": "/signal/docs/concepts/events"
+  },
+  "next": {
+    "title": "Versioning",
+    "permalink": "/signal/docs/concepts/versioning"
+  }
+}

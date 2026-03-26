@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Menu, X, Github, Zap } from "lucide-react";
+import { Menu, X, BookOpen, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "#features", label: "Features" },
-  { href: "#code", label: "Quick Start" },
+  { href: "#features", label: "Primitives" },
+  { href: "#code", label: "Example" },
   { href: "#architecture", label: "Architecture" },
-  { href: "#deployment", label: "Deploy" },
+  { href: "#deployment", label: "Bindings" },
 ];
 
 export function Header() {
@@ -61,14 +61,14 @@ export function Header() {
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Github className="w-5 h-5" />
-              <span className="text-sm">GitHub</span>
+              <BookOpen className="w-5 h-5" />
+              <span className="text-sm">Repository</span>
             </a>
             <a
               href="#code"
               className="px-4 py-2 bg-gradient-to-r from-primary via-secondary to-accent text-white font-semibold text-sm rounded-lg hover:opacity-90 transition-opacity"
             >
-              Get Started
+              Quickstart
             </a>
           </div>
 
@@ -104,8 +104,8 @@ export function Header() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Github className="w-5 h-5" />
-                <span>GitHub</span>
+                <BookOpen className="w-5 h-5" />
+                <span>Repository</span>
               </a>
             </div>
           </div>

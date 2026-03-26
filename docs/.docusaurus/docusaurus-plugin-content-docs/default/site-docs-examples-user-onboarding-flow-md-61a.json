@@ -1,0 +1,22 @@
+{
+  "id": "examples/user-onboarding-flow",
+  "title": "User Onboarding Flow",
+  "description": "1. A client sends user.onboard.v1.",
+  "source": "@site/docs/examples/user-onboarding-flow.md",
+  "sourceDirName": "examples",
+  "slug": "/examples/user-onboarding-flow",
+  "permalink": "/signal/docs/examples/user-onboarding-flow",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/examples/user-onboarding-flow.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "User Onboarding Flow"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Escrow Release Flow",
+    "permalink": "/signal/docs/examples/escrow-release-flow"
+  }
+}

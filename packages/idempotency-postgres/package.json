@@ -1,0 +1,27 @@
+{
+  "name": "@signal/idempotency-postgres",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@signal/protocol": "workspace:*",
+    "@signal/runtime": "workspace:*",
+    "drizzle-orm": "^0.38.4",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.16",
+    "@types/pg": "^8.11.10",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.9"
+  }
+}

@@ -1,0 +1,144 @@
+import type { z } from "zod";
+import type {
+  SignalCapabilities,
+  SignalEnvelope,
+  SignalErrorEnvelope,
+  SignalKind,
+  SignalResult,
+} from "@signal/protocol";
+
+export type { SignalErrorEnvelope } from "@signal/protocol";
+
+export type SignalOperationKind = SignalKind;
+
+export type SignalSchema<T> = z.ZodType<T>;
+
+export type SignalAuth = Record<string, unknown> | undefined;
+
+export interface SignalRequestContext {
+  correlationId?: string;
+  causationId?: string;
+  traceId?: string;
+  source?: {
+    system?: string;
+    transport?: string;
+    runtime?: string;
+  };
+  auth?: SignalAuth;
+  meta?: Record<string, unknown>;
+}
+
+export interface SignalExecutionContext {
+  readonly request: SignalRequestContext;
+  readonly envelope?: SignalEnvelope;
+  emit<TPayload>(
+    name: string,
+    payload: TPayload,
+    meta?: Record<string, unknown>
+  ): Promise<SignalEnvelope<TPayload>>;
+}
+
+export interface SignalOperationDefinition<TInput = unknown, TResult = unknown> {
+  name: string;
+  kind: SignalOperationKind;
+  inputSchema: SignalSchema<TInput>;
+  resultSchema: SignalSchema<TResult>;
+  handler(input: TInput, context: SignalExecutionContext): Promise<TResult> | TResult;
+  idempotency?: "required" | "optional" | "none";
+  description?: string;
+  inputSchemaId?: string;
+  resultSchemaId?: string;
+}
+
+export interface SignalQueryDefinition<TInput = unknown, TResult = unknown>
+  extends SignalOperationDefinition<TInput, TResult> {
+  kind: "query";
+}
+
+export interface SignalMutationDefinition<TInput = unknown, TResult = unknown>
+  extends SignalOperationDefinition<TInput, TResult> {
+  kind: "mutation";
+  idempotency: "required" | "optional" | "none";
+}
+
+export interface SignalEventDefinition<TInput = unknown, TResult = unknown>
+  extends SignalOperationDefinition<TInput, TResult> {
+  kind: "event";
+}
+
+export interface SignalExecutionOutcome<TResult = unknown> {
+  ok: true;
+  result: TResult;
+  envelope: SignalEnvelope;
+}
+
+export interface SignalExecutionFailure {
+  ok: false;
+  error: SignalErrorEnvelope;
+}
+
+export type SignalExecutionResult<TResult = unknown> =
+  | SignalExecutionOutcome<TResult>
+  | SignalExecutionFailure;
+
+export interface SignalIdempotencyRecord {
+  operationName: string;
+  idempotencyKey: string;
+  payloadFingerprint: string;
+  status: "pending" | "completed" | "failed";
+  result?: unknown;
+  error?: SignalErrorEnvelope;
+  createdAt: string;
+  updatedAt: string;
+  messageId?: string;
+}
+
+export interface SignalIdempotencyReservation {
+  state: "reserved" | "replayed" | "conflict" | "inflight";
+  record?: SignalIdempotencyRecord;
+}
+
+export interface SignalIdempotencyStore {
+  reserve(input: {
+    operationName: string;
+    idempotencyKey: string;
+    payloadFingerprint: string;
+  }): Promise<SignalIdempotencyReservation>;
+  complete(input: {
+    operationName: string;
+    idempotencyKey: string;
+    payloadFingerprint: string;
+    result: unknown;
+    messageId?: string;
+  }): Promise<void>;
+  fail(input: {
+    operationName: string;
+    idempotencyKey: string;
+    payloadFingerprint: string;
+    error: SignalErrorEnvelope;
+  }): Promise<void>;
+}
+
+export interface SignalDispatcher {
+  dispatch(envelope: SignalEnvelope): Promise<void>;
+  subscribe(
+    name: string,
+    handler: (envelope: SignalEnvelope) => void | Promise<void>
+  ): () => void;
+}
+
+export interface SignalRuntimeOptions {
+  protocol?: string;
+  idempotencyStore?: SignalIdempotencyStore;
+  dispatcher?: SignalDispatcher;
+  runtimeName?: string;
+}
+
+export interface SignalCapabilityProvider {
+  capabilities(): SignalCapabilities;
+}
+
+export interface SignalBinding {
+  query<TInput, TResult>(name: string, input: TInput, request?: SignalRequestContext): Promise<SignalExecutionResult<TResult>>;
+  mutation<TInput, TResult>(name: string, input: TInput, request?: SignalRequestContext & { idempotencyKey?: string }): Promise<SignalExecutionResult<TResult>>;
+}

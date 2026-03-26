@@ -1,0 +1,26 @@
+{
+  "id": "reference/errors",
+  "title": "Errors",
+  "description": "Shape",
+  "source": "@site/docs/reference/errors.md",
+  "sourceDirName": "reference",
+  "slug": "/reference/errors",
+  "permalink": "/signal/docs/reference/errors",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/reference/errors.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Errors"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Capabilities",
+    "permalink": "/signal/docs/reference/capabilities"
+  },
+  "next": {
+    "title": "Conformance",
+    "permalink": "/signal/docs/reference/conformance"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "examples/escrow-release-flow",
+  "title": "Escrow Release Flow",
+  "description": "1. A client sends escrow.release.v1.",
+  "source": "@site/docs/examples/escrow-release-flow.md",
+  "sourceDirName": "examples",
+  "slug": "/examples/escrow-release-flow",
+  "permalink": "/signal/docs/examples/escrow-release-flow",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/examples/escrow-release-flow.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Escrow Release Flow"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Payment Capture Flow",
+    "permalink": "/signal/docs/examples/payment-capture-flow"
+  },
+  "next": {
+    "title": "User Onboarding Flow",
+    "permalink": "/signal/docs/examples/user-onboarding-flow"
+  }
+}

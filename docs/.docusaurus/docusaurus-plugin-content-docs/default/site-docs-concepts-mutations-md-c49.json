@@ -1,0 +1,26 @@
+{
+  "id": "concepts/mutations",
+  "title": "Mutations",
+  "description": "What It Is",
+  "source": "@site/docs/concepts/mutations.md",
+  "sourceDirName": "concepts",
+  "slug": "/concepts/mutations",
+  "permalink": "/signal/docs/concepts/mutations",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/concepts/mutations.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Mutations"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Queries",
+    "permalink": "/signal/docs/concepts/queries"
+  },
+  "next": {
+    "title": "Events",
+    "permalink": "/signal/docs/concepts/events"
+  }
+}

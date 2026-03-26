@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signal.dev/schemas/payment-capture.mutation.schema.json",
+  "title": "Payment Capture Mutation",
+  "type": "object",
+  "required": ["paymentId", "amount", "currency"],
+  "properties": {
+    "paymentId": { "type": "string" },
+    "amount": { "type": "number", "exclusiveMinimum": 0 },
+    "currency": { "type": "string", "minLength": 3, "maxLength": 3 }
+  },
+  "additionalProperties": false
+}

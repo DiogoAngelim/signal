@@ -1,0 +1,26 @@
+{
+  "id": "guides/emit-and-consume-events",
+  "title": "Emit and Consume Events",
+  "description": "Steps",
+  "source": "@site/docs/guides/emit-and-consume-events.md",
+  "sourceDirName": "guides",
+  "slug": "/guides/emit-and-consume-events",
+  "permalink": "/signal/docs/guides/emit-and-consume-events",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/guides/emit-and-consume-events.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Emit and Consume Events"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Define Your First Mutation",
+    "permalink": "/signal/docs/guides/define-your-first-mutation"
+  },
+  "next": {
+    "title": "HTTP Binding",
+    "permalink": "/signal/docs/guides/http-binding"
+  }
+}

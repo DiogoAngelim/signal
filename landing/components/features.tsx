@@ -12,51 +12,51 @@ import {
 const features = [
   {
     icon: Database,
-    title: "Database Agnostic",
+    title: "Protocol first",
     description:
-      "Works with any database. Signal keeps policy in the core and storage in adapters.",
+      "Public RFCs define the envelope, result model, idempotency, and versioning rules.",
   },
   {
     icon: Cloud,
-    title: "Serverless-First",
+    title: "Versioned operations",
     description:
-      "Built for Vercel, AWS Lambda, Fly.io, and edge runtimes with no long-lived state.",
+      "Queries, mutations, and events use explicit names like payment.capture.v1.",
   },
   {
     icon: Zap,
-    title: "Named Operations",
+    title: "Standard envelope",
     description:
-      "Every query and mutation is explicit, named, and easy to trace end to end.",
+      "Every message carries protocol, kind, name, messageId, timestamp, and payload.",
   },
   {
     icon: Shield,
-    title: "Declarative Access Control",
+    title: "Idempotent mutations",
     description:
-      "Define access rules at the collection level. They run before handlers every time.",
+      "Mutations declare whether idempotency is required, optional, or none.",
   },
   {
     icon: RefreshCcw,
-    title: "Idempotent Mutations",
+    title: "Replay-safe events",
     description:
-      "Use an idempotency key plus payload fingerprint to replay stored results or detect conflicts.",
+      "Consumers must tolerate duplicates and avoid assuming global ordering.",
   },
   {
     icon: Layers,
-    title: "Replay-Safe Events",
+    title: "Capability documents",
     description:
-      "Event handlers stay safe under retries and out-of-order delivery.",
+      "Systems expose the queries, mutations, published events, and subscriptions they support.",
   },
   {
     icon: Lock,
-    title: "Inbox / Outbox",
+    title: "HTTP binding",
     description:
-      "Per-consumer dedupe and append-only audit hooks keep delivery explicit and adapter-friendly.",
+      "The reference server executes queries and mutations over HTTP without redefining the protocol.",
   },
   {
     icon: Code2,
-    title: "Optimistic Concurrency",
+    title: "In-process runtime",
     description:
-      "Expected versions raise explicit mismatch errors instead of silently overwriting data.",
+      "The same registry can execute inside Node.js for local runs and tests.",
   },
 ];
 
@@ -69,14 +69,14 @@ export function Features() {
       <div className="relative z-10 mx-auto max-w-7xl px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
-            Built for{" "}
+            Defined for{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
-              production
+              adoption
             </span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Every design decision is made with production guarantees in mind.
-            No compromises on reliability, security, or developer experience.
+            The structure stays simple and the contract stays explicit. Signal is
+            meant to be read, implemented, and extended.
           </p>
         </div>
 

@@ -1,0 +1,26 @@
+{
+  "id": "concepts/versioning",
+  "title": "Versioning",
+  "description": "What It Is",
+  "source": "@site/docs/concepts/versioning.md",
+  "sourceDirName": "concepts",
+  "slug": "/concepts/versioning",
+  "permalink": "/signal/docs/concepts/versioning",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/concepts/versioning.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Versioning"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Idempotency",
+    "permalink": "/signal/docs/concepts/idempotency"
+  },
+  "next": {
+    "title": "Order and Replay",
+    "permalink": "/signal/docs/concepts/order-and-replay"
+  }
+}
