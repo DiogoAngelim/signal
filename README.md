@@ -4,35 +4,168 @@ Signal is a transport-agnostic application protocol for versioned queries, expli
 
 ## What Lives Where
 
-- [Protocol specs](spec/) define the contract.
+- [Protocol specs](spec/) define the public contract.
+- [Schemas](schemas/) publish JSON Schema artifacts for protocol documents.
 - [Reference packages](packages/) implement the contract in TypeScript.
-- [Reference server](apps/reference-server/) shows the HTTP binding and the runtime together.
+- [Reference server](apps/reference-server/) shows the HTTP binding and runtime together.
 - [Docs site](docs/) explains the protocol for adoption.
-- [Examples](packages/examples/) show the domain flows end to end.
+- [Examples](packages/examples/) show runnable domain flows.
 
-## Protocol In One Envelope
+## 1. Preparation
 
-```json
-{
-  "protocol": "signal.v1",
-  "kind": "mutation",
-  "name": "payment.capture.v1",
-  "messageId": "7c1f2a6f-7ec1-4f89-8e0f-9d0f4a97c9a1",
-  "timestamp": "2026-03-25T12:00:00.000Z",
-  "payload": {
-    "paymentId": "pay_1001",
-    "amount": 120,
-    "currency": "USD"
-  }
-}
+Before you install or run anything, make sure you have:
+
+- Node.js 20 or newer
+- `pnpm` 9.9.0
+- PostgreSQL 14 or newer if you want the PostgreSQL-backed examples or reference server
+
+Clone the repository and move into the workspace root:
+
+```bash
+git clone https://github.com/DiogoAngelim/signal.git
+cd signal
 ```
 
-## Mutation Flow
+### 1.1 Database and Schema Set Up
 
-1. A client sends `payment.capture.v1` with an idempotency key.
-2. The runtime validates the input and checks the idempotency store.
-3. The mutation either executes once or replays the stored result.
-4. The mutation emits `payment.captured.v1` with causation metadata.
+The reference server and the Kafka + PostgreSQL example can use PostgreSQL for idempotency and projections.
+
+Create a database for local work:
+
+```bash
+createdb signal
+```
+
+If you want the PostgreSQL-backed idempotency store, point `DATABASE_URL` at that database and push the schema:
+
+```bash
+export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/signal
+pnpm dlx drizzle-kit push --config apps/reference-server/drizzle.config.ts
+```
+
+If you do not set `DATABASE_URL`, the reference server falls back to the in-memory idempotency store.
+
+## 2. Installation
+
+Install workspace dependencies once at the root:
+
+```bash
+pnpm install
+```
+
+Useful verification commands:
+
+```bash
+pnpm build
+pnpm test
+pnpm check
+```
+
+## 3. Configuration
+
+Signal uses explicit environment variables instead of hidden defaults.
+
+Common variables:
+
+- `DATABASE_URL` for PostgreSQL-backed idempotency and example storage
+- `SIGNAL_HTTP_PORT` for the reference server port
+- `KAFKA_BROKERS` for Kafka-backed examples
+- `KAFKA_TOPIC` for the example event topic
+- `KAFKA_CLIENT_ID` for the Kafka producer client id
+- `KAFKA_GROUP_ID` for the Kafka consumer group id
+
+Examples are documented in:
+
+- [`.env.example`](.env.example)
+- [`apps/reference-server/.env.example`](apps/reference-server/.env.example)
+- [`packages/examples/kafka-postgresql/.env.example`](packages/examples/kafka-postgresql/.env.example)
+
+## 4. Using
+
+### 4.1 Minimal
+
+The smallest useful setup is an in-process runtime with one query, one mutation, and one event.
+
+```ts
+import { createSignalRuntime, defineMutation, defineQuery } from "@signal/sdk-node";
+import { createMemoryIdempotencyStore } from "@signal/runtime";
+
+const runtime = createSignalRuntime({
+  runtimeName: "signal-reference",
+  dispatcher,
+  idempotencyStore: createMemoryIdempotencyStore(),
+});
+
+runtime.registerQuery(
+  defineQuery({
+    name: "payment.status.v1",
+    kind: "query",
+    inputSchema: paymentStatusInputSchema,
+    resultSchema: paymentStatusResultSchema,
+    handler: async (input) => repository.getPayment(input.paymentId),
+  })
+);
+```
+
+This mode is useful when you want:
+
+- local development without external services
+- fast tests for protocol behavior
+- a simple way to prove envelope validation and idempotency handling
+
+### 4.2 Advanced
+
+The advanced setup uses the PostgreSQL idempotency store, the HTTP binding, and the runnable reference server.
+
+```ts
+import { createPostgresIdempotencyStore } from "@signal/idempotency-postgres";
+import { createSignalRuntime } from "@signal/sdk-node";
+
+const runtime = createSignalRuntime({
+  runtimeName: "signal-reference",
+  dispatcher,
+  idempotencyStore: createPostgresIdempotencyStore({
+    connectionString: process.env.DATABASE_URL!,
+  }),
+});
+```
+
+For a full example that includes Kafka, PostgreSQL, queries, mutations, and replay-safe event handling, see:
+
+- [`packages/examples/kafka-postgresql/`](packages/examples/kafka-postgresql/)
+- [`apps/reference-server/`](apps/reference-server/)
+
+## 5. Deployment
+
+### Landing Site
+
+The public landing site is deployed to GitHub Pages.
+
+```bash
+pnpm --filter @signal/landing build
+```
+
+The Pages workflow runs on `main` and publishes the static export from `landing/out`.
+
+### Reference Server
+
+Build and run the HTTP reference server with:
+
+```bash
+pnpm --filter @signal/reference-server build
+pnpm --filter @signal/reference-server start
+```
+
+Set `DATABASE_URL` before starting if you want PostgreSQL-backed idempotency. Leave it unset if you want the in-memory fallback for local exploration.
+
+### Examples
+
+The runnable examples are meant for local evaluation and extension:
+
+- [`packages/examples/payment-capture/`](packages/examples/payment-capture/)
+- [`packages/examples/escrow-release/`](packages/examples/escrow-release/)
+- [`packages/examples/user-onboarding/`](packages/examples/user-onboarding/)
+- [`packages/examples/kafka-postgresql/`](packages/examples/kafka-postgresql/)
 
 ## Start Reading
 
@@ -42,7 +175,7 @@ Signal is a transport-agnostic application protocol for versioned queries, expli
 - [RFC-0001: Protocol core](spec/RFC-0001-signal-protocol-core.md)
 - [RFC-0002: HTTP binding](spec/RFC-0002-signal-http-binding.md)
 - [Reference server runbook](apps/reference-server/README.md)
-- [Payment capture example](packages/examples/payment-capture/README.md)
+- [Kafka + PostgreSQL example](packages/examples/kafka-postgresql/README.md)
 
 ## Repository Layout
 
@@ -57,13 +190,3 @@ Signal is a transport-agnostic application protocol for versioned queries, expli
 - `apps/reference-server` holds the runnable HTTP reference server.
 - `docs/` holds the Docusaurus documentation site.
 - `landing/` holds the public homepage.
-
-## Local Development
-
-```bash
-pnpm install
-pnpm build
-pnpm --filter @signal/reference-server start
-```
-
-The reference server uses the PostgreSQL-backed idempotency store when `DATABASE_URL` is set. Without it, the server falls back to the in-memory store so the protocol flow can still be exercised locally.
