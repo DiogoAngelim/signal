@@ -1,7 +1,7 @@
 {
   "name": "@signal/reference-server",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "type": "commonjs",
   "main": "dist/app.js",
   "types": "dist/app.d.ts",
