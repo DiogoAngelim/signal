@@ -3,6 +3,7 @@ import { useRoute, Link } from "wouter";
 import { fetchRegion, subscribeToUpdates } from "@/lib/api";
 import type { Region, StatusLevel } from "@/types/weather";
 import { StatusBadge } from "@/components/region/StatusBadge";
+import { SignalBadge } from "@/components/region/SignalBadge";
 import { RiskDrivers } from "@/components/region/RiskDrivers";
 import { AlertStrip } from "@/components/region/AlertStrip";
 import { ForecastChart } from "@/components/region/ForecastChart";
@@ -24,6 +25,9 @@ export function RegionDetailPage() {
   const lastStatusRef = useRef<StatusLevel | null>(null);
   const lastNotifiedStatusRef = useRef<StatusLevel | null>(null);
   const isNotificationSupported = useMemo(() => typeof window !== "undefined" && "Notification" in window, []);
+  const confidenceLabel = Number.isFinite(region?.signalConfidence)
+    ? `${Math.round((region?.signalConfidence ?? 0) * 100)}%`
+    : "n/a";
 
   const notificationKey = id ? `weather-signal-notify:${id}` : null;
   const notificationStatusKey = id ? `weather-signal-notify-status:${id}` : null;
@@ -250,6 +254,12 @@ export function RegionDetailPage() {
           <div className="text-sm font-medium text-foreground bg-muted/50 px-4 py-2 rounded-lg border w-full md:w-auto text-center">
             {getActionLevel(region.status)}
           </div>
+          {region.signalAction && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 px-3 py-2 rounded-lg border">
+              <SignalBadge action={region.signalAction} size="sm" />
+              <span>Confidence {confidenceLabel}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -262,6 +272,26 @@ export function RegionDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
+          <section className="bg-card rounded-xl border p-6 shadow-sm">
+            <h2 className="text-lg font-semibold mb-4 text-foreground">Decision Signal</h2>
+            <div className="flex flex-wrap items-center gap-3">
+              {region.signalAction && <SignalBadge action={region.signalAction} size="lg" />}
+              <span className="text-sm text-muted-foreground">Confidence {confidenceLabel}</span>
+              <span className="text-xs text-muted-foreground">Source: {region.signalSource ?? "heuristic"}</span>
+            </div>
+            {region.signalReasons?.length ? (
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground list-disc list-inside">
+                {region.signalReasons.slice(0, 3).map((reason) => (
+                  <li key={reason}>{reason}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-4 text-sm text-muted-foreground">
+                Signals are inferred from forecast and risk scoring when no policy decision is available.
+              </p>
+            )}
+          </section>
+
           <section className="bg-card rounded-xl border p-6 shadow-sm">
             <h2 className="text-lg font-semibold mb-4 text-foreground">Risk Drivers</h2>
             <RiskDrivers drivers={region.riskDrivers} />

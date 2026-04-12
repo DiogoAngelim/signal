@@ -1,4 +1,4 @@
-import type { Alert, LiveUpdate, ProviderHealthView, Region, RegionEvent, StatusLevel } from "@/types/weather";
+import type { Alert, LiveUpdate, ProviderHealthView, Region, RegionEvent, SignalAction, StatusLevel } from "@/types/weather";
 
 const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(/\/$/, "");
 const wsBaseOverride = import.meta.env.VITE_WS_BASE_URL as string | undefined;
@@ -282,6 +282,7 @@ function toRegionView(
 ): Region {
   const riskScore = Math.round((risk?.compositeRisk.score ?? 0) * 100);
   const status = mapRiskToStatus(risk, decision);
+  const signal = mapDecisionToSignal(decision, risk, status);
   const updatedAt = risk?.computedAt ?? forecast?.fetchedAt ?? new Date().toISOString();
   const drivers = buildDrivers(risk);
   const trend = buildTrend(forecast, riskScore);
@@ -306,6 +307,10 @@ function toRegionView(
     topConcern,
     summary,
     riskDrivers: drivers,
+    signalAction: signal?.action,
+    signalConfidence: signal?.confidence,
+    signalSource: signal?.source,
+    signalReasons: signal?.reasons,
     alerts: alertItems,
     recentEvents,
     lastUpdated: updatedAt,
@@ -434,6 +439,66 @@ function mapRiskToStatus(risk?: BackendRiskScore, decision?: BackendDecision): S
       return "Watch";
     default:
       return "Calm";
+  }
+}
+
+function mapDecisionToSignal(
+  decision?: BackendDecision,
+  risk?: BackendRiskScore,
+  status?: StatusLevel
+): { action: SignalAction; confidence?: number; source: "policy-engine" | "heuristic"; reasons?: string[] } | null {
+  if (decision) {
+    return {
+      action: decisionToSignalAction(decision.decision),
+      confidence: decision.confidence,
+      source: "policy-engine",
+      reasons: decision.reasons
+    };
+  }
+
+  if (status) {
+    return {
+      action: statusToSignalAction(status),
+      confidence: risk?.dataConfidence,
+      source: "heuristic"
+    };
+  }
+
+  return null;
+}
+
+function decisionToSignalAction(decision: string): SignalAction {
+  switch (decision.toUpperCase()) {
+    case "ESCALATE":
+      return "Escalate";
+    case "WARN":
+      return "Warn";
+    case "WATCH":
+      return "Watch";
+    case "DISPATCH":
+      return "Dispatch";
+    case "REQUIRE_HUMAN_REVIEW":
+      return "Review";
+    case "CANCEL":
+      return "Cancel";
+    case "SUPPRESS_DUPLICATE":
+      return "Suppress Duplicate";
+    case "NO_ACTION":
+    default:
+      return "No Action";
+  }
+}
+
+function statusToSignalAction(status: StatusLevel): SignalAction {
+  switch (status) {
+    case "Critical":
+      return "Escalate";
+    case "Warning":
+      return "Warn";
+    case "Watch":
+      return "Watch";
+    default:
+      return "No Action";
   }
 }
 

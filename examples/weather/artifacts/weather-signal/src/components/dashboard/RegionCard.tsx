@@ -1,17 +1,37 @@
+import type { MouseEvent } from "react";
 import type { Region } from "@/types/weather";
-import { formatRelativeTime, getStatusConfig } from "@/lib/utils";
+import { cn, formatRelativeTime, getStatusConfig } from "@/lib/utils";
 import { StatusBadge } from "../region/StatusBadge";
+import { SignalBadge } from "../region/SignalBadge";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { AlertCircle, Clock } from "lucide-react";
+import { AlertCircle, Bell, Clock } from "lucide-react";
 
 interface RegionCardProps {
   region: Region;
   index: number;
+  isNotified?: boolean;
+  notificationsDisabled?: boolean;
+  onToggleNotify?: (regionId: string) => void;
 }
 
-export function RegionCard({ region, index }: RegionCardProps) {
+export function RegionCard({
+  region,
+  index,
+  isNotified = false,
+  notificationsDisabled = false,
+  onToggleNotify
+}: RegionCardProps) {
   const config = getStatusConfig(region.status);
+  const confidenceLabel = Number.isFinite(region.signalConfidence)
+    ? `${Math.round((region.signalConfidence ?? 0) * 100)}%`
+    : "n/a";
+
+  const handleToggleNotify = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onToggleNotify?.(region.id);
+  };
 
   return (
     <Link href={`/dashboard/region/${region.id}`}>
@@ -26,7 +46,7 @@ export function RegionCard({ region, index }: RegionCardProps) {
           style={{ backgroundColor: config.color }}
         />
 
-        <div className="flex justify-between items-start mb-4">
+        <div className="flex justify-between items-start mb-4 gap-4">
           <div>
             <h3 className="text-lg font-semibold text-foreground tracking-tight flex items-center gap-2">
               {region.name} <span>{region.countryFlag}</span>
@@ -37,7 +57,33 @@ export function RegionCard({ region, index }: RegionCardProps) {
               <span>Trend: {region.trend}</span>
             </div>
           </div>
-          <StatusBadge status={region.status} />
+          <div className="flex flex-col items-end gap-2">
+            <button
+              type="button"
+              onClick={handleToggleNotify}
+              aria-pressed={isNotified}
+              disabled={notificationsDisabled}
+              title={isNotified ? "Notifications enabled" : "Enable notifications"}
+              className={cn(
+                "inline-flex h-8 w-8 items-center justify-center rounded-full border transition-colors",
+                isNotified
+                  ? "bg-primary/10 text-primary border-primary/30"
+                  : "bg-background/70 text-muted-foreground border-border",
+                notificationsDisabled
+                  ? "cursor-not-allowed opacity-50"
+                  : "hover:text-foreground hover:border-foreground/20"
+              )}
+            >
+              <Bell className="h-4 w-4" />
+            </button>
+            <StatusBadge status={region.status} />
+            {region.signalAction && (
+              <div className="flex items-center gap-2">
+                <SignalBadge action={region.signalAction} size="sm" />
+                <span className="text-[10px] text-muted-foreground">{confidenceLabel}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex-grow">

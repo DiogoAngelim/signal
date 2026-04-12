@@ -1,4 +1,13 @@
 export type StatusLevel = "Calm" | "Watch" | "Warning" | "Critical";
+export type SignalAction =
+  | "Escalate"
+  | "Warn"
+  | "Watch"
+  | "Dispatch"
+  | "Review"
+  | "Cancel"
+  | "Suppress Duplicate"
+  | "No Action";
 
 export interface Alert {
   id: string;
@@ -34,6 +43,10 @@ export interface Region {
   topConcern: string;
   summary: string;
   riskDrivers: string[];
+  signalAction?: SignalAction;
+  signalConfidence?: number;
+  signalSource?: "policy-engine" | "heuristic";
+  signalReasons?: string[];
   alerts: Alert[];
   recentEvents: RegionEvent[];
   lastUpdated: string;

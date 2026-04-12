@@ -10,7 +10,7 @@ export function LandingPage() {
         {/* Hero Section */}
         <section className="relative px-6 pt-24 pb-32 md:pt-32 md:pb-48 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background" />
-          
+
           <div className="container mx-auto max-w-4xl relative z-10 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -24,15 +24,15 @@ export function LandingPage() {
                 </span>
                 Live operational weather intelligence
               </div>
-              
+
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
                 Weather risk decisions,<br className="hidden md:block" /> delivered in <span className="text-primary">plain language</span>.
               </h1>
-              
+
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
                 Monitor storms, heat, wind, and flood risk across regions. Know what is safe, what is at risk, and what needs action.
               </p>
-              
+
               <Link href="/dashboard">
                 <Button size="lg" className="rounded-full px-8 h-14 text-base shadow-sm hover:shadow-md transition-all gap-2 group">
                   Open Risk Dashboard
@@ -47,7 +47,7 @@ export function LandingPage() {
         <section className="py-24 bg-muted/30 border-t">
           <div className="container mx-auto max-w-5xl px-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -63,7 +63,7 @@ export function LandingPage() {
                 </p>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -79,7 +79,7 @@ export function LandingPage() {
                 </p>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

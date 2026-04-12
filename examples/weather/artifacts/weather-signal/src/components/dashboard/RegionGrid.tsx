@@ -5,9 +5,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 interface RegionGridProps {
   regions: Region[];
   isLoading: boolean;
+  notifiedRegionIds?: Set<string>;
+  notificationsDisabled?: boolean;
+  onToggleNotify?: (regionId: string) => void;
 }
 
-export function RegionGrid({ regions, isLoading }: RegionGridProps) {
+export function RegionGrid({
+  regions,
+  isLoading,
+  notifiedRegionIds,
+  notificationsDisabled,
+  onToggleNotify
+}: RegionGridProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -50,7 +59,14 @@ export function RegionGrid({ regions, isLoading }: RegionGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {sortedRegions.map((region, index) => (
-        <RegionCard key={region.id} region={region} index={index} />
+        <RegionCard
+          key={region.id}
+          region={region}
+          index={index}
+          isNotified={notifiedRegionIds?.has(region.id) ?? false}
+          notificationsDisabled={notificationsDisabled}
+          onToggleNotify={onToggleNotify}
+        />
       ))}
     </div>
   );

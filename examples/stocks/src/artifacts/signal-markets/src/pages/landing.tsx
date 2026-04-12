@@ -7,12 +7,12 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground selection:bg-primary/20 overflow-x-hidden">
       <Navbar />
-      
+
       <main>
         {/* Hero Section */}
         <section className="relative overflow-hidden pt-24 pb-32 lg:pt-36 lg:pb-40">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-background to-background" />
-          
+
           <div className="container relative z-10 mx-auto px-4 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -31,7 +31,7 @@ export default function Landing() {
               <p className="mt-8 text-lg leading-relaxed text-muted-foreground sm:text-xl max-w-2xl mx-auto">
                 Signal Markets blends TradingView data with the market-signals model to turn global tickers into clear actions, confidence levels, and risk context.
               </p>
-              
+
               <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Link
                   href="/dashboard"
@@ -96,7 +96,7 @@ export default function Landing() {
               <h2 className="text-3xl md:text-4xl font-medium tracking-tight mb-4">Decisions should not be guesswork.</h2>
               <p className="text-lg text-muted-foreground">We translate market movement into a clear action signal, backed by model confidence and readable rationale.</p>
             </div>
-            
+
             <div className="grid gap-12 lg:grid-cols-3 max-w-5xl mx-auto">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -113,7 +113,7 @@ export default function Landing() {
                   Buy, hold, or sell indicators update as market conditions shift, so you can act without decoding charts.
                 </p>
               </motion.div>
-              
+
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -197,7 +197,7 @@ export default function Landing() {
                   <p className="text-sm text-muted-foreground">Portfolio Manager</p>
                 </div>
               </motion.div>
-              
+
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
