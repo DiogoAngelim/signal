@@ -1,0 +1,2836 @@
+[
+  {
+    "id": "nyc",
+    "name": "New York City",
+    "country": "US",
+    "state": "NY",
+    "latitude": 40.7128,
+    "longitude": -74.006,
+    "timezone": "America/New_York",
+    "criticalityWeight": 1.2,
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "miami",
+    "name": "Miami",
+    "country": "US",
+    "state": "FL",
+    "latitude": 25.7617,
+    "longitude": -80.1918,
+    "timezone": "America/New_York",
+    "criticalityWeight": 1.15,
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "houston",
+    "name": "Houston",
+    "country": "US",
+    "state": "TX",
+    "latitude": 29.7604,
+    "longitude": -95.3698,
+    "timezone": "America/Chicago",
+    "criticalityWeight": 1.1,
+    "tags": [
+      "coastal",
+      "river_basin",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "juiz-de-fora",
+    "name": "Juiz de Fora",
+    "country": "BR",
+    "state": "MG",
+    "latitude": -21.7605,
+    "longitude": -43.3488,
+    "timezone": "America/Sao_Paulo",
+    "criticalityWeight": 1.05,
+    "tags": [
+      "mountainous",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "sao-paulo",
+    "name": "Sao Paulo",
+    "country": "BR",
+    "state": "SP",
+    "latitude": -23.5505,
+    "longitude": -46.6333,
+    "timezone": "America/Sao_Paulo",
+    "criticalityWeight": 1.25,
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "lisbon",
+    "name": "Lisbon",
+    "country": "PT",
+    "latitude": 38.7223,
+    "longitude": -9.1393,
+    "timezone": "Europe/Lisbon",
+    "criticalityWeight": 1.1,
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "los-angeles",
+    "name": "Los Angeles",
+    "country": "US",
+    "state": "CA",
+    "latitude": 34.0522,
+    "longitude": -118.2437,
+    "timezone": "America/Los_Angeles",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "san-diego",
+    "name": "San Diego",
+    "country": "US",
+    "state": "CA",
+    "latitude": 32.7157,
+    "longitude": -117.1611,
+    "timezone": "America/Los_Angeles",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "san-francisco",
+    "name": "San Francisco",
+    "country": "US",
+    "state": "CA",
+    "latitude": 37.7749,
+    "longitude": -122.4194,
+    "timezone": "America/Los_Angeles",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "seattle",
+    "name": "Seattle",
+    "country": "US",
+    "state": "WA",
+    "latitude": 47.6062,
+    "longitude": -122.3321,
+    "timezone": "America/Los_Angeles",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "portland",
+    "name": "Portland",
+    "country": "US",
+    "state": "OR",
+    "latitude": 45.5152,
+    "longitude": -122.6784,
+    "timezone": "America/Los_Angeles",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "sacramento",
+    "name": "Sacramento",
+    "country": "US",
+    "state": "CA",
+    "latitude": 38.5816,
+    "longitude": -121.4944,
+    "timezone": "America/Los_Angeles",
+    "tags": [
+      "river_basin",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "las-vegas",
+    "name": "Las Vegas",
+    "country": "US",
+    "state": "NV",
+    "latitude": 36.1699,
+    "longitude": -115.1398,
+    "timezone": "America/Los_Angeles",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "phoenix",
+    "name": "Phoenix",
+    "country": "US",
+    "state": "AZ",
+    "latitude": 33.4484,
+    "longitude": -112.074,
+    "timezone": "America/Phoenix",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "denver",
+    "name": "Denver",
+    "country": "US",
+    "state": "CO",
+    "latitude": 39.7392,
+    "longitude": -104.9903,
+    "timezone": "America/Denver",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "dallas",
+    "name": "Dallas",
+    "country": "US",
+    "state": "TX",
+    "latitude": 32.7767,
+    "longitude": -96.797,
+    "timezone": "America/Chicago",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "austin",
+    "name": "Austin",
+    "country": "US",
+    "state": "TX",
+    "latitude": 30.2672,
+    "longitude": -97.7431,
+    "timezone": "America/Chicago",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "san-antonio",
+    "name": "San Antonio",
+    "country": "US",
+    "state": "TX",
+    "latitude": 29.4241,
+    "longitude": -98.4936,
+    "timezone": "America/Chicago",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "kansas-city",
+    "name": "Kansas City",
+    "country": "US",
+    "state": "MO",
+    "latitude": 39.0997,
+    "longitude": -94.5786,
+    "timezone": "America/Chicago",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "st-louis",
+    "name": "St Louis",
+    "country": "US",
+    "state": "MO",
+    "latitude": 38.627,
+    "longitude": -90.1994,
+    "timezone": "America/Chicago",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "minneapolis",
+    "name": "Minneapolis",
+    "country": "US",
+    "state": "MN",
+    "latitude": 44.9778,
+    "longitude": -93.265,
+    "timezone": "America/Chicago",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "chicago",
+    "name": "Chicago",
+    "country": "US",
+    "state": "IL",
+    "latitude": 41.8781,
+    "longitude": -87.6298,
+    "timezone": "America/Chicago",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "detroit",
+    "name": "Detroit",
+    "country": "US",
+    "state": "MI",
+    "latitude": 42.3314,
+    "longitude": -83.0458,
+    "timezone": "America/Detroit",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "cleveland",
+    "name": "Cleveland",
+    "country": "US",
+    "state": "OH",
+    "latitude": 41.4993,
+    "longitude": -81.6944,
+    "timezone": "America/New_York",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "columbus",
+    "name": "Columbus",
+    "country": "US",
+    "state": "OH",
+    "latitude": 39.9612,
+    "longitude": -82.9988,
+    "timezone": "America/New_York",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "cincinnati",
+    "name": "Cincinnati",
+    "country": "US",
+    "state": "OH",
+    "latitude": 39.1031,
+    "longitude": -84.512,
+    "timezone": "America/New_York",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "indianapolis",
+    "name": "Indianapolis",
+    "country": "US",
+    "state": "IN",
+    "latitude": 39.7684,
+    "longitude": -86.1581,
+    "timezone": "America/Indiana/Indianapolis",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "nashville",
+    "name": "Nashville",
+    "country": "US",
+    "state": "TN",
+    "latitude": 36.1627,
+    "longitude": -86.7816,
+    "timezone": "America/Chicago",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "atlanta",
+    "name": "Atlanta",
+    "country": "US",
+    "state": "GA",
+    "latitude": 33.749,
+    "longitude": -84.388,
+    "timezone": "America/New_York",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "charlotte",
+    "name": "Charlotte",
+    "country": "US",
+    "state": "NC",
+    "latitude": 35.2271,
+    "longitude": -80.8431,
+    "timezone": "America/New_York",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "raleigh",
+    "name": "Raleigh",
+    "country": "US",
+    "state": "NC",
+    "latitude": 35.7796,
+    "longitude": -78.6382,
+    "timezone": "America/New_York",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "washington-dc",
+    "name": "Washington DC",
+    "country": "US",
+    "state": "DC",
+    "latitude": 38.9072,
+    "longitude": -77.0369,
+    "timezone": "America/New_York",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "baltimore",
+    "name": "Baltimore",
+    "country": "US",
+    "state": "MD",
+    "latitude": 39.2904,
+    "longitude": -76.6122,
+    "timezone": "America/New_York",
+    "tags": [
+      "urban_dense",
+      "coastal"
+    ]
+  },
+  {
+    "id": "philadelphia",
+    "name": "Philadelphia",
+    "country": "US",
+    "state": "PA",
+    "latitude": 39.9526,
+    "longitude": -75.1652,
+    "timezone": "America/New_York",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "pittsburgh",
+    "name": "Pittsburgh",
+    "country": "US",
+    "state": "PA",
+    "latitude": 40.4406,
+    "longitude": -79.9959,
+    "timezone": "America/New_York",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "boston",
+    "name": "Boston",
+    "country": "US",
+    "state": "MA",
+    "latitude": 42.3601,
+    "longitude": -71.0589,
+    "timezone": "America/New_York",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "new-orleans",
+    "name": "New Orleans",
+    "country": "US",
+    "state": "LA",
+    "latitude": 29.9511,
+    "longitude": -90.0715,
+    "timezone": "America/Chicago",
+    "tags": [
+      "coastal",
+      "river_basin",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "tampa",
+    "name": "Tampa",
+    "country": "US",
+    "state": "FL",
+    "latitude": 27.9506,
+    "longitude": -82.4572,
+    "timezone": "America/New_York",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "orlando",
+    "name": "Orlando",
+    "country": "US",
+    "state": "FL",
+    "latitude": 28.5383,
+    "longitude": -81.3792,
+    "timezone": "America/New_York",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "jacksonville",
+    "name": "Jacksonville",
+    "country": "US",
+    "state": "FL",
+    "latitude": 30.3322,
+    "longitude": -81.6557,
+    "timezone": "America/New_York",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "toronto",
+    "name": "Toronto",
+    "country": "CA",
+    "latitude": 43.6532,
+    "longitude": -79.3832,
+    "timezone": "America/Toronto",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "montreal",
+    "name": "Montreal",
+    "country": "CA",
+    "latitude": 45.5017,
+    "longitude": -73.5673,
+    "timezone": "America/Toronto",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "ottawa",
+    "name": "Ottawa",
+    "country": "CA",
+    "latitude": 45.4215,
+    "longitude": -75.6972,
+    "timezone": "America/Toronto",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "vancouver",
+    "name": "Vancouver",
+    "country": "CA",
+    "latitude": 49.2827,
+    "longitude": -123.1207,
+    "timezone": "America/Vancouver",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "calgary",
+    "name": "Calgary",
+    "country": "CA",
+    "latitude": 51.0447,
+    "longitude": -114.0719,
+    "timezone": "America/Edmonton",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "edmonton",
+    "name": "Edmonton",
+    "country": "CA",
+    "latitude": 53.5461,
+    "longitude": -113.4938,
+    "timezone": "America/Edmonton",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "mexico-city",
+    "name": "Mexico City",
+    "country": "MX",
+    "latitude": 19.4326,
+    "longitude": -99.1332,
+    "timezone": "America/Mexico_City",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "guadalajara",
+    "name": "Guadalajara",
+    "country": "MX",
+    "latitude": 20.6597,
+    "longitude": -103.3496,
+    "timezone": "America/Mexico_City",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "monterrey",
+    "name": "Monterrey",
+    "country": "MX",
+    "latitude": 25.6866,
+    "longitude": -100.3161,
+    "timezone": "America/Monterrey",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "guatemala-city",
+    "name": "Guatemala City",
+    "country": "GT",
+    "latitude": 14.6349,
+    "longitude": -90.5069,
+    "timezone": "America/Guatemala",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "panama-city",
+    "name": "Panama City",
+    "country": "PA",
+    "latitude": 8.9824,
+    "longitude": -79.5199,
+    "timezone": "America/Panama",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "san-jose-cr",
+    "name": "San Jose",
+    "country": "CR",
+    "latitude": 9.9281,
+    "longitude": -84.0907,
+    "timezone": "America/Costa_Rica",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "havana",
+    "name": "Havana",
+    "country": "CU",
+    "latitude": 23.1136,
+    "longitude": -82.3666,
+    "timezone": "America/Havana",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "santo-domingo",
+    "name": "Santo Domingo",
+    "country": "DO",
+    "latitude": 18.4861,
+    "longitude": -69.9312,
+    "timezone": "America/Santo_Domingo",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "san-juan",
+    "name": "San Juan",
+    "country": "PR",
+    "latitude": 18.4655,
+    "longitude": -66.1057,
+    "timezone": "America/Puerto_Rico",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "rio-de-janeiro",
+    "name": "Rio de Janeiro",
+    "country": "BR",
+    "state": "RJ",
+    "latitude": -22.9068,
+    "longitude": -43.1729,
+    "timezone": "America/Sao_Paulo",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "brasilia",
+    "name": "Brasilia",
+    "country": "BR",
+    "state": "DF",
+    "latitude": -15.7975,
+    "longitude": -47.8919,
+    "timezone": "America/Sao_Paulo",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "belo-horizonte",
+    "name": "Belo Horizonte",
+    "country": "BR",
+    "state": "MG",
+    "latitude": -19.9167,
+    "longitude": -43.9345,
+    "timezone": "America/Sao_Paulo",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "salvador",
+    "name": "Salvador",
+    "country": "BR",
+    "state": "BA",
+    "latitude": -12.9777,
+    "longitude": -38.5016,
+    "timezone": "America/Bahia",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "recife",
+    "name": "Recife",
+    "country": "BR",
+    "state": "PE",
+    "latitude": -8.0476,
+    "longitude": -34.877,
+    "timezone": "America/Recife",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "fortaleza",
+    "name": "Fortaleza",
+    "country": "BR",
+    "state": "CE",
+    "latitude": -3.7319,
+    "longitude": -38.5267,
+    "timezone": "America/Fortaleza",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "porto-alegre",
+    "name": "Porto Alegre",
+    "country": "BR",
+    "state": "RS",
+    "latitude": -30.0346,
+    "longitude": -51.2177,
+    "timezone": "America/Sao_Paulo",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "curitiba",
+    "name": "Curitiba",
+    "country": "BR",
+    "state": "PR",
+    "latitude": -25.4284,
+    "longitude": -49.2733,
+    "timezone": "America/Sao_Paulo",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "manaus",
+    "name": "Manaus",
+    "country": "BR",
+    "state": "AM",
+    "latitude": -3.119,
+    "longitude": -60.0217,
+    "timezone": "America/Manaus",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "buenos-aires",
+    "name": "Buenos Aires",
+    "country": "AR",
+    "latitude": -34.6037,
+    "longitude": -58.3816,
+    "timezone": "America/Argentina/Buenos_Aires",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "cordoba",
+    "name": "Cordoba",
+    "country": "AR",
+    "latitude": -31.4201,
+    "longitude": -64.1888,
+    "timezone": "America/Argentina/Cordoba",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "rosario",
+    "name": "Rosario",
+    "country": "AR",
+    "latitude": -32.9442,
+    "longitude": -60.6505,
+    "timezone": "America/Argentina/Buenos_Aires",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "montevideo",
+    "name": "Montevideo",
+    "country": "UY",
+    "latitude": -34.9011,
+    "longitude": -56.1645,
+    "timezone": "America/Montevideo",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "santiago",
+    "name": "Santiago",
+    "country": "CL",
+    "latitude": -33.4489,
+    "longitude": -70.6693,
+    "timezone": "America/Santiago",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "lima",
+    "name": "Lima",
+    "country": "PE",
+    "latitude": -12.0464,
+    "longitude": -77.0428,
+    "timezone": "America/Lima",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "bogota",
+    "name": "Bogota",
+    "country": "CO",
+    "latitude": 4.711,
+    "longitude": -74.0721,
+    "timezone": "America/Bogota",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "medellin",
+    "name": "Medellin",
+    "country": "CO",
+    "latitude": 6.2442,
+    "longitude": -75.5812,
+    "timezone": "America/Bogota",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "cali",
+    "name": "Cali",
+    "country": "CO",
+    "latitude": 3.4516,
+    "longitude": -76.532,
+    "timezone": "America/Bogota",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "caracas",
+    "name": "Caracas",
+    "country": "VE",
+    "latitude": 10.4806,
+    "longitude": -66.9036,
+    "timezone": "America/Caracas",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "quito",
+    "name": "Quito",
+    "country": "EC",
+    "latitude": -0.1807,
+    "longitude": -78.4678,
+    "timezone": "America/Guayaquil",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "guayaquil",
+    "name": "Guayaquil",
+    "country": "EC",
+    "latitude": -2.1709,
+    "longitude": -79.9224,
+    "timezone": "America/Guayaquil",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "la-paz",
+    "name": "La Paz",
+    "country": "BO",
+    "latitude": -16.4897,
+    "longitude": -68.1193,
+    "timezone": "America/La_Paz",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "santa-cruz",
+    "name": "Santa Cruz",
+    "country": "BO",
+    "latitude": -17.7833,
+    "longitude": -63.1821,
+    "timezone": "America/La_Paz",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "asuncion",
+    "name": "Asuncion",
+    "country": "PY",
+    "latitude": -25.2637,
+    "longitude": -57.5759,
+    "timezone": "America/Asuncion",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "london",
+    "name": "London",
+    "country": "GB",
+    "latitude": 51.5074,
+    "longitude": -0.1278,
+    "timezone": "Europe/London",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "manchester",
+    "name": "Manchester",
+    "country": "GB",
+    "latitude": 53.4808,
+    "longitude": -2.2426,
+    "timezone": "Europe/London",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "birmingham",
+    "name": "Birmingham",
+    "country": "GB",
+    "latitude": 52.4862,
+    "longitude": -1.8904,
+    "timezone": "Europe/London",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "glasgow",
+    "name": "Glasgow",
+    "country": "GB",
+    "latitude": 55.8642,
+    "longitude": -4.2518,
+    "timezone": "Europe/London",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "edinburgh",
+    "name": "Edinburgh",
+    "country": "GB",
+    "latitude": 55.9533,
+    "longitude": -3.1883,
+    "timezone": "Europe/London",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "dublin",
+    "name": "Dublin",
+    "country": "IE",
+    "latitude": 53.3498,
+    "longitude": -6.2603,
+    "timezone": "Europe/Dublin",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "paris",
+    "name": "Paris",
+    "country": "FR",
+    "latitude": 48.8566,
+    "longitude": 2.3522,
+    "timezone": "Europe/Paris",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "lyon",
+    "name": "Lyon",
+    "country": "FR",
+    "latitude": 45.764,
+    "longitude": 4.8357,
+    "timezone": "Europe/Paris",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "marseille",
+    "name": "Marseille",
+    "country": "FR",
+    "latitude": 43.2965,
+    "longitude": 5.3698,
+    "timezone": "Europe/Paris",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "brussels",
+    "name": "Brussels",
+    "country": "BE",
+    "latitude": 50.8503,
+    "longitude": 4.3517,
+    "timezone": "Europe/Brussels",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "amsterdam",
+    "name": "Amsterdam",
+    "country": "NL",
+    "latitude": 52.3676,
+    "longitude": 4.9041,
+    "timezone": "Europe/Amsterdam",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "rotterdam",
+    "name": "Rotterdam",
+    "country": "NL",
+    "latitude": 51.9244,
+    "longitude": 4.4777,
+    "timezone": "Europe/Amsterdam",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "berlin",
+    "name": "Berlin",
+    "country": "DE",
+    "latitude": 52.52,
+    "longitude": 13.405,
+    "timezone": "Europe/Berlin",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "hamburg",
+    "name": "Hamburg",
+    "country": "DE",
+    "latitude": 53.5511,
+    "longitude": 9.9937,
+    "timezone": "Europe/Berlin",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "munich",
+    "name": "Munich",
+    "country": "DE",
+    "latitude": 48.1351,
+    "longitude": 11.582,
+    "timezone": "Europe/Berlin",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "frankfurt",
+    "name": "Frankfurt",
+    "country": "DE",
+    "latitude": 50.1109,
+    "longitude": 8.6821,
+    "timezone": "Europe/Berlin",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "cologne",
+    "name": "Cologne",
+    "country": "DE",
+    "latitude": 50.9375,
+    "longitude": 6.9603,
+    "timezone": "Europe/Berlin",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "dusseldorf",
+    "name": "Dusseldorf",
+    "country": "DE",
+    "latitude": 51.2277,
+    "longitude": 6.7735,
+    "timezone": "Europe/Berlin",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "zurich",
+    "name": "Zurich",
+    "country": "CH",
+    "latitude": 47.3769,
+    "longitude": 8.5417,
+    "timezone": "Europe/Zurich",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "geneva",
+    "name": "Geneva",
+    "country": "CH",
+    "latitude": 46.2044,
+    "longitude": 6.1432,
+    "timezone": "Europe/Zurich",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "vienna",
+    "name": "Vienna",
+    "country": "AT",
+    "latitude": 48.2082,
+    "longitude": 16.3738,
+    "timezone": "Europe/Vienna",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "prague",
+    "name": "Prague",
+    "country": "CZ",
+    "latitude": 50.0755,
+    "longitude": 14.4378,
+    "timezone": "Europe/Prague",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "warsaw",
+    "name": "Warsaw",
+    "country": "PL",
+    "latitude": 52.2297,
+    "longitude": 21.0122,
+    "timezone": "Europe/Warsaw",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "krakow",
+    "name": "Krakow",
+    "country": "PL",
+    "latitude": 50.0647,
+    "longitude": 19.945,
+    "timezone": "Europe/Warsaw",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "budapest",
+    "name": "Budapest",
+    "country": "HU",
+    "latitude": 47.4979,
+    "longitude": 19.0402,
+    "timezone": "Europe/Budapest",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "bucharest",
+    "name": "Bucharest",
+    "country": "RO",
+    "latitude": 44.4268,
+    "longitude": 26.1025,
+    "timezone": "Europe/Bucharest",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "sofia",
+    "name": "Sofia",
+    "country": "BG",
+    "latitude": 42.6977,
+    "longitude": 23.3219,
+    "timezone": "Europe/Sofia",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "belgrade",
+    "name": "Belgrade",
+    "country": "RS",
+    "latitude": 44.7866,
+    "longitude": 20.4489,
+    "timezone": "Europe/Belgrade",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "zagreb",
+    "name": "Zagreb",
+    "country": "HR",
+    "latitude": 45.815,
+    "longitude": 15.9819,
+    "timezone": "Europe/Zagreb",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "ljubljana",
+    "name": "Ljubljana",
+    "country": "SI",
+    "latitude": 46.0569,
+    "longitude": 14.5058,
+    "timezone": "Europe/Ljubljana",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "bratislava",
+    "name": "Bratislava",
+    "country": "SK",
+    "latitude": 48.1486,
+    "longitude": 17.1077,
+    "timezone": "Europe/Bratislava",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "rome",
+    "name": "Rome",
+    "country": "IT",
+    "latitude": 41.9028,
+    "longitude": 12.4964,
+    "timezone": "Europe/Rome",
+    "tags": [
+      "urban_dense",
+      "coastal"
+    ]
+  },
+  {
+    "id": "milan",
+    "name": "Milan",
+    "country": "IT",
+    "latitude": 45.4642,
+    "longitude": 9.19,
+    "timezone": "Europe/Rome",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "naples",
+    "name": "Naples",
+    "country": "IT",
+    "latitude": 40.8518,
+    "longitude": 14.2681,
+    "timezone": "Europe/Rome",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "turin",
+    "name": "Turin",
+    "country": "IT",
+    "latitude": 45.0703,
+    "longitude": 7.6869,
+    "timezone": "Europe/Rome",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "madrid",
+    "name": "Madrid",
+    "country": "ES",
+    "latitude": 40.4168,
+    "longitude": -3.7038,
+    "timezone": "Europe/Madrid",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "barcelona",
+    "name": "Barcelona",
+    "country": "ES",
+    "latitude": 41.3851,
+    "longitude": 2.1734,
+    "timezone": "Europe/Madrid",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "valencia",
+    "name": "Valencia",
+    "country": "ES",
+    "latitude": 39.4699,
+    "longitude": -0.3763,
+    "timezone": "Europe/Madrid",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "seville",
+    "name": "Seville",
+    "country": "ES",
+    "latitude": 37.3891,
+    "longitude": -5.9845,
+    "timezone": "Europe/Madrid",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "porto",
+    "name": "Porto",
+    "country": "PT",
+    "latitude": 41.1579,
+    "longitude": -8.6291,
+    "timezone": "Europe/Lisbon",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "stockholm",
+    "name": "Stockholm",
+    "country": "SE",
+    "latitude": 59.3293,
+    "longitude": 18.0686,
+    "timezone": "Europe/Stockholm",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "gothenburg",
+    "name": "Gothenburg",
+    "country": "SE",
+    "latitude": 57.7089,
+    "longitude": 11.9746,
+    "timezone": "Europe/Stockholm",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "oslo",
+    "name": "Oslo",
+    "country": "NO",
+    "latitude": 59.9139,
+    "longitude": 10.7522,
+    "timezone": "Europe/Oslo",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "copenhagen",
+    "name": "Copenhagen",
+    "country": "DK",
+    "latitude": 55.6761,
+    "longitude": 12.5683,
+    "timezone": "Europe/Copenhagen",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "helsinki",
+    "name": "Helsinki",
+    "country": "FI",
+    "latitude": 60.1699,
+    "longitude": 24.9384,
+    "timezone": "Europe/Helsinki",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "athens",
+    "name": "Athens",
+    "country": "GR",
+    "latitude": 37.9838,
+    "longitude": 23.7275,
+    "timezone": "Europe/Athens",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "istanbul",
+    "name": "Istanbul",
+    "country": "TR",
+    "latitude": 41.0082,
+    "longitude": 28.9784,
+    "timezone": "Europe/Istanbul",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "ankara",
+    "name": "Ankara",
+    "country": "TR",
+    "latitude": 39.9334,
+    "longitude": 32.8597,
+    "timezone": "Europe/Istanbul",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "izmir",
+    "name": "Izmir",
+    "country": "TR",
+    "latitude": 38.4237,
+    "longitude": 27.1428,
+    "timezone": "Europe/Istanbul",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "moscow",
+    "name": "Moscow",
+    "country": "RU",
+    "latitude": 55.7558,
+    "longitude": 37.6173,
+    "timezone": "Europe/Moscow",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "st-petersburg",
+    "name": "St Petersburg",
+    "country": "RU",
+    "latitude": 59.9311,
+    "longitude": 30.3609,
+    "timezone": "Europe/Moscow",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "kyiv",
+    "name": "Kyiv",
+    "country": "UA",
+    "latitude": 50.4501,
+    "longitude": 30.5234,
+    "timezone": "Europe/Kyiv",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "cairo",
+    "name": "Cairo",
+    "country": "EG",
+    "latitude": 30.0444,
+    "longitude": 31.2357,
+    "timezone": "Africa/Cairo",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "alexandria",
+    "name": "Alexandria",
+    "country": "EG",
+    "latitude": 31.2001,
+    "longitude": 29.9187,
+    "timezone": "Africa/Cairo",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "lagos",
+    "name": "Lagos",
+    "country": "NG",
+    "latitude": 6.5244,
+    "longitude": 3.3792,
+    "timezone": "Africa/Lagos",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "abuja",
+    "name": "Abuja",
+    "country": "NG",
+    "latitude": 9.0765,
+    "longitude": 7.3986,
+    "timezone": "Africa/Lagos",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "accra",
+    "name": "Accra",
+    "country": "GH",
+    "latitude": 5.6037,
+    "longitude": -0.187,
+    "timezone": "Africa/Accra",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "abidjan",
+    "name": "Abidjan",
+    "country": "CI",
+    "latitude": 5.3599,
+    "longitude": -4.0083,
+    "timezone": "Africa/Abidjan",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "dakar",
+    "name": "Dakar",
+    "country": "SN",
+    "latitude": 14.7167,
+    "longitude": -17.4677,
+    "timezone": "Africa/Dakar",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "casablanca",
+    "name": "Casablanca",
+    "country": "MA",
+    "latitude": 33.5731,
+    "longitude": -7.5898,
+    "timezone": "Africa/Casablanca",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "rabat",
+    "name": "Rabat",
+    "country": "MA",
+    "latitude": 34.0209,
+    "longitude": -6.8416,
+    "timezone": "Africa/Casablanca",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "algiers",
+    "name": "Algiers",
+    "country": "DZ",
+    "latitude": 36.7372,
+    "longitude": 3.0869,
+    "timezone": "Africa/Algiers",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "tunis",
+    "name": "Tunis",
+    "country": "TN",
+    "latitude": 36.8065,
+    "longitude": 10.1815,
+    "timezone": "Africa/Tunis",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "tripoli",
+    "name": "Tripoli",
+    "country": "LY",
+    "latitude": 32.8872,
+    "longitude": 13.1913,
+    "timezone": "Africa/Tripoli",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "khartoum",
+    "name": "Khartoum",
+    "country": "SD",
+    "latitude": 15.5007,
+    "longitude": 32.5599,
+    "timezone": "Africa/Khartoum",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "addis-ababa",
+    "name": "Addis Ababa",
+    "country": "ET",
+    "latitude": 8.9806,
+    "longitude": 38.7578,
+    "timezone": "Africa/Addis_Ababa",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "nairobi",
+    "name": "Nairobi",
+    "country": "KE",
+    "latitude": -1.2921,
+    "longitude": 36.8219,
+    "timezone": "Africa/Nairobi",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "kampala",
+    "name": "Kampala",
+    "country": "UG",
+    "latitude": 0.3476,
+    "longitude": 32.5825,
+    "timezone": "Africa/Kampala",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "kigali",
+    "name": "Kigali",
+    "country": "RW",
+    "latitude": -1.9441,
+    "longitude": 30.0619,
+    "timezone": "Africa/Kigali",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "dar-es-salaam",
+    "name": "Dar es Salaam",
+    "country": "TZ",
+    "latitude": -6.7924,
+    "longitude": 39.2083,
+    "timezone": "Africa/Dar_es_Salaam",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "johannesburg",
+    "name": "Johannesburg",
+    "country": "ZA",
+    "latitude": -26.2041,
+    "longitude": 28.0473,
+    "timezone": "Africa/Johannesburg",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "cape-town",
+    "name": "Cape Town",
+    "country": "ZA",
+    "latitude": -33.9249,
+    "longitude": 18.4241,
+    "timezone": "Africa/Johannesburg",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "durban",
+    "name": "Durban",
+    "country": "ZA",
+    "latitude": -29.8587,
+    "longitude": 31.0218,
+    "timezone": "Africa/Johannesburg",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "luanda",
+    "name": "Luanda",
+    "country": "AO",
+    "latitude": -8.839,
+    "longitude": 13.2894,
+    "timezone": "Africa/Luanda",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "maputo",
+    "name": "Maputo",
+    "country": "MZ",
+    "latitude": -25.9692,
+    "longitude": 32.5732,
+    "timezone": "Africa/Maputo",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "harare",
+    "name": "Harare",
+    "country": "ZW",
+    "latitude": -17.8252,
+    "longitude": 31.0335,
+    "timezone": "Africa/Harare",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "lusaka",
+    "name": "Lusaka",
+    "country": "ZM",
+    "latitude": -15.3875,
+    "longitude": 28.3228,
+    "timezone": "Africa/Lusaka",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "kinshasa",
+    "name": "Kinshasa",
+    "country": "CD",
+    "latitude": -4.4419,
+    "longitude": 15.2663,
+    "timezone": "Africa/Kinshasa",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "dubai",
+    "name": "Dubai",
+    "country": "AE",
+    "latitude": 25.2048,
+    "longitude": 55.2708,
+    "timezone": "Asia/Dubai",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "abu-dhabi",
+    "name": "Abu Dhabi",
+    "country": "AE",
+    "latitude": 24.4539,
+    "longitude": 54.3773,
+    "timezone": "Asia/Dubai",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "doha",
+    "name": "Doha",
+    "country": "QA",
+    "latitude": 25.2854,
+    "longitude": 51.531,
+    "timezone": "Asia/Qatar",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "kuwait-city",
+    "name": "Kuwait City",
+    "country": "KW",
+    "latitude": 29.3759,
+    "longitude": 47.9774,
+    "timezone": "Asia/Kuwait",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "manama",
+    "name": "Manama",
+    "country": "BH",
+    "latitude": 26.2235,
+    "longitude": 50.5876,
+    "timezone": "Asia/Bahrain",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "riyadh",
+    "name": "Riyadh",
+    "country": "SA",
+    "latitude": 24.7136,
+    "longitude": 46.6753,
+    "timezone": "Asia/Riyadh",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "jeddah",
+    "name": "Jeddah",
+    "country": "SA",
+    "latitude": 21.4858,
+    "longitude": 39.1925,
+    "timezone": "Asia/Riyadh",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "muscat",
+    "name": "Muscat",
+    "country": "OM",
+    "latitude": 23.5859,
+    "longitude": 58.4059,
+    "timezone": "Asia/Muscat",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "amman",
+    "name": "Amman",
+    "country": "JO",
+    "latitude": 31.9539,
+    "longitude": 35.9106,
+    "timezone": "Asia/Amman",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "beirut",
+    "name": "Beirut",
+    "country": "LB",
+    "latitude": 33.8938,
+    "longitude": 35.5018,
+    "timezone": "Asia/Beirut",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "tel-aviv",
+    "name": "Tel Aviv",
+    "country": "IL",
+    "latitude": 32.0853,
+    "longitude": 34.7818,
+    "timezone": "Asia/Jerusalem",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "tehran",
+    "name": "Tehran",
+    "country": "IR",
+    "latitude": 35.6892,
+    "longitude": 51.389,
+    "timezone": "Asia/Tehran",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "baghdad",
+    "name": "Baghdad",
+    "country": "IQ",
+    "latitude": 33.3152,
+    "longitude": 44.3661,
+    "timezone": "Asia/Baghdad",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "tokyo",
+    "name": "Tokyo",
+    "country": "JP",
+    "latitude": 35.6762,
+    "longitude": 139.6503,
+    "timezone": "Asia/Tokyo",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "osaka",
+    "name": "Osaka",
+    "country": "JP",
+    "latitude": 34.6937,
+    "longitude": 135.5023,
+    "timezone": "Asia/Tokyo",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "nagoya",
+    "name": "Nagoya",
+    "country": "JP",
+    "latitude": 35.1815,
+    "longitude": 136.9066,
+    "timezone": "Asia/Tokyo",
+    "tags": [
+      "urban_dense",
+      "coastal"
+    ]
+  },
+  {
+    "id": "sapporo",
+    "name": "Sapporo",
+    "country": "JP",
+    "latitude": 43.0618,
+    "longitude": 141.3545,
+    "timezone": "Asia/Tokyo",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "fukuoka",
+    "name": "Fukuoka",
+    "country": "JP",
+    "latitude": 33.5904,
+    "longitude": 130.4017,
+    "timezone": "Asia/Tokyo",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "seoul",
+    "name": "Seoul",
+    "country": "KR",
+    "latitude": 37.5665,
+    "longitude": 126.978,
+    "timezone": "Asia/Seoul",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "busan",
+    "name": "Busan",
+    "country": "KR",
+    "latitude": 35.1796,
+    "longitude": 129.0756,
+    "timezone": "Asia/Seoul",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "beijing",
+    "name": "Beijing",
+    "country": "CN",
+    "latitude": 39.9042,
+    "longitude": 116.4074,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "shanghai",
+    "name": "Shanghai",
+    "country": "CN",
+    "latitude": 31.2304,
+    "longitude": 121.4737,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "shenzhen",
+    "name": "Shenzhen",
+    "country": "CN",
+    "latitude": 22.5431,
+    "longitude": 114.0579,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "guangzhou",
+    "name": "Guangzhou",
+    "country": "CN",
+    "latitude": 23.1291,
+    "longitude": 113.2644,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "hong-kong",
+    "name": "Hong Kong",
+    "country": "HK",
+    "latitude": 22.3193,
+    "longitude": 114.1694,
+    "timezone": "Asia/Hong_Kong",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "tianjin",
+    "name": "Tianjin",
+    "country": "CN",
+    "latitude": 39.3434,
+    "longitude": 117.3616,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "chongqing",
+    "name": "Chongqing",
+    "country": "CN",
+    "latitude": 29.563,
+    "longitude": 106.5516,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "wuhan",
+    "name": "Wuhan",
+    "country": "CN",
+    "latitude": 30.5928,
+    "longitude": 114.3055,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "chengdu",
+    "name": "Chengdu",
+    "country": "CN",
+    "latitude": 30.5728,
+    "longitude": 104.0668,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "hangzhou",
+    "name": "Hangzhou",
+    "country": "CN",
+    "latitude": 30.2741,
+    "longitude": 120.1551,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "nanjing",
+    "name": "Nanjing",
+    "country": "CN",
+    "latitude": 32.0603,
+    "longitude": 118.7969,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "xian",
+    "name": "Xian",
+    "country": "CN",
+    "latitude": 34.3416,
+    "longitude": 108.9398,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "suzhou",
+    "name": "Suzhou",
+    "country": "CN",
+    "latitude": 31.2989,
+    "longitude": 120.5853,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "qingdao",
+    "name": "Qingdao",
+    "country": "CN",
+    "latitude": 36.0671,
+    "longitude": 120.3826,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "zhengzhou",
+    "name": "Zhengzhou",
+    "country": "CN",
+    "latitude": 34.7466,
+    "longitude": 113.6254,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "shenyang",
+    "name": "Shenyang",
+    "country": "CN",
+    "latitude": 41.8057,
+    "longitude": 123.4315,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "harbin",
+    "name": "Harbin",
+    "country": "CN",
+    "latitude": 45.8038,
+    "longitude": 126.5349,
+    "timezone": "Asia/Shanghai",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "taipei",
+    "name": "Taipei",
+    "country": "TW",
+    "latitude": 25.033,
+    "longitude": 121.5654,
+    "timezone": "Asia/Taipei",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "kaohsiung",
+    "name": "Kaohsiung",
+    "country": "TW",
+    "latitude": 22.6273,
+    "longitude": 120.3014,
+    "timezone": "Asia/Taipei",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "singapore",
+    "name": "Singapore",
+    "country": "SG",
+    "latitude": 1.3521,
+    "longitude": 103.8198,
+    "timezone": "Asia/Singapore",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "kuala-lumpur",
+    "name": "Kuala Lumpur",
+    "country": "MY",
+    "latitude": 3.139,
+    "longitude": 101.6869,
+    "timezone": "Asia/Kuala_Lumpur",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "jakarta",
+    "name": "Jakarta",
+    "country": "ID",
+    "latitude": -6.2088,
+    "longitude": 106.8456,
+    "timezone": "Asia/Jakarta",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "surabaya",
+    "name": "Surabaya",
+    "country": "ID",
+    "latitude": -7.2575,
+    "longitude": 112.7521,
+    "timezone": "Asia/Jakarta",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "manila",
+    "name": "Manila",
+    "country": "PH",
+    "latitude": 14.5995,
+    "longitude": 120.9842,
+    "timezone": "Asia/Manila",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "cebu",
+    "name": "Cebu",
+    "country": "PH",
+    "latitude": 10.3157,
+    "longitude": 123.8854,
+    "timezone": "Asia/Manila",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "bangkok",
+    "name": "Bangkok",
+    "country": "TH",
+    "latitude": 13.7563,
+    "longitude": 100.5018,
+    "timezone": "Asia/Bangkok",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "hanoi",
+    "name": "Hanoi",
+    "country": "VN",
+    "latitude": 21.0278,
+    "longitude": 105.8342,
+    "timezone": "Asia/Ho_Chi_Minh",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "ho-chi-minh-city",
+    "name": "Ho Chi Minh City",
+    "country": "VN",
+    "latitude": 10.8231,
+    "longitude": 106.6297,
+    "timezone": "Asia/Ho_Chi_Minh",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "phnom-penh",
+    "name": "Phnom Penh",
+    "country": "KH",
+    "latitude": 11.5564,
+    "longitude": 104.9282,
+    "timezone": "Asia/Phnom_Penh",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "yangon",
+    "name": "Yangon",
+    "country": "MM",
+    "latitude": 16.8409,
+    "longitude": 96.1735,
+    "timezone": "Asia/Yangon",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "vientiane",
+    "name": "Vientiane",
+    "country": "LA",
+    "latitude": 17.9757,
+    "longitude": 102.6331,
+    "timezone": "Asia/Vientiane",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "delhi",
+    "name": "Delhi",
+    "country": "IN",
+    "latitude": 28.6139,
+    "longitude": 77.209,
+    "timezone": "Asia/Kolkata",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "mumbai",
+    "name": "Mumbai",
+    "country": "IN",
+    "latitude": 19.076,
+    "longitude": 72.8777,
+    "timezone": "Asia/Kolkata",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "kolkata",
+    "name": "Kolkata",
+    "country": "IN",
+    "latitude": 22.5726,
+    "longitude": 88.3639,
+    "timezone": "Asia/Kolkata",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "chennai",
+    "name": "Chennai",
+    "country": "IN",
+    "latitude": 13.0827,
+    "longitude": 80.2707,
+    "timezone": "Asia/Kolkata",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "bangalore",
+    "name": "Bangalore",
+    "country": "IN",
+    "latitude": 12.9716,
+    "longitude": 77.5946,
+    "timezone": "Asia/Kolkata",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "hyderabad",
+    "name": "Hyderabad",
+    "country": "IN",
+    "latitude": 17.385,
+    "longitude": 78.4867,
+    "timezone": "Asia/Kolkata",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "pune",
+    "name": "Pune",
+    "country": "IN",
+    "latitude": 18.5204,
+    "longitude": 73.8567,
+    "timezone": "Asia/Kolkata",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "ahmedabad",
+    "name": "Ahmedabad",
+    "country": "IN",
+    "latitude": 23.0225,
+    "longitude": 72.5714,
+    "timezone": "Asia/Kolkata",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "surat",
+    "name": "Surat",
+    "country": "IN",
+    "latitude": 21.1702,
+    "longitude": 72.8311,
+    "timezone": "Asia/Kolkata",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "jaipur",
+    "name": "Jaipur",
+    "country": "IN",
+    "latitude": 26.9124,
+    "longitude": 75.7873,
+    "timezone": "Asia/Kolkata",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "lucknow",
+    "name": "Lucknow",
+    "country": "IN",
+    "latitude": 26.8467,
+    "longitude": 80.9462,
+    "timezone": "Asia/Kolkata",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "kanpur",
+    "name": "Kanpur",
+    "country": "IN",
+    "latitude": 26.4499,
+    "longitude": 80.3319,
+    "timezone": "Asia/Kolkata",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "dhaka",
+    "name": "Dhaka",
+    "country": "BD",
+    "latitude": 23.8103,
+    "longitude": 90.4125,
+    "timezone": "Asia/Dhaka",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "chittagong",
+    "name": "Chittagong",
+    "country": "BD",
+    "latitude": 22.3569,
+    "longitude": 91.7832,
+    "timezone": "Asia/Dhaka",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "karachi",
+    "name": "Karachi",
+    "country": "PK",
+    "latitude": 24.8607,
+    "longitude": 67.0011,
+    "timezone": "Asia/Karachi",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "lahore",
+    "name": "Lahore",
+    "country": "PK",
+    "latitude": 31.5204,
+    "longitude": 74.3587,
+    "timezone": "Asia/Karachi",
+    "tags": [
+      "urban_dense",
+      "river_basin"
+    ]
+  },
+  {
+    "id": "islamabad",
+    "name": "Islamabad",
+    "country": "PK",
+    "latitude": 33.6844,
+    "longitude": 73.0479,
+    "timezone": "Asia/Karachi",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "faisalabad",
+    "name": "Faisalabad",
+    "country": "PK",
+    "latitude": 31.418,
+    "longitude": 73.079,
+    "timezone": "Asia/Karachi",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "kathmandu",
+    "name": "Kathmandu",
+    "country": "NP",
+    "latitude": 27.7172,
+    "longitude": 85.324,
+    "timezone": "Asia/Kathmandu",
+    "tags": [
+      "urban_dense",
+      "mountainous"
+    ]
+  },
+  {
+    "id": "colombo",
+    "name": "Colombo",
+    "country": "LK",
+    "latitude": 6.9271,
+    "longitude": 79.8612,
+    "timezone": "Asia/Colombo",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "sydney",
+    "name": "Sydney",
+    "country": "AU",
+    "latitude": -33.8688,
+    "longitude": 151.2093,
+    "timezone": "Australia/Sydney",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "melbourne",
+    "name": "Melbourne",
+    "country": "AU",
+    "latitude": -37.8136,
+    "longitude": 144.9631,
+    "timezone": "Australia/Melbourne",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "brisbane",
+    "name": "Brisbane",
+    "country": "AU",
+    "latitude": -27.4698,
+    "longitude": 153.0251,
+    "timezone": "Australia/Brisbane",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "perth",
+    "name": "Perth",
+    "country": "AU",
+    "latitude": -31.9505,
+    "longitude": 115.8605,
+    "timezone": "Australia/Perth",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "adelaide",
+    "name": "Adelaide",
+    "country": "AU",
+    "latitude": -34.9285,
+    "longitude": 138.6007,
+    "timezone": "Australia/Adelaide",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "canberra",
+    "name": "Canberra",
+    "country": "AU",
+    "latitude": -35.2809,
+    "longitude": 149.13,
+    "timezone": "Australia/Sydney",
+    "tags": [
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "auckland",
+    "name": "Auckland",
+    "country": "NZ",
+    "latitude": -36.8509,
+    "longitude": 174.7645,
+    "timezone": "Pacific/Auckland",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "wellington",
+    "name": "Wellington",
+    "country": "NZ",
+    "latitude": -41.2866,
+    "longitude": 174.7756,
+    "timezone": "Pacific/Auckland",
+    "tags": [
+      "coastal",
+      "urban_dense"
+    ]
+  },
+  {
+    "id": "christchurch",
+    "name": "Christchurch",
+    "country": "NZ",
+    "latitude": -43.532,
+    "longitude": 172.6362,
+    "timezone": "Pacific/Auckland",
+    "tags": [
+      "urban_dense"
+    ]
+  }
+]

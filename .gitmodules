@@ -1,0 +1,6 @@
+[submodule "examples/stocks/lib/stocks-optimizer"]
+	path = examples/stocks/lib/stocks-optimizer
+	url = git@github.com:DiogoAngelim/stocks-optimizer.git
+[submodule "examples/stocks/lib/tradingview-data"]
+	path = examples/stocks/lib/tradingview-data
+	url = git@github.com:DiogoAngelim/tradingview-data.git

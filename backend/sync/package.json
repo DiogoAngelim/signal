@@ -1,0 +1,33 @@
+{
+  "name": "@digelim/15.sync",
+  "version": "0.1.2",
+  "private": false,
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "biome check src test",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@digelim/13.store": "0.1.2",
+    "@digelim/14.idempotency": "0.1.2"
+  },
+  "devDependencies": {
+    "@digelim/02.received": "1.1.2",
+    "@digelim/03.validated": "1.1.2"
+  }
+}

@@ -224,3 +224,105 @@ A Signal-compatible implementation must preserve:
 - capability discovery
 
 The Node runtime is the reference implementation, not the only valid one.
+# Signal Full-Stack Workspace
+
+Monorepo with a Signal backend toolkit and a full-stack demo app in the frontend workspace.
+
+## What Runs Locally
+
+- API server (Express) at http://localhost:8080
+- Signal client (Vite) at http://localhost:5173
+- Client talks to the API via `/api` (proxied to the API server in dev)
+
+## Quick Start
+
+From the repo root:
+
+```
+pnpm -C frontend run dev
+```
+
+This runs both the API server and the Signal client in parallel.
+
+## Configuration
+
+The client reads:
+
+- `VITE_API_BASE_URL` (default: `/api`)
+- `VITE_API_PROXY_TARGET` (default: `http://localhost:8080`)
+
+Create `frontend/artifacts/signal-client/.env` if you want to override defaults.
+
+## Test Scenarios
+
+Run these from the Signal client Playground.
+
+### Scenario 1: Success response
+
+- Message: `Run full-stack smoke test`
+- Operation: `transform`
+- Payload (optional JSON):
+
+```json
+{
+	"requestId": "demo-001",
+	"user": {
+		"id": "u_123",
+		"email": "demo@example.com"
+	},
+	"items": [
+		{ "sku": "signal-core", "qty": 2 },
+		{ "sku": "signal-ui", "qty": 1 }
+	],
+	"flags": {
+		"dryRun": true,
+		"priority": "low"
+	}
+}
+```
+
+Expected:
+- `status` is `success`
+- `message` is `Signal processed successfully.`
+- `result.operation` is `transform`
+- `result.received.message` matches the message
+- `result.received.data` matches the JSON payload
+
+### Scenario 2: Processing response
+
+- Message: `Ping`
+- Operation: `emit`
+- Payload (optional JSON):
+
+```json
+{
+	"ping": true
+}
+```
+
+Expected:
+- `status` is `processing`
+- `message` is `Signal queued for emission.`
+
+## Useful Commands
+
+- `pnpm -C frontend run dev` - run API server + client
+- `pnpm -C frontend --filter @workspace/api-server run dev` - API only
+- `pnpm -C frontend --filter @workspace/signal-client run dev` - client only
+
+## npm Module: signal-protocol
+
+This repo includes a publishable package at [packages/signal-protocol](packages/signal-protocol).
+It bundles the API routes plus the built client assets to avoid shipping frontend dependencies.
+
+Build the package (includes client assets):
+
+```
+pnpm -C packages/signal-protocol run prepack
+```
+
+Publish (run this manually):
+
+```
+pnpm -C packages/signal-protocol publish --access public
+```

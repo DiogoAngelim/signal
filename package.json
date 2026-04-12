@@ -13,10 +13,14 @@
     "lint": "pnpm -r --sort run lint",
     "format": "biome format --write .",
     "check": "biome check .",
-    "typecheck": "pnpm -r --sort run typecheck"
+    "typecheck": "pnpm -r --sort run typecheck",
+    "clean": "pnpm -r --sort run clean",
+    "release": "pnpm build && pnpm test && pnpm lint",
+    "publish:all": "pnpm -r --sort --filter ./packages/** publish --access public"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@types/node": "^20.17.16",
     "@vitest/coverage-v8": "^2.1.9",
     "typescript": "^5.7.3",
     "vitest": "^2.1.9"
