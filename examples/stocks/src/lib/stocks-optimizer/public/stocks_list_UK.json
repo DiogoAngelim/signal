@@ -1,0 +1,5934 @@
+[
+    {
+        "image": "/vesple/optimalstocks/images/krka.svg",
+        "symbol": "0HLK.L",
+        "name": "KRKA DD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "0OPM.L",
+        "name": "DATALEX ORD USD0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/telefonica.svg",
+        "symbol": "0QAL.L",
+        "name": "TELEFONICA DEUTSCHLAND HLDG AG NPV",
+        "market": ""
+    },
+    {
+        "symbol": "1SN.L",
+        "name": "FIRST TIN PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "450.L",
+        "name": "450 PLC",
+        "market": ""
+    },
+    {
+        "symbol": "4BB.L",
+        "name": "4BASEBIO PLC ORD EUR1",
+        "market": ""
+    },
+    {
+        "symbol": "4GBL.L",
+        "name": "4GLOBAL PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/888-holdings.svg",
+        "symbol": "888.L",
+        "name": "888 HOLDINGS PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/airtel-africa-plc-ord-usd0-50.svg",
+        "symbol": "AAF.L",
+        "name": "AIRTEL AFRICA PLC ORD USD0.5",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/anglo-american.svg",
+        "symbol": "AAL.L",
+        "name": "ANGLO AMERICAN USD0.54945",
+        "market": ""
+    },
+    {
+        "symbol": "AAU.L",
+        "name": "ARIANA RESOURCES ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/anglo-asian-mining-plc.svg",
+        "symbol": "AAZ.L",
+        "name": "ANGLO ASIAN MINING ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/abrdn.svg",
+        "symbol": "ABDN.L",
+        "name": "ABRDN PLC ORD GBP0.1396825396",
+        "market": ""
+    },
+    {
+        "symbol": "ABDP.L",
+        "name": "AB DYNAMICS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ABDX.L",
+        "name": "ABINGDON HEALTH PLC ORD GBP0.00025",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/associated-british-foods.svg",
+        "symbol": "ABF.L",
+        "name": "ASSOCIATED BRITISH FOODS PLC ORD 5 15/22P",
+        "market": ""
+    },
+    {
+        "symbol": "AC8.L",
+        "name": "ACCELER8 VENTURES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ACC.L",
+        "name": "ACCESS INTELLIGENCE ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/acg-acquisition-company-limite.svg",
+        "symbol": "ACG.L",
+        "name": "ACG ACQUISITION COMPANY LIMITED CLS A ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "ACP.L",
+        "name": "ARMADALE CAPITAL PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "ACRL.L",
+        "name": "ACCROL GROUP HLDGS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "ACRM.L",
+        "name": "ACUITYRM GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "ADA.L",
+        "name": "ADAMS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ADF.L",
+        "name": "FACILITIES BY ADF PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/admiral-group.svg",
+        "symbol": "ADM.L",
+        "name": "ADMIRAL GROUP ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "ADME.L",
+        "name": "ADM ENERGY PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ADMR.L",
+        "name": "ADMIRAL ACQUISITION LIMITED ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/adriatic-metals.svg",
+        "symbol": "ADT1.L",
+        "name": "ADRIATIC METALS PLC ORD GBP0.013355",
+        "market": ""
+    },
+    {
+        "symbol": "ADVT.L",
+        "name": "ADVANCEDADVT LIMITED ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "AEEE.L",
+        "name": "AQUILA ENERGY EFFICIENCY TRUST PLC ORD GBP0.01 (EUR)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/active-energy-plc.svg",
+        "symbol": "AEG.L",
+        "name": "ACTIVE ENERGY GROUP ORD GBP0.0035",
+        "market": ""
+    },
+    {
+        "symbol": "AEO.L",
+        "name": "AEOREMA COMMUNICATIONS PLC ORD GBP0.125",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/anglo-eastern-plantations.svg",
+        "symbol": "AEP.L",
+        "name": "ANGLO-EASTERN PLANTATIONS ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "AFM.L",
+        "name": "ALPHA FINANCIAL MKTS CONSULTING PLC ORD GBP0.00075",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/advfn-plc.svg",
+        "symbol": "AFN.L",
+        "name": "ADVFN PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "symbol": "AFP.L",
+        "name": "AFRICAN PIONEER PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "AFRN.L",
+        "name": "AFERIAN PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/argentex-plc.svg",
+        "symbol": "AGFX.L",
+        "name": "ARGENTEX GROUP PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/angle-plc.svg",
+        "symbol": "AGL.L",
+        "name": "ANGLE ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "AGTA.L",
+        "name": "AGRITERRA LTD ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/allergy-therapeutics-plc.svg",
+        "symbol": "AGY.L",
+        "name": "ALLERGY THERAPEUTICS ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ashtead.svg",
+        "symbol": "AHT.L",
+        "name": "ASHTEAD GROUP ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "AIEA.L",
+        "name": "AIREA PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "AIQ.L",
+        "name": "AIQ LTD ORDS GBP0.01 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "AJAX.L",
+        "name": "AJAX RESOURCES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/aj-bell-plc.svg",
+        "symbol": "AJB.L",
+        "name": "AJ BELL PLC ORD GBP0.000125",
+        "market": ""
+    },
+    {
+        "symbol": "ALBA.L",
+        "name": "ALBA MINERAL RESOURCES ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/alfa-financial-software-hold.svg",
+        "symbol": "ALFA.L",
+        "name": "ALFA FINANCIAL SOFTWARE HLDGS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "ALGW.L",
+        "name": "ALPHA GROWTH PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "ALK.L",
+        "name": "ALKEMY CAPITAL INVESTMENTS PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/atlantic-lithium-limited.svg",
+        "symbol": "ALL.L",
+        "name": "ATLANTIC LITHIUM LIMITED ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "ALPH.L",
+        "name": "ALPHA GROUP INTERNATIONAL PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "symbol": "ALT.L",
+        "name": "ALTITUDE GROUP ORD GBP0.004",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/altyn-plc.svg",
+        "symbol": "ALTN.L",
+        "name": "ALTYNGOLD PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "symbol": "ALU.L",
+        "name": "ALUMASC GROUP ORD GBP0.125",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/amigo.svg",
+        "symbol": "AMGO.L",
+        "name": "AMIGO HOLDINGS PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/aston-martin-lagonda.svg",
+        "symbol": "AML.L",
+        "name": "ASTON MARTIN LAGONDA GBL HLDGS PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "symbol": "AMOI.L",
+        "name": "ANEMOI INTERNATIONAL LTD ORD USD0.001 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "ANCR.L",
+        "name": "ANIMALCARE GROUP PLC ORD GBP0.20",
+        "market": ""
+    },
+    {
+        "symbol": "ANG.L",
+        "name": "ANGLING DIRECT PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ANGS.L",
+        "name": "ANGUS ENERGY PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/agronomics-ltd.svg",
+        "symbol": "ANIC.L",
+        "name": "AGRONOMICS LIMITED ORD GBP0.000001",
+        "market": ""
+    },
+    {
+        "symbol": "ANP.L",
+        "name": "ANPARIO ORD GBP0.23",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/antofagasta.svg",
+        "symbol": "ANTO.L",
+        "name": "ANTOFAGASTA PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "ANX.L",
+        "name": "ANEXO GROUP PLC ORD GBP0.0005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ao-world-plc.svg",
+        "symbol": "AO..L",
+        "name": "AO WORLD PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "symbol": "AOM.L",
+        "name": "ACTIVEOPS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "APQ.L",
+        "name": "APQ GLOBAL LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "APTA.L",
+        "name": "APTAMER GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/aptitude.svg",
+        "symbol": "APTD.L",
+        "name": "APTITUDE SOFTWARE GROUP PLC ORD GBP0.07333333",
+        "market": ""
+    },
+    {
+        "symbol": "AQX.L",
+        "name": "AQUIS EXCHANGE PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "ARA.L",
+        "name": "AURA RENEWABLE ACQUISITIONS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/argo-blockchain-plc-ord-0-1p.svg",
+        "symbol": "ARB.L",
+        "name": "ARGO BLOCKCHAIN PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "ARBB.L",
+        "name": "ARBUTHNOT BANKING GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ARC.L",
+        "name": "ARCONTECH GROUP PLC ORD GBP0.125",
+        "market": ""
+    },
+    {
+        "symbol": "ARCM.L",
+        "name": "ARC MINERALS LTD ORD NPV(DI)",
+        "market": ""
+    },
+    {
+        "symbol": "AREC.L",
+        "name": "ARECOR THERAPEUTICS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ARGO.L",
+        "name": "ARGO GROUP LTD ORD USD0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/asiamet-res-ltd.svg",
+        "symbol": "ARS.L",
+        "name": "ASIAMET RESOURCES LTD COM SHS USD0.01 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "ART.L",
+        "name": "ARTISANAL SPIRITS COMPANY PLC(THE) ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/asa-international-plc.svg",
+        "symbol": "ASAI.L",
+        "name": "ASA INTERNATIONAL GROUP PLC ORD GBP1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/asos.svg",
+        "symbol": "ASC.L",
+        "name": "ASOS PLC ORD GBP0.035",
+        "market": ""
+    },
+    {
+        "symbol": "ASCL.L",
+        "name": "ASCENTIAL PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ASHI.L",
+        "name": "ASHINGTON INNOVATION PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ashmore-plc.svg",
+        "symbol": "ASHM.L",
+        "name": "ASHMORE GROUP ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "ASIA.L",
+        "name": "ASIA STRATEGIC HOLDINGS LIMITED ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "ASPL.L",
+        "name": "ASEANA PROPERTIES LTD ORD USD0.05",
+        "market": ""
+    },
+    {
+        "symbol": "AST.L",
+        "name": "ASCENT RESOURCES ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "symbol": "ASTO.L",
+        "name": "ASSETCO PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ASY.L",
+        "name": "ANDREWS SYKES GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/auction-technology.svg",
+        "symbol": "ATG.L",
+        "name": "AUCTION TECHNOLOGY GROUP PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/andrada-mining-limited.svg",
+        "symbol": "ATM.L",
+        "name": "ANDRADA MINING LIMITED ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "ATN.L",
+        "name": "ATERIAN PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ATOM.L",
+        "name": "ATOME PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "symbol": "AUK.L",
+        "name": "AUKETT SWANKE GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "AURR.L",
+        "name": "AURRIGO INTERNATIONAL PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "symbol": "AUTG.L",
+        "name": "AUTINS GROUP PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/auto-trader-group-plc-ord-1p.svg",
+        "symbol": "AUTO.L",
+        "name": "AUTO TRADER GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/aviva.svg",
+        "symbol": "AV..L",
+        "name": "AVIVA ORD GBP0.328947368",
+        "market": ""
+    },
+    {
+        "symbol": "AVAP.L",
+        "name": "AVATION PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/avacta-group.svg",
+        "symbol": "AVCT.L",
+        "name": "AVACTA GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "AVG.L",
+        "name": "AVINGTRANS PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/avon-protection-plc.svg",
+        "symbol": "AVON.L",
+        "name": "AVON PROTECTION PLC ORD GBP1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/alphawave-ip-plc.svg",
+        "symbol": "AWE.L",
+        "name": "ALPHAWAVE IP GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "AYM.L",
+        "name": "ANGLESEY MINING ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/astrazeneca.svg",
+        "symbol": "AZN.L",
+        "name": "ASTRAZENECA PLC ORD USD0.25",
+        "market": ""
+    },
+    {
+        "symbol": "B90.L",
+        "name": "B90 HOLDINGS PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bae-systems.svg",
+        "symbol": "BA..L",
+        "name": "BAE SYSTEMS ORD GBP0.025",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/babcock-international.svg",
+        "symbol": "BAB.L",
+        "name": "BABCOCK INTERNATIONAL GROUP ORD GBP0.60",
+        "market": ""
+    },
+    {
+        "symbol": "BAG.L",
+        "name": "BARR(A.G.) ORD GBP0.04167",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bakkavor.svg",
+        "symbol": "BAKK.L",
+        "name": "BAKKAVOR GROUP PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "symbol": "BANK.L",
+        "name": "FIINU PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "BAR.L",
+        "name": "BRAND ARCHITEKTS GROUP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/barclays.svg",
+        "symbol": "BARC.L",
+        "name": "BARCLAYS PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/british-american-tobacco.svg",
+        "symbol": "BATS.L",
+        "name": "BRITISH AMERICAN TOBACCO ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "BAY.L",
+        "name": "BAY CAPITAL PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "BBB.L",
+        "name": "BIGBLU BROADBAND PLC ORD GBP0.15",
+        "market": ""
+    },
+    {
+        "symbol": "BBSN.L",
+        "name": "BRAVE BISON GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/balfour-beatty.svg",
+        "symbol": "BBY.L",
+        "name": "BALFOUR BEATTY GBP0.50",
+        "market": ""
+    },
+    {
+        "symbol": "BCE.L",
+        "name": "BEACON ENERGY PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/baltic-classifieds-plc.svg",
+        "symbol": "BCG.L",
+        "name": "BALTIC CLASSIFIEDS GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/barratt-developments.svg",
+        "symbol": "BDEV.L",
+        "name": "BARRATT DEVELOPMENTS ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "BELL.L",
+        "name": "BELLUSCURA PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "BEM.L",
+        "name": "BEOWULF MINING ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "BEN.L",
+        "name": "BENS CREEK GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/beazley-plc-ord-5p.svg",
+        "symbol": "BEZ.L",
+        "name": "BEAZLEY PLC (UK) ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "BFSP.L",
+        "name": "BLACKFINCH SPRING VCT PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bgeo-plc.svg",
+        "symbol": "BGEO.L",
+        "name": "BANK OF GEORGIA GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "BGO.L",
+        "name": "BANGO ORD GBP0.20",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bradda-head-lithium-limited.svg",
+        "symbol": "BHL.L",
+        "name": "BRADDA HEAD LITHIUM LIMITED ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "BILN.L",
+        "name": "BILLINGTON HOLDINGS PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "BIOM.L",
+        "name": "BIOME TECHNOLOGIES ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/blackbird-plc.svg",
+        "symbol": "BIRD.L",
+        "name": "BLACKBIRD PLC ORD GBP0.008",
+        "market": ""
+    },
+    {
+        "symbol": "BISI.L",
+        "name": "BISICHI PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/berkeley-group-holdings-the-plc-ord-5-4141p.svg",
+        "symbol": "BKG.L",
+        "name": "BERKELEY GROUP HLDGS ORD GBP0.054141",
+        "market": ""
+    },
+    {
+        "symbol": "BKS.L",
+        "name": "BEEKS FINANCIAL CLOUD GROUP PLC ORD GBP0.00125",
+        "market": ""
+    },
+    {
+        "symbol": "BLOE.L",
+        "name": "BLOCK ENERGY PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "symbol": "BLU.L",
+        "name": "BLUE STAR CAPITAL ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "BLVN.L",
+        "name": "BOWLEVEN PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/b-and-m-european-value-retail-s-a-ord-10p-di.svg",
+        "symbol": "BME.L",
+        "name": "B & M EUROPEAN VALUE RETAIL SA ORD GBP0.1 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bushveld-minerals-ltd.svg",
+        "symbol": "BMN.L",
+        "name": "BUSHVELD MINERALS LTD ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/braemar-shipping-services-plc.svg",
+        "symbol": "BMS.L",
+        "name": "BRAEMAR PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "BMT.L",
+        "name": "BRAIME GROUP PLC 'A'ORD NON VOTING GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "BMV.L",
+        "name": "BLUEBIRD MERCHANT VENTURES LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bloomsbury-publishing.svg",
+        "symbol": "BMY.L",
+        "name": "BLOOMSBURY PUBLISHING ORD GBP0.0125",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bunzl.svg",
+        "symbol": "BNZL.L",
+        "name": "BUNZL ORD GBP0.32142857",
+        "market": ""
+    },
+    {
+        "symbol": "BOD.L",
+        "name": "BOTSWANA DIAMONDS PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "symbol": "BOIL.L",
+        "name": "BARON OIL PLC ORD GBP0.00025",
+        "market": ""
+    },
+    {
+        "symbol": "BOKU.L",
+        "name": "BOKU INC CMN SHS USD0.0001 (DI) REG S CAT 3/144A",
+        "market": ""
+    },
+    {
+        "symbol": "BOOM.L",
+        "name": "AUDIOBOOM GROUP PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/boot-henry-plc.svg",
+        "symbol": "BOOT.L",
+        "name": "BOOT(HENRY) ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/borders-and-southern-petroleum-plc.svg",
+        "symbol": "BOR.L",
+        "name": "BORDERS & SOUTHERN PETROLEUM ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hollywood-bowl-plc.svg",
+        "symbol": "BOWL.L",
+        "name": "HOLLYWOOD BOWL GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/tritax-eurobox-plc.svg",
+        "symbol": "BOXE.L",
+        "name": "TRITAX EUROBOX PLC ORD EUR0.01 (GBP)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bodycote-plc.svg",
+        "symbol": "BOY.L",
+        "name": "BODYCOTE PLC ORD GBP0.1727272",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bp.svg",
+        "symbol": "BP..L",
+        "name": "BP ORD USD0.25",
+        "market": ""
+    },
+    {
+        "symbol": "BPM.L",
+        "name": "B.P.MARSH & PARTNERS ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bridgepoint-group-plc-ord-gbp0-00005.svg",
+        "symbol": "BPT.L",
+        "name": "BRIDGEPOINT GROUP PLC ORD GBP0.00005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/burberry.svg",
+        "symbol": "BRBY.L",
+        "name": "BURBERRY GROUP ORD GBP0.0005",
+        "market": ""
+    },
+    {
+        "symbol": "BRCK.L",
+        "name": "BRICKABILITY GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/breedon-plc.svg",
+        "symbol": "BREE.L",
+        "name": "BREEDON GRP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "BRES.L",
+        "name": "BLENCOWE RESOURCES PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "symbol": "BRH.L",
+        "name": "BRAVEHEART INVESTMENT GROUP ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "symbol": "BRS.L",
+        "name": "BEACON RISE HOLDINGS PLC ORD GBP1",
+        "market": ""
+    },
+    {
+        "symbol": "BSFA.L",
+        "name": "BSF ENTERPRISE PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bt-group.svg",
+        "symbol": "BT.A.L",
+        "name": "BT GROUP ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/batm-advanced-communications.svg",
+        "symbol": "BVC.L",
+        "name": "BATM ADVANCED COMMUNICATIONS LTD ORD ILS0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/britvic-plc-ord-20p.svg",
+        "symbol": "BVIC.L",
+        "name": "BRITVIC ORD GBP0.2",
+        "market": ""
+    },
+    {
+        "symbol": "BVX.L",
+        "name": "BIVICTRIX THERAPEUTICS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "BVXP.L",
+        "name": "BIOVENTIX PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bellway.svg",
+        "symbol": "BWY.L",
+        "name": "BELLWAY GBP0.125",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bytes-technology-grp-plc.svg",
+        "symbol": "BYIT.L",
+        "name": "BYTES TECHNOLOGY GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "BYOT.L",
+        "name": "BYOTROL ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "BZT.L",
+        "name": "BEZANT RESOURCES PLC ORD GBP0.00002",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/cab-pmts-hldgs-ltd.svg",
+        "symbol": "CABP.L",
+        "name": "CAB PAYMENTS HOLDINGS PLC ORD GBP0.000333333",
+        "market": ""
+    },
+    {
+        "symbol": "CAD.L",
+        "name": "CADOGAN ENERGY SOLUTIONS PLC ORD GBP0.03",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/capital-ltd.svg",
+        "symbol": "CAPD.L",
+        "name": "CAPITAL LIMITED ORD USD0.0001 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/carclo-plc.svg",
+        "symbol": "CAR.L",
+        "name": "CARCLO ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/card-factory-plc.svg",
+        "symbol": "CARD.L",
+        "name": "CARD FACTORY PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/carr-s-plc.svg",
+        "symbol": "CARR.L",
+        "name": "CARR'S GROUP PLC ORD GBP0.025",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/caspian-sunrise-plc.svg",
+        "symbol": "CASP.L",
+        "name": "CASPIAN SUNRISE PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/centaur-media-plc.svg",
+        "symbol": "CAU.L",
+        "name": "CENTAUR MEDIA ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "CAV.L",
+        "name": "CAVENDISH FINANCIAL PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/close-brothers-plc.svg",
+        "symbol": "CBG.L",
+        "name": "CLOSE BROS GROUP PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "CBOX.L",
+        "name": "CAKE BOX HOLDINGS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/computacenter-plc-ord-7-5-9p.svg",
+        "symbol": "CCC.L",
+        "name": "COMPUTACENTER ORD GBP0.075555",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/carnival.svg",
+        "symbol": "CCL.L",
+        "name": "CARNIVAL PLC ORD USD1.66",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/celtic-plc.svg",
+        "symbol": "CCP.L",
+        "name": "CELTIC PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "CCT.L",
+        "name": "CHARACTER GROUP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "CDFF.L",
+        "name": "CARDIFF PROPERTY PLC (THE) ORD GBP0.20",
+        "market": ""
+    },
+    {
+        "symbol": "CDGP.L",
+        "name": "CHAPEL DOWN GROUP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "CDL.L",
+        "name": "CLOUDBREAK DISCOVERY PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/challenger-energy-plc.svg",
+        "symbol": "CEG.L",
+        "name": "CHALLENGER ENERGY GROUP PLC ORD GBP0.0002",
+        "market": ""
+    },
+    {
+        "symbol": "CEL.L",
+        "name": "CELADON PHARMACEUTICALS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "CEPS.L",
+        "name": "CEPS PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "CER.L",
+        "name": "CERILLION PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/centamin.svg",
+        "symbol": "CEY.L",
+        "name": "CENTAMIN PLC ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "CFX.L",
+        "name": "COLEFAX GROUP ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "CFYN.L",
+        "name": "CAFFYNS ORD GBP0.50",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/georgia-capital-plc.svg",
+        "symbol": "CGEO.L",
+        "name": "GEORGIA CAPITAL PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "CGH.L",
+        "name": "CHAARAT GOLD HLDGS LTD ORD USD0.01 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "CGO.L",
+        "name": "CONTANGO HOLDINGS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/castings-plc.svg",
+        "symbol": "CGS.L",
+        "name": "CASTINGS ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "CHF.L",
+        "name": "CHESTERFIELD RESOURCES PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/chemring-plc.svg",
+        "symbol": "CHG.L",
+        "name": "CHEMRING GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "CHH.L",
+        "name": "CHURCHILL CHINA ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/chill-brands-plc.svg",
+        "symbol": "CHLL.L",
+        "name": "CHILL BRANDS GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/chrysalis-investments-ltd.svg",
+        "symbol": "CHRY.L",
+        "name": "CHRYSALIS INVESTMENTS LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "CHSS.L",
+        "name": "WORLD CHESS PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "CIC.L",
+        "name": "CONYGAR INVESTMENT COMPANY ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "CIZ.L",
+        "name": "CIZZLE BIOTECHNOLOGY HOLDINGS PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/clarkson-horace-plc.svg",
+        "symbol": "CKN.L",
+        "name": "CLARKSON ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "CKT.L",
+        "name": "CHECKIT PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/cellular-goods.svg",
+        "symbol": "CLAI.L",
+        "name": "CEL AI PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "CLBS.L",
+        "name": "CELEBRUS TECHNOLOGIES PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "symbol": "CLIG.L",
+        "name": "CITY OF LONDON INVESTMENT GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "CLON.L",
+        "name": "CLONTARF ENERGY ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "CLX.L",
+        "name": "CALNEX SOLUTIONS PLC ORD GBP0.00125",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/cmc-markets-plc.svg",
+        "symbol": "CMCX.L",
+        "name": "CMC MARKETS ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "CMET.L",
+        "name": "CAPITAL METALS PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "symbol": "CMH.L",
+        "name": "CHAMBERLIN PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "CML.L",
+        "name": "CML MICROSYSTEMS ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "CMO.L",
+        "name": "CMO GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "CMRS.L",
+        "name": "CRITICAL MINERAL RESOURCES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "CMX.L",
+        "name": "CATALYST MEDIA GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/centrica.svg",
+        "symbol": "CNA.L",
+        "name": "CENTRICA ORD GBP0.061728395",
+        "market": ""
+    },
+    {
+        "symbol": "CNC.L",
+        "name": "CONCURRENT TECHNOLOGIES ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/capricorn-energy-plc.svg",
+        "symbol": "CNE.L",
+        "name": "CAPRICORN ENERGY PLC ORD GBP0.0513986",
+        "market": ""
+    },
+    {
+        "symbol": "CNN.L",
+        "name": "CALEDONIAN TRUST PLC ORD GBP 0.2",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/condor-gold-plc.svg",
+        "symbol": "CNR.L",
+        "name": "CONDOR GOLD PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "CNS.L",
+        "name": "CORERO NETWORK SECURITY ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/omega-diagnostics.svg",
+        "symbol": "CNSL.L",
+        "name": "CAMBRIDGE NUTRITIONAL SCIENCES PLC ORD GBP0.04",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/coats-plc.svg",
+        "symbol": "COA.L",
+        "name": "COATS GROUP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "COBR.L",
+        "name": "COBRA RESOURCES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "CODE.L",
+        "name": "NORTHCODERS GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "COG.L",
+        "name": "CAMBRIDGE COGNITION HLDGS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "COM.L",
+        "name": "COMPTOIR GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "CORA.L",
+        "name": "CORA GOLD LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "CORO.L",
+        "name": "CORO ENERGY PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/costain-plc.svg",
+        "symbol": "COST.L",
+        "name": "COSTAIN GROUP ORD GBP0.50",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/compass.svg",
+        "symbol": "CPG.L",
+        "name": "COMPASS GROUP PLC ORD GBP0.1105",
+        "market": ""
+    },
+    {
+        "symbol": "CPH2.L",
+        "name": "CLEAN POWER HYDROGEN PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/capita.svg",
+        "symbol": "CPI.L",
+        "name": "CAPITA PLC ORD GBP0.02066666",
+        "market": ""
+    },
+    {
+        "symbol": "CPP.L",
+        "name": "CPPGROUP PLC ORD GBP1",
+        "market": ""
+    },
+    {
+        "symbol": "CPX.L",
+        "name": "CAP-XX LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "CRCL.L",
+        "name": "CORCEL PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/croda.svg",
+        "symbol": "CRDA.L",
+        "name": "CRODA INTERNATIONAL ORD GBP0.10609756",
+        "market": ""
+    },
+    {
+        "symbol": "CRDL.L",
+        "name": "CORDEL GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/conduit-ltd.svg",
+        "symbol": "CRE.L",
+        "name": "CONDUIT HLDGS LTD COM SHS USD0.01 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "CREO.L",
+        "name": "CREO MEDICAL GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "CRL.L",
+        "name": "CREIGHTONS ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "CRPR.L",
+        "name": "CROPPER(JAMES) ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/crest-nicholson.svg",
+        "symbol": "CRST.L",
+        "name": "CREST NICHOLSON HLDGS PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "CRTM.L",
+        "name": "CRITICAL METALS PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "symbol": "CRU.L",
+        "name": "CORAL PRODUCTS ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "CRV.L",
+        "name": "CRAVEN HOUSE CAPITAL PLC ORD USD1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/craneware-plc.svg",
+        "symbol": "CRW.L",
+        "name": "CRANEWARE PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "CSFS.L",
+        "name": "CORNERSTONE FS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/chesnara-plc.svg",
+        "symbol": "CSN.L",
+        "name": "CHESNARA PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "CSSG.L",
+        "name": "CROMA SECURITY SOLUTIONS GROUP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "CTA.L",
+        "name": "CT AUTOMOTIVE GROUP PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "symbol": "CTAI.L",
+        "name": "CATENAI PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/convatec-group-plc-ord-10p.svg",
+        "symbol": "CTEC.L",
+        "name": "CONVATEC GROUP PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "symbol": "CTG.L",
+        "name": "CHRISTIE GROUP PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/cleantech-lithium-plc.svg",
+        "symbol": "CTL.L",
+        "name": "CLEANTECH LITHIUM PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/clarke-t-plc.svg",
+        "symbol": "CTO.L",
+        "name": "TCLARKE PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/currys-plc.svg",
+        "symbol": "CURY.L",
+        "name": "CURRYS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/cranswick.svg",
+        "symbol": "CWK.L",
+        "name": "CRANSWICK ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ceres-power-plc.svg",
+        "symbol": "CWR.L",
+        "name": "CERES POWER HOLDINGS PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "CYAN.L",
+        "name": "CYANCONNODE HOLDINGS PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "symbol": "DAR.L",
+        "name": "DAR GLOBAL PLC ORD USD0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/darktrace.svg",
+        "symbol": "DARK.L",
+        "name": "DARKTRACE PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/globaldata-plc.svg",
+        "symbol": "DATA.L",
+        "name": "GLOBALDATA PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "DBOX.L",
+        "name": "DIGITALBOX PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/dolphin-capital-investors-ltd.svg",
+        "symbol": "DCI.L",
+        "name": "DCI ADVISORS LTD COM SHS EUR0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/directa-plus-plc.svg",
+        "symbol": "DCTA.L",
+        "name": "DIRECTA PLUS PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/diversified-energy-co-plc.svg",
+        "symbol": "DEC.L",
+        "name": "DIVERSIFIED ENERGY COMPANY PLC ORD GBP0.20",
+        "market": ""
+    },
+    {
+        "symbol": "DELT.L",
+        "name": "DELTIC ENERGY PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/deltex-medical-plc.svg",
+        "symbol": "DEMG.L",
+        "name": "DELTEX MEDICAL GROUP ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "DEST.L",
+        "name": "DESTINY PHARMA PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "DEVO.L",
+        "name": "DEVOLVER DIGITAL INC COM SHS USD0.0001 (DI) REG S CAT 3/144A",
+        "market": ""
+    },
+    {
+        "symbol": "DFCH.L",
+        "name": "DISTRIBUTION FINANCE CAPITAL HLDGS ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/dfs-furniture-plc.svg",
+        "symbol": "DFS.L",
+        "name": "DFS FURNITURE PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/diageo.svg",
+        "symbol": "DGE.L",
+        "name": "DIAGEO PLC ORD GBP0.28 101/108",
+        "market": ""
+    },
+    {
+        "symbol": "DGI.L",
+        "name": "DG INNOVATE PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/dialight-plc.svg",
+        "symbol": "DIA.L",
+        "name": "DIALIGHT ORD GBP0.0189",
+        "market": ""
+    },
+    {
+        "symbol": "DIS.L",
+        "name": "DISTIL PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "DKE.L",
+        "name": "DUKEMOUNT CAPITAL PLC ORD GBP0.00001",
+        "market": ""
+    },
+    {
+        "symbol": "DKL.L",
+        "name": "DEKEL AGRI-VISION PLC ORD EUR0.0003367 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/de-la-rue-plc.svg",
+        "symbol": "DLAR.L",
+        "name": "DE LA RUE ORD GBP0.4486857",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/direct-line-group.svg",
+        "symbol": "DLG.L",
+        "name": "DIRECT LINE INSURANCE GROUP PLC ORD GBP0.109090909",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/dunelm-group-plc-ord-1p.svg",
+        "symbol": "DNLM.L",
+        "name": "DUNELM GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "DNM.L",
+        "name": "DIANOMI PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/dr-martens-plc-ord-gbp0-01.svg",
+        "symbol": "DOCS.L",
+        "name": "DR. MARTENS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/dominos-pizza.svg",
+        "symbol": "DOM.L",
+        "name": "DOMINO'S PIZZA GROUP PLC ORD GBP0.00520833",
+        "market": ""
+    },
+    {
+        "symbol": "DPA.L",
+        "name": "DP AIRCRAFT I LTD ORD PREF NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/diploma-plc-ord-5p.svg",
+        "symbol": "DPLM.L",
+        "name": "DIPLOMA PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "DPP.L",
+        "name": "DP POLAND PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "symbol": "DRV.L",
+        "name": "DRIVER GROUP ORD GBP0.004",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/drax-group-plc-ord-11-16-29p.svg",
+        "symbol": "DRX.L",
+        "name": "DRAX GROUP PLC ORD GBP0.1155172",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/discoverie-plc.svg",
+        "symbol": "DSCV.L",
+        "name": "DISCOVERIE GROUP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "DSG.L",
+        "name": "DILLISTONE GROUP ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "DSW.L",
+        "name": "DSW CAPITAL PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "symbol": "DUKE.L",
+        "name": "DUKE CAPITAL LIMITED ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "DWHA.L",
+        "name": "DEWHURST GROUP PLC 'A'NON.V ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/dowlais-plc.svg",
+        "symbol": "DWL.L",
+        "name": "DOWLAIS GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "DXRX.L",
+        "name": "DIACEUTICS PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "symbol": "EAAS.L",
+        "name": "EENERGY GROUP PLC ORD GBP0.003",
+        "market": ""
+    },
+    {
+        "symbol": "EAH.L",
+        "name": "ECO ANIMAL HEALTH ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "EARN.L",
+        "name": "EARNZ PLC ORD GBP0.04",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ebiquity-plc.svg",
+        "symbol": "EBQ.L",
+        "name": "EBIQUITY PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "ECEL.L",
+        "name": "EUROCELL PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "ECHO.L",
+        "name": "ECHO ENERGY PLC ORD GBP0.000001",
+        "market": ""
+    },
+    {
+        "symbol": "ECK.L",
+        "name": "ECKOH PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "symbol": "ECOB.L",
+        "name": "ECO BUILDINGS GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ecora-resources-plc.svg",
+        "symbol": "ECOR.L",
+        "name": "ECORA RESOURCES PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "symbol": "ECR.L",
+        "name": "ECR MINERALS PLC ORD GBP0.00001",
+        "market": ""
+    },
+    {
+        "symbol": "EDEN.L",
+        "name": "EDEN RESEARCH PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "EEE.L",
+        "name": "EMPIRE METALS LTD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "EGT.L",
+        "name": "EUROPEAN GREEN TRANSITION PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "symbol": "ELCO.L",
+        "name": "ELECO PUBLIC LIMITED COMPANY ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/elixirr-international-plc.svg",
+        "symbol": "ELIX.L",
+        "name": "ELIXIRR INTERNATIONAL PLC ORD GBP0.00005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/elementis-plc.svg",
+        "symbol": "ELM.L",
+        "name": "ELEMENTIS ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "EMAN.L",
+        "name": "EVERYMAN MEDIA GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/man-group-plc-ord-usd0-0342857142.svg",
+        "symbol": "EMG.L",
+        "name": "MAN GROUP PLC (NEW) ORD USD0.0342857142",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/european-metals-ltd.svg",
+        "symbol": "EMH.L",
+        "name": "EUROPEAN METALS HOLDINGS LIMITED ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "EML.L",
+        "name": "EMMERSON PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "EMR.L",
+        "name": "EMPRESARIA GROUP ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ethernity-networks-ltd.svg",
+        "symbol": "ENET.L",
+        "name": "ETHERNITY NETWORKS LTD ORD ILS0.001 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/energean.svg",
+        "symbol": "ENOG.L",
+        "name": "ENERGEAN PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/enquest-plc.svg",
+        "symbol": "ENQ.L",
+        "name": "ENQUEST PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "ENSI.L",
+        "name": "ENSILICA PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/entain.svg",
+        "symbol": "ENT.L",
+        "name": "ENTAIN PLC ORD EUR0.01",
+        "market": ""
+    },
+    {
+        "symbol": "EOG.L",
+        "name": "EUROPA OIL & GAS(HLDGS) ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "EPP.L",
+        "name": "ENERGYPATHWAYS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "EPWN.L",
+        "name": "EPWIN GROUP PLC GBP0.0005",
+        "market": ""
+    },
+    {
+        "symbol": "EQLS.L",
+        "name": "EQUALS GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/essentra-plc.svg",
+        "symbol": "ESNT.L",
+        "name": "ESSENTRA PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "EST.L",
+        "name": "EAST STAR RESOURCES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ESYS.L",
+        "name": "ESSENSYS PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "symbol": "ETP.L",
+        "name": "ENERAQUA TECHNOLOGIES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/e-therapeutics-plc.svg",
+        "symbol": "ETX.L",
+        "name": "E-THERAPEUTICS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/eurasia-mining-plc-ord-0-1p.svg",
+        "symbol": "EUA.L",
+        "name": "EURASIA MINING PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/europa-metals.svg",
+        "symbol": "EUZ.L",
+        "name": "EUROPA METALS LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "EVST.L",
+        "name": "EVEREST GLOBAL PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/experian.svg",
+        "symbol": "EXPN.L",
+        "name": "EXPERIAN PLC ORD USD0.10",
+        "market": ""
+    },
+    {
+        "symbol": "EYE.L",
+        "name": "EAGLE EYE SOLUTIONS GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/easyjet.svg",
+        "symbol": "EZJ.L",
+        "name": "EASYJET ORD GBP0.27285714",
+        "market": ""
+    },
+    {
+        "symbol": "FA..L",
+        "name": "FIREANGEL SAFETY TECH GROUP PLC GBP0.02",
+        "market": ""
+    },
+    {
+        "symbol": "FAB.L",
+        "name": "FUSION ANTIBODIES PLC ORD GBP0.04",
+        "market": ""
+    },
+    {
+        "symbol": "FADL.L",
+        "name": "FADEL PARTNERS INC COM STK USD0.001 (DI) REGS CAT 3/144A",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/volution-plc.svg",
+        "symbol": "FAN.L",
+        "name": "VOLUTION GRP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "FAR.L",
+        "name": "FERRO-ALLOY RESOURCES LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/faron-pharmaceuticals-oy.svg",
+        "symbol": "FARN.L",
+        "name": "FARON PHARMACEUTICALS OY ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/funding-circle.svg",
+        "symbol": "FCH.L",
+        "name": "FUNDING CIRCLE HLDGS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "FCM.L",
+        "name": "FIRST CLASS METALS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "FDBK.L",
+        "name": "FEEDBACK ORD GBP0.5",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/fdm-plc.svg",
+        "symbol": "FDM.L",
+        "name": "FDM GROUP (HOLDINGS) PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "FEN.L",
+        "name": "FRENKEL TOPPING GROUP ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/firstgroup-plc.svg",
+        "symbol": "FGP.L",
+        "name": "FIRSTGROUP ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "FIH.L",
+        "name": "FIH GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "FIPP.L",
+        "name": "FRONTIER IP GROUP PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "symbol": "FKE.L",
+        "name": "FISKE ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "FLK.L",
+        "name": "FLETCHER KING PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/flutter-entertainment.svg",
+        "symbol": "FLTR.L",
+        "name": "FLUTTER ENTERTAINMENT PLC ORD EUR0.09 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "FMET.L",
+        "name": "FULCRUM METALS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "FNX.L",
+        "name": "FONIX MOBILE PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/forterra-plc.svg",
+        "symbol": "FORT.L",
+        "name": "FORTERRA PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/4imprint-plc.svg",
+        "symbol": "FOUR.L",
+        "name": "4IMPRINT GROUP PLC ORD 38 6/13P",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/foxtons-plc.svg",
+        "symbol": "FOXT.L",
+        "name": "FOXTONS GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "FPO.L",
+        "name": "FIRST PROPERTY ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "FRAN.L",
+        "name": "FRANCHISE BRANDS PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/frasers-group.svg",
+        "symbol": "FRAS.L",
+        "name": "FRASERS GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/fresnillo.svg",
+        "symbol": "FRES.L",
+        "name": "FRESNILLO PLC ORD USD0.50",
+        "market": ""
+    },
+    {
+        "symbol": "FRG.L",
+        "name": "FIRERING STRATEGIC MINERALS PLC ORD EUR0.001 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "FRP.L",
+        "name": "FRP ADVISORY GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/foresight-limit.svg",
+        "symbol": "FSG.L",
+        "name": "FORESIGHT GROUP HLDGS LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/james-fisher-and-sons-plc.svg",
+        "symbol": "FSJ.L",
+        "name": "FISHER(JAMES)& SONS PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/fuller-smith-and-turner-a.svg",
+        "symbol": "FSTA.L",
+        "name": "FULLER SMITH & TURNER 'A'ORD GBP0.40",
+        "market": ""
+    },
+    {
+        "symbol": "FTC.L",
+        "name": "FILTRONIC PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/futura-medical.svg",
+        "symbol": "FUM.L",
+        "name": "FUTURA MEDICAL ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/future.svg",
+        "symbol": "FUTR.L",
+        "name": "FUTURE PLC ORD GBP0.15",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ferrexpo-plc.svg",
+        "symbol": "FXPO.L",
+        "name": "FERREXPO PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "G4M.L",
+        "name": "GEAR4MUSIC (HOLDINGS) PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "symbol": "GATC.L",
+        "name": "GATTACA PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/games-workshop-group-plc-ord-5p.svg",
+        "symbol": "GAW.L",
+        "name": "GAMES WORKSHOP GROUP ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "GBP.L",
+        "name": "GLOBAL PETROLEUM LIMITED NPV",
+        "market": ""
+    },
+    {
+        "symbol": "GCM.L",
+        "name": "GCM RESOURCES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "GDP.L",
+        "name": "GOLDPLAT ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "GDR.L",
+        "name": "GENEDRIVE PLC ORD GBP0.015",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/goodwin-plc.svg",
+        "symbol": "GDWN.L",
+        "name": "GOODWIN ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/gelion-plc.svg",
+        "symbol": "GELN.L",
+        "name": "GELION UK LTD ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/gem-diamonds-ltd.svg",
+        "symbol": "GEMD.L",
+        "name": "GEM DIAMONDS LTD ORD USD0.01 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/genuit-plc.svg",
+        "symbol": "GEN.L",
+        "name": "GENUIT GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/genflow-biosciences-plc.svg",
+        "symbol": "GENF.L",
+        "name": "GENFLOW BIOSCIENCES PLC ORD GBP0.0003",
+        "market": ""
+    },
+    {
+        "symbol": "GENI.L",
+        "name": "GENINCODE PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/genel-energy-plc.svg",
+        "symbol": "GENL.L",
+        "name": "GENEL ENERGY ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "GETB.L",
+        "name": "GETBUSY PLC ORD GBP0.0015",
+        "market": ""
+    },
+    {
+        "symbol": "GFIN.L",
+        "name": "GFINITY PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "GFM.L",
+        "name": "GRIFFIN MINING ORD USD0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/galliford-try.svg",
+        "symbol": "GFRD.L",
+        "name": "GALLIFORD TRY HOLDINGS PLC ORD GBP0.5",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/greatland-gold.svg",
+        "symbol": "GGP.L",
+        "name": "GREATLAND GOLD ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "GHT.L",
+        "name": "GRESHAM TECHNOLOGIES PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/guild-esports-plc.svg",
+        "symbol": "GILD.L",
+        "name": "GUILD ESPORTS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/gulf-keystone-petroleum.svg",
+        "symbol": "GKP.L",
+        "name": "GULF KEYSTONE PETROLEUM LIMITED COM SHS USD1.00 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/mj-gleeson-plc.svg",
+        "symbol": "GLE.L",
+        "name": "M J GLEESON PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/glencore.svg",
+        "symbol": "GLEN.L",
+        "name": "GLENCORE PLC ORD USD0.01",
+        "market": ""
+    },
+    {
+        "symbol": "GLR.L",
+        "name": "GALILEO RESOURCES PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "GMAA.L",
+        "name": "GAMA AVIATION PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/golden-metal-resources-plc.svg",
+        "symbol": "GMET.L",
+        "name": "GOLDEN METAL RESOURCES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/gulf-marine-services-plc.svg",
+        "symbol": "GMS.L",
+        "name": "GULF MARINE SERVICES PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/genus-plc.svg",
+        "symbol": "GNS.L",
+        "name": "GENUS ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "GOOD.L",
+        "name": "GOOD ENERGY GROUP ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/global-ports-plc.svg",
+        "symbol": "GPH.L",
+        "name": "GLOBAL PORTS HOLDING PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "GPL.L",
+        "name": "GRAFT POLYMER (UK) PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "GR1T.L",
+        "name": "GRIT REAL ESTATE INCOME GRP LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "GRC.L",
+        "name": "GRC INTERNATIONAL GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/greggs-plc-ord-2p.svg",
+        "symbol": "GRG.L",
+        "name": "GREGGS ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/grainger.svg",
+        "symbol": "GRI.L",
+        "name": "GRAINGER PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "GROC.L",
+        "name": "GREENROC MINING PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/molten-ventures.svg",
+        "symbol": "GROW.L",
+        "name": "MOLTEN VENTURES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/gs-chain-plc.svg",
+        "symbol": "GSC.L",
+        "name": "GS CHAIN PLC ORD GBP0.000167",
+        "market": ""
+    },
+    {
+        "symbol": "GSCU.L",
+        "name": "GREAT SOUTHERN COPPER PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/glaxosmithkline.svg",
+        "symbol": "GSK.L",
+        "name": "GSK PLC ORD GBP0.3125",
+        "market": ""
+    },
+    {
+        "symbol": "GST.L",
+        "name": "GSTECHNOLOGIES LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "GTC.L",
+        "name": "GETECH GROUP ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "symbol": "GTLY.L",
+        "name": "GATELEY HLDGS PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "symbol": "GUN.L",
+        "name": "GUNSYND PLC ORD GBP0.00085",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/gusbourne-plc.svg",
+        "symbol": "GUS.L",
+        "name": "GUSBOURNE PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "GVMH.L",
+        "name": "GRAND VISION MEDIA HOLDINGS PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/globalworth-real-estate-invest-ltd-3-snr-emtn-29-03-2025-eur1000-1-regs.svg",
+        "symbol": "GWI.L",
+        "name": "GLOBALWORTH REAL ESTATE INVEST LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/gym-plc-the.svg",
+        "symbol": "GYM.L",
+        "name": "GYM GROUP PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "HAMA.L",
+        "name": "HAMAK GOLD LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "HARL.L",
+        "name": "HARLAND & WOLFF GROUP HOLDINGS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hays-plc-ord-1p.svg",
+        "symbol": "HAS.L",
+        "name": "HAYS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/haydale-graphene-inds-plc.svg",
+        "symbol": "HAYD.L",
+        "name": "HAYDALE GRAPHENE INDUSTRIES PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/harbour-energy.svg",
+        "symbol": "HBR.L",
+        "name": "HARBOUR ENERGY PLC ORD GBP0.00002",
+        "market": ""
+    },
+    {
+        "symbol": "HDD.L",
+        "name": "HARDIDE PLC ORD GBP0.04",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/helium-one-global-ltd.svg",
+        "symbol": "HE1.L",
+        "name": "HELIUM ONE GLOBAL LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/headlam-plc.svg",
+        "symbol": "HEAD.L",
+        "name": "HEADLAM GROUP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "HEIQ.L",
+        "name": "HEIQ PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "HELD.L",
+        "name": "HELLENIC DYNAMICS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "HEMO.L",
+        "name": "HEMOGENYX PHARMACEUTICALS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "HERC.L",
+        "name": "HERCULES SITE SERVICES PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "HEX.L",
+        "name": "HELIX EXPLORATION PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/halfords-plc.svg",
+        "symbol": "HFD.L",
+        "name": "HALFORDS GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hilton-food-plc.svg",
+        "symbol": "HFG.L",
+        "name": "HILTON FOOD GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hikma-pharmaceuticals.svg",
+        "symbol": "HIK.L",
+        "name": "HIKMA PHARMACEUTICALS ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hill-and-smith-plc.svg",
+        "symbol": "HILS.L",
+        "name": "HILL & SMITH PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hargreaves-lansdown.svg",
+        "symbol": "HL..L",
+        "name": "HARGREAVES LANSDOWN ORD GBP0.004",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/halma.svg",
+        "symbol": "HLMA.L",
+        "name": "HALMA ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/haleon-plc.svg",
+        "symbol": "HLN.L",
+        "name": "HALEON PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "HMI.L",
+        "name": "HARVEST MINERALS LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hochschild-mining-plc.svg",
+        "symbol": "HOC.L",
+        "name": "HOCHSCHILD MINING PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "HPAC.L",
+        "name": "HERMES PACIFIC INVESTMENTS PLC ORD GBP1",
+        "market": ""
+    },
+    {
+        "symbol": "HRN.L",
+        "name": "HORNBY PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hsbc.svg",
+        "symbol": "HSBA.L",
+        "name": "HSBC HOLDINGS PLC ORD USD0.50",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hansard-global-plc.svg",
+        "symbol": "HSD.L",
+        "name": "HANSARD GLOBAL PLC ORD GBP0.50",
+        "market": ""
+    },
+    {
+        "symbol": "HSM.L",
+        "name": "HEATH(SAMUEL)& SONS ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hostelworld-plc.svg",
+        "symbol": "HSW.L",
+        "name": "HOSTELWORLD GROUP PLC ORD EUR0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hiscox.svg",
+        "symbol": "HSX.L",
+        "name": "HISCOX ORD GBP0.065 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hunting-plc.svg",
+        "symbol": "HTG.L",
+        "name": "HUNTING ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/helios-towers-plc.svg",
+        "symbol": "HTWS.L",
+        "name": "HELIOS TOWERS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "HUD.L",
+        "name": "HUDDLED GROUP PLC ORD GBP0.00040108663",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hummingbird-resources-ltd.svg",
+        "symbol": "HUM.L",
+        "name": "HUMMINGBIRD RESOURCES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "HUW.L",
+        "name": "HELIOS UNDERWRITING PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/open-orphan.svg",
+        "symbol": "HVO.L",
+        "name": "HVIVO PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "HVT.L",
+        "name": "HEAVITREE BREWERY ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/howden-joinery.svg",
+        "symbol": "HWDN.L",
+        "name": "HOWDEN JOINERY GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/harworth-plc.svg",
+        "symbol": "HWG.L",
+        "name": "HARWORTH GROUP PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/horizonte-minerals-plc.svg",
+        "symbol": "HZM.L",
+        "name": "HORIZONTE MINERALS ORD GBP0.2",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ibstock-plc.svg",
+        "symbol": "IBST.L",
+        "name": "IBSTOCK PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/intermediate-capital.svg",
+        "symbol": "ICG.L",
+        "name": "INTERMEDIATE CAPITAL GROUP PLC ORD GBP0.2625",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/integrated-diagnostics-plc.svg",
+        "symbol": "IDHC.L",
+        "name": "INTEGRATED DIAGNOSTICS HLDGS PLC ORD USD0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/royal-mail.svg",
+        "symbol": "IDS.L",
+        "name": "INTL DISTRIBUTIONS SVCS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/invinity-energy-sys-plc.svg",
+        "symbol": "IES.L",
+        "name": "INVINITY ENERGY SYSTEMS PLC ORD EUR0.01",
+        "market": ""
+    },
+    {
+        "symbol": "IGE.L",
+        "name": "IMAGE SCAN HLDGS ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ig.svg",
+        "symbol": "IGG.L",
+        "name": "IG GROUP HLDGS ORD GBP0.00005",
+        "market": ""
+    },
+    {
+        "symbol": "IGP.L",
+        "name": "INTERCEDE GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "IGR.L",
+        "name": "IG DESIGN GROUP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "IHC.L",
+        "name": "INSPIRATION HEALTHCARE GROUP PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/intercontinental-hotels.svg",
+        "symbol": "IHG.L",
+        "name": "INTERCONTINENTAL HOTELS GROUP ORD GBP0.208521303",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/integrafin-plc.svg",
+        "symbol": "IHP.L",
+        "name": "INTEGRAFIN HOLDINGS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "IIG.L",
+        "name": "INTUITIVE INVESTMENTS GROUP PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/3i-group.svg",
+        "symbol": "III.L",
+        "name": "3I GROUP ORD GBP0.738636",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ilika-plc.svg",
+        "symbol": "IKA.L",
+        "name": "ILIKA PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/imperial-brands.svg",
+        "symbol": "IMB.L",
+        "name": "IMPERIAL BRANDS PLC GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/imi-plc.svg",
+        "symbol": "IMI.L",
+        "name": "IMI ORD GBP0.28571428",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/inchcape-plc-ord-10p.svg",
+        "symbol": "INCH.L",
+        "name": "INCHCAPE ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "INDI.L",
+        "name": "INDUS GAS LTD ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/indivior-plc.svg",
+        "symbol": "INDV.L",
+        "name": "INDIVIOR PLC ORD USD0.5",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/informa.svg",
+        "symbol": "INF.L",
+        "name": "INFORMA PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "ING.L",
+        "name": "INGENTA PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "INHC.L",
+        "name": "INDUCTION HEALTHCARE GROUP PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "symbol": "INSE.L",
+        "name": "INSPIRED PLC ORD GBP0.0125",
+        "market": ""
+    },
+    {
+        "symbol": "INSG.L",
+        "name": "INSIG AI PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "INSP.L",
+        "name": "INSPIRIT ENERGY HOLDINGS PLC ORD GBP0.00001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/investec-plc-ord-gbp0-0002.svg",
+        "symbol": "INVP.L",
+        "name": "INVESTEC ORD GBP0.0002",
+        "market": ""
+    },
+    {
+        "symbol": "INX.L",
+        "name": "I-NEXUS GLOBAL PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/iofina-plc.svg",
+        "symbol": "IOF.L",
+        "name": "IOFINA PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/international-personal-finan.svg",
+        "symbol": "IPF.L",
+        "name": "INTERNATIONAL PERSONAL FINANCE PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ip-plc.svg",
+        "symbol": "IPO.L",
+        "name": "IP GROUP ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/iq-ai-ltd.svg",
+        "symbol": "IQAI.L",
+        "name": "IQ-AI LTD ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/iqgeo-plc.svg",
+        "symbol": "IQG.L",
+        "name": "IQGEO GROUP PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "symbol": "IRON.L",
+        "name": "IRONVELD PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ithaca-energy-plc.svg",
+        "symbol": "ITH.L",
+        "name": "ITHACA ENERGY PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ITIM.L",
+        "name": "ITIM GROUP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/intertek.svg",
+        "symbol": "ITRK.L",
+        "name": "INTERTEK GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/itv.svg",
+        "symbol": "ITV.L",
+        "name": "ITV ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/itaconix-plc.svg",
+        "symbol": "ITX.L",
+        "name": "ITACONIX PLC ORD GBP0.50",
+        "market": ""
+    },
+    {
+        "symbol": "IUG.L",
+        "name": "INTELLIGENT ULTRASOUND GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/iwg.svg",
+        "symbol": "IWG.L",
+        "name": "IWG PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "IX..L",
+        "name": "I(X) NET ZERO PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "IXI.L",
+        "name": "IXICO PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "JADE.L",
+        "name": "JADE ROAD INVESTMENTS LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "JAN.L",
+        "name": "JANGADA MINES PLC ORD GBP0.0004",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/bluejay-mining.svg",
+        "symbol": "JAY.L",
+        "name": "BLUEJAY MINING PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/jd-sports.svg",
+        "symbol": "JD..L",
+        "name": "JD SPORTS FASHION PLC ORD GBP0.0005",
+        "market": ""
+    },
+    {
+        "symbol": "JDG.L",
+        "name": "JUDGES SCIENTIFIC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/wetherspoon-jd-plc.svg",
+        "symbol": "JDW.L",
+        "name": "WETHERSPOON(J.D.) ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "symbol": "JEL.L",
+        "name": "JERSEY ELECTRICITY PLC ORD GBP0.05 A",
+        "market": ""
+    },
+    {
+        "symbol": "JIM.L",
+        "name": "JARVIS SECURITIES ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/jubilee-metals-plc.svg",
+        "symbol": "JLP.L",
+        "name": "JUBILEE METALS GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/johnson-matthey.svg",
+        "symbol": "JMAT.L",
+        "name": "JOHNSON MATTHEY ORD GBP1.109245",
+        "market": ""
+    },
+    {
+        "symbol": "JNEO.L",
+        "name": "JOURNEO PLC ORD GBP0.065",
+        "market": ""
+    },
+    {
+        "symbol": "JOG.L",
+        "name": "JERSEY OIL & GAS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/jadestone-energy-plc.svg",
+        "symbol": "JSE.L",
+        "name": "JADESTONE ENERGY PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/jtc-plc.svg",
+        "symbol": "JTC.L",
+        "name": "JTC PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/jupiter-fund-management.svg",
+        "symbol": "JUP.L",
+        "name": "JUPITER FUND MANAGEMENT PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/just-plc.svg",
+        "symbol": "JUST.L",
+        "name": "JUST GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "JWNG.L",
+        "name": "JAYWING PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "KAT.L",
+        "name": "KATORO GOLD PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/kavango-resources-plc.svg",
+        "symbol": "KAV.L",
+        "name": "KAVANGO RESOURCES PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "KBT.L",
+        "name": "K3 BUSINESS TECHNOLOGY GROUP ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/kin-and-carta-plc.svg",
+        "symbol": "KCT.L",
+        "name": "KIN AND CARTA PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "KDNC.L",
+        "name": "CADENCE MINERALS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/kefi-gold-and-copper-plc.svg",
+        "symbol": "KEFI.L",
+        "name": "KEFI GOLD AND COPPER PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "KEN.L",
+        "name": "KENDRICK RESOURCES PLC ORD GBP0.0003",
+        "market": ""
+    },
+    {
+        "symbol": "KEYS.L",
+        "name": "KEYSTONE LAW GROUP PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/kingfisher-plc-ord-15-5-7p.svg",
+        "symbol": "KGF.L",
+        "name": "KINGFISHER ORD GBP0.157142857",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/kier-plc.svg",
+        "symbol": "KIE.L",
+        "name": "KIER GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "KINO.L",
+        "name": "KINOVO PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "KIST.L",
+        "name": "KISTOS HOLDINGS PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/kitwave-plc.svg",
+        "symbol": "KITW.L",
+        "name": "KITWAVE GROUP PLC",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/keller-plc.svg",
+        "symbol": "KLR.L",
+        "name": "KELLER GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "KLSO.L",
+        "name": "KELSO GROUP HOLDINGS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/kromek-plc.svg",
+        "symbol": "KMK.L",
+        "name": "KROMEK GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/kanabo-group.svg",
+        "symbol": "KNB.L",
+        "name": "KANABO GROUP PLC ORD GBP0.025",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/kainos.svg",
+        "symbol": "KNOS.L",
+        "name": "KAINOS GROUP PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "symbol": "KOD.L",
+        "name": "KODAL MINERALS PLC ORD GBP0.0003125",
+        "market": ""
+    },
+    {
+        "symbol": "KOO.L",
+        "name": "KOOTH PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/kore-potash.svg",
+        "symbol": "KP2.L",
+        "name": "KORE POTASH PLC ORD USD0.001",
+        "market": ""
+    },
+    {
+        "symbol": "KRPZ.L",
+        "name": "KROPZ PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "KRS.L",
+        "name": "KERAS RESOURCES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/kingswood-acquisition.svg",
+        "symbol": "KWG.L",
+        "name": "KINGSWOOD HOLDINGS LTD ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "KZG.L",
+        "name": "KAZERA GLOBAL PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "LAS.L",
+        "name": "LONDON & ASSOCIATED PROPERTIES ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "LBE.L",
+        "name": "LONGBOAT ENERGY PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "LDG.L",
+        "name": "LOGISTICS DEVELOPMENT GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "LDSG.L",
+        "name": "LEEDS GROUP PLC ORD GBP0.12",
+        "market": ""
+    },
+    {
+        "symbol": "LEX.L",
+        "name": "LEXINGTON GOLD LTD COM SHS USD0.003 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/london-fin-inv.svg",
+        "symbol": "LFI.L",
+        "name": "LONDON FINANCE & INVESTMENT GROUP ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/legal-and-general.svg",
+        "symbol": "LGEN.L",
+        "name": "LEGAL & GENERAL GROUP ORD GBP0.025",
+        "market": ""
+    },
+    {
+        "symbol": "LGRS.L",
+        "name": "LOUNGERS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "LIB.L",
+        "name": "LIBERTINE HOLDINGS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "LIFS.L",
+        "name": "LIFESAFE HOLDINGS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "LIKE.L",
+        "name": "LIKEWISE GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "LINV.L",
+        "name": "LENDINVEST PLC ORD GBP0.0005",
+        "market": ""
+    },
+    {
+        "symbol": "LIO.L",
+        "name": "LIONTRUST ASSET MANAGEMENT PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "LIT.L",
+        "name": "LITIGATION CAPITAL MGMT LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "LIV.L",
+        "name": "LIVERMORE INVESTMENTS GROUP LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "LLA.L",
+        "name": "LUNGLIFE AI INC ORD SHS USD0.0001(DI)REG S CAT3",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/lloyds.svg",
+        "symbol": "LLOY.L",
+        "name": "LLOYDS BANKING GROUP ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "symbol": "LME.L",
+        "name": "LIMITLESS EARTH PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "LND.L",
+        "name": "LANDORE RESOURCES LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "LORD.L",
+        "name": "LORDS GROUP TRADING PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "symbol": "LPA.L",
+        "name": "LPA GROUP ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/lancashire.svg",
+        "symbol": "LRE.L",
+        "name": "LANCASHIRE HLDGS COM SHS USD0.50",
+        "market": ""
+    },
+    {
+        "symbol": "LSC.L",
+        "name": "LONDON SECURITY PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/london-stock-exchange.svg",
+        "symbol": "LSEG.L",
+        "name": "LONDON STOCK EXCHANGE GROUP ORD GBP0.06918604",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/lsl-property-services-plc.svg",
+        "symbol": "LSL.L",
+        "name": "LSL PROPERTY SERVICES PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "symbol": "LST.L",
+        "name": "LIGHT SCIENCE TECHNOLOGIES HOLDINGS ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "LTHM.L",
+        "name": "LATHAM(JAMES) ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/luceco-plc.svg",
+        "symbol": "LUCE.L",
+        "name": "LUCECO PLC ORD GBP0.0005",
+        "market": ""
+    },
+    {
+        "symbol": "LVCG.L",
+        "name": "LIVE COMPANY GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/mitchells-and-butlers-plc.svg",
+        "symbol": "MAB.L",
+        "name": "MITCHELLS & BUTLERS PLC ORD GBP0.085416",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/mortgage-advice-bureau-holdi.svg",
+        "symbol": "MAB1.L",
+        "name": "MORTGAGE ADVICE BUREAU (HOLDINGS) PLC",
+        "market": ""
+    },
+    {
+        "symbol": "MAC.L",
+        "name": "MARECHALE CAPITAL PLC ORD GBP0.008",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/macfarlane-grp.svg",
+        "symbol": "MACF.L",
+        "name": "MACFARLANE GROUP ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "MAFL.L",
+        "name": "MINERAL & FINANCIAL INVESTMENTS LTD ORD GBP0.01 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "MAI.L",
+        "name": "MAINTEL HLDGS ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/manolete-partners-plc.svg",
+        "symbol": "MANO.L",
+        "name": "MANOLETE PARTNERS PLC ORD GBP0.004",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/marston-s-plc.svg",
+        "symbol": "MARS.L",
+        "name": "MARSTON'S ORD GBP0.07375",
+        "market": ""
+    },
+    {
+        "symbol": "MAST.L",
+        "name": "MAST ENERGY DEVELOPMENTS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/petro-matad-ltd.svg",
+        "symbol": "MATD.L",
+        "name": "PETRO MATAD LTD ORD USD0.01",
+        "market": ""
+    },
+    {
+        "symbol": "MBH.L",
+        "name": "MICHELMERSH BRICK HLDGS ORD GBP0.2",
+        "market": ""
+    },
+    {
+        "symbol": "MBO.L",
+        "name": "MOBILITYONE LTD ORD GBP0.025",
+        "market": ""
+    },
+    {
+        "symbol": "MBT.L",
+        "name": "MOBILE TORNADO GRP ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/mcbride-plc.svg",
+        "symbol": "MCB.L",
+        "name": "MCBRIDE ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/national-express-plc.svg",
+        "symbol": "MCG.L",
+        "name": "MOBICO GROUP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "MDZ.L",
+        "name": "MEDIAZEST ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/me-international-plc.svg",
+        "symbol": "MEGP.L",
+        "name": "ME GROUP INTERNATIONAL PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "symbol": "MEN.L",
+        "name": "MOLECULAR ENERGIES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/mears-plc.svg",
+        "symbol": "MER.L",
+        "name": "MEARS GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "MERC.L",
+        "name": "MERCIA ASSET MANAGEMENT PLC ORD GBP0.00001",
+        "market": ""
+    },
+    {
+        "symbol": "MET1.L",
+        "name": "METALS ONE PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "MEX.L",
+        "name": "TORTILLA MEXICAN GRILL PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "MFAI.L",
+        "name": "MINDFLAIR PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "symbol": "MFX.L",
+        "name": "MANX FINANCIAL GROUP PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/morgan-advanced-materials-pl.svg",
+        "symbol": "MGAM.L",
+        "name": "MORGAN ADVANCED MATERIALS PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/morgan-sindall-plc.svg",
+        "symbol": "MGNS.L",
+        "name": "MORGAN SINDALL GRP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "MHC.L",
+        "name": "MYHEALTHCHECKED PLC ORD GBP0.015",
+        "market": ""
+    },
+    {
+        "symbol": "MII.L",
+        "name": "MILTON CAPITAL PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "MILA.L",
+        "name": "MILA RESOURCES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "MIN.L",
+        "name": "MINOAN GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "MIND.L",
+        "name": "MIND GYM PLC ORD GBP0.00001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/mirriad-advertising-plc.svg",
+        "symbol": "MIRI.L",
+        "name": "MIRRIAD ADVERTISING PLC ORD GBP0.00001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/marks-and-spencer.svg",
+        "symbol": "MKS.L",
+        "name": "MARKS & SPENCER GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "MLVN.L",
+        "name": "MALVERN INTERNATIONAL PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "MMAG.L",
+        "name": "MUSICMAGPIE PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/mondi.svg",
+        "symbol": "MNDI.L",
+        "name": "MONDI PLC ORD EUR0.22",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/m-and-g-plc-ord-5.svg",
+        "symbol": "MNG.L",
+        "name": "M&G PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "MNRG.L",
+        "name": "METALNRG PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/moneysupermarketcom.svg",
+        "symbol": "MONY.L",
+        "name": "MONEYSUPERMARKET.COM GROUP PLC ORD GBP0.0002",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/moonpig-plc.svg",
+        "symbol": "MOON.L",
+        "name": "MOONPIG GROUP PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/hostmore-plc.svg",
+        "symbol": "MORE.L",
+        "name": "HOSTMORE PLC ORD GBP0.2",
+        "market": ""
+    },
+    {
+        "symbol": "MOS.L",
+        "name": "MOBILE STREAMS ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/motorpoint-plc.svg",
+        "symbol": "MOTR.L",
+        "name": "MOTORPOINT GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "MPAC.L",
+        "name": "MPAC GROUP PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "MPL.L",
+        "name": "MERCANTILE PORTS AND LOGISTICS LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "MRIT.L",
+        "name": "MERIT GROUP PLC ORD GBP0.28",
+        "market": ""
+    },
+    {
+        "symbol": "MRK.L",
+        "name": "MARKS ELECTRICAL GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/marlowe-plc.svg",
+        "symbol": "MRL.L",
+        "name": "MARLOWE PLC ORD GBP0.5",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/melrose-industries-plc-ords-160-21p.svg",
+        "symbol": "MRO.L",
+        "name": "MELROSE INDUSTRIES PLC ORD GBP0.22857142",
+        "market": ""
+    },
+    {
+        "symbol": "MSI.L",
+        "name": "MS INTERNATIONAL ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/marshalls-plc.svg",
+        "symbol": "MSLH.L",
+        "name": "MARSHALLS ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "MSMN.L",
+        "name": "MOSMAN OIL & GAS LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "MSYS.L",
+        "name": "MICROSAIC SYSTEMS PLC ORD GBP0.00001",
+        "market": ""
+    },
+    {
+        "symbol": "MTEC.L",
+        "name": "MADE TECH GROUP PLC ORD GBP0.0005",
+        "market": ""
+    },
+    {
+        "symbol": "MTL.L",
+        "name": "METALS EXPLORATION(UK) ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/mitie-plc.svg",
+        "symbol": "MTO.L",
+        "name": "MITIE GROUP ORD GBP0.025",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/metro-bank-plc.svg",
+        "symbol": "MTRO.L",
+        "name": "METRO BANK HOLDINGS PLC ORD GBP0.000001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/mountview-estates-plc.svg",
+        "symbol": "MTVW.L",
+        "name": "MOUNTVIEW ESTATES ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "MTW.L",
+        "name": "MATTIOLI WOODS ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/mulberry.svg",
+        "symbol": "MUL.L",
+        "name": "MULBERRY GROUP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "MWE.L",
+        "name": "MTI WIRELESS EDGE ORD ILS0.01",
+        "market": ""
+    },
+    {
+        "symbol": "MYX.L",
+        "name": "MYCELX TECHNOLOGIES CORP COM SHS USD0.025 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "N4P.L",
+        "name": "N4 PHARMA PLC ORD GBP0.004",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ninety-one-plc-ord-001.svg",
+        "symbol": "N91.L",
+        "name": "NINETY ONE PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/nanoco-plc.svg",
+        "symbol": "NANO.L",
+        "name": "NANOCO GROUP ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "NAR.L",
+        "name": "NORTHAMBER ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "NARF.L",
+        "name": "NARF INDUSTRIES PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "NBB.L",
+        "name": "NORMAN BROADBENT PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/nationwide-building-society-325-snr-nts-05-09-2029-eur100000-520.svg",
+        "symbol": "NBS.L",
+        "name": "NATIONWIDE BUILDING SOCIETY CORE CAPITAL DEFERRED GBP1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ncc-plc.svg",
+        "symbol": "NCC.L",
+        "name": "NCC GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "NEO.L",
+        "name": "NEO ENERGY METALS PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "NET.L",
+        "name": "NETCALL PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/network-intl-hldgs-plc.svg",
+        "symbol": "NETW.L",
+        "name": "NETWORK INTL HLDGS PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "NEXS.L",
+        "name": "NEXUS INFRASTRUCTURE PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "symbol": "NFX.L",
+        "name": "NUFORMIX PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/national-grid.svg",
+        "symbol": "NG..L",
+        "name": "NATIONAL GRID ORD GBP0.12431289",
+        "market": ""
+    },
+    {
+        "symbol": "NGHT.L",
+        "name": "NIGHTCAP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/nostrum-oil-and-gas-plc.svg",
+        "symbol": "NOG.L",
+        "name": "NOSTRUM OIL & GAS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "NSCI.L",
+        "name": "NETSCIENTIFIC PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "NTBR.L",
+        "name": "NORTHERN BEAR PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "NTOG.L",
+        "name": "NOSTRA TERRA OIL & GAS COMPANY PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "NTQ.L",
+        "name": "ENTEQ TECHNOLOGIES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/perimeter-medical-imaging-ai.svg",
+        "symbol": "NWF.L",
+        "name": "NWF GROUP PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/natwest-group.svg",
+        "symbol": "NWG.L",
+        "name": "NATWEST GROUP PLC ORD GBP1.0769",
+        "market": ""
+    },
+    {
+        "symbol": "NWOR.L",
+        "name": "NATIONAL WORLD PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "NWT.L",
+        "name": "NEWMARK SECURITY ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "NXQ.L",
+        "name": "NEXTEQ PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/norcros-plc.svg",
+        "symbol": "NXR.L",
+        "name": "NORCROS PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/next.svg",
+        "symbol": "NXT.L",
+        "name": "NEXT ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ocado-group.svg",
+        "symbol": "OCDO.L",
+        "name": "OCADO GROUP PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ocean-wilsons-ld.svg",
+        "symbol": "OCN.L",
+        "name": "OCEAN WILSONS HOLDINGS LTD ORD GBP0.20",
+        "market": ""
+    },
+    {
+        "symbol": "OCTP.L",
+        "name": "OXFORD CANNABINOID TECH HLDGS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "OHG.L",
+        "name": "ONE HERITAGE GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "OHT.L",
+        "name": "OCEAN HARVEST TECHNOLOGY GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "OMG.L",
+        "name": "OXFORD METRICS PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "symbol": "OMIP.L",
+        "name": "ONE MEDIA IP GROUP PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "symbol": "ONC.L",
+        "name": "ONCIMMUNE HLDGS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ONDO.L",
+        "name": "ONDO INSURTECH PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "ONE.L",
+        "name": "ONEIRO ENERGY PLC ORD GBP0.0085",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/oxford-nanopore-technologies-plc-ord-gbp0-0001.svg",
+        "symbol": "ONT.L",
+        "name": "OXFORD NANOPORE TECHNOLOGIES PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "OPG.L",
+        "name": "OPG POWER VENTURE PLC ORD GBP0.000147",
+        "market": ""
+    },
+    {
+        "symbol": "OPTI.L",
+        "name": "OPTIBIOTIX HEALTH PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "symbol": "ORCA.L",
+        "name": "ORCADIAN ENERGY PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "ORCH.L",
+        "name": "ORCHARD FUNDING GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "ORCP.L",
+        "name": "ORACLE POWER PLC ORD GBP0.00001",
+        "market": ""
+    },
+    {
+        "symbol": "ORNT.L",
+        "name": "ORIENT TELECOMS PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "ORR.L",
+        "name": "ORIOLE RESOURCES PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/osb-group-plc-ord-1p.svg",
+        "symbol": "OSB.L",
+        "name": "OSB GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/on-the-beach-plc.svg",
+        "symbol": "OTB.L",
+        "name": "ON THE BEACH GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/oxford-biomedica.svg",
+        "symbol": "OXB.L",
+        "name": "OXFORD BIOMEDICA ORD GBP0.50",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/oxford-instruments-plc.svg",
+        "symbol": "OXIG.L",
+        "name": "OXFORD INSTRUMENTS PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/paragon-banking-plc.svg",
+        "symbol": "PAG.L",
+        "name": "PARAGON BANKING GROUP PLC ORD GBP1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/michael-page-international.svg",
+        "symbol": "PAGE.L",
+        "name": "PAGEGROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "PALM.L",
+        "name": "PANTHER METALS PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "PAT.L",
+        "name": "PANTHERA RESOURCES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/paypoint.svg",
+        "symbol": "PAY.L",
+        "name": "PAYPOINT ORD GBP0.0033",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/pensionbee-plc.svg",
+        "symbol": "PBEE.L",
+        "name": "PENSIONBEE GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "PCIP.L",
+        "name": "PCI-PAL PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/petra-diamonds-ltd.svg",
+        "symbol": "PDL.L",
+        "name": "PETRA DIAMONDS ORD GBP0.0005 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "PEB.L",
+        "name": "PEBBLE BEACH SYSTEMS GROUP PLC ORD GBP0.025",
+        "market": ""
+    },
+    {
+        "symbol": "PEBB.L",
+        "name": "THE PEBBLE GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "PEEL.L",
+        "name": "PEEL HUNT LIMITED ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "PEG.L",
+        "name": "PETARDS GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "PEN.L",
+        "name": "PENNANT INTERNATIONAL GROUP ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/pets-at-home-plc.svg",
+        "symbol": "PETS.L",
+        "name": "PETS AT HOME GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/petrofac-ltd.svg",
+        "symbol": "PFC.L",
+        "name": "PETROFAC ORD USD0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/premier-foods-plc.svg",
+        "symbol": "PFD.L",
+        "name": "PREMIER FOODS ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "PGH.L",
+        "name": "PERSONAL GROUP HLDGS ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "PGV.L",
+        "name": "PRAETURA GROWTH VCT PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/pharos-energy-plc.svg",
+        "symbol": "PHAR.L",
+        "name": "PHAROS ENERGY PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/plant-health-care-plc.svg",
+        "symbol": "PHC.L",
+        "name": "PLANT HEALTH CARE ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/powerhouse-energy-plc.svg",
+        "symbol": "PHE.L",
+        "name": "POWERHOUSE ENERGY GROUP PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/petershill-partners-plc.svg",
+        "symbol": "PHLL.L",
+        "name": "PETERSHILL PARTNERS PLC ORD USD0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/phoenix-group-holdings-plc-ord-10p.svg",
+        "symbol": "PHNX.L",
+        "name": "PHOENIX GROUP HOLDINGS PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "PHSC.L",
+        "name": "PHSC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "PIER.L",
+        "name": "BRIGHTON PIER GROUP PLC (THE) ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "PINE.L",
+        "name": "PINEWOOD TECHNOLOGIES GROUP PLC ORD GBP1",
+        "market": ""
+    },
+    {
+        "symbol": "PIP.L",
+        "name": "PIPEHAWK ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/plus500.svg",
+        "symbol": "PLUS.L",
+        "name": "PLUS500 LIMITED ORD ILS0.01 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/parkmead-plc-the.svg",
+        "symbol": "PMG.L",
+        "name": "PARKMEAD GROUP(THE)PLC ORD GBP0.015",
+        "market": ""
+    },
+    {
+        "symbol": "PMI.L",
+        "name": "PREMIER MITON GROUP PLC ORD GBP0.0002",
+        "market": ""
+    },
+    {
+        "symbol": "PMP.L",
+        "name": "PORTMEIRION GROUP ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/pennon-group.svg",
+        "symbol": "PNN.L",
+        "name": "PENNON GROUP ORD GBP0.6105",
+        "market": ""
+    },
+    {
+        "symbol": "PNS.L",
+        "name": "PANTHER SECURITIES ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/pod-point-plc.svg",
+        "symbol": "PODP.L",
+        "name": "POD POINT GROUP HLDGS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "POLB.L",
+        "name": "POOLBEG PHARMA PLC ORD GBP0.0002",
+        "market": ""
+    },
+    {
+        "symbol": "POLN.L",
+        "name": "POLLEN STREET GROUP LIMITED ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/polarean-imaging-ltd.svg",
+        "symbol": "POLX.L",
+        "name": "POLAREAN IMAGING PLC ORD GBP0.00037",
+        "market": ""
+    },
+    {
+        "symbol": "POS.L",
+        "name": "PLEXUS HLDGS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "POW.L",
+        "name": "POWER METAL RESOURCES PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/pphe-hotel-ltd.svg",
+        "symbol": "PPH.L",
+        "name": "PPHE HOTEL GROUP LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "PPHC.L",
+        "name": "PUBLIC POL HLDG CO INC COM SHS USD0.001 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "PPP.L",
+        "name": "PENNPETRO ENERGY PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/proton-motor-power-systems-plc.svg",
+        "symbol": "PPS.L",
+        "name": "PROTON MOTOR POWER SYSTEMS PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "symbol": "PRD.L",
+        "name": "PREDATOR OIL & GAS HOLDINGS PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/pensana-plc.svg",
+        "symbol": "PRE.L",
+        "name": "PENSANA PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/premier-african-minerals-ltd.svg",
+        "symbol": "PREM.L",
+        "name": "PREMIER AFRICAN MINERALS LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "PRES.L",
+        "name": "PRESSURE TECHNOLOGIES PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "PRIM.L",
+        "name": "PRIMORUS INVESTMENTS PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/procook-plc.svg",
+        "symbol": "PROC.L",
+        "name": "PROCOOK GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/puretech-health.svg",
+        "symbol": "PRTC.L",
+        "name": "PURETECH HEALTH PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/prudential-plc.svg",
+        "symbol": "PRU.L",
+        "name": "PRUDENTIAL PLC GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/porvair-plc.svg",
+        "symbol": "PRV.L",
+        "name": "PORVAIR PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/phoenix-spree-deutschland-lt.svg",
+        "symbol": "PSDL.L",
+        "name": "PHOENIX SPREE DEUTSCHLAND LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/persimmon-plc-ord-10p.svg",
+        "symbol": "PSN.L",
+        "name": "PERSIMMON ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/pearson.svg",
+        "symbol": "PSON.L",
+        "name": "PEARSON ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/playtech-plc.svg",
+        "symbol": "PTEC.L",
+        "name": "PLAYTECH PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "PTY.L",
+        "name": "PARTWAY GROUP PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/phoenix-copper-limited.svg",
+        "symbol": "PXC.L",
+        "name": "PHOENIX COPPER LIMITED (BVI) ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "PXEN.L",
+        "name": "PROSPEX ENERGY PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "PXS.L",
+        "name": "PROVEXIS ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "PYC.L",
+        "name": "PHYSIOMICS ORD GBP0.004",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/pyx-resources-limited.svg",
+        "symbol": "PYX.L",
+        "name": "PYX RESOURCES LTD NPV (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/pz-cussons-plc.svg",
+        "symbol": "PZC.L",
+        "name": "PZ CUSSONS ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "QBT.L",
+        "name": "QUANTUM BLOCKCHAIN TECHNOLOGIES PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/quilter-plc.svg",
+        "symbol": "QLT.L",
+        "name": "QUILTER PLC ORD GBP0.08167",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/qinetiq-plc.svg",
+        "symbol": "QQ..L",
+        "name": "QINETIQ GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "QTX.L",
+        "name": "QUARTIX TECHNOLOGIES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "RAI.L",
+        "name": "RA INTERNATIONAL GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/rathbones-plc.svg",
+        "symbol": "RAT.L",
+        "name": "RATHBONES GROUP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "RBD.L",
+        "name": "REABOLD RESOURCES PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "RBG.L",
+        "name": "REVOLUTION BARS GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "RBGP.L",
+        "name": "RBG HOLDINGS PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "symbol": "RBN.L",
+        "name": "ROBINSON GBP0.005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/rainbow-rare-earths-ltd.svg",
+        "symbol": "RBW.L",
+        "name": "RAINBOW RARE EARTHS LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ricardo-plc.svg",
+        "symbol": "RCDO.L",
+        "name": "RICARDO ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "RCGH.L",
+        "name": "RC365 HOLDING PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/reach.svg",
+        "symbol": "RCH.L",
+        "name": "REACH PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "RDT.L",
+        "name": "ROSSLYN DATA TECHNOLOGIES PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/redrow.svg",
+        "symbol": "RDW.L",
+        "name": "REDROW PLC ORD GBP0.105",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/rea-plc.svg",
+        "symbol": "RE..L",
+        "name": "R.E.A. HLDGS PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "REAT.L",
+        "name": "REACT GROUP PLC ORD GBP0.125",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/record-plc.svg",
+        "symbol": "REC.L",
+        "name": "RECORD PLC ORD GBP0.00025",
+        "market": ""
+    },
+    {
+        "symbol": "REDC.L",
+        "name": "RED CAPITAL PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/redde-northgate-plc.svg",
+        "symbol": "REDD.L",
+        "name": "REDDE NORTHGATE PLC ORD GBP0.50",
+        "market": ""
+    },
+    {
+        "symbol": "REDX.L",
+        "name": "REDX PHARMA PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "REE.L",
+        "name": "ALTONA RARE EARTHS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/relx.svg",
+        "symbol": "REL.L",
+        "name": "RELX PLC GBP0.1444",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/renalytix-plc.svg",
+        "symbol": "RENX.L",
+        "name": "RENALYTIX PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "symbol": "RFX.L",
+        "name": "RAMSDENS HOLDINGS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/rhi-magnesita-nv.svg",
+        "symbol": "RHIM.L",
+        "name": "RHI MAGNESITA N.V. ORD EUR1.00 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/rio-tinto.svg",
+        "symbol": "RIO.L",
+        "name": "RIO TINTO ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/reckitt.svg",
+        "symbol": "RKT.L",
+        "name": "RECKITT BENCKISER GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/rm-plc.svg",
+        "symbol": "RM..L",
+        "name": "RM ORD GBP0.0228571428571",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/rightmove-plc-ord-0-1p.svg",
+        "symbol": "RMV.L",
+        "name": "RIGHTMOVE ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "RNEP.L",
+        "name": "ECOFIN U S RENEWABLES INFRA TST PLC ORD USD0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/rank-plc.svg",
+        "symbol": "RNK.L",
+        "name": "RANK GROUP ORD GBP0.1388888",
+        "market": ""
+    },
+    {
+        "symbol": "ROCK.L",
+        "name": "ROCKFIRE RESOURCES PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/deliveroo.svg",
+        "symbol": "ROO.L",
+        "name": "DELIVEROO PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/roquefort-therapeutics-plc.svg",
+        "symbol": "ROQ.L",
+        "name": "ROQUEFORT THERAPEUTICS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/rotork-plc-ord-0-5p.svg",
+        "symbol": "ROR.L",
+        "name": "ROTORK ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/randall-and-quilter-investment-ltd.svg",
+        "symbol": "RQIH.L",
+        "name": "R&Q INSURANCE HOLDINGS LTD ORD GBP0.02 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/rolls-royce.svg",
+        "symbol": "RR..L",
+        "name": "ROLLS ROYCE HOLDINGS ORD GBP0.20",
+        "market": ""
+    },
+    {
+        "symbol": "RRR.L",
+        "name": "RED ROCK RESOURCES ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/electrocomponents-plc-ord-10p.svg",
+        "symbol": "RS1.L",
+        "name": "RS GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "RST.L",
+        "name": "RESTORE GBP GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/renishaw-plc-ord-20p.svg",
+        "symbol": "RSW.L",
+        "name": "RENISHAW PLC ORD GBP0.20",
+        "market": ""
+    },
+    {
+        "symbol": "RTC.L",
+        "name": "RTC GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/rentokil-initial.svg",
+        "symbol": "RTO.L",
+        "name": "RENTOKIL INITIAL ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "RTOP.L",
+        "name": "REGTECH OPEN PROJECT PLC ORD GBP0.2",
+        "market": ""
+    },
+    {
+        "symbol": "RUA.L",
+        "name": "RUA LIFE SCIENCES PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/robert-walters-plc.svg",
+        "symbol": "RWA.L",
+        "name": "ROBERT WALTERS ORD GBP0.20",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/renewi-plc.svg",
+        "symbol": "RWI.L",
+        "name": "RENEWI PLC ORD GBP1",
+        "market": ""
+    },
+    {
+        "symbol": "S247.L",
+        "name": "SMARTTECH247 GROUP PLC. ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SAAS.L",
+        "name": "MICROLISE GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/simec-atlantis-energy-ltd.svg",
+        "symbol": "SAE.L",
+        "name": "SIMEC ATLANTIS ENERGY LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "SAG.L",
+        "name": "SCIENCE GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/saga.svg",
+        "symbol": "SAGA.L",
+        "name": "SAGA PLC ORD GBP0.15",
+        "market": ""
+    },
+    {
+        "symbol": "SAL.L",
+        "name": "SPACEANDPEOPLE ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "symbol": "SALT.L",
+        "name": "MICROSALT PLC ORD GBP0.001625",
+        "market": ""
+    },
+    {
+        "symbol": "SAR.L",
+        "name": "SAREUM HOLDINGS PLC ORD GBP0.0125",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/savannah-resources-plc.svg",
+        "symbol": "SAV.L",
+        "name": "SAVANNAH RESOURCES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SBDS.L",
+        "name": "SILVER BULLET DATA SERVICES GROUP P ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/sabre-insurance-plc.svg",
+        "symbol": "SBRE.L",
+        "name": "SABRE INSURANCE GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/sainsbury-s.svg",
+        "symbol": "SBRY.L",
+        "name": "SAINSBURY(J) ORD GBP0.28571428",
+        "market": ""
+    },
+    {
+        "symbol": "SBSI.L",
+        "name": "SCHRODER BSC SOCIAL IMPACT TST PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SBTX.L",
+        "name": "SKINBIOTHERAPEUTICS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SCE.L",
+        "name": "SURFACE TRANSFORMS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SCGL.L",
+        "name": "SEALAND CAPITAL GALAXY LTD ORD GBP0.0001 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "SCHO.L",
+        "name": "SCHOLIUM GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SCIR.L",
+        "name": "SCIROCCO ENERGY PLC ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "symbol": "SCLP.L",
+        "name": "SCANCELL HLDGS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/softcat-plc-ord-005.svg",
+        "symbol": "SCT.L",
+        "name": "SOFTCAT PLC ORD GBP0.0005",
+        "market": ""
+    },
+    {
+        "symbol": "SDG.L",
+        "name": "SANDERSON DESIGN GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/scientific-digital-imaging-plc.svg",
+        "symbol": "SDI.L",
+        "name": "SDI GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/schroders-plc.svg",
+        "symbol": "SDR.L",
+        "name": "SCHRODERS PLC ORD GBP0.20",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/superdry-plc.svg",
+        "symbol": "SDRY.L",
+        "name": "SUPERDRY PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/sdx-energy-plc.svg",
+        "symbol": "SDX.L",
+        "name": "SDX ENERGY PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/speedy-hire-plc.svg",
+        "symbol": "SDY.L",
+        "name": "SPEEDY HIRE ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "SEEN.L",
+        "name": "SEEEN PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "SENX.L",
+        "name": "SERINUS ENERGY PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/seplat-petroleum-development-co-plc.svg",
+        "symbol": "SEPL.L",
+        "name": "SEPLAT ENERGY PLC NGN0.5 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/s4-capital.svg",
+        "symbol": "SFOR.L",
+        "name": "S4 CAPITAL PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/severfield-plc.svg",
+        "symbol": "SFR.L",
+        "name": "SEVERFIELD PLC ORD GBP0.025",
+        "market": ""
+    },
+    {
+        "symbol": "SFT.L",
+        "name": "SOFTWARE CIRCLE PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/sage-group.svg",
+        "symbol": "SGE.L",
+        "name": "SAGE GROUP GBP0.01051948",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/shell.svg",
+        "symbol": "SHEL.L",
+        "name": "SHELL PLC ORD EUR0.07",
+        "market": ""
+    },
+    {
+        "symbol": "SHG.L",
+        "name": "SHANTA GOLD LTD ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/sig-plc.svg",
+        "symbol": "SHI.L",
+        "name": "SIG ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "SHOE.L",
+        "name": "SHOE ZONE PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SIS.L",
+        "name": "SCIENCE IN SPORT PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "symbol": "SIV.L",
+        "name": "SIVOTA PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SKA.L",
+        "name": "SHUKA MINERALS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SKL.L",
+        "name": "SKILLCAST GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "SLNG.L",
+        "name": "SLINGSBY(H.C.) ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/sylvania-platinum-limited.svg",
+        "symbol": "SLP.L",
+        "name": "SYLVANIA PLATINUM LTD CMN SHS USD0.01 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/smith-ds-plc-ord-10p.svg",
+        "symbol": "SMDS.L",
+        "name": "SMITH(DS) ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/smiths-group-plc-ord-37-5p.svg",
+        "symbol": "SMIN.L",
+        "name": "SMITHS GROUP PLC ORD GBP0.375",
+        "market": ""
+    },
+    {
+        "symbol": "SMJ.L",
+        "name": "SMART(J.)& CO(CONTRACTORS) ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "symbol": "SML.L",
+        "name": "STRATEGIC MINERALS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "SMRT.L",
+        "name": "SMARTSPACE SOFTWARE PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/wh-smith-plc.svg",
+        "symbol": "SMWH.L",
+        "name": "WH SMITH PLC ORD GBP0.220895",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/smith-and-nephew.svg",
+        "symbol": "SN..L",
+        "name": "SMITH & NEPHEW PLC ORD USD0.20",
+        "market": ""
+    },
+    {
+        "symbol": "SND.L",
+        "name": "SONDREL (HOLDINGS) PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/senior-plc.svg",
+        "symbol": "SNR.L",
+        "name": "SENIOR PLC GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "SNT.L",
+        "name": "SABIEN TECHNOLOGY GROUP PLC ORD GBP0.03",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/smiths-news.svg",
+        "symbol": "SNWS.L",
+        "name": "SMITHS NEWS PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "SNX.L",
+        "name": "SYNECTICS PLC ORD GBP0.20",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/solgold-plc.svg",
+        "symbol": "SOLG.L",
+        "name": "SOLGOLD PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SOLI.L",
+        "name": "SOLID STATE PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "SOM.L",
+        "name": "SOMERO ENTERPRISES INC COM STK USD0.001 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "SORT.L",
+        "name": "SORTED GROUP HOLDINGS PLC ORD GBP0.625",
+        "market": ""
+    },
+    {
+        "symbol": "SOS.L",
+        "name": "SOSANDAR PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/sound-energy-plc.svg",
+        "symbol": "SOU.L",
+        "name": "SOUND ENERGY PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SPA.L",
+        "name": "1SPATIAL PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "SPDI.L",
+        "name": "SECURE PROPERTY DEV & INV PLC ORD EUR0.01 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "SPEC.L",
+        "name": "INSPECS GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/spire-healthcare.svg",
+        "symbol": "SPI.L",
+        "name": "SPIRE HEALTHCARE GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SPR.L",
+        "name": "SPRINGFIELD PROPERTIES PLC ORD GBP0.00125",
+        "market": ""
+    },
+    {
+        "symbol": "SPSC.L",
+        "name": "SPECTRA SYSTEMS CORP COM SHS USD0.01 (DI/REGS)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/spirent-communications-plc.svg",
+        "symbol": "SPT.L",
+        "name": "SPIRENT COMMUNICATIONS ORD GBP0.03333",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/spirax-sarco-engineering-plc-ord-26-12-13p.svg",
+        "symbol": "SPX.L",
+        "name": "SPIRAX-SARCO ENGINEERING ORD GBP0.269230769",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/stelrad-plc.svg",
+        "symbol": "SRAD.L",
+        "name": "STELRAD GROUP PLC ORD GBP1.00",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/serabi-gold-plc.svg",
+        "symbol": "SRB.L",
+        "name": "SERABI GOLD PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/sunrise-resources.svg",
+        "symbol": "SRES.L",
+        "name": "SUNRISE RESOURCES ORD GBP0.00001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/serco-group.svg",
+        "symbol": "SRP.L",
+        "name": "SERCO GROUP PLC GBP0.02",
+        "market": ""
+    },
+    {
+        "symbol": "SRT.L",
+        "name": "SRT MARINE SYSTEMS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/sse-plc.svg",
+        "symbol": "SSE.L",
+        "name": "SSE PLC GBP0.50",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/seraphim-space-investment-trus.svg",
+        "symbol": "SSIT.L",
+        "name": "SERAPHIM SPACE INVESTMENT TRUST PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ssp-group-plc-ord-1-17-200p.svg",
+        "symbol": "SSPG.L",
+        "name": "SSP GROUP PLC ORD GBP0.01085",
+        "market": ""
+    },
+    {
+        "symbol": "SSTY.L",
+        "name": "SAFESTAY PLC GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/standard-chartered.svg",
+        "symbol": "STAN.L",
+        "name": "STANDARD CHARTERED PLC ORD USD0.50",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/secure-trust-bank-plc.svg",
+        "symbol": "STB.L",
+        "name": "SECURE TRUST BANK PLC ORD GBP0.40",
+        "market": ""
+    },
+    {
+        "symbol": "STCM.L",
+        "name": "STEPPE CEMENT ORD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/sthree-plc.svg",
+        "symbol": "STEM.L",
+        "name": "STHREE PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "STG.L",
+        "name": "STRIP TINNING HOLDINGS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/st-james-s-place-plc-ord-15p.svg",
+        "symbol": "STJ.L",
+        "name": "ST JAMES'S PLACE PLC ORD GBP0.15",
+        "market": ""
+    },
+    {
+        "symbol": "STK.L",
+        "name": "STREAKSAI PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "STM.L",
+        "name": "STM GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/stv-plc.svg",
+        "symbol": "STVG.L",
+        "name": "STV GROUP PLC ORD GBP0.50",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/shield-therapeutics-plc.svg",
+        "symbol": "STX.L",
+        "name": "SHIELD THERAPEUTICS PLC ORD GBP0.015",
+        "market": ""
+    },
+    {
+        "symbol": "SUH.L",
+        "name": "SUTTON HARBOUR GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SUN.L",
+        "name": "SURGICAL INNOVATIONS GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SUP.L",
+        "name": "SUPREME PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "SURE.L",
+        "name": "SURE VENTURES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/s-and-u-plc.svg",
+        "symbol": "SUS.L",
+        "name": "S & U ORD GBP0.125",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/savills-plc.svg",
+        "symbol": "SVS.L",
+        "name": "SAVILLS ORD GBP0.025",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/severn-trent.svg",
+        "symbol": "SVT.L",
+        "name": "SEVERN TRENT ORD GBP0.9789",
+        "market": ""
+    },
+    {
+        "symbol": "SWG.L",
+        "name": "SHEARWATER GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/spectris-plc-ord-5p.svg",
+        "symbol": "SXS.L",
+        "name": "SPECTRIS ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "SYM.L",
+        "name": "SYMPHONY ENVIRONMENTAL TECH PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SYME.L",
+        "name": "SUPPLY@ME CAPITAL PLC ORD GBP0.00002",
+        "market": ""
+    },
+    {
+        "symbol": "SYN.L",
+        "name": "SYNERGIA ENERGY LTD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/synthomer-plc.svg",
+        "symbol": "SYNT.L",
+        "name": "SYNTHOMER PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SYS.L",
+        "name": "SYSGROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "SYS1.L",
+        "name": "SYSTEM1 GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TAB.L",
+        "name": "BECKET INVEST PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TAND.L",
+        "name": "TAN DELTA SYSTEMS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "TAST.L",
+        "name": "TASTY ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/tate-and-lyle-plc-ord-25p.svg",
+        "symbol": "TATE.L",
+        "name": "TATE & LYLE ORD GBP0.2916666667",
+        "market": ""
+    },
+    {
+        "symbol": "TAVI.L",
+        "name": "TAVISTOCK INVESTMENTS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/tbc-bank-plc.svg",
+        "symbol": "TBCG.L",
+        "name": "TBC BANK GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TBLD.L",
+        "name": "TINYBUILD INC COM SHS USD0.001 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/tp-icap-plc.svg",
+        "symbol": "TCAP.L",
+        "name": "TP ICAP GROUP PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "TCF.L",
+        "name": "EVGEN PHARMA PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "symbol": "TEAM.L",
+        "name": "TEAM PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/tekcapital-plc.svg",
+        "symbol": "TEK.L",
+        "name": "TEKCAPITAL PLC ORD GBP0.004",
+        "market": ""
+    },
+    {
+        "symbol": "TENG.L",
+        "name": "TEN LIFESTYLE GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/telecom-plus-plc.svg",
+        "symbol": "TEP.L",
+        "name": "TELECOM PLUS ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "TERN.L",
+        "name": "TERN PLC ORD GBP0.0002",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/treatt-plc.svg",
+        "symbol": "TET.L",
+        "name": "TREATT ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "symbol": "TGP.L",
+        "name": "TEKMAR GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/tirupati-graphite-plc.svg",
+        "symbol": "TGR.L",
+        "name": "TIRUPATI GRAPHITE PLC ORD GBP0.025",
+        "market": ""
+    },
+    {
+        "symbol": "THAL.L",
+        "name": "THALASSA HOLDINGS LTD ORD SHS USD0.01 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/thg.svg",
+        "symbol": "THG.L",
+        "name": "THG PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/thor-energy-plc.svg",
+        "symbol": "THR.L",
+        "name": "THOR ENERGY PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/thruvision-plc.svg",
+        "symbol": "THRU.L",
+        "name": "THRUVISION GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TI01.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 1",
+        "market": ""
+    },
+    {
+        "symbol": "TI02.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 2",
+        "market": ""
+    },
+    {
+        "symbol": "TI03.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 3",
+        "market": ""
+    },
+    {
+        "symbol": "TI04.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 4",
+        "market": ""
+    },
+    {
+        "symbol": "TI05.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 5",
+        "market": ""
+    },
+    {
+        "symbol": "TI06.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 6",
+        "market": ""
+    },
+    {
+        "symbol": "TI07.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 7",
+        "market": ""
+    },
+    {
+        "symbol": "TI08.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 8",
+        "market": ""
+    },
+    {
+        "symbol": "TI09.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 9",
+        "market": ""
+    },
+    {
+        "symbol": "TI10.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 10",
+        "market": ""
+    },
+    {
+        "symbol": "TI11.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 11",
+        "market": ""
+    },
+    {
+        "symbol": "TI12.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 12",
+        "market": ""
+    },
+    {
+        "symbol": "TI51.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 51",
+        "market": ""
+    },
+    {
+        "symbol": "TI52.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 52",
+        "market": ""
+    },
+    {
+        "symbol": "TI53.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 53",
+        "market": ""
+    },
+    {
+        "symbol": "TI54.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 54",
+        "market": ""
+    },
+    {
+        "symbol": "TI55.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 55",
+        "market": ""
+    },
+    {
+        "symbol": "TI56.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 56",
+        "market": ""
+    },
+    {
+        "symbol": "TI57.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 57",
+        "market": ""
+    },
+    {
+        "symbol": "TI58.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 58",
+        "market": ""
+    },
+    {
+        "symbol": "TI59.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 59",
+        "market": ""
+    },
+    {
+        "symbol": "TI60.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 60",
+        "market": ""
+    },
+    {
+        "symbol": "TI61.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 61",
+        "market": ""
+    },
+    {
+        "symbol": "TI62.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 62",
+        "market": ""
+    },
+    {
+        "symbol": "TI63.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 63",
+        "market": ""
+    },
+    {
+        "symbol": "TI64.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 64",
+        "market": ""
+    },
+    {
+        "symbol": "TI65.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 65",
+        "market": ""
+    },
+    {
+        "symbol": "TI66.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 66",
+        "market": ""
+    },
+    {
+        "symbol": "TI67.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 67",
+        "market": ""
+    },
+    {
+        "symbol": "TI68.L",
+        "name": "FOR LSE USE ONLY LSE INJECTOR 68",
+        "market": ""
+    },
+    {
+        "symbol": "TIA.L",
+        "name": "TIALIS ESSENTIAL IT PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TIDE.L",
+        "name": "CRIMSON TIDE PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/ti-fluid-systems-plc.svg",
+        "symbol": "TIFS.L",
+        "name": "TI FLUID SYSTEMS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TIME.L",
+        "name": "TIME FINANCE PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "symbol": "TIR.L",
+        "name": "TIGER ROYALTIES AND INVESTMENTS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/tullow-oil-plc.svg",
+        "symbol": "TLW.L",
+        "name": "TULLOW OIL PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "TLY.L",
+        "name": "TOTALLY PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "symbol": "TM1.L",
+        "name": "TECHNOLOGY MINERALS PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/team-17-ltd.svg",
+        "symbol": "TM17.L",
+        "name": "TEAM17 GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TMG.L",
+        "name": "THE MISSION GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/taylor-maritime-invts-ltd.svg",
+        "symbol": "TMI.L",
+        "name": "TAYLOR MARITIME INVESTMENTS LTD ORD NPV (USD)",
+        "market": ""
+    },
+    {
+        "symbol": "TMO.L",
+        "name": "TIME OUT GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "TMOR.L",
+        "name": "MORE ACQUISITIONS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TMT.L",
+        "name": "TMT INVESTMENTS PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "TND.L",
+        "name": "TANDEM GROUP ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/tomco-energy-plc.svg",
+        "symbol": "TOM.L",
+        "name": "TOMCO ENERGY PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "TON.L",
+        "name": "TITON HLDGS ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "TPFG.L",
+        "name": "PROPERTY FRANCHISE GROUP PLC (THE) ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/travis-perkins-plc-ord-1205105.svg",
+        "symbol": "TPK.L",
+        "name": "TRAVIS PERKINS ORD GBP0.11205105",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/topps-tiles-plc.svg",
+        "symbol": "TPT.L",
+        "name": "TOPPS TILES PLC ORD GBP0.03333",
+        "market": ""
+    },
+    {
+        "symbol": "TPX.L",
+        "name": "TPXIMPACT HOLDINGS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TRAC.L",
+        "name": "T42 IOT TRACKING SOLUTIONS PLC ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "TRAF.L",
+        "name": "TRAFALGAR PROPERTY GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "TRAK.L",
+        "name": "TRAKM8 HLDGS ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TRCS.L",
+        "name": "TRACSIS PLC ORD GBP0.004",
+        "market": ""
+    },
+    {
+        "symbol": "TRD.L",
+        "name": "TRIAD GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/trifast-plc.svg",
+        "symbol": "TRI.L",
+        "name": "TRIFAST ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "TRIN.L",
+        "name": "TRINITY EXPLORATION & PRODUCTION ORD USD0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TRLS.L",
+        "name": "TRELLUS HEALTH PLC ORD GBP0.0006",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/trainline-plc.svg",
+        "symbol": "TRN.L",
+        "name": "TRAINLINE PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TRP.L",
+        "name": "TOWER RESOURCES ORD GBP0.00001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/trident-royalties-plc.svg",
+        "symbol": "TRR.L",
+        "name": "TRIDENT ROYALTIES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/trustpilot-plc.svg",
+        "symbol": "TRST.L",
+        "name": "TRUSTPILOT GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TRT.L",
+        "name": "TRANSENSE TECHNOLOGIES ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "TRU.L",
+        "name": "TRUFIN PLC ORD GBP0.91",
+        "market": ""
+    },
+    {
+        "symbol": "TRX.L",
+        "name": "TISSUE REGENIX GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "TRYB.L",
+        "name": "TRIBE TECHNOLOGY PLC ORD GBP0.0005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/tesco.svg",
+        "symbol": "TSCO.L",
+        "name": "TESCO ORD GBP0.0633333",
+        "market": ""
+    },
+    {
+        "symbol": "TST.L",
+        "name": "TOUCHSTAR PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "TSTL.L",
+        "name": "TRISTEL ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/tt-electronics-plc.svg",
+        "symbol": "TTG.L",
+        "name": "TT ELECTRONICS ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "symbol": "TUN.L",
+        "name": "TUNGSTEN WEST PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TUNE.L",
+        "name": "FOCUSRITE PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/taylor-wimpey.svg",
+        "symbol": "TW..L",
+        "name": "TAYLOR WIMPEY PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "TYM.L",
+        "name": "TERTIARY MINERALS PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/tyman-plc.svg",
+        "symbol": "TYMN.L",
+        "name": "TYMAN PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/alien-metals-ltd.svg",
+        "symbol": "UFO.L",
+        "name": "ALIEN METALS LTD COM SHS NPV (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "UJO.L",
+        "name": "UNION JACK OIL PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "UKOG.L",
+        "name": "UK OIL & GAS PLC ORD GBP0.000001",
+        "market": ""
+    },
+    {
+        "symbol": "UKR.L",
+        "name": "UKRPRODUCT GROUP LIMITED ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/up-global-sourcing-pl.svg",
+        "symbol": "ULTP.L",
+        "name": "ULTIMATE PRODUCTS PLC ORDS GBP0.0025",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/unilever.svg",
+        "symbol": "ULVR.L",
+        "name": "UNILEVER PLC ORD GBP0.031111",
+        "market": ""
+    },
+    {
+        "symbol": "UOG.L",
+        "name": "UNITED OIL & GAS PLC ORD GBP0.00001",
+        "market": ""
+    },
+    {
+        "symbol": "UPL.L",
+        "name": "UPLAND RESOURCES LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "URAH.L",
+        "name": "URA HOLDINGS PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "URU.L",
+        "name": "URU METALS LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/united-utilities-group-plc-ord-5p.svg",
+        "symbol": "UU..L",
+        "name": "UNITED UTILITIES GROUP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "symbol": "VAL.L",
+        "name": "VALIRX ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "VANL.L",
+        "name": "VAN ELLE HOLDINGS PLC ORD GBP0.02",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/provident-financial.svg",
+        "symbol": "VANQ.L",
+        "name": "VANQUIS BANKING GROUP PLC ORD GBP0.207272",
+        "market": ""
+    },
+    {
+        "symbol": "VARE.L",
+        "name": "VARIOUS EATERIES PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "VAST.L",
+        "name": "VAST RESOURCES PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "VCAP.L",
+        "name": "VECTOR CAPITAL PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/victrex-plc.svg",
+        "symbol": "VCT.L",
+        "name": "VICTREX ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "VEL.L",
+        "name": "VELOCITY COMPOSITES PLC ORD GBP0.0025",
+        "market": ""
+    },
+    {
+        "symbol": "VELA.L",
+        "name": "VELA TECHNOLOGIES PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/videndum-plc.svg",
+        "symbol": "VID.L",
+        "name": "VIDENDUM PLC ORD GBP0.20",
+        "market": ""
+    },
+    {
+        "symbol": "VINO.L",
+        "name": "VIRGIN WINES UK PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "VLE.L",
+        "name": "VOLVERE ORD GBP0.0000001",
+        "market": ""
+    },
+    {
+        "symbol": "VLG.L",
+        "name": "VENTURE LIFE GROUP PLC ORD GBP0.003",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/virgin-money-uk-plc-ord-gbp0-10.svg",
+        "symbol": "VMUK.L",
+        "name": "VIRGIN MONEY UK PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "symbol": "VNET.L",
+        "name": "VIANET GROUP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/vodafone.svg",
+        "symbol": "VOD.L",
+        "name": "VODAFONE GROUP ORD USD0.2095238",
+        "market": ""
+    },
+    {
+        "symbol": "VOX.L",
+        "name": "VOX VALOR CAPITAL LIMITED ORD GBP0.01 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/vp-plc.svg",
+        "symbol": "VP..L",
+        "name": "VP PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/verici-dx-plc.svg",
+        "symbol": "VRCI.L",
+        "name": "VERICI DX PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/versarien-plc.svg",
+        "symbol": "VRS.L",
+        "name": "VERSARIEN PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/vesuvius-plc.svg",
+        "symbol": "VSVS.L",
+        "name": "VESUVIUS PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/vistry-group-plc-ord-50p.svg",
+        "symbol": "VTY.L",
+        "name": "VISTRY GROUP PLC GBP0.50",
+        "market": ""
+    },
+    {
+        "symbol": "W7L.L",
+        "name": "WARPAINT LONDON PLC ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/water-intelligence-plc.svg",
+        "symbol": "WATR.L",
+        "name": "WATER INTELLIGENCE PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "WBI.L",
+        "name": "WOODBOIS LTD ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "WCAT.L",
+        "name": "WILDCAT PETROLEUM PLC ORD GBP0.000028",
+        "market": ""
+    },
+    {
+        "symbol": "WCW.L",
+        "name": "WALKER CRIPS GROUP ORD GBP0.066666",
+        "market": ""
+    },
+    {
+        "symbol": "WEB.L",
+        "name": "WEBIS HOLDINGS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/weir-group-plc-ord-12-5p.svg",
+        "symbol": "WEIR.L",
+        "name": "WEIR GROUP ORD GBP0.125",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/wood-john-plc.svg",
+        "symbol": "WG..L",
+        "name": "JOHN WOOD GROUP PLC ORD GBP0.0428571",
+        "market": ""
+    },
+    {
+        "symbol": "WHI.L",
+        "name": "W.H.IRELAND GROUP PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/wilmington-plc.svg",
+        "symbol": "WIL.L",
+        "name": "WILMINGTON PLC ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/wincanton.svg",
+        "symbol": "WIN.L",
+        "name": "WINCANTON ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/winkworth.svg",
+        "symbol": "WINK.L",
+        "name": "M WINKWORTH PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/wise.svg",
+        "symbol": "WISE.L",
+        "name": "WISE PLC CLS A ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/wickes-plc.svg",
+        "symbol": "WIX.L",
+        "name": "WICKES GROUP PLC ORD GBP0.1",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/wizz-air-holdings-plc-ord-gbp0-0001.svg",
+        "symbol": "WIZZ.L",
+        "name": "WIZZ AIR HLDGS PLC ORD GBP0.0001",
+        "market": ""
+    },
+    {
+        "symbol": "WNWD.L",
+        "name": "WINDWARD LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/watches-of-switzerland-group-plc-ord-gbp0-0125.svg",
+        "symbol": "WOSG.L",
+        "name": "WATCHES OF SWITZERLAND GROUP PLC ORD GBP0.0125",
+        "market": ""
+    },
+    {
+        "symbol": "WPHO.L",
+        "name": "WINDAR PHOTONICS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/wpp.svg",
+        "symbol": "WPP.L",
+        "name": "WPP PLC ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/wag-payment-solutions.svg",
+        "symbol": "WPS.L",
+        "name": "W.A.G PAYMENT SOLUTIONS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/theworkscouk-plc.svg",
+        "symbol": "WRKS.L",
+        "name": "THEWORKS.CO.UK PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "symbol": "WSBN.L",
+        "name": "WISHBONE GOLD PLC ORD GBP0.001 (DI)",
+        "market": ""
+    },
+    {
+        "symbol": "WSG.L",
+        "name": "WESTMINSTER GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "WSP.L",
+        "name": "WYNNSTAY PROPERTIES ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/whitbread.svg",
+        "symbol": "WTB.L",
+        "name": "WHITBREAD ORD GBP0.76797385",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/westmount-energy-ltd.svg",
+        "symbol": "WTE.L",
+        "name": "WESTMOUNT ENERGY LTD ORD NPV",
+        "market": ""
+    },
+    {
+        "symbol": "WYN.L",
+        "name": "WYNNSTAY GROUP ORD GBP0.25",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/xaar-plc.svg",
+        "symbol": "XAR.L",
+        "name": "XAAR ORD GBP0.10",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/xlmedia.svg",
+        "symbol": "XLM.L",
+        "name": "XLMEDIA PLC ORD USD0.000001",
+        "market": ""
+    },
+    {
+        "symbol": "XPF.L",
+        "name": "XP FACTORY PLC ORD GBP0.0125",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/xp-power-ltd.svg",
+        "symbol": "XPP.L",
+        "name": "XP POWER LTD ORD GBP0.01 (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/xps-pensions-plc-ord-gbp00005.svg",
+        "symbol": "XPS.L",
+        "name": "XPS PENSIONS GROUP PLC ORD GBP0.0005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/xeros-technology-plc-ord-15p.svg",
+        "symbol": "XSG.L",
+        "name": "XEROS TECHNOLOGY GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "symbol": "XTR.L",
+        "name": "XTRACT RESOURCES PLC ORD GBP0.0002",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/yougov-plc-ord-02p.svg",
+        "symbol": "YOU.L",
+        "name": "YOUGOV ORD GBP0.002",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/yu-plc-ord-gbp0005.svg",
+        "symbol": "YU..L",
+        "name": "YU GROUP PLC ORD GBP0.005",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/zambeef-products-plc-ord-zmw001.svg",
+        "symbol": "ZAM.L",
+        "name": "ZAMBEEF PRODUCTS ZMW0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/zenova-plc-ord-gbp0001.svg",
+        "symbol": "ZED.L",
+        "name": "ZENOVA GROUP PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/zegona-communications-plc-ord-1.svg",
+        "symbol": "ZEG.L",
+        "name": "ZEGONA COMMUNICATIONS PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/zenith-energy-ltd.svg",
+        "symbol": "ZEN.L",
+        "name": "ZENITH ENERGY LTD NPV",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/zinc-media-plc-ord-0125p.svg",
+        "symbol": "ZIN.L",
+        "name": "ZINC MEDIA GROUP PLC ORD GBP0.00125",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/zanaga-iron-ore-company-limited-ord-npv-di.svg",
+        "symbol": "ZIOC.L",
+        "name": "ZANAGA IRON ORE CO LTD ORD NPV (DI)",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/zinnwald-lithium-plc-ord-gbp001.svg",
+        "symbol": "ZNWD.L",
+        "name": "ZINNWALD LITHIUM PLC ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/zoo-digital-plc-ord-1p.svg",
+        "symbol": "ZOO.L",
+        "name": "ZOO DIGITAL GROUP ORD GBP0.01",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/zephyr-energy-plc.svg",
+        "symbol": "ZPHR.L",
+        "name": "ZEPHYR ENERGY PLC ORD GBP0.001",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/zotefoams-plc-ord-5p.svg",
+        "symbol": "ZTF.L",
+        "name": "ZOTEFOAMS ORD GBP0.05",
+        "market": ""
+    },
+    {
+        "image": "/vesple/optimalstocks/images/zytronic-plc-ord-1p.svg",
+        "symbol": "ZYT.L",
+        "name": "ZYTRONIC ORD GBP0.01",
+        "market": ""
+    }
+]

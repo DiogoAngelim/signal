@@ -2,12 +2,12 @@
 
 This workspace is ready to deploy on Vercel.
 
-Use `examples/stocks/src` as the Vercel project root.
+Use `examples/stocks` as the Vercel project root so the `lib` and `src` folders sit at the same level.
 
 ## What Vercel uses
 
-- Build command: `pnpm run build`
-- Output directory: `artifacts/signal-markets/dist/public`
+- Build command: `pnpm --dir src run build`
+- Output directory: `src/artifacts/signal-markets/dist/public`
 - API entrypoint: `api/index.js`
 
 ## Environment variables
@@ -20,6 +20,6 @@ If `NODE_ECU_API_BASE_URL` is not set on Vercel, the API falls back to the built
 ## Local verification
 
 ```bash
-pnpm run build
+pnpm --dir src run build
 pnpm dlx vercel build --yes
 ```

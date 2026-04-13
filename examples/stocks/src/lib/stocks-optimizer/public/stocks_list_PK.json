@@ -1,0 +1,2906 @@
+[
+  {
+    "symbol": "AAL",
+    "name": "Agro Allianz Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "ABOT",
+    "name": "Abbott Laboratories Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/abbott.svg"
+  },
+  {
+    "symbol": "ACPL",
+    "name": "Attock Cement Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/attock-cement-pakistan.svg"
+  },
+  {
+    "symbol": "AGL",
+    "name": "Agritech Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/agritech.svg"
+  },
+  {
+    "symbol": "AGP",
+    "name": "AGP Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/agp.svg"
+  },
+  {
+    "symbol": "AHL",
+    "name": "Arif Habib Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/arif-habib.svg"
+  },
+  {
+    "symbol": "ALIFE",
+    "name": "Adamjee Life Assurance Company Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/adamjee-insurance-co.svg"
+  },
+  {
+    "symbol": "ANL",
+    "name": "Azgard Nine Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/azgard-nine.svg"
+  },
+  {
+    "symbol": "ANNT",
+    "name": "Annoor Textile Mills Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "APL",
+    "name": "Attock Petroleum Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/attock-petroleum.svg"
+  },
+  {
+    "symbol": "ASC",
+    "name": "Al Shaheer Corp. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/al-shaheer-oration.svg"
+  },
+  {
+    "symbol": "ASIC",
+    "name": "Asia Insurance Co. Ltd. (Pakistan)",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/asia-insurance-co.svg"
+  },
+  {
+    "symbol": "ASL",
+    "name": "Aisha Steel Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/aisha-steel-mills.svg"
+  },
+  {
+    "symbol": "ASTL",
+    "name": "Amreli Steels Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/amreli-steels.svg"
+  },
+  {
+    "symbol": "ASTM",
+    "name": "Asim Textile Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/asim-textile-mills.svg"
+  },
+  {
+    "symbol": "ATBA",
+    "name": "Atlas Battery Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/atlas-honda.svg"
+  },
+  {
+    "symbol": "AVN",
+    "name": "Avanceon Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/avanceon.svg"
+  },
+  {
+    "symbol": "BCL",
+    "name": "Bolan Castings Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/bolan-castings.svg"
+  },
+  {
+    "symbol": "BECO",
+    "name": "BECO Steel Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/beco-steel.svg"
+  },
+  {
+    "symbol": "BGL",
+    "name": "Balochistan Glass Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/balochistan-glass.svg"
+  },
+  {
+    "symbol": "BHAT",
+    "name": "Bhanero Textile Mills Limited.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/faisal-spinning-mills.svg"
+  },
+  {
+    "symbol": "BLUEX",
+    "name": "Blue Ex Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/universal-network-systems.svg"
+  },
+  {
+    "symbol": "BML",
+    "name": "Bank Makramah Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/summit-bank.svg"
+  },
+  {
+    "symbol": "BNL",
+    "name": "Bunny's Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/bunnys.svg"
+  },
+  {
+    "symbol": "BOK",
+    "name": "Bank of Khyber",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-of-khyber.svg"
+  },
+  {
+    "symbol": "BOP",
+    "name": "Bank of Punjab",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-of-punjab.svg"
+  },
+  {
+    "symbol": "BTL",
+    "name": "Blessed Textiles Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/faisal-spinning-mills.svg"
+  },
+  {
+    "symbol": "CASH",
+    "name": "ARM Green Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/calcorp.svg"
+  },
+  {
+    "symbol": "CCM",
+    "name": "Crescent Cotton Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/crescent-cotton-mills.svg"
+  },
+  {
+    "symbol": "CENI",
+    "name": "Century Insurance Co., Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/century-insurance-co.svg"
+  },
+  {
+    "symbol": "CEPB",
+    "name": "Century Paper & Board Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/century-paper-and-board-mills.svg"
+  },
+  {
+    "symbol": "CFL",
+    "name": "Crescent Fibres Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/crescent-fibres.svg"
+  },
+  {
+    "symbol": "CHAS",
+    "name": "Chashma Sugar Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/chashma-sugar-mills.svg"
+  },
+  {
+    "symbol": "CHBL",
+    "name": "Chenab Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/chenab-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "CHCC",
+    "name": "Cherat Cement Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/cherat-cement-co.svg"
+  },
+  {
+    "symbol": "CJPL",
+    "name": "Crescent Jute Products Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/crescent-jute-products-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "CLCPS",
+    "name": "Chenab Ltd Non-voting Cum.Pref.Shs",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/chenab-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "CLOV",
+    "name": "Clover Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/clover-pakistan.svg"
+  },
+  {
+    "symbol": "CLVL",
+    "name": "Cordoba Logistics & Ventures Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/cordoba-logistics-and-ventures.svg"
+  },
+  {
+    "symbol": "CNERGY",
+    "name": "Cnergyico Pk Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/cnergyico-pk.svg"
+  },
+  {
+    "symbol": "COLG",
+    "name": "Colgate-Palmolive (Pakistan) Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/colgate-palmolive.svg"
+  },
+  {
+    "symbol": "CPHL",
+    "name": "Citi Pharma Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/citi-pharma.svg"
+  },
+  {
+    "symbol": "CPPL",
+    "name": "Cherat Packaging Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/cherat-packaging.svg"
+  },
+  {
+    "symbol": "CRTM",
+    "name": "Crescent Textile Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-crescent-textile-mills.svg"
+  },
+  {
+    "symbol": "CSAP",
+    "name": "Crescent Steel & Allied Products Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/crescent-steel-and-allied-products.svg"
+  },
+  {
+    "symbol": "CSIL",
+    "name": "Crescent Star Insurance Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/crescent-star-insurance.svg"
+  },
+  {
+    "symbol": "CTM",
+    "name": "Colony Textile Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/colony-textile-mills.svg"
+  },
+  {
+    "symbol": "CYAN",
+    "name": "CYAN Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/cyan.svg"
+  },
+  {
+    "symbol": "DAAG",
+    "name": "Data Agro Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/data-agro.svg"
+  },
+  {
+    "symbol": "DADX",
+    "name": "Dadex Eternit Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dadex-eternit.svg"
+  },
+  {
+    "symbol": "DBCI",
+    "name": "Dadabhoy Cement Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dadabhoy-cement-industries-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "DBSL",
+    "name": "Dadabhoy Sack Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "DCL",
+    "name": "Dewan Cement Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dewan-cement.svg"
+  },
+  {
+    "symbol": "DCTL",
+    "name": "Dadabhoy Construction Technology Ltd",
+    "market": "PSX"
+  },
+  {
+    "symbol": "DEL",
+    "name": "Dawood Equities Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dawood-equities.svg"
+  },
+  {
+    "symbol": "DFML",
+    "name": "Dewan Farooque Motors Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dewan-farooque-motors.svg"
+  },
+  {
+    "symbol": "DFSM",
+    "name": "Dewan Farooque Spinning Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dewan-farooque-spinning-mills.svg"
+  },
+  {
+    "symbol": "DGKC",
+    "name": "D.G. Khan Cement Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dg-khan-cement-company.svg"
+  },
+  {
+    "symbol": "DHPL",
+    "name": "DH Partners Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dh-partners-limited.svg"
+  },
+  {
+    "symbol": "DIIL",
+    "name": "Diamond Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/diamond-industries.svg"
+  },
+  {
+    "symbol": "DINT",
+    "name": "Din Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/din-textile-mills.svg"
+  },
+  {
+    "symbol": "DKTM",
+    "name": "Dewan Khalid Textile Mills Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "DLL",
+    "name": "Dawood Lawrencepur Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dawood-lawrencepur.svg"
+  },
+  {
+    "symbol": "DMC",
+    "name": "D.M. Corporation Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dm-textile-mills.svg"
+  },
+  {
+    "symbol": "DMTM",
+    "name": "Dewan Mushtaq Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dewan-sugar-mills.svg"
+  },
+  {
+    "symbol": "DNCC",
+    "name": "Dandot Cement Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dandot-cement-co.svg"
+  },
+  {
+    "symbol": "DOL",
+    "name": "Descon Oxychem Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/descon-oxychem.svg"
+  },
+  {
+    "symbol": "DSFL",
+    "name": "Dewan Salman Fibre Limited",
+    "market": "PSX"
+  },
+  {
+    "symbol": "DSIL",
+    "name": "D.S. Industries Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ds-industries.svg"
+  },
+  {
+    "symbol": "DSL",
+    "name": "Dost Steel Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dost-steels.svg"
+  },
+  {
+    "symbol": "DWAE",
+    "name": "Dewan Automotive Engineering Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dewan-automotive-engineering-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "DWSM",
+    "name": "Dewan Sugar Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dewan-sugar-mills.svg"
+  },
+  {
+    "symbol": "DWTM",
+    "name": "Dewan Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dewan-sugar-mills.svg"
+  },
+  {
+    "symbol": "DYNO",
+    "name": "Dynea Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dynea-pakistan-co.svg"
+  },
+  {
+    "symbol": "ECOP",
+    "name": "Ecopack Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ecopack.svg"
+  },
+  {
+    "symbol": "EFERT",
+    "name": "Engro Fertilizers Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/engro-powergen-qadirpur.svg"
+  },
+  {
+    "symbol": "EFUG",
+    "name": "EFU General Insurance Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/efu-general-insurance.svg"
+  },
+  {
+    "symbol": "EFUL",
+    "name": "EFU Life Assurance Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/efu-life-assurance.svg"
+  },
+  {
+    "symbol": "ELCM",
+    "name": "Elahi Cotton Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/elahi-cotton-mills.svg"
+  },
+  {
+    "symbol": "ELSM",
+    "name": "Ellcot Spinning Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ellcot-spinning-mills.svg"
+  },
+  {
+    "symbol": "EMCO",
+    "name": "Emco Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/emco-industries.svg"
+  },
+  {
+    "symbol": "ENGL",
+    "name": "English Leasing Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "ENGROH",
+    "name": "Engro Holdings Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dawood-hercules-corporation.svg"
+  },
+  {
+    "symbol": "EPCL",
+    "name": "Engro Polymer & Chemicals Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/engro-polymer-and-chemicals.svg"
+  },
+  {
+    "symbol": "EPCLPS",
+    "name": "Engro Polymer & Chemicals Limited Cum Conv Red Perp Pref Registered Shs",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/engro-polymer-and-chemicals.svg"
+  },
+  {
+    "symbol": "EPQL",
+    "name": "Engro Powergen Qadirpur Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/engro-powergen-qadirpur.svg"
+  },
+  {
+    "symbol": "ESBL",
+    "name": "Escorts Investment Bank Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/escorts-investment-bank.svg"
+  },
+  {
+    "symbol": "EWIC",
+    "name": "East West Insurance Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/east-west-insurance-co.svg"
+  },
+  {
+    "symbol": "EXIDE",
+    "name": "Exide Pakistan Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/exide-pakistan.svg"
+  },
+  {
+    "symbol": "EXTR",
+    "name": "Extraction Pakistan Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "FABL",
+    "name": "Faysal Bank Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/faysal-bank.svg"
+  },
+  {
+    "symbol": "FAEL",
+    "name": "Fatima Enterprises Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "FANM",
+    "name": "First Al-Noor Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-al-noor-modaraba.svg"
+  },
+  {
+    "symbol": "FASM",
+    "name": "Faisal Spinning Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/faisal-spinning-mills.svg"
+  },
+  {
+    "symbol": "FATIMA",
+    "name": "Fatima Fertilizer Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/fatima-fertilizer-company.svg"
+  },
+  {
+    "symbol": "FCCL",
+    "name": "Fauji Cement Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/fauji-cement-co.svg"
+  },
+  {
+    "symbol": "FCEL",
+    "name": "First Capital Equities Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-capital-equities-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "FCEPL",
+    "name": "Frieslandcampina Engro Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/frieslandcampina-engro-pakistan.svg"
+  },
+  {
+    "symbol": "FCIBL",
+    "name": "First Credit & Investment Bank Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-credit-and-investment-bank.svg"
+  },
+  {
+    "symbol": "FCL",
+    "name": "Fast Cables Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/fast-cables-limited.svg"
+  },
+  {
+    "symbol": "FCONM",
+    "name": "First Constellation Modaraba",
+    "market": "PSX"
+  },
+  {
+    "symbol": "FCSC",
+    "name": "First Capital Securities Corporation Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pace-pakistan.svg"
+  },
+  {
+    "symbol": "FDPL",
+    "name": "First Dawood Properties Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-dawood-investment-bank.svg"
+  },
+  {
+    "symbol": "FECM",
+    "name": "First Elite Capital Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-elite-capital-modaraba.svg"
+  },
+  {
+    "symbol": "FECTC",
+    "name": "Fecto Cement Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/fecto-cement.svg"
+  },
+  {
+    "symbol": "FEM",
+    "name": "First Equity Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-equity-modaraba.svg"
+  },
+  {
+    "symbol": "FEROZ",
+    "name": "Ferozsons Laboratories Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ferozsons-laboratories.svg"
+  },
+  {
+    "symbol": "FFC",
+    "name": "Fauji Fertilizer Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/fauji-fertilizer-co.svg"
+  },
+  {
+    "symbol": "FFL",
+    "name": "Fauji Foods Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/fauji-foods.svg"
+  },
+  {
+    "symbol": "FFLM",
+    "name": "First Fidelity Leasing Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-fidelity-leasing-modaraba.svg"
+  },
+  {
+    "symbol": "FHAM",
+    "name": "First Habib Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-habib-modaraba.svg"
+  },
+  {
+    "symbol": "FIBLM",
+    "name": "First IBL Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-ibl-modaraba.svg"
+  },
+  {
+    "symbol": "FIL",
+    "name": "Fateh Industries Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/fateh-industries-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "FIM",
+    "name": "First Investec Modaraba",
+    "market": "PSX"
+  },
+  {
+    "symbol": "FIMM",
+    "name": "First Imrooz Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-imrooz-modaraba.svg"
+  },
+  {
+    "symbol": "FLYNG",
+    "name": "Flying Cement Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/flying-cement-co.svg"
+  },
+  {
+    "symbol": "FML",
+    "name": "Feroze1888 Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/feroze1888-mills.svg"
+  },
+  {
+    "symbol": "FNBM",
+    "name": "First National Bank Modaraba",
+    "market": "PSX"
+  },
+  {
+    "symbol": "FNEL",
+    "name": "First National Equities Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-national-equities.svg"
+  },
+  {
+    "symbol": "FPJM",
+    "name": "First Punjab Modaraba Services Pvt Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-punjab-modaraba-services-pvt.svg"
+  },
+  {
+    "symbol": "FPRM",
+    "name": "First Paramount Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-paramount-modaraba.svg"
+  },
+  {
+    "symbol": "FRCL",
+    "name": "Frontier Ceramics Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/frontier-ceramics.svg"
+  },
+  {
+    "symbol": "FRSM",
+    "name": "Faran Sugar Mills Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/faran-sugar-mills.svg"
+  },
+  {
+    "symbol": "FSWL",
+    "name": "Fateh Sports Wear Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/fateh-sports-wear-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "FTHM",
+    "name": "Fateh Textile Mills Limited",
+    "market": "PSX"
+  },
+  {
+    "symbol": "FTMM",
+    "name": "First Treet Manufacturing Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-treet-manufacturing-modaraba.svg"
+  },
+  {
+    "symbol": "FTSM",
+    "name": "First Tri-Star Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-tri-star-modaraba.svg"
+  },
+  {
+    "symbol": "FZCM",
+    "name": "Fazal Cloth Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/fazal-cloth-mills.svg"
+  },
+  {
+    "symbol": "GADT",
+    "name": "Gadoon Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/gadoon-textile-mills.svg"
+  },
+  {
+    "symbol": "GAL",
+    "name": "Ghandhara Automobiles Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ghandhara-nissan.svg"
+  },
+  {
+    "symbol": "GAMON",
+    "name": "Gammon Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/gammon-pakistan.svg"
+  },
+  {
+    "symbol": "GATI",
+    "name": "Gatron Industries Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/gatron-industries.svg"
+  },
+  {
+    "symbol": "GATM",
+    "name": "Gul Ahmed Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/gul-ahmed-textile-mills.svg"
+  },
+  {
+    "symbol": "GCIL",
+    "name": "Ghani Chemical Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ghani-global-glass.svg"
+  },
+  {
+    "symbol": "GCWL",
+    "name": "Ghani ChemWorld Limited Registered Shs",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ghani-chemworld-limited.svg"
+  },
+  {
+    "symbol": "GDL",
+    "name": "GHANI DAIRIES LIMITED",
+    "market": "PSX"
+  },
+  {
+    "symbol": "GEMBCEM",
+    "name": "Burj Clean Energy Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/burj-modaraba-mgmt-co-pvt-ltd.svg"
+  },
+  {
+    "symbol": "GEMMEL",
+    "name": "Mughal Energy Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/mughal-energy-limited.svg"
+  },
+  {
+    "symbol": "GEMNETS",
+    "name": "Nets International Communication Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/nets-international-communication-limited.svg"
+  },
+  {
+    "symbol": "GEMPACRA",
+    "name": "Pakistan Credit Rating Agency Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-credit-rating-agency-limited.svg"
+  },
+  {
+    "symbol": "GEMPAPL",
+    "name": "Pak Agro Packaging Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pak-agro-packaging.svg"
+  },
+  {
+    "symbol": "GEMSPNL",
+    "name": "Supernet Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/supernet.svg"
+  },
+  {
+    "symbol": "GFIL",
+    "name": "Ghazi Fabrics International Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ghazi-fabrics-international.svg"
+  },
+  {
+    "symbol": "GGGL",
+    "name": "Ghani Global Glass Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ghani-global-glass.svg"
+  },
+  {
+    "symbol": "GGL",
+    "name": "Ghani Global Holdings Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ghani-global-glass.svg"
+  },
+  {
+    "symbol": "GHGL",
+    "name": "Ghani Glass Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ghani-glass.svg"
+  },
+  {
+    "symbol": "GHNI",
+    "name": "Ghandhara Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ghandhara-nissan.svg"
+  },
+  {
+    "symbol": "GIL",
+    "name": "Good Luck Industries Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/good-luck-industries.svg"
+  },
+  {
+    "symbol": "GLAXO",
+    "name": "GlaxoSmithKline Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/glaxosmithkline-pakistan.svg"
+  },
+  {
+    "symbol": "GLOT",
+    "name": "Globe Textile Mills Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "GLPL",
+    "name": "Gillette Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/gillette-india.svg"
+  },
+  {
+    "symbol": "GOC",
+    "name": "GOC (Pak) Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/goc-pak.svg"
+  },
+  {
+    "symbol": "GRR",
+    "name": "Globe Residency REIT",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/globe-residency-reit.svg"
+  },
+  {
+    "symbol": "GRYL",
+    "name": "Grays Leasing Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/grays-leasing.svg"
+  },
+  {
+    "symbol": "GSPM",
+    "name": "Gulshan Spinning Mills Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/paramount-spinning-mills-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "GTYR",
+    "name": "Ghandhara Tyre and Rubber Co Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ghandhara-tyre-and-rubber-co.svg"
+  },
+  {
+    "symbol": "GUSM",
+    "name": "Gulistan Spinning Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/paramount-spinning-mills-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "GUTM",
+    "name": "Gulistan Textile Mills Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "GVGL",
+    "name": "Ghani Value Glass Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ghani-value-glass.svg"
+  },
+  {
+    "symbol": "GWLC",
+    "name": "Gharibwal Cement Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/gharibwal-cement.svg"
+  },
+  {
+    "symbol": "HABSM",
+    "name": "Habib Sugar Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/habib-sugar-mills.svg"
+  },
+  {
+    "symbol": "HADC",
+    "name": "Haydari Construction Co. Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "HAEL",
+    "name": "Hala Enterprises Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/hala-enterprises.svg"
+  },
+  {
+    "symbol": "HAFL",
+    "name": "Hafiz Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/hafiz.svg"
+  },
+  {
+    "symbol": "HAJT",
+    "name": "Hajra Textile Mills Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "HALEON",
+    "name": "Haleon Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/haleon-pakistan.svg"
+  },
+  {
+    "symbol": "HASCOL",
+    "name": "Hascol Petroleum Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/hascol-petroleum.svg"
+  },
+  {
+    "symbol": "HATM",
+    "name": "Hamid Textile Mills Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "HBL",
+    "name": "Habib Bank Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/habib-bank.svg"
+  },
+  {
+    "symbol": "HCAR",
+    "name": "Honda Atlas Cars (Pakistan) Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/honda.svg"
+  },
+  {
+    "symbol": "HICL",
+    "name": "Habib Insurance Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/habib-insurance-co.svg"
+  },
+  {
+    "symbol": "HINO",
+    "name": "Hinopak Motors Limited.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/hinopak-motors.svg"
+  },
+  {
+    "symbol": "HINOON",
+    "name": "Highnoon Laboratories Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/highnoon-laboratories.svg"
+  },
+  {
+    "symbol": "HIRAT",
+    "name": "Hira Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/hira-textile-mills.svg"
+  },
+  {
+    "symbol": "HKKT",
+    "name": "Hakkim Textile Mills Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "HMB",
+    "name": "Habib Metropolitan Bank Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/habib-metropolitan-bank.svg"
+  },
+  {
+    "symbol": "HMIM",
+    "name": "Haji Mohammad Ismail Mills Limited",
+    "market": "PSX"
+  },
+  {
+    "symbol": "HPL",
+    "name": "Hoechst Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sanofi-aventis-pakistan.svg"
+  },
+  {
+    "symbol": "HRPL",
+    "name": "Habib Rice Products Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/habib-rice-products.svg"
+  },
+  {
+    "symbol": "HSPI",
+    "name": "Huffaz Seamless Pipe Industries Limited.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/huffaz-seamless-pipe-industries.svg"
+  },
+  {
+    "symbol": "HTL",
+    "name": "Hi-Tech Lubricants Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/hi-tech-lubricants.svg"
+  },
+  {
+    "symbol": "HUBC",
+    "name": "Hub Power Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/hub-power-co.svg"
+  },
+  {
+    "symbol": "HUMNL",
+    "name": "Hum Network Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/hum-network.svg"
+  },
+  {
+    "symbol": "HUSI",
+    "name": "Husein Industries Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/hussain-industries.svg"
+  },
+  {
+    "symbol": "HWQS",
+    "name": "Haseeb Waqas Sugar Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/haseeb-waqas-sugar.svg"
+  },
+  {
+    "symbol": "IBFL",
+    "name": "Ibrahim Fibres Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ibrahim-fibres.svg"
+  },
+  {
+    "symbol": "IBLHL",
+    "name": "IBL Healthcare Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ibl-healthcare.svg"
+  },
+  {
+    "symbol": "ICCI",
+    "name": "ICC Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/icc-industries-limited-defaulter.svg"
+  },
+  {
+    "symbol": "ICIBL",
+    "name": "Invest Capital Investment Bank Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/invest-capital-investment-bank.svg"
+  },
+  {
+    "symbol": "ICL",
+    "name": "Ittehad Chemicals Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ittehad-chemicals.svg"
+  },
+  {
+    "symbol": "IDRT",
+    "name": "Idrees Textile Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/idrees-textile-mills.svg"
+  },
+  {
+    "symbol": "IDSM",
+    "name": "Ideal Spinning Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ideal-spinning-mills.svg"
+  },
+  {
+    "symbol": "IDYM",
+    "name": "Indus Dyeing & Manufacturing Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/indus-dyeing-and-manufacturing-co.svg"
+  },
+  {
+    "symbol": "IGIHL",
+    "name": "IGI Holdings Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/igi-holdings.svg"
+  },
+  {
+    "symbol": "IGIL",
+    "name": "IGI Life Insurance Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/igi-life-insurance.svg"
+  },
+  {
+    "symbol": "ILP",
+    "name": "Interloop Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/interloop.svg"
+  },
+  {
+    "symbol": "IMAGE",
+    "name": "Image Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/image-pakistan.svg"
+  },
+  {
+    "symbol": "IML",
+    "name": "Imperial Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/imperial.svg"
+  },
+  {
+    "symbol": "IMS",
+    "name": "Intermarket Securities Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/efg-hermes-pakistan.svg"
+  },
+  {
+    "symbol": "INDU",
+    "name": "Indus Motor Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/toyota.svg"
+  },
+  {
+    "symbol": "INIL",
+    "name": "International Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/international-industries.svg"
+  },
+  {
+    "symbol": "INKL",
+    "name": "International Knitwear Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/international-knitwear.svg"
+  },
+  {
+    "symbol": "IPAK",
+    "name": "International Packaging Films Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/international-packaging-films-limited.svg"
+  },
+  {
+    "symbol": "IREIT",
+    "name": "Image REIT",
+    "market": "PSX"
+  },
+  {
+    "symbol": "ISIL",
+    "name": "Ismail Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ismail-industries.svg"
+  },
+  {
+    "symbol": "ISL",
+    "name": "International Steels limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/international-steels.svg"
+  },
+  {
+    "symbol": "ITANZ",
+    "name": "Itanz Technologies Limited",
+    "market": "PSX"
+  },
+  {
+    "symbol": "ITTEFAQ",
+    "name": "Ittefaq Iron Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ittefaq-iron-industries.svg"
+  },
+  {
+    "symbol": "JATM",
+    "name": "J.A. Textile Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ja-textile-mills.svg"
+  },
+  {
+    "symbol": "JDMT",
+    "name": "Janana De Malucho Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/janana-de-malucho-textile-mills.svg"
+  },
+  {
+    "symbol": "JDWS",
+    "name": "JDW Sugar Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/jdw-sugar-mills.svg"
+  },
+  {
+    "symbol": "JGICL",
+    "name": "Jubilee General Insurance Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/jubilee-holdings.svg"
+  },
+  {
+    "symbol": "JKSM",
+    "name": "JK Spinning Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/jk-spinning-mills.svg"
+  },
+  {
+    "symbol": "JLICL",
+    "name": "Jubilee Life Insurance Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/jubilee-life-insurance-company.svg"
+  },
+  {
+    "symbol": "JPGL",
+    "name": "Japan Power Generation Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "JSBL",
+    "name": "JS Bank Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/js-bank.svg"
+  },
+  {
+    "symbol": "JSCL",
+    "name": "Jahangir Siddiqui & Co. Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/js-bank.svg"
+  },
+  {
+    "symbol": "JSCLPSA",
+    "name": "Jahangir Siddiqui & Co. Ltd Cum Conv Red Pfd Registered Shs",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/js-bank.svg"
+  },
+  {
+    "symbol": "JSGCL",
+    "name": "JS Global Capital Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/js-momentum-factor-etf.svg"
+  },
+  {
+    "symbol": "JSIL",
+    "name": "JS Investments Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/js-bank.svg"
+  },
+  {
+    "symbol": "JSML",
+    "name": "Jauharabad Sugar Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/jauharabad-sugar-mills.svg"
+  },
+  {
+    "symbol": "JUBS",
+    "name": "Jubilee Spinning & Weaving Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/jubilee-spinning-and-weaving-mills.svg"
+  },
+  {
+    "symbol": "JVDC",
+    "name": "Javedan Corporation Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/javedan-oration.svg"
+  },
+  {
+    "symbol": "JVDCPS",
+    "name": "Javedan Corporation Ltd Pfd 2011- Without Fixed maturity Cum.Non-voting.Conv.Red.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/javedan-oration.svg"
+  },
+  {
+    "symbol": "KAKL",
+    "name": "Kaiser Arts & Krafts Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "KAPCO",
+    "name": "Kot Addu Power Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/kot-addu-power-co.svg"
+  },
+  {
+    "symbol": "KASBM",
+    "name": "KASB Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/kasb-modaraba.svg"
+  },
+  {
+    "symbol": "KCL",
+    "name": "Karam Ceramics Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/karam-ceramics.svg"
+  },
+  {
+    "symbol": "KEL",
+    "name": "K-Electric Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/k-electric.svg"
+  },
+  {
+    "symbol": "KHTC",
+    "name": "Khyber Tobacco Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/khyber-tobacco-co.svg"
+  },
+  {
+    "symbol": "KHYT",
+    "name": "Khyber Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/khyber-textile-mills.svg"
+  },
+  {
+    "symbol": "KML",
+    "name": "Kohinoor Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/kohinoor-mills.svg"
+  },
+  {
+    "symbol": "KOHC",
+    "name": "Kohat Cement Co Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/kohat-cement-co.svg"
+  },
+  {
+    "symbol": "KOHE",
+    "name": "Kohinoor Energy Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/kohinoor-energy.svg"
+  },
+  {
+    "symbol": "KOHP",
+    "name": "Kohinoor Power Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/kohinoor-power-co.svg"
+  },
+  {
+    "symbol": "KOHTM",
+    "name": "Kohat Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/saif-textile-mills.svg"
+  },
+  {
+    "symbol": "KOIL",
+    "name": "Kohinoor Industries Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/kohinoor-industries.svg"
+  },
+  {
+    "symbol": "KOSM",
+    "name": "Kohinoor Spinning Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/kohinoor-mills.svg"
+  },
+  {
+    "symbol": "KPUS",
+    "name": "Khairpur Sugar Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/khairpur-sugar-mills.svg"
+  },
+  {
+    "symbol": "KSBP",
+    "name": "KSB Pumps Company Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ksb-ag-vorzug.svg"
+  },
+  {
+    "symbol": "KSTM",
+    "name": "Khalid Siraj Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/khalid-siraj-textile-mills-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "KTML",
+    "name": "Kohinoor Textiles Mills Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/kohinoor-textiles-mills.svg"
+  },
+  {
+    "symbol": "LCI",
+    "name": "Lucky Core Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/lucky-core-industries.svg"
+  },
+  {
+    "symbol": "LEUL",
+    "name": "Leather Up Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/leather-up.svg"
+  },
+  {
+    "symbol": "LIVEN",
+    "name": "Liven Pharma Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/landmark-spinning-industries.svg"
+  },
+  {
+    "symbol": "LOADS",
+    "name": "Loads Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/loads.svg"
+  },
+  {
+    "symbol": "LOADSR1",
+    "name": "Loads Ltd Rights 2026-11.03.26 For Shares",
+    "market": "PSX"
+  },
+  {
+    "symbol": "LOTCHEM",
+    "name": "Lotte Chemical Pakistan Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/lotte-chemical.svg"
+  },
+  {
+    "symbol": "LPGL",
+    "name": "Leiner Pak Gelatine Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/leiner-pak-gelatine.svg"
+  },
+  {
+    "symbol": "LPL",
+    "name": "Lalpir Power Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakgen-power.svg"
+  },
+  {
+    "symbol": "LSECL",
+    "name": "Lse Capital limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/lse-capital-limited.svg"
+  },
+  {
+    "symbol": "LSECLR",
+    "name": "Lse Capital limited Rights 2026-05.03.26 for shares",
+    "market": "PSX"
+  },
+  {
+    "symbol": "LSEFSL",
+    "name": "LSE Financial Services Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/lse-financial-services-limited.svg"
+  },
+  {
+    "symbol": "LSEVL",
+    "name": "LSE Ventures Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/lse-ventures-limited.svg"
+  },
+  {
+    "symbol": "LUCK",
+    "name": "Lucky Cement Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/lucky-cement.svg"
+  },
+  {
+    "symbol": "MACFL",
+    "name": "Macpac Films Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/macpac-films.svg"
+  },
+  {
+    "symbol": "MACTER",
+    "name": "Macter International Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/macter-international.svg"
+  },
+  {
+    "symbol": "MARI",
+    "name": "Mari Energies Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/mari-petroleum-company.svg"
+  },
+  {
+    "symbol": "MCB",
+    "name": "MCB Bank Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/mcb-bank.svg"
+  },
+  {
+    "symbol": "MCBIM",
+    "name": "MCB Investment Management Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/mcb-arif-habib-savings-and-investments.svg"
+  },
+  {
+    "symbol": "MDTL",
+    "name": "Media Times Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pace-pakistan.svg"
+  },
+  {
+    "symbol": "MEBL",
+    "name": "Meezan Bank Limited.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/meezan-pakistan-etf.svg"
+  },
+  {
+    "symbol": "MEHT",
+    "name": "Mahmood Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/mahmood-textile-mills.svg"
+  },
+  {
+    "symbol": "MERIT",
+    "name": "Merit Packaging Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/merit-packaging.svg"
+  },
+  {
+    "symbol": "MFFL",
+    "name": "Mitchell'S Fruit Farms Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/mitchells-fruit-farms.svg"
+  },
+  {
+    "symbol": "MFFLR1",
+    "name": "Mitchell'S Fruit Farms Limited Rights 2026-09.04.26 for Shares",
+    "market": "PSX"
+  },
+  {
+    "symbol": "MFL",
+    "name": "Matco Foods Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/matco-foods.svg"
+  },
+  {
+    "symbol": "MFTM",
+    "name": "Mohammad Farooq Textile Mills Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "MIRKS",
+    "name": "Mirpurkhas Sugar Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/mirpurkhas-sugar-mills.svg"
+  },
+  {
+    "symbol": "MLCF",
+    "name": "Maple Leaf Cement Factory Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/maple-leaf-cement-factory.svg"
+  },
+  {
+    "symbol": "MOHE",
+    "name": "Mohib Exports Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "MQTM",
+    "name": "Maqbool Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/maqbool-textile-mills.svg"
+  },
+  {
+    "symbol": "MRNS",
+    "name": "Mehran Sugar Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/mehran-sugar-mills.svg"
+  },
+  {
+    "symbol": "MSCL",
+    "name": "Metropolitan Steel Corporation Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/metropolitan-steel.svg"
+  },
+  {
+    "symbol": "MSOT",
+    "name": "Masood Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/masood-textile-mills.svg"
+  },
+  {
+    "symbol": "MSOTPS",
+    "name": "Masood Textile Mills Ltd Pref Registered Shs",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/masood-textile-mills.svg"
+  },
+  {
+    "symbol": "MTL",
+    "name": "Millat Tractors Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/millat-tractors.svg"
+  },
+  {
+    "symbol": "MUBT",
+    "name": "Mubarak Textile Mills Limited",
+    "market": "PSX"
+  },
+  {
+    "symbol": "MUGHAL",
+    "name": "Mughal Iron & Steel Industries Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/mughal-iron-and-steel-industries.svg"
+  },
+  {
+    "symbol": "MUGHALC",
+    "name": "Mughal Iron & Steel Industries Ltd. Class C",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/mughal-iron-and-steel-industries.svg"
+  },
+  {
+    "symbol": "MUREB",
+    "name": "Murree Brewery Co., Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/murree-brewery.svg"
+  },
+  {
+    "symbol": "MWMP",
+    "name": "Mandviwala Mauser Plastic Industries Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/mandviwala-mauser-plastic-industries-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "NAFL",
+    "name": "National Fibres Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "NAGC",
+    "name": "Nagina Cotton Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/prosperity-weaving-mills.svg"
+  },
+  {
+    "symbol": "NATF",
+    "name": "National Foods Ltd. (Pakistan)",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/national-foods.svg"
+  },
+  {
+    "symbol": "NATM",
+    "name": "Nadeem Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/nadeem-textile-mills.svg"
+  },
+  {
+    "symbol": "NBP",
+    "name": "National Bank of Pakistan",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/national-bank-of-pakistan.svg"
+  },
+  {
+    "symbol": "NCL",
+    "name": "Nishat Chunian Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/nishat-chunian-power.svg"
+  },
+  {
+    "symbol": "NCML",
+    "name": "Nazir Cotton Mills Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/nazir-cotton-mills.svg"
+  },
+  {
+    "symbol": "NCPL",
+    "name": "Nishat Chunian Power Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/nishat-chunian-power.svg"
+  },
+  {
+    "symbol": "NESTLE",
+    "name": "Nestle Pakistan Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/nestle.svg"
+  },
+  {
+    "symbol": "NETSOL",
+    "name": "Netsol Technologies Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/netsol-technologies.svg"
+  },
+  {
+    "symbol": "NEXT",
+    "name": "Next Capital Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/next-capital.svg"
+  },
+  {
+    "symbol": "NICL",
+    "name": "Nimir Industrial Chemicals Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/nimir-industrial-chemicals.svg"
+  },
+  {
+    "symbol": "NINA",
+    "name": "Nina Industries Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "NMFL",
+    "name": "Nirala MSR Foods Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "NML",
+    "name": "Nishat Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/nishat-mills.svg"
+  },
+  {
+    "symbol": "NONS",
+    "name": "Noon Sugar Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/noon-sugar-mills.svg"
+  },
+  {
+    "symbol": "NPL",
+    "name": "Nishat Power Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/nishat-mills.svg"
+  },
+  {
+    "symbol": "NRL",
+    "name": "National Refinery Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/national-refinery.svg"
+  },
+  {
+    "symbol": "NRSL",
+    "name": "Nimir Resins Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/nimir-industrial-chemicals.svg"
+  },
+  {
+    "symbol": "NSRM",
+    "name": "National Silk & Rayon Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-national-silk-and-rayon-mills.svg"
+  },
+  {
+    "symbol": "OBOY",
+    "name": "Oilboy Energy Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/oilboy-energy.svg"
+  },
+  {
+    "symbol": "OCTOPUS",
+    "name": "Octopus Digital Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/octopus-digital.svg"
+  },
+  {
+    "symbol": "OGDC",
+    "name": "Oil & Gas Development Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/oil-and-gas-develop-gdr-reg-s.svg"
+  },
+  {
+    "symbol": "OLPL",
+    "name": "OLP Financial Services Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/olp-financial-services-pakistan.svg"
+  },
+  {
+    "symbol": "OLPM",
+    "name": "OLP Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/olp-financial-services-pakistan.svg"
+  },
+  {
+    "symbol": "OML",
+    "name": "Olympia Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/olympia-mills.svg"
+  },
+  {
+    "symbol": "ORM",
+    "name": "Orient Rental Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/orient-rental-modaraba.svg"
+  },
+  {
+    "symbol": "OTSU",
+    "name": "Otsuka Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/otsuka-pakistan.svg"
+  },
+  {
+    "symbol": "PABC",
+    "name": "Pakistan Aluminium Beverage Cans Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-aluminium-beverage-cans.svg"
+  },
+  {
+    "symbol": "PACE",
+    "name": "Pace Pakistan Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pace-pakistan.svg"
+  },
+  {
+    "symbol": "PAEL",
+    "name": "Pak Elektron Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pak-elektron.svg"
+  },
+  {
+    "symbol": "PAKD",
+    "name": "Pak Datacom Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pak-datacom.svg"
+  },
+  {
+    "symbol": "PAKL",
+    "name": "Pak Leather Crafts Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pak-leather-crafts.svg"
+  },
+  {
+    "symbol": "PAKMI",
+    "name": "First Pak Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-pak-modaraba.svg"
+  },
+  {
+    "symbol": "PAKOXY",
+    "name": "Pakistan Oxygen Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-oxygen.svg"
+  },
+  {
+    "symbol": "PAKQATAR",
+    "name": "Pak-Qatar Family Takaful Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pak-qatar-family-takaful-ltd.svg"
+  },
+  {
+    "symbol": "PAKRI",
+    "name": "Pakistan Reinsurance Co.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-reinsurance-co.svg"
+  },
+  {
+    "symbol": "PAKT",
+    "name": "Pakistan Tobacco Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-tobacco-co.svg"
+  },
+  {
+    "symbol": "PASL",
+    "name": "Pervez Ahmed Consultancy Services Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pervez-ahmed-consultancy-services.svg"
+  },
+  {
+    "symbol": "PASM",
+    "name": "Paramount Spinning Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/paramount-spinning-mills-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "PCAL",
+    "name": "Pakistan Cables Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-cables.svg"
+  },
+  {
+    "symbol": "PDGH",
+    "name": "Prudential Discount & Guarantee House Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "PECO",
+    "name": "Pakistan Engineering Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-engineering-co.svg"
+  },
+  {
+    "symbol": "PELPS",
+    "name": "Pak Elektron Ltd. Non-Cum Pref Registered Shs",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pak-elektron.svg"
+  },
+  {
+    "symbol": "PGLC",
+    "name": "Pak-Gulf Leasing Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pak-gulf-leasing-company.svg"
+  },
+  {
+    "symbol": "PHDL",
+    "name": "Pakistan Hotels Developers Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-hotels-developers.svg"
+  },
+  {
+    "symbol": "PIAHCLA",
+    "name": "PIA Holding Company Limited Class A",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pia-company-limited.svg"
+  },
+  {
+    "symbol": "PIAHCLB",
+    "name": "PIA Holding Company Limited Class B",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pia-company-limited.svg"
+  },
+  {
+    "symbol": "PIBTL",
+    "name": "Pakistan International Bulk Terminal Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-international-bulk-terminal.svg"
+  },
+  {
+    "symbol": "PICL",
+    "name": "Pakistan Industrial & Commercial Leasing Ltd",
+    "market": "PSX"
+  },
+  {
+    "symbol": "PICT",
+    "name": "Pakistan International Container Terminal Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/int-l-container-terminals.svg"
+  },
+  {
+    "symbol": "PIL",
+    "name": "PICIC Insurance Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/picic-insurance.svg"
+  },
+  {
+    "symbol": "PIM",
+    "name": "Popular Islamic Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/popular-islamic-modaraba.svg"
+  },
+  {
+    "symbol": "PINL",
+    "name": "Premier Insurance Co. of Pakistan Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/premier-insurance-co-of-pakistan.svg"
+  },
+  {
+    "symbol": "PIOC",
+    "name": "Pioneer Cement Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pioneer-cement.svg"
+  },
+  {
+    "symbol": "PKGI",
+    "name": "Pakistan General Insurance Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-general-insurance-co.svg"
+  },
+  {
+    "symbol": "PKGP",
+    "name": "Pakgen Power Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakgen-power.svg"
+  },
+  {
+    "symbol": "PKGS",
+    "name": "Packages Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/packages.svg"
+  },
+  {
+    "symbol": "PMRS",
+    "name": "Premier Sugar Mills & Distillery Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-premier-sugar-mills-and-distillery-co.svg"
+  },
+  {
+    "symbol": "PNSC",
+    "name": "Pakistan National Shipping Corporation",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-national-shipping-oration.svg"
+  },
+  {
+    "symbol": "POL",
+    "name": "Pakistan Oilfields Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-oilfields.svg"
+  },
+  {
+    "symbol": "POML",
+    "name": "Punjab Oil Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/punjab-oil-mills.svg"
+  },
+  {
+    "symbol": "POWER",
+    "name": "Power Cement Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/power-cement.svg"
+  },
+  {
+    "symbol": "POWERPS",
+    "name": "Power Cement Ltd Cumulative Perpetual Pref Registered Shs",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/power-cement.svg"
+  },
+  {
+    "symbol": "PPL",
+    "name": "Pakistan Petroleum Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-petroleum.svg"
+  },
+  {
+    "symbol": "PPP",
+    "name": "Pakistan Paper Products Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-paper-product.svg"
+  },
+  {
+    "symbol": "PPVC",
+    "name": "Pakistan PVC Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-pvc.svg"
+  },
+  {
+    "symbol": "PQGTL",
+    "name": "Pak-Qatar General Takaful Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "PREMA",
+    "name": "At-Tahur Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/at-tahur.svg"
+  },
+  {
+    "symbol": "PRET",
+    "name": "Premium Textile Mills Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/premium-textile-mills.svg"
+  },
+  {
+    "symbol": "PRIB",
+    "name": "Prudential Investment Bank Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "PRIC",
+    "name": "Progressive Insurance Co., Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "PRL",
+    "name": "Pakistan Refinery Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-refinery.svg"
+  },
+  {
+    "symbol": "PRWM",
+    "name": "Prosperity Weaving Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/prosperity-weaving-mills.svg"
+  },
+  {
+    "symbol": "PSEL",
+    "name": "Pakistan Services Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-services.svg"
+  },
+  {
+    "symbol": "PSO",
+    "name": "Pakistan State Oil Co. Ltd. Class I",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-state-oil-co.svg"
+  },
+  {
+    "symbol": "PSX",
+    "name": "Pakistan Stock Exchange Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-stock-exchange.svg"
+  },
+  {
+    "symbol": "PSYL",
+    "name": "Pakistan Synthetics Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-synthetics.svg"
+  },
+  {
+    "symbol": "PTC",
+    "name": "Pakistan Telecommunication Co. Ltd. Class A",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/pakistan-telecommunication-company.svg"
+  },
+  {
+    "symbol": "PTL",
+    "name": "Panther Tyres Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/panther-tyres.svg"
+  },
+  {
+    "symbol": "QTECH",
+    "name": "Quantum Data Technologies Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/chakwal-spinning-mills.svg"
+  },
+  {
+    "symbol": "QUET",
+    "name": "Quetta Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/quetta-textile-mills.svg"
+  },
+  {
+    "symbol": "QUICE",
+    "name": "Quice Food Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/quice-food-industries.svg"
+  },
+  {
+    "symbol": "QUSW",
+    "name": "Quality Steel Work Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "RCML",
+    "name": "Reliance Cotton Spinning Mills Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/reliance-cotton-spinning-mills.svg"
+  },
+  {
+    "symbol": "REDCO",
+    "name": "Redco Textiles Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/redco-textiles.svg"
+  },
+  {
+    "symbol": "REGAL",
+    "name": "Regal Ceramics Ltd",
+    "market": "PSX"
+  },
+  {
+    "symbol": "REWM",
+    "name": "Reliance Weaving Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/reliance-weaving-mills.svg"
+  },
+  {
+    "symbol": "RICL",
+    "name": "Reliance Insurance Co Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/reliance-insurance-co.svg"
+  },
+  {
+    "symbol": "RMPL",
+    "name": "Rafhan Maize Products Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/rafhan-maize-products-co.svg"
+  },
+  {
+    "symbol": "RPL",
+    "name": "Roshan Packages Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/roshan-packages.svg"
+  },
+  {
+    "symbol": "RUBY",
+    "name": "Ruby Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ruby-textiles-mills.svg"
+  },
+  {
+    "symbol": "RUPL",
+    "name": "Rupali Polyester Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/rupali-polyester.svg"
+  },
+  {
+    "symbol": "SAIF",
+    "name": "Saif Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/saif-textile-mills.svg"
+  },
+  {
+    "symbol": "SANE",
+    "name": "Salman Noman Enterprises Limited",
+    "market": "PSX"
+  },
+  {
+    "symbol": "SANSM",
+    "name": "Sanghar Sugar Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sanghar-sugar-mills.svg"
+  },
+  {
+    "symbol": "SAPT",
+    "name": "Sapphire Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sapphire-textile-mills.svg"
+  },
+  {
+    "symbol": "SARC",
+    "name": "Sardar Chemical Industries Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sardar-chemical-industries.svg"
+  },
+  {
+    "symbol": "SASML",
+    "name": "Sindh Abadgars Sugar Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sindh-abadgars-sugar-mill.svg"
+  },
+  {
+    "symbol": "SAZEW",
+    "name": "Sazgar Engineering Works Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sazgar-engineering-works.svg"
+  },
+  {
+    "symbol": "SBL",
+    "name": "Samba Bank Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/samba-bank.svg"
+  },
+  {
+    "symbol": "SCBPL",
+    "name": "Standard Chartered Bank (Pakistan) Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/standard-chartered.svg"
+  },
+  {
+    "symbol": "SCHT",
+    "name": "Schon Textiles Ltd",
+    "market": "PSX"
+  },
+  {
+    "symbol": "SCL",
+    "name": "Shield Corporation Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shield-oration.svg"
+  },
+  {
+    "symbol": "SDOT",
+    "name": "Sadoon Textile Industries Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "SEARL",
+    "name": "Searle Company Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-searle-company.svg"
+  },
+  {
+    "symbol": "SEL",
+    "name": "Sitara Energy Limited.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sitara-peroxide.svg"
+  },
+  {
+    "symbol": "SEPL",
+    "name": "Security Papers Limited.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/security-papers.svg"
+  },
+  {
+    "symbol": "SERT",
+    "name": "Service Industries Textiles Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/service-industries-textiles.svg"
+  },
+  {
+    "symbol": "SFAT",
+    "name": "Safa Textile Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "SFL",
+    "name": "Sapphire Fibres Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sapphire-textile-mills.svg"
+  },
+  {
+    "symbol": "SGABL",
+    "name": "SG Allied Businesses Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sg-allied-businesses.svg"
+  },
+  {
+    "symbol": "SGF",
+    "name": "Service Global Footwear Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/service-global-footwear.svg"
+  },
+  {
+    "symbol": "SGPL",
+    "name": "S.G. Power Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/s-g-power.svg"
+  },
+  {
+    "symbol": "SHCI",
+    "name": "Shaffi Chemical Industries Limited",
+    "market": "PSX"
+  },
+  {
+    "symbol": "SHCM",
+    "name": "Shadman Cotton Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shadman-cotton-mills.svg"
+  },
+  {
+    "symbol": "SHDT",
+    "name": "Shadab Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shadab-textile-mills.svg"
+  },
+  {
+    "symbol": "SHDTR1",
+    "name": "Shadab Textile Mills Limited Rights 2026-01.04.2026 for shares",
+    "market": "PSX"
+  },
+  {
+    "symbol": "SHEZ",
+    "name": "Shezan International Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shezan-international.svg"
+  },
+  {
+    "symbol": "SHFA",
+    "name": "Shifa International Hospitals Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shifa-international-hospitals.svg"
+  },
+  {
+    "symbol": "SHJS",
+    "name": "Shahtaj Sugar Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shahtaj-sugar-mills.svg"
+  },
+  {
+    "symbol": "SHNI",
+    "name": "Shaheen Insurance Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shaheen-insurance-co.svg"
+  },
+  {
+    "symbol": "SHSML",
+    "name": "Shahmurad Sugar Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shahmurad-sugar-mills.svg"
+  },
+  {
+    "symbol": "SIBL",
+    "name": "Security Investment Bank Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/security-investment-bank.svg"
+  },
+  {
+    "symbol": "SIEM",
+    "name": "Siemens Pakistan Engineering Co. Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/siemens.svg"
+  },
+  {
+    "symbol": "SINDM",
+    "name": "Sindh Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sindh-modaraba.svg"
+  },
+  {
+    "symbol": "SITC",
+    "name": "Sitara Chemicals Industries Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sitara-chemicals-industries.svg"
+  },
+  {
+    "symbol": "SKRS",
+    "name": "Sakrand Sugar Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sakrand-sugar-mills.svg"
+  },
+  {
+    "symbol": "SLCL",
+    "name": "Security Leasing Corporation Limited.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "SLCPA",
+    "name": "Security Leasing Pkr10 Cum Prf 9.1%",
+    "market": "PSX"
+  },
+  {
+    "symbol": "SLGL",
+    "name": "SECURE LOGISTICS - TRAX GROUP LIMITED",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/secure-logistics-ltd.svg"
+  },
+  {
+    "symbol": "SLL",
+    "name": "SME Leasing Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sme-leasing.svg"
+  },
+  {
+    "symbol": "SLYT",
+    "name": "Sally Textile Mills Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sally-textile-mills-ltd-defaulter.svg"
+  },
+  {
+    "symbol": "SMCPL",
+    "name": "Safe Mix Concrete Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/safe-mix-concrete.svg"
+  },
+  {
+    "symbol": "SML",
+    "name": "Shakarganj Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shakarganj.svg"
+  },
+  {
+    "symbol": "SNAI",
+    "name": "Sana Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sana-industries.svg"
+  },
+  {
+    "symbol": "SNBL",
+    "name": "Soneri Bank Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/soneri-bank.svg"
+  },
+  {
+    "symbol": "SNGP",
+    "name": "Sui Northern Gas Pipelines Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sui-northern-gas-pipelines.svg"
+  },
+  {
+    "symbol": "SPCL",
+    "name": "Saudi Pak Consultancy Company Limited",
+    "market": "PSX"
+  },
+  {
+    "symbol": "SPEL",
+    "name": "SPEL Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/synthetic-products-enterprises.svg"
+  },
+  {
+    "symbol": "SPL",
+    "name": "Sitara Peroxide Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sitara-peroxide.svg"
+  },
+  {
+    "symbol": "SPWL",
+    "name": "Saif Power Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/saif-power.svg"
+  },
+  {
+    "symbol": "SRR",
+    "name": "Signature Residency REIT",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/signature-residency-reit.svg"
+  },
+  {
+    "symbol": "SRVI",
+    "name": "Service Industries Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/service-industries.svg"
+  },
+  {
+    "symbol": "SSGC",
+    "name": "Sui Southern Gas Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sui-southern-gas-co.svg"
+  },
+  {
+    "symbol": "SSIC",
+    "name": "Silver Star Insurance Co., Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "SSML",
+    "name": "Saritow Spinning Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/saritow-spinning-mills.svg"
+  },
+  {
+    "symbol": "SSOM",
+    "name": "S.S. Oil Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/ss-oil-mills.svg"
+  },
+  {
+    "symbol": "STCL",
+    "name": "Shabbir Tiles & Ceramics Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shabbir-tiles-and-ceramics.svg"
+  },
+  {
+    "symbol": "STJT",
+    "name": "Shahtaj Textile Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shahtaj-textile-mills.svg"
+  },
+  {
+    "symbol": "STL",
+    "name": "Supernet Technologies Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/hallmark-company.svg"
+  },
+  {
+    "symbol": "STML",
+    "name": "Shams Textile Mills Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shams-textile-mills.svg"
+  },
+  {
+    "symbol": "STPL",
+    "name": "Siddiqsons Tin Plate Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/siddiqsons-tin-plate.svg"
+  },
+  {
+    "symbol": "STYLERS",
+    "name": "Stylers International Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/stylers-international-limited.svg"
+  },
+  {
+    "symbol": "SUHJ",
+    "name": "Suhail Jute Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/suhail-jute-mills.svg"
+  },
+  {
+    "symbol": "SURAJ",
+    "name": "Suraj Ghee Industries Ltd",
+    "market": "PSX"
+  },
+  {
+    "symbol": "SURC",
+    "name": "Suraj Cotton Mills Limited.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/suraj-cotton-mills.svg"
+  },
+  {
+    "symbol": "SUTM",
+    "name": "Sunrays Textile Mills Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/sunrays-textile-mills.svg"
+  },
+  {
+    "symbol": "SWL",
+    "name": "Standard Worldwide Ltd",
+    "market": "PSX"
+  },
+  {
+    "symbol": "SYM",
+    "name": "Symmetry Group Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/symmetry-ltd.svg"
+  },
+  {
+    "symbol": "SYS",
+    "name": "Systems Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/systems.svg"
+  },
+  {
+    "symbol": "SZTM",
+    "name": "Shahzad Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shahzad-textile-mills.svg"
+  },
+  {
+    "symbol": "TAJT",
+    "name": "Taj Textile Mills Limited",
+    "market": "PSX"
+  },
+  {
+    "symbol": "TATM",
+    "name": "Tata Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/tata-textile-mills.svg"
+  },
+  {
+    "symbol": "TBL",
+    "name": "Treet Battery Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/treet-battery-limited.svg"
+  },
+  {
+    "symbol": "TCORP",
+    "name": "Tariq Corporation Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/tariq-oration.svg"
+  },
+  {
+    "symbol": "TCORPCPS",
+    "name": "Tariq Corporation Limited Cum Conv Pfd Registered Shs",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/tariq-oration.svg"
+  },
+  {
+    "symbol": "TELE",
+    "name": "Telecard Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/telecard.svg"
+  },
+  {
+    "symbol": "TGL",
+    "name": "Tariq Glass Industries Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/tariq-glass-industries.svg"
+  },
+  {
+    "symbol": "THALL",
+    "name": "Thal Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/thal.svg"
+  },
+  {
+    "symbol": "THCCL",
+    "name": "Thatta Cement Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/thatta-cement-company.svg"
+  },
+  {
+    "symbol": "TICL",
+    "name": "Thal Industries Corp. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-thal-industrial-oration.svg"
+  },
+  {
+    "symbol": "TOMCL",
+    "name": "Organic Meat Company Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-organic-meat-co.svg"
+  },
+  {
+    "symbol": "TOWL",
+    "name": "Towellers Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/towellers.svg"
+  },
+  {
+    "symbol": "TPL",
+    "name": "TPL Corp Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/tpl.svg"
+  },
+  {
+    "symbol": "TPLI",
+    "name": "TPL Insurance Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/tpl-insurance.svg"
+  },
+  {
+    "symbol": "TPLL",
+    "name": "TPL Life Insurance Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/dar-es-salaam-textile-mills.svg"
+  },
+  {
+    "symbol": "TPLP",
+    "name": "TPL Properties Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/tpl-properties.svg"
+  },
+  {
+    "symbol": "TPLT",
+    "name": "TPL Trakker Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/tpl-trakker.svg"
+  },
+  {
+    "symbol": "TREET",
+    "name": "Treet Corp. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/treet.svg"
+  },
+  {
+    "symbol": "TRG",
+    "name": "TRG Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/trg-pakistan.svg"
+  },
+  {
+    "symbol": "TRIBL",
+    "name": "Trust Investment Bank Limited.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "TRIPF",
+    "name": "Tri-Pack Films Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/tri-pack-films.svg"
+  },
+  {
+    "symbol": "TRSM",
+    "name": "Trust Modaraba Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/trust-modaraba.svg"
+  },
+  {
+    "symbol": "TSBL",
+    "name": "Trust Securities & Brokerage Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/trust-securities-and-brokerage.svg"
+  },
+  {
+    "symbol": "TSBLR1",
+    "name": "Trust Securities & Brokerage Ltd Rights 2026-12.03.26 For Shares",
+    "market": "PSX"
+  },
+  {
+    "symbol": "TSML",
+    "name": "Tandlianwala Sugar Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/tandlianwala-sugar-mills.svg"
+  },
+  {
+    "symbol": "TSPL",
+    "name": "Tri-Star Power Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/tri-star-power-co.svg"
+  },
+  {
+    "symbol": "UBDL",
+    "name": "United Brands Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/united-brands.svg"
+  },
+  {
+    "symbol": "UBL",
+    "name": "United Bank Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/united-bank.svg"
+  },
+  {
+    "symbol": "UCAPM",
+    "name": "Unicap Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/unicap-modaraba.svg"
+  },
+  {
+    "symbol": "UDLI",
+    "name": "UDL International Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/udl-international-limited.svg"
+  },
+  {
+    "symbol": "UDPL",
+    "name": "United Distributors Pakistan Limited.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/united-distributors-pakistan.svg"
+  },
+  {
+    "symbol": "UNIC",
+    "name": "United Insurance Co. of Pakistan Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/united-insurance-co-of-pakistan.svg"
+  },
+  {
+    "symbol": "UNITY",
+    "name": "Unity Foods Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/unity-foods.svg"
+  },
+  {
+    "symbol": "UPFL",
+    "name": "Unilever Pakistan Foods Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/unilever.svg"
+  },
+  {
+    "symbol": "USMT",
+    "name": "Usman Textile Mills Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "UVIC",
+    "name": "Universal Insurance Co. Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/universal-insurance-co.svg"
+  },
+  {
+    "symbol": "UWAPL",
+    "name": "UNITY WALIMAR PRIVATE LIMITED",
+    "market": "PSX"
+  },
+  {
+    "symbol": "WAFI",
+    "name": "Wafi Energy Pakistan Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/shell.svg"
+  },
+  {
+    "symbol": "WAHN",
+    "name": "Wah Nobel Chemicals Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/wah-nobel-chemicals.svg"
+  },
+  {
+    "symbol": "WASL",
+    "name": "Wasl Mobility Modaraba",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-prudential-modaraba.svg"
+  },
+  {
+    "symbol": "WASLR",
+    "name": "Wasl Mobility Modaraba Rights 2025-30.03.2026 For shares",
+    "market": "PSX"
+  },
+  {
+    "symbol": "WAVES",
+    "name": "Waves Corporation Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/waves-home-appliances.svg"
+  },
+  {
+    "symbol": "WAVESAPP",
+    "name": "Waves Home Appliances Ltd",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/waves-home-appliances.svg"
+  },
+  {
+    "symbol": "WTL",
+    "name": "Worldcall Telecom Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/worldcall-telecom.svg"
+  },
+  {
+    "symbol": "YOUW",
+    "name": "Yousaf Weaving Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/yousuf-weaving-mills.svg"
+  },
+  {
+    "symbol": "ZAHID",
+    "name": "ZAHIDJEE Textile Mills Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/zahidjee-textile-mills.svg"
+  },
+  {
+    "symbol": "ZAL",
+    "name": "Zarea Ltd.",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/zarea-limited.svg"
+  },
+  {
+    "symbol": "ZELP",
+    "name": "Zeal Pak Cement Factory Ltd.",
+    "market": "PSX"
+  },
+  {
+    "symbol": "ZIL",
+    "name": "ZIL Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/zil.svg"
+  },
+  {
+    "symbol": "ZTL",
+    "name": "Zephyr Textiles Limited",
+    "market": "PSX",
+    "image": "https://s3-symbol-logo.tradingview.com/zephyr-textiles.svg"
+  }
+]

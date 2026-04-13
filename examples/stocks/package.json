@@ -1,0 +1,11 @@
+{
+  "name": "signal-stocks-deploy",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.12.4",
+  "scripts": {
+    "build": "pnpm --dir src run build",
+    "install:workspace": "pnpm --dir src install"
+  }
+}

@@ -37,6 +37,8 @@ const __dirname = path.dirname(__filename);
 
 const PUBLIC_DIR_CANDIDATES = [
   path.resolve(process.cwd(), "stocks-public"),
+  path.resolve(process.cwd(), "src", "stocks-public"),
+  path.resolve(process.cwd(), "lib", "stocks-optimizer", "public"),
   path.resolve(__dirname, "../../../../..", "lib", "stocks-optimizer", "public"),
   path.resolve(__dirname, "../../../..", "lib", "stocks-optimizer", "public")
 ];

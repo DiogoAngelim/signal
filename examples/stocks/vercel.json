@@ -1,0 +1,30 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "pnpm --dir src install",
+  "buildCommand": "pnpm --dir src run build",
+  "outputDirectory": "src/artifacts/signal-markets/dist/public",
+  "functions": {
+    "api/index.js": {
+      "includeFiles": [
+        "src/artifacts/api-server/dist/**",
+        "src/stocks-public/**",
+        "lib/stocks-optimizer/public/**"
+      ],
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api?path=$1"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/dashboard/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
