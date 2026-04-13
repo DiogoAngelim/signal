@@ -36,6 +36,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PUBLIC_DIR_CANDIDATES = [
+  path.resolve(process.cwd(), "stocks-public"),
   path.resolve(__dirname, "../../../../..", "lib", "stocks-optimizer", "public"),
   path.resolve(__dirname, "../../../..", "lib", "stocks-optimizer", "public")
 ];
@@ -55,7 +56,10 @@ const MAX_SYMBOLS_PER_REQUEST = Number(process.env.TRADINGVIEW_MAX_SYMBOLS ?? 30
 const TRADINGVIEW_REQUESTS_PER_MINUTE = Number(process.env.TRADINGVIEW_REQUESTS_PER_MINUTE ?? 25);
 const TRADINGVIEW_BASE_URL = process.env.TRADINGVIEW_DATA_BASE_URL?.trim()
   ?? "https://tradingview-data.vercel.app?symbol=";
-const NODE_ECU_API_BASE_URL = (process.env.NODE_ECU_API_BASE_URL ?? "http://localhost:4410/api").trim();
+const NODE_ECU_API_BASE_URL = (
+  process.env.NODE_ECU_API_BASE_URL
+  ?? (process.env.VERCEL ? "off" : "http://localhost:4410/api")
+).trim();
 const NODE_ECU_TIMEOUT_MS = Number(process.env.NODE_ECU_TIMEOUT_MS ?? 6000);
 const SIGNAL_CACHE_TTL_MS = Number(process.env.SIGNAL_CACHE_TTL_MS ?? 5 * 60 * 1000);
 
