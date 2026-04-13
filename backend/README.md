@@ -2,15 +2,15 @@
 
 ## Summary
 
-Signal Backend is a modular, TypeScript-based toolkit for modeling, validating, and executing Signal envelopes across a consistent lifecycle. It provides small, composable packages for intake, validation, evaluation, decisioning, action execution, result recording, local persistence, and sync.
+Signal is a modular, TypeScript-based toolkit for modeling, validating, and executing Signal messages across a consistent lifecycle. It provides small, composable packages for input, validation, evaluation, decisioning, execution, logging, local persistence, and synchonization.
 
 ## Why This Exists
 
 The backend packages are built to:
-- Provide a consistent envelope protocol and lifecycle for signals.
-- Keep validation, processing, and persistence concerns separate and testable.
-- Support offline-first workflows with local storage and replay-safe sync.
-- Enable multiple transport layers (HTTP today, other transports later).
+- Provide a consistent messaging protocol and lifecycle for sensors and IoT devices.
+- Keep validation, processing, and persistence concerns modular and testable.
+- Support offline-first workflows with local storage and replay-safe synchronization.
+- Enable multiple transport layers (HTTP today, or any other modern transport protocol).
 
 ## Modules and API Reference
 
@@ -25,7 +25,7 @@ Normalizes high-level intent into a `SignalEnvelope`.
 
 ### @digelim/02.received
 
-Envelope intake and transition to `received` lifecycle.
+Message input and transition to `received` lifecycle.
 
 - `receiveEnvelope()`
 - `isReceivedEnvelope()`
@@ -38,7 +38,7 @@ Envelope intake and transition to `received` lifecycle.
 
 ### @digelim/03.validated
 
-Validates protocol and transitions to `validated` lifecycle.
+Validates against protocol and transition to the `validated` status.
 
 - `validateEnvelope()`
 - `validateOperationName()`
@@ -51,7 +51,7 @@ Validates protocol and transitions to `validated` lifecycle.
 
 ### @digelim/04.source
 
-Enriches envelopes with source and meta.
+Enriches messages with source and meta.
 
 - `SourceNormalizer`
 - `SourceContext`
@@ -210,7 +210,7 @@ Offline-first sync for local records.
 
 ## Usage Examples
 
-### 1) Receive then validate
+### 1) Receive, then validate
 
 ```ts
 import { receiveEnvelope } from "@digelim/02.received";

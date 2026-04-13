@@ -6,7 +6,7 @@ Signal is not a payments framework. It is the execution kernel and public contra
 
 ## What Signal Is
 
-- a public protocol contract for envelopes, names, results, errors, and capabilities
+- a public protocol contract for messages, names, results, errors, and capabilities
 - a reference runtime for explicit query, mutation, and event execution
 - a thin binding model for HTTP and future transports
 - a pluggable foundation for idempotency storage, replay-safe consumers, and delivery metadata
@@ -22,7 +22,7 @@ Signal is not a payments framework. It is the execution kernel and public contra
 ## Core Guarantees
 
 - operations are explicit and versioned: `note.get.v1`, `post.publish.v1`, `post.published.v1`
-- every message uses the standard Signal envelope
+- every message uses the standard Signal structure
 - queries are read-only
 - mutations declare idempotency explicitly: `required`, `optional`, or `none`
 - same idempotency key plus same normalized payload yields the same logical result
@@ -41,7 +41,7 @@ Signal is not a payments framework. It is the execution kernel and public contra
 
 ## Packages
 
-- `packages/protocol`: envelopes, names, results, errors, capabilities, JSON-schema artifacts
+- `packages/protocol`: messages, names, results, errors, capabilities, and JSON-schema artifacts
 - `packages/runtime`: Node.js reference runtime, idempotency helpers, dispatcher, replay-safe utilities
 - `packages/sdk-node`: explicit registration helpers for Node applications
 - `packages/binding-http`: thin Fastify binding for Signal queries, mutations, and capabilities
@@ -224,91 +224,12 @@ A Signal-compatible implementation must preserve:
 - capability discovery
 
 The Node runtime is the reference implementation, not the only valid one.
-# Signal Full-Stack Workspace
+# Example Apps
 
-Monorepo with a Signal backend toolkit and a full-stack demo app in the frontend workspace.
+Signal no longer includes a standalone frontend workspace. UI demos live in `examples/`:
 
-## What Runs Locally
-
-- API server (Express) at http://localhost:8080
-- Signal client (Vite) at http://localhost:5173
-- Client talks to the API via `/api` (proxied to the API server in dev)
-
-## Quick Start
-
-From the repo root:
-
-```
-pnpm -C frontend run dev
-```
-
-This runs both the API server and the Signal client in parallel.
-
-## Configuration
-
-The client reads:
-
-- `VITE_API_BASE_URL` (default: `/api`)
-- `VITE_API_PROXY_TARGET` (default: `http://localhost:8080`)
-
-Create `frontend/artifacts/signal-client/.env` if you want to override defaults.
-
-## Test Scenarios
-
-Run these from the Signal client Playground.
-
-### Scenario 1: Success response
-
-- Message: `Run full-stack smoke test`
-- Operation: `transform`
-- Payload (optional JSON):
-
-```json
-{
-	"requestId": "demo-001",
-	"user": {
-		"id": "u_123",
-		"email": "demo@example.com"
-	},
-	"items": [
-		{ "sku": "signal-core", "qty": 2 },
-		{ "sku": "signal-ui", "qty": 1 }
-	],
-	"flags": {
-		"dryRun": true,
-		"priority": "low"
-	}
-}
-```
-
-Expected:
-- `status` is `success`
-- `message` is `Signal processed successfully.`
-- `result.operation` is `transform`
-- `result.received.message` matches the message
-- `result.received.data` matches the JSON payload
-
-### Scenario 2: Processing response
-
-- Message: `Ping`
-- Operation: `emit`
-- Payload (optional JSON):
-
-```json
-{
-	"ping": true
-}
-```
-
-Expected:
-- `status` is `processing`
-- `message` is `Signal queued for emission.`
-
-## Useful Commands
-
-- `pnpm -C frontend run dev` - run API server + client
-- `pnpm -C frontend --filter @workspace/api-server run dev` - API only
-- `pnpm -C frontend --filter @workspace/signal-client run dev` - client only
+- `examples/weather/` - Weather Signal app + server. See `examples/weather/replit.md` for setup and commands.
+- `examples/stocks/` - Signal Markets UI demo. See `examples/stocks/src/replit.md` for details.
 
 ## npm Module: signal-protocol
 
