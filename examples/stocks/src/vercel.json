@@ -3,7 +3,7 @@
   "buildCommand": "pnpm run build",
   "outputDirectory": "artifacts/signal-markets/dist/public",
   "functions": {
-    "api/index.js": {
+    "api/index.cjs": {
       "includeFiles": "stocks-public/**",
       "maxDuration": 60
     }

@@ -4,7 +4,7 @@
   "buildCommand": "pnpm --dir src run build",
   "outputDirectory": "src/artifacts/signal-markets/dist/public",
   "functions": {
-    "api/index.js": {
+    "api/index.cjs": {
       "includeFiles": [
         "src/artifacts/api-server/dist/**",
         "src/stocks-public/**",
