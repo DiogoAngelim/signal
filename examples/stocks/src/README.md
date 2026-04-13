@@ -8,7 +8,7 @@ Use `examples/stocks` as the Vercel project root so the `lib` and `src` folders 
 
 - Build command: `pnpm --dir src run build`
 - Output directory: `src/artifacts/signal-markets/dist/public`
-- API entrypoint: `api/index.js`
+- API entrypoint: `api/index.cjs`
 
 ## Environment variables
 
