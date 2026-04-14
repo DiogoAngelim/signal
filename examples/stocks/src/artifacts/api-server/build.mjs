@@ -14,16 +14,9 @@ async function buildAll() {
   const distDir = path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true });
 
-  await esbuild({
-    entryPoints: [
-      path.resolve(artifactDir, "src/index.ts"),
-      path.resolve(artifactDir, "src/app.ts")
-    ],
+  const commonConfig = {
     platform: "node",
     bundle: true,
-    format: "esm",
-    outdir: distDir,
-    outExtension: { ".js": ".mjs" },
     logLevel: "info",
     // Some packages may not be bundleable, so we externalize them, we can add more here as needed.
     // Some of the packages below may not be imported or installed, but we're adding them in case they are in the future.
@@ -109,6 +102,17 @@ async function buildAll() {
       // pino relies on workers to handle logging, instead of externalizing it we use a plugin to handle it
       esbuildPluginPino({ transports: ["pino-pretty"] })
     ],
+  };
+
+  await esbuild({
+    ...commonConfig,
+    entryPoints: [
+      path.resolve(artifactDir, "src/index.ts"),
+      path.resolve(artifactDir, "src/app.ts")
+    ],
+    format: "esm",
+    outdir: distDir,
+    outExtension: { ".js": ".mjs" },
     // Make sure packages that are cjs only (e.g. express) but are bundled continue to work in our esm output file
     banner: {
       js: `import { createRequire as __bannerCrReq } from 'node:module';
@@ -120,6 +124,14 @@ globalThis.__filename = __bannerUrl.fileURLToPath(import.meta.url);
 globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     `,
     },
+  });
+
+  await esbuild({
+    ...commonConfig,
+    entryPoints: [path.resolve(artifactDir, "src/app.ts")],
+    format: "cjs",
+    outdir: distDir,
+    outExtension: { ".js": ".cjs" },
   });
 }
 
