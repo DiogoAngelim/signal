@@ -142,28 +142,52 @@ export default function Dashboard() {
   const statusOptions: Array<StockStatus | "All"> = ["All", "Stable", "Rising", "Watch", "Dip"];
   const signalOptions: Array<TradeSignal | "All"> = ["All", "Buy", "Hold", "Sell"];
 
-  const portfolio = useMemo(() => {
-    const pricedStocks = stocks.filter((stock) => Number.isFinite(stock.price));
-    const totalValue = pricedStocks.reduce((sum, stock) => sum + (stock.price ?? 0), 0);
-    const avgChange = pricedStocks.length
-      ? pricedStocks.reduce((sum, stock) => sum + (stock.changePercent ?? 0), 0) / pricedStocks.length
-      : 0;
-    const todayChangeDollar = totalValue * (avgChange / 100);
+  const portfolioPositions = useMemo(() => {
+    return stocks
+      .filter((stock) =>
+        stock.signalAction === "Buy"
+        && stock.status === "Rising"
+        && Number.isFinite(stock.price)
+      )
+      .map((stock) => {
+        const quantity = 1;
+        const price = stock.price ?? 0;
+        const changePercent = stock.changePercent ?? 0;
+        const marketValue = price * quantity;
 
-    const overallSignal = avgChange >= 1
-      ? "Momentum Up"
-      : avgChange <= -1
-        ? "Risk Off"
-        : "Mostly Stable";
+        return {
+          ...stock,
+          quantity,
+          marketValue,
+          dayChangeDollar: marketValue * (changePercent / 100)
+        };
+      });
+  }, [stocks]);
+
+  const portfolio = useMemo(() => {
+    const totalValue = portfolioPositions.reduce((sum, stock) => sum + stock.marketValue, 0);
+    const todayChangeDollar = portfolioPositions.reduce((sum, stock) => sum + stock.dayChangeDollar, 0);
+    const todayChangePercent = totalValue > 0
+      ? Number(((todayChangeDollar / totalValue) * 100).toFixed(2))
+      : 0;
+    const totalQuantity = portfolioPositions.reduce((sum, stock) => sum + stock.quantity, 0);
+
+    const overallSignal = !portfolioPositions.length
+      ? "No Buy Setup"
+      : todayChangePercent >= 1
+        ? "Buy Momentum"
+        : "Accumulating";
 
     return {
       totalValue,
       todayChangeDollar,
-      todayChangePercent: Number(avgChange.toFixed(2)),
+      todayChangePercent,
       marketStatus: getMarketStatus(marketFilter),
-      overallSignal
+      overallSignal,
+      positionCount: portfolioPositions.length,
+      totalQuantity
     };
-  }, [stocks, marketFilter, marketClock]);
+  }, [portfolioPositions, marketFilter, marketClock]);
 
   useEffect(() => {
     let mounted = true;
@@ -352,13 +376,12 @@ export default function Dashboard() {
   }, [stocks, statusFilter, signalFilter]);
 
   const allocation = useMemo(() => {
-    const priced = filteredStocks.filter((stock) => Number.isFinite(stock.price));
-    const total = priced.reduce((sum, stock) => sum + (stock.price ?? 0), 0);
+    const total = portfolioPositions.reduce((sum, stock) => sum + stock.marketValue, 0);
     return {
       total,
-      items: priced.slice(0, 5)
+      items: portfolioPositions.slice(0, 5)
     };
-  }, [filteredStocks]);
+  }, [portfolioPositions]);
 
   const filteredMarkets = useMemo(() => {
     const query = marketQuery.trim().toLowerCase();
@@ -379,6 +402,8 @@ export default function Dashboard() {
   const totalValue = portfolio.totalValue ?? 0;
   const totalChange = portfolio.todayChangeDollar ?? 0;
   const totalChangePercent = portfolio.todayChangePercent ?? 0;
+  const positionCount = portfolio.positionCount ?? 0;
+  const totalQuantity = portfolio.totalQuantity ?? 0;
 
   if (loading) {
     return (
@@ -416,6 +441,9 @@ export default function Dashboard() {
                 {formatMaybeCurrency(Math.abs(totalChange))} ({totalChangePercent}%)
               </div>
             </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {positionCount} positions · {totalQuantity} shares · Buy + Rising only
+            </p>
           </div>
 
           <div className="flex items-center gap-6 bg-card border border-border/50 rounded-2xl px-6 py-4 shadow-sm">
@@ -586,7 +614,7 @@ export default function Dashboard() {
               {allocation.total > 0 ? (
                 <div className="space-y-3">
                   {allocation.items.map((stock) => {
-                    const percent = Math.min(100, Math.max(2, Math.round(((stock.price ?? 0) / allocation.total) * 100)));
+                    const percent = Math.min(100, Math.max(2, Math.round((stock.marketValue / allocation.total) * 100)));
                     return (
                       <div key={stock.ticker} className="flex items-center gap-3">
                         <div className="w-12 text-xs font-medium text-muted-foreground">{stock.ticker}</div>
@@ -604,7 +632,7 @@ export default function Dashboard() {
                   })}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">Allocation will appear once quotes are loaded.</p>
+                <p className="text-sm text-muted-foreground">Allocation will appear once Buy + Rising positions are loaded.</p>
               )}
             </div>
 
