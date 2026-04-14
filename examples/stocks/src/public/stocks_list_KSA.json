@@ -1,0 +1,1664 @@
+[
+  {
+    "image": "/vesple/optimalstocks/images/riyad-bank.svg",
+    "symbol": "1010.SR",
+    "name": "RIYAD BANK",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bank-aljazira.svg",
+    "symbol": "1020.SR",
+    "name": "BANK ALJAZIRA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-investment-bank.svg",
+    "symbol": "1030.SR",
+    "name": "SAUDI INVESTMENT BANK",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/banque-saudi-fransi.svg",
+    "symbol": "1050.SR",
+    "name": "BANQUE SAUDI FRANSI",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-british-bank.svg",
+    "symbol": "1060.SR",
+    "name": "SAUDI BRITISH BANK",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arab-national-bank.svg",
+    "symbol": "1080.SR",
+    "name": "ARAB NATIONAL BANK",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-tadawul-co.svg",
+    "symbol": "1111.SR",
+    "name": "SAUDI TADAWUL GROUP HOLDING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-rajhi-bank.svg",
+    "symbol": "1120.SR",
+    "name": "AL RAJHI BANK",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bank-albilad.svg",
+    "symbol": "1140.SR",
+    "name": "BANK ALBILAD",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alinma-bank.svg",
+    "symbol": "1150.SR",
+    "name": "ALINMA BANK",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-national-bank.svg",
+    "symbol": "1180.SR",
+    "name": "THE SAUDI NATIONAL BANK",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/amlak-international-for-real-estate-finance-co.svg",
+    "symbol": "1182.SR",
+    "name": "AMLAK INTERNATIONAL FINANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-home-loans-co.svg",
+    "symbol": "1183.SR",
+    "name": "SHL FINANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/takween-advanced-industries-co.svg",
+    "symbol": "1201.SR",
+    "name": "TAKWEEN ADVANCED INDUSTRIES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/middle-east-paper-co.svg",
+    "symbol": "1202.SR",
+    "name": "MIDDLE EAST PAPER CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/basic-chemical-industries-co.svg",
+    "symbol": "1210.SR",
+    "name": "BASIC CHEMICAL INDUSTRIES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-arabian-mining-co.svg",
+    "symbol": "1211.SR",
+    "name": "SAUDI ARABIAN MINING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/astra-industrial.svg",
+    "symbol": "1212.SR",
+    "name": "ASTRA INDUSTRIAL GROUP",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/naseej-international-trading-co.svg",
+    "symbol": "1213.SR",
+    "name": "NASEEJ INTERNATIONAL TRADING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-hassan-ghazi-ibrahim-shaker-co.svg",
+    "symbol": "1214.SR",
+    "name": "AL HASSAN GHAZI IBRAHIM SHAKER CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/united-wire-factories-co.svg",
+    "symbol": "1301.SR",
+    "name": "UNITED WIRE FACTORIES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bawan-co.svg",
+    "symbol": "1302.SR",
+    "name": "BAWAN CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/electrical-industries-co.svg",
+    "symbol": "1303.SR",
+    "name": "ELECTRICAL INDUSTRIES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-yamamah-steel.svg",
+    "symbol": "1304.SR",
+    "name": "AL YAMAMAH STEEL INDUSTRIES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-steel-pipe-co.svg",
+    "symbol": "1320.SR",
+    "name": "SAUDI STEEL PIPE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/east-pipes-integrated-company-for-industry.svg",
+    "symbol": "1321.SR",
+    "name": "EAST PIPES INTEGRATED COMPANY FOR INDUSTRY",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/almasane-alkobra-mining-co.svg",
+    "symbol": "1322.SR",
+    "name": "ALMASANE ALKOBRA MINING CO",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/seera.svg",
+    "symbol": "1810.SR",
+    "name": "SEERA GROUP HOLDING",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/abdulmohsen-alhokair-for-tourism-and-development.svg",
+    "symbol": "1820.SR",
+    "name": "ABDULMOHSEN ALHOKAIR GROUP FOR TOURISM AND DEVELOPMENT",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/leejam-sports-co.svg",
+    "symbol": "1830.SR",
+    "name": "LEEJAM SPORTS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/maharah-human-resources-co.svg",
+    "symbol": "1831.SR",
+    "name": "MAHARAH HUMAN RESOURCES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sadr-logistics-co.svg",
+    "symbol": "1832.SR",
+    "name": "SADR LOGISTICS CO",
+    "market": ""
+  },
+  {
+    "symbol": "1833.SR",
+    "name": "AL MAWARID MANPOWER CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/methanol-chemicals-company.svg",
+    "symbol": "2001.SR",
+    "name": "METHANOL CHEMICALS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-basic.svg",
+    "symbol": "2010.SR",
+    "name": "SAUDI BASIC INDUSTRIES CORP.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sabic-agri-nutrients.svg",
+    "symbol": "2020.SR",
+    "name": "SABIC AGRI-NUTRIENTS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-arabia-refineries-co.svg",
+    "symbol": "2030.SR",
+    "name": "SAUDI ARABIA REFINERIES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-ceramic-co.svg",
+    "symbol": "2040.SR",
+    "name": "SAUDI CERAMIC CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/savola.svg",
+    "symbol": "2050.SR",
+    "name": "SAVOLA GROUP",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/national-industrialization-co.svg",
+    "symbol": "2060.SR",
+    "name": "NATIONAL INDUSTRIALIZATION CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-pharmaceutical-industries-and-medical-appliances.svg",
+    "symbol": "2070.SR",
+    "name": "SAUDI PHARMACEUTICAL INDUSTRIES AND MEDICAL APPLIANCES CORP.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/national-gas-and-industrialization-co.svg",
+    "symbol": "2080.SR",
+    "name": "NATIONAL GAS AND INDUSTRIALIZATION CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alkhorayef-water-and-power-technologies.svg",
+    "symbol": "2081.SR",
+    "name": "ALKHORAYEF WATER AND POWER TECHNOLOGIES CO",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/acwa-power-co.svg",
+    "symbol": "2082.SR",
+    "name": "ACWA POWER CO.",
+    "market": ""
+  },
+  {
+    "symbol": "2083.SR",
+    "name": "THE POWER AND WATER UTILITY COMPANY FOR JUBAIL AND YANBU",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/national-gypsum.svg",
+    "symbol": "2090.SR",
+    "name": "NATIONAL GYPSUM CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wafrah-for-industry-and-development-co.svg",
+    "symbol": "2100.SR",
+    "name": "WAFRAH FOR INDUSTRY AND DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-cable-co.svg",
+    "symbol": "2110.SR",
+    "name": "SAUDI CABLE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-advanced-industries-co.svg",
+    "symbol": "2120.SR",
+    "name": "SAUDI ADVANCED INDUSTRIES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-industrial-development.svg",
+    "symbol": "2130.SR",
+    "name": "SAUDI INDUSTRIAL DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ayyan-investment-co.svg",
+    "symbol": "2140.SR",
+    "name": "AYYAN INVESTMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/the-national-company-for-glass-industries.svg",
+    "symbol": "2150.SR",
+    "name": "THE NATIONAL COMPANY FOR GLASS INDUSTRIES",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-arabian-amiantit-co.svg",
+    "symbol": "2160.SR",
+    "name": "SAUDI ARABIAN AMIANTIT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alujain.svg",
+    "symbol": "2170.SR",
+    "name": "ALUJAIN CORP.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/filing-and-packing-materials-manufacturing-co.svg",
+    "symbol": "2180.SR",
+    "name": "FILING AND PACKING MATERIALS MANUFACTURING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-industrial-services-co.svg",
+    "symbol": "2190.SR",
+    "name": "SUSTAINED INFRASTRUCTURE HOLDING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arabian-pipes-co.svg",
+    "symbol": "2200.SR",
+    "name": "ARABIAN PIPES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nama-chemicals-co.svg",
+    "symbol": "2210.SR",
+    "name": "NAMA CHEMICALS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/national-metal-manufacturing-and-casting-co.svg",
+    "symbol": "2220.SR",
+    "name": "NATIONAL METAL MANUFACTURING AND CASTING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-arabian-oil.svg",
+    "symbol": "2222.SR",
+    "name": "SAUDI ARABIAN OIL CO.",
+    "market": ""
+  },
+  {
+    "symbol": "2223.SR",
+    "name": "SAUDI ARAMCO BASE OIL CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-chemical-co.svg",
+    "symbol": "2230.SR",
+    "name": "SAUDI CHEMICAL CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/zamil-industrial-investment-co.svg",
+    "symbol": "2240.SR",
+    "name": "ZAMIL INDUSTRIAL INVESTMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-industrial-investment.svg",
+    "symbol": "2250.SR",
+    "name": "SAUDI INDUSTRIAL INVESTMENT GROUP",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudia-dairy-and-foodstuff-co.svg",
+    "symbol": "2270.SR",
+    "name": "SAUDIA DAIRY AND FOODSTUFF CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/almarai-co.svg",
+    "symbol": "2280.SR",
+    "name": "ALMARAI CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tanmiah-food-co.svg",
+    "symbol": "2281.SR",
+    "name": "TANMIAH FOOD CO",
+    "market": ""
+  },
+  {
+    "symbol": "2282.SR",
+    "name": "NAQI WATER CO.",
+    "market": ""
+  },
+  {
+    "symbol": "2283.SR",
+    "name": "FIRST MILLING CO.",
+    "market": ""
+  },
+  {
+    "symbol": "2284.SR",
+    "name": "MODERN MILLS FOR FOOD PRODUCTS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/yanbu-national-petrochemical-co.svg",
+    "symbol": "2290.SR",
+    "name": "YANBU NATIONAL PETROCHEMICAL CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-paper-manufacturing-co.svg",
+    "symbol": "2300.SR",
+    "name": "SAUDI PAPER MANUFACTURING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sahara-international-petrochemical-co.svg",
+    "symbol": "2310.SR",
+    "name": "SAHARA INTERNATIONAL PETROCHEMICAL CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-babtain-power-and-telecommunication-co.svg",
+    "symbol": "2320.SR",
+    "name": "AL-BABTAIN POWER AND TELECOMMUNICATION CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/advanced-petrochemical-co.svg",
+    "symbol": "2330.SR",
+    "name": "ADVANCED PETROCHEMICAL CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-abdullatif-industrial-investment-company.svg",
+    "symbol": "2340.SR",
+    "name": "AL ABDULLATIF INDUSTRIAL INVESTMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-kayan-petrochemical-co.svg",
+    "symbol": "2350.SR",
+    "name": "SAUDI KAYAN PETROCHEMICAL CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-vitrified-clay-pipes-co.svg",
+    "symbol": "2360.SR",
+    "name": "SAUDI VITRIFIED CLAY PIPES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/middle-east-specialized-cables-co.svg",
+    "symbol": "2370.SR",
+    "name": "MIDDLE EAST SPECIALIZED CABLES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rabigh-refining-and-petrochemical-co.svg",
+    "symbol": "2380.SR",
+    "name": "RABIGH REFINING AND PETROCHEMICAL CO.",
+    "market": ""
+  },
+  {
+    "symbol": "2381.SR",
+    "name": "ARABIAN DRILLING CO.",
+    "market": ""
+  },
+  {
+    "symbol": "2382.SR",
+    "name": "ADES HOLDING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/najran-cement-co.svg",
+    "symbol": "3002.SR",
+    "name": "NAJRAN CEMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/city-cement-co.svg",
+    "symbol": "3003.SR",
+    "name": "CITY CEMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/northern-region-cement.svg",
+    "symbol": "3004.SR",
+    "name": "NORTHERN REGION CEMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/umm-al-qura-cement-co.svg",
+    "symbol": "3005.SR",
+    "name": "UMM AL-QURA CEMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/zahrat-al-waha-for-trading-co.svg",
+    "symbol": "3007.SR",
+    "name": "ZAHRAT AL WAHA FOR TRADING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-kathiri-co.svg",
+    "symbol": "3008.SR",
+    "name": "AL KATHIRI HOLDING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arabian-cement-co.svg",
+    "symbol": "3010.SR",
+    "name": "ARABIAN CEMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/yamama-cement-co.svg",
+    "symbol": "3020.SR",
+    "name": "YAMAMA CEMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-cement-co.svg",
+    "symbol": "3030.SR",
+    "name": "SAUDI CEMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/qassim-cement-co.svg",
+    "symbol": "3040.SR",
+    "name": "QASSIM CEMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/southern-province-cement-co.svg",
+    "symbol": "3050.SR",
+    "name": "SOUTHERN PROVINCE CEMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/yanbu-cement-co.svg",
+    "symbol": "3060.SR",
+    "name": "YANBU CEMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/eastern-province-cement-co.svg",
+    "symbol": "3080.SR",
+    "name": "EASTERN PROVINCE CEMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tabuk-cement-co.svg",
+    "symbol": "3090.SR",
+    "name": "TABUK CEMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-jouf-cement-co.svg",
+    "symbol": "3091.SR",
+    "name": "AL JOUF CEMENT CO.",
+    "market": ""
+  },
+  {
+    "symbol": "3092.SR",
+    "name": "RIYADH CEMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/abdullah-al-othaim-markets-co.svg",
+    "symbol": "4001.SR",
+    "name": "ABDULLAH AL OTHAIM MARKETS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mouwasat-medical-services-co.svg",
+    "symbol": "4002.SR",
+    "name": "MOUWASAT MEDICAL SERVICES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/united-electronics-co.svg",
+    "symbol": "4003.SR",
+    "name": "UNITED ELECTRONICS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dallah-healthcare-co.svg",
+    "symbol": "4004.SR",
+    "name": "DALLAH HEALTHCARE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/national-medical-care-co.svg",
+    "symbol": "4005.SR",
+    "name": "NATIONAL MEDICAL CARE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-marketing-co.svg",
+    "symbol": "4006.SR",
+    "name": "SAUDI MARKETING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-hammadi-company-for-development-and-investment.svg",
+    "symbol": "4007.SR",
+    "name": "AL HAMMADI HOLDING",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-company-for-hardware.svg",
+    "symbol": "4008.SR",
+    "name": "SAUDI COMPANY FOR HARDWARE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/middle-east-healthcare-co.svg",
+    "symbol": "4009.SR",
+    "name": "MIDDLE EAST HEALTHCARE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lazurde-company-for-jewelry.svg",
+    "symbol": "4011.SR",
+    "name": "LAZURDE COMPANY FOR JEWELRY",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/thob-al-aseel-co.svg",
+    "symbol": "4012.SR",
+    "name": "THOB AL ASEEL CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dr-sulaiman-al-habib-medical-services-group.svg",
+    "symbol": "4013.SR",
+    "name": "DR. SULAIMAN AL HABIB MEDICAL SERVICES GROUP",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/scientific-and-medical-equipment-house-co.svg",
+    "symbol": "4014.SR",
+    "name": "SCIENTIFIC AND MEDICAL EQUIPMENT HOUSE CO.",
+    "market": ""
+  },
+  {
+    "symbol": "4015.SR",
+    "name": "JAMJOOM PHARMACEUTICALS FACTORY CO.",
+    "market": ""
+  },
+  {
+    "symbol": "4016.SR",
+    "name": "MIDDLE EAST PHARMACEUTICAL INDUSTRIES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-real-estate-co.svg",
+    "symbol": "4020.SR",
+    "name": "SAUDI REAL ESTATE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/national-shipping-company-of-saudi-arabia.svg",
+    "symbol": "4030.SR",
+    "name": "NATIONAL SHIPPING COMPANY OF SAUDI ARABIA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-ground-services-co.svg",
+    "symbol": "4031.SR",
+    "name": "SAUDI GROUND SERVICES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-public-transport-co.svg",
+    "symbol": "4040.SR",
+    "name": "SAUDI PUBLIC TRANSPORT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-automotive-services-co.svg",
+    "symbol": "4050.SR",
+    "name": "SAUDI AUTOMOTIVE SERVICES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/baazeem-trading-co.svg",
+    "symbol": "4051.SR",
+    "name": "BAAZEEM TRADING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/anaam-international.svg",
+    "symbol": "4061.SR",
+    "name": "ANAAM INTERNATIONAL HOLDING GROUP",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tihama.svg",
+    "symbol": "4070.SR",
+    "name": "TIHAMA ADVERTISING AND PUBLIC RELATIONS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arabian-contracting-services-co.svg",
+    "symbol": "4071.SR",
+    "name": "ARABIAN CONTRACTING SERVICES CO.",
+    "market": ""
+  },
+  {
+    "symbol": "4072.SR",
+    "name": "MBC GROUP CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aseer-trading-tourism.svg",
+    "symbol": "4080.SR",
+    "name": "ASEER TRADING, TOURISM AND MANUFACTURING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nayifat-finance-co.svg",
+    "symbol": "4081.SR",
+    "name": "NAYIFAT FINANCE CO.",
+    "market": ""
+  },
+  {
+    "symbol": "4082.SR",
+    "name": "MORABAHA MARINA FINANCING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/taiba-investments-co.svg",
+    "symbol": "4090.SR",
+    "name": "TAIBA INVESTMENTS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/makkah-construction-and-development-co.svg",
+    "symbol": "4100.SR",
+    "name": "MAKKAH CONSTRUCTION AND DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/batic-investments-and-logistics-co.svg",
+    "symbol": "4110.SR",
+    "name": "BATIC INVESTMENTS AND LOGISTICS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-baha-investment-and-development-co.svg",
+    "symbol": "4130.SR",
+    "name": "AL-BAHA INVESTMENT AND DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-industrial-export-co.svg",
+    "symbol": "4140.SR",
+    "name": "SAUDI INDUSTRIAL EXPORT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-omran-industrial.svg",
+    "symbol": "4141.SR",
+    "name": "AL-OMRAN INDUSTRIAL TRADING CO.",
+    "market": ""
+  },
+  {
+    "symbol": "4142.SR",
+    "name": "RIYADH CABLES GROUP CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arriyadh-development-co.svg",
+    "symbol": "4150.SR",
+    "name": "ARRIYADH DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "symbol": "4160.SR",
+    "name": "NATIONAL AGRICULTURAL MARKETING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bindawood-co.svg",
+    "symbol": "4161.SR",
+    "name": "BINDAWOOD HOLDING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/almunajem-foods-co.svg",
+    "symbol": "4162.SR",
+    "name": "ALMUNAJEM FOODS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aldawaa-medical-services-co.svg",
+    "symbol": "4163.SR",
+    "name": "ALDAWAA MEDICAL SERVICES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nahdi-medical-co.svg",
+    "symbol": "4164.SR",
+    "name": "NAHDI MEDICAL CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tourism-enterprise-co.svg",
+    "symbol": "4170.SR",
+    "name": "TOURISM ENTERPRISE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fitaihi-holding.svg",
+    "symbol": "4180.SR",
+    "name": "FITAIHI HOLDING GROUP",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/jarir-marketing-co.svg",
+    "symbol": "4190.SR",
+    "name": "JARIR MARKETING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/abdullah-saad-mohammed-abo-moati-for-bookstores.svg",
+    "symbol": "4191.SR",
+    "name": "ABDULLAH SAAD MOHAMMED ABO MOATI FOR BOOKSTORES CO.",
+    "market": ""
+  },
+  {
+    "symbol": "4192.SR",
+    "name": "ALSAIF STORES FOR DEVELOPMENT AND INVESTMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aldrees-petroleum-and-transport-services.svg",
+    "symbol": "4200.SR",
+    "name": "ALDREES PETROLEUM AND TRANSPORT SERVICES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-research-and-media-group.svg",
+    "symbol": "4210.SR",
+    "name": "SAUDI RESEARCH AND MEDIA GROUP",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/emaar-the-economic-city.svg",
+    "symbol": "4220.SR",
+    "name": "EMAAR THE ECONOMIC CITY",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/red-sea-international-co.svg",
+    "symbol": "4230.SR",
+    "name": "RED SEA INTERNATIONAL CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fawaz-abdulaziz-alhokair-co.svg",
+    "symbol": "4240.SR",
+    "name": "FAWAZ ABDULAZIZ ALHOKAIR CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/jabal-omar-development-company.svg",
+    "symbol": "4250.SR",
+    "name": "JABAL OMAR DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/united-international-transportation-co.svg",
+    "symbol": "4260.SR",
+    "name": "UNITED INTERNATIONAL TRANSPORTATION CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/theeb-rent-a-car-co.svg",
+    "symbol": "4261.SR",
+    "name": "THEEB RENT A CAR CO.",
+    "market": ""
+  },
+  {
+    "symbol": "4262.SR",
+    "name": "LUMI RENTAL CO.",
+    "market": ""
+  },
+  {
+    "symbol": "4263.SR",
+    "name": "SAL SAUDI LOGISTICS SERVICES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-printing-and-packaging-co.svg",
+    "symbol": "4270.SR",
+    "name": "SAUDI PRINTING AND PACKAGING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kingdom-co.svg",
+    "symbol": "4280.SR",
+    "name": "KINGDOM HOLDING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alkhaleej-training-and-education-co.svg",
+    "symbol": "4290.SR",
+    "name": "ALKHALEEJ TRAINING AND EDUCATION CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/national-company-for-learning-and-education.svg",
+    "symbol": "4291.SR",
+    "name": "NATIONAL COMPANY FOR LEARNING AND EDUCATION",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ataa-educational-co.svg",
+    "symbol": "4292.SR",
+    "name": "ATAA EDUCATIONAL CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dar-alarkan-real-estate-development-co.svg",
+    "symbol": "4300.SR",
+    "name": "DAR ALARKAN REAL ESTATE DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/knowledge-economic-city.svg",
+    "symbol": "4310.SR",
+    "name": "KNOWLEDGE ECONOMIC CITY",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alandalus-property.svg",
+    "symbol": "4320.SR",
+    "name": "ALANDALUS PROPERTY CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arabian-centres-co.svg",
+    "symbol": "4321.SR",
+    "name": "ARABIAN CENTRES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/retal-urban-development-co.svg",
+    "symbol": "4322.SR",
+    "name": "RETAL URBAN DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "symbol": "4323.SR",
+    "name": "SUMOU REAL ESTATE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-electricity-company.svg",
+    "symbol": "5110.SR",
+    "name": "SAUDI ELECTRICITY CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/halwani-bros-co.svg",
+    "symbol": "6001.SR",
+    "name": "HALWANI BROS. CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/herfy-food-services-co.svg",
+    "symbol": "6002.SR",
+    "name": "HERFY FOOD SERVICES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-airlines-catering-co.svg",
+    "symbol": "6004.SR",
+    "name": "CATRION CATERING HOLDING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/national-agricultural-development-co.svg",
+    "symbol": "6010.SR",
+    "name": "NATIONAL AGRICULTURAL DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/raydan-food-co.svg",
+    "symbol": "6012.SR",
+    "name": "RAYDAN FOOD CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/development-works-food-co.svg",
+    "symbol": "6013.SR",
+    "name": "DEVELOPMENT WORKS FOOD CO.",
+    "market": ""
+  },
+  {
+    "symbol": "6014.SR",
+    "name": "ALAMAR FOODS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-gassim-investment.svg",
+    "symbol": "6020.SR",
+    "name": "AL GASSIM INVESTMENT HOLDING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tabuk-agricultural.svg",
+    "symbol": "6040.SR",
+    "name": "TABUK AGRICULTURAL DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-fisheries-co.svg",
+    "symbol": "6050.SR",
+    "name": "SAUDI FISHERIES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ash-sharqiyah-development-co.svg",
+    "symbol": "6060.SR",
+    "name": "ASH-SHARQIYAH DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-jouf-agricultural-development-co.svg",
+    "symbol": "6070.SR",
+    "name": "AL-JOUF AGRICULTURAL DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/jazan-energy-and-development.svg",
+    "symbol": "6090.SR",
+    "name": "JAZAN DEVELOPMENT AND INVESTMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-telecom-co.svg",
+    "symbol": "7010.SR",
+    "name": "SAUDI TELECOM CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/etihad-etisalat-co.svg",
+    "symbol": "7020.SR",
+    "name": "ETIHAD ETISALAT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mobile-telecommunication-company-saudi-arabia.svg",
+    "symbol": "7030.SR",
+    "name": "MOBILE TELECOMMUNICATION COMPANY SAUDI ARABIA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/etihad-atheeb-telecommunication-co.svg",
+    "symbol": "7040.SR",
+    "name": "ETIHAD ATHEEB TELECOMMUNICATION CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-moammar-information-systems-co.svg",
+    "symbol": "7200.SR",
+    "name": "AL MOAMMAR INFORMATION SYSTEMS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arab-sea-information-system-co.svg",
+    "symbol": "7201.SR",
+    "name": "ARAB SEA INFORMATION SYSTEM CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arabian-internet-and-communications-services-co.svg",
+    "symbol": "7202.SR",
+    "name": "ARABIAN INTERNET AND COMMUNICATIONS SERVICES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/elm-co.svg",
+    "symbol": "7203.SR",
+    "name": "ELM CO",
+    "market": ""
+  },
+  {
+    "symbol": "7204.SR",
+    "name": "PERFECT PRESENTATION FOR COMMERCIAL SERVICES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/the-company-for-cooperative-insurance.svg",
+    "symbol": "8010.SR",
+    "name": "THE COMPANY FOR COOPERATIVE INSURANCE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aljazira-takaful-taawuni.svg",
+    "symbol": "8012.SR",
+    "name": "ALJAZIRA TAKAFUL TAAWUNI CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/malath-cooperative-insurance-co.svg",
+    "symbol": "8020.SR",
+    "name": "MALATH COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/the-mediterranean-and-gulf-insurance-and-reinsurance-co.svg",
+    "symbol": "8030.SR",
+    "name": "THE MEDITERRANEAN AND GULF INSURANCE AND REINSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/allianz-saudi-fransi.svg",
+    "symbol": "8040.SR",
+    "name": "ALLIANZ SAUDI FRANSI COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/salama-cooperative-insurance-co.svg",
+    "symbol": "8050.SR",
+    "name": "SALAMA COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/walaa-cooperative-insurance-co.svg",
+    "symbol": "8060.SR",
+    "name": "WALAA COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arabian-shield-cooperative-insurance-co.svg",
+    "symbol": "8070.SR",
+    "name": "ARABIAN SHIELD COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-arabian-cooperative-insurance-co.svg",
+    "symbol": "8100.SR",
+    "name": "SAUDI ARABIAN COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gulf-union-alahlia-cooperative-insurance-co.svg",
+    "symbol": "8120.SR",
+    "name": "GULF UNION ALAHLIA COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/allied-cooperative-insurance.svg",
+    "symbol": "8150.SR",
+    "name": "ALLIED COOPERATIVE INSURANCE GROUP",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arabia-insurance-cooperative-co.svg",
+    "symbol": "8160.SR",
+    "name": "ARABIA INSURANCE COOPERATIVE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-etihad-cooperative-insurance-co.svg",
+    "symbol": "8170.SR",
+    "name": "AL-ETIHAD COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-sagr-cooperative-insurance-co.svg",
+    "symbol": "8180.SR",
+    "name": "AL SAGR COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/united-cooperative-assurance.svg",
+    "symbol": "8190.SR",
+    "name": "UNITED COOPERATIVE ASSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-reinsurance-co.svg",
+    "symbol": "8200.SR",
+    "name": "SAUDI REINSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bupa-arabia-for-cooperative-insurance-co.svg",
+    "symbol": "8210.SR",
+    "name": "BUPA ARABIA FOR COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-rajhi-company-for-cooperative-insurance.svg",
+    "symbol": "8230.SR",
+    "name": "AL-RAJHI COMPANY FOR COOPERATIVE INSURANCE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/chubb.svg",
+    "symbol": "8240.SR",
+    "name": "CHUBB ARABIA COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/axa.svg",
+    "symbol": "8250.SR",
+    "name": "GULF INSURANCE GROUP",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gulf-general-cooperative-insurance-co.svg",
+    "symbol": "8260.SR",
+    "name": "GULF GENERAL COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/al-alamiya-for-cooperative-insurance-co.svg",
+    "symbol": "8280.SR",
+    "name": "LIVA INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wataniya-insurance-co.svg",
+    "symbol": "8300.SR",
+    "name": "WATANIYA INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/amana-cooperative-insurance.svg",
+    "symbol": "8310.SR",
+    "name": "AMANA COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-enaya-cooperative-insurance-co.svg",
+    "symbol": "8311.SR",
+    "name": "SAUDI ENAYA COOPERATIVE INSURANCE CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/national-building-and-marketing-co.svg",
+    "symbol": "9510.SR",
+    "name": "NATIONAL BUILDING AND MARKETING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/watani-iron-steel-co.svg",
+    "symbol": "9513.SR",
+    "name": "WATANI IRON STEEL CO",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mohammed-hasan-alnaqool-sons-co.svg",
+    "symbol": "9514.SR",
+    "name": "MOHAMMED HASAN ALNAQOOL SONS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fesh-fash-snack-food-production-co.svg",
+    "symbol": "9515.SR",
+    "name": "FESH FASH SNACK FOOD PRODUCTION CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/natural-gas-distribution-co.svg",
+    "symbol": "9516.SR",
+    "name": "NATURAL GAS DISTRIBUTION CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/national-fertilizer-co.svg",
+    "symbol": "9517.SR",
+    "name": "MOBI INDUSTRY CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/enma-alrawabi-co.svg",
+    "symbol": "9521.SR",
+    "name": "ENMA ALRAWABI CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alhasoob-co.svg",
+    "symbol": "9522.SR",
+    "name": "ALHASOOB CO",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/five-pipe-saudi-co.svg",
+    "symbol": "9523.SR",
+    "name": "GROUP FIVE PIPE SAUDI CO",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/advance-international-company-for-communication-and-informat.svg",
+    "symbol": "9524.SR",
+    "name": "ADVANCE INTERNATIONAL COMPANY FOR COMMUNICATION AND INFORMAT",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alwasail-industrial-co.svg",
+    "symbol": "9525.SR",
+    "name": "ALWASAIL INDUSTRIAL CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ame-company-for-medical-supplies.svg",
+    "symbol": "9527.SR",
+    "name": "AME COMPANY FOR MEDICAL SUPPLIES",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arabian-international-healthcare-co.svg",
+    "symbol": "9530.SR",
+    "name": "ARABIAN INTERNATIONAL HEALTHCARE HOLDING CO",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aljouf-mineral-water-bottling-co.svg",
+    "symbol": "9532.SR",
+    "name": "ALJOUF MINERAL WATER BOTTLING CO",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saudi-parts-center-co.svg",
+    "symbol": "9533.SR",
+    "name": "SAUDI PARTS CENTER CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ladun-investment-co.svg",
+    "symbol": "9535.SR",
+    "name": "LADUN INVESTMENT CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arabian-food-and-dairy-factories-co.svg",
+    "symbol": "9536.SR",
+    "name": "ARABIAN FOOD AND DAIRY FACTORIES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/amwaj-international-co.svg",
+    "symbol": "9537.SR",
+    "name": "AMWAJ INTERNATIONAL CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/naseej-for-technology-co.svg",
+    "symbol": "9538.SR",
+    "name": "NASEEJ FOR TECHNOLOGY CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aqaseem-factory-for-chemicals-and-plastics-co.svg",
+    "symbol": "9539.SR",
+    "name": "AQASEEM FACTORY FOR CHEMICALS AND PLASTICS CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/national-environmental-recycling-co.svg",
+    "symbol": "9540.SR",
+    "name": "NATIONAL ENVIRONMENTAL RECYCLING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/academy-of-learning-co.svg",
+    "symbol": "9541.SR",
+    "name": "ACADEMY OF LEARNING CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/keir-international-co.svg",
+    "symbol": "9542.SR",
+    "name": "KEIR INTERNATIONAL CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9543.SR",
+    "name": "SAUDI NETWORKERS SERVICES CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/future-care-trading-co.svg",
+    "symbol": "9544.SR",
+    "name": "FUTURE CARE TRADING CO",
+    "market": ""
+  },
+  {
+    "symbol": "9545.SR",
+    "name": "INTERNATIONAL HUMAN RESOURCES CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9546.SR",
+    "name": "NABA ALSAHA MEDICAL SERVICES CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9547.SR",
+    "name": "RAWASI ALBINA INVESTMENT CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9548.SR",
+    "name": "ARABIAN PLASTIC INDUSTRIAL CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9549.SR",
+    "name": "ABDULAZIZ AND MANSOUR IBRAHIM ALBABTIN CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9550.SR",
+    "name": "SURE GLOBAL TECH CO",
+    "market": ""
+  },
+  {
+    "symbol": "9551.SR",
+    "name": "KNOWLEDGE TOWER TRADING CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9552.SR",
+    "name": "SAUDI TOP FOR TRADING CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9553.SR",
+    "name": "MOLAN STEEL CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9555.SR",
+    "name": "LEEN ALKHAIR TRADING CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9556.SR",
+    "name": "NOFOTH FOOD PRODUCTS CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9557.SR",
+    "name": "EDARAT COMMUNICATION AND INFORMATION TECHNOLOGY CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9558.SR",
+    "name": "ALQEMAM FOR COMPUTER SYSTEMS CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9559.SR",
+    "name": "BALADY POULTRY TRADING CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9560.SR",
+    "name": "WAJA CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9561.SR",
+    "name": "KNOWLEDGE NET CO.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/foods-gate-trading.svg",
+    "symbol": "9562.SR",
+    "name": "FOODS GATE TRADING CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9563.SR",
+    "name": "BENA STEEL INDUSTRIES CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9564.SR",
+    "name": "HORIZON FOOD CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9565.SR",
+    "name": "MEYAR CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9566.SR",
+    "name": "SAUDI LIME INDUSTRIES CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9567.SR",
+    "name": "GHIDA ALSULTAN FOR FAST FOOD CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9568.SR",
+    "name": "MAYAR HOLDING CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9569.SR",
+    "name": "ALMUNEEF COMPANY FOR TRADE\\, INDUSTRY\\,AGRICULTURE AND CONTR",
+    "market": ""
+  },
+  {
+    "symbol": "9570.SR",
+    "name": "TAM DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9571.SR",
+    "name": "MUNAWLA CARGO CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9572.SR",
+    "name": "AL-RAZI MEDICAL CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9574.SR",
+    "name": "PROFESSIONAL MEDICAL EXPERTISE CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9575.SR",
+    "name": "MARBLE DESIGN CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9576.SR",
+    "name": "PAPER HOME CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9577.SR",
+    "name": "DAR ALMARKABAH FOR RENTING CARS CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9578.SR",
+    "name": "ATLAS ELEVATORS GENERAL TRADING AND CONTRACTING CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9579.SR",
+    "name": "INTELLIGENT OUD COMPANY FOR TRADING",
+    "market": ""
+  },
+  {
+    "symbol": "9580.SR",
+    "name": "AL RASHID INDUSTRIAL CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9581.SR",
+    "name": "CLEAN LIFE CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9583.SR",
+    "name": "UNITED MINING INDUSTRIES CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9584.SR",
+    "name": "RIYAL INVESTMENT AND DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9585.SR",
+    "name": "MULKIA INVESTMENT CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9586.SR",
+    "name": "OSOOL AND BAKHEET INVESTMENT CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9587.SR",
+    "name": "LANA MEDICAL CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9588.SR",
+    "name": "RIYADH STEEL CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9589.SR",
+    "name": "FAD INTERNATIONAL CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9590.SR",
+    "name": "ARMAH SPORTS CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9591.SR",
+    "name": "VIEW UNITED REAL ESTATE DEVELOPMENT CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9592.SR",
+    "name": "ALMUJTAMA ALRAIDA MEDICAL CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9593.SR",
+    "name": "PAN GULF MARKETING CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9594.SR",
+    "name": "AL-MODAWAT SPECIALIZED MEDICAL CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9595.SR",
+    "name": "WSM FOR INFORMATION TECHNOLOGY CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9596.SR",
+    "name": "QUARA FINANCE CO.",
+    "market": ""
+  },
+  {
+    "symbol": "9598.SR",
+    "name": "AL MOHAFAZA COMPANY FOR EDUCATION",
+    "market": ""
+  },
+  {
+    "symbol": "9599.SR",
+    "name": "TAQAT MINERAL TRADING CO.",
+    "market": ""
+  }
+]

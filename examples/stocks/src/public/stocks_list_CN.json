@@ -1,0 +1,968 @@
+[
+  {
+    "symbol": "000001",
+    "name": "Ping An Bank Co. Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ping-an.svg"
+  },
+  {
+    "symbol": "000002",
+    "name": "China Vanke Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/china-vanke-co.svg"
+  },
+  {
+    "symbol": "000007",
+    "name": "Shenzhen Quanxinhao Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-quanxinha.svg"
+  },
+  {
+    "symbol": "000008",
+    "name": "China High-Speed Railway Technology Co. Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/china-high-speed-r.svg"
+  },
+  {
+    "symbol": "000009",
+    "name": "China Baoan Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/china-baoan.svg"
+  },
+  {
+    "symbol": "000010",
+    "name": "Shenzhen Ecobeauty Co. Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-ecobeauty.svg"
+  },
+  {
+    "symbol": "000012",
+    "name": "CSG Holding Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/csg-co.svg"
+  },
+  {
+    "symbol": "000014",
+    "name": "Shahe Industrial Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shahe-industrial-c.svg"
+  },
+  {
+    "symbol": "000016",
+    "name": "Konka Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/konka.svg"
+  },
+  {
+    "symbol": "000017",
+    "name": "Shenzhen China Bicycle Company (Holdings) Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-china-bic.svg"
+  },
+  {
+    "symbol": "000019",
+    "name": "Shenzhen Cereals Holdings Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-cereals-h.svg"
+  },
+  {
+    "symbol": "000020",
+    "name": "Shenzhen Zhongheng Huafa Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/s-z-zhongheng-huaf.svg"
+  },
+  {
+    "symbol": "000021",
+    "name": "Shenzhen Kaifa Technology Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-kaifa-tec.svg"
+  },
+  {
+    "symbol": "000025",
+    "name": "Shenzhen Tellus Holding Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shn-tellus-hldngs.svg"
+  },
+  {
+    "symbol": "000027",
+    "name": "Shenzhen Energy Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shn-energy.svg"
+  },
+  {
+    "symbol": "000030",
+    "name": "FAWER Automotive Parts Ltd. Co. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/fawer-automotive-p.svg"
+  },
+  {
+    "symbol": "000032",
+    "name": "Shenzhen SED Industry Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-sed-indus.svg"
+  },
+  {
+    "symbol": "000035",
+    "name": "China Tianying Inc",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/china-tianying.svg"
+  },
+  {
+    "symbol": "000036",
+    "name": "China Union Holdings Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/china-union-hold-l.svg"
+  },
+  {
+    "symbol": "000037",
+    "name": "Shenzhen Nanshan Power Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-nanshan-p.svg"
+  },
+  {
+    "symbol": "000039",
+    "name": "China International Marine Containers (Group) Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/china-intl-marine-containers.svg"
+  },
+  {
+    "symbol": "000042",
+    "name": "Shenzhen Centralcon Investment Holding Co. Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shn-centralcon-inv.svg"
+  },
+  {
+    "symbol": "000045",
+    "name": "Shenzhen Textile (Holdings) Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shn-textile-hldgs.svg"
+  },
+  {
+    "symbol": "000048",
+    "name": "Shenzhen Kingkey Smart Agriculture Times Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-kingkey-s.svg"
+  },
+  {
+    "symbol": "000049",
+    "name": "Shenzhen Desay Battery Technology Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-desay-bat.svg"
+  },
+  {
+    "symbol": "000050",
+    "name": "Tianma Microelectronics Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tianma-microelectr.svg"
+  },
+  {
+    "symbol": "000055",
+    "name": "China Fangda Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/china-fangda-gp-co.svg"
+  },
+  {
+    "symbol": "000056",
+    "name": "Shenzhen Wongtee International Enterprise Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-wongtee-i.svg"
+  },
+  {
+    "symbol": "000059",
+    "name": "North Huajin Chemical Industries Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/north-huajin-chemi.svg"
+  },
+  {
+    "symbol": "000060",
+    "name": "Shenzhen Zhongjin Lingnan Nonfemet Co. Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shn-zhongjin-lingn.svg"
+  },
+  {
+    "symbol": "000061",
+    "name": "Shenzhen Agricultural Products Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-agricultu.svg"
+  },
+  {
+    "symbol": "000062",
+    "name": "Shenzhen Huaqiang Industry Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shn-huaqiang-ind.svg"
+  },
+  {
+    "symbol": "000063",
+    "name": "ZTE Corporation Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zte.svg"
+  },
+  {
+    "symbol": "000065",
+    "name": "Norinco International Cooperation Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/norinco-intl-co.svg"
+  },
+  {
+    "symbol": "000066",
+    "name": "China Greatwall Technology Group Co Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/china-greatwall-te.svg"
+  },
+  {
+    "symbol": "000068",
+    "name": "Shenzhen Huakong Seg Co. Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-huakong-s.svg"
+  },
+  {
+    "symbol": "000069",
+    "name": "Shenzhen Overseas Chinese Town Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-overseas.svg"
+  },
+  {
+    "symbol": "000070",
+    "name": "Shenzhen SDG Information Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shn-sdg-informa.svg"
+  },
+  {
+    "symbol": "000078",
+    "name": "Shenzhen Neptunus Bioengineering Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shn-neptunus-bio.svg"
+  },
+  {
+    "symbol": "000088",
+    "name": "Shenzhen Yan Tian Port Holdings Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shn-yan-tian-port.svg"
+  },
+  {
+    "symbol": "000089",
+    "name": "Shenzhen Airport Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shn-airport.svg"
+  },
+  {
+    "symbol": "000090",
+    "name": "Shenzhen Tagen Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shn-tagen.svg"
+  },
+  {
+    "symbol": "000096",
+    "name": "Shenzhen Guangju Energy Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenzhen-guangju-e.svg"
+  },
+  {
+    "symbol": "000099",
+    "name": "CITIC Offshore Helicopter Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/citic-offshore-hel.svg"
+  },
+  {
+    "symbol": "000100",
+    "name": "TCL Technology Group Corporation Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tcl-technology-gro.svg"
+  },
+  {
+    "symbol": "000155",
+    "name": "Sichuan New Energy Power Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sichuan-new-energy.svg"
+  },
+  {
+    "symbol": "000156",
+    "name": "Wasu Media Holding Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/wasu-media.svg"
+  },
+  {
+    "symbol": "000157",
+    "name": "Zoomlion Heavy Industry Science & Technology Co. Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zoomlion-heavy-industry-science-and-technology-co-ltd.svg"
+  },
+  {
+    "symbol": "000158",
+    "name": "Shijiazhuang Changshan Beiming Technology Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shijiazhuang-chan.svg"
+  },
+  {
+    "symbol": "000159",
+    "name": "Xinjiang International Industry Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/xinjiang-intl-ind.svg"
+  },
+  {
+    "symbol": "000166",
+    "name": "Shenwan Hongyuan Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shenwan-hongyuan-group.svg"
+  },
+  {
+    "symbol": "000301",
+    "name": "Jiangsu Eastern Shenghong Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jiangsu-eastern-sh.svg"
+  },
+  {
+    "symbol": "000333",
+    "name": "Midea Group Co. Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/midea.svg"
+  },
+  {
+    "symbol": "000338",
+    "name": "Weichai Power Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/weichai-power-company-ltd.svg"
+  },
+  {
+    "symbol": "000400",
+    "name": "XJ Electric Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/xj-electric.svg"
+  },
+  {
+    "symbol": "000401",
+    "name": "BBMG Jidong Cement Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/bbmg.svg"
+  },
+  {
+    "symbol": "000402",
+    "name": "Financial Street Holdings Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/financial-street-h.svg"
+  },
+  {
+    "symbol": "000403",
+    "name": "Pacific Shuanglin Bio-pharmacy Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pacific-shuanglin.svg"
+  },
+  {
+    "symbol": "000404",
+    "name": "Changhong Huayi Compressor Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/changhong-huayi-co.svg"
+  },
+  {
+    "symbol": "000407",
+    "name": "Shandong Shengli Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shandong-shengli.svg"
+  },
+  {
+    "symbol": "000408",
+    "name": "Zangge Mining Company Limited Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zangge-mining-co-l.svg"
+  },
+  {
+    "symbol": "000409",
+    "name": "Yunding Technology Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/yunding-technology.svg"
+  },
+  {
+    "symbol": "000411",
+    "name": "Zhejiang Int'l Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zhejiang-intl-gp-c.svg"
+  },
+  {
+    "symbol": "000415",
+    "name": "Bohai Leasing Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/bohai-leasing-co.svg"
+  },
+  {
+    "symbol": "000417",
+    "name": "Hefei Department Store Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/hefei-department-s.svg"
+  },
+  {
+    "symbol": "000419",
+    "name": "Changsha Tongcheng Holdings Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/c-tongcheng-hold-c.svg"
+  },
+  {
+    "symbol": "000420",
+    "name": "Jilin Chemical Fibre Stock Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jilin-chemical-fib.svg"
+  },
+  {
+    "symbol": "000422",
+    "name": "Hubei Yihua Chemical Industry Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/hubei-yihua-chem.svg"
+  },
+  {
+    "symbol": "000423",
+    "name": "Dong-E-E-Jiao Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dong-e-e-jiao-co.svg"
+  },
+  {
+    "symbol": "000425",
+    "name": "XCMG Construction Machinery Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/xcmg-construction.svg"
+  },
+  {
+    "symbol": "000426",
+    "name": "Inner Mongolia Xingye Silver and Tin Mining Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/inner-mongolia-xin.svg"
+  },
+  {
+    "symbol": "000428",
+    "name": "Huatian Hotel Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/huatian-hotel-gp.svg"
+  },
+  {
+    "symbol": "000429",
+    "name": "Guangdong Provincial Expressway Development Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/guangdong-prov-exp.svg"
+  },
+  {
+    "symbol": "000430",
+    "name": "Zhang Jia Jie Tourism Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zhang-jia-jie-tour.svg"
+  },
+  {
+    "symbol": "000488",
+    "name": "Shandong Chenming Paper Holdings Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shandong-chenming-paper-hldgs.svg"
+  },
+  {
+    "symbol": "000498",
+    "name": "SHANDONG HI-SPEED ROAD&BRIDGE GROUP CO., LTD Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shandong-hi-spee.svg"
+  },
+  {
+    "symbol": "000503",
+    "name": "China Reform Health Management & Services Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/china-reform-healt.svg"
+  },
+  {
+    "symbol": "000504",
+    "name": "Landfar Bio-medicine Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nanhua-bio-medicin.svg"
+  },
+  {
+    "symbol": "000505",
+    "name": "Hainan Jingliang Holdings Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/hainan-jingliang.svg"
+  },
+  {
+    "symbol": "000506",
+    "name": "Zhaojin International Gold Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zhongrun-resources.svg"
+  },
+  {
+    "symbol": "000507",
+    "name": "Zhuhai Port Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zhuhai-port-holdin.svg"
+  },
+  {
+    "symbol": "000509",
+    "name": "Huasu Holdings Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/huasu.svg"
+  },
+  {
+    "symbol": "000510",
+    "name": "Sichuan Xinjinlu Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sichuan-xinjinlu-g.svg"
+  },
+  {
+    "symbol": "000513",
+    "name": "Livzon Pharmaceutical Group, Inc. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/livzon-pharmaceutical.svg"
+  },
+  {
+    "symbol": "000514",
+    "name": "Chongqing Yukaifa Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/chongqing-yukaifa.svg"
+  },
+  {
+    "symbol": "000516",
+    "name": "Xi'an International Medical Investment Co. Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/xian-international.svg"
+  },
+  {
+    "symbol": "000517",
+    "name": "Rongan Property Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rongan-property-co.svg"
+  },
+  {
+    "symbol": "000518",
+    "name": "Jiangsu Sihuan Bioengineering Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jiangsu-sihuan-bio.svg"
+  },
+  {
+    "symbol": "000519",
+    "name": "North Industries Group Red Arrow Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/north-navigation-control-technology.svg"
+  },
+  {
+    "symbol": "000520",
+    "name": "Phoenix Shipping (Wuhan) Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/phoenix-shipping.svg"
+  },
+  {
+    "symbol": "000521",
+    "name": "Changhong Meiling Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/changhong-meiling.svg"
+  },
+  {
+    "symbol": "000523",
+    "name": "Hongmian Zhihui Science and Technology Innovation Co., Ltd. Guangzhou Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/hongmian-zhihui-sc.svg"
+  },
+  {
+    "symbol": "000524",
+    "name": "Guangzhou Lingnan Group Holdings Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/guangzhou-lingnan.svg"
+  },
+  {
+    "symbol": "000525",
+    "name": "Nanjing Redsun Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nanjing-red-sun-co.svg"
+  },
+  {
+    "symbol": "000526",
+    "name": "Xueda (Xiamen) Education Technology Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/xueda-xiamen-edu.svg"
+  },
+  {
+    "symbol": "000528",
+    "name": "Guangxi Liugong Machinery Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/guangxi-liugong-ma.svg"
+  },
+  {
+    "symbol": "000529",
+    "name": "Guangdong Guanghong Holdings Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/guangdong-guanghon.svg"
+  },
+  {
+    "symbol": "000530",
+    "name": "Bingshan Refrigeration & Heat Transfer Technologies Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/bingshan-refrigera.svg"
+  },
+  {
+    "symbol": "000531",
+    "name": "Guangzhou Hengyun Enterprises Holding Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/guangzhou-hengyun.svg"
+  },
+  {
+    "symbol": "000532",
+    "name": "Zhuhai Huajin Capital Co Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/huafa-industrial-coltdzhuhai.svg"
+  },
+  {
+    "symbol": "000533",
+    "name": "Guangdong Shunna Electric Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/guangdong-shunna-e.svg"
+  },
+  {
+    "symbol": "000534",
+    "name": "Wedge Industrial Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/wedge-industrial-c.svg"
+  },
+  {
+    "symbol": "000536",
+    "name": "Hua Ying Technology (Group) Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cpt-technology-g.svg"
+  },
+  {
+    "symbol": "000537",
+    "name": "Green Development Electricity Group of Tianjin Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/china-green-electr.svg"
+  },
+  {
+    "symbol": "000538",
+    "name": "Yunnan Baiyao Group Co. Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/yunnan-baiyao-grp.svg"
+  },
+  {
+    "symbol": "000539",
+    "name": "Guangdong Electric Power Development Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/guangdong-electric.svg"
+  },
+  {
+    "symbol": "000541",
+    "name": "Foshan Electrical and Lighting Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/foshan-electrical.svg"
+  },
+  {
+    "symbol": "000543",
+    "name": "An Hui Wenergy Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/an-hui-wenergy-co.svg"
+  },
+  {
+    "symbol": "000544",
+    "name": "Zhongyuan Environmental Protection Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/central-plains-env.svg"
+  },
+  {
+    "symbol": "000546",
+    "name": "Jinyuan EP Co.,Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jinyuan-ep-co-ltd.svg"
+  },
+  {
+    "symbol": "000547",
+    "name": "Addsino Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/addsino-co-ltd.svg"
+  },
+  {
+    "symbol": "000548",
+    "name": "Hunan Investment Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/hunan-investment.svg"
+  },
+  {
+    "symbol": "000551",
+    "name": "Create Technology & Science Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/create-tech-and-scie.svg"
+  },
+  {
+    "symbol": "000552",
+    "name": "Gansu Energy Chemical Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gansu-energy-chemi.svg"
+  },
+  {
+    "symbol": "000553",
+    "name": "ADAMA Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/adama-ltd.svg"
+  },
+  {
+    "symbol": "000554",
+    "name": "SINOPEC Shandong Taishan Petroleum Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sinopec-yizheng-chem-fibre-co-ltd.svg"
+  },
+  {
+    "symbol": "000555",
+    "name": "Digital China Information Service Group Company Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dc-holdings.svg"
+  },
+  {
+    "symbol": "000558",
+    "name": "Chengdu New Tianfu Culture Tourism Development Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lander-sports-deve.svg"
+  },
+  {
+    "symbol": "000559",
+    "name": "Wanxiang Qianchao Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/wanxiang-qianchao.svg"
+  },
+  {
+    "symbol": "000560",
+    "name": "5I5J Holding Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/5i5j.svg"
+  },
+  {
+    "symbol": "000563",
+    "name": "Shaanxi International Trust Corp., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shaanxi-internatio.svg"
+  },
+  {
+    "symbol": "000564",
+    "name": "CCOOP Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ccoop-co-ltd.svg"
+  },
+  {
+    "symbol": "000566",
+    "name": "Hainan Haiyao Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/hainan-haiyao-co.svg"
+  },
+  {
+    "symbol": "000567",
+    "name": "Hainan Haide Capital Management Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/hainan-haide-capit.svg"
+  },
+  {
+    "symbol": "000568",
+    "name": "Luzhou Laojiao Company Limited Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/luzhou-lao-jiao-co.svg"
+  },
+  {
+    "symbol": "000570",
+    "name": "Changchai Company Limited Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/changchai-co.svg"
+  },
+  {
+    "symbol": "000571",
+    "name": "Sundiro Holding Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sundiro-co.svg"
+  },
+  {
+    "symbol": "000572",
+    "name": "Haima Automobile Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/haima-automobile-c.svg"
+  },
+  {
+    "symbol": "000573",
+    "name": "Dongguan Winnerway Industrial Zone Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dongguan-winnerway.svg"
+  },
+  {
+    "symbol": "000576",
+    "name": "Guangdong Ganhua Science & Industry Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/guangdong-ganhua-s.svg"
+  },
+  {
+    "symbol": "000581",
+    "name": "Weifu High-Technology Group Co. Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/weifu-high-tech.svg"
+  },
+  {
+    "symbol": "000582",
+    "name": "Beibu Gulf Port Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/beibu-gulf-port-co.svg"
+  },
+  {
+    "symbol": "000586",
+    "name": "Sichuan Huiyuan Optical Communications Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sichuan-huiyuan-op.svg"
+  },
+  {
+    "symbol": "000589",
+    "name": "Guizhou Tyre Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gui-zhou-tyre-co.svg"
+  },
+  {
+    "symbol": "000590",
+    "name": "Guhan Pharmaceutical Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tus-pharmaceutica.svg"
+  },
+  {
+    "symbol": "000591",
+    "name": "CECEP Solar Energy Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cecep-solar-energy.svg"
+  },
+  {
+    "symbol": "000592",
+    "name": "Zhongfu Straits (Pingtan) Development Company Limited Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zhongfu-straits-p.svg"
+  },
+  {
+    "symbol": "000593",
+    "name": "Delong Composite Energy Group Co. Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nanfang-ventilator.svg"
+  },
+  {
+    "symbol": "000595",
+    "name": "Ningxia Guoyun New Energy Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/baota-industry-co.svg"
+  },
+  {
+    "symbol": "000596",
+    "name": "Anhui Gujing Distillery Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/anhui-gujing-distl.svg"
+  },
+  {
+    "symbol": "000597",
+    "name": "Northeast Pharmaceutical Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/northeast-pharmace.svg"
+  },
+  {
+    "symbol": "000598",
+    "name": "Chengdu Xingrong Environment Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/chengdu-xingrong-e.svg"
+  },
+  {
+    "symbol": "000599",
+    "name": "Qingdao Doublestar Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qingdao-doublestar.svg"
+  },
+  {
+    "symbol": "000600",
+    "name": "HCIG Energy Investment Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/h-jionto-energy-in.svg"
+  },
+  {
+    "symbol": "000601",
+    "name": "Guangdong Shaoneng Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/guangdong-shaoneng.svg"
+  },
+  {
+    "symbol": "000603",
+    "name": "Shengda Resources Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shengda-resources.svg"
+  },
+  {
+    "symbol": "000605",
+    "name": "Bohai Water Industry Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/bohai-water-indust.svg"
+  },
+  {
+    "symbol": "000607",
+    "name": "Zhejiang Huamei Holding Co. Ltd.",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zhejiang-huamei-ho.svg"
+  },
+  {
+    "symbol": "000608",
+    "name": "Yang Guang Co., Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/yang-guang-co-lt.svg"
+  },
+  {
+    "symbol": "000610",
+    "name": "Xi'an Tourism Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/xi-an-tourism-co.svg"
+  },
+  {
+    "symbol": "000612",
+    "name": "Jiaozuo Wanfang Aluminum Manufacturing Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jiaozuo-wanfang-al.svg"
+  },
+  {
+    "symbol": "000615",
+    "name": "Jointown Aesthetics ValleyCo.,Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/aoyuan-beauty-vall.svg"
+  },
+  {
+    "symbol": "000617",
+    "name": "CNPC Capital Co Ltd Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cnpc-capital-compa.svg"
+  },
+  {
+    "symbol": "000619",
+    "name": "Conch (Anhui) Energy Saving and Environment Protection New Material Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/conch-anhui-ener.svg"
+  },
+  {
+    "symbol": "000620",
+    "name": "Winnovation Culturaltainment Development Limited. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/macrolink-cultural.svg"
+  },
+  {
+    "symbol": "000623",
+    "name": "Jilin Aodong Pharmaceutical Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jilin-aodong-pharm.svg"
+  },
+  {
+    "symbol": "000625",
+    "name": "Chongqing Changan Automobile Company Limited Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/chong-qing-changan.svg"
+  },
+  {
+    "symbol": "000626",
+    "name": "Grand Industrial Holding Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/grand-industrial-h.svg"
+  },
+  {
+    "symbol": "000628",
+    "name": "Chengdu Hi-Tech Development Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/chengdu-hi-tech-de.svg"
+  },
+  {
+    "symbol": "000629",
+    "name": "Pangang Group Vanadium & Titanium Resources Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pangang-gp-vanadiu.svg"
+  },
+  {
+    "symbol": "000630",
+    "name": "Tongling Nonferrous Metals Group Co., Ltd. Class A",
+    "market": "SZSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tongling-nonferrou.svg"
+  }
+]

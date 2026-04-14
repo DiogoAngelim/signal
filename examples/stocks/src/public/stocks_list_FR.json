@@ -1,0 +1,4376 @@
+[
+  {
+    "symbol": "1023P.PA",
+    "name": "BCP Investimento. SA Cert. 2008-on Ibex",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "1025P.PA",
+    "name": "BCP Investimento. SA Cert. 2009-on EURO STOXX",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "1040P.PA",
+    "name": "Banco Comercial Portugues. SA European Certificate 2011- Open end on CAC 40 index",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "1052P.PA",
+    "name": "Banco Comercial Portugues. SA Structured Instrument 2016-open end on MSCI World",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/b-c-p-bco-comercial-portugues.svg"
+  },
+  {
+    "symbol": "1053P.PA",
+    "name": "Banco Comercial Portugues. SA Structured Instrument 2018-open end on",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/b-c-p-bco-comercial-portugues.svg"
+  },
+  {
+    "symbol": "1612B.PA",
+    "name": "BNP Paribas Arbitrage Issuance BV Certificate Open-End 2008-Without Fixed Maturity on CMDTY Gold",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "74SW.PA",
+    "name": "74Software",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/axway-software-sa.svg"
+  },
+  {
+    "symbol": "AAA.PA",
+    "name": "Alan Allman Associates SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/alan-allman-associates.svg"
+  },
+  {
+    "symbol": "AB.PA",
+    "name": "AB Science SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ab-science-sa.svg"
+  },
+  {
+    "symbol": "ABCA.PA",
+    "name": "ABC arbitrage SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/abc-arbitrage.svg"
+  },
+  {
+    "symbol": "ABEO.PA",
+    "name": "Abeo SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/abeo-sa-eur075.svg"
+  },
+  {
+    "symbol": "ABLD.PA",
+    "name": "ABL Diagnostics SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/abl-diagnostics.svg"
+  },
+  {
+    "symbol": "ABNX.PA",
+    "name": "ABIONYX Pharma SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/abionyx-pharma-sa.svg"
+  },
+  {
+    "symbol": "ABVX.PA",
+    "name": "Abivax SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/abivax-sa.svg"
+  },
+  {
+    "symbol": "AC.PA",
+    "name": "Accor SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/accor.svg"
+  },
+  {
+    "symbol": "ACA.PA",
+    "name": "Credit Agricole SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-agricole.svg"
+  },
+  {
+    "symbol": "ACAN.PA",
+    "name": "Acanthe Developpement SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/acanthe-developpement-sa.svg"
+  },
+  {
+    "symbol": "ADOC.PA",
+    "name": "Adocia SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/adocia-sas.svg"
+  },
+  {
+    "symbol": "ADP.PA",
+    "name": "Aeroports de Paris",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/aeroports-de-paris.svg"
+  },
+  {
+    "symbol": "AELIS.PA",
+    "name": "Aelis Farma SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/aelis-farma.svg"
+  },
+  {
+    "symbol": "AF.PA",
+    "name": "Air France-KLM SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/air-france-klm.svg"
+  },
+  {
+    "symbol": "AI.PA",
+    "name": "Air Liquide SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/liquide.svg"
+  },
+  {
+    "symbol": "AIR.PA",
+    "name": "Airbus SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/airbus.svg"
+  },
+  {
+    "symbol": "AKE.PA",
+    "name": "Arkema SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/arkema.svg"
+  },
+  {
+    "symbol": "AKW.PA",
+    "name": "AKWEL SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/akwel.svg"
+  },
+  {
+    "symbol": "AL2SI.PA",
+    "name": "2CRSI SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/2crsi.svg"
+  },
+  {
+    "symbol": "ALADO.PA",
+    "name": "Adomos SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "ALAFY.PA",
+    "name": "Afyren SAS",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/afyren.svg"
+  },
+  {
+    "symbol": "ALAGO.PA",
+    "name": "E-Pango",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/e-pango.svg"
+  },
+  {
+    "symbol": "ALAGP.PA",
+    "name": "Agripower France SASU",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/agripower.svg"
+  },
+  {
+    "symbol": "ALAGR.PA",
+    "name": "AgroGeneration SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/agrogeneration.svg"
+  },
+  {
+    "symbol": "ALAIR.PA",
+    "name": "Groupe Airwell SAS",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/groupe-airwell.svg"
+  },
+  {
+    "symbol": "ALALO.PA",
+    "name": "Acheter-Louer.fr SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/acheter-louerfr.svg"
+  },
+  {
+    "symbol": "ALAMA.PA",
+    "name": "AMA Corporation Plc",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ama-plc.svg"
+  },
+  {
+    "symbol": "ALAQU.PA",
+    "name": "Aquila SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/aquila.svg"
+  },
+  {
+    "symbol": "ALARF.PA",
+    "name": "Adeunis RF SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/adeunis-rf-saca.svg"
+  },
+  {
+    "symbol": "ALATA.PA",
+    "name": "Atari SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/atari.svg"
+  },
+  {
+    "symbol": "ALAUD.PA",
+    "name": "Audacia SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/audacia.svg"
+  },
+  {
+    "symbol": "ALAVI.PA",
+    "name": "AdVini SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/advini.svg"
+  },
+  {
+    "symbol": "ALBFR.PA",
+    "name": "Sidetrade SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/sidetrade.svg"
+  },
+  {
+    "symbol": "ALBIO.PA",
+    "name": "Biosynex SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/biosynex.svg"
+  },
+  {
+    "symbol": "ALBKK.PA",
+    "name": "Baikowski SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/baikowski-sas.svg"
+  },
+  {
+    "symbol": "ALBLD.PA",
+    "name": "Bilendi SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bilendi.svg"
+  },
+  {
+    "symbol": "ALBOA.PA",
+    "name": "BOA Concept SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/boa-concept.svg"
+  },
+  {
+    "symbol": "ALBON.PA",
+    "name": "Compagnie Lebon SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/compagnie-lebon.svg"
+  },
+  {
+    "symbol": "ALBOU.PA",
+    "name": "Bourrelier Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bourrelier.svg"
+  },
+  {
+    "symbol": "ALBPK.PA",
+    "name": "Broadpeak SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/broadpeak.svg"
+  },
+  {
+    "symbol": "ALBPS.PA",
+    "name": "Biophytis SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/biophytis.svg"
+  },
+  {
+    "symbol": "ALCAB.PA",
+    "name": "Cabasse SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cabasse-sa.svg"
+  },
+  {
+    "symbol": "ALCAF.PA",
+    "name": "CAFOM SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cafom-sa.svg"
+  },
+  {
+    "symbol": "ALCAT.PA",
+    "name": "Catana Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/catana.svg"
+  },
+  {
+    "symbol": "ALCBI.PA",
+    "name": "Crypto Blockchain Industries SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/crypto-blockchain-industries.svg"
+  },
+  {
+    "symbol": "ALCBX.PA",
+    "name": "Cibox Inter@ctive SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cibox-inter-ctive-sa.svg"
+  },
+  {
+    "symbol": "ALCGM.PA",
+    "name": "Cegedim SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cegedim-sa.svg"
+  },
+  {
+    "symbol": "ALCIS.PA",
+    "name": "Catering International Services",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/catering-intl-services.svg"
+  },
+  {
+    "symbol": "ALCJ.PA",
+    "name": "Crossject SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/crossject.svg"
+  },
+  {
+    "symbol": "ALCLA.PA",
+    "name": "Claranova SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/claranova-se.svg"
+  },
+  {
+    "symbol": "ALCLS.PA",
+    "name": "Cellectis S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cellectis.svg"
+  },
+  {
+    "symbol": "ALCOF.PA",
+    "name": "Cofidur SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cofidur.svg"
+  },
+  {
+    "symbol": "ALCOG.PA",
+    "name": "Cogra 48 SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cogra-48.svg"
+  },
+  {
+    "symbol": "ALCOX.PA",
+    "name": "Nicox SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/nicox-sa.svg"
+  },
+  {
+    "symbol": "ALCPB.PA",
+    "name": "Capital B",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/the-blockchain-group.svg"
+  },
+  {
+    "symbol": "ALCRB.PA",
+    "name": "Carbios SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/carbios.svg"
+  },
+  {
+    "symbol": "ALCUR.PA",
+    "name": "Arcure SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/arcure-sa.svg"
+  },
+  {
+    "symbol": "ALCWE.PA",
+    "name": "Charwood Energy S.A",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/charwood-energy-sa.svg"
+  },
+  {
+    "symbol": "ALDAR.PA",
+    "name": "Damartex SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/damartex.svg"
+  },
+  {
+    "symbol": "ALDBT.PA",
+    "name": "Douaisienne de Basse Tension SAS",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/dbt.svg"
+  },
+  {
+    "symbol": "ALDEL.PA",
+    "name": "Delfingen",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/delfingen-industry.svg"
+  },
+  {
+    "symbol": "ALDLS.PA",
+    "name": "DLSI SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/dlsi.svg"
+  },
+  {
+    "symbol": "ALDLT.PA",
+    "name": "Delta Plus Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-plus.svg"
+  },
+  {
+    "symbol": "ALDMS.PA",
+    "name": "Diagnostic Medical Systems",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/diagnostic-medical-systems.svg"
+  },
+  {
+    "symbol": "ALDNE.PA",
+    "name": "Don't Nod Entertainment SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/dont-nod-entertainment-sa.svg"
+  },
+  {
+    "symbol": "ALDNX.PA",
+    "name": "DNXCORP SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/dnxcorp.svg"
+  },
+  {
+    "symbol": "ALDOL.PA",
+    "name": "Dolfines SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/dolfines.svg"
+  },
+  {
+    "symbol": "ALDRV.PA",
+    "name": "Drone Volt SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/drone-volt.svg"
+  },
+  {
+    "symbol": "ALDUB.PA",
+    "name": "Encres Dubuit SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/encres-dubuit.svg"
+  },
+  {
+    "symbol": "ALDUX.PA",
+    "name": "AdUX SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/adux.svg"
+  },
+  {
+    "symbol": "ALDV.PA",
+    "name": "Alliance Developpement Capital SIIC",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/adc-siic.svg"
+  },
+  {
+    "symbol": "ALDVI.PA",
+    "name": "Advicenne SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/advicenne.svg"
+  },
+  {
+    "symbol": "ALECO.PA",
+    "name": "ECOMIAM SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ecomiam-sa.svg"
+  },
+  {
+    "symbol": "ALECP.PA",
+    "name": "EuropaCorp SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/europacorp.svg"
+  },
+  {
+    "symbol": "ALEMG.PA",
+    "name": "Laboratoires Euromedis",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/euromedis-groupe.svg"
+  },
+  {
+    "symbol": "ALEMV.PA",
+    "name": "Emova Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/emova.svg"
+  },
+  {
+    "symbol": "ALENO.PA",
+    "name": "Enogia SAS",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/enogia.svg"
+  },
+  {
+    "symbol": "ALENT.PA",
+    "name": "ETHERO",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/entreparticulierscom.svg"
+  },
+  {
+    "symbol": "ALEO2.PA",
+    "name": "EO2",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/eo2.svg"
+  },
+  {
+    "symbol": "ALERO.PA",
+    "name": "EuroLand Corporate SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/euroland-corporate.svg"
+  },
+  {
+    "symbol": "ALERS.PA",
+    "name": "Eurobio-Scientific SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/eurobio-scientific.svg"
+  },
+  {
+    "symbol": "ALESA.PA",
+    "name": "Ecoslops SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ecoslops.svg"
+  },
+  {
+    "symbol": "ALESE.PA",
+    "name": "Entech Smart Energies",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/entech.svg"
+  },
+  {
+    "symbol": "ALETC.PA",
+    "name": "Energy Solar Tech, S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/energy-solar-tech.svg"
+  },
+  {
+    "symbol": "ALEUA.PA",
+    "name": "Eurasia Groupe SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/eurasia-groupe.svg"
+  },
+  {
+    "symbol": "ALEUP.PA",
+    "name": "Europlasma SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/europlasma-eur1-post-consolidation.svg"
+  },
+  {
+    "symbol": "ALEXA.PA",
+    "name": "Exacompta Clairefontaine SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/exacompta-clairefontaine.svg"
+  },
+  {
+    "symbol": "ALEXP.PA",
+    "name": "One Experience",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/one-experience.svg"
+  },
+  {
+    "symbol": "ALFLE.PA",
+    "name": "Fleury Michon SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fleury-michon-sa.svg"
+  },
+  {
+    "symbol": "ALFLO.PA",
+    "name": "Florentaise SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/florentaise-sa.svg"
+  },
+  {
+    "symbol": "ALFOR.PA",
+    "name": "Forsee Power SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/forsee-power-sa.svg"
+  },
+  {
+    "symbol": "ALFPC.PA",
+    "name": "Fountaine Pajot SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fountaine-pajot-sa.svg"
+  },
+  {
+    "symbol": "ALFRE.PA",
+    "name": "Freelance.com",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/freelancecom.svg"
+  },
+  {
+    "symbol": "ALFUM.PA",
+    "name": "Fill Up Media S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fill-up-media-sa.svg"
+  },
+  {
+    "symbol": "ALGAE.PA",
+    "name": "Fermentalg SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fermentalg.svg"
+  },
+  {
+    "symbol": "ALGEC.PA",
+    "name": "GECI International SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/geci-international-eur1-post-consolidation.svg"
+  },
+  {
+    "symbol": "ALGEN.PA",
+    "name": "genOway SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/genoway-sa.svg"
+  },
+  {
+    "symbol": "ALGEV.PA",
+    "name": "Gevelot SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/gevelot.svg"
+  },
+  {
+    "symbol": "ALGID.PA",
+    "name": "Egide SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/egide.svg"
+  },
+  {
+    "symbol": "ALGIL.PA",
+    "name": "Groupe Guillin SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/groupe-guillin.svg"
+  },
+  {
+    "symbol": "ALGIR.PA",
+    "name": "Signaux Girod SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/signaux-girod.svg"
+  },
+  {
+    "symbol": "ALGLD.PA",
+    "name": "Gold by Gold SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/gold-by-gold.svg"
+  },
+  {
+    "symbol": "ALGRO.PA",
+    "name": "Grolleau",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/grolleau.svg"
+  },
+  {
+    "symbol": "ALGTR.PA",
+    "name": "Groupe Tera SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/groupe-tera.svg"
+  },
+  {
+    "symbol": "ALHAF.PA",
+    "name": "Haffner Energy SAS",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/haffner-energy.svg"
+  },
+  {
+    "symbol": "ALHEX.PA",
+    "name": "HEXAOM SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hexaom.svg"
+  },
+  {
+    "symbol": "ALHF.PA",
+    "name": "HF Company",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hf-company.svg"
+  },
+  {
+    "symbol": "ALHG.PA",
+    "name": "Louis Hachette Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/louis-hachette.svg"
+  },
+  {
+    "symbol": "ALHGO.PA",
+    "name": "Hamilton Global Opportunities PLC",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hamilton-global-opportunities-plc.svg"
+  },
+  {
+    "symbol": "ALHGR.PA",
+    "name": "Hoffmann Green Cement Technologies SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hoffmann-green-cement-technologies.svg"
+  },
+  {
+    "symbol": "ALHIT.PA",
+    "name": "HiTechPros SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hitechpros.svg"
+  },
+  {
+    "symbol": "ALHOP.PA",
+    "name": "Hopscotch Groupe SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hopscotch-groupe.svg"
+  },
+  {
+    "symbol": "ALHPI.PA",
+    "name": "Hopium S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hopium-sa.svg"
+  },
+  {
+    "symbol": "ALHRG.PA",
+    "name": "HERIGE SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/herige.svg"
+  },
+  {
+    "symbol": "ALHRS.PA",
+    "name": "Hydrogen Refueling Solutions SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hydrogen-refueling-solutions-sa-eur01.svg"
+  },
+  {
+    "symbol": "ALHUN.PA",
+    "name": "Hunyvers",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hunyvers.svg"
+  },
+  {
+    "symbol": "ALHYP.PA",
+    "name": "Hipay Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hipay-sa.svg"
+  },
+  {
+    "symbol": "ALI2S.PA",
+    "name": "i2S SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/i2s.svg"
+  },
+  {
+    "symbol": "ALIBR.PA",
+    "name": "Calibre",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cybergun-sa.svg"
+  },
+  {
+    "symbol": "ALICA.PA",
+    "name": "ICAPE HOLDING",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/icape.svg"
+  },
+  {
+    "symbol": "ALIKO.PA",
+    "name": "Ikonisys SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ikonisys.svg"
+  },
+  {
+    "symbol": "ALIMO.PA",
+    "name": "Groupimo S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/groupimo.svg"
+  },
+  {
+    "symbol": "ALIMP.PA",
+    "name": "Implanet SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/implanet.svg"
+  },
+  {
+    "symbol": "ALIMR.PA",
+    "name": "Immersion SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/immersion.svg"
+  },
+  {
+    "symbol": "ALINN.PA",
+    "name": "Innelec Multimedia SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/innelec-multimedia.svg"
+  },
+  {
+    "symbol": "ALINS.PA",
+    "name": "Intrasense SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/intrasense-sas.svg"
+  },
+  {
+    "symbol": "ALINT.PA",
+    "name": "IntegraGen SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/integragen.svg"
+  },
+  {
+    "symbol": "ALINV.PA",
+    "name": "Invibes Advertising NV",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/invibes-advertising-nv.svg"
+  },
+  {
+    "symbol": "ALISP.PA",
+    "name": "ISPD Network",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/antevenio.svg"
+  },
+  {
+    "symbol": "ALITL.PA",
+    "name": "IT Link SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/it-link-sa.svg"
+  },
+  {
+    "symbol": "ALJXR.PA",
+    "name": "Archos SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/archos-eur0009.svg"
+  },
+  {
+    "symbol": "ALKAL.PA",
+    "name": "Kalray SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/kalray-sadir.svg"
+  },
+  {
+    "symbol": "ALKEY.PA",
+    "name": "Keyrus SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/keyrus.svg"
+  },
+  {
+    "symbol": "ALKKO.PA",
+    "name": "KKO International SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/kko-international-sa.svg"
+  },
+  {
+    "symbol": "ALKLA.PA",
+    "name": "Klarsen SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/klarsen.svg"
+  },
+  {
+    "symbol": "ALKLH.PA",
+    "name": "Klea Holding",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/visiomed.svg"
+  },
+  {
+    "symbol": "ALKLK.PA",
+    "name": "Kerlink SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/kerlink-saca.svg"
+  },
+  {
+    "symbol": "ALKLN.PA",
+    "name": "Kaleon S.p.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/kaleon-spa.svg"
+  },
+  {
+    "symbol": "ALKOM.PA",
+    "name": "Plasticos Compuestos SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/plasticos-compuestos-sa.svg"
+  },
+  {
+    "symbol": "ALLAN.PA",
+    "name": "Lanson-BCC",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lanson-bcc.svg"
+  },
+  {
+    "symbol": "ALLDL.PA",
+    "name": "Groupe LDLC SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/groupe-ldlc.svg"
+  },
+  {
+    "symbol": "ALLEX.PA",
+    "name": "Lexibook Linguistic Electronic System SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lexibook-linguistic-electron.svg"
+  },
+  {
+    "symbol": "ALLGO.PA",
+    "name": "LARGO SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/largo.svg"
+  },
+  {
+    "symbol": "ALLHB.PA",
+    "name": "Les Hotels Baverez SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/les-hotels-baverez.svg"
+  },
+  {
+    "symbol": "ALLIX.PA",
+    "name": "Wallix Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/wallix.svg"
+  },
+  {
+    "symbol": "ALLLN.PA",
+    "name": "LleidaNetworks Serveis Telematics SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lleidanetworks.svg"
+  },
+  {
+    "symbol": "ALLOG.PA",
+    "name": "Logic Instrument SA Class A",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/logic-instrument.svg"
+  },
+  {
+    "symbol": "ALLPL.PA",
+    "name": "Lepermislibre SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lepermislibre-sa.svg"
+  },
+  {
+    "symbol": "ALLUX.PA",
+    "name": "Installux S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/installux-sa.svg"
+  },
+  {
+    "symbol": "ALMAR.PA",
+    "name": "Mare Nostrum SA (FR)",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mare-nostrum.svg"
+  },
+  {
+    "symbol": "ALMAS.PA",
+    "name": "Mastrad SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mastrad.svg"
+  },
+  {
+    "symbol": "ALMCE.PA",
+    "name": "Mon Courtier Energie Groupe",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mon-courtier-energie-groupe-sa.svg"
+  },
+  {
+    "symbol": "ALMDG.PA",
+    "name": "MGI Digital Graphic Technology",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mgi-digital-graphic-technolo.svg"
+  },
+  {
+    "symbol": "ALMDT.PA",
+    "name": "Median Technologies",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/median-technologies.svg"
+  },
+  {
+    "symbol": "ALMER.PA",
+    "name": "Sapmer SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/sapmer.svg"
+  },
+  {
+    "symbol": "ALMET.PA",
+    "name": "Methanor SCA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/methanor-sca.svg"
+  },
+  {
+    "symbol": "ALMEX.PA",
+    "name": "MEXEDIA S.P.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mexedia-spa.svg"
+  },
+  {
+    "symbol": "ALMGI.PA",
+    "name": "MG International",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mg-international.svg"
+  },
+  {
+    "symbol": "ALMIB.PA",
+    "name": "Amoeba SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/amoeba.svg"
+  },
+  {
+    "symbol": "ALMIN.PA",
+    "name": "Mint SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mint.svg"
+  },
+  {
+    "symbol": "ALMKS.PA",
+    "name": "Making Science Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/making-science-group.svg"
+  },
+  {
+    "symbol": "ALMKT.PA",
+    "name": "Mauna Kea Technologies SA Class O",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mauna-kea-technologies.svg"
+  },
+  {
+    "symbol": "ALMLB.PA",
+    "name": "Miliboo SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/miliboo-sa.svg"
+  },
+  {
+    "symbol": "ALMOU.PA",
+    "name": "Moulinvest SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/moulinvest-sa.svg"
+  },
+  {
+    "symbol": "ALMRB.PA",
+    "name": "Mr Bricolage SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mr-bricolage-sa.svg"
+  },
+  {
+    "symbol": "ALMUN.PA",
+    "name": "Munic SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/munic.svg"
+  },
+  {
+    "symbol": "ALNEV.PA",
+    "name": "Neovacs SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/neovacs.svg"
+  },
+  {
+    "symbol": "ALNFL.PA",
+    "name": "NFL Biosciences SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/nfl-biosciences-sa.svg"
+  },
+  {
+    "symbol": "ALNLF.PA",
+    "name": "Neolife SAS",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/neolife.svg"
+  },
+  {
+    "symbol": "ALNMG.PA",
+    "name": "Netmedia Group",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/makheia.svg"
+  },
+  {
+    "symbol": "ALNMR.PA",
+    "name": "nam.R SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/namr.svg"
+  },
+  {
+    "symbol": "ALNN6.PA",
+    "name": "ENENSYS Technologies SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/enensys-technologies-sa.svg"
+  },
+  {
+    "symbol": "ALNOV.PA",
+    "name": "Novacyt SAS",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/novacyt-s-a.svg"
+  },
+  {
+    "symbol": "ALNRG.PA",
+    "name": "Energisme SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/energisme.svg"
+  },
+  {
+    "symbol": "ALNSC.PA",
+    "name": "NSC Groupe SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/nsc-groupe.svg"
+  },
+  {
+    "symbol": "ALNSE.PA",
+    "name": "NSE SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/nse.svg"
+  },
+  {
+    "symbol": "ALNTG.PA",
+    "name": "Netgem SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/netgem-sa.svg"
+  },
+  {
+    "symbol": "ALNXT.PA",
+    "name": "Nextedia SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/nextedia.svg"
+  },
+  {
+    "symbol": "ALO.PA",
+    "name": "Alstom SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/alstom.svg"
+  },
+  {
+    "symbol": "ALODC.PA",
+    "name": "Omer - Decugis & Cie SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/omer-decugis-and-cie-eur1.svg"
+  },
+  {
+    "symbol": "ALODY.PA",
+    "name": "Odyssee Technologies",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/odyssee-technologies.svg"
+  },
+  {
+    "symbol": "ALOKW.PA",
+    "name": "Groupe OKwind SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/groupe-okwind.svg"
+  },
+  {
+    "symbol": "ALOPM.PA",
+    "name": "Oncodesign Precision Medicine S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/oncodesign-precision-medicine.svg"
+  },
+  {
+    "symbol": "ALORA.PA",
+    "name": "Altheora SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/altheora-sa.svg"
+  },
+  {
+    "symbol": "ALORD.PA",
+    "name": "Ordissimo SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ordissimo-sa.svg"
+  },
+  {
+    "symbol": "ALPAS.PA",
+    "name": "Passat SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/passat.svg"
+  },
+  {
+    "symbol": "ALPAT.PA",
+    "name": "Plant Advanced Technologies SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/plant-advanced-technologies.svg"
+  },
+  {
+    "symbol": "ALPAU.PA",
+    "name": "PAULIC Meunerie SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/paulic-meunerie.svg"
+  },
+  {
+    "symbol": "ALPDX.PA",
+    "name": "Piscine Desjoyaux SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/piscines-desjoyaux-sa.svg"
+  },
+  {
+    "symbol": "ALPET.PA",
+    "name": "Pet service Holding N.V",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/pet-service-nv.svg"
+  },
+  {
+    "symbol": "ALPHI.PA",
+    "name": "Facephi Biometria SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/facephi-biometra-sa.svg"
+  },
+  {
+    "symbol": "ALPJT.PA",
+    "name": "Poujoulat SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/poujoulat-eur6125.svg"
+  },
+  {
+    "symbol": "ALPM.PA",
+    "name": "Precia SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/precia.svg"
+  },
+  {
+    "symbol": "ALPOU.PA",
+    "name": "Poulaillon SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/poulaillon-sa.svg"
+  },
+  {
+    "symbol": "ALPRG.PA",
+    "name": "Prologue SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/prologue-reg.svg"
+  },
+  {
+    "symbol": "ALPRI.PA",
+    "name": "Prismaflex International SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/prismaflex-international.svg"
+  },
+  {
+    "symbol": "ALPUL.PA",
+    "name": "Pullup Entertainment",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/focus-entertainment.svg"
+  },
+  {
+    "symbol": "ALPWG.PA",
+    "name": "Prodways Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/prodways-sa.svg"
+  },
+  {
+    "symbol": "ALQGC.PA",
+    "name": "Quantum Genomics Societe Anonyme",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/quantum-genomics-sas-regr.svg"
+  },
+  {
+    "symbol": "ALQWA.PA",
+    "name": "Qwamplify SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/qwamplify-sa.svg"
+  },
+  {
+    "symbol": "ALREA.PA",
+    "name": "Realites SCA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/realites.svg"
+  },
+  {
+    "symbol": "ALREB.PA",
+    "name": "Rebirth S.P.A.",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "ALREW.PA",
+    "name": "Reworld Media SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/reworld.svg"
+  },
+  {
+    "symbol": "ALRFG.PA",
+    "name": "Racing Force SpA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/racing-force.svg"
+  },
+  {
+    "symbol": "ALRGR.PA",
+    "name": "Rougier SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/rougier-sa.svg"
+  },
+  {
+    "symbol": "ALRIB.PA",
+    "name": "Riber SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/riber-sa.svg"
+  },
+  {
+    "symbol": "ALRIS.PA",
+    "name": "Rising Stone SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/rising-stone-sa.svg"
+  },
+  {
+    "symbol": "ALROC.PA",
+    "name": "RocTool SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/roctool.svg"
+  },
+  {
+    "symbol": "ALRPD.PA",
+    "name": "Rapid Nutrition PLC",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/rapid-nutrition-plc.svg"
+  },
+  {
+    "symbol": "ALSAF.PA",
+    "name": "Safe SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/safe-orthopaedics-sa.svg"
+  },
+  {
+    "symbol": "ALSAS.PA",
+    "name": "Stradim-Espace Finances SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/stradim.svg"
+  },
+  {
+    "symbol": "ALSEC.PA",
+    "name": "Soditech SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/soditech-ingenierie.svg"
+  },
+  {
+    "symbol": "ALSEI.PA",
+    "name": "Societa Editoriale Il Fatto SpA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/societa-editoriale-il-fatto.svg"
+  },
+  {
+    "symbol": "ALSEM.PA",
+    "name": "SEMCO Technologies",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/semco-technologies.svg"
+  },
+  {
+    "symbol": "ALSEN.PA",
+    "name": "Sensorion SAS",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/sensorion-sa.svg"
+  },
+  {
+    "symbol": "ALSGD.PA",
+    "name": "SpineGuard",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/spineguard-sa.svg"
+  },
+  {
+    "symbol": "ALSMA.PA",
+    "name": "S.M.A.I.O S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/smaio.svg"
+  },
+  {
+    "symbol": "ALSPT.PA",
+    "name": "Spartoo SAS",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/spartoo.svg"
+  },
+  {
+    "symbol": "ALSPW.PA",
+    "name": "Spineway SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/spineway.svg"
+  },
+  {
+    "symbol": "ALSRS.PA",
+    "name": "Sirius Media",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/metadvertise.svg"
+  },
+  {
+    "symbol": "ALSTI.PA",
+    "name": "STIF",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/stif.svg"
+  },
+  {
+    "symbol": "ALSTW.PA",
+    "name": "StreamWIDE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/streamwide.svg"
+  },
+  {
+    "symbol": "ALTA.PA",
+    "name": "Altarea SCA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/altarea.svg"
+  },
+  {
+    "symbol": "ALTAI.PA",
+    "name": "LightOn S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lighton.svg"
+  },
+  {
+    "symbol": "ALTAO.PA",
+    "name": "Aton",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hybrigenics-sa.svg"
+  },
+  {
+    "symbol": "ALTD.PA",
+    "name": "Tonner Drones S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-drone.svg"
+  },
+  {
+    "symbol": "ALTHE.PA",
+    "name": "Theraclion SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/theraclion.svg"
+  },
+  {
+    "symbol": "ALTHO.PA",
+    "name": "Metavisio SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/metavisio-thomson-computing.svg"
+  },
+  {
+    "symbol": "ALTHX.PA",
+    "name": "THX Pharma",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/theranexus-sadir.svg"
+  },
+  {
+    "symbol": "ALTME.PA",
+    "name": "TME Pharma N.V.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/tme-pharma-nv.svg"
+  },
+  {
+    "symbol": "ALTOO.PA",
+    "name": "Toosla Societe Anonyme",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/toosla.svg"
+  },
+  {
+    "symbol": "ALTOU.PA",
+    "name": "Touax SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/touax.svg"
+  },
+  {
+    "symbol": "ALTPC.PA",
+    "name": "Societe Marseillaise du Tunnel Prado Carenage SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/smtpc.svg"
+  },
+  {
+    "symbol": "ALTRA.PA",
+    "name": "Tractial",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bd-multi-media.svg"
+  },
+  {
+    "symbol": "ALTRI.PA",
+    "name": "Trilogiq SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/trilogiq.svg"
+  },
+  {
+    "symbol": "ALTUV.PA",
+    "name": "Bio-UV Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bio-uv-sas.svg"
+  },
+  {
+    "symbol": "ALTXC.PA",
+    "name": "TXCom SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/txcom.svg"
+  },
+  {
+    "symbol": "ALU10.PA",
+    "name": "U10 Corp SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/u10.svg"
+  },
+  {
+    "symbol": "ALUCI.PA",
+    "name": "Lucibel S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lucibel-sa.svg"
+  },
+  {
+    "symbol": "ALUNT.PA",
+    "name": "Uniti SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/uniti.svg"
+  },
+  {
+    "symbol": "ALUPG.PA",
+    "name": "UPERGY SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/upergy.svg"
+  },
+  {
+    "symbol": "ALUVI.PA",
+    "name": "UV GERMI Societe Anonyme",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/uv-germi-sa.svg"
+  },
+  {
+    "symbol": "ALVAL.PA",
+    "name": "Valbiotis SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/valbiotis-sas.svg"
+  },
+  {
+    "symbol": "ALVAP.PA",
+    "name": "Kumulus Vape SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/kumulus-vape.svg"
+  },
+  {
+    "symbol": "ALVAZ.PA",
+    "name": "Vaziva SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vaziva-sa.svg"
+  },
+  {
+    "symbol": "ALVDM.PA",
+    "name": "Voyageurs du Monde SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/voyageurs-du-monde.svg"
+  },
+  {
+    "symbol": "ALVER.PA",
+    "name": "Vergnet S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vergnet.svg"
+  },
+  {
+    "symbol": "ALVG.PA",
+    "name": "VEOM Group",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cabasse.svg"
+  },
+  {
+    "symbol": "ALVGO.PA",
+    "name": "Vogo SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vogo-saca.svg"
+  },
+  {
+    "symbol": "ALVIA.PA",
+    "name": "Vialife SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vialife.svg"
+  },
+  {
+    "symbol": "ALVIN.PA",
+    "name": "Vinpai S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vinpai-sa.svg"
+  },
+  {
+    "symbol": "ALVIO.PA",
+    "name": "Valerio Therapeutics",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/onxeo-sa.svg"
+  },
+  {
+    "symbol": "ALVIR.PA",
+    "name": "Virtualware 2007 SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/virtualware.svg"
+  },
+  {
+    "symbol": "ALVU.PA",
+    "name": "VENTE-UNIQUE.COM",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vente-uniquecom-sa.svg"
+  },
+  {
+    "symbol": "ALWEC.PA",
+    "name": "WE.CONNECT SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/we-connect.svg"
+  },
+  {
+    "symbol": "ALWF.PA",
+    "name": "Winfarm SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/winfarm.svg"
+  },
+  {
+    "symbol": "ALWIN.PA",
+    "name": "WINAMP GROUP",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/targetspot-sa.svg"
+  },
+  {
+    "symbol": "ALWIT.PA",
+    "name": "Witbe SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/witbenet.svg"
+  },
+  {
+    "symbol": "ALWTR.PA",
+    "name": "Watera",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/osmosun-sa.svg"
+  },
+  {
+    "symbol": "ALXIL.PA",
+    "name": "Xilam Animation SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/xilam-animation.svg"
+  },
+  {
+    "symbol": "AM.PA",
+    "name": "Dassault Aviation SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/dassault-aviation.svg"
+  },
+  {
+    "symbol": "AMUN.PA",
+    "name": "Amundi SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/amundi.svg"
+  },
+  {
+    "symbol": "ANTIN.PA",
+    "name": "Antin Infrastructure Partners",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/antin-infrastructure-partners.svg"
+  },
+  {
+    "symbol": "ARAMI.PA",
+    "name": "Aramis Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/aramis-sa.svg"
+  },
+  {
+    "symbol": "ARDO.PA",
+    "name": "Les Motocycles Ardoin Saint Amand et Cie Act.de prioriteB",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ardoin-st-amand-a.svg"
+  },
+  {
+    "symbol": "AREIT.PA",
+    "name": "Altareit",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/altareit.svg"
+  },
+  {
+    "symbol": "ARG.PA",
+    "name": "Argan",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/argan.svg"
+  },
+  {
+    "symbol": "ARTE.PA",
+    "name": "Artea SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/artea.svg"
+  },
+  {
+    "symbol": "ARTO.PA",
+    "name": "Societe Industrielle & Financiere de l'Artois SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/artois-nom.svg"
+  },
+  {
+    "symbol": "ARVEN.PA",
+    "name": "Arverne Group Act",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/transition-warrant.svg"
+  },
+  {
+    "symbol": "ASY.PA",
+    "name": "Assystem SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/assystem.svg"
+  },
+  {
+    "symbol": "ATE.PA",
+    "name": "Alten SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/alten.svg"
+  },
+  {
+    "symbol": "ATEME.PA",
+    "name": "Ateme SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ateme-sa.svg"
+  },
+  {
+    "symbol": "ATLD.PA",
+    "name": "Atland SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/atland.svg"
+  },
+  {
+    "symbol": "ATO.PA",
+    "name": "Atos SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/atos.svg"
+  },
+  {
+    "symbol": "AUB.PA",
+    "name": "Aubay SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/aubay.svg"
+  },
+  {
+    "symbol": "AUGR.PA",
+    "name": "Augros Cosmetics Packaging SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/augros-cp-eur014.svg"
+  },
+  {
+    "symbol": "AURE.PA",
+    "name": "Aurea SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/aurea.svg"
+  },
+  {
+    "symbol": "AVT.PA",
+    "name": "Avenir Telecom SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/avenir-telecom.svg"
+  },
+  {
+    "symbol": "AYV.PA",
+    "name": "Ayvens",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ald.svg"
+  },
+  {
+    "symbol": "BAIN.PA",
+    "name": "Monte-Carlo Societe des Bains de Mer SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bains-mer-monaco.svg"
+  },
+  {
+    "symbol": "BALYO.PA",
+    "name": "Balyo SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/balyo-sa.svg"
+  },
+  {
+    "symbol": "BASS.PA",
+    "name": "Bassac SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bassac-sa.svg"
+  },
+  {
+    "symbol": "BB.PA",
+    "name": "Societe BIC SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bic.svg"
+  },
+  {
+    "symbol": "BEN.PA",
+    "name": "Beneteau SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/beneteau.svg"
+  },
+  {
+    "symbol": "BIBS3.PA",
+    "name": "Biophytis SA Warrant 2026-14.03.2031 on BIOPHYTIS",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "BIG.PA",
+    "name": "Bigben Interactive SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bigben-interactive.svg"
+  },
+  {
+    "symbol": "BIM.PA",
+    "name": "bioMerieux SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/biomerieux.svg"
+  },
+  {
+    "symbol": "BLC.PA",
+    "name": "Bastide Le Confort Medical SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bastide-le-confort-medical.svg"
+  },
+  {
+    "symbol": "BLEE.PA",
+    "name": "Bleecker S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bleecker.svg"
+  },
+  {
+    "symbol": "BN.PA",
+    "name": "Danone SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/danone.svg"
+  },
+  {
+    "symbol": "BNBS.PA",
+    "name": "Drone Volt SA Warrant 2021-14.12.26 on Drone Volt",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/drone-volt.svg"
+  },
+  {
+    "symbol": "BNP.PA",
+    "name": "BNP Paribas S.A. Class A",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/paribas.svg"
+  },
+  {
+    "symbol": "BOI.PA",
+    "name": "Boiron SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/boiron-sa.svg"
+  },
+  {
+    "symbol": "BOL.PA",
+    "name": "Bollore SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bollore.svg"
+  },
+  {
+    "symbol": "BON.PA",
+    "name": "Bonduelle SCA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bonduelle-sca.svg"
+  },
+  {
+    "symbol": "BSD.PA",
+    "name": "Bourse Direct SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bourse-direct.svg"
+  },
+  {
+    "symbol": "BUI.PA",
+    "name": "Barbara Bui SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/barbara-bui.svg"
+  },
+  {
+    "symbol": "BUR.PA",
+    "name": "Burelle S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/burelle.svg"
+  },
+  {
+    "symbol": "BVI.PA",
+    "name": "Bureau Veritas SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bureau-veritas.svg"
+  },
+  {
+    "symbol": "CA.PA",
+    "name": "Carrefour SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/carrefour.svg"
+  },
+  {
+    "symbol": "CAF.PA",
+    "name": "Caisse Regionale de Credit Agricole Mutuel de Paris et d'Ile-de-France Cert.Coop.d'Invest.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-agricole.svg"
+  },
+  {
+    "symbol": "CAP.PA",
+    "name": "Capgemini SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/capgemini.svg"
+  },
+  {
+    "symbol": "CARM.PA",
+    "name": "Carmila SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/carmila.svg"
+  },
+  {
+    "symbol": "CAT31.PA",
+    "name": "Caisse Regionale de Credit Agricole Mutuel Toulouse 31 Cert.Coop.d'Invest. Em.janv.88",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-agricole.svg"
+  },
+  {
+    "symbol": "CBDG.PA",
+    "name": "Compagnie du Cambodge SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cambodge-nom.svg"
+  },
+  {
+    "symbol": "CBE.PA",
+    "name": "Robertet SA Cert.d'Invest. Em.87",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/robertet-ci.svg"
+  },
+  {
+    "symbol": "CBOT.PA",
+    "name": "CBo Territoria SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cbo-territoria.svg"
+  },
+  {
+    "symbol": "CBSAB.PA",
+    "name": "Crypto Blockchain Industries Warrant 2024-31.03.25 on Crypto BC Ind",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/crypto-blockchain-industries.svg"
+  },
+  {
+    "symbol": "CBSM.PA",
+    "name": "Societe Centrale des Bois et Scieries de la Manche",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/scbsm.svg"
+  },
+  {
+    "symbol": "CCN.PA",
+    "name": "Caisse Regionale de Credit Agricole Mutuel de Normandie Seine Cert.Coop.d'invt.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ca-normandie-seine-cci.svg"
+  },
+  {
+    "symbol": "CDA.PA",
+    "name": "Compagnie des Alpes SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/compagnie-des-alpes.svg"
+  },
+  {
+    "symbol": "CDI.PA",
+    "name": "Christian Dior SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/dior.svg"
+  },
+  {
+    "symbol": "CEN.PA",
+    "name": "Groupe Crit SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/groupe-crit.svg"
+  },
+  {
+    "symbol": "CFI.PA",
+    "name": "Compagnie Fonciere Internationale",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cfi-compagnie-fonciere-inter.svg"
+  },
+  {
+    "symbol": "CHSR.PA",
+    "name": "La Chausseria SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/chausseria.svg"
+  },
+  {
+    "symbol": "CIV.PA",
+    "name": "Caisse Regionale de Credit Agricole Mutuel d'Ille-et-Vilaine Cert.coop.d'invt.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ca-ille-et-vilaine-cci.svg"
+  },
+  {
+    "symbol": "CJBS.PA",
+    "name": "Crossject SA Warrants 2024-13.12.27 on CROSSJECT",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/crossject.svg"
+  },
+  {
+    "symbol": "CLARI.PA",
+    "name": "Clariane SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/korian.svg"
+  },
+  {
+    "symbol": "CMO.PA",
+    "name": "CRCAM du Morbihan",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-agricole.svg"
+  },
+  {
+    "symbol": "CNDF.PA",
+    "name": "Caisse Regionale de Credit Agricole Mutuel Nord de France Cert.Coop.d'Inv.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ca-nord-de-france-cci.svg"
+  },
+  {
+    "symbol": "CO.PA",
+    "name": "Casino, Guichard-Perrachon SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/casino-guichard.svg"
+  },
+  {
+    "symbol": "COBS1.PA",
+    "name": "Casino, Guichard-Perrachon SA Warrant 2024-27.03.28 on Casino Guic Per",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/casino-guichard.svg"
+  },
+  {
+    "symbol": "COBS3.PA",
+    "name": "Casino Guichard Perrachon Warrant 2024-27.04.29 on Casino Guic Per",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/casino-guichard.svg"
+  },
+  {
+    "symbol": "COFA.PA",
+    "name": "Coface SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/coface.svg"
+  },
+  {
+    "symbol": "COH.PA",
+    "name": "Coheris SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/coheris-sa.svg"
+  },
+  {
+    "symbol": "COTY.PA",
+    "name": "Coty Inc. Class A",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/coty.svg"
+  },
+  {
+    "symbol": "COUR.PA",
+    "name": "Courtois SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/courtois-r.svg"
+  },
+  {
+    "symbol": "COV.PA",
+    "name": "Covivio SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/covivio.svg"
+  },
+  {
+    "symbol": "COVH.PA",
+    "name": "Covivio Hotels SCA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/covivio.svg"
+  },
+  {
+    "symbol": "CPBBS.PA",
+    "name": "Blockchain Group SA Warrant 2025-10.04.26 on Blockchain Grp",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/the-blockchain-group.svg"
+  },
+  {
+    "symbol": "CRAP.PA",
+    "name": "Caisse Regionale De Credit Agricole Mutuel Alpes Provence CERT.COOP.D'INVEST.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-agricole.svg"
+  },
+  {
+    "symbol": "CRAV.PA",
+    "name": "Caisse Regionale de Credit Agricole Mutuel Atlantique Vendee Cert.Coop.d'Inv.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-agricole.svg"
+  },
+  {
+    "symbol": "CRBP2.PA",
+    "name": "Caisse Regionale de Credit Agricole Mutuel Brie Picardie Cert. Coop. d'invest.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-agricole.svg"
+  },
+  {
+    "symbol": "CRI.PA",
+    "name": "Compagnie Chargeurs Invest",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/chargeurs.svg"
+  },
+  {
+    "symbol": "CRLA.PA",
+    "name": "Caisse Regionale de Credit Agricole Mutuel du Languedoc Cert.Coop.d'invt.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-agricole.svg"
+  },
+  {
+    "symbol": "CRLO.PA",
+    "name": "Caisse Regionale de Credit Agricole Mutuel Loire Haute-Loire Cert.coop.d'invest.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-agricole.svg"
+  },
+  {
+    "symbol": "CROS.PA",
+    "name": "Crosswood SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/crosswood.svg"
+  },
+  {
+    "symbol": "CRSU.PA",
+    "name": "CRCAM de Sud Rhone-Alpes",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-agricole.svg"
+  },
+  {
+    "symbol": "CRTO.PA",
+    "name": "Caisse Regionale de Credit Agricole Mutuel de la Touraine et du Poitou Cert.Coop.d'Invt.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-agricole.svg"
+  },
+  {
+    "symbol": "CS.PA",
+    "name": "AXA SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/axa.svg"
+  },
+  {
+    "symbol": "CSNV.PA",
+    "name": "AXA SA TEMP",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/axa.svg"
+  },
+  {
+    "symbol": "CVX.PA",
+    "name": "Carvolix",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/affluent-medical.svg"
+  },
+  {
+    "symbol": "DBG.PA",
+    "name": "Derichebourg SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/derichebourg.svg"
+  },
+  {
+    "symbol": "DBV.PA",
+    "name": "DBV Technologies SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/dbv-technologies.svg"
+  },
+  {
+    "symbol": "DEC.PA",
+    "name": "JCDecaux SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/jc-decaux-sa.svg"
+  },
+  {
+    "symbol": "DEEZR.PA",
+    "name": "Deezer SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/deezer-sa.svg"
+  },
+  {
+    "symbol": "DEEZW.PA",
+    "name": "Deezer SA Warrant 2021-open on Deezer",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/deezer-sa.svg"
+  },
+  {
+    "symbol": "DG.PA",
+    "name": "VINCI SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vinci.svg"
+  },
+  {
+    "symbol": "DIM.PA",
+    "name": "Sartorius Stedim Biotech SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/sartorius.svg"
+  },
+  {
+    "symbol": "DKUPL.PA",
+    "name": "Dekuple",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/dekuple.svg"
+  },
+  {
+    "symbol": "DPAM.PA",
+    "name": "Les Docks des Petroles d'Ambes SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/docks-des-petroles-d-ambes.svg"
+  },
+  {
+    "symbol": "DPT.PA",
+    "name": "ST Dupont SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/st-dupont.svg"
+  },
+  {
+    "symbol": "DSY.PA",
+    "name": "Dassault Systemes SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/dassault-systemes.svg"
+  },
+  {
+    "symbol": "EAPI.PA",
+    "name": "Euroapi SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/euroapi-sa.svg"
+  },
+  {
+    "symbol": "EC.PA",
+    "name": "Totalenergies EP Gabon",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/total.svg"
+  },
+  {
+    "symbol": "EDEN.PA",
+    "name": "Edenred SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/edenred.svg"
+  },
+  {
+    "symbol": "EDI.PA",
+    "name": "Media 6 SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/media-6.svg"
+  },
+  {
+    "symbol": "EEM.PA",
+    "name": "Electricite et Eaux de Madagascar SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/electricite-et-eaux.svg"
+  },
+  {
+    "symbol": "EFG.PA",
+    "name": "Eagle Football Group",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ol-groupe.svg"
+  },
+  {
+    "symbol": "EFI.PA",
+    "name": "Eurasia Fonciere Investissements",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/eurasia-fonc-inv.svg"
+  },
+  {
+    "symbol": "EGR.PA",
+    "name": "Transition Evergreen",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/transition-evergreen.svg"
+  },
+  {
+    "symbol": "EIFF.PA",
+    "name": "Societe de la Tour Eiffel SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ste-de-la-tour-eiffel.svg"
+  },
+  {
+    "symbol": "EKI.PA",
+    "name": "Ekinops SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ekinops.svg"
+  },
+  {
+    "symbol": "EL.PA",
+    "name": "EssilorLuxottica SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/essilorluxottica.svg"
+  },
+  {
+    "symbol": "ELEC.PA",
+    "name": "Electricite de Strasbourg SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/electricite-de-strasbourg-rg.svg"
+  },
+  {
+    "symbol": "ELIOR.PA",
+    "name": "Elior Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/elior.svg"
+  },
+  {
+    "symbol": "ELIS.PA",
+    "name": "Elis SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/elis.svg"
+  },
+  {
+    "symbol": "EMEIS.PA",
+    "name": "Emeis",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/orpea.svg"
+  },
+  {
+    "symbol": "EN.PA",
+    "name": "Bouygues SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bouygues.svg"
+  },
+  {
+    "symbol": "ENGI.PA",
+    "name": "ENGIE S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/engie.svg"
+  },
+  {
+    "symbol": "ENX.PA",
+    "name": "Euronext NV",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/euronext.svg"
+  },
+  {
+    "symbol": "EOS.PA",
+    "name": "Acteos SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/acteos.svg"
+  },
+  {
+    "symbol": "EQS.PA",
+    "name": "Equasens SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/pharmagest-inter.svg"
+  },
+  {
+    "symbol": "ERA.PA",
+    "name": "Eramet SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/eramet.svg"
+  },
+  {
+    "symbol": "ERF.PA",
+    "name": "Eurofins Scientific SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/eurofins-scientific.svg"
+  },
+  {
+    "symbol": "ETL.PA",
+    "name": "Eutelsat Communications SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/eutelsat-communic.svg"
+  },
+  {
+    "symbol": "EXA.PA",
+    "name": "Exail Technologies SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/groupe-gorge.svg"
+  },
+  {
+    "symbol": "EXE.PA",
+    "name": "EXEL Industries SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/exel-industries-sa-a-shs.svg"
+  },
+  {
+    "symbol": "EXENS.PA",
+    "name": "Exosens",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/exosens-sa-eur0425.svg"
+  },
+  {
+    "symbol": "EXPL.PA",
+    "name": "Societe Explosifs et Produits Chimiques SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/explosifs-prod-chi.svg"
+  },
+  {
+    "symbol": "FCMC.PA",
+    "name": "Societe Fermiere du Casino Municipal de Cannes SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-fermiere-du-casino.svg"
+  },
+  {
+    "symbol": "FDE.PA",
+    "name": "La Francaise de l'Energie SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/francaise-energie.svg"
+  },
+  {
+    "symbol": "FDJU.PA",
+    "name": "FDJ United",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/la-francaise-des.svg"
+  },
+  {
+    "symbol": "FGA.PA",
+    "name": "Figeac Aero SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/figeac-aero.svg"
+  },
+  {
+    "symbol": "FGR.PA",
+    "name": "Eiffage SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/eiffage.svg"
+  },
+  {
+    "symbol": "FII.PA",
+    "name": "LISI SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lisi.svg"
+  },
+  {
+    "symbol": "FINM.PA",
+    "name": "FINANCIERE MARJOS SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/financiere-marjos.svg"
+  },
+  {
+    "symbol": "FIPP.PA",
+    "name": "FIPP SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fipp.svg"
+  },
+  {
+    "symbol": "FMONC.PA",
+    "name": "Financiere Moncey",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/moncey-fin-nom.svg"
+  },
+  {
+    "symbol": "FNAC.PA",
+    "name": "Fnac Darty SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fnac-darty.svg"
+  },
+  {
+    "symbol": "FOAF.PA",
+    "name": "Compagnie Financiere de l'Ouest Africain",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/financiere-ouest-africain.svg"
+  },
+  {
+    "symbol": "FORE.PA",
+    "name": "La Forestiere Equatoriale SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/la-forestiere-equatoriale.svg"
+  },
+  {
+    "symbol": "FPG.PA",
+    "name": "Union Technologies Informatique Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/union-technologies-informat.svg"
+  },
+  {
+    "symbol": "FR.PA",
+    "name": "Valeo SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/valeo.svg"
+  },
+  {
+    "symbol": "FREY.PA",
+    "name": "Frey SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/frey.svg"
+  },
+  {
+    "symbol": "FRVIA.PA",
+    "name": "Forvia SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/faurecia.svg"
+  },
+  {
+    "symbol": "FSDV.PA",
+    "name": "FSDV",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fayence-sarreguemines-digoin.svg"
+  },
+  {
+    "symbol": "GAM.PA",
+    "name": "Gaumont SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/gaumont-sa.svg"
+  },
+  {
+    "symbol": "GBT.PA",
+    "name": "Guerbet SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/guerbet.svg"
+  },
+  {
+    "symbol": "GDS.PA",
+    "name": "Ramsay Generale de Sante SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ramsay-generale-de-sante.svg"
+  },
+  {
+    "symbol": "GEA.PA",
+    "name": "Grenobloise d'Electronique et d'Automatismes SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/gea.svg"
+  },
+  {
+    "symbol": "GET.PA",
+    "name": "Getlink SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/getlink-se.svg"
+  },
+  {
+    "symbol": "GFC.PA",
+    "name": "Gecina SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/gecina-sa.svg"
+  },
+  {
+    "symbol": "GIDBS.PA",
+    "name": "Egide SA Warrant 2024-13.05.26 on Egide",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/egide.svg"
+  },
+  {
+    "symbol": "GJAJ.PA",
+    "name": "Groupe JAJ",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/groupe-jaj.svg"
+  },
+  {
+    "symbol": "GLE.PA",
+    "name": "Societe Generale S.A. Class A",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-generale.svg"
+  },
+  {
+    "symbol": "GLO.PA",
+    "name": "GL events SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/gl-events.svg"
+  },
+  {
+    "symbol": "GNFT.PA",
+    "name": "Genfit SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/genfit.svg"
+  },
+  {
+    "symbol": "GNRO.PA",
+    "name": "GeNeuro SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/geneuro-sa.svg"
+  },
+  {
+    "symbol": "GPE.PA",
+    "name": "Groupe Pizzorno Environnement SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/gpe-groupe-pizzorno.svg"
+  },
+  {
+    "symbol": "GRVO.PA",
+    "name": "Graines Voltz SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/graines-voltz-sa.svg"
+  },
+  {
+    "symbol": "GTT.PA",
+    "name": "Gaztransport & Technigaz SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/gtt-gaztransport.svg"
+  },
+  {
+    "symbol": "GUI.PA",
+    "name": "Guillemot Corp. SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/guillemot.svg"
+  },
+  {
+    "symbol": "HAFBS.PA",
+    "name": "Haffner Energy SAS Warrant 2025-04.10.26 on Haffner Ener",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/haffner-energy.svg"
+  },
+  {
+    "symbol": "HCO.PA",
+    "name": "HighCo SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/high-co.svg"
+  },
+  {
+    "symbol": "HDF.PA",
+    "name": "Hydrogene de France",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hydrogene-de-france.svg"
+  },
+  {
+    "symbol": "HDP.PA",
+    "name": "Hotels de Paris",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/les-hotels-de-paris.svg"
+  },
+  {
+    "symbol": "HO.PA",
+    "name": "Thales SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/thales.svg"
+  },
+  {
+    "symbol": "IAM.PA",
+    "name": "Maroc Telecom SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/itissalat-al-ma-inh-dh.svg"
+  },
+  {
+    "symbol": "ICAD.PA",
+    "name": "Icade SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/icade.svg"
+  },
+  {
+    "symbol": "IDIP.PA",
+    "name": "Institut de Developpement Industriel SCA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/idi.svg"
+  },
+  {
+    "symbol": "IDL.PA",
+    "name": "ID Logistics Group",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/id-logistics-group.svg"
+  },
+  {
+    "symbol": "IMDA.PA",
+    "name": "Immobiliere Dassault SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/immobiliere-dassault-sa.svg"
+  },
+  {
+    "symbol": "INEA.PA",
+    "name": "Fonciere INEA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fonciere-inea.svg"
+  },
+  {
+    "symbol": "INF.PA",
+    "name": "Infotel SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/infotel.svg"
+  },
+  {
+    "symbol": "IPH.PA",
+    "name": "Innate Pharma SA Class A",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/innate-pharma-sa.svg"
+  },
+  {
+    "symbol": "IPN.PA",
+    "name": "Ipsen SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ipsen.svg"
+  },
+  {
+    "symbol": "IPS.PA",
+    "name": "Ipsos SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ipsos.svg"
+  },
+  {
+    "symbol": "ITP.PA",
+    "name": "Interparfums",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/interparfums.svg"
+  },
+  {
+    "symbol": "ITXT.PA",
+    "name": "Intexa SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/intexa-sa.svg"
+  },
+  {
+    "symbol": "IVA.PA",
+    "name": "Inventiva SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/inventiva.svg"
+  },
+  {
+    "symbol": "JBOG.PA",
+    "name": "Jacques Bogart SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/jacques-bogart-eur0076224519685-post-subdivision.svg"
+  },
+  {
+    "symbol": "JCQ.PA",
+    "name": "Jacquet Metals SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/jacquet-metal-sa.svg"
+  },
+  {
+    "symbol": "KER.PA",
+    "name": "Kering SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/kering.svg"
+  },
+  {
+    "symbol": "KOF.PA",
+    "name": "Kaufman & Broad SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/kaufman-and-broad-sa.svg"
+  },
+  {
+    "symbol": "LACR.PA",
+    "name": "Lacroix Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lacroix.svg"
+  },
+  {
+    "symbol": "LAT.PA",
+    "name": "Latecoere SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/latecoere.svg"
+  },
+  {
+    "symbol": "LBIRD.PA",
+    "name": "Lumibird SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lumibird.svg"
+  },
+  {
+    "symbol": "LEBL.PA",
+    "name": "Fonciere 7 Investissement",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fonciere-7-invest.svg"
+  },
+  {
+    "symbol": "LHYFE.PA",
+    "name": "Lhyfe SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lhyfe-sa.svg"
+  },
+  {
+    "symbol": "LI.PA",
+    "name": "Klepierre SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/klepierre.svg"
+  },
+  {
+    "symbol": "LIN.PA",
+    "name": "Linedata Services SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/linedata-services.svg"
+  },
+  {
+    "symbol": "LNA.PA",
+    "name": "LNA Sante SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lna-sante.svg"
+  },
+  {
+    "symbol": "LOCAL.PA",
+    "name": "Solocal Group",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/solocal.svg"
+  },
+  {
+    "symbol": "LOUP.PA",
+    "name": "LDC SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/l-d-c.svg"
+  },
+  {
+    "symbol": "LPE.PA",
+    "name": "Laurent-Perrier SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/laurent-perrier.svg"
+  },
+  {
+    "symbol": "LR.PA",
+    "name": "Legrand SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/legrand.svg"
+  },
+  {
+    "symbol": "LSS.PA",
+    "name": "Lectra SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lectra.svg"
+  },
+  {
+    "symbol": "MAAT.PA",
+    "name": "MaaT Pharma",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/maat-pharma.svg"
+  },
+  {
+    "symbol": "MALT.PA",
+    "name": "Malteries Franco-Belges",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/malteries-franco-belges.svg"
+  },
+  {
+    "symbol": "MASBS.PA",
+    "name": "Mastrad SA Warrant 2019-30.11.29 on Mastrad",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mastrad.svg"
+  },
+  {
+    "symbol": "MAU.PA",
+    "name": "Etablissements Maurel & Prom SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/maurel-et-prom.svg"
+  },
+  {
+    "symbol": "MBWS.PA",
+    "name": "Marie Brizard Wine & Spirits SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mbws.svg"
+  },
+  {
+    "symbol": "MC.PA",
+    "name": "LVMH Moet Hennessy Louis Vuitton SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lvmh.svg"
+  },
+  {
+    "symbol": "MDM.PA",
+    "name": "Maisons du Monde SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/maisons-du-monde.svg"
+  },
+  {
+    "symbol": "MDTBS.PA",
+    "name": "Median Technologies Warrant 2025-05.02.28 on Median Techno",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/median-technologies.svg"
+  },
+  {
+    "symbol": "MEDCL.PA",
+    "name": "MedinCell SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/medincell-sa-eur001.svg"
+  },
+  {
+    "symbol": "MEMS.PA",
+    "name": "MEMSCAP SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/memscap-sa-regpt.svg"
+  },
+  {
+    "symbol": "MERY.PA",
+    "name": "Mercialys SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mercialys.svg"
+  },
+  {
+    "symbol": "MF.PA",
+    "name": "Wendel SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/wendel.svg"
+  },
+  {
+    "symbol": "MHM.PA",
+    "name": "MyHotelMatch S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/myhotelmatch.svg"
+  },
+  {
+    "symbol": "MKTBS.PA",
+    "name": "MAUNA KEA TECHNOLOGIES Warrant 2025-18.11.30 on MK Techno. O",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mauna-kea-technologies.svg"
+  },
+  {
+    "symbol": "ML.PA",
+    "name": "Cie Generale des Etablissements Michelin SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/michelin.svg"
+  },
+  {
+    "symbol": "MLAA.PA",
+    "name": "L'Agence Automobiliere",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/l-agence-automobiliere.svg"
+  },
+  {
+    "symbol": "MLAAH.PA",
+    "name": "Amatheon Agri Holding NV",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/amatheon-agri-nv.svg"
+  },
+  {
+    "symbol": "MLAAT.PA",
+    "name": "Azorean-Aquatic Technologies SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/azorean-aquatic-technologies-sa.svg"
+  },
+  {
+    "symbol": "MLABC.PA",
+    "name": "IGIS Neptune Barcelona Holdco SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLACT.PA",
+    "name": "Activium Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/activium.svg"
+  },
+  {
+    "symbol": "MLAEM.PA",
+    "name": "Ashler et Manson SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ashler-et-manson.svg"
+  },
+  {
+    "symbol": "MLAGI.PA",
+    "name": "GROUPE AG3I SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ag3i.svg"
+  },
+  {
+    "symbol": "MLAGP.PA",
+    "name": "Agp Malaga Socimi Sa",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLAIG.PA",
+    "name": "Andino Inversiones Global SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/andino-inversiones-global-sa.svg"
+  },
+  {
+    "symbol": "MLALE.PA",
+    "name": "Ucapital Global Plc",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/united-capital-plc.svg"
+  },
+  {
+    "symbol": "MLALV.PA",
+    "name": "Alveen SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/alveen.svg"
+  },
+  {
+    "symbol": "MLARD.PA",
+    "name": "Les Motocycles Ardoin Saint Amand & Cie SA Class A",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ardoin-st-amand-a.svg"
+  },
+  {
+    "symbol": "MLARE.PA",
+    "name": "Aref Thalassa SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLARI.PA",
+    "name": "Arimelia ITG SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLARO.PA",
+    "name": "Aroca Del Pinar SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLASO.PA",
+    "name": "Apodaca Inversiones Inmobiliarias SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLAST.PA",
+    "name": "Astickso XXI SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLAZL.PA",
+    "name": "AZ Leasing SpA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLAZR.PA",
+    "name": "The Azur Selection SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/the-azur-selection-sa.svg"
+  },
+  {
+    "symbol": "MLBAR.PA",
+    "name": "Barings Core Spain Socimi SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLBBO.PA",
+    "name": "BEBO Health SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bebo-health.svg"
+  },
+  {
+    "symbol": "MLBIM.PA",
+    "name": "Bimmart Investment SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLBIO.PA",
+    "name": "Nortem Biogroup SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLBON.PA",
+    "name": "bonyf NV",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/bonyf.svg"
+  },
+  {
+    "symbol": "MLBSP.PA",
+    "name": "Blue Shark Power System SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/blue-shark-power.svg"
+  },
+  {
+    "symbol": "MLCAC.PA",
+    "name": "Lombard & Medot",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lombard-et-medot.svg"
+  },
+  {
+    "symbol": "MLCAN.PA",
+    "name": "Eurolog Canola Socimi SAU",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLCFD.PA",
+    "name": "Compagnie de Chemins de Fer Departementaux",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/chfer-departementaux.svg"
+  },
+  {
+    "symbol": "MLCFM.PA",
+    "name": "CFM Indosuez Wealth SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cfm-indosuez-wealth.svg"
+  },
+  {
+    "symbol": "MLCHE.PA",
+    "name": "Cheops Technology SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cheops-technology.svg"
+  },
+  {
+    "symbol": "MLCLI.PA",
+    "name": "Maison Clio Blue SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/maison-clio-blue.svg"
+  },
+  {
+    "symbol": "MLCLP.PA",
+    "name": "Colipays reunion",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/colipays.svg"
+  },
+  {
+    "symbol": "MLCMB.PA",
+    "name": "Compagnie du Mont-Blanc SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cie-du-mont-blanc.svg"
+  },
+  {
+    "symbol": "MLCMG.PA",
+    "name": "CMG CleanTech SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cmg-cleantech.svg"
+  },
+  {
+    "symbol": "MLCMI.PA",
+    "name": "SOCIETE DE CONSEIL EN EXTERNALISATION ET EN MARKETING INTERNET",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/scemi.svg"
+  },
+  {
+    "symbol": "MLCNT.PA",
+    "name": "Consort NT",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLCOE.PA",
+    "name": "Core Spain Holdco SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLCOR.PA",
+    "name": "Corep Lighting SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLCOT.PA",
+    "name": "Reboost Blockchain Corp",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/coretech-5.svg"
+  },
+  {
+    "symbol": "MLCOU.PA",
+    "name": "Courbet Heritage",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/courbet.svg"
+  },
+  {
+    "symbol": "MLDAM.PA",
+    "name": "Damaris SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/damaris.svg"
+  },
+  {
+    "symbol": "MLDYN.PA",
+    "name": "Dynafond SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/dynafond.svg"
+  },
+  {
+    "symbol": "MLEAS.PA",
+    "name": "Easson Holdings Limited",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLEAV.PA",
+    "name": "EAVS Groupe SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLECE.PA",
+    "name": "Faifey Invest SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLEDR.PA",
+    "name": "Eaux de Royan SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/eaux-de-royan.svg"
+  },
+  {
+    "symbol": "MLEDS.PA",
+    "name": "Editions du Signe SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/editions-du-signe.svg"
+  },
+  {
+    "symbol": "MLEFA.PA",
+    "name": "EDUFORM'ACTION",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/eduform-action.svg"
+  },
+  {
+    "symbol": "MLERH.PA",
+    "name": "Elix Rental Housing SOCIMI II SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLESV.PA",
+    "name": "ES Vedra Properties SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLFDV.PA",
+    "name": "Franck Deville",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fd.svg"
+  },
+  {
+    "symbol": "MLFIR.PA",
+    "name": "FirstCaution SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/firstcaution-sa.svg"
+  },
+  {
+    "symbol": "MLFNP.PA",
+    "name": "FNP Technologies SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fnp-technologies-sa.svg"
+  },
+  {
+    "symbol": "MLFTI.PA",
+    "name": "France Tourisme Immobilier SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/france-tourisme-immobilier.svg"
+  },
+  {
+    "symbol": "MLFXO.PA",
+    "name": "Finaxo Environnement",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/finaxo-environnement.svg"
+  },
+  {
+    "symbol": "MLGAI.PA",
+    "name": "Grande Armee Investissement",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/gai.svg"
+  },
+  {
+    "symbol": "MLGAL.PA",
+    "name": "Galeo Concept",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/galeo.svg"
+  },
+  {
+    "symbol": "MLGEQ.PA",
+    "name": "Gentlemen's Equity SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/gentlemen-s-equity-sa.svg"
+  },
+  {
+    "symbol": "MLGL.PA",
+    "name": "Glass to Power S.p.A.",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLGNS.PA",
+    "name": "Genesis Reit Socimi SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLGRC.PA",
+    "name": "Groupe Carnivor SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/groupe-carnivor-sa.svg"
+  },
+  {
+    "symbol": "MLHAY.PA",
+    "name": "Healthcare Activos Yield SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLHBB.PA",
+    "name": "Financiere Hoche Bains-Les-Bains",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hoche-bains-lbain.svg"
+  },
+  {
+    "symbol": "MLHBP.PA",
+    "name": "Hoteles Bestprice SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hoteles-bestprice.svg"
+  },
+  {
+    "symbol": "MLHCF.PA",
+    "name": "Home Concept France SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLHIN.PA",
+    "name": "Hoteliere & Immobiliere de Nice SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hotlimmobnice.svg"
+  },
+  {
+    "symbol": "MLHK.PA",
+    "name": "H&K AG",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hk.svg"
+  },
+  {
+    "symbol": "MLHMC.PA",
+    "name": "Societe Immobiliere et d'Exploitation de l'Hotel Majestic",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hotmajestic-canne.svg"
+  },
+  {
+    "symbol": "MLHOT.PA",
+    "name": "Hotelim SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hotelim.svg"
+  },
+  {
+    "symbol": "MLHPE.PA",
+    "name": "Hopening SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hopening.svg"
+  },
+  {
+    "symbol": "MLHYD.PA",
+    "name": "Hydraulique Holding",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hydraulique.svg"
+  },
+  {
+    "symbol": "MLHYE.PA",
+    "name": "HYDRO Exploitation SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hydro-exploit.svg"
+  },
+  {
+    "symbol": "MLIDS.PA",
+    "name": "IDS",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ids.svg"
+  },
+  {
+    "symbol": "MLIFC.PA",
+    "name": "Infoclip SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/infoclip.svg"
+  },
+  {
+    "symbol": "MLIFS.PA",
+    "name": "Impulse Fitness Solutions, S.A",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/impulse-fitness-solutions-sa.svg"
+  },
+  {
+    "symbol": "MLIME.PA",
+    "name": "Imeon Energy",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLIML.PA",
+    "name": "Imalliance SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/imalliance.svg"
+  },
+  {
+    "symbol": "MLIMP.PA",
+    "name": "Imprimerie Chirat SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/imprimerie-chirat.svg"
+  },
+  {
+    "symbol": "MLINA.PA",
+    "name": "Inmolecule Nanotech SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/inmolecule-nanotech-sa.svg"
+  },
+  {
+    "symbol": "MLINM.PA",
+    "name": "Inmark Prime SOCIMI SAU",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLINT.PA",
+    "name": "Iante Investments Socimi SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLIPO.PA",
+    "name": "Iposa Properties SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLIPP.PA",
+    "name": "Immobiliere Parisienne de la Perle et des Pierres Precieuses",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/immparisperle.svg"
+  },
+  {
+    "symbol": "MLIRF.PA",
+    "name": "Innovative-RFK SpA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/innovative-rfk-spa.svg"
+  },
+  {
+    "symbol": "MLISP.PA",
+    "name": "Inmosupa Socimi SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLITN.PA",
+    "name": "Italy Innovazioni S.p.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/italy-innovazioni.svg"
+  },
+  {
+    "symbol": "MLJDL.PA",
+    "name": "Res Gestae Socimi S.A.",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLLAB.PA",
+    "name": "Media Lab SpA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/media-lab.svg"
+  },
+  {
+    "symbol": "MLLCB.PA",
+    "name": "Les Constructeurs du Bois SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/constructeurs-bois.svg"
+  },
+  {
+    "symbol": "MLLOI.PA",
+    "name": "Locasystem International SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/locasystem-intl.svg"
+  },
+  {
+    "symbol": "MLMAQ.PA",
+    "name": "MAQ Administracion Urbanas Socimi SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLMCA.PA",
+    "name": "MACOMPTA.FR S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/macomptafr.svg"
+  },
+  {
+    "symbol": "MLMFI.PA",
+    "name": "Condor Technologies N.V.",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLMGL.PA",
+    "name": "Magillem Design Services SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/magillem-design-services.svg"
+  },
+  {
+    "symbol": "MLMIB.PA",
+    "name": "Metrics in Balance NV",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLMIV.PA",
+    "name": "Meridia RE IV SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLMTP.PA",
+    "name": "Montepino Logistica SOCIMI SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/montepino-logistica-socimi-sa.svg"
+  },
+  {
+    "symbol": "MLMUT.PA",
+    "name": "Mutter Ventures SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mutter-ventures-sa.svg"
+  },
+  {
+    "symbol": "MLNDG.PA",
+    "name": "Global Pielago Socimi SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLNMA.PA",
+    "name": "Nicolas Miguet",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/miguet-et-associes.svg"
+  },
+  {
+    "symbol": "MLNOV.PA",
+    "name": "Novatech Industries SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/novatech-ind.svg"
+  },
+  {
+    "symbol": "MLNOX.PA",
+    "name": "Bio Inox S.A.",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLOCT.PA",
+    "name": "Octopus Biosafety SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/octopus-biosafety.svg"
+  },
+  {
+    "symbol": "MLODT.PA",
+    "name": "ODIOT S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/odiot-sa.svg"
+  },
+  {
+    "symbol": "MLOKP.PA",
+    "name": "OK Properties I SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLONE.PA",
+    "name": "Body One SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/body-one.svg"
+  },
+  {
+    "symbol": "MLONL.PA",
+    "name": "Onlineformapro SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/onlineformapro.svg"
+  },
+  {
+    "symbol": "MLORB.PA",
+    "name": "Orbis Properties SOCIMI SAU",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLORQ.PA",
+    "name": "Orinoquia Real Estate SOCIMI SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/orinoquia-real-estate-socimi-sa.svg"
+  },
+  {
+    "symbol": "MLPAC.PA",
+    "name": "Pacte Novation",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/pacte-novation.svg"
+  },
+  {
+    "symbol": "MLPER.PA",
+    "name": "Perseida Renta Gestion Socimi SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLPHO.PA",
+    "name": "Photonike Capital SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/photonike-capital.svg"
+  },
+  {
+    "symbol": "MLPHW.PA",
+    "name": "Phone Web SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/phone-web.svg"
+  },
+  {
+    "symbol": "MLPLC.PA",
+    "name": "Placoplatre SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/placoplatre.svg"
+  },
+  {
+    "symbol": "MLPRE.PA",
+    "name": "PRELUDE S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/prelude-sa.svg"
+  },
+  {
+    "symbol": "MLPRG.PA",
+    "name": "PREATONI Group",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/preatoni.svg"
+  },
+  {
+    "symbol": "MLPRI.PA",
+    "name": "Societe Nationale de Propriete d'Immeubles",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLPRX.PA",
+    "name": "Parx Materials NV",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/parx-materials-nv.svg"
+  },
+  {
+    "symbol": "MLPVG.PA",
+    "name": "Groupe Plus-Values",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLSAG.PA",
+    "name": "Sagax Real Estate Socimi SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLSCI.PA",
+    "name": "Scientia School SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/scientia-school-sa.svg"
+  },
+  {
+    "symbol": "MLSDN.PA",
+    "name": "La Savonnerie De Nyons SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/savonnerie-nyons.svg"
+  },
+  {
+    "symbol": "MLSEQ.PA",
+    "name": "Sequa Petroleum N.V.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/sequa-petroleum-nv.svg"
+  },
+  {
+    "symbol": "MLSJA.PA",
+    "name": "Saja Real Estate Socimi SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLSML.PA",
+    "name": "Smalto",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/smalto.svg"
+  },
+  {
+    "symbol": "MLSPI.PA",
+    "name": "Student Property Income Socimi SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLSRP.PA",
+    "name": "Speed Rabbit Pizza SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/speed-rabbit-pizza.svg"
+  },
+  {
+    "symbol": "MLSTR.PA",
+    "name": "Streit Mecanique SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/streit-mecanique.svg"
+  },
+  {
+    "symbol": "MLTRO.PA",
+    "name": "Troc de l'Ile SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/troc-ile.svg"
+  },
+  {
+    "symbol": "MLUAV.PA",
+    "name": "Embention Sistemas Inteligentes SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/embention-sistemas-inteligentes-sa.svg"
+  },
+  {
+    "symbol": "MLUMG.PA",
+    "name": "Umalis Group",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/umalis-sa.svg"
+  },
+  {
+    "symbol": "MLURC.PA",
+    "name": "Urbanizadora Constructora Levantina SOCIMI, S.A.",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLVIC.PA",
+    "name": "Vicso Invest SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLVIE.PA",
+    "name": "Integritas Viager SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLVIN.PA",
+    "name": "Fonciere Vindi SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fonciere-vindi.svg"
+  },
+  {
+    "symbol": "MLVRE.PA",
+    "name": "Vandor Real Estate SOCIMI SAU",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLVRF.PA",
+    "name": "VREF Seville Real Estate Holdco SOCIMI SA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "MLWEA.PA",
+    "name": "WEACCESS GROUP SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/weaccess.svg"
+  },
+  {
+    "symbol": "MLWEY.PA",
+    "name": "Weya SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/weya.svg"
+  },
+  {
+    "symbol": "MLWRS.PA",
+    "name": "Wellness Resorts Socimi SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/wellness-resorts-socimi-sa.svg"
+  },
+  {
+    "symbol": "MMB.PA",
+    "name": "Lagardere SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/lagardere-sa.svg"
+  },
+  {
+    "symbol": "MMT.PA",
+    "name": "Metropole Television SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/metropole-tv.svg"
+  },
+  {
+    "symbol": "MRN.PA",
+    "name": "Mersen SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/mersen-ex-carbon-lorraine.svg"
+  },
+  {
+    "symbol": "MTU.PA",
+    "name": "Manitou BF SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/manitou-bf.svg"
+  },
+  {
+    "symbol": "NACON.PA",
+    "name": "Nacon SASU",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/nacon-sa.svg"
+  },
+  {
+    "symbol": "NAE.PA",
+    "name": "North Atlantic Energies",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/esso-thailand-public-company-limited.svg"
+  },
+  {
+    "symbol": "NANO.PA",
+    "name": "Nanobiotix SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/nanobiotix.svg"
+  },
+  {
+    "symbol": "NEX.PA",
+    "name": "Nexans SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/nexans.svg"
+  },
+  {
+    "symbol": "NICBS.PA",
+    "name": "Nicox SA Warrant 2024-20.06.26 on Nicox",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/nicox-sa.svg"
+  },
+  {
+    "symbol": "NK.PA",
+    "name": "Imerys SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/imerys.svg"
+  },
+  {
+    "symbol": "NR21.PA",
+    "name": "NR21 SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/nr-21.svg"
+  },
+  {
+    "symbol": "NRG.PA",
+    "name": "NRJ Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/nrj.svg"
+  },
+  {
+    "symbol": "NRO.PA",
+    "name": "Neurones SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/neurones.svg"
+  },
+  {
+    "symbol": "NXI.PA",
+    "name": "Nexity SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/nexity.svg"
+  },
+  {
+    "symbol": "ODET.PA",
+    "name": "Compagnie de l'Odet SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/odet-compagnie-de-l.svg"
+  },
+  {
+    "symbol": "ONEBS.PA",
+    "name": "One Experience Warrant 2025-04.09.27 on One Experience",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "OPM.PA",
+    "name": "OPmobility",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/plastic-omnium.svg"
+  },
+  {
+    "symbol": "OR.PA",
+    "name": "L'Oreal S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/l-oreal.svg"
+  },
+  {
+    "symbol": "ORA.PA",
+    "name": "Orange SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/orange.svg"
+  },
+  {
+    "symbol": "OREGE.PA",
+    "name": "Orege SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/orege-eur025.svg"
+  },
+  {
+    "symbol": "ORIA.PA",
+    "name": "Fiducial Real Estate SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fidreale.svg"
+  },
+  {
+    "symbol": "OSE.PA",
+    "name": "OSE Immunotherapeutics SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ose-immunotherapeutics.svg"
+  },
+  {
+    "symbol": "OVH.PA",
+    "name": "OVH Groupe SAS",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ovh-groupe.svg"
+  },
+  {
+    "symbol": "PAR.PA",
+    "name": "Paref SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/paref.svg"
+  },
+  {
+    "symbol": "PARP.PA",
+    "name": "Groupe Partouche SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/groupe-partouche-sa-regr.svg"
+  },
+  {
+    "symbol": "PARRO.PA",
+    "name": "Parrot SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/parrot.svg"
+  },
+  {
+    "symbol": "PAT.PA",
+    "name": "Patrimoine et Commerce",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/patrimoine-et-commerce-regr.svg"
+  },
+  {
+    "symbol": "PERR.PA",
+    "name": "Gerard Perrier Industrie SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/gerard-perrier-electric.svg"
+  },
+  {
+    "symbol": "PEUG.PA",
+    "name": "Peugeot Invest SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/peugeot-invest.svg"
+  },
+  {
+    "symbol": "PIG.PA",
+    "name": "Haulotte Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/haulotte.svg"
+  },
+  {
+    "symbol": "PLNW.PA",
+    "name": "Planisware Societe anonyme",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/planisware.svg"
+  },
+  {
+    "symbol": "PLX.PA",
+    "name": "PLUXEE N.V.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/pluxee-n-v.svg"
+  },
+  {
+    "symbol": "POMRY.PA",
+    "name": "Maison Pommery & Associes",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vranken-pommery.svg"
+  },
+  {
+    "symbol": "POXEL.PA",
+    "name": "Poxel SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/poxel-sa.svg"
+  },
+  {
+    "symbol": "PRC.PA",
+    "name": "Artmarket.com SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/artmarket-com.svg"
+  },
+  {
+    "symbol": "PROAC.PA",
+    "name": "Proactis SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/proactis-sa.svg"
+  },
+  {
+    "symbol": "PUB.PA",
+    "name": "Publicis Groupe SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/publicis-groupe-sa.svg"
+  },
+  {
+    "symbol": "PVL.PA",
+    "name": "Plastiques du Val de Loire SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/plastivaloire.svg"
+  },
+  {
+    "symbol": "QDT.PA",
+    "name": "Quadient SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/quadient-sa.svg"
+  },
+  {
+    "symbol": "RBO.PA",
+    "name": "Roche Bobois SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/roche-bobois.svg"
+  },
+  {
+    "symbol": "RBT.PA",
+    "name": "Robertet SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/robertet-ci.svg"
+  },
+  {
+    "symbol": "RCO.PA",
+    "name": "Remy Cointreau SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/remy-cointreau.svg"
+  },
+  {
+    "symbol": "RF.PA",
+    "name": "Eurazeo SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/eurazeo-se.svg"
+  },
+  {
+    "symbol": "RI.PA",
+    "name": "Pernod Ricard SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/pernod.svg"
+  },
+  {
+    "symbol": "RMS.PA",
+    "name": "Hermes International S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/hermes.svg"
+  },
+  {
+    "symbol": "RUI.PA",
+    "name": "Rubis SCA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/rubis.svg"
+  },
+  {
+    "symbol": "RXL.PA",
+    "name": "Rexel SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/rexel.svg"
+  },
+  {
+    "symbol": "S30.PA",
+    "name": "Solutions 30 SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/solutions-30-se.svg"
+  },
+  {
+    "symbol": "SABE.PA",
+    "name": "Saint Jean Groupe SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/sabeton.svg"
+  },
+  {
+    "symbol": "SAF.PA",
+    "name": "Safran SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/safran.svg"
+  },
+  {
+    "symbol": "SAMS.PA",
+    "name": "Groupe Samse",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/samse-sa.svg"
+  },
+  {
+    "symbol": "SAN.PA",
+    "name": "Sanofi SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/sanofi.svg"
+  },
+  {
+    "symbol": "SAVE.PA",
+    "name": "Savencia SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/savencia-sa.svg"
+  },
+  {
+    "symbol": "SBT.PA",
+    "name": "Oeneo SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/oeneo.svg"
+  },
+  {
+    "symbol": "SCHP.PA",
+    "name": "Seche Environnement SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/seche-environnement.svg"
+  },
+  {
+    "symbol": "SCR.PA",
+    "name": "SCOR SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/scor-se.svg"
+  },
+  {
+    "symbol": "SDG.PA",
+    "name": "Synergie SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/synergie-sa.svg"
+  },
+  {
+    "symbol": "SEFER.PA",
+    "name": "SergeFerrari Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/serge-ferrari.svg"
+  },
+  {
+    "symbol": "SELER.PA",
+    "name": "Selectirente SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/selectirente.svg"
+  },
+  {
+    "symbol": "SESG.PA",
+    "name": "SES SA FDR (Class A)",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ses.svg"
+  },
+  {
+    "symbol": "SFCA.PA",
+    "name": "Societe Francaise de Casinos SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/soc-franc-casinos.svg"
+  },
+  {
+    "symbol": "SFPI.PA",
+    "name": "Groupe SFPI SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/groupe-sfpi.svg"
+  },
+  {
+    "symbol": "SGO.PA",
+    "name": "Compagnie de Saint-Gobain SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/saint-gobain.svg"
+  },
+  {
+    "symbol": "SGONV.PA",
+    "name": "Compagnie de Saint-Gobain SA TEMP",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/saint-gobain.svg"
+  },
+  {
+    "symbol": "SIGBS.PA",
+    "name": "Gensight Biologics SA Warrant 2025-03.07.30 on GENSIGHT BIOLOGICS",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/gensight-biologics.svg"
+  },
+  {
+    "symbol": "SIGHT.PA",
+    "name": "Gensight Biologics SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/gensight-biologics.svg"
+  },
+  {
+    "symbol": "SK.PA",
+    "name": "SEB SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/s-e-b.svg"
+  },
+  {
+    "symbol": "SMCP.PA",
+    "name": "SMCP SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/smcp.svg"
+  },
+  {
+    "symbol": "SMLBS.PA",
+    "name": "Smalto Warrant 2008-2.7.18 Ext to 29.06.28 on shs SMALTO",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/smalto.svg"
+  },
+  {
+    "symbol": "SOI.PA",
+    "name": "Soitec SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/soitec.svg"
+  },
+  {
+    "symbol": "SOP.PA",
+    "name": "Sopra Steria Group SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/sopra-steria-group.svg"
+  },
+  {
+    "symbol": "SPEL.PA",
+    "name": "Fonciere Volta SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/fonciere-volta.svg"
+  },
+  {
+    "symbol": "SPIE.PA",
+    "name": "SPIE SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/spie.svg"
+  },
+  {
+    "symbol": "SRP.PA",
+    "name": "SRP Groupe SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/showroomprive.svg"
+  },
+  {
+    "symbol": "STF.PA",
+    "name": "STEF",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/stef.svg"
+  },
+  {
+    "symbol": "STLAP.PA",
+    "name": "Stellantis N.V.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/stellantis.svg"
+  },
+  {
+    "symbol": "STMPA.PA",
+    "name": "STMicroelectronics NV",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/stmicroelectronics.svg"
+  },
+  {
+    "symbol": "SU.PA",
+    "name": "Schneider Electric SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/schneider.svg"
+  },
+  {
+    "symbol": "SW.PA",
+    "name": "Sodexo SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/sodexo.svg"
+  },
+  {
+    "symbol": "SWP.PA",
+    "name": "Sword Group SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/sword.svg"
+  },
+  {
+    "symbol": "TBSO.PA",
+    "name": "TBSO",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/tayninh.svg"
+  },
+  {
+    "symbol": "TDBS.PA",
+    "name": "Tonner Drones Warrant 2024-02.08.27 on Tonner Drones",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-drone.svg"
+  },
+  {
+    "symbol": "TDBS2.PA",
+    "name": "Tonner Drones Warrant 2025-29.12.28 on Tonner Drones",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "TDBS3.PA",
+    "name": "Tonner Drones Warrant 2025-29.12.28 on Tonner Drones",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-drone.svg"
+  },
+  {
+    "symbol": "TE.PA",
+    "name": "Technip Energies NV",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/technip-energies-n-v.svg"
+  },
+  {
+    "symbol": "TEP.PA",
+    "name": "Teleperformance SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/teleperformance.svg"
+  },
+  {
+    "symbol": "TERBS.PA",
+    "name": "Teract Warrant 2020-open on Teract",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/teract-sa.svg"
+  },
+  {
+    "symbol": "TFF.PA",
+    "name": "TFF Group",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/tff.svg"
+  },
+  {
+    "symbol": "TFI.PA",
+    "name": "Television Francaise 1 SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/tf1.svg"
+  },
+  {
+    "symbol": "TFINV.PA",
+    "name": "Television Francaise 1 SA TF1 TEMP",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/tf1.svg"
+  },
+  {
+    "symbol": "THEP.PA",
+    "name": "Thermador Groupe",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/thermador-groupe.svg"
+  },
+  {
+    "symbol": "TKO.PA",
+    "name": "Tikehau Capital SCA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/tikehau-capital.svg"
+  },
+  {
+    "symbol": "TNG.PA",
+    "name": "Transgene SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/transgene.svg"
+  },
+  {
+    "symbol": "TRACT.PA",
+    "name": "Teract",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/teract-sa.svg"
+  },
+  {
+    "symbol": "TRI.PA",
+    "name": "Trigano SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/trigano.svg"
+  },
+  {
+    "symbol": "TTE.PA",
+    "name": "TotalEnergies SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/total.svg"
+  },
+  {
+    "symbol": "TVRB.PA",
+    "name": "Televerbier SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/televerbier.svg"
+  },
+  {
+    "symbol": "UB93V.PA",
+    "name": "Vontobel Financial Products GmbH Underlying Tracker 2021-open end auf SolSpacTechNTR",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/sstx-pi-openv.svg"
+  },
+  {
+    "symbol": "UBI.PA",
+    "name": "UBISOFT Entertainment",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ubisoft.svg"
+  },
+  {
+    "symbol": "US88V.PA",
+    "name": "Vontobel Financial Products GmbH Underlying Tracker 2021-open end on BTC/USD",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/btusd-pi-openv.svg"
+  },
+  {
+    "symbol": "US89V.PA",
+    "name": "Vontobel Financial Products GmbH Underlying Tracker 2021-open end on ETH/USD",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/xtusd-pi-openv.svg"
+  },
+  {
+    "symbol": "VAC.PA",
+    "name": "Pierre et Vacances SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/pierre-vacances.svg"
+  },
+  {
+    "symbol": "VACBS.PA",
+    "name": "Pierre et Vacances SA Warrant 2022-15.09.27 on Pierre et Vacances",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/pierre-vacances.svg"
+  },
+  {
+    "symbol": "VACBT.PA",
+    "name": "Pierre et Vacances Warrant 2022-15.09.27 on Pierre et Vacances",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/pierre-vacances.svg"
+  },
+  {
+    "symbol": "VANTI.PA",
+    "name": "Vantiva SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/technicolor-bsa-2024.svg"
+  },
+  {
+    "symbol": "VAZBS.PA",
+    "name": "Vaziva Warrant 2025-17.12.27 on Vaziva",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vaziva-sa.svg"
+  },
+  {
+    "symbol": "VCT.PA",
+    "name": "Vicat SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vicat.svg"
+  },
+  {
+    "symbol": "VETO.PA",
+    "name": "Vetoquinol SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vetoquinol.svg"
+  },
+  {
+    "symbol": "VIE.PA",
+    "name": "Veolia Environnement SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/veolia-environnement.svg"
+  },
+  {
+    "symbol": "VIL.PA",
+    "name": "Viel & Cie SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/viel-et-compagnie.svg"
+  },
+  {
+    "symbol": "VIRI.PA",
+    "name": "Viridien",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/cgg.svg"
+  },
+  {
+    "symbol": "VIRP.PA",
+    "name": "Virbac SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/virbac.svg"
+  },
+  {
+    "symbol": "VIV.PA",
+    "name": "Vivendi SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vivendi.svg"
+  },
+  {
+    "symbol": "VK.PA",
+    "name": "Vallourec SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vallourec.svg"
+  },
+  {
+    "symbol": "VKBS.PA",
+    "name": "Vallourec SA Warrant 2021-30.06.26 on Vallourec",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vallourec.svg"
+  },
+  {
+    "symbol": "VLA.PA",
+    "name": "Valneva SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/valneva-se.svg"
+  },
+  {
+    "symbol": "VLTSA.PA",
+    "name": "Voltalia SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/voltalia.svg"
+  },
+  {
+    "symbol": "VMX.PA",
+    "name": "Verimatrix SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/verimatrix.svg"
+  },
+  {
+    "symbol": "VRLA.PA",
+    "name": "Verallia SAS",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/verallia.svg"
+  },
+  {
+    "symbol": "VTR.PA",
+    "name": "Vitura SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/vitura.svg"
+  },
+  {
+    "symbol": "VU.PA",
+    "name": "Vusion",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/ses-imagotag.svg"
+  },
+  {
+    "symbol": "WAGA.PA",
+    "name": "Waga Energy SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/waga-energy.svg"
+  },
+  {
+    "symbol": "WAVE.PA",
+    "name": "Wavestone SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/wavestone.svg"
+  },
+  {
+    "symbol": "WLN.PA",
+    "name": "Worldline SA",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/worldline.svg"
+  },
+  {
+    "symbol": "WLNDS.PA",
+    "name": "Worldline SA Rights 2026-27.03.2026 For Shares",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "XFAB.PA",
+    "name": "X-FAB Silicon Foundries SE",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/x-fab-silicon-foundries-se.svg"
+  },
+  {
+    "symbol": "XQ48V.PA",
+    "name": "Vontobel Financial Products GmbH Underlying Tracker 2021-open end auf Carbon dioxide EUA",
+    "market": "Euronext Paris"
+  },
+  {
+    "symbol": "YOUNI.PA",
+    "name": "Younited Financial S.A.",
+    "market": "Euronext Paris",
+    "image": "https://s3-symbol-logo.tradingview.com/younited-financial.svg"
+  }
+]

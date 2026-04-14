@@ -1,0 +1,790 @@
+[
+  {
+    "symbol": "AAB",
+    "name": "Aalborg Boldspilklub A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/aalborg-boldspilklub-a-s.svg"
+  },
+  {
+    "symbol": "BO",
+    "name": "Bang & Olufsen A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/bang-and-olufsen-a-s.svg"
+  },
+  {
+    "symbol": "CARL_A",
+    "name": "Carlsberg AS Class A",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/carlsberg-b-a-s.svg"
+  },
+  {
+    "symbol": "CARL_B",
+    "name": "Carlsberg AS Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/carlsberg-b-a-s.svg"
+  },
+  {
+    "symbol": "CBRAIN",
+    "name": "cBrain A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/cbrain-a-s.svg"
+  },
+  {
+    "symbol": "CEMAT",
+    "name": "Cemat A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/cemat-a-s.svg"
+  },
+  {
+    "symbol": "CHEMM",
+    "name": "ChemoMetec A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/chemometec-a-s.svg"
+  },
+  {
+    "symbol": "COLO_B",
+    "name": "Coloplast A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/coloplast-b-a-s.svg"
+  },
+  {
+    "symbol": "COLUM",
+    "name": "Columbus A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/columbus-a-s.svg"
+  },
+  {
+    "symbol": "CPHCAP_PREF32",
+    "name": "Copenhagen Capital A/S Pref Bearer and/or registered Shs A",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/copenhagen-capital-a-s-stam.svg"
+  },
+  {
+    "symbol": "CPHCAP_ST",
+    "name": "Copenhagen Capital A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/copenhagen-capital-a-s-stam.svg"
+  },
+  {
+    "symbol": "DAB",
+    "name": "Danske Andelskassers Bank A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/danske-andelskassers-bank-a-s.svg"
+  },
+  {
+    "symbol": "DAC",
+    "name": "Danish Aerospace Company AS",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/danish-aerospace-company-a-s.svg"
+  },
+  {
+    "symbol": "DAC_T",
+    "name": "DANISH AEROSPACE COMPANY A S",
+    "market": "OMXCOP"
+  },
+  {
+    "symbol": "DANSKE",
+    "name": "Danske Bank A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/danske-bank-a-s.svg"
+  },
+  {
+    "symbol": "DANT",
+    "name": "Dantax A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/dantax-a-s.svg"
+  },
+  {
+    "symbol": "DATA",
+    "name": "Dataproces Group A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/dataproces-a-s.svg"
+  },
+  {
+    "symbol": "DEMANT",
+    "name": "Demant A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/demant-a-s.svg"
+  },
+  {
+    "symbol": "DFDS",
+    "name": "DFDS A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/dfds-a-s.svg"
+  },
+  {
+    "symbol": "DJUR",
+    "name": "Djurslands Bank A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/djurslands-bank-a-s.svg"
+  },
+  {
+    "symbol": "DNORD",
+    "name": "Dampskibsselskabet NORDEN A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/d-s-norden.svg"
+  },
+  {
+    "symbol": "DONKEY",
+    "name": "DonkeyRepublic Holding A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/donkeyrepublic-a-s.svg"
+  },
+  {
+    "symbol": "DSV",
+    "name": "DSV A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/dsv-a-s.svg"
+  },
+  {
+    "symbol": "EGNETY",
+    "name": "EgnsINVEST EjendommeTyskland A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/egnsinvest-ejd-tyskland-a-s.svg"
+  },
+  {
+    "symbol": "EMBLA",
+    "name": "Embla Medical hf",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/ossur-hf.svg"
+  },
+  {
+    "symbol": "ERRIA",
+    "name": "Erria A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/erria-a-s.svg"
+  },
+  {
+    "symbol": "ESG",
+    "name": "Ennogie Solar Group A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/ennogie-solar-a-s.svg"
+  },
+  {
+    "symbol": "FASTPC",
+    "name": "FastPassCorp A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/fastpasscorp-a-s.svg"
+  },
+  {
+    "symbol": "FED",
+    "name": "Fast Ejendom Danmark A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/fast-ejendom-danmark-a-s.svg"
+  },
+  {
+    "symbol": "FFARMS",
+    "name": "FirstFarms A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/firstfarms-a-s.svg"
+  },
+  {
+    "symbol": "FLS",
+    "name": "FLSmidth & Co. A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/flsmidth-and-co-a-s.svg"
+  },
+  {
+    "symbol": "FLUG_B",
+    "name": "Flugger Group A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/flugger-a-s-b.svg"
+  },
+  {
+    "symbol": "FOBANK",
+    "name": "Foroya Banki",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/banknordik-p-f.svg"
+  },
+  {
+    "symbol": "FOM",
+    "name": "Fom Technologies A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/fom-technologies-a-s.svg"
+  },
+  {
+    "symbol": "FYNBK",
+    "name": "Fynske Bank A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/fynske-bank-a-s.svg"
+  },
+  {
+    "symbol": "GABR",
+    "name": "Gabriel Holding A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/gabriel-a-s.svg"
+  },
+  {
+    "symbol": "GERHSP",
+    "name": "German High Street Properties AS Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/german-high-street-propertie.svg"
+  },
+  {
+    "symbol": "GJ",
+    "name": "Glunz & Jensen Holding A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/glunz-and-jensen-a-s.svg"
+  },
+  {
+    "symbol": "GMAB",
+    "name": "Genmab A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/genmab-a-s.svg"
+  },
+  {
+    "symbol": "GN",
+    "name": "GN Store Nord A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/gn-store-nord-a-s.svg"
+  },
+  {
+    "symbol": "GREENM",
+    "name": "GreenMobility A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/greenmobility-a-s.svg"
+  },
+  {
+    "symbol": "GRLA",
+    "name": "GronlandsBANKEN A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/gronlandsbanken-a-s.svg"
+  },
+  {
+    "symbol": "GUBRA",
+    "name": "Gubra A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/gubra-a-s.svg"
+  },
+  {
+    "symbol": "GYLD_A",
+    "name": "Gyldendal A/S Class A",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/gyldendal-b-a-s.svg"
+  },
+  {
+    "symbol": "GYLD_B",
+    "name": "Gyldendal A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/gyldendal-b-a-s.svg"
+  },
+  {
+    "symbol": "HARB_B",
+    "name": "Harboes Bryggeri A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/harboes-bryggeri-b-a-s.svg"
+  },
+  {
+    "symbol": "HH",
+    "name": "H+H International A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/h-h-international-a-s.svg"
+  },
+  {
+    "symbol": "HLUN_A",
+    "name": "H. Lundbeck A/S Class A",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/h-lundbeck-a-s-b.svg"
+  },
+  {
+    "symbol": "HLUN_B",
+    "name": "H. Lundbeck A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/h-lundbeck-a-s-b.svg"
+  },
+  {
+    "symbol": "HOVE",
+    "name": "Hove A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/hove-a-s.svg"
+  },
+  {
+    "symbol": "HUSCO",
+    "name": "HusCompagniet A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/huscompagniet-a-s.svg"
+  },
+  {
+    "symbol": "HVID",
+    "name": "Hvidbjerg Bank A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/hvidbjerg-bank-a-s.svg"
+  },
+  {
+    "symbol": "IMPERO",
+    "name": "Impero A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/impero-a-s.svg"
+  },
+  {
+    "symbol": "ISS",
+    "name": "ISS A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/iss.svg"
+  },
+  {
+    "symbol": "JDAN",
+    "name": "Jeudan A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/jeudan-a-s.svg"
+  },
+  {
+    "symbol": "JYSK",
+    "name": "Jyske Bank A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/jyske-bank-a-s.svg"
+  },
+  {
+    "symbol": "KBHL",
+    "name": "Kobenhavns Lufthavne A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/kobenhavns-lufthavne-a-s.svg"
+  },
+  {
+    "symbol": "KLEE_B",
+    "name": "Brd. Klee A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/brd-klee-b-a-s.svg"
+  },
+  {
+    "symbol": "KONSOL",
+    "name": "Konsolidator A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/konsolidator-a-s.svg"
+  },
+  {
+    "symbol": "KRE",
+    "name": "Kreditbanken A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/kreditbanken-a-s.svg"
+  },
+  {
+    "symbol": "LASP",
+    "name": "Laan & Spar Bank A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/lan-og-spar-bank-a-s.svg"
+  },
+  {
+    "symbol": "LEDIBOND",
+    "name": "LED iBond International A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/led-ibond-international-a-s.svg"
+  },
+  {
+    "symbol": "LOLB",
+    "name": "Lollands Bank A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/lollands-bank-a-s.svg"
+  },
+  {
+    "symbol": "LUXOR_B",
+    "name": "Luxor A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/luxor-b-a-s.svg"
+  },
+  {
+    "symbol": "MAERSK_A",
+    "name": "A.P. Moller - Maersk A/S Class A",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/a-p-moller-maersk.svg"
+  },
+  {
+    "symbol": "MAERSK_B",
+    "name": "A.P. Moller - Maersk A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/a-p-moller-maersk.svg"
+  },
+  {
+    "symbol": "MATAS",
+    "name": "Matas A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/matas-a-s.svg"
+  },
+  {
+    "symbol": "MDUNDO",
+    "name": "Mdundo.com A / S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/mdundocom-a-s.svg"
+  },
+  {
+    "symbol": "MFLNASNNDK2",
+    "name": "J.P. Morgan SE Mini Future 2025-open end on NASDAQ 100",
+    "market": "OMXCOP"
+  },
+  {
+    "symbol": "MFSNASNNDK2",
+    "name": "J.P. Morgan SE Mini Future 2025-open end on NASDAQ 100",
+    "market": "OMXCOP"
+  },
+  {
+    "symbol": "MNBA",
+    "name": "Mons Bank A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/mons-bank-a-s.svg"
+  },
+  {
+    "symbol": "MONSO",
+    "name": "Monsenso A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/monsenso-a-s.svg"
+  },
+  {
+    "symbol": "MOVINN",
+    "name": "Movinn A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/movinn-a-s.svg"
+  },
+  {
+    "symbol": "MTHH",
+    "name": "MT Hojgaard Holding A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/mt-hojgaard-a-s.svg"
+  },
+  {
+    "symbol": "NDA_DK",
+    "name": "Nordea Bank Abp",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/nordea-bank-abp.svg"
+  },
+  {
+    "symbol": "NETC",
+    "name": "Netcompany Group A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/netcompany-a-s.svg"
+  },
+  {
+    "symbol": "NEWCAP",
+    "name": "NewCap Holding A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/newcap-a-s.svg"
+  },
+  {
+    "symbol": "NEXCOM",
+    "name": "Nexcom A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/nexcom-a-s.svg"
+  },
+  {
+    "symbol": "NKT",
+    "name": "NKT A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/nkt-a-s.svg"
+  },
+  {
+    "symbol": "NLFSK",
+    "name": "Nilfisk Holding A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/nilfisk-a-s.svg"
+  },
+  {
+    "symbol": "NNIT",
+    "name": "NNIT A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/nnit-a-s.svg"
+  },
+  {
+    "symbol": "NORTHM",
+    "name": "North Media A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/north-media-a-s.svg"
+  },
+  {
+    "symbol": "NOVO_B",
+    "name": "Novo Nordisk A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/novo-nordisk.svg"
+  },
+  {
+    "symbol": "NSIS_B",
+    "name": "Novonesis A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/novozymes-b-a-s.svg"
+  },
+  {
+    "symbol": "NTG",
+    "name": "NTG Nordic Transport Group A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/ntg-nordic-transport-a-s.svg"
+  },
+  {
+    "symbol": "OKEAC",
+    "name": "Ostasiatiske Kompagni A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/eac-invest-a-s.svg"
+  },
+  {
+    "symbol": "ORSTED",
+    "name": "Orsted",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/orsted.svg"
+  },
+  {
+    "symbol": "PAAL_B",
+    "name": "Per Aarsleff Holding A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/per-aarsleff-a-s-b.svg"
+  },
+  {
+    "symbol": "PARKEN",
+    "name": "PARKEN Sport & Entertainment A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/parken-sport-and-entertainment-a-s.svg"
+  },
+  {
+    "symbol": "PARKST_A",
+    "name": "Park Street A/S Class A",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/park-street-a-s-a.svg"
+  },
+  {
+    "symbol": "PEG",
+    "name": "Pharma Equity Group A/S Class A",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/blue-vision-a-s-a.svg"
+  },
+  {
+    "symbol": "PFINV",
+    "name": "Papirfabrikken Invest A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/silkeborg-if-invest-a-s.svg"
+  },
+  {
+    "symbol": "PNDORA",
+    "name": "Pandora A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/pandora-a-s.svg"
+  },
+  {
+    "symbol": "PRIMOF",
+    "name": "Prime Office A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/prime-office-a-s.svg"
+  },
+  {
+    "symbol": "QINTER",
+    "name": "Q-Interline A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/q-interline-a-s.svg"
+  },
+  {
+    "symbol": "RBLN_B",
+    "name": "Roblon A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/roblon-b-a-s.svg"
+  },
+  {
+    "symbol": "RBREW",
+    "name": "Royal Unibrew A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/royal-unibrew-a-s.svg"
+  },
+  {
+    "symbol": "RIAS_B",
+    "name": "RIAS A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/rias-b-a-s.svg"
+  },
+  {
+    "symbol": "RILBA",
+    "name": "Ringkjobing Landbobank A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/ringkjobing-landbobank-a-s.svg"
+  },
+  {
+    "symbol": "ROCK_A",
+    "name": "ROCKWOOL A/S Class A",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/rockwool-a-s-ser-b.svg"
+  },
+  {
+    "symbol": "ROCK_B",
+    "name": "ROCKWOOL A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/rockwool-a-s-ser-b.svg"
+  },
+  {
+    "symbol": "ROV",
+    "name": "Rovsing A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/rovsing-a-s.svg"
+  },
+  {
+    "symbol": "RTX",
+    "name": "RTX A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/rtx-a-s.svg"
+  },
+  {
+    "symbol": "SAMPO_DKK",
+    "name": "Sampo Oyj",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/sampo-plc-a.svg"
+  },
+  {
+    "symbol": "SCHO",
+    "name": "Schouw & Co",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/schouw-and-co-a-s.svg"
+  },
+  {
+    "symbol": "SHAPE",
+    "name": "Shape Robotics AS",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/shape-robotics-a-s.svg"
+  },
+  {
+    "symbol": "SIG",
+    "name": "Scandinavian Investment Group A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/scandinavian-investment-a-s.svg"
+  },
+  {
+    "symbol": "SKAKO",
+    "name": "SKAKO A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/skako-a-s.svg"
+  },
+  {
+    "symbol": "SKJE",
+    "name": "Skjern Bank A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/skjern-bank-a-s.svg"
+  },
+  {
+    "symbol": "SMSMED",
+    "name": "Scandinavian Medical Solutions A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/scandinavian-medical-solutions-a-s.svg"
+  },
+  {
+    "symbol": "SOLAR_B",
+    "name": "Solar A/S Class B",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/solar-b-a-s.svg"
+  },
+  {
+    "symbol": "SPG",
+    "name": "SP Group A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/sp-a-s.svg"
+  },
+  {
+    "symbol": "SPKSJF",
+    "name": "Sparekassen Sjaelland-Fyn A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/sparekassen-sjaelland-fyn-a-s.svg"
+  },
+  {
+    "symbol": "STENO",
+    "name": "StenoCare A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/stenocare-a-s.svg"
+  },
+  {
+    "symbol": "STG",
+    "name": "Scandinavian Tobacco Group A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/scandinavian-tobacco-a-s.svg"
+  },
+  {
+    "symbol": "STRAP",
+    "name": "Strategic Partners A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/orphazyme-a-s-orphazyme-ord-shs.svg"
+  },
+  {
+    "symbol": "STRINV",
+    "name": "Strategic Investments A/S Class A",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/strategic-investments-a-s.svg"
+  },
+  {
+    "symbol": "SWISS",
+    "name": "Swiss Properties Invest A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/swiss-properties-invest-a-s.svg"
+  },
+  {
+    "symbol": "TCM",
+    "name": "TCM Group AS",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/tcm-a-s.svg"
+  },
+  {
+    "symbol": "TGAMES",
+    "name": "TROPHY GAMES Development A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/trophy-games-development-a-s.svg"
+  },
+  {
+    "symbol": "TIV",
+    "name": "Tivoli A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/tivoli-a-s.svg"
+  },
+  {
+    "symbol": "TRACKER_CO2_NORDEAD",
+    "name": "Nordea Bank Abp Exchange Traded Product 2024-open end on 1xBull SPARK/HANETF Open",
+    "market": "OMXCOP"
+  },
+  {
+    "symbol": "TRIFOR",
+    "name": "Trifork Group AG",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/trifork-ag.svg"
+  },
+  {
+    "symbol": "TRMD_A",
+    "name": "TORM PLC Class A",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/torm.svg"
+  },
+  {
+    "symbol": "TRYG",
+    "name": "Tryg A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/tryg-a-s.svg"
+  },
+  {
+    "symbol": "UIE",
+    "name": "UIE PLC",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/uie-plc.svg"
+  },
+  {
+    "symbol": "UNLGRP",
+    "name": "Unlimit Group A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/conferize-a-s.svg"
+  },
+  {
+    "symbol": "VIRO",
+    "name": "ViroGates A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/virogates-a-s.svg"
+  },
+  {
+    "symbol": "VWS",
+    "name": "Vestas Wind Systems A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/vestas.svg"
+  },
+  {
+    "symbol": "WIRTEK",
+    "name": "Wirtek A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/wirtek-a-s.svg"
+  },
+  {
+    "symbol": "WMA",
+    "name": "WindowMaster International A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/windowmaster-international-a-s.svg"
+  },
+  {
+    "symbol": "ZEAL",
+    "name": "Zealand Pharma A/S",
+    "market": "OMXCOP",
+    "image": "https://s3-symbol-logo.tradingview.com/zealand-pharma-a-s.svg"
+  }
+]

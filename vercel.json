@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "pnpm --dir examples/stocks/src install",
-  "buildCommand": "pnpm --dir examples/stocks/src run build",
-  "outputDirectory": "examples/stocks/src/artifacts/signal-markets/dist/public",
+  "buildCommand": "pnpm --dir examples/stocks/src run build && node ./copy-public.mjs",
+  "outputDirectory": "public",
   "functions": {
     "api/index.js": {
       "includeFiles": "examples/stocks/src/artifacts/**",

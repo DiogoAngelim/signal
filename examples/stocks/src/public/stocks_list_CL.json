@@ -1,0 +1,2768 @@
+[
+  {
+    "symbol": "AAPL",
+    "name": "Apple Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/apple.svg"
+  },
+  {
+    "symbol": "ABBV",
+    "name": "AbbVie, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/abbvie.svg"
+  },
+  {
+    "symbol": "ABT",
+    "name": "Abbott Laboratories",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/abbott.svg"
+  },
+  {
+    "symbol": "ACN",
+    "name": "Accenture Plc Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/accenture.svg"
+  },
+  {
+    "symbol": "ADBE",
+    "name": "Adobe Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/adobe.svg"
+  },
+  {
+    "symbol": "ADP",
+    "name": "Automatic Data Processing, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/automatic-data-processing.svg"
+  },
+  {
+    "symbol": "AIG",
+    "name": "American International Group, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/american-international.svg"
+  },
+  {
+    "symbol": "AMD",
+    "name": "Advanced Micro Devices, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/advanced-micro-devices.svg"
+  },
+  {
+    "symbol": "AMGN",
+    "name": "Amgen Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/amgen.svg"
+  },
+  {
+    "symbol": "AMZN",
+    "name": "Amazon.com, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/amazon.svg"
+  },
+  {
+    "symbol": "AVGO",
+    "name": "Broadcom Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/broadcom.svg"
+  },
+  {
+    "symbol": "AXP",
+    "name": "American Express Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/american-express.svg"
+  },
+  {
+    "symbol": "BA",
+    "name": "Boeing Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/boeing.svg"
+  },
+  {
+    "symbol": "BAC",
+    "name": "Bank of America Corp",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-of-america.svg"
+  },
+  {
+    "symbol": "BACL",
+    "name": "Boeing Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/boeing.svg"
+  },
+  {
+    "symbol": "BCI",
+    "name": "Banco de Credito e Inversiones",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/bco-credito-invers.svg"
+  },
+  {
+    "symbol": "BIIB",
+    "name": "Biogen Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/biogen.svg"
+  },
+  {
+    "symbol": "BINT",
+    "name": "Banco Internacional",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/bco-internacional.svg"
+  },
+  {
+    "symbol": "BKNG",
+    "name": "Booking Holdings Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/booking.svg"
+  },
+  {
+    "symbol": "BLX",
+    "name": "Banco Latinoamericano de Comercio Exterior, S.A. Class E",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-latinoamericano-de-comercio-exterior-sa.svg"
+  },
+  {
+    "symbol": "BTU",
+    "name": "Peabody Energy Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/peabody-energy.svg"
+  },
+  {
+    "symbol": "C",
+    "name": "Citigroup Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/citigroup.svg"
+  },
+  {
+    "symbol": "CALCHB_OSA",
+    "name": "PAMPA CALICHERA SOCIEDAD DE INVERSI",
+    "market": "BCS"
+  },
+  {
+    "symbol": "CALICHERAB",
+    "name": "Sociedad de Inversiones Pampa Calichera S.A. Class B",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/pampa-calichera-sa.svg"
+  },
+  {
+    "symbol": "CAMANCHACA",
+    "name": "Compania Pesquera Camanchaca S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/compania-pesquera.svg"
+  },
+  {
+    "symbol": "CAMARONEX",
+    "name": "Pampa Camarones SpA Class B",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/pampa-camarones-spa-class-b.svg"
+  },
+  {
+    "symbol": "CAMPOS",
+    "name": "Sociedad de Inversiones Campos Chilenos S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inv-campos-chile.svg"
+  },
+  {
+    "symbol": "CANALISTAS",
+    "name": "Sociedad de Canalistas La Foresta de Apoquindo SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "CAP",
+    "name": "CAP S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cap-sa.svg"
+  },
+  {
+    "symbol": "CAROZZI",
+    "name": "Carozzi S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/carozzi-sa.svg"
+  },
+  {
+    "symbol": "CASABLANCA",
+    "name": "Energia de Casablanca S.A.",
+    "market": "BCS"
+  },
+  {
+    "symbol": "CAT",
+    "name": "Caterpillar Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/caterpillar.svg"
+  },
+  {
+    "symbol": "CATCL",
+    "name": "Caterpillar Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/caterpillar.svg"
+  },
+  {
+    "symbol": "CAVCL",
+    "name": "Camrova Resources Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/camrova-resources.svg"
+  },
+  {
+    "symbol": "CAVUSD",
+    "name": "Camrova Resources Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/camrova-resources.svg"
+  },
+  {
+    "symbol": "CCL",
+    "name": "Citigroup Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/citigroup.svg"
+  },
+  {
+    "symbol": "CCU",
+    "name": "Compania Cervecerias Unidas S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/compania-cervecerias-unidas.svg"
+  },
+  {
+    "symbol": "CELSIACL",
+    "name": "Celsia SA ESP",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/celsia-sa-esp.svg"
+  },
+  {
+    "symbol": "CELSIAUS",
+    "name": "Celsia SA ESP",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/celsia-sa-esp.svg"
+  },
+  {
+    "symbol": "CEM",
+    "name": "CEM",
+    "market": "BCS"
+  },
+  {
+    "symbol": "CEMARGOSCL",
+    "name": "Cementos Argos SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cementos-argos-sa.svg"
+  },
+  {
+    "symbol": "CEMARGOSUS",
+    "name": "Cementos Argos SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cementos-argos-sa.svg"
+  },
+  {
+    "symbol": "CEMENTOS",
+    "name": "Cementos Bio Bio S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cementos-bio-bio.svg"
+  },
+  {
+    "symbol": "CENCOMALLS",
+    "name": "Cencosud Shopping SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cencosud-sa.svg"
+  },
+  {
+    "symbol": "CENCOSHOPP",
+    "name": "CENCOSHOPP",
+    "market": "BCS"
+  },
+  {
+    "symbol": "CENCOSUD",
+    "name": "Cencosud S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cencosud-sa.svg"
+  },
+  {
+    "symbol": "CGE",
+    "name": "Compania General de Electricidad S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cia-gral-de-electr.svg"
+  },
+  {
+    "symbol": "CGEGAS",
+    "name": "CGE GAS NATURAL SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cge-gas-natural-sa.svg"
+  },
+  {
+    "symbol": "CGET",
+    "name": "CGE Transmision SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cge-transmision-sa.svg"
+  },
+  {
+    "symbol": "CHILE",
+    "name": "Banco de Chile",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-de-chile.svg"
+  },
+  {
+    "symbol": "CIC",
+    "name": "Companias CIC S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/companias-cic-sa.svg"
+  },
+  {
+    "symbol": "CINTAC",
+    "name": "Cintac S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cintac-sa.svg"
+  },
+  {
+    "symbol": "CINTAC_OSA",
+    "name": "CINTAC-OSA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "CLHCL",
+    "name": "CEMEX Latam Holdings SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cemex-latam-sa.svg"
+  },
+  {
+    "symbol": "CLHUS",
+    "name": "CEMEX Latam Holdings SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cemex-latam-sa.svg"
+  },
+  {
+    "symbol": "CLUBUNION",
+    "name": "Union Inmobiliaria S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/union-inmobiliaria.svg"
+  },
+  {
+    "symbol": "CMCSA",
+    "name": "Comcast Corporation Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/comcast.svg"
+  },
+  {
+    "symbol": "CMCSACL",
+    "name": "Comcast Corporation Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/comcast.svg"
+  },
+  {
+    "symbol": "CMPC",
+    "name": "Empresas CMPC S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/empresas-cmpc-sa.svg"
+  },
+  {
+    "symbol": "CMXCL",
+    "name": "Power Metallic Mines Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/power-nickel.svg"
+  },
+  {
+    "symbol": "CNECCL",
+    "name": "Canacol Energy Ltd.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/canacol-energy-ltd.svg"
+  },
+  {
+    "symbol": "CNECUS",
+    "name": "Canacol Energy Ltd.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/canacol-energy-ltd.svg"
+  },
+  {
+    "symbol": "COLBUN",
+    "name": "Colbun SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/colbun-sa.svg"
+  },
+  {
+    "symbol": "COLCRAIG",
+    "name": "Colegio Craighouse SA Class B",
+    "market": "BCS"
+  },
+  {
+    "symbol": "COLCRAIG_A",
+    "name": "COLCRAIG-A",
+    "market": "BCS"
+  },
+  {
+    "symbol": "COLCRAIG_B",
+    "name": "COLCRAIG-B",
+    "market": "BCS"
+  },
+  {
+    "symbol": "COLINSE",
+    "name": "Colegio Ingles Catolico De La Serena SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "COLO_COLO",
+    "name": "Blanco Y Negro S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/blanco-y-negro-sa.svg"
+  },
+  {
+    "symbol": "CONCHATORO",
+    "name": "Vina Concha Y Toro S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/vina-concha-y-toro.svg"
+  },
+  {
+    "symbol": "CONDES_OSA",
+    "name": "Clinica Las Condes S.A. Rights 2025-29.07.25 For Shs",
+    "market": "BCS"
+  },
+  {
+    "symbol": "CONSOG_OSA",
+    "name": "ZURICH CHILE SEG",
+    "market": "BCS"
+  },
+  {
+    "symbol": "CONSOGRAL",
+    "name": "Zurich Chile Seguros Generales SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/chilena-consolidad.svg"
+  },
+  {
+    "symbol": "COPEC",
+    "name": "Empresas Copec S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/empresas-copec.svg"
+  },
+  {
+    "symbol": "COPEVAL",
+    "name": "Compania Agropecuaria Copeval S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/compania-agropecuaria-copeval-sa.svg"
+  },
+  {
+    "symbol": "COSPE_100E",
+    "name": "COSPE-100E",
+    "market": "BCS"
+  },
+  {
+    "symbol": "COSPE_50_E",
+    "name": "COSPE-50\\E",
+    "market": "BCS"
+  },
+  {
+    "symbol": "COSPEL_100",
+    "name": "COSPEL\\100",
+    "market": "BCS"
+  },
+  {
+    "symbol": "COSPEL_50",
+    "name": "COSPEL\\50",
+    "market": "BCS"
+  },
+  {
+    "symbol": "COST",
+    "name": "Costco Wholesale Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/costco-wholesale.svg"
+  },
+  {
+    "symbol": "COSTCL",
+    "name": "Costco Wholesale Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/costco-wholesale.svg"
+  },
+  {
+    "symbol": "COUNTRY_A",
+    "name": "Prince Of Wales Country Club Sociedad Anonima Inmobiliaria Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/prince-of-wales-country-cub-sa-inmo.svg"
+  },
+  {
+    "symbol": "COUNTRY_B",
+    "name": "Prince Of Wales Country Club Sociedad Anonima Inmobiliaria Class B",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/prince-of-wales-country-cub-sa-inmo.svg"
+  },
+  {
+    "symbol": "COUNTRY_P",
+    "name": "Prince Of Wales Country Club Sociedad Anonima Inmobiliaria Class P",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/prince-of-wales-country-cub-sa-inmo.svg"
+  },
+  {
+    "symbol": "COVADONGA",
+    "name": "Inversiones Covadonga S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inv-covadonga.svg"
+  },
+  {
+    "symbol": "CPK",
+    "name": "Chesapeake Utilities Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/chesapeake-utilities.svg"
+  },
+  {
+    "symbol": "CPKCL",
+    "name": "Chesapeake Utilities Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/chesapeake-utilities.svg"
+  },
+  {
+    "symbol": "CRAIGHOUSE",
+    "name": "Inmobiliaria Craighouse SA CRAIGHOUSE",
+    "market": "BCS"
+  },
+  {
+    "symbol": "CRFICLCFCL",
+    "name": "Corporacion Financiera Colombiana SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/corporacion-financiera-colombiana-sa.svg"
+  },
+  {
+    "symbol": "CRFICLCFUS",
+    "name": "Corporacion Financiera Colombiana SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/corporacion-financiera-colombiana-sa.svg"
+  },
+  {
+    "symbol": "CRISTALES",
+    "name": "Cristalerias De Chile S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cristalerias-chile.svg"
+  },
+  {
+    "symbol": "CRM",
+    "name": "Salesforce, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/salesforce.svg"
+  },
+  {
+    "symbol": "CRMCL",
+    "name": "Salesforce, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/salesforce.svg"
+  },
+  {
+    "symbol": "CRUZAD_OSB",
+    "name": "CRUZAD-OSB",
+    "market": "BCS"
+  },
+  {
+    "symbol": "CRUZADOS",
+    "name": "Cruzados SADP Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cruzados-sadp.svg"
+  },
+  {
+    "symbol": "CSCO",
+    "name": "Cisco Systems, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cisco.svg"
+  },
+  {
+    "symbol": "CSCOCL",
+    "name": "Cisco Systems, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cisco.svg"
+  },
+  {
+    "symbol": "CTC",
+    "name": "Telefonica Chile S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/telefonica-chile-s.svg"
+  },
+  {
+    "symbol": "CTC_OSA",
+    "name": "TELEFONICA CHILE S.A.",
+    "market": "BCS"
+  },
+  {
+    "symbol": "CU_CL",
+    "name": "Compania Cervecerias Unidas S.A. Sponsored ADR",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/compania-cervecerias-unidas.svg"
+  },
+  {
+    "symbol": "CUPRUM",
+    "name": "Administradora de Fondos de Pensiones Cuprum SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/afp-cuprum-sa.svg"
+  },
+  {
+    "symbol": "CVS",
+    "name": "CVS Health Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cvs-health.svg"
+  },
+  {
+    "symbol": "CVSCL",
+    "name": "CVS Health Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cvs-health.svg"
+  },
+  {
+    "symbol": "CVX",
+    "name": "Chevron Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/chevron.svg"
+  },
+  {
+    "symbol": "CVXCL",
+    "name": "Chevron Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/chevron.svg"
+  },
+  {
+    "symbol": "DAVIVIENCL",
+    "name": "Banco Davivienda SA Pfd",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-davivienda-sa.svg"
+  },
+  {
+    "symbol": "DAVIVIENUS",
+    "name": "Banco Davivienda SA Pfd",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-davivienda-sa.svg"
+  },
+  {
+    "symbol": "DEHESA",
+    "name": "Inmobiliaria de Deportes la Dehesa SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "DIS",
+    "name": "Walt Disney Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/walt-disney.svg"
+  },
+  {
+    "symbol": "DISCL",
+    "name": "Walt Disney Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/walt-disney.svg"
+  },
+  {
+    "symbol": "DIWATTS",
+    "name": "DIWATTS",
+    "market": "BCS"
+  },
+  {
+    "symbol": "DOLAR",
+    "name": "DOLAR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "DOLAR_CH",
+    "name": "DOLAR\\CH",
+    "market": "BCS"
+  },
+  {
+    "symbol": "DOLAR_USA",
+    "name": "DOLAR\\USA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "DOLAR*USA",
+    "name": "DOLAR*USA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "DOLARFR",
+    "name": "DOLARFR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "DOLARN",
+    "name": "DOLARN",
+    "market": "BCS"
+  },
+  {
+    "symbol": "DOLARS",
+    "name": "DOLARS",
+    "market": "BCS"
+  },
+  {
+    "symbol": "DUNCANFOX",
+    "name": "Duncan Fox S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/duncan-fox.svg"
+  },
+  {
+    "symbol": "EBAY",
+    "name": "eBay Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/ebay.svg"
+  },
+  {
+    "symbol": "EBAYCL",
+    "name": "eBay Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/ebay.svg"
+  },
+  {
+    "symbol": "ECL",
+    "name": "Engie Energia Chile S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/engie-energia.svg"
+  },
+  {
+    "symbol": "ECOMETRIC",
+    "name": "ECOMETRIC",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ECOPTRLCL",
+    "name": "Ecopetrol SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/ecopetrol.svg"
+  },
+  {
+    "symbol": "ECOPTRLUS",
+    "name": "Ecopetrol SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/ecopetrol.svg"
+  },
+  {
+    "symbol": "EDELMAG",
+    "name": "Empresa Electrica de Magallanes S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/elec-magallanes-sa.svg"
+  },
+  {
+    "symbol": "EDELPA",
+    "name": "Envases del Pacifico S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/envases-del-pacifico-sa.svg"
+  },
+  {
+    "symbol": "EDELPA_OSA",
+    "name": "EDELPA-OSA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "EISA",
+    "name": "Echeverria Izquierdo SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/echeverria-izq-sa.svg"
+  },
+  {
+    "symbol": "ELECMETAL",
+    "name": "Compania Electro Metalurgica S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/electro-metalurgic.svg"
+  },
+  {
+    "symbol": "ELUXSA",
+    "name": "ELUXSA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "EMBONOR_A",
+    "name": "Coca Cola Embonor S.A. Pfd Series A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/coca-cola.svg"
+  },
+  {
+    "symbol": "EMBONOR_B",
+    "name": "Coca Cola Embonor SA Pfd Series B",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/coca-cola.svg"
+  },
+  {
+    "symbol": "EMILIANA",
+    "name": "Vinedos Emiliana S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/vinedos-emiliana.svg"
+  },
+  {
+    "symbol": "ENAEX",
+    "name": "Enaex S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/enaex-sa.svg"
+  },
+  {
+    "symbol": "ENELAM",
+    "name": "Enel Americas S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/enel.svg"
+  },
+  {
+    "symbol": "ENELCHILE",
+    "name": "Enel Chile SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/enel.svg"
+  },
+  {
+    "symbol": "ENELDXCH",
+    "name": "Enel Distribucion Chile S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/enel.svg"
+  },
+  {
+    "symbol": "ENELGXCH",
+    "name": "Enel Generacion Chile S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/enel.svg"
+  },
+  {
+    "symbol": "ENELTXCH",
+    "name": "ENELTXCH",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ENJOY",
+    "name": "Enjoy S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/enjoy-sa.svg"
+  },
+  {
+    "symbol": "ENJOY_OSA",
+    "name": "ENJOY-OSA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ENLASA",
+    "name": "Energia Latina S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/energia-latina-sa.svg"
+  },
+  {
+    "symbol": "ENTEL",
+    "name": "Empresa Nacional de Telecomunicaciones S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/emp-nac-telecomuni.svg"
+  },
+  {
+    "symbol": "ESPANOLA",
+    "name": "Compania de Inversiones la Espanola S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/compania-de-inversiones-la-espanola-sa.svg"
+  },
+  {
+    "symbol": "ESPANOLVAL",
+    "name": "Club Espanol de Valparaiso SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ESSBA_OSA",
+    "name": "ESSBA-OSA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ESSBC_OSA",
+    "name": "ESSBC-OSA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ESSBIO_A",
+    "name": "Essbio S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/essbio-sa.svg"
+  },
+  {
+    "symbol": "ESSBIO_B",
+    "name": "Essbio S.A. Pfd Shs Series -B-",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/essbio-sa.svg"
+  },
+  {
+    "symbol": "ESSBIO_C",
+    "name": "Essbio S.A. Pfd Series C",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/essbio-sa.svg"
+  },
+  {
+    "symbol": "ESTACIONAM",
+    "name": "Inmobiliaria Central de Estacionamientos Agustinas S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inmobiliaria-cntrl-de-estac-agustas.svg"
+  },
+  {
+    "symbol": "ESVAL_A",
+    "name": "Esval SA Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/esval-sa.svg"
+  },
+  {
+    "symbol": "ESVAL_B",
+    "name": "Esval SA Pfd Series B",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ESVAL_C",
+    "name": "Esval SA Class C",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/esval-sa.svg"
+  },
+  {
+    "symbol": "ESVALC_OSA",
+    "name": "ESVALC-OSA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ETBCL",
+    "name": "Empresa de Telecomunicaciones de Bogota SA ESP",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/empresa-de-telecomunicaciones-de-bogota-sa-esp.svg"
+  },
+  {
+    "symbol": "ETBUS",
+    "name": "Empresa de Telecomunicaciones de Bogota SA ESP",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/empresa-de-telecomunicaciones-de-bogota-sa-esp.svg"
+  },
+  {
+    "symbol": "EXITOCL",
+    "name": "Almacenes Exito SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/almacenes-exito-sa.svg"
+  },
+  {
+    "symbol": "EXITOUS",
+    "name": "Almacenes Exito SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/almacenes-exito-sa.svg"
+  },
+  {
+    "symbol": "EXSTMCHA",
+    "name": "EXSTMCHA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "EXSTMCHB",
+    "name": "EXSTMCHB",
+    "market": "BCS"
+  },
+  {
+    "symbol": "EXWATTS",
+    "name": "EXWATTS",
+    "market": "BCS"
+  },
+  {
+    "symbol": "FALABELLA",
+    "name": "Falabella S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/falabella.svg"
+  },
+  {
+    "symbol": "FB",
+    "name": "FB",
+    "market": "BCS"
+  },
+  {
+    "symbol": "FBCL",
+    "name": "FBCL",
+    "market": "BCS"
+  },
+  {
+    "symbol": "FCX",
+    "name": "Freeport-McMoRan, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/freeport-mcmoran.svg"
+  },
+  {
+    "symbol": "FCXCL",
+    "name": "Freeport-McMoRan, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/freeport-mcmoran.svg"
+  },
+  {
+    "symbol": "FEPASA",
+    "name": "Ferrocarril del Pacifico S.A.",
+    "market": "BCS"
+  },
+  {
+    "symbol": "FERIAOSOR",
+    "name": "Feria de Osorno SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "FMNCL",
+    "name": "Fidelity Minerals Corp.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/fidelity-minerals.svg"
+  },
+  {
+    "symbol": "FORUS",
+    "name": "Forus S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/forus-sa.svg"
+  },
+  {
+    "symbol": "FOSFOROS",
+    "name": "Compania Chilena de Fosforos S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/chilena-fosforos.svg"
+  },
+  {
+    "symbol": "FRACCION_X",
+    "name": "FRACCION-X",
+    "market": "BCS"
+  },
+  {
+    "symbol": "FROWARD",
+    "name": "Portuaria Cabo Froward S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/portuaria-cabo-froward-sa.svg"
+  },
+  {
+    "symbol": "GASCO",
+    "name": "Empresas Gasco SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/empresas-gasco-sa.svg"
+  },
+  {
+    "symbol": "GASCOINV",
+    "name": "Gasco Inversiones SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/empresas-gasco-sa.svg"
+  },
+  {
+    "symbol": "GE",
+    "name": "GE Aerospace",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/ge-aerospace.svg"
+  },
+  {
+    "symbol": "GEBCL",
+    "name": "GRUPO ENERGIA BOGOTA S.A. E.S.P",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-energia-bogota.svg"
+  },
+  {
+    "symbol": "GEBUS",
+    "name": "GRUPO ENERGIA BOGOTA S.A. E.S.P",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-energia-bogota.svg"
+  },
+  {
+    "symbol": "GECL",
+    "name": "GE Aerospace",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/ge-aerospace.svg"
+  },
+  {
+    "symbol": "GENERADORA",
+    "name": "Sociedad de Inversiones Generadora de Empresas SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "GILD",
+    "name": "Gilead Sciences, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/gilead.svg"
+  },
+  {
+    "symbol": "GILDCL",
+    "name": "Gilead Sciences, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/gilead.svg"
+  },
+  {
+    "symbol": "GOLF",
+    "name": "SA de Deportes Club de Golf Santiago",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/club-de-golf.svg"
+  },
+  {
+    "symbol": "GOOG",
+    "name": "Alphabet Inc. Class C",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/alphabet.svg"
+  },
+  {
+    "symbol": "GOOGCL",
+    "name": "Alphabet Inc. Class C",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/alphabet.svg"
+  },
+  {
+    "symbol": "GOOGL",
+    "name": "Alphabet Inc. Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/alphabet.svg"
+  },
+  {
+    "symbol": "GOOGLCL",
+    "name": "Alphabet Inc. Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/alphabet.svg"
+  },
+  {
+    "symbol": "GRANAD_OSA",
+    "name": "GRANADILLA COUNTRY",
+    "market": "BCS"
+  },
+  {
+    "symbol": "GRANADILLA",
+    "name": "Granadilla Country Club S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/granadilla-country-club-sa.svg"
+  },
+  {
+    "symbol": "GRPARGOSCL",
+    "name": "Grupo Argos S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-argos-sa.svg"
+  },
+  {
+    "symbol": "GRPARGOSUS",
+    "name": "Grupo Argos S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-argos-sa.svg"
+  },
+  {
+    "symbol": "GRZCL",
+    "name": "Gold Reserve Ltd.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/gold-reserve.svg"
+  },
+  {
+    "symbol": "HABITAT",
+    "name": "AFP Habitat SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/afp-habitat-sa.svg"
+  },
+  {
+    "symbol": "HAL",
+    "name": "Halliburton Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/halliburton.svg"
+  },
+  {
+    "symbol": "HALCL",
+    "name": "Halliburton Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/halliburton.svg"
+  },
+  {
+    "symbol": "HBCSA",
+    "name": "HBCSA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "HD",
+    "name": "Home Depot, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/home-depot.svg"
+  },
+  {
+    "symbol": "HDCL",
+    "name": "Home Depot, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/home-depot.svg"
+  },
+  {
+    "symbol": "HF",
+    "name": "Hortifrut SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/hortifrut-sa.svg"
+  },
+  {
+    "symbol": "HF_A",
+    "name": "Hortifrut SA Class A",
+    "market": "BCS"
+  },
+  {
+    "symbol": "HF_B",
+    "name": "Hortifrut SA Class B",
+    "market": "BCS"
+  },
+  {
+    "symbol": "HF_CLP",
+    "name": "HF CLP",
+    "market": "BCS"
+  },
+  {
+    "symbol": "HF_USD",
+    "name": "HF USD",
+    "market": "BCS"
+  },
+  {
+    "symbol": "HIPERMARC",
+    "name": "Hipermarc S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/hipermarc-sa.svg"
+  },
+  {
+    "symbol": "HIPICO",
+    "name": "Club Hipico De Santiago S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/club-hipico-de-santiago-sa.svg"
+  },
+  {
+    "symbol": "HIPODROMOA",
+    "name": "Sociedad Hipodromo Chile S.A. Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/hipodromo-chile-sa.svg"
+  },
+  {
+    "symbol": "HIPODROMOB",
+    "name": "Sociedad Hipodromo Chile S.A. Class B",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/hipodromo-chile-sa.svg"
+  },
+  {
+    "symbol": "HITES",
+    "name": "Empresas Hites S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/empresas-hites-s-a.svg"
+  },
+  {
+    "symbol": "HON",
+    "name": "Honeywell International Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/honeywell.svg"
+  },
+  {
+    "symbol": "HONCL",
+    "name": "Honeywell International Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/honeywell.svg"
+  },
+  {
+    "symbol": "HPQ",
+    "name": "HP Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/hp.svg"
+  },
+  {
+    "symbol": "HPQCL",
+    "name": "HP Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/hp.svg"
+  },
+  {
+    "symbol": "HWM",
+    "name": "Howmet Aerospace Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/howmet-aerospace.svg"
+  },
+  {
+    "symbol": "HWMCL",
+    "name": "Howmet Aerospace Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/howmet-aerospace.svg"
+  },
+  {
+    "symbol": "IACSA",
+    "name": "Inversiones Agricolas y Comerciales S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inversiones-agrico.svg"
+  },
+  {
+    "symbol": "IAM",
+    "name": "Inversiones Aguas Metropolitanas S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inversiones-aguas.svg"
+  },
+  {
+    "symbol": "IANSA",
+    "name": "Empresas Iansa S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/empresas-iansa-sa.svg"
+  },
+  {
+    "symbol": "IBM",
+    "name": "International Business Machines Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/international-bus-mach.svg"
+  },
+  {
+    "symbol": "IBMCL",
+    "name": "International Business Machines Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/international-bus-mach.svg"
+  },
+  {
+    "symbol": "ILC",
+    "name": "Inversiones La Construccion SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inv-la-construccio.svg"
+  },
+  {
+    "symbol": "INDISA",
+    "name": "Instituto de Diagnostico S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inst-diagnostico.svg"
+  },
+  {
+    "symbol": "INFODEMA",
+    "name": "Infodema S. A.",
+    "market": "BCS"
+  },
+  {
+    "symbol": "INGEVEC",
+    "name": "Ingevec S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/ingevec-sa.svg"
+  },
+  {
+    "symbol": "INIA",
+    "name": "INIA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "INMOBVINA",
+    "name": "Sociedad Inmobiliaria Vina Del Mar S.A.",
+    "market": "BCS"
+  },
+  {
+    "symbol": "INTC",
+    "name": "Intel Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/intel.svg"
+  },
+  {
+    "symbol": "INTCCL",
+    "name": "Intel Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/intel.svg"
+  },
+  {
+    "symbol": "INVERCAP",
+    "name": "Invercap SA INVERCAP",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/invercap-sa.svg"
+  },
+  {
+    "symbol": "INVERFOODS",
+    "name": "Invertec Foods SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "INVERNOVA",
+    "name": "Invernova S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/invernova-sa.svg"
+  },
+  {
+    "symbol": "INVEXANS",
+    "name": "Invexans S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/invexans-sa.svg"
+  },
+  {
+    "symbol": "INVIESPA",
+    "name": "Inversiones Union Espanola S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inv-union-espanola.svg"
+  },
+  {
+    "symbol": "IOCL",
+    "name": "Inca One Gold Corp.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inca-one-gold.svg"
+  },
+  {
+    "symbol": "IPAL",
+    "name": "Ipal S.A.",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ISACL",
+    "name": "Interconexion Electrica SA ESP",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/interconexion-electrica-sa-esp.svg"
+  },
+  {
+    "symbol": "ISANPA",
+    "name": "Inmobiliaria San Patricio S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inmobiliaria-san-patricio-sa.svg"
+  },
+  {
+    "symbol": "ISAUS",
+    "name": "Interconexion Electrica SA ESP",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/interconexion-electrica-sa-esp.svg"
+  },
+  {
+    "symbol": "ITAUCL",
+    "name": "Banco Itau Chile",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/itau-unibanco.svg"
+  },
+  {
+    "symbol": "ITAUCORP",
+    "name": "ITAU CORPBANCA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/itau-unibanco.svg"
+  },
+  {
+    "symbol": "JNJ",
+    "name": "Johnson & Johnson",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/johnson-and-johnson.svg"
+  },
+  {
+    "symbol": "JNJCL",
+    "name": "Johnson & Johnson",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/johnson-and-johnson.svg"
+  },
+  {
+    "symbol": "JPM",
+    "name": "JPMorgan Chase & Co.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/jpmorgan-chase.svg"
+  },
+  {
+    "symbol": "JPMCL",
+    "name": "JPMorgan Chase & Co.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/jpmorgan-chase.svg"
+  },
+  {
+    "symbol": "KO",
+    "name": "Coca-Cola Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/coca-cola.svg"
+  },
+  {
+    "symbol": "KOCL",
+    "name": "Coca-Cola Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/coca-cola.svg"
+  },
+  {
+    "symbol": "LAPOLA_OSA",
+    "name": "LAPOLA-OSA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "LAS_CONDES",
+    "name": "Clinica Las Condes S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/clinica-las-condes.svg"
+  },
+  {
+    "symbol": "LFL_CL",
+    "name": "LATAM Airlines Group SA Sponsored ADR",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/latam-airlines.svg"
+  },
+  {
+    "symbol": "LIN",
+    "name": "Linde plc",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/linde.svg"
+  },
+  {
+    "symbol": "LINCL",
+    "name": "Linde plc",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/linde.svg"
+  },
+  {
+    "symbol": "LINDEFUT",
+    "name": "Liga Independiente de Futbol SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "LIPIGAS",
+    "name": "Empresas Lipigas SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/empresas-lipigas.svg"
+  },
+  {
+    "symbol": "LITORAL",
+    "name": "Compania Electrica del Litoral S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/electrica-del-litoral-sa.svg"
+  },
+  {
+    "symbol": "LITORALTX",
+    "name": "LITORAL TRANSMISION SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "LLY",
+    "name": "Eli Lilly and Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/eli-lilly.svg"
+  },
+  {
+    "symbol": "LLYCL",
+    "name": "Eli Lilly and Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/eli-lilly.svg"
+  },
+  {
+    "symbol": "LTM",
+    "name": "LATAM Airlines Group SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/latam-airlines.svg"
+  },
+  {
+    "symbol": "LTM_OSA",
+    "name": "LTM-OSA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "MA",
+    "name": "Mastercard Incorporated Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/mastercard.svg"
+  },
+  {
+    "symbol": "MACL",
+    "name": "Mastercard Incorporated Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/mastercard.svg"
+  },
+  {
+    "symbol": "MAISONNETT",
+    "name": "Colegio La Maisonnette SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "MALLPLAZA",
+    "name": "Plaza SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/plaza-sa.svg"
+  },
+  {
+    "symbol": "MANQUEHUE",
+    "name": "Inmobiliaria Manquehue SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inmobil-manquehue.svg"
+  },
+  {
+    "symbol": "MARBELLACC",
+    "name": "Marbella Country Club S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/marbella-country-club-sa.svg"
+  },
+  {
+    "symbol": "MARGARET_S",
+    "name": "Colegio Britanico Saint Margaret's SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "MARINSA",
+    "name": "Maritima de Inversiones S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/maritima-de-invers.svg"
+  },
+  {
+    "symbol": "MASISA",
+    "name": "Masisa S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/masisa-sa.svg"
+  },
+  {
+    "symbol": "MCD",
+    "name": "McDonald's Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/mcdonalds.svg"
+  },
+  {
+    "symbol": "MCDCL",
+    "name": "McDonald's Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/mcdonalds.svg"
+  },
+  {
+    "symbol": "MDLZ",
+    "name": "Mondelez International, Inc. Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/mondelez.svg"
+  },
+  {
+    "symbol": "MDLZCL",
+    "name": "Mondelez International, Inc. Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/mondelez.svg"
+  },
+  {
+    "symbol": "MELON",
+    "name": "Melon SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/melon-sa.svg"
+  },
+  {
+    "symbol": "META",
+    "name": "Meta Platforms Inc Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/meta-platforms.svg"
+  },
+  {
+    "symbol": "METACL",
+    "name": "Meta Platforms Inc Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/meta-platforms.svg"
+  },
+  {
+    "symbol": "MINERA",
+    "name": "Minera Valparaiso S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/minera-valparaiso.svg"
+  },
+  {
+    "symbol": "MINEROSCL",
+    "name": "Mineros SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/mineros-sa.svg"
+  },
+  {
+    "symbol": "MINEROSUS",
+    "name": "Mineros SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/mineros-sa.svg"
+  },
+  {
+    "symbol": "MMM",
+    "name": "3M Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/3m.svg"
+  },
+  {
+    "symbol": "MMMCL",
+    "name": "3M Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/3m.svg"
+  },
+  {
+    "symbol": "MO",
+    "name": "Altria Group, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/altria.svg"
+  },
+  {
+    "symbol": "MOCL",
+    "name": "Altria Group, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/altria.svg"
+  },
+  {
+    "symbol": "MOLLER",
+    "name": "Empresa Constructora Moller y Perez Cotapos SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/emp-constr-moller.svg"
+  },
+  {
+    "symbol": "MOLLER_OSA",
+    "name": "EMP CONSTR MOLLER Y PEREZ COTAPOS",
+    "market": "BCS"
+  },
+  {
+    "symbol": "MOLYMET",
+    "name": "Molibdenos y Metales S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/molibdenos-y-metal.svg"
+  },
+  {
+    "symbol": "MOS",
+    "name": "Mobi724 Global Solutions, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/mobi724-global-solutions.svg"
+  },
+  {
+    "symbol": "MPLAZA_OSA",
+    "name": "Plaza SA Rights 2024-27.07.24 For Shs",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/plaza-sa.svg"
+  },
+  {
+    "symbol": "MRK",
+    "name": "Merck & Co., Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/merck-and-co.svg"
+  },
+  {
+    "symbol": "MRKCL",
+    "name": "Merck & Co., Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/merck-and-co.svg"
+  },
+  {
+    "symbol": "MS",
+    "name": "Morgan Stanley",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/morgan-stanley.svg"
+  },
+  {
+    "symbol": "MSCL",
+    "name": "Morgan Stanley",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/morgan-stanley.svg"
+  },
+  {
+    "symbol": "MSFT",
+    "name": "Microsoft Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/microsoft.svg"
+  },
+  {
+    "symbol": "MSFTCL",
+    "name": "Microsoft Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/microsoft.svg"
+  },
+  {
+    "symbol": "MUELLES",
+    "name": "Muelles de Penco SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "MULTI_X",
+    "name": "Multiexport Foods S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/multiexport-foods.svg"
+  },
+  {
+    "symbol": "NAVARINO",
+    "name": "Navarino SA NAVARINO",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/navarino-sa.svg"
+  },
+  {
+    "symbol": "NAVIERA",
+    "name": "Grupo Empresas Navieras S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grp-empr-navieras.svg"
+  },
+  {
+    "symbol": "NEM",
+    "name": "Newmont Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/newmont.svg"
+  },
+  {
+    "symbol": "NEMCL",
+    "name": "Newmont Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/newmont.svg"
+  },
+  {
+    "symbol": "NFLX",
+    "name": "Netflix, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/netflix.svg"
+  },
+  {
+    "symbol": "NFLXCL",
+    "name": "Netflix, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/netflix.svg"
+  },
+  {
+    "symbol": "NIBSA",
+    "name": "Nibsa S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/nibsa-sa.svg"
+  },
+  {
+    "symbol": "NITRA_OSA",
+    "name": "NITRATOS DE CHILE SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "NKE",
+    "name": "NIKE, Inc. Class B",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/nike.svg"
+  },
+  {
+    "symbol": "NKECL",
+    "name": "NIKE, Inc. Class B",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/nike.svg"
+  },
+  {
+    "symbol": "NORTE_OSA",
+    "name": "NORTE GRANDE SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "NORTEGRAN",
+    "name": "Norte Grande S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/norte-grande-sa.svg"
+  },
+  {
+    "symbol": "NTGCLGAS",
+    "name": "Naturgy Chile Gas Natural SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cge-gas-natural-sa.svg"
+  },
+  {
+    "symbol": "NUAM",
+    "name": "Holding Bursatil Regional SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/hbr-sa-bursatil-regional-sa.svg"
+  },
+  {
+    "symbol": "NUEVAPOLAR",
+    "name": "NUEVAPOLAR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "NUEVAREG",
+    "name": "Inversiones Nueva Region SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "NUTRAVALOR",
+    "name": "Inversiones Nutravalor SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/invers-nutravalor.svg"
+  },
+  {
+    "symbol": "NUTRESACL",
+    "name": "Grupo Nutresa S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-nutresa-sa.svg"
+  },
+  {
+    "symbol": "NUTRESAUS",
+    "name": "Grupo Nutresa S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-nutresa-sa.svg"
+  },
+  {
+    "symbol": "NVDA",
+    "name": "NVIDIA Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/nvidia.svg"
+  },
+  {
+    "symbol": "NVDACL",
+    "name": "NVIDIA Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/nvidia.svg"
+  },
+  {
+    "symbol": "OLDBOYS",
+    "name": "Old Grangonian Club SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORCL",
+    "name": "Oracle Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/oracle.svg"
+  },
+  {
+    "symbol": "ORCLCL",
+    "name": "Oracle Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/oracle.svg"
+  },
+  {
+    "symbol": "ORO_100",
+    "name": "ORO\\100",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_100_E",
+    "name": "ORO\\100-E",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_100*",
+    "name": "ORO\\100*",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_100*FR",
+    "name": "ORO\\100*FR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_100FR",
+    "name": "ORO\\100FR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_20",
+    "name": "ORO\\20",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_20_E",
+    "name": "ORO\\20-E",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_20*",
+    "name": "ORO\\20*",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_20*FR",
+    "name": "ORO\\20*FR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_200",
+    "name": "ORO\\200",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_200_E",
+    "name": "ORO\\200-E",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_200*",
+    "name": "ORO\\200*",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_200*FR",
+    "name": "ORO\\200*FR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_200FR",
+    "name": "ORO\\200FR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_20FR",
+    "name": "ORO\\20FR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_50",
+    "name": "ORO\\50",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_50_E",
+    "name": "ORO\\50-E",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_50*",
+    "name": "ORO\\50*",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_50*FR",
+    "name": "ORO\\50*FR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_500",
+    "name": "ORO\\500",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_500_E",
+    "name": "ORO\\500-E",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_500*",
+    "name": "ORO\\500*",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_500*FR",
+    "name": "ORO\\500*FR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_500FR",
+    "name": "ORO\\500FR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_50FR",
+    "name": "ORO\\50FR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ORO_BLANCO",
+    "name": "Sociedad De Inversiones Oro Blanco S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/socd-inv-oro-blanc.svg"
+  },
+  {
+    "symbol": "OROBCO_OSA",
+    "name": "SOCIEDAD INVERSIONES ORO BLANCO SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "OSOJI_X",
+    "name": "OSOJI ROBOTICS CORPORATION CHILE SP",
+    "market": "BCS"
+  },
+  {
+    "symbol": "OXIQUIM",
+    "name": "Oxiquim S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/oxiquim-sa.svg"
+  },
+  {
+    "symbol": "PARAUCO",
+    "name": "Parque Arauco S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/parque-arauco-sa.svg"
+  },
+  {
+    "symbol": "PASUR",
+    "name": "Forestal Constructora y Comercial del Pacifico Sur S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/forestal-pacifico.svg"
+  },
+  {
+    "symbol": "PAZ",
+    "name": "PAZ Corp S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/paz-sa.svg"
+  },
+  {
+    "symbol": "PEHUENCHE",
+    "name": "Empresa Electrica Pehuenche S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/electrica-pehuench.svg"
+  },
+  {
+    "symbol": "PEP",
+    "name": "PepsiCo, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/pepsico.svg"
+  },
+  {
+    "symbol": "PEPCL",
+    "name": "PepsiCo, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/pepsico.svg"
+  },
+  {
+    "symbol": "PFAVALCL",
+    "name": "Grupo Aval Acciones y Valores SA Pfd",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-aval-acciones-y-valores.svg"
+  },
+  {
+    "symbol": "PFAVALUS",
+    "name": "Grupo Aval Acciones y Valores SA Pfd",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-aval-acciones-y-valores.svg"
+  },
+  {
+    "symbol": "PFCARGOSCL",
+    "name": "Cementos Argos SA Pfd Registered Shs",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cementos-argos-sa.svg"
+  },
+  {
+    "symbol": "PFCARGOSUS",
+    "name": "Cementos Argos SA Pfd Registered Shs",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cementos-argos-sa.svg"
+  },
+  {
+    "symbol": "PFCPRCOLCL",
+    "name": "Corporacion Financiera Colombiana SA Pref",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/corporacion-financiera-colombiana-sa.svg"
+  },
+  {
+    "symbol": "PFCPRCOLUS",
+    "name": "Corporacion Financiera Colombiana SA Pref",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/corporacion-financiera-colombiana-sa.svg"
+  },
+  {
+    "symbol": "PFE",
+    "name": "Pfizer Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/pfizer.svg"
+  },
+  {
+    "symbol": "PFECL",
+    "name": "Pfizer Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/pfizer.svg"
+  },
+  {
+    "symbol": "PFGRPARGCL",
+    "name": "Grupo Argos SA Pfd",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-argos-sa.svg"
+  },
+  {
+    "symbol": "PFGRPARGUS",
+    "name": "Grupo Argos SA Pfd",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-argos-sa.svg"
+  },
+  {
+    "symbol": "PFSURACL",
+    "name": "Grupo de Inversiones Suramericana SA Pfd",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-de-inversiones-suramericana-sa.svg"
+  },
+  {
+    "symbol": "PFSURAUS",
+    "name": "Grupo de Inversiones Suramericana SA Pfd",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-de-inversiones-suramericana-sa.svg"
+  },
+  {
+    "symbol": "PG",
+    "name": "Procter & Gamble Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/procter-and-gamble.svg"
+  },
+  {
+    "symbol": "PGCL",
+    "name": "Procter & Gamble Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/procter-and-gamble.svg"
+  },
+  {
+    "symbol": "PGRPSURACL",
+    "name": "GPO DE INVERSIONES SURAMERICANA SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "PLANVITAL",
+    "name": "Administradora de Fondos de Pensiones Planvital SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/afp-planvital-sa.svg"
+  },
+  {
+    "symbol": "PLATA_10",
+    "name": "PLATA\\10",
+    "market": "BCS"
+  },
+  {
+    "symbol": "PLATA_10*",
+    "name": "PLATA\\10*",
+    "market": "BCS"
+  },
+  {
+    "symbol": "PLATA_10FR",
+    "name": "PLATA\\10FR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "PLATA10*FR",
+    "name": "PLATA10*FR",
+    "market": "BCS"
+  },
+  {
+    "symbol": "POLO",
+    "name": "Club de Polo y Equitacion San Cristobal S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/club-de-polo.svg"
+  },
+  {
+    "symbol": "POLPAICO",
+    "name": "Cemento Polpaico S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cemento-polpaico.svg"
+  },
+  {
+    "symbol": "POTAB_OSA",
+    "name": "POTASIOS DE CHILE SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "POTASIOS_A",
+    "name": "Potasios De Chile S.A. Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/potasios-de-chile.svg"
+  },
+  {
+    "symbol": "POTASIOS_B",
+    "name": "Potasios De Chile S.A. Class B",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/potasios-de-chile.svg"
+  },
+  {
+    "symbol": "PPXCL",
+    "name": "PPX Mining Corp.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/ppx-mining.svg"
+  },
+  {
+    "symbol": "PREVISION",
+    "name": "Seguros Vida Security Prevision S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/cia-seguros-vida-security-prevision.svg"
+  },
+  {
+    "symbol": "PROMIGASCL",
+    "name": "Promigas SA ESP",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/promigas-sa-esp.svg"
+  },
+  {
+    "symbol": "PROMIGASUS",
+    "name": "Promigas SA ESP",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/promigas-sa-esp.svg"
+  },
+  {
+    "symbol": "PROVIDA",
+    "name": "Administradora de Fondos de Pensiones ProVida S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/afp-provida.svg"
+  },
+  {
+    "symbol": "PUCOBRE",
+    "name": "Sociedad Punta del Cobre S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/sociedad-punta-del.svg"
+  },
+  {
+    "symbol": "PUMACL",
+    "name": "Puma Exploration Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/puma-exploration.svg"
+  },
+  {
+    "symbol": "PUNTILLA",
+    "name": "Electrica Puntilla SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "QCOM",
+    "name": "QUALCOMM Incorporated",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/qualcomm.svg"
+  },
+  {
+    "symbol": "QCOMCL",
+    "name": "QUALCOMM Incorporated",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/qualcomm.svg"
+  },
+  {
+    "symbol": "QUEMCHI",
+    "name": "Quemchi S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/quemchi-sa.svg"
+  },
+  {
+    "symbol": "QUILICURA",
+    "name": "Quilicura S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/quilicura-sa.svg"
+  },
+  {
+    "symbol": "QUINENCO",
+    "name": "Quinenco S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/quinenco-sa.svg"
+  },
+  {
+    "symbol": "REBRISA_A",
+    "name": "Rebrisa SA REBRISA Pfd A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/rebrisa-sa.svg"
+  },
+  {
+    "symbol": "REBRISA_B",
+    "name": "Rebrisa SA REBRISA Pfd B",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/rebrisa-sa.svg"
+  },
+  {
+    "symbol": "RIPLEY",
+    "name": "Ripley Corp S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/ripley-sa.svg"
+  },
+  {
+    "symbol": "RTX",
+    "name": "RTX Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/raytheon.svg"
+  },
+  {
+    "symbol": "RTXCL",
+    "name": "RTX Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/raytheon.svg"
+  },
+  {
+    "symbol": "SALFA_OSA",
+    "name": "SALFA-OSA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "SALFACORP",
+    "name": "Salfacorp S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/salfacorp-sa.svg"
+  },
+  {
+    "symbol": "SALMOCAM",
+    "name": "Salmones Camanchaca SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/salmones-camanchac.svg"
+  },
+  {
+    "symbol": "SANTA_RITA",
+    "name": "S.A. Vina Santa Rita",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/vina-santa-rita-sa.svg"
+  },
+  {
+    "symbol": "SANTANA",
+    "name": "Santana S.A.",
+    "market": "BCS"
+  },
+  {
+    "symbol": "SBUX",
+    "name": "Starbucks Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/starbucks.svg"
+  },
+  {
+    "symbol": "SBUXCL",
+    "name": "Starbucks Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/starbucks.svg"
+  },
+  {
+    "symbol": "SCHWAGER",
+    "name": "Schwager S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/schwager-sa.svg"
+  },
+  {
+    "symbol": "SCOTIABKCL",
+    "name": "Scotiabank Chile Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/scotiabank-chile.svg"
+  },
+  {
+    "symbol": "SIEMEL",
+    "name": "Inversiones Agricolas e Industriales SA SIEMEL",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inv-siemel-sa.svg"
+  },
+  {
+    "symbol": "SIMSA",
+    "name": "SOCIEDAD DE INFRAESTRUCTURAS DE MERCADO SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/bolsa-de-comercio.svg"
+  },
+  {
+    "symbol": "SIPSA",
+    "name": "SIPSA S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/sipsa-sa.svg"
+  },
+  {
+    "symbol": "SIPSA_OSA",
+    "name": "SIPSA-OSA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "SIXTERRA",
+    "name": "Inmobiliaria Sixterra SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inmobiliaria-sixte.svg"
+  },
+  {
+    "symbol": "SK",
+    "name": "Sigdo Koppers S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/sigdo-koppers-sa.svg"
+  },
+  {
+    "symbol": "SMSAAM",
+    "name": "Sociedad Matriz Saam S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/sociedad-matriz-sa.svg"
+  },
+  {
+    "symbol": "SMU",
+    "name": "SMU SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/smu-sa.svg"
+  },
+  {
+    "symbol": "SOCOVESA",
+    "name": "Socovesa S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/socovesa-sa.svg"
+  },
+  {
+    "symbol": "SOFRUCO",
+    "name": "Sociedad Agricola la Rosa Sofruco SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/sociedad-agricola-la-rosa-sofruco-sa.svg"
+  },
+  {
+    "symbol": "SONDA",
+    "name": "Sonda S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/sonda-sa.svg"
+  },
+  {
+    "symbol": "SOPROCAL",
+    "name": "Soprocal Calerias e Industrias S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/soprocal-calerias.svg"
+  },
+  {
+    "symbol": "SOQUICOM",
+    "name": "Soquimich Comercial S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/soquimich-comercia.svg"
+  },
+  {
+    "symbol": "SPORTFRAN",
+    "name": "S. A. Inmobiliaria Sport Francais",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inmobiliaria-sport-francals.svg"
+  },
+  {
+    "symbol": "SPORTING",
+    "name": "Valparaiso Sporting Club S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/valparaiso-sporting-club-sa.svg"
+  },
+  {
+    "symbol": "SQM_A",
+    "name": "Sociedad Quimica y Minera de Chile SA Pfd Series A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/sqm.svg"
+  },
+  {
+    "symbol": "SQM_B",
+    "name": "Sociedad Quimica y Minera de Chile SA Pfd Series B",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/sqm.svg"
+  },
+  {
+    "symbol": "SSVCL",
+    "name": "Southern Silver Exploration Corp.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/southern-silver-exploration.svg"
+  },
+  {
+    "symbol": "STADITALIA",
+    "name": "Inmobiliaria Stadio Italiano SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "STMCHA",
+    "name": "Sociedad Transmisora Metropolitana SA Class A",
+    "market": "BCS"
+  },
+  {
+    "symbol": "STMCHB",
+    "name": "Sociedad Transmisora Metropolitana SA Class B",
+    "market": "BCS"
+  },
+  {
+    "symbol": "SUDMEDICA",
+    "name": "Sudmedica S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/sudmedica.svg"
+  },
+  {
+    "symbol": "SURACL",
+    "name": "Grupo de Inversiones Suramericana S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-de-inversiones-suramericana-sa.svg"
+  },
+  {
+    "symbol": "SURAUS",
+    "name": "Grupo de Inversiones Suramericana S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-de-inversiones-suramericana-sa.svg"
+  },
+  {
+    "symbol": "SZCL",
+    "name": "Santacruz Silver Mining Ltd.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/santacruz-silver-mining-ltd.svg"
+  },
+  {
+    "symbol": "T",
+    "name": "AT&T Inc",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/at-and-t.svg"
+  },
+  {
+    "symbol": "TCL",
+    "name": "AT&T Inc",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/at-and-t.svg"
+  },
+  {
+    "symbol": "TERPELCL",
+    "name": "Organizacion Terpel SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/organizacion-terpel-sa.svg"
+  },
+  {
+    "symbol": "TERPELUS",
+    "name": "Organizacion Terpel SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/organizacion-terpel-sa.svg"
+  },
+  {
+    "symbol": "TGT",
+    "name": "Target Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/target.svg"
+  },
+  {
+    "symbol": "TGTCL",
+    "name": "Target Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/target.svg"
+  },
+  {
+    "symbol": "TMO",
+    "name": "Thermo Fisher Scientific Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/thermo-fisher-scientific.svg"
+  },
+  {
+    "symbol": "TMOCL",
+    "name": "Thermo Fisher Scientific Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/thermo-fisher-scientific.svg"
+  },
+  {
+    "symbol": "TRICAHUE",
+    "name": "Inversiones Tricahue S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inv-tricahue.svg"
+  },
+  {
+    "symbol": "TRICOT",
+    "name": "Empresas Tricot SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/empresas-tricot-sa.svg"
+  },
+  {
+    "symbol": "TRV",
+    "name": "Travelers Companies, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/travelers.svg"
+  },
+  {
+    "symbol": "TRVCL",
+    "name": "Travelers Companies, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/travelers.svg"
+  },
+  {
+    "symbol": "TSLA",
+    "name": "Tesla, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/tesla.svg"
+  },
+  {
+    "symbol": "TSLACL",
+    "name": "Tesla, Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/tesla.svg"
+  },
+  {
+    "symbol": "TXN",
+    "name": "Texas Instruments Incorporated",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/texas-instruments.svg"
+  },
+  {
+    "symbol": "TXNCL",
+    "name": "Texas Instruments Incorporated",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/texas-instruments.svg"
+  },
+  {
+    "symbol": "UNESPA",
+    "name": "INVERSIONES UNESPA S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/inv-unespa-sa.svg"
+  },
+  {
+    "symbol": "UNH",
+    "name": "UnitedHealth Group Incorporated",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/unitedhealth.svg"
+  },
+  {
+    "symbol": "UNHCL",
+    "name": "UnitedHealth Group Incorporated",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/unitedhealth.svg"
+  },
+  {
+    "symbol": "UNION_GOLF",
+    "name": "Union El Golf S.A.",
+    "market": "BCS"
+  },
+  {
+    "symbol": "UNP",
+    "name": "Union Pacific Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/union-pacific.svg"
+  },
+  {
+    "symbol": "UNPCL",
+    "name": "Union Pacific Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/union-pacific.svg"
+  },
+  {
+    "symbol": "UPS",
+    "name": "United Parcel Service, Inc. Class B",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/united-parcel.svg"
+  },
+  {
+    "symbol": "UPSCL",
+    "name": "United Parcel Service, Inc. Class B",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/united-parcel.svg"
+  },
+  {
+    "symbol": "USB",
+    "name": "U.S. Bancorp",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/us-bancorp.svg"
+  },
+  {
+    "symbol": "USBCL",
+    "name": "U.S. Bancorp",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/us-bancorp.svg"
+  },
+  {
+    "symbol": "V",
+    "name": "Visa Inc. Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/visa.svg"
+  },
+  {
+    "symbol": "VAPORES",
+    "name": "Compania Sud Americana de Vapores S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/sudamericana-vapor.svg"
+  },
+  {
+    "symbol": "VCL",
+    "name": "Visa Inc. Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/visa.svg"
+  },
+  {
+    "symbol": "VCMAC1",
+    "name": "Volcan Compania Minera S.A.A. Class A",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/volcan-compania-minera.svg"
+  },
+  {
+    "symbol": "VCMBC1",
+    "name": "Volcan Compania Minera S.A.A. Class B",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/volcan-compania-minera.svg"
+  },
+  {
+    "symbol": "VENTANAS",
+    "name": "Puerto Ventanas S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/puerto-ventanas-sa.svg"
+  },
+  {
+    "symbol": "VICONT_OSA",
+    "name": "FRUTICOLA VICONTO SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "VICONTO",
+    "name": "Fruticola Viconto S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/fruticola-viconto.svg"
+  },
+  {
+    "symbol": "VOLCAN",
+    "name": "Compania Industrial el Volcan S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/industrial-volcan.svg"
+  },
+  {
+    "symbol": "VSPT",
+    "name": "Vina San Pedro Tarapaca S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/vina-san-pedro-tar.svg"
+  },
+  {
+    "symbol": "VZ",
+    "name": "Verizon Communications Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/verizon.svg"
+  },
+  {
+    "symbol": "VZCL",
+    "name": "Verizon Communications Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/verizon.svg"
+  },
+  {
+    "symbol": "WALMARTCL",
+    "name": "Walmart Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/walmart.svg"
+  },
+  {
+    "symbol": "WATTS",
+    "name": "Watt's SA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/watts-sa.svg"
+  },
+  {
+    "symbol": "WFC",
+    "name": "Wells Fargo & Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/wells-fargo.svg"
+  },
+  {
+    "symbol": "WFCCL",
+    "name": "Wells Fargo & Company",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/wells-fargo.svg"
+  },
+  {
+    "symbol": "WMLCL",
+    "name": "Wealth Minerals Ltd.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/wealth-minerals-ltd.svg"
+  },
+  {
+    "symbol": "WMT",
+    "name": "Walmart Inc.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/walmart.svg"
+  },
+  {
+    "symbol": "XOM",
+    "name": "Exxon Mobil Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/exxon.svg"
+  },
+  {
+    "symbol": "XOMCL",
+    "name": "Exxon Mobil Corporation",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/exxon.svg"
+  },
+  {
+    "symbol": "YUGOSLAVA",
+    "name": "Inmobiliaria Yugoslava SA",
+    "market": "BCS"
+  },
+  {
+    "symbol": "ZEROQ",
+    "name": "Panther Management SpA",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/panther-management-spa.svg"
+  },
+  {
+    "symbol": "ZOFRI",
+    "name": "Zona Franca de Iquique S.A.",
+    "market": "BCS",
+    "image": "https://s3-symbol-logo.tradingview.com/zona-franca-iquiqu.svg"
+  }
+]

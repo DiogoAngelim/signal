@@ -1,0 +1,4230 @@
+[
+  {
+    "image": "/vesple/optimalstocks/images/aberdeen-international.svg",
+    "symbol": "AAB.TO",
+    "name": "ABERDEEN INTERNATIONAL INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "AAUC.TO",
+    "name": "ALLIED GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/advantage-energy.svg",
+    "symbol": "AAV.TO",
+    "name": "ADVANTAGE ENERGY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/abrasilver-resource.svg",
+    "symbol": "ABRA.TO",
+    "name": "ABRASILVER RESOURCE CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/barrick-gold.svg",
+    "symbol": "ABX.TO",
+    "name": "BARRICK GOLD CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/air-canada.svg",
+    "symbol": "AC.TO",
+    "name": "AIR CANADA",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aurora-cannabis.svg",
+    "symbol": "ACB.TO",
+    "name": "AURORA CANNABIS INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "ACD.TO",
+    "name": "ACCORD FINANCIAL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/autocanada.svg",
+    "symbol": "ACQ.TO",
+    "name": "AUTOCANADA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/adcore.svg",
+    "symbol": "ADCO.TO",
+    "name": "ADCORE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/adentra.svg",
+    "symbol": "ADEN.TO",
+    "name": "ADENTRA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/acadian-timber.svg",
+    "symbol": "ADN.TO",
+    "name": "ACADIAN TIMBER CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "ADY.TO",
+    "name": "ADYTON RESOURCES CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "symbol": "AEG.TO",
+    "name": "AEGIS BRANDS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/agnico-eagle-mines.svg",
+    "symbol": "AEM.TO",
+    "name": "AGNICO EAGLE MINES LTD",
+    "market": "TSX"
+  },
+  {
+    "symbol": "AFF.TO",
+    "name": "AFFINITY METALS CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alphamin-resources.svg",
+    "symbol": "AFM.TO",
+    "name": "ALPHAMIN RES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ag-growth-international.svg",
+    "symbol": "AFN.TO",
+    "name": "AG GROWTH INTERNATIONAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alamos-gold.svg",
+    "symbol": "AGI.TO",
+    "name": "ALAMOS GOLD INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "AI.TO",
+    "name": "ATRIUM MORTGAGE INVESTMENT CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/healwell-ai.svg",
+    "symbol": "AIDX.TO",
+    "name": "HEALWELL AI INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/altus-group.svg",
+    "symbol": "AIF.TO",
+    "name": "ALTUS GROUP LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/almonty-industries.svg",
+    "symbol": "AII.TO",
+    "name": "ALMONTY INDUSTRIES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aimia.svg",
+    "symbol": "AIM.TO",
+    "name": "AIMIA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/altagas.svg",
+    "symbol": "ALA.TO",
+    "name": "ALTAGAS LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/algoma-central.svg",
+    "symbol": "ALC.TO",
+    "name": "ALGOMA CENTRAL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/altius-minerals.svg",
+    "symbol": "ALS.TO",
+    "name": "ALTIUS MINERALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alithya.svg",
+    "symbol": "ALYA.TO",
+    "name": "ALITHYA GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ambari-brands.svg",
+    "symbol": "AMB.TO",
+    "name": "AMBARI BRANDS INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arizona-metals.svg",
+    "symbol": "AMC.TO",
+    "name": "ARIZONA METALS COR",
+    "market": "TSX"
+  },
+  {
+    "symbol": "AMR.TO",
+    "name": "AM RES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/azucar-minerals-ltd.svg",
+    "symbol": "AMZ.TO",
+    "name": "AZUCAR MINERALS LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/andlauer-healthcare-group.svg",
+    "symbol": "AND.TO",
+    "name": "ANDLAUER HEALTHCARE GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/anaergia.svg",
+    "symbol": "ANRG.TO",
+    "name": "ANAERGIA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/appili-therapeutics.svg",
+    "symbol": "APLI.TO",
+    "name": "APPILI THERAPEUTICS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/andean-precious-metals.svg",
+    "symbol": "APM.TO",
+    "name": "ANDEAN PRECIOUS METALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aptose-biosciences.svg",
+    "symbol": "APS.TO",
+    "name": "APTOSE BIOSCIENCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/algonquin-power.svg",
+    "symbol": "AQN.TO",
+    "name": "ALGONQUIN POWER & UTILITIES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aclara-resources.svg",
+    "symbol": "ARA.TO",
+    "name": "ACLARA RESOURCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aecon-group-inc.svg",
+    "symbol": "ARE.TO",
+    "name": "AECON GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/amerigo-resources.svg",
+    "symbol": "ARG.TO",
+    "name": "AMERIGO RESOURCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aris-mng.svg",
+    "symbol": "ARIS.TO",
+    "name": "ARIS MINING CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "symbol": "ARL.TO",
+    "name": "AURUM LAKE MINING CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arc-resources.svg",
+    "symbol": "ARX.TO",
+    "name": "ARC RESOURCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arizona-sonoran-copper-company.svg",
+    "symbol": "ASCU.TO",
+    "name": "ARIZONA SONORAN COPPER CO INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/avino-silver-and-gold-mines.svg",
+    "symbol": "ASM.TO",
+    "name": "AVINO SILVER & GOLD MINES",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/candente-copper.svg",
+    "symbol": "ATCU.TO",
+    "name": "ALTA COPPER CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alimentation-couche-tard.svg",
+    "symbol": "ATD.TO",
+    "name": "ALIMENTATION COUCHE-TARD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/athabasca.svg",
+    "symbol": "ATH.TO",
+    "name": "ATHABASCA OIL CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "ATI.TO",
+    "name": "ALTAI RESOURCES",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/snc-lavalin.svg",
+    "symbol": "ATRL.TO",
+    "name": "SNC-LAVALIN GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ats-automation-tooling-system.svg",
+    "symbol": "ATS.TO",
+    "name": "ATS CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/atex-resources.svg",
+    "symbol": "ATX.TO",
+    "name": "ATEX RESOURCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/atico-mining.svg",
+    "symbol": "ATY.TO",
+    "name": "ATICO MINING CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aritzia.svg",
+    "symbol": "ATZ.TO",
+    "name": "ARITZIA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aurion-resources-ltd.svg",
+    "symbol": "AU.TO",
+    "name": "AURION RESOURCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/avicanna.svg",
+    "symbol": "AVCN.TO",
+    "name": "AVICANNA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/avalon-advanced-materials.svg",
+    "symbol": "AVL.TO",
+    "name": "AVALON ADVANCED MATERIALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/avant-brands.svg",
+    "symbol": "AVNT.TO",
+    "name": "AVANT BRANDS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/arrow-expl.svg",
+    "symbol": "AXL.TO",
+    "name": "ARROW EXPLORATION CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aya-gold-and-silver.svg",
+    "symbol": "AYA.TO",
+    "name": "AYA GOLD & SILVER INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/azarga-metals.svg",
+    "symbol": "AZR.TO",
+    "name": "AZARGA METALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/else-nutrition.svg",
+    "symbol": "BABY.TO",
+    "name": "ELSE NUTRITION HOLDINGS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/blue-star-gold.svg",
+    "symbol": "BAU.TO",
+    "name": "BLUE STAR GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/blackberry.svg",
+    "symbol": "BB.TO",
+    "name": "BLACKBERRY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/brookfield-business.svg",
+    "symbol": "BBUC.TO",
+    "name": "BROOKFIELD BUSINESS CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bce.svg",
+    "symbol": "BCE.TO",
+    "name": "BCE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/briacell.svg",
+    "symbol": "BCT.TO",
+    "name": "BRIACELL THERAPEUTICS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/badger-infrastructure.svg",
+    "symbol": "BDGI.TO",
+    "name": "BADGER INFRASTRUCTURE SOLUTIONS LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/black-diamond-ltd.svg",
+    "symbol": "BDI.TO",
+    "name": "BLACK DIAMOND GROUP LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bird-construction.svg",
+    "symbol": "BDT.TO",
+    "name": "BIRD CONSTRUCTION INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "BES.TO",
+    "name": "BRAILLE ENERGY SYSTEMS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bevcanna-enterprises.svg",
+    "symbol": "BEV.TO",
+    "name": "BEVCANNA ENTERPRISES INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bausch-health-companies.svg",
+    "symbol": "BHC.TO",
+    "name": "BAUSCH HEALTH COMPANIES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/birchcliff-energy.svg",
+    "symbol": "BIR.TO",
+    "name": "BIRCHCLIFF ENERGY",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bitfarms.svg",
+    "symbol": "BITF.TO",
+    "name": "BITFARMS LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/black-iron.svg",
+    "symbol": "BKI.TO",
+    "name": "BLACK IRON INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ballard-power-systems.svg",
+    "symbol": "BLDP.TO",
+    "name": "BALLARD POWER SYSTEMS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/blackline-safety.svg",
+    "symbol": "BLN.TO",
+    "name": "BLACKLINE SAFETY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/boralex.svg",
+    "symbol": "BLX.TO",
+    "name": "BORALEX INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bank-of-montreal.svg",
+    "symbol": "BMO.TO",
+    "name": "BANK OF MONTREAL",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bonterra-energy.svg",
+    "symbol": "BNE.TO",
+    "name": "BONTERRA ENERGY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bengal-energy-ltd.svg",
+    "symbol": "BNG.TO",
+    "name": "BENGAL ENERGY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bank-of-nova-scotia.svg",
+    "symbol": "BNS.TO",
+    "name": "BANK OF NOVA SCOTIA",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/airboss-of-america.svg",
+    "symbol": "BOS.TO",
+    "name": "AIRBOSS OF AMERICA CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bqe-water.svg",
+    "symbol": "BQE.TO",
+    "name": "BQE WTR INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/big-rock-brewery.svg",
+    "symbol": "BR.TO",
+    "name": "BIG ROCK BREWERY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bragg-gaming.svg",
+    "symbol": "BRAG.TO",
+    "name": "BRAGG GAMING GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/brookfield.svg",
+    "symbol": "BRE.TO",
+    "name": "BRIDGEMARQ REAL ESTATE SERVICES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bri-chem.svg",
+    "symbol": "BRY.TO",
+    "name": "BRI-CHEM CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "BST.TO",
+    "name": "BESSOR MINERALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/belo-sun-mining.svg",
+    "symbol": "BSX.TO",
+    "name": "BELO SUN MNG CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/baytex-energy.svg",
+    "symbol": "BTE.TO",
+    "name": "BAYTEX ENERGY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/b2gold.svg",
+    "symbol": "BTO.TO",
+    "name": "B2GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/burcon-nutrascience.svg",
+    "symbol": "BU.TO",
+    "name": "BURCON NUTRASCIENCE CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "BWR.TO",
+    "name": "BWR EXPLORATION INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/boyd-group-services.svg",
+    "symbol": "BYD.TO",
+    "name": "BOYD GROUP SERVICES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/baylin-technologies.svg",
+    "symbol": "BYL.TO",
+    "name": "BAYLIN TECHNOLOGIES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cae.svg",
+    "symbol": "CAE.TO",
+    "name": "CAE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cascadia-minerals-ltd.svg",
+    "symbol": "CAM.TO",
+    "name": "CASCADIA MINERALS LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cascades.svg",
+    "symbol": "CAS.TO",
+    "name": "CASCADES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cat-strategic-metals.svg",
+    "symbol": "CAT.TO",
+    "name": "CAT STRATEGIC METALS CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/colibri-resource.svg",
+    "symbol": "CBI.TO",
+    "name": "COLIBRI RESOURCES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cogeco-communications.svg",
+    "symbol": "CCA.TO",
+    "name": "COGECO COMMUNICATIONS INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "CCI.TO",
+    "name": "CANADIAN COPPER INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canagold-res-ltd.svg",
+    "symbol": "CCM.TO",
+    "name": "CANAGOLD RESOURCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/green-river-gold.svg",
+    "symbol": "CCR.TO",
+    "name": "GREEN RIVER GOLD CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/condor-energies.svg",
+    "symbol": "CDR.TO",
+    "name": "CONDOR ENERGIES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cloud-dx.svg",
+    "symbol": "CDX.TO",
+    "name": "CLOUD DX INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "CEG.TO",
+    "name": "CERRO GRANDE MINING CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/coelacanth-energy.svg",
+    "symbol": "CEI.TO",
+    "name": "COELACANTH ENERGY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ces-energy-solutions.svg",
+    "symbol": "CEU.TO",
+    "name": "CES ENERGY SOLUTIONS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canaccord-genuity.svg",
+    "symbol": "CF.TO",
+    "name": "CANACCORD GENUITY GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/conifex-timber.svg",
+    "symbol": "CFF.TO",
+    "name": "CONIFEX TIMBER INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canfor.svg",
+    "symbol": "CFP.TO",
+    "name": "CANFOR CORP NEW",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/calfrac-well-services-ltd.svg",
+    "symbol": "CFW.TO",
+    "name": "CALFRAC WELL SERVICES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canfor-pulp-products.svg",
+    "symbol": "CFX.TO",
+    "name": "CANFOR PULP PRODUCTS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/centerra-gold.svg",
+    "symbol": "CG.TO",
+    "name": "CENTERRA GOLD INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canadian-gold.svg",
+    "symbol": "CGC.TO",
+    "name": "CANADIAN GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cogeco.svg",
+    "symbol": "CGO.TO",
+    "name": "COGECO INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cineplex.svg",
+    "symbol": "CGX.TO",
+    "name": "CINEPLEX INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/calian-ltd.svg",
+    "symbol": "CGY.TO",
+    "name": "CALIAN GROUP LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/charbone-hydrogen.svg",
+    "symbol": "CH.TO",
+    "name": "CHARBONE HYDROGEN CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/chorus-aviation.svg",
+    "symbol": "CHR.TO",
+    "name": "CHORUS AVIATION INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/colliers-intl-group.svg",
+    "symbol": "CIGI.TO",
+    "name": "COLLIERS INTL GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cardinal-energy-ltd.svg",
+    "symbol": "CJ.TO",
+    "name": "CARDINAL ENERGY GROUP(CANADA)",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cargojet.svg",
+    "symbol": "CJT.TO",
+    "name": "CARGOJET INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "CKI.TO",
+    "name": "CLARKE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/christina-lake-cannabis.svg",
+    "symbol": "CLC.TO",
+    "name": "CHRISTINA LAKE CANNABIS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/jourdan-resources.svg",
+    "symbol": "CLM.TO",
+    "name": "CONSOLIDATED LITHIUM METALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/celestica.svg",
+    "symbol": "CLS.TO",
+    "name": "CELESTICA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canoe-mining-ventures.svg",
+    "symbol": "CLV.TO",
+    "name": "CANOE MNG VENTURES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canadian-imperial-bank-of-commerce.svg",
+    "symbol": "CM.TO",
+    "name": "CANADIAN IMPERIAL BANK OF COMMERCE",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cielo-waste-solutions.svg",
+    "symbol": "CMC.TO",
+    "name": "CIELO WASTE SOLUTIONS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/computer-modelling-ltd.svg",
+    "symbol": "CMG.TO",
+    "name": "COMPUTER MODELLING GROUP LTD",
+    "market": "TSX"
+  },
+  {
+    "symbol": "CML.TO",
+    "name": "CANICKEL MINING LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cullinan-metals.svg",
+    "symbol": "CMT.TO",
+    "name": "CULLINAN METALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canacol-energy-ltd.svg",
+    "symbol": "CNE.TO",
+    "name": "CANACOL ENERGY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/collective-mining-ltd.svg",
+    "symbol": "CNL.TO",
+    "name": "COLLECTIVE MINING LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canadian-natural-resources.svg",
+    "symbol": "CNQ.TO",
+    "name": "CANADIAN NATURAL RESOURCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canadian-national-railways.svg",
+    "symbol": "CNR.TO",
+    "name": "CANADIAN NATIONAL RAILWAYS CO",
+    "market": "TSX"
+  },
+  {
+    "symbol": "CNT.TO",
+    "name": "CENTURY GLOBAL COMMODITIES CORP(KY)",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tokens-com.svg",
+    "symbol": "COIN.TO",
+    "name": "TOKENS.COM CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "COS.TO",
+    "name": "CONIAGAS BATTERY METALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canadian-pacific-railway.svg",
+    "symbol": "CP.TO",
+    "name": "CANADIAN PAC KANS CITY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cipher-pharmaceuticals.svg",
+    "symbol": "CPH.TO",
+    "name": "CIPHER PHARMACEUTICALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/capital-power.svg",
+    "symbol": "CPX.TO",
+    "name": "CAPITAL POWER CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canter-res.svg",
+    "symbol": "CRC.TO",
+    "name": "CANTER RESOURCES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cardiol-therapeutics.svg",
+    "symbol": "CRDL.TO",
+    "name": "CARDIOL THERAPEUTICS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/critical-elements-lithium.svg",
+    "symbol": "CRE.TO",
+    "name": "CRITICAL ELEMENTS LITHIUM CORPORATI",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cronos-group.svg",
+    "symbol": "CRON.TO",
+    "name": "CRONOS GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/carerx.svg",
+    "symbol": "CRRX.TO",
+    "name": "CARERX CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "symbol": "CRWN.TO",
+    "name": "CROWN CAPITAL PARTNERS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/capstone-mining.svg",
+    "symbol": "CS.TO",
+    "name": "CAPSTONE COPPER CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "CSS.TO",
+    "name": "CASCADA SILVER CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/constellation-software.svg",
+    "symbol": "CSU.TO",
+    "name": "CONSTELLATION SOFTWARE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/centaurus-energy.svg",
+    "symbol": "CTA.TO",
+    "name": "CENTAURUS ENERGY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canadian-tire.svg",
+    "symbol": "CTC.TO",
+    "name": "CANADIAN TIRE LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cotec.svg",
+    "symbol": "CTH.TO",
+    "name": "COTEC HOLDINGS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/crescita-therapeutics.svg",
+    "symbol": "CTX.TO",
+    "name": "CRESCITA THERAPEUTICS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canadian-utilities.svg",
+    "symbol": "CU.TO",
+    "name": "CANADIAN UTILITIES",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/curaleaf.svg",
+    "symbol": "CURA.TO",
+    "name": "CURALEAF HOLDINGS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cenovus.svg",
+    "symbol": "CVE.TO",
+    "name": "CENOVUS ENERGY INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "CVG.TO",
+    "name": "CLAIRVEST GROUP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/coveo-solutions.svg",
+    "symbol": "CVO.TO",
+    "name": "COVEO SOLUTIONS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canalaska-uranium-ltd.svg",
+    "symbol": "CVV.TO",
+    "name": "CANALASKA URANIUM LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/charlotte-s-web.svg",
+    "symbol": "CWEB.TO",
+    "name": "CHARLOTTES WEB HOLDINGS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/caldwell-partners-international.svg",
+    "symbol": "CWL.TO",
+    "name": "CALDWELL PARTNERS INTERNATIONAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/currency-exchange-international.svg",
+    "symbol": "CXI.TO",
+    "name": "CURRENCY EXCHANGE INTL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cymat-technologies-ltd.svg",
+    "symbol": "CYM.TO",
+    "name": "CYMAT TECHNOLOGIES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/doman-building-materials-ltd.svg",
+    "symbol": "DBM.TO",
+    "name": "DOMAN BUILDING MATERIALS GROUP LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/d-box-technologies.svg",
+    "symbol": "DBO.TO",
+    "name": "D-BOX TECHNOLOGIES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/docebo.svg",
+    "symbol": "DCBO.TO",
+    "name": "DOCEBO INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/data-communications-management.svg",
+    "symbol": "DCM.TO",
+    "name": "DATA COMMUNICATIONS MANAGEMENT CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/defiance-silver.svg",
+    "symbol": "DEF.TO",
+    "name": "DEFIANCE SILVER CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dfr-gold.svg",
+    "symbol": "DFR.TO",
+    "name": "DFR GOLD INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/definity-financial.svg",
+    "symbol": "DFY.TO",
+    "name": "DEFINITY FINL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/star-diamond.svg",
+    "symbol": "DIAM.TO",
+    "name": "STAR DIAMOND CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/diversified-royalty.svg",
+    "symbol": "DIV.TO",
+    "name": "DIVERSIFIED RTY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dominion-lending-ctrs.svg",
+    "symbol": "DLCG.TO",
+    "name": "DOMINION LENDING CENTRES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/datametrex-ai-limit.svg",
+    "symbol": "DM.TO",
+    "name": "DATAMETREX AI LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/denison-mines.svg",
+    "symbol": "DML.TO",
+    "name": "DENISON MINES CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/district-metals.svg",
+    "symbol": "DMX.TO",
+    "name": "DISTRICT METALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dye-and-durham.svg",
+    "symbol": "DND.TO",
+    "name": "DYE & DURHAM LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dynacor.svg",
+    "symbol": "DNG.TO",
+    "name": "DYNACOR GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dentalcorp.svg",
+    "symbol": "DNTL.TO",
+    "name": "DENTALCORP HLDGS LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cloudmd-software-and-services-inc.svg",
+    "symbol": "DOC.TO",
+    "name": "CLOUDMD SOFTWARE & SERVICES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dollarama.svg",
+    "symbol": "DOL.TO",
+    "name": "DOLLARAMA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/brp.svg",
+    "symbol": "DOO.TO",
+    "name": "BRP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dundee-precious-metals.svg",
+    "symbol": "DPM.TO",
+    "name": "DUNDEE PRECIOUS METALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/medical-facilities.svg",
+    "symbol": "DR.TO",
+    "name": "MEDICAL FACILITIES CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dream-unlimited.svg",
+    "symbol": "DRM.TO",
+    "name": "DREAM UNLIMITED CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dirtt-environmental-solutions-ltd.svg",
+    "symbol": "DRT.TO",
+    "name": "DIRTT ENVIRONMENTAL SOLUTIONS LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/adf.svg",
+    "symbol": "DRX.TO",
+    "name": "ADF GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/descartes-systems-group.svg",
+    "symbol": "DSG.TO",
+    "name": "DESCARTES SYSTEMS GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/discovery-metals.svg",
+    "symbol": "DSV.TO",
+    "name": "DISCOVERY SILVER CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/defence-therapeutics.svg",
+    "symbol": "DTC.TO",
+    "name": "DEFENCE THERAPEUTICS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/d2l.svg",
+    "symbol": "DTOL.TO",
+    "name": "D2L INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dexterra.svg",
+    "symbol": "DXT.TO",
+    "name": "DEXTERRA GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dynacert.svg",
+    "symbol": "DYA.TO",
+    "name": "DYNACERT INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/enterprise.svg",
+    "symbol": "E.TO",
+    "name": "ENTERPRISE GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/east-side-games.svg",
+    "symbol": "EAGR.TO",
+    "name": "EAST SIDE GAMES GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "EBR.TO",
+    "name": "EAGLE BAY RESOURCES CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ecn-capital.svg",
+    "symbol": "ECN.TO",
+    "name": "ECN CAPITAL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ecosynthetix.svg",
+    "symbol": "ECO.TO",
+    "name": "ECOSYNTHETIX INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/element-29-resources.svg",
+    "symbol": "ECU.TO",
+    "name": "ELEMENT 29 RESOURCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/endeavour-silver.svg",
+    "symbol": "EDR.TO",
+    "name": "ENDEAVOUR SILVER CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/spectral-medical.svg",
+    "symbol": "EDT.TO",
+    "name": "SPECTRAL MEDICAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/endeavour-mining.svg",
+    "symbol": "EDV.TO",
+    "name": "ENDEAVOUR MINING PLC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/element-fleet-management.svg",
+    "symbol": "EFN.TO",
+    "name": "ELEMENT FLEET MANAGEMENT CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/enerflex-ltd.svg",
+    "symbol": "EFX.TO",
+    "name": "ENERFLEX LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/enthusiast-gaming.svg",
+    "symbol": "EGLX.TO",
+    "name": "ENTHUSIAST GAMING HOLDINGS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/exchange-income-corporation.svg",
+    "symbol": "EIF.TO",
+    "name": "EXCHANGE INCOME CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/elysee-development.svg",
+    "symbol": "ELC.TO",
+    "name": "ELYSEE DEVELOPMENT CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/eldorado-gold.svg",
+    "symbol": "ELD.TO",
+    "name": "ELDORADO GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/silver-elephant-mng.svg",
+    "symbol": "ELEF.TO",
+    "name": "SILVER ELEPHANT MINING CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/e-l-financial.svg",
+    "symbol": "ELF.TO",
+    "name": "E L FINANCIAL CORP LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/eloro-resources-ltd.svg",
+    "symbol": "ELO.TO",
+    "name": "ELORO RESOURCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/eastern-platinum.svg",
+    "symbol": "ELR.TO",
+    "name": "EASTERN PLATINUM LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/electrovaya.svg",
+    "symbol": "ELVA.TO",
+    "name": "ELECTROVAYA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/emera.svg",
+    "symbol": "EMA.TO",
+    "name": "EMERA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/enbridge.svg",
+    "symbol": "ENB.TO",
+    "name": "ENBRIDGE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/enghouse-systems.svg",
+    "symbol": "ENGH.TO",
+    "name": "ENGHOUSE SYSTEMS",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/eco-oro-minerals.svg",
+    "symbol": "EOM.TO",
+    "name": "ECO ORO MINERALS CORP. J",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/eupraxia-pharmaceuticals.svg",
+    "symbol": "EPRX.TO",
+    "name": "EUPRAXIA PHARMACEUTICALS INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "EQ.TO",
+    "name": "EQ INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/equitable-group.svg",
+    "symbol": "EQB.TO",
+    "name": "EQB INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/eros-resources.svg",
+    "symbol": "ERC.TO",
+    "name": "EROS RESOURCES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/erdene-resource-development.svg",
+    "symbol": "ERD.TO",
+    "name": "ERDENE RESOURCE DEVELOPMENT CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ero-copper.svg",
+    "symbol": "ERO.TO",
+    "name": "ERO COPPER CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ensign-energy-services.svg",
+    "symbol": "ESI.TO",
+    "name": "ENSIGN ENERGY SERVICES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/euro-sun-mining.svg",
+    "symbol": "ESM.TO",
+    "name": "EURO SUN MINING INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/evertz-technologies-ltd.svg",
+    "symbol": "ET.TO",
+    "name": "EVERTZ TECHNOLOGIES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/entree-resources-ltd.svg",
+    "symbol": "ETG.TO",
+    "name": "ENTREE RESOURCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/extendicare.svg",
+    "symbol": "EXE.TO",
+    "name": "EXTENDICARE INC CDA",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/avante-mining.svg",
+    "symbol": "FAN.TO",
+    "name": "FIRST ATLANTIC NICKEL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/foraco-international-marseille.svg",
+    "symbol": "FAR.TO",
+    "name": "FORACO INTERNATIONAL SA",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/firm-capital-mortgage-investment.svg",
+    "symbol": "FC.TO",
+    "name": "FIRM CAPITAL MORTGAGE INV CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fandifi-technology.svg",
+    "symbol": "FDM.TO",
+    "name": "FANDIFI TECHNOLOGY CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/faraday-copper.svg",
+    "symbol": "FDY.TO",
+    "name": "FARADAY COPPER CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fe-battery-metals.svg",
+    "symbol": "FE.TO",
+    "name": "FE BATTERY METALS CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/frontera-energy.svg",
+    "symbol": "FEC.TO",
+    "name": "FRONTERA ENERGY CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/first-mining-gold.svg",
+    "symbol": "FF.TO",
+    "name": "FIRST MINING GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "FFF.TO",
+    "name": "55 NORTH MINING INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fairfax-financial.svg",
+    "symbol": "FFH.TO",
+    "name": "FAIRFAX FINANCIAL HLDGS LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/frontier-lithium.svg",
+    "symbol": "FL.TO",
+    "name": "FRONTIER LITHIUM INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "FLNT.TO",
+    "name": "FLINT CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/first-quantum-minerals.svg",
+    "symbol": "FM.TO",
+    "name": "FIRST QUANTUM MINERALS",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/forum-energy-metals.svg",
+    "symbol": "FMC.TO",
+    "name": "FORUM ENERGY METALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fathom-nickel.svg",
+    "symbol": "FNI.TO",
+    "name": "FATHOM NICKEL INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/franco-nevada.svg",
+    "symbol": "FNV.TO",
+    "name": "FRANCO NEVADA CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/foran-mining.svg",
+    "symbol": "FOM.TO",
+    "name": "FORAN MINING CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/goodfood-market.svg",
+    "symbol": "FOOD.TO",
+    "name": "GOODFOOD MARKET CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fortune-bay.svg",
+    "symbol": "FOR.TO",
+    "name": "FORTUNE BAY CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "FORA.TO",
+    "name": "VERTICALSCOPE HLDGS INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "FP.TO",
+    "name": "FP NEWSPAPERS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fpx-nickel.svg",
+    "symbol": "FPX.TO",
+    "name": "FPX NICKEL CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "FRG.TO",
+    "name": "FORGE RESOURCES CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/freehold-royalties.svg",
+    "symbol": "FRU.TO",
+    "name": "FREEHOLD ROYALTIES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/firstservice.svg",
+    "symbol": "FSV.TO",
+    "name": "FIRSTSERVICE CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/forsys-metals.svg",
+    "symbol": "FSY.TO",
+    "name": "FORSYS METALS CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fiera-capital.svg",
+    "symbol": "FSZ.TO",
+    "name": "FIERA CAPITAL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fortune-minerals-limited.svg",
+    "symbol": "FT.TO",
+    "name": "FORTUNE MINERALS LD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/firan-technology.svg",
+    "symbol": "FTG.TO",
+    "name": "FIRAN TECHNOLOGY GROUP CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fortis.svg",
+    "symbol": "FTS.TO",
+    "name": "FORTIS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/finning.svg",
+    "symbol": "FTT.TO",
+    "name": "FINNING INTERNATIONAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fury-gold-mines-limited.svg",
+    "symbol": "FURY.TO",
+    "name": "FURY GOLD MINES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fortuna-silver-mines.svg",
+    "symbol": "FVI.TO",
+    "name": "FORTUNA SILVER MINES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/freegold-ventures.svg",
+    "symbol": "FVL.TO",
+    "name": "FREEGOLD VENTURES",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/augusta-gold.svg",
+    "symbol": "G.TO",
+    "name": "AUGUSTA GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/galiano-gold.svg",
+    "symbol": "GAU.TO",
+    "name": "GALIANO GOLD INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "GBT.TO",
+    "name": "BMTC GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gabriel-resources-ltd.svg",
+    "symbol": "GBU.TO",
+    "name": "GABRIEL RESOURCES",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/guardian-capital-ltd.svg",
+    "symbol": "GCG.TO",
+    "name": "GUARDIAN CAPITAL GROUP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/colabor.svg",
+    "symbol": "GCL.TO",
+    "name": "COLABOR GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/genesis-land-development.svg",
+    "symbol": "GDC.TO",
+    "name": "GENESIS LAND DEVELOPMENT CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gdi-integrated-facility.svg",
+    "symbol": "GDI.TO",
+    "name": "GDI INTEGRATED FAC SVCS INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "GDL.TO",
+    "name": "GOODFELLOW INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/global-ed-cmntys.svg",
+    "symbol": "GEC.TO",
+    "name": "GLOBAL ED CMNTYS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gibson-energy.svg",
+    "symbol": "GEI.TO",
+    "name": "GIBSON ENERGY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/generation-mining-limited.svg",
+    "symbol": "GENM.TO",
+    "name": "GENERATION MINING LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/geodrill-ltd.svg",
+    "symbol": "GEO.TO",
+    "name": "GEODRILL LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gfl-environmental.svg",
+    "symbol": "GFL.TO",
+    "name": "GFL ENVIRONMENTAL INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/greenfirst-forest-products.svg",
+    "symbol": "GFP.TO",
+    "name": "GREENFIRST FOREST PRODUCTS INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "GGC.TO",
+    "name": "GENERIC GOLD CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gogold-resources.svg",
+    "symbol": "GGD.TO",
+    "name": "GOGOLD RESOURCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/g6-materials.svg",
+    "symbol": "GGG.TO",
+    "name": "G6 MATERIALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gamehost.svg",
+    "symbol": "GH.TO",
+    "name": "GAMEHOST INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gildan-activewear.svg",
+    "symbol": "GIL.TO",
+    "name": "GILDAN ACTIVEWEAR INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gitennes-exploration.svg",
+    "symbol": "GIT.TO",
+    "name": "GITENNES EXPLORATION INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/glg-life-tech.svg",
+    "symbol": "GLG.TO",
+    "name": "GLG LIFE TECH CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/global-atomic.svg",
+    "symbol": "GLO.TO",
+    "name": "GLOBAL ATOMIC CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/galaxy-digital.svg",
+    "symbol": "GLXY.TO",
+    "name": "GALAXY DIGITAL HLDGS LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/goldstar-minerals.svg",
+    "symbol": "GMI.TO",
+    "name": "GREEN MINING INNOVATION INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/g-mining-ventures.svg",
+    "symbol": "GMIN.TO",
+    "name": "G MINING VENTURES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/globex-mining-enterprises.svg",
+    "symbol": "GMX.TO",
+    "name": "GLOBEX MINING ENTERPRISES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/goldmining.svg",
+    "symbol": "GOLD.TO",
+    "name": "GOLDMINING INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canada-goose.svg",
+    "symbol": "GOOS.TO",
+    "name": "CANADA GOOSE HOLDINGS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nanoxplore.svg",
+    "symbol": "GRA.TO",
+    "name": "NANOXPLORE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gold-springs-resource.svg",
+    "symbol": "GRC.TO",
+    "name": "GOLD SPRINGS RESOURCE CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tantalus-sys-hldgs.svg",
+    "symbol": "GRID.TO",
+    "name": "TANTALUS SYSTEMS HOLDING INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/greenlane-renewables.svg",
+    "symbol": "GRN.TO",
+    "name": "GREENLANE RENEWABLES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gold-reserve.svg",
+    "symbol": "GRZ.TO",
+    "name": "GOLD RESERVE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gatekeeper-systems.svg",
+    "symbol": "GSI.TO",
+    "name": "GATEKEEPER SYS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/goeasy.svg",
+    "symbol": "GSY.TO",
+    "name": "GOEASY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/g2-goldfields.svg",
+    "symbol": "GTWO.TO",
+    "name": "G2 GOLDFIELDS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/knight-therapeutics.svg",
+    "symbol": "GUD.TO",
+    "name": "KNIGHT THERAPEUTICS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/guru-organic-energy-co.svg",
+    "symbol": "GURU.TO",
+    "name": "GURU ORGANIC ENERGY CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "GVC.TO",
+    "name": "GLACIER MEDIA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/great-west-lifeco.svg",
+    "symbol": "GWO.TO",
+    "name": "GREAT WEST LIFECO INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "GXP.TO",
+    "name": "GREENRIDGE EXPLORATION INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hydro-one.svg",
+    "symbol": "H.TO",
+    "name": "HYDRO ONE LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/haivision-sys.svg",
+    "symbol": "HAI.TO",
+    "name": "HAIVISION SYSTEMS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/harfang-expl.svg",
+    "symbol": "HAR.TO",
+    "name": "HARFANG EXPLORATION INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hudbay-minerals.svg",
+    "symbol": "HBM.TO",
+    "name": "HUDBAY MINERALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/helix-biopharma.svg",
+    "symbol": "HBP.TO",
+    "name": "HELIX BIOPHARMA CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hemostemix.svg",
+    "symbol": "HEM.TO",
+    "name": "HEMOSTEMIX INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/high-liner-foods.svg",
+    "symbol": "HLF.TO",
+    "name": "HIGH LINER FOODS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hls-therapeutics.svg",
+    "symbol": "HLS.TO",
+    "name": "HLS THERAPEUTICS INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "HML.TO",
+    "name": "HERITAGE MINING LTD.",
+    "market": "TSX"
+  },
+  {
+    "symbol": "HSLV.TO",
+    "name": "HIGHLANDER SILVER CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hut-8-mining.svg",
+    "symbol": "HUT.TO",
+    "name": "HUT 8 CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/high-arctic-energy-services.svg",
+    "symbol": "HWO.TO",
+    "name": "HIGH ARCTIC ENERGY SERVICES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/headwater-exploration.svg",
+    "symbol": "HWX.TO",
+    "name": "HEADWATER EXPLORATION INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ia-financial.svg",
+    "symbol": "IAG.TO",
+    "name": "IA FINANCIAL CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ishares.svg",
+    "symbol": "IAU.TO",
+    "name": "I 80 GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "IC.TO",
+    "name": "IC CAPITALIGHT CORP.",
+    "market": "TSX"
+  },
+  {
+    "symbol": "ICE.TO",
+    "name": "CANLAN ICE SPORTS CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "symbol": "ICS.TO",
+    "name": "INTEGRATED CYBER SOLUTIONS INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ifabric.svg",
+    "symbol": "IFA.TO",
+    "name": "IFABRIC CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/intact-financial-corporation.svg",
+    "symbol": "IFC.TO",
+    "name": "INTACT FINANCIAL CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/interfor.svg",
+    "symbol": "IFP.TO",
+    "name": "INTERFOR CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/igm-financial.svg",
+    "symbol": "IGM.TO",
+    "name": "IGM FINANCIAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/imperial-metals.svg",
+    "symbol": "III.TO",
+    "name": "IMPERIAL METALS CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/acuityads.svg",
+    "symbol": "ILLM.TO",
+    "name": "ILLUMIN HOLDINGS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/iamgold.svg",
+    "symbol": "IMG.TO",
+    "name": "IAMGOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/international-metals-mng.svg",
+    "symbol": "IMM.TO",
+    "name": "INTERNATIONAL METALS MINING CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/imperial-oil.svg",
+    "symbol": "IMO.TO",
+    "name": "IMPERIAL OIL",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/intermap-technologies.svg",
+    "symbol": "IMP.TO",
+    "name": "INTERMAP TECHNOLOGIES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/inplay-oil.svg",
+    "symbol": "IPO.TO",
+    "name": "INPLAY OIL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/airiq.svg",
+    "symbol": "IQ.TO",
+    "name": "AIRIQ INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/isoenergy.svg",
+    "symbol": "ISO.TO",
+    "name": "ISOENERGY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/international-tower-hill-mines-ltd.svg",
+    "symbol": "ITH.TO",
+    "name": "INTERNATIONAL TOWER HILL MINES",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ivanhoe-mines.svg",
+    "symbol": "IVN.TO",
+    "name": "IVANHOE MINES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/invesque.svg",
+    "symbol": "IVQ.TO",
+    "name": "INVESQUE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/jaguar-mining-inc.svg",
+    "symbol": "JAG.TO",
+    "name": "JAGUAR MINING INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/jayden-resources.svg",
+    "symbol": "JDN.TO",
+    "name": "JAYDEN RESOURCES INC NEW",
+    "market": "TSX"
+  },
+  {
+    "symbol": "JEC.TO",
+    "name": "JURA ENERGY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/journey-energy.svg",
+    "symbol": "JOY.TO",
+    "name": "JOURNEY ENERGY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/jamieson-wellness.svg",
+    "symbol": "JWEL.TO",
+    "name": "JAMIESON WELLNESS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kinross-gold.svg",
+    "symbol": "K.TO",
+    "name": "KINROSS GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/k-bro-linen.svg",
+    "symbol": "KBL.TO",
+    "name": "K BRO LINEN INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/american-potash-new.svg",
+    "symbol": "KCL.TO",
+    "name": "AMERICAN POTASH CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kiwetinohk-energy.svg",
+    "symbol": "KEC.TO",
+    "name": "KIWETINOHK ENERGY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kolibri-global-energy.svg",
+    "symbol": "KEI.TO",
+    "name": "KOLIBRI GLOBAL ENERGY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kelt-exploration-ltd.svg",
+    "symbol": "KEL.TO",
+    "name": "KELT EXPLORATION LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/keyera.svg",
+    "symbol": "KEY.TO",
+    "name": "KEYERA CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kits-eyecare-ltd.svg",
+    "symbol": "KITS.TO",
+    "name": "KITS EYE CARE LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kelso-technologies.svg",
+    "symbol": "KLS.TO",
+    "name": "KELSO TECHNOLOGIES",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/k92-mining.svg",
+    "symbol": "KNT.TO",
+    "name": "K92 MNG INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kp-tissue.svg",
+    "symbol": "KPT.TO",
+    "name": "KP TISSUE INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "KRI.TO",
+    "name": "KOBO RESOURCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/karnalyte-resources.svg",
+    "symbol": "KRN.TO",
+    "name": "KARNALYTE RESOURCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/koryx-copper.svg",
+    "symbol": "KRY.TO",
+    "name": "KORYX COPPER INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kneatcom.svg",
+    "symbol": "KSI.TO",
+    "name": "KNEAT COM INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/k2-gold.svg",
+    "symbol": "KTO.TO",
+    "name": "K2 GOLD CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kwesst-micro-systems.svg",
+    "symbol": "KWE.TO",
+    "name": "KWESST MICRO SYSTEMS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kinaxis.svg",
+    "symbol": "KXS.TO",
+    "name": "KINAXIS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/loblaw-companies.svg",
+    "symbol": "L.TO",
+    "name": "LOBLAWS COMPANIES LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/labrador-gold.svg",
+    "symbol": "LAB.TO",
+    "name": "LABRADOR GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/medipharm-labs.svg",
+    "symbol": "LABS.TO",
+    "name": "MEDIPHARM LABS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lithium-americas.svg",
+    "symbol": "LAC.TO",
+    "name": "LITHIUM AMERICAS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/laramide-resources-ltd.svg",
+    "symbol": "LAM.TO",
+    "name": "LARAMIDE RESOURCES",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/laurentian-bank-of-canada.svg",
+    "symbol": "LB.TO",
+    "name": "LAURENTIAN BANK OF CANADA",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tidewater-midstream-and-infrastructure-ltd.svg",
+    "symbol": "LCFS.TO",
+    "name": "TIDEWATER RENEWABLES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lavras-gold.svg",
+    "symbol": "LGC.TO",
+    "name": "LAVRAS GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/liberty-gold.svg",
+    "symbol": "LGD.TO",
+    "name": "LIBERTY GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/largo.svg",
+    "symbol": "LGO.TO",
+    "name": "LARGO INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/labrador-iron-ore-royalty-corporation.svg",
+    "symbol": "LIF.TO",
+    "name": "LABRADOR IRON ORE RTY CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/li-metal.svg",
+    "symbol": "LIM.TO",
+    "name": "LI-METAL CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lion-one-metals-ltd.svg",
+    "symbol": "LIO.TO",
+    "name": "LION ONE METALS LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lithium-royalty.svg",
+    "symbol": "LIRC.TO",
+    "name": "LITHIUM RTY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/latin-metals.svg",
+    "symbol": "LMS.TO",
+    "name": "LATIN METALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/loncor-gold.svg",
+    "symbol": "LN.TO",
+    "name": "LONCOR GOLD INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/leon-s-furniture.svg",
+    "symbol": "LNF.TO",
+    "name": "LEON'S FURNITURE",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/linamar.svg",
+    "symbol": "LNR.TO",
+    "name": "LINAMAR CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lupaka-gold.svg",
+    "symbol": "LPK.TO",
+    "name": "LUPAKA GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "LSL.TO",
+    "name": "LSL PHARMA GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lightspeed.svg",
+    "symbol": "LSPD.TO",
+    "name": "LIGHTSPEED COMMERCE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lucara-diamond.svg",
+    "symbol": "LUC.TO",
+    "name": "LUCARA DIAMOND CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lundin-gold.svg",
+    "symbol": "LUG.TO",
+    "name": "LUNDIN GOLD INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lundin-mining.svg",
+    "symbol": "LUN.TO",
+    "name": "LUNDIN MINING CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/newlox-gold-ventures.svg",
+    "symbol": "LUX.TO",
+    "name": "NEWLOX GOLD VENTURES CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/maritime-resources.svg",
+    "symbol": "MAE.TO",
+    "name": "MARITIME RES CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/minera-alamos.svg",
+    "symbol": "MAI.TO",
+    "name": "MINERA ALAMOS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/magellan-aerospace.svg",
+    "symbol": "MAL.TO",
+    "name": "MAGELLAN AEROSPACE",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/marimaca-copper.svg",
+    "symbol": "MARI.TO",
+    "name": "MARIMACA COPPER CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/shawcor-ltd.svg",
+    "symbol": "MATR.TO",
+    "name": "MATTR CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/montage-gold.svg",
+    "symbol": "MAU.TO",
+    "name": "MONTAGE GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "MBL.TO",
+    "name": "MABEL VENTURES INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/microbix-biosystems.svg",
+    "symbol": "MBX.TO",
+    "name": "MICROBIX BIOSYSTEMS",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mccoy-global.svg",
+    "symbol": "MCB.TO",
+    "name": "MCCOY GLOBAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mcf-energy-ltd.svg",
+    "symbol": "MCF.TO",
+    "name": "MCF ENERGY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/minnova.svg",
+    "symbol": "MCI.TO",
+    "name": "MINNOVA CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mda.svg",
+    "symbol": "MDA.TO",
+    "name": "MDA LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/major-drilling-international.svg",
+    "symbol": "MDI.TO",
+    "name": "MAJOR DRILLING GROUP INTL INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "MDM.TO",
+    "name": "MADORO METALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/medicenna-therapeutics.svg",
+    "symbol": "MDNA.TO",
+    "name": "MEDICENNA THERAPEUTICS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/medexus-pharmaceuticals.svg",
+    "symbol": "MDP.TO",
+    "name": "MEDEXUS PHARMACEUTICALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/meg-energy.svg",
+    "symbol": "MEG.TO",
+    "name": "MEG ENERGY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mainstreet-equity.svg",
+    "symbol": "MEQ.TO",
+    "name": "MAINSTREET EQUITY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/metalore-resources-limited.svg",
+    "symbol": "MET.TO",
+    "name": "METALORE RESOURCES LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/manulife.svg",
+    "symbol": "MFC.TO",
+    "name": "MANULIFE FINANCIAL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/maple-leaf-foods.svg",
+    "symbol": "MFI.TO",
+    "name": "MAPLE LEAF FOODS",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/magna-international.svg",
+    "symbol": "MG.TO",
+    "name": "MAGNA INTERNATIONAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mega-uranium-ltd.svg",
+    "symbol": "MGA.TO",
+    "name": "MEGA URANIUM LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/magnum-goldcorp.svg",
+    "symbol": "MGI.TO",
+    "name": "MAGNUM GOLDCORP INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "MIM.TO",
+    "name": "MIMEDIA HOLDINGS INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "MIS.TO",
+    "name": "MISTANGO RIVER RESOURCES INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mcan-mortgage.svg",
+    "symbol": "MKP.TO",
+    "name": "MCAN MORTGAGE CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mount-logan-cap.svg",
+    "symbol": "MLC.TO",
+    "name": "MOUNT LOGAN CAPITAL INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/metallic-minerals.svg",
+    "symbol": "MMG.TO",
+    "name": "METALLIC MINERALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/minco-cap.svg",
+    "symbol": "MMM.TO",
+    "name": "MINCO CAPITAL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/manganese-x-energy.svg",
+    "symbol": "MN.TO",
+    "name": "MANGANESE X ENERGY CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "MNG.TO",
+    "name": "MONGOOSE MINING LTD.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/meridian-mining-uk-societas.svg",
+    "symbol": "MNO.TO",
+    "name": "MERIDIAN MINING UK SOCIETAS",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mogo.svg",
+    "symbol": "MOGO.TO",
+    "name": "MOGO INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/morien-resources.svg",
+    "symbol": "MOX.TO",
+    "name": "MORIEN RESOURCES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/madison-pacific-properties.svg",
+    "symbol": "MPC.TO",
+    "name": "MADISON PACIFIC PROPERTIES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/medicure.svg",
+    "symbol": "MPH.TO",
+    "name": "MEDICURE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mountain-province-diamonds.svg",
+    "symbol": "MPVD.TO",
+    "name": "MOUNTAIN PROVINCE DIAMONDS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/morguard-corporation.svg",
+    "symbol": "MRC.TO",
+    "name": "MORGUARD CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/melcor-development-ltd.svg",
+    "symbol": "MRD.TO",
+    "name": "MELCOR DEVELOPMENTS",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/martinrea-international.svg",
+    "symbol": "MRE.TO",
+    "name": "MARTINREA INTERNATIONAL INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "MRN.TO",
+    "name": "MACLAREN MINERALS LTD.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/metro.svg",
+    "symbol": "MRU.TO",
+    "name": "METRO INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mirasol-resources-ltd.svg",
+    "symbol": "MRZ.TO",
+    "name": "MIRASOL RESOURCES LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/satellos-bioscience.svg",
+    "symbol": "MSCL.TO",
+    "name": "SATELLOS BIOSCIENCE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/minco-silver.svg",
+    "symbol": "MSV.TO",
+    "name": "MINCO SILVER CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "symbol": "MT.TO",
+    "name": "M3 METALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mtb-metals.svg",
+    "symbol": "MTB.TO",
+    "name": "MTB METALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/galway-gold.svg",
+    "symbol": "MTK.TO",
+    "name": "MONTAUK METALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mullen-group-ltd.svg",
+    "symbol": "MTL.TO",
+    "name": "MULLEN GROUP LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mty-food-group.svg",
+    "symbol": "MTY.TO",
+    "name": "MTY FOOD GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mundoro-capital.svg",
+    "symbol": "MUN.TO",
+    "name": "MUNDORO CAPITAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/methanex.svg",
+    "symbol": "MX.TO",
+    "name": "METHANEX CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/maxim-power.svg",
+    "symbol": "MXG.TO",
+    "name": "MAXIM POWER CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/national-bank-of-canada.svg",
+    "symbol": "NA.TO",
+    "name": "NATIONAL BANK OF CANADA",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nano-one-materials.svg",
+    "symbol": "NANO.TO",
+    "name": "NANO ONE MATLS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nevgold.svg",
+    "symbol": "NAU.TO",
+    "name": "NEVGOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/northcliff-resources-ltd.svg",
+    "symbol": "NCF.TO",
+    "name": "NORTHCLIFF RESOURCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nevada-copper.svg",
+    "symbol": "NCU.TO",
+    "name": "NEVADA COPPER CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/northisle-copper-and-gold.svg",
+    "symbol": "NCX.TO",
+    "name": "NORTHISLE COPPER & GOLD INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/northern-dynasty-minerals.svg",
+    "symbol": "NDM.TO",
+    "name": "NORTHERN DYNASTY MINERALS LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/neo-performance-materials.svg",
+    "symbol": "NEO.TO",
+    "name": "NEO PERFORMANCE MATERIALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nextsource-materials.svg",
+    "symbol": "NEXT.TO",
+    "name": "NEXTSOURCE MATERIALS INC (CA)",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nuclear-fuels.svg",
+    "symbol": "NF.TO",
+    "name": "NUCLEAR FUELS INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nfi-group.svg",
+    "symbol": "NFI.TO",
+    "name": "NFI GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/new-gold.svg",
+    "symbol": "NGD.TO",
+    "name": "NEW GOLD INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ngex-minerals-ltd.svg",
+    "symbol": "NGEX.TO",
+    "name": "NGEX MINERALS LTD",
+    "market": "TSX"
+  },
+  {
+    "symbol": "NIC.TO",
+    "name": "DELOTA CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nio-strategic-metals.svg",
+    "symbol": "NIO.TO",
+    "name": "NIO STRATEGIC METALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/north-american-construction-ltd.svg",
+    "symbol": "NOA.TO",
+    "name": "NORTH AMERICAN CONSTRUCTION GRP LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/norsemont-mining.svg",
+    "symbol": "NOM.TO",
+    "name": "NORSEMONT MINING INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nouveau-monde-graphite.svg",
+    "symbol": "NOU.TO",
+    "name": "NOUVEAU MONDE GRAPHITE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/northland-power.svg",
+    "symbol": "NPI.TO",
+    "name": "NORTHLAND POWER INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/verde-agritech-ltd.svg",
+    "symbol": "NPK.TO",
+    "name": "VERDE AGRITECH LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/noram-lithium.svg",
+    "symbol": "NRM.TO",
+    "name": "NORAM LITHIUM CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "NT.TO",
+    "name": "NEWTERRA RESOURCES INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nutrien.svg",
+    "symbol": "NTR.TO",
+    "name": "NUTRIEN LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/new-pacific-metals.svg",
+    "symbol": "NUAG.TO",
+    "name": "NEW PACIFIC METALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/numinus-wellness.svg",
+    "symbol": "NUMI.TO",
+    "name": "NUMINUS WELLNESS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nuvista-energy-ltd.svg",
+    "symbol": "NVA.TO",
+    "name": "NUVISTA ENERGY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nass-vy-gateway-ltd.svg",
+    "symbol": "NVG.TO",
+    "name": "NASS VALLEY GATEWAY LTD.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/novo-resources.svg",
+    "symbol": "NVO.TO",
+    "name": "NOVO RESOURCES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/north-west-company.svg",
+    "symbol": "NWC.TO",
+    "name": "NORTH WEST COMPANY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nexgen-energy.svg",
+    "symbol": "NXE.TO",
+    "name": "NEXGEN ENERGY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nexus-gold-new.svg",
+    "symbol": "NXS.TO",
+    "name": "NEXUS GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/obsidian-energy-ltd.svg",
+    "symbol": "OBE.TO",
+    "name": "OBSIDIAN ENERGY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/oceanagold-corporation.svg",
+    "symbol": "OGC.TO",
+    "name": "OCEANAGOLD CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/orbit-garant-drilling.svg",
+    "symbol": "OGD.TO",
+    "name": "ORBIT GARANT DRILLING INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/organigram.svg",
+    "symbol": "OGI.TO",
+    "name": "ORGANIGRAM HOLDINGS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/orla-mining.svg",
+    "symbol": "OLA.TO",
+    "name": "ORLA MINING LTD NEW",
+    "market": "TSX"
+  },
+  {
+    "symbol": "OLY.TO",
+    "name": "OLYMPIA FINANCIAL GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/osisko-metals.svg",
+    "symbol": "OM.TO",
+    "name": "OSISKO METALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/omai-gold-mines.svg",
+    "symbol": "OMG.TO",
+    "name": "OMAI GOLD MINES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/01-communique-lab.svg",
+    "symbol": "ONE.TO",
+    "name": "01 COMMUNIQUE LABORATORY",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/onex-corporation.svg",
+    "symbol": "ONEX.TO",
+    "name": "ONEX CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/organic-potash.svg",
+    "symbol": "OPC.TO",
+    "name": "ORGANIC POTASH CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/optiva.svg",
+    "symbol": "OPT.TO",
+    "name": "OPTIVA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/opawica-explorations.svg",
+    "symbol": "OPW.TO",
+    "name": "OPAWICA EXPLORATIONS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/osisko-gold-royalties.svg",
+    "symbol": "OR.TO",
+    "name": "OSISKO GOLD ROYALTIES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/orezone-gold.svg",
+    "symbol": "ORE.TO",
+    "name": "OREZONE GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/orvana-minerals.svg",
+    "symbol": "ORV.TO",
+    "name": "ORVANA MINERALS",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/osino-resources.svg",
+    "symbol": "OSI.TO",
+    "name": "OSINO RESOURCES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/seven-and-i-holdings.svg",
+    "symbol": "OTC.TO",
+    "name": "OCUMETICS TECHNOLOGY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/open-text.svg",
+    "symbol": "OTEX.TO",
+    "name": "OPEN TEXT CO",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pan-american-silver.svg",
+    "symbol": "PAAS.TO",
+    "name": "PAN AMERICAN SILVER CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/premium-brands.svg",
+    "symbol": "PBH.TO",
+    "name": "PREMIUM BRANDS HLDGS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pollard-banknote-ltd.svg",
+    "symbol": "PBL.TO",
+    "name": "POLLARD BANKNOTE LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/precision-drilling.svg",
+    "symbol": "PD.TO",
+    "name": "PRECISION DRILLING CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pet-valu-holdings.svg",
+    "symbol": "PET.TO",
+    "name": "PET VALU HOLDINGS LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/peyto-exploration-and-development.svg",
+    "symbol": "PEY.TO",
+    "name": "PEYTO EXPLORATION & DEVELOP CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/petrofrontier.svg",
+    "symbol": "PFC.TO",
+    "name": "PETROFRONTIER CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/stillwater-critical-minerals.svg",
+    "symbol": "PGE.TO",
+    "name": "STILLWATER CRITICAL MINERALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/prosper-gold.svg",
+    "symbol": "PGX.TO",
+    "name": "PROSPER GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/providence-gold-mines.svg",
+    "symbol": "PHD.TO",
+    "name": "PROVIDENCE GOLD MINES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/phx-energy-services.svg",
+    "symbol": "PHX.TO",
+    "name": "PHX ENERGY SVCS CO",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/polaris-renewable-energy.svg",
+    "symbol": "PIF.TO",
+    "name": "POLARIS RENEWABLE ENERGY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/parkland.svg",
+    "symbol": "PKI.TO",
+    "name": "PARKLAND CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/patriot-battery-metals.svg",
+    "symbol": "PMET.TO",
+    "name": "PATRIOT BATTERY METALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pine-cliff-energy-ltd.svg",
+    "symbol": "PNE.TO",
+    "name": "PINE CLIFF ENERGY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kraken-robotics.svg",
+    "symbol": "PNG.TO",
+    "name": "KRAKEN ROBOTICS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pangea-natural-foods.svg",
+    "symbol": "PNGA.TO",
+    "name": "PANGEA NATURAL FOODS INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pinetree-capital-ltd.svg",
+    "symbol": "PNP.TO",
+    "name": "PINETREE CAPITAL LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/paramount-resources.svg",
+    "symbol": "POU.TO",
+    "name": "PARAMOUNT RESOURCES LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/power-corporation-of-canada.svg",
+    "symbol": "POW.TO",
+    "name": "POWER CORP OF CANADA",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pembina-pipeline.svg",
+    "symbol": "PPL.TO",
+    "name": "PEMBINA PIPELINE CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/prairie-provident-res.svg",
+    "symbol": "PPR.TO",
+    "name": "PRAIRIE PROVIDENT RESOURCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/perpetua-resources.svg",
+    "symbol": "PPTA.TO",
+    "name": "PERPETUA RES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ppx-mining.svg",
+    "symbol": "PPX.TO",
+    "name": "PPX MINING CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/probe-gold.svg",
+    "symbol": "PRB.TO",
+    "name": "PROBE GOLD INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/propel-hldgs.svg",
+    "symbol": "PRL.TO",
+    "name": "PROPEL HOLDINGS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/primo-water.svg",
+    "symbol": "PRMW.TO",
+    "name": "PRIMO WATER CORPORATION CANADA",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/profound-medical.svg",
+    "symbol": "PRN.TO",
+    "name": "PROFOUND MED CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/petrus-resources-ltd.svg",
+    "symbol": "PRQ.TO",
+    "name": "PETRUS RESOURCES LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pulse-seismic.svg",
+    "symbol": "PSD.TO",
+    "name": "PULSE SEISMIC INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pason-systems.svg",
+    "symbol": "PSI.TO",
+    "name": "PASON SYSTEM INCOR",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/prairiesky-royalty.svg",
+    "symbol": "PSK.TO",
+    "name": "PRAIRIESKY ROYALTY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/platinum-group-metals.svg",
+    "symbol": "PTM.TO",
+    "name": "PLATINUM GROUP METALS LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/premier-american-uranium.svg",
+    "symbol": "PUR.TO",
+    "name": "PREMIER AMERICAN URANIUM INC NEW",
+    "market": "TSX"
+  },
+  {
+    "symbol": "PVT.TO",
+    "name": "PIVOTREE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/p2earn.svg",
+    "symbol": "PXE.TO",
+    "name": "P2EARN INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/parex-resources.svg",
+    "symbol": "PXT.TO",
+    "name": "PAREX RESOURCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pyrogenesis.svg",
+    "symbol": "PYR.TO",
+    "name": "PYROGENESIS CANADA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pizza-pizza-royalty.svg",
+    "symbol": "PZA.TO",
+    "name": "PIZZA PIZZA ROYALTY CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "Q.TO",
+    "name": "QUETZAL COPPER CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/quinsam-capital.svg",
+    "symbol": "QCA.TO",
+    "name": "QUINSAM CAPITAL CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/questerre-energy.svg",
+    "symbol": "QEC.TO",
+    "name": "QUESTERRE ENERGY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/quipt-home-medical.svg",
+    "symbol": "QIPT.TO",
+    "name": "QUIPT HOME MEDICAL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/queens-rd-cap-invt-ltd.svg",
+    "symbol": "QRC.TO",
+    "name": "QUEEN'S ROAD CAPITAL INVESTMENT",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/quarterhill.svg",
+    "symbol": "QTRH.TO",
+    "name": "QUARTERHILL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ritchie-bros-auctioneers.svg",
+    "symbol": "RBA.TO",
+    "name": "RB GLOBAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rubellite-energy.svg",
+    "symbol": "RBY.TO",
+    "name": "RUBELLITE ENERGY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rf-capital.svg",
+    "symbol": "RCG.TO",
+    "name": "RF CAPITAL GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/richelieu-hardware.svg",
+    "symbol": "RCH.TO",
+    "name": "RICHELIEU HARDWARE",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/re-royalties-ltd.svg",
+    "symbol": "RE.TO",
+    "name": "RE ROYALTIES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/real-matters.svg",
+    "symbol": "REAL.TO",
+    "name": "REAL MATTERS INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "RES.TO",
+    "name": "AURIC RESOURCES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/royalties.svg",
+    "symbol": "RI.TO",
+    "name": "ROYALTIES INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rio2.svg",
+    "symbol": "RIO.TO",
+    "name": "RIO2 LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/roots.svg",
+    "symbol": "ROOT.TO",
+    "name": "ROOTS CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/recharge-resources-ltd.svg",
+    "symbol": "RR.TO",
+    "name": "RECHARGE RESOURCES LTD.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/riverside-resources-new.svg",
+    "symbol": "RRI.TO",
+    "name": "RIVERSIDE RES INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "RRL.TO",
+    "name": "RESOLUTE RESOURCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rogers-sugar.svg",
+    "symbol": "RSI.TO",
+    "name": "ROGERS SUGAR INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "RTG.TO",
+    "name": "RTG MNG INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rupert-resources.svg",
+    "symbol": "RUP.TO",
+    "name": "RUPERT RESOURCES",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/russel-metals.svg",
+    "symbol": "RUS.TO",
+    "name": "RUSSEL METALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pathfinder-ventures.svg",
+    "symbol": "RV.TO",
+    "name": "PATHFINDER VENTURES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/resverlogix.svg",
+    "symbol": "RVX.TO",
+    "name": "RESVERLOGIX CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "RXM.TO",
+    "name": "ROCKEX MINING CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/royal-bank-of-canada.svg",
+    "symbol": "RY.TO",
+    "name": "ROYAL BANK OF CANADA",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/royal-road-minerals-ltd.svg",
+    "symbol": "RYR.TO",
+    "name": "ROYAL ROAD MINERALS LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sherritt-international.svg",
+    "symbol": "S.TO",
+    "name": "SHERRITT INTL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sterling-metals.svg",
+    "symbol": "SAG.TO",
+    "name": "STERLING METALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/starcore-international-mines-ltd.svg",
+    "symbol": "SAM.TO",
+    "name": "STARCORE INTERNATIONAL MINES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saputo.svg",
+    "symbol": "SAP.TO",
+    "name": "SAPUTO GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/st-augustine-gold-and-copper-ltd.svg",
+    "symbol": "SAU.TO",
+    "name": "ST AUGUSTINE GOLD AND COPPER LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/silver-bear.svg",
+    "symbol": "SBR.TO",
+    "name": "SILVER BEAR RESOURCES PLC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pipestone-energy.svg",
+    "symbol": "SCR.TO",
+    "name": "STRATHCONA RESOURCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/spartan-delta.svg",
+    "symbol": "SDE.TO",
+    "name": "SPARTAN DELTA CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "SDI.TO",
+    "name": "STAMPEDE DRILLING INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/seabridge-gold.svg",
+    "symbol": "SEA.TO",
+    "name": "SEABRIDGE GOLD INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/senvest-capital.svg",
+    "symbol": "SEC.TO",
+    "name": "SENVEST CAPITAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/secure-energy-services.svg",
+    "symbol": "SES.TO",
+    "name": "SECURE ENERGY SERVICES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sagicor-finl-co-ltd.svg",
+    "symbol": "SFC.TO",
+    "name": "SAGICOR FINL CO LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nxt-energy-solutions.svg",
+    "symbol": "SFD.TO",
+    "name": "NXT ENERGY SOLUTIONS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/solution-financial.svg",
+    "symbol": "SFI.TO",
+    "name": "SOLUTION FINANCIAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/snowline-gold.svg",
+    "symbol": "SGD.TO",
+    "name": "SNOWLINE GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sonoro-gold.svg",
+    "symbol": "SGO.TO",
+    "name": "SONORO GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/surge-energy.svg",
+    "symbol": "SGY.TO",
+    "name": "SURGE ENERGY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/source-energy-services-ltd.svg",
+    "symbol": "SHLE.TO",
+    "name": "SOURCE ENERGY SERVICES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sienna-sr-living.svg",
+    "symbol": "SIA.TO",
+    "name": "SIENNA SENIOR LIVING INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sokoman-minerals.svg",
+    "symbol": "SIC.TO",
+    "name": "SOKOMAN MINERALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sprott.svg",
+    "symbol": "SII.TO",
+    "name": "SPROTT INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/savaria.svg",
+    "symbol": "SIS.TO",
+    "name": "SAVARIA CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/stella-jones.svg",
+    "symbol": "SJ.TO",
+    "name": "STELLA JONES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/skeena-resources-limited.svg",
+    "symbol": "SKE.TO",
+    "name": "SKEENA RESOURCES LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sun-life.svg",
+    "symbol": "SLF.TO",
+    "name": "SUN LIFE FINANCIAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/solaris-resources.svg",
+    "symbol": "SLS.TO",
+    "name": "SOLARIS RESOURCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sierra-madre-gold-and-silver-ltd.svg",
+    "symbol": "SM.TO",
+    "name": "SIERRA MADRE GOLD AND SILVER LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/silver-range-resources-ltd.svg",
+    "symbol": "SNG.TO",
+    "name": "SILVER RANGE RESOURCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saturn-oil-and-gas.svg",
+    "symbol": "SOIL.TO",
+    "name": "SATURN OIL & GAS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sunopta.svg",
+    "symbol": "SOY.TO",
+    "name": "SUNOPTA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/spanish-mountain-gold-ltd.svg",
+    "symbol": "SPA.TO",
+    "name": "SPANISH MOUNTAIN GOLD LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/superior-plus.svg",
+    "symbol": "SPB.TO",
+    "name": "SUPERIOR PLUS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/spc-nickel.svg",
+    "symbol": "SPC.TO",
+    "name": "SPC NICKEL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/silver-predator.svg",
+    "symbol": "SPD.TO",
+    "name": "SILVER PREDATOR CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/snipp-interactive.svg",
+    "symbol": "SPN.TO",
+    "name": "SNIPP INTERACTIVE INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "SPZ.TO",
+    "name": "SUPERBUZZ INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/stria-lithium.svg",
+    "symbol": "SRA.TO",
+    "name": "STRIA LITHIUM INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sangoma-technologies.svg",
+    "symbol": "STC.TO",
+    "name": "SANGOMA TECHNOLOGIES CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/stack-cap.svg",
+    "symbol": "STCK.TO",
+    "name": "STACK CAPITAL GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/step-energy-svcs-ltd.svg",
+    "symbol": "STEP.TO",
+    "name": "STEP ENERGY SERVICES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/steppe-gold-limited.svg",
+    "symbol": "STGO.TO",
+    "name": "STEPPE GOLD LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/moneta-gold.svg",
+    "symbol": "STLR.TO",
+    "name": "STLLR GOLD INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/stantec.svg",
+    "symbol": "STN.TO",
+    "name": "STANTEC INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/suncor-energy.svg",
+    "symbol": "SU.TO",
+    "name": "SUNCOR ENERGY INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "SUG.TO",
+    "name": "SUCRO LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/strathmore-plus-uranium.svg",
+    "symbol": "SUU.TO",
+    "name": "STRATHMORE PLUS URANIUM CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sernova.svg",
+    "symbol": "SVA.TO",
+    "name": "SERNOVA CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/silver-bull-resources.svg",
+    "symbol": "SVB.TO",
+    "name": "SILVER BULL RESOURCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/storagevault-canada.svg",
+    "symbol": "SVI.TO",
+    "name": "STORAGEVAULT CANADA INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/silvercorp-metals.svg",
+    "symbol": "SVM.TO",
+    "name": "SILVERCORP METALS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/swiss-wtr-decaffinated-coffee.svg",
+    "symbol": "SWP.TO",
+    "name": "SWISS WTR DECAFFINATED COFFEE INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/supremex.svg",
+    "symbol": "SXP.TO",
+    "name": "SUPREMEX INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sylogist-ltd.svg",
+    "symbol": "SYZ.TO",
+    "name": "SYLOGIST LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/stagezero-life-sciences-ltd.svg",
+    "symbol": "SZLS.TO",
+    "name": "STAGEZERO LIFE SCIENCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/telus.svg",
+    "symbol": "T.TO",
+    "name": "TELUS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/transalta-mtn.svg",
+    "symbol": "TA.TO",
+    "name": "TRANSALTA CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/petrotal.svg",
+    "symbol": "TAL.TO",
+    "name": "PETROTAL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/benchmark-metals.svg",
+    "symbol": "TAU.TO",
+    "name": "THESIS GOLD INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/taiga-building-products-ltd.svg",
+    "symbol": "TBL.TO",
+    "name": "TAIGA BUILDING PRODUCTS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/trillion-energy-international.svg",
+    "symbol": "TCF.TO",
+    "name": "TRILLION ENERGY INTERNATIONAL INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tecsys.svg",
+    "symbol": "TCS.TO",
+    "name": "TECSYS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/trican-well-service-ltd.svg",
+    "symbol": "TCW.TO",
+    "name": "TRICAN WELL SERVICE",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/toronto-dominion-bank.svg",
+    "symbol": "TD.TO",
+    "name": "TORONTO-DOMINION BANK",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/timbercreek-financial.svg",
+    "symbol": "TF.TO",
+    "name": "TIMBERCREEK FINL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tfi-international.svg",
+    "symbol": "TFII.TO",
+    "name": "TFI INTERNATIONAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/triple-flag-precious.svg",
+    "symbol": "TFPM.TO",
+    "name": "TRIPLE FLAG PRECIOUS METALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/terago.svg",
+    "symbol": "TGO.TO",
+    "name": "TERAGO INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/thinkific-labs.svg",
+    "symbol": "THNC.TO",
+    "name": "THINKIFIC LABS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/titan-mining.svg",
+    "symbol": "TI.TO",
+    "name": "TITAN MINING CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/toromont-industries-ltd.svg",
+    "symbol": "TIH.TO",
+    "name": "TOROMONT INDUSTRIES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tiny-ltd.svg",
+    "symbol": "TINY.TO",
+    "name": "TINY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/telus-international.svg",
+    "symbol": "TIXT.TO",
+    "name": "TELUS INTERNATIONAL (CDA) INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/taseko-mines.svg",
+    "symbol": "TKO.TO",
+    "name": "TASEKO MINES",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/troilus-gold.svg",
+    "symbol": "TLG.TO",
+    "name": "TROILUS GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/talon-metals.svg",
+    "symbol": "TLO.TO",
+    "name": "TALON METALS CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/trench-metals.svg",
+    "symbol": "TMC.TO",
+    "name": "TRENCH METALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/trilogy-metals.svg",
+    "symbol": "TMQ.TO",
+    "name": "TRILOGY METALS INC NEW",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tenaz-energy.svg",
+    "symbol": "TNZ.TO",
+    "name": "TENAZ ENERGY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tocvan-ventures.svg",
+    "symbol": "TOC.TO",
+    "name": "TOCVAN VENTURES CORP.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/total-energy-services.svg",
+    "symbol": "TOT.TO",
+    "name": "TOTAL ENERGY SERVICES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tourmaline-oil.svg",
+    "symbol": "TOU.TO",
+    "name": "TOURMALINE OIL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/spin-master.svg",
+    "symbol": "TOY.TO",
+    "name": "SPIN MASTER CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tethys-petroleum-ltd.svg",
+    "symbol": "TPL.TO",
+    "name": "TETHYS PETROLEUM LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/topaz-energy.svg",
+    "symbol": "TPZ.TO",
+    "name": "TOPAZ ENERGY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/thomson-reuters.svg",
+    "symbol": "TRI.TO",
+    "name": "THOMSON-REUTERS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tc-energy.svg",
+    "symbol": "TRP.TO",
+    "name": "TC ENERGY CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/transat-at.svg",
+    "symbol": "TRZ.TO",
+    "name": "TRANSAT AT INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/talisker-resources-ltd.svg",
+    "symbol": "TSK.TO",
+    "name": "TALISKER RESOURCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tree-island-steel-ltd.svg",
+    "symbol": "TSL.TO",
+    "name": "TREE ISLAND STEEL LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/terrascend.svg",
+    "symbol": "TSND.TO",
+    "name": "TERRASCEND CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/trisura-group.svg",
+    "symbol": "TSU.TO",
+    "name": "TRISURA GROUP LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/titanium-transportation.svg",
+    "symbol": "TTNM.TO",
+    "name": "TITANIUM TRANSN GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tamarack-valley-energy.svg",
+    "symbol": "TVE.TO",
+    "name": "TAMARACK VALLEY ENERGY LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tvi-pacific.svg",
+    "symbol": "TVI.TO",
+    "name": "TVI PACIFIC INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/terravest-industries.svg",
+    "symbol": "TVK.TO",
+    "name": "TERRAVEST INDUSTRIES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/twc-enterprises-ltd.svg",
+    "symbol": "TWC.TO",
+    "name": "TWC ENTERPRISES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tidewater-midstream-and-infrastructure-ltd.svg",
+    "symbol": "TWM.TO",
+    "name": "TIDEWATER MIDSTREAM & INFRASTR LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/torex-gold-resources.svg",
+    "symbol": "TXG.TO",
+    "name": "TOREX GOLD RESOURCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/touchstone-exploration.svg",
+    "symbol": "TXP.TO",
+    "name": "TOUCHSTONE EXPLORATION INC",
+    "market": "TSX"
+  },
+  {
+    "symbol": "UNI.TO",
+    "name": "UNISYNC CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/urbana.svg",
+    "symbol": "URB.TO",
+    "name": "URBANA CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/uranium-royalty.svg",
+    "symbol": "URC.TO",
+    "name": "URANIUM ROYALTY CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ur-energy.svg",
+    "symbol": "URE.TO",
+    "name": "UR ENERGY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/americas-silver.svg",
+    "symbol": "USA.TO",
+    "name": "AMERICAS GOLD & SILVER CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/versabank.svg",
+    "symbol": "VBNK.TO",
+    "name": "VERSABANK NEW",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vecima-networks.svg",
+    "symbol": "VCM.TO",
+    "name": "VECIMA NETWORKS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vermilion-energyl.svg",
+    "symbol": "VET.TO",
+    "name": "VERMILION ENERGY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/volcanic-gold-mines.svg",
+    "symbol": "VG.TO",
+    "name": "VOLCANIC GOLD MINES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vitalhub.svg",
+    "symbol": "VHI.TO",
+    "name": "VITALHUB CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/valeura-energy.svg",
+    "symbol": "VLE.TO",
+    "name": "VALEURA ENERGY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/velan.svg",
+    "symbol": "VLN.TO",
+    "name": "VELAN INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/5n-plus.svg",
+    "symbol": "VNP.TO",
+    "name": "5N PLUS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vox-royalty.svg",
+    "symbol": "VOXR.TO",
+    "name": "VOX RTY CORP (CA)",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gamelancer-media.svg",
+    "symbol": "VRTS.TO",
+    "name": "GAMELANCER MEDIA CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vizsla-silver.svg",
+    "symbol": "VZLA.TO",
+    "name": "VIZSLA SILVER CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/waste-connections-ca.svg",
+    "symbol": "WCN.TO",
+    "name": "WASTE CONNECTIONS INC (CA)",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/whitecap-resources.svg",
+    "symbol": "WCP.TO",
+    "name": "WHITECAP RESOURCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wesdome-gold-mines.svg",
+    "symbol": "WDO.TO",
+    "name": "WESDOME GOLD MINES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/westaim-the.svg",
+    "symbol": "WED.TO",
+    "name": "WESTAIM CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/canopy-growth.svg",
+    "symbol": "WEED.TO",
+    "name": "CANOPY GROWTH CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/western-forest-products.svg",
+    "symbol": "WEF.TO",
+    "name": "WESTERN FOREST PRODUCTS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/well-health-technologies.svg",
+    "symbol": "WELL.TO",
+    "name": "WELL HEALTH TECHNOLOGIES CORP",
+    "market": "TSX"
+  },
+  {
+    "symbol": "WFC.TO",
+    "name": "WALL FINANCIAL CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/west-fraser-timber.svg",
+    "symbol": "WFG.TO",
+    "name": "WEST FRASER TIMBER CO",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/westward-gold.svg",
+    "symbol": "WG.TO",
+    "name": "WESTWARD GOLD INC.",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wildbrain-ltd.svg",
+    "symbol": "WILD.TO",
+    "name": "WILDBRAIN LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wajax.svg",
+    "symbol": "WJX.TO",
+    "name": "WAJAX CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wolfden-res.svg",
+    "symbol": "WLF.TO",
+    "name": "WOLFDEN RES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wallbridge-mining.svg",
+    "symbol": "WM.TO",
+    "name": "WALLBRIDGE MINING CO",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wealth-minerals-ltd.svg",
+    "symbol": "WML.TO",
+    "name": "WEALTH MINERALS",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/weston-george.svg",
+    "symbol": "WN.TO",
+    "name": "GEORGE WESTON LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wonderfi-technologies-inc.svg",
+    "symbol": "WNDR.TO",
+    "name": "WONDERFI TECHNOLOGIES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/winpak-ltd.svg",
+    "symbol": "WPK.TO",
+    "name": "WINPAK LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wheaton-precious-metals.svg",
+    "symbol": "WPM.TO",
+    "name": "WHEATON PRECIOUS METALS CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/westport-fuel-systems.svg",
+    "symbol": "WPRT.TO",
+    "name": "WESTPORT FUEL SYSTEMS INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/western-energy-services.svg",
+    "symbol": "WRG.TO",
+    "name": "WESTERN ENERGY SERVICES CORPORATION",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/western-copper-and-gold.svg",
+    "symbol": "WRN.TO",
+    "name": "WESTERN COPPER & GOLD CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/western-res.svg",
+    "symbol": "WRX.TO",
+    "name": "WESTERN RESOURCES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wsp-global.svg",
+    "symbol": "WSP.TO",
+    "name": "WSP GLOBAL INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/westshore-terminals.svg",
+    "symbol": "WTE.TO",
+    "name": "WESTSHORE TERMINALS INVESTMENT CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tmx-group.svg",
+    "symbol": "X.TO",
+    "name": "TMX GROUP LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/goldmoney.svg",
+    "symbol": "XAU.TO",
+    "name": "GOLDMONEY INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/auxly-cannabis-group.svg",
+    "symbol": "XLY.TO",
+    "name": "AUXLY CANNABIS GROUP INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/exco-technologies-ltd.svg",
+    "symbol": "XTC.TO",
+    "name": "EXCO TECHNOLOGIES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/xtra-gold-resources.svg",
+    "symbol": "XTG.TO",
+    "name": "XTRA-GOLD RESOURCES CORP",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/xtract-one-technologies.svg",
+    "symbol": "XTRA.TO",
+    "name": "XTRACT ONE TECHNOLOGIES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/yellow-pages-ltd.svg",
+    "symbol": "Y.TO",
+    "name": "YELLOW PAGES LIMITED",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/yangarra-resources-ltd.svg",
+    "symbol": "YGR.TO",
+    "name": "YANGARRA RESOURCES LTD",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/yorbeau-resources.svg",
+    "symbol": "YRB.TO",
+    "name": "YORBEAU RESOURCES INC",
+    "market": "TSX"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/zentek-ltd.svg",
+    "symbol": "ZEN.TO",
+    "name": "ZENTEK LTD",
+    "market": "TSX"
+  }
+]
