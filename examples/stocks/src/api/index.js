@@ -18,7 +18,7 @@ function joinPath(value) {
   return value ?? "";
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const [, rawSearch = ""] = (req.url ?? "/api").split("?");
   const params = new URLSearchParams(rawSearch);
   const forwardedPath = joinPath(params.getAll("path"));
@@ -32,4 +32,4 @@ export default async function handler(req, res) {
   const app = await loadApp();
 
   return app(req, res);
-}
+};

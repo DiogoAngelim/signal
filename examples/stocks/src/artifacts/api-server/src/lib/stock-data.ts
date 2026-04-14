@@ -38,6 +38,13 @@ const __dirname = path.dirname(__filename);
 const PUBLIC_DIR_CANDIDATES = [
   path.resolve(process.cwd(), "stocks-public"),
   path.resolve(process.cwd(), "src", "stocks-public"),
+  path.resolve(process.cwd(), "artifacts", "signal-markets", "public"),
+  path.resolve(process.cwd(), "artifacts", "signal-markets", "dist", "public"),
+  path.resolve(process.cwd(), "examples", "stocks", "src", "artifacts", "signal-markets", "public"),
+  path.resolve(process.cwd(), "examples", "stocks", "src", "artifacts", "signal-markets", "dist", "public"),
+  path.resolve(process.cwd(), "examples", "stocks", "src", "stocks-public"),
+  path.resolve(process.cwd(), "examples", "stocks", "src", "lib", "stocks-optimizer", "public"),
+  path.resolve(process.cwd(), "examples", "stocks", "lib", "stocks-optimizer", "public"),
   path.resolve(process.cwd(), "lib", "stocks-optimizer", "public"),
   path.resolve(__dirname, "../../../../..", "lib", "stocks-optimizer", "public"),
   path.resolve(__dirname, "../../../..", "lib", "stocks-optimizer", "public")

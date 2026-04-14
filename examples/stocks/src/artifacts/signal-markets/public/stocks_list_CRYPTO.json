@@ -1,0 +1,116 @@
+[
+    {
+        "symbol": "BINANCE:SOLBRL",
+        "name": "SOL / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCSOL.svg"
+    },
+    {
+        "symbol": "BINANCE:XRPBRL",
+        "name": "XRP / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCXRP.svg"
+    },
+    {
+        "symbol": "BINANCE:POLBRL",
+        "name": "POL / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCPOLYG.svg"
+    },
+    {
+        "symbol": "BINANCE:SUIBRL",
+        "name": "SUI / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCSUI.svg"
+    },
+    {
+        "symbol": "BINANCE:SHIBBRL",
+        "name": "SHIB / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCSHIB.svg"
+    },
+    {
+        "symbol": "BINANCE:RENDERBRL",
+        "name": "RENDER / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCRNDR.svg"
+    },
+    {
+        "symbol": "BINANCE:AVAXBRL",
+        "name": "AVAX / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCAVAX.svg"
+    },
+    {
+        "symbol": "BINANCE:PEPEBRL",
+        "name": "PEPE / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCPEPE.svg"
+    },
+    {
+        "symbol": "BINANCE:NEARBRL",
+        "name": "NEAR / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCNEAR.svg"
+    },
+    {
+        "symbol": "BINANCE:TRUMPBRL",
+        "name": "TRUMP / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCTRUMPOF.svg"
+    },
+    {
+        "symbol": "BINANCE:BTCBRL",
+        "name": "Bitcoin / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCBTC.svg"
+    },
+    {
+        "symbol": "BINANCE:USDTBRL",
+        "name": "TetherUS / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCUSDT.svg"
+    },
+    {
+        "symbol": "BINANCE:ETHBRL",
+        "name": "Ethereum / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCETH.svg"
+    },
+    {
+        "symbol": "BINANCE:USDCBRL",
+        "name": "USD Coin / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCUSDC.svg"
+    },
+    {
+        "symbol": "BINANCE:DOGEBRL",
+        "name": "Dogecoin / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCDOGE.svg"
+    },
+    {
+        "symbol": "BINANCE:ADABRL",
+        "name": "Cardano / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCADA.svg"
+    },
+    {
+        "symbol": "BINANCE:LINKBRL",
+        "name": "ChainLink / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCLINK.svg"
+    },
+    {
+        "symbol": "BINANCE:LTCBRL",
+        "name": "Litecoin / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCLTC.svg"
+    },
+    {
+        "symbol": "BINANCE:BNBBRL",
+        "name": "Binance Coin / BRL",
+        "market": "Binance",
+        "image": "https://s3-symbol-logo.tradingview.com/crypto/XTVCBNB.svg"
+    }
+]
