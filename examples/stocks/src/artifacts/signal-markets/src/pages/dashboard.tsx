@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/navbar";
-import { fetchMarkets, fetchStockList, fetchStockQuotes, type MarketOption, type StockData, type StockStatus, type TradeSignal } from "@/lib/api";
+import { ApiRequestError, fetchMarkets, fetchStockList, fetchStockQuotes, type MarketOption, type StockData, type StockStatus, type TradeSignal } from "@/lib/api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowUpRight, ArrowDownRight, Clock, TrendingUp, LineChart, Info } from "lucide-react";
 import { LineChart as RechartsLineChart, Line, ResponsiveContainer, YAxis } from "recharts";
@@ -57,6 +57,9 @@ const DEFAULT_MARKET_SCHEDULE: MarketSchedule = {
   weekend: [0, 6]
 };
 
+const REFRESH_INTERVAL_MS = 60_000;
+const STALE_AFTER_MS = REFRESH_INTERVAL_MS * 2;
+
 function resolveMarketSchedule(market: string): MarketSchedule {
   const normalized = market.trim().toUpperCase();
   if (!normalized) return DEFAULT_MARKET_SCHEDULE;
@@ -92,6 +95,31 @@ function getMarketStatus(market: string): "Open" | "Closed" {
     : nowMinutes >= openMinutes || nowMinutes < closeMinutes;
 
   return isOpen ? "Open" : "Closed";
+}
+
+function describeRefreshError(error: unknown): string {
+  if (error instanceof ApiRequestError) {
+    if (error.timedOut) {
+      return "Live data request timed out. Retrying shortly.";
+    }
+
+    if (error.status === 429) {
+      return "Live data rate limited. Retrying shortly.";
+    }
+
+    if (error.status) {
+      return `Live data unavailable (${error.status}). Retrying shortly.`;
+    }
+  }
+
+  return "Live data unavailable. Retrying shortly.";
+}
+
+function formatSyncTime(timestamp: number): string {
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(timestamp);
 }
 
 function StatusBadge({ status }: { status: StockStatus }) {
@@ -133,11 +161,18 @@ export default function Dashboard() {
   const [selectedStock, setSelectedStock] = useState<StockData | null>(null);
   const [totalStocks, setTotalStocks] = useState(0);
   const [updateMsg, setUpdateMsg] = useState("Loading market data...");
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const refreshInFlight = useRef(false);
+  const stocksRef = useRef<StockData[]>([]);
+  const marketFilterRef = useRef("");
   const signalSnapshotRef = useRef(new Map<string, { action?: TradeSignal; source?: string }>());
   const notificationsEnabledRef = useRef(false);
   const [marketClock, setMarketClock] = useState(() => Date.now());
+
+  stocksRef.current = stocks;
+  marketFilterRef.current = marketFilter;
 
   const statusOptions: Array<StockStatus | "All"> = ["All", "Stable", "Rising", "Watch", "Dip"];
   const signalOptions: Array<TradeSignal | "All"> = ["All", "Buy", "Hold", "Sell"];
@@ -189,6 +224,30 @@ export default function Dashboard() {
     };
   }, [portfolioPositions, marketFilter, marketClock]);
 
+  const isStale = !loading && (
+    Boolean(refreshError)
+    || (lastSyncedAt !== null && marketClock - lastSyncedAt > STALE_AFTER_MS)
+  );
+  const lastSyncedLabel = lastSyncedAt ? formatSyncTime(lastSyncedAt) : "Waiting for first sync";
+
+  async function refreshVisibleQuotes(reason: string) {
+    const currentStocks = stocksRef.current;
+    const currentMarket = marketFilterRef.current;
+
+    if (!currentStocks.length || !currentMarket || refreshInFlight.current) {
+      return;
+    }
+
+    refreshInFlight.current = true;
+    setUpdateMsg(reason);
+
+    try {
+      await fetchQuotesBatched(currentMarket, currentStocks, () => false);
+    } finally {
+      refreshInFlight.current = false;
+    }
+  }
+
   useEffect(() => {
     let mounted = true;
 
@@ -226,7 +285,7 @@ export default function Dashboard() {
   useEffect(() => {
     const interval = setInterval(() => {
       setMarketClock(Date.now());
-    }, 60000);
+    }, REFRESH_INTERVAL_MS);
 
     return () => clearInterval(interval);
   }, []);
@@ -240,8 +299,11 @@ export default function Dashboard() {
         return;
       }
       setLoading(true);
+      setRefreshError(null);
+      setLastSyncedAt(null);
       setStocks([]);
       setSelectedStock(null);
+      setUpdateMsg("Syncing live market data...");
 
       try {
         const listResponse = await fetchStockList(marketFilter, 0, 24);
@@ -255,9 +317,12 @@ export default function Dashboard() {
         setStocks(baseStocks);
         setLoading(false);
         await fetchQuotesBatched(marketFilter, baseStocks, () => cancelled);
-      } catch {
+      } catch (error) {
         if (!cancelled) {
           setLoading(false);
+          const message = describeRefreshError(error);
+          setRefreshError(message);
+          setUpdateMsg(message);
         }
       }
     }
@@ -274,13 +339,48 @@ export default function Dashboard() {
     const interval = setInterval(() => {
       if (refreshInFlight.current) return;
       refreshInFlight.current = true;
+      setUpdateMsg("Refreshing live market data...");
       fetchQuotesBatched(marketFilter, stocks, () => false).finally(() => {
         refreshInFlight.current = false;
       });
-    }, 60000);
+    }, REFRESH_INTERVAL_MS);
 
     return () => clearInterval(interval);
   }, [stocks, marketFilter]);
+
+  useEffect(() => {
+    if (typeof document === "undefined" || typeof window === "undefined") {
+      return;
+    }
+
+    const maybeRefresh = (reason: string) => {
+      const needsRefresh = !lastSyncedAt
+        || marketClock - lastSyncedAt >= REFRESH_INTERVAL_MS
+        || Boolean(refreshError);
+
+      if (needsRefresh) {
+        void refreshVisibleQuotes(reason);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        maybeRefresh("Tab active. Refreshing market data...");
+      }
+    };
+
+    const handleOnline = () => {
+      maybeRefresh("Back online. Refreshing market data...");
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("online", handleOnline);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("online", handleOnline);
+    };
+  }, [lastSyncedAt, marketClock, refreshError]);
 
   useEffect(() => {
     if (!selectedStock) return;
@@ -322,12 +422,27 @@ export default function Dashboard() {
     const batchSize = 4;
     const delayMs = 700;
 
+    setRefreshError(null);
+
     for (let index = 0; index < symbols.length; index += batchSize) {
       const batch = symbols.slice(index, index + batchSize);
-      const quotes = await fetchStockQuotes(market, batch, { withSignals: true });
+      let quotes;
+
+      try {
+        quotes = await fetchStockQuotes(market, batch, { withSignals: true });
+      } catch (error) {
+        if (!shouldCancel()) {
+          const message = describeRefreshError(error);
+          setRefreshError(message);
+          setUpdateMsg(message);
+        }
+        return;
+      }
+
       if (shouldCancel()) return;
 
       setStocks((prev) => mergeQuotes(prev, quotes));
+      setLastSyncedAt(Date.now());
       if (quotes.length) {
         const head = quotes[0];
         const direction = head.changePercent >= 0 ? "up" : "down";
@@ -443,6 +558,9 @@ export default function Dashboard() {
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
               {positionCount} positions · {totalQuantity} shares · Buy + Rising only
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Last synced: {lastSyncedLabel}
             </p>
           </div>
 
@@ -595,13 +713,18 @@ export default function Dashboard() {
               )}
             </div>
 
-            <div className="bg-card border border-border/50 rounded-2xl p-4 flex items-center gap-4 text-sm shadow-sm">
+            <div className={`bg-card border rounded-2xl p-4 flex items-center gap-4 text-sm shadow-sm ${isStale ? "border-[#ffecb3] bg-[#fff8e1]/50 dark:border-[#f57f17]/30 dark:bg-[#f57f17]/10" : "border-border/50"}`}>
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <TrendingUp size={16} />
               </div>
-              <p className="text-muted-foreground">
-                <strong className="text-foreground font-medium">Live:</strong> {updateMsg}
-              </p>
+              <div className="space-y-1">
+                <p className="text-muted-foreground">
+                  <strong className="text-foreground font-medium">{isStale ? "Stale:" : "Live:"}</strong> {updateMsg}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Last synced {lastSyncedLabel}
+                </p>
+              </div>
             </div>
           </div>
 
