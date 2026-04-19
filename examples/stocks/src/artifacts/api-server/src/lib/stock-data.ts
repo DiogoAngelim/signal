@@ -28,6 +28,9 @@ export interface StockQuote {
   signalAction?: TradeSignal;
   signalConfidence?: number;
   signalSource?: "node-ecu" | "heuristic";
+  signalEmittedAt?: string;
+  signalEntryPrice?: number;
+  signalReturnPercent?: number;
 }
 
 export type TradeSignal = "Buy" | "Hold" | "Sell";
@@ -75,7 +78,20 @@ const SIGNAL_CACHE_TTL_MS = Number(process.env.SIGNAL_CACHE_TTL_MS ?? 5 * 60 * 1
 const listCache = new Map<string, { expiresAt: number; items: StockListItem[] }>();
 const marketCache = new Map<string, { expiresAt: number; items: StockListItem[] }>();
 const quoteCache = new Map<string, { expiresAt: number; quote: StockQuote }>();
-const signalCache = new Map<string, { expiresAt: number; signal: Pick<StockQuote, "signalAction" | "signalConfidence" | "signalSource"> }>();
+type SignalSnapshot = Pick<
+  StockQuote,
+  | "signalAction"
+  | "signalConfidence"
+  | "signalSource"
+  | "signalEmittedAt"
+  | "signalEntryPrice"
+  | "signalReturnPercent"
+>;
+
+type SignalDecision = Pick<StockQuote, "signalAction" | "signalConfidence" | "signalSource">;
+
+const signalCache = new Map<string, { expiresAt: number; signal: SignalDecision }>();
+const signalEmissionState = new Map<string, Required<Pick<StockQuote, "signalAction" | "signalEmittedAt" | "signalEntryPrice">>>();
 const tradingViewRequestTimestamps: number[] = [];
 let tradingViewQueue: Promise<void> = Promise.resolve();
 
@@ -333,15 +349,46 @@ async function fetchQuote(exchange: string, symbol: string, market?: string): Pr
 async function getSignalForQuote(
   quote: StockQuote,
   market?: string
-): Promise<Pick<StockQuote, "signalAction" | "signalConfidence" | "signalSource">> {
+): Promise<SignalSnapshot> {
   const cacheKey = `${(market ?? "GLOBAL").toUpperCase()}:${quote.symbol}`;
   const cached = signalCache.get(cacheKey);
-  if (cached && cached.expiresAt > Date.now()) {
-    return cached.signal;
-  }
+  const signal = cached && cached.expiresAt > Date.now()
+    ? cached.signal
+    : await createSignalDecision(quote, market);
 
+  const currentPrice = Number.isFinite(quote.price) && quote.price > 0 ? quote.price : 0;
+  const nowIso = new Date().toISOString();
+  const previousEmission = signalEmissionState.get(cacheKey);
+  const shouldStartEmission = !previousEmission || previousEmission.signalAction !== signal.signalAction;
+  const emission = shouldStartEmission
+    ? {
+      signalAction: signal.signalAction ?? "Hold",
+      signalEmittedAt: nowIso,
+      signalEntryPrice: currentPrice
+    }
+    : previousEmission;
+
+  signalEmissionState.set(cacheKey, emission);
+
+  const signalReturnPercent = emission.signalEntryPrice > 0
+    ? ((currentPrice - emission.signalEntryPrice) / emission.signalEntryPrice) * 100
+    : 0;
+
+  return {
+    ...signal,
+    signalEmittedAt: emission.signalEmittedAt,
+    signalEntryPrice: emission.signalEntryPrice,
+    signalReturnPercent: Number(signalReturnPercent.toFixed(2))
+  };
+}
+
+async function createSignalDecision(
+  quote: StockQuote,
+  market?: string
+): Promise<SignalDecision> {
   const fromModel = await evaluateNodeEcuSignal(quote, market);
   const signal = fromModel ?? deriveHeuristicSignal(quote);
+  const cacheKey = `${(market ?? "GLOBAL").toUpperCase()}:${quote.symbol}`;
 
   signalCache.set(cacheKey, {
     expiresAt: Date.now() + SIGNAL_CACHE_TTL_MS,
@@ -353,7 +400,7 @@ async function getSignalForQuote(
 
 function deriveHeuristicSignal(
   quote: StockQuote
-): Pick<StockQuote, "signalAction" | "signalConfidence" | "signalSource"> {
+): SignalDecision {
   const change = quote.changePercent ?? 0;
   const absChange = Math.abs(change);
   const signalAction: TradeSignal = change >= 1.2

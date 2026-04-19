@@ -32,6 +32,9 @@ export interface StockQuote {
   signalAction?: TradeSignal;
   signalConfidence?: number;
   signalSource?: "node-ecu" | "heuristic";
+  signalEmittedAt?: string;
+  signalEntryPrice?: number;
+  signalReturnPercent?: number;
 }
 
 export type StockData = StockListItem & {
@@ -49,6 +52,9 @@ export type StockData = StockListItem & {
   signalAction?: TradeSignal;
   signalConfidence?: number;
   signalSource?: "node-ecu" | "heuristic";
+  signalEmittedAt?: string;
+  signalEntryPrice?: number;
+  signalReturnPercent?: number;
 };
 
 const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(/\/$/, "");
@@ -124,9 +130,9 @@ async function request<T>(
         : timedOut
           ? new ApiRequestError("Request timed out", { retryable: true, timedOut: true })
           : new ApiRequestError(
-              error instanceof Error ? error.message : "Request failed",
-              { retryable: true }
-            );
+            error instanceof Error ? error.message : "Request failed",
+            { retryable: true }
+          );
 
       if (attempt < retryCount && normalized.retryable) {
         await delay(500 * (attempt + 1));

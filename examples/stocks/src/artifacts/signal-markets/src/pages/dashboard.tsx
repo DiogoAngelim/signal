@@ -122,6 +122,19 @@ function formatSyncTime(timestamp: number): string {
   }).format(timestamp);
 }
 
+function formatSignalTime(value?: string): string {
+  if (!value) return "—";
+  const timestamp = Date.parse(value);
+  if (!Number.isFinite(timestamp)) return "—";
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(timestamp);
+}
+
 function StatusBadge({ status }: { status: StockStatus }) {
   const styles = {
     Stable: "bg-muted text-muted-foreground border-border",
@@ -187,36 +200,42 @@ export default function Dashboard() {
       .map((stock) => {
         const quantity = 1;
         const price = stock.price ?? 0;
-        const changePercent = stock.changePercent ?? 0;
+        const signalEntryPrice = stock.signalEntryPrice ?? price;
         const marketValue = price * quantity;
+        const signalCostBasis = signalEntryPrice * quantity;
+        const signalReturnDollar = marketValue - signalCostBasis;
 
         return {
           ...stock,
           quantity,
           marketValue,
-          dayChangeDollar: marketValue * (changePercent / 100)
+          signalEntryPrice,
+          signalCostBasis,
+          signalReturnDollar
         };
       });
   }, [stocks]);
 
   const portfolio = useMemo(() => {
     const totalValue = portfolioPositions.reduce((sum, stock) => sum + stock.marketValue, 0);
-    const todayChangeDollar = portfolioPositions.reduce((sum, stock) => sum + stock.dayChangeDollar, 0);
-    const todayChangePercent = totalValue > 0
-      ? Number(((todayChangeDollar / totalValue) * 100).toFixed(2))
+    const signalCostBasis = portfolioPositions.reduce((sum, stock) => sum + stock.signalCostBasis, 0);
+    const signalReturnDollar = portfolioPositions.reduce((sum, stock) => sum + stock.signalReturnDollar, 0);
+    const signalReturnPercent = signalCostBasis > 0
+      ? Number(((signalReturnDollar / signalCostBasis) * 100).toFixed(2))
       : 0;
     const totalQuantity = portfolioPositions.reduce((sum, stock) => sum + stock.quantity, 0);
 
     const overallSignal = !portfolioPositions.length
       ? "No Buy Setup"
-      : todayChangePercent >= 1
+      : signalReturnPercent >= 1
         ? "Buy Momentum"
         : "Accumulating";
 
     return {
       totalValue,
-      todayChangeDollar,
-      todayChangePercent,
+      signalCostBasis,
+      signalReturnDollar,
+      signalReturnPercent,
       marketStatus: getMarketStatus(marketFilter),
       overallSignal,
       positionCount: portfolioPositions.length,
@@ -462,9 +481,22 @@ export default function Dashboard() {
     return current.map((stock) => {
       const quote = quoteMap.get(stock.ticker);
       if (!quote) return stock;
+      const signalAction = quote.signalAction ?? stock.signalAction;
+      const sameSignalAction = Boolean(signalAction && stock.signalAction === signalAction);
+      const signalEntryPrice = sameSignalAction
+        ? stock.signalEntryPrice ?? quote.signalEntryPrice
+        : quote.signalEntryPrice ?? stock.signalEntryPrice;
+      const signalEmittedAt = sameSignalAction
+        ? stock.signalEmittedAt ?? quote.signalEmittedAt
+        : quote.signalEmittedAt ?? stock.signalEmittedAt;
+      const nextPrice = quote.price ?? stock.price;
+      const signalReturnPercent = signalEntryPrice && nextPrice
+        ? Number((((nextPrice - signalEntryPrice) / signalEntryPrice) * 100).toFixed(2))
+        : quote.signalReturnPercent ?? stock.signalReturnPercent;
+
       return {
         ...stock,
-        price: quote.price ?? stock.price,
+        price: nextPrice,
         changePercent: quote.changePercent ?? stock.changePercent,
         status: quote.status ?? stock.status,
         high52: quote.high52 ?? stock.high52,
@@ -474,9 +506,12 @@ export default function Dashboard() {
         impact: quote.impact ?? stock.impact,
         cap: quote.cap ?? stock.cap,
         peRatio: quote.peRatio ?? stock.peRatio,
-        signalAction: quote.signalAction ?? stock.signalAction,
+        signalAction,
         signalConfidence: quote.signalConfidence ?? stock.signalConfidence,
-        signalSource: quote.signalSource ?? stock.signalSource
+        signalSource: quote.signalSource ?? stock.signalSource,
+        signalEmittedAt,
+        signalEntryPrice,
+        signalReturnPercent
       };
     });
   }
@@ -515,8 +550,8 @@ export default function Dashboard() {
   }, [filteredStocks, selectedStock]);
 
   const totalValue = portfolio.totalValue ?? 0;
-  const totalChange = portfolio.todayChangeDollar ?? 0;
-  const totalChangePercent = portfolio.todayChangePercent ?? 0;
+  const totalChange = portfolio.signalReturnDollar ?? 0;
+  const totalChangePercent = portfolio.signalReturnPercent ?? 0;
   const positionCount = portfolio.positionCount ?? 0;
   const totalQuantity = portfolio.totalQuantity ?? 0;
 
@@ -553,11 +588,11 @@ export default function Dashboard() {
               </span>
               <div className={`flex items-center text-sm font-medium ${totalChange >= 0 ? 'text-primary' : 'text-destructive'}`}>
                 {totalChange >= 0 ? <ArrowUpRight className="h-4 w-4 mr-1" /> : <ArrowDownRight className="h-4 w-4 mr-1" />}
-                {formatMaybeCurrency(Math.abs(totalChange))} ({totalChangePercent}%)
+                {formatMaybeCurrency(Math.abs(totalChange))} ({totalChangePercent}%) since signal
               </div>
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
-              {positionCount} positions · {totalQuantity} shares · Buy + Rising only
+              {positionCount} positions · {totalQuantity} shares · Buy + Rising only · signal-entry basis
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Last synced: {lastSyncedLabel}
@@ -808,6 +843,20 @@ export default function Dashboard() {
                       <span className="text-muted-foreground block mb-1">Confidence</span>
                       <span className="font-medium">
                         {selectedStock.signalConfidence != null ? `${Math.round(selectedStock.signalConfidence)}%` : "—"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block mb-1">Signal Emitted</span>
+                      <span className="font-medium">{formatSignalTime(selectedStock.signalEmittedAt)}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block mb-1">Entry Price</span>
+                      <span className="font-medium">{formatMaybeCurrency(selectedStock.signalEntryPrice)}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block mb-1">Since Signal</span>
+                      <span className={`font-medium ${(selectedStock.signalReturnPercent ?? 0) >= 0 ? "text-primary" : "text-destructive"}`}>
+                        {selectedStock.signalReturnPercent != null ? `${selectedStock.signalReturnPercent >= 0 ? "+" : ""}${selectedStock.signalReturnPercent.toFixed(2)}%` : "—"}
                       </span>
                     </div>
                     <div>
