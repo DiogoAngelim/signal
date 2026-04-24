@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
 import type { ProviderHealthView } from "@/types/weather";
 import { fetchProviderHealth } from "@/lib/api";
+import { AUTO_REFRESH_INTERVAL_MS } from "@/lib/refresh";
 
 export function ProviderHealth() {
   const [providers, setProviders] = useState<ProviderHealthView[]>([]);
@@ -23,7 +24,7 @@ export function ProviderHealth() {
         });
 
     load();
-    const interval = setInterval(load, 15000);
+    const interval = setInterval(load, AUTO_REFRESH_INTERVAL_MS);
     return () => {
       mounted = false;
       clearInterval(interval);

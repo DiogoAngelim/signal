@@ -1,6 +1,7 @@
 import type { Alert, LiveUpdate, ProviderHealthView, Region, RegionEvent, SignalAction, StatusLevel } from "@/types/weather";
 import { MOCK_REGIONS } from "@/data/mockRegions";
 import { MOCK_UPDATES } from "@/data/mockUpdates";
+import { AUTO_REFRESH_INTERVAL_MS } from "@/lib/refresh";
 
 const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(/\/$/, "");
 const wsBaseOverride = import.meta.env.VITE_WS_BASE_URL as string | undefined;
@@ -723,12 +724,8 @@ function shouldSwitchToMock(_error: unknown): boolean {
 
 function getMockRegions(): Region[] {
   return MOCK_REGIONS.map((region) => {
-    const coords = mockCoordinates[region.id] ?? defaultCoordinates;
     return {
       ...region,
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-      timezone: coords.timezone,
       signalAction: statusToSignalAction(region.status),
       signalConfidence: mockConfidence(region.riskScore),
       signalSource: "heuristic",
@@ -775,7 +772,7 @@ function subscribeToMockUpdates(cb: (update: LiveUpdate) => void): () => void {
   const interval = window.setInterval(() => {
     cb(MOCK_UPDATES[index % MOCK_UPDATES.length]);
     index += 1;
-  }, 15000);
+  }, AUTO_REFRESH_INTERVAL_MS);
 
   return () => {
     window.clearInterval(interval);
@@ -785,53 +782,3 @@ function subscribeToMockUpdates(cb: (update: LiveUpdate) => void): () => void {
 function mockConfidence(riskScore: number): number {
   return Math.max(0.52, Math.min(0.94, 0.5 + riskScore / 200));
 }
-
-const defaultCoordinates = {
-  latitude: 0,
-  longitude: 0,
-  timezone: "UTC"
-};
-
-const mockCoordinates: Record<string, { latitude: number; longitude: number; timezone: string }> = {
-  "juiz-de-fora": { latitude: -21.761, longitude: -43.3487, timezone: "America/Sao_Paulo" },
-  "sao-paulo": { latitude: -23.5505, longitude: -46.6333, timezone: "America/Sao_Paulo" },
-  "rio-de-janeiro": { latitude: -22.9068, longitude: -43.1729, timezone: "America/Sao_Paulo" },
-  "belo-horizonte": { latitude: -19.9167, longitude: -43.9345, timezone: "America/Sao_Paulo" },
-  campinas: { latitude: -22.9099, longitude: -47.0626, timezone: "America/Sao_Paulo" },
-  santos: { latitude: -23.9608, longitude: -46.3336, timezone: "America/Sao_Paulo" },
-  "sao-jose-dos-campos": { latitude: -23.2237, longitude: -45.9009, timezone: "America/Sao_Paulo" },
-  sorocaba: { latitude: -23.5015, longitude: -47.4526, timezone: "America/Sao_Paulo" },
-  "ribeirao-preto": { latitude: -21.1704, longitude: -47.8103, timezone: "America/Sao_Paulo" },
-  "sao-jose-do-rio-preto": { latitude: -20.8113, longitude: -49.3758, timezone: "America/Sao_Paulo" },
-  bauru: { latitude: -22.3145, longitude: -49.0587, timezone: "America/Sao_Paulo" },
-  niteroi: { latitude: -22.8832, longitude: -43.1034, timezone: "America/Sao_Paulo" },
-  petropolis: { latitude: -22.505, longitude: -43.1787, timezone: "America/Sao_Paulo" },
-  "campos-dos-goytacazes": { latitude: -21.7622, longitude: -41.3183, timezone: "America/Sao_Paulo" },
-  "volta-redonda": { latitude: -22.5202, longitude: -44.0996, timezone: "America/Sao_Paulo" },
-  uberlandia: { latitude: -18.9186, longitude: -48.2772, timezone: "America/Sao_Paulo" },
-  uberaba: { latitude: -19.7474, longitude: -47.9381, timezone: "America/Sao_Paulo" },
-  vitoria: { latitude: -20.3155, longitude: -40.3128, timezone: "America/Sao_Paulo" },
-  "vila-velha": { latitude: -20.3478, longitude: -40.2949, timezone: "America/Sao_Paulo" },
-  serra: { latitude: -20.1286, longitude: -40.3078, timezone: "America/Sao_Paulo" },
-  linhares: { latitude: -19.3947, longitude: -40.0643, timezone: "America/Sao_Paulo" },
-  "cachoeiro-de-itapemirim": { latitude: -20.8467, longitude: -41.1211, timezone: "America/Sao_Paulo" },
-  "teofilo-otoni": { latitude: -17.857, longitude: -41.5054, timezone: "America/Sao_Paulo" },
-  colatina: { latitude: -19.5387, longitude: -40.6306, timezone: "America/Sao_Paulo" },
-  araxa: { latitude: -19.5902, longitude: -46.9438, timezone: "America/Sao_Paulo" },
-  paracatu: { latitude: -17.2245, longitude: -46.8749, timezone: "America/Sao_Paulo" },
-  ubatuba: { latitude: -23.4332, longitude: -45.0838, timezone: "America/Sao_Paulo" },
-  guaruja: { latitude: -23.9931, longitude: -46.2564, timezone: "America/Sao_Paulo" },
-  itatiaia: { latitude: -22.4897, longitude: -44.5638, timezone: "America/Sao_Paulo" },
-  "cabo-frio": { latitude: -22.8794, longitude: -42.0186, timezone: "America/Sao_Paulo" },
-  diamantina: { latitude: -18.2418, longitude: -43.6031, timezone: "America/Sao_Paulo" },
-  "barra-do-garcaas": { latitude: -15.8897, longitude: -52.2567, timezone: "America/Sao_Paulo" },
-  santarem: { latitude: -2.4385, longitude: -54.6996, timezone: "America/Santarem" },
-  parintins: { latitude: -2.6283, longitude: -56.7358, timezone: "America/Manaus" },
-  itabuna: { latitude: -14.7876, longitude: -39.2781, timezone: "America/Bahia" },
-  caruaru: { latitude: -8.2846, longitude: -35.9699, timezone: "America/Recife" },
-  "juazeiro-do-norte": { latitude: -7.2131, longitude: -39.3153, timezone: "America/Fortaleza" },
-  mossoro: { latitude: -5.187, longitude: -37.3441, timezone: "America/Fortaleza" },
-  dourados: { latitude: -22.2231, longitude: -54.812, timezone: "America/Campo_Grande" },
-  chapeco: { latitude: -27.1004, longitude: -52.6152, timezone: "America/Sao_Paulo" },
-  bage: { latitude: -31.3297, longitude: -54.1069, timezone: "America/Sao_Paulo" }
-};
