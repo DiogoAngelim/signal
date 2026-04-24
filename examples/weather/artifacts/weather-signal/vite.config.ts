@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import { fileURLToPath } from "node:url";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 const rawPort = process.env.PORT ?? "3000";
@@ -13,6 +14,7 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 const basePath = process.env.BASE_PATH ?? "/";
+const artifactDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   base: basePath,
@@ -25,7 +27,7 @@ export default defineConfig({
       ? [
         await import("@replit/vite-plugin-cartographer").then((m) =>
           m.cartographer({
-            root: path.resolve(import.meta.dirname, ".."),
+            root: path.resolve(artifactDir, ".."),
           }),
         ),
         await import("@replit/vite-plugin-dev-banner").then((m) =>
@@ -36,14 +38,14 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "src"),
-      "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
+      "@": path.resolve(artifactDir, "src"),
+      "@assets": path.resolve(artifactDir, "..", "..", "attached_assets"),
     },
     dedupe: ["react", "react-dom"],
   },
-  root: path.resolve(import.meta.dirname),
+  root: path.resolve(artifactDir),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path.resolve(artifactDir, "dist/public"),
     emptyOutDir: true,
   },
   server: {
