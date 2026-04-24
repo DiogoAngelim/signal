@@ -702,12 +702,8 @@ function toLiveUpdate(event: BackendEvent, regionMap: Map<string, string>): Live
 function countryFlag(country: string): string {
   const normalized = country.trim().toUpperCase();
   const map: Record<string, string> = {
-    US: "🇺🇸",
-    USA: "🇺🇸",
     BRAZIL: "🇧🇷",
-    BR: "🇧🇷",
-    PORTUGAL: "🇵🇹",
-    PT: "🇵🇹"
+    BR: "🇧🇷"
   };
   return map[normalized] ?? "🌍";
 }
@@ -715,12 +711,8 @@ function countryFlag(country: string): string {
 function countryName(country: string): string {
   const normalized = country.trim().toUpperCase();
   const map: Record<string, string> = {
-    US: "United States",
-    USA: "United States",
     BR: "Brazil",
-    BRAZIL: "Brazil",
-    PT: "Portugal",
-    PORTUGAL: "Portugal"
+    BRAZIL: "Brazil"
   };
   return map[normalized] ?? country;
 }
@@ -756,7 +748,7 @@ function getMockUpdates(): LiveUpdate[] {
 function getMockProviderHealth(): ProviderHealthView[] {
   return [
     {
-      provider: "National Weather Service",
+      provider: "INMET",
       status: "healthy",
       failureCount: 0,
       lastSuccessAt: new Date().toISOString(),
@@ -764,7 +756,7 @@ function getMockProviderHealth(): ProviderHealthView[] {
       notes: "Demo fallback data"
     },
     {
-      provider: "Open-Meteo",
+      provider: "CEMADEN",
       status: "healthy",
       failureCount: 0,
       lastSuccessAt: new Date().toISOString(),
@@ -801,12 +793,8 @@ const defaultCoordinates = {
 };
 
 const mockCoordinates: Record<string, { latitude: number; longitude: number; timezone: string }> = {
-  nyc: { latitude: 40.7128, longitude: -74.006, timezone: "America/New_York" },
-  miami: { latitude: 25.7617, longitude: -80.1918, timezone: "America/New_York" },
-  houston: { latitude: 29.7604, longitude: -95.3698, timezone: "America/Chicago" },
   "juiz-de-fora": { latitude: -21.761, longitude: -43.3487, timezone: "America/Sao_Paulo" },
   "sao-paulo": { latitude: -23.5505, longitude: -46.6333, timezone: "America/Sao_Paulo" },
-  lisbon: { latitude: 38.7223, longitude: -9.1393, timezone: "Europe/Lisbon" },
   "rio-de-janeiro": { latitude: -22.9068, longitude: -43.1729, timezone: "America/Sao_Paulo" },
   "belo-horizonte": { latitude: -19.9167, longitude: -43.9345, timezone: "America/Sao_Paulo" },
   campinas: { latitude: -22.9099, longitude: -47.0626, timezone: "America/Sao_Paulo" },
@@ -826,5 +814,24 @@ const mockCoordinates: Record<string, { latitude: number; longitude: number; tim
   "vila-velha": { latitude: -20.3478, longitude: -40.2949, timezone: "America/Sao_Paulo" },
   serra: { latitude: -20.1286, longitude: -40.3078, timezone: "America/Sao_Paulo" },
   linhares: { latitude: -19.3947, longitude: -40.0643, timezone: "America/Sao_Paulo" },
-  "cachoeiro-de-itapemirim": { latitude: -20.8467, longitude: -41.1211, timezone: "America/Sao_Paulo" }
+  "cachoeiro-de-itapemirim": { latitude: -20.8467, longitude: -41.1211, timezone: "America/Sao_Paulo" },
+  "teofilo-otoni": { latitude: -17.857, longitude: -41.5054, timezone: "America/Sao_Paulo" },
+  colatina: { latitude: -19.5387, longitude: -40.6306, timezone: "America/Sao_Paulo" },
+  araxa: { latitude: -19.5902, longitude: -46.9438, timezone: "America/Sao_Paulo" },
+  paracatu: { latitude: -17.2245, longitude: -46.8749, timezone: "America/Sao_Paulo" },
+  ubatuba: { latitude: -23.4332, longitude: -45.0838, timezone: "America/Sao_Paulo" },
+  guaruja: { latitude: -23.9931, longitude: -46.2564, timezone: "America/Sao_Paulo" },
+  itatiaia: { latitude: -22.4897, longitude: -44.5638, timezone: "America/Sao_Paulo" },
+  "cabo-frio": { latitude: -22.8794, longitude: -42.0186, timezone: "America/Sao_Paulo" },
+  diamantina: { latitude: -18.2418, longitude: -43.6031, timezone: "America/Sao_Paulo" },
+  "barra-do-garcaas": { latitude: -15.8897, longitude: -52.2567, timezone: "America/Sao_Paulo" },
+  santarem: { latitude: -2.4385, longitude: -54.6996, timezone: "America/Santarem" },
+  parintins: { latitude: -2.6283, longitude: -56.7358, timezone: "America/Manaus" },
+  itabuna: { latitude: -14.7876, longitude: -39.2781, timezone: "America/Bahia" },
+  caruaru: { latitude: -8.2846, longitude: -35.9699, timezone: "America/Recife" },
+  "juazeiro-do-norte": { latitude: -7.2131, longitude: -39.3153, timezone: "America/Fortaleza" },
+  mossoro: { latitude: -5.187, longitude: -37.3441, timezone: "America/Fortaleza" },
+  dourados: { latitude: -22.2231, longitude: -54.812, timezone: "America/Campo_Grande" },
+  chapeco: { latitude: -27.1004, longitude: -52.6152, timezone: "America/Sao_Paulo" },
+  bage: { latitude: -31.3297, longitude: -54.1069, timezone: "America/Sao_Paulo" }
 };

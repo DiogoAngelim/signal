@@ -38,95 +38,6 @@ export interface Region {
 
 export const MOCK_REGIONS: Region[] = [
   {
-    id: "nyc",
-    name: "New York City",
-    country: "United States",
-    countryFlag: "🇺🇸",
-    status: "Watch",
-    riskScore: 42,
-    topConcern: "Strong winds and coastal flooding risk",
-    summary: "A rapidly intensifying low-pressure system is bringing gusty winds and some coastal flooding risk to lower Manhattan. Most daily activities can continue with caution.",
-    riskDrivers: ["Wind gusts up to 55 mph expected by evening", "Coastal flood advisory in effect for Lower Manhattan", "Flight delays likely at JFK and LGA"],
-    alerts: [
-      { id: "nyc-1", message: "Coastal Flood Advisory — Lower Manhattan, 6PM–Midnight", severity: "Watch", issuedAt: new Date(Date.now() - 1000 * 60 * 45).toISOString() },
-    ],
-    recentEvents: [
-      { id: "nyc-e1", description: "Wind advisory upgraded to Watch status", timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString() },
-      { id: "nyc-e2", description: "NWS issued coastal flood advisory for Lower Manhattan", timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString() },
-      { id: "nyc-e3", description: "Status updated from Calm to Watch", timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString() },
-    ],
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 8).toISOString(),
-    forecastPoints: [
-      { hour: "Now", riskScore: 42, label: "Watch" },
-      { hour: "3pm", riskScore: 58, label: "Warning" },
-      { hour: "6pm", riskScore: 65, label: "Warning" },
-      { hour: "9pm", riskScore: 70, label: "Warning" },
-      { hour: "Mid", riskScore: 48, label: "Watch" },
-      { hour: "6am", riskScore: 22, label: "Calm" },
-    ],
-    trend: "worsening",
-  },
-  {
-    id: "miami",
-    name: "Miami",
-    country: "United States",
-    countryFlag: "🇺🇸",
-    status: "Warning",
-    riskScore: 71,
-    topConcern: "Tropical storm watch in effect",
-    summary: "A developing tropical system is approaching the Florida coast. Conditions will deteriorate rapidly through tonight. Preparation is strongly advised.",
-    riskDrivers: ["Tropical storm watch effective until further notice", "Heavy rain and storm surge expected 6–24 hrs", "Mandatory evacuation in effect for Zone A"],
-    alerts: [
-      { id: "mia-1", message: "Tropical Storm Watch — Broward & Miami-Dade Counties", severity: "Warning", issuedAt: new Date(Date.now() - 1000 * 60 * 90).toISOString() },
-      { id: "mia-2", message: "Zone A Mandatory Evacuation Order in Effect", severity: "Critical", issuedAt: new Date(Date.now() - 1000 * 60 * 60).toISOString() },
-    ],
-    recentEvents: [
-      { id: "mia-e1", description: "Tropical Storm Watch issued by NHC", timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString() },
-      { id: "mia-e2", description: "Status elevated from Watch to Warning", timestamp: new Date(Date.now() - 1000 * 60 * 90).toISOString() },
-      { id: "mia-e3", description: "Mandatory evacuation order issued for Zone A", timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString() },
-      { id: "mia-e4", description: "Risk score updated: 58 → 71", timestamp: new Date(Date.now() - 1000 * 60 * 20).toISOString() },
-    ],
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-    forecastPoints: [
-      { hour: "Now", riskScore: 71, label: "Warning" },
-      { hour: "3pm", riskScore: 80, label: "Critical" },
-      { hour: "6pm", riskScore: 88, label: "Critical" },
-      { hour: "9pm", riskScore: 90, label: "Critical" },
-      { hour: "Mid", riskScore: 75, label: "Warning" },
-      { hour: "6am", riskScore: 55, label: "Warning" },
-    ],
-    trend: "worsening",
-  },
-  {
-    id: "houston",
-    name: "Houston",
-    country: "United States",
-    countryFlag: "🇺🇸",
-    status: "Warning",
-    riskScore: 63,
-    topConcern: "Flash flood emergency in Harris County",
-    summary: "Slow-moving thunderstorms are producing extreme rainfall totals across the metro area. Roads in low-lying areas are impassable. Avoid non-essential travel.",
-    riskDrivers: ["Rainfall totals of 6–10 inches in last 12 hours", "Flash Flood Emergency for Harris County", "Multiple road closures across I-10 corridor"],
-    alerts: [
-      { id: "hou-1", message: "Flash Flood Emergency — Harris County", severity: "Critical", issuedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString() },
-    ],
-    recentEvents: [
-      { id: "hou-e1", description: "Flash Flood Warning upgraded to Emergency", timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString() },
-      { id: "hou-e2", description: "Multiple road closures reported on I-10", timestamp: new Date(Date.now() - 1000 * 60 * 20).toISOString() },
-      { id: "hou-e3", description: "Rainfall exceeded 8 inches in Katy area", timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString() },
-    ],
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 3).toISOString(),
-    forecastPoints: [
-      { hour: "Now", riskScore: 63, label: "Warning" },
-      { hour: "3pm", riskScore: 70, label: "Warning" },
-      { hour: "6pm", riskScore: 55, label: "Warning" },
-      { hour: "9pm", riskScore: 40, label: "Watch" },
-      { hour: "Mid", riskScore: 28, label: "Watch" },
-      { hour: "6am", riskScore: 15, label: "Calm" },
-    ],
-    trend: "improving",
-  },
-  {
     id: "juiz-de-fora",
     name: "Juiz de Fora",
     country: "Brazil",
@@ -179,32 +90,8 @@ export const MOCK_REGIONS: Region[] = [
     ],
     trend: "worsening",
   },
-  {
-    id: "lisbon",
-    name: "Lisbon",
-    country: "Portugal",
-    countryFlag: "🇵🇹",
-    status: "Calm",
-    riskScore: 8,
-    topConcern: "Clear skies, no active concerns",
-    summary: "Lisbon is experiencing excellent weather with no active threats. Conditions are expected to remain stable through the week.",
-    riskDrivers: ["Clear skies and mild temperatures", "Light westerly breeze", "No active weather warnings"],
-    alerts: [],
-    recentEvents: [
-      { id: "lis-e1", description: "Routine monitoring — all clear", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString() },
-    ],
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-    forecastPoints: [
-      { hour: "Now", riskScore: 8, label: "Calm" },
-      { hour: "3pm", riskScore: 10, label: "Calm" },
-      { hour: "6pm", riskScore: 12, label: "Calm" },
-      { hour: "9pm", riskScore: 9, label: "Calm" },
-      { hour: "Mid", riskScore: 7, label: "Calm" },
-      { hour: "6am", riskScore: 8, label: "Calm" },
-    ],
-    trend: "stable",
-  },
   ...buildSoutheastBrazilRegions(),
+  ...buildMinorBrazilRegions(),
 ];
 
 interface DemoRegionConfig {
@@ -431,6 +318,206 @@ function buildSoutheastBrazilRegions(): Region[] {
       summary: "Storms drifting toward Cachoeiro may create a brief period of heavier rain and lightning late today. The setup is not severe everywhere, but some neighborhoods may see quick impacts.",
       riskDrivers: ["Interior storms drifting toward the metro area", "Elevated lightning risk at day’s end", "Minor urban runoff in heavier cells"],
       trend: "worsening"
+    }
+  ];
+
+  return configs.map(createDemoRegion);
+}
+
+function buildMinorBrazilRegions(): Region[] {
+  const configs: DemoRegionConfig[] = [
+    {
+      id: "teofilo-otoni",
+      name: "Teófilo Otoni",
+      status: "Watch",
+      riskScore: 31,
+      topConcern: "Brief evening storms over inland valleys",
+      summary: "Scattered inland thunderstorms may brush Teófilo Otoni late in the day with short bursts of rain and lightning. Impacts should stay localized but noticeable.",
+      riskDrivers: ["Localized convective buildup over surrounding hills", "Short-duration downpours possible", "Reduced visibility on regional roadways"],
+      trend: "stable"
+    },
+    {
+      id: "colatina",
+      name: "Colatina",
+      status: "Watch",
+      riskScore: 30,
+      topConcern: "Warm afternoon instability near the Doce valley",
+      summary: "Conditions around Colatina support isolated showers and a few thunderstorms later this afternoon. Monitoring is recommended, though widespread disruption is unlikely.",
+      riskDrivers: ["Valley humidity supporting isolated storms", "Low-end runoff risk in urban pockets", "Lightning risk increases after peak heating"],
+      trend: "stable"
+    },
+    {
+      id: "araxa",
+      name: "Araxá",
+      status: "Calm",
+      riskScore: 24,
+      topConcern: "Routine convective monitoring",
+      summary: "Araxá remains under a relatively calm weather pattern with only low-end shower chances. Most city operations can proceed normally.",
+      riskDrivers: ["Light afternoon instability", "No active alerts", "Weather pattern remains broadly stable"],
+      trend: "stable"
+    },
+    {
+      id: "paracatu",
+      name: "Paracatu",
+      status: "Watch",
+      riskScore: 29,
+      topConcern: "Heat-driven showers across western Minas",
+      summary: "Localized convective pockets may form around Paracatu late in the afternoon. The setup is modest, but a few heavier cells may briefly affect transport corridors.",
+      riskDrivers: ["Late-day heat instability", "Brief downpours possible", "Localized gusts with isolated cells"],
+      trend: "stable"
+    },
+    {
+      id: "ubatuba",
+      name: "Ubatuba",
+      status: "Warning",
+      riskScore: 54,
+      topConcern: "Coastal rain bands and slope runoff",
+      summary: "Persistent moisture along the coast is increasing runoff pressure on hillside neighborhoods in Ubatuba. Travel conditions may worsen quickly under heavier bands.",
+      riskDrivers: ["Repeated coastal showers", "Slope runoff in elevated neighborhoods", "Road conditions degrade under stronger rain bands"],
+      trend: "worsening",
+      alertMessage: "Coastal rain advisory active for Ubatuba hillside sectors"
+    },
+    {
+      id: "guaruja",
+      name: "Guarujá",
+      status: "Watch",
+      riskScore: 39,
+      topConcern: "Marine gusts and temporary beachfront flooding",
+      summary: "Guarujá is seeing a moderate coastal weather pattern with gusty onshore flow and brief drainage stress near seafront avenues. Impacts are manageable but active.",
+      riskDrivers: ["Marine gusts along exposed districts", "Beachfront drainage sensitivity", "Short-lived urban flooding possible"],
+      trend: "worsening",
+      alertMessage: "Beachfront drainage watch active for Guarujá"
+    },
+    {
+      id: "itatiaia",
+      name: "Itatiaia",
+      status: "Watch",
+      riskScore: 33,
+      topConcern: "Mountain storms near the Serra da Mantiqueira",
+      summary: "Storms over the mountain corridor near Itatiaia may trigger lightning and brief heavy rain. Outdoor and park-facing activity should remain alert to quick changes.",
+      riskDrivers: ["Terrain-enhanced thunderstorm formation", "Sudden rain near mountain access roads", "Elevated lightning risk in exposed areas"],
+      trend: "worsening"
+    },
+    {
+      id: "cabo-frio",
+      name: "Cabo Frio",
+      status: "Watch",
+      riskScore: 35,
+      topConcern: "Coastal gusts and scattered showers",
+      summary: "Cabo Frio remains under a breezy coastal setup with periods of scattered rain. Most effects should stay short-lived, though exposed marine areas may be more affected.",
+      riskDrivers: ["Onshore wind strengthening late afternoon", "Intermittent showers along the coast", "Marine transport may see brief slowdowns"],
+      trend: "stable"
+    },
+    {
+      id: "diamantina",
+      name: "Diamantina",
+      status: "Calm",
+      riskScore: 22,
+      topConcern: "Low-end shower chance over elevated terrain",
+      summary: "Diamantina is in a relatively quiet pattern with only isolated shower development expected. Monitoring remains routine.",
+      riskDrivers: ["Minor terrain-driven convection", "No active warnings in effect", "Limited operational disruption expected"],
+      trend: "stable"
+    },
+    {
+      id: "barra-do-garcaas",
+      name: "Barra do Garças",
+      status: "Watch",
+      riskScore: 34,
+      topConcern: "Evening thunderstorms spreading across the interior",
+      summary: "Storms drifting over the interior may bring lightning and heavier rain pockets to Barra do Garças tonight. Conditions remain manageable but deserve attention.",
+      riskDrivers: ["Storm clusters moving in from nearby interior zones", "Localized heavier rain bursts", "Temporary transport disruption risk"],
+      trend: "worsening"
+    },
+    {
+      id: "santarem",
+      name: "Santarém",
+      status: "Warning",
+      riskScore: 56,
+      topConcern: "River humidity fueling repeated heavy showers",
+      summary: "High moisture around Santarém is supporting repeated heavy showers and a stronger flood-prone pattern in low-lying areas. Urban drainage should be monitored closely.",
+      riskDrivers: ["High river-basin humidity", "Repeated heavy showers through the day", "Low-lying neighborhoods more exposed to runoff"],
+      trend: "worsening",
+      alertMessage: "Localized flood watch active for low-lying sectors in Santarém"
+    },
+    {
+      id: "parintins",
+      name: "Parintins",
+      status: "Watch",
+      riskScore: 37,
+      topConcern: "Amazon convection intensifying after midday",
+      summary: "Convective activity is expected to intensify around Parintins in the afternoon, bringing lightning and short-lived heavy rain. River operations may need closer observation.",
+      riskDrivers: ["Amazon basin instability increasing this afternoon", "Lightning risk near exposed transport routes", "Localized rain bursts may limit visibility"],
+      trend: "worsening"
+    },
+    {
+      id: "itabuna",
+      name: "Itabuna",
+      status: "Watch",
+      riskScore: 32,
+      topConcern: "Warm, unstable air over southern Bahia",
+      summary: "Itabuna is under a modest convective setup with localized thunderstorm potential. Most impacts should remain brief, though runoff is possible in sensitive corridors.",
+      riskDrivers: ["Southern Bahia humidity supporting showers", "Short-lived thunderstorm cells", "Localized drainage backups possible"],
+      trend: "stable"
+    },
+    {
+      id: "caruaru",
+      name: "Caruaru",
+      status: "Calm",
+      riskScore: 20,
+      topConcern: "Routine dry-season monitoring",
+      summary: "Caruaru remains under mostly manageable conditions with only isolated shower risk. No major disruption signals are currently present.",
+      riskDrivers: ["Mostly stable air mass", "Low-end shower probability", "No active weather alerts"],
+      trend: "stable"
+    },
+    {
+      id: "juazeiro-do-norte",
+      name: "Juazeiro do Norte",
+      status: "Watch",
+      riskScore: 27,
+      topConcern: "Heat and isolated storms near the Chapada",
+      summary: "The Juazeiro do Norte area may see a few isolated storms develop near the escarpment later in the day. The overall setup remains moderate.",
+      riskDrivers: ["Heat-driven instability", "Localized storm formation near higher terrain", "Brief gusts possible with isolated cells"],
+      trend: "stable"
+    },
+    {
+      id: "mossoro",
+      name: "Mossoró",
+      status: "Calm",
+      riskScore: 19,
+      topConcern: "Hot but broadly stable conditions",
+      summary: "Mossoró is experiencing a mostly stable weather window with minimal storm potential. Heat remains the main operational consideration.",
+      riskDrivers: ["Persistent heat through the afternoon", "Very low rainfall probability", "No active alerts in effect"],
+      trend: "stable"
+    },
+    {
+      id: "dourados",
+      name: "Dourados",
+      status: "Watch",
+      riskScore: 34,
+      topConcern: "Interior storm cells and reduced visibility",
+      summary: "Dourados may see evening thunderstorms with a few heavier pockets capable of lowering visibility and slowing road traffic. Conditions warrant active observation.",
+      riskDrivers: ["Interior storm cells crossing transport corridors", "Brief heavier rainfall bursts", "Localized gusts with stronger cells"],
+      trend: "worsening"
+    },
+    {
+      id: "chapeco",
+      name: "Chapecó",
+      status: "Watch",
+      riskScore: 33,
+      topConcern: "Southern frontal moisture increasing rain chances",
+      summary: "Chapecó remains in a frontal moisture pattern that supports scattered rain and a few thunderstorms. Major disruption is not expected, but conditions are unsettled.",
+      riskDrivers: ["Frontal moisture supporting scattered rain", "Localized thunderstorm risk", "Wet roads may affect regional travel"],
+      trend: "stable"
+    },
+    {
+      id: "bage",
+      name: "Bagé",
+      status: "Watch",
+      riskScore: 30,
+      topConcern: "Windy southern plains conditions",
+      summary: "Bagé is under a breezier pattern with passing showers and lower-end frontal instability. Open-area operations should plan for windier conditions.",
+      riskDrivers: ["Wind exposure across the plains", "Passing rain bands", "Cool frontal boundary raising instability slightly"],
+      trend: "stable"
     }
   ];
 
