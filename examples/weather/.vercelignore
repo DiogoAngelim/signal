@@ -1,0 +1,7 @@
+.agents
+.local
+node_modules
+artifacts/mockup-sandbox
+artifacts/api-server
+api
+public
