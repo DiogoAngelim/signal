@@ -59,6 +59,7 @@ const DEFAULT_MARKET_SCHEDULE: MarketSchedule = {
 
 const REFRESH_INTERVAL_MS = 60_000;
 const STALE_AFTER_MS = REFRESH_INTERVAL_MS * 2;
+const COMMISSION_RATE = 0.005;
 
 function resolveMarketSchedule(market: string): MarketSchedule {
   const normalized = market.trim().toUpperCase();
@@ -201,13 +202,19 @@ export default function Dashboard() {
         const quantity = 1;
         const price = stock.price ?? 0;
         const signalEntryPrice = stock.signalEntryPrice ?? price;
-        const marketValue = price * quantity;
-        const signalCostBasis = signalEntryPrice * quantity;
+        const grossMarketValue = price * quantity;
+        const grossSignalCostBasis = signalEntryPrice * quantity;
+        const exitCommission = grossMarketValue * COMMISSION_RATE;
+        const entryCommission = grossSignalCostBasis * COMMISSION_RATE;
+        const marketValue = grossMarketValue - exitCommission;
+        const signalCostBasis = grossSignalCostBasis + entryCommission;
         const signalReturnDollar = marketValue - signalCostBasis;
 
         return {
           ...stock,
           quantity,
+          entryCommission,
+          exitCommission,
           marketValue,
           signalEntryPrice,
           signalCostBasis,
@@ -592,7 +599,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
-              {positionCount} positions · {totalQuantity} shares · Buy + Rising only · signal-entry basis
+              {positionCount} positions · {totalQuantity} shares · Buy + Rising only · signal-entry basis · 0.5% commission included
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Last synced: {lastSyncedLabel}
