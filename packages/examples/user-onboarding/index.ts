@@ -1,6 +1,15 @@
 import { createProtocolError } from "@signal/protocol";
 import { defineEvent, defineMutation, defineQuery } from "@signal/sdk-node";
-import { createExampleRuntime, createReplaySafeSubscriber } from "../support";
+import {
+  createExampleRuntime,
+  createReplaySafeSubscriber,
+  ensureExampleSelfTraining,
+  instrumentExampleEvent,
+  instrumentExampleMutation,
+  instrumentExampleQuery,
+  instrumentExampleSubscriber,
+  type ExampleStateWithSelfTraining,
+} from "../support";
 import {
   userOnboardInputSchema,
   userOnboardedEventSchema,
@@ -17,7 +26,7 @@ export interface UserRecord {
   onboardAttempts: number;
 }
 
-export interface UserOnboardingState {
+export interface UserOnboardingState extends ExampleStateWithSelfTraining {
   users: Map<string, UserRecord>;
   welcomeMessages: string[];
 }
@@ -45,19 +54,21 @@ export function registerUserOnboarding(
   runtime = createExampleRuntime(),
   state = createUserOnboardingState()
 ) {
+  const selfTraining = ensureExampleSelfTraining(state, "user-onboarding");
+
   runtime.registerQuery(
     defineQuery({
       name: "user.profile.v1",
       kind: "query",
       inputSchema: userProfileInputSchema,
       resultSchema: userProfileResultSchema,
-      handler: (input) => {
+      handler: instrumentExampleQuery(selfTraining, "user.profile.v1", (input) => {
         const user = state.users.get(input.userId);
         if (!user) {
           throw createProtocolError("NOT_FOUND", `Unknown user ${input.userId}`);
         }
         return user;
-      },
+      }),
     })
   );
 
@@ -68,7 +79,7 @@ export function registerUserOnboarding(
       inputSchema: userOnboardedEventSchema,
       resultSchema: userOnboardedEventSchema,
       /* c8 ignore next */
-      handler: (payload) => payload,
+      handler: instrumentExampleEvent(selfTraining, "user.onboarded.v1", (payload) => payload),
     })
   );
 
@@ -79,7 +90,7 @@ export function registerUserOnboarding(
       idempotency: "required",
       inputSchema: userOnboardInputSchema,
       resultSchema: userProfileResultSchema,
-      handler: async (input, context) => {
+      handler: instrumentExampleMutation(selfTraining, "user.onboard.v1", async (input, context) => {
         const user = state.users.get(input.userId);
         if (!user) {
           state.users.set(input.userId, {
@@ -112,15 +123,15 @@ export function registerUserOnboarding(
         });
 
         return record;
-      },
+      }),
     })
   );
 
   runtime.subscribe(
     "user.onboarded.v1",
-    createReplaySafeSubscriber(async (event) => {
+    createReplaySafeSubscriber(instrumentExampleSubscriber(selfTraining, "user.onboarded.v1", async (event) => {
       state.welcomeMessages.push(event.messageId);
-    })
+    }))
   );
 
   return { runtime, state };

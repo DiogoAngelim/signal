@@ -4,6 +4,13 @@ import { createPostgresIdempotencyStore } from "@signal/idempotency-postgres";
 import { createSignalRuntime, defineEvent, defineMutation, defineQuery } from "@signal/sdk-node";
 import type { SignalIdempotencyStore, SignalRuntime } from "@signal/runtime";
 import {
+  createPersistentExampleSelfTraining,
+  instrumentExampleEvent,
+  instrumentExampleMutation,
+  instrumentExampleQuery,
+  type ExampleSelfTrainingModule,
+} from "../support";
+import {
   createKafkaSignalDispatcher,
   createPaymentCaptureConsumer,
   projectPaymentCapturedEvent,
@@ -37,6 +44,7 @@ export interface KafkaPostgresExample {
   repository: PaymentCaptureRepository;
   dispatcher: KafkaSignalDispatcher;
   consumer: Awaited<ReturnType<typeof createPaymentCaptureConsumer>>;
+  selfTraining: ExampleSelfTrainingModule;
   pool?: Pool;
   close(): Promise<void>;
 }
@@ -47,6 +55,7 @@ export interface KafkaPostgresExampleDependencies {
   dispatcher?: KafkaSignalDispatcher;
   consumer?: Awaited<ReturnType<typeof createPaymentCaptureConsumer>>;
   idempotencyStore?: SignalIdempotencyStore;
+  selfTraining?: ExampleSelfTrainingModule;
 }
 
 export function readKafkaBrokers(value = process.env["KAFKA_BROKERS"]): string[] {
@@ -69,7 +78,8 @@ export function readKafkaPostgresExampleConfig(): KafkaPostgresExampleConfig {
 
 export function registerKafkaPostgresExample(
   runtime: SignalRuntime,
-  repository: PaymentCaptureRepository
+  repository: PaymentCaptureRepository,
+  selfTraining = createPersistentExampleSelfTraining("kafka-postgresql")
 ) {
   runtime.registerQuery(
     defineQuery({
@@ -77,13 +87,13 @@ export function registerKafkaPostgresExample(
       kind: "query",
       inputSchema: paymentStatusInputSchema,
       resultSchema: paymentStatusResultSchema,
-      handler: async (input) => {
+      handler: instrumentExampleQuery(selfTraining, "payment.status.v1", async (input) => {
         const payment = await repository.getPayment(input.paymentId);
         if (!payment) {
           throw createProtocolError("NOT_FOUND", `Unknown payment ${input.paymentId}`);
         }
         return payment;
-      },
+      }),
     })
   );
 
@@ -93,7 +103,11 @@ export function registerKafkaPostgresExample(
       kind: "query",
       inputSchema: paymentCaptureLogInputSchema,
       resultSchema: paymentCaptureLogResultSchema,
-      handler: async (input) => repository.listCaptureLog(input.paymentId),
+      handler: instrumentExampleQuery(
+        selfTraining,
+        "payment.capture-log.v1",
+        async (input) => repository.listCaptureLog(input.paymentId)
+      ),
     })
   );
 
@@ -103,7 +117,7 @@ export function registerKafkaPostgresExample(
       kind: "event",
       inputSchema: paymentCapturedEventSchema,
       resultSchema: paymentCapturedEventSchema,
-      handler: (payload) => payload,
+      handler: instrumentExampleEvent(selfTraining, "payment.captured.v1", (payload) => payload),
     })
   );
 
@@ -114,7 +128,7 @@ export function registerKafkaPostgresExample(
       idempotency: "required",
       inputSchema: paymentCaptureInputSchema,
       resultSchema: paymentStatusResultSchema,
-      handler: async (input, context) => {
+      handler: instrumentExampleMutation(selfTraining, "payment.capture.v1", async (input, context) => {
         const captured = await repository.capturePayment(input);
 
         await context.emit("payment.captured.v1", {
@@ -125,7 +139,7 @@ export function registerKafkaPostgresExample(
         });
 
         return captured;
-      },
+      }),
     })
   );
 
@@ -143,6 +157,9 @@ export async function createKafkaPostgresExample(
       : new Pool({
           connectionString: config.connectionString,
         }));
+  const selfTraining =
+    dependencies.selfTraining ??
+    createPersistentExampleSelfTraining("kafka-postgresql", pool ? { pool } : undefined);
   const postgresRepository =
     dependencies.repository ?? createPostgresPaymentCaptureRepository(pool as Pool);
   const dispatcher =
@@ -163,7 +180,7 @@ export async function createKafkaPostgresExample(
     runtimeName: "signal-kafka-postgresql-example",
   });
 
-  registerKafkaPostgresExample(runtime, postgresRepository);
+  registerKafkaPostgresExample(runtime, postgresRepository, selfTraining);
   runtime.lock();
 
   await postgresRepository.ensureSchema();
@@ -183,6 +200,7 @@ export async function createKafkaPostgresExample(
     repository: postgresRepository,
     dispatcher,
     consumer,
+    selfTraining,
     pool,
     async close(): Promise<void> {
       if (dependencies.consumer === undefined) {

@@ -1,6 +1,15 @@
 import { createProtocolError } from "@signal/protocol";
 import { defineEvent, defineMutation, defineQuery } from "@signal/sdk-node";
-import { createExampleRuntime, createReplaySafeSubscriber } from "../support";
+import {
+  createExampleRuntime,
+  createReplaySafeSubscriber,
+  ensureExampleSelfTraining,
+  instrumentExampleEvent,
+  instrumentExampleMutation,
+  instrumentExampleQuery,
+  instrumentExampleSubscriber,
+  type ExampleStateWithSelfTraining,
+} from "../support";
 import {
   paymentCaptureInputSchema,
   paymentCapturedEventSchema,
@@ -17,7 +26,7 @@ export interface PaymentRecord {
   captureAttempts: number;
 }
 
-export interface PaymentCaptureState {
+export interface PaymentCaptureState extends ExampleStateWithSelfTraining {
   payments: Map<string, PaymentRecord>;
   ledgerMessages: string[];
 }
@@ -45,19 +54,21 @@ export function registerPaymentCapture(
   runtime = createExampleRuntime(),
   state = createPaymentCaptureState()
 ) {
+  const selfTraining = ensureExampleSelfTraining(state, "payment-capture");
+
   runtime.registerQuery(
     defineQuery({
       name: "payment.status.v1",
       kind: "query",
       inputSchema: paymentStatusInputSchema,
       resultSchema: paymentStatusResultSchema,
-      handler: (input) => {
+      handler: instrumentExampleQuery(selfTraining, "payment.status.v1", (input) => {
         const payment = state.payments.get(input.paymentId);
         if (!payment) {
           throw createProtocolError("NOT_FOUND", `Unknown payment ${input.paymentId}`);
         }
         return payment;
-      },
+      }),
     })
   );
 
@@ -68,7 +79,7 @@ export function registerPaymentCapture(
       inputSchema: paymentCapturedEventSchema,
       resultSchema: paymentCapturedEventSchema,
       /* c8 ignore next */
-      handler: (payload) => payload,
+      handler: instrumentExampleEvent(selfTraining, "payment.captured.v1", (payload) => payload),
     })
   );
 
@@ -79,7 +90,7 @@ export function registerPaymentCapture(
       idempotency: "required",
       inputSchema: paymentCaptureInputSchema,
       resultSchema: paymentStatusResultSchema,
-      handler: async (input, context) => {
+      handler: instrumentExampleMutation(selfTraining, "payment.capture.v1", async (input, context) => {
         const payment = state.payments.get(input.paymentId);
 
         if (!payment) {
@@ -106,15 +117,15 @@ export function registerPaymentCapture(
         });
 
         return payment;
-      },
+      }),
     })
   );
 
   runtime.subscribe(
     "payment.captured.v1",
-    createReplaySafeSubscriber(async (event) => {
+    createReplaySafeSubscriber(instrumentExampleSubscriber(selfTraining, "payment.captured.v1", async (event) => {
       state.ledgerMessages.push(event.messageId);
-    })
+    }))
   );
 
   return { runtime, state };

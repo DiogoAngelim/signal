@@ -1,6 +1,15 @@
 import { createProtocolError } from "@signal/protocol";
 import { defineEvent, defineMutation, defineQuery } from "@signal/sdk-node";
-import { createExampleRuntime, createReplaySafeSubscriber } from "../support";
+import {
+  createExampleRuntime,
+  createReplaySafeSubscriber,
+  ensureExampleSelfTraining,
+  instrumentExampleEvent,
+  instrumentExampleMutation,
+  instrumentExampleQuery,
+  instrumentExampleSubscriber,
+  type ExampleStateWithSelfTraining,
+} from "../support";
 import {
   escrowReleaseInputSchema,
   escrowReleasedEventSchema,
@@ -18,7 +27,7 @@ export interface EscrowRecord {
   releaseAttempts: number;
 }
 
-export interface EscrowReleaseState {
+export interface EscrowReleaseState extends ExampleStateWithSelfTraining {
   escrows: Map<string, EscrowRecord>;
   releaseLog: string[];
 }
@@ -47,19 +56,21 @@ export function registerEscrowRelease(
   runtime = createExampleRuntime(),
   state = createEscrowReleaseState()
 ) {
+  const selfTraining = ensureExampleSelfTraining(state, "escrow-release");
+
   runtime.registerQuery(
     defineQuery({
       name: "escrow.status.v1",
       kind: "query",
       inputSchema: escrowStatusInputSchema,
       resultSchema: escrowStatusResultSchema,
-      handler: (input) => {
+      handler: instrumentExampleQuery(selfTraining, "escrow.status.v1", (input) => {
         const escrow = state.escrows.get(input.escrowId);
         if (!escrow) {
           throw createProtocolError("NOT_FOUND", `Unknown escrow ${input.escrowId}`);
         }
         return escrow;
-      },
+      }),
     })
   );
 
@@ -70,7 +81,7 @@ export function registerEscrowRelease(
       inputSchema: escrowReleasedEventSchema,
       resultSchema: escrowReleasedEventSchema,
       /* c8 ignore next */
-      handler: (payload) => payload,
+      handler: instrumentExampleEvent(selfTraining, "escrow.released.v1", (payload) => payload),
     })
   );
 
@@ -81,7 +92,7 @@ export function registerEscrowRelease(
       idempotency: "required",
       inputSchema: escrowReleaseInputSchema,
       resultSchema: escrowStatusResultSchema,
-      handler: async (input, context) => {
+      handler: instrumentExampleMutation(selfTraining, "escrow.release.v1", async (input, context) => {
         const escrow = state.escrows.get(input.escrowId);
         if (!escrow) {
           throw createProtocolError("NOT_FOUND", `Unknown escrow ${input.escrowId}`);
@@ -104,15 +115,15 @@ export function registerEscrowRelease(
         });
 
         return escrow;
-      },
+      }),
     })
   );
 
   runtime.subscribe(
     "escrow.released.v1",
-    createReplaySafeSubscriber(async (event) => {
+    createReplaySafeSubscriber(instrumentExampleSubscriber(selfTraining, "escrow.released.v1", async (event) => {
       state.releaseLog.push(event.messageId);
-    })
+    }))
   );
 
   return { runtime, state };
