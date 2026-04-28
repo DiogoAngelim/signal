@@ -2,6 +2,13 @@ import fs from "fs";
 import path from "path";
 import Papa from "papaparse";
 import { fileURLToPath } from "url";
+import {
+  calibrateSignalDecision,
+  getAdaptiveThresholds,
+  getSignalTrainingState,
+  recordSignalSnapshot,
+  type SignalTrainingState,
+} from "./signal-training";
 
 export interface StockListItem {
   symbol: string;
@@ -88,10 +95,13 @@ type SignalSnapshot = Pick<
   | "signalReturnPercent"
 >;
 
-type SignalDecision = Pick<StockQuote, "signalAction" | "signalConfidence" | "signalSource">;
+type SignalDecision = {
+  signalAction: TradeSignal;
+  signalConfidence: number;
+  signalSource: "node-ecu" | "heuristic";
+};
 
 const signalCache = new Map<string, { expiresAt: number; signal: SignalDecision }>();
-const signalEmissionState = new Map<string, Required<Pick<StockQuote, "signalAction" | "signalEmittedAt" | "signalEntryPrice">>>();
 const tradingViewRequestTimestamps: number[] = [];
 let tradingViewQueue: Promise<void> = Promise.resolve();
 
@@ -351,43 +361,32 @@ async function getSignalForQuote(
   market?: string
 ): Promise<SignalSnapshot> {
   const cacheKey = `${(market ?? "GLOBAL").toUpperCase()}:${quote.symbol}`;
+  const trainingState = await getSignalTrainingState(market ?? "GLOBAL", quote.symbol);
   const cached = signalCache.get(cacheKey);
   const signal = cached && cached.expiresAt > Date.now()
     ? cached.signal
-    : await createSignalDecision(quote, market);
+    : await createSignalDecision(quote, market, trainingState);
 
   const currentPrice = Number.isFinite(quote.price) && quote.price > 0 ? quote.price : 0;
-  const nowIso = new Date().toISOString();
-  const previousEmission = signalEmissionState.get(cacheKey);
-  const shouldStartEmission = !previousEmission || previousEmission.signalAction !== signal.signalAction;
-  const emission = shouldStartEmission
-    ? {
-      signalAction: signal.signalAction ?? "Hold",
-      signalEmittedAt: nowIso,
-      signalEntryPrice: currentPrice
-    }
-    : previousEmission;
-
-  signalEmissionState.set(cacheKey, emission);
-
-  const signalReturnPercent = emission.signalEntryPrice > 0
-    ? ((currentPrice - emission.signalEntryPrice) / emission.signalEntryPrice) * 100
-    : 0;
-
-  return {
-    ...signal,
-    signalEmittedAt: emission.signalEmittedAt,
-    signalEntryPrice: emission.signalEntryPrice,
-    signalReturnPercent: Number(signalReturnPercent.toFixed(2))
-  };
+  return await recordSignalSnapshot({
+    market: market ?? "GLOBAL",
+    symbol: quote.symbol,
+    currentPrice,
+    signal,
+    previousState: trainingState,
+  });
 }
 
 async function createSignalDecision(
   quote: StockQuote,
-  market?: string
+  market: string | undefined,
+  trainingState: SignalTrainingState
 ): Promise<SignalDecision> {
   const fromModel = await evaluateNodeEcuSignal(quote, market);
-  const signal = fromModel ?? deriveHeuristicSignal(quote);
+  const signal = calibrateSignalDecision(
+    fromModel ?? deriveHeuristicSignal(quote, trainingState),
+    trainingState
+  );
   const cacheKey = `${(market ?? "GLOBAL").toUpperCase()}:${quote.symbol}`;
 
   signalCache.set(cacheKey, {
@@ -399,13 +398,15 @@ async function createSignalDecision(
 }
 
 function deriveHeuristicSignal(
-  quote: StockQuote
+  quote: StockQuote,
+  trainingState: SignalTrainingState
 ): SignalDecision {
   const change = quote.changePercent ?? 0;
   const absChange = Math.abs(change);
-  const signalAction: TradeSignal = change >= 1.2
+  const { buyThreshold, sellThreshold } = getAdaptiveThresholds(trainingState);
+  const signalAction: TradeSignal = change >= buyThreshold
     ? "Buy"
-    : change <= -1.2
+    : change <= sellThreshold
       ? "Sell"
       : "Hold";
   const signalConfidence = clampNumber(20 + absChange * 12, 15, 95);
@@ -420,7 +421,7 @@ function deriveHeuristicSignal(
 async function evaluateNodeEcuSignal(
   quote: StockQuote,
   market?: string
-): Promise<Pick<StockQuote, "signalAction" | "signalConfidence" | "signalSource"> | null> {
+): Promise<SignalDecision | null> {
   if (!NODE_ECU_API_BASE_URL || NODE_ECU_API_BASE_URL.toLowerCase() === "off") {
     return null;
   }
