@@ -3,7 +3,7 @@ let appPromise;
 async function loadApp() {
   if (!appPromise) {
     appPromise = import("../artifacts/api-server/dist/app.mjs").then(
-      (module) => module.default ?? module
+      (module) => module.default ?? module,
     );
   }
 

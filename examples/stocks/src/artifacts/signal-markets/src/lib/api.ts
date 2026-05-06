@@ -20,6 +20,8 @@ export interface StockListItem {
 export interface StockQuote {
   symbol: string;
   price: number;
+  bid?: number;
+  ask?: number;
   changePercent: number;
   status: StockStatus;
   high52: number;
@@ -40,6 +42,8 @@ export interface StockQuote {
 export type StockData = StockListItem & {
   ticker: string;
   price?: number;
+  bid?: number;
+  ask?: number;
   changePercent?: number;
   status?: StockStatus;
   high52?: number;
@@ -57,7 +61,10 @@ export type StockData = StockListItem & {
   signalReturnPercent?: number;
 };
 
-const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(/\/$/, "");
+const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(
+  /\/$/,
+  "",
+);
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 12_000;
 const DEFAULT_RETRY_COUNT = 1;
@@ -70,7 +77,7 @@ export class ApiRequestError extends Error {
 
   constructor(
     message: string,
-    options?: { status?: number; retryable?: boolean; timedOut?: boolean }
+    options?: { status?: number; retryable?: boolean; timedOut?: boolean },
   ) {
     super(message);
     this.name = "ApiRequestError";
@@ -86,9 +93,13 @@ function delay(ms: number) {
 
 async function request<T>(
   path: string,
-  options?: RequestInit & { timeoutMs?: number; retryCount?: number }
+  options?: RequestInit & { timeoutMs?: number; retryCount?: number },
 ): Promise<T> {
-  const { timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, retryCount = DEFAULT_RETRY_COUNT, ...fetchOptions } = options ?? {};
+  const {
+    timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
+    retryCount = DEFAULT_RETRY_COUNT,
+    ...fetchOptions
+  } = options ?? {};
 
   for (let attempt = 0; attempt <= retryCount; attempt += 1) {
     const controller = new AbortController();
@@ -112,27 +123,31 @@ async function request<T>(
       const response = await fetch(`${apiBase}${path}`, {
         headers: { "Content-Type": "application/json" },
         ...fetchOptions,
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       if (!response.ok) {
         throw new ApiRequestError(`Request failed: ${response.status}`, {
           status: response.status,
-          retryable: RETRYABLE_STATUSES.has(response.status)
+          retryable: RETRYABLE_STATUSES.has(response.status),
         });
       }
 
       const body = (await response.json()) as { data: T };
       return body.data;
     } catch (error) {
-      const normalized = error instanceof ApiRequestError
-        ? error
-        : timedOut
-          ? new ApiRequestError("Request timed out", { retryable: true, timedOut: true })
-          : new ApiRequestError(
-            error instanceof Error ? error.message : "Request failed",
-            { retryable: true }
-          );
+      const normalized =
+        error instanceof ApiRequestError
+          ? error
+          : timedOut
+            ? new ApiRequestError("Request timed out", {
+              retryable: true,
+              timedOut: true,
+            })
+            : new ApiRequestError(
+              error instanceof Error ? error.message : "Request failed",
+              { retryable: true },
+            );
 
       if (attempt < retryCount && normalized.retryable) {
         await delay(500 * (attempt + 1));
@@ -158,29 +173,40 @@ export async function fetchMarkets(): Promise<MarketOption[]> {
 export async function fetchStockList(
   market: string,
   offset = 0,
-  limit = 24
+  limit = 24,
 ): Promise<{ market: string; total: number; items: StockListItem[] }> {
   const params = new URLSearchParams({
     market,
     offset: String(offset),
-    limit: String(limit)
+    limit: String(limit),
   });
-  return request<{ market: string; total: number; items: StockListItem[] }>(`/stocks/list?${params}`);
+  return request<{ market: string; total: number; items: StockListItem[] }>(
+    `/stocks/list?${params}`,
+  );
 }
 
 export async function fetchStockQuotes(
   market: string,
   symbols: string[],
-  options?: { withSignals?: boolean }
+  options?: { withSignals?: boolean; timeoutMs?: number; retryCount?: number },
 ): Promise<StockQuote[]> {
   if (!symbols.length) {
     return [];
   }
 
-  const payload = { market, symbols, withSignals: options?.withSignals ?? false };
-  const response = await request<{ market: string; quotes: StockQuote[] }>("/stocks/quotes", {
+  const response = await request<{
+    market?: string;
+    exchange?: string;
+    quotes: StockQuote[];
+  }>("/stocks/quotes", {
     method: "POST",
-    body: JSON.stringify(payload)
+    body: JSON.stringify({
+      market,
+      symbols,
+      withSignals: options?.withSignals,
+    }),
+    timeoutMs: options?.timeoutMs,
+    retryCount: options?.retryCount,
   });
 
   return response.quotes;

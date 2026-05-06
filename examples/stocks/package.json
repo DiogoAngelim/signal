@@ -6,6 +6,17 @@
   "packageManager": "pnpm@10.12.4",
   "scripts": {
     "build": "pnpm --dir src run build && node ./copy-public.mjs",
+    "start": "dotenv -e .env -- ./startup.sh",
     "install:workspace": "pnpm --dir src install"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.39",
+    "@types/react": "^19.2.14",
+    "dotenv-cli": "^11.0.0"
+  },
+  "dependencies": {
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.8.0",
+    "recharts": "^3.8.1"
   }
 }
