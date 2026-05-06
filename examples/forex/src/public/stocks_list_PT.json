@@ -1,0 +1,272 @@
+[
+  {
+    "symbol": "BCP",
+    "name": "Banco Comercial Portugues S.A.",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/b-c-p-bco-comercial-portugues.svg"
+  },
+  {
+    "symbol": "CDU",
+    "name": "Conduril - Engenharia, S.A.",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/conduril-engenharia.svg"
+  },
+  {
+    "symbol": "COR",
+    "name": "Corticeira Amorim SGPS SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/corticeira-amorim-sgps.svg"
+  },
+  {
+    "symbol": "CTT",
+    "name": "CTT - Correios de Portugal SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/ctt-correios-de-portugal-sa.svg"
+  },
+  {
+    "symbol": "EDP",
+    "name": "EDP S.A.",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/energias-br-on-nm.svg"
+  },
+  {
+    "symbol": "EDPR",
+    "name": "EDP Renovaveis SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/edp-renovaveis.svg"
+  },
+  {
+    "symbol": "EGL",
+    "name": "Mota-Engil SGPS SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/mota-engil.svg"
+  },
+  {
+    "symbol": "ENXP",
+    "name": "Euronext NV",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/euronext.svg"
+  },
+  {
+    "symbol": "ESON",
+    "name": "ESTORIL-SOL, SGPS, S.A.",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/estoril-sol-sgps-nominativas.svg"
+  },
+  {
+    "symbol": "FCP",
+    "name": "Futebol Clube do Porto SAD",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/fut-clube-porto.svg"
+  },
+  {
+    "symbol": "FLEXD",
+    "name": "Flexdeal - SIMFE SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/flexdeal.svg"
+  },
+  {
+    "symbol": "GALP",
+    "name": "Galp Energia, SGPS S.A. Class B",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/galp-energia-nom.svg"
+  },
+  {
+    "symbol": "GLINT",
+    "name": "GLINTT GLOBAL, S.A.",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/glintt.svg"
+  },
+  {
+    "symbol": "IBS",
+    "name": "Ibersol, SGPS S.A.",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/ibersol-sgps.svg"
+  },
+  {
+    "symbol": "IPR",
+    "name": "Impresa SGPS SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/impresa-sgps-nom.svg"
+  },
+  {
+    "symbol": "JMT",
+    "name": "Jeronimo Martins, SGPS S.A.",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/j-martins-sgps.svg"
+  },
+  {
+    "symbol": "MAR",
+    "name": "Martifer SGPS",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/martifer-sgps-sa.svg"
+  },
+  {
+    "symbol": "MCP",
+    "name": "Grupo Media Capital SGPS SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-media-capital-sgps.svg"
+  },
+  {
+    "symbol": "MLARR",
+    "name": "Arrabidashopping - SIC Imobiliaria Fechada, S.A.",
+    "market": "Euronext Lisbon"
+  },
+  {
+    "symbol": "MLATR",
+    "name": "Atrium Bire Sigi SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/atrium-bire-sigi-sa.svg"
+  },
+  {
+    "symbol": "MLCIA",
+    "name": "CIAGEST - SIGI, S.A",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/ciagest-sigi-sa.svg"
+  },
+  {
+    "symbol": "MLFMV",
+    "name": "Farminveste - SGPS SA Class B",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/farminveste.svg"
+  },
+  {
+    "symbol": "MLGSH",
+    "name": "Gaiashopping - SIC Imobiliaria Fechada SA",
+    "market": "Euronext Lisbon"
+  },
+  {
+    "symbol": "MLMAC",
+    "name": "Promontoria MACC 1x1 Socimi SA",
+    "market": "Euronext Lisbon"
+  },
+  {
+    "symbol": "MLMR",
+    "name": "Monumental Residence - Sociedade de Investimento Coletivo Imobiliaria Fechada SA",
+    "market": "Euronext Lisbon"
+  },
+  {
+    "symbol": "MLORE",
+    "name": "Olimpo Real Estate Portugal SIGI SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/olimpo-real-estate-socimi-sa.svg"
+  },
+  {
+    "symbol": "MLRSR",
+    "name": "RSR Singular Assets Europe SOCIMI SA",
+    "market": "Euronext Lisbon"
+  },
+  {
+    "symbol": "MLRZE",
+    "name": "Raize-Instituicao De Pagamentos SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/raize-instituicao-de-pagamentos-s-a.svg"
+  },
+  {
+    "symbol": "MLVDN",
+    "name": "Vila Dos Numeros - Sigi SA",
+    "market": "Euronext Lisbon"
+  },
+  {
+    "symbol": "MRL",
+    "name": "MERLIN Properties SOCIMI, S.A.",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/merlin-properties.svg"
+  },
+  {
+    "symbol": "NBA",
+    "name": "Novabase SGPS SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/novabase-sgps-nom.svg"
+  },
+  {
+    "symbol": "NOS",
+    "name": "NOS SGPS SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/nos-sgps-sa.svg"
+  },
+  {
+    "symbol": "NVG",
+    "name": "Navigator Company SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/the-navigator-comp.svg"
+  },
+  {
+    "symbol": "PHR",
+    "name": "PHarol SGPS S.A.",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/pharol-sgps-sa.svg"
+  },
+  {
+    "symbol": "RAM",
+    "name": "Ramada Investimentos e Industria,S.A.",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/ramada-investimentos-e-industria-s-a.svg"
+  },
+  {
+    "symbol": "RENE",
+    "name": "Redes Energeticas Nacionais SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/ren.svg"
+  },
+  {
+    "symbol": "SCB",
+    "name": "Sporting Clube de Braga-Futebol Sad",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/sporting-clube-de-braga.svg"
+  },
+  {
+    "symbol": "SCP",
+    "name": "Sporting Clube de Portugal Futebol SAD",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/sporting-clube-de-portugal.svg"
+  },
+  {
+    "symbol": "SCT",
+    "name": "TOYOTA CAETANO PORTUGAL",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/toyota.svg"
+  },
+  {
+    "symbol": "SEM",
+    "name": "Semapa Sociedade de Investimento e Gestao SGPS SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/semapa.svg"
+  },
+  {
+    "symbol": "SLBEN",
+    "name": "Sport Lisboa e Benfica-Futebol SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/benfica-sad.svg"
+  },
+  {
+    "symbol": "SNC",
+    "name": "Sonaecom SGPS SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/sonaecom-sgps.svg"
+  },
+  {
+    "symbol": "SNG",
+    "name": "Sonagi, S.G.P.S., S.A.",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/sonagi.svg"
+  },
+  {
+    "symbol": "SON",
+    "name": "Sonae SGPS SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/sonae.svg"
+  },
+  {
+    "symbol": "TDSA",
+    "name": "Teixeira Duarte, S.A.",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/teixeira-duarte-sa.svg"
+  },
+  {
+    "symbol": "VAF",
+    "name": "VAA Vista Alegre Atlantis SGPS SA",
+    "market": "Euronext Lisbon",
+    "image": "https://s3-symbol-logo.tradingview.com/vaa-vista-alegre.svg"
+  }
+]

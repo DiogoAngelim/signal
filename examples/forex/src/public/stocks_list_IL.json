@@ -1,0 +1,2741 @@
+[
+  {
+    "symbol": "ACCL",
+    "name": "Accel Solutions Group Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/accel.svg"
+  },
+  {
+    "symbol": "ADGR",
+    "name": "Adgar Investment & Development Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/adgar-inv.svg"
+  },
+  {
+    "symbol": "AGRD",
+    "name": "Autonomous Guard Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tchnopls-vent.svg"
+  },
+  {
+    "symbol": "AILN",
+    "name": "Axilion Smart Mobility Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/axilion.svg"
+  },
+  {
+    "symbol": "ALAR",
+    "name": "ALARUM TECHNOLOGIES LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/alarum-technologies-ltd.svg"
+  },
+  {
+    "symbol": "ALBA",
+    "name": "Albaad Massuot Yitzhak Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/albaad.svg"
+  },
+  {
+    "symbol": "ALL",
+    "name": "Alltrade Recycling Ltd.",
+    "market": "TASE"
+  },
+  {
+    "symbol": "ALLT",
+    "name": "Allot Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/allot-ltd.svg"
+  },
+  {
+    "symbol": "ALMY",
+    "name": "Alma Yesodot Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/alma-yesodot.svg"
+  },
+  {
+    "symbol": "ALTF",
+    "name": "ALTSHULER SHAHAM FINANCIAL LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/altshuler-shaham-f.svg"
+  },
+  {
+    "symbol": "AMAL",
+    "name": "Amal Holdings Ad Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/amal-ad-ltd.svg"
+  },
+  {
+    "symbol": "AMD",
+    "name": "Amiad Water Systems Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/amiad-water-system.svg"
+  },
+  {
+    "symbol": "AMDA",
+    "name": "Almeda Ventures Limited Partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/almeda-ventures-li.svg"
+  },
+  {
+    "symbol": "AMX",
+    "name": "Automax Motors Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/automax-motors-ltd.svg"
+  },
+  {
+    "symbol": "ANGL",
+    "name": "Salomon A. Angel Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/angel-salomon.svg"
+  },
+  {
+    "symbol": "ANLT",
+    "name": "Analyst I.M.S. Investment Management Services Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/analyst.svg"
+  },
+  {
+    "symbol": "APLP",
+    "name": "Apollo Power Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/apollo-power.svg"
+  },
+  {
+    "symbol": "ARF",
+    "name": "ASHDOD REFINERY LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ashdod-refinery-lt.svg"
+  },
+  {
+    "symbol": "ARTS",
+    "name": "Airtouch Solar Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/airtouch-solar-ltd.svg"
+  },
+  {
+    "symbol": "ASGR",
+    "name": "Aspen Group Ltd. (Israel)",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/aspen.svg"
+  },
+  {
+    "symbol": "ASHG",
+    "name": "Ashtrom Group Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ashtrom.svg"
+  },
+  {
+    "symbol": "AUDC",
+    "name": "AudioCodes Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/audiocodes.svg"
+  },
+  {
+    "symbol": "AURA",
+    "name": "Aura Investments Limited",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/aura.svg"
+  },
+  {
+    "symbol": "AVER",
+    "name": "Averbuch Formica Center Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/averbuch.svg"
+  },
+  {
+    "symbol": "AVIA",
+    "name": "Aviation Links Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/aviation-links.svg"
+  },
+  {
+    "symbol": "AVIV",
+    "name": "Mordechai Aviv Taasiot Beniyah 1973 Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/aviv.svg"
+  },
+  {
+    "symbol": "AVRT",
+    "name": "Avrot Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/avrot.svg"
+  },
+  {
+    "symbol": "AXN",
+    "name": "Axon Vision Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/axon-vision-ltd.svg"
+  },
+  {
+    "symbol": "BARI",
+    "name": "BARAK INVESTMENT HOUSE LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/barak-investment.svg"
+  },
+  {
+    "symbol": "BIGT",
+    "name": "Big Tech 50 R&D LP",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/big-tech-50-randd-lp.svg"
+  },
+  {
+    "symbol": "BIOV",
+    "name": "BioView Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/bio-view.svg"
+  },
+  {
+    "symbol": "BLEG",
+    "name": "BlackEdge Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/michman-finance.svg"
+  },
+  {
+    "symbol": "BLGO",
+    "name": "Buligo Capital Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/buligo-capital-ltd.svg"
+  },
+  {
+    "symbol": "BLND",
+    "name": "Blender Financial Technologies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/blender-finance-te.svg"
+  },
+  {
+    "symbol": "BLRX",
+    "name": "BioLineRX Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/biolinerx-ltd.svg"
+  },
+  {
+    "symbol": "BOLT",
+    "name": "BioLight Life Sciences Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/biolight.svg"
+  },
+  {
+    "symbol": "BONS",
+    "name": "Bonus Biogroup Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/bonus-biogroup-ltd.svg"
+  },
+  {
+    "symbol": "BRAN",
+    "name": "Baran Group Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/baran.svg"
+  },
+  {
+    "symbol": "BRIL",
+    "name": "Brill Shoe Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/brill.svg"
+  },
+  {
+    "symbol": "BRKT",
+    "name": "Bareket Capital Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/bareket-capital-lt.svg"
+  },
+  {
+    "symbol": "BRND",
+    "name": "Brand Group (M.G) Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/brand.svg"
+  },
+  {
+    "symbol": "BUFT",
+    "name": "Buff Technologies Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/buff-technologies.svg"
+  },
+  {
+    "symbol": "BVC",
+    "name": "BATM Advanced Communications Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/batm-advanced-communications.svg"
+  },
+  {
+    "symbol": "BWAY",
+    "name": "Brainsway Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/brainsway-ltd.svg"
+  },
+  {
+    "symbol": "CAMT",
+    "name": "Camtek Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/camtek.svg"
+  },
+  {
+    "symbol": "CANF",
+    "name": "Can-Fite BioPharma Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/can-fite-biopharma.svg"
+  },
+  {
+    "symbol": "CAST",
+    "name": "Castro Model Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/castro.svg"
+  },
+  {
+    "symbol": "CBI",
+    "name": "Clal Biotechnology Industries Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/clal-biotech.svg"
+  },
+  {
+    "symbol": "CDEV",
+    "name": "Cohen Development Gas & Oil Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/cohen-dev.svg"
+  },
+  {
+    "symbol": "CEL",
+    "name": "Cellcom Israel Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/cellcom.svg"
+  },
+  {
+    "symbol": "CGEN",
+    "name": "Compugen Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/compugen.svg"
+  },
+  {
+    "symbol": "CILO",
+    "name": "CIELO-BLU GROUP LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/cielo-blu.svg"
+  },
+  {
+    "symbol": "CION",
+    "name": "CION Investment Corp.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/cion-investment.svg"
+  },
+  {
+    "symbol": "CISY",
+    "name": "CI Systems (Israel) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/c-i-systems.svg"
+  },
+  {
+    "symbol": "CLIS",
+    "name": "Clal Insurance Enterprises Holdings Limited",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/clal-insurance.svg"
+  },
+  {
+    "symbol": "CMDR",
+    "name": "Computer Direct Group Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/computer-direct.svg"
+  },
+  {
+    "symbol": "CMER",
+    "name": "C. Mer Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mer.svg"
+  },
+  {
+    "symbol": "CNGL",
+    "name": "CANADA GLOBAL (T.R) LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/canada-global.svg"
+  },
+  {
+    "symbol": "CNTL-M",
+    "name": "CONTINUAL LTD.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/continual-ltd.svg"
+  },
+  {
+    "symbol": "CNZN-M",
+    "name": "Canzon Israel Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/canzon-israel-ltd.svg"
+  },
+  {
+    "symbol": "CPIA",
+    "name": "Cipia Vision Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/cipia-vision-ltd.svg"
+  },
+  {
+    "symbol": "CPPL",
+    "name": "CITY PEOPLE OF ROTSHTEIN GROUP LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/city-people-of-rot.svg"
+  },
+  {
+    "symbol": "CRML",
+    "name": "CARMEL CORP LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/carmel-ltd.svg"
+  },
+  {
+    "symbol": "CRMT",
+    "name": "Carmit Candy Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/carmit.svg"
+  },
+  {
+    "symbol": "CRSM",
+    "name": "Carasso Motors Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/carasso-motors-ltd.svg"
+  },
+  {
+    "symbol": "CRSR",
+    "name": "Carasso Real Estate Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/carasso-real-estat.svg"
+  },
+  {
+    "symbol": "CTPL1",
+    "name": "I.C.P. Israel Citrus Plantations Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/citrus-plant-5.svg"
+  },
+  {
+    "symbol": "CTPL5",
+    "name": "I.C.P. Israel Citrus Plantations Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/citrus-plant-5.svg"
+  },
+  {
+    "symbol": "CYBR",
+    "name": "Palo Alto Networks, Inc.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/palo-alto-networks.svg"
+  },
+  {
+    "symbol": "DANE",
+    "name": "Danel (Adir Yeoshua) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/danel.svg"
+  },
+  {
+    "symbol": "DANH",
+    "name": "Dan Hotels Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/dan-hotels.svg"
+  },
+  {
+    "symbol": "DELG",
+    "name": "Delta Galil Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/delta.svg"
+  },
+  {
+    "symbol": "DIFI",
+    "name": "DIRECT FINANCE OF DIRECT GROUP (2006)LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/direct-finance-of.svg"
+  },
+  {
+    "symbol": "DIMRI",
+    "name": "Y.H. Dimri Construction and Development Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/dimri.svg"
+  },
+  {
+    "symbol": "DIPL",
+    "name": "Diplomat Holdings Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/diplomat.svg"
+  },
+  {
+    "symbol": "DISI",
+    "name": "Discount Investment Corp. Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/discount-inv.svg"
+  },
+  {
+    "symbol": "DLEA",
+    "name": "Delek Automotive Systems Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/delek-automotiv.svg"
+  },
+  {
+    "symbol": "DLEKG",
+    "name": "Delek Group Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/delek.svg"
+  },
+  {
+    "symbol": "DLPR",
+    "name": "Delek Israel Properties (D.P.) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/delek-israel-prope.svg"
+  },
+  {
+    "symbol": "DLTI",
+    "name": "Delta Israel Brands Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-israel-brand.svg"
+  },
+  {
+    "symbol": "DNYA",
+    "name": "Danya Cebus Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/dnya-cebus.svg"
+  },
+  {
+    "symbol": "DORL",
+    "name": "DORAL GROUP RENEWABLE ENERGY RESOURCES LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/doral-gp-renewable.svg"
+  },
+  {
+    "symbol": "DRAL",
+    "name": "Dor Alon Energy in Israel (1988) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/dor-alon.svg"
+  },
+  {
+    "symbol": "DRSH",
+    "name": "DORSEL HOLDINGS LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/dorsel-ltd.svg"
+  },
+  {
+    "symbol": "DSCT",
+    "name": "Israel Discount Bank Limited Class A",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/discount.svg"
+  },
+  {
+    "symbol": "DSIT",
+    "name": "DSIT Solutions Ltd.",
+    "market": "TASE"
+  },
+  {
+    "symbol": "DUNI",
+    "name": "Duniec Bros. Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/duniec.svg"
+  },
+  {
+    "symbol": "ECNR",
+    "name": "Econergy renewable energy Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/econergy-renewable.svg"
+  },
+  {
+    "symbol": "ECP",
+    "name": "Electra Consumer Products Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/electra-co-pr.svg"
+  },
+  {
+    "symbol": "EFNC-M",
+    "name": "ERECH FINANCE CAHALACHA LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/erech-finance.svg"
+  },
+  {
+    "symbol": "ELAD",
+    "name": "Elad Software Systems Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/elad-software.svg"
+  },
+  {
+    "symbol": "ELAL",
+    "name": "El Al Israel Airlines Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/el-al-israel-airlines-ltd.svg"
+  },
+  {
+    "symbol": "ELCO",
+    "name": "Elco Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/elco.svg"
+  },
+  {
+    "symbol": "ELCRE",
+    "name": "Electra Real Estate Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/electra-real-e.svg"
+  },
+  {
+    "symbol": "ELLO",
+    "name": "Ellomay Capital Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ellomay-capital-ltd.svg"
+  },
+  {
+    "symbol": "ELMR",
+    "name": "El-Mor Electric Installation & Services (1986) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/elmor.svg"
+  },
+  {
+    "symbol": "ELRN",
+    "name": "Elron Ventures Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/elron-ventures-ltd.svg"
+  },
+  {
+    "symbol": "ELSPC",
+    "name": "Elspec Engineering Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/elspec.svg"
+  },
+  {
+    "symbol": "ELTR",
+    "name": "Electra Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/electra.svg"
+  },
+  {
+    "symbol": "ELWS",
+    "name": "Electreon Wireless Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/electreon-wireless-ltd.svg"
+  },
+  {
+    "symbol": "EMCO",
+    "name": "E & M Computing Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/eandm.svg"
+  },
+  {
+    "symbol": "EMDV",
+    "name": "Emilia Development (O.F.G.) Ltd. Class A",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/emilia-devel.svg"
+  },
+  {
+    "symbol": "EMITF",
+    "name": "Elbit Imaging Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/elbit-imaging-ltd.svg"
+  },
+  {
+    "symbol": "ENLT",
+    "name": "Enlight Renewable Energy Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/enlight-energy.svg"
+  },
+  {
+    "symbol": "ENLV",
+    "name": "Enlivex Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/enlivex-therapeutics-ltd.svg"
+  },
+  {
+    "symbol": "ENOG",
+    "name": "Energean Plc",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/energean.svg"
+  },
+  {
+    "symbol": "ENRG",
+    "name": "Energix-Renewable Energies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/energix.svg"
+  },
+  {
+    "symbol": "EPIT",
+    "name": "EPITOMEE MEDICAL LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/epitomee-medical-ltd.svg"
+  },
+  {
+    "symbol": "EQTL",
+    "name": "Equital Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/equital.svg"
+  },
+  {
+    "symbol": "ESLT",
+    "name": "Elbit Systems Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/elbit-systems.svg"
+  },
+  {
+    "symbol": "ETGA",
+    "name": "ETGA GROUP LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/etga-ltd.svg"
+  },
+  {
+    "symbol": "EVGN",
+    "name": "Evogene Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/evogene.svg"
+  },
+  {
+    "symbol": "EXPO",
+    "name": "Export Investment Co. Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/export-inv.svg"
+  },
+  {
+    "symbol": "FBRT",
+    "name": "FMS Enterprises Migun Limited",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/fms.svg"
+  },
+  {
+    "symbol": "FGAS",
+    "name": "Fire & Gas Detection Technologies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/fire-and-gas-detecti.svg"
+  },
+  {
+    "symbol": "FIBI",
+    "name": "First International Bank of Israel Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/fibi-bank.svg"
+  },
+  {
+    "symbol": "FIBIH",
+    "name": "FIBI Holdings Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/fibi.svg"
+  },
+  {
+    "symbol": "FORTY",
+    "name": "Formula Systems (1985) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/formula.svg"
+  },
+  {
+    "symbol": "FOX",
+    "name": "Fox-Wizel Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/fox-group.svg"
+  },
+  {
+    "symbol": "FRDN",
+    "name": "Fridenson Logistic Services Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/fridenson.svg"
+  },
+  {
+    "symbol": "FRSX",
+    "name": "Foresight Autonomous Holdings Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/foresight-autonomous.svg"
+  },
+  {
+    "symbol": "FTAL",
+    "name": "Fattal Holdings (1998) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/fattal.svg"
+  },
+  {
+    "symbol": "G107",
+    "name": "Group 107 Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/107-ltd.svg"
+  },
+  {
+    "symbol": "GABY",
+    "name": "Gabay Group Construction Initiation Management and Real Estate Holdings Ltd.",
+    "market": "TASE"
+  },
+  {
+    "symbol": "GAD",
+    "name": "GAD DAIRIES MARKETING 1992 LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/gad-dairies-marketing-1992-ltd.svg"
+  },
+  {
+    "symbol": "GAGR",
+    "name": "GAON GROUP Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/b-gaon-lt.svg"
+  },
+  {
+    "symbol": "GAON-M",
+    "name": "B. Gaon Holdings Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/b-gaon-lt.svg"
+  },
+  {
+    "symbol": "GCT",
+    "name": "G CITY LTD.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/gazit-globe.svg"
+  },
+  {
+    "symbol": "GEFR",
+    "name": "GEFFEN RESIDENCE & RENEWAL LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/geffen-residence.svg"
+  },
+  {
+    "symbol": "GIBUI",
+    "name": "Gibui Holdings Ltd.",
+    "market": "TASE"
+  },
+  {
+    "symbol": "GILT",
+    "name": "Gilat Satellite Networks Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/gilat-satellite-networks.svg"
+  },
+  {
+    "symbol": "GIVO",
+    "name": "Givot Olam Oil Exploration LP (1993)",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/givot-olam-oil-exp.svg"
+  },
+  {
+    "symbol": "GIVO.R34",
+    "name": "Givot Olam Oil Exploration LP (1993) Rights 2026",
+    "market": "TASE"
+  },
+  {
+    "symbol": "GIX",
+    "name": "Gix Internet Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/gix-internet-ltd.svg"
+  },
+  {
+    "symbol": "GLDE",
+    "name": "GOLDEN ENERGY POWER LTD.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/golden-energy.svg"
+  },
+  {
+    "symbol": "GLEN-M",
+    "name": "GLOBE ENERGY RESOURES Y.C.D LIMITED PARNERSHIP",
+    "market": "TASE"
+  },
+  {
+    "symbol": "GLRS",
+    "name": "Globrands Group Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/globrands.svg"
+  },
+  {
+    "symbol": "GLTL",
+    "name": "Gilat Telecom Global Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/gilat-telecom.svg"
+  },
+  {
+    "symbol": "GNCL",
+    "name": "GenCell Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/gencell-ltd.svg"
+  },
+  {
+    "symbol": "GOLD",
+    "name": "Gold Bond Group Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/gold.svg"
+  },
+  {
+    "symbol": "GOSS",
+    "name": "G1 Secure Solutions Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/g-1-secu.svg"
+  },
+  {
+    "symbol": "GOTO",
+    "name": "GOTO Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/goto-ltd.svg"
+  },
+  {
+    "symbol": "GPGB-M",
+    "name": "G. P. Global Power Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/gp-global-power.svg"
+  },
+  {
+    "symbol": "GRIN",
+    "name": "Golan Renewable Industries Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/golan-renewable.svg"
+  },
+  {
+    "symbol": "GSFI",
+    "name": "Gan Shmuel Foods Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/gan-shmuel.svg"
+  },
+  {
+    "symbol": "GVYM",
+    "name": "Gav-Yam Lands Corp. Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/gav-yam-lands.svg"
+  },
+  {
+    "symbol": "HAMAT",
+    "name": "Hamat Group Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/hamat.svg"
+  },
+  {
+    "symbol": "HARL",
+    "name": "Harel Insurance Investments & Financial Services Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/harel.svg"
+  },
+  {
+    "symbol": "HDST-M",
+    "name": "HBL- Hadasit Bio-Holdings Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/hbl-hadasit-bio.svg"
+  },
+  {
+    "symbol": "HGG",
+    "name": "Hagag Group Real Estate Development Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/hagag.svg"
+  },
+  {
+    "symbol": "HGGE",
+    "name": "HAGAG EUROPE DEVELOPMENT Z.F. LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/hagag-europe-devel.svg"
+  },
+  {
+    "symbol": "HIPR",
+    "name": "HIPER GLOBAL LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/hiper-global-ltd.svg"
+  },
+  {
+    "symbol": "HIVE",
+    "name": "Hive 2040 R&D Limited Partnership",
+    "market": "TASE"
+  },
+  {
+    "symbol": "HLAN",
+    "name": "Hilan Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/hilan.svg"
+  },
+  {
+    "symbol": "HLMS",
+    "name": "Holmes Place International Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/holmes-place.svg"
+  },
+  {
+    "symbol": "HMAM",
+    "name": "Hamama Meir Trading (1996) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/hamama.svg"
+  },
+  {
+    "symbol": "HMGS",
+    "name": "HOMEBIOGAS LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/homebiogas-ltd.svg"
+  },
+  {
+    "symbol": "HOD",
+    "name": "Hod Assaf Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/hod.svg"
+  },
+  {
+    "symbol": "HRON",
+    "name": "Hiron Trade Investments & Industrial Buildings Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/hiron.svg"
+  },
+  {
+    "symbol": "HUMX-M",
+    "name": "Human Xtensions Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/human-xtensions-lt.svg"
+  },
+  {
+    "symbol": "IARG",
+    "name": "iArgento High Tech Assets Limited Partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/iargento-hi-tech.svg"
+  },
+  {
+    "symbol": "IBI",
+    "name": "IBI Investment House Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ibi-lion.svg"
+  },
+  {
+    "symbol": "IBIU",
+    "name": "IBI Managing & Underwriting Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ibi-lion.svg"
+  },
+  {
+    "symbol": "ICHO",
+    "name": "Israel Canada Hotels Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/dna-biomed.svg"
+  },
+  {
+    "symbol": "ICL",
+    "name": "ICL Group Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/icl.svg"
+  },
+  {
+    "symbol": "ICON",
+    "name": "ICON GROUP LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/icon-ltd.svg"
+  },
+  {
+    "symbol": "IDIN",
+    "name": "I.D.I. Insurance Company Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/idi-insur.svg"
+  },
+  {
+    "symbol": "IDMO",
+    "name": "Idomoo Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/idomoo-ltd.svg"
+  },
+  {
+    "symbol": "IES",
+    "name": "I.E.S Holdings Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ies.svg"
+  },
+  {
+    "symbol": "ILCO",
+    "name": "Israel Corporation Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/israel.svg"
+  },
+  {
+    "symbol": "ILDC",
+    "name": "Land Development of Nimrodi Group Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/land-dev.svg"
+  },
+  {
+    "symbol": "ILDR",
+    "name": "Israel Land Development - Urban Renewal Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ild-renewal.svg"
+  },
+  {
+    "symbol": "ILX",
+    "name": "ILEX Medical Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ilex-medical.svg"
+  },
+  {
+    "symbol": "IMCO",
+    "name": "Imco Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/imco.svg"
+  },
+  {
+    "symbol": "IMED",
+    "name": "IMED Infinity Medical - Limited Partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/imed-infinity.svg"
+  },
+  {
+    "symbol": "INCR",
+    "name": "InterCure Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/intercure-ltd.svg"
+  },
+  {
+    "symbol": "ININ",
+    "name": "INTER INDUSTRIES PLUS LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/inter-indstries.svg"
+  },
+  {
+    "symbol": "INRM",
+    "name": "Inrom Construction Industries Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/inrom-const.svg"
+  },
+  {
+    "symbol": "INTR",
+    "name": "Inter-Gamma Investment Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/intergama.svg"
+  },
+  {
+    "symbol": "IPO",
+    "name": "InPlay Oil Corp",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/inplay-oil.svg"
+  },
+  {
+    "symbol": "ISCD",
+    "name": "Isracard Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/isracard.svg"
+  },
+  {
+    "symbol": "ISCN",
+    "name": "Israel Canada (T.R) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/israel-canada.svg"
+  },
+  {
+    "symbol": "ISHI",
+    "name": "Israel Shipyards Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/israel-shipyards.svg"
+  },
+  {
+    "symbol": "ISHO",
+    "name": "ISRAS HOLDINGS LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/isras.svg"
+  },
+  {
+    "symbol": "ISI",
+    "name": "ImageSat International (ISI)",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/imagesat-inertnati.svg"
+  },
+  {
+    "symbol": "ISOP",
+    "name": "Israel Opportunity Energy Resources, LP.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/israel-opportunity.svg"
+  },
+  {
+    "symbol": "ISRA",
+    "name": "Isramco Negev 2 Limited Partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/isramco-negev-2.svg"
+  },
+  {
+    "symbol": "ISRG",
+    "name": "Israir Group Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/israir-ltd.svg"
+  },
+  {
+    "symbol": "ISRO",
+    "name": "Isrotel Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/isrotel.svg"
+  },
+  {
+    "symbol": "ISTA",
+    "name": "Issta Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/issta.svg"
+  },
+  {
+    "symbol": "JBNK",
+    "name": "Bank of Jerusalem Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/jerusalem.svg"
+  },
+  {
+    "symbol": "JCFN",
+    "name": "Jacob Finance & Investments Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/jacob-finance-and.svg"
+  },
+  {
+    "symbol": "JEEN",
+    "name": "Jeen AI Technologies Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/micronet-01.svg"
+  },
+  {
+    "symbol": "JNGO",
+    "name": "Jungo Connectivity Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/jungo-connectivity.svg"
+  },
+  {
+    "symbol": "KAFR",
+    "name": "Kafrit Industries (1993) Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/kafrit.svg"
+  },
+  {
+    "symbol": "KARE",
+    "name": "Kardan Real Estate Enterprise & Development Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/kardan-real-es.svg"
+  },
+  {
+    "symbol": "KEN",
+    "name": "Kenon Holdings Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/kenon-ltd.svg"
+  },
+  {
+    "symbol": "KLIL",
+    "name": "Klil Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/klil.svg"
+  },
+  {
+    "symbol": "KMDA",
+    "name": "Kamada Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/kamada.svg"
+  },
+  {
+    "symbol": "KNFM",
+    "name": "Knafaim Holdings Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/knafaim.svg"
+  },
+  {
+    "symbol": "KRDI",
+    "name": "Kardan Israel Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/kardan-nv.svg"
+  },
+  {
+    "symbol": "KRNV-M",
+    "name": "Kardan N.V.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/kardan-nv.svg"
+  },
+  {
+    "symbol": "KRUR",
+    "name": "Kerur Holdings Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/kerur.svg"
+  },
+  {
+    "symbol": "LAHAV",
+    "name": "Lahav L.R. Real Estate Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/lahav.svg"
+  },
+  {
+    "symbol": "LAPD",
+    "name": "Lapidoth Capital Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/lapidoth-cap.svg"
+  },
+  {
+    "symbol": "LBRA",
+    "name": "Libra Insurance Co. Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/libra-insurance-co.svg"
+  },
+  {
+    "symbol": "LBTL",
+    "name": "A. Libental Holdings Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/libental.svg"
+  },
+  {
+    "symbol": "LCTX",
+    "name": "Lineage Cell Therapeutics, Inc.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/lineage-cell-therapeutics.svg"
+  },
+  {
+    "symbol": "LEOF",
+    "name": "Levinski Ofer Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/levinski-ofer.svg"
+  },
+  {
+    "symbol": "LEVI",
+    "name": "Meshulam Levinstein Contracting & Engineering Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/levinstein-eng.svg"
+  },
+  {
+    "symbol": "LHIS",
+    "name": "Lachish Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/lachish.svg"
+  },
+  {
+    "symbol": "LODZ",
+    "name": "LODZIA REAL ESTATE LTD.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/lodzia.svg"
+  },
+  {
+    "symbol": "LPHL",
+    "name": "Lapidoth-Heletz Lp",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/lapidoth-heletz.svg"
+  },
+  {
+    "symbol": "LPSN",
+    "name": "LivePerson, Inc.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/liveperson.svg"
+  },
+  {
+    "symbol": "LSCO",
+    "name": "Lesico Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/lesico.svg"
+  },
+  {
+    "symbol": "LUDN",
+    "name": "Ludan Engineering Co. Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ludan.svg"
+  },
+  {
+    "symbol": "LUDT",
+    "name": "LUDAN-TECH LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ludan-tech-ltd.svg"
+  },
+  {
+    "symbol": "LUMI",
+    "name": "Bank Leumi Le-Israel B.M.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/leumi.svg"
+  },
+  {
+    "symbol": "LURO",
+    "name": "Luzon Ronson N.V.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/luzon.svg"
+  },
+  {
+    "symbol": "LUZC",
+    "name": "Luzon Credit and Finance Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tarya.svg"
+  },
+  {
+    "symbol": "LUZN",
+    "name": "AMOS LUZON DEVELOPMENT AND ENERGY GROUP LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/luzon.svg"
+  },
+  {
+    "symbol": "MAXO",
+    "name": "Max Stock Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/max-stock-ltd.svg"
+  },
+  {
+    "symbol": "MCLL",
+    "name": "Michlol Finance Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/michlol-finance.svg"
+  },
+  {
+    "symbol": "MCPL",
+    "name": "Michpal Technologies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/michpal-technologies-ltd.svg"
+  },
+  {
+    "symbol": "MDIN",
+    "name": "Modiin Energy-Limited Partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/modiin-energy-ltd.svg"
+  },
+  {
+    "symbol": "MDPR",
+    "name": "Medipower (Overseas) Public Co. Limited.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/medipower-01.svg"
+  },
+  {
+    "symbol": "MDTR",
+    "name": "Mediterranean Towers Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mediterranean-towers-ltd.svg"
+  },
+  {
+    "symbol": "MEDN",
+    "name": "Mehadrin Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mehadrin.svg"
+  },
+  {
+    "symbol": "MGDL",
+    "name": "Migdal Insurance & Financial Holdings Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/migdal-insur.svg"
+  },
+  {
+    "symbol": "MGDO",
+    "name": "Megido Y.K. Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/megido-yk-ltd.svg"
+  },
+  {
+    "symbol": "MGOR",
+    "name": "Mega Or Holdings Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mega-or.svg"
+  },
+  {
+    "symbol": "MIA",
+    "name": "Mia Dynamics Motors LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mia-dynamics-motor.svg"
+  },
+  {
+    "symbol": "MIFT",
+    "name": "Millennium Food-Tech-Limited Partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/millennium-food-te.svg"
+  },
+  {
+    "symbol": "MISH",
+    "name": "Mivtach Shamir Holdings Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mivtach-shamir.svg"
+  },
+  {
+    "symbol": "MLD-M",
+    "name": "MirLand Development Corporation Plc",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mirland-developmen.svg"
+  },
+  {
+    "symbol": "MLRN",
+    "name": "M.L.R.N Projects & Trading Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mlrn-projects.svg"
+  },
+  {
+    "symbol": "MLSR",
+    "name": "Melisron Limited",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/melisron.svg"
+  },
+  {
+    "symbol": "MLTH",
+    "name": "MALAM-TEAM HOLDINGS LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/arad-investment.svg"
+  },
+  {
+    "symbol": "MMHD",
+    "name": "Menora Mivtachim Holdings Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/menora-miv-hld.svg"
+  },
+  {
+    "symbol": "MNIF",
+    "name": "Menif - Financial Services Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/menif-financial.svg"
+  },
+  {
+    "symbol": "MNIN",
+    "name": "Mendelson Infrastructure & Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mendelson-if.svg"
+  },
+  {
+    "symbol": "MNRA",
+    "name": "Menara Ventures XL-Limited Partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/menara-ventures-xl.svg"
+  },
+  {
+    "symbol": "MPP",
+    "name": "MORE PROVIDENT FUNDS AND PENSION LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mor-indus.svg"
+  },
+  {
+    "symbol": "MPRS",
+    "name": "MediPress Health-Limited Partnership Partnership Units",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/medipress-health-l.svg"
+  },
+  {
+    "symbol": "MRG",
+    "name": "MULTI RETAIL GROUP LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/multi-retail.svg"
+  },
+  {
+    "symbol": "MRHL",
+    "name": "Merchavia Holdings and Investments Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/merchavia-hold.svg"
+  },
+  {
+    "symbol": "MRIN",
+    "name": "Y.D. More Investments Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mor-indus.svg"
+  },
+  {
+    "symbol": "MSBI",
+    "name": "Hamashbir 365 Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/hamashbir-365.svg"
+  },
+  {
+    "symbol": "MSHR",
+    "name": "Mishorim Real Estate Investments Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mishorim.svg"
+  },
+  {
+    "symbol": "MSKE",
+    "name": "Meshek Energy Renewable Energies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/meshek-engy-renewa.svg"
+  },
+  {
+    "symbol": "MSLA",
+    "name": "Maslavi Construction Co. Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/maslavi.svg"
+  },
+  {
+    "symbol": "MSVT",
+    "name": "MASSIVIT 3D PRINTING TECHNOLOGIES LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/massivit-3d-printi.svg"
+  },
+  {
+    "symbol": "MTAV",
+    "name": "MEITAV INVESTMENTS HOUSE LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/meitav-inv-house.svg"
+  },
+  {
+    "symbol": "MTLF",
+    "name": "Matricelf Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/matricelf-ltd.svg"
+  },
+  {
+    "symbol": "MTRD",
+    "name": "Meitav Trade Investments Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/meitav-trade-inv.svg"
+  },
+  {
+    "symbol": "MTRN",
+    "name": "Maytronics Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/maytronics.svg"
+  },
+  {
+    "symbol": "MTRX",
+    "name": "Matrix IT Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/matrix.svg"
+  },
+  {
+    "symbol": "MUTG",
+    "name": "Urban Brand Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/urban-brand-ltd.svg"
+  },
+  {
+    "symbol": "MVNE",
+    "name": "Mivne Real Estate (K.D) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mivne.svg"
+  },
+  {
+    "symbol": "MYDS",
+    "name": "Mydas Real Estate Investments Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mydas.svg"
+  },
+  {
+    "symbol": "MZTF",
+    "name": "Mizrahi Tefahot Bank Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/mizrahi-tefahot.svg"
+  },
+  {
+    "symbol": "NAWI",
+    "name": "Nawi Group Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/nawi.svg"
+  },
+  {
+    "symbol": "NFTA",
+    "name": "Naphtha Israel Petroleum Corp Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/naphtha.svg"
+  },
+  {
+    "symbol": "NICE",
+    "name": "NICE Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/nice.svg"
+  },
+  {
+    "symbol": "NISA",
+    "name": "Nissan Medical Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/nissan.svg"
+  },
+  {
+    "symbol": "NOFR",
+    "name": "O.Y. NOFAR ENERGY LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/oy-nofar-energy.svg"
+  },
+  {
+    "symbol": "NRGN",
+    "name": "NRGENE TECHNOLOGIES LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/nrgene-techs-ltd.svg"
+  },
+  {
+    "symbol": "NSTR",
+    "name": "Norstar Holdings, Inc.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/norstar.svg"
+  },
+  {
+    "symbol": "NTGR",
+    "name": "Netanel Group Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/netanel-menivim-lt.svg"
+  },
+  {
+    "symbol": "NTML",
+    "name": "Neto Malinda Trading Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/neto-malinda.svg"
+  },
+  {
+    "symbol": "NTNB",
+    "name": "NETANEL MENIVIM LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/netanel-menivim-lt.svg"
+  },
+  {
+    "symbol": "NTO",
+    "name": "Neto M.E. Holdings Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/neto-malinda.svg"
+  },
+  {
+    "symbol": "NURI",
+    "name": "NUR INK INNOVATIONS LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/nur-ink-innovation.svg"
+  },
+  {
+    "symbol": "NVLG",
+    "name": "Novolog (Pharm UP 1966) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/novolog.svg"
+  },
+  {
+    "symbol": "NVMI",
+    "name": "Nova Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/nova.svg"
+  },
+  {
+    "symbol": "NVPT",
+    "name": "Navitas Petroleum LP",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/navitas-petroleum.svg"
+  },
+  {
+    "symbol": "NWMD",
+    "name": "Newmed Energy Limited Partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/newmed-energy-ltd.svg"
+  },
+  {
+    "symbol": "NXFR.M",
+    "name": "NextFerm Technologies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/nextferm-technolog.svg"
+  },
+  {
+    "symbol": "NXGN-M",
+    "name": "Nextgen Biomed Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/nextgen-biomed-ltd.svg"
+  },
+  {
+    "symbol": "NXSN",
+    "name": "NextVison Stabilized Systems, Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/next-vision-stabil.svg"
+  },
+  {
+    "symbol": "NXTG-M",
+    "name": "NEXTAGE Therapeutics Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/nextage-therapeuti.svg"
+  },
+  {
+    "symbol": "NXTM",
+    "name": "Nextcom Ltd. (Israel)",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/nextcom.svg"
+  },
+  {
+    "symbol": "NYAX",
+    "name": "Nayax Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/nayax-ltd.svg"
+  },
+  {
+    "symbol": "OMCN",
+    "name": "Omer Construction And Engineering Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/omer-construction-and-engineering-ltd.svg"
+  },
+  {
+    "symbol": "ONE",
+    "name": "One Software Technologies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/one-technologi.svg"
+  },
+  {
+    "symbol": "OPAL",
+    "name": "Opal Balance Investments Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/opal-balance.svg"
+  },
+  {
+    "symbol": "OPCE",
+    "name": "OPC Energy Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/opc-energy.svg"
+  },
+  {
+    "symbol": "OPK",
+    "name": "OPKO Health, Inc.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/opko-health.svg"
+  },
+  {
+    "symbol": "ORA",
+    "name": "Ormat Technologies, Inc.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ormat-technologies.svg"
+  },
+  {
+    "symbol": "ORL",
+    "name": "Oil Refineries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/bazan.svg"
+  },
+  {
+    "symbol": "ORMP",
+    "name": "Oramed Pharmaceuticals Incorporated",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/oramed.svg"
+  },
+  {
+    "symbol": "ORNP",
+    "name": "Orion Retail Properties Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/orion-retail-properties-ltd.svg"
+  },
+  {
+    "symbol": "ORON",
+    "name": "Oron Group Investments & Holdings Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/oron.svg"
+  },
+  {
+    "symbol": "ORTC",
+    "name": "O.R.T. Technologies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ort.svg"
+  },
+  {
+    "symbol": "PAYT",
+    "name": "Payton Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/payton-planar-magnetics.svg"
+  },
+  {
+    "symbol": "PAZ",
+    "name": "Paz Retail and Energy Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/paz-oil.svg"
+  },
+  {
+    "symbol": "PCBT",
+    "name": "PCB Technologies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/pcb-tec.svg"
+  },
+  {
+    "symbol": "PEN",
+    "name": "Peninsula Group Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/peninsula.svg"
+  },
+  {
+    "symbol": "PERI",
+    "name": "Perion Network Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/perion-network.svg"
+  },
+  {
+    "symbol": "PHOE",
+    "name": "Phoenix Financial Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/phoenix.svg"
+  },
+  {
+    "symbol": "PHTM",
+    "name": "Photomyne Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/photomyne-ltd.svg"
+  },
+  {
+    "symbol": "PIES",
+    "name": "PIE SIAM LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/pie-siam-ltd.svg"
+  },
+  {
+    "symbol": "PLAZ-L",
+    "name": "Plaza Centers N.V.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/plaza-centers-nv-ord-eur100-cdi.svg"
+  },
+  {
+    "symbol": "PLCR",
+    "name": "Plasto-Cargal Group Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/plasto-cargal.svg"
+  },
+  {
+    "symbol": "PLRM",
+    "name": "Palram Industries (1990) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/palram.svg"
+  },
+  {
+    "symbol": "PLSM",
+    "name": "Pulsenmore Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/pulsenmore-ltd.svg"
+  },
+  {
+    "symbol": "PLSN",
+    "name": "Plasson Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/plasson-indus.svg"
+  },
+  {
+    "symbol": "PLUR",
+    "name": "Pluri Inc.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/pluristem-therapeutics.svg"
+  },
+  {
+    "symbol": "PMNT",
+    "name": "Payment Financial Technologies Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/payment-financial.svg"
+  },
+  {
+    "symbol": "PMVM",
+    "name": "PomVom LTD.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/pomvom-ltd.svg"
+  },
+  {
+    "symbol": "PNRG",
+    "name": "Phinergy Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/phinergy-ltd.svg"
+  },
+  {
+    "symbol": "POLI",
+    "name": "Bank Hapoalim BM",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-hapoalim.svg"
+  },
+  {
+    "symbol": "POLP",
+    "name": "Polyram Plastic Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/polyram-plastic-in.svg"
+  },
+  {
+    "symbol": "POLY",
+    "name": "Polygon Real Estate Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/polygon.svg"
+  },
+  {
+    "symbol": "PPBT",
+    "name": "Purple Biotech Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/purple-biotech.svg"
+  },
+  {
+    "symbol": "PPIL",
+    "name": "Plastopil Hazorea Co. Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/plastopil-hazorea.svg"
+  },
+  {
+    "symbol": "PRDM",
+    "name": "Prodalim Investments Ltd",
+    "market": "TASE"
+  },
+  {
+    "symbol": "PRIM",
+    "name": "Prime Energy P.E. LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/prime-energy-pe.svg"
+  },
+  {
+    "symbol": "PRKM",
+    "name": "PARKOMAT INTERNATIONAL LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/parkomat-internati.svg"
+  },
+  {
+    "symbol": "PRMG",
+    "name": "Primotec Group Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/primotec-ltd.svg"
+  },
+  {
+    "symbol": "PRPD",
+    "name": "PROPDO LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/propdo-ltd.svg"
+  },
+  {
+    "symbol": "PRSK",
+    "name": "Prashkovsky Investments & Construction Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/prashkovsky.svg"
+  },
+  {
+    "symbol": "PRTC",
+    "name": "Priortech Limited",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/priortech.svg"
+  },
+  {
+    "symbol": "PSRX",
+    "name": "Psyrex CNS Bio-Tech Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/cannabotech-ltd.svg"
+  },
+  {
+    "symbol": "PTBL",
+    "name": "Property & Building Corp. Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/propert-and-buil.svg"
+  },
+  {
+    "symbol": "PTCH",
+    "name": "Israel Petrochemical Enterprises Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/petrochemical.svg"
+  },
+  {
+    "symbol": "PTNR",
+    "name": "Partner Communications Co. Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/partner.svg"
+  },
+  {
+    "symbol": "PTX",
+    "name": "PetroTX - Limited Partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/petrotx.svg"
+  },
+  {
+    "symbol": "QLTU",
+    "name": "Qualitau Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/qualitau.svg"
+  },
+  {
+    "symbol": "QNCO",
+    "name": "(I.Z.) Queenco Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/queenco.svg"
+  },
+  {
+    "symbol": "RANI",
+    "name": "Rani Zim Shopping Centers Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/rani-zim.svg"
+  },
+  {
+    "symbol": "RATI",
+    "name": "Ratio Energies Limited Partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ratio-energies-ltd.svg"
+  },
+  {
+    "symbol": "RAVD",
+    "name": "Ravad Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ravad.svg"
+  },
+  {
+    "symbol": "RAYG-M",
+    "name": "RAY TLV GROUP LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/intelicanna-ltd.svg"
+  },
+  {
+    "symbol": "RESF",
+    "name": "Reshef Technologies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/reshef-technologies-ltd.svg"
+  },
+  {
+    "symbol": "RGAS",
+    "name": "R.G.A. Services and Cleaning (Israel) 1987 Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/rga-services-isr.svg"
+  },
+  {
+    "symbol": "RIMO",
+    "name": "Rimoni Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/rimoni.svg"
+  },
+  {
+    "symbol": "RLCO",
+    "name": "Ralco Agencies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ralco.svg"
+  },
+  {
+    "symbol": "RLRE",
+    "name": "Rami Levy Shekma Real Estate Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/rami-levy-shekma-real-estate-ltd.svg"
+  },
+  {
+    "symbol": "RMLI",
+    "name": "Rami Levi Chain Stores Hashikma Marketing 2006 Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/rami-levi.svg"
+  },
+  {
+    "symbol": "RMN",
+    "name": "RAM-ON INVESTMENTS & HOLDINGS (1999) LTD.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ram-on.svg"
+  },
+  {
+    "symbol": "RMON",
+    "name": "Rimon Consulting & Management Services Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/rimon-consulting-and.svg"
+  },
+  {
+    "symbol": "ROBO",
+    "name": "RoboGroup T.E.K. Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/robogroup-t-e-k.svg"
+  },
+  {
+    "symbol": "ROTS",
+    "name": "Rotshtein Realestate Limited",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/rotshtein.svg"
+  },
+  {
+    "symbol": "RPAC",
+    "name": "Rapac Communication & Infrastructure Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/rapac.svg"
+  },
+  {
+    "symbol": "RPOL",
+    "name": "RP Optical Lab Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/rp-optical-lab-ltd.svg"
+  },
+  {
+    "symbol": "RSEL",
+    "name": "RSL Electronics Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/rsl.svg"
+  },
+  {
+    "symbol": "RTEN",
+    "name": "ROTEM ENERGY MINERAL (REM) - LIMITED PARTNERSHIP",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/rotem-energy-miner.svg"
+  },
+  {
+    "symbol": "RTLS",
+    "name": "Retailors Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/retailors-ltd.svg"
+  },
+  {
+    "symbol": "RTMD-M",
+    "name": "RETAILMINDS TECHNOLOGIES LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/retailminds-tec.svg"
+  },
+  {
+    "symbol": "RTPT",
+    "name": "Ratio Petroleum Energy LP",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ratio-petroleum.svg"
+  },
+  {
+    "symbol": "RTSN",
+    "name": "Rotem Shani Entrepreneurship And Investments Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/rotem-shani-entrep.svg"
+  },
+  {
+    "symbol": "RVL",
+    "name": "Raval ICS Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/raval.svg"
+  },
+  {
+    "symbol": "RZR",
+    "name": "Razor Labs Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/razor-labs-ltd.svg"
+  },
+  {
+    "symbol": "SADE",
+    "name": "SADE REAL ESTATE-Y.S. LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/sade-real-estat.svg"
+  },
+  {
+    "symbol": "SAE",
+    "name": "Shufersal Ltd Class B",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/shufersal.svg"
+  },
+  {
+    "symbol": "SANO1",
+    "name": "Sano-Brunos Enterprises Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/sano.svg"
+  },
+  {
+    "symbol": "SARN",
+    "name": "Sarine Technologies Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/sarine-tech.svg"
+  },
+  {
+    "symbol": "SBEN",
+    "name": "SHIKUN & BINUI ENERGY LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/shikun-and-binui.svg"
+  },
+  {
+    "symbol": "SCC",
+    "name": "Space-Communication Limited",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/space-com.svg"
+  },
+  {
+    "symbol": "SCDX",
+    "name": "Scodix Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/scodix-ltd.svg"
+  },
+  {
+    "symbol": "SCOP",
+    "name": "Scope Metals Group Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/scope.svg"
+  },
+  {
+    "symbol": "SEMG",
+    "name": "Seach Medical Group Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/seach-medical.svg"
+  },
+  {
+    "symbol": "SFRN",
+    "name": "Sufrin Holdings LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/sufrin-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "SHAN",
+    "name": "Shaniv Paper Industry Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/shaniv.svg"
+  },
+  {
+    "symbol": "SHGR",
+    "name": "Shagrir Group Vehicle Services Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/shagrir-vehicle-services-ltd.svg"
+  },
+  {
+    "symbol": "SHMM",
+    "name": "SHAMAYM IMPROVE LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/shamaym-improve.svg"
+  },
+  {
+    "symbol": "SHNP",
+    "name": "E. Schnapp Co. Works Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/schnapp.svg"
+  },
+  {
+    "symbol": "SHOM",
+    "name": "E.N. Shoham Business Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/shoham-business.svg"
+  },
+  {
+    "symbol": "SHVA",
+    "name": "Automatic Bank Services Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/automatic-bank-services-ltd.svg"
+  },
+  {
+    "symbol": "SHVL",
+    "name": "Shoval Engineering and Construction LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/shoval-engineering.svg"
+  },
+  {
+    "symbol": "SKBN",
+    "name": "Shikun & Binui Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/shikun-and-binui.svg"
+  },
+  {
+    "symbol": "SKLN",
+    "name": "Skyline Investments Inc",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/skyline.svg"
+  },
+  {
+    "symbol": "SLCL-M",
+    "name": "SILVER CASTLE HOLDINGS LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/silver-castle.svg"
+  },
+  {
+    "symbol": "SLRM",
+    "name": "Solrom Holdings Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/solrom.svg"
+  },
+  {
+    "symbol": "SMAG",
+    "name": "Smart Agro - Limited Partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/smart-agro-limited.svg"
+  },
+  {
+    "symbol": "SMNR",
+    "name": "SHEMEN YIELDING REAL ESTATE LTD Class A",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/shemen-estate.svg"
+  },
+  {
+    "symbol": "SMSH",
+    "name": "Smart Shooter Ltd.",
+    "market": "TASE"
+  },
+  {
+    "symbol": "SMT",
+    "name": "Summit Real Estate Holdings Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/summit.svg"
+  },
+  {
+    "symbol": "SNCM",
+    "name": "Suny Cellular Communication Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/suny-commun.svg"
+  },
+  {
+    "symbol": "SNEL",
+    "name": "Synel M.L.L. Payway Limited",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/synel-payway-mll-ltd.svg"
+  },
+  {
+    "symbol": "SNFL",
+    "name": "Sunflower Sustainable Investments Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/sunflower.svg"
+  },
+  {
+    "symbol": "SOLR",
+    "name": "Solaer renewable energies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/solaer-renewable.svg"
+  },
+  {
+    "symbol": "SOLT",
+    "name": "SOLTERRA ENERGY LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/solterra-ene.svg"
+  },
+  {
+    "symbol": "SONO",
+    "name": "Sonovia Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/sonovia-ltd.svg"
+  },
+  {
+    "symbol": "SONR",
+    "name": "Sonol Real Estate & Investments Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/sonol-real-estate-and-investments-ltd.svg"
+  },
+  {
+    "symbol": "SPDV",
+    "name": "Speedvalue Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/speedvalue-ltd.svg"
+  },
+  {
+    "symbol": "SPEN",
+    "name": "Shapir Engineering and Industry Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/shapir-eng.svg"
+  },
+  {
+    "symbol": "SPGS",
+    "name": "Supergas Power (2019) Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/electra-power.svg"
+  },
+  {
+    "symbol": "SPNTC",
+    "name": "N.R. Spuntech Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/spuntech.svg"
+  },
+  {
+    "symbol": "SPRG",
+    "name": "Spring Ventures Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/spring.svg"
+  },
+  {
+    "symbol": "SRAC",
+    "name": "S.R Accord Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/sr-accord.svg"
+  },
+  {
+    "symbol": "SRFT",
+    "name": "Zvi Sarfati & Sons Investments & Constructions Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/sarfati.svg"
+  },
+  {
+    "symbol": "STEC",
+    "name": "SureTech Investments Limited Partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/sure-tech-invs.svg"
+  },
+  {
+    "symbol": "STG",
+    "name": "STG International Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/stg.svg"
+  },
+  {
+    "symbol": "STRG",
+    "name": "Storage Drop Storage Technologies LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/storage-drop.svg"
+  },
+  {
+    "symbol": "STRS",
+    "name": "Strauss Group Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/strauss.svg"
+  },
+  {
+    "symbol": "SUGT",
+    "name": "Sugat Group Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/sugat-ltd.svg"
+  },
+  {
+    "symbol": "SVRE-L",
+    "name": "SaverOne 2014 Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/saverone-2014-ltd.svg"
+  },
+  {
+    "symbol": "SVRT-M",
+    "name": "SavorEat Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/savoreat-ltd.svg"
+  },
+  {
+    "symbol": "TASE",
+    "name": "Tel Aviv Stock Exchange Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tel-aviv-stock-exchange-ltd.svg"
+  },
+  {
+    "symbol": "TATT",
+    "name": "TAT Technologies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tat-technologies.svg"
+  },
+  {
+    "symbol": "TAYA",
+    "name": "Taya Investment Co. Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/taya-inv.svg"
+  },
+  {
+    "symbol": "TDRN",
+    "name": "Tadiran Group Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tadiran.svg"
+  },
+  {
+    "symbol": "TECT",
+    "name": "TECTONA LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tectona.svg"
+  },
+  {
+    "symbol": "TEDE",
+    "name": "Tedea Technological Development & Automation Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tedea.svg"
+  },
+  {
+    "symbol": "TEVA",
+    "name": "Teva Pharmaceutical Industries Limited",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/teva.svg"
+  },
+  {
+    "symbol": "TFRLF",
+    "name": "Tefron Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tefron.svg"
+  },
+  {
+    "symbol": "TGI",
+    "name": "TGI INFRASTRUCTURES LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tgi.svg"
+  },
+  {
+    "symbol": "TGTR",
+    "name": "Together Pharma Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/together.svg"
+  },
+  {
+    "symbol": "THES",
+    "name": "THIRDEYE SYSTEMS LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/thirdeye.svg"
+  },
+  {
+    "symbol": "TIGI",
+    "name": "Tigi Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tigi.svg"
+  },
+  {
+    "symbol": "TKUN",
+    "name": "Tikun Olam-Cannbit Pharmaceuticals Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tikun-olam-canb.svg"
+  },
+  {
+    "symbol": "TLSY",
+    "name": "Telsys Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/telsys.svg"
+  },
+  {
+    "symbol": "TMIS",
+    "name": "THEMIS G.R.E.N. LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/themis.svg"
+  },
+  {
+    "symbol": "TMRP",
+    "name": "Tamar Petroleum Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tamar-pet.svg"
+  },
+  {
+    "symbol": "TNDO",
+    "name": "Tondo Smart Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tondo-smart.svg"
+  },
+  {
+    "symbol": "TOEN",
+    "name": "Tomer Energy Royalties (2012) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tomer-energy.svg"
+  },
+  {
+    "symbol": "TOPG",
+    "name": "Top Group Software Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/top-systems.svg"
+  },
+  {
+    "symbol": "TPGM",
+    "name": "Top Gum Industries Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/top-gum.svg"
+  },
+  {
+    "symbol": "TRAN",
+    "name": "Trucknet Enterprise Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/trucknet.svg"
+  },
+  {
+    "symbol": "TRLT",
+    "name": "Tera Light Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tera-light.svg"
+  },
+  {
+    "symbol": "TRPZ",
+    "name": "TURPAZ INDUSTRIES LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/turpaz-industries.svg"
+  },
+  {
+    "symbol": "TSEM",
+    "name": "Tower Semiconductor Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tower-semiconductor.svg"
+  },
+  {
+    "symbol": "TSG",
+    "name": "TSG IT Advanced Systems Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tsg-it-advanced.svg"
+  },
+  {
+    "symbol": "TTAM",
+    "name": "Tiv Taam Holdings 1 Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/tiv-taam.svg"
+  },
+  {
+    "symbol": "TURB",
+    "name": "TURBOGEN LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/turbogen.svg"
+  },
+  {
+    "symbol": "TUZA",
+    "name": "Teuza - A Fairchild Technology Venture Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/teuza.svg"
+  },
+  {
+    "symbol": "UNCT",
+    "name": "Unicorn Technologies-Limited partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/unicorn-tech-pu.svg"
+  },
+  {
+    "symbol": "UNIT",
+    "name": "Unitronics (1989) (RG) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/unitronics.svg"
+  },
+  {
+    "symbol": "UNMI",
+    "name": "Universal Motors Israel Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/universal-motors-israel-ltd.svg"
+  },
+  {
+    "symbol": "UNTC",
+    "name": "Unic-Tech Limited Partnership",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/unic-tech-pu.svg"
+  },
+  {
+    "symbol": "UNVO-M",
+    "name": "Univo Pharmaceuticals Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/univo.svg"
+  },
+  {
+    "symbol": "UPSL",
+    "name": "Upsellon Brands Holdings Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/upsellon-brands.svg"
+  },
+  {
+    "symbol": "URBC",
+    "name": "URBANICA (PALO) RETAIL LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/urbanica-palo-re.svg"
+  },
+  {
+    "symbol": "UTRN",
+    "name": "Utron Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/utron.svg"
+  },
+  {
+    "symbol": "VCTR",
+    "name": "Victory Supermarket Chain Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/victory.svg"
+  },
+  {
+    "symbol": "VILR",
+    "name": "Villar International Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/villar.svg"
+  },
+  {
+    "symbol": "VISN",
+    "name": "Vision Sigma Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/vision-sigma.svg"
+  },
+  {
+    "symbol": "VRDS",
+    "name": "Veridis Environment Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/veridis-environmen.svg"
+  },
+  {
+    "symbol": "VRYX",
+    "name": "Veloryx Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/aquarius-engines-a-m-ltd.svg"
+  },
+  {
+    "symbol": "VTNA",
+    "name": "Vitania Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/vitania.svg"
+  },
+  {
+    "symbol": "WESR",
+    "name": "WeSure Global Tech Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/wesure-globalt.svg"
+  },
+  {
+    "symbol": "WILC",
+    "name": "G. Willi-Food International Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/willy-food.svg"
+  },
+  {
+    "symbol": "WILK",
+    "name": "Wilk Technologies Ltd",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/wilk.svg"
+  },
+  {
+    "symbol": "WLFD",
+    "name": "Willy Food Investments Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/willy-food.svg"
+  },
+  {
+    "symbol": "WNBZ-L",
+    "name": "WIND BUZZ TECHNOLOGIES LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/wind-buzz-technol.svg"
+  },
+  {
+    "symbol": "XTLB",
+    "name": "XTL Biopharmaceuticals Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/xtl-biopharmaceuticals-ltd.svg"
+  },
+  {
+    "symbol": "YAAZ",
+    "name": "Y.E.Z. Entrepreneurship, Construction and Urban Renewal Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/yez-entrepreneurship-construction-and-urban-renewal-ltd.svg"
+  },
+  {
+    "symbol": "YACO",
+    "name": "YACOBI BROTHERS GROUP (YSB) LTD",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/yaacobi.svg"
+  },
+  {
+    "symbol": "YBOX",
+    "name": "YBOX Real Estate Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/ybox.svg"
+  },
+  {
+    "symbol": "YBRD",
+    "name": "Y.B Urban Renewal - Residential Development LTD.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/yb-renewal.svg"
+  },
+  {
+    "symbol": "YESD",
+    "name": "Yesodot Eitanim Construction Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/yesodot-eitanim-co.svg"
+  },
+  {
+    "symbol": "YHNF",
+    "name": "M. Yochananof & Sons (1988) Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/yochananof.svg"
+  },
+  {
+    "symbol": "ZNKL",
+    "name": "Zanlakol Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/zanlakol.svg"
+  },
+  {
+    "symbol": "ZOOZ",
+    "name": "ZOOZ Strategy Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/zooz-power.svg"
+  },
+  {
+    "symbol": "ZPRS",
+    "name": "Zephyrus Wing Energies Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/zephyrus-wing-ener.svg"
+  },
+  {
+    "symbol": "ZUR",
+    "name": "Zur Shamir Holdings Ltd.",
+    "market": "TASE",
+    "image": "https://s3-symbol-logo.tradingview.com/zur.svg"
+  }
+]

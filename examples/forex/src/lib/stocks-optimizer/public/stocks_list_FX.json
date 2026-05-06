@@ -1,0 +1,362 @@
+[
+  {
+    "market": "United States",
+    "symbol": "EURUSD",
+    "name": "Euro / US Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "USDJPY",
+    "name": "US Dollar / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "GBPUSD",
+    "name": "British Pound / US Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "AUDUSD",
+    "name": "Australian Dollar / US Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "USDCAD",
+    "name": "US Dollar / Canadian Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "USDCHF",
+    "name": "US Dollar / Swiss Franc",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "NZDUSD",
+    "name": "New Zealand Dollar / US Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "USDBRL",
+    "name": "US Dollar / Brazilian Real",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "USDMXN",
+    "name": "US Dollar / Mexican Peso",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "USDTRY",
+    "name": "US Dollar / Turkish Lira",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "USDZAR",
+    "name": "US Dollar / South African Rand",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "USDSGD",
+    "name": "US Dollar / Singapore Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "USDHKD",
+    "name": "US Dollar / Hong Kong Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "USDNOK",
+    "name": "US Dollar / Norwegian Krone",
+    "sector": "Forex"
+  },
+  {
+    "market": "United States",
+    "symbol": "USDSEK",
+    "name": "US Dollar / Swedish Krona",
+    "sector": "Forex"
+  },
+  {
+    "market": "Euro Zone",
+    "symbol": "EURUSD",
+    "name": "Euro / US Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Euro Zone",
+    "symbol": "EURGBP",
+    "name": "Euro / British Pound",
+    "sector": "Forex"
+  },
+  {
+    "market": "Euro Zone",
+    "symbol": "EURJPY",
+    "name": "Euro / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "Euro Zone",
+    "symbol": "EURCHF",
+    "name": "Euro / Swiss Franc",
+    "sector": "Forex"
+  },
+  {
+    "market": "Euro Zone",
+    "symbol": "EURCAD",
+    "name": "Euro / Canadian Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Euro Zone",
+    "symbol": "EURAUD",
+    "name": "Euro / Australian Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "United Kingdom",
+    "symbol": "GBPUSD",
+    "name": "British Pound / US Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "United Kingdom",
+    "symbol": "EURGBP",
+    "name": "Euro / British Pound",
+    "sector": "Forex"
+  },
+  {
+    "market": "United Kingdom",
+    "symbol": "GBPJPY",
+    "name": "British Pound / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "United Kingdom",
+    "symbol": "GBPCHF",
+    "name": "British Pound / Swiss Franc",
+    "sector": "Forex"
+  },
+  {
+    "market": "United Kingdom",
+    "symbol": "GBPAUD",
+    "name": "British Pound / Australian Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "United Kingdom",
+    "symbol": "GBPCAD",
+    "name": "British Pound / Canadian Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Japan",
+    "symbol": "USDJPY",
+    "name": "US Dollar / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "Japan",
+    "symbol": "EURJPY",
+    "name": "Euro / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "Japan",
+    "symbol": "GBPJPY",
+    "name": "British Pound / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "Japan",
+    "symbol": "AUDJPY",
+    "name": "Australian Dollar / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "Japan",
+    "symbol": "CADJPY",
+    "name": "Canadian Dollar / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "Japan",
+    "symbol": "CHFJPY",
+    "name": "Swiss Franc / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "Japan",
+    "symbol": "NZDJPY",
+    "name": "New Zealand Dollar / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "Australia",
+    "symbol": "AUDUSD",
+    "name": "Australian Dollar / US Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Australia",
+    "symbol": "EURAUD",
+    "name": "Euro / Australian Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Australia",
+    "symbol": "GBPAUD",
+    "name": "British Pound / Australian Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Australia",
+    "symbol": "AUDCAD",
+    "name": "Australian Dollar / Canadian Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Australia",
+    "symbol": "AUDJPY",
+    "name": "Australian Dollar / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "Australia",
+    "symbol": "AUDNZD",
+    "name": "Australian Dollar / New Zealand Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Canada",
+    "symbol": "USDCAD",
+    "name": "US Dollar / Canadian Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Canada",
+    "symbol": "EURCAD",
+    "name": "Euro / Canadian Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Canada",
+    "symbol": "GBPCAD",
+    "name": "British Pound / Canadian Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Canada",
+    "symbol": "AUDCAD",
+    "name": "Australian Dollar / Canadian Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Canada",
+    "symbol": "CADJPY",
+    "name": "Canadian Dollar / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "Switzerland",
+    "symbol": "USDCHF",
+    "name": "US Dollar / Swiss Franc",
+    "sector": "Forex"
+  },
+  {
+    "market": "Switzerland",
+    "symbol": "EURCHF",
+    "name": "Euro / Swiss Franc",
+    "sector": "Forex"
+  },
+  {
+    "market": "Switzerland",
+    "symbol": "GBPCHF",
+    "name": "British Pound / Swiss Franc",
+    "sector": "Forex"
+  },
+  {
+    "market": "Switzerland",
+    "symbol": "CHFJPY",
+    "name": "Swiss Franc / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "New Zealand",
+    "symbol": "NZDUSD",
+    "name": "New Zealand Dollar / US Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "New Zealand",
+    "symbol": "AUDNZD",
+    "name": "Australian Dollar / New Zealand Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "New Zealand",
+    "symbol": "NZDJPY",
+    "name": "New Zealand Dollar / Japanese Yen",
+    "sector": "Forex"
+  },
+  {
+    "market": "Brazil",
+    "symbol": "USDBRL",
+    "name": "US Dollar / Brazilian Real",
+    "sector": "Forex"
+  },
+  {
+    "market": "Mexico",
+    "symbol": "USDMXN",
+    "name": "US Dollar / Mexican Peso",
+    "sector": "Forex"
+  },
+  {
+    "market": "Turkey",
+    "symbol": "USDTRY",
+    "name": "US Dollar / Turkish Lira",
+    "sector": "Forex"
+  },
+  {
+    "market": "South Africa",
+    "symbol": "USDZAR",
+    "name": "US Dollar / South African Rand",
+    "sector": "Forex"
+  },
+  {
+    "market": "Singapore",
+    "symbol": "USDSGD",
+    "name": "US Dollar / Singapore Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Hong Kong",
+    "symbol": "USDHKD",
+    "name": "US Dollar / Hong Kong Dollar",
+    "sector": "Forex"
+  },
+  {
+    "market": "Norway",
+    "symbol": "USDNOK",
+    "name": "US Dollar / Norwegian Krone",
+    "sector": "Forex"
+  },
+  {
+    "market": "Sweden",
+    "symbol": "USDSEK",
+    "name": "US Dollar / Swedish Krona",
+    "sector": "Forex"
+  }
+]

@@ -1,0 +1,2042 @@
+[
+  {
+    "symbol": "4SI.JO",
+    "name": "4Sight Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/4sight-ltd.svg"
+  },
+  {
+    "symbol": "ABAM1.JO",
+    "name": "ABSA Bank Ltd Underlying Tracker 2024-open end on Basket",
+    "market": "JSE"
+  },
+  {
+    "symbol": "ABAM2.JO",
+    "name": "Cartesian ABS INC AMC",
+    "market": "JSE"
+  },
+  {
+    "symbol": "ABG.JO",
+    "name": "Absa Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/absa-bank-ltd-pref.svg"
+  },
+  {
+    "symbol": "ACL.JO",
+    "name": "ArcelorMittal South Africa Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/arcelormittal.svg"
+  },
+  {
+    "symbol": "ACS.JO",
+    "name": "Acsion Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/acsion.svg"
+  },
+  {
+    "symbol": "ACT.JO",
+    "name": "AfroCentric Investment Corporation Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/afrocentric.svg"
+  },
+  {
+    "symbol": "ADH.JO",
+    "name": "ADvTECH Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/advtech-ltd.svg"
+  },
+  {
+    "symbol": "ADR.JO",
+    "name": "Adcorp Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/adcorp-holdings.svg"
+  },
+  {
+    "symbol": "ADW.JO",
+    "name": "African Dawn Capital Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/african-dawn-capital.svg"
+  },
+  {
+    "symbol": "ADXOPP.JO",
+    "name": "UBS AG",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AEG.JO",
+    "name": "Aveng Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/aveng.svg"
+  },
+  {
+    "symbol": "AEL.JO",
+    "name": "Altron Limited Class A",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/allied-electronics.svg"
+  },
+  {
+    "symbol": "AFE.JO",
+    "name": "AECI Ltd",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/aeci-limited.svg"
+  },
+  {
+    "symbol": "AFEP.JO",
+    "name": "AECI Ltd 5 1/2 % Cum.Pref.Shs",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/aeci-limited.svg"
+  },
+  {
+    "symbol": "AFH.JO",
+    "name": "Alexander Forbes Group Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/alexander-forbes-gr.svg"
+  },
+  {
+    "symbol": "AFT.JO",
+    "name": "Afrimat Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/afrimat-limited.svg"
+  },
+  {
+    "symbol": "AGL.JO",
+    "name": "Anglo American plc",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/anglo-american.svg"
+  },
+  {
+    "symbol": "ALEGRO.JO",
+    "name": "Ubs Ag London Branch Underlying Tracker 2024-12.12.31 (Exp.09.12.31) on Allegro Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC001.JO",
+    "name": "Standard Bank of South Africa Ltd Structured Instrument 2022-01.12.32 AMC001 on AAM Multi Strategy Equity Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC002.JO",
+    "name": "Standard Bank of South Africa Ltd Structured Instrument 2022-01.12.32 AMC002 on High Street Offshore Yielding",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC003.JO",
+    "name": "Standard Bank of South Africa Ltd Structured Instrument 2022-01.12.32 AMC003 on CGAM Focussed Equity Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC004.JO",
+    "name": "Standard Bank of South Africa Ltd Warrant 2023-10.05.30 on AMC EntertHldg Rg-A",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC005.JO",
+    "name": "Standard Bank of South Africa Ltd Warrant 2023-open end on AMC EntertHldg Rg-A",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC006.JO",
+    "name": "Standard Bank of South Africa Ltd Structured Instrument 2023-27.06.33 (Exp.24.06.33) AMC006 on NVest Balanced",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC007.JO",
+    "name": "Standard Bank of South Africa Ltd Underlying Tracker 2023-20.09.33 on High Street Wealth Warriors High Equity",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC009.JO",
+    "name": "Standard Bank of South Africa Ltd Underlying Tracker 2024-15.09.33 (Exp.12.09.33) on Baobab Equity AMC",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC010.JO",
+    "name": "SBStockbroking Share AMC",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC011.JO",
+    "name": "SB Stockbroking ETF AMC",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC012.JO",
+    "name": "Standard Bank of South Africa Ltd Structured Note 2024-17.11.33 on RAONON",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC013.JO",
+    "name": "Standard Bank of South Africa Ltd Underlying Tracker 2025-27.01.34 on Basket",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC014.JO",
+    "name": "Standard Bank Of South Africa Limited Treasury Division Registered Shs",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC015.JO",
+    "name": "Standard Bank of South Africa Limited 0 % Medium Term Notes 2024-20.12.34 Series 15",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC016.JO",
+    "name": "Standard Bank of South Africa Ltd Underlying Tracker 2024-20.12.34 on Differential Kyrios",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC018.JO",
+    "name": "Standard Bk Of Sa Perles",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC020.JO",
+    "name": "Catalyx SA Core Hegde",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AMC021.JO",
+    "name": "Standard Bank of South Africa Ltd Registered Shs",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AME.JO",
+    "name": "African Media Entertainment Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/african-media-ent.svg"
+  },
+  {
+    "symbol": "ANCOMP.JO",
+    "name": "UBS AG. London Branch Structured Instrument 2022-30.11.27 on AnBro Dynamic Compound Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "ANG.JO",
+    "name": "Anglogold Ashanti PLC",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/anglogold-ashanti.svg"
+  },
+  {
+    "symbol": "ANH.JO",
+    "name": "Anheuser-Busch InBev SA/NV",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/anheuser-busch-inbev.svg"
+  },
+  {
+    "symbol": "ANI.JO",
+    "name": "Afine Investments Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/afine-investments.svg"
+  },
+  {
+    "symbol": "AON.JO",
+    "name": "African and Overseas Enterprises Limited Class N",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/african-over-ent.svg"
+  },
+  {
+    "symbol": "AOO.JO",
+    "name": "African and Overseas Enterprises Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/african-over-ent.svg"
+  },
+  {
+    "symbol": "AOVP.JO",
+    "name": "African and Overseas Enterprises Limited 6 % Cum Part Pref Registered Shs",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/african-over-ent.svg"
+  },
+  {
+    "symbol": "APH.JO",
+    "name": "Alphamin Resources Corp.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/alphamin-resources.svg"
+  },
+  {
+    "symbol": "APN.JO",
+    "name": "Aspen Pharmacare Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/aspen-pharmacare-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "ARI.JO",
+    "name": "African Rainbow Minerals Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/african-rainbow-min-ltd.svg"
+  },
+  {
+    "symbol": "ARL.JO",
+    "name": "Astral Foods Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/astral-foods-ltd.svg"
+  },
+  {
+    "symbol": "ART.JO",
+    "name": "Argent Industrial Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/argent-industrial.svg"
+  },
+  {
+    "symbol": "ASIAGR.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2023-22.09.28 (Exp.19.09.28) on The Capital Link Partners",
+    "market": "JSE"
+  },
+  {
+    "symbol": "AVI.JO",
+    "name": "AVI Limited Class Y",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/avi-ltd.svg"
+  },
+  {
+    "symbol": "AXX.JO",
+    "name": "Araxi Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/capital-appreciation.svg"
+  },
+  {
+    "symbol": "BAC.JO",
+    "name": "Africa Bitcoin Corporation Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/altvest-capital-ltd.svg"
+  },
+  {
+    "symbol": "BACA.JO",
+    "name": "Africa Bitcoin Corporation Limited Pfd Registered Shs A",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/altvest-capital-ltd.svg"
+  },
+  {
+    "symbol": "BACB.JO",
+    "name": "Africa Bitcoin Corporation Limited Pfd Registered Shs B",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/altvest-capital-ltd.svg"
+  },
+  {
+    "symbol": "BAMGCF.JO",
+    "name": "UBS Actively Managed Certificate linked to the Boutique Global Champions Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "BAMHUM.JO",
+    "name": "UBS AMC BAM Hummingbird",
+    "market": "JSE"
+  },
+  {
+    "symbol": "BAT.JO",
+    "name": "Brait PLC",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/brait-ord.svg"
+  },
+  {
+    "symbol": "BCF.JO",
+    "name": "Bowler Metcalf Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/bowler-metcalf.svg"
+  },
+  {
+    "symbol": "BEL.JO",
+    "name": "Bell Equipment Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/bell-equipment.svg"
+  },
+  {
+    "symbol": "BHG.JO",
+    "name": "BHP Group Ltd",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/bhp.svg"
+  },
+  {
+    "symbol": "BID.JO",
+    "name": "Bid Corporation Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/bid-ltd.svg"
+  },
+  {
+    "symbol": "BIGGLS.JO",
+    "name": "UBS AG. London Branch Registered shs",
+    "market": "JSE"
+  },
+  {
+    "symbol": "BIK.JO",
+    "name": "Brikor Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/brikor.svg"
+  },
+  {
+    "symbol": "BIOTEC.JO",
+    "name": "UBS AG, London Branch Exchange Traded Product 2023-27.06.28 on Bloomberg Transatlantic Top50 Biotech",
+    "market": "JSE"
+  },
+  {
+    "symbol": "BLU.JO",
+    "name": "Blu Label Unlimited Group Ltd",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/blue-label-telecoms.svg"
+  },
+  {
+    "symbol": "BOX.JO",
+    "name": "Boxer Retail Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/boxer-retail-limited.svg"
+  },
+  {
+    "symbol": "BRN.JO",
+    "name": "Brimstone Investment Corporation Limited Class N",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/brimstone-inv.svg"
+  },
+  {
+    "symbol": "BRNDZ.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2023-22.09.28 (Exp.19.09.28) BRNDZ on AnBro World's Biggest",
+    "market": "JSE"
+  },
+  {
+    "symbol": "BRT.JO",
+    "name": "Brimstone Investment Corporation Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/brimstone-inv.svg"
+  },
+  {
+    "symbol": "BTI.JO",
+    "name": "British American Tobacco p.l.c.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/british-american-tobacco.svg"
+  },
+  {
+    "symbol": "BVT.JO",
+    "name": "Bidvest Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/bidvest-ltd.svg"
+  },
+  {
+    "symbol": "BWN.JO",
+    "name": "Balwin Properties Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/balwin-properties.svg"
+  },
+  {
+    "symbol": "BYI.JO",
+    "name": "Bytes Technology Group Plc",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/bytes-technology-grp-plc.svg"
+  },
+  {
+    "symbol": "CAA.JO",
+    "name": "CA Sales Holdings (Pty) Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ca-sales-holdings.svg"
+  },
+  {
+    "symbol": "CAC.JO",
+    "name": "CAFCA Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cafca.svg"
+  },
+  {
+    "symbol": "CAT.JO",
+    "name": "Caxton and CTP Publishers and Printers Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/caxton-ctp-publish-print.svg"
+  },
+  {
+    "symbol": "CATP.JO",
+    "name": "Caxton and CTP Publishers and Printers Limited 6 % Ptg.Pref.Shs",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/caxton-ctp-publish-print.svg"
+  },
+  {
+    "symbol": "CCC.JO",
+    "name": "Cilo Cybin Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cilo-cybin-ltd.svg"
+  },
+  {
+    "symbol": "CCD.JO",
+    "name": "Cell C Holdings Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cell-c-ltd.svg"
+  },
+  {
+    "symbol": "CCMGCZ.JO",
+    "name": "UBS AG. London Branch Structured Instrument 2022-30.11.27 on Coherent Global Commodity Investment",
+    "market": "JSE"
+  },
+  {
+    "symbol": "CFR.JO",
+    "name": "Compagnie Financiere Richemont SA",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/richemont-n.svg"
+  },
+  {
+    "symbol": "CGR.JO",
+    "name": "Calgro M3 Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/calgro-m3-hldgs.svg"
+  },
+  {
+    "symbol": "CHP.JO",
+    "name": "Choppies Enterprises Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/choppies-enterprises-ltd.svg"
+  },
+  {
+    "symbol": "CKS.JO",
+    "name": "Crookes Brothers Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/crooked-brothers.svg"
+  },
+  {
+    "symbol": "CLH.JO",
+    "name": "City Lodge Hotels Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/city-lodge-hotels-ltd.svg"
+  },
+  {
+    "symbol": "CLI.JO",
+    "name": "Clientele Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/clientele-ltd.svg"
+  },
+  {
+    "symbol": "CLPASI.JO",
+    "name": "UBS AG. London Branch Structured Instrument 2022-30.11.27 on Capital Link Partners Asia Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "CLS.JO",
+    "name": "Clicks Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/clicks-ltd.svg"
+  },
+  {
+    "symbol": "CMH.JO",
+    "name": "Combined Motor Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/combined-motor-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "CML.JO",
+    "name": "Coronation Fund Managers Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/coronation-fund-mngrs-ld.svg"
+  },
+  {
+    "symbol": "CPI.JO",
+    "name": "Capitec Bank Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/capitec-bank-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "CPIP.JO",
+    "name": "Capitec Bank Holdings Limited Non-Cum non-Red Pref Registered Shs",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/capitec-bank-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "CPP.JO",
+    "name": "Collins Property Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tradehold-limited-b-pref.svg"
+  },
+  {
+    "symbol": "CPR.JO",
+    "name": "Copper 360 Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/copper-360-limited.svg"
+  },
+  {
+    "symbol": "CSB.JO",
+    "name": "Cashbuild Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cashbuild-ltd.svg"
+  },
+  {
+    "symbol": "DCP.JO",
+    "name": "Dis-Chem Pharmacies Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dis-chem-pharmacies-ltd.svg"
+  },
+  {
+    "symbol": "DNB.JO",
+    "name": "Deneb Investments Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/deneb-investments.svg"
+  },
+  {
+    "symbol": "DNKGLO.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2024-15.08.31 (Exp.12.08.31) on Danakali",
+    "market": "JSE"
+  },
+  {
+    "symbol": "DNKOPP.JO",
+    "name": "UBS AG. London Branch Structured Instrument 2022-30.11.27 on Denker Opportunities Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "DRD.JO",
+    "name": "DRDGOLD Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/drdgold.svg"
+  },
+  {
+    "symbol": "DSBP.JO",
+    "name": "Discovery Limited non.cum.non.part.pref.Shs Class B",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/discovery-ltd.svg"
+  },
+  {
+    "symbol": "DSY.JO",
+    "name": "Discovery Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/discovery-ltd.svg"
+  },
+  {
+    "symbol": "DTC.JO",
+    "name": "Datatec Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/datatec-ltd.svg"
+  },
+  {
+    "symbol": "EEL.JO",
+    "name": "Efora Energy Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/efora-energy.svg"
+  },
+  {
+    "symbol": "ELI.JO",
+    "name": "Ellies Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ellies-holdings.svg"
+  },
+  {
+    "symbol": "EMH.JO",
+    "name": "eMedia Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/e-media-holdings.svg"
+  },
+  {
+    "symbol": "EMN.JO",
+    "name": "eMedia Holdings Limited Class N",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/e-media-holdings.svg"
+  },
+  {
+    "symbol": "ENX.JO",
+    "name": "enX Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/enx-group.svg"
+  },
+  {
+    "symbol": "EPE.JO",
+    "name": "EPE Capital Partners Ltd. Class A",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/epe-capital-partners.svg"
+  },
+  {
+    "symbol": "EPS.JO",
+    "name": "Eastern Platinum Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/eastern-platinum.svg"
+  },
+  {
+    "symbol": "EUZ.JO",
+    "name": "Europa Metals Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/europa-metals.svg"
+  },
+  {
+    "symbol": "EXEMEQ.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2025-14.05.32 EXEMEQ on Excelsia Emerging Market Equity",
+    "market": "JSE"
+  },
+  {
+    "symbol": "EXX.JO",
+    "name": "Exxaro Resources Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/exxaro-resources-ltd.svg"
+  },
+  {
+    "symbol": "FBR.JO",
+    "name": "Famous Brands Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/famous-brands-ltd.svg"
+  },
+  {
+    "symbol": "FFB.JO",
+    "name": "Fortress Real Estate Investments Limited Class B",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/fortress-reit-ltd-b.svg"
+  },
+  {
+    "symbol": "FGL.JO",
+    "name": "Finbond Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/finbond.svg"
+  },
+  {
+    "symbol": "FNBLSP.JO",
+    "name": "UBS South Africa (Pty) Limited Structured Instruments 2023-04.04.28 on F.N.B.",
+    "market": "JSE"
+  },
+  {
+    "symbol": "FSR.JO",
+    "name": "FirstRand Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/firstrand-ltd.svg"
+  },
+  {
+    "symbol": "FTH.JO",
+    "name": "Frontier Transport Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/frontier-transport-hldg-ld.svg"
+  },
+  {
+    "symbol": "FUELZA.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2024-25.05.29 (Exp.22.05.29) on The Coherent Fuel Hedge",
+    "market": "JSE"
+  },
+  {
+    "symbol": "GCT.JO",
+    "name": "Greencoat Renewables Plc",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/greencoat-renewables-plc.svg"
+  },
+  {
+    "symbol": "GFI.JO",
+    "name": "Gold Fields Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gold-fields.svg"
+  },
+  {
+    "symbol": "GIMLPC.JO",
+    "name": "UBS AG, London Branch Structured Instrument 2022-30.04.26 on",
+    "market": "JSE"
+  },
+  {
+    "symbol": "GLN.JO",
+    "name": "Glencore plc",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/glencore.svg"
+  },
+  {
+    "symbol": "GLOBOP.JO",
+    "name": "UBS AMC GLBL Opportunity",
+    "market": "JSE"
+  },
+  {
+    "symbol": "GML.JO",
+    "name": "Gemfields Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gemfields.svg"
+  },
+  {
+    "symbol": "GND.JO",
+    "name": "Grindrod Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/grindrod-ltd.svg"
+  },
+  {
+    "symbol": "GNDP.JO",
+    "name": "Grindrod Ltd Cum.Non-Red.Non-Ptg.Non-Cnv.Pref.Shs",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/grindrod-ltd.svg"
+  },
+  {
+    "symbol": "GPL.JO",
+    "name": "Grand Parade Investments Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/grand-parade-inv.svg"
+  },
+  {
+    "symbol": "GRSP.JO",
+    "name": "Goldrush Holdings Limited Non-Cum Pref Registered Shs",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/recm-and-calibre-limited.svg"
+  },
+  {
+    "symbol": "GTC.JO",
+    "name": "Globe Trade Centre S.A.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gtc.svg"
+  },
+  {
+    "symbol": "HAR.JO",
+    "name": "Harmony Gold Mining Co. Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/harmony-gold.svg"
+  },
+  {
+    "symbol": "HCI.JO",
+    "name": "Hosken Consolidated Investments Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/hosken-cons-inv-ltd.svg"
+  },
+  {
+    "symbol": "HDC.JO",
+    "name": "Hudaco Industries Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/hudaco-industries.svg"
+  },
+  {
+    "symbol": "HERTGE.JO",
+    "name": "UBS AG, London Branch Underlying Tracker 2026-08.03.33 on",
+    "market": "JSE"
+  },
+  {
+    "symbol": "HLM.JO",
+    "name": "Hulamin Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/hulamin.svg"
+  },
+  {
+    "symbol": "HUG.JO",
+    "name": "Huge Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/huge.svg"
+  },
+  {
+    "symbol": "IBLVR4.JO",
+    "name": "Investec Bank Limited",
+    "market": "JSE"
+  },
+  {
+    "symbol": "IMP.JO",
+    "name": "Impala Platinum Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/impala-platinum-hlgs-ltd.svg"
+  },
+  {
+    "symbol": "IMRP1.JO",
+    "name": "Investec Bank (Mauritius) Ltd Redeemable preference shares IMRP1",
+    "market": "JSE"
+  },
+  {
+    "symbol": "IMRP10.JO",
+    "name": "Investec Bank (Mauritius) Ltd Cr Lkd Red Pref Registered Shs -IMRP10- 2023-20.06.28",
+    "market": "JSE"
+  },
+  {
+    "symbol": "IMRP11.JO",
+    "name": "Investec Bank (Mauritius) Ltd Cr Lkd Red Pref Registered Shs -IMRP11-",
+    "market": "JSE"
+  },
+  {
+    "symbol": "IMRP12.JO",
+    "name": "Investec Bank (Mauritius) Ltd Cr Lkd Red Pref Registered Shs -IMRP12- 2023-20.12.2028",
+    "market": "JSE"
+  },
+  {
+    "symbol": "IMRP13.JO",
+    "name": "Investec Bank (Mauritius) Ltd Cr Lkd Unsec Red Cum Non-Ptg Pref Registered Shs -IMRP13- 2023-20.12.28",
+    "market": "JSE"
+  },
+  {
+    "symbol": "IMRP14.JO",
+    "name": "Investec Bank (Mauritius) Ltd Cr Lkd Red Cum Non-Ptg Unsec Pref Registered Shs -IMRP14-",
+    "market": "JSE"
+  },
+  {
+    "symbol": "IMRP2.JO",
+    "name": "Investec Bank (Mauritius) Ltd Redeemable Preference Shares IMRP2",
+    "market": "JSE"
+  },
+  {
+    "symbol": "IMRP3.JO",
+    "name": "Investec Bank (Mauritius) Ltd Redeemable preference shares IMRP3",
+    "market": "JSE"
+  },
+  {
+    "symbol": "IMRP4.JO",
+    "name": "Investec Bank (Mauritius) Ltd Redeemable preference shares IMRP4",
+    "market": "JSE"
+  },
+  {
+    "symbol": "IMRP5.JO",
+    "name": "Investec Bank (Mauritius) Ltd Redeemable preference shares IMRP5",
+    "market": "JSE"
+  },
+  {
+    "symbol": "IMRP6.JO",
+    "name": "Investec Bank (Mauritius) Ltd Redeemable preference shares IMRP6",
+    "market": "JSE"
+  },
+  {
+    "symbol": "IMRP7.JO",
+    "name": "Investec Bank (Mauritius) Ltd Redeemable preference shares IMRP7",
+    "market": "JSE"
+  },
+  {
+    "symbol": "INL.JO",
+    "name": "Investec Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/investec-ltd.svg"
+  },
+  {
+    "symbol": "INP.JO",
+    "name": "Investec plc",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/investec-plc-ord-gbp0-0002.svg"
+  },
+  {
+    "symbol": "INPP.JO",
+    "name": "Investec PLC Pref",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/investec-plc-ord-gbp0-0002.svg"
+  },
+  {
+    "symbol": "INPPR.JO",
+    "name": "Investec PLC Pref. (Rand)",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/investec-plc-ord-gbp0-0002.svg"
+  },
+  {
+    "symbol": "INPR.JO",
+    "name": "Investec Limited Non-Red.Non-Cum.Non-Ptg.Prf.Shs",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/investec-ltd.svg"
+  },
+  {
+    "symbol": "IOC.JO",
+    "name": "iOCO Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/eoh-holdings.svg"
+  },
+  {
+    "symbol": "ISA.JO",
+    "name": "ISA Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/isa-holdings.svg"
+  },
+  {
+    "symbol": "ISB.JO",
+    "name": "Insimbi Industrial Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/insimbi-ind-hldgs.svg"
+  },
+  {
+    "symbol": "ISGLOB.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2023-30.06.28 (Exp.27.06.28) on UBS ISGLOB",
+    "market": "JSE"
+  },
+  {
+    "symbol": "ISO.JO",
+    "name": "ASP Isotopes, Inc.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/asp-isotopes.svg"
+  },
+  {
+    "symbol": "ITE.JO",
+    "name": "Italtile Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/italtile-ltd.svg"
+  },
+  {
+    "symbol": "IVT.JO",
+    "name": "Invicta Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/invicta-holdings.svg"
+  },
+  {
+    "symbol": "JBL.JO",
+    "name": "Jubilee Metals Group PLC",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jubilee-metals-plc.svg"
+  },
+  {
+    "symbol": "JSE.JO",
+    "name": "JSE Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jse-ltd.svg"
+  },
+  {
+    "symbol": "KAL.JO",
+    "name": "KAL Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kaap-agri.svg"
+  },
+  {
+    "symbol": "KAP.JO",
+    "name": "KAP Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kap-industrial-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "KBO.JO",
+    "name": "Kibo Energy Plc",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kibo-energy.svg"
+  },
+  {
+    "symbol": "KIO.JO",
+    "name": "Kumba Iron Ore Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kumba-iron-ore-ltd.svg"
+  },
+  {
+    "symbol": "KP2.JO",
+    "name": "Kore Potash PLC",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kore-potash.svg"
+  },
+  {
+    "symbol": "KRO.JO",
+    "name": "Karooooo Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/karooooo-ltd.svg"
+  },
+  {
+    "symbol": "KST.JO",
+    "name": "PSG Financial Services Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/psg-konsult-limited.svg"
+  },
+  {
+    "symbol": "LAB.JO",
+    "name": "Labat Africa Ltd",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/labat-africa.svg"
+  },
+  {
+    "symbol": "LBR.JO",
+    "name": "Libstar Holdings Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/libstar-holdings.svg"
+  },
+  {
+    "symbol": "LEW.JO",
+    "name": "Lewis Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lewis.svg"
+  },
+  {
+    "symbol": "LHC.JO",
+    "name": "Life Healthcare Group Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/life-healthc-grp-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "LSK.JO",
+    "name": "Lesaka Technologies, Inc.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lesakatech.svg"
+  },
+  {
+    "symbol": "LTE.JO",
+    "name": "Lighthouse Properties Plc",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lighthouse-properties.svg"
+  },
+  {
+    "symbol": "MAVCGI.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2025-30.11.32 on CG Innovation ZA Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "MAVEND.JO",
+    "name": "UBS AG, London Branch Underlying Tracker 2025-30.11.32 on Maven Endeavour Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "MCZ.JO",
+    "name": "MC Mining Ltd",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mc-mining.svg"
+  },
+  {
+    "symbol": "MDI.JO",
+    "name": "Master Drilling Group Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/master-drilling-grp.svg"
+  },
+  {
+    "symbol": "MERGE.JO",
+    "name": "UBS South Africa (Pty) Limited Structured Instrument 2023-04.04.28 on Mears Group",
+    "market": "JSE"
+  },
+  {
+    "symbol": "MERGQB.JO",
+    "name": "UBS AMC Mer GBL Quant B",
+    "market": "JSE"
+  },
+  {
+    "symbol": "METVRS.JO",
+    "name": "UBS AG, London Branch Exchange Traded Product 2023-27.06.28 on MSCI USA IMI MetSel",
+    "market": "JSE"
+  },
+  {
+    "symbol": "MHB.JO",
+    "name": "Mahube Infrastructure Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mahube-infrastructure.svg"
+  },
+  {
+    "symbol": "MKR.JO",
+    "name": "Montauk Renewables, Inc.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/montauk-renewables.svg"
+  },
+  {
+    "symbol": "MMP.JO",
+    "name": "Marshall Monteagle PLC",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/marshall-monteagle.svg"
+  },
+  {
+    "symbol": "MNP.JO",
+    "name": "Mondi plc",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mondi.svg"
+  },
+  {
+    "symbol": "MPT.JO",
+    "name": "Mpact Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mpact.svg"
+  },
+  {
+    "symbol": "MRF.JO",
+    "name": "Merafe Resources Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/merafe-resources.svg"
+  },
+  {
+    "symbol": "MRP.JO",
+    "name": "Mr Price Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mr-price-ltd.svg"
+  },
+  {
+    "symbol": "MRPWMB.JO",
+    "name": "UBS Inc Reverse Convertible 2024-15.08.31 (Exp.12.08.31) on SACPIYOY",
+    "market": "JSE"
+  },
+  {
+    "symbol": "MSP.JO",
+    "name": "MAS P.L.C.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mas-plc.svg"
+  },
+  {
+    "symbol": "MST.JO",
+    "name": "Mustek Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mustek.svg"
+  },
+  {
+    "symbol": "MTA.JO",
+    "name": "Metair Investments Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/metair-investments.svg"
+  },
+  {
+    "symbol": "MTH.JO",
+    "name": "Motus Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/motus-ltd.svg"
+  },
+  {
+    "symbol": "MTM.JO",
+    "name": "Momentum Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/momentum-met-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "MTN.JO",
+    "name": "MTN Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mtn-ltd.svg"
+  },
+  {
+    "symbol": "MTU.JO",
+    "name": "Mantengu Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mantengu-mining.svg"
+  },
+  {
+    "symbol": "N91.JO",
+    "name": "Ninety One Plc",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ninety-one-plc-ord-001.svg"
+  },
+  {
+    "symbol": "NCS.JO",
+    "name": "Nictus Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nictus.svg"
+  },
+  {
+    "symbol": "NED.JO",
+    "name": "Nedbank Group",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nedbank-ltd.svg"
+  },
+  {
+    "symbol": "NPH.JO",
+    "name": "Northam Platinum Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/northam-platinum-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "NPK.JO",
+    "name": "Nampak Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nampak.svg"
+  },
+  {
+    "symbol": "NPKP.JO",
+    "name": "Nampak Ltd 6 % Cum Pref.Shs",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nampak.svg"
+  },
+  {
+    "symbol": "NPN.JO",
+    "name": "Naspers Limited Class N",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/naspers.svg"
+  },
+  {
+    "symbol": "NPP1.JO",
+    "name": "Nampak Ltd 6 1/2 % Cum.Pref.Shs",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nampak.svg"
+  },
+  {
+    "symbol": "NRP.JO",
+    "name": "NEPI Rockcastle N.V",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nepi-rockcastle-nv.svg"
+  },
+  {
+    "symbol": "NTC.JO",
+    "name": "Netcare Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/netcare-limited.svg"
+  },
+  {
+    "symbol": "NTCP.JO",
+    "name": "Netcare Ltd Cum.Non-Red.Non-Part.Non-Conv.Pref.Shs",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/netcare-limited.svg"
+  },
+  {
+    "symbol": "NTU.JO",
+    "name": "Nutun Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/transaction-capital-ltd.svg"
+  },
+  {
+    "symbol": "NVS.JO",
+    "name": "Novus Holdings Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/novus-limited.svg"
+  },
+  {
+    "symbol": "NWL.JO",
+    "name": "Nu-World Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nu-world-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "NY1.JO",
+    "name": "Ninety One Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ninety-one-plc-ord-001.svg"
+  },
+  {
+    "symbol": "OAO.JO",
+    "name": "Oando PLC",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/oando-plc.svg"
+  },
+  {
+    "symbol": "OCE.JO",
+    "name": "Oceana Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/oceana-ltd.svg"
+  },
+  {
+    "symbol": "OILGAS.JO",
+    "name": "UBS AG, London Branch Exchange Traded Product 2023-27.06.28 on Bloomberg Eurozone DM Top 10 Oil & Gas Net",
+    "market": "JSE"
+  },
+  {
+    "symbol": "OMN.JO",
+    "name": "Omnia Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/omnia-ltd.svg"
+  },
+  {
+    "symbol": "OMU.JO",
+    "name": "Old Mutual Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/old-mutual-limited.svg"
+  },
+  {
+    "symbol": "OPA.JO",
+    "name": "Channel VAS Investments Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/channel-vas-investments-limited.svg"
+  },
+  {
+    "symbol": "ORDGMU.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2025-14.05.32 ORDGMU on Ordian Global Multi-Asset Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "ORN.JO",
+    "name": "Orion Minerals Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/orion-minerals-limited.svg"
+  },
+  {
+    "symbol": "OUT.JO",
+    "name": "OUTsurance Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/outsurance-limited.svg"
+  },
+  {
+    "symbol": "PAN.JO",
+    "name": "Pan African Resources PLC",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pan-african-resource-plc.svg"
+  },
+  {
+    "symbol": "PBT.JO",
+    "name": "PBT Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pbt-limited.svg"
+  },
+  {
+    "symbol": "PCMCOP.JO",
+    "name": "UBS Actively Managed Certificate Private Clients Mid Cap Opportunities Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "PIK.JO",
+    "name": "Pick N Pay Stores Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pick-n-pay-stores-ltd.svg"
+  },
+  {
+    "symbol": "PMR.JO",
+    "name": "Premier Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/premier-limited.svg"
+  },
+  {
+    "symbol": "PMV.JO",
+    "name": "Primeserv Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/primeserv-ltd.svg"
+  },
+  {
+    "symbol": "PPC.JO",
+    "name": "PPC Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ppc-ltd.svg"
+  },
+  {
+    "symbol": "PPE.JO",
+    "name": "Purple Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/purple-ltd.svg"
+  },
+  {
+    "symbol": "PPH.JO",
+    "name": "Pepkor Holdings Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pepkor-ltd.svg"
+  },
+  {
+    "symbol": "PPR.JO",
+    "name": "Putprop Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/putprop-ltd.svg"
+  },
+  {
+    "symbol": "PROWWF.JO",
+    "name": "UBS AG, London Branch Underlying Tracker 2026-08.03.33 on",
+    "market": "JSE"
+  },
+  {
+    "symbol": "PRX.JO",
+    "name": "Prosus N.V. Class N",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/prosus.svg"
+  },
+  {
+    "symbol": "PWR.JO",
+    "name": "PowerFleet, Inc.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/powerfleet.svg"
+  },
+  {
+    "symbol": "QFH.JO",
+    "name": "Quantum Foods Holdings Ltd",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/quantum-foods-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "QLT.JO",
+    "name": "Quilter Plc",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/quilter-plc.svg"
+  },
+  {
+    "symbol": "RBO.JO",
+    "name": "Rainbow Chicken Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rainbow-chicken-limited.svg"
+  },
+  {
+    "symbol": "RBX.JO",
+    "name": "Raubex Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/raubex-ltd.svg"
+  },
+  {
+    "symbol": "RCL.JO",
+    "name": "RCL Foods Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rcl-foods-limited.svg"
+  },
+  {
+    "symbol": "REM.JO",
+    "name": "Remgro Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/remgro-ltd.svg"
+  },
+  {
+    "symbol": "RFG.JO",
+    "name": "RFG Holdings Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rfg-limited.svg"
+  },
+  {
+    "symbol": "RHB.JO",
+    "name": "RH Bophelo Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rh-bophelo-limited.svg"
+  },
+  {
+    "symbol": "RLO.JO",
+    "name": "Reunert Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/reunert-ltd.svg"
+  },
+  {
+    "symbol": "RMH.JO",
+    "name": "RMB Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rmb-ltd.svg"
+  },
+  {
+    "symbol": "RNG.JO",
+    "name": "Randgold & Exploration Company Ltd",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/randgold-and-expl-co-ltd.svg"
+  },
+  {
+    "symbol": "RNI.JO",
+    "name": "Reinet Investments S.C.A.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/reinetin.svg"
+  },
+  {
+    "symbol": "RTN.JO",
+    "name": "Rex Trueform Group Limited Class N",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rex-trueform.svg"
+  },
+  {
+    "symbol": "RTO.JO",
+    "name": "Rex Trueform Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rex-trueform.svg"
+  },
+  {
+    "symbol": "S32.JO",
+    "name": "South32 Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/south32.svg"
+  },
+  {
+    "symbol": "SAAGG.JO",
+    "name": "UBS South Africa (Pty) Limited Structured Instrument 2023-04.04.28 on MC Saatchi",
+    "market": "JSE"
+  },
+  {
+    "symbol": "SAALG.JO",
+    "name": "UBS South Africa (Pty) Limited Structured Instrument 2023-04.04.28 on MC Saatchi",
+    "market": "JSE"
+  },
+  {
+    "symbol": "SAP.JO",
+    "name": "Sappi Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sappi-ltd.svg"
+  },
+  {
+    "symbol": "SAQUAL.JO",
+    "name": "UBS AG. London Branch Structured Note 2024-18.11.31 on Basket",
+    "market": "JSE"
+  },
+  {
+    "symbol": "SBK.JO",
+    "name": "Standard Bank Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/standard-bank-ltd.svg"
+  },
+  {
+    "symbol": "SBKP.JO",
+    "name": "Standard Bank Group Limited 6 1/2 % 1st Cum.Pref.Shs",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/standard-bank-ltd.svg"
+  },
+  {
+    "symbol": "SBP.JO",
+    "name": "Sabvest Capital Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sabvest-capital-limited.svg"
+  },
+  {
+    "symbol": "SBPP.JO",
+    "name": "Standard Bank Group Limited Non-Red.Non.Cum.Non.Ptg.Pref.Shs",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/standard-bank-ltd.svg"
+  },
+  {
+    "symbol": "SBTGFP.JO",
+    "name": "UBS South Africa (Pty) Limited Structured Instrument 2023-04.04.28 on Sterling Bncrp",
+    "market": "JSE"
+  },
+  {
+    "symbol": "SDL.JO",
+    "name": "Southern Palladium Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/southern-palladium-ltd.svg"
+  },
+  {
+    "symbol": "SDM001.JO",
+    "name": "Summit Issuer (RF) Limited Preference Shs",
+    "market": "JSE"
+  },
+  {
+    "symbol": "SDO.JO",
+    "name": "Stadio Holdings Pty Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/stadio-limited.svg"
+  },
+  {
+    "symbol": "SEB.JO",
+    "name": "Sebata Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sebata-ltd.svg"
+  },
+  {
+    "symbol": "SEP.JO",
+    "name": "Sephaku Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sephaku-ltd.svg"
+  },
+  {
+    "symbol": "SGP.JO",
+    "name": "Sail Mining Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/chrometco-ltd.svg"
+  },
+  {
+    "symbol": "SHG.JO",
+    "name": "Sea Harvest Group Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sea-harvest-ltd.svg"
+  },
+  {
+    "symbol": "SHP.JO",
+    "name": "Shoprite Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shoprite-ltd.svg"
+  },
+  {
+    "symbol": "SKA.JO",
+    "name": "Shuka Minerals PLC",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shuka-minerals-plc-ord-gbp001.svg"
+  },
+  {
+    "symbol": "SLG.JO",
+    "name": "Salungano Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/salungano-limited.svg"
+  },
+  {
+    "symbol": "SLM.JO",
+    "name": "Sanlam Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sanlam-limited.svg"
+  },
+  {
+    "symbol": "SNT.JO",
+    "name": "Santam Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/santam-limited.svg"
+  },
+  {
+    "symbol": "SNV.JO",
+    "name": "Santova Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/santova-logistics-ltd.svg"
+  },
+  {
+    "symbol": "SOH.JO",
+    "name": "South Ocean Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/south-ocean-ltd.svg"
+  },
+  {
+    "symbol": "SOL.JO",
+    "name": "Sasol Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sasol.svg"
+  },
+  {
+    "symbol": "SOLBE1.JO",
+    "name": "BEE - Sasol Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sasol.svg"
+  },
+  {
+    "symbol": "SPG.JO",
+    "name": "Super Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/super-ltd.svg"
+  },
+  {
+    "symbol": "SPP.JO",
+    "name": "Spar Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/the-spar-ltd.svg"
+  },
+  {
+    "symbol": "SSK.JO",
+    "name": "Stefanutti Stocks Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/stefanutti-stck-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "SSU.JO",
+    "name": "Southern Sun Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tsogo-sun-hotels-ltd.svg"
+  },
+  {
+    "symbol": "SSW.JO",
+    "name": "Sibanye Stillwater Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sibanye-stillwater.svg"
+  },
+  {
+    "symbol": "STALB4.JO",
+    "name": "UBS Actively Managed Certificate - STANLIB Strategy 4 Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "STALB5.JO",
+    "name": "UBS Actively Managed Certificate STANLIB Strategy 5 Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "SUI.JO",
+    "name": "Sun International Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sun-international-ltd.svg"
+  },
+  {
+    "symbol": "SUR.JO",
+    "name": "Spur Corporation Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/spur-ltd.svg"
+  },
+  {
+    "symbol": "SXM.JO",
+    "name": "Sable Exploration and Mining Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sableexplorationandmining.svg"
+  },
+  {
+    "symbol": "SYG.JO",
+    "name": "Sygnia Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sygnia-itrix.svg"
+  },
+  {
+    "symbol": "SZK.JO",
+    "name": "SAB Zenzele Kabili Holdings (RF) Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sab-zenzele-kabili.svg"
+  },
+  {
+    "symbol": "TBS.JO",
+    "name": "Tiger Brands Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tiger-brands-ltd.svg"
+  },
+  {
+    "symbol": "TFG.JO",
+    "name": "Foschini Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/the-foschini-limited.svg"
+  },
+  {
+    "symbol": "TFGP.JO",
+    "name": "Foschini Group Limited 6 1/2 % Part.Cum.Pref.Shs",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/the-foschini-limited.svg"
+  },
+  {
+    "symbol": "TGA.JO",
+    "name": "Thungela Resources Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/thungela-resources-ltd.svg"
+  },
+  {
+    "symbol": "THA.JO",
+    "name": "Tharisa Plc",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tharisa-plc.svg"
+  },
+  {
+    "symbol": "TITANS.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2025-14.05.32 TITANS on AnBro TITANS Portfolio",
+    "market": "JSE"
+  },
+  {
+    "symbol": "TKG.JO",
+    "name": "Telkom SA SOC Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/telkom-sa-soc-ltd.svg"
+  },
+  {
+    "symbol": "TLM.JO",
+    "name": "TeleMasters Holdings Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/telemaster-ltd.svg"
+  },
+  {
+    "symbol": "TMT.JO",
+    "name": "Trematon Capital Investments Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/trematon-capital-inv-ltd.svg"
+  },
+  {
+    "symbol": "TON.JO",
+    "name": "Tongaat Hulett Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tongaat-hulett.svg"
+  },
+  {
+    "symbol": "TPC.JO",
+    "name": "Transpaco Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/transpaco-ltd.svg"
+  },
+  {
+    "symbol": "TRL.JO",
+    "name": "Trellidor Holdings Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/trellidor-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "TRU.JO",
+    "name": "Truworths International Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/truworths-int-ltd.svg"
+  },
+  {
+    "symbol": "TSG.JO",
+    "name": "Tsogo Sun Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tsogo-sun-gaming-ltd.svg"
+  },
+  {
+    "symbol": "TTO.JO",
+    "name": "Trustco Group Holdings Ltd",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/trustco-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "UA8GRO.JO",
+    "name": "UBS AMC A8G GROWTH PORTF",
+    "market": "JSE"
+  },
+  {
+    "symbol": "UABSPA.JO",
+    "name": "UBS AG. London Branch Structured Note 2018-28.08.23 on United Arab Bank Br",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UBDATA.JO",
+    "name": "UBS AG, London Branch Structured Instrument 2021-08.09.26 on Solactive Big Data Net Total Return",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UBDAUD.JO",
+    "name": "UBS AG, London Branch Structured Instrument 2021-08.09.26 on S&P500 Div Arist TR",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UBFAMU.JO",
+    "name": "UBS AG, London Branch Structured Instrument 2021-08.09.26 on Solactive Global Family-Owned Companies",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UBGURU.JO",
+    "name": "UBS AG, London Branch Structured Instrument 2021-08.09.26 on Guru Net Total Return",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UBLVHD.JO",
+    "name": "UBS AG,London Branch Structured Instrument 2021-08.09.26 on SP500 LVlty HgDvNTR",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UBNDDU.JO",
+    "name": "UBS AG, London Branch Structured Note 2021-08.09.26 on MSCI USA",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UBRAIC.JO",
+    "name": "UBS AG, London Branch Structured Instrument 2021-08.09.26 on S&P Knsh NERAIC NTR",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UBRAND.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2023-30.06.28 (Exp.27.06.28) on UBS UBRAND",
+    "market": "JSE"
+  },
+  {
+    "symbol": "UBROBO.JO",
+    "name": "UBS AG, London Branch Structured Instrument 2021-08.09.26 on Solactive Robotics and Drones Net TR",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UBSNDX.JO",
+    "name": "UBS Inc Structured Instrument 2021-06.07.26 on NASDAQ 100",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UBSSNP.JO",
+    "name": "UBS AG. London Branch Structured Instrument 2021-06.07.26 on S&P 500",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UBSSXF.JO",
+    "name": "UBS Inc Structured Instrument 2021-06.07.26 on ESTX50 EUR P",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UBSUKX.JO",
+    "name": "UBS Inc Structured Instrument 2021-06.07.26 on FTSE 100",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UBTECU.JO",
+    "name": "UBS AG, London Branch Structured Instrument 2021-08.09.26 on Solactive Global Family-Owned Companies",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UCIGEP.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2023-22.09.28 (Exp.19.09.28) on Cast Iron Global Special",
+    "market": "JSE"
+  },
+  {
+    "symbol": "UEFPCA.JO",
+    "name": "UBS AG. London Branch Structured Note 2018-15.02.23 on",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UEFPCL.JO",
+    "name": "UBS UEFPCL 19Sep28",
+    "market": "JSE"
+  },
+  {
+    "symbol": "UEMERG.JO",
+    "name": "UBS Inc Structured Instrument 2021-06.07.26 on MSCI EM",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UESGWL.JO",
+    "name": "UBS AG, London Branch Structured Instrument 2021-08.09.26 on MSCI World ESG Leaders Net Total Return",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UJAPAN.JO",
+    "name": "UBS Inc Structured Instrument 2021-06.07.26 on MSCI Japan",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UMMIEA.JO",
+    "name": "UBS AG. London Branch Structured Note 2018-28.08.23 on",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UMMIEB.JO",
+    "name": "UBS AG. London Branch Structured Note 2018-28.08.23 on",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UNICRN.JO",
+    "name": "UBS AG. London Branch Structured Note 2018-08.12.23 (Exp.05.12.23) on Unicorn USD Portfolio",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UNPWGP.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2024-14.09.31 (Exp.09.09.31) on Nedbank Private Wealth",
+    "market": "JSE"
+  },
+  {
+    "symbol": "UOMWPA.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2018-20.10.23 (Exp.17.10.23) on Old Mutual Wealth Global",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UPCHPA.JO",
+    "name": "UBS AG. London Branch Structured Note 2018-23.10.23 on",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UPL.JO",
+    "name": "Universal Partners Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/universal-partners.svg"
+  },
+  {
+    "symbol": "USPACE.JO",
+    "name": "UBS AG, London Branch Exchange Traded Product 2023-27.06.28 on EN HELIOS SPACE",
+    "market": "JSE"
+  },
+  {
+    "symbol": "USQCPA.JO",
+    "name": "UBS AG. London Branch Structured Instrument 2018-05.12.23 on MSCI World Net Total Return USD",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UUQUAD.JO",
+    "name": "UBS AG. London Branch Underlying Tracker 2023-30.06.28 (Exp.27.06.28) on UBS UUQUAD",
+    "market": "JSE"
+  },
+  {
+    "symbol": "UWORLD.JO",
+    "name": "UBS AG, London Branch Structured Instrument 2021-30.06.26 on MSCI World Net Total Return",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "VAL.JO",
+    "name": "Valterra Platinum Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/anglo-american.svg"
+  },
+  {
+    "symbol": "VIS.JO",
+    "name": "Visual International Holdings Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/visual-international-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "VOD.JO",
+    "name": "Vodacom Group Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/vodacom-ltd.svg"
+  },
+  {
+    "symbol": "VUN.JO",
+    "name": "Vunani Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/vunani-ltd.svg"
+  },
+  {
+    "symbol": "WBC.JO",
+    "name": "We Buy Cars Holdings Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/we-buy-cars-ltd.svg"
+  },
+  {
+    "symbol": "WBO.JO",
+    "name": "Wilson Bayly Holmes-Ovcon Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/wilson-bayly-hlm-ovc-ltd.svg"
+  },
+  {
+    "symbol": "WEZ.JO",
+    "name": "Wesizwe Platinum Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/wesizwe-platinum-ltd.svg"
+  },
+  {
+    "symbol": "WHL.JO",
+    "name": "Woolworths Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/woolworths-ltd.svg"
+  },
+  {
+    "symbol": "WVR.JO",
+    "name": "Weaver Fintech Ltd.",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/homechoice-int.svg"
+  },
+  {
+    "symbol": "XII.JO",
+    "name": "Numeral Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/numeral-limited.svg"
+  },
+  {
+    "symbol": "YRK.JO",
+    "name": "York Timber Holdings Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/york-timber-ltd.svg"
+  },
+  {
+    "symbol": "YYLBEE.JO",
+    "name": "YeboYethu Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/yeboyethu-rf-ltd.svg"
+  },
+  {
+    "symbol": "ZED.JO",
+    "name": "Zeder Investments Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zeder-inv-ltd.svg"
+  },
+  {
+    "symbol": "ZZD.JO",
+    "name": "Zeda Limited",
+    "market": "JSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zeda-limited.svg"
+  }
+]

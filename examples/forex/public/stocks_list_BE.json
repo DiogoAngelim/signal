@@ -1,0 +1,758 @@
+[
+  {
+    "symbol": "ABI.BR",
+    "name": "Anheuser-Busch InBev SA/NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/anheuser-busch-inbev.svg"
+  },
+  {
+    "symbol": "ABO.BR",
+    "name": "ABO-Group Environment NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/abo-environment.svg"
+  },
+  {
+    "symbol": "ACCB.BR",
+    "name": "Accentis nv",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/accentis.svg"
+  },
+  {
+    "symbol": "ACKB.BR",
+    "name": "Ackermans & van Haaren NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/ackermans-vhaaren.svg"
+  },
+  {
+    "symbol": "AED.BR",
+    "name": "Aedifica SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/aedifica.svg"
+  },
+  {
+    "symbol": "AGFB.BR",
+    "name": "Agfa-Gevaert NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/agfa-gevaert.svg"
+  },
+  {
+    "symbol": "AGS.BR",
+    "name": "ageas SA/NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/ageas.svg"
+  },
+  {
+    "symbol": "ALEMS.BR",
+    "name": "European Medical Solutions.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/dms-imaging.svg"
+  },
+  {
+    "symbol": "ARGX.BR",
+    "name": "argenx SE",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/argenx.svg"
+  },
+  {
+    "symbol": "ASCE.BR",
+    "name": "Ascencio SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/ascencio.svg"
+  },
+  {
+    "symbol": "ATEB.BR",
+    "name": "ATENOR S.A.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/atenor.svg"
+  },
+  {
+    "symbol": "AZE.BR",
+    "name": "Azelis Group N.V.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/azelis-nv.svg"
+  },
+  {
+    "symbol": "BANI.BR",
+    "name": "Banimmo SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/banimmo-a.svg"
+  },
+  {
+    "symbol": "BANQ.BR",
+    "name": "Banqup Group",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/unifiedpost-sa-nv.svg"
+  },
+  {
+    "symbol": "BAR.BR",
+    "name": "Barco NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/barco.svg"
+  },
+  {
+    "symbol": "BEKB.BR",
+    "name": "Bekaert SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/bekaert.svg"
+  },
+  {
+    "symbol": "BELU.BR",
+    "name": "Beluga NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/beluga.svg"
+  },
+  {
+    "symbol": "BELYS.BR",
+    "name": "Belysse Group NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/balta.svg"
+  },
+  {
+    "symbol": "BIOS.BR",
+    "name": "BioSenic",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/bone-therapeutics.svg"
+  },
+  {
+    "symbol": "BNB.BR",
+    "name": "Banque nationale de Belgique SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/bque-nat-belgique.svg"
+  },
+  {
+    "symbol": "BPOST.BR",
+    "name": "bpost SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/bpost.svg"
+  },
+  {
+    "symbol": "BREB.BR",
+    "name": "Brederode S.A.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/brederode.svg"
+  },
+  {
+    "symbol": "BTLS.BR",
+    "name": "Biotalys NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/biotalys-nv.svg"
+  },
+  {
+    "symbol": "CAMB.BR",
+    "name": "Campine nv",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/campine.svg"
+  },
+  {
+    "symbol": "CAND.BR",
+    "name": "Candela Invest SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/candela-invest.svg"
+  },
+  {
+    "symbol": "CENER.BR",
+    "name": "Cenergy Holdings SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/cenergy.svg"
+  },
+  {
+    "symbol": "CFEB.BR",
+    "name": "Compagnie d'Entreprises CFE SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/cfe.svg"
+  },
+  {
+    "symbol": "CLEX.BR",
+    "name": "Cumulex N.V.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/cumulex.svg"
+  },
+  {
+    "symbol": "CMBT.BR",
+    "name": "CMB.TECH NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/euronav.svg"
+  },
+  {
+    "symbol": "COBH.BR",
+    "name": "Societe commerciale de brasserie",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/cobrha-d.svg"
+  },
+  {
+    "symbol": "COFB.BR",
+    "name": "Cofinimmo SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/cofinimmo.svg"
+  },
+  {
+    "symbol": "COLR.BR",
+    "name": "Colruyt Group N.V.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/colruyt.svg"
+  },
+  {
+    "symbol": "COMB.BR",
+    "name": "Compagnie du Bois Sauvage SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/cie-bois-sauvage.svg"
+  },
+  {
+    "symbol": "CPINV.BR",
+    "name": "Care Property Invest SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/care-property-invest.svg"
+  },
+  {
+    "symbol": "CYAD.BR",
+    "name": "Celyad Oncology SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/celyad-oncology-sa.svg"
+  },
+  {
+    "symbol": "DECB.BR",
+    "name": "Deceuninck nv",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/deceuninck.svg"
+  },
+  {
+    "symbol": "DEME.BR",
+    "name": "DEME Group NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/deme.svg"
+  },
+  {
+    "symbol": "DEXB.BR",
+    "name": "Dexia Holding SA",
+    "market": "Euronext Brussels"
+  },
+  {
+    "symbol": "DIE.BR",
+    "name": "D'Ieteren Group SA/NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/d-ieteren.svg"
+  },
+  {
+    "symbol": "DIEG.BR",
+    "name": "Diegem Kennedy/immolease Trust Cert.Immobilier",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/diegem-kennedycert.svg"
+  },
+  {
+    "symbol": "DISL.BR",
+    "name": "Distri-Land/Le Certificat Foncier Cert.Imm.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/distri-land-cert.svg"
+  },
+  {
+    "symbol": "ECONB.BR",
+    "name": "Econocom Group SE Class D",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/econocom.svg"
+  },
+  {
+    "symbol": "EKOP.BR",
+    "name": "Ekopak NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/ekopak-nv.svg"
+  },
+  {
+    "symbol": "ELI.BR",
+    "name": "Elia Group SA/NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/elia.svg"
+  },
+  {
+    "symbol": "EMD.BR",
+    "name": "EMD MUSIC SA",
+    "market": "Euronext Brussels"
+  },
+  {
+    "symbol": "ENRGY.BR",
+    "name": "EnergyVision NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/energyvision.svg"
+  },
+  {
+    "symbol": "EVS.BR",
+    "name": "EVS Broadcast Equipment SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/evs-broadcequipm.svg"
+  },
+  {
+    "symbol": "EXM.BR",
+    "name": "EXMAR NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/exmar-ord.svg"
+  },
+  {
+    "symbol": "FAGR.BR",
+    "name": "Fagron SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/fagron.svg"
+  },
+  {
+    "symbol": "FLOB.BR",
+    "name": "Floridienne NV",
+    "market": "Euronext Brussels"
+  },
+  {
+    "symbol": "FLSP.BR",
+    "name": "FLOWSPARKS N.V.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/flowsparks.svg"
+  },
+  {
+    "symbol": "FLUX.BR",
+    "name": "Fluxys Belgium SA Class D",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/fluxys-belgium.svg"
+  },
+  {
+    "symbol": "FOU.BR",
+    "name": "Fountain SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/fountain.svg"
+  },
+  {
+    "symbol": "GBLB.BR",
+    "name": "Groupe Bruxelles Lambert SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/gbl.svg"
+  },
+  {
+    "symbol": "GIMB.BR",
+    "name": "Gimv NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/gimv.svg"
+  },
+  {
+    "symbol": "HOMI.BR",
+    "name": "Home Invest Belgium SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/home-invest-belgium.svg"
+  },
+  {
+    "symbol": "HYL.BR",
+    "name": "Hyloris Pharmaceuticals SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/hyloris.svg"
+  },
+  {
+    "symbol": "HYSG.BR",
+    "name": "Hybrid Software Group PLC",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/hybrid-software-plc.svg"
+  },
+  {
+    "symbol": "IBAB.BR",
+    "name": "Ion Beam Applications SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/ion-beam-applications.svg"
+  },
+  {
+    "symbol": "ICE.BR",
+    "name": "Ice Concept SA",
+    "market": "Euronext Brussels"
+  },
+  {
+    "symbol": "IEP.BR",
+    "name": "IEP Invest NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/iep-invest.svg"
+  },
+  {
+    "symbol": "IMMO.BR",
+    "name": "Immobel SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/immobel.svg"
+  },
+  {
+    "symbol": "IMMOU.BR",
+    "name": "Immo Moury SCA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/immo-moury-d.svg"
+  },
+  {
+    "symbol": "INCLU.BR",
+    "name": "Inclusio SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/inclusio-sa-nv.svg"
+  },
+  {
+    "symbol": "JEN.BR",
+    "name": "Jensen-Group NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/jensen.svg"
+  },
+  {
+    "symbol": "KBC.BR",
+    "name": "KBC Group N.V.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/kbc-groep-nv.svg"
+  },
+  {
+    "symbol": "KBCA.BR",
+    "name": "KBC Ancora SCA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/kbc-ancora-ord.svg"
+  },
+  {
+    "symbol": "KEYW.BR",
+    "name": "Keyware Technologies NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/keyware-technologies.svg"
+  },
+  {
+    "symbol": "KIN.BR",
+    "name": "Kinepolis Group NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/kinepolis.svg"
+  },
+  {
+    "symbol": "LOTB.BR",
+    "name": "Lotus Bakeries NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/lotus-bakeries.svg"
+  },
+  {
+    "symbol": "MCC.BR",
+    "name": "Immo Mechelen City Center NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/immo-mechelen-city-center.svg"
+  },
+  {
+    "symbol": "MELE.BR",
+    "name": "Melexis NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/melexis.svg"
+  },
+  {
+    "symbol": "MIKO.BR",
+    "name": "Miko NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/miko.svg"
+  },
+  {
+    "symbol": "MLADE.BR",
+    "name": "ADEC Innovations B.V.",
+    "market": "Euronext Brussels"
+  },
+  {
+    "symbol": "MLMAZ.BR",
+    "name": "MAZARO",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/mazaro.svg"
+  },
+  {
+    "symbol": "MLNEU.BR",
+    "name": "Compagnie Financiere de Neufcour SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/neufcour-fin.svg"
+  },
+  {
+    "symbol": "MLTV.BR",
+    "name": "CHOICE NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/choice-nv.svg"
+  },
+  {
+    "symbol": "MONT.BR",
+    "name": "MONTEA NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/montea-nv.svg"
+  },
+  {
+    "symbol": "MOP.BR",
+    "name": "Palmboomen Cultuur Maatschappij Mopoli (Palmeraies de Mopoli) NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/mopoli.svg"
+  },
+  {
+    "symbol": "MOPF.BR",
+    "name": "Palmboomen Cultuur Maatschappij Mopoli (Palmeraies de Mopoli) NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/mopoli.svg"
+  },
+  {
+    "symbol": "MOUR.BR",
+    "name": "Moury Construct SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/moury-construct.svg"
+  },
+  {
+    "symbol": "MTLS.BR",
+    "name": "Materialise NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/materialise.svg"
+  },
+  {
+    "symbol": "NEWT.BR",
+    "name": "Newtree Societe Anonyme",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/newtree.svg"
+  },
+  {
+    "symbol": "NEXTA.BR",
+    "name": "NEXTENSA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/nextensa.svg"
+  },
+  {
+    "symbol": "NYR.BR",
+    "name": "Nyrstar NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/nyrstar.svg"
+  },
+  {
+    "symbol": "NYXH.BR",
+    "name": "Nyxoah SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/nyxoah-sa.svg"
+  },
+  {
+    "symbol": "OBEL.BR",
+    "name": "Orange Belgium SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/orange.svg"
+  },
+  {
+    "symbol": "ONTEX.BR",
+    "name": "Ontex Group N.V.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/ontex.svg"
+  },
+  {
+    "symbol": "ONWD.BR",
+    "name": "Onward Medical N.V.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/onward-medical.svg"
+  },
+  {
+    "symbol": "OPTI.BR",
+    "name": "OPTION",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/crescent.svg"
+  },
+  {
+    "symbol": "OXUR.BR",
+    "name": "Oxurion NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/oxurion.svg"
+  },
+  {
+    "symbol": "PAY.BR",
+    "name": "Payton Planar Magnetics Ltd.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/payton-planar-magnetics.svg"
+  },
+  {
+    "symbol": "PROX.BR",
+    "name": "Proximus SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/proximus.svg"
+  },
+  {
+    "symbol": "QRF.BR",
+    "name": "Qrf Comm. VA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/qrf-comm-va.svg"
+  },
+  {
+    "symbol": "REAL.BR",
+    "name": "Realco S.A.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/realco.svg"
+  },
+  {
+    "symbol": "RECT.BR",
+    "name": "Recticel SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/recticel.svg"
+  },
+  {
+    "symbol": "REI.BR",
+    "name": "Reibel SA",
+    "market": "Euronext Brussels"
+  },
+  {
+    "symbol": "RET.BR",
+    "name": "Retail Estates SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/retail-estates.svg"
+  },
+  {
+    "symbol": "ROCK.BR",
+    "name": "WHITESTONE GROUP",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/whitestone.svg"
+  },
+  {
+    "symbol": "ROU.BR",
+    "name": "Roularta Media Group NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/roularta.svg"
+  },
+  {
+    "symbol": "SEQUA.BR",
+    "name": "Sequana Medical N.V",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/sequana-medical.svg"
+  },
+  {
+    "symbol": "SHUR.BR",
+    "name": "Shurgard Self Storage Limited",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/shurgard.svg"
+  },
+  {
+    "symbol": "SIP.BR",
+    "name": "SIPEF SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/sipef.svg"
+  },
+  {
+    "symbol": "SOF.BR",
+    "name": "Sofina SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/sofina.svg"
+  },
+  {
+    "symbol": "SOFT.BR",
+    "name": "Softimat S.A.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/softimat.svg"
+  },
+  {
+    "symbol": "SOLB.BR",
+    "name": "Solvay SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/solvay.svg"
+  },
+  {
+    "symbol": "SOLV.BR",
+    "name": "SOLVAC S.A.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/solvac-nom-retail.svg"
+  },
+  {
+    "symbol": "SPA.BR",
+    "name": "SPADEL S.A.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/spadel.svg"
+  },
+  {
+    "symbol": "SYENS.BR",
+    "name": "Syensqo SA/NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/syensqo.svg"
+  },
+  {
+    "symbol": "TESB.BR",
+    "name": "Tessenderlo Group N.V.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/tessenderlo.svg"
+  },
+  {
+    "symbol": "TEXF.BR",
+    "name": "Texaf SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/texaf.svg"
+  },
+  {
+    "symbol": "TINC.BR",
+    "name": "TINC NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/tinc-comm-va.svg"
+  },
+  {
+    "symbol": "TITC.BR",
+    "name": "Titan S.A.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/titan-cement.svg"
+  },
+  {
+    "symbol": "TUB.BR",
+    "name": "Financiere de Tubize S.A.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/tubize-fin.svg"
+  },
+  {
+    "symbol": "TUBAT.BR",
+    "name": "Financiere de Tubize SA Rights From the exchange 05",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/tubize-fin.svg"
+  },
+  {
+    "symbol": "UCB.BR",
+    "name": "UCB S.A.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/ucb.svg"
+  },
+  {
+    "symbol": "UMI.BR",
+    "name": "Umicore SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/umicore.svg"
+  },
+  {
+    "symbol": "VAN.BR",
+    "name": "Van de Velde NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/van-de-velde.svg"
+  },
+  {
+    "symbol": "VASTB.BR",
+    "name": "Vastned",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/vastned-belgium.svg"
+  },
+  {
+    "symbol": "VGP.BR",
+    "name": "VGP NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/vgp.svg"
+  },
+  {
+    "symbol": "VIO.BR",
+    "name": "Viohalco SA/NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/viohalco.svg"
+  },
+  {
+    "symbol": "WDP.BR",
+    "name": "Warehouses De Pauw SA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/warehouses-de-pauw.svg"
+  },
+  {
+    "symbol": "WEB.BR",
+    "name": "Warehouses Estates N.V.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/warehouses-estates-belgium-web.svg"
+  },
+  {
+    "symbol": "WEHB.BR",
+    "name": "Wereldhave Belgium SCA",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/wereldhave-belgium.svg"
+  },
+  {
+    "symbol": "WHATS.BR",
+    "name": "What's Cooking Group NV",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/ter-beke.svg"
+  },
+  {
+    "symbol": "XIOR.BR",
+    "name": "Xior Student Housing N.V.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/xior-student-housi.svg"
+  },
+  {
+    "symbol": "ZEN.BR",
+    "name": "Zenobe Gramme/Immo-Zenobe Gramme Cert.Imm.",
+    "market": "Euronext Brussels",
+    "image": "https://s3-symbol-logo.tradingview.com/zenobe-gramme-cert.svg"
+  }
+]

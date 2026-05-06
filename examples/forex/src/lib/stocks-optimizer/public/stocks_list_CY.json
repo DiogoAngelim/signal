@@ -1,0 +1,521 @@
+[
+  {
+    "symbol": "AEON",
+    "name": "Aeonic Securities C.I.F. Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/aeonic-secur-cif-plc-cr.svg"
+  },
+  {
+    "symbol": "AGRO",
+    "name": "Agros Development 'Proodos' Public Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/agros-devel-co-proodos-ltd.svg"
+  },
+  {
+    "symbol": "ATL",
+    "name": "Atlantic Insurance Company Public Limited",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/atlantic-insurance-co-pub-ltd.svg"
+  },
+  {
+    "symbol": "CBAM",
+    "name": "Constantinou Bros Properties Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/constantinoy-bros-properties.svg"
+  },
+  {
+    "symbol": "CBD",
+    "name": "Constantinou Bros Developers Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/constantinoy-bros-properties.svg"
+  },
+  {
+    "symbol": "CBH",
+    "name": "Constantinou Bros Hotels Public Company Ltd",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/constantinoy-bros-properties.svg"
+  },
+  {
+    "symbol": "CCC",
+    "name": "Cyprus Cement Company Limited",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/the-cyprus-cement-publ-co-ltd.svg"
+  },
+  {
+    "symbol": "CFI",
+    "name": "Cyprus Forest Industries Public Ltd",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/cyprus-forest-industries-ltd.svg"
+  },
+  {
+    "symbol": "CJ",
+    "name": "Chris Joannou Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/chris-joannou-public-ltd.svg"
+  },
+  {
+    "symbol": "CLL",
+    "name": "CLR Investment Fund",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/clr-investment-fund-public-ltd.svg"
+  },
+  {
+    "symbol": "CONT",
+    "name": "CONTRACT INSURANCE AND FINANCIAL SERVICES SA",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/contract-insand-fin-serv-cr.svg"
+  },
+  {
+    "symbol": "COS",
+    "name": "Cosmos Insurance Public Co. Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/cosmos-insurance-public-co-ltd.svg"
+  },
+  {
+    "symbol": "COV",
+    "name": "Toxotis Investments Public Limited",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/toxotis-investments-public-ltd.svg"
+  },
+  {
+    "symbol": "CPIH",
+    "name": "CPI Holdings Public Ltd",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/cpi-public-ltd.svg"
+  },
+  {
+    "symbol": "CRDO",
+    "name": "Corado Management Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/corado-mgmt-plc-cr-with-vrc.svg"
+  },
+  {
+    "symbol": "CTC",
+    "name": "Cyprus Trading Corporation Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/cyprus-trading-plc.svg"
+  },
+  {
+    "symbol": "DEM",
+    "name": "Demetra Holdings Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/demetra-plc.svg"
+  },
+  {
+    "symbol": "DISP",
+    "name": "DISPLAY ART PLC",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/display-art-plc.svg"
+  },
+  {
+    "symbol": "DOME",
+    "name": "Dome Investments Public Co. Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/dome-investments-public-coltd.svg"
+  },
+  {
+    "symbol": "EHMI",
+    "name": "Echmi Investment Consultants SA",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/echmi-sa-investment-consult.svg"
+  },
+  {
+    "symbol": "ELF",
+    "name": "Ellinas Finance Public Company Ltd",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/ellinas-finance-public-co-ltd.svg"
+  },
+  {
+    "symbol": "EPIEN",
+    "name": "Selected Energy SA",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/selected-energy-sa.svg"
+  },
+  {
+    "symbol": "ERME",
+    "name": "Ermes Department Stores PLC",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/ermes-department-stores-plc.svg"
+  },
+  {
+    "symbol": "EUROBCY",
+    "name": "EUROBANK S.A.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/eurobank-cr.svg"
+  },
+  {
+    "symbol": "FAHC",
+    "name": "First Advisory & Holdings SA",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/first-advisory-and-sa.svg"
+  },
+  {
+    "symbol": "FBI",
+    "name": "Alkis H. Hadjikyriacos (Frou Frou Biscuits) Public Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/alkis-h-hadjikyriacos-ltd.svg"
+  },
+  {
+    "symbol": "FRENCO",
+    "name": "FRENCO PLC",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/frenco-plc-cr-with-vrc.svg"
+  },
+  {
+    "symbol": "FRON3",
+    "name": "Frontarico Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/frontarico-plc.svg"
+  },
+  {
+    "symbol": "FWW",
+    "name": "Woolworth (Cyprus) Properties PLC",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/woolworth-cyprus-propert-plc.svg"
+  },
+  {
+    "symbol": "GAPV",
+    "name": "G.A.P. Vassilopoulos Public Ltd",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/gap-vassilop-pub-ltd-cr.svg"
+  },
+  {
+    "symbol": "GAS",
+    "name": "C.O. Cyprus Opportunity Energy Public Co. Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/co-cyprus-opportenergy-publ.svg"
+  },
+  {
+    "symbol": "HCM",
+    "name": "Harvest Capital Management Public Ltd",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/harvest-capital-manag-pu-ltd.svg"
+  },
+  {
+    "symbol": "HENAN",
+    "name": "Henan Wandi Minerals Public Company Ltd",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/henan-wandi-minerals-cr.svg"
+  },
+  {
+    "symbol": "IDNA",
+    "name": "iDNA Genomics Public Ltd",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/idna-gen-pub-ltd-cr-with-vrc.svg"
+  },
+  {
+    "symbol": "INF",
+    "name": "Interfund Investments Plc Units",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/interfund-investments-plc.svg"
+  },
+  {
+    "symbol": "ISXI",
+    "name": "Isxis Investment Public Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/isxis-investment-public-ltd.svg"
+  },
+  {
+    "symbol": "ITTL",
+    "name": "Mall of Cyprus (MC) Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/the-mall-of-engomi-me-plc.svg"
+  },
+  {
+    "symbol": "KAR",
+    "name": "Karyes Investments Public Co. Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/karyes-investment-pub-co-ltd.svg"
+  },
+  {
+    "symbol": "KEO",
+    "name": "KEO plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/keo-plc.svg"
+  },
+  {
+    "symbol": "KG",
+    "name": "K+G Complex Public Company Ltd",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/k-g-complex-public-co-ltd.svg"
+  },
+  {
+    "symbol": "KINGS",
+    "name": "King's Head Development Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/king-s-head-devel-plc-cr.svg"
+  },
+  {
+    "symbol": "KOYIM",
+    "name": "K. KOUIMTZIS S.A.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/k-kouimtzis-sa-cr.svg"
+  },
+  {
+    "symbol": "KOYTARI",
+    "name": "Athanasios D. Koukoutaris S.A.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/athanasios-d-koukoutaris.svg"
+  },
+  {
+    "symbol": "KYTH",
+    "name": "K. Kythreotis Holdings Public Ltd",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/k-kythreotis-ltd.svg"
+  },
+  {
+    "symbol": "LAGLF",
+    "name": "Lanitis Golf Public Co. Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/lanitis-golf-public-co-ltd.svg"
+  },
+  {
+    "symbol": "LAY",
+    "name": "Layster Investments Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/layster-investments-plc-cr.svg"
+  },
+  {
+    "symbol": "LCH",
+    "name": "Leptos Calypso Hotels Limited",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/leptos-calypso-hotels-ltd.svg"
+  },
+  {
+    "symbol": "LHH",
+    "name": "Lordos Hotel(Holdings) Public Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/lordos-hotels-ltd.svg"
+  },
+  {
+    "symbol": "LI",
+    "name": "LCP Holdings & Investments Public Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/lcp-and-invest-pub-ltd.svg"
+  },
+  {
+    "symbol": "LOG",
+    "name": "Logicom Public Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/logicom-public-ltd.svg"
+  },
+  {
+    "symbol": "LPL",
+    "name": "Lordos United Public Ltd",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/lordos-united-public-ltd.svg"
+  },
+  {
+    "symbol": "LUI",
+    "name": "Louis Public Company Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/louis-plc.svg"
+  },
+  {
+    "symbol": "MEDSC",
+    "name": "Medscope Holdings Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/medscope-hold-plc-cr-and-vrc.svg"
+  },
+  {
+    "symbol": "MEDTRN",
+    "name": "Meditrina Cyprus PLC",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/meditrina-cy-plc-cr-with-vrc.svg"
+  },
+  {
+    "symbol": "METTM",
+    "name": "Mettmann Public Company Limited",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/mettmann-public-co-ltd-cr-vr.svg"
+  },
+  {
+    "symbol": "MHP",
+    "name": "Magean Holding Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/magean-plc-cr-with-vr.svg"
+  },
+  {
+    "symbol": "MHV",
+    "name": "MHV Mediterranean Hospitality Venture Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/mhv-medithospvent-plc.svg"
+  },
+  {
+    "symbol": "MINE",
+    "name": "Minerva Insurance Co Public Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/minerva-insurance-company-ltd.svg"
+  },
+  {
+    "symbol": "MIT",
+    "name": "Mitsides Public Company Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/mitsides-public-co.svg"
+  },
+  {
+    "symbol": "NETIN",
+    "name": "NETinfo Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/net-info-plc-cr-with-vrc.svg"
+  },
+  {
+    "symbol": "NTK",
+    "name": "Enteca PLC Class B",
+    "market": "CSECY"
+  },
+  {
+    "symbol": "ORCA",
+    "name": "Orca Investment Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/orca-investment-plc-cr.svg"
+  },
+  {
+    "symbol": "PENGU",
+    "name": "MR. PENGU PUBLIC COMPANY LTD",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/mr-pengu-pub-co-ltd-cr-and-vrc.svg"
+  },
+  {
+    "symbol": "PES",
+    "name": "Philoktimatiki Public Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/philoktimatiki-public-ltd.svg"
+  },
+  {
+    "symbol": "PHL",
+    "name": "Petrolina (Holdings) Public Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/petrolina-ltd.svg"
+  },
+  {
+    "symbol": "PLATA",
+    "name": "Plata Management Public Ltd",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/plata-management-public-ltd-cr.svg"
+  },
+  {
+    "symbol": "PND",
+    "name": "Pandora Investments Public Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/pandora-investments-public-ltd.svg"
+  },
+  {
+    "symbol": "PROSPER",
+    "name": "PROSPERTREE PLC",
+    "market": "CSECY"
+  },
+  {
+    "symbol": "REG",
+    "name": "Regallia Holdings & Investments Public Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/regallia-and-investltd.svg"
+  },
+  {
+    "symbol": "REPX",
+    "name": "Reputation Exchange PLC",
+    "market": "CSECY"
+  },
+  {
+    "symbol": "RNS",
+    "name": "RIANESON INVESTMENTS PLC",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/rianeson-investments-plc.svg"
+  },
+  {
+    "symbol": "ROFOL",
+    "name": "A.J. Green Shell Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/aj-green-shell-plc.svg"
+  },
+  {
+    "symbol": "ROL",
+    "name": "Rolandos Enterprises Public Limited",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/rolandos-enterprises-ltd.svg"
+  },
+  {
+    "symbol": "SNPM",
+    "name": "S.N.P. Southeast Network Public Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/snp-shoutheast-network-public-ltd.svg"
+  },
+  {
+    "symbol": "SOLIDUS",
+    "name": "Solidus Securities SA",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/solidus-securities-sa.svg"
+  },
+  {
+    "symbol": "STONE",
+    "name": "Paphos Stone C. Estates Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/paphos-stone-c-est-plc-cr.svg"
+  },
+  {
+    "symbol": "TOP",
+    "name": "Top Kinisis Travel Public Limited",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/top-kinisis-travel-public-ltd.svg"
+  },
+  {
+    "symbol": "TSH",
+    "name": "A. Tsokkos Hotels Public Ltd",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/atsokkos-hotels-public-ltd.svg"
+  },
+  {
+    "symbol": "UFI",
+    "name": "Unifast Finance & Investments Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/unifast-finance-and-invest-ltd.svg"
+  },
+  {
+    "symbol": "UGE",
+    "name": "Universal Golf Enterprises Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/universal-golf-entplc-crvrc.svg"
+  },
+  {
+    "symbol": "UNI",
+    "name": "Unigrowth Investments Public Limited",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/unigrowth-investments-ltd.svg"
+  },
+  {
+    "symbol": "VCW",
+    "name": "Vassiliko Cement Works Public Co. Ltd.",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/vassilico-cement-works-ltd.svg"
+  },
+  {
+    "symbol": "VITAF",
+    "name": "Pharmaceutical Centre SA",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/pharmaceutical-centre-sa-cr.svg"
+  },
+  {
+    "symbol": "WEALTH",
+    "name": "GlobalWealth Group Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/wealthavenue-plc-cr-with-vrc.svg"
+  },
+  {
+    "symbol": "WOOC",
+    "name": "Mall of Engomi (ME) Plc",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/the-mall-of-engomi-me-plc.svg"
+  },
+  {
+    "symbol": "YACHT",
+    "name": "Upyachting Management PLC",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/upyachting-manag-plc-cr.svg"
+  },
+  {
+    "symbol": "YODA",
+    "name": "YODA PLC",
+    "market": "CSECY",
+    "image": "https://s3-symbol-logo.tradingview.com/yoda-plc-cr-with-vrc.svg"
+  }
+]

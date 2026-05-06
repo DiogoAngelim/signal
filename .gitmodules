@@ -4,3 +4,9 @@
 [submodule "examples/stocks/lib/tradingview-data"]
 	path = examples/stocks/lib/tradingview-data
 	url = git@github.com:DiogoAngelim/tradingview-data.git
+[submodule "examples/forex/lib/stocks-optimizer"]
+	path = examples/forex/lib/stocks-optimizer
+	url = git@github.com:DiogoAngelim/stocks-optimizer.git
+[submodule "examples/forex/lib/tradingview-data"]
+	path = examples/forex/lib/tradingview-data
+	url = git@github.com:DiogoAngelim/tradingview-data.git
