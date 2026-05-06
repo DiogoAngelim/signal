@@ -1,0 +1,419 @@
+[
+  {
+    "symbol": "AMAC",
+    "name": "Africa Mega Agricorp PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/kenya-orchards.svg"
+  },
+  {
+    "symbol": "ARM",
+    "name": "ARM Cement PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/arm-cement.svg"
+  },
+  {
+    "symbol": "BAMB",
+    "name": "Bamburi Cement Co. Ltd.",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/bamburi-cement.svg"
+  },
+  {
+    "symbol": "BAT",
+    "name": "British American Tobacco Kenya PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/british-american-tobacco.svg"
+  },
+  {
+    "symbol": "BKG",
+    "name": "BK Group Plc",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/bk-group-plc.svg"
+  },
+  {
+    "symbol": "BOC",
+    "name": "B.O.C Kenya Ltd",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/boc-ltd-kenya.svg"
+  },
+  {
+    "symbol": "CABL",
+    "name": "East African Cables PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/e-a-cables.svg"
+  },
+  {
+    "symbol": "CARB",
+    "name": "Carbacid Investments Ltd",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/carbacid-investments.svg"
+  },
+  {
+    "symbol": "CGEN",
+    "name": "Car & General (Kenya) PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/car-and-general.svg"
+  },
+  {
+    "symbol": "CIC",
+    "name": "CIC Insurance Group PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/cic-insurance.svg"
+  },
+  {
+    "symbol": "CMC",
+    "name": "CMC Holdings Ltd.",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/cmc-holdings.svg"
+  },
+  {
+    "symbol": "COOP",
+    "name": "Co-operative Bank of Kenya Ltd.",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/the-co-operative-bank.svg"
+  },
+  {
+    "symbol": "CRWN",
+    "name": "Crown Paints Kenya PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/crown-paints-kenya.svg"
+  },
+  {
+    "symbol": "CTUM",
+    "name": "Centum Investment Company PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/centum-investment.svg"
+  },
+  {
+    "symbol": "DCON",
+    "name": "Deacons (East Africa) PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/deacons-east-africa.svg"
+  },
+  {
+    "symbol": "DTK",
+    "name": "Diamond Trust Bank Kenya Ltd.",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/diamond-trust-bank-kenya.svg"
+  },
+  {
+    "symbol": "EABL",
+    "name": "East African Breweries Plc",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/east-african-breweries.svg"
+  },
+  {
+    "symbol": "EGAD",
+    "name": "Eaagads Ltd",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/eaagads.svg"
+  },
+  {
+    "symbol": "EQTY",
+    "name": "Equity Group Holdings Limited",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/equity-group-holdings.svg"
+  },
+  {
+    "symbol": "EVRD",
+    "name": "Eveready East Africa PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/eveready-east-africa.svg"
+  },
+  {
+    "symbol": "FTGH",
+    "name": "Flame Tree Group Holdings Ltd",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/flame-tree-group-holdings.svg"
+  },
+  {
+    "symbol": "HAFR",
+    "name": "Home Afrika Ltd.",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/home-afrika.svg"
+  },
+  {
+    "symbol": "HBE",
+    "name": "Homeboyz Entertainment PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/homeboyz-entertainment.svg"
+  },
+  {
+    "symbol": "HBER",
+    "name": "Hutchings Biemer Kes5",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/hutchings-biemer.svg"
+  },
+  {
+    "symbol": "HFCK",
+    "name": "HF Group PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/hf-group.svg"
+  },
+  {
+    "symbol": "HFCK.R0000",
+    "name": "HF Group PLC Rights Issue 24 For Rg shares (Nil Paid)",
+    "market": "NSEKE"
+  },
+  {
+    "symbol": "IMH",
+    "name": "I&M Group Plc",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/i-and-m-holdings.svg"
+  },
+  {
+    "symbol": "JUB",
+    "name": "Jubilee Holdings Ltd",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/jubilee-holdings.svg"
+  },
+  {
+    "symbol": "KAPC",
+    "name": "Kapchorua Tea Kenya PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/kapchorua-tea.svg"
+  },
+  {
+    "symbol": "KCB",
+    "name": "KCB Group PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/kcb-group.svg"
+  },
+  {
+    "symbol": "KEGN",
+    "name": "Kenya Electricity Generating Company PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/kengen.svg"
+  },
+  {
+    "symbol": "KENO",
+    "name": "KenolKobil Limited",
+    "market": "NSEKE"
+  },
+  {
+    "symbol": "KNRE",
+    "name": "Kenya Re-Insurance Corporation Ltd.",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/kenya-reinsurance.svg"
+  },
+  {
+    "symbol": "KPC",
+    "name": "Kenya Pipeline Company PLC",
+    "market": "NSEKE"
+  },
+  {
+    "symbol": "KPLC",
+    "name": "Kenya Power & Lighting Company Plc",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/kenya-power-and-lighting-preferred-7.svg"
+  },
+  {
+    "symbol": "KPLC.P0004",
+    "name": "Kenya Power & Lighting Company Plc 4 % Pref.Shs",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/kenya-power-and-lighting-preferred-7.svg"
+  },
+  {
+    "symbol": "KPLC.P0007",
+    "name": "Kenya Power & Lighting Company Plc 7 % Pref.Shs",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/kenya-power-and-lighting-preferred-7.svg"
+  },
+  {
+    "symbol": "KQ",
+    "name": "Kenya Airways PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/kenya-airways.svg"
+  },
+  {
+    "symbol": "KUKZ",
+    "name": "Kakuzi PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/kakuzi.svg"
+  },
+  {
+    "symbol": "KURV",
+    "name": "Kurwitu Ventures Ltd",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/kurwitu-ventures.svg"
+  },
+  {
+    "symbol": "LBTY",
+    "name": "Liberty Kenya Holdings Ltd.",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/liberty-kenya-holdings.svg"
+  },
+  {
+    "symbol": "LIMT",
+    "name": "Limuru Tea Plc",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/limuru-tea.svg"
+  },
+  {
+    "symbol": "LKL",
+    "name": "Longhorn Publishers Limited",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/longhorn-publishers.svg"
+  },
+  {
+    "symbol": "MASH",
+    "name": "Marshalls East Africa Ltd.",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/marshalls-east-africa.svg"
+  },
+  {
+    "symbol": "MSC",
+    "name": "Mumias Sugar Company Limited",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/mumias-sugar.svg"
+  },
+  {
+    "symbol": "NBK",
+    "name": "National Bank of Kenya Limited",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/national-bank-of-kenya.svg"
+  },
+  {
+    "symbol": "NBV",
+    "name": "Nairobi Business Ventures Ltd.",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/nairobi-business-ventures.svg"
+  },
+  {
+    "symbol": "NCBA",
+    "name": "NCBA Group PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/ncba-group.svg"
+  },
+  {
+    "symbol": "NMG",
+    "name": "Nation Media Group Limited",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/nation-media.svg"
+  },
+  {
+    "symbol": "NSE",
+    "name": "Nairobi Securities Exchange PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/nairobi-securities-exchange.svg"
+  },
+  {
+    "symbol": "OCH",
+    "name": "Olympia Capital Holdings Limited",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/olympia-capital-holdings.svg"
+  },
+  {
+    "symbol": "PORT",
+    "name": "East African Portland Cement Co. Ltd.",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/e-a-portland-cement.svg"
+  },
+  {
+    "symbol": "SASN",
+    "name": "Sasini PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/sasini.svg"
+  },
+  {
+    "symbol": "SBIC",
+    "name": "Stanbic Holdings Plc",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/stanbic-ibtc-plc.svg"
+  },
+  {
+    "symbol": "SCAN",
+    "name": "WPP Scangroup Plc",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/wpp-scangroup.svg"
+  },
+  {
+    "symbol": "SCBK",
+    "name": "Standard Chartered Bank Kenya Ltd",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/standard-chartered-bank-kenya.svg"
+  },
+  {
+    "symbol": "SCOM",
+    "name": "Safaricom PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/safaricom.svg"
+  },
+  {
+    "symbol": "SGL",
+    "name": "Standard Group PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/standard-group.svg"
+  },
+  {
+    "symbol": "SKL",
+    "name": "Shri Krishana Overseas Ltd",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/shri-krishana-overseas-ltd.svg"
+  },
+  {
+    "symbol": "SLAM",
+    "name": "Sanlam Allianz Holdings (Kenya) PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/sanlam-limited.svg"
+  },
+  {
+    "symbol": "SLAM.R0000",
+    "name": "SANLAM KENYA PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/sanlam-limited.svg"
+  },
+  {
+    "symbol": "SMER",
+    "name": "Sameer Africa PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/sameer-africa.svg"
+  },
+  {
+    "symbol": "TCL",
+    "name": "Trans-Century PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/transcentury-ltd.svg"
+  },
+  {
+    "symbol": "TOTL",
+    "name": "TotalEnergies Marketing Kenya Plc",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/total.svg"
+  },
+  {
+    "symbol": "TPSE",
+    "name": "TPS Eastern Africa PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/tps-eastern-africa.svg"
+  },
+  {
+    "symbol": "UCHM",
+    "name": "Uchumi Supermarkets PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/uchumi-supermarket.svg"
+  },
+  {
+    "symbol": "UMME",
+    "name": "Umeme Ltd.",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/umeme.svg"
+  },
+  {
+    "symbol": "UNGA",
+    "name": "Unga Group PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/unga-group.svg"
+  },
+  {
+    "symbol": "WTK",
+    "name": "Williamson Tea Kenya PLC",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/kapchorua-tea.svg"
+  },
+  {
+    "symbol": "XPRS",
+    "name": "Express Kenya Ltd",
+    "market": "NSEKE",
+    "image": "https://s3-symbol-logo.tradingview.com/express-kenya.svg"
+  }
+]

@@ -1,0 +1,310 @@
+[
+  {
+    "symbol": "ABC.B",
+    "name": "Banco del Caribe CA Banco Universal Class B",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "BNC",
+    "name": "Banco Nacional de Credito, C.A.",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-nacional-de-credito-ca-banco-universal.svg"
+  },
+  {
+    "symbol": "BPV",
+    "name": "Banco Provincial, S.A.",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-provincial-sa-banco-universal.svg"
+  },
+  {
+    "symbol": "BVCC",
+    "name": "Caracas Stock Exchange",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/bolsa-de-valores-de-caracas-ca.svg"
+  },
+  {
+    "symbol": "BVL",
+    "name": "BANCO DE VENEZUELA, S.A. BANCO UNIVERSAL",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-de-venezuela-sa-banco-universal.svg"
+  },
+  {
+    "symbol": "CCP.B",
+    "name": "Clabe Capital C.A. Class B",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/clabe-capital-ca-class-b.svg"
+  },
+  {
+    "symbol": "CCR",
+    "name": "Ceramica Carabobo, S.A.C.A",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/ceramica-carabobo-saca.svg"
+  },
+  {
+    "symbol": "CCR.O",
+    "name": "CERAMICA CARABOBO S.A.C.A - OPTC",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "CGQ",
+    "name": "Corporacion Grupo Quimico S.A.C.A.",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/corporaci-n-grupo-quimico-ca.svg"
+  },
+  {
+    "symbol": "CGQ.O",
+    "name": "CORPORACIÃN GRUPO QUIMICO, C.A. (OPTC)",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "CIE",
+    "name": "CORPORACION INDUSTRAIL DE ENERGIA, C.A. S.A.C.A",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "CIE.O",
+    "name": "CORPORACION INDUSTRIAL DE ENERGIA, C.A. S.A.C.A (SE. ESPECIAL)",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "CRM.A",
+    "name": "Corimon CA Class A",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/corimon-ca.svg"
+  },
+  {
+    "symbol": "DOM",
+    "name": "Dominguez & Cia SA",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/dominguez-cia-sa.svg"
+  },
+  {
+    "symbol": "EFE",
+    "name": "Productos EFE, S.A.",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/productos-efe-sa.svg"
+  },
+  {
+    "symbol": "ENV",
+    "name": "Envases Venezolanos, C.A.",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/envases-venezolanos-sa.svg"
+  },
+  {
+    "symbol": "FNC",
+    "name": "Fabrica Nacional de Cementos CA FNC",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/fabrica-nacional-de-cementos-ca.svg"
+  },
+  {
+    "symbol": "FVI.A",
+    "name": "F.V.I. Fondo de Valores Inmobiliarios, S.A.C.A. Class A",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "FVI.B",
+    "name": "F.V.I. Fondo de Valores Inmobiliarios, S.A.C.A. Class B",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "GMC.B",
+    "name": "Grupo Mantra Corp CA Registered Shs Series -B-",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-mantra-ca-clase-b.svg"
+  },
+  {
+    "symbol": "GZL",
+    "name": "Grupo Zuliano, C.A.",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-zuliano-ca-saca.svg"
+  },
+  {
+    "symbol": "GZL.A",
+    "name": "Grupo Zuliano CA GZ 5 % Cum Conv Red Pfd Registered Shs A",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-zuliano-ca-saca.svg"
+  },
+  {
+    "symbol": "GZL.B",
+    "name": "Grupo Zuliano CA GZ Cum Conv Red Pfd Registered Shs B",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-zuliano-ca-saca.svg"
+  },
+  {
+    "symbol": "GZL.P",
+    "name": "GRUPO ZULIANO, C.A. S.A.C.A PRIMARIO",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-zuliano-ca-saca.svg"
+  },
+  {
+    "symbol": "IBV",
+    "name": "Inmuebles Banco de Venezuela 1985 CA IBV",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "ICP.B",
+    "name": "Inversiones Crece Pymes CA Class B",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/inversiones-crecepymes-ca-clase-b.svg"
+  },
+  {
+    "symbol": "IMP.B",
+    "name": "Impulsa Agronegocios CA Class B",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/impulsa-agronegocios-ca-class-b.svg"
+  },
+  {
+    "symbol": "INV",
+    "name": "Inversiones Diversas CA (Inverdica)",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "IVC",
+    "name": "INVACA Inmuebles, Valores y Capitales S.A.C.A",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/invaca-inmuebles-valores-y-capitales-saca-clase-b.svg"
+  },
+  {
+    "symbol": "IVC.A",
+    "name": "INVACA Inmuebles, Valores y Capitales S.A.C.A Class A",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/invaca-inmuebles-valores-y-capitales-saca-clase-b.svg"
+  },
+  {
+    "symbol": "IVC.B",
+    "name": "INVACA Inmuebles, Valores y Capitales S.A.C.A Registered Shs Series -B-",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/invaca-inmuebles-valores-y-capitales-saca-clase-b.svg"
+  },
+  {
+    "symbol": "MPA",
+    "name": "Manufacturas de Papel CA",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/manufacturas-de-papel-saca-manpa.svg"
+  },
+  {
+    "symbol": "MTC.B",
+    "name": "Montesco Fondo Agroindustrial CA Class B",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/montesco-fondo-agroindustrial-ca-clase-b.svg"
+  },
+  {
+    "symbol": "MVZ.A",
+    "name": "Mercantil Servicios Financieros C.A. Class A",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/mercantil-servicios-financieros-ca-clase-b.svg"
+  },
+  {
+    "symbol": "MVZ.B",
+    "name": "Mercantil Servicios Financieros C.A. Class B",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/mercantil-servicios-financieros-ca-clase-b.svg"
+  },
+  {
+    "symbol": "OCE",
+    "name": "Oriente Entidad de Inversion Colectiva Inmobiliaria CA",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "PCP.B",
+    "name": "Fondo Petrolia CA Class B",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/petrolia-ca-fund-class-b.svg"
+  },
+  {
+    "symbol": "PGR",
+    "name": "PROAGRO, C.A.",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/proagro-ca.svg"
+  },
+  {
+    "symbol": "PGR.O",
+    "name": "PROAGRO, C.A. (SESION ESPECIAL)",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "PIV.B",
+    "name": "Pivca Promotora de Inversiones y Valores CA Class B",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/pivca-promotora-de-inversiones-y-valores-ca.svg"
+  },
+  {
+    "symbol": "PTN",
+    "name": "Protinal CA",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/protinal-ca.svg"
+  },
+  {
+    "symbol": "PTN.O",
+    "name": "PROTINAL, C.A. (SESIÃN ESPECIAL)",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "RFM",
+    "name": "Rendivalores Fondo Mutual De Inversiones De Capital Cerrado, C.A.",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/rendivalores-fondo-mutual-de-inversiones-de-capital-cerrado-ca.svg"
+  },
+  {
+    "symbol": "RST",
+    "name": "C.A. Ron Santa Teresa",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/ca-ron-santa-teresa-clase-b.svg"
+  },
+  {
+    "symbol": "RST.B",
+    "name": "C.A. Ron Santa Teresa Class B",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/ca-ron-santa-teresa-clase-b.svg"
+  },
+  {
+    "symbol": "RST.O",
+    "name": "C.A. RON SANTA TERESA (SESION ESPECIAL)",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "SV.A",
+    "name": "Inversiones Selva CA Class A",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "SV.B",
+    "name": "Inversiones Selva CA Class B",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "SVS",
+    "name": "Siderurgica Venezolana SA",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/siderurgica-venezolana-sivensa-sa.svg"
+  },
+  {
+    "symbol": "TDV.D",
+    "name": "C.A. Nacional Telefonos de Venezuela Class D",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/ca-nacional-telefonos-de-venezuela-clase-d.svg"
+  },
+  {
+    "symbol": "TDV.P",
+    "name": "C.A. NACIONAL TELEFONOS DE VENEZUELA CLASE 'D'",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/ca-nacional-telefonos-de-venezuela-clase-d.svg"
+  },
+  {
+    "symbol": "TPG",
+    "name": "TELARES DE PALO GRANDE, C.A.",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/telares-de-palo-grande-ca.svg"
+  },
+  {
+    "symbol": "TPG.O",
+    "name": "TELARES DE PALO GRANDE, C.A. (SE. ESPECIAL)",
+    "market": "BVCV"
+  },
+  {
+    "symbol": "VNA.B",
+    "name": "VENEALTERNATIVE S.A. Class B",
+    "market": "BVCV",
+    "image": "https://s3-symbol-logo.tradingview.com/venealternative-sa-clase-b.svg"
+  }
+]

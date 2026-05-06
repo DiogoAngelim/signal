@@ -1,0 +1,170 @@
+[
+  {
+    "symbol": "ALVO",
+    "name": "Alvotech",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/alvotech.svg"
+  },
+  {
+    "symbol": "EIK",
+    "name": "EIK Fasteignafelag HF",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/eik-fasteignafelag-hf.svg"
+  },
+  {
+    "symbol": "EIM",
+    "name": "Eimskipafelag Islands hf.",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/eimskipafelag-islands-hf.svg"
+  },
+  {
+    "symbol": "FESTI",
+    "name": "Festi hf.",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/festi-hf.svg"
+  },
+  {
+    "symbol": "HAGA",
+    "name": "Hagar hf.",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/hagar-hf.svg"
+  },
+  {
+    "symbol": "HAMP",
+    "name": "Hampiajan hf",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/hampi-jan-hf.svg"
+  },
+  {
+    "symbol": "HEIMAR",
+    "name": "Heimar hf.",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/reginn-hf.svg"
+  },
+  {
+    "symbol": "ICEAIR",
+    "name": "Icelandair Group hf",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/icelandair-group-hf.svg"
+  },
+  {
+    "symbol": "ICESEA",
+    "name": "Iceland Seafood International hf",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/iceland-seafood-international-hf.svg"
+  },
+  {
+    "symbol": "ISB",
+    "name": "Islandsbanki hf",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/islandsbanki-hf.svg"
+  },
+  {
+    "symbol": "ISF",
+    "name": "Isfelag hf.",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/isfelag-hf.svg"
+  },
+  {
+    "symbol": "ISLAX",
+    "name": "Icelandic Salmon AS",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/icelandic-salmon-as.svg"
+  },
+  {
+    "symbol": "JBTM",
+    "name": "JBT Marel Corporation",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/john-bean-technologies-corporation.svg"
+  },
+  {
+    "symbol": "KALD",
+    "name": "Kaldalon hf",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/kaldalon-hf.svg"
+  },
+  {
+    "symbol": "KLAPP",
+    "name": "Klappir Graenar Lausnir hf Class B",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/klappir-green-solutions.svg"
+  },
+  {
+    "symbol": "KLDVK",
+    "name": "Kaldvik AS",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/ice-fish-farm-as.svg"
+  },
+  {
+    "symbol": "KVIKA",
+    "name": "Kvika banki hf",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/kvika-banki-hf.svg"
+  },
+  {
+    "symbol": "NOVA",
+    "name": "Nova Klubburinn hf.",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/nova-klubburinn-hf.svg"
+  },
+  {
+    "symbol": "OCS",
+    "name": "Oculis Holding AG",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/oculis-ag.svg"
+  },
+  {
+    "symbol": "REITIR",
+    "name": "Reitir fasteignafelag hf",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/reitir-fasteignafelag-hf.svg"
+  },
+  {
+    "symbol": "SFS_B",
+    "name": "Slaturfelag Suaurlands Svf",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/slaturfelag-sudurlands-svf.svg"
+  },
+  {
+    "symbol": "SIMINN",
+    "name": "Siminn hf.",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/siminn-hf.svg"
+  },
+  {
+    "symbol": "SJOVA",
+    "name": "Sjova-Almennar tryggingar hf",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/sjova-almennar-tryggingar-hf.svg"
+  },
+  {
+    "symbol": "SKAGI",
+    "name": "Skagi hf",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/vatryggingafelag-islands-hf.svg"
+  },
+  {
+    "symbol": "SKEL",
+    "name": "Skel fjarfestingafelag hf.",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/skeljungur-hf.svg"
+  },
+  {
+    "symbol": "SOLID",
+    "name": "Solid Cloud hf",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/solid-clouds-hf.svg"
+  },
+  {
+    "symbol": "SVN",
+    "name": "Sildarvinnslan hf.",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/sildarvinnslan-hf.svg"
+  },
+  {
+    "symbol": "SYN",
+    "name": "Syn hf",
+    "market": "OMXICE",
+    "image": "https://s3-symbol-logo.tradingview.com/syn-hf.svg"
+  }
+]

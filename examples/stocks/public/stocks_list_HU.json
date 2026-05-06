@@ -1,0 +1,470 @@
+[
+  {
+    "symbol": "ALTEO",
+    "name": "ALTEO Energy Services Plc Class A",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/alteo-nyrt.svg"
+  },
+  {
+    "symbol": "ANY",
+    "name": "ANY Security Printing Co. Plc",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/any-security-printing-co.svg"
+  },
+  {
+    "symbol": "BET",
+    "name": "Budapest Stock Exchange Plc",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/budapest-stock-ex.svg"
+  },
+  {
+    "symbol": "BGP",
+    "name": "Biggeorge Property Plc.",
+    "market": "BET"
+  },
+  {
+    "symbol": "BGR",
+    "name": "Biggeorge REIT Plc",
+    "market": "BET"
+  },
+  {
+    "symbol": "BMW",
+    "name": "Bayerische Motoren Werke AG",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/bmw.svg"
+  },
+  {
+    "symbol": "CDSYS",
+    "name": "CDSYS Nyrt.",
+    "market": "BET"
+  },
+  {
+    "symbol": "CHOME",
+    "name": "Chameleon Smart Home Zrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/chameleon-smart-ho.svg"
+  },
+  {
+    "symbol": "CIGPANNONIA",
+    "name": "CIG Pannonia Life Insurance Plc",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/cig-pannonia-life-insuranc-a.svg"
+  },
+  {
+    "symbol": "CIVTA",
+    "name": "CIVITA GROUP Nyrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/civita-nyrt.svg"
+  },
+  {
+    "symbol": "COMMERZBANK",
+    "name": "Commerzbank AG",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/commerzbank.svg"
+  },
+  {
+    "symbol": "COOL",
+    "name": "COOL AIRCONDITIONAL Commercial and Service Public Limited Company",
+    "market": "BET"
+  },
+  {
+    "symbol": "DELTA",
+    "name": "Delta Group Plc",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-technologies-nyrt.svg"
+  },
+  {
+    "symbol": "DEUTSCHEBANK",
+    "name": "Deutsche Bank AG",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-bank-ag.svg"
+  },
+  {
+    "symbol": "DEUTSCHETEL",
+    "name": "Deutsche Telekom AG",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-telekom.svg"
+  },
+  {
+    "symbol": "DKAM",
+    "name": "Delta Group Plc",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-technologies-nyrt.svg"
+  },
+  {
+    "symbol": "DMKER",
+    "name": "DM-KER Plc",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/dm-ker-share.svg"
+  },
+  {
+    "symbol": "DUNAHOUSE",
+    "name": "DH Group Nyilvanosan Mukodo Reszvenytarsasag",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/duna-house-share.svg"
+  },
+  {
+    "symbol": "ENEFI",
+    "name": "ENEFI Asset Management Plc",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/enefi-asset-management-plc.svg"
+  },
+  {
+    "symbol": "ENEFIELS",
+    "name": "ENEFI Asset Management Plc Pref Bearer Shs",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/enefi-asset-management-plc.svg"
+  },
+  {
+    "symbol": "ENRGY",
+    "name": "Energy Investment SE",
+    "market": "BET"
+  },
+  {
+    "symbol": "EON",
+    "name": "E.ON SE",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/e-on.svg"
+  },
+  {
+    "symbol": "EPDUF",
+    "name": "Epduferr Nyrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/epduferr-nyilvanos.svg"
+  },
+  {
+    "symbol": "EPROLIUSIA",
+    "name": "Eprolius Ingatlan Nyrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/eprolius-ingatlan-nyrt-ordinary-share.svg"
+  },
+  {
+    "symbol": "ESENT",
+    "name": "eSense Human Resources Szolgaltato Nyilvanosan Mukodo Reszvenytarsasag",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/esense-human-res.svg"
+  },
+  {
+    "symbol": "EUSOL",
+    "name": "EU-SOLAR Kereskedelmi es Szolgaltato Nyilvanosan Mukodo Reszvenytarsasag.",
+    "market": "BET"
+  },
+  {
+    "symbol": "FINEXT",
+    "name": "Finext Asset Management Plc",
+    "market": "BET"
+  },
+  {
+    "symbol": "FINEXTB",
+    "name": "Finext Asset Management PLC Class B",
+    "market": "BET"
+  },
+  {
+    "symbol": "FORRAS/OE",
+    "name": "Forras Trust and Investment Company Pref. series B",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/forr-s-b-share.svg"
+  },
+  {
+    "symbol": "FORRAS/T",
+    "name": "Forras Trust and Investment Company",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/forr-s-b-share.svg"
+  },
+  {
+    "symbol": "FUTURAQUA",
+    "name": "FuturAqua Mineral Water Production & Asset Management Plc",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/futuraqua-share.svg"
+  },
+  {
+    "symbol": "GLIA",
+    "name": "Glia Nova Nyilvanosan Mukodo Reszvenytarsasag",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/glia-nova-nyilvano.svg"
+  },
+  {
+    "symbol": "GLOSTER",
+    "name": "Gloster Digital Group",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/gloster-share.svg"
+  },
+  {
+    "symbol": "GOPD",
+    "name": "GOPD Nyrt.",
+    "market": "BET"
+  },
+  {
+    "symbol": "GRNT",
+    "name": "GRANIT Bank Nyilvanosan Mukodo Reszvenytarsasag",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/granit-bank-zartko.svg"
+  },
+  {
+    "symbol": "GSPARK",
+    "name": "Graphisoft Park SE",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/graphisoft-park-se.svg"
+  },
+  {
+    "symbol": "GWPH",
+    "name": "Goodwill Pharma Nyrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/goodwill-pharma-orvos-es-gyogyszertudomanyi-nyrt.svg"
+  },
+  {
+    "symbol": "HENKEL",
+    "name": "Henkel AG & Co. KGaA Pref",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/henkel.svg"
+  },
+  {
+    "symbol": "INFINEON",
+    "name": "Infineon Technologies AG",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/infineon-technologies.svg"
+  },
+  {
+    "symbol": "KERMN",
+    "name": "Kermann IT Solutions Nyilvanosan Mukodo Reszvenytarsasag",
+    "market": "BET"
+  },
+  {
+    "symbol": "LUFTHANSA",
+    "name": "Deutsche Lufthansa AG",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/lufthansa.svg"
+  },
+  {
+    "symbol": "MASTERPLAST",
+    "name": "Masterplast Nyrt",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/masterplast-nyilvanosan-muko.svg"
+  },
+  {
+    "symbol": "MEGAKRAN",
+    "name": "MEGAKRAN Plc.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/megakran-share.svg"
+  },
+  {
+    "symbol": "MERCEDESBENZ",
+    "name": "Mercedes-Benz Group AG",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/daimler.svg"
+  },
+  {
+    "symbol": "MKBBANK",
+    "name": "MBH Bank Plc. Class A",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/mkb-bank-share.svg"
+  },
+  {
+    "symbol": "MOL",
+    "name": "MOL Hungarian Oil & Gas Plc Class A",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/mol.svg"
+  },
+  {
+    "symbol": "MTELEKOM",
+    "name": "Magyar Telekom Telecommunications PLC",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-telekom.svg"
+  },
+  {
+    "symbol": "MTMX",
+    "name": "MetMax Europe Nyrt.",
+    "market": "BET"
+  },
+  {
+    "symbol": "MULTI",
+    "name": "MULTIHOME Ingatlanforgalmazo Nyilvanosan Mukodo Reszvenytarsasag",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/multihome-zrt.svg"
+  },
+  {
+    "symbol": "MUNICHRE",
+    "name": "Munchener Ruckversicherungs-Gesellschaft AG",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/munichre.svg"
+  },
+  {
+    "symbol": "NAP",
+    "name": "NAP Zrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/nap-nyrt-ordinary-share.svg"
+  },
+  {
+    "symbol": "NATUR",
+    "name": "Naturland Holding Vagyonkezelo es Befektetesi Nyilvanosan Mukodo Reszvenytarsasag Class A",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/naturland.svg"
+  },
+  {
+    "symbol": "NAVIG",
+    "name": "Navigator Investments Nyrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/navigator-investme.svg"
+  },
+  {
+    "symbol": "NORD",
+    "name": "Nord General Public Limited Company",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/nord-general-plc.svg"
+  },
+  {
+    "symbol": "NUTEX",
+    "name": "Nutex Investments Plc Series E",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/nutex-plc.svg"
+  },
+  {
+    "symbol": "O3PNR",
+    "name": "O3 Partners NV",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/oxo-technologies-nv.svg"
+  },
+  {
+    "symbol": "OPUS",
+    "name": "OPUS GLOBAL Nyrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/opus-global-nyilvanosan-muko.svg"
+  },
+  {
+    "symbol": "ORMESTER",
+    "name": "Ormester Vagyonvedelmi Nyrt",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/rmester-share.svg"
+  },
+  {
+    "symbol": "OTP",
+    "name": "OTP Bank Nyrt",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/otpbknyr-gdr.svg"
+  },
+  {
+    "symbol": "PANNERGY",
+    "name": "PannErgy Nyrt",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/pannergy-plc.svg"
+  },
+  {
+    "symbol": "PENSUM",
+    "name": "Pensum Group Nyrt",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/pensum-share.svg"
+  },
+  {
+    "symbol": "POLYDUCT",
+    "name": "Polyduct Nyrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/polyduct-nyrt-ordinary-share.svg"
+  },
+  {
+    "symbol": "RABA",
+    "name": "Raba Automotive Group Nyrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/raba-automotive-plc.svg"
+  },
+  {
+    "symbol": "RICHTER",
+    "name": "Chemical Works of Gedeon Richter Plc",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/richterg-gds.svg"
+  },
+  {
+    "symbol": "SAP",
+    "name": "SAP SE",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/sap.svg"
+  },
+  {
+    "symbol": "SIEMENS",
+    "name": "Siemens Aktiengesellschaft",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/siemens.svg"
+  },
+  {
+    "symbol": "SPPC",
+    "name": "Shopper Park Plus Nyrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/shopper-park-plus.svg"
+  },
+  {
+    "symbol": "STRT",
+    "name": "STRT Holding Nyrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/strt-nyrt.svg"
+  },
+  {
+    "symbol": "SUNDELL",
+    "name": "SunDell Estate Nyilvanosan Mukodo Reszvenytarsasag",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/sundell-estate-share.svg"
+  },
+  {
+    "symbol": "TAKAREKJZB",
+    "name": "MBH Mortgage Bank Co. Plc.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/takarek-mortgage-bank-co-plc.svg"
+  },
+  {
+    "symbol": "THYSSENKRUPP",
+    "name": "thyssenkrupp AG",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/thyssenkrupp.svg"
+  },
+  {
+    "symbol": "UBM",
+    "name": "UBM Holding Nyrt",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/ubm-public.svg"
+  },
+  {
+    "symbol": "VERTI",
+    "name": "VERTIKAL Group Nyilvanosan Mukodo Reszvenytarsasag",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/vertikal-zrt.svg"
+  },
+  {
+    "symbol": "VIG",
+    "name": "Vienna Insurance Group AG",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/vienna-insurance-group-a.svg"
+  },
+  {
+    "symbol": "VLBRG",
+    "name": "Valberg Nyilvanosan Mukodo Reszvenytarsasag",
+    "market": "BET"
+  },
+  {
+    "symbol": "VOLKSWAGEN",
+    "name": "Volkswagen AG Pref",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/volkswagen.svg"
+  },
+  {
+    "symbol": "VVT",
+    "name": "ViVeTech Nyrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/vivetech-plc.svg"
+  },
+  {
+    "symbol": "WABERERS",
+    "name": "WABERER'S INTERNATIONAL NYRT.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/waberer.svg"
+  },
+  {
+    "symbol": "WIZZAIR",
+    "name": "Wizz Air Holdings Plc",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/wizz-air-holdings-plc-ord-gbp0-0001.svg"
+  },
+  {
+    "symbol": "ZWACK",
+    "name": "Zwack Unicum Nyrt.",
+    "market": "BET",
+    "image": "https://s3-symbol-logo.tradingview.com/zwack-unicum-rt.svg"
+  }
+]

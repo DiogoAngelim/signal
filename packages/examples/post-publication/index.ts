@@ -1,6 +1,14 @@
 import { createProtocolError } from "@signal/protocol";
 import { defineEvent, defineMutation, defineQuery } from "@signal/sdk-node";
-import { createExampleRuntime } from "../support";
+import {
+  createExampleRuntime,
+  ensureExampleSelfTraining,
+  instrumentExampleEvent,
+  instrumentExampleMutation,
+  instrumentExampleQuery,
+  instrumentExampleSubscriber,
+  type ExampleStateWithSelfTraining,
+} from "../support";
 import {
   postGetInputSchema,
   postPublishedEventSchema,
@@ -9,7 +17,7 @@ import {
   type PostState,
 } from "./schemas";
 
-export interface PostPublicationState {
+export interface PostPublicationState extends ExampleStateWithSelfTraining {
   posts: Map<string, PostState>;
   deliveredEventIds: string[];
 }
@@ -40,6 +48,8 @@ export function registerPostPublication(
     registerSubscriber?: boolean;
   } = {}
 ) {
+  const selfTraining = ensureExampleSelfTraining(state, "post-publication");
+
   runtime.registerQuery(
     defineQuery({
       name: "post.get.v1",
@@ -47,14 +57,14 @@ export function registerPostPublication(
       description: "Read the current post state.",
       inputSchema: postGetInputSchema,
       resultSchema: postStateSchema,
-      handler: (input) => {
+      handler: instrumentExampleQuery(selfTraining, "post.get.v1", (input) => {
         const post = state.posts.get(input.postId);
         if (!post) {
           throw createProtocolError("NOT_FOUND", `Unknown post ${input.postId}`);
         }
 
         return post;
-      },
+      }),
     })
   );
 
@@ -65,7 +75,7 @@ export function registerPostPublication(
       description: "Record that a post became publicly visible.",
       inputSchema: postPublishedEventSchema,
       resultSchema: postPublishedEventSchema,
-      handler: (payload) => payload,
+      handler: instrumentExampleEvent(selfTraining, "post.published.v1", (payload) => payload),
     })
   );
 
@@ -83,7 +93,7 @@ export function registerPostPublication(
         title: input.title.trim(),
         body: input.body.trim(),
       }),
-      handler: async (input, context) => {
+      handler: instrumentExampleMutation(selfTraining, "post.publish.v1", async (input, context) => {
         const post = state.posts.get(input.postId);
         if (!post) {
           throw createProtocolError("NOT_FOUND", `Unknown post ${input.postId}`);
@@ -111,16 +121,16 @@ export function registerPostPublication(
         });
 
         return post;
-      },
+      }),
     })
   );
 
   if (options.registerSubscriber ?? true) {
     runtime.subscribe(
       "post.published.v1",
-      async (event) => {
+      instrumentExampleSubscriber(selfTraining, "post.published.v1", async (event) => {
         state.deliveredEventIds.push(event.messageId);
-      },
+      }),
       {
         consumerId: "post-projection",
         replaySafe: true,

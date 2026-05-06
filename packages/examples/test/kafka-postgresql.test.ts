@@ -1,8 +1,11 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import path from "node:path";
+import { tmpdir } from "node:os";
 import { createSignalEnvelope } from "@signal/protocol";
 import { createMemoryIdempotencyStore } from "@signal/runtime";
 import { createSignalRuntime } from "@signal/sdk-node";
 import type { Pool } from "pg";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createKafkaPostgresExample,
   createKafkaSignalDispatcher,
@@ -16,6 +19,9 @@ import {
   runKafkaPostgresDemo,
 } from "../kafka-postgresql";
 import type { PaymentRecord } from "../kafka-postgresql/repository";
+import { createPersistentExampleSelfTraining } from "../support";
+
+let trainingDir = "";
 
 function createRecordingDispatcher() {
   const subscribers = new Map<string, Set<(envelope: ReturnType<typeof createSignalEnvelope>) => void | Promise<void>>>();
@@ -53,6 +59,7 @@ function createRecordingDispatcher() {
 
 function createFakePoolHarness() {
   const payments = new Map<string, PaymentRecord>();
+  const trainingSnapshots = new Map<string, Record<string, unknown>>();
   const captureLog = new Map<
     string,
     {
@@ -79,6 +86,10 @@ function createFakePoolHarness() {
       }
 
       if (sql.startsWith("CREATE TABLE IF NOT EXISTS signal_example_payment_capture_log")) {
+        return { rows: [], rowCount: 0 };
+      }
+
+      if (sql.startsWith('CREATE TABLE IF NOT EXISTS "signal_example_self_training"')) {
         return { rows: [], rowCount: 0 };
       }
 
@@ -208,6 +219,23 @@ function createFakePoolHarness() {
         };
       }
 
+      if (
+        sql ===
+        'SELECT snapshot FROM "signal_example_self_training" WHERE module_id = $1 LIMIT 1'
+      ) {
+        const snapshot = trainingSnapshots.get(String(values[0]));
+        return {
+          rows: snapshot ? [{ snapshot }] : [],
+          rowCount: snapshot ? 1 : 0,
+        };
+      }
+
+      if (sql.startsWith('INSERT INTO "signal_example_self_training" (module_id, snapshot, updated_at)')) {
+        const [moduleId, snapshot] = values;
+        trainingSnapshots.set(String(moduleId), JSON.parse(String(snapshot)) as Record<string, unknown>);
+        return { rows: [], rowCount: 1 };
+      }
+
       throw new Error(`Unexpected SQL: ${sql}`);
     }),
     release: vi.fn(),
@@ -218,8 +246,13 @@ function createFakePoolHarness() {
     end: vi.fn(async () => undefined),
   } as unknown as Pool;
 
-  return { pool, client, payments, captureLog, queries };
+  return { pool, client, payments, trainingSnapshots, captureLog, queries };
 }
+
+beforeEach(() => {
+  trainingDir = mkdtempSync(path.join(tmpdir(), "signal-kafka-training-"));
+  process.env["SIGNAL_EXAMPLE_TRAINING_DIR"] = trainingDir;
+});
 
 afterEach(() => {
   delete process.env.DATABASE_URL;
@@ -227,6 +260,11 @@ afterEach(() => {
   delete process.env.KAFKA_TOPIC;
   delete process.env.KAFKA_CLIENT_ID;
   delete process.env.KAFKA_GROUP_ID;
+  delete process.env.SIGNAL_EXAMPLE_TRAINING_DIR;
+  if (trainingDir) {
+    rmSync(trainingDir, { recursive: true, force: true });
+    trainingDir = "";
+  }
 });
 
 describe("kafka postgres example", () => {
@@ -403,6 +441,33 @@ describe("kafka postgres example", () => {
     });
     expect(harness.client.query).toHaveBeenCalled();
     expect(harness.queries.some((query) => query.startsWith("CREATE TABLE IF NOT EXISTS signal_example_payments"))).toBe(true);
+  });
+
+  it("persists self-training snapshots through postgres", async () => {
+    const harness = createFakePoolHarness();
+    const selfTraining = createPersistentExampleSelfTraining("postgres-self-training", {
+      pool: harness.pool,
+    });
+
+    await selfTraining.recordQuery("payment.status.v1", { paymentId: "pay_9001" }, {
+      status: "success",
+      result: { paymentId: "pay_9001", status: "captured" },
+    });
+    await selfTraining.recordMutation("payment.capture.v1", { paymentId: "pay_9001" }, {
+      status: "failure",
+      error: new Error("duplicate capture"),
+    });
+
+    const nextInstance = createPersistentExampleSelfTraining("postgres-self-training", {
+      pool: harness.pool,
+    });
+    const snapshot = await nextInstance.snapshot();
+
+    expect(nextInstance.storageKind).toBe("postgres");
+    expect(snapshot.totals.observations).toBe(2);
+    expect(snapshot.parameters.operations["query:payment.status.v1"]?.successes).toBe(1);
+    expect(snapshot.parameters.operations["mutation:payment.capture.v1"]?.failures).toBe(1);
+    expect(harness.trainingSnapshots.get("postgres-self-training")).toBeTruthy();
   });
 
   it("dispatches event envelopes through kafka helpers and starts a replay-safe consumer", async () => {

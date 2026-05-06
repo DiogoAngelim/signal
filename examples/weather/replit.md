@@ -23,7 +23,7 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Preview path**: `/`
 - **Purpose**: Premium weather risk monitoring app for non-technical users
 - **Features**: Landing page, dashboard with region cards, region detail view, live updates feed, dark mode
-- **Data**: Mock data only (6 regions: NYC, Miami, Houston, Juiz de Fora, São Paulo, Lisbon)
+- **Data**: Brazil-only mock data fallback with major, mid-size, and smaller cities across multiple regions
 - **State**: Zustand for dark mode, selected region, refresh tracking
 - **API layer**: `src/lib/api.ts` — isolated mock implementations; swap for real REST/WS when backend ready
 - **Status levels**: Calm / Watch / Warning / Critical (defined in `src/lib/statusConfig.ts`)

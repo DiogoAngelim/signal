@@ -1,7 +1,14 @@
 import type { Alert, LiveUpdate, ProviderHealthView, Region, RegionEvent, SignalAction, StatusLevel } from "@/types/weather";
+import { MOCK_REGIONS } from "@/data/mockRegions";
+import { MOCK_UPDATES } from "@/data/mockUpdates";
+import { AUTO_REFRESH_INTERVAL_MS } from "@/lib/refresh";
 
 const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(/\/$/, "");
 const wsBaseOverride = import.meta.env.VITE_WS_BASE_URL as string | undefined;
+const forceMockData = import.meta.env.VITE_USE_MOCK_DATA === "true";
+const canFallbackToMock = forceMockData || (!import.meta.env.VITE_API_BASE_URL && !wsBaseOverride);
+
+let backendMode: "mock" | "live" | "unknown" = forceMockData ? "mock" : "unknown";
 
 interface ApiResponse<T> {
   data: T;
@@ -99,34 +106,52 @@ interface BackendDecision {
 }
 
 export async function fetchRegions(): Promise<Region[]> {
-  const regions = await request<BackendRegion[]>("/regions");
-  const [risks, alerts, forecasts, decisions, events] = await Promise.all([
-    requestSafe<BackendRiskScore[]>("/risk/latest", []),
-    requestSafe<BackendAlert[]>("/alerts/active", []),
-    requestSafe<BackendForecast[]>("/forecast/latest", []),
-    requestSafe<BackendDecision[]>("/decisions/recent", []),
-    requestSafe<BackendEvent[]>("/events/recent", [])
-  ]);
+  if (backendMode === "mock") {
+    return getMockRegions();
+  }
 
-  const riskMap = mapByRegion(risks);
-  const alertMap = mapByRegion(alerts);
-  const forecastMap = mapByRegion(forecasts);
-  const decisionMap = mapByRegion(decisions);
-  const eventMap = mapEventsByRegion(events);
+  try {
+    const regions = await request<BackendRegion[]>("/regions");
+    const [risks, alerts, forecasts, decisions, events] = await Promise.all([
+      requestSafe<BackendRiskScore[]>("/risk/latest", []),
+      requestSafe<BackendAlert[]>("/alerts/active", []),
+      requestSafe<BackendForecast[]>("/forecast/latest", []),
+      requestSafe<BackendDecision[]>("/decisions/recent", []),
+      requestSafe<BackendEvent[]>("/events/recent", [])
+    ]);
 
-  return regions.map((region) =>
-    toRegionView(
-      region,
-      riskMap.get(region.id)?.[0],
-      alertMap.get(region.id) ?? [],
-      forecastMap.get(region.id)?.[0],
-      decisionMap.get(region.id)?.[0],
-      eventMap.get(region.id) ?? []
-    )
-  );
+    backendMode = "live";
+
+    const riskMap = mapByRegion(risks);
+    const alertMap = mapByRegion(alerts);
+    const forecastMap = mapByRegion(forecasts);
+    const decisionMap = mapByRegion(decisions);
+    const eventMap = mapEventsByRegion(events);
+
+    return regions.map((region) =>
+      toRegionView(
+        region,
+        riskMap.get(region.id)?.[0],
+        alertMap.get(region.id) ?? [],
+        forecastMap.get(region.id)?.[0],
+        decisionMap.get(region.id)?.[0],
+        eventMap.get(region.id) ?? []
+      )
+    );
+  } catch (error) {
+    if (shouldSwitchToMock(error)) {
+      backendMode = "mock";
+      return getMockRegions();
+    }
+    throw error;
+  }
 }
 
 export async function fetchRegion(id: string): Promise<Region | null> {
+  if (backendMode === "mock") {
+    return getMockRegion(id);
+  }
+
   try {
     const region = await request<BackendRegion>(`/regions/${id}`);
     const [risk, alerts, forecast, decisions, events] = await Promise.all([
@@ -147,16 +172,26 @@ export async function fetchRegion(id: string): Promise<Region | null> {
       decisions?.[0],
       regionEvents
     );
-  } catch {
+  } catch (error) {
+    if (shouldSwitchToMock(error)) {
+      backendMode = "mock";
+      return getMockRegion(id);
+    }
     return null;
   }
 }
 
 export async function fetchProviderHealth(): Promise<ProviderHealthView[]> {
+  if (backendMode === "mock") {
+    return getMockProviderHealth();
+  }
   return requestSafe<ProviderHealthView[]>("/providers/health", []);
 }
 
 export async function fetchRecentUpdates(): Promise<LiveUpdate[]> {
+  if (backendMode === "mock") {
+    return getMockUpdates();
+  }
   const events = await requestSafe<BackendEvent[]>("/events/recent", []);
   const regionMap = await loadRegionNameMap();
   return (events ?? []).map((event) => toLiveUpdate(event, regionMap)).filter(Boolean) as LiveUpdate[];
@@ -165,9 +200,23 @@ export async function fetchRecentUpdates(): Promise<LiveUpdate[]> {
 export async function subscribeToUpdates(
   cb: (update: LiveUpdate) => void
 ): Promise<() => void> {
+  if (backendMode === "mock") {
+    return subscribeToMockUpdates(cb);
+  }
+
   const regionMap = await loadRegionNameMap();
   const wsUrl = buildWsUrl("/ws");
-  const socket = new WebSocket(wsUrl);
+  let socket: WebSocket;
+
+  try {
+    socket = new WebSocket(wsUrl);
+  } catch (error) {
+    if (shouldSwitchToMock(error)) {
+      backendMode = "mock";
+      return subscribeToMockUpdates(cb);
+    }
+    throw error;
+  }
 
   const onMessage = (event: MessageEvent) => {
     try {
@@ -196,6 +245,11 @@ export async function subscribeToUpdates(
 
   socket.addEventListener("open", onOpen);
   socket.addEventListener("message", onMessage);
+  socket.addEventListener("error", () => {
+    if (canFallbackToMock) {
+      backendMode = "mock";
+    }
+  });
 
   return () => {
     socket.removeEventListener("open", onOpen);
@@ -205,6 +259,10 @@ export async function subscribeToUpdates(
 }
 
 async function request<T>(path: string): Promise<T> {
+  if (backendMode === "mock") {
+    throw new Error("Mock mode active");
+  }
+
   const response = await fetch(buildApiUrl(path));
   if (!response.ok) {
     throw new Error(`Request failed: ${response.status}`);
@@ -560,6 +618,10 @@ function describeEvent(event: BackendEvent, alerts: BackendAlert[]): string {
 
 async function loadRegionNameMap(): Promise<Map<string, string>> {
   const map = new Map<string, string>();
+  if (backendMode === "mock") {
+    getMockRegions().forEach((region) => map.set(region.id, region.name));
+    return map;
+  }
   try {
     const regions = await request<BackendRegion[]>("/regions");
     regions.forEach((region) => map.set(region.id, region.name));
@@ -641,12 +703,8 @@ function toLiveUpdate(event: BackendEvent, regionMap: Map<string, string>): Live
 function countryFlag(country: string): string {
   const normalized = country.trim().toUpperCase();
   const map: Record<string, string> = {
-    US: "🇺🇸",
-    USA: "🇺🇸",
     BRAZIL: "🇧🇷",
-    BR: "🇧🇷",
-    PORTUGAL: "🇵🇹",
-    PT: "🇵🇹"
+    BR: "🇧🇷"
   };
   return map[normalized] ?? "🌍";
 }
@@ -654,12 +712,73 @@ function countryFlag(country: string): string {
 function countryName(country: string): string {
   const normalized = country.trim().toUpperCase();
   const map: Record<string, string> = {
-    US: "United States",
-    USA: "United States",
     BR: "Brazil",
-    BRAZIL: "Brazil",
-    PT: "Portugal",
-    PORTUGAL: "Portugal"
+    BRAZIL: "Brazil"
   };
   return map[normalized] ?? country;
+}
+
+function shouldSwitchToMock(_error: unknown): boolean {
+  return canFallbackToMock;
+}
+
+function getMockRegions(): Region[] {
+  return MOCK_REGIONS.map((region) => {
+    return {
+      ...region,
+      signalAction: statusToSignalAction(region.status),
+      signalConfidence: mockConfidence(region.riskScore),
+      signalSource: "heuristic",
+      signalReasons: region.riskDrivers.slice(0, 3)
+    };
+  });
+}
+
+function getMockRegion(id: string): Region | null {
+  return getMockRegions().find((region) => region.id === id) ?? null;
+}
+
+function getMockUpdates(): LiveUpdate[] {
+  return MOCK_UPDATES.slice(0, 10);
+}
+
+function getMockProviderHealth(): ProviderHealthView[] {
+  return [
+    {
+      provider: "INMET",
+      status: "healthy",
+      failureCount: 0,
+      lastSuccessAt: new Date().toISOString(),
+      lastLatencyMs: 184,
+      notes: "Demo fallback data"
+    },
+    {
+      provider: "CEMADEN",
+      status: "healthy",
+      failureCount: 0,
+      lastSuccessAt: new Date().toISOString(),
+      lastLatencyMs: 132,
+      notes: "Demo fallback data"
+    }
+  ];
+}
+
+function subscribeToMockUpdates(cb: (update: LiveUpdate) => void): () => void {
+  if (MOCK_UPDATES.length === 0) {
+    return () => {};
+  }
+
+  let index = 0;
+  const interval = window.setInterval(() => {
+    cb(MOCK_UPDATES[index % MOCK_UPDATES.length]);
+    index += 1;
+  }, AUTO_REFRESH_INTERVAL_MS);
+
+  return () => {
+    window.clearInterval(interval);
+  };
+}
+
+function mockConfidence(riskScore: number): number {
+  return Math.max(0.52, Math.min(0.94, 0.5 + riskScore / 200));
 }

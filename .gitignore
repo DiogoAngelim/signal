@@ -15,3 +15,4 @@ out
 *.tsbuildinfo
 apps/reference-server/dist
 docs/build
+.vercel

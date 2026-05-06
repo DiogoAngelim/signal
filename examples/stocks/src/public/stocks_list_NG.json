@@ -1,0 +1,786 @@
+[
+  {
+    "symbol": "ALEX",
+    "name": "Aluminium Extrusion Industries PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/aluminium-extrusion-industries-plc.svg"
+  },
+  {
+    "symbol": "CADBURY",
+    "name": "Cadbury Nigeria PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/cadbury-plc-nigeria.svg"
+  },
+  {
+    "symbol": "CAP",
+    "name": "Chemical & Allied Products Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/chemical-and-allied-products-plc.svg"
+  },
+  {
+    "symbol": "CAVERTON",
+    "name": "Caverton Offshore Support Group Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/caverton-offshore-support-plc.svg"
+  },
+  {
+    "symbol": "CHAMPION",
+    "name": "Champion Breweries PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/champion-brewery-plc.svg"
+  },
+  {
+    "symbol": "CHAMS",
+    "name": "Chams Holding Company Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/chams-plc.svg"
+  },
+  {
+    "symbol": "CHELLARAM",
+    "name": "Chellarams PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/chellarams-plc.svg"
+  },
+  {
+    "symbol": "CILEASING",
+    "name": "C&I Leasing PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/c-and-i-leasing-plc.svg"
+  },
+  {
+    "symbol": "CONHALLPLC",
+    "name": "Consolidated Hallmark Holdings Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/consolidated-hallmark-insurance-plc.svg"
+  },
+  {
+    "symbol": "CONOIL",
+    "name": "Conoil PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/conoil-plc.svg"
+  },
+  {
+    "symbol": "CORNERST",
+    "name": "Cornerstone Insurance PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/cornerstone-insurance-co-plc.svg"
+  },
+  {
+    "symbol": "CUSTODIAN",
+    "name": "Custodian Investment Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/custodian-investment-plc.svg"
+  },
+  {
+    "symbol": "CUTIX",
+    "name": "Cutix PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/cutix-plc.svg"
+  },
+  {
+    "symbol": "CWG",
+    "name": "CWG Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/computer-warehouse-plc.svg"
+  },
+  {
+    "symbol": "DAARCOMM",
+    "name": "DAAR Communications PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/daar-communications-plc.svg"
+  },
+  {
+    "symbol": "DANGCEM",
+    "name": "Dangote Cement PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/dangote-cement-plc.svg"
+  },
+  {
+    "symbol": "DANGSUGAR",
+    "name": "Dangote Sugar Refinery PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/dangote-sugar-refinery-plc.svg"
+  },
+  {
+    "symbol": "DEAPCAP",
+    "name": "DEAP Capital Management & Trust Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/deap-capital-management-and-trust-plc.svg"
+  },
+  {
+    "symbol": "DUNLOP",
+    "name": "DN Tyre & Rubber Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/dn-tyre-and-rubber-plc.svg"
+  },
+  {
+    "symbol": "EKOCORP",
+    "name": "Ekocorp PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/ekocorp-plc.svg"
+  },
+  {
+    "symbol": "ELLAHLAKES",
+    "name": "Ellah Lakes Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/ellah-lakes-plc.svg"
+  },
+  {
+    "symbol": "ENAMELWA",
+    "name": "Nigerian Enamelware PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/nigerian-enamelware-co-plc.svg"
+  },
+  {
+    "symbol": "ETERNA",
+    "name": "Eterna PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/eterna-plc.svg"
+  },
+  {
+    "symbol": "ETI",
+    "name": "Ecobank Transnational, Inc.",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/ecobank-transnational.svg"
+  },
+  {
+    "symbol": "ETRANZACT",
+    "name": "eTranzact International Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/e-tranzact-international-plc.svg"
+  },
+  {
+    "symbol": "EUNISELL",
+    "name": "Eunisell Interlinked Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/eunisell-interlinked-plc.svg"
+  },
+  {
+    "symbol": "FCMB",
+    "name": "FCMB Group Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/fcmb-plc.svg"
+  },
+  {
+    "symbol": "FIDELITYBK",
+    "name": "Fidelity Bank PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/fidelity-bank-plc.svg"
+  },
+  {
+    "symbol": "FIDSON",
+    "name": "Fidson Healthcare Ltd.",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/fidson-healthcare-plc.svg"
+  },
+  {
+    "symbol": "FIRSTHOLDCO",
+    "name": "First HoldCo Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/fbn-plc.svg"
+  },
+  {
+    "symbol": "FLOURMILL",
+    "name": "Flour Mills Of Nigeria Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/flour-mills-of-nigeria-plc.svg"
+  },
+  {
+    "symbol": "FTGINSURE",
+    "name": "Fortis Global Insurance Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/standard-alliance-insurance-plc.svg"
+  },
+  {
+    "symbol": "FTNCOCOA",
+    "name": "FTN Cocoa Processors Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/ftn-cocoa-processors-plc.svg"
+  },
+  {
+    "symbol": "GEREGU",
+    "name": "Geregu Power Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/geregu-power-plc.svg"
+  },
+  {
+    "symbol": "GOLDBREW",
+    "name": "Golden Guinea Breweries Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/golden-guinea-breweries-plc.svg"
+  },
+  {
+    "symbol": "GTCO",
+    "name": "Guaranty Trust Holding Company Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/guaranty-trust-company-plc.svg"
+  },
+  {
+    "symbol": "GUINEAINS",
+    "name": "Guinea Insurance PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/guinea-insurance-plc.svg"
+  },
+  {
+    "symbol": "GUINNESS",
+    "name": "Guinness Nigeria PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/guinness-nigeria-plc.svg"
+  },
+  {
+    "symbol": "HMCALL",
+    "name": "Haldane McCall Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/hmcall.svg"
+  },
+  {
+    "symbol": "HONYFLOUR",
+    "name": "Honeywell Flour Mills Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/honeywell-flour-mills-plc.svg"
+  },
+  {
+    "symbol": "IKEJAHOTEL",
+    "name": "Ikeja Hotel PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/ikeja-hotel-plc.svg"
+  },
+  {
+    "symbol": "IMG",
+    "name": "Industrial and Medical Gases Nigeria PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/industrial-and-medical-gases-nigeria-plc.svg"
+  },
+  {
+    "symbol": "INFINITY",
+    "name": "Infinity Trust Mortgage Bank Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/infinity-trust-mortgage-bank-plc.svg"
+  },
+  {
+    "symbol": "INTBREW",
+    "name": "International Breweries PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/international-breweries-plc.svg"
+  },
+  {
+    "symbol": "INTENEGINS",
+    "name": "International Energy Insurance Co. Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/international-energy-insurance-co-plc.svg"
+  },
+  {
+    "symbol": "JAIZBANK",
+    "name": "Jaiz Bank PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/jaiz-bank-plc.svg"
+  },
+  {
+    "symbol": "JAPAULGOLD",
+    "name": "Japaul Gold & Ventures PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/japaul-gold-and-ventures-plc.svg"
+  },
+  {
+    "symbol": "JBERGER",
+    "name": "Julius Berger Nigeria Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/julius-berger-plc-nigeria.svg"
+  },
+  {
+    "symbol": "JOHNHOLT",
+    "name": "John Holt PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/john-holt-plc.svg"
+  },
+  {
+    "symbol": "JULI",
+    "name": "Juli Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/juli-plc.svg"
+  },
+  {
+    "symbol": "LASACO",
+    "name": "Lasaco Assurance PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/lasaco-assurance-plc.svg"
+  },
+  {
+    "symbol": "LEARNAFRCA",
+    "name": "Learn Africa PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/learn-africa-plc.svg"
+  },
+  {
+    "symbol": "LEGENDINT",
+    "name": "LEGEND INTERNET PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/legend-internet-plc.svg"
+  },
+  {
+    "symbol": "LINKASSURE",
+    "name": "Linkage Assurance PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/linkage-assurance-plc.svg"
+  },
+  {
+    "symbol": "LIVESTOCK",
+    "name": "Livestock Feeds PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/livestock-feeds-plc.svg"
+  },
+  {
+    "symbol": "LIVINGTRUST",
+    "name": "LivingTrust Mortgage Bank PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/livingtrust-mortgage-bank-plc-bls.svg"
+  },
+  {
+    "symbol": "MANSARD",
+    "name": "AXA Mansard Insurance PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/axamansard-insurance-plc.svg"
+  },
+  {
+    "symbol": "MAYBAKER",
+    "name": "May & Baker Nigeria Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/may-and-baker-plc-nigeria.svg"
+  },
+  {
+    "symbol": "MBENEFIT",
+    "name": "Mutual Benefits Assurance PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/mutual-benefits-assurance-plc.svg"
+  },
+  {
+    "symbol": "MCNICHOLS",
+    "name": "McNichols Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/mcnichols-plc.svg"
+  },
+  {
+    "symbol": "MECURE",
+    "name": "Mecure Industries PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/mecure-industries-plc.svg"
+  },
+  {
+    "symbol": "MEYER",
+    "name": "Meyer PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/meyer-plc.svg"
+  },
+  {
+    "symbol": "MORISON",
+    "name": "Morison Industries PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/morison-industries-plc.svg"
+  },
+  {
+    "symbol": "MTNN",
+    "name": "MTN Nigeria Communications Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/mtn-nigeria-communications-plc.svg"
+  },
+  {
+    "symbol": "MULTITREX",
+    "name": "Multi-Trex Integrated Foods Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/multi-trex-integrated-foods-plc.svg"
+  },
+  {
+    "symbol": "MULTIVERSE",
+    "name": "Multiverse Mining & Exploration PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/multiverse-mining-and-exploration-plc.svg"
+  },
+  {
+    "symbol": "NAHCO",
+    "name": "Nigerian Aviation Handling Co. Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/nigerian-aviation-handling-co-plc.svg"
+  },
+  {
+    "symbol": "NASCON",
+    "name": "NASCON Allied Industries Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/nascon-allied-industries-plc.svg"
+  },
+  {
+    "symbol": "NB",
+    "name": "Nigerian Breweries PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/nigerian-breweries-plc.svg"
+  },
+  {
+    "symbol": "NCR",
+    "name": "NCR (Nigeria) PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/ncr-plc-nigeria.svg"
+  },
+  {
+    "symbol": "NEIMETH",
+    "name": "Neimeth International Pharmaceuticals PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/neimeth-international-pharmaceuticals-plc.svg"
+  },
+  {
+    "symbol": "NEM",
+    "name": "NEM Insurance Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/nem-insurance-co-plc.svg"
+  },
+  {
+    "symbol": "NESTLE",
+    "name": "Nestle Nigeria Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/nestle.svg"
+  },
+  {
+    "symbol": "NGXGROUP",
+    "name": "Nigerian Exchange Group PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/nigerian-exchange.svg"
+  },
+  {
+    "symbol": "NIGERINS",
+    "name": "Niger Insurance Co. Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/niger-insurance-plc.svg"
+  },
+  {
+    "symbol": "NNFM",
+    "name": "Northern Nigeria Flour Mills Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/northern-nigeria-flour-mills-plc.svg"
+  },
+  {
+    "symbol": "NPFMCRFBK",
+    "name": "NPF Microfinance Bank PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/npf-microfinance-bank-plc.svg"
+  },
+  {
+    "symbol": "NSLTECH",
+    "name": "Secure Electronic Technology Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/secure-electronic-technology-plc.svg"
+  },
+  {
+    "symbol": "OANDO",
+    "name": "Oando PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/oando-plc.svg"
+  },
+  {
+    "symbol": "OKOMUOIL",
+    "name": "Okomu Oil Palm Co. Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/okomu-oil-palm-co-plc.svg"
+  },
+  {
+    "symbol": "OMATEK",
+    "name": "Omatek Ventures PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/omatek-ventures-ltd.svg"
+  },
+  {
+    "symbol": "PHARMDEKO",
+    "name": "Pharma-Deko PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/pharma-deko-plc.svg"
+  },
+  {
+    "symbol": "PREMPAINTS",
+    "name": "Premier Paints PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/premier-paints-plc.svg"
+  },
+  {
+    "symbol": "PRESCO",
+    "name": "Presco PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/presco-plc.svg"
+  },
+  {
+    "symbol": "PRESTIGE",
+    "name": "Prestige Assurance Co. Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/prestige-assurance-co-plc.svg"
+  },
+  {
+    "symbol": "PZ",
+    "name": "PZ Cussons Nigeria PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/pz-cussons-nigeria-plc.svg"
+  },
+  {
+    "symbol": "RAKUNITY",
+    "name": "Rak Unity Petroleum Co. Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/rak-unity-petroleum-co-plc.svg"
+  },
+  {
+    "symbol": "REDSTAREX",
+    "name": "Red Star Express PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/red-star-express-plc.svg"
+  },
+  {
+    "symbol": "REGALINS",
+    "name": "Regency Alliance Insurance PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/regency-alliance-insurance-plc.svg"
+  },
+  {
+    "symbol": "RESORTSAL",
+    "name": "Resort Savings & Loans Plc",
+    "market": "NSENG"
+  },
+  {
+    "symbol": "RONCHESS",
+    "name": "Ronchess Global Resources PLC",
+    "market": "NSENG"
+  },
+  {
+    "symbol": "ROYALEX",
+    "name": "Royal Exchange PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/royal-exchange-plc.svg"
+  },
+  {
+    "symbol": "RTBRISCOE",
+    "name": "RT Briscoe Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/r-t-briscoe-plc.svg"
+  },
+  {
+    "symbol": "SCOA",
+    "name": "SCOA Nigeria PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/scoa-nigeria-plc.svg"
+  },
+  {
+    "symbol": "SEPLAT",
+    "name": "Seplat Energy PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/seplat-petroleum-development-co-plc.svg"
+  },
+  {
+    "symbol": "SFSREIT",
+    "name": "SFS Real Estate Investment Trust",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/sfs-real-estate-investment-trust.svg"
+  },
+  {
+    "symbol": "SKYAVN",
+    "name": "Skyway Aviation Handling Co. Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/skyway-aviation-handling-company-plc.svg"
+  },
+  {
+    "symbol": "SOVRENINS",
+    "name": "Sovereign Trust Insurance PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/sovereign-trust-insurance-plc.svg"
+  },
+  {
+    "symbol": "STACO",
+    "name": "Staco Insurance PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/staco-insurance-plc.svg"
+  },
+  {
+    "symbol": "STANBIC",
+    "name": "Stanbic IBTC Holdings Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/stanbic-ibtc-plc.svg"
+  },
+  {
+    "symbol": "STERLINGNG",
+    "name": "Sterling Financial Holdings Company Limited",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/sterling-financial-company-plc.svg"
+  },
+  {
+    "symbol": "SUNUASSUR",
+    "name": "SUNU Assurances Nigeria Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/sunu-assurances-nigeria-plc.svg"
+  },
+  {
+    "symbol": "TANTALIZER",
+    "name": "Tantalizers PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/tantalizers-plc.svg"
+  },
+  {
+    "symbol": "THOMASWY",
+    "name": "Thomas Wyatt Nigeria Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/thomas-wyatt-plc-nigeria.svg"
+  },
+  {
+    "symbol": "TIP",
+    "name": "Initiates PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/the-initiates-plc.svg"
+  },
+  {
+    "symbol": "TOTAL",
+    "name": "TotalEnergies Marketing Nigeria Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/total.svg"
+  },
+  {
+    "symbol": "TRANSCOHOT",
+    "name": "Transcorp Hotels PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/transcorp-hotels-plc.svg"
+  },
+  {
+    "symbol": "TRANSCORP",
+    "name": "Transnational Corporation of Nigeria PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/transnational-of-nigeria-plc.svg"
+  },
+  {
+    "symbol": "TRANSEXPR",
+    "name": "Trans Nationwide Express Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/trans-nationwide-express-plc.svg"
+  },
+  {
+    "symbol": "TRANSPOWER",
+    "name": "Transcorp Power PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/transcorp-power-plc.svg"
+  },
+  {
+    "symbol": "TRIPPLEG",
+    "name": "Tripple Gee & Company Plc.",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/tripple-gee-and-company-plc.svg"
+  },
+  {
+    "symbol": "UACN",
+    "name": "UAC of Nigeria PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/uac-plc-nigeria.svg"
+  },
+  {
+    "symbol": "UBA",
+    "name": "United Bank for Africa PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/united-bank-for-africa-plc-nigeria.svg"
+  },
+  {
+    "symbol": "UCAP",
+    "name": "United Capital Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/united-capital-plc.svg"
+  },
+  {
+    "symbol": "UHOMREIT",
+    "name": "UH Real Estate Investment Trust",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/union-homes-real-estate-investment-trust.svg"
+  },
+  {
+    "symbol": "UNILEVER",
+    "name": "Unilever Nigeria PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/unilever.svg"
+  },
+  {
+    "symbol": "UNIONDICON",
+    "name": "Union Dicon Salt Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/union-dicon-salt.svg"
+  },
+  {
+    "symbol": "UNITYBNK",
+    "name": "Unity Bank PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/unity-bank-plc.svg"
+  },
+  {
+    "symbol": "UNIVINSURE",
+    "name": "Universal Insurance Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/universal-insurance-co-plc.svg"
+  },
+  {
+    "symbol": "UPDC",
+    "name": "UPDC Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/updc-plc-bls.svg"
+  },
+  {
+    "symbol": "UPDCREIT",
+    "name": "UPDC Real Estate Investment Trust",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/updc-plc-bls.svg"
+  },
+  {
+    "symbol": "UPL",
+    "name": "University Press PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/university-press-plc.svg"
+  },
+  {
+    "symbol": "VANLEER",
+    "name": "Greif Nigeria PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/greif-nigeria-plc.svg"
+  },
+  {
+    "symbol": "VERITASKAP",
+    "name": "Veritas Kapital Assurance Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/unitykapital-assurance-plc.svg"
+  },
+  {
+    "symbol": "VFDGROUP",
+    "name": "VFD Group PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/vfd-plc.svg"
+  },
+  {
+    "symbol": "VITAFOAM",
+    "name": "Vitafoam Nigeria Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/vitafoam-plc-nigeria.svg"
+  },
+  {
+    "symbol": "WAPCO",
+    "name": "Lafarge Africa Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/lafarge-cement-wapco-plc.svg"
+  },
+  {
+    "symbol": "WAPIC",
+    "name": "Coronation Insurance Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/wapic-insurance-plc.svg"
+  },
+  {
+    "symbol": "WEMABANK",
+    "name": "Wema Bank PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/wema-bank-plc.svg"
+  },
+  {
+    "symbol": "ZENITHBANK",
+    "name": "Zenith Bank PLC",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/zenith-bank-plc.svg"
+  },
+  {
+    "symbol": "ZICHIS",
+    "name": "Zichis Agro-Allied Industries Plc",
+    "market": "NSENG",
+    "image": "https://s3-symbol-logo.tradingview.com/zichis-agro-allied-industries-plc.svg"
+  }
+]

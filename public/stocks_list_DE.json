@@ -1,0 +1,2520 @@
+[
+  {
+    "symbol": "123F.DE",
+    "name": "123FAHRSCHULE SE",
+    "market": ""
+  },
+  {
+    "symbol": "14D.DE",
+    "name": "TOKENTUS INVESTMENT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/covestro.svg",
+    "symbol": "1COV.DE",
+    "name": "COVESTRO AG O.N.",
+    "market": ""
+  },
+  {
+    "symbol": "1J1.DE",
+    "name": "MINAS METALS LTD",
+    "market": ""
+  },
+  {
+    "symbol": "1SXP.DE",
+    "name": "SCHOTT PHARMA AG & CO. KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/1-1-ag-inh-o-n.svg",
+    "symbol": "1U1.DE",
+    "name": "1&1 AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cannovum-ag-84.svg",
+    "symbol": "27N0.DE",
+    "name": "CANNOVUM CANNABIS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/2g-energy-ag.svg",
+    "symbol": "2GB.DE",
+    "name": "2G ENERGY AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/handr-gmbh-and-co-kgaa.svg",
+    "symbol": "2HRA.DE",
+    "name": "H&R GMBH & CO. KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/2invest-ag.svg",
+    "symbol": "2INV.DE",
+    "name": "2INVEST AG",
+    "market": ""
+  },
+  {
+    "symbol": "3KC.DE",
+    "name": "FEDERATED HERMES INC",
+    "market": ""
+  },
+  {
+    "symbol": "3PS.DE",
+    "name": "PASON SYSTEMS INC",
+    "market": ""
+  },
+  {
+    "symbol": "3SQ1.DE",
+    "name": "A.H.T. SYNGAS TECH. EO 1",
+    "market": ""
+  },
+  {
+    "symbol": "3TY.DE",
+    "name": "TITAN MACHINERY INC",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/daldrup-and-soehne-ag.svg",
+    "symbol": "4DS.DE",
+    "name": "DALDRUP & SOEHNE AG",
+    "market": ""
+  },
+  {
+    "symbol": "4FB.DE",
+    "name": "FIRST INTERSTATE BANCSYSTEM INC",
+    "market": ""
+  },
+  {
+    "symbol": "4PC.DE",
+    "name": "PERIMETER MEDICAL IMAGING AI INC",
+    "market": ""
+  },
+  {
+    "symbol": "4QI.DE",
+    "name": "XTEP INTERNATIONAL HOLDINGS LTD",
+    "market": ""
+  },
+  {
+    "symbol": "56P.DE",
+    "name": "NG ENERGY INTERNATIONAL CORP",
+    "market": ""
+  },
+  {
+    "symbol": "75S.DE",
+    "name": "SDM SE",
+    "market": ""
+  },
+  {
+    "symbol": "7V0.DE",
+    "name": "DARWIN AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/traton-se-inh-o-n.svg",
+    "symbol": "8TRA.DE",
+    "name": "TRATON SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mph-health-care-ag.svg",
+    "symbol": "93M1.DE",
+    "name": "MPH HEALTH CARE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/all-for-one-se.svg",
+    "symbol": "A1OS.DE",
+    "name": "ALL FOR ONE GROUP SE",
+    "market": ""
+  },
+  {
+    "symbol": "A35.DE",
+    "name": "FEDERAL AGRICULTURAL MORTGAGE CORP",
+    "market": ""
+  },
+  {
+    "symbol": "A3B.DE",
+    "name": "ACCO BRANDS CORP",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/artec-technologies-ag.svg",
+    "symbol": "A6T.DE",
+    "name": "ARTEC TECHNOLOGIES AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/finlab-ag.svg",
+    "symbol": "A7A.DE",
+    "name": "HELIAD AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/falck-renewables.svg",
+    "symbol": "AA4.DE",
+    "name": "FERRONORDIC AB",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/amadeus-fire-ag.svg",
+    "symbol": "AAD.DE",
+    "name": "AMADEUS FIRE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aumann.svg",
+    "symbol": "AAG.DE",
+    "name": "AUMANN AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aap-implantate.svg",
+    "symbol": "AAQ1.DE",
+    "name": "AAP IMPLANTATE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/abo-wind-ag.svg",
+    "symbol": "AB9.DE",
+    "name": "ABO WIND AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/clearvise-ag.svg",
+    "symbol": "ABO.DE",
+    "name": "CLEARVISE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/advanced-blockchain-ag.svg",
+    "symbol": "ABX.DE",
+    "name": "ADVANCED BLOCKCHAIN AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alzchem-ag.svg",
+    "symbol": "ACT.DE",
+    "name": "ALZCHEM GROUP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/as-creation-tapeten-ag.svg",
+    "symbol": "ACWN.DE",
+    "name": "A.S. CREATION TAPETEN AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bet-at-homecom-ag.svg",
+    "symbol": "ACX.DE",
+    "name": "BET-AT-HOME.COM AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bitcoin-se.svg",
+    "symbol": "ADE.DE",
+    "name": "BITCOIN GROUP SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/adler-sa.svg",
+    "symbol": "ADJ.DE",
+    "name": "ADLER GROUP S.A",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/adesso-ag.svg",
+    "symbol": "ADN1.DE",
+    "name": "ADESSO SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/adidas.svg",
+    "symbol": "ADS.DE",
+    "name": "ADIDAS AG NA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/adva-optical-networking-se.svg",
+    "symbol": "ADV.DE",
+    "name": "ADTRAN NETWORKS SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/allgeier-se.svg",
+    "symbol": "AEIN.DE",
+    "name": "ALLGEIER SE",
+    "market": ""
+  },
+  {
+    "symbol": "AFS.DE",
+    "name": "AFFILIATED MANAGERS GROUP INC",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/carl-zeiss-meditec.svg",
+    "symbol": "AFX.DE",
+    "name": "CARL ZEISS MEDITEC AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/auto1-group-se-inh-o-n.svg",
+    "symbol": "AG1.DE",
+    "name": "AUTO1 GRP",
+    "market": ""
+  },
+  {
+    "symbol": "AGX.DE",
+    "name": "SILVER X MINING CORP",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/doccheck-ag.svg",
+    "symbol": "AJ91.DE",
+    "name": "DOCCHECK AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/albis-leasing-ag.svg",
+    "symbol": "ALG.DE",
+    "name": "ALBIS LEASING AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/allianz.svg",
+    "symbol": "ALV.DE",
+    "name": "ALLIANZ SE NA O.N.",
+    "market": ""
+  },
+  {
+    "symbol": "AMA.DE",
+    "name": "ALTECH ADVANCED MATERIALS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/medondo-ag.svg",
+    "symbol": "AMI.DE",
+    "name": "MEDONDO HLDG AG INH O.N.",
+    "market": ""
+  },
+  {
+    "symbol": "ANP.DE",
+    "name": "APOGEE ENTERPRISES INC",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/atoss-software-ag.svg",
+    "symbol": "AOF.DE",
+    "name": "ATOSS SOFTWARE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ad-pepper-media-intl-nv.svg",
+    "symbol": "APM.DE",
+    "name": "AD PEPPER MEDIA INTL NV",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/apontis-pharma-ag.svg",
+    "symbol": "APPH.DE",
+    "name": "APONTIS PHARMA AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aroundtown-eo-01.svg",
+    "symbol": "AT1.DE",
+    "name": "AROUNDTOWN SA",
+    "market": ""
+  },
+  {
+    "symbol": "AX1.DE",
+    "name": "SIPAI HEALTH TECHNOLOGY COMPANY., LIMITED.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/blue-cap-ag.svg",
+    "symbol": "B7E.DE",
+    "name": "BLUE CAP AG",
+    "market": ""
+  },
+  {
+    "symbol": "B9B.DE",
+    "name": "BHB BRAUHLD.BAY.MIT.AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/basf.svg",
+    "symbol": "BAS.DE",
+    "name": "BASF SE NA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bayer.svg",
+    "symbol": "BAYN.DE",
+    "name": "BAYER AG NA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bechtle-ag-inhaber-aktien-o-n.svg",
+    "symbol": "BC8.DE",
+    "name": "BECHTLE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bertrandt-ag.svg",
+    "symbol": "BDT.DE",
+    "name": "BERTRANDT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/beiersdorf.svg",
+    "symbol": "BEI.DE",
+    "name": "BEIERSDORF AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/berentzen-gruppe-ag.svg",
+    "symbol": "BEZ.DE",
+    "name": "BERENTZEN-GRUPPE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/befesa-s-a-ord-o-n.svg",
+    "symbol": "BFSA.DE",
+    "name": "BEFESA SA",
+    "market": ""
+  },
+  {
+    "symbol": "BHI.DE",
+    "name": "BLACK HILLS CORP",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bio-gate-ag.svg",
+    "symbol": "BIG1.DE",
+    "name": "BIO-GATE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bijou-brigitte-modi-access.svg",
+    "symbol": "BIJ.DE",
+    "name": "BIJOU BRIGITTE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bike24-ag.svg",
+    "symbol": "BIKE.DE",
+    "name": "BIKE24 HOLDING AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/biotest-ag-st-o-n.svg",
+    "symbol": "BIO.DE",
+    "name": "BIOTEST AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/brockhaus-technologies-ag.svg",
+    "symbol": "BKHT.DE",
+    "name": "BROCKHAUS TECHNOLOGIES AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bmw.svg",
+    "symbol": "BMW.DE",
+    "name": "BAY.MOTOREN WERKE AG ST",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/brain-biotech-ag.svg",
+    "symbol": "BNN.DE",
+    "name": "BRAIN BIOTECH AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/brenntag-se-na-o-n.svg",
+    "symbol": "BNR.DE",
+    "name": "BRENNTAG SE",
+    "market": ""
+  },
+  {
+    "symbol": "BOG.DE",
+    "name": "STOCK3 AG NA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hugo-boss.svg",
+    "symbol": "BOSS.DE",
+    "name": "HUGO BOSS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dic-asset-ag.svg",
+    "symbol": "BRNK.DE",
+    "name": "BRANICKS GROUP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/basler-ag.svg",
+    "symbol": "BSL.DE",
+    "name": "BASLER AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bastei-lubbe-ag.svg",
+    "symbol": "BST.DE",
+    "name": "BASTEI LUEBBE AG",
+    "market": ""
+  },
+  {
+    "symbol": "BT3.DE",
+    "name": "LINEAGE CELL THERAPEUTICS INC",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/borussia-dortmund.svg",
+    "symbol": "BVB.DE",
+    "name": "BORUSSIA DORTMUND KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/baader-bank-ag.svg",
+    "symbol": "BWB.DE",
+    "name": "BAADER BANK AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/baywa-bayerische-warenvermit.svg",
+    "symbol": "BYW.DE",
+    "name": "BAYWA AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mvise-ag.svg",
+    "symbol": "C1V.DE",
+    "name": "MVISE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cherry.svg",
+    "symbol": "C3RY.DE",
+    "name": "CHERRY SE",
+    "market": ""
+  },
+  {
+    "symbol": "CA1.DE",
+    "name": "CIRCUS SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/commerzbank.svg",
+    "symbol": "CBK.DE",
+    "name": "COMMERZBANK AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/corestate-capital-sa.svg",
+    "symbol": "CCAP.DE",
+    "name": "CORESTATE CAPITAL HOLDING S.A.",
+    "market": ""
+  },
+  {
+    "symbol": "CDZ0.DE",
+    "name": "MHP HOTEL AG INH O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/friwo-ag.svg",
+    "symbol": "CEA.DE",
+    "name": "FRIWO AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ceconomy-ag.svg",
+    "symbol": "CEC.DE",
+    "name": "CECONOMY AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ceotronics-ag.svg",
+    "symbol": "CEK.DE",
+    "name": "CEOTRONICS AG",
+    "market": ""
+  },
+  {
+    "symbol": "CFC.DE",
+    "name": "UET UNITED ELECTRONIC TECHNOLOGY AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mediqon-ag.svg",
+    "symbol": "CHG.DE",
+    "name": "CHAPTERS GROUP AG",
+    "market": ""
+  },
+  {
+    "symbol": "CHO.DE",
+    "name": "CONDUIT HOLDINGS LIMITED",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cliq-digital-ag.svg",
+    "symbol": "CLIQ.DE",
+    "name": "CLIQ DIGITAL AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cancom-se-o-n.svg",
+    "symbol": "COK.DE",
+    "name": "CANCOM SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/continental-ag.svg",
+    "symbol": "CON.DE",
+    "name": "CONTINENTAL AG O.N.",
+    "market": ""
+  },
+  {
+    "symbol": "CPX.DE",
+    "name": "CAPSENSIXX AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cr-capital-ag.svg",
+    "symbol": "CRZK.DE",
+    "name": "CR ENERGY AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cenit-ag.svg",
+    "symbol": "CSH.DE",
+    "name": "CENIT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cewe-stiftung-and-co-kgaa.svg",
+    "symbol": "CWC.DE",
+    "name": "CEWE STIFTUNG & CO. KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sbf-ag.svg",
+    "symbol": "CY1K.DE",
+    "name": "SBF AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cyan-ag.svg",
+    "symbol": "CYR.DE",
+    "name": "CYAN AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/datagroup-se.svg",
+    "symbol": "D6H.DE",
+    "name": "DATAGROUP SE",
+    "market": ""
+  },
+  {
+    "symbol": "D77.DE",
+    "name": "NEON EQUITY AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/data-modul-ag.svg",
+    "symbol": "DAM.DE",
+    "name": "DATA MODUL AG PROD.U.V.V.E.S",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/datron-ag.svg",
+    "symbol": "DAR.DE",
+    "name": "DATRON AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/deutsche-boerse-na-o-n.svg",
+    "symbol": "DB1.DE",
+    "name": "DEUTSCHE BOERSE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/deutsche-beteiligungs-ag.svg",
+    "symbol": "DBAN.DE",
+    "name": "DEUTSCHE BETEILIGUNGS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/deutsche-bank-ag.svg",
+    "symbol": "DBK.DE",
+    "name": "DEUTSCHE BANK AG NA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/defama-deutsche-fachmarkt-ag.svg",
+    "symbol": "DEF.DE",
+    "name": "DEFAMA DEUTSCHE FACHMARKT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/deutsche-euroshop.svg",
+    "symbol": "DEQ.DE",
+    "name": "DEUTSCHE EUROSHOP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/delticom-ag.svg",
+    "symbol": "DEX.DE",
+    "name": "DELTICOM AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/deutz-ag.svg",
+    "symbol": "DEZ.DE",
+    "name": "DEUTZ AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/df-deutsche-forfait-ag.svg",
+    "symbol": "DFTK.DE",
+    "name": "DF DEUTSCHE FORFAIT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/deutsche-grundstueckautionen-ag.svg",
+    "symbol": "DGR.DE",
+    "name": "DEUTSCHE GRUNDSTUECKAUTIONEN AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/delivery-hero.svg",
+    "symbol": "DHER.DE",
+    "name": "DELIVERY HERO SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/deutsche-post-ag.svg",
+    "symbol": "DHL.DE",
+    "name": "DEUTSCHE POST AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dierig-hldg-ag.svg",
+    "symbol": "DIE.DE",
+    "name": "DIERIG HLDG AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/delignit-ag.svg",
+    "symbol": "DLX.DE",
+    "name": "DELIGNIT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dermapharm-hldg-inh-o-n.svg",
+    "symbol": "DMP.DE",
+    "name": "DERMAPHARM HLDG SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/demire-dt-mts-real-estate-ag.svg",
+    "symbol": "DMRE.DE",
+    "name": "DEMIRE DT MITTELSTAND REAL ESTATE A",
+    "market": ""
+  },
+  {
+    "symbol": "DOU.DE",
+    "name": "DOUGLAS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/deutsche-rohstoff-ag.svg",
+    "symbol": "DR0.DE",
+    "name": "DEUTSCHE ROHSTOFF AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/draegerwerk-st-a-o-n.svg",
+    "symbol": "DRW8.DE",
+    "name": "DRAEGERWERK AG & CO KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bands-banksysteme-ag.svg",
+    "symbol": "DTD2.DE",
+    "name": "B&S BANKSYSTEME AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/deutsche-telekom.svg",
+    "symbol": "DTE.DE",
+    "name": "DT.TELEKOM AG NA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/daimler-truck-hldg-jge-na.svg",
+    "symbol": "DTG.DE",
+    "name": "DAIMLER TRUCK HLDG JGE NA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/duerr-ag-o-n.svg",
+    "symbol": "DUE.DE",
+    "name": "DUERR AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/deutsche-wohnen-se-inh.svg",
+    "symbol": "DWNI.DE",
+    "name": "DEUTSCHE WOHNEN SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dws-group.svg",
+    "symbol": "DWS.DE",
+    "name": "DWS GROUP SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ecotel-communication-ag.svg",
+    "symbol": "E4C.DE",
+    "name": "ECOTEL COMMUNICATION AG",
+    "market": ""
+  },
+  {
+    "symbol": "E8X.DE",
+    "name": "ELEXXION AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/erlebnis-akademie-ag.svg",
+    "symbol": "EAD.DE",
+    "name": "ERLEBNIS AKADEMIE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/enbw-energie-bad-wue-on.svg",
+    "symbol": "EBK.DE",
+    "name": "ENBW ENERGIE BADEN-WUERTTEMBERG AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mountain-alliance-ag.svg",
+    "symbol": "ECF.DE",
+    "name": "MOUNTAIN ALLIANCE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ludwig-beck-am-rathauseck.svg",
+    "symbol": "ECK.DE",
+    "name": "LUDWIG BECK AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/edag-engineering-ag.svg",
+    "symbol": "ED4.DE",
+    "name": "EDAG ENGINEERING GROUP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/edel-se-and-co-kgaa.svg",
+    "symbol": "EDL.DE",
+    "name": "EDEL SE & CO. KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/deutsche-effectenandwechsel-betell-ag.svg",
+    "symbol": "EFF.DE",
+    "name": "DEUTSCHE EFFECTEN&WECHSEL-BETELL AG",
+    "market": ""
+  },
+  {
+    "symbol": "EFIT.DE",
+    "name": "EASYMOTIONSKIN TEC SF-,1",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/energiekontor-ag.svg",
+    "symbol": "EKT.DE",
+    "name": "ENERGIEKONTOR AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/elumeo-se.svg",
+    "symbol": "ELB.DE",
+    "name": "ELUMEO SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/elmos-semiconductor-se.svg",
+    "symbol": "ELG.DE",
+    "name": "ELMOS SEMICONDUCTOR SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pferdewettende-ag.svg",
+    "symbol": "EMH.DE",
+    "name": "PFERDEWETTEN.DE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/siemens-energy.svg",
+    "symbol": "ENR.DE",
+    "name": "SIEMENS ENERGY AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/e-on.svg",
+    "symbol": "EOAN.DE",
+    "name": "E.ON SE NA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/erwe-immobilien-ag.svg",
+    "symbol": "ERWE.DE",
+    "name": "ERWE IMMOB. AG INH O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/envitec-biogas-ag.svg",
+    "symbol": "ETG.DE",
+    "name": "ENVITEC BIOGAS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/eckert-and-ziegler-strahlen-un.svg",
+    "symbol": "EUZ.DE",
+    "name": "ECKERT & ZIEGLER SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cts-eventim-kgaa.svg",
+    "symbol": "EVD.DE",
+    "name": "CTS EVENTIM AG & CO. KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/evonik-industries-na-o-n.svg",
+    "symbol": "EVK.DE",
+    "name": "EVONIK INDUSTRIES AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/evotec.svg",
+    "symbol": "EVT.DE",
+    "name": "EVOTEC SE INH O.N.",
+    "market": ""
+  },
+  {
+    "symbol": "EXJ.DE",
+    "name": "READCREST CAPITAL AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/exasol-ag.svg",
+    "symbol": "EXL.DE",
+    "name": "EXASOL AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sfc-energy-ag-br.svg",
+    "symbol": "F3C.DE",
+    "name": "SFC ENERGY AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fabasoft-ag.svg",
+    "symbol": "FAA.DE",
+    "name": "FABASOFT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fcr-immobilien-ag.svg",
+    "symbol": "FC9.DE",
+    "name": "FCR IMMOBILIEN AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fortec-elektronik-ag.svg",
+    "symbol": "FEV.DE",
+    "name": "FORTEC ELEKTRONIK AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fast-finance24-hldg-ag.svg",
+    "symbol": "FF24.DE",
+    "name": "FAST FINANCE24 HLDG AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fielmann-ag-o-n.svg",
+    "symbol": "FIE.DE",
+    "name": "FIELMANN GROUP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fresenius-medical-care.svg",
+    "symbol": "FME.DE",
+    "name": "FRESEN.MED.CARE KGAA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/freenet-ag-na-o-n.svg",
+    "symbol": "FNTN.DE",
+    "name": "FREENET AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fuchs-petrolub-na-st-o-n.svg",
+    "symbol": "FPE.DE",
+    "name": "FUCHS SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/frequentis-ag.svg",
+    "symbol": "FQT.DE",
+    "name": "FREQUENTIS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fraport.svg",
+    "symbol": "FRA.DE",
+    "name": "FRAPORT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fresenius-medical-care.svg",
+    "symbol": "FRE.DE",
+    "name": "FRESENIUS SE+CO.KGAA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/foris-ag.svg",
+    "symbol": "FRS.DE",
+    "name": "FORIS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/flatexdegiro.svg",
+    "symbol": "FTK.DE",
+    "name": "FLATEXDEGIRO AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/formycon-ag.svg",
+    "symbol": "FYB.DE",
+    "name": "FORMYCON AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gea-group-ag.svg",
+    "symbol": "G1A.DE",
+    "name": "GEA GROUP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/scout24-se-na-o-n.svg",
+    "symbol": "G24.DE",
+    "name": "SCOUT24 SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sgt-german-private-equity-gmbh.svg",
+    "symbol": "GAI.DE",
+    "name": "SGT GERMAN PRIVATE EQTY GMBH&CO.KGA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bilfinger-se.svg",
+    "symbol": "GBF.DE",
+    "name": "BILFINGER SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/global-fashion-sa.svg",
+    "symbol": "GFG.DE",
+    "name": "GLOBAL FASHION GROUP SA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gft-technologies-se.svg",
+    "symbol": "GFT.DE",
+    "name": "GFT TECHNOLOGIES SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dmg-mori-ag-o-n.svg",
+    "symbol": "GIL.DE",
+    "name": "DMG MORI AKTIENGESELLSCHAFT",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/grenke.svg",
+    "symbol": "GLJ.DE",
+    "name": "GRENKE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/geratherm-medical-ag.svg",
+    "symbol": "GME.DE",
+    "name": "GERATHERM MEDICAL AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/grammer-ag.svg",
+    "symbol": "GMM.DE",
+    "name": "GRAMMER AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gesco-ag.svg",
+    "symbol": "GSC1.DE",
+    "name": "GESCO SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tonkens-agrar-ag.svg",
+    "symbol": "GTK.DE",
+    "name": "TONKENS AGRAR AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gateway-real-estate-ag.svg",
+    "symbol": "GTY.DE",
+    "name": "GATEWAY REAL ESTATE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gerresheimer-ag.svg",
+    "symbol": "GXI.DE",
+    "name": "GERRESHEIMER AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/grand-city-propert-eo-10.svg",
+    "symbol": "GYC.DE",
+    "name": "GRAND CITY PROPERTIES S.A.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/exceet-sa.svg",
+    "symbol": "H2A.DE",
+    "name": "H2APEX GROUP SCA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/enapter-ag.svg",
+    "symbol": "H2O.DE",
+    "name": "ENAPTER AG INH O.N.",
+    "market": ""
+  },
+  {
+    "symbol": "H68.DE",
+    "name": "RIGSAVE SPA OR",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hwa-ag.svg",
+    "symbol": "H9W.DE",
+    "name": "HWA AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hensoldt-ag.svg",
+    "symbol": "HAG.DE",
+    "name": "HENSOLDT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hawesko-se.svg",
+    "symbol": "HAW.DE",
+    "name": "HAWESKO HOLDING SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hornbach-hold.svg",
+    "symbol": "HBH.DE",
+    "name": "HORNBACH HLDG AG & CO KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/heidelberger-druckmaschinen.svg",
+    "symbol": "HDD.DE",
+    "name": "HEIDELBERGER DRUCKMASCHINEN AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/heidelbergcement-i.svg",
+    "symbol": "HEI.DE",
+    "name": "HEIDELBERG MATERIALS",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/henkel.svg",
+    "symbol": "HEN.DE",
+    "name": "HENKEL AG&CO. KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hellofresh.svg",
+    "symbol": "HFG.DE",
+    "name": "HELLOFRESH SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hgears-ag.svg",
+    "symbol": "HGEA.DE",
+    "name": "HGEARS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cantourage-se.svg",
+    "symbol": "HIGH.DE",
+    "name": "CANTOURAGE GROUP SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hapag-lloyd-ag.svg",
+    "symbol": "HLAG.DE",
+    "name": "HAPAG-LLOYD AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hella-gmbh.svg",
+    "symbol": "HLE.DE",
+    "name": "HELLA GMBH & CO. KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/highlight-communications-br.svg",
+    "symbol": "HLG.DE",
+    "name": "HIGHLIGHT COMMUNICATIONS AG",
+    "market": ""
+  },
+  {
+    "symbol": "HMU.DE",
+    "name": "HMS BERGBAU AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dr-hoenle-ag.svg",
+    "symbol": "HNL.DE",
+    "name": "DR HOENLE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hannover-rueck.svg",
+    "symbol": "HNR1.DE",
+    "name": "HANNOVER RUECK SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hochtief.svg",
+    "symbol": "HOT.DE",
+    "name": "HOCHTIEF AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ringmetall-se.svg",
+    "symbol": "HP3A.DE",
+    "name": "RINGMETALL SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/heidelberg-pharma-ag.svg",
+    "symbol": "HPHA.DE",
+    "name": "HEIDELBERG PHARMA AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/7c-solarparken-ag.svg",
+    "symbol": "HRPK.DE",
+    "name": "7C SOLARPARKEN AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hometogo-se.svg",
+    "symbol": "HTG.DE",
+    "name": "HOMETOGO SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ernst-russ-ag.svg",
+    "symbol": "HXCK.DE",
+    "name": "ERNST RUSS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hypoport-se-na-o-n.svg",
+    "symbol": "HYQ.DE",
+    "name": "HYPOPORT SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ibu-tec-advanced-materials-ag.svg",
+    "symbol": "IBU.DE",
+    "name": "IBU TEC ADVANCED MATERIALS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/incity-immobilien-ag.svg",
+    "symbol": "IC8.DE",
+    "name": "INCITY IMMOBILIEN AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/infineon-technologies.svg",
+    "symbol": "IFX.DE",
+    "name": "INFINEON TECH.AG NA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/medios-ag.svg",
+    "symbol": "ILM1.DE",
+    "name": "MEDIOS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/indus-ag.svg",
+    "symbol": "INH.DE",
+    "name": "INDUS-HOLDING AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/instone-real-estate-ag.svg",
+    "symbol": "INS.DE",
+    "name": "INSTONE REAL ESTATE GROUP SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gbs-software-ag.svg",
+    "symbol": "INW.DE",
+    "name": "GBS SOFTWARE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ionos-se.svg",
+    "symbol": "IOS.DE",
+    "name": "IONOS GROUP SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/intica-systems-ag.svg",
+    "symbol": "IS7.DE",
+    "name": "INTICA SYSTEMS SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/intershop-comm.svg",
+    "symbol": "ISHA.DE",
+    "name": "INTERSHOP COMMUNICATIONS",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/intertainment-ag.svg",
+    "symbol": "ITN.DE",
+    "name": "INTERTAINMENT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kap-ag.svg",
+    "symbol": "IUR.DE",
+    "name": "KAP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ivu-traffic-technologies-ag.svg",
+    "symbol": "IVU.DE",
+    "name": "IVU TRAFFIC TECHNOLOGIES AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/traffic-systems-se.svg",
+    "symbol": "IXX.DE",
+    "name": "INIT INNOVATION IN TRAFFIC SYS SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/jdc-ag.svg",
+    "symbol": "JDC.DE",
+    "name": "JDC GROUP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/jenoptik-ag.svg",
+    "symbol": "JEN.DE",
+    "name": "JENOPTIK AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/jost-werke-ag.svg",
+    "symbol": "JST.DE",
+    "name": "JOST WERKE SE",
+    "market": ""
+  },
+  {
+    "symbol": "JY0.DE",
+    "name": "PARTEC AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/knorr-bremse-ag-inh-o-n.svg",
+    "symbol": "KBX.DE",
+    "name": "KNORR BREMSE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kloeckner-and-co-se.svg",
+    "symbol": "KCO.DE",
+    "name": "KLOECKNER & CO SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kion-group-ag.svg",
+    "symbol": "KGX.DE",
+    "name": "KION GROUP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/krones-ag-o-n.svg",
+    "symbol": "KRN.DE",
+    "name": "KRONES AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ksb-ag-vorzug.svg",
+    "symbol": "KSB.DE",
+    "name": "KSB SE & CO. KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kps-ag.svg",
+    "symbol": "KSC.DE",
+    "name": "KPS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/knaus-tabbert-ag.svg",
+    "symbol": "KTA.DE",
+    "name": "KNAUS TABBERT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kontron-ag.svg",
+    "symbol": "KTN.DE",
+    "name": "KONTRON AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/khd-humboldt-wedag-internati.svg",
+    "symbol": "KWG.DE",
+    "name": "KHD HUMBOLDT WEDAG INTL (DT) AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kws-saat-kgaa-inh-o-n.svg",
+    "symbol": "KWS.DE",
+    "name": "KWS SAAT SE & CO. KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/leg-immobilien-se-na-o-n.svg",
+    "symbol": "LEG.DE",
+    "name": "LEG IMMOBILIEN SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/leifheit-ag.svg",
+    "symbol": "LEI.DE",
+    "name": "LEIFHEIT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lufthansa.svg",
+    "symbol": "LHA.DE",
+    "name": "LUFTHANSA AG VNA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/limes-schlosskliniken-ag.svg",
+    "symbol": "LIK.DE",
+    "name": "LIMES SCHLOSSKLINIKEN AG",
+    "market": ""
+  },
+  {
+    "symbol": "LMIA.DE",
+    "name": "LION E-MOBILITY AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lpkf-laser-and-electronics-se.svg",
+    "symbol": "LPK.DE",
+    "name": "LPKF LASER & ELECTRONICS SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lloyd-fonds-ag.svg",
+    "symbol": "LQAG.DE",
+    "name": "LAIQON AG",
+    "market": ""
+  },
+  {
+    "symbol": "LRND.DE",
+    "name": "LEARND SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ls-telcom-ag.svg",
+    "symbol": "LSX.DE",
+    "name": "LS TELCOM AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lang-and-schwarz-ag.svg",
+    "symbol": "LUS1.DE",
+    "name": "LANG & SCHWARZ WERTPAPIER",
+    "market": ""
+  },
+  {
+    "symbol": "LXN.DE",
+    "name": "LXP INDUSTRIAL TRUST",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lanxess-ag.svg",
+    "symbol": "LXS.DE",
+    "name": "LANXESS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/m1-kliniken-ag.svg",
+    "symbol": "M12.DE",
+    "name": "M1 KLINIKEN AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pyramid-ag.svg",
+    "symbol": "M3BK.DE",
+    "name": "PYRAMID AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mevis-medical-solutions-ag.svg",
+    "symbol": "M3V.DE",
+    "name": "MEVIS MEDICAL SOLUTIONS AG",
+    "market": ""
+  },
+  {
+    "symbol": "M5S.DE",
+    "name": "MARNA BETEIL.AG INH O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nynomic-ag.svg",
+    "symbol": "M7U.DE",
+    "name": "NYNOMIC AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/binect-ag.svg",
+    "symbol": "MA10.DE",
+    "name": "BINECT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/maternus-kliniken.svg",
+    "symbol": "MAK.DE",
+    "name": "MATERNUS KLINIKEN",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mbb-se.svg",
+    "symbol": "MBB.DE",
+    "name": "MBB SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/daimler.svg",
+    "symbol": "MBG.DE",
+    "name": "MERCEDES-BENZ GROUP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/merkur-privatbank-kgaa.svg",
+    "symbol": "MBK.DE",
+    "name": "MERKUR PRIVATBANK KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mobotix-ag.svg",
+    "symbol": "MBQ.DE",
+    "name": "MOBOTIX AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mediclin-ag.svg",
+    "symbol": "MED.DE",
+    "name": "MEDICLIN AG",
+    "market": ""
+  },
+  {
+    "symbol": "MIN.DE",
+    "name": "SYNLOGIC INC",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mueller-die-lila-logistik-se.svg",
+    "symbol": "MLL.DE",
+    "name": "MUELLER-DIE LILA LOGISTIK SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mlp-se.svg",
+    "symbol": "MLP.DE",
+    "name": "MLP SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mpc-capital-ag.svg",
+    "symbol": "MPCK.DE",
+    "name": "MPC MUENCHMEYER PETERSEN CAPITAL",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/merck-kgaa.svg",
+    "symbol": "MRK.DE",
+    "name": "MERCK KGAA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mister-spex-se.svg",
+    "symbol": "MRX.DE",
+    "name": "MISTER SPEX SE",
+    "market": ""
+  },
+  {
+    "symbol": "MS1.DE",
+    "name": "MARLEY SPOON GROUP SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ms-industrie-ag.svg",
+    "symbol": "MSAG.DE",
+    "name": "MS INDUSTRIE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mtu-aero-engines.svg",
+    "symbol": "MTX.DE",
+    "name": "MTU AERO ENGINES AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/muehlbauer-ag.svg",
+    "symbol": "MUB.DE",
+    "name": "MUEHLBAUER HOLDING AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mensch-und-maschon.svg",
+    "symbol": "MUM.DE",
+    "name": "MENSCH & MASCHINE SOFTWARE SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/munichre.svg",
+    "symbol": "MUV2.DE",
+    "name": "MUENCH.RUECKVERS.VNA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mutares-ag.svg",
+    "symbol": "MUX.DE",
+    "name": "MUTARES SE & CO. KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mvv-energie-ag-na-o-n.svg",
+    "symbol": "MVV1.DE",
+    "name": "MVV ENERGIE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mwb-fairtrade-wertpapierhdbk-ag.svg",
+    "symbol": "MWB0.DE",
+    "name": "MWB FAIRTRADE WERTPAPIERHDBK AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/max-automation-se.svg",
+    "symbol": "MXHN.DE",
+    "name": "MAX AUTOMATION SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/masterflex-se.svg",
+    "symbol": "MZX.DE",
+    "name": "MASTERFLEX SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/the-naga-ag.svg",
+    "symbol": "N4G.DE",
+    "name": "THE NAGA GROUP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nagarro.svg",
+    "symbol": "NA9.DE",
+    "name": "NAGARRO SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/northern-data-ag.svg",
+    "symbol": "NB2.DE",
+    "name": "NORTHERN DATA AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nuernberger-beteilig-akt-b.svg",
+    "symbol": "NBG6.DE",
+    "name": "NURNBERGER BETEILIGUNGS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/norcom-information-technolog.svg",
+    "symbol": "NC5A.DE",
+    "name": "NORCOM INFO.TECH. GMBH&CO.KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/thyssenkrupp-nucera.svg",
+    "symbol": "NCH2.DE",
+    "name": "THYSSENKRUPP NUCERA AG & CO. KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aurubis-ag.svg",
+    "symbol": "NDA.DE",
+    "name": "AURUBIS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nordex.svg",
+    "symbol": "NDX1.DE",
+    "name": "NORDEX SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nemetschek-se-on.svg",
+    "symbol": "NEM.DE",
+    "name": "NEMETSCHEK SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/netfonds-ag.svg",
+    "symbol": "NF4.DE",
+    "name": "NETFONDS AG",
+    "market": ""
+  },
+  {
+    "symbol": "NFA.DE",
+    "name": "NATHAN'S FAMOUS INC",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nfon-ag.svg",
+    "symbol": "NFN.DE",
+    "name": "NFON AG",
+    "market": ""
+  },
+  {
+    "symbol": "NHS.DE",
+    "name": "NORTHWEST BANCSHARES INC",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nanorepro-ag.svg",
+    "symbol": "NN6.DE",
+    "name": "NANOREPRO AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/norma-se.svg",
+    "symbol": "NOEJ.DE",
+    "name": "NORMA GROUP SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nabaltec-ag.svg",
+    "symbol": "NTG.DE",
+    "name": "NABALTEC AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/noratis-ag.svg",
+    "symbol": "NUVA.DE",
+    "name": "NORATIS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/novem-sa.svg",
+    "symbol": "NVM.DE",
+    "name": "NOVEM GROUP SA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nexus-ag.svg",
+    "symbol": "NXU.DE",
+    "name": "NEXUS AG",
+    "market": ""
+  },
+  {
+    "symbol": "O4B.DE",
+    "name": "OVB HOLDING AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cpi-property-grp-eo-10.svg",
+    "symbol": "O5G.DE",
+    "name": "CPI PROPERTY GROUP S.A.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/orbis-ag.svg",
+    "symbol": "OBS.DE",
+    "name": "ORBIS SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ohb-se-on.svg",
+    "symbol": "OHB.DE",
+    "name": "OHB SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/plan-optik-ag.svg",
+    "symbol": "P4O.DE",
+    "name": "PLAN OPTIK AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pantaflix-ag.svg",
+    "symbol": "PAL.DE",
+    "name": "PANTAFLIX AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/patrizia-ag-na-on.svg",
+    "symbol": "PAT.DE",
+    "name": "PATRIZIA SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dt-pfandbriefbk-ag.svg",
+    "symbol": "PBB.DE",
+    "name": "DEUTSCHE PFANDBRIEFBANK AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/procredit-ag.svg",
+    "symbol": "PCZ.DE",
+    "name": "PROCREDIT HOLDING AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pfeiffer-vacuum-tech-o-n.svg",
+    "symbol": "PFV.DE",
+    "name": "PFEIFFER VACUUM TECHNOLOGY",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/paragon-gmbh-co-kgaa.svg",
+    "symbol": "PGN.DE",
+    "name": "PARAGON GMBH & CO KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pne-wind-ag-reg.svg",
+    "symbol": "PNE3.DE",
+    "name": "PNE AG",
+    "market": ""
+  },
+  {
+    "symbol": "PO1.DE",
+    "name": "PERFORMANCE ONE AG NA O.N",
+    "market": ""
+  },
+  {
+    "symbol": "PQ3.DE",
+    "name": "PROVIDENT FINANCIAL SERVICES INC",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/psi-software-ag.svg",
+    "symbol": "PSAN.DE",
+    "name": "PSI SOFTWARE SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/prosiebensat-1-na-o-n.svg",
+    "symbol": "PSM.DE",
+    "name": "PROSIEBENSAT1 MEDIA SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/puma.svg",
+    "symbol": "PUM.DE",
+    "name": "PUMA SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/progress-werk-oberkirch-ag.svg",
+    "symbol": "PWO.DE",
+    "name": "PWO AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pyrum-innovations-ag.svg",
+    "symbol": "PYR.DE",
+    "name": "PYRUM INNOVATIONS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/scherzer-and-co-ag.svg",
+    "symbol": "PZS.DE",
+    "name": "SCHERZER & CO. AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/quirin-privatbank-ag.svg",
+    "symbol": "QB7.DE",
+    "name": "QUIRIN PRIVATBANK AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/qbeyond-ag.svg",
+    "symbol": "QBY.DE",
+    "name": "Q.BEYOND AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rubean-ag.svg",
+    "symbol": "R1B.DE",
+    "name": "RUBEAN AG",
+    "market": ""
+  },
+  {
+    "symbol": "R3NK.DE",
+    "name": "RENK GROUP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rational-ag.svg",
+    "symbol": "RAA.DE",
+    "name": "RATIONAL AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kst-beteiligungs-ag.svg",
+    "symbol": "RCMN.DE",
+    "name": "RCM BETEILIGUNGS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/shop-apotheke.svg",
+    "symbol": "RDC.DE",
+    "name": "REDCARE PHARMACY N.V.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rhoen-klinikum-ag.svg",
+    "symbol": "RHK.DE",
+    "name": "RHOEN-KLINIKUM AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rheinmetall-ag.svg",
+    "symbol": "RHM.DE",
+    "name": "RHEINMETALL AG",
+    "market": ""
+  },
+  {
+    "symbol": "ROF.DE",
+    "name": "KFORCE INC ",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/r-stahl-ag.svg",
+    "symbol": "RSL2.DE",
+    "name": "R STAHL AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/realtech-ag.svg",
+    "symbol": "RTC.DE",
+    "name": "REALTECH AG",
+    "market": ""
+  },
+  {
+    "symbol": "RTV.DE",
+    "name": "YOUR FAMILY ENTER.AG NA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rwe.svg",
+    "symbol": "RWE.DE",
+    "name": "RWE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/spielvgg-unterhaching-kgaa.svg",
+    "symbol": "S6P.DE",
+    "name": "SPIELVGG UNTERHACH. NA ON",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sma-solar-technology.svg",
+    "symbol": "S92.DE",
+    "name": "SMA SOLAR TECHNOLOGY AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sap.svg",
+    "symbol": "SAP.DE",
+    "name": "SAP SE O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/stroeer-se-co-kgaa.svg",
+    "symbol": "SAX.DE",
+    "name": "STROEER SE&CO KGAA",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/smartbroker-ag.svg",
+    "symbol": "SB1.DE",
+    "name": "SMARTBROKER HOLDING AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/stratec-biomedical-ag.svg",
+    "symbol": "SBS.DE",
+    "name": "STRATEC SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/synbiotic-se.svg",
+    "symbol": "SBX.DE",
+    "name": "SYNBIOTIC SE NA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/schweizer-electronic-ag.svg",
+    "symbol": "SCE.DE",
+    "name": "SCHWEIZER ELECTRONIC AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/k-s-ag.svg",
+    "symbol": "SDF.DE",
+    "name": "K+S AG NA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sts-ag.svg",
+    "symbol": "SF3.DE",
+    "name": "STS GROUP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saf-holland-se.svg",
+    "symbol": "SFQ.DE",
+    "name": "SAF HOLLAND SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sgl.svg",
+    "symbol": "SGL.DE",
+    "name": "SGL CARBON SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/snp-schneider-neureither-and-p.svg",
+    "symbol": "SHF.DE",
+    "name": "SNP SCHNEIDER-NEUREITHER & PTNS SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/siemens-health-ag-na-o-n.svg",
+    "symbol": "SHL.DE",
+    "name": "SIEMENS HEALTHINEERS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/siemens.svg",
+    "symbol": "SIE.DE",
+    "name": "SIEMENS AG NA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/first-sensor-ag.svg",
+    "symbol": "SIS.DE",
+    "name": "FIRST SENSOR AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sixt-se-st-o-n.svg",
+    "symbol": "SIX2.DE",
+    "name": "SIXT SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/serviceware-se.svg",
+    "symbol": "SJJ.DE",
+    "name": "SERVICEWARE SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/koenig-and-bauer-ag.svg",
+    "symbol": "SKB.DE",
+    "name": "KOENIG & BAUER AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/solutiance-ag.svg",
+    "symbol": "SLSA.DE",
+    "name": "SOLUTIANCE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/suess-microtec-se.svg",
+    "symbol": "SMHN.DE",
+    "name": "SUESS MICROTEC SE",
+    "market": ""
+  },
+  {
+    "symbol": "SMWN.DE",
+    "name": "SM WIRTSCHAFTSBERAT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/singulus-technologies-br.svg",
+    "symbol": "SNG.DE",
+    "name": "SINGULUS TECHNOLOG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cryptology-asset-plc.svg",
+    "symbol": "SRAG.DE",
+    "name": "SAMARA ASSET GROUP PLC.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sartorius.svg",
+    "symbol": "SRT.DE",
+    "name": "SARTORIUS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/steico-se.svg",
+    "symbol": "ST5.DE",
+    "name": "STEICO SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/stabilus-se.svg",
+    "symbol": "STM.DE",
+    "name": "STABILUS SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/surteco-se.svg",
+    "symbol": "SUR.DE",
+    "name": "SURTECO GROUP SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/shareholder-value-beteiligungen-ag.svg",
+    "symbol": "SVE.DE",
+    "name": "SHAREHOLDER VALUE BETEILIGUNGEN AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/schloss-wachenheim-ag.svg",
+    "symbol": "SWA.DE",
+    "name": "SCHLOSS WACHENHEIM AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/symrise-ag-inh-o-n.svg",
+    "symbol": "SY1.DE",
+    "name": "SYMRISE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/softing-ag.svg",
+    "symbol": "SYT.DE",
+    "name": "SOFTING AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/syzygy-ag.svg",
+    "symbol": "SYZ.DE",
+    "name": "SYZYGY AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/salzgitter-ag-o-n.svg",
+    "symbol": "SZG.DE",
+    "name": "SALZGITTER AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/suedzucker-ag-o-n.svg",
+    "symbol": "SZU.DE",
+    "name": "SUEDZUCKER AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/seven-principles-ag.svg",
+    "symbol": "T3T1.DE",
+    "name": "SEVEN PRINCIPLES AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tag-immobilien-ag.svg",
+    "symbol": "TEG.DE",
+    "name": "TAG IMMOBILIEN AG",
+    "market": ""
+  },
+  {
+    "symbol": "TEM.DE",
+    "name": "TONGCHENG TRAVEL HOLDINGS LIMITED",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/logwin-ag.svg",
+    "symbol": "TGHN.DE",
+    "name": "LOGWIN AG",
+    "market": ""
+  },
+  {
+    "symbol": "TGK.DE",
+    "name": "PRECIPIO INC",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/11-88-0-solutions-ag.svg",
+    "symbol": "TGT.DE",
+    "name": "11 88 0 SOLUTIONS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/zeal-network-se.svg",
+    "symbol": "TIMA.DE",
+    "name": "ZEAL NETWORK SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/thyssenkrupp.svg",
+    "symbol": "TKA.DE",
+    "name": "THYSSENKRUPP AG O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/talanx.svg",
+    "symbol": "TLX.DE",
+    "name": "TALANX AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/teamviewer.svg",
+    "symbol": "TMV.DE",
+    "name": "TEAMVIEWER SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tonies-se.svg",
+    "symbol": "TNIE.DE",
+    "name": "TONIES SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pva-tepla-ag.svg",
+    "symbol": "TPE.DE",
+    "name": "PVA TEPLA AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fashionette-ag.svg",
+    "symbol": "TPG.DE",
+    "name": "PLATFORM GROUP AG (THE)",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/otrs-ag.svg",
+    "symbol": "TR9.DE",
+    "name": "OTRS AG IA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/takkt-ag.svg",
+    "symbol": "TTK.DE",
+    "name": "TAKKT AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kst-beteiligungs-ag.svg",
+    "symbol": "TTO.DE",
+    "name": "TTL BET.GRDBES.AG INH ON",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/technotrans-se.svg",
+    "symbol": "TTR1.DE",
+    "name": "TECHNOTRANS SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tui.svg",
+    "symbol": "TUI1.DE",
+    "name": "TUI AG NA O.N.",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/umweltbank-ag.svg",
+    "symbol": "UBK.DE",
+    "name": "UMWELTBANK AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/united-labels-ag.svg",
+    "symbol": "ULC.DE",
+    "name": "UNITED LABELS AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/umt-united-mobility-technology-ag.svg",
+    "symbol": "UMDK.DE",
+    "name": "UMT UNITED MOBILITY TECHNOLOGY AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/uniper-se-na-o-n.svg",
+    "symbol": "UN0.DE",
+    "name": "UNIPER SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/utd-internet-ag-na.svg",
+    "symbol": "UTDI.DE",
+    "name": "UNITED INTERNET AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/3u-ag.svg",
+    "symbol": "UUU.DE",
+    "name": "3U HOLDING AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/uzin-utz-ag.svg",
+    "symbol": "UZU.DE",
+    "name": "UZIN UTZ SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vita-34-ag.svg",
+    "symbol": "V3V.DE",
+    "name": "VITA 34 AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/viscom-ag.svg",
+    "symbol": "V6C.DE",
+    "name": "VISCOM AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/verbio.svg",
+    "symbol": "VBK.DE",
+    "name": "VERBIO SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/voltabox-ag.svg",
+    "symbol": "VBX.DE",
+    "name": "VOLTABOX AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/veganz-ag.svg",
+    "symbol": "VEZ.DE",
+    "name": "VEGANZ GROUP AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/friedrich-vorwerk-se.svg",
+    "symbol": "VH2.DE",
+    "name": "FRIEDRICH VORWERK GRP SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vib-vermoegen-na-o-n.svg",
+    "symbol": "VIH1.DE",
+    "name": "VIB VERMOEGEN AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vonovia.svg",
+    "symbol": "VNA.DE",
+    "name": "VONOVIA SE",
+    "market": ""
+  },
+  {
+    "symbol": "VNB.DE",
+    "name": "VALLEY NATIONAL BANCORP",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vossloh-ag.svg",
+    "symbol": "VOS.DE",
+    "name": "VOSSLOH AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/volkswagen.svg",
+    "symbol": "VOW.DE",
+    "name": "VOLKSWAGEN AG ST O.N.",
+    "market": ""
+  },
+  {
+    "symbol": "VRL.DE",
+    "name": "NET DIGITAL AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wacker-neuson-se-na-o-n.svg",
+    "symbol": "WAC.DE",
+    "name": "WACKER NEUSON SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/siltronic-ag-na-o-n.svg",
+    "symbol": "WAF.DE",
+    "name": "SILTRONIC AG",
+    "market": ""
+  },
+  {
+    "symbol": "WC7.DE",
+    "name": "WALLBRIDGE MINING CO LTD ",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wacker-chemie-o-n.svg",
+    "symbol": "WCH.DE",
+    "name": "WACKER CHEMIE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/windelnde-se.svg",
+    "symbol": "WDL1.DE",
+    "name": "NAKIKI SE",
+    "market": ""
+  },
+  {
+    "symbol": "WED.DE",
+    "name": "WEBSTER FINANCIAL CORP (CONN)",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/westwing-se.svg",
+    "symbol": "WEW.DE",
+    "name": "WESTWING GROUP SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/weng-fine-art-ag.svg",
+    "symbol": "WFA.DE",
+    "name": "WENG FINE ART AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sporttotal-ag.svg",
+    "symbol": "WIG1.DE",
+    "name": "SPORTTOTAL AG",
+    "market": ""
+  },
+  {
+    "symbol": "WOLF.DE",
+    "name": "META WOLF AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/washtec-ag.svg",
+    "symbol": "WSU.DE",
+    "name": "WASHTEC AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wuestenrot-wuertt-ag-o-n.svg",
+    "symbol": "WUW.DE",
+    "name": "WUSTENROT & WURTTEMBERGISCHE AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/deutsche-bank-ag.svg",
+    "symbol": "XAD6.DE",
+    "name": "XTRACKERS PHYSICAL SILVER ETC (EUR)",
+    "market": ""
+  },
+  {
+    "symbol": "XQN.DE",
+    "name": "CORE MOLDING TECHNOLOGIES INC",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sino.svg",
+    "symbol": "XTP.DE",
+    "name": "SINO AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/yoc-ag-on.svg",
+    "symbol": "YOC.DE",
+    "name": "YOC AG",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/about-you-holding-se.svg",
+    "symbol": "YOU.DE",
+    "name": "ABOUT YOU HOLDING SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/secunet-security-ag-o-n.svg",
+    "symbol": "YSN.DE",
+    "name": "SECUNET SECURITY AG",
+    "market": ""
+  },
+  {
+    "symbol": "Z29.DE",
+    "name": "029 GROUP SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/zalando.svg",
+    "symbol": "ZAL.DE",
+    "name": "ZALANDO SE",
+    "market": ""
+  },
+  {
+    "image": "/vesple/optimalstocks/images/elringklinger-ag-na-on.svg",
+    "symbol": "ZIL2.DE",
+    "name": "ELRINGKLINGER AG",
+    "market": ""
+  }
+]

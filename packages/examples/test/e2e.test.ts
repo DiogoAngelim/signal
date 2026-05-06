@@ -1,4 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import path from "node:path";
+import { tmpdir } from "node:os";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   createExampleRuntime,
   createReplaySafeSubscriber,
@@ -23,6 +26,21 @@ import {
   runUserOnboardingDemo,
 } from "../user-onboarding";
 import * as examples from "../index";
+
+let trainingDir = "";
+
+beforeEach(() => {
+  trainingDir = mkdtempSync(path.join(tmpdir(), "signal-examples-training-"));
+  process.env["SIGNAL_EXAMPLE_TRAINING_DIR"] = trainingDir;
+});
+
+afterEach(() => {
+  delete process.env["SIGNAL_EXAMPLE_TRAINING_DIR"];
+  if (trainingDir) {
+    rmSync(trainingDir, { recursive: true, force: true });
+    trainingDir = "";
+  }
+});
 
 describe("example flow", () => {
   it("keeps the minimal runtime example explicit and inspectable", async () => {
@@ -142,6 +160,49 @@ describe("example flow", () => {
     expect(missingEscrow.ok).toBe(false);
     expect(existingUser.ok).toBe(true);
     expect(missingUser.ok).toBe(false);
+  });
+
+  it("persists self-training parameters across example registrations", async () => {
+    const first = registerPostPublication();
+
+    await first.runtime.query("post.get.v1", {
+      postId: "post_1001",
+    });
+    await first.runtime.query("post.get.v1", {
+      postId: "missing",
+    });
+    await first.runtime.mutation(
+      "post.publish.v1",
+      {
+        postId: "post_1001",
+        title: "Protocol first",
+        body: "Signal keeps transport and execution concerns separate.",
+      },
+      {
+        idempotencyKey: "persist-training-1",
+      }
+    );
+
+    const firstSnapshot = await first.state.selfTraining?.snapshot();
+
+    expect(firstSnapshot?.totals.observations).toBeGreaterThanOrEqual(4);
+    expect(first.state.selfTraining?.storageKind).toBe("file");
+    expect(
+      first.state.selfTraining?.filePath
+        ? existsSync(first.state.selfTraining.filePath)
+        : false
+    ).toBe(true);
+
+    const second = registerPostPublication();
+    const secondSnapshot = await second.state.selfTraining?.snapshot();
+    const queryOperation = secondSnapshot?.parameters.operations["query:post.get.v1"];
+    const mutationOperation = secondSnapshot?.parameters.operations["mutation:post.publish.v1"];
+
+    expect(secondSnapshot?.totals.observations).toBe(firstSnapshot?.totals.observations);
+    expect(queryOperation?.observations).toBe(2);
+    expect(queryOperation?.failures).toBe(1);
+    expect(mutationOperation?.observations).toBe(1);
+    expect(mutationOperation?.successes).toBe(1);
   });
 
   it("covers example error paths and already-processed branches", async () => {

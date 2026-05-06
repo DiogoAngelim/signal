@@ -1,0 +1,1567 @@
+[
+  {
+    "symbol": "ABG",
+    "name": "ABG Sundal Collier Holding ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/abg-sundal-collier-hldg-asa.svg"
+  },
+  {
+    "symbol": "ABS",
+    "name": "Arctic Bioscience AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/arctic-bioscience-as.svg"
+  },
+  {
+    "symbol": "ACR",
+    "name": "Axactor ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/axactor-asa.svg"
+  },
+  {
+    "symbol": "AFG",
+    "name": "AF Gruppen ASA Class A",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/af-gruppen-asa.svg"
+  },
+  {
+    "symbol": "AFK",
+    "name": "Arendals Fossekompani ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/arendals-fossekampani.svg"
+  },
+  {
+    "symbol": "AIX",
+    "name": "Ayfie International AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/ayfie-international-as.svg"
+  },
+  {
+    "symbol": "AKH",
+    "name": "Aker Horizons ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/aker-horizons-asa.svg"
+  },
+  {
+    "symbol": "AKVA",
+    "name": "AKVA Group ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/akva-asa.svg"
+  },
+  {
+    "symbol": "ALNG",
+    "name": "Awilco LNG ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/awilco-lng-as.svg"
+  },
+  {
+    "symbol": "ARR",
+    "name": "Arribatec Group ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/arribatec-asa-nok280.svg"
+  },
+  {
+    "symbol": "ASA",
+    "name": "Atlantic Sapphire ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/atlantic-sapphire-asa.svg"
+  },
+  {
+    "symbol": "AZT",
+    "name": "ArcticZymes Technologies ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/arcticzymes-technologies-asa.svg"
+  },
+  {
+    "symbol": "BALT",
+    "name": "Baltic Sea Properties AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/baltic-sea-properties-as.svg"
+  },
+  {
+    "symbol": "BCS",
+    "name": "Bergen Carbon Solutions AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/bergen-carbon-solutions-as.svg"
+  },
+  {
+    "symbol": "BMA",
+    "name": "Byggma ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/byggma-asa.svg"
+  },
+  {
+    "symbol": "BOR",
+    "name": "Borgestad ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/borgestad-asa.svg"
+  },
+  {
+    "symbol": "BORR",
+    "name": "Borr Drilling Limited",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/borr-drilling.svg"
+  },
+  {
+    "symbol": "BSP",
+    "name": "Black Sea Property AS",
+    "market": "Euronext Oslo"
+  },
+  {
+    "symbol": "BWE",
+    "name": "BW Energy Ltd.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/bw-lpg-ltd.svg"
+  },
+  {
+    "symbol": "BWO",
+    "name": "BW Offshore Limited",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/bw-lpg-ltd.svg"
+  },
+  {
+    "symbol": "CADLR",
+    "name": "Cadeler A/S",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/cadeler-as.svg"
+  },
+  {
+    "symbol": "CAMBI",
+    "name": "Cambi ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/cambi-asa-nok002.svg"
+  },
+  {
+    "symbol": "CAPSL",
+    "name": "Capsol Technologies ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/capsol-technologies-asa.svg"
+  },
+  {
+    "symbol": "CAPT",
+    "name": "Capital Tankers Corp.",
+    "market": "Euronext Oslo"
+  },
+  {
+    "symbol": "CAVEN",
+    "name": "Cavendish Hydrogen ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/cavendish-hydrogen-asa.svg"
+  },
+  {
+    "symbol": "CLOUD",
+    "name": "Cloudberry Clean Energy ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/cloudberry-clean-energy-asa.svg"
+  },
+  {
+    "symbol": "CMBTO",
+    "name": "CMB.TECH NV",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/euronav.svg"
+  },
+  {
+    "symbol": "CODE",
+    "name": "CodeLab Capital AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/patientsky-as.svg"
+  },
+  {
+    "symbol": "CONTX",
+    "name": "ContextVision AB",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/contextvision-ab.svg"
+  },
+  {
+    "symbol": "COSH",
+    "name": "Constellation Oil Services Holding S.A. Shs Norwegian depository receipts 1 Sh",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/constellation-oil-svcs-hldg-s-a.svg"
+  },
+  {
+    "symbol": "CRNA",
+    "name": "Circio Holding ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/circio-asa.svg"
+  },
+  {
+    "symbol": "CRNAS",
+    "name": "CIRCIO HOLDING ASA WTS 09/06/26(TO SUB FOR ORD",
+    "market": "Euronext Oslo"
+  },
+  {
+    "symbol": "CYVIZ",
+    "name": "Cyviz AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/cyviz-as.svg"
+  },
+  {
+    "symbol": "DDRIL",
+    "name": "Dolphin Drilling AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/dolphin-drilling-as.svg"
+  },
+  {
+    "symbol": "DELIA",
+    "name": "Dellia Group AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/dellia-as.svg"
+  },
+  {
+    "symbol": "DFENS",
+    "name": "Fjord Defence Group ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/fjord-defence-asa.svg"
+  },
+  {
+    "symbol": "DNB",
+    "name": "DNB Bank ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/dnb-bank-asa.svg"
+  },
+  {
+    "symbol": "DNO",
+    "name": "DNO ASA Class A",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/dno-asa.svg"
+  },
+  {
+    "symbol": "DOFG",
+    "name": "DOF Group ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/dof-asa.svg"
+  },
+  {
+    "symbol": "DSRT",
+    "name": "Desert Control AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/desert-control-as.svg"
+  },
+  {
+    "symbol": "DVD",
+    "name": "Deep Value Driller AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/deep-value-driller-as.svg"
+  },
+  {
+    "symbol": "EAM",
+    "name": "EAM Solar AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/eam-solar-asa.svg"
+  },
+  {
+    "symbol": "EIOF",
+    "name": "Eidesvik Offshore ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/eidesvik-offshore-asa.svg"
+  },
+  {
+    "symbol": "ELABS",
+    "name": "Elliptic Laboratories ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/elliptic-laboratories-asa.svg"
+  },
+  {
+    "symbol": "ELIMP",
+    "name": "Elektroimportoren AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/elektroimportoren-as.svg"
+  },
+  {
+    "symbol": "ELK",
+    "name": "Elkem ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/elkem-asa.svg"
+  },
+  {
+    "symbol": "ELMRA",
+    "name": "Elmera Group ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/elmera-asa.svg"
+  },
+  {
+    "symbol": "ELO",
+    "name": "Elopak ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/elopak-asa.svg"
+  },
+  {
+    "symbol": "EMGS",
+    "name": "ElectroMagnetic GeoServices ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/electromagnetic-geoservices.svg"
+  },
+  {
+    "symbol": "ENDUR",
+    "name": "Endur ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/endur-asa.svg"
+  },
+  {
+    "symbol": "ENERG",
+    "name": "Energeia AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/energeia-as.svg"
+  },
+  {
+    "symbol": "ENH",
+    "name": "Sed Energy Holdings PLC",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/seabird-exploration-plc.svg"
+  },
+  {
+    "symbol": "ENSU",
+    "name": "Ensurge Micropower ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/ensurge-micropower-asa.svg"
+  },
+  {
+    "symbol": "ENTRA",
+    "name": "Entra ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/entra-asa.svg"
+  },
+  {
+    "symbol": "ENVIP",
+    "name": "Envipco Holding N.V.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/envipco.svg"
+  },
+  {
+    "symbol": "EPR",
+    "name": "Europris ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/europris-asa.svg"
+  },
+  {
+    "symbol": "EQNR",
+    "name": "Equinor ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/equinor.svg"
+  },
+  {
+    "symbol": "EQVA",
+    "name": "Eqva ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/eqva-asa-nok005.svg"
+  },
+  {
+    "symbol": "EXTX",
+    "name": "EXACT Therapeutics AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/exact-therapeutics-as.svg"
+  },
+  {
+    "symbol": "FFSB",
+    "name": "Flekkefjord Sparebank",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/flekkefjord-sparebank.svg"
+  },
+  {
+    "symbol": "FRO",
+    "name": "Frontline Plc",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/frontline.svg"
+  },
+  {
+    "symbol": "GEM",
+    "name": "Green Minerals AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/green-minerals-as.svg"
+  },
+  {
+    "symbol": "GENT",
+    "name": "Gentian Diagnostics ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/gentian-diagnostics-asa.svg"
+  },
+  {
+    "symbol": "GEOS",
+    "name": "Golden Energy Offshore Services ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/golden-energy-offshore-services-as.svg"
+  },
+  {
+    "symbol": "GIGA",
+    "name": "Gigante Salmon AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/gigante-salmon-as.svg"
+  },
+  {
+    "symbol": "GJF",
+    "name": "Gjensidige Forsikring ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/gjensidige-forsikring-asa.svg"
+  },
+  {
+    "symbol": "GKP",
+    "name": "Gulf Keystone Petroleum Limited",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-keystone-petroleum.svg"
+  },
+  {
+    "symbol": "GOD",
+    "name": "Goodtech ASA Class A",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/goodtech-asa-nok2.svg"
+  },
+  {
+    "symbol": "GRONG",
+    "name": "Grong Sparebank",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/grong-sparebank.svg"
+  },
+  {
+    "symbol": "GSF",
+    "name": "Grieg Seafood ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/grieg-seafood.svg"
+  },
+  {
+    "symbol": "GYL",
+    "name": "Gyldendal Norsk Forlag Asa",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/glydendal-asa.svg"
+  },
+  {
+    "symbol": "HAFNI",
+    "name": "Hafnia Limited",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/hafnia-limited.svg"
+  },
+  {
+    "symbol": "HAUTO",
+    "name": "Hoegh Autoliners ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/hoegh-autoliners-asa.svg"
+  },
+  {
+    "symbol": "HAV",
+    "name": "HAV Group ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/hav-asa.svg"
+  },
+  {
+    "symbol": "HAVI",
+    "name": "Havila Shipping ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/havila-shipping-asa.svg"
+  },
+  {
+    "symbol": "HBC",
+    "name": "Hofseth Biocare ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/hofseth-biocare-asa.svg"
+  },
+  {
+    "symbol": "HDLY",
+    "name": "Huddly AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/huddly-as.svg"
+  },
+  {
+    "symbol": "HELG",
+    "name": "SpareBank 1 Helgeland",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sparebank-1-smn.svg"
+  },
+  {
+    "symbol": "HERMA",
+    "name": "Hermana Holding ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/hermana-asa.svg"
+  },
+  {
+    "symbol": "HEX",
+    "name": "Hexagon Composites ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/hexagon-composites-asa.svg"
+  },
+  {
+    "symbol": "HGSB",
+    "name": "Haugesund Sparebank",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/haugesund-sparebank.svg"
+  },
+  {
+    "symbol": "HKY",
+    "name": "Havila Kystruten AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/havila-shipping-asa.svg"
+  },
+  {
+    "symbol": "HPUR",
+    "name": "Hexagon Purus ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/hexagon-purus-asa.svg"
+  },
+  {
+    "symbol": "HSHP",
+    "name": "Himalaya Shipping Ltd.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/himalaya-shipping-ltd.svg"
+  },
+  {
+    "symbol": "HSPG",
+    "name": "Holand og Setskog Sparebank",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/holand-og-setskog-sparebank.svg"
+  },
+  {
+    "symbol": "HUDL",
+    "name": "Huddlestock Fintech AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/huddlestock-fintech-as.svg"
+  },
+  {
+    "symbol": "HUNT",
+    "name": "Hunter Group ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/hunter-asa-nok00382.svg"
+  },
+  {
+    "symbol": "HYN",
+    "name": "Hynion AS Class A",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/hynion-as.svg"
+  },
+  {
+    "symbol": "HYPRO",
+    "name": "HydrogenPro ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/hydrogenpro-as.svg"
+  },
+  {
+    "symbol": "IDEX",
+    "name": "IDEX Biometrics ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/idex-asa.svg"
+  },
+  {
+    "symbol": "INDCT",
+    "name": "Induct AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/induct-as.svg"
+  },
+  {
+    "symbol": "INIFY",
+    "name": "INIFY Laboratories AB",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/inify-laboratories-ab.svg"
+  },
+  {
+    "symbol": "ININ",
+    "name": "Inin Group AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/inin-as.svg"
+  },
+  {
+    "symbol": "INSTA",
+    "name": "Instabank ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/instabank-asa.svg"
+  },
+  {
+    "symbol": "IOX",
+    "name": "InterOil Exploration and Production ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/interoil-exploration-and-production-nok5.svg"
+  },
+  {
+    "symbol": "ISLAX",
+    "name": "Icelandic Salmon AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/icelandic-salmon-as.svg"
+  },
+  {
+    "symbol": "ITERA",
+    "name": "Itera ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/itera-asa.svg"
+  },
+  {
+    "symbol": "IWS",
+    "name": "Integrated Wind Solutions ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/integrated-wind-solutions-asa.svg"
+  },
+  {
+    "symbol": "JAREN",
+    "name": "Jaeren Sparebank",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/jaeren-sparebank-nok25-grunnfondsbevis.svg"
+  },
+  {
+    "symbol": "JIN",
+    "name": "Jinhui Shipping & Transportation Ltd.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/jinhui-shipping-and-transporta.svg"
+  },
+  {
+    "symbol": "KCC",
+    "name": "Klaveness Combination Carriers ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/klaveness-combination-carriers-asa.svg"
+  },
+  {
+    "symbol": "KID",
+    "name": "Kid ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/kid-asa.svg"
+  },
+  {
+    "symbol": "KING",
+    "name": "Kingfish Company N.V.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/kingfish-company-nv-the.svg"
+  },
+  {
+    "symbol": "KIT",
+    "name": "Kitron ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/kitron-asa.svg"
+  },
+  {
+    "symbol": "KLDVK",
+    "name": "Kaldvik AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/ice-fish-farm-as.svg"
+  },
+  {
+    "symbol": "KMCP",
+    "name": "KMC Properties ASA",
+    "market": "Euronext Oslo"
+  },
+  {
+    "symbol": "KOA",
+    "name": "Kongsberg Automotive ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/kongsberg-automotive-asa.svg"
+  },
+  {
+    "symbol": "KOG",
+    "name": "Kongsberg Gruppen ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/kongsberg-gruppen-asa.svg"
+  },
+  {
+    "symbol": "KOMPL",
+    "name": "Komplett ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/komplett-asa.svg"
+  },
+  {
+    "symbol": "KRAB",
+    "name": "Kraft Bank ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/kraft-bank-asa.svg"
+  },
+  {
+    "symbol": "LIFE",
+    "name": "Lifecare ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/lifecare-as.svg"
+  },
+  {
+    "symbol": "LIFES",
+    "name": "Lifecare ASA Company Warrant 2026-12.06.26 on Lifecare Series 2",
+    "market": "Euronext Oslo"
+  },
+  {
+    "symbol": "LINK",
+    "name": "LINK Mobility Group Holding ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/link-mobility-asa.svg"
+  },
+  {
+    "symbol": "LOKO",
+    "name": "Lokotech Group AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/lokotech-as.svg"
+  },
+  {
+    "symbol": "LOKOS",
+    "name": "Lokotech Group AS Company Warrant 2025-15.04.26 on Lokotech Grp",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/lokotech-as.svg"
+  },
+  {
+    "symbol": "LSG",
+    "name": "Leroy Seafood Group ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/leroy-seafood-asa.svg"
+  },
+  {
+    "symbol": "LUMI",
+    "name": "Lumi Gruppen AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/lumi-gruppen-as.svg"
+  },
+  {
+    "symbol": "LYTIX",
+    "name": "Lytix Biopharma AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/lytix-biopharma-as.svg"
+  },
+  {
+    "symbol": "MAS",
+    "name": "Masoval AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/masoval-as.svg"
+  },
+  {
+    "symbol": "MEDI",
+    "name": "Medistim ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/medistim-asa.svg"
+  },
+  {
+    "symbol": "MELG",
+    "name": "Melhus Sparebank",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/melhus-sparebank.svg"
+  },
+  {
+    "symbol": "MGN",
+    "name": "Magnora ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/magnora-asa.svg"
+  },
+  {
+    "symbol": "MING",
+    "name": "SpareBank 1 SMN",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sparebank-1-smn.svg"
+  },
+  {
+    "symbol": "MORG",
+    "name": "Sparebanken More",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sparebanken-more.svg"
+  },
+  {
+    "symbol": "MORLD",
+    "name": "Moreld ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/moreld-as.svg"
+  },
+  {
+    "symbol": "MOWI",
+    "name": "Mowi ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/mowi.svg"
+  },
+  {
+    "symbol": "MPCC",
+    "name": "MPC Container Ships ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/mpc-container-ships.svg"
+  },
+  {
+    "symbol": "MPCES",
+    "name": "MPC Energy Solutions NV",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/mpc-energy-solutions-nv.svg"
+  },
+  {
+    "symbol": "MULTI",
+    "name": "Multiconsult ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/multiconsult-asa.svg"
+  },
+  {
+    "symbol": "MVE",
+    "name": "Matvareexpressen AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/matvareexpressen-as.svg"
+  },
+  {
+    "symbol": "MVW",
+    "name": "M Vest Water AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/m-vest-water-as.svg"
+  },
+  {
+    "symbol": "NAPA",
+    "name": "Napatech A/S",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/napatech-a-s.svg"
+  },
+  {
+    "symbol": "NAS",
+    "name": "Norwegian Air Shuttle ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/norwegian-air-shuttle.svg"
+  },
+  {
+    "symbol": "NAVA",
+    "name": "Navamedic ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/navamedic-asa.svg"
+  },
+  {
+    "symbol": "NBX",
+    "name": "Norwegian Block Exchange AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/norwegian-block-exchange-as.svg"
+  },
+  {
+    "symbol": "NCOD",
+    "name": "Norcod AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/norcod-as.svg"
+  },
+  {
+    "symbol": "NEL",
+    "name": "NEL ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/nel.svg"
+  },
+  {
+    "symbol": "NEXT",
+    "name": "NEXT Biometrics Group ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/next-biometrics-asa.svg"
+  },
+  {
+    "symbol": "NHY",
+    "name": "Norsk Hydro ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/norsk-hydro.svg"
+  },
+  {
+    "symbol": "NISB",
+    "name": "Nidaros Sparebank",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/nidaros-sparebank.svg"
+  },
+  {
+    "symbol": "NKR",
+    "name": "Nekkar ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/nekkar-asa.svg"
+  },
+  {
+    "symbol": "NOAP",
+    "name": "Nordic Aqua Partners AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/nordic-aqua-partners-as.svg"
+  },
+  {
+    "symbol": "NOD",
+    "name": "Nordic Semiconductor ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/nordic-semiconductor-asa.svg"
+  },
+  {
+    "symbol": "NOFIN",
+    "name": "Nordic Financials ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/nordic-financials-asa.svg"
+  },
+  {
+    "symbol": "NOHAL",
+    "name": "Nordic Halibut AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/nordic-halibut-as.svg"
+  },
+  {
+    "symbol": "NOL",
+    "name": "Northern Ocean Ltd.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/northern-ocean-ltd.svg"
+  },
+  {
+    "symbol": "NOM",
+    "name": "Nordic Mining ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/nordic-mining-asa.svg"
+  },
+  {
+    "symbol": "NONG",
+    "name": "SpareBank 1 Nord-Norge",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sparebank-1-smn.svg"
+  },
+  {
+    "symbol": "NORAM",
+    "name": "NorAm Drilling AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/noram-drilling-as.svg"
+  },
+  {
+    "symbol": "NORBT",
+    "name": "Norbit ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/norbit-asa.svg"
+  },
+  {
+    "symbol": "NORCO",
+    "name": "Norconsult ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/norconsult-asa.svg"
+  },
+  {
+    "symbol": "NORDH",
+    "name": "Nordhealth AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/nordhealth-as.svg"
+  },
+  {
+    "symbol": "NORSE",
+    "name": "Norse Atlantic ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/norse-atlantic-asa.svg"
+  },
+  {
+    "symbol": "NORTH",
+    "name": "North Energy ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/north-energy-asa.svg"
+  },
+  {
+    "symbol": "NOSN",
+    "name": "NOS Nova AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/horisont-energi-as.svg"
+  },
+  {
+    "symbol": "NRC",
+    "name": "NRC Group ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/nrc-asa.svg"
+  },
+  {
+    "symbol": "NSKOG",
+    "name": "Norske Skog ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/norske-skog-asa.svg"
+  },
+  {
+    "symbol": "NTG",
+    "name": "Nordic Technology Group AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/nordic-technology-as.svg"
+  },
+  {
+    "symbol": "NTI",
+    "name": "Norsk Titanium AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/norsk-titanium-as.svg"
+  },
+  {
+    "symbol": "NYKD",
+    "name": "Nykode Therapeutics ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/nykode-therapeutics-as.svg"
+  },
+  {
+    "symbol": "OBSRV",
+    "name": "Observe Medical ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/observe-medical-asa.svg"
+  },
+  {
+    "symbol": "OCEAN",
+    "name": "Ocean-Geoloop AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/ocean-geoloop-as.svg"
+  },
+  {
+    "symbol": "ODF",
+    "name": "Odfjell SE Class A",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/odfjell-se.svg"
+  },
+  {
+    "symbol": "ODFB",
+    "name": "Odfjell SE Class B",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/odfjell-se.svg"
+  },
+  {
+    "symbol": "ODL",
+    "name": "Odfjell Drilling Ltd.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/odfjell-drilling-limited.svg"
+  },
+  {
+    "symbol": "OET",
+    "name": "Okeanis Eco Tankers Corp.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/okeanis-eco-tankers.svg"
+  },
+  {
+    "symbol": "OKEA",
+    "name": "OKEA ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/okea-asa.svg"
+  },
+  {
+    "symbol": "OMDA",
+    "name": "Omda AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/omda-as.svg"
+  },
+  {
+    "symbol": "ONCIN",
+    "name": "Oncoinvent ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/bergenbio-asa.svg"
+  },
+  {
+    "symbol": "ORK",
+    "name": "Orkla ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/orkla.svg"
+  },
+  {
+    "symbol": "OSUN",
+    "name": "Ocean Sun AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/ocean-sun-as.svg"
+  },
+  {
+    "symbol": "OTEC",
+    "name": "Otello Corporation ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/otello-asa.svg"
+  },
+  {
+    "symbol": "OTL",
+    "name": "Odfjell Technology Ltd.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/odfjell-technology-ltd.svg"
+  },
+  {
+    "symbol": "OTOVO",
+    "name": "Otovo ASA Class A",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/otovo-asa.svg"
+  },
+  {
+    "symbol": "PARB",
+    "name": "Pareto Bank ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/pareto-bank-asa.svg"
+  },
+  {
+    "symbol": "PCIB",
+    "name": "PCI Biotech Holding ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/pci-biotech-asa.svg"
+  },
+  {
+    "symbol": "PEN",
+    "name": "Panoro Energy ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/panoro-energy-asa.svg"
+  },
+  {
+    "symbol": "PEXIP",
+    "name": "Pexip Holding ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/pexip-asa.svg"
+  },
+  {
+    "symbol": "PHO",
+    "name": "Photocure ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/photocure-asa.svg"
+  },
+  {
+    "symbol": "PLGC",
+    "name": "Pelagic Credit Plc",
+    "market": "Euronext Oslo"
+  },
+  {
+    "symbol": "PLSV",
+    "name": "Paratus Energy Services Ltd.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/paratus-energy-services-ltd.svg"
+  },
+  {
+    "symbol": "PLT",
+    "name": "poLight ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/polight-asa.svg"
+  },
+  {
+    "symbol": "PNOR",
+    "name": "PetroNor E&P ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/petronor-eandp-asa.svg"
+  },
+  {
+    "symbol": "POL",
+    "name": "Polaris Media ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/polaris-media-asa.svg"
+  },
+  {
+    "symbol": "PPG",
+    "name": "Pioneer Property Group ASA 9.5 % Pfd Registered Shs",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/pioneer-property-asa.svg"
+  },
+  {
+    "symbol": "PROT",
+    "name": "Protector Forsikring ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/protector-forsikring-asa.svg"
+  },
+  {
+    "symbol": "PROXI",
+    "name": "Proximar Seafood AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/proximar-seafood-as.svg"
+  },
+  {
+    "symbol": "PRS",
+    "name": "Prosafe SE",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/prosafe-se-sn.svg"
+  },
+  {
+    "symbol": "PRYME",
+    "name": "Pryme N.V.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/pryme-nv.svg"
+  },
+  {
+    "symbol": "PSE",
+    "name": "Petrolia SE",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/petrolia-se.svg"
+  },
+  {
+    "symbol": "PUBLI",
+    "name": "Public Property Invest ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/public-property-invest-asa.svg"
+  },
+  {
+    "symbol": "PYRUM",
+    "name": "Pyrum Innovations AG",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/pyrum-innovations-ag.svg"
+  },
+  {
+    "symbol": "QEC",
+    "name": "Questerre Energy Corporation Class A",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/questerre-energy.svg"
+  },
+  {
+    "symbol": "RANA",
+    "name": "Rana Gruber ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/rana-gruber-asa.svg"
+  },
+  {
+    "symbol": "REACH",
+    "name": "Reach Subsea ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "RECSI",
+    "name": "REC Silicon ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/rec-silicon.svg"
+  },
+  {
+    "symbol": "RECST",
+    "name": "REC Silicon ASA Rights 2026-07.04.26 For Shares REC Silicon Rg",
+    "market": "Euronext Oslo"
+  },
+  {
+    "symbol": "REFL",
+    "name": "Refuels N.V.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/refuels-nv.svg"
+  },
+  {
+    "symbol": "RING",
+    "name": "SpareBank 1 Ringerike Hadeland",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sparebank-1-smn.svg"
+  },
+  {
+    "symbol": "RIVER",
+    "name": "River Tech p.l.c.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/river-tech-plc.svg"
+  },
+  {
+    "symbol": "ROGS",
+    "name": "Rogaland Sparebank",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sandnes-sparebank.svg"
+  },
+  {
+    "symbol": "ROM",
+    "name": "RomReal Ltd.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/romreal-invest-ltd.svg"
+  },
+  {
+    "symbol": "ROMER",
+    "name": "Romerike Sparebank",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/romerike-sparebank.svg"
+  },
+  {
+    "symbol": "SAGA",
+    "name": "Saga Pure ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/saga-pure-asa.svg"
+  },
+  {
+    "symbol": "SALM",
+    "name": "SalMar ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/salmar-asa.svg"
+  },
+  {
+    "symbol": "SALME",
+    "name": "Salmon Evolution ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/salmon-evolution-asa.svg"
+  },
+  {
+    "symbol": "SATS",
+    "name": "SATS ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sats-asa.svg"
+  },
+  {
+    "symbol": "SB1NO",
+    "name": "SPAREBANK 1 SOR-NORGE ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sparebank-1-sr-bank.svg"
+  },
+  {
+    "symbol": "SB68",
+    "name": "Sparebank 68 grader nord",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sparebank-68-grader-nord.svg"
+  },
+  {
+    "symbol": "SBNOR",
+    "name": "Sparebanken Norge",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sparebanken-vest.svg"
+  },
+  {
+    "symbol": "SBO",
+    "name": "Selvaag Bolig ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/selvaag-bolig-as.svg"
+  },
+  {
+    "symbol": "SCANA",
+    "name": "Scana ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/scana-asa.svg"
+  },
+  {
+    "symbol": "SCATC",
+    "name": "Scatec ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/scatec-asa.svg"
+  },
+  {
+    "symbol": "SDSD",
+    "name": "S.D. Standard ETC PLC",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sd-standard-etc-plc.svg"
+  },
+  {
+    "symbol": "SEA1",
+    "name": "Sea1 Offshore Incorporation",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/siem-offshore.svg"
+  },
+  {
+    "symbol": "SKAND",
+    "name": "Skandia GreenPower AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/skandia-greenpower-as.svg"
+  },
+  {
+    "symbol": "SKUE",
+    "name": "Skue Sparebank",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/skue-sparebank.svg"
+  },
+  {
+    "symbol": "SMOP",
+    "name": "Smartoptics Group ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/smartoptics-as.svg"
+  },
+  {
+    "symbol": "SNI",
+    "name": "Stolt-Nielsen Limited",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/stolt-nielsen-limited.svg"
+  },
+  {
+    "symbol": "SNOR",
+    "name": "SpareBank 1 Nordmore",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sparebank-1-sr-bank.svg"
+  },
+  {
+    "symbol": "SNTIA",
+    "name": "Sentia ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sentia-asa.svg"
+  },
+  {
+    "symbol": "SOAG",
+    "name": "SpareBank 1 Ostfold Akershus",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sparebank-1-smn.svg"
+  },
+  {
+    "symbol": "SOFF",
+    "name": "Solstad Offshore ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/solstad-offshore-asa.svg"
+  },
+  {
+    "symbol": "SOFTX",
+    "name": "SoftOx Solutions AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/softox-solutions-as.svg"
+  },
+  {
+    "symbol": "SOGN",
+    "name": "Sogn Sparebank",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sogn-sparebank.svg"
+  },
+  {
+    "symbol": "SOMA",
+    "name": "Solstad Maritime ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/solstad-offshore-asa.svg"
+  },
+  {
+    "symbol": "SPOG",
+    "name": "Sparebanken Ost",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sparebanken-ost.svg"
+  },
+  {
+    "symbol": "SPOL",
+    "name": "Sparebank 1 Ostlandet",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/sparebank-1-smn.svg"
+  },
+  {
+    "symbol": "STB",
+    "name": "Storebrand ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/storebrand.svg"
+  },
+  {
+    "symbol": "STECH",
+    "name": "SoilTech AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/soiltech-asa.svg"
+  },
+  {
+    "symbol": "STRO",
+    "name": "StrongPoint ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/strongpoint-asa.svg"
+  },
+  {
+    "symbol": "STST",
+    "name": "Stainless Tankers ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/stainless-tankers-asa.svg"
+  },
+  {
+    "symbol": "SUBC",
+    "name": "Subsea 7 S.A.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/subsea-7.svg"
+  },
+  {
+    "symbol": "SWON",
+    "name": "SoftwareOne Holding Ltd.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/softwareone-n.svg"
+  },
+  {
+    "symbol": "TECH",
+    "name": "Techstep ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/techstep-asa.svg"
+  },
+  {
+    "symbol": "TEKNA",
+    "name": "Tekna Holding ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/tekna-asa.svg"
+  },
+  {
+    "symbol": "TEL",
+    "name": "Telenor ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/telenor.svg"
+  },
+  {
+    "symbol": "TGS",
+    "name": "TGS ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/tgs-asa.svg"
+  },
+  {
+    "symbol": "TIETO",
+    "name": "TietoEVRY Oyj",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/tietoevry.svg"
+  },
+  {
+    "symbol": "TINDE",
+    "name": "Tinde Sparebank",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/romsdal-sparebank.svg"
+  },
+  {
+    "symbol": "TOM",
+    "name": "TOMRA Systems ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/tomra-systems.svg"
+  },
+  {
+    "symbol": "TRMED",
+    "name": "Thor Medical ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/nordic-nanovector-asa.svg"
+  },
+  {
+    "symbol": "TRSB",
+    "name": "Trondelag Sparebank",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/trondelag-sparebank.svg"
+  },
+  {
+    "symbol": "VAR",
+    "name": "Var Energi ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/var-energi-asa.svg"
+  },
+  {
+    "symbol": "VDI",
+    "name": "Vantage Drilling International Ltd",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/vantage-drilling-international.svg"
+  },
+  {
+    "symbol": "VEI",
+    "name": "Veidekke ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/veidekke.svg"
+  },
+  {
+    "symbol": "VEND",
+    "name": "Vend Marketplaces ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/schibsted-asa-ser-a.svg"
+  },
+  {
+    "symbol": "VISTN",
+    "name": "Vistin Pharma ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/vistin-pharma-asa.svg"
+  },
+  {
+    "symbol": "VOW",
+    "name": "Vow ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/vow-asa.svg"
+  },
+  {
+    "symbol": "VTURA",
+    "name": "Ventura Offshore Holding Ltd.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/ventura-offshore-hldgs-ltd.svg"
+  },
+  {
+    "symbol": "VVL",
+    "name": "Voss Veksel- og Landmandsbank ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/voss-veksal-og-landmandsbank.svg"
+  },
+  {
+    "symbol": "WAWI",
+    "name": "Wallenius Wilhelmsen ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/wallenius-wilhelmsen-asa.svg"
+  },
+  {
+    "symbol": "WEST",
+    "name": "Western Bulk Chartering AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/western-bulk-chartering-as.svg"
+  },
+  {
+    "symbol": "WSTEP",
+    "name": "Webstep AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/webstep-asa.svg"
+  },
+  {
+    "symbol": "WWI",
+    "name": "Wilh. Wilhelmsen Holding ASA Class A",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/wilh-wilhelmsen-hldg-asa.svg"
+  },
+  {
+    "symbol": "WWIB",
+    "name": "Wilh. Wilhelmsen Holding ASA Class B",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/wilh-wilhelmsen-hldg-asa.svg"
+  },
+  {
+    "symbol": "XPLRA",
+    "name": "Xplora Technologies AS",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/xplora-technologies-as.svg"
+  },
+  {
+    "symbol": "YAR",
+    "name": "Yara International ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/yara-international.svg"
+  },
+  {
+    "symbol": "ZAL",
+    "name": "Zalaris ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/zalaris-asa.svg"
+  },
+  {
+    "symbol": "ZAP",
+    "name": "Zaptec ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/zaptec.svg"
+  },
+  {
+    "symbol": "ZENA",
+    "name": "Zenith Energy Ltd.",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/zenith-energy-ltd.svg"
+  },
+  {
+    "symbol": "ZLNA",
+    "name": "Zelluna ASA",
+    "market": "Euronext Oslo",
+    "image": "https://s3-symbol-logo.tradingview.com/ultimovacs-asa.svg"
+  }
+]

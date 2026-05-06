@@ -2,7 +2,12 @@
   "name": "signal-workspace",
   "private": true,
   "version": "1.0.0",
-  "packageManager": "pnpm@9.9.0",
+  "packageManager": "pnpm@10.12.4",
+  "pnpm": {
+    "overrides": {
+      "webpackbar": "7.0.0"
+    }
+  },
   "scripts": {
     "build": "pnpm -r --sort run build",
     "dev": "pnpm --filter @signal/landing dev",

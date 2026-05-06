@@ -1,7 +1,12 @@
 import { z } from "zod";
 import { createProtocolError } from "@signal/protocol";
 import { defineQuery } from "@signal/sdk-node";
-import { createExampleRuntime } from "../support";
+import {
+  createExampleRuntime,
+  ensureExampleSelfTraining,
+  instrumentExampleQuery,
+  type ExampleStateWithSelfTraining,
+} from "../support";
 
 const noteInputSchema = z.object({
   noteId: z.string().min(1),
@@ -13,7 +18,7 @@ const noteResultSchema = z.object({
   version: z.literal("v1"),
 });
 
-export interface MinimalRuntimeState {
+export interface MinimalRuntimeState extends ExampleStateWithSelfTraining {
   notes: Map<
     string,
     {
@@ -43,6 +48,8 @@ export function registerMinimalRuntime(
   runtime = createExampleRuntime(),
   state = createMinimalRuntimeState()
 ) {
+  const selfTraining = ensureExampleSelfTraining(state, "minimal-runtime");
+
   runtime.registerQuery(
     defineQuery({
       name: "note.get.v1",
@@ -50,14 +57,14 @@ export function registerMinimalRuntime(
       description: "Read a single note from the in-process example store.",
       inputSchema: noteInputSchema,
       resultSchema: noteResultSchema,
-      handler: (input) => {
+      handler: instrumentExampleQuery(selfTraining, "note.get.v1", (input) => {
         const note = state.notes.get(input.noteId);
         if (!note) {
           throw createProtocolError("NOT_FOUND", `Unknown note ${input.noteId}`);
         }
 
         return note;
-      },
+      }),
     })
   );
 

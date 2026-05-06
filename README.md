@@ -39,6 +39,18 @@ Signal is not a payments framework. It is the execution kernel and public contra
 - Storage: pluggable persistence for idempotency and replay state
 - Domain modules: downstream systems built on top of Signal
 
+## Client Session Guidance
+
+Signal keeps execution and transport semantics explicit, but long-running browser session behavior remains a downstream concern.
+
+- browser clients should set request timeouts and treat deadlines as application policy
+- browser clients should use retry and backoff for transient HTTP failures instead of expecting the runtime to schedule retries
+- browser clients should surface stale-state UI when refresh loops pause or fail
+- browser clients should refresh on visibility or connectivity changes when they depend on periodic polling
+- background notifications should be delivered by app-level infrastructure such as web push, email, or another server-side channel
+
+Signal may carry transport-independent hints such as `context.deadlineAt`, but it does not manage browser tab lifecycle, polling loops, reconnection policy, or push delivery for downstream applications.
+
 ## Packages
 
 - `packages/protocol`: messages, names, results, errors, capabilities, and JSON-schema artifacts

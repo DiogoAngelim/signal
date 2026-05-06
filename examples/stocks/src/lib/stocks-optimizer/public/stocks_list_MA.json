@@ -1,0 +1,461 @@
+[
+  {
+    "symbol": "ADH",
+    "name": "Douja Promotion Groupe Addoha SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/douja-prom-addoha.svg"
+  },
+  {
+    "symbol": "ADI",
+    "name": "Alliances Developpement Immobiliere (Ste) SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/alliances.svg"
+  },
+  {
+    "symbol": "AFM",
+    "name": "AFMA SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/afma.svg"
+  },
+  {
+    "symbol": "AGM",
+    "name": "Agma SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/agma.svg"
+  },
+  {
+    "symbol": "AKT",
+    "name": "Akdital",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/akdital-sa.svg"
+  },
+  {
+    "symbol": "ALM",
+    "name": "Aluminium du Maroc",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/aluminium-du-maroc.svg"
+  },
+  {
+    "symbol": "ATL",
+    "name": "AtlantaSanad",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/atlantasanad.svg"
+  },
+  {
+    "symbol": "ATW",
+    "name": "Attijariwafa Bank SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/attijariwafa-bank.svg"
+  },
+  {
+    "symbol": "BAL",
+    "name": "Societe Immobiliere Balima SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/balima.svg"
+  },
+  {
+    "symbol": "BCI",
+    "name": "Banque Marocaine pour le Commerce et l'Industrie",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/paribas.svg"
+  },
+  {
+    "symbol": "BCP",
+    "name": "Banque Centrale Populaire SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/bcp.svg"
+  },
+  {
+    "symbol": "BOA",
+    "name": "Bank of Africa SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-of-africa.svg"
+  },
+  {
+    "symbol": "CAP",
+    "name": "Cash plus S.A",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/cash-plus-sa.svg"
+  },
+  {
+    "symbol": "CDM",
+    "name": "Credit du Maroc (Ste) SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/cdm.svg"
+  },
+  {
+    "symbol": "CFG",
+    "name": "CFG Bank SA Class A",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/cfg-bank.svg"
+  },
+  {
+    "symbol": "CIH",
+    "name": "Credit Immobilier et Hotelier SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/cih.svg"
+  },
+  {
+    "symbol": "CMA",
+    "name": "Ciments du Maroc SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/ciments-du-maroc.svg"
+  },
+  {
+    "symbol": "CMG",
+    "name": "CMGP GROUP",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/cmgp.svg"
+  },
+  {
+    "symbol": "CMT",
+    "name": "Compagnie Miniere de Touissit SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/miniere-touissit.svg"
+  },
+  {
+    "symbol": "COL",
+    "name": "Colorado SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/colorado.svg"
+  },
+  {
+    "symbol": "CRS",
+    "name": "Cartier Saada SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/cartier-saada.svg"
+  },
+  {
+    "symbol": "CSR",
+    "name": "COSUMAR SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/cosumar.svg"
+  },
+  {
+    "symbol": "CTM",
+    "name": "Compagnie de Transport au Maroc SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/ctm.svg"
+  },
+  {
+    "symbol": "DHO",
+    "name": "Delta Holding SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/delta.svg"
+  },
+  {
+    "symbol": "DIS",
+    "name": "DIAC Salaf SA",
+    "market": "CSEMA"
+  },
+  {
+    "symbol": "DLM",
+    "name": "Delattre Levivier Maroc SA",
+    "market": "CSEMA"
+  },
+  {
+    "symbol": "DRI",
+    "name": "DARI Couspate S.A. Class A",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/dari-couspate.svg"
+  },
+  {
+    "symbol": "DWY",
+    "name": "Disway SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/disway.svg"
+  },
+  {
+    "symbol": "DYT",
+    "name": "Disty Technologies SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/disty-technologies.svg"
+  },
+  {
+    "symbol": "EQD",
+    "name": "Societe d'Equipement Domestique et Menager SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/eqdom.svg"
+  },
+  {
+    "symbol": "FBR",
+    "name": "Fenie Brossette (Ste) SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/fenie-brossette.svg"
+  },
+  {
+    "symbol": "GAZ",
+    "name": "Afriquia Gaz",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/afriquia-gaz.svg"
+  },
+  {
+    "symbol": "GTM",
+    "name": "Societe Generale des Travaux du Maroc",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-generale-des-travaux-du-maroc.svg"
+  },
+  {
+    "symbol": "HPS",
+    "name": "Hightech Payment Systems SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/hps.svg"
+  },
+  {
+    "symbol": "IAM",
+    "name": "Maroc Telecom SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/itissalat-al-ma-inh-dh.svg"
+  },
+  {
+    "symbol": "IBC",
+    "name": "IBMaroc.com",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/ib-maroccom.svg"
+  },
+  {
+    "symbol": "IMO",
+    "name": "Immorente Invest SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/immorente-invest.svg"
+  },
+  {
+    "symbol": "INV",
+    "name": "Involys SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/involys.svg"
+  },
+  {
+    "symbol": "JET",
+    "name": "Jet Contractors SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/jet-contractors.svg"
+  },
+  {
+    "symbol": "LBV",
+    "name": "Label'Vie SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/label-vie.svg"
+  },
+  {
+    "symbol": "LES",
+    "name": "Lesieur Cristal SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/lesieur-cristal.svg"
+  },
+  {
+    "symbol": "LHM",
+    "name": "LafargeHolcim Maroc SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/lafargeholcim-bangladesh.svg"
+  },
+  {
+    "symbol": "M2M",
+    "name": "M2M Group SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/m2m.svg"
+  },
+  {
+    "symbol": "MAB",
+    "name": "Maghrebail SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/maghrebail.svg"
+  },
+  {
+    "symbol": "MDP",
+    "name": "Med Paper SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/med-paper.svg"
+  },
+  {
+    "symbol": "MIC",
+    "name": "Microdata SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/microdata.svg"
+  },
+  {
+    "symbol": "MLE",
+    "name": "Maroc Leasing SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/maroc-leasing.svg"
+  },
+  {
+    "symbol": "MNG",
+    "name": "Managem SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/smi.svg"
+  },
+  {
+    "symbol": "MOX",
+    "name": "Maghreb Oxygene SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/maghreb-oxygene.svg"
+  },
+  {
+    "symbol": "MSA",
+    "name": "Marsa Maroc SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/sodep-marsa-maroc.svg"
+  },
+  {
+    "symbol": "MUT",
+    "name": "Mutandis SCA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/mutandis-sca.svg"
+  },
+  {
+    "symbol": "NEJ",
+    "name": "Auto Nejma",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/auto-nejma.svg"
+  },
+  {
+    "symbol": "NKL",
+    "name": "Ennakl",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/ennakl-automobiles.svg"
+  },
+  {
+    "symbol": "OUL",
+    "name": "Les Eaux Minerales d'Oulmes SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/oulmes.svg"
+  },
+  {
+    "symbol": "PRO",
+    "name": "Promopharm SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/promopharm-sa.svg"
+  },
+  {
+    "symbol": "RDS",
+    "name": "Residences Dar Saada S.A.",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/res-dar-saada.svg"
+  },
+  {
+    "symbol": "REB",
+    "name": "Rebab Company SA Limited",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/rebab-company.svg"
+  },
+  {
+    "symbol": "RIS",
+    "name": "Risma SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/risma.svg"
+  },
+  {
+    "symbol": "S2M",
+    "name": "Societe Maghrebine de Monetique SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/sm-monetique.svg"
+  },
+  {
+    "symbol": "SAH",
+    "name": "Sanlam Maroc",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/sanlam-limited.svg"
+  },
+  {
+    "symbol": "SAM",
+    "name": "Marocaine de l'Industrie du Raffinage (Ste Anonyme)",
+    "market": "CSEMA"
+  },
+  {
+    "symbol": "SBM",
+    "name": "Societe des Boissons du Maroc SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-des-boissons-du-maroc.svg"
+  },
+  {
+    "symbol": "SID",
+    "name": "SONASID SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/sonasid.svg"
+  },
+  {
+    "symbol": "SLF",
+    "name": "Salafin SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/salafin.svg"
+  },
+  {
+    "symbol": "SMI",
+    "name": "Societe Metallurgique d'Imiter SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/smi.svg"
+  },
+  {
+    "symbol": "SNA",
+    "name": "Stokvis Nord Afrique (Ste) SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/stokvis-nord-afrique.svg"
+  },
+  {
+    "symbol": "SNP",
+    "name": "Nationale d'Electrolyse et de Petrochimie (Ste) SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/snep.svg"
+  },
+  {
+    "symbol": "SOT",
+    "name": "Sothema",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/sothema.svg"
+  },
+  {
+    "symbol": "SRM",
+    "name": "Societe de Realisations Mecaniques SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/realisations-mecaniques.svg"
+  },
+  {
+    "symbol": "STR",
+    "name": "STROC Industrie SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/stroc-industrie.svg"
+  },
+  {
+    "symbol": "TGC",
+    "name": "Travaux Generaux de Construction de Casablanca S.A.",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/travaux-generaux-de-constructions-de-casablanca.svg"
+  },
+  {
+    "symbol": "TMA",
+    "name": "TotalEnergies Marketing Maroc",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/total.svg"
+  },
+  {
+    "symbol": "TQM",
+    "name": "TAQA Morocco SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/taqa-morocco.svg"
+  },
+  {
+    "symbol": "UMR",
+    "name": "Unimer SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/unimer.svg"
+  },
+  {
+    "symbol": "VCN",
+    "name": "Vicenne",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/vicenne.svg"
+  },
+  {
+    "symbol": "WAA",
+    "name": "Wafa Assurance SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/wafa-assurance.svg"
+  },
+  {
+    "symbol": "ZDJ",
+    "name": "Zellidja (Ste) SA",
+    "market": "CSEMA",
+    "image": "https://s3-symbol-logo.tradingview.com/zellidja-sa.svg"
+  }
+]

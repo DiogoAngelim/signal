@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Bell, MapPin } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+import { AUTO_REFRESH_INTERVAL_MS } from "@/lib/refresh";
 
 export function RegionDetailPage() {
   const [, params] = useRoute("/dashboard/region/:id");
@@ -101,7 +102,7 @@ export function RegionDetailPage() {
     subscribeToUpdates((update) => {
       if (update.regionId !== id) return;
       const now = Date.now();
-      if (now - lastUpdate < 5000) return;
+      if (now - lastUpdate < AUTO_REFRESH_INTERVAL_MS) return;
       lastUpdate = now;
       fetchRegion(id).then((data) => {
         setRegion(data);

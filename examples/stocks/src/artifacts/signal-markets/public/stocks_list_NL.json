@@ -1,0 +1,726 @@
+[
+  {
+    "symbol": "AALB.AS",
+    "name": "Aalberts N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/aalberts-n-v.svg"
+  },
+  {
+    "symbol": "ABN.AS",
+    "name": "ABN AMRO Bank N.V. Depositary receipts",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/abn-amro.svg"
+  },
+  {
+    "symbol": "ACOMO.AS",
+    "name": "Acomo N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/amsterdam-commodities.svg"
+  },
+  {
+    "symbol": "AD.AS",
+    "name": "Koninklijke Ahold Delhaize N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/ahold-delhaize.svg"
+  },
+  {
+    "symbol": "ADYEN.AS",
+    "name": "Adyen NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/adyen.svg"
+  },
+  {
+    "symbol": "AGIL.AS",
+    "name": "Agility Capital Holding Inc.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/thunderbird-resorts.svg"
+  },
+  {
+    "symbol": "AGN.AS",
+    "name": "Aegon Ltd.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/aegon.svg"
+  },
+  {
+    "symbol": "AJAX.AS",
+    "name": "AFC Ajax N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/afc-ajax-nv.svg"
+  },
+  {
+    "symbol": "AKZA.AS",
+    "name": "Akzo Nobel N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/akzo-nobel.svg"
+  },
+  {
+    "symbol": "ALFEN.AS",
+    "name": "Alfen NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/alfen.svg"
+  },
+  {
+    "symbol": "ALLFG.AS",
+    "name": "Allfunds Group plc",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/allfunds-group-plc.svg"
+  },
+  {
+    "symbol": "ALX.AS",
+    "name": "ALUMEXX N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/alumexx-n-v.svg"
+  },
+  {
+    "symbol": "AMG.AS",
+    "name": "AMG Critical Materials N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/amg-advanced-metallurgical-group.svg"
+  },
+  {
+    "symbol": "AMUND.AS",
+    "name": "Almunda Professionals N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/almunda-professional-n-v.svg"
+  },
+  {
+    "symbol": "APAM.AS",
+    "name": "Aperam S.A.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/aperam.svg"
+  },
+  {
+    "symbol": "ARCAD.AS",
+    "name": "Arcadis NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/arcadis.svg"
+  },
+  {
+    "symbol": "ASM.AS",
+    "name": "ASM International N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/asm-international.svg"
+  },
+  {
+    "symbol": "ASML.AS",
+    "name": "ASML Holding NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/asml.svg"
+  },
+  {
+    "symbol": "ASRNL.AS",
+    "name": "ASR Nederland N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/asr-nederland.svg"
+  },
+  {
+    "symbol": "AVTX.AS",
+    "name": "Avantium N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/avantium.svg"
+  },
+  {
+    "symbol": "AXS.AS",
+    "name": "Accsys Technologies PLC",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/accsys-technologies-plc.svg"
+  },
+  {
+    "symbol": "AZRN.AS",
+    "name": "Azerion Group N.V",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/azerion-group-n-v.svg"
+  },
+  {
+    "symbol": "AZRNW.AS",
+    "name": "Azerion Group N.V Warrant 2021-28 on Eur FNT IPO",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/azerion-group-n-v.svg"
+  },
+  {
+    "symbol": "BACE.AS",
+    "name": "BM3EAC Corp.",
+    "market": "Euronext Amsterdam"
+  },
+  {
+    "symbol": "BAMNB.AS",
+    "name": "Koninklijke BAM Groep NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/koninklijke-bam-groep-n-v.svg"
+  },
+  {
+    "symbol": "BESI.AS",
+    "name": "BE Semiconductor Industries N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/be-semiconductor-industries.svg"
+  },
+  {
+    "symbol": "BEVER.AS",
+    "name": "N.V. Bever Holding",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/bever-holding-gewone-aandelen.svg"
+  },
+  {
+    "symbol": "BFIT.AS",
+    "name": "Basic-Fit NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/basic-fit.svg"
+  },
+  {
+    "symbol": "BNJ.AS",
+    "name": "Banijay Group N.V. Class A",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/banijay-65-gtd-snr-nts-01-03-26-eur100000-regs.svg"
+  },
+  {
+    "symbol": "BRNL.AS",
+    "name": "Brunel International N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/brunel-internat.svg"
+  },
+  {
+    "symbol": "CABKA.AS",
+    "name": "Cabka N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/cabka-nv.svg"
+  },
+  {
+    "symbol": "CABLE.AS",
+    "name": "Global InterConnection Group Limited",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/global-interconnection-limited.svg"
+  },
+  {
+    "symbol": "CCEP.AS",
+    "name": "Coca-Cola Europacific Partners plc",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/coca-cola.svg"
+  },
+  {
+    "symbol": "CMCOM.AS",
+    "name": "CM.com N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/cm-com.svg"
+  },
+  {
+    "symbol": "CRBN.AS",
+    "name": "Corbion NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/corbion.svg"
+  },
+  {
+    "symbol": "CSG.AS",
+    "name": "CSG N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/csg-bv.svg"
+  },
+  {
+    "symbol": "CTAC.AS",
+    "name": "Ctac NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/ctac.svg"
+  },
+  {
+    "symbol": "CTPNV.AS",
+    "name": "CTP N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/ctp-nv.svg"
+  },
+  {
+    "symbol": "CVC.AS",
+    "name": "CVC Capital Partners plc",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/cvc-capital-partners-plc.svg"
+  },
+  {
+    "symbol": "DSC2S.AS",
+    "name": "Cabka N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/cabka-nv.svg"
+  },
+  {
+    "symbol": "DSCW2.AS",
+    "name": "Cabka N.V. Warrant 2020-23.11.25",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/cabka-nv.svg"
+  },
+  {
+    "symbol": "DSCW3.AS",
+    "name": "Cabka N.V. Warrant 2020-23.11.25",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/cabka-nv.svg"
+  },
+  {
+    "symbol": "DSFIR.AS",
+    "name": "DSM-Firmenich AG",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/dsm-kon.svg"
+  },
+  {
+    "symbol": "EARTH.AS",
+    "name": "GREEN EARTH GROUP N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/dgb-group-n-v.svg"
+  },
+  {
+    "symbol": "EAS2P.AS",
+    "name": "Ease2pay N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/ease2pay-nv.svg"
+  },
+  {
+    "symbol": "EBUS.AS",
+    "name": "Ebusco Holding N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/ebusco-holding-n-v.svg"
+  },
+  {
+    "symbol": "ECMPA.AS",
+    "name": "Eurocommercial Properties NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/eurocommercial-properties.svg"
+  },
+  {
+    "symbol": "ENVI.AS",
+    "name": "Envipco Holding N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/envipco.svg"
+  },
+  {
+    "symbol": "ERC.AS",
+    "name": "ER Capital N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/tie-kinetix.svg"
+  },
+  {
+    "symbol": "EXO.AS",
+    "name": "EXOR N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/exor.svg"
+  },
+  {
+    "symbol": "FAST.AS",
+    "name": "Fastned BV Shs Depositary Receipt 1 Shs",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/fastned.svg"
+  },
+  {
+    "symbol": "FER.AS",
+    "name": "Ferrovial SE",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/ferrovial.svg"
+  },
+  {
+    "symbol": "FERGR.AS",
+    "name": "Ferrari Group PLC",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/ferrari-group.svg"
+  },
+  {
+    "symbol": "FFARM.AS",
+    "name": "ForFarmers NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/forfarmers.svg"
+  },
+  {
+    "symbol": "FLOW.AS",
+    "name": "Flow Traders Ltd",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/flow-traders-ltd.svg"
+  },
+  {
+    "symbol": "FUR.AS",
+    "name": "Fugro NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/fugro.svg"
+  },
+  {
+    "symbol": "GLPG.AS",
+    "name": "Galapagos NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/galapagos.svg"
+  },
+  {
+    "symbol": "HAL.AS",
+    "name": "HAL Trust",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/hal-trust.svg"
+  },
+  {
+    "symbol": "HAVAS.AS",
+    "name": "Havas NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/havas-nv.svg"
+  },
+  {
+    "symbol": "HEIA.AS",
+    "name": "Heineken NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/heineken.svg"
+  },
+  {
+    "symbol": "HEIJM.AS",
+    "name": "Koninklijke Heijmans N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/heijmans.svg"
+  },
+  {
+    "symbol": "HEIO.AS",
+    "name": "Heineken Holding N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/heineken.svg"
+  },
+  {
+    "symbol": "HOLCO.AS",
+    "name": "Holland Colours NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/holland-colours.svg"
+  },
+  {
+    "symbol": "HWK.AS",
+    "name": "Hawick Data N.V",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/iex-group-n-v.svg"
+  },
+  {
+    "symbol": "HYDRA.AS",
+    "name": "Hydratec Industries NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/hydratec-gewone-aandelen.svg"
+  },
+  {
+    "symbol": "IMCD.AS",
+    "name": "IMCD N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/imcd.svg"
+  },
+  {
+    "symbol": "INGA.AS",
+    "name": "ING Groep N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/ing.svg"
+  },
+  {
+    "symbol": "INPST.AS",
+    "name": "InPost S.A.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/inpost-s-a.svg"
+  },
+  {
+    "symbol": "JDEP.AS",
+    "name": "JDE Peet's NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/jde-peet-s.svg"
+  },
+  {
+    "symbol": "KENDR.AS",
+    "name": "Kendrion N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/kendrion-n-v.svg"
+  },
+  {
+    "symbol": "KPN.AS",
+    "name": "Royal KPN NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/kpn-kon.svg"
+  },
+  {
+    "symbol": "LIGHT.AS",
+    "name": "Signify NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/signify-nv.svg"
+  },
+  {
+    "symbol": "LVIDE.AS",
+    "name": "Lavide Holding N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/lavide-holding.svg"
+  },
+  {
+    "symbol": "MICC.AS",
+    "name": "Magnum Ice Cream Co. N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/the-magnum-ice-cream-company-nv.svg"
+  },
+  {
+    "symbol": "MORE.AS",
+    "name": "Morefield Group N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/morefield-group-n-v.svg"
+  },
+  {
+    "symbol": "MT.AS",
+    "name": "ArcelorMittal SA",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/arcelormittal.svg"
+  },
+  {
+    "symbol": "MTRK.AS",
+    "name": "MotorK PLC",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/motork-plc.svg"
+  },
+  {
+    "symbol": "NAI.AS",
+    "name": "New Amsterdam Invest NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/new-amsterdam-invest-nv-treasury-shares.svg"
+  },
+  {
+    "symbol": "NAITR.AS",
+    "name": "New Amsterdam Invest NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/new-amsterdam-invest-nv-treasury-shares.svg"
+  },
+  {
+    "symbol": "NEDAP.AS",
+    "name": "Nedap N.V",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/nedap.svg"
+  },
+  {
+    "symbol": "NEDSE.AS",
+    "name": "MKB NedSense N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/mkb-nedsense-n-v.svg"
+  },
+  {
+    "symbol": "NN.AS",
+    "name": "NN Group N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/nn-group.svg"
+  },
+  {
+    "symbol": "NRP.AS",
+    "name": "NEPI Rockcastle N.V",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/nepi-rockcastle-nv.svg"
+  },
+  {
+    "symbol": "NSE.AS",
+    "name": "New Sources Energy NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/new-sources-energy-n-v.svg"
+  },
+  {
+    "symbol": "NSI.AS",
+    "name": "NSI NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/nsi-nv.svg"
+  },
+  {
+    "symbol": "NXFIL.AS",
+    "name": "NX Filtration N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/nx-filtration-n-v.svg"
+  },
+  {
+    "symbol": "OCI.AS",
+    "name": "OCI NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/oci-n-v.svg"
+  },
+  {
+    "symbol": "PBH.AS",
+    "name": "PB Holding NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/pb-holding.svg"
+  },
+  {
+    "symbol": "PHARM.AS",
+    "name": "Pharming Group NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/pharming-group.svg"
+  },
+  {
+    "symbol": "PHIA.AS",
+    "name": "Koninklijke Philips N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/philips.svg"
+  },
+  {
+    "symbol": "PNL.AS",
+    "name": "PostNL NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/postnl.svg"
+  },
+  {
+    "symbol": "PORF.AS",
+    "name": "N.V. Koninklijke Porceleyne Fles",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/koninklijke-porceleyne-fles.svg"
+  },
+  {
+    "symbol": "PPLA.AS",
+    "name": "PPLA Participations Ltd GDR",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/ppla-unt.svg"
+  },
+  {
+    "symbol": "PPLAA.AS",
+    "name": "PPLA Participations Ltd Class A",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/ppla-unt.svg"
+  },
+  {
+    "symbol": "PPLAB.AS",
+    "name": "PPLA Participations Ltd Class B",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/ppla-unt.svg"
+  },
+  {
+    "symbol": "PREVA.AS",
+    "name": "VALUE8 NV Cumulative Preferent Shares Shs",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/value8.svg"
+  },
+  {
+    "symbol": "PRX.AS",
+    "name": "Prosus N.V. Class N",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/prosus.svg"
+  },
+  {
+    "symbol": "QEV.AS",
+    "name": "QEV N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/spear-investments-i-bv-ordinary-shares.svg"
+  },
+  {
+    "symbol": "QEVT.AS",
+    "name": "QEV N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/spear-investments-i-bv-ordinary-shares.svg"
+  },
+  {
+    "symbol": "RAND.AS",
+    "name": "Randstad NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/randstad.svg"
+  },
+  {
+    "symbol": "REINA.AS",
+    "name": "Reinet Investments S.C.A.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/reinetin.svg"
+  },
+  {
+    "symbol": "REN.AS",
+    "name": "RELX PLC",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/relx.svg"
+  },
+  {
+    "symbol": "SBMO.AS",
+    "name": "SBM Offshore NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/sbm-offshore.svg"
+  },
+  {
+    "symbol": "SHELL.AS",
+    "name": "Shell Plc",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/shell.svg"
+  },
+  {
+    "symbol": "SIFG.AS",
+    "name": "Sif Holding N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/sif-holding.svg"
+  },
+  {
+    "symbol": "SLIGR.AS",
+    "name": "Sligro Food Group N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/sligro-food-group-n-v.svg"
+  },
+  {
+    "symbol": "SWICH.AS",
+    "name": "SWI Capital Holding Ltd.",
+    "market": "Euronext Amsterdam"
+  },
+  {
+    "symbol": "TFG.AS",
+    "name": "Tetragon Financial Group Limited",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/tetragon-financial-group.svg"
+  },
+  {
+    "symbol": "THEON.AS",
+    "name": "Theon International Plc",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/theon-international-plc.svg"
+  },
+  {
+    "symbol": "TOM2.AS",
+    "name": "TomTom NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/tomtom.svg"
+  },
+  {
+    "symbol": "TRIO.AS",
+    "name": "TRIODOS BANK NV Depositary Receipt",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/triodos-bank-nv-225-frn-lt2-05-02-2032-eur100000-regs.svg"
+  },
+  {
+    "symbol": "TWEKA.AS",
+    "name": "TKH Group N.V. Cert",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/tkh-group-n-v.svg"
+  },
+  {
+    "symbol": "UMG.AS",
+    "name": "Universal Music Group N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/universal-music-group-n-v.svg"
+  },
+  {
+    "symbol": "UNA.AS",
+    "name": "Unilever PLC",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/unilever.svg"
+  },
+  {
+    "symbol": "VALUE.AS",
+    "name": "VALUE8 NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/value8.svg"
+  },
+  {
+    "symbol": "VLK.AS",
+    "name": "Van Lanschot Kempen NV cert. of shs",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/v-lanschot-kempen.svg"
+  },
+  {
+    "symbol": "VPK.AS",
+    "name": "Royal Vopak NV",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/vopak.svg"
+  },
+  {
+    "symbol": "VTA.AS",
+    "name": "Volta Finance Limited",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/volta-finance-limited.svg"
+  },
+  {
+    "symbol": "VVY.AS",
+    "name": "Vivoryon Therapeutics N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/vivoryon-therapeutics-n-v.svg"
+  },
+  {
+    "symbol": "WHA.AS",
+    "name": "Wereldhave N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/wereldhave-belgium.svg"
+  },
+  {
+    "symbol": "WKL.AS",
+    "name": "Wolters Kluwer N.V.",
+    "market": "Euronext Amsterdam",
+    "image": "https://s3-symbol-logo.tradingview.com/wolters-kluwer.svg"
+  }
+]

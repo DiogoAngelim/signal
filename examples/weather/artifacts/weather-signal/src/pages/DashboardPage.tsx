@@ -11,6 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Map as MapIcon, Search } from "lucide-react";
+import { AUTO_REFRESH_INTERVAL_MS } from "@/lib/refresh";
+
+const MAX_VISIBLE_REGIONS = 120;
 
 export function DashboardPage() {
   const isNotificationSupported = useMemo(
@@ -50,6 +53,7 @@ export function DashboardPage() {
       const matchesSearch = !needle
         ? true
         : region.name.toLowerCase().includes(needle) ||
+        (region.state?.toLowerCase().includes(needle) ?? false) ||
         region.country.toLowerCase().includes(needle) ||
         region.id.toLowerCase().includes(needle);
       const action = region.signalAction ?? "No Action";
@@ -57,6 +61,10 @@ export function DashboardPage() {
       return matchesSearch && matchesSignal;
     });
   }, [regions, searchQuery, signalFilter]);
+  const visibleRegions = useMemo(
+    () => filteredRegions.slice(0, MAX_VISIBLE_REGIONS),
+    [filteredRegions]
+  );
   const summaryRegions = activeTab === "search" ? filteredRegions : regions;
   const notificationsDisabled = notificationState === "unsupported" || notificationState === "denied";
 
@@ -146,7 +154,7 @@ export function DashboardPage() {
 
     subscribeToUpdates((update) => {
       const now = Date.now();
-      if (now - lastRefreshRef.current > 5000) {
+      if (now - lastRefreshRef.current > AUTO_REFRESH_INTERVAL_MS) {
         lastRefreshRef.current = now;
         refreshNow();
       }
@@ -251,9 +259,14 @@ export function DashboardPage() {
                     </SelectContent>
                   </Select>
                   <div className="text-xs text-muted-foreground">
-                    Showing {filteredRegions.length} of {regions.length} regions
+                    Showing {Math.min(visibleRegions.length, filteredRegions.length)} of {filteredRegions.length} matching regions, {regions.length} total
                   </div>
                 </div>
+                {filteredRegions.length > MAX_VISIBLE_REGIONS && (
+                  <div className="text-xs text-muted-foreground">
+                    Refine search or signal filters to narrow results beyond the first {MAX_VISIBLE_REGIONS} municipalities.
+                  </div>
+                )}
                 {notificationState === "denied" && (
                   <div className="text-xs text-destructive">
                     Notifications are blocked in your browser settings.
@@ -276,7 +289,7 @@ export function DashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               <div className="lg:col-span-3 space-y-6">
                 <RegionGrid
-                  regions={filteredRegions}
+                  regions={visibleRegions}
                   isLoading={isLoading}
                   notifiedRegionIds={notifiedRegionSet}
                   notificationsDisabled={notificationsDisabled}

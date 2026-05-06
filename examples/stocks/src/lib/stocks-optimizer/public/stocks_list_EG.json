@@ -1,0 +1,1506 @@
+[
+  {
+    "symbol": "AALR.CA",
+    "name": "General Co. for Land Reclamation Development & Reconstruction",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/general-company-for-land-reclamationdevelopment-and-reconstru.svg"
+  },
+  {
+    "symbol": "ABUK.CA",
+    "name": "Abou Kir Fertilizers & Chemical Industries Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/abou-kir-fertilizers.svg"
+  },
+  {
+    "symbol": "ACAMD.CA",
+    "name": "Arab Co. for Asset Management & Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-co-for-asset-management-and-development.svg"
+  },
+  {
+    "symbol": "ACGC.CA",
+    "name": "Arab Cotton Ginning Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-cotton-ginning.svg"
+  },
+  {
+    "symbol": "ADCI.CA",
+    "name": "Arab Pharmaceuticals",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-pharmaceuticals.svg"
+  },
+  {
+    "symbol": "ADIB.CA",
+    "name": "Abu Dhabi Islamic Bank-Egypt",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/abu-dhabi-islamic-bank-egypt.svg"
+  },
+  {
+    "symbol": "ADPC.CA",
+    "name": "Arab Dairy Products Co. Arab Dairy - Panda",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-arab-dairy-products-co-arab-dairy-panda.svg"
+  },
+  {
+    "symbol": "ADRI.CA",
+    "name": "Arab Development & Real Estate Investment",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-development-and-real-estate-investment.svg"
+  },
+  {
+    "symbol": "AFDI.CA",
+    "name": "Alahly For Development & Investment",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-ahli-investment-and-development.svg"
+  },
+  {
+    "symbol": "AFMC.CA",
+    "name": "Alexandria Flour Mills Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/alexandria-flour-mills.svg"
+  },
+  {
+    "symbol": "AIFI.CA",
+    "name": "Atlas for Investment & Food Industries SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/atlas-for-investment-and-food-industries.svg"
+  },
+  {
+    "symbol": "AIH.CA",
+    "name": "Arabia Investments Holding SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arabia-investments.svg"
+  },
+  {
+    "symbol": "AJWA.CA",
+    "name": "Ajwa for Food Industries Co. Egypt",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ajwa-for-food-industries-company-egypt.svg"
+  },
+  {
+    "symbol": "ALCN.CA",
+    "name": "Alexandria Containers & Goods",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/alexandria-containers-and-goods.svg"
+  },
+  {
+    "symbol": "ALUM.CA",
+    "name": "Arab Aluminum Co. SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-aluminum.svg"
+  },
+  {
+    "symbol": "AMER.CA",
+    "name": "Amer Group Holding",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/amer.svg"
+  },
+  {
+    "symbol": "AMES.CA",
+    "name": "Alexandria New Medical Center Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/alexandria-new-medical-center.svg"
+  },
+  {
+    "symbol": "AMIA.CA",
+    "name": "Arab Moltaqa Investments Company",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-moltaka-investments-co.svg"
+  },
+  {
+    "symbol": "AMOC.CA",
+    "name": "Alexandria Mineral Oils Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/alexandria-mineral-oils-company.svg"
+  },
+  {
+    "symbol": "AMPI.CA",
+    "name": "AL Moasher Pay for Electronic Payment and Collection (S.A.E)",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/al-moasher-for-programming-and-information-dissemination.svg"
+  },
+  {
+    "symbol": "ANFI.CA",
+    "name": "Alexandria National Co. for Financial Investment",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/alexandria-national-company-for-financial-investment.svg"
+  },
+  {
+    "symbol": "APSW.CA",
+    "name": "Arab Polvara Spinning & Weaving Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-polvara-spinning-and-weaving-co.svg"
+  },
+  {
+    "symbol": "ARAB.CA",
+    "name": "Arab Developers Holding",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-developers.svg"
+  },
+  {
+    "symbol": "ARCC.CA",
+    "name": "Arabian Cement Company",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arabian-cement-company.svg"
+  },
+  {
+    "symbol": "AREH.CA",
+    "name": "Egyptian Real Estate Group",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-real-estate.svg"
+  },
+  {
+    "symbol": "ARVA.CA",
+    "name": "Arab Valves Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-valves-company.svg"
+  },
+  {
+    "symbol": "ASCM.CA",
+    "name": "ASEC Co. for Mining",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/asek-company-for-mining-ascom.svg"
+  },
+  {
+    "symbol": "ASPI.CA",
+    "name": "Aspire Capital Holding for Financial Investments",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/aspire-capital-for-financial-investments.svg"
+  },
+  {
+    "symbol": "ATLC.CA",
+    "name": "Al Tawfeek Leasing Company-A.T.LEASE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/rights-issue-of-al-tawfeek-leasing-company-atlease-1.svg"
+  },
+  {
+    "symbol": "ATQA.CA",
+    "name": "Misr National Steel",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/misr-national-steel-ataqa.svg"
+  },
+  {
+    "symbol": "AXPH.CA",
+    "name": "Alexandria Company for Pharmaceuticals and Chemical Industries",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/alexandria-pharmaceuticals.svg"
+  },
+  {
+    "symbol": "BIDI.CA",
+    "name": "El Badr Investment and Development - BID",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-badr-investment-and-development-bid.svg"
+  },
+  {
+    "symbol": "BIGP.CA",
+    "name": "ElBarbary Investment Group",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/barbary-investment-big.svg"
+  },
+  {
+    "symbol": "BINV.CA",
+    "name": "B Investments Holding SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/b-investments.svg"
+  },
+  {
+    "symbol": "BIOC.CA",
+    "name": "GlaxoSmithKline S.A.E.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/glaxosmithkline.svg"
+  },
+  {
+    "symbol": "BTFH.CA",
+    "name": "Beltone Holding",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/belton-financial.svg"
+  },
+  {
+    "symbol": "CAED.CA",
+    "name": "Cairo Educational Services",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cairo-educational-services.svg"
+  },
+  {
+    "symbol": "CANA.CA",
+    "name": "Suez Canal Bank SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/suez-canal-bank-sae.svg"
+  },
+  {
+    "symbol": "CCAP.CA",
+    "name": "QALA For Financial Investments",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/citadel-capital-common-shares.svg"
+  },
+  {
+    "symbol": "CCAPP.CA",
+    "name": "QALA For Financial Investments Pref Registered Shs",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/citadel-capital-common-shares.svg"
+  },
+  {
+    "symbol": "CCRS.CA",
+    "name": "Gulf Canadian Real Estate Investment Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-canadian-real-estate-investment-co.svg"
+  },
+  {
+    "symbol": "CEFM.CA",
+    "name": "Middle Egypt Flour Mills",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/middle-egypt-flour-mills.svg"
+  },
+  {
+    "symbol": "CERA.CA",
+    "name": "Arab Ceramic Co. - Ceramica Remas",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-arab-ceramic-co-ceramica-remas.svg"
+  },
+  {
+    "symbol": "CFGH.CA",
+    "name": "Concrete Fashion Group for Commercial and Industrial Investments S.A.E",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/al-arafa-for-investment-and-consultancies.svg"
+  },
+  {
+    "symbol": "CICH.CA",
+    "name": "CI Capital Holding for Financial Investments",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ci-capital-for-financial-investments.svg"
+  },
+  {
+    "symbol": "CIEB.CA",
+    "name": "Credit Agricole Egypt",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-agricole-egypt.svg"
+  },
+  {
+    "symbol": "CIRA.CA",
+    "name": "Cairo For Investment And Real Estate Developments -CIRA Education",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cairo-for-investment-and-real-estate-development.svg"
+  },
+  {
+    "symbol": "CLHO.CA",
+    "name": "Cleopatra Hospital Company",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cleopatra-hospital-company.svg"
+  },
+  {
+    "symbol": "CNFN.CA",
+    "name": "Contact Financial Holding SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/contact-financial.svg"
+  },
+  {
+    "symbol": "COMI.CA",
+    "name": "Commercial International Bank - Egypt (CIB) S.A.E.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/commercial-international-bank-egypt.svg"
+  },
+  {
+    "symbol": "COPR.CA",
+    "name": "Cooper for Commercial Investment & Real Estate Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/national-real-estate-bank-for-development.svg"
+  },
+  {
+    "symbol": "COSG.CA",
+    "name": "Cairo Oils & Soap",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cairo-oils-and-soap.svg"
+  },
+  {
+    "symbol": "CPCI.CA",
+    "name": "Kahira Pharmaceuticals & Chemical Industries Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cairo-pharmaceuticals.svg"
+  },
+  {
+    "symbol": "CPME.CA",
+    "name": "Catalyst Partners Middle East",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/catalyst-parteners-middle-east-cpme.svg"
+  },
+  {
+    "symbol": "CRST.CA",
+    "name": "Creast Mark For Contracting And Real Estate Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-egyptian-company-for-construction-development-lift-slab.svg"
+  },
+  {
+    "symbol": "CSAG.CA",
+    "name": "Canal Shipping Agencies Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/canal-shipping-agencies.svg"
+  },
+  {
+    "symbol": "DAPH.CA",
+    "name": "Development & Engineering Consultants",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/development-and-engineering-consultants.svg"
+  },
+  {
+    "symbol": "DCCC.CA",
+    "name": "Damietta Container and Cargo Handling",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/damietta-container-and-cargo-handling.svg"
+  },
+  {
+    "symbol": "DEIN.CA",
+    "name": "Delta Insurance",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-insurance.svg"
+  },
+  {
+    "symbol": "DGTZ.CA",
+    "name": "Digitize for Investment And Technology",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/digitize-for-investment-and-technology.svg"
+  },
+  {
+    "symbol": "DOMT.CA",
+    "name": "Arabian Food Industries Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arabian-food-industries-domty.svg"
+  },
+  {
+    "symbol": "DSCW.CA",
+    "name": "Dice Sports & Casual Wear Manufacturers SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/dice-sport-and-casual-wear.svg"
+  },
+  {
+    "symbol": "DTPP.CA",
+    "name": "Delta for Printing & Packaging",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-for-printing-and-packaging.svg"
+  },
+  {
+    "symbol": "EALR.CA",
+    "name": "El Arabia for Land Reclamation",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-arabia-for-land-reclamation.svg"
+  },
+  {
+    "symbol": "EASB.CA",
+    "name": "Egyptian Arabian Company for Securities Brokerage EAC",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-arabian-themar-comp-for-securitiesandbonds-brok-eac.svg"
+  },
+  {
+    "symbol": "EAST.CA",
+    "name": "Eastern Company",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/eastern-company.svg"
+  },
+  {
+    "symbol": "EBSC.CA",
+    "name": "Osool ESB Securities Brokerage",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/osool-esb-securities-brokerage.svg"
+  },
+  {
+    "symbol": "ECAP.CA",
+    "name": "El Ezz Ceramics & Porcelain Co. (Gemma)",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-ezz-porcelain-gemma.svg"
+  },
+  {
+    "symbol": "EDFM.CA",
+    "name": "East Delta Flour Mills Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/east-delta-flour-mills.svg"
+  },
+  {
+    "symbol": "EEII.CA",
+    "name": "El Arabia Engineering Industries",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-arabia-engineering-industries.svg"
+  },
+  {
+    "symbol": "EFIC.CA",
+    "name": "Egyptian Financial & Industrial Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-financial-and-industrial.svg"
+  },
+  {
+    "symbol": "EFID.CA",
+    "name": "Edita Food Industries SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/edita-food-industries-sae.svg"
+  },
+  {
+    "symbol": "EFIH.CA",
+    "name": "e-finance for Digital and Financial Investments S.A.E.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/e-finance-for-digital-and-financial-investments.svg"
+  },
+  {
+    "symbol": "EGAL.CA",
+    "name": "Egypt Aluminum",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egypt-aluminum.svg"
+  },
+  {
+    "symbol": "EGAS.CA",
+    "name": "Egypt Gas Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/natural-gas-and-mining-project-egypt-gas.svg"
+  },
+  {
+    "symbol": "EGBE.CA",
+    "name": "Egyptian Gulf Bank",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-gulf-bank.svg"
+  },
+  {
+    "symbol": "EGCH.CA",
+    "name": "Egyptian Chemical Industries",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-chemical-industries-kima.svg"
+  },
+  {
+    "symbol": "EGS370O1C013.CA",
+    "name": "National Printing",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/national-printing.svg"
+  },
+  {
+    "symbol": "EGS385S1C012.CA",
+    "name": "Ferchem Misr Co. for Fertilizers & Chemicals",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ferchem-misr-co-for-fertillizers-and-chemicals.svg"
+  },
+  {
+    "symbol": "EGS3E071C013.CA",
+    "name": "Acrow Misr",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/acrow-misr.svg"
+  },
+  {
+    "symbol": "EGS632D1C010.CA",
+    "name": "Misr Life Insurance",
+    "market": "EGX"
+  },
+  {
+    "symbol": "EGS72351C017.CA",
+    "name": "Al-Safwa Hospital",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/al-safwa-hospital.svg"
+  },
+  {
+    "symbol": "EGS72L31C011.CA",
+    "name": "SOLARSOL For Energy",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/solarsol-for-energy.svg"
+  },
+  {
+    "symbol": "EGS72XL1C014.CA",
+    "name": "Premium Healthcare Group",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/rights-issue-of-premium-healthcare-1.svg"
+  },
+  {
+    "symbol": "EGSA.CA",
+    "name": "Egyptian Satellite Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-satellites-nilesat.svg"
+  },
+  {
+    "symbol": "EGTS.CA",
+    "name": "Egyptian for Tourism Resorts",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-for-tourism-resorts.svg"
+  },
+  {
+    "symbol": "EGWA.CA",
+    "name": "General Warehouses of Egypt",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/general-warehouses-of-egypt.svg"
+  },
+  {
+    "symbol": "EHDR.CA",
+    "name": "Egyptians Housing Development & Reconstruction",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptians-housing-development-and-reconstruction.svg"
+  },
+  {
+    "symbol": "ELEC.CA",
+    "name": "Electro Cable Egypt",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/electro-cable-egypt.svg"
+  },
+  {
+    "symbol": "ELKA.CA",
+    "name": "El Kahera Housing",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-kahera-housing.svg"
+  },
+  {
+    "symbol": "ELNA.CA",
+    "name": "El Nasr for Manufacturing Agricultural Crops",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-nasr-for-manufacturing-agricultural-crops.svg"
+  },
+  {
+    "symbol": "ELSH.CA",
+    "name": "El-Shams Housing & Development SA",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-shams-housing-and-urbanization.svg"
+  },
+  {
+    "symbol": "ELWA.CA",
+    "name": "Elwadi for International Investment & Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-wadi-for-international-and-investement-development.svg"
+  },
+  {
+    "symbol": "EMFD.CA",
+    "name": "Emaar Misr for Development SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/emaar-misr-for-development.svg"
+  },
+  {
+    "symbol": "ENGC.CA",
+    "name": "Industrial Engineering Co. for Construction & Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/engineering-industries-icon.svg"
+  },
+  {
+    "symbol": "EOSB.CA",
+    "name": "El Orouba Securities Brokerage",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-orouba-securities-brokerage.svg"
+  },
+  {
+    "symbol": "EPCO.CA",
+    "name": "Egypt for Poultry Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egypt-for-poultry.svg"
+  },
+  {
+    "symbol": "EPPK.CA",
+    "name": "El Ahram Co. for Printing & Packing",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-ahram-co-for-printing-and-packing.svg"
+  },
+  {
+    "symbol": "ETEL.CA",
+    "name": "Telecom Egypt",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/telecom-egypt.svg"
+  },
+  {
+    "symbol": "ETRS.CA",
+    "name": "Egyptian Transport & Commercial Services Co. SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-transport-egytrans.svg"
+  },
+  {
+    "symbol": "EXPA.CA",
+    "name": "Export Development Bank of Egypt",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/export-development-bank-of-egypt-edbe.svg"
+  },
+  {
+    "symbol": "FAIT.CA",
+    "name": "Faisal Islamic Bank of Egypt",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/faisal-islamic-bank-of-egypt-in-egp.svg"
+  },
+  {
+    "symbol": "FAITA.CA",
+    "name": "Faisal Islamic Bank of Egypt",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/faisal-islamic-bank-of-egypt-in-egp.svg"
+  },
+  {
+    "symbol": "FIRE.CA",
+    "name": "First Investment & Real Estate Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-investment-company-and-real-estate-development.svg"
+  },
+  {
+    "symbol": "FNAR.CA",
+    "name": "Al Fanar Contracting Construction Trade Import & Export Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/al-fanar-contracting-construction-trade-import-and-export-co.svg"
+  },
+  {
+    "symbol": "FTNS.CA",
+    "name": "Fitness Prime",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/fitness-prime.svg"
+  },
+  {
+    "symbol": "FWRY.CA",
+    "name": "Fawry For Banking Technology And Electronic Payment",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/fawry-for-banking-technology-and-electronic-payment.svg"
+  },
+  {
+    "symbol": "GBCO.CA",
+    "name": "GB Corp",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gb-auto.svg"
+  },
+  {
+    "symbol": "GDWA.CA",
+    "name": "Gadwa For Industrial Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gadwa-for-industrial-development.svg"
+  },
+  {
+    "symbol": "GEOS.CA",
+    "name": "Geos for trading and contracting",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/geos-for-trading-and-contracting.svg"
+  },
+  {
+    "symbol": "GGCC.CA",
+    "name": "Giza General Contracting & Real Estate Investment",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/giza-general-contracting.svg"
+  },
+  {
+    "symbol": "GGRN.CA",
+    "name": "Gogreen for Agricultural Investment and Development Company",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gogreen-for-agricultural-investment.svg"
+  },
+  {
+    "symbol": "GIHD.CA",
+    "name": "Gharbia Islamic Housing Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gharbia-islamic-housing-development.svg"
+  },
+  {
+    "symbol": "GMCI.CA",
+    "name": "GMC Group for Industrial Commercial & Financial Investments",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gmc-for-industrial-commercial-and-financial-investments.svg"
+  },
+  {
+    "symbol": "GOUR.CA",
+    "name": "Gourmet Egypt.Com Foods",
+    "market": "EGX"
+  },
+  {
+    "symbol": "GPIM.CA",
+    "name": "GPI For Urban Growth",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptians-for-investment-and-urban-development.svg"
+  },
+  {
+    "symbol": "GPPL.CA",
+    "name": "Golden Pyramids Plaza",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/golden-pyramids-plaza.svg"
+  },
+  {
+    "symbol": "GRCA.CA",
+    "name": "Grand Investment Capital",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/grand-investment-capital.svg"
+  },
+  {
+    "symbol": "GSSC.CA",
+    "name": "General Silos & Storage Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/general-silos-and-storage.svg"
+  },
+  {
+    "symbol": "GTEX.CA",
+    "name": "G-TEX for Commercial and Industrial Investments S.A.E",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gtex-for-commercial-and-industrial.svg"
+  },
+  {
+    "symbol": "GTWL.CA",
+    "name": "Golden Textiles & Clothes Wool",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/golden-textiles-and-clothes-wool.svg"
+  },
+  {
+    "symbol": "HAVC.CA",
+    "name": "Hassan Allam Investments & Venture Capital S.A.E",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hassan-allam-investment-and-venture-capital.svg"
+  },
+  {
+    "symbol": "HBCO.CA",
+    "name": "Heibco Npv",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/heibco-for-commercial-investments-and-real-estate-development.svg"
+  },
+  {
+    "symbol": "HDBK.CA",
+    "name": "Housing & Development Bank",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/housing-and-development-bank.svg"
+  },
+  {
+    "symbol": "HDST.CA",
+    "name": "HEDGESTONE INVESTMENT",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hedgestone-investment.svg"
+  },
+  {
+    "symbol": "HELI.CA",
+    "name": "Heliopolis Housing",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/heliopolis-housing.svg"
+  },
+  {
+    "symbol": "HRHO.CA",
+    "name": "EFG Holding S.A.E.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-financial-hermes-company.svg"
+  },
+  {
+    "symbol": "IBCT.CA",
+    "name": "International Business Corp. for Trading & Agencies",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/international-business-for-trading-and-agencies.svg"
+  },
+  {
+    "symbol": "ICFC.CA",
+    "name": "International Co. for Fertilizers & Chemicals",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/international-company-for-fertilizers-and-chemicals.svg"
+  },
+  {
+    "symbol": "ICID.CA",
+    "name": "International Company for Investment & Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/international-co-for-investment-and-development.svg"
+  },
+  {
+    "symbol": "ICLE.CA",
+    "name": "International Co. for Leasing SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/international-company-for-leasing-incolease.svg"
+  },
+  {
+    "symbol": "ICMI.CA",
+    "name": "International Company for Medical Industries",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/international-company-for-medical-industries-icmi.svg"
+  },
+  {
+    "symbol": "IDRE.CA",
+    "name": "Ismailia Development & Real Estate Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ismailia-development-and-real-estate-co.svg"
+  },
+  {
+    "symbol": "IEEC.CA",
+    "name": "Industrial & Engineering Enterprises Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/industrial-and-engineering-enterprises-co.svg"
+  },
+  {
+    "symbol": "IFAP.CA",
+    "name": "International Agricultural Products",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/international-agricultural-products.svg"
+  },
+  {
+    "symbol": "INEG.CA",
+    "name": "Integrated Engineering Group S.A.E",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/integrated-engineering-sae.svg"
+  },
+  {
+    "symbol": "INFI.CA",
+    "name": "Ismailia National Food Industries",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ismailia-national-food-industries.svg"
+  },
+  {
+    "symbol": "IRON.CA",
+    "name": "Egyptian Iron & Steel",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-iron-and-steel.svg"
+  },
+  {
+    "symbol": "ISMA.CA",
+    "name": "Ismailia Misr Poultry",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ismailia-misr-poultry.svg"
+  },
+  {
+    "symbol": "ISMQ.CA",
+    "name": "Iron & Steel for Mines & Quarries",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/iron-and-steel-for-mines-and-quarries.svg"
+  },
+  {
+    "symbol": "ISPH.CA",
+    "name": "Ibnsina Pharma",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ibnsina-pharma.svg"
+  },
+  {
+    "symbol": "JUFO.CA",
+    "name": "Juhayna Food Industries",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/juhayna-food-industries.svg"
+  },
+  {
+    "symbol": "KABO.CA",
+    "name": "El Nasr Clothing & Textiles Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-nasr-clothes-and-textiles-kabo.svg"
+  },
+  {
+    "symbol": "KORA.CA",
+    "name": "KORRA",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/korra.svg"
+  },
+  {
+    "symbol": "KRDI.CA",
+    "name": "Al Khair River for Development Agriculture Investment and Environmental Services",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/al-khair-river-for-development-agricultural-investmentandenvir.svg"
+  },
+  {
+    "symbol": "KWIN.CA",
+    "name": "El Kahera El Watania Investment",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-kahera-el-watania-investment.svg"
+  },
+  {
+    "symbol": "KZPC.CA",
+    "name": "Kafr El Zayat Pesticides & Chemical Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/kafr-el-zayat-pesticides.svg"
+  },
+  {
+    "symbol": "LCSW.CA",
+    "name": "Lecico Egypt SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/lecico-egypt.svg"
+  },
+  {
+    "symbol": "LUTS.CA",
+    "name": "Lotus For Agricultural Investments And Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/lotus-for-agricultural-investments-and-development.svg"
+  },
+  {
+    "symbol": "MAAL.CA",
+    "name": "Marseilla Al Masreia Al Khalegeya for Holding Investment",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/marseille-almasreia-alkhalegeya-for-investment.svg"
+  },
+  {
+    "symbol": "MASR.CA",
+    "name": "Madinet Masr for Housing & Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/medinet-nasr-housing.svg"
+  },
+  {
+    "symbol": "MBEG.CA",
+    "name": "MB for Engineering & Contracting",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mb-engineering.svg"
+  },
+  {
+    "symbol": "MBSC.CA",
+    "name": "Misr Beni Suef Cement Co. SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/misr-beni-suef-cement.svg"
+  },
+  {
+    "symbol": "MCQE.CA",
+    "name": "Misr Cement Co. (Qena)",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/misr-cement-qena.svg"
+  },
+  {
+    "symbol": "MCRO.CA",
+    "name": "Macro Group Pharmaceutical S.A.E.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/macro-pharmaceuticals-macro-capital.svg"
+  },
+  {
+    "symbol": "MCROR1.CA",
+    "name": "Macro Group Pharmaceutical S.A.E Rights 2025-03.12.25 For shares",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/macro-pharmaceuticals-macro-capital.svg"
+  },
+  {
+    "symbol": "MEGM.CA",
+    "name": "Middle East Glass Manufacturing SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/middle-east-glass-manufacturing.svg"
+  },
+  {
+    "symbol": "MENA.CA",
+    "name": "Mena Touristic & Real Estate Investment",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mena-touristic-and-real-estate-investment.svg"
+  },
+  {
+    "symbol": "MEPA.CA",
+    "name": "Medical Packaging Company",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/medical-packaging-company.svg"
+  },
+  {
+    "symbol": "MFPC.CA",
+    "name": "Misr Fertilizers Production Company MOPCO",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/misr-fretilizers-production-company-mopco.svg"
+  },
+  {
+    "symbol": "MFSC.CA",
+    "name": "Misr Duty Free Shops Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/misr-duty-free-shops.svg"
+  },
+  {
+    "symbol": "MHOT.CA",
+    "name": "Misr Hotels Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/misr-hotels.svg"
+  },
+  {
+    "symbol": "MICH.CA",
+    "name": "Misr Chemical Industries Ltd.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/misr-chemical-industries.svg"
+  },
+  {
+    "symbol": "MILS.CA",
+    "name": "North Cairo Mills Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/north-cairo-mills.svg"
+  },
+  {
+    "symbol": "MIPH.CA",
+    "name": "Minapharm Pharmaceuticals",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/minapharm-pharmaceuticals.svg"
+  },
+  {
+    "symbol": "MISR.CA",
+    "name": "MISR Intercontinental for Granite & Marble",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/misr-intercontinental-for-granite-and-marble-egy-ston.svg"
+  },
+  {
+    "symbol": "MKIT.CA",
+    "name": "Misr Kuwait Investment & Trading Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/misr-kuwait-investment-and-trading-co.svg"
+  },
+  {
+    "symbol": "MMAT.CA",
+    "name": "Marsa Marsa Alam for Tourism Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/marsa-marsa-alam-for-tourism-development.svg"
+  },
+  {
+    "symbol": "MOED.CA",
+    "name": "Egyptian Modern Education Systems",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-egyptian-modern-education-systems.svg"
+  },
+  {
+    "symbol": "MOIL.CA",
+    "name": "Maridive & Oil Services SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/maridive-and-oil-services.svg"
+  },
+  {
+    "symbol": "MOIN.CA",
+    "name": "Mohandes Insurance Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mohandes-insurance.svg"
+  },
+  {
+    "symbol": "MOSC.CA",
+    "name": "Misr Oils & Soap Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/misr-oils-and-soap.svg"
+  },
+  {
+    "symbol": "MPCI.CA",
+    "name": "Memphis Pharmaceutical & Chemical Industries",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/memphis-pharmaceuticals.svg"
+  },
+  {
+    "symbol": "MPCO.CA",
+    "name": "Mansourah Poultry Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mansourah-poultry.svg"
+  },
+  {
+    "symbol": "MPRC.CA",
+    "name": "Egyptian Media Production City",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-media-production-city.svg"
+  },
+  {
+    "symbol": "MTIE.CA",
+    "name": "MM Group for Industry & International Trade",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mm-for-industry-and-international-trade.svg"
+  },
+  {
+    "symbol": "NAHO.CA",
+    "name": "Naeem Holding Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/naeem.svg"
+  },
+  {
+    "symbol": "NARE.CA",
+    "name": "Naeem Real Estate Holding Group",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/reacap-financial-investments.svg"
+  },
+  {
+    "symbol": "NCCW.CA",
+    "name": "Nasr Co. for Civil Works",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/nasr-company-for-civil-works.svg"
+  },
+  {
+    "symbol": "NDRL.CA",
+    "name": "National Drilling Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/national-drilling.svg"
+  },
+  {
+    "symbol": "NEDA.CA",
+    "name": "Northern Upper Egypt Development & Agricultural Production",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/northern-upper-egypt-development-and-agricultural-production.svg"
+  },
+  {
+    "symbol": "NHPS.CA",
+    "name": "National Housing for Professional Syndicates",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/national-housing-for-professional-syndicates.svg"
+  },
+  {
+    "symbol": "NINH.CA",
+    "name": "Nozha International Hospital",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/nozha-international-hospital.svg"
+  },
+  {
+    "symbol": "NIPH.CA",
+    "name": "El-Nile Co. for Pharmaceuticals & Chemical Industries",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-nile-co-for-pharmaceuticals-and-chemical-industries.svg"
+  },
+  {
+    "symbol": "OBRI.CA",
+    "name": "El Obour Real Estate Investment",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-obour-real-estate-investment.svg"
+  },
+  {
+    "symbol": "OCDI.CA",
+    "name": "Six of October Development & Investment (SODIC)",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/six-of-october-development-and-investment-sodic.svg"
+  },
+  {
+    "symbol": "OCPH.CA",
+    "name": "October Pharma Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/october-pharma.svg"
+  },
+  {
+    "symbol": "ODIN.CA",
+    "name": "ODIN Investments",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/odin-investments.svg"
+  },
+  {
+    "symbol": "OFH.CA",
+    "name": "O B Financial Holding",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/orascom-financial.svg"
+  },
+  {
+    "symbol": "OIH.CA",
+    "name": "Orascom Investment Holding SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/orascom-investment.svg"
+  },
+  {
+    "symbol": "OLFI.CA",
+    "name": "Obour Land for Food Industries",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/obour-land-for-food-industries.svg"
+  },
+  {
+    "symbol": "ORAS.CA",
+    "name": "Orascom Construction Plc",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/orascom-construction-plc.svg"
+  },
+  {
+    "symbol": "ORHD.CA",
+    "name": "Orascom Development Egypt (S.A.E)",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/orascom-development-egypt.svg"
+  },
+  {
+    "symbol": "ORWE.CA",
+    "name": "Oriental Weavers Carpet",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/oriental-weavers.svg"
+  },
+  {
+    "symbol": "PHAR.CA",
+    "name": "Egyptian International Pharmaceutical Industries Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-international-pharmaceuticals-eipico.svg"
+  },
+  {
+    "symbol": "PHDC.CA",
+    "name": "Palm Hills Development Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/palm-hills-development-company.svg"
+  },
+  {
+    "symbol": "PHTV.CA",
+    "name": "Pyramisa Hotels",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/pyramisa-hotels.svg"
+  },
+  {
+    "symbol": "POCO.CA",
+    "name": "Port Said Container And Cargo Handling",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/port-said-containers-and-cargo-handling-co.svg"
+  },
+  {
+    "symbol": "POUL.CA",
+    "name": "Cairo Poultry Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cairo-poultry.svg"
+  },
+  {
+    "symbol": "PRCL.CA",
+    "name": "General Co. for Ceramic & Porcelain Products",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ceramic-and-porcelain.svg"
+  },
+  {
+    "symbol": "PRDC.CA",
+    "name": "Pioneers Properties for Urban Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/pioneers-properties-for-urban-development-predco.svg"
+  },
+  {
+    "symbol": "PRMH.CA",
+    "name": "Prime Holding",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/prime.svg"
+  },
+  {
+    "symbol": "QNBE.CA",
+    "name": "Qatar National Bank",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-national-bank-alahly.svg"
+  },
+  {
+    "symbol": "RACC.CA",
+    "name": "Raya Contact Center",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/raya-contact-center.svg"
+  },
+  {
+    "symbol": "RAKT.CA",
+    "name": "Rakta Paper Manufacturing",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/rakta-paper-manufacturing.svg"
+  },
+  {
+    "symbol": "RAYA.CA",
+    "name": "Raya Holding for Financial Investments SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/raya-for-financial-investments.svg"
+  },
+  {
+    "symbol": "RKAZ.CA",
+    "name": "REKAZ Financial Holding",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/port-saied-for-agricultural-development-and-construction.svg"
+  },
+  {
+    "symbol": "RMDA.CA",
+    "name": "Tenth of Ramadan Pharmaceutical Industries & Diagnostic-Rameda",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tenth-of-ramadan-pharmaceutical-industriesanddiagnostic-rameda.svg"
+  },
+  {
+    "symbol": "ROTO.CA",
+    "name": "Rowad Tourism (Al Rowad) Co",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/rowad-tourism-al-rowad.svg"
+  },
+  {
+    "symbol": "RREI.CA",
+    "name": "Arab Real Estate Investment Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-real-estate-investment-co-alico.svg"
+  },
+  {
+    "symbol": "RTVC.CA",
+    "name": "Remco for Touristic Villages Construction",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/remco-for-touristic-villages-construction.svg"
+  },
+  {
+    "symbol": "RUBX.CA",
+    "name": "Rubex International for Plastic & Acrylic Manufacturing",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/rubex-international-for-plastic-and-acrylic-manufacturing.svg"
+  },
+  {
+    "symbol": "SAIB.CA",
+    "name": "Societe Arabe Internationale de Banque",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-arabe-internationale-de-banque-saib.svg"
+  },
+  {
+    "symbol": "SAUD.CA",
+    "name": "Al Baraka Bank Egypt",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/al-baraka-bank-egypt.svg"
+  },
+  {
+    "symbol": "SCEM.CA",
+    "name": "Sinai Cement Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sinai-cement.svg"
+  },
+  {
+    "symbol": "SCFM.CA",
+    "name": "South Cairo & Giza Mills & Bakeries",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/south-cairo-and-giza-mills-and-bakeries.svg"
+  },
+  {
+    "symbol": "SCTS.CA",
+    "name": "Sues Canal Co. for Technology Settling",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sues-canal-company-for-technology-settling.svg"
+  },
+  {
+    "symbol": "SDTI.CA",
+    "name": "Sharm Dreams Co. for Tourism Investment",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sharm-dreams-co-for-tourism-investment.svg"
+  },
+  {
+    "symbol": "SEIG.CA",
+    "name": "Saudi Egyptian Investment & Finance Co. SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/saudi-egyptian-investment-and-finance.svg"
+  },
+  {
+    "symbol": "SEIGA.CA",
+    "name": "Saudi Egyptian Investment & Finance Co. SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/saudi-egyptian-investment-and-finance.svg"
+  },
+  {
+    "symbol": "SIPC.CA",
+    "name": "Sabaa International Company for Pharmaceutial and Chemical Industry",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sabaa-international-company-for-pharmaceutical-and-chemical.svg"
+  },
+  {
+    "symbol": "SKPC.CA",
+    "name": "Sidi Kerir Petrochemicals",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sidi-kerir-petrochemicals-sidpec.svg"
+  },
+  {
+    "symbol": "SMFR.CA",
+    "name": "Samad Misr-EGYFERT",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/samad-misr-egyfert.svg"
+  },
+  {
+    "symbol": "SNFC.CA",
+    "name": "Sharkia National Food",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sharkia-national-food.svg"
+  },
+  {
+    "symbol": "SPHT.CA",
+    "name": "El Shams Pyramids Co. for Hotels & Touristic Projects SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-shams-pyramids-for-hotelsand-touristic-projects.svg"
+  },
+  {
+    "symbol": "SPIN.CA",
+    "name": "Alexandria Spinning & Weaving",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/alexandria-spinning-and-weaving-spinalex.svg"
+  },
+  {
+    "symbol": "SPMD.CA",
+    "name": "Speed Medical SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/speed-medical.svg"
+  },
+  {
+    "symbol": "SUGR.CA",
+    "name": "Delta Sugar",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-sugar.svg"
+  },
+  {
+    "symbol": "SVCE.CA",
+    "name": "South Valley Cement Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/south-valley-cement.svg"
+  },
+  {
+    "symbol": "SWDY.CA",
+    "name": "El Sewedy Electric Company",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/elswedy-electric.svg"
+  },
+  {
+    "symbol": "TALM.CA",
+    "name": "Taaleem Management Services S.A.E",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/taaleem-management-services.svg"
+  },
+  {
+    "symbol": "TANM.CA",
+    "name": "Tanmiya for Real Estate Investment",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tanmiya-for-real-estate-investment.svg"
+  },
+  {
+    "symbol": "TAQA.CA",
+    "name": "TAQA Arabia",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/taqa-arabia.svg"
+  },
+  {
+    "symbol": "TMGH.CA",
+    "name": "Talaat Moustafa Group Holding",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/t-m-g.svg"
+  },
+  {
+    "symbol": "TRTO.CA",
+    "name": "TransOceans Tours",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/transoceans-tours.svg"
+  },
+  {
+    "symbol": "TWSA.CA",
+    "name": "TAWASOA FOR FACTORING",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tawasoa-for-factoring.svg"
+  },
+  {
+    "symbol": "UBEE.CA",
+    "name": "United Bank SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-united-bank.svg"
+  },
+  {
+    "symbol": "UEFM.CA",
+    "name": "Upper Egypt Flour Mills Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/upper-egypt-flour-mills.svg"
+  },
+  {
+    "symbol": "UEGC.CA",
+    "name": "El-Saeed Contracting & Real Estate Investment Co. SCCD",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/elsaeed-contractingand-real-estate-investment-company-sccd.svg"
+  },
+  {
+    "symbol": "UNIP.CA",
+    "name": "Universal Co. for Paper & Packaging Materials-Unipack",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/universal-for-paper-and-packaging-materials-unipack.svg"
+  },
+  {
+    "symbol": "UNIT.CA",
+    "name": "United Housing Construction SA",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/united-housing-and-development.svg"
+  },
+  {
+    "symbol": "UPMS.CA",
+    "name": "Union Pharmacist Company For Medical Services And Investment",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/union-pharmacist-company-for-medical-services-and-investment.svg"
+  },
+  {
+    "symbol": "UTOP.CA",
+    "name": "Utopia Real Estate Investment & Tourism SAE",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/utopia.svg"
+  },
+  {
+    "symbol": "VALU.CA",
+    "name": "U Consumer Finance S.A.E",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/u-consumer-finance.svg"
+  },
+  {
+    "symbol": "VERT.CA",
+    "name": "Vertika for Industry & Trade",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/vertika-for-industry-and-trade.svg"
+  },
+  {
+    "symbol": "VLMR.CA",
+    "name": "Valmore Holding",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-kuwaiti.svg"
+  },
+  {
+    "symbol": "VLMRA.CA",
+    "name": "Valmore Holding",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-kuwaiti.svg"
+  },
+  {
+    "symbol": "WCDF.CA",
+    "name": "Middle & West Delta Flour Mills Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/middle-and-west-delta-flour-mills.svg"
+  },
+  {
+    "symbol": "WKOL.CA",
+    "name": "Wadi Kom Ombo Land Reclamation",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/wadi-kom-ombo-land-reclamation.svg"
+  },
+  {
+    "symbol": "ZEOT.CA",
+    "name": "Extracted Oils & Derivatives Co.",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/extracted-oils.svg"
+  },
+  {
+    "symbol": "ZMID.CA",
+    "name": "Zahraa Maadi Investment & Development",
+    "market": "EGX",
+    "image": "https://s3-symbol-logo.tradingview.com/zahraa-maadi-investment-and-development.svg"
+  }
+]
