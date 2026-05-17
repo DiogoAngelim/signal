@@ -757,11 +757,22 @@ function lifecycleState(stock: StockData, now: number): { state: SignalLifecycle
   return { state: "ACTIVE", ageMs };
 }
 
+function stabilizedRatio(returns: number[], downsideOnly = false) {
+  const sample = downsideOnly ? returns.filter((value) => value < 0) : returns;
+  const minWindow = 20;
+  const sampleWeight = clampMetric(returns.length / minWindow, 0, 1);
+  const avg = mean(returns);
+  const volatilityFloor = 0.008;
+  const volatility = Math.max(stddev(sample), volatilityFloor);
+  const cappedAnnualization = Math.sqrt(Math.min(Math.max(returns.length, 1), 30));
+  const raw = volatility > 0 ? (avg / volatility) * cappedAnnualization : 0;
+  return Number((Math.max(-4, Math.min(4, raw * sampleWeight))).toFixed(2));
+}
+
 function deriveAdaptiveSignal(stock: StockData, now: number): AdaptiveSignalView {
   const returns = rollingReturns(stock);
   const avg = mean(returns);
   const deviation = stddev(returns);
-  const downside = stddev(returns.filter((value) => value < 0));
   const change = Number(stock.changePercent ?? 0);
   const absChange = Math.abs(change);
   const signalAction = stock.signalAction ?? "Hold";
@@ -802,8 +813,8 @@ function deriveAdaptiveSignal(stock: StockData, now: number): AdaptiveSignalView
     expectedMovePct,
     featureConsensus: consensus / 100,
     ensembleAgreement: agreement / 100,
-    rollingSharpe: Number((deviation > 0 ? (avg / deviation) * Math.sqrt(Math.max(returns.length, 1)) : 0).toFixed(2)),
-    rollingSortino: Number((downside > 0 ? (avg / downside) * Math.sqrt(Math.max(returns.length, 1)) : 0).toFixed(2)),
+    rollingSharpe: stabilizedRatio(returns),
+    rollingSortino: stabilizedRatio(returns, true),
     hitRate: Number(hitRate.toFixed(1)),
     expectancy: Number((avg * 100).toFixed(2)),
     profitFactor: Number(Math.min(9.99, profitFactor).toFixed(2)),
@@ -830,6 +841,274 @@ function distribution<T extends string>(items: T[]) {
   const map = new Map<T, number>();
   for (const item of items) map.set(item, (map.get(item) ?? 0) + 1);
   return map;
+}
+
+type TimingState = "Early" | "Active" | "Late" | "Exhausted";
+type RiskLevel = "Low Risk" | "Moderate Risk" | "High Risk" | "Extreme Risk";
+type ConvictionLevel = "Low Conviction" | "Medium Conviction" | "High Conviction";
+
+type ExecutionDecision = {
+  signal: AdaptiveSignalView;
+  actionLabel: "Buy" | "Watch" | "Hold" | "Reduce" | "Avoid";
+  convictionLabel: ConvictionLevel;
+  calibratedConfidence: number;
+  suggestedAllocationPct: number;
+  portfolioExposurePct: number;
+  remainingRiskBudgetPct: number;
+  timingState: TimingState;
+  riskLevel: RiskLevel;
+  riskScore: number;
+  qualityScore: number;
+  environmentLabel: string;
+  tradeExplanation: string;
+  signalQuality: number;
+  calibrationScore: number;
+  survivalProbability: number;
+  regimeQuality: number;
+  liquidityScore: number;
+  volatilityPenalty: number;
+  genealogy: Array<{ label: string; value: number; tone: "good" | "warn" | "bad" | "info" }>;
+};
+
+function formatRegime(regime: AdaptiveRegime) {
+  const labels: Record<AdaptiveRegime, string> = {
+    TRENDING: "Trending Market",
+    MEAN_REVERTING: "Pullback Environment",
+    HIGH_VOL: "High Volatility",
+    LOW_VOL: "Quiet Market",
+    BREAKOUT: "Strong Momentum",
+    PANIC: "Aggressive Selloff",
+    COMPRESSION: "Sideways Consolidation",
+  };
+  return labels[regime];
+}
+
+function qualityLabel(value: number, good = "Strong", mid = "Moderate", weak = "Weak") {
+  if (value >= 72) return good;
+  if (value >= 48) return mid;
+  return weak;
+}
+
+function deriveTimingState(signal: AdaptiveSignalView): TimingState {
+  const minutes = signal.signalAgeMs / 60_000;
+  const decayPressure = signal.uncertainty + signal.volatilityShift * 0.4 - signal.stabilityScore * 0.35;
+  if (signal.lifecycleState === "COMPLETED" || signal.lifecycleState === "INVALIDATED" || minutes > 180 || decayPressure > 58) {
+    return "Exhausted";
+  }
+  if (signal.lifecycleState === "DECAYING" || minutes > 90 || decayPressure > 42) return "Late";
+  if (signal.lifecycleState === "EMITTED" || minutes < 12) return "Early";
+  return "Active";
+}
+
+function deriveRiskLevel(score: number): RiskLevel {
+  if (score >= 82) return "Extreme Risk";
+  if (score >= 62) return "High Risk";
+  if (score >= 36) return "Moderate Risk";
+  return "Low Risk";
+}
+
+function calibrateConfidence(signal: AdaptiveSignalView) {
+  const samples = rollingReturns(signal).length;
+  const sampleWeight = samples / (samples + 24);
+  const baseConfidence = signal.signalAction === "Hold" ? 50 : 57;
+  const raw = signal.confidence;
+  const shrunk = baseConfidence * (1 - sampleWeight) + raw * sampleWeight;
+  const penalty =
+    signal.uncertainty * 0.22 +
+    signal.driftScore * 0.14 +
+    signal.volatilityShift * 0.1 +
+    Math.max(0, 0.62 - signal.ensembleAgreement) * 22;
+  const cap =
+    samples >= 25 && signal.ensembleAgreement > 0.86 && signal.driftScore < 22 && signal.uncertainty < 24
+      ? 96
+      : 91;
+  return clampMetric(shrunk - penalty, 28, cap);
+}
+
+function liquidityScore(signal: AdaptiveSignalView) {
+  const price = Number(signal.price ?? 0);
+  const hasLiveQuote = signal.quoteStatus === "available" ? 18 : signal.quoteStatus === "unavailable" ? -22 : 0;
+  const priceQuality = price > 1 ? 72 : price > 0 ? 48 : 32;
+  const historyQuality = Math.min(18, (signal.history?.length ?? 0) * 1.2);
+  return clampMetric(priceQuality + historyQuality + hasLiveQuote);
+}
+
+function regimeQuality(signal: AdaptiveSignalView) {
+  const action = signal.signalAction ?? "Hold";
+  if (signal.regime === "PANIC") return action === "Sell" ? 62 : 22;
+  if (signal.regime === "BREAKOUT") return action === "Buy" ? 88 : 46;
+  if (signal.regime === "TRENDING") return action === "Buy" ? 82 : 54;
+  if (signal.regime === "MEAN_REVERTING") return action === "Sell" ? 72 : 56;
+  if (signal.regime === "COMPRESSION") return 50;
+  if (signal.regime === "HIGH_VOL") return action === "Hold" ? 42 : 48;
+  return 64;
+}
+
+function survivalProbability(signal: AdaptiveSignalView) {
+  const lifecycleBoost: Record<SignalLifecycle, number> = {
+    EMITTED: 68,
+    ACTIVE: 74,
+    DECAYING: 42,
+    INVALIDATED: 12,
+    COMPLETED: 55,
+  };
+  return clampMetric(
+    lifecycleBoost[signal.lifecycleState] +
+      signal.stabilityScore * 0.18 +
+      signal.ensembleAgreement * 12 -
+      signal.driftScore * 0.18 -
+      signal.uncertainty * 0.12,
+  );
+}
+
+function buildTradeExplanation(decision: Omit<ExecutionDecision, "tradeExplanation">) {
+  const action = decision.actionLabel.toLowerCase();
+  const environment = decision.environmentLabel.toLowerCase();
+  if (decision.riskLevel === "Extreme Risk") {
+    return `Avoid new exposure while ${environment} conditions remain unstable and reliability is weak.`;
+  }
+  if (decision.actionLabel === "Buy" && decision.convictionLabel === "High Conviction") {
+    return `Indicators are aligned, timing is ${decision.timingState.toLowerCase()}, and risk is contained for this ${environment} setup.`;
+  }
+  if (decision.actionLabel === "Watch") {
+    return `The setup is improving, but allocation stays measured until reliability and timing strengthen.`;
+  }
+  if (decision.actionLabel === "Reduce" || decision.actionLabel === "Avoid") {
+    return `Risk is elevated because reliability is weakening and the expected move no longer compensates for volatility.`;
+  }
+  return `Current evidence supports a ${action} posture while the market waits for a cleaner entry.`;
+}
+
+function buildExecutionDecisions(signals: AdaptiveSignalView[], portfolio: SimulatedPortfolio): ExecutionDecision[] {
+  const totalValue =
+    (portfolio.cash ?? 0) +
+    Object.values(portfolio.positions ?? {}).reduce((sum, position) => sum + (position.marketValue ?? 0), 0);
+  const exposurePct = totalValue > 0
+    ? (Object.values(portfolio.positions ?? {}).reduce((sum, position) => sum + (position.marketValue ?? 0), 0) / totalValue) * 100
+    : 0;
+  const raw = signals.map((signal) => {
+    const calibratedConfidence = calibrateConfidence(signal);
+    const signalQuality = clampMetric(
+      calibratedConfidence * 0.34 +
+        signal.stabilityScore * 0.22 +
+        signal.ensembleAgreement * 100 * 0.22 +
+        Math.max(0, Math.abs(signal.expectedMovePct)) * 2.2 -
+        signal.driftScore * 0.18,
+    );
+    const calibrationScore = clampMetric(100 - signal.predictionResidual * 1.7 - Math.max(0, signal.confidence - calibratedConfidence) * 0.4);
+    const survival = survivalProbability(signal);
+    const regime = regimeQuality(signal);
+    const liquidity = liquidityScore(signal);
+    const volatilityPenalty = clampMetric(12 + signal.volatilityShift * 0.72 + signal.uncertainty * 0.35, 8, 100);
+    const riskScore = clampMetric(
+      signal.driftScore * 0.35 +
+        signal.uncertainty * 0.28 +
+        signal.volatilityShift * 0.24 +
+        (100 - calibrationScore) * 0.13 +
+        (signal.regime === "PANIC" ? 18 : 0),
+    );
+    const timingState = deriveTimingState(signal);
+    const qualityScore = clampMetric(
+      signalQuality * 0.3 +
+        calibrationScore * 0.18 +
+        survival * 0.18 +
+        regime * 0.16 +
+        liquidity * 0.12 -
+        volatilityPenalty * 0.14 -
+        (timingState === "Late" ? 6 : timingState === "Exhausted" ? 24 : 0),
+    );
+    const action = signal.signalAction ?? "Hold";
+    const riskLevel = deriveRiskLevel(riskScore);
+    const actionLabel: ExecutionDecision["actionLabel"] =
+      action === "Buy" && qualityScore >= 62 && riskScore < 68
+        ? "Buy"
+        : action === "Buy" && qualityScore >= 48
+          ? "Watch"
+          : action === "Sell" && riskScore >= 58
+            ? "Reduce"
+            : riskScore >= 76
+              ? "Avoid"
+              : "Hold";
+    const convictionLabel: ConvictionLevel =
+      qualityScore >= 74 && calibratedConfidence >= 70
+        ? "High Conviction"
+        : qualityScore >= 52
+          ? "Medium Conviction"
+          : "Low Conviction";
+    const baseSize =
+      actionLabel === "Buy"
+        ? (signalQuality / 100) *
+          (calibrationScore / 100) *
+          (survival / 100) *
+          (regime / 100) *
+          (liquidity / 100) /
+          Math.max(0.45, volatilityPenalty / 38)
+        : 0;
+    const decisionBase = {
+      signal,
+      actionLabel,
+      convictionLabel,
+      calibratedConfidence,
+      suggestedAllocationPct: 0,
+      portfolioExposurePct: exposurePct,
+      remainingRiskBudgetPct: 0,
+      timingState,
+      riskLevel,
+      riskScore,
+      qualityScore,
+      environmentLabel: formatRegime(signal.regime),
+      signalQuality,
+      calibrationScore,
+      survivalProbability: survival,
+      regimeQuality: regime,
+      liquidityScore: liquidity,
+      volatilityPenalty,
+      genealogy: [
+        { label: "Momentum", value: signalQuality, tone: "good" as const },
+        { label: "Volatility", value: clampMetric(100 - volatilityPenalty), tone: riskScore > 65 ? "warn" as const : "info" as const },
+        { label: "Trend", value: regime, tone: "good" as const },
+        { label: "Liquidity", value: liquidity, tone: liquidity < 45 ? "warn" as const : "info" as const },
+        { label: "Market Context", value: regime, tone: signal.regime === "PANIC" ? "bad" as const : "good" as const },
+        { label: "Participation", value: signal.ensembleAgreement * 100, tone: signal.ensembleAgreement > 0.7 ? "good" as const : "warn" as const },
+      ],
+      _baseSize: baseSize,
+    };
+    return {
+      ...decisionBase,
+      tradeExplanation: buildTradeExplanation(decisionBase),
+    };
+  });
+
+  const totalBase = raw.reduce((sum, item) => sum + item._baseSize, 0);
+  const regimeTotals = new Map<AdaptiveRegime, number>();
+  const targetExposure =
+    raw.length && mean(raw.map((item) => item.riskScore)) > 65
+      ? 32
+      : raw.length && mean(raw.map((item) => item.qualityScore)) > 66
+        ? 72
+        : 52;
+  let deployed = 0;
+  const decisions = raw.map((item) => {
+    const normalized = totalBase > 0 ? (item._baseSize / totalBase) * targetExposure : 0;
+    const maxPerAsset = item.riskLevel === "Low Risk" ? 5 : item.riskLevel === "Moderate Risk" ? 4.2 : 2.4;
+    const regimeCap = item.signal.regime === "PANIC" ? 8 : 18;
+    const currentRegime = regimeTotals.get(item.signal.regime) ?? 0;
+    const allocation = Math.max(0, Math.min(normalized, maxPerAsset, Math.max(0, regimeCap - currentRegime)));
+    regimeTotals.set(item.signal.regime, currentRegime + allocation);
+    deployed += allocation;
+    const { _baseSize, ...decision } = item;
+    return {
+      ...decision,
+      suggestedAllocationPct: Number(allocation.toFixed(1)),
+      remainingRiskBudgetPct: Number(Math.max(0, targetExposure - deployed).toFixed(1)),
+    };
+  });
+
+  return decisions.sort(
+    (a, b) =>
+      b.suggestedAllocationPct - a.suggestedAllocationPct ||
+      b.qualityScore - a.qualityScore,
+  );
 }
 
 function IntelligenceMetricCard({
@@ -884,56 +1163,56 @@ function AIHealthSection({
   return (
     <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
       <IntelligenceMetricCard
-        label="Drift Score"
+        label="Signal Reliability"
         value={metrics.drift.toFixed(0)}
-        sub={metrics.drift < 35 ? "low drift" : metrics.drift < 65 ? "watching" : "unstable"}
+        sub={metrics.drift < 35 ? "high reliability" : metrics.drift < 65 ? "mixed reliability" : "weak reliability"}
         tone={metrics.drift < 35 ? "good" : metrics.drift < 65 ? "warn" : "bad"}
         icon={AlertTriangle}
       />
       <IntelligenceMetricCard
-        label="Signal Entropy"
+        label="Market Clarity"
         value={metrics.entropy.toFixed(0)}
-        sub="signal diversity"
+        sub="directional clarity"
         tone={metrics.entropy > 45 && metrics.entropy < 75 ? "good" : "warn"}
         icon={Activity}
       />
       <IntelligenceMetricCard
-        label="Ensemble Agreement"
+        label="Indicator Alignment"
         value={`${metrics.ensemble.toFixed(0)}%`}
-        sub="feature consensus"
+        sub="setup agreement"
         tone={metrics.ensemble >= 70 ? "good" : metrics.ensemble >= 50 ? "info" : "warn"}
         icon={Layers}
       />
       <IntelligenceMetricCard
-        label="Calibration"
+        label="Historical Accuracy"
         value={`${metrics.calibration.toFixed(0)}%`}
-        sub="confidence fit"
+        sub="confidence realism"
         tone={metrics.calibration >= 70 ? "good" : metrics.calibration >= 50 ? "info" : "warn"}
         icon={Gauge}
       />
       <IntelligenceMetricCard
-        label="Regime Stability"
+        label="Environment Stability"
         value={`${metrics.regimeStability.toFixed(0)}%`}
         sub="transition quality"
         tone={metrics.regimeStability >= 70 ? "good" : metrics.regimeStability >= 45 ? "info" : "warn"}
         icon={ShieldCheck}
       />
       <IntelligenceMetricCard
-        label="Model Stability"
+        label="Setup Durability"
         value={`${metrics.modelStability.toFixed(0)}%`}
         sub="diagnostic health"
         tone={metrics.modelStability >= 70 ? "good" : metrics.modelStability >= 45 ? "info" : "warn"}
         icon={Brain}
       />
       <IntelligenceMetricCard
-        label="Survival Rate"
+        label="Signal Survival"
         value={`${metrics.survival.toFixed(0)}%`}
         sub="active signals"
         tone={metrics.survival >= 60 ? "good" : metrics.survival >= 35 ? "info" : "warn"}
         icon={Radio}
       />
       <IntelligenceMetricCard
-        label="Residual"
+        label="Prediction Error"
         value={metrics.residual.toFixed(0)}
         sub="prediction error"
         tone={metrics.residual < 25 ? "good" : metrics.residual < 50 ? "warn" : "bad"}
@@ -944,15 +1223,16 @@ function AIHealthSection({
 }
 
 function LiveIntelligenceChart({
-  signal,
+  decision,
   fallback,
 }: {
-  signal?: AdaptiveSignalView;
-  fallback: AdaptiveSignalView[];
+  decision?: ExecutionDecision;
+  fallback: ExecutionDecision[];
 }) {
-  const active = signal ?? fallback[0];
+  const activeDecision = decision ?? fallback[0];
+  const active = activeDecision?.signal;
   const chartRows = useMemo(() => {
-    const history = active?.history?.length ? active.history : fallback.flatMap((item) => item.history ?? []).slice(-30);
+    const history = active?.history?.length ? active.history : fallback.flatMap((item) => item.signal.history ?? []).slice(-30);
     const prices = history.length ? history : [0, 0];
     const expected = active?.expectedMovePct ?? 0;
     return prices.slice(-60).map((price, index, items) => {
@@ -973,7 +1253,7 @@ function LiveIntelligenceChart({
       <div className="flex flex-col gap-4 border-b border-border/60 p-4 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            Live Intelligence Surface
+            Live Opportunity Map
           </div>
           <div className="mt-1 flex items-center gap-3">
             <span className="font-mono text-2xl font-semibold">{active?.ticker ?? "No signal"}</span>
@@ -983,7 +1263,7 @@ function LiveIntelligenceChart({
                 className="rounded px-2 py-0.5 text-[10px] font-semibold text-background"
                 style={{ backgroundColor: active.regimeColor }}
               >
-                {active.regime}
+                {formatRegime(active.regime)}
               </span>
             )}
           </div>
@@ -991,12 +1271,12 @@ function LiveIntelligenceChart({
         {active && (
           <div className="grid grid-cols-3 gap-3 text-right text-xs">
             <div>
-              <div className="text-muted-foreground">Confidence</div>
-              <div className="text-lg font-semibold">{active.confidence.toFixed(0)}%</div>
+              <div className="text-muted-foreground">Conviction</div>
+              <div className="text-lg font-semibold">{activeDecision.convictionLabel.replace(" Conviction", "")}</div>
             </div>
             <div>
-              <div className="text-muted-foreground">Uncertainty</div>
-              <div className="text-lg font-semibold">{active.uncertainty.toFixed(0)}</div>
+              <div className="text-muted-foreground">Risk</div>
+              <div className="text-lg font-semibold">{activeDecision.riskLevel.replace(" Risk", "")}</div>
             </div>
             <div>
               <div className="text-muted-foreground">Expected Move</div>
@@ -1031,7 +1311,7 @@ function LiveIntelligenceChart({
                 return (
                   <div className="rounded-lg border border-border bg-popover px-3 py-2 text-xs shadow-md">
                     <div className="font-medium">{formatMaybeCurrency(row.price)}</div>
-                    <div className="text-muted-foreground">live surface</div>
+                    <div className="text-muted-foreground">live opportunity map</div>
                   </div>
                 );
               }}
@@ -1045,10 +1325,10 @@ function LiveIntelligenceChart({
         {active && (
           <div className="pointer-events-none absolute bottom-4 left-4 right-4 grid grid-cols-4 gap-2 text-[10px]">
             {[
-              ["Drift", active.driftScore.toFixed(0)],
+              ["Signal Reliability", qualityLabel(100 - active.driftScore, "High", "Moderate", "Weak")],
               ["Stability", `${active.stabilityScore.toFixed(0)}%`],
-              ["Agreement", active.ensembleAgreement.toFixed(2)],
-              ["Decay", active.lifecycleState],
+              ["Indicator Alignment", `${(active.ensembleAgreement * 100).toFixed(0)}%`],
+              ["Timing", activeDecision.timingState],
             ].map(([label, value]) => (
               <div key={label} className="rounded border border-border/60 bg-background/75 px-2 py-1 backdrop-blur">
                 <div className="text-muted-foreground">{label}</div>
@@ -1063,11 +1343,11 @@ function LiveIntelligenceChart({
 }
 
 function AdaptiveSignalFeed({
-  signals,
+  decisions,
   selected,
   onSelect,
 }: {
-  signals: AdaptiveSignalView[];
+  decisions: ExecutionDecision[];
   selected?: string;
   onSelect: (signal: AdaptiveSignalView) => void;
 }) {
@@ -1076,14 +1356,16 @@ function AdaptiveSignalFeed({
       <div className="flex items-center justify-between border-b border-border/60 p-4">
         <div>
           <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            Adaptive Signal Feed
+            Opportunity Feed
           </div>
-          <div className="text-sm text-muted-foreground">streaming confidence, drift, regime, and lifecycle</div>
+          <div className="text-sm text-muted-foreground">ranked by action quality, timing, risk, and allocation</div>
         </div>
-        <Badge variant="outline">{signals.length} tracked</Badge>
+        <Badge variant="outline">{decisions.length} tracked</Badge>
       </div>
       <div className="max-h-[720px] overflow-y-auto">
-        {signals.slice(0, 180).map((signal) => (
+        {decisions.slice(0, 180).map((decision) => {
+          const signal = decision.signal;
+          return (
           <button
             key={signal.adaptiveId}
             type="button"
@@ -1097,39 +1379,46 @@ function AdaptiveSignalFeed({
               <div className="flex items-center gap-2">
                 <span className="truncate font-mono font-semibold">{signal.ticker}</span>
                 <SignalBadge action={signal.signalAction ?? "Hold"} />
+                <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                  {decision.actionLabel}
+                </span>
               </div>
               <div className="mt-1 truncate text-xs text-muted-foreground">{signal.name}</div>
             </div>
             <div>
-              <div className="text-[10px] uppercase text-muted-foreground">Confidence</div>
+              <div className="text-[10px] uppercase text-muted-foreground">Conviction</div>
               <div className="mt-1 h-1.5 rounded-full bg-muted">
-                <div className="h-full rounded-full" style={{ width: `${signal.confidence}%`, backgroundColor: signal.confidenceColor }} />
+                <div className="h-full rounded-full" style={{ width: `${decision.calibratedConfidence}%`, backgroundColor: signal.confidenceColor }} />
               </div>
-              <div className="mt-1 text-xs font-semibold">{signal.confidence.toFixed(0)}%</div>
+              <div className="mt-1 text-xs font-semibold">{decision.convictionLabel}</div>
             </div>
             <div>
-              <div className="text-[10px] uppercase text-muted-foreground">Regime</div>
+              <div className="text-[10px] uppercase text-muted-foreground">Allocation</div>
               <div className="mt-1 inline-flex rounded px-2 py-0.5 text-[10px] font-semibold text-background" style={{ backgroundColor: signal.regimeColor }}>
-                {signal.regime}
+                {decision.suggestedAllocationPct.toFixed(1)}%
               </div>
+              <div className="mt-1 text-xs text-muted-foreground">{decision.environmentLabel}</div>
             </div>
             <div className="hidden md:block">
-              <div className="text-[10px] uppercase text-muted-foreground">Quality</div>
+              <div className="text-[10px] uppercase text-muted-foreground">Risk</div>
               <div className="mt-1 text-xs">
-                Drift {signal.driftScore.toFixed(0)} · Stability {signal.stabilityScore.toFixed(0)}
+                {decision.riskLevel} · {decision.timingState}
               </div>
-              <div className="text-xs text-muted-foreground">Agreement {signal.ensembleAgreement.toFixed(2)}</div>
+              <div className="text-xs text-muted-foreground">Indicator alignment {(signal.ensembleAgreement * 100).toFixed(0)}%</div>
             </div>
             <div className="hidden md:block">
-              <div className="text-[10px] uppercase text-muted-foreground">Lifecycle</div>
-              <div className="mt-1 text-xs font-semibold">{signal.lifecycleState}</div>
+              <div className="text-[10px] uppercase text-muted-foreground">Expected Move</div>
+              <div className={cn("mt-1 text-xs font-semibold", signal.expectedMovePct >= 0 ? "text-emerald-400" : "text-rose-400")}>
+                {signal.expectedMovePct >= 0 ? "+" : ""}{signal.expectedMovePct.toFixed(2)}%
+              </div>
               <div className="text-xs text-muted-foreground">
-                {formatAge(signal.signalAgeMs)} · Sharpe {signal.rollingSharpe.toFixed(2)} · {signal.expectedMovePct >= 0 ? "+" : ""}{signal.expectedMovePct.toFixed(2)}%
+                {formatAge(signal.signalAgeMs)} · risk-adjusted {signal.rollingSharpe.toFixed(2)}
               </div>
             </div>
           </button>
-        ))}
-        {!signals.length && (
+          );
+        })}
+        {!decisions.length && (
           <div className="p-8 text-sm text-muted-foreground">Waiting for adaptive signal stream.</div>
         )}
       </div>
@@ -1144,14 +1433,14 @@ function RegimeTimeline({ signals }: { signals: AdaptiveSignalView[] }) {
   return (
     <section className="rounded-xl border border-border/60 bg-card p-4">
       <div className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-        Regime Timeline
+        Market Environment Timeline
       </div>
       <div className="flex h-8 overflow-hidden rounded border border-border/50">
         {regimes.map(([regime, count]) => (
           <div
             key={regime}
             className="h-full"
-            title={`${regime}: ${count}`}
+            title={`${formatRegime(regime)}: ${count}`}
             style={{
               width: `${(count / total) * 100}%`,
               backgroundColor: regimeColor(regime),
@@ -1165,7 +1454,7 @@ function RegimeTimeline({ signals }: { signals: AdaptiveSignalView[] }) {
           <div key={regime} className="flex items-center justify-between gap-3 rounded border border-border/50 px-2 py-1.5">
             <span className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: regimeColor(regime) }} />
-              {regime}
+              {formatRegime(regime)}
             </span>
             <span className="text-muted-foreground">{((count / total) * 100).toFixed(0)}%</span>
           </div>
@@ -1188,12 +1477,12 @@ function FeatureDiagnostics({ signals }: { signals: AdaptiveSignalView[] }) {
       drift: mean(signals.map((signal) => signal.volatilityShift)),
     },
     {
-      name: "Regime classifier",
+      name: "Market context",
       contribution: mean(signals.map((signal) => signal.stabilityScore)),
       drift: 100 - mean(signals.map((signal) => signal.stabilityScore)),
     },
     {
-      name: "Forward-test residual",
+      name: "Prediction error",
       contribution: 100 - mean(signals.map((signal) => signal.predictionResidual)),
       drift: mean(signals.map((signal) => signal.predictionResidual)),
     },
@@ -1206,7 +1495,7 @@ function FeatureDiagnostics({ signals }: { signals: AdaptiveSignalView[] }) {
   return (
     <section className="rounded-xl border border-border/60 bg-card p-4">
       <div className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-        Feature Diagnostics
+        Signal Composition
       </div>
       <div className="space-y-3">
         {rows.map((row) => (
@@ -1214,7 +1503,7 @@ function FeatureDiagnostics({ signals }: { signals: AdaptiveSignalView[] }) {
             <div className="mb-1 flex items-center justify-between gap-3 text-xs">
               <span className="font-medium">{row.name}</span>
               <span className={row.drift > 60 ? "text-amber-400" : "text-muted-foreground"}>
-                drift {row.drift.toFixed(0)}
+                instability {row.drift.toFixed(0)}
               </span>
             </div>
             <div className="grid grid-cols-[1fr_72px] items-center gap-3">
@@ -1251,20 +1540,117 @@ function ConditionalPerformance({ signals }: { signals: AdaptiveSignalView[] }) 
   return (
     <section className="rounded-xl border border-border/60 bg-card p-4">
       <div className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-        Conditional Performance
+        Performance By Environment
       </div>
       <div className="space-y-2">
         {rows.map((row) => (
           <div key={row.regime} className="grid grid-cols-[1fr_64px_64px_64px] items-center gap-2 rounded border border-border/50 px-2 py-2 text-xs">
             <span className="flex items-center gap-2 font-medium">
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: regimeColor(row.regime) }} />
-              {row.regime}
+              {formatRegime(row.regime)}
             </span>
-            <span className="text-right text-muted-foreground">S {row.sharpe.toFixed(2)}</span>
+            <span className="text-right text-muted-foreground">RA {row.sharpe.toFixed(2)}</span>
             <span className="text-right text-muted-foreground">E {row.expectancy.toFixed(2)}</span>
             <span className="text-right text-muted-foreground">{row.hitRate.toFixed(0)}%</span>
           </div>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function TopOpportunities({ decisions }: { decisions: ExecutionDecision[] }) {
+  const rows = decisions.filter((item) => item.actionLabel === "Buy" || item.actionLabel === "Watch").slice(0, 3);
+  return (
+    <section className="rounded-xl border border-border/60 bg-card p-4">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+          Top Opportunities
+        </div>
+        <Badge variant="outline">{rows.length || 0} actionable</Badge>
+      </div>
+      <div className="grid gap-3 md:grid-cols-3">
+        {(rows.length ? rows : decisions.slice(0, 3)).map((decision, index) => (
+          <div key={decision.signal.adaptiveId} className="rounded-lg border border-border/60 bg-background/35 p-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <span className="text-xs font-semibold text-muted-foreground">#{index + 1}</span>
+              <span className="rounded px-2 py-0.5 text-[10px] font-semibold text-background" style={{ backgroundColor: decision.signal.regimeColor }}>
+                {decision.actionLabel}
+              </span>
+            </div>
+            <div className="font-mono text-lg font-semibold">{decision.signal.ticker}</div>
+            <div className="mt-1 text-xs text-muted-foreground">{decision.convictionLabel}</div>
+            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <div className="text-muted-foreground">Allocation</div>
+                <div className="font-semibold">{decision.suggestedAllocationPct.toFixed(1)}%</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground">Timing</div>
+                <div className="font-semibold">{decision.timingState}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground">Risk</div>
+                <div className="font-semibold">{decision.riskLevel.replace(" Risk", "")}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground">Move</div>
+                <div className={cn("font-semibold", decision.signal.expectedMovePct >= 0 ? "text-emerald-400" : "text-rose-400")}>
+                  {decision.signal.expectedMovePct >= 0 ? "+" : ""}{decision.signal.expectedMovePct.toFixed(1)}%
+                </div>
+              </div>
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{decision.tradeExplanation}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PortfolioIntelligence({
+  decisions,
+  portfolio,
+}: {
+  decisions: ExecutionDecision[];
+  portfolio: SimulatedPortfolio;
+}) {
+  const totalValue =
+    (portfolio.cash ?? 0) +
+    Object.values(portfolio.positions ?? {}).reduce((sum, position) => sum + (position.marketValue ?? 0), 0);
+  const invested = Object.values(portfolio.positions ?? {}).reduce((sum, position) => sum + (position.marketValue ?? 0), 0);
+  const currentExposure = totalValue > 0 ? (invested / totalValue) * 100 : 0;
+  const recommendedExposure = Math.min(100, decisions.reduce((sum, item) => sum + item.suggestedAllocationPct, 0));
+  const riskBudget = Math.max(0, 100 - Math.max(currentExposure, recommendedExposure));
+  const dominantEnvironment = Array.from(distribution(decisions.slice(0, 80).map((item) => item.environmentLabel)).entries())
+    .sort((a, b) => b[1] - a[1])[0]?.[0] ?? "Waiting for live data";
+
+  return (
+    <section className="rounded-xl border border-border/60 bg-card p-4">
+      <div className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        Portfolio Intelligence
+      </div>
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="rounded-lg border border-border/50 p-3">
+          <div className="text-xs text-muted-foreground">Current Exposure</div>
+          <div className="mt-1 text-xl font-semibold">{currentExposure.toFixed(1)}%</div>
+        </div>
+        <div className="rounded-lg border border-border/50 p-3">
+          <div className="text-xs text-muted-foreground">Recommended Exposure</div>
+          <div className="mt-1 text-xl font-semibold">{recommendedExposure.toFixed(1)}%</div>
+        </div>
+        <div className="rounded-lg border border-border/50 p-3">
+          <div className="text-xs text-muted-foreground">Remaining Risk Budget</div>
+          <div className="mt-1 text-xl font-semibold">{riskBudget.toFixed(1)}%</div>
+        </div>
+        <div className="rounded-lg border border-border/50 p-3">
+          <div className="text-xs text-muted-foreground">Capital At Risk</div>
+          <div className="mt-1 text-xl font-semibold">{formatMaybeCurrency((totalValue * recommendedExposure) / 100)}</div>
+        </div>
+      </div>
+      <div className="mt-3 rounded-lg border border-border/50 p-3 text-xs">
+        <div className="text-muted-foreground">Dominant Market Environment</div>
+        <div className="mt-1 font-semibold">{dominantEnvironment}</div>
       </div>
     </section>
   );
@@ -1283,6 +1669,7 @@ export default function Dashboard() {
   const [selectedStock, setSelectedStock] = useState<StockData | null>(null);
   const [signalHistory, setSignalHistory] = useState<SignalEvent[]>([]);
   const [signalsMenuOpen, setSignalsMenuOpen] = useState(true);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const [totalStocks, setTotalStocks] = useState(0);
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
   const [refreshError, setRefreshError] = useState<string | null>(null);
@@ -2391,6 +2778,32 @@ export default function Dashboard() {
   const activeSimulatedPortfolio =
     simulatedPortfolios[marketFilter] ?? createEmptyPortfolio();
 
+  const executionDecisions = useMemo(
+    () => buildExecutionDecisions(adaptiveSignals, activeSimulatedPortfolio),
+    [adaptiveSignals, activeSimulatedPortfolio],
+  );
+
+  const selectedExecutionDecision = useMemo(() => {
+    if (!selectedAdaptiveSignal) return executionDecisions[0];
+    return (
+      executionDecisions.find((decision) => decision.signal.ticker === selectedAdaptiveSignal.ticker) ??
+      buildExecutionDecisions([selectedAdaptiveSignal], activeSimulatedPortfolio)[0]
+    );
+  }, [activeSimulatedPortfolio, executionDecisions, selectedAdaptiveSignal]);
+
+  const recommendedExposure = useMemo(
+    () => Math.min(100, executionDecisions.reduce((sum, decision) => sum + decision.suggestedAllocationPct, 0)),
+    [executionDecisions],
+  );
+
+  const opportunityTrend = useMemo(() => {
+    const best = executionDecisions.slice(0, 20);
+    const avgQuality = mean(best.map((decision) => decision.qualityScore));
+    if (avgQuality >= 68) return "Improving";
+    if (avgQuality >= 48) return "Selective";
+    return "Deteriorating";
+  }, [executionDecisions]);
+
   const portfolioPositions = useMemo(
     () =>
       Object.values(activeSimulatedPortfolio.positions).filter((p) => p.quantity > 0).sort(
@@ -2618,29 +3031,29 @@ export default function Dashboard() {
         >
           <div>
             <h1 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1">
-              Adaptive Intelligence Terminal {selectedMarketLabel && `— ${selectedMarketLabel}`}
+              Trading Opportunity Terminal {selectedMarketLabel && `— ${selectedMarketLabel}`}
             </h1>
             <div className="flex items-baseline gap-4">
               <span className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground">
-                {selectedAdaptiveSignal
-                  ? `${selectedAdaptiveSignal.confidence.toFixed(0)}%`
+                {selectedExecutionDecision
+                  ? `${selectedExecutionDecision.actionLabel}`
                   : "—"}
               </span>
               {marketFilter && (
                 <div
-                  className={`text-sm font-medium ${(selectedAdaptiveSignal?.expectedMovePct ?? 0) >= 0 ? "text-primary" : "text-destructive"
+                  className={`text-sm font-medium ${(selectedExecutionDecision?.signal.expectedMovePct ?? 0) >= 0 ? "text-primary" : "text-destructive"
                     }`}
                 >
-                  {selectedAdaptiveSignal
-                    ? `${selectedAdaptiveSignal.regime} · ${selectedAdaptiveSignal.expectedMovePct >= 0 ? "+" : ""}${selectedAdaptiveSignal.expectedMovePct.toFixed(2)}% expected`
-                    : "awaiting adaptive signal"}
+                  {selectedExecutionDecision
+                    ? `${selectedExecutionDecision.convictionLabel} · ${selectedExecutionDecision.suggestedAllocationPct.toFixed(1)}% suggested allocation`
+                    : "awaiting live opportunity"}
                 </div>
               )}
             </div>
             {marketFilter && (
               <p className="mt-2 text-sm text-muted-foreground">
-                Drift {aiHealth.drift.toFixed(0)} · Entropy {aiHealth.entropy.toFixed(0)} · Ensemble {aiHealth.ensemble.toFixed(0)}% ·{" "}
-                {positionCount} forward-tested positions · {formatMaybeCurrency(portfolio.cash)} cash
+                Market Environment: {selectedExecutionDecision?.environmentLabel ?? "Waiting"} · Signal Reliability: {qualityLabel(100 - aiHealth.drift, "High", "Moderate", "Weak")} · Opportunities: {opportunityTrend} · Recommended Exposure: {recommendedExposure.toFixed(1)}%
+                {" · "}{positionCount} live positions · {formatMaybeCurrency(portfolio.cash)} cash
                 {portfolioStartLabel && (
                   <> · started {portfolioStartLabel}</>
                 )}
@@ -2661,21 +3074,34 @@ export default function Dashboard() {
             <div className="w-px h-8 bg-border/60"></div>
             <div>
               <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1.5">
-                <LineChart className="h-3.5 w-3.5" /> Model State
+                <LineChart className="h-3.5 w-3.5" /> Signal Status
               </div>
-              <div className="font-medium">{marketFilter ? `${selectedAdaptiveSignal?.lifecycleState ?? portfolio.overallSignal}` : "—"}</div>
+              <div className="font-medium">{marketFilter ? `${selectedExecutionDecision?.timingState ?? portfolio.overallSignal}` : "—"}</div>
             </div>
           </div>
         </motion.header>
 
         <div className="mb-8 space-y-6">
           <AIHealthSection metrics={aiHealth} />
+          <TopOpportunities decisions={executionDecisions} />
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.8fr)_minmax(320px,0.9fr)]">
-            <LiveIntelligenceChart signal={selectedAdaptiveSignal} fallback={adaptiveSignals} />
+            <LiveIntelligenceChart decision={selectedExecutionDecision} fallback={executionDecisions} />
             <div className="space-y-6">
+              <PortfolioIntelligence decisions={executionDecisions} portfolio={activeSimulatedPortfolio} />
               <RegimeTimeline signals={adaptiveSignals} />
-              <FeatureDiagnostics signals={adaptiveSignals} />
-              <ConditionalPerformance signals={adaptiveSignals} />
+              <button
+                type="button"
+                onClick={() => setAdvancedOpen((open) => !open)}
+                className="w-full rounded-lg border border-border/60 bg-card px-4 py-3 text-left text-sm font-medium"
+              >
+                {advancedOpen ? "Hide" : "Show"} Advanced Diagnostics
+              </button>
+              {advancedOpen && (
+                <>
+                  <FeatureDiagnostics signals={adaptiveSignals} />
+                  <ConditionalPerformance signals={adaptiveSignals} />
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -2941,9 +3367,9 @@ export default function Dashboard() {
                 ? (Math.pow(1 + totalReturn, 1 / elapsedMonths) - 1) * 100
                 : null;
 
-              // Sharpe, annualised from the actual spacing between value snapshots.
+              // Risk-adjusted performance with minimum-window weighting and a volatility floor.
               let sharpe: number | null = null;
-              if (vh.length >= 5) {
+              if (vh.length >= 12) {
                 const periodReturns: number[] = [];
                 const intervals: number[] = [];
                 for (let i = 1; i < vh.length; i++) {
@@ -2958,13 +3384,14 @@ export default function Dashboard() {
                 if (periodReturns.length >= 2) {
                   const mean = periodReturns.reduce((s, r) => s + r, 0) / periodReturns.length;
                   const variance = periodReturns.reduce((s, r) => s + Math.pow(r - mean, 2), 0) / (periodReturns.length - 1);
-                  const std = Math.sqrt(variance);
+                  const std = Math.max(Math.sqrt(variance), 0.004);
                   const avgInterval =
                     intervals.reduce((sum, dt) => sum + dt, 0) / intervals.length;
                   const periodsPerYear =
-                    avgInterval > 0 ? (365.25 * 24 * 3_600_000) / avgInterval : 0;
+                    avgInterval > 0 ? Math.min((365.25 * 24 * 3_600_000) / avgInterval, 252) : 0;
+                  const sampleWeight = Math.min(1, periodReturns.length / 30);
                   sharpe = std > 0 && periodsPerYear > 0
-                    ? (mean / std) * Math.sqrt(periodsPerYear)
+                    ? Math.max(-4, Math.min(4, (mean / std) * Math.sqrt(periodsPerYear) * sampleWeight))
                     : null;
                 }
               }
@@ -2978,12 +3405,12 @@ export default function Dashboard() {
 
               const stats: Array<{ label: string; value: string; sub?: string; positive?: boolean | null }> = [
                 { label: "Profit Factor", value: fmtPF(profitFactor), sub: "gross profit / gross loss", positive: profitFactor === null ? null : profitFactor >= 1 },
-                { label: "Risk Adjusted", value: riskAdjustedReturn === null ? "—" : `${riskAdjustedReturn >= 0 ? "+" : ""}${(riskAdjustedReturn * 100).toFixed(2)}%`, sub: "return adjusted by Sharpe", positive: riskAdjustedReturn === null ? null : riskAdjustedReturn >= 0 },
+                { label: "Risk Adjusted", value: riskAdjustedReturn === null ? "—" : `${riskAdjustedReturn >= 0 ? "+" : ""}${(riskAdjustedReturn * 100).toFixed(2)}%`, sub: "return adjusted for volatility", positive: riskAdjustedReturn === null ? null : riskAdjustedReturn >= 0 },
                 { label: "Monthly Return", value: monthlyReturn === null ? "—" : `${monthlyReturn >= 0 ? "+" : ""}${monthlyReturn.toFixed(2)}%`, sub: "compounded", positive: monthlyReturn === null ? null : monthlyReturn >= 0 },
                 { label: "Total Trades", value: String(totalTrades), sub: `${wins.length}W / ${losses.length}L`, positive: null },
                 { label: "Win Rate", value: fmt(winRate, 1, "%"), sub: "closed trades", positive: winRate === null ? null : winRate >= 50 },
                 { label: "Max Drawdown", value: fmt(maxDrawdown * 100, 1, "%"), sub: "peak-to-trough", positive: maxDrawdown === 0 ? null : false },
-                { label: "Sharpe Ratio", value: fmt(sharpe, 2), sub: "annualised", positive: sharpe === null ? null : sharpe >= 1 },
+                { label: "Risk-Adjusted Performance", value: fmt(sharpe, 2), sub: "stabilized", positive: sharpe === null ? null : sharpe >= 1 },
                 { label: "Total Return", value: `${totalReturn >= 0 ? "+" : ""}${(totalReturn * 100).toFixed(2)}%`, sub: `${(currentValue - startValue) >= 0 ? "+" : ""}$${(currentValue - startValue).toFixed(2)} net`, positive: totalReturn >= 0 },
               ];
 
@@ -3134,7 +3561,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-8">
             <AdaptiveSignalFeed
-              signals={adaptiveSignals}
+              decisions={executionDecisions}
               selected={selectedStock?.ticker}
               onSelect={(signal) => setSelectedStock(signal)}
             />
@@ -3153,7 +3580,7 @@ export default function Dashboard() {
                   {updateMsg}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Last synced {lastSyncedLabel} · {adaptiveSignals.length} adaptive rows · {selectedAdaptiveSignal?.lifecycleState ?? "EMITTED"}
+                  Last synced {lastSyncedLabel} · {executionDecisions.length} ranked opportunities · {selectedExecutionDecision?.timingState ?? "Early"}
                 </p>
               </div>
             </div>
@@ -3166,7 +3593,7 @@ export default function Dashboard() {
                 Simulated Positions
               </h3>
               <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
-                Positioning opens only on fresh Buy + Rising signals while the selected exchange market is open. Available cash is split across new entries by Sharpe-weighted sizing, held positions stay untouched, and exits happen when that ticker no longer qualifies.
+                Positioning opens only on fresh Buy + Rising signals while the selected exchange market is open. Available cash is split across new entries by risk-adjusted sizing, held positions stay untouched, and exits happen when that ticker no longer qualifies.
               </p>
               {allocation.total > 0 ? (
                 <div className="space-y-3">
@@ -3247,7 +3674,7 @@ export default function Dashboard() {
                           className="rounded px-2 py-0.5 text-[10px] font-semibold text-background"
                           style={{ backgroundColor: selectedAdaptiveSignal.regimeColor }}
                         >
-                          {selectedAdaptiveSignal.regime}
+                          {formatRegime(selectedAdaptiveSignal.regime)}
                         </span>
                       )}
                       <StatusBadge status={selectedStock.status ?? "Stable"} />
@@ -3287,52 +3714,52 @@ export default function Dashboard() {
                   <div className="grid grid-cols-2 gap-y-4 gap-x-2 mb-8 text-sm">
                     <div>
                       <span className="text-muted-foreground block mb-1">
-                        Signal
+                        Action
                       </span>
                       <span className="font-medium">
-                        {selectedStock.signalAction ?? "Hold"}
+                        {selectedExecutionDecision?.actionLabel ?? selectedStock.signalAction ?? "Hold"}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground block mb-1">
-                        Confidence
+                        Conviction
                       </span>
                       <span className="font-medium">
-                        {selectedAdaptiveSignal
-                          ? `${selectedAdaptiveSignal.confidence.toFixed(0)}%`
+                        {selectedExecutionDecision
+                          ? selectedExecutionDecision.convictionLabel
                           : "—"}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground block mb-1">
-                        Uncertainty
+                        Suggested Allocation
                       </span>
                       <span className="font-medium">
-                        {selectedAdaptiveSignal ? selectedAdaptiveSignal.uncertainty.toFixed(0) : "—"}
+                        {selectedExecutionDecision ? `${selectedExecutionDecision.suggestedAllocationPct.toFixed(1)}%` : "—"}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground block mb-1">
-                        Drift
+                        Timing
                       </span>
                       <span className="font-medium">
-                        {selectedAdaptiveSignal ? selectedAdaptiveSignal.driftScore.toFixed(0) : "—"}
+                        {selectedExecutionDecision?.timingState ?? "—"}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground block mb-1">
-                        Stability
+                        Risk Level
                       </span>
                       <span className="font-medium">
-                        {selectedAdaptiveSignal ? `${selectedAdaptiveSignal.stabilityScore.toFixed(0)}%` : "—"}
+                        {selectedExecutionDecision?.riskLevel ?? "—"}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground block mb-1">
-                        Ensemble
+                        Market Environment
                       </span>
                       <span className="font-medium">
-                        {selectedAdaptiveSignal ? selectedAdaptiveSignal.ensembleAgreement.toFixed(2) : "—"}
+                        {selectedExecutionDecision?.environmentLabel ?? "—"}
                       </span>
                     </div>
                     <div>
@@ -3347,15 +3774,15 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <span className="text-muted-foreground block mb-1">
-                        Lifecycle
+                        Indicator Alignment
                       </span>
                       <span className="font-medium">
-                        {selectedAdaptiveSignal?.lifecycleState ?? "EMITTED"}
+                        {selectedAdaptiveSignal ? `${(selectedAdaptiveSignal.ensembleAgreement * 100).toFixed(0)}%` : "—"}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground block mb-1">
-                        Rolling Sharpe
+                        Risk-Adjusted Performance
                       </span>
                       <span className="font-medium">
                         {selectedAdaptiveSignal ? selectedAdaptiveSignal.rollingSharpe.toFixed(2) : "—"}
@@ -3416,10 +3843,11 @@ export default function Dashboard() {
                   <div className="space-y-4">
                     <div className="bg-muted/40 rounded-xl p-4">
                       <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
-                        <Info className="h-4 w-4 text-primary" /> The Signal
+                        <Info className="h-4 w-4 text-primary" /> Trade Read
                       </h4>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {selectedStock.summary ??
+                        {selectedExecutionDecision?.tradeExplanation ??
+                          selectedStock.summary ??
                           "Live insight will appear once quotes are synced."}
                       </p>
                     </div>
@@ -3429,8 +3857,9 @@ export default function Dashboard() {
                         What this means for you
                       </h4>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {selectedStock.impact ??
-                          "Watchlist impact is updating."}
+                        {selectedExecutionDecision
+                          ? `${selectedExecutionDecision.actionLabel} posture with ${selectedExecutionDecision.riskLevel.toLowerCase()}, ${selectedExecutionDecision.timingState.toLowerCase()} timing, and ${selectedExecutionDecision.suggestedAllocationPct.toFixed(1)}% suggested capital.`
+                          : selectedStock.impact ?? "Watchlist impact is updating."}
                       </p>
                       {selectedStock.quoteStatus === "unavailable" && (
                         <p className="mt-2 text-xs text-muted-foreground">
@@ -3439,6 +3868,50 @@ export default function Dashboard() {
                         </p>
                       )}
                     </div>
+
+                    {selectedExecutionDecision && (
+                      <div className="rounded-xl border border-border/60 p-4">
+                        <h4 className="mb-3 text-sm font-medium text-foreground">
+                          Signal Composition
+                        </h4>
+                        <div className="space-y-2">
+                          {selectedExecutionDecision.genealogy.map((item) => (
+                            <div key={item.label} className="grid grid-cols-[96px_1fr_42px] items-center gap-2 text-xs">
+                              <span className="text-muted-foreground">{item.label}</span>
+                              <div className="h-1.5 rounded-full bg-muted">
+                                <div
+                                  className={cn(
+                                    "h-full rounded-full",
+                                    item.tone === "good" && "bg-emerald-400",
+                                    item.tone === "warn" && "bg-amber-400",
+                                    item.tone === "bad" && "bg-rose-400",
+                                    item.tone === "info" && "bg-sky-400",
+                                  )}
+                                  style={{ width: `${clampMetric(item.value)}%` }}
+                                />
+                              </div>
+                              <span className="text-right tabular-nums text-muted-foreground">{item.value.toFixed(0)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {advancedOpen && selectedAdaptiveSignal && (
+                      <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
+                        <h4 className="mb-3 text-sm font-medium text-foreground">
+                          Advanced Diagnostics
+                        </h4>
+                        <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground">
+                          <span>Raw confidence {selectedAdaptiveSignal.confidence.toFixed(0)}%</span>
+                          <span>Calibrated confidence {selectedExecutionDecision?.calibratedConfidence.toFixed(0)}%</span>
+                          <span>Drift {selectedAdaptiveSignal.driftScore.toFixed(0)}</span>
+                          <span>Entropy {selectedAdaptiveSignal.entropy.toFixed(0)}</span>
+                          <span>Residual {selectedAdaptiveSignal.predictionResidual.toFixed(0)}</span>
+                          <span>Lifecycle {selectedAdaptiveSignal.lifecycleState}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               ) : (
