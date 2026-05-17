@@ -41,6 +41,7 @@ export interface StockQuote {
   signalEmittedAt?: string;
   signalEntryPrice?: number;
   signalReturnPercent?: number;
+  quoteSource?: "binance-spot" | "binance-futures" | "tradingview";
 }
 
 export type TradeSignal = "Buy" | "Hold" | "Sell";
@@ -138,6 +139,18 @@ const TRADINGVIEW_TIMEOUT_MS = Number(
 const TRADINGVIEW_BASE_URL =
   process.env.TRADINGVIEW_DATA_BASE_URL?.trim() ??
   "https://tradingview-data.vercel.app?symbol=";
+const BINANCE_SPOT_BASE_URL = (
+  process.env.BINANCE_SPOT_BASE_URL ?? "https://api.binance.com"
+).replace(/\/$/, "");
+const BINANCE_FUTURES_BASE_URL = (
+  process.env.BINANCE_FUTURES_BASE_URL ?? "https://fapi.binance.com"
+).replace(/\/$/, "");
+const BINANCE_TICKER_CACHE_TTL_MS = Number(
+  process.env.BINANCE_TICKER_CACHE_TTL_MS ?? 5_000,
+);
+const BINANCE_QUOTE_CACHE_TTL_MS = Number(
+  process.env.BINANCE_QUOTE_CACHE_TTL_MS ?? 10_000,
+);
 const NODE_ECU_API_BASE_URL = (
   process.env.NODE_ECU_API_BASE_URL ??
   (process.env.VERCEL ? "off" : "http://localhost:4410/api")
@@ -178,6 +191,27 @@ const signalCache = new Map<
 >();
 const tradingViewRequestTimestamps: number[] = [];
 let tradingViewQueue: Promise<void> = Promise.resolve();
+
+type BinanceTicker = {
+  symbol: string;
+  priceChangePercent?: string;
+  lastPrice?: string;
+  bidPrice?: string;
+  askPrice?: string;
+  openPrice?: string;
+  highPrice?: string;
+  lowPrice?: string;
+  closeTime?: number;
+};
+
+type BinanceTickerCache = {
+  expiresAt: number;
+  spot: Map<string, BinanceTicker>;
+  futures: Map<string, BinanceTicker>;
+};
+
+let binanceTickerCache: BinanceTickerCache | null = null;
+let binanceTickerCachePromise: Promise<BinanceTickerCache> | null = null;
 
 const exchangeLabelOverrides: Record<string, string> = {
   UK: "United Kingdom",
@@ -328,7 +362,8 @@ export async function fetchQuotes(
     async (symbol) => {
       let quote = null;
       let lastError = null;
-      for (let attempt = 1; attempt <= 3; attempt++) {
+      const maxAttempts = isBinanceScope(normalized, normalized) ? 1 : 3;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
           quote = await fetchQuote(
             normalized,
@@ -341,7 +376,9 @@ export async function fetchQuotes(
           lastError = err;
         }
         // Exponential backoff
-        await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+        if (attempt < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+        }
       }
       if (quote) {
         results.push(quote);
@@ -380,7 +417,8 @@ export async function fetchMarketQuotes(
     async (symbol) => {
       let quote = null;
       let lastError = null;
-      for (let attempt = 1; attempt <= 3; attempt++) {
+      const maxAttempts = isBinanceScope(normalized, normalized) ? 1 : 3;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
           quote = await fetchQuote(
             normalized,
@@ -393,7 +431,9 @@ export async function fetchMarketQuotes(
           lastError = err;
         }
         // Exponential backoff
-        await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+        if (attempt < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+        }
       }
       if (quote) {
         results.push(quote);
@@ -478,6 +518,18 @@ async function fetchQuote(
     return cached.quote;
   }
 
+  if (isBinanceScope(exchange, market)) {
+    const binanceQuote = await fetchBinanceQuote(symbol);
+    if (binanceQuote) {
+      quoteCache.set(cacheKey, {
+        expiresAt: Date.now() + BINANCE_QUOTE_CACHE_TTL_MS,
+        quote: binanceQuote,
+      });
+      return binanceQuote;
+    }
+    return cached?.quote ?? null;
+  }
+
   const rows = await fetchTradingViewRows(symbol, market);
   if (!rows.length) {
     logger.warn(
@@ -518,6 +570,7 @@ async function fetchQuote(
     impact,
     cap: "N/A",
     peRatio: undefined,
+    quoteSource: "tradingview",
   };
 
   quoteCache.set(cacheKey, {
@@ -612,6 +665,205 @@ function deriveHeuristicSignal(
     signalConfidence: Math.round(signalConfidence),
     signalSource: "heuristic",
   };
+}
+
+function isBinanceScope(exchange: string, market?: string): boolean {
+  const values = [exchange, market ?? ""].map((value) =>
+    value.trim().toUpperCase(),
+  );
+  return values.some((value) => value === "BINANCE" || value === "CRYPTO");
+}
+
+async function fetchBinanceQuote(symbol: string): Promise<StockQuote | null> {
+  const normalized = normalizeBinanceSymbol(symbol);
+  if (!normalized) return null;
+
+  const cache = await getBinanceTickerCache();
+  const ticker =
+    normalized.kind === "futures"
+      ? cache.futures.get(normalized.apiSymbol)
+      : cache.spot.get(normalized.apiSymbol);
+
+  if (!ticker) {
+    logger.warn(
+      {
+        symbol,
+        apiSymbol: normalized.apiSymbol,
+        marketType: normalized.kind,
+      },
+      "Binance ticker snapshot has no row for symbol",
+    );
+    return null;
+  }
+
+  const price = parseFiniteNumber(ticker.lastPrice);
+  if (!Number.isFinite(price) || price <= 0) {
+    logger.warn(
+      {
+        symbol,
+        apiSymbol: normalized.apiSymbol,
+        marketType: normalized.kind,
+        lastPrice: ticker.lastPrice,
+      },
+      "Binance ticker row has no usable last price",
+    );
+    return null;
+  }
+
+  const changePercent = parseFiniteNumber(ticker.priceChangePercent) || 0;
+  const open = parseFiniteNumber(ticker.openPrice);
+  const high = parseFiniteNumber(ticker.highPrice);
+  const low = parseFiniteNumber(ticker.lowPrice);
+  const history = buildBinanceTickerHistory({
+    open: Number.isFinite(open) && open > 0 ? open : price,
+    high: Number.isFinite(high) && high > 0 ? high : price,
+    low: Number.isFinite(low) && low > 0 ? low : price,
+    close: price,
+  });
+  const bid = parseFiniteNumber(ticker.bidPrice);
+  const ask = parseFiniteNumber(ticker.askPrice);
+  const estimatedSpread = estimateSpread(price, history);
+  const status = statusFromChange(changePercent);
+
+  return {
+    symbol,
+    price,
+    bid: Number.isFinite(bid) && bid > 0 ? bid : estimatedSpread.bid,
+    ask: Number.isFinite(ask) && ask > 0 ? ask : estimatedSpread.ask,
+    changePercent: Number(changePercent.toFixed(2)),
+    status,
+    high52: Number.isFinite(high) && high > 0 ? high : price,
+    low52: Number.isFinite(low) && low > 0 ? low : price,
+    history,
+    summary: buildSummary(symbol, changePercent, status),
+    impact: buildImpact(status, changePercent),
+    cap: "N/A",
+    peRatio: undefined,
+    quoteSource:
+      normalized.kind === "futures" ? "binance-futures" : "binance-spot",
+  };
+}
+
+function normalizeBinanceSymbol(
+  symbol: string,
+): { apiSymbol: string; kind: "spot" | "futures" } | null {
+  const rawSymbol = symbol.trim().toUpperCase();
+  if (!rawSymbol) return null;
+  const withoutExchange = rawSymbol.includes(":")
+    ? rawSymbol.split(":").pop() ?? rawSymbol
+    : rawSymbol;
+  const kind = withoutExchange.endsWith(".P") ? "futures" : "spot";
+  const apiSymbol = withoutExchange.replace(/\.P$/, "").replace(/[^A-Z0-9]/g, "");
+  return apiSymbol ? { apiSymbol, kind } : null;
+}
+
+async function getBinanceTickerCache(): Promise<BinanceTickerCache> {
+  if (binanceTickerCache && binanceTickerCache.expiresAt > Date.now()) {
+    return binanceTickerCache;
+  }
+  if (binanceTickerCachePromise) {
+    return binanceTickerCachePromise;
+  }
+
+  binanceTickerCachePromise = Promise.all([
+    fetchBinanceTickerRows(`${BINANCE_SPOT_BASE_URL}/api/v3/ticker/24hr`, "spot"),
+    fetchBinanceTickerRows(
+      `${BINANCE_FUTURES_BASE_URL}/fapi/v1/ticker/24hr`,
+      "futures",
+    ),
+  ])
+    .then(([spotRows, futuresRows]) => {
+      const cache: BinanceTickerCache = {
+        expiresAt: Date.now() + BINANCE_TICKER_CACHE_TTL_MS,
+        spot: new Map(spotRows.map((row) => [row.symbol, row])),
+        futures: new Map(futuresRows.map((row) => [row.symbol, row])),
+      };
+      binanceTickerCache = cache;
+      return cache;
+    })
+    .finally(() => {
+      binanceTickerCachePromise = null;
+    });
+
+  return binanceTickerCachePromise;
+}
+
+async function fetchBinanceTickerRows(
+  url: string,
+  marketType: "spot" | "futures",
+): Promise<BinanceTicker[]> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), TRADINGVIEW_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      logger.warn(
+        {
+          marketType,
+          status: response.status,
+          statusText: response.statusText,
+        },
+        "Binance ticker snapshot request failed",
+      );
+      return [];
+    }
+
+    const data = (await response.json()) as unknown;
+    if (!Array.isArray(data)) {
+      logger.warn({ marketType }, "Binance ticker snapshot was not an array");
+      return [];
+    }
+
+    return data
+      .filter((item): item is BinanceTicker =>
+        Boolean(
+          item &&
+            typeof item === "object" &&
+            "symbol" in item &&
+            typeof (item as { symbol?: unknown }).symbol === "string",
+        ),
+      )
+      .map((item) => ({
+        ...item,
+        symbol: item.symbol.toUpperCase(),
+      }));
+  } catch (error) {
+    logger.warn({ marketType, err: error }, "Binance ticker snapshot request errored");
+    return [];
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function parseFiniteNumber(value: unknown): number {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : Number.NaN;
+}
+
+function buildBinanceTickerHistory(input: {
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}): number[] {
+  const { open, high, low, close } = input;
+  const points: number[] = [];
+  const steps: number = 30;
+  for (let index = 0; index < steps; index++) {
+    const progress = steps === 1 ? 1 : index / (steps - 1);
+    const trend = open + (close - open) * progress;
+    const wave =
+      Math.sin(progress * Math.PI * 2) * (high - low) * 0.08 +
+      Math.sin(progress * Math.PI * 5) * (high - low) * 0.03;
+    const value = Math.min(high, Math.max(low, trend + wave));
+    points.push(Number(value.toFixed(8)));
+  }
+  points[points.length - 1] = close;
+  return points;
 }
 
 async function evaluateNodeEcuSignal(

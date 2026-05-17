@@ -37,6 +37,10 @@ export interface StockQuote {
   signalEmittedAt?: string;
   signalEntryPrice?: number;
   signalReturnPercent?: number;
+  quoteSource?: "binance-spot" | "binance-futures" | "tradingview";
+  quoteStatus?: "available" | "pending" | "unavailable";
+  quoteStatusReason?: string;
+  quoteLastAttemptedAt?: number;
 }
 
 export type StockData = StockListItem & {
@@ -59,6 +63,10 @@ export type StockData = StockListItem & {
   signalEmittedAt?: string;
   signalEntryPrice?: number;
   signalReturnPercent?: number;
+  quoteSource?: "binance-spot" | "binance-futures" | "tradingview";
+  quoteStatus?: "available" | "pending" | "unavailable";
+  quoteStatusReason?: string;
+  quoteLastAttemptedAt?: number;
 };
 
 export interface SignalEvent {
@@ -68,6 +76,15 @@ export interface SignalEvent {
   symbol: string;
   emittedAt: string;
   signal: StockQuote & Partial<StockData>;
+}
+
+export interface StockQuoteBatchResponse {
+  market?: string;
+  exchange?: string;
+  requestedSymbols: string[];
+  unavailableSymbols: string[];
+  partial: boolean;
+  quotes: StockQuote[];
 }
 
 const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(
@@ -194,18 +211,27 @@ export async function fetchStockList(
   );
 }
 
-export async function fetchStockQuotes(
+export async function fetchStockQuoteBatch(
   market: string,
   symbols: string[],
   options?: { withSignals?: boolean; timeoutMs?: number; retryCount?: number },
-): Promise<StockQuote[]> {
+): Promise<StockQuoteBatchResponse> {
   if (!symbols.length) {
-    return [];
+    return {
+      market,
+      requestedSymbols: [],
+      unavailableSymbols: [],
+      partial: false,
+      quotes: [],
+    };
   }
 
   const response = await request<{
     market?: string;
     exchange?: string;
+    requestedSymbols?: string[];
+    unavailableSymbols?: string[];
+    partial?: boolean;
     quotes: StockQuote[];
   }>("/stocks/quotes", {
     method: "POST",
@@ -218,6 +244,28 @@ export async function fetchStockQuotes(
     retryCount: options?.retryCount,
   });
 
+  const requestedSymbols = response.requestedSymbols ?? symbols;
+  const returnedSymbols = new Set(response.quotes.map((quote) => quote.symbol));
+  const unavailableSymbols =
+    response.unavailableSymbols ??
+    requestedSymbols.filter((symbol) => !returnedSymbols.has(symbol));
+
+  return {
+    market: response.market,
+    exchange: response.exchange,
+    requestedSymbols,
+    unavailableSymbols,
+    partial: response.partial ?? unavailableSymbols.length > 0,
+    quotes: response.quotes,
+  };
+}
+
+export async function fetchStockQuotes(
+  market: string,
+  symbols: string[],
+  options?: { withSignals?: boolean; timeoutMs?: number; retryCount?: number },
+): Promise<StockQuote[]> {
+  const response = await fetchStockQuoteBatch(market, symbols, options);
   return response.quotes;
 }
 

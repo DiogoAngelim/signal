@@ -470,10 +470,25 @@ async function refreshScope(
     return [];
   }
 
+  const scopedSymbols = filterSymbolsForScope(scope, normalizedSymbols);
+  const skippedSymbols = normalizedSymbols.filter(
+    (symbol) => !scopedSymbols.includes(symbol),
+  );
+  if (skippedSymbols.length) {
+    await markWatchEntriesRefreshed(
+      scope,
+      skippedSymbols,
+      "Symbol is not part of the selected market list.",
+    );
+  }
+  if (!scopedSymbols.length) {
+    return [];
+  }
+
   const allQuotesWithSignals: StockQuote[] = [];
 
-  for (let index = 0; index < normalizedSymbols.length; index += SIGNAL_REFRESH_CHUNK_SIZE) {
-    const chunk = normalizedSymbols.slice(index, index + SIGNAL_REFRESH_CHUNK_SIZE);
+  for (let index = 0; index < scopedSymbols.length; index += SIGNAL_REFRESH_CHUNK_SIZE) {
+    const chunk = scopedSymbols.slice(index, index + SIGNAL_REFRESH_CHUNK_SIZE);
     const quotes =
       scope.scopeType === "market"
         ? await fetchMarketQuotes(scope.scopeCode, chunk, {
@@ -493,8 +508,21 @@ async function refreshScope(
   }
 
   await storeSignalSnapshots(scope, allQuotesWithSignals);
-  await markWatchEntriesRefreshed(scope, normalizedSymbols, null);
+  await markWatchEntriesRefreshed(scope, scopedSymbols, null);
   return allQuotesWithSignals;
+}
+
+function filterSymbolsForScope(scope: SignalScope, symbols: string[]): string[] {
+  const sourceItems =
+    scope.scopeType === "market"
+      ? loadMarketList(scope.scopeCode)
+      : loadStockList(scope.scopeCode);
+  if (!sourceItems.length) {
+    return symbols;
+  }
+
+  const allowedSymbols = new Set(sourceItems.map((item) => normalizeSymbol(item.symbol)));
+  return symbols.filter((symbol) => allowedSymbols.has(symbol));
 }
 
 async function runRefreshCycle(): Promise<number> {

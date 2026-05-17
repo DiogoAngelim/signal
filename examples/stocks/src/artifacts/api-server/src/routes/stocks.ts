@@ -12,7 +12,6 @@ import {
   emitFakeFrontendSignal,
   getBackgroundSignalEngineStatus,
   getSignalEvents,
-  getStoredSignalSnapshots,
   registerSymbolsForBackgroundRefresh,
   storeSignalEvents,
   storeSignalSnapshots,
@@ -69,22 +68,6 @@ async function registerSymbolsForBackgroundRefreshIfAvailable(
       "Signal watchlist persistence unavailable; continuing with live quotes",
       scope,
     );
-  }
-}
-
-async function getStoredSignalSnapshotsIfAvailable(
-  scope: SignalScope,
-  symbols: string[],
-): Promise<StockQuote[]> {
-  try {
-    return await getStoredSignalSnapshots(scope, symbols);
-  } catch (error) {
-    logSignalPersistenceWarning(
-      error,
-      "Stored signal snapshots unavailable; fetching live quotes",
-      scope,
-    );
-    return [];
   }
 }
 
@@ -185,39 +168,25 @@ router.get("/stocks/list", (req, res) => {
 router.post("/stocks/quotes", async (req, res) => {
   const market = String(req.body?.market ?? "").trim();
   const exchange = String(req.body?.exchange ?? "US").toUpperCase();
-  const symbols = Array.isArray(req.body?.symbols)
-    ? req.body.symbols.map(String)
+  const symbols: string[] = Array.isArray(req.body?.symbols)
+    ? (req.body.symbols as unknown[]).map((symbol) => String(symbol))
     : [];
+  const requestedSymbols: string[] = Array.from(
+    new Set(symbols.map((symbol) => symbol.trim()).filter(Boolean)),
+  );
   const withSignals = Boolean(req.body?.withSignals);
   const scope = resolveScope(market, exchange);
 
-  if (!symbols.length) {
+  if (!requestedSymbols.length) {
     res.status(400).json({ error: "symbols array is required" });
     return;
   }
 
-  await registerSymbolsForBackgroundRefreshIfAvailable(scope, symbols);
-
-  if (withSignals) {
-    const storedQuotes = await getStoredSignalSnapshotsIfAvailable(
-      scope,
-      symbols,
-    );
-    if (storedQuotes.length === symbols.length) {
-      res.json({
-        data: {
-          market: market || undefined,
-          exchange: market ? undefined : exchange,
-          quotes: storedQuotes,
-        },
-      });
-      return;
-    }
-  }
+  await registerSymbolsForBackgroundRefreshIfAvailable(scope, requestedSymbols);
 
   const quotes = market
-    ? await fetchMarketQuotes(market, symbols)
-    : await fetchQuotes(exchange, symbols);
+    ? await fetchMarketQuotes(market, requestedSymbols)
+    : await fetchQuotes(exchange, requestedSymbols);
 
   const enrichedQuotes = withSignals
     ? await attachSignalsToQuotes(quotes, market || exchange)
@@ -227,10 +196,18 @@ router.post("/stocks/quotes", async (req, res) => {
     await storeSignalSnapshotsIfAvailable(scope, enrichedQuotes);
   }
 
+  const returnedSymbols = new Set(enrichedQuotes.map((quote) => quote.symbol));
+  const unavailableSymbols = requestedSymbols.filter(
+    (symbol) => !returnedSymbols.has(symbol),
+  );
+
   res.json({
     data: {
       market: market || undefined,
       exchange: market ? undefined : exchange,
+      requestedSymbols,
+      unavailableSymbols,
+      partial: unavailableSymbols.length > 0,
       quotes: enrichedQuotes,
     },
   });

@@ -34,7 +34,7 @@ import {
   fetchSignalHistory,
   fetchMarkets,
   fetchStockList,
-  fetchStockQuotes,
+  fetchStockQuoteBatch,
   registerSignalWatchlist,
   type MarketOption,
   type SignalEvent,
@@ -51,7 +51,7 @@ const UNAVAILABLE_LIVE_QUOTE_CACHE_TTL_MS = 30_000;
 
 type CachedQuoteEntry =
   | { status: "available"; quote: StockQuote; cachedAt: number }
-  | { status: "unavailable"; cachedAt: number };
+  | { status: "unavailable"; reason: string; cachedAt: number };
 
 const liveQuoteCache = new Map<string, CachedQuoteEntry>();
 
@@ -69,7 +69,7 @@ function isLiveQuoteCacheEntryFresh(entry: CachedQuoteEntry) {
 
 function readLiveQuoteCache(market: string, symbols: string[]) {
   const cachedQuotes: StockQuote[] = [];
-  const cachedPendingSymbols: string[] = [];
+  const cachedUnavailableSymbols: string[] = [];
   const uncachedSymbols: string[] = [];
 
   for (const symbol of symbols) {
@@ -89,11 +89,11 @@ function readLiveQuoteCache(market: string, symbols: string[]) {
     if (cached.status === "available") {
       cachedQuotes.push(cached.quote);
     } else {
-      cachedPendingSymbols.push(symbol);
+      cachedUnavailableSymbols.push(symbol);
     }
   }
 
-  return { cachedQuotes, cachedPendingSymbols, uncachedSymbols };
+  return { cachedQuotes, cachedUnavailableSymbols, uncachedSymbols };
 }
 
 function cacheLiveQuotes(market: string, quotes: Array<{ symbol: string } & Partial<StockQuote>>) {
@@ -102,20 +102,48 @@ function cacheLiveQuotes(market: string, quotes: Array<{ symbol: string } & Part
     if (!quote.symbol) continue;
     liveQuoteCache.set(liveQuoteCacheKey(market, quote.symbol), {
       status: "available",
-      quote: quote as StockQuote,
+      quote: {
+        ...quote,
+        quoteStatus: "available",
+        quoteStatusReason: undefined,
+        quoteLastAttemptedAt: cachedAt,
+      } as StockQuote,
       cachedAt,
     });
   }
 }
 
-function cacheUnavailableLiveQuotes(market: string, symbols: string[]) {
+function cacheUnavailableLiveQuotes(
+  market: string,
+  symbols: string[],
+  reason = "The quote provider returned no usable rows for this symbol.",
+) {
   const cachedAt = Date.now();
   for (const symbol of symbols) {
     liveQuoteCache.set(liveQuoteCacheKey(market, symbol), {
       status: "unavailable",
+      reason,
       cachedAt,
     });
   }
+}
+
+function isPlaceholderQuoteSummary(summary?: string) {
+  return (
+    !summary ||
+    summary === SYNCING_QUOTE_SUMMARY ||
+    summary === MARKET_CLOSED_QUOTE_SUMMARY ||
+    summary === UNAVAILABLE_QUOTE_SUMMARY
+  );
+}
+
+function isPlaceholderQuoteImpact(impact?: string) {
+  return (
+    !impact ||
+    impact === "Live data will refresh as the market-wide quote sync reaches this asset." ||
+    impact === MARKET_CLOSED_QUOTE_IMPACT ||
+    impact === UNAVAILABLE_QUOTE_IMPACT
+  );
 }
 
 function formatMaybeCurrency(value: number | undefined | null) {
@@ -272,7 +300,14 @@ const QUOTE_REQUEST_SYMBOL_BATCH_SIZE = 8;
 const QUOTE_BATCH_DELAY_MS = 500;
 const QUOTE_REQUEST_TIMEOUT_MS = 45_000;
 const SYNCING_QUOTE_SUMMARY = "Live quote sync in progress.";
-const PREFERRED_INITIAL_MARKETS = ["NASDAQ", "NYSE", "AMEX"];
+const MARKET_CLOSED_QUOTE_SUMMARY = "Market closed. Quote sync paused.";
+const MARKET_CLOSED_QUOTE_IMPACT =
+  "Watching market status. Live quotes and signals will resume when this exchange opens.";
+const UNAVAILABLE_QUOTE_SUMMARY =
+  "Live quote unavailable from the current provider.";
+const UNAVAILABLE_QUOTE_IMPACT =
+  "The API is tracking this symbol, but the quote source returned no usable rows. Check the API console for the exact provider response.";
+const PREFERRED_INITIAL_MARKETS = ["BINANCE", "CRYPTO", "NASDAQ", "NYSE", "AMEX"];
 const statusOptions: Array<StockStatus | "All"> = [
   "All",
   "Stable",
@@ -882,17 +917,27 @@ export default function Dashboard() {
         if (!mounted) return;
         setMarkets(data);
         if (data.length) {
+          const openPreferredMarket =
+            PREFERRED_INITIAL_MARKETS.find((code) =>
+              data.some((item) => item.code === code && getMarketStatus(item.code) === "Open"),
+            );
           const preferredMarket =
+            openPreferredMarket ??
             PREFERRED_INITIAL_MARKETS.find((code) =>
               data.some((item) => item.code === code),
-            ) ?? data[0].code;
-          setMarketFilter((current) =>
-            current &&
-              current !== data[0].code &&
-              data.some((item) => item.code === current)
-              ? current
-              : preferredMarket,
-          );
+            ) ??
+            data[0].code;
+          setMarketFilter((current) => {
+            const currentExists = data.some((item) => item.code === current);
+            if (
+              current &&
+              currentExists &&
+              (getMarketStatus(current) === "Open" || !openPreferredMarket)
+            ) {
+              return current;
+            }
+            return preferredMarket;
+          });
         } else {
           setLoading(false);
         }
@@ -918,6 +963,24 @@ export default function Dashboard() {
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!markets.length || !marketFilter || isSelectedMarketOpen) return;
+    const openPreferredMarket = PREFERRED_INITIAL_MARKETS.find((code) =>
+      markets.some((item) => item.code === code && getMarketStatus(item.code) === "Open"),
+    );
+    if (!openPreferredMarket || openPreferredMarket === marketFilter) return;
+    const onlyPlaceholders =
+      !stocks.length ||
+      stocks.every(
+        (stock) =>
+          stock.price == null &&
+          (stock.quoteStatus === "pending" || isPlaceholderQuoteSummary(stock.summary)),
+      );
+    if (onlyPlaceholders) {
+      setMarketFilter(openPreferredMarket);
+    }
+  }, [isSelectedMarketOpen, marketFilter, markets, stocks]);
 
   useEffect(() => {
     if (!marketMenuOpen) return;
@@ -967,7 +1030,11 @@ export default function Dashboard() {
       const cached = stocksListCacheRef.current[marketFilter];
       if (cached && cached.items.length > 0) {
         setTotalStocks(cached.total);
-        setStocks(cached.items);
+        setStocks(
+          getMarketStatus(marketFilter) === "Open"
+            ? cached.items
+            : markQuotesPaused(cached.items),
+        );
         setLoading(false);
         const watchKey = `${marketFilter}:${cached.items.length}`;
         if (!watchlistRegisteredRef.current.has(watchKey)) {
@@ -984,6 +1051,7 @@ export default function Dashboard() {
             symbolLimit: INITIAL_QUOTE_SYMBOL_LIMIT,
           });
         } else {
+          setLastSyncedAt(null);
           setUpdateMsg("Market closed. Watching status until it reopens.");
         }
         return;
@@ -1000,6 +1068,7 @@ export default function Dashboard() {
         let offset = 0;
         let total = 0;
         const items: StockData[] = [];
+        const marketOpen = getMarketStatus(marketFilter) === "Open";
 
         do {
           const response = await fetchStockList(
@@ -1014,8 +1083,11 @@ export default function Dashboard() {
             ...response.items.map((item) => ({
               ...item,
               ticker: item.symbol,
-              summary: SYNCING_QUOTE_SUMMARY,
-              impact: "Live data will refresh as the market-wide quote sync reaches this asset.",
+              summary: marketOpen ? SYNCING_QUOTE_SUMMARY : MARKET_CLOSED_QUOTE_SUMMARY,
+              impact: marketOpen
+                ? "Live data will refresh as the market-wide quote sync reaches this asset."
+                : MARKET_CLOSED_QUOTE_IMPACT,
+              quoteStatus: "pending" as const,
             })),
           );
           offset += response.items.length;
@@ -1036,11 +1108,12 @@ export default function Dashboard() {
             watchlistRegisteredRef.current.delete(watchKey);
           });
         }
-        if (getMarketStatus(marketFilter) === "Open") {
+        if (marketOpen) {
           await fetchQuotesBatched(marketFilter, items, () => cancelled, {
             symbolLimit: INITIAL_QUOTE_SYMBOL_LIMIT,
           });
         } else {
+          setLastSyncedAt(null);
           setUpdateMsg("Market closed. Watching status until it reopens.");
         }
       } catch (error) {
@@ -1444,24 +1517,25 @@ export default function Dashboard() {
       const batchSymbols = symbols.slice(index, index + QUOTE_REQUEST_SYMBOL_BATCH_SIZE);
       const {
         cachedQuotes,
-        cachedPendingSymbols,
+        cachedUnavailableSymbols,
         uncachedSymbols,
       } = options?.bypassCache
           ? {
             cachedQuotes: [],
-            cachedPendingSymbols: [],
+            cachedUnavailableSymbols: [],
             uncachedSymbols: batchSymbols,
           }
           : readLiveQuoteCache(market, batchSymbols);
-      let quotes;
+      let quotes: StockQuote[];
+      let unavailableCount = 0;
 
       if (cachedQuotes.length) {
         setStocks((prev) => mergeQuotes(prev, cachedQuotes));
         setLastSyncedAt(Date.now());
       }
 
-      if (cachedPendingSymbols.length) {
-        setStocks((prev) => markQuotesPending(prev, cachedPendingSymbols));
+      if (cachedUnavailableSymbols.length) {
+        setStocks((prev) => markQuotesUnavailable(prev, cachedUnavailableSymbols));
       }
 
       if (!uncachedSymbols.length) {
@@ -1476,17 +1550,26 @@ export default function Dashboard() {
       }
 
       try {
-        quotes = await fetchStockQuotes(market, uncachedSymbols, {
+        const quoteBatch = await fetchStockQuoteBatch(market, uncachedSymbols, {
           withSignals: true,
           timeoutMs: QUOTE_REQUEST_TIMEOUT_MS,
           retryCount: 0,
         });
+        quotes = quoteBatch.quotes;
+        unavailableCount = quoteBatch.unavailableSymbols.length;
+
+        if (quoteBatch.unavailableSymbols.length) {
+          cacheUnavailableLiveQuotes(market, quoteBatch.unavailableSymbols);
+          setStocks((prev) =>
+            markQuotesUnavailable(prev, quoteBatch.unavailableSymbols),
+          );
+        }
       } catch (error) {
         if (!shouldCancel()) {
           const message = describeRefreshError(error);
           setRefreshError(message);
           setUpdateMsg(message);
-          setStocks((prev) => markQuotesPending(prev, uncachedSymbols));
+          setStocks((prev) => markQuotesUnavailable(prev, uncachedSymbols, message));
         }
         continue;
       }
@@ -1501,14 +1584,18 @@ export default function Dashboard() {
       );
       if (missingSymbols.length) {
         cacheUnavailableLiveQuotes(market, missingSymbols);
-        setStocks((prev) => markQuotesPending(prev, missingSymbols));
+        setStocks((prev) => markQuotesUnavailable(prev, missingSymbols));
       }
       setLastSyncedAt(Date.now());
       if (quotes.length) {
         const head = quotes[0];
         const direction = head.changePercent >= 0 ? "up" : "down";
         setUpdateMsg(
-          `${quotes.length} quotes synced. ${head.symbol} ${direction} ${Math.abs(head.changePercent).toFixed(2)}%`,
+          `${quotes.length} quotes synced${unavailableCount ? `, ${unavailableCount} unavailable` : ""}. ${head.symbol} ${direction} ${Math.abs(head.changePercent).toFixed(2)}%`,
+        );
+      } else if (uncachedSymbols.length) {
+        setUpdateMsg(
+          `${uncachedSymbols.length} symbols returned no live quote rows. Check API console for details.`,
         );
       }
 
@@ -1521,25 +1608,51 @@ export default function Dashboard() {
     }
   }
 
-  function markQuotesPending(current: StockData[], symbols: string[]) {
+  function markQuotesUnavailable(
+    current: StockData[],
+    symbols: string[],
+    reason = "The quote provider returned no usable rows for this symbol.",
+  ): StockData[] {
     const pending = new Set(symbols);
+    const attemptedAt = Date.now();
     return current.map((stock) =>
       pending.has(stock.ticker)
         ? {
           ...stock,
           summary:
-            !stock.summary || stock.summary === SYNCING_QUOTE_SUMMARY
-              ? "Live quote unavailable. Retrying in background."
+            isPlaceholderQuoteSummary(stock.summary)
+              ? UNAVAILABLE_QUOTE_SUMMARY
               : stock.summary,
           impact:
-            !stock.impact ||
-              stock.impact ===
-                "Live data will refresh as the market-wide quote sync reaches this asset."
-              ? "This symbol remains tracked and will retry on the next scheduled refresh."
+            isPlaceholderQuoteImpact(stock.impact)
+              ? UNAVAILABLE_QUOTE_IMPACT
               : stock.impact,
+          quoteStatus: "unavailable" as const,
+          quoteStatusReason: reason,
+          quoteLastAttemptedAt: attemptedAt,
         }
         : stock,
     );
+  }
+
+  function markQuotesPaused(current: StockData[]): StockData[] {
+    return current.map((stock) => {
+      if (stock.price != null || stock.quoteStatus === "available") {
+        return stock;
+      }
+
+      return {
+        ...stock,
+        summary: isPlaceholderQuoteSummary(stock.summary)
+          ? MARKET_CLOSED_QUOTE_SUMMARY
+          : stock.summary,
+        impact: isPlaceholderQuoteImpact(stock.impact)
+          ? MARKET_CLOSED_QUOTE_IMPACT
+          : stock.impact,
+        quoteStatus: "pending" as const,
+        quoteStatusReason: MARKET_CLOSED_QUOTE_IMPACT,
+      };
+    });
   }
 
   function mergeQuotes(
@@ -1590,6 +1703,9 @@ export default function Dashboard() {
         signalEmittedAt,
         signalEntryPrice,
         signalReturnPercent,
+        quoteStatus: "available" as const,
+        quoteStatusReason: undefined,
+        quoteLastAttemptedAt: Date.now(),
       };
     });
   }
@@ -1741,7 +1857,9 @@ export default function Dashboard() {
       (lastSyncedAt !== null && marketClock - lastSyncedAt > STALE_AFTER_MS));
   const lastSyncedLabel = lastSyncedAt
     ? formatSyncTime(lastSyncedAt)
-    : "Waiting for first sync";
+    : isSelectedMarketOpen
+      ? "Waiting for first sync"
+      : "Paused until market opens";
 
   const portfolioStartedAt = portfolio.startedAt ?? null;
   const portfolioStartLabel = portfolioStartedAt
@@ -2365,6 +2483,9 @@ export default function Dashboard() {
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
+                          {stock.quoteStatus === "unavailable" && (
+                            <Badge variant="outline">No quote</Badge>
+                          )}
                           <StatusBadge status={status} />
                           <SignalBadge action={signalAction} />
                         </div>
@@ -2500,6 +2621,9 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <StatusBadge status={selectedStock.status ?? "Stable"} />
+                    {selectedStock.quoteStatus === "unavailable" && (
+                      <Badge variant="outline">Provider unavailable</Badge>
+                    )}
                   </div>
 
                   <div className="h-32 w-full mb-6 relative group">
@@ -2619,6 +2743,12 @@ export default function Dashboard() {
                         {selectedStock.impact ??
                           "Watchlist impact is updating."}
                       </p>
+                      {selectedStock.quoteStatus === "unavailable" && (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {selectedStock.quoteStatusReason ??
+                            "The quote source returned no usable rows."}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </motion.div>
