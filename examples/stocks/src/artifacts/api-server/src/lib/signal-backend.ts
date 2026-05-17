@@ -33,18 +33,22 @@ export interface BackgroundSignalEngineStatus {
 
 const WATCHLIST_TABLE = "stock_signal_watchlist";
 const SNAPSHOT_TABLE = "stock_signal_snapshots";
+const EVENT_TABLE = "stock_signal_events";
 const REFRESH_INTERVAL_MS = Number(
-  process.env.STOCK_SIGNAL_REFRESH_INTERVAL_MS ?? 60_000,
+  process.env.STOCK_SIGNAL_REFRESH_INTERVAL_MS ?? 5_000,
 );
 const SNAPSHOT_FRESHNESS_MS = Number(
   process.env.STOCK_SIGNAL_SNAPSHOT_FRESHNESS_MS ??
-    Math.max(REFRESH_INTERVAL_MS * 2, 120_000),
+  Math.max(REFRESH_INTERVAL_MS * 2, 120_000),
 );
 const WATCH_TTL_MS = Number(
   process.env.STOCK_SIGNAL_WATCH_TTL_MS ?? 24 * 60 * 60 * 1000,
 );
 const MAX_SYMBOLS_PER_CYCLE = Number(
-  process.env.STOCK_SIGNAL_MAX_SYMBOLS_PER_CYCLE ?? 96,
+  process.env.STOCK_SIGNAL_MAX_SYMBOLS_PER_CYCLE ?? 240,
+);
+const SIGNAL_REFRESH_CHUNK_SIZE = Number(
+  process.env.STOCK_SIGNAL_REFRESH_CHUNK_SIZE ?? 30,
 );
 const BOOTSTRAP_SYMBOLS_PER_SCOPE = Number(
   process.env.STOCK_SIGNAL_BOOTSTRAP_SYMBOLS_PER_SCOPE ?? 24,
@@ -84,6 +88,15 @@ type WatchlistRow = {
   scope_type: SignalScopeType;
   scope_code: string;
   symbol: string;
+};
+
+type SignalEventRow = {
+  id: string;
+  scope_type: SignalScopeType;
+  scope_code: string;
+  symbol: string;
+  payload: unknown;
+  emitted_at: string | Date;
 };
 
 const runtimeState: Omit<
@@ -198,6 +211,17 @@ function mapSnapshotRow(row: SnapshotRow): StockQuote {
   };
 }
 
+function mapSignalEventRow(row: SignalEventRow) {
+  return {
+    id: String(row.id),
+    scopeType: row.scope_type,
+    scopeCode: row.scope_code,
+    symbol: row.symbol,
+    emittedAt: toIsoString(row.emitted_at) ?? new Date().toISOString(),
+    signal: row.payload,
+  };
+}
+
 async function ensureSignalBackendSchema(): Promise<void> {
   if (!schemaReady) {
     schemaReady = (async () => {
@@ -214,6 +238,45 @@ async function ensureSignalBackendSchema(): Promise<void> {
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           PRIMARY KEY (scope_type, scope_code, symbol)
         )
+      `);
+
+      await pool.query(`
+        UPDATE ${WATCHLIST_TABLE}
+        SET
+          scope_type = CASE
+            WHEN LOWER(TRIM(scope_type)) = 'market' THEN 'market'
+            ELSE 'exchange'
+          END,
+          scope_code = UPPER(TRIM(scope_code)),
+          symbol = UPPER(TRIM(symbol))
+        WHERE
+          scope_type <> CASE
+            WHEN LOWER(TRIM(scope_type)) = 'market' THEN 'market'
+            ELSE 'exchange'
+          END
+          OR scope_code <> UPPER(TRIM(scope_code))
+          OR symbol <> UPPER(TRIM(symbol))
+      `);
+
+      await pool.query(`
+        WITH ranked AS (
+          SELECT
+            ctid,
+            ROW_NUMBER() OVER (
+              PARTITION BY scope_type, scope_code, symbol
+              ORDER BY updated_at DESC, added_at DESC, ctid DESC
+            ) AS rn
+          FROM ${WATCHLIST_TABLE}
+        )
+        DELETE FROM ${WATCHLIST_TABLE} target
+        USING ranked
+        WHERE target.ctid = ranked.ctid
+          AND ranked.rn > 1
+      `);
+
+      await pool.query(`
+        CREATE UNIQUE INDEX IF NOT EXISTS ${WATCHLIST_TABLE}_scope_symbol_uidx
+        ON ${WATCHLIST_TABLE} (scope_type, scope_code, symbol)
       `);
 
       await pool.query(`
@@ -241,6 +304,61 @@ async function ensureSignalBackendSchema(): Promise<void> {
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           PRIMARY KEY (scope_type, scope_code, symbol)
         )
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ${EVENT_TABLE} (
+          id BIGSERIAL PRIMARY KEY,
+          scope_type TEXT NOT NULL,
+          scope_code TEXT NOT NULL,
+          symbol TEXT NOT NULL,
+          payload JSONB NOT NULL,
+          emitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `);
+
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS ${EVENT_TABLE}_scope_emitted_idx
+        ON ${EVENT_TABLE} (scope_type, scope_code, emitted_at DESC)
+      `);
+
+      await pool.query(`
+        UPDATE ${SNAPSHOT_TABLE}
+        SET
+          scope_type = CASE
+            WHEN LOWER(TRIM(scope_type)) = 'market' THEN 'market'
+            ELSE 'exchange'
+          END,
+          scope_code = UPPER(TRIM(scope_code)),
+          symbol = UPPER(TRIM(symbol))
+        WHERE
+          scope_type <> CASE
+            WHEN LOWER(TRIM(scope_type)) = 'market' THEN 'market'
+            ELSE 'exchange'
+          END
+          OR scope_code <> UPPER(TRIM(scope_code))
+          OR symbol <> UPPER(TRIM(symbol))
+      `);
+
+      await pool.query(`
+        WITH ranked AS (
+          SELECT
+            ctid,
+            ROW_NUMBER() OVER (
+              PARTITION BY scope_type, scope_code, symbol
+              ORDER BY fetched_at DESC, updated_at DESC, ctid DESC
+            ) AS rn
+          FROM ${SNAPSHOT_TABLE}
+        )
+        DELETE FROM ${SNAPSHOT_TABLE} target
+        USING ranked
+        WHERE target.ctid = ranked.ctid
+          AND ranked.rn > 1
+      `);
+
+      await pool.query(`
+        CREATE UNIQUE INDEX IF NOT EXISTS ${SNAPSHOT_TABLE}_scope_symbol_uidx
+        ON ${SNAPSHOT_TABLE} (scope_type, scope_code, symbol)
       `);
     })().catch((error) => {
       schemaReady = null;
@@ -344,38 +462,45 @@ async function seedWatchlist(): Promise<void> {
 async function refreshScope(
   scope: SignalScope,
   symbols: string[],
-): Promise<void> {
+): Promise<StockQuote[]> {
   const normalizedSymbols = Array.from(
     new Set(symbols.map(normalizeSymbol)),
   ).filter(Boolean);
   if (!normalizedSymbols.length) {
-    return;
+    return [];
   }
 
-  const quotes =
-    scope.scopeType === "market"
-      ? await fetchMarketQuotes(scope.scopeCode, normalizedSymbols, {
+  const allQuotesWithSignals: StockQuote[] = [];
+
+  for (let index = 0; index < normalizedSymbols.length; index += SIGNAL_REFRESH_CHUNK_SIZE) {
+    const chunk = normalizedSymbols.slice(index, index + SIGNAL_REFRESH_CHUNK_SIZE);
+    const quotes =
+      scope.scopeType === "market"
+        ? await fetchMarketQuotes(scope.scopeCode, chunk, {
           bypassCache: true,
         })
-      : await fetchQuotes(scope.scopeCode, normalizedSymbols, {
+        : await fetchQuotes(scope.scopeCode, chunk, {
           bypassCache: true,
         });
-  const quotesWithSignals = await attachSignalsToQuotes(
-    quotes,
-    scope.scopeCode,
-    {
-      bypassSignalCache: true,
-    },
-  );
+    const quotesWithSignals = await attachSignalsToQuotes(
+      quotes,
+      scope.scopeCode,
+      {
+        bypassSignalCache: true,
+      },
+    );
+    allQuotesWithSignals.push(...quotesWithSignals);
+  }
 
-  await storeSignalSnapshots(scope, quotesWithSignals);
+  await storeSignalSnapshots(scope, allQuotesWithSignals);
   await markWatchEntriesRefreshed(scope, normalizedSymbols, null);
+  return allQuotesWithSignals;
 }
 
-async function runRefreshCycle(): Promise<void> {
+async function runRefreshCycle(): Promise<number> {
   const dueEntries = await loadDueWatchEntries();
   if (!dueEntries.length) {
-    return;
+    return 0;
   }
 
   const grouped = new Map<string, { scope: SignalScope; symbols: string[] }>();
@@ -397,13 +522,10 @@ async function runRefreshCycle(): Promise<void> {
 
   for (const group of grouped.values()) {
     try {
-      await refreshScope(group.scope, group.symbols);
+      const updatedSignals = await refreshScope(group.scope, group.symbols);
       // Broadcast updated signals after refresh
-      if (signalBroadcast) {
-        const updatedSignals = await getStoredSignalSnapshots(
-          group.scope,
-          group.symbols,
-        );
+      if (signalBroadcast && updatedSignals.length) {
+        await storeSignalEvents(group.scope, updatedSignals);
         signalBroadcast({
           type: "signal-update",
           scope: group.scope,
@@ -425,6 +547,8 @@ async function runRefreshCycle(): Promise<void> {
       await markWatchEntriesRefreshed(group.scope, group.symbols, message);
     }
   }
+
+  return dueEntries.length;
 }
 
 async function runEngineLoop(): Promise<void> {
@@ -432,8 +556,9 @@ async function runEngineLoop(): Promise<void> {
   runtimeState.lastStartedAt = new Date().toISOString();
 
   while (true) {
+    let refreshedCount = 0;
     try {
-      await runRefreshCycle();
+      refreshedCount = await runRefreshCycle();
       runtimeState.cycleCount += 1;
       runtimeState.lastCompletedAt = new Date().toISOString();
     } catch (error) {
@@ -442,7 +567,12 @@ async function runEngineLoop(): Promise<void> {
       logger.error({ err: error }, "Background signal engine cycle failed");
     }
 
-    await new Promise((resolve) => setTimeout(resolve, REFRESH_INTERVAL_MS));
+    await new Promise((resolve) =>
+      setTimeout(
+        resolve,
+        refreshedCount >= MAX_SYMBOLS_PER_CYCLE ? 100 : REFRESH_INTERVAL_MS,
+      ),
+    );
   }
 }
 
@@ -640,6 +770,80 @@ export async function storeSignalSnapshots(
   );
 }
 
+export async function storeSignalEvents(
+  scope: SignalScope,
+  quotes: StockQuote[],
+): Promise<void> {
+  const normalizedScopeCode = normalizeScopeCode(scope.scopeCode);
+  const normalizedQuotes = quotes
+    .map((quote) => ({ ...quote, symbol: normalizeSymbol(quote.symbol) }))
+    .filter((quote) => quote.symbol);
+
+  if (!normalizedQuotes.length) return;
+
+  await ensureSignalBackendSchema();
+
+  const values: string[] = [];
+  const params: Array<string | null> = [];
+
+  for (const quote of normalizedQuotes) {
+    const baseIndex = params.length;
+    values.push(
+      `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}::jsonb, COALESCE($${baseIndex + 5}::timestamptz, NOW()))`,
+    );
+    params.push(
+      scope.scopeType,
+      normalizedScopeCode,
+      quote.symbol,
+      JSON.stringify(quote),
+      quote.signalEmittedAt ?? null,
+    );
+  }
+
+  await pool.query(
+    `
+      INSERT INTO ${EVENT_TABLE} (
+        scope_type,
+        scope_code,
+        symbol,
+        payload,
+        emitted_at
+      )
+      VALUES ${values.join(", ")}
+    `,
+    params,
+  );
+}
+
+export async function getSignalEvents(
+  scope?: Partial<SignalScope>,
+  limit = 100,
+) {
+  await ensureSignalBackendSchema();
+
+  const normalizedLimit = Math.min(Math.max(Math.floor(limit), 1), 300);
+  const hasScope = Boolean(scope?.scopeType && scope?.scopeCode);
+
+  const result = await pool.query<SignalEventRow>(
+    `
+      SELECT *
+      FROM ${EVENT_TABLE}
+      ${hasScope ? "WHERE scope_type = $1 AND scope_code = $2" : ""}
+      ORDER BY emitted_at DESC, id DESC
+      LIMIT $${hasScope ? 3 : 1}
+    `,
+    hasScope
+      ? [
+          scope!.scopeType!,
+          normalizeScopeCode(scope!.scopeCode!),
+          normalizedLimit,
+        ]
+      : [normalizedLimit],
+  );
+
+  return result.rows.map(mapSignalEventRow);
+}
+
 export async function getBackgroundSignalEngineStatus(): Promise<BackgroundSignalEngineStatus> {
   const [activeWatchCount, snapshotCount] = await Promise.all([
     countActiveWatchEntries(),
@@ -678,4 +882,47 @@ let signalBroadcast: ((data: any) => void) | null = null;
 
 export function setSignalBroadcast(fn: (data: any) => void) {
   signalBroadcast = fn;
+}
+
+export function emitFakeFrontendSignal(data?: Partial<StockQuote> & {
+  symbol?: string;
+  name?: string;
+  ticker?: string;
+}) {
+  const symbol = normalizeSymbol(data?.symbol ?? data?.ticker ?? "BINANCE:POLBRL");
+  const price = Number(data?.price ?? 0.47);
+  const entryPrice = Number(data?.signalEntryPrice ?? 0.46);
+  const now = new Date().toISOString();
+
+  const signal = {
+    ticker: symbol,
+    symbol,
+    name: data?.name ?? "Temporary fake signal",
+    price,
+    bid: Number(data?.bid ?? price),
+    ask: Number(data?.ask ?? price),
+    changePercent: Number(data?.changePercent ?? 1.5),
+    status: data?.status ?? "Rising",
+    high52: Number(data?.high52 ?? price),
+    low52: Number(data?.low52 ?? entryPrice),
+    history: data?.history ?? [entryPrice, price],
+    summary: data?.summary ?? "Temporary fake Buy + Rising signal.",
+    impact: data?.impact ?? "Dev-only signal emitted from the API console trigger.",
+    signalAction: data?.signalAction ?? "Buy",
+    signalConfidence: Number(data?.signalConfidence ?? 88),
+    signalSource: data?.signalSource ?? "heuristic",
+    signalEmittedAt: data?.signalEmittedAt ?? now,
+    signalEntryPrice: entryPrice,
+    signalReturnPercent: Number(
+      (((price - entryPrice) / entryPrice) * 100).toFixed(2),
+    ),
+  } satisfies StockQuote & { ticker: string; name: string };
+
+  signalBroadcast?.({
+    type: "signal",
+    dev: true,
+    data: signal,
+  });
+
+  return signal;
 }

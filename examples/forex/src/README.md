@@ -2,7 +2,7 @@
 
 This workspace is ready to deploy on Vercel.
 
-Use `examples/stocks` as the Vercel project root so the `lib` and `src` folders sit at the same level.
+Use `examples/forex` as the Vercel project root so the `lib` and `src` folders sit at the same level.
 
 ## What Vercel uses
 

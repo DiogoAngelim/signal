@@ -18,7 +18,7 @@ function joinPath(value) {
   return value ?? "";
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   const [, rawSearch = ""] = (req.url ?? "/api").split("?");
   const params = new URLSearchParams(rawSearch);
   const forwardedPath = joinPath(params.getAll("path"));

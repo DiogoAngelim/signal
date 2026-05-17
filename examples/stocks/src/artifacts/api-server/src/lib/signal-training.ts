@@ -111,8 +111,8 @@ function mapRowToState(
     symbol: String(row.symbol ?? fallback.symbol),
     lastSignalAction:
       row.last_signal_action === "Buy" ||
-      row.last_signal_action === "Sell" ||
-      row.last_signal_action === "Hold"
+        row.last_signal_action === "Sell" ||
+        row.last_signal_action === "Hold"
         ? row.last_signal_action
         : fallback.lastSignalAction,
     lastSignalConfidence: Math.round(
@@ -197,6 +197,38 @@ async function ensureSignalTrainingSchema(): Promise<void> {
         PRIMARY KEY (market, symbol)
       )
     `)
+      .then(async () => {
+        await pool.query(`
+          UPDATE ${TABLE_NAME}
+          SET
+            market = UPPER(TRIM(market)),
+            symbol = UPPER(TRIM(symbol))
+          WHERE
+            market <> UPPER(TRIM(market))
+            OR symbol <> UPPER(TRIM(symbol))
+        `);
+
+        await pool.query(`
+          WITH ranked AS (
+            SELECT
+              ctid,
+              ROW_NUMBER() OVER (
+                PARTITION BY market, symbol
+                ORDER BY updated_at DESC, ctid DESC
+              ) AS rn
+            FROM ${TABLE_NAME}
+          )
+          DELETE FROM ${TABLE_NAME} target
+          USING ranked
+          WHERE target.ctid = ranked.ctid
+            AND ranked.rn > 1
+        `);
+
+        await pool.query(`
+          CREATE UNIQUE INDEX IF NOT EXISTS ${TABLE_NAME}_market_symbol_uidx
+          ON ${TABLE_NAME} (market, symbol)
+        `);
+      })
       .then(() => undefined)
       .catch((error) => {
         schemaReady = null;
@@ -305,6 +337,9 @@ async function saveSignalTrainingState(
 ): Promise<void> {
   await ensureSignalTrainingSchema();
 
+  const normalizedMarket = state.market.trim().toUpperCase() || "GLOBAL";
+  const normalizedSymbol = state.symbol.trim().toUpperCase();
+
   const nowIso = new Date().toISOString();
   await pool.query(
     `INSERT INTO ${TABLE_NAME} (
@@ -351,8 +386,8 @@ async function saveSignalTrainingState(
       confidence_bias = EXCLUDED.confidence_bias,
       updated_at = EXCLUDED.updated_at`,
     [
-      state.market,
-      state.symbol,
+      normalizedMarket,
+      normalizedSymbol,
       state.lastSignalAction,
       Math.round(state.lastSignalConfidence),
       state.lastSignalSource,
@@ -372,6 +407,9 @@ async function saveSignalTrainingState(
       nowIso,
     ],
   );
+
+  state.market = normalizedMarket;
+  state.symbol = normalizedSymbol;
 
   stateCache.set(cacheKey(state.market, state.symbol), {
     expiresAt: Date.now() + CACHE_TTL_MS,
@@ -402,10 +440,10 @@ export async function getSignalTrainingState(
 
     state = result.rows[0]
       ? mapRowToState(
-          result.rows[0] as Record<string, unknown>,
-          normalizedMarket,
-          normalizedSymbol,
-        )
+        result.rows[0] as Record<string, unknown>,
+        normalizedMarket,
+        normalizedSymbol,
+      )
       : createDefaultState(normalizedMarket, normalizedSymbol);
   } catch (error) {
     logTrainingPersistenceWarning(
@@ -504,8 +542,8 @@ export async function recordSignalSnapshot(input: {
   const signalReturnPercent =
     state.lastSignalEntryPrice > 0
       ? ((currentPrice - state.lastSignalEntryPrice) /
-          state.lastSignalEntryPrice) *
-        100
+        state.lastSignalEntryPrice) *
+      100
       : 0;
 
   return {

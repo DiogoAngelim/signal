@@ -333,7 +333,7 @@ export async function fetchQuotes(
           quote = await fetchQuote(
             normalized,
             symbol,
-            undefined, // Always try both plain and prefixed symbols
+            normalized, // Always try both plain and prefixed symbols
             options,
           );
           if (quote) break;
@@ -384,7 +384,7 @@ export async function fetchMarketQuotes(
           quote = await fetchQuote(
             normalized,
             symbol,
-            undefined, // Always try both plain and prefixed symbols
+            normalized, // Always try both plain and prefixed symbols
             options,
           );
           if (quote) break;
@@ -574,9 +574,22 @@ function deriveHeuristicSignal(
   const change = quote.changePercent ?? 0;
   const absChange = Math.abs(change);
   const { buyThreshold, sellThreshold } = getAdaptiveThresholds(trainingState);
-  const signalAction: TradeSignal =
+  const signalConfidence = clampNumber(25 + absChange * 20, 20, 95);
+
+  let signalAction: TradeSignal =
     change >= buyThreshold ? "Buy" : change <= sellThreshold ? "Sell" : "Hold";
-  const signalConfidence = clampNumber(20 + absChange * 12, 15, 95);
+
+  // For forex, strong directional moves should still emit Buy/Sell even when
+  // adaptive thresholds have not been crossed yet.
+  const directionalTrigger = Math.max(Math.abs(buyThreshold), Math.abs(sellThreshold), 1);
+  const isHighConfidenceMove = signalConfidence >= 50 || absChange >= directionalTrigger;
+  if (signalAction === "Hold" && isHighConfidenceMove) {
+    if (quote.status === "Rising" || change > 0) {
+      signalAction = "Buy";
+    } else if (quote.status === "Dip" || change < 0) {
+      signalAction = "Sell";
+    }
+  }
 
   return {
     signalAction,
@@ -751,6 +764,8 @@ function resolveTradingViewMarkets(market?: string): string[] {
 
   const aliases: Record<string, string[]> = {
     B3: ["BMFBOVESPA", "B3"],
+    FX: ["FX_IDC", "FX", "OANDA"],
+    FOREX: ["FX_IDC", "FX", "OANDA"],
   };
 
   return aliases[normalized] ?? [normalized];

@@ -121,7 +121,7 @@ const LIST_CACHE_TTL_MS = Number(
 const QUOTE_CACHE_TTL_MS = Number(
   process.env.TRADINGVIEW_CACHE_TTL_MS ?? 5 * 60 * 1000,
 );
-const TRADINGVIEW_BATCH_SIZE = Number(process.env.TRADINGVIEW_BATCH_SIZE ?? 3);
+const TRADINGVIEW_BATCH_SIZE = Number(process.env.TRADINGVIEW_BATCH_SIZE ?? 8);
 const TRADINGVIEW_BATCH_DELAY_MS = Number(
   process.env.TRADINGVIEW_BATCH_DELAY_MS ?? 500,
 );
@@ -129,7 +129,7 @@ const MAX_SYMBOLS_PER_REQUEST = Number(
   process.env.TRADINGVIEW_MAX_SYMBOLS ?? 30,
 );
 const TRADINGVIEW_REQUESTS_PER_MINUTE = Number(
-  process.env.TRADINGVIEW_REQUESTS_PER_MINUTE ?? 25,
+  process.env.TRADINGVIEW_REQUESTS_PER_MINUTE ?? 120,
 );
 const TRADINGVIEW_TIMEOUT_MS = Number(
   process.env.TRADINGVIEW_TIMEOUT_MS ?? 10_000,
@@ -173,7 +173,7 @@ type SignalDecision = {
 
 const signalCache = new Map<
   string,
-  { expiresAt: number; signal: SignalDecision }
+  { expiresAt: number; signal: SignalDecision; snapshot?: SignalSnapshot }
 >();
 const tradingViewRequestTimestamps: number[] = [];
 let tradingViewQueue: Promise<void> = Promise.resolve();
@@ -332,7 +332,7 @@ export async function fetchQuotes(
           quote = await fetchQuote(
             normalized,
             symbol,
-            undefined, // Always try both plain and prefixed symbols
+            normalized, // Always try both plain and prefixed symbols
             options,
           );
           if (quote) break;
@@ -383,7 +383,7 @@ export async function fetchMarketQuotes(
           quote = await fetchQuote(
             normalized,
             symbol,
-            undefined, // Always try both plain and prefixed symbols
+            normalized, // Always try both plain and prefixed symbols
             options,
           );
           if (quote) break;
@@ -495,11 +495,13 @@ async function fetchQuote(
   const summary = buildSummary(symbol, changePercent, status);
   const impact = buildImpact(status, changePercent);
 
+  const { bid, ask } = estimateSpread(price, history);
+
   const quote: StockQuote = {
     symbol,
     price,
-    bid: price, // fallback: use price as bid
-    ask: price, // fallback: use price as ask
+    bid,
+    ask,
     changePercent: Number(changePercent.toFixed(2)),
     status,
     high52: Number.isFinite(high52) ? high52 : price,
@@ -525,25 +527,46 @@ async function getSignalForQuote(
   options?: SignalAttachOptions,
 ): Promise<SignalSnapshot> {
   const cacheKey = `${(market ?? "GLOBAL").toUpperCase()}:${quote.symbol}`;
+  const cached = signalCache.get(cacheKey);
+  const useCache = !options?.bypassSignalCache && cached && cached.expiresAt > Date.now();
+
+  // Full cache hit: return snapshot directly, skipping all DB I/O
+  if (useCache && cached.snapshot) {
+    return cached.snapshot;
+  }
+
+  // Cache miss or snapshot not yet stored: compute signal + record snapshot
   const trainingState = await getSignalTrainingState(
     market ?? "GLOBAL",
     quote.symbol,
   );
-  const cached = signalCache.get(cacheKey);
-  const signal =
-    !options?.bypassSignalCache && cached && cached.expiresAt > Date.now()
-      ? cached.signal
-      : await createSignalDecision(quote, market, trainingState);
+  const signal = useCache
+    ? cached.signal
+    : await createSignalDecision(quote, market, trainingState);
 
   const currentPrice =
     Number.isFinite(quote.price) && quote.price > 0 ? quote.price : 0;
-  return await recordSignalSnapshot({
+  const snapshot = await recordSignalSnapshot({
     market: market ?? "GLOBAL",
     symbol: quote.symbol,
     currentPrice,
     signal,
     previousState: trainingState,
   });
+
+  // Store snapshot in signal cache so subsequent hits skip all DB I/O
+  const existingEntry = signalCache.get(cacheKey);
+  if (existingEntry) {
+    existingEntry.snapshot = snapshot;
+  } else {
+    signalCache.set(cacheKey, {
+      expiresAt: Date.now() + SIGNAL_CACHE_TTL_MS,
+      signal,
+      snapshot,
+    });
+  }
+
+  return snapshot;
 }
 
 async function createSignalDecision(
@@ -750,6 +773,10 @@ function resolveTradingViewMarkets(market?: string): string[] {
 
   const aliases: Record<string, string[]> = {
     B3: ["BMFBOVESPA", "B3"],
+    BINANCE: ["BINANCE"],
+    CRYPTO: ["BINANCE", "CRYPTO"],
+    FX: ["FX_IDC", "FX", "OANDA"],
+    FOREX: ["FX_IDC", "FX", "OANDA"],
   };
 
   return aliases[normalized] ?? [normalized];
@@ -896,6 +923,59 @@ function statusFromChange(changePercent: number): StockQuote["status"] {
   if (changePercent >= 1) return "Rising";
   if (changePercent <= -1) return "Dip";
   return "Stable";
+}
+
+/**
+ * Estimates bid/ask spread using a heuristic based on price level and
+ * historical volatility. Higher volatility and lower-priced stocks tend
+ * to have wider spreads.
+ *
+ * Spread tiers (as % of price):
+ *   price >= 100  → base 0.02% + volatility component
+ *   price >= 10   → base 0.05% + volatility component
+ *   price >= 1    → base 0.15% + volatility component
+ *   price < 1     → base 0.50% + volatility component
+ */
+function estimateSpread(
+  price: number,
+  history: number[],
+): { bid: number; ask: number } {
+  if (!Number.isFinite(price) || price <= 0) {
+    return { bid: price, ask: price };
+  }
+
+  // Compute annualised daily volatility from history (last 30 prices)
+  let volatility = 0;
+  if (history.length >= 2) {
+    const returns: number[] = [];
+    for (let i = 1; i < history.length; i++) {
+      const prev = history[i - 1];
+      const curr = history[i];
+      if (prev > 0 && curr > 0) {
+        returns.push(Math.log(curr / prev));
+      }
+    }
+    if (returns.length >= 2) {
+      const mean = returns.reduce((s, v) => s + v, 0) / returns.length;
+      const variance =
+        returns.reduce((s, v) => s + (v - mean) ** 2, 0) /
+        (returns.length - 1);
+      volatility = Math.sqrt(variance); // daily std dev (log returns)
+    }
+  }
+
+  // Base half-spread percentage by price tier
+  const basePct =
+    price >= 100 ? 0.0002 : price >= 10 ? 0.0005 : price >= 1 ? 0.0015 : 0.005;
+
+  // Add a volatility contribution (daily std dev scaled down)
+  const halfSpreadPct = basePct + volatility * 0.1;
+
+  const halfSpread = price * halfSpreadPct;
+  const bid = Number((price - halfSpread).toFixed(4));
+  const ask = Number((price + halfSpread).toFixed(4));
+
+  return { bid, ask };
 }
 
 function buildSummary(

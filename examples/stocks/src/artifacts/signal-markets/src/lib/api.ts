@@ -61,6 +61,15 @@ export type StockData = StockListItem & {
   signalReturnPercent?: number;
 };
 
+export interface SignalEvent {
+  id: string;
+  scopeType: "market" | "exchange";
+  scopeCode: string;
+  symbol: string;
+  emittedAt: string;
+  signal: StockQuote & Partial<StockData>;
+}
+
 const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(
   /\/$/,
   "",
@@ -210,4 +219,38 @@ export async function fetchStockQuotes(
   });
 
   return response.quotes;
+}
+
+export async function registerSignalWatchlist(
+  market: string,
+  symbols: string[],
+): Promise<{ registered: number }> {
+  if (!symbols.length) {
+    return { registered: 0 };
+  }
+
+  return request<{ registered: number }>("/stocks/signals/watch", {
+    method: "POST",
+    body: JSON.stringify({ market, symbols }),
+    timeoutMs: 30_000,
+    retryCount: 0,
+  });
+}
+
+export async function fetchSignalHistory(
+  market?: string,
+  limit = 100,
+): Promise<SignalEvent[]> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (market) params.set("market", market);
+  return request<SignalEvent[]>(`/stocks/signals/history?${params}`);
+}
+
+export async function emitFakeSignal(
+  data: Partial<StockData> & { symbol?: string; market?: string } = {},
+): Promise<{ emitted: boolean }> {
+  return request<{ emitted: boolean }>("/stocks/signals/fake", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 }

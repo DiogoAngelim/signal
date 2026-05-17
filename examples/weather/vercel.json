@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "pnpm install --no-frozen-lockfile",
+  "installCommand": "rm -rf node_modules && pnpm install --force --no-frozen-lockfile",
   "buildCommand": "pnpm --filter @workspace/weather-signal run build",
   "outputDirectory": "artifacts/weather-signal/dist/public",
   "rewrites": [

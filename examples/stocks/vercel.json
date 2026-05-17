@@ -4,7 +4,7 @@
   "buildCommand": "pnpm --dir src run build && node ./copy-public.mjs",
   "outputDirectory": "public",
   "functions": {
-    "api/index.cjs": {
+    "api/index.js": {
       "includeFiles": "src/artifacts/**",
       "maxDuration": 60
     }

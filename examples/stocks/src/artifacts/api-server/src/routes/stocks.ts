@@ -9,9 +9,12 @@ import {
   type StockQuote,
 } from "../lib/stock-data";
 import {
+  emitFakeFrontendSignal,
   getBackgroundSignalEngineStatus,
+  getSignalEvents,
   getStoredSignalSnapshots,
   registerSymbolsForBackgroundRefresh,
+  storeSignalEvents,
   storeSignalSnapshots,
   type SignalScope,
 } from "../lib/signal-backend";
@@ -113,6 +116,50 @@ router.get("/stocks/markets", (_req, res) => {
 router.get("/stocks/signals/status", async (_req, res) => {
   const status = await getBackgroundSignalEngineStatus();
   res.json({ data: status });
+});
+
+router.post("/stocks/signals/watch", async (req, res) => {
+  const market = String(req.body?.market ?? "").trim();
+  const exchange = String(req.body?.exchange ?? "US").toUpperCase();
+  const symbols = Array.isArray(req.body?.symbols)
+    ? req.body.symbols.map(String)
+    : [];
+  const scope = resolveScope(market, exchange);
+
+  if (!symbols.length) {
+    res.status(400).json({ error: "symbols array is required" });
+    return;
+  }
+
+  await registerSymbolsForBackgroundRefresh(scope, symbols);
+  res.json({ data: { registered: symbols.length } });
+});
+
+router.get("/stocks/signals/history", async (req, res) => {
+  const market = String(req.query.market ?? "").trim();
+  const exchange = String(req.query.exchange ?? "").trim();
+  const limit = Number(req.query.limit ?? 100);
+  const scope = market
+    ? resolveScope(market, "")
+    : exchange
+      ? resolveScope("", exchange)
+      : undefined;
+
+  const events = await getSignalEvents(scope, limit);
+  res.json({ data: events });
+});
+
+router.post("/stocks/signals/fake", async (req, res) => {
+  if (process.env.VERCEL) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
+
+  const market = String(req.body?.market ?? "DEV").trim();
+  const scope = resolveScope(market, "");
+  const signal = emitFakeFrontendSignal(req.body ?? {});
+  await storeSignalEvents(scope, [signal]);
+  res.json({ data: { emitted: true } });
 });
 
 router.get("/stocks/list", (req, res) => {

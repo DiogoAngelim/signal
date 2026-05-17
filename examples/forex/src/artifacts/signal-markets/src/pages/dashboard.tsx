@@ -5,6 +5,10 @@ import {
   LineChart as RechartsLineChart,
   YAxis,
   Line,
+  AreaChart,
+  Area,
+  XAxis,
+  Tooltip as RechartsTooltip,
 } from "recharts";
 import { Navbar } from "@/components/navbar";
 import {
@@ -15,6 +19,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   TrendingUp,
   LineChart,
@@ -317,10 +322,12 @@ function getOverallSignal(stocks: StockData[]): string {
 }
 
 type SimulatedPosition = StockData & {
+  side: "long" | "short";
   quantity: number;
   entryPrice: number;
   investedAmount: number;
   marketValue: number;
+  unrealizedPnL: number;
   targetWeight: number;
   openedAt: number;
 };
@@ -328,17 +335,33 @@ type SimulatedPosition = StockData & {
 type SimulatedPortfolio = {
   cash: number;
   positions: Record<string, SimulatedPosition>;
+  startedAt: number | null;
+  startValue: number;
+  valueHistory: Array<{ t: number; v: number }>;
+  closedPositions: Array<{ ticker: string; name?: string; side: "long" | "short"; quantity: number; entryPrice: number; exitPrice: number; investedAmount: number; proceeds: number; openedAt: number; closedAt: number }>;
 };
 
 function createEmptyPortfolio(): SimulatedPortfolio {
   return {
-    cash: STARTING_PORTFOLIO_VALUE,
+    cash: 0,
     positions: {},
+    startedAt: null,
+    startValue: STARTING_PORTFOLIO_VALUE,
+    valueHistory: [],
+    closedPositions: [],
   };
 }
 
-function isBuySetup(stock: StockData): boolean {
-  return stock.signalAction === "Buy" && stock.status === "Rising";
+function getSimulatedPositionSide(stock: StockData): "long" | "short" | null {
+  if (stock.signalAction === "Buy" && stock.status === "Rising") {
+    return "long";
+  }
+
+  if (stock.signalAction === "Sell" && stock.status === "Dip") {
+    return "short";
+  }
+
+  return null;
 }
 
 function resolveSimulatedEntryPrice(stock: StockData, currentPrice: number) {
@@ -487,6 +510,8 @@ export default function Dashboard() {
   const [marketQuery, setMarketQuery] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<StockStatus | "All">("All");
   const [signalFilter, setSignalFilter] = useState<TradeSignal | "All">("All");
+  const [chartTimeframe, setChartTimeframe] = useState<"1W" | "1M" | "3M" | "All">("All");
+  const [portfolioTab, setPortfolioTab] = useState<"chart" | "history" | "stats">("chart");
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [selectedStock, setSelectedStock] = useState<StockData | null>(null);
   const [totalStocks, setTotalStocks] = useState(0);
@@ -495,6 +520,15 @@ export default function Dashboard() {
   const [updateMsg, setUpdateMsg] = useState<string>("Loading market data...");
   const [loading, setLoading] = useState(true);
   const [marketClock, setMarketClock] = useState(() => Date.now());
+  const PORTFOLIO_SCHEMA_VERSION = 1; // v1: valueHistory + closedPositions
+  useEffect(() => {
+    const schemaVersion = Number(localStorage.getItem("signal-markets:portfolios:v") ?? "0");
+    if (schemaVersion < PORTFOLIO_SCHEMA_VERSION) {
+      localStorage.removeItem("signal-markets:portfolios");
+      localStorage.setItem("signal-markets:portfolios:v", String(PORTFOLIO_SCHEMA_VERSION));
+    }
+  }, []);
+
   const [simulatedPortfolios, setSimulatedPortfolios] = useState<
     Record<string, SimulatedPortfolio>
   >({});
@@ -513,6 +547,7 @@ export default function Dashboard() {
   // --- WebSocket integration for real-time signals ---
   const WS_URL = (() => {
     const envUrl = (import.meta as any).env?.VITE_WS_URL;
+    if (envUrl === "none" || envUrl === "disabled") return null;
     if (envUrl) return envUrl;
     if (typeof window !== "undefined") {
       const l = window.location;
@@ -523,7 +558,7 @@ export default function Dashboard() {
   })();
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!WS_URL || typeof window === "undefined") return;
     let ws: WebSocket | null = null;
     let alive = true;
 
@@ -784,17 +819,27 @@ export default function Dashboard() {
     if (!marketFilter || !stocks.length) return;
 
     setSimulatedPortfolios((current) => {
-      // Only allocate to eligible stocks with valid, nonzero prices
+      // Only allocate to actionable setups with valid, nonzero prices.
       const eligible = stocks.filter((stock) => {
         const price = Number(stock.price);
-        return isBuySetup(stock) && Number.isFinite(price) && price > 0;
+        return (
+          getSimulatedPositionSide(stock) !== null &&
+          Number.isFinite(price) &&
+          price > 0
+        );
       });
+      const existing = current[marketFilter] ?? createEmptyPortfolio();
+      const now = Date.now();
       if (!eligible.length) {
         return {
           ...current,
           [marketFilter]: {
             cash: STARTING_PORTFOLIO_VALUE,
             positions: {},
+            startedAt: existing.startedAt,
+            startValue: existing.startValue ?? STARTING_PORTFOLIO_VALUE,
+            valueHistory: existing.valueHistory ?? [],
+            closedPositions: existing.closedPositions ?? [],
           },
         };
       }
@@ -807,36 +852,87 @@ export default function Dashboard() {
       const positions: Record<string, SimulatedPosition> = {};
 
       eligible.forEach((stock, index) => {
-        // Use ask for entry, bid for liquidation, fallback to price or 0
+        // Longs enter near ask and exit near bid; shorts enter near bid and cover near ask.
         const price = Number(stock.price) || 0;
-        const ask = Number.isFinite(stock.ask) && stock.ask! > 0 ? Number(stock.ask) : price;
-        const bid = Number.isFinite(stock.bid) && stock.bid! > 0 ? Number(stock.bid) : price;
+        const ask =
+          Number.isFinite(stock.ask) && stock.ask! > 0
+            ? Number(stock.ask)
+            : price;
+        const bid =
+          Number.isFinite(stock.bid) && stock.bid! > 0
+            ? Number(stock.bid)
+            : price;
+        const side = getSimulatedPositionSide(stock) ?? "long";
         const targetWeight = weights[index] ?? 0;
         const amount = investedAmount * targetWeight;
-        const entryPrice = resolveSimulatedEntryPrice(stock, ask);
+        const entryReference = side === "short" ? bid : ask;
+        const exitReference = side === "short" ? ask : bid;
+        const entryPrice = resolveSimulatedEntryPrice(stock, entryReference);
         const quantity = amount / (entryPrice || 1); // avoid division by zero
+        const unrealizedPnL =
+          side === "short"
+            ? quantity * (entryPrice - exitReference)
+            : quantity * (exitReference - entryPrice);
+        const prevPos = existing.positions[stock.ticker];
         positions[stock.ticker] = {
           ...stock,
+          side,
           quantity,
-          entryPrice,
+          entryPrice: prevPos ? prevPos.entryPrice : entryPrice,
           investedAmount: amount,
-          marketValue: quantity * bid,
+          marketValue: Math.max(0, amount + unrealizedPnL),
+          unrealizedPnL,
           targetWeight,
-          openedAt: Date.now(),
+          openedAt: prevPos ? prevPos.openedAt : now,
         };
       });
 
-      // Normalize weights
-      const totalMarketValue = Object.values(positions).reduce((sum, p) => sum + p.marketValue, 0);
+      // Normalize weights across current portfolio equity.
+      const totalMarketValue = Object.values(positions).reduce(
+        (sum, p) => sum + p.marketValue,
+        0,
+      );
       Object.values(positions).forEach((p) => {
         p.targetWeight = totalMarketValue > 0 ? p.marketValue / totalMarketValue : 0;
       });
+
+      // Detect closed positions (in existing but not in new)
+      const closedPositions = [...(existing.closedPositions ?? [])];
+      for (const [ticker, pos] of Object.entries(existing.positions ?? {})) {
+        if (!positions[ticker]) {
+          const exitRef = pos.side === "short"
+            ? (stocks.find(s => s.ticker === ticker)?.ask ?? pos.entryPrice)
+            : (stocks.find(s => s.ticker === ticker)?.bid ?? pos.entryPrice);
+          const exitPrice = Number.isFinite(exitRef) && (exitRef as number) > 0 ? exitRef as number : pos.entryPrice;
+          const proceeds = pos.side === "short"
+            ? pos.quantity * (2 * pos.entryPrice - exitPrice)
+            : pos.quantity * exitPrice;
+          if (pos.quantity > 0 && !closedPositions.some((c) => c.ticker === ticker && c.openedAt === pos.openedAt)) {
+            closedPositions.push({ ticker, name: pos.name, side: pos.side, quantity: pos.quantity, entryPrice: pos.entryPrice, exitPrice, investedAmount: pos.investedAmount, proceeds, openedAt: pos.openedAt, closedAt: now });
+          }
+        }
+      }
+
+      // Append valueHistory snapshot
+      const prevHistory = existing.valueHistory ?? [];
+      const snapshotValue = totalMarketValue + cash;
+      const lastPoint = prevHistory[prevHistory.length - 1];
+      const valueHistory = [...prevHistory];
+      if (!lastPoint || now - lastPoint.t > 60_000) {
+        valueHistory.push({ t: now, v: snapshotValue });
+      }
+
+      const isFirstRun = !existing.startedAt;
 
       return {
         ...current,
         [marketFilter]: {
           cash,
           positions,
+          startedAt: existing.startedAt ?? now,
+          startValue: existing.startValue ?? STARTING_PORTFOLIO_VALUE,
+          valueHistory: isFirstRun ? [{ t: now, v: snapshotValue }] : valueHistory,
+          closedPositions,
         },
       };
     });
@@ -1043,7 +1139,7 @@ export default function Dashboard() {
 
   const portfolioPositions = useMemo(
     () =>
-      Object.values(activeSimulatedPortfolio.positions).sort(
+      Object.values(activeSimulatedPortfolio.positions).filter((p) => p.quantity > 0).sort(
         (a, b) => b.marketValue - a.marketValue,
       ),
     [activeSimulatedPortfolio.positions],
@@ -1059,12 +1155,11 @@ export default function Dashboard() {
         (sum, stock) => sum + stock.investedAmount,
         0,
       );
-      const totalValue = positionsValue;
-      const totalReturn = positionsValue - investedAmount;
-      const totalReturnPercent =
-        investedAmount > 0
-          ? Number(((totalReturn / investedAmount) * 100).toFixed(2))
-          : 0;
+      const totalValue = positionsValue + activeSimulatedPortfolio.cash;
+      const totalReturn = totalValue - STARTING_PORTFOLIO_VALUE;
+      const totalReturnPercent = Number(
+        ((totalReturn / STARTING_PORTFOLIO_VALUE) * 100).toFixed(2),
+      );
 
       return {
         totalValue,
@@ -1135,6 +1230,24 @@ export default function Dashboard() {
     ? formatSyncTime(lastSyncedAt)
     : "Waiting for first sync";
 
+  const valueHistory = activeSimulatedPortfolio.valueHistory ?? [];
+  const durationMs = { "1W": 7 * 24 * 3_600_000, "1M": 30 * 24 * 3_600_000, "3M": 90 * 24 * 3_600_000 } as const;
+  const filteredValueHistory = (() => {
+    if (valueHistory.length === 0) return valueHistory;
+    if (chartTimeframe === "All") return valueHistory;
+    const startedAt = valueHistory[0]?.t ?? 0;
+    const cutoff = startedAt + durationMs[chartTimeframe];
+    const windowed = valueHistory.filter((point) => point.t <= cutoff);
+    return windowed.length >= 2 ? windowed : valueHistory.slice(0, Math.min(2, valueHistory.length));
+  })();
+
+  const portfolioStartedAt = activeSimulatedPortfolio.startedAt ?? null;
+  const portfolioStartLabel = portfolioStartedAt
+    ? new Date(portfolioStartedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+    : null;
+
+  const selectedMarketLabel = markets.find((m) => m.code === marketFilter)?.label ?? null;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
@@ -1162,7 +1275,7 @@ export default function Dashboard() {
         >
           <div>
             <h1 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1">
-              Portfolio Value
+              Portfolio Value {selectedMarketLabel && `— ${selectedMarketLabel}`}
             </h1>
             <div className="flex items-baseline gap-4">
               <span className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground">
@@ -1201,6 +1314,259 @@ export default function Dashboard() {
             </div>
           </div>
         </motion.header>
+
+        {/* Portfolio Tabs: Cumulative Returns Chart | Operations History */}
+        <Tabs value={portfolioTab} onValueChange={(v) => setPortfolioTab(v as "chart" | "history" | "stats")} className="mb-8">
+          <TabsList className="mb-4">
+            <TabsTrigger value="chart">Cumulative Returns</TabsTrigger>
+            <TabsTrigger value="history">Operations History</TabsTrigger>
+            <TabsTrigger value="stats">Statistics</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="chart">
+            {valueHistory.length > 1 && (() => {
+              const chartData = filteredValueHistory;
+              const first = chartData[0].v;
+              const returnData = chartData.map((point) => ({
+                t: point.t,
+                r: first > 0 ? Number((((point.v - first) / first) * 100).toFixed(2)) : 0,
+              }));
+              const lastReturn = returnData[returnData.length - 1]?.r ?? 0;
+              const isUp = lastReturn >= 0;
+              const strokeColor = isUp ? "hsl(var(--primary))" : "hsl(var(--destructive))";
+              const gradientId = "portfolioGradient";
+              const timeframes = ["1W", "1M", "3M", "All"] as const;
+              const spanMs = chartData[chartData.length - 1].t - chartData[0].t;
+              const tickFmt = (t: number) => {
+                const d = new Date(t);
+                if (spanMs > 20 * 60 * 60_000) return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+                return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+              };
+              const tooltipFmt = (t: number) => new Date(t).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+              return (
+                <motion.div key="chart" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card border border-border/50 rounded-3xl p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Cumulative Returns</h2>
+                      <div className={`text-xl font-semibold mt-1 ${isUp ? "text-primary" : "text-destructive"}`}>
+                        {lastReturn >= 0 ? "+" : ""}{lastReturn.toFixed(2)}%{" "}
+                        <span className="text-xs font-normal text-muted-foreground">
+                          {chartTimeframe === "All" ? `since ${portfolioStartLabel ?? "inception"}` : `since start of ${chartTimeframe}`}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      {timeframes.map((tf) => (
+                        <button
+                          key={tf}
+                          onClick={() => setChartTimeframe(tf)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${chartTimeframe === tf ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                        >{tf}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={returnData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={strokeColor} stopOpacity={0.15} />
+                            <stop offset="95%" stopColor={strokeColor} stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <XAxis dataKey="t" tickFormatter={tickFmt} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={60} />
+                        <YAxis tickFormatter={(v) => `${v > 0 ? "+" : ""}${v.toFixed(1)}%`} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={52} />
+                        <RechartsTooltip
+                          content={({ active, payload }) => {
+                            if (!active || !payload?.length) return null;
+                            const pt = payload[0].payload as { t: number; r: number };
+                            return (
+                              <div className="bg-card border border-border rounded-lg px-3 py-2 text-xs shadow-lg">
+                                <div className="text-muted-foreground">{tooltipFmt(pt.t)}</div>
+                                <div className={`font-semibold ${pt.r >= 0 ? "text-primary" : "text-destructive"}`}>{pt.r >= 0 ? "+" : ""}{pt.r.toFixed(2)}%</div>
+                              </div>
+                            );
+                          }}
+                        />
+                        <Area type="monotone" dataKey="r" stroke={strokeColor} strokeWidth={2} fill={`url(#${gradientId})`} dot={false} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </motion.div>
+              );
+            })()}
+          </TabsContent>
+
+          <TabsContent value="history">
+            {(() => {
+              const closed = (activeSimulatedPortfolio?.closedPositions ?? []).filter((c) => c.quantity > 0);
+              const open = portfolioPositions;
+              if (closed.length === 0 && open.length === 0) {
+                return (
+                  <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
+                    No operations yet. Start a portfolio to track trades.
+                  </div>
+                );
+              }
+              type HistoryRow = { ticker: string; name?: string; side: string; quantity: number; entryPrice: number; exitPrice?: number; pnl?: number; pnlPct?: number; openedAt: number; closedAt?: number; status: "Open" | "Closed" };
+              const allRows: HistoryRow[] = [
+                ...open.map((p) => ({
+                  ticker: p.ticker, name: p.name, side: p.side, quantity: p.quantity, entryPrice: p.entryPrice,
+                  exitPrice: undefined, pnl: p.unrealizedPnL,
+                  pnlPct: p.investedAmount > 0 ? p.unrealizedPnL / p.investedAmount : 0,
+                  openedAt: p.openedAt, closedAt: undefined, status: "Open" as const,
+                })),
+                ...closed.slice().reverse().map((c) => ({
+                  ticker: c.ticker, name: c.name, side: c.side, quantity: c.quantity, entryPrice: c.entryPrice,
+                  exitPrice: c.exitPrice, pnl: c.proceeds - c.investedAmount,
+                  pnlPct: c.investedAmount > 0 ? (c.proceeds - c.investedAmount) / c.investedAmount : 0,
+                  openedAt: c.openedAt, closedAt: c.closedAt, status: "Closed" as const,
+                })),
+              ];
+              const fmtDate = (ts: number) => new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "2-digit" });
+              const fmtPrice = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+              return (
+                <div className="overflow-x-auto rounded-xl border border-border">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-muted/40 text-muted-foreground">
+                        <th className="text-left px-4 py-3 font-medium">Pair</th>
+                        <th className="text-left px-4 py-3 font-medium">Side</th>
+                        <th className="text-right px-4 py-3 font-medium">Qty</th>
+                        <th className="text-right px-4 py-3 font-medium">Entry</th>
+                        <th className="text-right px-4 py-3 font-medium">Exit</th>
+                        <th className="text-right px-4 py-3 font-medium">P&L</th>
+                        <th className="text-right px-4 py-3 font-medium">Opened</th>
+                        <th className="text-right px-4 py-3 font-medium">Closed</th>
+                        <th className="text-right px-4 py-3 font-medium">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allRows.map((row, i) => (
+                        <tr key={`${row.ticker}-${i}`} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                          <td className="px-4 py-3 font-mono font-semibold">{row.ticker}</td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${row.side === "long" ? "bg-emerald-500/15 text-emerald-500" : "bg-red-500/15 text-red-500"}`}>{row.side}</span>
+                          </td>
+                          <td className="px-4 py-3 text-right">{row.quantity.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-right">{fmtPrice(row.entryPrice)}</td>
+                          <td className="px-4 py-3 text-right">{row.exitPrice != null ? fmtPrice(row.exitPrice) : "—"}</td>
+                          <td className={`px-4 py-3 text-right font-medium ${(row.pnl ?? 0) >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                            {row.pnl != null ? `${(row.pnl ?? 0) >= 0 ? "+" : ""}$${Math.abs(row.pnl).toFixed(2)} (${((row.pnlPct ?? 0) * 100).toFixed(1)}%)` : "—"}
+                          </td>
+                          <td className="px-4 py-3 text-right text-muted-foreground">{fmtDate(row.openedAt)}</td>
+                          <td className="px-4 py-3 text-right text-muted-foreground">{row.closedAt != null ? fmtDate(row.closedAt) : "—"}</td>
+                          <td className="px-4 py-3 text-right">
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${row.status === "Open" ? "bg-emerald-500/15 text-emerald-500" : "bg-muted text-muted-foreground"}`}>{row.status}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
+          </TabsContent>
+
+          <TabsContent value="stats">
+            {(() => {
+              const closed = (activeSimulatedPortfolio?.closedPositions ?? []).filter((c) => c.quantity > 0);
+              const vh = valueHistory;
+
+              // --- Closed-trade metrics ---
+              const wins = closed.filter((c) => c.proceeds - c.investedAmount > 0);
+              const losses = closed.filter((c) => c.proceeds - c.investedAmount <= 0);
+              const grossProfit = wins.reduce((s, c) => s + (c.proceeds - c.investedAmount), 0);
+              const grossLoss = Math.abs(losses.reduce((s, c) => s + (c.proceeds - c.investedAmount), 0));
+              const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? Infinity : null;
+              const totalTrades = closed.length;
+              const winRate = totalTrades > 0 ? (wins.length / totalTrades) * 100 : null;
+              const expectedPayoff = totalTrades > 0 ? (grossProfit - grossLoss) / totalTrades : null;
+
+              // --- Value-history metrics ---
+              const startValue = activeSimulatedPortfolio?.startValue ?? STARTING_PORTFOLIO_VALUE;
+              const currentValue = (activeSimulatedPortfolio?.cash ?? 0) +
+                Object.values(activeSimulatedPortfolio?.positions ?? {}).reduce((s, p) => s + p.marketValue, 0);
+
+              // Max drawdown from valueHistory
+              let maxDrawdown = 0;
+              let peak = vh[0]?.v ?? 0;
+              for (const pt of vh) {
+                if (pt.v > peak) peak = pt.v;
+                const dd = peak > 0 ? (peak - pt.v) / peak : 0;
+                if (dd > maxDrawdown) maxDrawdown = dd;
+              }
+
+              // Monthly return: compounded from total elapsed time
+              const firstT = vh[0]?.t;
+              const lastT = vh[vh.length - 1]?.t;
+              const elapsedMs = firstT && lastT ? lastT - firstT : 0;
+              const elapsedMonths = elapsedMs / (30.44 * 24 * 3_600_000);
+              const totalReturn = startValue > 0 ? (currentValue - startValue) / startValue : 0;
+              const monthlyReturn = elapsedMonths >= 0.5 && startValue > 0
+                ? (Math.pow(1 + totalReturn, 1 / elapsedMonths) - 1) * 100
+                : null;
+
+              // Sharpe (annualised from valueHistory snapshots)
+              let sharpe: number | null = null;
+              if (vh.length >= 5) {
+                const dailyReturns: number[] = [];
+                for (let i = 1; i < vh.length; i++) {
+                  const prev = vh[i - 1].v;
+                  const curr = vh[i].v;
+                  if (prev > 0) dailyReturns.push((curr - prev) / prev);
+                }
+                if (dailyReturns.length >= 2) {
+                  const mean = dailyReturns.reduce((s, r) => s + r, 0) / dailyReturns.length;
+                  const variance = dailyReturns.reduce((s, r) => s + Math.pow(r - mean, 2), 0) / dailyReturns.length;
+                  const std = Math.sqrt(variance);
+                  sharpe = std > 0 ? (mean / std) * Math.sqrt(252) : null;
+                }
+              }
+
+              const fmt = (v: number | null, decimals = 2, suffix = "") =>
+                v === null ? "—" : `${v.toFixed(decimals)}${suffix}`;
+              const fmtPF = (v: number | null) =>
+                v === null ? "—" : v === Infinity ? "∞" : v.toFixed(2);
+
+              const stats: Array<{ label: string; value: string; sub?: string; positive?: boolean | null }> = [
+                { label: "Profit Factor", value: fmtPF(profitFactor), sub: "gross profit / gross loss", positive: profitFactor === null ? null : profitFactor >= 1 },
+                { label: "Expected Payoff", value: expectedPayoff === null ? "—" : `${expectedPayoff >= 0 ? "+" : ""}$${Math.abs(expectedPayoff).toFixed(2)}`, sub: "avg P&L per trade", positive: expectedPayoff === null ? null : expectedPayoff >= 0 },
+                { label: "Monthly Return", value: monthlyReturn === null ? "—" : `${monthlyReturn >= 0 ? "+" : ""}${monthlyReturn.toFixed(2)}%`, sub: "compounded", positive: monthlyReturn === null ? null : monthlyReturn >= 0 },
+                { label: "Total Trades", value: String(totalTrades), sub: `${wins.length}W / ${losses.length}L`, positive: null },
+                { label: "Win Rate", value: fmt(winRate, 1, "%"), sub: "closed trades", positive: winRate === null ? null : winRate >= 50 },
+                { label: "Max Drawdown", value: fmt(maxDrawdown * 100, 1, "%"), sub: "peak-to-trough", positive: maxDrawdown === 0 ? null : false },
+                { label: "Sharpe Ratio", value: fmt(sharpe, 2), sub: "annualised", positive: sharpe === null ? null : sharpe >= 1 },
+                { label: "Total Return", value: `${totalReturn >= 0 ? "+" : ""}${(totalReturn * 100).toFixed(2)}%`, sub: `${(currentValue - startValue) >= 0 ? "+" : ""}$${(currentValue - startValue).toFixed(2)} net`, positive: totalReturn >= 0 },
+              ];
+
+              const hasData = totalTrades > 0 || vh.length >= 2;
+
+              return (
+                <div>
+                  {!hasData && (
+                    <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
+                      No data yet. Statistics will appear once the portfolio has history.
+                    </div>
+                  )}
+                  {hasData && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      {stats.map((s) => (
+                        <div key={s.label} className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm flex flex-col gap-1">
+                          <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{s.label}</span>
+                          <span className={`text-2xl font-semibold tabular-nums ${s.positive === null ? "text-foreground" : s.positive ? "text-emerald-500" : "text-red-500"}`}>
+                            {s.value}
+                          </span>
+                          {s.sub && <span className="text-xs text-muted-foreground">{s.sub}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </TabsContent>
+        </Tabs>
 
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full md:max-w-3xl">
@@ -1413,6 +1779,11 @@ export default function Dashboard() {
                             <span className="font-medium text-foreground">
                               {stock.ticker}
                             </span>
+                            <span
+                              className={`ml-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${stock.side === "short" ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"}`}
+                            >
+                              {stock.side === "short" ? "Short" : "Long"}
+                            </span>
                             <span className="ml-2 text-muted-foreground">
                               {stock.quantity.toFixed(2)} units
                             </span>
@@ -1423,6 +1794,12 @@ export default function Dashboard() {
                             </div>
                             <div className="text-muted-foreground">
                               Entry {formatRate(stock.entryPrice)}
+                            </div>
+                            <div
+                              className={stock.unrealizedPnL >= 0 ? "text-primary" : "text-destructive"}
+                            >
+                              {stock.unrealizedPnL >= 0 ? "+" : ""}
+                              {formatMaybeCurrency(stock.unrealizedPnL)}
                             </div>
                           </div>
                         </div>

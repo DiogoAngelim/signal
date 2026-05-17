@@ -3,10 +3,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ResponsiveContainer,
   LineChart as RechartsLineChart,
+  AreaChart,
+  Area,
+  XAxis,
   YAxis,
+  Tooltip,
   Line,
+  ReferenceLine,
 } from "recharts";
 import { Navbar } from "@/components/navbar";
+import { toast } from "@/hooks/use-toast";
 import {
   Select,
   SelectTrigger,
@@ -15,6 +21,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   TrendingUp,
   LineChart,
@@ -23,10 +30,14 @@ import {
 } from "lucide-react";
 import {
   ApiRequestError,
+  emitFakeSignal,
+  fetchSignalHistory,
   fetchMarkets,
   fetchStockList,
   fetchStockQuotes,
+  registerSignalWatchlist,
   type MarketOption,
+  type SignalEvent,
   type StockData,
   type StockQuote,
   type StockStatus,
@@ -123,6 +134,13 @@ function formatPercent(value: number | undefined | null) {
   return displayValue.toFixed(2);
 }
 
+function formatQuantity(value: number) {
+  if (!Number.isFinite(value)) return "0";
+  return value.toLocaleString("en-US", {
+    maximumFractionDigits: Number.isInteger(value) ? 0 : 6,
+  });
+}
+
 function formatSignalTime(dateStr: string | undefined) {
   if (!dateStr) return "—";
   const timestamp = Date.parse(dateStr);
@@ -135,6 +153,50 @@ function formatSignalTime(dateStr: string | undefined) {
   }).format(timestamp);
 }
 
+function describeSignalToast(signal: Partial<StockData> & { symbol?: string }) {
+  const symbol = signal.symbol ?? signal.ticker ?? "Signal";
+  const action = signal.signalAction ?? "Hold";
+  const status = signal.status ?? "Stable";
+  const price = formatMaybeCurrency(signal.price);
+  const confidence =
+    signal.signalConfidence != null
+      ? `${Math.round(Number(signal.signalConfidence))}%`
+      : "—";
+
+  return {
+    title: `${symbol} ${action} · ${status}`,
+    description: `${price} · confidence ${confidence}`,
+  };
+}
+
+function makeLocalSignalEvent(
+  signal: Partial<StockData> & { symbol?: string },
+  market: string,
+): SignalEvent {
+  const symbol = signal.symbol ?? signal.ticker ?? "UNKNOWN";
+  const emittedAt = signal.signalEmittedAt ?? new Date().toISOString();
+
+  return {
+    id: `${symbol}-${emittedAt}-${Math.random().toString(36).slice(2)}`,
+    scopeType: "market",
+    scopeCode: market || "LOCAL",
+    symbol,
+    emittedAt,
+    signal: {
+      symbol,
+      price: Number(signal.price ?? 0),
+      changePercent: Number(signal.changePercent ?? 0),
+      status: signal.status ?? "Stable",
+      high52: Number(signal.high52 ?? signal.price ?? 0),
+      low52: Number(signal.low52 ?? signal.price ?? 0),
+      history: signal.history ?? [],
+      summary: signal.summary ?? "",
+      impact: signal.impact ?? "",
+      ...signal,
+    },
+  };
+}
+
 type MarketSchedule = {
   timeZone: string;
   open: [number, number];
@@ -144,7 +206,7 @@ type MarketSchedule = {
 
 const MARKET_SCHEDULES: Array<{ match: RegExp; schedule: MarketSchedule }> = [
   {
-    match: /CRYPTO/i,
+    match: /BINANCE|CRYPTO/i,
     schedule: { timeZone: "UTC", open: [0, 0], close: [24, 0], weekend: [] },
   },
   {
@@ -204,7 +266,9 @@ const STARTING_PORTFOLIO_VALUE = 1000;
 const REFRESH_INTERVAL_MS = 60_000;
 const STALE_AFTER_MS = REFRESH_INTERVAL_MS * 2;
 const STOCK_LIST_PAGE_SIZE = 500;
-const QUOTE_BATCH_SIZE = 8;
+const INITIAL_QUOTE_SYMBOL_LIMIT = 120;
+const VISIBLE_QUOTE_SYMBOL_LIMIT = 120;
+const QUOTE_REQUEST_SYMBOL_BATCH_SIZE = 30;
 const QUOTE_BATCH_DELAY_MS = 500;
 const QUOTE_REQUEST_TIMEOUT_MS = 45_000;
 const PREFERRED_INITIAL_MARKETS = ["NASDAQ", "NYSE", "AMEX"];
@@ -233,6 +297,9 @@ function resolveMarketSchedule(market: string): MarketSchedule {
 
 function getMarketStatus(market: string): "Open" | "Closed" {
   const schedule = resolveMarketSchedule(market);
+  if (schedule.open[0] === 0 && schedule.close[0] === 24 && !schedule.weekend.length) {
+    return "Open";
+  }
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone: schedule.timeZone,
     hour: "2-digit",
@@ -312,22 +379,101 @@ type SimulatedPosition = StockData & {
   marketValue: number;
   targetWeight: number;
   openedAt: number;
+  entrySignalKey?: string;
 };
 
 type SimulatedPortfolio = {
   cash: number;
   positions: Record<string, SimulatedPosition>;
+  startedAt: number | null;   // epoch ms when this portfolio was first opened; null if not yet started
+  startValue: number;  // initial capital (used as cumulative baseline)
+  valueHistory: Array<{ t: number; v: number }>; // cumulative value over time
+  closedPositions: Array<{ ticker: string; name?: string; quantity: number; entryPrice: number; exitPrice: number; investedAmount: number; proceeds: number; openedAt: number; closedAt: number; entrySignalKey?: string }>;
 };
+type ClosedPosition = SimulatedPortfolio["closedPositions"][number];
 
 function createEmptyPortfolio(): SimulatedPortfolio {
   return {
-    cash: STARTING_PORTFOLIO_VALUE,
+    cash: 0,
     positions: {},
+    startedAt: null,
+    startValue: STARTING_PORTFOLIO_VALUE,
+    valueHistory: [],
+    closedPositions: [],
   };
+}
+
+function toUtcDayKey(timestamp: number): string {
+  const date = new Date(timestamp);
+  return `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`;
+}
+
+function rounded(value: number, digits = 4): number {
+  const factor = 10 ** digits;
+  return Math.round(value * factor) / factor;
+}
+
+function closedPositionFingerprint(position: ClosedPosition): string {
+  return [
+    position.ticker.trim().toUpperCase(),
+    position.entrySignalKey ?? "legacy",
+    rounded(position.quantity, 6),
+    rounded(position.entryPrice, 4),
+    rounded(position.exitPrice, 4),
+    toUtcDayKey(position.openedAt),
+    toUtcDayKey(position.closedAt),
+  ].join("|");
+}
+
+function dedupeClosedPositions(items: ClosedPosition[]): ClosedPosition[] {
+  const seen = new Set<string>();
+  const deduped: ClosedPosition[] = [];
+
+  for (const item of items) {
+    const key = closedPositionFingerprint(item);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    deduped.push(item);
+  }
+
+  return deduped;
+}
+
+function normalizePortfolioStorage(
+  portfolios: Record<string, SimulatedPortfolio>,
+): Record<string, SimulatedPortfolio> {
+  return Object.fromEntries(
+    Object.entries(portfolios).map(([market, portfolio]) => [
+      market,
+      {
+        ...portfolio,
+        closedPositions: dedupeClosedPositions(portfolio.closedPositions ?? []),
+      },
+    ]),
+  );
 }
 
 function isBuySetup(stock: StockData): boolean {
   return stock.signalAction === "Buy" && stock.status === "Rising";
+}
+
+function signalEntryKey(stock: StockData): string {
+  const emittedAt = stock.signalEmittedAt
+    ? String(stock.signalEmittedAt)
+    : "unknown-time";
+  const entryPrice = Number(stock.signalEntryPrice);
+  const priceKey = Number.isFinite(entryPrice) && entryPrice > 0
+    ? rounded(entryPrice, 6)
+    : "market";
+
+  return [
+    stock.ticker.trim().toUpperCase(),
+    stock.signalAction ?? "Hold",
+    emittedAt,
+    priceKey,
+  ].join("|");
 }
 
 function resolveSimulatedEntryPrice(stock: StockData, currentPrice: number) {
@@ -474,21 +620,55 @@ export default function Dashboard() {
   const [markets, setMarkets] = useState<MarketOption[]>([]);
   const [marketFilter, setMarketFilter] = useState<string>("");
   const [marketQuery, setMarketQuery] = useState<string>("");
+  const [marketMenuOpen, setMarketMenuOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StockStatus | "All">("All");
   const [signalFilter, setSignalFilter] = useState<TradeSignal | "All">("All");
+  const [chartTimeframe, setChartTimeframe] = useState<"1W" | "1M" | "3M" | "All">("All");
+  const [portfolioTab, setPortfolioTab] = useState<"chart" | "history" | "stats">("chart");
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [selectedStock, setSelectedStock] = useState<StockData | null>(null);
+  const [signalHistory, setSignalHistory] = useState<SignalEvent[]>([]);
+  const [signalsMenuOpen, setSignalsMenuOpen] = useState(true);
   const [totalStocks, setTotalStocks] = useState(0);
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const [updateMsg, setUpdateMsg] = useState<string>("Loading market data...");
   const [loading, setLoading] = useState(true);
   const [marketClock, setMarketClock] = useState(() => Date.now());
+  // v10: fractional sizing, signal emission de-dupe, and closed-market pause.
+  const PORTFOLIO_SCHEMA_VERSION = 10;
   const [simulatedPortfolios, setSimulatedPortfolios] = useState<
     Record<string, SimulatedPortfolio>
-  >({});
+  >(() => {
+    try {
+      const schemaVersion = Number(localStorage.getItem("signal-markets:portfolios:v") ?? 0);
+      if (schemaVersion < PORTFOLIO_SCHEMA_VERSION) {
+        localStorage.removeItem("signal-markets:portfolios");
+        localStorage.setItem("signal-markets:portfolios:v", String(PORTFOLIO_SCHEMA_VERSION));
+        return {};
+      }
+      const saved = localStorage.getItem("signal-markets:portfolios");
+      if (!saved) {
+        return {};
+      }
+
+      const parsed = JSON.parse(saved) as Record<string, SimulatedPortfolio>;
+      return normalizePortfolioStorage(parsed);
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("signal-markets:portfolios", JSON.stringify(simulatedPortfolios));
+    } catch { }
+  }, [simulatedPortfolios]);
 
   const refreshInFlight = useRef(false);
+  const marketMenuRef = useRef<HTMLDivElement | null>(null);
+  const marketSearchInputRef = useRef<HTMLInputElement | null>(null);
+  const watchlistRegisteredRef = useRef(new Set<string>());
   const stocksRef = useRef<StockData[]>([]);
   const marketFilterRef = useRef("");
   const notificationsEnabledRef = useRef(false);
@@ -499,28 +679,41 @@ export default function Dashboard() {
   stocksRef.current = stocks;
   marketFilterRef.current = marketFilter;
 
+  const selectedMarketStatus = marketFilter ? getMarketStatus(marketFilter) : "Closed";
+  const isSelectedMarketOpen = selectedMarketStatus === "Open";
+
   // --- WebSocket integration for real-time signals ---
-  const WS_URL = (() => {
+  const WS_URLS = (() => {
     const envUrl = (import.meta as any).env?.VITE_WS_URL;
-    if (envUrl) return envUrl;
+    if (envUrl === "none" || envUrl === "disabled") return [];
+    if (envUrl) return [envUrl];
     if (typeof window !== "undefined") {
-      const l = window.location;
-      const proto = l.protocol === "https:" ? "wss:" : "ws:";
-      return proto + "//" + l.host + "/ws";
+      const apiUrl = (import.meta as any).env?.VITE_API_BASE_URL;
+      const base = apiUrl
+        ? new URL(apiUrl, window.location.origin)
+        : window.location;
+      const proto = base.protocol === "https:" ? "wss:" : "ws:";
+      const urls = [
+        proto + "//" + base.host + "/ws",
+        "ws://localhost:3000/ws",
+      ];
+      return Array.from(new Set(urls));
     }
-    return "ws://localhost:3000/ws";
+    return ["ws://localhost:3000/ws"];
   })();
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!WS_URLS.length || typeof window === "undefined") return;
     let ws: WebSocket | null = null;
     let alive = true;
 
 
-    function connect() {
-      ws = new window.WebSocket(WS_URL);
+    function connect(urlIndex = 0) {
+      let opened = false;
+      ws = new window.WebSocket(WS_URLS[urlIndex]);
 
       ws.onopen = () => {
+        opened = true;
         // Optionally, send a hello or subscribe message if protocol requires
         // ws.send(JSON.stringify({ type: "subscribe", markets: [marketFilter] }));
       };
@@ -528,20 +721,53 @@ export default function Dashboard() {
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
-          // Expecting: { type: "signal", data: { symbol, ...signalFields } }
-          if (msg && msg.type === "signal" && msg.data && msg.data.symbol) {
+          const currentMarket = marketFilterRef.current;
+          if (currentMarket && getMarketStatus(currentMarket) !== "Open" && !msg.dev) {
+            setUpdateMsg("Market closed. Watching status until it reopens.");
+            return;
+          }
+          const incomingSignals: Array<Partial<StockData> & { symbol?: string }> =
+            msg?.type === "signal" && msg.data?.symbol
+              ? [msg.data]
+              : msg?.type === "signal-update" && Array.isArray(msg.signals)
+                ? msg.signals
+                : [];
+
+          if (incomingSignals.length) {
+            const firstSignal = incomingSignals[0] as Partial<StockData> & {
+              symbol?: string;
+            };
+            toast(describeSignalToast(firstSignal));
+            setSignalHistory((current) => [
+              ...incomingSignals.map((signal) =>
+                makeLocalSignalEvent(signal, marketFilterRef.current),
+              ),
+              ...current,
+            ].slice(0, 100));
             setStocks((prev) => {
-              const idx = prev.findIndex((stock) => stock.ticker === msg.data.symbol);
-              if (idx !== -1) {
-                // Update existing stock
-                return prev.map((stock, i) =>
-                  i === idx ? { ...stock, ...msg.data } : stock
-                );
-              } else {
-                // Add new stock to the top for immediate visibility
-                return [{ ...msg.data, ticker: msg.data.symbol }, ...prev];
+              let next = prev;
+              for (const signal of incomingSignals) {
+                const symbol = signal.symbol ?? signal.ticker;
+                if (!symbol) continue;
+                const idx = next.findIndex((stock) => stock.ticker === symbol);
+                if (idx !== -1) {
+                  next = next.map((stock, i) =>
+                    i === idx ? { ...stock, ...signal, ticker: symbol } : stock,
+                  );
+                } else {
+                  next = [{
+                    ...signal,
+                    ticker: symbol,
+                    symbol,
+                    name: signal.name ?? symbol,
+                    exchange: signal.exchange ?? marketFilterRef.current,
+                    country: signal.country ?? marketFilterRef.current,
+                  }, ...next];
+                }
               }
+              return next;
             });
+            setUpdateMsg(`${incomingSignals.length} signal update${incomingSignals.length === 1 ? "" : "s"} received.`);
           }
         } catch (err) {
           // Ignore malformed messages
@@ -551,7 +777,8 @@ export default function Dashboard() {
       ws.onclose = () => {
         if (alive) {
           // Try to reconnect after a delay
-          setTimeout(connect, 2000);
+          const nextIndex = opened ? urlIndex : Math.min(urlIndex + 1, WS_URLS.length - 1);
+          setTimeout(() => connect(nextIndex), 2000);
         }
       };
 
@@ -566,13 +793,71 @@ export default function Dashboard() {
       alive = false;
       ws?.close();
     };
-  }, [WS_URL]);
+  }, [WS_URLS.join("|")]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    (window as any).signalMarketsFakeSignal = async (
+      data: Partial<StockData> & { symbol?: string } = {},
+    ) => {
+      try {
+        await emitFakeSignal({ market: marketFilterRef.current || "DEV", ...data });
+      } catch {
+      }
+
+      const symbol = data.symbol ?? data.ticker ?? "BINANCE:POLBRL";
+      const price = Number(data.price ?? 0.47);
+      const signal = {
+        symbol,
+        ticker: symbol,
+        name: data.name ?? "Temporary fake signal",
+        price,
+        changePercent: data.changePercent ?? 1.5,
+        status: data.status ?? "Rising",
+        high52: data.high52 ?? price,
+        low52: data.low52 ?? 0.46,
+        history: data.history ?? [0.46, price],
+        summary: data.summary ?? "Temporary fake Buy + Rising signal.",
+        impact: data.impact ?? "Dev-only browser console signal.",
+        signalAction: data.signalAction ?? "Buy",
+        signalConfidence: data.signalConfidence ?? 88,
+        signalSource: data.signalSource ?? "heuristic",
+        signalEmittedAt: data.signalEmittedAt ?? new Date().toISOString(),
+        signalEntryPrice: data.signalEntryPrice ?? 0.46,
+        ...data,
+      } satisfies Partial<StockData> & { symbol: string };
+
+      toast(describeSignalToast(signal));
+      setSignalHistory((current) => [
+        makeLocalSignalEvent(signal, marketFilterRef.current),
+        ...current,
+      ].slice(0, 100));
+      setStocks((prev) => {
+        const idx = prev.findIndex((stock) => stock.ticker === symbol);
+        if (idx === -1) return [signal as StockData, ...prev];
+        return prev.map((stock, index) =>
+          index === idx ? { ...stock, ...signal } : stock,
+        );
+      });
+      setUpdateMsg(`Fake signal received for ${symbol}.`);
+    };
+
+    return () => {
+      delete (window as any).signalMarketsFakeSignal;
+    };
+  }, []);
 
   async function refreshVisibleQuotes(reason: string) {
     const currentStocks = stocksRef.current;
     const currentMarket = marketFilterRef.current;
 
     if (!currentStocks.length || !currentMarket || refreshInFlight.current) {
+      return;
+    }
+
+    if (getMarketStatus(currentMarket) !== "Open") {
+      setUpdateMsg("Market closed. Watching status until it reopens.");
       return;
     }
 
@@ -633,6 +918,38 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (!marketMenuOpen) return;
+    marketSearchInputRef.current?.focus();
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (
+        marketMenuRef.current &&
+        !marketMenuRef.current.contains(event.target as Node)
+      ) {
+        setMarketMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [marketMenuOpen]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchSignalHistory(undefined, 100)
+      .then((events) => {
+        if (!cancelled) setSignalHistory(events);
+      })
+      .catch(() => {
+        if (!cancelled) setSignalHistory([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // --- Stocks List Cache ---
   const stocksListCacheRef = useRef<{ [market: string]: { items: StockData[]; total: number } }>({});
 
@@ -651,7 +968,23 @@ export default function Dashboard() {
         setTotalStocks(cached.total);
         setStocks(cached.items);
         setLoading(false);
-        await fetchQuotesBatched(marketFilter, cached.items, () => cancelled);
+        const watchKey = `${marketFilter}:${cached.items.length}`;
+        if (!watchlistRegisteredRef.current.has(watchKey)) {
+          watchlistRegisteredRef.current.add(watchKey);
+          void registerSignalWatchlist(
+            marketFilter,
+            cached.items.map((item) => item.ticker),
+          ).catch(() => {
+            watchlistRegisteredRef.current.delete(watchKey);
+          });
+        }
+        if (getMarketStatus(marketFilter) === "Open") {
+          await fetchQuotesBatched(marketFilter, cached.items, () => cancelled, {
+            symbolLimit: INITIAL_QUOTE_SYMBOL_LIMIT,
+          });
+        } else {
+          setUpdateMsg("Market closed. Watching status until it reopens.");
+        }
         return;
       }
 
@@ -680,6 +1013,8 @@ export default function Dashboard() {
             ...response.items.map((item) => ({
               ...item,
               ticker: item.symbol,
+              summary: "Queued for live quote sync.",
+              impact: "Live data will refresh when this asset enters the active quote window.",
             })),
           );
           offset += response.items.length;
@@ -690,7 +1025,23 @@ export default function Dashboard() {
         setLoading(false);
         // Cache the result
         stocksListCacheRef.current[marketFilter] = { items, total };
-        await fetchQuotesBatched(marketFilter, items, () => cancelled);
+        const watchKey = `${marketFilter}:${items.length}`;
+        if (!watchlistRegisteredRef.current.has(watchKey)) {
+          watchlistRegisteredRef.current.add(watchKey);
+          void registerSignalWatchlist(
+            marketFilter,
+            items.map((item) => item.ticker),
+          ).catch(() => {
+            watchlistRegisteredRef.current.delete(watchKey);
+          });
+        }
+        if (getMarketStatus(marketFilter) === "Open") {
+          await fetchQuotesBatched(marketFilter, items, () => cancelled, {
+            symbolLimit: INITIAL_QUOTE_SYMBOL_LIMIT,
+          });
+        } else {
+          setUpdateMsg("Market closed. Watching status until it reopens.");
+        }
       } catch (error) {
         if (!cancelled) {
           setLoading(false);
@@ -711,10 +1062,21 @@ export default function Dashboard() {
   useEffect(() => {
     if (!stocks.length || !marketFilter) return;
     const interval = setInterval(() => {
+      if (getMarketStatus(marketFilter) !== "Open") {
+        setUpdateMsg("Market closed. Watching status until it reopens.");
+        return;
+      }
       if (refreshInFlight.current) return;
       refreshInFlight.current = true;
       setUpdateMsg("Refreshing live market data...");
-      fetchQuotesBatched(marketFilter, stocks, () => false, {
+      const visibleStocks = stocks.filter((stock) => {
+        const matchesStatus =
+          statusFilter === "All" || stock.status === statusFilter;
+        const action = stock.signalAction ?? "Hold";
+        const matchesSignal = signalFilter === "All" || action === signalFilter;
+        return matchesStatus && matchesSignal;
+      });
+      fetchQuotesBatched(marketFilter, visibleStocks.slice(0, VISIBLE_QUOTE_SYMBOL_LIMIT), () => false, {
         bypassCache: true,
       }).finally(() => {
         refreshInFlight.current = false;
@@ -722,7 +1084,18 @@ export default function Dashboard() {
     }, REFRESH_INTERVAL_MS);
 
     return () => clearInterval(interval);
-  }, [stocks, marketFilter]);
+  }, [stocks, marketFilter, statusFilter, signalFilter]);
+
+  useEffect(() => {
+    if (!stocks.length || !marketFilter || refreshInFlight.current) return;
+    if (!isSelectedMarketOpen) {
+      setUpdateMsg("Market closed. Watching status until it reopens.");
+      return;
+    }
+    if (!lastSyncedAt || marketClock - lastSyncedAt >= REFRESH_INTERVAL_MS) {
+      void refreshVisibleQuotes("Market open. Refreshing live signals...");
+    }
+  }, [isSelectedMarketOpen, lastSyncedAt, marketClock, marketFilter, stocks.length]);
 
   useEffect(() => {
     if (typeof document === "undefined" || typeof window === "undefined") {
@@ -771,65 +1144,258 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!marketFilter || !stocks.length) return;
+    if (!isSelectedMarketOpen) return;
 
     setSimulatedPortfolios((current) => {
-      // Only allocate to eligible stocks with valid, nonzero prices
-      const eligible = stocks.filter((stock) => {
-        const price = Number(stock.price);
-        return isBuySetup(stock) && Number.isFinite(price) && price > 0;
-      });
-      if (!eligible.length) {
+      const existing = current[marketFilter];
+      const now = Date.now();
+      // Helper to compute bid price for a live stock
+      function liveBidFor(stock: StockData): number {
+        const price = Number(stock.price) || 0;
+        return Number.isFinite(stock.bid) && stock.bid! > 0
+          ? Number(stock.bid)
+          : price;
+      }
+
+      function fallbackBidForPosition(pos: SimulatedPosition): number {
+        const posBid = Number(pos.bid);
+        if (Number.isFinite(posBid) && posBid > 0) return posBid;
+        const posPrice = Number(pos.price);
+        if (Number.isFinite(posPrice) && posPrice > 0) return posPrice;
+        return pos.entryPrice;
+      }
+
+      function resolvedBidForPosition(
+        liveStock: StockData | undefined,
+        pos: SimulatedPosition,
+      ): number {
+        if (liveStock) {
+          const liveBid = liveBidFor(liveStock);
+          if (Number.isFinite(liveBid) && liveBid > 0) {
+            return liveBid;
+          }
+        }
+        return fallbackBidForPosition(pos);
+      }
+
+      // ── First visit for this market: open initial Buy+Rising positions ──
+      if (!existing) {
+        const eligible = stocks.filter((s) => {
+          const price = Number(s.price);
+          return isBuySetup(s) && Number.isFinite(price) && price > 0;
+        });
+        if (!eligible.length) {
+          return {
+            ...current,
+            [marketFilter]: {
+              cash: STARTING_PORTFOLIO_VALUE,
+              positions: {},
+              startedAt: now,
+              startValue: STARTING_PORTFOLIO_VALUE,
+              valueHistory: [],
+              closedPositions: [],
+            },
+          };
+        }
+
+        const weights = maxSharpeWeights(eligible);
+        let cash = STARTING_PORTFOLIO_VALUE;
+        const positions: Record<string, SimulatedPosition> = {};
+        eligible.forEach((stock, index) => {
+          const price = Number(stock.price) || 0;
+          const ask = Number.isFinite(stock.ask) && stock.ask! > 0 ? Number(stock.ask) : price;
+          const bid = liveBidFor(stock);
+          const targetWeight = weights[index] ?? 0;
+          const amount = STARTING_PORTFOLIO_VALUE * targetWeight;
+          const entryPrice = resolveSimulatedEntryPrice(stock, ask);
+          const quantity =
+            entryPrice > 0 ? Number((amount / entryPrice).toFixed(6)) : 0;
+          if (quantity <= 0) return;
+          const actualCost = quantity * entryPrice;
+          cash -= actualCost;
+          positions[stock.ticker] = {
+            ...stock,
+            quantity,
+            entryPrice,
+            investedAmount: actualCost,
+            marketValue: quantity * bid,
+            targetWeight,
+            openedAt: now,
+            entrySignalKey: signalEntryKey(stock),
+          };
+        });
+        if (cash < 0.01) cash = 0;
+        const totalMV = Object.values(positions).reduce((s, p) => s + p.marketValue, 0);
+        Object.values(positions).forEach((p) => {
+          p.targetWeight = totalMV > 0 ? p.marketValue / totalMV : 0;
+        });
         return {
           ...current,
           [marketFilter]: {
-            cash: STARTING_PORTFOLIO_VALUE,
-            positions: {},
+            cash,
+            positions,
+            startedAt: now,
+            startValue: STARTING_PORTFOLIO_VALUE,
+            valueHistory: [{ t: now, v: totalMV + cash }],
+            closedPositions: [],
           },
         };
       }
 
-      // Cap the initial investment to $1000
-      const initialInvestment = STARTING_PORTFOLIO_VALUE;
-      const weights = maxSharpeWeights(eligible);
-      const investedAmount = initialInvestment;
-      let cash = 0;
+      // ── Subsequent refreshes: sell exits, buy new entries, update values ──
+      const buyRisingSet = new Set(
+        stocks
+          .filter((s) => {
+            const price = Number(s.price);
+            return isBuySetup(s) && Number.isFinite(price) && price > 0;
+          })
+          .map((s) => s.ticker),
+      );
+
+      let cash = existing.cash ?? STARTING_PORTFOLIO_VALUE;
       const positions: Record<string, SimulatedPosition> = {};
+      const closedPositions = [...(existing.closedPositions ?? [])];
 
-      eligible.forEach((stock, index) => {
-        // Use ask for entry, bid for liquidation, fallback to price or 0
-        const price = Number(stock.price) || 0;
-        const ask = Number.isFinite(stock.ask) && stock.ask! > 0 ? Number(stock.ask) : price;
-        const bid = Number.isFinite(stock.bid) && stock.bid! > 0 ? Number(stock.bid) : price;
-        const targetWeight = weights[index] ?? 0;
-        const amount = investedAmount * targetWeight;
-        const entryPrice = resolveSimulatedEntryPrice(stock, ask);
-        const quantity = amount / (entryPrice || 1); // avoid division by zero
-        positions[stock.ticker] = {
-          ...stock,
-          quantity,
-          entryPrice,
-          investedAmount: amount,
-          marketValue: quantity * bid,
-          targetWeight,
-          openedAt: Date.now(),
+      // Step 1 – Update held positions and sell those that are no longer Buy+Rising
+      for (const [ticker, pos] of Object.entries(existing.positions)) {
+        const liveStock = stocks.find((s) => s.ticker === ticker);
+
+        if (!buyRisingSet.has(ticker)) {
+          // SELL: position exited — crystallise proceeds at current bid
+          const bid = resolvedBidForPosition(liveStock, pos);
+          const proceeds = pos.quantity * bid;
+          cash += proceeds;
+          const closedCandidate: ClosedPosition = {
+            ticker,
+            name: (liveStock ?? pos).name,
+            quantity: pos.quantity,
+            entryPrice: pos.entryPrice,
+            exitPrice: bid,
+            investedAmount: pos.investedAmount,
+            proceeds,
+            openedAt: pos.openedAt,
+            closedAt: now,
+            entrySignalKey: pos.entrySignalKey,
+          };
+          if (
+            pos.quantity > 0 &&
+            !closedPositions.some(
+              (existingPosition) =>
+                closedPositionFingerprint(existingPosition) ===
+                closedPositionFingerprint(closedCandidate),
+            )
+          ) {
+            closedPositions.push(closedCandidate);
+          }
+          continue;
+        }
+
+        // Still Buy+Rising — update live fields, preserve entry/quantity
+        if (!liveStock) {
+          positions[ticker] = pos;
+          continue;
+        }
+        const bid = resolvedBidForPosition(liveStock, pos);
+        positions[ticker] = {
+          ...pos,
+          price: liveStock.price,
+          bid: liveStock.bid,
+          ask: liveStock.ask,
+          changePercent: liveStock.changePercent,
+          status: liveStock.status,
+          signalAction: liveStock.signalAction,
+          signalConfidence: liveStock.signalConfidence,
+          signalEmittedAt: liveStock.signalEmittedAt,
+          signalReturnPercent: liveStock.signalReturnPercent,
+          summary: liveStock.summary,
+          entryPrice: pos.entryPrice,
+          quantity: pos.quantity,
+          investedAmount: pos.investedAmount,
+          targetWeight: pos.targetWeight,
+          openedAt: pos.openedAt,
+          marketValue: pos.quantity * bid,
         };
+      }
+
+      // Recovery guard for legacy corrupted state: no positions + no cash.
+      if (Object.keys(positions).length === 0 && cash <= 0) {
+        cash = existing.startValue ?? STARTING_PORTFOLIO_VALUE;
+      }
+
+      // Step 2 – Open new Buy+Rising entries with available cash.
+      // Existing positions are NEVER disturbed — each position lives and dies
+      // on its own signal. No forced rebalancing.
+      const heldTickers = new Set(Object.keys(positions));
+      const closedSignalKeys = new Set(
+        closedPositions
+          .map((position) => position.entrySignalKey)
+          .filter(Boolean) as string[],
+      );
+      const newEntries = stocks.filter(
+        (s) =>
+          buyRisingSet.has(s.ticker) &&
+          !heldTickers.has(s.ticker) &&
+          !closedSignalKeys.has(signalEntryKey(s)),
+      );
+
+      if (newEntries.length > 0 && cash > 0) {
+        const deployable = cash;
+        if (deployable > 0) {
+          const newWeights = maxSharpeWeights(newEntries);
+          newEntries.forEach((stock, index) => {
+            const price = Number(stock.price) || 0;
+            const ask = Number.isFinite(stock.ask) && stock.ask! > 0 ? Number(stock.ask) : price;
+            const bid = liveBidFor(stock);
+            const targetWeight = newWeights[index] ?? 0;
+            const amount = deployable * targetWeight;
+            const entryPrice = resolveSimulatedEntryPrice(stock, ask);
+            const quantity =
+              entryPrice > 0 ? Number((amount / entryPrice).toFixed(6)) : 0;
+            if (quantity <= 0) return;
+            const actualCost = quantity * entryPrice;
+            cash -= actualCost;
+            positions[stock.ticker] = {
+              ...stock,
+              quantity,
+              entryPrice,
+              investedAmount: actualCost,
+              marketValue: quantity * bid,
+              targetWeight,
+              openedAt: now,
+              entrySignalKey: signalEntryKey(stock),
+            };
+          });
+          if (cash < 0.01) cash = 0;
+        }
+      }
+
+      // Step 3 – Recompute target weights across all positions
+      const totalMV = Object.values(positions).reduce((s, p) => s + p.marketValue, 0);
+      Object.values(positions).forEach((p) => {
+        p.targetWeight = totalMV > 0 ? p.marketValue / totalMV : 0;
       });
 
-      // Normalize weights
-      const totalMarketValue = Object.values(positions).reduce((sum, p) => sum + p.marketValue, 0);
-      Object.values(positions).forEach((p) => {
-        p.targetWeight = totalMarketValue > 0 ? p.marketValue / totalMarketValue : 0;
-      });
+      // Step 4 – Record value snapshot (positions + cash)
+      const portfolioValue = totalMV + cash;
+      const prevHistory = existing.valueHistory ?? [];
+      const valueHistory: Array<{ t: number; v: number }> = [
+        ...prevHistory.slice(-499),
+        { t: now, v: portfolioValue },
+      ];
 
       return {
         ...current,
         [marketFilter]: {
+          startedAt: existing.startedAt ?? now,
+          startValue: existing.startValue ?? STARTING_PORTFOLIO_VALUE,
           cash,
           positions,
+          valueHistory,
+          closedPositions: dedupeClosedPositions(closedPositions),
         },
       };
     });
-  }, [marketFilter, stocks]);
+  }, [isSelectedMarketOpen, marketFilter, stocks]);
 
   useEffect(() => {
     if (!notificationsEnabledRef.current || typeof Notification === "undefined")
@@ -864,13 +1430,17 @@ export default function Dashboard() {
     market: string,
     list: StockData[],
     shouldCancel: () => boolean,
-    options?: { bypassCache?: boolean },
+    options?: { bypassCache?: boolean; symbolLimit?: number },
   ) {
-    const symbols = list.map((stock) => stock.ticker).filter(Boolean);
+    const symbols = list
+      .map((stock) => stock.ticker)
+      .filter(Boolean)
+      .slice(0, options?.symbolLimit ?? list.length);
 
     setRefreshError(null);
 
-    for (const symbol of symbols) {
+    for (let index = 0; index < symbols.length; index += QUOTE_REQUEST_SYMBOL_BATCH_SIZE) {
+      const batchSymbols = symbols.slice(index, index + QUOTE_REQUEST_SYMBOL_BATCH_SIZE);
       const {
         cachedQuotes,
         cachedPendingSymbols,
@@ -879,9 +1449,9 @@ export default function Dashboard() {
           ? {
             cachedQuotes: [],
             cachedPendingSymbols: [],
-            uncachedSymbols: [symbol],
+            uncachedSymbols: batchSymbols,
           }
-          : readLiveQuoteCache(market, [symbol]);
+          : readLiveQuoteCache(market, batchSymbols);
       let quotes;
 
       if (cachedQuotes.length) {
@@ -937,7 +1507,7 @@ export default function Dashboard() {
         const head = quotes[0];
         const direction = head.changePercent >= 0 ? "up" : "down";
         setUpdateMsg(
-          `${head.symbol} ${direction} ${Math.abs(head.changePercent).toFixed(2)}%`,
+          `${quotes.length} quotes synced. ${head.symbol} ${direction} ${Math.abs(head.changePercent).toFixed(2)}%`,
         );
       }
 
@@ -1032,7 +1602,7 @@ export default function Dashboard() {
 
   const portfolioPositions = useMemo(
     () =>
-      Object.values(activeSimulatedPortfolio.positions).sort(
+      Object.values(activeSimulatedPortfolio.positions).filter((p) => p.quantity > 0).sort(
         (a, b) => b.marketValue - a.marketValue,
       ),
     [activeSimulatedPortfolio.positions],
@@ -1048,29 +1618,37 @@ export default function Dashboard() {
         (sum, stock) => sum + stock.investedAmount,
         0,
       );
-      const totalValue = positionsValue;
-      const totalReturn = positionsValue - investedAmount;
+      const cash = activeSimulatedPortfolio.cash ?? 0;
+      const totalValue = positionsValue + cash;
+      const startValue =
+        activeSimulatedPortfolio.startValue ?? STARTING_PORTFOLIO_VALUE;
+      const totalReturn = totalValue - startValue;
       const totalReturnPercent =
-        investedAmount > 0
-          ? Number(((totalReturn / investedAmount) * 100).toFixed(2))
+        startValue > 0
+          ? Number(((totalReturn / startValue) * 100).toFixed(2))
           : 0;
 
       return {
         totalValue,
-        cash: activeSimulatedPortfolio.cash,
+        cash,
         investedAmount,
+        startValue,
+        startedAt: activeSimulatedPortfolio.startedAt ?? null,
         totalReturn,
         totalReturnPercent,
-        marketStatus: getMarketStatus(marketFilter),
+        marketStatus: selectedMarketStatus,
         overallSignal: getOverallSignal(stocks),
         positionCount: portfolioPositions.length,
       };
     },
     [
       activeSimulatedPortfolio.cash,
+      activeSimulatedPortfolio.startValue,
+      activeSimulatedPortfolio.startedAt,
       marketFilter,
       marketClock,
       portfolioPositions,
+      selectedMarketStatus,
       stocks,
     ],
   );
@@ -1106,8 +1684,42 @@ export default function Dashboard() {
     }
   }, [filteredStocks, selectedStock]);
 
+  const selectedMarketLabel = markets.find((m) => m.code === marketFilter)?.label ?? null;
+  const visibleSignalHistory = useMemo(
+    () =>
+      marketFilter
+        ? signalHistory.filter(
+          (event) => event.scopeCode === marketFilter || event.signal.market === marketFilter,
+        )
+        : signalHistory,
+    [marketFilter, signalHistory],
+  );
   const totalValue = portfolio.totalValue ?? 0;
   const positionCount = portfolio.positionCount ?? 0;
+  const valueHistory = activeSimulatedPortfolio.valueHistory ?? [];
+  const filteredValueHistory = (() => {
+    if (valueHistory.length === 0) return valueHistory;
+    const durationMs: Record<"1W" | "1M" | "3M", number> = {
+      "1W": 7 * 24 * 60 * 60_000,
+      "1M": 30 * 24 * 60 * 60_000,
+      "3M": 90 * 24 * 60 * 60_000,
+    };
+    if (chartTimeframe === "All") {
+      return valueHistory;
+    }
+    const latest = valueHistory[valueHistory.length - 1]?.t ?? 0;
+    const cutoff = latest - durationMs[chartTimeframe];
+    const firstBeforeCutoff = [...valueHistory]
+      .reverse()
+      .find((point) => point.t < cutoff);
+    const windowed = valueHistory.filter((point) => point.t >= cutoff);
+    if (firstBeforeCutoff && windowed.length) {
+      return [firstBeforeCutoff, ...windowed];
+    }
+    return windowed.length > 1
+      ? windowed
+      : valueHistory.slice(Math.max(0, valueHistory.length - 2));
+  })();
   const totalReturn =
     Math.abs(portfolio.totalReturn ?? 0) < DISPLAY_ZERO_THRESHOLD
       ? 0
@@ -1123,6 +1735,15 @@ export default function Dashboard() {
   const lastSyncedLabel = lastSyncedAt
     ? formatSyncTime(lastSyncedAt)
     : "Waiting for first sync";
+
+  const portfolioStartedAt = portfolio.startedAt ?? null;
+  const portfolioStartLabel = portfolioStartedAt
+    ? new Date(portfolioStartedAt).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+    : null;
 
   if (loading) {
     return (
@@ -1141,6 +1762,59 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       <Navbar />
+      <aside
+        className={`fixed left-0 top-24 z-40 max-h-[calc(100vh-7rem)] border border-border/60 bg-card shadow-lg transition-all ${
+          signalsMenuOpen ? "w-80" : "w-10"
+        }`}
+      >
+        <button
+          className="flex h-10 w-full items-center justify-between px-3 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+          onClick={() => setSignalsMenuOpen((open) => !open)}
+        >
+          {signalsMenuOpen && <span>Signal History</span>}
+          <span>{signalsMenuOpen ? "‹" : "›"}</span>
+        </button>
+        {signalsMenuOpen && (
+          <div className="max-h-[calc(100vh-10rem)] overflow-y-auto border-t border-border/60">
+            {visibleSignalHistory.length ? (
+              visibleSignalHistory.map((event) => {
+                const signal = event.signal;
+                const action = signal.signalAction ?? "Hold";
+                const status = signal.status ?? "Stable";
+                return (
+                  <div key={event.id} className="border-b border-border/50 p-3 text-xs last:border-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono font-semibold text-foreground">
+                        {event.symbol}
+                      </span>
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                        {event.scopeCode}
+                      </span>
+                    </div>
+                    <div className="mt-1 font-medium">
+                      {action} · {status} · {formatMaybeCurrency(signal.price)}
+                    </div>
+                    <div className="mt-1 text-muted-foreground">
+                      {formatSignalTime(event.emittedAt)}
+                      {signal.signalConfidence != null &&
+                        ` · ${Math.round(Number(signal.signalConfidence))}%`}
+                    </div>
+                    {signal.summary && (
+                      <div className="mt-1 line-clamp-2 text-muted-foreground">
+                        {signal.summary}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <div className="p-3 text-xs text-muted-foreground">
+                No signals emitted yet.
+              </div>
+            )}
+          </div>
+        )}
+      </aside>
 
       <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
         {/* Top Summary Bar */}
@@ -1151,26 +1825,33 @@ export default function Dashboard() {
         >
           <div>
             <h1 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1">
-              Portfolio Value
+              Portfolio Value {selectedMarketLabel && `— ${selectedMarketLabel}`}
             </h1>
             <div className="flex items-baseline gap-4">
               <span className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground">
-                {formatMaybeCurrency(totalValue)}
+                {marketFilter ? formatMaybeCurrency(totalValue) : "—"}
               </span>
-              <div
-                className={`text-sm font-medium ${totalReturn >= 0 ? "text-primary" : "text-destructive"
-                  }`}
-              >
-                {totalReturn >= 0 ? "+" : ""}
-                {formatMaybeCurrency(totalReturn)} ({formatPercent(totalReturnPercent)}%)
-              </div>
+              {marketFilter && (
+                <div
+                  className={`text-sm font-medium ${totalReturn >= 0 ? "text-primary" : "text-destructive"
+                    }`}
+                >
+                  {totalReturn >= 0 ? "+" : ""}
+                  {formatMaybeCurrency(totalReturn)} ({formatPercent(totalReturnPercent)}%)
+                </div>
+              )}
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {positionCount} simulated positions ·{" "}
-              {formatMaybeCurrency(portfolio.cash)} cash available
-            </p>
+            {marketFilter && (
+              <p className="mt-2 text-sm text-muted-foreground">
+                {positionCount} simulated positions ·{" "}
+                {formatMaybeCurrency(portfolio.cash)} cash available
+                {portfolioStartLabel && (
+                  <> · started {portfolioStartLabel}</>
+                )}
+              </p>
+            )}
             <p className="mt-1 text-xs text-muted-foreground">
-              Last synced: {lastSyncedLabel}
+              {marketFilter ? <>Last synced: {lastSyncedLabel}</> : "Select an exchange market to view portfolio data"}
             </p>
           </div>
 
@@ -1179,17 +1860,352 @@ export default function Dashboard() {
               <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5" /> Market Status
               </div>
-              <div className="font-medium">{portfolio.marketStatus}</div>
+              <div className="font-medium">{marketFilter ? portfolio.marketStatus : "—"}</div>
             </div>
             <div className="w-px h-8 bg-border/60"></div>
             <div>
               <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1.5">
                 <LineChart className="h-3.5 w-3.5" /> Overall Signal
               </div>
-              <div className="font-medium">{portfolio.overallSignal}</div>
+              <div className="font-medium">{marketFilter ? portfolio.overallSignal : "—"}</div>
             </div>
           </div>
         </motion.header>
+
+        {/* Portfolio Tabs: Cumulative Returns Chart | Operations History */}
+        <Tabs value={portfolioTab} onValueChange={(v) => setPortfolioTab(v as "chart" | "history" | "stats")} className="mb-8">
+          <TabsList className="mb-4">
+            <TabsTrigger value="chart">Cumulative Returns</TabsTrigger>
+            <TabsTrigger value="history">Operations History</TabsTrigger>
+            <TabsTrigger value="stats">Statistics</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="chart">
+            {valueHistory.length > 1 && (() => {
+              const chartData = filteredValueHistory;
+              const first = chartData[0].v;
+              const returnData = chartData.map((point) => ({
+                t: point.t,
+                r: first > 0 ? Number((((point.v - first) / first) * 100).toFixed(2)) : 0,
+              }));
+              const lastReturn = returnData[returnData.length - 1]?.r ?? 0;
+              const isUp = lastReturn >= 0;
+              const strokeColor = isUp ? "hsl(var(--primary))" : "hsl(var(--destructive))";
+              const gradientId = "portfolioGradient";
+              const timeframes = ["1W", "1M", "3M", "All"] as const;
+              const spanMs = chartData[chartData.length - 1].t - chartData[0].t;
+              const tickFmt = (t: number) => {
+                const d = new Date(t);
+                if (spanMs > 20 * 60 * 60_000) {
+                  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+                }
+                return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+              };
+              const tooltipFmt = (t: number) => {
+                const d = new Date(t);
+                if (spanMs > 20 * 60 * 60_000) {
+                  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+                }
+                return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" });
+              };
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-8 bg-card border border-border/50 rounded-2xl px-6 py-4 shadow-sm"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Cumulative Returns
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-xs font-medium ${isUp ? "text-primary" : "text-destructive"}`}>
+                        {isUp ? "+" : ""}
+                        {formatPercent(lastReturn)}% {chartTimeframe === "All" ? `since ${portfolioStartLabel ?? "inception"}` : `since start of ${chartTimeframe}`}
+                      </span>
+                      <div className="flex items-center gap-0.5">
+                        {timeframes.map((tf) => (
+                          <button
+                            key={tf}
+                            onClick={() => setChartTimeframe(tf)}
+                            className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors ${chartTimeframe === tf
+                                ? "bg-primary/10 text-primary"
+                                : "text-muted-foreground hover:text-foreground"
+                              }`}
+                          >
+                            {tf}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="h-36 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={returnData}
+                        margin={{ top: 4, right: 4, left: 0, bottom: 0 }}
+                      >
+                        <defs>
+                          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={strokeColor} stopOpacity={0.2} />
+                            <stop offset="95%" stopColor={strokeColor} stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <XAxis
+                          dataKey="t"
+                          type="number"
+                          domain={["dataMin", "dataMax"]}
+                          scale="time"
+                          tickFormatter={tickFmt}
+                          tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                          axisLine={false}
+                          tickLine={false}
+                          minTickGap={60}
+                        />
+                        <YAxis domain={["auto", "auto"]} hide />
+                        <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
+                        <Tooltip
+                          content={({ active, payload }) => {
+                            if (!active || !payload?.length) return null;
+                            const d = payload[0].payload as { t: number; r: number };
+                            return (
+                              <div className="bg-popover border border-border rounded-lg px-3 py-2 text-xs shadow-md">
+                                <div className="font-medium text-foreground">
+                                  {d.r >= 0 ? "+" : ""}{formatPercent(d.r)}%
+                                </div>
+                                <div className="text-muted-foreground">{tooltipFmt(d.t)}</div>
+                              </div>
+                            );
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="r"
+                          stroke={strokeColor}
+                          strokeWidth={2}
+                          fill={`url(#${gradientId})`}
+                          dot={false}
+                          isAnimationActive={false}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </motion.div>
+              );
+            })()}
+          </TabsContent>
+
+          <TabsContent value="history">
+            {(() => {
+              const closed = (activeSimulatedPortfolio?.closedPositions ?? []).filter((c) => c.quantity > 0);
+              const open = portfolioPositions;
+              if (closed.length === 0 && open.length === 0) {
+                return (
+                  <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
+                    No operations yet. Start a portfolio to track trades.
+                  </div>
+                );
+              }
+              const allRows: Array<{ ticker: string; name?: string; quantity: number; entryPrice: number; exitPrice?: number; pnl?: number; pnlPct?: number; openedAt: number; closedAt?: number; status: "Open" | "Closed" }> = [
+                ...open.map((p) => ({
+                  ticker: p.ticker,
+                  name: p.name,
+                  quantity: p.quantity,
+                  entryPrice: p.entryPrice,
+                  exitPrice: undefined,
+                  pnl: p.marketValue - p.investedAmount,
+                  pnlPct: p.investedAmount > 0 ? (p.marketValue - p.investedAmount) / p.investedAmount : 0,
+                  openedAt: p.openedAt,
+                  closedAt: undefined,
+                  status: "Open" as const,
+                })),
+                ...closed.slice().reverse().map((c) => ({
+                  ticker: c.ticker,
+                  name: c.name,
+                  quantity: c.quantity,
+                  entryPrice: c.entryPrice,
+                  exitPrice: c.exitPrice,
+                  pnl: c.proceeds - c.investedAmount,
+                  pnlPct: c.investedAmount > 0 ? (c.proceeds - c.investedAmount) / c.investedAmount : 0,
+                  openedAt: c.openedAt,
+                  closedAt: c.closedAt,
+                  status: "Closed" as const,
+                })),
+              ];
+              const dedupedRows = (() => {
+                const seen = new Set<string>();
+                return allRows.filter((row) => {
+                  const key = [
+                    row.ticker.trim().toUpperCase(),
+                    row.status,
+                    rounded(row.quantity, 6),
+                    rounded(row.entryPrice, 4),
+                    rounded(row.exitPrice ?? 0, 4),
+                    toUtcDayKey(row.openedAt),
+                    row.closedAt != null ? toUtcDayKey(row.closedAt) : "open",
+                  ].join("|");
+
+                  if (seen.has(key)) {
+                    return false;
+                  }
+
+                  seen.add(key);
+                  return true;
+                });
+              })();
+              const fmtDate = (ts: number) => new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "2-digit" });
+              const fmtMoney = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+              return (
+                <div className="overflow-x-auto rounded-xl border border-border">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-muted/40 text-muted-foreground">
+                        <th className="text-left px-4 py-3 font-medium">Ticker</th>
+                        <th className="text-right px-4 py-3 font-medium">Qty</th>
+                        <th className="text-right px-4 py-3 font-medium">Entry</th>
+                        <th className="text-right px-4 py-3 font-medium">Exit</th>
+                        <th className="text-right px-4 py-3 font-medium">Return</th>
+                        <th className="text-right px-4 py-3 font-medium">Opened</th>
+                        <th className="text-right px-4 py-3 font-medium">Closed</th>
+                        <th className="text-right px-4 py-3 font-medium">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dedupedRows.map((row, i) => (
+                        <tr key={`${row.ticker}-${i}`} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                          <td className="px-4 py-3 font-mono font-semibold">{row.ticker}</td>
+                          <td className="px-4 py-3 text-right">{formatQuantity(row.quantity)}</td>
+                          <td className="px-4 py-3 text-right">{fmtMoney(row.entryPrice)}</td>
+                          <td className="px-4 py-3 text-right">{row.exitPrice != null ? fmtMoney(row.exitPrice) : "—"}</td>
+                          <td className={`px-4 py-3 text-right font-medium ${(row.pnl ?? 0) >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                            {row.pnl != null ? `${(row.pnl ?? 0) >= 0 ? "+" : ""}${fmtMoney(row.pnl)} (${((row.pnlPct ?? 0) * 100).toFixed(1)}%)` : "—"}
+                          </td>
+                          <td className="px-4 py-3 text-right text-muted-foreground">{fmtDate(row.openedAt)}</td>
+                          <td className="px-4 py-3 text-right text-muted-foreground">{row.closedAt != null ? fmtDate(row.closedAt) : "—"}</td>
+                          <td className="px-4 py-3 text-right">
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${row.status === "Open" ? "bg-emerald-500/15 text-emerald-500" : "bg-muted text-muted-foreground"}`}>
+                              {row.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
+          </TabsContent>
+
+          <TabsContent value="stats">
+            {(() => {
+              const closed = (activeSimulatedPortfolio?.closedPositions ?? []).filter((c) => c.quantity > 0);
+              const vh = valueHistory;
+
+              // --- Closed-trade metrics ---
+              const wins = closed.filter((c) => c.proceeds - c.investedAmount > 0);
+              const losses = closed.filter((c) => c.proceeds - c.investedAmount <= 0);
+              const grossProfit = wins.reduce((s, c) => s + (c.proceeds - c.investedAmount), 0);
+              const grossLoss = Math.abs(losses.reduce((s, c) => s + (c.proceeds - c.investedAmount), 0));
+              const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? Infinity : null;
+              const totalTrades = closed.length;
+              const winRate = totalTrades > 0 ? (wins.length / totalTrades) * 100 : null;
+              // --- Value-history metrics ---
+              const startValue = activeSimulatedPortfolio?.startValue ?? STARTING_PORTFOLIO_VALUE;
+              const currentValue = (activeSimulatedPortfolio?.cash ?? 0) +
+                Object.values(activeSimulatedPortfolio?.positions ?? {}).reduce((s, p) => s + p.marketValue, 0);
+
+              // Max drawdown from valueHistory
+              let maxDrawdown = 0;
+              let peak = vh[0]?.v ?? 0;
+              for (const pt of vh) {
+                if (pt.v > peak) peak = pt.v;
+                const dd = peak > 0 ? (peak - pt.v) / peak : 0;
+                if (dd > maxDrawdown) maxDrawdown = dd;
+              }
+
+              // Monthly return: compounded from total elapsed time
+              const firstT = vh[0]?.t;
+              const lastT = vh[vh.length - 1]?.t;
+              const elapsedMs = firstT && lastT ? lastT - firstT : 0;
+              const elapsedMonths = elapsedMs / (30.44 * 24 * 3_600_000);
+              const totalReturn = startValue > 0 ? (currentValue - startValue) / startValue : 0;
+              const monthlyReturn = elapsedMonths >= 0.5 && startValue > 0
+                ? (Math.pow(1 + totalReturn, 1 / elapsedMonths) - 1) * 100
+                : null;
+
+              // Sharpe, annualised from the actual spacing between value snapshots.
+              let sharpe: number | null = null;
+              if (vh.length >= 5) {
+                const periodReturns: number[] = [];
+                const intervals: number[] = [];
+                for (let i = 1; i < vh.length; i++) {
+                  const prev = vh[i - 1].v;
+                  const curr = vh[i].v;
+                  const dt = vh[i].t - vh[i - 1].t;
+                  if (prev > 0 && dt > 0) {
+                    periodReturns.push((curr - prev) / prev);
+                    intervals.push(dt);
+                  }
+                }
+                if (periodReturns.length >= 2) {
+                  const mean = periodReturns.reduce((s, r) => s + r, 0) / periodReturns.length;
+                  const variance = periodReturns.reduce((s, r) => s + Math.pow(r - mean, 2), 0) / (periodReturns.length - 1);
+                  const std = Math.sqrt(variance);
+                  const avgInterval =
+                    intervals.reduce((sum, dt) => sum + dt, 0) / intervals.length;
+                  const periodsPerYear =
+                    avgInterval > 0 ? (365.25 * 24 * 3_600_000) / avgInterval : 0;
+                  sharpe = std > 0 && periodsPerYear > 0
+                    ? (mean / std) * Math.sqrt(periodsPerYear)
+                    : null;
+                }
+              }
+              const riskAdjustedReturn =
+                sharpe === null ? null : totalReturn * Math.max(sharpe, 0);
+
+              const fmt = (v: number | null, decimals = 2, suffix = "") =>
+                v === null ? "—" : `${v.toFixed(decimals)}${suffix}`;
+              const fmtPF = (v: number | null) =>
+                v === null ? "—" : v === Infinity ? "∞" : v.toFixed(2);
+
+              const stats: Array<{ label: string; value: string; sub?: string; positive?: boolean | null }> = [
+                { label: "Profit Factor", value: fmtPF(profitFactor), sub: "gross profit / gross loss", positive: profitFactor === null ? null : profitFactor >= 1 },
+                { label: "Risk Adjusted", value: riskAdjustedReturn === null ? "—" : `${riskAdjustedReturn >= 0 ? "+" : ""}${(riskAdjustedReturn * 100).toFixed(2)}%`, sub: "return adjusted by Sharpe", positive: riskAdjustedReturn === null ? null : riskAdjustedReturn >= 0 },
+                { label: "Monthly Return", value: monthlyReturn === null ? "—" : `${monthlyReturn >= 0 ? "+" : ""}${monthlyReturn.toFixed(2)}%`, sub: "compounded", positive: monthlyReturn === null ? null : monthlyReturn >= 0 },
+                { label: "Total Trades", value: String(totalTrades), sub: `${wins.length}W / ${losses.length}L`, positive: null },
+                { label: "Win Rate", value: fmt(winRate, 1, "%"), sub: "closed trades", positive: winRate === null ? null : winRate >= 50 },
+                { label: "Max Drawdown", value: fmt(maxDrawdown * 100, 1, "%"), sub: "peak-to-trough", positive: maxDrawdown === 0 ? null : false },
+                { label: "Sharpe Ratio", value: fmt(sharpe, 2), sub: "annualised", positive: sharpe === null ? null : sharpe >= 1 },
+                { label: "Total Return", value: `${totalReturn >= 0 ? "+" : ""}${(totalReturn * 100).toFixed(2)}%`, sub: `${(currentValue - startValue) >= 0 ? "+" : ""}$${(currentValue - startValue).toFixed(2)} net`, positive: totalReturn >= 0 },
+              ];
+
+              const hasData = totalTrades > 0 || vh.length >= 2;
+
+              return (
+                <div>
+                  {!hasData && (
+                    <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
+                      No data yet. Statistics will appear once the portfolio has history.
+                    </div>
+                  )}
+                  {hasData && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      {stats.map((s) => (
+                        <div key={s.label} className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm flex flex-col gap-1">
+                          <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{s.label}</span>
+                          <span className={`text-2xl font-semibold tabular-nums ${s.positive === null ? "text-foreground" : s.positive ? "text-emerald-500" : "text-red-500"}`}>
+                            {s.value}
+                          </span>
+                          {s.sub && <span className="text-xs text-muted-foreground">{s.sub}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </TabsContent>
+        </Tabs>
 
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full md:max-w-3xl">
@@ -1197,41 +2213,61 @@ export default function Dashboard() {
               <label className="text-xs font-medium text-muted-foreground">
                 Exchange Market
               </label>
-              <Select
-                value={marketFilter}
-                onValueChange={setMarketFilter}
-                onOpenChange={(open) => {
-                  if (open) {
+              <div className="relative" ref={marketMenuRef}>
+                <button
+                  type="button"
+                  className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-left text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring"
+                  onClick={() => {
+                    setMarketMenuOpen((open) => !open);
                     setMarketQuery("");
-                  }
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select market" />
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  <div className="sticky top-0 z-10 bg-popover px-2 pt-2 pb-1">
-                    <input
-                      className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                      placeholder="Search markets"
-                      value={marketQuery}
-                      onChange={(event) => setMarketQuery(event.target.value)}
-                      onKeyDown={(event) => event.stopPropagation()}
-                    />
-                  </div>
-                  {filteredMarkets.length ? (
-                    filteredMarkets.map((market) => (
-                      <SelectItem key={market.code} value={market.code}>
-                        {market.label}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <div className="px-2 py-2 text-xs text-muted-foreground">
-                      No markets found.
+                  }}
+                >
+                  <span className="truncate">
+                    {selectedMarketLabel ?? "Select market"}
+                  </span>
+                  <span className="text-muted-foreground">⌄</span>
+                </button>
+                {marketMenuOpen && (
+                  <div
+                    className="absolute z-50 mt-1 max-h-72 w-full overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md"
+                    onPointerDown={(event) => event.stopPropagation()}
+                  >
+                    <div className="sticky top-0 z-10 bg-popover px-2 pt-2 pb-1">
+                      <input
+                        ref={marketSearchInputRef}
+                        className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                        placeholder="Search markets"
+                        value={marketQuery}
+                        onChange={(event) => setMarketQuery(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Escape") setMarketMenuOpen(false);
+                        }}
+                      />
                     </div>
-                  )}
-                </SelectContent>
-              </Select>
+                    <div className="max-h-60 overflow-y-auto p-1">
+                      {filteredMarkets.length ? (
+                        filteredMarkets.map((market) => (
+                          <button
+                            key={market.code}
+                            type="button"
+                            className="flex w-full items-center rounded-sm px-2 py-1.5 text-left text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+                            onClick={() => {
+                              setMarketFilter(market.code);
+                              setMarketMenuOpen(false);
+                            }}
+                          >
+                            {market.label}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-2 py-2 text-xs text-muted-foreground">
+                          No markets found.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -1301,7 +2337,7 @@ export default function Dashboard() {
                     : null;
                   const status = stock.status ?? "Stable";
                   const signalAction = stock.signalAction ?? "Hold";
-                  const summary = stock.summary ?? "Fetching live quote...";
+                  const summary = stock.summary ?? "Queued for live quote sync.";
 
                   return (
                     <motion.button
@@ -1380,6 +2416,9 @@ export default function Dashboard() {
                 <LineChart className="h-4 w-4 text-primary" />
                 Simulated Positions
               </h3>
+              <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
+                Positioning opens only on fresh Buy + Rising signals while the selected exchange market is open. Available cash is split across new entries by Sharpe-weighted sizing, held positions stay untouched, and exits happen when that ticker no longer qualifies.
+              </p>
               {allocation.total > 0 ? (
                 <div className="space-y-3">
                   {allocation.items.map((stock) => {
@@ -1403,7 +2442,7 @@ export default function Dashboard() {
                               {stock.ticker}
                             </span>
                             <span className="ml-2 text-muted-foreground">
-                              {stock.quantity.toFixed(4)} sh
+                              {formatQuantity(stock.quantity)} units
                             </span>
                           </div>
                           <div className="text-right">
