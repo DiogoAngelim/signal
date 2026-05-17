@@ -1,5 +1,19 @@
 export type StockStatus = "Stable" | "Rising" | "Watch" | "Dip";
 export type TradeSignal = "Buy" | "Hold" | "Sell";
+export type AdaptiveRegime =
+  | "TRENDING"
+  | "MEAN_REVERTING"
+  | "HIGH_VOL"
+  | "LOW_VOL"
+  | "BREAKOUT"
+  | "PANIC"
+  | "COMPRESSION";
+export type SignalLifecycle =
+  | "EMITTED"
+  | "ACTIVE"
+  | "DECAYING"
+  | "INVALIDATED"
+  | "COMPLETED";
 
 export interface MarketOption {
   code: string;
@@ -41,6 +55,29 @@ export interface StockQuote {
   quoteStatus?: "available" | "pending" | "unavailable";
   quoteStatusReason?: string;
   quoteLastAttemptedAt?: number;
+  regime?: AdaptiveRegime;
+  confidence?: number;
+  uncertainty?: number;
+  driftScore?: number;
+  stabilityScore?: number;
+  expectedMovePct?: number;
+  featureConsensus?: number;
+  ensembleAgreement?: number;
+  lifecycleState?: SignalLifecycle;
+  liveMetrics?: {
+    rollingSharpe: number;
+    rollingSortino: number;
+    hitRate: number;
+    expectancy: number;
+    profitFactor: number;
+    maxDrawdown: number;
+  };
+  diagnostics?: {
+    entropy: number;
+    featureDrift: number;
+    predictionResidual: number;
+    volatilityShift: number;
+  };
 }
 
 export type StockData = StockListItem & {
@@ -67,6 +104,29 @@ export type StockData = StockListItem & {
   quoteStatus?: "available" | "pending" | "unavailable";
   quoteStatusReason?: string;
   quoteLastAttemptedAt?: number;
+  regime?: AdaptiveRegime;
+  confidence?: number;
+  uncertainty?: number;
+  driftScore?: number;
+  stabilityScore?: number;
+  expectedMovePct?: number;
+  featureConsensus?: number;
+  ensembleAgreement?: number;
+  lifecycleState?: SignalLifecycle;
+  liveMetrics?: {
+    rollingSharpe: number;
+    rollingSortino: number;
+    hitRate: number;
+    expectancy: number;
+    profitFactor: number;
+    maxDrawdown: number;
+  };
+  diagnostics?: {
+    entropy: number;
+    featureDrift: number;
+    predictionResidual: number;
+    volatilityShift: number;
+  };
 };
 
 export interface SignalEvent {

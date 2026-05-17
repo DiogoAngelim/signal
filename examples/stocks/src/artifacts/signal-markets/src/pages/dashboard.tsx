@@ -23,6 +23,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
+  Activity,
+  AlertTriangle,
+  Brain,
+  Gauge,
+  Layers,
+  Radio,
+  ShieldCheck,
   TrendingUp,
   LineChart,
   Info,
@@ -38,6 +45,8 @@ import {
   registerSignalWatchlist,
   type MarketOption,
   type SignalEvent,
+  type AdaptiveRegime,
+  type SignalLifecycle,
   type StockData,
   type StockQuote,
   type StockStatus,
@@ -641,14 +650,623 @@ function StatusBadge({ status }: { status: StockStatus }) {
   return <Badge variant={variant}>{status}</Badge>;
 }
 function SignalBadge({ action }: { action: TradeSignal }) {
-  let color = "";
-  if (action === "Buy") color = "bg-green-500 text-white";
-  if (action === "Sell") color = "bg-red-500 text-white";
-  if (action === "Hold") color = "bg-yellow-500 text-black";
+  let color = "bg-slate-500/15 text-slate-300 border border-slate-500/30";
+  if (action === "Buy") color = "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30";
+  if (action === "Sell") color = "bg-rose-500/15 text-rose-300 border border-rose-500/30";
+  if (action === "Hold") color = "bg-sky-500/15 text-sky-300 border border-sky-500/30";
   return (
     <span className={cn("px-2 py-0.5 rounded text-xs font-semibold", color)}>
       {action}
     </span>
+  );
+}
+
+type AdaptiveSignalView = StockData & {
+  adaptiveId: string;
+  regime: AdaptiveRegime;
+  confidence: number;
+  uncertainty: number;
+  driftScore: number;
+  stabilityScore: number;
+  expectedMovePct: number;
+  featureConsensus: number;
+  ensembleAgreement: number;
+  rollingSharpe: number;
+  rollingSortino: number;
+  hitRate: number;
+  expectancy: number;
+  profitFactor: number;
+  maxDrawdown: number;
+  entropy: number;
+  predictionResidual: number;
+  volatilityShift: number;
+  lifecycleState: SignalLifecycle;
+  signalAgeMs: number;
+  confidenceColor: string;
+  regimeColor: string;
+};
+
+function clampMetric(value: number, min = 0, max = 100) {
+  return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
+}
+
+function mean(values: number[]) {
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+}
+
+function stddev(values: number[]) {
+  if (values.length < 2) return 0;
+  const avg = mean(values);
+  return Math.sqrt(mean(values.map((value) => (value - avg) ** 2)));
+}
+
+function rollingReturns(stock: StockData) {
+  return returnsFromHistory(stock.history).slice(-30);
+}
+
+function regimeColor(regime: AdaptiveRegime) {
+  const colors: Record<AdaptiveRegime, string> = {
+    TRENDING: "hsl(150 74% 46%)",
+    MEAN_REVERTING: "hsl(200 82% 55%)",
+    HIGH_VOL: "hsl(31 92% 55%)",
+    LOW_VOL: "hsl(215 26% 58%)",
+    BREAKOUT: "hsl(169 84% 44%)",
+    PANIC: "hsl(0 84% 60%)",
+    COMPRESSION: "hsl(267 84% 68%)",
+  };
+  return colors[regime];
+}
+
+function confidenceColor(action: TradeSignal, confidence: number, uncertainty: number) {
+  const alpha = clampMetric((confidence - uncertainty * 0.35) / 100, 0.18, 0.96);
+  if (action === "Buy") return `rgba(16, 185, 129, ${alpha})`;
+  if (action === "Sell") return `rgba(244, 63, 94, ${alpha})`;
+  return `rgba(56, 189, 248, ${alpha})`;
+}
+
+function deriveRegime(stock: StockData): AdaptiveRegime {
+  const change = Number(stock.changePercent ?? 0);
+  const absChange = Math.abs(change);
+  const returns = rollingReturns(stock);
+  const vol = stddev(returns) * 100;
+  const range =
+    stock.high52 && stock.low52 && stock.price
+      ? ((stock.high52 - stock.low52) / Math.max(stock.price, 0.0001)) * 100
+      : 0;
+
+  if (absChange >= 8 || stock.status === "Watch" && change < -3) return "PANIC";
+  if (stock.status === "Watch" || vol >= 2.5) return "HIGH_VOL";
+  if (stock.signalAction === "Buy" && stock.status === "Rising" && absChange >= 1.2) return "BREAKOUT";
+  if (stock.signalAction === "Buy" && change > 0) return "TRENDING";
+  if (stock.signalAction === "Sell" || stock.status === "Dip") return "MEAN_REVERTING";
+  if (vol <= 0.35 && range <= 12) return "COMPRESSION";
+  return "LOW_VOL";
+}
+
+function lifecycleState(stock: StockData, now: number): { state: SignalLifecycle; ageMs: number } {
+  if (stock.quoteStatus === "unavailable") return { state: "INVALIDATED", ageMs: 0 };
+  const emitted = Date.parse(stock.signalEmittedAt ?? "");
+  const ageMs = Number.isFinite(emitted) ? Math.max(0, now - emitted) : 0;
+  if (!stock.signalEmittedAt) return { state: "EMITTED", ageMs };
+  if ((stock.signalReturnPercent ?? 0) >= 3 || (stock.signalReturnPercent ?? 0) <= -3) {
+    return { state: "COMPLETED", ageMs };
+  }
+  if (stock.signalAction === "Hold" && ageMs > 10 * 60_000) return { state: "DECAYING", ageMs };
+  if (ageMs < 3 * 60_000) return { state: "EMITTED", ageMs };
+  if (ageMs > 90 * 60_000) return { state: "DECAYING", ageMs };
+  return { state: "ACTIVE", ageMs };
+}
+
+function deriveAdaptiveSignal(stock: StockData, now: number): AdaptiveSignalView {
+  const returns = rollingReturns(stock);
+  const avg = mean(returns);
+  const deviation = stddev(returns);
+  const downside = stddev(returns.filter((value) => value < 0));
+  const change = Number(stock.changePercent ?? 0);
+  const absChange = Math.abs(change);
+  const signalAction = stock.signalAction ?? "Hold";
+  const confidence = clampMetric(stock.confidence ?? stock.signalConfidence ?? (signalAction === "Hold" ? 46 : 58 + absChange * 8));
+  const volatilityShift = clampMetric(deviation * 1300 + absChange * 4);
+  const driftScore = clampMetric(stock.driftScore ?? volatilityShift * 0.55 + (stock.quoteStatus === "unavailable" ? 35 : 0) + (stock.status === "Watch" ? 18 : 0));
+  const stabilityScore = clampMetric(stock.stabilityScore ?? 100 - driftScore * 0.72 - (signalAction === "Hold" ? 8 : 0));
+  const uncertainty = clampMetric(stock.uncertainty ?? 100 - confidence * 0.68 + driftScore * 0.38);
+  const agreement = clampMetric(stock.ensembleAgreement != null ? stock.ensembleAgreement * 100 : confidence * 0.62 + stabilityScore * 0.32 - uncertainty * 0.12);
+  const consensus = clampMetric(stock.featureConsensus != null ? stock.featureConsensus * 100 : agreement * 0.72 + stabilityScore * 0.2);
+  const direction = signalAction === "Sell" ? -1 : signalAction === "Buy" ? 1 : change >= 0 ? 1 : -1;
+  const expectedMovePct = Number((stock.expectedMovePct ?? direction * Math.max(absChange, deviation * 100) * (confidence / 75)).toFixed(2));
+  const winReturns = returns.filter((value) => value > 0);
+  const lossReturns = returns.filter((value) => value < 0);
+  const hitRate = returns.length ? (winReturns.length / returns.length) * 100 : confidence * 0.55;
+  const profitFactor = Math.abs(lossReturns.reduce((sum, value) => sum + value, 0)) > 0
+    ? Math.abs(winReturns.reduce((sum, value) => sum + value, 0) / lossReturns.reduce((sum, value) => sum + value, 0))
+    : winReturns.length ? 3 : 1;
+  const maxDrawdown = Math.max(0, ...returns.map((_, index) => {
+    const slice = returns.slice(0, index + 1);
+    const cumulative = slice.reduce((value, item) => value * (1 + item), 1);
+    const peak = Math.max(1, ...slice.map((__, peakIndex) => slice.slice(0, peakIndex + 1).reduce((value, item) => value * (1 + item), 1)));
+    return ((peak - cumulative) / peak) * 100;
+  }));
+  const { state, ageMs } = lifecycleState(stock, now);
+  const regime = stock.regime ?? deriveRegime(stock);
+  const entropy = clampMetric(signalAction === "Hold" ? 62 - confidence * 0.2 : 44 + uncertainty * 0.38);
+  const predictionResidual = clampMetric(Math.abs((stock.signalReturnPercent ?? change) - expectedMovePct) * 8);
+
+  return {
+    ...stock,
+    adaptiveId: `${stock.ticker}:${stock.signalEmittedAt ?? "live"}`,
+    regime,
+    confidence,
+    uncertainty,
+    driftScore,
+    stabilityScore,
+    expectedMovePct,
+    featureConsensus: consensus / 100,
+    ensembleAgreement: agreement / 100,
+    rollingSharpe: Number((deviation > 0 ? (avg / deviation) * Math.sqrt(Math.max(returns.length, 1)) : 0).toFixed(2)),
+    rollingSortino: Number((downside > 0 ? (avg / downside) * Math.sqrt(Math.max(returns.length, 1)) : 0).toFixed(2)),
+    hitRate: Number(hitRate.toFixed(1)),
+    expectancy: Number((avg * 100).toFixed(2)),
+    profitFactor: Number(Math.min(9.99, profitFactor).toFixed(2)),
+    maxDrawdown: Number(maxDrawdown.toFixed(2)),
+    entropy,
+    predictionResidual,
+    volatilityShift,
+    lifecycleState: state,
+    signalAgeMs: ageMs,
+    confidenceColor: confidenceColor(signalAction, confidence, uncertainty),
+    regimeColor: regimeColor(regime),
+  };
+}
+
+function formatAge(ms: number) {
+  if (!ms) return "new";
+  const minutes = Math.floor(ms / 60_000);
+  if (minutes < 1) return "<1m";
+  if (minutes < 60) return `${minutes}m`;
+  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+}
+
+function distribution<T extends string>(items: T[]) {
+  const map = new Map<T, number>();
+  for (const item of items) map.set(item, (map.get(item) ?? 0) + 1);
+  return map;
+}
+
+function IntelligenceMetricCard({
+  label,
+  value,
+  sub,
+  tone = "neutral",
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  tone?: "neutral" | "good" | "warn" | "bad" | "info";
+  icon: typeof Activity;
+}) {
+  const toneClass = {
+    neutral: "text-foreground bg-muted/50",
+    good: "text-emerald-300 bg-emerald-500/10 border-emerald-500/20",
+    warn: "text-amber-300 bg-amber-500/10 border-amber-500/20",
+    bad: "text-rose-300 bg-rose-500/10 border-rose-500/20",
+    info: "text-sky-300 bg-sky-500/10 border-sky-500/20",
+  }[tone];
+
+  return (
+    <div className={cn("rounded-lg border border-border/60 p-3", toneClass)}>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </span>
+        <Icon className="h-3.5 w-3.5 opacity-80" />
+      </div>
+      <div className="text-2xl font-semibold tabular-nums">{value}</div>
+      {sub && <div className="mt-1 text-[11px] text-muted-foreground">{sub}</div>}
+    </div>
+  );
+}
+
+function AIHealthSection({
+  metrics,
+}: {
+  metrics: {
+    drift: number;
+    entropy: number;
+    ensemble: number;
+    calibration: number;
+    regimeStability: number;
+    modelStability: number;
+    survival: number;
+    residual: number;
+  };
+}) {
+  return (
+    <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <IntelligenceMetricCard
+        label="Drift Score"
+        value={metrics.drift.toFixed(0)}
+        sub={metrics.drift < 35 ? "low drift" : metrics.drift < 65 ? "watching" : "unstable"}
+        tone={metrics.drift < 35 ? "good" : metrics.drift < 65 ? "warn" : "bad"}
+        icon={AlertTriangle}
+      />
+      <IntelligenceMetricCard
+        label="Signal Entropy"
+        value={metrics.entropy.toFixed(0)}
+        sub="signal diversity"
+        tone={metrics.entropy > 45 && metrics.entropy < 75 ? "good" : "warn"}
+        icon={Activity}
+      />
+      <IntelligenceMetricCard
+        label="Ensemble Agreement"
+        value={`${metrics.ensemble.toFixed(0)}%`}
+        sub="feature consensus"
+        tone={metrics.ensemble >= 70 ? "good" : metrics.ensemble >= 50 ? "info" : "warn"}
+        icon={Layers}
+      />
+      <IntelligenceMetricCard
+        label="Calibration"
+        value={`${metrics.calibration.toFixed(0)}%`}
+        sub="confidence fit"
+        tone={metrics.calibration >= 70 ? "good" : metrics.calibration >= 50 ? "info" : "warn"}
+        icon={Gauge}
+      />
+      <IntelligenceMetricCard
+        label="Regime Stability"
+        value={`${metrics.regimeStability.toFixed(0)}%`}
+        sub="transition quality"
+        tone={metrics.regimeStability >= 70 ? "good" : metrics.regimeStability >= 45 ? "info" : "warn"}
+        icon={ShieldCheck}
+      />
+      <IntelligenceMetricCard
+        label="Model Stability"
+        value={`${metrics.modelStability.toFixed(0)}%`}
+        sub="diagnostic health"
+        tone={metrics.modelStability >= 70 ? "good" : metrics.modelStability >= 45 ? "info" : "warn"}
+        icon={Brain}
+      />
+      <IntelligenceMetricCard
+        label="Survival Rate"
+        value={`${metrics.survival.toFixed(0)}%`}
+        sub="active signals"
+        tone={metrics.survival >= 60 ? "good" : metrics.survival >= 35 ? "info" : "warn"}
+        icon={Radio}
+      />
+      <IntelligenceMetricCard
+        label="Residual"
+        value={metrics.residual.toFixed(0)}
+        sub="prediction error"
+        tone={metrics.residual < 25 ? "good" : metrics.residual < 50 ? "warn" : "bad"}
+        icon={LineChart}
+      />
+    </section>
+  );
+}
+
+function LiveIntelligenceChart({
+  signal,
+  fallback,
+}: {
+  signal?: AdaptiveSignalView;
+  fallback: AdaptiveSignalView[];
+}) {
+  const active = signal ?? fallback[0];
+  const chartRows = useMemo(() => {
+    const history = active?.history?.length ? active.history : fallback.flatMap((item) => item.history ?? []).slice(-30);
+    const prices = history.length ? history : [0, 0];
+    const expected = active?.expectedMovePct ?? 0;
+    return prices.slice(-60).map((price, index, items) => {
+      const projection = index === items.length - 1 ? price * (1 + expected / 100) : null;
+      const uncertainty = active ? Math.max(0.002, active.uncertainty / 7000) : 0.01;
+      return {
+        index,
+        price,
+        upper: price * (1 + uncertainty),
+        lower: price * (1 - uncertainty),
+        projection,
+      };
+    });
+  }, [active, fallback]);
+
+  return (
+    <section className="overflow-hidden rounded-xl border border-border/60 bg-card">
+      <div className="flex flex-col gap-4 border-b border-border/60 p-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            Live Intelligence Surface
+          </div>
+          <div className="mt-1 flex items-center gap-3">
+            <span className="font-mono text-2xl font-semibold">{active?.ticker ?? "No signal"}</span>
+            {active && <SignalBadge action={active.signalAction ?? "Hold"} />}
+            {active && (
+              <span
+                className="rounded px-2 py-0.5 text-[10px] font-semibold text-background"
+                style={{ backgroundColor: active.regimeColor }}
+              >
+                {active.regime}
+              </span>
+            )}
+          </div>
+        </div>
+        {active && (
+          <div className="grid grid-cols-3 gap-3 text-right text-xs">
+            <div>
+              <div className="text-muted-foreground">Confidence</div>
+              <div className="text-lg font-semibold">{active.confidence.toFixed(0)}%</div>
+            </div>
+            <div>
+              <div className="text-muted-foreground">Uncertainty</div>
+              <div className="text-lg font-semibold">{active.uncertainty.toFixed(0)}</div>
+            </div>
+            <div>
+              <div className="text-muted-foreground">Expected Move</div>
+              <div className={cn("text-lg font-semibold", active.expectedMovePct >= 0 ? "text-emerald-400" : "text-rose-400")}>
+                {active.expectedMovePct >= 0 ? "+" : ""}{active.expectedMovePct.toFixed(2)}%
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="relative h-80 p-4">
+        {active && (
+          <div
+            className="absolute inset-x-4 top-4 h-16 rounded-lg opacity-20 blur-2xl"
+            style={{ backgroundColor: active.regimeColor }}
+          />
+        )}
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartRows} margin={{ top: 18, right: 20, left: 0, bottom: 8 }}>
+            <defs>
+              <linearGradient id="uncertaintyBand" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="hsl(40 95% 58%)" stopOpacity={0.2} />
+                <stop offset="100%" stopColor="hsl(40 95% 58%)" stopOpacity={0.02} />
+              </linearGradient>
+            </defs>
+            <XAxis dataKey="index" hide />
+            <YAxis domain={["dataMin", "dataMax"]} hide />
+            <Tooltip
+              content={({ active: isActive, payload }) => {
+                if (!isActive || !payload?.length) return null;
+                const row = payload[0].payload as { price: number };
+                return (
+                  <div className="rounded-lg border border-border bg-popover px-3 py-2 text-xs shadow-md">
+                    <div className="font-medium">{formatMaybeCurrency(row.price)}</div>
+                    <div className="text-muted-foreground">live surface</div>
+                  </div>
+                );
+              }}
+            />
+            <Area type="monotone" dataKey="upper" stroke="transparent" fill="url(#uncertaintyBand)" dot={false} isAnimationActive={false} />
+            <Area type="monotone" dataKey="lower" stroke="transparent" fill="hsl(var(--card))" dot={false} isAnimationActive={false} />
+            <Line type="monotone" dataKey="price" stroke={active?.confidenceColor ?? "hsl(var(--primary))"} strokeWidth={2.5} dot={false} isAnimationActive={false} />
+            <Line type="monotone" dataKey="projection" stroke="hsl(40 95% 58%)" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 3 }} isAnimationActive={false} />
+          </AreaChart>
+        </ResponsiveContainer>
+        {active && (
+          <div className="pointer-events-none absolute bottom-4 left-4 right-4 grid grid-cols-4 gap-2 text-[10px]">
+            {[
+              ["Drift", active.driftScore.toFixed(0)],
+              ["Stability", `${active.stabilityScore.toFixed(0)}%`],
+              ["Agreement", active.ensembleAgreement.toFixed(2)],
+              ["Decay", active.lifecycleState],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded border border-border/60 bg-background/75 px-2 py-1 backdrop-blur">
+                <div className="text-muted-foreground">{label}</div>
+                <div className="font-semibold">{value}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function AdaptiveSignalFeed({
+  signals,
+  selected,
+  onSelect,
+}: {
+  signals: AdaptiveSignalView[];
+  selected?: string;
+  onSelect: (signal: AdaptiveSignalView) => void;
+}) {
+  return (
+    <section className="rounded-xl border border-border/60 bg-card">
+      <div className="flex items-center justify-between border-b border-border/60 p-4">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            Adaptive Signal Feed
+          </div>
+          <div className="text-sm text-muted-foreground">streaming confidence, drift, regime, and lifecycle</div>
+        </div>
+        <Badge variant="outline">{signals.length} tracked</Badge>
+      </div>
+      <div className="max-h-[720px] overflow-y-auto">
+        {signals.slice(0, 180).map((signal) => (
+          <button
+            key={signal.adaptiveId}
+            type="button"
+            onClick={() => onSelect(signal)}
+            className={cn(
+              "grid w-full grid-cols-[minmax(0,1.2fr)_0.75fr_1fr] gap-4 border-b border-border/40 px-4 py-3 text-left transition-colors hover:bg-muted/35 md:grid-cols-[minmax(0,1.2fr)_0.65fr_0.85fr_0.85fr_0.85fr]",
+              selected === signal.ticker && "bg-primary/5",
+            )}
+          >
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="truncate font-mono font-semibold">{signal.ticker}</span>
+                <SignalBadge action={signal.signalAction ?? "Hold"} />
+              </div>
+              <div className="mt-1 truncate text-xs text-muted-foreground">{signal.name}</div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase text-muted-foreground">Confidence</div>
+              <div className="mt-1 h-1.5 rounded-full bg-muted">
+                <div className="h-full rounded-full" style={{ width: `${signal.confidence}%`, backgroundColor: signal.confidenceColor }} />
+              </div>
+              <div className="mt-1 text-xs font-semibold">{signal.confidence.toFixed(0)}%</div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase text-muted-foreground">Regime</div>
+              <div className="mt-1 inline-flex rounded px-2 py-0.5 text-[10px] font-semibold text-background" style={{ backgroundColor: signal.regimeColor }}>
+                {signal.regime}
+              </div>
+            </div>
+            <div className="hidden md:block">
+              <div className="text-[10px] uppercase text-muted-foreground">Quality</div>
+              <div className="mt-1 text-xs">
+                Drift {signal.driftScore.toFixed(0)} · Stability {signal.stabilityScore.toFixed(0)}
+              </div>
+              <div className="text-xs text-muted-foreground">Agreement {signal.ensembleAgreement.toFixed(2)}</div>
+            </div>
+            <div className="hidden md:block">
+              <div className="text-[10px] uppercase text-muted-foreground">Lifecycle</div>
+              <div className="mt-1 text-xs font-semibold">{signal.lifecycleState}</div>
+              <div className="text-xs text-muted-foreground">
+                {formatAge(signal.signalAgeMs)} · Sharpe {signal.rollingSharpe.toFixed(2)} · {signal.expectedMovePct >= 0 ? "+" : ""}{signal.expectedMovePct.toFixed(2)}%
+              </div>
+            </div>
+          </button>
+        ))}
+        {!signals.length && (
+          <div className="p-8 text-sm text-muted-foreground">Waiting for adaptive signal stream.</div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function RegimeTimeline({ signals }: { signals: AdaptiveSignalView[] }) {
+  const regimes = Array.from(distribution(signals.map((signal) => signal.regime)).entries())
+    .sort((a, b) => b[1] - a[1]);
+  const total = Math.max(1, signals.length);
+  return (
+    <section className="rounded-xl border border-border/60 bg-card p-4">
+      <div className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        Regime Timeline
+      </div>
+      <div className="flex h-8 overflow-hidden rounded border border-border/50">
+        {regimes.map(([regime, count]) => (
+          <div
+            key={regime}
+            className="h-full"
+            title={`${regime}: ${count}`}
+            style={{
+              width: `${(count / total) * 100}%`,
+              backgroundColor: regimeColor(regime),
+              opacity: 0.72,
+            }}
+          />
+        ))}
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+        {regimes.slice(0, 6).map(([regime, count]) => (
+          <div key={regime} className="flex items-center justify-between gap-3 rounded border border-border/50 px-2 py-1.5">
+            <span className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: regimeColor(regime) }} />
+              {regime}
+            </span>
+            <span className="text-muted-foreground">{((count / total) * 100).toFixed(0)}%</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function FeatureDiagnostics({ signals }: { signals: AdaptiveSignalView[] }) {
+  const rows = [
+    {
+      name: "Momentum persistence",
+      contribution: mean(signals.map((signal) => signal.featureConsensus)) * 100,
+      drift: mean(signals.map((signal) => signal.driftScore * 0.72)),
+    },
+    {
+      name: "Volatility adapter",
+      contribution: 100 - mean(signals.map((signal) => signal.uncertainty * 0.68)),
+      drift: mean(signals.map((signal) => signal.volatilityShift)),
+    },
+    {
+      name: "Regime classifier",
+      contribution: mean(signals.map((signal) => signal.stabilityScore)),
+      drift: 100 - mean(signals.map((signal) => signal.stabilityScore)),
+    },
+    {
+      name: "Forward-test residual",
+      contribution: 100 - mean(signals.map((signal) => signal.predictionResidual)),
+      drift: mean(signals.map((signal) => signal.predictionResidual)),
+    },
+  ].map((row) => ({
+    ...row,
+    contribution: clampMetric(row.contribution),
+    drift: clampMetric(row.drift),
+  }));
+
+  return (
+    <section className="rounded-xl border border-border/60 bg-card p-4">
+      <div className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        Feature Diagnostics
+      </div>
+      <div className="space-y-3">
+        {rows.map((row) => (
+          <div key={row.name}>
+            <div className="mb-1 flex items-center justify-between gap-3 text-xs">
+              <span className="font-medium">{row.name}</span>
+              <span className={row.drift > 60 ? "text-amber-400" : "text-muted-foreground"}>
+                drift {row.drift.toFixed(0)}
+              </span>
+            </div>
+            <div className="grid grid-cols-[1fr_72px] items-center gap-3">
+              <div className="h-1.5 rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{ width: `${row.contribution}%` }}
+                />
+              </div>
+              <div className="text-right text-xs text-muted-foreground">
+                {row.contribution.toFixed(0)}%
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ConditionalPerformance({ signals }: { signals: AdaptiveSignalView[] }) {
+  const rows = Array.from(distribution(signals.map((signal) => signal.regime)).keys())
+    .slice(0, 5)
+    .map((regime) => {
+      const scoped = signals.filter((signal) => signal.regime === regime);
+      return {
+        regime,
+        sharpe: mean(scoped.map((signal) => signal.rollingSharpe)),
+        expectancy: mean(scoped.map((signal) => signal.expectancy)),
+        hitRate: mean(scoped.map((signal) => signal.hitRate)),
+      };
+    });
+
+  return (
+    <section className="rounded-xl border border-border/60 bg-card p-4">
+      <div className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        Conditional Performance
+      </div>
+      <div className="space-y-2">
+        {rows.map((row) => (
+          <div key={row.regime} className="grid grid-cols-[1fr_64px_64px_64px] items-center gap-2 rounded border border-border/50 px-2 py-2 text-xs">
+            <span className="flex items-center gap-2 font-medium">
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: regimeColor(row.regime) }} />
+              {row.regime}
+            </span>
+            <span className="text-right text-muted-foreground">S {row.sharpe.toFixed(2)}</span>
+            <span className="text-right text-muted-foreground">E {row.expectancy.toFixed(2)}</span>
+            <span className="text-right text-muted-foreground">{row.hitRate.toFixed(0)}%</span>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -1720,6 +2338,56 @@ export default function Dashboard() {
     });
   }, [stocks, statusFilter, signalFilter]);
 
+  const adaptiveSignals = useMemo(
+    () =>
+      filteredStocks
+        .map((stock) => deriveAdaptiveSignal(stock, marketClock))
+        .sort(
+          (a, b) =>
+            b.confidence * b.ensembleAgreement -
+            b.driftScore * 0.4 -
+            (a.confidence * a.ensembleAgreement - a.driftScore * 0.4),
+        ),
+    [filteredStocks, marketClock],
+  );
+
+  const selectedAdaptiveSignal = useMemo(() => {
+    if (!selectedStock) return adaptiveSignals[0];
+    return (
+      adaptiveSignals.find((signal) => signal.ticker === selectedStock.ticker) ??
+      deriveAdaptiveSignal(selectedStock, marketClock)
+    );
+  }, [adaptiveSignals, marketClock, selectedStock]);
+
+  const aiHealth = useMemo(() => {
+    const signals = adaptiveSignals.length ? adaptiveSignals : stocks.map((stock) => deriveAdaptiveSignal(stock, marketClock));
+    const actionCounts = distribution(signals.map((signal) => signal.signalAction ?? "Hold"));
+    const total = Math.max(1, signals.length);
+    const probabilities = Array.from(actionCounts.values()).map((count) => count / total);
+    const entropy =
+      probabilities.length > 1
+        ? (-probabilities.reduce((sum, probability) => sum + probability * Math.log2(probability), 0) /
+          Math.log2(Math.max(2, probabilities.length))) *
+        100
+        : 0;
+    const activeCount = signals.filter((signal) => signal.lifecycleState === "ACTIVE" || signal.lifecycleState === "EMITTED").length;
+    const regimeCounts = distribution(signals.map((signal) => signal.regime));
+    const largestRegimeShare = Math.max(0, ...Array.from(regimeCounts.values())) / total;
+    const drift = mean(signals.map((signal) => signal.driftScore));
+    const residual = mean(signals.map((signal) => signal.predictionResidual));
+    const ensemble = mean(signals.map((signal) => signal.ensembleAgreement * 100));
+    return {
+      drift,
+      entropy,
+      ensemble,
+      calibration: clampMetric(100 - residual * 1.4),
+      regimeStability: clampMetric(largestRegimeShare * 100 - drift * 0.15),
+      modelStability: clampMetric(mean(signals.map((signal) => signal.stabilityScore)) - drift * 0.12),
+      survival: (activeCount / total) * 100,
+      residual,
+    };
+  }, [adaptiveSignals, marketClock, stocks]);
+
   const activeSimulatedPortfolio =
     simulatedPortfolios[marketFilter] ?? createEmptyPortfolio();
 
@@ -1950,26 +2618,29 @@ export default function Dashboard() {
         >
           <div>
             <h1 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1">
-              Portfolio Value {selectedMarketLabel && `— ${selectedMarketLabel}`}
+              Adaptive Intelligence Terminal {selectedMarketLabel && `— ${selectedMarketLabel}`}
             </h1>
             <div className="flex items-baseline gap-4">
               <span className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground">
-                {marketFilter ? formatMaybeCurrency(totalValue) : "—"}
+                {selectedAdaptiveSignal
+                  ? `${selectedAdaptiveSignal.confidence.toFixed(0)}%`
+                  : "—"}
               </span>
               {marketFilter && (
                 <div
-                  className={`text-sm font-medium ${totalReturn >= 0 ? "text-primary" : "text-destructive"
+                  className={`text-sm font-medium ${(selectedAdaptiveSignal?.expectedMovePct ?? 0) >= 0 ? "text-primary" : "text-destructive"
                     }`}
                 >
-                  {totalReturn >= 0 ? "+" : ""}
-                  {formatMaybeCurrency(totalReturn)} ({formatPercent(totalReturnPercent)}%)
+                  {selectedAdaptiveSignal
+                    ? `${selectedAdaptiveSignal.regime} · ${selectedAdaptiveSignal.expectedMovePct >= 0 ? "+" : ""}${selectedAdaptiveSignal.expectedMovePct.toFixed(2)}% expected`
+                    : "awaiting adaptive signal"}
                 </div>
               )}
             </div>
             {marketFilter && (
               <p className="mt-2 text-sm text-muted-foreground">
-                {positionCount} simulated positions ·{" "}
-                {formatMaybeCurrency(portfolio.cash)} cash available
+                Drift {aiHealth.drift.toFixed(0)} · Entropy {aiHealth.entropy.toFixed(0)} · Ensemble {aiHealth.ensemble.toFixed(0)}% ·{" "}
+                {positionCount} forward-tested positions · {formatMaybeCurrency(portfolio.cash)} cash
                 {portfolioStartLabel && (
                   <> · started {portfolioStartLabel}</>
                 )}
@@ -1990,12 +2661,24 @@ export default function Dashboard() {
             <div className="w-px h-8 bg-border/60"></div>
             <div>
               <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1.5">
-                <LineChart className="h-3.5 w-3.5" /> Overall Signal
+                <LineChart className="h-3.5 w-3.5" /> Model State
               </div>
-              <div className="font-medium">{marketFilter ? portfolio.overallSignal : "—"}</div>
+              <div className="font-medium">{marketFilter ? `${selectedAdaptiveSignal?.lifecycleState ?? portfolio.overallSignal}` : "—"}</div>
             </div>
           </div>
         </motion.header>
+
+        <div className="mb-8 space-y-6">
+          <AIHealthSection metrics={aiHealth} />
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.8fr)_minmax(320px,0.9fr)]">
+            <LiveIntelligenceChart signal={selectedAdaptiveSignal} fallback={adaptiveSignals} />
+            <div className="space-y-6">
+              <RegimeTimeline signals={adaptiveSignals} />
+              <FeatureDiagnostics signals={adaptiveSignals} />
+              <ConditionalPerformance signals={adaptiveSignals} />
+            </div>
+          </div>
+        </div>
 
         {/* Portfolio Tabs: Cumulative Returns Chart | Operations History */}
         <Tabs value={portfolioTab} onValueChange={(v) => setPortfolioTab(v as "chart" | "history" | "stats")} className="mb-8">
@@ -2450,76 +3133,14 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {filteredStocks.length === 0 ? (
-                <div className="col-span-full bg-card border border-border/50 rounded-2xl p-6 text-sm text-muted-foreground">
-                  No stocks match the current filters.
-                </div>
-              ) : (
-                filteredStocks.map((stock, i) => {
-                  const changePercent = Number.isFinite(stock.changePercent)
-                    ? (stock.changePercent as number)
-                    : null;
-                  const status = stock.status ?? "Stable";
-                  const signalAction = stock.signalAction ?? "Hold";
-                  const summary = stock.summary ?? SYNCING_QUOTE_SUMMARY;
-
-                  return (
-                    <motion.button
-                      key={stock.ticker}
-                      initial={{ opacity: 0, scale: 0.97 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.05 }}
-                      onClick={() => setSelectedStock(stock)}
-                      className={`text-left group relative bg-card border rounded-2xl p-5 transition-all duration-300 hover:shadow-md hover:border-primary/30 ${selectedStock?.ticker === stock.ticker ? "ring-2 ring-primary/20 border-primary/40" : "border-border/60 shadow-sm"}`}
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
-                            {stock.ticker}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {stock.name}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {stock.quoteStatus === "unavailable" && (
-                            <Badge variant="outline">No quote</Badge>
-                          )}
-                          <StatusBadge status={status} />
-                          <SignalBadge action={signalAction} />
-                        </div>
-                      </div>
-
-                      <div className="flex items-baseline justify-between mb-4">
-                        <span className="text-2xl font-medium">
-                          {formatMaybeCurrency(stock.price)}
-                        </span>
-                        <span
-                          className={`text-sm font-medium ${changePercent === null
-                            ? "text-muted-foreground"
-                            : changePercent >= 0
-                              ? "text-primary"
-                              : "text-destructive"
-                            }`}
-                        >
-                          {changePercent === null
-                            ? "—"
-                            : `${changePercent >= 0 ? "+" : ""}${changePercent.toFixed(2)}%`}
-                        </span>
-                      </div>
-
-                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-1">
-                        {summary}
-                      </p>
-                    </motion.button>
-                  );
-                })
-              )}
-            </div>
+            <AdaptiveSignalFeed
+              signals={adaptiveSignals}
+              selected={selectedStock?.ticker}
+              onSelect={(signal) => setSelectedStock(signal)}
+            />
 
             <div
-              className={`bg-card border rounded-2xl p-4 flex items-center gap-4 text-sm shadow-sm ${isStale ? "border-[#ffecb3] bg-[#fff8e1]/50 dark:border-[#f57f17]/30 dark:bg-[#f57f17]/10" : "border-border/50"}`}
+              className={`bg-card border rounded-xl p-4 flex items-center gap-4 text-sm shadow-sm ${isStale ? "border-[#ffecb3] bg-[#fff8e1]/50 dark:border-[#f57f17]/30 dark:bg-[#f57f17]/10" : "border-border/50"}`}
             >
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <TrendingUp size={16} />
@@ -2532,7 +3153,7 @@ export default function Dashboard() {
                   {updateMsg}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Last synced {lastSyncedLabel}
+                  Last synced {lastSyncedLabel} · {adaptiveSignals.length} adaptive rows · {selectedAdaptiveSignal?.lifecycleState ?? "EMITTED"}
                 </p>
               </div>
             </div>
@@ -2620,7 +3241,17 @@ export default function Dashboard() {
                         {selectedStock.name}
                       </p>
                     </div>
-                    <StatusBadge status={selectedStock.status ?? "Stable"} />
+                    <div className="flex items-center gap-2">
+                      {selectedAdaptiveSignal && (
+                        <span
+                          className="rounded px-2 py-0.5 text-[10px] font-semibold text-background"
+                          style={{ backgroundColor: selectedAdaptiveSignal.regimeColor }}
+                        >
+                          {selectedAdaptiveSignal.regime}
+                        </span>
+                      )}
+                      <StatusBadge status={selectedStock.status ?? "Stable"} />
+                    </div>
                     {selectedStock.quoteStatus === "unavailable" && (
                       <Badge variant="outline">Provider unavailable</Badge>
                     )}
@@ -2667,9 +3298,67 @@ export default function Dashboard() {
                         Confidence
                       </span>
                       <span className="font-medium">
-                        {selectedStock.signalConfidence != null
-                          ? `${Math.round(selectedStock.signalConfidence)}%`
+                        {selectedAdaptiveSignal
+                          ? `${selectedAdaptiveSignal.confidence.toFixed(0)}%`
                           : "—"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block mb-1">
+                        Uncertainty
+                      </span>
+                      <span className="font-medium">
+                        {selectedAdaptiveSignal ? selectedAdaptiveSignal.uncertainty.toFixed(0) : "—"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block mb-1">
+                        Drift
+                      </span>
+                      <span className="font-medium">
+                        {selectedAdaptiveSignal ? selectedAdaptiveSignal.driftScore.toFixed(0) : "—"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block mb-1">
+                        Stability
+                      </span>
+                      <span className="font-medium">
+                        {selectedAdaptiveSignal ? `${selectedAdaptiveSignal.stabilityScore.toFixed(0)}%` : "—"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block mb-1">
+                        Ensemble
+                      </span>
+                      <span className="font-medium">
+                        {selectedAdaptiveSignal ? selectedAdaptiveSignal.ensembleAgreement.toFixed(2) : "—"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block mb-1">
+                        Expected Move
+                      </span>
+                      <span className={cn("font-medium", (selectedAdaptiveSignal?.expectedMovePct ?? 0) >= 0 ? "text-emerald-400" : "text-rose-400")}>
+                        {selectedAdaptiveSignal
+                          ? `${selectedAdaptiveSignal.expectedMovePct >= 0 ? "+" : ""}${selectedAdaptiveSignal.expectedMovePct.toFixed(2)}%`
+                          : "—"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block mb-1">
+                        Lifecycle
+                      </span>
+                      <span className="font-medium">
+                        {selectedAdaptiveSignal?.lifecycleState ?? "EMITTED"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block mb-1">
+                        Rolling Sharpe
+                      </span>
+                      <span className="font-medium">
+                        {selectedAdaptiveSignal ? selectedAdaptiveSignal.rollingSharpe.toFixed(2) : "—"}
                       </span>
                     </div>
                     <div>
