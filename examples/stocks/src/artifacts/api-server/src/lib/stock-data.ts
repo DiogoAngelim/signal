@@ -9,6 +9,7 @@ import {
   recordSignalSnapshot,
   type SignalTrainingState,
 } from "./signal-training";
+import { logger } from "./logger";
 
 export interface StockListItem {
   symbol: string;
@@ -345,8 +346,9 @@ export async function fetchQuotes(
       if (quote) {
         results.push(quote);
       } else if (lastError) {
-        const { logger } = require("./logger");
         logger.warn({ symbol, err: lastError }, "Failed to fetch quote after retries");
+      } else {
+        logger.warn({ exchange: normalized, symbol }, "No live quote rows returned after retries");
       }
     },
   );
@@ -396,8 +398,9 @@ export async function fetchMarketQuotes(
       if (quote) {
         results.push(quote);
       } else if (lastError) {
-        const { logger } = require("./logger");
         logger.warn({ symbol, err: lastError }, "Failed to fetch quote after retries");
+      } else {
+        logger.warn({ market: normalized, symbol }, "No live quote rows returned after retries");
       }
     },
   );
@@ -477,6 +480,10 @@ async function fetchQuote(
 
   const rows = await fetchTradingViewRows(symbol, market);
   if (!rows.length) {
+    logger.warn(
+      { market, symbol, candidates: buildTradingViewCandidates(symbol, market) },
+      "TradingView returned no rows for quote",
+    );
     return cached?.quote ?? null;
   }
 
@@ -756,8 +763,15 @@ function buildTradingViewCandidates(symbol: string, market?: string): string[] {
   const marketVariants = resolveTradingViewMarkets(market);
   const candidates: string[] = [];
 
+  for (const tvSymbol of symbolVariants) {
+    if (tvSymbol.includes(":")) {
+      candidates.push(tvSymbol);
+    }
+  }
+
   for (const tvMarket of marketVariants) {
     for (const tvSymbol of symbolVariants) {
+      if (tvSymbol.includes(":")) continue;
       candidates.push(`${tvMarket}:${tvSymbol}`);
     }
   }
@@ -800,12 +814,24 @@ async function fetchTradingViewRowsForSymbol(
       signal: controller.signal,
     });
     if (!response.ok) {
+      logger.warn(
+        { symbol: tvSymbol, status: response.status, statusText: response.statusText },
+        "TradingView quote request failed",
+      );
       return [];
     }
 
     const csv = await response.text();
-    return parseCsvRows(csv);
-  } catch {
+    const rows = parseCsvRows(csv);
+    if (!rows.length) {
+      logger.warn(
+        { symbol: tvSymbol, bytes: csv.length, preview: csv.slice(0, 120) },
+        "TradingView quote response contained no parseable rows",
+      );
+    }
+    return rows;
+  } catch (error) {
+    logger.warn({ symbol: tvSymbol, err: error }, "TradingView quote request errored");
     return [];
   } finally {
     clearTimeout(timeout);

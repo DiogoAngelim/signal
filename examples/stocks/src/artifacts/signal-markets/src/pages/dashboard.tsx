@@ -268,9 +268,10 @@ const STALE_AFTER_MS = REFRESH_INTERVAL_MS * 2;
 const STOCK_LIST_PAGE_SIZE = 500;
 const INITIAL_QUOTE_SYMBOL_LIMIT = 120;
 const VISIBLE_QUOTE_SYMBOL_LIMIT = 120;
-const QUOTE_REQUEST_SYMBOL_BATCH_SIZE = 30;
+const QUOTE_REQUEST_SYMBOL_BATCH_SIZE = 8;
 const QUOTE_BATCH_DELAY_MS = 500;
 const QUOTE_REQUEST_TIMEOUT_MS = 45_000;
+const SYNCING_QUOTE_SUMMARY = "Live quote sync in progress.";
 const PREFERRED_INITIAL_MARKETS = ["NASDAQ", "NYSE", "AMEX"];
 const statusOptions: Array<StockStatus | "All"> = [
   "All",
@@ -1013,8 +1014,8 @@ export default function Dashboard() {
             ...response.items.map((item) => ({
               ...item,
               ticker: item.symbol,
-              summary: "Queued for live quote sync.",
-              impact: "Live data will refresh when this asset enters the active quote window.",
+              summary: SYNCING_QUOTE_SUMMARY,
+              impact: "Live data will refresh as the market-wide quote sync reaches this asset.",
             })),
           );
           offset += response.items.length;
@@ -1526,10 +1527,16 @@ export default function Dashboard() {
       pending.has(stock.ticker)
         ? {
           ...stock,
-          summary: stock.summary ?? "Live quote pending for this symbol.",
+          summary:
+            !stock.summary || stock.summary === SYNCING_QUOTE_SUMMARY
+              ? "Live quote unavailable. Retrying in background."
+              : stock.summary,
           impact:
-            stock.impact ??
-            "This symbol remains tracked and will retry on the next scheduled refresh.",
+            !stock.impact ||
+              stock.impact ===
+                "Live data will refresh as the market-wide quote sync reaches this asset."
+              ? "This symbol remains tracked and will retry on the next scheduled refresh."
+              : stock.impact,
         }
         : stock,
     );
@@ -2337,7 +2344,7 @@ export default function Dashboard() {
                     : null;
                   const status = stock.status ?? "Stable";
                   const signalAction = stock.signalAction ?? "Hold";
-                  const summary = stock.summary ?? "Queued for live quote sync.";
+                  const summary = stock.summary ?? SYNCING_QUOTE_SUMMARY;
 
                   return (
                     <motion.button
