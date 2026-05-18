@@ -679,10 +679,14 @@ async function fetchBinanceQuote(symbol: string): Promise<StockQuote | null> {
   if (!normalized) return null;
 
   const cache = await getBinanceTickerCache();
-  const ticker =
+  let ticker =
     normalized.kind === "futures"
       ? cache.futures.get(normalized.apiSymbol)
       : cache.spot.get(normalized.apiSymbol);
+
+  if (!ticker) {
+    ticker = (await fetchBinanceTickerRow(normalized)) ?? undefined;
+  }
 
   if (!ticker) {
     logger.warn(
@@ -757,6 +761,19 @@ function normalizeBinanceSymbol(
   return apiSymbol ? { apiSymbol, kind } : null;
 }
 
+async function fetchBinanceTickerRow(input: {
+  apiSymbol: string;
+  kind: "spot" | "futures";
+}): Promise<BinanceTicker | null> {
+  const baseUrl =
+    input.kind === "futures" ? BINANCE_FUTURES_BASE_URL : BINANCE_SPOT_BASE_URL;
+  const path =
+    input.kind === "futures" ? "/fapi/v1/ticker/24hr" : "/api/v3/ticker/24hr";
+  const url = `${baseUrl}${path}?symbol=${encodeURIComponent(input.apiSymbol)}`;
+  const rows = await fetchBinanceTickerRows(url, input.kind);
+  return rows[0] ?? null;
+}
+
 async function getBinanceTickerCache(): Promise<BinanceTickerCache> {
   if (binanceTickerCache && binanceTickerCache.expiresAt > Date.now()) {
     return binanceTickerCache;
@@ -813,12 +830,9 @@ async function fetchBinanceTickerRows(
     }
 
     const data = (await response.json()) as unknown;
-    if (!Array.isArray(data)) {
-      logger.warn({ marketType }, "Binance ticker snapshot was not an array");
-      return [];
-    }
+    const records = Array.isArray(data) ? data : [data];
 
-    return data
+    return records
       .filter((item): item is BinanceTicker =>
         Boolean(
           item &&
