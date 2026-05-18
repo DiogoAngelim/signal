@@ -527,7 +527,6 @@ async function fetchQuote(
       });
       return binanceQuote;
     }
-    return cached?.quote ?? null;
   }
 
   const rows = await fetchTradingViewRows(symbol, market);
