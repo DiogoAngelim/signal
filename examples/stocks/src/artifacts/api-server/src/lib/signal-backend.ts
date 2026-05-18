@@ -3,6 +3,7 @@ import {
   attachSignalsToQuotes,
   fetchMarketQuotes,
   fetchQuotes,
+  listMarkets,
   loadMarketList,
   loadStockList,
   type StockQuote,
@@ -55,7 +56,7 @@ const BOOTSTRAP_SYMBOLS_PER_SCOPE = Number(
   process.env.STOCK_SIGNAL_BOOTSTRAP_SYMBOLS_PER_SCOPE ?? 24,
 );
 const BOOTSTRAP_SCOPES = parseBootstrapScopes(
-  process.env.STOCK_SIGNAL_BOOTSTRAP_SCOPES ?? "exchange:US",
+  process.env.STOCK_SIGNAL_BOOTSTRAP_SCOPES ?? "all",
 );
 const ENGINE_ENABLED = parseBooleanEnv(
   process.env.ENABLE_BACKGROUND_SIGNAL_ENGINE,
@@ -132,6 +133,11 @@ function parseBooleanEnv(
 }
 
 function parseBootstrapScopes(value: string): SignalScope[] {
+  const normalizedValue = value.trim().toLowerCase();
+  if (!normalizedValue || ["*", "all", "markets:all", "market:*"].includes(normalizedValue)) {
+    return discoverAllMarketScopes();
+  }
+
   const scopes = value
     .split(",")
     .map((entry) => entry.trim())
@@ -154,6 +160,19 @@ function parseBootstrapScopes(value: string): SignalScope[] {
     .filter((entry): entry is SignalScope => Boolean(entry));
 
   return scopes.length ? scopes : [{ scopeType: "exchange", scopeCode: "US" }];
+}
+
+function discoverAllMarketScopes(): SignalScope[] {
+  const marketScopes = listMarkets()
+    .map((market) => ({
+      scopeType: "market",
+      scopeCode: normalizeScopeCode(market.code),
+    }) satisfies SignalScope)
+    .filter((scope) => Boolean(scope.scopeCode));
+
+  return marketScopes.length
+    ? marketScopes
+    : [{ scopeType: "exchange", scopeCode: "US" }];
 }
 
 function normalizeScopeCode(value: string): string {
@@ -448,6 +467,8 @@ async function ensureSignalBackendSchema(): Promise<void> {
         CREATE UNIQUE INDEX IF NOT EXISTS ${SNAPSHOT_TABLE}_scope_symbol_uidx
         ON ${SNAPSHOT_TABLE} (scope_type, scope_code, symbol)
       `);
+
+      await backfillSignalEventsFromSnapshots();
     })().catch((error) => {
       schemaReady = null;
       throw error;
@@ -455,6 +476,58 @@ async function ensureSignalBackendSchema(): Promise<void> {
   }
 
   await schemaReady;
+}
+
+async function backfillSignalEventsFromSnapshots(): Promise<void> {
+  await pool.query(`
+    INSERT INTO ${EVENT_TABLE} (
+      scope_type,
+      scope_code,
+      symbol,
+      event_token,
+      payload,
+      emitted_at
+    )
+    SELECT
+      scope_type,
+      scope_code,
+      symbol,
+      CONCAT(
+        symbol,
+        '|',
+        COALESCE(signal_action, 'Hold'),
+        '|',
+        COALESCE(signal_source, 'unknown'),
+        '|',
+        COALESCE(signal_emitted_at::text, fetched_at::text),
+        '|',
+        COALESCE(signal_entry_price::text, 'market')
+      ) AS event_token,
+      jsonb_build_object(
+        'symbol', symbol,
+        'price', price,
+        'changePercent', change_percent,
+        'status', status,
+        'high52', high_52,
+        'low52', low_52,
+        'history', history,
+        'summary', summary,
+        'impact', impact,
+        'cap', cap,
+        'peRatio', pe_ratio,
+        'signalAction', signal_action,
+        'signalConfidence', signal_confidence,
+        'signalSource', signal_source,
+        'signalEmittedAt', signal_emitted_at,
+        'signalEntryPrice', signal_entry_price,
+        'signalReturnPercent', signal_return_percent
+      ) AS payload,
+      COALESCE(signal_emitted_at, fetched_at) AS emitted_at
+    FROM ${SNAPSHOT_TABLE}
+    WHERE signal_action IS NOT NULL
+    ON CONFLICT (scope_type, scope_code, event_token)
+    DO NOTHING
+  `);
 }
 
 async function countActiveWatchEntries(): Promise<number> {
