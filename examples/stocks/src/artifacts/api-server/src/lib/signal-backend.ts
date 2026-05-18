@@ -7,6 +7,7 @@ import {
   loadStockList,
   type StockQuote,
 } from "./stock-data";
+import { appendLiveMarketContextOccurrences } from "./market-context-occurrences";
 import { logger } from "./logger";
 
 export type SignalScopeType = "market" | "exchange";
@@ -95,6 +96,7 @@ type SignalEventRow = {
   scope_type: SignalScopeType;
   scope_code: string;
   symbol: string;
+  event_token: string;
   payload: unknown;
   emitted_at: string | Date;
 };
@@ -217,9 +219,29 @@ function mapSignalEventRow(row: SignalEventRow) {
     scopeType: row.scope_type,
     scopeCode: row.scope_code,
     symbol: row.symbol,
+    token: row.event_token,
     emittedAt: toIsoString(row.emitted_at) ?? new Date().toISOString(),
     signal: row.payload,
   };
+}
+
+function signalEventToken(quote: StockQuote): string {
+  const entryPrice = Number(quote.signalEntryPrice);
+  const entryPriceKey =
+    Number.isFinite(entryPrice) && entryPrice > 0
+      ? String(entryPrice)
+      : "market";
+  const emittedAtKey =
+    toIsoString(quote.signalEmittedAt) ??
+    `${quote.signalAction ?? "Hold"}:${entryPriceKey}`;
+
+  return [
+    normalizeSymbol(quote.symbol),
+    quote.signalAction ?? "Hold",
+    quote.signalSource ?? "unknown",
+    emittedAtKey,
+    entryPriceKey,
+  ].join("|");
 }
 
 async function ensureSignalBackendSchema(): Promise<void> {
@@ -312,14 +334,80 @@ async function ensureSignalBackendSchema(): Promise<void> {
           scope_type TEXT NOT NULL,
           scope_code TEXT NOT NULL,
           symbol TEXT NOT NULL,
+          event_token TEXT,
           payload JSONB NOT NULL,
           emitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
       `);
 
       await pool.query(`
+        ALTER TABLE ${EVENT_TABLE}
+        ADD COLUMN IF NOT EXISTS event_token TEXT
+      `);
+
+      await pool.query(`
+        UPDATE ${EVENT_TABLE}
+        SET
+          scope_type = CASE
+            WHEN LOWER(TRIM(scope_type)) = 'market' THEN 'market'
+            ELSE 'exchange'
+          END,
+          scope_code = UPPER(TRIM(scope_code)),
+          symbol = UPPER(TRIM(symbol)),
+          event_token = COALESCE(
+            NULLIF(event_token, ''),
+            CONCAT(
+              UPPER(TRIM(symbol)),
+              '|',
+              COALESCE(payload->>'signalAction', 'Hold'),
+              '|',
+              COALESCE(payload->>'signalSource', 'unknown'),
+              '|',
+              COALESCE(payload->>'signalEmittedAt', emitted_at::text),
+              '|',
+              COALESCE(payload->>'signalEntryPrice', 'market')
+            )
+          )
+        WHERE
+          scope_type <> CASE
+            WHEN LOWER(TRIM(scope_type)) = 'market' THEN 'market'
+            ELSE 'exchange'
+          END
+          OR scope_code <> UPPER(TRIM(scope_code))
+          OR symbol <> UPPER(TRIM(symbol))
+          OR event_token IS NULL
+          OR event_token = ''
+      `);
+
+      await pool.query(`
+        WITH ranked AS (
+          SELECT
+            id,
+            ROW_NUMBER() OVER (
+              PARTITION BY scope_type, scope_code, event_token
+              ORDER BY emitted_at ASC, id ASC
+            ) AS rn
+          FROM ${EVENT_TABLE}
+        )
+        DELETE FROM ${EVENT_TABLE} target
+        USING ranked
+        WHERE target.id = ranked.id
+          AND ranked.rn > 1
+      `);
+
+      await pool.query(`
+        ALTER TABLE ${EVENT_TABLE}
+        ALTER COLUMN event_token SET NOT NULL
+      `);
+
+      await pool.query(`
         CREATE INDEX IF NOT EXISTS ${EVENT_TABLE}_scope_emitted_idx
         ON ${EVENT_TABLE} (scope_type, scope_code, emitted_at DESC)
+      `);
+
+      await pool.query(`
+        CREATE UNIQUE INDEX IF NOT EXISTS ${EVENT_TABLE}_scope_token_uidx
+        ON ${EVENT_TABLE} (scope_type, scope_code, event_token)
       `);
 
       await pool.query(`
@@ -796,6 +884,15 @@ export async function storeSignalSnapshots(
     `,
     params,
   );
+
+  await appendLiveMarketContextOccurrences(
+    {
+      scopeType: scope.scopeType,
+      scopeCode: normalizedScopeCode,
+    },
+    normalizedQuotes,
+    "stock_signal_snapshots",
+  );
 }
 
 export async function storeSignalEvents(
@@ -817,12 +914,13 @@ export async function storeSignalEvents(
   for (const quote of normalizedQuotes) {
     const baseIndex = params.length;
     values.push(
-      `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}::jsonb, COALESCE($${baseIndex + 5}::timestamptz, NOW()))`,
+      `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, $${baseIndex + 5}::jsonb, COALESCE($${baseIndex + 6}::timestamptz, NOW()))`,
     );
     params.push(
       scope.scopeType,
       normalizedScopeCode,
       quote.symbol,
+      signalEventToken(quote),
       JSON.stringify(quote),
       quote.signalEmittedAt ?? null,
     );
@@ -834,10 +932,13 @@ export async function storeSignalEvents(
         scope_type,
         scope_code,
         symbol,
+        event_token,
         payload,
         emitted_at
       )
       VALUES ${values.join(", ")}
+      ON CONFLICT (scope_type, scope_code, event_token)
+      DO NOTHING
     `,
     params,
   );

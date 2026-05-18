@@ -17,6 +17,10 @@ import {
   storeSignalSnapshots,
   type SignalScope,
 } from "../lib/signal-backend";
+import {
+  ensureMarketContextSchema,
+  replayHistoricalMarketContext,
+} from "../lib/market-context-occurrences";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -99,6 +103,31 @@ router.get("/stocks/markets", (_req, res) => {
 router.get("/stocks/signals/status", async (_req, res) => {
   const status = await getBackgroundSignalEngineStatus();
   res.json({ data: status });
+});
+
+router.post("/stocks/context/schema", async (_req, res) => {
+  await ensureMarketContextSchema();
+  res.json({ data: { ready: true } });
+});
+
+router.post("/stocks/context/replay", async (req, res) => {
+  const result = await replayHistoricalMarketContext({
+    candleTable:
+      typeof req.body?.candleTable === "string"
+        ? req.body.candleTable
+        : undefined,
+    batchSize: Number(req.body?.batchSize ?? undefined) || undefined,
+    market: typeof req.body?.market === "string" ? req.body.market : undefined,
+    venue: typeof req.body?.venue === "string" ? req.body.venue : undefined,
+    asset: typeof req.body?.asset === "string" ? req.body.asset : undefined,
+    timeframe:
+      typeof req.body?.timeframe === "string" ? req.body.timeframe : undefined,
+    ingestionSource:
+      typeof req.body?.ingestionSource === "string"
+        ? req.body.ingestionSource
+        : undefined,
+  });
+  res.json({ data: result });
 });
 
 router.post("/stocks/signals/watch", async (req, res) => {

@@ -134,6 +134,7 @@ export interface SignalEvent {
   scopeType: "market" | "exchange";
   scopeCode: string;
   symbol: string;
+  token?: string;
   emittedAt: string;
   signal: StockQuote & Partial<StockData>;
 }
