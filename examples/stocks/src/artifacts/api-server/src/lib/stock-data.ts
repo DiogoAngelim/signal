@@ -518,7 +518,7 @@ async function fetchQuote(
     return cached.quote;
   }
 
-  if (isBinanceScope(exchange, market)) {
+  if (isBinanceScope(exchange, market) && !process.env.VERCEL) {
     const binanceQuote = await fetchBinanceQuote(symbol);
     if (binanceQuote) {
       quoteCache.set(cacheKey, {
