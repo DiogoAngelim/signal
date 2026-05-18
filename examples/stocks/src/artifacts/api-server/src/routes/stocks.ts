@@ -19,7 +19,7 @@ import {
 } from "../lib/signal-backend";
 import {
   ensureMarketContextSchema,
-  replayHistoricalMarketContext,
+  hydrateMarketContextFromAvailableHistory,
 } from "../lib/market-context-occurrences";
 import { logger } from "../lib/logger";
 
@@ -111,7 +111,7 @@ router.post("/stocks/context/schema", async (_req, res) => {
 });
 
 router.post("/stocks/context/replay", async (req, res) => {
-  const result = await replayHistoricalMarketContext({
+  const result = await hydrateMarketContextFromAvailableHistory({
     candleTable:
       typeof req.body?.candleTable === "string"
         ? req.body.candleTable

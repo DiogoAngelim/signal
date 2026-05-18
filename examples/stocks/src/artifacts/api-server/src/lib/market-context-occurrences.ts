@@ -106,6 +106,34 @@ type ReplaySourceRow = {
   volume: number | string | null;
 };
 
+type SignalSnapshotHistoryRow = {
+  scope_type: string | null;
+  scope_code: string | null;
+  symbol: string | null;
+  price: number | string | null;
+  change_percent: number | string | null;
+  status: string | null;
+  high_52: number | string | null;
+  low_52: number | string | null;
+  history: unknown;
+  summary: string | null;
+  impact: string | null;
+  cap: string | null;
+  pe_ratio: number | string | null;
+  signal_action: string | null;
+  signal_confidence: number | string | null;
+  signal_source: string | null;
+  signal_emitted_at: string | Date | null;
+  signal_entry_price: number | string | null;
+  signal_return_percent: number | string | null;
+  fetched_at: string | Date | null;
+};
+
+type HistoryBackfillResult = {
+  processedRows: number;
+  emittedOccurrences: number;
+};
+
 const MARKET_OCCURRENCES_TABLE = "market_occurrences";
 const MARKET_STATE_SNAPSHOTS_TABLE = "market_state_snapshots";
 const SIGNAL_OCCURRENCES_TABLE = "signal_occurrences";
@@ -113,11 +141,13 @@ const REGIME_TRANSITIONS_TABLE = "regime_transitions";
 const ALLOCATION_STATE_OCCURRENCES_TABLE = "allocation_state_occurrences";
 const HISTORICAL_REPLAY_JOBS_TABLE = "historical_replay_jobs";
 const HISTORICAL_REPLAY_CHECKPOINTS_TABLE = "historical_replay_checkpoints";
+const SIGNAL_SNAPSHOTS_TABLE = "stock_signal_snapshots";
 const DEFAULT_CANDLE_TABLE =
   process.env.MARKET_CONTEXT_CANDLE_TABLE ?? "market_candles";
 const DEFAULT_REPLAY_BATCH_SIZE = Number(
   process.env.MARKET_CONTEXT_REPLAY_BATCH_SIZE ?? 1000,
 );
+const HISTORY_POINT_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
 let schemaReady: Promise<void> | null = null;
 let contextPersistenceWarningLogged = false;
@@ -134,6 +164,11 @@ function normalizeAsset(value: string | undefined) {
 function toFiniteNumber(value: unknown, fallback = 0): number {
   const parsed = typeof value === "number" ? value : Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function toOptionalFiniteNumber(value: unknown): number | undefined {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 function clamp(value: number, min = 0, max = 100): number {
@@ -161,6 +196,63 @@ function returnsFromHistory(history: number[] | undefined): number[] {
       return previous > 0 ? (price - previous) / previous : 0;
     })
     .filter((value) => Number.isFinite(value));
+}
+
+function parseHistoryValues(value: unknown): number[] {
+  if (typeof value === "string") {
+    try {
+      return parseHistoryValues(JSON.parse(value));
+    } catch {
+      return [];
+    }
+  }
+
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => toOptionalFiniteNumber(entry))
+    .filter((entry): entry is number => entry !== undefined && entry > 0);
+}
+
+function toIsoString(value: string | Date | null | undefined, fallback: Date) {
+  if (value instanceof Date && Number.isFinite(value.getTime())) {
+    return value.toISOString();
+  }
+
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    if (Number.isFinite(parsed)) return new Date(parsed).toISOString();
+  }
+
+  return fallback.toISOString();
+}
+
+function historicalHistoryTimestamp(
+  endTimestampUtc: string,
+  index: number,
+  total: number,
+) {
+  const end = Date.parse(endTimestampUtc);
+  const offset = Math.max(0, total - index - 1) * HISTORY_POINT_INTERVAL_MS;
+  return new Date(end - offset).toISOString();
+}
+
+function toTradeSignal(value: unknown): TradeSignal {
+  return value === "Buy" || value === "Sell" || value === "Hold"
+    ? value
+    : "Hold";
+}
+
+function toQuoteStatus(value: unknown): StockQuote["status"] {
+  return value === "Stable" ||
+    value === "Rising" ||
+    value === "Watch" ||
+    value === "Dip"
+    ? value
+    : "Stable";
+}
+
+function toSignalSource(value: unknown): StockQuote["signalSource"] {
+  return value === "node-ecu" || value === "heuristic" ? value : "heuristic";
 }
 
 function transitionMagnitude(
@@ -531,6 +623,20 @@ async function tryEnableTimescale(tableName: string) {
   }
 }
 
+async function runMarketContextBackfill(
+  name: string,
+  task: () => Promise<unknown>,
+) {
+  try {
+    await task();
+  } catch (error) {
+    logger.warn(
+      { err: error, name },
+      "Market context history backfill could not complete",
+    );
+  }
+}
+
 export async function ensureMarketContextSchema(): Promise<void> {
   if (!schemaReady) {
     schemaReady = (async () => {
@@ -760,6 +866,21 @@ export async function ensureMarketContextSchema(): Promise<void> {
       await addCompatibilityColumnIfTableExists("signals", "market_occurrence_id");
 
       await tryEnableTimescale(MARKET_OCCURRENCES_TABLE);
+      await pool.query("CREATE EXTENSION IF NOT EXISTS pgcrypto").catch(() => {
+        undefined;
+      });
+      await runMarketContextBackfill(
+        "existing occurrence detail rows",
+        backfillOccurrenceDetailRowsFromExistingOccurrences,
+      );
+      await runMarketContextBackfill("signal snapshot history", () =>
+        backfillMarketContextFromSignalSnapshots(),
+      );
+      await runMarketContextBackfill("historical candle table", () =>
+        replayHistoricalMarketContextInternal({
+          ingestionSource: "postgres_historical_replay",
+        }),
+      );
     })().catch((error) => {
       schemaReady = null;
       throw error;
@@ -770,7 +891,6 @@ export async function ensureMarketContextSchema(): Promise<void> {
 }
 
 async function insertDiagnosedContext(context: DiagnosedMarketContext) {
-  await ensureMarketContextSchema();
   const result = await pool.query<{ occurrence_id: string }>(
     `
       INSERT INTO ${MARKET_OCCURRENCES_TABLE} (
@@ -913,7 +1033,11 @@ async function insertOccurrenceDetailRows(context: DiagnosedMarketContext) {
         transition_magnitude,
         state_transition_labels,
         occurrence_origin
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NULL, $9, $10, $11, $12::jsonb, $13)
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8,
+        (SELECT regime_state FROM ${MARKET_OCCURRENCES_TABLE} WHERE occurrence_id = $3),
+        $9, $10, $11, $12::jsonb, $13
+      )
       ON CONFLICT (occurrence_id) DO NOTHING
     `,
     [
@@ -1025,10 +1149,9 @@ async function insertSignalOccurrence(
   );
 }
 
-export async function appendMarketContextOccurrence(
+async function appendMarketContextOccurrenceInternal(
   input: MarketContextInput,
 ): Promise<string | null> {
-  await ensureMarketContextSchema();
   const context = await diagnoseContext(input);
   const insertedOccurrenceId = await insertDiagnosedContext(context);
 
@@ -1039,6 +1162,316 @@ export async function appendMarketContextOccurrence(
   await insertOccurrenceDetailRows(context);
   await insertSignalOccurrence(context, input.quote);
   return insertedOccurrenceId;
+}
+
+async function backfillOccurrenceDetailRowsFromExistingOccurrences() {
+  await pool.query(`
+    INSERT INTO ${MARKET_STATE_SNAPSHOTS_TABLE} (
+      snapshot_id,
+      occurrence_id,
+      timestamp_utc,
+      market,
+      venue,
+      asset,
+      timeframe,
+      state_hash,
+      context_payload,
+      ingestion_source
+    )
+    SELECT
+      gen_random_uuid(),
+      mo.occurrence_id,
+      mo.timestamp_utc,
+      mo.market,
+      mo.venue,
+      mo.asset,
+      mo.timeframe,
+      mo.state_hash,
+      jsonb_build_object(
+        'occurrenceId', mo.occurrence_id,
+        'previousOccurrenceId', mo.previous_occurrence_id,
+        'timestampUtc', mo.timestamp_utc,
+        'occurrenceOrigin', mo.occurrence_origin,
+        'market', mo.market,
+        'venue', mo.venue,
+        'asset', mo.asset,
+        'timeframe', mo.timeframe,
+        'regimeState', mo.regime_state,
+        'regimeConfidence', mo.regime_confidence,
+        'trendQuality', mo.trend_quality,
+        'breadth', mo.breadth,
+        'participation', mo.participation,
+        'volatilityPressure', mo.volatility_pressure,
+        'regimeStability', mo.regime_stability,
+        'exposureDurability', mo.exposure_durability,
+        'holdingQuality', mo.holding_quality,
+        'calibration', mo.calibration,
+        'riskPressure', mo.risk_pressure,
+        'allocationPosture', mo.allocation_posture,
+        'capitalDeployed', mo.capital_deployed,
+        'availableRiskBudget', mo.available_risk_budget,
+        'setupQualityDistribution', mo.setup_quality_distribution,
+        'signalDistribution', mo.signal_distribution,
+        'marketInterpretationLabels', mo.market_interpretation_labels,
+        'stateTransitionLabels', mo.state_transition_labels,
+        'stateHash', mo.state_hash,
+        'transitionType', mo.transition_type,
+        'transitionMagnitude', mo.transition_magnitude,
+        'emittedReason', mo.emitted_reason,
+        'emittedBy', mo.emitted_by,
+        'ingestionSource', mo.ingestion_source,
+        'signalId', mo.signal_id
+      ),
+      mo.ingestion_source
+    FROM ${MARKET_OCCURRENCES_TABLE} mo
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM ${MARKET_STATE_SNAPSHOTS_TABLE} snapshot
+      WHERE snapshot.occurrence_id = mo.occurrence_id
+    )
+  `);
+
+  await pool.query(`
+    WITH ordered_occurrences AS (
+      SELECT
+        mo.*,
+        COALESCE(
+          previous.regime_state,
+          LAG(mo.regime_state) OVER (
+            PARTITION BY mo.market, mo.venue, mo.asset, mo.timeframe
+            ORDER BY mo.timestamp_utc ASC, mo.created_at ASC
+          )
+        ) AS previous_regime_state
+      FROM ${MARKET_OCCURRENCES_TABLE} mo
+      LEFT JOIN ${MARKET_OCCURRENCES_TABLE} previous
+        ON previous.occurrence_id = mo.previous_occurrence_id
+    )
+    INSERT INTO ${REGIME_TRANSITIONS_TABLE} (
+      regime_transition_id,
+      occurrence_id,
+      previous_occurrence_id,
+      timestamp_utc,
+      market,
+      venue,
+      asset,
+      timeframe,
+      from_regime_state,
+      to_regime_state,
+      transition_type,
+      transition_magnitude,
+      state_transition_labels,
+      occurrence_origin
+    )
+    SELECT
+      gen_random_uuid(),
+      occurrence_id,
+      previous_occurrence_id,
+      timestamp_utc,
+      market,
+      venue,
+      asset,
+      timeframe,
+      previous_regime_state,
+      regime_state,
+      transition_type,
+      transition_magnitude,
+      state_transition_labels,
+      occurrence_origin
+    FROM ordered_occurrences ordered
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM ${REGIME_TRANSITIONS_TABLE} transition
+      WHERE transition.occurrence_id = ordered.occurrence_id
+    )
+  `);
+
+  await pool.query(`
+    INSERT INTO ${ALLOCATION_STATE_OCCURRENCES_TABLE} (
+      allocation_occurrence_id,
+      occurrence_id,
+      timestamp_utc,
+      market,
+      venue,
+      asset,
+      timeframe,
+      allocation_posture,
+      capital_deployed,
+      available_risk_budget,
+      setup_quality_distribution,
+      signal_distribution,
+      occurrence_origin
+    )
+    SELECT
+      gen_random_uuid(),
+      mo.occurrence_id,
+      mo.timestamp_utc,
+      mo.market,
+      mo.venue,
+      mo.asset,
+      mo.timeframe,
+      mo.allocation_posture,
+      mo.capital_deployed,
+      mo.available_risk_budget,
+      mo.setup_quality_distribution,
+      mo.signal_distribution,
+      mo.occurrence_origin
+    FROM ${MARKET_OCCURRENCES_TABLE} mo
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM ${ALLOCATION_STATE_OCCURRENCES_TABLE} allocation
+      WHERE allocation.occurrence_id = mo.occurrence_id
+    )
+  `);
+}
+
+function snapshotHistoryToQuote(
+  row: SignalSnapshotHistoryRow,
+  price: number,
+  history: number[],
+  timestampUtc: string,
+): StockQuote {
+  const signalAction = toTradeSignal(row.signal_action);
+  return {
+    symbol: normalizeAsset(String(row.symbol ?? "")),
+    price,
+    changePercent: toFiniteNumber(row.change_percent, 0),
+    status: toQuoteStatus(row.status),
+    confidence: toFiniteNumber(row.signal_confidence, 50),
+    summary: row.summary ?? "Historical market context replay",
+    impact: row.impact ?? "Historical context",
+    cap: row.cap ?? "N/A",
+    high52: toFiniteNumber(row.high_52, Math.max(...history, price)),
+    low52: toFiniteNumber(row.low_52, Math.min(...history, price)),
+    peRatio: toFiniteNumber(row.pe_ratio, 0),
+    history,
+    signalAction,
+    signalConfidence: toFiniteNumber(row.signal_confidence, 50),
+    signalSource: toSignalSource(row.signal_source),
+    signalEmittedAt: toIsoString(row.signal_emitted_at, new Date(timestampUtc)),
+    signalEntryPrice: toFiniteNumber(row.signal_entry_price, price),
+    signalReturnPercent: toFiniteNumber(row.signal_return_percent, 0),
+  };
+}
+
+function snapshotHistoryRowToInputs(
+  row: SignalSnapshotHistoryRow,
+  request: ContextReplayRequest,
+): MarketContextInput[] {
+  const history = parseHistoryValues(row.history);
+  const fallbackPrice = toOptionalFiniteNumber(row.price);
+  const prices = history.length ? history : fallbackPrice ? [fallbackPrice] : [];
+  if (!prices.length) return [];
+
+  const endTimestampUtc = toIsoString(
+    row.signal_emitted_at ?? row.fetched_at,
+    new Date(),
+  );
+  const scopeType = String(row.scope_type ?? "").toLowerCase();
+  const scopeCode = normalizeIdentifierValue(String(row.scope_code ?? ""), "GLOBAL");
+  const market = normalizeIdentifierValue(request.market ?? scopeCode, scopeCode);
+  const venue =
+    request.venue ??
+    (scopeType === "market" ? scopeCode : "EXCHANGE");
+  const asset = normalizeAsset(String(request.asset ?? row.symbol ?? ""));
+  const timeframe = normalizeIdentifierValue(request.timeframe ?? "1D", "1D");
+
+  if (asset === "UNKNOWN") return [];
+
+  return prices.map((price, index) => {
+    const timestampUtc = historicalHistoryTimestamp(
+      endTimestampUtc,
+      index,
+      prices.length,
+    );
+    const trailingHistory = prices.slice(Math.max(0, index - 29), index + 1);
+    const high = Math.max(...trailingHistory, price);
+    const low = Math.min(...trailingHistory, price);
+    const quote = snapshotHistoryToQuote(row, price, trailingHistory, timestampUtc);
+
+    return {
+      timestampUtc,
+      occurrenceOrigin: request.origin ?? "historical_backfill",
+      market,
+      venue,
+      asset,
+      timeframe,
+      price,
+      open: trailingHistory[0] ?? price,
+      high,
+      low,
+      close: price,
+      history: trailingHistory,
+      quote,
+      ingestionSource:
+        request.ingestionSource ?? "stock_signal_snapshots_history",
+      emittedBy: "historical-replay-engine",
+    };
+  });
+}
+
+async function backfillMarketContextFromSignalSnapshots(
+  request: ContextReplayRequest = {},
+): Promise<HistoryBackfillResult> {
+  if (!(await tableExists(SIGNAL_SNAPSHOTS_TABLE))) {
+    return { processedRows: 0, emittedOccurrences: 0 };
+  }
+
+  const result = await pool.query<SignalSnapshotHistoryRow>(
+    `
+      SELECT
+        scope_type,
+        scope_code,
+        symbol,
+        price,
+        change_percent,
+        status,
+        high_52,
+        low_52,
+        history,
+        summary,
+        impact,
+        cap,
+        pe_ratio,
+        signal_action,
+        signal_confidence,
+        signal_source,
+        signal_emitted_at,
+        signal_entry_price,
+        signal_return_percent,
+        fetched_at
+      FROM ${SIGNAL_SNAPSHOTS_TABLE}
+      WHERE history IS NOT NULL OR price IS NOT NULL
+      ORDER BY fetched_at ASC, scope_type ASC, scope_code ASC, symbol ASC
+    `,
+  );
+
+  let processedRows = 0;
+  let emittedOccurrences = 0;
+
+  for (const row of result.rows) {
+    const scopeCode = normalizeIdentifierValue(String(row.scope_code ?? ""), "GLOBAL");
+    const scopeType = String(row.scope_type ?? "").toLowerCase();
+    const venue = scopeType === "market" ? scopeCode : "EXCHANGE";
+    const asset = normalizeAsset(String(row.symbol ?? ""));
+    if (request.market && scopeCode !== request.market.toUpperCase()) continue;
+    if (request.venue && venue !== request.venue.toUpperCase()) continue;
+    if (request.asset && asset !== request.asset.toUpperCase()) continue;
+
+    for (const input of snapshotHistoryRowToInputs(row, request)) {
+      processedRows += 1;
+      const occurrenceId = await appendMarketContextOccurrenceInternal(input);
+      if (occurrenceId) emittedOccurrences += 1;
+    }
+  }
+
+  return { processedRows, emittedOccurrences };
+}
+
+export async function appendMarketContextOccurrence(
+  input: MarketContextInput,
+): Promise<string | null> {
+  await ensureMarketContextSchema();
+  return appendMarketContextOccurrenceInternal(input);
 }
 
 export async function appendLiveMarketContextOccurrences(
@@ -1126,10 +1559,9 @@ function replayRowToInput(
   };
 }
 
-export async function replayHistoricalMarketContext(
+async function replayHistoricalMarketContextInternal(
   request: ContextReplayRequest = {},
 ): Promise<ContextReplayResult> {
-  await ensureMarketContextSchema();
   const candleTable = request.candleTable ?? DEFAULT_CANDLE_TABLE;
   const quotedTable = quoteQualifiedIdentifier(candleTable);
   const jobId = randomUUID();
@@ -1299,7 +1731,7 @@ export async function replayHistoricalMarketContext(
 
       for (const row of result.rows) {
         processedRows += 1;
-        const occurrenceId = await appendMarketContextOccurrence(
+        const occurrenceId = await appendMarketContextOccurrenceInternal(
           replayRowToInput(row, request),
         );
         if (occurrenceId) emittedOccurrences += 1;
@@ -1400,4 +1832,42 @@ export async function replayHistoricalMarketContext(
     );
     throw error;
   }
+}
+
+export async function replayHistoricalMarketContext(
+  request: ContextReplayRequest = {},
+): Promise<ContextReplayResult> {
+  await ensureMarketContextSchema();
+  return replayHistoricalMarketContextInternal(request);
+}
+
+export async function hydrateMarketContextFromAvailableHistory(
+  request: ContextReplayRequest = {},
+): Promise<ContextReplayResult> {
+  await ensureMarketContextSchema();
+  const jobId = randomUUID();
+  const candleResult = await replayHistoricalMarketContextInternal(request);
+  const snapshotResult = await backfillMarketContextFromSignalSnapshots(request);
+  await backfillOccurrenceDetailRowsFromExistingOccurrences();
+
+  const processedRows = candleResult.processedRows + snapshotResult.processedRows;
+  const emittedOccurrences =
+    candleResult.emittedOccurrences + snapshotResult.emittedOccurrences;
+  const status =
+    candleResult.status === "failed"
+      ? "failed"
+      : processedRows > 0 || emittedOccurrences > 0
+        ? "completed"
+        : "skipped";
+
+  return {
+    jobId,
+    status,
+    processedRows,
+    emittedOccurrences,
+    message:
+      status === "skipped"
+        ? candleResult.message ?? "No historical source rows were available."
+        : undefined,
+  };
 }
