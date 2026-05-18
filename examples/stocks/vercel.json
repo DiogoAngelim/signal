@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "pnpm --dir src install",
-  "buildCommand": "pnpm --dir src run build && node ./copy-public.mjs",
+  "installCommand": "corepack enable && corepack prepare pnpm@10.12.4 --activate && pnpm --dir src install --frozen-lockfile",
+  "buildCommand": "corepack enable && corepack prepare pnpm@10.12.4 --activate && pnpm --dir src run build && node ./copy-public.mjs",
   "outputDirectory": "public",
   "functions": {
     "api/index.js": {
