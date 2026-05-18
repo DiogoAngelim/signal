@@ -156,6 +156,47 @@ const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(
 const DEFAULT_REQUEST_TIMEOUT_MS = 12_000;
 const DEFAULT_RETRY_COUNT = 1;
 const RETRYABLE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+const STATIC_CACHE_TTL_MS = 30 * 60_000;
+const QUOTE_BATCH_CACHE_TTL_MS = 10 * 60_000;
+
+type CacheEntry<T> = {
+  value: T;
+  expiresAt: number;
+};
+
+const memoryCache = new Map<string, CacheEntry<unknown>>();
+
+function readCache<T>(key: string): T | null {
+  const now = Date.now();
+  const memoryEntry = memoryCache.get(key) as CacheEntry<T> | undefined;
+  if (memoryEntry && memoryEntry.expiresAt > now) return memoryEntry.value;
+  if (memoryEntry) memoryCache.delete(key);
+
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const entry = JSON.parse(raw) as CacheEntry<T>;
+    if (entry.expiresAt > now) {
+      memoryCache.set(key, entry);
+      return entry.value;
+    }
+    sessionStorage.removeItem(key);
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function writeCache<T>(key: string, value: T, ttlMs: number) {
+  const entry: CacheEntry<T> = { value, expiresAt: Date.now() + ttlMs };
+  memoryCache.set(key, entry);
+  try {
+    sessionStorage.setItem(key, JSON.stringify(entry));
+  } catch {
+    // Ignore storage pressure; the memory cache still covers this tab.
+  }
+}
 
 export class ApiRequestError extends Error {
   status?: number;
@@ -254,7 +295,12 @@ async function request<T>(
 }
 
 export async function fetchMarkets(): Promise<MarketOption[]> {
-  return request<MarketOption[]>("/stocks/markets");
+  const key = "signal-markets:markets";
+  const cached = readCache<MarketOption[]>(key);
+  if (cached) return cached;
+  const markets = await request<MarketOption[]>("/stocks/markets");
+  writeCache(key, markets, STATIC_CACHE_TTL_MS);
+  return markets;
 }
 
 export async function fetchStockList(
@@ -262,14 +308,22 @@ export async function fetchStockList(
   offset = 0,
   limit = 24,
 ): Promise<{ market: string; total: number; items: StockListItem[] }> {
+  const cacheKey = `signal-markets:stock-list:${market}:${offset}:${limit}`;
+  const cached = readCache<{ market: string; total: number; items: StockListItem[] }>(
+    cacheKey,
+  );
+  if (cached) return cached;
+
   const params = new URLSearchParams({
     market,
     offset: String(offset),
     limit: String(limit),
   });
-  return request<{ market: string; total: number; items: StockListItem[] }>(
+  const stockList = await request<{ market: string; total: number; items: StockListItem[] }>(
     `/stocks/list?${params}`,
   );
+  writeCache(cacheKey, stockList, STATIC_CACHE_TTL_MS);
+  return stockList;
 }
 
 export async function fetchStockQuoteBatch(
@@ -286,6 +340,13 @@ export async function fetchStockQuoteBatch(
       quotes: [],
     };
   }
+
+  const normalizedSymbols = Array.from(
+    new Set(symbols.map((symbol) => symbol.trim()).filter(Boolean)),
+  ).sort((a, b) => a.localeCompare(b));
+  const cacheKey = `signal-markets:quote-batch:${market}:${options?.withSignals ? "signals" : "plain"}:${normalizedSymbols.join(",")}`;
+  const cached = readCache<StockQuoteBatchResponse>(cacheKey);
+  if (cached) return cached;
 
   const response = await request<{
     market?: string;
@@ -311,7 +372,7 @@ export async function fetchStockQuoteBatch(
     response.unavailableSymbols ??
     requestedSymbols.filter((symbol) => !returnedSymbols.has(symbol));
 
-  return {
+  const batch = {
     market: response.market,
     exchange: response.exchange,
     requestedSymbols,
@@ -319,6 +380,8 @@ export async function fetchStockQuoteBatch(
     partial: response.partial ?? unavailableSymbols.length > 0,
     quotes: response.quotes,
   };
+  writeCache(cacheKey, batch, QUOTE_BATCH_CACHE_TTL_MS);
+  return batch;
 }
 
 export async function fetchStockQuotes(
