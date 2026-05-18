@@ -1493,7 +1493,6 @@ async function backfillMarketContextFromSignalSnapshots(
         SELECT
           LOWER(scope_type) AS scope_type,
           UPPER(scope_code) AS scope_code,
-          UPPER(symbol) AS asset,
           COALESCE(change_percent, 0)::double precision AS change_percent,
           COALESCE(high_52, price, 0)::double precision AS high_52,
           COALESCE(low_52, price, 0)::double precision AS low_52,
@@ -1510,17 +1509,64 @@ async function backfillMarketContextFromSignalSnapshots(
         CROSS JOIN LATERAL jsonb_array_elements(price_history) WITH ORDINALITY AS element(value, ordinality)
         WHERE (element.value #>> '{}') ~ '^-?[0-9]+(\\.[0-9]+)?$'
       ),
-      ordered AS (
+      market_series AS (
         SELECT
-          (end_timestamp_utc - ((total_points - point_index) * INTERVAL '1 day')) AS timestamp_utc,
+          date_trunc(
+            'day',
+            end_timestamp_utc - ((total_points - point_index) * INTERVAL '1 day')
+          ) AS timestamp_utc,
+          scope_type,
           scope_code AS market,
           CASE WHEN scope_type = 'market' THEN scope_code ELSE 'EXCHANGE' END AS venue,
-          asset,
+          'MARKET'::text AS asset,
           '1D'::text AS timeframe,
+          AVG(price)::double precision AS price,
+          AVG(change_percent)::double precision AS change_percent,
+          MAX(GREATEST(high_52, price))::double precision AS high_52,
+          MIN(LEAST(low_52, price))::double precision AS low_52,
+          CASE
+            WHEN AVG(
+              CASE
+                WHEN signal_action = 'Buy' THEN 1
+                WHEN signal_action = 'Sell' THEN -1
+                ELSE 0
+              END
+            ) > 0.2 THEN 'Buy'
+            WHEN AVG(
+              CASE
+                WHEN signal_action = 'Buy' THEN 1
+                WHEN signal_action = 'Sell' THEN -1
+                ELSE 0
+              END
+            ) < -0.2 THEN 'Sell'
+            ELSE 'Hold'
+          END AS signal_action,
+          AVG(COALESCE(signal_confidence, 50))::double precision AS signal_confidence,
+          'heuristic'::text AS signal_source,
+          AVG(COALESCE(signal_entry_price, price))::double precision AS signal_entry_price,
+          AVG(COALESCE(signal_return_percent, 0))::double precision AS signal_return_percent,
+          COUNT(*)::double precision AS instrument_count
+        FROM expanded
+        WHERE price > 0
+        GROUP BY
+          date_trunc(
+            'day',
+            end_timestamp_utc - ((total_points - point_index) * INTERVAL '1 day')
+          ),
+          scope_type,
+          scope_code
+      ),
+      ordered AS (
+        SELECT
+          timestamp_utc,
+          market,
+          venue,
+          asset,
+          timeframe,
           price,
           FIRST_VALUE(price) OVER (
-            PARTITION BY scope_type, scope_code, asset
-            ORDER BY point_index ASC
+            PARTITION BY scope_type, market, asset
+            ORDER BY timestamp_utc ASC
           ) AS first_price,
           change_percent,
           high_52,
@@ -1529,11 +1575,9 @@ async function backfillMarketContextFromSignalSnapshots(
           signal_confidence,
           signal_source,
           signal_entry_price,
-          signal_return_percent
-        FROM expanded
-        WHERE asset IS NOT NULL
-          AND asset <> ''
-          AND price > 0
+          signal_return_percent,
+          instrument_count
+        FROM market_series
       ),
       metrics AS (
         SELECT
@@ -1555,7 +1599,7 @@ async function backfillMarketContextFromSignalSnapshots(
         SELECT
           *,
           LEAST(100, GREATEST(0, 50 + trend_pct * 7 - volatility_pressure * 0.18)) AS trend_quality,
-          50::double precision AS participation,
+          LEAST(100, GREATEST(0, 40 + LN(GREATEST(instrument_count, 1)) * 12)) AS participation,
           LEAST(100, GREATEST(0, volatility_pressure * 0.75 + CASE WHEN trend_pct < 0 THEN ABS(trend_pct) * 4 ELSE 0 END)) AS risk_pressure
         FROM scored
       ),
