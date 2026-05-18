@@ -1416,55 +1416,342 @@ async function backfillMarketContextFromSignalSnapshots(
     return { processedRows: 0, emittedOccurrences: 0 };
   }
 
-  const result = await pool.query<SignalSnapshotHistoryRow>(
-    `
-      SELECT
-        scope_type,
-        scope_code,
-        symbol,
-        price,
-        change_percent,
-        status,
-        high_52,
-        low_52,
-        history,
-        summary,
-        impact,
-        cap,
-        pe_ratio,
-        signal_action,
-        signal_confidence,
-        signal_source,
-        signal_emitted_at,
-        signal_entry_price,
-        signal_return_percent,
-        fetched_at
-      FROM ${SIGNAL_SNAPSHOTS_TABLE}
-      WHERE history IS NOT NULL OR price IS NOT NULL
-      ORDER BY fetched_at ASC, scope_type ASC, scope_code ASC, symbol ASC
-    `,
-  );
-
-  let processedRows = 0;
-  let emittedOccurrences = 0;
-
-  for (const row of result.rows) {
-    const scopeCode = normalizeIdentifierValue(String(row.scope_code ?? ""), "GLOBAL");
-    const scopeType = String(row.scope_type ?? "").toLowerCase();
-    const venue = scopeType === "market" ? scopeCode : "EXCHANGE";
-    const asset = normalizeAsset(String(row.symbol ?? ""));
-    if (request.market && scopeCode !== request.market.toUpperCase()) continue;
-    if (request.venue && venue !== request.venue.toUpperCase()) continue;
-    if (request.asset && asset !== request.asset.toUpperCase()) continue;
-
-    for (const input of snapshotHistoryRowToInputs(row, request)) {
-      processedRows += 1;
-      const occurrenceId = await appendMarketContextOccurrenceInternal(input);
-      if (occurrenceId) emittedOccurrences += 1;
-    }
+  const requestedTimeframe = request.timeframe
+    ? normalizeIdentifierValue(request.timeframe, "1D")
+    : null;
+  if (requestedTimeframe && requestedTimeframe !== "1D") {
+    return { processedRows: 0, emittedOccurrences: 0 };
   }
 
-  return { processedRows, emittedOccurrences };
+  const params: unknown[] = [];
+  const filters: string[] = [];
+
+  if (request.market) {
+    params.push(request.market.toUpperCase());
+    filters.push(`UPPER(scope_code) = $${params.length}`);
+  }
+
+  if (request.venue) {
+    params.push(request.venue.toUpperCase());
+    filters.push(`
+      CASE
+        WHEN LOWER(scope_type) = 'market' THEN UPPER(scope_code)
+        ELSE 'EXCHANGE'
+      END = $${params.length}
+    `);
+  }
+
+  if (request.asset) {
+    params.push(request.asset.toUpperCase());
+    filters.push(`UPPER(symbol) = $${params.length}`);
+  }
+
+  const whereClause = filters.length ? `AND ${filters.join(" AND ")}` : "";
+  const origin = request.origin ?? "historical_backfill";
+  const ingestionSource =
+    request.ingestionSource ?? "stock_signal_snapshots_history";
+
+  params.push(origin, ingestionSource);
+  const originParam = params.length - 1;
+  const sourceParam = params.length;
+
+  const result = await pool.query<{
+    processed_rows: string;
+    emitted_occurrences: string;
+  }>(
+    `
+      WITH source_rows AS (
+        SELECT
+          scope_type,
+          scope_code,
+          symbol,
+          price,
+          change_percent,
+          status,
+          high_52,
+          low_52,
+          history,
+          signal_action,
+          signal_confidence,
+          signal_source,
+          signal_emitted_at,
+          signal_entry_price,
+          signal_return_percent,
+          COALESCE(signal_emitted_at, fetched_at, NOW()) AS end_timestamp_utc,
+          CASE
+            WHEN jsonb_typeof(history) = 'array' AND jsonb_array_length(history) > 0
+              THEN history
+            WHEN price IS NOT NULL
+              THEN jsonb_build_array(price)
+            ELSE '[]'::jsonb
+          END AS price_history
+        FROM ${SIGNAL_SNAPSHOTS_TABLE}
+        WHERE (history IS NOT NULL OR price IS NOT NULL)
+          ${whereClause}
+      ),
+      expanded AS (
+        SELECT
+          LOWER(scope_type) AS scope_type,
+          UPPER(scope_code) AS scope_code,
+          UPPER(symbol) AS asset,
+          COALESCE(change_percent, 0)::double precision AS change_percent,
+          COALESCE(high_52, price, 0)::double precision AS high_52,
+          COALESCE(low_52, price, 0)::double precision AS low_52,
+          signal_action,
+          signal_confidence,
+          signal_source,
+          signal_entry_price,
+          signal_return_percent,
+          end_timestamp_utc,
+          jsonb_array_length(price_history) AS total_points,
+          element.ordinality::integer AS point_index,
+          (element.value #>> '{}')::double precision AS price
+        FROM source_rows
+        CROSS JOIN LATERAL jsonb_array_elements(price_history) WITH ORDINALITY AS element(value, ordinality)
+        WHERE (element.value #>> '{}') ~ '^-?[0-9]+(\\.[0-9]+)?$'
+      ),
+      ordered AS (
+        SELECT
+          (end_timestamp_utc - ((total_points - point_index) * INTERVAL '1 day')) AS timestamp_utc,
+          scope_code AS market,
+          CASE WHEN scope_type = 'market' THEN scope_code ELSE 'EXCHANGE' END AS venue,
+          asset,
+          '1D'::text AS timeframe,
+          price,
+          FIRST_VALUE(price) OVER (
+            PARTITION BY scope_type, scope_code, asset
+            ORDER BY point_index ASC
+          ) AS first_price,
+          change_percent,
+          high_52,
+          low_52,
+          signal_action,
+          signal_confidence,
+          signal_source,
+          signal_entry_price,
+          signal_return_percent
+        FROM expanded
+        WHERE asset IS NOT NULL
+          AND asset <> ''
+          AND price > 0
+      ),
+      metrics AS (
+        SELECT
+          *,
+          CASE
+            WHEN first_price > 0 THEN ((price - first_price) / first_price) * 100
+            ELSE 0
+          END AS trend_pct
+        FROM ordered
+      ),
+      scored AS (
+        SELECT
+          *,
+          LEAST(100, GREATEST(0, ABS(change_percent) * 6 + ABS(trend_pct) * 2)) AS volatility_pressure,
+          LEAST(100, GREATEST(0, 50 + change_percent * 4)) AS breadth
+        FROM metrics
+      ),
+      diagnosed AS (
+        SELECT
+          *,
+          LEAST(100, GREATEST(0, 50 + trend_pct * 7 - volatility_pressure * 0.18)) AS trend_quality,
+          50::double precision AS participation,
+          LEAST(100, GREATEST(0, volatility_pressure * 0.75 + CASE WHEN trend_pct < 0 THEN ABS(trend_pct) * 4 ELSE 0 END)) AS risk_pressure
+        FROM scored
+      ),
+      contexts AS (
+        SELECT
+          *,
+          CASE
+            WHEN risk_pressure >= 76 THEN 'PANIC'
+            WHEN volatility_pressure >= 68 THEN 'HIGH_VOL'
+            WHEN trend_pct >= 1.2 AND trend_quality >= 58 THEN 'TRENDING'
+            WHEN trend_pct <= -1.2 THEN 'MEAN_REVERTING'
+            WHEN volatility_pressure <= 24 THEN 'COMPRESSION'
+            ELSE 'LOW_VOL'
+          END AS regime_state,
+          LEAST(99, GREATEST(15, ABS(trend_pct) * 8 + ABS(volatility_pressure - 50) * 0.55 + COALESCE(signal_confidence, 50) * 0.35)) AS regime_confidence,
+          LEAST(100, GREATEST(0, 100 - volatility_pressure * 0.68 - risk_pressure * 0.18)) AS regime_stability
+        FROM diagnosed
+      ),
+      postures AS (
+        SELECT
+          *,
+          LEAST(100, GREATEST(0, trend_quality * 0.44 + regime_stability * 0.38 + participation * 0.18)) AS exposure_durability
+        FROM contexts
+      ),
+      payloads AS (
+        SELECT
+          *,
+          LEAST(100, GREATEST(0, exposure_durability * 0.64 + COALESCE(signal_return_percent, 0) * 3)) AS holding_quality,
+          LEAST(100, GREATEST(0, COALESCE(signal_confidence, regime_confidence) * 0.7 + regime_stability * 0.3)) AS calibration,
+          CASE
+            WHEN risk_pressure >= 74 THEN 'DEFENSIVE'
+            WHEN exposure_durability >= 70 AND trend_quality >= 62 THEN 'EXPANSION'
+            WHEN exposure_durability <= 38 THEN 'CASH_PRESERVATION'
+            ELSE 'BALANCED'
+          END AS allocation_posture
+        FROM postures
+      ),
+      occurrence_payloads AS (
+        SELECT
+          gen_random_uuid() AS occurrence_id,
+          NULL::uuid AS previous_occurrence_id,
+          timestamp_utc,
+          $${originParam}::text AS occurrence_origin,
+          market,
+          venue,
+          asset,
+          timeframe,
+          regime_state,
+          regime_confidence,
+          trend_quality,
+          breadth,
+          participation,
+          volatility_pressure,
+          regime_stability,
+          exposure_durability,
+          holding_quality,
+          calibration,
+          risk_pressure,
+          allocation_posture,
+          CASE
+            WHEN allocation_posture = 'EXPANSION' THEN exposure_durability
+            WHEN allocation_posture = 'BALANCED' THEN exposure_durability * 0.55
+            ELSE exposure_durability * 0.18
+          END AS capital_deployed,
+          LEAST(100, GREATEST(0, 100 - risk_pressure)) AS available_risk_budget,
+          jsonb_build_object(
+            'weak', CASE WHEN exposure_durability < 40 THEN 1 ELSE 0 END,
+            'developing', CASE WHEN exposure_durability >= 40 AND exposure_durability < 65 THEN 1 ELSE 0 END,
+            'strong', CASE WHEN exposure_durability >= 65 THEN 1 ELSE 0 END
+          ) AS setup_quality_distribution,
+          jsonb_build_object(
+            'Buy', CASE WHEN signal_action = 'Buy' THEN 1 ELSE 0 END,
+            'Hold', CASE WHEN COALESCE(signal_action, 'Hold') = 'Hold' THEN 1 ELSE 0 END,
+            'Sell', CASE WHEN signal_action = 'Sell' THEN 1 ELSE 0 END
+          ) AS signal_distribution,
+          jsonb_build_array(
+            LOWER(regime_state),
+            LOWER(allocation_posture),
+            CASE WHEN risk_pressure >= 70 THEN 'risk_pressure_high' ELSE 'risk_pressure_normal' END,
+            'historical_replay'
+          ) AS market_interpretation_labels,
+          jsonb_build_array('historical_replay') AS state_transition_labels,
+          md5(CONCAT_WS(
+            '|',
+            market,
+            venue,
+            asset,
+            timeframe,
+            regime_state,
+            allocation_posture,
+            ROUND(trend_quality::numeric, 0),
+            ROUND(breadth::numeric, 0),
+            ROUND(volatility_pressure::numeric, 0),
+            ROUND(price::numeric, 6)
+          )) AS state_hash,
+          'historical_replay'::text AS transition_type,
+          LEAST(100, GREATEST(0, ABS(trend_pct) * 10 + volatility_pressure * 0.25)) AS transition_magnitude,
+          'derived_from_signal_snapshot_history'::text AS emitted_reason,
+          'historical-replay-engine'::text AS emitted_by,
+          $${sourceParam}::text AS ingestion_source,
+          md5(CONCAT_WS('|', asset, COALESCE(signal_action, 'Hold'), timestamp_utc::text, COALESCE(signal_entry_price::text, price::text))) AS signal_id
+        FROM payloads
+      ),
+      inserted AS (
+        INSERT INTO ${MARKET_OCCURRENCES_TABLE} (
+          occurrence_id,
+          previous_occurrence_id,
+          timestamp_utc,
+          occurrence_origin,
+          market,
+          venue,
+          asset,
+          timeframe,
+          regime_state,
+          regime_confidence,
+          trend_quality,
+          breadth,
+          participation,
+          volatility_pressure,
+          regime_stability,
+          exposure_durability,
+          holding_quality,
+          calibration,
+          risk_pressure,
+          allocation_posture,
+          capital_deployed,
+          available_risk_budget,
+          setup_quality_distribution,
+          signal_distribution,
+          market_interpretation_labels,
+          state_transition_labels,
+          state_hash,
+          transition_type,
+          transition_magnitude,
+          emitted_reason,
+          emitted_by,
+          ingestion_source,
+          signal_id
+        )
+        SELECT
+          occurrence_id,
+          previous_occurrence_id,
+          timestamp_utc,
+          occurrence_origin,
+          market,
+          venue,
+          asset,
+          timeframe,
+          regime_state,
+          regime_confidence,
+          trend_quality,
+          breadth,
+          participation,
+          volatility_pressure,
+          regime_stability,
+          exposure_durability,
+          holding_quality,
+          calibration,
+          risk_pressure,
+          allocation_posture,
+          capital_deployed,
+          available_risk_budget,
+          setup_quality_distribution,
+          signal_distribution,
+          market_interpretation_labels,
+          state_transition_labels,
+          state_hash,
+          transition_type,
+          transition_magnitude,
+          emitted_reason,
+          emitted_by,
+          ingestion_source,
+          signal_id
+        FROM occurrence_payloads
+        ON CONFLICT (
+          timestamp_utc,
+          market,
+          venue,
+          asset,
+          timeframe,
+          state_hash
+        )
+        DO NOTHING
+        RETURNING 1
+      )
+      SELECT
+        (SELECT COUNT(*) FROM occurrence_payloads)::text AS processed_rows,
+        (SELECT COUNT(*) FROM inserted)::text AS emitted_occurrences
+    `,
+    params,
+  );
+
+  return {
+    processedRows: Number(result.rows[0]?.processed_rows ?? 0),
+    emittedOccurrences: Number(result.rows[0]?.emitted_occurrences ?? 0),
+  };
 }
 
 export async function appendMarketContextOccurrence(
