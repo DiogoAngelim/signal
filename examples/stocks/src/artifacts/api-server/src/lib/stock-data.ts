@@ -42,9 +42,46 @@ export interface StockQuote {
   signalEntryPrice?: number;
   signalReturnPercent?: number;
   quoteSource?: "binance-spot" | "binance-futures" | "tradingview";
+  regime?: AdaptiveRegime;
+  confidence?: number;
+  uncertainty?: number;
+  driftScore?: number;
+  stabilityScore?: number;
+  expectedMovePct?: number;
+  featureConsensus?: number;
+  ensembleAgreement?: number;
+  lifecycleState?: SignalLifecycle;
+  liveMetrics?: {
+    rollingSharpe: number;
+    rollingSortino: number;
+    hitRate: number;
+    expectancy: number;
+    profitFactor: number;
+    maxDrawdown: number;
+  };
+  diagnostics?: {
+    entropy: number;
+    featureDrift: number;
+    predictionResidual: number;
+    volatilityShift: number;
+  };
 }
 
 export type TradeSignal = "Buy" | "Hold" | "Sell";
+export type AdaptiveRegime =
+  | "TRENDING"
+  | "MEAN_REVERTING"
+  | "HIGH_VOL"
+  | "LOW_VOL"
+  | "BREAKOUT"
+  | "PANIC"
+  | "COMPRESSION";
+export type SignalLifecycle =
+  | "EMITTED"
+  | "ACTIVE"
+  | "DECAYING"
+  | "INVALIDATED"
+  | "COMPLETED";
 export interface QuoteFetchOptions {
   bypassCache?: boolean;
 }
@@ -191,6 +228,150 @@ const signalCache = new Map<
 >();
 const tradingViewRequestTimestamps: number[] = [];
 let tradingViewQueue: Promise<void> = Promise.resolve();
+
+function clampMetric(value: number, min = 0, max = 100): number {
+  return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
+}
+
+function mean(values: number[]): number {
+  return values.length
+    ? values.reduce((sum, value) => sum + value, 0) / values.length
+    : 0;
+}
+
+function standardDeviation(values: number[]): number {
+  if (values.length < 2) return 0;
+  const average = mean(values);
+  return Math.sqrt(
+    mean(values.map((value) => (value - average) ** 2)),
+  );
+}
+
+function returnsFromHistory(history: number[] | undefined): number[] {
+  if (!history || history.length < 3) return [];
+  return history
+    .slice(1)
+    .map((price, index) => {
+      const previous = history[index];
+      return previous && previous > 0 ? (price - previous) / previous : 0;
+    })
+    .filter((value) => Number.isFinite(value));
+}
+
+function stabilizedRatio(returns: number[], downsideOnly = false): number {
+  const sample = downsideOnly ? returns.filter((value) => value < 0) : returns;
+  const sampleWeight = clampMetric(returns.length / 20, 0, 1);
+  const volatility = Math.max(standardDeviation(sample), 0.008);
+  const annualization = Math.sqrt(Math.min(Math.max(returns.length, 1), 30));
+  const raw = volatility > 0 ? (mean(returns) / volatility) * annualization : 0;
+  return Number(Math.max(-4, Math.min(4, raw * sampleWeight)).toFixed(2));
+}
+
+function deriveRegime(quote: StockQuote): AdaptiveRegime {
+  const change = Number(quote.changePercent ?? 0);
+  const absChange = Math.abs(change);
+  const volatility = standardDeviation(returnsFromHistory(quote.history)) * 100;
+  const range =
+    quote.high52 && quote.low52 && quote.price
+      ? ((quote.high52 - quote.low52) / Math.max(quote.price, 0.0001)) * 100
+      : 0;
+
+  if (absChange >= 8 || (quote.status === "Watch" && change < -3)) return "PANIC";
+  if (quote.status === "Watch" || volatility >= 2.5) return "HIGH_VOL";
+  if (quote.signalAction === "Buy" && quote.status === "Rising" && absChange >= 1.2) return "BREAKOUT";
+  if (quote.signalAction === "Buy" && change > 0) return "TRENDING";
+  if (quote.signalAction === "Sell" || quote.status === "Dip") return "MEAN_REVERTING";
+  if (volatility <= 0.35 && range <= 12) return "COMPRESSION";
+  return "LOW_VOL";
+}
+
+function deriveLifecycleState(quote: StockQuote): SignalLifecycle {
+  const emittedAt = Date.parse(quote.signalEmittedAt ?? "");
+  const ageMs = Number.isFinite(emittedAt) ? Date.now() - emittedAt : 0;
+  const returnPercent = Number(quote.signalReturnPercent ?? 0);
+
+  if (Math.abs(returnPercent) >= 3) return "COMPLETED";
+  if (!quote.signalEmittedAt || ageMs < 3 * 60_000) return "EMITTED";
+  if (quote.signalAction === "Hold" && ageMs > 10 * 60_000) return "DECAYING";
+  if (ageMs > 90 * 60_000) return "DECAYING";
+  return "ACTIVE";
+}
+
+function enrichAdaptiveQuote(quote: StockQuote): StockQuote {
+  const returns = returnsFromHistory(quote.history).slice(-30);
+  const averageReturn = mean(returns);
+  const volatility = standardDeviation(returns);
+  const change = Number(quote.changePercent ?? 0);
+  const absChange = Math.abs(change);
+  const signalAction = quote.signalAction ?? "Hold";
+  const confidence = clampMetric(
+    quote.signalConfidence ?? (signalAction === "Hold" ? 46 : 58 + absChange * 8),
+  );
+  const volatilityShift = clampMetric(volatility * 1300 + absChange * 4);
+  const driftScore = clampMetric(
+    volatilityShift * 0.55 + (quote.status === "Watch" ? 18 : 0),
+  );
+  const stabilityScore = clampMetric(
+    100 - driftScore * 0.72 - (signalAction === "Hold" ? 8 : 0),
+  );
+  const uncertainty = clampMetric(100 - confidence * 0.68 + driftScore * 0.38);
+  const agreement = clampMetric(confidence * 0.62 + stabilityScore * 0.32 - uncertainty * 0.12);
+  const consensus = clampMetric(agreement * 0.72 + stabilityScore * 0.2);
+  const direction = signalAction === "Sell" ? -1 : signalAction === "Buy" ? 1 : change >= 0 ? 1 : -1;
+  const expectedMovePct = Number(
+    (direction * Math.max(absChange, volatility * 100) * (confidence / 75)).toFixed(2),
+  );
+  const winReturns = returns.filter((value) => value > 0);
+  const lossReturns = returns.filter((value) => value < 0);
+  const grossWins = winReturns.reduce((sum, value) => sum + value, 0);
+  const grossLosses = Math.abs(lossReturns.reduce((sum, value) => sum + value, 0));
+  const profitFactor = grossLosses > 0 ? grossWins / grossLosses : winReturns.length ? 3 : 1;
+  const maxDrawdown = Math.max(
+    0,
+    ...returns.map((_, index) => {
+      const slice = returns.slice(0, index + 1);
+      const cumulative = slice.reduce((value, item) => value * (1 + item), 1);
+      const peak = Math.max(
+        1,
+        ...slice.map((__, peakIndex) =>
+          slice.slice(0, peakIndex + 1).reduce((value, item) => value * (1 + item), 1),
+        ),
+      );
+      return ((peak - cumulative) / peak) * 100;
+    }),
+  );
+  const entropy = clampMetric(signalAction === "Hold" ? 62 - confidence * 0.2 : 44 + uncertainty * 0.38);
+  const predictionResidual = clampMetric(
+    Math.abs((quote.signalReturnPercent ?? change) - expectedMovePct) * 8,
+  );
+
+  return {
+    ...quote,
+    regime: quote.regime ?? deriveRegime(quote),
+    confidence,
+    uncertainty,
+    driftScore,
+    stabilityScore,
+    expectedMovePct,
+    featureConsensus: Number((consensus / 100).toFixed(4)),
+    ensembleAgreement: Number((agreement / 100).toFixed(4)),
+    lifecycleState: quote.lifecycleState ?? deriveLifecycleState(quote),
+    liveMetrics: {
+      rollingSharpe: stabilizedRatio(returns),
+      rollingSortino: stabilizedRatio(returns, true),
+      hitRate: Number((returns.length ? (winReturns.length / returns.length) * 100 : confidence * 0.55).toFixed(1)),
+      expectancy: Number((averageReturn * 100).toFixed(2)),
+      profitFactor: Number(Math.min(9.99, profitFactor).toFixed(2)),
+      maxDrawdown: Number(maxDrawdown.toFixed(2)),
+    },
+    diagnostics: {
+      entropy,
+      featureDrift: driftScore,
+      predictionResidual,
+      volatilityShift,
+    },
+  };
+}
 
 type BinanceTicker = {
   symbol: string;
@@ -463,10 +644,12 @@ export async function attachSignalsToQuotes(
   const signalMap = new Map(
     signalResults.map((item) => [item.symbol, item.signal]),
   );
-  return quotes.map((quote) => ({
-    ...quote,
-    ...(signalMap.get(quote.symbol) ?? {}),
-  }));
+  return quotes.map((quote) =>
+    enrichAdaptiveQuote({
+      ...quote,
+      ...(signalMap.get(quote.symbol) ?? {}),
+    }),
+  );
 }
 
 function getListCount(exchange: string): number {
