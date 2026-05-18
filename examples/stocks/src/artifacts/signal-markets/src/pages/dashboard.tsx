@@ -60,12 +60,53 @@ import { cn } from "@/lib/utils";
 const DISPLAY_ZERO_THRESHOLD = 0.005;
 const LIVE_QUOTE_CACHE_TTL_MS = 60_000;
 const UNAVAILABLE_LIVE_QUOTE_CACHE_TTL_MS = 30_000;
+const MARKET_DATA_CACHE_TTL_MS = 30 * 60_000;
 
 type CachedQuoteEntry =
   | { status: "available"; quote: StockQuote; cachedAt: number }
   | { status: "unavailable"; reason: string; cachedAt: number };
 
 const liveQuoteCache = new Map<string, CachedQuoteEntry>();
+
+type CachedMarketData = {
+  stocks: StockData[];
+  selectedTicker?: string;
+  lastSyncedAt: number | null;
+  syncTotal: number;
+  syncAttempted: number;
+  syncUnavailable: number;
+  cachedAt: number;
+};
+
+function marketDataCacheKey(market: string) {
+  return `signal-markets:market-data:${market.trim().toUpperCase()}`;
+}
+
+function readMarketDataCache(market: string): CachedMarketData | null {
+  try {
+    const raw = sessionStorage.getItem(marketDataCacheKey(market));
+    if (!raw) return null;
+    const cached = JSON.parse(raw) as CachedMarketData;
+    if (Date.now() - cached.cachedAt > MARKET_DATA_CACHE_TTL_MS) {
+      sessionStorage.removeItem(marketDataCacheKey(market));
+      return null;
+    }
+    return Array.isArray(cached.stocks) && cached.stocks.length ? cached : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeMarketDataCache(market: string, data: Omit<CachedMarketData, "cachedAt">) {
+  try {
+    sessionStorage.setItem(
+      marketDataCacheKey(market),
+      JSON.stringify({ ...data, cachedAt: Date.now() }),
+    );
+  } catch {
+    // Ignore storage pressure; live state still holds the latest sweep.
+  }
+}
 
 function liveQuoteCacheKey(market: string, symbol: string) {
   return `${market.trim().toUpperCase()}:${symbol.trim().toUpperCase()}`;
@@ -2213,14 +2254,28 @@ export default function Dashboard() {
       if (!selectedMarket) return;
 
       try {
-        setLoading(true);
+        const cachedMarketData = readMarketDataCache(selectedMarket);
+        if (cachedMarketData) {
+          setStocks(cachedMarketData.stocks);
+          setSelectedTicker(
+            cachedMarketData.selectedTicker ?? cachedMarketData.stocks[0]?.ticker,
+          );
+          setLastSyncedAt(cachedMarketData.lastSyncedAt);
+          setSyncTotal(cachedMarketData.syncTotal);
+          setSyncAttempted(cachedMarketData.syncAttempted);
+          setSyncUnavailable(cachedMarketData.syncUnavailable);
+          setLoading(false);
+        } else {
+          setLoading(true);
+          setStocks([]);
+          setSelectedTicker(undefined);
+          setLastSyncedAt(null);
+          setSyncTotal(0);
+          setSyncAttempted(0);
+          setSyncUnavailable(0);
+        }
+
         setRefreshError(null);
-        setStocks([]);
-        setSelectedTicker(undefined);
-        setLastSyncedAt(null);
-        setSyncTotal(0);
-        setSyncAttempted(0);
-        setSyncUnavailable(0);
 
         let offset = 0;
         let total = 0;
@@ -2246,7 +2301,12 @@ export default function Dashboard() {
           .filter(Boolean)));
         const stockBySymbol = new Map(listItems.map((stock) => [stock.symbol, stock]));
         setSyncTotal(symbols.length);
+        setSyncAttempted(0);
+        setSyncUnavailable(0);
         setLoading(false);
+        let attemptedCount = 0;
+        let unavailableCount = 0;
+        let latestSyncedAt = cachedMarketData?.lastSyncedAt ?? null;
 
         for (let index = 0; index < symbols.length; index += QUOTE_REQUEST_SYMBOL_BATCH_SIZE) {
           if (cancelled) return;
@@ -2259,13 +2319,27 @@ export default function Dashboard() {
 
           if (cachedQuotes.length) {
             setStocks((current) =>
-              mergeStockQuotes(current, cachedQuotes, stockBySymbol, selectedMarket),
+              {
+                const next = mergeStockQuotes(current, cachedQuotes, stockBySymbol, selectedMarket);
+                latestSyncedAt = Date.now();
+                writeMarketDataCache(selectedMarket, {
+                  stocks: next,
+                  selectedTicker: cachedQuotes[0]?.symbol ?? next[0]?.ticker,
+                  lastSyncedAt: latestSyncedAt,
+                  syncTotal: symbols.length,
+                  syncAttempted: attemptedCount + cachedQuotes.length + cachedUnavailableSymbols.length,
+                  syncUnavailable: unavailableCount + cachedUnavailableSymbols.length,
+                });
+                return next;
+              },
             );
             setSelectedTicker((current) => current ?? cachedQuotes[0]?.symbol);
-            setLastSyncedAt(Date.now());
+            setLastSyncedAt(latestSyncedAt);
           }
 
           if (cachedQuotes.length || cachedUnavailableSymbols.length) {
+            attemptedCount += cachedQuotes.length + cachedUnavailableSymbols.length;
+            unavailableCount += cachedUnavailableSymbols.length;
             setSyncAttempted((current) =>
               current + cachedQuotes.length + cachedUnavailableSymbols.length,
             );
@@ -2285,15 +2359,29 @@ export default function Dashboard() {
           cacheUnavailableLiveQuotes(selectedMarket, quoteBatch.unavailableSymbols);
 
           setStocks((current) =>
-            mergeStockQuotes(current, quoteBatch.quotes, stockBySymbol, selectedMarket),
+            {
+              const next = mergeStockQuotes(current, quoteBatch.quotes, stockBySymbol, selectedMarket);
+              if (quoteBatch.quotes.length) latestSyncedAt = Date.now();
+              writeMarketDataCache(selectedMarket, {
+                stocks: next,
+                selectedTicker: quoteBatch.quotes[0]?.symbol ?? next[0]?.ticker,
+                lastSyncedAt: latestSyncedAt,
+                syncTotal: symbols.length,
+                syncAttempted: attemptedCount + quoteBatch.quotes.length + quoteBatch.unavailableSymbols.length,
+                syncUnavailable: unavailableCount + quoteBatch.unavailableSymbols.length,
+              });
+              return next;
+            },
           );
           setSelectedTicker((current) => current ?? quoteBatch.quotes[0]?.symbol);
+          attemptedCount += quoteBatch.quotes.length + quoteBatch.unavailableSymbols.length;
+          unavailableCount += quoteBatch.unavailableSymbols.length;
           setSyncAttempted((current) =>
             current + quoteBatch.quotes.length + quoteBatch.unavailableSymbols.length,
           );
           setSyncUnavailable((current) => current + quoteBatch.unavailableSymbols.length);
           if (quoteBatch.quotes.length) {
-            setLastSyncedAt(Date.now());
+            setLastSyncedAt(latestSyncedAt);
           }
 
           if (QUOTE_BATCH_DELAY_MS > 0 && index + QUOTE_REQUEST_SYMBOL_BATCH_SIZE < symbols.length) {
