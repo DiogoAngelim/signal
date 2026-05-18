@@ -1312,10 +1312,7 @@ async function runBatched<T>(
 
   for (let index = 0; index < items.length; index += size) {
     const batch = items.slice(index, index + size);
-    // Restrict to one at a time to minimize memory usage and concurrency
-    for (const item of batch) {
-      await handler(item);
-    }
+    await Promise.all(batch.map((item) => handler(item)));
     if (delay > 0 && index + size < items.length) {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
