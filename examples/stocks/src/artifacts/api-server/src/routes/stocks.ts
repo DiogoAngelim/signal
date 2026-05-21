@@ -33,6 +33,9 @@ const MARKET_MONTHLY_VOLATILITY_REFRESH_INTERVAL_MS = Number(
 );
 const REFRESH_MARKET_MONTHLY_VOLATILITY_ON_QUOTES =
   process.env.MARKET_MONTHLY_VOLATILITY_REFRESH_ON_QUOTES === "true";
+const STOCK_QUOTES_RESPONSE_BUDGET_MS = Number(
+  process.env.STOCK_QUOTES_RESPONSE_BUDGET_MS ?? 45_000,
+);
 const monthlyVolatilityRefreshes = new Map<
   string,
   { lastStartedAt: number; pending?: Promise<void> }
@@ -272,6 +275,9 @@ router.get("/stocks/list", (req, res) => {
 });
 
 router.post("/stocks/quotes", async (req, res) => {
+  const startedAt = Date.now();
+  const deadlineAt =
+    startedAt + Math.max(5_000, Math.min(STOCK_QUOTES_RESPONSE_BUDGET_MS, 55_000));
   const market = String(req.body?.market ?? "").trim();
   const exchange = String(req.body?.exchange ?? "US").toUpperCase();
   const symbols: string[] = Array.isArray(req.body?.symbols)
@@ -288,18 +294,27 @@ router.post("/stocks/quotes", async (req, res) => {
     return;
   }
 
-  await registerSymbolsForBackgroundRefreshIfAvailable(scope, requestedSymbols);
+  void registerSymbolsForBackgroundRefreshIfAvailable(scope, requestedSymbols);
 
   const quotes = market
-    ? await fetchMarketQuotes(market, requestedSymbols)
-    : await fetchQuotes(exchange, requestedSymbols);
+    ? await fetchMarketQuotes(market, requestedSymbols, {
+      deadlineAt,
+      minRemainingMs: 4_000,
+    })
+    : await fetchQuotes(exchange, requestedSymbols, {
+      deadlineAt,
+      minRemainingMs: 4_000,
+    });
 
   const enrichedQuotes = withSignals
-    ? await attachSignalsToQuotes(quotes, market || exchange)
+    ? await attachSignalsToQuotes(quotes, market || exchange, {
+      deadlineAt,
+      minRemainingMs: 2_000,
+    })
     : quotes;
 
   if (withSignals && enrichedQuotes.length) {
-    await storeSignalSnapshotsIfAvailable(scope, enrichedQuotes);
+    void storeSignalSnapshotsIfAvailable(scope, enrichedQuotes);
   }
 
   scheduleMarketMonthlyVolatilityRefresh(market, enrichedQuotes);
@@ -308,6 +323,7 @@ router.post("/stocks/quotes", async (req, res) => {
   const unavailableSymbols = requestedSymbols.filter(
     (symbol) => !returnedSymbols.has(symbol),
   );
+  const deadlineExhausted = Date.now() + 2_000 >= deadlineAt;
 
   res.json({
     data: {
@@ -315,8 +331,10 @@ router.post("/stocks/quotes", async (req, res) => {
       exchange: market ? undefined : exchange,
       requestedSymbols,
       unavailableSymbols,
+      deferredSymbols: deadlineExhausted ? unavailableSymbols : [],
       partial: unavailableSymbols.length > 0,
       quotes: enrichedQuotes,
+      elapsedMs: Date.now() - startedAt,
     },
   });
 });

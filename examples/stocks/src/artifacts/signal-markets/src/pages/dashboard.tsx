@@ -58,9 +58,9 @@ import {
 import { cn } from "@/lib/utils";
 
 const DISPLAY_ZERO_THRESHOLD = 0.005;
-const LIVE_QUOTE_CACHE_TTL_MS = 60_000;
-const UNAVAILABLE_LIVE_QUOTE_CACHE_TTL_MS = 30_000;
 const MARKET_DATA_CACHE_TTL_MS = 30 * 60_000;
+const LIVE_QUOTE_CACHE_TTL_MS = MARKET_DATA_CACHE_TTL_MS;
+const UNAVAILABLE_LIVE_QUOTE_CACHE_TTL_MS = 5 * 60_000;
 
 type CachedQuoteEntry =
   | { status: "available"; quote: StockQuote; cachedAt: number }
@@ -82,29 +82,65 @@ function marketDataCacheKey(market: string) {
   return `signal-markets:market-data:${market.trim().toUpperCase()}`;
 }
 
-function readMarketDataCache(market: string): CachedMarketData | null {
+function cacheStorage() {
+  if (typeof window === "undefined") return null;
   try {
-    const raw = sessionStorage.getItem(marketDataCacheKey(market));
+    return window.localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function readMarketDataCache(market: string): CachedMarketData | null {
+  const storage = cacheStorage();
+  if (!storage) return null;
+  try {
+    const raw = storage.getItem(marketDataCacheKey(market));
     if (!raw) return null;
     const cached = JSON.parse(raw) as CachedMarketData;
     if (Date.now() - cached.cachedAt > MARKET_DATA_CACHE_TTL_MS) {
-      sessionStorage.removeItem(marketDataCacheKey(market));
+      storage.removeItem(marketDataCacheKey(market));
       return null;
     }
-    return Array.isArray(cached.stocks) && cached.stocks.length ? cached : null;
+    if (!Array.isArray(cached.stocks) || !cached.stocks.length) return null;
+    hydrateLiveQuoteCacheFromStocks(market, cached.stocks, cached.cachedAt);
+    return cached;
   } catch {
     return null;
   }
 }
 
 function writeMarketDataCache(market: string, data: Omit<CachedMarketData, "cachedAt">) {
+  const storage = cacheStorage();
+  if (!storage) return;
   try {
-    sessionStorage.setItem(
+    storage.setItem(
       marketDataCacheKey(market),
       JSON.stringify({ ...data, cachedAt: Date.now() }),
     );
   } catch {
     // Ignore storage pressure; live state still holds the latest sweep.
+  }
+}
+
+function hydrateLiveQuoteCacheFromStocks(
+  market: string,
+  stocks: StockData[],
+  cachedAt: number,
+) {
+  for (const stock of stocks) {
+    if (!stock.ticker || !Number.isFinite(stock.price)) continue;
+    liveQuoteCache.set(liveQuoteCacheKey(market, stock.ticker), {
+      status: "available",
+      quote: {
+        ...stock,
+        symbol: stock.ticker,
+        quoteStatus: "available",
+        quoteStatusReason: undefined,
+        quoteLastAttemptedAt: cachedAt,
+      } as StockQuote,
+      cachedAt,
+    });
   }
 }
 
@@ -345,9 +381,9 @@ const DEFAULT_MARKET_SCHEDULE: MarketSchedule = {
 };
 const STARTING_PORTFOLIO_VALUE = 1000;
 const STOCK_LIST_PAGE_SIZE = 5000;
-const QUOTE_REQUEST_SYMBOL_BATCH_SIZE = 12;
-const QUOTE_BATCH_DELAY_MS = 100;
-const QUOTE_REQUEST_TIMEOUT_MS = 240_000;
+const QUOTE_REQUEST_SYMBOL_BATCH_SIZE = 24;
+const QUOTE_BATCH_DELAY_MS = 0;
+const QUOTE_REQUEST_TIMEOUT_MS = 75_000;
 const SYNCING_QUOTE_SUMMARY = "Market sweep in progress.";
 const MARKET_CLOSED_QUOTE_SUMMARY = "Market closed. Coverage paused.";
 const MARKET_CLOSED_QUOTE_IMPACT =
@@ -1117,7 +1153,10 @@ function buildExecutionDecisions(
       signal.expectancy * 5 -
       signal.maxDrawdown * 0.35,
     );
-    const expectedMoveQuality = clampMetric(Math.abs(signal.expectedMovePct) * 7, 0, 24);
+    const tradableExpectedRange = signal.expectedMovePct > 0;
+    const expectedMoveQuality = tradableExpectedRange
+      ? clampMetric(signal.expectedMovePct * 7, 0, 24)
+      : 0;
     const signalQuality = clampMetric(
       calibratedConfidence * 0.28 +
       signal.stabilityScore * 0.2 +
@@ -1163,7 +1202,9 @@ function buildExecutionDecisions(
     const action = signal.signalAction ?? "Hold";
     const riskLevel = deriveRiskLevel(riskScore);
     const actionLabel: ExecutionDecision["actionLabel"] =
-      action === "Buy" && qualityScore >= 62 && riskScore < 68
+      !tradableExpectedRange && (action === "Buy" || action === "Hold")
+        ? "Avoid"
+        : action === "Buy" && qualityScore >= 62 && riskScore < 68
         ? "Buy"
         : action === "Buy" && qualityScore >= 48
           ? "Watch"
@@ -1179,7 +1220,9 @@ function buildExecutionDecisions(
           ? "Medium Conviction"
           : "Low Conviction";
     const allocationIntent =
-      actionLabel === "Buy"
+      !tradableExpectedRange
+        ? 0
+        : actionLabel === "Buy"
         ? 1
         : actionLabel === "Watch"
           ? 0.55
@@ -1334,6 +1377,102 @@ function plainRegime(regime: AdaptiveRegime) {
   return labels[regime];
 }
 
+function priorityAllocationCandidates(decisions: ExecutionDecision[]) {
+  return decisions
+    .filter(
+      (item) =>
+        (item.actionLabel === "Buy" || item.actionLabel === "Watch") &&
+        item.signal.expectedMovePct > 0 &&
+        item.suggestedAllocationPct > 0,
+    )
+    .slice(0, 5);
+}
+
+type PriorityCandidateSnapshot = {
+  ticker: string;
+  actionLabel: ExecutionDecision["actionLabel"];
+  allocationPct: number;
+  expectedMovePct: number;
+};
+
+function priorityCandidatesStorageKey(market: string) {
+  return `signal-markets:priority-candidates:${market.trim().toUpperCase()}`;
+}
+
+function serializePriorityCandidates(candidates: ExecutionDecision[]): string {
+  const snapshot: PriorityCandidateSnapshot[] = candidates.map((candidate) => ({
+    ticker: candidate.signal.ticker.trim().toUpperCase(),
+    actionLabel: candidate.actionLabel,
+    allocationPct: Number(candidate.suggestedAllocationPct.toFixed(1)),
+    expectedMovePct: Number(candidate.signal.expectedMovePct.toFixed(1)),
+  }));
+  return JSON.stringify(snapshot);
+}
+
+function parsePriorityCandidates(value: string | null): PriorityCandidateSnapshot[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item) => ({
+        ticker: String(item.ticker ?? "").trim().toUpperCase(),
+        actionLabel: String(item.actionLabel ?? "Hold") as ExecutionDecision["actionLabel"],
+        allocationPct: Number(item.allocationPct ?? 0),
+        expectedMovePct: Number(item.expectedMovePct ?? 0),
+      }))
+      .filter((item) => item.ticker);
+  } catch {
+    return [];
+  }
+}
+
+function describePriorityCandidateChange(
+  previous: PriorityCandidateSnapshot[],
+  next: PriorityCandidateSnapshot[],
+) {
+  const previousByTicker = new Map(previous.map((item) => [item.ticker, item]));
+  const nextByTicker = new Map(next.map((item) => [item.ticker, item]));
+  const enter = next.filter((item) => !previousByTicker.has(item.ticker));
+  const close = previous.filter((item) => !nextByTicker.has(item.ticker));
+  const resize = next.filter((item) => {
+    const previousItem = previousByTicker.get(item.ticker);
+    return (
+      previousItem &&
+      (previousItem.actionLabel !== item.actionLabel ||
+        Math.abs(previousItem.allocationPct - item.allocationPct) >= 0.5)
+    );
+  });
+
+  const parts = [
+    ...enter.map((item) => `Enter ${cleanTicker(item.ticker)} ${item.allocationPct.toFixed(1)}%`),
+    ...resize.map((item) => `Adjust ${cleanTicker(item.ticker)} to ${item.allocationPct.toFixed(1)}%`),
+    ...close.map((item) => `Close/review ${cleanTicker(item.ticker)}`),
+  ];
+  return parts.slice(0, 6).join("; ");
+}
+
+async function sendPriorityAllocationNotification(market: string, body: string) {
+  if (!body || typeof window === "undefined" || !("Notification" in window)) {
+    return false;
+  }
+
+  try {
+    let permission = Notification.permission;
+    if (permission === "default") {
+      permission = await Notification.requestPermission();
+    }
+    if (permission !== "granted") return false;
+
+    new Notification(`${market} Priority Allocation Candidates changed`, {
+      body,
+      tag: `signal-markets-priority-${market}`,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function derivePortfolioPosture(decisions: ExecutionDecision[], metrics: { drift: number; ensemble: number; survival: number; regimeStability: number }) {
   const scoped = decisions.slice(0, 80);
@@ -1515,12 +1654,16 @@ function PortfolioIntelligence({ decisions, portfolio }: { decisions: ExecutionD
 }
 
 function TopOpportunities({ decisions }: { decisions: ExecutionDecision[] }) {
-  const rows = decisions.filter((item) => item.actionLabel === "Buy" || item.actionLabel === "Watch").slice(0, 5);
-  const displayRows = rows.length ? rows : decisions.slice(0, 6);
+  const rows = priorityAllocationCandidates(decisions);
+  const displayRows = rows.length
+    ? rows
+    : decisions
+      .filter((item) => item.signal.expectedMovePct > 0 && item.suggestedAllocationPct > 0)
+      .slice(0, 6);
   return (
     <InsightShell title="Priority Allocation Candidates" eyebrow="Highest-quality exposures first" action={<Badge variant="outline" className="border-slate-700 text-slate-300">Top {displayRows.length}</Badge>}>
       <div className="grid gap-4 lg:grid-cols-2">
-        {displayRows.map((decision, index) => (
+        {displayRows.length ? displayRows.map((decision, index) => (
           <button key={decision.signal.adaptiveId} type="button" className="group rounded-3xl border border-slate-800 bg-slate-900/30 p-4 text-left transition hover:-translate-y-0.5 hover:border-emerald-400/40 hover:bg-slate-900/70">
             <div className="mb-4 flex items-center justify-between">
               <span className="rounded-full bg-slate-800 px-2.5 py-1 font-mono text-xs font-semibold text-slate-200">{cleanTicker(decision.signal.ticker)}</span>
@@ -1535,7 +1678,11 @@ function TopOpportunities({ decisions }: { decisions: ExecutionDecision[] }) {
             </div>
             <p className="mt-4 text-xs leading-5 text-slate-400">{decision.riskLevel === "Extreme Risk" ? "Avoid incremental exposure until volatility normalizes and participation improves." : decision.actionLabel === "Buy" ? "Relative strength is improving with contained downside pressure. Size selectively." : "Maintain coverage while waiting for broader confirmation."}</p>
           </button>
-        ))}
+        )) : (
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/30 p-5 text-sm leading-6 text-slate-400 lg:col-span-2">
+            No positive expected-range candidates are currently eligible for allocation.
+          </div>
+        )}
       </div>
     </InsightShell>
   );
@@ -1634,19 +1781,23 @@ function AdaptiveSignalFeed({ decisions, selected, onSelect }: { decisions: Exec
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const pageCount = Math.max(1, Math.ceil(decisions.length / pageSize));
+  const exposedDecisions = useMemo(
+    () => decisions.filter((decision) => decision.suggestedAllocationPct > DISPLAY_ZERO_THRESHOLD),
+    [decisions],
+  );
+  const pageCount = Math.max(1, Math.ceil(exposedDecisions.length / pageSize));
   const boundedPage = Math.min(page, pageCount);
   const sorted = useMemo(() => {
-    return [...decisions].sort((a, b) => {
+    return [...exposedDecisions].sort((a, b) => {
       const result = compareOpportunity(a, b, sortKey);
       return sortDirection === "asc" ? result : -result;
     });
-  }, [decisions, sortDirection, sortKey]);
+  }, [exposedDecisions, sortDirection, sortKey]);
   const visible = sorted.slice((boundedPage - 1) * pageSize, boundedPage * pageSize);
 
   useEffect(() => {
     setPage(1);
-  }, [pageSize, sortDirection, sortKey]);
+  }, [exposedDecisions.length, pageSize, sortDirection, sortKey]);
 
   function updateSort(nextSortKey: OpportunitySortKey) {
     if (sortKey === nextSortKey) {
@@ -1675,7 +1826,12 @@ function AdaptiveSignalFeed({ decisions, selected, onSelect }: { decisions: Exec
             ))}
           </select>
           <Badge variant="outline" className="border-slate-700 text-slate-300">
-            {decisions.length ? `${(boundedPage - 1) * pageSize + 1}-${Math.min(boundedPage * pageSize, decisions.length)} of ${decisions.length}` : "0 in view"}
+            {exposedDecisions.length
+              ? `${(boundedPage - 1) * pageSize + 1}-${Math.min(boundedPage * pageSize, exposedDecisions.length)} of ${exposedDecisions.length}`
+              : "0 live exposures"}
+          </Badge>
+          <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-200">
+            Live
           </Badge>
         </div>
       }
@@ -1701,15 +1857,21 @@ function AdaptiveSignalFeed({ decisions, selected, onSelect }: { decisions: Exec
           ))}
         </div>
         <div className="divide-y divide-slate-800">
-          {visible.map((decision) => (
-            <div key={decision.signal.adaptiveId}>
-              <button type="button" onClick={() => { onSelect(decision.signal); setExpanded(expanded === decision.signal.adaptiveId ? null : decision.signal.adaptiveId); }} className={cn("grid w-full grid-cols-[1.1fr_0.8fr_0.8fr_0.8fr_0.8fr] gap-4 px-4 py-3 text-left text-sm transition hover:bg-slate-900/60", selected === decision.signal.ticker && "bg-emerald-400/5")}>
-                <span className="min-w-0"><span className="rounded-full bg-slate-800 px-2.5 py-1 font-mono text-xs font-semibold text-slate-100">{cleanTicker(decision.signal.ticker)}</span><span className="ml-2 hidden truncate text-xs text-slate-500 md:inline">{decision.signal.name}</span></span>
-                <span className="text-slate-300">{plainAction(decision.actionLabel)}</span><span className="font-semibold text-slate-100">{decision.suggestedAllocationPct.toFixed(1)}%</span><span className="text-slate-300">{decision.qualityScore.toFixed(0)}/100</span><span className={decision.riskScore > 65 ? "text-rose-300" : "text-slate-300"}>{plainRisk(decision.riskLevel)}</span>
-              </button>
-              {expanded === decision.signal.adaptiveId && <div className="bg-slate-950/70 px-4 pb-4 text-sm text-slate-400"><div className="rounded-2xl border border-slate-800 bg-slate-900/30 p-4">{decision.tradeExplanation} Participation: {plainTiming(decision.timingState)}. Breadth: {(decision.signal.ensembleAgreement * 100).toFixed(0)}%. Holding window: {formatDuration(decision.recommendedHoldingMinutes * 60_000)}.</div></div>}
+          {visible.length ? (
+            visible.map((decision) => (
+              <div key={decision.signal.adaptiveId}>
+                <button type="button" onClick={() => { onSelect(decision.signal); setExpanded(expanded === decision.signal.adaptiveId ? null : decision.signal.adaptiveId); }} className={cn("grid w-full grid-cols-[1.1fr_0.8fr_0.8fr_0.8fr_0.8fr] gap-4 px-4 py-3 text-left text-sm transition hover:bg-slate-900/60", selected === decision.signal.ticker && "bg-emerald-400/5")}>
+                  <span className="min-w-0"><span className="rounded-full bg-slate-800 px-2.5 py-1 font-mono text-xs font-semibold text-slate-100">{cleanTicker(decision.signal.ticker)}</span><span className="ml-2 hidden truncate text-xs text-slate-500 md:inline">{decision.signal.name}</span></span>
+                  <span className="text-slate-300">{plainAction(decision.actionLabel)}</span><span className="font-semibold text-slate-100">{decision.suggestedAllocationPct.toFixed(1)}%</span><span className="text-slate-300">{decision.qualityScore.toFixed(0)}/100</span><span className={decision.riskScore > 65 ? "text-rose-300" : "text-slate-300"}>{plainRisk(decision.riskLevel)}</span>
+                </button>
+                {expanded === decision.signal.adaptiveId && <div className="bg-slate-950/70 px-4 pb-4 text-sm text-slate-400"><div className="rounded-2xl border border-slate-800 bg-slate-900/30 p-4">{decision.tradeExplanation} Participation: {plainTiming(decision.timingState)}. Breadth: {(decision.signal.ensembleAgreement * 100).toFixed(0)}%. Holding window: {formatDuration(decision.recommendedHoldingMinutes * 60_000)}.</div></div>}
+              </div>
+            ))
+          ) : (
+            <div className="px-4 py-6 text-sm text-slate-400">
+              No active exposure rows. Zero-exposure candidates are hidden from the ledger.
             </div>
-          ))}
+          )}
         </div>
       </div>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -1934,17 +2096,11 @@ function portfolioStats(portfolio: SimulatedPortfolio) {
   const periodsPerYear = avgIntervalMs > 0
     ? Math.min(252, (365.25 * 24 * 3_600_000) / avgIntervalMs)
     : 0;
-  const sampleWeight = clampMetric(periodReturns.length / 30, 0, 1);
-  const sharpe = periodReturns.length >= 2
-    ? Math.max(
-      -4,
-      Math.min(
-        4,
-        (avg / Math.max(volatility, 0.004)) *
-          Math.sqrt(periodsPerYear || Math.min(252, periodReturns.length)) *
-          sampleWeight,
-      ),
-    )
+  const annualizationPeriods = periodsPerYear || Math.min(252, periodReturns.length);
+  const annualizedReturn = avg * annualizationPeriods;
+  const annualizedVolatility = volatility * Math.sqrt(annualizationPeriods);
+  const normalizedAnnualSharpe = periodReturns.length >= 2 && annualizedVolatility > 0
+    ? annualizedReturn / annualizedVolatility
     : null;
   const first = history[0]?.t;
   const last = history[history.length - 1]?.t;
@@ -1963,7 +2119,7 @@ function portfolioStats(portfolio: SimulatedPortfolio) {
     currentValue: effectiveValue,
     totalReturn,
     maxDrawdown,
-    sharpe,
+    normalizedAnnualSharpe,
     monthlyReturn,
     profitFactor,
     winRate: closed.length ? (wins.length / closed.length) * 100 : null,
@@ -2183,7 +2339,7 @@ function PortfolioPerformanceTabs({ portfolio }: { portfolio: SimulatedPortfolio
               ["Profit Factor", stats.profitFactor == null ? "—" : stats.profitFactor === Infinity ? "∞" : stats.profitFactor.toFixed(2), stats.profitFactor == null ? null : stats.profitFactor >= 1],
               ["Win Rate", stats.winRate == null ? "—" : `${stats.winRate.toFixed(1)}%`, stats.winRate == null ? null : stats.winRate >= 50],
               ["Max Drawdown", `${(stats.maxDrawdown * 100).toFixed(1)}%`, stats.maxDrawdown === 0 ? null : false],
-              ["Risk Efficiency", stats.sharpe == null ? "—" : stats.sharpe.toFixed(2), stats.sharpe == null ? null : stats.sharpe >= 1],
+              ["Normalized Annual Sharpe", stats.normalizedAnnualSharpe == null ? "—" : stats.normalizedAnnualSharpe.toFixed(2), stats.normalizedAnnualSharpe == null ? null : stats.normalizedAnnualSharpe >= 1],
               ["Closed Executions", String(stats.totalTrades), null],
               ["Average Holding Period", formatDuration(stats.averageDurationMs), null],
             ].map(([label, value, positive]) => (
@@ -2242,6 +2398,11 @@ export default function Dashboard() {
   const allocationDecisions = useMemo(
     () => buildExecutionDecisions(adaptiveSignals, createEmptyPortfolio(), calibrationState),
     [adaptiveSignals, calibrationState],
+  );
+
+  const priorityCandidates = useMemo(
+    () => priorityAllocationCandidates(allocationDecisions),
+    [allocationDecisions],
   );
 
   const selectedDecision =
@@ -2410,7 +2571,11 @@ export default function Dashboard() {
           if (cancelled) return;
 
           cacheLiveQuotes(selectedMarket, quoteBatch.quotes);
-          cacheUnavailableLiveQuotes(selectedMarket, quoteBatch.unavailableSymbols);
+          const deferredSymbols = new Set(quoteBatch.deferredSymbols ?? []);
+          const terminalUnavailableSymbols = quoteBatch.unavailableSymbols.filter(
+            (symbol) => !deferredSymbols.has(symbol),
+          );
+          cacheUnavailableLiveQuotes(selectedMarket, terminalUnavailableSymbols);
 
           setStocks((current) =>
             {
@@ -2421,19 +2586,19 @@ export default function Dashboard() {
                 selectedTicker: quoteBatch.quotes[0]?.symbol ?? next[0]?.ticker,
                 lastSyncedAt: latestSyncedAt,
                 syncTotal: symbols.length,
-                syncAttempted: attemptedCount + quoteBatch.quotes.length + quoteBatch.unavailableSymbols.length,
-                syncUnavailable: unavailableCount + quoteBatch.unavailableSymbols.length,
+                syncAttempted: attemptedCount + quoteBatch.quotes.length + terminalUnavailableSymbols.length,
+                syncUnavailable: unavailableCount + terminalUnavailableSymbols.length,
               });
               return next;
             },
           );
           setSelectedTicker((current) => current ?? quoteBatch.quotes[0]?.symbol);
-          attemptedCount += quoteBatch.quotes.length + quoteBatch.unavailableSymbols.length;
-          unavailableCount += quoteBatch.unavailableSymbols.length;
+          attemptedCount += quoteBatch.quotes.length + terminalUnavailableSymbols.length;
+          unavailableCount += terminalUnavailableSymbols.length;
           setSyncAttempted((current) =>
-            current + quoteBatch.quotes.length + quoteBatch.unavailableSymbols.length,
+            current + quoteBatch.quotes.length + terminalUnavailableSymbols.length,
           );
-          setSyncUnavailable((current) => current + quoteBatch.unavailableSymbols.length);
+          setSyncUnavailable((current) => current + terminalUnavailableSymbols.length);
           if (quoteBatch.quotes.length) {
             setLastSyncedAt(latestSyncedAt);
           }
@@ -2662,6 +2827,41 @@ export default function Dashboard() {
       };
     });
   }, [allocationDecisions, selectedMarket, selectedMarketStatus, stocks]);
+
+  useEffect(() => {
+    if (!selectedMarket || loading || syncAttempted === 0) return;
+    const storage = cacheStorage();
+    if (!storage) return;
+
+    const key = priorityCandidatesStorageKey(selectedMarket);
+    const nextSignature = serializePriorityCandidates(priorityCandidates);
+    let previousSignature: string | null = null;
+    try {
+      previousSignature = storage.getItem(key);
+    } catch {
+      previousSignature = null;
+    }
+
+    if (previousSignature && previousSignature !== nextSignature) {
+      const previous = parsePriorityCandidates(previousSignature);
+      const next = parsePriorityCandidates(nextSignature);
+      const body = describePriorityCandidateChange(previous, next);
+
+      if (body) {
+        void sendPriorityAllocationNotification(selectedMarket, body);
+        toast({
+          title: "Priority Allocation Candidates changed",
+          description: body,
+        });
+      }
+    }
+
+    try {
+      storage.setItem(key, nextSignature);
+    } catch {
+      // Notification dedupe is best-effort when browser storage is restricted.
+    }
+  }, [loading, priorityCandidates, selectedMarket, syncAttempted]);
   return (
     <main className="min-h-screen bg-[#020817] text-slate-100">
       <div className="mx-auto max-w-[1600px] px-6 py-6">

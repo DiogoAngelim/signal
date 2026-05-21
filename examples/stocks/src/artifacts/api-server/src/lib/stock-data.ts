@@ -84,10 +84,14 @@ export type SignalLifecycle =
   | "COMPLETED";
 export interface QuoteFetchOptions {
   bypassCache?: boolean;
+  deadlineAt?: number;
+  minRemainingMs?: number;
 }
 
 export interface SignalAttachOptions {
   bypassSignalCache?: boolean;
+  deadlineAt?: number;
+  minRemainingMs?: number;
 }
 
 export interface MarketDailyCandle {
@@ -168,18 +172,36 @@ const LIST_CACHE_TTL_MS = Number(
 const QUOTE_CACHE_TTL_MS = Number(
   process.env.TRADINGVIEW_CACHE_TTL_MS ?? 5 * 60 * 1000,
 );
-const TRADINGVIEW_BATCH_SIZE = Number(process.env.TRADINGVIEW_BATCH_SIZE ?? 8);
+const TRADINGVIEW_MISS_CACHE_TTL_MS = Number(
+  process.env.TRADINGVIEW_MISS_CACHE_TTL_MS ?? 15 * 60 * 1000,
+);
+const TRADINGVIEW_RESOLVED_SYMBOL_CACHE_TTL_MS = Number(
+  process.env.TRADINGVIEW_RESOLVED_SYMBOL_CACHE_TTL_MS ?? 12 * 60 * 60 * 1000,
+);
+const TRADINGVIEW_BATCH_SIZE = Number(process.env.TRADINGVIEW_BATCH_SIZE ?? 10);
 const TRADINGVIEW_BATCH_DELAY_MS = Number(
-  process.env.TRADINGVIEW_BATCH_DELAY_MS ?? 500,
+  process.env.TRADINGVIEW_BATCH_DELAY_MS ?? 0,
 );
 const MAX_SYMBOLS_PER_REQUEST = Number(
-  process.env.TRADINGVIEW_MAX_SYMBOLS ?? 30,
+  process.env.TRADINGVIEW_MAX_SYMBOLS ?? 24,
 );
 const TRADINGVIEW_REQUESTS_PER_MINUTE = Number(
-  process.env.TRADINGVIEW_REQUESTS_PER_MINUTE ?? 120,
+  process.env.TRADINGVIEW_REQUESTS_PER_MINUTE ?? 54,
+);
+const TRADINGVIEW_REQUEST_BURST_SIZE = Number(
+  process.env.TRADINGVIEW_REQUEST_BURST_SIZE ?? 3,
+);
+const TRADINGVIEW_MAX_CANDIDATES_PER_SYMBOL = Number(
+  process.env.TRADINGVIEW_MAX_CANDIDATES_PER_SYMBOL ?? 4,
+);
+const TRADINGVIEW_BACKOFF_BASE_MS = Number(
+  process.env.TRADINGVIEW_BACKOFF_BASE_MS ?? 2_000,
+);
+const TRADINGVIEW_BACKOFF_MAX_MS = Number(
+  process.env.TRADINGVIEW_BACKOFF_MAX_MS ?? 30_000,
 );
 const TRADINGVIEW_TIMEOUT_MS = Number(
-  process.env.TRADINGVIEW_TIMEOUT_MS ?? 15_000,
+  process.env.TRADINGVIEW_TIMEOUT_MS ?? 10_000,
 );
 const QUOTE_HISTORY_BARS = Number(process.env.TRADINGVIEW_QUOTE_BARS ?? 320);
 const MARKET_VOLATILITY_LOOKBACK_YEARS = Number(
@@ -222,10 +244,22 @@ const marketCache = new Map<
   { expiresAt: number; items: StockListItem[] }
 >();
 const quoteCache = new Map<string, { expiresAt: number; quote: StockQuote }>();
+type TradingViewRow = { date: string; price: number };
+type TradingViewRowsOptions = {
+  bars?: number;
+  lookbackYears?: number;
+  deadlineAt?: number;
+  minRemainingMs?: number;
+};
 const tradingViewRowsCache = new Map<
   string,
-  { expiresAt: number; rows: Array<{ date: string; price: number }> }
+  { expiresAt: number; rows: TradingViewRow[] }
 >();
+const tradingViewResolvedSymbolCache = new Map<
+  string,
+  { expiresAt: number; tvSymbol: string }
+>();
+const tradingViewRowsInFlight = new Map<string, Promise<TradingViewRow[]>>();
 type SignalSnapshot = Pick<
   StockQuote,
   | "signalAction"
@@ -248,6 +282,17 @@ const signalCache = new Map<
 >();
 const tradingViewRequestTimestamps: number[] = [];
 let tradingViewQueue: Promise<void> = Promise.resolve();
+let tradingViewBackoffUntil = 0;
+let consecutiveTradingViewFailures = 0;
+
+function hasTimeRemaining(
+  options?: { deadlineAt?: number; minRemainingMs?: number },
+  fallbackMinRemainingMs = 2_500,
+): boolean {
+  if (!options?.deadlineAt) return true;
+  const minRemainingMs = options.minRemainingMs ?? fallbackMinRemainingMs;
+  return Date.now() + minRemainingMs < options.deadlineAt;
+}
 
 function clampMetric(value: number, min = 0, max = 100): number {
   return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
@@ -327,6 +372,30 @@ function deriveRegime(quote: StockQuote): AdaptiveRegime {
   if (quote.signalAction === "Sell" || quote.status === "Dip") return "MEAN_REVERTING";
   if (volatility <= 0.35 && range <= 12) return "COMPRESSION";
   return "LOW_VOL";
+}
+
+function deriveTrainingMarketCondition(quote: StockQuote): AdaptiveRegime {
+  const change = Number(quote.changePercent ?? 0);
+  const absChange = Math.abs(change);
+  const volatility = standardDeviation(returnsFromHistory(quote.history)) * 100;
+  const range =
+    quote.high52 && quote.low52 && quote.price
+      ? ((quote.high52 - quote.low52) / Math.max(quote.price, 0.0001)) * 100
+      : 0;
+
+  if (absChange >= 8 || (quote.status === "Watch" && change < -3)) return "PANIC";
+  if (quote.status === "Watch" || volatility >= 2.5) return "HIGH_VOL";
+  if (quote.status === "Rising" && change > 0) {
+    return absChange >= 1.2 ? "BREAKOUT" : "TRENDING";
+  }
+  if (quote.status === "Dip" || change < 0) return "MEAN_REVERTING";
+  if (volatility <= 0.35 && range <= 12) return "COMPRESSION";
+  return "LOW_VOL";
+}
+
+function trainingMarketScope(market: string | undefined, quote: StockQuote) {
+  const base = (market ?? "GLOBAL").trim().toUpperCase() || "GLOBAL";
+  return `${base}|${deriveTrainingMarketCondition(quote)}`;
 }
 
 function deriveLifecycleState(quote: StockQuote): SignalLifecycle {
@@ -584,6 +653,7 @@ export async function fetchQuotes(
     TRADINGVIEW_BATCH_SIZE,
     TRADINGVIEW_BATCH_DELAY_MS,
     async (symbol) => {
+      if (!hasTimeRemaining(options, 4_000)) return;
       let quote: StockQuote | null = null;
       let lastError: unknown = null;
 
@@ -601,6 +671,7 @@ export async function fetchQuotes(
         logger.warn({ exchange: normalized, symbol }, "No live quote rows returned");
       }
     },
+    { shouldContinue: () => hasTimeRemaining(options, 4_000) },
   );
 
   return results;
@@ -628,6 +699,7 @@ export async function fetchMarketQuotes(
     TRADINGVIEW_BATCH_SIZE,
     TRADINGVIEW_BATCH_DELAY_MS,
     async (symbol) => {
+      if (!hasTimeRemaining(options, 4_000)) return;
       let quote: StockQuote | null = null;
       let lastError: unknown = null;
 
@@ -645,6 +717,7 @@ export async function fetchMarketQuotes(
         logger.warn({ market: normalized, symbol }, "No live quote rows returned");
       }
     },
+    { shouldContinue: () => hasTimeRemaining(options, 4_000) },
   );
 
   return results;
@@ -666,6 +739,7 @@ export async function fetchMarketDailyCandles(
     TRADINGVIEW_BATCH_SIZE,
     TRADINGVIEW_BATCH_DELAY_MS,
     async (symbol) => {
+      if (!hasTimeRemaining(undefined, 4_000)) return;
       const rows = await fetchTradingViewRows(symbol, normalized, {
         bars: MARKET_VOLATILITY_BARS,
         lookbackYears: MARKET_VOLATILITY_LOOKBACK_YEARS,
@@ -695,7 +769,9 @@ export async function attachSignalsToQuotes(
   const signalResults = await Promise.all(
     quotes.map(async (quote) => ({
       symbol: quote.symbol,
-      signal: await getSignalForQuote(quote, market, options),
+      signal: hasTimeRemaining(options, 2_500)
+        ? await getSignalForQuote(quote, market, options)
+        : buildEphemeralSignalSnapshot(quote),
     })),
   );
   const signalMap = new Map(
@@ -758,6 +834,10 @@ async function fetchQuote(
     return cached.quote;
   }
 
+  if (!hasTimeRemaining(options, 4_000)) {
+    return cached?.quote ?? null;
+  }
+
   if (isBinanceScope(exchange, market) && !process.env.VERCEL) {
     const binanceQuote = await fetchBinanceQuote(symbol);
     if (binanceQuote) {
@@ -771,6 +851,8 @@ async function fetchQuote(
 
   const rows = await fetchTradingViewRows(symbol, market, {
     bars: QUOTE_HISTORY_BARS,
+    deadlineAt: options?.deadlineAt,
+    minRemainingMs: options?.minRemainingMs,
   });
   if (!rows.length) {
     logger.warn(
@@ -827,7 +909,12 @@ async function getSignalForQuote(
   market?: string,
   options?: SignalAttachOptions,
 ): Promise<SignalSnapshot> {
-  const cacheKey = `${(market ?? "GLOBAL").toUpperCase()}:${quote.symbol}`;
+  if (!hasTimeRemaining(options, 2_500)) {
+    return buildEphemeralSignalSnapshot(quote);
+  }
+
+  const scopedMarket = trainingMarketScope(market, quote);
+  const cacheKey = `${scopedMarket}:${quote.symbol}`;
   const cached = signalCache.get(cacheKey);
   const useCache = !options?.bypassSignalCache && cached && cached.expiresAt > Date.now();
 
@@ -838,17 +925,24 @@ async function getSignalForQuote(
 
   // Cache miss or snapshot not yet stored: compute signal + record snapshot
   const trainingState = await getSignalTrainingState(
-    market ?? "GLOBAL",
+    scopedMarket,
     quote.symbol,
   );
+  if (!hasTimeRemaining(options, 2_000)) {
+    return buildEphemeralSignalSnapshot(quote);
+  }
   const signal = useCache
     ? cached.signal
-    : await createSignalDecision(quote, market, trainingState);
+    : await createSignalDecision(quote, market, trainingState, scopedMarket);
+
+  if (!hasTimeRemaining(options, 1_500)) {
+    return buildSignalSnapshot(quote, signal);
+  }
 
   const currentPrice =
     Number.isFinite(quote.price) && quote.price > 0 ? quote.price : 0;
   const snapshot = await recordSignalSnapshot({
-    market: market ?? "GLOBAL",
+    market: scopedMarket,
     symbol: quote.symbol,
     currentPrice,
     signal,
@@ -870,17 +964,69 @@ async function getSignalForQuote(
   return snapshot;
 }
 
+function buildSignalSnapshot(
+  quote: StockQuote,
+  signal: SignalDecision,
+): SignalSnapshot {
+  const currentPrice =
+    Number.isFinite(quote.price) && quote.price > 0 ? quote.price : 0;
+  const entryPrice =
+    Number.isFinite(quote.signalEntryPrice) && quote.signalEntryPrice! > 0
+      ? quote.signalEntryPrice!
+      : currentPrice;
+  const signalReturnPercent =
+    entryPrice > 0 && currentPrice > 0
+      ? ((currentPrice - entryPrice) / entryPrice) * 100
+      : 0;
+
+  return {
+    ...signal,
+    signalEmittedAt: quote.signalEmittedAt ?? new Date().toISOString(),
+    signalEntryPrice: entryPrice,
+    signalReturnPercent: Number(signalReturnPercent.toFixed(2)),
+  };
+}
+
+function buildEphemeralSignalSnapshot(quote: StockQuote): SignalSnapshot {
+  const signal = deriveHeuristicSignal(quote, defaultSignalTrainingState(quote.symbol));
+  return buildSignalSnapshot(quote, signal);
+}
+
+function defaultSignalTrainingState(symbol: string): SignalTrainingState {
+  return {
+    market: "GLOBAL",
+    symbol: symbol.trim().toUpperCase(),
+    lastSignalAction: "Hold",
+    lastSignalConfidence: 50,
+    lastSignalSource: "heuristic",
+    lastSignalEmittedAt: null,
+    lastSignalEntryPrice: 0,
+    lastObservedPrice: 0,
+    lastObservedAt: null,
+    buyObservations: 0,
+    buySuccesses: 0,
+    holdObservations: 0,
+    holdSuccesses: 0,
+    sellObservations: 0,
+    sellSuccesses: 0,
+    buyThreshold: 1.2,
+    sellThreshold: -1.2,
+    confidenceBias: 0,
+  };
+}
+
 async function createSignalDecision(
   quote: StockQuote,
   market: string | undefined,
   trainingState: SignalTrainingState,
+  trainingScope: string = market ?? "GLOBAL",
 ): Promise<SignalDecision> {
   const fromModel = await evaluateNodeEcuSignal(quote, market);
   const signal = calibrateSignalDecision(
     fromModel ?? deriveHeuristicSignal(quote, trainingState),
     trainingState,
   );
-  const cacheKey = `${(market ?? "GLOBAL").toUpperCase()}:${quote.symbol}`;
+  const cacheKey = `${trainingScope.toUpperCase()}:${quote.symbol}`;
 
   signalCache.set(cacheKey, {
     expiresAt: Date.now() + SIGNAL_CACHE_TTL_MS,
@@ -1255,13 +1401,19 @@ function clampNumber(value: number, min: number, max: number): number {
 async function fetchTradingViewRows(
   symbol: string,
   market?: string,
-  options: { bars?: number; lookbackYears?: number } = {},
-): Promise<Array<{ date: string; price: number }>> {
-  const candidates = buildTradingViewCandidates(symbol, market);
+  options: TradingViewRowsOptions = {},
+): Promise<TradingViewRow[]> {
+  const resolutionKey = tradingViewResolutionKey(symbol, market);
+  const candidates = prioritizeTradingViewCandidates(
+    buildTradingViewCandidates(symbol, market),
+    resolutionKey,
+  );
 
   for (const candidate of candidates) {
+    if (!hasTimeRemaining(options, 4_000)) break;
     const rows = await fetchTradingViewRowsForSymbol(candidate, options);
     if (rows.length) {
+      cacheResolvedTradingViewSymbol(resolutionKey, candidate);
       return rows;
     }
   }
@@ -1319,25 +1471,53 @@ function stripYahooSuffix(symbol: string): string {
 
 async function fetchTradingViewRowsForSymbol(
   tvSymbol: string,
-  options: { bars?: number; lookbackYears?: number } = {},
-): Promise<Array<{ date: string; price: number }>> {
-  const cacheKey = `${tvSymbol}:${options.bars ?? ""}:${options.lookbackYears ?? ""}`;
+  options: TradingViewRowsOptions = {},
+): Promise<TradingViewRow[]> {
+  const cacheKey = tradingViewRowsCacheKey(tvSymbol, options);
   const cached = tradingViewRowsCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) {
     return cached.rows;
   }
+
+  const pending = tradingViewRowsInFlight.get(cacheKey);
+  if (pending) return pending;
+
+  const request = fetchTradingViewRowsForSymbolUncached(tvSymbol, options, cacheKey)
+    .finally(() => {
+      tradingViewRowsInFlight.delete(cacheKey);
+    });
+  tradingViewRowsInFlight.set(cacheKey, request);
+  return request;
+}
+
+async function fetchTradingViewRowsForSymbolUncached(
+  tvSymbol: string,
+  options: TradingViewRowsOptions,
+  cacheKey: string,
+): Promise<TradingViewRow[]> {
+  if (!hasTimeRemaining(options, 4_000)) return [];
 
   const url = buildTradingViewUrl(tvSymbol, options);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TRADINGVIEW_TIMEOUT_MS);
 
   try {
-    await scheduleTradingViewRequest();
+    const scheduled = await scheduleTradingViewRequest(options);
+    if (!scheduled) return [];
     const response = await fetch(url, {
       headers: { Accept: "text/csv, text/plain, */*" },
       signal: controller.signal,
     });
     if (!response.ok) {
+      const retryAfterMs = retryAfterHeaderMs(response.headers.get("retry-after"));
+      registerTradingViewFailure(retryAfterMs);
+      cacheTradingViewRows(
+        cacheKey,
+        [],
+        response.status === 404
+          ? TRADINGVIEW_MISS_CACHE_TTL_MS
+          : Math.min(TRADINGVIEW_MISS_CACHE_TTL_MS, retryAfterMs ?? 60_000),
+      );
       logger.warn(
         { symbol: tvSymbol, status: response.status, statusText: response.statusText },
         "TradingView quote request failed",
@@ -1353,12 +1533,20 @@ async function fetchTradingViewRowsForSymbol(
         "TradingView quote response contained no parseable rows",
       );
     }
-    tradingViewRowsCache.set(cacheKey, {
-      expiresAt: Date.now() + QUOTE_CACHE_TTL_MS,
+    registerTradingViewSuccess();
+    cacheTradingViewRows(
+      cacheKey,
       rows,
-    });
+      rows.length ? QUOTE_CACHE_TTL_MS : TRADINGVIEW_MISS_CACHE_TTL_MS,
+    );
     return rows;
   } catch (error) {
+    registerTradingViewFailure();
+    cacheTradingViewRows(
+      cacheKey,
+      [],
+      Math.min(TRADINGVIEW_MISS_CACHE_TTL_MS, 30_000),
+    );
     logger.warn({ symbol: tvSymbol, err: error }, "TradingView quote request errored");
     return [];
   } finally {
@@ -1366,19 +1554,94 @@ async function fetchTradingViewRowsForSymbol(
   }
 }
 
-async function scheduleTradingViewRequest(): Promise<void> {
+function tradingViewRowsCacheKey(
+  tvSymbol: string,
+  options: TradingViewRowsOptions = {},
+) {
+  return `${tvSymbol}:${options.bars ?? ""}:${options.lookbackYears ?? ""}`;
+}
+
+function cacheTradingViewRows(
+  cacheKey: string,
+  rows: TradingViewRow[],
+  ttlMs: number,
+) {
+  tradingViewRowsCache.set(cacheKey, {
+    expiresAt: Date.now() + Math.max(1_000, ttlMs),
+    rows,
+  });
+}
+
+function tradingViewResolutionKey(symbol: string, market?: string) {
+  return `${market?.trim().toUpperCase() ?? "GLOBAL"}:${symbol.trim().toUpperCase()}`;
+}
+
+function prioritizeTradingViewCandidates(
+  candidates: string[],
+  resolutionKey: string,
+) {
+  const resolved = tradingViewResolvedSymbolCache.get(resolutionKey);
+  const preferred =
+    resolved && resolved.expiresAt > Date.now() ? resolved.tvSymbol : undefined;
+  if (resolved && resolved.expiresAt <= Date.now()) {
+    tradingViewResolvedSymbolCache.delete(resolutionKey);
+  }
+
+  const ordered = preferred
+    ? [preferred, ...candidates.filter((candidate) => candidate !== preferred)]
+    : candidates;
+  const limit = Math.max(
+    1,
+    Math.floor(
+      Number.isFinite(TRADINGVIEW_MAX_CANDIDATES_PER_SYMBOL)
+        ? TRADINGVIEW_MAX_CANDIDATES_PER_SYMBOL
+        : 4,
+    ),
+  );
+  return Array.from(new Set(ordered)).slice(0, limit);
+}
+
+function cacheResolvedTradingViewSymbol(resolutionKey: string, tvSymbol: string) {
+  tradingViewResolvedSymbolCache.set(resolutionKey, {
+    expiresAt: Date.now() + TRADINGVIEW_RESOLVED_SYMBOL_CACHE_TTL_MS,
+    tvSymbol,
+  });
+}
+
+async function scheduleTradingViewRequest(
+  options?: { deadlineAt?: number; minRemainingMs?: number },
+): Promise<boolean> {
   if (
     !Number.isFinite(TRADINGVIEW_REQUESTS_PER_MINUTE) ||
     TRADINGVIEW_REQUESTS_PER_MINUTE <= 0
   ) {
-    return;
+    return true;
   }
 
   const limit = Math.max(1, Math.floor(TRADINGVIEW_REQUESTS_PER_MINUTE));
+  const burstSize = Math.max(
+    1,
+    Math.min(
+      limit,
+      Math.floor(
+        Number.isFinite(TRADINGVIEW_REQUEST_BURST_SIZE)
+          ? TRADINGVIEW_REQUEST_BURST_SIZE
+          : 1,
+      ),
+    ),
+  );
+  const minGapMs = Math.ceil(60_000 / limit);
   const windowMs = 60 * 1000;
 
-  tradingViewQueue = tradingViewQueue.then(async () => {
-    const now = Date.now();
+  const scheduled = tradingViewQueue.catch(() => undefined).then(async () => {
+    let now = Date.now();
+    if (tradingViewBackoffUntil > now) {
+      const waitMs = tradingViewBackoffUntil - now;
+      if (!hasTimeAfterWait(waitMs, options, 1_500)) return false;
+      await sleep(waitMs);
+      now = Date.now();
+    }
+
     while (
       tradingViewRequestTimestamps.length &&
       now - tradingViewRequestTimestamps[0] >= windowMs
@@ -1388,13 +1651,73 @@ async function scheduleTradingViewRequest(): Promise<void> {
 
     if (tradingViewRequestTimestamps.length >= limit) {
       const waitMs = windowMs - (now - tradingViewRequestTimestamps[0]) + 10;
-      await new Promise((resolve) => setTimeout(resolve, Math.max(0, waitMs)));
+      if (!hasTimeAfterWait(waitMs, options, 1_500)) return false;
+      await sleep(Math.max(0, waitMs));
+      now = Date.now();
+      while (
+        tradingViewRequestTimestamps.length &&
+        now - tradingViewRequestTimestamps[0] >= windowMs
+      ) {
+        tradingViewRequestTimestamps.shift();
+      }
+    }
+
+    const lastRequestAt =
+      tradingViewRequestTimestamps[tradingViewRequestTimestamps.length - 1] ?? 0;
+    if (
+      tradingViewRequestTimestamps.length >= burstSize &&
+      now - lastRequestAt < minGapMs
+    ) {
+      const waitMs = minGapMs - (now - lastRequestAt);
+      if (!hasTimeAfterWait(waitMs, options, 1_500)) return false;
+      await sleep(waitMs);
     }
 
     tradingViewRequestTimestamps.push(Date.now());
+    return true;
   });
+  tradingViewQueue = scheduled.then(() => undefined, () => undefined);
 
-  return tradingViewQueue;
+  return scheduled;
+}
+
+function hasTimeAfterWait(
+  waitMs: number,
+  options?: { deadlineAt?: number; minRemainingMs?: number },
+  fallbackMinRemainingMs = 1_500,
+) {
+  if (!options?.deadlineAt) return true;
+  const minRemainingMs = options.minRemainingMs ?? fallbackMinRemainingMs;
+  return Date.now() + Math.max(0, waitMs) + minRemainingMs < options.deadlineAt;
+}
+
+function registerTradingViewSuccess() {
+  consecutiveTradingViewFailures = 0;
+  tradingViewBackoffUntil = 0;
+}
+
+function registerTradingViewFailure(retryAfterMs?: number | null) {
+  consecutiveTradingViewFailures += 1;
+  const exponentialBackoffMs = Math.min(
+    TRADINGVIEW_BACKOFF_MAX_MS,
+    TRADINGVIEW_BACKOFF_BASE_MS * 2 ** Math.min(consecutiveTradingViewFailures - 1, 5),
+  );
+  const backoffMs = Math.max(retryAfterMs ?? 0, exponentialBackoffMs);
+  tradingViewBackoffUntil = Math.max(tradingViewBackoffUntil, Date.now() + backoffMs);
+}
+
+function retryAfterHeaderMs(value: string | null): number | null {
+  if (!value) return null;
+  const seconds = Number(value);
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return seconds * 1000;
+  }
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? Math.max(0, timestamp - Date.now()) : null;
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, Math.max(0, ms)));
 }
 
 function buildTradingViewUrl(
@@ -1586,13 +1909,16 @@ async function runBatched<T>(
   batchSize: number,
   batchDelayMs: number,
   handler: (item: T) => Promise<void>,
+  options?: { shouldContinue?: () => boolean },
 ): Promise<void> {
   const size = Math.max(1, Math.floor(batchSize));
   const delay = Math.max(0, Math.floor(batchDelayMs));
 
   for (let index = 0; index < items.length; index += size) {
+    if (options?.shouldContinue && !options.shouldContinue()) break;
     const batch = items.slice(index, index + size);
     await Promise.all(batch.map((item) => handler(item)));
+    if (options?.shouldContinue && !options.shouldContinue()) break;
     if (delay > 0 && index + size < items.length) {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }

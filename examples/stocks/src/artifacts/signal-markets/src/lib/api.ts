@@ -144,6 +144,7 @@ export interface StockQuoteBatchResponse {
   exchange?: string;
   requestedSymbols: string[];
   unavailableSymbols: string[];
+  deferredSymbols?: string[];
   partial: boolean;
   quotes: StockQuote[];
 }
@@ -353,6 +354,7 @@ export async function fetchStockQuoteBatch(
     exchange?: string;
     requestedSymbols?: string[];
     unavailableSymbols?: string[];
+    deferredSymbols?: string[];
     partial?: boolean;
     quotes: StockQuote[];
   }>("/stocks/quotes", {
@@ -371,12 +373,14 @@ export async function fetchStockQuoteBatch(
   const unavailableSymbols =
     response.unavailableSymbols ??
     requestedSymbols.filter((symbol) => !returnedSymbols.has(symbol));
+  const deferredSymbols = response.deferredSymbols ?? [];
 
   const batch = {
     market: response.market,
     exchange: response.exchange,
     requestedSymbols,
     unavailableSymbols,
+    deferredSymbols,
     partial: response.partial ?? unavailableSymbols.length > 0,
     quotes: response.quotes,
   };
