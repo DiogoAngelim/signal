@@ -345,7 +345,7 @@ const DEFAULT_MARKET_SCHEDULE: MarketSchedule = {
 };
 const STARTING_PORTFOLIO_VALUE = 1000;
 const STOCK_LIST_PAGE_SIZE = 5000;
-const QUOTE_REQUEST_SYMBOL_BATCH_SIZE = 30;
+const QUOTE_REQUEST_SYMBOL_BATCH_SIZE = 12;
 const QUOTE_BATCH_DELAY_MS = 100;
 const QUOTE_REQUEST_TIMEOUT_MS = 240_000;
 const SYNCING_QUOTE_SUMMARY = "Market sweep in progress.";
@@ -562,35 +562,15 @@ function signalEntryKey(stock: StockData): string {
   ].join("|");
 }
 
-function resolveSimulatedEntryPrice(stock: StockData, currentPrice: number) {
-  const signalEntryPrice = Number(stock.signalEntryPrice);
-  if (
-    Number.isFinite(signalEntryPrice) &&
-    signalEntryPrice > 0 &&
-    Math.abs(signalEntryPrice - currentPrice) / currentPrice > 0.0001
-  ) {
-    return signalEntryPrice;
-  }
-
-  const changePercent = Number(stock.changePercent);
-  if (Number.isFinite(changePercent) && changePercent > -99.9) {
-    const previousClose = currentPrice / (1 + changePercent / 100);
-    if (Number.isFinite(previousClose) && previousClose > 0) {
-      return previousClose;
-    }
-  }
-
-  return currentPrice;
-}
-
 function returnsFromHistory(history: number[] | undefined): number[] {
-  if (!history || history.length < 3) return [];
+  const prices = (history ?? []).filter((price) => Number.isFinite(price) && price > 0);
+  if (prices.length < 2) return [];
 
-  return history
+  return prices
     .slice(1)
     .map((price, index) => {
-      const previous = history[index];
-      return previous && previous > 0 ? (price - previous) / previous : 0;
+      const previous = prices[index];
+      return (price - previous) / previous;
     })
     .filter((value) => Number.isFinite(value));
 }
@@ -738,7 +718,22 @@ function mean(values: number[]) {
 function stddev(values: number[]) {
   if (values.length < 2) return 0;
   const avg = mean(values);
-  return Math.sqrt(mean(values.map((value) => (value - avg) ** 2)));
+  return Math.sqrt(
+    values.reduce((sum, value) => sum + (value - avg) ** 2, 0) /
+      (values.length - 1),
+  );
+}
+
+function maxDrawdownFromReturns(returns: number[]) {
+  let value = 1;
+  let peak = 1;
+  let maxDrawdown = 0;
+  for (const periodReturn of returns) {
+    value *= 1 + periodReturn;
+    peak = Math.max(peak, value);
+    maxDrawdown = Math.max(maxDrawdown, peak > 0 ? (peak - value) / peak : 0);
+  }
+  return maxDrawdown;
 }
 
 function rollingReturns(stock: StockData) {
@@ -799,14 +794,15 @@ function lifecycleState(stock: StockData, now: number): { state: SignalLifecycle
 }
 
 function stabilizedRatio(returns: number[], downsideOnly = false) {
-  const sample = downsideOnly ? returns.filter((value) => value < 0) : returns;
-  const minWindow = 20;
-  const sampleWeight = clampMetric(returns.length / minWindow, 0, 1);
+  if (returns.length < 2) return 0;
+  const downside = returns.filter((value) => value < 0);
+  const sampleWeight = clampMetric(returns.length / (returns.length + 20), 0, 1);
   const avg = mean(returns);
-  const volatilityFloor = 0.008;
-  const volatility = Math.max(stddev(sample), volatilityFloor);
+  const volatility = downsideOnly
+    ? Math.sqrt(mean((downside.length ? downside : [0]).map((value) => value ** 2)))
+    : stddev(returns);
   const cappedAnnualization = Math.sqrt(Math.min(Math.max(returns.length, 1), 30));
-  const raw = volatility > 0 ? (avg / volatility) * cappedAnnualization : 0;
+  const raw = (avg / Math.max(volatility, 0.006)) * cappedAnnualization;
   return Number((Math.max(-4, Math.min(4, raw * sampleWeight))).toFixed(2));
 }
 
@@ -818,30 +814,41 @@ function deriveAdaptiveSignal(stock: StockData, now: number): AdaptiveSignalView
   const absChange = Math.abs(change);
   const signalAction = stock.signalAction ?? "Hold";
   const confidence = clampMetric(stock.confidence ?? stock.signalConfidence ?? (signalAction === "Hold" ? 46 : 58 + absChange * 8));
-  const volatilityShift = clampMetric(deviation * 1300 + absChange * 4);
-  const driftScore = clampMetric(stock.driftScore ?? volatilityShift * 0.55 + (stock.quoteStatus === "unavailable" ? 35 : 0) + (stock.status === "Watch" ? 18 : 0));
+  const volatilityPct = deviation * 100;
+  const volatilityShift = clampMetric(stock.diagnostics?.volatilityShift ?? deviation * 1000 + absChange * 3);
+  const driftScore = clampMetric(stock.driftScore ?? volatilityShift * 0.58 + (stock.quoteStatus === "unavailable" ? 35 : 0) + (stock.status === "Watch" ? 16 : 0));
   const stabilityScore = clampMetric(stock.stabilityScore ?? 100 - driftScore * 0.72 - (signalAction === "Hold" ? 8 : 0));
   const uncertainty = clampMetric(stock.uncertainty ?? 100 - confidence * 0.68 + driftScore * 0.38);
   const agreement = clampMetric(stock.ensembleAgreement != null ? stock.ensembleAgreement * 100 : confidence * 0.62 + stabilityScore * 0.32 - uncertainty * 0.12);
   const consensus = clampMetric(stock.featureConsensus != null ? stock.featureConsensus * 100 : agreement * 0.72 + stabilityScore * 0.2);
   const direction = signalAction === "Sell" ? -1 : signalAction === "Buy" ? 1 : change >= 0 ? 1 : -1;
-  const expectedMovePct = Number((stock.expectedMovePct ?? direction * Math.max(absChange, deviation * 100) * (confidence / 75)).toFixed(2));
+  const trendComponentPct =
+    Math.abs(avg) * 100 * Math.sqrt(Math.min(Math.max(returns.length, 1), 10));
+  const volatilityForecastPct =
+    volatilityPct * Math.sqrt(Math.min(Math.max(returns.length, 1), 5));
+  const fallbackMovePct =
+    direction *
+    clampMetric(
+      (Math.max(absChange * 0.45, trendComponentPct) + volatilityForecastPct * 0.6) *
+        (0.55 + confidence / 160),
+      0.05,
+      18,
+    );
+  const expectedMovePct = Number((stock.expectedMovePct ?? fallbackMovePct).toFixed(2));
   const winReturns = returns.filter((value) => value > 0);
   const lossReturns = returns.filter((value) => value < 0);
   const hitRate = returns.length ? (winReturns.length / returns.length) * 100 : confidence * 0.55;
   const profitFactor = Math.abs(lossReturns.reduce((sum, value) => sum + value, 0)) > 0
     ? Math.abs(winReturns.reduce((sum, value) => sum + value, 0) / lossReturns.reduce((sum, value) => sum + value, 0))
     : winReturns.length ? 3 : 1;
-  const maxDrawdown = Math.max(0, ...returns.map((_, index) => {
-    const slice = returns.slice(0, index + 1);
-    const cumulative = slice.reduce((value, item) => value * (1 + item), 1);
-    const peak = Math.max(1, ...slice.map((__, peakIndex) => slice.slice(0, peakIndex + 1).reduce((value, item) => value * (1 + item), 1)));
-    return ((peak - cumulative) / peak) * 100;
-  }));
+  const maxDrawdown = maxDrawdownFromReturns(returns) * 100;
   const { state, ageMs } = lifecycleState(stock, now);
   const regime = stock.regime ?? deriveRegime(stock);
   const entropy = clampMetric(signalAction === "Hold" ? 62 - confidence * 0.2 : 44 + uncertainty * 0.38);
-  const predictionResidual = clampMetric(Math.abs((stock.signalReturnPercent ?? change) - expectedMovePct) * 8);
+  const predictionResidual = clampMetric(
+    Math.abs((stock.signalReturnPercent ?? change) - expectedMovePct) * 5 +
+    Math.max(0, volatilityShift - 60) * 0.15,
+  );
 
   return {
     ...stock,
@@ -1104,12 +1111,20 @@ function buildExecutionDecisions(
       survival: survivalForecast,
     });
     const calibratedConfidence = clampMetric(initialCalibratedConfidence * metaAllocation.confidenceDiscount, 24, initialCalibratedConfidence);
+    const returnQuality = clampMetric(
+      50 +
+      signal.rollingSharpe * 9 +
+      signal.expectancy * 5 -
+      signal.maxDrawdown * 0.35,
+    );
+    const expectedMoveQuality = clampMetric(Math.abs(signal.expectedMovePct) * 7, 0, 24);
     const signalQuality = clampMetric(
-      calibratedConfidence * 0.34 +
-      signal.stabilityScore * 0.22 +
-      signal.ensembleAgreement * 100 * 0.22 +
-      Math.max(0, Math.abs(signal.expectedMovePct)) * 2.2 -
-      signal.driftScore * 0.18,
+      calibratedConfidence * 0.28 +
+      signal.stabilityScore * 0.2 +
+      signal.ensembleAgreement * 100 * 0.18 +
+      returnQuality * 0.18 +
+      expectedMoveQuality -
+      signal.driftScore * 0.14,
     );
     const calibrationScore = clampMetric(
       preliminaryCalibrationScore * 0.55 +
@@ -1119,12 +1134,20 @@ function buildExecutionDecisions(
     const survival = survivalForecast.survivalProbability;
     const regime = regimeQuality(signal);
     const liquidity = liquidityScore(signal);
-    const volatilityPenalty = clampMetric(12 + signal.volatilityShift * 0.72 + signal.uncertainty * 0.35, 8, 100);
-    const riskScore = clampMetric(
-      signal.driftScore * 0.35 +
+    const volatilityPenalty = clampMetric(
+      10 +
+      signal.volatilityShift * 0.62 +
       signal.uncertainty * 0.28 +
-      signal.volatilityShift * 0.24 +
-      (100 - calibrationScore) * 0.13 +
+      signal.maxDrawdown * 0.45,
+      8,
+      100,
+    );
+    const riskScore = clampMetric(
+      signal.driftScore * 0.3 +
+      signal.uncertainty * 0.24 +
+      signal.volatilityShift * 0.2 +
+      signal.maxDrawdown * 0.16 +
+      (100 - calibrationScore) * 0.1 +
       (signal.regime === "PANIC" ? 18 : 0),
     );
     const timingState = deriveTimingState(signal);
@@ -1155,16 +1178,23 @@ function buildExecutionDecisions(
         : qualityScore >= 52
           ? "Medium Conviction"
           : "Low Conviction";
-    const baseSize =
+    const allocationIntent =
       actionLabel === "Buy"
-        ? metaAllocation.exposureMultiplier *
-        (signalQuality / 100) *
-        (calibrationScore / 100) *
-        (survival / 100) *
-        (regime / 100) *
-        (liquidity / 100) /
-        Math.max(0.45, volatilityPenalty / 38)
-        : 0;
+        ? 1
+        : actionLabel === "Watch"
+          ? 0.55
+          : actionLabel === "Hold" && action !== "Sell" && qualityScore >= 30 && riskScore < 72
+            ? 0.22
+            : 0;
+    const baseSize =
+      allocationIntent *
+      metaAllocation.exposureMultiplier *
+      (signalQuality / 100) *
+      (calibrationScore / 100) *
+      (survival / 100) *
+      (regime / 100) *
+      (liquidity / 100) /
+      Math.max(0.45, volatilityPenalty / 38);
     const decisionBase = {
       signal,
       actionLabel,
@@ -1207,16 +1237,26 @@ function buildExecutionDecisions(
 
   const totalBase = raw.reduce((sum, item) => sum + item._baseSize, 0);
   const regimeTotals = new Map<AdaptiveRegime, number>();
-  const targetExposure =
-    raw.length && mean(raw.map((item) => item.riskScore)) > 65
-      ? 32
-      : raw.length && mean(raw.map((item) => item.qualityScore)) > 66
-        ? 72
-        : 52;
+  const investable = raw.filter((item) => item._baseSize > 0);
+  const targetExposure = investable.length
+    ? clampMetric(
+      mean(investable.map((item) => item.qualityScore)) * 0.46 +
+      mean(investable.map((item) => item.survivalProbability)) * 0.24 +
+      mean(investable.map((item) => item.metaAllocation.exposureMultiplier * 100)) * 0.26 -
+      mean(investable.map((item) => item.riskScore)) * 0.34,
+      8,
+      78,
+    )
+    : 0;
   let deployed = 0;
   const decisions = raw.map((item) => {
     const normalized = totalBase > 0 ? (item._baseSize / totalBase) * targetExposure : 0;
-    const maxPerAsset = item.riskLevel === "Low Risk" ? 5 : item.riskLevel === "Moderate Risk" ? 4.2 : 2.4;
+    const maxPerAsset =
+      item.actionLabel === "Watch"
+        ? item.riskLevel === "Low Risk" ? 3.2 : item.riskLevel === "Moderate Risk" ? 2.6 : 1.4
+        : item.actionLabel === "Hold"
+          ? item.riskLevel === "Low Risk" ? 2.2 : item.riskLevel === "Moderate Risk" ? 1.6 : 0.8
+          : item.riskLevel === "Low Risk" ? 5 : item.riskLevel === "Moderate Risk" ? 4.2 : 2.4;
     const regimeCap = item.signal.regime === "PANIC" ? 8 : 18;
     const currentRegime = regimeTotals.get(item.signal.regime) ?? 0;
     const allocation = Math.max(
@@ -1889,13 +1929,27 @@ function portfolioStats(portfolio: SimulatedPortfolio) {
   }).filter((value) => Number.isFinite(value));
   const volatility = stddev(periodReturns);
   const avg = mean(periodReturns);
+  const intervals = history.slice(1).map((point, index) => point.t - history[index].t).filter((value) => value > 0);
+  const avgIntervalMs = mean(intervals);
+  const periodsPerYear = avgIntervalMs > 0
+    ? Math.min(252, (365.25 * 24 * 3_600_000) / avgIntervalMs)
+    : 0;
+  const sampleWeight = clampMetric(periodReturns.length / 30, 0, 1);
   const sharpe = periodReturns.length >= 2
-    ? Math.max(-4, Math.min(4, (avg / Math.max(volatility, 0.004)) * Math.sqrt(Math.min(252, periodReturns.length))))
+    ? Math.max(
+      -4,
+      Math.min(
+        4,
+        (avg / Math.max(volatility, 0.004)) *
+          Math.sqrt(periodsPerYear || Math.min(252, periodReturns.length)) *
+          sampleWeight,
+      ),
+    )
     : null;
   const first = history[0]?.t;
   const last = history[history.length - 1]?.t;
   const elapsedMonths = first && last ? (last - first) / (30.44 * 24 * 3_600_000) : 0;
-  const monthlyReturn = elapsedMonths >= 0.5
+  const monthlyReturn = elapsedMonths >= 0.5 && totalReturn > -1
     ? (Math.pow(1 + totalReturn, 1 / elapsedMonths) - 1) * 100
     : null;
   const averageDurationMs = closed.length
@@ -2425,7 +2479,7 @@ export default function Dashboard() {
       const now = Date.now();
       const liveByTicker = new Map(stocks.map((stock) => [stock.ticker, stock]));
       const actionable = allocationDecisions
-        .filter((decision) => decision.actionLabel === "Buy" && decision.suggestedAllocationPct > 0)
+        .filter((decision) => decision.suggestedAllocationPct > 0 && decision.actionLabel !== "Avoid" && decision.actionLabel !== "Reduce")
         .slice(0, 40);
       const rawSuggestedExposure = actionable.reduce((sum, decision) => sum + decision.suggestedAllocationPct, 0);
       const scale =
@@ -2572,12 +2626,11 @@ export default function Dashboard() {
             marketValue: quantity * bid,
           };
         } else {
-          const entryPrice = resolveSimulatedEntryPrice(stock, ask);
           positions[ticker] = {
             ...stock,
             quantity: addedQuantity,
-            entryPrice,
-            investedAmount: addedQuantity * entryPrice,
+            entryPrice: ask,
+            investedAmount: addedQuantity * ask,
             marketValue: addedQuantity * bid,
             targetWeight: target.targetPct / 100,
             openedAt: now,

@@ -750,7 +750,6 @@ export default function Dashboard() {
     void loadStocks();
 
     return () => {
-      cancelled = true;
     };
   }, [marketFilter]);
 

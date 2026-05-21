@@ -1,6 +1,10 @@
 import { randomUUID, createHash } from "crypto";
 import { pool } from "@workspace/db";
-import { type StockQuote, type TradeSignal } from "./stock-data";
+import {
+  type MarketDailyCandle,
+  type StockQuote,
+  type TradeSignal,
+} from "./stock-data";
 import { logger } from "./logger";
 import type { SignalScope } from "./signal-backend";
 
@@ -23,6 +27,14 @@ export interface ContextReplayResult {
   processedRows: number;
   emittedOccurrences: number;
   message?: string;
+}
+
+export interface MarketMonthlyVolatilityResult {
+  market: string;
+  venue: string;
+  candlesProcessed: number;
+  assetMonthsSaved: number;
+  monthsSaved: number;
 }
 
 type MarketContextInput = {
@@ -136,6 +148,9 @@ type HistoryBackfillResult = {
 
 const MARKET_OCCURRENCES_TABLE = "market_occurrences";
 const MARKET_STATE_SNAPSHOTS_TABLE = "market_state_snapshots";
+const MARKET_MONTHLY_VOLATILITY_TABLE = "market_monthly_volatility";
+const MARKET_MONTHLY_ASSET_VOLATILITY_TABLE =
+  "market_monthly_asset_volatility";
 const SIGNAL_OCCURRENCES_TABLE = "signal_occurrences";
 const REGIME_TRANSITIONS_TABLE = "regime_transitions";
 const ALLOCATION_STATE_OCCURRENCES_TABLE = "allocation_state_occurrences";
@@ -147,9 +162,27 @@ const DEFAULT_CANDLE_TABLE =
 const DEFAULT_REPLAY_BATCH_SIZE = Number(
   process.env.MARKET_CONTEXT_REPLAY_BATCH_SIZE ?? 1000,
 );
+const MONTHLY_VOLATILITY_LOOKBACK_YEARS = Number(
+  process.env.MARKET_VOLATILITY_LOOKBACK_YEARS ?? 5,
+);
 const HISTORY_POINT_INTERVAL_MS = 24 * 60 * 60 * 1000;
+const MONTH_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 let schemaReady: Promise<void> | null = null;
+let monthlyVolatilitySchemaReady: Promise<void> | null = null;
 let contextPersistenceWarningLogged = false;
 
 function normalizeIdentifierValue(value: string | undefined, fallback: string) {
@@ -184,16 +217,37 @@ function mean(values: number[]): number {
 function standardDeviation(values: number[]): number {
   if (values.length < 2) return 0;
   const average = mean(values);
-  return Math.sqrt(mean(values.map((value) => (value - average) ** 2)));
+  return Math.sqrt(
+    values.reduce((sum, value) => sum + (value - average) ** 2, 0) /
+      (values.length - 1),
+  );
+}
+
+function utcMonthStart(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+}
+
+function utcMonthStartYearsAgo(years: number): Date {
+  const now = new Date();
+  return new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - years * 12 + 1, 1),
+  );
+}
+
+function monthLabel(monthIndex: number): string {
+  return MONTH_LABELS[monthIndex - 1] ?? "";
 }
 
 function returnsFromHistory(history: number[] | undefined): number[] {
-  if (!history || history.length < 2) return [];
-  return history
+  const prices = (history ?? []).filter(
+    (price) => Number.isFinite(price) && price > 0,
+  );
+  if (prices.length < 2) return [];
+  return prices
     .slice(1)
     .map((price, index) => {
-      const previous = history[index];
-      return previous > 0 ? (price - previous) / previous : 0;
+      const previous = prices[index];
+      return (price - previous) / previous;
     })
     .filter((value) => Number.isFinite(value));
 }
@@ -299,13 +353,14 @@ function diagnoseRegime(input: MarketContextInput) {
       ? ((input.high - input.low) / last) * 100
       : Math.abs(input.quote?.changePercent ?? trendPct);
   const volatility = standardDeviation(returns) * 100;
-  const volatilityPressure = clamp(volatility * 18 + rangePct * 3);
-  const trendQuality = clamp(50 + trendPct * 7 - volatilityPressure * 0.18);
-  const breadth = clamp(50 + (input.quote?.changePercent ?? trendPct) * 4);
+  const realizedMove = Math.abs(input.quote?.changePercent ?? trendPct);
+  const volatilityPressure = clamp(volatility * 10 + rangePct * 1.6 + realizedMove * 2.2);
+  const trendQuality = clamp(50 + trendPct * 5.4 - volatilityPressure * 0.22);
+  const breadth = clamp(50 + (input.quote?.changePercent ?? trendPct) * 3.2);
   const participation = clamp(
     input.volume && input.volume > 0 ? 56 + Math.log10(input.volume) * 4 : 50,
   );
-  const riskPressure = clamp(volatilityPressure * 0.75 + (trendPct < 0 ? Math.abs(trendPct) * 4 : 0));
+  const riskPressure = clamp(volatilityPressure * 0.72 + (trendPct < 0 ? Math.abs(trendPct) * 3.4 : 0));
   const regimeState =
     riskPressure >= 76
       ? "PANIC"
@@ -623,6 +678,62 @@ async function tryEnableTimescale(tableName: string) {
   }
 }
 
+async function ensureMarketMonthlyVolatilitySchema(): Promise<void> {
+  if (!monthlyVolatilitySchemaReady) {
+    monthlyVolatilitySchemaReady = (async () => {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ${MARKET_MONTHLY_ASSET_VOLATILITY_TABLE} (
+          market TEXT NOT NULL,
+          venue TEXT NOT NULL,
+          asset TEXT NOT NULL,
+          month_start TIMESTAMPTZ NOT NULL,
+          year INTEGER NOT NULL,
+          month_index INTEGER NOT NULL,
+          month_label TEXT NOT NULL,
+          volatility_pressure DOUBLE PRECISION NOT NULL,
+          return_count INTEGER NOT NULL,
+          source_min_timestamp_utc TIMESTAMPTZ NOT NULL,
+          source_max_timestamp_utc TIMESTAMPTZ NOT NULL,
+          refreshed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (market, venue, asset, month_start)
+        )
+      `);
+
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS ${MARKET_MONTHLY_ASSET_VOLATILITY_TABLE}_market_month_idx
+        ON ${MARKET_MONTHLY_ASSET_VOLATILITY_TABLE} (market, venue, month_start)
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ${MARKET_MONTHLY_VOLATILITY_TABLE} (
+          market TEXT NOT NULL,
+          venue TEXT NOT NULL,
+          month_start TIMESTAMPTZ NOT NULL,
+          year INTEGER NOT NULL,
+          month_index INTEGER NOT NULL,
+          month_label TEXT NOT NULL,
+          volatility_pressure DOUBLE PRECISION NOT NULL,
+          observation_count INTEGER NOT NULL,
+          source_min_timestamp_utc TIMESTAMPTZ NOT NULL,
+          source_max_timestamp_utc TIMESTAMPTZ NOT NULL,
+          refreshed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (market, venue, month_start)
+        )
+      `);
+
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS ${MARKET_MONTHLY_VOLATILITY_TABLE}_market_month_idx
+        ON ${MARKET_MONTHLY_VOLATILITY_TABLE} (market, venue, month_start)
+      `);
+    })().catch((error) => {
+      monthlyVolatilitySchemaReady = null;
+      throw error;
+    });
+  }
+
+  await monthlyVolatilitySchemaReady;
+}
+
 async function runMarketContextBackfill(
   name: string,
   task: () => Promise<unknown>,
@@ -718,6 +829,8 @@ export async function ensureMarketContextSchema(): Promise<void> {
         CREATE INDEX IF NOT EXISTS ${MARKET_OCCURRENCES_TABLE}_timestamp_brin_idx
         ON ${MARKET_OCCURRENCES_TABLE} USING BRIN (timestamp_utc)
       `);
+
+      await ensureMarketMonthlyVolatilitySchema();
 
       await pool.query(`
         CREATE TABLE IF NOT EXISTS ${MARKET_STATE_SNAPSHOTS_TABLE} (
@@ -1591,16 +1704,16 @@ async function backfillMarketContextFromSignalSnapshots(
       scored AS (
         SELECT
           *,
-          LEAST(100, GREATEST(0, ABS(change_percent) * 6 + ABS(trend_pct) * 2)) AS volatility_pressure,
-          LEAST(100, GREATEST(0, 50 + change_percent * 4)) AS breadth
+          LEAST(100, GREATEST(0, ABS(change_percent) * 2.2 + ABS(trend_pct) * 1.6)) AS volatility_pressure,
+          LEAST(100, GREATEST(0, 50 + change_percent * 3.2)) AS breadth
         FROM metrics
       ),
       diagnosed AS (
         SELECT
           *,
-          LEAST(100, GREATEST(0, 50 + trend_pct * 7 - volatility_pressure * 0.18)) AS trend_quality,
+          LEAST(100, GREATEST(0, 50 + trend_pct * 5.4 - volatility_pressure * 0.22)) AS trend_quality,
           LEAST(100, GREATEST(0, 40 + LN(GREATEST(instrument_count, 1)) * 12)) AS participation,
-          LEAST(100, GREATEST(0, volatility_pressure * 0.75 + CASE WHEN trend_pct < 0 THEN ABS(trend_pct) * 4 ELSE 0 END)) AS risk_pressure
+          LEAST(100, GREATEST(0, volatility_pressure * 0.72 + CASE WHEN trend_pct < 0 THEN ABS(trend_pct) * 3.4 ELSE 0 END)) AS risk_pressure
         FROM scored
       ),
       contexts AS (
@@ -1795,6 +1908,243 @@ async function backfillMarketContextFromSignalSnapshots(
   return {
     processedRows: Number(result.rows[0]?.processed_rows ?? 0),
     emittedOccurrences: Number(result.rows[0]?.emitted_occurrences ?? 0),
+  };
+}
+
+export async function storeMarketMonthlyVolatilityFromCandles(input: {
+  market: string;
+  venue?: string;
+  candles: MarketDailyCandle[];
+}): Promise<MarketMonthlyVolatilityResult> {
+  await ensureMarketMonthlyVolatilitySchema();
+
+  const market = normalizeIdentifierValue(input.market, "GLOBAL");
+  const venue = normalizeIdentifierValue(input.venue ?? input.market, market);
+  const startMonth = utcMonthStartYearsAgo(MONTHLY_VOLATILITY_LOOKBACK_YEARS);
+  const candlesByAsset = new Map<
+    string,
+    Array<{ timestamp: Date; close: number }>
+  >();
+
+  for (const candle of input.candles) {
+    const asset = normalizeAsset(candle.asset);
+    const timestamp =
+      candle.timestampUtc instanceof Date
+        ? candle.timestampUtc
+        : new Date(candle.timestampUtc);
+    const close = toOptionalFiniteNumber(candle.close);
+
+    if (
+      asset === "UNKNOWN" ||
+      !close ||
+      close <= 0 ||
+      !Number.isFinite(timestamp.getTime())
+    ) {
+      continue;
+    }
+
+    const assetCandles = candlesByAsset.get(asset) ?? [];
+    assetCandles.push({ timestamp, close });
+    candlesByAsset.set(asset, assetCandles);
+  }
+
+  type AssetMonthBucket = {
+    market: string;
+    venue: string;
+    asset: string;
+    monthStart: Date;
+    returns: number[];
+    sourceMin: Date;
+    sourceMax: Date;
+  };
+
+  const buckets = new Map<string, AssetMonthBucket>();
+  let candlesProcessed = 0;
+
+  for (const [asset, assetCandles] of candlesByAsset) {
+    assetCandles.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    let previousClose: number | null = null;
+
+    for (const candle of assetCandles) {
+      candlesProcessed += 1;
+      const close = candle.close;
+      if (
+        previousClose &&
+        previousClose > 0 &&
+        candle.timestamp >= startMonth
+      ) {
+        const returnPct = ((close - previousClose) / previousClose) * 100;
+        if (Number.isFinite(returnPct)) {
+          const monthStart = utcMonthStart(candle.timestamp);
+          const key = `${asset}:${monthStart.toISOString()}`;
+          const bucket =
+            buckets.get(key) ??
+            {
+              market,
+              venue,
+              asset,
+              monthStart,
+              returns: [],
+              sourceMin: candle.timestamp,
+              sourceMax: candle.timestamp,
+            };
+
+          bucket.returns.push(returnPct);
+          if (candle.timestamp < bucket.sourceMin) {
+            bucket.sourceMin = candle.timestamp;
+          }
+          if (candle.timestamp > bucket.sourceMax) {
+            bucket.sourceMax = candle.timestamp;
+          }
+          buckets.set(key, bucket);
+        }
+      }
+      previousClose = close;
+    }
+  }
+
+  const assetMonthRows = [...buckets.values()]
+    .filter((bucket) => bucket.returns.length)
+    .map((bucket) => {
+      const returnVolatility = standardDeviation(bucket.returns);
+      const averageAbsReturn = mean(bucket.returns.map((value) => Math.abs(value)));
+      const volatilityPressure = clamp(
+        returnVolatility * 14 + averageAbsReturn * 4,
+      );
+      const monthIndex = bucket.monthStart.getUTCMonth() + 1;
+
+      return {
+        market: bucket.market,
+        venue: bucket.venue,
+        asset: bucket.asset,
+        monthStart: bucket.monthStart,
+        year: bucket.monthStart.getUTCFullYear(),
+        monthIndex,
+        monthLabel: monthLabel(monthIndex),
+        volatilityPressure,
+        returnCount: bucket.returns.length,
+        sourceMin: bucket.sourceMin,
+        sourceMax: bucket.sourceMax,
+      };
+    });
+
+  if (!assetMonthRows.length) {
+    return {
+      market,
+      venue,
+      candlesProcessed,
+      assetMonthsSaved: 0,
+      monthsSaved: 0,
+    };
+  }
+
+  const valueSql = assetMonthRows
+    .map((_, index) => {
+      const offset = index * 11;
+      return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8}, $${offset + 9}, $${offset + 10}, $${offset + 11}, NOW())`;
+    })
+    .join(", ");
+  const params = assetMonthRows.flatMap((row) => [
+    row.market,
+    row.venue,
+    row.asset,
+    row.monthStart.toISOString(),
+    row.year,
+    row.monthIndex,
+    row.monthLabel,
+    row.volatilityPressure,
+    row.returnCount,
+    row.sourceMin.toISOString(),
+    row.sourceMax.toISOString(),
+  ]);
+
+  await pool.query(
+    `
+      INSERT INTO ${MARKET_MONTHLY_ASSET_VOLATILITY_TABLE} (
+        market,
+        venue,
+        asset,
+        month_start,
+        year,
+        month_index,
+        month_label,
+        volatility_pressure,
+        return_count,
+        source_min_timestamp_utc,
+        source_max_timestamp_utc,
+        refreshed_at
+      ) VALUES ${valueSql}
+      ON CONFLICT (market, venue, asset, month_start) DO UPDATE SET
+        year = EXCLUDED.year,
+        month_index = EXCLUDED.month_index,
+        month_label = EXCLUDED.month_label,
+        volatility_pressure = EXCLUDED.volatility_pressure,
+        return_count = EXCLUDED.return_count,
+        source_min_timestamp_utc = EXCLUDED.source_min_timestamp_utc,
+        source_max_timestamp_utc = EXCLUDED.source_max_timestamp_utc,
+        refreshed_at = EXCLUDED.refreshed_at
+    `,
+    params,
+  );
+
+  const monthStarts = Array.from(
+    new Set(assetMonthRows.map((row) => row.monthStart.toISOString())),
+  );
+  const aggregateResult = await pool.query<{ month_start: string }>(
+    `
+      INSERT INTO ${MARKET_MONTHLY_VOLATILITY_TABLE} (
+        market,
+        venue,
+        month_start,
+        year,
+        month_index,
+        month_label,
+        volatility_pressure,
+        observation_count,
+        source_min_timestamp_utc,
+        source_max_timestamp_utc,
+        refreshed_at
+      )
+      SELECT
+        market,
+        venue,
+        month_start,
+        EXTRACT(YEAR FROM month_start)::int AS year,
+        EXTRACT(MONTH FROM month_start)::int AS month_index,
+        to_char(month_start, 'Mon') AS month_label,
+        (
+          SUM(volatility_pressure * return_count)
+          / NULLIF(SUM(return_count), 0)
+        )::double precision AS volatility_pressure,
+        SUM(return_count)::int AS observation_count,
+        MIN(source_min_timestamp_utc) AS source_min_timestamp_utc,
+        MAX(source_max_timestamp_utc) AS source_max_timestamp_utc,
+        NOW() AS refreshed_at
+      FROM ${MARKET_MONTHLY_ASSET_VOLATILITY_TABLE}
+      WHERE market = $1
+        AND venue = $2
+        AND month_start = ANY($3::timestamptz[])
+      GROUP BY market, venue, month_start
+      ON CONFLICT (market, venue, month_start) DO UPDATE SET
+        year = EXCLUDED.year,
+        month_index = EXCLUDED.month_index,
+        month_label = EXCLUDED.month_label,
+        volatility_pressure = EXCLUDED.volatility_pressure,
+        observation_count = EXCLUDED.observation_count,
+        source_min_timestamp_utc = EXCLUDED.source_min_timestamp_utc,
+        source_max_timestamp_utc = EXCLUDED.source_max_timestamp_utc,
+        refreshed_at = EXCLUDED.refreshed_at
+      RETURNING month_start
+    `,
+    [market, venue, monthStarts],
+  );
+
+  return {
+    market,
+    venue,
+    candlesProcessed,
+    assetMonthsSaved: assetMonthRows.length,
+    monthsSaved: aggregateResult.rows.length,
   };
 }
 

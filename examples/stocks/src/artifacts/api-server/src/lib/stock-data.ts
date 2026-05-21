@@ -90,6 +90,14 @@ export interface SignalAttachOptions {
   bypassSignalCache?: boolean;
 }
 
+export interface MarketDailyCandle {
+  market: string;
+  venue: string;
+  asset: string;
+  timestampUtc: string | Date;
+  close: number;
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -171,7 +179,15 @@ const TRADINGVIEW_REQUESTS_PER_MINUTE = Number(
   process.env.TRADINGVIEW_REQUESTS_PER_MINUTE ?? 120,
 );
 const TRADINGVIEW_TIMEOUT_MS = Number(
-  process.env.TRADINGVIEW_TIMEOUT_MS ?? 4_000,
+  process.env.TRADINGVIEW_TIMEOUT_MS ?? 15_000,
+);
+const QUOTE_HISTORY_BARS = Number(process.env.TRADINGVIEW_QUOTE_BARS ?? 320);
+const MARKET_VOLATILITY_LOOKBACK_YEARS = Number(
+  process.env.MARKET_VOLATILITY_LOOKBACK_YEARS ?? 5,
+);
+const MARKET_VOLATILITY_BARS = Number(
+  process.env.MARKET_VOLATILITY_BARS ??
+    MARKET_VOLATILITY_LOOKBACK_YEARS * 252 + 80,
 );
 const TRADINGVIEW_BASE_URL =
   process.env.TRADINGVIEW_DATA_BASE_URL?.trim() ??
@@ -206,6 +222,10 @@ const marketCache = new Map<
   { expiresAt: number; items: StockListItem[] }
 >();
 const quoteCache = new Map<string, { expiresAt: number; quote: StockQuote }>();
+const tradingViewRowsCache = new Map<
+  string,
+  { expiresAt: number; rows: Array<{ date: string; price: number }> }
+>();
 type SignalSnapshot = Pick<
   StockQuote,
   | "signalAction"
@@ -243,28 +263,52 @@ function standardDeviation(values: number[]): number {
   if (values.length < 2) return 0;
   const average = mean(values);
   return Math.sqrt(
-    mean(values.map((value) => (value - average) ** 2)),
+    values.reduce((sum, value) => sum + (value - average) ** 2, 0) /
+      (values.length - 1),
   );
 }
 
 function returnsFromHistory(history: number[] | undefined): number[] {
-  if (!history || history.length < 3) return [];
-  return history
+  const prices = (history ?? []).filter(
+    (price) => Number.isFinite(price) && price > 0,
+  );
+  if (prices.length < 2) return [];
+  return prices
     .slice(1)
     .map((price, index) => {
-      const previous = history[index];
-      return previous && previous > 0 ? (price - previous) / previous : 0;
+      const previous = prices[index];
+      return (price - previous) / previous;
     })
     .filter((value) => Number.isFinite(value));
 }
 
 function stabilizedRatio(returns: number[], downsideOnly = false): number {
-  const sample = downsideOnly ? returns.filter((value) => value < 0) : returns;
-  const sampleWeight = clampMetric(returns.length / 20, 0, 1);
-  const volatility = Math.max(standardDeviation(sample), 0.008);
+  if (returns.length < 2) return 0;
+  const downside = returns.filter((value) => value < 0);
+  const volatility = downsideOnly
+    ? Math.sqrt(mean((downside.length ? downside : [0]).map((value) => value ** 2)))
+    : standardDeviation(returns);
+  const sampleWeight = clampMetric(returns.length / (returns.length + 20), 0, 1);
   const annualization = Math.sqrt(Math.min(Math.max(returns.length, 1), 30));
-  const raw = volatility > 0 ? (mean(returns) / volatility) * annualization : 0;
+  const raw = (mean(returns) / Math.max(volatility, 0.006)) * annualization;
   return Number(Math.max(-4, Math.min(4, raw * sampleWeight)).toFixed(2));
+}
+
+function maxDrawdownFromReturns(returns: number[]): number {
+  let value = 1;
+  let peak = 1;
+  let maxDrawdown = 0;
+  for (const periodReturn of returns) {
+    value *= 1 + periodReturn;
+    peak = Math.max(peak, value);
+    maxDrawdown = Math.max(maxDrawdown, peak > 0 ? (peak - value) / peak : 0);
+  }
+  return maxDrawdown;
+}
+
+function maxDrawdownFromPrices(history: number[]): number {
+  const returns = returnsFromHistory(history);
+  return returns.length ? maxDrawdownFromReturns(returns) : 0;
 }
 
 function deriveRegime(quote: StockQuote): AdaptiveRegime {
@@ -307,9 +351,10 @@ function enrichAdaptiveQuote(quote: StockQuote): StockQuote {
   const confidence = clampMetric(
     quote.signalConfidence ?? (signalAction === "Hold" ? 46 : 58 + absChange * 8),
   );
-  const volatilityShift = clampMetric(volatility * 1300 + absChange * 4);
+  const volatilityPct = volatility * 100;
+  const volatilityShift = clampMetric(volatilityPct * 10 + absChange * 3);
   const driftScore = clampMetric(
-    volatilityShift * 0.55 + (quote.status === "Watch" ? 18 : 0),
+    volatilityShift * 0.58 + (quote.status === "Watch" ? 16 : 0),
   );
   const stabilityScore = clampMetric(
     100 - driftScore * 0.72 - (signalAction === "Hold" ? 8 : 0),
@@ -318,31 +363,29 @@ function enrichAdaptiveQuote(quote: StockQuote): StockQuote {
   const agreement = clampMetric(confidence * 0.62 + stabilityScore * 0.32 - uncertainty * 0.12);
   const consensus = clampMetric(agreement * 0.72 + stabilityScore * 0.2);
   const direction = signalAction === "Sell" ? -1 : signalAction === "Buy" ? 1 : change >= 0 ? 1 : -1;
+  const trendComponentPct =
+    Math.abs(averageReturn) * 100 * Math.sqrt(Math.min(Math.max(returns.length, 1), 10));
+  const volatilityForecastPct =
+    volatilityPct * Math.sqrt(Math.min(Math.max(returns.length, 1), 5));
+  const moveMagnitudePct = clampNumber(
+    (Math.max(absChange * 0.45, trendComponentPct) + volatilityForecastPct * 0.6) *
+      (0.55 + confidence / 160),
+    0.05,
+    18,
+  );
   const expectedMovePct = Number(
-    (direction * Math.max(absChange, volatility * 100) * (confidence / 75)).toFixed(2),
+    (direction * moveMagnitudePct).toFixed(2),
   );
   const winReturns = returns.filter((value) => value > 0);
   const lossReturns = returns.filter((value) => value < 0);
   const grossWins = winReturns.reduce((sum, value) => sum + value, 0);
   const grossLosses = Math.abs(lossReturns.reduce((sum, value) => sum + value, 0));
-  const profitFactor = grossLosses > 0 ? grossWins / grossLosses : winReturns.length ? 3 : 1;
-  const maxDrawdown = Math.max(
-    0,
-    ...returns.map((_, index) => {
-      const slice = returns.slice(0, index + 1);
-      const cumulative = slice.reduce((value, item) => value * (1 + item), 1);
-      const peak = Math.max(
-        1,
-        ...slice.map((__, peakIndex) =>
-          slice.slice(0, peakIndex + 1).reduce((value, item) => value * (1 + item), 1),
-        ),
-      );
-      return ((peak - cumulative) / peak) * 100;
-    }),
-  );
+  const profitFactor = grossLosses > 0 ? grossWins / grossLosses : winReturns.length ? 4 : 1;
+  const maxDrawdown = maxDrawdownFromReturns(returns) * 100;
   const entropy = clampMetric(signalAction === "Hold" ? 62 - confidence * 0.2 : 44 + uncertainty * 0.38);
   const predictionResidual = clampMetric(
-    Math.abs((quote.signalReturnPercent ?? change) - expectedMovePct) * 8,
+    Math.abs((quote.signalReturnPercent ?? change) - expectedMovePct) * 5 +
+      Math.max(0, volatilityShift - 60) * 0.15,
   );
 
   return {
@@ -541,32 +584,21 @@ export async function fetchQuotes(
     TRADINGVIEW_BATCH_SIZE,
     TRADINGVIEW_BATCH_DELAY_MS,
     async (symbol) => {
-      let quote = null;
-      let lastError = null;
-      const maxAttempts = isBinanceScope(normalized, normalized) ? 1 : 3;
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-          quote = await fetchQuote(
-            normalized,
-            symbol,
-            normalized, // Always try both plain and prefixed symbols
-            options,
-          );
-          if (quote) break;
-        } catch (err) {
-          lastError = err;
-        }
-        // Exponential backoff
-        if (attempt < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
-        }
+      let quote: StockQuote | null = null;
+      let lastError: unknown = null;
+
+      try {
+        quote = await fetchQuote(normalized, symbol, normalized, options);
+      } catch (err) {
+        lastError = err;
       }
+
       if (quote) {
         results.push(quote);
       } else if (lastError) {
-        logger.warn({ symbol, err: lastError }, "Failed to fetch quote after retries");
+        logger.warn({ symbol, err: lastError }, "Failed to fetch quote");
       } else {
-        logger.warn({ exchange: normalized, symbol }, "No live quote rows returned after retries");
+        logger.warn({ exchange: normalized, symbol }, "No live quote rows returned");
       }
     },
   );
@@ -596,37 +628,62 @@ export async function fetchMarketQuotes(
     TRADINGVIEW_BATCH_SIZE,
     TRADINGVIEW_BATCH_DELAY_MS,
     async (symbol) => {
-      let quote = null;
-      let lastError = null;
-      const maxAttempts = isBinanceScope(normalized, normalized) ? 1 : 3;
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-          quote = await fetchQuote(
-            normalized,
-            symbol,
-            normalized, // Always try both plain and prefixed symbols
-            options,
-          );
-          if (quote) break;
-        } catch (err) {
-          lastError = err;
-        }
-        // Exponential backoff
-        if (attempt < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
-        }
+      let quote: StockQuote | null = null;
+      let lastError: unknown = null;
+
+      try {
+        quote = await fetchQuote(normalized, symbol, normalized, options);
+      } catch (err) {
+        lastError = err;
       }
+
       if (quote) {
         results.push(quote);
       } else if (lastError) {
-        logger.warn({ symbol, err: lastError }, "Failed to fetch quote after retries");
+        logger.warn({ symbol, err: lastError }, "Failed to fetch quote");
       } else {
-        logger.warn({ market: normalized, symbol }, "No live quote rows returned after retries");
+        logger.warn({ market: normalized, symbol }, "No live quote rows returned");
       }
     },
   );
 
   return results;
+}
+
+export async function fetchMarketDailyCandles(
+  market: string,
+  symbols: string[],
+): Promise<MarketDailyCandle[]> {
+  const normalized = market.trim().toUpperCase();
+  const uniqueSymbols = Array.from(
+    new Set(symbols.map((symbol) => symbol.trim())),
+  ).filter(Boolean);
+  const limitedSymbols = uniqueSymbols.slice(0, MAX_SYMBOLS_PER_REQUEST);
+  const candles: MarketDailyCandle[] = [];
+
+  await runBatched(
+    limitedSymbols,
+    TRADINGVIEW_BATCH_SIZE,
+    TRADINGVIEW_BATCH_DELAY_MS,
+    async (symbol) => {
+      const rows = await fetchTradingViewRows(symbol, normalized, {
+        bars: MARKET_VOLATILITY_BARS,
+        lookbackYears: MARKET_VOLATILITY_LOOKBACK_YEARS,
+      });
+
+      for (const row of rows) {
+        candles.push({
+          market: normalized,
+          venue: normalized,
+          asset: symbol.trim().toUpperCase(),
+          timestampUtc: row.date,
+          close: row.price,
+        });
+      }
+    },
+  );
+
+  return candles;
 }
 
 export async function attachSignalsToQuotes(
@@ -712,7 +769,9 @@ async function fetchQuote(
     }
   }
 
-  const rows = await fetchTradingViewRows(symbol, market);
+  const rows = await fetchTradingViewRows(symbol, market, {
+    bars: QUOTE_HISTORY_BARS,
+  });
   if (!rows.length) {
     logger.warn(
       { market, symbol, candidates: buildTradingViewCandidates(symbol, market) },
@@ -840,7 +899,25 @@ function deriveHeuristicSignal(
   const { buyThreshold, sellThreshold } = getAdaptiveThresholds(trainingState);
   const signalAction: TradeSignal =
     change >= buyThreshold ? "Buy" : change <= sellThreshold ? "Sell" : "Hold";
-  const signalConfidence = clampNumber(20 + absChange * 12, 15, 95);
+  const neutralBand = Math.max(
+    0.2,
+    Math.min(Math.abs(buyThreshold), Math.abs(sellThreshold)),
+  );
+  const signalStrength =
+    signalAction === "Hold"
+      ? clampNumber(1 - absChange / neutralBand, 0, 1)
+      : clampNumber(
+        absChange /
+          Math.max(
+            0.2,
+            signalAction === "Buy" ? Math.abs(buyThreshold) : Math.abs(sellThreshold),
+          ),
+        0,
+        3,
+      );
+  const signalConfidence = signalAction === "Hold"
+    ? clampNumber(44 + signalStrength * 22, 20, 86)
+    : clampNumber(48 + signalStrength * 18, 25, 95);
 
   return {
     signalAction,
@@ -1159,23 +1236,12 @@ function mapIntentToTradeSignal(
 }
 
 function computeVolatility(history: number[]): number {
-  if (history.length < 3) return 0.02;
-  const returns = history.slice(1).map((price, index) => {
-    const prev = history[index];
-    return prev ? (price - prev) / prev : 0;
-  });
-  const mean = returns.reduce((sum, value) => sum + value, 0) / returns.length;
-  const variance =
-    returns.reduce((sum, value) => sum + (value - mean) ** 2, 0) /
-    returns.length;
-  return Math.sqrt(variance);
+  const returns = returnsFromHistory(history);
+  return returns.length >= 2 ? standardDeviation(returns) : 0.02;
 }
 
 function computeDrawdown(history: number[]): number {
-  const peak = Math.max(...history);
-  const last = history[history.length - 1] ?? peak;
-  if (!Number.isFinite(peak) || peak <= 0) return 0;
-  return (peak - last) / peak;
+  return maxDrawdownFromPrices(history);
 }
 
 function clampUnit(value: number): number {
@@ -1183,17 +1249,18 @@ function clampUnit(value: number): number {
 }
 
 function clampNumber(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
+  return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
 }
 
 async function fetchTradingViewRows(
   symbol: string,
   market?: string,
+  options: { bars?: number; lookbackYears?: number } = {},
 ): Promise<Array<{ date: string; price: number }>> {
   const candidates = buildTradingViewCandidates(symbol, market);
 
   for (const candidate of candidates) {
-    const rows = await fetchTradingViewRowsForSymbol(candidate);
+    const rows = await fetchTradingViewRowsForSymbol(candidate, options);
     if (rows.length) {
       return rows;
     }
@@ -1224,7 +1291,9 @@ function buildTradingViewCandidates(symbol: string, market?: string): string[] {
     }
   }
 
-  candidates.push(...symbolVariants);
+  if (!marketVariants.length) {
+    candidates.push(...symbolVariants);
+  }
 
   return Array.from(new Set(candidates));
 }
@@ -1250,8 +1319,15 @@ function stripYahooSuffix(symbol: string): string {
 
 async function fetchTradingViewRowsForSymbol(
   tvSymbol: string,
+  options: { bars?: number; lookbackYears?: number } = {},
 ): Promise<Array<{ date: string; price: number }>> {
-  const url = buildTradingViewUrl(tvSymbol);
+  const cacheKey = `${tvSymbol}:${options.bars ?? ""}:${options.lookbackYears ?? ""}`;
+  const cached = tradingViewRowsCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.rows;
+  }
+
+  const url = buildTradingViewUrl(tvSymbol, options);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TRADINGVIEW_TIMEOUT_MS);
 
@@ -1277,6 +1353,10 @@ async function fetchTradingViewRowsForSymbol(
         "TradingView quote response contained no parseable rows",
       );
     }
+    tradingViewRowsCache.set(cacheKey, {
+      expiresAt: Date.now() + QUOTE_CACHE_TTL_MS,
+      rows,
+    });
     return rows;
   } catch (error) {
     logger.warn({ symbol: tvSymbol, err: error }, "TradingView quote request errored");
@@ -1317,21 +1397,38 @@ async function scheduleTradingViewRequest(): Promise<void> {
   return tradingViewQueue;
 }
 
-function buildTradingViewUrl(symbol: string): string {
+function buildTradingViewUrl(
+  symbol: string,
+  options: { bars?: number; lookbackYears?: number } = {},
+): string {
   const encoded = encodeURIComponent(symbol);
+  let url: string;
   if (TRADINGVIEW_BASE_URL.includes("{symbol}")) {
-    return TRADINGVIEW_BASE_URL.replaceAll("{symbol}", encoded);
-  }
-  if (
+    url = TRADINGVIEW_BASE_URL.replaceAll("{symbol}", encoded);
+  } else if (
     TRADINGVIEW_BASE_URL.includes("symbol=") ||
     TRADINGVIEW_BASE_URL.endsWith("?symbol")
   ) {
-    return `${TRADINGVIEW_BASE_URL}${encoded}`;
+    url = `${TRADINGVIEW_BASE_URL}${encoded}`;
+  } else if (TRADINGVIEW_BASE_URL.endsWith("/")) {
+    url = `${TRADINGVIEW_BASE_URL}${encoded}`;
+  } else {
+    url = `${TRADINGVIEW_BASE_URL}?symbol=${encoded}`;
   }
-  if (TRADINGVIEW_BASE_URL.endsWith("/")) {
-    return `${TRADINGVIEW_BASE_URL}${encoded}`;
+
+  const params = new URLSearchParams();
+  if (Number.isFinite(options.bars) && Number(options.bars) > 0) {
+    params.set("bars", String(Math.floor(Number(options.bars))));
   }
-  return `${TRADINGVIEW_BASE_URL}?symbol=${encoded}`;
+  if (
+    Number.isFinite(options.lookbackYears) &&
+    Number(options.lookbackYears) > 0
+  ) {
+    params.set("lookbackYears", String(Math.floor(Number(options.lookbackYears))));
+  }
+
+  const query = params.toString();
+  return query ? `${url}${url.includes("?") ? "&" : "?"}${query}` : url;
 }
 
 function parseCsvRows(csv: string): Array<{ date: string; price: number }> {

@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import {
   attachSignalsToQuotes,
+  fetchMarketDailyCandles,
   fetchMarketQuotes,
   fetchQuotes,
   listMarkets,
@@ -20,11 +21,22 @@ import {
 import {
   ensureMarketContextSchema,
   hydrateMarketContextFromAvailableHistory,
+  storeMarketMonthlyVolatilityFromCandles,
 } from "../lib/market-context-occurrences";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 let signalPersistenceWarningLogged = false;
+let monthlyVolatilityPersistenceWarningLogged = false;
+const MARKET_MONTHLY_VOLATILITY_REFRESH_INTERVAL_MS = Number(
+  process.env.MARKET_MONTHLY_VOLATILITY_REFRESH_INTERVAL_MS ?? 60 * 60 * 1000,
+);
+const REFRESH_MARKET_MONTHLY_VOLATILITY_ON_QUOTES =
+  process.env.MARKET_MONTHLY_VOLATILITY_REFRESH_ON_QUOTES === "true";
+const monthlyVolatilityRefreshes = new Map<
+  string,
+  { lastStartedAt: number; pending?: Promise<void> }
+>();
 
 function resolveScope(market: string, exchange: string): SignalScope {
   if (market) {
@@ -88,6 +100,71 @@ async function storeSignalSnapshotsIfAvailable(
       scope,
     );
   }
+}
+
+async function storeMarketMonthlyVolatilityIfAvailable(
+  market: string,
+  quotes: StockQuote[],
+) {
+  if (!market || !quotes.length) return;
+
+  try {
+    const candles = await fetchMarketDailyCandles(
+      market,
+      quotes.map((quote) => quote.symbol),
+    );
+    if (!candles.length) return;
+
+    await storeMarketMonthlyVolatilityFromCandles({
+      market,
+      venue: market,
+      candles,
+    });
+  } catch (error) {
+    if (monthlyVolatilityPersistenceWarningLogged) return;
+    monthlyVolatilityPersistenceWarningLogged = true;
+    logger.warn(
+      { err: error, market },
+      "Market monthly volatility persistence unavailable; continuing with live quotes",
+    );
+  }
+}
+
+function scheduleMarketMonthlyVolatilityRefresh(
+  market: string,
+  quotes: StockQuote[],
+) {
+  if (!REFRESH_MARKET_MONTHLY_VOLATILITY_ON_QUOTES) return;
+
+  const normalizedMarket = market.trim().toUpperCase();
+  if (!normalizedMarket || !quotes.length) return;
+
+  const now = Date.now();
+  const current = monthlyVolatilityRefreshes.get(normalizedMarket);
+  if (
+    current?.pending ||
+    now - (current?.lastStartedAt ?? 0) <
+      MARKET_MONTHLY_VOLATILITY_REFRESH_INTERVAL_MS
+  ) {
+    return;
+  }
+
+  const pending = storeMarketMonthlyVolatilityIfAvailable(
+    normalizedMarket,
+    quotes,
+  ).finally(() => {
+    const latest = monthlyVolatilityRefreshes.get(normalizedMarket);
+    if (latest?.pending === pending) {
+      monthlyVolatilityRefreshes.set(normalizedMarket, {
+        lastStartedAt: latest.lastStartedAt,
+      });
+    }
+  });
+
+  monthlyVolatilityRefreshes.set(normalizedMarket, {
+    lastStartedAt: now,
+    pending,
+  });
 }
 
 router.get("/stocks/exchanges", (_req, res) => {
@@ -224,6 +301,8 @@ router.post("/stocks/quotes", async (req, res) => {
   if (withSignals && enrichedQuotes.length) {
     await storeSignalSnapshotsIfAvailable(scope, enrichedQuotes);
   }
+
+  scheduleMarketMonthlyVolatilityRefresh(market, enrichedQuotes);
 
   const returnedSymbols = new Set(enrichedQuotes.map((quote) => quote.symbol));
   const unavailableSymbols = requestedSymbols.filter(

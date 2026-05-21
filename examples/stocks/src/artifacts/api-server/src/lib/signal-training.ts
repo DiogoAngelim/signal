@@ -44,6 +44,14 @@ const CACHE_TTL_MS = Number(
 const DEFAULT_BUY_THRESHOLD = 1.2;
 const DEFAULT_SELL_THRESHOLD = -1.2;
 const DEFAULT_CONFIDENCE_BIAS = 0;
+const DEFAULT_ACTION_SUCCESS_RATE = 0.55;
+const BAYES_PRIOR_OBSERVATIONS = 8;
+const MATERIAL_MOVE_PCT = Number(
+  process.env.STOCK_SIGNAL_MATERIAL_MOVE_PCT ?? 0.35,
+);
+const HOLD_SUCCESS_BAND_PCT = Number(
+  process.env.STOCK_SIGNAL_HOLD_BAND_PCT ?? 0.85,
+);
 
 const stateCache = new Map<
   string,
@@ -97,7 +105,7 @@ function toNumber(value: unknown, fallback: number): number {
 }
 
 function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
+  return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
 }
 
 function mapRowToState(
@@ -270,37 +278,73 @@ function getActionSuccessRate(
   return stats.observations > 0 ? stats.successes / stats.observations : null;
 }
 
+function sampleCredibility(observations: number): number {
+  return clamp(observations / (observations + BAYES_PRIOR_OBSERVATIONS), 0, 1);
+}
+
+function getSmoothedActionSuccessRate(
+  state: SignalTrainingState,
+  action: TradeSignal,
+): number {
+  const stats = getActionStats(state, action);
+  return (
+    (stats.successes + DEFAULT_ACTION_SUCCESS_RATE * BAYES_PRIOR_OBSERVATIONS) /
+    (stats.observations + BAYES_PRIOR_OBSERVATIONS)
+  );
+}
+
 function evaluateSignalOutcome(
   action: TradeSignal,
   returnPercent: number,
 ): boolean {
   if (action === "Buy") {
-    return returnPercent >= 0;
+    return returnPercent >= MATERIAL_MOVE_PCT;
   }
   if (action === "Sell") {
-    return returnPercent <= 0;
+    return returnPercent <= -MATERIAL_MOVE_PCT;
   }
-  return Math.abs(returnPercent) <= 1;
+  return Math.abs(returnPercent) <= HOLD_SUCCESS_BAND_PCT;
 }
 
 function recomputeAdaptiveState(
   state: SignalTrainingState,
 ): SignalTrainingState {
-  const buyRate = getActionSuccessRate(state, "Buy") ?? 0.55;
-  const sellRate = getActionSuccessRate(state, "Sell") ?? 0.55;
-  const holdRate = getActionSuccessRate(state, "Hold") ?? 0.55;
+  const buyRate = getSmoothedActionSuccessRate(state, "Buy");
+  const sellRate = getSmoothedActionSuccessRate(state, "Sell");
+  const holdRate = getSmoothedActionSuccessRate(state, "Hold");
+  const buyCredibility = sampleCredibility(state.buyObservations);
+  const sellCredibility = sampleCredibility(state.sellObservations);
 
   state.buyThreshold = Number(
-    clamp(DEFAULT_BUY_THRESHOLD + (0.55 - buyRate) * 1.6, 0.6, 2.4).toFixed(4),
+    clamp(
+      DEFAULT_BUY_THRESHOLD +
+        (DEFAULT_ACTION_SUCCESS_RATE - buyRate) * 1.6 * buyCredibility,
+      0.6,
+      2.4,
+    ).toFixed(4),
   );
   state.sellThreshold = Number(
-    clamp(DEFAULT_SELL_THRESHOLD - (0.55 - sellRate) * 1.6, -2.4, -0.6).toFixed(
-      4,
-    ),
+    clamp(
+      DEFAULT_SELL_THRESHOLD -
+        (DEFAULT_ACTION_SUCCESS_RATE - sellRate) * 1.6 * sellCredibility,
+      -2.4,
+      -0.6,
+    ).toFixed(4),
   );
 
-  const overallBias = (buyRate - 0.5 + (sellRate - 0.5) + (holdRate - 0.5)) / 3;
-  state.confidenceBias = Number(clamp(overallBias * 24, -12, 12).toFixed(4));
+  const totalCredibility =
+    buyCredibility +
+    sellCredibility +
+    sampleCredibility(state.holdObservations);
+  const overallBias =
+    totalCredibility > 0
+      ? (
+          (buyRate - 0.5) * buyCredibility +
+          (sellRate - 0.5) * sellCredibility +
+          (holdRate - 0.5) * sampleCredibility(state.holdObservations)
+        ) / totalCredibility
+      : 0;
+  state.confidenceBias = Number(clamp(overallBias * 28, -12, 12).toFixed(4));
 
   return state;
 }
@@ -465,8 +509,10 @@ export function calibrateSignalDecision(
   decision: SignalDecision,
   state: SignalTrainingState,
 ): SignalDecision {
-  const actionRate = getActionSuccessRate(state, decision.signalAction);
-  const actionBias = actionRate == null ? 0 : (actionRate - 0.5) * 18;
+  const actionStats = getActionStats(state, decision.signalAction);
+  const actionRate = getSmoothedActionSuccessRate(state, decision.signalAction);
+  const actionBias =
+    (actionRate - 0.5) * 18 * sampleCredibility(actionStats.observations);
 
   return {
     ...decision,
