@@ -407,6 +407,27 @@ const signalOptions: Array<TradeSignal | "All"> = [
   "Hold",
   "Sell",
 ];
+type RiskMode = "small" | "balanced" | "normal";
+const RISK_MODE_CONFIG: Record<RiskMode, { label: string; maxExposure: number; allocationMultiplier: number; minQuality: number }> = {
+  small: {
+    label: "Small",
+    maxExposure: 20,
+    allocationMultiplier: 0.45,
+    minQuality: 55,
+  },
+  balanced: {
+    label: "Balanced",
+    maxExposure: 45,
+    allocationMultiplier: 0.72,
+    minQuality: 48,
+  },
+  normal: {
+    label: "Normal",
+    maxExposure: 75,
+    allocationMultiplier: 1,
+    minQuality: 42,
+  },
+};
 const LEGACY_PORTFOLIO_STORAGE_KEYS = [
   "signal-markets:portfolios",
   "signal-markets:portfolios:v",
@@ -1229,7 +1250,9 @@ function buildExecutionDecisions(
   portfolio: SimulatedPortfolio,
   calibrationState: CalibrationState,
   portfolioLifecycle?: PortfolioLifecycleInsight,
+  riskMode: RiskMode = "small",
 ): ExecutionDecision[] {
+  const riskConfig = RISK_MODE_CONFIG[riskMode];
   const totalValue =
     (portfolio.cash ?? 0) +
     Object.values(portfolio.positions ?? {}).reduce((sum, position) => sum + (position.marketValue ?? 0), 0);
@@ -1338,6 +1361,8 @@ function buildExecutionDecisions(
     const allocationIntent =
       !tradableExpectedRange
         ? 0
+        : qualityScore < riskConfig.minQuality
+          ? 0
         : actionLabel === "Buy"
         ? 1
         : actionLabel === "Watch"
@@ -1347,6 +1372,7 @@ function buildExecutionDecisions(
             : 0;
     const baseSize =
       allocationIntent *
+      riskConfig.allocationMultiplier *
       lifecycleGate.allocationMultiplier *
       metaAllocation.exposureMultiplier *
       (signalQuality / 100) *
@@ -1410,7 +1436,7 @@ function buildExecutionDecisions(
       mean(investable.map((item) => item.metaAllocation.exposureMultiplier * 100)) * 0.26 -
       mean(investable.map((item) => item.riskScore)) * 0.34,
       8,
-      78,
+      riskConfig.maxExposure,
     )
     : 0;
   let deployed = 0;
@@ -1650,6 +1676,153 @@ function currentActionFromExposure(exposure: number, posture: "defensive" | "con
   return exposure < 35 ? "Increase Exposure Selectively" : "Maintain Core Exposure";
 }
 
+type UserActionTone = "good" | "info" | "warn" | "bad";
+
+function statisticalConfidence(sampleSize: number): { label: string; tone: UserActionTone; detail: string } {
+  if (sampleSize >= 500) return { label: "High confidence", tone: "good", detail: "Large closed-execution sample." };
+  if (sampleSize >= 200) return { label: "Moderate confidence", tone: "info", detail: "Enough executions to trust directionally." };
+  if (sampleSize >= 50) return { label: "Early confidence", tone: "warn", detail: "Useful signal, but still fragile." };
+  return { label: "Low confidence", tone: "bad", detail: "Sample is too small for full trust." };
+}
+
+function benchmarkReturnFromCoverage(stocks: StockData[]): number | null {
+  const returns = stocks
+    .map((stock) => {
+      const history = (stock.history ?? []).filter((price) => Number.isFinite(price) && price > 0);
+      if (history.length < 2) return null;
+      const start = history[0];
+      const end = Number(stock.price) > 0 ? Number(stock.price) : history[history.length - 1];
+      return start > 0 ? ((end - start) / start) * 100 : null;
+    })
+    .filter((value): value is number => value != null && Number.isFinite(value));
+  return returns.length >= 3 ? mean(returns) : null;
+}
+
+function toneClasses(tone: UserActionTone) {
+  return {
+    good: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
+    info: "border-sky-500/30 bg-sky-500/10 text-sky-200",
+    warn: "border-amber-500/35 bg-amber-500/10 text-amber-200",
+    bad: "border-rose-500/35 bg-rose-500/10 text-rose-200",
+  }[tone];
+}
+
+function deriveUserAction(input: {
+  decisions: ExecutionDecision[];
+  metrics: { drift: number; ensemble: number; survival: number; regimeStability: number };
+  portfolio: SimulatedPortfolio;
+  lifecycle: PortfolioLifecycleInsight;
+  marketStatus: string;
+  benchmarkReturn: number | null;
+  dataQualityPct: number;
+}) {
+  const stats = portfolioStats(input.portfolio);
+  const confidence = statisticalConfidence(stats.totalTrades);
+  const totalReturnPct = stats.totalReturn * 100;
+  const suggestedExposure = Math.min(
+    100,
+    input.decisions.reduce((sum, item) => sum + item.suggestedAllocationPct, 0),
+  );
+  const investableCount = input.decisions.filter(
+    (item) => item.suggestedAllocationPct > DISPLAY_ZERO_THRESHOLD,
+  ).length;
+  const profitFactor = stats.profitFactor === Infinity ? 99 : stats.profitFactor ?? 0;
+  const sharpe = stats.normalizedAnnualSharpe ?? 0;
+  const benchmarkSpread =
+    input.benchmarkReturn == null ? null : totalReturnPct - input.benchmarkReturn;
+  const warnings: string[] = [];
+
+  if (input.lifecycle.reason) warnings.push(input.lifecycle.reason);
+  if (stats.totalTrades < 200) warnings.push(`${confidence.label}: ${confidence.detail}`);
+  if (profitFactor < 1 && stats.totalTrades > 0) warnings.push("Profit factor is below 1.0 after closed executions.");
+  if (sharpe < 0 && stats.totalTrades > 0) warnings.push("Risk-adjusted returns are negative.");
+  if (benchmarkSpread != null && benchmarkSpread < -1) warnings.push("Strategy is underperforming the equal-weight coverage benchmark.");
+  if (input.dataQualityPct < 90) warnings.push("Coverage is incomplete; verify stale or unavailable quotes.");
+
+  if (input.lifecycle.label === "Disregard" || input.lifecycle.state === "RETIRED") {
+    return {
+      action: "Stop",
+      heading: "Stop New Trades",
+      tone: "bad" as const,
+      summary: "Lifecycle gates have removed trust. Do not open new exposure until the strategy recovers through audited feedback.",
+      nextStep: "Close fragile exposure and wait for a new lifecycle decision.",
+      confidence,
+      suggestedExposure,
+      investableCount,
+      benchmarkSpread,
+      warnings,
+    };
+  }
+
+  if (
+    input.lifecycle.label === "Careful" ||
+    profitFactor < 1 ||
+    sharpe < 0 ||
+    input.metrics.drift >= 65
+  ) {
+    return {
+      action: "Reduce",
+      heading: "Reduce Or Stand Down",
+      tone: "warn" as const,
+      summary: "The system is not earning enough trust for normal sizing. Treat new ideas as review-only unless lifecycle gates recover.",
+      nextStep: "Cut weak positions first and keep new allocation capped.",
+      confidence,
+      suggestedExposure,
+      investableCount,
+      benchmarkSpread,
+      warnings,
+    };
+  }
+
+  if (
+    stats.totalTrades < 200 ||
+    input.lifecycle.state !== "PRODUCTION" ||
+    confidence.tone === "warn" ||
+    confidence.tone === "bad"
+  ) {
+    return {
+      action: "Trade Small",
+      heading: "Trade Small, Keep Learning",
+      tone: "info" as const,
+      summary: "The system can collect feedback, but the evidence is not strong enough for normal allocation.",
+      nextStep: "Use reduced sizing and require clean lifecycle reasons before adding risk.",
+      confidence,
+      suggestedExposure,
+      investableCount,
+      benchmarkSpread,
+      warnings,
+    };
+  }
+
+  if (suggestedExposure <= DISPLAY_ZERO_THRESHOLD || input.marketStatus !== "Open") {
+    return {
+      action: "Observe",
+      heading: "Observe",
+      tone: "info" as const,
+      summary: "No current setup clears enough gates to justify new allocation.",
+      nextStep: "Wait for investable exposure to reappear.",
+      confidence,
+      suggestedExposure,
+      investableCount,
+      benchmarkSpread,
+      warnings,
+    };
+  }
+
+  return {
+    action: "Trade Normally",
+    heading: "Trade Normally",
+    tone: "good" as const,
+    summary: "Lifecycle state, sample size, and risk-adjusted performance support normal controlled allocation.",
+    nextStep: "Follow the ranked allocation ledger and keep monitoring lifecycle downgrades.",
+    confidence,
+    suggestedExposure,
+    investableCount,
+    benchmarkSpread,
+    warnings,
+  };
+}
+
 function toneForValue(value: number, warn = 45, bad = 70) {
   if (value >= bad) return "bad" as const;
   if (value >= warn) return "warn" as const;
@@ -1685,49 +1858,94 @@ function InsightShell({ title, eyebrow, children, action }: { title: string; eye
   );
 }
 
-function MarketRegimeHero({ decisions, metrics, portfolio, marketStatus, lastSyncedLabel }: { decisions: ExecutionDecision[]; metrics: { drift: number; entropy: number; ensemble: number; calibration: number; regimeStability: number; modelStability: number; survival: number; residual: number }; portfolio: SimulatedPortfolio; marketStatus: string; lastSyncedLabel: string }) {
+function MarketRegimeHero({
+  decisions,
+  metrics,
+  portfolio,
+  marketStatus,
+  lastSyncedLabel,
+  lifecycleInsight,
+  benchmarkReturn,
+  dataQualityPct,
+  riskMode,
+}: {
+  decisions: ExecutionDecision[];
+  metrics: { drift: number; entropy: number; ensemble: number; calibration: number; regimeStability: number; modelStability: number; survival: number; residual: number };
+  portfolio: SimulatedPortfolio;
+  marketStatus: string;
+  lastSyncedLabel: string;
+  lifecycleInsight: PortfolioLifecycleInsight;
+  benchmarkReturn: number | null;
+  dataQualityPct: number;
+  riskMode: RiskMode;
+}) {
   const totalValue = (portfolio.cash ?? 0) + Object.values(portfolio.positions ?? {}).reduce((sum, position) => sum + (position.marketValue ?? 0), 0);
   const invested = Object.values(portfolio.positions ?? {}).reduce((sum, position) => sum + (position.marketValue ?? 0), 0);
   const currentExposure = totalValue > 0 ? (invested / totalValue) * 100 : 0;
-  const posture = derivePortfolioPosture(decisions, metrics);
-  const confidence = clampMetric(metrics.ensemble * 0.42 + metrics.regimeStability * 0.28 + metrics.survival * 0.2 + (100 - metrics.drift) * 0.1);
-  const deployable = Math.max(0, totalValue * Math.max(0, posture.recommendedExposure - currentExposure) / 100);
-  const riskStatus = metrics.drift > 65 ? "Risk budget is tightening" : metrics.drift < 35 ? "Risk budget remains orderly" : "Risk budget is mixed";
+  const stats = portfolioStats(portfolio);
+  const userAction = deriveUserAction({
+    decisions,
+    metrics,
+    portfolio,
+    lifecycle: lifecycleInsight,
+    marketStatus,
+    benchmarkReturn,
+    dataQualityPct,
+  });
+  const deployable = Math.max(0, totalValue * Math.max(0, userAction.suggestedExposure - currentExposure) / 100);
+  const benchmarkLabel =
+    userAction.benchmarkSpread == null
+      ? "Benchmark pending"
+      : `${userAction.benchmarkSpread >= 0 ? "+" : ""}${userAction.benchmarkSpread.toFixed(2)} pts`;
 
   return (
-    <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-[2rem] border border-slate-800 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.14),transparent_34%),linear-gradient(135deg,#020617_0%,#0f172a_54%,#111827_100%)] p-7 text-slate-100 shadow-2xl">
-      <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+    <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-lg border border-slate-800 bg-[#050b18] p-6 text-slate-100 shadow-2xl">
       <div className="relative grid gap-8 xl:grid-cols-[1.45fr_0.95fr]">
         <div>
           <div className="mb-5 flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-300">{posture.label}</span>
+            <span className={cn("rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]", toneClasses(userAction.tone))}>{userAction.action}</span>
+            <span className={cn("rounded-full border px-3 py-1 text-xs", lifecycleInsight.className)}>{lifecycleInsight.label}</span>
             <span className="rounded-full border border-slate-700 bg-slate-900/60 px-3 py-1 text-xs text-slate-400">Venue {marketStatus}</span>
-            <span className="rounded-full border border-slate-700 bg-slate-900/60 px-3 py-1 text-xs text-slate-400">Coverage {lastSyncedLabel}</span>
+            <span className="rounded-full border border-slate-700 bg-slate-900/60 px-3 py-1 text-xs text-slate-400">{RISK_MODE_CONFIG[riskMode].label} risk</span>
+            <span className="rounded-full border border-slate-700 bg-slate-900/60 px-3 py-1 text-xs text-slate-400">Synced {lastSyncedLabel}</span>
           </div>
-          <h1 className="max-w-4xl text-4xl font-semibold tracking-[-0.04em] text-white md:text-6xl">{posture.heading}</h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">{posture.summary}</p>
-          <div className="mt-8 grid gap-3 sm:grid-cols-4">
+          <h1 className="max-w-4xl text-4xl font-semibold text-white md:text-6xl">{userAction.heading}</h1>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">{userAction.summary}</p>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {[
-              ["Target Exposure", `${posture.recommendedExposure.toFixed(1)}%`],
-              ["Live Exposure", `${currentExposure.toFixed(1)}%`],
-              ["Available Risk Budget", formatMaybeCurrency(deployable)],
-              ["Regime Confidence", `${confidence.toFixed(0)}%`],
-            ].map(([label, value]) => (
-              <div key={label} className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
+              ["Closed Sample", `${stats.totalTrades}`, userAction.confidence.label],
+              ["Benchmark Spread", benchmarkLabel, "vs equal-weight coverage"],
+              ["Trust Gate", lifecycleInsight.state.replace("_", " "), lifecycleInsight.label],
+              ["Data Quality", `${dataQualityPct.toFixed(0)}%`, "available quotes"],
+            ].map(([label, value, detail]) => (
+              <div key={label} className="rounded-lg border border-slate-800 bg-slate-950/55 p-4">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</div>
                 <div className="mt-2 text-2xl font-semibold tabular-nums text-slate-100">{value}</div>
+                <div className="mt-1 text-xs text-slate-500">{detail}</div>
               </div>
             ))}
           </div>
         </div>
-        <div className="rounded-3xl border border-slate-700/80 bg-slate-950/70 p-5">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">Portfolio mandate</div>
-          <div className="mt-3 text-3xl font-semibold tracking-tight text-white">{posture.action}</div>
-          <p className="mt-3 text-sm leading-6 text-slate-400">{riskStatus}. Position sizing should remain aligned with available risk budget.</p>
+        <div className="rounded-lg border border-slate-700/80 bg-slate-950/70 p-5">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">Next Action</div>
+          <div className="mt-3 text-3xl font-semibold tracking-tight text-white">{userAction.nextStep}</div>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {[
+              ["Target", `${userAction.suggestedExposure.toFixed(1)}%`],
+              ["Live", `${currentExposure.toFixed(1)}%`],
+              ["Available Risk Budget", formatMaybeCurrency(deployable)],
+              ["Candidates", `${userAction.investableCount}`],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-lg border border-slate-800 bg-slate-900/35 p-3">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</div>
+                <div className="mt-2 text-lg font-semibold tabular-nums text-slate-100">{value}</div>
+              </div>
+            ))}
+          </div>
           <div className="mt-6 space-y-4">
             <div>
-              <div className="mb-2 flex justify-between text-xs text-slate-400"><span>Exposure range</span><span>{currentExposure.toFixed(1)}% / {posture.recommendedExposure.toFixed(1)}%</span></div>
-              <Meter value={posture.recommendedExposure} tone={posture.recommendedExposure > 60 ? "good" : posture.recommendedExposure > 35 ? "info" : "warn"} />
+              <div className="mb-2 flex justify-between text-xs text-slate-400"><span>Exposure</span><span>{currentExposure.toFixed(1)}% / {userAction.suggestedExposure.toFixed(1)}%</span></div>
+              <Meter value={userAction.suggestedExposure} tone={userAction.suggestedExposure > 60 ? "good" : userAction.suggestedExposure > 35 ? "info" : "warn"} />
             </div>
             <div>
               <div className="mb-2 flex justify-between text-xs text-slate-400"><span>Risk pressure</span><span>{metrics.drift.toFixed(0)}</span></div>
@@ -1737,6 +1955,13 @@ function MarketRegimeHero({ decisions, metrics, portfolio, marketStatus, lastSyn
               <div className="mb-2 flex justify-between text-xs text-slate-400"><span>Participation breadth</span><span>{metrics.ensemble.toFixed(0)}%</span></div>
               <Meter value={metrics.ensemble} tone={metrics.ensemble > 65 ? "good" : metrics.ensemble > 45 ? "info" : "warn"} />
             </div>
+          </div>
+          <div className="mt-6 space-y-2">
+            {(userAction.warnings.length ? userAction.warnings : [lifecycleInsight.reason]).slice(0, 4).map((warning) => (
+              <div key={warning} className="rounded-lg border border-slate-800 bg-slate-900/35 px-3 py-2 text-xs leading-5 text-slate-300">
+                {warning}
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -1786,22 +2011,32 @@ function TopOpportunities({ decisions }: { decisions: ExecutionDecision[] }) {
     <InsightShell title="Priority Allocation Candidates" eyebrow="Highest-quality exposures first" action={<Badge variant="outline" className="border-slate-700 text-slate-300">Top {displayRows.length}</Badge>}>
       <div className="grid gap-4 lg:grid-cols-2">
         {displayRows.length ? displayRows.map((decision, index) => (
-          <button key={decision.signal.adaptiveId} type="button" className="group rounded-3xl border border-slate-800 bg-slate-900/30 p-4 text-left transition hover:-translate-y-0.5 hover:border-emerald-400/40 hover:bg-slate-900/70">
+          <div key={decision.signal.adaptiveId} className="rounded-lg border border-slate-800 bg-slate-900/30 p-4">
             <div className="mb-4 flex items-center justify-between">
               <span className="rounded-full bg-slate-800 px-2.5 py-1 font-mono text-xs font-semibold text-slate-200">{cleanTicker(decision.signal.ticker)}</span>
-              <span className="text-[11px] font-semibold text-slate-500">#{index + 1}</span>
+              <div className="flex items-center gap-2">
+                {decision.lifecycleAction && (
+                  <span className="rounded-full border border-slate-700 bg-slate-950 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-300">
+                    {decision.lifecycleAction}
+                  </span>
+                )}
+                <span className="text-[11px] font-semibold text-slate-500">#{index + 1}</span>
+              </div>
             </div>
             <div className="text-sm font-semibold text-slate-100">{plainAction(decision.actionLabel)} · {plainConviction(decision.convictionLabel)}</div>
-            <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+            <div className="mt-4 grid grid-cols-3 gap-3 text-xs">
               <div><div className="text-slate-500">Exposure</div><div className="mt-1 text-lg font-semibold text-slate-100">{decision.suggestedAllocationPct.toFixed(1)}%</div></div>
               <div><div className="text-slate-500">Expected range</div><div className={cn("mt-1 text-lg font-semibold", decision.signal.expectedMovePct >= 0 ? "text-emerald-300" : "text-rose-300")}>{decision.signal.expectedMovePct >= 0 ? "+" : ""}{decision.signal.expectedMovePct.toFixed(1)}%</div></div>
-              <div><div className="text-slate-500">Participation</div><div className="mt-1 font-medium text-slate-200">{plainTiming(decision.timingState)}</div></div>
               <div><div className="text-slate-500">Setup quality</div><div className="mt-1 font-medium text-slate-200">{decision.qualityScore.toFixed(0)}/100</div></div>
             </div>
-            <p className="mt-4 text-xs leading-5 text-slate-400">{decision.riskLevel === "Extreme Risk" ? "Avoid incremental exposure until volatility normalizes and participation improves." : decision.actionLabel === "Buy" ? "Relative strength is improving with contained downside pressure. Size selectively." : "Maintain coverage while waiting for broader confirmation."}</p>
-          </button>
+            <div className="mt-4 space-y-2 text-xs leading-5 text-slate-400">
+              <div><span className="font-semibold text-slate-300">Why:</span> {decision.tradeExplanation}</div>
+              <div><span className="font-semibold text-slate-300">Sizing:</span> quality {decision.qualityScore.toFixed(0)}, risk {decision.riskScore.toFixed(0)}, lifecycle x{decision.lifecycleAllocationMultiplier.toFixed(2)}.</div>
+              <div><span className="font-semibold text-slate-300">Invalidates:</span> {decision.lifecycleCanOpenNewTrades ? "lifecycle downgrade, exhausted timing, or elevated risk pressure." : "lifecycle gate has already blocked new risk."}</div>
+            </div>
+          </div>
         )) : (
-          <div className="rounded-3xl border border-slate-800 bg-slate-900/30 p-5 text-sm leading-6 text-slate-400 lg:col-span-2">
+          <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-5 text-sm leading-6 text-slate-400 lg:col-span-2">
             No positive expected-range candidates are currently eligible for allocation.
           </div>
         )}
@@ -2575,12 +2810,10 @@ function PortfolioPerformanceTabs({ portfolio }: { portfolio: SimulatedPortfolio
           <div className="grid gap-3 md:grid-cols-4">
             {[
               ["Total Return", `${stats.totalReturn >= 0 ? "+" : ""}${(stats.totalReturn * 100).toFixed(2)}%`, stats.totalReturn >= 0],
-              ["Monthly Return", stats.monthlyReturn == null ? "—" : `${stats.monthlyReturn >= 0 ? "+" : ""}${stats.monthlyReturn.toFixed(2)}%`, stats.monthlyReturn == null ? null : stats.monthlyReturn >= 0],
               ["Profit Factor", stats.profitFactor == null ? "—" : stats.profitFactor === Infinity ? "∞" : stats.profitFactor.toFixed(2), stats.profitFactor == null ? null : stats.profitFactor >= 1],
-              ["Win Rate", stats.winRate == null ? "—" : `${stats.winRate.toFixed(1)}%`, stats.winRate == null ? null : stats.winRate >= 50],
-              ["Max Drawdown", `${(stats.maxDrawdown * 100).toFixed(1)}%`, stats.maxDrawdown === 0 ? null : false],
               ["Normalized Annual Sharpe", stats.normalizedAnnualSharpe == null ? "—" : stats.normalizedAnnualSharpe.toFixed(2), stats.normalizedAnnualSharpe == null ? null : stats.normalizedAnnualSharpe >= 1],
-              ["Closed Executions", String(stats.totalTrades), null],
+              ["Max Drawdown", `${(stats.maxDrawdown * 100).toFixed(1)}%`, stats.maxDrawdown === 0 ? null : false],
+              ["Closed Sample", String(stats.totalTrades), null],
               ["Average Holding Period", formatDuration(stats.averageDurationMs), null],
             ].map(([label, value, positive]) => (
               <div key={String(label)} className="rounded-2xl border border-slate-800 bg-slate-900/30 p-4">
@@ -2605,6 +2838,7 @@ export default function Dashboard() {
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const [selectedTicker, setSelectedTicker] = useState<string | undefined>();
+  const [riskMode, setRiskMode] = useState<RiskMode>("small");
   const [syncTotal, setSyncTotal] = useState(0);
   const [syncAttempted, setSyncAttempted] = useState(0);
   const [syncUnavailable, setSyncUnavailable] = useState(0);
@@ -2653,12 +2887,14 @@ export default function Dashboard() {
       activeSimulatedPortfolio,
       calibrationState,
       activePortfolioLifecycleInsight,
+      riskMode,
     ),
     [
       adaptiveSignals,
       activeSimulatedPortfolio,
       calibrationState,
       activePortfolioLifecycleInsight,
+      riskMode,
     ],
   );
 
@@ -2668,14 +2904,27 @@ export default function Dashboard() {
       createEmptyPortfolio(),
       calibrationState,
       activePortfolioLifecycleInsight,
+      riskMode,
     ),
-    [adaptiveSignals, calibrationState, activePortfolioLifecycleInsight],
+    [adaptiveSignals, calibrationState, activePortfolioLifecycleInsight, riskMode],
   );
 
   const priorityCandidates = useMemo(
     () => priorityAllocationCandidates(allocationDecisions),
     [allocationDecisions],
   );
+  const benchmarkReturn = useMemo(
+    () => benchmarkReturnFromCoverage(stocks),
+    [stocks],
+  );
+  const availableQuoteCount = stocks.filter(
+    (stock) => stock.quoteStatus !== "unavailable" && Number(stock.price) > 0,
+  ).length;
+  const dataQualityPct = syncAttempted
+    ? ((syncAttempted - syncUnavailable) / Math.max(1, syncAttempted)) * 100
+    : stocks.length
+      ? (availableQuoteCount / Math.max(1, stocks.length)) * 100
+      : 0;
 
   const selectedDecision =
     executionDecisions.find((decision) => decision.signal.ticker === selectedTicker) ??
@@ -3171,26 +3420,21 @@ export default function Dashboard() {
                   ))}
                 </select>
               </div>
+              <div className="w-[150px]">
+                <select
+                  value={riskMode}
+                  onChange={(event) => setRiskMode(event.target.value as RiskMode)}
+                  className="h-11 w-full rounded-xl border border-slate-800 bg-[#061226] px-4 text-sm font-medium text-slate-200 outline-none transition focus:border-cyan-500"
+                >
+                  {Object.entries(RISK_MODE_CONFIG).map(([mode, config]) => (
+                    <option key={mode} value={mode}>
+                      {config.label} risk
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-          </div>
-
-          <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-slate-800 bg-[#061226]">
-            {[
-              ["Venue", selectedMarketStatus],
-              ["Mandate", selectedDecision ? plainAction(selectedDecision.actionLabel) : "Reviewing"],
-              ["Exposure", `${Math.min(100, executionDecisions.reduce((sum, decision) => sum + decision.suggestedAllocationPct, 0)).toFixed(1)}%`],
-            ].map(([label, value]) => (
-              <div key={label} className="min-w-[140px] border-l border-slate-800 p-4 first:border-l-0">
-                <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                  {label}
-                </div>
-
-                <div className="mt-2 text-lg font-semibold text-white">
-                  {value}
-                </div>
-              </div>
-            ))}
           </div>
         </header>
 
@@ -3213,20 +3457,19 @@ export default function Dashboard() {
                 portfolio={activeSimulatedPortfolio}
                 marketStatus={selectedMarketStatus}
                 lastSyncedLabel={lastSyncedLabel}
+                lifecycleInsight={activePortfolioLifecycleInsight}
+                benchmarkReturn={benchmarkReturn}
+                dataQualityPct={dataQualityPct}
+                riskMode={riskMode}
               />
-            </div>
-
-            <div className="mb-6">
-              <PortfolioIntelligence decisions={executionDecisions} portfolio={activeSimulatedPortfolio} />
             </div>
 
             <div className="mb-6">
               <PortfolioPerformanceTabs portfolio={activeSimulatedPortfolio} />
             </div>
 
-            <section className="mb-6 grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+            <section className="mb-6">
               <TopOpportunities decisions={executionDecisions} />
-              <MarketIntelligenceSummary metrics={intelligenceMetrics} />
             </section>
 
             <section className="mb-6 grid gap-4 xl:grid-cols-2">
