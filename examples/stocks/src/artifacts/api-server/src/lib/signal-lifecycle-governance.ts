@@ -35,7 +35,7 @@ export interface GovernSignalDecisionInput {
   previousState: SignalTrainingState;
 }
 
-type ModelRow = {
+export type ModelRow = {
   model_id: string;
   parent_model_id: string | null;
   training_window_start: string | Date;
@@ -50,6 +50,16 @@ type ModelRow = {
   lifecycle_state: ModelLifecycleState;
   registered_at: string | Date;
   updated_at: string | Date;
+};
+
+type AuditRow = {
+  audit_id: number;
+  model_id: string;
+  timestamp: string | Date;
+  old_state: ModelLifecycleState;
+  new_state: ModelLifecycleState;
+  metrics_snapshot: EvaluationMetrics;
+  reason: string;
 };
 
 const MODEL_REGISTRY_TABLE = "stock_model_registry";
@@ -88,6 +98,20 @@ const SLIPPAGE_R_PER_TRADE = Number(
 const BASELINE_BACKTEST_EXPECTANCY_R = Number(
   process.env.STOCK_MODEL_LIFECYCLE_BASELINE_BACKTEST_EXPECTANCY_R ?? 0.08,
 );
+const ZERO_METRICS: EvaluationMetrics = {
+  expectancy_r: 0,
+  rolling_expectancy_r: 0,
+  profit_factor_after_costs: 0,
+  max_drawdown: 0,
+  average_winner_r: 0,
+  average_loser_r: 0,
+  top_1_profit_dependency: 0,
+  top_3_profit_dependency: 0,
+  result_without_top_1: 0,
+  result_without_top_3: 0,
+  slippage_sensitivity: 0,
+  live_vs_backtest_decay: 0,
+};
 
 let schemaReady: Promise<void> | null = null;
 let warningLogged = false;
@@ -160,7 +184,7 @@ export async function getSignalLifecycleAuditLog(modelId?: string) {
   const params: string[] = [];
   const where = modelId ? "WHERE model_id = $1" : "";
   if (modelId) params.push(modelId);
-  const result = await pool.query(
+  const result = await pool.query<AuditRow>(
     `
       SELECT *
       FROM ${MODEL_AUDIT_TABLE}
@@ -171,6 +195,33 @@ export async function getSignalLifecycleAuditLog(modelId?: string) {
     params,
   );
   return result.rows;
+}
+
+export async function createSignalLifecycleCandidateVersions(input: {
+  market: string;
+  parentModelId?: string;
+  reason?: string;
+}): Promise<ModelRow[]> {
+  await ensureLifecycleSchema();
+  const normalizedMarket = normalizeScope(input.market);
+  const parents = input.parentModelId
+    ? await loadModelParentsById(input.parentModelId)
+    : await loadModelParentsByMarket(normalizedMarket);
+  const parentModels = parents.length
+    ? parents
+    : [await ensureBaselineModel(normalizedMarket)];
+  const created: ModelRow[] = [];
+
+  for (const parent of parentModels) {
+    created.push(
+      await createCandidateForParent(
+        parent,
+        input.reason ?? "Created candidate version from lifecycle console",
+      ),
+    );
+  }
+
+  return created;
 }
 
 async function ensureLifecycleSchema(): Promise<void> {
@@ -274,6 +325,19 @@ async function ensureLifecycleSchema(): Promise<void> {
 
 async function ensureRuntimeModel(market: string): Promise<ModelRow> {
   const normalizedMarket = normalizeScope(market);
+  await ensureBaselineModel(normalizedMarket);
+
+  const active = await loadPreferredRuntimeModel(normalizedMarket);
+  if (active) return active;
+
+  const baseline = await loadModelById(`stock-signal:${normalizedMarket}:baseline`);
+  if (!baseline) {
+    throw new Error(`Lifecycle model for ${normalizedMarket} could not be loaded`);
+  }
+  return baseline;
+}
+
+async function ensureBaselineModel(normalizedMarket: string): Promise<ModelRow> {
   const now = new Date();
   const validationStart = new Date(now.getTime() - 30 * 86_400_000);
   const trainingStart = new Date(now.getTime() - 120 * 86_400_000);
@@ -325,6 +389,146 @@ async function ensureRuntimeModel(market: string): Promise<ModelRow> {
     throw new Error(`Lifecycle model ${modelId} could not be loaded`);
   }
   return model;
+}
+
+async function loadPreferredRuntimeModel(regimeScope: string): Promise<ModelRow | null> {
+  const result = await pool.query<ModelRow>(
+    `
+      SELECT *
+      FROM ${MODEL_REGISTRY_TABLE}
+      WHERE regime_scope = $1
+      ORDER BY
+        CASE lifecycle_state
+          WHEN 'PRODUCTION' THEN 1
+          WHEN 'SMALL_LIVE' THEN 2
+          WHEN 'REDUCED' THEN 3
+          WHEN 'WATCHLIST' THEN 4
+          WHEN 'SHADOW' THEN 5
+          WHEN 'CANDIDATE' THEN 6
+          WHEN 'RESEARCH' THEN 7
+          WHEN 'RETIRED' THEN 8
+          ELSE 9
+        END,
+        updated_at DESC,
+        registered_at DESC
+      LIMIT 1
+    `,
+    [regimeScope],
+  );
+  return result.rows[0] ?? null;
+}
+
+async function loadModelById(modelId: string): Promise<ModelRow | null> {
+  const result = await pool.query<ModelRow>(
+    `SELECT * FROM ${MODEL_REGISTRY_TABLE} WHERE model_id = $1 LIMIT 1`,
+    [modelId],
+  );
+  return result.rows[0] ?? null;
+}
+
+async function loadModelParentsById(modelId: string): Promise<ModelRow[]> {
+  const model = await loadModelById(modelId);
+  return model ? [model] : [];
+}
+
+async function loadModelParentsByMarket(normalizedMarket: string): Promise<ModelRow[]> {
+  const result = await pool.query<ModelRow>(
+    `
+      WITH ranked AS (
+        SELECT
+          *,
+          ROW_NUMBER() OVER (
+            PARTITION BY regime_scope
+            ORDER BY
+              CASE lifecycle_state
+                WHEN 'PRODUCTION' THEN 1
+                WHEN 'SMALL_LIVE' THEN 2
+                WHEN 'REDUCED' THEN 3
+                WHEN 'WATCHLIST' THEN 4
+                WHEN 'SHADOW' THEN 5
+                WHEN 'CANDIDATE' THEN 6
+                WHEN 'RESEARCH' THEN 7
+                WHEN 'RETIRED' THEN 8
+                ELSE 9
+              END,
+              updated_at DESC,
+              registered_at DESC
+          ) AS rn
+        FROM ${MODEL_REGISTRY_TABLE}
+        WHERE regime_scope = $1 OR regime_scope LIKE $2
+      )
+      SELECT *
+      FROM ranked
+      WHERE rn = 1
+      ORDER BY regime_scope ASC
+      LIMIT 16
+    `,
+    [normalizedMarket, `${normalizedMarket}|%`],
+  );
+  return result.rows;
+}
+
+async function createCandidateForParent(
+  parent: ModelRow,
+  reason: string,
+): Promise<ModelRow> {
+  const now = new Date();
+  const timestamp = now.toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
+  const suffix = stableHash(`${parent.model_id}:${timestamp}:${reason}`).slice(0, 8);
+  const modelId = `stock-signal:${parent.regime_scope}:candidate:${timestamp}:${suffix}`;
+  const trainingEnd = new Date(now.getTime() - 7 * 86_400_000);
+  const trainingStart = new Date(now.getTime() - 127 * 86_400_000);
+
+  await pool.query(
+    `
+      INSERT INTO ${MODEL_REGISTRY_TABLE} (
+        model_id,
+        parent_model_id,
+        training_window_start,
+        training_window_end,
+        validation_window_start,
+        validation_window_end,
+        regime_scope,
+        feature_hash,
+        parameter_hash,
+        objective_function,
+        number_of_tested_variants,
+        lifecycle_state,
+        registered_at,
+        updated_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'CANDIDATE', NOW(), NOW())
+      ON CONFLICT (model_id) DO NOTHING
+    `,
+    [
+      modelId,
+      parent.model_id,
+      trainingStart.toISOString(),
+      trainingEnd.toISOString(),
+      trainingEnd.toISOString(),
+      now.toISOString(),
+      parent.regime_scope,
+      stableHash(`${parent.feature_hash}:candidate:${timestamp}`),
+      stableHash(`${parent.parameter_hash}:candidate:${timestamp}`),
+      parent.objective_function || "maximize_expectancy_r_after_costs",
+      Math.max(1, Number(parent.number_of_tested_variants) + 1),
+    ],
+  );
+
+  const created = await loadModelById(modelId);
+  if (!created) {
+    throw new Error(`Candidate model ${modelId} could not be loaded`);
+  }
+
+  await appendAudit({
+    model_id: created.model_id,
+    old_state: "RESEARCH",
+    new_state: "CANDIDATE",
+    metrics_snapshot: ZERO_METRICS,
+    reason: `${reason}; parent=${parent.model_id}`,
+  });
+
+  return created;
 }
 
 async function recordClosedSignalOutcome(
@@ -497,6 +701,28 @@ async function transitionModel(
     [model.model_id, newState],
   );
 
+  await appendAudit({
+    model_id: model.model_id,
+    old_state: model.lifecycle_state,
+    new_state: newState,
+    metrics_snapshot: metrics,
+    reason,
+  });
+
+  return {
+    ...model,
+    lifecycle_state: newState,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+async function appendAudit(input: {
+  model_id: string;
+  old_state: ModelLifecycleState;
+  new_state: ModelLifecycleState;
+  metrics_snapshot: EvaluationMetrics;
+  reason: string;
+}): Promise<void> {
   await pool.query(
     `
       INSERT INTO ${MODEL_AUDIT_TABLE} (
@@ -510,19 +736,13 @@ async function transitionModel(
       VALUES ($1, NOW(), $2, $3, $4::jsonb, $5)
     `,
     [
-      model.model_id,
-      model.lifecycle_state,
-      newState,
-      JSON.stringify(metrics),
-      reason,
+      input.model_id,
+      input.old_state,
+      input.new_state,
+      JSON.stringify(input.metrics_snapshot),
+      input.reason,
     ],
   );
-
-  return {
-    ...model,
-    lifecycle_state: newState,
-    updated_at: new Date().toISOString(),
-  };
 }
 
 function buildLifecycleDecision(

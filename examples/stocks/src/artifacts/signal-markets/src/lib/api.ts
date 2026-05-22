@@ -165,6 +165,48 @@ export interface SignalEvent {
   signal: StockQuote & Partial<StockData>;
 }
 
+export interface EvaluationMetrics {
+  expectancy_r: number;
+  rolling_expectancy_r: number;
+  profit_factor_after_costs: number;
+  max_drawdown: number;
+  average_winner_r: number;
+  average_loser_r: number;
+  top_1_profit_dependency: number;
+  top_3_profit_dependency: number;
+  result_without_top_1: number;
+  result_without_top_3: number;
+  slippage_sensitivity: number;
+  live_vs_backtest_decay: number;
+}
+
+export interface ModelLifecycleRecord {
+  model_id: string;
+  parent_model_id: string | null;
+  training_window_start: string;
+  training_window_end: string;
+  validation_window_start: string;
+  validation_window_end: string;
+  regime_scope: string;
+  feature_hash: string;
+  parameter_hash: string;
+  objective_function: string;
+  number_of_tested_variants: number;
+  lifecycle_state: ModelLifecycleState;
+  registered_at: string;
+  updated_at: string;
+}
+
+export interface ModelLifecycleAuditEntry {
+  audit_id: number;
+  model_id: string;
+  timestamp: string;
+  old_state: ModelLifecycleState;
+  new_state: ModelLifecycleState;
+  metrics_snapshot: Partial<EvaluationMetrics>;
+  reason: string;
+}
+
 export interface StockQuoteBatchResponse {
   market?: string;
   exchange?: string;
@@ -446,6 +488,43 @@ export async function fetchSignalHistory(
   const params = new URLSearchParams({ limit: String(limit) });
   if (market) params.set("market", market);
   return request<SignalEvent[]>(`/stocks/signals/history?${params}`);
+}
+
+export async function fetchModelLifecycle(): Promise<ModelLifecycleRecord[]> {
+  return request<ModelLifecycleRecord[]>("/stocks/model-lifecycle", {
+    timeoutMs: 30_000,
+    retryCount: 0,
+  });
+}
+
+export async function fetchModelLifecycleAudit(
+  modelId?: string,
+): Promise<ModelLifecycleAuditEntry[]> {
+  const params = new URLSearchParams();
+  if (modelId) params.set("modelId", modelId);
+  return request<ModelLifecycleAuditEntry[]>(
+    `/stocks/model-lifecycle/audit${params.size ? `?${params}` : ""}`,
+    {
+      timeoutMs: 30_000,
+      retryCount: 0,
+    },
+  );
+}
+
+export async function createModelLifecycleCandidate(input: {
+  market: string;
+  parentModelId?: string;
+  reason?: string;
+}): Promise<{ created: number; models: ModelLifecycleRecord[] }> {
+  return request<{ created: number; models: ModelLifecycleRecord[] }>(
+    "/stocks/model-lifecycle/candidate",
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+      timeoutMs: 30_000,
+      retryCount: 0,
+    },
+  );
 }
 
 export async function emitFakeSignal(

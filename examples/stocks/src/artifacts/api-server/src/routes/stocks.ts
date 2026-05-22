@@ -24,6 +24,7 @@ import {
   storeMarketMonthlyVolatilityFromCandles,
 } from "../lib/market-context-occurrences";
 import {
+  createSignalLifecycleCandidateVersions,
   getSignalLifecycleAuditLog,
   listSignalLifecycleModels,
 } from "../lib/signal-lifecycle-governance";
@@ -257,6 +258,28 @@ router.get("/stocks/model-lifecycle/audit", async (req, res) => {
     typeof req.query.modelId === "string" ? req.query.modelId : undefined;
   const entries = await getSignalLifecycleAuditLog(modelId);
   res.json({ data: entries });
+});
+
+router.post("/stocks/model-lifecycle/candidate", async (req, res) => {
+  const market = String(req.body?.market ?? "").trim();
+  const parentModelId =
+    typeof req.body?.parentModelId === "string"
+      ? req.body.parentModelId.trim()
+      : undefined;
+  const reason =
+    typeof req.body?.reason === "string" ? req.body.reason.trim() : undefined;
+
+  if (!market) {
+    res.status(400).json({ error: "market is required" });
+    return;
+  }
+
+  const models = await createSignalLifecycleCandidateVersions({
+    market,
+    parentModelId: parentModelId || undefined,
+    reason,
+  });
+  res.json({ data: { created: models.length, models } });
 });
 
 router.post("/stocks/signals/fake", async (req, res) => {
