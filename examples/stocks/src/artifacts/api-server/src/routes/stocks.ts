@@ -23,6 +23,10 @@ import {
   hydrateMarketContextFromAvailableHistory,
   storeMarketMonthlyVolatilityFromCandles,
 } from "../lib/market-context-occurrences";
+import {
+  getSignalLifecycleAuditLog,
+  listSignalLifecycleModels,
+} from "../lib/signal-lifecycle-governance";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -241,6 +245,18 @@ router.get("/stocks/signals/history", async (req, res) => {
 
   const events = await getSignalEvents(scope, limit);
   res.json({ data: events });
+});
+
+router.get("/stocks/model-lifecycle", async (_req, res) => {
+  const models = await listSignalLifecycleModels();
+  res.json({ data: models });
+});
+
+router.get("/stocks/model-lifecycle/audit", async (req, res) => {
+  const modelId =
+    typeof req.query.modelId === "string" ? req.query.modelId : undefined;
+  const entries = await getSignalLifecycleAuditLog(modelId);
+  res.json({ data: entries });
 });
 
 router.post("/stocks/signals/fake", async (req, res) => {

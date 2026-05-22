@@ -14,6 +14,20 @@ export type SignalLifecycle =
   | "DECAYING"
   | "INVALIDATED"
   | "COMPLETED";
+export type ModelLifecycleState =
+  | "RESEARCH"
+  | "CANDIDATE"
+  | "SHADOW"
+  | "SMALL_LIVE"
+  | "PRODUCTION"
+  | "WATCHLIST"
+  | "REDUCED"
+  | "RETIRED";
+export type ModelLifecycleAction =
+  | "Awaiting Decision"
+  | "Careful"
+  | "Trusted"
+  | "Disregard";
 
 export interface MarketOption {
   code: string;
@@ -51,6 +65,12 @@ export interface StockQuote {
   signalEmittedAt?: string;
   signalEntryPrice?: number;
   signalReturnPercent?: number;
+  modelId?: string;
+  modelLifecycleState?: ModelLifecycleState;
+  modelLifecycleAction?: ModelLifecycleAction;
+  modelLifecycleReason?: string;
+  modelCanOpenNewTrades?: boolean;
+  modelAllocationMultiplier?: number;
   quoteSource?: "binance-spot" | "binance-futures" | "tradingview";
   quoteStatus?: "available" | "pending" | "unavailable";
   quoteStatusReason?: string;
@@ -100,6 +120,12 @@ export type StockData = StockListItem & {
   signalEmittedAt?: string;
   signalEntryPrice?: number;
   signalReturnPercent?: number;
+  modelId?: string;
+  modelLifecycleState?: ModelLifecycleState;
+  modelLifecycleAction?: ModelLifecycleAction;
+  modelLifecycleReason?: string;
+  modelCanOpenNewTrades?: boolean;
+  modelAllocationMultiplier?: number;
   quoteSource?: "binance-spot" | "binance-futures" | "tradingview";
   quoteStatus?: "available" | "pending" | "unavailable";
   quoteStatusReason?: string;

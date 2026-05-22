@@ -9,6 +9,11 @@ import {
   recordSignalSnapshot,
   type SignalTrainingState,
 } from "./signal-training";
+import {
+  applyLifecycleToSignal,
+  governSignalDecision,
+  type SignalLifecycleDecision,
+} from "./signal-lifecycle-governance";
 import { logger } from "./logger";
 
 export interface StockListItem {
@@ -41,6 +46,12 @@ export interface StockQuote {
   signalEmittedAt?: string;
   signalEntryPrice?: number;
   signalReturnPercent?: number;
+  modelId?: string;
+  modelLifecycleState?: SignalLifecycleDecision["modelLifecycleState"];
+  modelLifecycleAction?: SignalLifecycleDecision["modelLifecycleAction"];
+  modelLifecycleReason?: string;
+  modelCanOpenNewTrades?: boolean;
+  modelAllocationMultiplier?: number;
   quoteSource?: "binance-spot" | "binance-futures" | "tradingview";
   regime?: AdaptiveRegime;
   confidence?: number;
@@ -269,6 +280,12 @@ type SignalSnapshot = Pick<
   | "signalEmittedAt"
   | "signalEntryPrice"
   | "signalReturnPercent"
+  | "modelId"
+  | "modelLifecycleState"
+  | "modelLifecycleAction"
+  | "modelLifecycleReason"
+  | "modelCanOpenNewTrades"
+  | "modelAllocationMultiplier"
 >;
 
 type SignalDecision = {
@@ -942,29 +959,70 @@ async function getSignalForQuote(
 
   const currentPrice =
     Number.isFinite(quote.price) && quote.price > 0 ? quote.price : 0;
-  const snapshot = options?.recordSignalSnapshots === false
-    ? buildSignalSnapshot(quote, signal)
-    : await recordSignalSnapshot({
+  const governed = options?.recordSignalSnapshots === false
+    ? { signal, lifecycle: null }
+    : await governSignalForQuote({
       market: scopedMarket,
       symbol: quote.symbol,
       currentPrice,
       signal,
       previousState: trainingState,
     });
+  const snapshot = options?.recordSignalSnapshots === false
+    ? buildSignalSnapshot(quote, signal)
+    : await recordSignalSnapshot({
+      market: scopedMarket,
+      symbol: quote.symbol,
+      currentPrice,
+      signal: governed.signal,
+      previousState: trainingState,
+    });
+  const governedSnapshot = governed.lifecycle
+    ? attachLifecycleToSnapshot(snapshot, governed.lifecycle)
+    : snapshot;
 
   // Store snapshot in signal cache so subsequent hits skip all DB I/O
   const existingEntry = signalCache.get(cacheKey);
   if (existingEntry) {
-    existingEntry.snapshot = snapshot;
+    existingEntry.snapshot = governedSnapshot;
   } else {
     signalCache.set(cacheKey, {
       expiresAt: Date.now() + SIGNAL_CACHE_TTL_MS,
-      signal,
-      snapshot,
+      signal: governed.signal,
+      snapshot: governedSnapshot,
     });
   }
 
-  return snapshot;
+  return governedSnapshot;
+}
+
+async function governSignalForQuote(input: {
+  market: string;
+  symbol: string;
+  currentPrice: number;
+  signal: SignalDecision;
+  previousState: SignalTrainingState;
+}): Promise<{ signal: SignalDecision; lifecycle: SignalLifecycleDecision | null }> {
+  const lifecycle = await governSignalDecision(input);
+  return {
+    signal: applyLifecycleToSignal(input.signal, lifecycle),
+    lifecycle,
+  };
+}
+
+function attachLifecycleToSnapshot(
+  snapshot: SignalSnapshot,
+  lifecycle: SignalLifecycleDecision,
+): SignalSnapshot {
+  return {
+    ...snapshot,
+    modelId: lifecycle.modelId,
+    modelLifecycleState: lifecycle.modelLifecycleState,
+    modelLifecycleAction: lifecycle.modelLifecycleAction,
+    modelLifecycleReason: lifecycle.modelLifecycleReason,
+    modelCanOpenNewTrades: lifecycle.modelCanOpenNewTrades,
+    modelAllocationMultiplier: lifecycle.modelAllocationMultiplier,
+  };
 }
 
 function buildSignalSnapshot(

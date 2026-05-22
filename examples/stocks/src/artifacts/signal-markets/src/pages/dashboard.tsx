@@ -46,6 +46,7 @@ import {
   fetchStockQuoteBatch,
   registerSignalWatchlist,
   type MarketOption,
+  type ModelLifecycleState,
   type SignalEvent,
   type AdaptiveRegime,
   type SignalLifecycle,
@@ -1005,6 +1006,11 @@ type ExecutionDecision = {
   liquidityScore: number;
   volatilityPenalty: number;
   metaAllocation: MetaAllocationDecision;
+  lifecycleState?: ModelLifecycleState;
+  lifecycleAction?: string;
+  lifecycleReason?: string;
+  lifecycleAllocationMultiplier: number;
+  lifecycleCanOpenNewTrades: boolean;
   classifiedRegime: MarketRegimeClassification;
   survivalForecast: SurvivalForecast;
   recommendedHoldingMinutes: number;
@@ -1155,6 +1161,12 @@ function calibrationStateFromSignals(signals: AdaptiveSignalView[]): Calibration
 function buildTradeExplanation(decision: Omit<ExecutionDecision, "tradeExplanation">) {
   const environment = decision.environmentLabel.toLowerCase();
   const metaReasons = decision.metaAllocation.reasons.slice(0, 2).join(" ");
+  if (!decision.lifecycleCanOpenNewTrades) {
+    return `Lifecycle gates block new exposure: ${decision.lifecycleReason ?? "the strategy version is not cleared to trade."}`;
+  }
+  if (decision.lifecycleAllocationMultiplier < 1) {
+    return `Lifecycle gates require reduced sizing. ${decision.lifecycleReason ?? ""} ${metaReasons}`;
+  }
   if (decision.riskLevel === "Extreme Risk") {
     return `Avoid new exposure while ${environment} conditions remain unstable. ${metaReasons}`;
   }
@@ -1170,10 +1182,53 @@ function buildTradeExplanation(decision: Omit<ExecutionDecision, "tradeExplanati
   return `Conditions support a ${plainAction(decision.actionLabel).toLowerCase()} mandate while the market searches for cleaner participation. ${metaReasons}`;
 }
 
+type LifecycleGate = {
+  state?: ModelLifecycleState;
+  action?: string;
+  reason?: string;
+  canOpenNewTrades: boolean;
+  allocationMultiplier: number;
+};
+
+function portfolioLifecycleMultiplier(insight?: PortfolioLifecycleInsight): number {
+  if (!insight) return 1;
+  if (insight.state === "RETIRED") return 0;
+  if (insight.state === "WATCHLIST") return 0;
+  if (insight.state === "REDUCED") return 0.35;
+  if (insight.state === "PRODUCTION") return 1;
+  if (insight.state === "SMALL_LIVE") return 0.65;
+  return 0.5;
+}
+
+function lifecycleGateForSignal(
+  signal: AdaptiveSignalView,
+  portfolioLifecycle?: PortfolioLifecycleInsight,
+): LifecycleGate {
+  const modelMultiplier = signal.modelAllocationMultiplier ?? 1;
+  const portfolioMultiplier = portfolioLifecycleMultiplier(portfolioLifecycle);
+  const modelCanTrade = signal.modelCanOpenNewTrades ?? true;
+  const portfolioCanTrade = portfolioMultiplier > 0;
+  const allocationMultiplier = Math.min(modelMultiplier, portfolioMultiplier);
+  const state = signal.modelLifecycleState ?? portfolioLifecycle?.state;
+  const action = signal.modelLifecycleAction ?? portfolioLifecycle?.label;
+  const reason = signal.modelLifecycleReason ?? portfolioLifecycle?.reason;
+
+  return {
+    state,
+    action,
+    reason,
+    canOpenNewTrades: modelCanTrade && portfolioCanTrade,
+    allocationMultiplier: modelCanTrade && portfolioCanTrade
+      ? clampMetric(allocationMultiplier, 0, 1)
+      : 0,
+  };
+}
+
 function buildExecutionDecisions(
   signals: AdaptiveSignalView[],
   portfolio: SimulatedPortfolio,
   calibrationState: CalibrationState,
+  portfolioLifecycle?: PortfolioLifecycleInsight,
 ): ExecutionDecision[] {
   const totalValue =
     (portfolio.cash ?? 0) +
@@ -1254,7 +1309,7 @@ function buildExecutionDecisions(
     );
     const action = signal.signalAction ?? "Hold";
     const riskLevel = deriveRiskLevel(riskScore);
-    const actionLabel: ExecutionDecision["actionLabel"] =
+    const initialActionLabel: ExecutionDecision["actionLabel"] =
       !tradableExpectedRange && (action === "Buy" || action === "Hold")
         ? "Avoid"
         : action === "Buy" && qualityScore >= 62 && riskScore < 68
@@ -1266,6 +1321,14 @@ function buildExecutionDecisions(
             : riskScore >= 76
               ? "Avoid"
               : "Hold";
+    const lifecycleGate = lifecycleGateForSignal(signal, portfolioLifecycle);
+    const isHeld = Boolean(portfolio.positions?.[signal.ticker]);
+    const actionLabel: ExecutionDecision["actionLabel"] =
+      !lifecycleGate.canOpenNewTrades
+        ? isHeld
+          ? "Reduce"
+          : "Avoid"
+        : initialActionLabel;
     const convictionLabel: ConvictionLevel =
       qualityScore >= 74 && calibratedConfidence >= 70
         ? "High Conviction"
@@ -1284,6 +1347,7 @@ function buildExecutionDecisions(
             : 0;
     const baseSize =
       allocationIntent *
+      lifecycleGate.allocationMultiplier *
       metaAllocation.exposureMultiplier *
       (signalQuality / 100) *
       (calibrationScore / 100) *
@@ -1311,6 +1375,11 @@ function buildExecutionDecisions(
       liquidityScore: liquidity,
       volatilityPenalty,
       metaAllocation,
+      lifecycleState: lifecycleGate.state,
+      lifecycleAction: lifecycleGate.action,
+      lifecycleReason: lifecycleGate.reason,
+      lifecycleAllocationMultiplier: lifecycleGate.allocationMultiplier,
+      lifecycleCanOpenNewTrades: lifecycleGate.canOpenNewTrades,
       classifiedRegime: classified.regime,
       survivalForecast,
       recommendedHoldingMinutes: survivalForecast.recommendedHoldingMinutes,
@@ -2195,7 +2264,7 @@ function formatDuration(ms: number | null) {
 
 type PortfolioLifecycleInsight = {
   label: string;
-  state: "RESEARCH" | "CANDIDATE" | "SHADOW" | "SMALL_LIVE" | "PRODUCTION" | "WATCHLIST" | "REDUCED" | "RETIRED";
+  state: ModelLifecycleState;
   className: string;
   reason: string;
 };
@@ -2208,12 +2277,21 @@ function portfolioLifecycleInsight(
   const sharpe = stats.normalizedAnnualSharpe ?? 0;
   const winRate = stats.winRate ?? 0;
 
-  if (!trainingActive || stats.totalTrades === 0) {
+  if (!trainingActive) {
     return {
       label: "Awaiting Decision",
       state: "RESEARCH",
       className: "border-slate-700 bg-slate-900/50 text-slate-400",
       reason: "No closed execution sample yet.",
+    };
+  }
+
+  if (stats.totalTrades === 0) {
+    return {
+      label: "Awaiting Decision",
+      state: "SMALL_LIVE",
+      className: "border-cyan-500/30 bg-cyan-500/10 text-cyan-200",
+      reason: "Collecting the first live feedback sample with reduced sizing.",
     };
   }
 
@@ -2546,6 +2624,18 @@ export default function Dashboard() {
 
   const activeSimulatedPortfolio =
     simulatedPortfolios[selectedMarket] ?? createEmptyPortfolio();
+  const activePortfolioTrainingActive =
+    SIMULATED_EXECUTIONS_ENABLED &&
+    (stocks.length > 0 ||
+      activeSimulatedPortfolio.valueHistory.length > 0 ||
+      Object.keys(activeSimulatedPortfolio.positions).length > 0);
+  const activePortfolioLifecycleInsight = useMemo(
+    () => portfolioLifecycleInsight(
+      portfolioStats(activeSimulatedPortfolio),
+      activePortfolioTrainingActive,
+    ),
+    [activePortfolioTrainingActive, activeSimulatedPortfolio],
+  );
 
   const adaptiveSignals = useMemo(
     () => stocks.map((stock) => deriveAdaptiveSignal(stock, Date.now())),
@@ -2558,13 +2648,28 @@ export default function Dashboard() {
   );
 
   const executionDecisions = useMemo(
-    () => buildExecutionDecisions(adaptiveSignals, activeSimulatedPortfolio, calibrationState),
-    [adaptiveSignals, activeSimulatedPortfolio, calibrationState],
+    () => buildExecutionDecisions(
+      adaptiveSignals,
+      activeSimulatedPortfolio,
+      calibrationState,
+      activePortfolioLifecycleInsight,
+    ),
+    [
+      adaptiveSignals,
+      activeSimulatedPortfolio,
+      calibrationState,
+      activePortfolioLifecycleInsight,
+    ],
   );
 
   const allocationDecisions = useMemo(
-    () => buildExecutionDecisions(adaptiveSignals, createEmptyPortfolio(), calibrationState),
-    [adaptiveSignals, calibrationState],
+    () => buildExecutionDecisions(
+      adaptiveSignals,
+      createEmptyPortfolio(),
+      calibrationState,
+      activePortfolioLifecycleInsight,
+    ),
+    [adaptiveSignals, calibrationState, activePortfolioLifecycleInsight],
   );
 
   const priorityCandidates = useMemo(
