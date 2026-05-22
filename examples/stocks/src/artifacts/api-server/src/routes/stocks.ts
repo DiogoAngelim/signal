@@ -36,6 +36,8 @@ const REFRESH_MARKET_MONTHLY_VOLATILITY_ON_QUOTES =
 const STOCK_QUOTES_RESPONSE_BUDGET_MS = Number(
   process.env.STOCK_QUOTES_RESPONSE_BUDGET_MS ?? 45_000,
 );
+const STOCK_QUOTES_PERSISTENCE_ENABLED =
+  process.env.STOCK_QUOTES_PERSISTENCE_ENABLED !== "false";
 const monthlyVolatilityRefreshes = new Map<
   string,
   { lastStartedAt: number; pending?: Promise<void> }
@@ -294,7 +296,9 @@ router.post("/stocks/quotes", async (req, res) => {
     return;
   }
 
-  void registerSymbolsForBackgroundRefreshIfAvailable(scope, requestedSymbols);
+  if (STOCK_QUOTES_PERSISTENCE_ENABLED) {
+    void registerSymbolsForBackgroundRefreshIfAvailable(scope, requestedSymbols);
+  }
 
   const quotes = market
     ? await fetchMarketQuotes(market, requestedSymbols, {
@@ -310,14 +314,17 @@ router.post("/stocks/quotes", async (req, res) => {
     ? await attachSignalsToQuotes(quotes, market || exchange, {
       deadlineAt,
       minRemainingMs: 2_000,
+      recordSignalSnapshots: STOCK_QUOTES_PERSISTENCE_ENABLED,
     })
     : quotes;
 
-  if (withSignals && enrichedQuotes.length) {
+  if (STOCK_QUOTES_PERSISTENCE_ENABLED && withSignals && enrichedQuotes.length) {
     void storeSignalSnapshotsIfAvailable(scope, enrichedQuotes);
   }
 
-  scheduleMarketMonthlyVolatilityRefresh(market, enrichedQuotes);
+  if (STOCK_QUOTES_PERSISTENCE_ENABLED) {
+    scheduleMarketMonthlyVolatilityRefresh(market, enrichedQuotes);
+  }
 
   const returnedSymbols = new Set(enrichedQuotes.map((quote) => quote.symbol));
   const unavailableSymbols = requestedSymbols.filter(

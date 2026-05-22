@@ -92,6 +92,7 @@ export interface SignalAttachOptions {
   bypassSignalCache?: boolean;
   deadlineAt?: number;
   minRemainingMs?: number;
+  recordSignalSnapshots?: boolean;
 }
 
 export interface MarketDailyCandle {
@@ -941,13 +942,15 @@ async function getSignalForQuote(
 
   const currentPrice =
     Number.isFinite(quote.price) && quote.price > 0 ? quote.price : 0;
-  const snapshot = await recordSignalSnapshot({
-    market: scopedMarket,
-    symbol: quote.symbol,
-    currentPrice,
-    signal,
-    previousState: trainingState,
-  });
+  const snapshot = options?.recordSignalSnapshots === false
+    ? buildSignalSnapshot(quote, signal)
+    : await recordSignalSnapshot({
+      market: scopedMarket,
+      symbol: quote.symbol,
+      currentPrice,
+      signal,
+      previousState: trainingState,
+    });
 
   // Store snapshot in signal cache so subsequent hits skip all DB I/O
   const existingEntry = signalCache.get(cacheKey);

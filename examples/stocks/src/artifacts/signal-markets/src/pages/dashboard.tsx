@@ -406,7 +406,60 @@ const signalOptions: Array<TradeSignal | "All"> = [
   "Hold",
   "Sell",
 ];
-const PORTFOLIO_STORAGE_KEY = "signal-markets:portfolios";
+const LEGACY_PORTFOLIO_STORAGE_KEYS = [
+  "signal-markets:portfolios",
+  "signal-markets:portfolios:v",
+  "signal-markets:portfolios:v2",
+];
+const PORTFOLIO_STORAGE_KEY = "signal-markets:portfolios:v3";
+const PORTFOLIO_STORAGE_PREFIX = "signal-markets:portfolios";
+const SIMULATED_EXECUTIONS_ENABLED =
+  import.meta.env.VITE_ENABLE_SIMULATED_EXECUTIONS !== "false";
+const FRESH_START_STORAGE_KEY =
+  "signal-markets:fresh-start:allocation-ledger:2026-05-21";
+
+function clearSignalMarketsStorageForFreshStart() {
+  try {
+    if (localStorage.getItem(FRESH_START_STORAGE_KEY) === "done") {
+      return;
+    }
+
+    const keysToRemove = new Set<string>([
+      ...LEGACY_PORTFOLIO_STORAGE_KEYS,
+      PORTFOLIO_STORAGE_KEY,
+    ]);
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (key?.startsWith("signal-markets:")) {
+        keysToRemove.add(key);
+      }
+    }
+    for (const key of keysToRemove) {
+      localStorage.removeItem(key);
+    }
+    localStorage.setItem(FRESH_START_STORAGE_KEY, "done");
+  } catch {
+    // Ignore storage failures in private browsing or restricted previews.
+  }
+}
+
+function clearPortfolioStorage() {
+  try {
+    const keysToRemove = new Set<string>([
+      ...LEGACY_PORTFOLIO_STORAGE_KEYS,
+      PORTFOLIO_STORAGE_KEY,
+    ]);
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (key?.startsWith(PORTFOLIO_STORAGE_PREFIX)) {
+        keysToRemove.add(key);
+      }
+    }
+    for (const key of keysToRemove) localStorage.removeItem(key);
+  } catch {
+    // Ignore storage failures in private browsing or restricted previews.
+  }
+}
 
 function resolveMarketSchedule(market: string): MarketSchedule {
   const normalized = market.trim().toUpperCase();
@@ -2140,6 +2193,92 @@ function formatDuration(ms: number | null) {
   return `${Math.max(1, Math.round(minutes))}m`;
 }
 
+type PortfolioLifecycleInsight = {
+  label: string;
+  state: "RESEARCH" | "CANDIDATE" | "SHADOW" | "SMALL_LIVE" | "PRODUCTION" | "WATCHLIST" | "REDUCED" | "RETIRED";
+  className: string;
+  reason: string;
+};
+
+function portfolioLifecycleInsight(
+  stats: ReturnType<typeof portfolioStats>,
+  trainingActive: boolean,
+): PortfolioLifecycleInsight {
+  const profitFactor = stats.profitFactor === Infinity ? 9.99 : stats.profitFactor ?? 0;
+  const sharpe = stats.normalizedAnnualSharpe ?? 0;
+  const winRate = stats.winRate ?? 0;
+
+  if (!trainingActive || stats.totalTrades === 0) {
+    return {
+      label: "Awaiting Decision",
+      state: "RESEARCH",
+      className: "border-slate-700 bg-slate-900/50 text-slate-400",
+      reason: "No closed execution sample yet.",
+    };
+  }
+
+  if (stats.totalTrades < 30) {
+    return {
+      label: "Awaiting Decision",
+      state: "CANDIDATE",
+      className: "border-sky-500/30 bg-sky-500/10 text-sky-200",
+      reason: "Sample is still too small for promotion.",
+    };
+  }
+
+  if (stats.totalReturn < 0 && (profitFactor < 1 || sharpe < 0)) {
+    return {
+      label: "Disregard",
+      state: "RETIRED",
+      className: "border-rose-500/35 bg-rose-500/10 text-rose-200",
+      reason: "Closed execution sample is negative after risk adjustment.",
+    };
+  }
+
+  if (profitFactor < 1 || sharpe < 0 || winRate < 35) {
+    return {
+      label: "Careful",
+      state: "REDUCED",
+      className: "border-amber-500/35 bg-amber-500/10 text-amber-200",
+      reason: "Performance is not strong enough for full allocation.",
+    };
+  }
+
+  if (stats.totalTrades < 100) {
+    return {
+      label: "Awaiting Decision",
+      state: "SHADOW",
+      className: "border-sky-500/30 bg-sky-500/10 text-sky-200",
+      reason: "Promising, but needs more closed executions.",
+    };
+  }
+
+  if (stats.maxDrawdown > 0.08 || profitFactor < 1.15 || sharpe < 0.5) {
+    return {
+      label: "Careful",
+      state: "WATCHLIST",
+      className: "border-amber-500/35 bg-amber-500/10 text-amber-200",
+      reason: "Keep under review until risk-adjusted performance improves.",
+    };
+  }
+
+  if (stats.totalTrades >= 200 && stats.totalReturn > 0 && profitFactor >= 1.25 && sharpe >= 1) {
+    return {
+      label: "Trusted",
+      state: "PRODUCTION",
+      className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
+      reason: "Sample and risk-adjusted performance clear production gates.",
+    };
+  }
+
+  return {
+    label: "Awaiting Decision",
+    state: "SMALL_LIVE",
+    className: "border-cyan-500/30 bg-cyan-500/10 text-cyan-200",
+    reason: "Live sample is constructive but still below production gates.",
+  };
+}
+
 function PortfolioPerformanceTabs({ portfolio }: { portfolio: SimulatedPortfolio }) {
   const [tab, setTab] = useState<"chart" | "history" | "stats">("chart");
   const [tradePage, setTradePage] = useState(1);
@@ -2159,6 +2298,10 @@ function PortfolioPerformanceTabs({ portfolio }: { portfolio: SimulatedPortfolio
     r: baseline > 0 ? ((point.v - baseline) / baseline) * 100 : 0,
   }));
   const lastReturn = chartRows[chartRows.length - 1]?.r ?? 0;
+  const trainingActive =
+    SIMULATED_EXECUTIONS_ENABLED &&
+    (portfolio.valueHistory.length > 0 || Object.keys(portfolio.positions).length > 0);
+  const lifecycleInsight = portfolioLifecycleInsight(stats, trainingActive);
   const strokeColor = lastReturn >= 0 ? "hsl(158 64% 52%)" : "hsl(348 83% 60%)";
   const gradientId = lastReturn >= 0 ? "compoundedReturnsUp" : "compoundedReturnsDown";
   const formatDate = (timestamp: number) =>
@@ -2179,9 +2322,28 @@ function PortfolioPerformanceTabs({ portfolio }: { portfolio: SimulatedPortfolio
       title="Portfolio Performance"
       eyebrow="Compounded returns and execution record"
       action={
-        <Badge variant="outline" className="border-slate-700 text-slate-300">
-          {lastReturn >= 0 ? "+" : ""}{lastReturn.toFixed(2)}%
-        </Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline" className="border-slate-700 text-slate-300">
+            {lastReturn >= 0 ? "+" : ""}{lastReturn.toFixed(2)}%
+          </Badge>
+          <Badge
+            variant="outline"
+            className={cn(lifecycleInsight.className)}
+            title={`Lifecycle: ${lifecycleInsight.state}. ${lifecycleInsight.reason}`}
+          >
+            {lifecycleInsight.label}
+          </Badge>
+          <Badge
+            variant="outline"
+            className={cn(
+              trainingActive
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+                : "border-slate-700 bg-slate-900/50 text-slate-400",
+            )}
+          >
+            {trainingActive ? "Training Active" : "Training Idle"}
+          </Badge>
+        </div>
       }
     >
       <Tabs value={tab} onValueChange={(value) => setTab(value as "chart" | "history" | "stats")}>
@@ -2370,6 +2532,11 @@ export default function Dashboard() {
   const [syncUnavailable, setSyncUnavailable] = useState(0);
   const [simulatedPortfolios, setSimulatedPortfolios] = useState<Record<string, SimulatedPortfolio>>(() => {
     try {
+      clearSignalMarketsStorageForFreshStart();
+      if (!SIMULATED_EXECUTIONS_ENABLED) {
+        clearPortfolioStorage();
+        return {};
+      }
       const saved = localStorage.getItem(PORTFOLIO_STORAGE_KEY);
       return saved ? normalizePortfolioStorage(JSON.parse(saved)) : {};
     } catch {
@@ -2626,6 +2793,11 @@ export default function Dashboard() {
   }, [selectedMarket]);
 
   useEffect(() => {
+    if (!SIMULATED_EXECUTIONS_ENABLED) {
+      clearPortfolioStorage();
+      return;
+    }
+
     try {
       localStorage.setItem(
         PORTFOLIO_STORAGE_KEY,
@@ -2637,6 +2809,12 @@ export default function Dashboard() {
   }, [simulatedPortfolios]);
 
   useEffect(() => {
+    if (!SIMULATED_EXECUTIONS_ENABLED) {
+      setSimulatedPortfolios((current) =>
+        Object.keys(current).length ? {} : current,
+      );
+      return;
+    }
     if (!selectedMarket || !stocks.length || selectedMarketStatus !== "Open") return;
 
     setSimulatedPortfolios((current) => {
