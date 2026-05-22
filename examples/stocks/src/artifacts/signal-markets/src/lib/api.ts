@@ -207,6 +207,63 @@ export interface ModelLifecycleAuditEntry {
   reason: string;
 }
 
+export interface PortfolioDecisionTopTicker {
+  ticker: string;
+  action: string;
+  allocationPct: number;
+  targetCapital: number;
+  quality: number;
+  risk: number;
+}
+
+export interface PortfolioDecisionMemoryEntry {
+  id: string;
+  market: string;
+  recordedAt: number;
+  signature: string;
+  recommendation: string;
+  readiness: string;
+  tone: "good" | "info" | "warn" | "bad";
+  budget: number;
+  targetAllocationPct: number;
+  targetCapital: number;
+  confidenceFilter: "small" | "balanced" | "normal";
+  confidenceFilterLabel: string;
+  lifecycleState: ModelLifecycleState;
+  lifecycleLabel: string;
+  topTickers: PortfolioDecisionTopTicker[];
+  startPortfolioValue: number;
+  startTotalReturn: number;
+  startSharpe: number | null;
+  startProfitFactor: number | null;
+  startClosedTrades: number;
+  startDrawdown: number;
+  dataQualityPct: number;
+}
+
+export interface PortfolioDecisionOutcome {
+  id: number;
+  decisionId: string;
+  windowLabel: "1d" | "7d" | "30d";
+  evaluatedAt: number;
+  outcome: "Too early" | "Helped" | "Hurt" | "Mixed";
+  tone: "good" | "info" | "warn" | "bad";
+  returnChange: number;
+  sharpeChange: number;
+  closedTradeChange: number;
+  drawdownChange: number;
+  trustChange: string;
+}
+
+export interface PortfolioDecisionAuditEntry {
+  id: number;
+  decisionId: string | null;
+  market: string;
+  eventType: "recorded" | "outcome_checked";
+  timestamp: number;
+  snapshot: Record<string, unknown>;
+}
+
 export interface StockQuoteBatchResponse {
   market?: string;
   exchange?: string;
@@ -525,6 +582,88 @@ export async function createModelLifecycleCandidate(input: {
       retryCount: 0,
     },
   );
+}
+
+export async function fetchPortfolioDecisionMemory(
+  market?: string,
+  limit = 50,
+): Promise<PortfolioDecisionMemoryEntry[]> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (market) params.set("market", market);
+  return request<PortfolioDecisionMemoryEntry[]>(
+    `/stocks/portfolio-decisions?${params}`,
+    {
+      timeoutMs: 30_000,
+      retryCount: 0,
+    },
+  );
+}
+
+export async function fetchPortfolioDecisionAudit(
+  market?: string,
+  limit = 50,
+): Promise<PortfolioDecisionAuditEntry[]> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (market) params.set("market", market);
+  return request<PortfolioDecisionAuditEntry[]>(
+    `/stocks/portfolio-decisions/audit?${params}`,
+    {
+      timeoutMs: 30_000,
+      retryCount: 0,
+    },
+  );
+}
+
+export async function fetchPortfolioDecisionOutcomes(
+  market?: string,
+  limit = 50,
+): Promise<PortfolioDecisionOutcome[]> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (market) params.set("market", market);
+  return request<PortfolioDecisionOutcome[]>(
+    `/stocks/portfolio-decisions/outcomes?${params}`,
+    {
+      timeoutMs: 30_000,
+      retryCount: 0,
+    },
+  );
+}
+
+export async function recordPortfolioDecisionMemory(
+  entry: PortfolioDecisionMemoryEntry,
+): Promise<PortfolioDecisionMemoryEntry> {
+  return request<PortfolioDecisionMemoryEntry>("/stocks/portfolio-decisions", {
+    method: "POST",
+    body: JSON.stringify(entry),
+    timeoutMs: 30_000,
+    retryCount: 0,
+  });
+}
+
+export async function reviewPortfolioDecisionOutcomes(input: {
+  market: string;
+  evaluatedAt?: number;
+  currentPortfolioValue: number;
+  currentTotalReturn: number;
+  currentSharpe: number | null;
+  currentProfitFactor: number | null;
+  currentClosedTrades: number;
+  currentDrawdown: number;
+  lifecycleState: ModelLifecycleState;
+  lifecycleLabel: string;
+}): Promise<{
+  entries: PortfolioDecisionMemoryEntry[];
+  outcomes: PortfolioDecisionOutcome[];
+}> {
+  return request<{
+    entries: PortfolioDecisionMemoryEntry[];
+    outcomes: PortfolioDecisionOutcome[];
+  }>("/stocks/portfolio-decisions/outcomes", {
+    method: "POST",
+    body: JSON.stringify(input),
+    timeoutMs: 30_000,
+    retryCount: 0,
+  });
 }
 
 export async function emitFakeSignal(

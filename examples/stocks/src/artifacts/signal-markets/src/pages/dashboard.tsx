@@ -42,14 +42,19 @@ import {
   ApiRequestError,
   emitFakeSignal,
   fetchModelLifecycle,
+  fetchPortfolioDecisionAudit,
+  fetchPortfolioDecisionMemory,
   fetchSignalHistory,
   fetchMarkets,
   fetchStockList,
   fetchStockQuoteBatch,
   registerSignalWatchlist,
+  recordPortfolioDecisionMemory,
+  reviewPortfolioDecisionOutcomes,
   type MarketOption,
   type ModelLifecycleRecord,
   type ModelLifecycleState,
+  type PortfolioDecisionAuditEntry,
   type SignalEvent,
   type AdaptiveRegime,
   type SignalLifecycle,
@@ -411,21 +416,24 @@ const signalOptions: Array<TradeSignal | "All"> = [
   "Sell",
 ];
 type RiskMode = "small" | "balanced" | "normal";
-const RISK_MODE_CONFIG: Record<RiskMode, { label: string; maxExposure: number; allocationMultiplier: number; minQuality: number }> = {
+const RISK_MODE_CONFIG: Record<RiskMode, { label: string; description: string; maxExposure: number; allocationMultiplier: number; minQuality: number }> = {
   small: {
-    label: "Preserve Capital",
+    label: "Conservative",
+    description: "Only strongest setups qualify.",
     maxExposure: 20,
     allocationMultiplier: 0.45,
     minQuality: 55,
   },
   balanced: {
-    label: "Balanced Allocation",
+    label: "Balanced",
+    description: "Quality filter with moderate sizing.",
     maxExposure: 45,
     allocationMultiplier: 0.72,
     minQuality: 48,
   },
   normal: {
-    label: "Full Participation",
+    label: "Aggressive",
+    description: "More participation, wider risk budget.",
     maxExposure: 75,
     allocationMultiplier: 1,
     minQuality: 42,
@@ -438,6 +446,13 @@ const LEGACY_PORTFOLIO_STORAGE_KEYS = [
 ];
 const PORTFOLIO_STORAGE_KEY = "signal-markets:portfolios:v3";
 const PORTFOLIO_STORAGE_PREFIX = "signal-markets:portfolios";
+const PORTFOLIO_BUDGET_STORAGE_KEY = "signal-markets:portfolio-budgets:v1";
+const SELECTED_MARKET_STORAGE_KEY = "signal-markets:preference:selected-market:v1";
+const RISK_MODE_STORAGE_KEY = "signal-markets:preference:confidence-filter:v1";
+const SIGNAL_PAGE_SIZE_STORAGE_KEY = "signal-markets:preference:signal-page-size:v1";
+const DECISION_MEMO_STORAGE_KEY = "signal-markets:preference:decision-memo-expanded:v1";
+const DECISION_MEMORY_STORAGE_KEY = "signal-markets:decision-memory:v1";
+const DECISION_MEMORY_LIMIT = 60;
 const SIMULATED_EXECUTIONS_ENABLED =
   import.meta.env.VITE_ENABLE_SIMULATED_EXECUTIONS !== "false";
 const FRESH_START_STORAGE_KEY =
@@ -481,6 +496,168 @@ function clearPortfolioStorage() {
       }
     }
     for (const key of keysToRemove) localStorage.removeItem(key);
+  } catch {
+    // Ignore storage failures in private browsing or restricted previews.
+  }
+}
+
+function normalizeBudgetMap(value: unknown): Record<string, number> {
+  if (!value || typeof value !== "object") return {};
+  const budgets: Record<string, number> = {};
+  for (const [market, rawBudget] of Object.entries(value as Record<string, unknown>)) {
+    const budget = Number(rawBudget);
+    if (Number.isFinite(budget) && budget > 0) budgets[market] = budget;
+  }
+  return budgets;
+}
+
+function readStoredString(key: string, fallback: string) {
+  try {
+    return localStorage.getItem(key) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function readStoredRiskMode() {
+  const stored = readStoredString(RISK_MODE_STORAGE_KEY, "small");
+  return stored in RISK_MODE_CONFIG ? stored as RiskMode : "small";
+}
+
+function readStoredSignalPageSize() {
+  try {
+    const stored = Number(localStorage.getItem(SIGNAL_PAGE_SIZE_STORAGE_KEY));
+    return [20, 50, 100].includes(stored) ? stored : 20;
+  } catch {
+    return 20;
+  }
+}
+
+function readStoredBoolean(key: string, fallback = false) {
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored == null) return fallback;
+    return stored === "true";
+  } catch {
+    return fallback;
+  }
+}
+
+function writeStoredPreference(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Ignore storage failures in private browsing or restricted previews.
+  }
+}
+
+type DecisionMemoryTopTicker = {
+  ticker: string;
+  action: ExecutionDecision["actionLabel"];
+  allocationPct: number;
+  targetCapital: number;
+  quality: number;
+  risk: number;
+};
+
+type DecisionMemoryEntry = {
+  id: string;
+  market: string;
+  recordedAt: number;
+  signature: string;
+  recommendation: string;
+  readiness: string;
+  tone: UserActionTone;
+  budget: number;
+  targetAllocationPct: number;
+  targetCapital: number;
+  confidenceFilter: RiskMode;
+  confidenceFilterLabel: string;
+  lifecycleState: ModelLifecycleState;
+  lifecycleLabel: string;
+  topTickers: DecisionMemoryTopTicker[];
+  startPortfolioValue: number;
+  startTotalReturn: number;
+  startSharpe: number | null;
+  startProfitFactor: number | null;
+  startClosedTrades: number;
+  startDrawdown: number;
+  dataQualityPct: number;
+};
+
+function normalizeDecisionMemory(value: unknown): DecisionMemoryEntry[] {
+  if (!Array.isArray(value)) return [];
+  const normalized = value
+    .map((entry): DecisionMemoryEntry | null => {
+      if (!entry || typeof entry !== "object") return null;
+      const item = entry as Partial<DecisionMemoryEntry>;
+      const market = String(item.market ?? "").trim();
+      const recordedAt = Number(item.recordedAt);
+      if (!market || !Number.isFinite(recordedAt)) return null;
+      const confidenceFilter = item.confidenceFilter && item.confidenceFilter in RISK_MODE_CONFIG
+        ? item.confidenceFilter
+        : "small";
+      const lifecycleState = item.lifecycleState ?? "RESEARCH";
+      return {
+        id: String(item.id ?? `${market}:${recordedAt}`),
+        market,
+        recordedAt,
+        signature: String(item.signature ?? ""),
+        recommendation: String(item.recommendation ?? "Hold Cash"),
+        readiness: String(item.readiness ?? "Paper trade only"),
+        tone: item.tone === "good" || item.tone === "bad" || item.tone === "warn" ? item.tone : "info",
+        budget: Number(item.budget) || STARTING_PORTFOLIO_VALUE,
+        targetAllocationPct: Number(item.targetAllocationPct) || 0,
+        targetCapital: Number(item.targetCapital) || 0,
+        confidenceFilter,
+        confidenceFilterLabel: String(item.confidenceFilterLabel ?? RISK_MODE_CONFIG[confidenceFilter].label),
+        lifecycleState,
+        lifecycleLabel: String(item.lifecycleLabel ?? plainLifecycleState(lifecycleState)),
+        topTickers: Array.isArray(item.topTickers)
+          ? item.topTickers.slice(0, 4).map((ticker) => ({
+            ticker: String(ticker.ticker ?? ""),
+            action: String(ticker.action ?? "Hold") as ExecutionDecision["actionLabel"],
+            allocationPct: Number(ticker.allocationPct) || 0,
+            targetCapital: Number(ticker.targetCapital) || 0,
+            quality: Number(ticker.quality) || 0,
+            risk: Number(ticker.risk) || 0,
+          })).filter((ticker) => ticker.ticker)
+          : [],
+        startPortfolioValue: Number(item.startPortfolioValue) || 0,
+        startTotalReturn: Number(item.startTotalReturn) || 0,
+        startSharpe: item.startSharpe == null ? null : Number(item.startSharpe),
+        startProfitFactor: item.startProfitFactor == null ? null : Number(item.startProfitFactor),
+        startClosedTrades: Number(item.startClosedTrades) || 0,
+        startDrawdown: Number(item.startDrawdown) || 0,
+        dataQualityPct: Number(item.dataQualityPct) || 0,
+      };
+    })
+    .filter((entry): entry is DecisionMemoryEntry => Boolean(entry))
+    .sort((a, b) => b.recordedAt - a.recordedAt);
+  const seen = new Set<string>();
+  return normalized.filter((entry) => {
+    const key = `${entry.market}:${entry.signature || entry.id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, DECISION_MEMORY_LIMIT);
+}
+
+function readDecisionMemory() {
+  try {
+    const saved = localStorage.getItem(DECISION_MEMORY_STORAGE_KEY);
+    return saved ? normalizeDecisionMemory(JSON.parse(saved)) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeDecisionMemory(entries: DecisionMemoryEntry[]) {
+  try {
+    localStorage.setItem(
+      DECISION_MEMORY_STORAGE_KEY,
+      JSON.stringify(normalizeDecisionMemory(entries)),
+    );
   } catch {
     // Ignore storage failures in private browsing or restricted previews.
   }
@@ -592,12 +769,12 @@ type SimulatedPortfolio = {
 };
 type ClosedPosition = SimulatedPortfolio["closedPositions"][number];
 
-function createEmptyPortfolio(): SimulatedPortfolio {
+function createEmptyPortfolio(startValue = STARTING_PORTFOLIO_VALUE): SimulatedPortfolio {
   return {
-    cash: 0,
+    cash: startValue,
     positions: {},
     startedAt: null,
-    startValue: STARTING_PORTFOLIO_VALUE,
+    startValue,
     valueHistory: [],
     closedPositions: [],
   };
@@ -1516,6 +1693,14 @@ function plainTradeStatus(label: "Open" | "Closed") {
   return label === "Open" ? "Active" : "Realized";
 }
 
+function plainCapitalMove(currentValue: number, targetValue: number) {
+  const delta = targetValue - currentValue;
+  if (delta > 1) return `Add ${formatMaybeCurrency(delta)}`;
+  if (delta < -1) return `Trim ${formatMaybeCurrency(Math.abs(delta))}`;
+  if (currentValue > 1) return "Hold";
+  return "No capital";
+}
+
 function plainRegime(regime: AdaptiveRegime) {
   const labels: Record<AdaptiveRegime, string> = {
     TRENDING: "Constructive Trend Environment",
@@ -2304,6 +2489,7 @@ function OpportunityMap({ decisions, selected, onSelect }: { decisions: Executio
 type OpportunitySortKey =
   | "quality"
   | "allocation"
+  | "dollars"
   | "risk"
   | "expectedMove"
   | "ticker"
@@ -2312,6 +2498,7 @@ type OpportunitySortKey =
 const opportunitySortLabels: Record<OpportunitySortKey, string> = {
   quality: "Confidence",
   allocation: "Suggested Size",
+  dollars: "Capital",
   risk: "Risk",
   expectedMove: "Upside Range",
   ticker: "Ticker",
@@ -2332,6 +2519,7 @@ function compareOpportunity(
   const values: Record<Exclude<OpportunitySortKey, "ticker" | "posture">, [number, number]> = {
     quality: [a.qualityScore, b.qualityScore],
     allocation: [a.suggestedAllocationPct, b.suggestedAllocationPct],
+    dollars: [a.suggestedAllocationPct, b.suggestedAllocationPct],
     risk: [a.riskScore, b.riskScore],
     expectedMove: [a.signal.expectedMovePct, b.signal.expectedMovePct],
   };
@@ -2339,16 +2527,70 @@ function compareOpportunity(
   return left - right;
 }
 
-function AdaptiveSignalFeed({ decisions, selected, onSelect }: { decisions: ExecutionDecision[]; selected?: string; onSelect: (signal: AdaptiveSignalView) => void }) {
+function AdaptiveSignalFeed({
+  decisions,
+  portfolio,
+  budget,
+  onBudgetChange,
+  selected,
+  onSelect,
+}: {
+  decisions: ExecutionDecision[];
+  portfolio: SimulatedPortfolio;
+  budget: number;
+  onBudgetChange: (budget: number) => void;
+  selected?: string;
+  onSelect: (signal: AdaptiveSignalView) => void;
+}) {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<OpportunitySortKey>("quality");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(readStoredSignalPageSize);
+  const [budgetInput, setBudgetInput] = useState(() => String(Math.round(budget)));
+  const parsedBudgetInput = Number(budgetInput.replace(/[,$\s]/g, ""));
+  const budgetDraftIsValid = Number.isFinite(parsedBudgetInput) && parsedBudgetInput > 0;
+  const planningBudget = budgetDraftIsValid ? parsedBudgetInput : budget;
+  const budgetDraftChanged =
+    budgetDraftIsValid && Math.abs(planningBudget - budget) > 0.01;
   const exposedDecisions = useMemo(
     () => decisions.filter((decision) => decision.suggestedAllocationPct > DISPLAY_ZERO_THRESHOLD),
     [decisions],
   );
+  const targetByTicker = useMemo(
+    () => new Map(exposedDecisions.map((decision) => [
+      decision.signal.ticker,
+      (planningBudget * decision.suggestedAllocationPct) / 100,
+    ])),
+    [exposedDecisions, planningBudget],
+  );
+  const capitalSummary = useMemo(() => {
+    const currentByTicker = new Map(
+      Object.values(portfolio.positions ?? {}).map((position) => [position.ticker, position.marketValue]),
+    );
+    const targetTotal = Array.from(targetByTicker.values()).reduce((sum, value) => sum + value, 0);
+    let add = 0;
+    let trim = 0;
+    let hold = 0;
+
+    for (const [ticker, targetValue] of targetByTicker.entries()) {
+      const currentValue = currentByTicker.get(ticker) ?? 0;
+      add += Math.max(0, targetValue - currentValue);
+      trim += Math.max(0, currentValue - targetValue);
+      hold += Math.min(currentValue, targetValue);
+    }
+
+    for (const [ticker, currentValue] of currentByTicker.entries()) {
+      if (!targetByTicker.has(ticker)) trim += currentValue;
+    }
+
+    return {
+      add,
+      trim,
+      hold,
+      cashLeft: Math.max(0, planningBudget - targetTotal),
+    };
+  }, [planningBudget, portfolio.positions, targetByTicker]);
   const pageCount = Math.max(1, Math.ceil(exposedDecisions.length / pageSize));
   const boundedPage = Math.min(page, pageCount);
   const sorted = useMemo(() => {
@@ -2363,6 +2605,14 @@ function AdaptiveSignalFeed({ decisions, selected, onSelect }: { decisions: Exec
     setPage(1);
   }, [exposedDecisions.length, pageSize, sortDirection, sortKey]);
 
+  useEffect(() => {
+    setBudgetInput(String(Math.round(budget)));
+  }, [budget]);
+
+  useEffect(() => {
+    writeStoredPreference(SIGNAL_PAGE_SIZE_STORAGE_KEY, String(pageSize));
+  }, [pageSize]);
+
   function updateSort(nextSortKey: OpportunitySortKey) {
     if (sortKey === nextSortKey) {
       setSortDirection((current) => (current === "asc" ? "desc" : "asc"));
@@ -2372,12 +2622,41 @@ function AdaptiveSignalFeed({ decisions, selected, onSelect }: { decisions: Exec
     setSortDirection(nextSortKey === "ticker" || nextSortKey === "posture" ? "asc" : "desc");
   }
 
+  function applyBudget() {
+    if (!budgetDraftChanged) return;
+    onBudgetChange(planningBudget);
+  }
+
   return (
     <InsightShell
       title="Position Sizes To Use"
       eyebrow="Stocks at 0% size are hidden"
       action={
         <div className="flex flex-wrap items-center gap-2">
+          <label className="flex h-8 items-center gap-2 rounded-lg border border-slate-700 bg-slate-950 px-2 text-xs text-slate-400">
+            Capital Budget
+            <input
+              value={budgetInput}
+              onChange={(event) => setBudgetInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  applyBudget();
+                }
+              }}
+              inputMode="decimal"
+              className="h-6 w-24 bg-transparent text-right font-semibold tabular-nums text-slate-100 outline-none"
+              aria-label="Capital budget"
+            />
+          </label>
+          {budgetDraftChanged && (
+            <button
+              type="button"
+              onClick={applyBudget}
+              className="h-8 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 text-xs font-medium text-cyan-200"
+            >
+              Apply
+            </button>
+          )}
           <select
             value={pageSize}
             onChange={(event) => setPageSize(Number(event.target.value))}
@@ -2392,7 +2671,7 @@ function AdaptiveSignalFeed({ decisions, selected, onSelect }: { decisions: Exec
           <Badge variant="outline" className="border-slate-700 text-slate-300">
             {exposedDecisions.length
               ? `${(boundedPage - 1) * pageSize + 1}-${Math.min(boundedPage * pageSize, exposedDecisions.length)} of ${exposedDecisions.length}`
-	              : "0 active ideas"}
+              : "0 active ideas"}
           </Badge>
           <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-200">
             Live
@@ -2400,11 +2679,35 @@ function AdaptiveSignalFeed({ decisions, selected, onSelect }: { decisions: Exec
         </div>
       }
     >
+      <div className="mb-4 grid gap-3 md:grid-cols-4">
+        {[
+          ["Add", capitalSummary.add, capitalSummary.add > 1 ? "good" : "info"],
+          ["Trim", capitalSummary.trim, capitalSummary.trim > 1 ? "warn" : "info"],
+          ["Hold", capitalSummary.hold, "info"],
+          ["Unassigned", capitalSummary.cashLeft, "info"],
+        ].map(([label, value, tone]) => (
+          <div
+            key={String(label)}
+            className={cn(
+              "rounded-lg border px-4 py-3",
+              tone === "good"
+                ? "border-emerald-500/30 bg-emerald-500/10"
+                : tone === "warn"
+                  ? "border-amber-500/35 bg-amber-500/10"
+                  : "border-slate-800 bg-slate-900/30",
+            )}
+          >
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</div>
+            <div className="mt-2 text-xl font-semibold tabular-nums text-slate-100">{formatMaybeCurrency(Number(value))}</div>
+          </div>
+        ))}
+      </div>
       <div className="overflow-hidden rounded-2xl border border-slate-800">
-        <div className="sticky top-0 grid grid-cols-[1.1fr_0.8fr_0.8fr_0.8fr_0.8fr] gap-4 border-b border-slate-800 bg-slate-950/95 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <div className="sticky top-0 grid grid-cols-[1.1fr_0.85fr_0.85fr_0.75fr_0.75fr_0.75fr] gap-4 border-b border-slate-800 bg-slate-950/95 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
           {[
             ["ticker", "Ticker"],
             ["posture", "Action"],
+            ["dollars", "Capital"],
             ["allocation", "Size"],
             ["quality", "Confidence"],
             ["risk", "Risk"],
@@ -2422,15 +2725,64 @@ function AdaptiveSignalFeed({ decisions, selected, onSelect }: { decisions: Exec
         </div>
         <div className="divide-y divide-slate-800">
           {visible.length ? (
-            visible.map((decision) => (
-              <div key={decision.signal.adaptiveId}>
-                <button type="button" onClick={() => { onSelect(decision.signal); setExpanded(expanded === decision.signal.adaptiveId ? null : decision.signal.adaptiveId); }} className={cn("grid w-full grid-cols-[1.1fr_0.8fr_0.8fr_0.8fr_0.8fr] gap-4 px-4 py-3 text-left text-sm transition hover:bg-slate-900/60", selected === decision.signal.ticker && "bg-emerald-400/5")}>
-                  <span className="min-w-0"><span className="rounded-full bg-slate-800 px-2.5 py-1 font-mono text-xs font-semibold text-slate-100">{cleanTicker(decision.signal.ticker)}</span><span className="ml-2 hidden truncate text-xs text-slate-500 md:inline">{decision.signal.name}</span></span>
-                  <span className="text-slate-300">{plainAction(decision.actionLabel)}</span><span className="font-semibold text-slate-100">{decision.suggestedAllocationPct.toFixed(1)}%</span><span className="text-slate-300">{decision.qualityScore.toFixed(0)}/100</span><span className={decision.riskScore > 65 ? "text-rose-300" : "text-slate-300"}>{plainRisk(decision.riskLevel)}</span>
-                </button>
-                {expanded === decision.signal.adaptiveId && <div className="bg-slate-950/70 px-4 pb-4 text-sm text-slate-400"><div className="rounded-2xl border border-slate-800 bg-slate-900/30 p-4">{decision.tradeExplanation} Entry timing: {plainTiming(decision.timingState)}. Market support: {(decision.signal.ensembleAgreement * 100).toFixed(0)}%. Expected holding window: {formatDuration(decision.recommendedHoldingMinutes * 60_000)}.</div></div>}
-              </div>
-            ))
+            visible.map((decision) => {
+              const currentValue = portfolio.positions?.[decision.signal.ticker]?.marketValue ?? 0;
+              const targetValue = targetByTicker.get(decision.signal.ticker) ?? 0;
+              return (
+                <div key={decision.signal.adaptiveId}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelect(decision.signal);
+                      setExpanded(expanded === decision.signal.adaptiveId ? null : decision.signal.adaptiveId);
+                    }}
+                    className={cn(
+                      "grid w-full grid-cols-[1.1fr_0.85fr_0.85fr_0.75fr_0.75fr_0.75fr] gap-4 px-4 py-3 text-left text-sm transition hover:bg-slate-900/60",
+                      selected === decision.signal.ticker && "bg-emerald-400/5",
+                    )}
+                  >
+                    <span className="min-w-0">
+                      <span className="rounded-full bg-slate-800 px-2.5 py-1 font-mono text-xs font-semibold text-slate-100">
+                        {cleanTicker(decision.signal.ticker)}
+                      </span>
+                      <span className="ml-2 hidden truncate text-xs text-slate-500 md:inline">
+                        {decision.signal.name}
+                      </span>
+                    </span>
+                    <span className="text-slate-300">{plainCapitalMove(currentValue, targetValue)}</span>
+                    <span className="font-semibold text-slate-100">{formatMaybeCurrency(targetValue)}</span>
+                    <span className="font-semibold text-slate-100">{decision.suggestedAllocationPct.toFixed(1)}%</span>
+                    <span className="text-slate-300">{decision.qualityScore.toFixed(0)}/100</span>
+                    <span className={decision.riskScore > 65 ? "text-rose-300" : "text-slate-300"}>
+                      {plainRisk(decision.riskLevel)}
+                    </span>
+                  </button>
+                  {expanded === decision.signal.adaptiveId && (
+                    <div className="bg-slate-950/70 px-4 pb-4 text-sm text-slate-400">
+                      <div className="grid gap-3 rounded-2xl border border-slate-800 bg-slate-900/30 p-4 md:grid-cols-3">
+                        <div>
+                          <span className="font-semibold text-slate-300">Why capital:</span>{" "}
+                          {decision.tradeExplanation}
+                        </div>
+                        <div>
+                          <span className="font-semibold text-slate-300">Why this size:</span>{" "}
+                          target {formatMaybeCurrency(targetValue)} from{" "}
+                          {decision.suggestedAllocationPct.toFixed(1)}% of budget, confidence{" "}
+                          {decision.qualityScore.toFixed(0)}, risk {decision.riskScore.toFixed(0)}, trust cap{" "}
+                          {(decision.lifecycleAllocationMultiplier * 100).toFixed(0)}%.
+                        </div>
+                        <div>
+                          <span className="font-semibold text-slate-300">Reduce if:</span>{" "}
+                          trust falls, market risk rises, timing stretches, or price data weakens. Entry timing:{" "}
+                          {plainTiming(decision.timingState)}. Expected hold:{" "}
+                          {formatDuration(decision.recommendedHoldingMinutes * 60_000)}.
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
           ) : (
             <div className="px-4 py-6 text-sm text-slate-400">
               No stock currently earns a position size. 0% rows are hidden.
@@ -2799,6 +3151,674 @@ function portfolioLifecycleInsight(
   };
 }
 
+function portfolioReviewTrigger(stats: ReturnType<typeof portfolioStats>, lifecycle: PortfolioLifecycleInsight, dataQualityPct: number) {
+  if (dataQualityPct < 80) return "Review when price coverage is back above 80%.";
+  if (stats.totalTrades < 30) return `Review after ${30 - stats.totalTrades} more closed trades.`;
+  if (stats.totalTrades < 100) return `Review after ${100 - stats.totalTrades} more closed trades.`;
+  if ((stats.normalizedAnnualSharpe ?? 0) < 0) return "Review when risk-adjusted returns turn positive.";
+  if ((stats.profitFactor ?? 0) < 1) return "Review when winners exceed losers after costs.";
+  if (stats.maxDrawdown > 0.08) return "Review when drawdown is back under 8%.";
+  if (lifecycle.state === "PRODUCTION") return "Review when drawdown, Sharpe, or trust state changes.";
+  return "Review after the next closed trade batch.";
+}
+
+function portfolioDecisionPosture(
+  stats: ReturnType<typeof portfolioStats>,
+  lifecycle: PortfolioLifecycleInsight,
+  dataQualityPct: number,
+  targetAllocationPct: number,
+): { label: string; tone: UserActionTone; reason: string } {
+  const sharpe = stats.normalizedAnnualSharpe ?? 0;
+  const profitFactor = stats.profitFactor === Infinity ? 9.99 : stats.profitFactor ?? 0;
+
+  if (lifecycle.state === "RETIRED") {
+    return {
+      label: "Do Not Add Capital",
+      tone: "bad",
+      reason: lifecycle.reason,
+    };
+  }
+
+  if (dataQualityPct < 70) {
+    return {
+      label: "Wait For Cleaner Prices",
+      tone: "warn",
+      reason: `Only ${dataQualityPct.toFixed(0)}% of the market list has usable prices.`,
+    };
+  }
+
+  if (targetAllocationPct < 1) {
+    return {
+      label: "Hold Cash",
+      tone: "info",
+      reason: "No current stock clears the quality and risk filter.",
+    };
+  }
+
+  if (
+    lifecycle.state === "RESEARCH" ||
+    lifecycle.state === "CANDIDATE" ||
+    lifecycle.state === "SHADOW" ||
+    lifecycle.state === "SMALL_LIVE" ||
+    stats.totalTrades < 30
+  ) {
+    return {
+      label: "Test Small",
+      tone: "info",
+      reason: lifecycle.reason,
+    };
+  }
+
+  if (lifecycle.state === "REDUCED" || lifecycle.state === "WATCHLIST" || sharpe < 0 || profitFactor < 1) {
+    return {
+      label: "Reduce / Wait",
+      tone: "warn",
+      reason: lifecycle.reason,
+    };
+  }
+
+  if (lifecycle.state === "PRODUCTION") {
+    return {
+      label: "Deploy Capital",
+      tone: "good",
+      reason: lifecycle.reason,
+    };
+  }
+
+  return {
+    label: "Deploy Carefully",
+    tone: "info",
+    reason: lifecycle.reason,
+  };
+}
+
+function targetAllocationPctForDecisions(decisions: ExecutionDecision[]) {
+  return Math.min(
+    100,
+    decisions
+      .filter((decision) => decision.suggestedAllocationPct > DISPLAY_ZERO_THRESHOLD)
+      .reduce((sum, decision) => sum + decision.suggestedAllocationPct, 0),
+  );
+}
+
+function topCapitalDriversForDecisions(decisions: ExecutionDecision[], budget: number, limit = 4): DecisionMemoryTopTicker[] {
+  return [...decisions]
+    .filter((decision) => decision.suggestedAllocationPct > DISPLAY_ZERO_THRESHOLD)
+    .sort((a, b) => b.suggestedAllocationPct - a.suggestedAllocationPct)
+    .slice(0, limit)
+    .map((decision) => ({
+      ticker: cleanTicker(decision.signal.ticker),
+      action: decision.actionLabel,
+      allocationPct: Number(decision.suggestedAllocationPct.toFixed(1)),
+      targetCapital: (budget * decision.suggestedAllocationPct) / 100,
+      quality: Number(decision.qualityScore.toFixed(0)),
+      risk: Number(decision.riskScore.toFixed(0)),
+    }));
+}
+
+function decisionReadinessLabel(
+  stats: ReturnType<typeof portfolioStats>,
+  lifecycle: PortfolioLifecycleInsight,
+  dataQualityPct: number,
+  targetAllocationPct: number,
+  riskMode: RiskMode,
+) {
+  const sampleTarget = riskMode === "normal" ? 200 : riskMode === "balanced" ? 100 : 30;
+  const checklistPassed =
+    dataQualityPct >= 80 &&
+    lifecycle.state !== "RETIRED" &&
+    stats.totalTrades >= sampleTarget &&
+    stats.maxDrawdown <= 0.08 &&
+    targetAllocationPct >= 1;
+  const hasHardBlock =
+    lifecycle.state === "RETIRED" ||
+    dataQualityPct < 70 ||
+    stats.maxDrawdown > 0.08 ||
+    targetAllocationPct < 1;
+
+  if (hasHardBlock) return { label: "Wait", tone: "bad" as const };
+  if (checklistPassed && lifecycle.state === "PRODUCTION") return { label: "Ready to follow", tone: "good" as const };
+  return { label: "Paper trade only", tone: "warn" as const };
+}
+
+function lifecycleTrustRank(state: ModelLifecycleState) {
+  const ranks: Record<ModelLifecycleState, number> = {
+    RETIRED: 0,
+    RESEARCH: 1,
+    CANDIDATE: 2,
+    SHADOW: 3,
+    REDUCED: 3,
+    WATCHLIST: 4,
+    SMALL_LIVE: 5,
+    PRODUCTION: 6,
+  };
+  return ranks[state] ?? 1;
+}
+
+function decisionMemorySignature(entry: Pick<DecisionMemoryEntry, "market" | "recommendation" | "readiness" | "budget" | "targetAllocationPct" | "confidenceFilter" | "lifecycleState" | "topTickers">) {
+  return [
+    entry.market,
+    entry.recommendation,
+    entry.readiness,
+    Math.round(entry.budget),
+    entry.targetAllocationPct.toFixed(1),
+    entry.confidenceFilter,
+    entry.lifecycleState,
+    entry.topTickers.map((ticker) => `${ticker.ticker}:${ticker.action}:${ticker.allocationPct.toFixed(1)}`).join("|"),
+  ].join("::");
+}
+
+function buildDecisionMemoryEntry({
+  market,
+  decisions,
+  portfolio,
+  budget,
+  lifecycleInsight,
+  dataQualityPct,
+  riskMode,
+}: {
+  market: string;
+  decisions: ExecutionDecision[];
+  portfolio: SimulatedPortfolio;
+  budget: number;
+  lifecycleInsight: PortfolioLifecycleInsight;
+  dataQualityPct: number;
+  riskMode: RiskMode;
+}): DecisionMemoryEntry {
+  const stats = portfolioStats(portfolio);
+  const targetAllocationPct = targetAllocationPctForDecisions(decisions);
+  const posture = portfolioDecisionPosture(stats, lifecycleInsight, dataQualityPct, targetAllocationPct);
+  const readiness = decisionReadinessLabel(stats, lifecycleInsight, dataQualityPct, targetAllocationPct, riskMode);
+  const topTickers = topCapitalDriversForDecisions(decisions, budget);
+  const entry: DecisionMemoryEntry = {
+    id: `${market}:${Date.now()}`,
+    market,
+    recordedAt: Date.now(),
+    signature: "",
+    recommendation: posture.label,
+    readiness: readiness.label,
+    tone: readiness.tone,
+    budget,
+    targetAllocationPct,
+    targetCapital: (budget * targetAllocationPct) / 100,
+    confidenceFilter: riskMode,
+    confidenceFilterLabel: RISK_MODE_CONFIG[riskMode].label,
+    lifecycleState: lifecycleInsight.state,
+    lifecycleLabel: plainLifecycleState(lifecycleInsight.state),
+    topTickers,
+    startPortfolioValue: stats.currentValue,
+    startTotalReturn: stats.totalReturn,
+    startSharpe: stats.normalizedAnnualSharpe,
+    startProfitFactor: stats.profitFactor === Infinity ? 9.99 : stats.profitFactor,
+    startClosedTrades: stats.totalTrades,
+    startDrawdown: stats.maxDrawdown,
+    dataQualityPct,
+  };
+  return {
+    ...entry,
+    signature: decisionMemorySignature(entry),
+  };
+}
+
+function evaluateDecisionMemory(entry: DecisionMemoryEntry, portfolio: SimulatedPortfolio, lifecycle: PortfolioLifecycleInsight) {
+  const stats = portfolioStats(portfolio);
+  const returnChange = (stats.totalReturn - entry.startTotalReturn) * 100;
+  const closedTradeChange = stats.totalTrades - entry.startClosedTrades;
+  const currentSharpe = stats.normalizedAnnualSharpe ?? 0;
+  const startSharpe = entry.startSharpe ?? 0;
+  const sharpeChange = currentSharpe - startSharpe;
+  const trustChange = lifecycleTrustRank(lifecycle.state) - lifecycleTrustRank(entry.lifecycleState);
+
+  const outcome =
+    closedTradeChange < 5 && Math.abs(returnChange) < 0.25
+      ? { label: "Too early", tone: "info" as const }
+      : returnChange > 0.25 && sharpeChange >= -0.1
+        ? { label: "Helped", tone: "good" as const }
+        : returnChange < -0.25 && sharpeChange < 0
+          ? { label: "Hurt", tone: "bad" as const }
+          : { label: "Mixed", tone: "warn" as const };
+  const trust =
+    trustChange > 0
+      ? "Trust improved"
+      : trustChange < 0
+        ? "Trust weakened"
+        : "Trust unchanged";
+
+  return {
+    ...outcome,
+    returnChange,
+    closedTradeChange,
+    sharpeChange,
+    trust,
+  };
+}
+
+function PortfolioDecisionSummary({
+  decisions,
+  portfolio,
+  budget,
+  lifecycleInsight,
+  dataQualityPct,
+  riskMode,
+  onRiskModeChange,
+}: {
+  decisions: ExecutionDecision[];
+  portfolio: SimulatedPortfolio;
+  budget: number;
+  lifecycleInsight: PortfolioLifecycleInsight;
+  dataQualityPct: number;
+  riskMode: RiskMode;
+  onRiskModeChange: (mode: RiskMode) => void;
+}) {
+  const [showDecisionMemo, setShowDecisionMemo] = useState(() =>
+    readStoredBoolean(DECISION_MEMO_STORAGE_KEY),
+  );
+  const stats = portfolioStats(portfolio);
+  const targetAllocationPct = Math.min(
+    100,
+    decisions
+      .filter((decision) => decision.suggestedAllocationPct > DISPLAY_ZERO_THRESHOLD)
+      .reduce((sum, decision) => sum + decision.suggestedAllocationPct, 0),
+  );
+  const targetCapital = (budget * targetAllocationPct) / 100;
+  const currentCapital = Object.values(portfolio.positions ?? {}).reduce(
+    (sum, position) => sum + (position.marketValue ?? 0),
+    0,
+  );
+  const unassigned = Math.max(0, budget - targetCapital);
+  const posture = portfolioDecisionPosture(stats, lifecycleInsight, dataQualityPct, targetAllocationPct);
+  const riskConfig = RISK_MODE_CONFIG[riskMode];
+  const profitFactor = stats.profitFactor === Infinity ? 9.99 : stats.profitFactor ?? 0;
+  const sharpe = stats.normalizedAnnualSharpe ?? 0;
+  const avgQuality = mean(decisions.map((decision) => decision.qualityScore));
+  const avgRisk = mean(decisions.map((decision) => decision.riskScore));
+  const topCapitalDrivers = [...decisions]
+    .filter((decision) => decision.suggestedAllocationPct > DISPLAY_ZERO_THRESHOLD)
+    .sort((a, b) => b.suggestedAllocationPct - a.suggestedAllocationPct)
+    .slice(0, 4);
+  const topAllocationPct = topCapitalDrivers[0]?.suggestedAllocationPct ?? 0;
+  const topTwoAllocationPct = topCapitalDrivers
+    .slice(0, 2)
+    .reduce((sum, decision) => sum + decision.suggestedAllocationPct, 0);
+  const topAllocationShare = targetAllocationPct > 0 ? (topAllocationPct / targetAllocationPct) * 100 : 0;
+  const topTwoAllocationShare = targetAllocationPct > 0 ? (topTwoAllocationPct / targetAllocationPct) * 100 : 0;
+  const concentrationClear =
+    targetAllocationPct < 1 ||
+    (topCapitalDrivers.length >= 3 && topAllocationShare <= 35 && topTwoAllocationShare <= 60);
+  const sampleTarget = riskMode === "normal" ? 200 : riskMode === "balanced" ? 100 : 30;
+  const checklist = [
+    {
+      label: "Prices Are Usable",
+      passed: dataQualityPct >= 80,
+      detail: `${dataQualityPct.toFixed(0)}% coverage; 80% minimum.`,
+    },
+    {
+      label: "Trust Allows Trading",
+      passed: lifecycleInsight.state !== "RETIRED",
+      detail: plainLifecycleState(lifecycleInsight.state),
+    },
+    {
+      label: "Trade Sample Fits Size",
+      passed: stats.totalTrades >= sampleTarget,
+      detail: `${stats.totalTrades} closed trades; ${sampleTarget}+ for ${riskConfig.label.toLowerCase()}.`,
+    },
+    {
+      label: "Drawdown Inside Limit",
+      passed: stats.maxDrawdown <= 0.08,
+      detail: `${(stats.maxDrawdown * 100).toFixed(1)}%; 8.0% limit.`,
+    },
+    {
+      label: "Allocation Is Diversified",
+      passed: concentrationClear,
+      detail: targetAllocationPct >= 1
+        ? `Top name ${topAllocationShare.toFixed(0)}%, top two ${topTwoAllocationShare.toFixed(0)}% of target.`
+        : "No active allocation.",
+    },
+    {
+      label: "Cash Impact Is Clear",
+      passed: budget > 0 && targetCapital <= budget && Number.isFinite(targetCapital),
+      detail: `${formatMaybeCurrency(targetCapital)} target, ${formatMaybeCurrency(unassigned)} unassigned.`,
+    },
+  ];
+  const hasHardBlock =
+    lifecycleInsight.state === "RETIRED" ||
+    dataQualityPct < 70 ||
+    stats.maxDrawdown > 0.08 ||
+    targetAllocationPct < 1;
+  const checklistPassed = checklist.every((item) => item.passed);
+  const readiness = hasHardBlock
+    ? { label: "Wait", tone: "bad" as const }
+    : checklistPassed && lifecycleInsight.state === "PRODUCTION"
+      ? { label: "Ready to follow", tone: "good" as const }
+      : { label: "Paper trade only", tone: "warn" as const };
+  const capitalUpside = [
+    targetAllocationPct >= 1
+      ? `Qualified setups support ${targetAllocationPct.toFixed(1)}% target exposure.`
+      : "No ticker currently clears the capital filter.",
+    dataQualityPct >= 90
+      ? `${dataQualityPct.toFixed(0)}% of covered tickers have usable prices.`
+      : null,
+    avgQuality >= riskConfig.minQuality
+      ? `Average setup quality is ${avgQuality.toFixed(0)}, above the ${riskConfig.minQuality} filter.`
+      : null,
+    lifecycleInsight.state === "PRODUCTION" || lifecycleInsight.state === "SMALL_LIVE"
+      ? plainLifecycleReason(lifecycleInsight.reason)
+      : null,
+  ].filter((item): item is string => Boolean(item));
+  const capitalRestraints = [
+    stats.totalTrades < 200
+      ? `Closed trade sample is ${stats.totalTrades}; 200+ supports normal sizing.`
+      : null,
+    sharpe < 1
+      ? `Normalized annual Sharpe is ${sharpe.toFixed(2)}; +1.00 is the full-size mark.`
+      : null,
+    profitFactor < 1.25
+      ? `Profit factor is ${profitFactor.toFixed(2)}; 1.25+ supports full size.`
+      : null,
+    stats.maxDrawdown > 0.08
+      ? `Max drawdown is ${(stats.maxDrawdown * 100).toFixed(1)}%; the watch limit is 8.0%.`
+      : null,
+    dataQualityPct < 90
+      ? `Price coverage is ${dataQualityPct.toFixed(0)}%; sizing improves above 90%.`
+      : null,
+    avgRisk > 55
+      ? `Average risk score is ${avgRisk.toFixed(0)}, so capital stays selective.`
+      : null,
+  ].filter((item): item is string => Boolean(item));
+
+  useEffect(() => {
+    writeStoredPreference(DECISION_MEMO_STORAGE_KEY, String(showDecisionMemo));
+  }, [showDecisionMemo]);
+
+  return (
+    <InsightShell
+      title="Portfolio Decision"
+      eyebrow="Capital to allocate right now"
+      action={<Badge variant="outline" className={cn(toneClasses(posture.tone))}>{posture.label}</Badge>}
+    >
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+        <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ["Capital Posture", posture.label],
+              ["Budget", formatMaybeCurrency(budget)],
+              ["Target Allocation", formatMaybeCurrency(targetCapital)],
+              ["Unassigned Cash", formatMaybeCurrency(unassigned)],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</div>
+                <div className="mt-2 text-xl font-semibold tabular-nums text-slate-100">{value}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 grid gap-3 border-t border-slate-800 pt-4 md:grid-cols-3">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Main Reason</div>
+              <div className="mt-2 text-sm leading-6 text-slate-300">{plainLifecycleReason(posture.reason)}</div>
+            </div>
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Next Review Trigger</div>
+              <div className="mt-2 text-sm leading-6 text-slate-300">
+                {portfolioReviewTrigger(stats, lifecycleInsight, dataQualityPct)}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Current Capital</div>
+              <div className="mt-2 text-sm leading-6 text-slate-300">
+                {formatMaybeCurrency(currentCapital)} currently invested. Target is {targetAllocationPct.toFixed(1)}% of budget.
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 border-t border-slate-800 pt-4">
+            <button
+              type="button"
+              onClick={() => setShowDecisionMemo((current) => !current)}
+              aria-expanded={showDecisionMemo}
+              className="rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-cyan-500/40 hover:text-cyan-100"
+            >
+              {showDecisionMemo ? "Hide capital memo" : "Why this capital call?"}
+            </button>
+          </div>
+          {showDecisionMemo && (
+            <div className="mt-4 grid gap-3 border-t border-slate-800 pt-4 xl:grid-cols-2">
+              <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">What Supports Capital</div>
+                <div className="mt-3 space-y-2 text-sm leading-6 text-slate-300">
+                  {capitalUpside.map((item) => (
+                    <div key={item}>{item}</div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-lg border border-amber-500/25 bg-amber-500/5 p-4">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-300">What Caps Capital</div>
+                <div className="mt-3 space-y-2 text-sm leading-6 text-slate-300">
+                  {capitalRestraints.length ? capitalRestraints.map((item) => (
+                    <div key={item}>{item}</div>
+                  )) : <div>No major cap is active beyond the selected confidence filter.</div>}
+                </div>
+              </div>
+              <div className="rounded-lg border border-slate-800 bg-slate-950/45 p-4">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Promotion Marks</div>
+                <div className="mt-3 grid gap-2 text-sm text-slate-300 sm:grid-cols-2">
+                  {[
+                    ["Closed trades", `${stats.totalTrades} / 200`],
+                    ["Sharpe", `${sharpe.toFixed(2)} / 1.00`],
+                    ["Profit factor", `${profitFactor.toFixed(2)} / 1.25`],
+                    ["Max drawdown", `${(stats.maxDrawdown * 100).toFixed(1)}% / 8.0% max`],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-md border border-slate-800 bg-slate-900/40 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500">{label}</div>
+                      <div className="mt-1 font-semibold tabular-nums text-slate-100">{value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-lg border border-slate-800 bg-slate-950/45 p-4">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Tickers Driving The Call</div>
+                <div className="mt-3 space-y-2">
+                  {topCapitalDrivers.length ? topCapitalDrivers.map((decision) => (
+                    <div key={decision.signal.adaptiveId} className="flex items-center justify-between gap-3 rounded-md border border-slate-800 bg-slate-900/40 px-3 py-2 text-sm">
+                      <div>
+                        <div className="font-mono font-semibold text-slate-100">{cleanTicker(decision.signal.ticker)}</div>
+                        <div className="text-xs text-slate-500">{plainAction(decision.actionLabel)} · quality {decision.qualityScore.toFixed(0)}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold tabular-nums text-slate-100">{formatMaybeCurrency((budget * decision.suggestedAllocationPct) / 100)}</div>
+                        <div className="text-xs text-slate-500">{decision.suggestedAllocationPct.toFixed(1)}%</div>
+                      </div>
+                    </div>
+                  )) : <div className="text-sm text-slate-400">No ticker currently receives capital.</div>}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Confidence Filter</div>
+              <div className="mt-2 text-sm text-slate-300">{riskConfig.description}</div>
+            </div>
+            <Badge variant="outline" className="border-slate-700 text-slate-300">
+              {riskConfig.minQuality}+ quality
+            </Badge>
+          </div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            {(Object.entries(RISK_MODE_CONFIG) as Array<[RiskMode, (typeof RISK_MODE_CONFIG)[RiskMode]]>).map(([mode, config]) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => onRiskModeChange(mode)}
+                className={cn(
+                  "rounded-lg border px-3 py-3 text-left transition",
+                  mode === riskMode
+                    ? "border-cyan-500/40 bg-cyan-500/10 text-cyan-100"
+                    : "border-slate-800 bg-slate-950/50 text-slate-400 hover:border-slate-600 hover:text-slate-200",
+                )}
+              >
+                <div className="text-sm font-semibold">{config.label}</div>
+                <div className="mt-1 text-xs leading-5 opacity-80">Max {config.maxExposure}% exposure</div>
+              </button>
+            ))}
+          </div>
+          <div className="mt-4 border-t border-slate-800 pt-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Review Checklist</div>
+              <Badge variant="outline" className={cn(toneClasses(readiness.tone))}>
+                {readiness.label}
+              </Badge>
+            </div>
+            <div className="mt-3 space-y-2">
+              {checklist.map((item) => (
+                <div
+                  key={item.label}
+                  className="flex items-start gap-3 rounded-lg border border-slate-800 bg-slate-950/45 px-3 py-2"
+                >
+                  <span
+                    className={cn(
+                      "mt-1 h-2.5 w-2.5 shrink-0 rounded-full",
+                      item.passed ? "bg-emerald-400" : "bg-amber-400",
+                    )}
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-slate-200">{item.label}</span>
+                    <span className="block text-xs leading-5 text-slate-500">{item.detail}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className={cn("mt-3 rounded-lg border px-3 py-2 text-sm font-semibold", toneClasses(readiness.tone))}>
+              {readiness.label}
+            </div>
+          </div>
+        </div>
+      </div>
+    </InsightShell>
+  );
+}
+
+function DecisionMemoryPanel({
+  entries,
+  auditEntries,
+  portfolio,
+  lifecycleInsight,
+}: {
+  entries: DecisionMemoryEntry[];
+  auditEntries: PortfolioDecisionAuditEntry[];
+  portfolio: SimulatedPortfolio;
+  lifecycleInsight: PortfolioLifecycleInsight;
+}) {
+  const visibleEntries = entries.slice(0, 5);
+  const judged = visibleEntries.map((entry) => ({
+    entry,
+    outcome: evaluateDecisionMemory(entry, portfolio, lifecycleInsight),
+  }));
+  const latestOutcome = judged[0]?.outcome;
+
+  return (
+    <InsightShell
+      title="Decision Memory"
+      eyebrow="Has following this helped?"
+      action={
+        latestOutcome ? (
+          <Badge variant="outline" className={cn(toneClasses(latestOutcome.tone))}>
+            Latest {latestOutcome.label}
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="border-slate-700 text-slate-300">
+            Recording
+          </Badge>
+        )
+      }
+    >
+      {judged.length ? (
+        <div className="grid gap-3">
+          {judged.map(({ entry, outcome }) => (
+            <div key={entry.id} className="rounded-lg border border-slate-800 bg-slate-900/30 p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline" className={cn(toneClasses(entry.tone))}>
+                      {entry.readiness}
+                    </Badge>
+                    <Badge variant="outline" className={cn(toneClasses(outcome.tone))}>
+                      {outcome.label}
+                    </Badge>
+                    <span className="text-xs text-slate-500">
+                      {formatDuration(Date.now() - entry.recordedAt)} ago
+                    </span>
+                  </div>
+                  <div className="mt-3 text-sm leading-6 text-slate-300">
+                    Recommended <span className="font-semibold text-slate-100">{entry.recommendation}</span>{" "}
+                    with {entry.confidenceFilterLabel.toLowerCase()} filter,{" "}
+                    {formatMaybeCurrency(entry.targetCapital)} target capital, and{" "}
+                    {plainLifecycleState(entry.lifecycleState).toLowerCase()} trust.
+                  </div>
+                </div>
+                <div className="grid min-w-[240px] grid-cols-3 gap-2 text-right">
+                  {[
+                    ["Return", `${outcome.returnChange >= 0 ? "+" : ""}${outcome.returnChange.toFixed(2)} pts`],
+                    ["Trades", `+${Math.max(0, outcome.closedTradeChange)}`],
+                    ["Trust", outcome.trust],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-md border border-slate-800 bg-slate-950/45 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500">{label}</div>
+                      <div className="mt-1 text-xs font-semibold text-slate-100">{value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {entry.topTickers.length ? entry.topTickers.map((ticker) => (
+                  <span
+                    key={`${entry.id}:${ticker.ticker}`}
+                    className="rounded-full border border-slate-700 bg-slate-950/50 px-2.5 py-1 text-xs text-slate-300"
+                  >
+                    {ticker.ticker} {ticker.allocationPct.toFixed(1)}%
+                  </span>
+                )) : (
+                  <span className="rounded-full border border-slate-700 bg-slate-950/50 px-2.5 py-1 text-xs text-slate-400">
+                    No ticker received capital
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+          <div className="rounded-lg border border-slate-800 bg-slate-950/45 p-4">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Decision Audit
+            </div>
+            <div className="mt-3 divide-y divide-slate-800">
+              {auditEntries.slice(0, 5).length ? auditEntries.slice(0, 5).map((entry) => (
+                <div key={entry.id} className="flex items-center justify-between gap-4 py-2 text-sm">
+                  <div>
+                    <div className="font-medium text-slate-200">
+                      {entry.eventType === "recorded" ? "Capital call recorded" : "Outcome checked"}
+                    </div>
+                    <div className="text-xs text-slate-500">{entry.decisionId ?? entry.market}</div>
+                  </div>
+                  <div className="text-right text-xs text-slate-500">
+                    {formatDuration(Date.now() - entry.timestamp)} ago
+                  </div>
+                </div>
+              )) : (
+                <div className="py-2 text-sm text-slate-400">
+                  Audit events will appear after the first durable decision record.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-4 text-sm text-slate-400">
+          The next portfolio call will be recorded here and judged against later results.
+        </div>
+      )}
+    </InsightShell>
+  );
+}
+
 function PortfolioPerformanceTabs({ portfolio }: { portfolio: SimulatedPortfolio }) {
   const [tab, setTab] = useState<"chart" | "history" | "stats">("chart");
   const [tradePage, setTradePage] = useState(1);
@@ -2845,6 +3865,9 @@ function PortfolioPerformanceTabs({ portfolio }: { portfolio: SimulatedPortfolio
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="border-slate-700 text-slate-300">
             {lastReturn >= 0 ? "+" : ""}{lastReturn.toFixed(2)}%
+          </Badge>
+          <Badge variant="outline" className="border-slate-700 text-slate-300">
+            Budget {formatMaybeCurrency(portfolio.startValue)}
           </Badge>
           <Badge
             variant="outline"
@@ -3039,16 +4062,28 @@ function PortfolioPerformanceTabs({ portfolio }: { portfolio: SimulatedPortfolio
 
 export default function Dashboard() {
   const [markets, setMarkets] = useState<MarketOption[]>([]);
-  const [selectedMarket, setSelectedMarket] = useState("BINANCE");
+  const [selectedMarket, setSelectedMarket] = useState(() =>
+    readStoredString(SELECTED_MARKET_STORAGE_KEY, "BINANCE"),
+  );
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const [selectedTicker, setSelectedTicker] = useState<string | undefined>();
-  const [riskMode, setRiskMode] = useState<RiskMode>("small");
+  const [riskMode, setRiskMode] = useState<RiskMode>(readStoredRiskMode);
   const [syncTotal, setSyncTotal] = useState(0);
   const [syncAttempted, setSyncAttempted] = useState(0);
   const [syncUnavailable, setSyncUnavailable] = useState(0);
+  const [portfolioBudgets, setPortfolioBudgets] = useState<Record<string, number>>(() => {
+    try {
+      const saved = localStorage.getItem(PORTFOLIO_BUDGET_STORAGE_KEY);
+      return saved ? normalizeBudgetMap(JSON.parse(saved)) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [decisionMemory, setDecisionMemory] = useState<DecisionMemoryEntry[]>(readDecisionMemory);
+  const [decisionAudit, setDecisionAudit] = useState<PortfolioDecisionAuditEntry[]>([]);
   const [simulatedPortfolios, setSimulatedPortfolios] = useState<Record<string, SimulatedPortfolio>>(() => {
     try {
       clearSignalMarketsStorageForFreshStart();
@@ -3063,8 +4098,17 @@ export default function Dashboard() {
     }
   });
 
+  const activeBudget = portfolioBudgets[selectedMarket] ?? STARTING_PORTFOLIO_VALUE;
   const activeSimulatedPortfolio =
-    simulatedPortfolios[selectedMarket] ?? createEmptyPortfolio();
+    simulatedPortfolios[selectedMarket] ?? createEmptyPortfolio(activeBudget);
+  const activeDecisionMemory = useMemo(
+    () => decisionMemory.filter((entry) => entry.market === selectedMarket),
+    [decisionMemory, selectedMarket],
+  );
+  const activeDecisionAudit = useMemo(
+    () => decisionAudit.filter((entry) => entry.market === selectedMarket),
+    [decisionAudit, selectedMarket],
+  );
   const activePortfolioTrainingActive =
     SIMULATED_EXECUTIONS_ENABLED &&
     (stocks.length > 0 ||
@@ -3077,6 +4121,36 @@ export default function Dashboard() {
     ),
     [activePortfolioTrainingActive, activeSimulatedPortfolio],
   );
+
+  function applyPortfolioBudget(nextBudget: number) {
+    if (!selectedMarket || !Number.isFinite(nextBudget) || nextBudget <= 0) return;
+    const currentBudget = portfolioBudgets[selectedMarket] ?? STARTING_PORTFOLIO_VALUE;
+    if (Math.abs(nextBudget - currentBudget) < 0.01) return;
+
+    const existing = simulatedPortfolios[selectedMarket];
+    const hasHistory = Boolean(
+      existing &&
+      (Object.keys(existing.positions ?? {}).length ||
+        (existing.closedPositions ?? []).length ||
+        (existing.valueHistory ?? []).length),
+    );
+    if (
+      hasHistory &&
+      typeof window !== "undefined" &&
+      !window.confirm("Changing the capital budget starts a new paper portfolio for this market. Continue?")
+    ) {
+      return;
+    }
+
+    setPortfolioBudgets((current) => ({
+      ...current,
+      [selectedMarket]: nextBudget,
+    }));
+    setSimulatedPortfolios((current) => ({
+      ...current,
+      [selectedMarket]: createEmptyPortfolio(nextBudget),
+    }));
+  }
 
   const adaptiveSignals = useMemo(
     () => stocks.map((stock) => deriveAdaptiveSignal(stock, Date.now())),
@@ -3167,13 +4241,15 @@ export default function Dashboard() {
         if (Array.isArray(marketResponse)) {
           setMarkets(marketResponse);
 
+          const savedMarket = readStoredString(SELECTED_MARKET_STORAGE_KEY, selectedMarket);
+          const saved = marketResponse.find((market) => market.code === savedMarket);
           const preferred = marketResponse.find(
             (m) =>
               m.code.toUpperCase() === "BINANCE",
           );
 
-          if (preferred) {
-            setSelectedMarket(preferred.code);
+          if (saved || preferred) {
+            setSelectedMarket((saved ?? preferred)!.code);
           }
         }
       } catch (err) {
@@ -3348,6 +4424,109 @@ export default function Dashboard() {
   }, [selectedMarket]);
 
   useEffect(() => {
+    if (selectedMarket) writeStoredPreference(SELECTED_MARKET_STORAGE_KEY, selectedMarket);
+  }, [selectedMarket]);
+
+  useEffect(() => {
+    writeStoredPreference(RISK_MODE_STORAGE_KEY, riskMode);
+  }, [riskMode]);
+
+  useEffect(() => {
+    if (!selectedMarket) return;
+    let cancelled = false;
+    Promise.all([
+      fetchPortfolioDecisionMemory(selectedMarket, DECISION_MEMORY_LIMIT),
+      fetchPortfolioDecisionAudit(selectedMarket, DECISION_MEMORY_LIMIT),
+    ])
+      .then(([entries, auditEntries]) => {
+        if (cancelled) return;
+        setDecisionMemory((current) =>
+          normalizeDecisionMemory([...(entries as unknown[]), ...current]),
+        );
+        setDecisionAudit(auditEntries);
+      })
+      .catch(() => {
+        // Local decision memory remains available when the backend is unavailable.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedMarket]);
+
+  useEffect(() => {
+    if (loading || !selectedMarket || !executionDecisions.length || syncAttempted === 0) return;
+    const entry = buildDecisionMemoryEntry({
+      market: selectedMarket,
+      decisions: executionDecisions,
+      portfolio: activeSimulatedPortfolio,
+      budget: activeBudget,
+      lifecycleInsight: activePortfolioLifecycleInsight,
+      dataQualityPct,
+      riskMode,
+    });
+
+    setDecisionMemory((current) => {
+      const normalized = normalizeDecisionMemory(current);
+      const latestForMarket = normalized.find((item) => item.market === selectedMarket);
+      if (latestForMarket?.signature === entry.signature) return current;
+      void recordPortfolioDecisionMemory(entry)
+        .then(() => fetchPortfolioDecisionAudit(selectedMarket, DECISION_MEMORY_LIMIT))
+        .then(setDecisionAudit)
+        .catch(() => {
+          // The local copy remains auditable in this browser if persistence is unavailable.
+        });
+      return normalizeDecisionMemory([entry, ...normalized]);
+    });
+  }, [
+    activeBudget,
+    activePortfolioLifecycleInsight,
+    activeSimulatedPortfolio,
+    dataQualityPct,
+    executionDecisions,
+    loading,
+    riskMode,
+    selectedMarket,
+    syncAttempted,
+  ]);
+
+  useEffect(() => {
+    writeDecisionMemory(decisionMemory);
+  }, [decisionMemory]);
+
+  useEffect(() => {
+    if (loading || !selectedMarket || !activeDecisionMemory.length || syncAttempted === 0) return;
+    const stats = portfolioStats(activeSimulatedPortfolio);
+    reviewPortfolioDecisionOutcomes({
+      market: selectedMarket,
+      evaluatedAt: Date.now(),
+      currentPortfolioValue: stats.currentValue,
+      currentTotalReturn: stats.totalReturn,
+      currentSharpe: stats.normalizedAnnualSharpe,
+      currentProfitFactor: stats.profitFactor === Infinity ? 9.99 : stats.profitFactor,
+      currentClosedTrades: stats.totalTrades,
+      currentDrawdown: stats.maxDrawdown,
+      lifecycleState: activePortfolioLifecycleInsight.state,
+      lifecycleLabel: plainLifecycleState(activePortfolioLifecycleInsight.state),
+    })
+      .then(async (result) => {
+        setDecisionMemory((current) =>
+          normalizeDecisionMemory([...(result.entries as unknown[]), ...current]),
+        );
+        setDecisionAudit(await fetchPortfolioDecisionAudit(selectedMarket, DECISION_MEMORY_LIMIT));
+      })
+      .catch(() => {
+        // Outcome checks are retried on the next refresh when the backend is available.
+      });
+  }, [
+    activeDecisionMemory.length,
+    activePortfolioLifecycleInsight,
+    activeSimulatedPortfolio,
+    loading,
+    selectedMarket,
+    syncAttempted,
+  ]);
+
+  useEffect(() => {
     if (!SIMULATED_EXECUTIONS_ENABLED) {
       clearPortfolioStorage();
       return;
@@ -3362,6 +4541,17 @@ export default function Dashboard() {
       // Ignore storage failures in private browsing or restricted previews.
     }
   }, [simulatedPortfolios]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        PORTFOLIO_BUDGET_STORAGE_KEY,
+        JSON.stringify(normalizeBudgetMap(portfolioBudgets)),
+      );
+    } catch {
+      // Ignore storage failures in private browsing or restricted previews.
+    }
+  }, [portfolioBudgets]);
 
   useEffect(() => {
     if (!SIMULATED_EXECUTIONS_ENABLED) {
@@ -3394,7 +4584,7 @@ export default function Dashboard() {
         ]),
       );
 
-      let cash = existing?.cash ?? STARTING_PORTFOLIO_VALUE;
+      let cash = existing?.cash ?? activeBudget;
       const positions: Record<string, SimulatedPosition> = {};
       const closedPositions = [...(existing?.closedPositions ?? [])];
 
@@ -3551,7 +4741,7 @@ export default function Dashboard() {
         ...current,
         [selectedMarket]: {
           startedAt: existing?.startedAt ?? now,
-          startValue: existing?.startValue ?? STARTING_PORTFOLIO_VALUE,
+          startValue: existing?.startValue ?? activeBudget,
           cash: Math.max(0, cash),
           positions,
           valueHistory: [...(existing?.valueHistory ?? []).slice(-239), { t: now, v: value }],
@@ -3559,7 +4749,7 @@ export default function Dashboard() {
         },
       };
     });
-  }, [allocationDecisions, selectedMarket, selectedMarketStatus, stocks]);
+  }, [activeBudget, allocationDecisions, selectedMarket, selectedMarketStatus, stocks]);
 
   useEffect(() => {
     if (!selectedMarket || loading || syncAttempted === 0) return;
@@ -3631,22 +4821,6 @@ export default function Dashboard() {
                 </select>
               </div>
             </label>
-            <label className="grid gap-1">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Sizing Rule</span>
-              <div className="w-[210px]">
-                <select
-                  value={riskMode}
-                  onChange={(event) => setRiskMode(event.target.value as RiskMode)}
-                  className="h-11 w-full rounded-xl border border-slate-800 bg-[#061226] px-4 text-sm font-medium text-slate-200 outline-none transition focus:border-cyan-500"
-                >
-                  {Object.entries(RISK_MODE_CONFIG).map(([mode, config]) => (
-                    <option key={mode} value={mode}>
-                      {config.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </label>
           </div>
         </header>
 
@@ -3677,8 +4851,32 @@ export default function Dashboard() {
             </div>
 
             <div className="mb-6">
+              <PortfolioDecisionSummary
+                decisions={executionDecisions}
+                portfolio={activeSimulatedPortfolio}
+                budget={activeBudget}
+                lifecycleInsight={activePortfolioLifecycleInsight}
+                dataQualityPct={dataQualityPct}
+                riskMode={riskMode}
+                onRiskModeChange={setRiskMode}
+              />
+            </div>
+
+            <div className="mb-6">
+              <DecisionMemoryPanel
+                entries={activeDecisionMemory}
+                auditEntries={activeDecisionAudit}
+                portfolio={activeSimulatedPortfolio}
+                lifecycleInsight={activePortfolioLifecycleInsight}
+              />
+            </div>
+
+            <div className="mb-6">
               <AdaptiveSignalFeed
                 decisions={executionDecisions}
+                portfolio={activeSimulatedPortfolio}
+                budget={activeBudget}
+                onBudgetChange={applyPortfolioBudget}
                 selected={selectedTicker}
                 onSelect={(signal) => setSelectedTicker(signal.ticker)}
               />

@@ -28,6 +28,13 @@ import {
   getSignalLifecycleAuditLog,
   listSignalLifecycleModels,
 } from "../lib/signal-lifecycle-governance";
+import {
+  listPortfolioDecisionAudit,
+  listPortfolioDecisionMemory,
+  listPortfolioDecisionOutcomes,
+  recordPortfolioDecisionMemory,
+  reviewPortfolioDecisionOutcomes,
+} from "../lib/portfolio-decision-memory";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -258,6 +265,90 @@ router.get("/stocks/model-lifecycle/audit", async (req, res) => {
     typeof req.query.modelId === "string" ? req.query.modelId : undefined;
   const entries = await getSignalLifecycleAuditLog(modelId);
   res.json({ data: entries });
+});
+
+router.get("/stocks/portfolio-decisions", async (req, res) => {
+  const market = typeof req.query.market === "string" ? req.query.market : undefined;
+  const limit = Number(req.query.limit ?? 50);
+  const entries = await listPortfolioDecisionMemory({ market, limit });
+  res.json({ data: entries });
+});
+
+router.get("/stocks/portfolio-decisions/audit", async (req, res) => {
+  const market = typeof req.query.market === "string" ? req.query.market : undefined;
+  const limit = Number(req.query.limit ?? 50);
+  const entries = await listPortfolioDecisionAudit({ market, limit });
+  res.json({ data: entries });
+});
+
+router.get("/stocks/portfolio-decisions/outcomes", async (req, res) => {
+  const market = typeof req.query.market === "string" ? req.query.market : undefined;
+  const limit = Number(req.query.limit ?? 50);
+  const outcomes = await listPortfolioDecisionOutcomes({ market, limit });
+  res.json({ data: outcomes });
+});
+
+router.post("/stocks/portfolio-decisions", async (req, res) => {
+  const body = req.body ?? {};
+  const market = String(body.market ?? "").trim();
+
+  if (!market) {
+    res.status(400).json({ error: "market is required" });
+    return;
+  }
+
+  const entry = await recordPortfolioDecisionMemory({
+    id: String(body.id ?? `${market}:${Date.now()}`),
+    market,
+    recordedAt: Number(body.recordedAt ?? Date.now()),
+    signature: String(body.signature ?? ""),
+    recommendation: String(body.recommendation ?? "Hold Cash"),
+    readiness: String(body.readiness ?? "Paper trade only"),
+    tone: body.tone === "good" || body.tone === "bad" || body.tone === "warn" ? body.tone : "info",
+    budget: Number(body.budget ?? 0),
+    targetAllocationPct: Number(body.targetAllocationPct ?? 0),
+    targetCapital: Number(body.targetCapital ?? 0),
+    confidenceFilter:
+      body.confidenceFilter === "balanced" || body.confidenceFilter === "normal"
+        ? body.confidenceFilter
+        : "small",
+    confidenceFilterLabel: String(body.confidenceFilterLabel ?? "Conservative"),
+    lifecycleState: body.lifecycleState ?? "RESEARCH",
+    lifecycleLabel: String(body.lifecycleLabel ?? "Needs More Proof"),
+    topTickers: Array.isArray(body.topTickers) ? body.topTickers : [],
+    startPortfolioValue: Number(body.startPortfolioValue ?? 0),
+    startTotalReturn: Number(body.startTotalReturn ?? 0),
+    startSharpe: body.startSharpe == null ? null : Number(body.startSharpe),
+    startProfitFactor: body.startProfitFactor == null ? null : Number(body.startProfitFactor),
+    startClosedTrades: Number(body.startClosedTrades ?? 0),
+    startDrawdown: Number(body.startDrawdown ?? 0),
+    dataQualityPct: Number(body.dataQualityPct ?? 0),
+  });
+  res.json({ data: entry });
+});
+
+router.post("/stocks/portfolio-decisions/outcomes", async (req, res) => {
+  const body = req.body ?? {};
+  const market = String(body.market ?? "").trim();
+
+  if (!market) {
+    res.status(400).json({ error: "market is required" });
+    return;
+  }
+
+  const result = await reviewPortfolioDecisionOutcomes({
+    market,
+    evaluatedAt: Number(body.evaluatedAt ?? Date.now()),
+    currentPortfolioValue: Number(body.currentPortfolioValue ?? 0),
+    currentTotalReturn: Number(body.currentTotalReturn ?? 0),
+    currentSharpe: body.currentSharpe == null ? null : Number(body.currentSharpe),
+    currentProfitFactor: body.currentProfitFactor == null ? null : Number(body.currentProfitFactor),
+    currentClosedTrades: Number(body.currentClosedTrades ?? 0),
+    currentDrawdown: Number(body.currentDrawdown ?? 0),
+    lifecycleState: body.lifecycleState ?? "RESEARCH",
+    lifecycleLabel: String(body.lifecycleLabel ?? "Needs More Proof"),
+  });
+  res.json({ data: result });
 });
 
 router.post("/stocks/model-lifecycle/candidate", async (req, res) => {
