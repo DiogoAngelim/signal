@@ -3133,10 +3133,6 @@ export default function Dashboard() {
       ? (availableQuoteCount / Math.max(1, stocks.length)) * 100
       : 0;
 
-  const selectedDecision =
-    executionDecisions.find((decision) => decision.signal.ticker === selectedTicker) ??
-    executionDecisions[0];
-
   const selectedMarketStatus = getMarketStatus(selectedMarket);
   const lastSyncedLabel = lastSyncedAt
     ? new Date(lastSyncedAt).toLocaleTimeString([], {
@@ -3688,23 +3684,6 @@ export default function Dashboard() {
               />
             </div>
 
-            <section className="mb-6">
-              <TopOpportunities decisions={executionDecisions} />
-            </section>
-
-            <section className="mb-6 grid gap-4 xl:grid-cols-2">
-              <OpportunityMap
-                decisions={executionDecisions}
-                selected={selectedTicker}
-                onSelect={(signal) => setSelectedTicker(signal.ticker)}
-              />
-              <LiveIntelligenceChart decision={selectedDecision} fallback={executionDecisions} />
-            </section>
-
-            <div className="mb-6">
-              <PortfolioPerformanceTabs portfolio={activeSimulatedPortfolio} />
-            </div>
-
             <div className="mb-6">
               <LifecycleOperationsPanel
                 market={selectedMarket}
@@ -3712,6 +3691,10 @@ export default function Dashboard() {
                 lifecycleInsight={activePortfolioLifecycleInsight}
                 dataQualityPct={dataQualityPct}
               />
+            </div>
+
+            <div className="mb-6">
+              <PortfolioPerformanceTabs portfolio={activeSimulatedPortfolio} />
             </div>
           </>
         )}
