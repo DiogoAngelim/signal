@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Signal Markets"
+version = "1.0.0"
+id = "artifacts/signal-markets"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23260
+
+[services.development]
+run = "pnpm --filter @workspace/signal-markets run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/signal-markets", "run", "build" ]
+publicDir = "artifacts/signal-markets/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23260"
+BASE_PATH = "/"

@@ -15,8 +15,10 @@
     "dotenv-cli": "^11.0.0"
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
+    "react-csv": "^2.2.2",
     "recharts": "^3.8.1"
   }
 }

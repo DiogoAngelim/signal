@@ -1,0 +1,752 @@
+[
+  {
+    "symbol": "AEM",
+    "name": "Alter Ego Media S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/alter-ego-media-sa.svg"
+  },
+  {
+    "symbol": "AIA",
+    "name": "Athens International Airport S.A",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/athens-inter-nal-airport-sa.svg"
+  },
+  {
+    "symbol": "ALMY",
+    "name": "Alumil Aluminium Industry S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/alumil-aluminium-industry.svg"
+  },
+  {
+    "symbol": "ATEK",
+    "name": "Attica Publications SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/attica-publications-sa-cr.svg"
+  },
+  {
+    "symbol": "AVE",
+    "name": "AVE S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ave-sa.svg"
+  },
+  {
+    "symbol": "CAIROMEZ",
+    "name": "Cairo Mezz Plc",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/cairo-mezz-plc-cr.svg"
+  },
+  {
+    "symbol": "CENER",
+    "name": "Cenergy Holdings SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/cenergy.svg"
+  },
+  {
+    "symbol": "CENTR",
+    "name": "Centric Holdings SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/centric-sa.svg"
+  },
+  {
+    "symbol": "CNLCAP",
+    "name": "CNL Capital EKES-AIFM",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/cnl-capital-ekes-aifm-cr.svg"
+  },
+  {
+    "symbol": "CPI",
+    "name": "CPI Computer Peripherals International S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/cpi-sa-cr.svg"
+  },
+  {
+    "symbol": "CREDIA",
+    "name": "CrediaBank S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/attica-bank-sa.svg"
+  },
+  {
+    "symbol": "DAIOS",
+    "name": "Daios Plastics S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/daios-plastics-sa-cr.svg"
+  },
+  {
+    "symbol": "DIMAND",
+    "name": "DIMAND SOCIETE ANONYME DEVELOPMENT & EXPLOITATION OF REAL ESTATE & CONSTRUCTIONS SERVICES & HOLDING",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/dimand-sa.svg"
+  },
+  {
+    "symbol": "DOMIK",
+    "name": "DOMIKI KRITIS S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/domiki-kritis-sa-cr.svg"
+  },
+  {
+    "symbol": "DOPPLER",
+    "name": "DOPPLER S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/doppler-sa-cr.svg"
+  },
+  {
+    "symbol": "DOTSOFT",
+    "name": "DOTSOFT S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/dotsoft-sa-cr.svg"
+  },
+  {
+    "symbol": "DROME",
+    "name": "DROMEAS S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/dromeas-sa-cr.svg"
+  },
+  {
+    "symbol": "DUR",
+    "name": "Duros SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/duros-sa-cr.svg"
+  },
+  {
+    "symbol": "EEE",
+    "name": "Coca-Cola HBC AG",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/coca-cola.svg"
+  },
+  {
+    "symbol": "EIS",
+    "name": "European Innovation Solutions S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/euroconsultants-sa-cr.svg"
+  },
+  {
+    "symbol": "EKTER",
+    "name": "EKTER S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ekter-sa-cr.svg"
+  },
+  {
+    "symbol": "ELBE",
+    "name": "ELVE S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/elve-sa-cr.svg"
+  },
+  {
+    "symbol": "ELHA",
+    "name": "ELVALHALCOR Hellenic Copper and Aluminium Industry S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/elvalhalcor-sa-cr.svg"
+  },
+  {
+    "symbol": "ELIN",
+    "name": "ELINOIL HELLENIC PETROLEUM COMPANY S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/elinoil-sa-cr.svg"
+  },
+  {
+    "symbol": "ELLAKTOR",
+    "name": "Ellaktor SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ellaktor-sa.svg"
+  },
+  {
+    "symbol": "ELPE",
+    "name": "HELLENiQ ENERGY Holdings S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/hellenic-petroleum-sa.svg"
+  },
+  {
+    "symbol": "ELSTR",
+    "name": "Elastron S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/elastron-sa.svg"
+  },
+  {
+    "symbol": "ELTON",
+    "name": "ELTON S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/elton-chemicals-sa-cr.svg"
+  },
+  {
+    "symbol": "ETE",
+    "name": "National Bank of Greece S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/national-bank-of-greece-cr.svg"
+  },
+  {
+    "symbol": "EUROB",
+    "name": "EUROBANK S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/eurobank-cr.svg"
+  },
+  {
+    "symbol": "EVR",
+    "name": "Evropi Holdings SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/klm-sa-cr.svg"
+  },
+  {
+    "symbol": "EVROF",
+    "name": "Evropharma Milk Industry Anonyme Industrial & Commercial Company",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/evrofarma-sa-cr.svg"
+  },
+  {
+    "symbol": "EX",
+    "name": "EUROXX Securities S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/euroxx-securities-sa.svg"
+  },
+  {
+    "symbol": "EXAE",
+    "name": "Hellenic Exchanges - Athens Stock Exchange S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/hellenic-exchanges-ase-sa.svg"
+  },
+  {
+    "symbol": "EYAPS",
+    "name": "Thessaloniki Water and Sewage Company SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/thessalonikh-water-supply-sa.svg"
+  },
+  {
+    "symbol": "EYDAP",
+    "name": "Athens Water Supply and Sewerage Company S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/athens-water-supply-sa-cr.svg"
+  },
+  {
+    "symbol": "FAIS",
+    "name": "Fais Holding Societe Anonyme",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/fais-sa-cr.svg"
+  },
+  {
+    "symbol": "FLEXO",
+    "name": "Flexopack SA Plastics",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/flexopack-sa.svg"
+  },
+  {
+    "symbol": "FOODL",
+    "name": "Foodlink S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/foodlink-sa-cr.svg"
+  },
+  {
+    "symbol": "FOYRK",
+    "name": "FOURLIS HOLDINGS S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/fourlis-sa-cr.svg"
+  },
+  {
+    "symbol": "FRIGO",
+    "name": "Frigoglass S.A.I.C.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/frigoglass-sa-cr.svg"
+  },
+  {
+    "symbol": "GCMEZZ",
+    "name": "Galaxy Cosmos Mezz Plc",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/galaxy-cosmos-mezz-plc-cr.svg"
+  },
+  {
+    "symbol": "GEBKA",
+    "name": "General Commercial & Industrial S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/gencommercial-and-ind-cr.svg"
+  },
+  {
+    "symbol": "GEKTERNA",
+    "name": "Gek Terna S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/gek-terna-sa.svg"
+  },
+  {
+    "symbol": "HAIDE",
+    "name": "Haidemenos SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/haidemenos-cr.svg"
+  },
+  {
+    "symbol": "HTO",
+    "name": "Hellenic Telecommunications Organization SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/hellenic-telecom-org-cr.svg"
+  },
+  {
+    "symbol": "IATR",
+    "name": "ATHENS MEDICAL CENTER S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/athens-medical-csa-cr.svg"
+  },
+  {
+    "symbol": "IKTIN",
+    "name": "Iktinos Hellas S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/iktinos-hellas-sa-cr.svg"
+  },
+  {
+    "symbol": "ILYDA",
+    "name": "ILYDA S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ilyda-sa-cr.svg"
+  },
+  {
+    "symbol": "INLIF",
+    "name": "INTERLIFE General Insurance Company SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/interlife-sa.svg"
+  },
+  {
+    "symbol": "INTEK",
+    "name": "IDEAL HOLDINGS S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ideal-sa.svg"
+  },
+  {
+    "symbol": "INTET",
+    "name": "INTERTECH S.A. INTERNATIONAL TECHNOLOGIES",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/intertech-sa-inter-tech.svg"
+  },
+  {
+    "symbol": "INTRK",
+    "name": "Intracom Holdings SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/intracom-cr.svg"
+  },
+  {
+    "symbol": "KARE",
+    "name": "Karelia Tobacco Company Inc.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/karelia-tobacco-company-cr.svg"
+  },
+  {
+    "symbol": "KEKR",
+    "name": "KEKROPS S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kekrops-hotel-tourist-build.svg"
+  },
+  {
+    "symbol": "KORDE",
+    "name": "Kordellos Bros S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kordellos-chbros-sa-cr.svg"
+  },
+  {
+    "symbol": "KRI",
+    "name": "Kri-Kri Milk Industry S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kri-kri-milk-industry-sa-cr.svg"
+  },
+  {
+    "symbol": "KYLO",
+    "name": "Loulis Food Ingredients SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/flour-mills-loulis-sa-cr.svg"
+  },
+  {
+    "symbol": "KYSA",
+    "name": "Flour Mills C. Sarantopoulos SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/c-sarantopoulos-flour-mills.svg"
+  },
+  {
+    "symbol": "LAMDA",
+    "name": "LAMDA Development S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/lamda-development-sa.svg"
+  },
+  {
+    "symbol": "LAMPS",
+    "name": "Lampsa Hotel Co.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/lampsa-hotel.svg"
+  },
+  {
+    "symbol": "LANAC",
+    "name": "Lanakam S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/lanakam-sa-cr.svg"
+  },
+  {
+    "symbol": "LAVI",
+    "name": "Lavipharm SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/lavipharm-sa-cr.svg"
+  },
+  {
+    "symbol": "LEBEK",
+    "name": "N. LEVENTERIS S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/n-levederis-c.svg"
+  },
+  {
+    "symbol": "LEBEP",
+    "name": "N. LEVENTERIS S.A. Pref Bearer",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/n-levederis-c.svg"
+  },
+  {
+    "symbol": "LOGISMOS",
+    "name": "Logismos Information Systems S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/logismos-sa-cr.svg"
+  },
+  {
+    "symbol": "MASTIHA",
+    "name": "Mediterra SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/mediterra-sa-cr.svg"
+  },
+  {
+    "symbol": "MATHIO",
+    "name": "Mathios Refractories S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/mathios-refractory-sa.svg"
+  },
+  {
+    "symbol": "MEDIC",
+    "name": "Medicon Hellas",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/medicon-hellas-sa-cr.svg"
+  },
+  {
+    "symbol": "MERKO",
+    "name": "Mermeren Kombinat A.D. GDR",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/mermeren-kombinat-ad-prile.svg"
+  },
+  {
+    "symbol": "MEVA",
+    "name": "MEVACO S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/mevaco-sa-cr.svg"
+  },
+  {
+    "symbol": "MIG",
+    "name": "MIG HOLDINGS S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/marfin-investgroup-sa-cr.svg"
+  },
+  {
+    "symbol": "MIN",
+    "name": "Minerva Knitwear SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/minerva-knitwear-sa-cb.svg"
+  },
+  {
+    "symbol": "MODA",
+    "name": "N. Varveris-Moda Bagno S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/n-varveris-moda-bango-sa.svg"
+  },
+  {
+    "symbol": "MOH",
+    "name": "MOTOR OIL (HELLAS) CORINTH REFINERIES S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/motor-oil-hellas-sa-cr.svg"
+  },
+  {
+    "symbol": "MOTO",
+    "name": "MOTODYNAMICS S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/carsmotorcycandmarengtrandimp.svg"
+  },
+  {
+    "symbol": "MOYZK",
+    "name": "EL. D. MOUZAKIS S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/el-d-mouzakis-sa-cr.svg"
+  },
+  {
+    "symbol": "MPITR",
+    "name": "BITROS HOLDING S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/bitros-sa-cr.svg"
+  },
+  {
+    "symbol": "MTLN",
+    "name": "Metlen Energy & Metals PLC",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/metlen-plc-cr.svg"
+  },
+  {
+    "symbol": "NAKAS",
+    "name": "Philippos Nakas S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/nakas-music.svg"
+  },
+  {
+    "symbol": "NAYP",
+    "name": "Nafpaktos Textile Industry SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/nafpaktos-textile-ind.svg"
+  },
+  {
+    "symbol": "NOVAL",
+    "name": "Noval Property Real Estate Investment Company",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/noval-property-reic-cr.svg"
+  },
+  {
+    "symbol": "OLTH",
+    "name": "Thessaloniki Port Authority S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/thessaloniki-port-authority.svg"
+  },
+  {
+    "symbol": "OLYMP",
+    "name": "Technical Olympic S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/technical-olympics-sa.svg"
+  },
+  {
+    "symbol": "ONYX",
+    "name": "Onyx Touristiki S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/onyx-touristiki-sa.svg"
+  },
+  {
+    "symbol": "OPTIMA",
+    "name": "Optima Bank SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/optima-bank-sa-cr.svg"
+  },
+  {
+    "symbol": "OPTRON",
+    "name": "Optronics Technologies SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/optronics-technologies-sa.svg"
+  },
+  {
+    "symbol": "ORILINA",
+    "name": "Orilina Properties Real Estate Investment Company",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/orilina-properties-reic-cr.svg"
+  },
+  {
+    "symbol": "OTOEL",
+    "name": "Autohellas SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/autohellas-sa-cr.svg"
+  },
+  {
+    "symbol": "PAIR",
+    "name": "E. PAIRIS SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/e-pairis-sa-cr.svg"
+  },
+  {
+    "symbol": "PAP",
+    "name": "Papoutsanis SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/papoutsanis-sa.svg"
+  },
+  {
+    "symbol": "PERF",
+    "name": "Performance Technologies AE",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/performance-technologies-ae.svg"
+  },
+  {
+    "symbol": "PETRO",
+    "name": "Petros Petropoulos",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/p-petropoulos-sa-cr.svg"
+  },
+  {
+    "symbol": "PLAKR",
+    "name": "Crete Plastics SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/crete-plastics-sa-cr.svg"
+  },
+  {
+    "symbol": "PLAT",
+    "name": "Thrace Plastics Holding and Commercial S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/thrace-plastics-hold-and-com-sa.svg"
+  },
+  {
+    "symbol": "PPA",
+    "name": "Piraeus Port Authority S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/pireus-port-authority-sa-cr.svg"
+  },
+  {
+    "symbol": "PPC",
+    "name": "Public Power Corporation S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/public-power-sa-cr.svg"
+  },
+  {
+    "symbol": "PRD",
+    "name": "Proodeftikh Technical Company S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/proodeftikh-techn-co-sa-cr.svg"
+  },
+  {
+    "symbol": "PREMIA",
+    "name": "PREMIA REAL ESTATE INVESTMENT COMPANY SOCIETE ANOMYME",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/premia-sa.svg"
+  },
+  {
+    "symbol": "PROF",
+    "name": "PROFILE Systems & Software S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/profile-systems-and-software-sa.svg"
+  },
+  {
+    "symbol": "PROFK",
+    "name": "Pipeworks L. Girakian Profil SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/pipeworks-girakian-profil-sa.svg"
+  },
+  {
+    "symbol": "PVMEZZ",
+    "name": "PHOENIX VEGA MEZZ LTD",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/phoenix-vega-mezz-plc-cr.svg"
+  },
+  {
+    "symbol": "QLCO",
+    "name": "QUALCO GROUP S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/qualco-sa-cr.svg"
+  },
+  {
+    "symbol": "QUAL",
+    "name": "Quality & Reliability S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/quality-and-reliability-sa.svg"
+  },
+  {
+    "symbol": "QUEST",
+    "name": "Quest Holdings SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/quest-sa.svg"
+  },
+  {
+    "symbol": "REALCONS",
+    "name": "Real Consulting IT Business Solutions S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/real-consulting-sa-cr.svg"
+  },
+  {
+    "symbol": "REVOIL",
+    "name": "REVOIL Petroleum Company SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/revoil-sa.svg"
+  },
+  {
+    "symbol": "SAR",
+    "name": "GR. SARANTIS S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/gr-sarantis-sa-cr.svg"
+  },
+  {
+    "symbol": "SIDMA",
+    "name": "Sidma Steel S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/sidma-steel-sa-cr.svg"
+  },
+  {
+    "symbol": "SOFTWEB",
+    "name": "SoftWeb Adaptive IT Solutions",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/softweb-adapt-it-solutions.svg"
+  },
+  {
+    "symbol": "SPACE",
+    "name": "Space Hellas S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/space-hellas-sa-cr.svg"
+  },
+  {
+    "symbol": "SPIR",
+    "name": "House of Agriculture Spirou SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-house-of-agriculture-spi.svg"
+  },
+  {
+    "symbol": "SUNMEZZ",
+    "name": "SunriseMezz Plc",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/sunrisemezz-plc-cr.svg"
+  },
+  {
+    "symbol": "TELL",
+    "name": "Bank of Greece SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-of-greece-cr.svg"
+  },
+  {
+    "symbol": "TITC",
+    "name": "Titan S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/titan-cement.svg"
+  },
+  {
+    "symbol": "TPEIR",
+    "name": "Piraeus Bank S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/piraeus-financial-sa.svg"
+  },
+  {
+    "symbol": "TREK",
+    "name": "Trek Development of Infrastructures & Services S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/trek-development-of-infrastructures-and-services-sa.svg"
+  },
+  {
+    "symbol": "TRESTATES",
+    "name": "Trade Estates Real Estate Investment Company",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/trade-estates-reic-cr.svg"
+  },
+  {
+    "symbol": "VIDAVO",
+    "name": "Vidavo SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/vidavo-sa-cr.svg"
+  },
+  {
+    "symbol": "VIO",
+    "name": "Viohalco SA/NV",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/viohalco.svg"
+  },
+  {
+    "symbol": "VOSYS",
+    "name": "VOYATZOGLOU S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/vogiatzogloy-systems-sa-cr.svg"
+  },
+  {
+    "symbol": "XYLEK",
+    "name": "Interwood-Xylemporia ATENE SA",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/interwood-xylemporia-atene-cr.svg"
+  },
+  {
+    "symbol": "XYLEP",
+    "name": "Interwood-Xylemporia A.T.E.N.E. Pref.Reg.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/interwood-xylemporia-atene-cr.svg"
+  },
+  {
+    "symbol": "YALCO",
+    "name": "YALCO - Socrates D. Constantinou & Son S.A.",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/yalco-constantinoy-sa-cr.svg"
+  },
+  {
+    "symbol": "YKNOT",
+    "name": "Y/KNOT S.A",
+    "market": "ATHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kiriakoulis-shipping-sa.svg"
+  }
+]

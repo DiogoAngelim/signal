@@ -1,0 +1,1571 @@
+[
+  {
+    "symbol": "BRK/B.LMA",
+    "name": "Berkshire Hathaway Inc. Class B",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/berkshire-hathaway.svg"
+  },
+  {
+    "symbol": "CARDIFC1.LMA",
+    "name": "BNP Paribas Cardif SA Compania de Seguros y Reaseguros",
+    "market": "BVL"
+  },
+  {
+    "symbol": "CARTAVC1.LMA",
+    "name": "Cartavio SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/cartavio-sociedad-anonima-abierta.svg"
+  },
+  {
+    "symbol": "CASAGRC1.LMA",
+    "name": "Casa Grande SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/casa-grande-saa.svg"
+  },
+  {
+    "symbol": "CASTROC1.LMA",
+    "name": "Castrovirreyna Compania Minera SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "CASTROI1.LMA",
+    "name": "Castrovirreyna Compania Minera SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "CAT.LMA",
+    "name": "Caterpillar Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/caterpillar.svg"
+  },
+  {
+    "symbol": "CAVALIC1.LMA",
+    "name": "Cavali SA ICLV",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/cavali-sa-iclv.svg"
+  },
+  {
+    "symbol": "CAYALTC1.LMA",
+    "name": "Agricola Cayalti SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/agricola-cayalti-saa.svg"
+  },
+  {
+    "symbol": "CCL.LMA",
+    "name": "Carnival Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/carnival.svg"
+  },
+  {
+    "symbol": "CDPR.LMA",
+    "name": "Cerro de Pasco Resources, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/cerro-de-pasco-res.svg"
+  },
+  {
+    "symbol": "CESCEPC1.LMA",
+    "name": "Cesce Peru SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "CHIQUIC1.LMA",
+    "name": "Empresa Agraria Chiquitoy SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "CHUBSGC1.LMA",
+    "name": "Chubb Peru SA Compania de Seguros y Reaseguros",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/chubb.svg"
+  },
+  {
+    "symbol": "CHUCARC1.LMA",
+    "name": "Central Azucarera Chucarapi Pampa Blanca SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "CITIBKC1.LMA",
+    "name": "Citibank del Peru SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "CMAQPC1.LMA",
+    "name": "Caja Municipal de Ahorro y Credito de Arequipa SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "CMG.LMA",
+    "name": "Chipotle Mexican Grill, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/chipotle-mexican-grill.svg"
+  },
+  {
+    "symbol": "COCESUC1.LMA",
+    "name": "Corporacion Cervesur SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/corporacion-cervesur-sa.svg"
+  },
+  {
+    "symbol": "COCESUI1.LMA",
+    "name": "Corporacion Cervesur SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/corporacion-cervesur-sa.svg"
+  },
+  {
+    "symbol": "COFIDCC1.LMA",
+    "name": "Corporacion Financiera de Desarrollo SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "COIN.LMA",
+    "name": "Coinbase Global, Inc. Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/coinbase.svg"
+  },
+  {
+    "symbol": "COLCAC1.LMA",
+    "name": "COLCA CAPITAL FTE SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "COMPARC1.LMA",
+    "name": "Compartamos Banco SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "CONCESI1.LMA",
+    "name": "Consorcio Cementero del Sur SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/consorcio-cementero-del-sur-sa.svg"
+  },
+  {
+    "symbol": "COP.LMA",
+    "name": "ConocoPhillips",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/conocophillips.svg"
+  },
+  {
+    "symbol": "CORAREC1.LMA",
+    "name": "Corporacion Aceros Arequipa SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/corporacion-aceros-arequipa-sa.svg"
+  },
+  {
+    "symbol": "CORAREI1.LMA",
+    "name": "Corporacion Aceros Arequipa SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/corporacion-aceros-arequipa-sa.svg"
+  },
+  {
+    "symbol": "COST.LMA",
+    "name": "Costco Wholesale Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/costco-wholesale.svg"
+  },
+  {
+    "symbol": "CPAC.LMA",
+    "name": "Cementos Pacasmayo SAA Sponsored ADR",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/cementos-pacasmayo-saa.svg"
+  },
+  {
+    "symbol": "CPACASC1.LMA",
+    "name": "Cementos Pacasmayo SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/cementos-pacasmayo-saa.svg"
+  },
+  {
+    "symbol": "CPACASI1.LMA",
+    "name": "Cementos Pacasmayo SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/cementos-pacasmayo-saa.svg"
+  },
+  {
+    "symbol": "CRANDEC1.LMA",
+    "name": "Caja Rural de Ahorro y Credito Los Andes SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "CRECAPC1.LMA",
+    "name": "Credicorp Capital Peru SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/credicorp-capital-peru-saa.svg"
+  },
+  {
+    "symbol": "CRECERC1.LMA",
+    "name": "Crecer Seguros SA Compania de Seguros",
+    "market": "BVL"
+  },
+  {
+    "symbol": "CREDITC1.LMA",
+    "name": "Banco de Credito del Peru SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-de-credito-del-peru.svg"
+  },
+  {
+    "symbol": "CRETEXC1.LMA",
+    "name": "CREDITEX SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/creditex-saa.svg"
+  },
+  {
+    "symbol": "CRETEXI1.LMA",
+    "name": "Creditex SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/creditex-saa.svg"
+  },
+  {
+    "symbol": "CRM.LMA",
+    "name": "Salesforce, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/salesforce.svg"
+  },
+  {
+    "symbol": "CRWD.LMA",
+    "name": "CrowdStrike Holdings, Inc. Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/crowdstrike.svg"
+  },
+  {
+    "symbol": "CSCO.LMA",
+    "name": "Cisco Systems, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/cisco.svg"
+  },
+  {
+    "symbol": "CSPSEALD.LMA",
+    "name": "Sociedad Electrica Del Sur Oeste SA SEAL Rights 2026-10.04.26 For Shares",
+    "market": "BVL"
+  },
+  {
+    "symbol": "CVERDEC1.LMA",
+    "name": "Sociedad Minera Cerro Verde SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/sociedad-minera-cerro-verde-sa.svg"
+  },
+  {
+    "symbol": "CVS.LMA",
+    "name": "CVS Health Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/cvs-health.svg"
+  },
+  {
+    "symbol": "CVX.LMA",
+    "name": "Chevron Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/chevron.svg"
+  },
+  {
+    "symbol": "DAL.LMA",
+    "name": "Delta Air Lines, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-air-lines.svg"
+  },
+  {
+    "symbol": "DELL.LMA",
+    "name": "Dell Technologies, Inc. Class C",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/dell.svg"
+  },
+  {
+    "symbol": "DESXXIC1.LMA",
+    "name": "Desarrollos Siglo XXI SAA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "DIS.LMA",
+    "name": "Walt Disney Company",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/walt-disney.svg"
+  },
+  {
+    "symbol": "DUNENC1.LMA",
+    "name": "Dunas Energia SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "ECU.LMA",
+    "name": "Element 29 Resources, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/element-29-resources.svg"
+  },
+  {
+    "symbol": "EDUNASC1.LMA",
+    "name": "Electro Dunas SAA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "EFECTIC1.LMA",
+    "name": "Financiera Efectiva SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "EGEPIBC1.LMA",
+    "name": "Enel Generacion Piura SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/enel.svg"
+  },
+  {
+    "symbol": "EGESUBC1.LMA",
+    "name": "Empresa de Generacion Electrica del Sur SA - EGESUR",
+    "market": "BVL"
+  },
+  {
+    "symbol": "ELCOMEI1.LMA",
+    "name": "Empresa Editora El Comercio SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/empresa-editora-el-comercio.svg"
+  },
+  {
+    "symbol": "ELECPBC1.LMA",
+    "name": "Electroperu SA Class B",
+    "market": "BVL"
+  },
+  {
+    "symbol": "ELESUDC1.LMA",
+    "name": "Empresa Regional de Servicio Publico de Electricidad S.A. Class D",
+    "market": "BVL"
+  },
+  {
+    "symbol": "ENGIEC1.LMA",
+    "name": "ENGIE Energia Peru SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/engie-energia-del-peru-sa.svg"
+  },
+  {
+    "symbol": "ENPACIC1.LMA",
+    "name": "Energia del Pacifico SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/energia-del-pacifico-sa.svg"
+  },
+  {
+    "symbol": "ENPACII1.LMA",
+    "name": "Energia del Pacifico SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/energia-del-pacifico-sa.svg"
+  },
+  {
+    "symbol": "ENPH.LMA",
+    "name": "Enphase Energy, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/enphase-energy.svg"
+  },
+  {
+    "symbol": "EPUNOBC1.LMA",
+    "name": "Electro Puno SAA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "ESUREBC1.LMA",
+    "name": "Electro Sur Este SAA Class B",
+    "market": "BVL"
+  },
+  {
+    "symbol": "ETERNII1.LMA",
+    "name": "Fabrica Peruana Eternit SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/fabrica-peruana-eternit.svg"
+  },
+  {
+    "symbol": "ETN.LMA",
+    "name": "Eaton Corp. Plc",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/eaton.svg"
+  },
+  {
+    "symbol": "ETNAI1.LMA",
+    "name": "Fabrica Nacional de Acumuladores ETNA SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/fabrica-nacional-de-acumuladores-sa.svg"
+  },
+  {
+    "symbol": "EXALMC1.LMA",
+    "name": "Pesquera Exalmar SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/pesquera-exalmar-sa.svg"
+  },
+  {
+    "symbol": "F.LMA",
+    "name": "Ford Motor Company",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/ford.svg"
+  },
+  {
+    "symbol": "FANUPEC1.LMA",
+    "name": "Sociedad Agricola Fanupe Vichayal Sa FANUPE",
+    "market": "BVL"
+  },
+  {
+    "symbol": "FCONFIC1.LMA",
+    "name": "Financiera Confianza SAA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "FCREDIC1.LMA",
+    "name": "Financiera Credinka SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "FCX.LMA",
+    "name": "Freeport-McMoRan, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/freeport-mcmoran.svg"
+  },
+  {
+    "symbol": "FDX.LMA",
+    "name": "FedEx Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/fedex.svg"
+  },
+  {
+    "symbol": "FERREYC1.LMA",
+    "name": "Ferreycorp SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/ferreycorp-saa.svg"
+  },
+  {
+    "symbol": "FILAMEI1.LMA",
+    "name": "Filamentos Industriales SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/filamentos-industriales.svg"
+  },
+  {
+    "symbol": "FINTFCC1.LMA",
+    "name": "Financiera TFC SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "FMVCLATC.LMA",
+    "name": "VC Bonos Corporativos LATAM I FMIV",
+    "market": "BVL"
+  },
+  {
+    "symbol": "FOSPACC1.LMA",
+    "name": "Fosfatos Del Pacifico SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "FOSSALC1.LMA",
+    "name": "Fossal SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/fossal-saa.svg"
+  },
+  {
+    "symbol": "FOSSALI1.LMA",
+    "name": "Fossal SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/fossal-saa.svg"
+  },
+  {
+    "symbol": "FPROEMC1.LMA",
+    "name": "Financiera ProEmpresa SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "FPROEMP1.LMA",
+    "name": "Financiera ProEmpresa SA Pfd",
+    "market": "BVL"
+  },
+  {
+    "symbol": "FUTURAC1.LMA",
+    "name": "Futura Consorcio Inmobiliario SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/futura-consorcio-inmobiliario-sa.svg"
+  },
+  {
+    "symbol": "FUTURAI1.LMA",
+    "name": "Futura Consorcio Inmobiliario SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/futura-consorcio-inmobiliario-sa.svg"
+  },
+  {
+    "symbol": "GANSALC1.LMA",
+    "name": "Empresa Agricola Ganadera Salamanca SA SALAMANCA GANSAL",
+    "market": "BVL"
+  },
+  {
+    "symbol": "GBVLAC1.LMA",
+    "name": "Grupo BVL SAA Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-bvl-saa.svg"
+  },
+  {
+    "symbol": "GBVLBC1.LMA",
+    "name": "Grupo BVL SAA Class B",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-bvl-saa.svg"
+  },
+  {
+    "symbol": "GE.LMA",
+    "name": "GE Aerospace",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/ge-aerospace.svg"
+  },
+  {
+    "symbol": "GILD.LMA",
+    "name": "Gilead Sciences, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/gilead.svg"
+  },
+  {
+    "symbol": "GLORIAI1.LMA",
+    "name": "Leche Gloria SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/leche-gloria-sa.svg"
+  },
+  {
+    "symbol": "GM.LMA",
+    "name": "General Motors Company",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/general-motors.svg"
+  },
+  {
+    "symbol": "GNBC1.LMA",
+    "name": "Banco GNB Peru SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "GOOG.LMA",
+    "name": "Alphabet Inc. Class C",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/alphabet.svg"
+  },
+  {
+    "symbol": "GOOGL.LMA",
+    "name": "Alphabet Inc. Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/alphabet.svg"
+  },
+  {
+    "symbol": "GRHOLDC1.LMA",
+    "name": "GR Holding SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/gr-sa.svg"
+  },
+  {
+    "symbol": "GS.LMA",
+    "name": "Goldman Sachs Group, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/golden-sachs-etf-trust-goldman.svg"
+  },
+  {
+    "symbol": "HABITAC1.LMA",
+    "name": "AFP Habitat SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "HBM.LMA",
+    "name": "Hudbay Minerals Inc",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/hudbay-minerals.svg"
+  },
+  {
+    "symbol": "HD.LMA",
+    "name": "Home Depot, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/home-depot.svg"
+  },
+  {
+    "symbol": "HERMESC1.LMA",
+    "name": "Hermes Transportes Blindados SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/hermes-transportes-blindados-sa.svg"
+  },
+  {
+    "symbol": "HIDRA2C1.LMA",
+    "name": "Empresa Regional de Servicio Publico de Electricidad Electronorte Medio SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/empresa-regional-electronorte-medio.svg"
+  },
+  {
+    "symbol": "HIDROSI1.LMA",
+    "name": "Hidrostal SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/hidrostal-sa.svg"
+  },
+  {
+    "symbol": "HOOD.LMA",
+    "name": "Robinhood Markets, Inc. Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/robinhood.svg"
+  },
+  {
+    "symbol": "HPE.LMA",
+    "name": "Hewlett Packard Enterprise Co.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/hewlett-packard-enterprise.svg"
+  },
+  {
+    "symbol": "IBKR.LMA",
+    "name": "Interactive Brokers Group, Inc. Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/interactive-brokers-group.svg"
+  },
+  {
+    "symbol": "IBM.LMA",
+    "name": "International Business Machines Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/international-bus-mach.svg"
+  },
+  {
+    "symbol": "ICBCC1.LMA",
+    "name": "ICBC Peru Bank SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "IEQSAI1.LMA",
+    "name": "Industrias Electro Quimicas SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "IFS.LMA",
+    "name": "Intercorp Financial Services Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/intercorp-financial-services.svg"
+  },
+  {
+    "symbol": "IIDEC1.LMA",
+    "name": "Inmobiliaria Ide SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/inmobiliaria-ide-sa.svg"
+  },
+  {
+    "symbol": "IIDEI1.LMA",
+    "name": "Inmobiliaria Ide SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/inmobiliaria-ide-sa.svg"
+  },
+  {
+    "symbol": "INCRAIC1.LMA",
+    "name": "Inca Rail SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "INDECOI1.LMA",
+    "name": "Indeco SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/indeco-sa.svg"
+  },
+  {
+    "symbol": "INFIXPC1.LMA",
+    "name": "INFINANCE XP SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "INGENIC1.LMA",
+    "name": "Empresa Azucarera El Ingenio SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "INRETC1.LMA",
+    "name": "InRetail Peru Corp.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/inretail-peru.svg"
+  },
+  {
+    "symbol": "INSURC1.LMA",
+    "name": "Insur SA Compania de Seguros",
+    "market": "BVL"
+  },
+  {
+    "symbol": "INTC.LMA",
+    "name": "Intel Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/intel.svg"
+  },
+  {
+    "symbol": "INTEGRC1.LMA",
+    "name": "AFP Integra SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "INTERBC1.LMA",
+    "name": "Banco Internacional del Peru SAA Interbank",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-internacional-del-peru-intbnc.svg"
+  },
+  {
+    "symbol": "INTPEBC1.LMA",
+    "name": "Integratel Peru S.A.A Class B",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/telefonica.svg"
+  },
+  {
+    "symbol": "INTPECC1.LMA",
+    "name": "Integratel Peru S.A.A Class C",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/telefonica.svg"
+  },
+  {
+    "symbol": "INTSEGC1.LMA",
+    "name": "Interseguro Cia de Seguros SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "INVCENC1.LMA",
+    "name": "Inversiones Centenario SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/inversiones-centenario.svg"
+  },
+  {
+    "symbol": "INVCO2C1.LMA",
+    "name": "Inversiones Corporativas A1 SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "INVCORI1.LMA",
+    "name": "Inversiones Corporativas A1 SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/inversiones-corporativas-a1-sa.svg"
+  },
+  {
+    "symbol": "INVERPC1.LMA",
+    "name": "Inverperu Inmobiliaria SAA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "INVERTC1.LMA",
+    "name": "Inversiones en Turismo SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "INVFALC1.LMA",
+    "name": "Inverfal Peru SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/inverfal-peru-saa.svg"
+  },
+  {
+    "symbol": "IPCHAC1.LMA",
+    "name": "Inversiones Portuarias Chancay SAA Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/inversiones-portuarias-chancay-sa.svg"
+  },
+  {
+    "symbol": "IPCHBC1.LMA",
+    "name": "Inversiones Portuarias Chancay SAA Preffered Registered Shs B",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/inversiones-portuarias-chancay-sa.svg"
+  },
+  {
+    "symbol": "ISICC1.LMA",
+    "name": "Inmobiliaria SIC SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/inmobiliaria-sic-sa.svg"
+  },
+  {
+    "symbol": "JNJ.LMA",
+    "name": "Johnson & Johnson",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/johnson-and-johnson.svg"
+  },
+  {
+    "symbol": "JPM.LMA",
+    "name": "JPMorgan Chase & Co.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/jpmorgan-chase.svg"
+  },
+  {
+    "symbol": "JPMORGC1.LMA",
+    "name": "J.P. Morgan Bank (Peru)",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/jpmorgan-chase.svg"
+  },
+  {
+    "symbol": "K.LMA",
+    "name": "Kinross Gold Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/kinross-gold.svg"
+  },
+  {
+    "symbol": "KHC.LMA",
+    "name": "Kraft Heinz Company",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/kraft-heinz.svg"
+  },
+  {
+    "symbol": "KO.LMA",
+    "name": "Coca-Cola Company",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/coca-cola.svg"
+  },
+  {
+    "symbol": "LAIVEBC1.LMA",
+    "name": "Laive SA Class B",
+    "market": "BVL"
+  },
+  {
+    "symbol": "LAREDOC1.LMA",
+    "name": "Agroindustrial Laredo SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/agroindustrial-laredo-saa.svg"
+  },
+  {
+    "symbol": "LIBSEGC1.LMA",
+    "name": "Liberty Seguros SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "LLY.LMA",
+    "name": "Eli Lilly and Company",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/eli-lilly.svg"
+  },
+  {
+    "symbol": "LUISAI1.LMA",
+    "name": "Compania Minera Santa Luisa SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/compania-minera-santa-luisa-sa.svg"
+  },
+  {
+    "symbol": "LUSURC1.LMA",
+    "name": "Luz del Sur SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/luz-del-sur-sa.svg"
+  },
+  {
+    "symbol": "MA.LMA",
+    "name": "Mastercard Incorporated Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/mastercard.svg"
+  },
+  {
+    "symbol": "MAPFSGC1.LMA",
+    "name": "Mapfre Peru Compania de Seguros y Reaseguros",
+    "market": "BVL"
+  },
+  {
+    "symbol": "MCD.LMA",
+    "name": "McDonald's Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/mcdonalds.svg"
+  },
+  {
+    "symbol": "MELI.LMA",
+    "name": "MercadoLibre, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/mercadolibre.svg"
+  },
+  {
+    "symbol": "META.LMA",
+    "name": "Meta Platforms Inc Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/meta-platforms.svg"
+  },
+  {
+    "symbol": "MIBANC1.LMA",
+    "name": "Mibanco-Banco De La Micro Empresa SA Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/mibanco-banco-la-micro-empresa-sa.svg"
+  },
+  {
+    "symbol": "MICHEI1.LMA",
+    "name": "Michell y Cia SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/michell-industrial.svg"
+  },
+  {
+    "symbol": "MINCORC1.LMA",
+    "name": "Sociedad Minera Corona SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/socidad-minera-corona-sa.svg"
+  },
+  {
+    "symbol": "MINCORI1.LMA",
+    "name": "Sociedad Minera Corona SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/socidad-minera-corona-sa.svg"
+  },
+  {
+    "symbol": "MINSURI1.LMA",
+    "name": "Minsur SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/minsur-sa.svg"
+  },
+  {
+    "symbol": "MIRL.LMA",
+    "name": "Minera IRL Limited",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/minera-irl-ltd.svg"
+  },
+  {
+    "symbol": "MITSUFC1.LMA",
+    "name": "Mitsui Auto Finance Peru SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "MMM.LMA",
+    "name": "3M Company",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/3m.svg"
+  },
+  {
+    "symbol": "MOROCOC1.LMA",
+    "name": "Compania Minera San Ignacio de Morococha SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/cia-minera-san-ignacio-de-morococha.svg"
+  },
+  {
+    "symbol": "MOROCOI1.LMA",
+    "name": "Compania Minera San Ignacio de Morococha SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/cia-minera-san-ignacio-de-morococha.svg"
+  },
+  {
+    "symbol": "MRK.LMA",
+    "name": "Merck & Co., Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/merck-and-co.svg"
+  },
+  {
+    "symbol": "MRNA.LMA",
+    "name": "Moderna, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/moderna.svg"
+  },
+  {
+    "symbol": "MS.LMA",
+    "name": "Morgan Stanley",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/morgan-stanley.svg"
+  },
+  {
+    "symbol": "MSFT.LMA",
+    "name": "Microsoft Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/microsoft.svg"
+  },
+  {
+    "symbol": "MSTR.LMA",
+    "name": "Strategy Inc Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/strategy-cad-hedged-cibc-cdr.svg"
+  },
+  {
+    "symbol": "MU.LMA",
+    "name": "Micron Technology, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/micron-technology.svg"
+  },
+  {
+    "symbol": "NEE.LMA",
+    "name": "NextEra Energy, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/nextera-energy.svg"
+  },
+  {
+    "symbol": "NEM.LMA",
+    "name": "Newmont Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/newmont.svg"
+  },
+  {
+    "symbol": "NEXAPEC1.LMA",
+    "name": "Nexa Resources Peru SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/nexa-resources-peru-saa.svg"
+  },
+  {
+    "symbol": "NEXAPEI1.LMA",
+    "name": "Nexa Resources Peru SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/nexa-resources-peru-saa.svg"
+  },
+  {
+    "symbol": "NFLX.LMA",
+    "name": "Netflix, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/netflix.svg"
+  },
+  {
+    "symbol": "NKE.LMA",
+    "name": "NIKE, Inc. Class B",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/nike.svg"
+  },
+  {
+    "symbol": "NUAM.LMA",
+    "name": "Holding Bursatil Regional SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/hbr-sa-bursatil-regional-sa.svg"
+  },
+  {
+    "symbol": "NVDA.LMA",
+    "name": "NVIDIA Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/nvidia.svg"
+  },
+  {
+    "symbol": "ON.LMA",
+    "name": "ON Semiconductor Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/on-semiconductor.svg"
+  },
+  {
+    "symbol": "ORCL.LMA",
+    "name": "Oracle Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/oracle.svg"
+  },
+  {
+    "symbol": "ORYGENC1.LMA",
+    "name": "Orygen Peru SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/enel.svg"
+  },
+  {
+    "symbol": "OXY.LMA",
+    "name": "Occidental Petroleum Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/occidental-petroleum.svg"
+  },
+  {
+    "symbol": "PACIFIC1.LMA",
+    "name": "Pacifico Compania de Seguros y Reaseguros SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/pacifico-cia-seguros-y-reaseguros.svg"
+  },
+  {
+    "symbol": "PALOALC1.LMA",
+    "name": "AI Inversiones Palo Alto SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "PANW.LMA",
+    "name": "Palo Alto Networks, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/palo-alto-networks.svg"
+  },
+  {
+    "symbol": "PARAMOC1.LMA",
+    "name": "Agro Industrial Paramonga SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/agroindustrial-de-paramonga.svg"
+  },
+  {
+    "symbol": "PDD.LMA",
+    "name": "PDD Holdings Inc. Sponsored ADR Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/pinduoduo.svg"
+  },
+  {
+    "symbol": "PEP.LMA",
+    "name": "PepsiCo, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/pepsico.svg"
+  },
+  {
+    "symbol": "PERENAC1.LMA",
+    "name": "Peruana de Energia SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/peruana-de-energia-sa.svg"
+  },
+  {
+    "symbol": "PERENBC1.LMA",
+    "name": "Peruana de Energia SAA PREF SHS B",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/peruana-de-energia-sa.svg"
+  },
+  {
+    "symbol": "PERUBAI1.LMA",
+    "name": "Perubar SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/perubar.svg"
+  },
+  {
+    "symbol": "PETROBC1.LMA",
+    "name": "Petroleos Del Peru - Petroperu SA Class B",
+    "market": "BVL"
+  },
+  {
+    "symbol": "PFE.LMA",
+    "name": "Pfizer Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/pfizer.svg"
+  },
+  {
+    "symbol": "PG.LMA",
+    "name": "Procter & Gamble Company",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/procter-and-gamble.svg"
+  },
+  {
+    "symbol": "PHTBC1.LMA",
+    "name": "Peru Holding de Turismo SAA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "PIURAC1.LMA",
+    "name": "Industria Textil Piura SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "PIURAI1.LMA",
+    "name": "Industria Textil Piura SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "PLTR.LMA",
+    "name": "Palantir Technologies Inc. Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/palantir.svg"
+  },
+  {
+    "symbol": "PLUZENC1.LMA",
+    "name": "Pluz Energia Peru SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/enel.svg"
+  },
+  {
+    "symbol": "PML.LMA",
+    "name": "Panoro Minerals Ltd.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/panoro-minerals-limited.svg"
+  },
+  {
+    "symbol": "PODERC1.LMA",
+    "name": "Compania Minera Poderosa SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/compania-minera-poderosa-sa.svg"
+  },
+  {
+    "symbol": "POMALCC1.LMA",
+    "name": "Empresa Agroindustrial Pomalca SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/empresa-agroindustrial-pomalca-sa.svg"
+  },
+  {
+    "symbol": "PORTAC1.LMA",
+    "name": "Los Portales SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "POSITIC1.LMA",
+    "name": "La Positiva Seguros y Reaseguros SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/la-positiva-seguros-y-reaseguros.svg"
+  },
+  {
+    "symbol": "POSITVC1.LMA",
+    "name": "La Positiva Vida Seguros y Reaseguros SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "PPX.LMA",
+    "name": "PPX Mining Corp.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/ppx-mining.svg"
+  },
+  {
+    "symbol": "PRIMAC1.LMA",
+    "name": "Prima AFP SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "PROFUTC1.LMA",
+    "name": "Profuturo AFP SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "PROTECC1.LMA",
+    "name": "Protecta SA Compania de Seguros",
+    "market": "BVL"
+  },
+  {
+    "symbol": "PSKY.LMA",
+    "name": "Paramount Skydance Corporation Class B",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/viacomcbs.svg"
+  },
+  {
+    "symbol": "PUCALAC1.LMA",
+    "name": "Agro Pucala SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/agro-pucala-saa.svg"
+  },
+  {
+    "symbol": "PVTBC1.LMA",
+    "name": "PVT Portafolio De Valores SA Class B",
+    "market": "BVL"
+  },
+  {
+    "symbol": "PYPL.LMA",
+    "name": "PayPal Holdings, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/paypal.svg"
+  },
+  {
+    "symbol": "QAPAQC1.LMA",
+    "name": "Financiera Qapaq SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "QCOM.LMA",
+    "name": "QUALCOMM Incorporated",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/qualcomm.svg"
+  },
+  {
+    "symbol": "QUALSGC1.LMA",
+    "name": "Qualitas Compania de Seguros SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "QUIMPAC1.LMA",
+    "name": "Quimpac SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/quimpac-sa.svg"
+  },
+  {
+    "symbol": "QUIMPAI1.LMA",
+    "name": "Quimpac SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/quimpac-sa.svg"
+  },
+  {
+    "symbol": "RBCAC1.LMA",
+    "name": "Red Bicolor de Comunicaciones SAA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "RBCBC1.LMA",
+    "name": "Red Bicolor de Comunicaciones SAA Class B",
+    "market": "BVL"
+  },
+  {
+    "symbol": "RECORDI1.LMA",
+    "name": "Manufactura de Metales y Aluminio Record SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/manufactura-de-metales-alum-record.svg"
+  },
+  {
+    "symbol": "REG.LMA",
+    "name": "Regulus Resources Inc",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/regulus-resources.svg"
+  },
+  {
+    "symbol": "REGN.LMA",
+    "name": "Regeneron Pharmaceuticals, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/regeneron-pharmaceuticals.svg"
+  },
+  {
+    "symbol": "RIMSEGC1.LMA",
+    "name": "Rimac Seguros y Reaseguros",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/rimac-seguros-y-reaseguros.svg"
+  },
+  {
+    "symbol": "RIO.LMA",
+    "name": "RIO2 Limited",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/rio2.svg"
+  },
+  {
+    "symbol": "SAGAC1.LMA",
+    "name": "Saga Falabella SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/falabella.svg"
+  },
+  {
+    "symbol": "SANC1.LMA",
+    "name": "Banco Santander Peru SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/santander.svg"
+  },
+  {
+    "symbol": "SANFINC1.LMA",
+    "name": "SANFINC1",
+    "market": "BVL"
+  },
+  {
+    "symbol": "SANGABC1.LMA",
+    "name": "Empresa de Generacion Electrica San Gaban SA Class B",
+    "market": "BVL"
+  },
+  {
+    "symbol": "SBUX.LMA",
+    "name": "Starbucks Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/starbucks.svg"
+  },
+  {
+    "symbol": "SCCO.LMA",
+    "name": "Southern Copper Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/southern-copper.svg"
+  },
+  {
+    "symbol": "SCOTIAC1.LMA",
+    "name": "Scotiabank Peru SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/scotiabank-peru-saa.svg"
+  },
+  {
+    "symbol": "SEALDC1.LMA",
+    "name": "Sociedad Electrica del Sur Oeste SA Class D",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/sociedad-electrica-del-sur-oeste-sa.svg"
+  },
+  {
+    "symbol": "SEDAPBC1.LMA",
+    "name": "Servicio de Agua Potable y Alcantarillado de Lima SA Class B",
+    "market": "BVL"
+  },
+  {
+    "symbol": "SHOP.LMA",
+    "name": "Shopify, Inc. Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/shopify.svg"
+  },
+  {
+    "symbol": "SHOUGEC1.LMA",
+    "name": "Shougang Generacion Electrica SAA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "SHPC1.LMA",
+    "name": "Shougang Hierro Peru Saa",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/shougang-hierro-peru.svg"
+  },
+  {
+    "symbol": "SIDERC1.LMA",
+    "name": "Empresa Siderurgica del Peru SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/empresa-siderurgica-del-peru-saa.svg"
+  },
+  {
+    "symbol": "SLB.LMA",
+    "name": "SLB Limited",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/schlumberger.svg"
+  },
+  {
+    "symbol": "SMCI.LMA",
+    "name": "Super Micro Computer, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/super-micro-computer.svg"
+  },
+  {
+    "symbol": "SNCRISC1.LMA",
+    "name": "Textil San Cristobal SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "SNJACIC1.LMA",
+    "name": "Agroindustrias San Jacinto SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/agroindustrias-san-jacinto-sociedad.svg"
+  },
+  {
+    "symbol": "SNJUANC1.LMA",
+    "name": "Cerveceria San Juan SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/cerveceria-san-juan-sa.svg"
+  },
+  {
+    "symbol": "SNJUANI1.LMA",
+    "name": "Cerveceria San Juan SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/cerveceria-san-juan-sa.svg"
+  },
+  {
+    "symbol": "SOLUCIC1.LMA",
+    "name": "Solucion Empresa Administradora Hipotecaria SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "SPCCPI1.LMA",
+    "name": "Southern Peru Copper Corp.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/southern-peru-copper-sucursal.svg"
+  },
+  {
+    "symbol": "SPCCPI2.LMA",
+    "name": "Southern Peru Copper Corp. Sucursal del Peru",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/southern-peru-copper-sucursal.svg"
+  },
+  {
+    "symbol": "STG.LMA",
+    "name": "STRACON Group Holding Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/stracon.svg"
+  },
+  {
+    "symbol": "T.LMA",
+    "name": "AT&T Inc",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/at-and-t.svg"
+  },
+  {
+    "symbol": "TEF.LMA",
+    "name": "Telefonica SA Sponsored ADR",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/telefonica.svg"
+  },
+  {
+    "symbol": "TELCAAC1.LMA",
+    "name": "Telecable Siglo 21 SAA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "TELCABC1.LMA",
+    "name": "Telecable Siglo 21 SAA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "TGT.LMA",
+    "name": "Target Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/target.svg"
+  },
+  {
+    "symbol": "TMO.LMA",
+    "name": "Thermo Fisher Scientific Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/thermo-fisher-scientific.svg"
+  },
+  {
+    "symbol": "TMUS.LMA",
+    "name": "T-Mobile US, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/t-mobile.svg"
+  },
+  {
+    "symbol": "TOTALSC1.LMA",
+    "name": "TOTAL Servicios Financieros Empresa de Creditos",
+    "market": "BVL"
+  },
+  {
+    "symbol": "TRADIC1.LMA",
+    "name": "Tradi SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "TSLA.LMA",
+    "name": "Tesla, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/tesla.svg"
+  },
+  {
+    "symbol": "TTD.LMA",
+    "name": "Trade Desk, Inc. Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/the-trade-desk.svg"
+  },
+  {
+    "symbol": "TUMANC1.LMA",
+    "name": "Empresa Agroindustrial Tuman SAA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/empresa-agroindustrial-tuman-sa.svg"
+  },
+  {
+    "symbol": "UAL.LMA",
+    "name": "United Airlines Holdings, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/united-airlines.svg"
+  },
+  {
+    "symbol": "UBER.LMA",
+    "name": "Uber Technologies, Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/uber.svg"
+  },
+  {
+    "symbol": "UNACEMC1.LMA",
+    "name": "UNACEM Corp. Sociedad Anonima Abierta",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/union-andina-de-cementos-s-a-a.svg"
+  },
+  {
+    "symbol": "UNH.LMA",
+    "name": "UnitedHealth Group Incorporated",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/unitedhealth.svg"
+  },
+  {
+    "symbol": "UNITEXC1.LMA",
+    "name": "Compania Universal Textil SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/compania-universal-textil-sa.svg"
+  },
+  {
+    "symbol": "UNITEXI1.LMA",
+    "name": "Compania Universal Textil SA",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/compania-universal-textil-sa.svg"
+  },
+  {
+    "symbol": "UPS.LMA",
+    "name": "United Parcel Service, Inc. Class B",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/united-parcel.svg"
+  },
+  {
+    "symbol": "V.LMA",
+    "name": "Visa Inc. Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/visa.svg"
+  },
+  {
+    "symbol": "VIVSEGC1.LMA",
+    "name": "Vivir Seguros Cia de Seguros de Vida SA",
+    "market": "BVL"
+  },
+  {
+    "symbol": "VOLCAAC1.LMA",
+    "name": "Volcan Compania Minera S.A.A. Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/volcan-compania-minera.svg"
+  },
+  {
+    "symbol": "VOLCABC1.LMA",
+    "name": "Volcan Compania Minera S.A.A. Class B",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/volcan-compania-minera.svg"
+  },
+  {
+    "symbol": "VZ.LMA",
+    "name": "Verizon Communications Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/verizon.svg"
+  },
+  {
+    "symbol": "WFC.LMA",
+    "name": "Wells Fargo & Company",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/wells-fargo.svg"
+  },
+  {
+    "symbol": "WMT.LMA",
+    "name": "Walmart Inc.",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/walmart.svg"
+  },
+  {
+    "symbol": "WPM.LMA",
+    "name": "Wheaton Precious Metals Corp",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/wheaton-precious-metals.svg"
+  },
+  {
+    "symbol": "XOM.LMA",
+    "name": "Exxon Mobil Corporation",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/exxon.svg"
+  },
+  {
+    "symbol": "XYZ.LMA",
+    "name": "Block, Inc. Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/block.svg"
+  },
+  {
+    "symbol": "ZM.LMA",
+    "name": "Zoom Communications, Inc. Class A",
+    "market": "BVL",
+    "image": "https://s3-symbol-logo.tradingview.com/zoom-video-communications.svg"
+  }
+]

@@ -1,0 +1,2554 @@
+import { randomUUID, createHash } from "crypto";
+import { pool } from "@workspace/db";
+import {
+  type MarketDailyCandle,
+  type StockQuote,
+  type TradeSignal,
+} from "./stock-data";
+import { logger } from "./logger";
+import type { SignalScope } from "./signal-backend";
+
+export type OccurrenceOrigin = "historical_backfill" | "live_runtime";
+
+export interface ContextReplayRequest {
+  candleTable?: string;
+  batchSize?: number;
+  market?: string;
+  venue?: string;
+  asset?: string;
+  timeframe?: string;
+  origin?: OccurrenceOrigin;
+  ingestionSource?: string;
+}
+
+export interface ContextReplayResult {
+  jobId: string;
+  status: "completed" | "failed" | "skipped";
+  processedRows: number;
+  emittedOccurrences: number;
+  message?: string;
+}
+
+export interface MarketMonthlyVolatilityResult {
+  market: string;
+  venue: string;
+  candlesProcessed: number;
+  assetMonthsSaved: number;
+  monthsSaved: number;
+}
+
+type MarketContextInput = {
+  timestampUtc: string;
+  occurrenceOrigin: OccurrenceOrigin;
+  market: string;
+  venue: string;
+  asset: string;
+  timeframe: string;
+  price: number;
+  open?: number;
+  high?: number;
+  low?: number;
+  close?: number;
+  volume?: number;
+  history?: number[];
+  quote?: StockQuote;
+  ingestionSource: string;
+  emittedBy: string;
+};
+
+type DiagnosedMarketContext = {
+  occurrenceId: string;
+  previousOccurrenceId: string | null;
+  timestampUtc: string;
+  occurrenceOrigin: OccurrenceOrigin;
+  market: string;
+  venue: string;
+  asset: string;
+  timeframe: string;
+  regimeState: string;
+  regimeConfidence: number;
+  trendQuality: number;
+  breadth: number;
+  participation: number;
+  volatilityPressure: number;
+  regimeStability: number;
+  exposureDurability: number;
+  holdingQuality: number;
+  calibration: number;
+  riskPressure: number;
+  allocationPosture: string;
+  capitalDeployed: number;
+  availableRiskBudget: number;
+  setupQualityDistribution: Record<string, number>;
+  signalDistribution: Record<TradeSignal, number>;
+  marketInterpretationLabels: string[];
+  stateTransitionLabels: string[];
+  stateHash: string;
+  transitionType: string;
+  transitionMagnitude: number;
+  emittedReason: string;
+  emittedBy: string;
+  ingestionSource: string;
+  signalId?: string | null;
+};
+
+type OccurrenceRow = {
+  occurrence_id: string;
+  state_hash: string;
+  regime_state: string;
+  allocation_posture: string;
+  trend_quality: number;
+  breadth: number;
+  participation: number;
+  volatility_pressure: number;
+  regime_confidence: number;
+  risk_pressure: number;
+};
+
+type ReplaySourceRow = {
+  timestamp_utc: string | Date;
+  market: string | null;
+  venue: string | null;
+  asset: string | null;
+  timeframe: string | null;
+  open: number | string | null;
+  high: number | string | null;
+  low: number | string | null;
+  close: number | string | null;
+  volume: number | string | null;
+};
+
+type SignalSnapshotHistoryRow = {
+  scope_type: string | null;
+  scope_code: string | null;
+  symbol: string | null;
+  price: number | string | null;
+  change_percent: number | string | null;
+  status: string | null;
+  high_52: number | string | null;
+  low_52: number | string | null;
+  history: unknown;
+  summary: string | null;
+  impact: string | null;
+  cap: string | null;
+  pe_ratio: number | string | null;
+  signal_action: string | null;
+  signal_confidence: number | string | null;
+  signal_source: string | null;
+  signal_emitted_at: string | Date | null;
+  signal_entry_price: number | string | null;
+  signal_return_percent: number | string | null;
+  fetched_at: string | Date | null;
+};
+
+type HistoryBackfillResult = {
+  processedRows: number;
+  emittedOccurrences: number;
+};
+
+const MARKET_OCCURRENCES_TABLE = "market_occurrences";
+const MARKET_STATE_SNAPSHOTS_TABLE = "market_state_snapshots";
+const MARKET_MONTHLY_VOLATILITY_TABLE = "market_monthly_volatility";
+const MARKET_MONTHLY_ASSET_VOLATILITY_TABLE =
+  "market_monthly_asset_volatility";
+const SIGNAL_OCCURRENCES_TABLE = "signal_occurrences";
+const REGIME_TRANSITIONS_TABLE = "regime_transitions";
+const ALLOCATION_STATE_OCCURRENCES_TABLE = "allocation_state_occurrences";
+const HISTORICAL_REPLAY_JOBS_TABLE = "historical_replay_jobs";
+const HISTORICAL_REPLAY_CHECKPOINTS_TABLE = "historical_replay_checkpoints";
+const SIGNAL_SNAPSHOTS_TABLE = "stock_signal_snapshots";
+const DEFAULT_CANDLE_TABLE =
+  process.env.MARKET_CONTEXT_CANDLE_TABLE ?? "market_candles";
+const DEFAULT_REPLAY_BATCH_SIZE = Number(
+  process.env.MARKET_CONTEXT_REPLAY_BATCH_SIZE ?? 1000,
+);
+const MONTHLY_VOLATILITY_LOOKBACK_YEARS = Number(
+  process.env.MARKET_VOLATILITY_LOOKBACK_YEARS ?? 5,
+);
+const HISTORY_POINT_INTERVAL_MS = 24 * 60 * 60 * 1000;
+const MONTH_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+let schemaReady: Promise<void> | null = null;
+let monthlyVolatilitySchemaReady: Promise<void> | null = null;
+let contextPersistenceWarningLogged = false;
+
+function normalizeIdentifierValue(value: string | undefined, fallback: string) {
+  const normalized = value?.trim().toUpperCase();
+  return normalized || fallback;
+}
+
+function normalizeAsset(value: string | undefined) {
+  return normalizeIdentifierValue(value, "UNKNOWN");
+}
+
+function toFiniteNumber(value: unknown, fallback = 0): number {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function toOptionalFiniteNumber(value: unknown): number | undefined {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function clamp(value: number, min = 0, max = 100): number {
+  return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
+}
+
+function mean(values: number[]): number {
+  return values.length
+    ? values.reduce((sum, value) => sum + value, 0) / values.length
+    : 0;
+}
+
+function standardDeviation(values: number[]): number {
+  if (values.length < 2) return 0;
+  const average = mean(values);
+  return Math.sqrt(
+    values.reduce((sum, value) => sum + (value - average) ** 2, 0) /
+      (values.length - 1),
+  );
+}
+
+function utcMonthStart(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+}
+
+function utcMonthStartYearsAgo(years: number): Date {
+  const now = new Date();
+  return new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - years * 12 + 1, 1),
+  );
+}
+
+function monthLabel(monthIndex: number): string {
+  return MONTH_LABELS[monthIndex - 1] ?? "";
+}
+
+function returnsFromHistory(history: number[] | undefined): number[] {
+  const prices = (history ?? []).filter(
+    (price) => Number.isFinite(price) && price > 0,
+  );
+  if (prices.length < 2) return [];
+  return prices
+    .slice(1)
+    .map((price, index) => {
+      const previous = prices[index];
+      return (price - previous) / previous;
+    })
+    .filter((value) => Number.isFinite(value));
+}
+
+function parseHistoryValues(value: unknown): number[] {
+  if (typeof value === "string") {
+    try {
+      return parseHistoryValues(JSON.parse(value));
+    } catch {
+      return [];
+    }
+  }
+
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => toOptionalFiniteNumber(entry))
+    .filter((entry): entry is number => entry !== undefined && entry > 0);
+}
+
+function toIsoString(value: string | Date | null | undefined, fallback: Date) {
+  if (value instanceof Date && Number.isFinite(value.getTime())) {
+    return value.toISOString();
+  }
+
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    if (Number.isFinite(parsed)) return new Date(parsed).toISOString();
+  }
+
+  return fallback.toISOString();
+}
+
+function historicalHistoryTimestamp(
+  endTimestampUtc: string,
+  index: number,
+  total: number,
+) {
+  const end = Date.parse(endTimestampUtc);
+  const offset = Math.max(0, total - index - 1) * HISTORY_POINT_INTERVAL_MS;
+  return new Date(end - offset).toISOString();
+}
+
+function toTradeSignal(value: unknown): TradeSignal {
+  return value === "Buy" || value === "Sell" || value === "Hold"
+    ? value
+    : "Hold";
+}
+
+function toQuoteStatus(value: unknown): StockQuote["status"] {
+  return value === "Stable" ||
+    value === "Rising" ||
+    value === "Watch" ||
+    value === "Dip"
+    ? value
+    : "Stable";
+}
+
+function toSignalSource(value: unknown): StockQuote["signalSource"] {
+  return value === "node-ecu" || value === "heuristic" ? value : "heuristic";
+}
+
+function transitionMagnitude(
+  previous: OccurrenceRow | null,
+  current: DiagnosedMarketContext,
+): number {
+  if (!previous) return 100;
+
+  const numericShift =
+    Math.abs(toFiniteNumber(previous.trend_quality) - current.trendQuality) *
+      0.16 +
+    Math.abs(toFiniteNumber(previous.breadth) - current.breadth) * 0.12 +
+    Math.abs(toFiniteNumber(previous.participation) - current.participation) *
+      0.1 +
+    Math.abs(
+      toFiniteNumber(previous.volatility_pressure) -
+        current.volatilityPressure,
+    ) *
+      0.2 +
+    Math.abs(toFiniteNumber(previous.regime_confidence) - current.regimeConfidence) *
+      0.12 +
+    Math.abs(toFiniteNumber(previous.risk_pressure) - current.riskPressure) *
+      0.14;
+  const regimeShift = previous.regime_state === current.regimeState ? 0 : 18;
+  const postureShift =
+    previous.allocation_posture === current.allocationPosture ? 0 : 14;
+
+  return Number(clamp(numericShift + regimeShift + postureShift).toFixed(4));
+}
+
+function diagnoseRegime(input: MarketContextInput) {
+  const history =
+    input.history?.length
+      ? input.history
+      : [input.open, input.high, input.low, input.close ?? input.price]
+          .map((value) => toFiniteNumber(value, Number.NaN))
+          .filter((value) => Number.isFinite(value));
+  const returns = returnsFromHistory(history);
+  const first = history[0] ?? input.price;
+  const last = history[history.length - 1] ?? input.price;
+  const trendPct = first > 0 ? ((last - first) / first) * 100 : 0;
+  const rangePct =
+    input.high && input.low && last > 0
+      ? ((input.high - input.low) / last) * 100
+      : Math.abs(input.quote?.changePercent ?? trendPct);
+  const volatility = standardDeviation(returns) * 100;
+  const realizedMove = Math.abs(input.quote?.changePercent ?? trendPct);
+  const volatilityPressure = clamp(volatility * 10 + rangePct * 1.6 + realizedMove * 2.2);
+  const trendQuality = clamp(50 + trendPct * 5.4 - volatilityPressure * 0.22);
+  const breadth = clamp(50 + (input.quote?.changePercent ?? trendPct) * 3.2);
+  const participation = clamp(
+    input.volume && input.volume > 0 ? 56 + Math.log10(input.volume) * 4 : 50,
+  );
+  const riskPressure = clamp(volatilityPressure * 0.72 + (trendPct < 0 ? Math.abs(trendPct) * 3.4 : 0));
+  const regimeState =
+    riskPressure >= 76
+      ? "PANIC"
+      : volatilityPressure >= 68
+        ? "HIGH_VOL"
+        : trendPct >= 1.2 && trendQuality >= 58
+          ? "TRENDING"
+          : trendPct <= -1.2
+            ? "MEAN_REVERTING"
+            : volatilityPressure <= 24
+              ? "COMPRESSION"
+              : "LOW_VOL";
+  const regimeConfidence = clamp(
+    Math.abs(trendPct) * 8 +
+      Math.abs(volatilityPressure - 50) * 0.55 +
+      (input.quote?.signalConfidence ?? 50) * 0.35,
+    15,
+    99,
+  );
+  const regimeStability = clamp(100 - volatilityPressure * 0.68 - riskPressure * 0.18);
+  const exposureDurability = clamp(
+    trendQuality * 0.44 + regimeStability * 0.38 + participation * 0.18,
+  );
+  const holdingQuality = clamp(
+    exposureDurability * 0.64 + (input.quote?.signalReturnPercent ?? 0) * 3,
+  );
+  const calibration = clamp(
+    (input.quote?.confidence ?? input.quote?.signalConfidence ?? regimeConfidence) *
+      0.7 +
+      regimeStability * 0.3,
+  );
+  const allocationPosture =
+    riskPressure >= 74
+      ? "DEFENSIVE"
+      : exposureDurability >= 70 && trendQuality >= 62
+        ? "EXPANSION"
+        : exposureDurability <= 38
+          ? "CASH_PRESERVATION"
+          : "BALANCED";
+
+  return {
+    regimeState,
+    regimeConfidence: Number(regimeConfidence.toFixed(4)),
+    trendQuality: Number(trendQuality.toFixed(4)),
+    breadth: Number(breadth.toFixed(4)),
+    participation: Number(participation.toFixed(4)),
+    volatilityPressure: Number(volatilityPressure.toFixed(4)),
+    regimeStability: Number(regimeStability.toFixed(4)),
+    exposureDurability: Number(exposureDurability.toFixed(4)),
+    holdingQuality: Number(holdingQuality.toFixed(4)),
+    calibration: Number(calibration.toFixed(4)),
+    riskPressure: Number(riskPressure.toFixed(4)),
+    allocationPosture,
+  };
+}
+
+function hashState(value: unknown) {
+  return createHash("sha256")
+    .update(JSON.stringify(value))
+    .digest("hex");
+}
+
+function buildStateLabels(
+  previous: OccurrenceRow | null,
+  context: DiagnosedMarketContext,
+): string[] {
+  const labels: string[] = [];
+  if (!previous) labels.push("initial_state");
+  if (previous && previous.regime_state !== context.regimeState) {
+    labels.push("regime_changed");
+  }
+  if (previous && previous.allocation_posture !== context.allocationPosture) {
+    labels.push("allocation_posture_changed");
+  }
+  if (
+    previous &&
+    Math.abs(toFiniteNumber(previous.breadth) - context.breadth) >= 12
+  ) {
+    labels.push("breadth_shift");
+  }
+  if (
+    previous &&
+    Math.abs(toFiniteNumber(previous.participation) - context.participation) >=
+      12
+  ) {
+    labels.push("participation_shift");
+  }
+  if (
+    previous &&
+    Math.abs(
+      toFiniteNumber(previous.volatility_pressure) -
+        context.volatilityPressure,
+    ) >= 10
+  ) {
+    labels.push("volatility_transition");
+  }
+  if (
+    previous &&
+    Math.abs(toFiniteNumber(previous.regime_confidence) - context.regimeConfidence) >=
+      15
+  ) {
+    labels.push("confidence_shift");
+  }
+  return labels.length ? labels : ["state_hash_changed"];
+}
+
+function transitionType(labels: string[]) {
+  if (labels.includes("initial_state")) return "initial";
+  if (labels.includes("regime_changed")) return "regime_change";
+  if (labels.includes("allocation_posture_changed")) return "allocation_change";
+  if (labels.includes("volatility_transition")) return "volatility_transition";
+  if (labels.includes("breadth_shift")) return "breadth_shift";
+  if (labels.includes("participation_shift")) return "participation_shift";
+  if (labels.includes("confidence_shift")) return "confidence_shift";
+  return "state_hash_change";
+}
+
+function quoteToContextInput(
+  scope: SignalScope,
+  quote: StockQuote,
+  origin: OccurrenceOrigin,
+  ingestionSource: string,
+): MarketContextInput {
+  const timestampUtc =
+    quote.signalEmittedAt && Number.isFinite(Date.parse(quote.signalEmittedAt))
+      ? new Date(quote.signalEmittedAt).toISOString()
+      : new Date().toISOString();
+
+  return {
+    timestampUtc,
+    occurrenceOrigin: origin,
+    market: normalizeIdentifierValue(scope.scopeCode, "GLOBAL"),
+    venue: scope.scopeType === "market" ? normalizeIdentifierValue(scope.scopeCode, "GLOBAL") : "EXCHANGE",
+    asset: normalizeAsset(quote.symbol),
+    timeframe: "live",
+    price: quote.price,
+    high: quote.high52,
+    low: quote.low52,
+    close: quote.price,
+    history: quote.history,
+    quote,
+    ingestionSource,
+    emittedBy: "signal-backend",
+  };
+}
+
+async function getPreviousOccurrence(input: MarketContextInput) {
+  const result = await pool.query<OccurrenceRow>(
+    `
+      SELECT
+        occurrence_id,
+        state_hash,
+        regime_state,
+        allocation_posture,
+        trend_quality,
+        breadth,
+        participation,
+        volatility_pressure,
+        regime_confidence,
+        risk_pressure
+      FROM ${MARKET_OCCURRENCES_TABLE}
+      WHERE market = $1
+        AND venue = $2
+        AND asset = $3
+        AND timeframe = $4
+        AND timestamp_utc <= $5::timestamptz
+      ORDER BY timestamp_utc DESC, created_at DESC
+      LIMIT 1
+    `,
+    [
+      input.market,
+      input.venue,
+      input.asset,
+      input.timeframe,
+      input.timestampUtc,
+    ],
+  );
+
+  return result.rows[0] ?? null;
+}
+
+async function diagnoseContext(
+  input: MarketContextInput,
+): Promise<DiagnosedMarketContext> {
+  const metrics = diagnoseRegime(input);
+  const signalAction = input.quote?.signalAction ?? "Hold";
+  const setupQualityDistribution = {
+    weak: metrics.exposureDurability < 40 ? 1 : 0,
+    developing:
+      metrics.exposureDurability >= 40 && metrics.exposureDurability < 65
+        ? 1
+        : 0,
+    strong: metrics.exposureDurability >= 65 ? 1 : 0,
+  };
+  const signalDistribution: Record<TradeSignal, number> = {
+    Buy: signalAction === "Buy" ? 1 : 0,
+    Hold: signalAction === "Hold" ? 1 : 0,
+    Sell: signalAction === "Sell" ? 1 : 0,
+  };
+  const marketInterpretationLabels = [
+    metrics.regimeState.toLowerCase(),
+    metrics.allocationPosture.toLowerCase(),
+    metrics.riskPressure >= 70 ? "risk_pressure_high" : "risk_pressure_normal",
+    metrics.participation >= 60 ? "participation_confirmed" : "participation_muted",
+  ];
+  const stateHash = hashState({
+    market: input.market,
+    venue: input.venue,
+    asset: input.asset,
+    timeframe: input.timeframe,
+    regimeState: metrics.regimeState,
+    allocationPosture: metrics.allocationPosture,
+    trendQuality: Math.round(metrics.trendQuality),
+    breadth: Math.round(metrics.breadth),
+    participation: Math.round(metrics.participation),
+    volatilityPressure: Math.round(metrics.volatilityPressure),
+    regimeConfidence: Math.round(metrics.regimeConfidence),
+    setupQualityDistribution,
+    signalDistribution,
+  });
+  const previous = await getPreviousOccurrence(input);
+
+  const context: DiagnosedMarketContext = {
+    occurrenceId: randomUUID(),
+    previousOccurrenceId: previous?.occurrence_id ?? null,
+    timestampUtc: input.timestampUtc,
+    occurrenceOrigin: input.occurrenceOrigin,
+    market: input.market,
+    venue: input.venue,
+    asset: input.asset,
+    timeframe: input.timeframe,
+    ...metrics,
+    capitalDeployed:
+      metrics.allocationPosture === "EXPANSION"
+        ? metrics.exposureDurability
+        : metrics.allocationPosture === "BALANCED"
+          ? metrics.exposureDurability * 0.55
+          : metrics.exposureDurability * 0.18,
+    availableRiskBudget: clamp(100 - metrics.riskPressure),
+    setupQualityDistribution,
+    signalDistribution,
+    marketInterpretationLabels,
+    stateTransitionLabels: [],
+    stateHash,
+    transitionType: "state_hash_change",
+    transitionMagnitude: 0,
+    emittedReason: "deterministic_context_state_transition",
+    emittedBy: input.emittedBy,
+    ingestionSource: input.ingestionSource,
+  };
+
+  context.transitionMagnitude = transitionMagnitude(previous, context);
+  context.stateTransitionLabels = buildStateLabels(previous, context);
+  context.transitionType = transitionType(context.stateTransitionLabels);
+
+  return context;
+}
+
+function logContextPersistenceWarning(error: unknown, message: string) {
+  if (contextPersistenceWarningLogged) return;
+  contextPersistenceWarningLogged = true;
+  logger.warn({ err: error }, message);
+}
+
+async function tableExists(tableName: string) {
+  const result = await pool.query<{ exists: boolean }>(
+    "SELECT to_regclass($1) IS NOT NULL AS exists",
+    [tableName],
+  );
+  return Boolean(result.rows[0]?.exists);
+}
+
+function quoteIdent(identifier: string) {
+  return `"${identifier.replace(/"/g, '""')}"`;
+}
+
+function quoteQualifiedIdentifier(value: string) {
+  const parts = value.split(".").map((part) => part.trim()).filter(Boolean);
+  if (!parts.length || parts.length > 2) {
+    throw new Error(`Invalid table identifier: ${value}`);
+  }
+  if (!parts.every((part) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(part))) {
+    throw new Error(`Invalid table identifier: ${value}`);
+  }
+  return parts.map(quoteIdent).join(".");
+}
+
+async function addCompatibilityColumnIfTableExists(
+  tableName: string,
+  columnName: string,
+) {
+  if (!(await tableExists(tableName))) return;
+  await pool.query(
+    `ALTER TABLE ${quoteQualifiedIdentifier(tableName)}
+     ADD COLUMN IF NOT EXISTS ${quoteIdent(columnName)} UUID`,
+  );
+}
+
+async function tryEnableTimescale(tableName: string) {
+  try {
+    const extension = await pool.query<{ available: boolean }>(
+      "SELECT EXISTS (SELECT 1 FROM pg_available_extensions WHERE name = 'timescaledb') AS available",
+    );
+    if (!extension.rows[0]?.available) return;
+    await pool.query("CREATE EXTENSION IF NOT EXISTS timescaledb");
+    await pool.query(
+      "SELECT create_hypertable($1::regclass, 'timestamp_utc', if_not_exists => TRUE)",
+      [tableName],
+    );
+  } catch (error) {
+    logger.warn(
+      { err: error, tableName },
+      "TimescaleDB optimization unavailable; using standard PostgreSQL indexes",
+    );
+  }
+}
+
+async function ensureMarketMonthlyVolatilitySchema(): Promise<void> {
+  if (!monthlyVolatilitySchemaReady) {
+    monthlyVolatilitySchemaReady = (async () => {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ${MARKET_MONTHLY_ASSET_VOLATILITY_TABLE} (
+          market TEXT NOT NULL,
+          venue TEXT NOT NULL,
+          asset TEXT NOT NULL,
+          month_start TIMESTAMPTZ NOT NULL,
+          year INTEGER NOT NULL,
+          month_index INTEGER NOT NULL,
+          month_label TEXT NOT NULL,
+          volatility_pressure DOUBLE PRECISION NOT NULL,
+          return_count INTEGER NOT NULL,
+          source_min_timestamp_utc TIMESTAMPTZ NOT NULL,
+          source_max_timestamp_utc TIMESTAMPTZ NOT NULL,
+          refreshed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (market, venue, asset, month_start)
+        )
+      `);
+
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS ${MARKET_MONTHLY_ASSET_VOLATILITY_TABLE}_market_month_idx
+        ON ${MARKET_MONTHLY_ASSET_VOLATILITY_TABLE} (market, venue, month_start)
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ${MARKET_MONTHLY_VOLATILITY_TABLE} (
+          market TEXT NOT NULL,
+          venue TEXT NOT NULL,
+          month_start TIMESTAMPTZ NOT NULL,
+          year INTEGER NOT NULL,
+          month_index INTEGER NOT NULL,
+          month_label TEXT NOT NULL,
+          volatility_pressure DOUBLE PRECISION NOT NULL,
+          observation_count INTEGER NOT NULL,
+          source_min_timestamp_utc TIMESTAMPTZ NOT NULL,
+          source_max_timestamp_utc TIMESTAMPTZ NOT NULL,
+          refreshed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (market, venue, month_start)
+        )
+      `);
+
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS ${MARKET_MONTHLY_VOLATILITY_TABLE}_market_month_idx
+        ON ${MARKET_MONTHLY_VOLATILITY_TABLE} (market, venue, month_start)
+      `);
+    })().catch((error) => {
+      monthlyVolatilitySchemaReady = null;
+      throw error;
+    });
+  }
+
+  await monthlyVolatilitySchemaReady;
+}
+
+async function runMarketContextBackfill(
+  name: string,
+  task: () => Promise<unknown>,
+) {
+  try {
+    await task();
+  } catch (error) {
+    logger.warn(
+      { err: error, name },
+      "Market context history backfill could not complete",
+    );
+  }
+}
+
+export async function ensureMarketContextSchema(): Promise<void> {
+  if (!schemaReady) {
+    schemaReady = (async () => {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ${MARKET_OCCURRENCES_TABLE} (
+          occurrence_id UUID PRIMARY KEY,
+          previous_occurrence_id UUID,
+          timestamp_utc TIMESTAMPTZ NOT NULL,
+          occurrence_origin TEXT NOT NULL CHECK (occurrence_origin IN ('historical_backfill', 'live_runtime')),
+          market TEXT NOT NULL,
+          venue TEXT NOT NULL,
+          asset TEXT NOT NULL,
+          timeframe TEXT NOT NULL,
+          regime_state TEXT NOT NULL,
+          regime_confidence DOUBLE PRECISION NOT NULL,
+          trend_quality DOUBLE PRECISION NOT NULL,
+          breadth DOUBLE PRECISION NOT NULL,
+          participation DOUBLE PRECISION NOT NULL,
+          volatility_pressure DOUBLE PRECISION NOT NULL,
+          regime_stability DOUBLE PRECISION NOT NULL,
+          exposure_durability DOUBLE PRECISION NOT NULL,
+          holding_quality DOUBLE PRECISION NOT NULL,
+          calibration DOUBLE PRECISION NOT NULL,
+          risk_pressure DOUBLE PRECISION NOT NULL,
+          allocation_posture TEXT NOT NULL,
+          capital_deployed DOUBLE PRECISION NOT NULL,
+          available_risk_budget DOUBLE PRECISION NOT NULL,
+          setup_quality_distribution JSONB NOT NULL DEFAULT '{}'::jsonb,
+          signal_distribution JSONB NOT NULL DEFAULT '{}'::jsonb,
+          market_interpretation_labels JSONB NOT NULL DEFAULT '[]'::jsonb,
+          state_transition_labels JSONB NOT NULL DEFAULT '[]'::jsonb,
+          state_hash TEXT NOT NULL,
+          transition_type TEXT NOT NULL,
+          transition_magnitude DOUBLE PRECISION NOT NULL,
+          emitted_reason TEXT NOT NULL,
+          emitted_by TEXT NOT NULL,
+          ingestion_source TEXT NOT NULL,
+          trade_id TEXT,
+          execution_id TEXT,
+          signal_id TEXT,
+          portfolio_action_id TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          CONSTRAINT ${MARKET_OCCURRENCES_TABLE}_previous_fk
+            FOREIGN KEY (previous_occurrence_id)
+            REFERENCES ${MARKET_OCCURRENCES_TABLE}(occurrence_id)
+        )
+      `);
+
+      await pool.query(`
+        CREATE UNIQUE INDEX IF NOT EXISTS ${MARKET_OCCURRENCES_TABLE}_idempotency_uidx
+        ON ${MARKET_OCCURRENCES_TABLE} (
+          timestamp_utc,
+          market,
+          venue,
+          asset,
+          timeframe,
+          state_hash
+        )
+      `);
+
+      for (const column of [
+        "timestamp_utc",
+        "asset",
+        "market",
+        "venue",
+        "timeframe",
+        "regime_state",
+        "transition_type",
+        "occurrence_origin",
+        "state_hash",
+      ]) {
+        await pool.query(`
+          CREATE INDEX IF NOT EXISTS ${MARKET_OCCURRENCES_TABLE}_${column}_idx
+          ON ${MARKET_OCCURRENCES_TABLE} (${column})
+        `);
+      }
+
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS ${MARKET_OCCURRENCES_TABLE}_timestamp_brin_idx
+        ON ${MARKET_OCCURRENCES_TABLE} USING BRIN (timestamp_utc)
+      `);
+
+      await ensureMarketMonthlyVolatilitySchema();
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ${MARKET_STATE_SNAPSHOTS_TABLE} (
+          snapshot_id UUID PRIMARY KEY,
+          occurrence_id UUID NOT NULL REFERENCES ${MARKET_OCCURRENCES_TABLE}(occurrence_id),
+          timestamp_utc TIMESTAMPTZ NOT NULL,
+          market TEXT NOT NULL,
+          venue TEXT NOT NULL,
+          asset TEXT NOT NULL,
+          timeframe TEXT NOT NULL,
+          state_hash TEXT NOT NULL,
+          context_payload JSONB NOT NULL,
+          ingestion_source TEXT NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (occurrence_id)
+        )
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ${SIGNAL_OCCURRENCES_TABLE} (
+          signal_occurrence_id UUID PRIMARY KEY,
+          occurrence_id UUID NOT NULL REFERENCES ${MARKET_OCCURRENCES_TABLE}(occurrence_id),
+          signal_id TEXT,
+          trade_id TEXT,
+          execution_id TEXT,
+          portfolio_action_id TEXT,
+          timestamp_utc TIMESTAMPTZ NOT NULL,
+          market TEXT NOT NULL,
+          venue TEXT NOT NULL,
+          asset TEXT NOT NULL,
+          timeframe TEXT NOT NULL,
+          signal_action TEXT,
+          signal_confidence DOUBLE PRECISION,
+          signal_source TEXT,
+          signal_entry_price DOUBLE PRECISION,
+          signal_return_percent DOUBLE PRECISION,
+          signal_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+          occurrence_origin TEXT NOT NULL CHECK (occurrence_origin IN ('historical_backfill', 'live_runtime')),
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (occurrence_id, signal_id)
+        )
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ${REGIME_TRANSITIONS_TABLE} (
+          regime_transition_id UUID PRIMARY KEY,
+          occurrence_id UUID NOT NULL REFERENCES ${MARKET_OCCURRENCES_TABLE}(occurrence_id),
+          previous_occurrence_id UUID,
+          timestamp_utc TIMESTAMPTZ NOT NULL,
+          market TEXT NOT NULL,
+          venue TEXT NOT NULL,
+          asset TEXT NOT NULL,
+          timeframe TEXT NOT NULL,
+          from_regime_state TEXT,
+          to_regime_state TEXT NOT NULL,
+          transition_type TEXT NOT NULL,
+          transition_magnitude DOUBLE PRECISION NOT NULL,
+          state_transition_labels JSONB NOT NULL DEFAULT '[]'::jsonb,
+          occurrence_origin TEXT NOT NULL CHECK (occurrence_origin IN ('historical_backfill', 'live_runtime')),
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (occurrence_id)
+        )
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ${ALLOCATION_STATE_OCCURRENCES_TABLE} (
+          allocation_occurrence_id UUID PRIMARY KEY,
+          occurrence_id UUID NOT NULL REFERENCES ${MARKET_OCCURRENCES_TABLE}(occurrence_id),
+          timestamp_utc TIMESTAMPTZ NOT NULL,
+          market TEXT NOT NULL,
+          venue TEXT NOT NULL,
+          asset TEXT NOT NULL,
+          timeframe TEXT NOT NULL,
+          allocation_posture TEXT NOT NULL,
+          capital_deployed DOUBLE PRECISION NOT NULL,
+          available_risk_budget DOUBLE PRECISION NOT NULL,
+          setup_quality_distribution JSONB NOT NULL DEFAULT '{}'::jsonb,
+          signal_distribution JSONB NOT NULL DEFAULT '{}'::jsonb,
+          occurrence_origin TEXT NOT NULL CHECK (occurrence_origin IN ('historical_backfill', 'live_runtime')),
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (occurrence_id)
+        )
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ${HISTORICAL_REPLAY_JOBS_TABLE} (
+          job_id UUID PRIMARY KEY,
+          status TEXT NOT NULL,
+          candle_table TEXT NOT NULL,
+          market TEXT,
+          venue TEXT,
+          asset TEXT,
+          timeframe TEXT,
+          started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          completed_at TIMESTAMPTZ,
+          processed_rows BIGINT NOT NULL DEFAULT 0,
+          emitted_occurrences BIGINT NOT NULL DEFAULT 0,
+          last_error TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ${HISTORICAL_REPLAY_CHECKPOINTS_TABLE} (
+          checkpoint_id UUID PRIMARY KEY,
+          job_id UUID NOT NULL REFERENCES ${HISTORICAL_REPLAY_JOBS_TABLE}(job_id),
+          candle_table TEXT NOT NULL,
+          market TEXT,
+          venue TEXT,
+          asset TEXT,
+          timeframe TEXT,
+          last_timestamp_utc TIMESTAMPTZ,
+          last_market TEXT,
+          last_venue TEXT,
+          last_asset TEXT,
+          last_timeframe TEXT,
+          processed_rows BIGINT NOT NULL DEFAULT 0,
+          emitted_occurrences BIGINT NOT NULL DEFAULT 0,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (job_id)
+        )
+      `);
+
+      for (const tableName of [
+        MARKET_STATE_SNAPSHOTS_TABLE,
+        SIGNAL_OCCURRENCES_TABLE,
+        REGIME_TRANSITIONS_TABLE,
+        ALLOCATION_STATE_OCCURRENCES_TABLE,
+      ]) {
+        await pool.query(`
+          CREATE INDEX IF NOT EXISTS ${tableName}_timestamp_idx
+          ON ${tableName} (timestamp_utc)
+        `);
+        await pool.query(`
+          CREATE INDEX IF NOT EXISTS ${tableName}_asset_idx
+          ON ${tableName} (asset)
+        `);
+      }
+
+      await addCompatibilityColumnIfTableExists("trades", "market_occurrence_id");
+      await addCompatibilityColumnIfTableExists("executions", "market_occurrence_id");
+      await addCompatibilityColumnIfTableExists("executions", "signal_occurrence_id");
+      await addCompatibilityColumnIfTableExists("positions", "market_occurrence_id");
+      await addCompatibilityColumnIfTableExists("portfolio_activity", "market_occurrence_id");
+      await addCompatibilityColumnIfTableExists("portfolio_actions", "market_occurrence_id");
+      await addCompatibilityColumnIfTableExists("signals", "market_occurrence_id");
+
+      await tryEnableTimescale(MARKET_OCCURRENCES_TABLE);
+      await pool.query("CREATE EXTENSION IF NOT EXISTS pgcrypto").catch(() => {
+        undefined;
+      });
+      await runMarketContextBackfill(
+        "existing occurrence detail rows",
+        backfillOccurrenceDetailRowsFromExistingOccurrences,
+      );
+      await runMarketContextBackfill("signal snapshot history", () =>
+        backfillMarketContextFromSignalSnapshots(),
+      );
+      await runMarketContextBackfill("historical candle table", () =>
+        replayHistoricalMarketContextInternal({
+          ingestionSource: "postgres_historical_replay",
+        }),
+      );
+    })().catch((error) => {
+      schemaReady = null;
+      throw error;
+    });
+  }
+
+  await schemaReady;
+}
+
+async function insertDiagnosedContext(context: DiagnosedMarketContext) {
+  const result = await pool.query<{ occurrence_id: string }>(
+    `
+      INSERT INTO ${MARKET_OCCURRENCES_TABLE} (
+        occurrence_id,
+        previous_occurrence_id,
+        timestamp_utc,
+        occurrence_origin,
+        market,
+        venue,
+        asset,
+        timeframe,
+        regime_state,
+        regime_confidence,
+        trend_quality,
+        breadth,
+        participation,
+        volatility_pressure,
+        regime_stability,
+        exposure_durability,
+        holding_quality,
+        calibration,
+        risk_pressure,
+        allocation_posture,
+        capital_deployed,
+        available_risk_budget,
+        setup_quality_distribution,
+        signal_distribution,
+        market_interpretation_labels,
+        state_transition_labels,
+        state_hash,
+        transition_type,
+        transition_magnitude,
+        emitted_reason,
+        emitted_by,
+        ingestion_source,
+        signal_id
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8,
+        $9, $10, $11, $12, $13, $14, $15, $16,
+        $17, $18, $19, $20, $21, $22, $23::jsonb,
+        $24::jsonb, $25::jsonb, $26::jsonb, $27, $28,
+        $29, $30, $31, $32, $33
+      )
+      ON CONFLICT (
+        timestamp_utc,
+        market,
+        venue,
+        asset,
+        timeframe,
+        state_hash
+      )
+      DO NOTHING
+      RETURNING occurrence_id
+    `,
+    [
+      context.occurrenceId,
+      context.previousOccurrenceId,
+      context.timestampUtc,
+      context.occurrenceOrigin,
+      context.market,
+      context.venue,
+      context.asset,
+      context.timeframe,
+      context.regimeState,
+      context.regimeConfidence,
+      context.trendQuality,
+      context.breadth,
+      context.participation,
+      context.volatilityPressure,
+      context.regimeStability,
+      context.exposureDurability,
+      context.holdingQuality,
+      context.calibration,
+      context.riskPressure,
+      context.allocationPosture,
+      context.capitalDeployed,
+      context.availableRiskBudget,
+      JSON.stringify(context.setupQualityDistribution),
+      JSON.stringify(context.signalDistribution),
+      JSON.stringify(context.marketInterpretationLabels),
+      JSON.stringify(context.stateTransitionLabels),
+      context.stateHash,
+      context.transitionType,
+      context.transitionMagnitude,
+      context.emittedReason,
+      context.emittedBy,
+      context.ingestionSource,
+      context.signalId ?? null,
+    ],
+  );
+
+  return result.rows[0]?.occurrence_id ?? null;
+}
+
+async function insertOccurrenceDetailRows(context: DiagnosedMarketContext) {
+  await pool.query(
+    `
+      INSERT INTO ${MARKET_STATE_SNAPSHOTS_TABLE} (
+        snapshot_id,
+        occurrence_id,
+        timestamp_utc,
+        market,
+        venue,
+        asset,
+        timeframe,
+        state_hash,
+        context_payload,
+        ingestion_source
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10)
+      ON CONFLICT (occurrence_id) DO NOTHING
+    `,
+    [
+      randomUUID(),
+      context.occurrenceId,
+      context.timestampUtc,
+      context.market,
+      context.venue,
+      context.asset,
+      context.timeframe,
+      context.stateHash,
+      JSON.stringify(context),
+      context.ingestionSource,
+    ],
+  );
+
+  await pool.query(
+    `
+      INSERT INTO ${REGIME_TRANSITIONS_TABLE} (
+        regime_transition_id,
+        occurrence_id,
+        previous_occurrence_id,
+        timestamp_utc,
+        market,
+        venue,
+        asset,
+        timeframe,
+        from_regime_state,
+        to_regime_state,
+        transition_type,
+        transition_magnitude,
+        state_transition_labels,
+        occurrence_origin
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8,
+        (SELECT regime_state FROM ${MARKET_OCCURRENCES_TABLE} WHERE occurrence_id = $3),
+        $9, $10, $11, $12::jsonb, $13
+      )
+      ON CONFLICT (occurrence_id) DO NOTHING
+    `,
+    [
+      randomUUID(),
+      context.occurrenceId,
+      context.previousOccurrenceId,
+      context.timestampUtc,
+      context.market,
+      context.venue,
+      context.asset,
+      context.timeframe,
+      context.regimeState,
+      context.transitionType,
+      context.transitionMagnitude,
+      JSON.stringify(context.stateTransitionLabels),
+      context.occurrenceOrigin,
+    ],
+  );
+
+  await pool.query(
+    `
+      INSERT INTO ${ALLOCATION_STATE_OCCURRENCES_TABLE} (
+        allocation_occurrence_id,
+        occurrence_id,
+        timestamp_utc,
+        market,
+        venue,
+        asset,
+        timeframe,
+        allocation_posture,
+        capital_deployed,
+        available_risk_budget,
+        setup_quality_distribution,
+        signal_distribution,
+        occurrence_origin
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13)
+      ON CONFLICT (occurrence_id) DO NOTHING
+    `,
+    [
+      randomUUID(),
+      context.occurrenceId,
+      context.timestampUtc,
+      context.market,
+      context.venue,
+      context.asset,
+      context.timeframe,
+      context.allocationPosture,
+      context.capitalDeployed,
+      context.availableRiskBudget,
+      JSON.stringify(context.setupQualityDistribution),
+      JSON.stringify(context.signalDistribution),
+      context.occurrenceOrigin,
+    ],
+  );
+}
+
+async function insertSignalOccurrence(
+  context: DiagnosedMarketContext,
+  quote?: StockQuote,
+) {
+  if (!quote?.signalAction) return;
+  const signalId =
+    context.signalId ??
+    hashState({
+      asset: context.asset,
+      action: quote.signalAction,
+      emittedAt: quote.signalEmittedAt ?? context.timestampUtc,
+      entryPrice: quote.signalEntryPrice ?? null,
+    });
+
+  await pool.query(
+    `
+      INSERT INTO ${SIGNAL_OCCURRENCES_TABLE} (
+        signal_occurrence_id,
+        occurrence_id,
+        signal_id,
+        timestamp_utc,
+        market,
+        venue,
+        asset,
+        timeframe,
+        signal_action,
+        signal_confidence,
+        signal_source,
+        signal_entry_price,
+        signal_return_percent,
+        signal_payload,
+        occurrence_origin
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15)
+      ON CONFLICT (occurrence_id, signal_id) DO NOTHING
+    `,
+    [
+      randomUUID(),
+      context.occurrenceId,
+      signalId,
+      context.timestampUtc,
+      context.market,
+      context.venue,
+      context.asset,
+      context.timeframe,
+      quote.signalAction,
+      quote.signalConfidence ?? null,
+      quote.signalSource ?? null,
+      quote.signalEntryPrice ?? null,
+      quote.signalReturnPercent ?? null,
+      JSON.stringify(quote),
+      context.occurrenceOrigin,
+    ],
+  );
+}
+
+async function appendMarketContextOccurrenceInternal(
+  input: MarketContextInput,
+): Promise<string | null> {
+  const context = await diagnoseContext(input);
+  const insertedOccurrenceId = await insertDiagnosedContext(context);
+
+  if (!insertedOccurrenceId) {
+    return null;
+  }
+
+  await insertOccurrenceDetailRows(context);
+  await insertSignalOccurrence(context, input.quote);
+  return insertedOccurrenceId;
+}
+
+async function backfillOccurrenceDetailRowsFromExistingOccurrences() {
+  await pool.query(`
+    INSERT INTO ${MARKET_STATE_SNAPSHOTS_TABLE} (
+      snapshot_id,
+      occurrence_id,
+      timestamp_utc,
+      market,
+      venue,
+      asset,
+      timeframe,
+      state_hash,
+      context_payload,
+      ingestion_source
+    )
+    SELECT
+      gen_random_uuid(),
+      mo.occurrence_id,
+      mo.timestamp_utc,
+      mo.market,
+      mo.venue,
+      mo.asset,
+      mo.timeframe,
+      mo.state_hash,
+      jsonb_build_object(
+        'occurrenceId', mo.occurrence_id,
+        'previousOccurrenceId', mo.previous_occurrence_id,
+        'timestampUtc', mo.timestamp_utc,
+        'occurrenceOrigin', mo.occurrence_origin,
+        'market', mo.market,
+        'venue', mo.venue,
+        'asset', mo.asset,
+        'timeframe', mo.timeframe,
+        'regimeState', mo.regime_state,
+        'regimeConfidence', mo.regime_confidence,
+        'trendQuality', mo.trend_quality,
+        'breadth', mo.breadth,
+        'participation', mo.participation,
+        'volatilityPressure', mo.volatility_pressure,
+        'regimeStability', mo.regime_stability,
+        'exposureDurability', mo.exposure_durability,
+        'holdingQuality', mo.holding_quality,
+        'calibration', mo.calibration,
+        'riskPressure', mo.risk_pressure,
+        'allocationPosture', mo.allocation_posture,
+        'capitalDeployed', mo.capital_deployed,
+        'availableRiskBudget', mo.available_risk_budget,
+        'setupQualityDistribution', mo.setup_quality_distribution,
+        'signalDistribution', mo.signal_distribution,
+        'marketInterpretationLabels', mo.market_interpretation_labels,
+        'stateTransitionLabels', mo.state_transition_labels,
+        'stateHash', mo.state_hash,
+        'transitionType', mo.transition_type,
+        'transitionMagnitude', mo.transition_magnitude,
+        'emittedReason', mo.emitted_reason,
+        'emittedBy', mo.emitted_by,
+        'ingestionSource', mo.ingestion_source,
+        'signalId', mo.signal_id
+      ),
+      mo.ingestion_source
+    FROM ${MARKET_OCCURRENCES_TABLE} mo
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM ${MARKET_STATE_SNAPSHOTS_TABLE} snapshot
+      WHERE snapshot.occurrence_id = mo.occurrence_id
+    )
+  `);
+
+  await pool.query(`
+    WITH ordered_occurrences AS (
+      SELECT
+        mo.*,
+        COALESCE(
+          previous.regime_state,
+          LAG(mo.regime_state) OVER (
+            PARTITION BY mo.market, mo.venue, mo.asset, mo.timeframe
+            ORDER BY mo.timestamp_utc ASC, mo.created_at ASC
+          )
+        ) AS previous_regime_state
+      FROM ${MARKET_OCCURRENCES_TABLE} mo
+      LEFT JOIN ${MARKET_OCCURRENCES_TABLE} previous
+        ON previous.occurrence_id = mo.previous_occurrence_id
+    )
+    INSERT INTO ${REGIME_TRANSITIONS_TABLE} (
+      regime_transition_id,
+      occurrence_id,
+      previous_occurrence_id,
+      timestamp_utc,
+      market,
+      venue,
+      asset,
+      timeframe,
+      from_regime_state,
+      to_regime_state,
+      transition_type,
+      transition_magnitude,
+      state_transition_labels,
+      occurrence_origin
+    )
+    SELECT
+      gen_random_uuid(),
+      occurrence_id,
+      previous_occurrence_id,
+      timestamp_utc,
+      market,
+      venue,
+      asset,
+      timeframe,
+      previous_regime_state,
+      regime_state,
+      transition_type,
+      transition_magnitude,
+      state_transition_labels,
+      occurrence_origin
+    FROM ordered_occurrences ordered
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM ${REGIME_TRANSITIONS_TABLE} transition
+      WHERE transition.occurrence_id = ordered.occurrence_id
+    )
+  `);
+
+  await pool.query(`
+    INSERT INTO ${ALLOCATION_STATE_OCCURRENCES_TABLE} (
+      allocation_occurrence_id,
+      occurrence_id,
+      timestamp_utc,
+      market,
+      venue,
+      asset,
+      timeframe,
+      allocation_posture,
+      capital_deployed,
+      available_risk_budget,
+      setup_quality_distribution,
+      signal_distribution,
+      occurrence_origin
+    )
+    SELECT
+      gen_random_uuid(),
+      mo.occurrence_id,
+      mo.timestamp_utc,
+      mo.market,
+      mo.venue,
+      mo.asset,
+      mo.timeframe,
+      mo.allocation_posture,
+      mo.capital_deployed,
+      mo.available_risk_budget,
+      mo.setup_quality_distribution,
+      mo.signal_distribution,
+      mo.occurrence_origin
+    FROM ${MARKET_OCCURRENCES_TABLE} mo
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM ${ALLOCATION_STATE_OCCURRENCES_TABLE} allocation
+      WHERE allocation.occurrence_id = mo.occurrence_id
+    )
+  `);
+}
+
+function snapshotHistoryToQuote(
+  row: SignalSnapshotHistoryRow,
+  price: number,
+  history: number[],
+  timestampUtc: string,
+): StockQuote {
+  const signalAction = toTradeSignal(row.signal_action);
+  return {
+    symbol: normalizeAsset(String(row.symbol ?? "")),
+    price,
+    changePercent: toFiniteNumber(row.change_percent, 0),
+    status: toQuoteStatus(row.status),
+    confidence: toFiniteNumber(row.signal_confidence, 50),
+    summary: row.summary ?? "Historical market context replay",
+    impact: row.impact ?? "Historical context",
+    cap: row.cap ?? "N/A",
+    high52: toFiniteNumber(row.high_52, Math.max(...history, price)),
+    low52: toFiniteNumber(row.low_52, Math.min(...history, price)),
+    peRatio: toFiniteNumber(row.pe_ratio, 0),
+    history,
+    signalAction,
+    signalConfidence: toFiniteNumber(row.signal_confidence, 50),
+    signalSource: toSignalSource(row.signal_source),
+    signalEmittedAt: toIsoString(row.signal_emitted_at, new Date(timestampUtc)),
+    signalEntryPrice: toFiniteNumber(row.signal_entry_price, price),
+    signalReturnPercent: toFiniteNumber(row.signal_return_percent, 0),
+  };
+}
+
+function snapshotHistoryRowToInputs(
+  row: SignalSnapshotHistoryRow,
+  request: ContextReplayRequest,
+): MarketContextInput[] {
+  const history = parseHistoryValues(row.history);
+  const fallbackPrice = toOptionalFiniteNumber(row.price);
+  const prices = history.length ? history : fallbackPrice ? [fallbackPrice] : [];
+  if (!prices.length) return [];
+
+  const endTimestampUtc = toIsoString(
+    row.signal_emitted_at ?? row.fetched_at,
+    new Date(),
+  );
+  const scopeType = String(row.scope_type ?? "").toLowerCase();
+  const scopeCode = normalizeIdentifierValue(String(row.scope_code ?? ""), "GLOBAL");
+  const market = normalizeIdentifierValue(request.market ?? scopeCode, scopeCode);
+  const venue =
+    request.venue ??
+    (scopeType === "market" ? scopeCode : "EXCHANGE");
+  const asset = normalizeAsset(String(request.asset ?? row.symbol ?? ""));
+  const timeframe = normalizeIdentifierValue(request.timeframe ?? "1D", "1D");
+
+  if (asset === "UNKNOWN") return [];
+
+  return prices.map((price, index) => {
+    const timestampUtc = historicalHistoryTimestamp(
+      endTimestampUtc,
+      index,
+      prices.length,
+    );
+    const trailingHistory = prices.slice(Math.max(0, index - 29), index + 1);
+    const high = Math.max(...trailingHistory, price);
+    const low = Math.min(...trailingHistory, price);
+    const quote = snapshotHistoryToQuote(row, price, trailingHistory, timestampUtc);
+
+    return {
+      timestampUtc,
+      occurrenceOrigin: request.origin ?? "historical_backfill",
+      market,
+      venue,
+      asset,
+      timeframe,
+      price,
+      open: trailingHistory[0] ?? price,
+      high,
+      low,
+      close: price,
+      history: trailingHistory,
+      quote,
+      ingestionSource:
+        request.ingestionSource ?? "stock_signal_snapshots_history",
+      emittedBy: "historical-replay-engine",
+    };
+  });
+}
+
+async function backfillMarketContextFromSignalSnapshots(
+  request: ContextReplayRequest = {},
+): Promise<HistoryBackfillResult> {
+  if (!(await tableExists(SIGNAL_SNAPSHOTS_TABLE))) {
+    return { processedRows: 0, emittedOccurrences: 0 };
+  }
+
+  const requestedTimeframe = request.timeframe
+    ? normalizeIdentifierValue(request.timeframe, "1D")
+    : null;
+  if (requestedTimeframe && requestedTimeframe !== "1D") {
+    return { processedRows: 0, emittedOccurrences: 0 };
+  }
+
+  const params: unknown[] = [];
+  const filters: string[] = [];
+
+  if (request.market) {
+    params.push(request.market.toUpperCase());
+    filters.push(`UPPER(scope_code) = $${params.length}`);
+  }
+
+  if (request.venue) {
+    params.push(request.venue.toUpperCase());
+    filters.push(`
+      CASE
+        WHEN LOWER(scope_type) = 'market' THEN UPPER(scope_code)
+        ELSE 'EXCHANGE'
+      END = $${params.length}
+    `);
+  }
+
+  if (request.asset) {
+    params.push(request.asset.toUpperCase());
+    filters.push(`UPPER(symbol) = $${params.length}`);
+  }
+
+  const whereClause = filters.length ? `AND ${filters.join(" AND ")}` : "";
+  const origin = request.origin ?? "historical_backfill";
+  const ingestionSource =
+    request.ingestionSource ?? "stock_signal_snapshots_history";
+
+  params.push(origin, ingestionSource);
+  const originParam = params.length - 1;
+  const sourceParam = params.length;
+
+  const result = await pool.query<{
+    processed_rows: string;
+    emitted_occurrences: string;
+  }>(
+    `
+      WITH source_rows AS (
+        SELECT
+          scope_type,
+          scope_code,
+          symbol,
+          price,
+          change_percent,
+          status,
+          high_52,
+          low_52,
+          history,
+          signal_action,
+          signal_confidence,
+          signal_source,
+          signal_emitted_at,
+          signal_entry_price,
+          signal_return_percent,
+          COALESCE(signal_emitted_at, fetched_at, NOW()) AS end_timestamp_utc,
+          CASE
+            WHEN jsonb_typeof(history) = 'array' AND jsonb_array_length(history) > 0
+              THEN history
+            WHEN price IS NOT NULL
+              THEN jsonb_build_array(price)
+            ELSE '[]'::jsonb
+          END AS price_history
+        FROM ${SIGNAL_SNAPSHOTS_TABLE}
+        WHERE (history IS NOT NULL OR price IS NOT NULL)
+          ${whereClause}
+      ),
+      expanded AS (
+        SELECT
+          LOWER(scope_type) AS scope_type,
+          UPPER(scope_code) AS scope_code,
+          COALESCE(change_percent, 0)::double precision AS change_percent,
+          COALESCE(high_52, price, 0)::double precision AS high_52,
+          COALESCE(low_52, price, 0)::double precision AS low_52,
+          signal_action,
+          signal_confidence,
+          signal_source,
+          signal_entry_price,
+          signal_return_percent,
+          end_timestamp_utc,
+          jsonb_array_length(price_history) AS total_points,
+          element.ordinality::integer AS point_index,
+          (element.value #>> '{}')::double precision AS price
+        FROM source_rows
+        CROSS JOIN LATERAL jsonb_array_elements(price_history) WITH ORDINALITY AS element(value, ordinality)
+        WHERE (element.value #>> '{}') ~ '^-?[0-9]+(\\.[0-9]+)?$'
+      ),
+      market_series AS (
+        SELECT
+          date_trunc(
+            'day',
+            end_timestamp_utc - ((total_points - point_index) * INTERVAL '1 day')
+          ) AS timestamp_utc,
+          scope_type,
+          scope_code AS market,
+          CASE WHEN scope_type = 'market' THEN scope_code ELSE 'EXCHANGE' END AS venue,
+          'MARKET'::text AS asset,
+          '1D'::text AS timeframe,
+          AVG(price)::double precision AS price,
+          AVG(change_percent)::double precision AS change_percent,
+          MAX(GREATEST(high_52, price))::double precision AS high_52,
+          MIN(LEAST(low_52, price))::double precision AS low_52,
+          CASE
+            WHEN AVG(
+              CASE
+                WHEN signal_action = 'Buy' THEN 1
+                WHEN signal_action = 'Sell' THEN -1
+                ELSE 0
+              END
+            ) > 0.2 THEN 'Buy'
+            WHEN AVG(
+              CASE
+                WHEN signal_action = 'Buy' THEN 1
+                WHEN signal_action = 'Sell' THEN -1
+                ELSE 0
+              END
+            ) < -0.2 THEN 'Sell'
+            ELSE 'Hold'
+          END AS signal_action,
+          AVG(COALESCE(signal_confidence, 50))::double precision AS signal_confidence,
+          'heuristic'::text AS signal_source,
+          AVG(COALESCE(signal_entry_price, price))::double precision AS signal_entry_price,
+          AVG(COALESCE(signal_return_percent, 0))::double precision AS signal_return_percent,
+          COUNT(*)::double precision AS instrument_count
+        FROM expanded
+        WHERE price > 0
+        GROUP BY
+          date_trunc(
+            'day',
+            end_timestamp_utc - ((total_points - point_index) * INTERVAL '1 day')
+          ),
+          scope_type,
+          scope_code
+      ),
+      ordered AS (
+        SELECT
+          timestamp_utc,
+          market,
+          venue,
+          asset,
+          timeframe,
+          price,
+          FIRST_VALUE(price) OVER (
+            PARTITION BY scope_type, market, asset
+            ORDER BY timestamp_utc ASC
+          ) AS first_price,
+          change_percent,
+          high_52,
+          low_52,
+          signal_action,
+          signal_confidence,
+          signal_source,
+          signal_entry_price,
+          signal_return_percent,
+          instrument_count
+        FROM market_series
+      ),
+      metrics AS (
+        SELECT
+          *,
+          CASE
+            WHEN first_price > 0 THEN ((price - first_price) / first_price) * 100
+            ELSE 0
+          END AS trend_pct
+        FROM ordered
+      ),
+      scored AS (
+        SELECT
+          *,
+          LEAST(100, GREATEST(0, ABS(change_percent) * 2.2 + ABS(trend_pct) * 1.6)) AS volatility_pressure,
+          LEAST(100, GREATEST(0, 50 + change_percent * 3.2)) AS breadth
+        FROM metrics
+      ),
+      diagnosed AS (
+        SELECT
+          *,
+          LEAST(100, GREATEST(0, 50 + trend_pct * 5.4 - volatility_pressure * 0.22)) AS trend_quality,
+          LEAST(100, GREATEST(0, 40 + LN(GREATEST(instrument_count, 1)) * 12)) AS participation,
+          LEAST(100, GREATEST(0, volatility_pressure * 0.72 + CASE WHEN trend_pct < 0 THEN ABS(trend_pct) * 3.4 ELSE 0 END)) AS risk_pressure
+        FROM scored
+      ),
+      contexts AS (
+        SELECT
+          *,
+          CASE
+            WHEN risk_pressure >= 76 THEN 'PANIC'
+            WHEN volatility_pressure >= 68 THEN 'HIGH_VOL'
+            WHEN trend_pct >= 1.2 AND trend_quality >= 58 THEN 'TRENDING'
+            WHEN trend_pct <= -1.2 THEN 'MEAN_REVERTING'
+            WHEN volatility_pressure <= 24 THEN 'COMPRESSION'
+            ELSE 'LOW_VOL'
+          END AS regime_state,
+          LEAST(99, GREATEST(15, ABS(trend_pct) * 8 + ABS(volatility_pressure - 50) * 0.55 + COALESCE(signal_confidence, 50) * 0.35)) AS regime_confidence,
+          LEAST(100, GREATEST(0, 100 - volatility_pressure * 0.68 - risk_pressure * 0.18)) AS regime_stability
+        FROM diagnosed
+      ),
+      postures AS (
+        SELECT
+          *,
+          LEAST(100, GREATEST(0, trend_quality * 0.44 + regime_stability * 0.38 + participation * 0.18)) AS exposure_durability
+        FROM contexts
+      ),
+      payloads AS (
+        SELECT
+          *,
+          LEAST(100, GREATEST(0, exposure_durability * 0.64 + COALESCE(signal_return_percent, 0) * 3)) AS holding_quality,
+          LEAST(100, GREATEST(0, COALESCE(signal_confidence, regime_confidence) * 0.7 + regime_stability * 0.3)) AS calibration,
+          CASE
+            WHEN risk_pressure >= 74 THEN 'DEFENSIVE'
+            WHEN exposure_durability >= 70 AND trend_quality >= 62 THEN 'EXPANSION'
+            WHEN exposure_durability <= 38 THEN 'CASH_PRESERVATION'
+            ELSE 'BALANCED'
+          END AS allocation_posture
+        FROM postures
+      ),
+      occurrence_payloads AS (
+        SELECT
+          gen_random_uuid() AS occurrence_id,
+          NULL::uuid AS previous_occurrence_id,
+          timestamp_utc,
+          $${originParam}::text AS occurrence_origin,
+          market,
+          venue,
+          asset,
+          timeframe,
+          regime_state,
+          regime_confidence,
+          trend_quality,
+          breadth,
+          participation,
+          volatility_pressure,
+          regime_stability,
+          exposure_durability,
+          holding_quality,
+          calibration,
+          risk_pressure,
+          allocation_posture,
+          CASE
+            WHEN allocation_posture = 'EXPANSION' THEN exposure_durability
+            WHEN allocation_posture = 'BALANCED' THEN exposure_durability * 0.55
+            ELSE exposure_durability * 0.18
+          END AS capital_deployed,
+          LEAST(100, GREATEST(0, 100 - risk_pressure)) AS available_risk_budget,
+          jsonb_build_object(
+            'weak', CASE WHEN exposure_durability < 40 THEN 1 ELSE 0 END,
+            'developing', CASE WHEN exposure_durability >= 40 AND exposure_durability < 65 THEN 1 ELSE 0 END,
+            'strong', CASE WHEN exposure_durability >= 65 THEN 1 ELSE 0 END
+          ) AS setup_quality_distribution,
+          jsonb_build_object(
+            'Buy', CASE WHEN signal_action = 'Buy' THEN 1 ELSE 0 END,
+            'Hold', CASE WHEN COALESCE(signal_action, 'Hold') = 'Hold' THEN 1 ELSE 0 END,
+            'Sell', CASE WHEN signal_action = 'Sell' THEN 1 ELSE 0 END
+          ) AS signal_distribution,
+          jsonb_build_array(
+            LOWER(regime_state),
+            LOWER(allocation_posture),
+            CASE WHEN risk_pressure >= 70 THEN 'risk_pressure_high' ELSE 'risk_pressure_normal' END,
+            'historical_replay'
+          ) AS market_interpretation_labels,
+          jsonb_build_array('historical_replay') AS state_transition_labels,
+          md5(CONCAT_WS(
+            '|',
+            market,
+            venue,
+            asset,
+            timeframe,
+            regime_state,
+            allocation_posture,
+            ROUND(trend_quality::numeric, 0),
+            ROUND(breadth::numeric, 0),
+            ROUND(volatility_pressure::numeric, 0),
+            ROUND(price::numeric, 6)
+          )) AS state_hash,
+          'historical_replay'::text AS transition_type,
+          LEAST(100, GREATEST(0, ABS(trend_pct) * 10 + volatility_pressure * 0.25)) AS transition_magnitude,
+          'derived_from_signal_snapshot_history'::text AS emitted_reason,
+          'historical-replay-engine'::text AS emitted_by,
+          $${sourceParam}::text AS ingestion_source,
+          md5(CONCAT_WS('|', asset, COALESCE(signal_action, 'Hold'), timestamp_utc::text, COALESCE(signal_entry_price::text, price::text))) AS signal_id
+        FROM payloads
+      ),
+      inserted AS (
+        INSERT INTO ${MARKET_OCCURRENCES_TABLE} (
+          occurrence_id,
+          previous_occurrence_id,
+          timestamp_utc,
+          occurrence_origin,
+          market,
+          venue,
+          asset,
+          timeframe,
+          regime_state,
+          regime_confidence,
+          trend_quality,
+          breadth,
+          participation,
+          volatility_pressure,
+          regime_stability,
+          exposure_durability,
+          holding_quality,
+          calibration,
+          risk_pressure,
+          allocation_posture,
+          capital_deployed,
+          available_risk_budget,
+          setup_quality_distribution,
+          signal_distribution,
+          market_interpretation_labels,
+          state_transition_labels,
+          state_hash,
+          transition_type,
+          transition_magnitude,
+          emitted_reason,
+          emitted_by,
+          ingestion_source,
+          signal_id
+        )
+        SELECT
+          occurrence_id,
+          previous_occurrence_id,
+          timestamp_utc,
+          occurrence_origin,
+          market,
+          venue,
+          asset,
+          timeframe,
+          regime_state,
+          regime_confidence,
+          trend_quality,
+          breadth,
+          participation,
+          volatility_pressure,
+          regime_stability,
+          exposure_durability,
+          holding_quality,
+          calibration,
+          risk_pressure,
+          allocation_posture,
+          capital_deployed,
+          available_risk_budget,
+          setup_quality_distribution,
+          signal_distribution,
+          market_interpretation_labels,
+          state_transition_labels,
+          state_hash,
+          transition_type,
+          transition_magnitude,
+          emitted_reason,
+          emitted_by,
+          ingestion_source,
+          signal_id
+        FROM occurrence_payloads
+        ON CONFLICT (
+          timestamp_utc,
+          market,
+          venue,
+          asset,
+          timeframe,
+          state_hash
+        )
+        DO NOTHING
+        RETURNING 1
+      )
+      SELECT
+        (SELECT COUNT(*) FROM occurrence_payloads)::text AS processed_rows,
+        (SELECT COUNT(*) FROM inserted)::text AS emitted_occurrences
+    `,
+    params,
+  );
+
+  return {
+    processedRows: Number(result.rows[0]?.processed_rows ?? 0),
+    emittedOccurrences: Number(result.rows[0]?.emitted_occurrences ?? 0),
+  };
+}
+
+export async function storeMarketMonthlyVolatilityFromCandles(input: {
+  market: string;
+  venue?: string;
+  candles: MarketDailyCandle[];
+}): Promise<MarketMonthlyVolatilityResult> {
+  await ensureMarketMonthlyVolatilitySchema();
+
+  const market = normalizeIdentifierValue(input.market, "GLOBAL");
+  const venue = normalizeIdentifierValue(input.venue ?? input.market, market);
+  const startMonth = utcMonthStartYearsAgo(MONTHLY_VOLATILITY_LOOKBACK_YEARS);
+  const candlesByAsset = new Map<
+    string,
+    Array<{ timestamp: Date; close: number }>
+  >();
+
+  for (const candle of input.candles) {
+    const asset = normalizeAsset(candle.asset);
+    const timestamp =
+      candle.timestampUtc instanceof Date
+        ? candle.timestampUtc
+        : new Date(candle.timestampUtc);
+    const close = toOptionalFiniteNumber(candle.close);
+
+    if (
+      asset === "UNKNOWN" ||
+      !close ||
+      close <= 0 ||
+      !Number.isFinite(timestamp.getTime())
+    ) {
+      continue;
+    }
+
+    const assetCandles = candlesByAsset.get(asset) ?? [];
+    assetCandles.push({ timestamp, close });
+    candlesByAsset.set(asset, assetCandles);
+  }
+
+  type AssetMonthBucket = {
+    market: string;
+    venue: string;
+    asset: string;
+    monthStart: Date;
+    returns: number[];
+    sourceMin: Date;
+    sourceMax: Date;
+  };
+
+  const buckets = new Map<string, AssetMonthBucket>();
+  let candlesProcessed = 0;
+
+  for (const [asset, assetCandles] of candlesByAsset) {
+    assetCandles.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    let previousClose: number | null = null;
+
+    for (const candle of assetCandles) {
+      candlesProcessed += 1;
+      const close = candle.close;
+      if (
+        previousClose &&
+        previousClose > 0 &&
+        candle.timestamp >= startMonth
+      ) {
+        const returnPct = ((close - previousClose) / previousClose) * 100;
+        if (Number.isFinite(returnPct)) {
+          const monthStart = utcMonthStart(candle.timestamp);
+          const key = `${asset}:${monthStart.toISOString()}`;
+          const bucket =
+            buckets.get(key) ??
+            {
+              market,
+              venue,
+              asset,
+              monthStart,
+              returns: [],
+              sourceMin: candle.timestamp,
+              sourceMax: candle.timestamp,
+            };
+
+          bucket.returns.push(returnPct);
+          if (candle.timestamp < bucket.sourceMin) {
+            bucket.sourceMin = candle.timestamp;
+          }
+          if (candle.timestamp > bucket.sourceMax) {
+            bucket.sourceMax = candle.timestamp;
+          }
+          buckets.set(key, bucket);
+        }
+      }
+      previousClose = close;
+    }
+  }
+
+  const assetMonthRows = [...buckets.values()]
+    .filter((bucket) => bucket.returns.length)
+    .map((bucket) => {
+      const returnVolatility = standardDeviation(bucket.returns);
+      const averageAbsReturn = mean(bucket.returns.map((value) => Math.abs(value)));
+      const volatilityPressure = clamp(
+        returnVolatility * 14 + averageAbsReturn * 4,
+      );
+      const monthIndex = bucket.monthStart.getUTCMonth() + 1;
+
+      return {
+        market: bucket.market,
+        venue: bucket.venue,
+        asset: bucket.asset,
+        monthStart: bucket.monthStart,
+        year: bucket.monthStart.getUTCFullYear(),
+        monthIndex,
+        monthLabel: monthLabel(monthIndex),
+        volatilityPressure,
+        returnCount: bucket.returns.length,
+        sourceMin: bucket.sourceMin,
+        sourceMax: bucket.sourceMax,
+      };
+    });
+
+  if (!assetMonthRows.length) {
+    return {
+      market,
+      venue,
+      candlesProcessed,
+      assetMonthsSaved: 0,
+      monthsSaved: 0,
+    };
+  }
+
+  const valueSql = assetMonthRows
+    .map((_, index) => {
+      const offset = index * 11;
+      return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8}, $${offset + 9}, $${offset + 10}, $${offset + 11}, NOW())`;
+    })
+    .join(", ");
+  const params = assetMonthRows.flatMap((row) => [
+    row.market,
+    row.venue,
+    row.asset,
+    row.monthStart.toISOString(),
+    row.year,
+    row.monthIndex,
+    row.monthLabel,
+    row.volatilityPressure,
+    row.returnCount,
+    row.sourceMin.toISOString(),
+    row.sourceMax.toISOString(),
+  ]);
+
+  await pool.query(
+    `
+      INSERT INTO ${MARKET_MONTHLY_ASSET_VOLATILITY_TABLE} (
+        market,
+        venue,
+        asset,
+        month_start,
+        year,
+        month_index,
+        month_label,
+        volatility_pressure,
+        return_count,
+        source_min_timestamp_utc,
+        source_max_timestamp_utc,
+        refreshed_at
+      ) VALUES ${valueSql}
+      ON CONFLICT (market, venue, asset, month_start) DO UPDATE SET
+        year = EXCLUDED.year,
+        month_index = EXCLUDED.month_index,
+        month_label = EXCLUDED.month_label,
+        volatility_pressure = EXCLUDED.volatility_pressure,
+        return_count = EXCLUDED.return_count,
+        source_min_timestamp_utc = EXCLUDED.source_min_timestamp_utc,
+        source_max_timestamp_utc = EXCLUDED.source_max_timestamp_utc,
+        refreshed_at = EXCLUDED.refreshed_at
+    `,
+    params,
+  );
+
+  const monthStarts = Array.from(
+    new Set(assetMonthRows.map((row) => row.monthStart.toISOString())),
+  );
+  const aggregateResult = await pool.query<{ month_start: string }>(
+    `
+      INSERT INTO ${MARKET_MONTHLY_VOLATILITY_TABLE} (
+        market,
+        venue,
+        month_start,
+        year,
+        month_index,
+        month_label,
+        volatility_pressure,
+        observation_count,
+        source_min_timestamp_utc,
+        source_max_timestamp_utc,
+        refreshed_at
+      )
+      SELECT
+        market,
+        venue,
+        month_start,
+        EXTRACT(YEAR FROM month_start)::int AS year,
+        EXTRACT(MONTH FROM month_start)::int AS month_index,
+        to_char(month_start, 'Mon') AS month_label,
+        (
+          SUM(volatility_pressure * return_count)
+          / NULLIF(SUM(return_count), 0)
+        )::double precision AS volatility_pressure,
+        SUM(return_count)::int AS observation_count,
+        MIN(source_min_timestamp_utc) AS source_min_timestamp_utc,
+        MAX(source_max_timestamp_utc) AS source_max_timestamp_utc,
+        NOW() AS refreshed_at
+      FROM ${MARKET_MONTHLY_ASSET_VOLATILITY_TABLE}
+      WHERE market = $1
+        AND venue = $2
+        AND month_start = ANY($3::timestamptz[])
+      GROUP BY market, venue, month_start
+      ON CONFLICT (market, venue, month_start) DO UPDATE SET
+        year = EXCLUDED.year,
+        month_index = EXCLUDED.month_index,
+        month_label = EXCLUDED.month_label,
+        volatility_pressure = EXCLUDED.volatility_pressure,
+        observation_count = EXCLUDED.observation_count,
+        source_min_timestamp_utc = EXCLUDED.source_min_timestamp_utc,
+        source_max_timestamp_utc = EXCLUDED.source_max_timestamp_utc,
+        refreshed_at = EXCLUDED.refreshed_at
+      RETURNING month_start
+    `,
+    [market, venue, monthStarts],
+  );
+
+  return {
+    market,
+    venue,
+    candlesProcessed,
+    assetMonthsSaved: assetMonthRows.length,
+    monthsSaved: aggregateResult.rows.length,
+  };
+}
+
+export async function appendMarketContextOccurrence(
+  input: MarketContextInput,
+): Promise<string | null> {
+  await ensureMarketContextSchema();
+  return appendMarketContextOccurrenceInternal(input);
+}
+
+export async function appendLiveMarketContextOccurrences(
+  scope: SignalScope,
+  quotes: StockQuote[],
+  ingestionSource: string,
+): Promise<number> {
+  let emitted = 0;
+  for (const quote of quotes) {
+    try {
+      const occurrenceId = await appendMarketContextOccurrence(
+        quoteToContextInput(scope, quote, "live_runtime", ingestionSource),
+      );
+      if (occurrenceId) emitted += 1;
+    } catch (error) {
+      logContextPersistenceWarning(
+        error,
+        "Market context persistence unavailable; continuing signal storage",
+      );
+    }
+  }
+  return emitted;
+}
+
+async function availableColumns(tableName: string) {
+  const parts = tableName.split(".");
+  const table = parts[parts.length - 1];
+  const schema = parts.length === 2 ? parts[0] : "public";
+  const result = await pool.query<{ column_name: string }>(
+    `
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_schema = $1
+        AND table_name = $2
+    `,
+    [schema, table],
+  );
+  return new Set(result.rows.map((row) => row.column_name));
+}
+
+function firstColumn(columns: Set<string>, candidates: string[]) {
+  return candidates.find((candidate) => columns.has(candidate)) ?? null;
+}
+
+function replayRowToInput(
+  row: ReplaySourceRow,
+  request: ContextReplayRequest,
+): MarketContextInput {
+  const close = toFiniteNumber(row.close, 0);
+  const market = normalizeIdentifierValue(
+    String(row.market ?? request.market ?? ""),
+    "GLOBAL",
+  );
+  const venue = normalizeIdentifierValue(
+    String(row.venue ?? request.venue ?? market),
+    market,
+  );
+  return {
+    timestampUtc:
+      row.timestamp_utc instanceof Date
+        ? row.timestamp_utc.toISOString()
+        : new Date(row.timestamp_utc).toISOString(),
+    occurrenceOrigin: request.origin ?? "historical_backfill",
+    market,
+    venue,
+    asset: normalizeAsset(String(row.asset ?? request.asset ?? "")),
+    timeframe: normalizeIdentifierValue(
+      String(row.timeframe ?? request.timeframe ?? "1D"),
+      "1D",
+    ),
+    price: close,
+    open: toFiniteNumber(row.open, close),
+    high: toFiniteNumber(row.high, close),
+    low: toFiniteNumber(row.low, close),
+    close,
+    volume: toFiniteNumber(row.volume, 0),
+    history: [
+      toFiniteNumber(row.open, close),
+      toFiniteNumber(row.high, close),
+      toFiniteNumber(row.low, close),
+      close,
+    ],
+    ingestionSource: request.ingestionSource ?? "postgres_historical_replay",
+    emittedBy: "historical-replay-engine",
+  };
+}
+
+async function replayHistoricalMarketContextInternal(
+  request: ContextReplayRequest = {},
+): Promise<ContextReplayResult> {
+  const candleTable = request.candleTable ?? DEFAULT_CANDLE_TABLE;
+  const quotedTable = quoteQualifiedIdentifier(candleTable);
+  const jobId = randomUUID();
+
+  if (!(await tableExists(candleTable))) {
+    return {
+      jobId,
+      status: "skipped",
+      processedRows: 0,
+      emittedOccurrences: 0,
+      message: `Replay source table ${candleTable} was not found in the existing database.`,
+    };
+  }
+
+  const columns = await availableColumns(candleTable);
+  const timestampColumn = firstColumn(columns, [
+    "timestamp_utc",
+    "timestamp",
+    "time",
+    "occurred_at",
+    "date",
+  ]);
+  const assetColumn = firstColumn(columns, ["asset", "symbol", "ticker"]);
+  const marketColumn = firstColumn(columns, ["market", "exchange", "scope_code"]);
+  const venueColumn = firstColumn(columns, ["venue", "exchange", "market"]);
+  const timeframeColumn = firstColumn(columns, ["timeframe", "interval"]);
+  const openColumn = firstColumn(columns, ["open", "open_price"]);
+  const highColumn = firstColumn(columns, ["high", "high_price"]);
+  const lowColumn = firstColumn(columns, ["low", "low_price"]);
+  const closeColumn = firstColumn(columns, ["close", "close_price", "price"]);
+  const volumeColumn = firstColumn(columns, ["volume", "base_volume"]);
+
+  if (!timestampColumn || !assetColumn || !closeColumn) {
+    return {
+      jobId,
+      status: "skipped",
+      processedRows: 0,
+      emittedOccurrences: 0,
+      message: `Replay source ${candleTable} needs timestamp, asset/symbol, and close/price columns.`,
+    };
+  }
+
+  await pool.query(
+    `
+      INSERT INTO ${HISTORICAL_REPLAY_JOBS_TABLE} (
+        job_id,
+        status,
+        candle_table,
+        market,
+        venue,
+        asset,
+        timeframe
+      ) VALUES ($1, 'running', $2, $3, $4, $5, $6)
+    `,
+    [
+      jobId,
+      candleTable,
+      request.market ?? null,
+      request.venue ?? null,
+      request.asset ?? null,
+      request.timeframe ?? null,
+    ],
+  );
+
+  let processedRows = 0;
+  let emittedOccurrences = 0;
+  let lastTimestamp: string | null = null;
+  let lastMarket = "";
+  let lastVenue = "";
+  let lastAsset = "";
+  let lastTimeframe = "";
+  const batchSize = Math.min(
+    Math.max(Math.floor(request.batchSize ?? DEFAULT_REPLAY_BATCH_SIZE), 1),
+    10_000,
+  );
+  const filters: string[] = [];
+  const params: unknown[] = [];
+
+  function addFilter(column: string | null, value: string | undefined) {
+    if (!column || !value) return;
+    params.push(value.toUpperCase());
+    filters.push(`UPPER(${quoteIdent(column)}::text) = $${params.length}`);
+  }
+
+  addFilter(marketColumn, request.market);
+  addFilter(venueColumn, request.venue);
+  addFilter(assetColumn, request.asset);
+  addFilter(timeframeColumn, request.timeframe);
+
+  const marketOrderExpression = marketColumn
+    ? `COALESCE(${quoteIdent(marketColumn)}::text, '')`
+    : "''";
+  const venueOrderExpression = venueColumn
+    ? `COALESCE(${quoteIdent(venueColumn)}::text, '')`
+    : "''";
+  const timeframeOrderExpression = timeframeColumn
+    ? `COALESCE(${quoteIdent(timeframeColumn)}::text, '')`
+    : "''";
+
+  try {
+    while (true) {
+      const cursorParams = [...params];
+      const cursorFilters = [...filters];
+      if (lastTimestamp) {
+        cursorParams.push(
+          lastTimestamp,
+          lastTimestamp,
+          lastMarket,
+          lastVenue,
+          lastAsset,
+          lastTimeframe,
+        );
+        cursorFilters.push(
+          `(
+            ${quoteIdent(timestampColumn)} > $${cursorParams.length - 5}::timestamptz
+            OR (
+              ${quoteIdent(timestampColumn)} = $${cursorParams.length - 4}::timestamptz
+              AND (
+                ${marketOrderExpression},
+                ${venueOrderExpression},
+                ${quoteIdent(assetColumn)}::text,
+                ${timeframeOrderExpression}
+              ) > (
+                $${cursorParams.length - 3},
+                $${cursorParams.length - 2},
+                $${cursorParams.length - 1},
+                $${cursorParams.length}
+              )
+            )
+          )`,
+        );
+      }
+
+      cursorParams.push(batchSize);
+      const limitParam = cursorParams.length;
+      const whereClause = cursorFilters.length
+        ? `WHERE ${cursorFilters.join(" AND ")}`
+        : "";
+
+      const result = await pool.query<ReplaySourceRow>(
+        `
+          SELECT
+            ${quoteIdent(timestampColumn)} AS timestamp_utc,
+            ${marketColumn ? quoteIdent(marketColumn) : "NULL"} AS market,
+            ${venueColumn ? quoteIdent(venueColumn) : "NULL"} AS venue,
+            ${quoteIdent(assetColumn)} AS asset,
+            ${timeframeColumn ? quoteIdent(timeframeColumn) : "NULL"} AS timeframe,
+            ${openColumn ? quoteIdent(openColumn) : "NULL"} AS open,
+            ${highColumn ? quoteIdent(highColumn) : "NULL"} AS high,
+            ${lowColumn ? quoteIdent(lowColumn) : "NULL"} AS low,
+            ${quoteIdent(closeColumn)} AS close,
+            ${volumeColumn ? quoteIdent(volumeColumn) : "NULL"} AS volume
+          FROM ${quotedTable}
+          ${whereClause}
+          ORDER BY
+            ${quoteIdent(timestampColumn)} ASC,
+            ${marketOrderExpression} ASC,
+            ${venueOrderExpression} ASC,
+            ${quoteIdent(assetColumn)}::text ASC,
+            ${timeframeOrderExpression} ASC
+          LIMIT $${limitParam}
+        `,
+        cursorParams,
+      );
+
+      if (!result.rows.length) break;
+
+      for (const row of result.rows) {
+        processedRows += 1;
+        const occurrenceId = await appendMarketContextOccurrenceInternal(
+          replayRowToInput(row, request),
+        );
+        if (occurrenceId) emittedOccurrences += 1;
+        lastTimestamp =
+          row.timestamp_utc instanceof Date
+            ? row.timestamp_utc.toISOString()
+            : new Date(row.timestamp_utc).toISOString();
+        lastMarket = String(row.market ?? "");
+        lastVenue = String(row.venue ?? "");
+        lastAsset = String(row.asset ?? "");
+        lastTimeframe = String(row.timeframe ?? "");
+      }
+
+      await pool.query(
+        `
+          INSERT INTO ${HISTORICAL_REPLAY_CHECKPOINTS_TABLE} (
+            checkpoint_id,
+            job_id,
+            candle_table,
+            market,
+            venue,
+            asset,
+            timeframe,
+            last_timestamp_utc,
+            last_market,
+            last_venue,
+            last_asset,
+            last_timeframe,
+            processed_rows,
+            emitted_occurrences,
+            updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
+          ON CONFLICT (job_id)
+          DO UPDATE SET
+            last_timestamp_utc = EXCLUDED.last_timestamp_utc,
+            last_market = EXCLUDED.last_market,
+            last_venue = EXCLUDED.last_venue,
+            last_asset = EXCLUDED.last_asset,
+            last_timeframe = EXCLUDED.last_timeframe,
+            processed_rows = EXCLUDED.processed_rows,
+            emitted_occurrences = EXCLUDED.emitted_occurrences,
+            updated_at = NOW()
+        `,
+        [
+          randomUUID(),
+          jobId,
+          candleTable,
+          request.market ?? null,
+          request.venue ?? null,
+          request.asset ?? null,
+          request.timeframe ?? null,
+          lastTimestamp,
+          lastMarket,
+          lastVenue,
+          lastAsset,
+          lastTimeframe,
+          processedRows,
+          emittedOccurrences,
+        ],
+      );
+
+      if (result.rows.length < batchSize) break;
+    }
+
+    await pool.query(
+      `
+        UPDATE ${HISTORICAL_REPLAY_JOBS_TABLE}
+        SET
+          status = 'completed',
+          completed_at = NOW(),
+          processed_rows = $2,
+          emitted_occurrences = $3
+        WHERE job_id = $1
+      `,
+      [jobId, processedRows, emittedOccurrences],
+    );
+
+    return {
+      jobId,
+      status: "completed",
+      processedRows,
+      emittedOccurrences,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Replay failed";
+    await pool.query(
+      `
+        UPDATE ${HISTORICAL_REPLAY_JOBS_TABLE}
+        SET
+          status = 'failed',
+          completed_at = NOW(),
+          processed_rows = $2,
+          emitted_occurrences = $3,
+          last_error = $4
+        WHERE job_id = $1
+      `,
+      [jobId, processedRows, emittedOccurrences, message],
+    );
+    throw error;
+  }
+}
+
+export async function replayHistoricalMarketContext(
+  request: ContextReplayRequest = {},
+): Promise<ContextReplayResult> {
+  await ensureMarketContextSchema();
+  return replayHistoricalMarketContextInternal(request);
+}
+
+export async function hydrateMarketContextFromAvailableHistory(
+  request: ContextReplayRequest = {},
+): Promise<ContextReplayResult> {
+  await ensureMarketContextSchema();
+  const jobId = randomUUID();
+  const candleResult = await replayHistoricalMarketContextInternal(request);
+  const snapshotResult = await backfillMarketContextFromSignalSnapshots(request);
+  await backfillOccurrenceDetailRowsFromExistingOccurrences();
+
+  const processedRows = candleResult.processedRows + snapshotResult.processedRows;
+  const emittedOccurrences =
+    candleResult.emittedOccurrences + snapshotResult.emittedOccurrences;
+  const status =
+    candleResult.status === "failed"
+      ? "failed"
+      : processedRows > 0 || emittedOccurrences > 0
+        ? "completed"
+        : "skipped";
+
+  return {
+    jobId,
+    status,
+    processedRows,
+    emittedOccurrences,
+    message:
+      status === "skipped"
+        ? candleResult.message ?? "No historical source rows were available."
+        : undefined,
+  };
+}

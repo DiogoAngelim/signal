@@ -1,0 +1,332 @@
+[
+  {
+    "symbol": "ABQK.QA",
+    "name": "AHLI BANK Q.P.S.C.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ahli-bank-qpsc.svg"
+  },
+  {
+    "symbol": "AHCS.QA",
+    "name": "Aamal Company Q.S.C.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/aamal-qpsc.svg"
+  },
+  {
+    "symbol": "AKHI.QA",
+    "name": "Al Khaleej Takaful Group",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/al-khaleej-takaful-insurance-qpsc.svg"
+  },
+  {
+    "symbol": "BEMA.QA",
+    "name": "Damaan Islamic Insurance Company (Beema)",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/damaan-islamic-insurance-qpsc.svg"
+  },
+  {
+    "symbol": "BLDN.QA",
+    "name": "Baladna Q.P.S.C",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/baladna-qpsc.svg"
+  },
+  {
+    "symbol": "BRES.QA",
+    "name": "Barwa Real Estate Co.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/barwa-real-estate-qpsc.svg"
+  },
+  {
+    "symbol": "CBQK.QA",
+    "name": "Commercial Bank (Q.S.C.)",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/the-commercial-bank-psqc.svg"
+  },
+  {
+    "symbol": "DBIS.QA",
+    "name": "Dlala Brokerage and Investment Holding Company",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dlala-brokerage-and-investment-holding-qpsc.svg"
+  },
+  {
+    "symbol": "DHBK.QA",
+    "name": "Doha Bank",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/doha-bank-qpsc.svg"
+  },
+  {
+    "symbol": "DOHI.QA",
+    "name": "Doha Insurance Co.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/doha-insurance-group-qpsc.svg"
+  },
+  {
+    "symbol": "DUBK.QA",
+    "name": "Dukhan Bank Q.P.S.C.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dukhan-bank.svg"
+  },
+  {
+    "symbol": "ERES.QA",
+    "name": "Ezdan Holding Group",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ezdan-holding-group-qpsc.svg"
+  },
+  {
+    "symbol": "FALH.QA",
+    "name": "Al Faleh Educational Holding Co.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/al-faleh-educational-holding-qpsc.svg"
+  },
+  {
+    "symbol": "GISS.QA",
+    "name": "Gulf International Services QSC",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-international-services-qpsc.svg"
+  },
+  {
+    "symbol": "GWCS.QA",
+    "name": "Gulf Warehousing Co.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-warehousing-qpsc.svg"
+  },
+  {
+    "symbol": "IGRD.QA",
+    "name": "Estithmar Holding Q.P.S.C",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/investment-holding-group-qpsc.svg"
+  },
+  {
+    "symbol": "IHGS.QA",
+    "name": "Inma Holding Company",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/inma-holding-qpsc.svg"
+  },
+  {
+    "symbol": "IQCD.QA",
+    "name": "Industries of Qatar Co.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/industries-qatar-qpsc.svg"
+  },
+  {
+    "symbol": "MARK.QA",
+    "name": "AlRayan Bank",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/masraf-al-rayan-qpsc.svg"
+  },
+  {
+    "symbol": "MCCS.QA",
+    "name": "Mannai Corporation Q.P.S.C.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mannai-corporation-qpsc.svg"
+  },
+  {
+    "symbol": "MCGS.QA",
+    "name": "Medicare Group QSC",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/medicare-group-qpsc.svg"
+  },
+  {
+    "symbol": "MERS.QA",
+    "name": "Almeera Consumer Goods Co. QSC",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/al-meera-consumer-goods-qpsc.svg"
+  },
+  {
+    "symbol": "MEZA.QA",
+    "name": "Meeza QSTP LLC",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/meeza-qstp-llc.svg"
+  },
+  {
+    "symbol": "MFMS.QA",
+    "name": "Mosanada Facilities Management Services Q.P.S.C.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mosanada-facilities-management-services-qpsc.svg"
+  },
+  {
+    "symbol": "MHAR.QA",
+    "name": "Al Mahhar Holding Company QPSC",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/al-mahhar-qpsc.svg"
+  },
+  {
+    "symbol": "MKDM.QA",
+    "name": "Mekdam Holding Group Company",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mekdam-holding-group-qpsc.svg"
+  },
+  {
+    "symbol": "MPHC.QA",
+    "name": "Mesaieed Petrochemical Holding Company Q.S.C.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mesaieed-petrochemical-holding-qpsc.svg"
+  },
+  {
+    "symbol": "MRDS.QA",
+    "name": "Mazaya Real Estate Development Company",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mazaya-real-estate-development-qpsc.svg"
+  },
+  {
+    "symbol": "NLCS.QA",
+    "name": "Alijarah Holding",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/national-leasing-holding-qpsc.svg"
+  },
+  {
+    "symbol": "ORDS.QA",
+    "name": "Ooredoo Q.P.S.C",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ooredoo-qpsc.svg"
+  },
+  {
+    "symbol": "QAMC.QA",
+    "name": "Qatar Aluminium Manufacturing Company",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-aluminium-manufacturing-qpsc.svg"
+  },
+  {
+    "symbol": "QATI.QA",
+    "name": "Qatar Insurance Co.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-insurance-qspc.svg"
+  },
+  {
+    "symbol": "QCFS.QA",
+    "name": "Qatar Cinema & Film Distribution Co.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-cinema-and-film-distribution-qpsc.svg"
+  },
+  {
+    "symbol": "QEWS.QA",
+    "name": "Nebras Energy",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-electricity-and-water-qpsc.svg"
+  },
+  {
+    "symbol": "QFBQ.QA",
+    "name": "Lesha Bank L.L.C",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-first-bank-llc.svg"
+  },
+  {
+    "symbol": "QFLS.QA",
+    "name": "Qatar Fuel-Woqod QSC",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-fuel-qpsc.svg"
+  },
+  {
+    "symbol": "QGMD.QA",
+    "name": "Qatar German For Medical Devices",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatari-german-for-medical-devices-qpsc.svg"
+  },
+  {
+    "symbol": "QGRI.QA",
+    "name": "Qatar General Insurance & Reinsurance Company Q.P.S.C.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-general-insurance-and-reinsurance-qpsc.svg"
+  },
+  {
+    "symbol": "QGTS.QA",
+    "name": "Qatar Gas Transport Co.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-gas-transport-ltd-qpsc.svg"
+  },
+  {
+    "symbol": "QIBK.QA",
+    "name": "Qatar Islamic Bank",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-islamic-bank-qpsc.svg"
+  },
+  {
+    "symbol": "QIGD.QA",
+    "name": "Qatari Investors Group",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatari-investors-group-qpsc.svg"
+  },
+  {
+    "symbol": "QIIK.QA",
+    "name": "Qatar International Islamic Bank",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-international-islamic-bank-qpsc.svg"
+  },
+  {
+    "symbol": "QIMD.QA",
+    "name": "Qatar Industrial Manufacturing Co.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-industrial-manufacturing-qpsc.svg"
+  },
+  {
+    "symbol": "QISI.QA",
+    "name": "Qatar Islamic Insurance Group",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-islamic-insurance-group-qpsc.svg"
+  },
+  {
+    "symbol": "QLMI.QA",
+    "name": "QLM Life & Medical Insurance Company QPSC",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qlm-life-and-medical-insurance-qpsc.svg"
+  },
+  {
+    "symbol": "QNBK.QA",
+    "name": "Qatar National Bank QPSC",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-national-bank-qpsc.svg"
+  },
+  {
+    "symbol": "QNCD.QA",
+    "name": "Qatar National Cement Co.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-national-cement-qpsc.svg"
+  },
+  {
+    "symbol": "QNNS.QA",
+    "name": "Qatar Navigation QSC",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-navigation-qpsc.svg"
+  },
+  {
+    "symbol": "QOIS.QA",
+    "name": "Qatar Oman Investment Co.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-oman-investment-qpsc.svg"
+  },
+  {
+    "symbol": "SIIS.QA",
+    "name": "Salam International Investment Ltd.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/salam-international-investment-limited-qpsc.svg"
+  },
+  {
+    "symbol": "TQES.QA",
+    "name": "Qatar Electronic Systems Co. (Techno Q) QPSC",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/qatar-electronic-systems-qpsc.svg"
+  },
+  {
+    "symbol": "UDCD.QA",
+    "name": "United Development Co.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/united-development-qpsc.svg"
+  },
+  {
+    "symbol": "VFQS.QA",
+    "name": "Vodafone Qatar QSC",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/vodafone.svg"
+  },
+  {
+    "symbol": "WDAM.QA",
+    "name": "Widam Food Company Q. S. C",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/widam-food-qpsc.svg"
+  },
+  {
+    "symbol": "ZHCD.QA",
+    "name": "Zad Holding Co.",
+    "market": "QSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zad-holding-qpsc.svg"
+  }
+]

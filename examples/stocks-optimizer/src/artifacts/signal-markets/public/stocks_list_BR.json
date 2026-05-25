@@ -1,0 +1,1414 @@
+[
+  {
+    "image": "/vesple/optimalstocks/images/alliar.svg",
+    "symbol": "AALR3.SA",
+    "name": "ALLIAR ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ambev.svg",
+    "symbol": "ABEV3.SA",
+    "name": "AMBEV S/A ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/aeris-on-nm.svg",
+    "symbol": "AERI3.SA",
+    "name": "AERIS ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "AFLT3.SA",
+    "name": "AFLUENTE T ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/brasilagro.svg",
+    "symbol": "AGRO3.SA",
+    "name": "BRASILAGRO ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/agrogalaxy-on-nm.svg",
+    "symbol": "AGXY3.SA",
+    "name": "AGROGALAXY ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/allied-on-nm.svg",
+    "symbol": "ALLD3.SA",
+    "name": "ALLIED ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alpargatas.svg",
+    "symbol": "ALPA3.SA",
+    "name": "ALPARGATAS ON N1",
+    "market": "B3"
+  },
+  {
+    "symbol": "ALPK3.SA",
+    "name": "ESTAPAR ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/alupar.svg",
+    "symbol": "ALUP3.SA",
+    "name": "ALUPAR ON N2",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lojas-marisaon-nm.svg",
+    "symbol": "AMAR3.SA",
+    "name": "LOJAS MARISAON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ambipar.svg",
+    "symbol": "AMBP3.SA",
+    "name": "AMBIPAR ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/americanas.svg",
+    "symbol": "AMER3.SA",
+    "name": "AMERICANAS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/anima.svg",
+    "symbol": "ANIM3.SA",
+    "name": "ANIMA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/armac-on-ed-nm.svg",
+    "symbol": "ARML3.SA",
+    "name": "ARMAC ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/assai-on-nm.svg",
+    "symbol": "ASAI3.SA",
+    "name": "ASSAI ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "AURE3.SA",
+    "name": "AUREN ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "AVLL3.SA",
+    "name": "ALPHAVILLE ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "AZEV3.SA",
+    "name": "AZEVEDO ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/b3-on-nm.svg",
+    "symbol": "B3SA3.SA",
+    "name": "B3 ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "BALM3.SA",
+    "name": "BAUMER ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/amazonia-on-es.svg",
+    "symbol": "BAZA3.SA",
+    "name": "AMAZONIA ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/banco-do-brasil.svg",
+    "symbol": "BBAS3.SA",
+    "name": "BRASIL ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bradesco.svg",
+    "symbol": "BBDC3.SA",
+    "name": "BRADESCO ON N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bb-seguridade.svg",
+    "symbol": "BBSE3.SA",
+    "name": "BBSEGURIDADEON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/minerva-on-nm.svg",
+    "symbol": "BEEF3.SA",
+    "name": "MINERVA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/banestes-on-ed.svg",
+    "symbol": "BEES3.SA",
+    "name": "BANESTES ON",
+    "market": "B3"
+  },
+  {
+    "symbol": "BGIP3.SA",
+    "name": "BANESE ON",
+    "market": "B3"
+  },
+  {
+    "symbol": "BIOM3.SA",
+    "name": "BIOMM ON ES MA",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/blau-on-nm.svg",
+    "symbol": "BLAU3.SA",
+    "name": "BLAU ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/merc-brasil-pn-n1.svg",
+    "symbol": "BMEB3.SA",
+    "name": "MERC BRASIL ON N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bemobi-tech-on-nm.svg",
+    "symbol": "BMOB3.SA",
+    "name": "BEMOBI TECH ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/nord-brasil-on.svg",
+    "symbol": "BNBR3.SA",
+    "name": "NORD BRASIL ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/btgp.svg",
+    "symbol": "BPAC3.SA",
+    "name": "BTGP BANCO ON N2",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/bradespar.svg",
+    "symbol": "BRAP3.SA",
+    "name": "BRADESPAR ON N1",
+    "market": "B3"
+  },
+  {
+    "symbol": "BRGE3.SA",
+    "name": "ALFA CONSORCON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/braskem.svg",
+    "symbol": "BRKM3.SA",
+    "name": "BRASKEM ON N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/br-propert-on-nm.svg",
+    "symbol": "BRPR3.SA",
+    "name": "BR PROPERT ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/banrisul.svg",
+    "symbol": "BRSR3.SA",
+    "name": "BANRISUL ON N1",
+    "market": "B3"
+  },
+  {
+    "symbol": "CAMB3.SA",
+    "name": "CAMBUCI ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/camil.svg",
+    "symbol": "CAML3.SA",
+    "name": "CAMIL ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/meliuz.svg",
+    "symbol": "CASH3.SA",
+    "name": "MELIUZ ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cba-on-nm.svg",
+    "symbol": "CBAV3.SA",
+    "name": "CBA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cea-modas-on-nm.svg",
+    "symbol": "CEAB3.SA",
+    "name": "CEA MODAS ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "CEBR3.SA",
+    "name": "CEB ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/coelba-pna.svg",
+    "symbol": "CEEB3.SA",
+    "name": "COELBA ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ceee-d.svg",
+    "symbol": "CEED3.SA",
+    "name": "CEEE-D ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/comgas-on.svg",
+    "symbol": "CGAS3.SA",
+    "name": "COMGAS ON",
+    "market": "B3"
+  },
+  {
+    "symbol": "CGRA3.SA",
+    "name": "GRAZZIOTIN ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cemig.svg",
+    "symbol": "CMIG3.SA",
+    "name": "CEMIG ON N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/csn-mineracao.svg",
+    "symbol": "CMIN3.SA",
+    "name": "CSNMINERACAOON N2",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cogna.svg",
+    "symbol": "COGN3.SA",
+    "name": "COGNA ON ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cpfl-energia.svg",
+    "symbol": "CPFE3.SA",
+    "name": "CPFL ENERGIAON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cia-paranaense.svg",
+    "symbol": "CPLE3.SA",
+    "name": "COPEL ON N2",
+    "market": "B3"
+  },
+  {
+    "symbol": "CRIV3.SA",
+    "name": "ALFA FINANC ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cosan.svg",
+    "symbol": "CSAN3.SA",
+    "name": "COSAN ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cruzeiro-eduon-nm.svg",
+    "symbol": "CSED3.SA",
+    "name": "CRUZEIRO EDUON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/copasa.svg",
+    "symbol": "CSMG3.SA",
+    "name": "COPASA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/companhia-siderurgica-nacional.svg",
+    "symbol": "CSNA3.SA",
+    "name": "SID NACIONALON",
+    "market": "B3"
+  },
+  {
+    "symbol": "CSUD3.SA",
+    "name": "CSU DIGITAL ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cury-s-a-on-nm.svg",
+    "symbol": "CURY3.SA",
+    "name": "CURY S/A ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cvc-brasil-on-nm.svg",
+    "symbol": "CVCB3.SA",
+    "name": "CVC BRASIL ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/caixa-segurion.svg",
+    "symbol": "CXSE3.SA",
+    "name": "CAIXA SEGURION NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cyrela-realton-nm.svg",
+    "symbol": "CYRE3.SA",
+    "name": "CYRELA REALTON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dasa-on-nm.svg",
+    "symbol": "DASA3.SA",
+    "name": "DASA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/desktop-on-nm.svg",
+    "symbol": "DESK3.SA",
+    "name": "DESKTOP ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dexxos-par.svg",
+    "symbol": "DEXP3.SA",
+    "name": "DEXXOS PAR ON N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/direcional.svg",
+    "symbol": "DIRR3.SA",
+    "name": "DIRECIONAL ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "DMVF3.SA",
+    "name": "D1000VFARMA ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "DOTZ3.SA",
+    "name": "DOTZ SA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dexco-on-nm.svg",
+    "symbol": "DXCO3.SA",
+    "name": "DEXCO ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "EALT3.SA",
+    "name": "ACO ALTONA ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ecorodovias.svg",
+    "symbol": "ECOR3.SA",
+    "name": "ECORODOVIAS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/engie-brasilon-nm.svg",
+    "symbol": "EGIE3.SA",
+    "name": "ENGIE BRASILON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/centrais-eletr-bras-sa.svg",
+    "symbol": "ELET3.SA",
+    "name": "ELETROBRAS ON N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/embraer.svg",
+    "symbol": "EMBR3.SA",
+    "name": "EMBRAER ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/eneva.svg",
+    "symbol": "ENEV3.SA",
+    "name": "ENEVA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/energisa-unt-n2.svg",
+    "symbol": "ENGI3.SA",
+    "name": "ENERGISA ON N2",
+    "market": "B3"
+  },
+  {
+    "symbol": "ENJU3.SA",
+    "name": "ENJOEI ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/energisa-mt-on.svg",
+    "symbol": "ENMT3.SA",
+    "name": "ENERGISA MT ON",
+    "market": "B3"
+  },
+  {
+    "symbol": "EPAR3.SA",
+    "name": "EMBPAR S/A ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/eqtl-para-on.svg",
+    "symbol": "EQPA3.SA",
+    "name": "EQTL PARA ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/equatorial.svg",
+    "symbol": "EQTL3.SA",
+    "name": "EQUATORIAL ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/espacolaser-on-nm.svg",
+    "symbol": "ESPA3.SA",
+    "name": "ESPACOLASER ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/eternit.svg",
+    "symbol": "ETER3.SA",
+    "name": "ETERNIT ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/eucatex-pn-n1.svg",
+    "symbol": "EUCA3.SA",
+    "name": "EUCATEX ON N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/even.svg",
+    "symbol": "EVEN3.SA",
+    "name": "EVEN ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/eztec.svg",
+    "symbol": "EZTC3.SA",
+    "name": "EZTEC ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fer-heringeron-nm.svg",
+    "symbol": "FHER3.SA",
+    "name": "FER HERINGERON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/unifique-on-nm.svg",
+    "symbol": "FIQE3.SA",
+    "name": "UNIFIQUE ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fleury-on-nm.svg",
+    "symbol": "FLRY3.SA",
+    "name": "FLEURY ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/fras-le-on-n1.svg",
+    "symbol": "FRAS3.SA",
+    "name": "FRAS-LE ON EJ N1",
+    "market": "B3"
+  },
+  {
+    "symbol": "FRIO3.SA",
+    "name": "METALFRIO ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gafisa.svg",
+    "symbol": "GFSA3.SA",
+    "name": "GAFISA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gerdau.svg",
+    "symbol": "GGBR3.SA",
+    "name": "GERDAU ON N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gps-on-nm.svg",
+    "symbol": "GGPS3.SA",
+    "name": "GPS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/grupo-mateuson-nm.svg",
+    "symbol": "GMAT3.SA",
+    "name": "GRUPO MATEUSON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/gerdau.svg",
+    "symbol": "GOAU3.SA",
+    "name": "GERDAU MET ON N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/grendene.svg",
+    "symbol": "GRND3.SA",
+    "name": "GRENDENE ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/guararapes.svg",
+    "symbol": "GUAR3.SA",
+    "name": "GUARARAPES ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "HAGA3.SA",
+    "name": "HAGA S/A ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hapvida.svg",
+    "symbol": "HAPV3.SA",
+    "name": "HAPVIDA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/helbor.svg",
+    "symbol": "HBOR3.SA",
+    "name": "HELBOR ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "HBRE3.SA",
+    "name": "HBR REALTY ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hidrovias-on-nm.svg",
+    "symbol": "HBSA3.SA",
+    "name": "HIDROVIAS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/hypera.svg",
+    "symbol": "HYPE3.SA",
+    "name": "HYPERA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/infracomm-on-nm.svg",
+    "symbol": "IFCM3.SA",
+    "name": "INFRACOMM ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/iguatemi-saon-n1.svg",
+    "symbol": "IGTI3.SA",
+    "name": "IGUATEMI S.AON N1",
+    "market": "B3"
+  },
+  {
+    "symbol": "INEP3.SA",
+    "name": "INEPAR ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/intelbras-on-nm.svg",
+    "symbol": "INTB3.SA",
+    "name": "INTELBRAS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/irbbrasil-reon.svg",
+    "symbol": "IRBR3.SA",
+    "name": "IRBBRASIL REON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/itausa.svg",
+    "symbol": "ITSA3.SA",
+    "name": "ITAUSA ON EJ N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/itau-unibanco.svg",
+    "symbol": "ITUB3.SA",
+    "name": "ITAUUNIBANCOON N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/jallesmachadon-nm.svg",
+    "symbol": "JALL3.SA",
+    "name": "JALLESMACHADON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "JFEN3.SA",
+    "name": "JOAO FORTES ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/jhsf-part-on-nm.svg",
+    "symbol": "JHSF3.SA",
+    "name": "JHSF PART ON ED NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/jsl.svg",
+    "symbol": "JSLG3.SA",
+    "name": "JSL ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/kepler-weberon-eb.svg",
+    "symbol": "KEPL3.SA",
+    "name": "KEPLER WEBERON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/klabin.svg",
+    "symbol": "KLBN3.SA",
+    "name": "KLABIN S/A ON N2",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/terrasantapaon-nm.svg",
+    "symbol": "LAND3.SA",
+    "name": "TERRASANTAPAON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lavvi-on-nm.svg",
+    "symbol": "LAVV3.SA",
+    "name": "LAVVI ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/metal-leve.svg",
+    "symbol": "LEVE3.SA",
+    "name": "METAL LEVE ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/light.svg",
+    "symbol": "LIGT3.SA",
+    "name": "LIGHT S/A ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/quero-quero-on-nm.svg",
+    "symbol": "LJQQ3.SA",
+    "name": "QUERO-QUERO ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/log-commercial-properties.svg",
+    "symbol": "LOGG3.SA",
+    "name": "LOG COM PROPON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/log-in.svg",
+    "symbol": "LOGN3.SA",
+    "name": "LOG-IN ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lopes.svg",
+    "symbol": "LPSB3.SA",
+    "name": "LOPES BRASILON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/lojas-renner.svg",
+    "symbol": "LREN3.SA",
+    "name": "LOJAS RENNERON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "LUPA3.SA",
+    "name": "LUPATECH ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/locaweb.svg",
+    "symbol": "LWSA3.SA",
+    "name": "LOCAWEB ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mater-dei-on-nm.svg",
+    "symbol": "MATD3.SA",
+    "name": "MATER DEI ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/m-diasbranco.svg",
+    "symbol": "MDIA3.SA",
+    "name": "M.DIASBRANCOON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "MDNE3.SA",
+    "name": "MOURA DUBEUXON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/imc-s-a-on-nm.svg",
+    "symbol": "MEAL3.SA",
+    "name": "IMC S/A ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "MELK3.SA",
+    "name": "MELNICK ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/magaz-luiza-on-nm.svg",
+    "symbol": "MGLU3.SA",
+    "name": "MAGAZINE LUIZA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mills.svg",
+    "symbol": "MILS3.SA",
+    "name": "MILLS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/multilaser-on-ed-nm.svg",
+    "symbol": "MLAS3.SA",
+    "name": "MULTILASER ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "MNDL3.SA",
+    "name": "MUNDIAL ON",
+    "market": "B3"
+  },
+  {
+    "symbol": "MNPR3.SA",
+    "name": "MINUPAR ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/movida-on-nm.svg",
+    "symbol": "MOVI3.SA",
+    "name": "MOVIDA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/mrv.svg",
+    "symbol": "MRVE3.SA",
+    "name": "MRV ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "MTRE3.SA",
+    "name": "MITRE REALTYON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/multiplan-on-n2.svg",
+    "symbol": "MULT3.SA",
+    "name": "MULTIPLAN ON N2",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/iochp-maxionon.svg",
+    "symbol": "MYPK3.SA",
+    "name": "IOCHP-MAXIONON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/neoenergia.svg",
+    "symbol": "NEOE3.SA",
+    "name": "NEOENERGIA ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "NEXP3.SA",
+    "name": "NEXPE ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/neogrid.svg",
+    "symbol": "NGRD3.SA",
+    "name": "NEOGRID ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "NUTR3.SA",
+    "name": "NUTRIPLANT ON MA",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/odontoprev.svg",
+    "symbol": "ODPV3.SA",
+    "name": "ODONTOPREV ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ourofino-s-aon-nm.svg",
+    "symbol": "OFSA3.SA",
+    "name": "OUROFINO S/AON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/oi.svg",
+    "symbol": "OIBR3.SA",
+    "name": "OI ON N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/oncoclinicason-nm.svg",
+    "symbol": "ONCO3.SA",
+    "name": "ONCOCLINICASON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "OPCT3.SA",
+    "name": "OCEANPACT ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/orizon-on-nm.svg",
+    "symbol": "ORVR3.SA",
+    "name": "ORIZON ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "OSXB3.SA",
+    "name": "OSX BRASIL ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/cia-brasileira-distr-pao-de-acucar.svg",
+    "symbol": "PCAR3.SA",
+    "name": "P.ACUCAR-CBDON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pdg-realt.svg",
+    "symbol": "PDGR3.SA",
+    "name": "PDG REALT ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "PDTC3.SA",
+    "name": "PADTEC ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/brasileiro-petrobras.svg",
+    "symbol": "PETR3.SA",
+    "name": "PETROBRAS ON N2",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/petz.svg",
+    "symbol": "PETZ3.SA",
+    "name": "PETZ ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/profarma.svg",
+    "symbol": "PFRM3.SA",
+    "name": "PROFARMA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/pague-menos-on-nm.svg",
+    "symbol": "PGMN3.SA",
+    "name": "PAGUE MENOS ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "PINE3.SA",
+    "name": "PINE ON N2",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/plascar-parton.svg",
+    "symbol": "PLAS3.SA",
+    "name": "PLASCAR PARTON",
+    "market": "B3"
+  },
+  {
+    "symbol": "PLPL3.SA",
+    "name": "PLANOEPLANO ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "PMAM3.SA",
+    "name": "PARANAPANEMAON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/dimed.svg",
+    "symbol": "PNVL3.SA",
+    "name": "DIMED ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/marcopolo.svg",
+    "symbol": "POMO3.SA",
+    "name": "MARCOPOLO ON N2",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wilson-sons-on-eb-nm.svg",
+    "symbol": "PORT3.SA",
+    "name": "WILSON SONS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/positivo-tecon.svg",
+    "symbol": "POSI3.SA",
+    "name": "POSITIVO TECON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/petrorio-on-nm.svg",
+    "symbol": "PRIO3.SA",
+    "name": "PETRORIO ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "PRNR3.SA",
+    "name": "PRINER ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/porto-seguro.svg",
+    "symbol": "PSSA3.SA",
+    "name": "PORTO SEGUROON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/portobello.svg",
+    "symbol": "PTBL3.SA",
+    "name": "PORTOBELLO ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "PTNT3.SA",
+    "name": "PETTENATI ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/qualicorp-on-nm.svg",
+    "symbol": "QUAL3.SA",
+    "name": "QUALICORP ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/raiadrogasilon.svg",
+    "symbol": "RADL3.SA",
+    "name": "RAIADROGASILON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rumo-s-a.svg",
+    "symbol": "RAIL3.SA",
+    "name": "RUMO S.A. ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/celul-irani.svg",
+    "symbol": "RANI3.SA",
+    "name": "IRANI ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/randon.svg",
+    "symbol": "RAPT3.SA",
+    "name": "RANDON PART ON EJ N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/recrusul.svg",
+    "symbol": "RCSL3.SA",
+    "name": "RECRUSUL ON",
+    "market": "B3"
+  },
+  {
+    "symbol": "RDNI3.SA",
+    "name": "RNI ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rede-d-or.svg",
+    "symbol": "RDOR3.SA",
+    "name": "REDE D OR ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/petrorecsa-on-nm.svg",
+    "symbol": "RECV3.SA",
+    "name": "PETRORECSA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/rede-energiaon.svg",
+    "symbol": "REDE3.SA",
+    "name": "REDE ENERGIAON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/localiza.svg",
+    "symbol": "RENT3.SA",
+    "name": "LOCALIZA ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "RNEW3.SA",
+    "name": "RENOVA ON N2",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/industrias-romi.svg",
+    "symbol": "ROMI3.SA",
+    "name": "ROMI ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "RPAD3.SA",
+    "name": "ALFA HOLDINGON",
+    "market": "B3"
+  },
+  {
+    "symbol": "RPMG3.SA",
+    "name": "PET MANGUINHON",
+    "market": "B3"
+  },
+  {
+    "symbol": "RSID3.SA",
+    "name": "ROSSI RESID ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/santander.svg",
+    "symbol": "SANB3.SA",
+    "name": "SANTANDER BRON EJ",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sanepar.svg",
+    "symbol": "SAPR3.SA",
+    "name": "SANEPAR ON N2",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/grupo-sbf-on-nm.svg",
+    "symbol": "SBFG3.SA",
+    "name": "GRUPO SBF ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sabesp.svg",
+    "symbol": "SBSP3.SA",
+    "name": "SABESP ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sao-carlos-on-nm.svg",
+    "symbol": "SCAR3.SA",
+    "name": "SAO CARLOS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ser-educa.svg",
+    "symbol": "SEER3.SA",
+    "name": "SER EDUCA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sequoia-log-on-nm.svg",
+    "symbol": "SEQL3.SA",
+    "name": "SEQUOIA LOG ON NM",
+    "market": "B3"
+  },
+  {
+    "symbol": "SGPS3.SA",
+    "name": "SPRINGS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/time-for-fun.svg",
+    "symbol": "SHOW3.SA",
+    "name": "TIME FOR FUNON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/slc-agricola.svg",
+    "symbol": "SLCE3.SA",
+    "name": "SLC AGRICOLAON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/saraiva.svg",
+    "symbol": "SLED3.SA",
+    "name": "SARAIVA LIVRON N2",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/smart-fit-on-nm.svg",
+    "symbol": "SMFT3.SA",
+    "name": "SMART FIT ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sao-martinhoon.svg",
+    "symbol": "SMTO3.SA",
+    "name": "SAO MARTINHOON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/sansuy-on.svg",
+    "symbol": "SNSY3.SA",
+    "name": "SANSUY ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/boa-safra-on-nm.svg",
+    "symbol": "SOJA3.SA",
+    "name": "BOA SAFRA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/suzano.svg",
+    "symbol": "SUZB3.SA",
+    "name": "SUZANO S.A. ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/syn-prop-tecon-nm.svg",
+    "symbol": "SYNE3.SA",
+    "name": "SYN PROP TECON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/taesa.svg",
+    "symbol": "TAEE3.SA",
+    "name": "TAESA ON N2",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/taurus-armas.svg",
+    "symbol": "TASA3.SA",
+    "name": "TAURUS ARMASON N2",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tecnisa.svg",
+    "symbol": "TCSA3.SA",
+    "name": "TECNISA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/grupotechnos.svg",
+    "symbol": "TECN3.SA",
+    "name": "TECHNOS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/telebras-pn.svg",
+    "symbol": "TELB3.SA",
+    "name": "TELEBRAS ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tenda.svg",
+    "symbol": "TEND3.SA",
+    "name": "TENDA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tegma.svg",
+    "symbol": "TGMA3.SA",
+    "name": "TEGMA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tim-participacoes.svg",
+    "symbol": "TIMS3.SA",
+    "name": "TIM ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/totvs.svg",
+    "symbol": "TOTS3.SA",
+    "name": "TOTVS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/triunfo-parton-nm.svg",
+    "symbol": "TPIS3.SA",
+    "name": "TRIUNFO PARTON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tc-on-nm.svg",
+    "symbol": "TRAD3.SA",
+    "name": "TC ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/trisul.svg",
+    "symbol": "TRIS3.SA",
+    "name": "TRISUL ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/3tentos-on-nm.svg",
+    "symbol": "TTEN3.SA",
+    "name": "3TENTOS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/tupy.svg",
+    "symbol": "TUPY3.SA",
+    "name": "TUPY ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/unicasa-on-nm.svg",
+    "symbol": "UCAS3.SA",
+    "name": "UNICASA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/ultrapar-participacoes.svg",
+    "symbol": "UGPA3.SA",
+    "name": "ULTRAPAR ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/unipar.svg",
+    "symbol": "UNIP3.SA",
+    "name": "UNIPAR ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/usiminas-pna-n1.svg",
+    "symbol": "USIM3.SA",
+    "name": "USIMINAS ON N1",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vale.svg",
+    "symbol": "VALE3.SA",
+    "name": "VALE ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vamos-on-nm.svg",
+    "symbol": "VAMO3.SA",
+    "name": "VAMOS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vibra-on-nm.svg",
+    "symbol": "VBBR3.SA",
+    "name": "VIBRA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vittia-on-ed-nm.svg",
+    "symbol": "VITT3.SA",
+    "name": "VITTIA ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vivara-sa-on-nm.svg",
+    "symbol": "VIVA3.SA",
+    "name": "VIVARA S.A. ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/viver-on-nm.svg",
+    "symbol": "VIVR3.SA",
+    "name": "VIVER ON ES NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/telefonica.svg",
+    "symbol": "VIVT3.SA",
+    "name": "TELEF BRASILON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/valid.svg",
+    "symbol": "VLID3.SA",
+    "name": "VALID ON EJ NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/le-lis-blanc.svg",
+    "symbol": "VSTE3.SA",
+    "name": "VESTE ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/vulcabras.svg",
+    "symbol": "VULC3.SA",
+    "name": "VULCABRAS ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/viveo-on-nm.svg",
+    "symbol": "VVEO3.SA",
+    "name": "VIVEO ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/weg.svg",
+    "symbol": "WEGE3.SA",
+    "name": "WEG ON ED NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/westwing-on-nm.svg",
+    "symbol": "WEST3.SA",
+    "name": "WESTWING ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/whirlpool-on.svg",
+    "symbol": "WHRL3.SA",
+    "name": "WHIRLPOOL ON",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/wiz-s-a.svg",
+    "symbol": "WIZC3.SA",
+    "name": "WIZ CO ON NM",
+    "market": "B3"
+  },
+  {
+    "image": "/vesple/optimalstocks/images/yduqs-part-on-nm.svg",
+    "symbol": "YDUQ3.SA",
+    "name": "YDUQS PART ON NM",
+    "market": "B3"
+  }
+]

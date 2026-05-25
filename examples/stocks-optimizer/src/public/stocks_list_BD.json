@@ -1,0 +1,1784 @@
+[
+  {
+    "symbol": "ACFL",
+    "name": "Aman Cotton Fibrous PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/aman-cotton-fibrous-ltd.svg"
+  },
+  {
+    "symbol": "ACI",
+    "name": "Advanced Chemical Industries PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/advanced-chemical-industries-ltd.svg"
+  },
+  {
+    "symbol": "AIL",
+    "name": "Alif Industries Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/alif-industries-ltd.svg"
+  },
+  {
+    "symbol": "ALIF",
+    "name": "Alif Manufacturing Company Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/alif-industries-ltd.svg"
+  },
+  {
+    "symbol": "AOL",
+    "name": "Associated Oxygen Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/associated-oxygen-ltd.svg"
+  },
+  {
+    "symbol": "BBS",
+    "name": "Bangladesh Building Systems PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/bangladesh-building-system-ltd.svg"
+  },
+  {
+    "symbol": "BIFC",
+    "name": "Bangladesh Industrial Finance Company Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/bangladesh-industrial-finance-co-ltd.svg"
+  },
+  {
+    "symbol": "BSC",
+    "name": "Bangladesh Shipping Corporation",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/bangladesh-shipping-co-ltd-bsc.svg"
+  },
+  {
+    "symbol": "CENTRALINS",
+    "name": "Central Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/central-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "CENTRALPHL",
+    "name": "Central Pharmaceuticals Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/central-pharmaceuticals-ltd.svg"
+  },
+  {
+    "symbol": "CITYBANK",
+    "name": "City Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/the-city-bank-ltd.svg"
+  },
+  {
+    "symbol": "CITYGENINS",
+    "name": "City Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/city-general-insurance-company-ltd.svg"
+  },
+  {
+    "symbol": "CLICL",
+    "name": "Chartered Life Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/chartered-life-insurance-company-ltd.svg"
+  },
+  {
+    "symbol": "CNATEX",
+    "name": "C & A Textiles Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/c-and-a-textiles-ltd.svg"
+  },
+  {
+    "symbol": "CONFIDCEM",
+    "name": "Confidence Cement PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/confidence-cement-co-ltd.svg"
+  },
+  {
+    "symbol": "CONTININS",
+    "name": "Continental Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/continental-insurance-ltd.svg"
+  },
+  {
+    "symbol": "COPPERTECH",
+    "name": "Coppertech Industries Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/coppertech-industries-ltd.svg"
+  },
+  {
+    "symbol": "CROWNCEMNT",
+    "name": "Crown Cement PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/crown-cement-plc.svg"
+  },
+  {
+    "symbol": "CRYSTALINS",
+    "name": "Crystal Insurance Company Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/crystal-insurance-company-ltd.svg"
+  },
+  {
+    "symbol": "CVOPRL",
+    "name": "CVO Petrochemical Refinery PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/cvo-petrochemical-refinery-ltd.svg"
+  },
+  {
+    "symbol": "DACCADYE",
+    "name": "Dacca Dyeing and Manufacturing Company Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/the-dacca-dyeing-and-manufacturing-co-ltd.svg"
+  },
+  {
+    "symbol": "DAFODILCOM",
+    "name": "Daffodil Computers PLC.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/daffodil-computers-ltd.svg"
+  },
+  {
+    "symbol": "DBH",
+    "name": "DBH Finance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/dbh-finance-plc.svg"
+  },
+  {
+    "symbol": "DELTALIFE",
+    "name": "Delta Life Insurance Company Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-life-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "DELTASPINN",
+    "name": "Delta Spinners Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-spinners-ltd.svg"
+  },
+  {
+    "symbol": "DESCO",
+    "name": "Dhaka Electric Supply Co. Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/dhaka-electric-supply-co-ltd.svg"
+  },
+  {
+    "symbol": "DESHBANDHU",
+    "name": "Deshbandhu Polymer Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/deshbandhu-polymer-ltd.svg"
+  },
+  {
+    "symbol": "DGIC",
+    "name": "Desh General Insurance Company Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/desh-general-insurance-company-ltd.svg"
+  },
+  {
+    "symbol": "DHAKABANK",
+    "name": "Dhaka Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/dhaka-bank-ltd.svg"
+  },
+  {
+    "symbol": "DHAKAINS",
+    "name": "Dhaka Insurance Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/dhaka-insurance-ltd.svg"
+  },
+  {
+    "symbol": "DOMINAGE",
+    "name": "Dominage Steel Building Systems Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/dominage-steel-building-systems-ltd.svg"
+  },
+  {
+    "symbol": "DOREENPWR",
+    "name": "Doreen Power Generations & Systems Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/doreen-power-generations-and-systems-ltd.svg"
+  },
+  {
+    "symbol": "DSHGARME",
+    "name": "Desh Garments Limited.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/desh-garments-ltd.svg"
+  },
+  {
+    "symbol": "DSSL",
+    "name": "Dragon Sweater & Spinning Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/dragon-sweater-and-spinning-ltd.svg"
+  },
+  {
+    "symbol": "DULAMIACOT",
+    "name": "Dulamia Cotton Spinning Mills Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/dulamia-cotton-spinning-mills-ltd.svg"
+  },
+  {
+    "symbol": "DUTCHBANGL",
+    "name": "Dutch-Bangla Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/dutch-bangla-bank-ltd.svg"
+  },
+  {
+    "symbol": "EASTERNINS",
+    "name": "Eastern Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/eastern-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "EASTLAND",
+    "name": "Eastland Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/eastland-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "EASTRNLUB",
+    "name": "Eastern Lubricants Blenders PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/eastern-lubricants-blenders-ltd.svg"
+  },
+  {
+    "symbol": "EBL",
+    "name": "Eastern Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/ebl-nrb-mutual-fund.svg"
+  },
+  {
+    "symbol": "ECABLES",
+    "name": "Eastern Cables Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/eastern-cables-ltd.svg"
+  },
+  {
+    "symbol": "EGEN",
+    "name": "eGeneration PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/egeneration-ltd.svg"
+  },
+  {
+    "symbol": "EHL",
+    "name": "Eastern Housing Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/eastern-housing-ltd.svg"
+  },
+  {
+    "symbol": "EIL",
+    "name": "Express Insurance Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/express-insurance-ltd.svg"
+  },
+  {
+    "symbol": "EMERALDOIL",
+    "name": "Emerald Oil Industries Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/emerald-oil-industries-ltd.svg"
+  },
+  {
+    "symbol": "ENVOYTEX",
+    "name": "Envoy Textiles Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/envoy-textiles-ltd.svg"
+  },
+  {
+    "symbol": "EPGL",
+    "name": "Energypac Power Generation PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/energypac-power-generation-ltd.svg"
+  },
+  {
+    "symbol": "ESQUIRENIT",
+    "name": "Esquire Knit Composite PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/esquire-knit-composite-plc.svg"
+  },
+  {
+    "symbol": "ETL",
+    "name": "Evince Textiles Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/evince-textiles-ltd.svg"
+  },
+  {
+    "symbol": "EXIMBANK",
+    "name": "Export Import Bank of Bangladesh PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/export-import-bank-of-bangladesh-ltd.svg"
+  },
+  {
+    "symbol": "FAMILYTEX",
+    "name": "Familytex (BD) Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/familytex-bd-ltd.svg"
+  },
+  {
+    "symbol": "FARCHEM",
+    "name": "FAR Chemicals Industries Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/far-chemicals-industries-ltd.svg"
+  },
+  {
+    "symbol": "FAREASTFIN",
+    "name": "Fareast Finance & Investment Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/fareast-finance-and-investment-ltd.svg"
+  },
+  {
+    "symbol": "FAREASTLIF",
+    "name": "Fareast Islami Life Insurance Company Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/fareast-islami-life-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "FASFIN",
+    "name": "FAS Finance & Investment Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/fas-finance-and-investment-ltd.svg"
+  },
+  {
+    "symbol": "FEDERALINS",
+    "name": "Federal Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/federal-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "FEKDIL",
+    "name": "Far East Knitting & Dyeing Industries PLC.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/far-east-knitting-and-dyeing-industries-ltd.svg"
+  },
+  {
+    "symbol": "FINEFOODS",
+    "name": "Fine Foods Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/fine-foods-ltd.svg"
+  },
+  {
+    "symbol": "FIRSTFIN",
+    "name": "First Finance Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/first-finance-ltd.svg"
+  },
+  {
+    "symbol": "FIRSTSBANK",
+    "name": "First Security Islami Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/first-security-islami-bank-ltd.svg"
+  },
+  {
+    "symbol": "FORTUNE",
+    "name": "Fortune Shoes Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/fortune-shoes-ltd.svg"
+  },
+  {
+    "symbol": "FUWANGCER",
+    "name": "Fu-Wang Ceramic Industry Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/fu-wang-ceramic-industry-ltd.svg"
+  },
+  {
+    "symbol": "FUWANGFOOD",
+    "name": "Fu-Wang Foods Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/fu-wang-foods-ltd.svg"
+  },
+  {
+    "symbol": "GBBPOWER",
+    "name": "GBB POWER Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/gbb-power-ltd.svg"
+  },
+  {
+    "symbol": "GEMINISEA",
+    "name": "Gemini Sea Food PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/gemini-sea-food-ltd.svg"
+  },
+  {
+    "symbol": "GENEXIL",
+    "name": "Genex Infosys PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/genex-infosys-ltd.svg"
+  },
+  {
+    "symbol": "GENNEXT",
+    "name": "Generation Next Fashions Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/generation-next-fashions-ltd.svg"
+  },
+  {
+    "symbol": "GHAIL",
+    "name": "Golden Harvest Agro Industries Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/golden-harvest-agro-industries-ltd.svg"
+  },
+  {
+    "symbol": "GHCL",
+    "name": "Global Heavy Chemicals Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/global-heavy-chemicals-ltd.svg"
+  },
+  {
+    "symbol": "GIB",
+    "name": "Global Islami Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/global-islami-bank-ltd.svg"
+  },
+  {
+    "symbol": "GLOBALINS",
+    "name": "Global Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/global-insurance-ltd.svg"
+  },
+  {
+    "symbol": "GOLDENSON",
+    "name": "Golden Son Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/golden-son-ltd.svg"
+  },
+  {
+    "symbol": "GP",
+    "name": "Grameenphone Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/grameenphone-ltd.svg"
+  },
+  {
+    "symbol": "GPHISPAT",
+    "name": "GPH Ispat Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/gph-ispat-ltd.svg"
+  },
+  {
+    "symbol": "GQBALLPEN",
+    "name": "G.Q. Ball Pen Industries Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/gq-ball-pen-industries-ltd.svg"
+  },
+  {
+    "symbol": "GREENDELT",
+    "name": "Green Delta Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/green-delta-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "GSPFINANCE",
+    "name": "GSP Finance Company PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/gsp-finance-company-bangladesh-ltd.svg"
+  },
+  {
+    "symbol": "HAKKANIPUL",
+    "name": "Hakkani Pulp & Paper Mills PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/hakkani-pulp-and-paper-mills-ltd.svg"
+  },
+  {
+    "symbol": "HAMI",
+    "name": "Hami Industries PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/imam-button-industries-ltd.svg"
+  },
+  {
+    "symbol": "HEIDELBCEM",
+    "name": "Heidelberg Materials Bangladesh PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/heidelberg-cement-bangladesh-ltd.svg"
+  },
+  {
+    "symbol": "HFL",
+    "name": "Hamid Fabrics PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/hamid-fabrics-ltd.svg"
+  },
+  {
+    "symbol": "HRTEX",
+    "name": "H.R. Textile Mills Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/hrtextile-mills-ltd.svg"
+  },
+  {
+    "symbol": "HWAWELLTEX",
+    "name": "Hwa Well Textiles (BD)PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/hwa-well-textiles-bd-ltd.svg"
+  },
+  {
+    "symbol": "IBNSINA",
+    "name": "BN SINA Pharmaceutical Industry PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/the-ibn-sina-pharmaceutical-industry-plc.svg"
+  },
+  {
+    "symbol": "IBP",
+    "name": "Indo-Bangla Pharmaceuticals Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/indo-bangla-pharmaceuticals-ltd.svg"
+  },
+  {
+    "symbol": "ICB",
+    "name": "Investment Corporation of Bangladesh",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/investment-of-bangladesh-icb.svg"
+  },
+  {
+    "symbol": "ICBIBANK",
+    "name": "ICB Islamic Bank Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/icb-islamic-bank-ltd.svg"
+  },
+  {
+    "symbol": "ICICL",
+    "name": "Islami Commercial Insurance PLC.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/islami-commercial-insurance-company-ltd.svg"
+  },
+  {
+    "symbol": "IDLC",
+    "name": "IDLC Finance PLC.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/idlc-finance-ltd.svg"
+  },
+  {
+    "symbol": "IFADAUTOS",
+    "name": "IFAD Autos PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/ifad-autos-ltd.svg"
+  },
+  {
+    "symbol": "IFIC",
+    "name": "IFIC Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/ific-bank-plc.svg"
+  },
+  {
+    "symbol": "ILFSL",
+    "name": "International Leasing and Financial Services Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/international-leasing-and-financial-services-ltd.svg"
+  },
+  {
+    "symbol": "INDEXAGRO",
+    "name": "Index Agro Industries Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/index-agro-industries-ltd.svg"
+  },
+  {
+    "symbol": "INTECH",
+    "name": "Intech Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/intech-ltd.svg"
+  },
+  {
+    "symbol": "INTRACO",
+    "name": "Intraco Refueling Station PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/intraco-refueling-station-ltd.svg"
+  },
+  {
+    "symbol": "IPDC",
+    "name": "IPDC Finance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/ipdc-finance-ltd.svg"
+  },
+  {
+    "symbol": "ISLAMIBANK",
+    "name": "Islami Bank Bangladesh PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/islami-bank-bangladesh-ltd.svg"
+  },
+  {
+    "symbol": "ISLAMICFIN",
+    "name": "Islamic Finance & Investment PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/islamic-finance-and-investment-ltd.svg"
+  },
+  {
+    "symbol": "ISLAMIINS",
+    "name": "Islami Insurance Bangladesh Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/islami-insurance-bangladesh-ltd.svg"
+  },
+  {
+    "symbol": "ISNLTD",
+    "name": "Information Services Network Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/information-services-network-ltd.svg"
+  },
+  {
+    "symbol": "ITC",
+    "name": "IT Consultants PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/information-technology-consultants-ltd.svg"
+  },
+  {
+    "symbol": "JAMUNABANK",
+    "name": "Jamuna Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/jamuna-bank-ltd.svg"
+  },
+  {
+    "symbol": "JAMUNAOIL",
+    "name": "Jamuna Oil Company Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/jamuna-oil-company-ltd.svg"
+  },
+  {
+    "symbol": "JANATAINS",
+    "name": "Janata Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/janata-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "JHRML",
+    "name": "JMI Hospital Requisite Manufacturing Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/jmi-hospital-requisite-manufacturing-ltd.svg"
+  },
+  {
+    "symbol": "JMISMDL",
+    "name": "JMI Syringes & Medical Devices Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/jmi-syringes-and-medical-devices-ltd.svg"
+  },
+  {
+    "symbol": "JUTESPINN",
+    "name": "Jute Spinners Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/jute-spinners-ltd.svg"
+  },
+  {
+    "symbol": "KARNAPHULI",
+    "name": "Karnaphuli Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/karnaphuli-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "KAY&QUE",
+    "name": "Kay and Que (Bangladesh) Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/kay-and-que-bangladesh-ltd.svg"
+  },
+  {
+    "symbol": "KBPPWBIL",
+    "name": "Khan Brothers PP Woven Bag Industries Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/khan-brothers-pp-woven-bag-industries-ltd.svg"
+  },
+  {
+    "symbol": "KDSALTD",
+    "name": "KDS Accessories Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/kds-accessories-ltd.svg"
+  },
+  {
+    "symbol": "KEYACOSMET",
+    "name": "Keya Cosmetic Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/keya-cosmetics-ltd.svg"
+  },
+  {
+    "symbol": "KOHINOOR",
+    "name": "Kohinoor Chemical Co. (Bangladesh) Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/kohinoor-chemical-industries-ltd.svg"
+  },
+  {
+    "symbol": "KPCL",
+    "name": "Khulna Power Company Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/khulna-power-co-ltd.svg"
+  },
+  {
+    "symbol": "KPPL",
+    "name": "Khulna Printing & Packaging Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/khulna-printing-and-packaging-ltd.svg"
+  },
+  {
+    "symbol": "KTL",
+    "name": "Kattali Textile Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/kattali-textile-ltd.svg"
+  },
+  {
+    "symbol": "LANKABAFIN",
+    "name": "LankaBangla Finance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/lankabangla-finance-ltd.svg"
+  },
+  {
+    "symbol": "LBSL",
+    "name": "LANKABANGLA SECURITIES PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/lankabangla-securities-ltd.svg"
+  },
+  {
+    "symbol": "LEGACYFOOT",
+    "name": "Legacy Footwear Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/legacy-footwear-ltd.svg"
+  },
+  {
+    "symbol": "LHB",
+    "name": "LafargeHolcim Bangladesh PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/lafargeholcim-bangladesh.svg"
+  },
+  {
+    "symbol": "LIBRAINFU",
+    "name": "Libra Infusions Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/libra-infusions-ltd.svg"
+  },
+  {
+    "symbol": "LINDEBD",
+    "name": "Linde Bangladesh Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/linde-bangladesh-ltd.svg"
+  },
+  {
+    "symbol": "LOVELLO",
+    "name": "Taufika Foods and Lovello Ice-cream PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/taufika-foods-and-lovello-ice-cream-plc.svg"
+  },
+  {
+    "symbol": "LRBDL",
+    "name": "Lub-rref (Bangladesh) Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/lub-rref-bangladesh-ltd.svg"
+  },
+  {
+    "symbol": "MAGURAPLEX",
+    "name": "Magura Multiplex PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/paper-processing-and-packaging-ltd.svg"
+  },
+  {
+    "symbol": "MAKSONSPIN",
+    "name": "Maksons Spinning Mills PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/maksons-spinning-mills-ltd.svg"
+  },
+  {
+    "symbol": "MALEKSPIN",
+    "name": "Malek Spinning Mills PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/malek-spinning-mills-ltd.svg"
+  },
+  {
+    "symbol": "MARICO",
+    "name": "Marico Bangladesh Limited.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/marico-bangladesh-ltd.svg"
+  },
+  {
+    "symbol": "MATINSPINN",
+    "name": "Matin Spinning PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/matin-spinning-plc.svg"
+  },
+  {
+    "symbol": "MEGCONMILK",
+    "name": "Meghna Condensed Milk Industries Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/meghna-condensed-milk-industries-ltd.svg"
+  },
+  {
+    "symbol": "MEGHNACEM",
+    "name": "Meghna Cement Mills PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/meghna-cement-mills-ltd.svg"
+  },
+  {
+    "symbol": "MEGHNAINS",
+    "name": "Meghna Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/meghna-insurance-company-ltd.svg"
+  },
+  {
+    "symbol": "MEGHNALIFE",
+    "name": "Meghna Life Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/meghna-life-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "MEGHNAPET",
+    "name": "Meghna Pet Industries Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/meghna-pet-industries-ltd.svg"
+  },
+  {
+    "symbol": "MERCANBANK",
+    "name": "Mercantile Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/mercantile-bank-ltd.svg"
+  },
+  {
+    "symbol": "MERCINS",
+    "name": "Mercantile Islami Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/mercantile-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "METROSPIN",
+    "name": "Metro Spinning Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/metro-spinning-ltd.svg"
+  },
+  {
+    "symbol": "MHSML",
+    "name": "Mozaffar Hossain Spinning Mills Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/mozaffar-hossain-spinning-mills-ltd.svg"
+  },
+  {
+    "symbol": "MIDASFIN",
+    "name": "MIDAS Financing PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/midas-financing-ltd.svg"
+  },
+  {
+    "symbol": "MIDLANDBNK",
+    "name": "Midland Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/midland-bank-ltd.svg"
+  },
+  {
+    "symbol": "MIRACLEIND",
+    "name": "Miracle Industries Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/miracle-industries-ltd.svg"
+  },
+  {
+    "symbol": "MIRAKHTER",
+    "name": "Mir Akhter Hossain Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/mir-akhter-hossain-ltd.svg"
+  },
+  {
+    "symbol": "MITHUNKNIT",
+    "name": "Mithun Knitting & Dyeing (CEPZ) Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/mithun-knitting-and-dyeing-cepz-ltd.svg"
+  },
+  {
+    "symbol": "MJLBD",
+    "name": "MJL Bangladesh PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/mjl-bangladesh-plc.svg"
+  },
+  {
+    "symbol": "MLDYEING",
+    "name": "M.L. Dyeing & Textile Ind. PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/ml-dyeing-ltd.svg"
+  },
+  {
+    "symbol": "MONNOAGML",
+    "name": "Monno Agro & General Machinery Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/monno-agro-and-general-machinery-ltd.svg"
+  },
+  {
+    "symbol": "MONNOCERA",
+    "name": "Monno Ceramic Industries Limited.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/monno-ceramic-industries-ltd.svg"
+  },
+  {
+    "symbol": "MONNOFABR",
+    "name": "Monno Fabrics Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/monno-fabrics-ltd.svg"
+  },
+  {
+    "symbol": "MONOSPOOL",
+    "name": "Monospool Bangladesh PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/bangladesh-monospool-paper-manufacturing-company-ltd.svg"
+  },
+  {
+    "symbol": "MPETROLEUM",
+    "name": "Meghna Petroleum Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/meghna-petroleum-ltd.svg"
+  },
+  {
+    "symbol": "MTB",
+    "name": "Mutual Trust Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/mutual-trust-bank-ltd.svg"
+  },
+  {
+    "symbol": "NAHEEACP",
+    "name": "Nahee Aluminum Composite Panel PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/nahee-aluminum-composite-panel-ltd.svg"
+  },
+  {
+    "symbol": "NATLIFEINS",
+    "name": "National Life Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/national-life-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "NAVANACNG",
+    "name": "Navana CNG Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/navana-cng-ltd.svg"
+  },
+  {
+    "symbol": "NAVANAPHAR",
+    "name": "Navana Pharmaceuticals PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/navana-pharmaceuticals-ltd.svg"
+  },
+  {
+    "symbol": "NBL",
+    "name": "National Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/national-bank-ltd.svg"
+  },
+  {
+    "symbol": "NCCBANK",
+    "name": "National Credit and Commerce Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/national-credit-and-commerce-bank-ltd.svg"
+  },
+  {
+    "symbol": "NEWLINE",
+    "name": "New Line Clothings Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/new-line-clothings-ltd.svg"
+  },
+  {
+    "symbol": "NFML",
+    "name": "National Feed Mill Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/national-feed-mill-ltd.svg"
+  },
+  {
+    "symbol": "NHFIL",
+    "name": "National Housing Finance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/national-housing-finance-and-investments-ltd.svg"
+  },
+  {
+    "symbol": "NITOLINS",
+    "name": "Nitol Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/nitol-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "NORTHERN",
+    "name": "Northern Jute Manufacturing Co. Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/northern-jute-manufacturing-co-ltd.svg"
+  },
+  {
+    "symbol": "NORTHRNINS",
+    "name": "Northern Islami Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/northern-islami-insurance-ltd.svg"
+  },
+  {
+    "symbol": "NPOLYMER",
+    "name": "National Polymer Industries PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/national-polymer-industries-plc.svg"
+  },
+  {
+    "symbol": "NRBBANK",
+    "name": "NRB Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/nrb-bank-plc.svg"
+  },
+  {
+    "symbol": "NRBCBANK",
+    "name": "NRBC Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/nrb-commercial-bank-ltd.svg"
+  },
+  {
+    "symbol": "NTC",
+    "name": "National Tea Company Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/national-tea-co-ltd.svg"
+  },
+  {
+    "symbol": "NTLTUBES",
+    "name": "National Tubes Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/national-tubes-ltd.svg"
+  },
+  {
+    "symbol": "NURANI",
+    "name": "Nurani Dyeing & Sweater Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/nurani-dyeing-and-sweater-ltd.svg"
+  },
+  {
+    "symbol": "OAL",
+    "name": "Olympic Accessories Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/olympic-accessories-ltd.svg"
+  },
+  {
+    "symbol": "OIMEX",
+    "name": "Oimex Electrode Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/oimex-electrode-ltd.svg"
+  },
+  {
+    "symbol": "OLYMPIC",
+    "name": "Olympic Industries PLC.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/olympic-industries-ltd.svg"
+  },
+  {
+    "symbol": "ONEBANKPLC",
+    "name": "One Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/one-bank-ltd.svg"
+  },
+  {
+    "symbol": "ORIONINFU",
+    "name": "Orion Infusion Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/orion-infusions-ltd.svg"
+  },
+  {
+    "symbol": "ORIONPHARM",
+    "name": "Orion Pharma Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/orion-pharma-ltd.svg"
+  },
+  {
+    "symbol": "PADMALIFE",
+    "name": "Padma Islami Life Insurance Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/padma-islami-life-insurance-limited.svg"
+  },
+  {
+    "symbol": "PADMAOIL",
+    "name": "Padma Oil PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/padma-oil-co-ltd.svg"
+  },
+  {
+    "symbol": "PARAMOUNT",
+    "name": "Paramount Insurance PLC.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/paramount-textile-ltd.svg"
+  },
+  {
+    "symbol": "PDL",
+    "name": "Pacific Denims Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/pacific-denims-ltd.svg"
+  },
+  {
+    "symbol": "PENINSULA",
+    "name": "The Peninsula Chittagong PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/the-peninsula-chittagong-ltd.svg"
+  },
+  {
+    "symbol": "PEOPLESINS",
+    "name": "Peoples Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/peoples-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "PHARMAID",
+    "name": "Pharma Aids Limited.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/pharma-aids-ltd.svg"
+  },
+  {
+    "symbol": "PHENIXINS",
+    "name": "Phoenix Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/phoenix-finance-and-investments-ltd.svg"
+  },
+  {
+    "symbol": "PHOENIXFIN",
+    "name": "Phoenix Finance and Investments Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/phoenix-finance-and-investments-ltd.svg"
+  },
+  {
+    "symbol": "PIONEERINS",
+    "name": "Pioneer Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/pioneer-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "PLFSL",
+    "name": "Peoples Leasing and Financial Services Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/people-s-leasing-and-financial-services-ltd.svg"
+  },
+  {
+    "symbol": "POPULARLIF",
+    "name": "Popular Life Insurance Co. Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/popular-life-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "POWERGRID",
+    "name": "Power Grid Co. of Bangladesh Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/power-grid-company-of-bangladesh-ltd.svg"
+  },
+  {
+    "symbol": "PRAGATIINS",
+    "name": "Pragati Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/pragati-insurance-ltd.svg"
+  },
+  {
+    "symbol": "PRAGATILIF",
+    "name": "Pragati Life Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/pragati-life-insurance-ltd.svg"
+  },
+  {
+    "symbol": "PREMIERBAN",
+    "name": "The Premier Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/the-premier-bank-ltd.svg"
+  },
+  {
+    "symbol": "PREMIERCEM",
+    "name": "Premier Cement Mills PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/premier-cement-mills-plc.svg"
+  },
+  {
+    "symbol": "PREMIERLEA",
+    "name": "Premier Leasing & Finance Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/premier-leasing-and-finance-ltd.svg"
+  },
+  {
+    "symbol": "PRIMEBANK",
+    "name": "Prime Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/prime-bank-ltd.svg"
+  },
+  {
+    "symbol": "PRIMEFIN",
+    "name": "Prime Finance and Investment Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/prime-finance-and-investment-ltd.svg"
+  },
+  {
+    "symbol": "PRIMEINSUR",
+    "name": "Prime Islami Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/prime-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "PRIMELIFE",
+    "name": "Prime Life Insurance Company Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/prime-islami-life-insurance-ltd.svg"
+  },
+  {
+    "symbol": "PRIMETEX",
+    "name": "Prime Textile Spining Mills Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/prime-textile-spinning-mills-ltd.svg"
+  },
+  {
+    "symbol": "PROGRESLIF",
+    "name": "Progressive Life Insurance Co. Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/progressive-life-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "PROVATIINS",
+    "name": "Provati Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/provati-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "PTL",
+    "name": "Paramount Textile PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/paramount-textile-ltd.svg"
+  },
+  {
+    "symbol": "PUBALIBANK",
+    "name": "Pubali Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/pubali-bank-ltd.svg"
+  },
+  {
+    "symbol": "PURABIGEN",
+    "name": "Purabi General Insurance Co. Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/purabi-general-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "QUASEMIND",
+    "name": "Quasem Industries Limited.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/quasem-industries-ltd.svg"
+  },
+  {
+    "symbol": "QUEENSOUTH",
+    "name": "Queen South Textile Mills Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/queen-south-textile-mills-ltd.svg"
+  },
+  {
+    "symbol": "RAHIMAFOOD",
+    "name": "Rahima Food Corporation Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/rahima-food-ltd.svg"
+  },
+  {
+    "symbol": "RAHIMTEXT",
+    "name": "Rahim Textile Mills Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/rahim-textile-mills-ltd.svg"
+  },
+  {
+    "symbol": "RAKCERAMIC",
+    "name": "RAK Ceramics (Baneladesh) Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/rak-ceramics-bangladesh-ltd.svg"
+  },
+  {
+    "symbol": "RANFOUNDRY",
+    "name": "Rangpur Foundry Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/rangpur-foundry-ltd.svg"
+  },
+  {
+    "symbol": "RDFOOD",
+    "name": "Rangpur Dairy and Food Products Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/rangpur-dairy-and-food-products-ltd.svg"
+  },
+  {
+    "symbol": "RECKITTBEN",
+    "name": "Reckitt Benckiser (Bangladesh) PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/reckitt-benckiser-bangladesh-plc.svg"
+  },
+  {
+    "symbol": "REGENTTEX",
+    "name": "Regent Textile Mills Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/regent-textile-mills-ltd.svg"
+  },
+  {
+    "symbol": "RELIANCINS",
+    "name": "Reliance Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/reliance-group.svg"
+  },
+  {
+    "symbol": "RENATA",
+    "name": "Renata PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/renata-ltd.svg"
+  },
+  {
+    "symbol": "RENWICKJA",
+    "name": "Renwick Janeswar and Co. (BD) Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/renwick-jajneswar-and-co-bd-ltd.svg"
+  },
+  {
+    "symbol": "REPUBLIC",
+    "name": "Republic Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/republic-insurance-company-ltd.svg"
+  },
+  {
+    "symbol": "RINGSHINE",
+    "name": "Ring Shine Textiles Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/ring-shine-textiles-ltd.svg"
+  },
+  {
+    "symbol": "ROBI",
+    "name": "Robi Axiata PLc",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/robi-axiata-ltd.svg"
+  },
+  {
+    "symbol": "RSRMSTEEL",
+    "name": "Ratanpur Steel Re-Rolling Mills Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/ratanpur-steel-re-rolling-mills-ltd.svg"
+  },
+  {
+    "symbol": "RUNNERAUTO",
+    "name": "Runner Automobiles PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/runner-automobiles-plc.svg"
+  },
+  {
+    "symbol": "RUPALIBANK",
+    "name": "Rupali Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/rupali-bank-ltd.svg"
+  },
+  {
+    "symbol": "RUPALIINS",
+    "name": "Rupali Insurance Company Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/rupali-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "RUPALILIFE",
+    "name": "Rupali Life Insurance Co. Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/rupali-life-insurance-company-ltd.svg"
+  },
+  {
+    "symbol": "SAFKOSPINN",
+    "name": "Safko Spinning Mills Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/safko-spinning-mills-ltd.svg"
+  },
+  {
+    "symbol": "SAIFPOWER",
+    "name": "SAIF Powertec Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/saif-powertec-ltd.svg"
+  },
+  {
+    "symbol": "SAIHAMCOT",
+    "name": "Saiham Cotton Mills Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/saiham-cotton-mills-ltd.svg"
+  },
+  {
+    "symbol": "SAIHAMTEX",
+    "name": "Saiham Textile Mills Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/saiham-textile-mills-ltd.svg"
+  },
+  {
+    "symbol": "SALAMCRST",
+    "name": "S. Alam Cold Rolled Steels Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/s-alam-cold-rolled-steels-ltd.svg"
+  },
+  {
+    "symbol": "SALVO",
+    "name": "Salvo Organic Industries PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/salvo-chemical-industry-ltd.svg"
+  },
+  {
+    "symbol": "SAMATALETH",
+    "name": "Samata Leather Complex (Pvt.) Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/samata-leather-complex-ltd.svg"
+  },
+  {
+    "symbol": "SAMORITA",
+    "name": "Samorita Hospital Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/samorita-hospital-ltd.svg"
+  },
+  {
+    "symbol": "SANDHANINS",
+    "name": "Shandhani Life Insurance Co.Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/sandhani-life-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "SAPORTL",
+    "name": "Summit Alliance Port Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/summit-alliance-port-ltd.svg"
+  },
+  {
+    "symbol": "SAVAREFR",
+    "name": "Savar Refractories Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/savar-refractories-ltd.svg"
+  },
+  {
+    "symbol": "SBACBANK",
+    "name": "SBAC Bank PLC.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/south-bangla-agriculture-and-commerce-bank-ltd.svg"
+  },
+  {
+    "symbol": "SEAPEARL",
+    "name": "Sea Pearl Beach Resort & Spa Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/sea-pearl-beach-resort-and-spa-ltd.svg"
+  },
+  {
+    "symbol": "SHAHJABANK",
+    "name": "Shahjalal Islami Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/shahjalal-islami-bank-ltd.svg"
+  },
+  {
+    "symbol": "SHARPIND",
+    "name": "Sharp Industries PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/rn-spinning-mills-ltd.svg"
+  },
+  {
+    "symbol": "SHASHADNIM",
+    "name": "Shasha Denims PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/shasha-denims-ltd.svg"
+  },
+  {
+    "symbol": "SHEPHERD",
+    "name": "Shepherd Industries PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/shepherd-industries-ltd.svg"
+  },
+  {
+    "symbol": "SHURWID",
+    "name": "Shurwid Industries Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/shurwid-industries-ltd.svg"
+  },
+  {
+    "symbol": "SHYAMPSUG",
+    "name": "Shyampur Sugar Mills Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/shyampur-sugar-mills-ltd.svg"
+  },
+  {
+    "symbol": "SIBL",
+    "name": "Social Islami Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/social-islami-bank-ltd.svg"
+  },
+  {
+    "symbol": "SICL",
+    "name": "Sikder Insurance Co., Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/sikder-insurance-company-limited.svg"
+  },
+  {
+    "symbol": "SILCOPHL",
+    "name": "Silco Pharmaceuticals Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/silco-pharmaceuticals-ltd.svg"
+  },
+  {
+    "symbol": "SILVAPHL",
+    "name": "Silva Pharmaceuticals Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/silva-pharmaceuticals-ltd.svg"
+  },
+  {
+    "symbol": "SIMTEX",
+    "name": "Simtex Industries PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/simtex-industries-ltd.svg"
+  },
+  {
+    "symbol": "SINGERBD",
+    "name": "Singer Bangladesh Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/singer-bangladesh-ltd.svg"
+  },
+  {
+    "symbol": "SINOBANGLA",
+    "name": "Sinobangla Industries Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/sinobangla-industries-ltd.svg"
+  },
+  {
+    "symbol": "SIPLC",
+    "name": "Sena Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/sena-kalyan-insurance-company-ltd.svg"
+  },
+  {
+    "symbol": "SKTRIMS",
+    "name": "SK Trims & Industries Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/sk-trims-and-industries-ltd.svg"
+  },
+  {
+    "symbol": "SONALIANSH",
+    "name": "Sonali Aansh Industries Limited.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/sonali-aansh-industries-ltd.svg"
+  },
+  {
+    "symbol": "SONALILIFE",
+    "name": "Sonali Life Insurance Company Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/sonali-life-insurance-company-ltd.svg"
+  },
+  {
+    "symbol": "SONALIPAPR",
+    "name": "Sonali Paper & Board Mills Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/sonali-paper-and-board-mills-ltd.svg"
+  },
+  {
+    "symbol": "SONARBAINS",
+    "name": "Sonar Bangla Insurance Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/sonar-bangla-insurance-ltd.svg"
+  },
+  {
+    "symbol": "SONARGAON",
+    "name": "Sonargaon Textiles Limited.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/sonargaon-textiles-ltd.svg"
+  },
+  {
+    "symbol": "SOUTHEASTB",
+    "name": "Southeast Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/southeast-bank-ltd.svg"
+  },
+  {
+    "symbol": "SPCERAMICS",
+    "name": "Shinepukur Ceramics PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/shinepukur-ceramics-ltd.svg"
+  },
+  {
+    "symbol": "SPCL",
+    "name": "Shahjibazar Power Co Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/shahjibazar-power-co-ltd.svg"
+  },
+  {
+    "symbol": "SQUARETEXT",
+    "name": "Square Textiles PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/square-textile-ltd.svg"
+  },
+  {
+    "symbol": "SQURPHARMA",
+    "name": "Square Pharmaceuticals PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/square-pharmaceuticals-ltd.svg"
+  },
+  {
+    "symbol": "SSSTEEL",
+    "name": "S.S. Steel Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/ss-steel-ltd.svg"
+  },
+  {
+    "symbol": "STANCERAM",
+    "name": "Standard Ceramic Industries Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/standard-ceramic-industries-ltd.svg"
+  },
+  {
+    "symbol": "STANDARINS",
+    "name": "Standard Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/standard-insurance-ltd.svg"
+  },
+  {
+    "symbol": "STANDBANKL",
+    "name": "Standard Islami Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/standard-bank-ltd.svg"
+  },
+  {
+    "symbol": "STYLECRAFT",
+    "name": "Stylecraft Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/stylecraft-ltd.svg"
+  },
+  {
+    "symbol": "SUMITPOWER",
+    "name": "Summit Power Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/summit-power-ltd.svg"
+  },
+  {
+    "symbol": "SUNLIFEINS",
+    "name": "Sunlife Insurance Co. Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/sunlife-insurance-company-ltd.svg"
+  },
+  {
+    "symbol": "TAKAFULINS",
+    "name": "Takaful Islami Insurance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/takaful-islami-insurance-ltd.svg"
+  },
+  {
+    "symbol": "TALLUSPIN",
+    "name": "Tallu Spinning Mills Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/tallu-spinning-mills-ltd.svg"
+  },
+  {
+    "symbol": "TAMIJTEX",
+    "name": "Tamijuddin Textile Mills PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/tamijuddin-textile-mills-plc.svg"
+  },
+  {
+    "symbol": "TECHNODRUG",
+    "name": "Techno Drugs Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/techno-drugs-ltd.svg"
+  },
+  {
+    "symbol": "TILIL",
+    "name": "Trust Islami Life Insurance Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/trust-islami-life-insurance-ltd.svg"
+  },
+  {
+    "symbol": "TITASGAS",
+    "name": "Titas Gas Transmission and Distribution PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/titas-gas-transmission-and-distribution-company-ltd.svg"
+  },
+  {
+    "symbol": "TOSRIFA",
+    "name": "Tosrifa Industries Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/tosrifa-industries-ltd.svg"
+  },
+  {
+    "symbol": "TRUSTBANK",
+    "name": "Trust Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/trust-bank-ltd.svg"
+  },
+  {
+    "symbol": "TUNGHAI",
+    "name": "Tung Hai Knitting & Dyeing Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/tung-hai-knitting-and-dyeing-ltd.svg"
+  },
+  {
+    "symbol": "UCB",
+    "name": "United Commercial Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/united-commercial-bank-ltd-ucbl.svg"
+  },
+  {
+    "symbol": "UNILEVERCL",
+    "name": "Unilever Consumer Care Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/unilever.svg"
+  },
+  {
+    "symbol": "UNIONBANK",
+    "name": "Union Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/union-bank-ltd.svg"
+  },
+  {
+    "symbol": "UNIONCAP",
+    "name": "Union Capital Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/union-capital-ltd.svg"
+  },
+  {
+    "symbol": "UNIONINS",
+    "name": "Union Insurance Co. Ltd",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/union-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "UNIQUEHRL",
+    "name": "Unique Hotel & Resorts PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/unique-hotel-and-resorts-plc.svg"
+  },
+  {
+    "symbol": "UNITEDFIN",
+    "name": "United Finance PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/united-finance-ltd.svg"
+  },
+  {
+    "symbol": "UNITEDINS",
+    "name": "United Insurance Company Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/united-insurance-co-ltd.svg"
+  },
+  {
+    "symbol": "UPGDCL",
+    "name": "United Power Generation & Distribution Co. Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/united-power-generation-and-distribution-company-ltd.svg"
+  },
+  {
+    "symbol": "USMANIAGL",
+    "name": "Usmania Glass Sheet Factory Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/usmania-glass-sheet-factory-ltd.svg"
+  },
+  {
+    "symbol": "UTTARABANK",
+    "name": "Uttara Bank PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/uttara-bank-ltd.svg"
+  },
+  {
+    "symbol": "UTTARAFIN",
+    "name": "Uttara Finance and Investments Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/uttara-finance-and-investments-ltd.svg"
+  },
+  {
+    "symbol": "VFSTDL",
+    "name": "VFS Thread Dyeing Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/vfs-thread-dyeing-ltd.svg"
+  },
+  {
+    "symbol": "WALTONHIL",
+    "name": "Walton Hi-Tech Industries PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/walton-hi-tech-industries-plc.svg"
+  },
+  {
+    "symbol": "WATACHEM",
+    "name": "Wata Chemicals Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/wata-chemicals-ltd.svg"
+  },
+  {
+    "symbol": "WMSHIPYARD",
+    "name": "Western Marine Shipyard Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/western-marine-shipyard-ltd.svg"
+  },
+  {
+    "symbol": "YPL",
+    "name": "Yeakin Polymer Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/yeakin-polymer-ltd.svg"
+  },
+  {
+    "symbol": "ZAHEENSPIN",
+    "name": "Zaheen Spinning PLC",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/zaheen-spinning-ltd.svg"
+  },
+  {
+    "symbol": "ZAHINTEX",
+    "name": "Zahintex Industries Ltd.",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/zahintex-industries-ltd.svg"
+  },
+  {
+    "symbol": "ZEALBANGLA",
+    "name": "Zeal Bangla Sugar Milla Limited",
+    "market": "DSEBD",
+    "image": "https://s3-symbol-logo.tradingview.com/zeal-bangla-sugar-mills-ltd.svg"
+  }
+]

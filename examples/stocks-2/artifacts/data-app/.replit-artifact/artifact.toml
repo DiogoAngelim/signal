@@ -1,0 +1,31 @@
+kind = "data-app"
+previewPath = "/"
+title = "Stocks Capital Desk"
+version = "1.0.0"
+id = "artifacts/data-app"
+router = "path"
+
+[[integratedSkills]]
+name = "data-visualization"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24452
+
+[services.development]
+run = "pnpm --filter @workspace/data-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/data-app", "run", "build" ]
+publicDir = "artifacts/data-app/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24452"
+BASE_PATH = "/"

@@ -2165,17 +2165,17 @@ function MarketRegimeHero({
           </div>
         </div>
         <div className="rounded-lg border border-slate-700/80 bg-slate-950/70 p-5">
-	          <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">Portfolio Move</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">Portfolio Move</div>
           <div className="mt-3 text-3xl font-semibold tracking-tight text-white">{userAction.nextStep}</div>
           <p className="mt-3 text-sm leading-6 text-slate-400">
             Position size follows closed trades, basket spread, market risk, and price coverage.
           </p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             {[
-	              ["Target Size", `${userAction.suggestedExposure.toFixed(1)}%`],
-	              ["Current Size", `${currentExposure.toFixed(1)}%`],
-	              ["Cash Room To Add", formatMaybeCurrency(deployable)],
-	              ["Stocks With Size", `${userAction.investableCount}`],
+              ["Target Size", `${userAction.suggestedExposure.toFixed(1)}%`],
+              ["Current Size", `${currentExposure.toFixed(1)}%`],
+              ["Cash Room To Add", formatMaybeCurrency(deployable)],
+              ["Stocks With Size", `${userAction.investableCount}`],
             ].map(([label, value]) => (
               <div key={label} className="rounded-lg border border-slate-800 bg-slate-900/35 p-3">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</div>
@@ -2185,15 +2185,15 @@ function MarketRegimeHero({
           </div>
           <div className="mt-6 space-y-4">
             <div>
-	              <div className="mb-2 flex justify-between text-xs text-slate-400"><span>Position size</span><span>{currentExposure.toFixed(1)}% / {userAction.suggestedExposure.toFixed(1)}%</span></div>
+              <div className="mb-2 flex justify-between text-xs text-slate-400"><span>Position size</span><span>{currentExposure.toFixed(1)}% / {userAction.suggestedExposure.toFixed(1)}%</span></div>
               <Meter value={userAction.suggestedExposure} tone={userAction.suggestedExposure > 60 ? "good" : userAction.suggestedExposure > 35 ? "info" : "warn"} />
             </div>
             <div>
-	              <div className="mb-2 flex justify-between text-xs text-slate-400"><span>Market risk</span><span>{metrics.drift.toFixed(0)}</span></div>
+              <div className="mb-2 flex justify-between text-xs text-slate-400"><span>Market risk</span><span>{metrics.drift.toFixed(0)}</span></div>
               <Meter value={metrics.drift} tone={toneForValue(metrics.drift)} />
             </div>
             <div>
-	              <div className="mb-2 flex justify-between text-xs text-slate-400"><span>Opportunity breadth</span><span>{metrics.ensemble.toFixed(0)}%</span></div>
+              <div className="mb-2 flex justify-between text-xs text-slate-400"><span>Opportunity breadth</span><span>{metrics.ensemble.toFixed(0)}%</span></div>
               <Meter value={metrics.ensemble} tone={metrics.ensemble > 65 ? "good" : metrics.ensemble > 45 ? "info" : "warn"} />
             </div>
           </div>
@@ -2317,31 +2317,31 @@ function LifecycleOperationsPanel({
         <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-4">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>
-	              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Active Strategy ID</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Active Strategy ID</div>
               <div className="mt-2 break-all font-mono text-sm text-slate-100">
-	                {currentModel ? compactModelId(currentModel.model_id) : "No trust record yet"}
+                {currentModel ? compactModelId(currentModel.model_id) : "No trust record yet"}
               </div>
             </div>
             <span className={cn("shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]", lifecycleStateClass(currentModel?.lifecycle_state))}>
-	              {plainLifecycleState(currentModel?.lifecycle_state ?? lifecycleInsight.state)}
+              {plainLifecycleState(currentModel?.lifecycle_state ?? lifecycleInsight.state)}
             </span>
           </div>
           <div className="grid gap-3 text-xs text-slate-400">
             <div>
-	              <div className="text-slate-500">Built from</div>
+              <div className="text-slate-500">Built from</div>
               <div className="mt-1 break-all font-mono text-slate-300">
-	                {currentModel?.parent_model_id ? compactModelId(currentModel.parent_model_id) : "Original strategy"}
+                {currentModel?.parent_model_id ? compactModelId(currentModel.parent_model_id) : "Original strategy"}
               </div>
             </div>
             <div>
-	              <div className="text-slate-500">Last reviewed</div>
+              <div className="text-slate-500">Last reviewed</div>
               <div className="mt-1 text-slate-300">{formatLifecycleTimestamp(currentModel?.updated_at)}</div>
             </div>
             <div>
-	              <div className="text-slate-500">Comeback rule</div>
-	              <div className="mt-1 leading-5 text-slate-300">
-	                A stopped strategy stays on record. A comeback starts as a fresh review.
-	              </div>
+              <div className="text-slate-500">Comeback rule</div>
+              <div className="mt-1 leading-5 text-slate-300">
+                A stopped strategy stays on record. A comeback starts as a fresh review.
+              </div>
             </div>
           </div>
         </div>
@@ -2409,7 +2409,7 @@ function TopOpportunities({ decisions }: { decisions: ExecutionDecision[] }) {
               <div className="flex items-center gap-2">
                 {decision.lifecycleAction && (
                   <span className="rounded-full border border-slate-700 bg-slate-950 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-300">
-	                    {plainLifecycleAction(decision.lifecycleAction)}
+                    {plainLifecycleAction(decision.lifecycleAction)}
                   </span>
                 )}
                 <span className="text-[11px] font-semibold text-slate-500">#{index + 1}</span>
@@ -2417,19 +2417,19 @@ function TopOpportunities({ decisions }: { decisions: ExecutionDecision[] }) {
             </div>
             <div className="text-sm font-semibold text-slate-100">{plainAction(decision.actionLabel)} · {plainConviction(decision.convictionLabel)}</div>
             <div className="mt-4 grid grid-cols-3 gap-3 text-xs">
-	              <div><div className="text-slate-500">Suggested size</div><div className="mt-1 text-lg font-semibold text-slate-100">{decision.suggestedAllocationPct.toFixed(1)}%</div></div>
-	              <div><div className="text-slate-500">Upside range</div><div className={cn("mt-1 text-lg font-semibold", decision.signal.expectedMovePct >= 0 ? "text-emerald-300" : "text-rose-300")}>{decision.signal.expectedMovePct >= 0 ? "+" : ""}{decision.signal.expectedMovePct.toFixed(1)}%</div></div>
-	              <div><div className="text-slate-500">Confidence</div><div className="mt-1 font-medium text-slate-200">{decision.qualityScore.toFixed(0)}/100</div></div>
+              <div><div className="text-slate-500">Suggested size</div><div className="mt-1 text-lg font-semibold text-slate-100">{decision.suggestedAllocationPct.toFixed(1)}%</div></div>
+              <div><div className="text-slate-500">Upside range</div><div className={cn("mt-1 text-lg font-semibold", decision.signal.expectedMovePct >= 0 ? "text-emerald-300" : "text-rose-300")}>{decision.signal.expectedMovePct >= 0 ? "+" : ""}{decision.signal.expectedMovePct.toFixed(1)}%</div></div>
+              <div><div className="text-slate-500">Confidence</div><div className="mt-1 font-medium text-slate-200">{decision.qualityScore.toFixed(0)}/100</div></div>
             </div>
             <div className="mt-4 space-y-2 text-xs leading-5 text-slate-400">
-	              <div><span className="font-semibold text-slate-300">Reason:</span> {decision.tradeExplanation}</div>
-	              <div><span className="font-semibold text-slate-300">Position size:</span> confidence {decision.qualityScore.toFixed(0)}, risk {decision.riskScore.toFixed(0)}, trust cap {(decision.lifecycleAllocationMultiplier * 100).toFixed(0)}% of normal size.</div>
-	              <div><span className="font-semibold text-slate-300">Step back if:</span> {decision.lifecycleCanOpenNewTrades ? "the strategy is downgraded, timing gets stretched, or market risk rises." : "the strategy is already blocked from new risk."}</div>
+              <div><span className="font-semibold text-slate-300">Reason:</span> {decision.tradeExplanation}</div>
+              <div><span className="font-semibold text-slate-300">Position size:</span> confidence {decision.qualityScore.toFixed(0)}, risk {decision.riskScore.toFixed(0)}, trust cap {(decision.lifecycleAllocationMultiplier * 100).toFixed(0)}% of normal size.</div>
+              <div><span className="font-semibold text-slate-300">Step back if:</span> {decision.lifecycleCanOpenNewTrades ? "the strategy is downgraded, timing gets stretched, or market risk rises." : "the strategy is already blocked from new risk."}</div>
             </div>
           </div>
         )) : (
           <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-5 text-sm leading-6 text-slate-400 lg:col-span-2">
-		            No stock currently deserves fresh capital.
+            No stock currently deserves fresh capital.
           </div>
         )}
       </div>
@@ -2472,7 +2472,7 @@ function OpportunityMap({ decisions, selected, onSelect }: { decisions: Executio
     y: clampMetric(100 - decision.riskScore),
   }));
   return (
-	    <InsightShell title="Upside/Risk Map" eyebrow="Top-right is preferred: higher upside, lower risk">
+    <InsightShell title="Upside/Risk Map" eyebrow="Top-right is preferred: higher upside, lower risk">
       <div className="relative h-[360px] overflow-hidden rounded-3xl border border-slate-800 bg-[linear-gradient(135deg,rgba(15,23,42,0.92),rgba(2,6,23,0.98))]">
         <div className="absolute left-1/2 top-0 h-full w-px bg-slate-800" /><div className="absolute left-0 top-1/2 h-px w-full bg-slate-800" />
         <div className="absolute left-4 top-4 text-xs text-emerald-300">Improving upside</div><div className="absolute bottom-4 right-4 text-xs text-rose-300">Higher risk / weaker breadth</div><div className="absolute bottom-4 left-4 text-xs text-slate-500">Low participation</div><div className="absolute right-4 top-4 text-xs text-slate-400">Preferred zone</div>
@@ -2829,7 +2829,7 @@ function LiveIntelligenceChart({ decision, fallback }: { decision?: ExecutionDec
     return prices.slice(-80).map((price, index) => ({ index, price }));
   }, [active, fallback]);
   return (
-	    <InsightShell title="Selected Price Path" eyebrow="Price history for the highlighted ticker" action={active && <Badge variant="outline" className="border-slate-700 text-slate-300">{cleanTicker(active.ticker)}</Badge>}>
+    <InsightShell title="Selected Price Path" eyebrow="Price history for the highlighted ticker" action={active && <Badge variant="outline" className="border-slate-700 text-slate-300">{cleanTicker(active.ticker)}</Badge>}>
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartRows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
@@ -3391,6 +3391,461 @@ function evaluateDecisionMemory(entry: DecisionMemoryEntry, portfolio: Simulated
     sharpeChange,
     trust,
   };
+}
+
+type CanonicalDecision = {
+  decision: "Do Not Trade" | "Paper Trade Only" | "Trade Small" | "Trade";
+  capitalAction: string;
+  confidence: "Low" | "Medium" | "High";
+  confidenceTone: UserActionTone;
+  validUntil: string;
+  why: string[];
+  whatWouldChangeIt: string;
+  bottomLine: string;
+  tone: UserActionTone;
+  targetAllocationPct: number;
+  targetCapital: number;
+  spread: number | null;
+  unchangedCount: number;
+};
+
+function formatPointDelta(value: number | null | undefined, suffix = "") {
+  if (value == null || !Number.isFinite(value)) return "—";
+  if (Math.abs(value) < 0.01) return `0.00${suffix}`;
+  return `${value > 0 ? "+" : ""}${value.toFixed(2)}${suffix}`;
+}
+
+function metricDelta(current: number | null, previous: number | null, suffix = "") {
+  if (current == null || previous == null || !Number.isFinite(current) || !Number.isFinite(previous)) {
+    return "First reading";
+  }
+  const delta = current - previous;
+  if (Math.abs(delta) < 0.01) return "No meaningful change";
+  return `${formatPointDelta(previous, suffix)} -> ${formatPointDelta(current, suffix)} ${delta > 0 ? "up" : "down"}`;
+}
+
+function decisionConfidence(stats: ReturnType<typeof portfolioStats>, lifecycle: PortfolioLifecycleInsight): CanonicalDecision["confidence"] {
+  const profitFactor = stats.profitFactor === Infinity ? 9.99 : stats.profitFactor ?? 0;
+  const sharpe = stats.normalizedAnnualSharpe ?? 0;
+  if (stats.totalTrades >= 200 && lifecycle.state === "PRODUCTION" && sharpe >= 1 && profitFactor >= 1.25) return "High";
+  if (stats.totalTrades >= 50 && lifecycle.state !== "RETIRED" && profitFactor >= 1) return "Medium";
+  return "Low";
+}
+
+function buildCanonicalDecision(input: {
+  decisions: ExecutionDecision[];
+  portfolio: SimulatedPortfolio;
+  budget: number;
+  lifecycleInsight: PortfolioLifecycleInsight;
+  dataQualityPct: number;
+  riskMode: RiskMode;
+  benchmarkReturn: number | null;
+  memory: DecisionMemoryEntry[];
+}): CanonicalDecision {
+  const stats = portfolioStats(input.portfolio);
+  const targetAllocationPct = targetAllocationPctForDecisions(input.decisions);
+  const targetCapital = (input.budget * targetAllocationPct) / 100;
+  const profitFactor = stats.profitFactor === Infinity ? 9.99 : stats.profitFactor ?? 0;
+  const sharpe = stats.normalizedAnnualSharpe ?? 0;
+  const spread = input.benchmarkReturn == null ? null : stats.totalReturn * 100 - input.benchmarkReturn;
+  const confidence = decisionConfidence(stats, input.lifecycleInsight);
+  const confidenceTone: UserActionTone = confidence === "High" ? "good" : confidence === "Medium" ? "info" : "bad";
+  const unchangedCount = input.memory.filter((entry) => entry.recommendation === input.memory[0]?.recommendation).length;
+
+  if (
+    input.lifecycleInsight.state === "RETIRED" ||
+    input.dataQualityPct < 70 ||
+    stats.maxDrawdown > 0.08 ||
+    targetAllocationPct < 1 ||
+    sharpe < 0 ||
+    profitFactor < 1
+  ) {
+    const why = [
+      input.lifecycleInsight.state === "RETIRED" || sharpe < 0 || profitFactor < 1
+        ? "No confirmed edge after risk and trade outcomes."
+        : null,
+      targetAllocationPct < 1
+        ? "No stock clears the allocation threshold."
+        : input.dataQualityPct < 70
+          ? "Market data quality is below the trading minimum."
+          : stats.maxDrawdown > 0.08
+            ? "Drawdown is beyond the risk limit."
+            : null,
+    ].filter((item): item is string => Boolean(item)).slice(0, 2);
+    return {
+      decision: "Do Not Trade",
+      capitalAction: "Hold cash / no new allocation",
+      confidence,
+      confidenceTone,
+      validUntil: "Until profit factor clears 1.00, Sharpe is positive, and at least one setup earns capital.",
+      why: why.length ? why : ["Evidence does not justify new risk."],
+      whatWouldChangeIt: "Positive Sharpe, profit factor above 1.00, clean prices, and investable setup breadth.",
+      bottomLine: "Bottom line: no edge confirmed; capital remains unallocated.",
+      tone: "bad",
+      targetAllocationPct,
+      targetCapital,
+      spread,
+      unchangedCount,
+    };
+  }
+
+  if (input.lifecycleInsight.state !== "PRODUCTION" || stats.totalTrades < 200 || confidence !== "High") {
+    return {
+      decision: input.lifecycleInsight.state === "SMALL_LIVE" ? "Trade Small" : "Paper Trade Only",
+      capitalAction: `Cap allocation at ${targetAllocationPct.toFixed(1)}% (${formatMaybeCurrency(targetCapital)})`,
+      confidence,
+      confidenceTone,
+      validUntil: `Until closed trades reach 200 and trust state reaches ${plainLifecycleState("PRODUCTION")}.`,
+      why: [
+        plainLifecycleReason(input.lifecycleInsight.reason),
+        `${stats.totalTrades} closed trades; full-size requires 200.`,
+      ],
+      whatWouldChangeIt: "More closed trades with positive Sharpe, stronger profit factor, and stable drawdown.",
+      bottomLine: "Bottom line: evidence is improving, but capital stays limited.",
+      tone: "warn",
+      targetAllocationPct,
+      targetCapital,
+      spread,
+      unchangedCount,
+    };
+  }
+
+  return {
+    decision: "Trade",
+    capitalAction: `Allocate ${formatMaybeCurrency(targetCapital)} across qualified names`,
+    confidence,
+    confidenceTone,
+    validUntil: "Until drawdown, coverage, trust state, or opportunity breadth deteriorates.",
+    why: [
+      "Closed trade sample and trust state support controlled allocation.",
+      `${targetAllocationPct.toFixed(1)}% target exposure clears the active filter.`,
+    ],
+    whatWouldChangeIt: "Drawdown above 8%, profit factor below 1.25, or trust falling out of production.",
+    bottomLine: "Bottom line: edge is confirmed enough for controlled allocation.",
+    tone: "good",
+    targetAllocationPct,
+    targetCapital,
+    spread,
+    unchangedCount,
+  };
+}
+
+function DecisionSpine({
+  decision,
+  budget,
+  onBudgetChange,
+}: {
+  decision: CanonicalDecision;
+  budget: number;
+  onBudgetChange: (budget: number) => void;
+}) {
+  const [budgetInput, setBudgetInput] = useState(() => String(Math.round(budget)));
+  const parsedBudget = Number(budgetInput.replace(/[,$\s]/g, ""));
+  const budgetChanged = Number.isFinite(parsedBudget) && parsedBudget > 0 && Math.abs(parsedBudget - budget) > 0.01;
+
+  useEffect(() => {
+    setBudgetInput(String(Math.round(budget)));
+  }, [budget]);
+
+  return (
+    <section className="rounded-lg border border-slate-800 bg-[#050b18] p-6 shadow-2xl">
+      <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+        <div>
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className={cn(toneClasses(decision.tone))}>
+              Decision: {decision.decision}
+            </Badge>
+            <Badge variant="outline" className={cn(toneClasses(decision.confidenceTone))}>
+              Confidence: {decision.confidence}
+            </Badge>
+            {decision.unchangedCount > 1 && (
+              <Badge variant="outline" className="border-slate-700 bg-slate-900/50 text-slate-300">
+                Decision unchanged across last {Math.min(decision.unchangedCount, 4)} evaluations
+              </Badge>
+            )}
+          </div>
+          <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">
+            {decision.capitalAction}
+          </h1>
+          <div className="mt-6 grid gap-3 md:grid-cols-2">
+            {decision.why.slice(0, 2).map((reason) => (
+              <div key={reason} className="rounded-lg border border-slate-800 bg-slate-950/55 p-4 text-sm leading-6 text-slate-300">
+                {reason}
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 rounded-lg border border-slate-800 bg-slate-900/35 p-4">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">What Would Change It</div>
+            <div className="mt-2 text-sm leading-6 text-slate-300">{decision.whatWouldChangeIt}</div>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-5">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Time Validity</div>
+          <div className="mt-2 text-sm leading-6 text-slate-300">{decision.validUntil}</div>
+          <div className="mt-5 grid gap-3">
+            {[
+              ["Target allocation", `${decision.targetAllocationPct.toFixed(1)}%`],
+              ["Target capital", formatMaybeCurrency(decision.targetCapital)],
+              ["Basket spread", decision.spread == null ? "Pending" : formatPointDelta(decision.spread, " pts")],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-lg border border-slate-800 bg-slate-900/35 p-3">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</div>
+                <div className="mt-2 text-lg font-semibold tabular-nums text-slate-100">{value}</div>
+              </div>
+            ))}
+          </div>
+          <label className="mt-5 block">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Capital Budget</span>
+            <div className="mt-2 flex gap-2">
+              <input
+                value={budgetInput}
+                onChange={(event) => setBudgetInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && budgetChanged) onBudgetChange(parsedBudget);
+                }}
+                inputMode="decimal"
+                className="h-10 min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 text-right text-sm font-semibold tabular-nums text-slate-100 outline-none"
+                aria-label="Capital budget"
+              />
+              {budgetChanged && (
+                <button
+                  type="button"
+                  onClick={() => onBudgetChange(parsedBudget)}
+                  className="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 text-xs font-medium text-cyan-200"
+                >
+                  Apply
+                </button>
+              )}
+            </div>
+          </label>
+        </div>
+      </div>
+      <div className={cn("mt-5 rounded-lg border px-4 py-3 text-sm font-semibold", toneClasses(decision.tone))}>
+        {decision.bottomLine}
+      </div>
+    </section>
+  );
+}
+
+function EvidenceCard({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{title}</div>
+      <div className="mt-4 grid gap-3">{children}</div>
+    </div>
+  );
+}
+
+function EvidenceRow({
+  label,
+  value,
+  threshold,
+  delta,
+  tone,
+}: {
+  label: string;
+  value: string;
+  threshold: string;
+  delta: string;
+  tone: UserActionTone;
+}) {
+  return (
+    <div className="rounded-lg border border-slate-800 bg-slate-900/35 p-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-sm font-medium text-slate-200">{label}</div>
+        <Badge variant="outline" className={cn(toneClasses(tone))}>{value}</Badge>
+      </div>
+      <div className="mt-2 text-xs leading-5 text-slate-500">{threshold}</div>
+      <div className="mt-1 text-xs leading-5 text-slate-400">{delta}</div>
+    </div>
+  );
+}
+
+function EvidenceLayer({
+  decisions,
+  portfolio,
+  lifecycleInsight,
+  dataQualityPct,
+  benchmarkReturn,
+  memory,
+  riskMode,
+  onRiskModeChange,
+}: {
+  decisions: ExecutionDecision[];
+  portfolio: SimulatedPortfolio;
+  lifecycleInsight: PortfolioLifecycleInsight;
+  dataQualityPct: number;
+  benchmarkReturn: number | null;
+  memory: DecisionMemoryEntry[];
+  riskMode: RiskMode;
+  onRiskModeChange: (mode: RiskMode) => void;
+}) {
+  const stats = portfolioStats(portfolio);
+  const previous = memory[1] ?? memory[0];
+  const currentSpread = benchmarkReturn == null ? null : stats.totalReturn * 100 - benchmarkReturn;
+  const previousSpread = previous ? previous.startTotalReturn * 100 : null;
+  const profitFactor = stats.profitFactor === Infinity ? 9.99 : stats.profitFactor ?? 0;
+  const sharpe = stats.normalizedAnnualSharpe ?? 0;
+  const investable = decisions.filter((decision) => decision.suggestedAllocationPct > DISPLAY_ZERO_THRESHOLD);
+  const avgQuality = mean(decisions.map((decision) => decision.qualityScore));
+  const nearDrawdownLimit = stats.maxDrawdown >= 0.06;
+  const nearCoverageLimit = dataQualityPct < 90;
+  const noMeaningfulChange =
+    previous &&
+    Math.abs((currentSpread ?? 0) - (previousSpread ?? 0)) < 0.05 &&
+    Math.abs(dataQualityPct - previous.dataQualityPct) < 1 &&
+    lifecycleInsight.state === previous.lifecycleState;
+
+  return (
+    <InsightShell
+      title="Evidence"
+      eyebrow="Only decision-relevant thresholds"
+      action={
+        noMeaningfulChange ? (
+          <Badge variant="outline" className="border-slate-700 bg-slate-900/50 text-slate-300">
+            No meaningful change since last review
+          </Badge>
+        ) : null
+      }
+    >
+      <div className="grid gap-4 xl:grid-cols-4">
+        <EvidenceCard title="Performance">
+          <EvidenceRow
+            label="Profit factor"
+            value={profitFactor.toFixed(2)}
+            threshold="Needs 1.00 to resume, 1.25 for full size."
+            delta={metricDelta(profitFactor, previous?.startProfitFactor ?? null)}
+            tone={profitFactor >= 1.25 ? "good" : profitFactor >= 1 ? "info" : "bad"}
+          />
+          <EvidenceRow
+            label="Sharpe"
+            value={sharpe.toFixed(2)}
+            threshold="Needs positive; +1.00 confirms full-size risk."
+            delta={metricDelta(sharpe, previous?.startSharpe ?? null)}
+            tone={sharpe >= 1 ? "good" : sharpe >= 0 ? "info" : "bad"}
+          />
+        </EvidenceCard>
+        <EvidenceCard title="Risk">
+          <EvidenceRow
+            label="Max drawdown"
+            value={`${(stats.maxDrawdown * 100).toFixed(1)}%`}
+            threshold="8.0% is the hard watch limit."
+            delta={metricDelta(stats.maxDrawdown * 100, previous ? previous.startDrawdown * 100 : null, "%")}
+            tone={stats.maxDrawdown <= 0.04 ? "good" : nearDrawdownLimit ? "warn" : "info"}
+          />
+          <EvidenceRow
+            label="Active exposure"
+            value={`${targetAllocationPctForDecisions(decisions).toFixed(1)}%`}
+            threshold={`${RISK_MODE_CONFIG[riskMode].label} caps exposure at ${RISK_MODE_CONFIG[riskMode].maxExposure}%.`}
+            delta={`${investable.length} stocks currently qualify.`}
+            tone={investable.length ? "info" : "bad"}
+          />
+        </EvidenceCard>
+        <EvidenceCard title="Market Quality">
+          <EvidenceRow
+            label="Price coverage"
+            value={`${dataQualityPct.toFixed(0)}%`}
+            threshold="80% minimum, 90% preferred."
+            delta={metricDelta(dataQualityPct, previous?.dataQualityPct ?? null, "%")}
+            tone={dataQualityPct >= 90 ? "good" : nearCoverageLimit && dataQualityPct >= 80 ? "warn" : "bad"}
+          />
+          <EvidenceRow
+            label="Basket spread"
+            value={currentSpread == null ? "Pending" : formatPointDelta(currentSpread, " pts")}
+            threshold="Strategy should not trail the basket by more than 1 point."
+            delta={metricDelta(currentSpread, previousSpread, " pts")}
+            tone={currentSpread == null ? "info" : currentSpread >= 0 ? "good" : currentSpread >= -1 ? "warn" : "bad"}
+          />
+        </EvidenceCard>
+        <EvidenceCard title="Model Trust">
+          <EvidenceRow
+            label="Closed trades"
+            value={`${stats.totalTrades}`}
+            threshold="30 to review, 100 to trust directionally, 200 for full size."
+            delta={previous ? `Previous call had ${previous.startClosedTrades}.` : "First reading"}
+            tone={stats.totalTrades >= 200 ? "good" : stats.totalTrades >= 30 ? "info" : "warn"}
+          />
+          <EvidenceRow
+            label="Trust state"
+            value={plainLifecycleState(lifecycleInsight.state)}
+            threshold="Production is required for full allocation."
+            delta={previous ? `${plainLifecycleState(previous.lifecycleState)} -> ${plainLifecycleState(lifecycleInsight.state)}` : "First reading"}
+            tone={lifecycleInsight.state === "PRODUCTION" ? "good" : lifecycleInsight.state === "RETIRED" ? "bad" : "warn"}
+          />
+        </EvidenceCard>
+      </div>
+      <div className="mt-4 rounded-lg border border-slate-800 bg-slate-900/30 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Control Rules Active</div>
+          <div className="flex flex-wrap gap-2">
+            {(Object.keys(RISK_MODE_CONFIG) as RiskMode[]).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => onRiskModeChange(mode)}
+                className={cn(
+                  "rounded-lg border px-3 py-1.5 text-xs font-medium transition",
+                  riskMode === mode
+                    ? "border-cyan-400/50 bg-cyan-400/10 text-cyan-100"
+                    : "border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200",
+                )}
+              >
+                {RISK_MODE_CONFIG[mode].label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-3">
+          {[
+            `${RISK_MODE_CONFIG[riskMode].label}: ${RISK_MODE_CONFIG[riskMode].description}`,
+            `Lifecycle cap: ${plainLifecycleState(lifecycleInsight.state)}`,
+            `Quality filter: ${RISK_MODE_CONFIG[riskMode].minQuality}+ score`,
+          ].map((rule) => (
+            <div key={rule} className="rounded-lg border border-slate-800 bg-slate-950/45 px-3 py-2 text-sm text-slate-300">
+              {rule}
+            </div>
+          ))}
+        </div>
+      </div>
+    </InsightShell>
+  );
+}
+
+function AppendixLayer({
+  portfolio,
+  decisionMemory,
+  decisionAudit,
+  lifecycleInsight,
+}: {
+  portfolio: SimulatedPortfolio;
+  decisionMemory: DecisionMemoryEntry[];
+  decisionAudit: PortfolioDecisionAuditEntry[];
+  lifecycleInsight: PortfolioLifecycleInsight;
+}) {
+  const [tab, setTab] = useState<"trades" | "decisions">("trades");
+
+  return (
+    <InsightShell title="Appendix" eyebrow="Logs only">
+      <Tabs value={tab} onValueChange={(value) => setTab(value as "trades" | "decisions")}>
+        <TabsList className="mb-5 bg-slate-900/70">
+          <TabsTrigger value="trades">Trade History</TabsTrigger>
+          <TabsTrigger value="decisions">Decision History & Audit</TabsTrigger>
+        </TabsList>
+        <TabsContent value="trades">
+          <PortfolioPerformanceTabs portfolio={portfolio} />
+        </TabsContent>
+        <TabsContent value="decisions">
+          <DecisionMemoryPanel
+            entries={decisionMemory}
+            auditEntries={decisionAudit}
+            portfolio={portfolio}
+            lifecycleInsight={lifecycleInsight}
+          />
+        </TabsContent>
+      </Tabs>
+    </InsightShell>
+  );
 }
 
 function PortfolioDecisionSummary({
@@ -4206,6 +4661,28 @@ export default function Dashboard() {
     : stocks.length
       ? (availableQuoteCount / Math.max(1, stocks.length)) * 100
       : 0;
+  const canonicalDecision = useMemo(
+    () => buildCanonicalDecision({
+      decisions: executionDecisions,
+      portfolio: activeSimulatedPortfolio,
+      budget: activeBudget,
+      lifecycleInsight: activePortfolioLifecycleInsight,
+      dataQualityPct,
+      riskMode,
+      benchmarkReturn,
+      memory: activeDecisionMemory,
+    }),
+    [
+      activeBudget,
+      activeDecisionMemory,
+      activePortfolioLifecycleInsight,
+      activeSimulatedPortfolio,
+      benchmarkReturn,
+      dataQualityPct,
+      executionDecisions,
+      riskMode,
+    ],
+  );
 
   const selectedMarketStatus = getMarketStatus(selectedMarket);
   const lastSyncedLabel = lastSyncedAt
@@ -4773,7 +5250,7 @@ export default function Dashboard() {
       if (body) {
         void sendPriorityAllocationNotification(selectedMarket, body);
         toast({
-	          title: "Top ideas changed",
+          title: "Top ideas changed",
           description: body,
         });
       }
@@ -4836,63 +5313,34 @@ export default function Dashboard() {
           </section>
         ) : (
           <>
-            <div className="mb-8">
-              <MarketRegimeHero
-                decisions={executionDecisions}
-                metrics={intelligenceMetrics}
-                portfolio={activeSimulatedPortfolio}
-                marketStatus={selectedMarketStatus}
-                lastSyncedLabel={lastSyncedLabel}
-                lifecycleInsight={activePortfolioLifecycleInsight}
-                benchmarkReturn={benchmarkReturn}
-                dataQualityPct={dataQualityPct}
-                riskMode={riskMode}
+            <div className="mb-6">
+              <DecisionSpine
+                decision={canonicalDecision}
+                budget={activeBudget}
+                onBudgetChange={applyPortfolioBudget}
               />
             </div>
 
             <div className="mb-6">
-              <PortfolioDecisionSummary
+              <EvidenceLayer
                 decisions={executionDecisions}
                 portfolio={activeSimulatedPortfolio}
-                budget={activeBudget}
                 lifecycleInsight={activePortfolioLifecycleInsight}
                 dataQualityPct={dataQualityPct}
+                benchmarkReturn={benchmarkReturn}
+                memory={activeDecisionMemory}
                 riskMode={riskMode}
                 onRiskModeChange={setRiskMode}
               />
             </div>
 
             <div className="mb-6">
-              <DecisionMemoryPanel
-                entries={activeDecisionMemory}
-                auditEntries={activeDecisionAudit}
+              <AppendixLayer
                 portfolio={activeSimulatedPortfolio}
+                decisionMemory={activeDecisionMemory}
+                decisionAudit={activeDecisionAudit}
                 lifecycleInsight={activePortfolioLifecycleInsight}
               />
-            </div>
-
-            <div className="mb-6">
-              <AdaptiveSignalFeed
-                decisions={executionDecisions}
-                portfolio={activeSimulatedPortfolio}
-                budget={activeBudget}
-                onBudgetChange={applyPortfolioBudget}
-                selected={selectedTicker}
-                onSelect={(signal) => setSelectedTicker(signal.ticker)}
-              />
-            </div>
-
-            <div className="mb-6">
-              <LifecycleOperationsPanel
-                market={selectedMarket}
-                decisions={executionDecisions}
-                lifecycleInsight={activePortfolioLifecycleInsight}
-                dataQualityPct={dataQualityPct}
-              />
-            </div>
-
-            <div className="mb-6">
-              <PortfolioPerformanceTabs portfolio={activeSimulatedPortfolio} />
             </div>
           </>
         )}

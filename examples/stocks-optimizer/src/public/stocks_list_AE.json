@@ -1,0 +1,1556 @@
+[
+  {
+    "symbol": "ADNH",
+    "name": "Abu Dhabi National Hotels Co.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/abu-dhabi-national-hotels-co.svg"
+  },
+  {
+    "symbol": "ALEC",
+    "name": "ALEC Holdings PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/alec-pjsc.svg"
+  },
+  {
+    "symbol": "AMAN.DU",
+    "name": "Dubai Islamic Insurance & Reinsurance Co.",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/aman-dubai-isl-in.svg"
+  },
+  {
+    "symbol": "AMR",
+    "name": "Americana Restaurants International PLC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/americana-restaurants-international-plc.svg"
+  },
+  {
+    "symbol": "ASM",
+    "name": "Al Seer Marine Supplies & Equipment Company P.J.S.C",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/al-seer-marine-supplies-and-equipment-company-pjsc.svg"
+  },
+  {
+    "symbol": "BOS",
+    "name": "Bank of Sharjah",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-of-sharjah.svg"
+  },
+  {
+    "symbol": "CBD",
+    "name": "Commercial Bank of Dubai(PSC)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/commercial-bank-of-dubai.svg"
+  },
+  {
+    "symbol": "CBD.DU",
+    "name": "Commercial Bank of Dubai(PSC)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/commercial-bank-of-dubai.svg"
+  },
+  {
+    "symbol": "CBI",
+    "name": "Commercial Bank International",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/commercial-international-bank-egypt.svg"
+  },
+  {
+    "symbol": "CBI.AD",
+    "name": "Commercial Bank International",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/commercial-international-bank-egypt.svg"
+  },
+  {
+    "symbol": "DANA",
+    "name": "DANA GAS PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/dana-gas-pjsc.svg"
+  },
+  {
+    "symbol": "DANA.AD",
+    "name": "DANA GAS PJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/dana-gas-pjsc.svg"
+  },
+  {
+    "symbol": "DEPA",
+    "name": "Depa Plc",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/depa-plc.svg"
+  },
+  {
+    "symbol": "DEPA",
+    "name": "Depa Plc",
+    "market": "NASDAQDUBAI",
+    "image": "https://s3-symbol-logo.tradingview.com/depa-plc.svg"
+  },
+  {
+    "symbol": "DEPACLA",
+    "name": "Depa PLC Class A",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/depa-plc.svg"
+  },
+  {
+    "symbol": "DEPACLA",
+    "name": "Depa PLC Class A",
+    "market": "NASDAQDUBAI",
+    "image": "https://s3-symbol-logo.tradingview.com/depa-plc.svg"
+  },
+  {
+    "symbol": "DEWA",
+    "name": "Dubai Electricity & Water Authority PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-electricity-and-water-authority.svg"
+  },
+  {
+    "symbol": "DEWA.DU",
+    "name": "Dubai Electricity & Water Authority PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-electricity-and-water-authority.svg"
+  },
+  {
+    "symbol": "DEYAAR",
+    "name": "Deyaar Development (P.J.S.C)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/deyaar-development.svg"
+  },
+  {
+    "symbol": "DEYAAR.DU",
+    "name": "Deyaar Development (P.J.S.C)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/deyaar-development.svg"
+  },
+  {
+    "symbol": "DFM",
+    "name": "Dubai Financial Market (DFM) - PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-financial.svg"
+  },
+  {
+    "symbol": "DFM.DU",
+    "name": "Dubai Financial Market (DFM) - PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-financial.svg"
+  },
+  {
+    "symbol": "DHAFRA",
+    "name": "Al Dhafra Insurance Co.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/al-dhafra-insurance-co.svg"
+  },
+  {
+    "symbol": "DHAFRA.AD",
+    "name": "Al Dhafra Insurance Co.",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/al-dhafra-insurance-co.svg"
+  },
+  {
+    "symbol": "DIB",
+    "name": "Dubai Islamic Bank PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-islamic-bank.svg"
+  },
+  {
+    "symbol": "DIB.DU",
+    "name": "Dubai Islamic Bank PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-islamic-bank.svg"
+  },
+  {
+    "symbol": "DIC",
+    "name": "Dubai Investment (P.J.S.C)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-investments.svg"
+  },
+  {
+    "symbol": "DIC.DU",
+    "name": "Dubai Investment (P.J.S.C)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-investments.svg"
+  },
+  {
+    "symbol": "DIN",
+    "name": "Dubai Insurance CompanyPSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-insurance.svg"
+  },
+  {
+    "symbol": "DIN.DU",
+    "name": "Dubai Insurance CompanyPSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-insurance.svg"
+  },
+  {
+    "symbol": "DNIR",
+    "name": "Dubai National Insurance & Reinsurance Co. (P.S.C.)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-national-insurance.svg"
+  },
+  {
+    "symbol": "DNIR.DU",
+    "name": "Dubai National Insurance & Reinsurance Co. (P.S.C.)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-national-insurance.svg"
+  },
+  {
+    "symbol": "DRC",
+    "name": "Dubai Refreshment Company P.J.S.C",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-refreshment.svg"
+  },
+  {
+    "symbol": "DRC.DU",
+    "name": "Dubai Refreshment Company P.J.S.C",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-refreshment.svg"
+  },
+  {
+    "symbol": "DRIVE",
+    "name": "Emirates Driving Company",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-driving-company.svg"
+  },
+  {
+    "symbol": "DRIVE.AD",
+    "name": "Emirates Driving Company",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-driving-company.svg"
+  },
+  {
+    "symbol": "DSI",
+    "name": "Drake & Scull International (P J S C)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/drake-and-scull-inte.svg"
+  },
+  {
+    "symbol": "DSI.DU",
+    "name": "Drake & Scull International (P J S C)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/drake-and-scull-inte.svg"
+  },
+  {
+    "symbol": "DTC",
+    "name": "Dubai Taxi Co. PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-taxi-company.svg"
+  },
+  {
+    "symbol": "DTC.DU",
+    "name": "Dubai Taxi Co. PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/dubai-taxi-company.svg"
+  },
+  {
+    "symbol": "DU",
+    "name": "Emirates Integrated Telecommunications Company PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/emirate-integrated.svg"
+  },
+  {
+    "symbol": "DU.DU",
+    "name": "Emirates Integrated Telecommunications Company PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/emirate-integrated.svg"
+  },
+  {
+    "symbol": "E7",
+    "name": "E7 Group PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/e7-group.svg"
+  },
+  {
+    "symbol": "E7.AD",
+    "name": "E7 Group PJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/e7-group.svg"
+  },
+  {
+    "symbol": "E7W",
+    "name": "E7 Group PJSC Warrants",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/e7-group.svg"
+  },
+  {
+    "symbol": "E7W.AD",
+    "name": "E7 Group PJSC Warrants",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/e7-group.svg"
+  },
+  {
+    "symbol": "EAND",
+    "name": "Emirates Telecom. Group Company (Etisalat Group) PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-telecom-company-etisalat-pjsc.svg"
+  },
+  {
+    "symbol": "EAND.AD",
+    "name": "Emirates Telecom. Group Company (Etisalat Group) PJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-telecom-company-etisalat-pjsc.svg"
+  },
+  {
+    "symbol": "EASYLEASE",
+    "name": "Easy Lease Motorcycle Rental PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/easy-lease-motorcycle-rental-pjsc.svg"
+  },
+  {
+    "symbol": "EASYLEASE.AD",
+    "name": "Easy Lease Motorcycle Rental PJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/easy-lease-motorcycle-rental-pjsc.svg"
+  },
+  {
+    "symbol": "EIB",
+    "name": "Emirates Islamic Bank PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-islam-bk.svg"
+  },
+  {
+    "symbol": "EIB.DU",
+    "name": "Emirates Islamic Bank PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-islam-bk.svg"
+  },
+  {
+    "symbol": "EIBANK",
+    "name": "Emirates Investment Bank PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-inv-bank.svg"
+  },
+  {
+    "symbol": "EIBANK.DU",
+    "name": "Emirates Investment Bank PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-inv-bank.svg"
+  },
+  {
+    "symbol": "EIC",
+    "name": "Emirates Insurance Co.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-insurance-co.svg"
+  },
+  {
+    "symbol": "EIC.AD",
+    "name": "Emirates Insurance Co.",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-insurance-co.svg"
+  },
+  {
+    "symbol": "EKTTITAB",
+    "name": "Ekttitab Holding Co. (S.A.K.)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ekttitab-holding-c.svg"
+  },
+  {
+    "symbol": "EKTTITAB.DU",
+    "name": "Ekttitab Holding Co. (S.A.K.)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/ekttitab-holding-c.svg"
+  },
+  {
+    "symbol": "EMAAR",
+    "name": "Emaar Properties (P.J.S.C)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/emaar-properties.svg"
+  },
+  {
+    "symbol": "EMAAR.DU",
+    "name": "Emaar Properties (P.J.S.C)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/emaar-properties.svg"
+  },
+  {
+    "symbol": "EMAARDEV",
+    "name": "Emaar Development PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/emaar-development.svg"
+  },
+  {
+    "symbol": "EMAARDEV.DU",
+    "name": "Emaar Development PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/emaar-development.svg"
+  },
+  {
+    "symbol": "EMIRATESNBD",
+    "name": "Emirates NBD Bank (P.J.S.C)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-nbd.svg"
+  },
+  {
+    "symbol": "EMIRATESNBD.DU",
+    "name": "Emirates NBD Bank (P.J.S.C)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-nbd.svg"
+  },
+  {
+    "symbol": "EMPOWER",
+    "name": "Emirates Central Cooling Systems Corporation PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-central-c.svg"
+  },
+  {
+    "symbol": "EMPOWER.DU",
+    "name": "Emirates Central Cooling Systems Corporation PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-central-c.svg"
+  },
+  {
+    "symbol": "EMSTEEL",
+    "name": "EMSTEEL BUILDING MATERIALS PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/arkan-building-materials-company.svg"
+  },
+  {
+    "symbol": "EMSTEEL.AD",
+    "name": "EMSTEEL BUILDING MATERIALS PJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/arkan-building-materials-company.svg"
+  },
+  {
+    "symbol": "ERC",
+    "name": "Emirates Reem Investments PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-refreshments.svg"
+  },
+  {
+    "symbol": "ERC.DU",
+    "name": "Emirates Reem Investments PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/emirates-refreshments.svg"
+  },
+  {
+    "symbol": "ESG",
+    "name": "ESG EMIRATES STALLIONS GROUP P.J.S.C",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/esg-emirates-stallions-pjsc.svg"
+  },
+  {
+    "symbol": "ESG.AD",
+    "name": "ESG EMIRATES STALLIONS GROUP P.J.S.C",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/esg-emirates-stallions-pjsc.svg"
+  },
+  {
+    "symbol": "ESHRAQ",
+    "name": "ESHRAQ INVESTMENTS P.J.S.C",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/eshraq-investments-pjsc.svg"
+  },
+  {
+    "symbol": "ESHRAQ.AD",
+    "name": "ESHRAQ INVESTMENTS P.J.S.C",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/eshraq-investments-pjsc.svg"
+  },
+  {
+    "symbol": "FAB",
+    "name": "First Abu Dhabi Bank",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/first-abu-dhabi-bank.svg"
+  },
+  {
+    "symbol": "FAB.AD",
+    "name": "First Abu Dhabi Bank",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-abu-dhabi-bank.svg"
+  },
+  {
+    "symbol": "FBI",
+    "name": "Fujairah Building Industries P.S.C",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/fujairah-building-industries-psc.svg"
+  },
+  {
+    "symbol": "FBI.AD",
+    "name": "Fujairah Building Industries P.S.C",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/fujairah-building-industries-psc.svg"
+  },
+  {
+    "symbol": "FCI",
+    "name": "Fujairah Cement Industries",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/fujairah-cement-industries.svg"
+  },
+  {
+    "symbol": "FCI.AD",
+    "name": "Fujairah Cement Industries",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/fujairah-cement-industries.svg"
+  },
+  {
+    "symbol": "FERTIGLB",
+    "name": "Fertiglobe plc",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/fertiglobe-plc.svg"
+  },
+  {
+    "symbol": "FERTIGLB.AD",
+    "name": "Fertiglobe plc",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/fertiglobe-plc.svg"
+  },
+  {
+    "symbol": "FH",
+    "name": "Finance House",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/finance-house.svg"
+  },
+  {
+    "symbol": "FH.AD",
+    "name": "Finance House",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/finance-house.svg"
+  },
+  {
+    "symbol": "FIDELITYUNITED",
+    "name": "United Fidelity Insurance Company (P.S.C)",
+    "market": ""
+  },
+  {
+    "symbol": "FIDELITYUNITED.AD",
+    "name": "United Fidelity Insurance Company (P.S.C)",
+    "market": "ADX"
+  },
+  {
+    "symbol": "FNF",
+    "name": "FOODCO NATIONAL FOODSTUFF PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/foodco-national-foodstuff-prjsc.svg"
+  },
+  {
+    "symbol": "FNF.AD",
+    "name": "FOODCO NATIONAL FOODSTUFF PJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/foodco-national-foodstuff-prjsc.svg"
+  },
+  {
+    "symbol": "GCEM",
+    "name": "Gulf Cement Co.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-cement-co.svg"
+  },
+  {
+    "symbol": "GCEM.AD",
+    "name": "Gulf Cement Co.",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-cement-co.svg"
+  },
+  {
+    "symbol": "GFH",
+    "name": "GFH Financial Group BSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/gfh-financial-group.svg"
+  },
+  {
+    "symbol": "GFH.DU",
+    "name": "GFH Financial Group BSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/gfh-financial-group.svg"
+  },
+  {
+    "symbol": "GHITHA",
+    "name": "GHITHA HOLDING P.J.S.C.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ghitha-pjsc.svg"
+  },
+  {
+    "symbol": "GHITHA.AD",
+    "name": "GHITHA HOLDING P.J.S.C.",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/ghitha-pjsc.svg"
+  },
+  {
+    "symbol": "GIH",
+    "name": "Gulf Investment House Company",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-investment-house.svg"
+  },
+  {
+    "symbol": "GIH.AD",
+    "name": "Gulf Investment House Company",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-investment-house.svg"
+  },
+  {
+    "symbol": "GMPC",
+    "name": "Gulf Medical Projects Company",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-medical-projects-company.svg"
+  },
+  {
+    "symbol": "GMPC.AD",
+    "name": "Gulf Medical Projects Company",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-medical-projects-company.svg"
+  },
+  {
+    "symbol": "GULFNAV",
+    "name": "Gulf Navigation Holding (P . J . S . C)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-navigation.svg"
+  },
+  {
+    "symbol": "GULFNAV.DU",
+    "name": "Gulf Navigation Holding (P . J . S . C)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-navigation.svg"
+  },
+  {
+    "symbol": "HAYAH",
+    "name": "Hayah Insurance Company P.J.S.C",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hayah-insurance-company-pjsc.svg"
+  },
+  {
+    "symbol": "HAYAH.AD",
+    "name": "Hayah Insurance Company P.J.S.C",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/hayah-insurance-company-pjsc.svg"
+  },
+  {
+    "symbol": "HH",
+    "name": "HILY HOLDING PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hily-holding-pjsc.svg"
+  },
+  {
+    "symbol": "HH.AD",
+    "name": "HILY HOLDING PJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/hily-holding-pjsc.svg"
+  },
+  {
+    "symbol": "HIK",
+    "name": "Hikma Pharmaceuticals Plc Sponsored GDR RegS",
+    "market": "NASDAQDUBAI",
+    "image": "https://s3-symbol-logo.tradingview.com/hikma-pharmaceuticals.svg"
+  },
+  {
+    "symbol": "HIK",
+    "name": "Hikma Pharmaceuticals Plc Sponsored GDR RegS",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hikma-pharmaceuticals.svg"
+  },
+  {
+    "symbol": "ICAP",
+    "name": "Investcorp Capital PLC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/investcorp.svg"
+  },
+  {
+    "symbol": "ICAP.AD",
+    "name": "Investcorp Capital PLC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/investcorp.svg"
+  },
+  {
+    "symbol": "IFA",
+    "name": "International Financial Advisors Holding K.P.S.C.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/international-financial-advisors.svg"
+  },
+  {
+    "symbol": "IFA.DU",
+    "name": "International Financial Advisors Holding K.P.S.C.",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/international-financial-advisors.svg"
+  },
+  {
+    "symbol": "IH",
+    "name": "Insurance House",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/insurance-house.svg"
+  },
+  {
+    "symbol": "IH.AD",
+    "name": "Insurance House",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/insurance-house.svg"
+  },
+  {
+    "symbol": "IHC",
+    "name": "International Holding Company PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/international-company-pjsc.svg"
+  },
+  {
+    "symbol": "IHC.AD",
+    "name": "International Holding Company PJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/international-company-pjsc.svg"
+  },
+  {
+    "symbol": "INVESTB",
+    "name": "Invest Bank",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/invest-bank.svg"
+  },
+  {
+    "symbol": "INVESTB.AD",
+    "name": "Invest Bank",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/invest-bank.svg"
+  },
+  {
+    "symbol": "INVICTUS",
+    "name": "Invictus Investment Company PLC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/invictus-investment-company-plc.svg"
+  },
+  {
+    "symbol": "INVICTUS.AD",
+    "name": "Invictus Investment Company PLC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/invictus-investment-company-plc.svg"
+  },
+  {
+    "symbol": "ITHMR",
+    "name": "Ithmaar Holding BSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ithmaar-holding.svg"
+  },
+  {
+    "symbol": "ITHMR.DU",
+    "name": "Ithmaar Holding BSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/ithmaar-holding.svg"
+  },
+  {
+    "symbol": "JULPHAR",
+    "name": "Gulf Pharmaceutical Industries",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-pharmaceutical-industries.svg"
+  },
+  {
+    "symbol": "JULPHAR.AD",
+    "name": "Gulf Pharmaceutical Industries",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-pharmaceutical-industries.svg"
+  },
+  {
+    "symbol": "KICO",
+    "name": "AL KHALEEJ Investment",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/al-khaleej-investment.svg"
+  },
+  {
+    "symbol": "KICO.AD",
+    "name": "AL KHALEEJ Investment",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/al-khaleej-investment.svg"
+  },
+  {
+    "symbol": "LULU",
+    "name": "Lulu Retail Holdings PLC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/lulu-retail-holdin.svg"
+  },
+  {
+    "symbol": "LULU.AD",
+    "name": "Lulu Retail Holdings PLC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/lulu-retail-holdin.svg"
+  },
+  {
+    "symbol": "MAIR",
+    "name": "MAIR GROUP -  P.J.S.C.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/mair-group-pjsc.svg"
+  },
+  {
+    "symbol": "MAIR.AD",
+    "name": "MAIR GROUP -  P.J.S.C.",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/mair-group-pjsc.svg"
+  },
+  {
+    "symbol": "MANAZEL",
+    "name": "Manazel PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/manazel-pjsc.svg"
+  },
+  {
+    "symbol": "MANAZEL.AD",
+    "name": "Manazel PJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/manazel-pjsc.svg"
+  },
+  {
+    "symbol": "MASQ",
+    "name": "Mashreqbank PSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/mashreqbank.svg"
+  },
+  {
+    "symbol": "MASQ.DU",
+    "name": "Mashreqbank PSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/mashreqbank.svg"
+  },
+  {
+    "symbol": "MAZAYA",
+    "name": "Al-Mazaya Holding Co. SAKC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/al-mazaya-holding.svg"
+  },
+  {
+    "symbol": "MAZAYA.DU",
+    "name": "Al-Mazaya Holding Co. SAKC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/al-mazaya-holding.svg"
+  },
+  {
+    "symbol": "MBME",
+    "name": "MBME GROUP Private Joint Stock Company",
+    "market": ""
+  },
+  {
+    "symbol": "MBME.AD",
+    "name": "MBME GROUP Private Joint Stock Company",
+    "market": "ADX"
+  },
+  {
+    "symbol": "METHAQ",
+    "name": "Methaq Takaful Insurance Company",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/methaq-takaful-insurance-compnay.svg"
+  },
+  {
+    "symbol": "METHAQ.AD",
+    "name": "Methaq Takaful Insurance Company",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/methaq-takaful-insurance-compnay.svg"
+  },
+  {
+    "symbol": "MKHZN",
+    "name": "Agility Public Warehousing Co. K.S.C.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/agility-public-war.svg"
+  },
+  {
+    "symbol": "MKHZN.DU",
+    "name": "Agility Public Warehousing Co. K.S.C.",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/agility-public-war.svg"
+  },
+  {
+    "symbol": "MODON",
+    "name": "Modon Holding PSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/modon-holding-psc.svg"
+  },
+  {
+    "symbol": "MODON.AD",
+    "name": "Modon Holding PSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/modon-holding-psc.svg"
+  },
+  {
+    "symbol": "NAHO",
+    "name": "Naeem Holding Co.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/naeem.svg"
+  },
+  {
+    "symbol": "NAHO.DU",
+    "name": "Naeem Holding Co.",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/naeem.svg"
+  },
+  {
+    "symbol": "NBF",
+    "name": "National Bank of Fujairah",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/national-bank-of-fujairah.svg"
+  },
+  {
+    "symbol": "NBF.AD",
+    "name": "National Bank of Fujairah",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/national-bank-of-fujairah.svg"
+  },
+  {
+    "symbol": "NBQ",
+    "name": "National Bank of Umm Al Qaiwain",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/national-bank-of-umm-al-qaiwain.svg"
+  },
+  {
+    "symbol": "NBQ.AD",
+    "name": "National Bank of Umm Al Qaiwain",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/national-bank-of-umm-al-qaiwain.svg"
+  },
+  {
+    "symbol": "NCC",
+    "name": "National Cement Company PSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/national-cement.svg"
+  },
+  {
+    "symbol": "NCC.DU",
+    "name": "National Cement Company PSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/national-cement.svg"
+  },
+  {
+    "symbol": "NCTH",
+    "name": "National Corporation for Tourism & Hotels",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/national-for-tourism-and-hotels.svg"
+  },
+  {
+    "symbol": "NCTH.AD",
+    "name": "National Corporation for Tourism & Hotels",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/national-for-tourism-and-hotels.svg"
+  },
+  {
+    "symbol": "NDAQ",
+    "name": "Nasdaq, Inc.",
+    "market": "NASDAQDUBAI",
+    "image": "https://s3-symbol-logo.tradingview.com/nasdaq.svg"
+  },
+  {
+    "symbol": "NDAQ",
+    "name": "Nasdaq, Inc.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/nasdaq.svg"
+  },
+  {
+    "symbol": "NGI",
+    "name": "National General Insurance Co (P.J.S.C)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/national-general-insurance.svg"
+  },
+  {
+    "symbol": "NGI.DU",
+    "name": "National General Insurance Co (P.J.S.C)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/national-general-insurance.svg"
+  },
+  {
+    "symbol": "NIH",
+    "name": "National International Co. (Holding) (K.S.C.)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/natl-international.svg"
+  },
+  {
+    "symbol": "NIH.DU",
+    "name": "National International Co. (Holding) (K.S.C.)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/natl-international.svg"
+  },
+  {
+    "symbol": "NIND",
+    "name": "National Industries Group (Holding) SAK",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/national-industries-group.svg"
+  },
+  {
+    "symbol": "NIND.DU",
+    "name": "National Industries Group (Holding) SAK",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/national-industries-group.svg"
+  },
+  {
+    "symbol": "NMDC",
+    "name": "NMDC Group PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/national-marine-dredging-co.svg"
+  },
+  {
+    "symbol": "NMDC.AD",
+    "name": "NMDC Group PJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/national-marine-dredging-co.svg"
+  },
+  {
+    "symbol": "NMDCENR",
+    "name": "NMDC Energy P.J.S.C.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/nmdc-energy-pjsc.svg"
+  },
+  {
+    "symbol": "NMDCENR.AD",
+    "name": "NMDC Energy P.J.S.C.",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/nmdc-energy-pjsc.svg"
+  },
+  {
+    "symbol": "OEIHC",
+    "name": "Oman & Emirates Investment Holding Co",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/oman-and-emirates-investment-co.svg"
+  },
+  {
+    "symbol": "OEIHC.AD",
+    "name": "Oman & Emirates Investment Holding Co",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/oman-and-emirates-investment-co.svg"
+  },
+  {
+    "symbol": "ORAS",
+    "name": "Orascom Construction PLC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/orascom-construction-plc.svg"
+  },
+  {
+    "symbol": "ORAS.AD",
+    "name": "Orascom Construction PLC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/orascom-construction-plc.svg"
+  },
+  {
+    "symbol": "ORDS",
+    "name": "OOREDOO",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ooredoo-qpsc.svg"
+  },
+  {
+    "symbol": "ORDS.AD",
+    "name": "OOREDOO",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/ooredoo-qpsc.svg"
+  },
+  {
+    "symbol": "ORIENT",
+    "name": "Orient Insurance PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-orient-ins.svg"
+  },
+  {
+    "symbol": "ORIENT.DU",
+    "name": "Orient Insurance PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-orient-ins.svg"
+  },
+  {
+    "symbol": "ORIENTTKAFUL",
+    "name": "Orient Takaful PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/orient-unb-takaful.svg"
+  },
+  {
+    "symbol": "ORIENTTKAFUL.DU",
+    "name": "Orient Takaful PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/orient-unb-takaful.svg"
+  },
+  {
+    "symbol": "PALMS",
+    "name": "PALMS SPORTS PrJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/palms-sports-prjsc.svg"
+  },
+  {
+    "symbol": "PALMS.AD",
+    "name": "PALMS SPORTS PrJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/palms-sports-prjsc.svg"
+  },
+  {
+    "symbol": "PARKIN",
+    "name": "Parkin Co. PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/parkin-company-pjs.svg"
+  },
+  {
+    "symbol": "PARKIN.DU",
+    "name": "Parkin Co. PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/parkin-company-pjs.svg"
+  },
+  {
+    "symbol": "PHX",
+    "name": "PHOENIX GROUP   PLC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/phoenix-group-holdings-plc-ord-10p.svg"
+  },
+  {
+    "symbol": "PHX.AD",
+    "name": "PHOENIX GROUP   PLC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/phoenix-group-holdings-plc-ord-10p.svg"
+  },
+  {
+    "symbol": "PRESIGHT",
+    "name": "Presight AI Holding PLC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/presight-ai-plc.svg"
+  },
+  {
+    "symbol": "PRESIGHT.AD",
+    "name": "Presight AI Holding PLC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/presight-ai-plc.svg"
+  },
+  {
+    "symbol": "PUREHEALTH",
+    "name": "Pure Health Holding PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/puretech-health.svg"
+  },
+  {
+    "symbol": "PUREHEALTH.AD",
+    "name": "Pure Health Holding PJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/puretech-health.svg"
+  },
+  {
+    "symbol": "QIC",
+    "name": "Umm Al Qaiwain General Investment Co. P.S.C",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/umm-al-qaiwain-general-investment-co-psc.svg"
+  },
+  {
+    "symbol": "QIC.AD",
+    "name": "Umm Al Qaiwain General Investment Co. P.S.C",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/umm-al-qaiwain-general-investment-co-psc.svg"
+  },
+  {
+    "symbol": "RAKBANK",
+    "name": "The National Bank of Ras Al Khaimah",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/the-national-bank-of-ras-al-khaimah.svg"
+  },
+  {
+    "symbol": "RAKBANK.AD",
+    "name": "The National Bank of Ras Al Khaimah",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-national-bank-of-ras-al-khaimah.svg"
+  },
+  {
+    "symbol": "RAKCEC",
+    "name": "RAK Ceramics PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/rak-ceramics-pjsc.svg"
+  },
+  {
+    "symbol": "RAKCEC.AD",
+    "name": "RAK Ceramics PJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/rak-ceramics-pjsc.svg"
+  },
+  {
+    "symbol": "RAKNIC",
+    "name": "Ras Alkhaima National Insurance Co.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ras-alkhaima-national-insurance-co.svg"
+  },
+  {
+    "symbol": "RAKNIC.AD",
+    "name": "Ras Alkhaima National Insurance Co.",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/ras-alkhaima-national-insurance-co.svg"
+  },
+  {
+    "symbol": "RAKPROP",
+    "name": "RAK Properties",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/rak-properties.svg"
+  },
+  {
+    "symbol": "RAKPROP.AD",
+    "name": "RAK Properties",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/rak-properties.svg"
+  },
+  {
+    "symbol": "RAKWCT",
+    "name": "RAK Co. for White Cement & Construction Materials",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/rak-co-for-white-cement-and-construction-materials.svg"
+  },
+  {
+    "symbol": "RAKWCT.AD",
+    "name": "RAK Co. for White Cement & Construction Materials",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/rak-co-for-white-cement-and-construction-materials.svg"
+  },
+  {
+    "symbol": "RAPCO",
+    "name": "RAPCO Investment PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ras-al-khaimah-poultry-and-feeding-co.svg"
+  },
+  {
+    "symbol": "RAPCO.AD",
+    "name": "RAPCO Investment PJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/ras-al-khaimah-poultry-and-feeding-co.svg"
+  },
+  {
+    "symbol": "RPM",
+    "name": "Response Plus Holding PrJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/response-plus-prjsc.svg"
+  },
+  {
+    "symbol": "RPM.AD",
+    "name": "Response Plus Holding PrJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/response-plus-prjsc.svg"
+  },
+  {
+    "symbol": "SAGA",
+    "name": "Sagasse Investment Company PLC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sagasse-investment.svg"
+  },
+  {
+    "symbol": "SAGA.AD",
+    "name": "Sagasse Investment Company PLC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/sagasse-investment.svg"
+  },
+  {
+    "symbol": "SALAM",
+    "name": "Al Salam Bank B.S.C.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/al-salam-bank.svg"
+  },
+  {
+    "symbol": "SALAM.DU",
+    "name": "Al Salam Bank B.S.C.",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/al-salam-bank.svg"
+  },
+  {
+    "symbol": "SALAMA",
+    "name": "Islamic Arab Insurance Co. (Salama)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/islamic-arab-insurance.svg"
+  },
+  {
+    "symbol": "SALAMA.DU",
+    "name": "Islamic Arab Insurance Co. (Salama)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/islamic-arab-insurance.svg"
+  },
+  {
+    "symbol": "SALIK",
+    "name": "Salik Company PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/salik-company-pj.svg"
+  },
+  {
+    "symbol": "SALIK.DU",
+    "name": "Salik Company PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/salik-company-pj.svg"
+  },
+  {
+    "symbol": "SAWAEED",
+    "name": "Sawaeed Holding P.J.S.C",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sawaeed-pjsc.svg"
+  },
+  {
+    "symbol": "SAWAEED.AD",
+    "name": "Sawaeed Holding P.J.S.C",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/sawaeed-pjsc.svg"
+  },
+  {
+    "symbol": "SCIDC",
+    "name": "Sharjah Cement and Industrial Development Co.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sharjah-cement-and-industrial-development-co.svg"
+  },
+  {
+    "symbol": "SCIDC.AD",
+    "name": "Sharjah Cement and Industrial Development Co.",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/sharjah-cement-and-industrial-development-co.svg"
+  },
+  {
+    "symbol": "SHUAA",
+    "name": "Shuaa Capital (P.S.C)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/shuaa-capital.svg"
+  },
+  {
+    "symbol": "SHUAA.DU",
+    "name": "Shuaa Capital (P.S.C)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/shuaa-capital.svg"
+  },
+  {
+    "symbol": "SIB",
+    "name": "Sharjah Islamic Bank",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sharjah-islamic-bank.svg"
+  },
+  {
+    "symbol": "SIB.AD",
+    "name": "Sharjah Islamic Bank",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/sharjah-islamic-bank.svg"
+  },
+  {
+    "symbol": "SICO",
+    "name": "Sharjah Insurance Company",
+    "market": ""
+  },
+  {
+    "symbol": "SICO.AD",
+    "name": "Sharjah Insurance Company",
+    "market": "ADX"
+  },
+  {
+    "symbol": "SPACE42",
+    "name": "SPACE42 PLC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/space42.svg"
+  },
+  {
+    "symbol": "SPACE42.AD",
+    "name": "SPACE42 PLC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/space42.svg"
+  },
+  {
+    "symbol": "SPINNEYS",
+    "name": "Spinneys 1961 Holding plc",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/spinneys-1961-hold.svg"
+  },
+  {
+    "symbol": "SPINNEYS.DU",
+    "name": "Spinneys 1961 Holding plc",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/spinneys-1961-hold.svg"
+  },
+  {
+    "symbol": "SUDATEL",
+    "name": "Sudatel Telecommunications Group Company Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sudatel-telecommunications-company-limited.svg"
+  },
+  {
+    "symbol": "SUDATEL.AD",
+    "name": "Sudatel Telecommunications Group Company Limited",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/sudatel-telecommunications-company-limited.svg"
+  },
+  {
+    "symbol": "SUKOON",
+    "name": "Sukoon Insurance PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/oman-insurance.svg"
+  },
+  {
+    "symbol": "SUKOON.DU",
+    "name": "Sukoon Insurance PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/oman-insurance.svg"
+  },
+  {
+    "symbol": "SUKOONTAKAFL",
+    "name": "Sukoon Takaful PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/arabian-scandinavian.svg"
+  },
+  {
+    "symbol": "SUKOONTAKAFL.DU",
+    "name": "Sukoon Takaful PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/arabian-scandinavian.svg"
+  },
+  {
+    "symbol": "TAALEEM",
+    "name": "Taaleem Holdings PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/taaleem-p.svg"
+  },
+  {
+    "symbol": "TAALEEM.DU",
+    "name": "Taaleem Holdings PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/taaleem-p.svg"
+  },
+  {
+    "symbol": "TABREED",
+    "name": "National Central Cooling Co. (P.S.C.) (Tabreed)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ncc-tabreed.svg"
+  },
+  {
+    "symbol": "TABREED.DU",
+    "name": "National Central Cooling Co. (P.S.C.) (Tabreed)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/ncc-tabreed.svg"
+  },
+  {
+    "symbol": "TAKAFUL_EM",
+    "name": "Takaful Emarat - Insurance (PSC)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/takaful-emarat.svg"
+  },
+  {
+    "symbol": "TAKAFUL_EM.DU",
+    "name": "Takaful Emarat - Insurance (PSC)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/takaful-emarat.svg"
+  },
+  {
+    "symbol": "TALABAT",
+    "name": "Talabat Holding Plc",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/talabat-pl.svg"
+  },
+  {
+    "symbol": "TALABAT.DU",
+    "name": "Talabat Holding Plc",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/talabat-pl.svg"
+  },
+  {
+    "symbol": "TAQA",
+    "name": "Abu Dhabi National Energy Company",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/abu-dhabi-national-energy-company.svg"
+  },
+  {
+    "symbol": "TAQA.AD",
+    "name": "Abu Dhabi National Energy Company",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/abu-dhabi-national-energy-company.svg"
+  },
+  {
+    "symbol": "TECOM",
+    "name": "TECOM Group PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tecom-pjsc.svg"
+  },
+  {
+    "symbol": "TECOM.DU",
+    "name": "TECOM Group PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/tecom-pjsc.svg"
+  },
+  {
+    "symbol": "TKFL",
+    "name": "Abu Dhabi National Takaful Co.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/abu-dhabi-national-takaful-co.svg"
+  },
+  {
+    "symbol": "TKFL.AD",
+    "name": "Abu Dhabi National Takaful Co.",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/abu-dhabi-national-takaful-co.svg"
+  },
+  {
+    "symbol": "TNI",
+    "name": "The National Investor PRJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/the-national-investor-prjsc.svg"
+  },
+  {
+    "symbol": "TNI.AD",
+    "name": "The National Investor PRJSC",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-national-investor-prjsc.svg"
+  },
+  {
+    "symbol": "UAB",
+    "name": "United Arab Bank",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/united-arab-bank.svg"
+  },
+  {
+    "symbol": "UAB.AD",
+    "name": "United Arab Bank",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/united-arab-bank.svg"
+  },
+  {
+    "symbol": "UFC",
+    "name": "United Foods Co. PSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/united-foods-compa.svg"
+  },
+  {
+    "symbol": "UFC.DU",
+    "name": "United Foods Co. PSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/united-foods-compa.svg"
+  },
+  {
+    "symbol": "UNIKAI",
+    "name": "Unikai Foods PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/unikai-foods.svg"
+  },
+  {
+    "symbol": "UNIKAI.DU",
+    "name": "Unikai Foods PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/unikai-foods.svg"
+  },
+  {
+    "symbol": "UNION",
+    "name": "Union Insurance Company",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/union-insurance-company.svg"
+  },
+  {
+    "symbol": "UNION.AD",
+    "name": "Union Insurance Company",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/union-insurance-company.svg"
+  },
+  {
+    "symbol": "UNIONCOOP",
+    "name": "Union Coop",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/union-coop.svg"
+  },
+  {
+    "symbol": "UNIONCOOP.DU",
+    "name": "Union Coop",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/union-coop.svg"
+  },
+  {
+    "symbol": "UPP",
+    "name": "Union Properties (P.J.S.C)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/union-pacific.svg"
+  },
+  {
+    "symbol": "UPP.DU",
+    "name": "Union Properties (P.J.S.C)",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/union-pacific.svg"
+  },
+  {
+    "symbol": "WAHA",
+    "name": "Waha Capital Company",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/waha-capital-company.svg"
+  },
+  {
+    "symbol": "WAHA.AD",
+    "name": "Waha Capital Company",
+    "market": "ADX",
+    "image": "https://s3-symbol-logo.tradingview.com/waha-capital-company.svg"
+  },
+  {
+    "symbol": "WATANIA",
+    "name": "Watania International Holding PJSC",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/dar-al-takaful.svg"
+  },
+  {
+    "symbol": "WATANIA.DU",
+    "name": "Watania International Holding PJSC",
+    "market": "DFM",
+    "image": "https://s3-symbol-logo.tradingview.com/dar-al-takaful.svg"
+  }
+]

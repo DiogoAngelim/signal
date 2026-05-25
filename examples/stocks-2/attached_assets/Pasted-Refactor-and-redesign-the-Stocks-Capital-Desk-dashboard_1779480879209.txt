@@ -1,0 +1,97 @@
+Refactor and redesign the “Stocks Capital Desk” dashboard UI and its information architecture.
+
+Goal
+
+Create a clean, high-signal decision dashboard that clearly communicates:
+
+current market decision
+supporting metrics
+thresholds vs actual values
+change triggers
+
+The system must feel like an institutional capital allocation terminal: minimal noise, high clarity, and strict hierarchy.
+
+Current problem to solve
+
+The current layout is:
+
+repetitive (same decision shown multiple times)
+mixes narrative, metrics, and rules without hierarchy
+has redundant sections (“Do Not Trade” repeated in multiple forms)
+lacks visual or structural separation between:
+decision
+evidence
+thresholds
+system state
+Required redesign principles
+Single Source of Truth for Decision
+One prominent “Decision Card” at the top
+Must include:
+Decision (Trade / Do Not Trade / Hold / Reduce Risk)
+Confidence score
+Allocation %
+
+Structured Evidence Layer
+Organize metrics into clear groups:
+
+Performance (Sharpe, Profit Factor, Return)
+Risk (Drawdown, Exposure)
+Data Quality (Coverage, Trade count)
+Model Trust (Closed trades, system maturity)
+
+Each metric must show:
+
+current value
+required threshold
+status indicator (pass/fail)
+Remove Redundancy
+Do NOT repeat the same decision in multiple sections
+Remove duplicated interpretations like “Do Not Trade” across multiple labels
+Keep one canonical decision output only
+
+Replace narrative text with structured signals
+Convert:
+
+“What Would Change It”
+“Time Validity”
+“Bottom line”
+
+into a single section:
+→ “Activation Conditions” (bullet list of thresholds required to change state)
+
+Improve visual hierarchy
+Top: Decision Card (large, dominant)
+Middle: Metrics grid (clean grouped cards)
+Bottom: System state (trust, logs, lifecycle caps)
+Make it scan-friendly
+No paragraphs longer than 1–2 lines
+Prefer compact labels + values
+Use consistent formatting across all metrics
+Suggested layout structure
+Decision Header
+Current Decision
+Confidence
+Allocation %
+Key Metrics Grid
+Performance
+Risk
+Data Quality
+Model Trust
+
+Threshold Comparison Table
+Each metric:
+
+Metric | Value | Required | Status
+Activation Conditions
+List of conditions required to switch to “Trade”
+System State Footer
+Lifecycle mode
+Closed trades
+Coverage
+Last evaluation summary
+Output requirements
+Clean UI design (React preferred if applicable)
+Modular components (DecisionCard, MetricsGrid, ThresholdTable)
+No duplicate logic or repeated labels
+Prioritize readability over verbosity
+Keep the system deterministic and audit-friendly

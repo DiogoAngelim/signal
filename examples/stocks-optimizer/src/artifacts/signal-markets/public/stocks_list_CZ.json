@@ -1,0 +1,374 @@
+[
+  {
+    "symbol": "ANDR",
+    "name": "ANDRITZ AG",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/andritz-ag.svg"
+  },
+  {
+    "symbol": "ATS",
+    "name": "AT & S Austria Technologie & Systemtechnik Aktiengesellschaft",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/at-s-austr-t-systemt.svg"
+  },
+  {
+    "symbol": "BVB",
+    "name": "Borussia Dortmund GmbH & Co. KGaA",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/borussia-dortmund.svg"
+  },
+  {
+    "symbol": "CEZ",
+    "name": "CEZ as",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/cez.svg"
+  },
+  {
+    "symbol": "CPI",
+    "name": "CPI Europe AG",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/iiaav.svg"
+  },
+  {
+    "symbol": "CSG",
+    "name": "CSG N.V.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/csg-bv.svg"
+  },
+  {
+    "symbol": "CTPNV",
+    "name": "CTP N.V.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/ctp-nv.svg"
+  },
+  {
+    "symbol": "CZG",
+    "name": "COLT CZ GROUP SE",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/colt-cz-se.svg"
+  },
+  {
+    "symbol": "DBK",
+    "name": "Deutsche Bank AG",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-bank-ag.svg"
+  },
+  {
+    "symbol": "DSPW",
+    "name": "Doosan Skoda Power AS",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/dhico.svg"
+  },
+  {
+    "symbol": "DTE",
+    "name": "Deutsche Telekom AG",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-telekom.svg"
+  },
+  {
+    "symbol": "EFORU",
+    "name": "E4U as",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/e4u-as-energy-for-you.svg"
+  },
+  {
+    "symbol": "EMAN",
+    "name": "eMan a.s.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/eman-as.svg"
+  },
+  {
+    "symbol": "ENRGA",
+    "name": "ENERGOAQUA, a.s.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/energoaqua-as.svg"
+  },
+  {
+    "symbol": "EOAN",
+    "name": "E.ON SE",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/e-on.svg"
+  },
+  {
+    "symbol": "ERBAG",
+    "name": "Erste Group Bank AG",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/erste-group-bnk-inh-o-n.svg"
+  },
+  {
+    "symbol": "FACC",
+    "name": "FACC AG",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/facc-ag.svg"
+  },
+  {
+    "symbol": "FILL",
+    "name": "FILLAMENTUM as",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/fillamentum-as.svg"
+  },
+  {
+    "symbol": "FIXED",
+    "name": "Fixed.zone a.s.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/fixedzone-as.svg"
+  },
+  {
+    "symbol": "FTSHP",
+    "name": "Footshop a.s.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/wood-spac-one-130.svg"
+  },
+  {
+    "symbol": "FTSW3",
+    "name": "WOOD SPAC One a.s. Warrant 2022-open end on WOOD SPAC Br Reg S",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/wood-spac-one-130.svg"
+  },
+  {
+    "symbol": "GEN",
+    "name": "Gen Digital Inc.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/nortonlifelock.svg"
+  },
+  {
+    "symbol": "GEV",
+    "name": "GEVORKYAN, a.s.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/gevorkyan-as.svg"
+  },
+  {
+    "symbol": "HEIA",
+    "name": "Heineken NV",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/heineken.svg"
+  },
+  {
+    "symbol": "HWIO",
+    "name": "HARDWARIO A.S.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/hardwario-as.svg"
+  },
+  {
+    "symbol": "JUV2",
+    "name": "Juventus Football Club S.p.A.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/juventus-fc.svg"
+  },
+  {
+    "symbol": "KARIN",
+    "name": "Karo Leather AS",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/karo-investas.svg"
+  },
+  {
+    "symbol": "KGH",
+    "name": "KGHM Polska Miedz S.A.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/kghm.svg"
+  },
+  {
+    "symbol": "KLIKY",
+    "name": "M&T 1997 a.s.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/mandt-1997.svg"
+  },
+  {
+    "symbol": "KOFOL",
+    "name": "Kofola CeskoSlovensko as",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/kofola-cs-as.svg"
+  },
+  {
+    "symbol": "KOMB",
+    "name": "Komercni banka, a.s.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-generale.svg"
+  },
+  {
+    "symbol": "M2C",
+    "name": "Mark2 Corporation Investment SE",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/mark2.svg"
+  },
+  {
+    "symbol": "MMCTE",
+    "name": "Mmcite a.s.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/mmcite-as.svg"
+  },
+  {
+    "symbol": "MOL",
+    "name": "MOL Hungarian Oil & Gas Plc Class A",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/mol.svg"
+  },
+  {
+    "symbol": "MONET",
+    "name": "MONETA Money Bank AS",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/moneta-money-bank-as.svg"
+  },
+  {
+    "symbol": "NOKIA",
+    "name": "Nokia Oyj",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/nokia.svg"
+  },
+  {
+    "symbol": "OMV",
+    "name": "OMV AG",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/omv-ag.svg"
+  },
+  {
+    "symbol": "OTP",
+    "name": "OTP Bank Nyrt",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/otpbknyr-gdr.svg"
+  },
+  {
+    "symbol": "PEN",
+    "name": "Photon Energy NV",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/photon.svg"
+  },
+  {
+    "symbol": "PINK",
+    "name": "Pilulka Lekarny a.s.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/pilulka-lekarny.svg"
+  },
+  {
+    "symbol": "PKN",
+    "name": "ORLEN Spolka Akcyjna",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/pknorlen.svg"
+  },
+  {
+    "symbol": "PKO",
+    "name": "PKO Bank Polski SA",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/pkobp.svg"
+  },
+  {
+    "symbol": "PRAB",
+    "name": "Prabos plus a.s.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/prabos-plus-as.svg"
+  },
+  {
+    "symbol": "PRIUA",
+    "name": "Primoco UAV SE",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/primoco-uav-se.svg"
+  },
+  {
+    "symbol": "PVT",
+    "name": "RMS Mezzanine, a.s.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/rms-mezzanine.svg"
+  },
+  {
+    "symbol": "RBI",
+    "name": "Raiffeisen Bank International AG",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/raiffeisen-bk-intl-inh.svg"
+  },
+  {
+    "symbol": "RWE",
+    "name": "RWE AG",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/rwe.svg"
+  },
+  {
+    "symbol": "SABFG",
+    "name": "SAB Finance as",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/sab-finance-as.svg"
+  },
+  {
+    "symbol": "SHELL",
+    "name": "Shell Plc",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/shell.svg"
+  },
+  {
+    "symbol": "SKAB",
+    "name": "Skanska AB Class B",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/skanska-ab-ser-b.svg"
+  },
+  {
+    "symbol": "TABAK",
+    "name": "Philip Morris CR as",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/philip-morris.svg"
+  },
+  {
+    "symbol": "TMR",
+    "name": "Tatry mountain resorts as",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/tatry-mount-resorts.svg"
+  },
+  {
+    "symbol": "TOMA",
+    "name": "TOMA, a.s.",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/toma.svg"
+  },
+  {
+    "symbol": "ULVR",
+    "name": "Unilever PLC",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/unilever.svg"
+  },
+  {
+    "symbol": "UQA",
+    "name": "UNIQA Insurance Group AG",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/uniqa-insurance-group-ag.svg"
+  },
+  {
+    "symbol": "VER",
+    "name": "VERBUND AG Class A",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/verbund-ag-inh-a.svg"
+  },
+  {
+    "symbol": "VIG",
+    "name": "Vienna Insurance Group AG",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/vienna-insurance-group-a.svg"
+  },
+  {
+    "symbol": "VOE",
+    "name": "voestalpine AG",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/voestalpine-ag.svg"
+  },
+  {
+    "symbol": "VOLVB",
+    "name": "Volvo AB Class B",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/volvo-car.svg"
+  },
+  {
+    "symbol": "VOW",
+    "name": "Volkswagen AG Pref",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/volkswagen.svg"
+  },
+  {
+    "symbol": "WIE",
+    "name": "Wienerberger AG",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/wienerberger.svg"
+  },
+  {
+    "symbol": "WPS",
+    "name": "W.A.G. Payment Solutions Plc",
+    "market": "PSECZ",
+    "image": "https://s3-symbol-logo.tradingview.com/wag-payment-solutions.svg"
+  }
+]

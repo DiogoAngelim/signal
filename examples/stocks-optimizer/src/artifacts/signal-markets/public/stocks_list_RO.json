@@ -1,0 +1,1749 @@
+[
+  {
+    "symbol": "AAB",
+    "name": "Agroland Agribusiness S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/agroland-business-system.svg"
+  },
+  {
+    "symbol": "AAG",
+    "name": "AAGES S.A",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/aages-sa.svg"
+  },
+  {
+    "symbol": "ABN",
+    "name": "ABN Systems International",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/abn-systems-international.svg"
+  },
+  {
+    "symbol": "AG",
+    "name": "Agroland Business System SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/agroland-business-system.svg"
+  },
+  {
+    "symbol": "ALB",
+    "name": "Albapam S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/albapam-sa.svg"
+  },
+  {
+    "symbol": "ALT",
+    "name": "Altur SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/altur-slatina.svg"
+  },
+  {
+    "symbol": "ALU",
+    "name": "Alumil Rom Industry SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/alumil-rom-industry-bucuresti.svg"
+  },
+  {
+    "symbol": "ALV",
+    "name": "Allianz SE",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/allianz.svg"
+  },
+  {
+    "symbol": "ALW",
+    "name": "Visual Fan SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/visual-fan.svg"
+  },
+  {
+    "symbol": "AMAL",
+    "name": "International Caviar Corp. SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/international-caviar-calan.svg"
+  },
+  {
+    "symbol": "ANTA",
+    "name": "Romanta Estival 2002 SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/romanta-estival-2002-sa.svg"
+  },
+  {
+    "symbol": "APP",
+    "name": "Appraisal & Valuation SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/appraisal-and-valuation.svg"
+  },
+  {
+    "symbol": "ARM",
+    "name": "Armatura SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/armatura-cluj-napoca.svg"
+  },
+  {
+    "symbol": "ARMT",
+    "name": "Caromet SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/caromet-caransebes.svg"
+  },
+  {
+    "symbol": "ARO",
+    "name": "Aro-Palace SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/aro-palace-sa-brasov.svg"
+  },
+  {
+    "symbol": "ARS",
+    "name": "Aerostar SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/aerostar-bacau.svg"
+  },
+  {
+    "symbol": "ASC",
+    "name": "Ascendia SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/ascendia-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "ATB",
+    "name": "Antibiotice SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/antibiotice-iasi.svg"
+  },
+  {
+    "symbol": "ATRD",
+    "name": "Atelierele CFR Grivita SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/atelierele-cfr-grivita-bucuresti.svg"
+  },
+  {
+    "symbol": "BCM",
+    "name": "Casa de Bucovina Club de Munte SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/casa-de-bucovina-club-de-munte.svg"
+  },
+  {
+    "symbol": "BIO",
+    "name": "Biofarm SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/biofarm-bucuresti.svg"
+  },
+  {
+    "symbol": "BIOW",
+    "name": "Vifrana SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/vifrana-sa.svg"
+  },
+  {
+    "symbol": "BMW",
+    "name": "Bayerische Motoren Werke AG",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/bmw.svg"
+  },
+  {
+    "symbol": "BNET",
+    "name": "Bittnet Systems SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/bittnet-systems-sa.svg"
+  },
+  {
+    "symbol": "BONA",
+    "name": "Bonas Import Export S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/bonas-import-export-sa.svg"
+  },
+  {
+    "symbol": "BRK",
+    "name": "SSIF BRK Financial Group SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/brk-oe-tsz-e-mini-sandp-500.svg"
+  },
+  {
+    "symbol": "BRM",
+    "name": "Bermas S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/bermas-suceava.svg"
+  },
+  {
+    "symbol": "BUCS",
+    "name": "Bucovina SA Scheia",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/bucovina-suceava.svg"
+  },
+  {
+    "symbol": "BVB",
+    "name": "Bursa de Valori Bucuresti",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/bursa-de-valori-bucuresti.svg"
+  },
+  {
+    "symbol": "CAB",
+    "name": "Gocab Software Sa Ron0.1",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/gocab-software.svg"
+  },
+  {
+    "symbol": "CACU",
+    "name": "SIFI CJ LOGISTIC SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/comat-cluj-napoca.svg"
+  },
+  {
+    "symbol": "CAIN",
+    "name": "Casa Alba-Independenta SA Sibiu",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/casa-alba-independenta.svg"
+  },
+  {
+    "symbol": "CAOR",
+    "name": "SIF Hoteluri S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sif-hoteluri.svg"
+  },
+  {
+    "symbol": "CBC",
+    "name": "Carbochim SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/carbochim-cluj-napoca.svg"
+  },
+  {
+    "symbol": "CBKN",
+    "name": "Commerzbank AG",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/commerzbank.svg"
+  },
+  {
+    "symbol": "CBOT",
+    "name": "Comcereal SA (Botosani)",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/comcereal-sa-botosani.svg"
+  },
+  {
+    "symbol": "CC",
+    "name": "CONNECTIONS CONSULT S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/connections-consult.svg"
+  },
+  {
+    "symbol": "CCOM",
+    "name": "Cerealcom SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/cerealcom-alexandria.svg"
+  },
+  {
+    "symbol": "CEPO",
+    "name": "CEPROCIM S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/ceprocim-bucuresti.svg"
+  },
+  {
+    "symbol": "CFED",
+    "name": "Constructii Feroviare Craiova SA Craiova",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/constructii-feroviare-craiova-sa-craiova.svg"
+  },
+  {
+    "symbol": "CFH",
+    "name": "Cris-Tim Family Holding S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/cris-tim-family-sa.svg"
+  },
+  {
+    "symbol": "CHIA",
+    "name": "Constructii Hidrotehnice SA Iasi",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/constructii-hidrotehnice-iasi.svg"
+  },
+  {
+    "symbol": "CHRD",
+    "name": "Chromosome Dynamics S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/chromosome-dynamics-bucuresti.svg"
+  },
+  {
+    "symbol": "CICE",
+    "name": "Cicero SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/cicero-dr-t-severin.svg"
+  },
+  {
+    "symbol": "CICO",
+    "name": "CI-CO SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/ci-co-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "CLAIM",
+    "name": "Air Claim SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/air-claim.svg"
+  },
+  {
+    "symbol": "CLUB",
+    "name": "Hotel Club Estival 2002 SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/hotel-club-estival-2002-neptun.svg"
+  },
+  {
+    "symbol": "CMBU",
+    "name": "Commixt SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "CMCM",
+    "name": "Comcm SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sc-comcm-sa-constanta.svg"
+  },
+  {
+    "symbol": "CMF",
+    "name": "Comelf SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/comelf-bistrita.svg"
+  },
+  {
+    "symbol": "CMIL",
+    "name": "Comcereal SA (Bucuresti)",
+    "market": "BVB"
+  },
+  {
+    "symbol": "CMP",
+    "name": "Compa SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/compa-sibiu.svg"
+  },
+  {
+    "symbol": "CMVX",
+    "name": "COMVEX SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/comvex-constanta.svg"
+  },
+  {
+    "symbol": "CNTE",
+    "name": "Conted SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/conted-sa-dorohoi.svg"
+  },
+  {
+    "symbol": "COBL",
+    "name": "Bricomat SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/bricomat-sibiu.svg"
+  },
+  {
+    "symbol": "COBU",
+    "name": "Concifor SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/renewable-management-sa.svg"
+  },
+  {
+    "symbol": "COCB",
+    "name": "Comcereal SA (Slobozia)",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/comcereal-sa-slobozia.svg"
+  },
+  {
+    "symbol": "COCR",
+    "name": "Cocor SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/cocor-bucuresti.svg"
+  },
+  {
+    "symbol": "CODE",
+    "name": "Softbinator Technologies",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/softbinator-technologies.svg"
+  },
+  {
+    "symbol": "COEC",
+    "name": "Conect Business Park SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/conect-business-park-sa.svg"
+  },
+  {
+    "symbol": "COET",
+    "name": "Complex Comet SA Bucuresti",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/complex-comet-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "COKG",
+    "name": "Comalex SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/comalex-alexandria.svg"
+  },
+  {
+    "symbol": "COKJ",
+    "name": "Concivia SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/concivia-braila.svg"
+  },
+  {
+    "symbol": "COLK",
+    "name": "Conex Prahova SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "COMI",
+    "name": "Condmag SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/condmag-brasov.svg"
+  },
+  {
+    "symbol": "COMY",
+    "name": "Comat SA (Giurgiu)",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/comat-sa-giurgiu.svg"
+  },
+  {
+    "symbol": "CONK",
+    "name": "Concas SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "CORO",
+    "name": "Constructii Feroviare SA Galati",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/constructii-feroviare-galati.svg"
+  },
+  {
+    "symbol": "COTE",
+    "name": "Conpet SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/conpet-sa-ploiesti.svg"
+  },
+  {
+    "symbol": "COTM",
+    "name": "Comat SA (Galati)",
+    "market": "BVB"
+  },
+  {
+    "symbol": "COTN",
+    "name": "Comrep SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/comrep-sa-ploiesti.svg"
+  },
+  {
+    "symbol": "COUT",
+    "name": "Comturist SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/comturist-bucuresti.svg"
+  },
+  {
+    "symbol": "COVB",
+    "name": "Confectii SA Vaslui",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/confectii-vaslui-sa.svg"
+  },
+  {
+    "symbol": "CPHA",
+    "name": "Ceprohart SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/ceprohart-braila.svg"
+  },
+  {
+    "symbol": "CPLB",
+    "name": "Constructii Complexe SA Buzau",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/constructii-complexe-buzau.svg"
+  },
+  {
+    "symbol": "CRC",
+    "name": "CHIMCOMPLEX S.A. BORZESTI",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/chimcomplex-borzesti-sa-onesti.svg"
+  },
+  {
+    "symbol": "CRMC",
+    "name": "Carmeco SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/carmeco-sa.svg"
+  },
+  {
+    "symbol": "CRPC",
+    "name": "CARPATHIA CAPITAL S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/carpathia-capital.svg"
+  },
+  {
+    "symbol": "CTT",
+    "name": "Continental AG",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/continental-ag.svg"
+  },
+  {
+    "symbol": "DAI",
+    "name": "Mercedes-Benz Group AG",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/daimler.svg"
+  },
+  {
+    "symbol": "DBK",
+    "name": "Deutsche Bank AG",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-bank-ag.svg"
+  },
+  {
+    "symbol": "DENT",
+    "name": "Dr Fischer Dental SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/dr-fischer-dental.svg"
+  },
+  {
+    "symbol": "DIAS",
+    "name": "Diasfin SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "DIGI",
+    "name": "Digi Communications NV",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/digi-communications-nv.svg"
+  },
+  {
+    "symbol": "DN",
+    "name": "DN Agrar Group S.A",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/dn-agrar.svg"
+  },
+  {
+    "symbol": "DOIS",
+    "name": "Dorna Turism SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/dorna-turism-vatra-dornei.svg"
+  },
+  {
+    "symbol": "DPW",
+    "name": "Deutsche Post AG",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-post-ag.svg"
+  },
+  {
+    "symbol": "DTE",
+    "name": "Deutsche Telekom AG",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-telekom.svg"
+  },
+  {
+    "symbol": "DTG",
+    "name": "Daimler Truck Holding AG",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/daimler-truck-hldg-jge-na.svg"
+  },
+  {
+    "symbol": "DUPX",
+    "name": "Duplex SA Fagaras",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/duplex-sa-fagaras.svg"
+  },
+  {
+    "symbol": "EAI",
+    "name": "Electro-Alfa International SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "EBS",
+    "name": "Erste Group Bank AG",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/erste-group-bnk-inh-o-n.svg"
+  },
+  {
+    "symbol": "ECT",
+    "name": "Grupul Industrial Electrocontact SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/grupul-industrial-electrocontact.svg"
+  },
+  {
+    "symbol": "EEAI",
+    "name": "Electroconstructia Elco Alba Iulia SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/electroconstructia-elco-alba-iulia.svg"
+  },
+  {
+    "symbol": "EFO",
+    "name": "Turism Hoteluri Restaurante Marea Neagra SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/turismhotelurirestaurante-marea-neagra.svg"
+  },
+  {
+    "symbol": "EL",
+    "name": "Societatea Energetica Electrica S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/electrica-sa-gdr-reg-s.svg"
+  },
+  {
+    "symbol": "ELCT",
+    "name": "EL-CO S.A.",
+    "market": "BVB"
+  },
+  {
+    "symbol": "ELEL",
+    "name": "Electroconstructia Elco SA Suceava",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/electroconstructia-elco-suceava.svg"
+  },
+  {
+    "symbol": "ELER",
+    "name": "Elerom SA Roman",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/elerom-roman.svg"
+  },
+  {
+    "symbol": "ELGS",
+    "name": "AETA SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/aeta-sa.svg"
+  },
+  {
+    "symbol": "ELJ",
+    "name": "Electroaparataj SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/electroaparataj-bucuresti.svg"
+  },
+  {
+    "symbol": "ELJA",
+    "name": "Electromontaj Carpati SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/electromontaj-carpati-sibiu.svg"
+  },
+  {
+    "symbol": "ELMA",
+    "name": "Electromagnetica SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/electromagnetica-bucuresti.svg"
+  },
+  {
+    "symbol": "ELRD",
+    "name": "Electrecord SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/electrecord-bucuresti.svg"
+  },
+  {
+    "symbol": "ELV",
+    "name": "Elvila S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/elvila-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "ELZY",
+    "name": "Electroprecizia SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/electroprecizia-sacele.svg"
+  },
+  {
+    "symbol": "EM",
+    "name": "Grup EM",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/grup-em.svg"
+  },
+  {
+    "symbol": "EMAI",
+    "name": "Emailul SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/emailul-medias.svg"
+  },
+  {
+    "symbol": "EMTL",
+    "name": "Electrometal SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "ENP",
+    "name": "S.C. COMPANIA ENERGOPETROL S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/compania-energopetrol-campina.svg"
+  },
+  {
+    "symbol": "EOAN",
+    "name": "E.ON SE",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/e-on.svg"
+  },
+  {
+    "symbol": "EPN",
+    "name": "EMA PIATRA NEAMT SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/ema-piatra-neamt.svg"
+  },
+  {
+    "symbol": "FACY",
+    "name": "Fabrica de Scule Rasnov SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/fabrica-de-scule-risnov-sa-rasnov.svg"
+  },
+  {
+    "symbol": "FAMZ",
+    "name": "FAM S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/fam-galati.svg"
+  },
+  {
+    "symbol": "FEP",
+    "name": "FEPER S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/feper-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "FERO",
+    "name": "Iamba Arad S.A. Arad",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/feroneria-arad.svg"
+  },
+  {
+    "symbol": "FIMA",
+    "name": "Fimaro SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/fimaro-cluj.svg"
+  },
+  {
+    "symbol": "FOJE",
+    "name": "Foraj Sonde SA (Videle)",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/foraj-sonde-videle.svg"
+  },
+  {
+    "symbol": "FOMA",
+    "name": "Forma SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "FOSB",
+    "name": "Foraj Sonde Craiova SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/foraj-sonde-craiova.svg"
+  },
+  {
+    "symbol": "FRB",
+    "name": "Firebyte Games SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/firebyte-games.svg"
+  },
+  {
+    "symbol": "GALF",
+    "name": "Galfinband SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/galfinband-sa.svg"
+  },
+  {
+    "symbol": "GGC",
+    "name": "GLISSANDO GARDEN CENTER",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/glissando-garden-center.svg"
+  },
+  {
+    "symbol": "GHIM",
+    "name": "A.T.C. Agro Total Construct SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "GREEN",
+    "name": "Green Tech International S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/green-tech-international.svg"
+  },
+  {
+    "symbol": "GRIU",
+    "name": "Griul SA Bucuresti",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/griul-bucuresti.svg"
+  },
+  {
+    "symbol": "GSH",
+    "name": "Grup Serban Holding S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/grup-serban-sa.svg"
+  },
+  {
+    "symbol": "H2O",
+    "name": "S.P.E.E.H. Hidroelectrica S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/speeh-hidroelectrica-sa.svg"
+  },
+  {
+    "symbol": "HAI",
+    "name": "Holde Agri Invest S.A Class A",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/holde-agri-invest.svg"
+  },
+  {
+    "symbol": "HEAL",
+    "name": "Helios SA (Romania)",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/helios-sa-astileu.svg"
+  },
+  {
+    "symbol": "HLEB",
+    "name": "Hercules SA Braila",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/hercules-sa-braila.svg"
+  },
+  {
+    "symbol": "HUNT",
+    "name": "IHUNT TECHNOLOGY IMPORT-EXPORT S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/ihunt-technology.svg"
+  },
+  {
+    "symbol": "IAMU",
+    "name": "IAMU SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/iamu-blaj.svg"
+  },
+  {
+    "symbol": "IANY",
+    "name": "24 Ianuarie SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/24-ianuarie-ploiesti.svg"
+  },
+  {
+    "symbol": "IARV",
+    "name": "IAR SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/iar-brasov.svg"
+  },
+  {
+    "symbol": "IASX",
+    "name": "Iasitex SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/iasitex-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "ICEV",
+    "name": "INSTITUTUL DE CERCETARI PENTRU ACOPERIRI AVANSATE ICAA SA BUCURESTI",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/institutul-de-cercetari-pentru-acoperiri-avansate-icaa-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "ICMA",
+    "name": "ICMA SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "IMMO",
+    "name": "IMMO GURU S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/immo-guru-stefanestii-de-jos.svg"
+  },
+  {
+    "symbol": "IMP",
+    "name": "Impact Developer & Contractor SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/impact-developer-and-contractor-bucuresti.svg"
+  },
+  {
+    "symbol": "INCT",
+    "name": "Incertrans SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/incertrans-bucuresti.svg"
+  },
+  {
+    "symbol": "INMA",
+    "name": "Industrie Mica Prahova SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "INOX",
+    "name": "Inox SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/inox-magurele.svg"
+  },
+  {
+    "symbol": "INTA",
+    "name": "Independenta SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/independenta-sibiu.svg"
+  },
+  {
+    "symbol": "IORB",
+    "name": "IOR SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/ior-bucuresti.svg"
+  },
+  {
+    "symbol": "IPHI",
+    "name": "Iprochim SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/iprochim-bucuresti.svg"
+  },
+  {
+    "symbol": "IPRO",
+    "name": "Iprolam SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/iprolam-sa.svg"
+  },
+  {
+    "symbol": "IPRU",
+    "name": "Iproeb SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/iproeb-bistrita.svg"
+  },
+  {
+    "symbol": "IUBR",
+    "name": "IUS SA Brasov",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/ius-brasov.svg"
+  },
+  {
+    "symbol": "JTG",
+    "name": "JT GRUP OIL",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/jt-grup-oil.svg"
+  },
+  {
+    "symbol": "LCSI",
+    "name": "LCS Imobiliar SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/lcs-imobiliar-sa-cluj-napoca.svg"
+  },
+  {
+    "symbol": "LHA",
+    "name": "Deutsche Lufthansa AG",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/lufthansa.svg"
+  },
+  {
+    "symbol": "LIH",
+    "name": "Life Is Hard S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/life-is-hard-sa.svg"
+  },
+  {
+    "symbol": "LITO",
+    "name": "Litoral SA Mamaia",
+    "market": "BVB"
+  },
+  {
+    "symbol": "M",
+    "name": "Med Life SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/med-life-sa.svg"
+  },
+  {
+    "symbol": "MACO",
+    "name": "Macofil SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/macofil-tg-jiu.svg"
+  },
+  {
+    "symbol": "MALI",
+    "name": "Comalim SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/comalim-arad.svg"
+  },
+  {
+    "symbol": "MAM",
+    "name": "MAMBRICOLAJ S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/mambricolaj-sa.svg"
+  },
+  {
+    "symbol": "MAMA",
+    "name": "Magazin Universal Maramures SA Baia Mare",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/magazin-universal-maramures-baia-mare.svg"
+  },
+  {
+    "symbol": "MCAB",
+    "name": "Romcab SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/romcab-tg-mures.svg"
+  },
+  {
+    "symbol": "MEBY",
+    "name": "LUCEAFARUL SA BACAU",
+    "market": "BVB"
+  },
+  {
+    "symbol": "MECA",
+    "name": "Metalurgica SA Bucuresti",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/metalurgica-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "MECF",
+    "name": "Mecanica Ceahlau SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/mecanica-sa-ceahlau.svg"
+  },
+  {
+    "symbol": "MECP",
+    "name": "Mecon SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/mecon-sa-brasov.svg"
+  },
+  {
+    "symbol": "MELE",
+    "name": "Metal Lemn SA Craiova",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/metal-lemn-sa-craiova.svg"
+  },
+  {
+    "symbol": "MEOR",
+    "name": "METALICA S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/metalica-oradea.svg"
+  },
+  {
+    "symbol": "MEOY",
+    "name": "Mecanica Codlea SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/mecanica-codlea.svg"
+  },
+  {
+    "symbol": "MESA",
+    "name": "Metalul Mesa SA Salonta",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/metalul-mesa-sa.svg"
+  },
+  {
+    "symbol": "MET",
+    "name": "Meta Estate Trust S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/meta-estate-trust.svg"
+  },
+  {
+    "symbol": "METT",
+    "name": "METTEXIN SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "METY",
+    "name": "Mecanica Rotes SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/mecanica-rotes-targoviste.svg"
+  },
+  {
+    "symbol": "MFC",
+    "name": "MF CAPITAL SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/mecanica-fina-bucuresti.svg"
+  },
+  {
+    "symbol": "MIB",
+    "name": "Millenium Insurance Broker (MIB) Broker de Asigurare-Reasigurare S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/millenium-insurance-broker-sa.svg"
+  },
+  {
+    "symbol": "MILK",
+    "name": "Agroserv Mariuta S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/agroserv-mariuta.svg"
+  },
+  {
+    "symbol": "MINO",
+    "name": "Mindo SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/mindo-dorohoi.svg"
+  },
+  {
+    "symbol": "MINX",
+    "name": "Minexfor SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/minexfor-deva.svg"
+  },
+  {
+    "symbol": "MOBE",
+    "name": "Mobest SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/mobest-bucuresti.svg"
+  },
+  {
+    "symbol": "MOBG",
+    "name": "Mobex SA TG. Mures",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/mobex-sa-tgmures.svg"
+  },
+  {
+    "symbol": "MOBT",
+    "name": "Mobila SA Radauti",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/mobila-radauti.svg"
+  },
+  {
+    "symbol": "MODY",
+    "name": "Moldova SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/moldova-sa.svg"
+  },
+  {
+    "symbol": "MOIB",
+    "name": "Moara Cibin SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/moara-cibin-sibiu.svg"
+  },
+  {
+    "symbol": "MORA",
+    "name": "Morarit Panificatie SA Roman",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/morarit-panificatie-roman.svg"
+  },
+  {
+    "symbol": "NAPO",
+    "name": "Napoca SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/societatea-de-constructii-napoca.svg"
+  },
+  {
+    "symbol": "NAXY",
+    "name": "Navexim SA Galati",
+    "market": "BVB"
+  },
+  {
+    "symbol": "NCHI",
+    "name": "SCALA DEVELOPMENT S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/scala-development-sa.svg"
+  },
+  {
+    "symbol": "NEOL",
+    "name": "Neptun Olimp SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/neptun-olimp-neptun.svg"
+  },
+  {
+    "symbol": "NORD",
+    "name": "Nord SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/nord-bucuresti.svg"
+  },
+  {
+    "symbol": "NRF",
+    "name": "Norofert S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/norofert-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "NTEX",
+    "name": "SIFI CJ STORAGE SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sifi-cj-storage.svg"
+  },
+  {
+    "symbol": "NUIA",
+    "name": "Abo Mix SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "OIL",
+    "name": "Oil Terminal SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/oil-terminal-constanta.svg"
+  },
+  {
+    "symbol": "OMAL",
+    "name": "Comaliment SA Resita",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/comaliment-sa-resita.svg"
+  },
+  {
+    "symbol": "OMSE",
+    "name": "Comat Caras Severin SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "ONE",
+    "name": "One United Properties S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/one-united-properties.svg"
+  },
+  {
+    "symbol": "PACY",
+    "name": "Palace SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/palace-sa-sinaia.svg"
+  },
+  {
+    "symbol": "PBK",
+    "name": "Patria Bank SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/fdi-etf-bet-patria-tradeville.svg"
+  },
+  {
+    "symbol": "PCTM",
+    "name": "Prima Construct SA Timisoara",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/primaconstruct-timisoara.svg"
+  },
+  {
+    "symbol": "PE",
+    "name": "Premier Energy PLC",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/premier-energy-plc.svg"
+  },
+  {
+    "symbol": "PETY",
+    "name": "Petal SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/petal-sa.svg"
+  },
+  {
+    "symbol": "POTI",
+    "name": "Potis Capital SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/potis-capital-sa.svg"
+  },
+  {
+    "symbol": "PPL",
+    "name": "Promateris S.A",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/promateris-bucuresti.svg"
+  },
+  {
+    "symbol": "PPLI",
+    "name": "Professional Imo Partners S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/professional-imo-partners-sa.svg"
+  },
+  {
+    "symbol": "PRAE",
+    "name": "Prodlacta SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/prodlacta-brasov.svg"
+  },
+  {
+    "symbol": "PRBU",
+    "name": "Practic SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/practic-bucuresti.svg"
+  },
+  {
+    "symbol": "PRDI",
+    "name": "PRODHART SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "PREB",
+    "name": "Prebet SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/prebet-aiud.svg"
+  },
+  {
+    "symbol": "PREH",
+    "name": "Prefab SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/prefab-bucuresti.svg"
+  },
+  {
+    "symbol": "PRIB",
+    "name": "Primcom SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/primcom-bucuresti.svg"
+  },
+  {
+    "symbol": "PRSN",
+    "name": "Prospectiuni SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/prospectiuni-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "PTR",
+    "name": "Rompetrol Well Services SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/rompetrol-rafinare-constanta.svg"
+  },
+  {
+    "symbol": "PVBS",
+    "name": "PERSEUS FINTECH S.A",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/perseus-fintech-sa.svg"
+  },
+  {
+    "symbol": "RANT",
+    "name": "Granitul SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/granitul-bucuresti.svg"
+  },
+  {
+    "symbol": "RCHI",
+    "name": "Grand Hotel Bucharest S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/compania-hoteliera-intercontinental.svg"
+  },
+  {
+    "symbol": "REFE",
+    "name": "Remarul 16 Februarie SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/remarul-16-februarie-sa-cluj-napoca.svg"
+  },
+  {
+    "symbol": "REIT",
+    "name": "Star Residence Invest S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/star-residence-invest.svg"
+  },
+  {
+    "symbol": "RELE",
+    "name": "Relee SA Medias",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/relee-medias.svg"
+  },
+  {
+    "symbol": "REMM",
+    "name": "Remat Maramures SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "REVA",
+    "name": "Reva SA Simeria",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/reva-simeria.svg"
+  },
+  {
+    "symbol": "RMAH",
+    "name": "Farmaceutica Remedia SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/farmaceutica-remedia-deva.svg"
+  },
+  {
+    "symbol": "ROC1",
+    "name": "Roca Industry Holdingrock1 SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/roca-industry-holdingrock1-sa.svg"
+  },
+  {
+    "symbol": "ROCE",
+    "name": "Romcarbon SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/romcarbon-sa-buzau.svg"
+  },
+  {
+    "symbol": "ROOF",
+    "name": "Romanofir SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "RORX",
+    "name": "Romaero SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "RPH",
+    "name": "Ropharma SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/ropharma-brasov.svg"
+  },
+  {
+    "symbol": "RRC",
+    "name": "Rompetrol Rafinare SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/rompetrol-rafinare-constanta.svg"
+  },
+  {
+    "symbol": "RRD",
+    "name": "ROMRADIATOARE S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/romradiatoare-sa-brasov.svg"
+  },
+  {
+    "symbol": "SAFE",
+    "name": "Safetech Innovations SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/safetech-innovations-sa.svg"
+  },
+  {
+    "symbol": "SAP",
+    "name": "SAP SE",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sap.svg"
+  },
+  {
+    "symbol": "SATU",
+    "name": "Saturn SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/saturn-sa.svg"
+  },
+  {
+    "symbol": "SCBC",
+    "name": "Scut SA Bacau",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/scut-bacau.svg"
+  },
+  {
+    "symbol": "SCDM",
+    "name": "Unirea Shopping Center SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/unirea-shopping-center-bucuresti.svg"
+  },
+  {
+    "symbol": "SECE",
+    "name": "Service Neptun 2002 SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/service-neptun-2002-neptun.svg"
+  },
+  {
+    "symbol": "SEOL",
+    "name": "Semrom Oltenia SA Craiova",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/semrom-oltenia-craiova.svg"
+  },
+  {
+    "symbol": "SEOM",
+    "name": "Germina Agribusiness SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/semrom-muntenia-bucuresti.svg"
+  },
+  {
+    "symbol": "SERC",
+    "name": "SERICO S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/serico-bucuresti.svg"
+  },
+  {
+    "symbol": "SEVE",
+    "name": "Severnav SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/severnav-dr-tr-severin.svg"
+  },
+  {
+    "symbol": "SFG",
+    "name": "Sphera Franchise Group SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sphera-franchise.svg"
+  },
+  {
+    "symbol": "SIDG",
+    "name": "ArcelorMittal Hunedoara S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/arcelormittal.svg"
+  },
+  {
+    "symbol": "SIE",
+    "name": "Siemens Aktiengesellschaft",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/siemens.svg"
+  },
+  {
+    "symbol": "SIEP",
+    "name": "Sinter Ref SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "SIFI",
+    "name": "SIF Imobiliare PLC",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sif-imobiliare-plc-nicosia.svg"
+  },
+  {
+    "symbol": "SIGS",
+    "name": "Sigstrat SA Sighetu Marmatiei",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sigstrat-sa-sighetu.svg"
+  },
+  {
+    "symbol": "SINA",
+    "name": "Sinatex SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sinatex-bucuresti.svg"
+  },
+  {
+    "symbol": "SINT",
+    "name": "Sintofarm SA Bucuresti",
+    "market": "BVB"
+  },
+  {
+    "symbol": "SIRJ",
+    "name": "Siraj AD Impex SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "SLBB",
+    "name": "Suport Logistic Bucuresti SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/suport-logistic-bucuresti.svg"
+  },
+  {
+    "symbol": "SMTL",
+    "name": "Simtel Team SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/simtel-team.svg"
+  },
+  {
+    "symbol": "SNC",
+    "name": "Santierul Naval Constanta SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/santierul-naval-constanta.svg"
+  },
+  {
+    "symbol": "SNG",
+    "name": "Societatea Nationala de Gaze Naturale Romgaz S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/societatea-national-gdr-regs.svg"
+  },
+  {
+    "symbol": "SNN",
+    "name": "S.N. Nuclearelectrica S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sn-nuclearelectrica-sa.svg"
+  },
+  {
+    "symbol": "SNO",
+    "name": "Santierul Naval Orsova SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/santierul-naval-orsova.svg"
+  },
+  {
+    "symbol": "SNP",
+    "name": "OMV Petrom SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/omv-petrom-sa-reg-s.svg"
+  },
+  {
+    "symbol": "SOCP",
+    "name": "Socep SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/socep-constanta.svg"
+  },
+  {
+    "symbol": "SOMR",
+    "name": "Sometra SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sometra-copsa-mica.svg"
+  },
+  {
+    "symbol": "SOPL",
+    "name": "Somplast SA Nasaud",
+    "market": "BVB"
+  },
+  {
+    "symbol": "SOTA",
+    "name": "Someta SA Tasnad",
+    "market": "BVB"
+  },
+  {
+    "symbol": "SPTU",
+    "name": "SPIT Bucovina SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/spit-bucovina-sa-suceava.svg"
+  },
+  {
+    "symbol": "SPX",
+    "name": "SIPEX Company",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sipex-company.svg"
+  },
+  {
+    "symbol": "STKP",
+    "name": "STK PROPERTIES S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/stk-properties.svg"
+  },
+  {
+    "symbol": "STNM",
+    "name": "Santierul Naval 2 Mai SA Mangalia",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/santierul-naval-2-mai-mangalia.svg"
+  },
+  {
+    "symbol": "STOF",
+    "name": "Stofe Buhusi SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/stofe-sa-buhusi.svg"
+  },
+  {
+    "symbol": "STOZ",
+    "name": "Sticloval SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sticloval-sa.svg"
+  },
+  {
+    "symbol": "STZ",
+    "name": "Sinteza SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sinteza-oradea.svg"
+  },
+  {
+    "symbol": "TBK",
+    "name": "Transilvania Broker de Asigurare SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/transilvania-broker-de-asigurare.svg"
+  },
+  {
+    "symbol": "TBM",
+    "name": "Turbomecanica SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/turbomecanica-bucuresti.svg"
+  },
+  {
+    "symbol": "TEL",
+    "name": "C.N.T.E.E. Transelectrica SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/cntee-transelectrica-bucuresti.svg"
+  },
+  {
+    "symbol": "TGN",
+    "name": "S.N.T.G.N. Transgaz SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/sntgn-transgaz-medias.svg"
+  },
+  {
+    "symbol": "TIGH",
+    "name": "Tarnava SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "TLV",
+    "name": "Banca Transilvania SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/banca-transilvania-cluj-ron1000.svg"
+  },
+  {
+    "symbol": "TRGI",
+    "name": "Transporturi Auto Giulesti SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/transporturi-auto-giulesti-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "TRNG",
+    "name": "Transgex SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "TRP",
+    "name": "Teraplast SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/teraplast-bistrita.svg"
+  },
+  {
+    "symbol": "TRSB",
+    "name": "Transcom SA Sibiu",
+    "market": "BVB"
+  },
+  {
+    "symbol": "TRSK",
+    "name": "Transilana SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/transilana-sa-ghimbav.svg"
+  },
+  {
+    "symbol": "TRVM",
+    "name": "Transcom SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/transcom-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "TSND",
+    "name": "Tusnad SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/tusnad-baile-tusnad.svg"
+  },
+  {
+    "symbol": "TTS",
+    "name": "Transport Trade Services S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/transport-trade-services-sa.svg"
+  },
+  {
+    "symbol": "TUAA",
+    "name": "Turism Covasna SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/turism-covasna-covasna.svg"
+  },
+  {
+    "symbol": "TUFE",
+    "name": "Turism Felix SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/turism-felix-baile-felix.svg"
+  },
+  {
+    "symbol": "UAM",
+    "name": "UAMT SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/uamt-oradea.svg"
+  },
+  {
+    "symbol": "UARG",
+    "name": "Argus SA Constanta",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/argus-constanta.svg"
+  },
+  {
+    "symbol": "UCET",
+    "name": "Clabucet Estival 2002 SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/clabucet-estival-2002-sa.svg"
+  },
+  {
+    "symbol": "UNIR",
+    "name": "Unirea SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/unirea-cluj.svg"
+  },
+  {
+    "symbol": "UNISEM",
+    "name": "UNISEM SA Bucuresti",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/unisem-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "UPRR",
+    "name": "Upruc CTR SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "URBA",
+    "name": "Urbana SA Bistrita",
+    "market": "BVB"
+  },
+  {
+    "symbol": "URCB",
+    "name": "URC SA Vascau",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/urc-sa-vascau.svg"
+  },
+  {
+    "symbol": "UTGR",
+    "name": "Utilaj Greu SA Murfatlar",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/utilaj-greu-murfatlar.svg"
+  },
+  {
+    "symbol": "UZC",
+    "name": "Uzuc S.A.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/uzuc-ploiesti.svg"
+  },
+  {
+    "symbol": "UZIN",
+    "name": "Uzinexport SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/uzinexport-sa-bucuresti.svg"
+  },
+  {
+    "symbol": "UZT",
+    "name": "UZTEL SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "VAC",
+    "name": "Prodvinalco SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/prodvinalco-cluj-napoca.svg"
+  },
+  {
+    "symbol": "VESY",
+    "name": "VES SA",
+    "market": "BVB"
+  },
+  {
+    "symbol": "VIAG",
+    "name": "Vinalcool Arges SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/vinalcool-arges-sa-pitesti.svg"
+  },
+  {
+    "symbol": "VITK",
+    "name": "Vitimas SA Tecuci",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/vitimas-sa-tecuci.svg"
+  },
+  {
+    "symbol": "VNC",
+    "name": "Vrancart SA",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/vrancart-adjud.svg"
+  },
+  {
+    "symbol": "WINE",
+    "name": "Purcari Wineries Public Co., Ltd.",
+    "market": "BVB",
+    "image": "https://s3-symbol-logo.tradingview.com/purcari-wineries-pcl.svg"
+  }
+]

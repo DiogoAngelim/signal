@@ -1,0 +1,5387 @@
+[
+  {
+    "symbol": "AAD",
+    "name": "Amadeus FiRe AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/amadeus-fire-ag.svg"
+  },
+  {
+    "symbol": "AAL",
+    "name": "American Airlines Group Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/american-airlines-group.svg"
+  },
+  {
+    "symbol": "AAPL",
+    "name": "Apple Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/apple.svg"
+  },
+  {
+    "symbol": "ABBV",
+    "name": "AbbVie, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/abbvie.svg"
+  },
+  {
+    "symbol": "ABE",
+    "name": "AB Effectenbeteiligungen AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ab-effectenbeteiligungen-ag.svg"
+  },
+  {
+    "symbol": "ABN",
+    "name": "ABN AMRO Bank N.V. Depositary receipts",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/abn-amro.svg"
+  },
+  {
+    "symbol": "ABNB",
+    "name": "Airbnb, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/airbnb.svg"
+  },
+  {
+    "symbol": "ABT",
+    "name": "Abbott Laboratories",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/abbott.svg"
+  },
+  {
+    "symbol": "ABVX",
+    "name": "Abivax SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/abivax-sa.svg"
+  },
+  {
+    "symbol": "ACA",
+    "name": "Credit Agricole SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-agricole.svg"
+  },
+  {
+    "symbol": "ACS",
+    "name": "ACS, Actividades de Construccion y Servicios SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/acs-actividades-de-construccion-y-servicios.svg"
+  },
+  {
+    "symbol": "ACX",
+    "name": "Acerinox SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/acerinox.svg"
+  },
+  {
+    "symbol": "AD",
+    "name": "Koninklijke Ahold Delhaize N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ahold-delhaize.svg"
+  },
+  {
+    "symbol": "ADBE",
+    "name": "Adobe Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/adobe.svg"
+  },
+  {
+    "symbol": "ADE",
+    "name": "Bitcoin Group SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bitcoin-se.svg"
+  },
+  {
+    "symbol": "ADEN",
+    "name": "Adecco Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/adecco-n.svg"
+  },
+  {
+    "symbol": "ADI",
+    "name": "Analog Devices, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/analog-devices.svg"
+  },
+  {
+    "symbol": "ADJ",
+    "name": "ADLER Group SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/adler-sa.svg"
+  },
+  {
+    "symbol": "ADP",
+    "name": "Automatic Data Processing, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/automatic-data-processing.svg"
+  },
+  {
+    "symbol": "ADSK",
+    "name": "Autodesk, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/autodesk.svg"
+  },
+  {
+    "symbol": "ADTN",
+    "name": "ADTRAN Holdings, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/adtran.svg"
+  },
+  {
+    "symbol": "ADV",
+    "name": "Adtran Networks SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/adva-optical-networking-se.svg"
+  },
+  {
+    "symbol": "ADYE",
+    "name": "Adyen NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/adyen.svg"
+  },
+  {
+    "symbol": "AFK",
+    "name": "Air France-KLM SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/air-france-klm.svg"
+  },
+  {
+    "symbol": "AFL",
+    "name": "Aflac Incorporated",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/aflac.svg"
+  },
+  {
+    "symbol": "AFX",
+    "name": "Carl Zeiss Meditec AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/carl-zeiss-meditec.svg"
+  },
+  {
+    "symbol": "AGCO",
+    "name": "AGCO Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/agco.svg"
+  },
+  {
+    "symbol": "AGEN",
+    "name": "Assicurazioni Generali S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/generali-assicurazioni.svg"
+  },
+  {
+    "symbol": "AI",
+    "name": "Air Liquide SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/liquide.svg"
+  },
+  {
+    "symbol": "AIG",
+    "name": "American International Group, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/american-international.svg"
+  },
+  {
+    "symbol": "AIR",
+    "name": "Airbus SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/airbus.svg"
+  },
+  {
+    "symbol": "AKAM",
+    "name": "Akamai Technologies, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/akamai.svg"
+  },
+  {
+    "symbol": "ALC",
+    "name": "Alcon AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/alcon.svg"
+  },
+  {
+    "symbol": "ALFE",
+    "name": "Alfen NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/alfen.svg"
+  },
+  {
+    "symbol": "ALGN",
+    "name": "Align Technology, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/align-technology.svg"
+  },
+  {
+    "symbol": "ALM",
+    "name": "Almirall SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/almirall.svg"
+  },
+  {
+    "symbol": "ALSO",
+    "name": "Alstom SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/alstom.svg"
+  },
+  {
+    "symbol": "ALV",
+    "name": "Allianz SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/allianz.svg"
+  },
+  {
+    "symbol": "AMAT",
+    "name": "Applied Materials, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/applied-materials.svg"
+  },
+  {
+    "symbol": "AMD",
+    "name": "Advanced Micro Devices, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/advanced-micro-devices.svg"
+  },
+  {
+    "symbol": "AME",
+    "name": "AMETEK, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ametek.svg"
+  },
+  {
+    "symbol": "AMGN",
+    "name": "Amgen Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/amgen.svg"
+  },
+  {
+    "symbol": "AMP",
+    "name": "Amplifon SpA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/amplifon.svg"
+  },
+  {
+    "symbol": "AMUN",
+    "name": "Amundi SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/amundi.svg"
+  },
+  {
+    "symbol": "AMZN",
+    "name": "Amazon.com, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/amazon.svg"
+  },
+  {
+    "symbol": "ANA",
+    "name": "Acciona SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/acciona.svg"
+  },
+  {
+    "symbol": "ANDR",
+    "name": "ANDRITZ AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/andritz-ag.svg"
+  },
+  {
+    "symbol": "AOC",
+    "name": "Aluminum Corporation of China Limited Class H",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/aluminum-of-china.svg"
+  },
+  {
+    "symbol": "APAM",
+    "name": "Aperam S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/aperam.svg"
+  },
+  {
+    "symbol": "APH",
+    "name": "Amphenol Corporation Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/amphenol.svg"
+  },
+  {
+    "symbol": "ARGX",
+    "name": "argenx SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/argenx.svg"
+  },
+  {
+    "symbol": "ASMI",
+    "name": "ASM International N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/asm-international.svg"
+  },
+  {
+    "symbol": "ASML",
+    "name": "ASML Holding NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/asml.svg"
+  },
+  {
+    "symbol": "ATS",
+    "name": "AT & S Austria Technologie & Systemtechnik Aktiengesellschaft",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/at-s-austr-t-systemt.svg"
+  },
+  {
+    "symbol": "ATT",
+    "name": "AT&T Inc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/at-and-t.svg"
+  },
+  {
+    "symbol": "AVTR",
+    "name": "Avantor, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/avantor.svg"
+  },
+  {
+    "symbol": "AWK",
+    "name": "American Water Works Company, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/american-water-works.svg"
+  },
+  {
+    "symbol": "AXP",
+    "name": "American Express Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/american-express.svg"
+  },
+  {
+    "symbol": "AYV",
+    "name": "Ayvens",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ald.svg"
+  },
+  {
+    "symbol": "AZM",
+    "name": "Azimut Holding Spa",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/azimut.svg"
+  },
+  {
+    "symbol": "AZO",
+    "name": "AutoZone, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/autozone.svg"
+  },
+  {
+    "symbol": "BA",
+    "name": "Boeing Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/boeing.svg"
+  },
+  {
+    "symbol": "BAER",
+    "name": "Julius Baer Gruppe AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/julius-baer-n.svg"
+  },
+  {
+    "symbol": "BAH",
+    "name": "bet-at-home.com AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bet-at-homecom-ag.svg"
+  },
+  {
+    "symbol": "BARN",
+    "name": "Barry Callebaut AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/barry-callebaut-n.svg"
+  },
+  {
+    "symbol": "BAX",
+    "name": "Baxter International Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/baxter.svg"
+  },
+  {
+    "symbol": "BBVA",
+    "name": "Banco Bilbao Vizcaya Argentaria, S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-bilbao-vizcaya-argentaria.svg"
+  },
+  {
+    "symbol": "BBWI",
+    "name": "Bath & Body Works, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bath-and-body-works.svg"
+  },
+  {
+    "symbol": "BDT",
+    "name": "Bertrandt AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bertrandt-ag.svg"
+  },
+  {
+    "symbol": "BDX",
+    "name": "Becton, Dickinson and Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/becton-dickinson.svg"
+  },
+  {
+    "symbol": "BE",
+    "name": "Bloom Energy Corporation Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bloom-energy.svg"
+  },
+  {
+    "symbol": "BEI",
+    "name": "Beiersdorf AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/beiersdorf.svg"
+  },
+  {
+    "symbol": "BESI",
+    "name": "BE Semiconductor Industries N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/be-semiconductor-industries.svg"
+  },
+  {
+    "symbol": "BG",
+    "name": "BAWAG Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bawag-group-ag.svg"
+  },
+  {
+    "symbol": "BGN",
+    "name": "Banca Generali S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/banca-generali.svg"
+  },
+  {
+    "symbol": "BHD",
+    "name": "Burgenland Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/burgenland-ag.svg"
+  },
+  {
+    "symbol": "BIDU",
+    "name": "Baidu, Inc. Sponsored ADR Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/baidu.svg"
+  },
+  {
+    "symbol": "BIIB",
+    "name": "Biogen Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/biogen.svg"
+  },
+  {
+    "symbol": "BIM",
+    "name": "bioMerieux SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/biomerieux.svg"
+  },
+  {
+    "symbol": "BIO",
+    "name": "Biogena Group Invest AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/biogena-invest-ag.svg"
+  },
+  {
+    "symbol": "BKR",
+    "name": "Baker Hughes Company Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/baker-hughes.svg"
+  },
+  {
+    "symbol": "BKT",
+    "name": "Bankinter SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bankinter.svg"
+  },
+  {
+    "symbol": "BKW",
+    "name": "BKW AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bkw-n.svg"
+  },
+  {
+    "symbol": "BMED",
+    "name": "Banca Mediolanum SpA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/banca-mediolanum.svg"
+  },
+  {
+    "symbol": "BMRN",
+    "name": "BioMarin Pharmaceutical Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/biomarin-pharmaceutical.svg"
+  },
+  {
+    "symbol": "BMW",
+    "name": "Bayerische Motoren Werke AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bmw.svg"
+  },
+  {
+    "symbol": "BN",
+    "name": "Danone SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/danone.svg"
+  },
+  {
+    "symbol": "BNP",
+    "name": "BNP Paribas S.A. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/paribas.svg"
+  },
+  {
+    "symbol": "BNR",
+    "name": "Brenntag SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/brenntag-se-na-o-n.svg"
+  },
+  {
+    "symbol": "BNTX",
+    "name": "BioNTech SE Sponsored ADR",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/biontech.svg"
+  },
+  {
+    "symbol": "BOL",
+    "name": "Bollore SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bollore.svg"
+  },
+  {
+    "symbol": "BOSS",
+    "name": "HUGO BOSS AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hugo-boss.svg"
+  },
+  {
+    "symbol": "BPE",
+    "name": "BPER Banca S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bper-banca.svg"
+  },
+  {
+    "symbol": "BTS",
+    "name": "BTV Vier Lander Bank AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-fuer-tirol-and-vorarlberg.svg"
+  },
+  {
+    "symbol": "BVB",
+    "name": "Borussia Dortmund GmbH & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/borussia-dortmund.svg"
+  },
+  {
+    "symbol": "BVI",
+    "name": "Bureau Veritas SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bureau-veritas.svg"
+  },
+  {
+    "symbol": "BYND",
+    "name": "Beyond Meat, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/beyond-meat.svg"
+  },
+  {
+    "symbol": "BZU",
+    "name": "Buzzi Spa",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/buzzi-unicem.svg"
+  },
+  {
+    "symbol": "CABK",
+    "name": "CaixaBank SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/caixabank.svg"
+  },
+  {
+    "symbol": "CAI",
+    "name": "CA Immobilien Anlagen AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ca-immob-anl.svg"
+  },
+  {
+    "symbol": "CAN",
+    "name": "Canal+ SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/canal.svg"
+  },
+  {
+    "symbol": "CAPG",
+    "name": "Capgemini SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/capgemini.svg"
+  },
+  {
+    "symbol": "CARE",
+    "name": "Icona Technology Spa",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/icona-technology-spa.svg"
+  },
+  {
+    "symbol": "CARG",
+    "name": "Carrier Global Corp.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/carrier-global-corporation.svg"
+  },
+  {
+    "symbol": "CARL",
+    "name": "Carlsberg AS Class B",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/carlsberg-b-a-s.svg"
+  },
+  {
+    "symbol": "CARR",
+    "name": "Carrefour SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/carrefour.svg"
+  },
+  {
+    "symbol": "CAT",
+    "name": "Caterpillar Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/caterpillar.svg"
+  },
+  {
+    "symbol": "CATL",
+    "name": "Contemporary Amperex Technology Co., Limited Class H",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/contemporary-amper.svg"
+  },
+  {
+    "symbol": "CBK",
+    "name": "Commerzbank AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/commerzbank.svg"
+  },
+  {
+    "symbol": "CCH",
+    "name": "Coca-Cola HBC AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/coca-cola.svg"
+  },
+  {
+    "symbol": "CDE",
+    "name": "Coeur Mining, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/coeur-mining.svg"
+  },
+  {
+    "symbol": "CDI",
+    "name": "Christian Dior SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dior.svg"
+  },
+  {
+    "symbol": "CDNS",
+    "name": "Cadence Design Systems, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cadence-design-systems.svg"
+  },
+  {
+    "symbol": "CFR",
+    "name": "Compagnie Financiere Richemont SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/richemont-n.svg"
+  },
+  {
+    "symbol": "CH1104914457",
+    "name": "UBS AG. London Branch Warrant 2021-31.03.31 on to 10Y EUR Par Swap Rate",
+    "market": "VIE"
+  },
+  {
+    "symbol": "CH1278233403",
+    "name": "Maverix Securities AG Warrant 2026-null auf SMI",
+    "market": "VIE"
+  },
+  {
+    "symbol": "CH1278233411",
+    "name": "Maverix Securities AG Warrant 2026-null auf S&P 500",
+    "market": "VIE"
+  },
+  {
+    "symbol": "CHD",
+    "name": "Church & Dwight Co., Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/church-and-dwight.svg"
+  },
+  {
+    "symbol": "CHEM",
+    "name": "Chemours Co.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/the-chemours.svg"
+  },
+  {
+    "symbol": "CHKP",
+    "name": "Check Point Software Technologies Ltd.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/check-point-software-technologies.svg"
+  },
+  {
+    "symbol": "CHMG",
+    "name": "Chipotle Mexican Grill, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/chipotle-mexican-grill.svg"
+  },
+  {
+    "symbol": "CHTR",
+    "name": "Charter Communications, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/charter.svg"
+  },
+  {
+    "symbol": "CIE",
+    "name": "CIE Automotive, S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cie-automotive.svg"
+  },
+  {
+    "symbol": "CIGN",
+    "name": "Cigna Group",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cigna.svg"
+  },
+  {
+    "symbol": "CITI",
+    "name": "Citigroup Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/citigroup.svg"
+  },
+  {
+    "symbol": "CLN",
+    "name": "Clariant AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/clariant-n.svg"
+  },
+  {
+    "symbol": "CLNX",
+    "name": "Cellnex Telecom S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cellnex-telecom.svg"
+  },
+  {
+    "symbol": "CMCS",
+    "name": "Comcast Corporation Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/comcast.svg"
+  },
+  {
+    "symbol": "CMEG",
+    "name": "CME Group Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cme.svg"
+  },
+  {
+    "symbol": "CMI",
+    "name": "Cummins Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cummins.svg"
+  },
+  {
+    "symbol": "CNCB",
+    "name": "China Construction Bank Corporation Class H",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/china-construction-bank.svg"
+  },
+  {
+    "symbol": "CNHI",
+    "name": "CNH Industrial NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cnh.svg"
+  },
+  {
+    "symbol": "CNN1",
+    "name": "Canon Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/canon.svg"
+  },
+  {
+    "symbol": "COFI",
+    "name": "Capital One Financial Corp",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/capital-one.svg"
+  },
+  {
+    "symbol": "COIN",
+    "name": "Coinbase Global, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/coinbase.svg"
+  },
+  {
+    "symbol": "COK",
+    "name": "CANCOM SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cancom-se-o-n.svg"
+  },
+  {
+    "symbol": "COLG",
+    "name": "Colgate-Palmolive Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/colgate-palmolive.svg"
+  },
+  {
+    "symbol": "COLO",
+    "name": "Coloplast A/S Class B",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/coloplast-b-a-s.svg"
+  },
+  {
+    "symbol": "COLR",
+    "name": "Colruyt Group N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/colruyt.svg"
+  },
+  {
+    "symbol": "CON",
+    "name": "Continental AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/continental-ag.svg"
+  },
+  {
+    "symbol": "COP2",
+    "name": "CompuGroup Medical SE & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/compugroup-med-na-o-n.svg"
+  },
+  {
+    "symbol": "COPH",
+    "name": "ConocoPhillips",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/conocophillips.svg"
+  },
+  {
+    "symbol": "COPN",
+    "name": "Cosmo Pharmaceuticals NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cosmo-pharm-n.svg"
+  },
+  {
+    "symbol": "COST",
+    "name": "Costco Wholesale Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/costco-wholesale.svg"
+  },
+  {
+    "symbol": "CPI",
+    "name": "CPI Europe AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/iiaav.svg"
+  },
+  {
+    "symbol": "CRM",
+    "name": "Salesforce, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/salesforce.svg"
+  },
+  {
+    "symbol": "CS",
+    "name": "AXA SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/axa.svg"
+  },
+  {
+    "symbol": "CSCO",
+    "name": "Cisco Systems, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cisco.svg"
+  },
+  {
+    "symbol": "CSG",
+    "name": "CSG N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/csg-bv.svg"
+  },
+  {
+    "symbol": "CSX",
+    "name": "CSX Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/csx.svg"
+  },
+  {
+    "symbol": "CTAS",
+    "name": "Cintas Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cintas.svg"
+  },
+  {
+    "symbol": "CTSH",
+    "name": "Cognizant Technology Solutions Corporation Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cognizant.svg"
+  },
+  {
+    "symbol": "CTVA",
+    "name": "Corteva Inc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/corteva.svg"
+  },
+  {
+    "symbol": "CVC",
+    "name": "CVC Capital Partners plc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cvc-capital-partners-plc.svg"
+  },
+  {
+    "symbol": "CVS",
+    "name": "CVS Health Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cvs-health.svg"
+  },
+  {
+    "symbol": "CVX",
+    "name": "Chevron Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/chevron.svg"
+  },
+  {
+    "symbol": "CWC",
+    "name": "CEWE Stiftung & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cewe-stiftung-and-co-kgaa.svg"
+  },
+  {
+    "symbol": "DAA2",
+    "name": "Dassault Aviation SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dassault-aviation.svg"
+  },
+  {
+    "symbol": "DAL",
+    "name": "Delta Air Lines, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-air-lines.svg"
+  },
+  {
+    "symbol": "DANS",
+    "name": "Danske Bank A/S",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/danske-bank-a-s.svg"
+  },
+  {
+    "symbol": "DBAN",
+    "name": "Deutsche Beteiligungs AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-beteiligungs-ag.svg"
+  },
+  {
+    "symbol": "DBK",
+    "name": "Deutsche Bank AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-bank-ag.svg"
+  },
+  {
+    "symbol": "DBO",
+    "name": "Deutsche Boerse AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-boerse-na-o-n.svg"
+  },
+  {
+    "symbol": "DBX",
+    "name": "Dropbox, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dropbox.svg"
+  },
+  {
+    "symbol": "DDD",
+    "name": "3D Systems Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/3-d-systems.svg"
+  },
+  {
+    "symbol": "DDOG",
+    "name": "Datadog, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/datadog.svg"
+  },
+  {
+    "symbol": "DDPN",
+    "name": "DuPont de Nemours, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dupont-de-nemours.svg"
+  },
+  {
+    "symbol": "DECK",
+    "name": "Deckers Outdoor Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/deckers-outdoor.svg"
+  },
+  {
+    "symbol": "DEER",
+    "name": "Deere & Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/deere.svg"
+  },
+  {
+    "symbol": "DELL",
+    "name": "Dell Technologies, Inc. Class C",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dell.svg"
+  },
+  {
+    "symbol": "DEMA",
+    "name": "Demant A/S",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/demant-a-s.svg"
+  },
+  {
+    "symbol": "DEQ",
+    "name": "Deutsche EuroShop AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-euroshop.svg"
+  },
+  {
+    "symbol": "DEZ",
+    "name": "DEUTZ AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/deutz-ag.svg"
+  },
+  {
+    "symbol": "DG",
+    "name": "VINCI SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/vinci.svg"
+  },
+  {
+    "symbol": "DGEN",
+    "name": "Dollar General Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dollar-general.svg"
+  },
+  {
+    "symbol": "DHER",
+    "name": "Delivery Hero SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/delivery-hero.svg"
+  },
+  {
+    "symbol": "DHL",
+    "name": "Deutsche Post AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-post-ag.svg"
+  },
+  {
+    "symbol": "DHRC",
+    "name": "Danaher Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/danaher.svg"
+  },
+  {
+    "symbol": "DIAS",
+    "name": "DiaSorin S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/diasorin.svg"
+  },
+  {
+    "symbol": "DIC",
+    "name": "BRANICKS Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dic-asset-ag.svg"
+  },
+  {
+    "symbol": "DIET",
+    "name": "D'Ieteren Group SA/NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/d-ieteren.svg"
+  },
+  {
+    "symbol": "DIM",
+    "name": "Sartorius Stedim Biotech SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sartorius.svg"
+  },
+  {
+    "symbol": "DIS",
+    "name": "Walt Disney Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/walt-disney.svg"
+  },
+  {
+    "symbol": "DKI",
+    "name": "DAIKIN INDUSTRIES, LTD.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/daikin-industries.svg"
+  },
+  {
+    "symbol": "DLTR",
+    "name": "Dollar Tree, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dollar-tree.svg"
+  },
+  {
+    "symbol": "DMP",
+    "name": "Dermapharm Holding SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dermapharm-hldg-inh-o-n.svg"
+  },
+  {
+    "symbol": "DOC",
+    "name": "DO & CO Aktiengesellschaft",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/do-co.svg"
+  },
+  {
+    "symbol": "DOEN",
+    "name": "Dominion Energy Inc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dominion-energy.svg"
+  },
+  {
+    "symbol": "DOU2",
+    "name": "Douglas AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/douglas-ag.svg"
+  },
+  {
+    "symbol": "DOW",
+    "name": "Dow, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dow.svg"
+  },
+  {
+    "symbol": "DPZ",
+    "name": "Domino's Pizza, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dominos-pizza.svg"
+  },
+  {
+    "symbol": "DRI",
+    "name": "1&1 AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/1-1-ag-inh-o-n.svg"
+  },
+  {
+    "symbol": "DRW3",
+    "name": "Draegerwerk AG & Co. KGaA Pref",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/draegerwerk-st-a-o-n.svg"
+  },
+  {
+    "symbol": "DSFI",
+    "name": "DSM-Firmenich AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dsm-kon.svg"
+  },
+  {
+    "symbol": "DSV",
+    "name": "DSV A/S",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dsv-a-s.svg"
+  },
+  {
+    "symbol": "DSY2",
+    "name": "Dassault Systemes SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dassault-systemes.svg"
+  },
+  {
+    "symbol": "DTE",
+    "name": "Deutsche Telekom AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-telekom.svg"
+  },
+  {
+    "symbol": "DTG",
+    "name": "Daimler Truck Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/daimler-truck-hldg-jge-na.svg"
+  },
+  {
+    "symbol": "DUE",
+    "name": "Durr AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/duerr-ag-o-n.svg"
+  },
+  {
+    "symbol": "DUKE",
+    "name": "Duke Energy Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/duke-energy.svg"
+  },
+  {
+    "symbol": "DVN",
+    "name": "Devon Energy Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/devon-energy.svg"
+  },
+  {
+    "symbol": "DWNI",
+    "name": "Deutsche Wohnen SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/deutsche-wohnen-se-inh.svg"
+  },
+  {
+    "symbol": "DWS",
+    "name": "DWS Group GmbH & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dws-group.svg"
+  },
+  {
+    "symbol": "DXCM",
+    "name": "DexCom, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dexcom.svg"
+  },
+  {
+    "symbol": "EA",
+    "name": "Electronic Arts Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/electronic-arts.svg"
+  },
+  {
+    "symbol": "EBAY",
+    "name": "eBay Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ebay.svg"
+  },
+  {
+    "symbol": "EBS",
+    "name": "Erste Group Bank AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/erste-group-bnk-inh-o-n.svg"
+  },
+  {
+    "symbol": "ECHO",
+    "name": "EchoStar Corporation Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/echostar.svg"
+  },
+  {
+    "symbol": "ECL",
+    "name": "Ecolab Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ecolab.svg"
+  },
+  {
+    "symbol": "ED",
+    "name": "Consolidated Edison, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/consolidated-edison.svg"
+  },
+  {
+    "symbol": "EDEN",
+    "name": "Edenred SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/edenred.svg"
+  },
+  {
+    "symbol": "EFIN",
+    "name": "Extrafin S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/extrafin-spa.svg"
+  },
+  {
+    "symbol": "EFX",
+    "name": "Equifax Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/equifax.svg"
+  },
+  {
+    "symbol": "EI",
+    "name": "EssilorLuxottica SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/essilorluxottica.svg"
+  },
+  {
+    "symbol": "EIOS",
+    "name": "Enry'S Island S.P.A. Societa' Benefit",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/enry-s-island-spa-sb.svg"
+  },
+  {
+    "symbol": "EK7",
+    "name": "Agricultural Bank of China Limited Class H",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/agricultural-bank-of-china.svg"
+  },
+  {
+    "symbol": "EKTG",
+    "name": "EnergieKontor AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/energiekontor-ag.svg"
+  },
+  {
+    "symbol": "ELE",
+    "name": "Endesa S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/endesa.svg"
+  },
+  {
+    "symbol": "ELIA",
+    "name": "Elia Group SA/NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/elia.svg"
+  },
+  {
+    "symbol": "ELIS",
+    "name": "Elis SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/elis.svg"
+  },
+  {
+    "symbol": "ELMO",
+    "name": "Elmos Semiconductor SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/elmos-semiconductor-se.svg"
+  },
+  {
+    "symbol": "ELV",
+    "name": "Elevance Health, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/anthem.svg"
+  },
+  {
+    "symbol": "EMR",
+    "name": "Emerson Electric Co.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/emerson.svg"
+  },
+  {
+    "symbol": "EMSN",
+    "name": "EMS-CHEMIE HOLDING AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ems-chemie-n.svg"
+  },
+  {
+    "symbol": "EN",
+    "name": "Bouygues SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bouygues.svg"
+  },
+  {
+    "symbol": "ENEL",
+    "name": "Enel SpA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/enel.svg"
+  },
+  {
+    "symbol": "ENG",
+    "name": "Enagas SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/enagas.svg"
+  },
+  {
+    "symbol": "ENGI",
+    "name": "ENGIE S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/engie.svg"
+  },
+  {
+    "symbol": "ENI",
+    "name": "Eni S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/eni.svg"
+  },
+  {
+    "symbol": "ENPH",
+    "name": "Enphase Energy, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/enphase-energy.svg"
+  },
+  {
+    "symbol": "ENR",
+    "name": "Siemens Energy AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/siemens-energy.svg"
+  },
+  {
+    "symbol": "ENX",
+    "name": "Euronext NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/euronext.svg"
+  },
+  {
+    "symbol": "EOAN",
+    "name": "E.ON SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/e-on.svg"
+  },
+  {
+    "symbol": "EOGR",
+    "name": "EOG Resources, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/eog.svg"
+  },
+  {
+    "symbol": "ERAM",
+    "name": "Eramet SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/eramet.svg"
+  },
+  {
+    "symbol": "ES",
+    "name": "Eversource Energy",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/eversource-energy.svg"
+  },
+  {
+    "symbol": "ESF",
+    "name": "Eurofins Scientific SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/eurofins-scientific.svg"
+  },
+  {
+    "symbol": "ESLA",
+    "name": "Estee Lauder Companies Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/estee-lauder.svg"
+  },
+  {
+    "symbol": "ETL",
+    "name": "Eutelsat Communications SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/eutelsat-communic.svg"
+  },
+  {
+    "symbol": "ETS",
+    "name": "EuroTeleSites AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/eurotelesites-ag.svg"
+  },
+  {
+    "symbol": "ETSY",
+    "name": "Etsy, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/etsy.svg"
+  },
+  {
+    "symbol": "EUZG",
+    "name": "Eckert & Ziegler SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/eckert-and-ziegler-strahlen-un.svg"
+  },
+  {
+    "symbol": "EVD",
+    "name": "CTS Eventim AG & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/cts-eventim-kgaa.svg"
+  },
+  {
+    "symbol": "EVK",
+    "name": "Evonik Industries AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/evonik-industries-na-o-n.svg"
+  },
+  {
+    "symbol": "EVN",
+    "name": "EVN AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/evn-ag.svg"
+  },
+  {
+    "symbol": "EVT",
+    "name": "Evotec SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/evotec.svg"
+  },
+  {
+    "symbol": "EWLS",
+    "name": "Edwards Lifesciences Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/edwards.svg"
+  },
+  {
+    "symbol": "EXEC",
+    "name": "Exelon Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/exelon.svg"
+  },
+  {
+    "symbol": "EXO",
+    "name": "EXOR N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/exor.svg"
+  },
+  {
+    "symbol": "EXPE",
+    "name": "Expedia Group, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/expedia.svg"
+  },
+  {
+    "symbol": "F3CG",
+    "name": "SFC Energy AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sfc-energy-ag-br.svg"
+  },
+  {
+    "symbol": "FACC",
+    "name": "FACC AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/facc-ag.svg"
+  },
+  {
+    "symbol": "FANG",
+    "name": "Diamondback Energy, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/diamondback.svg"
+  },
+  {
+    "symbol": "FAST",
+    "name": "Fastenal Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fastenal.svg"
+  },
+  {
+    "symbol": "FBK",
+    "name": "FinecoBank SpA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/finecobank.svg"
+  },
+  {
+    "symbol": "FCE2",
+    "name": "FuelCell Energy, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fuelcell-energy.svg"
+  },
+  {
+    "symbol": "FCX",
+    "name": "Freeport-McMoRan, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/freeport-mcmoran.svg"
+  },
+  {
+    "symbol": "FDJ",
+    "name": "FDJ United",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/la-francaise-des.svg"
+  },
+  {
+    "symbol": "FDX",
+    "name": "FedEx Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fedex.svg"
+  },
+  {
+    "symbol": "FGR",
+    "name": "Eiffage SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/eiffage.svg"
+  },
+  {
+    "symbol": "FHZN",
+    "name": "Flughafen Zurich AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/flughafen-zuerich-n.svg"
+  },
+  {
+    "symbol": "FIE",
+    "name": "Fielmann Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fielmann-ag-o-n.svg"
+  },
+  {
+    "symbol": "FISV",
+    "name": "Fiserv, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fiserv.svg"
+  },
+  {
+    "symbol": "FKA",
+    "name": "Frauenthal Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/frauenthal-ag.svg"
+  },
+  {
+    "symbol": "FLU",
+    "name": "Flughafen Wien AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/flughafen-wien-ag.svg"
+  },
+  {
+    "symbol": "FME",
+    "name": "Fresenius Medical Care AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fresenius-medical-care.svg"
+  },
+  {
+    "symbol": "FNIS",
+    "name": "Fidelity National Information Services, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fidelity-information-services.svg"
+  },
+  {
+    "symbol": "FNTN",
+    "name": "freenet AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/freenet-ag-na-o-n.svg"
+  },
+  {
+    "symbol": "FORD",
+    "name": "Ford Motor Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ford.svg"
+  },
+  {
+    "symbol": "FOSL",
+    "name": "Fossil Group, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fossil-group.svg"
+  },
+  {
+    "symbol": "FP",
+    "name": "TotalEnergies SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/total.svg"
+  },
+  {
+    "symbol": "FPE",
+    "name": "FUCHS SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fuchs-petrolub-na-st-o-n.svg"
+  },
+  {
+    "symbol": "FPE4",
+    "name": "FUCHS SE Pref Registered Shs",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fuchs-petrolub-na-st-o-n.svg"
+  },
+  {
+    "symbol": "FQT",
+    "name": "Frequentis AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/frequentis-ag.svg"
+  },
+  {
+    "symbol": "FR",
+    "name": "Valeo SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/valeo.svg"
+  },
+  {
+    "symbol": "FRA",
+    "name": "Fraport AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fraport.svg"
+  },
+  {
+    "symbol": "FRE",
+    "name": "Fresenius SE & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fresenius-medical-care.svg"
+  },
+  {
+    "symbol": "FRGR",
+    "name": "Ferrari Group PLC",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ferrari-group.svg"
+  },
+  {
+    "symbol": "FRVI",
+    "name": "Forvia SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/faurecia.svg"
+  },
+  {
+    "symbol": "FSLR",
+    "name": "First Solar, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/first-solar.svg"
+  },
+  {
+    "symbol": "FSTN",
+    "name": "Fastned BV Shs Depositary Receipt 1 Shs",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fastned.svg"
+  },
+  {
+    "symbol": "FTI",
+    "name": "TechnipFMC plc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/technipfmc.svg"
+  },
+  {
+    "symbol": "FTK",
+    "name": "flatexDEGIRO AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/flatexdegiro.svg"
+  },
+  {
+    "symbol": "FZM",
+    "name": "ZTE Corporation Class H",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/zte.svg"
+  },
+  {
+    "symbol": "G1A",
+    "name": "GEA Group Aktiengesellschaft",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/gea-group-ag.svg"
+  },
+  {
+    "symbol": "G24",
+    "name": "Scout24 SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/scout24-se-na-o-n.svg"
+  },
+  {
+    "symbol": "GAGS",
+    "name": "Gurktaler AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/gurktaler-ag-st.svg"
+  },
+  {
+    "symbol": "GAGV",
+    "name": "Gurktaler AG Vorz.Akt.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/gurktaler-ag-st.svg"
+  },
+  {
+    "symbol": "GALD",
+    "name": "Galderma Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/galderma-ag.svg"
+  },
+  {
+    "symbol": "GALE",
+    "name": "Galenica AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/galenica-n.svg"
+  },
+  {
+    "symbol": "GAS",
+    "name": "Naturgy Energy Group, S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/naturgy.svg"
+  },
+  {
+    "symbol": "GBF",
+    "name": "Bilfinger SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/bilfinger-se.svg"
+  },
+  {
+    "symbol": "GBLB",
+    "name": "Groupe Bruxelles Lambert SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/gbl.svg"
+  },
+  {
+    "symbol": "GE",
+    "name": "GE Aerospace",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ge-aerospace.svg"
+  },
+  {
+    "symbol": "GEBN",
+    "name": "Geberit AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/geberit-n.svg"
+  },
+  {
+    "symbol": "GEDY",
+    "name": "General Dynamics Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/general-dynamics.svg"
+  },
+  {
+    "symbol": "GEFI",
+    "name": "Georg Fischer AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/fischer-n.svg"
+  },
+  {
+    "symbol": "GET",
+    "name": "Getlink SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/getlink-se.svg"
+  },
+  {
+    "symbol": "GFGT",
+    "name": "Global Fashion Group S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/global-fashion-sa.svg"
+  },
+  {
+    "symbol": "GFT",
+    "name": "GFT Technologies SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/gft-technologies-se.svg"
+  },
+  {
+    "symbol": "GHC",
+    "name": "Gallmetzer Healthcare SpA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/gallmetzer-healthcare-spa.svg"
+  },
+  {
+    "symbol": "GIL",
+    "name": "DMG MORI Aktiengesellschaft",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dmg-mori-ag-o-n.svg"
+  },
+  {
+    "symbol": "GILD",
+    "name": "Gilead Sciences, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/gilead.svg"
+  },
+  {
+    "symbol": "GIS",
+    "name": "General Mills, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/general-mills.svg"
+  },
+  {
+    "symbol": "GIVN",
+    "name": "Givaudan SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/givaudan-n.svg"
+  },
+  {
+    "symbol": "GLE",
+    "name": "Societe Generale S.A. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-generale.svg"
+  },
+  {
+    "symbol": "GLJ",
+    "name": "GRENKE AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/grenke.svg"
+  },
+  {
+    "symbol": "GLPG",
+    "name": "Galapagos NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/galapagos.svg"
+  },
+  {
+    "symbol": "GLW",
+    "name": "Corning Inc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/corning.svg"
+  },
+  {
+    "symbol": "GMAB",
+    "name": "Genmab A/S",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/genmab-a-s.svg"
+  },
+  {
+    "symbol": "GME",
+    "name": "GameStop Corp. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/gamestop.svg"
+  },
+  {
+    "symbol": "GMM",
+    "name": "Grammer AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/grammer-ag.svg"
+  },
+  {
+    "symbol": "GMOT",
+    "name": "General Motors Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/general-motors.svg"
+  },
+  {
+    "symbol": "GNSN",
+    "name": "GN Store Nord A/S",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/gn-store-nord-a-s.svg"
+  },
+  {
+    "symbol": "GOOA",
+    "name": "Alphabet Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/alphabet.svg"
+  },
+  {
+    "symbol": "GOOC",
+    "name": "Alphabet Inc. Class C",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/alphabet.svg"
+  },
+  {
+    "symbol": "GPN",
+    "name": "Global Payments Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/global-payments.svg"
+  },
+  {
+    "symbol": "GPRO",
+    "name": "GoPro, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/gopro.svg"
+  },
+  {
+    "symbol": "GRF",
+    "name": "Grifols, S.A. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/grifols.svg"
+  },
+  {
+    "symbol": "GRP2",
+    "name": "Groupon, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/groupon.svg"
+  },
+  {
+    "symbol": "GRU",
+    "name": "Geely Automobile Holdings Limited",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/geely-auto.svg"
+  },
+  {
+    "symbol": "GRV",
+    "name": "Great Wall Motor Co., Ltd. Class H",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/greatwall-motor.svg"
+  },
+  {
+    "symbol": "GS",
+    "name": "Goldman Sachs Group, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/golden-sachs-etf-trust-goldman.svg"
+  },
+  {
+    "symbol": "GTT",
+    "name": "Gaztransport & Technigaz SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/gtt-gaztransport.svg"
+  },
+  {
+    "symbol": "GVC",
+    "name": "Entain PLC",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/entain.svg"
+  },
+  {
+    "symbol": "GWW",
+    "name": "W.W. Grainger, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/grainger.svg"
+  },
+  {
+    "symbol": "GXI",
+    "name": "Gerresheimer AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/gerresheimer-ag.svg"
+  },
+  {
+    "symbol": "GYC",
+    "name": "Grand City Properties SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/grand-city-propert-eo-10.svg"
+  },
+  {
+    "symbol": "GYT",
+    "name": "Goodyear Tire & Rubber Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/goodyear-tire-and-rubber.svg"
+  },
+  {
+    "symbol": "HAG",
+    "name": "HENSOLDT AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hensoldt-ag.svg"
+  },
+  {
+    "symbol": "HAL",
+    "name": "Halliburton Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/halliburton.svg"
+  },
+  {
+    "symbol": "HAS",
+    "name": "Hasbro, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hasbro.svg"
+  },
+  {
+    "symbol": "HAV2",
+    "name": "Havas NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/havas-nv.svg"
+  },
+  {
+    "symbol": "HBAN",
+    "name": "Helvetia Baloise Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/helvetia-n.svg"
+  },
+  {
+    "symbol": "HBH",
+    "name": "HORNBACH Holding AG & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hornbach-hold.svg"
+  },
+  {
+    "symbol": "HD",
+    "name": "Home Depot, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/home-depot.svg"
+  },
+  {
+    "symbol": "HDD",
+    "name": "Heidelberger Druckmaschinen AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/heidelberger-druckmaschinen.svg"
+  },
+  {
+    "symbol": "HED",
+    "name": "Maschinenfabrik HEID Aktiengesellschaft",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/maschinenfabrik-heid-ag.svg"
+  },
+  {
+    "symbol": "HEI",
+    "name": "Heidelberg Materials AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/heidelbergcement-i.svg"
+  },
+  {
+    "symbol": "HEIA",
+    "name": "Heineken NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/heineken.svg"
+  },
+  {
+    "symbol": "HEIO",
+    "name": "Heineken Holding N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/heineken.svg"
+  },
+  {
+    "symbol": "HEN",
+    "name": "Henkel AG & Co. KGaA Pref",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/henkel.svg"
+  },
+  {
+    "symbol": "HENI",
+    "name": "Henkel AG & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/henkel.svg"
+  },
+  {
+    "symbol": "HERS",
+    "name": "Hera S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hera.svg"
+  },
+  {
+    "symbol": "HFG",
+    "name": "HelloFresh SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hellofresh.svg"
+  },
+  {
+    "symbol": "HHFA",
+    "name": "Hamburger Hafen und Logistik AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hamburger-hafen-und-logistik.svg"
+  },
+  {
+    "symbol": "HLAG",
+    "name": "Hapag-Lloyd AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hapag-lloyd-ag.svg"
+  },
+  {
+    "symbol": "HLE",
+    "name": "HELLA GmbH & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hella-gmbh.svg"
+  },
+  {
+    "symbol": "HLMI",
+    "name": "Hecla Mining Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hecla-mining.svg"
+  },
+  {
+    "symbol": "HLTW",
+    "name": "Hilton Worldwide Holdings Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hilton-worldwide.svg"
+  },
+  {
+    "symbol": "HNLG",
+    "name": "Hoenle AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dr-hoenle-ag.svg"
+  },
+  {
+    "symbol": "HNR1",
+    "name": "Hannover Rueck SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hannover-rueck.svg"
+  },
+  {
+    "symbol": "HOG",
+    "name": "Harley-Davidson, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/harley-davidson.svg"
+  },
+  {
+    "symbol": "HOLN",
+    "name": "Holcim Ltd",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/holcim-n.svg"
+  },
+  {
+    "symbol": "HOLX",
+    "name": "Hologic, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hologic.svg"
+  },
+  {
+    "symbol": "HON",
+    "name": "Honeywell International Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/honeywell.svg"
+  },
+  {
+    "symbol": "HOT",
+    "name": "HOCHTIEF Aktiengesellschaft",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hochtief.svg"
+  },
+  {
+    "symbol": "HPE",
+    "name": "Hewlett Packard Enterprise Co.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hewlett-packard-enterprise.svg"
+  },
+  {
+    "symbol": "HPQ",
+    "name": "HP Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hp.svg"
+  },
+  {
+    "symbol": "HRL",
+    "name": "Hormel Foods Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hormel-foods.svg"
+  },
+  {
+    "symbol": "HRX5",
+    "name": "Reploid Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/reploid-ag.svg"
+  },
+  {
+    "symbol": "HSIC",
+    "name": "Henry Schein, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/henry-schein.svg"
+  },
+  {
+    "symbol": "HST",
+    "name": "Hutter & Schrantz Stahlbau AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hutter-and-schrantz-stahlbau-ag.svg"
+  },
+  {
+    "symbol": "HSY",
+    "name": "Hershey Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hershey.svg"
+  },
+  {
+    "symbol": "HTGG",
+    "name": "HomeToGo SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hometogo-se.svg"
+  },
+  {
+    "symbol": "HUI",
+    "name": "HUI S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hui-spa.svg"
+  },
+  {
+    "symbol": "HUS",
+    "name": "Hutter & Schrantz AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hutter-and-schrantz-ag.svg"
+  },
+  {
+    "symbol": "HWM",
+    "name": "Howmet Aerospace Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/howmet-aerospace.svg"
+  },
+  {
+    "symbol": "HYQ",
+    "name": "Hypoport SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hypoport-se-na-o-n.svg"
+  },
+  {
+    "symbol": "IAG",
+    "name": "International Consolidated Airlines Group SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/international-consolidated-airlines-group.svg"
+  },
+  {
+    "symbol": "IBE",
+    "name": "Iberdrola SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/iberdrola.svg"
+  },
+  {
+    "symbol": "IBM",
+    "name": "International Business Machines Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/international-bus-mach.svg"
+  },
+  {
+    "symbol": "ICEI",
+    "name": "Intercontinental Exchange, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/intercontinental-exchange.svg"
+  },
+  {
+    "symbol": "ICG",
+    "name": "Incergo S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/incergo-sa.svg"
+  },
+  {
+    "symbol": "ICK",
+    "name": "Industrial and Commercial Bank of China Limited Class H",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/industrial-and-commercial-bank-of-china.svg"
+  },
+  {
+    "symbol": "IDR",
+    "name": "Indra Sistemas, S.A. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/indra-sistemas.svg"
+  },
+  {
+    "symbol": "IDXX",
+    "name": "IDEXX Laboratories, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/idexx-laboratories.svg"
+  },
+  {
+    "symbol": "IFF",
+    "name": "International Flavors & Fragrances Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/international-flavors-and-fragrances.svg"
+  },
+  {
+    "symbol": "IFX",
+    "name": "Infineon Technologies AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/infineon-technologies.svg"
+  },
+  {
+    "symbol": "IG",
+    "name": "Italgas SpA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/italgas.svg"
+  },
+  {
+    "symbol": "ILM1",
+    "name": "Medios AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/medios-ag.svg"
+  },
+  {
+    "symbol": "ILMN",
+    "name": "Illumina, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/illumina.svg"
+  },
+  {
+    "symbol": "IMCD",
+    "name": "IMCD N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/imcd.svg"
+  },
+  {
+    "symbol": "INGA",
+    "name": "ING Groep N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ing.svg"
+  },
+  {
+    "symbol": "INH",
+    "name": "INDUS Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/indus-ag.svg"
+  },
+  {
+    "symbol": "INTC",
+    "name": "Intel Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/intel.svg"
+  },
+  {
+    "symbol": "INTU",
+    "name": "Intuit Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/intuit.svg"
+  },
+  {
+    "symbol": "IOC",
+    "name": "Itochu Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/itochu.svg"
+  },
+  {
+    "symbol": "IOS",
+    "name": "IONOS Group SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ionos-se.svg"
+  },
+  {
+    "symbol": "IOY",
+    "name": "Infosys Limited Sponsored ADR",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/infosys.svg"
+  },
+  {
+    "symbol": "IPCO",
+    "name": "International Paper Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/international-paper.svg"
+  },
+  {
+    "symbol": "IPN",
+    "name": "Ipsen SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ipsen.svg"
+  },
+  {
+    "symbol": "IQVH",
+    "name": "IQVIA Holdings Inc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/iqvia.svg"
+  },
+  {
+    "symbol": "ISP",
+    "name": "Intesa Sanpaolo S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/intesa.svg"
+  },
+  {
+    "symbol": "ISRG",
+    "name": "Intuitive Surgical, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/intuitive-surgical.svg"
+  },
+  {
+    "symbol": "ISS",
+    "name": "ISS A/S",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/iss.svg"
+  },
+  {
+    "symbol": "ITW",
+    "name": "Illinois Tool Works Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/illinois-tool-works.svg"
+  },
+  {
+    "symbol": "ITX",
+    "name": "Industria de Diseno Textil, S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/inditex.svg"
+  },
+  {
+    "symbol": "IVG",
+    "name": "Iveco Group NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/iveco.svg"
+  },
+  {
+    "symbol": "IWA",
+    "name": "IWATANI Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/iwatani.svg"
+  },
+  {
+    "symbol": "JAT",
+    "name": "Japan Tobacco Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/japan-tobacco.svg"
+  },
+  {
+    "symbol": "JBHT",
+    "name": "J.B. Hunt Transport Services, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/j-b-hunt.svg"
+  },
+  {
+    "symbol": "JD",
+    "name": "JD.com, Inc. Sponsored ADR Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/jd-com.svg"
+  },
+  {
+    "symbol": "JDEP",
+    "name": "JDE Peet's NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/jde-peet-s.svg"
+  },
+  {
+    "symbol": "JEN",
+    "name": "Jenoptik AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/jenoptik-ag.svg"
+  },
+  {
+    "symbol": "JKS",
+    "name": "JinkoSolar Holding Co., Ltd. Sponsored ADR",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/jinkosolar.svg"
+  },
+  {
+    "symbol": "JMIA",
+    "name": "Jumia Technologies AG Sponsored ADR",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/jumia.svg"
+  },
+  {
+    "symbol": "JNJ",
+    "name": "Johnson & Johnson",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/johnson-and-johnson.svg"
+  },
+  {
+    "symbol": "JOYY",
+    "name": "JOYY, Inc. Sponsored ADR Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/yy-inc.svg"
+  },
+  {
+    "symbol": "JPM",
+    "name": "JPMorgan Chase & Co.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/jpmorgan-chase.svg"
+  },
+  {
+    "symbol": "JSTG",
+    "name": "JOST Werke SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/jost-werke-ag.svg"
+  },
+  {
+    "symbol": "JUN3",
+    "name": "Jungheinrich AG Pref",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/jungheinrich-prfd.svg"
+  },
+  {
+    "symbol": "JUV2",
+    "name": "Juventus Football Club S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/juventus-fc.svg"
+  },
+  {
+    "symbol": "JYSK",
+    "name": "Jyske Bank A/S",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/jyske-bank-a-s.svg"
+  },
+  {
+    "symbol": "K2G",
+    "name": "K2G Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/k2g-ag.svg"
+  },
+  {
+    "symbol": "KBC",
+    "name": "KBC Group N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kbc-groep-nv.svg"
+  },
+  {
+    "symbol": "KBX",
+    "name": "Knorr-Bremse AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/knorr-bremse-ag-inh-o-n.svg"
+  },
+  {
+    "symbol": "KCO",
+    "name": "Kloeckner & Co SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kloeckner-and-co-se.svg"
+  },
+  {
+    "symbol": "KD",
+    "name": "Kyndryl Holdings Incorporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kyndryl.svg"
+  },
+  {
+    "symbol": "KDP",
+    "name": "Keurig Dr Pepper Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/keurig-dr-pepper.svg"
+  },
+  {
+    "symbol": "KER",
+    "name": "Kering SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kering.svg"
+  },
+  {
+    "symbol": "KEY",
+    "name": "KeyCorp",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/keycorp.svg"
+  },
+  {
+    "symbol": "KEYS",
+    "name": "Keysight Technologies Inc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/keysight-technologies.svg"
+  },
+  {
+    "symbol": "KGX",
+    "name": "KION GROUP AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kion-group-ag.svg"
+  },
+  {
+    "symbol": "KHC",
+    "name": "Kraft Heinz Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kraft-heinz.svg"
+  },
+  {
+    "symbol": "KLAC",
+    "name": "KLA Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kla-tencor.svg"
+  },
+  {
+    "symbol": "KLAR",
+    "name": "Klarna Group Plc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/klarna.svg"
+  },
+  {
+    "symbol": "KMBC",
+    "name": "Kimberly-Clark Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kimberly-clark.svg"
+  },
+  {
+    "symbol": "KMI",
+    "name": "Kinder Morgan Inc Class P",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kinder-morgan.svg"
+  },
+  {
+    "symbol": "KNIN",
+    "name": "Kuehne & Nagel International AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuehne-nagel.svg"
+  },
+  {
+    "symbol": "KO",
+    "name": "Coca-Cola Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/coca-cola.svg"
+  },
+  {
+    "symbol": "KOMT",
+    "name": "Komatsu Ltd.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/komatsu.svg"
+  },
+  {
+    "symbol": "KPN",
+    "name": "Royal KPN NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kpn-kon.svg"
+  },
+  {
+    "symbol": "KR",
+    "name": "Kroger Co.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kroger.svg"
+  },
+  {
+    "symbol": "KRKG",
+    "name": "Krka, d. d., Novo mesto",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/krka.svg"
+  },
+  {
+    "symbol": "KRN",
+    "name": "Krones AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/krones-ag-o-n.svg"
+  },
+  {
+    "symbol": "KTCG",
+    "name": "Kapsch TrafficCom AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kapsch-trafficcom-ag.svg"
+  },
+  {
+    "symbol": "KTN",
+    "name": "Kontron AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kontron-ag.svg"
+  },
+  {
+    "symbol": "KWS",
+    "name": "KWS SAAT SE & Co KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/kws-saat-kgaa-inh-o-n.svg"
+  },
+  {
+    "symbol": "LDO",
+    "name": "Leonardo SpA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/leonardo.svg"
+  },
+  {
+    "symbol": "LEG",
+    "name": "LEG Immobilien SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/leg-immobilien-se-na-o-n.svg"
+  },
+  {
+    "symbol": "LEVI",
+    "name": "Levi Strauss & Co. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/levi-strauss-and-co.svg"
+  },
+  {
+    "symbol": "LGA",
+    "name": "LG Display Co., Ltd Sponsored ADR",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lg-display.svg"
+  },
+  {
+    "symbol": "LGHT",
+    "name": "Signify NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/signify-nv.svg"
+  },
+  {
+    "symbol": "LHA",
+    "name": "Deutsche Lufthansa AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lufthansa.svg"
+  },
+  {
+    "symbol": "LHXT",
+    "name": "L3Harris Technologies Inc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/l3-harris.svg"
+  },
+  {
+    "symbol": "LIN",
+    "name": "Linde plc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/linde.svg"
+  },
+  {
+    "symbol": "LISN",
+    "name": "Chocoladefabriken Lindt & Spruengli AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lindt-n.svg"
+  },
+  {
+    "symbol": "LISP",
+    "name": "Chocoladefabriken Lindt & Spruengli AG Partizipsch.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lindt-n.svg"
+  },
+  {
+    "symbol": "LLYC",
+    "name": "Eli Lilly and Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/eli-lilly.svg"
+  },
+  {
+    "symbol": "LMT",
+    "name": "Lockheed Martin Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lockheed-martin.svg"
+  },
+  {
+    "symbol": "LNZ",
+    "name": "Lenzing AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lenzing-ag.svg"
+  },
+  {
+    "symbol": "LOGN",
+    "name": "Logitech International S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/logitech-international.svg"
+  },
+  {
+    "symbol": "LONN",
+    "name": "Lonza Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lonza-n.svg"
+  },
+  {
+    "symbol": "LOTB",
+    "name": "Lotus Bakeries NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lotus-bakeries.svg"
+  },
+  {
+    "symbol": "LOWE",
+    "name": "Lowe's Companies, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lowe-s.svg"
+  },
+  {
+    "symbol": "LPKG",
+    "name": "LPKF Laser & Electronics SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lpkf-laser-and-electronics-se.svg"
+  },
+  {
+    "symbol": "LR",
+    "name": "Legrand SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/legrand.svg"
+  },
+  {
+    "symbol": "LRC2",
+    "name": "Lam Research Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lam-research.svg"
+  },
+  {
+    "symbol": "LTH",
+    "name": "Linz Textil Holding Aktiengesellschaft",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/linz-textil-ag.svg"
+  },
+  {
+    "symbol": "LTMC",
+    "name": "Lottomatica Group S.P.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lottomatica.svg"
+  },
+  {
+    "symbol": "LULU",
+    "name": "lululemon athletica inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lululemon-athletica.svg"
+  },
+  {
+    "symbol": "LUNA",
+    "name": "H. Lundbeck A/S Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/h-lundbeck-a-s-b.svg"
+  },
+  {
+    "symbol": "LUNB",
+    "name": "H. Lundbeck A/S Class B",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/h-lundbeck-a-s-b.svg"
+  },
+  {
+    "symbol": "LUV",
+    "name": "Southwest Airlines Co.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/southwest.svg"
+  },
+  {
+    "symbol": "LVSC",
+    "name": "Las Vegas Sands Corp.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/las-vegas-sands.svg"
+  },
+  {
+    "symbol": "LXS",
+    "name": "LANXESS AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lanxess-ag.svg"
+  },
+  {
+    "symbol": "LYFT",
+    "name": "Lyft, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lyft.svg"
+  },
+  {
+    "symbol": "MACY",
+    "name": "Macy's, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/macy-s.svg"
+  },
+  {
+    "symbol": "MAN",
+    "name": "Josef Manner & Comp. AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/josef-manner-and-comp-ag.svg"
+  },
+  {
+    "symbol": "MAP",
+    "name": "Mapfre SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mapfre.svg"
+  },
+  {
+    "symbol": "MAR",
+    "name": "Marriott International, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/marriott.svg"
+  },
+  {
+    "symbol": "MARA",
+    "name": "MARA Holdings, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/marathon-digital-holdings.svg"
+  },
+  {
+    "symbol": "MARI",
+    "name": "Marinomed Biotech AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/marinomed-biotech-ag.svg"
+  },
+  {
+    "symbol": "MAST",
+    "name": "Mastercard Incorporated Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mastercard.svg"
+  },
+  {
+    "symbol": "MAT",
+    "name": "Mattel, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mattel.svg"
+  },
+  {
+    "symbol": "MAT1",
+    "name": "Panasonic Holdings Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/panasonic.svg"
+  },
+  {
+    "symbol": "MB",
+    "name": "Mediobanca - Banca di Credito Finanziario S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mediobanca.svg"
+  },
+  {
+    "symbol": "MBBG",
+    "name": "MBB SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mbb-se.svg"
+  },
+  {
+    "symbol": "MBG",
+    "name": "Mercedes-Benz Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/daimler.svg"
+  },
+  {
+    "symbol": "MC",
+    "name": "LVMH Moet Hennessy Louis Vuitton SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/lvmh.svg"
+  },
+  {
+    "symbol": "MCD",
+    "name": "McDonald's Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mcdonalds.svg"
+  },
+  {
+    "symbol": "MCHP",
+    "name": "Microchip Technology Incorporated",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/microchip-technology.svg"
+  },
+  {
+    "symbol": "MDLZ",
+    "name": "Mondelez International, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mondelez.svg"
+  },
+  {
+    "symbol": "MDT",
+    "name": "Medtronic Plc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/medtronic.svg"
+  },
+  {
+    "symbol": "MEL",
+    "name": "Melia Hotels International, S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/melia-hotels-international.svg"
+  },
+  {
+    "symbol": "MELI",
+    "name": "MercadoLibre, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mercadolibre.svg"
+  },
+  {
+    "symbol": "MEO",
+    "name": "METRO AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/metro-ag-st-o-n.svg"
+  },
+  {
+    "symbol": "MER",
+    "name": "MERIDIANA Capital Markets SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/meridiana-blockchain-ventures.svg"
+  },
+  {
+    "symbol": "MERE",
+    "name": "MERIDIANA Capital Markets SE TEMP",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/meridiana-blockchain-ventures.svg"
+  },
+  {
+    "symbol": "META",
+    "name": "Meta Platforms Inc Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/meta-platforms.svg"
+  },
+  {
+    "symbol": "METL",
+    "name": "MetLife, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/metlife.svg"
+  },
+  {
+    "symbol": "MFE2",
+    "name": "MFE-MediaForEurope NV Class B",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mfe-a.svg"
+  },
+  {
+    "symbol": "MITT",
+    "name": "Mitsubishi Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mitsubishi.svg"
+  },
+  {
+    "symbol": "MKC",
+    "name": "McCormick & Company, Incorporated",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mccormick.svg"
+  },
+  {
+    "symbol": "MLP",
+    "name": "MLP SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mlp-se.svg"
+  },
+  {
+    "symbol": "MMCO",
+    "name": "Marsh & McLennan Companies, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/marsh-and-mclennan.svg"
+  },
+  {
+    "symbol": "MMK",
+    "name": "Mayr-Melnhof Karton AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mayr-melnhof-karton.svg"
+  },
+  {
+    "symbol": "MMM",
+    "name": "3M Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/3m.svg"
+  },
+  {
+    "symbol": "MNST",
+    "name": "Monster Beverage Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/monster-beverage.svg"
+  },
+  {
+    "symbol": "MOCO",
+    "name": "Moody's Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/moodys.svg"
+  },
+  {
+    "symbol": "MONC",
+    "name": "Moncler SpA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/moncler.svg"
+  },
+  {
+    "symbol": "MOSI",
+    "name": "Motorola Solutions, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/motorola-solutions.svg"
+  },
+  {
+    "symbol": "MPC",
+    "name": "Marathon Petroleum Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/marathon-petroleum.svg"
+  },
+  {
+    "symbol": "MRCK",
+    "name": "Merck KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/merck-kgaa.svg"
+  },
+  {
+    "symbol": "MRK",
+    "name": "Merck & Co., Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/merck-and-co.svg"
+  },
+  {
+    "symbol": "MRNA",
+    "name": "Moderna, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/moderna.svg"
+  },
+  {
+    "symbol": "MRSA",
+    "name": "A.P. Moller - Maersk A/S Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/a-p-moller-maersk.svg"
+  },
+  {
+    "symbol": "MRSK",
+    "name": "A.P. Moller - Maersk A/S Class B",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/a-p-moller-maersk.svg"
+  },
+  {
+    "symbol": "MRVL",
+    "name": "Marvell Technology, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/marvell-tech.svg"
+  },
+  {
+    "symbol": "MSCI",
+    "name": "MSCI Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/msci.svg"
+  },
+  {
+    "symbol": "MSFT",
+    "name": "Microsoft Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/microsoft.svg"
+  },
+  {
+    "symbol": "MT",
+    "name": "ArcelorMittal SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/arcelormittal.svg"
+  },
+  {
+    "symbol": "MTC2",
+    "name": "Match Group, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/match-group-inc.svg"
+  },
+  {
+    "symbol": "MTD",
+    "name": "Mettler-Toledo International Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mettler-toledo-international.svg"
+  },
+  {
+    "symbol": "MTX",
+    "name": "MTU Aero Engines AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mtu-aero-engines.svg"
+  },
+  {
+    "symbol": "MU",
+    "name": "Micron Technology, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/micron-technology.svg"
+  },
+  {
+    "symbol": "MUMG",
+    "name": "Mensch und Maschine Software SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mensch-und-maschon.svg"
+  },
+  {
+    "symbol": "MUV",
+    "name": "Munchener Ruckversicherungs-Gesellschaft AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/munichre.svg"
+  },
+  {
+    "symbol": "MUX2",
+    "name": "McEwen Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mcewen-mining.svg"
+  },
+  {
+    "symbol": "MUXG",
+    "name": "Mutares SE & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mutares-ag.svg"
+  },
+  {
+    "symbol": "MWB",
+    "name": "MWB AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/mwb-ag.svg"
+  },
+  {
+    "symbol": "MWD",
+    "name": "Morgan Stanley",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/morgan-stanley.svg"
+  },
+  {
+    "symbol": "NA9N",
+    "name": "Nagarro SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nagarro.svg"
+  },
+  {
+    "symbol": "NCH2",
+    "name": "thyssenkrupp nucera AG & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/thyssenkrupp-nucera.svg"
+  },
+  {
+    "symbol": "NCLH",
+    "name": "Norwegian Cruise Line Holdings Ltd.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/norwegian-cruise-line.svg"
+  },
+  {
+    "symbol": "NDA",
+    "name": "Aurubis AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/aurubis-ag.svg"
+  },
+  {
+    "symbol": "NDAQ",
+    "name": "Nasdaq, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nasdaq.svg"
+  },
+  {
+    "symbol": "NDX1",
+    "name": "Nordex SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nordex.svg"
+  },
+  {
+    "symbol": "NEE",
+    "name": "NextEra Energy, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nextera-energy.svg"
+  },
+  {
+    "symbol": "NEM",
+    "name": "Nemetschek SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nemetschek-se-on.svg"
+  },
+  {
+    "symbol": "NESN",
+    "name": "Nestle S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nestle.svg"
+  },
+  {
+    "symbol": "NEWM",
+    "name": "Newmont Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/newmont.svg"
+  },
+  {
+    "symbol": "NEX",
+    "name": "Nexans SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nexans.svg"
+  },
+  {
+    "symbol": "NEXI",
+    "name": "Nexi S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nexi.svg"
+  },
+  {
+    "symbol": "NFLX",
+    "name": "Netflix, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/netflix.svg"
+  },
+  {
+    "symbol": "NIB",
+    "name": "Nidec Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nidec.svg"
+  },
+  {
+    "symbol": "NISA",
+    "name": "Nissan Motor Co., Ltd.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nissan.svg"
+  },
+  {
+    "symbol": "NITT",
+    "name": "NTT Inc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nippon-tel.svg"
+  },
+  {
+    "symbol": "NKE",
+    "name": "NIKE, Inc. Class B",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nike.svg"
+  },
+  {
+    "symbol": "NKT",
+    "name": "NKT A/S",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nkt-a-s.svg"
+  },
+  {
+    "symbol": "NLBR",
+    "name": "Nova Ljubljanska banka d.d.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nova-ljubljanska-b-gdr-reg-s.svg"
+  },
+  {
+    "symbol": "NLOK",
+    "name": "Gen Digital Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nortonlifelock.svg"
+  },
+  {
+    "symbol": "NN",
+    "name": "NN Group N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nn-group.svg"
+  },
+  {
+    "symbol": "NNN1",
+    "name": "Tencent Holdings Ltd Unsponsored ADR",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tencent.svg"
+  },
+  {
+    "symbol": "NNND",
+    "name": "Tencent Holdings Ltd",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tencent.svg"
+  },
+  {
+    "symbol": "NNO2",
+    "name": "Novo Nordisk A/S Class B",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/novo-nordisk.svg"
+  },
+  {
+    "symbol": "NOCO",
+    "name": "Northrop Grumman Corp.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/northrop-grumman.svg"
+  },
+  {
+    "symbol": "NOEJ",
+    "name": "NORMA Group SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/norma-se.svg"
+  },
+  {
+    "symbol": "NOKI",
+    "name": "Nokia Oyj",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nokia.svg"
+  },
+  {
+    "symbol": "NOVN",
+    "name": "Novartis AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/novartis.svg"
+  },
+  {
+    "symbol": "NRE1",
+    "name": "Nokian Renkaat Oyj",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nokian-tyres-plc.svg"
+  },
+  {
+    "symbol": "NSCO",
+    "name": "Norfolk Southern Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/norfolk-southern.svg"
+  },
+  {
+    "symbol": "NTES",
+    "name": "Netease Inc Sponsored ADR",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/netease.svg"
+  },
+  {
+    "symbol": "NTO",
+    "name": "Nintendo Co., Ltd.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nintendo.svg"
+  },
+  {
+    "symbol": "NVAX",
+    "name": "Novavax, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/novavax.svg"
+  },
+  {
+    "symbol": "NVDA",
+    "name": "NVIDIA Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nvidia.svg"
+  },
+  {
+    "symbol": "NXPI",
+    "name": "NXP Semiconductors NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/nxp-semiconductors.svg"
+  },
+  {
+    "symbol": "NZYM",
+    "name": "Novonesis A/S Class B",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/novozymes-b-a-s.svg"
+  },
+  {
+    "symbol": "OBCK",
+    "name": "Ottobock SE & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ottobock-se-and-co-kgaa.svg"
+  },
+  {
+    "symbol": "OBS",
+    "name": "Oberbank AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/oberbank-ag.svg"
+  },
+  {
+    "symbol": "OKE",
+    "name": "ONEOK, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/oneok.svg"
+  },
+  {
+    "symbol": "OMV",
+    "name": "OMV AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/omv-ag.svg"
+  },
+  {
+    "symbol": "ONSE",
+    "name": "ON Semiconductor Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/on-semiconductor.svg"
+  },
+  {
+    "symbol": "ONTX",
+    "name": "Ontex Group N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ontex.svg"
+  },
+  {
+    "symbol": "OR",
+    "name": "L'Oreal S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/l-oreal.svg"
+  },
+  {
+    "symbol": "ORA",
+    "name": "Orange SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/orange.svg"
+  },
+  {
+    "symbol": "ORAT",
+    "name": "Ormat Technologies, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ormat-technologies.svg"
+  },
+  {
+    "symbol": "ORCL",
+    "name": "Oracle Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/oracle.svg"
+  },
+  {
+    "symbol": "ORLY",
+    "name": "O'Reilly Automotive, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/o-reilly-auto.svg"
+  },
+  {
+    "symbol": "ORP2",
+    "name": "Emeis",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/orpea.svg"
+  },
+  {
+    "symbol": "ORST",
+    "name": "Orsted",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/orsted.svg"
+  },
+  {
+    "symbol": "OTIS",
+    "name": "Otis Worldwide Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/otis-worldwide.svg"
+  },
+  {
+    "symbol": "OXYP",
+    "name": "Occidental Petroleum Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/occidental-petroleum.svg"
+  },
+  {
+    "symbol": "P1Z",
+    "name": "PATRIZIA SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/patrizia-ag-na-on.svg"
+  },
+  {
+    "symbol": "P911",
+    "name": "Porsche AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/porsche-automobil-holding.svg"
+  },
+  {
+    "symbol": "PAH3",
+    "name": "Porsche Automobil Holding SE Pref",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/porsche-automobil-holding.svg"
+  },
+  {
+    "symbol": "PAL",
+    "name": "PALFINGER AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/palfinger-ag.svg"
+  },
+  {
+    "symbol": "PANW",
+    "name": "Palo Alto Networks, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/palo-alto-networks.svg"
+  },
+  {
+    "symbol": "PAYX",
+    "name": "Paychex, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/paychex.svg"
+  },
+  {
+    "symbol": "PBB",
+    "name": "Deutsche Pfandbriefbank AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dt-pfandbriefbk-ag.svg"
+  },
+  {
+    "symbol": "PC",
+    "name": "Pirelli & C. S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/pirelli-and-c.svg"
+  },
+  {
+    "symbol": "PCAR",
+    "name": "PACCAR Inc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/paccar.svg"
+  },
+  {
+    "symbol": "PCG",
+    "name": "PG&E Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/pg-and-e.svg"
+  },
+  {
+    "symbol": "PCZH",
+    "name": "ProCredit Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/procredit-ag.svg"
+  },
+  {
+    "symbol": "PECN",
+    "name": "PetroChina Co., Ltd. Class H",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/petrochina.svg"
+  },
+  {
+    "symbol": "PEG",
+    "name": "Public Service Enterprise Group Inc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/public-service-enterprise.svg"
+  },
+  {
+    "symbol": "PEPS",
+    "name": "PepsiCo, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/pepsico.svg"
+  },
+  {
+    "symbol": "PETG",
+    "name": "Petrol dd Ljubljana",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/petrol-ljub-inh.svg"
+  },
+  {
+    "symbol": "PFE",
+    "name": "Pfizer Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/pfizer.svg"
+  },
+  {
+    "symbol": "PFV",
+    "name": "Pfeiffer Vacuum Technology AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/pfeiffer-vacuum-tech-o-n.svg"
+  },
+  {
+    "symbol": "PG",
+    "name": "Procter & Gamble Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/procter-and-gamble.svg"
+  },
+  {
+    "symbol": "PGHN",
+    "name": "Partners Group Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/partners-n.svg"
+  },
+  {
+    "symbol": "PH",
+    "name": "Parker-Hannifin Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/parker-hannifin.svg"
+  },
+  {
+    "symbol": "PHIA",
+    "name": "Koninklijke Philips N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/philips.svg"
+  },
+  {
+    "symbol": "PHM",
+    "name": "Pharma Mar SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/pharma-mar.svg"
+  },
+  {
+    "symbol": "PLNW",
+    "name": "Planisware Societe anonyme",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/planisware.svg"
+  },
+  {
+    "symbol": "PLTR",
+    "name": "Palantir Technologies Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/palantir.svg"
+  },
+  {
+    "symbol": "PLUG",
+    "name": "Plug Power Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/plug-power.svg"
+  },
+  {
+    "symbol": "PLUX",
+    "name": "PLUXEE N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/pluxee-n-v.svg"
+  },
+  {
+    "symbol": "PMOR",
+    "name": "Philip Morris International Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/philip-morris.svg"
+  },
+  {
+    "symbol": "PNCF",
+    "name": "PNC Financial Services Group, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/pnc-financial.svg"
+  },
+  {
+    "symbol": "PNDO",
+    "name": "Pandora A/S",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/pandora-a-s.svg"
+  },
+  {
+    "symbol": "PNE3",
+    "name": "PNE AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/pne-wind-ag-reg.svg"
+  },
+  {
+    "symbol": "POS",
+    "name": "PORR AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/porr-ag.svg"
+  },
+  {
+    "symbol": "POST",
+    "name": "Osterreichische Post AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/oesterreich-post-ag.svg"
+  },
+  {
+    "symbol": "PPG",
+    "name": "PPG Industries, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ppg-industries.svg"
+  },
+  {
+    "symbol": "PRLB",
+    "name": "Proto Labs, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/proto-labs.svg"
+  },
+  {
+    "symbol": "PROX",
+    "name": "Proximus SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/proximus.svg"
+  },
+  {
+    "symbol": "PRU",
+    "name": "Prudential Financial, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/prudential.svg"
+  },
+  {
+    "symbol": "PRX",
+    "name": "Prosus N.V. Class N",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/prosus.svg"
+  },
+  {
+    "symbol": "PRY",
+    "name": "Prysmian S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/prysmian.svg"
+  },
+  {
+    "symbol": "PSAG",
+    "name": "PSI Software SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/psi-software-ag.svg"
+  },
+  {
+    "symbol": "PSM",
+    "name": "ProSiebenSat.1 Media SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/prosiebensat-1-na-o-n.svg"
+  },
+  {
+    "symbol": "PSPN",
+    "name": "PSP Swiss Property AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/psp-n.svg"
+  },
+  {
+    "symbol": "PST",
+    "name": "Poste Italiane SpA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/poste-italiane.svg"
+  },
+  {
+    "symbol": "PSXC",
+    "name": "Phillips 66",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/phillips-66.svg"
+  },
+  {
+    "symbol": "PTON",
+    "name": "Peloton Interactive, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/peloton-interactive-inc.svg"
+  },
+  {
+    "symbol": "PTPN",
+    "name": "Pentixapharm Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/pentixapharm-ag.svg"
+  },
+  {
+    "symbol": "PUB",
+    "name": "Publicis Groupe SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/publicis-groupe-sa.svg"
+  },
+  {
+    "symbol": "PUIG",
+    "name": "Puig Brands, S.A. Class B",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/puig-brands.svg"
+  },
+  {
+    "symbol": "PUM",
+    "name": "PUMA SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/puma.svg"
+  },
+  {
+    "symbol": "PYPL",
+    "name": "PayPal Holdings, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/paypal.svg"
+  },
+  {
+    "symbol": "PYT",
+    "name": "POLYTEC HOLDING AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/polytec-ag.svg"
+  },
+  {
+    "symbol": "PZX",
+    "name": "Ping An Insurance (Group) Company of China, Ltd. Class H",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ping-an.svg"
+  },
+  {
+    "symbol": "QCOM",
+    "name": "QUALCOMM Incorporated",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/qualcomm.svg"
+  },
+  {
+    "symbol": "QGE4",
+    "name": "QIAGEN NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/qiagen-nv.svg"
+  },
+  {
+    "symbol": "QVC",
+    "name": "QVC Group, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/qurate-retail.svg"
+  },
+  {
+    "symbol": "RAA",
+    "name": "Rational Aktiengesellschaft",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/rational-ag.svg"
+  },
+  {
+    "symbol": "RACE",
+    "name": "Ferrari NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ferrari.svg"
+  },
+  {
+    "symbol": "RAND",
+    "name": "Randstad NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/randstad.svg"
+  },
+  {
+    "symbol": "RAT",
+    "name": "Rath AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/rath-ag.svg"
+  },
+  {
+    "symbol": "RBI",
+    "name": "Raiffeisen Bank International AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/raiffeisen-bk-intl-inh.svg"
+  },
+  {
+    "symbol": "RCO",
+    "name": "Remy Cointreau SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/remy-cointreau.svg"
+  },
+  {
+    "symbol": "REC",
+    "name": "Recordati S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/recordati-ord.svg"
+  },
+  {
+    "symbol": "REE",
+    "name": "Redeia Corporacion SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/red-electrica.svg"
+  },
+  {
+    "symbol": "REGN",
+    "name": "Regeneron Pharmaceuticals, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/regeneron-pharmaceuticals.svg"
+  },
+  {
+    "symbol": "REGU",
+    "name": "Reguest S.P.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/reguest-spa.svg"
+  },
+  {
+    "symbol": "RENK",
+    "name": "RENK Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/renk-ag.svg"
+  },
+  {
+    "symbol": "REP",
+    "name": "Repsol SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/repsol.svg"
+  },
+  {
+    "symbol": "RHIM",
+    "name": "RHI Magnesita NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/rhi-magnesita-nv.svg"
+  },
+  {
+    "symbol": "RHK",
+    "name": "RHON-KLINIKUM AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/rhoen-klinikum-ag.svg"
+  },
+  {
+    "symbol": "RHM",
+    "name": "Rheinmetall AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/rheinmetall-ag.svg"
+  },
+  {
+    "symbol": "RI",
+    "name": "Pernod Ricard SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/pernod.svg"
+  },
+  {
+    "symbol": "RILB",
+    "name": "Ringkjobing Landbobank A/S",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ringkjobing-landbobank-a-s.svg"
+  },
+  {
+    "symbol": "RLI",
+    "name": "Reliance Industries Ltd Sponsored GDR 144A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/reliance-industrial-infrastructure.svg"
+  },
+  {
+    "symbol": "RMD",
+    "name": "ResMed Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/resmed.svg"
+  },
+  {
+    "symbol": "RMS",
+    "name": "Hermes International S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/hermes.svg"
+  },
+  {
+    "symbol": "RNO",
+    "name": "Renault SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/renault.svg"
+  },
+  {
+    "symbol": "ROCH",
+    "name": "Roche Holding Ltd",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/roche.svg"
+  },
+  {
+    "symbol": "ROCK",
+    "name": "ROCKWOOL A/S Class B",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/rockwool-a-s-ser-b.svg"
+  },
+  {
+    "symbol": "ROGH",
+    "name": "Roche Holding Ltd",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/roche.svg"
+  },
+  {
+    "symbol": "ROGP",
+    "name": "Roche Holding Ltd",
+    "market": "VIE"
+  },
+  {
+    "symbol": "ROK",
+    "name": "Rockwell Automation, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/rockwell-automation.svg"
+  },
+  {
+    "symbol": "ROKU",
+    "name": "Roku, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/roku.svg"
+  },
+  {
+    "symbol": "ROS",
+    "name": "Rosenbauer International AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/rosenbauer-international-ag.svg"
+  },
+  {
+    "symbol": "ROST",
+    "name": "Ross Stores, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ross-stores.svg"
+  },
+  {
+    "symbol": "ROVI",
+    "name": "Laboratorios Farmaceuticos Rovi, S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/laboratorios-farmaceuticos.svg"
+  },
+  {
+    "symbol": "RTL",
+    "name": "RTL Group S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/rtlgroup.svg"
+  },
+  {
+    "symbol": "RTX",
+    "name": "RTX Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/raytheon.svg"
+  },
+  {
+    "symbol": "RUN",
+    "name": "Sunrun Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sunrun.svg"
+  },
+  {
+    "symbol": "RWE",
+    "name": "RWE AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/rwe.svg"
+  },
+  {
+    "symbol": "RWT",
+    "name": "RWT AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/rwt-ag.svg"
+  },
+  {
+    "symbol": "RXL",
+    "name": "Rexel SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/rexel.svg"
+  },
+  {
+    "symbol": "S92",
+    "name": "SMA Solar Technology AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sma-solar-technology.svg"
+  },
+  {
+    "symbol": "SAB",
+    "name": "Banco de Sabadell SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-de-sabadell.svg"
+  },
+  {
+    "symbol": "SAF",
+    "name": "Safran SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/safran.svg"
+  },
+  {
+    "symbol": "SAN",
+    "name": "Banco Santander, S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/santander.svg"
+  },
+  {
+    "symbol": "SANO",
+    "name": "Sanofi SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sanofi.svg"
+  },
+  {
+    "symbol": "SAP",
+    "name": "SAP SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sap.svg"
+  },
+  {
+    "symbol": "SATG",
+    "name": "Sartorius AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sartorius.svg"
+  },
+  {
+    "symbol": "SAX",
+    "name": "Stroeer SE & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/stroeer-se-co-kgaa.svg"
+  },
+  {
+    "symbol": "SBMO",
+    "name": "SBM Offshore NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sbm-offshore.svg"
+  },
+  {
+    "symbol": "SBO",
+    "name": "SBO AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/schoeller-bleckmann-oilfield.svg"
+  },
+  {
+    "symbol": "SBSG",
+    "name": "STRATEC SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/stratec-biomedical-ag.svg"
+  },
+  {
+    "symbol": "SBUX",
+    "name": "Starbucks Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/starbucks.svg"
+  },
+  {
+    "symbol": "SCHN",
+    "name": "Schindler Holding Ltd.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/schindler-n.svg"
+  },
+  {
+    "symbol": "SCHP",
+    "name": "Schindler Holding Ltd. Pref",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/schindler-n.svg"
+  },
+  {
+    "symbol": "SCHW",
+    "name": "Charles Schwab Corp",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/schwab.svg"
+  },
+  {
+    "symbol": "SCMN",
+    "name": "Swisscom AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/swisscom-n.svg"
+  },
+  {
+    "symbol": "SCR",
+    "name": "SCOR SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/scor-se.svg"
+  },
+  {
+    "symbol": "SDF",
+    "name": "K+S AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/k-s-ag.svg"
+  },
+  {
+    "symbol": "SDZ",
+    "name": "Sandoz Group Ltd",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sandoz-ag.svg"
+  },
+  {
+    "symbol": "SEBS",
+    "name": "SEB SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/s-e-b.svg"
+  },
+  {
+    "symbol": "SEDG",
+    "name": "SolarEdge Technologies, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/solaredge-technologies.svg"
+  },
+  {
+    "symbol": "SEM",
+    "name": "Semperit AG Holding",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/semperit-ag.svg"
+  },
+  {
+    "symbol": "SFER",
+    "name": "Salvatore Ferragamo S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/salvatore-ferragamo.svg"
+  },
+  {
+    "symbol": "SFQ2",
+    "name": "SAF-HOLLAND SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/saf-holland-se.svg"
+  },
+  {
+    "symbol": "SFT",
+    "name": "SoftBank Group Corp.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/softbank.svg"
+  },
+  {
+    "symbol": "SFZN",
+    "name": "Siegfried Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/siegfried-n.svg"
+  },
+  {
+    "symbol": "SGL",
+    "name": "SGL Carbon SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sgl.svg"
+  },
+  {
+    "symbol": "SGO",
+    "name": "Compagnie de Saint-Gobain SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/saint-gobain.svg"
+  },
+  {
+    "symbol": "SGSN",
+    "name": "SGS SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sgs-n.svg"
+  },
+  {
+    "symbol": "SHA1",
+    "name": "Schaeffler AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/schaeffler.svg"
+  },
+  {
+    "symbol": "SHFG",
+    "name": "SNP Schneider-Neureither & Partner SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/snp-schneider-neureither-and-p.svg"
+  },
+  {
+    "symbol": "SHL",
+    "name": "Siemens Healthineers AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/siemens-health-ag-na-o-n.svg"
+  },
+  {
+    "symbol": "SHM",
+    "name": "Shimano Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/shimano.svg"
+  },
+  {
+    "symbol": "SHOP",
+    "name": "Redcare Pharmacy N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/shop-apotheke.svg"
+  },
+  {
+    "symbol": "SHWW",
+    "name": "Sherwin-Williams Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sherwin-williams.svg"
+  },
+  {
+    "symbol": "SIE",
+    "name": "Siemens Aktiengesellschaft",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/siemens.svg"
+  },
+  {
+    "symbol": "SIGN",
+    "name": "SIG Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sig-combibloc-grp-n.svg"
+  },
+  {
+    "symbol": "SIKA",
+    "name": "Sika AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sika.svg"
+  },
+  {
+    "symbol": "SIX2",
+    "name": "Sixt SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sixt-se-st-o-n.svg"
+  },
+  {
+    "symbol": "SIXT",
+    "name": "Sixt SE Pref",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sixt-se-st-o-n.svg"
+  },
+  {
+    "symbol": "SKB",
+    "name": "Koenig & Bauer AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/koenig-and-bauer-ag.svg"
+  },
+  {
+    "symbol": "SLHN",
+    "name": "Swiss Life Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/swiss-life-ag-n.svg"
+  },
+  {
+    "symbol": "SLR",
+    "name": "Solaria Energia y Medio Ambiente, S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/solaria-energia-y-medio-ambiente.svg"
+  },
+  {
+    "symbol": "SMC2",
+    "name": "Super Micro Computer, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/super-micro-computer.svg"
+  },
+  {
+    "symbol": "SMGC",
+    "name": "SMG Swiss Marketplace Group Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/smg-swiss-marketplace-ag.svg"
+  },
+  {
+    "symbol": "SMHN",
+    "name": "SUSS MicroTec SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/suess-microtec-se.svg"
+  },
+  {
+    "symbol": "SNAP",
+    "name": "Snap, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/snap.svg"
+  },
+  {
+    "symbol": "SNOW",
+    "name": "ServiceNow, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/servicenow.svg"
+  },
+  {
+    "symbol": "SNWF",
+    "name": "Snowflake, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/snowflake.svg"
+  },
+  {
+    "symbol": "SOF",
+    "name": "Sofina SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sofina.svg"
+  },
+  {
+    "symbol": "SOI",
+    "name": "Soitec SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/soitec.svg"
+  },
+  {
+    "symbol": "SOLB",
+    "name": "Solvay SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/solvay.svg"
+  },
+  {
+    "symbol": "SON1",
+    "name": "Sony Group Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sony.svg"
+  },
+  {
+    "symbol": "SONO",
+    "name": "Sonos, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sonos.svg"
+  },
+  {
+    "symbol": "SOON",
+    "name": "Sonova Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sonova-n.svg"
+  },
+  {
+    "symbol": "SOUT",
+    "name": "Southern Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/southern.svg"
+  },
+  {
+    "symbol": "SPG",
+    "name": "Springer Nature AG & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/springer-nature-ag-and-co-kgaa.svg"
+  },
+  {
+    "symbol": "SPGI",
+    "name": "S&P Global, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/s-and-p-global.svg"
+  },
+  {
+    "symbol": "SPIE",
+    "name": "SPIE SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/spie.svg"
+  },
+  {
+    "symbol": "SPM3",
+    "name": "Saipem S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/saipem.svg"
+  },
+  {
+    "symbol": "SPOT",
+    "name": "Spotify Technology SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/spotify-technology.svg"
+  },
+  {
+    "symbol": "SPSN",
+    "name": "Swiss Prime Site AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/swiss-prime-site-n.svg"
+  },
+  {
+    "symbol": "SQN",
+    "name": "Swissquote Group Holding Ltd.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/swissquote-n.svg"
+  },
+  {
+    "symbol": "SQU",
+    "name": "Block, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/block.svg"
+  },
+  {
+    "symbol": "SREN",
+    "name": "Sempra",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sempra-energy.svg"
+  },
+  {
+    "symbol": "SRG",
+    "name": "Snam S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/snam.svg"
+  },
+  {
+    "symbol": "SRT3",
+    "name": "Sartorius AG Pref",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sartorius.svg"
+  },
+  {
+    "symbol": "SSU",
+    "name": "Samsung Electronics Co., Ltd. Sponsored GDR",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/samsung.svg"
+  },
+  {
+    "symbol": "SSUN",
+    "name": "Samsung Electronics Co Ltd Sponsored GDR Pfd",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/samsung.svg"
+  },
+  {
+    "symbol": "ST5G",
+    "name": "Steico SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/steico-se.svg"
+  },
+  {
+    "symbol": "STA2",
+    "name": "Stabilus SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/stabilus-se.svg"
+  },
+  {
+    "symbol": "STLA",
+    "name": "Stellantis N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/stellantis.svg"
+  },
+  {
+    "symbol": "STM",
+    "name": "Stadlauer Malzfabrik AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/stadlauer-malzfabrik-ag.svg"
+  },
+  {
+    "symbol": "STMI",
+    "name": "STMicroelectronics NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/stmicroelectronics.svg"
+  },
+  {
+    "symbol": "STMN",
+    "name": "Straumann Holding AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/straumann-n.svg"
+  },
+  {
+    "symbol": "STOG",
+    "name": "Sto SE & Co. KGaA Vorz-Inhaber-Akt ohne Stimmrecht",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sto-se-and-co-kgaa-pref-shrs.svg"
+  },
+  {
+    "symbol": "STR",
+    "name": "STRABAG SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/strabag-se.svg"
+  },
+  {
+    "symbol": "STT",
+    "name": "State Street Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/state-street.svg"
+  },
+  {
+    "symbol": "STXH",
+    "name": "Seagate Technology Holdings PLC",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/seagate.svg"
+  },
+  {
+    "symbol": "STZ",
+    "name": "Constellation Brands, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/constellation-brands.svg"
+  },
+  {
+    "symbol": "SU",
+    "name": "Schneider Electric SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/schneider.svg"
+  },
+  {
+    "symbol": "SW",
+    "name": "Sodexo SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sodexo.svg"
+  },
+  {
+    "symbol": "SWK",
+    "name": "Stanley Black & Decker, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/stanley-black-and-decker.svg"
+  },
+  {
+    "symbol": "SWKS",
+    "name": "Skyworks Solutions, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/skyworks-solutions.svg"
+  },
+  {
+    "symbol": "SWRE",
+    "name": "Swiss Re AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/swiss-re-n.svg"
+  },
+  {
+    "symbol": "SWUT",
+    "name": "SW Umwelttechnik Stoiser & Wolschner AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sw-umwelttechnik-stoiser-and-w.svg"
+  },
+  {
+    "symbol": "SY1",
+    "name": "Symrise AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/symrise-ag-inh-o-n.svg"
+  },
+  {
+    "symbol": "SYEN",
+    "name": "Syensqo SA/NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/syensqo.svg"
+  },
+  {
+    "symbol": "SYK",
+    "name": "Stryker Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/stryker.svg"
+  },
+  {
+    "symbol": "SYNP",
+    "name": "Synopsys, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/synopsys.svg"
+  },
+  {
+    "symbol": "SYY",
+    "name": "Sysco Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/sysco.svg"
+  },
+  {
+    "symbol": "SZG",
+    "name": "Salzgitter AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/salzgitter-ag-o-n.svg"
+  },
+  {
+    "symbol": "SZU",
+    "name": "Suedzucker AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/suedzucker-ag-o-n.svg"
+  },
+  {
+    "symbol": "TCOM",
+    "name": "Trip.com Group Ltd. Sponsored ADR",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ctrip-com-international.svg"
+  },
+  {
+    "symbol": "TECN",
+    "name": "Tecan Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tecan-ag-n.svg"
+  },
+  {
+    "symbol": "TEEN",
+    "name": "Technip Energies NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/technip-energies-n-v.svg"
+  },
+  {
+    "symbol": "TEF",
+    "name": "Telefonica SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/telefonica.svg"
+  },
+  {
+    "symbol": "TEG",
+    "name": "TAG Immobilien AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tag-immobilien-ag.svg"
+  },
+  {
+    "symbol": "TEMN",
+    "name": "Temenos AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/temenos-n.svg"
+  },
+  {
+    "symbol": "TENA",
+    "name": "Tenaris S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tenaris.svg"
+  },
+  {
+    "symbol": "TEP",
+    "name": "Teleperformance SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/teleperformance.svg"
+  },
+  {
+    "symbol": "TEVA",
+    "name": "Teva Pharmaceutical Industries Limited Sponsored ADR",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/teva.svg"
+  },
+  {
+    "symbol": "TFC",
+    "name": "Truist Financial Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/truist-financial.svg"
+  },
+  {
+    "symbol": "TGTC",
+    "name": "Target Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/target.svg"
+  },
+  {
+    "symbol": "THAL",
+    "name": "Thales SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/thales.svg"
+  },
+  {
+    "symbol": "TIT",
+    "name": "Telecom Italia S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/telecom-italia.svg"
+  },
+  {
+    "symbol": "TITR",
+    "name": "Telecom Italia Rsp",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/telecom-italia.svg"
+  },
+  {
+    "symbol": "TJXC",
+    "name": "TJX Companies Inc",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tjx-cos.svg"
+  },
+  {
+    "symbol": "TKA",
+    "name": "Telekom Austria AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/telekom-austria-ag.svg"
+  },
+  {
+    "symbol": "TKD",
+    "name": "Takeda Pharmaceutical Co. Ltd.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/takeda.svg"
+  },
+  {
+    "symbol": "TKMS",
+    "name": "TKMS AG & Co. KGaA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tkms-ag-and-co-kgaa.svg"
+  },
+  {
+    "symbol": "TKR",
+    "name": "thyssenkrupp AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/thyssenkrupp.svg"
+  },
+  {
+    "symbol": "TLR2",
+    "name": "Tilray Brands, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tilray.svg"
+  },
+  {
+    "symbol": "TLX",
+    "name": "Talanx AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/talanx.svg"
+  },
+  {
+    "symbol": "TMOF",
+    "name": "Thermo Fisher Scientific Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/thermo-fisher-scientific.svg"
+  },
+  {
+    "symbol": "TMUS",
+    "name": "T-Mobile US, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/t-mobile.svg"
+  },
+  {
+    "symbol": "TMV",
+    "name": "TeamViewer SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/teamviewer.svg"
+  },
+  {
+    "symbol": "TNIE",
+    "name": "tonies SE Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tonies-se.svg"
+  },
+  {
+    "symbol": "TOM",
+    "name": "Toyota Motor Corp.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/toyota.svg"
+  },
+  {
+    "symbol": "TOM2",
+    "name": "TomTom NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tomtom.svg"
+  },
+  {
+    "symbol": "TOUR",
+    "name": "Palladium Finance Plc SICAV - Tourbillon Strategic Fund Shs A",
+    "market": "VIE"
+  },
+  {
+    "symbol": "TOWN",
+    "name": "Aroundtown SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/aroundtown-eo-01.svg"
+  },
+  {
+    "symbol": "TPEG",
+    "name": "PVA TePla AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/pva-tepla-ag.svg"
+  },
+  {
+    "symbol": "TRE",
+    "name": "Tecnicas Reunidas SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tecnicas-reunidas.svg"
+  },
+  {
+    "symbol": "TRIP",
+    "name": "TripAdvisor, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tripadvisor.svg"
+  },
+  {
+    "symbol": "TRMD",
+    "name": "TORM PLC Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/torm.svg"
+  },
+  {
+    "symbol": "TRN",
+    "name": "Terna S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/terna.svg"
+  },
+  {
+    "symbol": "TROW",
+    "name": "T. Rowe Price Group, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/rowe-price.svg"
+  },
+  {
+    "symbol": "TRV",
+    "name": "Travelers Companies, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/travelers.svg"
+  },
+  {
+    "symbol": "TRYG",
+    "name": "Tryg A/S",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tryg-a-s.svg"
+  },
+  {
+    "symbol": "TSCO",
+    "name": "Tractor Supply Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tractor-supply.svg"
+  },
+  {
+    "symbol": "TSFA",
+    "name": "Taiwan Semiconductor Manufacturing Co., Ltd. Sponsored ADR",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/taiwan-semiconductor.svg"
+  },
+  {
+    "symbol": "TSLA",
+    "name": "Tesla, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tesla.svg"
+  },
+  {
+    "symbol": "TSN",
+    "name": "Tyson Foods, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tyson-foods.svg"
+  },
+  {
+    "symbol": "TTD",
+    "name": "Trade Desk, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/the-trade-desk.svg"
+  },
+  {
+    "symbol": "TTK",
+    "name": "TAKKT AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/takkt-ag.svg"
+  },
+  {
+    "symbol": "TTWO",
+    "name": "Take-Two Interactive Software, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/take-two-interactive-software.svg"
+  },
+  {
+    "symbol": "TUBI",
+    "name": "Financiere de Tubize S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tubize-fin.svg"
+  },
+  {
+    "symbol": "TUI1",
+    "name": "TUI AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/tui.svg"
+  },
+  {
+    "symbol": "TWLO",
+    "name": "Twilio, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/twilio.svg"
+  },
+  {
+    "symbol": "TXN",
+    "name": "Texas Instruments Incorporated",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/texas-instruments.svg"
+  },
+  {
+    "symbol": "UAA",
+    "name": "Under Armour, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/under-armour.svg"
+  },
+  {
+    "symbol": "UAC",
+    "name": "Under Armour, Inc. Class C",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/under-armour.svg"
+  },
+  {
+    "symbol": "UAL",
+    "name": "United Airlines Holdings, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/united-airlines.svg"
+  },
+  {
+    "symbol": "UBER",
+    "name": "Uber Technologies, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/uber.svg"
+  },
+  {
+    "symbol": "UBIS",
+    "name": "UBISOFT Entertainment",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubisoft.svg"
+  },
+  {
+    "symbol": "UBS",
+    "name": "UBM Development AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubm-development-ag.svg"
+  },
+  {
+    "symbol": "UBSG",
+    "name": "UBS Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UCB",
+    "name": "UCB S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ucb.svg"
+  },
+  {
+    "symbol": "UCG",
+    "name": "UniCredit S.p.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/unicredit.svg"
+  },
+  {
+    "symbol": "UEC",
+    "name": "Uranium Energy Corp.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/uranium-energy.svg"
+  },
+  {
+    "symbol": "UHR",
+    "name": "Swatch Group Ltd. Bearer",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/swatch-group.svg"
+  },
+  {
+    "symbol": "UKO",
+    "name": "UKO Microshops AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/uko-microshops-ag.svg"
+  },
+  {
+    "symbol": "ULTA",
+    "name": "Ulta Beauty Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/ulta-beauty.svg"
+  },
+  {
+    "symbol": "UMG",
+    "name": "Universal Music Group N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/universal-music-group-n-v.svg"
+  },
+  {
+    "symbol": "UMI",
+    "name": "Umicore SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/umicore.svg"
+  },
+  {
+    "symbol": "UN02",
+    "name": "Uniper SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/uniper-se-na-o-n.svg"
+  },
+  {
+    "symbol": "UNH",
+    "name": "UnitedHealth Group Incorporated",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/unitedhealth.svg"
+  },
+  {
+    "symbol": "UNI",
+    "name": "UNIPOL ASSICURAZIONI SPA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/unipol.svg"
+  },
+  {
+    "symbol": "UNPC",
+    "name": "Union Pacific Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/union-pacific.svg"
+  },
+  {
+    "symbol": "UPSI",
+    "name": "United Parcel Service, Inc. Class B",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/united-parcel.svg"
+  },
+  {
+    "symbol": "UQA",
+    "name": "UNIQA Insurance Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/uniqa-insurance-group-ag.svg"
+  },
+  {
+    "symbol": "USBC",
+    "name": "U.S. Bancorp",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/us-bancorp.svg"
+  },
+  {
+    "symbol": "UTDI",
+    "name": "United Internet AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/utd-internet-ag-na.svg"
+  },
+  {
+    "symbol": "V1NC",
+    "name": "VINCORION SE",
+    "market": "VIE"
+  },
+  {
+    "symbol": "VACN",
+    "name": "VAT Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/vat-n.svg"
+  },
+  {
+    "symbol": "VAS",
+    "name": "VAS AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/vas-ag.svg"
+  },
+  {
+    "symbol": "VBKG",
+    "name": "Verbio SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/verbio.svg"
+  },
+  {
+    "symbol": "VEEV",
+    "name": "Veeva Systems Inc Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/veeva-systems.svg"
+  },
+  {
+    "symbol": "VER",
+    "name": "VERBUND AG Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/verbund-ag-inh-a.svg"
+  },
+  {
+    "symbol": "VFC",
+    "name": "V.F. Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/v-f.svg"
+  },
+  {
+    "symbol": "VIE",
+    "name": "Veolia Environnement SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/veolia-environnement.svg"
+  },
+  {
+    "symbol": "VIG",
+    "name": "Vienna Insurance Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/vienna-insurance-group-a.svg"
+  },
+  {
+    "symbol": "VIS",
+    "name": "Viscofan, S.A.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/viscofan.svg"
+  },
+  {
+    "symbol": "VISA",
+    "name": "Visa Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/visa.svg"
+  },
+  {
+    "symbol": "VIV",
+    "name": "Vivendi SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/vivendi.svg"
+  },
+  {
+    "symbol": "VLA",
+    "name": "Valneva SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/valneva-se.svg"
+  },
+  {
+    "symbol": "VLO",
+    "name": "Valero Energy Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/valero-energy.svg"
+  },
+  {
+    "symbol": "VNA",
+    "name": "Vonovia SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/vonovia.svg"
+  },
+  {
+    "symbol": "VOD",
+    "name": "Vodafone Group Public Limited Company Sponsored ADR",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/vodafone.svg"
+  },
+  {
+    "symbol": "VOE",
+    "name": "voestalpine AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/voestalpine-ag.svg"
+  },
+  {
+    "symbol": "VOS",
+    "name": "Vossloh Aktiengesellschaft",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/vossloh-ag.svg"
+  },
+  {
+    "symbol": "VOW",
+    "name": "Volkswagen AG Pref",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/volkswagen.svg"
+  },
+  {
+    "symbol": "VOWI",
+    "name": "Volkswagen AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/volkswagen.svg"
+  },
+  {
+    "symbol": "VPK",
+    "name": "Royal Vopak NV",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/vopak.svg"
+  },
+  {
+    "symbol": "VRLA",
+    "name": "Verallia SAS",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/verallia.svg"
+  },
+  {
+    "symbol": "VRSK",
+    "name": "Verisk Analytics, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/verisk-analytics.svg"
+  },
+  {
+    "symbol": "VRTX",
+    "name": "Vertex Pharmaceuticals Incorporated",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/vertex-pharmaceutical.svg"
+  },
+  {
+    "symbol": "VTRS",
+    "name": "Viatris, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/viatris.svg"
+  },
+  {
+    "symbol": "VVYN",
+    "name": "Vivoryon Therapeutics N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/vivoryon-therapeutics-n-v.svg"
+  },
+  {
+    "symbol": "VWSB",
+    "name": "Vestas Wind Systems A/S",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/vestas.svg"
+  },
+  {
+    "symbol": "VZ",
+    "name": "Verizon Communications Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/verizon.svg"
+  },
+  {
+    "symbol": "WAB",
+    "name": "Westinghouse Air Brake Technologies Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/wabtec.svg"
+  },
+  {
+    "symbol": "WAC",
+    "name": "Wacker Neuson SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/wacker-neuson-se-na-o-n.svg"
+  },
+  {
+    "symbol": "WAF",
+    "name": "Siltronic AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/siltronic-ag-na-o-n.svg"
+  },
+  {
+    "symbol": "WBDI",
+    "name": "Warner Bros. Discovery, Inc. Series A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/warner-bros-discovery.svg"
+  },
+  {
+    "symbol": "WBO",
+    "name": "Weibo Corp. Sponsored ADR Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/weibo.svg"
+  },
+  {
+    "symbol": "WCH",
+    "name": "Wacker Chemie AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/wacker-chemie-o-n.svg"
+  },
+  {
+    "symbol": "WDC",
+    "name": "Western Digital Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/webster-financial.svg"
+  },
+  {
+    "symbol": "WFC",
+    "name": "Wells Fargo & Company",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/wells-fargo.svg"
+  },
+  {
+    "symbol": "WI4",
+    "name": "Weichai Power Co., Ltd. Class H",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/weichai-power-company-ltd.svg"
+  },
+  {
+    "symbol": "WIE",
+    "name": "Wienerberger AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/wienerberger.svg"
+  },
+  {
+    "symbol": "WIOA",
+    "name": "Wipro Limited Sponsored ADR",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/wipro.svg"
+  },
+  {
+    "symbol": "WKL",
+    "name": "Wolters Kluwer N.V.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/wolters-kluwer.svg"
+  },
+  {
+    "symbol": "WLN",
+    "name": "Worldline SA",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/worldline.svg"
+  },
+  {
+    "symbol": "WM",
+    "name": "Waste Management, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/waste-management.svg"
+  },
+  {
+    "symbol": "WMB",
+    "name": "Williams Companies, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/williams.svg"
+  },
+  {
+    "symbol": "WMG",
+    "name": "Warner Music Group Corp. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/wmg.svg"
+  },
+  {
+    "symbol": "WMT",
+    "name": "Walmart Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/walmart.svg"
+  },
+  {
+    "symbol": "WOL",
+    "name": "Wolford Aktiengesellschaft",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/wolford-ag.svg"
+  },
+  {
+    "symbol": "WOLF",
+    "name": "Wolftank Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/wolftank-adisa.svg"
+  },
+  {
+    "symbol": "WPB",
+    "name": "Wiener Privatbank SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/wiener-privatbank-se.svg"
+  },
+  {
+    "symbol": "WSU",
+    "name": "WashTec AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/washtec-ag.svg"
+  },
+  {
+    "symbol": "WUW",
+    "name": "Wuestenrot & Wuerttembergische AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/wuestenrot-wuertt-ag-o-n.svg"
+  },
+  {
+    "symbol": "WXF",
+    "name": "Warimpex Finanz- und Beteiligungs AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/warimpex.svg"
+  },
+  {
+    "symbol": "XCEL",
+    "name": "Xcel Energy Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/xcel-energy.svg"
+  },
+  {
+    "symbol": "XK4",
+    "name": "Gabler Group AG",
+    "market": "VIE"
+  },
+  {
+    "symbol": "XOM",
+    "name": "Exxon Mobil Corporation",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/exxon.svg"
+  },
+  {
+    "symbol": "XRAY",
+    "name": "DENTSPLY SIRONA, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/dentsply-sirona.svg"
+  },
+  {
+    "symbol": "XS2728487260",
+    "name": "CG Digital Currencies (S.514)",
+    "market": "VIE"
+  },
+  {
+    "symbol": "XS2733415520",
+    "name": "GlobWafers Call/Siltronic24-29",
+    "market": "VIE"
+  },
+  {
+    "symbol": "XYL",
+    "name": "Xylem Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/xylem.svg"
+  },
+  {
+    "symbol": "YELP",
+    "name": "Yelp Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/yelp.svg"
+  },
+  {
+    "symbol": "YSNG",
+    "name": "secunet Security Networks AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/secunet-security-ag-o-n.svg"
+  },
+  {
+    "symbol": "YUM",
+    "name": "Yum! Brands, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/yum-brands.svg"
+  },
+  {
+    "symbol": "ZAG",
+    "name": "Zumtobel Group AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/zumtobel-ag.svg"
+  },
+  {
+    "symbol": "ZAL",
+    "name": "Zalando SE",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/zalando.svg"
+  },
+  {
+    "symbol": "ZBH",
+    "name": "Zimmer Biomet Holdings, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/zimmer-biomet.svg"
+  },
+  {
+    "symbol": "ZEAL",
+    "name": "Zealand Pharma A/S",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/zealand-pharma-a-s.svg"
+  },
+  {
+    "symbol": "ZHT",
+    "name": "Zeppelin Hotel Tech S.P.A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/zeppelin-hotel-tech-spa.svg"
+  },
+  {
+    "symbol": "ZIL2",
+    "name": "ElringKlinger AG",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/elringklinger-ag-na-on.svg"
+  },
+  {
+    "symbol": "ZOOM",
+    "name": "Zoom Communications, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/zoom-video-communications.svg"
+  },
+  {
+    "symbol": "ZOTS",
+    "name": "Zoetis, Inc. Class A",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/zoetis.svg"
+  },
+  {
+    "symbol": "ZSCA",
+    "name": "Zscaler, Inc.",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/zscaler.svg"
+  },
+  {
+    "symbol": "ZURN",
+    "name": "Zurich Insurance Group Ltd",
+    "market": "VIE",
+    "image": "https://s3-symbol-logo.tradingview.com/zurich.svg"
+  }
+]

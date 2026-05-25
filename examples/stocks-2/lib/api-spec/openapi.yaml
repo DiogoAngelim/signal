@@ -1,0 +1,457 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: capital-desk
+    description: Capital desk decision and metrics
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /capital-desk/decision:
+    get:
+      operationId: getDecision
+      tags: [capital-desk]
+      summary: Get current trading decision
+      description: Returns the canonical decision card with confidence and allocation
+      responses:
+        "200":
+          description: Decision card data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DecisionCard"
+
+  /capital-desk/metrics:
+    get:
+      operationId: getMetrics
+      tags: [capital-desk]
+      summary: Get all metric groups
+      description: Returns grouped metrics (Performance, Risk, Data Quality, Model Trust)
+      responses:
+        "200":
+          description: Metrics groups
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetricsGroups"
+
+  /capital-desk/thresholds:
+    get:
+      operationId: getThresholds
+      tags: [capital-desk]
+      summary: Get threshold comparison table
+      description: Returns all metrics with current value, required threshold, and pass/fail status
+      responses:
+        "200":
+          description: Threshold rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ThresholdRow"
+
+  /capital-desk/activation-conditions:
+    get:
+      operationId: getActivationConditions
+      tags: [capital-desk]
+      summary: Get activation conditions
+      description: Returns list of conditions required to change the current decision state
+      responses:
+        "200":
+          description: Activation conditions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivationConditions"
+
+  /capital-desk/system-state:
+    get:
+      operationId: getSystemState
+      tags: [capital-desk]
+      summary: Get system state
+      description: Returns lifecycle mode, closed trades, coverage, and last evaluation summary
+      responses:
+        "200":
+          description: System state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemState"
+
+  /capital-desk/exchanges:
+    get:
+      operationId: getExchanges
+      tags: [capital-desk]
+      summary: Get available exchanges
+      description: Returns the list of supported exchange markets
+      responses:
+        "200":
+          description: Exchange list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Exchange"
+
+  /capital-desk/signals:
+    get:
+      operationId: getSignals
+      tags: [capital-desk]
+      summary: Get buy/sell signals
+      description: Returns current buy and sell signals filtered by exchange and investor mode
+      parameters:
+        - name: exchange
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Exchange market ID to filter signals
+        - name: mode
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Investor mode: conservative | balanced | aggressive"
+        - name: budget
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Available capital budget (negative = withdrawal)
+      responses:
+        "200":
+          description: Signal list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignalsResponse"
+
+  /capital-desk/trade-history:
+    get:
+      operationId: getTradeHistory
+      tags: [capital-desk]
+      summary: Get trade history
+      description: Returns historical trade list and P&L chart data filtered by exchange
+      parameters:
+        - name: exchange
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Exchange market ID to filter history
+        - name: mode
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Investor mode: conservative | balanced | aggressive"
+      responses:
+        "200":
+          description: Trade history with chart data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeHistory"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    DecisionCard:
+      type: object
+      required: [decision, confidence, allocationPct, timestamp, decisionColor]
+      properties:
+        decision:
+          type: string
+          description: "Trade | Do Not Trade | Hold | Reduce Risk"
+        confidence:
+          type: number
+          description: Confidence score 0-100
+        allocationPct:
+          type: number
+          description: Recommended allocation percentage
+        timestamp:
+          type: string
+          description: ISO timestamp of the decision
+        decisionColor:
+          type: string
+          description: "green | red | yellow | orange"
+        reasoning:
+          type: ["string", "null"]
+          description: One-line rationale for the decision
+
+    Metric:
+      type: object
+      required: [label, value, unit, status]
+      properties:
+        label:
+          type: string
+        value:
+          type: number
+        unit:
+          type: string
+          description: "% | ratio | count | days"
+        displayValue:
+          type: string
+          description: Pre-formatted string for display
+        status:
+          type: string
+          description: "pass | fail | warn"
+        trend:
+          type: ["string", "null"]
+          description: "up | down | flat"
+
+    MetricGroup:
+      type: object
+      required: [group, metrics]
+      properties:
+        group:
+          type: string
+          description: "Performance | Risk | Data Quality | Model Trust"
+        metrics:
+          type: array
+          items:
+            $ref: "#/components/schemas/Metric"
+
+    MetricsGroups:
+      type: object
+      required: [groups, evaluatedAt]
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/MetricGroup"
+        evaluatedAt:
+          type: string
+
+    ThresholdRow:
+      type: object
+      required: [metric, value, required, status, group]
+      properties:
+        metric:
+          type: string
+        value:
+          type: string
+          description: Formatted current value
+        required:
+          type: string
+          description: Formatted required threshold
+        status:
+          type: string
+          description: "pass | fail | warn"
+        group:
+          type: string
+          description: "Performance | Risk | Data Quality | Model Trust"
+        delta:
+          type: ["string", "null"]
+          description: Difference from threshold
+
+    ActivationConditions:
+      type: object
+      required: [currentDecision, targetDecision, conditions]
+      properties:
+        currentDecision:
+          type: string
+        targetDecision:
+          type: string
+        conditions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Condition"
+
+    Condition:
+      type: object
+      required: [label, current, required, met]
+      properties:
+        label:
+          type: string
+        current:
+          type: string
+        required:
+          type: string
+        met:
+          type: boolean
+
+    SystemState:
+      type: object
+      required: [lifecycleMode, closedTrades, coveragePct, lastEvaluation, maturityScore]
+      properties:
+        lifecycleMode:
+          type: string
+          description: "Warmup | Active | Cautious | Suspended"
+        closedTrades:
+          type: integer
+        coveragePct:
+          type: number
+        lastEvaluation:
+          type: string
+          description: ISO timestamp
+        maturityScore:
+          type: number
+          description: 0-100
+        notes:
+          type: ["string", "null"]
+
+    Exchange:
+      type: object
+      required: [id, name, region, assetClass, currency]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        region:
+          type: string
+          description: "US | EU | APAC | Global"
+        assetClass:
+          type: string
+          description: "Equities | Crypto | FX | Futures | ETFs"
+        currency:
+          type: string
+          description: Base currency code, e.g. USD
+
+    Signal:
+      type: object
+      required: [id, ticker, direction, exchange, confidence, amountPct, amountUnits, price, rationale, generatedAt]
+      properties:
+        id:
+          type: string
+        ticker:
+          type: string
+        direction:
+          type: string
+          description: "buy | sell"
+        exchange:
+          type: string
+          description: Exchange ID this signal applies to
+        confidence:
+          type: number
+          description: Signal confidence 0-100
+        amountPct:
+          type: number
+          description: Recommended position size as % of portfolio
+        amountUnits:
+          type: number
+          description: Recommended number of units/shares/contracts
+        price:
+          type: number
+          description: Current price at signal generation
+        rationale:
+          type: string
+          description: One-line reason for the signal
+        generatedAt:
+          type: string
+          description: ISO timestamp
+
+    SignalsResponse:
+      type: object
+      required: [signals, exchange, mode, budget, generatedAt]
+      properties:
+        signals:
+          type: array
+          items:
+            $ref: "#/components/schemas/Signal"
+        exchange:
+          type: string
+        mode:
+          type: string
+          description: "conservative | balanced | aggressive"
+        budget:
+          type: number
+        generatedAt:
+          type: string
+
+    TradeRecord:
+      type: object
+      required: [id, ticker, direction, exchange, openedAt, closedAt, entryPrice, exitPrice, units, pnl, pnlPct]
+      properties:
+        id:
+          type: string
+        ticker:
+          type: string
+        direction:
+          type: string
+          description: "long | short"
+        exchange:
+          type: string
+        openedAt:
+          type: string
+          description: ISO timestamp
+        closedAt:
+          type: string
+          description: ISO timestamp
+        entryPrice:
+          type: number
+        exitPrice:
+          type: number
+        units:
+          type: number
+        pnl:
+          type: number
+          description: Absolute P&L in base currency
+        pnlPct:
+          type: number
+          description: P&L as percentage
+
+    PnlPoint:
+      type: object
+      required: [date, cumulativePnl, dailyPnl]
+      properties:
+        date:
+          type: string
+          description: "YYYY-MM-DD"
+        cumulativePnl:
+          type: number
+        dailyPnl:
+          type: number
+
+    TradeHistory:
+      type: object
+      required: [trades, chartData, totalPnl, totalPnlPct, winCount, lossCount, exchange]
+      properties:
+        trades:
+          type: array
+          items:
+            $ref: "#/components/schemas/TradeRecord"
+        chartData:
+          type: array
+          items:
+            $ref: "#/components/schemas/PnlPoint"
+        totalPnl:
+          type: number
+        totalPnlPct:
+          type: number
+        winCount:
+          type: integer
+        lossCount:
+          type: integer
+        exchange:
+          type: string
