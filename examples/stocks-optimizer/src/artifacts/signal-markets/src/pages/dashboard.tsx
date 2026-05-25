@@ -62,6 +62,8 @@ type DisplayStock = StockData & {
   quoteStatus?: QuoteStatus;
   quoteStatusReason?: string;
   quoteLastAttemptedAt?: number;
+  signalStatus?: "provided" | "missing";
+  allocationAction?: TradeSignal;
 };
 
 type IntelligenceStock = DisplayStock & {
@@ -268,6 +270,76 @@ function inferIntelligence(stock: DisplayStock): IntelligenceStock {
   };
 }
 
+function deriveAllocationAction(
+  stock: IntelligenceStock,
+  context: {
+    regime: string;
+    avgRisk: number;
+    breadth: number;
+    targetExposure: number;
+    marketStatus: "Open" | "Closed";
+  },
+): TradeSignal {
+  const rawAction = (stock.signalAction ?? "Hold") as TradeSignal;
+  const hasExplicitSignal = stock.signalStatus === "provided";
+
+  if (hasExplicitSignal && rawAction === "Sell") {
+    return "Sell";
+  }
+
+  if (stock.mandate === "Avoid / Reduce" || stock.riskPressure >= 78) {
+    return "Sell";
+  }
+
+  if (context.regime === "Capital Preservation Phase") {
+    if (stock.setupQuality >= 82 && stock.riskPressure < 38 && stock.expectedMove > 0) {
+      return "Buy";
+    }
+
+    if (stock.riskPressure > 64 || stock.expectedMove < -1.5) {
+      return "Sell";
+    }
+
+    return "Hold";
+  }
+
+  if (context.regime === "Defensive Environment") {
+    if (
+      stock.setupQuality >= 72 &&
+      stock.riskPressure < 48 &&
+      stock.suggestedExposure > 0 &&
+      stock.expectedMove > 0
+    ) {
+      return "Buy";
+    }
+
+    if (stock.riskPressure > 70 || stock.expectedMove < -2) {
+      return "Sell";
+    }
+
+    return "Hold";
+  }
+
+  if (hasExplicitSignal && rawAction === "Buy" && stock.riskPressure < 72) {
+    return "Buy";
+  }
+
+  if (
+    stock.suggestedExposure > 0 &&
+    stock.setupQuality >= 58 &&
+    stock.riskPressure < 68 &&
+    stock.expectedMove >= -0.5
+  ) {
+    return "Buy";
+  }
+
+  if (stock.setupQuality < 42 && stock.expectedMove < 0) {
+    return "Sell";
+  }
+
+  return "Hold";
+}
+
 function mergeQuotes(current: DisplayStock[], quotes: Array<{ symbol: string } & Partial<StockQuote>>): DisplayStock[] {
   if (!quotes.length) return current;
   const map = new Map(quotes.map((quote) => [String(quote.symbol).toUpperCase(), quote]));
@@ -286,6 +358,7 @@ function mergeQuotes(current: DisplayStock[], quotes: Array<{ symbol: string } &
       price: nextPrice,
       changePercent: numeric((quote as any).changePercent, numeric(stock.changePercent)),
       signalAction: ((quote as any).signalAction ?? stock.signalAction) as TradeSignal,
+      signalStatus: (quote as any).signalAction ? "provided" : stock.signalStatus ?? "missing",
       signalConfidence: numeric((quote as any).signalConfidence, numeric((stock as any).signalConfidence)),
       signalEntryPrice: entryPrice,
       signalReturnPercent,
@@ -305,11 +378,12 @@ function parseStockListItem(item: any, marketOpen: boolean): DisplayStock {
   return {
     ...item,
     ticker: String(item.ticker ?? item.symbol ?? ""),
-    symbol: String(item.symbol ?? item.ticker ?? ""),
+    symbol: String(item.symbol || item.ticker || ""),
     price: numeric(item.price),
     changePercent: numeric(item.changePercent),
     status: (item.status ?? "Stable") as StockStatus,
     signalAction: (item.signalAction ?? "Hold") as TradeSignal,
+    signalStatus: item.signalAction ? "provided" : "missing",
     summary: item.summary ?? (marketOpen ? "Live quote sync in progress." : "Market closed. Quote sync paused."),
     impact: item.impact ?? (marketOpen
       ? "Live data will refresh as quote coverage reaches this asset."
@@ -388,6 +462,86 @@ function StatusPill({ children, tone = "neutral" }: { children: React.ReactNode;
   );
 }
 
+function AllocationLedgerTable({
+  action,
+  items,
+  selectedTicker,
+  onSelectTicker,
+  loading,
+}: {
+  action: TradeSignal;
+  items: IntelligenceStock[];
+  selectedTicker: string | null;
+  onSelectTicker: (ticker: string) => void;
+  loading: boolean;
+}) {
+  const tone = action === "Buy" ? "good" : action === "Sell" ? "bad" : "neutral";
+
+  return (
+    <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.025]">
+      <div className="flex flex-col gap-3 border-b border-white/10 bg-white/[0.035] px-4 py-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3">
+          <StatusPill tone={tone}>{action}</StatusPill>
+          <div>
+            <div className="text-sm font-semibold text-white">{action} Ledger</div>
+            <div className="text-xs text-slate-500">{items.length} instruments</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr] bg-white/[0.025] px-4 py-3 text-[11px] uppercase tracking-[0.16em] text-slate-500">
+        <div>Ticker</div>
+        <div>Exposure</div>
+        <div>Quality</div>
+        <div>Risk</div>
+      </div>
+
+      <div className="max-h-[360px] divide-y divide-white/10 overflow-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-700/40 hover:[&::-webkit-scrollbar-thumb]:bg-slate-500/60 [&::-webkit-scrollbar-corner]:bg-transparent">
+        {loading ? (
+          <div className="flex items-center gap-3 px-4 py-8 text-sm text-slate-400">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            Loading institutional coverage...
+          </div>
+        ) : items.length ? (
+          items.slice(0, 40).map((stock) => {
+            const ticker = normalizedTicker(stock);
+            const isSelected = selectedTicker === ticker;
+
+            return (
+              <button
+                key={ticker}
+                type="button"
+                onClick={() => onSelectTicker(ticker)}
+                className={cx(
+                  "grid w-full grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr] items-center px-4 py-4 text-left text-sm transition hover:bg-white/[0.04]",
+                  isSelected && "bg-emerald-300/10",
+                )}
+              >
+                <div>
+                  <div className="font-semibold text-white">{ticker}</div>
+                  <div className="mt-1 line-clamp-1 text-xs text-slate-500">{stockName(stock)}</div>
+                  <div className="mt-1 text-[11px] text-slate-600">
+                    {stock.status ?? "Stable"} · {(stock as any).signalStatus === "provided" ? "signal" : "regime"}
+                  </div>
+                </div>
+                <div className="text-slate-300">{fmtPlainPct(stock.suggestedExposure)}</div>
+                <div className="font-medium text-slate-100">{Math.round(stock.setupQuality)}/100</div>
+                <div className={stock.riskPressure > 65 ? "text-amber-200" : "text-emerald-200"}>
+                  {stock.riskPressure > 65 ? "Elevated" : "Contained"}
+                </div>
+              </button>
+            );
+          })
+        ) : (
+          <div className="px-4 py-8 text-sm text-slate-500">
+            No {action.toLowerCase()} instruments match the current search and table filter.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [markets, setMarkets] = useState<MarketOption[]>([]);
   const [marketFilter, setMarketFilter] = useState("");
@@ -398,10 +552,12 @@ export default function Dashboard() {
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
+  const [isSelectedCardFlipped, setIsSelectedCardFlipped] = useState(false);
+  const [selectedHistory, setSelectedHistory] = useState<Array<{ index: number; date?: string; price: number }>>([]);
+  const [selectedHistoryLoading, setSelectedHistoryLoading] = useState(false);
   const [query, setQuery] = useState("");
-  const [signalFilter, setSignalFilter] = useState<TradeSignal | "All">("All");
-  const [statusFilter, setStatusFilter] = useState<StockStatus | "All">("All");
   const registeredWatchlists = useRef(new Set<string>());
+
 
   useEffect(() => {
     let cancelled = false;
@@ -515,28 +671,92 @@ export default function Dashboard() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toUpperCase();
+
     return intelligence.filter((stock) => {
-      const action = (stock.signalAction ?? "Hold") as TradeSignal;
-      const status = (stock.status ?? "Stable") as StockStatus;
-      const matchesQuery = !q || normalizedTicker(stock).toUpperCase().includes(q) || stockName(stock).toUpperCase().includes(q);
-      const matchesSignal = signalFilter === "All" || action === signalFilter;
-      const matchesStatus = statusFilter === "All" || status === statusFilter;
-      return matchesQuery && matchesSignal && matchesStatus;
+      return (
+        !q ||
+        normalizedTicker(stock).toUpperCase().includes(q) ||
+        stockName(stock).toUpperCase().includes(q)
+      );
     });
-  }, [intelligence, query, signalFilter, statusFilter]);
+  }, [intelligence, query]);
 
   const selected = useMemo(() => {
     return filtered.find((item) => normalizedTicker(item) === selectedTicker) ?? filtered[0] ?? null;
   }, [filtered, selectedTicker]);
 
-  const topOpportunities = filtered
-    .filter((stock) => stock.mandate !== "Avoid / Reduce")
-    .slice(0, 5);
+  useEffect(() => {
+    setIsSelectedCardFlipped(false);
+  }, [marketFilter]);
+
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSelectedHistory() {
+      if (!selected) {
+        setSelectedHistory([]);
+        return;
+      }
+
+      const symbol = normalizedTicker(selected);
+
+      if (!symbol) {
+        setSelectedHistory([]);
+        return;
+      }
+
+      setSelectedHistoryLoading(true);
+
+      try {
+        const response = await fetch(
+          `/api/stocks/history?symbol=${encodeURIComponent(symbol)}&market=${encodeURIComponent(marketFilter)}&bars=80`,
+        );
+
+        if (!response.ok) {
+          throw new Error(`History request failed: ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const points = Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(payload?.items)
+            ? payload.items
+            : [];
+
+        if (!cancelled) {
+          setSelectedHistory(
+            points
+              .map((point: any, index: number) => ({
+                index,
+                date: point.date,
+                price: Number(point.price ?? point.close),
+              }))
+              .filter((point: any) => Number.isFinite(point.price)),
+          );
+        }
+      } catch {
+        if (!cancelled) {
+          setSelectedHistory([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setSelectedHistoryLoading(false);
+        }
+      }
+    }
+
+    void loadSelectedHistory();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selected, marketFilter]);
 
   const openPositions = intelligence.filter((stock) => stock.suggestedExposure > 0);
   const targetExposure = clamp(openPositions.reduce((sum, stock) => sum + stock.suggestedExposure, 0), 0, 65);
   const liveExposure = targetExposure;
-  const capitalDeployed = STARTING_PORTFOLIO_VALUE * (liveExposure / 100);
+  const capitalDeployed = "******";
   const riskBudget = Math.max(0, STARTING_PORTFOLIO_VALUE * ((targetExposure - liveExposure) / 100));
   const avgQuality = mean(intelligence.slice(0, 30).map((item) => item.setupQuality));
   const avgRisk = mean(intelligence.slice(0, 30).map((item) => item.riskPressure));
@@ -566,13 +786,67 @@ export default function Dashboard() {
           ? "Maintain Selective Exposure"
           : "Increase Exposure Gradually";
 
+  const allocationContext = useMemo(
+    () => ({
+      regime,
+      avgRisk,
+      breadth,
+      targetExposure,
+      marketStatus,
+    }),
+    [regime, avgRisk, breadth, targetExposure, marketStatus],
+  );
+
+  const allocationUniverse = useMemo(
+    () =>
+      filtered.map((stock) => ({
+        ...stock,
+        allocationAction: deriveAllocationAction(stock, allocationContext),
+      })),
+    [filtered, allocationContext],
+  );
+
+  const finalOpenPositions = useMemo(
+    () =>
+      allocationUniverse.filter((stock) => {
+        return stock.allocationAction === "Buy" && numeric(stock.suggestedExposure) > 0;
+      }),
+    [allocationUniverse],
+  );
+
+  const ledgerGroups = useMemo(() => {
+    const actions: TradeSignal[] = ["Buy", "Hold", "Sell"];
+
+    return actions.map((action) => {
+      const items = allocationUniverse.filter((stock) => {
+        return stock.allocationAction === action;
+      });
+
+      return {
+        action,
+        items,
+      };
+    });
+  }, [allocationUniverse]);
+
+  const topOpportunities = allocationUniverse
+    .filter((stock) => stock.allocationAction === "Buy")
+    .slice(0, 5);
+
   const lastSyncedLabel = lastSyncedAt
     ? new Intl.DateTimeFormat("en-US", { hour: "2-digit", minute: "2-digit" }).format(lastSyncedAt)
     : "—";
 
-  const history = selected?.history?.length
-    ? selected.history.slice(-80).map((price, index) => ({ index, price }))
-    : filtered.slice(0, 80).map((stock, index) => ({ index, price: numeric(stock.price) || index + 1 }));
+  const history = selectedHistory.length
+    ? selectedHistory
+    : selected?.history?.length
+      ? selected.history.slice(-80).map((price, index) => ({ index, price }))
+      : selected
+        ? Array.from({ length: 24 }, (_, index) => ({
+            index,
+            price: numeric(selected.price) || 1,
+          }))
+        : [];
 
   const surface = filtered.slice(0, 80).map((stock) => ({
     ticker: normalizedTicker(stock),
@@ -581,6 +855,184 @@ export default function Dashboard() {
     z: Math.max(40, stock.setupQuality),
     stock,
   }));
+
+  const portfolioHistory = useMemo(() => {
+    const positions = finalOpenPositions.filter((stock) => {
+      return numeric(stock.suggestedExposure) > 0;
+    });
+
+    if (!positions.length) return [];
+
+    const maxHistoryLength = Math.max(
+      2,
+      ...positions.map((stock) => stock.history?.length ?? 0),
+    );
+
+    const points = Math.min(120, maxHistoryLength);
+    const initialEquity = STARTING_PORTFOLIO_VALUE;
+    const deployedFraction = clamp(liveExposure, 0, 100) / 100;
+    const cashFraction = 1 - deployedFraction;
+    const totalSuggestedExposure = positions.reduce(
+      (sum, stock) => sum + numeric(stock.suggestedExposure),
+      0,
+    );
+
+    if (totalSuggestedExposure <= 0) return [];
+
+    function priceAt(stock: IntelligenceStock, index: number) {
+      const history = stock.history ?? [];
+
+      if (history.length >= 2) {
+        const start = Math.max(0, history.length - points);
+        const sliced = history.slice(start);
+        const value = sliced[Math.min(index, sliced.length - 1)];
+        return numeric(value, numeric(stock.price));
+      }
+
+      const entry = numeric(
+        (stock as any).signalEntryPrice,
+        numeric(stock.price),
+      );
+
+      const current = numeric(stock.price, entry);
+      const progress = index / Math.max(1, points - 1);
+
+      return entry + (current - entry) * progress;
+    }
+
+    return Array.from({ length: points }, (_, index) => {
+      let weightedPositionReturn = 0;
+
+      for (const stock of positions) {
+        const weight = numeric(stock.suggestedExposure) / totalSuggestedExposure;
+        const basePrice = priceAt(stock, 0);
+        const currentPrice = priceAt(stock, index);
+
+        const stockReturn =
+          basePrice > 0 && currentPrice > 0
+            ? currentPrice / basePrice - 1
+            : 0;
+
+        weightedPositionReturn += weight * stockReturn;
+      }
+
+      const portfolioReturn = deployedFraction * weightedPositionReturn;
+      const equity = initialEquity * (cashFraction + deployedFraction * (1 + weightedPositionReturn));
+
+      return {
+        index,
+        equity,
+        returnPct: portfolioReturn * 100,
+        deployedPct: liveExposure,
+        cashPct: cashFraction * 100,
+      };
+    });
+  }, [finalOpenPositions, liveExposure]);
+
+  const latestPortfolioPoint = portfolioHistory[portfolioHistory.length - 1];
+  const portfolioReturnPct = latestPortfolioPoint?.returnPct ?? null;
+  const portfolioEquity = latestPortfolioPoint?.equity ?? null;
+
+  const portfolioReturns = useMemo(() => {
+    if (portfolioHistory.length < 2) return [];
+
+    const returns: number[] = [];
+
+    for (let index = 1; index < portfolioHistory.length; index += 1) {
+      const previous = numeric(portfolioHistory[index - 1]?.equity);
+      const current = numeric(portfolioHistory[index]?.equity);
+
+      if (previous > 0 && current > 0) {
+        returns.push((current - previous) / previous);
+      }
+    }
+
+    return returns;
+  }, [portfolioHistory]);
+
+  const normalizedAnnualSharpe = useMemo(() => {
+    if (portfolioReturns.length < 2) return null;
+
+    const avgReturn = mean(portfolioReturns);
+    const volatility = stdev(portfolioReturns);
+
+    if (volatility <= 0) return null;
+
+    return (avgReturn / volatility) * Math.sqrt(252);
+  }, [portfolioReturns]);
+
+  const averageDurationDays = useMemo(() => {
+    const active = finalOpenPositions.filter((stock) => numeric(stock.suggestedExposure) > 0);
+
+    if (!active.length) return null;
+
+    const durations = active.map((stock) => {
+      const explicitDuration =
+        numeric((stock as any).averageDurationDays, NaN) ||
+        numeric((stock as any).holdingPeriodDays, NaN) ||
+        numeric((stock as any).durationDays, NaN);
+
+      if (Number.isFinite(explicitDuration) && explicitDuration > 0) {
+        return explicitDuration;
+      }
+
+      const historyLength = stock.history?.length ?? 0;
+
+      if (historyLength > 1) {
+        return Math.min(252, historyLength);
+      }
+
+      return 1;
+    });
+
+    return mean(durations);
+  }, [finalOpenPositions]);
+
+  const portfolioProfitFactor = useMemo(() => {
+    if (!portfolioReturns.length) return null;
+
+    const grossProfit = portfolioReturns
+      .filter((value) => value > 0)
+      .reduce((sum, value) => sum + value, 0);
+
+    const grossLoss = Math.abs(
+      portfolioReturns
+        .filter((value) => value < 0)
+        .reduce((sum, value) => sum + value, 0),
+    );
+
+    if (grossLoss === 0) return grossProfit > 0 ? Infinity : null;
+
+    return grossProfit / grossLoss;
+  }, [portfolioReturns]);
+
+  const portfolioWinRate = useMemo(() => {
+    if (!portfolioReturns.length) return null;
+
+    return (
+      (portfolioReturns.filter((value) => value > 0).length / portfolioReturns.length) *
+      100
+    );
+  }, [portfolioReturns]);
+
+  const portfolioMaxDrawdown = useMemo(() => {
+    if (!portfolioHistory.length) return null;
+
+    let peak = portfolioHistory[0]?.equity ?? STARTING_PORTFOLIO_VALUE;
+    let maxDrawdown = 0;
+
+    for (const point of portfolioHistory) {
+      const equity = numeric(point.equity, peak);
+      peak = Math.max(peak, equity);
+
+      if (peak > 0) {
+        const drawdown = ((peak - equity) / peak) * 100;
+        maxDrawdown = Math.max(maxDrawdown, drawdown);
+      }
+    }
+
+    return maxDrawdown;
+  }, [portfolioHistory]);
 
   return (
     <div className="min-h-screen bg-[#05070b] text-slate-100">
@@ -653,10 +1105,8 @@ export default function Dashboard() {
                     : "Trend evidence is improving. Naubly supports gradual capital deployment while risk pressure remains contained."}
               </p>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 <MiniMetric label="Target Exposure" value={fmtPlainPct(targetExposure)} />
-                <MiniMetric label="Live Exposure" value={fmtPlainPct(liveExposure)} />
-                <MiniMetric label="Available Risk Budget" value={fmtCurrency(riskBudget)} />
                 <MiniMetric label="Regime Confidence" value={fmtPlainPct(confidence, 0)} />
               </div>
             </div>
@@ -671,72 +1121,290 @@ export default function Dashboard() {
                     ? "Risk budget remains orderly. Position sizing can stay aligned with current opportunity quality."
                     : "Keep capital flexible. Selection quality matters more than broad exposure."}
               </p>
-              <div className="grid grid-cols-2 gap-3">
-                <MiniMetric label="Capital Deployed" value={fmtCurrency(capitalDeployed)} />
-                <MiniMetric label="Available Budget" value={fmtPlainPct(Math.max(0, targetExposure - liveExposure))} />
-              </div>
               <QualityBar value={100 - avgRisk} label="Risk Pressure Control" />
               <QualityBar value={breadth} label="Participation Breadth" />
             </div>
           </SectionShell>
         </section>
 
-        <section className="mb-6 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+        <section className="mb-6 grid min-w-0 gap-5 mb-6 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
           <SectionShell
             eyebrow="Highest-quality exposures first"
             title="Priority Allocation Candidates"
             action={<StatusPill tone="neutral">Top 5</StatusPill>}
           >
             <div className="grid gap-3 lg:grid-cols-2">
-              {topOpportunities.map((stock, index) => (
-                <button
-                  key={normalizedTicker(stock)}
-                  type="button"
-                  onClick={() => setSelectedTicker(normalizedTicker(stock))}
-                  className={cx(
-                    "rounded-[1.5rem] border p-4 text-left transition hover:-translate-y-0.5 hover:bg-white/[0.06]",
-                    selected && normalizedTicker(selected) === normalizedTicker(stock)
-                      ? "border-emerald-300/40 bg-emerald-300/10"
-                      : "border-white/10 bg-white/[0.035]",
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="text-lg font-semibold text-white">{normalizedTicker(stock)}</div>
-                      <div className="mt-1 text-[11px] uppercase tracking-[0.16em] text-slate-500">#{index + 1}</div>
-                    </div>
-                    <StatusPill tone={stock.mandate === "Increase Gradually" ? "good" : "neutral"}>{stock.mandate}</StatusPill>
-                  </div>
-                  <div className="mt-5 space-y-3">
-                    <QualityBar value={stock.setupQuality} label="Setup quality" />
-                    <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
-                      <div>
-                        <div className="text-slate-500">Exposure</div>
-                        <div className="font-semibold text-slate-100">{fmtPlainPct(stock.suggestedExposure)}</div>
+              {topOpportunities.map((stock, index) => {
+                const ticker = normalizedTicker(stock);
+                const isSelected = selected ? normalizedTicker(selected) === ticker : false;
+                const isFlipped = isSelected && isSelectedCardFlipped;
+
+                return (
+                  <button
+                    key={ticker}
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
+                        setIsSelectedCardFlipped((value) => !value);
+                      } else {
+                        setSelectedTicker(ticker);
+                        setIsSelectedCardFlipped(true);
+                      }
+                    }}
+                    className="relative min-h-[320px] rounded-[1.5rem] text-left outline-none [perspective:1400px]"
+                    aria-label={isSelected && isFlipped ? "Show selected instrument summary" : "Show selected instrument history"}
+                  >
+                    <div
+                      className={cx(
+                        "relative min-h-[320px] rounded-[1.5rem] transition-transform duration-500 [transform-style:preserve-3d]",
+                        isFlipped && "[transform:rotateY(180deg)]",
+                      )}
+                    >
+                      <div
+                        className={cx(
+                          "absolute inset-0 rounded-[1.5rem] border p-4 transition hover:-translate-y-0.5 hover:bg-white/[0.06] [backface-visibility:hidden]",
+                          isSelected
+                            ? "border-emerald-300/40 bg-emerald-300/10"
+                            : "border-white/10 bg-white/[0.035]",
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="text-lg font-semibold text-white">{ticker}</div>
+                            <div className="mt-1 text-[11px] uppercase tracking-[0.16em] text-slate-500">#{index + 1}</div>
+                          </div>
+                          <StatusPill tone={stock.mandate === "Increase Gradually" ? "good" : "neutral"}>{stock.mandate}</StatusPill>
+                        </div>
+
+                        <div className="mt-5 space-y-3">
+                          <QualityBar value={stock.setupQuality} label="Setup quality" />
+                          <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
+                            <div>
+                              <div className="text-slate-500">Exposure</div>
+                              <div className="font-semibold text-slate-100">{fmtPlainPct(stock.suggestedExposure)}</div>
+                            </div>
+                            <div>
+                              <div className="text-slate-500">Expected range</div>
+                              <div className="font-semibold text-slate-100">{fmtPct(stock.expectedMove)}</div>
+                            </div>
+                          </div>
+                          <p className="line-clamp-3 text-xs leading-5 text-slate-400">{stock.explanation}</p>
+
+                          <div className="rounded-2xl border border-white/10 bg-white/[0.035] px-3 py-2 text-xs text-slate-500">
+                            {isSelected ? "Click to view return path" : "Click to select"}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-slate-500">Expected range</div>
-                        <div className="font-semibold text-slate-100">{fmtPct(stock.expectedMove)}</div>
+
+                      <div className="absolute inset-0 rounded-[1.5rem] border border-emerald-300/30 bg-slate-950/95 p-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                        <div className="mb-4 flex items-center justify-between gap-3">
+                          <div>
+                            <div className="text-[11px] uppercase tracking-[0.18em] text-emerald-300/70">Selected instrument history</div>
+                            <div className="mt-1 text-lg font-semibold text-white">{ticker}</div>
+                            <div className="line-clamp-1 text-xs text-slate-500">{stockName(stock)}</div>
+                          </div>
+                          <StatusPill tone={stock.expectedMove >= 0 ? "good" : "bad"}>{fmtPct(stock.expectedMove)}</StatusPill>
+                        </div>
+
+                        <div className="h-[210px] min-w-0 overflow-hidden">
+                          {selectedHistoryLoading ? (
+                            <div className="grid h-full place-items-center text-xs text-slate-500">
+                              Loading return path...
+                            </div>
+                          ) : history.length < 2 ? (
+                            <div className="grid h-full place-items-center text-xs text-slate-500">
+                              Return path unavailable
+                            </div>
+                          ) : (
+                            <ResponsiveContainer width="100%" height="100%">
+                              <AreaChart data={history} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+                              <defs>
+                                <linearGradient id={`institutionalPath-${ticker}`} x1="0" x2="0" y1="0" y2="1">
+                                  <stop offset="0%" stopColor="#34d399" stopOpacity={0.28} />
+                                  <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
+                                </linearGradient>
+                              </defs>
+                              <XAxis dataKey="index" hide />
+                              <YAxis domain={["dataMin", "dataMax"]} hide />
+                              <Tooltip
+                                content={({ active, payload }) =>
+                                  active && payload?.length ? (
+                                    <div className="rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-slate-200 shadow-xl">
+                                      {fmtCurrency(Number(payload[0].payload.price))}
+                                    </div>
+                                  ) : null
+                                }
+                              />
+                              <Area
+                                type="monotone"
+                                dataKey="price"
+                                stroke="#34d399"
+                                strokeWidth={2.5}
+                                fill={`url(#institutionalPath-${ticker})`}
+                                dot={false}
+                                isAnimationActive={false}
+                              />
+                              </AreaChart>
+                            </ResponsiveContainer>
+                          )}
+                        </div>
+
+                        <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.035] px-3 py-2 text-xs text-slate-500">
+                          Click to return to allocation summary
+                        </div>
                       </div>
                     </div>
-                    <p className="line-clamp-3 text-xs leading-5 text-slate-400">{stock.explanation}</p>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </SectionShell>
 
           <SectionShell eyebrow="Compounded returns and execution record" title="Portfolio Performance">
             <div className="grid grid-cols-2 gap-3">
-              <MiniMetric label="Total Return" value={fmtPct((capitalDeployed / STARTING_PORTFOLIO_VALUE) * 12.5)} />
-              <MiniMetric label="Profit Factor" value={(1 + confidence / 90).toFixed(2)} />
-              <MiniMetric label="Win Rate" value={fmtPlainPct(clamp(confidence - avgRisk * 0.15))} />
-              <MiniMetric label="Max Drawdown" value={fmtPlainPct(Math.max(0.4, avgRisk / 38))} />
+              <MiniMetric label="Total Return" value={fmtPct(portfolioReturnPct)} />
+              <MiniMetric
+                label="Annualized Sharpe"
+                value={
+                  normalizedAnnualSharpe == null
+                    ? "—"
+                    : normalizedAnnualSharpe.toFixed(2)
+                }
+                sub="Normalized · 252 periods"
+              />
+              <MiniMetric
+                label="Average Duration"
+                value={
+                  averageDurationDays == null
+                    ? "—"
+                    : `${averageDurationDays.toFixed(0)}d`
+                }
+                sub="Active exposures"
+              />
+              <MiniMetric
+                label="Profit Factor"
+                value={
+                  portfolioProfitFactor == null
+                    ? "—"
+                    : portfolioProfitFactor === Infinity
+                      ? "∞"
+                      : portfolioProfitFactor.toFixed(2)
+                }
+              />
+              <MiniMetric
+                label="Win Rate"
+                value={fmtPlainPct(portfolioWinRate)}
+              />
+              <MiniMetric
+                label="Max Drawdown"
+                value={fmtPlainPct(portfolioMaxDrawdown)}
+              />
+            </div>
+
+            <SectionShell
+              className="min-w-0 bg-white/[0.035] mt-8"
+              eyebrow="Overall portfolio performance"
+              title="Portfolio Return Path"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <div className="text-2xl font-semibold text-white">
+                    {portfolioEquity !== null ? fmtCurrency(portfolioEquity) : "—"}
+                  </div>
+                  <div className="text-sm text-slate-500">
+                    Weighted equity curve from final regime-adjusted Buy exposures
+                  </div>
+                </div>
+
+                {portfolioReturnPct !== null ? (
+                  <StatusPill tone={portfolioReturnPct >= 0 ? "good" : "bad"}>
+                    {fmtPct(portfolioReturnPct)}
+                  </StatusPill>
+                ) : null}
+              </div>
+
+              <div className="h-[160px] min-w-0 overflow-hidden">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={portfolioHistory}
+                    margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id="portfolioPerformancePath" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor="#38bdf8" stopOpacity={0.28} />
+                        <stop offset="100%" stopColor="#38bdf8" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+
+                    <XAxis dataKey="index" hide />
+                    <YAxis domain={["dataMin", "dataMax"]} hide />
+
+                    <Tooltip
+                      content={({ active, payload }) =>
+                        active && payload?.length ? (
+                          <div className="rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-slate-200 shadow-xl">
+                            <div className="font-medium text-white">
+                              {fmtCurrency(Number(payload[0].payload.equity))}
+                            </div>
+                            <div className="text-slate-500">
+                              {fmtPct(Number(payload[0].payload.returnPct))}
+                            </div>
+                          </div>
+                        ) : null
+                      }
+                    />
+
+                    <Area
+                      type="monotone"
+                      dataKey="equity"
+                      stroke="#38bdf8"
+                      strokeWidth={2.5}
+                      fill="url(#portfolioPerformancePath)"
+                      dot={false}
+                      isAnimationActive={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </SectionShell>
+          </SectionShell>
+
+        </section>
+
+        <section className="mb-6 grid min-w-0 gap-5">
+          <SectionShell
+            eyebrow="Quality-ranked exposures"
+            title="Allocation Ledger"
+            action={<StatusPill tone="neutral">{filtered.length} instruments</StatusPill>}
+          >
+            <div className="mb-4">
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search ticker across Buy, Hold, and Sell..."
+                className="h-11 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 text-sm text-slate-100 outline-none placeholder:text-slate-600"
+              />
+            </div>
+
+            <div className="grid gap-4 xl:grid-cols-3">
+              {ledgerGroups.map((group) => (
+                <AllocationLedgerTable
+                  key={group.action}
+                  action={group.action}
+                  items={group.items}
+                  selectedTicker={selectedTicker}
+                  onSelectTicker={(ticker) => {
+                    setSelectedTicker(ticker);
+                    setIsSelectedCardFlipped(true);
+                  }}
+                  loading={loading}
+                />
+              ))}
             </div>
           </SectionShell>
         </section>
 
-        <section className="mb-6 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <section className="mb-6 grid min-w-0 gap-5 mb-6 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
           <SectionShell eyebrow="Market interpretation" title="Regime Intelligence">
             <div className="grid gap-4 md:grid-cols-3">
               <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-4">
@@ -776,7 +1444,7 @@ export default function Dashboard() {
           </SectionShell>
 
           <SectionShell className="min-w-0" eyebrow="Relative strength versus risk" title="Opportunity Surface">
-            <div className="h-[320px] min-w-0">
+            <div className="h-[230px] min-w-0">
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart margin={{ top: 8, right: 10, bottom: 8, left: -20 }}>
                   <CartesianGrid stroke="rgba(148, 163, 184, 0.08)" />
@@ -799,107 +1467,6 @@ export default function Dashboard() {
                   <Scatter data={surface} fill="#34d399" />
                 </ScatterChart>
               </ResponsiveContainer>
-            </div>
-          </SectionShell>
-        </section>
-
-        <section className="mb-6 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <SectionShell className="min-w-0" eyebrow="Selected instrument history" title="Return Path">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-semibold text-white">{selected ? normalizedTicker(selected) : "—"}</div>
-                <div className="text-sm text-slate-500">{selected ? stockName(selected) : "Select an instrument"}</div>
-              </div>
-              {selected ? <StatusPill tone={selected.expectedMove >= 0 ? "good" : "bad"}>{fmtPct(selected.expectedMove)}</StatusPill> : null}
-            </div>
-            <div className="h-[240px] min-w-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={history} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-                  <defs>
-                    <linearGradient id="institutionalPath" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor="#34d399" stopOpacity={0.28} />
-                      <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="index" hide />
-                  <YAxis domain={["dataMin", "dataMax"]} hide />
-                  <Tooltip
-                    content={({ active, payload }) =>
-                      active && payload?.length ? (
-                        <div className="rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-slate-200 shadow-xl">
-                          {fmtCurrency(Number(payload[0].payload.price))}
-                        </div>
-                      ) : null
-                    }
-                  />
-                  <Area type="monotone" dataKey="price" stroke="#34d399" strokeWidth={2.5} fill="url(#institutionalPath)" dot={false} isAnimationActive={false} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </SectionShell>
-
-          <SectionShell
-            eyebrow="Quality-ranked exposures"
-            title="Allocation Ledger"
-            action={<StatusPill tone="neutral">{filtered.length} instruments</StatusPill>}
-          >
-            <div className="mb-4 grid gap-3 md:grid-cols-3">
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search ticker..."
-                className="h-11 rounded-2xl border border-white/10 bg-slate-950 px-4 text-sm text-slate-100 outline-none placeholder:text-slate-600"
-              />
-              <select
-                value={signalFilter}
-                onChange={(event) => setSignalFilter(event.target.value as TradeSignal | "All")}
-                className="h-11 rounded-2xl border border-white/10 bg-slate-950 px-4 text-sm text-slate-100 outline-none"
-              >
-                {["All", "Buy", "Hold", "Sell"].map((option) => <option key={option}>{option}</option>)}
-              </select>
-              <select
-                value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value as StockStatus | "All")}
-                className="h-11 rounded-2xl border border-white/10 bg-slate-950 px-4 text-sm text-slate-100 outline-none"
-              >
-                {["All", "Stable", "Rising", "Watch", "Dip"].map((option) => <option key={option}>{option}</option>)}
-              </select>
-            </div>
-
-            <div className="overflow-hidden rounded-3xl border border-white/10">
-              <div className="grid grid-cols-[1.2fr_0.9fr_0.7fr_0.7fr_0.7fr] bg-white/[0.035] px-4 py-3 text-[11px] uppercase tracking-[0.16em] text-slate-500">
-                <div>Ticker</div>
-                <div>Mandate</div>
-                <div>Exposure</div>
-                <div>Quality</div>
-                <div>Risk</div>
-              </div>
-              <div className="max-h-[520px] divide-y divide-white/10 overflow-auto">
-                {loading ? (
-                  <div className="flex items-center gap-3 px-4 py-8 text-sm text-slate-400">
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                    Loading institutional coverage...
-                  </div>
-                ) : filtered.slice(0, 40).map((stock) => (
-                  <button
-                    key={normalizedTicker(stock)}
-                    type="button"
-                    onClick={() => setSelectedTicker(normalizedTicker(stock))}
-                    className="grid w-full grid-cols-[1.2fr_0.9fr_0.7fr_0.7fr_0.7fr] items-center px-4 py-4 text-left text-sm transition hover:bg-white/[0.04]"
-                  >
-                    <div>
-                      <div className="font-semibold text-white">{normalizedTicker(stock)}</div>
-                      <div className="mt-1 line-clamp-1 text-xs text-slate-500">{stockName(stock)}</div>
-                    </div>
-                    <div className="text-slate-300">{stock.mandate}</div>
-                    <div className="text-slate-300">{fmtPlainPct(stock.suggestedExposure)}</div>
-                    <div className="font-medium text-slate-100">{Math.round(stock.setupQuality)}/100</div>
-                    <div className={stock.riskPressure > 65 ? "text-amber-200" : "text-emerald-200"}>
-                      {stock.riskPressure > 65 ? "Elevated" : "Contained"}
-                    </div>
-                  </button>
-                ))}
-              </div>
             </div>
           </SectionShell>
         </section>

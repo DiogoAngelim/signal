@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import Papa from "papaparse";
-import { fileURLToPath } from "url";
 import {
   calibrateSignalDecision,
   getAdaptiveThresholds,
@@ -114,8 +113,7 @@ export interface MarketDailyCandle {
   close: number;
 }
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const currentDirname = process.cwd();
 
 const PUBLIC_DIR_CANDIDATES = [
   path.resolve(process.cwd(), "stocks-public"),
@@ -161,13 +159,13 @@ const PUBLIC_DIR_CANDIDATES = [
   ),
   path.resolve(process.cwd(), "lib", "stocks-optimizer", "public"),
   path.resolve(
-    __dirname,
+    currentDirname,
     "../../../../..",
     "lib",
     "stocks-optimizer",
     "public",
   ),
-  path.resolve(__dirname, "../../../..", "lib", "stocks-optimizer", "public"),
+  path.resolve(currentDirname, "../../../..", "lib", "stocks-optimizer", "public"),
 ];
 
 const DEFAULT_PUBLIC_DIR =

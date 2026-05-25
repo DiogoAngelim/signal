@@ -1,0 +1,25 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter @workspace/api-server build && pnpm --filter @workspace/signal-markets build",
+  "outputDirectory": "src/artifacts/signal-markets/dist",
+  "functions": {
+    "api/**/*.js": {
+      "includeFiles": "{api/_quote-cache.js,api/_quote-sync.js,api/_stock-files.js,src/artifacts/signal-markets/public/**}"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/stocks/(.*)",
+      "destination": "/api/stocks/$1"
+    },
+    {
+      "source": "/signals/(.*)",
+      "destination": "/api/signals/$1"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

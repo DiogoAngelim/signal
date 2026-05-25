@@ -1,28 +1,55 @@
 {
   "name": "stocks-optimizer",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
-  "type": "module",
   "packageManager": "pnpm@10.12.4",
   "scripts": {
-    "build": "pnpm --dir src install && pnpm --dir src --filter @workspace/api-server build && pnpm --dir src --filter @workspace/signal-markets build",
-    "start": "pnpm --dir src --filter @workspace/signal-markets dev",
-    "install:workspace": "pnpm --dir src install",
-    "dev": "pnpm --dir src --filter @workspace/signal-markets dev",
-    "build:api": "pnpm --dir src --filter @workspace/api-server build",
-    "build:web": "pnpm --dir src --filter @workspace/signal-markets build",
-    "validate": "pnpm build"
+    "build": "pnpm --filter @workspace/signal-markets build",
+    "dev": "pnpm --filter @workspace/signal-markets dev"
+  },
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter @workspace/signal-markets build",
+  "outputDirectory": "src/artifacts/signal-markets/dist",
+  "functions": {
+    "api/[...path].ts": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/stocks/(.*)",
+      "destination": "/api/stocks/$1"
+    },
+    {
+      "source": "/signals/(.*)",
+      "destination": "/api/signals/$1"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "dependencies": {
+    "cors": "^2.8.6",
+    "drizzle-orm": "catalog:",
+    "express": "^5.2.1",
+    "papaparse": "^5.5.3",
+    "pg": "catalog:",
+    "pino": "^9.14.0",
+    "pino-http": "^10.5.0",
+    "serverless-http": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^20.19.39",
-    "@types/react": "^19.2.14",
-    "dotenv-cli": "^11.0.0"
-  },
-  "dependencies": {
-    "@tanstack/react-table": "^8.21.3",
-    "framer-motion": "^12.38.0",
-    "lucide-react": "^1.8.0",
-    "react-csv": "^2.2.2",
-    "recharts": "^3.8.1"
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "esbuild": "catalog:",
+    "typescript": "catalog:"
   }
 }

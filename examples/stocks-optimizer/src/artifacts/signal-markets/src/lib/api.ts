@@ -1,5 +1,5 @@
 export type StockStatus = "Stable" | "Rising" | "Watch" | "Dip";
-export type TradeSignal = "Buy" | "Hold" | "Sell";
+export type TradeSignal = "Hold" | "Buy" | "Sell";
 export type AdaptiveRegime =
   | "TRENDING"
   | "MEAN_REVERTING"
@@ -345,20 +345,6 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-
-
-
-
-function apiUrl(path: string): string {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-
-  if (!API_BASE) {
-    return normalizedPath;
-  }
-
-  return `${API_BASE}${normalizedPath}`;
-}
-
 async function request<T>(
   path: string,
   options?: RequestInit & { timeoutMs?: number; retryCount?: number },
@@ -434,41 +420,47 @@ async function request<T>(
   throw new ApiRequestError("Request failed", { retryable: false });
 }
 
-export async function fetchMarkets(): Promise<MarketOption[]> {
+export async function fetchMarkets(): Promise<any[]> {
   const response = await request<any>("/api/stocks/markets");
 
-  return Array.isArray(response)
-    ? response
-    : Array.isArray(response?.data)
-      ? response.data
-      : Array.isArray(response?.markets)
-        ? response.markets
-        : Array.isArray(response?.items)
-          ? response.items
-          : [];
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.items)) return response.items;
+  if (Array.isArray(response?.markets)) return response.markets;
+
+  return [];
 }
 
 export async function fetchStockList(
   market: string,
   offset = 0,
-  limit = 24,
-): Promise<{ market: string; total: number; items: StockListItem[] }> {
-  const cacheKey = `signal-markets:stock-list:${market}:${offset}:${limit}`;
-  const cached = readCache<{ market: string; total: number; items: StockListItem[] }>(
-    cacheKey,
+  limit = 50,
+): Promise<any> {
+  const response = await request<any>(
+    `/api/stocks/list?market=${encodeURIComponent(market)}&offset=${offset}&limit=${limit}`,
   );
-  if (cached) return cached;
 
-  const params = new URLSearchParams({
-    market,
-    offset: String(offset),
-    limit: String(limit),
-  });
-  const stockList = await request<{ market: string; total: number; items: StockListItem[] }>(
-    `/api/stocks/list?${params}`,
-  );
-  writeCache(cacheKey, stockList, STATIC_CACHE_TTL_MS);
-  return stockList;
+  const items =
+    Array.isArray(response)
+      ? response
+      : Array.isArray(response?.data)
+        ? response.data
+        : Array.isArray(response?.items)
+          ? response.items
+          : Array.isArray(response?.stocks)
+            ? response.stocks
+            : [];
+
+  console.log("[api] fetchStockList", { market, items, response });
+  return {
+    ...response,
+    data: items,
+    items,
+    total: Number(response?.total ?? items.length),
+    offset: Number(response?.offset ?? offset),
+    limit: Number(response?.limit ?? limit),
+    market: response?.market ?? market,
+  };
 }
 
 export async function fetchStockQuoteBatch(
@@ -479,52 +471,31 @@ export async function fetchStockQuoteBatch(
     timeoutMs?: number;
     retryCount?: number;
   },
-): Promise<{ quotes: StockQuote[] }> {
-  const payload = {
-    market,
-    symbols,
-    withSignals: options?.withSignals ?? true,
-    timeoutMs: options?.timeoutMs,
-    retryCount: options?.retryCount,
-  };
+): Promise<{ quotes: any[] }> {
+  const response = await request<any>("/api/stocks/quotes", {
+    method: "POST",
+    body: JSON.stringify({
+      market,
+      symbols,
+      withSignals: options?.withSignals ?? true,
+      timeoutMs: options?.timeoutMs,
+      retryCount: options?.retryCount,
+    }),
+  });
 
-  const routes = [
-    "/api/stocks/quotes",
-    "/api/stocks/quotes/batch",
-    "/api/quotes/batch",
-    "/stocks/quotes",
-    "/stocks/quotes/batch",
-  ];
+  const quotes =
+    Array.isArray(response)
+      ? response
+      : Array.isArray(response?.quotes)
+        ? response.quotes
+        : Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response?.items)
+            ? response.items
+            : [];
 
-  let lastError: unknown = null;
-
-  for (const route of routes) {
-    try {
-      const response = await request<any>(route, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-
-      const quotes =
-        Array.isArray(response)
-          ? response
-          : Array.isArray(response?.quotes)
-            ? response.quotes
-            : Array.isArray(response?.data)
-              ? response.data
-              : Array.isArray(response?.items)
-                ? response.items
-                : [];
-
-      return { quotes };
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  throw lastError instanceof Error
-    ? lastError
-    : new Error("Unable to fetch stock quote batch");
+  console.log("[api] fetchStockQuoteBatch", { market, symbols, quotes });
+  return { quotes };
 }
 
 export async function fetchStockQuotes(
@@ -540,31 +511,10 @@ export async function registerSignalWatchlist(
   market: string,
   symbols: string[],
 ): Promise<void> {
-  const payload = { market, symbols };
-
-  const routes = [
-    "/api/stocks/signals/watch",
-    "/api/signals/watch",
-    "/api/signals/watchlist",
-    "/stocks/signals/watch",
-    "/stocks/signals/watchlist",
-    "/signals/watch",
-    "/signals/watchlist",
-  ];
-
-  for (const route of routes) {
-    try {
-      await request(route, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-      return;
-    } catch {
-      // Try next compatible route.
-    }
-  }
-
-  // Non-critical: the dashboard can still operate without registering a watchlist.
+  await request("/api/stocks/watch-market", {
+    method: "POST",
+    body: JSON.stringify({ market, symbols }),
+  });
 }
 
 export async function fetchSignalHistory(

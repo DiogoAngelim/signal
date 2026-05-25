@@ -1,0 +1,12 @@
+node_modules
+**/node_modules
+.git
+**/.git
+dist
+**/.cache
+**/.vite
+**/coverage
+**/*.log
+**/.DS_Store
+stocks-optimizer-built.zip
+*.zip

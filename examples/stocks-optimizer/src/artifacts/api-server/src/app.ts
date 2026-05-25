@@ -34,8 +34,9 @@ app.use("/api", router);
 
 // Serve frontend static files in production
 if (
-  process.env.NODE_ENV === "production" ||
-  process.env.SERVE_FRONTEND === "true"
+  !process.env.VERCEL &&
+  (process.env.NODE_ENV === "production" ||
+    process.env.SERVE_FRONTEND === "true")
 ) {
   const frontendPath = path.resolve(
     __dirname,
