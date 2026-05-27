@@ -1,3 +1,29 @@
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "")
+  .replace(/\/$/, "")
+  .replace(/\/api\/stocks\/markets$/i, "")
+  .replace(/\/api$/i, "");
+
+function apiUrl(path: string) {
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  if (!API_BASE_URL) {
+    return normalizedPath;
+  }
+
+  return `${API_BASE_URL}${normalizedPath}`;
+}
+
+import {
+  backtestCacheKey,
+  recoverBacktestPayload,
+  rememberBacktestPayload,
+  shouldProtectBacktestUrl,
+} from "./persistent-backtest-cache";
+import { sanitizePromotionState } from "./promotion-sanity";
 export type StockStatus = "Stable" | "Rising" | "Watch" | "Dip";
 export type TradeSignal = "Hold" | "Buy" | "Sell";
 export type AdaptiveRegime =
@@ -274,10 +300,6 @@ export interface StockQuoteBatchResponse {
   quotes: StockQuote[];
 }
 
-const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(
-  /\/$/,
-  "",
-);
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 12_000;
 const DEFAULT_RETRY_COUNT = 1;
@@ -335,6 +357,55 @@ export class ApiRequestError extends Error {
   ) {
     super(message);
     this.name = "ApiRequestError";
+
+function sanitizeBacktestApiPayload<T>(url: string, payload: T): T {
+  if (
+    !url.includes("/api/portfolio") &&
+    !url.includes("/portfolio") &&
+    !url.includes("/api/strategy") &&
+    !url.includes("/strategy")
+  ) {
+    return sanitizeBacktestApiPayload(requestUrl, payload);
+  }
+
+  const anyPayload: any = payload;
+
+  if (anyPayload?.summary) {
+    return {
+      ...anyPayload,
+      summary: sanitizePromotionState(anyPayload.summary),
+      snapshot: anyPayload.snapshot
+        ? sanitizePromotionState(anyPayload.snapshot)
+        : anyPayload.snapshot,
+    };
+  }
+
+  if (
+    anyPayload &&
+    typeof anyPayload === "object" &&
+    ("tradeCount" in anyPayload || "survivalScore" in anyPayload || "backtestStatus" in anyPayload)
+  ) {
+    return sanitizePromotionState(anyPayload) as T;
+  }
+
+  return payload;
+}
+
+
+function protectBacktestApiPayload<T>(url: string, method: string, payload: T): T {
+  if (!shouldProtectBacktestUrl(url)) return payload;
+
+  const key = backtestCacheKey(url, method);
+  const recovered = recoverBacktestPayload(key, payload);
+
+  if (recovered === payload) {
+    rememberBacktestPayload(key, payload);
+  }
+
+  return sanitizeBacktestApiPayload(requestUrl, recovered);
+}
+
+
     this.status = options?.status;
     this.retryable = options?.retryable ?? false;
     this.timedOut = options?.timedOut ?? false;
@@ -345,9 +416,13 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+
+
+
 async function request<T>(
   path: string,
-  options?: RequestInit & { timeoutMs?: number; retryCount?: number },
+  options?: RequestInit & {
+ timeoutMs?: number; retryCount?: number },
 ): Promise<T> {
   const {
     timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
@@ -374,7 +449,21 @@ async function request<T>(
     }
 
     try {
-      const response = await fetch(`${apiBase}${path}`, {
+        const rawPath = typeof path === "string" ? path : String(path);
+
+  if (
+    rawPath.includes("/api/stocks/watch-market") &&
+    import.meta.env.VITE_ENABLE_PORTFOLIO_API !== "true"
+  ) {
+    console.info("[api] Skipping /api/stocks/watch-market locally");
+    return {
+      ok: true,
+      skipped: true,
+      reason: "portfolio API disabled locally",
+    } as any;
+  }
+
+  const response = await fetch(apiUrl(path), {
         headers: { "Content-Type": "application/json" },
         ...fetchOptions,
         signal: controller.signal,

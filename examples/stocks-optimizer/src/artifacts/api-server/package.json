@@ -8,6 +8,7 @@
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "test": "tsx --test src/lib/model-lifecycle.test.ts",
+    "test:coverage": "c8 --100 --include='src/lib/model-lifecycle.ts' pnpm test",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

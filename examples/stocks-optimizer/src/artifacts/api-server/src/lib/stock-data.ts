@@ -15,6 +15,681 @@ import {
 } from "./signal-lifecycle-governance";
 import { logger } from "./logger";
 
+function shouldUseBinanceFallbackProvider(market: unknown, symbol: unknown) {
+  const marketValue = String(market ?? "").trim().toUpperCase();
+  const symbolValue = String(symbol ?? "").trim().toUpperCase();
+
+  if (process.env.ENABLE_BINANCE_FALLBACK !== "true") {
+    return false;
+  }
+
+  return (
+    marketValue === "BINANCE" ||
+    marketValue.includes("BINANCE") ||
+    symbolValue.startsWith("BINANCE:")
+  );
+}
+
+
+
+function isBinanceMarketContext(market: unknown, symbol: unknown) {
+  const marketValue = String(market ?? "").trim().toUpperCase();
+  const symbolValue = String(symbol ?? "").trim().toUpperCase();
+
+  return (
+    marketValue.includes("BINANCE") ||
+    marketValue.includes("CRYPTO") ||
+    symbolValue.startsWith("BINANCE:")
+  );
+}
+
+
+
+function shouldUseBinanceProvider(market: unknown, symbol: unknown) {
+  const marketValue = String(market ?? "").trim().toUpperCase();
+  const symbolValue = String(symbol ?? "").trim().toUpperCase();
+
+  return (
+    marketValue.includes("BINANCE") ||
+    marketValue.includes("CRYPTO") ||
+    symbolValue.startsWith("BINANCE:")
+  );
+}
+
+
+
+function normalizeBinanceSnapshotSymbol(symbol: string) {
+  const raw = String(symbol ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/^BINANCE:/, "")
+    .replace(/\.P$/, "")
+    .replace(/[^A-Z0-9]/g, "");
+
+  if (!raw) return raw;
+
+  // Binance liquid spot and USD-margined futures generally use USDT.
+  if (raw.endsWith("USDT") || raw.endsWith("USDC") || raw.endsWith("BUSD") || raw.endsWith("FDUSD")) {
+    return raw;
+  }
+
+  // Convert common app/provider USD notation to Binance USDT notation.
+  if (raw.endsWith("USD")) {
+    return `${raw.slice(0, -3)}USDT`;
+  }
+
+  // If the symbol is just a base asset, default to USDT.
+  if (!/(USDT|USDC|BUSD|FDUSD|BTC|ETH)$/.test(raw)) {
+    return `${raw}USDT`;
+  }
+
+  return raw;
+}
+
+
+
+function baseProviderTicker(symbol: string) {
+  return String(symbol ?? "")
+    .trim()
+    .split(":")
+    .at(-1)!
+    .replace(/\.(BR|AS|PA|LS|IR|OL|L|MI|DE|F|SW|MC|SA)$/i, "");
+}
+
+function marketNameFromOptions(options: any) {
+  return String(
+    options?.market ??
+    options?.marketName ??
+    options?.exchange ??
+    options?.venue ??
+    "",
+  ).toUpperCase();
+}
+
+function candidateTradingViewScannerSymbols(rawSymbol: string, options?: any) {
+  const raw = String(rawSymbol ?? "").trim();
+  const base = baseProviderTicker(raw);
+  const market = marketNameFromOptions(options);
+  const candidates = new Set<string>();
+
+async function fetchTradingViewScannerRows(symbol: string, options: TradingViewRowsOptions): Promise<TradingViewRow[]> {
+
+  if (!hasTimeRemaining(options, 3_500)) return [];
+
+  const candidates = candidateTradingViewScannerSymbols(symbol, options);
+
+  if (!candidates.length) return [];
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), TRADINGVIEW_TIMEOUT_MS);
+
+  try {
+    const response = await fetch("https://scanner.tradingview.com/global/scan", {
+      method: "POST",
+      headers: {
+        Accept: "application/json, text/plain, */*",
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0",
+      },
+      body: JSON.stringify({
+        symbols: {
+          tickers: candidates,
+          query: { types: [] },
+        },
+        columns: [
+          "close",
+          "open",
+          "high",
+          "low",
+          "volume",
+          "change",
+          "change_abs",
+        ],
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) return [];
+
+    const payload = await response.json();
+    const row = Array.isArray(payload?.data) ? payload.data[0] : null;
+    const data = Array.isArray(row?.d) ? row.d : [];
+
+    const close = Number(data[0]);
+    if (!Number.isFinite(close) || close <= 0) return [];
+
+    const open = Number(data[1]);
+    const high = Number(data[2]);
+    const low = Number(data[3]);
+    const volume = Number(data[4]);
+    const changePercent = Number(data[5]);
+    const changeAbs = Number(data[6]);
+
+    logger.info(
+      { originalSymbol: symbol, providerSymbol: row?.s, candidates },
+      "Resolved quote through TradingView scanner",
+    );
+
+    return [
+      {
+        date: new Date().toISOString().slice(0, 10),
+        open: Number.isFinite(open) ? open : close,
+        high: Number.isFinite(high) ? high : close,
+        low: Number.isFinite(low) ? low : close,
+        price: close,
+        regularMarketPrice: close,
+        close,
+        adjustedClose: close,
+        volume: Number.isFinite(volume) ? volume : 0,
+        regularMarketVolume: Number.isFinite(volume) ? volume : 0,
+        change: Number.isFinite(changeAbs) ? changeAbs : 0,
+        changePercent: Number.isFinite(changePercent) ? changePercent : 0,
+        regularMarketChange: Number.isFinite(changeAbs) ? changeAbs : 0,
+        regularMarketChangePercent: Number.isFinite(changePercent) ? changePercent : 0,
+      } as TradingViewRow,
+    ];
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+  if (raw.includes(":")) {
+    candidates.add(raw);
+  }
+
+  if (
+    market === "ADX" ||
+    market.includes("ABU DHABI") ||
+    market.includes("ABU_DHABI") ||
+    /^ADX:/i.test(raw)
+  ) {
+    candidates.add(`ADX:${base}`);
+    return Array.from(candidates);
+  }
+
+  if (market.includes("EURONEXT OSLO") || market.includes("OSLO") || /\.OL$/i.test(raw)) {
+    candidates.add(`OSL:${base}`);
+    candidates.add(`OSE:${base}`);
+    candidates.add(`OSLO:${base}`);
+    return Array.from(candidates);
+  }
+
+  if (
+    market.includes("EURONEXT BRUSSELS") ||
+    market.includes("BRUSSELS") ||
+    market.includes("EURONEXT AMSTERDAM") ||
+    market.includes("AMSTERDAM") ||
+    market.includes("EURONEXT PARIS") ||
+    market.includes("PARIS") ||
+    market.includes("EURONEXT LISBON") ||
+    market.includes("LISBON") ||
+    market.includes("EURONEXT DUBLIN") ||
+    market.includes("DUBLIN") ||
+    /^EURONEXT:/i.test(raw) ||
+    /\.(BR|AS|PA|LS|IR)$/i.test(raw)
+  ) {
+    candidates.add(`EURONEXT:${base}`);
+    return Array.from(candidates);
+  }
+
+  if (market.includes("LSE") || market.includes("LONDON") || /\.L$/i.test(raw)) {
+    candidates.add(`LSE:${base}`);
+    candidates.add(`LONDON:${base}`);
+    return Array.from(candidates);
+  }
+
+  if (market.includes("SIX") || market.includes("SWISS") || /\.SW$/i.test(raw)) {
+    candidates.add(`SIX:${base}`);
+    candidates.add(`SWX:${base}`);
+    return Array.from(candidates);
+  }
+
+  if (market.includes("MILAN") || market.includes("BORSA") || /\.MI$/i.test(raw)) {
+    candidates.add(`MIL:${base}`);
+    candidates.add(`MILAN:${base}`);
+    return Array.from(candidates);
+  }
+
+  // Generic fallbacks.
+  candidates.add(raw);
+  candidates.add(base);
+  candidates.add(`EURONEXT:${base}`);
+  candidates.add(`OSL:${base}`);
+
+  return Array.from(candidates).filter(Boolean);
+}
+
+
+
+const PROVIDER_SYMBOL_RESOLUTION_CACHE = new Map<string, { symbol: string | null; expiresAt: number }>();
+const PROVIDER_SYMBOL_RESOLUTION_TTL_MS = 6 * 60 * 60 * 1000;
+
+function providerResolutionKey(symbol: string) {
+  return String(symbol ?? "").trim().toUpperCase();
+}
+
+function getCachedProviderSymbol(symbol: string) {
+  const key = providerResolutionKey(symbol);
+  const cached = PROVIDER_SYMBOL_RESOLUTION_CACHE.get(key);
+
+  if (!cached) return undefined;
+
+  if (Date.now() > cached.expiresAt) {
+    PROVIDER_SYMBOL_RESOLUTION_CACHE.delete(key);
+    return undefined;
+  }
+
+  return cached.symbol;
+}
+
+function setCachedProviderSymbol(symbol: string, resolved: string | null) {
+  PROVIDER_SYMBOL_RESOLUTION_CACHE.set(providerResolutionKey(symbol), {
+    symbol: resolved,
+    expiresAt: Date.now() + PROVIDER_SYMBOL_RESOLUTION_TTL_MS,
+  });
+}
+
+function candidateProviderSymbols(rawSymbol: string) {
+  const raw = String(rawSymbol ?? "").trim();
+  const prefix = raw.includes(":") ? raw.split(":")[0] : "";
+  const base = raw.includes(":") ? raw.split(":").at(-1) ?? raw : raw;
+
+  const stripped = base
+    .replace(/\.OL$/i, "")
+    .replace(/\.BR$/i, "")
+    .replace(/\.AS$/i, "")
+    .replace(/\.PA$/i, "")
+    .replace(/\.LS$/i, "")
+    .replace(/\.IR$/i, "")
+    .replace(/\.L$/i, "");
+
+  const candidates = new Set<string>();
+
+  candidates.add(raw);
+  candidates.add(base);
+
+  if (/OSLO/i.test(prefix) || /\.OL$/i.test(base)) {
+    candidates.add(`${stripped}.OL`);
+    candidates.add(`OSL:${stripped}`);
+    candidates.add(`OSLO:${stripped}`);
+    candidates.add(`OSE:${stripped}`);
+    candidates.add(`EURONEXT:${stripped}`);
+  } else if (/BRUSSELS/i.test(prefix) || /\.BR$/i.test(base)) {
+    candidates.add(`${stripped}.BR`);
+    candidates.add(`EURONEXT:${stripped}`);
+  } else if (/AMSTERDAM/i.test(prefix) || /\.AS$/i.test(base)) {
+    candidates.add(`${stripped}.AS`);
+    candidates.add(`EURONEXT:${stripped}`);
+  } else if (/PARIS/i.test(prefix) || /\.PA$/i.test(base)) {
+    candidates.add(`${stripped}.PA`);
+    candidates.add(`EURONEXT:${stripped}`);
+  } else if (/LISBON/i.test(prefix) || /\.LS$/i.test(base)) {
+    candidates.add(`${stripped}.LS`);
+    candidates.add(`EURONEXT:${stripped}`);
+  } else if (/DUBLIN/i.test(prefix) || /\.IR$/i.test(base)) {
+    candidates.add(`${stripped}.IR`);
+    candidates.add(`EURONEXT:${stripped}`);
+  } else if (/LSE|LONDON/i.test(prefix) || /\.L$/i.test(base)) {
+    candidates.add(`${stripped}.L`);
+    candidates.add(`LSE:${stripped}`);
+  } else {
+    candidates.add(stripped);
+  }
+
+  return Array.from(candidates).filter(Boolean);
+}
+
+async function yahooChartRowsForProviderSymbol(symbol: string, options: TradingViewRowsOptions): Promise<TradingViewRow[]> {
+  if (!hasTimeRemaining(options, 3_500)) return [];
+
+  const encoded = encodeURIComponent(symbol.includes(":") ? symbol.split(":").at(-1) ?? symbol : symbol);
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encoded}?range=6mo&interval=1d&includePrePost=false&events=div%2Csplits`;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), TRADINGVIEW_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/json, text/plain, */*",
+        "User-Agent": "Mozilla/5.0",
+      },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) return [];
+
+    const payload = await response.json();
+    const result = payload?.chart?.result?.[0];
+    const timestamps = Array.isArray(result?.timestamp) ? result.timestamp : [];
+    const quote = result?.indicators?.quote?.[0] ?? {};
+    const adjusted = result?.indicators?.adjclose?.[0]?.adjclose ?? [];
+
+    const rows: TradingViewRow[] = [];
+
+    for (let index = 0; index < timestamps.length; index += 1) {
+      const close = Number(quote.close?.[index]);
+      if (!Number.isFinite(close) || close <= 0) continue;
+
+      const open = Number(quote.open?.[index]);
+      const high = Number(quote.high?.[index]);
+      const low = Number(quote.low?.[index]);
+      const volume = Number(quote.volume?.[index]);
+      const adjClose = Number(adjusted?.[index]);
+
+      rows.push({
+        date: new Date(Number(timestamps[index]) * 1000).toISOString().slice(0, 10),
+        open: Number.isFinite(open) ? open : close,
+        high: Number.isFinite(high) ? high : close,
+        low: Number.isFinite(low) ? low : close,
+        close,
+        adjustedClose: Number.isFinite(adjClose) ? adjClose : close,
+        volume: Number.isFinite(volume) ? volume : 0,
+      } as TradingViewRow);
+    }
+
+    return rows;
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function resolveProviderRows(rawSymbol: string, options: TradingViewRowsOptions) {
+  const cached = getCachedProviderSymbol(rawSymbol);
+
+  if (cached === null) return { symbol: null, rows: [] };
+
+  if (cached) {
+    const rows = await yahooChartRowsForProviderSymbol(cached, options);
+    if (rows.length) return { symbol: cached, rows };
+  }
+
+  for (const candidate of candidateProviderSymbols(rawSymbol)) {
+    const rows = await yahooChartRowsForProviderSymbol(candidate, options);
+
+    if (rows.length) {
+      setCachedProviderSymbol(rawSymbol, candidate);
+      return { symbol: candidate, rows };
+    }
+  }
+
+  setCachedProviderSymbol(rawSymbol, null);
+  return { symbol: null, rows: [] };
+}
+
+
+
+function normalizeYahooCsvSymbol(symbol: string) {
+  const raw = String(symbol ?? "").trim();
+  const upper = raw.toUpperCase();
+
+  const withoutPrefix = raw.includes(":") ? raw.split(":").at(-1) ?? raw : raw;
+
+  if (/^EURONEXT BRUSSELS:/i.test(raw)) {
+    return withoutPrefix.replace(/\.BR$/i, "") + ".BR";
+  }
+
+  if (/^EURONEXT AMSTERDAM:/i.test(raw)) {
+    return withoutPrefix.replace(/\.AS$/i, "") + ".AS";
+  }
+
+  if (/^EURONEXT PARIS:/i.test(raw)) {
+    return withoutPrefix.replace(/\.PA$/i, "") + ".PA";
+  }
+
+  if (/^EURONEXT LISBON:/i.test(raw)) {
+    return withoutPrefix.replace(/\.LS$/i, "") + ".LS";
+  }
+
+  if (/^EURONEXT DUBLIN:/i.test(raw)) {
+    return withoutPrefix.replace(/\.IR$/i, "") + ".IR";
+  }
+
+  if (/^EURONEXT OSLO:/i.test(raw)) {
+    return withoutPrefix.replace(/\.OL$/i, "") + ".OL";
+  }
+
+  if (/^EURONEXT:/i.test(raw)) {
+    // Generic EURONEXT is not enough for Yahoo CSV.
+    // Keep existing suffix if present; otherwise leave base symbol unchanged.
+    return withoutPrefix;
+  }
+
+  if (upper.startsWith("BINANCE:")) {
+    return withoutPrefix.replace(/\.P$/i, "").replace(/USD$/i, "USDT");
+  }
+
+  return withoutPrefix;
+}
+
+
+
+function parseTradingViewCsvBarQuote(symbol: string, text: string) {
+  const lines = String(text ?? "")
+    .trim()
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length < 2) return null;
+
+  const header = lines[0].split(",").map((part) => part.trim().toLowerCase());
+
+  const dateIndex = header.indexOf("date");
+  const openIndex = header.indexOf("open");
+  const highIndex = header.indexOf("high");
+  const lowIndex = header.indexOf("low");
+  const closeIndex = header.indexOf("close");
+  const adjCloseIndex = header.indexOf("adj close");
+  const volumeIndex = header.indexOf("volume");
+
+  if (dateIndex < 0 || closeIndex < 0) return null;
+
+  function n(value: string | undefined) {
+    if (value == null || value === "" || value.toLowerCase() === "null") return null;
+    const parsed = Number(value.replace(/,/g, ""));
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  const bars = [];
+
+  for (const line of lines.slice(1)) {
+    const cols = line.split(",").map((part) => part.trim());
+    const close = n(cols[closeIndex]);
+
+    if (close == null || close <= 0) continue;
+
+    bars.push({
+      date: cols[dateIndex],
+      open: n(cols[openIndex]) ?? close,
+      high: n(cols[highIndex]) ?? close,
+      low: n(cols[lowIndex]) ?? close,
+      close,
+      adjustedClose: adjCloseIndex >= 0 ? n(cols[adjCloseIndex]) : null,
+      volume: volumeIndex >= 0 ? n(cols[volumeIndex]) : null,
+    });
+  }
+
+  const latest = bars.at(-1);
+  if (!latest) return null;
+
+  const previous = bars.length > 1 ? bars.at(-2) : null;
+  const previousClose = previous?.close ?? latest.open;
+  const change = latest.close - previousClose;
+  const changePercent = previousClose > 0 ? (change / previousClose) * 100 : 0;
+
+  return {
+    symbol,
+    price: latest.close,
+    close: latest.close,
+    open: latest.open,
+    high: latest.high,
+    low: latest.low,
+    volume: latest.volume,
+    change,
+    changePercent,
+    regularMarketPrice: latest.close,
+    regularMarketChange: change,
+    regularMarketChangePercent: changePercent,
+    regularMarketVolume: latest.volume,
+    updatedAt: latest.date,
+    source: "tradingview-bars",
+  };
+}
+
+
+
+type ParsedTradingViewBar = {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  adjustedClose: number | null;
+  volume: number | null;
+};
+
+function parseTradingViewCsvBars(text: string): ParsedTradingViewBar[] {
+  const lines = String(text ?? "")
+    .trim()
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length < 2) return [];
+
+  const header = lines[0].split(",").map((part) => part.trim().toLowerCase());
+
+  const dateIndex = header.indexOf("date");
+  const openIndex = header.indexOf("open");
+  const highIndex = header.indexOf("high");
+  const lowIndex = header.indexOf("low");
+  const closeIndex = header.indexOf("close");
+  const adjCloseIndex = header.indexOf("adj close");
+  const volumeIndex = header.indexOf("volume");
+
+  if (dateIndex < 0 || closeIndex < 0) return [];
+
+  const parseNumber = (value: string | undefined) => {
+    if (value == null || value === "" || value.toLowerCase() === "null") return null;
+    const parsed = Number(String(value).replace(/,/g, ""));
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  const bars: ParsedTradingViewBar[] = [];
+
+  for (const line of lines.slice(1)) {
+    const cols = line.split(",").map((part) => part.trim());
+
+    const close = parseNumber(cols[closeIndex]);
+    if (close == null || close <= 0) continue;
+
+    const open = parseNumber(cols[openIndex]) ?? close;
+    const high = parseNumber(cols[highIndex]) ?? close;
+    const low = parseNumber(cols[lowIndex]) ?? close;
+    const adjustedClose = adjCloseIndex >= 0 ? parseNumber(cols[adjCloseIndex]) : null;
+    const volume = volumeIndex >= 0 ? parseNumber(cols[volumeIndex]) : null;
+
+    bars.push({
+      date: cols[dateIndex],
+      open,
+      high,
+      low,
+      close,
+      adjustedClose,
+      volume,
+    });
+  }
+
+  return bars;
+}
+
+function latestTradingViewBarAsQuote(symbol: string, text: string) {
+  const bars = parseTradingViewCsvBars(text);
+  const latest = bars.at(-1);
+
+  if (!latest) return null;
+
+  const previous = bars.length > 1 ? bars.at(-2) : null;
+  const previousClose = previous?.close ?? latest.open;
+  const change = latest.close - previousClose;
+  const changePercent = previousClose > 0 ? (change / previousClose) * 100 : 0;
+
+  return {
+    symbol,
+    price: latest.close,
+    close: latest.close,
+    open: latest.open,
+    high: latest.high,
+    low: latest.low,
+    volume: latest.volume,
+    change,
+    changePercent,
+    regularMarketPrice: latest.close,
+    regularMarketChange: change,
+    regularMarketChangePercent: changePercent,
+    regularMarketVolume: latest.volume,
+    updatedAt: latest.date,
+    source: "tradingview-bars",
+  };
+}
+
+
+
+function normalizeTradingViewSymbol(symbol: string) {
+  const value = String(symbol ?? "").trim();
+
+  return value
+    .replace(/^EURONEXT\s+(BRUSSELS|AMSTERDAM|PARIS|LISBON|DUBLIN|OSLO):/i, "EURONEXT:")
+    .replace(/\.BR$/i, "")
+    .replace(/\.AS$/i, "")
+    .replace(/\.PA$/i, "")
+    .replace(/\.LS$/i, "")
+    .replace(/\.IR$/i, "")
+    .replace(/\.OL$/i, "");
+}
+
+
+
+function shouldSkipLocalQuoteSymbol(symbol: string) {
+  const value = String(symbol ?? "").trim().toUpperCase();
+
+  return (
+    !value ||
+    /\d{3,}$/.test(value) ||
+    /^[A-Z]+\d{3,}$/.test(value) ||
+    value.includes("TEST") ||
+    value.includes("DUMMY")
+  );
+}
+
+
+
+const UNAVAILABLE_QUOTE_SYMBOLS = new Map<string, number>();
+const UNAVAILABLE_QUOTE_TTL_MS = 30 * 60 * 1000;
+
+function isUnavailableQuoteSymbol(key: string) {
+  const until = UNAVAILABLE_QUOTE_SYMBOLS.get(key);
+  if (!until) return false;
+
+  if (Date.now() > until) {
+    UNAVAILABLE_QUOTE_SYMBOLS.delete(key);
+    return false;
+  }
+
+  return true;
+}
+
+function markUnavailableQuoteSymbol(key: string) {
+  UNAVAILABLE_QUOTE_SYMBOLS.set(key, Date.now() + UNAVAILABLE_QUOTE_TTL_MS);
+}
+
+
+
 export interface StockListItem {
   symbol: string;
   name: string;
@@ -211,7 +886,7 @@ const TRADINGVIEW_BACKOFF_MAX_MS = Number(
   process.env.TRADINGVIEW_BACKOFF_MAX_MS ?? 30_000,
 );
 const TRADINGVIEW_TIMEOUT_MS = Number(
-  process.env.TRADINGVIEW_TIMEOUT_MS ?? 10_000,
+  process.env.TRADINGVIEW_TIMEOUT_MS ?? 30_000,
 );
 const QUOTE_HISTORY_BARS = Number(process.env.TRADINGVIEW_QUOTE_BARS ?? 320);
 const MARKET_VOLATILITY_LOOKBACK_YEARS = Number(
@@ -234,7 +909,7 @@ const BINANCE_TICKER_CACHE_TTL_MS = Number(
   process.env.BINANCE_TICKER_CACHE_TTL_MS ?? 5_000,
 );
 const BINANCE_QUOTE_CACHE_TTL_MS = Number(
-  process.env.BINANCE_QUOTE_CACHE_TTL_MS ?? 10_000,
+  process.env.BINANCE_QUOTE_CACHE_TTL_MS ?? 30_000,
 );
 const NODE_ECU_API_BASE_URL = (
   process.env.NODE_ECU_API_BASE_URL ??
@@ -300,6 +975,14 @@ const tradingViewRequestTimestamps: number[] = [];
 let tradingViewQueue: Promise<void> = Promise.resolve();
 let tradingViewBackoffUntil = 0;
 let consecutiveTradingViewFailures = 0;
+
+
+function normalizeBinanceApiSymbol(symbol: string) {
+  return symbol
+    .replace(/^BINANCE:/, "")
+    .replace(/\.P$/, "")
+    .replace(/USD$/, "USDT");
+}
 
 function hasTimeRemaining(
   options?: { deadlineAt?: number; minRemainingMs?: number },
@@ -682,9 +1365,9 @@ export async function fetchQuotes(
       if (quote) {
         results.push(quote);
       } else if (lastError) {
-        logger.warn({ symbol, err: lastError }, "Failed to fetch quote");
+        logger.debug({ symbol, err: lastError }, "Failed to fetch quote");
       } else {
-        logger.warn({ exchange: normalized, symbol }, "No live quote rows returned");
+        logger.debug({ exchange: normalized, symbol }, "No live quote rows returned");
       }
     },
     { shouldContinue: () => hasTimeRemaining(options, 4_000) },
@@ -728,9 +1411,9 @@ export async function fetchMarketQuotes(
       if (quote) {
         results.push(quote);
       } else if (lastError) {
-        logger.warn({ symbol, err: lastError }, "Failed to fetch quote");
+        logger.debug({ symbol, err: lastError }, "Failed to fetch quote");
       } else {
-        logger.warn({ market: normalized, symbol }, "No live quote rows returned");
+        logger.debug({ market: normalized, symbol }, "No live quote rows returned");
       }
     },
     { shouldContinue: () => hasTimeRemaining(options, 4_000) },
@@ -855,7 +1538,9 @@ async function fetchQuote(
   }
 
   if (isBinanceScope(exchange, market) && !process.env.VERCEL) {
-    const binanceQuote = await fetchBinanceQuote(symbol);
+    const binanceQuote = shouldUseBinanceFallbackProvider(typeof market !== "undefined" ? market : undefined, typeof symbol !== "undefined" ? symbol : undefined)
+      ? await fetchBinanceQuote(symbol)
+      : null;
     if (binanceQuote) {
       quoteCache.set(cacheKey, {
         expiresAt: Date.now() + BINANCE_QUOTE_CACHE_TTL_MS,
@@ -871,7 +1556,7 @@ async function fetchQuote(
     minRemainingMs: options?.minRemainingMs,
   });
   if (!rows.length) {
-    logger.warn(
+    logger.debug(
       { market, symbol, candidates: buildTradingViewCandidates(symbol, market) },
       "TradingView returned no rows for quote",
     );
@@ -1148,12 +1833,12 @@ async function fetchBinanceQuote(symbol: string): Promise<StockQuote | null> {
       ? cache.futures.get(normalized.apiSymbol)
       : cache.spot.get(normalized.apiSymbol);
 
-  if (!ticker) {
-    ticker = (await fetchBinanceTickerRow(normalized)) ?? undefined;
+  if (!ticker && shouldUseBinanceFallbackProvider(typeof market !== "undefined" ? market : undefined, typeof symbol !== "undefined" ? symbol : undefined)) {
+    ticker = await fetchBinanceTickerRow(normalized);
   }
 
   if (!ticker) {
-    logger.warn(
+    logger.debug(
       {
         symbol,
         apiSymbol: normalized.apiSymbol,
@@ -1166,6 +1851,15 @@ async function fetchBinanceQuote(symbol: string): Promise<StockQuote | null> {
 
   const price = parseFiniteNumber(ticker.lastPrice);
   if (!Number.isFinite(price) || price <= 0) {
+    const parsedBarQuote = parseTradingViewCsvBarQuote(symbol, text);
+
+    if (parsedBarQuote) {
+
+      return parsedBarQuote;
+
+    }
+
+
     logger.warn(
       {
         symbol,
@@ -1234,7 +1928,7 @@ async function fetchBinanceTickerRow(input: {
   const path =
     input.kind === "futures" ? "/fapi/v1/ticker/24hr" : "/api/v3/ticker/24hr";
   const url = `${baseUrl}${path}?symbol=${encodeURIComponent(input.apiSymbol)}`;
-  const rows = await fetchBinanceTickerRows(url, input.kind);
+  const rows = (shouldUseBinanceFallbackProvider(typeof market !== "undefined" ? market : undefined, typeof symbol !== "undefined" ? symbol : undefined) ? await fetchBinanceTickerRows(url, input.kind) : null);
   return rows[0] ?? null;
 }
 
@@ -1283,13 +1977,17 @@ async function fetchBinanceTickerRows(
     });
     if (!response.ok) {
       logger.warn(
-        {
-          marketType,
-          status: response.status,
-          statusText: response.statusText,
-        },
-        "Binance ticker snapshot request failed",
-      );
+      {
+        marketType,
+        market: typeof market !== "undefined" ? market : undefined,
+        symbol: typeof symbol !== "undefined" ? symbol : undefined,
+        apiSymbol: typeof apiSymbol !== "undefined" ? apiSymbol : undefined,
+        url: typeof url !== "undefined" ? url : undefined,
+        status: response.status,
+        statusText: response.statusText,
+      },
+      "Binance ticker snapshot request failed",
+    );
       return [];
     }
 
@@ -1549,6 +2247,161 @@ async function fetchTradingViewRowsForSymbol(
   return request;
 }
 
+
+function scannerBaseTickerResolved(symbol: string) {
+  return String(symbol ?? "")
+    .trim()
+    .split(":")
+    .at(-1)!
+    .replace(/\.(BR|AS|PA|LS|IR|OL|L|MI|DE|F|SW|MC|SA)$/i, "");
+}
+
+function scannerMarketResolved(options: any) {
+  return String(
+    options?.market ??
+    options?.marketName ??
+    options?.exchange ??
+    options?.venue ??
+    "",
+  ).toUpperCase();
+}
+
+function scannerCandidatesResolved(rawSymbol: string, options?: any) {
+  const raw = String(rawSymbol ?? "").trim();
+  const base = scannerBaseTickerResolved(raw);
+  const market = scannerMarketResolved(options);
+  const candidates = new Set<string>();
+
+  if (raw.includes(":")) candidates.add(raw);
+
+  if (market === "ADX" || market.includes("ABU DHABI") || /^ADX:/i.test(raw)) {
+    candidates.add(`ADX:${base}`);
+    return Array.from(candidates);
+  }
+
+  if (market.includes("OSLO") || /^EURONEXT OSLO:/i.test(raw) || /\.OL$/i.test(raw)) {
+    candidates.add(`OSL:${base}`);
+    candidates.add(`OSE:${base}`);
+    candidates.add(`EURONEXT:${base}`);
+    return Array.from(candidates);
+  }
+
+  if (
+    market.includes("BRUSSELS") ||
+    market.includes("AMSTERDAM") ||
+    market.includes("PARIS") ||
+    market.includes("LISBON") ||
+    market.includes("DUBLIN") ||
+    /^EURONEXT/i.test(raw) ||
+    /\.(BR|AS|PA|LS|IR)$/i.test(raw)
+  ) {
+    candidates.add(`EURONEXT:${base}`);
+    return Array.from(candidates);
+  }
+
+  if (market.includes("LSE") || market.includes("LONDON") || /\.L$/i.test(raw)) {
+    candidates.add(`LSE:${base}`);
+    return Array.from(candidates);
+  }
+
+  candidates.add(raw);
+  candidates.add(base);
+  candidates.add(`ADX:${base}`);
+  candidates.add(`EURONEXT:${base}`);
+  candidates.add(`OSL:${base}`);
+
+  return Array.from(candidates).filter(Boolean);
+}
+
+async function fetchTradingViewScannerRowsResolved(
+  symbol: string,
+  options: TradingViewRowsOptions,
+): Promise<TradingViewRow[]> {
+  if (!hasTimeRemaining(options, 3_500)) return [];
+
+  const candidates = scannerCandidatesResolved(symbol, options);
+  if (!candidates.length) return [];
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), TRADINGVIEW_TIMEOUT_MS);
+
+  try {
+    const response = await fetch("https://scanner.tradingview.com/global/scan", {
+      method: "POST",
+      headers: {
+        Accept: "application/json, text/plain, */*",
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0",
+      },
+      body: JSON.stringify({
+        symbols: {
+          tickers: candidates,
+          query: { types: [] },
+        },
+        columns: [
+          "close",
+          "open",
+          "high",
+          "low",
+          "volume",
+          "change",
+          "change_abs",
+        ],
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) return [];
+
+    const payload = await response.json();
+    const row = Array.isArray(payload?.data) ? payload.data[0] : null;
+    const data = Array.isArray(row?.d) ? row.d : [];
+
+    const close = Number(data[0]);
+    if (!Number.isFinite(close) || close <= 0) return [];
+
+    const open = Number(data[1]);
+    const high = Number(data[2]);
+    const low = Number(data[3]);
+    const volume = Number(data[4]);
+    const changePercent = Number(data[5]);
+    const changeAbs = Number(data[6]);
+
+    logger.info(
+      { originalSymbol: symbol, providerSymbol: row?.s, candidates },
+      "Resolved quote through TradingView scanner",
+    );
+
+    return [
+      {
+        date: new Date().toISOString().slice(0, 10),
+        open: Number.isFinite(open) ? open : close,
+        high: Number.isFinite(high) ? high : close,
+        low: Number.isFinite(low) ? low : close,
+        price: close,
+        regularMarketPrice: close,
+        close,
+        adjustedClose: close,
+        volume: Number.isFinite(volume) ? volume : 0,
+        regularMarketVolume: Number.isFinite(volume) ? volume : 0,
+        change: Number.isFinite(changeAbs) ? changeAbs : 0,
+        changePercent: Number.isFinite(changePercent) ? changePercent : 0,
+        regularMarketChange: Number.isFinite(changeAbs) ? changeAbs : 0,
+        regularMarketChangePercent: Number.isFinite(changePercent) ? changePercent : 0,
+      } as TradingViewRow,
+    ];
+  } catch (error) {
+    logger.debug(
+      { symbol, candidates, err: error },
+      "TradingView scanner quote request failed",
+    );
+    return [];
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+
 async function fetchTradingViewRowsForSymbolUncached(
   tvSymbol: string,
   options: TradingViewRowsOptions,
@@ -1556,7 +2409,14 @@ async function fetchTradingViewRowsForSymbolUncached(
 ): Promise<TradingViewRow[]> {
   if (!hasTimeRemaining(options, 4_000)) return [];
 
-  const url = buildTradingViewUrl(tvSymbol, options);
+  const csvSymbol = normalizeYahooCsvSymbol(tvSymbol);
+  const scannerRows = await fetchTradingViewScannerRowsResolved(tvSymbol, options);
+  if (scannerRows.length) {
+    cacheTradingViewRows(cacheKey, scannerRows, QUOTE_CACHE_TTL_MS);
+    return scannerRows;
+  }
+
+  const url = buildTradingViewUrl(csvSymbol, options);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TRADINGVIEW_TIMEOUT_MS);
 
@@ -1578,7 +2438,7 @@ async function fetchTradingViewRowsForSymbolUncached(
           : Math.min(TRADINGVIEW_MISS_CACHE_TTL_MS, retryAfterMs ?? 60_000),
       );
       logger.warn(
-        { symbol: tvSymbol, status: response.status, statusText: response.statusText },
+        { symbol: csvSymbol, originalSymbol: tvSymbol, status: response.status, statusText: response.statusText },
         "TradingView quote request failed",
       );
       return [];
@@ -1588,7 +2448,7 @@ async function fetchTradingViewRowsForSymbolUncached(
     const rows = parseCsvRows(csv);
     if (!rows.length) {
       logger.warn(
-        { symbol: tvSymbol, bytes: csv.length, preview: csv.slice(0, 120) },
+        { symbol: csvSymbol, originalSymbol: tvSymbol, bytes: csv.length, preview: csv.slice(0, 120) },
         "TradingView quote response contained no parseable rows",
       );
     }
@@ -1606,7 +2466,7 @@ async function fetchTradingViewRowsForSymbolUncached(
       [],
       Math.min(TRADINGVIEW_MISS_CACHE_TTL_MS, 30_000),
     );
-    logger.warn({ symbol: tvSymbol, err: error }, "TradingView quote request errored");
+    logger.warn({ symbol: normalizeTradingViewSymbol(tvSymbol), err: error }, "TradingView quote request errored");
     return [];
   } finally {
     clearTimeout(timeout);

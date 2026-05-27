@@ -11,6 +11,141 @@ import {
 import { appendLiveMarketContextOccurrences } from "./market-context-occurrences";
 import { logger } from "./logger";
 
+function safeDatabasePrice(value: any) {
+  const candidates = [
+    value?.price,
+    value?.regularMarketPrice,
+    value?.close,
+    value?.last,
+    value?.lastPrice,
+    value?.markPrice,
+    value?.previousClose,
+    value?.quote?.price,
+    value?.quote?.regularMarketPrice,
+    value?.quote?.close,
+  ];
+
+  for (const candidate of candidates) {
+    const parsed = Number(candidate);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+
+  // Database column is NOT NULL. Use 0 only for unavailable/unpriced symbols.
+  return 0;
+}
+
+
+
+function coerceSignalSnapshotPrice(snapshot: any) {
+  const candidates = [
+    snapshot?.price,
+    snapshot?.regularMarketPrice,
+    snapshot?.close,
+    snapshot?.last,
+    snapshot?.lastPrice,
+    snapshot?.markPrice,
+    snapshot?.previousClose,
+    snapshot?.quote?.price,
+    snapshot?.quote?.regularMarketPrice,
+    snapshot?.quote?.close,
+  ];
+
+  for (const candidate of candidates) {
+    const value = Number(candidate);
+    if (Number.isFinite(value) && value > 0) return value;
+  }
+
+  return null;
+}
+
+
+
+function normalizedSnapshotPrice(value: any) {
+  const candidates = [
+    value?.price,
+    value?.regularMarketPrice,
+    value?.close,
+    value?.last,
+    value?.lastPrice,
+    value?.markPrice,
+    value?.previousClose,
+  ];
+
+  for (const candidate of candidates) {
+    const n = Number(candidate);
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+
+  return null;
+}
+
+function snapshotHasValidPrice(value: any) {
+  return normalizedSnapshotPrice(value) !== null;
+}
+
+
+
+function shouldUseBinanceFallbackProvider(market: unknown, symbol: unknown) {
+  const marketValue = String(market ?? "").trim().toUpperCase();
+  const symbolValue = String(symbol ?? "").trim().toUpperCase();
+
+  if (process.env.ENABLE_BINANCE_FALLBACK !== "true") {
+    return false;
+  }
+
+  return (
+    marketValue === "BINANCE" ||
+    marketValue.includes("BINANCE") ||
+    symbolValue.startsWith("BINANCE:")
+  );
+}
+
+
+
+function normalizeBinanceSnapshotSymbol(symbol: string) {
+  const raw = String(symbol ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/^BINANCE:/, "")
+    .replace(/\.P$/, "")
+    .replace(/[^A-Z0-9]/g, "");
+
+  if (!raw) return raw;
+
+  // Binance liquid spot and USD-margined futures generally use USDT.
+  if (raw.endsWith("USDT") || raw.endsWith("USDC") || raw.endsWith("BUSD") || raw.endsWith("FDUSD")) {
+    return raw;
+  }
+
+  // Convert common app/provider USD notation to Binance USDT notation.
+  if (raw.endsWith("USD")) {
+    return `${raw.slice(0, -3)}USDT`;
+  }
+
+  // If the symbol is just a base asset, default to USDT.
+  if (!/(USDT|USDC|BUSD|FDUSD|BTC|ETH)$/.test(raw)) {
+    return `${raw}USDT`;
+  }
+
+  return raw;
+}
+
+
+
+function shouldSkipLocalQuoteSymbol(symbol: string) {
+  const value = String(symbol ?? "").trim().toUpperCase();
+
+  return (
+    !value ||
+    /\d{3,}$/.test(value) ||
+    /^[A-Z]+\d{3,}$/.test(value) ||
+    value.includes("TEST") ||
+    value.includes("DUMMY")
+  );
+}
+
+
+
 export type SignalScopeType = "market" | "exchange";
 
 export interface SignalScope {
@@ -120,6 +255,14 @@ const runtimeState: Omit<
 
 let schemaReady: Promise<void> | null = null;
 let engineStarted = false;
+
+
+function normalizeBinanceApiSymbol(symbol: string) {
+  return symbol
+    .replace(/^BINANCE:/, "")
+    .replace(/\.P$/, "")
+    .replace(/USD$/, "USDT");
+}
 
 function parseBooleanEnv(
   value: string | undefined,
@@ -908,7 +1051,31 @@ export async function storeSignalSnapshots(
     );
   }
 
-  await pool.query(
+  quotes = quotes
+    .map((snapshot: any) => ({
+      ...snapshot,
+      price: coerceSignalSnapshotPrice(snapshot),
+    }))
+    .filter((snapshot: any) => {
+      if (snapshot.price !== null) return true;
+
+      logger.debug(
+        {
+          scopeType: snapshot.scopeType,
+          scopeCode: snapshot.scopeCode,
+          symbol: snapshot.symbol,
+        },
+        "Skipping signal snapshot with null price before database insert",
+      );
+
+      return false;
+    });
+
+  if (!quotes.length) {
+    return;
+  }
+
+await pool.query(
     `
       INSERT INTO ${SNAPSHOT_TABLE} (
         scope_type,
@@ -1043,7 +1210,7 @@ export async function getSignalEvents(
       : [normalizedLimit],
   );
 
-  return result.rows.map(mapSignalEventRow);
+  return result.scope.map(mapSignalEventRow);
 }
 
 export async function getBackgroundSignalEngineStatus(): Promise<BackgroundSignalEngineStatus> {

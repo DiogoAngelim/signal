@@ -7,6 +7,8 @@
     "dev": "vite --config vite.config.ts --host 0.0.0.0",
     "build": "vite build --config vite.config.ts",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
+    "test": "vitest run src/lib/metaAllocation.test.ts",
+    "test:coverage": "vitest run src/lib/metaAllocation.test.ts --coverage --coverage.provider=v8 --coverage.include='src/lib/metaAllocation.ts' --coverage.thresholds.lines=100 --coverage.thresholds.functions=100 --coverage.thresholds.statements=100 --coverage.thresholds.branches=100",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "preview": "vite --config vite.config.ts preview --host 0.0.0.0"
   },

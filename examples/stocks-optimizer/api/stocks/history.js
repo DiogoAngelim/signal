@@ -91,11 +91,15 @@ module.exports = async function handler(req, res) {
     });
 
     if (!response.ok) {
-      res.status(502).json({
-        error: "HISTORY_LOAD_FAILED",
-        message: `TradingView history request failed: ${response.status}`,
+      res.status(200).json({
         symbol,
-        tradingViewSymbol
+        market,
+        tradingViewSymbol,
+        data: [],
+        items: [],
+        total: 0,
+        source: `tradingview-unavailable:${response.status}`,
+        unavailable: true
       });
       return;
     }

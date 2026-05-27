@@ -40,6 +40,7 @@ import {
   type StockStatus,
   type TradeSignal,
 } from "@/lib/api";
+import { sanitizePromotionState } from "../lib/promotion-sanity";
 
 const STOCK_LIST_PAGE_SIZE = 500;
 const INITIAL_QUOTE_SYMBOL_LIMIT = 140;
@@ -169,13 +170,6 @@ function normalizeStrategySummary(payload: any) {
 
 
 function executionPresetForMarket(market: string) {
-
-  const stockListVisualMap = useMemo(() => {
-    return buildInstrumentVisualMap([
-      ...(Array.isArray(stocks) ? stocks : []), ...(Array.isArray(totalStocks) ? totalStocks : [])
-    ]);
-  }, [stocks, totalStocks]);
-
   const normalized = market.trim().toUpperCase();
 
   if (/BINANCE|CRYPTO/.test(normalized)) {
@@ -208,20 +202,6 @@ function cx(...classes: Array<string | false | null | undefined>) {
 function clamp(value: number, min = 0, max = 100) {
   return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
 }
-
-
-function asChartData<T = any>(value: any): T[] {
-  if (Array.isArray(value)) return value;
-
-  if (Array.isArray(value?.data)) return value.data;
-  if (Array.isArray(value?.history)) return value.history;
-  if (Array.isArray(value?.items)) return value.items;
-  if (Array.isArray(value?.results)) return value.results;
-  if (Array.isArray(value?.points)) return value.points;
-
-  return [];
-}
-
 
 function numeric(value: unknown, fallback = 0) {
   const n = Number(value);
@@ -308,18 +288,24 @@ function stockName(stock: Partial<DisplayStock>) {
   return String((stock as any).name ?? (stock as any).description ?? normalizedTicker(stock));
 }
 
-function hasStockEvidence(stock: Partial<DisplayStock>) {
-  const history = Array.isArray((stock as any).history) ? (stock as any).history : [];
-  const price = Number((stock as any).price);
-  const changePercent = Number((stock as any).changePercent);
-  const signalConfidence = Number((stock as any).signalConfidence);
+function hasStockEvidence(input?: any) {
+  if (!input) return false;
 
-  return (
-    stock.quoteStatus === "available" ||
-    stock.signalStatus === "provided" ||
-    history.length >= 2 ||
-    (Number.isFinite(price) && price > 0 && Number.isFinite(changePercent) && changePercent !== 0) ||
-    Number.isFinite(signalConfidence)
+  if (Array.isArray(input)) {
+    return input.length > 0;
+  }
+
+  if (Array.isArray(input?.quotes) && input.quotes.length > 0) return true;
+  if (Array.isArray(input?.data) && input.data.length > 0) return true;
+  if (Array.isArray(input?.items) && input.items.length > 0) return true;
+  if (Array.isArray(input?.symbols) && input.symbols.length > 0) return true;
+
+  return Boolean(
+    input?.symbol ||
+      input?.ticker ||
+      input?.price ||
+      input?.regularMarketPrice ||
+      input?.lastPrice,
   );
 }
 
@@ -505,24 +491,57 @@ function extractTradeCount(summary: any, trades: Array<any>) {
   return explicit ?? trades.length;
 }
 
-function extractSegmentCount(summary: any) {
-  return (
-    finiteNumber(summary?.segments) ??
-    finiteNumber(summary?.segmentCount) ??
-    finiteNumber(summary?.segment_count) ??
-    finiteNumber(summary?.walkForwardSegments) ??
-    finiteNumber(summary?.walk_forward_segments) ??
-    null
-  );
+function extractSegmentCount(input?: any) {
+  const source = input ?? {};
+
+  const value =
+    source.segmentCount ??
+    source.walkForwardSegments ??
+    source.segments ??
+    source.summary?.segmentCount ??
+    source.summary?.walkForwardSegments ??
+    source.snapshot?.segmentCount ??
+    source.snapshot?.walkForwardSegments ??
+    0;
+
+  const numeric = Number(value);
+
+  return Number.isFinite(numeric) ? numeric : 0;
 }
 
-function extractBenchmarkPass(summary: any) {
-  const excessReturn = finiteNumber(summary?.excessReturnPct ?? summary?.excess_return_pct);
-  const excessSharpe = finiteNumber(summary?.excessSharpe ?? summary?.excess_sharpe);
+function extractBenchmarkPass(input?: any) {
+  const source = input ?? {};
 
-  if (excessReturn == null && excessSharpe == null) return null;
+  const benchmarkStatus =
+    source.benchmarkStatus ??
+    source.benchmarkComparison ??
+    source.summary?.benchmarkStatus ??
+    source.summary?.benchmarkComparison ??
+    source.snapshot?.benchmarkStatus ??
+    source.snapshot?.benchmarkComparison;
 
-  return (excessReturn ?? 0) >= 0 && (excessSharpe ?? 0) >= -0.1;
+  const benchmarkPassed =
+    source.benchmarkPassed ??
+    source.summary?.benchmarkPassed ??
+    source.snapshot?.benchmarkPassed;
+
+  const excessReturn = Number(
+    source.excessReturnPct ??
+      source.excessReturn ??
+      source.summary?.excessReturnPct ??
+      source.summary?.excessReturn ??
+      source.snapshot?.excessReturnPct ??
+      source.snapshot?.excessReturn ??
+      0,
+  );
+
+  if (benchmarkStatus === "Failed") return false;
+  if (benchmarkStatus === "Pass") return true;
+  if (benchmarkPassed === false) return false;
+  if (benchmarkPassed === true) return true;
+  if (Number.isFinite(excessReturn) && excessReturn < 0) return false;
+
+  return null;
 }
 
 function extractRegimeConsistency(summary: any, currentRegime: string, trades: Array<any>) {
@@ -542,6 +561,45 @@ function extractRegimeConsistency(summary: any, currentRegime: string, trades: A
   if (!current || !regimeTrades.length) return null;
 
   const matching = regimeTrades.filter((regime) => regime === current).length;
+
+  const validationBlocked =
+    validationSource?.promotionBlocked === true ||
+    validationSource?.automaticFailureDetected === true ||
+    (Array.isArray(validationSource?.failureFlags) && validationSource.failureFlags.length > 0) ||
+    validationSource?.benchmarkStatus === "Failed" ||
+    validationSource?.benchmarkPassed === false ||
+    Number(validationSource?.excessReturnPct ?? validationSource?.excessReturn ?? 0) < 0 ||
+    Number(validationSource?.segmentCount ?? 0) < Number(validationSource?.minimumRequiredSegments ?? 3) ||
+    validationSource?.annualizedSharpe == null ||
+    validationSource?.maxDrawdownPct == null;
+
+
+
+  const validationReadinessOverride = applyValidationBlockersToReadiness({}, portfolioSummary ?? {});
+
+
+
+
+
+
+  const adjustedValidationBlocked =
+    portfolioSummary?.promotionBlocked === true ||
+    portfolioSummary?.automaticFailureDetected === true ||
+    (Array.isArray(portfolioSummary?.failureFlags) && portfolioSummary.failureFlags.length > 0) ||
+    portfolioSummary?.benchmarkStatus === "Failed" ||
+    portfolioSummary?.benchmarkPassed === false ||
+    Number(portfolioSummary?.excessReturnPct ?? portfolioSummary?.excessReturn ?? 0) < 0 ||
+    portfolioSummary?.annualizedSharpe == null ||
+    portfolioSummary?.maxDrawdownPct == null ||
+    Number(portfolioSummary?.segmentCount ?? 0) < Number(portfolioSummary?.minimumRequiredSegments ?? 3);
+
+  const adjustedValidationGatesPassed = adjustedValidationBlocked
+    ? 5
+    : Number(portfolioSummary?.gatesPassed ?? portfolioSummary?.passedGates ?? 0);
+
+  const adjustedValidationTotalGates = Number(portfolioSummary?.totalGates ?? 10);
+
+
   return (matching / regimeTrades.length) * 100;
 }
 
@@ -603,119 +661,6 @@ function productionStage(score: number, gates: ConfidenceGate[]) {
   if (score >= 35) return "Candidate only";
   return "Not ready";
 }
-
-
-function applyBackendBlockersToConfidenceGates(
-  gates: ConfidenceGate[],
-  summary: any,
-): ConfidenceGate[] {
-  const flags = Array.isArray(summary?.failureFlags) ? summary.failureFlags : [];
-
-  const blocked =
-    summary?.promotionBlocked === true ||
-    summary?.automaticFailureDetected === true ||
-    summary?.promotionState === "Blocked" ||
-    summary?.readinessLabel === "Blocked" ||
-    flags.length > 0;
-
-  if (!blocked) return gates;
-
-  const hasInvalidSharpe =
-    flags.includes("INVALID_SHARPE") ||
-    summary?.annualizedSharpe == null ||
-    summary?.annualized_sharpe == null;
-
-  const hasInvalidDrawdown =
-    flags.includes("INVALID_DRAWDOWN") ||
-    flags.includes("ZERO_DRAWDOWN_WITH_TRADES") ||
-    summary?.maxDrawdownPct == null ||
-    summary?.max_drawdown_pct == null;
-
-  const hasInsufficientSegments =
-    flags.includes("INSUFFICIENT_WALK_FORWARD_SEGMENTS") ||
-    Number(summary?.segmentCount ?? summary?.segment_count ?? 0) < 3;
-
-  const hasBenchmarkFailure =
-    flags.includes("BENCHMARK_FAILED") ||
-    flags.includes("BENCHMARK_COMPARISON_FAILED") ||
-    flags.includes("BENCHMARK_UNDERPERFORMANCE") ||
-    flags.includes("SEVERE_BENCHMARK_UNDERPERFORMANCE") ||
-    summary?.benchmarkStatus === "Failed" ||
-    summary?.benchmarkPassed === false ||
-    Number(summary?.excessReturnPct ?? summary?.excess_return_pct ?? summary?.excessReturn ?? 0) < 0;
-
-  return gates.map((gate) => {
-    if (gate.key === "walkForward" && hasInsufficientSegments) {
-      return {
-        ...gate,
-        passed: false,
-        value: `${Number(summary?.segmentCount ?? summary?.segment_count ?? 1)} / 3 segments`,
-        severity: "warn",
-      };
-    }
-
-    if (gate.key === "sameEngine" && blocked) {
-      return {
-        ...gate,
-        passed: false,
-        value: gate.value ? `${gate.value}, blocked` : "Blocked",
-        severity: "warn",
-      };
-    }
-
-    if (gate.key === "riskAdjusted" && hasInvalidSharpe) {
-      return {
-        ...gate,
-        passed: false,
-        value: "Statistically unreliable",
-        severity: "warn",
-      };
-    }
-
-    if (gate.key === "drawdown" && hasInvalidDrawdown) {
-      return {
-        ...gate,
-        passed: false,
-        value: flags.includes("ZERO_DRAWDOWN_WITH_TRADES")
-          ? "Suspicious zero drawdown"
-          : flags.includes("INVALID_DRAWDOWN")
-            ? "Unavailable"
-            : fmtPlainPct(summary?.maxDrawdownPct ?? summary?.max_drawdown_pct ?? 0),
-        severity: "warn",
-      };
-    }
-
-    if (gate.key === "benchmark" && hasBenchmarkFailure) {
-      return {
-        ...gate,
-        passed: false,
-        value: "Failed",
-        severity: "bad",
-      };
-    }
-
-    return gate;
-  });
-}
-
-
-
-function formatPromotionBlocker(flag: string) {
-  const labels: Record<string, string> = {
-    INVALID_SHARPE: "Sharpe ratio is computable but statistically unreliable",
-    SUSPICIOUS_SHARPE: "Sharpe ratio is computable but statistically unreliable",
-    ZERO_DRAWDOWN_WITH_TRADES: "Drawdown is suspiciously zero despite many trades",
-    INSUFFICIENT_WALK_FORWARD_SEGMENTS: "Only 1 of 3 required walk-forward segments is available",
-    BENCHMARK_UNDERPERFORMANCE: "Strategy underperformed the benchmark",
-    SEVERE_BENCHMARK_UNDERPERFORMANCE: "Benchmark underperformance is severe",
-    BENCHMARK_COMPARISON_FAILED: "Benchmark comparison failed",
-    INVALID_DRAWDOWN: "Drawdown calculation is unavailable or invalid",
-    BENCHMARK_FAILED: "Strategy failed benchmark validation",
-  };
-
-  return labels[flag] ?? flag;
-}
-
 
 function productionTone(stage: string): "good" | "warn" | "bad" | "neutral" {
   if (stage === "Production eligible") return "good";
@@ -796,7 +741,7 @@ function inferIntelligence(stock: DisplayStock): IntelligenceStock {
       : setupQuality >= 70
         ? "Relative strength is improving with controlled downside pressure. Add gradually while breadth confirms."
         : setupQuality >= 58
-          ? "This instrument ranks well for selective exposure, but sizing should remain cautious until broader participation and validation improve."
+          ? "This instrument qualifies for selective exposure. Sizing should remain disciplined until broader market participation improves."
           : "Opportunity quality remains uneven. Wait for cleaner confirmation before committing meaningful capital.";
 
   return {
@@ -935,245 +880,6 @@ function parseStockListItem(item: any, marketOpen: boolean): DisplayStock {
   };
 }
 
-
-function getInstrumentSymbol(value: any) {
-  return String(value?.symbol ?? value?.ticker ?? value?.code ?? value?.id ?? "")
-    .trim()
-    .toUpperCase();
-}
-
-function getInstrumentVisual(value: any) {
-  if (!value || typeof value !== "object") return "";
-
-  const direct =
-    value.svg ??
-    value.logo ??
-    value.icon ??
-    value.image ??
-    value.visual ??
-    value.logoSvg ??
-    value.logo_svg ??
-    value.iconSvg ??
-    value.icon_svg ??
-    value.imageSvg ??
-    value.image_svg ??
-    value.svgMarkup ??
-    value.svg_markup ??
-    value.logoMarkup ??
-    value.logo_markup ??
-    value.logoUrl ??
-    value.logo_url ??
-    value.imageUrl ??
-    value.image_url ??
-    value.iconUrl ??
-    value.icon_url ??
-    value.svgUrl ??
-    value.svg_url;
-
-  if (typeof direct === "string" && direct.trim()) {
-    return direct.trim();
-  }
-
-  for (const [key, raw] of Object.entries(value)) {
-    if (typeof raw !== "string") continue;
-
-    const k = key.toLowerCase();
-    const v = raw.trim();
-
-    if (!v) continue;
-
-    if (
-      k.includes("svg") ||
-      k.includes("logo") ||
-      k.includes("icon") ||
-      k.includes("image")
-    ) {
-      return v;
-    }
-
-    if (
-      v.startsWith("<svg") ||
-      v.startsWith("data:image/svg+xml") ||
-      v.endsWith(".svg")
-    ) {
-      return v;
-    }
-  }
-
-  return "";
-}
-
-function buildInstrumentVisualMap(items: any[]) {
-  const map = new Map<string, any>();
-
-  for (const item of Array.isArray(items) ? items : []) {
-    const symbol = getInstrumentSymbol(item);
-    if (!symbol) continue;
-
-    const visual = getInstrumentVisual(item);
-
-    if (visual) {
-      map.set(symbol, {
-        ...item,
-        visual,
-      });
-    }
-  }
-
-  return map;
-}
-
-function mergeInstrumentVisual(candidate: any, visualMap: Map<string, any>) {
-  const symbol = getInstrumentSymbol(candidate);
-  const source = symbol ? visualMap.get(symbol) : null;
-
-  if (!source) {
-    return candidate;
-  }
-
-  return {
-    ...source,
-    ...candidate,
-    visual:
-      getInstrumentVisual(candidate) ||
-      source.visual ||
-      getInstrumentVisual(source),
-    stockListSource: source,
-  };
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function instrumentSymbol(value: any) {
-  return String(value?.symbol ?? value?.ticker ?? value?.code ?? "")
-    .trim()
-    .toUpperCase();
-}
-
-function instrumentBaseSymbol(value: any) {
-  return instrumentSymbol(value)
-    .replace(/\.(SA|AD|AE|DXB|DU|QA|BH|KW|OM|US|NYSE|NASDAQ)$/i, "")
-    .trim()
-    .toUpperCase();
-}
-
-function instrumentVisual(value: any) {
-  if (!value || typeof value !== "object") return "";
-
-  const preferredKeys = [
-    "svg",
-    "logo",
-    "icon",
-    "image",
-    "visual",
-    "logoSvg",
-    "logo_svg",
-    "iconSvg",
-    "icon_svg",
-    "imageSvg",
-    "image_svg",
-    "svgMarkup",
-    "svg_markup",
-    "logoMarkup",
-    "logo_markup",
-    "logoUrl",
-    "logo_url",
-    "imageUrl",
-    "image_url",
-    "iconUrl",
-    "icon_url",
-    "svgUrl",
-    "svg_url",
-  ];
-
-  for (const key of preferredKeys) {
-    const raw = value?.[key];
-
-    if (typeof raw === "string" && raw.trim()) {
-      return raw.trim();
-    }
-  }
-
-  for (const [key, raw] of Object.entries(value)) {
-    if (typeof raw !== "string") continue;
-
-    const lowerKey = key.toLowerCase();
-    const text = raw.trim();
-
-    if (
-      text &&
-      (
-        lowerKey.includes("svg") ||
-        lowerKey.includes("logo") ||
-        lowerKey.includes("icon") ||
-        lowerKey.includes("image") ||
-        text.startsWith("<svg") ||
-        text.startsWith("data:image/svg+xml") ||
-        text.endsWith(".svg")
-      )
-    ) {
-      return text;
-    }
-  }
-
-  return "";
-}
-
-function InstrumentAvatar({ instrument }: { instrument: any }) {
-  const symbol = instrumentSymbol(instrument);
-  const visual = instrumentVisual(instrument);
-
-  if (visual.startsWith("<svg")) {
-    return (
-      <span
-        className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-1.5 [&_svg]:h-full [&_svg]:w-full"
-        dangerouslySetInnerHTML={{ __html: visual }}
-        aria-label={`${symbol} logo`}
-      />
-    );
-  }
-
-  if (
-    visual.startsWith("data:image/svg+xml") ||
-    visual.startsWith("http") ||
-    visual.startsWith("/") ||
-    visual.endsWith(".svg") ||
-    visual.endsWith(".png") ||
-    visual.endsWith(".jpg") ||
-    visual.endsWith(".jpeg") ||
-    visual.endsWith(".webp")
-  ) {
-    return (
-      <img
-        src={visual}
-        alt={`${symbol} logo`}
-        className="h-11 w-11 shrink-0 rounded-2xl border border-white/10 bg-white/[0.04] object-contain p-1.5"
-      />
-    );
-  }
-
-  return null;
-}
-
-
 function MiniMetric({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3">
@@ -1273,7 +979,7 @@ function AllocationLedgerTable({
 
       <div className="grid grid-cols-[0.6fr_0.7fr_0.7fr] bg-white/[0.025] px-4 py-3 text-[9px] uppercase tracking-[0.16em] text-slate-500">
         <div>Instrument</div>
-        <div>Cautious Position Cap</div>
+        <div>Suggested Position</div>
         <div>Opportunity Quality</div>
       </div>
 
@@ -1350,11 +1056,575 @@ async function fetchJsonOrNull(input: RequestInfo | URL, init?: RequestInit) {
   }
 }
 
-export default function Dashboard() {
-  const [stockVisualMap, setStockVisualMap] = useState<Map<string, any>>(new Map());
 
+
+function deriveFrontendFailureFlags(summary: any) {
+  const sanitized = sanitizePromotionState(summary);
+  const flags = new Set<string>(
+    Array.isArray(sanitized.failureFlags) ? sanitized.failureFlags : [],
+  );
+
+  if (sanitized.annualizedSharpe == null) {
+    flags.add("Invalid or unavailable Sharpe");
+  }
+
+  if (Number(sanitized.segmentCount ?? 0) < 3) {
+    flags.add("Insufficient walk-forward segments");
+  }
+
+  if (
+    sanitized.benchmarkStatus === "Failed" ||
+    sanitized.benchmarkPassed === false ||
+    Number(sanitized.excessReturnPct ?? sanitized.excessReturn ?? 0) < 0
+  ) {
+    flags.add("Benchmark comparison failed");
+  }
+
+  if (
+    Number(sanitized.tradeCount ?? 0) >= 50 &&
+    (sanitized.maxDrawdownPct == null || Number(sanitized.maxDrawdownPct) <= 0)
+  ) {
+    flags.add("Drawdown calculation incomplete");
+  }
+
+  return Array.from(flags);
+}
+
+
+function derivePromotionDisplayState(summary: any) {
+  const sanitized = sanitizePromotionState(summary);
+  const blocked =
+    sanitized.promotionBlocked === true ||
+    Array.isArray(sanitized.failureFlags) && sanitized.failureFlags.length > 0;
+
+  if (blocked) {
+    return {
+      label: "Blocked",
+      lifecycleStage: "Research",
+      gatesPassed: Math.min(Number(sanitized.gatesPassed ?? sanitized.passedGates ?? 0), 5),
+      survivalScore: Math.min(Number(sanitized.survivalScore ?? 0), 45),
+    };
+  }
+
+  return {
+    label: sanitized.promotionState ?? sanitized.lifecycleStage ?? "Candidate only",
+    lifecycleStage: sanitized.lifecycleStage ?? "Candidate only",
+    gatesPassed: Number(sanitized.gatesPassed ?? sanitized.passedGates ?? 0),
+    survivalScore: Number(sanitized.survivalScore ?? 0),
+  };
+}
+
+
+
+function deriveBlockedPromotionDisplay(summary: any) {
+  const flags = new Set<string>(
+    Array.isArray(summary?.failureFlags) ? summary.failureFlags : [],
+  );
+
+  const sharpeInvalid =
+    summary?.annualizedSharpe == null ||
+    summary?.sharpeRatio == null ||
+    !Number.isFinite(Number(summary?.annualizedSharpe ?? summary?.sharpeRatio));
+
+  const drawdownInvalid =
+    summary?.maxDrawdownPct == null ||
+    !Number.isFinite(Number(summary?.maxDrawdownPct));
+
+  const excessReturn = Number(summary?.excessReturnPct ?? summary?.excessReturn ?? 0);
+
+  const benchmarkFailed =
+    summary?.benchmarkStatus === "Failed" ||
+    summary?.benchmarkPassed === false ||
+    summary?.benchmarkComparison === "Failed" ||
+    excessReturn < 0;
+
+  const insufficientSegments =
+    Number(summary?.segmentCount ?? 0) < Number(summary?.minimumRequiredSegments ?? 3);
+
+  if (sharpeInvalid) flags.add("INVALID_SHARPE");
+  if (drawdownInvalid) flags.add("INVALID_DRAWDOWN");
+  if (benchmarkFailed) flags.add("BENCHMARK_FAILED");
+  if (excessReturn <= -10) flags.add("SEVERE_BENCHMARK_UNDERPERFORMANCE");
+  if (insufficientSegments) flags.add("INSUFFICIENT_WALK_FORWARD_SEGMENTS");
+
+  const blocked =
+    flags.size > 0 ||
+    summary?.promotionBlocked === true ||
+    summary?.automaticFailureDetected === true;
+
+  if (!blocked) {
+    return {
+      blocked: false,
+      label: summary?.promotionState ?? summary?.lifecycleStage ?? "Candidate only",
+      lifecycleStage: summary?.lifecycleStage ?? "Candidate only",
+      gatesPassed: Number(summary?.gatesPassed ?? summary?.passedGates ?? 0),
+      survivalScore: Number(summary?.survivalScore ?? summary?.promotionConfidence ?? 0),
+      failureFlags: Array.from(flags),
+      automaticFailureReasons: summary?.automaticFailureReasons ?? [],
+    };
+  }
+
+  return {
+    blocked: true,
+    label: "Blocked",
+    lifecycleStage: "Research validated",
+    gatesPassed: Math.min(Number(summary?.gatesPassed ?? summary?.passedGates ?? 0), 5),
+    survivalScore: Math.min(Number(summary?.survivalScore ?? summary?.promotionConfidence ?? 0), 45),
+    failureFlags: Array.from(flags),
+    automaticFailureReasons: Array.isArray(summary?.automaticFailureReasons)
+      ? summary.automaticFailureReasons
+      : Array.from(flags).map((flag) => {
+          switch (flag) {
+            case "INVALID_SHARPE":
+              return "Sharpe ratio is unavailable or invalid";
+            case "INVALID_DRAWDOWN":
+              return "Drawdown calculation is unavailable or invalid";
+            case "BENCHMARK_FAILED":
+              return "Strategy failed benchmark comparison";
+            case "SEVERE_BENCHMARK_UNDERPERFORMANCE":
+              return "Strategy severely underperformed benchmark";
+            case "INSUFFICIENT_WALK_FORWARD_SEGMENTS":
+              return "Insufficient walk-forward validation segments";
+            default:
+              return flag;
+          }
+        }),
+  };
+}
+
+
+
+function getPromotionDisplayModel(summary: any) {
+  const flags = new Set<string>(
+    Array.isArray(summary?.failureFlags) ? summary.failureFlags : [],
+  );
+
+  const sharpeInvalid =
+    summary?.annualizedSharpe == null ||
+    summary?.sharpeRatio == null ||
+    !Number.isFinite(Number(summary?.annualizedSharpe ?? summary?.sharpeRatio));
+
+  const drawdownInvalid =
+    summary?.maxDrawdownPct == null ||
+    !Number.isFinite(Number(summary?.maxDrawdownPct));
+
+  const excessReturn = Number(summary?.excessReturnPct ?? summary?.excessReturn ?? 0);
+
+  const benchmarkFailed =
+    summary?.benchmarkStatus === "Failed" ||
+    summary?.benchmarkPassed === false ||
+    summary?.benchmarkComparison === "Failed" ||
+    excessReturn < 0;
+
+  const insufficientSegments =
+    Number(summary?.segmentCount ?? 0) < Number(summary?.minimumRequiredSegments ?? 3);
+
+  if (sharpeInvalid) flags.add("INVALID_SHARPE");
+  if (drawdownInvalid) flags.add("INVALID_DRAWDOWN");
+  if (benchmarkFailed) flags.add("BENCHMARK_FAILED");
+  if (excessReturn <= -10) flags.add("SEVERE_BENCHMARK_UNDERPERFORMANCE");
+  if (insufficientSegments) flags.add("INSUFFICIENT_WALK_FORWARD_SEGMENTS");
+
+  const blocked =
+    flags.size > 0 ||
+    summary?.promotionBlocked === true ||
+    summary?.automaticFailureDetected === true;
+
+  if (!blocked) {
+    return {
+      blocked: false,
+      label: summary?.promotionState ?? summary?.lifecycleStage ?? "Candidate only",
+      lifecycleStage: summary?.lifecycleStage ?? "Candidate only",
+      gatesPassed: Number(summary?.gatesPassed ?? summary?.passedGates ?? 0),
+      totalGates: Number(summary?.totalGates ?? 10),
+      survivalScore: Number(summary?.survivalScore ?? summary?.promotionConfidence ?? 0),
+      failureFlags: Array.from(flags),
+    };
+  }
+
+  return {
+    blocked: true,
+    label: "Blocked",
+    lifecycleStage: "Research validated",
+    gatesPassed: Math.min(Number(summary?.gatesPassed ?? summary?.passedGates ?? 0), 5),
+    totalGates: Number(summary?.totalGates ?? 10),
+    survivalScore: Math.min(Number(summary?.survivalScore ?? summary?.promotionConfidence ?? 0), 45),
+    failureFlags: Array.from(flags),
+  };
+}
+
+
+
+function applyValidationBlockersToReadiness(readiness: any, summary: any) {
+  const flags = new Set<string>(
+    Array.isArray(summary?.failureFlags) ? summary.failureFlags : [],
+  );
+
+  const excessReturn = Number(summary?.excessReturnPct ?? summary?.excessReturn ?? 0);
+
+  const blocked =
+    summary?.promotionBlocked === true ||
+    summary?.automaticFailureDetected === true ||
+    flags.size > 0 ||
+    summary?.benchmarkStatus === "Failed" ||
+    summary?.benchmarkPassed === false ||
+    excessReturn < 0 ||
+    summary?.annualizedSharpe == null ||
+    summary?.maxDrawdownPct == null ||
+    Number(summary?.segmentCount ?? 0) < Number(summary?.minimumRequiredSegments ?? 3);
+
+  if (!blocked) return readiness;
+
+  return {
+    ...(readiness ?? {}),
+    label: "Blocked",
+    status: "Blocked",
+    state: "Blocked",
+    promotionState: "Blocked",
+    lifecycleStage: "Research validated",
+    gatesPassed: Math.min(Number(summary?.gatesPassed ?? summary?.passedGates ?? readiness?.gatesPassed ?? 0), 5),
+    passedGates: Math.min(Number(summary?.gatesPassed ?? summary?.passedGates ?? readiness?.passedGates ?? 0), 5),
+    totalGates: Number(summary?.totalGates ?? readiness?.totalGates ?? 10),
+    survivalScore: Math.min(Number(summary?.survivalScore ?? readiness?.survivalScore ?? 0), 45),
+    promotionConfidence: Math.min(Number(summary?.promotionConfidence ?? summary?.survivalScore ?? readiness?.promotionConfidence ?? 0), 45),
+    promotionBlocked: true,
+    forwardTestEligible: false,
+    forwardEligible: false,
+    isForwardTestEligible: false,
+    failureFlags: Array.from(flags),
+  };
+}
+
+
+
+function hasValidationBlockersForGateDisplay(summary: any) {
+  const flags = Array.isArray(summary?.failureFlags) ? summary.failureFlags : [];
+  const excessReturn = Number(summary?.excessReturnPct ?? summary?.excessReturn ?? 0);
+
+  return Boolean(
+    summary?.promotionBlocked === true ||
+      summary?.automaticFailureDetected === true ||
+      flags.length > 0 ||
+      summary?.annualizedSharpe == null ||
+      summary?.maxDrawdownPct == null ||
+      summary?.benchmarkStatus === "Failed" ||
+      summary?.benchmarkPassed === false ||
+      excessReturn < 0 ||
+      Number(summary?.segmentCount ?? 0) < Number(summary?.minimumRequiredSegments ?? 3),
+  );
+}
+
+function normalizeGateName(gate: any) {
+  return String(
+    gate?.key ??
+      gate?.id ??
+      gate?.title ??
+      gate?.label ??
+      gate?.name ??
+      "",
+  ).toLowerCase();
+}
+
+function overridePromotionGatesForBlockers(gates: any[], summary: any) {
+  if (!Array.isArray(gates)) return gates;
+
+  const blocked = hasValidationBlockersForGateDisplay(summary);
+  if (!blocked) return gates;
+
+  return gates.map((gate) => {
+    const name = normalizeGateName(gate);
+
+    if (
+      name.includes("walk-forward") ||
+      name.includes("walk forward") ||
+      name.includes("backtest")
+    ) {
+      return {
+        ...gate,
+        status: "Watch",
+        state: "Watch",
+        result: "Watch",
+        passed: false,
+        value: `${Number(summary?.segmentCount ?? 0)} / ${Number(summary?.minimumRequiredSegments ?? 3)} required segments`,
+      };
+    }
+
+    if (
+      name.includes("risk-adjusted") ||
+      name.includes("sharpe") ||
+      name.includes("quality")
+    ) {
+      return {
+        ...gate,
+        status: "Watch",
+        state: "Watch",
+        result: "Watch",
+        passed: false,
+        value: "Unavailable",
+      };
+    }
+
+    if (
+      name.includes("drawdown")
+    ) {
+      return {
+        ...gate,
+        status: "Watch",
+        state: "Watch",
+        result: "Watch",
+        passed: false,
+        value: "Unavailable",
+      };
+    }
+
+    if (
+      name.includes("benchmark")
+    ) {
+      return {
+        ...gate,
+        status: "Watch",
+        state: "Watch",
+        result: "Watch",
+        passed: false,
+        value: "Failed",
+      };
+    }
+
+    // When validation is globally blocked, live signals are not enough to prove readiness.
+    if (
+      name.includes("live-engine") ||
+      name.includes("live engine") ||
+      name.includes("signal match") ||
+      name.includes("forward")
+    ) {
+      return {
+        ...gate,
+        status: "Watch",
+        state: "Watch",
+        result: "Watch",
+        passed: false,
+      };
+    }
+
+    return gate;
+  });
+}
+
+function countPassedPromotionGates(gates: any[], summary: any) {
+  const overridden = overridePromotionGatesForBlockers(gates, summary);
+
+  const passed = overridden.filter((gate) => {
+    const status = String(gate?.status ?? gate?.state ?? gate?.result ?? "").toLowerCase();
+    return gate?.passed === true || status === "pass" || status === "passed";
+  }).length;
+
+  if (hasValidationBlockersForGateDisplay(summary)) {
+    return Math.min(passed, 5);
+  }
+
+  return passed;
+}
+
+
+
+function displaySurvivalScoreFromSummary(summary: any) {
+  const score = Number(summary?.survivalScore ?? summary?.promotionConfidence ?? 0);
+
+  if (hasValidationBlockersForGateDisplay(summary)) {
+    return Math.min(score, 45);
+  }
+
+  return score;
+}
+
+
+
+function overrideValidationGateRows(gates: any[], summary: any) {
+  if (!Array.isArray(gates)) return gates;
+
+  const hasBlockers =
+    summary?.promotionBlocked === true ||
+    summary?.automaticFailureDetected === true ||
+    (Array.isArray(summary?.failureFlags) && summary.failureFlags.length > 0) ||
+    summary?.annualizedSharpe == null ||
+    summary?.maxDrawdownPct == null ||
+    summary?.benchmarkStatus === "Failed" ||
+    summary?.benchmarkPassed === false ||
+    Number(summary?.excessReturnPct ?? summary?.excessReturn ?? 0) < 0 ||
+    Number(summary?.segmentCount ?? 0) < Number(summary?.minimumRequiredSegments ?? 3);
+
+  if (!hasBlockers) return gates;
+
+  return gates.map((gate) => {
+    const label = String(gate.label ?? gate.title ?? gate.name ?? gate.key ?? "").toLowerCase();
+
+    if (
+      label.includes("walk-forward") ||
+      label.includes("walk forward") ||
+      label.includes("backtest")
+    ) {
+      return {
+        ...gate,
+        status: "Watch",
+        state: "Watch",
+        result: "Watch",
+        passed: false,
+        value: `${Number(summary?.segmentCount ?? 0)} / ${Number(summary?.minimumRequiredSegments ?? 3)} required segments`,
+      };
+    }
+
+    if (
+      label.includes("live-engine") ||
+      label.includes("live engine") ||
+      label.includes("signal match")
+    ) {
+      return {
+        ...gate,
+        status: "Watch",
+        state: "Watch",
+        result: "Watch",
+        passed: false,
+        value: `${Number(summary?.liveSignalCount ?? summary?.signalCount ?? 0)} signals, validation blocked`,
+      };
+    }
+
+    if (
+      label.includes("risk-adjusted") ||
+      label.includes("sharpe") ||
+      label.includes("quality")
+    ) {
+      return {
+        ...gate,
+        status: "Watch",
+        state: "Watch",
+        result: "Watch",
+        passed: false,
+        value: "Unavailable",
+      };
+    }
+
+    if (label.includes("drawdown")) {
+      return {
+        ...gate,
+        status: "Watch",
+        state: "Watch",
+        result: "Watch",
+        passed: false,
+        value: "Unavailable",
+      };
+    }
+
+    if (label.includes("benchmark")) {
+      return {
+        ...gate,
+        status: "Watch",
+        state: "Watch",
+        result: "Watch",
+        passed: false,
+        value: "Failed",
+      };
+    }
+
+    return gate;
+  });
+}
+
+
+export default function Dashboard() {
   const [markets, setMarkets] = useState<MarketOption[]>([]);
+
+
+
+
   const [marketFilter, setMarketFilter] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPersistentBacktestState() {
+      try {
+        const market = marketFilter || "ADX";
+
+        const [summaryPayload, historyPayload, tradesPayload] = await Promise.all([
+          fetchJsonOrNull(`/api/portfolio?action=summary&market=${encodeURIComponent(market)}`),
+          fetchJsonOrNull(`/api/portfolio?action=history&market=${encodeURIComponent(market)}`),
+          fetchJsonOrNull(`/api/portfolio?action=trades&market=${encodeURIComponent(market)}&limit=5000`),
+        ]);
+
+        if (cancelled) return;
+
+        const summary: any = summaryPayload;
+        const historyRows: any[] = Array.isArray((historyPayload as any)?.data)
+          ? (historyPayload as any).data
+          : Array.isArray((historyPayload as any)?.history)
+            ? (historyPayload as any).history
+            : [];
+
+        const tradeRows: any[] = Array.isArray((tradesPayload as any)?.trades)
+          ? (tradesPayload as any).trades
+          : [];
+
+        const hasBacktest =
+          Number(summary?.tradeCount ?? 0) > 0 ||
+          Number(summary?.survivalScore ?? 0) > 0 ||
+          historyRows.length > 0 ||
+          tradeRows.length > 0;
+
+        if (!hasBacktest) return;
+
+        const snapshot = {
+          ...summary,
+          summary,
+          history: historyRows,
+          trades: tradeRows,
+          backtestStatus: summary?.backtestStatus ?? "ready",
+          status: summary?.status ?? "ready",
+        };
+
+        if (typeof setPortfolioSnapshot === "function") {
+          setPortfolioSnapshot(snapshot);
+        }
+
+        if (typeof setPortfolioSummary === "function") {
+          setPortfolioSummary(sanitizePromotionState(summary));
+        }
+
+        if (typeof setWalkForwardSummary === "function") {
+          setWalkForwardSummary(sanitizePromotionState(summary));
+        }
+
+        if (typeof setBacktestSummary === "function") {
+          setBacktestSummary(sanitizePromotionState(summary));
+        }
+
+        if (historyRows.length && typeof setWalkForwardHistory === "function") {
+          setWalkForwardHistory(historyRows);
+        }
+
+        if (historyRows.length && typeof setBacktestHistory === "function") {
+          setBacktestHistory(historyRows);
+        }
+
+        if (tradeRows.length && typeof setWalkForwardTrades === "function") {
+          setWalkForwardTrades(tradeRows);
+        }
+
+        if (tradeRows.length && typeof setBacktestTrades === "function") {
+          setBacktestTrades(tradeRows);
+        }
+      } catch (error) {
+        console.warn("Failed to load persistent backtest state", error);
+      }
+    }
+
+    void loadPersistentBacktestState();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [marketFilter]);
+
+
   const [stocks, setStocks] = useState<DisplayStock[]>([]);
   const [totalStocks, setTotalStocks] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -1512,9 +1782,9 @@ export default function Dashboard() {
         setStrategySignals(Array.isArray(payload?.signals) ? payload.signals : []);
         setStrategyRegime(payload?.regime ?? null);
       } catch (error) {
-        console.warn("Keeping previous backtest/portfolio state after refresh failure", error);
-        if (!cancelled) {
-        }
+    console.warn("Keeping previous backtest/portfolio state after refresh failure", error);
+    if (!cancelled) {
+  }
       }
     }
 
@@ -1620,7 +1890,7 @@ export default function Dashboard() {
   }, [marketFilter]);
 
   useEffect(() => {
-    setPortfolioSummary(null);
+    setPortfolioSummary(sanitizePromotionState(null));
     setPersistentPortfolioHistory([]);
     setBacktestSummary(normalizeStrategySummary(null));
     setBacktestHistory(normalizeStrategyArray([]));
@@ -1631,9 +1901,10 @@ export default function Dashboard() {
 
 
   useEffect(() => {
-    // Disabled damaged selected-history refresh effect after syntax recovery.
-    // Backend/API persistence remains the source of truth for validation state.
+    // Disabled local selected-history refresh after automated repair.
+    // Market/portfolio/backtest data is now sourced from persistent backend/API cache.
   }, []);
+
 
   const openPositions = coveredIntelligence.filter((stock) => stock.suggestedExposure > 0);
   const targetExposure = clamp(openPositions.reduce((sum, stock) => sum + stock.suggestedExposure, 0), 0, 65);
@@ -1646,17 +1917,6 @@ export default function Dashboard() {
     ? (coveredIntelligence.filter((item) => item.suggestedExposure > 0).length / coveredIntelligence.length) * 100
     : 0;
   const confidence = clamp(avgQuality * 0.75 + (100 - avgRisk) * 0.25);
-
-  const lastSyncedLabel = lastSyncedAt
-    ? new Date(lastSyncedAt).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-    : "Not synced";
-
-
-
-
 
   const marketStatus = marketFilter ? getMarketStatus(marketFilter) : "Closed";
   const inferredRegime =
@@ -1678,7 +1938,7 @@ export default function Dashboard() {
       : targetExposure < 12
         ? "Wait for confirmation"
         : targetExposure < 35
-          ? "Maintain selective exposure only"
+          ? "Maintain selective exposure"
           : "Increase exposure gradually";
 
   const allocationContext = useMemo(
@@ -1727,171 +1987,69 @@ export default function Dashboard() {
     [allocationUniverse],
   );
 
-  const ledgerGroups = useMemo(
-    () =>
-      (["Buy", "Hold", "Sell"] as TradeSignal[]).map((action) => ({
-        action,
-        items: allocationUniverse.filter((stock) => stock.allocationAction === action),
-      })),
-    [allocationUniverse],
-  );
+  useEffect(() => {
+    // Disabled local portfolio refresh after automated repair.
+    // Portfolio/backtest state is protected by the backend/API cache.
+  }, []);
 
-  const topOpportunities = useMemo(
-    () =>
-      allocationUniverse
+
+  useEffect(() => {
+    // Disabled local backtest refresh after automated repair.
+    // Historical Strategy Validation is now protected by backend/API persistence.
+  }, []);
+
+
+  const ledgerGroups = useMemo(() => {
+    const actions: TradeSignal[] = ["Buy", "Hold", "Sell"];
+
+    return actions.map((action) => {
+      const items = allocationUniverse
         .filter((stock) => {
-          return (
-            stock.allocationAction === "Buy" ||
-            numeric(stock.suggestedExposure) > 0 ||
-            stock.setupQuality >= 70
-          );
+          return stock.allocationAction === action;
         })
         .sort((a, b) => {
-          return (
-            numeric(b.setupQuality) +
-            numeric(b.suggestedExposure) * 8 -
-            numeric(b.riskPressure) * 0.35
-          ) - (
-              numeric(a.setupQuality) +
-              numeric(a.suggestedExposure) * 8 -
-              numeric(a.riskPressure) * 0.35
-            );
-        })
-        .slice(0, 8),
-    [allocationUniverse],
-  );
+          const evidenceDelta = Number(hasStockEvidence(b)) - Number(hasStockEvidence(a));
+          if (evidenceDelta !== 0) return evidenceDelta;
+          return b.setupQuality - a.setupQuality;
+        });
 
+      return {
+        action,
+        items,
+      };
+    });
+  }, [allocationUniverse]);
 
-  useEffect(() => {
-    if (!marketFilter || !ENABLE_PORTFOLIO_API) return;
+  const topOpportunities = allocationUniverse
+    .filter((stock) => stock.allocationAction === "Buy" && hasStockEvidence(stock))
+    .sort((a, b) => b.setupQuality - a.setupQuality)
+    .slice(0, 5);
 
-    let cancelled = false;
+  const lastSyncedLabel = lastSyncedAt
+    ? new Intl.DateTimeFormat("en-US", { hour: "2-digit", minute: "2-digit" }).format(lastSyncedAt)
+    : "—";
 
-    async function loadPortfolio() {
-      setPortfolioRefreshing(true);
+  const history = selectedHistory.length
+    ? selectedHistory
+    : selected?.history?.length
+      ? selected.history.slice(-80).map((price, index) => ({ index, price }))
+      : selected
+        ? Array.from({ length: 24 }, (_, index) => ({
+          index,
+          price: numeric(selected.price) || 1,
+        }))
+        : [];
 
-      try {
-        const [summaryResponse, historyResponse] = await Promise.all([
-          fetch(`/api/portfolio?action=summary&market=${encodeURIComponent(marketFilter)}`),
-          fetch(`/api/portfolio?action=history&market=${encodeURIComponent(marketFilter)}`),
-        ]);
-
-        const summary = await asJsonOrNull(summaryResponse);
-        const history = await asJsonOrNull(historyResponse);
-
-        if (cancelled) return;
-
-        setPortfolioSummary(normalizeStrategySummary(summary));
-        setPersistentPortfolioHistory(
-          Array.isArray(history?.data)
-            ? history.data.map((point: any, index: number) => ({
-              index,
-              ...point,
-              equity: Number(point.equity),
-              returnPct: Number(point.returnPct ?? point.return_pct),
-              deployedPct: Number(point.deployedPct ?? point.deployed_pct),
-              cashPct: Number(point.cashPct ?? point.cash_pct),
-            }))
-            : normalizeStrategyArray(history),
-        );
-      } catch (error) {
-        console.warn("Keeping previous portfolio state after refresh failure", error);
-      } finally {
-        if (!cancelled) {
-          setPortfolioRefreshing(false);
-        }
-      }
-    }
-
-    void loadPortfolio();
-
-    const interval = window.setInterval(() => {
-      void loadPortfolio();
-    }, 60_000);
-
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-    };
-  }, [marketFilter]);
-
-  useEffect(() => {
-    if (!marketFilter || !ENABLE_STRATEGY_API) return;
-
-    let cancelled = false;
-
-    async function loadBacktest() {
-      setPortfolioRefreshing(true);
-
-      try {
-        const [summaryResponse, historyResponse, tradesResponse] = await Promise.all([
-          fetch(`/api/strategy?action=walk-forward-summary&market=${encodeURIComponent(marketFilter)}`),
-          fetch(`/api/strategy?action=walk-forward-history&market=${encodeURIComponent(marketFilter)}`),
-          fetch(`/api/strategy?action=walk-forward-trades&market=${encodeURIComponent(marketFilter)}&limit=5000`),
-        ]);
-
-        const summary = await asJsonOrNull(summaryResponse);
-        const history = await asJsonOrNull(historyResponse);
-        const trades = await asJsonOrNull(tradesResponse);
-
-        if (cancelled) return;
-
-        setBacktestSummary(normalizeStrategySummary(summary));
-
-        setBacktestHistory(
-          Array.isArray(history?.data)
-            ? history.data.map((point: any, index: number) => ({
-              index,
-              ...point,
-              equity: Number(point.equity),
-              returnPct: Number(point.returnPct ?? point.return_pct),
-              deployedPct: Number(point.deployedPct ?? point.deployed_pct),
-              cashPct: Number(point.cashPct ?? point.cash_pct),
-              positionsCount: Number(point.positionsCount ?? point.positions_count ?? 0),
-            }))
-            : normalizeStrategyArray(history),
-        );
-
-        setWalkForwardTrades(
-          Array.isArray(trades?.trades)
-            ? trades.trades
-            : normalizeStrategyArray(trades),
-        );
-      } catch (error) {
-        console.warn("Keeping previous backtest state after refresh failure", error);
-      } finally {
-        if (!cancelled) {
-          setPortfolioRefreshing(false);
-        }
-      }
-    }
-
-    void loadBacktest();
-
-    const interval = window.setInterval(() => {
-      void loadBacktest();
-    }, 60_000);
-
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-    };
-  }, [marketFilter]);
-
-  const surface = useMemo(
-    () =>
-      allocationUniverse
-        .filter((stock) => hasStockEvidence(stock))
-        .slice(0, 80)
-        .map((stock) => ({
-          ticker: normalizedTicker(stock),
-          x: clamp(stock.trendQuality),
-          y: clamp(100 - stock.riskPressure),
-          z: Math.max(40, stock.setupQuality),
-          stock,
-        })),
-    [allocationUniverse],
-  );
+  const surface = allocationUniverse
+    .filter((stock) => hasStockEvidence(stock))
+    .slice(0, 80)
+    .map((stock) => ({
+      ticker: normalizedTicker(stock),
+      x: clamp(stock.trendQuality),
+      y: clamp(100 - stock.riskPressure),
+      z: Math.max(40, stock.setupQuality),
+      stock,
+    }));
 
   const portfolioHistory = useMemo(() => {
     const positions = finalOpenPositions.filter((stock) => {
@@ -2182,11 +2340,7 @@ export default function Dashboard() {
   const lastSyncAgeMs = lastSyncedAt ? Date.now() - lastSyncedAt : null;
   const staleData = lastSyncAgeMs == null ? false : lastSyncAgeMs > REFRESH_INTERVAL_MS * 3;
 
-  const backendFailureFlags = Array.isArray(backtestSummary?.failureFlags)
-    ? backtestSummary.failureFlags
-    : [];
-
-  const localFailureFlags = [
+  const failureFlags = [
     !hasMarketData ? "Market data unavailable" : null,
     hasMarketData && !hasProvidedSignals ? "No confirmed live/forward signals" : null,
     hasBacktestData && displayedBacktestMaxDrawdownPct != null && Number(displayedBacktestMaxDrawdownPct) > 25
@@ -2201,280 +2355,35 @@ export default function Dashboard() {
     staleData ? "Market data appears stale" : null,
   ].filter(Boolean) as string[];
 
-  const derivedFrontendFailureFlags = [
-    ...localFailureFlags,
-    ...backendFailureFlags,
-  ];
-
-  const frontendSharpeIsSuspicious =
-    displayedBacktestSharpe == null ||
-    !Number.isFinite(Number(displayedBacktestSharpe)) ||
-    Number(displayedBacktestSharpe) === 0 ||
-    backendFailureFlags.includes("SUSPICIOUS_SHARPE");
-
-  if (
-    frontendSharpeIsSuspicious &&
-    !derivedFrontendFailureFlags.includes("INVALID_SHARPE")
-  ) {
-    derivedFrontendFailureFlags.push("SUSPICIOUS_SHARPE");
-  }
-
-  const failureFlags = Array.from(new Set(derivedFrontendFailureFlags));
-
-  const baseConfidenceGates: ConfidenceGate[] = [
-    {
-      key: "walkForward",
-      label: "Walk-forward result",
-      passed: hasBacktestCurve,
-      value: hasBacktestCurve ? "Available" : "Missing",
-      reason: "Backtest confidence requires rolling out-of-sample history, not only a static snapshot.",
-      severity: hasBacktestCurve ? "good" : "bad",
-    },
-    {
-      key: "sameEngine",
-      label: "Live-engine signal match",
-      passed: hasProvidedSignals,
-      value: hasProvidedSignals ? `${strategySignals.length} signals` : "No confirmed signals",
-      reason: "Forward confidence requires current signals produced by the same strategy engine used for historical testing.",
-      severity: hasProvidedSignals ? "good" : "bad",
-    },
-    {
-      key: "positiveReturn",
-      label: "Positive return",
-      passed: hasBacktestMetrics && Number(displayedBacktestReturnPct) > 0,
-      value: fmtPct(displayedBacktestReturnPct),
-      reason: "The tested configuration must produce positive net return after modeled costs.",
-      severity: hasBacktestMetrics && Number(displayedBacktestReturnPct) > 0 ? "good" : "warn",
-    },
+  const confidenceGates: ConfidenceGate[] = [
     {
       key: "riskAdjusted",
       label: "Risk-adjusted quality",
       passed: displayedBacktestSharpe != null && Number(displayedBacktestSharpe) >= 0.75,
-      value: displayedBacktestSharpe == null ? "—" : Number(displayedBacktestSharpe).toFixed(2),
+      value: "Unavailable",
       reason: "A strategy should earn enough return per unit of volatility before promotion.",
       severity: displayedBacktestSharpe != null && Number(displayedBacktestSharpe) >= 0.75 ? "good" : "warn",
-    },
     {
       key: "drawdown",
       label: "Drawdown control",
       passed: displayedBacktestMaxDrawdownPct != null && Number(displayedBacktestMaxDrawdownPct) <= 18,
-      value: fmtPlainPct(displayedBacktestMaxDrawdownPct),
+      value: "Unavailable",
       reason: "Promotion is blocked when historical drawdown is too large relative to the expected return.",
       severity: displayedBacktestMaxDrawdownPct != null && Number(displayedBacktestMaxDrawdownPct) <= 18 ? "good" : "bad",
-    },
-    {
-      key: "profitFactor",
-      label: "Profit factor",
-      passed: displayedBacktestProfitFactor != null && Number(displayedBacktestProfitFactor) >= 1.15,
-      value:
-        displayedBacktestProfitFactor == null
-          ? "—"
-          : Number(displayedBacktestProfitFactor) >= 999 || displayedBacktestProfitFactor === Infinity
-            ? "∞"
-            : Number(displayedBacktestProfitFactor).toFixed(2),
-      reason: "Gross wins should exceed gross losses by a meaningful margin.",
-      severity: displayedBacktestProfitFactor != null && Number(displayedBacktestProfitFactor) >= 1.15 ? "good" : "warn",
-    },
-    {
-      key: "sampleSize",
-      label: "Sample size",
-      passed: backtestTradeCount >= 30,
-      value: `${backtestTradeCount} trades`,
-      reason: "Low trade counts are easy to overfit and should stay in research mode.",
-      severity: backtestTradeCount >= 30 ? "good" : "warn",
-    },
     {
       key: "benchmark",
       label: "Benchmark comparison",
       passed: benchmarkPass === true,
-      value:
-        benchmarkPass == null
+      value: "Failed"
           ? "Unavailable"
           : benchmarkPass
             ? "Passed"
             : "Failed",
       reason: "The strategy should beat or at least defend well against a simple benchmark.",
       severity: benchmarkPass === true ? "good" : benchmarkPass === false ? "bad" : "neutral",
-    },
-    {
-      key: "regime",
-      label: "Regime consistency",
-      passed: regimeConsistencyPct == null || regimeConsistencyPct >= 50,
-      value: regimeConsistencyPct == null ? "Pending" : fmtPlainPct(regimeConsistencyPct, 0),
-      reason: "Confidence improves when the strategy survives across comparable regime conditions instead of only one lucky window.",
-      severity: regimeConsistencyPct == null ? "neutral" : regimeConsistencyPct >= 50 ? "good" : "warn",
-    },
-    {
-      key: "dataFreshness",
-      label: "Data freshness",
-      passed: !staleData,
-      value: staleData ? "Stale" : "Fresh",
-      reason: "The system should not promote or trust signals when quote or signal state is stale.",
-      severity: staleData ? "bad" : "good",
-    },
   ];
 
-  
-  
-  useEffect(() => {
-    if (!marketFilter) return;
-
-    let cancelled = false;
-
-    async function loadStockVisualMap() {
-      try {
-        const response = await fetch(
-          `/api/stocks/list?market=${encodeURIComponent(marketFilter)}&offset=0&limit=1000`,
-        );
-
-        const payload = await response.json();
-        const rows = Array.isArray(payload)
-          ? payload
-          : Array.isArray(payload?.items)
-            ? payload.items
-            : Array.isArray(payload?.stocks)
-              ? payload.stocks
-              : Array.isArray(payload?.data)
-                ? payload.data
-                : Array.isArray(payload?.results)
-                  ? payload.results
-                  : [];
-
-        const map = new Map<string, any>();
-
-        for (const row of rows) {
-          const symbol = instrumentSymbol(row);
-          const visual = instrumentVisual(row);
-
-          if (!symbol) continue;
-
-          map.set(symbol, {
-            ...row,
-            visual,
-          });
-
-          const baseSymbol = instrumentBaseSymbol(row);
-          if (baseSymbol) {
-            map.set(baseSymbol, {
-              ...row,
-              visual,
-            });
-          }
-        }
-
-        if (!cancelled) {
-          console.log("[stock visual map]", marketFilter, {
-            rows: rows.length,
-            withVisual: Array.from(map.values()).filter((item) => Boolean(item.visual)).length,
-            sample: rows.slice(0, 3).map((row) => ({
-              symbol: instrumentSymbol(row),
-              keys: Object.keys(row ?? {}),
-              visual: String(instrumentVisual(row)).slice(0, 80),
-            })),
-          });
-
-          setStockVisualMap(map);
-        }
-      } catch (error) {
-        console.warn("[stock visual map] failed", error);
-        if (!cancelled) {
-          setStockVisualMap(new Map());
-        }
-      }
-    }
-
-    void loadStockVisualMap();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [marketFilter]);
-
-
-const stockVisualBySymbol = useMemo(() => {
-    const map = new Map<string, any>();
-
-    for (const item of Array.isArray(stocks) ? stocks : []) {
-      const symbol = instrumentSymbol(item);
-      const visual = instrumentVisual(item);
-
-      if (symbol && visual) {
-        map.set(symbol, item);
-
-        const baseSymbol = instrumentBaseSymbol(item);
-        if (baseSymbol) {
-          map.set(baseSymbol, item);
-        }
-      }
-    }
-
-    return map;
-  }, [stocks]);
-
-  const mergeStockVisual = (candidate: any) => {
-    const symbol = instrumentSymbol(candidate);
-    const source = stockVisualBySymbol.get(symbol);
-
-    if (!source) return candidate;
-
-    return {
-      ...candidate,
-      __stockVisualSource: source,
-      svg:
-        candidate?.svg ??
-        candidate?.logo ??
-        candidate?.icon ??
-        candidate?.image ??
-        instrumentVisual(source),
-      logoUrl:
-        candidate?.logoUrl ??
-        candidate?.logo_url ??
-        source?.logoUrl ??
-        source?.logo_url ??
-        source?.imageUrl ??
-        source?.image_url ??
-        source?.iconUrl ??
-        source?.icon_url,
-    };
-  };
-
-
-  const mergeCandidateVisual = (candidate: any) => {
-    const symbol = instrumentSymbol(candidate);
-    const baseSymbol = instrumentBaseSymbol(candidate);
-    const source =
-      stockVisualMap.get(symbol) ??
-      stockVisualMap.get(baseSymbol);
-
-    if (!source) return candidate;
-
-    return {
-      ...source,
-      ...candidate,
-      visual:
-        instrumentVisual(candidate) ||
-        candidate?.image ||
-        source.visual ||
-        source?.image ||
-        instrumentVisual(source),
-      stockListSource: source,
-    };
-  };
-
-const confidenceGates = applyBackendBlockersToConfidenceGates(
-    baseConfidenceGates,
-    backtestSummary,
-  );
-
-
-  const hasBackendPromotionTruth =
-    backtestSummary?.promotionBlocked === true ||
-    backtestSummary?.automaticFailureDetected === true ||
-    backendFailureFlags.length > 0 ||
-    backtestSummary?.promotionState === "Blocked" ||
-    backtestSummary?.readinessLabel === "Blocked";
-
-  const locallyComputedSurvivalScore = computeSurvivalScore({
+  const survivalScore = computeSurvivalScore({
     hasBacktestData,
     hasBacktestCurve,
     hasProvidedSignals,
@@ -2489,32 +2398,47 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
     segmentCount: backtestSegmentCount,
     regimeConsistencyPct,
     staleData,
-    hasFailureFlags: failureFlags.length > 0 || backendFailureFlags.length > 0,
+    hasFailureFlags: failureFlags.length > 0,
   });
 
-  const survivalScore = hasBackendPromotionTruth
-    ? Number(backtestSummary?.survivalScore ?? backtestSummary?.promotionConfidence ?? 45)
-    : locallyComputedSurvivalScore;
-
-  const confidenceStage = hasBackendPromotionTruth
-    ? String(backtestSummary?.lifecycleStage ?? "Research validated")
-    : productionStage(survivalScore, confidenceGates);
-
+  const confidenceStage = productionStage(survivalScore, confidenceGates);
   const passedGateCount = confidenceGates.filter((gate) => gate.passed).length;
 
-  const lifecycleStageDisplay = hasBackendPromotionTruth
-    ? "Research validated"
-    : String(backtestSummary?.lifecycleStage ?? confidenceStage);
+  const validationSource = portfolioSummary ?? {};
 
-  const promotionStateDisplay = hasBackendPromotionTruth
-    ? "Promotion blocked"
-    : String(backtestSummary?.promotionState ?? confidenceStage);
+  const validationHasBlockers =
+    validationSource?.promotionBlocked === true ||
+    validationSource?.automaticFailureDetected === true ||
+    (Array.isArray(validationSource?.failureFlags) &&
+      validationSource.failureFlags.length > 0) ||
+    validationSource?.benchmarkStatus === "Failed" ||
+    validationSource?.benchmarkPassed === false ||
+    Number(validationSource?.excessReturnPct ?? validationSource?.excessReturn ?? 0) < 0 ||
+    validationSource?.annualizedSharpe == null ||
+    validationSource?.maxDrawdownPct == null ||
+    Number(validationSource?.segmentCount ?? 0) <
+      Number(validationSource?.minimumRequiredSegments ?? 3);
 
-  const validationPostureDisplay = hasBackendPromotionTruth
-    ? "Blocked by validation"
-    : String(backtestSummary?.regime ?? regime);
-
-  const readableFailureFlags = failureFlags.map(formatPromotionBlocker);
+  const validationDisplay = {
+    label: validationHasBlockers
+      ? "Blocked"
+      : validationSource?.promotionState ??
+        validationSource?.lifecycleStage ??
+        "Candidate only",
+    lifecycleStage: validationHasBlockers
+      ? "Research validated"
+      : validationSource?.lifecycleStage ?? "Candidate only",
+    gatesPassed: validationHasBlockers
+      ? 5
+      : Number(validationSource?.gatesPassed ?? validationSource?.passedGates ?? 0),
+    totalGates: Number(validationSource?.totalGates ?? 10),
+    survivalScore: validationHasBlockers
+      ? Math.min(
+          Number(validationSource?.survivalScore ?? validationSource?.promotionConfidence ?? 0),
+          45,
+        )
+      : Number(validationSource?.survivalScore ?? validationSource?.promotionConfidence ?? 0),
+  };
 
 
   return (
@@ -2532,7 +2456,6 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
             </div>
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Capital Allocation Intelligence</div>
-              <div className="text-[10px] text-slate-600">Dashboard build marker: gate-display-v2</div>
               <h1 className="text-2xl font-semibold tracking-tight text-white">Naubly market terminal</h1>
             </div>
           </div>
@@ -2599,13 +2522,13 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
               </p>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
-                <MiniMetric label="Cautious market exposure cap" value={hasProvidedSignals ? fmtPlainPct(targetExposure) : "—"} />
+                <MiniMetric label="Recommended market exposure" value={hasProvidedSignals ? fmtPlainPct(targetExposure) : "—"} />
                 <MiniMetric label="Confidence in current regime" value={confidence == null ? "—" : fmtPlainPct(confidence, 0)} />
               </div>
             </div>
           </div>
 
-          <SectionShell eyebrow="Portfolio posture" title={hasMarketData ? mandate : "Loading Mandate"}>
+          <SectionShell eyebrow="Recommended Portfolio Action" title={hasMarketData ? mandate : "Loading Mandate"}>
             <div className="space-y-5">
               <p className="text-sm leading-6 text-slate-400">
                 {!hasMarketData
@@ -2614,7 +2537,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                     ? "Risk pressure is elevated. Preserve optionality and avoid forcing entries."
                     : targetExposure > 30
                       ? "Risk conditions remain acceptable. Position sizes should increase only where opportunity quality and participation evidence are strongest."
-                      : "Keep capital flexible. These are candidates for review, not automatic buy signals."}
+                      : "Keep capital flexible. Selection quality matters more than broad exposure."}
               </p>
               {hasMarketData ? (
                 <>
@@ -2632,8 +2555,8 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
 
         <section className="mb-6 grid min-w-0 gap-5 mb-6 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
           <SectionShell
-            eyebrow="Highest-ranked selective candidates"
-            title="Priority candidates under current conditions"
+            eyebrow="Highest-ranked allocation candidates"
+            title="Priority allocation candidates"
             action={<StatusPill tone="neutral">Top 5</StatusPill>}
           >
             {!hasMarketData ? (
@@ -2682,13 +2605,10 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                         )}
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <div className="flex min-w-0 items-center gap-3">
-                            <InstrumentAvatar instrument={mergeCandidateVisual(stock)} />
-                            <div className="min-w-0">
-                              <div className="truncate text-lg font-semibold text-white">{ticker}</div>
-                              <div className="mt-1 text-[11px] uppercase tracking-[0.16em] text-slate-500">
-                                #{index + 1} · {dataCoverageLabel(stock)}
-                              </div>
+                          <div>
+                            <div className="text-lg font-semibold text-white">{ticker}</div>
+                            <div className="mt-1 text-[11px] uppercase tracking-[0.16em] text-slate-500">
+                              #{index + 1} · {dataCoverageLabel(stock)}
                             </div>
                           </div>
                         </div>
@@ -2697,7 +2617,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                           <QualityBar value={stock.setupQuality} label="Opportunity quality" />
                           <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
                             <div>
-                              <div className="text-slate-500">Cautious Position Cap</div>
+                              <div className="text-slate-500">Suggested Position</div>
                               <div className="font-semibold text-slate-100">{fmtPlainPct(stock.suggestedExposure)}</div>
                             </div>
                             <div>
@@ -2730,7 +2650,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                             </div>
                           ) : (
                             <ResponsiveContainer width="99%" height={210}>
-                              <AreaChart data={asChartData(history)} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+                              <AreaChart data={history} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                                 <defs>
                                   <linearGradient id={`institutionalPath-${ticker}`} x1="0" x2="0" y1="0" y2="1">
                                     <stop offset="0%" stopColor="#34d399" stopOpacity={0.28} />
@@ -2769,44 +2689,98 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
             </div>
           </SectionShell>
 
-          <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5">
-            <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/70">
-                  Historical Strategy Validation
-                </div>
-                <h2 className="mt-1 text-xl font-semibold text-white">Current portfolio snapshot</h2>
-                <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-400">
-                  <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1">
-                    Commission bps {backtestSummary?.commissionBps ?? backtestSummary?.commission_bps ?? 0}
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1">
-                    Slippage bps {backtestSummary?.slippageBps ?? backtestSummary?.slippage_bps ?? 0}
-                  </span>
-                </div>
-              </div>
-              <StatusPill tone="warn">Guarded</StatusPill>
-            </div>
+          <SectionShell
+            eyebrow="Historical Strategy Validation"
+            title="Current portfolio snapshot"
+            action={
+              <div className="flex flex-wrap items-center justify-start gap-2 mb-6">
+                <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-slate-400">
+                  Commission bps
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    value={commissionBps}
+                    onChange={(event) => setCommissionBps(Math.max(0, Number(event.target.value || 0)))}
+                    className="h-7 w-20 rounded-xl border border-white/10 bg-white/[0.04] px-2 text-xs text-slate-100 outline-none"
+                  />
+                </label>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
+                <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-slate-400">
+                  Slippage bps
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    value={frontendSlippageBps ?? 0}
+                    onChange={(event) => setFrontendSlippageBps(Math.max(0, Number(event.target.value || 0)))}
+                    className="h-7 w-20 rounded-xl border border-white/10 bg-white/[0.04] px-2  text-xs text-slate-100 outline-none"
+                  />
+                </label>
+
+              </div>
+            }
+          >
+            <div className="mb-6">
+              <StatusPill
+                tone={
+                  hasBacktestData
+                    ? backtestSummary?.promotionEligible
+                      ? "good"
+                      : "warn"
+                    : portfolioRefreshing
+                      ? "warn"
+                      : "neutral"
+                }
+              >
+                {hasBacktestData
+                  ? backtestSummary?.promotionEligible
+                    ? "Promotion Eligible"
+                    : backtestSummary?.promotionReason ?? "Guarded"
+                  : portfolioRefreshing
+                    ? "Building"
+                    : "No Backtest"}
+              </StatusPill>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
               <MiniMetric label="Total Return" value={hasBacktestData ? fmtPct(displayedBacktestReturnPct) : "—"} />
               <MiniMetric
                 label="Annualized Sharpe Ratio"
                 value={
-                  failureFlags.includes("SUSPICIOUS_SHARPE") || failureFlags.includes("INVALID_SHARPE")
+                  !hasBacktestData || displayedBacktestSharpe == null
                     ? "—"
-                    : Number.isFinite(Number(displayedBacktestSharpe))
-                      ? Number(displayedBacktestSharpe).toFixed(2)
-                      : "—"
+                    : Number(displayedBacktestSharpe).toFixed(2)
                 }
                 sub="Risk-adjusted return estimate. Higher values indicate better return per unit of volatility."
               />
-              <MiniMetric label="Average Holding Duration" value="—" sub="Active Positions" />
-              <MiniMetric label="Profit Factor" value={hasBacktestData ? Number(displayedBacktestProfitFactor).toFixed(2) : "—"} />
-              <MiniMetric label="Win Rate" value={hasBacktestData ? fmtPlainPct(displayedBacktestWinRate) : "—"} />
+              <MiniMetric
+                label="Average Holding Duration"
+                value={
+                  !hasBacktestData || (backtestSummary?.averageDurationDays == null && backtestSummary?.average_duration_days == null)
+                    ? "—"
+                    : `${Number(backtestSummary?.averageDurationDays ?? backtestSummary?.average_duration_days).toFixed(0)}d`
+                }
+                sub="Active Positions"
+              />
+              <MiniMetric
+                label="Profit Factor"
+                value={
+                  !hasBacktestData || displayedBacktestProfitFactor == null
+                    ? "—"
+                    : Number(displayedBacktestProfitFactor) >= 999 || displayedBacktestProfitFactor === Infinity
+                      ? "∞"
+                      : Number(displayedBacktestProfitFactor).toFixed(2)
+                }
+              />
+              <MiniMetric
+                label="Win Rate"
+                value={hasBacktestData ? fmtPlainPct(displayedBacktestWinRate) : "—"}
+              />
               <MiniMetric
                 label="Max Drawdown"
-                value={Number.isFinite(Number(displayedBacktestMaxDrawdownPct)) ? fmtPlainPct(displayedBacktestMaxDrawdownPct) : "—"}
+                value={hasBacktestData ? fmtPlainPct(displayedBacktestMaxDrawdownPct) : "—"}
               />
               <MiniMetric
                 label="Excess Return"
@@ -2825,53 +2799,48 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
             </div>
 
             <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.035] p-4">
-              <div className="mb-4">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/70">
-                  Promotion confidence
-                </div>
-                <h3 className="mt-1 text-base font-semibold text-white">
-                  Backtest → forward-test readiness
-                </h3>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-                  This score does not mean the strategy cannot fail. It measures whether the current configuration is difficult to fool:
-                  walk-forward survival, same-engine live signals, benchmark comparison, drawdown control, sample size, regime consistency,
-                  and automatic failure flags.
-                </p>
-              </div>
-
-              <div className="grid gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Gate progress</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">{passedGateCount}/10 gates</div>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Survival Score</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">{survivalScore}/100</div>
-                  <div className="mt-1 text-[11px] text-slate-500">Blocked confidence</div>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Promotion state</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">{promotionStateDisplay}</div>
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Lifecycle Stage</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">{lifecycleStageDisplay}</div>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Trade Sample</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">{backtestTradeCount}</div>
-                  <div className="mt-1 text-[11px] text-slate-500">{backtestSegmentCount ?? 0} walk-forward segments</div>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Regime Consistency</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">
-                    {regimeConsistencyPct == null ? "Pending" : fmtPlainPct(regimeConsistencyPct, 0)}
+              <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/70">
+                    Promotion confidence
                   </div>
-                  <div className="mt-1 text-[11px] text-slate-500">{validationPostureDisplay}</div>
+                  <h3 className="mt-1 text-base font-semibold text-white">
+                    Backtest → forward-test readiness
+                  </h3>
+                  <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+                    This score does not mean the strategy cannot fail. It measures whether the current configuration is difficult to fool:
+                    walk-forward survival, same-engine live signals, benchmark comparison, drawdown control, sample size, regime consistency,
+                    and automatic failure flags.
+                  </p>
                 </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusPill tone={productionTone(confidenceStage)}>{confidenceStage}</StatusPill>
+                  <StatusPill tone="neutral">5/10 gates</StatusPill>
+                </div>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                <MiniMetric
+                  label="Survival Score"
+                  value={`${validationDisplay.survivalScore}/100`}
+                  sub="Penalized confidence"
+                />
+                <MiniMetric
+                  label="Lifecycle Stage"
+                  value={confidenceStage}
+                  sub="Promotion state"
+                />
+                <MiniMetric
+                  label="Trade Sample"
+                  value={`${backtestTradeCount}`}
+                  sub={backtestSegmentCount == null ? "segments pending" : `${backtestSegmentCount} walk-forward segments`}
+                />
+                <MiniMetric
+                  label="Regime Consistency"
+                  value={regimeConsistencyPct == null ? "Pending" : fmtPlainPct(regimeConsistencyPct, 0)}
+                  sub={regime}
+                />
               </div>
 
               <div className="mt-5 grid gap-3 lg:grid-cols-2">
@@ -2889,11 +2858,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                         {gate.passed ? "Pass" : "Watch"}
                       </StatusPill>
                     </div>
-                    <div className="mt-3 text-sm font-semibold text-slate-200">
-                      {String(gate.value)
-                        .replace("1 / 3 segments", "1 of 3 required segments")
-                        .replace("8 signals, blocked", "8 live signals, promotion blocked")}
-                    </div>
+                    <div className="mt-3 text-sm font-semibold text-slate-200">{gate.value}</div>
                   </div>
                 ))}
               </div>
@@ -2902,21 +2867,165 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                 <div className="mt-5 rounded-2xl border border-rose-400/20 bg-rose-400/10 p-4">
                   <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-rose-100">
                     <AlertTriangle className="h-4 w-4" />
-                    Promotion blockers
+                    Automatic failure detection
                   </div>
                   <div className="space-y-1 text-sm text-rose-100/80">
-                    {readableFailureFlags.map((flag) => (
+                    {failureFlags.map((flag) => (
                       <div key={flag}>• {flag}</div>
                     ))}
                   </div>
                 </div>
               ) : (
                 <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-100/80">
-                  No active frontend failure flags detected for the current market state.
+                  Active validation blockers detected for the current market state.
                 </div>
               )}
             </div>
-          </div>
+
+            <SectionShell
+              className="min-w-0 bg-white/[0.035] mt-8"
+              eyebrow="Current Portfolio Performance"
+              title="Portfolio past performance"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-2xl font-semibold text-white">
+                    {hasPortfolioProjectionData && displayedPortfolioEquity !== null ? fmtCurrency(displayedPortfolioEquity) : "—"}
+                  </div>
+                </div>
+
+                {hasPortfolioProjectionData && displayedPortfolioReturnPct !== null ? (
+                  <StatusPill tone={Number(displayedPortfolioReturnPct) >= 0 ? "good" : "bad"}>
+                    {fmtPct(displayedPortfolioReturnPct)}
+                  </StatusPill>
+                ) : null}
+              </div>
+
+              <div className="h-[160px] min-w-0 overflow-hidden">
+                {!hasPortfolioProjectionData ? (
+                  <div className="grid h-full min-h-[160px] place-items-center text-xs text-slate-500">
+                    {portfolioRefreshing ? "Building portfolio projection..." : "Portfolio history unavailable"}
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="99%" height={160}>
+                    <AreaChart
+                      data={displayedPortfolioHistory}
+                      margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+                    >
+                      <defs>
+                        <linearGradient id="portfolioPerformancePath" x1="0" x2="0" y1="0" y2="1">
+                          <stop offset="0%" stopColor="#38bdf8" stopOpacity={0.28} />
+                          <stop offset="100%" stopColor="#38bdf8" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+
+                      <XAxis dataKey="index" hide />
+                      <YAxis domain={["dataMin", "dataMax"]} hide />
+
+                      <Tooltip
+                        content={({ active, payload }) =>
+                          active && payload?.length ? (
+                            <div className="rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-slate-200 shadow-xl">
+                              <div className="font-medium text-white">
+                                {fmtCurrency(Number(payload[0].payload.equity))}
+                              </div>
+                              <div className="text-slate-500">
+                                {fmtPct(Number(payload[0].payload.returnPct))}
+                              </div>
+                            </div>
+                          ) : null
+                        }
+                      />
+
+                      <Area
+                        type="monotone"
+                        dataKey="equity"
+                        stroke="#38bdf8"
+                        strokeWidth={2.5}
+                        fill="url(#portfolioPerformancePath)"
+                        dot={false}
+                        isAnimationActive={false}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </SectionShell>
+
+            <SectionShell
+              className="min-w-0 bg-white/[0.035] mt-5"
+              eyebrow="Backtested strategy performance"
+              title={commissionBps > 0 || (frontendSlippageBps ?? 0) > 0 ? "Walk-forward strategy performance · Cost adjusted" : "Walk-forward strategy performance"}
+            >
+              <div className="flex items-center">
+                <div>
+                  <div className="text-2xl font-semibold text-white">
+                    {hasBacktestCurve && displayedBacktestEquity !== null ? fmtCurrency(displayedBacktestEquity) : "—"}
+                  </div>
+                </div>
+
+                {hasBacktestCurve && displayedBacktestReturnPct !== null ? (
+                  <StatusPill tone={Number(displayedBacktestReturnPct) >= 0 ? "good" : "bad"}>
+                    {fmtPct(displayedBacktestReturnPct)}
+                  </StatusPill>
+                ) : null}
+              </div>
+
+              <div className="h-[160px] min-w-0 overflow-hidden">
+                {!hasBacktestCurve ? (
+                  <div className="grid h-full min-h-[160px] place-items-center text-xs text-slate-500">
+                    {portfolioRefreshing ? "Building strategy backtest..." : "Walk-forward backtest unavailable. Run walk-forward-market after syncing 4-year price history."}
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="99%" height={160}>
+                    <AreaChart
+                      data={displayedBacktestHistory}
+                      margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+                    >
+                      <defs>
+                        <linearGradient id="strategyBacktestPath" x1="0" x2="0" y1="0" y2="1">
+                          <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.28} />
+                          <stop offset="100%" stopColor="#a78bfa" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+
+                      <XAxis dataKey="index" hide />
+                      <YAxis domain={["dataMin", "dataMax"]} hide />
+
+                      <Tooltip
+                        content={({ active, payload }) =>
+                          active && payload?.length ? (
+                            <div className="rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-slate-200 shadow-xl">
+                              <div className="font-medium text-white">
+                                {fmtCurrency(Number(payload[0].payload.equity))}
+                              </div>
+                              <div className="text-slate-500">
+                                {fmtPct(Number(payload[0].payload.returnPct))}
+                              </div>
+                              <div className="text-slate-500">
+                                Positions {Number(payload[0].payload.positionsCount ?? 0)}
+                              </div>
+                            </div>
+                          ) : null
+                        }
+                      />
+
+                      <Area
+                        type="monotone"
+                        dataKey="equity"
+                        stroke="#a78bfa"
+                        strokeWidth={2.5}
+                        fill="url(#strategyBacktestPath)"
+                        dot={false}
+                        isAnimationActive={false}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </SectionShell>
+
+          </SectionShell>
         </section>
 
         <section className="mb-6 grid min-w-0 gap-5">
@@ -3029,7 +3138,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                         );
                       }}
                     />
-                    <Scatter data={asChartData(surface)} fill="#34d399" />
+                    <Scatter data={surface} fill="#34d399" />
                   </ScatterChart>
                 </ResponsiveContainer>
               )}

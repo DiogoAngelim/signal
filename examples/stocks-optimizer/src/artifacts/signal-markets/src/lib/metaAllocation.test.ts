@@ -4,6 +4,9 @@ import {
   classifyMarketRegime,
   decideMetaAllocation,
   forecastSignalSurvival,
+  getCalibrationState,
+  RollingCalibrationTracker,
+  updateCalibration,
   type DiagnosticInputs,
 } from "./metaAllocation";
 
@@ -86,6 +89,19 @@ describe("meta allocation governors", () => {
 
   it("shortens holding horizon when survival is low", () => {
     const durable = forecastSignalSurvival({ diagnostics: baseDiagnostics });
+    const moderate = forecastSignalSurvival({
+      diagnostics: {
+        ...baseDiagnostics,
+        holdingQuality: 50,
+        modelDurability: 50,
+        survivalProbability: 50,
+        trendQuality: 50,
+        breadth: 50,
+        regimeStability: 50,
+        volatilityPressure: 60,
+        residualInstability: 50,
+      },
+    });
     const fragile = forecastSignalSurvival({
       diagnostics: {
         ...baseDiagnostics,
@@ -99,6 +115,7 @@ describe("meta allocation governors", () => {
       recentSignalReversals: 2,
     });
 
+    expect(moderate.breakdownRisk).toBe("moderate");
     expect(fragile.recommendedHoldingMinutes).toBeLessThan(durable.recommendedHoldingMinutes);
   });
 
@@ -126,5 +143,75 @@ describe("meta allocation governors", () => {
     });
 
     expect(gamedProxy.exposureMultiplier).toBeLessThan(clean.exposureMultiplier);
+  });
+
+  it("normalizes every realized outcome shape in rolling calibration", () => {
+    const tracker = new RollingCalibrationTracker(2);
+
+    tracker.updateCalibration({ predictedProbability: 72 }, { success: true });
+    tracker.updateCalibration(0.2, { outcomeQuality: 35 });
+    const state = tracker.updateCalibration(Number.NaN, { realizedReturn: -3 });
+    const fallbackOutcomeState = tracker.updateCalibration(0.5, {});
+
+    expect(state.sampleSize).toBe(2);
+    expect(fallbackOutcomeState.sampleSize).toBe(2);
+    expect(fallbackOutcomeState.bucketAccuracy.reduce((sum, bucket) => sum + bucket.count, 0)).toBe(2);
+    expect(fallbackOutcomeState.bucketAccuracy[2].count).toBe(2);
+  });
+
+  it("reports default and drifting calibration states", () => {
+    expect(buildCalibrationState([]).bias).toBe("insufficient_data");
+
+    const underconfident = buildCalibrationState([
+      { predictedProbability: 0.2, realizedOutcomeQuality: 0.8 },
+      { predictedProbability: 0.25, realizedOutcomeQuality: 0.85 },
+      { predictedProbability: 0.3, realizedOutcomeQuality: 0.9 },
+      { predictedProbability: 0.35, realizedOutcomeQuality: 0.8 },
+      { predictedProbability: 0.4, realizedOutcomeQuality: 0.85 },
+      { predictedProbability: 0.45, realizedOutcomeQuality: 0.9 },
+      { predictedProbability: 0.5, realizedOutcomeQuality: 0.85 },
+      { predictedProbability: 0.55, realizedOutcomeQuality: 0.95 },
+      { predictedProbability: 0.8, realizedOutcomeQuality: 0.1 },
+    ]);
+
+    expect(underconfident.bias).toBe("underconfident");
+    expect(underconfident.drift).toBeGreaterThan(0);
+  });
+
+  it("classifies low signal and high volatility regimes", () => {
+    expect(classifyMarketRegime({ breadth: 20, entropy: 80 }).regime).toBe("low_signal");
+    expect(classifyMarketRegime({ volatilityPressure: 80, residualInstability: 40 }).regime).toBe("high_volatility");
+  });
+
+  it("tracks calibration through the module-level tracker", () => {
+    const before = getCalibrationState().sampleSize;
+    const state = updateCalibration({ predictedProbability: 0.6 }, { success: false });
+
+    expect(state.sampleSize).toBe(before + 1);
+    expect(getCalibrationState().sampleSize).toBe(before + 1);
+  });
+
+  it("builds a decision from default governors and clamps extreme inputs", () => {
+    const decision = decideMetaAllocation({
+      diagnostics: {
+        entropy: Number.POSITIVE_INFINITY,
+        drift: Number.POSITIVE_INFINITY,
+        breadth: Number.NEGATIVE_INFINITY,
+        residualInstability: Number.POSITIVE_INFINITY,
+        survivalProbability: 20,
+      },
+      survival: {
+        survivalProbability: 30,
+        estimatedHalfLifeMinutes: 30,
+        recommendedHoldingMinutes: 15,
+        breakdownRisk: "unstable",
+        reasons: [],
+      },
+    });
+
+    expect(decision.exposureMultiplier).toBeLessThan(0.4);
+    expect(decision.allocationCap).toBeGreaterThanOrEqual(0.8);
+    expect(decision.reasons).toContain("Missing diagnostics trigger conservative defaults.");
+    expect(decideMetaAllocation({ diagnostics: baseDiagnostics }).regimeRisk).toBe("low");
   });
 });

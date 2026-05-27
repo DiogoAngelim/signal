@@ -3,12 +3,15 @@
   "installCommand": "pnpm install",
   "buildCommand": "pnpm --filter @workspace/api-server build && pnpm --filter @workspace/signal-markets build",
   "outputDirectory": "src/artifacts/signal-markets/dist",
-  "functions": {
-    "api/**/*.js": {
-      "includeFiles": "{api/_quote-cache.js,api/_quote-sync.js,api/_stock-files.js,src/artifacts/signal-markets/public/**}"
-    }
-  },
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/api-catchall.js"
+    },
+    {
+      "source": "/api",
+      "destination": "/api/api-catchall.js"
+    },
     {
       "source": "/stocks/(.*)",
       "destination": "/api/stocks/$1"

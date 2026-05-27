@@ -8,6 +8,20 @@ import {
 import { logger } from "./logger";
 import type { SignalScope } from "./signal-backend";
 
+function shouldSkipLocalQuoteSymbol(symbol: string) {
+  const value = String(symbol ?? "").trim().toUpperCase();
+
+  return (
+    !value ||
+    /\d{3,}$/.test(value) ||
+    /^[A-Z]+\d{3,}$/.test(value) ||
+    value.includes("TEST") ||
+    value.includes("DUMMY")
+  );
+}
+
+
+
 export type OccurrenceOrigin = "historical_backfill" | "live_runtime";
 
 export interface ContextReplayRequest {
@@ -2316,7 +2330,7 @@ async function replayHistoricalMarketContextInternal(
   let lastTimeframe = "";
   const batchSize = Math.min(
     Math.max(Math.floor(request.batchSize ?? DEFAULT_REPLAY_BATCH_SIZE), 1),
-    10_000,
+    30_000,
   );
   const filters: string[] = [];
   const params: unknown[] = [];

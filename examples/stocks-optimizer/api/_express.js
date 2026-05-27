@@ -1,12 +1,9 @@
-const serverless = require("serverless-http");
-
 let cachedHandler;
 
 function getExpressHandler() {
   if (!cachedHandler) {
     const mod = require("../src/artifacts/api-server/dist/app.cjs");
-    const app = mod.default || mod;
-    cachedHandler = serverless(app);
+    cachedHandler = mod.default || mod;
   }
 
   return cachedHandler;
@@ -14,10 +11,16 @@ function getExpressHandler() {
 
 function createRouteHandler(expressPath) {
   return function handler(req, res) {
-    const queryIndex = req.url.indexOf("?");
-    const query = queryIndex >= 0 ? req.url.slice(queryIndex) : "";
+    const rawUrl = req.url ?? "";
+    const queryIndex = rawUrl.indexOf("?");
+    const path = queryIndex >= 0 ? rawUrl.slice(0, queryIndex) : rawUrl;
+    const query = queryIndex >= 0 ? rawUrl.slice(queryIndex) : "";
 
-    req.url = `${expressPath}${query}`;
+    if (path === expressPath || path.startsWith(`${expressPath}/`)) {
+      req.url = `${path}${query}`;
+    } else {
+      req.url = `${expressPath}${path}${query}`;
+    }
     req.originalUrl = req.url;
 
     return getExpressHandler()(req, res);
@@ -26,4 +29,5 @@ function createRouteHandler(expressPath) {
 
 module.exports = {
   createRouteHandler,
+  getExpressHandler,
 };
