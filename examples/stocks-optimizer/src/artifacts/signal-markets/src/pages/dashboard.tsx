@@ -702,15 +702,15 @@ function applyBackendBlockersToConfidenceGates(
 
 function formatPromotionBlocker(flag: string) {
   const labels: Record<string, string> = {
-    INVALID_SHARPE: "Sharpe ratio is computable but statistically unreliable",
-    SUSPICIOUS_SHARPE: "Sharpe ratio is computable but statistically unreliable",
-    ZERO_DRAWDOWN_WITH_TRADES: "Drawdown is suspiciously zero despite many trades",
-    INSUFFICIENT_WALK_FORWARD_SEGMENTS: "Only 1 of 3 required walk-forward segments is available",
-    BENCHMARK_UNDERPERFORMANCE: "Strategy underperformed the benchmark",
-    SEVERE_BENCHMARK_UNDERPERFORMANCE: "Benchmark underperformance is severe",
+    INVALID_SHARPE: "Risk-adjusted return is not reliable enough yet",
+    SUSPICIOUS_SHARPE: "Risk-adjusted return is not reliable enough yet",
+    ZERO_DRAWDOWN_WITH_TRADES: "The drawdown result looks unrealistic",
+    INSUFFICIENT_WALK_FORWARD_SEGMENTS: "More test periods are needed",
+    BENCHMARK_UNDERPERFORMANCE: "The strategy did not beat the simple benchmark",
+    SEVERE_BENCHMARK_UNDERPERFORMANCE: "The strategy was far below the simple benchmark",
     BENCHMARK_COMPARISON_FAILED: "Benchmark comparison failed",
-    INVALID_DRAWDOWN: "Drawdown calculation is unavailable or invalid",
-    BENCHMARK_FAILED: "Strategy failed benchmark validation",
+    INVALID_DRAWDOWN: "Drawdown could not be checked",
+    BENCHMARK_FAILED: "The strategy failed the benchmark check",
   };
 
   return labels[flag] ?? flag;
@@ -722,6 +722,21 @@ function productionTone(stage: string): "good" | "warn" | "bad" | "neutral" {
   if (stage === "Forward-test eligible" || stage === "Research validated") return "warn";
   if (stage === "Not ready") return "bad";
   return "neutral";
+}
+
+function plainStageLabel(value: unknown) {
+  const text = String(value ?? "").trim();
+  const labels: Record<string, string> = {
+    "Production eligible": "Ready for live review",
+    "Forward-test eligible": "Ready for real-time testing",
+    "Research validated": "Research review",
+    "Candidate only": "Idea only",
+    "Not ready": "Not ready",
+    "Promotion blocked": "Blocked",
+    Blocked: "Blocked",
+  };
+
+  return labels[text] ?? text;
 }
 
 
@@ -792,12 +807,12 @@ function inferIntelligence(stock: DisplayStock): IntelligenceStock {
 
   const explanation =
     mandate === "Avoid / Reduce"
-      ? "Risk pressure is rising faster than setup quality. Keep exposure limited until conditions stabilize."
+      ? "Risk is rising faster than the opportunity. Keep the position small until conditions improve."
       : setupQuality >= 70
-        ? "Relative strength is improving with controlled downside pressure. Add gradually while breadth confirms."
+        ? "The trend is improving and risk is controlled. Consider adding gradually."
         : setupQuality >= 58
-          ? "This instrument ranks well for selective exposure, but sizing should remain cautious until broader participation and validation improve."
-          : "Opportunity quality remains uneven. Wait for cleaner confirmation before committing meaningful capital.";
+          ? "This looks reasonable, but position size should stay limited until there is more confirmation."
+          : "The signal is not clear enough yet. Wait for stronger confirmation before adding money.";
 
   return {
     ...stock,
@@ -1176,10 +1191,10 @@ function InstrumentAvatar({ instrument }: { instrument: any }) {
 
 function MiniMetric({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3">
-      <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">{label}</div>
-      <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-50">{value}</div>
-      {sub ? <div className="mt-1 text-xs text-slate-500">{sub}</div> : null}
+    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">{label}</div>
+      <div className="mt-2 text-2xl font-semibold tracking-tight text-white">{value}</div>
+      {sub ? <div className="mt-1 text-xs text-zinc-500">{sub}</div> : null}
     </div>
   );
 }
@@ -1198,14 +1213,14 @@ function SectionShell({
   className?: string;
 }) {
   return (
-    <section className={cx("rounded-[2rem] border border-white/10 bg-slate-950/70 p-5 shadow-2xl shadow-black/20 backdrop-blur", className)}>
-      <div className="mb-5 flex items-start justify-between gap-4">
-        <div>
-          {eyebrow ? <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/70">{eyebrow}</div> : null}
-          <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-50">{title}</h2>
+    <section className={cx("rounded-xl border border-white/10 bg-[#0f0f0f] p-5 shadow-2xl shadow-black/20", className)}>
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          {eyebrow ? <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#FDD000]">{eyebrow}</div> : null}
+          <h2 className="mt-1 text-lg font-semibold tracking-tight text-white">{title}</h2>
         </div>
+        {action ? <div className="shrink-0">{action}</div> : null}
       </div>
-      {action}
       {children}
     </section>
   );
@@ -1215,12 +1230,12 @@ function QualityBar({ value, label }: { value: number; label?: string }) {
   return (
     <div>
       <div className="mb-1 flex justify-between text-[11px] text-slate-500">
-        <span>{label ?? "Opportunity Quality"}</span>
+        <span>{label ?? "Quality score"}</span>
         <span>{Math.round(value)}/100</span>
       </div>
-      <div className="h-2 rounded-full bg-slate-800">
+      <div className="h-2 rounded-full bg-zinc-800">
         <div
-          className="h-2 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-300"
+          className="h-2 rounded-full bg-[#FDD000]"
           style={{ width: `${clamp(value)}%` }}
         />
       </div>
@@ -1233,10 +1248,10 @@ function StatusPill({ children, tone = "neutral" }: { children: React.ReactNode;
     <span
       className={cx(
         "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium",
-        tone === "good" && "border-emerald-400/20 bg-emerald-400/10 text-emerald-200",
-        tone === "warn" && "border-amber-400/20 bg-amber-400/10 text-amber-200",
-        tone === "bad" && "border-rose-400/20 bg-rose-400/10 text-rose-200",
-        tone === "neutral" && "border-white/10 bg-white/[0.04] text-slate-300",
+        tone === "good" && "border-[#FDD000]/40 bg-[#FDD000] text-black",
+        tone === "warn" && "border-[#FDD000]/30 bg-[#FDD000]/15 text-[#FDD000]",
+        tone === "bad" && "border-red-400/30 bg-red-500/10 text-red-200",
+        tone === "neutral" && "border-white/10 bg-white/[0.04] text-zinc-200",
       )}
     >
       {children}
@@ -1260,28 +1275,28 @@ function AllocationLedgerTable({
   const tone = action === "Buy" ? "good" : action === "Sell" ? "bad" : "neutral";
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.025]">
+    <div className="overflow-hidden rounded-xl border border-white/10 bg-[#151515]">
       <div className="flex flex-col gap-3 border-b border-white/10 bg-white/[0.035] px-4 py-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
           <StatusPill tone={tone}>{action}</StatusPill>
           <div>
             <div className="text-sm font-semibold text-white">{action}</div>
-            <div className="text-xs text-slate-500">{items.length} instruments</div>
+            <div className="text-xs text-zinc-500">{items.length} items</div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-[0.6fr_0.7fr_0.7fr] bg-white/[0.025] px-4 py-3 text-[9px] uppercase tracking-[0.16em] text-slate-500">
-        <div>Instrument</div>
-        <div>Cautious Position Cap</div>
-        <div>Opportunity Quality</div>
+      <div className="grid grid-cols-[0.8fr_0.6fr_0.6fr] bg-white/[0.025] px-4 py-3 text-[9px] uppercase tracking-[0.16em] text-zinc-500">
+        <div>Asset</div>
+        <div>Max position</div>
+        <div>Score</div>
       </div>
 
-      <div className="max-h-[360px] divide-y divide-white/10 overflow-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-700/40 hover:[&::-webkit-scrollbar-thumb]:bg-slate-500/60 [&::-webkit-scrollbar-corner]:bg-transparent">
+      <div className="max-h-[360px] divide-y divide-white/10 overflow-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-700/60 hover:[&::-webkit-scrollbar-thumb]:bg-zinc-500/80 [&::-webkit-scrollbar-corner]:bg-transparent">
         {loading ? (
-          <div className="flex items-center gap-3 px-4 py-8 text-sm text-slate-400">
+          <div className="flex items-center gap-3 px-4 py-8 text-sm text-zinc-400">
             <RefreshCw className="h-4 w-4 animate-spin" />
-            Loading institutional coverage...
+            Loading market data...
           </div>
         ) : items.length ? (
           items.slice(0, 40).map((stock) => {
@@ -1295,23 +1310,23 @@ function AllocationLedgerTable({
                 onClick={() => onSelectInstrument(ticker)}
                 className={cx(
                   "grid w-full grid-cols-[1.2fr_0.7fr_0.7fr] items-center px-4 py-4 text-left text-sm transition hover:bg-white/[0.04]",
-                  isSelected && "bg-emerald-300/10",
+                  isSelected && "bg-[#FDD000]/10",
                 )}
               >
                 <div>
                   <div className="font-semibold text-white">{ticker}</div>
-                  <div className="mt-1 line-clamp-1 text-xs text-slate-500">{stockName(stock)}</div>
-                  <div className="mt-1 text-[11px] text-slate-600">
+                  <div className="mt-1 line-clamp-1 text-xs text-zinc-500">{stockName(stock)}</div>
+                  <div className="mt-1 text-[11px] text-zinc-600">
                     {stock.status ?? "Stable"} · {dataCoverageLabel(stock)}
                   </div>
                 </div>
-                <div className="text-slate-300">{fmtPlainPct(stock.suggestedExposure)}</div>
+                <div className="text-zinc-300">{fmtPlainPct(stock.suggestedExposure)}</div>
                 <div className="font-medium text-slate-100">{Math.round(stock.setupQuality)}%</div>
               </button>
             );
           })
         ) : (
-          <div className="px-4 py-8 text-sm text-slate-500">
+          <div className="px-4 py-8 text-sm text-zinc-500">
             No {action.toLowerCase()} instruments match the current search.
           </div>
         )}
@@ -2190,10 +2205,10 @@ export default function Dashboard() {
     !hasMarketData ? "Market data unavailable" : null,
     hasMarketData && !hasProvidedSignals ? "No confirmed live/forward signals" : null,
     hasBacktestData && displayedBacktestMaxDrawdownPct != null && Number(displayedBacktestMaxDrawdownPct) > 25
-      ? "Backtest drawdown above 25%"
+      ? "Past loss level was above 25%"
       : null,
     hasBacktestData && displayedBacktestSharpe != null && Number(displayedBacktestSharpe) < 0.5
-      ? "Sharpe below minimum threshold"
+      ? "Risk-adjusted return is below the minimum"
       : null,
     hasBacktestData && displayedBacktestProfitFactor != null && Number(displayedBacktestProfitFactor) < 1
       ? "Profit factor below 1"
@@ -2224,18 +2239,18 @@ export default function Dashboard() {
   const baseConfidenceGates: ConfidenceGate[] = [
     {
       key: "walkForward",
-      label: "Walk-forward result",
+      label: "Tested over time",
       passed: hasBacktestCurve,
       value: hasBacktestCurve ? "Available" : "Missing",
-      reason: "Backtest confidence requires rolling out-of-sample history, not only a static snapshot.",
+      reason: "The strategy should be tested across different time periods, not just one snapshot.",
       severity: hasBacktestCurve ? "good" : "bad",
     },
     {
       key: "sameEngine",
-      label: "Live-engine signal match",
+      label: "Live signal match",
       passed: hasProvidedSignals,
       value: hasProvidedSignals ? `${strategySignals.length} signals` : "No confirmed signals",
-      reason: "Forward confidence requires current signals produced by the same strategy engine used for historical testing.",
+      reason: "Current signals should come from the same strategy that was tested in the past.",
       severity: hasProvidedSignals ? "good" : "bad",
     },
     {
@@ -2243,23 +2258,23 @@ export default function Dashboard() {
       label: "Positive return",
       passed: hasBacktestMetrics && Number(displayedBacktestReturnPct) > 0,
       value: fmtPct(displayedBacktestReturnPct),
-      reason: "The tested configuration must produce positive net return after modeled costs.",
+      reason: "The tested strategy should be positive after estimated costs.",
       severity: hasBacktestMetrics && Number(displayedBacktestReturnPct) > 0 ? "good" : "warn",
     },
     {
       key: "riskAdjusted",
-      label: "Risk-adjusted quality",
+      label: "Return for the risk",
       passed: displayedBacktestSharpe != null && Number(displayedBacktestSharpe) >= 0.75,
       value: displayedBacktestSharpe == null ? "—" : Number(displayedBacktestSharpe).toFixed(2),
-      reason: "A strategy should earn enough return per unit of volatility before promotion.",
+      reason: "The return should be strong enough for the amount of volatility.",
       severity: displayedBacktestSharpe != null && Number(displayedBacktestSharpe) >= 0.75 ? "good" : "warn",
     },
     {
       key: "drawdown",
-      label: "Drawdown control",
+      label: "Loss control",
       passed: displayedBacktestMaxDrawdownPct != null && Number(displayedBacktestMaxDrawdownPct) <= 18,
       value: fmtPlainPct(displayedBacktestMaxDrawdownPct),
-      reason: "Promotion is blocked when historical drawdown is too large relative to the expected return.",
+      reason: "Large past losses make the strategy harder to trust.",
       severity: displayedBacktestMaxDrawdownPct != null && Number(displayedBacktestMaxDrawdownPct) <= 18 ? "good" : "bad",
     },
     {
@@ -2272,7 +2287,7 @@ export default function Dashboard() {
           : Number(displayedBacktestProfitFactor) >= 999 || displayedBacktestProfitFactor === Infinity
             ? "∞"
             : Number(displayedBacktestProfitFactor).toFixed(2),
-      reason: "Gross wins should exceed gross losses by a meaningful margin.",
+      reason: "Winning trades should outweigh losing trades by a clear margin.",
       severity: displayedBacktestProfitFactor != null && Number(displayedBacktestProfitFactor) >= 1.15 ? "good" : "warn",
     },
     {
@@ -2280,7 +2295,7 @@ export default function Dashboard() {
       label: "Sample size",
       passed: backtestTradeCount >= 30,
       value: `${backtestTradeCount} trades`,
-      reason: "Low trade counts are easy to overfit and should stay in research mode.",
+      reason: "A small number of trades is less reliable.",
       severity: backtestTradeCount >= 30 ? "good" : "warn",
     },
     {
@@ -2293,15 +2308,15 @@ export default function Dashboard() {
           : benchmarkPass
             ? "Passed"
             : "Failed",
-      reason: "The strategy should beat or at least defend well against a simple benchmark.",
+      reason: "The strategy should compare well with a simple buy-and-hold benchmark.",
       severity: benchmarkPass === true ? "good" : benchmarkPass === false ? "bad" : "neutral",
     },
     {
       key: "regime",
-      label: "Regime consistency",
+      label: "Similar market check",
       passed: regimeConsistencyPct == null || regimeConsistencyPct >= 50,
       value: regimeConsistencyPct == null ? "Pending" : fmtPlainPct(regimeConsistencyPct, 0),
-      reason: "Confidence improves when the strategy survives across comparable regime conditions instead of only one lucky window.",
+      reason: "Confidence improves when results hold up in similar market conditions.",
       severity: regimeConsistencyPct == null ? "neutral" : regimeConsistencyPct >= 50 ? "good" : "warn",
     },
     {
@@ -2309,7 +2324,7 @@ export default function Dashboard() {
       label: "Data freshness",
       passed: !staleData,
       value: staleData ? "Stale" : "Fresh",
-      reason: "The system should not promote or trust signals when quote or signal state is stale.",
+      reason: "Old price or signal data should not be trusted.",
       severity: staleData ? "bad" : "good",
     },
   ];
@@ -2503,37 +2518,31 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
   const passedGateCount = confidenceGates.filter((gate) => gate.passed).length;
 
   const lifecycleStageDisplay = hasBackendPromotionTruth
-    ? "Research validated"
-    : String(backtestSummary?.lifecycleStage ?? confidenceStage);
+    ? plainStageLabel("Research validated")
+    : plainStageLabel(backtestSummary?.lifecycleStage ?? confidenceStage);
 
   const promotionStateDisplay = hasBackendPromotionTruth
-    ? "Promotion blocked"
-    : String(backtestSummary?.promotionState ?? confidenceStage);
+    ? plainStageLabel("Promotion blocked")
+    : plainStageLabel(backtestSummary?.promotionState ?? confidenceStage);
 
   const validationPostureDisplay = hasBackendPromotionTruth
-    ? "Blocked by validation"
-    : String(backtestSummary?.regime ?? regime);
+    ? "Blocked by checks"
+    : plainStageLabel(backtestSummary?.regime ?? regime);
 
   const readableFailureFlags = failureFlags.map(formatPromotionBlocker);
 
 
   return (
-    <div className="min-h-screen bg-[#05070b] text-slate-100">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute left-[-20%] top-[-20%] h-[620px] w-[620px] rounded-full bg-emerald-500/10 blur-3xl" />
-        <div className="absolute right-[-18%] top-[10%] h-[520px] w-[520px] rounded-full bg-cyan-500/10 blur-3xl" />
-      </div>
-
+    <div className="min-h-screen bg-black text-white">
       <main className="relative mx-auto max-w-[1500px] px-5 py-6 lg:px-8">
-        <header className="mb-6 flex flex-col gap-4 rounded-[2rem] border border-white/10 bg-white/[0.035] p-4 backdrop-blur lg:flex-row lg:items-center lg:justify-between">
+        <header className="mb-6 flex flex-col gap-4 rounded-xl border border-white/10 bg-[#0f0f0f] p-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
-            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-400/10 text-emerald-300 ring-1 ring-emerald-300/20">
+            <div className="grid h-12 w-12 place-items-center rounded-lg bg-[#FDD000] text-black">
               <Brain className="h-6 w-6" />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Capital Allocation Intelligence</div>
-              <div className="text-[10px] text-slate-600">Dashboard build marker: gate-display-v2</div>
-              <h1 className="text-2xl font-semibold tracking-tight text-white">Naubly market terminal</h1>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#FDD000]">Investment dashboard</div>
+              <h1 className="text-2xl font-semibold tracking-tight text-white">Market overview</h1>
             </div>
           </div>
 
@@ -2541,7 +2550,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
             <select
               value={marketFilter}
               onChange={(event) => setMarketFilter(event.target.value)}
-              className="h-11 rounded-2xl border border-white/10 bg-slate-950 px-4 text-sm text-slate-100 outline-none ring-0"
+              className="h-11 rounded-lg border border-white/10 bg-black px-4 text-sm text-white outline-none ring-0"
             >
               {markets.map((market) => (
                 <option key={marketCode(market)} value={marketCode(market)}>
@@ -2553,28 +2562,28 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
             <button
               type="button"
               onClick={() => void refreshQuotes(marketFilter, stocks, true)}
-              className="inline-flex h-11 items-center gap-2 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 px-4 text-sm font-medium text-emerald-200 transition hover:bg-emerald-300/15"
+              className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#FDD000] bg-[#FDD000] px-4 text-sm font-semibold text-black transition hover:bg-[#ffe45c]"
             >
               <RefreshCw className={cx("h-4 w-4", refreshingQuotes && "animate-spin")} />
-              Refresh
+              Update data
             </button>
           </div>
         </header>
 
         {refreshError ? (
-          <div className="mb-5 flex items-center gap-3 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+          <div className="mb-5 flex items-center gap-3 rounded-lg border border-[#FDD000]/30 bg-[#FDD000]/10 px-4 py-3 text-sm text-[#FDD000]">
             <AlertTriangle className="h-4 w-4" />
             {refreshError}
           </div>
         ) : null}
 
-        <section className="mb-6 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(360px,0.8fr)]">
-          <div className="relative overflow-hidden rounded-[2.25rem] border border-emerald-300/15 bg-gradient-to-br from-slate-950 via-slate-950 to-emerald-950/30 p-7 shadow-2xl shadow-black/30">
+        <section className="mb-6 grid min-w-0 items-stretch gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.85fr)]">
+          <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#111] p-7 shadow-2xl shadow-black/30">
             <div className="max-w-3xl">
               <div className="mb-4 flex flex-wrap gap-2">
                 <div
                   className={`top-8 hidden rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] lg:block ${marketStatus === "Open"
-                    ? "border-emerald-300/10 bg-emerald-300/5 text-emerald-200"
+                    ? "border-[#FDD000]/30 bg-[#FDD000]/10 text-[#FDD000]"
                     : "border-red-300/10 bg-red-300/5 text-red-200"
                     }`}
                 >
@@ -2586,67 +2595,67 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
               </div>
 
               <h2 className="text-4xl font-semibold tracking-tight text-white md:text-5xl">
-                {hasMarketData ? regime : "Loading market intelligence"}
+                {hasMarketData ? regime : "Loading market view"}
               </h2>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">
+              <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-300">
                 {!hasMarketData
-                  ? "Loading market coverage, quote state, and regime context for the selected venue."
+                  ? "Loading prices, signals, and basic market context for the selected market."
                   : avgRisk != null && avgRisk > 72
-                    ? "Market conditions remain unstable. Naubly recommends capital preservation and reduced exposure until volatility stabilizes."
+                    ? "Market conditions look unstable. Keep more money in cash until volatility cools down."
                     : targetExposure < 35
-                      ? "Conditions are constructive but selective. Exposure should remain disciplined until participation broadens."
-                      : "Trend conditions are improving, but confirmation is still incomplete. The system supports gradual exposure increases while risk pressure remains controlled."}
+                      ? "Conditions are improving, but only a few assets qualify. Keep position sizes small."
+                      : "The trend is improving. Add exposure gradually while risk remains controlled."}
               </p>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
-                <MiniMetric label="Cautious market exposure cap" value={hasProvidedSignals ? fmtPlainPct(targetExposure) : "—"} />
-                <MiniMetric label="Confidence in current regime" value={confidence == null ? "—" : fmtPlainPct(confidence, 0)} />
+                <MiniMetric label="Suggested maximum exposure" value={hasProvidedSignals ? fmtPlainPct(targetExposure) : "—"} />
+                <MiniMetric label="Confidence score" value={confidence == null ? "—" : fmtPlainPct(confidence, 0)} />
               </div>
             </div>
           </div>
 
-          <SectionShell eyebrow="Portfolio posture" title={hasMarketData ? mandate : "Loading Mandate"}>
+          <SectionShell eyebrow="Portfolio posture" title={hasMarketData ? mandate : "Loading suggested action"}>
             <div className="space-y-5">
-              <p className="text-sm leading-6 text-slate-400">
+              <p className="text-sm leading-6 text-zinc-400">
                 {!hasMarketData
-                  ? "Waiting for the selected market to load enough instruments and quote context."
+                  ? "Waiting for enough market data to make a simple suggestion."
                   : avgRisk != null && avgRisk > 72
-                    ? "Risk pressure is elevated. Preserve optionality and avoid forcing entries."
+                    ? "Risk is high. Avoid forcing new buys."
                     : targetExposure > 30
-                      ? "Risk conditions remain acceptable. Position sizes should increase only where opportunity quality and participation evidence are strongest."
-                      : "Keep capital flexible. These are candidates for review, not automatic buy signals."}
+                      ? "Risk is acceptable. Increase only the clearest positions."
+                      : "Stay flexible. These are ideas to review, not automatic buy orders."}
               </p>
               {hasMarketData ? (
                 <>
-                  <QualityBar value={avgRisk == null ? 0 : 100 - avgRisk} label="Risk Pressure" />
-                  <QualityBar value={hasProvidedSignals ? breadth : 0} label="Market Participation" />
+                  <QualityBar value={avgRisk == null ? 0 : 100 - avgRisk} label="Risk control" />
+                  <QualityBar value={hasProvidedSignals ? breadth : 0} label="Market participation" />
                 </>
               ) : (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-5 text-sm text-slate-500">
-                  Market mandate loading...
+                <div className="rounded-lg border border-white/10 bg-white/[0.035] px-4 py-5 text-sm text-zinc-500">
+                  Suggested action is loading...
                 </div>
               )}
             </div>
           </SectionShell>
         </section>
 
-        <section className="mb-6 grid min-w-0 gap-5 mb-6 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+        <section className="mb-6 grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(420px,0.85fr)]">
           <SectionShell
-            eyebrow="Highest-ranked selective candidates"
-            title="Priority candidates under current conditions"
+            eyebrow="Investment ideas"
+            title="Top ideas for this market"
             action={<StatusPill tone="neutral">Top 5</StatusPill>}
           >
             {!hasMarketData ? (
-              <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.035] px-4 py-8 text-sm text-slate-500">
-                Loading allocation candidates for the selected market...
+              <div className="mt-6 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-8 text-sm text-zinc-500">
+                Loading ideas for the selected market...
               </div>
             ) : !topOpportunities.length ? (
-              <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.035] px-4 py-8 text-sm text-slate-500">
-                No Buy candidates currently qualify under the active regime and risk filters.
+              <div className="mt-6 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-8 text-sm text-zinc-500">
+                No buy ideas pass the current risk checks.
               </div>
             ) : null}
 
-            <div className="grid gap-3 lg:grid-cols-2 mt-6">
+            <div className="mt-6 grid gap-3 lg:grid-cols-2">
               {hasMarketData && topOpportunities.map((stock, index) => {
                 const ticker = normalizedTicker(stock);
                 const isSelected = selected ? normalizedTicker(selected) === ticker : false;
@@ -2664,20 +2673,20 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                         setIsSelectedCardFlipped(true);
                       }
                     }}
-                    className="relative min-h-[320px] rounded-[1.5rem] text-left outline-none [perspective:1400px]"
-                    aria-label={isSelected && isFlipped ? "Show selected instrument summary" : "Show selected instrument history"}
+                    className="relative min-h-[320px] rounded-xl text-left outline-none [perspective:1400px]"
+                    aria-label={isSelected && isFlipped ? "Show asset summary" : "Show asset price history"}
                   >
                     <div
                       className={cx(
-                        "relative min-h-[320px] rounded-[1.5rem] transition-transform duration-500 [transform-style:preserve-3d]",
+                        "relative min-h-[320px] rounded-xl transition-transform duration-500 [transform-style:preserve-3d]",
                         isFlipped && "[transform:rotateY(180deg)]",
                       )}
                     >
                       <div
                         className={cx(
-                          "absolute inset-0 rounded-[1.5rem] border p-4 transition hover:-translate-y-0.5 hover:bg-white/[0.06] [backface-visibility:hidden]",
+                          "absolute inset-0 rounded-xl border p-4 transition hover:-translate-y-0.5 hover:bg-white/[0.06] [backface-visibility:hidden]",
                           isSelected
-                            ? "border-emerald-300/40 bg-emerald-300/10"
+                            ? "border-[#FDD000]/50 bg-[#FDD000]/10"
                             : "border-white/10 bg-white/[0.035]",
                         )}
                       >
@@ -2686,7 +2695,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                             <InstrumentAvatar instrument={mergeCandidateVisual(stock)} />
                             <div className="min-w-0">
                               <div className="truncate text-lg font-semibold text-white">{ticker}</div>
-                              <div className="mt-1 text-[11px] uppercase tracking-[0.16em] text-slate-500">
+                              <div className="mt-1 text-[11px] uppercase tracking-[0.16em] text-zinc-500">
                                 #{index + 1} · {dataCoverageLabel(stock)}
                               </div>
                             </div>
@@ -2694,47 +2703,47 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                         </div>
 
                         <div className="mt-5 space-y-3">
-                          <QualityBar value={stock.setupQuality} label="Opportunity quality" />
-                          <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
+                          <QualityBar value={stock.setupQuality} label="Quality score" />
+                          <div className="grid grid-cols-2 gap-2 text-xs text-zinc-400">
                             <div>
-                              <div className="text-slate-500">Cautious Position Cap</div>
+                              <div className="text-zinc-500">Max position</div>
                               <div className="font-semibold text-slate-100">{fmtPlainPct(stock.suggestedExposure)}</div>
                             </div>
                             <div>
-                              <div className="text-slate-500">Expected Return Range</div>
+                              <div className="text-zinc-500">Expected change</div>
                               <div className="font-semibold text-slate-100">{fmtPct(stock.expectedMove)}</div>
                             </div>
                           </div>
-                          <p className="line-clamp-3 text-xs leading-5 text-slate-400">{stock.explanation}</p>
+                          <p className="line-clamp-3 text-xs leading-5 text-zinc-400">{stock.explanation}</p>
                         </div>
                       </div>
 
-                      <div className="absolute inset-0 rounded-[1.5rem] border border-emerald-300/30 bg-slate-950/95 p-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                      <div className="absolute inset-0 rounded-xl border border-[#FDD000]/40 bg-black p-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
                         <div className="mb-4 flex items-center justify-between gap-3">
                           <div>
-                            <div className="text-[11px] uppercase tracking-[0.18em] text-emerald-300/70">Selected Instrument Return Path</div>
+                            <div className="text-[11px] uppercase tracking-[0.18em] text-[#FDD000]">Price history</div>
                             <div className="mt-1 text-lg font-semibold text-white">{ticker}</div>
-                            <div className="line-clamp-1 text-xs text-slate-500">{stockName(stock)}</div>
+                            <div className="line-clamp-1 text-xs text-zinc-500">{stockName(stock)}</div>
                           </div>
                           <StatusPill tone={stock.expectedMove >= 0 ? "good" : "bad"}>{fmtPct(stock.expectedMove)}</StatusPill>
                         </div>
 
                         <div className="h-[200px] min-w-0 overflow-hidden">
                           {selectedHistoryLoading ? (
-                            <div className="grid h-full place-items-center text-xs text-slate-500">
+                            <div className="grid h-full place-items-center text-xs text-zinc-500">
                               Loading return path...
                             </div>
                           ) : !isFlipped || history.length < 2 ? (
-                            <div className="grid h-full min-h-[210px] place-items-center text-xs text-slate-500">
-                              {history.length < 2 ? "Return path unavailable" : "Open historical return path"}
+                            <div className="grid h-full min-h-[210px] place-items-center text-xs text-zinc-500">
+                              {history.length < 2 ? "Price history unavailable" : "Open price history"}
                             </div>
                           ) : (
                             <ResponsiveContainer width="99%" height={210}>
                               <AreaChart data={asChartData(history)} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                                 <defs>
                                   <linearGradient id={`institutionalPath-${ticker}`} x1="0" x2="0" y1="0" y2="1">
-                                    <stop offset="0%" stopColor="#34d399" stopOpacity={0.28} />
-                                    <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
+                                    <stop offset="0%" stopColor="#FDD000" stopOpacity={0.28} />
+                                    <stop offset="100%" stopColor="#FDD000" stopOpacity={0} />
                                   </linearGradient>
                                 </defs>
                                 <XAxis dataKey="index" hide />
@@ -2742,7 +2751,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                                 <Tooltip
                                   content={({ active, payload }) =>
                                     active && payload?.length ? (
-                                      <div className="rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-slate-200 shadow-xl">
+                                      <div className="rounded-lg border border-white/10 bg-black px-3 py-2 text-xs text-zinc-200 shadow-xl">
                                         {fmtCurrency(Number(payload[0].payload.price))}
                                       </div>
                                     ) : null
@@ -2751,7 +2760,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                                 <Area
                                   type="monotone"
                                   dataKey="price"
-                                  stroke="#34d399"
+                                  stroke="#FDD000"
                                   strokeWidth={2.5}
                                   fill={`url(#institutionalPath-${ticker})`}
                                   dot={false}
@@ -2769,14 +2778,14 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
             </div>
           </SectionShell>
 
-          <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5">
+          <div className="rounded-xl border border-white/10 bg-[#0f0f0f] p-5 shadow-2xl shadow-black/20">
             <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/70">
-                  Historical Strategy Validation
+                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#FDD000]">
+                  Strategy history
                 </div>
-                <h2 className="mt-1 text-xl font-semibold text-white">Current portfolio snapshot</h2>
-                <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-400">
+                <h2 className="mt-1 text-xl font-semibold text-white">Past performance snapshot</h2>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs text-zinc-400">
                   <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1">
                     Commission bps {backtestSummary?.commissionBps ?? backtestSummary?.commission_bps ?? 0}
                   </span>
@@ -2785,7 +2794,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                   </span>
                 </div>
               </div>
-              <StatusPill tone="warn">Guarded</StatusPill>
+              <StatusPill tone="warn">Needs review</StatusPill>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
@@ -2799,9 +2808,9 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                       ? Number(displayedBacktestSharpe).toFixed(2)
                       : "—"
                 }
-                sub="Risk-adjusted return estimate. Higher values indicate better return per unit of volatility."
+                sub="Return compared with volatility. Higher is better."
               />
-              <MiniMetric label="Average Holding Duration" value="—" sub="Active Positions" />
+              <MiniMetric label="Average Holding Time" value="—" sub="Open positions" />
               <MiniMetric label="Profit Factor" value={hasBacktestData ? Number(displayedBacktestProfitFactor).toFixed(2) : "—"} />
               <MiniMetric label="Win Rate" value={hasBacktestData ? fmtPlainPct(displayedBacktestWinRate) : "—"} />
               <MiniMetric
@@ -2824,53 +2833,52 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
               />
             </div>
 
-            <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.035] p-4">
-              <div className="mb-4">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/70">
-                  Promotion confidence
-                </div>
-                <h3 className="mt-1 text-base font-semibold text-white">
-                  Backtest → forward-test readiness
-                </h3>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-                  This score does not mean the strategy cannot fail. It measures whether the current configuration is difficult to fool:
-                  walk-forward survival, same-engine live signals, benchmark comparison, drawdown control, sample size, regime consistency,
-                  and automatic failure flags.
-                </p>
-              </div>
+          </div>
+        </section>
 
-              <div className="grid gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Gate progress</div>
+        <section className="mb-6 grid min-w-0 gap-5">
+          <SectionShell
+            eyebrow="Readiness check"
+            title="Can this strategy be tested live?"
+            action={<StatusPill tone={productionTone(confidenceStage)}>{promotionStateDisplay}</StatusPill>}
+          >
+              <p className="max-w-4xl text-sm leading-6 text-zinc-400">
+                This check asks a simple question: is the strategy strong enough to test with real-time data? It reviews past results,
+                risk, number of trades, benchmark comparison, and warning flags. It does not guarantee future performance.
+              </p>
+
+              <div className="mt-5 grid gap-3 md:grid-cols-3">
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Checks passed</div>
                   <div className="mt-1 text-sm font-semibold text-slate-100">{passedGateCount}/10 gates</div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Survival Score</div>
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Reliability score</div>
                   <div className="mt-1 text-sm font-semibold text-slate-100">{survivalScore}/100</div>
-                  <div className="mt-1 text-[11px] text-slate-500">Blocked confidence</div>
+                  <div className="mt-1 text-[11px] text-zinc-500">Higher means more reliable</div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Promotion state</div>
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Status</div>
                   <div className="mt-1 text-sm font-semibold text-slate-100">{promotionStateDisplay}</div>
                 </div>
               </div>
 
               <div className="mt-5 grid gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Lifecycle Stage</div>
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Review stage</div>
                   <div className="mt-1 text-sm font-semibold text-slate-100">{lifecycleStageDisplay}</div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Trade Sample</div>
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Tested trades</div>
                   <div className="mt-1 text-sm font-semibold text-slate-100">{backtestTradeCount}</div>
-                  <div className="mt-1 text-[11px] text-slate-500">{backtestSegmentCount ?? 0} walk-forward segments</div>
+                  <div className="mt-1 text-[11px] text-zinc-500">{backtestSegmentCount ?? 0} test periods</div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Regime Consistency</div>
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Similar market match</div>
                   <div className="mt-1 text-sm font-semibold text-slate-100">
                     {regimeConsistencyPct == null ? "Pending" : fmtPlainPct(regimeConsistencyPct, 0)}
                   </div>
-                  <div className="mt-1 text-[11px] text-slate-500">{validationPostureDisplay}</div>
+                  <div className="mt-1 text-[11px] text-zinc-500">{validationPostureDisplay}</div>
                 </div>
               </div>
 
@@ -2878,12 +2886,12 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                 {confidenceGates.map((gate) => (
                   <div
                     key={gate.key}
-                    className="rounded-2xl border border-white/10 bg-slate-950/60 p-4"
+                    className="rounded-lg border border-white/10 bg-[#151515] p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="font-medium text-white">{gate.label}</div>
-                        <div className="mt-1 text-xs leading-5 text-slate-500">{gate.reason}</div>
+                        <div className="mt-1 text-xs leading-5 text-zinc-500">{gate.reason}</div>
                       </div>
                       <StatusPill tone={gate.passed ? "good" : gate.severity}>
                         {gate.passed ? "Pass" : "Watch"}
@@ -2899,10 +2907,10 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
               </div>
 
               {failureFlags.length ? (
-                <div className="mt-5 rounded-2xl border border-rose-400/20 bg-rose-400/10 p-4">
+                <div className="mt-5 rounded-lg border border-red-400/20 bg-red-500/10 p-4">
                   <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-rose-100">
                     <AlertTriangle className="h-4 w-4" />
-                    Promotion blockers
+                    Items to fix
                   </div>
                   <div className="space-y-1 text-sm text-rose-100/80">
                     {readableFailureFlags.map((flag) => (
@@ -2911,26 +2919,25 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                   </div>
                 </div>
               ) : (
-                <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-100/80">
-                  No active frontend failure flags detected for the current market state.
+                <div className="mt-5 rounded-lg border border-[#FDD000]/30 bg-[#FDD000]/10 p-4 text-sm text-[#FDD000]">
+                  No warning flags are active for the current market view.
                 </div>
               )}
-            </div>
-          </div>
+          </SectionShell>
         </section>
 
         <section className="mb-6 grid min-w-0 gap-5">
           <SectionShell
-            eyebrow="Allocation ledger"
-            title="Allocation ledger"
-            action={<StatusPill tone="neutral">{hasMarketData ? `${filtered.length} instruments` : "Loading"}</StatusPill>}
+            eyebrow="Action lists"
+            title="Buy, hold, and sell lists"
+            action={<StatusPill tone="neutral">{hasMarketData ? `${filtered.length} assets` : "Loading"}</StatusPill>}
           >
             <div className="my-4">
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search tickers across Buy, Hold, and Sell lists..."
-                className="h-11 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 text-sm text-slate-100 outline-none placeholder:text-slate-600"
+                placeholder="Search by ticker or asset name..."
+                className="h-11 w-full rounded-lg border border-white/10 bg-black px-4 text-sm text-white outline-none placeholder:text-zinc-600"
               />
             </div>
 
@@ -2952,84 +2959,84 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
           </SectionShell>
         </section>
 
-        <section className="mb-6 grid min-w-0 gap-5 mb-6 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.8fr)_minmax(0,0.6fr)]">
-          <SectionShell eyebrow="Market Interpretation" title="Regime intelligence">
+        <section className="mb-6 grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]">
+          <SectionShell eyebrow="Market explanation" title="What the market data means">
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-4">
+              <div className="rounded-lg border border-white/10 bg-[#151515] p-4">
                 <div className="mb-4 flex items-center gap-3">
-                  <TrendingUp className="h-5 w-5 text-emerald-300" />
+                  <TrendingUp className="h-5 w-5 text-[#FDD000]" />
                   <div>
-                    <div className="font-semibold text-white">Trend quality</div>
-                    <div className="text-xs text-slate-500">Reliability, breadth, and signal clarity</div>
+                    <div className="font-semibold text-white">Trend strength</div>
+                    <div className="text-xs text-zinc-500">How clear the price direction looks</div>
                   </div>
                 </div>
                 {hasMarketData ? <QualityBar value={hasUsableMarketData && avgQuality != null ? avgQuality : 0} /> : null}
-                <p className="mt-4 text-sm leading-6 text-slate-400">
+                <p className="mt-4 text-sm leading-6 text-zinc-400">
                   {hasMarketData
-                    ? "Trend evidence is present but still selective. Favor only the clearest opportunities and avoid over-allocating to weak signals."
-                    : "Trend quality will appear after market coverage loads."}
+                    ? "Some trends are present, but not all are strong. Focus on the clearest ideas."
+                    : "Trend strength will appear after market data loads."}
                 </p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-4">
+              <div className="rounded-lg border border-white/10 bg-[#151515] p-4">
                 <div className="mb-4 flex items-center gap-3">
-                  <ShieldCheck className="h-5 w-5 text-cyan-300" />
+                  <ShieldCheck className="h-5 w-5 text-[#FDD000]" />
                   <div>
-                    <div className="font-semibold text-white">Risk status regime</div>
-                    <div className="text-xs text-slate-500">Volatility, stability, and model calibration</div>
+                    <div className="font-semibold text-white">Risk control</div>
+                    <div className="text-xs text-zinc-500">How stable the market looks</div>
                   </div>
                 </div>
                 {hasMarketData ? <QualityBar value={hasUsableMarketData && avgRisk != null ? 100 - avgRisk : 0} /> : null}
-                <p className="mt-4 text-sm leading-6 text-slate-400">
+                <p className="mt-4 text-sm leading-6 text-zinc-400">
                   {hasMarketData
-                    ? `Volatility pressure is ${avgRisk != null && avgRisk > 65 ? "elevated" : "orderly"} and model stability remains ${confidence != null && confidence > 65 ? "acceptable" : "mixed"}.`
-                    : "Risk Status regime will appear after live coverage and signal context load."}
+                    ? `Volatility is ${avgRisk != null && avgRisk > 65 ? "high" : "under control"} and confidence is ${confidence != null && confidence > 65 ? "acceptable" : "mixed"}.`
+                    : "Risk control will appear after live data loads."}
                 </p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-4">
+              <div className="rounded-lg border border-white/10 bg-[#151515] p-4">
                 <div className="mb-4 flex items-center gap-3">
-                  <Layers className="h-5 w-5 text-amber-300" />
+                  <Layers className="h-5 w-5 text-[#FDD000]" />
                   <div>
-                    <div className="font-semibold text-white">Exposure durability</div>
-                    <div className="text-xs text-slate-500">Holding quality and error control</div>
+                    <div className="font-semibold text-white">Position durability</div>
+                    <div className="text-xs text-zinc-500">How suitable the ideas are to hold</div>
                   </div>
                 </div>
                 {hasMarketData ? <QualityBar value={hasProvidedSignals && avgQuality != null && confidence != null ? clamp((avgQuality + confidence) / 2) : 0} /> : null}
-                <p className="mt-4 text-sm leading-6 text-slate-400">
+                <p className="mt-4 text-sm leading-6 text-zinc-400">
                   {hasMarketData
-                    ? "Active Positions are being filtered by durability, not just momentum."
-                    : "Exposure durability will appear after allocation candidates are available."}
+                    ? "The list favors ideas that have both trend support and risk control."
+                    : "Position durability will appear after investment ideas load."}
                 </p>
               </div>
             </div>
           </SectionShell>
 
-          <SectionShell className="min-w-0" eyebrow="Opportunity surface" title="Opportunity surface">
+          <SectionShell className="min-w-0" eyebrow="Risk and opportunity" title="Risk and opportunity map">
             <div className="h-[200px] min-w-0 overflow-hidden">
               {surface.length < 2 ? (
-                <div className="grid h-full min-h-[230px] place-items-center text-xs text-slate-500">
-                  {hasMarketData ? "Opportunity surface will appear after confirmed strategy signals are available." : "Loading opportunity surface..."}
+                <div className="grid h-full min-h-[230px] place-items-center text-xs text-zinc-500">
+                  {hasMarketData ? "The map will appear after confirmed signals are available." : "Loading map..."}
                 </div>
               ) : (
                 <ResponsiveContainer width="99%" height={230}>
                   <ScatterChart margin={{ top: 8, right: 10, bottom: 8, left: -20 }}>
                     <CartesianGrid stroke="rgba(148, 163, 184, 0.08)" />
-                    <XAxis type="number" dataKey="x" name="Trend" domain={[0, 100]} tick={{ fill: "#64748b", fontSize: 11 }} />
-                    <YAxis type="number" dataKey="y" name="Risk Status Control" domain={[0, 100]} tick={{ fill: "#64748b", fontSize: 11 }} />
+                    <XAxis type="number" dataKey="x" name="Trend" domain={[0, 100]} tick={{ fill: "#a1a1aa", fontSize: 11 }} />
+                    <YAxis type="number" dataKey="y" name="Risk control" domain={[0, 100]} tick={{ fill: "#a1a1aa", fontSize: 11 }} />
                     <Tooltip
                       cursor={{ strokeDasharray: "3 3" }}
                       content={({ active, payload }) => {
                         if (!active || !payload?.length) return null;
                         const row = payload[0].payload as any;
                         return (
-                          <div className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-xs shadow-xl">
+                          <div className="rounded-lg border border-white/10 bg-black px-4 py-3 text-xs shadow-xl">
                             <div className="font-semibold text-white">{row.ticker}</div>
-                            <div className="mt-1 text-slate-400">Opportunity Quality {Math.round(row.stock.setupQuality)}/100</div>
-                            <div className="text-slate-400">Risk Status {Math.round(row.stock.riskPressure)}/100</div>
+                            <div className="mt-1 text-zinc-400">Quality score {Math.round(row.stock.setupQuality)}/100</div>
+                            <div className="text-zinc-400">Risk level {Math.round(row.stock.riskPressure)}/100</div>
                           </div>
                         );
                       }}
                     />
-                    <Scatter data={asChartData(surface)} fill="#34d399" />
+                    <Scatter data={asChartData(surface)} fill="#FDD000" />
                   </ScatterChart>
                 </ResponsiveContainer>
               )}
@@ -3037,8 +3044,8 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
           </SectionShell>
         </section>
 
-        <footer className="pb-8 text-center text-xs text-slate-600">
-          {totalStocks ? `${totalStocks.toLocaleString()} instruments covered in this venue` : "Coverage loading"} · Last updated {lastSyncedLabel}
+        <footer className="pb-8 text-center text-xs text-zinc-600">
+          {totalStocks ? `${totalStocks.toLocaleString()} assets covered in this market` : "Coverage loading"} · Last updated {lastSyncedLabel}
         </footer>
       </main>
     </div>

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SignalErrorEnvelope } from "@signal/protocol";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   drizzle: vi.fn(),
@@ -93,7 +93,28 @@ describe("postgres idempotency store", () => {
       idempotencyKey: "capture-1",
       payloadFingerprint: "fingerprint-a",
       result: { ok: true },
+      resultMeta: {
+        outcome: "completed",
+        operation: {
+          kind: "mutation",
+          name: "payment.capture.v1",
+        },
+        envelope: {
+          messageId: "msg-1",
+        },
+        timing: {
+          startedAt: "2026-03-25T00:00:00.000Z",
+          completedAt: "2026-03-25T00:00:00.010Z",
+          durationMs: 10,
+        },
+      },
       messageId: "msg-1",
+    });
+    await store.complete({
+      operationName: "payment.capture.v1",
+      idempotencyKey: "capture-1",
+      payloadFingerprint: "fingerprint-a",
+      result: { ok: true },
     });
 
     expect(reservation.state).toBe("reserved");
@@ -104,7 +125,32 @@ describe("postgres idempotency store", () => {
         values: {
           status: "completed",
           result: { ok: true },
+          resultMeta: {
+            outcome: "completed",
+            operation: {
+              kind: "mutation",
+              name: "payment.capture.v1",
+            },
+            envelope: {
+              messageId: "msg-1",
+            },
+            timing: {
+              startedAt: "2026-03-25T00:00:00.000Z",
+              completedAt: "2026-03-25T00:00:00.010Z",
+              durationMs: 10,
+            },
+          },
           messageId: "msg-1",
+          updatedAt: expect.any(Date),
+        },
+      },
+      {
+        type: "complete",
+        values: {
+          status: "completed",
+          result: { ok: true },
+          resultMeta: undefined,
+          messageId: null,
           updatedAt: expect.any(Date),
         },
       },
@@ -141,6 +187,9 @@ describe("postgres idempotency store", () => {
         payloadFingerprint: "fingerprint-b",
         status: "completed",
         result: { ok: true },
+        resultMeta: {
+          outcome: "completed",
+        },
         error: null,
         createdAt: new Date("2026-03-25T00:00:00.000Z"),
         updatedAt: new Date("2026-03-25T00:00:00.000Z"),
@@ -154,7 +203,10 @@ describe("postgres idempotency store", () => {
         payloadFingerprint: "fingerprint-c",
         status: "failed",
         result: null,
-        error: { code: "CONFLICT", message: "failed" } satisfies SignalErrorEnvelope,
+        error: {
+          code: "CONFLICT",
+          message: "failed",
+        } satisfies SignalErrorEnvelope,
         createdAt: new Date("2026-03-25T00:00:00.000Z"),
         updatedAt: new Date("2026-03-25T00:00:00.000Z"),
         messageId: null,
@@ -197,6 +249,7 @@ describe("postgres idempotency store", () => {
 
     expect(inflight.state).toBe("inflight");
     expect(replayed.state).toBe("replayed");
+    expect(replayed.record?.resultMeta).toEqual({ outcome: "completed" });
     expect(failed.state).toBe("replayed");
     expect(conflict.state).toBe("conflict");
   });

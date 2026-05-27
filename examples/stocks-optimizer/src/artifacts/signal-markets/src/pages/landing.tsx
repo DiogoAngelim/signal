@@ -15,14 +15,12 @@ import {
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground selection:bg-primary/20 overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-white selection:bg-[#FDD000]/30">
       <Navbar />
 
       <main>
         {/* Hero Section */}
-        <section className="relative overflow-hidden pt-24 pb-32 lg:pt-36 lg:pb-40">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-background to-background" />
-
+        <section className="relative overflow-hidden border-b border-white/10 bg-black pt-24 pb-28 lg:pt-32 lg:pb-32">
           <div className="container relative z-10 mx-auto px-4 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -30,29 +28,26 @@ export default function Landing() {
               transition={{ duration: 0.6, ease: "easeOut" }}
               className="mx-auto max-w-4xl"
             >
-              <div className="mb-6 inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary">
-                <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse"></span>
-                Live market signals with confidence scoring
+              <div className="mb-6 inline-flex items-center rounded-md border border-[#FDD000]/30 bg-[#FDD000]/10 px-3 py-1 text-sm font-medium text-[#FDD000]">
+                <span className="mr-2 flex h-2 w-2 rounded-full bg-[#FDD000]"></span>
+                Live market signals with simple confidence scores
               </div>
-              <h1 className="text-4xl font-medium tracking-tight text-foreground sm:text-6xl lg:text-7xl leading-[1.1]">
-                Signals that tell you when to <br className="hidden sm:block" />
-                <span className="text-primary italic font-serif pr-2">
-                  buy, hold,
-                </span>{" "}
-                or sell.
+              <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl leading-[1.1]">
+                Clear market signals for <br className="hidden sm:block" />
+                buy, hold, and sell decisions.
               </h1>
-              <p className="mt-8 text-lg leading-relaxed text-muted-foreground sm:text-xl max-w-2xl mx-auto">
-                Signal Markets blends TradingView data with the market-signals
-                model to turn global tickers into clear actions, confidence
-                levels, and risk context.
+              <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-zinc-300 sm:text-xl">
+                Signal Markets turns price data into plain actions, confidence
+                scores, and risk context. It is designed to be readable even if
+                you are new to investing.
               </p>
 
               <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Link
                   href="/dashboard"
-                  className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary px-8 text-sm font-medium text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-primary/20 sm:w-auto hover:-translate-y-0.5"
+                  className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-[#FDD000] px-8 text-sm font-semibold text-black shadow-lg transition-all hover:-translate-y-0.5 hover:bg-[#ffe45c] sm:w-auto"
                 >
-                  Open Signal Dashboard
+                  Open dashboard
                   <ArrowRight
                     size={16}
                     className="transition-transform group-hover:translate-x-1"
@@ -60,9 +55,9 @@ export default function Landing() {
                 </Link>
                 <a
                   href="#philosophy"
-                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-muted/50 px-8 text-sm font-medium text-foreground transition-all hover:bg-muted sm:w-auto"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-8 text-sm font-medium text-white transition-all hover:bg-white/10 sm:w-auto"
                 >
-                  How signals work
+                  View explanation
                 </a>
               </div>
             </motion.div>
@@ -70,44 +65,44 @@ export default function Landing() {
         </section>
 
         {/* Feature UI Preview Section */}
-        <section className="py-12 pb-24">
+        <section className="bg-black py-12 pb-24">
           <div className="container mx-auto px-4">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="mx-auto max-w-5xl rounded-2xl border border-border/60 bg-card p-2 shadow-2xl shadow-black/5"
+              className="mx-auto max-w-5xl rounded-xl border border-white/10 bg-[#0f0f0f] p-2 shadow-2xl shadow-black/40"
             >
-              <div className="rounded-xl bg-background/50 border border-border/40 p-4 sm:p-8 backdrop-blur-sm">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 pb-6 border-b border-border/40">
-                  <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      <LayoutTemplate className="h-6 w-6 text-primary" />
+              <div className="rounded-lg border border-white/10 bg-black p-4 sm:p-8">
+                <div className="mb-8 flex flex-col items-center justify-between gap-4 border-b border-white/10 pb-6 sm:flex-row">
+                  <div className="flex w-full items-center gap-4 sm:w-auto">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#FDD000]">
+                      <LayoutTemplate className="h-6 w-6 text-black" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-lg">
-                        Signal-First Dashboard
+                      <h3 className="text-lg font-semibold text-white">
+                        Signal dashboard
                       </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Action, confidence, and context in one view.
+                      <p className="text-sm text-zinc-400">
+                        Action, confidence, and context in one screen.
                       </p>
                     </div>
                   </div>
                   <div className="w-full sm:w-auto text-left sm:text-right">
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Model Status
+                    <p className="mb-1 text-sm text-zinc-400">
+                      Data status
                     </p>
-                    <span className="inline-flex items-center rounded-full bg-[#e8f5e9] dark:bg-[#1b5e20]/20 px-2.5 py-0.5 text-xs font-medium text-[#2e7d32] dark:text-[#81c784] border border-[#c8e6c9] dark:border-[#2e7d32]/30">
-                      Signal Engine Active
+                    <span className="inline-flex items-center rounded-md border border-[#FDD000]/30 bg-[#FDD000]/10 px-2.5 py-0.5 text-xs font-medium text-[#FDD000]">
+                      Signals active
                     </span>
                   </div>
                 </div>
-                <div className="grid sm:grid-cols-3 gap-6">
+                <div className="grid gap-6 sm:grid-cols-3">
                   {[1, 2, 3].map((i) => (
                     <div
                       key={i}
-                      className="h-32 rounded-lg bg-muted/30 border border-border/40 animate-pulse"
+                      className="h-32 rounded-lg border border-white/10 bg-white/[0.06] animate-pulse"
                       style={{ animationDelay: `${i * 0.15}s` }}
                     ></div>
                   ))}
@@ -118,15 +113,15 @@ export default function Landing() {
         </section>
 
         {/* Value Prop Section */}
-        <section className="bg-muted/30 py-32 border-y border-border/40">
+        <section className="border-y border-white/10 bg-[#0f0f0f] py-32">
           <div className="container mx-auto px-4">
             <div className="mb-16 text-center max-w-3xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-medium tracking-tight mb-4">
-                Decisions should not be guesswork.
+              <h2 className="mb-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
+                Decisions should be easy to understand.
               </h2>
-              <p className="text-lg text-muted-foreground">
-                We translate market movement into a clear action signal, backed
-                by model confidence and readable rationale.
+              <p className="text-lg text-zinc-400">
+                The app translates market movement into a clear action, a
+                confidence score, and a short explanation.
               </p>
             </div>
 
@@ -138,15 +133,14 @@ export default function Landing() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="flex flex-col items-start"
               >
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-background shadow-sm border border-border/60 text-primary">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-md border border-white/10 bg-black text-[#FDD000]">
                   <Eye size={24} strokeWidth={1.5} />
                 </div>
-                <h3 className="mb-3 text-xl font-medium tracking-tight">
-                  Actionable Signals
+                <h3 className="mb-3 text-xl font-semibold tracking-tight text-white">
+                  Clear actions
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Buy, hold, or sell indicators update as market conditions
-                  shift, so you can act without decoding charts.
+                <p className="leading-relaxed text-zinc-400">
+                  Buy, hold, or sell labels update as market conditions change.
                 </p>
               </motion.div>
 
@@ -157,15 +151,14 @@ export default function Landing() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex flex-col items-start"
               >
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-background shadow-sm border border-border/60 text-primary">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-md border border-white/10 bg-black text-[#FDD000]">
                   <ShieldCheck size={24} strokeWidth={1.5} />
                 </div>
-                <h3 className="mb-3 text-xl font-medium tracking-tight">
-                  Confidence You Can Read
+                <h3 className="mb-3 text-xl font-semibold tracking-tight text-white">
+                  Readable confidence
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Every signal includes confidence and a short rationale, so you
-                  understand the "why" behind the change.
+                <p className="leading-relaxed text-zinc-400">
+                  Each signal includes a score and a short reason.
                 </p>
               </motion.div>
 
@@ -176,15 +169,15 @@ export default function Landing() {
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="flex flex-col items-start"
               >
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-background shadow-sm border border-border/60 text-primary">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-md border border-white/10 bg-black text-[#FDD000]">
                   <LineChart size={24} strokeWidth={1.5} />
                 </div>
-                <h3 className="mb-3 text-xl font-medium tracking-tight">
-                  Global Coverage
+                <h3 className="mb-3 text-xl font-semibold tracking-tight text-white">
+                  Market coverage
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Monitor markets across regions with schedules and signal
-                  changes that stay accurate even after hours.
+                <p className="leading-relaxed text-zinc-400">
+                  Review markets across regions with clear open and closed
+                  status.
                 </p>
               </motion.div>
             </div>
@@ -192,7 +185,7 @@ export default function Landing() {
         </section>
 
         {/* Philosophy Section */}
-        <section id="philosophy" className="py-32">
+        <section id="philosophy" className="bg-black py-32">
           <div className="container mx-auto px-4 max-w-4xl text-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -200,20 +193,18 @@ export default function Landing() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-8">
-                The market moves fast. <br className="hidden sm:block" />
-                <span className="text-muted-foreground">
-                  Your decision should not be rushed.
-                </span>
+              <h2 className="mb-8 text-3xl font-semibold tracking-tight text-white md:text-5xl">
+                Markets move fast. <br className="hidden sm:block" />
+                Decisions should stay clear.
               </h2>
-              <div className="space-y-6 text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto font-serif">
+              <div className="mx-auto max-w-3xl space-y-6 text-lg leading-relaxed text-zinc-400 md:text-xl">
                 <p>
-                  Signal Markets is built for investors who want clear guidance,
-                  not noisy dashboards or stress-driven alerts.
+                  Signal Markets is built for investors who want simple,
+                  objective information.
                 </p>
                 <p>
-                  We surface the most important signal change, explain it in
-                  plain language, and keep you focused on long-term outcomes.
+                  It highlights the signal, explains the reason, and keeps risk
+                  visible.
                 </p>
               </div>
             </motion.div>
@@ -221,7 +212,7 @@ export default function Landing() {
         </section>
 
         {/* Testimonial / Social Proof */}
-        <section className="bg-muted/20 py-24 border-t border-border/40">
+        <section className="border-t border-white/10 bg-[#0f0f0f] py-24">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
               <motion.div
@@ -231,21 +222,19 @@ export default function Landing() {
                 transition={{ duration: 0.6 }}
                 className="space-y-6"
               >
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-2">
+                <div className="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-md bg-[#FDD000] text-black">
                   <Wallet size={24} strokeWidth={1.5} />
                 </div>
-                <h2 className="text-3xl font-medium tracking-tight">
-                  Built for decisive investors.
+                <h2 className="text-3xl font-semibold tracking-tight text-white">
+                  Built for review before action.
                 </h2>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  "I get a clear buy/hold/sell signal with confidence instead of
-                  doom-scrolling charts. It keeps me focused on the right move."
+                <p className="text-lg leading-relaxed text-zinc-400">
+                  The dashboard shows the action, the confidence level, and the
+                  main risk checks before any decision.
                 </p>
-                <div className="pt-4 border-t border-border/60">
-                  <p className="font-medium text-foreground">Ravi Patel</p>
-                  <p className="text-sm text-muted-foreground">
-                    Portfolio Manager
-                  </p>
+                <div className="border-t border-white/10 pt-4">
+                  <p className="font-medium text-white">Research workflow</p>
+                  <p className="text-sm text-zinc-500">Market signal review</p>
                 </div>
               </motion.div>
 
@@ -254,25 +243,25 @@ export default function Landing() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="bg-card rounded-2xl border border-border/60 p-8 shadow-sm"
+                className="rounded-xl border border-white/10 bg-black p-8 shadow-sm"
               >
-                <h3 className="font-medium text-lg mb-6">
-                  The Signal Markets Promise
+                <h3 className="mb-6 text-lg font-semibold text-white">
+                  What the dashboard checks
                 </h3>
-                <ul className="space-y-4 text-muted-foreground">
+                <ul className="space-y-4 text-zinc-400">
                   <li className="flex gap-3">
-                    <div className="mt-1 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                    <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FDD000]" />
                     <span>
-                      Signals backed by model confidence and rationale.
+                      Signal direction with a confidence score.
                     </span>
                   </li>
                   <li className="flex gap-3">
-                    <div className="mt-1 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                    <span>Global market coverage with clear status.</span>
+                    <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FDD000]" />
+                    <span>Market status and risk checks.</span>
                   </li>
                   <li className="flex gap-3">
-                    <div className="mt-1 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                    <span>Only the changes that matter.</span>
+                    <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FDD000]" />
+                    <span>Plain explanations for each recommendation.</span>
                   </li>
                 </ul>
               </motion.div>
@@ -281,8 +270,7 @@ export default function Landing() {
         </section>
 
         {/* Final CTA */}
-        <section className="py-32 relative overflow-hidden">
-          <div className="absolute inset-0 bg-primary/5" />
+        <section className="relative overflow-hidden border-t border-white/10 bg-black py-32">
           <div className="container relative z-10 mx-auto px-4 text-center max-w-3xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -290,18 +278,17 @@ export default function Landing() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-4xl font-medium tracking-tight mb-6">
-                Ready to act with confidence?
+              <h2 className="mb-6 text-4xl font-semibold tracking-tight text-white">
+                Review the current market view.
               </h2>
-              <p className="text-xl text-muted-foreground mb-10">
-                See your next signal, understand the rationale, and move with
-                intent.
+              <p className="mb-10 text-xl text-zinc-400">
+                See current signals, risk checks, and clear explanations.
               </p>
               <Link
                 href="/dashboard"
-                className="inline-flex h-14 items-center justify-center gap-2 rounded-full bg-primary px-10 text-base font-medium text-primary-foreground shadow-xl transition-all hover:bg-primary/90 hover:shadow-primary/20 hover:-translate-y-0.5"
+                className="inline-flex h-14 items-center justify-center gap-2 rounded-md bg-[#FDD000] px-10 text-base font-semibold text-black shadow-xl transition-all hover:-translate-y-0.5 hover:bg-[#ffe45c]"
               >
-                View Live Signals
+                View live signals
                 <ArrowRight size={18} />
               </Link>
             </motion.div>
@@ -309,21 +296,21 @@ export default function Landing() {
         </section>
       </main>
 
-      <footer className="border-t border-border/50 py-12 bg-card">
+      <footer className="border-t border-white/10 bg-[#0f0f0f] py-12">
         <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="flex items-center gap-2 text-zinc-400">
             <TrendingUp size={18} />
             <span className="font-medium">Signal Markets</span>
           </div>
-          <p className="text-sm text-muted-foreground text-center">
+          <p className="text-center text-sm text-zinc-500">
             © {new Date().getFullYear()} Signal Markets. Designed for the
             everyday investor.
           </p>
-          <div className="flex gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-foreground transition-colors">
+          <div className="flex gap-6 text-sm text-zinc-500">
+            <a href="#" className="transition-colors hover:text-white">
               Privacy
             </a>
-            <a href="#" className="hover:text-foreground transition-colors">
+            <a href="#" className="transition-colors hover:text-white">
               Terms
             </a>
           </div>

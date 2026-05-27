@@ -1,19 +1,25 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import { defineEvent, defineMutation, defineQuery } from "../../sdk-node/src";
 import {
-  SignalRuntime,
+  PerceptionLayer,
   SignalRegistry,
+  SignalRuntime,
   buildCapabilities,
   createInProcessDispatcher,
   createMemoryIdempotencyStore,
+  createNestedExecutionContext,
   createReplaySafeSubscriber,
   dispatchEvent,
   ensureEnvelope,
   executeMutation,
   fingerprint,
+  freezeRequestContext,
+  normalizeRequestContext,
   stableStringify,
+  throwIfExecutionBlocked,
+  toSignalFailure,
 } from "../src";
-import { z } from "zod";
 
 describe("runtime", () => {
   it("supports in-process dispatching and replay-safe subscribers", async () => {
@@ -23,7 +29,7 @@ describe("runtime", () => {
       "audit.event.v1",
       createReplaySafeSubscriber(async (event) => {
         seen.push(event.messageId);
-      })
+      }),
     );
 
     const runtime = new SignalRuntime({ dispatcher });
@@ -34,7 +40,7 @@ describe("runtime", () => {
         inputSchema: z.object({ value: z.string() }),
         resultSchema: z.object({ value: z.string() }),
         handler: (payload) => payload,
-      })
+      }),
     );
 
     const envelope = ensureEnvelope({
@@ -50,7 +56,7 @@ describe("runtime", () => {
         kind: "event",
         name: "audit.unhandled.v1",
         payload: { value: "two" },
-      })
+      }),
     );
     unsubscribe();
 
@@ -59,7 +65,7 @@ describe("runtime", () => {
 
   it("covers hash helpers, event causation fallback, and the default emit guard", async () => {
     expect(stableStringify([1, { b: 2, a: undefined }, null])).toBe(
-      '[1,{"b":2},null]'
+      '[1,{"b":2},null]',
     );
     expect(fingerprint({ a: 1, b: [2, 3] })).toHaveLength(64);
 
@@ -74,7 +80,7 @@ describe("runtime", () => {
         inputSchema: z.object({ value: z.string() }),
         resultSchema: z.object({ value: z.string() }),
         handler: (payload) => payload,
-      })
+      }),
     );
 
     dispatcher.subscribe("audit.event.v1", async (event) => {
@@ -90,7 +96,7 @@ describe("runtime", () => {
         request: {},
         envelope: { messageId: "envelope-1" } as never,
         emit: async () => undefined,
-      }
+      },
     );
     const undelivered = await dispatchEvent(
       registry,
@@ -101,7 +107,7 @@ describe("runtime", () => {
         request: {},
         envelope: { messageId: "envelope-2" } as never,
         emit: async () => undefined,
-      }
+      },
     );
 
     const runtime = new SignalRuntime({
@@ -116,11 +122,11 @@ describe("runtime", () => {
         resultSchema: z.object({ ok: z.literal(true) }),
         handler: async (_input, context) => {
           await expect(
-            context.emit("audit.event.v1", { value: "ignored" })
+            context.emit("audit.event.v1", { value: "ignored" }),
           ).rejects.toThrow("emit is only available inside mutation handlers");
           return { ok: true as const };
         },
-      })
+      }),
     );
 
     const query = await runtime.query("example.emit.v1", {});
@@ -146,7 +152,7 @@ describe("runtime", () => {
         inputSchema: z.object({ value: z.string() }),
         resultSchema: z.object({ value: z.string() }),
         handler: (payload) => payload,
-      })
+      }),
     );
     runtime.registerMutation(
       defineMutation({
@@ -159,11 +165,11 @@ describe("runtime", () => {
           await context.emit(
             "audit.emitted.v1",
             { value: input.value },
-            { source: "mutation-handler" }
+            { source: "mutation-handler" },
           );
           return input;
         },
-      })
+      }),
     );
 
     dispatcher.subscribe("audit.emitted.v1", async (event) => {
@@ -173,7 +179,7 @@ describe("runtime", () => {
     const result = await runtime.mutation(
       "audit.emit.v1",
       { value: "ok" },
-      { idempotencyKey: "emit-1" }
+      { idempotencyKey: "emit-1" },
     );
 
     expect(result.ok).toBe(true);
@@ -193,7 +199,7 @@ describe("runtime", () => {
         inputSchema: z.object({ value: z.string() }),
         resultSchema: z.object({ value: z.string() }),
         handler: (input) => input,
-      })
+      }),
     );
 
     const result = await runtime.mutation("audit.once.v1", { value: "ok" });
@@ -216,7 +222,7 @@ describe("runtime", () => {
         inputSchema: z.object({ value: z.string() }),
         resultSchema: z.object({ value: z.string() }),
         handler: (input) => input,
-      })
+      }),
     );
     runtime.registerMutation(
       defineMutation({
@@ -232,7 +238,7 @@ describe("runtime", () => {
             details: { reason: "blocked" },
           };
         },
-      })
+      }),
     );
 
     const recorded = await executeMutation(
@@ -246,18 +252,18 @@ describe("runtime", () => {
           source: { system: "test", transport: "unit", runtime: "runtime" },
         },
       } as never,
-      "record-1"
+      "record-1",
     );
     const plainFailure = await runtime.mutation(
       "audit.plain.v1",
       { value: "nope" },
-      { idempotencyKey: "plain-1" }
+      { idempotencyKey: "plain-1" },
     );
 
     expect(recorded.ok).toBe(true);
     expect(plainFailure.ok).toBe(false);
     expect(plainFailure.ok === false && plainFailure.error.message).toBe(
-      "Mutation failed"
+      "Mutation failed",
     );
   });
 
@@ -280,30 +286,32 @@ describe("runtime", () => {
           state.count += input.amount;
           return { count: state.count };
         },
-      })
+      }),
     );
 
     const first = await runtime.mutation(
       "counter.increment.v1",
       { amount: 1 },
-      { idempotencyKey: "inc-1" }
+      { idempotencyKey: "inc-1" },
     );
     const replay = await runtime.mutation(
       "counter.increment.v1",
       { amount: 1 },
-      { idempotencyKey: "inc-1" }
+      { idempotencyKey: "inc-1" },
     );
     const conflict = await runtime.mutation(
       "counter.increment.v1",
       { amount: 2 },
-      { idempotencyKey: "inc-1" }
+      { idempotencyKey: "inc-1" },
     );
 
     expect(first.ok).toBe(true);
     expect(replay.ok).toBe(true);
     expect((replay.ok && replay.result.count) || 0).toBe(1);
     expect(conflict.ok).toBe(false);
-    expect(conflict.ok === false && conflict.error.code).toBe("IDEMPOTENCY_CONFLICT");
+    expect(conflict.ok === false && conflict.error.code).toBe(
+      "IDEMPOTENCY_CONFLICT",
+    );
   });
 
   it("handles validation errors, custom errors, and replayed failures", async () => {
@@ -325,7 +333,7 @@ describe("runtime", () => {
             details: { retryAfter: 1 },
           });
         },
-      })
+      }),
     );
     runtime.registerQuery(
       defineQuery({
@@ -336,7 +344,7 @@ describe("runtime", () => {
         handler: () => {
           throw new Error("query crashed");
         },
-      })
+      }),
     );
     runtime.registerQuery(
       defineQuery({
@@ -351,7 +359,7 @@ describe("runtime", () => {
             details: { reason: "blocked" },
           };
         },
-      })
+      }),
     );
 
     runtime.registerMutation(
@@ -368,7 +376,7 @@ describe("runtime", () => {
             details: { retryAfter: 1 },
           });
         },
-      })
+      }),
     );
     runtime.registerMutation(
       defineMutation({
@@ -380,7 +388,7 @@ describe("runtime", () => {
         handler: () => {
           throw new Error("mutation crashed");
         },
-      })
+      }),
     );
     runtime.registerMutation(
       defineMutation({
@@ -392,39 +400,43 @@ describe("runtime", () => {
         handler: () => {
           throw 42;
         },
-      })
+      }),
     );
 
     const queryValidationFailure = await runtime.query("example.lookup.v1", {});
-    const queryFailure = await runtime.query("example.lookup.v1", { id: "one" });
+    const queryFailure = await runtime.query("example.lookup.v1", {
+      id: "one",
+    });
     const queryInternalFailure = await runtime.query("example.crash.v1", {
       id: "one",
     });
-    const queryRawFailure = await runtime.query("example.raw.v1", { id: "one" });
+    const queryRawFailure = await runtime.query("example.raw.v1", {
+      id: "one",
+    });
     const mutationValidationFailure = await runtime.mutation(
       "example.fail.v1",
       {},
-      { idempotencyKey: "fail-0" }
+      { idempotencyKey: "fail-0" },
     );
     const mutationFailure = await runtime.mutation(
       "example.fail.v1",
       { id: "one" },
-      { idempotencyKey: "fail-1" }
+      { idempotencyKey: "fail-1" },
     );
     const mutationInternalFailure = await runtime.mutation(
       "example.crash.v1",
       { id: "one" },
-      { idempotencyKey: "crash-1" }
+      { idempotencyKey: "crash-1" },
     );
     const mutationUnknownFailure = await runtime.mutation(
       "example.unknown.v1",
       { id: "one" },
-      { idempotencyKey: "unknown-1" }
+      { idempotencyKey: "unknown-1" },
     );
     const replayFailure = await runtime.mutation(
       "example.fail.v1",
       { id: "one" },
-      { idempotencyKey: "fail-1" }
+      { idempotencyKey: "fail-1" },
     );
     const requiredMissingKey = await runtime.mutation("example.crash.v1", {
       id: "two",
@@ -433,15 +445,15 @@ describe("runtime", () => {
     expect(queryValidationFailure.ok).toBe(false);
     expect(queryFailure.ok).toBe(false);
     expect(queryFailure.ok === false && queryFailure.error.code).toBe(
-      "RETRYABLE_ERROR"
+      "RETRYABLE_ERROR",
     );
     expect(queryInternalFailure.ok).toBe(false);
-    expect(queryInternalFailure.ok === false && queryInternalFailure.error.code).toBe(
-      "INTERNAL_ERROR"
-    );
+    expect(
+      queryInternalFailure.ok === false && queryInternalFailure.error.code,
+    ).toBe("INTERNAL_ERROR");
     expect(queryRawFailure.ok).toBe(false);
     expect(queryRawFailure.ok === false && queryRawFailure.error.message).toBe(
-      "Query failed"
+      "Query failed",
     );
     expect(mutationValidationFailure.ok).toBe(false);
     expect(mutationFailure.ok).toBe(false);
@@ -449,12 +461,12 @@ describe("runtime", () => {
     expect(mutationUnknownFailure.ok).toBe(false);
     expect(replayFailure.ok).toBe(false);
     expect(replayFailure.ok === false && replayFailure.error.code).toBe(
-      "RETRYABLE_ERROR"
+      "RETRYABLE_ERROR",
     );
     expect(requiredMissingKey.ok).toBe(false);
-    expect(requiredMissingKey.ok === false && requiredMissingKey.error.code).toBe(
-      "BAD_REQUEST"
-    );
+    expect(
+      requiredMissingKey.ok === false && requiredMissingKey.error.code,
+    ).toBe("BAD_REQUEST");
   });
 
   it("treats invalid inputs and missing operations as protocol errors", async () => {
@@ -470,7 +482,7 @@ describe("runtime", () => {
         inputSchema: z.object({ value: z.string() }),
         resultSchema: z.object({ value: z.string() }),
         handler: (payload) => payload,
-      })
+      }),
     );
     runtime.registerQuery(
       defineQuery({
@@ -479,7 +491,7 @@ describe("runtime", () => {
         inputSchema: z.object({ value: z.string() }),
         resultSchema: z.object({ value: z.string() }),
         handler: (payload) => payload,
-      })
+      }),
     );
 
     const missingQuery = await runtime.query("missing.query.v1", {});
@@ -487,19 +499,21 @@ describe("runtime", () => {
     const missingMutation = await runtime.mutation(
       "missing.mutation.v1",
       {},
-      { idempotencyKey: "missing-1" }
+      { idempotencyKey: "missing-1" },
     );
-    await expect(runtime.publish("missing.event.v1", { value: "x" })).rejects.toMatchObject({
+    await expect(
+      runtime.publish("missing.event.v1", { value: "x" }),
+    ).rejects.toMatchObject({
       code: "UNSUPPORTED_OPERATION",
     });
 
     expect(missingQuery.ok).toBe(false);
     expect(missingQuery.ok === false && missingQuery.error.code).toBe(
-      "UNSUPPORTED_OPERATION"
+      "UNSUPPORTED_OPERATION",
     );
     expect(invalidQuery.ok).toBe(false);
     expect(invalidQuery.ok === false && invalidQuery.error.code).toBe(
-      "VALIDATION_ERROR"
+      "VALIDATION_ERROR",
     );
     expect(missingMutation.ok).toBe(false);
   });
@@ -532,13 +546,13 @@ describe("runtime", () => {
         inputSchema: z.object({ id: z.string().min(1) }),
         resultSchema: z.object({ id: z.string() }),
         handler: () => ({ id: "new" }),
-      })
+      }),
     );
 
     const inflight = await runtime.mutation(
       "example.record.v1",
       { id: "one" },
-      { idempotencyKey: "record-1" }
+      { idempotencyKey: "record-1" },
     );
 
     const replayRuntime = new SignalRuntime({
@@ -569,20 +583,22 @@ describe("runtime", () => {
         inputSchema: z.object({ id: z.string().min(1) }),
         resultSchema: z.object({ id: z.string() }),
         handler: () => ({ id: "new" }),
-      })
+      }),
     );
 
     const replayed = await replayRuntime.mutation(
       "example.record.v1",
       { id: "one" },
-      { idempotencyKey: "record-2" }
+      { idempotencyKey: "record-2" },
     );
 
     const registry = new SignalRegistry();
     registry.lock();
 
     expect(inflight.ok).toBe(false);
-    expect(inflight.ok === false && inflight.error.code).toBe("RETRYABLE_ERROR");
+    expect(inflight.ok === false && inflight.error.code).toBe(
+      "RETRYABLE_ERROR",
+    );
     expect(replayed.ok).toBe(true);
     expect(replayed.ok && replayed.result).toEqual({ id: "ok" });
     expect(() =>
@@ -593,8 +609,8 @@ describe("runtime", () => {
           inputSchema: z.object({}),
           resultSchema: z.object({ ok: z.literal(true) }),
           handler: () => ({ ok: true as const }),
-        })
-      )
+        }),
+      ),
     ).toThrow("Signal registry is locked");
   });
 
@@ -664,27 +680,236 @@ describe("runtime", () => {
         inputSchema: z.object({}),
         resultSchema: z.object({ ok: z.literal(true) }),
         handler: () => ({ ok: true as const }),
-      })
+      }),
     );
 
     const capabilities = runtime.capabilities();
-    expect(runtime.registry.allDefinitions().map((entry) => entry.name)).toContain(
-      "status.get.v1"
-    );
+    expect(
+      runtime.registry.allDefinitions().map((entry) => entry.name),
+    ).toContain("status.get.v1");
     expect(capabilities.queries.map((entry) => entry.name)).toContain(
-      "status.get.v1"
+      "status.get.v1",
     );
     expect(capabilities.protocol).toBe("signal.v1");
     expect(
-      buildCapabilities(runtime.registry, { inProcess: true, http: { basePath: "/signal" } }, [
-        "status.changed.v1",
-      ]).subscribedEvents
+      buildCapabilities(
+        runtime.registry,
+        { inProcess: true, http: { basePath: "/signal" } },
+        [
+          "status.changed.v1",
+          {
+            name: "status.replayed.v1",
+            consumerId: "consumer-a",
+            replaySafe: true,
+            description: "Replay-safe status projection",
+          },
+        ],
+      ).subscribedEvents,
     ).toEqual([
       {
         name: "status.changed.v1",
         kind: "event",
       },
+      {
+        name: "status.replayed.v1",
+        kind: "event",
+        consumerId: "consumer-a",
+        replaySafe: true,
+        description: "Replay-safe status projection",
+      },
     ]);
+  });
+
+  it("covers execution metadata, replay-safe runtime subscriptions, and nested emit failures", async () => {
+    const frozen = freezeRequestContext({
+      meta: {
+        nested: [{ value: 1 }],
+      },
+    });
+    expect(Object.isFrozen(frozen.meta)).toBe(true);
+    expect(Object.isFrozen((frozen.meta?.nested as unknown[])[0])).toBe(true);
+
+    const normalized = normalizeRequestContext({});
+    const normalizedWithMeta = normalizeRequestContext({ meta: { value: 1 } });
+    const retryable = toSignalFailure(
+      {
+        code: "RETRYABLE_ERROR",
+        category: "transport",
+        retryable: true,
+      },
+      "INTERNAL_ERROR",
+      "fallback",
+    );
+    const defaultRetryability = toSignalFailure(
+      {
+        code: "FORBIDDEN",
+      },
+      "INTERNAL_ERROR",
+      "fallback",
+    );
+
+    expect(normalized.meta).toBeUndefined();
+    expect(normalizedWithMeta.meta).toEqual({ value: 1 });
+    expect(() =>
+      throwIfExecutionBlocked({
+        abortSignal: {
+          aborted: true,
+          reason: undefined,
+        } as unknown as AbortSignal,
+      }),
+    ).toThrow("Execution cancelled");
+    expect(retryable.category).toBe("transport");
+    expect(retryable.retryable).toBe(true);
+    expect(defaultRetryability.retryable).toBe(false);
+
+    const runtime = new SignalRuntime();
+    const seen: string[] = [];
+    runtime.registerEvent(
+      defineEvent({
+        name: "meta.changed.v1",
+        kind: "event",
+        inputSchema: z.object({ value: z.string() }),
+        resultSchema: z.object({ value: z.string() }),
+        handler: (payload) => payload,
+      }),
+    );
+    runtime.registerQuery(
+      defineQuery({
+        name: "meta.get.v1",
+        kind: "query",
+        inputSchema: z.object({ value: z.string() }),
+        resultSchema: z.object({ value: z.string() }),
+        handler: (input) => input,
+      }),
+    );
+    runtime.subscribe(
+      "meta.changed.v1",
+      async (event) => {
+        seen.push(event.messageId);
+      },
+      { replaySafe: true, consumerId: "meta-consumer" },
+    );
+
+    const deadlineAt = "2999-01-01T00:00:00.000Z";
+    const query = await runtime.query(
+      "meta.get.v1",
+      { value: "ok" },
+      {
+        deadlineAt,
+        delivery: {
+          mode: "at-least-once",
+          attempt: 2,
+          consumerId: "meta-consumer",
+          replayed: true,
+        },
+      },
+    );
+    const event = await runtime.publish("meta.changed.v1", { value: "one" });
+    await runtime.dispatcher.dispatch(event);
+
+    const nested = createNestedExecutionContext(
+      {
+        request: {},
+        startedAt: Date.now(),
+        emit: async () => undefined,
+      },
+      event,
+    );
+
+    await expect(
+      nested.emit("meta.changed.v1", { value: "nope" }),
+    ).rejects.toThrow("Nested emit is not supported");
+    expect(query.ok && query.meta.deadline?.deadlineAt).toBe(deadlineAt);
+    expect(query.ok && query.meta.delivery?.attempt).toBe(2);
+    expect(seen).toEqual([event.messageId]);
+
+    const abortController = new AbortController();
+    abortController.abort();
+    const cancelled = await runtime.query(
+      "meta.get.v1",
+      { value: "ok" },
+      { abortSignal: abortController.signal },
+    );
+    expect(cancelled.ok).toBe(false);
+    expect(cancelled.ok === false && cancelled.error.code).toBe("CANCELLED");
+  });
+
+  it("covers normalized idempotency and reserved validation failure cleanup", async () => {
+    const failed: string[] = [];
+    const runtime = new SignalRuntime({
+      idempotencyStore: {
+        reserve: async () => ({
+          state: "reserved",
+        }),
+        complete: async () => undefined,
+        fail: async (input) => {
+          failed.push(input.operationName);
+        },
+      },
+    });
+
+    runtime.registerMutation(
+      defineMutation({
+        name: "normalized.save.v1",
+        kind: "mutation",
+        idempotency: "required",
+        inputSchema: z.object({
+          id: z.string(),
+          transient: z.string(),
+        }),
+        resultSchema: z.object({
+          id: z.string(),
+        }),
+        normalizeIdempotencyInput: (input) => ({ id: input.id }),
+        handler: (input) => ({ id: input.id }),
+      }),
+    );
+    runtime.registerMutation(
+      defineMutation({
+        name: "invalid.result.v1",
+        kind: "mutation",
+        idempotency: "required",
+        inputSchema: z.object({ id: z.string() }),
+        resultSchema: z.object({ id: z.string() }),
+        handler: () => ({ id: 1 }) as never,
+      }),
+    );
+
+    const normalized = await runtime.mutation(
+      "normalized.save.v1",
+      { id: "same", transient: "first" },
+      { idempotencyKey: "normalized-1" },
+    );
+    const invalid = await runtime.mutation(
+      "invalid.result.v1",
+      { id: "bad" },
+      { idempotencyKey: "invalid-result-1" },
+    );
+
+    expect(normalized.ok).toBe(true);
+    expect(invalid.ok).toBe(false);
+    expect(failed).toContain("invalid.result.v1");
+  });
+
+  it("accepts an existing perception layer instance", async () => {
+    const perception = new PerceptionLayer();
+    const runtime = new SignalRuntime({ perception });
+
+    runtime.registerQuery(
+      defineQuery({
+        name: "perceived.get.v1",
+        kind: "query",
+        inputSchema: z.object({ value: z.number() }),
+        resultSchema: z.object({ value: z.number() }),
+        handler: (input) => input,
+      }),
+    );
+
+    const result = await runtime.query("perceived.get.v1", { value: 1 });
+
+    expect(result.ok).toBe(true);
+    expect(runtime.perception).toBe(perception);
+    expect(perception.getSnapshot("perceived.get")).toBeDefined();
   });
 
   it("publishes events with causation and custom context", async () => {
@@ -699,7 +924,7 @@ describe("runtime", () => {
         inputSchema: z.object({ status: z.string() }),
         resultSchema: z.object({ status: z.string() }),
         handler: (payload) => payload,
-      })
+      }),
     );
 
     const seen: string[] = [];
@@ -715,7 +940,7 @@ describe("runtime", () => {
         causationId: "cause-2",
         traceId: "trace-2",
         source: { system: "admin", transport: "in-process", runtime: "test" },
-      }
+      },
     );
 
     expect(event.kind).toBe("event");
@@ -734,8 +959,8 @@ describe("runtime", () => {
           inputSchema: z.object({}),
           resultSchema: z.object({ ok: z.literal(true) }),
           handler: () => ({ ok: true as const }),
-        })
-      )
+        }),
+      ),
     ).toThrow("Signal registry is locked");
   });
 });

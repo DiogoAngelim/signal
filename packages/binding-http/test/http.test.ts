@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { defineMutation, defineQuery } from "../../sdk-node/src";
-import { SignalRuntime, createMemoryIdempotencyStore } from "../../runtime/src";
-import { createSignalHttpServer } from "../src";
 import { z } from "zod";
+import { SignalRuntime, createMemoryIdempotencyStore } from "../../runtime/src";
+import { defineMutation, defineQuery } from "../../sdk-node/src";
+import { createSignalHttpServer } from "../src";
 
 describe("http binding", () => {
   it("executes queries and mutations", async () => {
@@ -19,7 +19,7 @@ describe("http binding", () => {
         inputSchema: z.object({}),
         resultSchema: z.object({ value: z.number() }),
         handler: () => ({ value }),
-      })
+      }),
     );
 
     runtime.registerMutation(
@@ -33,7 +33,7 @@ describe("http binding", () => {
           value += input.amount;
           return { value };
         },
-      })
+      }),
     );
 
     const app = createSignalHttpServer(runtime);
@@ -124,10 +124,10 @@ describe("http binding", () => {
     expect(JSON.parse(mutationResponse.body).result.value).toBe(2);
     expect(JSON.parse(capabilitiesResponse.body).protocol).toBe("signal.v1");
     expect(JSON.parse(missingQueryResponse.body).error.code).toBe(
-      "UNSUPPORTED_OPERATION"
+      "UNSUPPORTED_OPERATION",
     );
     expect(JSON.parse(replayResponse.body).error.code).toBe(
-      "IDEMPOTENCY_CONFLICT"
+      "IDEMPOTENCY_CONFLICT",
     );
   });
 
@@ -145,12 +145,12 @@ describe("http binding", () => {
           noteId: z.string().min(1),
         }),
         handler: (input) => input,
-      })
+      }),
     );
 
     const app = createSignalHttpServer(runtime);
 
-    const response = await app.inject({
+    const runtimeValidationResponse = await app.inject({
       method: "POST",
       url: "/signal/query/note.get.v1",
       payload: {
@@ -159,14 +159,58 @@ describe("http binding", () => {
         },
       },
     });
+    const queryParseResponse = await app.inject({
+      method: "POST",
+      url: "/signal/query/note.get.v1",
+      payload: null,
+    });
+    const mutationParseResponse = await app.inject({
+      method: "POST",
+      url: "/signal/mutation/note.save.v1",
+      payload: null,
+    });
 
-    expect(response.statusCode).toBe(400);
-    expect(JSON.parse(response.body)).toMatchObject({
+    const throwingApp = createSignalHttpServer({
+      query: async () => {
+        throw 42;
+      },
+      mutation: async () => {
+        throw 42;
+      },
+      capabilities: () => runtime.capabilities(),
+    } as never);
+    const thrownQueryResponse = await throwingApp.inject({
+      method: "POST",
+      url: "/signal/query/note.get.v1",
+      payload: { payload: { noteId: "note_1" } },
+    });
+    const thrownMutationResponse = await throwingApp.inject({
+      method: "POST",
+      url: "/signal/mutation/note.save.v1",
+      payload: { payload: { noteId: "note_1" } },
+    });
+
+    expect(runtimeValidationResponse.statusCode).toBe(400);
+    expect(JSON.parse(runtimeValidationResponse.body)).toMatchObject({
       ok: false,
       error: {
         code: "VALIDATION_ERROR",
         category: "validation",
       },
     });
+    expect(queryParseResponse.statusCode).toBe(400);
+    expect(JSON.parse(queryParseResponse.body).error.code).toBe("BAD_REQUEST");
+    expect(mutationParseResponse.statusCode).toBe(400);
+    expect(JSON.parse(mutationParseResponse.body).error.code).toBe(
+      "BAD_REQUEST",
+    );
+    expect(thrownQueryResponse.statusCode).toBe(400);
+    expect(JSON.parse(thrownQueryResponse.body).error.message).toBe(
+      "Invalid Signal HTTP request body",
+    );
+    expect(thrownMutationResponse.statusCode).toBe(400);
+    expect(JSON.parse(thrownMutationResponse.body).error.message).toBe(
+      "Invalid Signal HTTP request body",
+    );
   });
 });

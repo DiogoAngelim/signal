@@ -1,7 +1,7 @@
-import express, { type Express, type NextFunction } from "express";
-import cors from "cors";
-import path from "node:path";
 import fs from "node:fs";
+import path from "node:path";
+import cors from "cors";
+import express, { type Express, type NextFunction } from "express";
 import { createSignalApiRouter } from "./api";
 import { resolveClientDir } from "./client";
 
@@ -31,7 +31,7 @@ export function createSignalServer(
 
     const indexPath = path.join(clientPath, "index.html");
 
-    app.get("*", (req, res, next: NextFunction) => {
+    app.get(/.*/, (req, res, next: NextFunction) => {
       if (req.path.startsWith(basePath)) {
         next();
         return;

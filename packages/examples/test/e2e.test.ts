@@ -1,41 +1,43 @@
 import { existsSync, mkdtempSync, rmSync } from "node:fs";
-import path from "node:path";
 import { tmpdir } from "node:os";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import {
-  createExampleRuntime,
-  createReplaySafeSubscriber,
-} from "../support";
-import { runMinimalRuntimeDemo } from "../minimal-runtime";
-import {
-  registerPostPublication,
-  runPostPublicationDemo,
-} from "../post-publication";
-import { runHttpPostPublicationDemo } from "../http-post-publication";
+import path from "node:path";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { runCapabilitiesInspectionDemo } from "../capabilities-inspection";
+import { createCustomTransportSkeleton } from "../custom-transport-skeleton";
+import { registerEscrowRelease, runEscrowReleaseDemo } from "../escrow-release";
+import { runHttpPostPublicationDemo } from "../http-post-publication";
+import * as examples from "../index";
+import {
+  registerMinimalRuntime,
+  runMinimalRuntimeDemo,
+} from "../minimal-runtime";
 import {
   registerPaymentCapture,
   runPaymentCaptureDemo,
 } from "../payment-capture";
 import {
-  registerEscrowRelease,
-  runEscrowReleaseDemo,
-} from "../escrow-release";
+  registerPostPublication,
+  runPostPublicationDemo,
+} from "../post-publication";
+import { createExampleRuntime, createReplaySafeSubscriber } from "../support";
 import {
   registerUserOnboarding,
   runUserOnboardingDemo,
 } from "../user-onboarding";
-import * as examples from "../index";
 
 let trainingDir = "";
 
+function unsetEnv(name: string): void {
+  Reflect.deleteProperty(process.env, name);
+}
+
 beforeEach(() => {
   trainingDir = mkdtempSync(path.join(tmpdir(), "signal-examples-training-"));
-  process.env["SIGNAL_EXAMPLE_TRAINING_DIR"] = trainingDir;
+  process.env.SIGNAL_EXAMPLE_TRAINING_DIR = trainingDir;
 });
 
 afterEach(() => {
-  delete process.env["SIGNAL_EXAMPLE_TRAINING_DIR"];
+  unsetEnv("SIGNAL_EXAMPLE_TRAINING_DIR");
   if (trainingDir) {
     rmSync(trainingDir, { recursive: true, force: true });
     trainingDir = "";
@@ -61,10 +63,12 @@ describe("example flow", () => {
     expect(result.replay.ok && result.replay.meta.outcome).toBe("replayed");
     expect(result.conflict.ok).toBe(false);
     expect(result.conflict.ok === false && result.conflict.error.code).toBe(
-      "IDEMPOTENCY_CONFLICT"
+      "IDEMPOTENCY_CONFLICT",
     );
     expect(result.state.deliveredEventIds).toHaveLength(1);
-    expect(result.capabilities.mutations[0]?.emits).toEqual(["post.published.v1"]);
+    expect(result.capabilities.mutations[0]?.emits).toEqual([
+      "post.published.v1",
+    ]);
   });
 
   it("supports the HTTP example and capability inspection example", async () => {
@@ -74,9 +78,9 @@ describe("example flow", () => {
     expect(http.query.ok).toBe(true);
     expect(http.mutation.ok).toBe(true);
     expect(http.capabilities.protocol).toBe("signal.v1");
-    expect(capabilities.publication.mutations.map((entry) => entry.name)).toEqual([
-      "post.publish.v1",
-    ]);
+    expect(
+      capabilities.publication.mutations.map((entry) => entry.name),
+    ).toEqual(["post.publish.v1"]);
   });
 
   it("keeps payment capture replay-safe", async () => {
@@ -113,7 +117,7 @@ describe("example flow", () => {
       "support.event.v1",
       createReplaySafeSubscriber(async (event) => {
         seen.push(event.messageId);
-      })
+      }),
     );
 
     expect(runtime.runtimeName).toBe("signal-example");
@@ -180,7 +184,7 @@ describe("example flow", () => {
       },
       {
         idempotencyKey: "persist-training-1",
-      }
+      },
     );
 
     const firstSnapshot = await first.state.selfTraining?.snapshot();
@@ -190,15 +194,19 @@ describe("example flow", () => {
     expect(
       first.state.selfTraining?.filePath
         ? existsSync(first.state.selfTraining.filePath)
-        : false
+        : false,
     ).toBe(true);
 
     const second = registerPostPublication();
     const secondSnapshot = await second.state.selfTraining?.snapshot();
-    const queryOperation = secondSnapshot?.parameters.operations["query:post.get.v1"];
-    const mutationOperation = secondSnapshot?.parameters.operations["mutation:post.publish.v1"];
+    const queryOperation =
+      secondSnapshot?.parameters.operations["query:post.get.v1"];
+    const mutationOperation =
+      secondSnapshot?.parameters.operations["mutation:post.publish.v1"];
 
-    expect(secondSnapshot?.totals.observations).toBe(firstSnapshot?.totals.observations);
+    expect(secondSnapshot?.totals.observations).toBe(
+      firstSnapshot?.totals.observations,
+    );
     expect(queryOperation?.observations).toBe(2);
     expect(queryOperation?.failures).toBe(1);
     expect(mutationOperation?.observations).toBe(1);
@@ -216,22 +224,22 @@ describe("example flow", () => {
     const paymentConflict = await payment.runtime.mutation(
       "payment.capture.v1",
       { paymentId: "pay_1001", amount: 999, currency: "USD" },
-      { idempotencyKey: "payment-conflict-1" }
+      { idempotencyKey: "payment-conflict-1" },
     );
     const paymentMissingMutation = await payment.runtime.mutation(
       "payment.capture.v1",
       { paymentId: "missing", amount: 120, currency: "USD" },
-      { idempotencyKey: "payment-missing-1" }
+      { idempotencyKey: "payment-missing-1" },
     );
     const firstPaymentCapture = await payment.runtime.mutation(
       "payment.capture.v1",
       { paymentId: "pay_1001", amount: 120, currency: "USD" },
-      { idempotencyKey: "payment-capture-1" }
+      { idempotencyKey: "payment-capture-1" },
     );
     const alreadyCapturedPayment = await payment.runtime.mutation(
       "payment.capture.v1",
       { paymentId: "pay_1001", amount: 120, currency: "USD" },
-      { idempotencyKey: "payment-capture-2" }
+      { idempotencyKey: "payment-capture-2" },
     );
 
     const escrowNotFound = await escrow.runtime.query("escrow.status.v1", {
@@ -240,17 +248,17 @@ describe("example flow", () => {
     const escrowMissingMutation = await escrow.runtime.mutation(
       "escrow.release.v1",
       { escrowId: "missing" },
-      { idempotencyKey: "escrow-missing-1" }
+      { idempotencyKey: "escrow-missing-1" },
     );
     const firstEscrowRelease = await escrow.runtime.mutation(
       "escrow.release.v1",
       { escrowId: "esc_2001" },
-      { idempotencyKey: "escrow-release-1" }
+      { idempotencyKey: "escrow-release-1" },
     );
     const alreadyReleasedEscrow = await escrow.runtime.mutation(
       "escrow.release.v1",
       { escrowId: "esc_2001" },
-      { idempotencyKey: "escrow-release-2" }
+      { idempotencyKey: "escrow-release-2" },
     );
 
     const userNotFound = await user.runtime.query("user.profile.v1", {
@@ -259,17 +267,17 @@ describe("example flow", () => {
     const userMissingMutation = await user.runtime.mutation(
       "user.onboard.v1",
       { userId: "missing", email: "missing@example.com", plan: "free" },
-      { idempotencyKey: "user-missing-1" }
+      { idempotencyKey: "user-missing-1" },
     );
     const firstOnboard = await user.runtime.mutation(
       "user.onboard.v1",
       { userId: "user_3001", email: "ada@example.com", plan: "pro" },
-      { idempotencyKey: "user-onboard-1" }
+      { idempotencyKey: "user-onboard-1" },
     );
     const alreadyOnboardedUser = await user.runtime.mutation(
       "user.onboard.v1",
       { userId: "user_3001", email: "ada@example.com", plan: "pro" },
-      { idempotencyKey: "user-onboard-2" }
+      { idempotencyKey: "user-onboard-2" },
     );
 
     expect(paymentNotFound.ok).toBe(false);
@@ -285,5 +293,137 @@ describe("example flow", () => {
     expect(userMissingMutation.ok).toBe(true);
     expect(firstOnboard.ok).toBe(true);
     expect(alreadyOnboardedUser.ok).toBe(true);
+  });
+
+  it("covers minimal and post publication failure branches", async () => {
+    const minimal = registerMinimalRuntime();
+    const missingNote = await minimal.runtime.query("note.get.v1", {
+      noteId: "missing",
+    });
+    const post = registerPostPublication();
+
+    const missingMinimal = await post.runtime.query("post.get.v1", {
+      postId: "missing",
+    });
+    const missingPublish = await post.runtime.mutation(
+      "post.publish.v1",
+      {
+        postId: "missing",
+        title: "Protocol first",
+        body: "Signal keeps transport and execution concerns separate.",
+      },
+      { idempotencyKey: "post-missing-1" },
+    );
+    const mismatchPublish = await post.runtime.mutation(
+      "post.publish.v1",
+      {
+        postId: "post_1001",
+        title: "Wrong",
+        body: "Signal keeps transport and execution concerns separate.",
+      },
+      { idempotencyKey: "post-mismatch-1" },
+    );
+    const firstPublish = await post.runtime.mutation(
+      "post.publish.v1",
+      {
+        postId: "post_1001",
+        title: "Protocol first",
+        body: "Signal keeps transport and execution concerns separate.",
+      },
+      { idempotencyKey: "post-publish-1" },
+    );
+    const alreadyPublished = await post.runtime.mutation(
+      "post.publish.v1",
+      {
+        postId: "post_1001",
+        title: "Protocol first",
+        body: "Signal keeps transport and execution concerns separate.",
+      },
+      { idempotencyKey: "post-publish-2" },
+    );
+
+    expect(missingNote.ok).toBe(false);
+    expect(missingMinimal.ok).toBe(false);
+    expect(missingPublish.ok).toBe(false);
+    expect(mismatchPublish.ok).toBe(false);
+    expect(firstPublish.ok).toBe(true);
+    expect(alreadyPublished.ok).toBe(true);
+  });
+
+  it("covers the custom transport skeleton dispatcher and subscriptions", async () => {
+    const calls: Array<{ method: string; status: string }> = [];
+    const selfTraining = {
+      moduleId: "custom-test",
+      storageKind: "file" as const,
+      storageKey: "memory",
+      snapshot: async () => {
+        throw new Error("unused");
+      },
+      recordQuery: async () => undefined,
+      recordMutation: async () => undefined,
+      recordEvent: async () => undefined,
+      recordDispatch: vi.fn(
+        async (_name: string, _input: unknown, outcome: { status: string }) => {
+          calls.push({ method: "dispatch", status: outcome.status });
+        },
+      ),
+      recordSubscription: vi.fn(
+        async (_name: string, _input: unknown, outcome: { status: string }) => {
+          calls.push({ method: "subscription", status: outcome.status });
+        },
+      ),
+      recordSubscriber: vi.fn(
+        async (_name: string, _input: unknown, outcome: { status: string }) => {
+          calls.push({ method: "subscriber", status: outcome.status });
+        },
+      ),
+    };
+    const dispatcher = createCustomTransportSkeleton(selfTraining);
+    const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+    await dispatcher.dispatch({
+      protocol: "signal.v1",
+      kind: "event",
+      name: "transport.sample.v1",
+      messageId: "msg-1",
+      timestamp: new Date().toISOString(),
+      payload: { ok: true },
+    });
+
+    const unsubscribe = dispatcher.subscribe(
+      "transport.sample.v1",
+      async () => undefined,
+    );
+    await Promise.resolve();
+    unsubscribe();
+    dispatcher.subscribe("transport.failed.v1", async () => {
+      throw new Error("subscriber failed");
+    });
+    await Promise.resolve();
+
+    selfTraining.recordDispatch.mockImplementationOnce(async () => {
+      throw new Error("dispatch failed");
+    });
+    await expect(
+      dispatcher.dispatch({
+        protocol: "signal.v1",
+        kind: "event",
+        name: "transport.failed.v1",
+        messageId: "msg-2",
+        timestamp: new Date().toISOString(),
+        payload: { ok: false },
+      }),
+    ).rejects.toThrow("dispatch failed");
+
+    expect(calls.map((call) => `${call.method}:${call.status}`)).toEqual(
+      expect.arrayContaining([
+        "dispatch:success",
+        "dispatch:failure",
+        "subscription:success",
+        "subscriber:success",
+        "subscriber:failure",
+      ]),
+    );
+    log.mockRestore();
   });
 });

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { signalKinds } from "./kinds";
 import { signalProtocolVersion } from "./envelope";
+import { signalKinds } from "./kinds";
 import { signalNameSchema } from "./names";
 
 export const signalOperationCapabilitySchema = z.object({
@@ -28,6 +28,7 @@ export const signalCapabilitiesSchema = z.object({
       cancellation: z.boolean(),
       idempotency: z.boolean(),
       replaySafety: z.boolean(),
+      perception: z.boolean().optional(),
     })
     .optional(),
   bindings: z
@@ -50,7 +51,7 @@ export type SignalOperationCapability = z.infer<
 export type SignalCapabilities = z.infer<typeof signalCapabilitiesSchema>;
 
 export function createSignalCapabilities(
-  input: SignalCapabilities
+  input: SignalCapabilities,
 ): SignalCapabilities {
   return signalCapabilitiesSchema.parse(input);
 }

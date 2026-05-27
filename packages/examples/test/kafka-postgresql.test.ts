@@ -1,6 +1,6 @@
 import { mkdtempSync, rmSync } from "node:fs";
-import path from "node:path";
 import { tmpdir } from "node:os";
+import path from "node:path";
 import { createSignalEnvelope } from "@signal/protocol";
 import { createMemoryIdempotencyStore } from "@signal/runtime";
 import { createSignalRuntime } from "@signal/sdk-node";
@@ -23,13 +23,26 @@ import { createPersistentExampleSelfTraining } from "../support";
 
 let trainingDir = "";
 
+function unsetEnv(name: string): void {
+  Reflect.deleteProperty(process.env, name);
+}
+
 function createRecordingDispatcher() {
-  const subscribers = new Map<string, Set<(envelope: ReturnType<typeof createSignalEnvelope>) => void | Promise<void>>>();
+  const subscribers = new Map<
+    string,
+    Set<
+      (
+        envelope: ReturnType<typeof createSignalEnvelope>,
+      ) => void | Promise<void>
+    >
+  >();
   const events: Array<ReturnType<typeof createSignalEnvelope>> = [];
 
   return {
     events,
-    async dispatch(envelope: ReturnType<typeof createSignalEnvelope>): Promise<void> {
+    async dispatch(
+      envelope: ReturnType<typeof createSignalEnvelope>,
+    ): Promise<void> {
       events.push(envelope);
       const handlers = subscribers.get(envelope.name);
       if (!handlers) {
@@ -42,7 +55,9 @@ function createRecordingDispatcher() {
     },
     subscribe(
       name: string,
-      handler: (envelope: ReturnType<typeof createSignalEnvelope>) => void | Promise<void>
+      handler: (
+        envelope: ReturnType<typeof createSignalEnvelope>,
+      ) => void | Promise<void>,
     ) {
       const handlers = subscribers.get(name) ?? new Set();
       handlers.add(handler);
@@ -81,15 +96,25 @@ function createFakePoolHarness() {
         return { rows: [], rowCount: 0 };
       }
 
-      if (sql.startsWith("CREATE TABLE IF NOT EXISTS signal_example_payments")) {
+      if (
+        sql.startsWith("CREATE TABLE IF NOT EXISTS signal_example_payments")
+      ) {
         return { rows: [], rowCount: 0 };
       }
 
-      if (sql.startsWith("CREATE TABLE IF NOT EXISTS signal_example_payment_capture_log")) {
+      if (
+        sql.startsWith(
+          "CREATE TABLE IF NOT EXISTS signal_example_payment_capture_log",
+        )
+      ) {
         return { rows: [], rowCount: 0 };
       }
 
-      if (sql.startsWith('CREATE TABLE IF NOT EXISTS "signal_example_self_training"')) {
+      if (
+        sql.startsWith(
+          'CREATE TABLE IF NOT EXISTS "signal_example_self_training"',
+        )
+      ) {
         return { rows: [], rowCount: 0 };
       }
 
@@ -126,7 +151,9 @@ function createFakePoolHarness() {
               amount: payment.amount,
               currency: payment.currency,
               status: payment.status,
-              captured_at: payment.capturedAt ? new Date(payment.capturedAt) : null,
+              captured_at: payment.capturedAt
+                ? new Date(payment.capturedAt)
+                : null,
               capture_attempts: payment.captureAttempts,
             },
           ],
@@ -150,7 +177,9 @@ function createFakePoolHarness() {
               amount: payment.amount,
               currency: payment.currency,
               status: payment.status,
-              captured_at: payment.capturedAt ? new Date(payment.capturedAt) : null,
+              captured_at: payment.capturedAt
+                ? new Date(payment.capturedAt)
+                : null,
               capture_attempts: payment.captureAttempts,
             },
           ],
@@ -158,7 +187,9 @@ function createFakePoolHarness() {
         };
       }
 
-      if (sql.startsWith("UPDATE signal_example_payments SET status = 'captured'")) {
+      if (
+        sql.startsWith("UPDATE signal_example_payments SET status = 'captured'")
+      ) {
         const [paymentId, capturedAt] = values;
         const current = payments.get(String(paymentId));
         if (!current) {
@@ -215,7 +246,9 @@ function createFakePoolHarness() {
           rows: [...captureLog.values()]
             .filter((entry) => entry.payment_id === paymentId)
             .map((entry) => ({ ...entry })),
-          rowCount: [...captureLog.values()].filter((entry) => entry.payment_id === paymentId).length,
+          rowCount: [...captureLog.values()].filter(
+            (entry) => entry.payment_id === paymentId,
+          ).length,
         };
       }
 
@@ -230,9 +263,16 @@ function createFakePoolHarness() {
         };
       }
 
-      if (sql.startsWith('INSERT INTO "signal_example_self_training" (module_id, snapshot, updated_at)')) {
+      if (
+        sql.startsWith(
+          'INSERT INTO "signal_example_self_training" (module_id, snapshot, updated_at)',
+        )
+      ) {
         const [moduleId, snapshot] = values;
-        trainingSnapshots.set(String(moduleId), JSON.parse(String(snapshot)) as Record<string, unknown>);
+        trainingSnapshots.set(
+          String(moduleId),
+          JSON.parse(String(snapshot)) as Record<string, unknown>,
+        );
         return { rows: [], rowCount: 1 };
       }
 
@@ -251,16 +291,16 @@ function createFakePoolHarness() {
 
 beforeEach(() => {
   trainingDir = mkdtempSync(path.join(tmpdir(), "signal-kafka-training-"));
-  process.env["SIGNAL_EXAMPLE_TRAINING_DIR"] = trainingDir;
+  process.env.SIGNAL_EXAMPLE_TRAINING_DIR = trainingDir;
 });
 
 afterEach(() => {
-  delete process.env.DATABASE_URL;
-  delete process.env.KAFKA_BROKERS;
-  delete process.env.KAFKA_TOPIC;
-  delete process.env.KAFKA_CLIENT_ID;
-  delete process.env.KAFKA_GROUP_ID;
-  delete process.env.SIGNAL_EXAMPLE_TRAINING_DIR;
+  unsetEnv("DATABASE_URL");
+  unsetEnv("KAFKA_BROKERS");
+  unsetEnv("KAFKA_TOPIC");
+  unsetEnv("KAFKA_CLIENT_ID");
+  unsetEnv("KAFKA_GROUP_ID");
+  unsetEnv("SIGNAL_EXAMPLE_TRAINING_DIR");
   if (trainingDir) {
     rmSync(trainingDir, { recursive: true, force: true });
     trainingDir = "";
@@ -269,11 +309,11 @@ afterEach(() => {
 
 describe("kafka postgres example", () => {
   it("parses kafka config from environment", () => {
-    delete process.env.DATABASE_URL;
-    delete process.env.KAFKA_BROKERS;
-    delete process.env.KAFKA_TOPIC;
-    delete process.env.KAFKA_CLIENT_ID;
-    delete process.env.KAFKA_GROUP_ID;
+    unsetEnv("DATABASE_URL");
+    unsetEnv("KAFKA_BROKERS");
+    unsetEnv("KAFKA_TOPIC");
+    unsetEnv("KAFKA_CLIENT_ID");
+    unsetEnv("KAFKA_GROUP_ID");
 
     expect(readKafkaBrokers()).toEqual(["localhost:9092"]);
 
@@ -293,11 +333,11 @@ describe("kafka postgres example", () => {
     expect(readKafkaBrokers("one:1, two:2")).toEqual(["one:1", "two:2"]);
     expect(readKafkaBrokers()).toEqual(["a:9092", "b:9092"]);
 
-    delete process.env.DATABASE_URL;
-    delete process.env.KAFKA_BROKERS;
-    delete process.env.KAFKA_TOPIC;
-    delete process.env.KAFKA_CLIENT_ID;
-    delete process.env.KAFKA_GROUP_ID;
+    unsetEnv("DATABASE_URL");
+    unsetEnv("KAFKA_BROKERS");
+    unsetEnv("KAFKA_TOPIC");
+    unsetEnv("KAFKA_CLIENT_ID");
+    unsetEnv("KAFKA_GROUP_ID");
 
     expect(readKafkaPostgresExampleConfig()).toEqual({
       connectionString: "postgresql://postgres:postgres@localhost:5432/signal",
@@ -340,27 +380,57 @@ describe("kafka postgres example", () => {
     const first = await runtime.mutation(
       "payment.capture.v1",
       { paymentId: "pay_9001", amount: 120, currency: "USD" },
-      { idempotencyKey: "capture-pay_9001-001" }
+      { idempotencyKey: "capture-pay_9001-001" },
     );
     const replay = await runtime.mutation(
       "payment.capture.v1",
       { paymentId: "pay_9001", amount: 120, currency: "USD" },
-      { idempotencyKey: "capture-pay_9001-001" }
+      { idempotencyKey: "capture-pay_9001-001" },
     );
 
     expect(first.ok).toBe(true);
     expect(replay.ok).toBe(true);
     expect(events).toHaveLength(1);
+    await expect(
+      repository.capturePayment({
+        paymentId: "missing",
+        amount: 120,
+        currency: "USD",
+      }),
+    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    await expect(
+      repository.capturePayment({
+        paymentId: "pay_9001",
+        amount: 999,
+        currency: "USD",
+      }),
+    ).rejects.toMatchObject({ code: "CONFLICT" });
+    await expect(
+      repository.capturePayment({
+        paymentId: "pay_9001",
+        amount: 120,
+        currency: "USD",
+      }),
+    ).resolves.toMatchObject({ status: "captured", captureAttempts: 1 });
+    expect(await repository.getPayment("missing")).toBeNull();
     expect(await repository.ensureSchema()).toBeUndefined();
     expect(await projectPaymentCapturedEvent(repository, events[0])).toBe(true);
-    expect(await projectPaymentCapturedEvent(repository, events[0])).toBe(false);
+    expect(await projectPaymentCapturedEvent(repository, events[0])).toBe(
+      false,
+    );
 
-    const status = await runtime.query("payment.status.v1", { paymentId: "pay_9001" });
+    const status = await runtime.query("payment.status.v1", {
+      paymentId: "pay_9001",
+    });
+    const missingStatus = await runtime.query("payment.status.v1", {
+      paymentId: "missing",
+    });
     const captureLog = await runtime.query("payment.capture-log.v1", {
       paymentId: "pay_9001",
     });
 
     expect(status.ok).toBe(true);
+    expect(missingStatus.ok).toBe(false);
     if (status.ok) {
       expect(status.result.captureAttempts).toBe(1);
       expect(status.result.status).toBe("captured");
@@ -371,13 +441,67 @@ describe("kafka postgres example", () => {
     }
   });
 
+  it("emits a fallback captured timestamp when repositories omit one", async () => {
+    const dispatcher = createRecordingDispatcher();
+    const runtime = createSignalRuntime({
+      idempotencyStore: createMemoryIdempotencyStore(),
+      dispatcher,
+    });
+    const repository = {
+      ensureSchema: vi.fn(async () => undefined),
+      seedPayment: vi.fn(async () => undefined),
+      getPayment: vi.fn(async () => ({
+        paymentId: "pay_fallback",
+        amount: 120,
+        currency: "USD",
+        status: "authorized" as const,
+        capturedAt: null,
+        captureAttempts: 0,
+      })),
+      capturePayment: vi.fn(async () => ({
+        paymentId: "pay_fallback",
+        amount: 120,
+        currency: "USD",
+        status: "captured" as const,
+        capturedAt: null,
+        captureAttempts: 1,
+      })),
+      recordCaptureLog: vi.fn(async () => true),
+      listCaptureLog: vi.fn(async () => ({
+        paymentId: "pay_fallback",
+        events: [],
+      })),
+    };
+
+    registerKafkaPostgresExample(runtime, repository);
+    const result = await runtime.mutation(
+      "payment.capture.v1",
+      { paymentId: "pay_fallback", amount: 120, currency: "USD" },
+      { idempotencyKey: "capture-fallback-1" },
+    );
+
+    expect(result.ok).toBe(true);
+    expect(dispatcher.events[0]?.payload).toMatchObject({
+      paymentId: "pay_fallback",
+      capturedAt: expect.any(String),
+    });
+  });
+
   it("covers the postgres repository contract with a fake pool", async () => {
     const harness = createFakePoolHarness();
     const repository = createPostgresPaymentCaptureRepository(harness.pool);
 
     await repository.ensureSchema();
-    await repository.seedPayment({ paymentId: "pay_9001", amount: 120, currency: "USD" });
-    await repository.seedPayment({ paymentId: "pay_9001", amount: 999, currency: "EUR" });
+    await repository.seedPayment({
+      paymentId: "pay_9001",
+      amount: 120,
+      currency: "USD",
+    });
+    await repository.seedPayment({
+      paymentId: "pay_9001",
+      amount: 999,
+      currency: "EUR",
+    });
 
     expect(await repository.getPayment("missing")).toBeNull();
 
@@ -395,7 +519,7 @@ describe("kafka postgres example", () => {
         paymentId: "missing",
         amount: 120,
         currency: "USD",
-      })
+      }),
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
 
     await expect(
@@ -403,7 +527,7 @@ describe("kafka postgres example", () => {
         paymentId: "pay_9001",
         amount: 999,
         currency: "USD",
-      })
+      }),
     ).rejects.toMatchObject({ code: "CONFLICT" });
 
     const captured = await repository.capturePayment({
@@ -440,55 +564,207 @@ describe("kafka postgres example", () => {
       currency: "USD",
     });
     expect(harness.client.query).toHaveBeenCalled();
-    expect(harness.queries.some((query) => query.startsWith("CREATE TABLE IF NOT EXISTS signal_example_payments"))).toBe(true);
+    expect(
+      harness.queries.some((query) =>
+        query.startsWith("CREATE TABLE IF NOT EXISTS signal_example_payments"),
+      ),
+    ).toBe(true);
+  });
+
+  it("maps postgres repository camel-case rows and update fallbacks", async () => {
+    const client = {
+      query: vi.fn(async (text: string, values: readonly unknown[] = []) => {
+        const sql = text.replace(/\s+/g, " ").trim();
+        if (sql === "BEGIN" || sql === "COMMIT") {
+          return { rows: [], rowCount: 0 };
+        }
+        if (
+          sql ===
+          "SELECT payment_id, amount, currency, status, captured_at, capture_attempts FROM signal_example_payments WHERE payment_id = $1 LIMIT 1"
+        ) {
+          if (values[0] === "pay_default") {
+            return {
+              rows: [
+                {
+                  payment_id: "pay_default",
+                  amount: 120,
+                  currency: "USD",
+                  status: "authorized",
+                  captured_at: null,
+                },
+              ],
+              rowCount: 1,
+            };
+          }
+          return {
+            rows: [
+              {
+                paymentId: "pay_camel",
+                amount: 120,
+                currency: "USD",
+                status: "authorized",
+                capturedAt: "2026-05-27T00:00:00.000Z",
+                captureAttempts: 2,
+              },
+            ],
+            rowCount: 1,
+          };
+        }
+        if (
+          sql ===
+          "SELECT payment_id, amount, currency, status, captured_at, capture_attempts FROM signal_example_payments WHERE payment_id = $1 FOR UPDATE"
+        ) {
+          return {
+            rows: [
+              {
+                paymentId: "pay_camel",
+                amount: 120,
+                currency: "USD",
+                status: "authorized",
+                capturedAt: null,
+                captureAttempts: 0,
+              },
+            ],
+            rowCount: 1,
+          };
+        }
+        if (sql.startsWith("UPDATE signal_example_payments")) {
+          return { rows: [], rowCount: 0 };
+        }
+        if (
+          sql ===
+          "SELECT message_id, payment_id, amount, currency, captured_at FROM signal_example_payment_capture_log WHERE payment_id = $1 ORDER BY created_at ASC"
+        ) {
+          return {
+            rows: [
+              {
+                messageId: "msg-camel",
+                paymentId: "pay_camel",
+                amount: 120,
+                currency: "USD",
+                capturedAt: "2026-05-27T00:00:00.000Z",
+              },
+            ],
+            rowCount: 1,
+          };
+        }
+        throw new Error(`Unexpected SQL: ${sql}`);
+      }),
+      release: vi.fn(),
+    };
+    const pool = {
+      connect: vi.fn(async () => client),
+    } as unknown as Pool;
+    const repository = createPostgresPaymentCaptureRepository(pool);
+
+    await expect(repository.getPayment("pay_camel")).resolves.toMatchObject({
+      paymentId: "pay_camel",
+      capturedAt: "2026-05-27T00:00:00.000Z",
+      captureAttempts: 2,
+    });
+    await expect(repository.getPayment("pay_default")).resolves.toMatchObject({
+      paymentId: "pay_default",
+      capturedAt: null,
+      captureAttempts: 0,
+    });
+    await expect(
+      repository.capturePayment({
+        paymentId: "pay_camel",
+        amount: 120,
+        currency: "USD",
+      }),
+    ).resolves.toMatchObject({
+      paymentId: "pay_camel",
+      status: "authorized",
+    });
+    await expect(repository.listCaptureLog("pay_camel")).resolves.toEqual({
+      paymentId: "pay_camel",
+      events: [
+        {
+          messageId: "msg-camel",
+          paymentId: "pay_camel",
+          amount: 120,
+          currency: "USD",
+          capturedAt: "2026-05-27T00:00:00.000Z",
+        },
+      ],
+    });
   });
 
   it("persists self-training snapshots through postgres", async () => {
     const harness = createFakePoolHarness();
-    const selfTraining = createPersistentExampleSelfTraining("postgres-self-training", {
-      pool: harness.pool,
-    });
+    const selfTraining = createPersistentExampleSelfTraining(
+      "postgres-self-training",
+      {
+        pool: harness.pool,
+      },
+    );
 
-    await selfTraining.recordQuery("payment.status.v1", { paymentId: "pay_9001" }, {
-      status: "success",
-      result: { paymentId: "pay_9001", status: "captured" },
-    });
-    await selfTraining.recordMutation("payment.capture.v1", { paymentId: "pay_9001" }, {
-      status: "failure",
-      error: new Error("duplicate capture"),
-    });
+    await selfTraining.recordQuery(
+      "payment.status.v1",
+      { paymentId: "pay_9001" },
+      {
+        status: "success",
+        result: { paymentId: "pay_9001", status: "captured" },
+      },
+    );
+    await selfTraining.recordMutation(
+      "payment.capture.v1",
+      { paymentId: "pay_9001" },
+      {
+        status: "failure",
+        error: new Error("duplicate capture"),
+      },
+    );
 
-    const nextInstance = createPersistentExampleSelfTraining("postgres-self-training", {
-      pool: harness.pool,
-    });
+    const nextInstance = createPersistentExampleSelfTraining(
+      "postgres-self-training",
+      {
+        pool: harness.pool,
+      },
+    );
     const snapshot = await nextInstance.snapshot();
 
     expect(nextInstance.storageKind).toBe("postgres");
     expect(snapshot.totals.observations).toBe(2);
-    expect(snapshot.parameters.operations["query:payment.status.v1"]?.successes).toBe(1);
-    expect(snapshot.parameters.operations["mutation:payment.capture.v1"]?.failures).toBe(1);
-    expect(harness.trainingSnapshots.get("postgres-self-training")).toBeTruthy();
+    expect(
+      snapshot.parameters.operations["query:payment.status.v1"]?.successes,
+    ).toBe(1);
+    expect(
+      snapshot.parameters.operations["mutation:payment.capture.v1"]?.failures,
+    ).toBe(1);
+    expect(
+      harness.trainingSnapshots.get("postgres-self-training"),
+    ).toBeTruthy();
   });
 
   it("dispatches event envelopes through kafka helpers and starts a replay-safe consumer", async () => {
     const sent: Array<{ topic: string; message: string }> = [];
     const producer = {
       connect: vi.fn(async () => undefined),
-      send: vi.fn(async ({ topic, messages }: { topic: string; messages: Array<{ value?: string }> }) => {
-        sent.push({ topic, message: String(messages[0]?.value ?? "") });
-      }),
+      send: vi.fn(
+        async ({
+          topic,
+          messages,
+        }: { topic: string; messages: Array<{ value?: string }> }) => {
+          sent.push({ topic, message: String(messages[0]?.value ?? "") });
+        },
+      ),
       disconnect: vi.fn(async () => undefined),
     };
 
     const dispatcher = await createKafkaSignalDispatcher(
       { brokers: ["localhost:9092"], topic: "signal.example.events" },
-      { producer: producer as never }
+      { producer: producer as never },
     );
 
     const dispatchEvents: Array<ReturnType<typeof createSignalEnvelope>> = [];
-    const unsubscribe = dispatcher.subscribe("payment.captured.v1", async (envelope) => {
-      dispatchEvents.push(envelope);
-    });
+    const unsubscribe = dispatcher.subscribe(
+      "payment.captured.v1",
+      async (envelope) => {
+        dispatchEvents.push(envelope);
+      },
+    );
 
     const envelope = createSignalEnvelope({
       kind: "event",
@@ -515,7 +791,7 @@ describe("kafka postgres example", () => {
           currency: "USD",
           capturedAt: new Date().toISOString(),
         },
-      })
+      }),
     );
     await dispatcher.dispatch(envelope);
     unsubscribe();
@@ -535,7 +811,7 @@ describe("kafka postgres example", () => {
         kind: "query",
         name: "payment.status.v1",
         payload: { paymentId: "pay_9001" },
-      })
+      }),
     );
     const wrongName = await projectPaymentCapturedEvent(
       repository,
@@ -548,7 +824,7 @@ describe("kafka postgres example", () => {
           currency: "USD",
           capturedAt: new Date().toISOString(),
         },
-      })
+      }),
     );
     const valid = await projectPaymentCapturedEvent(repository, envelope);
     const duplicate = await projectPaymentCapturedEvent(repository, envelope);
@@ -561,10 +837,20 @@ describe("kafka postgres example", () => {
     const fakeConsumer = {
       connect: vi.fn(async () => undefined),
       subscribe: vi.fn(async () => undefined),
-      run: vi.fn(async ({ eachMessage }: { eachMessage: (input: { message: { value?: Buffer } }) => Promise<void> }) => {
-        await eachMessage({ message: { value: undefined } });
-        await eachMessage({ message: { value: Buffer.from(JSON.stringify(envelope)) } });
-      }),
+      run: vi.fn(
+        async ({
+          eachMessage,
+        }: {
+          eachMessage: (input: {
+            message: { value?: Buffer };
+          }) => Promise<void>;
+        }) => {
+          await eachMessage({ message: { value: undefined } });
+          await eachMessage({
+            message: { value: Buffer.from(JSON.stringify(envelope)) },
+          });
+        },
+      ),
       disconnect: vi.fn(async () => undefined),
     };
 
@@ -574,7 +860,7 @@ describe("kafka postgres example", () => {
         topic: "signal.example.events",
         repository,
       },
-      { consumer: fakeConsumer as never }
+      { consumer: fakeConsumer as never },
     );
 
     await consumer.start();
@@ -587,7 +873,9 @@ describe("kafka postgres example", () => {
     });
     expect(fakeConsumer.run).toHaveBeenCalledTimes(1);
     expect(fakeConsumer.disconnect).toHaveBeenCalledTimes(1);
-    expect((await repository.listCaptureLog("pay_9001")).events).toHaveLength(1);
+    expect((await repository.listCaptureLog("pay_9001")).events).toHaveLength(
+      1,
+    );
   });
 
   it("creates and runs the example with injected dependencies", async () => {
@@ -608,15 +896,15 @@ describe("kafka postgres example", () => {
         pool: harness.pool,
         dispatcher: dispatcher as never,
         consumer: consumer as never,
-      }
+      },
     );
 
     expect(dispatcher.events).toHaveLength(0);
     expect(consumer.start).not.toHaveBeenCalled();
     expect(
       harness.queries.some((query) =>
-        query.startsWith("CREATE TABLE IF NOT EXISTS signal_example_payments")
-      )
+        query.startsWith("CREATE TABLE IF NOT EXISTS signal_example_payments"),
+      ),
     ).toBe(true);
     await example.close();
     expect(consumer.stop).not.toHaveBeenCalled();
@@ -646,7 +934,7 @@ describe("kafka postgres example", () => {
         dispatcher: dispatcher as never,
         consumer: consumer as never,
         idempotencyStore: createMemoryIdempotencyStore(),
-      }
+      },
     );
 
     expect(output.first.ok).toBe(true);

@@ -1,14 +1,15 @@
-import type { z } from "zod";
 import type {
+  SignalAuth,
   SignalCapabilities,
+  SignalContext,
+  SignalDelivery,
   SignalEnvelope,
   SignalErrorEnvelope,
-  SignalResultMeta,
   SignalKind,
-  SignalDelivery,
-  SignalContext,
-  SignalAuth,
+  SignalResultMeta,
 } from "@signal/protocol";
+import type { z } from "zod";
+import type { PerceptionLayer, PerceptionLayerOptions } from "./perception";
 
 export type { SignalErrorEnvelope } from "@signal/protocol";
 
@@ -41,16 +42,22 @@ export interface SignalExecutionContext {
   emit<TPayload>(
     name: string,
     payload: TPayload,
-    meta?: Record<string, unknown>
+    meta?: Record<string, unknown>,
   ): Promise<SignalEnvelope<TPayload>>;
 }
 
-export interface SignalOperationDefinition<TInput = unknown, TResult = unknown> {
+export interface SignalOperationDefinition<
+  TInput = unknown,
+  TResult = unknown,
+> {
   name: string;
   kind: SignalOperationKind;
   inputSchema: SignalSchema<TInput>;
   resultSchema: SignalSchema<TResult>;
-  handler(input: TInput, context: SignalExecutionContext): Promise<TResult> | TResult;
+  handler(
+    input: TInput,
+    context: SignalExecutionContext,
+  ): Promise<TResult> | TResult;
   idempotency?: "required" | "optional" | "none";
   description?: string;
   inputSchemaId?: string;
@@ -135,7 +142,7 @@ export interface SignalDispatcher {
   dispatch(envelope: SignalEnvelope): Promise<void>;
   subscribe(
     name: string,
-    handler: (envelope: SignalEnvelope) => void | Promise<void>
+    handler: (envelope: SignalEnvelope) => void | Promise<void>,
   ): () => void;
 }
 
@@ -158,6 +165,7 @@ export interface SignalRuntimeOptions {
   protocol?: string;
   idempotencyStore?: SignalIdempotencyStore;
   dispatcher?: SignalDispatcher;
+  perception?: PerceptionLayer | PerceptionLayerOptions | false;
   runtimeName?: string;
   bindings?: SignalCapabilities["bindings"];
 }
@@ -167,6 +175,14 @@ export interface SignalCapabilityProvider {
 }
 
 export interface SignalBinding {
-  query<TInput, TResult>(name: string, input: TInput, request?: SignalRequestContext): Promise<SignalExecutionResult<TResult>>;
-  mutation<TInput, TResult>(name: string, input: TInput, request?: SignalRequestContext & { idempotencyKey?: string }): Promise<SignalExecutionResult<TResult>>;
+  query<TInput, TResult>(
+    name: string,
+    input: TInput,
+    request?: SignalRequestContext,
+  ): Promise<SignalExecutionResult<TResult>>;
+  mutation<TInput, TResult>(
+    name: string,
+    input: TInput,
+    request?: SignalRequestContext & { idempotencyKey?: string },
+  ): Promise<SignalExecutionResult<TResult>>;
 }

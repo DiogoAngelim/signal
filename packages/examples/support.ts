@@ -1,8 +1,11 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { Pool, type PoolClient, type PoolConfig } from "pg";
+import {
+  createMemoryIdempotencyStore,
+  createReplaySafeSubscriber,
+} from "@signal/runtime";
 import { createSignalRuntime } from "@signal/sdk-node";
-import { createMemoryIdempotencyStore, createReplaySafeSubscriber } from "@signal/runtime";
+import { Pool, type PoolClient, type PoolConfig } from "pg";
 
 export function createExampleRuntime() {
   return createSignalRuntime({
@@ -74,32 +77,44 @@ export interface ExampleSelfTrainingModule {
   recordQuery(
     name: string,
     input: unknown,
-    outcome: { status: "success"; result: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void>;
   recordMutation(
     name: string,
     input: unknown,
-    outcome: { status: "success"; result: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void>;
   recordEvent(
     name: string,
     input: unknown,
-    outcome: { status: "success"; result: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void>;
   recordSubscriber(
     name: string,
     input: unknown,
-    outcome: { status: "success"; result?: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result?: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void>;
   recordDispatch(
     name: string,
     input: unknown,
-    outcome: { status: "success"; result?: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result?: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void>;
   recordSubscription(
     name: string,
     input: unknown,
-    outcome: { status: "success"; result?: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result?: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void>;
 }
 
@@ -122,7 +137,10 @@ interface ExampleTrainingStorage {
   persist(snapshot: ExampleSelfTrainingSnapshot): Promise<void>;
 }
 
-const DEFAULT_TRAINING_DIR = path.resolve(process.cwd(), ".signal-example-training");
+const DEFAULT_TRAINING_DIR = path.resolve(
+  process.cwd(),
+  ".signal-example-training",
+);
 const DEFAULT_TRAINING_TABLE = "signal_example_self_training";
 const TRAINING_SNAPSHOT_VERSION = 1 as const;
 const DEFAULT_LEARNING_RATE = 0.1;
@@ -135,19 +153,32 @@ const MAX_SNAPSHOT_ITEMS = 10;
 const SHARED_TRAINING_POOLS = new Map<string, Pool>();
 const ENSURED_TRAINING_TABLES = new WeakMap<Pool, Map<string, Promise<void>>>();
 
+function readEnv(name: string): string | undefined {
+  return process.env[name];
+}
+
 function sanitizeModuleId(moduleId: string): string {
-  return moduleId.trim().toLowerCase().replace(/[^a-z0-9._-]+/g, "-") || "example";
+  return (
+    moduleId
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, "-") || "example"
+  );
 }
 
 function sanitizeTableName(tableName: string): string {
-  return /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tableName) ? tableName : DEFAULT_TRAINING_TABLE;
+  return /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tableName)
+    ? tableName
+    : DEFAULT_TRAINING_TABLE;
 }
 
 function quoteIdentifier(identifier: string): string {
-  return `"${identifier.replaceAll("\"", "\"\"")}"`;
+  return `"${identifier.replaceAll('"', '""')}"`;
 }
 
-function createEmptyTrainingSnapshot(moduleId: string): ExampleSelfTrainingSnapshot {
+function createEmptyTrainingSnapshot(
+  moduleId: string,
+): ExampleSelfTrainingSnapshot {
   return {
     version: TRAINING_SNAPSHOT_VERSION,
     moduleId,
@@ -168,7 +199,9 @@ function createEmptyTrainingSnapshot(moduleId: string): ExampleSelfTrainingSnaps
   };
 }
 
-function cloneSnapshot(snapshot: ExampleSelfTrainingSnapshot): ExampleSelfTrainingSnapshot {
+function cloneSnapshot(
+  snapshot: ExampleSelfTrainingSnapshot,
+): ExampleSelfTrainingSnapshot {
   return JSON.parse(JSON.stringify(snapshot)) as ExampleSelfTrainingSnapshot;
 }
 
@@ -205,13 +238,15 @@ function sanitizeValue(value: unknown, depth = 0): unknown {
     };
   }
   if (Array.isArray(value)) {
-    return value.slice(0, MAX_SNAPSHOT_ITEMS).map((entry) => sanitizeValue(entry, depth + 1));
+    return value
+      .slice(0, MAX_SNAPSHOT_ITEMS)
+      .map((entry) => sanitizeValue(entry, depth + 1));
   }
   if (value instanceof Map) {
     return Object.fromEntries(
       [...value.entries()]
         .slice(0, MAX_SNAPSHOT_ITEMS)
-        .map(([key, entry]) => [String(key), sanitizeValue(entry, depth + 1)])
+        .map(([key, entry]) => [String(key), sanitizeValue(entry, depth + 1)]),
     );
   }
   if (value instanceof Set) {
@@ -223,7 +258,7 @@ function sanitizeValue(value: unknown, depth = 0): unknown {
     return Object.fromEntries(
       Object.entries(value as Record<string, unknown>)
         .slice(0, MAX_SNAPSHOT_ITEMS)
-        .map(([key, entry]) => [key, sanitizeValue(entry, depth + 1)])
+        .map(([key, entry]) => [key, sanitizeValue(entry, depth + 1)]),
     );
   }
   return String(value);
@@ -231,11 +266,15 @@ function sanitizeValue(value: unknown, depth = 0): unknown {
 
 function resolveTrainingTableName(options: ExampleSelfTrainingOptions): string {
   return sanitizeTableName(
-    options.tableName ?? process.env["SIGNAL_EXAMPLE_TRAINING_TABLE"] ?? DEFAULT_TRAINING_TABLE
+    options.tableName ??
+      readEnv("SIGNAL_EXAMPLE_TRAINING_TABLE") ??
+      DEFAULT_TRAINING_TABLE,
   );
 }
 
-function resolveTrainingConnectionString(options: ExampleSelfTrainingOptions): string | undefined {
+function resolveTrainingConnectionString(
+  options: ExampleSelfTrainingOptions,
+): string | undefined {
   if (options.pool) {
     return undefined;
   }
@@ -244,23 +283,24 @@ function resolveTrainingConnectionString(options: ExampleSelfTrainingOptions): s
     return options.connectionString;
   }
 
-  if (process.env["SIGNAL_EXAMPLE_TRAINING_DATABASE_URL"]) {
-    return process.env["SIGNAL_EXAMPLE_TRAINING_DATABASE_URL"];
+  const trainingDatabaseUrl = readEnv("SIGNAL_EXAMPLE_TRAINING_DATABASE_URL");
+  if (trainingDatabaseUrl) {
+    return trainingDatabaseUrl;
   }
 
   const explicitTrainingDir =
-    options.trainingDir ?? process.env["SIGNAL_EXAMPLE_TRAINING_DIR"];
+    options.trainingDir ?? readEnv("SIGNAL_EXAMPLE_TRAINING_DIR");
   if (explicitTrainingDir) {
     return undefined;
   }
 
-  return process.env["DATABASE_URL"];
+  return readEnv("DATABASE_URL");
 }
 
 function resolveTrainingDir(options: ExampleSelfTrainingOptions): string {
   return (
     options.trainingDir ??
-    process.env["SIGNAL_EXAMPLE_TRAINING_DIR"] ??
+    readEnv("SIGNAL_EXAMPLE_TRAINING_DIR") ??
     DEFAULT_TRAINING_DIR
   );
 }
@@ -281,7 +321,10 @@ function getSharedTrainingPool(connectionString: string): Pool {
   return pool;
 }
 
-async function withPoolClient<T>(pool: Pool, task: (client: PoolClient) => Promise<T>): Promise<T> {
+async function withPoolClient<T>(
+  pool: Pool,
+  task: (client: PoolClient) => Promise<T>,
+): Promise<T> {
   const client = await pool.connect();
   try {
     return await task(client);
@@ -290,8 +333,12 @@ async function withPoolClient<T>(pool: Pool, task: (client: PoolClient) => Promi
   }
 }
 
-async function ensureTrainingTable(pool: Pool, tableName: string): Promise<void> {
-  const readyTables = ENSURED_TRAINING_TABLES.get(pool) ?? new Map<string, Promise<void>>();
+async function ensureTrainingTable(
+  pool: Pool,
+  tableName: string,
+): Promise<void> {
+  const readyTables =
+    ENSURED_TRAINING_TABLES.get(pool) ?? new Map<string, Promise<void>>();
   ENSURED_TRAINING_TABLES.set(pool, readyTables);
 
   const existing = readyTables.get(tableName);
@@ -307,7 +354,7 @@ async function ensureTrainingTable(pool: Pool, tableName: string): Promise<void>
         module_id TEXT PRIMARY KEY,
         snapshot JSONB NOT NULL,
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )`
+      )`,
     );
   });
 
@@ -323,13 +370,16 @@ async function ensureTrainingTable(pool: Pool, tableName: string): Promise<void>
 
 async function loadFileTrainingSnapshot(
   filePath: string,
-  moduleId: string
+  moduleId: string,
 ): Promise<ExampleSelfTrainingSnapshot> {
   try {
     const parsed = JSON.parse(await readFile(filePath, "utf8")) as
       | ExampleSelfTrainingSnapshot
       | undefined;
-    if (parsed?.version !== TRAINING_SNAPSHOT_VERSION || parsed.moduleId !== moduleId) {
+    if (
+      parsed?.version !== TRAINING_SNAPSHOT_VERSION ||
+      parsed.moduleId !== moduleId
+    ) {
       return createEmptyTrainingSnapshot(moduleId);
     }
     return parsed;
@@ -340,7 +390,7 @@ async function loadFileTrainingSnapshot(
 
 async function persistFileTrainingSnapshot(
   filePath: string,
-  snapshot: ExampleSelfTrainingSnapshot
+  snapshot: ExampleSelfTrainingSnapshot,
 ): Promise<void> {
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFile(filePath, JSON.stringify(snapshot, null, 2));
@@ -349,7 +399,7 @@ async function persistFileTrainingSnapshot(
 async function loadPostgresTrainingSnapshot(
   pool: Pool,
   tableName: string,
-  moduleId: string
+  moduleId: string,
 ): Promise<ExampleSelfTrainingSnapshot> {
   await ensureTrainingTable(pool, tableName);
 
@@ -357,8 +407,8 @@ async function loadPostgresTrainingSnapshot(
   const result = await withPoolClient(pool, (client) =>
     client.query<{ snapshot: ExampleSelfTrainingSnapshot | string }>(
       `SELECT snapshot FROM ${quotedTable} WHERE module_id = $1 LIMIT 1`,
-      [moduleId]
-    )
+      [moduleId],
+    ),
   );
 
   const row = result.rows[0];
@@ -372,7 +422,10 @@ async function loadPostgresTrainingSnapshot(
         ? (JSON.parse(row.snapshot) as ExampleSelfTrainingSnapshot)
         : row.snapshot;
 
-    if (parsed.version !== TRAINING_SNAPSHOT_VERSION || parsed.moduleId !== moduleId) {
+    if (
+      parsed.version !== TRAINING_SNAPSHOT_VERSION ||
+      parsed.moduleId !== moduleId
+    ) {
       return createEmptyTrainingSnapshot(moduleId);
     }
 
@@ -385,7 +438,7 @@ async function loadPostgresTrainingSnapshot(
 async function persistPostgresTrainingSnapshot(
   pool: Pool,
   tableName: string,
-  snapshot: ExampleSelfTrainingSnapshot
+  snapshot: ExampleSelfTrainingSnapshot,
 ): Promise<void> {
   await ensureTrainingTable(pool, tableName);
 
@@ -396,29 +449,36 @@ async function persistPostgresTrainingSnapshot(
        VALUES ($1, $2::jsonb, $3::timestamptz)
        ON CONFLICT (module_id)
        DO UPDATE SET snapshot = EXCLUDED.snapshot, updated_at = EXCLUDED.updated_at`,
-      [snapshot.moduleId, JSON.stringify(snapshot), snapshot.updatedAt]
-    )
+      [snapshot.moduleId, JSON.stringify(snapshot), snapshot.updatedAt],
+    ),
   );
 }
 
 function createTrainingStorage(
   moduleId: string,
-  options: ExampleSelfTrainingOptions
+  options: ExampleSelfTrainingOptions,
 ): ExampleTrainingStorage {
   const tableName = resolveTrainingTableName(options);
   const connectionString = resolveTrainingConnectionString(options);
-  const pool = options.pool ?? (connectionString ? getSharedTrainingPool(connectionString) : undefined);
+  const pool =
+    options.pool ??
+    (connectionString ? getSharedTrainingPool(connectionString) : undefined);
 
   if (pool) {
     return {
       kind: "postgres",
       storageKey: `postgres:${tableName}:${sanitizeModuleId(moduleId)}`,
-      load: (moduleId) => loadPostgresTrainingSnapshot(pool, tableName, moduleId),
-      persist: (snapshot) => persistPostgresTrainingSnapshot(pool, tableName, snapshot),
+      load: (moduleId) =>
+        loadPostgresTrainingSnapshot(pool, tableName, moduleId),
+      persist: (snapshot) =>
+        persistPostgresTrainingSnapshot(pool, tableName, snapshot),
     };
   }
 
-  const filePath = path.join(resolveTrainingDir(options), `${sanitizeModuleId(moduleId)}.json`);
+  const filePath = path.join(
+    resolveTrainingDir(options),
+    `${sanitizeModuleId(moduleId)}.json`,
+  );
 
   return {
     kind: "file",
@@ -457,7 +517,9 @@ class PersistentExampleSelfTraining implements ExampleSelfTrainingModule {
   async recordQuery(
     name: string,
     input: unknown,
-    outcome: { status: "success"; result: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void> {
     await this.recordSafely("query", name, input, outcome);
   }
@@ -465,7 +527,9 @@ class PersistentExampleSelfTraining implements ExampleSelfTrainingModule {
   async recordMutation(
     name: string,
     input: unknown,
-    outcome: { status: "success"; result: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void> {
     await this.recordSafely("mutation", name, input, outcome);
   }
@@ -473,7 +537,9 @@ class PersistentExampleSelfTraining implements ExampleSelfTrainingModule {
   async recordEvent(
     name: string,
     input: unknown,
-    outcome: { status: "success"; result: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void> {
     await this.recordSafely("event", name, input, outcome);
   }
@@ -481,7 +547,9 @@ class PersistentExampleSelfTraining implements ExampleSelfTrainingModule {
   async recordSubscriber(
     name: string,
     input: unknown,
-    outcome: { status: "success"; result?: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result?: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void> {
     await this.recordSafely("subscriber", name, input, outcome);
   }
@@ -489,7 +557,9 @@ class PersistentExampleSelfTraining implements ExampleSelfTrainingModule {
   async recordDispatch(
     name: string,
     input: unknown,
-    outcome: { status: "success"; result?: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result?: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void> {
     await this.recordSafely("dispatch", name, input, outcome);
   }
@@ -497,7 +567,9 @@ class PersistentExampleSelfTraining implements ExampleSelfTrainingModule {
   async recordSubscription(
     name: string,
     input: unknown,
-    outcome: { status: "success"; result?: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result?: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void> {
     await this.recordSafely("subscription", name, input, outcome);
   }
@@ -516,13 +588,17 @@ class PersistentExampleSelfTraining implements ExampleSelfTrainingModule {
     kind: ExampleTrainingOperationKind,
     name: string,
     input: unknown,
-    outcome: { status: "success"; result?: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result?: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void> {
     try {
       await this.record(kind, name, input, outcome);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      console.warn(`[signal examples] self-training persistence failed for ${this.moduleId}: ${message}`);
+      console.warn(
+        `[signal examples] self-training persistence failed for ${this.moduleId}: ${message}`,
+      );
     }
   }
 
@@ -530,25 +606,25 @@ class PersistentExampleSelfTraining implements ExampleSelfTrainingModule {
     kind: ExampleTrainingOperationKind,
     name: string,
     input: unknown,
-    outcome: { status: "success"; result?: unknown } | { status: "failure"; error: unknown }
+    outcome:
+      | { status: "success"; result?: unknown }
+      | { status: "failure"; error: unknown },
   ): Promise<void> {
     const run = this.writeQueue.then(async () => {
       await this.ensureLoaded();
 
       const key = `${kind}:${name}`;
       const at = new Date().toISOString();
-      const existing =
-        this.state.parameters.operations[key] ??
-        {
-          kind,
-          name,
-          observations: 0,
-          successes: 0,
-          failures: 0,
-          weight: 1,
-          confidence: 0,
-          lastObservedAt: null,
-        };
+      const existing = this.state.parameters.operations[key] ?? {
+        kind,
+        name,
+        observations: 0,
+        successes: 0,
+        failures: 0,
+        weight: 1,
+        confidence: 0,
+        lastObservedAt: null,
+      };
 
       existing.observations += 1;
       existing.lastObservedAt = at;
@@ -564,26 +640,30 @@ class PersistentExampleSelfTraining implements ExampleSelfTrainingModule {
       } else {
         existing.failures += 1;
         existing.lastResult = undefined;
-        existing.lastError = sanitizeValue(outcome.error) as ExampleTrainingOperationState["lastError"];
+        existing.lastError = sanitizeValue(
+          outcome.error,
+        ) as ExampleTrainingOperationState["lastError"];
         this.state.totals.failures += 1;
       }
 
-      existing.confidence =
-        existing.observations > 0
-          ? Number((existing.successes / existing.observations).toFixed(4))
-          : 0;
+      existing.confidence = Number(
+        (existing.successes / existing.observations).toFixed(4),
+      );
 
       const nextWeight =
         outcome.status === "success"
-          ? existing.weight + this.state.parameters.learningRate * (1 - existing.confidence)
-          : existing.weight - this.state.parameters.learningRate * this.state.parameters.decayRate;
+          ? existing.weight +
+            this.state.parameters.learningRate * (1 - existing.confidence)
+          : existing.weight -
+            this.state.parameters.learningRate *
+              this.state.parameters.decayRate;
 
       existing.weight = Number(
         clamp(
           nextWeight,
           this.state.parameters.minimumWeight,
-          this.state.parameters.maximumWeight
-        ).toFixed(4)
+          this.state.parameters.maximumWeight,
+        ).toFixed(4),
       );
 
       this.state.parameters.operations[key] = existing;
@@ -596,7 +676,7 @@ class PersistentExampleSelfTraining implements ExampleSelfTrainingModule {
       });
       this.state.recentObservations = this.state.recentObservations.slice(
         0,
-        MAX_RECENT_OBSERVATIONS
+        MAX_RECENT_OBSERVATIONS,
       );
 
       await this.storage.persist(this.state);
@@ -609,15 +689,20 @@ class PersistentExampleSelfTraining implements ExampleSelfTrainingModule {
 
 export function createPersistentExampleSelfTraining(
   moduleId: string,
-  options: ExampleSelfTrainingOptions = {}
+  options: ExampleSelfTrainingOptions = {},
 ): ExampleSelfTrainingModule {
-  return new PersistentExampleSelfTraining(moduleId, createTrainingStorage(moduleId, options));
+  return new PersistentExampleSelfTraining(
+    moduleId,
+    createTrainingStorage(moduleId, options),
+  );
 }
 
-export function ensureExampleSelfTraining<T extends ExampleStateWithSelfTraining>(
+export function ensureExampleSelfTraining<
+  T extends ExampleStateWithSelfTraining,
+>(
   state: T,
   moduleId: string,
-  options: ExampleSelfTrainingOptions = {}
+  options: ExampleSelfTrainingOptions = {},
 ): ExampleSelfTrainingModule {
   if (!state.selfTraining) {
     state.selfTraining = createPersistentExampleSelfTraining(moduleId, options);
@@ -628,12 +713,15 @@ export function ensureExampleSelfTraining<T extends ExampleStateWithSelfTraining
 export function instrumentExampleQuery<TInput, TResult>(
   selfTraining: ExampleSelfTrainingModule,
   name: string,
-  handler: (input: TInput) => MaybePromise<TResult>
+  handler: (input: TInput) => MaybePromise<TResult>,
 ): (input: TInput) => Promise<TResult> {
   return async (input: TInput): Promise<TResult> => {
     try {
       const result = await handler(input);
-      await selfTraining.recordQuery(name, input, { status: "success", result });
+      await selfTraining.recordQuery(name, input, {
+        status: "success",
+        result,
+      });
       return result;
     } catch (error) {
       await selfTraining.recordQuery(name, input, { status: "failure", error });
@@ -645,15 +733,21 @@ export function instrumentExampleQuery<TInput, TResult>(
 export function instrumentExampleMutation<TInput, TResult, TContext>(
   selfTraining: ExampleSelfTrainingModule,
   name: string,
-  handler: (input: TInput, context: TContext) => MaybePromise<TResult>
+  handler: (input: TInput, context: TContext) => MaybePromise<TResult>,
 ): (input: TInput, context: TContext) => Promise<TResult> {
   return async (input: TInput, context: TContext): Promise<TResult> => {
     try {
       const result = await handler(input, context);
-      await selfTraining.recordMutation(name, input, { status: "success", result });
+      await selfTraining.recordMutation(name, input, {
+        status: "success",
+        result,
+      });
       return result;
     } catch (error) {
-      await selfTraining.recordMutation(name, input, { status: "failure", error });
+      await selfTraining.recordMutation(name, input, {
+        status: "failure",
+        error,
+      });
       throw error;
     }
   };
@@ -662,12 +756,15 @@ export function instrumentExampleMutation<TInput, TResult, TContext>(
 export function instrumentExampleEvent<TInput, TResult>(
   selfTraining: ExampleSelfTrainingModule,
   name: string,
-  handler: (input: TInput) => MaybePromise<TResult>
+  handler: (input: TInput) => MaybePromise<TResult>,
 ): (input: TInput) => Promise<TResult> {
   return async (input: TInput): Promise<TResult> => {
     try {
       const result = await handler(input);
-      await selfTraining.recordEvent(name, input, { status: "success", result });
+      await selfTraining.recordEvent(name, input, {
+        status: "success",
+        result,
+      });
       return result;
     } catch (error) {
       await selfTraining.recordEvent(name, input, { status: "failure", error });
@@ -679,15 +776,21 @@ export function instrumentExampleEvent<TInput, TResult>(
 export function instrumentExampleSubscriber<TInput, TResult = void>(
   selfTraining: ExampleSelfTrainingModule,
   name: string,
-  handler: (input: TInput) => MaybePromise<TResult>
+  handler: (input: TInput) => MaybePromise<TResult>,
 ): (input: TInput) => Promise<TResult> {
   return async (input: TInput): Promise<TResult> => {
     try {
       const result = await handler(input);
-      await selfTraining.recordSubscriber(name, input, { status: "success", result });
+      await selfTraining.recordSubscriber(name, input, {
+        status: "success",
+        result,
+      });
       return result;
     } catch (error) {
-      await selfTraining.recordSubscriber(name, input, { status: "failure", error });
+      await selfTraining.recordSubscriber(name, input, {
+        status: "failure",
+        error,
+      });
       throw error;
     }
   };

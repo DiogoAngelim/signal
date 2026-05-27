@@ -1,7 +1,7 @@
 import {
-  createSignalCapabilities,
   type SignalCapabilities,
   type SignalOperationCapability,
+  createSignalCapabilities,
 } from "@signal/protocol";
 import type { SignalRegistry } from "./registry";
 
@@ -41,7 +41,9 @@ export function buildCapabilities(
         replaySafe?: boolean;
         description?: string;
       }
-  > = []
+  > = [],
+  features: Partial<NonNullable<SignalCapabilities["features"]>> &
+    Record<string, boolean | undefined> = {},
 ): SignalCapabilities {
   return createSignalCapabilities({
     protocol: "signal.v1",
@@ -53,13 +55,14 @@ export function buildCapabilities(
       toCapability({
         ...(typeof event === "string" ? { name: event } : event),
         kind: "event",
-      })
+      }),
     ),
     features: {
       deadlines: true,
       cancellation: true,
       idempotency: true,
       replaySafety: true,
+      ...features,
     },
     bindings,
   });

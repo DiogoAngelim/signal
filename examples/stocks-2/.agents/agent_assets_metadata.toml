@@ -1,8 +1,0 @@
-uploads = []
-generated = []
-
-[[outputs]]
-id = "YNsh3KgPVrO1jgyabChiu"
-uri = "file://.agents/outputs/capital-desk-analysis.md"
-type = "text"
-title = "Capital Desk Analysis Report — May 22, 2026"
