@@ -83,6 +83,7 @@ module.exports = async function handler(req, res) {
     const chartUrl = new URL(baseUrl);
     chartUrl.searchParams.set("symbol", tradingViewSymbol);
     chartUrl.searchParams.set("bars", String(bars));
+    chartUrl.searchParams.set("format", "csv");
 
     const response = await fetch(chartUrl.toString(), {
       headers: {

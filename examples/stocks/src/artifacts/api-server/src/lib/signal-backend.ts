@@ -10,6 +10,7 @@ import {
 } from "./stock-data";
 import { appendLiveMarketContextOccurrences } from "./market-context-occurrences";
 import { logger } from "./logger";
+import { sendSignalNotificationEmails } from "./signal-email";
 
 export type SignalScopeType = "market" | "exchange";
 
@@ -999,7 +1000,7 @@ export async function storeSignalEvents(
     );
   }
 
-  await pool.query(
+  const result = await pool.query<SignalEventRow>(
     `
       INSERT INTO ${EVENT_TABLE} (
         scope_type,
@@ -1012,8 +1013,21 @@ export async function storeSignalEvents(
       VALUES ${values.join(", ")}
       ON CONFLICT (scope_type, scope_code, event_token)
       DO NOTHING
+      RETURNING *
     `,
     params,
+  );
+
+  await sendSignalNotificationEmails(
+    result.rows.map((row) => ({
+      emittedAt: toIsoString(row.emitted_at) ?? undefined,
+      id: String(row.id),
+      quote: row.payload as StockQuote,
+      scope: {
+        scopeCode: row.scope_code,
+        scopeType: row.scope_type,
+      },
+    })),
   );
 }
 

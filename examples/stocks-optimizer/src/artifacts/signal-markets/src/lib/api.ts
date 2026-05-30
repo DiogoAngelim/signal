@@ -26,6 +26,8 @@ import {
 import { sanitizePromotionState } from "./promotion-sanity";
 export type StockStatus = "Stable" | "Rising" | "Watch" | "Dip";
 export type TradeSignal = "Hold" | "Buy" | "Sell";
+export type AllocationAction = TradeSignal | "Watch" | "Blocked";
+export type SizingMode = "none" | "micro" | "small" | "normal" | "large" | "maxSafe";
 export type AdaptiveRegime =
   | "TRENDING"
   | "MEAN_REVERTING"
@@ -54,6 +56,281 @@ export type ModelLifecycleAction =
   | "Careful"
   | "Trusted"
   | "Disregard";
+
+export type BeliefVerdict = "justified" | "weak" | "contradicted" | "uncertain";
+
+export interface BeliefEvidenceSummary {
+  name: string;
+  direction: "support" | "contradict" | "neutral";
+  strength: number;
+  confidence: number;
+  weightedStrength: number;
+  source?: string;
+  reason: string;
+}
+
+export interface BeliefDiagnostic {
+  verdict: BeliefVerdict;
+  confidence: number;
+  trustworthiness: number;
+  evidenceStrength: number;
+  evidenceAgreement: number;
+  fragility: number;
+  blockers: string[];
+  warnings: string[];
+  reason: string;
+  supportingEvidence?: BeliefEvidenceSummary[];
+  contradictoryEvidence?: BeliefEvidenceSummary[];
+}
+
+export type JudgementStatus = "trusted" | "cautious" | "review_required" | "blocked";
+export type RecognitionVerdict =
+  | "recognized"
+  | "partially_recognized"
+  | "novel"
+  | "conflicted"
+  | "insufficient_evidence";
+
+export interface RecognitionDiagnostic {
+  recognitionScore: number;
+  recurrenceConfidence: number;
+  noveltyScore: number;
+  archetype: string;
+  archetypeConfidence: number;
+  stateFingerprint: string;
+  matchedSamples: number;
+  matchedPositiveOutcomes: number;
+  matchedNegativeOutcomes: number;
+  outcomeStability: number;
+  discoveryNoveltyJustified: boolean;
+  judgementSimilarityJustified: boolean;
+  verdict: RecognitionVerdict;
+  reason: string;
+  missingEvidence: string[];
+  invalidationConditions: string[];
+  metadata?: {
+    module: "recognition";
+    version: string;
+    createdAt: string;
+  };
+}
+
+export type SurvivalOutcomeClass =
+  | "comfortable_survival"
+  | "stressed_survival"
+  | "barely_survived"
+  | "failed_survival";
+
+export type SurvivalMemoryStatus = "empty" | "clear" | "watch" | "scarred" | "near_ruin";
+export type SurvivalMemoryRecommendation = "act" | "act_with_reduced_size" | "wait";
+
+export interface SurvivalMemoryRecord {
+  id: string;
+  timestamp: string;
+  asset?: string;
+  venue?: string;
+  regime?: string;
+  stateFingerprint: string;
+  action: "buy" | "sell" | "hold" | "watch" | "reduce" | "exit";
+  maxExposure: number;
+  realizedReturn: number;
+  maxDrawdown: number;
+  maxAdverseExcursion: number;
+  recoveryTimeBars?: number;
+  volatilityExpansion: number;
+  tailRisk: number;
+  liquidityStress: number;
+  structuralDanger: number;
+  novelty: number;
+  opportunityDensity: number;
+  outcomeClass: SurvivalOutcomeClass;
+  survivalCost: number;
+  scarWeight: number;
+  notes?: string[];
+}
+
+export interface SurvivalMemoryDiagnostic {
+  module: "stocks.survival-memory";
+  name: "Survival Memory";
+  status: SurvivalMemoryStatus;
+  recommendation: SurvivalMemoryRecommendation;
+  recordCount: number;
+  matchedCount: number;
+  scarCount: number;
+  nearRuinCount: number;
+  averageSurvivalCost: number;
+  recoveryBurden: number;
+  survivalConfidence: number;
+  currentStateSimilarity: number;
+  exposureMultiplier: number;
+  confidencePenalty: number;
+  maxExposurePct: number;
+  stateFingerprint: string;
+  mainWarnings: string[];
+  reasons: string[];
+  missingEvidence: string[];
+  unlockConditions: string[];
+  invalidationConditions: string[];
+  fragileMatches: Array<{
+    id: string;
+    similarity: number;
+    outcomeClass: SurvivalOutcomeClass;
+    survivalCost: number;
+    realizedReturn: number;
+  }>;
+  records: SurvivalMemoryRecord[];
+}
+
+export interface JudgementDiagnostic {
+  status: JudgementStatus;
+  rawConfidence: number;
+  adjustedConfidence: number;
+  trust: number;
+  calibration: number;
+  reliability: number;
+  overfitRisk: number;
+  outcomeStability: number;
+  similarSampleSize: number;
+  expectedOutcome?: number;
+  confidenceDelta: number;
+  reasons: string[];
+  warnings: string[];
+  survivalMemory?: SurvivalMemoryDiagnostic;
+  evidence: {
+    similarStates: number;
+    positiveOutcomes: number;
+    negativeOutcomes: number;
+    neutralOutcomes: number;
+    averageOutcome?: number;
+    winRate?: number;
+    consistency?: number;
+  };
+}
+
+export interface TrustGovernorDiagnostic {
+  module: "signal.trust-governor";
+  name: "Signal Trust Governor";
+  trustScore: number;
+  confidenceCap: number;
+  participationMode: "blocked" | "exits_only" | "paper" | "micro" | "limited" | "normal";
+  maxExposure: number;
+  allowsNewExposure: boolean;
+  requiresReview: boolean;
+  allowedActions: string[];
+  blockedActions: string[];
+  primaryBlocker?: string;
+  blockers?: Array<{
+    id: string;
+    label: string;
+    severity: string;
+    reason: string;
+    unlockCriteria?: string[];
+  }>;
+  unlockCriteria?: string[];
+  contradictions?: string[];
+  reasons?: string[];
+}
+
+export type RecoveryStatus = "locked" | "recovering" | "restored" | "regressed";
+export type RecoveryMode = "observe" | "reduced-size" | "graduated" | "normal";
+
+export interface RecoveryDiagnostic {
+  module: "signal.recovery";
+  name: "Signal Recovery";
+  status: RecoveryStatus;
+  mode: RecoveryMode;
+  recoveryScore: number;
+  trustedCapacity: number;
+  confidenceCapLift: number;
+  recommendedExposureCap: number;
+  canRestoreSizing: boolean;
+  shouldEscalateHumanReview: boolean;
+  reasons: string[];
+  blockers: string[];
+  unlockConditions: string[];
+  invalidationConditions: string[];
+  audit?: Record<string, any>;
+}
+
+export interface ReadinessRemediationDiagnostic {
+  module: "signal.readiness-remediation-planner";
+  name: "Readiness Remediation Planner";
+  status: "ready" | "watch" | "review" | "blocked";
+  summary: string;
+  topAction: string;
+  totalExpectedTrustLift: number;
+  executionGate: "open" | "review" | "blocked";
+  targetStage?: string;
+  steps: Array<{
+    id: string;
+    category: string;
+    title: string;
+    priority: number;
+    severity: string;
+    status: string;
+    expectedTrustLift: number;
+    effort: string;
+    reason: string;
+    evidenceRequired: string[];
+    unlocks: string[];
+    sourceIds: string[];
+    metrics: {
+      currentScore: number | null;
+      targetScore: number;
+      deficit: number;
+    };
+  }>;
+  blockers: string[];
+  audit?: {
+    inputGateCount: number;
+    failedGateCount: number;
+    failureFlagCount: number;
+    formulas?: string[];
+  };
+}
+
+export type ResolveDecision =
+  | "commit"
+  | "wait"
+  | "escalate"
+  | "reject"
+  | "invalidate";
+
+export type CommitmentLevel =
+  | "none"
+  | "watch"
+  | "limited"
+  | "graduated"
+  | "full";
+
+export interface ResolveTrace {
+  id: string;
+  label: string;
+  value: number | string | null;
+  score: number;
+  weight: number;
+  passed: boolean;
+  threshold?: number;
+  reason: string;
+}
+
+export interface ResolveDiagnostic {
+  decision: ResolveDecision;
+  commitmentLevel: CommitmentLevel;
+  resolveScore: number;
+  requiredScore: number;
+  humanReviewRequired: boolean;
+  missingEvidence: string[];
+  unlockConditions: string[];
+  invalidationConditions: string[];
+  explanation: string;
+  traces: ResolveTrace[];
+  metadata: {
+    module: "resolve";
+    version: "v1";
+    createdAt: string;
+  };
+}
 
 export interface MarketOption {
   code: string;
@@ -91,6 +368,22 @@ export interface StockQuote {
   signalEmittedAt?: string;
   signalEntryPrice?: number;
   signalReturnPercent?: number;
+  sizingMode?: SizingMode;
+  sizingReasons?: string[];
+  sizingConstraints?: Array<{ id: string; label?: string; passed: boolean; reason?: string }>;
+  viabilityVerdict?: "viable" | "marginal" | "not-viable" | "blocked";
+  viabilityReason?: string;
+  viabilityWarnings?: string[];
+  viabilityBlockers?: string[];
+  viabilityMarginOfSafety?: number;
+  belief?: BeliefDiagnostic | null;
+  recognition?: RecognitionDiagnostic;
+  judgement?: JudgementDiagnostic;
+  survivalMemory?: SurvivalMemoryDiagnostic;
+  trustGovernor?: TrustGovernorDiagnostic;
+  recovery?: RecoveryDiagnostic;
+  resolve?: ResolveDiagnostic;
+  rejectionReason?: string | null;
   modelId?: string;
   modelLifecycleState?: ModelLifecycleState;
   modelLifecycleAction?: ModelLifecycleAction;
@@ -146,6 +439,22 @@ export type StockData = StockListItem & {
   signalEmittedAt?: string;
   signalEntryPrice?: number;
   signalReturnPercent?: number;
+  sizingMode?: SizingMode;
+  sizingReasons?: string[];
+  sizingConstraints?: Array<{ id: string; label?: string; passed: boolean; reason?: string }>;
+  viabilityVerdict?: "viable" | "marginal" | "not-viable" | "blocked";
+  viabilityReason?: string;
+  viabilityWarnings?: string[];
+  viabilityBlockers?: string[];
+  viabilityMarginOfSafety?: number;
+  belief?: BeliefDiagnostic | null;
+  recognition?: RecognitionDiagnostic;
+  judgement?: JudgementDiagnostic;
+  survivalMemory?: SurvivalMemoryDiagnostic;
+  trustGovernor?: TrustGovernorDiagnostic;
+  recovery?: RecoveryDiagnostic;
+  resolve?: ResolveDiagnostic;
+  rejectionReason?: string | null;
   modelId?: string;
   modelLifecycleState?: ModelLifecycleState;
   modelLifecycleAction?: ModelLifecycleAction;
@@ -365,7 +674,7 @@ function sanitizeBacktestApiPayload<T>(url: string, payload: T): T {
     !url.includes("/api/strategy") &&
     !url.includes("/strategy")
   ) {
-    return sanitizeBacktestApiPayload(requestUrl, payload);
+    return payload;
   }
 
   const anyPayload: any = payload;
@@ -402,7 +711,7 @@ function protectBacktestApiPayload<T>(url: string, method: string, payload: T): 
     rememberBacktestPayload(key, payload);
   }
 
-  return sanitizeBacktestApiPayload(requestUrl, recovered);
+  return sanitizeBacktestApiPayload(url, recovered);
 }
 
 
@@ -414,6 +723,19 @@ function protectBacktestApiPayload<T>(url: string, method: string, payload: T): 
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isLocalBrowserRuntime() {
+  if (typeof window === "undefined") return false;
+  return /^(localhost|127\.0\.0\.1|\[::1\])$/i.test(window.location.hostname);
+}
+
+function shouldSkipLocalPortfolioRoute(path: string) {
+  return (
+    path.includes("/api/stocks/watch-market") &&
+    import.meta.env.VITE_ENABLE_PORTFOLIO_API !== "true" &&
+    isLocalBrowserRuntime()
+  );
 }
 
 
@@ -451,10 +773,7 @@ async function request<T>(
     try {
         const rawPath = typeof path === "string" ? path : String(path);
 
-  if (
-    rawPath.includes("/api/stocks/watch-market") &&
-    import.meta.env.VITE_ENABLE_PORTFOLIO_API !== "true"
-  ) {
+  if (shouldSkipLocalPortfolioRoute(rawPath)) {
     console.info("[api] Skipping /api/stocks/watch-market locally");
     return {
       ok: true,

@@ -1,4 +1,19 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request } from "express";
+import { getOrCreateMarketBacktest } from "../lib/market-backtest.js";
+import {
+  attachSignalsToQuotes,
+  fetchMarketQuotes,
+} from "../lib/stock-data.js";
+import {
+  storeSignalEvents,
+  type SignalScope,
+} from "../lib/signal-backend.js";
+import {
+  sendSignalNotificationEmails,
+  sendSignalNotificationTestEmail,
+} from "../lib/signal-email.js";
+import { loadTradingViewHistoricalBars } from "../lib/tradingview-history.js";
+import { sizeFinancialExposure } from "../lib/financial-sizing.js";
 
 
 
@@ -136,12 +151,12 @@ function normalizeStockListArray(value: any) {
 
 
 
-async function loadStockList(market: string, limit = 80) {
-  const result = await loadMarketList(market, limit);
+function loadStockList(market: string, limit = 80) {
+  const result = loadMarketList(market, limit);
   return normalizeStockListArray(result);
 }
 
-async function loadMarketList(market: string, limit = 80) {
+function loadMarketList(market: string, limit = 80) {
   const normalizedMarket = String(market ?? "").trim().toUpperCase();
 
   const fallbackByMarket: Record<string, string[]> = {
@@ -193,6 +208,9 @@ const MARKET_MONTHLY_VOLATILITY_REFRESH_INTERVAL_MS = Number(
 );
 const REFRESH_MARKET_MONTHLY_VOLATILITY_ON_QUOTES =
   process.env.MARKET_MONTHLY_VOLATILITY_REFRESH_ON_QUOTES === "true";
+const SIGNAL_EMAIL_TEST_COOLDOWN_MS = Number(
+  process.env.SIGNAL_EMAIL_TEST_COOLDOWN_MS ?? 60_000,
+);
 const STOCK_QUOTES_RESPONSE_BUDGET_MS = Number(
   process.env.STOCK_QUOTES_RESPONSE_BUDGET_MS ?? 45_000,
 );
@@ -200,6 +218,48 @@ const STOCK_QUOTES_PERSISTENCE_ENABLED =
   process.env.STOCK_QUOTES_PERSISTENCE_ENABLED !== "false";
 
 const STRATEGY_ROUTE_CACHE = new Map<string, { cachedAt: number; payload: any }>();
+let lastSignalEmailTestAt = 0;
+
+function resolveSignalScope(market: string): SignalScope {
+  return {
+    scopeCode: market,
+    scopeType: "market",
+  };
+}
+
+function hasSignalEmailTestAccess(req: Request): boolean {
+  const secret = process.env.SIGNAL_EMAIL_TEST_SECRET?.trim() || process.env.ADMIN_SECRET?.trim();
+  if (!secret) return true;
+
+  const authorization = String(req.headers.authorization ?? "");
+  const bearerToken = authorization.toLowerCase().startsWith("bearer ")
+    ? authorization.slice("bearer ".length).trim()
+    : "";
+  const headerToken = String(req.headers["x-signal-email-test-secret"] ?? "");
+
+  return bearerToken === secret || headerToken === secret;
+}
+
+async function notifySignalEventsIfAvailable(
+  scope: SignalScope,
+  quotes: any[],
+) {
+  try {
+    await storeSignalEvents(scope, quotes);
+  } catch (error) {
+    logger.warn(
+      { err: error, scopeCode: scope.scopeCode, scopeType: scope.scopeType },
+      "Signal event persistence unavailable; sending signal emails directly",
+    );
+    await sendSignalNotificationEmails(
+      quotes.map((quote) => ({
+        emittedAt: quote.signalEmittedAt,
+        quote,
+        scope,
+      })),
+    );
+  }
+}
 
 function strategyNumeric(value: unknown, fallback = 0) {
   const n = Number(value);
@@ -238,10 +298,106 @@ function buildMinimalStrategyPayload(market: string, limitSymbols = 80) {
           ? "Sell"
           : "Hold";
 
-    const suggestedExposure =
+    const rawSuggestedExposure =
       signalAction === "Buy"
         ? strategyClamp((setupQuality - riskPressure * 0.35) / 15, 0, 5.5)
         : 0;
+    const sizingConstraints = [
+      {
+        id: "signal-persistence",
+        label: "Signal persistence",
+        type: "soft" as const,
+        passed: setupQuality >= 58,
+        severity: "medium" as const,
+        reason: "Signal persistence is not strong enough for full sizing.",
+      },
+      {
+        id: "cross-timeframe-agreement",
+        label: "Cross-timeframe agreement",
+        type: "soft" as const,
+        passed: setupQuality >= 62,
+        severity: "high" as const,
+        reason: "Cross-timeframe agreement is not confirmed in the local route.",
+      },
+      {
+        id: "liquidity-data-availability",
+        label: "Liquidity and data availability",
+        type: "hard" as const,
+        passed: price > 0,
+        severity: "high" as const,
+        reason: "Price data is incomplete for sizing.",
+      },
+      {
+        id: "volatility-acceptance",
+        label: "Volatility acceptance",
+        type: "hard" as const,
+        passed: riskPressure < 72,
+        severity: "high" as const,
+        reason: "Volatility or risk pressure is too high.",
+      },
+      {
+        id: "confidence-stability",
+        label: "Confidence stability",
+        type: "soft" as const,
+        passed: setupQuality >= 56,
+        severity: "medium" as const,
+        reason: "Confidence stability is weak.",
+      },
+      {
+        id: "opportunity-density",
+        label: "Opportunity density",
+        type: "hard" as const,
+        passed: signalAction === "Buy" && rawSuggestedExposure > 0,
+        severity: "high" as const,
+        reason: "Actionable opportunity density is too low.",
+      },
+      {
+        id: "risk-gate",
+        label: "Risk gate",
+        type: "hard" as const,
+        passed: riskPressure < 72,
+        severity: "high" as const,
+        reason: "Risk gate prevents position sizing.",
+      },
+    ];
+    const financialSizing = sizeFinancialExposure({
+      targetRef: symbol,
+      actionRef: signalAction,
+      confidence: setupQuality,
+      riskPressure,
+      requestedExposurePct: rawSuggestedExposure,
+      availableExposurePct: 5.5,
+      maxExposurePct: 5.5,
+      constraints: sizingConstraints,
+      viability: {
+        expectedBenefit: strategyClamp(
+          setupQuality * 0.6 +
+            Math.max(0, changePercent) * 7,
+        ),
+        expectedCost: strategyClamp(Math.abs(changePercent) * 4),
+        expectedRisk: riskPressure,
+        uncertainty: 100 - setupQuality,
+        confidence: setupQuality,
+        minMarginOfSafety: 0,
+        thresholds: {
+          minConfidence: 56,
+          maxRisk: 72,
+          maxUncertainty: 70,
+          maxCost: 85,
+        },
+        constraints: sizingConstraints.map((constraint) => ({
+          id: constraint.id,
+          label: constraint.label,
+          type: constraint.type,
+          hard: constraint.type === "hard",
+          passed: constraint.passed,
+          severity: constraint.severity,
+          reason: constraint.reason,
+        })),
+        context: { changePercent },
+      },
+    });
+    const suggestedExposure = signalAction === "Buy" ? financialSizing.suggestedExposurePct : 0;
 
     return {
       symbol,
@@ -256,6 +412,16 @@ function buildMinimalStrategyPayload(market: string, limitSymbols = 80) {
       trendQuality: strategyClamp(setupQuality + changePercent),
       timingQuality: strategyClamp((setupQuality + Math.max(0, changePercent * 8)) / 2),
       expectedMove: changePercent,
+      sizingMode: financialSizing.sizingMode,
+      sizingReasons: financialSizing.sizingReasons,
+      sizingConstraints: financialSizing.sizingConstraints,
+      sizingResult: financialSizing.sizingResult,
+      viabilityVerdict: financialSizing.viabilityVerdict,
+      viabilityReason: financialSizing.viabilityReason,
+      viabilityWarnings: financialSizing.viabilityWarnings,
+      viabilityBlockers: financialSizing.viabilityBlockers,
+      viabilityMarginOfSafety: financialSizing.viabilityMarginOfSafety,
+      viabilityResult: financialSizing.viabilityResult,
       regime:
         riskPressure > 72
           ? "Capital Preservation Phase"
@@ -327,9 +493,26 @@ async function handleStrategyRoute(req: any, res: any) {
   try {
     const action = String(req.query.action ?? req.body?.action ?? "").trim();
     const market = String(req.query.market ?? req.body?.market ?? "ADX").trim().toUpperCase();
+    const runtimeMode = String(
+      req.query.mode ??
+        req.query.runtimeMode ??
+        req.body?.mode ??
+        req.body?.runtimeMode ??
+        "",
+    ).trim();
+    const diagnosticsRequested =
+      action === "diagnostics" ||
+      req.query.diagnostics === "true" ||
+      req.body?.diagnostics === true;
     let portfolioPayload: any = null;
     try {
-      portfolioPayload = await getOrCreateMarketBacktest(market, { force: action === "walk-forward-market" });
+      portfolioPayload = await getOrCreateMarketBacktest(market, {
+        force: action === "walk-forward-market" || action === "diagnostics",
+        diagnostics: diagnosticsRequested,
+        debug: req.query.debug === "true" || req.body?.debug === true,
+        persistDiagnostics: req.query.persistDiagnostics === "true" || req.body?.persistDiagnostics === true,
+        runtimeMode,
+      });
 
       if (!portfolioPayload) {
         res.status(500).json({ error: "Failed to load market backtest cache" });
@@ -343,6 +526,18 @@ async function handleStrategyRoute(req: any, res: any) {
     const summary = portfolioPayload.summary ?? portfolioPayload.snapshot ?? {};
     const history = portfolioPayload.history ?? [];
     const trades = portfolioPayload.trades ?? [];
+
+    if (action === "diagnostics") {
+      res.json({
+        ok: true,
+        market,
+        summary,
+        diagnostics: portfolioPayload.diagnostics ?? null,
+        agencyDiagnostics: portfolioPayload.agencyDiagnostics ?? null,
+        resolveDiagnostics: portfolioPayload.resolveDiagnostics ?? summary.resolveDiagnostics ?? null,
+      });
+      return;
+    }
 
     if (action === "walk-forward-summary") {
       res.json(summary);
@@ -374,17 +569,11 @@ async function handleStrategyRoute(req: any, res: any) {
           survivalScore: summary.survivalScore ?? 0,
           configId: summary.configId ?? "local-walk-forward-v1",
         },
-        signals: (portfolioPayload.snapshot?.positions ?? []).map((position: any, index: number) => ({
-          symbol: position.symbol,
-          market,
-          signalAction: index % 3 === 0 ? "Hold" : "Buy",
-          allocationAction: index % 3 === 0 ? "Hold" : "Buy",
-          signalStatus: "confirmed",
-          suggestedExposure: position.exposurePct ?? 0,
-          setupQuality: 60 + index,
-          riskPressure: 32 + index * 2,
-          expectedMove: position.returnPct ?? 0,
-        })),
+        signals: Array.isArray(portfolioPayload.signals) ? portfolioPayload.signals : [],
+        opportunityDiscovery: portfolioPayload.opportunityDiscovery ?? null,
+        agencyDiagnostics: portfolioPayload.agencyDiagnostics ?? null,
+        resolveDiagnostics: portfolioPayload.resolveDiagnostics ?? summary.resolveDiagnostics ?? null,
+        diagnostics: diagnosticsRequested ? portfolioPayload.diagnostics ?? null : undefined,
       });
       return;
     }
@@ -398,6 +587,7 @@ async function handleStrategyRoute(req: any, res: any) {
         "walk-forward-summary",
         "walk-forward-history",
         "walk-forward-trades",
+        "diagnostics",
       ],
     });
   } catch (error) {
@@ -426,7 +616,11 @@ async function handleStocksMarketsRoute(_req: any, res: any) {
 
     const markets = new Map<string, {
       code: string;
+      value?: string;
+      market?: string;
+      label?: string;
       name: string;
+      displayName?: string;
       symbolCount: number;
       sourceFiles: string[];
     }>();
@@ -655,6 +849,34 @@ router.get("/stocks/list", handleStocksListRoute);
 
 router.get("/stocks/markets", handleStocksMarketsRoute);
 
+router.post("/stocks/signals/email-test", async (req, res) => {
+  if (!hasSignalEmailTestAccess(req)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const now = Date.now();
+  if (now - lastSignalEmailTestAt < SIGNAL_EMAIL_TEST_COOLDOWN_MS) {
+    res.status(429).json({ error: "Email test is cooling down" });
+    return;
+  }
+
+  const result = await sendSignalNotificationTestEmail(req.body ?? {});
+  if (result.sent) {
+    lastSignalEmailTestAt = now;
+    res.json({ data: result });
+    return;
+  }
+
+  const statusCode =
+    result.reason === "missing-provider"
+      ? 503
+      : result.reason === "disabled"
+        ? 409
+        : 500;
+  res.status(statusCode).json({ error: result.reason, data: result });
+});
+
 
 async function handleStocksQuotesRoute(req: any, res: any) {
   try {
@@ -662,6 +884,7 @@ async function handleStocksQuotesRoute(req: any, res: any) {
     const symbols = Array.isArray(req.body?.symbols)
       ? req.body.symbols.map((symbol: unknown) => String(symbol).trim()).filter(Boolean)
       : [];
+    const startedAt = Date.now();
 
     if (!market) {
       res.status(400).json({ error: "market is required" });
@@ -673,50 +896,51 @@ async function handleStocksQuotesRoute(req: any, res: any) {
       return;
     }
 
-    const quotes = symbols.map((symbol: string, index: number) => {
-      const seed = Array.from(`${market}:${symbol}`).reduce(
-        (sum, char) => sum + char.charCodeAt(0),
-        0,
-      );
-
-      const price = Number((5 + (seed % 500) / 10 + index * 0.15).toFixed(4));
-      const previousClose = Number((price * (0.985 + (seed % 7) / 1000)).toFixed(4));
-      const change = Number((price - previousClose).toFixed(4));
-      const changePercent = previousClose > 0
-        ? Number(((change / previousClose) * 100).toFixed(4))
-        : 0;
-
-      return {
-        symbol,
-        ticker: symbol,
-        market,
-        price,
-        regularMarketPrice: price,
-        close: price,
-        last: price,
-        lastPrice: price,
-        previousClose,
-        change,
-        changePercent,
-        regularMarketChange: change,
-        regularMarketChangePercent: changePercent,
-        volume: 0,
-        regularMarketVolume: 0,
-        currency: "USD",
-        provider: "local-json-fallback",
-        updatedAt: new Date().toISOString(),
-      };
+    const timeoutMs = Math.max(5_000, Number(req.body?.timeoutMs ?? req.query.timeoutMs ?? 45_000));
+    const deadlineAt = Date.now() + timeoutMs;
+    const quotes = await fetchMarketQuotes(market, symbols, {
+      bypassCache: req.body?.bypass === true,
+      deadlineAt,
+      minRemainingMs: 2_500,
     });
+    const withSignals = req.body?.withSignals !== false && req.query.withSignals !== "false";
+    const enriched = withSignals
+      ? await attachSignalsToQuotes(quotes, market, {
+          deadlineAt,
+          minRemainingMs: 1_500,
+          recordSignalSnapshots: req.body?.recordSignalSnapshots !== false,
+        })
+      : quotes;
+    if (withSignals && STOCK_QUOTES_PERSISTENCE_ENABLED && enriched.length) {
+      await notifySignalEventsIfAvailable(resolveSignalScope(market), enriched);
+    }
+    const quoteSymbols = new Set(enriched.map((quote: any) => String(quote.symbol ?? "").toUpperCase()));
+    const unavailableSymbols = symbols.filter((symbol: string) => !quoteSymbols.has(symbol.toUpperCase()));
+    const responseQuotes = enriched.map((quote: any) => ({
+      ...quote,
+      ticker: quote.ticker ?? quote.symbol,
+      market,
+      close: quote.close ?? quote.price,
+      last: quote.last ?? quote.price,
+      lastPrice: quote.lastPrice ?? quote.price,
+      regularMarketPrice: quote.regularMarketPrice ?? quote.price,
+      regularMarketChangePercent: quote.regularMarketChangePercent ?? quote.changePercent,
+      quoteStatus: "available",
+      source: quote.source ?? quote.quoteSource ?? "tradingview-data",
+      provider: quote.provider ?? "tradingview-data",
+      sampleCount: Array.isArray(quote.history) ? quote.history.length : 0,
+      updatedAt: quote.updatedAt ?? new Date().toISOString(),
+    }));
 
     res.json({
       data: {
         market,
         requestedSymbols: symbols,
-        unavailableSymbols: [],
+        unavailableSymbols,
         deferredSymbols: [],
-        partial: false,
-        quotes,
-        elapsedMs: 0,
+        partial: unavailableSymbols.length > 0,
+        quotes: responseQuotes,
+        elapsedMs: Date.now() - startedAt,
       },
     });
   } catch (error) {
@@ -730,54 +954,6 @@ async function handleStocksQuotesRoute(req: any, res: any) {
 
 router.post("/stocks/quotes", handleStocksQuotesRoute);
 
-
-function deterministicSeed(text: string) {
-  let hash = 2166136261;
-
-  for (let index = 0; index < text.length; index += 1) {
-    hash ^= text.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-
-  return hash >>> 0;
-}
-
-function syntheticHistoricalBarsFromQuote(market: string, symbol: string, priceInput: number, days = 252) {
-  const seed = deterministicSeed(`${market}:${symbol}`);
-  const lastPrice = Number.isFinite(priceInput) && priceInput > 0 ? priceInput : 10 + (seed % 300) / 10;
-  const drift = ((seed % 41) - 14) / 10000;
-  const amplitude = 0.012 + (seed % 13) / 1000;
-  const phase = (seed % 31) / 10;
-
-  const raw = Array.from({ length: days }, (_, index) => {
-    const t = index / Math.max(1, days - 1);
-    const cycle = Math.sin(index / 9 + phase) * amplitude;
-    const trend = 1 + (t - 1) * drift * days;
-    const close = Math.max(0.01, lastPrice * trend * (1 + cycle));
-    const open = Math.max(0.01, close * (1 - Math.sin(index / 5 + phase) * 0.004));
-    const high = Math.max(open, close) * 1.006;
-    const low = Math.min(open, close) * 0.994;
-
-    return {
-      date: new Date(Date.now() - (days - 1 - index) * 86400000).toISOString().slice(0, 10),
-      open,
-      high,
-      low,
-      close,
-      volume: 0,
-    };
-  });
-
-  const scale = lastPrice / Math.max(0.000001, raw.at(-1)?.close ?? lastPrice);
-
-  return raw.map((bar) => ({
-    ...bar,
-    open: Number((bar.open * scale).toFixed(6)),
-    high: Number((bar.high * scale).toFixed(6)),
-    low: Number((bar.low * scale).toFixed(6)),
-    close: Number((bar.close * scale).toFixed(6)),
-  }));
-}
 
 async function loadStockRowForHistory(market: string, symbol: string) {
   try {
@@ -812,23 +988,19 @@ router.get("/stocks/history", async (req, res) => {
       return;
     }
 
-    const row = await loadStockRowForHistory(market, symbol);
-
-    const price = Number(
-      row?.price ??
-        row?.regularMarketPrice ??
-        row?.close ??
-        row?.last ??
-        row?.lastPrice ??
-        row?.previousClose,
-    );
-
-    const data = syntheticHistoricalBarsFromQuote(market, symbol, price, days);
+    const data = await loadTradingViewHistoricalBars(market, symbol, {
+      bars: days,
+      lookbackYears: Math.max(1, Math.ceil(days / 252)),
+      minBars: 2,
+    });
 
     res.json({
       market,
       symbol,
-      provider: "local-json-history",
+      provider: "tradingview-data",
+      source: data[0]?.source ?? "tradingview-data",
+      sourceStatus: data.length ? data[0]?.sourceStatus ?? "delayed" : "unavailable",
+      dataQuality: data.length ? data[0]?.dataQuality ?? "real" : "degraded",
       data,
       count: data.length,
     });

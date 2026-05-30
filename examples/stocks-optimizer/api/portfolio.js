@@ -690,6 +690,7 @@ async function fetchTradingViewCsv(symbol, market) {
   const url = new URL(baseUrl);
   url.searchParams.set("symbol", normalizeTradingViewSymbol(symbol, market));
   url.searchParams.set("lookbackYears", "4");
+  url.searchParams.set("format", "csv");
 
   const response = await fetch(url.toString(), {
     headers: {

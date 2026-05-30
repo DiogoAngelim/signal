@@ -112,6 +112,7 @@ function localPortfolioBacktestTrades() {
 function localPortfolioBacktestSummary(market: string) {
   const history = localPortfolioBacktestHistory();
   const trades = localPortfolioBacktestTrades();
+  const segmentCount = 3;
   const winners = trades.filter((trade) => trade.returnPct > 0);
   const losers = trades.filter((trade) => trade.returnPct < 0);
   const grossProfit = winners.reduce((sum, trade) => sum + trade.returnPct, 0);
@@ -130,7 +131,7 @@ function localPortfolioBacktestSummary(market: string) {
     profitFactor: grossLoss > 0 ? grossProfit / grossLoss : 999,
     winRatePct: trades.length ? (winners.length / trades.length) * 100 : 0,
     tradeCount: trades.length,
-    segmentCount: walkForwardSegments.length,
+    segmentCount,
     survivalScore: 72,
     activePositions: 5,
     averageHoldingDuration: 22,

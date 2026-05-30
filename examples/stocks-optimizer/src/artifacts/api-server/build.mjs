@@ -4,7 +4,7 @@ const externalizeNpmButBundleWorkspace = {
   name: "externalize-npm-but-bundle-workspace",
   setup(build) {
     build.onResolve({ filter: /^[^./]|^\.[^./]|^\.\.[^/]/ }, (args) => {
-      if (args.path.startsWith("@workspace/")) {
+      if (args.path.startsWith("@workspace/") || args.path === "@signal/agency" || args.path.startsWith("@signal/agency/")) {
         return null;
       }
 

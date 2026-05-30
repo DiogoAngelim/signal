@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -34,19 +34,50 @@ import {
   fetchStockList,
   fetchStockQuoteBatch,
   registerSignalWatchlist,
+  type AllocationAction,
+  type BeliefDiagnostic,
+  type JudgementDiagnostic,
   type MarketOption,
+  type ReadinessRemediationDiagnostic,
+  type RecognitionDiagnostic,
+  type RecoveryDiagnostic,
+  type ResolveDiagnostic,
   type StockData,
   type StockQuote,
   type StockStatus,
+  type SurvivalMemoryDiagnostic,
   type TradeSignal,
+  type TrustGovernorDiagnostic,
 } from "@/lib/api";
+import MarketPerceptionEngine from "@/components/MarketPerceptionEngine";
+import {
+  MarketStateEngine,
+  buildMarketPerceptionMetrics,
+  createDefaultMetricRegistry,
+  type MarketStateSnapshot,
+} from "@/lib/market-perception";
+import {
+  capReliabilityConfidence,
+  capReliabilityExposure,
+  evaluateMarketReliability,
+  shouldUseDefensiveReliabilityPosture,
+} from "@/lib/market-reliability";
+import {
+  assetSizingLabel,
+  buildDashboardExposureSizing,
+  requestedExposureForAsset,
+  sizeAssetExposure,
+} from "@/lib/sizing";
+import { buildDashboardSemanticMetrics } from "@/lib/semantic-metrics";
 
 const STOCK_LIST_PAGE_SIZE = 500;
 const INITIAL_QUOTE_SYMBOL_LIMIT = 140;
+const MAX_QUOTE_SYMBOL_LIMIT = 500;
+const MIN_QUOTE_COVERAGE_RATIO = 1;
 const QUOTE_BATCH_SIZE = 25;
 const REFRESH_INTERVAL_MS = 60_000;
 const STARTING_PORTFOLIO_VALUE = 1_000;
-const ENABLE_STRATEGY_API = import.meta.env.VITE_ENABLE_STRATEGY_API === "true";
+const ENABLE_STRATEGY_API = import.meta.env.VITE_ENABLE_STRATEGY_API !== "false";
 const ENABLE_PORTFOLIO_API = import.meta.env.VITE_ENABLE_PORTFOLIO_API === "true";
 
 type MarketSchedule = {
@@ -64,8 +95,28 @@ type DisplayStock = StockData & {
   quoteStatus?: QuoteStatus;
   quoteStatusReason?: string;
   quoteLastAttemptedAt?: number;
-  signalStatus?: "provided" | "missing";
-  allocationAction?: TradeSignal;
+  signalStatus?: "confirmed" | "provided" | "missing" | "watch" | "blocked" | "risk-exit";
+  allocationAction?: AllocationAction;
+  sizingMode?: "none" | "micro" | "small" | "normal" | "large" | "maxSafe";
+  sizingReasons?: string[];
+  sizingConstraints?: Array<{ id: string; label?: string; passed: boolean; reason?: string }>;
+  sizingRationale?: string[];
+  opportunityDiscovery?: any;
+  discovery?: any;
+  agencyTrace?: any;
+  agency?: any;
+  belief?: BeliefDiagnostic | null;
+  recognition?: RecognitionDiagnostic;
+  judgement?: JudgementDiagnostic;
+  survivalMemory?: SurvivalMemoryDiagnostic;
+  trustGovernor?: TrustGovernorDiagnostic;
+  recovery?: RecoveryDiagnostic;
+  resolve?: ResolveDiagnostic;
+  discoveryScore?: number;
+  discoveryLifecycle?: string;
+  candidateProgression?: Array<any>;
+  adaptiveSuggestedExposure?: number;
+  rejectionReason?: string | null;
 };
 
 type IntelligenceStock = DisplayStock & {
@@ -78,10 +129,30 @@ type IntelligenceStock = DisplayStock & {
   mandate: string;
   participation: string;
   explanation: string;
+  sizingMode?: "none" | "micro" | "small" | "normal" | "large" | "maxSafe";
+  sizingReasons?: string[];
+  sizingConstraints?: Array<{ id: string; label?: string; passed: boolean; reason?: string }>;
+  sizingRationale?: string[];
+  opportunityDiscovery?: any;
+  discovery?: any;
+  agencyTrace?: any;
+  agency?: any;
+  belief?: BeliefDiagnostic | null;
+  recognition?: RecognitionDiagnostic;
+  judgement?: JudgementDiagnostic;
+  survivalMemory?: SurvivalMemoryDiagnostic;
+  trustGovernor?: TrustGovernorDiagnostic;
+  recovery?: RecoveryDiagnostic;
+  resolve?: ResolveDiagnostic;
+  discoveryScore?: number;
+  discoveryLifecycle?: string;
+  candidateProgression?: Array<any>;
+  adaptiveSuggestedExposure?: number;
 };
 
 const MARKET_SCHEDULES: Array<{ match: RegExp; schedule: MarketSchedule }> = [
   { match: /BINANCE|CRYPTO/i, schedule: { timeZone: "UTC", open: [0, 0], close: [24, 0], weekend: [] } },
+  { match: /ADX|DFM|DUBAI|ABU DHABI|UAE/i, schedule: { timeZone: "Asia/Dubai", open: [10, 0], close: [15, 0], weekend: [0, 6] } },
   { match: /B3|BMFBOVESPA|BRASIL/i, schedule: { timeZone: "America/Sao_Paulo", open: [10, 0], close: [17, 0], weekend: [0, 6] } },
   { match: /NASDAQ|NYSE|AMEX|ARCA|BATS|IEX|US\b/i, schedule: { timeZone: "America/New_York", open: [9, 30], close: [16, 0], weekend: [0, 6] } },
   { match: /LSE|LONDON|AIM|UK\b/i, schedule: { timeZone: "Europe/London", open: [8, 0], close: [16, 30], weekend: [0, 6] } },
@@ -169,13 +240,6 @@ function normalizeStrategySummary(payload: any) {
 
 
 function executionPresetForMarket(market: string) {
-
-  const stockListVisualMap = useMemo(() => {
-    return buildInstrumentVisualMap([
-      ...(Array.isArray(stocks) ? stocks : []), ...(Array.isArray(totalStocks) ? totalStocks : [])
-    ]);
-  }, [stocks, totalStocks]);
-
   const normalized = market.trim().toUpperCase();
 
   if (/BINANCE|CRYPTO/.test(normalized)) {
@@ -224,8 +288,24 @@ function asChartData<T = any>(value: any): T[] {
 
 
 function numeric(value: unknown, fallback = 0) {
+  if (value == null) return fallback;
+  if (typeof value === "string" && value.trim() === "") return fallback;
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
+}
+
+function positiveNumberOrNull(value: unknown) {
+  if (value == null) return null;
+  if (typeof value === "string" && value.trim() === "") return null;
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function optionalNumber(value: unknown) {
+  if (value == null) return undefined;
+  if (typeof value === "string" && value.trim() === "") return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : undefined;
 }
 
 function fmtCurrency(value: number | null | undefined) {
@@ -304,28 +384,47 @@ function normalizedTicker(stock: Partial<DisplayStock> & { symbol?: string }) {
   return String(stock.ticker ?? stock.symbol ?? "").trim();
 }
 
+function instrumentMatchKeys(value: Partial<DisplayStock> | Record<string, any>) {
+  const raw = String(value?.ticker ?? value?.symbol ?? "").trim().toUpperCase();
+  const bare = raw.replace(/^[A-Z0-9_]+:/, "");
+  return Array.from(new Set([raw, bare].filter(Boolean)));
+}
+
 function stockName(stock: Partial<DisplayStock>) {
   return String((stock as any).name ?? (stock as any).description ?? normalizedTicker(stock));
 }
 
 function hasStockEvidence(stock: Partial<DisplayStock>) {
   const history = Array.isArray((stock as any).history) ? (stock as any).history : [];
-  const price = Number((stock as any).price);
-  const changePercent = Number((stock as any).changePercent);
-  const signalConfidence = Number((stock as any).signalConfidence);
+  const price = positiveNumberOrNull((stock as any).price);
+  const changePercent = optionalNumber((stock as any).changePercent);
+  const signalConfidence = optionalNumber((stock as any).signalConfidence);
 
   return (
     stock.quoteStatus === "available" ||
     stock.signalStatus === "provided" ||
+    stock.signalStatus === "confirmed" ||
     history.length >= 2 ||
-    (Number.isFinite(price) && price > 0 && Number.isFinite(changePercent) && changePercent !== 0) ||
-    Number.isFinite(signalConfidence)
+    (price != null && changePercent != null && changePercent !== 0) ||
+    signalConfidence != null
   );
+}
+
+function quoteHasLivePrice(quote: Partial<StockQuote> | Partial<DisplayStock> | Record<string, unknown>) {
+  return positiveNumberOrNull((quote as any).price ?? (quote as any).last ?? (quote as any).close) != null;
+}
+
+function hasLiveQuoteCoverage(list: DisplayStock[]) {
+  return list.some((item) => item.quoteStatus === "available" || quoteHasLivePrice(item));
+}
+
+function hasSessionMarketCoverage(list: DisplayStock[]) {
+  return list.some((item) => hasStockEvidence(item));
 }
 
 function dataCoverageLabel(stock: Partial<DisplayStock>) {
   if (stock.quoteStatus === "available") return "live quote";
-  if (stock.signalStatus === "provided") return "signal";
+  if (stock.signalStatus === "provided" || stock.signalStatus === "confirmed") return "signal";
   if (Array.isArray((stock as any).history) && (stock as any).history.length >= 2) return "history";
   return "pending";
 }
@@ -481,6 +580,69 @@ function finiteNumber(value: unknown) {
   return Number.isFinite(n) ? n : null;
 }
 
+type DashboardNeedDiagnostic = {
+  needId: string;
+  category: string;
+  severity: number;
+  confidence: number;
+  explanation: string;
+  recommendations: string[];
+};
+
+export function resolveDashboardNeedDiagnostics(input: {
+  rawNeeds: DashboardNeedDiagnostic[];
+  strategyReadinessBlocked: boolean;
+  strategyMaxPositionPct: number | null;
+  calibrationStatus: string;
+  calibrationTrustworthiness: number | null;
+  calibratedConfidence: number | null;
+  rawConfidence: number | null;
+}) {
+  const calibrationRequiresReview = [
+    "insufficient-history",
+    "poor-calibration",
+    "unstable-outcomes",
+  ].includes(input.calibrationStatus);
+  const commitmentBlocked =
+    input.strategyReadinessBlocked ||
+    input.strategyMaxPositionPct === 0 ||
+    calibrationRequiresReview;
+
+  if (!commitmentBlocked) return input.rawNeeds;
+
+  const trustedConfidence = input.calibratedConfidence ?? input.rawConfidence ?? 50;
+  const severity = Math.round(clamp(Math.max(35, 100 - trustedConfidence)));
+  const confidence = Math.round(clamp(
+    input.calibrationTrustworthiness ??
+      input.calibratedConfidence ??
+      input.rawConfidence ??
+      50,
+  ));
+  const explanation = input.strategyReadinessBlocked && calibrationRequiresReview
+    ? "Strategy readiness and calibration gates block participation; wait for readiness and outcome stability before increasing exposure."
+    : input.strategyReadinessBlocked
+      ? "Strategy readiness gates block participation; wait for readiness before increasing exposure."
+    : input.calibrationStatus === "unstable-outcomes"
+      ? "Calibration history has enough samples, but outcomes are unstable; wait for similar signals to become more consistent before increasing participation."
+      : input.calibrationStatus === "poor-calibration"
+        ? "Historical calibration is not reliable enough yet; keep this review-gated before increasing participation."
+        : input.calibrationStatus === "insufficient-history"
+          ? "Calibration history is still insufficient; keep this review-gated before increasing participation."
+          : "Sizing gates set available capacity to zero; wait until commitment capacity reopens.";
+
+  return [{
+    needId: `wait:${severity}`,
+    category: "wait",
+    severity,
+    confidence,
+    explanation,
+    recommendations: [
+      "Keep the objective under human review until the blocking gate clears.",
+      "Do not convert improving perception signals into action while commitment is blocked.",
+    ],
+  }];
+}
+
 function formatGateNumber(value: unknown, digits = 2) {
   const n = finiteNumber(value);
   return n == null ? "—" : n.toFixed(digits);
@@ -517,6 +679,14 @@ function extractSegmentCount(summary: any) {
 }
 
 function extractBenchmarkPass(summary: any) {
+  if (summary?.benchmarkPassed === true || summary?.benchmarkStatus === "Pass" || summary?.benchmarkComparison === "Pass") {
+    return true;
+  }
+
+  if (summary?.benchmarkPassed === false || summary?.benchmarkStatus === "Failed" || summary?.benchmarkComparison === "Failed") {
+    return false;
+  }
+
   const excessReturn = finiteNumber(summary?.excessReturnPct ?? summary?.excess_return_pct);
   const excessSharpe = finiteNumber(summary?.excessSharpe ?? summary?.excess_sharpe);
 
@@ -543,6 +713,38 @@ function extractRegimeConsistency(summary: any, currentRegime: string, trades: A
 
   const matching = regimeTrades.filter((regime) => regime === current).length;
   return (matching / regimeTrades.length) * 100;
+}
+
+function extractAverageHoldingDays(summary: any, trades: Array<any>) {
+  const explicit =
+    finiteNumber(summary?.averageHoldingDuration) ??
+    finiteNumber(summary?.average_holding_duration) ??
+    finiteNumber(summary?.averageHoldingDays) ??
+    finiteNumber(summary?.average_holding_days) ??
+    finiteNumber(summary?.averageDurationDays) ??
+    finiteNumber(summary?.average_duration_days);
+
+  if (explicit != null) return explicit;
+
+  const durations = trades
+    .map((trade) => {
+      const explicitTradeDuration =
+        finiteNumber(trade.durationDays) ??
+        finiteNumber(trade.duration_days) ??
+        finiteNumber(trade.holdingDays) ??
+        finiteNumber(trade.holding_days);
+
+      if (explicitTradeDuration != null) return explicitTradeDuration;
+
+      const entry = Date.parse(String(trade.entryDate ?? trade.entry_date ?? ""));
+      const exit = Date.parse(String(trade.exitDate ?? trade.exit_date ?? ""));
+
+      if (!Number.isFinite(entry) || !Number.isFinite(exit) || exit < entry) return null;
+      return Math.max(1, Math.round((exit - entry) / 86_400_000));
+    })
+    .filter((value): value is number => value != null && Number.isFinite(value));
+
+  return durations.length ? mean(durations) : null;
 }
 
 function computeSurvivalScore(input: {
@@ -579,7 +781,7 @@ function computeSurvivalScore(input: {
   score += scoreGate(input.hasProvidedSignals, 8);
   score += scoreGate(totalReturn > 0, 10);
   score += scoreGate(sharpe >= 0.75, 12);
-  score += scoreGate(maxDrawdown <= 18, 12);
+  score += scoreGate(maxDrawdown <= 25, 12);
   score += scoreGate(profitFactor >= 1.15, 10);
   score += scoreGate(winRate >= 45, 6);
   score += scoreGate(excessReturn >= 0, 8);
@@ -620,45 +822,86 @@ function applyBackendBlockersToConfidenceGates(
 
   if (!blocked) return gates;
 
+  const hasSharpeValue =
+    finiteNumber(
+      summary?.annualizedSharpe ??
+        summary?.annualized_sharpe ??
+        summary?.sharpeRatio ??
+        summary?.sharpe_ratio,
+    ) != null;
+
   const hasInvalidSharpe =
     flags.includes("INVALID_SHARPE") ||
-    summary?.annualizedSharpe == null ||
-    summary?.annualized_sharpe == null;
+    flags.includes("SUSPICIOUS_SHARPE") ||
+    flags.includes("LOW_SHARPE") ||
+    !hasSharpeValue;
+
+  const hasDrawdownValue =
+    finiteNumber(
+      summary?.maxDrawdownPct ??
+        summary?.max_drawdown_pct ??
+        summary?.rawMaxDrawdownPct ??
+        summary?.raw_max_drawdown_pct,
+    ) != null;
 
   const hasInvalidDrawdown =
     flags.includes("INVALID_DRAWDOWN") ||
     flags.includes("ZERO_DRAWDOWN_WITH_TRADES") ||
-    summary?.maxDrawdownPct == null ||
-    summary?.max_drawdown_pct == null;
+    flags.includes("OVERFIT_LOW_DRAWDOWN") ||
+    !hasDrawdownValue;
 
   const hasInsufficientSegments =
     flags.includes("INSUFFICIENT_WALK_FORWARD_SEGMENTS") ||
     Number(summary?.segmentCount ?? summary?.segment_count ?? 0) < 3;
+  const hasWalkForwardInstability =
+    flags.includes("WALK_FORWARD_UNSTABLE") ||
+    flags.includes("OVERFIT_WALK_FORWARD_INSTABILITY");
+  const hasProfitFactorOverfit =
+    flags.includes("OVERFIT_PROFIT_FACTOR");
+  const hasParameterInstability =
+    flags.includes("PARAMETER_INSTABILITY");
+  const hasConcentrationDependency =
+    flags.includes("OUTLIER_DEPENDENCY") ||
+    flags.includes("OVERFIT_TOP_WINNER_DEPENDENCY") ||
+    flags.includes("OVERFIT_SEGMENT_CONCENTRATION");
+  const hasLiveSignalMismatch =
+    flags.includes("LIVE_SIGNAL_MISMATCH");
+  const hasRobustnessFailure =
+    flags.includes("ROBUSTNESS_OVERFIT_RISK") ||
+    flags.includes("ROBUSTNESS_EXECUTION_BLOCKED") ||
+    summary?.robustnessPassed === false ||
+    summary?.strategyReadiness?.components?.robustness?.passed === false;
 
   const hasBenchmarkFailure =
     flags.includes("BENCHMARK_FAILED") ||
     flags.includes("BENCHMARK_COMPARISON_FAILED") ||
     flags.includes("BENCHMARK_UNDERPERFORMANCE") ||
     flags.includes("SEVERE_BENCHMARK_UNDERPERFORMANCE") ||
+    flags.includes("WEAK_BENCHMARK_MARGIN") ||
     summary?.benchmarkStatus === "Failed" ||
     summary?.benchmarkPassed === false ||
     Number(summary?.excessReturnPct ?? summary?.excess_return_pct ?? summary?.excessReturn ?? 0) < 0;
 
   return gates.map((gate) => {
-    if (gate.key === "walkForward" && hasInsufficientSegments) {
+    if (gate.key === "walkForward" && (hasInsufficientSegments || hasWalkForwardInstability)) {
       return {
         ...gate,
         passed: false,
-        value: `${Number(summary?.segmentCount ?? summary?.segment_count ?? 1)} / 3 segments`,
+        value: hasInsufficientSegments
+          ? `${Number(summary?.segmentCount ?? summary?.segment_count ?? 1)} / 3 segments`
+          : "Unstable returns",
         severity: "warn",
       };
     }
 
-    if (gate.key === "sameEngine" && blocked) {
+    if (gate.key === "sameEngine" && hasLiveSignalMismatch) {
+      const forwardShadow = summary?.forwardShadow ?? {};
+      const averageReturn = finiteNumber(forwardShadow?.averageReturnPct ?? forwardShadow?.meanReturnPct);
+
       return {
         ...gate,
         passed: false,
-        value: gate.value ? `${gate.value}, blocked` : "Blocked",
+        value: averageReturn == null ? "Forward evidence failed" : `Forward avg ${fmtPct(averageReturn)}`,
         severity: "warn",
       };
     }
@@ -667,7 +910,7 @@ function applyBackendBlockersToConfidenceGates(
       return {
         ...gate,
         passed: false,
-        value: "Statistically unreliable",
+        value: flags.includes("LOW_SHARPE") ? "Sharpe below 1.00" : "Statistically unreliable",
         severity: "warn",
       };
     }
@@ -676,11 +919,44 @@ function applyBackendBlockersToConfidenceGates(
       return {
         ...gate,
         passed: false,
-        value: flags.includes("ZERO_DRAWDOWN_WITH_TRADES")
-          ? "Suspicious zero drawdown"
-          : flags.includes("INVALID_DRAWDOWN")
+        value: flags.includes("OVERFIT_LOW_DRAWDOWN")
+          ? "Too clean"
+          : flags.includes("ZERO_DRAWDOWN_WITH_TRADES")
+            ? "Suspicious zero drawdown"
+            : flags.includes("INVALID_DRAWDOWN")
             ? "Unavailable"
             : fmtPlainPct(summary?.maxDrawdownPct ?? summary?.max_drawdown_pct ?? 0),
+        severity: "warn",
+      };
+    }
+
+    if (gate.key === "profitFactor" && hasProfitFactorOverfit) {
+      return {
+        ...gate,
+        passed: false,
+        value: "Suspiciously high",
+        severity: "warn",
+      };
+    }
+
+    if (gate.key === "regime" && hasParameterInstability) {
+      return gate;
+    }
+
+    if (gate.key === "parameterRobustness" && hasParameterInstability) {
+      return {
+        ...gate,
+        passed: false,
+        value: "Unstable variants",
+        severity: "warn",
+      };
+    }
+
+    if (gate.key === "concentration" && hasConcentrationDependency) {
+      return {
+        ...gate,
+        passed: false,
+        value: "Outlier dependent",
         severity: "warn",
       };
     }
@@ -694,13 +970,33 @@ function applyBackendBlockersToConfidenceGates(
       };
     }
 
+    if (gate.key === "robustness" && hasRobustnessFailure) {
+      return {
+        ...gate,
+        passed: false,
+        value: flags.includes("ROBUSTNESS_EXECUTION_BLOCKED") ? "Safety gate blocked" : gate.value,
+        severity: "bad",
+      };
+    }
+
     return gate;
   });
 }
 
 
 
-function formatPromotionBlocker(flag: string) {
+function formatPromotionBlocker(flag: string, summary?: any) {
+  if (flag === "NEEDS_FORWARD_SHADOW") {
+    const forwardShadow = summary?.forwardShadow ?? {};
+    const observed = Number(forwardShadow?.observedSignalCount ?? 0);
+    const evaluated = Number(forwardShadow?.evaluatedSignalCount ?? 0);
+    const required = Number(forwardShadow?.requiredSignals ?? 0);
+
+    if (observed > 0 && evaluated < required) {
+      return `Forward shadow evidence is collecting (${evaluated}/${required} evaluated)`;
+    }
+  }
+
   const labels: Record<string, string> = {
     INVALID_SHARPE: "Risk-adjusted return is not reliable enough yet",
     SUSPICIOUS_SHARPE: "Risk-adjusted return is not reliable enough yet",
@@ -711,16 +1007,145 @@ function formatPromotionBlocker(flag: string) {
     BENCHMARK_COMPARISON_FAILED: "Benchmark comparison failed",
     INVALID_DRAWDOWN: "Drawdown could not be checked",
     BENCHMARK_FAILED: "The strategy failed the benchmark check",
+    WEAK_BENCHMARK_MARGIN: "The benchmark edge is too small after safety margin",
+    OVERFIT_PROFIT_FACTOR: "Profit factor or win rate looks too clean",
+    OVERFIT_LOW_DRAWDOWN: "Drawdown is too clean for the return and trade count",
+    OVERFIT_WALK_FORWARD_INSTABILITY: "Walk-forward returns are not stable enough",
+    SYNTHETIC_DATA_FOR_PROMOTION: "Synthetic historical data cannot support live testing",
+    DATA_QUALITY_NOT_PROMOTABLE: "Historical data quality is not strong enough",
+    PARAMETER_INSTABILITY: "Nearby parameter variants do not preserve the edge",
+    OVERFIT_TOP_WINNER_DEPENDENCY: "Results depend too much on a few winners",
+    OVERFIT_SEGMENT_CONCENTRATION: "Returns are too concentrated in one test period",
+    NEEDS_FORWARD_SHADOW: "Forward shadow evidence is required",
+    LOW_SHARPE: "Risk-adjusted return is below the minimum",
+    INSUFFICIENT_STRATEGY_EDGE: "Strategy edge is not strong enough",
+    HIGH_DRAWDOWN: "Past loss level was above 25%",
+    WALK_FORWARD_UNSTABLE: "Walk-forward returns are not stable enough",
+    LIVE_SIGNAL_MISMATCH: "Live signal evidence is not consistent enough",
+    OUTLIER_DEPENDENCY: "Results depend too much on a few winners",
   };
 
   return labels[flag] ?? flag;
 }
 
+function promotionBlockerGroup(flag: string): { key: string; label: string; priority: number } | null {
+  const text = String(flag ?? "").toLowerCase();
+  const code = String(flag ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_");
+
+  if (/DATA|SYNTHETIC|STALE|MARKET_DATA_UNAVAILABLE/.test(code) || text.includes("market data")) {
+    return {
+      key: "data",
+      label: "Confirm data quality and freshness before live testing.",
+      priority: 5,
+    };
+  }
+
+  if (/SHARPE|STRATEGY_EDGE/.test(code) || text.includes("risk-adjusted")) {
+    return {
+      key: "risk-adjusted-return",
+      label: "Improve risk-adjusted return; current Sharpe is below the live-test minimum.",
+      priority: 10,
+    };
+  }
+
+  if (/BENCHMARK/.test(code) || text.includes("benchmark")) {
+    return {
+      key: "benchmark",
+      label: "Rebuild benchmark edge; returns do not clear the benchmark safety margin.",
+      priority: 20,
+    };
+  }
+
+  if (/DRAWDOWN|HIGH_DRAWDOWN/.test(code) || text.includes("past loss") || text.includes("drawdown")) {
+    return {
+      key: "drawdown",
+      label: "Reduce drawdown; past loss level is above the strategy risk limit.",
+      priority: 30,
+    };
+  }
+
+  if (/WALK_FORWARD|SEGMENT|PERIOD/.test(code) || text.includes("walk-forward") || text.includes("test period")) {
+    return {
+      key: "walk-forward",
+      label: "Stabilize walk-forward results across independent test periods.",
+      priority: 40,
+    };
+  }
+
+  if (/PARAMETER/.test(code) || text.includes("parameter")) {
+    return {
+      key: "parameter-robustness",
+      label: "Improve parameter robustness; nearby variants do not preserve the edge.",
+      priority: 50,
+    };
+  }
+
+  if (/OUTLIER|TOP_WINNER|CONCENTRATION/.test(code) || text.includes("few winners") || text.includes("concentrated")) {
+    return {
+      key: "concentration",
+      label: "Reduce concentration risk; results depend too much on a few winners or periods.",
+      priority: 60,
+    };
+  }
+
+  if (/FORWARD_SHADOW|LIVE_SIGNAL/.test(code) || text.includes("confirmed live") || text.includes("forward signal")) {
+    return {
+      key: "forward-evidence",
+      label: "Collect more forward-shadow evidence from the same live signal engine.",
+      priority: 70,
+    };
+  }
+
+  if (/ROBUSTNESS|OVERFIT/.test(code) || text.includes("overfit")) {
+    return {
+      key: "robustness",
+      label: "Resolve robustness risk before allowing execution.",
+      priority: 80,
+    };
+  }
+
+  return null;
+}
+
+function summarizePromotionBlockers(flags: string[], summary?: any) {
+  const grouped = new Map<string, { label: string; priority: number }>();
+
+  for (const flag of flags) {
+    const group = promotionBlockerGroup(flag);
+
+    if (group) {
+      const existing = grouped.get(group.key);
+      if (!existing || group.priority < existing.priority) {
+        grouped.set(group.key, { label: group.label, priority: group.priority });
+      }
+      continue;
+    }
+
+    const label = formatPromotionBlocker(flag, summary);
+    grouped.set(label, { label, priority: 90 });
+  }
+
+  return Array.from(grouped.values())
+    .sort((a, b) => a.priority - b.priority || a.label.localeCompare(b.label))
+    .map((item) => item.label)
+    .slice(0, 8);
+}
+
+function gateStatusLabel(gate: ConfidenceGate) {
+  if (gate.passed) return "Pass";
+  if (gate.severity === "bad") return "Fail";
+  if (gate.severity === "neutral") return "Pending";
+  return "Watch";
+}
+
 
 function productionTone(stage: string): "good" | "warn" | "bad" | "neutral" {
   if (stage === "Production eligible") return "good";
-  if (stage === "Forward-test eligible" || stage === "Research validated") return "warn";
-  if (stage === "Not ready") return "bad";
+  if (stage === "Forward-test eligible" || stage === "Research validated" || stage === "Shadow test" || stage === "Paper trade" || stage === "Limited live") return "warn";
+  if (stage === "Not ready" || stage === "Research only" || stage === "Blocked") return "bad";
   return "neutral";
 }
 
@@ -729,7 +1154,12 @@ function plainStageLabel(value: unknown) {
   const labels: Record<string, string> = {
     "Production eligible": "Ready for live review",
     "Forward-test eligible": "Ready for real-time testing",
+    "Needs forward shadow": "Needs forward shadow",
     "Research validated": "Research review",
+    "Research only": "Research only",
+    "Shadow test": "Shadow test",
+    "Paper trade": "Paper trade",
+    "Limited live": "Limited live",
     "Candidate only": "Idea only",
     "Not ready": "Not ready",
     "Promotion blocked": "Blocked",
@@ -778,12 +1208,43 @@ function inferIntelligence(stock: DisplayStock): IntelligenceStock {
   );
   const timingQuality = clamp(numeric((stock as any).timingQuality, (setupQuality + trendQuality + positiveBreadth) / 3));
   const expectedMove = numeric((stock as any).expectedMove, numeric((stock as any).signalReturnPercent, recentReturn || avgReturn));
-  const hasProvidedSignal = stock.signalStatus === "provided";
+  const hasProvidedSignal = stock.signalStatus === "provided" || stock.signalStatus === "confirmed";
 
-  const suggestedExposure =
-    hasProvidedSignal && stock.signalAction === "Buy"
-      ? clamp((setupQuality - riskPressure * 0.35) / 15, 0, 5.5)
-      : 0;
+  const maxExposurePct = positiveNumberOrNull((stock as any).maxPositionPct) ?? 5.5;
+  const upstreamSuggestedExposure = optionalNumber((stock as any).suggestedExposure);
+  const rawSuggestedExposure = hasProvidedSignal
+    ? requestedExposureForAsset({
+        signalAction: (stock.signalAction ?? "Hold") as TradeSignal,
+        allocationAction: (stock as any).allocationAction,
+        suggestedExposurePct: upstreamSuggestedExposure ?? null,
+        setupQuality,
+        riskPressure,
+        maxExposurePct,
+      })
+    : 0;
+  const assetSizing = sizeAssetExposure({
+    targetRef: normalizedTicker(stock),
+    signalAction: (stock.signalAction ?? "Hold") as TradeSignal,
+    signalStatus: stock.signalStatus,
+    setupQuality,
+    riskPressure,
+    trendQuality,
+    timingQuality,
+    expectedMove,
+    requestedExposurePct: rawSuggestedExposure,
+    maxExposurePct,
+    hasEvidence,
+  });
+  const suggestedExposure = hasProvidedSignal && stock.signalAction === "Buy" ? assetSizing.suggestedExposurePct : 0;
+  const resynthesizedBuyExposure =
+    hasProvidedSignal &&
+    stock.signalAction === "Buy" &&
+    rawSuggestedExposure > 0 &&
+    !(Number.isFinite(upstreamSuggestedExposure) && Number(upstreamSuggestedExposure) > 0);
+  const sizingReasons = resynthesizedBuyExposure ? assetSizing.sizingReasons : (stock as any).sizingReasons ?? assetSizing.sizingReasons;
+  const sizingConstraints = resynthesizedBuyExposure ? assetSizing.sizingConstraints : (stock as any).sizingConstraints ?? assetSizing.sizingConstraints;
+  const sizingMode = resynthesizedBuyExposure ? assetSizing.sizingMode : (stock as any).sizingMode ?? assetSizing.sizingMode;
+  const sizingRationale = resynthesizedBuyExposure ? assetSizing.sizingRationale : (stock as any).sizingRationale ?? assetSizing.sizingRationale;
 
   const mandate =
     stock.signalAction === "Sell" || riskPressure > 72
@@ -806,7 +1267,9 @@ function inferIntelligence(stock: DisplayStock): IntelligenceStock {
           : "Weak Participation";
 
   const explanation =
-    mandate === "Avoid / Reduce"
+    suggestedExposure <= 0 && sizingReasons.length
+      ? sizingReasons[0]
+      : mandate === "Avoid / Reduce"
       ? "Risk is rising faster than the opportunity. Keep the position small until conditions improve."
       : setupQuality >= 70
         ? "The trend is improving and risk is controlled. Consider adding gradually."
@@ -825,7 +1288,48 @@ function inferIntelligence(stock: DisplayStock): IntelligenceStock {
     mandate,
     participation,
     explanation,
+    sizingMode,
+    sizingReasons,
+    sizingConstraints,
+    sizingRationale,
+    recognition: (stock as any).recognition,
+    judgement: (stock as any).judgement,
+    survivalMemory: (stock as any).survivalMemory ?? (stock as any).judgement?.survivalMemory,
   };
+}
+
+function primarySizingReason(stock: Partial<IntelligenceStock>) {
+  const reasons = Array.isArray(stock.sizingReasons) ? stock.sizingReasons : [];
+  return reasons.find(Boolean) ?? String((stock as any).rejectionReason ?? "");
+}
+
+function isOpportunityDensityOnlyBlock(stock: Partial<IntelligenceStock>) {
+  const reason = primarySizingReason(stock);
+  return /opportunity density/i.test(reason) && !/calibration|readiness|strategy readiness/i.test(reason);
+}
+
+function isAgencyBlockedParticipation(stock: Partial<IntelligenceStock>) {
+  const agency = (stock as any).agency ?? (stock as any).agencyTrace;
+  const decisionKind = String(agency?.decisionKind ?? agency?.decision ?? "").toLowerCase();
+
+  return agency?.allowed === false && /blocked[_\s-]?participation/.test(decisionKind);
+}
+
+function isCommitmentReviewCandidate(stock: IntelligenceStock) {
+  if (stock.signalStatus === "blocked" || stock.allocationAction === "Blocked" || isAgencyBlockedParticipation(stock)) {
+    return stock.riskPressure < 78 && !isOpportunityDensityOnlyBlock(stock);
+  }
+
+  if (stock.signalAction !== "Buy") return false;
+  if (stock.riskPressure >= 78) return false;
+  if (stock.expectedMove <= 0 && numeric(stock.discoveryScore) < 55) return false;
+  if (isOpportunityDensityOnlyBlock(stock)) return false;
+
+  return (
+    numeric(stock.setupQuality) >= 58 ||
+    numeric(stock.discoveryScore) >= 55 ||
+    stock.signalStatus === "confirmed"
+  );
 }
 
 function deriveAllocationAction(
@@ -836,10 +1340,18 @@ function deriveAllocationAction(
     breadth: number;
     targetExposure: number;
     marketStatus: "Open" | "Closed";
+    defensiveReliability?: boolean;
+    strategyBlocked?: boolean;
+    strategyMaxPositionPct?: number | null;
   },
-): TradeSignal {
+): AllocationAction {
   const rawAction = (stock.signalAction ?? "Hold") as TradeSignal;
-  const hasExplicitSignal = stock.signalStatus === "provided";
+  const hasExplicitSignal =
+    stock.signalStatus === "provided" ||
+    stock.signalStatus === "confirmed" ||
+    stock.signalStatus === "blocked" ||
+    stock.signalStatus === "watch" ||
+    stock.signalStatus === "risk-exit";
 
   if (hasExplicitSignal && rawAction === "Sell") {
     return "Sell";
@@ -847,6 +1359,22 @@ function deriveAllocationAction(
 
   if (stock.mandate === "Avoid / Reduce" || stock.riskPressure >= 78) {
     return "Sell";
+  }
+
+  if (context.strategyBlocked || context.strategyMaxPositionPct === 0) {
+    return isCommitmentReviewCandidate(stock) ? "Blocked" : "Watch";
+  }
+
+  if (isAgencyBlockedParticipation(stock)) {
+    return "Blocked";
+  }
+
+  if (context.defensiveReliability) {
+    if (hasExplicitSignal && rawAction === "Buy" && stock.setupQuality >= 84 && stock.riskPressure < 35) {
+      return "Buy";
+    }
+
+    return "Watch";
   }
 
   if (context.regime === "Capital Preservation Phase") {
@@ -858,7 +1386,7 @@ function deriveAllocationAction(
       return "Sell";
     }
 
-    return "Hold";
+    return "Watch";
   }
 
   if (context.regime === "Defensive Environment") {
@@ -875,7 +1403,7 @@ function deriveAllocationAction(
       return "Sell";
     }
 
-    return "Hold";
+    return "Watch";
   }
 
   if (hasExplicitSignal && rawAction === "Buy" && stock.riskPressure < 72) {
@@ -895,7 +1423,7 @@ function deriveAllocationAction(
     return "Sell";
   }
 
-  return "Hold";
+  return "Watch";
 }
 
 function mergeQuotes(current: DisplayStock[], quotes: Array<{ symbol: string } & Partial<StockQuote>>): DisplayStock[] {
@@ -904,7 +1432,18 @@ function mergeQuotes(current: DisplayStock[], quotes: Array<{ symbol: string } &
   return current.map((stock) => {
     const quote = map.get(normalizedTicker(stock).toUpperCase());
     if (!quote) return stock;
-    const nextPrice = numeric((quote as any).price, numeric(stock.price));
+    const quotePrice = positiveNumberOrNull((quote as any).price ?? (quote as any).last ?? (quote as any).close);
+    const stockPrice = positiveNumberOrNull(stock.price);
+    const nextPrice = quotePrice ?? stockPrice ?? optionalNumber(stock.price);
+    const hasLivePrice = quotePrice != null;
+    const quoteHistory = Array.isArray((quote as any).history)
+      ? (quote as any).history.map((value: unknown) => Number(value)).filter((value: number) => Number.isFinite(value) && value > 0)
+      : [];
+    const quoteSampleCount = Number((quote as any).sampleCount);
+    const stockSampleCount = Number((stock as any).sampleCount);
+    const sampleCount = Number.isFinite(quoteSampleCount) && quoteSampleCount > 0
+      ? quoteSampleCount
+      : quoteHistory.length || (Number.isFinite(stockSampleCount) ? stockSampleCount : 0);
     const entryPrice = numeric((quote as any).signalEntryPrice, numeric((stock as any).signalEntryPrice, nextPrice));
     const signalReturnPercent = entryPrice > 0 && nextPrice > 0
       ? ((nextPrice - entryPrice) / entryPrice) * 100
@@ -914,13 +1453,18 @@ function mergeQuotes(current: DisplayStock[], quotes: Array<{ symbol: string } &
       ...(quote as any),
       ticker: normalizedTicker(stock),
       price: nextPrice,
+      history: quoteHistory.length ? quoteHistory : stock.history,
+      sampleCount,
       changePercent: numeric((quote as any).changePercent, numeric(stock.changePercent)),
       signalAction: ((quote as any).signalAction ?? stock.signalAction) as TradeSignal,
       signalStatus: (quote as any).signalAction ? "provided" : stock.signalStatus ?? "missing",
       signalConfidence: numeric((quote as any).signalConfidence, numeric((stock as any).signalConfidence)),
       signalEntryPrice: entryPrice,
       signalReturnPercent,
-      quoteStatus: "available",
+      quoteStatus: hasLivePrice ? "available" : "unavailable",
+      quoteStatusReason: hasLivePrice
+        ? undefined
+        : String((quote as any).source ?? "Live price was unavailable"),
       quoteLastAttemptedAt: Date.now(),
     };
   });
@@ -937,7 +1481,7 @@ function parseStockListItem(item: any, marketOpen: boolean): DisplayStock {
     ...item,
     ticker: String(item.ticker ?? item.symbol ?? ""),
     symbol: String(item.symbol || item.ticker || ""),
-    price: numeric(item.price),
+    price: optionalNumber(item.price ?? item.last ?? item.close ?? item.regularMarketPrice),
     changePercent: numeric(item.changePercent),
     status: (item.status ?? "Stable") as StockStatus,
     signalAction: (item.signalAction ?? "Hold") as TradeSignal,
@@ -1199,6 +1743,198 @@ function MiniMetric({ label, value, sub }: { label: string; value: string; sub?:
   );
 }
 
+function beliefTone(belief?: BeliefDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+  if (!belief) return "neutral";
+  if (belief.verdict === "justified") return "good";
+  if (belief.verdict === "contradicted") return "bad";
+  return "warn";
+}
+
+function recognitionTone(recognition?: RecognitionDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+  if (!recognition) return "neutral";
+  if (recognition.verdict === "recognized") return "good";
+  if (recognition.verdict === "novel" || recognition.verdict === "partially_recognized") return "warn";
+  if (recognition.verdict === "conflicted") return "bad";
+  return "neutral";
+}
+
+export function recognitionClearsDiscoveryNoveltyNarrative(recognition?: RecognitionDiagnostic | null) {
+  if (!recognition) return false;
+
+  return recognition.verdict === "recognized" &&
+    recognition.recurrenceConfidence >= 70 &&
+    recognition.recognitionScore >= 65 &&
+    recognition.noveltyScore <= 35 &&
+    recognition.discoveryNoveltyJustified === false &&
+    recognition.judgementSimilarityJustified === true &&
+    (recognition.matchedSamples >= 5 || recognition.archetypeConfidence >= 70);
+}
+
+export function reconcileDiscoveryInvalidationConditions(
+  conditions: string[],
+  recognition?: RecognitionDiagnostic | null,
+) {
+  if (!recognitionClearsDiscoveryNoveltyNarrative(recognition)) return conditions;
+
+  const filtered = conditions.filter((condition) => !/too novel|novel to compare|known states/i.test(condition));
+  const archetype = recognition?.archetype?.replace(/_/g, " ") || "recognized state";
+  const recognitionCondition = `Re-open Discovery novelty only if Recognition recurrence falls below 70/100 or the ${archetype} outcome linkage weakens.`;
+
+  return Array.from(new Set([...filtered, recognitionCondition]));
+}
+
+export function discoveryRecognitionSentence(input: {
+  discoveryConfidence?: number | null;
+  discoveryNovelty?: number | null;
+  recognition?: RecognitionDiagnostic | null;
+}) {
+  const discoveryConfidence = finiteNumber(input.discoveryConfidence);
+  const discoveryNovelty = finiteNumber(input.discoveryNovelty);
+  if (discoveryConfidence == null || discoveryNovelty == null) return "";
+
+  const raw = ` Discovery confidence is ${fmtPlainPct(discoveryConfidence, 0)} with ${fmtPlainPct(discoveryNovelty, 0)} novelty.`;
+  if (!recognitionClearsDiscoveryNoveltyNarrative(input.recognition)) return raw;
+
+  return `${raw} Recognition rejects that novelty with ${fmtPlainPct(numeric(input.recognition?.recurrenceConfidence), 0)} recurrence.`;
+}
+
+export function recognitionStateRecurrenceLine(recognition?: RecognitionDiagnostic | null) {
+  if (!recognitionClearsDiscoveryNoveltyNarrative(recognition)) return "";
+
+  return `Recognition state recurrence ${numeric(recognition?.matchedSamples)} matched samples; Discovery outcome memory remains separate.`;
+}
+
+export function reconcileRecoveryBlockersWithRecognition(
+  blockers: string[],
+  recognition?: RecognitionDiagnostic | null,
+) {
+  if (!recognitionClearsDiscoveryNoveltyNarrative(recognition)) return blockers;
+
+  const matchedSamples = numeric(recognition?.matchedSamples);
+  const hasOutcomeLinkageBlocker = blockers.some((blocker) => /similar outcome sample count|positive similar-outcome ratio/i.test(blocker));
+  const filtered = blockers.filter((blocker) => !/similar outcome sample count|positive similar-outcome ratio/i.test(blocker));
+  const recognitionBlocker = hasOutcomeLinkageBlocker
+    ? `Recovery needs survival-safe outcome linkage; Recognition has ${matchedSamples} state matches, but normal sizing still requires reduced-size outcomes with acceptable drawdown and stress.`
+    : "";
+
+  return uniqueStrings([...filtered, recognitionBlocker]);
+}
+
+export function reconcileRecoveryUnlockConditionsWithRecognition(
+  conditions: string[],
+  recognition?: RecognitionDiagnostic | null,
+) {
+  if (!recognitionClearsDiscoveryNoveltyNarrative(recognition)) return conditions;
+
+  const archetype = recognition?.archetype?.replace(/_/g, " ") || "recognized state";
+  return uniqueStrings([
+    ...conditions,
+    `Close reduced-size outcomes for the ${archetype} archetype with survival cost below the recovery boundary before restoring normal sizing.`,
+  ]);
+}
+
+export function reconcileResolveUnlockConditionsWithRecognition(input: {
+  conditions: string[];
+  missingEvidence: string[];
+  recognition?: RecognitionDiagnostic | null;
+}) {
+  if (!recognitionClearsDiscoveryNoveltyNarrative(input.recognition)) return input.conditions;
+
+  const archetype = input.recognition?.archetype?.replace(/_/g, " ") || "recognized state";
+  const needsReducedSizeReview = input.missingEvidence.some((item) => /reduced-size survival review/i.test(item));
+  const needsAgencyTrust = input.missingEvidence.some((item) => /agency trust/i.test(item));
+
+  return uniqueStrings([
+    ...input.conditions,
+    needsAgencyTrust
+      ? "Convert additional clean reduced-size outcomes into Agency trust until the average clears 70/100."
+      : "",
+    needsReducedSizeReview
+      ? `Close reduced-size outcomes for the ${archetype} archetype with acceptable drawdown and stress before normal sizing is restored.`
+      : "",
+  ]);
+}
+
+function displaySizingMode(mode: string | undefined) {
+  if (!mode || mode === "none") return "None";
+  if (mode === "micro") return "Micro";
+  if (mode === "maxSafe") return "Max safe";
+  return mode.charAt(0).toUpperCase() + mode.slice(1);
+}
+
+export function maximumExposureSubLabel(input: {
+  sizingMode?: string;
+  suggestedMaximumExposurePct?: number;
+  semanticWord?: string;
+}) {
+  if (!finiteNumber(input.suggestedMaximumExposurePct) || numeric(input.suggestedMaximumExposurePct) <= 0) {
+    return undefined;
+  }
+
+  if (input.sizingMode === "micro") return "reduced-size portfolio cap";
+  if (input.sizingMode && input.sizingMode !== "none") {
+    return `${displaySizingMode(input.sizingMode).toLowerCase()} portfolio cap`;
+  }
+
+  return `${(input.semanticWord || "portfolio").toLowerCase()} cap`;
+}
+
+function uniqueStrings(values: string[]) {
+  return Array.from(new Set(values.filter(Boolean)));
+}
+
+function judgementTone(judgement?: JudgementDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+  if (!judgement) return "neutral";
+  if (judgement.status === "trusted") return "good";
+  if (judgement.status === "blocked") return "bad";
+  return "warn";
+}
+
+function trustGovernorTone(trustGovernor?: TrustGovernorDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+  if (!trustGovernor) return "neutral";
+  if (trustGovernor.participationMode === "normal" || trustGovernor.participationMode === "limited") return "good";
+  if (trustGovernor.participationMode === "blocked" || trustGovernor.participationMode === "exits_only") return "bad";
+  return "warn";
+}
+
+function resolveTone(resolve?: ResolveDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+  if (!resolve) return "neutral";
+  if (resolve.decision === "commit") return "good";
+  if (resolve.decision === "reject" || resolve.decision === "invalidate") return "bad";
+  if (resolve.decision === "escalate") return "bad";
+  return "warn";
+}
+
+function survivalMemoryTone(survivalMemory?: SurvivalMemoryDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+  if (!survivalMemory) return "neutral";
+  if (survivalMemory.status === "clear") return "good";
+  if (survivalMemory.status === "near_ruin") return "bad";
+  if (survivalMemory.status === "scarred" || survivalMemory.status === "watch") return "warn";
+  return "neutral";
+}
+
+function recoveryTone(recovery?: RecoveryDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+  if (!recovery) return "neutral";
+  if (recovery.status === "restored") return "good";
+  if (recovery.status === "recovering") return "warn";
+  if (recovery.status === "locked" || recovery.status === "regressed") return "bad";
+  return "neutral";
+}
+
+function remediationTone(plan?: ReadinessRemediationDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+  if (!plan) return "neutral";
+  if (plan.status === "ready") return "good";
+  if (plan.status === "blocked") return "bad";
+  return "warn";
+}
+
+function topBeliefEvidence(
+  belief: BeliefDiagnostic | null,
+  key: "supportingEvidence" | "contradictoryEvidence",
+) {
+  return Array.isArray(belief?.[key]) ? belief[key]!.slice(0, 2) : [];
+}
+
 function SectionShell({
   eyebrow,
   title,
@@ -1208,8 +1944,8 @@ function SectionShell({
 }: {
   eyebrow?: string;
   title: string;
-  action?: React.ReactNode;
-  children: React.ReactNode;
+  action?: ReactNode;
+  children: ReactNode;
   className?: string;
 }) {
   return (
@@ -1243,7 +1979,7 @@ function QualityBar({ value, label }: { value: number; label?: string }) {
   );
 }
 
-function StatusPill({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "good" | "warn" | "bad" | "neutral" }) {
+function StatusPill({ children, tone = "neutral" }: { children: ReactNode; tone?: "good" | "warn" | "bad" | "neutral" }) {
   return (
     <span
       className={cx(
@@ -1266,13 +2002,13 @@ function AllocationLedgerTable({
   onSelectInstrument,
   loading,
 }: {
-  action: TradeSignal;
+  action: AllocationAction;
   items: IntelligenceStock[];
   selectedTicker: string | null;
   onSelectInstrument: (ticker: string) => void;
   loading: boolean;
 }) {
-  const tone = action === "Buy" ? "good" : action === "Sell" ? "bad" : "neutral";
+  const tone = action === "Buy" ? "good" : action === "Sell" ? "bad" : action === "Blocked" ? "warn" : "neutral";
 
   return (
     <div className="overflow-hidden rounded-xl border border-white/10 bg-[#151515]">
@@ -1286,10 +2022,11 @@ function AllocationLedgerTable({
         </div>
       </div>
 
-      <div className="grid grid-cols-[0.8fr_0.6fr_0.6fr] bg-white/[0.025] px-4 py-3 text-[9px] uppercase tracking-[0.16em] text-zinc-500">
+      <div className="grid grid-cols-[1.1fr_0.55fr_0.55fr_1fr] gap-3 bg-white/[0.025] px-4 py-3 text-[9px] uppercase tracking-[0.16em] text-zinc-500">
         <div>Asset</div>
         <div>Max position</div>
         <div>Score</div>
+        <div>Why</div>
       </div>
 
       <div className="max-h-[360px] divide-y divide-white/10 overflow-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-700/60 hover:[&::-webkit-scrollbar-thumb]:bg-zinc-500/80 [&::-webkit-scrollbar-corner]:bg-transparent">
@@ -1309,7 +2046,7 @@ function AllocationLedgerTable({
                 type="button"
                 onClick={() => onSelectInstrument(ticker)}
                 className={cx(
-                  "grid w-full grid-cols-[1.2fr_0.7fr_0.7fr] items-center px-4 py-4 text-left text-sm transition hover:bg-white/[0.04]",
+                  "grid w-full grid-cols-[1.1fr_0.55fr_0.55fr_1fr] items-center gap-3 px-4 py-4 text-left text-sm transition hover:bg-white/[0.04]",
                   isSelected && "bg-[#FDD000]/10",
                 )}
               >
@@ -1317,11 +2054,14 @@ function AllocationLedgerTable({
                   <div className="font-semibold text-white">{ticker}</div>
                   <div className="mt-1 line-clamp-1 text-xs text-zinc-500">{stockName(stock)}</div>
                   <div className="mt-1 text-[11px] text-zinc-600">
-                    {stock.status ?? "Stable"} · {dataCoverageLabel(stock)}
+                    {assetSizingLabel(stock)} · {dataCoverageLabel(stock)}
                   </div>
                 </div>
                 <div className="text-zinc-300">{fmtPlainPct(stock.suggestedExposure)}</div>
                 <div className="font-medium text-slate-100">{Math.round(stock.setupQuality)}%</div>
+                <div className="line-clamp-2 text-xs leading-5 text-zinc-500">
+                  {stock.sizingReasons?.[0] ?? stock.rejectionReason ?? stock.explanation}
+                </div>
               </button>
             );
           })
@@ -1365,11 +2105,58 @@ async function fetchJsonOrNull(input: RequestInfo | URL, init?: RequestInit) {
   }
 }
 
+type MarketScopedDashboardData = {
+  stocks: DisplayStock[];
+  totalStocks: number;
+  loading: boolean;
+  lastSyncedAt: number | null;
+  refreshError: string | null;
+  stockVisualMap: Map<string, any>;
+  portfolioSummary: any | null;
+  persistentPortfolioHistory: Array<any>;
+  backtestSummary: any | null;
+  backtestHistory: Array<any>;
+  walkForwardTrades: Array<any>;
+  strategySignals: Array<any>;
+  strategyRegime: any | null;
+  opportunityDiscovery: any | null;
+  agencyDiagnostics: any | null;
+  marketPerceptionSnapshot: MarketStateSnapshot | null;
+};
+
+function createEmptyMarketData(): MarketScopedDashboardData {
+  return {
+    stocks: [],
+    totalStocks: 0,
+    loading: true,
+    lastSyncedAt: null,
+    refreshError: null,
+    stockVisualMap: new Map(),
+    portfolioSummary: null,
+    persistentPortfolioHistory: [],
+    backtestSummary: null,
+    backtestHistory: [],
+    walkForwardTrades: [],
+    strategySignals: [],
+    strategyRegime: null,
+    opportunityDiscovery: null,
+    agencyDiagnostics: null,
+    marketPerceptionSnapshot: null,
+  };
+}
+
 export default function Dashboard() {
   const [stockVisualMap, setStockVisualMap] = useState<Map<string, any>>(new Map());
+  const marketStateEngineRef = useRef<MarketStateEngine | null>(null);
+  if (marketStateEngineRef.current === null) {
+    marketStateEngineRef.current = new MarketStateEngine(createDefaultMetricRegistry());
+  }
+  const marketDataByMarketRef = useRef(new Map<string, MarketScopedDashboardData>());
+  const activeMarketRef = useRef("");
 
   const [markets, setMarkets] = useState<MarketOption[]>([]);
   const [marketFilter, setMarketFilter] = useState("");
+  activeMarketRef.current = marketFilter;
   const [stocks, setStocks] = useState<DisplayStock[]>([]);
   const [totalStocks, setTotalStocks] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -1389,10 +2176,81 @@ export default function Dashboard() {
   const [frontendSlippageBps, setFrontendSlippageBps] = useState(0);
   const [strategySignals, setStrategySignals] = useState<Array<any>>([]);
   const [strategyRegime, setStrategyRegime] = useState<any | null>(null);
+  const [opportunityDiscovery, setOpportunityDiscovery] = useState<any | null>(null);
+  const [agencyDiagnostics, setAgencyDiagnostics] = useState<any | null>(null);
+  const [marketPerceptionSnapshot, setMarketPerceptionSnapshot] = useState<MarketStateSnapshot | null>(null);
   const [portfolioRefreshing, setPortfolioRefreshing] = useState(false);
   const [query, setQuery] = useState("");
   const registeredWatchlists = useRef(new Set<string>());
   const refreshedPortfolioMarkets = useRef(new Set<string>());
+
+  function getMarketData(market: string) {
+    const existing = marketDataByMarketRef.current.get(market);
+    if (existing) return existing;
+
+    const next = createEmptyMarketData();
+    marketDataByMarketRef.current.set(market, next);
+    return next;
+  }
+
+  function applyMarketDataPatch(market: string, patch: Partial<MarketScopedDashboardData>) {
+    if (!market) return;
+
+    const next = {
+      ...getMarketData(market),
+      ...patch,
+    };
+    marketDataByMarketRef.current.set(market, next);
+
+    if (activeMarketRef.current !== market) return;
+
+    if ("stocks" in patch) setStocks(next.stocks);
+    if ("totalStocks" in patch) setTotalStocks(next.totalStocks);
+    if ("loading" in patch) setLoading(next.loading);
+    if ("lastSyncedAt" in patch) setLastSyncedAt(next.lastSyncedAt);
+    if ("refreshError" in patch) setRefreshError(next.refreshError);
+    if ("stockVisualMap" in patch) setStockVisualMap(next.stockVisualMap);
+    if ("portfolioSummary" in patch) setPortfolioSummary(next.portfolioSummary);
+    if ("persistentPortfolioHistory" in patch) setPersistentPortfolioHistory(next.persistentPortfolioHistory);
+    if ("backtestSummary" in patch) setBacktestSummary(next.backtestSummary);
+    if ("backtestHistory" in patch) setBacktestHistory(next.backtestHistory);
+    if ("walkForwardTrades" in patch) setWalkForwardTrades(next.walkForwardTrades);
+    if ("strategySignals" in patch) setStrategySignals(next.strategySignals);
+    if ("strategyRegime" in patch) setStrategyRegime(next.strategyRegime);
+    if ("opportunityDiscovery" in patch) setOpportunityDiscovery(next.opportunityDiscovery);
+    if ("agencyDiagnostics" in patch) setAgencyDiagnostics(next.agencyDiagnostics);
+    if ("marketPerceptionSnapshot" in patch) setMarketPerceptionSnapshot(next.marketPerceptionSnapshot);
+  }
+
+  function renderMarketData(market: string) {
+    const data = getMarketData(market);
+
+    setStocks(data.stocks);
+    setTotalStocks(data.totalStocks);
+    setLoading(data.loading);
+    setLastSyncedAt(data.lastSyncedAt);
+    setRefreshError(data.refreshError);
+    setStockVisualMap(data.stockVisualMap);
+    setPortfolioSummary(data.portfolioSummary);
+    setPersistentPortfolioHistory(data.persistentPortfolioHistory);
+    setBacktestSummary(data.backtestSummary);
+    setBacktestHistory(data.backtestHistory);
+    setWalkForwardTrades(data.walkForwardTrades);
+    setStrategySignals(data.strategySignals);
+    setStrategyRegime(data.strategyRegime);
+    setOpportunityDiscovery(data.opportunityDiscovery);
+    setAgencyDiagnostics(data.agencyDiagnostics);
+    setMarketPerceptionSnapshot(data.marketPerceptionSnapshot);
+    setRefreshingQuotes(false);
+  }
+
+  useEffect(() => {
+    if (!marketFilter) return;
+
+    renderMarketData(marketFilter);
+    setSelectedTicker(null);
+    setIsSelectedCardFlipped(false);
+  }, [marketFilter]);
 
 
   useEffect(() => {
@@ -1404,7 +2262,7 @@ export default function Dashboard() {
         const items = parseMarketsResponse(response);
         setMarkets(items);
         const preferred = items[0];
-        if (preferred) setMarketFilter(marketCode(preferred));
+        if (preferred) setMarketFilter((current) => current || marketCode(preferred));
       } catch (error) {
         setRefreshError("Could not load markets.");
       }
@@ -1416,24 +2274,83 @@ export default function Dashboard() {
   }, []);
 
   async function refreshQuotes(market: string, list: DisplayStock[], bypass = false) {
-    if (!market || !list.length || getMarketStatus(market) !== "Open") return;
-    setRefreshingQuotes(true);
-    setRefreshError(null);
+    if (!market || !list.length) return;
+    const hasExistingLiveCoverage = hasLiveQuoteCoverage(list);
+    const hasExistingMarketCoverage = hasExistingLiveCoverage || hasSessionMarketCoverage(list);
+    const currentMarketStatus = getMarketStatus(market);
+    const cachedMarketData = getMarketData(market);
+
+    if (currentMarketStatus === "Closed" && hasExistingMarketCoverage) {
+      applyMarketDataPatch(market, {
+        loading: false,
+        refreshError: null,
+        lastSyncedAt: cachedMarketData.lastSyncedAt ?? Date.now(),
+      });
+      if (activeMarketRef.current === market) {
+        setRefreshingQuotes(false);
+        setRefreshError(null);
+      }
+      return;
+    }
+
+    const shouldRefreshClosedVenue =
+      bypass ||
+      currentMarketStatus === "Open" ||
+      !hasExistingLiveCoverage ||
+      cachedMarketData.lastSyncedAt == null;
+    if (!shouldRefreshClosedVenue) return;
+    if (activeMarketRef.current === market) {
+      setRefreshingQuotes(true);
+      setRefreshError(null);
+    }
+    applyMarketDataPatch(market, { refreshError: null });
+
     try {
-      const symbols = list.map((item) => normalizedTicker(item)).filter(Boolean).slice(0, INITIAL_QUOTE_SYMBOL_LIMIT);
+      let liveQuoteCount = 0;
+      const quoteLimit = Math.min(
+        MAX_QUOTE_SYMBOL_LIMIT,
+        Math.max(INITIAL_QUOTE_SYMBOL_LIMIT, Math.ceil(list.length * MIN_QUOTE_COVERAGE_RATIO)),
+      );
+      const symbols = list.map((item) => normalizedTicker(item)).filter(Boolean).slice(0, quoteLimit);
       for (let index = 0; index < symbols.length; index += QUOTE_BATCH_SIZE) {
         const batch = symbols.slice(index, index + QUOTE_BATCH_SIZE);
         const response = await fetchStockQuoteBatch(market, batch, {
           withSignals: true,
           timeoutMs: 45_000,
-          retryCount: bypass ? 1 : 0,
+          retryCount: bypass || !hasExistingLiveCoverage ? 1 : 0,
         } as any);
         const quotes = ((response as any).quotes ?? []) as Array<{ symbol: string } & Partial<StockQuote>>;
-        setStocks((prev) => mergeQuotes(prev, quotes));
-        setLastSyncedAt(Date.now());
+        const batchLiveQuotes = quotes.filter(quoteHasLivePrice).length;
+        liveQuoteCount += batchLiveQuotes;
+        const cached = getMarketData(market);
+        const merged = mergeQuotes(cached.stocks.length ? cached.stocks : list, quotes);
+        applyMarketDataPatch(market, {
+          stocks: merged,
+          lastSyncedAt: batchLiveQuotes > 0 ? Date.now() : cached.lastSyncedAt,
+          loading: false,
+          refreshError: batchLiveQuotes > 0 || liveQuoteCount > 0 ? null : cached.refreshError,
+        });
+      }
+      if (liveQuoteCount === 0) {
+        applyMarketDataPatch(market, {
+          loading: false,
+          refreshError: hasExistingLiveCoverage
+            ? null
+            : "Quote sync returned no live prices for this market.",
+        });
       }
     } catch (error) {
-      setRefreshError("Live quote sync paused. Retrying shortly.");
+      applyMarketDataPatch(market, {
+        refreshError: hasExistingLiveCoverage
+          ? null
+          : currentMarketStatus === "Closed"
+            ? "Venue is closed. Live quote updates will resume at the next session."
+            : "Live quote sync paused. Retrying shortly.",
+      });
+    } finally {
+      if (activeMarketRef.current === market) {
+        setRefreshingQuotes(false);
+      }
     }
   }
 
@@ -1441,19 +2358,24 @@ export default function Dashboard() {
     let cancelled = false;
     async function loadStocks() {
       if (!marketFilter) return;
-      setLoading(true);
-      setRefreshError(null);
-      setStocks([]);
-      setTotalStocks(0);
+      const market = marketFilter;
+      const cached = getMarketData(market);
+      applyMarketDataPatch(market, {
+        loading: cached.stocks.length === 0,
+        refreshError: null,
+        stocks: cached.stocks,
+        totalStocks: cached.totalStocks,
+        lastSyncedAt: cached.lastSyncedAt,
+      });
 
-      const marketOpen = getMarketStatus(marketFilter) === "Open";
+      const marketOpen = getMarketStatus(market) === "Open";
       try {
         let offset = 0;
         let total = 0;
         const items: DisplayStock[] = [];
 
         do {
-          const response = await fetchStockList(marketFilter, offset, STOCK_LIST_PAGE_SIZE);
+          const response = await fetchStockList(market, offset, STOCK_LIST_PAGE_SIZE);
           if (cancelled) return;
           const responseItems = ((response as any).items ?? []) as any[];
           total = Number((response as any).total ?? responseItems.length);
@@ -1462,23 +2384,29 @@ export default function Dashboard() {
         } while (offset < total && offset < 2_000);
 
         if (cancelled) return;
-        setStocks(items);
-        setTotalStocks(total || items.length);
-        setLoading(false);
+        applyMarketDataPatch(market, {
+          stocks: items,
+          totalStocks: total || items.length,
+          lastSyncedAt: cached.lastSyncedAt ?? (hasSessionMarketCoverage(items) ? Date.now() : null),
+          loading: false,
+          refreshError: null,
+        });
 
-        const key = `${marketFilter}:${items.length}`;
+        const key = `${market}:${items.length}`;
         if (!registeredWatchlists.current.has(key)) {
           registeredWatchlists.current.add(key);
-          void registerSignalWatchlist(marketFilter, items.map((item) => normalizedTicker(item))).catch(() => {
+          void registerSignalWatchlist(market, items.map((item) => normalizedTicker(item))).catch(() => {
             registeredWatchlists.current.delete(key);
           });
         }
 
-        void refreshQuotes(marketFilter, items);
+        void refreshQuotes(market, items);
       } catch (error) {
         if (!cancelled) {
-          setRefreshError("Could not load market coverage.");
-          setLoading(false);
+          applyMarketDataPatch(market, {
+            refreshError: "Could not load market coverage.",
+            loading: false,
+          });
         }
       }
     }
@@ -1486,10 +2414,8 @@ export default function Dashboard() {
     void loadStocks();
 
     const interval = window.setInterval(() => {
-      setStocks((current) => {
-        void refreshQuotes(marketFilter, current);
-        return current;
-      });
+      const market = marketFilter;
+      void refreshQuotes(market, getMarketData(market).stocks);
     }, REFRESH_INTERVAL_MS);
 
     return () => {
@@ -1500,12 +2426,16 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!marketFilter || !ENABLE_STRATEGY_API) {
-      setStrategySignals([]);
-      setStrategyRegime(null);
+      if (!marketFilter) {
+        setStrategySignals([]);
+        setStrategyRegime(null);
+        setOpportunityDiscovery(null);
+      }
       return;
     }
 
     let cancelled = false;
+    const market = marketFilter;
 
     async function loadStrategySignals() {
       try {
@@ -1515,7 +2445,7 @@ export default function Dashboard() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            market: marketFilter,
+            market,
             limitSymbols: 25,
           }),
         });
@@ -1524,8 +2454,12 @@ export default function Dashboard() {
 
         if (cancelled) return;
 
-        setStrategySignals(Array.isArray(payload?.signals) ? payload.signals : []);
-        setStrategyRegime(payload?.regime ?? null);
+        applyMarketDataPatch(market, {
+          strategySignals: Array.isArray(payload?.signals) ? payload.signals : [],
+          strategyRegime: payload?.regime ?? null,
+          opportunityDiscovery: payload?.opportunityDiscovery ?? null,
+          agencyDiagnostics: payload?.agencyDiagnostics ?? null,
+        });
       } catch (error) {
         console.warn("Keeping previous backtest/portfolio state after refresh failure", error);
         if (!cancelled) {
@@ -1548,42 +2482,257 @@ export default function Dashboard() {
   const stocksWithStrategySignals = useMemo(() => {
     if (!strategySignals.length) return stocks;
 
-    const signalMap = new Map(
-      strategySignals.map((signal) => [
-        String(signal.symbol ?? signal.ticker ?? "").toUpperCase(),
-        signal,
-      ]),
-    );
+    const signalMap = new Map<string, any>();
+    for (const signal of strategySignals) {
+      for (const key of instrumentMatchKeys(signal)) {
+        signalMap.set(key, signal);
+      }
+    }
+    const matchedSignals = new Set<any>();
 
-    return stocks.map((stock) => {
+    const merged = stocks.map((stock) => {
       const ticker = normalizedTicker(stock);
-      const signal = signalMap.get(ticker.toUpperCase());
+      const signal = instrumentMatchKeys(stock)
+        .map((key) => signalMap.get(key))
+        .find(Boolean);
 
       if (!signal) return stock;
+      matchedSignals.add(signal);
 
       return {
         ...stock,
         ticker,
         symbol: ticker,
-        price: numeric(signal.price, numeric(stock.price)),
+        price: optionalNumber(signal.price) ?? optionalNumber(stock.price),
         signalAction: signal.signalAction ?? stock.signalAction,
         allocationAction: signal.allocationAction ?? stock.allocationAction,
-        signalStatus: "provided",
+        signalStatus: signal.signalStatus ?? "provided",
         suggestedExposure: numeric(signal.suggestedExposure, numeric((stock as any).suggestedExposure)),
         setupQuality: numeric(signal.setupQuality, numeric((stock as any).setupQuality)),
         riskPressure: numeric(signal.riskPressure, numeric((stock as any).riskPressure)),
         trendQuality: numeric(signal.trendQuality, numeric((stock as any).trendQuality)),
         timingQuality: numeric(signal.timingQuality, numeric((stock as any).timingQuality)),
         expectedMove: numeric(signal.expectedMove, numeric((stock as any).expectedMove)),
+        sizingMode: signal.sizingMode ?? (stock as any).sizingMode,
+        sizingReasons: signal.sizingReasons ?? (stock as any).sizingReasons,
+        sizingConstraints: signal.sizingConstraints ?? (stock as any).sizingConstraints,
+        sizingRationale: signal.sizingRationale ?? (stock as any).sizingRationale,
+        opportunityDiscovery: signal.opportunityDiscovery ?? (stock as any).opportunityDiscovery,
+        discovery: signal.opportunityDiscovery?.discovery ?? (stock as any).discovery,
+        agencyTrace: signal.agencyTrace ?? (stock as any).agencyTrace,
+        agency: signal.agency ?? (stock as any).agency,
+        belief: signal.belief ?? (stock as any).belief ?? null,
+        recognition: signal.recognition ?? (stock as any).recognition,
+        judgement: signal.judgement ?? (stock as any).judgement,
+        survivalMemory: signal.survivalMemory ?? signal.judgement?.survivalMemory ?? (stock as any).survivalMemory,
+        trustGovernor: signal.trustGovernor ?? (stock as any).trustGovernor,
+        resolve: signal.resolve ?? (stock as any).resolve,
+        discoveryScore: numeric(signal.discoveryScore, numeric((stock as any).discoveryScore)),
+        discoveryLifecycle: signal.discoveryLifecycle ?? (stock as any).discoveryLifecycle,
+        candidateProgression: signal.candidateProgression ?? (stock as any).candidateProgression,
+        adaptiveSuggestedExposure: numeric(signal.adaptiveSuggestedExposure, numeric((stock as any).adaptiveSuggestedExposure)),
+        rejectionReason: signal.rejectionReason ?? (stock as any).rejectionReason,
         regime: signal.regime,
         quoteStatus: stock.quoteStatus ?? "available",
       } as DisplayStock;
     });
-  }, [stocks, strategySignals]);
+    const appendedSignals = strategySignals
+      .filter((signal) => !matchedSignals.has(signal))
+      .map((signal) => {
+        const ticker = String(signal.ticker ?? signal.symbol ?? "").trim();
+        return {
+          ticker,
+          symbol: ticker,
+          name: String(signal.name ?? signal.description ?? ticker),
+          description: String(signal.description ?? signal.name ?? ticker),
+          market: String(signal.market ?? marketFilter ?? ""),
+          exchange: String(signal.exchange ?? signal.market ?? marketFilter ?? ""),
+          country: String(signal.country ?? signal.market ?? marketFilter ?? ""),
+          price: optionalNumber(signal.price),
+          status: "Stable" as StockStatus,
+          signalAction: (signal.signalAction ?? "Hold") as TradeSignal,
+          allocationAction: signal.allocationAction,
+          signalStatus: signal.signalStatus ?? "provided",
+          suggestedExposure: numeric(signal.suggestedExposure),
+          setupQuality: numeric(signal.setupQuality),
+          riskPressure: numeric(signal.riskPressure),
+          trendQuality: numeric(signal.trendQuality),
+          timingQuality: numeric(signal.timingQuality),
+          expectedMove: numeric(signal.expectedMove),
+          sizingMode: signal.sizingMode,
+          sizingReasons: signal.sizingReasons,
+          sizingConstraints: signal.sizingConstraints,
+          sizingRationale: signal.sizingRationale,
+          opportunityDiscovery: signal.opportunityDiscovery,
+          discovery: signal.opportunityDiscovery?.discovery,
+          agencyTrace: signal.agencyTrace,
+          agency: signal.agency,
+          belief: signal.belief ?? null,
+          recognition: signal.recognition,
+          judgement: signal.judgement,
+          survivalMemory: signal.survivalMemory ?? signal.judgement?.survivalMemory,
+          trustGovernor: signal.trustGovernor,
+          resolve: signal.resolve,
+          discoveryScore: numeric(signal.discoveryScore),
+          discoveryLifecycle: signal.discoveryLifecycle,
+          candidateProgression: signal.candidateProgression,
+          adaptiveSuggestedExposure: numeric(signal.adaptiveSuggestedExposure),
+          rejectionReason: signal.rejectionReason,
+          quoteStatus: optionalNumber(signal.price) != null ? "available" : "pending",
+          summary: optionalNumber(signal.price) != null ? "Strategy signal" : "Strategy signal awaiting live quote",
+        } as DisplayStock;
+      });
 
-  const intelligence = useMemo(
+    return [...merged, ...appendedSignals];
+  }, [marketFilter, stocks, strategySignals]);
+
+  const rawIntelligence = useMemo(
     () => stocksWithStrategySignals.map(inferIntelligence).sort((a, b) => b.setupQuality - a.setupQuality),
     [stocksWithStrategySignals],
+  );
+
+  const rawCoveredIntelligence = useMemo(
+    () => rawIntelligence.filter((stock) => hasStockEvidence(stock)),
+    [rawIntelligence],
+  );
+
+  const hasUsableMarketData =
+    !loading &&
+    rawIntelligence.length > 0 &&
+    rawIntelligence.some((stock) => {
+      return (
+        stock.quoteStatus === "available" ||
+        stock.signalStatus === "provided" ||
+        positiveNumberOrNull(stock.price) != null
+      );
+    });
+  const backtestDataQuality = backtestSummary?.dataQualityReport ?? backtestSummary?.dataQuality ?? {};
+  const hasRealBacktestMarketData =
+    Boolean(backtestSummary?.updatedAt) &&
+    (
+      backtestDataQuality?.promotionEligibleData === true ||
+      (
+        String(backtestDataQuality?.quality ?? "").toLowerCase() === "real" &&
+        Number(backtestDataQuality?.symbolCount ?? 0) > 0 &&
+        Number(backtestDataQuality?.syntheticSymbols ?? 0) === 0
+      )
+    );
+  const hasStrategyMarketData = strategySignals.some((signal) => {
+    return (
+      positiveNumberOrNull(signal?.price ?? signal?.entryPrice) != null ||
+      signal?.signalStatus === "provided" ||
+      signal?.signalStatus === "confirmed"
+    );
+  });
+
+  const forwardShadow = backtestSummary?.forwardShadow ?? {};
+  const confirmedStrategySignalCount = strategySignals.filter((signal) => {
+    return (
+      signal?.signalStatus === "confirmed" &&
+      numeric(signal?.suggestedExposure, 0) > 0
+    );
+  }).length;
+  const forwardShadowConfirmedCount = Number(forwardShadow?.confirmedSignalCount ?? 0);
+  const forwardShadowObservedCount = Number(forwardShadow?.observedSignalCount ?? 0);
+  const forwardShadowEvaluatedCount = Number(forwardShadow?.evaluatedSignalCount ?? 0);
+  const forwardShadowRequiredCount = Number(forwardShadow?.requiredSignals ?? 0);
+  const hasConfirmedForwardSignals =
+    confirmedStrategySignalCount > 0 ||
+    forwardShadowConfirmedCount > 0 ||
+    forwardShadowObservedCount > 0;
+
+  const hasProvidedSignals =
+    (hasUsableMarketData || hasRealBacktestMarketData || hasStrategyMarketData) &&
+    (
+      hasConfirmedForwardSignals ||
+      rawIntelligence.some((stock) => {
+        const status = String(stock.signalStatus ?? "");
+        return status === "provided" || status === "confirmed";
+      })
+    );
+
+  const hasMarketData = hasUsableMarketData || hasRealBacktestMarketData || hasStrategyMarketData;
+
+  const rawMarketUniverse = rawCoveredIntelligence.length ? rawCoveredIntelligence : rawIntelligence;
+  const rawOpenPositions = rawCoveredIntelligence.filter((stock) => stock.suggestedExposure > 0);
+  const rawTargetExposure = clamp(rawOpenPositions.reduce((sum, stock) => sum + stock.suggestedExposure, 0), 0, 65);
+  const rawAvgQuality = mean(rawCoveredIntelligence.slice(0, 30).map((item) => item.setupQuality));
+  const rawAvgRisk = mean(rawCoveredIntelligence.slice(0, 30).map((item) => item.riskPressure));
+  const rawBreadth = rawCoveredIntelligence.length
+    ? (rawCoveredIntelligence.filter((item) => item.suggestedExposure > 0).length / rawCoveredIntelligence.length) * 100
+    : 0;
+  const rawConfidence = clamp(rawAvgQuality * 0.75 + (100 - rawAvgRisk) * 0.25);
+
+  const lastSyncedLabel = lastSyncedAt
+    ? new Date(lastSyncedAt).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+    : "Not synced";
+
+  const lastSyncAgeMs = lastSyncedAt ? Date.now() - lastSyncedAt : null;
+  const staleData = lastSyncAgeMs == null ? false : lastSyncAgeMs > REFRESH_INTERVAL_MS * 3;
+
+  const marketStatus = marketFilter ? getMarketStatus(marketFilter) : "Closed";
+
+  const marketReliability = useMemo(
+    () =>
+      evaluateMarketReliability({
+        market: marketFilter,
+        marketStatus,
+        stocks: rawMarketUniverse,
+        avgRisk: rawAvgRisk,
+        avgQuality: rawAvgQuality,
+        breadth: rawBreadth,
+        confidence: rawConfidence,
+        targetExposure: rawTargetExposure,
+        survivalScore: rawConfidence,
+        failureFlags: [],
+        staleData,
+        hasBacktestData: false,
+        hasProvidedSignals,
+        backtestTradeCount: 0,
+        backtestSharpe: null,
+        backtestMaxDrawdownPct: null,
+        backtestProfitFactor: null,
+        backtestWinRatePct: null,
+        backtestReturnPct: null,
+        lastSuccessfulSync: lastSyncedAt,
+        expectedAssetCount: rawMarketUniverse.length || rawIntelligence.length || totalStocks || 1,
+      }),
+    [
+      marketFilter,
+      marketStatus,
+      rawMarketUniverse,
+      rawAvgRisk,
+      rawAvgQuality,
+      rawBreadth,
+      rawConfidence,
+      rawTargetExposure,
+      staleData,
+      hasProvidedSignals,
+      lastSyncedAt,
+      totalStocks,
+      rawIntelligence.length,
+    ],
+  );
+  const visibleRefreshError =
+    refreshError &&
+    !(
+      marketReliability.status === "healthy" &&
+      marketReliability.market.synchronizationStatus === "synced" &&
+      (marketReliability.market.lastSuccessfulSync != null || lastSyncedAt != null)
+    )
+      ? refreshError
+      : null;
+
+  const intelligence = useMemo(
+    () =>
+      rawIntelligence.map((stock) => ({
+        ...stock,
+        suggestedExposure: capReliabilityExposure(stock.suggestedExposure, marketReliability),
+      })),
+    [rawIntelligence, marketReliability],
   );
 
   const coveredIntelligence = useMemo(
@@ -1605,23 +2754,6 @@ export default function Dashboard() {
     });
   }, [marketUniverse, query]);
 
-  const hasUsableMarketData =
-    !loading &&
-    intelligence.length > 0 &&
-    intelligence.some((stock) => {
-      return (
-        stock.quoteStatus === "available" ||
-        stock.signalStatus === "provided" ||
-        Number.isFinite(numeric(stock.price, NaN))
-      );
-    });
-
-  const hasProvidedSignals =
-    hasUsableMarketData &&
-    intelligence.some((stock) => stock.signalStatus === "provided");
-
-  const hasMarketData = hasUsableMarketData;
-
   const selected = useMemo(() => {
     return filtered.find((item) => normalizedTicker(item) === selectedTicker) ?? filtered[0] ?? null;
   }, [filtered, selectedTicker]);
@@ -1633,17 +2765,6 @@ export default function Dashboard() {
   useEffect(() => {
     refreshedPortfolioMarkets.current.clear();
   }, [marketFilter]);
-
-  useEffect(() => {
-    setPortfolioSummary(null);
-    setPersistentPortfolioHistory([]);
-    setBacktestSummary(normalizeStrategySummary(null));
-    setBacktestHistory(normalizeStrategyArray([]));
-    setWalkForwardTrades(normalizeStrategyArray([]));
-    setStrategySignals([]);
-    setStrategyRegime(null);
-  }, [marketFilter]);
-
 
   useEffect(() => {
     // Disabled damaged selected-history refresh effect after syntax recovery.
@@ -1660,20 +2781,269 @@ export default function Dashboard() {
   const breadth = coveredIntelligence.length
     ? (coveredIntelligence.filter((item) => item.suggestedExposure > 0).length / coveredIntelligence.length) * 100
     : 0;
-  const confidence = clamp(avgQuality * 0.75 + (100 - avgRisk) * 0.25);
-
-  const lastSyncedLabel = lastSyncedAt
-    ? new Date(lastSyncedAt).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-    : "Not synced";
-
-
-
-
-
-  const marketStatus = marketFilter ? getMarketStatus(marketFilter) : "Closed";
+  const payloadDiscoveryCandidates = Array.isArray(opportunityDiscovery?.candidates)
+    ? opportunityDiscovery.candidates
+    : [];
+  const signalDiscoveryCandidates = strategySignals
+    .map((signal) => signal?.opportunityDiscovery)
+    .filter(Boolean);
+  const discoveryCandidates = payloadDiscoveryCandidates.length ? payloadDiscoveryCandidates : signalDiscoveryCandidates;
+  const discoveryDensityDiagnostics = opportunityDiscovery?.density ?? null;
+  const adaptiveOpportunityDensityPct = clamp(
+    finiteNumber(discoveryDensityDiagnostics?.density) ??
+      (discoveryCandidates.length
+        ? mean(discoveryCandidates.map((candidate: any) => numeric(candidate.candidateScore ?? candidate.genericOpportunity?.strength)))
+        : breadth),
+  );
+  const discoveryPipelineDiagnostics = opportunityDiscovery?.diagnostics ?? {
+    candidateCount: discoveryCandidates.length,
+    eligibleCount: discoveryCandidates.filter((candidate: any) => candidate.eligible).length,
+    improvingCount: discoveryCandidates.filter((candidate: any) => numeric(candidate.scoreVelocity) > 0).length,
+    averageScore: discoveryCandidates.length
+      ? mean(discoveryCandidates.map((candidate: any) => numeric(candidate.candidateScore)))
+      : 0,
+    averageVelocity: discoveryCandidates.length
+      ? mean(discoveryCandidates.map((candidate: any) => numeric(candidate.scoreVelocity)))
+      : 0,
+  };
+  const rawNeedDiagnostics = Array.isArray((marketPerceptionSnapshot?.framework as any)?.needs)
+    ? (marketPerceptionSnapshot?.framework as any).needs
+    : [];
+  const frameworkOpportunities = Array.isArray((marketPerceptionSnapshot?.framework as any)?.opportunities)
+    ? (marketPerceptionSnapshot?.framework as any).opportunities
+    : [];
+  const discoveryFindings = Array.isArray(opportunityDiscovery?.findings) ? opportunityDiscovery.findings : [];
+  const leadingDiscoveryCandidate = discoveryCandidates[0] ?? null;
+  const genericDiscovery =
+    opportunityDiscovery?.discovery ??
+    leadingDiscoveryCandidate?.discovery ??
+    null;
+  const discoverySupportEvidence = Array.isArray(genericDiscovery?.explanation?.supportingEvidence)
+    ? genericDiscovery.explanation.supportingEvidence
+    : [];
+  const discoveryContradictoryEvidence = Array.isArray(genericDiscovery?.explanation?.contradictoryEvidence)
+    ? genericDiscovery.explanation.contradictoryEvidence
+    : [];
+  const discoveryMissingEvidence = Array.isArray(genericDiscovery?.missingEvidence)
+    ? genericDiscovery.missingEvidence
+    : [];
+  const discoveryInvalidationConditions = Array.isArray(genericDiscovery?.invalidationConditions)
+    ? genericDiscovery.invalidationConditions
+    : [];
+  const discoveryMemory = genericDiscovery?.memory ?? null;
+  const discoveryLifecycle = genericDiscovery?.lifecycle ?? null;
+  const agencySummary = agencyDiagnostics?.summary ?? {};
+  const agencyState = agencyDiagnostics?.state ?? {};
+  const agencySelfDiagnosis = agencyState.selfDiagnosis ?? {};
+  const agencyAudits = Array.isArray(agencyDiagnostics?.signalAudits)
+    ? agencyDiagnostics.signalAudits
+    : strategySignals.map((signal) => signal?.agency).filter(Boolean);
+  const agencyRecommendation = String(
+    agencySummary.recommendation ??
+      agencyState.selfDiagnosis?.recommendation ??
+      "wait",
+  );
+  const agencyTrustPct = clamp(
+    (finiteNumber(agencySummary.averageTrust) ??
+      finiteNumber(agencySelfDiagnosis.trust) ??
+      0) * 100,
+  );
+  const agencyTrustAdjustmentPct = finiteNumber(agencySummary.trustAdjustment) == null
+    ? null
+    : clamp(Number(agencySummary.trustAdjustment) * 100);
+  const agencyTraceCount = numeric(agencySummary.traceCount ?? agencyState.traceCount ?? agencyAudits.length);
+  const agencyAllowedActions = numeric(
+    agencySummary.allowedActions ??
+      agencyAudits.filter((audit: any) => audit?.allowed === true).length,
+  );
+  const agencyBlockedActions = numeric(agencySummary.blockedActions);
+  const agencyMissingOutcomes = numeric(agencySummary.missingOutcomes);
+  const agencyDataReliabilityPct = finiteNumber(agencySelfDiagnosis.dataReliability);
+  const agencySelfDiagnosisCalibrationHealthPct = finiteNumber(agencySelfDiagnosis.calibrationHealth);
+  const agencyOverfitRiskPct = finiteNumber(agencySelfDiagnosis.overfitRisk);
+  const agencyReasons = Array.isArray(agencySelfDiagnosis.reasons) ? agencySelfDiagnosis.reasons : undefined;
+  const hasAgencyDiagnostics =
+    Boolean(agencyDiagnostics) ||
+    agencyAudits.length > 0 ||
+    finiteNumber(agencySummary.averageTrust) != null ||
+    finiteNumber(agencySelfDiagnosis.trust) != null;
+  const strategyReadiness = backtestSummary?.strategyReadiness ?? {};
+  const trustGovernor: TrustGovernorDiagnostic | null =
+    backtestSummary?.trustGovernor ??
+    strategyReadiness?.trustGovernor ??
+    null;
+  const readinessRemediation: ReadinessRemediationDiagnostic | null =
+    backtestSummary?.readinessRemediation ??
+    backtestSummary?.remediationPlan ??
+    strategyReadiness?.readinessRemediation ??
+    null;
+  const trustGovernorBlocks =
+    Boolean(trustGovernor) &&
+    trustGovernor?.allowsNewExposure === false &&
+    Array.isArray(trustGovernor?.blockedActions) &&
+    trustGovernor.blockedActions.includes("new_exposure");
+  const trustGovernorPrimaryReason =
+    trustGovernor?.blockers?.[0]?.reason ??
+    trustGovernor?.reasons?.[0] ??
+    "";
+  const strategyFailureFlags = Array.isArray(backtestSummary?.failureFlags)
+    ? backtestSummary.failureFlags
+    : [];
+  const strategyReadinessBlocked =
+    backtestSummary?.promotionBlocked === true ||
+    strategyFailureFlags.length > 0 ||
+    backtestSummary?.automaticFailureDetected === true ||
+    strategyReadiness?.blocked === true ||
+    backtestSummary?.readinessLabel === "Blocked" ||
+    backtestSummary?.promotionLabel === "Blocked";
+  const strategyMaxPositionPct =
+    finiteNumber(trustGovernor?.maxExposure) ??
+    finiteNumber(backtestSummary?.trustedMaxExposurePct) ??
+    finiteNumber(backtestSummary?.maxPositionPct) ??
+    finiteNumber(strategyReadiness?.maxPositionPct);
+  const strategyConfidenceCap =
+    finiteNumber(backtestSummary?.modelConfidence) ??
+    finiteNumber(strategyReadiness?.maxConfidence) ??
+    finiteNumber(backtestSummary?.promotionConfidence);
+  const calibrationDiagnostics =
+    strategyReadiness?.calibration ??
+    backtestSummary?.calibration ??
+    null;
+  const rawConfidenceDisplay =
+    finiteNumber(backtestSummary?.rawConfidence) ??
+    finiteNumber(strategyReadiness?.rawConfidence) ??
+    finiteNumber(calibrationDiagnostics?.rawConfidence) ??
+    strategyConfidenceCap;
+  const calibratedConfidenceDisplay =
+    finiteNumber(backtestSummary?.calibratedConfidence) ??
+    finiteNumber(strategyReadiness?.calibratedConfidence) ??
+    finiteNumber(calibrationDiagnostics?.calibratedConfidence) ??
+    strategyConfidenceCap;
+  const calibrationTrustworthinessDisplay =
+    finiteNumber(backtestSummary?.trustworthiness) ??
+    finiteNumber(strategyReadiness?.trustworthiness) ??
+    finiteNumber(calibrationDiagnostics?.trustworthiness);
+  const calibrationWarnings = Array.isArray(backtestSummary?.calibrationWarnings)
+    ? backtestSummary.calibrationWarnings
+    : Array.isArray(calibrationDiagnostics?.warnings)
+      ? calibrationDiagnostics.warnings
+      : [];
+  const calibrationSampleSize = numeric(calibrationDiagnostics?.sampleSize ?? 0);
+  const rawCalibrationStatus = String(
+    backtestSummary?.calibrationStatus ??
+      calibrationDiagnostics?.status ??
+      (calibrationSampleSize > 0 ? "tracked" : "insufficient-history"),
+  );
+  const calibrationStatus =
+    rawCalibrationStatus === "trusted" && calibrationWarnings.includes("unstable outcomes")
+      ? "unstable-outcomes"
+      : rawCalibrationStatus;
+  const calibrationTone =
+    calibrationStatus === "trusted" || calibrationStatus === "tracked"
+      ? "good"
+      : calibrationStatus === "poor-calibration"
+        ? "bad"
+        : "warn";
+  const calibrationExplanation = calibrationWarnings.includes("unstable outcomes")
+    ? "Calibration has enough history, but outcomes are unstable. Keep this review-gated until outcomes become more consistent."
+    : String(
+        backtestSummary?.calibrationExplanation ??
+          calibrationDiagnostics?.explanation ??
+          (calibrationSampleSize > 0
+            ? "Calibration checks whether past confidence matched actual outcomes."
+            : "Calibration history is still insufficient."),
+      );
+  const calibrationStatusLabel = calibrationStatus.replace(/-/g, " ");
+  const calibrationConfidenceDrop =
+    rawConfidenceDisplay != null && calibratedConfidenceDisplay != null
+      ? rawConfidenceDisplay - calibratedConfidenceDisplay
+      : 0;
+  const topCalibrationMessage =
+    calibrationSampleSize <= 0
+      ? "Calibration history is still insufficient."
+      : calibrationWarnings.includes("unstable outcomes")
+      ? `Calibration has ${calibrationSampleSize} samples, but outcomes are unstable. The system should stay review-gated until similar signals become more consistent.`
+      : strategyReadinessBlocked
+        ? `Calibration has ${calibrationSampleSize} samples, but strategy readiness gates still block exposure. Calibrated confidence is ${calibratedConfidenceDisplay == null ? "not available" : fmtPlainPct(calibratedConfidenceDisplay, 0)}.`
+        : calibrationConfidenceDrop >= 5
+          ? `Raw confidence is ${fmtPlainPct(rawConfidenceDisplay, 0)}; calibrated confidence is ${fmtPlainPct(calibratedConfidenceDisplay, 0)}. The system is cautious because similar past signals have not yet proven reliable enough.`
+          : `Calibration checks whether past confidence matched actual outcomes across ${calibrationSampleSize} samples.`;
+  const calibrationRequiresReview = [
+    "insufficient-history",
+    "poor-calibration",
+    "unstable-outcomes",
+  ].includes(calibrationStatus);
+  const strategyCapacityBlocked = strategyMaxPositionPct === 0;
+  const commitmentBlocked =
+    strategyReadinessBlocked ||
+    strategyCapacityBlocked ||
+    calibrationRequiresReview ||
+    trustGovernorBlocks;
+  const commitmentBlockReason = trustGovernorBlocks && trustGovernorPrimaryReason
+      ? trustGovernorPrimaryReason
+    : strategyReadinessBlocked
+      ? "Strategy readiness gates block new exposure."
+    : calibrationRequiresReview
+      ? "Calibration gates block new exposure until outcomes stabilize."
+      : strategyCapacityBlocked
+        ? "Sizing gates block new exposure until commitment capacity reopens."
+        : "";
+  const commitmentBlockLabel = trustGovernorBlocks && trustGovernorPrimaryReason
+    ? "Signal Trust Governor"
+    : calibrationRequiresReview && !strategyReadinessBlocked
+    ? "Calibration"
+    : "Strategy readiness";
+  const reviewIdeasMessage =
+    commitmentBlockReason
+      ? `${commitmentBlockReason} Showing the strongest review candidates instead of buy orders.`
+      : "Showing the strongest review candidates instead of buy orders.";
+  const needDiagnostics = resolveDashboardNeedDiagnostics({
+    rawNeeds: rawNeedDiagnostics,
+    strategyReadinessBlocked,
+    strategyMaxPositionPct,
+    calibrationStatus,
+    calibrationTrustworthiness: calibrationTrustworthinessDisplay,
+    calibratedConfidence: calibratedConfidenceDisplay,
+    rawConfidence: rawConfidenceDisplay,
+  });
+  const agencyCalibrationHealthPct =
+    calibrationTrustworthinessDisplay != null
+      ? calibrationTrustworthinessDisplay / 100
+      : agencySelfDiagnosisCalibrationHealthPct;
+  const agencyLevel = useMemo(
+    () =>
+      hasAgencyDiagnostics
+        ? {
+            recommendation: agencyRecommendation,
+            trustPct: agencyTrustPct,
+            traceCount: agencyTraceCount,
+            allowedActions: agencyAllowedActions,
+            blockedActions: agencyBlockedActions,
+            missingOutcomes: agencyMissingOutcomes,
+            dataReliabilityPct: agencyDataReliabilityPct,
+            calibrationHealthPct: agencyCalibrationHealthPct,
+            overfitRiskPct: agencyOverfitRiskPct,
+            reasons: agencyReasons,
+          }
+        : null,
+    [
+      hasAgencyDiagnostics,
+      agencyRecommendation,
+      agencyTrustPct,
+      agencyTraceCount,
+      agencyAllowedActions,
+      agencyBlockedActions,
+      agencyMissingOutcomes,
+      agencyDataReliabilityPct,
+      agencyCalibrationHealthPct,
+      agencyOverfitRiskPct,
+      agencyReasons,
+    ],
+  );
+  const confidence = Math.min(
+    capReliabilityConfidence(clamp(avgQuality * 0.75 + (100 - avgRisk) * 0.25), marketReliability) ?? 0,
+    strategyConfidenceCap ?? 100,
+  );
   const inferredRegime =
     avgRisk != null && avgRisk > 72
       ? "Capital Preservation Phase"
@@ -1695,6 +3065,64 @@ export default function Dashboard() {
         : targetExposure < 35
           ? "Maintain selective exposure only"
           : "Increase exposure gradually";
+  const marketHealthPct = clamp(avgQuality * 0.55 + (100 - avgRisk) * 0.45);
+  const dashboardSizing = buildDashboardExposureSizing({
+    marketRef: marketFilter || "market",
+    marketHealthPct,
+    opportunityDensityPct: adaptiveOpportunityDensityPct,
+    confidencePct: confidence ?? 0,
+    riskPct: avgRisk ?? 100,
+    requestedExposurePct: targetExposure,
+    strategyCapPct: 65,
+    hasMarketData,
+    hasProvidedSignals,
+    strategyBlocked: commitmentBlocked,
+    strategyBlockedLabel: commitmentBlockLabel,
+    strategyBlockedReason: commitmentBlockReason || undefined,
+  });
+  const opportunityParticipationPct = hasProvidedSignals ? adaptiveOpportunityDensityPct : 0;
+  const semanticMetrics = useMemo(
+    () =>
+      buildDashboardSemanticMetrics({
+        marketHealthPct,
+        opportunityDensityPct: adaptiveOpportunityDensityPct,
+        confidencePct: confidence ?? 0,
+        riskPct: avgRisk ?? 100,
+        avgQualityPct: avgQuality ?? 0,
+        suggestedMaximumExposurePct: dashboardSizing.suggestedMaximumExposurePct,
+        strategyCapPct: 65,
+        sizingMode: dashboardSizing.sizingMode,
+      }),
+    [
+      marketHealthPct,
+      adaptiveOpportunityDensityPct,
+      confidence,
+      avgRisk,
+      avgQuality,
+      dashboardSizing.suggestedMaximumExposurePct,
+      dashboardSizing.sizingMode,
+    ],
+  );
+  const sizingModeMetricValue = hasProvidedSignals
+    ? displaySizingMode(dashboardSizing.sizingMode)
+    : "—";
+  const sizingModeMetricSub = hasProvidedSignals && dashboardSizing.sizingMode !== "none"
+    ? dashboardSizing.sizingMode === "micro"
+      ? "reduced-size cap"
+      : semanticMetrics.sizing.word.toLowerCase()
+    : undefined;
+  const maximumExposureMetricValue = hasProvidedSignals
+    ? dashboardSizing.suggestedMaximumExposurePct <= 0
+      ? "None"
+      : fmtPlainPct(dashboardSizing.suggestedMaximumExposurePct)
+    : "—";
+  const maximumExposureMetricSub = hasProvidedSignals && dashboardSizing.suggestedMaximumExposurePct > 0
+    ? maximumExposureSubLabel({
+      sizingMode: dashboardSizing.sizingMode,
+      suggestedMaximumExposurePct: dashboardSizing.suggestedMaximumExposurePct,
+      semanticWord: semanticMetrics.maximumExposure.word,
+    })
+    : undefined;
 
   const allocationContext = useMemo(
     () => ({
@@ -1703,17 +3131,30 @@ export default function Dashboard() {
       breadth,
       targetExposure,
       marketStatus,
+      defensiveReliability: shouldUseDefensiveReliabilityPosture(marketReliability),
+      strategyBlocked: commitmentBlocked,
+      strategyMaxPositionPct,
     }),
-    [regime, avgRisk, breadth, targetExposure, marketStatus],
+    [regime, avgRisk, breadth, targetExposure, marketStatus, marketReliability, commitmentBlocked, strategyMaxPositionPct],
   );
 
   const allocationUniverse = useMemo(
     () =>
-      filtered.map((stock) => ({
-        ...stock,
-        allocationAction: ((stock as any).allocationAction ?? deriveAllocationAction(stock, allocationContext)) as TradeSignal,
-      })),
-    [filtered, allocationContext],
+      filtered.map((stock) => {
+        const action = ((stock as any).allocationAction ?? deriveAllocationAction(stock, allocationContext)) as AllocationAction;
+        const normalizedAction =
+          action === "Blocked" &&
+          commitmentBlocked &&
+          !isCommitmentReviewCandidate(stock)
+            ? "Watch"
+            : action;
+
+        return {
+          ...stock,
+          allocationAction: normalizedAction,
+        };
+      }),
+    [filtered, allocationContext, commitmentBlocked],
   );
 
   useEffect(() => {
@@ -1743,12 +3184,16 @@ export default function Dashboard() {
   );
 
   const ledgerGroups = useMemo(
-    () =>
-      (["Buy", "Hold", "Sell"] as TradeSignal[]).map((action) => ({
+    () => {
+      const middleAction: AllocationAction =
+        commitmentBlocked ? "Blocked" : "Watch";
+
+      return (["Buy", middleAction, "Sell"] as AllocationAction[]).map((action) => ({
         action,
         items: allocationUniverse.filter((stock) => stock.allocationAction === action),
-      })),
-    [allocationUniverse],
+      }));
+    },
+    [allocationUniverse, commitmentBlocked],
   );
 
   const topOpportunities = useMemo(
@@ -1756,9 +3201,8 @@ export default function Dashboard() {
       allocationUniverse
         .filter((stock) => {
           return (
-            stock.allocationAction === "Buy" ||
-            numeric(stock.suggestedExposure) > 0 ||
-            stock.setupQuality >= 70
+            stock.allocationAction === "Buy" &&
+            numeric(stock.suggestedExposure) > 0
           );
         })
         .sort((a, b) => {
@@ -1776,19 +3220,142 @@ export default function Dashboard() {
     [allocationUniverse],
   );
 
+  const reviewOpportunities = useMemo(
+    () =>
+      allocationUniverse
+        .filter((stock) => {
+          return (
+            stock.allocationAction === "Blocked" &&
+            stock.riskPressure < 78 &&
+            (
+              stock.signalAction === "Buy" ||
+              numeric(stock.setupQuality) >= 58 ||
+              numeric(stock.discoveryScore) >= 55
+            )
+          );
+        })
+        .sort((a, b) => {
+          return (
+            numeric(b.setupQuality) +
+            numeric(b.discoveryScore) * 0.4 -
+            numeric(b.riskPressure) * 0.35
+          ) - (
+              numeric(a.setupQuality) +
+              numeric(a.discoveryScore) * 0.4 -
+              numeric(a.riskPressure) * 0.35
+            );
+        })
+        .slice(0, 8),
+    [allocationUniverse],
+  );
+
+  const showingBlockedReviewIdeas = topOpportunities.length === 0 && reviewOpportunities.length > 0;
+  const displayedTopOpportunities = topOpportunities.length ? topOpportunities : reviewOpportunities;
+  const selectedAllocationStock = allocationUniverse.find((stock) => normalizedTicker(stock) === selectedTicker);
+  const beliefDiagnostic =
+    selectedAllocationStock?.belief ??
+    displayedTopOpportunities[0]?.belief ??
+    allocationUniverse.find((stock) => stock.belief)?.belief ??
+    null;
+  const beliefSupportEvidence = topBeliefEvidence(beliefDiagnostic, "supportingEvidence");
+  const beliefContradictoryEvidence = topBeliefEvidence(beliefDiagnostic, "contradictoryEvidence");
+  const recognitionDiagnostic: RecognitionDiagnostic | null =
+    selectedAllocationStock?.recognition ??
+    displayedTopOpportunities[0]?.recognition ??
+    allocationUniverse.find((stock) => stock.recognition)?.recognition ??
+    backtestSummary?.recognitionDiagnostics?.primary ??
+    null;
+  const recognitionMissingEvidence = recognitionDiagnostic?.missingEvidence?.length
+    ? recognitionDiagnostic.missingEvidence
+    : [recognitionDiagnostic ? "No recognition evidence gap reported." : "Recognition is waiting for Discovery and Judgement evidence."];
+  const recognitionInvalidationConditions = recognitionDiagnostic?.invalidationConditions?.length
+    ? recognitionDiagnostic.invalidationConditions
+    : [recognitionDiagnostic ? "No recognition invalidation condition reported." : "Recognition invalidation conditions are pending."];
+  const recognitionClearsDiscoveryNovelty = recognitionClearsDiscoveryNoveltyNarrative(recognitionDiagnostic);
+  const displayedDiscoveryInvalidationConditions = reconcileDiscoveryInvalidationConditions(
+    discoveryInvalidationConditions,
+    recognitionDiagnostic,
+  );
+  const discoveryMemoryRecognitionLine = recognitionStateRecurrenceLine(recognitionDiagnostic);
+  const judgementDiagnostic =
+    selectedAllocationStock?.judgement ??
+    displayedTopOpportunities[0]?.judgement ??
+    allocationUniverse.find((stock) => stock.judgement)?.judgement ??
+    null;
+  const judgementReasons = Array.isArray(judgementDiagnostic?.reasons)
+    ? judgementDiagnostic.reasons.slice(0, 3)
+    : [];
+  const survivalMemoryDiagnostic: SurvivalMemoryDiagnostic | null =
+    selectedAllocationStock?.survivalMemory ??
+    selectedAllocationStock?.judgement?.survivalMemory ??
+    displayedTopOpportunities[0]?.survivalMemory ??
+    displayedTopOpportunities[0]?.judgement?.survivalMemory ??
+    allocationUniverse.find((stock) => stock.survivalMemory)?.survivalMemory ??
+    allocationUniverse.find((stock) => stock.judgement?.survivalMemory)?.judgement?.survivalMemory ??
+    backtestSummary?.survivalMemory ??
+    strategyReadiness?.survivalMemory ??
+    null;
+  const survivalWarnings = survivalMemoryDiagnostic?.mainWarnings?.length
+    ? survivalMemoryDiagnostic.mainWarnings
+    : survivalMemoryDiagnostic?.reasons?.length
+      ? survivalMemoryDiagnostic.reasons
+      : [survivalMemoryDiagnostic ? "No survival warnings reported." : "Survival memory is waiting for outcome records with drawdown and stress fields."];
+  const recoveryDiagnostic: RecoveryDiagnostic | null =
+    selectedAllocationStock?.recovery ??
+    displayedTopOpportunities[0]?.recovery ??
+    allocationUniverse.find((stock) => stock.recovery)?.recovery ??
+    backtestSummary?.recovery ??
+    strategyReadiness?.recovery ??
+    null;
+  const recoveryBlockers = recoveryDiagnostic?.blockers?.length
+    ? recoveryDiagnostic.blockers
+    : [recoveryDiagnostic ? "No recovery blockers reported." : "Recovery diagnostics are pending."];
+  const recoveryUnlockConditions = recoveryDiagnostic?.unlockConditions?.length
+    ? recoveryDiagnostic.unlockConditions
+    : [recoveryDiagnostic ? "No recovery unlock conditions reported." : "Recovery unlock conditions are pending."];
+  const displayedRecoveryBlockers = reconcileRecoveryBlockersWithRecognition(
+    recoveryBlockers,
+    recognitionDiagnostic,
+  );
+  const displayedRecoveryUnlockConditions = reconcileRecoveryUnlockConditionsWithRecognition(
+    recoveryUnlockConditions,
+    recognitionDiagnostic,
+  );
+  const resolveDiagnostic =
+    selectedAllocationStock?.resolve ??
+    displayedTopOpportunities[0]?.resolve ??
+    allocationUniverse.find((stock) => stock.resolve)?.resolve ??
+    backtestSummary?.resolveDiagnostics?.primary ??
+    null;
+  const resolveMissingEvidence = resolveDiagnostic?.missingEvidence?.length
+    ? resolveDiagnostic.missingEvidence
+    : [resolveDiagnostic ? "No missing evidence reported." : "Resolve evidence is pending."];
+  const resolveUnlockConditions = resolveDiagnostic?.unlockConditions?.length
+    ? resolveDiagnostic.unlockConditions
+    : [resolveDiagnostic ? "No unlock conditions reported." : "Resolve unlock conditions are pending."];
+  const displayedResolveUnlockConditions = reconcileResolveUnlockConditionsWithRecognition({
+    conditions: resolveUnlockConditions,
+    missingEvidence: resolveMissingEvidence,
+    recognition: recognitionDiagnostic,
+  });
+  const resolveInvalidationConditions = resolveDiagnostic?.invalidationConditions?.length
+    ? resolveDiagnostic.invalidationConditions
+    : [resolveDiagnostic ? "No invalidation conditions reported." : "Resolve invalidation conditions are pending."];
+
 
   useEffect(() => {
     if (!marketFilter || !ENABLE_PORTFOLIO_API) return;
 
     let cancelled = false;
+    const market = marketFilter;
 
     async function loadPortfolio() {
       setPortfolioRefreshing(true);
 
       try {
         const [summaryResponse, historyResponse] = await Promise.all([
-          fetch(`/api/portfolio?action=summary&market=${encodeURIComponent(marketFilter)}`),
-          fetch(`/api/portfolio?action=history&market=${encodeURIComponent(marketFilter)}`),
+          fetch(`/api/portfolio?action=summary&market=${encodeURIComponent(market)}`),
+          fetch(`/api/portfolio?action=history&market=${encodeURIComponent(market)}`),
         ]);
 
         const summary = await asJsonOrNull(summaryResponse);
@@ -1796,9 +3363,8 @@ export default function Dashboard() {
 
         if (cancelled) return;
 
-        setPortfolioSummary(normalizeStrategySummary(summary));
-        setPersistentPortfolioHistory(
-          Array.isArray(history?.data)
+        const nextPortfolioSummary = normalizeStrategySummary(summary);
+        const nextPortfolioHistory = Array.isArray(history?.data)
             ? history.data.map((point: any, index: number) => ({
               index,
               ...point,
@@ -1807,8 +3373,12 @@ export default function Dashboard() {
               deployedPct: Number(point.deployedPct ?? point.deployed_pct),
               cashPct: Number(point.cashPct ?? point.cash_pct),
             }))
-            : normalizeStrategyArray(history),
-        );
+            : normalizeStrategyArray(history);
+
+        applyMarketDataPatch(market, {
+          portfolioSummary: nextPortfolioSummary,
+          persistentPortfolioHistory: nextPortfolioHistory,
+        });
       } catch (error) {
         console.warn("Keeping previous portfolio state after refresh failure", error);
       } finally {
@@ -1834,15 +3404,16 @@ export default function Dashboard() {
     if (!marketFilter || !ENABLE_STRATEGY_API) return;
 
     let cancelled = false;
+    const market = marketFilter;
 
     async function loadBacktest() {
       setPortfolioRefreshing(true);
 
       try {
         const [summaryResponse, historyResponse, tradesResponse] = await Promise.all([
-          fetch(`/api/strategy?action=walk-forward-summary&market=${encodeURIComponent(marketFilter)}`),
-          fetch(`/api/strategy?action=walk-forward-history&market=${encodeURIComponent(marketFilter)}`),
-          fetch(`/api/strategy?action=walk-forward-trades&market=${encodeURIComponent(marketFilter)}&limit=5000`),
+          fetch(`/api/strategy?action=walk-forward-summary&market=${encodeURIComponent(market)}`),
+          fetch(`/api/strategy?action=walk-forward-history&market=${encodeURIComponent(market)}`),
+          fetch(`/api/strategy?action=walk-forward-trades&market=${encodeURIComponent(market)}&limit=5000`),
         ]);
 
         const summary = await asJsonOrNull(summaryResponse);
@@ -1851,10 +3422,8 @@ export default function Dashboard() {
 
         if (cancelled) return;
 
-        setBacktestSummary(normalizeStrategySummary(summary));
-
-        setBacktestHistory(
-          Array.isArray(history?.data)
+        const nextBacktestSummary = normalizeStrategySummary(summary);
+        const nextBacktestHistory = Array.isArray(history?.data)
             ? history.data.map((point: any, index: number) => ({
               index,
               ...point,
@@ -1864,14 +3433,17 @@ export default function Dashboard() {
               cashPct: Number(point.cashPct ?? point.cash_pct),
               positionsCount: Number(point.positionsCount ?? point.positions_count ?? 0),
             }))
-            : normalizeStrategyArray(history),
-        );
+            : normalizeStrategyArray(history);
 
-        setWalkForwardTrades(
-          Array.isArray(trades?.trades)
+        const nextWalkForwardTrades = Array.isArray(trades?.trades)
             ? trades.trades
-            : normalizeStrategyArray(trades),
-        );
+            : normalizeStrategyArray(trades);
+
+        applyMarketDataPatch(market, {
+          backtestSummary: nextBacktestSummary,
+          backtestHistory: nextBacktestHistory,
+          walkForwardTrades: nextWalkForwardTrades,
+        });
       } catch (error) {
         console.warn("Keeping previous backtest state after refresh failure", error);
       } finally {
@@ -2132,12 +3704,20 @@ export default function Dashboard() {
   const displayedBacktestSharpe =
     commissionBps > 0 || (frontendSlippageBps ?? 0) > 0
       ? commissionAdjustedBacktestMetrics.annualizedSharpe
-      : backtestSummary?.annualizedSharpe ?? backtestSummary?.annualized_sharpe ?? null;
+      : backtestSummary?.annualizedSharpe ??
+        backtestSummary?.annualized_sharpe ??
+        backtestSummary?.rawAnnualizedSharpe ??
+        backtestSummary?.raw_annualized_sharpe ??
+        null;
 
   const displayedBacktestMaxDrawdownPct =
     commissionBps > 0 || (frontendSlippageBps ?? 0) > 0
       ? commissionAdjustedBacktestMetrics.maxDrawdownPct
-      : backtestSummary?.maxDrawdownPct ?? backtestSummary?.max_drawdown_pct ?? null;
+      : backtestSummary?.maxDrawdownPct ??
+        backtestSummary?.max_drawdown_pct ??
+        backtestSummary?.rawMaxDrawdownPct ??
+        backtestSummary?.raw_max_drawdown_pct ??
+        null;
 
   const displayedBacktestProfitFactor =
     commissionBps > 0 || (frontendSlippageBps ?? 0) > 0
@@ -2161,41 +3741,20 @@ export default function Dashboard() {
   const hasBacktestMetrics =
     hasBacktestData && displayedBacktestReturnPct !== null;
 
-  const resolvedWalkForwardHistory =
-    typeof strategyHistory !== "undefined"
-      ? strategyHistory
-      : typeof backtestHistory !== "undefined"
-        ? backtestHistory
-        : typeof portfolioHistory !== "undefined"
-          ? portfolioHistory
-          : [];
-
-  const resolvedWalkForwardTrades =
-    typeof strategyTrades !== "undefined"
-      ? strategyTrades
-      : typeof backtestTrades !== "undefined"
-        ? backtestTrades
-        : [];
-
-  const resolvedWalkForwardSummary =
-    typeof strategySummary !== "undefined"
-      ? strategySummary
-      : typeof backtestSummary !== "undefined"
-        ? backtestSummary
-        : null;
+  const resolvedWalkForwardHistory = backtestHistory.length ? backtestHistory : portfolioHistory;
+  const resolvedWalkForwardTrades = walkForwardTrades;
+  const resolvedWalkForwardSummary = backtestSummary;
 
   const hasBacktestCurve =
     resolvedWalkForwardHistory.length > 0 ||
     resolvedWalkForwardTrades.length > 0 ||
     Number(resolvedWalkForwardSummary?.tradeCount ?? 0) > 0;
 
-  const backtestTradeCount = extractTradeCount(backtestSummary, walkForwardTrades);
-  const backtestSegmentCount = extractSegmentCount(backtestSummary);
-  const benchmarkPass = extractBenchmarkPass(backtestSummary);
-  const regimeConsistencyPct = extractRegimeConsistency(backtestSummary, regime, walkForwardTrades);
-
-  const lastSyncAgeMs = lastSyncedAt ? Date.now() - lastSyncedAt : null;
-  const staleData = lastSyncAgeMs == null ? false : lastSyncAgeMs > REFRESH_INTERVAL_MS * 3;
+	  const backtestTradeCount = extractTradeCount(backtestSummary, walkForwardTrades);
+	  const backtestSegmentCount = extractSegmentCount(backtestSummary);
+	  const benchmarkPass = extractBenchmarkPass(backtestSummary);
+	  const regimeConsistencyPct = extractRegimeConsistency(backtestSummary, regime, walkForwardTrades);
+	  const backtestAverageHoldingDays = extractAverageHoldingDays(backtestSummary, walkForwardTrades);
 
   const backendFailureFlags = Array.isArray(backtestSummary?.failureFlags)
     ? backtestSummary.failureFlags
@@ -2203,7 +3762,7 @@ export default function Dashboard() {
 
   const localFailureFlags = [
     !hasMarketData ? "Market data unavailable" : null,
-    hasMarketData && !hasProvidedSignals ? "No confirmed live/forward signals" : null,
+    hasMarketData && !hasConfirmedForwardSignals ? "No confirmed live/forward signals" : null,
     hasBacktestData && displayedBacktestMaxDrawdownPct != null && Number(displayedBacktestMaxDrawdownPct) > 25
       ? "Past loss level was above 25%"
       : null,
@@ -2235,23 +3794,165 @@ export default function Dashboard() {
   }
 
   const failureFlags = Array.from(new Set(derivedFrontendFailureFlags));
+  const robustnessDiagnostics = backtestSummary?.robustnessDiagnostics ?? {};
+  const robustnessScore = finiteNumber(backtestSummary?.robustnessScore ?? robustnessDiagnostics?.robustnessScore);
+  const robustnessOverfitRisk = finiteNumber(backtestSummary?.overfitRiskScore ?? robustnessDiagnostics?.overfitRisk);
+  const deploymentReadinessScore = finiteNumber(backtestSummary?.deploymentReadinessScore ?? robustnessDiagnostics?.deploymentReadiness);
+  const backendRobustnessComponent = strategyReadiness?.components?.robustness;
+  const backendRobustnessPassed =
+    typeof backendRobustnessComponent?.passed === "boolean"
+      ? backendRobustnessComponent.passed
+      : null;
+  const backendRobustnessScore = finiteNumber(backendRobustnessComponent?.score);
+  const robustnessSafetyGate = String(robustnessDiagnostics?.safetyGate ?? "").toLowerCase();
+  const hasRobustnessDiagnostics =
+    Boolean(backendRobustnessComponent) ||
+    robustnessScore != null ||
+    robustnessOverfitRisk != null ||
+    deploymentReadinessScore != null ||
+    Boolean(robustnessSafetyGate);
+  const robustnessPassed =
+    backendRobustnessPassed ??
+    (!hasRobustnessDiagnostics
+      ? true
+      : (robustnessOverfitRisk == null || robustnessOverfitRisk <= 30) &&
+        (deploymentReadinessScore == null || deploymentReadinessScore >= 60) &&
+        robustnessSafetyGate !== "block");
+  const robustnessFailureReason =
+    Array.isArray(backendRobustnessComponent?.reasons) && backendRobustnessComponent.reasons.length
+      ? String(backendRobustnessComponent.reasons[0])
+      : "The strategy should stay live-test blocked when robustness or overfit checks are unstable.";
+  const robustnessReason = robustnessPassed
+    ? robustnessOverfitRisk != null
+      ? `Robustness is inside the execution threshold; overfit risk is ${fmtPlainPct(robustnessOverfitRisk, 0)}.`
+      : "Robustness and overfit checks are inside the execution thresholds."
+    : robustnessFailureReason;
+  const robustnessValue =
+    robustnessOverfitRisk != null
+      ? `Overfit ${fmtPlainPct(robustnessOverfitRisk, 0)}`
+      : deploymentReadinessScore != null
+        ? `Readiness ${fmtPlainPct(deploymentReadinessScore, 0)}`
+        : backendRobustnessScore != null
+          ? `${Math.round(backendRobustnessScore)}/100`
+          : "Healthy";
+  const backendStrategyEdgeComponent = strategyReadiness?.components?.strategyEdge;
+  const backendStrategyEdgePassed =
+    typeof backendStrategyEdgeComponent?.passed === "boolean"
+      ? backendStrategyEdgeComponent.passed
+      : null;
+  const strategyEdgePassed =
+    backendStrategyEdgePassed ??
+    (
+      displayedBacktestSharpe != null &&
+      Number(displayedBacktestSharpe) >= 1 &&
+      hasBacktestMetrics &&
+      Number(displayedBacktestReturnPct) > 0 &&
+      backtestTradeCount >= 30
+    );
+  const strategyEdgeReason =
+    Array.isArray(backendStrategyEdgeComponent?.reasons) && backendStrategyEdgeComponent.reasons.length
+      ? String(backendStrategyEdgeComponent.reasons[0])
+      : "Risk-adjusted return should clear the production threshold before new exposure is allowed.";
+  const backendWalkForwardComponent = strategyReadiness?.components?.walkForwardRobustness;
+  const backendWalkForwardPassed =
+    typeof backendWalkForwardComponent?.passed === "boolean"
+      ? backendWalkForwardComponent.passed
+      : null;
+  const walkForwardPassed =
+    backendWalkForwardPassed ??
+    (
+      hasBacktestCurve &&
+      (backtestSegmentCount == null || backtestSegmentCount >= 3)
+    );
+  const walkForwardReason =
+    Array.isArray(backendWalkForwardComponent?.reasons) && backendWalkForwardComponent.reasons.length
+      ? String(backendWalkForwardComponent.reasons[0])
+      : "The strategy should hold up across independent test periods, not only one snapshot.";
+  const walkForwardValue =
+    strategyReadiness?.walkForward?.segmentCount != null
+      ? `${strategyReadiness.walkForward.positiveSegmentCount ?? 0}/${strategyReadiness.walkForward.segmentCount} positive periods`
+      : hasBacktestCurve
+        ? "Available"
+        : "Missing";
+  const backendParameterComponent = strategyReadiness?.components?.parameterRobustness;
+  const backendParameterPassed =
+    typeof backendParameterComponent?.passed === "boolean"
+      ? backendParameterComponent.passed
+      : null;
+  const parameterStability = strategyReadiness?.parameterStability ?? backtestSummary?.parameterRobustness ?? {};
+  const parameterVariantCount = numeric(parameterStability?.variantCount ?? parameterStability?.variants?.length);
+  const parameterPassRate = finiteNumber(parameterStability?.passRate);
+  const parameterPassed =
+    backendParameterPassed ??
+    (
+      parameterStability?.stable === true &&
+      parameterVariantCount > 0 &&
+      (parameterPassRate == null || parameterPassRate >= 60)
+    );
+  const parameterReason =
+    Array.isArray(backendParameterComponent?.reasons) && backendParameterComponent.reasons.length
+      ? String(backendParameterComponent.reasons[0])
+      : "Nearby parameter variants should preserve the edge before live exposure is trusted.";
+  const parameterValue =
+    parameterVariantCount > 0
+      ? `${parameterVariantCount} variants${parameterPassRate == null ? "" : `, ${fmtPlainPct(parameterPassRate, 0)} pass`}`
+      : "Not evaluated";
+  const backendConcentrationComponent = strategyReadiness?.components?.concentrationControl;
+  const backendConcentrationPassed =
+    typeof backendConcentrationComponent?.passed === "boolean"
+      ? backendConcentrationComponent.passed
+      : null;
+  const concentrationRisk = strategyReadiness?.concentration ?? backtestSummary?.concentrationRisk ?? {};
+  const top1TradeContributionPct = finiteNumber(concentrationRisk?.top1TradeContributionPct);
+  const top5TradeContributionPct = finiteNumber(concentrationRisk?.top5TradeContributionPct);
+  const concentrationPassed = backendConcentrationPassed ?? true;
+  const concentrationReason =
+    Array.isArray(backendConcentrationComponent?.reasons) && backendConcentrationComponent.reasons.length
+      ? String(backendConcentrationComponent.reasons[0])
+      : "Returns should not depend too heavily on a few winning trades or one test period.";
+  const concentrationValue =
+    top1TradeContributionPct != null
+      ? `Top trade ${fmtPlainPct(top1TradeContributionPct, 0)}`
+      : top5TradeContributionPct != null
+        ? `Top 5 ${fmtPlainPct(top5TradeContributionPct, 0)}`
+        : "Distributed";
+  const backendRiskControlComponent = strategyReadiness?.components?.riskControl;
+  const backendRiskControlPassed =
+    typeof backendRiskControlComponent?.passed === "boolean"
+      ? backendRiskControlComponent.passed
+      : null;
+  const displayedBacktestDrawdownNumber = finiteNumber(displayedBacktestMaxDrawdownPct);
+  const lossControlPassed =
+    backendRiskControlPassed ??
+    (displayedBacktestDrawdownNumber != null && displayedBacktestDrawdownNumber <= 25);
+  const lossControlSeverity: ConfidenceGate["severity"] = lossControlPassed
+    ? displayedBacktestDrawdownNumber != null && displayedBacktestDrawdownNumber > 18
+      ? "warn"
+      : "good"
+    : "bad";
+  const lossControlReason =
+    Array.isArray(backendRiskControlComponent?.reasons) && backendRiskControlComponent.reasons.length
+      ? String(backendRiskControlComponent.reasons[0])
+      : "Large past losses make the strategy harder to trust.";
 
   const baseConfidenceGates: ConfidenceGate[] = [
     {
       key: "walkForward",
-      label: "Tested over time",
-      passed: hasBacktestCurve,
-      value: hasBacktestCurve ? "Available" : "Missing",
-      reason: "The strategy should be tested across different time periods, not just one snapshot.",
-      severity: hasBacktestCurve ? "good" : "bad",
+      label: "Walk-forward stability",
+      passed: walkForwardPassed,
+      value: walkForwardValue,
+      reason: walkForwardReason,
+      severity: walkForwardPassed ? "good" : "warn",
     },
     {
       key: "sameEngine",
       label: "Live signal match",
-      passed: hasProvidedSignals,
-      value: hasProvidedSignals ? `${strategySignals.length} signals` : "No confirmed signals",
+      passed: hasConfirmedForwardSignals,
+      value: hasConfirmedForwardSignals
+        ? `${Math.max(confirmedStrategySignalCount, forwardShadowConfirmedCount)} live, ${forwardShadowObservedCount} shadow, ${forwardShadowEvaluatedCount}/${forwardShadowRequiredCount || "?"} eval`
+        : "No confirmed signals",
       reason: "Current signals should come from the same strategy that was tested in the past.",
-      severity: hasProvidedSignals ? "good" : "bad",
+      severity: hasConfirmedForwardSignals ? "good" : "bad",
     },
     {
       key: "positiveReturn",
@@ -2263,19 +3964,19 @@ export default function Dashboard() {
     },
     {
       key: "riskAdjusted",
-      label: "Return for the risk",
-      passed: displayedBacktestSharpe != null && Number(displayedBacktestSharpe) >= 0.75,
+      label: "Strategy edge",
+      passed: strategyEdgePassed,
       value: displayedBacktestSharpe == null ? "—" : Number(displayedBacktestSharpe).toFixed(2),
-      reason: "The return should be strong enough for the amount of volatility.",
-      severity: displayedBacktestSharpe != null && Number(displayedBacktestSharpe) >= 0.75 ? "good" : "warn",
+      reason: strategyEdgeReason,
+      severity: strategyEdgePassed ? "good" : "warn",
     },
     {
       key: "drawdown",
       label: "Loss control",
-      passed: displayedBacktestMaxDrawdownPct != null && Number(displayedBacktestMaxDrawdownPct) <= 18,
+      passed: lossControlPassed,
       value: fmtPlainPct(displayedBacktestMaxDrawdownPct),
-      reason: "Large past losses make the strategy harder to trust.",
-      severity: displayedBacktestMaxDrawdownPct != null && Number(displayedBacktestMaxDrawdownPct) <= 18 ? "good" : "bad",
+      reason: lossControlReason,
+      severity: lossControlSeverity,
     },
     {
       key: "profitFactor",
@@ -2320,6 +4021,30 @@ export default function Dashboard() {
       severity: regimeConsistencyPct == null ? "neutral" : regimeConsistencyPct >= 50 ? "good" : "warn",
     },
     {
+      key: "parameterRobustness",
+      label: "Parameter robustness",
+      passed: parameterPassed,
+      value: parameterValue,
+      reason: parameterReason,
+      severity: parameterPassed ? "good" : "warn",
+    },
+    {
+      key: "concentration",
+      label: "Return concentration",
+      passed: concentrationPassed,
+      value: concentrationValue,
+      reason: concentrationReason,
+      severity: concentrationPassed ? "good" : "warn",
+    },
+    {
+      key: "robustness",
+      label: "Robustness risk",
+      passed: robustnessPassed,
+      value: robustnessValue,
+      reason: robustnessReason,
+      severity: robustnessPassed ? "good" : "bad",
+    },
+    {
       key: "dataFreshness",
       label: "Data freshness",
       passed: !staleData,
@@ -2335,11 +4060,12 @@ export default function Dashboard() {
     if (!marketFilter) return;
 
     let cancelled = false;
+    const market = marketFilter;
 
     async function loadStockVisualMap() {
       try {
         const response = await fetch(
-          `/api/stocks/list?market=${encodeURIComponent(marketFilter)}&offset=0&limit=1000`,
+          `/api/stocks/list?market=${encodeURIComponent(market)}&offset=0&limit=1000`,
         );
 
         const payload = await response.json();
@@ -2378,7 +4104,7 @@ export default function Dashboard() {
         }
 
         if (!cancelled) {
-          console.log("[stock visual map]", marketFilter, {
+          console.log("[stock visual map]", market, {
             rows: rows.length,
             withVisual: Array.from(map.values()).filter((item) => Boolean(item.visual)).length,
             sample: rows.slice(0, 3).map((row) => ({
@@ -2388,12 +4114,12 @@ export default function Dashboard() {
             })),
           });
 
-          setStockVisualMap(map);
+          applyMarketDataPatch(market, { stockVisualMap: map });
         }
       } catch (error) {
         console.warn("[stock visual map] failed", error);
         if (!cancelled) {
-          setStockVisualMap(new Map());
+          applyMarketDataPatch(market, { stockVisualMap: new Map() });
         }
       }
     }
@@ -2482,6 +4208,12 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
   );
 
 
+  const hasBackendReadinessTruth =
+    Boolean(backtestSummary?.strategyReadiness) ||
+    finiteNumber(backtestSummary?.readinessScore) != null ||
+    backtestSummary?.readinessStage != null ||
+    backtestSummary?.productionReadinessStatus != null;
+
   const hasBackendPromotionTruth =
     backtestSummary?.promotionBlocked === true ||
     backtestSummary?.automaticFailureDetected === true ||
@@ -2507,29 +4239,210 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
     hasFailureFlags: failureFlags.length > 0 || backendFailureFlags.length > 0,
   });
 
-  const survivalScore = hasBackendPromotionTruth
-    ? Number(backtestSummary?.survivalScore ?? backtestSummary?.promotionConfidence ?? 45)
+  const survivalScore = hasBackendReadinessTruth
+    ? Number(
+        backtestSummary?.survivalScore ??
+          backtestSummary?.promotionConfidence ??
+          strategyReadiness?.maxConfidence ??
+          locallyComputedSurvivalScore,
+      )
     : locallyComputedSurvivalScore;
+  const readinessScoreDisplay = hasBackendReadinessTruth
+    ? finiteNumber(backtestSummary?.strategyReadiness?.readinessScore ?? backtestSummary?.readinessScore) ?? survivalScore
+    : survivalScore;
 
-  const confidenceStage = hasBackendPromotionTruth
-    ? String(backtestSummary?.lifecycleStage ?? "Research validated")
+  const confidenceStage = hasBackendReadinessTruth
+    ? String(backtestSummary?.lifecycleStage ?? strategyReadiness?.stage ?? "Research validated")
     : productionStage(survivalScore, confidenceGates);
 
   const passedGateCount = confidenceGates.filter((gate) => gate.passed).length;
 
-  const lifecycleStageDisplay = hasBackendPromotionTruth
-    ? plainStageLabel("Research validated")
+  const lifecycleStageDisplay = hasBackendReadinessTruth
+    ? plainStageLabel(backtestSummary?.readinessStage ?? backtestSummary?.lifecycleStage ?? strategyReadiness?.stage ?? "Research only")
     : plainStageLabel(backtestSummary?.lifecycleStage ?? confidenceStage);
 
   const promotionStateDisplay = hasBackendPromotionTruth
-    ? plainStageLabel("Promotion blocked")
-    : plainStageLabel(backtestSummary?.promotionState ?? confidenceStage);
+    ? plainStageLabel(
+        backtestSummary?.promotionLabel ??
+        backtestSummary?.readinessLabel ??
+        (backtestSummary?.promotionBlocked ? "Blocked" : backtestSummary?.promotionState ?? confidenceStage),
+      )
+    : hasBackendReadinessTruth
+      ? plainStageLabel(backtestSummary?.promotionLabel ?? backtestSummary?.readinessLabel ?? strategyReadiness?.stage ?? confidenceStage)
+      : plainStageLabel(backtestSummary?.promotionState ?? confidenceStage);
+  const executionGateDisplay = commitmentBlocked ? "Review gated" : "Open";
+  const executionGateDetail = commitmentBlocked ? commitmentBlockLabel : promotionStateDisplay;
 
   const validationPostureDisplay = hasBackendPromotionTruth
     ? "Blocked by checks"
-    : plainStageLabel(backtestSummary?.regime ?? regime);
+    : calibrationRequiresReview
+      ? "Calibration review"
+      : commitmentBlocked
+        ? "Commitment review"
+        : plainStageLabel(backtestSummary?.regime ?? regime);
 
-  const readableFailureFlags = failureFlags.map(formatPromotionBlocker);
+  const readableFailureFlags = summarizePromotionBlockers(failureFlags, backtestSummary);
+  const trustReviewItems = Array.from(new Set([
+    ...readableFailureFlags,
+    calibrationRequiresReview
+      ? calibrationStatus === "unstable-outcomes"
+        ? "Stabilize calibration outcomes; keep review mode until similar closed signals are consistent."
+        : calibrationStatus === "poor-calibration"
+          ? "Improve calibration quality before allowing new exposure."
+          : "Collect enough evaluated outcomes before allowing new exposure."
+      : null,
+    calibrationConfidenceDrop >= 15
+      ? `Reduce raw-vs-calibrated confidence gap (${fmtPlainPct(rawConfidenceDisplay, 0)} raw vs ${fmtPlainPct(calibratedConfidenceDisplay, 0)} calibrated).`
+      : null,
+    calibrationWarnings.includes("overconfidence")
+      ? "Reduce overconfidence warnings by closing outcomes that match predicted confidence."
+      : null,
+    trustGovernorBlocks && trustGovernorPrimaryReason
+      ? `Trust Governor blocks new exposure: ${trustGovernorPrimaryReason}`
+      : null,
+    ...(trustGovernor?.unlockCriteria ?? []).slice(0, 3).map((item) => `Unlock: ${item}`),
+  ].filter(Boolean) as string[])).slice(0, 8);
+
+  const executionProfile = useMemo(
+    () => executionPresetForMarket(marketFilter || ""),
+    [marketFilter],
+  );
+
+  const failureFlagKey = failureFlags.join("|");
+
+  const marketPerceptionMetrics = useMemo(
+    () =>
+      buildMarketPerceptionMetrics({
+        marketStatus,
+        stocks: marketUniverse,
+        avgRisk,
+        avgQuality,
+        breadth,
+        confidence,
+        targetExposure,
+        survivalScore,
+        failureFlags,
+        staleData,
+        hasBacktestData,
+        hasProvidedSignals,
+        backtestTradeCount,
+        backtestSharpe: displayedBacktestSharpe,
+        backtestMaxDrawdownPct: displayedBacktestMaxDrawdownPct,
+        backtestProfitFactor: displayedBacktestProfitFactor,
+        backtestWinRatePct: displayedBacktestWinRate,
+        backtestReturnPct: displayedBacktestReturnPct,
+        robustnessScore,
+        robustnessOverfitRisk,
+        deploymentReadinessScore,
+        calibrationRawConfidence: rawConfidenceDisplay,
+        calibrationCalibratedConfidence: calibratedConfidenceDisplay,
+        calibrationHistoricalAccuracy: calibrationDiagnostics?.historicalAccuracy,
+        calibrationError: calibrationDiagnostics?.calibrationError,
+        calibrationTrustworthiness: calibrationTrustworthinessDisplay,
+        calibrationSampleSize,
+        calibrationStatus,
+        calibrationWarnings,
+        lastSuccessfulSync: lastSyncedAt,
+        expectedAssetCount: marketUniverse.length || totalStocks || 1,
+        exchangeSynchronized: !staleData,
+        partialApiFailures: marketReliability.market.partialApiFailures,
+        fallbackMode: marketReliability.market.fallbackMode,
+        executionProfile,
+      }),
+    [
+      marketStatus,
+      marketUniverse,
+      avgRisk,
+      avgQuality,
+      breadth,
+      confidence,
+      targetExposure,
+      survivalScore,
+      failureFlagKey,
+      staleData,
+      hasBacktestData,
+      hasProvidedSignals,
+      backtestTradeCount,
+      displayedBacktestSharpe,
+      displayedBacktestMaxDrawdownPct,
+      displayedBacktestProfitFactor,
+      displayedBacktestWinRate,
+      displayedBacktestReturnPct,
+      robustnessScore,
+      robustnessOverfitRisk,
+      deploymentReadinessScore,
+      rawConfidenceDisplay,
+      calibratedConfidenceDisplay,
+      calibrationDiagnostics,
+      calibrationTrustworthinessDisplay,
+      calibrationSampleSize,
+      calibrationStatus,
+      calibrationWarnings,
+      lastSyncedAt,
+      totalStocks,
+      marketReliability,
+      executionProfile,
+    ],
+  );
+
+  useEffect(() => {
+    if (!marketFilter || (loading && marketUniverse.length === 0)) return;
+
+    let cancelled = false;
+    const perceptionSource = {
+      marketStatus,
+      stocks: marketUniverse,
+      avgRisk,
+      avgQuality,
+      breadth,
+      confidence,
+      targetExposure,
+      survivalScore,
+      failureFlags,
+      staleData,
+      hasBacktestData,
+      hasProvidedSignals,
+      backtestTradeCount,
+      backtestSharpe: displayedBacktestSharpe,
+      backtestMaxDrawdownPct: displayedBacktestMaxDrawdownPct,
+      backtestProfitFactor: displayedBacktestProfitFactor,
+      backtestWinRatePct: displayedBacktestWinRate,
+      backtestReturnPct: displayedBacktestReturnPct,
+      robustnessScore,
+      robustnessOverfitRisk,
+      deploymentReadinessScore,
+      calibrationRawConfidence: rawConfidenceDisplay,
+      calibrationCalibratedConfidence: calibratedConfidenceDisplay,
+      calibrationHistoricalAccuracy: calibrationDiagnostics?.historicalAccuracy,
+      calibrationError: calibrationDiagnostics?.calibrationError,
+      calibrationTrustworthiness: calibrationTrustworthinessDisplay,
+      calibrationSampleSize,
+      calibrationStatus,
+      calibrationWarnings,
+      lastSuccessfulSync: lastSyncedAt,
+      expectedAssetCount: marketUniverse.length || totalStocks || 1,
+      exchangeSynchronized: !staleData,
+      partialApiFailures: marketReliability.market.partialApiFailures,
+      fallbackMode: marketReliability.market.fallbackMode,
+      executionProfile,
+    };
+
+    marketStateEngineRef.current?.setSource(perceptionSource);
+    void marketStateEngineRef.current
+      ?.ingest(marketPerceptionMetrics, {
+        market: marketFilter || "Unknown",
+        timeframe: "live",
+      })
+      .then((snapshot) => {
+        if (!cancelled) {
+          applyMarketDataPatch(marketFilter, { marketPerceptionSnapshot: snapshot });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [marketPerceptionMetrics, marketFilter, loading, marketUniverse.length]);
 
 
   return (
@@ -2570,10 +4483,10 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
           </div>
         </header>
 
-        {refreshError ? (
+        {visibleRefreshError ? (
           <div className="mb-5 flex items-center gap-3 rounded-lg border border-[#FDD000]/30 bg-[#FDD000]/10 px-4 py-3 text-sm text-[#FDD000]">
             <AlertTriangle className="h-4 w-4" />
-            {refreshError}
+            {visibleRefreshError}
           </div>
         ) : null}
 
@@ -2590,7 +4503,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                   {marketStatus === "Open" ? "Venue Open" : "Venue Closed"} · {lastSyncedLabel}
                 </div>
                 <StatusPill tone={avgRisk == null ? "neutral" : avgRisk < 45 ? "good" : avgRisk < 70 ? "warn" : "bad"}>
-                  Risk level: {hasMarketData ? avgRisk == null ? "Neutral" : avgRisk < 45 ? "Good" : avgRisk < 70 ? "Warn" : "Bad" : ''}
+                  Risk state: {hasMarketData ? semanticMetrics.risk.word : ""}
                 </StatusPill>
               </div>
 
@@ -2600,17 +4513,75 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
               <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-300">
                 {!hasMarketData
                   ? "Loading prices, signals, and basic market context for the selected market."
+                  : dashboardSizing.suggestedMaximumExposurePct === 0 && dashboardSizing.marketHealthPct >= 60
+                    ? dashboardSizing.exposureExplanation
                   : avgRisk != null && avgRisk > 72
                     ? "Market conditions look unstable. Keep more money in cash until volatility cools down."
-                    : targetExposure < 35
+                  : targetExposure < 35
                       ? "Conditions are improving, but only a few assets qualify. Keep position sizes small."
                       : "The trend is improving. Add exposure gradually while risk remains controlled."}
               </p>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
-                <MiniMetric label="Suggested maximum exposure" value={hasProvidedSignals ? fmtPlainPct(targetExposure) : "—"} />
-                <MiniMetric label="Confidence score" value={confidence == null ? "—" : fmtPlainPct(confidence, 0)} />
+              <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <MiniMetric
+                  label="Market Health"
+                  value={hasMarketData ? semanticMetrics.marketHealth.word : "—"}
+                  sub={hasMarketData ? fmtPlainPct(dashboardSizing.marketHealthPct, 0) : undefined}
+                />
+                <MiniMetric
+                  label="Opportunity Density"
+                  value={hasProvidedSignals ? semanticMetrics.opportunityDensity.word : "—"}
+                  sub={hasProvidedSignals ? fmtPlainPct(dashboardSizing.opportunityDensityPct, 0) : undefined}
+                />
+                <MiniMetric
+                  label="Sizing Mode"
+                  value={sizingModeMetricValue}
+                  sub={sizingModeMetricSub}
+                />
+                <MiniMetric
+                  label="Suggested Maximum Exposure"
+                  value={maximumExposureMetricValue}
+                  sub={maximumExposureMetricSub}
+                />
               </div>
+              {hasMarketData ? (
+                <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)]">
+                  <div className="rounded-lg border border-white/10 bg-white/[0.035] px-4 py-3">
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Why exposure is limited</div>
+                    <p className="mt-1 text-sm leading-6 text-zinc-300">{dashboardSizing.limitedReason}</p>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-white/[0.035] px-4 py-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Calibration status</div>
+                        <p className="mt-1 text-sm leading-6 text-zinc-300">{topCalibrationMessage}</p>
+                      </div>
+                      <StatusPill tone={calibrationTone}>
+                        {calibrationStatusLabel}
+                      </StatusPill>
+                    </div>
+                    <div className="mt-3 grid gap-2 text-xs text-zinc-500 sm:grid-cols-3">
+                      <div>
+                        <span className="block text-zinc-600">Raw</span>
+                        <span className="font-semibold text-slate-100">{rawConfidenceDisplay == null ? "—" : fmtPlainPct(rawConfidenceDisplay, 0)}</span>
+                      </div>
+                      <div>
+                        <span className="block text-zinc-600">Calibrated</span>
+                        <span className="font-semibold text-slate-100">{calibratedConfidenceDisplay == null ? "—" : fmtPlainPct(calibratedConfidenceDisplay, 0)}</span>
+                      </div>
+                      <div>
+                        <span className="block text-zinc-600">Trust</span>
+                        <span className="font-semibold text-slate-100">{calibrationTrustworthinessDisplay == null ? "—" : fmtPlainPct(calibrationTrustworthinessDisplay, 0)}</span>
+                      </div>
+                    </div>
+                    {calibrationWarnings.length ? (
+                      <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
+                        Warnings: {calibrationWarnings.slice(0, 3).join(", ")}.
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -2627,8 +4598,8 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
               </p>
               {hasMarketData ? (
                 <>
-                  <QualityBar value={avgRisk == null ? 0 : 100 - avgRisk} label="Risk control" />
-                  <QualityBar value={hasProvidedSignals ? breadth : 0} label="Market participation" />
+                  <QualityBar value={avgRisk == null ? 0 : 100 - avgRisk} label={`Risk control · ${semanticMetrics.risk.word}`} />
+                  <QualityBar value={opportunityParticipationPct} label={`Opportunity setup density · ${semanticMetrics.opportunityDensity.word}`} />
                 </>
               ) : (
                 <div className="rounded-lg border border-white/10 bg-white/[0.035] px-4 py-5 text-sm text-zinc-500">
@@ -2639,24 +4610,577 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
           </SectionShell>
         </section>
 
+        <MarketPerceptionEngine
+          snapshot={marketPerceptionSnapshot}
+          agencyLevel={agencyLevel}
+        />
+
+        <section className="mb-6 grid min-w-0 items-start gap-5 xl:grid-cols-2">
+          <SectionShell
+            eyebrow="Opportunity diagnostics"
+            title="Opportunity density diagnostics"
+            action={<StatusPill tone={adaptiveOpportunityDensityPct > 45 ? "good" : adaptiveOpportunityDensityPct > 20 ? "warn" : "neutral"}>{fmtPlainPct(adaptiveOpportunityDensityPct, 0)}</StatusPill>}
+          >
+            <div className="grid gap-3 sm:grid-cols-3">
+              <MiniMetric
+                label="Future density"
+                value={fmtPlainPct(adaptiveOpportunityDensityPct, 0)}
+                sub={String(discoveryDensityDiagnostics?.trend ?? "flat")}
+              />
+              <MiniMetric
+                label="Candidate quality"
+                value={fmtPlainPct(finiteNumber(discoveryDensityDiagnostics?.quality) ?? numeric(discoveryPipelineDiagnostics.averageScore), 0)}
+                sub={`${numeric(discoveryPipelineDiagnostics.candidateCount)} candidates`}
+              />
+              <MiniMetric
+                label="Conviction"
+                value={fmtPlainPct(finiteNumber(discoveryDensityDiagnostics?.confidence) ?? confidence ?? 0, 0)}
+                sub={`${numeric(discoveryPipelineDiagnostics.improvingCount)} improving`}
+              />
+            </div>
+            <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-6 text-zinc-400">
+              {discoveryDensityDiagnostics?.explanation ?? "Candidate density is being inferred from current signal progression."}
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-5">
+              <MiniMetric label="Discovery confidence" value={genericDiscovery ? fmtPlainPct(numeric(genericDiscovery.confidence), 0) : "—"} />
+              <MiniMetric label="Maturity" value={genericDiscovery ? fmtPlainPct(numeric(genericDiscovery.maturity), 0) : "—"} />
+              <MiniMetric label="Novelty" value={genericDiscovery ? fmtPlainPct(numeric(genericDiscovery.novelty), 0) : "—"} sub={recognitionClearsDiscoveryNovelty ? "Recognition rejected" : undefined} />
+              <MiniMetric label="Fragility" value={genericDiscovery ? fmtPlainPct(numeric(genericDiscovery.fragility), 0) : "—"} />
+              <MiniMetric label="Next step" value={genericDiscovery?.status?.replace(/_/g, " ") ?? "Pending"} sub={genericDiscovery?.recommendedNextStep} />
+            </div>
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Recognition"
+            title="Recognition diagnostics"
+            action={<StatusPill tone={recognitionTone(recognitionDiagnostic)}>{recognitionDiagnostic?.verdict?.replace(/_/g, " ") ?? "Pending"}</StatusPill>}
+          >
+            <div className="grid gap-3 sm:grid-cols-5">
+              <MiniMetric label="Recognition score" value={recognitionDiagnostic ? fmtPlainPct(numeric(recognitionDiagnostic.recognitionScore), 0) : "—"} />
+              <MiniMetric label="Recurrence" value={recognitionDiagnostic ? fmtPlainPct(numeric(recognitionDiagnostic.recurrenceConfidence), 0) : "—"} />
+              <MiniMetric label="Novelty" value={recognitionDiagnostic ? fmtPlainPct(numeric(recognitionDiagnostic.noveltyScore), 0) : "—"} />
+              <MiniMetric label="Archetype" value={recognitionDiagnostic?.archetype?.replace(/_/g, " ") ?? "—"} sub={recognitionDiagnostic ? fmtPlainPct(numeric(recognitionDiagnostic.archetypeConfidence), 0) : undefined} />
+              <MiniMetric label="Matched samples" value={recognitionDiagnostic ? String(numeric(recognitionDiagnostic.matchedSamples)) : "—"} sub={recognitionDiagnostic ? `${numeric(recognitionDiagnostic.matchedPositiveOutcomes)} / ${numeric(recognitionDiagnostic.matchedNegativeOutcomes)} outcomes` : undefined} />
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              <MiniMetric label="Outcome stability" value={recognitionDiagnostic ? fmtPlainPct(numeric(recognitionDiagnostic.outcomeStability), 0) : "—"} />
+              <MiniMetric label="Discovery novelty" value={recognitionDiagnostic ? (recognitionDiagnostic.discoveryNoveltyJustified ? "Justified" : "Rejected") : "—"} />
+              <MiniMetric label="Judgement similarity" value={recognitionDiagnostic ? (recognitionDiagnostic.judgementSimilarityJustified ? "Justified" : "Rejected") : "—"} />
+            </div>
+            <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-6 text-zinc-400">
+              {recognitionDiagnostic?.reason ?? "Recognition diagnostics will appear after comparable states are evaluated."}
+            </div>
+            <div className="mt-4 grid gap-3 lg:grid-cols-2">
+              <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Missing evidence</div>
+                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                  {recognitionMissingEvidence.slice(0, 4).map((item: string, index: number) => (
+                    <div key={`${item}-${index}`}>{item}</div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Invalidation conditions</div>
+                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                  {recognitionInvalidationConditions.slice(0, 4).map((item: string, index: number) => (
+                    <div key={`${item}-${index}`}>{item}</div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Need detection"
+            title="Need detection diagnostics"
+            action={<StatusPill tone={needDiagnostics.length ? "warn" : "neutral"}>{needDiagnostics.length || "Stable"}</StatusPill>}
+          >
+            <div className="space-y-3">
+              {(needDiagnostics.length ? needDiagnostics : [{
+                needId: "maintain",
+                category: "maintain",
+                severity: 0,
+                confidence: confidence ?? 0,
+                explanation: "No active need is blocking the current objective.",
+                recommendations: [],
+              }]).slice(0, 4).map((need: any) => (
+                <div key={need.needId} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-sm font-semibold text-white">{String(need.category).replace(/-/g, " ")}</div>
+                      <div className="mt-1 text-xs leading-5 text-zinc-500">{need.explanation}</div>
+                    </div>
+                    <StatusPill tone={numeric(need.severity) > 70 ? "bad" : numeric(need.severity) > 35 ? "warn" : "neutral"}>
+                      {fmtPlainPct(numeric(need.severity), 0)}
+                    </StatusPill>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Belief"
+            title="Belief diagnostics"
+            action={<StatusPill tone={beliefTone(beliefDiagnostic)}>{beliefDiagnostic?.verdict ?? "Pending"}</StatusPill>}
+          >
+            <div className="grid gap-3 sm:grid-cols-5">
+              <MiniMetric label="Verdict" value={beliefDiagnostic?.verdict ?? "—"} />
+              <MiniMetric label="Confidence" value={beliefDiagnostic ? fmtPlainPct(beliefDiagnostic.confidence, 0) : "—"} />
+              <MiniMetric label="Trustworthiness" value={beliefDiagnostic ? fmtPlainPct(beliefDiagnostic.trustworthiness, 0) : "—"} />
+              <MiniMetric label="Evidence strength" value={beliefDiagnostic ? fmtPlainPct(beliefDiagnostic.evidenceStrength, 0) : "—"} />
+              <MiniMetric label="Fragility" value={beliefDiagnostic ? fmtPlainPct(beliefDiagnostic.fragility, 0) : "—"} />
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <MiniMetric label="Evidence agreement" value={beliefDiagnostic ? fmtPlainPct(beliefDiagnostic.evidenceAgreement, 0) : "—"} />
+              <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Reason</div>
+                <div className="mt-2 line-clamp-3 text-sm leading-6 text-zinc-300">
+                  {beliefDiagnostic?.reason ?? "Belief evidence will appear after strategy candidates are evaluated."}
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Top supporting evidence</div>
+                <div className="mt-2 space-y-2">
+                  {(beliefSupportEvidence.length ? beliefSupportEvidence : [{ name: "Pending", weightedStrength: 0, reason: "No supporting evidence is selected yet." }]).map((item: any) => (
+                    <div key={`${item.name}-${item.weightedStrength}`} className="text-xs leading-5 text-zinc-400">
+                      <span className="font-semibold text-slate-200">{item.name}</span>
+                      {item.weightedStrength ? <span className="text-zinc-500"> · {fmtPlainPct(item.weightedStrength, 0)}</span> : null}
+                      <div className="text-zinc-500">{item.reason}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Top contradictory evidence</div>
+                <div className="mt-2 space-y-2">
+                  {(beliefContradictoryEvidence.length ? beliefContradictoryEvidence : [{ name: "Pending", weightedStrength: 0, reason: "No contradictory evidence is selected yet." }]).map((item: any) => (
+                    <div key={`${item.name}-${item.weightedStrength}`} className="text-xs leading-5 text-zinc-400">
+                      <span className="font-semibold text-slate-200">{item.name}</span>
+                      {item.weightedStrength ? <span className="text-zinc-500"> · {fmtPlainPct(item.weightedStrength, 0)}</span> : null}
+                      <div className="text-zinc-500">{item.reason}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Discovery pipeline"
+            title="Discovery pipeline diagnostics"
+            action={<StatusPill tone="neutral">{numeric(discoveryPipelineDiagnostics.candidateCount)} candidates</StatusPill>}
+          >
+            <div className="grid gap-3 sm:grid-cols-4">
+              <MiniMetric label="Eligible" value={String(numeric(discoveryPipelineDiagnostics.eligibleCount))} />
+              <MiniMetric label="Improving" value={String(numeric(discoveryPipelineDiagnostics.improvingCount))} />
+              <MiniMetric label="Avg score" value={fmtPlainPct(numeric(discoveryPipelineDiagnostics.averageScore), 0)} />
+              <MiniMetric label="Velocity" value={numeric(discoveryPipelineDiagnostics.averageVelocity).toFixed(1)} />
+            </div>
+            <div className="mt-4 space-y-2">
+              {discoveryFindings.slice(0, 3).map((finding: any) => (
+                <div key={finding.findingId} className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-5 text-zinc-400">
+                  <span className="font-semibold text-slate-200">{finding.pattern}</span>
+                  <span className="text-zinc-500"> - support {fmtPlainPct(numeric(finding.support), 0)}</span>
+                </div>
+              ))}
+              {!discoveryFindings.length ? (
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-zinc-500">
+                  Explorer findings will appear after recurring outcomes are observed.
+                </div>
+              ) : null}
+            </div>
+            <div className="mt-4 grid gap-3 lg:grid-cols-2">
+              <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Discovery support</div>
+                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                  {(discoverySupportEvidence.length ? discoverySupportEvidence : [{ label: "Pending", contribution: 0, reason: "Supporting evidence is pending." }]).slice(0, 4).map((item: any, index: number) => (
+                    <div key={`${item.label}-${index}`}>
+                      <span className="font-semibold text-slate-200">{item.label}</span>
+                      {item.contribution != null ? <span className="text-zinc-500"> · {fmtPlainPct(numeric(item.contribution), 0)}</span> : null}
+                      <div className="text-zinc-500">{item.reason}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Discovery contradictions</div>
+                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                  {(discoveryContradictoryEvidence.length ? discoveryContradictoryEvidence : [{ label: "None reported", contribution: 0, reason: "No contradictory discovery evidence is active." }]).slice(0, 4).map((item: any, index: number) => (
+                    <div key={`${item.label}-${index}`}>
+                      <span className="font-semibold text-slate-200">{item.label}</span>
+                      {item.contribution != null ? <span className="text-zinc-500"> · {fmtPlainPct(numeric(item.contribution), 0)}</span> : null}
+                      <div className="text-zinc-500">{item.reason}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 lg:grid-cols-3">
+              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Missing evidence</div>
+                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                  {(discoveryMissingEvidence.length ? discoveryMissingEvidence : ["No missing discovery evidence reported."]).slice(0, 4).map((item: string, index: number) => (
+                    <div key={`${item}-${index}`}>{item}</div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Invalidation conditions</div>
+                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                  {(displayedDiscoveryInvalidationConditions.length ? displayedDiscoveryInvalidationConditions : ["No discovery invalidation conditions reported."]).slice(0, 4).map((item: string, index: number) => (
+                    <div key={`${item}-${index}`}>{item}</div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Memory summary</div>
+                <div className="mt-3 space-y-1 text-xs leading-5 text-zinc-400">
+                  <div>Discovery similar outcomes {numeric(discoveryMemory?.similarOutcomes)}</div>
+                  <div>Discovery success/failure {fmtPlainPct(numeric(discoveryMemory?.successRatio), 0)} / {fmtPlainPct(numeric(discoveryMemory?.failureRatio), 0)}</div>
+                  <div>Discovery predictive {(discoveryMemory?.mostPredictiveEvidence ?? ["Pending"]).slice(0, 2).join(" · ")}</div>
+                  <div>Discovery misleading {(discoveryMemory?.mostMisleadingEvidence ?? ["Pending"]).slice(0, 2).join(" · ")}</div>
+                  {discoveryMemoryRecognitionLine ? <div>{discoveryMemoryRecognitionLine}</div> : null}
+                </div>
+              </div>
+            </div>
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Sizing"
+            title="Sizing diagnostics"
+            action={<StatusPill tone={dashboardSizing.sizingDecision === "allowed" ? "good" : dashboardSizing.sizingDecision === "blocked" ? "bad" : "warn"}>{dashboardSizing.sizingMode}</StatusPill>}
+          >
+            <div className="grid gap-3 sm:grid-cols-3">
+              <MiniMetric label="Selected step" value={fmtPlainPct(numeric((dashboardSizing.sizingResult as any)?.selectedLadderPct), 0)} />
+              <MiniMetric label="Max exposure" value={fmtPlainPct(dashboardSizing.suggestedMaximumExposurePct)} />
+              <MiniMetric label="Risk" value={fmtPlainPct(avgRisk ?? 100, 0)} />
+            </div>
+            <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
+              {(dashboardSizing.sizingRationale?.length ? dashboardSizing.sizingRationale : dashboardSizing.sizingReasons).slice(0, 3).map((reason) => (
+                <div key={reason} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">{reason}</div>
+              ))}
+            </div>
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Survival Memory"
+            title="Survival memory diagnostics"
+            action={<StatusPill tone={survivalMemoryTone(survivalMemoryDiagnostic)}>{survivalMemoryDiagnostic?.status?.replace(/_/g, " ") ?? "Pending"}</StatusPill>}
+          >
+            <div className="grid gap-3 sm:grid-cols-3">
+              <MiniMetric label="Survival memory status" value={survivalMemoryDiagnostic?.status?.replace(/_/g, " ") ?? "—"} />
+              <MiniMetric label="Scar count" value={survivalMemoryDiagnostic ? String(survivalMemoryDiagnostic.scarCount) : "—"} />
+              <MiniMetric label="Near-ruin count" value={survivalMemoryDiagnostic ? String(survivalMemoryDiagnostic.nearRuinCount) : "—"} />
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              <MiniMetric label="Average survival cost" value={survivalMemoryDiagnostic ? `${Math.round(numeric(survivalMemoryDiagnostic.averageSurvivalCost))}/100` : "—"} />
+              <MiniMetric label="Recovery burden" value={survivalMemoryDiagnostic ? `${Math.round(numeric(survivalMemoryDiagnostic.recoveryBurden))}/100` : "—"} />
+              <MiniMetric label="Survival confidence" value={survivalMemoryDiagnostic ? `${Math.round(numeric(survivalMemoryDiagnostic.survivalConfidence))}/100` : "—"} />
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <MiniMetric
+                label="Current state similarity to past fragile states"
+                value={survivalMemoryDiagnostic ? fmtPlainPct(numeric(survivalMemoryDiagnostic.currentStateSimilarity), 0) : "—"}
+              />
+              <MiniMetric
+                label="Recovery exposure cap"
+                value={survivalMemoryDiagnostic ? fmtPlainPct(numeric(survivalMemoryDiagnostic.maxExposurePct)) : "—"}
+                sub={survivalMemoryDiagnostic?.recommendation?.replace(/_/g, " ")}
+              />
+            </div>
+            <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
+              {survivalWarnings.slice(0, 4).map((warning) => (
+                <div key={warning} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">{warning}</div>
+              ))}
+            </div>
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Recovery"
+            title="Recovery diagnostics"
+            action={<StatusPill tone={recoveryTone(recoveryDiagnostic)}>{recoveryDiagnostic?.status?.replace(/-/g, " ") ?? "Pending"}</StatusPill>}
+          >
+            <div className="grid gap-3 sm:grid-cols-4">
+              <MiniMetric label="Recovery score" value={recoveryDiagnostic ? `${Math.round(numeric(recoveryDiagnostic.recoveryScore))}/100` : "—"} />
+              <MiniMetric label="Trusted capacity" value={recoveryDiagnostic ? fmtPlainPct(numeric(recoveryDiagnostic.trustedCapacity), 0) : "—"} />
+              <MiniMetric label="Confidence cap lift" value={recoveryDiagnostic ? `+${numeric(recoveryDiagnostic.confidenceCapLift).toFixed(1)}` : "—"} />
+              <MiniMetric
+                label="Recommended exposure cap"
+                value={recoveryDiagnostic ? fmtPlainPct(numeric(recoveryDiagnostic.recommendedExposureCap)) : "—"}
+                sub={recoveryDiagnostic?.mode?.replace(/-/g, " ")}
+              />
+            </div>
+            <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
+              {displayedRecoveryBlockers.slice(0, 3).map((blocker) => (
+                <div key={blocker} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">{blocker}</div>
+              ))}
+            </div>
+            <div className="mt-3 text-xs leading-5 text-zinc-500">
+              Unlock: {displayedRecoveryUnlockConditions.slice(0, 2).join(" ")}
+            </div>
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Signal Trust Governor"
+            title="Participation decision"
+            action={<StatusPill tone={trustGovernorTone(trustGovernor)}>{trustGovernor?.participationMode?.replace(/_/g, " ") ?? "Pending"}</StatusPill>}
+          >
+            <div className="grid gap-3 sm:grid-cols-3">
+              <MiniMetric label="Trust score" value={trustGovernor ? fmtPlainPct(trustGovernor.trustScore, 0) : "—"} />
+              <MiniMetric label="Confidence cap" value={trustGovernor ? fmtPlainPct(trustGovernor.confidenceCap, 0) : "—"} />
+              <MiniMetric label="Trusted exposure" value={trustGovernor ? fmtPlainPct(trustGovernor.maxExposure) : "—"} />
+            </div>
+            <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
+              {(trustGovernor?.reasons?.length ? trustGovernor.reasons : ["Trust governance will appear after strategy readiness is evaluated."]).slice(0, 3).map((reason) => (
+                <div key={reason} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">{reason}</div>
+              ))}
+            </div>
+            {trustGovernor?.unlockCriteria?.length ? (
+              <div className="mt-3 text-xs leading-5 text-zinc-500">
+                Unlock: {trustGovernor.unlockCriteria.slice(0, 2).join(" ")}
+              </div>
+            ) : null}
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Remediation"
+            title="Readiness remediation planner"
+            action={<StatusPill tone={remediationTone(readinessRemediation)}>{readinessRemediation?.status?.replace(/_/g, " ") ?? "Pending"}</StatusPill>}
+          >
+            <div className="grid gap-3 sm:grid-cols-3">
+              <MiniMetric label="Top action" value={readinessRemediation?.topAction ?? "—"} />
+              <MiniMetric label="Expected lift" value={readinessRemediation ? `+${readinessRemediation.totalExpectedTrustLift.toFixed(1)}` : "—"} />
+              <MiniMetric label="Execution gate" value={readinessRemediation?.executionGate?.replace(/_/g, " ") ?? "—"} />
+            </div>
+            <div className="mt-4 space-y-2">
+              {(readinessRemediation?.steps?.length ? readinessRemediation.steps : []).slice(0, 4).map((step) => (
+                <div key={step.id} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold text-white">{step.title}</div>
+                      <div className="mt-1 text-xs leading-5 text-zinc-500">{step.reason}</div>
+                    </div>
+                    <StatusPill tone={step.status === "blocked" ? "bad" : "warn"}>+{step.expectedTrustLift.toFixed(1)}</StatusPill>
+                  </div>
+                  <div className="mt-2 text-xs leading-5 text-zinc-500">
+                    {step.evidenceRequired.slice(0, 2).join(" · ")}
+                  </div>
+                </div>
+              ))}
+              {readinessRemediation && !readinessRemediation.steps.length ? (
+                <div className="rounded-lg border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+                  No remediation steps are active.
+                </div>
+              ) : null}
+              {!readinessRemediation ? (
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-zinc-500">
+                  Remediation diagnostics are pending.
+                </div>
+              ) : null}
+            </div>
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Judgement"
+            title="Judgement diagnostics"
+            action={<StatusPill tone={judgementTone(judgementDiagnostic)}>{judgementDiagnostic?.status?.replace(/_/g, " ") ?? "Pending"}</StatusPill>}
+          >
+            <div className="text-sm leading-6 text-zinc-400">
+              Judgement compares the current state with similar historical situations and checks whether past outcomes justify trusting the current signal.
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <MiniMetric label="Adjusted confidence" value={judgementDiagnostic ? fmtPlainPct(judgementDiagnostic.adjustedConfidence, 0) : "—"} />
+              <MiniMetric label="Reliability" value={judgementDiagnostic ? fmtPlainPct(judgementDiagnostic.reliability, 0) : "—"} />
+              <MiniMetric label="Similar samples" value={judgementDiagnostic ? String(judgementDiagnostic.similarSampleSize) : "—"} />
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <MiniMetric label="Outcome stability" value={judgementDiagnostic ? fmtPlainPct(judgementDiagnostic.outcomeStability, 0) : "—"} />
+              <MiniMetric label="Overfit risk" value={judgementDiagnostic ? fmtPlainPct(judgementDiagnostic.overfitRisk, 0) : "—"} />
+            </div>
+            <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
+              {(judgementReasons.length ? judgementReasons : ["Judgement will appear after similar historical outcomes are available."]).map((reason) => (
+                <div key={reason} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">{reason}</div>
+              ))}
+            </div>
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Agency"
+            title="Agency diagnostics"
+            action={<StatusPill tone={agencyRecommendation === "act" ? "good" : agencyRecommendation === "requires_human_review" ? "bad" : "warn"}>{agencyRecommendation.replace(/_/g, " ")}</StatusPill>}
+          >
+            <div className="grid gap-3 sm:grid-cols-3">
+              <MiniMetric
+                label="Trust"
+                value={fmtPlainPct(agencyTrustPct, 0)}
+                sub={agencyTrustAdjustmentPct != null && agencyTrustAdjustmentPct > 0
+                  ? `+${fmtPlainPct(agencyTrustAdjustmentPct, 0)} reduced-size outcome credit`
+                  : undefined}
+              />
+              <MiniMetric label="Calibration" value={agencyCalibrationHealthPct == null ? "—" : fmtPlainPct(agencyCalibrationHealthPct * 100, 0)} />
+              <MiniMetric label="Blocked" value={String(agencyBlockedActions)} />
+            </div>
+            <div className="mt-4 space-y-2">
+              {agencyAudits.slice(0, 3).map((audit: any) => (
+                <div key={audit.traceId ?? audit.symbol} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold text-white">{audit.symbol ?? audit.traceId}</div>
+                      <div className="mt-1 text-xs text-zinc-500">{String(audit.decisionKind ?? "decision").replace(/_/g, " ")}</div>
+                    </div>
+                    <StatusPill tone={audit.allowed ? "good" : "bad"}>{audit.allowed ? "Allowed" : "Blocked"}</StatusPill>
+                  </div>
+                  <div className="mt-2 text-xs leading-5 text-zinc-500">
+                    {audit.rawConfidence != null && audit.calibratedConfidence != null
+                      ? `Raw ${fmtPlainPct(audit.rawConfidence, 0)} -> calibrated ${fmtPlainPct(audit.calibratedConfidence, 0)}.`
+                      : (audit.violations ?? audit.reasons ?? []).slice(0, 1)[0] ?? `Outcome ${audit.outcomeLabel ?? "unknown"}`}
+                  </div>
+                </div>
+              ))}
+              {!agencyAudits.length ? (
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-8 text-sm text-zinc-500">
+                  Agency traces will appear after strategy decisions are evaluated.
+                </div>
+              ) : null}
+            </div>
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Resolve"
+            title="Resolve diagnostics"
+            action={<StatusPill tone={resolveTone(resolveDiagnostic)}>{resolveDiagnostic?.decision?.replace(/_/g, " ") ?? "Pending"}</StatusPill>}
+          >
+            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              <MiniMetric label="Decision" value={resolveDiagnostic?.decision?.replace(/_/g, " ") ?? "—"} />
+              <MiniMetric label="Commitment level" value={resolveDiagnostic?.commitmentLevel?.replace(/_/g, " ") ?? "—"} />
+              <MiniMetric label="Resolve score" value={resolveDiagnostic ? `${Math.round(numeric(resolveDiagnostic.resolveScore))}/100` : "—"} />
+              <MiniMetric label="Required score" value={resolveDiagnostic ? `${Math.round(numeric(resolveDiagnostic.requiredScore))}/100` : "—"} />
+              <MiniMetric label="Human review required" value={resolveDiagnostic ? (resolveDiagnostic.humanReviewRequired ? "Yes" : "No") : "—"} />
+            </div>
+            <div className="mt-4 rounded-lg border border-white/10 bg-[#151515] px-4 py-3 text-sm leading-6 text-zinc-400">
+              {resolveDiagnostic?.explanation ?? "Resolve will appear after Agency, Trust, Judgement, Risk, and sizing evidence are evaluated."}
+            </div>
+            <div className="mt-4 grid gap-3 lg:grid-cols-3">
+              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Missing evidence</div>
+                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                  {resolveMissingEvidence.slice(0, 4).map((item, index) => (
+                    <div key={`${item}-${index}`}>{item}</div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Unlock conditions</div>
+                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                  {displayedResolveUnlockConditions.slice(0, 6).map((item, index) => (
+                    <div key={`${item}-${index}`}>{item}</div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Invalidation conditions</div>
+                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                  {resolveInvalidationConditions.slice(0, 4).map((item, index) => (
+                    <div key={`${item}-${index}`}>{item}</div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Candidate progression"
+            title="Candidate progression view"
+            action={<StatusPill tone={leadingDiscoveryCandidate ? "neutral" : "warn"}>{leadingDiscoveryCandidate?.symbol ?? "Pending"}</StatusPill>}
+          >
+            {leadingDiscoveryCandidate ? (
+              <div className="space-y-3">
+                {(leadingDiscoveryCandidate.progression ?? []).map((point: any, index: number) => (
+                  <div key={`${point.stage}-${index}`} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm font-semibold text-white">{point.stage}</div>
+                      <div className="text-xs text-[#FDD000]">{fmtPlainPct(numeric(point.score), 0)}</div>
+                    </div>
+                    <div className="mt-1 text-xs leading-5 text-zinc-500">{point.explanation}</div>
+                  </div>
+                ))}
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-5 text-zinc-400">
+                  <span className="font-semibold text-slate-200">Discovery transition</span>
+                  <div className="mt-1 text-zinc-500">
+                    {leadingDiscoveryCandidate.discovery?.lifecycle?.transitionReason ??
+                      discoveryLifecycle?.transitionReason ??
+                      "Lifecycle transition reason is pending."}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-8 text-sm text-zinc-500">
+                Candidate progression is pending.
+              </div>
+            )}
+          </SectionShell>
+
+          <SectionShell
+            eyebrow="Lifecycle"
+            title="Opportunity lifecycle"
+            action={<StatusPill tone="neutral">{frameworkOpportunities.length + discoveryCandidates.length} observed</StatusPill>}
+          >
+            <div className="space-y-3">
+              {discoveryCandidates.slice(0, 5).map((candidate: any) => (
+                <div key={candidate.symbol ?? candidate.opportunityId} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold text-white">{candidate.symbol ?? candidate.opportunityId}</div>
+                      <div className="mt-1 text-xs text-zinc-500">
+                        Detected -&gt; Emerging -&gt; Strengthening -&gt; Eligible -&gt; Sized -&gt; Active -&gt; Closed
+                      </div>
+                    </div>
+                    <StatusPill tone={candidate.lifecycle === "Sized" || candidate.lifecycle === "Active" ? "good" : candidate.lifecycle === "Detected" ? "neutral" : "warn"}>
+                      {candidate.lifecycle ?? candidate.type}
+                    </StatusPill>
+                  </div>
+                  <div className="mt-2 text-xs leading-5 text-zinc-500">{candidate.explanation ?? candidate.evidence?.[0]}</div>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                    <MiniMetric label="Discovery maturity" value={candidate.discovery ? fmtPlainPct(numeric(candidate.discovery.maturity), 0) : "—"} />
+                    <MiniMetric label="Discovery confidence" value={candidate.discovery ? fmtPlainPct(numeric(candidate.discovery.confidence), 0) : "—"} />
+                    <MiniMetric label="Transition reason" value={candidate.discovery?.status?.replace(/_/g, " ") ?? "Pending"} sub={candidate.discovery?.lifecycle?.transitionReason} />
+                  </div>
+                </div>
+              ))}
+              {!discoveryCandidates.length ? (
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-8 text-sm text-zinc-500">
+                  Opportunity lifecycle is pending.
+                </div>
+              ) : null}
+            </div>
+          </SectionShell>
+        </section>
+
         <section className="mb-6 grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(420px,0.85fr)]">
           <SectionShell
             eyebrow="Investment ideas"
             title="Top ideas for this market"
-            action={<StatusPill tone="neutral">Top 5</StatusPill>}
+            action={<StatusPill tone={showingBlockedReviewIdeas ? "warn" : "neutral"}>{showingBlockedReviewIdeas ? "Review" : "Top 5"}</StatusPill>}
           >
             {!hasMarketData ? (
               <div className="mt-6 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-8 text-sm text-zinc-500">
                 Loading ideas for the selected market...
               </div>
-            ) : !topOpportunities.length ? (
+            ) : showingBlockedReviewIdeas ? (
+              <div className="mt-6 rounded-lg border border-[#FDD000]/25 bg-[#FDD000]/10 px-4 py-4 text-sm leading-6 text-[#FDD000]">
+                {reviewIdeasMessage}
+              </div>
+            ) : !displayedTopOpportunities.length ? (
               <div className="mt-6 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-8 text-sm text-zinc-500">
                 No buy ideas pass the current risk checks.
               </div>
             ) : null}
 
             <div className="mt-6 grid gap-3 lg:grid-cols-2">
-              {hasMarketData && topOpportunities.map((stock, index) => {
+              {hasMarketData && displayedTopOpportunities.map((stock, index) => {
                 const ticker = normalizedTicker(stock);
                 const isSelected = selected ? normalizedTicker(selected) === ticker : false;
                 const isFlipped = isSelected && isSelectedCardFlipped;
@@ -2713,8 +5237,23 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                               <div className="text-zinc-500">Expected change</div>
                               <div className="font-semibold text-slate-100">{fmtPct(stock.expectedMove)}</div>
                             </div>
+                            {stock.judgement ? (
+                              <div>
+                                <div className="text-zinc-500">Judgement</div>
+                                <div className="font-semibold text-slate-100">{stock.judgement.status.replace(/_/g, " ")}</div>
+                              </div>
+                            ) : null}
                           </div>
                           <p className="line-clamp-3 text-xs leading-5 text-zinc-400">{stock.explanation}</p>
+                          {stock.discovery ? (
+                            <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs leading-5 text-zinc-400">
+                              <span className="font-semibold text-slate-200">Discovery {stock.discovery.status}</span>
+                              <span className="text-zinc-500"> · confidence {fmtPlainPct(numeric(stock.discovery.confidence), 0)}</span>
+                              <div className="line-clamp-2 text-zinc-500">
+                                {stock.discovery.supportingEvidence?.[0]?.label ?? stock.discovery.explanation}
+                              </div>
+                            </div>
+                          ) : null}
                         </div>
                       </div>
 
@@ -2802,15 +5341,17 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
               <MiniMetric
                 label="Annualized Sharpe Ratio"
                 value={
-                  failureFlags.includes("SUSPICIOUS_SHARPE") || failureFlags.includes("INVALID_SHARPE")
-                    ? "—"
-                    : Number.isFinite(Number(displayedBacktestSharpe))
-                      ? Number(displayedBacktestSharpe).toFixed(2)
-                      : "—"
+                  Number.isFinite(Number(displayedBacktestSharpe))
+                    ? Number(displayedBacktestSharpe).toFixed(2)
+                    : "—"
                 }
                 sub="Return compared with volatility. Higher is better."
               />
-              <MiniMetric label="Average Holding Time" value="—" sub="Open positions" />
+              <MiniMetric
+                label="Average Holding Time"
+                value={hasBacktestData && backtestAverageHoldingDays != null ? `${Math.round(backtestAverageHoldingDays)}d` : "—"}
+                sub={`${backtestTradeCount || 0} closed trades`}
+              />
               <MiniMetric label="Profit Factor" value={hasBacktestData ? Number(displayedBacktestProfitFactor).toFixed(2) : "—"} />
               <MiniMetric label="Win Rate" value={hasBacktestData ? fmtPlainPct(displayedBacktestWinRate) : "—"} />
               <MiniMetric
@@ -2850,16 +5391,17 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
               <div className="mt-5 grid gap-3 md:grid-cols-3">
                 <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
                   <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Checks passed</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">{passedGateCount}/10 gates</div>
+                  <div className="mt-1 text-sm font-semibold text-slate-100">{passedGateCount}/{confidenceGates.length} gates</div>
                 </div>
                 <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Reliability score</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">{survivalScore}/100</div>
-                  <div className="mt-1 text-[11px] text-zinc-500">Higher means more reliable</div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Readiness score</div>
+                  <div className="mt-1 text-sm font-semibold text-slate-100">{readinessScoreDisplay}/100</div>
+                  <div className="mt-1 text-[11px] text-zinc-500">Higher means more live-test ready</div>
                 </div>
                 <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Status</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">{promotionStateDisplay}</div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Execution gate</div>
+                  <div className="mt-1 text-sm font-semibold text-slate-100">{executionGateDisplay}</div>
+                  <div className="mt-1 text-[11px] text-zinc-500">{executionGateDetail}</div>
                 </div>
               </div>
 
@@ -2882,6 +5424,31 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                 </div>
               </div>
 
+              <div className="mt-5 rounded-lg border border-white/10 bg-[#151515] p-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <div className="text-sm font-semibold text-white">Calibration</div>
+                    <p className="mt-1 max-w-3xl text-xs leading-5 text-zinc-500">
+                      Calibration checks whether past confidence matched actual outcomes. Raw confidence is what the model currently believes.
+                      Calibrated confidence is what the system is willing to trust based on past evidence.
+                    </p>
+                  </div>
+                  <StatusPill tone={calibrationTone}>
+                    {calibrationStatusLabel}
+                  </StatusPill>
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-4">
+                  <MiniMetric label="Raw confidence" value={rawConfidenceDisplay == null ? "—" : fmtPlainPct(rawConfidenceDisplay, 0)} />
+                  <MiniMetric label="Calibrated confidence" value={calibratedConfidenceDisplay == null ? "—" : fmtPlainPct(calibratedConfidenceDisplay, 0)} />
+                  <MiniMetric label="Trustworthiness" value={calibrationTrustworthinessDisplay == null ? "—" : fmtPlainPct(calibrationTrustworthinessDisplay, 0)} />
+                  <MiniMetric label="Sample size" value={String(calibrationSampleSize)} />
+                </div>
+                <div className="mt-3 text-xs leading-5 text-zinc-500">
+                  {calibrationExplanation}
+                  {calibrationWarnings.length ? ` Warnings: ${calibrationWarnings.slice(0, 3).join(", ")}.` : ""}
+                </div>
+              </div>
+
               <div className="mt-5 grid gap-3 lg:grid-cols-2">
                 {confidenceGates.map((gate) => (
                   <div
@@ -2894,7 +5461,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                         <div className="mt-1 text-xs leading-5 text-zinc-500">{gate.reason}</div>
                       </div>
                       <StatusPill tone={gate.passed ? "good" : gate.severity}>
-                        {gate.passed ? "Pass" : "Watch"}
+                        {gateStatusLabel(gate)}
                       </StatusPill>
                     </div>
                     <div className="mt-3 text-sm font-semibold text-slate-200">
@@ -2906,21 +5473,38 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                 ))}
               </div>
 
-              {failureFlags.length ? (
-                <div className="mt-5 rounded-lg border border-red-400/20 bg-red-500/10 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-rose-100">
+              {failureFlags.length || trustReviewItems.length ? (
+                <div
+                  className={cx(
+                    "mt-5 rounded-lg p-4",
+                    failureFlags.length
+                      ? "border border-red-400/20 bg-red-500/10"
+                      : "border border-[#FDD000]/30 bg-[#FDD000]/10",
+                  )}
+                >
+                  <div
+                    className={cx(
+                      "mb-2 flex items-center gap-2 text-sm font-semibold",
+                      failureFlags.length ? "text-rose-100" : "text-[#FDD000]",
+                    )}
+                  >
                     <AlertTriangle className="h-4 w-4" />
-                    Items to fix
+                    {failureFlags.length ? "Items to fix" : "Trust items to improve"}
                   </div>
-                  <div className="space-y-1 text-sm text-rose-100/80">
-                    {readableFailureFlags.map((flag) => (
+                  <div
+                    className={cx(
+                      "space-y-1 text-sm",
+                      failureFlags.length ? "text-rose-100/80" : "text-[#FDD000]/85",
+                    )}
+                  >
+                    {trustReviewItems.map((flag) => (
                       <div key={flag}>• {flag}</div>
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="mt-5 rounded-lg border border-[#FDD000]/30 bg-[#FDD000]/10 p-4 text-sm text-[#FDD000]">
-                  No warning flags are active for the current market view.
+                <div className="mt-5 rounded-lg border border-emerald-400/25 bg-emerald-500/10 p-4 text-sm text-emerald-100">
+                  No readiness or trust review items are active for the current market view.
                 </div>
               )}
           </SectionShell>
@@ -2929,7 +5513,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
         <section className="mb-6 grid min-w-0 gap-5">
           <SectionShell
             eyebrow="Action lists"
-            title="Buy, hold, and sell lists"
+            title="Buy, watch, and sell lists"
             action={<StatusPill tone="neutral">{hasMarketData ? `${filtered.length} assets` : "Loading"}</StatusPill>}
           >
             <div className="my-4">
@@ -2973,8 +5557,15 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                 {hasMarketData ? <QualityBar value={hasUsableMarketData && avgQuality != null ? avgQuality : 0} /> : null}
                 <p className="mt-4 text-sm leading-6 text-zinc-400">
                   {hasMarketData
-                    ? "Some trends are present, but not all are strong. Focus on the clearest ideas."
+                    ? `Trend structure is ${semanticMetrics.trend.word.toLowerCase()}. Focus on the clearest ideas.`
                     : "Trend strength will appear after market data loads."}
+                  {genericDiscovery
+                    ? discoveryRecognitionSentence({
+                      discoveryConfidence: finiteNumber(genericDiscovery.confidence),
+                      discoveryNovelty: finiteNumber(genericDiscovery.novelty),
+                      recognition: recognitionDiagnostic,
+                    })
+                    : ""}
                 </p>
               </div>
               <div className="rounded-lg border border-white/10 bg-[#151515] p-4">
@@ -2988,7 +5579,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                 {hasMarketData ? <QualityBar value={hasUsableMarketData && avgRisk != null ? 100 - avgRisk : 0} /> : null}
                 <p className="mt-4 text-sm leading-6 text-zinc-400">
                   {hasMarketData
-                    ? `Volatility is ${avgRisk != null && avgRisk > 65 ? "high" : "under control"} and confidence is ${confidence != null && confidence > 65 ? "acceptable" : "mixed"}.`
+                    ? `Risk control is ${semanticMetrics.risk.word.toLowerCase()} with ${semanticMetrics.marketHealth.word.toLowerCase()} market health.`
                     : "Risk control will appear after live data loads."}
                 </p>
               </div>
@@ -3003,7 +5594,7 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                 {hasMarketData ? <QualityBar value={hasProvidedSignals && avgQuality != null && confidence != null ? clamp((avgQuality + confidence) / 2) : 0} /> : null}
                 <p className="mt-4 text-sm leading-6 text-zinc-400">
                   {hasMarketData
-                    ? "The list favors ideas that have both trend support and risk control."
+                    ? `Position durability is ${semanticMetrics.durability.word.toLowerCase()}, based on trend support, confidence, and risk control.`
                     : "Position durability will appear after investment ideas load."}
                 </p>
               </div>

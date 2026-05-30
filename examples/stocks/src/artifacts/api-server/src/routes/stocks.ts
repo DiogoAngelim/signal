@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request } from "express";
 import {
   attachSignalsToQuotes,
   fetchMarketDailyCandles,
@@ -29,6 +29,10 @@ import {
   listSignalLifecycleModels,
 } from "../lib/signal-lifecycle-governance";
 import {
+  sendSignalNotificationEmails,
+  sendSignalNotificationTestEmail,
+} from "../lib/signal-email";
+import {
   listPortfolioDecisionAudit,
   listPortfolioDecisionMemory,
   listPortfolioDecisionOutcomes,
@@ -45,6 +49,9 @@ const MARKET_MONTHLY_VOLATILITY_REFRESH_INTERVAL_MS = Number(
 );
 const REFRESH_MARKET_MONTHLY_VOLATILITY_ON_QUOTES =
   process.env.MARKET_MONTHLY_VOLATILITY_REFRESH_ON_QUOTES === "true";
+const SIGNAL_EMAIL_TEST_COOLDOWN_MS = Number(
+  process.env.SIGNAL_EMAIL_TEST_COOLDOWN_MS ?? 60_000,
+);
 const STOCK_QUOTES_RESPONSE_BUDGET_MS = Number(
   process.env.STOCK_QUOTES_RESPONSE_BUDGET_MS ?? 45_000,
 );
@@ -54,6 +61,7 @@ const monthlyVolatilityRefreshes = new Map<
   string,
   { lastStartedAt: number; pending?: Promise<void> }
 >();
+let lastSignalEmailTestAt = 0;
 
 function resolveScope(market: string, exchange: string): SignalScope {
   if (market) {
@@ -117,6 +125,41 @@ async function storeSignalSnapshotsIfAvailable(
       scope,
     );
   }
+}
+
+async function storeSignalEventsIfAvailable(
+  scope: SignalScope,
+  quotes: StockQuote[],
+) {
+  try {
+    await storeSignalEvents(scope, quotes);
+  } catch (error) {
+    logSignalPersistenceWarning(
+      error,
+      "Signal event persistence unavailable; sending signal emails directly",
+      scope,
+    );
+    await sendSignalNotificationEmails(
+      quotes.map((quote) => ({
+        emittedAt: quote.signalEmittedAt,
+        quote,
+        scope,
+      })),
+    );
+  }
+}
+
+function hasSignalEmailTestAccess(req: Request): boolean {
+  const secret = process.env.SIGNAL_EMAIL_TEST_SECRET?.trim();
+  if (!secret) return true;
+
+  const authorization = String(req.headers.authorization ?? "");
+  const bearerToken = authorization.toLowerCase().startsWith("bearer ")
+    ? authorization.slice("bearer ".length).trim()
+    : "";
+  const headerToken = String(req.headers["x-signal-email-test-secret"] ?? "");
+
+  return bearerToken === secret || headerToken === secret;
 }
 
 async function storeMarketMonthlyVolatilityIfAvailable(
@@ -197,6 +240,34 @@ router.get("/stocks/markets", (_req, res) => {
 router.get("/stocks/signals/status", async (_req, res) => {
   const status = await getBackgroundSignalEngineStatus();
   res.json({ data: status });
+});
+
+router.post("/stocks/signals/email-test", async (req, res) => {
+  if (!hasSignalEmailTestAccess(req)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const now = Date.now();
+  if (now - lastSignalEmailTestAt < SIGNAL_EMAIL_TEST_COOLDOWN_MS) {
+    res.status(429).json({ error: "Email test is cooling down" });
+    return;
+  }
+
+  const result = await sendSignalNotificationTestEmail(req.body ?? {});
+  if (result.sent) {
+    lastSignalEmailTestAt = now;
+    res.json({ data: result });
+    return;
+  }
+
+  const statusCode =
+    result.reason === "missing-provider"
+      ? 503
+      : result.reason === "disabled"
+        ? 409
+        : 500;
+  res.status(statusCode).json({ error: result.reason, data: result });
 });
 
 router.post("/stocks/context/schema", async (_req, res) => {
@@ -449,6 +520,7 @@ router.post("/stocks/quotes", async (req, res) => {
     : quotes;
 
   if (STOCK_QUOTES_PERSISTENCE_ENABLED && withSignals && enrichedQuotes.length) {
+    await storeSignalEventsIfAvailable(scope, enrichedQuotes);
     void storeSignalSnapshotsIfAvailable(scope, enrichedQuotes);
   }
 

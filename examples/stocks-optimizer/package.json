@@ -6,7 +6,9 @@
   "scripts": {
     "build": "pnpm --filter @workspace/api-server build && pnpm --filter @workspace/signal-markets build",
     "dev": "pnpm --filter @workspace/signal-markets dev",
-    "test": "pnpm --filter @workspace/api-server test:coverage && pnpm --filter @workspace/signal-markets test:coverage"
+    "test": "node ./scripts/run-tests.cjs",
+    "lint": "pnpm --filter @workspace/api-server typecheck && pnpm --filter @workspace/signal-markets typecheck",
+    "typecheck": "pnpm --filter @workspace/api-server typecheck && pnpm --filter @workspace/signal-markets typecheck"
   },
   "installCommand": "pnpm install",
   "buildCommand": "pnpm --filter @workspace/signal-markets build",

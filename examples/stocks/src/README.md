@@ -18,6 +18,14 @@ Use `examples/stocks` as the Vercel project root so the `lib` and `src` folders 
 - `STOCK_SIGNAL_BOOTSTRAP_SCOPES` (optional): comma-separated startup watchlist scopes such as `exchange:US` or `market:NASDAQ`. Defaults to `all`, which seeds every discovered exchange market.
 - `STOCK_SIGNAL_BOOTSTRAP_SYMBOLS_PER_SCOPE` (optional): how many symbols to seed per bootstrap scope. Defaults to `24`.
 - `STOCK_SIGNAL_REFRESH_INTERVAL_MS` (optional): backend signal refresh cadence in milliseconds. Defaults to `60000`.
+- `SIGNAL_EMAIL_TO` (optional): comma-separated alert recipients. Defaults to `diogoangelim@gmail.com`.
+- `SIGNAL_EMAIL_FROM` (optional): sender address for signal alert emails. Resend defaults to `Signal Alerts <onboarding@resend.dev>` when this is unset.
+- `SIGNAL_EMAIL_PROVIDER` (optional): `resend`, `smtp`, or `sendmail`. If omitted, the API uses `RESEND_API_KEY`, then `SMTP_HOST`, then local `sendmail` outside Vercel.
+- `RESEND_API_KEY` (optional): enables Resend-backed signal alert emails.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE` (optional): enable SMTP-backed signal alert emails.
+- `SIGNAL_EMAIL_ENABLED` (optional): set to `false` to disable signal alert emails.
+- `SIGNAL_EMAIL_TEST_SECRET` (optional): when set, `POST /api/stocks/signals/email-test` requires `Authorization: Bearer <secret>` or `x-signal-email-test-secret`.
+- `SIGNAL_EMAIL_TEST_COOLDOWN_MS` (optional): rate limit for the test endpoint. Defaults to `60000`.
 
 If `NODE_ECU_API_BASE_URL` is not set on Vercel, the API falls back to the built-in heuristic signal generator instead of trying to call `localhost`.
 
@@ -29,6 +37,9 @@ Useful endpoints:
 
 - `POST /api/stocks/quotes` with `withSignals: true`: registers symbols with the backend watchlist and returns the latest persisted backend snapshots when fresh.
 - `GET /api/stocks/signals/status`: shows whether the background engine is enabled, when it last ran, and how many symbols/snapshots are currently tracked.
+
+New Buy and Sell signal events are emailed immediately after they are inserted into `stock_signal_events`. Existing event tokens are ignored, so refreshes of the same signal do not send duplicate emails.
+If event persistence is unavailable, the API still sends Buy and Sell emails directly from the Vercel function for freshly returned signals.
 
 ## Local verification
 

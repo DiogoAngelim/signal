@@ -14,9 +14,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["artifacts/signal-markets/src/*"]
+      "@/*": ["./artifacts/signal-markets/src/*"]
     }
   }
 }

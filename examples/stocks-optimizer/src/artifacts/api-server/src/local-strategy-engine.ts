@@ -1,3 +1,5 @@
+import { sizeFinancialExposure } from "./lib/financial-sizing";
+
 type StrategyPoint = {
   date: string;
   equity: number;
@@ -175,10 +177,107 @@ function signalForBars(
 
   const signalAction = buy ? "Buy" : sell ? "Sell" : "Hold";
 
-  const suggestedExposure =
+  const rawSuggestedExposure =
     signalAction === "Buy"
       ? clamp((setupQuality - riskPressure * 0.35) / 14, 0, config.maxPositionPct)
       : 0;
+  const sizingConstraints = [
+    {
+      id: "signal-persistence",
+      label: "Signal persistence",
+      type: "soft" as const,
+      passed: momentum >= config.minMomentum,
+      severity: "medium" as const,
+      reason: "Momentum persistence is not confirmed.",
+    },
+    {
+      id: "cross-timeframe-agreement",
+      label: "Cross-timeframe agreement",
+      type: "soft" as const,
+      passed: fast > slow && trend > 0,
+      severity: "high" as const,
+      reason: "Fast and slow trend evidence do not agree.",
+    },
+    {
+      id: "liquidity-data-availability",
+      label: "Liquidity and data availability",
+      type: "hard" as const,
+      passed: bars.length > config.slow + config.riskLookback,
+      severity: "high" as const,
+      reason: "Historical bars are incomplete for sizing.",
+    },
+    {
+      id: "volatility-acceptance",
+      label: "Volatility acceptance",
+      type: "hard" as const,
+      passed: riskPressure <= config.maxRisk,
+      severity: "high" as const,
+      reason: "Volatility exceeds the local strategy risk gate.",
+    },
+    {
+      id: "confidence-stability",
+      label: "Confidence stability",
+      type: "soft" as const,
+      passed: setupQuality >= config.minQuality,
+      severity: "medium" as const,
+      reason: "Setup quality is not stable enough for full sizing.",
+    },
+    {
+      id: "opportunity-density",
+      label: "Opportunity density",
+      type: "hard" as const,
+      passed: signalAction === "Buy" && rawSuggestedExposure > 0,
+      severity: "high" as const,
+      reason: "Actionable opportunity density is too low.",
+    },
+    {
+      id: "risk-gate",
+      label: "Risk gate",
+      type: "hard" as const,
+      passed: riskPressure <= config.maxRisk,
+      severity: "high" as const,
+      reason: "Risk gate prevents position sizing.",
+    },
+  ];
+  const financialSizing = sizeFinancialExposure({
+    targetRef: symbol,
+    actionRef: signalAction,
+    confidence: setupQuality,
+    riskPressure,
+    requestedExposurePct: rawSuggestedExposure,
+    availableExposurePct: config.maxPositionPct,
+    maxExposurePct: config.maxPositionPct,
+    constraints: sizingConstraints,
+    viability: {
+      expectedBenefit: clamp(
+        setupQuality * 0.55 +
+          Math.max(0, momentum) * 8 +
+          Math.max(0, trend) * 3,
+      ),
+      expectedCost: clamp(Math.abs(momentum) * 4 + Math.max(0, vol - 35) * 0.35),
+      expectedRisk: riskPressure,
+      uncertainty: 100 - setupQuality,
+      confidence: setupQuality,
+      minMarginOfSafety: 0,
+      thresholds: {
+        minConfidence: config.minQuality,
+        maxRisk: config.maxRisk,
+        maxUncertainty: 70,
+        maxCost: 85,
+      },
+      constraints: sizingConstraints.map((constraint) => ({
+        id: constraint.id,
+        label: constraint.label,
+        type: constraint.type,
+        hard: constraint.type === "hard",
+        passed: constraint.passed,
+        severity: constraint.severity,
+        reason: constraint.reason,
+      })),
+      context: { momentum, trend, volatilityPct: vol },
+    },
+  });
+  const suggestedExposure = signalAction === "Buy" ? financialSizing.suggestedExposurePct : 0;
 
   const regime =
     riskPressure > 72
@@ -202,6 +301,16 @@ function signalForBars(
     trendQuality: clamp(50 + trend * 10 + momentum),
     timingQuality: clamp((setupQuality + Math.max(0, momentum * 8)) / 2),
     expectedMove: momentum,
+    sizingMode: financialSizing.sizingMode,
+    sizingReasons: financialSizing.sizingReasons,
+    sizingConstraints: financialSizing.sizingConstraints,
+    sizingResult: financialSizing.sizingResult,
+    viabilityVerdict: financialSizing.viabilityVerdict,
+    viabilityReason: financialSizing.viabilityReason,
+    viabilityWarnings: financialSizing.viabilityWarnings,
+    viabilityBlockers: financialSizing.viabilityBlockers,
+    viabilityMarginOfSafety: financialSizing.viabilityMarginOfSafety,
+    viabilityResult: financialSizing.viabilityResult,
     regime,
   };
 }

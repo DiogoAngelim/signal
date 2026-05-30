@@ -88,181 +88,6 @@ function normalizeBinanceSnapshotSymbol(symbol: string) {
 
 
 
-function baseProviderTicker(symbol: string) {
-  return String(symbol ?? "")
-    .trim()
-    .split(":")
-    .at(-1)!
-    .replace(/\.(BR|AS|PA|LS|IR|OL|L|MI|DE|F|SW|MC|SA)$/i, "");
-}
-
-function marketNameFromOptions(options: any) {
-  return String(
-    options?.market ??
-    options?.marketName ??
-    options?.exchange ??
-    options?.venue ??
-    "",
-  ).toUpperCase();
-}
-
-function candidateTradingViewScannerSymbols(rawSymbol: string, options?: any) {
-  const raw = String(rawSymbol ?? "").trim();
-  const base = baseProviderTicker(raw);
-  const market = marketNameFromOptions(options);
-  const candidates = new Set<string>();
-
-async function fetchTradingViewScannerRows(symbol: string, options: TradingViewRowsOptions): Promise<TradingViewRow[]> {
-
-  if (!hasTimeRemaining(options, 3_500)) return [];
-
-  const candidates = candidateTradingViewScannerSymbols(symbol, options);
-
-  if (!candidates.length) return [];
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), TRADINGVIEW_TIMEOUT_MS);
-
-  try {
-    const response = await fetch("https://scanner.tradingview.com/global/scan", {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0",
-      },
-      body: JSON.stringify({
-        symbols: {
-          tickers: candidates,
-          query: { types: [] },
-        },
-        columns: [
-          "close",
-          "open",
-          "high",
-          "low",
-          "volume",
-          "change",
-          "change_abs",
-        ],
-      }),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) return [];
-
-    const payload = await response.json();
-    const row = Array.isArray(payload?.data) ? payload.data[0] : null;
-    const data = Array.isArray(row?.d) ? row.d : [];
-
-    const close = Number(data[0]);
-    if (!Number.isFinite(close) || close <= 0) return [];
-
-    const open = Number(data[1]);
-    const high = Number(data[2]);
-    const low = Number(data[3]);
-    const volume = Number(data[4]);
-    const changePercent = Number(data[5]);
-    const changeAbs = Number(data[6]);
-
-    logger.info(
-      { originalSymbol: symbol, providerSymbol: row?.s, candidates },
-      "Resolved quote through TradingView scanner",
-    );
-
-    return [
-      {
-        date: new Date().toISOString().slice(0, 10),
-        open: Number.isFinite(open) ? open : close,
-        high: Number.isFinite(high) ? high : close,
-        low: Number.isFinite(low) ? low : close,
-        price: close,
-        regularMarketPrice: close,
-        close,
-        adjustedClose: close,
-        volume: Number.isFinite(volume) ? volume : 0,
-        regularMarketVolume: Number.isFinite(volume) ? volume : 0,
-        change: Number.isFinite(changeAbs) ? changeAbs : 0,
-        changePercent: Number.isFinite(changePercent) ? changePercent : 0,
-        regularMarketChange: Number.isFinite(changeAbs) ? changeAbs : 0,
-        regularMarketChangePercent: Number.isFinite(changePercent) ? changePercent : 0,
-      } as TradingViewRow,
-    ];
-  } catch {
-    return [];
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-  if (raw.includes(":")) {
-    candidates.add(raw);
-  }
-
-  if (
-    market === "ADX" ||
-    market.includes("ABU DHABI") ||
-    market.includes("ABU_DHABI") ||
-    /^ADX:/i.test(raw)
-  ) {
-    candidates.add(`ADX:${base}`);
-    return Array.from(candidates);
-  }
-
-  if (market.includes("EURONEXT OSLO") || market.includes("OSLO") || /\.OL$/i.test(raw)) {
-    candidates.add(`OSL:${base}`);
-    candidates.add(`OSE:${base}`);
-    candidates.add(`OSLO:${base}`);
-    return Array.from(candidates);
-  }
-
-  if (
-    market.includes("EURONEXT BRUSSELS") ||
-    market.includes("BRUSSELS") ||
-    market.includes("EURONEXT AMSTERDAM") ||
-    market.includes("AMSTERDAM") ||
-    market.includes("EURONEXT PARIS") ||
-    market.includes("PARIS") ||
-    market.includes("EURONEXT LISBON") ||
-    market.includes("LISBON") ||
-    market.includes("EURONEXT DUBLIN") ||
-    market.includes("DUBLIN") ||
-    /^EURONEXT:/i.test(raw) ||
-    /\.(BR|AS|PA|LS|IR)$/i.test(raw)
-  ) {
-    candidates.add(`EURONEXT:${base}`);
-    return Array.from(candidates);
-  }
-
-  if (market.includes("LSE") || market.includes("LONDON") || /\.L$/i.test(raw)) {
-    candidates.add(`LSE:${base}`);
-    candidates.add(`LONDON:${base}`);
-    return Array.from(candidates);
-  }
-
-  if (market.includes("SIX") || market.includes("SWISS") || /\.SW$/i.test(raw)) {
-    candidates.add(`SIX:${base}`);
-    candidates.add(`SWX:${base}`);
-    return Array.from(candidates);
-  }
-
-  if (market.includes("MILAN") || market.includes("BORSA") || /\.MI$/i.test(raw)) {
-    candidates.add(`MIL:${base}`);
-    candidates.add(`MILAN:${base}`);
-    return Array.from(candidates);
-  }
-
-  // Generic fallbacks.
-  candidates.add(raw);
-  candidates.add(base);
-  candidates.add(`EURONEXT:${base}`);
-  candidates.add(`OSL:${base}`);
-
-  return Array.from(candidates).filter(Boolean);
-}
-
-
-
 const PROVIDER_SYMBOL_RESOLUTION_CACHE = new Map<string, { symbol: string | null; expiresAt: number }>();
 const PROVIDER_SYMBOL_RESOLUTION_TTL_MS = 6 * 60 * 60 * 1000;
 
@@ -303,6 +128,9 @@ function candidateProviderSymbols(rawSymbol: string) {
     .replace(/\.PA$/i, "")
     .replace(/\.LS$/i, "")
     .replace(/\.IR$/i, "")
+    .replace(/\.AD$/i, "")
+    .replace(/\.AE$/i, "")
+    .replace(/\.SA$/i, "")
     .replace(/\.L$/i, "");
 
   const candidates = new Set<string>();
@@ -316,6 +144,15 @@ function candidateProviderSymbols(rawSymbol: string) {
     candidates.add(`OSLO:${stripped}`);
     candidates.add(`OSE:${stripped}`);
     candidates.add(`EURONEXT:${stripped}`);
+  } else if (/ADX|ABU DHABI/i.test(prefix) || /\.AD$/i.test(base)) {
+    candidates.add(`${stripped}.AD`);
+    candidates.add(`ADX:${stripped}`);
+  } else if (/DFM|DUBAI/i.test(prefix) || /\.AE$/i.test(base)) {
+    candidates.add(`${stripped}.AE`);
+    candidates.add(`DFM:${stripped}`);
+  } else if (/B3|BMFBOVESPA|SAO PAULO|SÃO PAULO/i.test(prefix) || /\.SA$/i.test(base)) {
+    candidates.add(`${stripped}.SA`);
+    candidates.add(`BMFBOVESPA:${stripped}`);
   } else if (/BRUSSELS/i.test(prefix) || /\.BR$/i.test(base)) {
     candidates.add(`${stripped}.BR`);
     candidates.add(`EURONEXT:${stripped}`);
@@ -381,6 +218,7 @@ async function yahooChartRowsForProviderSymbol(symbol: string, options: TradingV
 
       rows.push({
         date: new Date(Number(timestamps[index]) * 1000).toISOString().slice(0, 10),
+        price: close,
         open: Number.isFinite(open) ? open : close,
         high: Number.isFinite(high) ? high : close,
         low: Number.isFinite(low) ? low : close,
@@ -791,10 +629,23 @@ export interface MarketDailyCandle {
 const currentDirname = process.cwd();
 
 const PUBLIC_DIR_CANDIDATES = [
+  path.resolve(process.cwd(), "src", "artifacts", "signal-markets", "public"),
+  path.resolve(process.cwd(), "src", "artifacts", "signal-markets", "dist", "public"),
+  path.resolve(process.cwd(), "..", "signal-markets", "public"),
+  path.resolve(process.cwd(), "..", "signal-markets", "dist", "public"),
   path.resolve(process.cwd(), "stocks-public"),
   path.resolve(process.cwd(), "src", "stocks-public"),
   path.resolve(process.cwd(), "artifacts", "signal-markets", "public"),
   path.resolve(process.cwd(), "artifacts", "signal-markets", "dist", "public"),
+  path.resolve(
+    process.cwd(),
+    "examples",
+    "stocks-optimizer",
+    "src",
+    "artifacts",
+    "signal-markets",
+    "public",
+  ),
   path.resolve(
     process.cwd(),
     "examples",
@@ -929,7 +780,22 @@ const marketCache = new Map<
   { expiresAt: number; items: StockListItem[] }
 >();
 const quoteCache = new Map<string, { expiresAt: number; quote: StockQuote }>();
-type TradingViewRow = { date: string; price: number };
+type TradingViewRow = {
+  date: string;
+  price: number;
+  open?: number;
+  high?: number;
+  low?: number;
+  close?: number;
+  adjustedClose?: number;
+  volume?: number;
+  regularMarketPrice?: number;
+  regularMarketVolume?: number;
+  change?: number;
+  changePercent?: number;
+  regularMarketChange?: number;
+  regularMarketChangePercent?: number;
+};
 type TradingViewRowsOptions = {
   bars?: number;
   lookbackYears?: number;
@@ -1833,7 +1699,7 @@ async function fetchBinanceQuote(symbol: string): Promise<StockQuote | null> {
       ? cache.futures.get(normalized.apiSymbol)
       : cache.spot.get(normalized.apiSymbol);
 
-  if (!ticker && shouldUseBinanceFallbackProvider(typeof market !== "undefined" ? market : undefined, typeof symbol !== "undefined" ? symbol : undefined)) {
+  if (!ticker) {
     ticker = await fetchBinanceTickerRow(normalized);
   }
 
@@ -1851,15 +1717,6 @@ async function fetchBinanceQuote(symbol: string): Promise<StockQuote | null> {
 
   const price = parseFiniteNumber(ticker.lastPrice);
   if (!Number.isFinite(price) || price <= 0) {
-    const parsedBarQuote = parseTradingViewCsvBarQuote(symbol, text);
-
-    if (parsedBarQuote) {
-
-      return parsedBarQuote;
-
-    }
-
-
     logger.warn(
       {
         symbol,
@@ -1928,7 +1785,7 @@ async function fetchBinanceTickerRow(input: {
   const path =
     input.kind === "futures" ? "/fapi/v1/ticker/24hr" : "/api/v3/ticker/24hr";
   const url = `${baseUrl}${path}?symbol=${encodeURIComponent(input.apiSymbol)}`;
-  const rows = (shouldUseBinanceFallbackProvider(typeof market !== "undefined" ? market : undefined, typeof symbol !== "undefined" ? symbol : undefined) ? await fetchBinanceTickerRows(url, input.kind) : null);
+  const rows = await fetchBinanceTickerRows(url, input.kind);
   return rows[0] ?? null;
 }
 
@@ -1977,17 +1834,14 @@ async function fetchBinanceTickerRows(
     });
     if (!response.ok) {
       logger.warn(
-      {
-        marketType,
-        market: typeof market !== "undefined" ? market : undefined,
-        symbol: typeof symbol !== "undefined" ? symbol : undefined,
-        apiSymbol: typeof apiSymbol !== "undefined" ? apiSymbol : undefined,
-        url: typeof url !== "undefined" ? url : undefined,
-        status: response.status,
-        statusText: response.statusText,
-      },
-      "Binance ticker snapshot request failed",
-    );
+        {
+          marketType,
+          url,
+          status: response.status,
+          statusText: response.statusText,
+        },
+        "Binance ticker snapshot request failed",
+      );
       return [];
     }
 
@@ -2253,7 +2107,7 @@ function scannerBaseTickerResolved(symbol: string) {
     .trim()
     .split(":")
     .at(-1)!
-    .replace(/\.(BR|AS|PA|LS|IR|OL|L|MI|DE|F|SW|MC|SA)$/i, "");
+    .replace(/\.(BR|AS|PA|LS|IR|OL|L|MI|DE|F|SW|MC|SA|AD|AE)$/i, "");
 }
 
 function scannerMarketResolved(options: any) {
@@ -2274,8 +2128,34 @@ function scannerCandidatesResolved(rawSymbol: string, options?: any) {
 
   if (raw.includes(":")) candidates.add(raw);
 
-  if (market === "ADX" || market.includes("ABU DHABI") || /^ADX:/i.test(raw)) {
+  if (market === "ADX" || market.includes("ABU DHABI") || /^ADX:/i.test(raw) || /\.AD$/i.test(raw)) {
     candidates.add(`ADX:${base}`);
+    return Array.from(candidates);
+  }
+
+  if (
+    market === "DFM" ||
+    market === "DXB" ||
+    market === "DUBAI" ||
+    market.includes("DUBAI") ||
+    /^DFM:/i.test(raw) ||
+    /^DUBAI:/i.test(raw) ||
+    /\.AE$/i.test(raw)
+  ) {
+    candidates.add(`DFM:${base}`);
+    candidates.add(`DUBAI:${base}`);
+    return Array.from(candidates);
+  }
+
+  if (
+    market === "B3" ||
+    market === "BMFBOVESPA" ||
+    market.includes("SAO PAULO") ||
+    market.includes("SÃO PAULO") ||
+    /^BMFBOVESPA:/i.test(raw) ||
+    /\.SA$/i.test(raw)
+  ) {
+    candidates.add(`BMFBOVESPA:${base}`);
     return Array.from(candidates);
   }
 
@@ -2307,6 +2187,7 @@ function scannerCandidatesResolved(rawSymbol: string, options?: any) {
   candidates.add(raw);
   candidates.add(base);
   candidates.add(`ADX:${base}`);
+  candidates.add(`BMFBOVESPA:${base}`);
   candidates.add(`EURONEXT:${base}`);
   candidates.add(`OSL:${base}`);
 

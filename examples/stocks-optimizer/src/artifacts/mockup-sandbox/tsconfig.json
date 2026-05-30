@@ -8,6 +8,8 @@
     "jsx": "preserve",
     "esModuleInterop": true,
     "allowImportingTsExtensions": true,
+    "ignoreDeprecations": "5.0",
+    "baseUrl": ".",
     "types": ["node", "vite/client"],
     "paths": {
       "@/*": ["./src/*"]

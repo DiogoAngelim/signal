@@ -1,4 +1,6 @@
 packages:
+  - "packages/agency"
+  - "packages/semantic-state"
   - "examples/stocks-optimizer"
   - "examples/stocks-optimizer/src/artifacts/*"
 

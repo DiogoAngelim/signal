@@ -1,0 +1,72 @@
+import * as React from "react";
+
+type IconProps = React.SVGProps<SVGSVGElement> & {
+  size?: string | number;
+};
+
+function createIcon(label: string) {
+  return React.forwardRef<SVGSVGElement, IconProps>(function TestIcon(
+    { children, size = 16, ...props },
+    ref,
+  ) {
+    return (
+      <svg
+        ref={ref}
+        data-lucide={label}
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        aria-hidden="true"
+        {...props}
+      >
+        {children}
+      </svg>
+    );
+  });
+}
+
+export const Activity = createIcon("activity");
+export const AlertCircle = createIcon("alert-circle");
+export const AlertTriangle = createIcon("alert-triangle");
+export const ArrowDownRight = createIcon("arrow-down-right");
+export const ArrowLeft = createIcon("arrow-left");
+export const ArrowRight = createIcon("arrow-right");
+export const ArrowUpRight = createIcon("arrow-up-right");
+export const BarChart3 = createIcon("bar-chart-3");
+export const Brain = createIcon("brain");
+export const Check = createIcon("check");
+export const CheckCircle2 = createIcon("check-circle-2");
+export const ChevronDown = createIcon("chevron-down");
+export const ChevronDownIcon = createIcon("chevron-down-icon");
+export const ChevronLeft = createIcon("chevron-left");
+export const ChevronLeftIcon = createIcon("chevron-left-icon");
+export const ChevronRight = createIcon("chevron-right");
+export const ChevronRightIcon = createIcon("chevron-right-icon");
+export const ChevronUp = createIcon("chevron-up");
+export const Circle = createIcon("circle");
+export const CircleDollarSign = createIcon("circle-dollar-sign");
+export const Clock = createIcon("clock");
+export const Compass = createIcon("compass");
+export const Eye = createIcon("eye");
+export const Gauge = createIcon("gauge");
+export const GripVertical = createIcon("grip-vertical");
+export const Layers = createIcon("layers");
+export const LayoutTemplate = createIcon("layout-template");
+export const LineChart = createIcon("line-chart");
+export const Loader2Icon = createIcon("loader-2-icon");
+export const Minus = createIcon("minus");
+export const Moon = createIcon("moon");
+export const MoreHorizontal = createIcon("more-horizontal");
+export const PanelLeftIcon = createIcon("panel-left-icon");
+export const Radio = createIcon("radio");
+export const RefreshCw = createIcon("refresh-cw");
+export const Search = createIcon("search");
+export const ShieldCheck = createIcon("shield-check");
+export const Sparkles = createIcon("sparkles");
+export const Sun = createIcon("sun");
+export const TrendingUp = createIcon("trending-up");
+export const Wallet = createIcon("wallet");
+export const X = createIcon("x");
+export const Zap = createIcon("zap");

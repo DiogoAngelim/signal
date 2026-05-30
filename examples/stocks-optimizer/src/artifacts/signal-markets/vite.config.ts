@@ -4,12 +4,20 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 const API_TARGET = "http://localhost:4010";
+const localNodeModules = path.resolve(process.cwd(), "node_modules");
+const isVitest = process.env.VITEST === "true";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
+    dedupe: ["react", "react-dom"],
     alias: {
       "@": path.resolve(process.cwd(), "src"),
+      react: path.resolve(localNodeModules, "react"),
+      "react-dom": path.resolve(localNodeModules, "react-dom"),
+      ...(isVitest
+        ? { "lucide-react": path.resolve(process.cwd(), "src/test/lucide-react.tsx") }
+        : {}),
     },
   },
   server: {
