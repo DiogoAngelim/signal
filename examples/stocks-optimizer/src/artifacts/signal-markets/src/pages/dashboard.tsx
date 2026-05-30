@@ -5963,6 +5963,7 @@ export default function Dashboard() {
     restorationProgressDiagnostic?.primaryBlocker ?? primaryUnlockCondition;
   const restorationOutcomeProof = restorationProgressDiagnostic?.outcomeProof;
   const restorationLedger = restorationProgressDiagnostic?.ledger;
+  const restorationActionPlan = restorationProgressDiagnostic?.actionPlan;
   const restorationLedgerEntries =
     restorationLedger?.entries?.length
       ? restorationLedger.entries.slice(-3).reverse()
@@ -5979,11 +5980,50 @@ export default function Dashboard() {
     restorationProgressDiagnostic?.nextActions?.length
       ? restorationProgressDiagnostic.nextActions
       : [primaryUnlockCondition];
+  const restorationActionInstruction =
+    restorationActionPlan?.activeInstruction ??
+    restorationNextActions[0] ??
+    primaryUnlockCondition;
+  const restorationExposureInstruction =
+    restorationActionPlan?.exposureInstruction ??
+    "Keep reduced-size participation in place until Survival Memory proof clears.";
+  const restorationProofLaneOpen =
+    restorationProgressDiagnostic?.canRestoreSizing === true ||
+    (restorationProgressDiagnostic?.currentExposureCapPct ?? 0) > 0;
+  const survivalConfidenceRestorationGate =
+    restorationProgressDiagnostic?.gates?.find(
+      (gate) => gate.id === "survival-confidence" && !gate.passed,
+    ) ?? null;
+  const cleanProofRestorationGate =
+    restorationProgressDiagnostic?.gates?.find(
+      (gate) =>
+        gate.id === "clean-reduced-size-outcomes" &&
+        !gate.passed &&
+        (restorationActionPlan?.remainingCleanOutcomes ?? 0) > 0,
+    ) ?? null;
+  const actionableRestorationGate =
+    survivalConfidenceRestorationGate ??
+    (restorationProofLaneOpen ? cleanProofRestorationGate : null) ??
+    restorationProgressDiagnostic?.gates?.find(
+      (gate) =>
+        !gate.passed &&
+        gate.id !== "survival-status" &&
+        gate.id !== "clean-reduced-size-outcomes",
+    ) ??
+    restorationProgressDiagnostic?.gates?.find((gate) => !gate.passed) ??
+    null;
+  const restorationRemainingCleanOutcomes =
+    restorationActionPlan?.remainingCleanOutcomes ??
+    restorationOutcomeProof?.remainingCleanReducedSizeOutcomes;
+  const restorationActiveBoundaryBreaks =
+    restorationActionPlan?.activeBoundaryBreaks ??
+    restorationOutcomeProof?.activeProofBoundaryBreakCount ??
+    restorationOutcomeProof?.failedReducedSizeOutcomeCount;
   const cleanReducedSizeOutcomeValue = restorationOutcomeProof
     ? `${restorationOutcomeProof.cleanReducedSizeOutcomeCount}/${restorationOutcomeProof.requiredCleanOutcomes}`
     : "Pending";
   const reducedSizeOutcomeSub = restorationOutcomeProof
-    ? `${restorationOutcomeProof.reducedSizeOutcomeCount} reduced-size outcomes / ${restorationOutcomeProof.failedReducedSizeOutcomeCount} boundary breaks`
+    ? `${restorationOutcomeProof.reducedSizeOutcomeCount} reduced-size outcomes / ${restorationActiveBoundaryBreaks ?? 0} active-lane breaks`
     : undefined;
   const restorationCurrentCapValue = restorationProgressDiagnostic
     ? fmtPlainPct(restorationProgressDiagnostic.currentExposureCapPct)
@@ -5991,11 +6031,22 @@ export default function Dashboard() {
   const restorationNormalTargetValue = restorationProgressDiagnostic
     ? fmtPlainPct(restorationProgressDiagnostic.targetNormalExposurePct)
     : "Pending";
+  const restorationActionPlanStatus =
+    restorationActionPlan?.status?.replace(/_/g, " ") ??
+    restorationProgressDiagnostic?.status?.replace(/_/g, " ") ??
+    "pending";
+  const restorationActionPlanTone =
+    restorationActionPlan?.status === "restored" ||
+    restorationActionPlan?.status === "ready_for_review"
+      ? "good"
+      : restorationActionPlan?.status === "reset_required"
+        ? "bad"
+        : "warn";
   const operatorSummary = !hasMarketData
     ? "Loading prices, signals, and governance before issuing a decision."
     : dashboardSizing.suggestedMaximumExposurePct <= 0
       ? `Stay flat for now. ${primaryInvalidationCondition}`
-      : `Use ${displaySizingMode(dashboardSizing.sizingMode).toLowerCase()} exposure in ${actionableTickersLabel}. Normal sizing stays locked until ${primaryUnlockCondition}`;
+      : `Use ${displaySizingMode(dashboardSizing.sizingMode).toLowerCase()} exposure in ${actionableTickersLabel}. ${restorationExposureInstruction}`;
   const restrictionImpactRows = (
     executiveIA.whyNotFullSize.factors.length
       ? executiveIA.whyNotFullSize.factors
@@ -6020,15 +6071,22 @@ export default function Dashboard() {
     0,
     executiveIA.whyNotFullSize.factors.length - restrictionImpactRows.length,
   );
-  const increaseExposureTriggers = uniqueStrings(
-    executiveIA.decisionChange.increaseExposure,
-  ).slice(0, 4);
+  const increaseExposureTriggers = uniqueStrings([
+    restorationActionInstruction,
+    ...executiveIA.decisionChange.increaseExposure.filter(
+      (item) => item !== primaryUnlockCondition,
+    ),
+  ]).slice(0, 4);
   const reduceOrInvalidateTriggers = uniqueStrings([
     ...executiveIA.decisionChange.reduceExposure,
     ...executiveIA.decisionChange.invalidateSignal,
   ]).slice(0, 4);
   const restorationPathTriggers = uniqueStrings(
-    executiveIA.decisionChange.watchToLimitedToNormal,
+    restorationActionPlan?.steps?.length
+      ? restorationActionPlan.steps.map(
+          (step) => `${step.label}: ${step.detail}`,
+        )
+      : executiveIA.decisionChange.watchToLimitedToNormal,
   ).slice(0, 3);
   const accountabilityHighlights = governanceEvolution.accountabilityLoop
     .filter((step) => step.status !== "complete")
@@ -6347,7 +6405,7 @@ export default function Dashboard() {
                     </StatusPill>
                   </div>
                   <p className="mt-3 text-sm leading-6 text-zinc-400">
-                    {primaryUnlockCondition}
+                    {restorationActionInstruction}
                   </p>
                   <div className="mt-4">
                     <div className="mb-1 flex justify-between text-[11px] text-zinc-500">
@@ -6428,6 +6486,96 @@ export default function Dashboard() {
 	                    sub="restoration destination"
 	                  />
 	                </div>
+	                <div className="mt-4 rounded-lg border border-[#FDD000]/20 bg-[#FDD000]/10 px-4 py-3">
+	                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+	                    <div className="min-w-0">
+	                      <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#FDD000]">
+	                        Restoration action plan
+	                      </div>
+	                      <div className="mt-2 text-base font-semibold text-white">
+	                        {restorationActionInstruction}
+	                      </div>
+	                      <p className="mt-2 text-sm leading-6 text-zinc-300">
+	                        {restorationExposureInstruction}
+	                      </p>
+	                    </div>
+	                    <StatusPill tone={restorationActionPlanTone}>
+	                      {restorationActionPlanStatus}
+	                    </StatusPill>
+	                  </div>
+	                  <div className="mt-4 grid gap-3 md:grid-cols-3">
+	                    <MiniMetric
+	                      label="Remaining clean outcomes"
+	                      value={
+	                        restorationRemainingCleanOutcomes == null
+	                          ? "Pending"
+	                          : String(restorationRemainingCleanOutcomes)
+	                      }
+	                      sub="current reduced-size streak"
+	                      emphasis="quiet"
+	                    />
+	                    <MiniMetric
+	                      label="Active lane breaks"
+	                      value={
+	                        restorationActiveBoundaryBreaks == null
+	                          ? "Pending"
+	                          : String(restorationActiveBoundaryBreaks)
+	                      }
+	                      sub="resets proof if above zero"
+	                      tone={
+	                        restorationActiveBoundaryBreaks && restorationActiveBoundaryBreaks > 0
+	                          ? "bad"
+	                          : "good"
+	                      }
+	                      emphasis="quiet"
+	                    />
+	                    <MiniMetric
+	                      label="Normal sizing"
+	                      value={
+	                        restorationProgressDiagnostic?.canRestoreSizing
+	                          ? "Review"
+	                          : "Locked"
+	                      }
+	                      sub="until proof lane clears"
+	                      tone={
+	                        restorationProgressDiagnostic?.canRestoreSizing
+	                          ? "good"
+	                          : "warn"
+	                      }
+	                      emphasis="quiet"
+	                    />
+	                  </div>
+	                  {restorationActionPlan?.steps?.length ? (
+	                    <div className="mt-4 grid gap-2 md:grid-cols-3">
+	                      {restorationActionPlan.steps.map((step) => (
+	                        <div
+	                          key={step.id}
+	                          className="rounded-lg border border-white/10 bg-black/20 px-3 py-2"
+	                        >
+	                          <div className="flex items-start justify-between gap-3">
+	                            <div className="min-w-0 text-sm font-medium text-zinc-100">
+	                              {step.label}
+	                            </div>
+	                            <StatusPill
+	                              tone={
+	                                step.status === "done"
+	                                  ? "good"
+	                                  : step.status === "blocked"
+	                                    ? "neutral"
+	                                    : "warn"
+	                              }
+	                            >
+	                              {step.status}
+	                            </StatusPill>
+	                          </div>
+	                          <div className="mt-2 line-clamp-3 text-xs leading-5 text-zinc-400">
+	                            {step.detail}
+	                          </div>
+	                        </div>
+	                      ))}
+	                    </div>
+	                  ) : null}
+	                </div>
 	                {restorationLedger?.statePath?.length ? (
 	                  <div className="mt-4 grid gap-2 md:grid-cols-4">
 	                    {restorationLedger.statePath.map((step) => (
@@ -6453,13 +6601,10 @@ export default function Dashboard() {
 	                <div className="mt-4 grid gap-3 md:grid-cols-1">
 	                  <MiniMetric
 	                    label="Next gate"
-	                    value={
-	                      restorationGatePreview.find((gate) => !gate.passed)
-	                        ?.label ?? "Clear"
-	                    }
-	                    sub={restorationNextActions[0]}
+	                    value={actionableRestorationGate?.label ?? "Clear"}
+	                    sub={restorationActionInstruction}
 	                    tone={
-	                      restorationGatePreview.some((gate) => !gate.passed)
+	                      actionableRestorationGate
 	                        ? "warn"
 	                        : "good"
 	                    }
@@ -6508,7 +6653,9 @@ export default function Dashboard() {
 	                      >
 	                        <div className="flex items-start justify-between gap-3">
 	                          <div className="min-w-0 text-sm font-medium text-zinc-200">
-	                            {gate.label}
+	                            {gate.id === "trust-score"
+	                              ? "Restoration trust"
+	                              : gate.label}
 	                          </div>
 	                          <StatusPill tone={gate.passed ? "good" : "warn"}>
 	                            {gate.passed ? "clear" : "open"}

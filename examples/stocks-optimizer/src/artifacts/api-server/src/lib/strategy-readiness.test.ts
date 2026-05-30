@@ -650,9 +650,107 @@ test("restoration ledger tracks clean reduced-size streaks and survival boundari
   assert.equal(progress.restorationState, "watch");
   assert.equal(progress.outcomeProof.requiredCleanOutcomes, 3);
   assert.equal(progress.outcomeProof.cleanReducedSizeOutcomeCount, 2);
+  assert.equal(progress.outcomeProof.remainingCleanReducedSizeOutcomes, 1);
+  assert.equal(progress.outcomeProof.activeProofBoundaryBreakCount, 0);
   assert.equal(progress.ledger.entries.length, 4);
   assert.ok(progress.ledger.entries.find((entry) => entry.id === "mae-break")?.boundaryBreaches.includes("MAE"));
   assert.equal(progress.ledger.exactUnlockCondition, "Close 1 more clean reduced-size outcome without breaching survival boundaries.");
+  assert.equal(progress.actionPlan.remainingCleanOutcomes, 1);
+  assert.match(progress.actionPlan.exposureInstruction, /Keep exposure capped/);
+});
+
+test("restoration proof lane can advance after an older boundary break is followed by a clean streak", () => {
+  const clean = {
+    timestamp: "2026-05-28T00:00:00.000Z",
+    stateFingerprint: "venue:binance|action:buy",
+    action: "buy",
+    maxExposure: 1,
+    realizedReturn: 1.2,
+    maxDrawdown: 4,
+    maxAdverseExcursion: 6,
+    recoveryTimeBars: 2,
+    volatilityExpansion: 8,
+    tailRisk: 10,
+    liquidityStress: 8,
+    structuralDanger: 9,
+    novelty: 12,
+    opportunityDensity: 35,
+    outcomeClass: "comfortable_survival",
+    survivalCost: 10,
+    scarWeight: 0,
+  };
+  const progress = buildRestorationProgress({
+    survivalMemory: survivalMemory({
+      status: "scarred",
+      recommendation: "act_with_reduced_size",
+      survivalConfidence: 73,
+      maxExposurePct: 2,
+      records: [
+        {
+          ...clean,
+          id: "older-mae-break",
+          asset: "SOLUSDT",
+          outcomeClass: "barely_survived",
+          maxAdverseExcursion: 36,
+          survivalCost: 34,
+          scarWeight: 0.55,
+        },
+        { ...clean, id: "clean-1", asset: "BNBUSDT" },
+        { ...clean, id: "clean-2", asset: "SOLUSDT" },
+        { ...clean, id: "clean-3", asset: "BNBUSDT" },
+      ],
+    }),
+    currentExposureCapPct: 2,
+    targetNormalExposurePct: 5,
+  });
+
+  assert.equal(progress.outcomeProof.failedReducedSizeOutcomeCount, 1);
+  assert.equal(progress.outcomeProof.activeProofBoundaryBreakCount, 0);
+  assert.equal(progress.outcomeProof.cleanReducedSizeOutcomeCount, 3);
+  assert.equal(progress.outcomeProof.remainingCleanReducedSizeOutcomes, 0);
+  assert.equal(progress.gates.find((gate) => gate.id === "clean-reduced-size-outcomes")?.passed, true);
+  assert.equal(progress.restorationState, "limited");
+  assert.equal(progress.actionPlan.status, "ready_for_review");
+  assert.match(progress.actionPlan.activeInstruction, /Promote Survival Memory/);
+});
+
+test("restoration plan blocks clean proof while survival confidence and proof lane capacity are missing", () => {
+  const progress = buildRestorationProgress({
+    survivalMemory: survivalMemory({
+      status: "scarred",
+      recommendation: "wait",
+      survivalConfidence: 66,
+      maxExposurePct: 0,
+    }),
+    currentExposureCapPct: 0,
+    targetNormalExposurePct: 0,
+  });
+  const cleanProofStep = progress.actionPlan.steps.find((step) => step.id === "collect-clean-outcomes");
+
+  assert.match(progress.actionPlan.activeInstruction, /Raise survival confidence from 66\/100/);
+  assert.match(progress.actionPlan.exposureInstruction, /Stay exits-only/);
+  assert.equal(progress.actionPlan.steps[0]?.id, "raise-survival-confidence");
+  assert.equal(cleanProofStep?.status, "blocked");
+  assert.match(cleanProofStep?.detail ?? "", /survival confidence reaches 70\/100/);
+});
+
+test("restoration plan asks to reopen the proof lane before counting clean outcomes at zero cap", () => {
+  const progress = buildRestorationProgress({
+    survivalMemory: survivalMemory({
+      status: "scarred",
+      recommendation: "act_with_reduced_size",
+      survivalConfidence: 73,
+      maxExposurePct: 0,
+    }),
+    currentExposureCapPct: 0,
+    targetNormalExposurePct: 0,
+  });
+  const cleanProofStep = progress.actionPlan.steps.find((step) => step.id === "collect-clean-outcomes");
+
+  assert.match(progress.actionPlan.activeInstruction, /Reopen reduced-size proof lane capacity/);
+  assert.equal(progress.actionPlan.steps[0]?.id, "reopen-proof-lane");
+  assert.equal(cleanProofStep?.status, "blocked");
+  assert.match(cleanProofStep?.detail ?? "", /current cap is 0%/);
 });
 
 test("recovery handles empty opportunity arrays and agency summary blocker counts", () => {

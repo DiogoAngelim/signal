@@ -36,6 +36,9 @@ describe("Dashboard calibration diagnostics", () => {
     expect(html).toContain("Clean proof");
     expect(html).toContain("Ledger state");
     expect(html).toContain("Normal sizing restoration");
+    expect(html).toContain("Restoration action plan");
+    expect(html).toContain("Remaining clean outcomes");
+    expect(html).toContain("Active lane breaks");
     expect(html).toContain("Calibration");
     expect(html).toContain("Belief diagnostics");
     expect(html).toContain("Recognition diagnostics");

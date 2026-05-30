@@ -570,6 +570,9 @@ export interface RestorationProgressDiagnostic {
     totalCleanReducedSizeOutcomeCount: number;
     cleanReducedSizeOutcomeCount: number;
     failedReducedSizeOutcomeCount: number;
+    remainingCleanReducedSizeOutcomes: number;
+    activeProofBoundaryBreakCount: number;
+    lastBoundaryBreakId?: string;
     cleanOutcomeRatio: number;
     survivalCostBoundary: number;
     maxDrawdownBoundary: number;
@@ -592,6 +595,20 @@ export interface RestorationProgressDiagnostic {
     requiredCleanOutcomes: number;
     cleanReducedSizeOutcomeCount: number;
     failedReducedSizeOutcomeCount: number;
+  };
+  actionPlan?: {
+    title: "Survival Memory Restoration Plan";
+    status: "collecting_evidence" | "reset_required" | "ready_for_review" | "restored";
+    activeInstruction: string;
+    exposureInstruction: string;
+    remainingCleanOutcomes: number;
+    activeBoundaryBreaks: number;
+    steps: Array<{
+      id: string;
+      label: string;
+      status: "done" | "active" | "blocked";
+      detail: string;
+    }>;
   };
   nextActions: string[];
   invalidationConditions: string[];

@@ -31,6 +31,9 @@ export type RestorationOutcomeProof = {
   totalCleanReducedSizeOutcomeCount: number;
   cleanReducedSizeOutcomeCount: number;
   failedReducedSizeOutcomeCount: number;
+  remainingCleanReducedSizeOutcomes: number;
+  activeProofBoundaryBreakCount: number;
+  lastBoundaryBreakId?: string;
   cleanOutcomeRatio: number;
   survivalCostBoundary: number;
   maxDrawdownBoundary: number;
@@ -76,6 +79,23 @@ export type SurvivalMemoryRestorationLedger = {
   failedReducedSizeOutcomeCount: number;
 };
 
+export type RestorationActionPlanStep = {
+  id: string;
+  label: string;
+  status: "done" | "active" | "blocked";
+  detail: string;
+};
+
+export type RestorationActionPlan = {
+  title: "Survival Memory Restoration Plan";
+  status: "collecting_evidence" | "reset_required" | "ready_for_review" | "restored";
+  activeInstruction: string;
+  exposureInstruction: string;
+  remainingCleanOutcomes: number;
+  activeBoundaryBreaks: number;
+  steps: RestorationActionPlanStep[];
+};
+
 export type RestorationProgressDiagnostic = {
   module: "stocks.restoration-progress";
   name: "Restoration Progress";
@@ -90,6 +110,7 @@ export type RestorationProgressDiagnostic = {
   gates: RestorationProgressGate[];
   ledger: SurvivalMemoryRestorationLedger;
   outcomeProof: RestorationOutcomeProof;
+  actionPlan: RestorationActionPlan;
   nextActions: string[];
   invalidationConditions: string[];
 };
@@ -184,7 +205,7 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
   const canRestoreSizing = recovery?.canRestoreSizing === true;
   const cleanOutcomeGatePassed =
     outcomeProof.cleanReducedSizeOutcomeCount >= outcomeProof.requiredCleanOutcomes &&
-    outcomeProof.failedReducedSizeOutcomeCount === 0;
+    outcomeProof.activeProofBoundaryBreakCount === 0;
   const gates: RestorationProgressGate[] = [
     gate({
       id: "survival-confidence",
@@ -309,12 +330,22 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     survivalConfidence,
     cleanOutcomeGatePassed,
     cleanReducedSizeOutcomeCount: outcomeProof.cleanReducedSizeOutcomeCount,
-    failedReducedSizeOutcomeCount: outcomeProof.failedReducedSizeOutcomeCount,
+    activeProofBoundaryBreakCount: outcomeProof.activeProofBoundaryBreakCount,
     threshold: thresholds.minSurvivalConfidenceForRestore,
   });
   const ledger = buildRestorationLedger({
     restorationState,
     outcomeProof,
+    survivalConfidence,
+    survivalConfidenceThreshold: thresholds.minSurvivalConfidenceForRestore,
+    survivalStatus: survivalMemory?.status,
+    canRestoreSizing,
+  });
+  const actionPlan = buildRestorationActionPlan({
+    outcomeProof,
+    ledger,
+    currentExposureCapPct,
+    targetNormalExposurePct,
     survivalConfidence,
     survivalConfidenceThreshold: thresholds.minSurvivalConfidenceForRestore,
     survivalStatus: survivalMemory?.status,
@@ -339,7 +370,9 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     gates,
     ledger,
     outcomeProof,
+    actionPlan,
     nextActions: unique([
+      actionPlan.activeInstruction,
       ledger.exactUnlockCondition,
       ...failedGates.map((item) => item.unlockCondition).filter(isString),
     ]),
@@ -370,6 +403,10 @@ function buildOutcomeProof(input: {
   const failedOutcomes = reducedSizeOutcomes.filter(isFailedOutcome);
   const ledgerEntries = reducedSizeOutcomes.map(ledgerEntryForRecord);
   const cleanStreakCount = cleanReducedSizeStreakCount(reducedSizeOutcomes);
+  const lastBoundaryBreak = [...ledgerEntries].reverse().find((entry) => entry.boundaryBreaches.length > 0);
+  const latestEntry = ledgerEntries[ledgerEntries.length - 1];
+  const activeProofBoundaryBreakCount =
+    cleanStreakCount > 0 || !latestEntry ? 0 : latestEntry.boundaryBreaches.length > 0 ? 1 : 0;
 
   return {
     requiredCleanOutcomes: REQUIRED_CLEAN_REDUCED_SIZE_OUTCOMES,
@@ -377,6 +414,12 @@ function buildOutcomeProof(input: {
     totalCleanReducedSizeOutcomeCount: cleanOutcomes.length,
     cleanReducedSizeOutcomeCount: cleanStreakCount,
     failedReducedSizeOutcomeCount: failedOutcomes.length,
+    remainingCleanReducedSizeOutcomes: Math.max(
+      0,
+      REQUIRED_CLEAN_REDUCED_SIZE_OUTCOMES - cleanStreakCount,
+    ),
+    activeProofBoundaryBreakCount,
+    lastBoundaryBreakId: lastBoundaryBreak?.id,
     cleanOutcomeRatio: round(
       reducedSizeOutcomes.length ? cleanOutcomes.length / reducedSizeOutcomes.length * 100 : 0,
     ),
@@ -410,7 +453,7 @@ function buildRestorationLedger(input: {
 }): SurvivalMemoryRestorationLedger {
   const cleanProofPassed =
     input.outcomeProof.cleanReducedSizeOutcomeCount >= input.outcomeProof.requiredCleanOutcomes &&
-    input.outcomeProof.failedReducedSizeOutcomeCount === 0;
+    input.outcomeProof.activeProofBoundaryBreakCount === 0;
   const confidencePassed = input.survivalConfidence >= input.survivalConfidenceThreshold;
   const statusClear = input.survivalStatus === "clear" || input.canRestoreSizing;
   const entries = input.outcomeProof.ledgerEntries;
@@ -440,7 +483,7 @@ function buildRestorationLedger(input: {
         state: "limited",
         label: "Limited proof",
         passed: cleanProofPassed,
-        detail: `${input.outcomeProof.cleanReducedSizeOutcomeCount}/${input.outcomeProof.requiredCleanOutcomes} clean reduced-size outcomes with ${input.outcomeProof.failedReducedSizeOutcomeCount} boundary breaks.`,
+        detail: `${input.outcomeProof.cleanReducedSizeOutcomeCount}/${input.outcomeProof.requiredCleanOutcomes} clean reduced-size outcomes with ${input.outcomeProof.activeProofBoundaryBreakCount} active-lane boundary breaks.`,
       },
       {
         state: "clear",
@@ -461,6 +504,189 @@ function buildRestorationLedger(input: {
     requiredCleanOutcomes: input.outcomeProof.requiredCleanOutcomes,
     cleanReducedSizeOutcomeCount: input.outcomeProof.cleanReducedSizeOutcomeCount,
     failedReducedSizeOutcomeCount: input.outcomeProof.failedReducedSizeOutcomeCount,
+  };
+}
+
+function buildRestorationActionPlan(input: {
+  outcomeProof: RestorationOutcomeProof;
+  ledger: SurvivalMemoryRestorationLedger;
+  currentExposureCapPct: number;
+  targetNormalExposurePct: number;
+  survivalConfidence: number;
+  survivalConfidenceThreshold: number;
+  survivalStatus?: string | null;
+  canRestoreSizing: boolean;
+}): RestorationActionPlan {
+  const remainingClean = input.outcomeProof.remainingCleanReducedSizeOutcomes;
+  const confidencePassed = input.survivalConfidence >= input.survivalConfidenceThreshold;
+  const cleanProofPassed =
+    remainingClean === 0 && input.outcomeProof.activeProofBoundaryBreakCount === 0;
+  const statusClear = input.survivalStatus === "clear" || input.canRestoreSizing;
+  const resetRequired = input.outcomeProof.activeProofBoundaryBreakCount > 0;
+  const proofLaneOpen = input.canRestoreSizing || input.currentExposureCapPct > 0;
+  const planStatus: RestorationActionPlan["status"] = input.canRestoreSizing
+    ? "restored"
+    : resetRequired
+      ? "reset_required"
+      : cleanProofPassed && confidencePassed
+        ? "ready_for_review"
+        : "collecting_evidence";
+  const activeInstruction = activeInstructionFor({
+    planStatus,
+    remainingClean,
+    confidencePassed,
+    proofLaneOpen,
+    survivalConfidence: input.survivalConfidence,
+    survivalConfidenceThreshold: input.survivalConfidenceThreshold,
+    statusClear,
+    exactUnlockCondition: input.ledger.exactUnlockCondition,
+  });
+  const firstStep = firstRestorationActionPlanStep({
+    canRestoreSizing: input.canRestoreSizing,
+    confidencePassed,
+    proofLaneOpen,
+    currentExposureCapPct: input.currentExposureCapPct,
+    survivalConfidence: input.survivalConfidence,
+    survivalConfidenceThreshold: input.survivalConfidenceThreshold,
+  });
+  const collectCleanOutcomesStep = collectCleanOutcomesActionPlanStep({
+    cleanProofPassed,
+    confidencePassed,
+    proofLaneOpen,
+    resetRequired,
+    remainingClean,
+    currentExposureCapPct: input.currentExposureCapPct,
+    survivalConfidenceThreshold: input.survivalConfidenceThreshold,
+  });
+
+  return {
+    title: "Survival Memory Restoration Plan",
+    status: planStatus,
+    activeInstruction,
+    exposureInstruction: input.canRestoreSizing
+      ? `Normal sizing can be reviewed against the ${formatPct(input.targetNormalExposurePct)} target.`
+      : !proofLaneOpen
+        ? "Stay exits-only until readiness, trust, and robustness gates reopen reduced-size proof lane capacity."
+      : `Keep exposure capped at ${formatPct(input.currentExposureCapPct)} until the proof lane and Survival Memory status clear.`,
+    remainingCleanOutcomes: remainingClean,
+    activeBoundaryBreaks: input.outcomeProof.activeProofBoundaryBreakCount,
+    steps: [
+      firstStep,
+      collectCleanOutcomesStep,
+      {
+        id: "clear-survival-memory",
+        label: "Clear Survival Memory",
+        status: statusClear ? "done" : cleanProofPassed && confidencePassed ? "active" : "blocked",
+        detail: statusClear
+          ? "Survival Memory status is clear."
+          : "Promote scarred/watch status only after the clean streak and survival confidence stay intact.",
+      },
+    ],
+  };
+}
+
+function firstRestorationActionPlanStep(input: {
+  canRestoreSizing: boolean;
+  confidencePassed: boolean;
+  proofLaneOpen: boolean;
+  currentExposureCapPct: number;
+  survivalConfidence: number;
+  survivalConfidenceThreshold: number;
+}): RestorationActionPlanStep {
+  if (input.canRestoreSizing) {
+    return {
+      id: "normal-sizing-review",
+      label: "Normal sizing review",
+      status: "done",
+      detail: "Reduced-size cap has finished its restoration role.",
+    };
+  }
+
+  if (!input.confidencePassed) {
+    return {
+      id: "raise-survival-confidence",
+      label: "Raise survival confidence",
+      status: "active",
+      detail: `Move survival confidence from ${Math.round(input.survivalConfidence)}/100 to at least ${input.survivalConfidenceThreshold}/100 before proof outcomes can restore sizing.`,
+    };
+  }
+
+  if (!input.proofLaneOpen) {
+    return {
+      id: "reopen-proof-lane",
+      label: "Reopen proof lane",
+      status: "active",
+      detail: `No clean reduced-size outcomes can be collected while current cap is ${formatPct(input.currentExposureCapPct)}; resolve blocking readiness, trust, or robustness gates first.`,
+    };
+  }
+
+  return {
+    id: "hold-reduced-size-cap",
+    label: "Hold reduced-size cap",
+    status: "active",
+    detail: `Do not restore normal sizing before clean proof clears; current cap is ${formatPct(input.currentExposureCapPct)}.`,
+  };
+}
+
+function collectCleanOutcomesActionPlanStep(input: {
+  cleanProofPassed: boolean;
+  confidencePassed: boolean;
+  proofLaneOpen: boolean;
+  resetRequired: boolean;
+  remainingClean: number;
+  currentExposureCapPct: number;
+  survivalConfidenceThreshold: number;
+}): RestorationActionPlanStep {
+  if (input.cleanProofPassed) {
+    return {
+      id: "collect-clean-outcomes",
+      label: "Collect clean outcomes",
+      status: "done",
+      detail: "Clean reduced-size outcome streak is complete.",
+    };
+  }
+
+  if (!input.confidencePassed && !input.proofLaneOpen) {
+    return {
+      id: "collect-clean-outcomes",
+      label: "Collect clean outcomes",
+      status: "blocked",
+      detail: `Clean outcomes cannot count until survival confidence reaches ${input.survivalConfidenceThreshold}/100 and proof lane capacity reopens from ${formatPct(input.currentExposureCapPct)}.`,
+    };
+  }
+
+  if (!input.confidencePassed) {
+    return {
+      id: "collect-clean-outcomes",
+      label: "Collect clean outcomes",
+      status: "blocked",
+      detail: `Wait for survival confidence to reach ${input.survivalConfidenceThreshold}/100 before collecting proof outcomes.`,
+    };
+  }
+
+  if (!input.proofLaneOpen) {
+    return {
+      id: "collect-clean-outcomes",
+      label: "Collect clean outcomes",
+      status: "blocked",
+      detail: `Clean outcomes cannot be collected while current cap is ${formatPct(input.currentExposureCapPct)}; reopen reduced-size proof lane capacity first.`,
+    };
+  }
+
+  if (input.resetRequired) {
+    return {
+      id: "collect-clean-outcomes",
+      label: "Collect clean outcomes",
+      status: "active",
+      detail: "Restart the clean reduced-size streak after the latest survival-boundary break.",
+    };
+  }
+
+  return {
+    id: "collect-clean-outcomes",
+    label: "Collect clean outcomes",
+    status: "active",
+    detail: `Close ${input.remainingClean} more clean reduced-size outcome${input.remainingClean === 1 ? "" : "s"} under survival, drawdown, and MAE boundaries.`,
   };
 }
 
@@ -549,7 +775,7 @@ function restorationStateFor(input: {
   survivalConfidence: number;
   cleanOutcomeGatePassed: boolean;
   cleanReducedSizeOutcomeCount: number;
-  failedReducedSizeOutcomeCount: number;
+  activeProofBoundaryBreakCount: number;
   threshold: number;
 }): SurvivalMemoryRestorationState {
   if (input.canRestoreSizing) return "clear";
@@ -564,7 +790,7 @@ function restorationStateFor(input: {
   if (
     input.survivalConfidence >= input.threshold &&
     input.cleanOutcomeGatePassed &&
-    input.failedReducedSizeOutcomeCount === 0
+    input.activeProofBoundaryBreakCount === 0
   ) {
     return "limited";
   }
@@ -616,6 +842,41 @@ function summaryFor(status: RestorationProgressStatus, primaryBlocker: string | 
   }
   if (primaryBlocker) return primaryBlocker;
   return "Restoration still needs clean reduced-size evidence and stable governance gates.";
+}
+
+function activeInstructionFor(input: {
+  planStatus: RestorationActionPlan["status"];
+  remainingClean: number;
+  confidencePassed: boolean;
+  proofLaneOpen: boolean;
+  survivalConfidence: number;
+  survivalConfidenceThreshold: number;
+  statusClear: boolean;
+  exactUnlockCondition: string;
+}) {
+  if (input.planStatus === "restored") {
+    return "Normal sizing restoration is available for downstream execution review.";
+  }
+  if (input.planStatus === "reset_required") {
+    return "Restart the reduced-size proof lane after the latest survival-boundary break.";
+  }
+  if (!input.confidencePassed) {
+    return `Raise survival confidence from ${Math.round(input.survivalConfidence)}/100 to at least ${input.survivalConfidenceThreshold}/100 before normal sizing can be restored.`;
+  }
+  if (!input.proofLaneOpen) {
+    return "Reopen reduced-size proof lane capacity before collecting clean outcomes.";
+  }
+  if (input.remainingClean > 0) {
+    return `Close ${input.remainingClean} more clean reduced-size outcome${input.remainingClean === 1 ? "" : "s"} before normal sizing is reviewed.`;
+  }
+  if (!input.statusClear) {
+    return "Promote Survival Memory from scarred/watch to clear now that reduced-size proof is intact.";
+  }
+  return input.exactUnlockCondition;
+}
+
+function formatPct(value: number) {
+  return `${round(value)}%`;
 }
 
 function normalizedSimilarSampleCount(recovery: RecoveryResult | null) {
