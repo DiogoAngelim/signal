@@ -1,4 +1,5 @@
 import { loadMarketList } from "./stock-data";
+import path from "path";
 import {
   DeadlockAnalyzer,
   ScoreNormalizationDiagnostics,
@@ -52,8 +53,14 @@ const DEFAULT_RUNTIME_MODE: DiagnosticRuntimeMode = "MODE_FULL_PERCEPTION";
 function localBacktestCacheDir() {
   return (
     process.env.LOCAL_BACKTEST_CACHE_DIR ||
-    "/Users/diogoangelim/signal/examples/stocks-optimizer/.local-cache/backtests"
+    path.resolve(process.cwd(), "../../..", ".local-cache/backtests")
   );
+}
+
+function canUsePersistedLocalBacktestCache() {
+  if (process.env.LOCAL_BACKTEST_CACHE_DISABLED === "true") return false;
+  if (process.env.LOCAL_BACKTEST_CACHE_DIR) return true;
+  return !process.env.VERCEL;
 }
 
 function localBacktestCacheFile(marketInput: string) {
@@ -67,6 +74,8 @@ function localBacktestCacheFile(marketInput: string) {
 
 async function readPersistedMarketBacktest(marketInput: string) {
   try {
+    if (!canUsePersistedLocalBacktestCache()) return null;
+
     const fs = await import("node:fs/promises");
     const file = localBacktestCacheFile(marketInput);
     const raw = await fs.readFile(file, "utf8");
@@ -92,6 +101,8 @@ async function readPersistedMarketBacktest(marketInput: string) {
 
 async function persistMarketBacktest(marketInput: string, payload: any) {
   try {
+    if (!canUsePersistedLocalBacktestCache()) return;
+
     if (
       !payload ||
       !payload.summary ||
@@ -2344,6 +2355,48 @@ export function buildHealthOptimizedConfigCandidates(config: MarketBacktestConfi
         stopLossPct: 4.8,
         trailingStopPct: 6.5,
       }, "crypto-sharpe-benchmark"),
+      variantConfig(config, {
+        lookbackDays: 59,
+        holdingDays: 8,
+        rebalanceDays: 6,
+        maxPositions: 1,
+        targetExposurePct: 22.5,
+        maxPositionPct: 22.5,
+        minMomentumPct: 0.3,
+        volatilityCapPct: 27,
+        candidateScoreShareFloor: 0.72,
+        marketMomentumFloorPct: 6,
+        stopLossPct: 5.5,
+        trailingStopPct: 7,
+      }, "crypto-responsive-confirmation"),
+      variantConfig(config, {
+        lookbackDays: 74,
+        holdingDays: 8,
+        rebalanceDays: 6,
+        maxPositions: 2,
+        targetExposurePct: 22.5,
+        maxPositionPct: 22.5,
+        minMomentumPct: 0.3,
+        volatilityCapPct: 27,
+        candidateScoreShareFloor: 0.72,
+        marketMomentumFloorPct: 6,
+        stopLossPct: 5.5,
+        trailingStopPct: 7,
+      }, "crypto-confirmed-participation"),
+      variantConfig(config, {
+        lookbackDays: 59,
+        holdingDays: 8,
+        rebalanceDays: 6,
+        maxPositions: 2,
+        targetExposurePct: 22.5,
+        maxPositionPct: 22.5,
+        minMomentumPct: 0.3,
+        volatilityCapPct: 27,
+        candidateScoreShareFloor: 0.72,
+        marketMomentumFloorPct: 6,
+        stopLossPct: 5.5,
+        trailingStopPct: 7,
+      }, "crypto-exceptional-balance"),
     );
   }
 
@@ -2435,6 +2488,7 @@ function evaluateHealthOptimizedConfig(
     config,
   );
   const healthScore = scoreStrategyHealthForSelection(summary, config, parameterRobustness);
+  const indicatorExcellence = buildIndicatorExcellenceDiagnostics(summary, parameterRobustness);
   const benchmarkMarginRequiredPct = Math.max(2, metricOrZero(summary?.benchmarkMarginRequiredPct) || 2);
   const selectionEligible =
     metricOrZero(summary?.tradeCount) >= Math.max(1, metricOrZero(config.minimumTrades) || 30) &&
@@ -2450,7 +2504,154 @@ function evaluateHealthOptimizedConfig(
     summary,
     parameterRobustness,
     healthScore,
+    indicatorExcellence,
     selectionEligible,
+  };
+}
+
+function buildIndicatorExcellenceDiagnostics(summary: any, parameterRobustness: any, baseSummary?: any) {
+  const targets = [
+    positiveIndicatorTarget(
+      "total-return",
+      "Total return",
+      metricOrZero(summary?.totalReturnPct),
+      100,
+      ">=",
+      "Portfolio return clears the exceptional upside target.",
+    ),
+    positiveIndicatorTarget(
+      "excess-return",
+      "Benchmark edge",
+      metricOrZero(summary?.excessReturnPct),
+      10,
+      ">=",
+      "Excess return is strong enough to sound exceptional without hiding benchmark context.",
+    ),
+    positiveIndicatorTarget(
+      "sharpe",
+      "Sharpe quality",
+      metricOrZero(summary?.annualizedSharpe ?? summary?.sharpeRatio),
+      1.25,
+      ">=",
+      "Risk-adjusted return clears the exceptional quality target.",
+    ),
+    positiveIndicatorTarget(
+      "drawdown",
+      "Drawdown control",
+      metricOrZero(summary?.maxDrawdownPct),
+      12,
+      "<=",
+      "Drawdown remains controlled while upside indicators improve.",
+    ),
+    positiveIndicatorTarget(
+      "profit-factor",
+      "Profit factor",
+      metricOrZero(summary?.profitFactor),
+      2.2,
+      ">=",
+      "Gross wins dominate gross losses by an exceptional margin.",
+    ),
+    positiveIndicatorTarget(
+      "win-rate",
+      "Win rate",
+      metricOrZero(summary?.winRatePct),
+      52,
+      ">=",
+      "Win rate is positive without relying on unrealistic purity.",
+    ),
+    positiveIndicatorTarget(
+      "trade-sample",
+      "Trade sample",
+      metricOrZero(summary?.tradeCount),
+      60,
+      ">=",
+      "The sample is large enough for the indicator set to be meaningful.",
+    ),
+    positiveIndicatorTarget(
+      "parameter-pass-rate",
+      "Parameter robustness",
+      metricOrZero(parameterRobustness?.passRate),
+      75,
+      ">=",
+      "Nearby variants preserve the edge often enough to support the metric posture.",
+    ),
+    positiveIndicatorTarget(
+      "benchmark-survival",
+      "Benchmark survival",
+      metricOrZero(parameterRobustness?.benchmarkSurvivalRate),
+      75,
+      ">=",
+      "Nearby variants keep benchmark edge intact.",
+    ),
+  ];
+  const passedCount = targets.filter((target) => target.passed).length;
+  const targetCount = targets.length;
+  const score = targetCount
+    ? Number((targets.reduce((sum, target) => sum + target.completionPct, 0) / targetCount).toFixed(2))
+    : 0;
+  const status =
+    passedCount === targetCount
+      ? "exceptional"
+      : passedCount >= targetCount - 1
+        ? "near_exceptional"
+        : "best_available";
+  const gaps = targets
+    .filter((target) => !target.passed)
+    .map((target) => `${target.label}: ${target.displayValue} ${target.operator} ${target.displayTarget}`);
+  const baseTotalReturn = finiteMetricOrNull(baseSummary?.totalReturnPct);
+  const baseExcessReturn = finiteMetricOrNull(baseSummary?.excessReturnPct);
+  const baseSharpe = finiteMetricOrNull(baseSummary?.annualizedSharpe ?? baseSummary?.sharpeRatio);
+  const baseDrawdown = finiteMetricOrNull(baseSummary?.maxDrawdownPct);
+
+  return {
+    module: "stocks.indicator-excellence-optimizer",
+    policy: "positive-indicator-simultaneous-targets-v1",
+    status,
+    score,
+    passedCount,
+    targetCount,
+    allTargetsSatisfied: passedCount === targetCount,
+    summary: passedCount === targetCount
+      ? "All tracked positive indicators clear the exceptional target set at the same time."
+      : `Best available configuration clears ${passedCount}/${targetCount} exceptional indicator targets.`,
+    targets,
+    gaps,
+    baseDelta: {
+      totalReturnPct: baseTotalReturn == null ? null : Number((metricOrZero(summary?.totalReturnPct) - baseTotalReturn).toFixed(2)),
+      excessReturnPct: baseExcessReturn == null ? null : Number((metricOrZero(summary?.excessReturnPct) - baseExcessReturn).toFixed(2)),
+      annualizedSharpe: baseSharpe == null ? null : Number((metricOrZero(summary?.annualizedSharpe ?? summary?.sharpeRatio) - baseSharpe).toFixed(2)),
+      maxDrawdownPct: baseDrawdown == null ? null : Number((metricOrZero(summary?.maxDrawdownPct) - baseDrawdown).toFixed(2)),
+    },
+  };
+}
+
+function positiveIndicatorTarget(
+  id: string,
+  label: string,
+  value: number,
+  target: number,
+  operator: ">=" | "<=",
+  reason: string,
+) {
+  const passed = operator === ">=" ? value >= target : value <= target;
+  const completionPct =
+    operator === ">="
+      ? clampBacktest(target === 0 ? (value >= 0 ? 100 : 0) : value / target * 100)
+      : value <= target
+        ? 100
+        : clampBacktest(target / Math.max(value, 0.0001) * 100);
+
+  return {
+    id,
+    label,
+    value: Number(value.toFixed(2)),
+    target,
+    operator,
+    passed,
+    completionPct: Number(completionPct.toFixed(2)),
+    displayValue: Number(value.toFixed(2)),
+    displayTarget: target,
+    reason,
   };
 }
 
@@ -2464,10 +2665,17 @@ function selectHealthOptimizedStrategyConfig(
     .map((candidate) => evaluateHealthOptimizedConfig(market, entries, benchmarkHistory, candidate))
     .sort((a, b) =>
       Number(b.selectionEligible) - Number(a.selectionEligible) ||
+      Number(b.indicatorExcellence.allTargetsSatisfied) - Number(a.indicatorExcellence.allTargetsSatisfied) ||
+      b.indicatorExcellence.score - a.indicatorExcellence.score ||
       b.healthScore - a.healthScore
     );
   const baseEvaluation = evaluations.find((evaluation) => evaluation.config.id === baseConfig.id) ?? evaluations[0];
   const selected = evaluations[0] ?? baseEvaluation;
+  const selectedIndicatorExcellence = buildIndicatorExcellenceDiagnostics(
+    selected?.summary,
+    selected?.parameterRobustness,
+    baseEvaluation?.summary,
+  );
 
   return {
     config: selected?.config ?? baseConfig,
@@ -2479,9 +2687,13 @@ function selectHealthOptimizedStrategyConfig(
       selected: selected?.config.id !== baseConfig.id,
       baseScore: Number((baseEvaluation?.healthScore ?? 0).toFixed(2)),
       selectedScore: Number((selected?.healthScore ?? 0).toFixed(2)),
+      indicatorExcellence: selectedIndicatorExcellence,
       candidates: evaluations.slice(0, 6).map((evaluation) => ({
         configId: evaluation.config.id,
         healthScore: Number(evaluation.healthScore.toFixed(2)),
+        indicatorScore: evaluation.indicatorExcellence.score,
+        indicatorTargetsPassed: evaluation.indicatorExcellence.passedCount,
+        indicatorTargetCount: evaluation.indicatorExcellence.targetCount,
         totalReturnPct: Number(metricOrZero(evaluation.summary.totalReturnPct).toFixed(2)),
         excessReturnPct: Number(metricOrZero(evaluation.summary.excessReturnPct).toFixed(2)),
         annualizedSharpe: Number(metricOrZero(evaluation.summary.annualizedSharpe).toFixed(2)),

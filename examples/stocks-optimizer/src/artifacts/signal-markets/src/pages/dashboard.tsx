@@ -3799,6 +3799,23 @@ export default function Dashboard() {
     finiteNumber(agencySummary.averageTrust) != null ||
     finiteNumber(agencySelfDiagnosis.trust) != null;
   const strategyReadiness = backtestSummary?.strategyReadiness ?? {};
+  const strategyHealthOptimization =
+    backtestSummary?.strategyHealthOptimization ?? null;
+  const indicatorExcellence =
+    strategyHealthOptimization?.indicatorExcellence ?? null;
+  const indicatorExcellenceTone: "good" | "warn" | "bad" | "neutral" =
+    indicatorExcellence?.allTargetsSatisfied
+      ? "good"
+      : indicatorExcellence?.status === "near_exceptional"
+        ? "warn"
+        : indicatorExcellence
+          ? "neutral"
+          : "warn";
+  const indicatorExcellenceLabel = indicatorExcellence
+    ? indicatorExcellence.allTargetsSatisfied
+      ? "Exceptional indicators"
+      : indicatorExcellence.status?.replace(/_/g, " ") ?? "Optimized"
+    : "Needs review";
   const trustGovernor: TrustGovernorDiagnostic | null =
     backtestSummary?.trustGovernor ?? strategyReadiness?.trustGovernor ?? null;
   const readinessRemediation: ReadinessRemediationDiagnostic | null =
@@ -9487,7 +9504,11 @@ export default function Dashboard() {
               eyebrow="Strategy history"
               title="Past performance snapshot"
               description="The visible layer keeps only the performance facts that change posture; benchmark and fee context stays one click away."
-              action={<StatusPill tone="warn">Needs review</StatusPill>}
+              action={
+                <StatusPill tone={indicatorExcellenceTone}>
+                  {indicatorExcellenceLabel}
+                </StatusPill>
+              }
             >
               <div className="grid gap-3 sm:grid-cols-2">
                 <MiniMetric
@@ -9523,11 +9544,30 @@ export default function Dashboard() {
                 />
               </div>
 
+              {indicatorExcellence ? (
+                <div className="mt-4 border-t border-white/10 pt-4 text-sm leading-6 text-zinc-300">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#FDD000]">
+                        Indicator excellence
+                      </div>
+                      <div className="mt-1 text-white">
+                        {indicatorExcellence.summary}
+                      </div>
+                    </div>
+                    <StatusPill tone={indicatorExcellenceTone}>
+                      {numeric(indicatorExcellence.passedCount)}/
+                      {numeric(indicatorExcellence.targetCount)}
+                    </StatusPill>
+                  </div>
+                </div>
+              ) : null}
+
               <AdvancedDisclosure
                 title="Backtest detail and benchmark context"
                 description="Fee assumptions, holding time, profit factor, and benchmark deltas."
                 summary={
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="grid gap-3 sm:grid-cols-4">
                     <MiniMetric
                       label="Profit factor"
                       value={
@@ -9554,6 +9594,21 @@ export default function Dashboard() {
                       label="Trades"
                       value={String(backtestTradeCount || 0)}
                       sub="closed trades"
+                      emphasis="quiet"
+                    />
+                    <MiniMetric
+                      label="Indicator targets"
+                      value={
+                        indicatorExcellence
+                          ? `${numeric(indicatorExcellence.passedCount)}/${numeric(
+                              indicatorExcellence.targetCount,
+                            )}`
+                          : "—"
+                      }
+                      sub={
+                        indicatorExcellence?.status?.replace(/_/g, " ") ??
+                        "pending"
+                      }
                       emphasis="quiet"
                     />
                   </div>
