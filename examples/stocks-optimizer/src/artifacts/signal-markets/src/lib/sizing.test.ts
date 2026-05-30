@@ -6,6 +6,8 @@ import {
   financialExposureBandForSizingMode,
   requestedExposureForAsset,
   sizeAssetExposure,
+  sizingModeLabelForOperator,
+  sizingModeSentenceForOperator,
 } from "./sizing";
 
 describe("stocks optimizer sizing integration", () => {
@@ -65,6 +67,9 @@ describe("stocks optimizer sizing integration", () => {
     expect(view.limitedReason).toBe(
       "Market structure is healthy, but sizing is blocked because actionable opportunity density is too low or risk gates prevent position sizing.",
     );
+    expect(view.operatorState.status).toBe("locked");
+    expect(view.operatorState.sizingModeLabel).toBe("Sizing locked");
+    expect(view.operatorState.portfolioCapLabel).toBe("No exposure");
     expect(view.sizingReasons.some((reason) => reason.includes("Opportunity density"))).toBe(true);
   });
 
@@ -84,6 +89,8 @@ describe("stocks optimizer sizing integration", () => {
 
     expect(view.suggestedMaximumExposurePct).toBe(0);
     expect(view.limitedReason).toBe("Strategy readiness gates block new exposure.");
+    expect(view.operatorState.status).toBe("locked");
+    expect(view.operatorState.portfolioCapLabel).toBe("No exposure");
   });
 
   it("can explain calibration commitment gates without relabeling them as readiness failures", () => {
@@ -105,6 +112,31 @@ describe("stocks optimizer sizing integration", () => {
     expect(view.suggestedMaximumExposurePct).toBe(0);
     expect(view.limitedReason).toBe("Calibration gates block new exposure until outcomes stabilize.");
     expect(view.sizingConstraints.some((constraint) => constraint.label === "Calibration")).toBe(true);
+  });
+
+  it("keeps raw none sizing structural while exposing operator-safe labels", () => {
+    const view = buildDashboardExposureSizing({
+      marketRef: "BINANCE",
+      marketHealthPct: 93,
+      opportunityDensityPct: 43,
+      confidencePct: 34,
+      riskPct: 7,
+      requestedExposurePct: 0,
+      strategyCapPct: 65,
+      hasMarketData: true,
+      hasProvidedSignals: true,
+      strategyBlocked: true,
+      strategyBlockedLabel: "Survival memory scar",
+      strategyBlockedReason: "Survival Memory requires proof before sizing can reopen.",
+    });
+
+    expect(view.sizingMode).toBe("none");
+    expect(view.suggestedMaximumExposurePct).toBe(0);
+    expect(view.operatorState.status).toBe("locked");
+    expect(view.operatorState.sizingModeLabel).toBe("Sizing locked");
+    expect(view.operatorState.portfolioCapLabel).toBe("No exposure");
+    expect(sizingModeLabelForOperator(view.sizingMode)).toBe("Sizing locked");
+    expect(sizingModeSentenceForOperator(view.sizingMode)).toBe("locked");
   });
 
   it("mature candidate receives non-zero sizing when constraints pass", () => {

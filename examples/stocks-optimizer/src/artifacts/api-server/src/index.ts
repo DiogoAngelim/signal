@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { createServer } from "node:http";
 import { WebSocketServer } from "ws";
+import binanceExecutionRouter from "./routes/binance-execution.js";
 import stocksRouter from "./routes/stocks.js";
 import { setSignalBroadcast, startBackgroundSignalEngine } from "./lib/signal-backend.js";
 import { getOrCreateMarketBacktest } from "./lib/market-backtest.js";
@@ -47,6 +48,8 @@ if (rawPort && (Number.isNaN(port) || port <= 0)) {
 
 app.use(stocksRouter);
 app.use("/api", stocksRouter);
+app.use(binanceExecutionRouter);
+app.use("/api", binanceExecutionRouter);
 
 const server = createServer(app);
 const wss = new WebSocketServer({ server });

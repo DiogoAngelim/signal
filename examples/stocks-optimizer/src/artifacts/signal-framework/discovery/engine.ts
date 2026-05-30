@@ -226,6 +226,7 @@ export type DiscoveredOpportunity = {
   trust: number;
   fragility: number;
   novelty: number;
+  regimeCoverageScore: number;
   maturity: number;
   readiness: number;
   supportingEvidence: DiscoveryRankedEvidence[];
@@ -245,6 +246,7 @@ export type DiscoveryResult = {
   trust: number;
   fragility: number;
   novelty: number;
+  regimeCoverageScore: number;
   maturity: number;
   contextMatch: DiscoveryContextMatch[];
   memory: DiscoveryMemorySummary;
@@ -308,6 +310,8 @@ type DiscoveryComputation = {
   evidenceScore: number;
   contradictionScore: number;
   constraintScore: number;
+  regimeCoverageScore: number;
+  regimeCoverageSignal: number;
   confidence: number;
   trust: number;
   fragility: number;
@@ -350,6 +354,7 @@ export function discover(input: DiscoveryInput): DiscoveryResult {
     trust: computation.trust,
     fragility: computation.fragility,
     novelty: computation.novelty,
+    regimeCoverageScore: computation.regimeCoverageScore,
     maturity: computation.lifecycle.maturity,
     contextMatch: computation.contextMatch,
     memory: computation.memory,
@@ -395,6 +400,8 @@ function compute(input: DiscoveryInput): DiscoveryComputation {
   const memoryPenalty = memory.sampleSize > 0 && memory.failureRatio > memory.successRatio
     ? (memory.failureRatio - memory.successRatio) * 0.35
     : 0;
+  const regimeCoverage = regimeCoverageFor(state, input.historicalStates);
+  const regimeCoverageSignal = regimeCoverage.hasSignal ? regimeCoverage.score : 50;
   const confidence = roundScore(clamp(
     candidateStrength * 0.28 +
       evidenceScore * 0.34 +
@@ -404,7 +411,8 @@ function compute(input: DiscoveryInput): DiscoveryComputation {
       contradictionScore * 0.28 -
       missingPenalty -
       noveltyPenalty -
-      memoryPenalty,
+      memoryPenalty +
+      (regimeCoverageSignal - 50) * 0.06,
   ));
   const trust = roundScore(clamp(
     memory.reliability * 0.34 +
@@ -412,13 +420,15 @@ function compute(input: DiscoveryInput): DiscoveryComputation {
       (100 - novelty) * 0.18 +
       evidenceScore * 0.24 -
       contradictionScore * 0.16 -
-      missingPenalty * 0.45,
+      missingPenalty * 0.45 +
+      (regimeCoverageSignal - 50) * 0.05,
   ));
   const fragility = roundScore(clamp(
     contradictionScore * 0.34 +
       novelty * 0.24 +
       missingPenalty * 0.22 +
-      (100 - constraintScore) * 0.2,
+      (100 - constraintScore) * 0.2 +
+      Math.max(0, 50 - regimeCoverageSignal) * 0.12,
   ));
   const lifecycle = lifecycleFor({
     candidates,
@@ -447,6 +457,7 @@ function compute(input: DiscoveryInput): DiscoveryComputation {
     memory,
     novelty,
     constraintScore,
+    regimeCoverageScore: regimeCoverage.score,
     missingPenalty,
     confidence,
   });
@@ -474,6 +485,8 @@ function compute(input: DiscoveryInput): DiscoveryComputation {
     evidenceScore: roundScore(evidenceScore),
     contradictionScore: roundScore(contradictionScore),
     constraintScore: roundScore(constraintScore),
+    regimeCoverageScore: regimeCoverage.score,
+    regimeCoverageSignal,
     confidence,
     trust,
     fragility,
@@ -522,6 +535,7 @@ function opportunityFromCandidate(
     trust: computation.trust,
     fragility: computation.fragility,
     novelty: computation.novelty,
+    regimeCoverageScore: computation.regimeCoverageScore,
     maturity: computation.lifecycle.maturity,
     readiness: computation.lifecycle.readiness,
     supportingEvidence: support,
@@ -948,6 +962,7 @@ function tracesFor(args: {
   memory: DiscoveryMemorySummary;
   novelty: number;
   constraintScore: number;
+  regimeCoverageScore: number;
   missingPenalty: number;
   confidence: number;
 }): DiscoveryTrace[] {
@@ -956,6 +971,7 @@ function tracesFor(args: {
     trace("evidence", "Supporting evidence", args.evidenceScore, 0.34, "Observed support explains why the opportunity may exist."),
     trace("memory", "Memory reliability", args.memory.reliability, 0.16, "Similar outcomes determine how much prior memory can be trusted."),
     trace("context", "Context familiarity", 100 - args.novelty, 0.12, "Known contexts reduce uncertainty."),
+    trace("regime-coverage", "Regime coverage", args.regimeCoverageScore, 0.06, "Broader regime history improves discovery confidence without changing sizing authority."),
     trace("constraints", "Constraint health", args.constraintScore, 0.1, "Passed constraints increase readiness before action."),
     trace("contradiction", "Contradiction penalty", args.contradictionScore, -0.28, "Contradictory evidence reduces confidence."),
     trace("missing", "Missing evidence penalty", args.missingPenalty, -0.07, "Incomplete evidence lowers confidence instead of throwing."),
@@ -991,6 +1007,37 @@ function recommendedNextStep(status: DiscoveryStatus, computation: DiscoveryComp
   if (status === "eligible") return "Prepare the opportunity for the next commitment boundary.";
   if (status === "strengthening") return "Keep tracking persistence and confirm the leading evidence cluster.";
   return "Continue observing until maturity and confidence improve.";
+}
+
+function regimeCoverageFor(
+  state: Record<string, unknown>,
+  historicalStates: DiscoveryHistoricalState[] | undefined,
+) {
+  const diagnostics = plainRecord(state.historyDiagnostics) ? state.historyDiagnostics : {};
+  const explicit = firstNumber(state.regimeCoverageScore, diagnostics.regimeCoverageScore);
+  if (explicit != null) return { score: score(explicit, 0), hasSignal: true };
+
+  const regimes = new Set<string>();
+  const covered = Array.isArray(state.keyRegimesCovered)
+    ? state.keyRegimesCovered
+    : Array.isArray(diagnostics.keyRegimesCovered)
+      ? diagnostics.keyRegimesCovered
+      : [];
+  for (const regime of covered) {
+    const text = stringValue(regime);
+    if (text) regimes.add(text);
+  }
+  for (const item of array(historicalStates)) {
+    const sampleState = plainRecord(item.state) ? item.state : {};
+    const metadata = plainRecord(item.metadata) ? item.metadata : {};
+    const regime = stringValue(sampleState.regime ?? sampleState.regimeType ?? metadata.regime ?? metadata.regimeType);
+    if (regime) regimes.add(regime);
+  }
+
+  if (regimes.size > 0) {
+    return { score: roundScore(clamp((regimes.size / 5) * 100)), hasSignal: true };
+  }
+  return { score: 0, hasSignal: false };
 }
 
 function constraintsScore(constraints: DiscoveryConstraint[] | undefined): number {

@@ -149,6 +149,51 @@ test("generic Discovery flags weak breadth without changing candidate output", (
   );
 });
 
+test("long-history discovery improves regime awareness without opening zero-cap sizing", () => {
+  const historyDiagnostics = {
+    symbolCount: 1,
+    requestedYears: 15,
+    historyCoverageYears: 15,
+    coveragePct: 100,
+    historyDepthScore: 96,
+    regimeCoverageScore: 92,
+    regimeDiversityScore: 90,
+    sampleDiversityScore: 88,
+    temporalConcentrationScore: 12,
+    coverageStatus: "full" as const,
+    currentRegime: "recovery" as const,
+    keyRegimesCovered: ["bull" as const, "bear" as const, "crash" as const, "recovery" as const, "volatility_transition" as const],
+    regimeCounts: { bull: 1000, bear: 800, crash: 120, recovery: 500, volatility_transition: 240 },
+    totalBars: 3780,
+    auditQualityScore: 100,
+    auditWarnings: [],
+    explanation: "Extended history improves regime awareness and calibration. Recent outcomes still govern sizing restoration.",
+  };
+  const result = discoverStockOpportunities({
+    market: "NASDAQ",
+    signals: [
+      signal({
+        symbol: "SAFE",
+        signalAction: "Buy",
+        suggestedExposure: 5,
+        maxPositionPct: 0,
+        setupQuality: 88,
+        riskPressure: 20,
+        expectedMove: 4,
+      }),
+    ],
+    barsBySymbol: { SAFE: bars(100, 0.006, 180_000) },
+    historyDiagnostics,
+  });
+  const candidate = result.candidates[0];
+
+  assert.equal(result.diagnostics.regimeCoverageScore, 92);
+  assert.equal(result.discovery.regimeCoverageScore, 92);
+  assert.equal(candidate.adaptiveSizing.size, 0);
+  assert.equal(candidate.adaptiveSizing.audit.maxCapacity, 0);
+  assert.ok(candidate.factors.regimeTransition > 60);
+});
+
 test("generic Discovery handles sparse prior outcomes and constraint fallbacks", () => {
   const previous = discoverStockOpportunities({
     signals: [signal({ symbol: "SPARSE", setupQuality: 52, expectedMove: 0.4 })],

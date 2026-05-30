@@ -1,0 +1,2113 @@
+{
+  "decisions": [
+    {
+      "decisionId": "stocks-optimizer:BTCUSDT:EXIT:1780160103430",
+      "status": "rejected",
+      "reasons": [
+        "below_min_notional"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BTCUSDT:EXIT:1780160103430",
+        "symbol": "BTCUSDT",
+        "action": "EXIT",
+        "confidence": 86,
+        "trust": 86.34,
+        "calibratedConfidence": 86,
+        "appSizePct": 1,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-30T16:55:03.430Z",
+        "price": 73915.19
+      },
+      "createdAt": "2026-05-30T16:55:04.809Z",
+      "updatedAt": "2026-05-30T16:55:04.809Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:ETHUSDT:EXIT:1780160103430",
+      "status": "rejected",
+      "reasons": [
+        "below_min_notional"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:ETHUSDT:EXIT:1780160103430",
+        "symbol": "ETHUSDT",
+        "action": "EXIT",
+        "confidence": 82,
+        "trust": 85.48,
+        "calibratedConfidence": 82,
+        "appSizePct": 1,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-30T16:55:03.430Z",
+        "price": 2025.84
+      },
+      "createdAt": "2026-05-30T16:55:04.811Z",
+      "updatedAt": "2026-05-30T16:55:04.811Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:BUY:1780160103430",
+      "status": "rejected",
+      "reasons": [
+        "below_min_notional"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:BUY:1780160103430",
+        "symbol": "SOLUSDT",
+        "action": "BUY",
+        "confidence": 73.07,
+        "trust": 71.62,
+        "calibratedConfidence": 56.81,
+        "appSizePct": 0.1404494382022472,
+        "riskState": "confirmed",
+        "sizingMode": "micro",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-30T16:55:03.430Z",
+        "price": 82.83
+      },
+      "createdAt": "2026-05-30T16:55:04.811Z",
+      "updatedAt": "2026-05-30T16:55:04.811Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:BUY:1780160103430",
+      "status": "rejected",
+      "reasons": [
+        "below_min_notional"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:BUY:1780160103430",
+        "symbol": "BNBUSDT",
+        "action": "BUY",
+        "confidence": 73.48,
+        "trust": 71.64,
+        "calibratedConfidence": 57.120000000000005,
+        "appSizePct": 0.1404494382022472,
+        "riskState": "confirmed",
+        "sizingMode": "micro",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-30T16:55:03.430Z",
+        "price": 707.56
+      },
+      "createdAt": "2026-05-30T16:55:04.812Z",
+      "updatedAt": "2026-05-30T16:55:04.812Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:AAVEUSDT:EXIT:1780160103430",
+      "status": "rejected",
+      "reasons": [
+        "below_min_notional"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:AAVEUSDT:EXIT:1780160103430",
+        "symbol": "AAVEUSDT",
+        "action": "EXIT",
+        "confidence": 86,
+        "trust": 86.27,
+        "calibratedConfidence": 86,
+        "appSizePct": 1,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-30T16:55:03.430Z",
+        "price": 83.16
+      },
+      "createdAt": "2026-05-30T16:55:04.812Z",
+      "updatedAt": "2026-05-30T16:55:04.812Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:ADAUSDT:EXIT:1780160103430",
+      "status": "rejected",
+      "reasons": [
+        "below_min_notional"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:ADAUSDT:EXIT:1780160103430",
+        "symbol": "ADAUSDT",
+        "action": "EXIT",
+        "confidence": 79,
+        "trust": 84.88,
+        "calibratedConfidence": 79,
+        "appSizePct": 1,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-30T16:55:03.430Z",
+        "price": 0.2365
+      },
+      "createdAt": "2026-05-30T16:55:04.813Z",
+      "updatedAt": "2026-05-30T16:55:04.813Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BTCUSDT:EXIT:1780160165194",
+      "status": "rejected",
+      "reasons": [
+        "below_min_notional"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BTCUSDT:EXIT:1780160165194",
+        "symbol": "BTCUSDT",
+        "action": "EXIT",
+        "confidence": 86,
+        "trust": 86.34,
+        "calibratedConfidence": 86,
+        "appSizePct": 1,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-30T16:56:05.194Z",
+        "price": 73915.19
+      },
+      "createdAt": "2026-05-30T16:56:05.972Z",
+      "updatedAt": "2026-05-30T16:56:05.972Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:ETHUSDT:EXIT:1780160165194",
+      "status": "rejected",
+      "reasons": [
+        "below_min_notional"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:ETHUSDT:EXIT:1780160165194",
+        "symbol": "ETHUSDT",
+        "action": "EXIT",
+        "confidence": 82,
+        "trust": 85.48,
+        "calibratedConfidence": 82,
+        "appSizePct": 1,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-30T16:56:05.194Z",
+        "price": 2025.84
+      },
+      "createdAt": "2026-05-30T16:56:05.973Z",
+      "updatedAt": "2026-05-30T16:56:05.973Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:BUY:1780160165194",
+      "status": "rejected",
+      "reasons": [
+        "below_min_notional"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:BUY:1780160165194",
+        "symbol": "SOLUSDT",
+        "action": "BUY",
+        "confidence": 73.07,
+        "trust": 71.62,
+        "calibratedConfidence": 56.81,
+        "appSizePct": 0.1404494382022472,
+        "riskState": "confirmed",
+        "sizingMode": "micro",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-30T16:56:05.194Z",
+        "price": 82.83
+      },
+      "createdAt": "2026-05-30T16:56:05.975Z",
+      "updatedAt": "2026-05-30T16:56:05.975Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:BUY:1780160165194",
+      "status": "rejected",
+      "reasons": [
+        "below_min_notional"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:BUY:1780160165194",
+        "symbol": "BNBUSDT",
+        "action": "BUY",
+        "confidence": 73.48,
+        "trust": 71.64,
+        "calibratedConfidence": 57.120000000000005,
+        "appSizePct": 0.1404494382022472,
+        "riskState": "confirmed",
+        "sizingMode": "micro",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-30T16:56:05.194Z",
+        "price": 707.56
+      },
+      "createdAt": "2026-05-30T16:56:05.977Z",
+      "updatedAt": "2026-05-30T16:56:05.977Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:AAVEUSDT:EXIT:1780160165194",
+      "status": "rejected",
+      "reasons": [
+        "below_min_notional"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:AAVEUSDT:EXIT:1780160165194",
+        "symbol": "AAVEUSDT",
+        "action": "EXIT",
+        "confidence": 86,
+        "trust": 86.27,
+        "calibratedConfidence": 86,
+        "appSizePct": 1,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-30T16:56:05.194Z",
+        "price": 83.16
+      },
+      "createdAt": "2026-05-30T16:56:05.978Z",
+      "updatedAt": "2026-05-30T16:56:05.978Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:ADAUSDT:EXIT:1780160165194",
+      "status": "rejected",
+      "reasons": [
+        "below_min_notional"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:ADAUSDT:EXIT:1780160165194",
+        "symbol": "ADAUSDT",
+        "action": "EXIT",
+        "confidence": 79,
+        "trust": 84.88,
+        "calibratedConfidence": 79,
+        "appSizePct": 1,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-30T16:56:05.194Z",
+        "price": 0.2365
+      },
+      "createdAt": "2026-05-30T16:56:05.980Z",
+      "updatedAt": "2026-05-30T16:56:05.980Z"
+    }
+  ],
+  "orders": [],
+  "reservations": [],
+  "snapshots": [
+    {
+      "expectedPositions": {},
+      "actualPositions": {},
+      "reservedCapital": 0,
+      "activeExposure": 0,
+      "driftDetected": false,
+      "driftReasons": [],
+      "createdAt": "2026-05-30T16:55:04.797Z"
+    },
+    {
+      "expectedPositions": {},
+      "actualPositions": {},
+      "reservedCapital": 0,
+      "activeExposure": 0,
+      "driftDetected": false,
+      "driftReasons": [],
+      "createdAt": "2026-05-30T16:56:05.962Z"
+    }
+  ],
+  "account": {
+    "syncedAt": "2026-05-30T16:56:05.954Z",
+    "equity": 30000,
+    "availableEquity": 30000,
+    "balances": {
+      "456": {
+        "free": 10000,
+        "locked": 0
+      },
+      "这是测试币": {
+        "free": 10000,
+        "locked": 0
+      },
+      "BNB": {
+        "free": 1,
+        "locked": 0
+      },
+      "BTC": {
+        "free": 1,
+        "locked": 0
+      },
+      "USDT": {
+        "free": 10000,
+        "locked": 0
+      },
+      "ETH": {
+        "free": 1,
+        "locked": 0
+      },
+      "LTC": {
+        "free": 8,
+        "locked": 0
+      },
+      "TRX": {
+        "free": 1450,
+        "locked": 0
+      },
+      "XRP": {
+        "free": 351,
+        "locked": 0
+      },
+      "GAS": {
+        "free": 300,
+        "locked": 0
+      },
+      "KNC": {
+        "free": 3374,
+        "locked": 0
+      },
+      "IOTA": {
+        "free": 8485,
+        "locked": 0
+      },
+      "LINK": {
+        "free": 50,
+        "locked": 0
+      },
+      "ETC": {
+        "free": 53,
+        "locked": 0
+      },
+      "ZEC": {
+        "free": 1,
+        "locked": 0
+      },
+      "DASH": {
+        "free": 9,
+        "locked": 0
+      },
+      "NEO": {
+        "free": 171,
+        "locked": 0
+      },
+      "ADX": {
+        "free": 6377,
+        "locked": 0
+      },
+      "ADA": {
+        "free": 1885,
+        "locked": 0
+      },
+      "XLM": {
+        "free": 3079,
+        "locked": 0
+      },
+      "STEEM": {
+        "free": 8508,
+        "locked": 0
+      },
+      "ONT": {
+        "free": 7970,
+        "locked": 0
+      },
+      "QTUM": {
+        "free": 545,
+        "locked": 0
+      },
+      "ZEN": {
+        "free": 67,
+        "locked": 0
+      },
+      "THETA": {
+        "free": 2332,
+        "locked": 0
+      },
+      "TUSD": {
+        "free": 10000,
+        "locked": 0
+      },
+      "ICX": {
+        "free": 13034,
+        "locked": 0
+      },
+      "VET": {
+        "free": 18446,
+        "locked": 0
+      },
+      "USDC": {
+        "free": 10000,
+        "locked": 0
+      },
+      "ONG": {
+        "free": 7136,
+        "locked": 0
+      },
+      "HOT": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ZIL": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ZRX": {
+        "free": 4342,
+        "locked": 0
+      },
+      "FET": {
+        "free": 2285,
+        "locked": 0
+      },
+      "BAT": {
+        "free": 4643,
+        "locked": 0
+      },
+      "IOST": {
+        "free": 18446,
+        "locked": 0
+      },
+      "CELR": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ENJ": {
+        "free": 10038,
+        "locked": 0
+      },
+      "ATOM": {
+        "free": 254,
+        "locked": 0
+      },
+      "TFUEL": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ONE": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ALGO": {
+        "free": 4122,
+        "locked": 0
+      },
+      "DOGE": {
+        "free": 4447,
+        "locked": 0
+      },
+      "DUSK": {
+        "free": 3438,
+        "locked": 0
+      },
+      "ANKR": {
+        "free": 18446,
+        "locked": 0
+      },
+      "WIN": {
+        "free": 18446,
+        "locked": 0
+      },
+      "COS": {
+        "free": 18446,
+        "locked": 0
+      },
+      "MTL": {
+        "free": 1557,
+        "locked": 0
+      },
+      "CVC": {
+        "free": 15800,
+        "locked": 0
+      },
+      "CHZ": {
+        "free": 11884,
+        "locked": 0
+      },
+      "BAND": {
+        "free": 2183,
+        "locked": 0
+      },
+      "XTZ": {
+        "free": 1313,
+        "locked": 0
+      },
+      "RVN": {
+        "free": 18446,
+        "locked": 0
+      },
+      "HBAR": {
+        "free": 5489,
+        "locked": 0
+      },
+      "STX": {
+        "free": 2042,
+        "locked": 0
+      },
+      "KAVA": {
+        "free": 7933,
+        "locked": 0
+      },
+      "ARPA": {
+        "free": 18446,
+        "locked": 0
+      },
+      "IOTX": {
+        "free": 18446,
+        "locked": 0
+      },
+      "RLC": {
+        "free": 1061,
+        "locked": 0
+      },
+      "BCH": {
+        "free": 1,
+        "locked": 0
+      },
+      "FTT": {
+        "free": 1508,
+        "locked": 0
+      },
+      "TRY": {
+        "free": 18466,
+        "locked": 0
+      },
+      "EUR": {
+        "free": 425,
+        "locked": 0
+      },
+      "OGN": {
+        "free": 18446,
+        "locked": 0
+      },
+      "LSK": {
+        "free": 3730,
+        "locked": 0
+      },
+      "BNT": {
+        "free": 1532,
+        "locked": 0
+      },
+      "MBL": {
+        "free": 18446,
+        "locked": 0
+      },
+      "COTI": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ZAR": {
+        "free": 18466,
+        "locked": 0
+      },
+      "SOL": {
+        "free": 5,
+        "locked": 0
+      },
+      "CTSI": {
+        "free": 15014,
+        "locked": 0
+      },
+      "HIVE": {
+        "free": 7441,
+        "locked": 0
+      },
+      "CHR": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ARDR": {
+        "free": 11593,
+        "locked": 0
+      },
+      "UAH": {
+        "free": 18466,
+        "locked": 0
+      },
+      "COMP": {
+        "free": 21,
+        "locked": 0
+      },
+      "SC": {
+        "free": 18446,
+        "locked": 0
+      },
+      "SNX": {
+        "free": 1531,
+        "locked": 0
+      },
+      "VTHO": {
+        "free": 18446,
+        "locked": 0
+      },
+      "DGB": {
+        "free": 18446,
+        "locked": 0
+      },
+      "RUNE": {
+        "free": 898,
+        "locked": 0
+      },
+      "DCR": {
+        "free": 24,
+        "locked": 0
+      },
+      "STORJ": {
+        "free": 4114,
+        "locked": 0
+      },
+      "AVA": {
+        "free": 1772,
+        "locked": 0
+      },
+      "MANA": {
+        "free": 5413,
+        "locked": 0
+      },
+      "YFI": {
+        "free": 1,
+        "locked": 0
+      },
+      "JST": {
+        "free": 5942,
+        "locked": 0
+      },
+      "CRV": {
+        "free": 2027,
+        "locked": 0
+      },
+      "SAND": {
+        "free": 6507,
+        "locked": 0
+      },
+      "NMR": {
+        "free": 56,
+        "locked": 0
+      },
+      "DOT": {
+        "free": 383,
+        "locked": 0
+      },
+      "LUNA": {
+        "free": 6854,
+        "locked": 0
+      },
+      "RSR": {
+        "free": 18446,
+        "locked": 0
+      },
+      "PAXG": {
+        "free": 1,
+        "locked": 0
+      },
+      "TRB": {
+        "free": 24,
+        "locked": 0
+      },
+      "WBTC": {
+        "free": 1,
+        "locked": 0
+      },
+      "SUSHI": {
+        "free": 2203,
+        "locked": 0
+      },
+      "KSM": {
+        "free": 100,
+        "locked": 0
+      },
+      "EGLD": {
+        "free": 116,
+        "locked": 0
+      },
+      "DIA": {
+        "free": 2430,
+        "locked": 0
+      },
+      "UMA": {
+        "free": 1052,
+        "locked": 0
+      },
+      "BEL": {
+        "free": 4466,
+        "locked": 0
+      },
+      "UNI": {
+        "free": 144,
+        "locked": 0
+      },
+      "SUN": {
+        "free": 18446,
+        "locked": 0
+      },
+      "AVAX": {
+        "free": 52,
+        "locked": 0
+      },
+      "CAKE": {
+        "free": 320,
+        "locked": 0
+      },
+      "XVS": {
+        "free": 188,
+        "locked": 0
+      },
+      "BRL": {
+        "free": 97,
+        "locked": 0
+      },
+      "AAVE": {
+        "free": 5,
+        "locked": 0
+      },
+      "NEAR": {
+        "free": 342,
+        "locked": 0
+      },
+      "FIL": {
+        "free": 468,
+        "locked": 0
+      },
+      "INJ": {
+        "free": 129,
+        "locked": 0
+      },
+      "AUDIO": {
+        "free": 18446,
+        "locked": 0
+      },
+      "CTK": {
+        "free": 2749,
+        "locked": 0
+      },
+      "AXS": {
+        "free": 369,
+        "locked": 0
+      },
+      "STRAX": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ROSE": {
+        "free": 18446,
+        "locked": 0
+      },
+      "SKL": {
+        "free": 18446,
+        "locked": 0
+      },
+      "GLM": {
+        "free": 3533,
+        "locked": 0
+      },
+      "GRT": {
+        "free": 18446,
+        "locked": 0
+      },
+      "JUV": {
+        "free": 1030,
+        "locked": 0
+      },
+      "PSG": {
+        "free": 650,
+        "locked": 0
+      },
+      "1INCH": {
+        "free": 5113,
+        "locked": 0
+      },
+      "OG": {
+        "free": 165,
+        "locked": 0
+      },
+      "ATM": {
+        "free": 478,
+        "locked": 0
+      },
+      "ASR": {
+        "free": 401,
+        "locked": 0
+      },
+      "CELO": {
+        "free": 5362,
+        "locked": 0
+      },
+      "RIF": {
+        "free": 9044,
+        "locked": 0
+      },
+      "CKB": {
+        "free": 18446,
+        "locked": 0
+      },
+      "TWT": {
+        "free": 1130,
+        "locked": 0
+      },
+      "SFP": {
+        "free": 1521,
+        "locked": 0
+      },
+      "DODO": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ACM": {
+        "free": 1165,
+        "locked": 0
+      },
+      "POND": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ALICE": {
+        "free": 3316,
+        "locked": 0
+      },
+      "SUPER": {
+        "free": 3922,
+        "locked": 0
+      },
+      "CFX": {
+        "free": 7982,
+        "locked": 0
+      },
+      "TKO": {
+        "free": 8018,
+        "locked": 0
+      },
+      "PUNDIX": {
+        "free": 3182,
+        "locked": 0
+      },
+      "TLM": {
+        "free": 18446,
+        "locked": 0
+      },
+      "BAR": {
+        "free": 1161,
+        "locked": 0
+      },
+      "SLP": {
+        "free": 18446,
+        "locked": 0
+      },
+      "SHIB": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ICP": {
+        "free": 179,
+        "locked": 0
+      },
+      "AR": {
+        "free": 204,
+        "locked": 0
+      },
+      "MASK": {
+        "free": 994,
+        "locked": 0
+      },
+      "LPT": {
+        "free": 225,
+        "locked": 0
+      },
+      "XVG": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ATA": {
+        "free": 18446,
+        "locked": 0
+      },
+      "GTC": {
+        "free": 5555,
+        "locked": 0
+      },
+      "PHA": {
+        "free": 14454,
+        "locked": 0
+      },
+      "MLN": {
+        "free": 161,
+        "locked": 0
+      },
+      "DEXE": {
+        "free": 43,
+        "locked": 0
+      },
+      "C98": {
+        "free": 18446,
+        "locked": 0
+      },
+      "QNT": {
+        "free": 7,
+        "locked": 0
+      },
+      "FLOW": {
+        "free": 12524,
+        "locked": 0
+      },
+      "MINA": {
+        "free": 7776,
+        "locked": 0
+      },
+      "RAY": {
+        "free": 622,
+        "locked": 0
+      },
+      "FARM": {
+        "free": 41,
+        "locked": 0
+      },
+      "QUICK": {
+        "free": 18446,
+        "locked": 0
+      },
+      "MBOX": {
+        "free": 18446,
+        "locked": 0
+      },
+      "REQ": {
+        "free": 7114,
+        "locked": 0
+      },
+      "WAXP": {
+        "free": 18446,
+        "locked": 0
+      },
+      "GNO": {
+        "free": 3,
+        "locked": 0
+      },
+      "XEC": {
+        "free": 18446,
+        "locked": 0
+      },
+      "DYDX": {
+        "free": 3287,
+        "locked": 0
+      },
+      "USDP": {
+        "free": 500,
+        "locked": 0
+      },
+      "GALA": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ILV": {
+        "free": 105,
+        "locked": 0
+      },
+      "YGG": {
+        "free": 11358,
+        "locked": 0
+      },
+      "SYS": {
+        "free": 18446,
+        "locked": 0
+      },
+      "FIDA": {
+        "free": 18446,
+        "locked": 0
+      },
+      "AGLD": {
+        "free": 1945,
+        "locked": 0
+      },
+      "RAD": {
+        "free": 2031,
+        "locked": 0
+      },
+      "RARE": {
+        "free": 18446,
+        "locked": 0
+      },
+      "LAZIO": {
+        "free": 811,
+        "locked": 0
+      },
+      "AUCTION": {
+        "free": 101,
+        "locked": 0
+      },
+      "MOVR": {
+        "free": 229,
+        "locked": 0
+      },
+      "CITY": {
+        "free": 850,
+        "locked": 0
+      },
+      "ENS": {
+        "free": 76,
+        "locked": 0
+      },
+      "QI": {
+        "free": 18446,
+        "locked": 0
+      },
+      "PORTO": {
+        "free": 602,
+        "locked": 0
+      },
+      "POWR": {
+        "free": 7465,
+        "locked": 0
+      },
+      "JASMY": {
+        "free": 18446,
+        "locked": 0
+      },
+      "AMP": {
+        "free": 18446,
+        "locked": 0
+      },
+      "PYR": {
+        "free": 1794,
+        "locked": 0
+      },
+      "ALCX": {
+        "free": 91,
+        "locked": 0
+      },
+      "SANTOS": {
+        "free": 446,
+        "locked": 0
+      },
+      "BICO": {
+        "free": 18446,
+        "locked": 0
+      },
+      "FLUX": {
+        "free": 6694,
+        "locked": 0
+      },
+      "HIGH": {
+        "free": 2742,
+        "locked": 0
+      },
+      "CVX": {
+        "free": 273,
+        "locked": 0
+      },
+      "PEOPLE": {
+        "free": 18446,
+        "locked": 0
+      },
+      "SPELL": {
+        "free": 18446,
+        "locked": 0
+      },
+      "JOE": {
+        "free": 10389,
+        "locked": 0
+      },
+      "ACH": {
+        "free": 18446,
+        "locked": 0
+      },
+      "IMX": {
+        "free": 2882,
+        "locked": 0
+      },
+      "GLMR": {
+        "free": 18446,
+        "locked": 0
+      },
+      "SCRT": {
+        "free": 4313,
+        "locked": 0
+      },
+      "API3": {
+        "free": 1338,
+        "locked": 0
+      },
+      "BTTC": {
+        "free": 18446,
+        "locked": 0
+      },
+      "XNO": {
+        "free": 1073,
+        "locked": 0
+      },
+      "WOO": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ALPINE": {
+        "free": 1082,
+        "locked": 0
+      },
+      "T": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ASTR": {
+        "free": 18446,
+        "locked": 0
+      },
+      "GMT": {
+        "free": 18446,
+        "locked": 0
+      },
+      "APE": {
+        "free": 3124,
+        "locked": 0
+      },
+      "NEXO": {
+        "free": 554,
+        "locked": 0
+      },
+      "LDO": {
+        "free": 1302,
+        "locked": 0
+      },
+      "OP": {
+        "free": 3708,
+        "locked": 0
+      },
+      "STG": {
+        "free": 2043,
+        "locked": 0
+      },
+      "LUNC": {
+        "free": 18446,
+        "locked": 0
+      },
+      "GMX": {
+        "free": 68,
+        "locked": 0
+      },
+      "POLYX": {
+        "free": 9875,
+        "locked": 0
+      },
+      "APT": {
+        "free": 490,
+        "locked": 0
+      },
+      "PLN": {
+        "free": 18466,
+        "locked": 0
+      },
+      "OSMO": {
+        "free": 15338,
+        "locked": 0
+      },
+      "HFT": {
+        "free": 18446,
+        "locked": 0
+      },
+      "PHB": {
+        "free": 4502,
+        "locked": 0
+      },
+      "MAGIC": {
+        "free": 7395,
+        "locked": 0
+      },
+      "RPL": {
+        "free": 254,
+        "locked": 0
+      },
+      "GNS": {
+        "free": 904,
+        "locked": 0
+      },
+      "SYN": {
+        "free": 9041,
+        "locked": 0
+      },
+      "SSV": {
+        "free": 174,
+        "locked": 0
+      },
+      "LQTY": {
+        "free": 1546,
+        "locked": 0
+      },
+      "USTC": {
+        "free": 18446,
+        "locked": 0
+      },
+      "PROM": {
+        "free": 255,
+        "locked": 0
+      },
+      "QKC": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ID": {
+        "free": 15285,
+        "locked": 0
+      },
+      "ARB": {
+        "free": 4059,
+        "locked": 0
+      },
+      "ARS": {
+        "free": 18466,
+        "locked": 0
+      },
+      "EDU": {
+        "free": 10728,
+        "locked": 0
+      },
+      "SUI": {
+        "free": 502,
+        "locked": 0
+      },
+      "PEPE": {
+        "free": 18446,
+        "locked": 0
+      },
+      "FLOKI": {
+        "free": 18446,
+        "locked": 0
+      },
+      "WBETH": {
+        "free": 1,
+        "locked": 0
+      },
+      "MAV": {
+        "free": 18446,
+        "locked": 0
+      },
+      "PENDLE": {
+        "free": 270,
+        "locked": 0
+      },
+      "ARKM": {
+        "free": 3918,
+        "locked": 0
+      },
+      "WLD": {
+        "free": 1961,
+        "locked": 0
+      },
+      "FDUSD": {
+        "free": 10000,
+        "locked": 0
+      },
+      "SEI": {
+        "free": 8211,
+        "locked": 0
+      },
+      "CYBER": {
+        "free": 901,
+        "locked": 0
+      },
+      "ARK": {
+        "free": 2769,
+        "locked": 0
+      },
+      "IQ": {
+        "free": 18446,
+        "locked": 0
+      },
+      "TIA": {
+        "free": 1337,
+        "locked": 0
+      },
+      "MEME": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ORDI": {
+        "free": 99,
+        "locked": 0
+      },
+      "BEAMX": {
+        "free": 18446,
+        "locked": 0
+      },
+      "PIVX": {
+        "free": 6242,
+        "locked": 0
+      },
+      "VIC": {
+        "free": 10606,
+        "locked": 0
+      },
+      "BLUR": {
+        "free": 18039,
+        "locked": 0
+      },
+      "VANRY": {
+        "free": 18446,
+        "locked": 0
+      },
+      "AEUR": {
+        "free": 429,
+        "locked": 0
+      },
+      "JTO": {
+        "free": 1174,
+        "locked": 0
+      },
+      "1000SATS": {
+        "free": 18446,
+        "locked": 0
+      },
+      "BONK": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ACE": {
+        "free": 3847,
+        "locked": 0
+      },
+      "NFP": {
+        "free": 18446,
+        "locked": 0
+      },
+      "AI": {
+        "free": 18446,
+        "locked": 0
+      },
+      "XAI": {
+        "free": 18446,
+        "locked": 0
+      },
+      "MANTA": {
+        "free": 7371,
+        "locked": 0
+      },
+      "ALT": {
+        "free": 18446,
+        "locked": 0
+      },
+      "JUP": {
+        "free": 2513,
+        "locked": 0
+      },
+      "PYTH": {
+        "free": 9623,
+        "locked": 0
+      },
+      "RONIN": {
+        "free": 4923,
+        "locked": 0
+      },
+      "DYM": {
+        "free": 18446,
+        "locked": 0
+      },
+      "PIXEL": {
+        "free": 18446,
+        "locked": 0
+      },
+      "STRK": {
+        "free": 12115,
+        "locked": 0
+      },
+      "PORTAL": {
+        "free": 18446,
+        "locked": 0
+      },
+      "AXL": {
+        "free": 6841,
+        "locked": 0
+      },
+      "WIF": {
+        "free": 2259,
+        "locked": 0
+      },
+      "METIS": {
+        "free": 135,
+        "locked": 0
+      },
+      "JPY": {
+        "free": 18466,
+        "locked": 0
+      },
+      "AEVO": {
+        "free": 16797,
+        "locked": 0
+      },
+      "BOME": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ETHFI": {
+        "free": 1154,
+        "locked": 0
+      },
+      "ENA": {
+        "free": 4151,
+        "locked": 0
+      },
+      "W": {
+        "free": 18446,
+        "locked": 0
+      },
+      "TNSR": {
+        "free": 12171,
+        "locked": 0
+      },
+      "SAGA": {
+        "free": 18446,
+        "locked": 0
+      },
+      "MXN": {
+        "free": 18466,
+        "locked": 0
+      },
+      "TAO": {
+        "free": 1,
+        "locked": 0
+      },
+      "REZ": {
+        "free": 18446,
+        "locked": 0
+      },
+      "BB": {
+        "free": 15360,
+        "locked": 0
+      },
+      "NOT": {
+        "free": 18446,
+        "locked": 0
+      },
+      "COP": {
+        "free": 18466,
+        "locked": 0
+      },
+      "IO": {
+        "free": 3207,
+        "locked": 0
+      },
+      "ZK": {
+        "free": 18446,
+        "locked": 0
+      },
+      "LISTA": {
+        "free": 5622,
+        "locked": 0
+      },
+      "ZRO": {
+        "free": 350,
+        "locked": 0
+      },
+      "G": {
+        "free": 18446,
+        "locked": 0
+      },
+      "BANANA": {
+        "free": 122,
+        "locked": 0
+      },
+      "RENDER": {
+        "free": 258,
+        "locked": 0
+      },
+      "TON": {
+        "free": 201,
+        "locked": 0
+      },
+      "DOGS": {
+        "free": 18446,
+        "locked": 0
+      },
+      "EURI": {
+        "free": 425,
+        "locked": 0
+      },
+      "POL": {
+        "free": 5064,
+        "locked": 0
+      },
+      "NEIRO": {
+        "free": 18446,
+        "locked": 0
+      },
+      "TURBO": {
+        "free": 18446,
+        "locked": 0
+      },
+      "1MBABYDOGE": {
+        "free": 18446,
+        "locked": 0
+      },
+      "CATI": {
+        "free": 7954,
+        "locked": 0
+      },
+      "HMSTR": {
+        "free": 18446,
+        "locked": 0
+      },
+      "EIGEN": {
+        "free": 2518,
+        "locked": 0
+      },
+      "BNSOL": {
+        "free": 5,
+        "locked": 0
+      },
+      "SCR": {
+        "free": 10005,
+        "locked": 0
+      },
+      "LUMIA": {
+        "free": 4045,
+        "locked": 0
+      },
+      "KAIA": {
+        "free": 10611,
+        "locked": 0
+      },
+      "COW": {
+        "free": 2795,
+        "locked": 0
+      },
+      "CETUS": {
+        "free": 17698,
+        "locked": 0
+      },
+      "PNUT": {
+        "free": 8139,
+        "locked": 0
+      },
+      "ACT": {
+        "free": 18446,
+        "locked": 0
+      },
+      "USUAL": {
+        "free": 18446,
+        "locked": 0
+      },
+      "THE": {
+        "free": 4830,
+        "locked": 0
+      },
+      "ACX": {
+        "free": 11261,
+        "locked": 0
+      },
+      "ORCA": {
+        "free": 329,
+        "locked": 0
+      },
+      "MOVE": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ME": {
+        "free": 4608,
+        "locked": 0
+      },
+      "VELODROME": {
+        "free": 18446,
+        "locked": 0
+      },
+      "VANA": {
+        "free": 320,
+        "locked": 0
+      },
+      "1000CAT": {
+        "free": 18446,
+        "locked": 0
+      },
+      "PENGU": {
+        "free": 18446,
+        "locked": 0
+      },
+      "BIO": {
+        "free": 10276,
+        "locked": 0
+      },
+      "D": {
+        "free": 18446,
+        "locked": 0
+      },
+      "AIXBT": {
+        "free": 14701,
+        "locked": 0
+      },
+      "CGPT": {
+        "free": 18159,
+        "locked": 0
+      },
+      "COOKIE": {
+        "free": 18446,
+        "locked": 0
+      },
+      "S": {
+        "free": 10319,
+        "locked": 0
+      },
+      "SOLV": {
+        "free": 18446,
+        "locked": 0
+      },
+      "TRUMP": {
+        "free": 211,
+        "locked": 0
+      },
+      "ANIME": {
+        "free": 18446,
+        "locked": 0
+      },
+      "BERA": {
+        "free": 1308,
+        "locked": 0
+      },
+      "1000CHEEMS": {
+        "free": 18446,
+        "locked": 0
+      },
+      "TST": {
+        "free": 18446,
+        "locked": 0
+      },
+      "LAYER": {
+        "free": 5700,
+        "locked": 0
+      },
+      "HEI": {
+        "free": 5817,
+        "locked": 0
+      },
+      "KAITO": {
+        "free": 1007,
+        "locked": 0
+      },
+      "SHELL": {
+        "free": 13274,
+        "locked": 0
+      },
+      "RED": {
+        "free": 3403,
+        "locked": 0
+      },
+      "GPS": {
+        "free": 18446,
+        "locked": 0
+      },
+      "EPIC": {
+        "free": 1416,
+        "locked": 0
+      },
+      "BMT": {
+        "free": 18446,
+        "locked": 0
+      },
+      "FORM": {
+        "free": 1839,
+        "locked": 0
+      },
+      "XUSD": {
+        "free": 499,
+        "locked": 0
+      },
+      "NIL": {
+        "free": 11840,
+        "locked": 0
+      },
+      "PARTI": {
+        "free": 9409,
+        "locked": 0
+      },
+      "MUBARAK": {
+        "free": 18446,
+        "locked": 0
+      },
+      "TUT": {
+        "free": 18446,
+        "locked": 0
+      },
+      "BROCCOLI714": {
+        "free": 18446,
+        "locked": 0
+      },
+      "BANANAS31": {
+        "free": 18446,
+        "locked": 0
+      },
+      "GUN": {
+        "free": 18446,
+        "locked": 0
+      },
+      "BABY": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ONDO": {
+        "free": 1585,
+        "locked": 0
+      },
+      "BIGTIME": {
+        "free": 18446,
+        "locked": 0
+      },
+      "VIRTUAL": {
+        "free": 603,
+        "locked": 0
+      },
+      "KERNEL": {
+        "free": 7877,
+        "locked": 0
+      },
+      "WCT": {
+        "free": 7588,
+        "locked": 0
+      },
+      "HYPER": {
+        "free": 4700,
+        "locked": 0
+      },
+      "INIT": {
+        "free": 5220,
+        "locked": 0
+      },
+      "SIGN": {
+        "free": 18446,
+        "locked": 0
+      },
+      "STO": {
+        "free": 5750,
+        "locked": 0
+      },
+      "SYRUP": {
+        "free": 1995,
+        "locked": 0
+      },
+      "KMNO": {
+        "free": 18446,
+        "locked": 0
+      },
+      "SXT": {
+        "free": 18446,
+        "locked": 0
+      },
+      "NXPC": {
+        "free": 1632,
+        "locked": 0
+      },
+      "AWE": {
+        "free": 8907,
+        "locked": 0
+      },
+      "HAEDAL": {
+        "free": 15013,
+        "locked": 0
+      },
+      "USD1": {
+        "free": 500,
+        "locked": 0
+      },
+      "HUMA": {
+        "free": 18446,
+        "locked": 0
+      },
+      "A": {
+        "free": 5597,
+        "locked": 0
+      },
+      "SOPH": {
+        "free": 18446,
+        "locked": 0
+      },
+      "RESOLV": {
+        "free": 16125,
+        "locked": 0
+      },
+      "HOME": {
+        "free": 18446,
+        "locked": 0
+      },
+      "SPK": {
+        "free": 14103,
+        "locked": 0
+      },
+      "NEWT": {
+        "free": 6517,
+        "locked": 0
+      },
+      "SAHARA": {
+        "free": 18446,
+        "locked": 0
+      },
+      "LA": {
+        "free": 3576,
+        "locked": 0
+      },
+      "ERA": {
+        "free": 3581,
+        "locked": 0
+      },
+      "C": {
+        "free": 6337,
+        "locked": 0
+      },
+      "TREE": {
+        "free": 7185,
+        "locked": 0
+      },
+      "TOWNS": {
+        "free": 18446,
+        "locked": 0
+      },
+      "PROVE": {
+        "free": 1923,
+        "locked": 0
+      },
+      "BFUSD": {
+        "free": 500,
+        "locked": 0
+      },
+      "PLUME": {
+        "free": 18446,
+        "locked": 0
+      },
+      "DOLO": {
+        "free": 15270,
+        "locked": 0
+      },
+      "MITO": {
+        "free": 9576,
+        "locked": 0
+      },
+      "WLFI": {
+        "free": 7485,
+        "locked": 0
+      },
+      "SOMI": {
+        "free": 2659,
+        "locked": 0
+      },
+      "OPEN": {
+        "free": 2209,
+        "locked": 0
+      },
+      "USDE": {
+        "free": 500,
+        "locked": 0
+      },
+      "LINEA": {
+        "free": 18446,
+        "locked": 0
+      },
+      "HOLO": {
+        "free": 7174,
+        "locked": 0
+      },
+      "PUMP": {
+        "free": 18446,
+        "locked": 0
+      },
+      "AVNT": {
+        "free": 3351,
+        "locked": 0
+      },
+      "ZKC": {
+        "free": 6570,
+        "locked": 0
+      },
+      "SKY": {
+        "free": 6242,
+        "locked": 0
+      },
+      "BARD": {
+        "free": 1805,
+        "locked": 0
+      },
+      "0G": {
+        "free": 905,
+        "locked": 0
+      },
+      "HEMI": {
+        "free": 18446,
+        "locked": 0
+      },
+      "XPL": {
+        "free": 5120,
+        "locked": 0
+      },
+      "MIRA": {
+        "free": 5973,
+        "locked": 0
+      },
+      "FF": {
+        "free": 7929,
+        "locked": 0
+      },
+      "EDEN": {
+        "free": 13400,
+        "locked": 0
+      },
+      "NOM": {
+        "free": 18446,
+        "locked": 0
+      },
+      "2Z": {
+        "free": 5222,
+        "locked": 0
+      },
+      "MORPHO": {
+        "free": 220,
+        "locked": 0
+      },
+      "ASTER": {
+        "free": 736,
+        "locked": 0
+      },
+      "WAL": {
+        "free": 6550,
+        "locked": 0
+      },
+      "EUL": {
+        "free": 359,
+        "locked": 0
+      },
+      "ENSO": {
+        "free": 534,
+        "locked": 0
+      },
+      "YB": {
+        "free": 4245,
+        "locked": 0
+      },
+      "ZBT": {
+        "free": 2716,
+        "locked": 0
+      },
+      "TURTLE": {
+        "free": 8935,
+        "locked": 0
+      },
+      "GIGGLE": {
+        "free": 13,
+        "locked": 0
+      },
+      "F": {
+        "free": 18446,
+        "locked": 0
+      },
+      "KITE": {
+        "free": 3235,
+        "locked": 0
+      },
+      "MMT": {
+        "free": 3599,
+        "locked": 0
+      },
+      "SAPIEN": {
+        "free": 4927,
+        "locked": 0
+      },
+      "ALLO": {
+        "free": 4355,
+        "locked": 0
+      },
+      "BANK": {
+        "free": 14862,
+        "locked": 0
+      },
+      "MET": {
+        "free": 2978,
+        "locked": 0
+      },
+      "USD": {
+        "free": 10000,
+        "locked": 0
+      },
+      "IDR": {
+        "free": 10000,
+        "locked": 0
+      },
+      "AT": {
+        "free": 2998,
+        "locked": 0
+      },
+      "KGST": {
+        "free": 18446,
+        "locked": 0
+      },
+      "BREV": {
+        "free": 4153,
+        "locked": 0
+      },
+      "币安人生": {
+        "free": 1374,
+        "locked": 0
+      },
+      "ZKP": {
+        "free": 5832,
+        "locked": 0
+      },
+      "U": {
+        "free": 499,
+        "locked": 0
+      },
+      "FRAX": {
+        "free": 1034,
+        "locked": 0
+      },
+      "FOGO": {
+        "free": 18446,
+        "locked": 0
+      },
+      "RLUSD": {
+        "free": 500,
+        "locked": 0
+      },
+      "SENT": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ZAMA": {
+        "free": 16718,
+        "locked": 0
+      },
+      "ESP": {
+        "free": 7183,
+        "locked": 0
+      },
+      "MANTRA": {
+        "free": 18446,
+        "locked": 0
+      },
+      "ROBO": {
+        "free": 18446,
+        "locked": 0
+      },
+      "OPN": {
+        "free": 2758,
+        "locked": 0
+      },
+      "NIGHT": {
+        "free": 15636,
+        "locked": 0
+      },
+      "CFG": {
+        "free": 2074,
+        "locked": 0
+      },
+      "KAT": {
+        "free": 18446,
+        "locked": 0
+      },
+      "XAUT": {
+        "free": 1,
+        "locked": 0
+      },
+      "USDS": {
+        "free": 500,
+        "locked": 0
+      },
+      "CHIP": {
+        "free": 9272,
+        "locked": 0
+      },
+      "MEGA": {
+        "free": 3995,
+        "locked": 0
+      },
+      "KZT": {
+        "free": 0,
+        "locked": 0
+      }
+    },
+    "openOrders": [],
+    "fills": []
+  },
+  "killSwitch": {
+    "active": false,
+    "reason": null,
+    "updatedAt": null
+  },
+  "circuitBreaker": {
+    "state": "closed",
+    "failureCount": 0,
+    "openedAt": null
+  },
+  "metrics": {
+    "decisions_received": 12,
+    "decisions_rejected": 12
+  }
+}

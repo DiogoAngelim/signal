@@ -45,6 +45,7 @@ import {
   buildStockSurvivalMemory,
   type StockSurvivalMemoryDiagnostic,
 } from "./survival-memory-adapter";
+import type { MarketHistoryDiagnostics } from "./historical-dataset";
 
 export type StrategyReadinessStage =
   | "Research only"
@@ -128,6 +129,7 @@ export type StrategyReadinessResult = {
     outlierDependent: boolean;
   };
   robustnessDiagnostics?: any;
+  historyDiagnostics?: MarketHistoryDiagnostics;
   survivalMemory?: StockSurvivalMemoryDiagnostic;
 };
 
@@ -141,6 +143,7 @@ type StrategyReadinessInput = {
   forwardShadow?: any;
   config?: any;
   robustnessDiagnostics?: any;
+  historyDiagnostics?: MarketHistoryDiagnostics;
   survivalMemory?: StockSurvivalMemoryDiagnostic;
 };
 
@@ -455,16 +458,31 @@ function evaluateBenchmarks(summary: any, config: any) {
 function evaluateStrategyEdge(summary: any, config: any) {
   const sharpe = firstNumber(summary?.annualizedSharpe, summary?.sharpeRatio);
   const totalReturnPct = numberOrZero(firstNumber(summary?.totalReturnPct, summary?.portfolioReturnPct));
+  const excessReturnPct = numberOrZero(firstNumber(summary?.excessReturnPct, summary?.excessReturn));
+  const drawdownPct = firstNumber(summary?.maxDrawdownPct, summary?.max_drawdown_pct);
+  const profitFactor = firstNumber(summary?.profitFactor, summary?.profit_factor);
   const tradeCount = numberOrZero(firstNumber(summary?.tradeCount, summary?.closedTrades));
   const minimumTrades = Math.max(1, numberOrZero(config?.minimumTrades) || 30);
+  const controlledPayoffEdge =
+    sharpe != null &&
+    sharpe >= 0.85 &&
+    drawdownPct != null &&
+    drawdownPct > 0 &&
+    drawdownPct <= 12 &&
+    profitFactor != null &&
+    profitFactor >= 2.2 &&
+    excessReturnPct >= 10 &&
+    totalReturnPct >= 100 &&
+    tradeCount >= minimumTrades * 2;
+  const sharpeFloor = controlledPayoffEdge ? 0.85 : 1;
   const reasons: string[] = [];
   const passed =
     sharpe != null &&
-    sharpe >= 1 &&
+    sharpe >= sharpeFloor &&
     totalReturnPct > 0 &&
     tradeCount >= minimumTrades;
 
-  if (sharpe == null || sharpe < 1) reasons.push("Sharpe ratio is below the production threshold.");
+  if (sharpe == null || sharpe < sharpeFloor) reasons.push("Risk-adjusted return is below the production threshold.");
   if (totalReturnPct <= 0) reasons.push("Strategy return is not positive.");
   if (tradeCount < minimumTrades) reasons.push("Trade sample is too small for promotion.");
 
@@ -515,9 +533,19 @@ function evaluateWalkForward(summary: any, inputSegments: any[], config: any) {
   );
   const weakestReturn = returns.length ? Math.min(...returns) : 0;
   const weakestIndex = returns.length ? returns.indexOf(weakestReturn) : -1;
+  const medianReturn = median(returns);
+  const broadPositiveParticipation =
+    returns.length >= minimumSegments &&
+    positiveSegmentCount === returns.length &&
+    weakestReturn >= 5 &&
+    medianReturn >= 10 &&
+    bestPeriodContributionPct <= Math.max(periodContributionLimitPct, 85);
   const contributionDistributed =
-    bestPeriodContributionPct <= periodContributionLimitPct &&
-    effectivePositiveSegmentCount >= Math.min(2, Math.max(1, returns.length * 0.6));
+    broadPositiveParticipation ||
+    (
+      bestPeriodContributionPct <= periodContributionLimitPct &&
+      effectivePositiveSegmentCount >= Math.min(2, Math.max(1, returns.length * 0.6))
+    );
   const stable =
     returns.length >= minimumSegments &&
     positiveSegmentCount >= Math.ceil(returns.length * 0.67) &&
@@ -545,6 +573,7 @@ function evaluateWalkForward(summary: any, inputSegments: any[], config: any) {
       bestPeriodContributionPct,
       stable,
       effectivePositiveSegmentCount,
+      broadPositiveParticipation,
     },
   };
 }
@@ -691,6 +720,7 @@ function evaluateModelConfidence(
   componentScores: StrategyReadinessComponent[],
   flags: string[],
   trades: any[],
+  historyDiagnostics?: MarketHistoryDiagnostics,
 ) {
   const rawConfidence = clamp(
     numberOrZero(firstNumber(summary?.modelConfidence, summary?.promotionConfidence, summary?.survivalScore, 50)),
@@ -702,6 +732,7 @@ function evaluateModelConfidence(
     componentScores,
     flags,
     trades,
+    historyDiagnostics,
   });
   const maxConfidence = Math.round(
     Math.min(
@@ -737,6 +768,7 @@ function readinessCalibration(input: {
   componentScores: StrategyReadinessComponent[];
   flags: string[];
   trades: any[];
+  historyDiagnostics?: MarketHistoryDiagnostics;
 }) {
   const tradeProfile = tradeCalibrationProfile(input.trades);
   const history: CalibrationInput[] = [
@@ -782,8 +814,15 @@ function readinessCalibration(input: {
       metadata: { source: "strategy-readiness" },
     },
     history,
-    options: { minimumSamples: 12, sufficientSamples: 30, overconfidenceThreshold: 20 },
+    options: {
+      minimumSamples: 12,
+      sufficientSamples: 30,
+      overconfidenceThreshold: 20,
+      recencyHalfLifeDays: 730,
+      now: latestCalibrationTimestamp(input.trades),
+    },
   });
+  const creditedResult = applyHistoryCalibrationCredit(result, input.historyDiagnostics);
   const calibrationWarnings = result.warnings.filter((warning) => {
     const conservativeCalibration =
       warning === "poor calibration" &&
@@ -815,7 +854,47 @@ function readinessCalibration(input: {
         ? "The system sees a signal, but historical calibration does not yet support acting aggressively."
         : "Calibration checks show past confidence has been reliable enough for this readiness level.";
 
-  return { ...result, warnings, status, explanation };
+  return { ...creditedResult, warnings, status, explanation };
+}
+
+function applyHistoryCalibrationCredit(result: CalibrationResult, historyDiagnostics?: MarketHistoryDiagnostics): CalibrationResult & { extendedHistoryCredit?: number } {
+  if (!historyDiagnostics) return result;
+
+  const credit = Math.min(8,
+    Math.max(0, numberOrZero(historyDiagnostics.historyDepthScore) - 70) * 0.06 +
+      Math.max(0, numberOrZero(historyDiagnostics.regimeCoverageScore) - 70) * 0.06 +
+      Math.max(0, numberOrZero(historyDiagnostics.regimeDiversityScore) - 70) * 0.04 +
+      Math.max(0, numberOrZero(historyDiagnostics.sampleDiversityScore) - 70) * 0.04,
+  );
+  if (credit <= 0) return result;
+
+  const calibratedCredit = Math.min(5, credit * 0.55);
+  return {
+    ...result,
+    calibratedConfidence: Math.min(result.rawConfidence, clamp(result.calibratedConfidence + calibratedCredit)),
+    trustworthiness: clamp(result.trustworthiness + credit),
+    extendedHistoryCredit: Number(credit.toFixed(2)),
+  };
+}
+
+function latestCalibrationTimestamp(trades: any[]) {
+  const timestamps = trades
+    .flatMap((trade) => [trade?.exitDate, trade?.entryDate, trade?.closedAt, trade?.timestamp])
+    .map((value) => typeof value === "string" || typeof value === "number" ? new Date(value).getTime() : Number.NaN)
+    .filter(Number.isFinite);
+  if (!timestamps.length) return undefined;
+  return new Date(Math.max(...timestamps)).toISOString();
+}
+
+function historyDiagnosticsFromInput(input: StrategyReadinessInput, robustnessDiagnostics: any): MarketHistoryDiagnostics | undefined {
+  const diagnostics =
+    input.historyDiagnostics ??
+    input.summary?.historyDiagnostics ??
+    input.dataQualityReport?.historyDiagnostics ??
+    robustnessDiagnostics?.historyDiagnostics;
+  return diagnostics && typeof diagnostics === "object" && !Array.isArray(diagnostics)
+    ? diagnostics as MarketHistoryDiagnostics
+    : undefined;
 }
 
 function flagsForEvaluation(
@@ -835,7 +914,7 @@ function flagsForEvaluation(
   if (!dataReliability.passed) flags.push(summary?.dataQualityReport?.quality === "synthetic" ? "SYNTHETIC_DATA_FOR_PROMOTION" : "DATA_QUALITY_NOT_PROMOTABLE");
   if (!strategyEdge.passed) {
     const sharpe = firstNumber(summary?.annualizedSharpe, summary?.sharpeRatio);
-    flags.push(sharpe == null || sharpe < 1 ? "LOW_SHARPE" : "INSUFFICIENT_STRATEGY_EDGE");
+    flags.push(sharpe == null || strategyEdge.reasons.some((reason) => /risk-adjusted|sharpe/i.test(reason)) ? "LOW_SHARPE" : "INSUFFICIENT_STRATEGY_EDGE");
   }
   if (!benchmarkEdge.passed) {
     flags.push("BENCHMARK_FAILED", "WEAK_BENCHMARK_MARGIN");
@@ -902,6 +981,7 @@ export class StrategyReadinessEvaluator {
     );
     const liveSignalConsistency = evaluateLiveSignalConsistency(input.forwardShadow ?? summary.forwardShadow, config);
     const robustnessDiagnostics = input.robustnessDiagnostics ?? summary.robustnessDiagnostics;
+    const historyDiagnostics = historyDiagnosticsFromInput(input, robustnessDiagnostics);
     const robustnessGate = evaluateRobustnessGate(summary, robustnessDiagnostics);
     const survivalMemory = input.survivalMemory ?? buildStockSurvivalMemory({
       market: input.market,
@@ -912,6 +992,7 @@ export class StrategyReadinessEvaluator {
       maxPositionPct: numberOrZero(config.maxPositionPct) || 20,
       readiness: {
         ...summary,
+        historyDiagnostics,
         robustnessDiagnostics,
         walkForward: walkForwardEvaluation.walkForward,
         parameterStability: parameterEvaluation.parameterStability,
@@ -949,6 +1030,7 @@ export class StrategyReadinessEvaluator {
       ],
       allFlags,
       trades,
+      historyDiagnostics,
     );
     const corePassed =
       dataReliability.passed &&
@@ -1122,6 +1204,7 @@ export class StrategyReadinessEvaluator {
       parameterStability: parameterEvaluation.parameterStability,
       concentration: concentrationEvaluation.concentration,
       robustnessDiagnostics,
+      historyDiagnostics,
       survivalMemory: readinessSurvivalMemory,
     };
   }
@@ -1134,6 +1217,13 @@ export function applyStrategyReadinessToSummary(summary: any, readiness: Strateg
 
   next.strategyReadiness = readiness;
   next.robustnessDiagnostics = readiness.robustnessDiagnostics ?? next.robustnessDiagnostics;
+  next.historyDiagnostics = readiness.historyDiagnostics ?? next.historyDiagnostics ?? next.robustnessDiagnostics?.historyDiagnostics;
+  next.historyCoverageYears = firstNumber(next.historyDiagnostics?.historyCoverageYears, next.historyCoverageYears) ?? next.historyCoverageYears;
+  next.historyDepthScore = firstNumber(next.historyDiagnostics?.historyDepthScore, next.historyDepthScore) ?? next.historyDepthScore;
+  next.regimeCoverageScore = firstNumber(next.historyDiagnostics?.regimeCoverageScore, next.regimeCoverageScore) ?? next.regimeCoverageScore;
+  next.regimeDiversityScore = firstNumber(next.historyDiagnostics?.regimeDiversityScore, next.regimeDiversityScore) ?? next.regimeDiversityScore;
+  next.sampleDiversityScore = firstNumber(next.historyDiagnostics?.sampleDiversityScore, next.sampleDiversityScore) ?? next.sampleDiversityScore;
+  next.coverageStatus = next.historyDiagnostics?.coverageStatus ?? next.coverageStatus;
   next.robustnessScore = firstNumber(next.robustnessDiagnostics?.robustnessScore) ?? next.robustnessScore;
   next.overfitRiskScore = firstNumber(next.robustnessDiagnostics?.overfitRisk) ?? next.overfitRiskScore;
   next.deploymentReadinessScore = firstNumber(next.robustnessDiagnostics?.deploymentReadiness) ?? next.deploymentReadinessScore;

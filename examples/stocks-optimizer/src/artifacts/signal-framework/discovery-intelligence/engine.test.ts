@@ -124,6 +124,32 @@ describe("discovery intelligence", () => {
     assert.equal(metaLearning.governanceTrend, 22.5);
   });
 
+  it("uses long-history regime coverage as a capped intelligence signal", () => {
+    const weak = evaluateDiscoveryIntelligence({
+      discoveries: [{ id: "d1", stage: "OBSERVED" }],
+      decisions: [{ id: "wait", action: "WAIT", alternatives: { ACT: 10, WAIT: 4, REJECT: 0, RESTRICT: 6 } }],
+      outcomes: [{ id: "wait:outcome", decisionId: "wait", value: 4 }],
+      restrictions: [],
+      traces: [{ id: "regime", metric: "regime coverage", value: 35 }],
+    });
+    const broad = evaluateDiscoveryIntelligence({
+      discoveries: [{ id: "d1", stage: "OBSERVED" }],
+      decisions: [{ id: "wait", action: "WAIT", alternatives: { ACT: 10, WAIT: 4, REJECT: 0, RESTRICT: 6 } }],
+      outcomes: [{ id: "wait:outcome", decisionId: "wait", value: 4 }],
+      restrictions: [],
+      traces: [],
+      historyDepthScore: 96,
+      regimeCoverageScore: 92,
+      regimeDiversityScore: 90,
+      sampleDiversityScore: 88,
+    });
+
+    assert.equal(weak.regimeCoverageScore, 35);
+    assert.equal(broad.regimeCoverageScore, 92);
+    assert.ok(broad.score > weak.score);
+    assert.ok(weak.recommendations.some((item) => item.id === "expand-regime-coverage"));
+  });
+
   it("keeps property-style invariants over generated generic records", () => {
     for (let seed = 0; seed < 32; seed += 1) {
       const discoveries = generatedDiscoveries(seed);

@@ -17,6 +17,13 @@ export type FinancialExposureBand = {
   label: string;
 };
 
+export type DashboardExposureOperatorState = {
+  status: "pending" | "locked" | "active";
+  sizingModeLabel: string;
+  portfolioCapLabel: string;
+  zeroExposureLabel: string;
+};
+
 export type FinancialSizingView = {
   sizingDecision: SizingDecision;
   sizingMode: SizingMode;
@@ -55,6 +62,7 @@ export type DashboardExposureSizingView = FinancialSizingView & {
   suggestedMaximumExposurePct: number;
   limitedReason: string;
   exposureExplanation: string;
+  operatorState: DashboardExposureOperatorState;
 };
 
 export type AssetExposureSizingInput = {
@@ -158,6 +166,11 @@ export function buildDashboardExposureSizing(input: DashboardExposureSizingInput
     suggestedMaximumExposurePct,
     limitedReason,
     exposureExplanation: limitedReason,
+    operatorState: dashboardExposureOperatorState({
+      hasProvidedSignals: input.hasProvidedSignals,
+      suggestedMaximumExposurePct,
+      sizingMode: exposureView.sizingMode,
+    }),
     ...viabilityFields(viabilityResult),
   };
 }
@@ -239,6 +252,19 @@ export function assetSizingLabel(input: {
     return Number(input.setupQuality ?? 0) >= 72 ? "Mature" : "Candidate";
   }
   return "Watch";
+}
+
+export function sizingModeLabelForOperator(mode: SizingMode | string | undefined) {
+  if (!mode || mode === "none") return "Sizing locked";
+  if (mode === "micro") return "Micro";
+  if (mode === "maxSafe") return "Max safe";
+  return mode.charAt(0).toUpperCase() + mode.slice(1);
+}
+
+export function sizingModeSentenceForOperator(mode: SizingMode | string | undefined) {
+  if (!mode || mode === "none") return "locked";
+  if (mode === "maxSafe") return "max safe";
+  return sizingModeLabelForOperator(mode).toLowerCase();
 }
 
 function dashboardConstraints(
@@ -390,6 +416,39 @@ function normalizeCapacityReason(reason: string) {
   return reason;
 }
 
+function dashboardExposureOperatorState(input: {
+  hasProvidedSignals: boolean;
+  suggestedMaximumExposurePct: number;
+  sizingMode: SizingMode;
+}): DashboardExposureOperatorState {
+  const zeroExposureLabel = "No exposure";
+
+  if (!input.hasProvidedSignals) {
+    return {
+      status: "pending",
+      sizingModeLabel: "Pending",
+      portfolioCapLabel: "Pending",
+      zeroExposureLabel,
+    };
+  }
+
+  if (input.sizingMode === "none" || input.suggestedMaximumExposurePct <= 0) {
+    return {
+      status: "locked",
+      sizingModeLabel: "Sizing locked",
+      portfolioCapLabel: zeroExposureLabel,
+      zeroExposureLabel,
+    };
+  }
+
+  return {
+    status: "active",
+    sizingModeLabel: sizingModeLabelForOperator(input.sizingMode),
+    portfolioCapLabel: formatOperatorPct(input.suggestedMaximumExposurePct),
+    zeroExposureLabel,
+  };
+}
+
 function applyViabilityToSizing(
   sizingResult: SizingResult,
   viabilityResult: ViabilityResult,
@@ -444,6 +503,10 @@ function clamp(value: number, min = 0, max = 100) {
 
 function round(value: number) {
   return Number(value.toFixed(2));
+}
+
+function formatOperatorPct(value: number) {
+  return `${value.toFixed(1)}%`;
 }
 
 function maxPositive(value: number) {

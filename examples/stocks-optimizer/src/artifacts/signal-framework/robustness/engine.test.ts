@@ -78,6 +78,51 @@ test("durable diagnostics reduce overfit risk below production threshold", () =>
   assert.deepEqual(result.reasons, ["Robustness diagnostics are within production tolerance."]);
 });
 
+test("long-history diversity scores reduce false overfit confidence without hiding weak coverage", () => {
+  const engine = new SignalRobustnessEngine();
+  const baseInput = {
+    observations: durableObservations(),
+    minimumSamples: 30,
+    trainWindowSize: 18,
+    validationWindowSize: 6,
+    stepSize: 6,
+    expectedForwardSamples: 30,
+    observedForwardSamples: 72,
+    dataQualityScore: 92,
+    parameterVariants: [
+      { id: "base", score: 100, baselineScore: 100, benchmarkScore: 35, passed: true },
+      { id: "nearby", score: 90, baselineScore: 100, benchmarkScore: 34, passed: true },
+    ],
+    adversarialScenarios: [
+      { id: "spread-widening", score: 90, baselineScore: 100, severity: 12 },
+    ],
+    leakageChecks: [
+      { id: "wf-1", trainEndIndex: 17, validationStartIndex: 18 },
+    ],
+    seed: 99,
+  };
+  const shallow = engine.evaluate({
+    ...baseInput,
+    historyDepthScore: 24,
+    regimeCoverageScore: 28,
+    regimeDiversityScore: 30,
+    sampleDiversityScore: 35,
+  });
+  const broad = engine.evaluate({
+    ...baseInput,
+    historyDepthScore: 96,
+    regimeCoverageScore: 92,
+    regimeDiversityScore: 90,
+    sampleDiversityScore: 88,
+  });
+
+  assert.ok(broad.overfitRisk < shallow.overfitRisk);
+  assert.equal(broad.historyDepthScore, 96);
+  assert.equal(broad.regimeDiversityScore, 90);
+  assert.ok(shallow.reasons.some((reason) => reason.includes("Historical depth")));
+  assert.ok(shallow.reasons.some((reason) => reason.includes("Regime coverage")));
+});
+
 test("fragile synchronized history is reduced or blocked instead of promoted", () => {
   const observations: RobustnessObservation[] = Array.from({ length: 22 }, (_, index) => ({
     index,

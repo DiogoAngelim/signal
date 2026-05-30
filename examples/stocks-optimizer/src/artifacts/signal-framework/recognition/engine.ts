@@ -119,6 +119,15 @@ export type RecognitionInput = {
   survivalMemory?: RecognitionSurvivalEvidence | null;
   recovery?: Record<string, unknown> | null;
   judgement?: RecognitionJudgementEvidence | null;
+  historyDiagnostics?: {
+    historyDepthScore?: number;
+    regimeCoverageScore?: number;
+    regimeDiversityScore?: number;
+    sampleDiversityScore?: number;
+    currentRegime?: string;
+    keyRegimesCovered?: string[];
+    regimeCounts?: Record<string, number>;
+  } | null;
   historicalStates?: RecognitionSample[];
   similarOutcomeSamples?: RecognitionSample[];
   outcomeSamples?: RecognitionSample[];
@@ -130,6 +139,7 @@ export type RecognitionInput = {
 export type RecognitionResult = {
   recognitionScore: number;
   recurrenceConfidence: number;
+  historicalSimilarityConfidence?: number;
   noveltyScore: number;
   archetype: string;
   archetypeConfidence: number;
@@ -215,7 +225,12 @@ export function recognizeState(input: RecognitionInput = {}): RecognitionResult 
   const discoveryConfidence = optionalScore(input.discovery?.confidence);
   const judgementSamples = sampleCountFromJudgement(input.judgement);
   const judgementReliability = optionalScore(input.judgement?.reliability);
-  const recurrenceConfidence = recurrenceConfidenceFor(evidence, input, thresholds);
+  const baseRecurrenceConfidence = recurrenceConfidenceFor(evidence, input, thresholds);
+  const historicalSimilarityConfidence = historicalSimilarityConfidenceFor(evidence, input);
+  const recurrenceConfidence = roundScore(Math.max(
+    baseRecurrenceConfidence,
+    Math.min(92, historicalSimilarityConfidence * 0.92),
+  ));
   const noveltyScore = noveltyScoreFor(evidence, input, recurrenceConfidence, thresholds);
   const recognitionScore = recognitionScoreFor(recurrenceConfidence, noveltyScore, evidence.archetype.confidence);
   const discoverySaysNovel = discoveryNovelty >= thresholds.noveltyThreshold ||
@@ -272,6 +287,7 @@ export function recognizeState(input: RecognitionInput = {}): RecognitionResult 
   return {
     recognitionScore,
     recurrenceConfidence,
+    historicalSimilarityConfidence,
     noveltyScore,
     archetype: evidence.archetype.label,
     archetypeConfidence: evidence.archetype.confidence,
@@ -286,6 +302,7 @@ export function recognizeState(input: RecognitionInput = {}): RecognitionResult 
     reason: reasonFor({
       verdict,
       recurrenceConfidence,
+      historicalSimilarityConfidence,
       noveltyScore,
       recognitionScore,
       evidence,
@@ -577,6 +594,32 @@ function recurrenceConfidenceFor(evidence: EvidenceSummary, input: RecognitionIn
   return roundScore(Math.max(direct, Math.min(49, summary)));
 }
 
+function historicalSimilarityConfidenceFor(evidence: EvidenceSummary, input: RecognitionInput) {
+  const diagnostics = input.historyDiagnostics;
+  if (!diagnostics) return 0;
+
+  const regimeCounts = plainRecord(diagnostics.regimeCounts) ? diagnostics.regimeCounts : {};
+  const covered = new Set(array(diagnostics.keyRegimesCovered).map((regime) => String(regime)));
+  for (const [regime, count] of Object.entries(regimeCounts)) {
+    if (Number(count) > 0) covered.add(regime);
+  }
+  const keyRegimes = ["bull", "bear", "crash", "recovery", "volatility_transition"];
+  const keyRegimeCoverage = keyRegimes.filter((regime) => covered.has(regime)).length / keyRegimes.length * 100;
+  const currentRegime = stringValue(diagnostics.currentRegime);
+  const currentRegimeRepresented = currentRegime != null && covered.has(currentRegime) ? 100 : currentRegime ? 50 : 0;
+  const recurrenceAnchor = Math.max(evidence.averageSimilarity, evidence.archetype.confidence, evidence.outcomeStability);
+  const scoreValue =
+    optionalScore(diagnostics.historyDepthScore) * 0.22 +
+    optionalScore(diagnostics.regimeCoverageScore) * 0.26 +
+    optionalScore(diagnostics.regimeDiversityScore) * 0.18 +
+    optionalScore(diagnostics.sampleDiversityScore) * 0.16 +
+    keyRegimeCoverage * 0.12 +
+    recurrenceAnchor * 0.06 +
+    currentRegimeRepresented * 0.04;
+
+  return roundScore(clamp(scoreValue));
+}
+
 function noveltyScoreFor(
   evidence: EvidenceSummary,
   input: RecognitionInput,
@@ -713,6 +756,7 @@ function invalidationConditionsFor(input: {
 function reasonFor(input: {
   verdict: RecognitionVerdict;
   recurrenceConfidence: number;
+  historicalSimilarityConfidence: number;
   noveltyScore: number;
   recognitionScore: number;
   evidence: EvidenceSummary;
@@ -721,7 +765,7 @@ function reasonFor(input: {
   discoveryNoveltyJustified: boolean;
   judgementSimilarityJustified: boolean;
 }) {
-  const base = `Recognition is ${input.verdict} with recurrence ${formatScore(input.recurrenceConfidence)}, novelty ${formatScore(input.noveltyScore)}, and ${input.evidence.evidenceSampleCount} matched sample(s).`;
+  const base = `Recognition is ${input.verdict} with recurrence ${formatScore(input.recurrenceConfidence)}, historical similarity ${formatScore(input.historicalSimilarityConfidence)}, novelty ${formatScore(input.noveltyScore)}, and ${input.evidence.evidenceSampleCount} matched sample(s).`;
 
   if (input.verdict === "recognized") {
     return `${base} The current state resembles the ${input.evidence.archetype.label} archetype with stable linked outcomes.`;

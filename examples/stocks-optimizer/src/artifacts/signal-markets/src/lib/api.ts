@@ -94,6 +94,7 @@ export type RecognitionVerdict =
 export interface RecognitionDiagnostic {
   recognitionScore: number;
   recurrenceConfidence: number;
+  historicalSimilarityConfidence?: number;
   noveltyScore: number;
   archetype: string;
   archetypeConfidence: number;
@@ -323,6 +324,7 @@ export interface DiscoveryAccountabilityDiagnostic {
 
 export interface DiscoveryIntelligenceDiagnostic {
   score: number;
+  regimeCoverageScore?: number;
   maturity: {
     emerging: number;
     detected: number;
@@ -386,6 +388,23 @@ export interface DiscoveryIntelligenceDiagnostic {
     priority: string;
     message: string;
   }>;
+}
+
+export interface HistoryDiagnostics {
+  historyCoverageYears?: number;
+  requestedYears?: number;
+  availableYears?: number;
+  coveragePct?: number;
+  coverageStatus?: "full" | "partial" | "thin" | "unavailable" | string;
+  historyDepthScore?: number;
+  regimeCoverageScore?: number;
+  sampleDiversityScore?: number;
+  regimeDiversityScore?: number;
+  temporalConcentrationScore?: number;
+  currentRegime?: string;
+  keyRegimesCovered?: string[];
+  regimeCounts?: Record<string, number>;
+  explanation?: string;
 }
 
 export interface WisdomDiagnostic {

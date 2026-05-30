@@ -49,6 +49,20 @@ const forwardShadow = {
   averageReturnPct: 0.8,
 };
 
+const longHistoryDiagnostics = {
+  historyCoverageYears: 15,
+  historyDepthScore: 96,
+  regimeCoverageScore: 94,
+  regimeDiversityScore: 91,
+  sampleDiversityScore: 89,
+  temporalConcentrationScore: 10,
+  coverageStatus: "full" as const,
+  currentRegime: "recovery",
+  keyRegimesCovered: ["bull", "bear", "crash", "recovery", "volatility_transition"],
+  regimeCounts: { bull: 1000, bear: 700, crash: 100, recovery: 400, volatility_transition: 250 },
+  explanation: "Extended history improves regime awareness and calibration. Recent outcomes still govern sizing restoration.",
+};
+
 function trades(count = 40, returnPct = 1.2) {
   return Array.from({ length: count }, (_, index) => ({
     symbol: `T${index}`,
@@ -398,6 +412,46 @@ test("survival memory can block buys and still allow risk exits", () => {
   assert.ok(riskExit.sizingReasons.includes("Risk-reducing exits remain allowed while Survival Memory blocks new exposure."));
 });
 
+test("long-history may improve trust and calibration but cannot clear Survival Memory or restore sizing", () => {
+  const baseline = evaluate();
+  const withHistory = evaluator.evaluate(passingInput({
+    summary: { historyDiagnostics: longHistoryDiagnostics },
+    dataQualityReport: { ...dataQualityReport, historyDiagnostics: longHistoryDiagnostics },
+  }));
+  const lockedReadiness = evaluator.evaluate({
+    ...passingInput({
+      summary: { historyDiagnostics: longHistoryDiagnostics },
+      dataQualityReport: { ...dataQualityReport, historyDiagnostics: longHistoryDiagnostics },
+    }),
+    survivalMemory: survivalMemory(),
+  });
+  const lockedDecision = classifyStrategySignal({
+    readiness: withHistory,
+    rawAction: "Buy",
+    expectedEdgePct: 6,
+    rawSuggestedExposurePct: 8,
+    setupQuality: 90,
+    riskPressure: 18,
+    volatilityPct: 3,
+    liquidityScore: 95,
+    signalConfidence: 92,
+    survivalMemory: survivalMemory(),
+    previousTrades: judgementTrades(Array(20).fill(5)),
+  });
+
+  assert.ok(withHistory.trustworthiness >= baseline.trustworthiness);
+  assert.ok(withHistory.calibratedConfidence >= baseline.calibratedConfidence);
+  assert.equal(withHistory.historyDiagnostics?.coverageStatus, "full");
+  assert.equal(lockedReadiness.survivalMemory?.status, "near_ruin");
+  assert.equal(lockedReadiness.maxPositionPct, 0);
+  assert.equal(lockedReadiness.trustGovernor.allowsNewExposure, false);
+  assert.equal(lockedReadiness.recovery.canRestoreSizing, false);
+  assert.equal(lockedDecision.allocationAction, "Blocked");
+  assert.equal(lockedDecision.suggestedExposure, 0);
+  assert.equal(lockedDecision.trustGovernor?.primaryBlocker, "survival_memory_wait");
+  assert.equal(lockedDecision.recovery?.canRestoreSizing, false);
+});
+
 test("readiness recovery includes near-ruin survival flags and summary discovery fallbacks", () => {
   const result = evaluator.evaluate({
     ...passingInput({
@@ -423,14 +477,25 @@ test("readiness recovery includes near-ruin survival flags and summary discovery
 });
 
 test("recovery diagnostics keep scarred dashboard-like states recovering and review gated", () => {
+  const base = evaluate();
   const ready = {
-    ...evaluate(),
+    ...base,
     maxConfidence: 73,
     rawConfidence: 85,
     calibratedConfidence: 73,
     trustworthiness: 80,
     maxPositionPct: 5.5,
     robustnessDiagnostics: { overfitRisk: 29 },
+    recovery: {
+      ...base.recovery,
+      audit: {
+        ...base.recovery.audit,
+        normalized: {
+          ...base.recovery.audit.normalized,
+          targetNormalExposure: 7.25,
+        },
+      },
+    },
   };
   const decision = classifyStrategySignal({
     readiness: ready,
@@ -476,10 +541,32 @@ test("recovery diagnostics keep scarred dashboard-like states recovering and rev
   assert.equal(decision.restorationProgress?.restorationState, "scarred");
   assert.equal(decision.restorationProgress?.ledger.title, "Survival Memory Restoration Ledger");
   assert.equal(decision.restorationProgress?.ledger.requiredCleanOutcomes, 3);
+  assert.equal(decision.restorationProgress?.targetNormalExposurePct, 7.25);
   assert.equal(decision.restorationProgress?.canRestoreSizing, false);
   assert.equal(decision.restorationProgress?.outcomeProof.cleanReducedSizeOutcomeCount, 0);
   assert.ok(decision.restorationProgress?.gates.some((gate) => gate.id === "clean-reduced-size-outcomes" && !gate.passed));
   assert.ok(decision.sizingReasons.some((reason) => reason.includes("Recovery is recovering")));
+});
+
+test("recovery target exposure falls back when readiness recovery audit is unavailable", () => {
+  const ready = {
+    ...evaluate(),
+    recovery: undefined,
+    maxPositionPct: 4.5,
+  } as any;
+  const decision = classifyStrategySignal({
+    readiness: ready,
+    rawAction: "Buy",
+    expectedEdgePct: 5,
+    rawSuggestedExposurePct: 4,
+    setupQuality: 86,
+    riskPressure: 24,
+    volatilityPct: 3,
+    liquidityScore: 92,
+    signalConfidence: 88,
+  });
+
+  assert.equal(decision.restorationProgress?.targetNormalExposurePct, 4.5);
 });
 
 test("judgement and survival caps do not masquerade as poor calibration blocks", () => {

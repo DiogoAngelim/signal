@@ -36,6 +36,7 @@ export type StockRecognitionDiagnostics = {
     verdict: RecognitionVerdict;
     recognitionScore: number;
     recurrenceConfidence: number;
+    historicalSimilarityConfidence: number;
     noveltyScore: number;
     archetype: string;
     matchedSamples: number;
@@ -90,29 +91,38 @@ export function buildStockRecognitionInput(input: {
   const genericDiscovery = candidate.discovery ?? signal.opportunityDiscovery?.discovery ?? input.opportunityDiscovery?.discovery ?? null;
   const judgement = signal.judgement ?? null;
   const survivalMemory = signal.survivalMemory ?? judgement?.survivalMemory ?? null;
+  const historyDiagnostics = historyDiagnosticsFromSummary(input.summary);
   const rawAction = actionIntentFor(signal);
   const currentState = {
     actionIntent: rawAction,
     setupQuality: finiteNumber(signal.setupQuality),
     riskPressure: finiteNumber(signal.riskPressure),
     signalConfidence: finiteNumber(signal.calibratedConfidence ?? signal.signalConfidence ?? signal.rawConfidence),
+    regimeType: historyDiagnostics?.currentRegime ?? signal.diagnostic?.regime ?? (signal as any).regime,
   };
   const perception = {
     opportunityDensity: finiteNumber(input.opportunityDiscovery?.density?.density),
     opportunityQuality: finiteNumber(candidate.candidateScore ?? input.opportunityDiscovery?.density?.quality),
     readinessScore: finiteNumber(input.summary?.readinessScore),
     dataReliability: finiteNumber(input.summary?.strategyReadiness?.components?.dataReliability?.score ?? input.summary?.dataReliability?.score),
+    historyDepthScore: finiteNumber(historyDiagnostics?.historyDepthScore),
+    regimeCoverageScore: finiteNumber(historyDiagnostics?.regimeCoverageScore),
+    regimeDiversityScore: finiteNumber(historyDiagnostics?.regimeDiversityScore),
+    sampleDiversityScore: finiteNumber(historyDiagnostics?.sampleDiversityScore),
   };
 
   return {
     currentState,
     perception,
+    historyDiagnostics,
     discovery: genericDiscovery,
     judgement,
     survivalMemory,
     recovery: compactRecoveryContext(signal.recovery ?? input.summary?.recovery ?? null),
+    historicalStates: historyStateSamples(historyDiagnostics, rawAction),
     outcomeSamples: tradeOutcomeSamples(input.trades, rawAction),
     archetypes: [
+      ...archetypesFromHistoryDiagnostics(historyDiagnostics, currentState, perception),
       ...archetypesFromCandidate(candidate, input.trades),
       ...archetypesFromJudgement({
         currentState,
@@ -123,6 +133,74 @@ export function buildStockRecognitionInput(input: {
     ],
     now: "1970-01-01T00:00:00.000Z",
   };
+}
+
+function historyDiagnosticsFromSummary(summary?: Record<string, any>) {
+  const diagnostics =
+    summary?.historyDiagnostics ??
+    summary?.strategyReadiness?.historyDiagnostics ??
+    summary?.robustnessDiagnostics?.historyDiagnostics ??
+    null;
+
+  return diagnostics && typeof diagnostics === "object" && !Array.isArray(diagnostics)
+    ? diagnostics as NonNullable<RecognitionInput["historyDiagnostics"]>
+    : null;
+}
+
+function historyStateSamples(historyDiagnostics: RecognitionInput["historyDiagnostics"], actionIntent: string) {
+  if (!historyDiagnostics) return [];
+  const regimes = historyDiagnostics.keyRegimesCovered?.length
+    ? historyDiagnostics.keyRegimesCovered
+    : Object.keys(historyDiagnostics.regimeCounts ?? {});
+
+  return regimes.slice(0, 8).map((regime) => ({
+    id: `history-regime:${regime}`,
+    state: {
+      actionIntent,
+      regimeType: regime,
+      historyDepthScore: historyDiagnostics.historyDepthScore,
+      regimeCoverageScore: historyDiagnostics.regimeCoverageScore,
+      regimeDiversityScore: historyDiagnostics.regimeDiversityScore,
+      sampleDiversityScore: historyDiagnostics.sampleDiversityScore,
+    },
+    archetype: `${regime}_regime_state`,
+    confidence: historyDiagnostics.regimeCoverageScore,
+    featureCoverage: historyDiagnostics.regimeDiversityScore,
+    metadata: {
+      source: "long-history",
+      regime,
+    },
+  }));
+}
+
+function archetypesFromHistoryDiagnostics(
+  historyDiagnostics: RecognitionInput["historyDiagnostics"],
+  currentState: Record<string, unknown>,
+  perception: Record<string, unknown>,
+) {
+  if (!historyDiagnostics) return [];
+  const regimes = historyDiagnostics.keyRegimesCovered?.length
+    ? historyDiagnostics.keyRegimesCovered
+    : Object.keys(historyDiagnostics.regimeCounts ?? {});
+  const sampleSize = regimes.reduce((sum, regime) => sum + Math.max(0, Math.round(finiteNumber(historyDiagnostics.regimeCounts?.[regime]) ?? 1)), 0);
+  if (!regimes.length || sampleSize <= 0) return [];
+
+  return [{
+    id: "long-history-regime-archetype",
+    label: `${historyDiagnostics.currentRegime ?? "multi"}_regime_state`,
+    state: currentState,
+    perception,
+    confidence: Math.min(95, Math.max(50, finiteNumber(historyDiagnostics.regimeCoverageScore) ?? 50)),
+    sampleSize,
+    positiveOutcomes: 0,
+    negativeOutcomes: 0,
+    neutralOutcomes: sampleSize,
+    outcomeStability: Math.min(95, Math.max(40, finiteNumber(historyDiagnostics.sampleDiversityScore) ?? 50)),
+    metadata: {
+      source: "long-history",
+      regimes,
+    },
+  }];
 }
 
 function tradeOutcomeSamples(trades: unknown[] | undefined, actionIntent: string) {
@@ -287,6 +365,7 @@ function summarizeRecognitionDiagnostics(
       verdict: signal.recognition.verdict,
       recognitionScore: signal.recognition.recognitionScore,
       recurrenceConfidence: signal.recognition.recurrenceConfidence,
+      historicalSimilarityConfidence: signal.recognition.historicalSimilarityConfidence,
       noveltyScore: signal.recognition.noveltyScore,
       archetype: signal.recognition.archetype,
       matchedSamples: signal.recognition.matchedSamples,

@@ -1,2 +1,4 @@
 .vercel
 .env*
+src/artifacts/api-server/.coverage/
+src/artifacts/api-server/.local-cache/

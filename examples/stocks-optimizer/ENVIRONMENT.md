@@ -90,3 +90,7 @@ Do not commit `.env`, `.env.local`, or `.vercel/.env*.local` files. They are int
 - `WORKER_ID`
 
 Vercel also provides platform variables such as `VERCEL`, `VERCEL_URL`, `VERCEL_REGION`, `NODE_ENV`, and `PORT`.
+
+## Long-history defaults
+
+Backtests default to `STOCK_BACKTEST_HISTORY_BARS=3780` and `STOCK_BACKTEST_LOOKBACK_YEARS=15`. Extended history feeds calibration, discovery, recognition, trust, and overfit diagnostics, but it does not restore sizing or bypass Survival Memory/recovery governance.

@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "../..",
+    "types": ["node"]
+  },
+  "include": [
+    "src",
+    "../api-server/src/modules/binance-execution"
+  ]
+}

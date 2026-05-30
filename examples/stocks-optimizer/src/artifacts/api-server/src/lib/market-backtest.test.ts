@@ -10,6 +10,7 @@ import {
   scoreStrategyHealthForSelection,
 } from "./market-backtest";
 import { backtestConfigForMarket } from "./market-backtest-config";
+import { buildHistoricalDataset, summarizeHistoricalDatasets } from "./historical-dataset";
 
 process.env.TRADINGVIEW_DATA_DISABLE_LOCAL = "true";
 process.env.TRADINGVIEW_DATA_BASE_URL = "https://mock.tradingview.local/api/chart-data";
@@ -32,6 +33,7 @@ function mockTradingViewBars(symbol: string, exchange: string, bars = 1260) {
   const amplitude = 0.045 + (seed % 17) / 1_000;
   const phase = (seed % 360) * Math.PI / 180;
   const shockEvery = 73 + (seed % 23);
+  const tradingDayMs = 86_400_000 * (365 / 252);
   let price = start;
 
   return Array.from({ length: bars }, (_, index) => {
@@ -44,8 +46,8 @@ function mockTradingViewBars(symbol: string, exchange: string, bars = 1260) {
     const low = Math.min(open, price) * 0.988;
 
     return {
-      date: new Date(Date.now() - (bars - 1 - index) * 86_400_000).toISOString().slice(0, 10),
-      timestamp: new Date(Date.now() - (bars - 1 - index) * 86_400_000).toISOString(),
+      date: new Date(Date.now() - (bars - 1 - index) * tradingDayMs).toISOString().slice(0, 10),
+      timestamp: new Date(Date.now() - (bars - 1 - index) * tradingDayMs).toISOString(),
       open,
       high,
       low,
@@ -59,8 +61,32 @@ globalThis.fetch = (async (input: RequestInfo | URL) => {
   const url = new URL(String(input));
   const symbol = url.searchParams.get("symbol") ?? "MOCK";
   const exchange = url.searchParams.get("exchange") ?? "";
-  const bars = Math.max(90, Math.min(Number(url.searchParams.get("bars") ?? 1260), 1260));
+  const bars = Math.max(90, Math.min(Number(url.searchParams.get("bars") ?? 3780), 3780));
   const rows = mockTradingViewBars(symbol, exchange, bars);
+
+  if (url.pathname.endsWith("/api/v3/klines")) {
+    return new Response(JSON.stringify(rows.map((row) => {
+      const openTime = Date.parse(`${row.date}T00:00:00.000Z`);
+
+      return [
+        openTime,
+        String(row.open),
+        String(row.high),
+        String(row.low),
+        String(row.close),
+        String(row.volume),
+        openTime + 86_400_000 - 1,
+        String(row.close * row.volume),
+        1_000,
+        String(row.volume * 0.48),
+        String(row.close * row.volume * 0.48),
+        "0",
+      ];
+    })), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  }
 
   return new Response(JSON.stringify({
     symbol: exchange ? `${exchange}:${symbol}` : symbol,
@@ -74,6 +100,31 @@ globalThis.fetch = (async (input: RequestInfo | URL) => {
     headers: { "content-type": "application/json" },
   });
 }) as typeof fetch;
+
+test("long-history dataset scores full and partial coverage", () => {
+  const full = buildHistoricalDataset({
+    symbol: "FULL",
+    requestedYears: 15,
+    requestedBars: 3780,
+    bars: mockTradingViewBars("FULL", "NASDAQ", 3780),
+  });
+  const partial = buildHistoricalDataset({
+    symbol: "PART",
+    requestedYears: 15,
+    requestedBars: 3780,
+    bars: mockTradingViewBars("PART", "NASDAQ", 252),
+  });
+  const summary = summarizeHistoricalDatasets([full, partial]);
+
+  assert.ok(full.coverage.availableYears >= 14.5, "full history should span roughly 15 years");
+  assert.equal(full.coverage.status, "full");
+  assert.ok(full.regimeStats.historyDepthScore >= 90);
+  assert.ok(full.regimeStats.regimeCoverageScore >= 0);
+  assert.notEqual(partial.coverage.status, "full");
+  assert.ok(partial.regimeStats.historyDepthScore < full.regimeStats.historyDepthScore);
+  assert.ok(summary.historyDepthScore < full.regimeStats.historyDepthScore);
+  assert.match(summary.explanation, /Extended history improves regime awareness/);
+});
 
 test("market backtest builds non-empty historical metrics for a market", async () => {
   const cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), "signal-market-backtest-"));
@@ -106,6 +157,14 @@ test("market backtest builds non-empty historical metrics for a market", async (
   assert.ok(payload.summary.forwardShadow?.confirmedSignalCount > 0, "live buy signals should be confirmed for shadow tracking");
   assert.ok(payload.summary.forwardShadow?.observedSignalCount > 0, "confirmed signals should be recorded as shadow observations");
   assert.equal(payload.summary.forwardShadow?.collectionStatus, "passed");
+  assert.ok(payload.summary.historyDiagnostics?.historyCoverageYears >= 14.5, "summary should consume long-history coverage");
+  assert.ok(payload.summary.historyDepthScore >= 90, "15-year history should produce high depth score");
+  assert.ok(payload.summary.regimeCoverageScore >= 0, "regime coverage score should be present");
+  assert.ok(payload.summary.regimeDiversityScore >= 0, "regime diversity score should be present");
+  assert.ok(payload.summary.sampleDiversityScore >= 0, "sample diversity score should be present");
+  assert.equal(payload.summary.coverageStatus, "full");
+  assert.ok(Number.isFinite(payload.summary.robustnessDiagnostics?.historyDepthScore));
+  assert.ok(Number.isFinite(payload.opportunityDiscovery?.diagnostics?.regimeCoverageScore));
   assert.equal(payload.config.name, "US large cap");
   assert.equal(payload.summary.strategyConfig.name, "US large cap");
   assert.equal(payload.summary.strategyProfile, "US large cap");

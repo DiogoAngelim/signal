@@ -66,6 +66,13 @@ test("survival outcome classification separates comfortable, stressed, barely su
     realizedReturn: -1,
     maxDrawdown: 6,
     maxAdverseExcursion: 8,
+  }), "stressed_survival");
+
+  assert.equal(classifySurvivalOutcome({
+    realizedReturn: -3,
+    maxDrawdown: 28,
+    maxAdverseExcursion: 32,
+    tailRisk: 76,
   }), "failed_survival");
 });
 

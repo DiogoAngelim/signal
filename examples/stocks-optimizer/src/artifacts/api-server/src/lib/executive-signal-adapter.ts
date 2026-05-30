@@ -258,6 +258,22 @@ export function buildStockExecutiveArchitecture(
       wisdom,
       discoveryAccountability,
     ),
+    historyDepthScore: firstNumber(
+      (signalInput.readiness as any).historyDiagnostics?.historyDepthScore,
+      signalInput.readiness.robustnessDiagnostics?.historyDepthScore,
+    ),
+    regimeCoverageScore: firstNumber(
+      (signalInput.readiness as any).historyDiagnostics?.regimeCoverageScore,
+      signalInput.readiness.robustnessDiagnostics?.regimeCoverageScore,
+    ),
+    sampleDiversityScore: firstNumber(
+      (signalInput.readiness as any).historyDiagnostics?.sampleDiversityScore,
+      signalInput.readiness.robustnessDiagnostics?.sampleDiversityScore,
+    ),
+    regimeDiversityScore: firstNumber(
+      (signalInput.readiness as any).historyDiagnostics?.regimeDiversityScore,
+      signalInput.readiness.robustnessDiagnostics?.regimeDiversityScore,
+    ),
   });
   const executiveDecision = evaluateExecutiveDecision({
     proposedDecision: proposedDecisionFor(decision),
@@ -573,6 +589,14 @@ function discoveryIntelligenceTracesFor(
       id: "current-governance",
       metric: "governance",
       value: discoveryAccountability.accountabilityScore,
+    },
+    {
+      id: "current-regime-coverage",
+      metric: "regime coverage",
+      value: firstNumber(
+        (input.readiness as any).historyDiagnostics?.regimeCoverageScore,
+        input.readiness.robustnessDiagnostics?.regimeCoverageScore,
+      ),
     },
     ...[...(input.previousTrades ?? []), ...(input.strategyHistory ?? [])].slice(-24).flatMap((trade: any, index) => [
       {

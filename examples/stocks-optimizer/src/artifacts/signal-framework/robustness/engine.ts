@@ -67,6 +67,10 @@ export type SignalRobustnessInput = {
   expectedForwardSamples?: number;
   observedForwardSamples?: number;
   dataQualityScore?: number;
+  historyDepthScore?: number;
+  regimeCoverageScore?: number;
+  regimeDiversityScore?: number;
+  sampleDiversityScore?: number;
   seed?: number;
 };
 
@@ -78,6 +82,10 @@ export type SignalRobustnessResult = {
   adaptabilityScore: number;
   uncertaintyLevel: number;
   deploymentReadiness: number;
+  historyDepthScore: number;
+  regimeCoverageScore: number;
+  regimeDiversityScore: number;
+  sampleDiversityScore: number;
   safetyGate: "allow" | "reduce" | "block";
   reasons: string[];
   walkForward: {
@@ -183,6 +191,10 @@ export class SignalRobustnessEngine {
     const observedForwardSamples = Math.max(0, Math.round(input.observedForwardSamples ?? observations.length));
     const expectedForwardSamples = Math.max(1, Math.round(input.expectedForwardSamples ?? minimumSamples));
     const forwardSampleScore = clamp((observedForwardSamples / expectedForwardSamples) * 100);
+    const historyDepthScore = clamp(input.historyDepthScore ?? statisticalIntegrity.minimumSampleScore);
+    const regimeCoverageScore = clamp(input.regimeCoverageScore ?? regimes.regimeRobustnessScore);
+    const regimeDiversityScore = clamp(input.regimeDiversityScore ?? clamp(100 - regimes.regimeDependencyScore));
+    const sampleDiversityScore = clamp(input.sampleDiversityScore ?? statisticalIntegrity.score);
     const componentScores = [
       walkForward.stabilityScore,
       regimes.regimeRobustnessScore,
@@ -196,9 +208,13 @@ export class SignalRobustnessEngine {
       realityGap.realismScore,
       statisticalIntegrity.score,
       forwardSampleScore,
+      historyDepthScore,
+      regimeCoverageScore,
+      regimeDiversityScore,
+      sampleDiversityScore,
     ];
-    const robustnessScore = Math.round(weightedMean(componentScores, [1.1, 1, 1, 1.05, 0.9, 0.9, 0.85, 1.25, 0.8, 1, 1.1, 0.7]));
-    const uncertaintyLevel = Math.round(clamp(100 - weightedMean(componentScores, [1, 1, 1.2, 1, 0.8, 0.8, 0.7, 1.4, 0.7, 1, 1.1, 0.7])));
+    const robustnessScore = Math.round(weightedMean(componentScores, [1.1, 1, 1, 1.05, 0.9, 0.9, 0.85, 1.25, 0.8, 1, 1.1, 0.7, 0.55, 0.5, 0.5, 0.45]));
+    const uncertaintyLevel = Math.round(clamp(100 - weightedMean(componentScores, [1, 1, 1.2, 1, 0.8, 0.8, 0.7, 1.4, 0.7, 1, 1.1, 0.7, 0.45, 0.45, 0.45, 0.4])));
     const structuralReliability = Math.round(mean([
       parameterSensitivity.stabilityScore,
       leakage.passed ? 100 : 0,
@@ -216,13 +232,28 @@ export class SignalRobustnessEngine {
       calibration.calibrationScore,
       structuralReliability,
       forwardSampleScore,
+      historyDepthScore,
+      regimeCoverageScore,
     ]));
+    const historyPenalty =
+      Math.max(0, 65 - historyDepthScore) * 0.12 +
+      Math.max(0, 65 - regimeCoverageScore) * 0.12 +
+      Math.max(0, 60 - regimeDiversityScore) * 0.1 +
+      Math.max(0, 60 - sampleDiversityScore) * 0.08;
+    const historyCredit = Math.min(12,
+      Math.max(0, historyDepthScore - 75) * 0.05 +
+        Math.max(0, regimeCoverageScore - 75) * 0.05 +
+        Math.max(0, regimeDiversityScore - 70) * 0.04 +
+        Math.max(0, sampleDiversityScore - 70) * 0.04,
+    );
     const overfitRisk = Math.round(clamp(
       100 - robustnessScore +
         parameterSensitivity.fragilityScore * 0.16 +
         regimes.regimeDependencyScore * 0.12 +
         Math.max(0, 55 - calibration.calibrationScore) * 0.2 +
-        (leakage.passed ? 0 : 28),
+        (leakage.passed ? 0 : 28) +
+        historyPenalty -
+        historyCredit,
     ));
     const deploymentReadiness = Math.round(clamp(mean([
       robustnessScore,
@@ -231,6 +262,8 @@ export class SignalRobustnessEngine {
       adaptabilityScore,
       100 - overfitRisk,
       participation.participationScore,
+      historyDepthScore,
+      regimeCoverageScore,
     ])));
     const safetyGate = leakage.passed === false || overfitRisk > 60
       ? "block"
@@ -248,6 +281,10 @@ export class SignalRobustnessEngine {
       participation: participation.participationScore,
       leakage,
       statisticalIntegrity: statisticalIntegrity.score,
+      historyDepthScore,
+      regimeCoverageScore,
+      regimeDiversityScore,
+      sampleDiversityScore,
     });
 
     return {
@@ -258,6 +295,10 @@ export class SignalRobustnessEngine {
       adaptabilityScore,
       uncertaintyLevel,
       deploymentReadiness,
+      historyDepthScore,
+      regimeCoverageScore,
+      regimeDiversityScore,
+      sampleDiversityScore,
       safetyGate,
       reasons,
       walkForward,
@@ -520,6 +561,10 @@ function buildReasons(input: {
   participation: number;
   leakage: { passed: boolean; violations: string[] };
   statisticalIntegrity: number;
+  historyDepthScore: number;
+  regimeCoverageScore: number;
+  regimeDiversityScore: number;
+  sampleDiversityScore: number;
 }) {
   const reasons: string[] = [];
   if (input.overfitRisk > 30) reasons.push("Overfit risk is above the production threshold.");
@@ -531,6 +576,10 @@ function buildReasons(input: {
   if (input.participation < 35) reasons.push("Executable participation is too sparse.");
   if (!input.leakage.passed) reasons.push(...input.leakage.violations);
   if (input.statisticalIntegrity < 60) reasons.push("Statistical integrity is below the production floor.");
+  if (input.historyDepthScore < 55) reasons.push("Historical depth is too shallow for broad overfit confidence.");
+  if (input.regimeCoverageScore < 55) reasons.push("Regime coverage is too narrow for broad overfit confidence.");
+  if (input.regimeDiversityScore < 55) reasons.push("Regime diversity is too narrow for broad overfit confidence.");
+  if (input.sampleDiversityScore < 55) reasons.push("Sample diversity is too concentrated for broad overfit confidence.");
   if (input.safetyGate === "allow" && reasons.length === 0) reasons.push("Robustness diagnostics are within production tolerance.");
   return Array.from(new Set(reasons));
 }

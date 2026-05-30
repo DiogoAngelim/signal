@@ -54,6 +54,7 @@ export type {
 export * from "./executive/engine";
 export * from "./execution-quality/engine";
 export * from "./execution/readiness";
+export * from "./history/types";
 export * from "./judgement";
 export * from "./math/statistics";
 export * from "./metrics/normalization";

@@ -73,7 +73,7 @@ test("survival enrichment extends stored trade outcomes without mutating the sou
   });
 
   assert.equal("survivalCost" in trades[0], false);
-  assert.equal(enriched[0]?.outcomeClass, "failed_survival");
+  assert.equal(enriched[0]?.outcomeClass, "stressed_survival");
   assert.equal(enriched[0]?.recoveryTimeBars, 5);
   assert.ok(enriched[0]?.survivalCost > 0);
   assert.ok(enriched[0]?.stateFingerprint.includes("venue:nyse"));

@@ -1,4 +1,4 @@
-import { clamp, mean, stdev } from "../math/statistics";
+import { clamp, stdev } from "../math/statistics";
 
 export type CalibrationInput = {
   id?: string;
@@ -36,6 +36,8 @@ export type CalibrationOptions = {
   poorCalibrationThreshold?: number;
   overconfidenceThreshold?: number;
   lowTrustworthinessThreshold?: number;
+  recencyHalfLifeDays?: number;
+  now?: string | number | Date;
 };
 
 export type CalibrationRunInput = {
@@ -47,6 +49,7 @@ export type CalibrationRunInput = {
 type EvaluatedRecord = {
   confidence: number;
   correctness: number;
+  weight: number;
   binaryOutcome?: number;
 };
 
@@ -90,13 +93,14 @@ const PARTIAL_LABELS = new Set(["partial", "mixed", "neutral"]);
 export function calibrate(input: CalibrationRunInput): CalibrationResult {
   const options = { ...DEFAULT_OPTIONS, ...(input.options ?? {}) };
   const rawConfidence = normalizeConfidence(input.current.confidence);
-  const evaluated = safeArray(input.history).flatMap(evaluateRecord);
+  const evaluated = safeArray(input.history).flatMap((record) => evaluateRecord(record, options));
   const sampleSize = evaluated.length;
+  const effectiveSampleSize = weightedSampleSize(evaluated);
   const historicalAccuracy = roundScore(
-    sampleSize ? mean(evaluated.map((record) => record.correctness)) * 100 : 50,
+    sampleSize ? weightedMean(evaluated.map((record) => [record.correctness, record.weight])) * 100 : 50,
   );
   const averageConfidence = roundScore(
-    sampleSize ? mean(evaluated.map((record) => record.confidence)) : 50,
+    sampleSize ? weightedMean(evaluated.map((record) => [record.confidence, record.weight])) : 50,
   );
   const calibrationError = roundSignedScore(
     averageConfidence - historicalAccuracy,
@@ -107,9 +111,9 @@ export function calibrate(input: CalibrationRunInput): CalibrationResult {
   );
   const brierScore = binaryOutcomes.length
     ? roundRatio(
-        mean(
+        weightedMean(
           binaryOutcomes.map(
-            (record) => (record.confidence / 100 - record.binaryOutcome) ** 2,
+            (record) => [(record.confidence / 100 - record.binaryOutcome) ** 2, record.weight],
           ),
         ),
       )
@@ -121,6 +125,7 @@ export function calibrate(input: CalibrationRunInput): CalibrationResult {
     calibrationError,
     brierScore,
     sufficientSamples: options.sufficientSamples,
+    effectiveSampleSize,
   });
   const calibratedConfidence = calibratedScore({
     rawConfidence,
@@ -128,6 +133,7 @@ export function calibrate(input: CalibrationRunInput): CalibrationResult {
     calibrationError,
     trustworthiness,
     sampleSize,
+    effectiveSampleSize,
     minimumSamples: options.minimumSamples,
     sufficientSamples: options.sufficientSamples,
   });
@@ -157,7 +163,7 @@ export function calibrate(input: CalibrationRunInput): CalibrationResult {
 
 export const calibrateConfidence = calibrate;
 
-function evaluateRecord(record: CalibrationInput): EvaluatedRecord[] {
+function evaluateRecord(record: CalibrationInput, options: CalibrationOptions): EvaluatedRecord[] {
   const correctness = correctnessFor(record);
   if (correctness == null) return [];
   const binaryOutcome = binaryOutcomeFor(record.outcome);
@@ -165,6 +171,7 @@ function evaluateRecord(record: CalibrationInput): EvaluatedRecord[] {
     {
       confidence: normalizeConfidence(record.confidence),
       correctness,
+      weight: recencyWeightFor(record, options),
       ...(binaryOutcome == null ? {} : { binaryOutcome }),
     },
   ];
@@ -247,12 +254,12 @@ function buildReliabilityBuckets(evaluated: EvaluatedRecord[]) {
     );
     const averageConfidence = roundScore(
       bucketRecords.length
-        ? mean(bucketRecords.map((record) => record.confidence))
+        ? weightedMean(bucketRecords.map((record) => [record.confidence, record.weight]))
         : 0,
     );
     const actualAccuracy = roundScore(
       bucketRecords.length
-        ? mean(bucketRecords.map((record) => record.correctness)) * 100
+        ? weightedMean(bucketRecords.map((record) => [record.correctness, record.weight])) * 100
         : 0,
     );
     return {
@@ -272,10 +279,11 @@ function trustworthinessScore(input: {
   calibrationError: number;
   brierScore?: number;
   sufficientSamples: number;
+  effectiveSampleSize: number;
 }) {
   if (!input.evaluated.length) return 35;
   const sampleScore = clamp(
-    (input.evaluated.length / Math.max(1, input.sufficientSamples)) * 100,
+    (input.effectiveSampleSize / Math.max(1, input.sufficientSamples)) * 100,
   );
   const calibrationQuality = clamp(100 - Math.abs(input.calibrationError));
   const consistency = clamp(
@@ -303,12 +311,13 @@ function calibratedScore(input: {
   calibrationError: number;
   trustworthiness: number;
   sampleSize: number;
+  effectiveSampleSize: number;
   minimumSamples: number;
   sufficientSamples: number;
 }) {
   if (input.sampleSize === 0) return roundScore(input.rawConfidence * 0.85);
   const sampleScore = clamp(
-    (input.sampleSize / Math.max(1, input.sufficientSamples)) * 100,
+    (input.effectiveSampleSize / Math.max(1, input.sufficientSamples)) * 100,
   );
   const evidenceCap = clamp(input.historicalAccuracy + sampleScore * 0.15);
   const overconfidencePenalty = Math.max(0, input.calibrationError) * 0.65;
@@ -360,6 +369,39 @@ function normalizeConfidence(value: number) {
 
 function safeArray<T>(value: T[] | undefined) {
   return Array.isArray(value) ? value.filter((item) => item != null) : [];
+}
+
+function recencyWeightFor(record: CalibrationInput, options: CalibrationOptions) {
+  const halfLifeDays = Number(options.recencyHalfLifeDays);
+  if (!Number.isFinite(halfLifeDays) || halfLifeDays <= 0) return 1;
+
+  const timestamp = timeValue(record.timestamp);
+  if (timestamp == null) return 1;
+
+  const now = timeValue(options.now) ?? Date.now();
+  const ageDays = Math.max(0, (now - timestamp) / 86_400_000);
+  return clamp(0.5 ** (ageDays / halfLifeDays), 0.05, 1);
+}
+
+function timeValue(value: unknown) {
+  if (value instanceof Date) return value.getTime();
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return undefined;
+}
+
+function weightedSampleSize(records: EvaluatedRecord[]) {
+  return records.reduce((sum, record) => sum + Math.max(0, record.weight), 0);
+}
+
+function weightedMean(values: Array<[number, number]>) {
+  const usable = values.filter(([value, weight]) => Number.isFinite(value) && Number.isFinite(weight) && weight > 0);
+  const totalWeight = usable.reduce((sum, [, weight]) => sum + weight, 0);
+  if (totalWeight <= 0) return 0;
+  return usable.reduce((sum, [value, weight]) => sum + value * weight, 0) / totalWeight;
 }
 
 function roundScore(value: number) {

@@ -1,0 +1,61 @@
+{
+  "createdAt": "2026-05-30T16:58:33.454Z",
+  "fingerprints": [
+    "stocks-optimizer|BTCUSDT|EXIT|risk-exit|none|1.00000000",
+    "stocks-optimizer|ETHUSDT|EXIT|risk-exit|none|1.00000000",
+    "stocks-optimizer|SOLUSDT|BUY|confirmed|micro|0.14044944",
+    "stocks-optimizer|BNBUSDT|BUY|confirmed|micro|0.14044944",
+    "stocks-optimizer|AAVEUSDT|EXIT|risk-exit|none|1.00000000",
+    "stocks-optimizer|ADAUSDT|EXIT|risk-exit|none|1.00000000"
+  ],
+  "decisions": [
+    {
+      "strategyId": "stocks-optimizer",
+      "symbol": "BTCUSDT",
+      "action": "EXIT",
+      "riskState": "risk-exit",
+      "sizingMode": "none",
+      "appSizePct": 1
+    },
+    {
+      "strategyId": "stocks-optimizer",
+      "symbol": "ETHUSDT",
+      "action": "EXIT",
+      "riskState": "risk-exit",
+      "sizingMode": "none",
+      "appSizePct": 1
+    },
+    {
+      "strategyId": "stocks-optimizer",
+      "symbol": "SOLUSDT",
+      "action": "BUY",
+      "riskState": "confirmed",
+      "sizingMode": "micro",
+      "appSizePct": 0.1404494382022472
+    },
+    {
+      "strategyId": "stocks-optimizer",
+      "symbol": "BNBUSDT",
+      "action": "BUY",
+      "riskState": "confirmed",
+      "sizingMode": "micro",
+      "appSizePct": 0.1404494382022472
+    },
+    {
+      "strategyId": "stocks-optimizer",
+      "symbol": "AAVEUSDT",
+      "action": "EXIT",
+      "riskState": "risk-exit",
+      "sizingMode": "none",
+      "appSizePct": 1
+    },
+    {
+      "strategyId": "stocks-optimizer",
+      "symbol": "ADAUSDT",
+      "action": "EXIT",
+      "riskState": "risk-exit",
+      "sizingMode": "none",
+      "appSizePct": 1
+    }
+  ]
+}

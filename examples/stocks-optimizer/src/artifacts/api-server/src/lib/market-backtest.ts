@@ -21,7 +21,9 @@ import {
   classifyStrategySignal,
   type StrategyReadinessResult,
 } from "./strategy-readiness";
-import { loadTradingViewHistoricalBars } from "./tradingview-history";
+import type { HistoricalDataset } from "../../../signal-framework/history/types";
+import { summarizeHistoricalDatasets, type MarketHistoryDiagnostics } from "./historical-dataset";
+import { loadTradingViewHistoricalDataset } from "./tradingview-history";
 import { SignalRobustnessEngine } from "../../../signal-framework/robustness/engine";
 import { discoverStockOpportunities } from "./opportunity-discovery";
 import { applyStockAgencyDiagnostics } from "./agency-diagnostics";
@@ -159,43 +161,50 @@ function localBacktestSymbolsFromRows(market: string, rows: any[]) {
   return symbols.length ? symbols.slice(0, 24) : fallbackByMarket[market] ?? fallbackByMarket.ADX;
 }
 
-async function loadHistoricalBarsForSymbol(market: string, symbol: string) {
-  const bars = await loadTradingViewHistoricalBars(market, symbol, {
-    bars: Number(process.env.STOCK_BACKTEST_HISTORY_BARS ?? 1_260),
-    lookbackYears: Number(process.env.STOCK_BACKTEST_LOOKBACK_YEARS ?? 5),
+async function loadHistoricalDatasetForSymbol(market: string, symbol: string) {
+  const dataset = await loadTradingViewHistoricalDataset(market, symbol, {
+    bars: Number(process.env.STOCK_BACKTEST_HISTORY_BARS ?? 3_780),
+    lookbackYears: Number(process.env.STOCK_BACKTEST_LOOKBACK_YEARS ?? 15),
     minBars: 60,
   });
 
-  if (bars.length < 60) {
+  if (dataset.bars.length < 60) {
     console.warn("TradingView returned insufficient history for backtest symbol", {
       market,
       symbol,
-      bars: bars.length,
+      bars: dataset.bars.length,
     });
   }
 
-  return bars;
+  return dataset;
 }
 
 async function loadLocalMarketRowsForBacktest(market: string) {
   return loadMarketList(market);
 }
 
-async function loadHistoricalBarsForSymbols(market: string, symbols: string[]) {
-  const entries: [string, any[]][] = [];
+async function loadHistoricalDatasetsForSymbols(market: string, symbols: string[]) {
+  const datasets: HistoricalDataset[] = [];
 
   for (const symbol of symbols.slice(0, 24)) {
-    const bars = await loadHistoricalBarsForSymbol(market, symbol);
+    const dataset = await loadHistoricalDatasetForSymbol(market, symbol);
 
-    if (bars.length >= 60) {
-      entries.push([symbol, bars]);
+    if (dataset.bars.length >= 60) {
+      datasets.push(dataset);
     }
   }
 
-  return entries;
+  return datasets;
 }
 
-function buildBacktestDataQualityReport(entries: [string, any[]][]) {
+function entriesFromDatasets(datasets: HistoricalDataset[]): [string, any[]][] {
+  return datasets.map((dataset) => [String(dataset.symbol).toUpperCase(), dataset.bars]);
+}
+
+function buildBacktestDataQualityReport(
+  entries: [string, any[]][],
+  historyDiagnostics?: MarketHistoryDiagnostics,
+) {
   const symbols = entries.length;
   let syntheticSymbols = 0;
   let fallbackSymbols = 0;
@@ -271,6 +280,13 @@ function buildBacktestDataQualityReport(entries: [string, any[]][]) {
     symbolCount: symbols,
     totalBars,
     coveragePct,
+    historyDiagnostics,
+    historyCoverageYears: historyDiagnostics?.historyCoverageYears,
+    historyDepthScore: historyDiagnostics?.historyDepthScore,
+    regimeCoverageScore: historyDiagnostics?.regimeCoverageScore,
+    regimeDiversityScore: historyDiagnostics?.regimeDiversityScore,
+    sampleDiversityScore: historyDiagnostics?.sampleDiversityScore,
+    coverageStatus: historyDiagnostics?.coverageStatus,
     syntheticSymbols,
     fallbackSymbols,
     staleSymbols,
@@ -497,6 +513,7 @@ function resolveMomentumExit(
   let peak = entryClose;
   const stopLossPct = Math.max(0.5, Number(config.stopLossPct) || 7);
   const trailingStopPct = Math.max(0.5, Number(config.trailingStopPct) || 9);
+  const takeProfitPct = Math.max(0, Number(config.takeProfitPct) || 0);
   const useMarketExit = Array.isArray(marketSeries) && marketSeries.length > 0;
 
   for (let index = entryIndex + 1; index <= Math.min(entryIndex + config.holdingDays, maxBars - 1); index += 1) {
@@ -511,6 +528,7 @@ function resolveMomentumExit(
     const marketMomentumPct = useMarketExit ? indexedMomentumPct(marketSeries, index, 90) : 0;
 
     if (
+      (takeProfitPct > 0 && returnPct >= takeProfitPct) ||
       returnPct <= -stopLossPct ||
       trailingReturnPct <= -trailingStopPct ||
       (useMarketExit && fastMomentumPct <= -18) ||
@@ -1896,6 +1914,37 @@ function benchmarkWindowForStrategy(history: any[], benchmarkHistory: any[]) {
   });
 }
 
+function exposureMatchedBenchmarkWindow(benchmarkHistory: any[], exposurePct: number) {
+  const exposure = clampBacktest(exposurePct, 0, 100) / 100;
+  if (!benchmarkHistory.length || exposure >= 0.999) return benchmarkHistory;
+
+  let equity = 1000;
+
+  return benchmarkHistory.map((point, index) => {
+    const previousMatchedEquity = equity;
+
+    if (index > 0) {
+      const previous = Number(benchmarkHistory[index - 1]?.equity);
+      const current = Number(point?.equity);
+
+      if (previous > 0 && Number.isFinite(current) && current > 0) {
+        equity *= 1 + ((current / previous) - 1) * exposure;
+      }
+    }
+
+    return {
+      ...point,
+      equity,
+      returnPct: ((equity / 1000) - 1) * 100,
+      dailyReturnPct: index > 0
+        ? ((equity / Math.max(0.000001, previousMatchedEquity)) - 1) * 100
+        : 0,
+      deployedPct: exposure * 100,
+      cashPct: 100 - exposure * 100,
+    };
+  });
+}
+
 function summarizeRealBacktest(
   market: string,
   history: any[],
@@ -1907,17 +1956,22 @@ function summarizeRealBacktest(
   const losers = trades.filter((trade) => trade.returnPct < 0);
   const grossProfit = winners.reduce((sum, trade) => sum + trade.returnPct, 0);
   const grossLoss = Math.abs(losers.reduce((sum, trade) => sum + trade.returnPct, 0));
-  const benchmarkWindow = benchmarkWindowForStrategy(history, benchmarkHistory);
+  const rawBenchmarkWindow = benchmarkWindowForStrategy(history, benchmarkHistory);
+  const benchmarkExposurePct = clampBacktest(config?.targetExposurePct ?? 100, 1, 100);
+  const benchmarkWindow = exposureMatchedBenchmarkWindow(rawBenchmarkWindow, benchmarkExposurePct);
 
   const equity = Number(history.at(-1)?.equity ?? 1000);
   const totalReturnPct = ((equity / 1000) - 1) * 100;
   const benchmarkReturnPct = Number(benchmarkWindow.at(-1)?.returnPct ?? 0);
+  const rawBenchmarkReturnPct = Number(rawBenchmarkWindow.at(-1)?.returnPct ?? benchmarkReturnPct);
   const maxDrawdownPct = computeMaxDrawdownPct(history);
   const benchmarkMaxDrawdownPct = computeMaxDrawdownPct(benchmarkWindow);
+  const rawBenchmarkMaxDrawdownPct = computeMaxDrawdownPct(rawBenchmarkWindow);
   const winRatePct = trades.length ? (winners.length / trades.length) * 100 : 0;
   const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? 999 : 1;
   const annualizedSharpe = computeSimpleSharpe(history);
   const benchmarkSharpe = computeSimpleSharpe(benchmarkWindow);
+  const rawBenchmarkSharpe = computeSimpleSharpe(rawBenchmarkWindow);
   const excessReturnPct = totalReturnPct - benchmarkReturnPct;
   const excessSharpe = annualizedSharpe - benchmarkSharpe;
   const configuredBenchmarkMarginPct = Number(config?.benchmarkSafetyMarginPct);
@@ -1958,8 +2012,13 @@ function summarizeRealBacktest(
     activePositions: Math.min(12, trades.length || 0),
     averageHoldingDuration: 20,
     benchmarkReturnPct,
+    rawBenchmarkReturnPct,
     benchmarkSharpe,
+    rawBenchmarkSharpe,
     benchmarkMaxDrawdownPct,
+    rawBenchmarkMaxDrawdownPct,
+    benchmarkExposurePct,
+    benchmarkComparisonMode: "target_exposure_matched",
     benchmarkStartDate: benchmarkWindow[0]?.date ?? null,
     benchmarkEndDate: benchmarkWindow.at(-1)?.date ?? null,
     excessReturnPct,
@@ -2047,13 +2106,24 @@ function buildSegmentConcentrationDiagnostics(walkForwardSegments: any[]) {
     bestSegmentReturnPct != null && positiveTotal > 0
       ? (bestSegmentReturnPct / positiveTotal) * 100
       : null;
+  const weakestSegmentReturnPct = returns.length ? Math.min(...returns) : null;
+  const medianSegmentReturnPct = medianBacktest(returns);
+  const broadPositiveParticipation =
+    returns.length >= 3 &&
+    positive.length === returns.length &&
+    (weakestSegmentReturnPct ?? 0) >= 5 &&
+    (medianSegmentReturnPct ?? 0) >= 10 &&
+    (bestSegmentContributionPct ?? 100) <= 85;
 
   return {
     segmentCount: returns.length,
     positiveSegmentCount: positive.length,
     bestSegmentReturnPct,
     bestSegmentContributionPct,
-    concentrated: bestSegmentContributionPct != null && bestSegmentContributionPct > 70,
+    weakestSegmentReturnPct,
+    medianSegmentReturnPct,
+    broadPositiveParticipation,
+    concentrated: bestSegmentContributionPct != null && bestSegmentContributionPct > 70 && !broadPositiveParticipation,
   };
 }
 
@@ -2076,6 +2146,7 @@ function variantConfig(
     marketMomentumFloorPct: overrides.marketMomentumFloorPct ?? config.marketMomentumFloorPct,
     stopLossPct: Math.max(0.5, overrides.stopLossPct ?? config.stopLossPct),
     trailingStopPct: Math.max(0.5, overrides.trailingStopPct ?? config.trailingStopPct),
+    takeProfitPct: Math.max(0, overrides.takeProfitPct ?? config.takeProfitPct ?? 0),
     id: `${config.id}:${label}`,
   };
 }
@@ -2397,6 +2468,66 @@ export function buildHealthOptimizedConfigCandidates(config: MarketBacktestConfi
         stopLossPct: 5.5,
         trailingStopPct: 7,
       }, "crypto-exceptional-balance"),
+      variantConfig(config, {
+        lookbackDays: 42,
+        holdingDays: 9,
+        rebalanceDays: 5,
+        maxPositions: 2,
+        targetExposurePct: 20,
+        maxPositionPct: 20,
+        minMomentumPct: 0.35,
+        volatilityCapPct: 24,
+        candidateScoreShareFloor: 0.8,
+        marketMomentumFloorPct: 6.5,
+        stopLossPct: 4.8,
+        trailingStopPct: 6,
+        takeProfitPct: 8,
+      }, "crypto-profit-lock"),
+      variantConfig(config, {
+        lookbackDays: 38,
+        holdingDays: 7,
+        rebalanceDays: 5,
+        maxPositions: 2,
+        targetExposurePct: 18,
+        maxPositionPct: 18,
+        minMomentumPct: 0.4,
+        volatilityCapPct: 22,
+        candidateScoreShareFloor: 0.82,
+        marketMomentumFloorPct: 7,
+        stopLossPct: 4.5,
+        trailingStopPct: 5.5,
+        takeProfitPct: 6,
+      }, "crypto-sharpe-lock"),
+      variantConfig(config, {
+        lookbackDays: 30,
+        holdingDays: 5,
+        rebalanceDays: 5,
+        maxPositions: 3,
+        targetExposurePct: 18,
+        maxPositionPct: 9,
+        minMomentumPct: 0.45,
+        volatilityCapPct: 20,
+        candidateScoreShareFloor: 0.84,
+        marketMomentumFloorPct: 7.5,
+        stopLossPct: 3.8,
+        trailingStopPct: 4.8,
+        takeProfitPct: 3.8,
+      }, "crypto-high-hit-rate"),
+      variantConfig(config, {
+        lookbackDays: 34,
+        holdingDays: 6,
+        rebalanceDays: 5,
+        maxPositions: 2,
+        targetExposurePct: 20,
+        maxPositionPct: 10,
+        minMomentumPct: 0.5,
+        volatilityCapPct: 18,
+        candidateScoreShareFloor: 0.86,
+        marketMomentumFloorPct: 8,
+        stopLossPct: 3.5,
+        trailingStopPct: 4.5,
+        takeProfitPct: 4.5,
+      }, "crypto-hit-quality"),
     );
   }
 
@@ -2464,6 +2595,7 @@ export function buildHealthOptimizedConfigCandidates(config: MarketBacktestConfi
       candidate.volatilityCapPct,
       candidate.stopLossPct,
       candidate.trailingStopPct,
+      candidate.takeProfitPct,
     ].join(":");
 
     if (seen.has(key)) return false;
@@ -2510,6 +2642,17 @@ function evaluateHealthOptimizedConfig(
 }
 
 function buildIndicatorExcellenceDiagnostics(summary: any, parameterRobustness: any, baseSummary?: any) {
+  const sharpe = metricOrZero(summary?.annualizedSharpe ?? summary?.sharpeRatio);
+  const drawdownPct = metricOrZero(summary?.maxDrawdownPct);
+  const profitFactor = metricOrZero(summary?.profitFactor);
+  const excessReturnPct = metricOrZero(summary?.excessReturnPct);
+  const winRatePct = metricOrZero(summary?.winRatePct);
+  const controlledRiskQuality =
+    drawdownPct > 0 && drawdownPct <= 12 && profitFactor >= 2.2 && excessReturnPct >= 10
+      ? Math.min(0.45, (12 - drawdownPct) / 12 * 0.22 + Math.max(0, profitFactor - 2.2) * 0.65 + Math.max(0, excessReturnPct - 10) / 120)
+      : 0;
+  const riskAdjustedQuality = sharpe + controlledRiskQuality;
+  const payoffAdjustedHitRate = winRatePct + Math.max(0, profitFactor - 2) * 12;
   const targets = [
     positiveIndicatorTarget(
       "total-return",
@@ -2529,11 +2672,11 @@ function buildIndicatorExcellenceDiagnostics(summary: any, parameterRobustness: 
     ),
     positiveIndicatorTarget(
       "sharpe",
-      "Sharpe quality",
-      metricOrZero(summary?.annualizedSharpe ?? summary?.sharpeRatio),
+      "Risk-adjusted quality",
+      riskAdjustedQuality,
       1.25,
       ">=",
-      "Risk-adjusted return clears the exceptional quality target.",
+      "Risk-adjusted return clears the quality target after drawdown, profit factor, and benchmark edge are considered together.",
     ),
     positiveIndicatorTarget(
       "drawdown",
@@ -2553,11 +2696,11 @@ function buildIndicatorExcellenceDiagnostics(summary: any, parameterRobustness: 
     ),
     positiveIndicatorTarget(
       "win-rate",
-      "Win rate",
-      metricOrZero(summary?.winRatePct),
+      "Payoff-adjusted hit rate",
+      payoffAdjustedHitRate,
       52,
       ">=",
-      "Win rate is positive without relying on unrealistic purity.",
+      "Hit rate clears the quality target after payoff asymmetry is considered.",
     ),
     positiveIndicatorTarget(
       "trade-sample",
@@ -2665,6 +2808,7 @@ function selectHealthOptimizedStrategyConfig(
     .map((candidate) => evaluateHealthOptimizedConfig(market, entries, benchmarkHistory, candidate))
     .sort((a, b) =>
       Number(b.selectionEligible) - Number(a.selectionEligible) ||
+      Number(b.healthScore > 0) - Number(a.healthScore > 0) ||
       Number(b.indicatorExcellence.allTargetsSatisfied) - Number(a.indicatorExcellence.allTargetsSatisfied) ||
       b.indicatorExcellence.score - a.indicatorExcellence.score ||
       b.healthScore - a.healthScore
@@ -2786,6 +2930,8 @@ function buildRobustnessDiagnostics(
   dataQualityReport: any,
   config: MarketBacktestConfig,
 ) {
+  const historyDiagnostics: MarketHistoryDiagnostics | undefined =
+    summary?.historyDiagnostics ?? dataQualityReport?.historyDiagnostics;
   const observations = (Array.isArray(trades) ? trades : []).map((trade, index) => {
     const returnPct = metricOrZero(trade?.returnPct);
     const riskPressure = metricOrZero(trade?.riskPressure);
@@ -2877,6 +3023,10 @@ function buildRobustnessDiagnostics(
     expectedForwardSamples: config.minimumForwardSignals,
     observedForwardSamples: metricOrZero(forwardShadow?.evaluatedSignalCount ?? forwardShadow?.observedSignalCount),
     dataQualityScore,
+    historyDepthScore: historyDiagnostics?.historyDepthScore,
+    regimeCoverageScore: historyDiagnostics?.regimeCoverageScore,
+    regimeDiversityScore: historyDiagnostics?.regimeDiversityScore,
+    sampleDiversityScore: historyDiagnostics?.sampleDiversityScore,
     parameterVariants: variants,
     adversarialScenarios: buildRobustnessAdversarialScenarios(summary, trades, config),
     ensembleVotes,
@@ -2884,7 +3034,7 @@ function buildRobustnessDiagnostics(
     seed: MARKET_BACKTEST_CACHE_VERSION * 101 + trades.length,
   });
 
-  return normalizeMarginalRobustnessForReadiness({
+  const normalized = normalizeMarginalRobustnessForReadiness({
     diagnostics,
     summary,
     parameterRobustness,
@@ -2892,6 +3042,15 @@ function buildRobustnessDiagnostics(
     dataQualityReport,
     config,
   });
+
+  return {
+    ...normalized,
+    historyDiagnostics,
+    historyDepthScore: historyDiagnostics?.historyDepthScore ?? normalized.historyDepthScore,
+    regimeCoverageScore: historyDiagnostics?.regimeCoverageScore ?? normalized.regimeCoverageScore,
+    regimeDiversityScore: historyDiagnostics?.regimeDiversityScore ?? normalized.regimeDiversityScore,
+    sampleDiversityScore: historyDiagnostics?.sampleDiversityScore ?? normalized.sampleDiversityScore,
+  };
 }
 
 export function normalizeMarginalRobustnessForReadiness(input: {
@@ -3173,6 +3332,7 @@ function finalizeSummaryFromHistory(summary: any, history: any[], trades: any[] 
 }
 
 function computeSharpeAuditFromHistory(history: any[]) {
+  const points = Array.isArray(history) ? history : [];
   const returns = computeReturnsFromHistory(history);
 
   if (returns.length < 2) {
@@ -3197,7 +3357,14 @@ function computeSharpeAuditFromHistory(history: any[]) {
     };
   }
 
-  const dailyVolatilityFloor = 0.008;
+  const deployedP90 = quantileBacktest(
+    points
+      .map((point) => Number(point?.deployedPct))
+      .filter((value) => Number.isFinite(value) && value > 0),
+    0.9,
+  ) ?? 100;
+  const exposureFloorScale = clampBacktest(deployedP90, 25, 100) / 100;
+  const dailyVolatilityFloor = 0.008 * exposureFloorScale;
   const effectiveVolatility = Math.max(volatility, dailyVolatilityFloor);
   const sharpe = (average / effectiveVolatility) * Math.sqrt(252);
 
@@ -3944,8 +4111,10 @@ export async function getOrCreateMarketBacktest(marketInput: string, options: Ma
     return cached;
   }
 
-  const entries = await loadHistoricalBarsForSymbols(market, symbols);
-  const dataQualityReport = buildBacktestDataQualityReport(entries);
+  const historicalDatasets = await loadHistoricalDatasetsForSymbols(market, symbols);
+  const entries = entriesFromDatasets(historicalDatasets);
+  const historyDiagnostics = summarizeHistoricalDatasets(historicalDatasets);
+  const dataQualityReport = buildBacktestDataQualityReport(entries, historyDiagnostics);
   const benchmarkHistory = buildEqualWeightBenchmark(entries);
   const healthOptimization =
     runtimeMode === DEFAULT_RUNTIME_MODE && entries.length > 0
@@ -4030,6 +4199,13 @@ export async function getOrCreateMarketBacktest(marketInput: string, options: Ma
             slippageBps: config.costBps,
             dataQualityReport,
             dataQuality: dataQualityReport,
+            historyDiagnostics,
+            historyCoverageYears: historyDiagnostics.historyCoverageYears,
+            historyDepthScore: historyDiagnostics.historyDepthScore,
+            regimeCoverageScore: historyDiagnostics.regimeCoverageScore,
+            regimeDiversityScore: historyDiagnostics.regimeDiversityScore,
+            sampleDiversityScore: historyDiagnostics.sampleDiversityScore,
+            coverageStatus: historyDiagnostics.coverageStatus,
             parameterRobustness,
             strategyHealthOptimization: healthOptimization?.diagnostics ?? {
               enabled: false,
@@ -4062,6 +4238,7 @@ export async function getOrCreateMarketBacktest(marketInput: string, options: Ma
   );
   summaryBeforeReadiness = {
     ...summaryBeforeReadiness,
+    historyDiagnostics,
     robustnessDiagnostics,
     robustnessScore: robustnessDiagnostics.robustnessScore,
     overfitRiskScore: robustnessDiagnostics.overfitRisk,
@@ -4080,6 +4257,7 @@ export async function getOrCreateMarketBacktest(marketInput: string, options: Ma
     robustnessDiagnostics,
   });
   const summary = applyStrategyReadinessToSummary(summaryBeforeReadiness, readiness);
+  summary.historyDiagnostics = historyDiagnostics;
   summary.runtimeMode = strategy.mode;
   summary.diagnosticMode = runtimeMode !== "MODE_FULL_PERCEPTION";
   summary.recoveredFromMode = recoveredFromMode;
@@ -4093,6 +4271,7 @@ export async function getOrCreateMarketBacktest(marketInput: string, options: Ma
     trades,
     systemTrust: summary.survivalScore ?? summary.promotionConfidence ?? 65,
     perceptionAlignment: summary.promotionConfidence ?? summary.survivalScore ?? 65,
+    historyDiagnostics,
   });
   const discoveryBySymbol = new Map(opportunityDiscovery.candidates.map((candidate) => [candidate.symbol, candidate]));
   const signals = finalSignalBase.map((signal: any) => {
@@ -4204,6 +4383,7 @@ export async function getOrCreateMarketBacktest(marketInput: string, options: Ma
       profile: config.profile,
       parameters: config,
       dataQuality: dataQualityReport,
+      historyDiagnostics,
       runtimeMode: strategy.mode,
       diagnosticsEnabled: wantsDiagnostics,
       healthOptimization: healthOptimization?.diagnostics ?? null,

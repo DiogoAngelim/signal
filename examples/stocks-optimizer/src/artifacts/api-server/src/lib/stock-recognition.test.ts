@@ -84,6 +84,49 @@ test("stock Recognition adapter keeps insufficient evidence explicit when histor
   assert.equal(result.recognitionDiagnostics.verdictCounts.insufficient_evidence, 1);
 });
 
+test("stock Recognition uses long-history regime coverage for historical similarity confidence", () => {
+  const base = applyStockRecognitionDiagnostics({
+    market: "NASDAQ",
+    signals: [signal({ judgement: undefined })],
+    trades: [],
+    opportunityDiscovery: {
+      candidates: [{ symbol: "AAA", candidateScore: 82 }],
+      discovery: { confidence: 28, novelty: 85, memory: { similarOutcomes: 0 } },
+    },
+  });
+  const extended = applyStockRecognitionDiagnostics({
+    market: "NASDAQ",
+    signals: [signal({ judgement: undefined })],
+    trades: [],
+    summary: {
+      historyDiagnostics: {
+        historyCoverageYears: 15,
+        historyDepthScore: 96,
+        regimeCoverageScore: 94,
+        regimeDiversityScore: 91,
+        sampleDiversityScore: 89,
+        coverageStatus: "full",
+        currentRegime: "recovery",
+        keyRegimesCovered: ["bull", "bear", "crash", "recovery", "volatility_transition"],
+        regimeCounts: { bull: 1000, bear: 700, crash: 100, recovery: 400, volatility_transition: 250 },
+      },
+    },
+    opportunityDiscovery: {
+      candidates: [{ symbol: "AAA", candidateScore: 82 }],
+      discovery: { confidence: 28, novelty: 85, memory: { similarOutcomes: 0 } },
+    },
+  });
+  const baseRecognition = base.signals[0]?.recognition;
+  const extendedRecognition = extended.signals[0]?.recognition;
+
+  assert.ok((extendedRecognition?.historicalSimilarityConfidence ?? 0) >= 85);
+  assert.ok((extendedRecognition?.recurrenceConfidence ?? 0) > (baseRecognition?.recurrenceConfidence ?? 0));
+  assert.equal(
+    extended.recognitionDiagnostics.signals[0]?.historicalSimilarityConfidence,
+    extendedRecognition?.historicalSimilarityConfidence,
+  );
+});
+
 test("stock Recognition accepts strong aggregate Judgement as a guarded archetype", () => {
   const result = applyStockRecognitionDiagnostics({
     market: "BINANCE",

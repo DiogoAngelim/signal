@@ -29,9 +29,10 @@ export type MarketBacktestConfig = {
   maxWalkForwardPeriodContributionPct: number;
   stopLossPct: number;
   trailingStopPct: number;
+  takeProfitPct: number;
 };
 
-export const MARKET_BACKTEST_CACHE_VERSION = 11;
+export const MARKET_BACKTEST_CACHE_VERSION = 17;
 
 const BASE_PROFILE: Omit<MarketBacktestConfig, "id" | "name" | "profile"> = {
   lookbackDays: 60,
@@ -54,6 +55,7 @@ const BASE_PROFILE: Omit<MarketBacktestConfig, "id" | "name" | "profile"> = {
   maxWalkForwardPeriodContributionPct: 60,
   stopLossPct: 7,
   trailingStopPct: 9,
+  takeProfitPct: 0,
 };
 
 const PROFILE_OVERRIDES: Record<

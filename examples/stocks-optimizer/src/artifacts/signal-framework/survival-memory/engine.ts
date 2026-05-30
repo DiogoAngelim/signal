@@ -140,7 +140,18 @@ export function classifySurvivalOutcome(input: SurvivalClassificationInput): Sur
   const structuralDanger = normalizeScore(input.structuralDanger);
   const stressPeak = Math.max(tailRisk, liquidityStress, structuralDanger);
 
-  if (realizedReturn < 0 || maxDrawdown >= 45 || adverse >= 45 || survivalCost >= 85) {
+  if (
+    maxDrawdown >= 45 ||
+    adverse >= 45 ||
+    survivalCost >= 85 ||
+    realizedReturn <= -12 ||
+    (realizedReturn < 0 && (
+      survivalCost >= 58 ||
+      maxDrawdown >= 25 ||
+      adverse >= 30 ||
+      stressPeak >= 70
+    ))
+  ) {
     return "failed_survival";
   }
 
@@ -158,6 +169,7 @@ export function classifySurvivalOutcome(input: SurvivalClassificationInput): Sur
     survivalCost >= 25 ||
     maxDrawdown >= 8 ||
     adverse >= 10 ||
+    realizedReturn < 0 ||
     recovery >= 25 ||
     stressPeak >= 35 ||
     normalizeScore(input.volatilityExpansion) >= 35

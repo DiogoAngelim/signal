@@ -8,7 +8,11 @@
     "dev": "pnpm --filter @workspace/signal-markets dev",
     "test": "node ./scripts/run-tests.cjs",
     "lint": "pnpm --filter @workspace/api-server typecheck && pnpm --filter @workspace/signal-markets typecheck",
-    "typecheck": "pnpm --filter @workspace/api-server typecheck && pnpm --filter @workspace/signal-markets typecheck"
+    "typecheck": "pnpm --filter @workspace/api-server typecheck && pnpm --filter @workspace/signal-markets typecheck",
+    "worker:build": "pnpm --filter @workspace/binance-execution-worker build",
+    "worker:dev": "pnpm --filter @workspace/binance-execution-worker dev",
+    "worker:start": "pnpm --filter @workspace/binance-execution-worker start",
+    "worker:typecheck": "pnpm --filter @workspace/binance-execution-worker typecheck"
   },
   "installCommand": "pnpm install",
   "buildCommand": "pnpm --filter @workspace/signal-markets build",

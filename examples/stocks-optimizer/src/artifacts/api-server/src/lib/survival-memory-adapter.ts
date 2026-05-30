@@ -168,10 +168,8 @@ function survivalRecordFromObject(value: unknown, index: number, input: StockSur
     realizedReturn < 0 ? Math.abs(realizedReturn) : riskPressure * 0.2,
     0,
   )!;
-  const structuralDanger = Math.max(
-    firstNumber(record.structuralDanger, record.structuralRisk, 0)!,
-    structuralDangerFor(input.readiness),
-  );
+  const explicitStructuralDanger = firstNumber(record.structuralDanger, record.structuralRisk);
+  const structuralDanger = explicitStructuralDanger ?? (source === "history" ? structuralDangerFor(input.readiness) : 0);
   const recoveryTimeBars = firstNumber(
     record.recoveryTimeBars,
     record.recoveryBars,

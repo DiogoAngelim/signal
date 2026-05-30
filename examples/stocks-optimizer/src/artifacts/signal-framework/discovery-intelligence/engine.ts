@@ -177,10 +177,15 @@ export interface DiscoveryIntelligenceInput {
   outcomes: OutcomeRecord[];
   restrictions: RestrictionRecord[];
   traces: TraceRecord[];
+  historyDepthScore?: number;
+  regimeCoverageScore?: number;
+  sampleDiversityScore?: number;
+  regimeDiversityScore?: number;
 }
 
 export interface DiscoveryIntelligenceResult {
   score: number;
+  regimeCoverageScore?: number;
   maturity: DiscoveryMaturity;
   economics: OpportunityEconomics;
   governance: GovernanceEffectiveness;
@@ -226,6 +231,10 @@ export function evaluateDiscoveryIntelligence(
     outcomes: input.outcomes ?? [],
     restrictions: input.restrictions ?? [],
     traces: input.traces ?? [],
+    historyDepthScore: input.historyDepthScore,
+    regimeCoverageScore: input.regimeCoverageScore,
+    sampleDiversityScore: input.sampleDiversityScore,
+    regimeDiversityScore: input.regimeDiversityScore,
   };
 
   const maturity = evaluateDiscoveryMaturity(completeInput.discoveries);
@@ -245,18 +254,28 @@ export function evaluateDiscoveryIntelligence(
     completeInput.traces,
     completeInput.outcomes,
   );
+  const regimeCoverageScore = evaluateRegimeCoverage(completeInput);
+  const hasAnyRecords =
+    completeInput.discoveries.length > 0 ||
+    completeInput.decisions.length > 0 ||
+    completeInput.outcomes.length > 0 ||
+    completeInput.restrictions.length > 0 ||
+    completeInput.traces.length > 0;
+  const regimeCoverageSignal = regimeCoverageScore > 0 ? regimeCoverageScore : hasAnyRecords ? 50 : 0;
   const score = roundScore(
     weightedMean([
-      [maturity.maturityScore, 0.22],
-      [economics.economicsScore, 0.24],
-      [governance.score, 0.2],
-      [institutionalization.institutionalizationScore, 0.16],
-      [metaLearning.score, 0.18],
+      [maturity.maturityScore, 0.2],
+      [economics.economicsScore, 0.22],
+      [governance.score, 0.18],
+      [institutionalization.institutionalizationScore, 0.14],
+      [metaLearning.score, 0.16],
+      [regimeCoverageSignal, 0.1],
     ]),
   );
 
   return {
     score,
+    regimeCoverageScore,
     maturity,
     economics,
     governance,
@@ -268,12 +287,32 @@ export function evaluateDiscoveryIntelligence(
       governance,
       institutionalization,
       metaLearning,
+      regimeCoverageScore,
     }),
   };
 }
 
 export const runDiscoveryIntelligence = evaluateDiscoveryIntelligence;
 export const scoreDiscoveryIntelligence = evaluateDiscoveryIntelligence;
+
+function evaluateRegimeCoverage(input: DiscoveryIntelligenceInput) {
+  const explicit = finiteNumber(input.regimeCoverageScore);
+  if (explicit != null) return roundScore(explicit);
+
+  const traceValues = input.traces
+    .filter((trace) => normalizeText(trace.metric).includes("regime coverage"))
+    .map((trace) => finiteNumber(trace.value))
+    .filter((value): value is number => value != null);
+  const diagnostics = [
+    finiteNumber(input.historyDepthScore),
+    finiteNumber(input.sampleDiversityScore),
+    finiteNumber(input.regimeDiversityScore),
+  ].filter((value): value is number => value != null);
+
+  if (traceValues.length) return roundScore(mean(traceValues));
+  if (diagnostics.length) return roundScore(mean(diagnostics));
+  return 0;
+}
 
 export function evaluateDiscoveryMaturity(
   discoveries: readonly DiscoveryRecord[] = [],
@@ -728,6 +767,7 @@ function buildRecommendations(parts: {
   governance: GovernanceEffectiveness;
   institutionalization: InstitutionalKnowledge;
   metaLearning: MetaLearning;
+  regimeCoverageScore: number;
 }): Recommendation[] {
   const recommendations: Recommendation[] = [];
 
@@ -772,6 +812,14 @@ function buildRecommendations(parts: {
       category: "meta-learning",
       priority: "medium",
       message: "Investigate why calibration, trust, survival, decision quality, or governance trends are weakening.",
+    });
+  }
+  if (parts.regimeCoverageScore > 0 && parts.regimeCoverageScore < 55) {
+    recommendations.push({
+      id: "expand-regime-coverage",
+      category: "maturity",
+      priority: "medium",
+      message: "Broaden long-history coverage across bull, bear, crash, recovery, and volatility transition regimes.",
     });
   }
   if (recommendations.length === 0) {

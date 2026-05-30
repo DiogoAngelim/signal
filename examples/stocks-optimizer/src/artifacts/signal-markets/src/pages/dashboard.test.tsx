@@ -43,7 +43,16 @@ describe("Dashboard calibration diagnostics", () => {
     expect(html).toContain("Belief diagnostics");
     expect(html).toContain("Recognition diagnostics");
     expect(html).toContain("Recurrence");
+    expect(html).toContain("Historical similarity");
     expect(html).toContain("Judgement similarity");
+    expect(html).toContain("History Coverage");
+    expect(html).toContain("History Depth");
+    expect(html).toContain("Regime Coverage");
+    expect(html).toContain("Regime Diversity");
+    expect(html).toContain("Coverage Status");
+    expect(html).toContain(
+      "Extended history improves regime awareness and calibration. Recent outcomes still govern sizing restoration.",
+    );
     expect(html).toContain("Judgement diagnostics");
     expect(html).toContain("Survival memory diagnostics");
     expect(html).toContain("Survival memory status");
@@ -294,5 +303,12 @@ describe("Dashboard calibration diagnostics", () => {
         semanticWord: "Dormant",
       }),
     ).toBe("reduced-size portfolio cap");
+    expect(
+      maximumExposureSubLabel({
+        sizingMode: "none",
+        suggestedMaximumExposurePct: 0,
+        semanticWord: "Dormant",
+      }),
+    ).toBe("Sizing locked by governance");
   });
 });

@@ -16,6 +16,7 @@ import type {
   OpportunityOutcomeRecord,
   OpportunityType,
 } from "../../../signal-framework/types";
+import type { MarketHistoryDiagnostics } from "./historical-dataset";
 
 export type StockBar = {
   date?: string;
@@ -105,6 +106,7 @@ export type StockOpportunityDiscoveryInput = {
   needs?: DetectedNeed[];
   systemTrust?: number;
   perceptionAlignment?: number;
+  historyDiagnostics?: MarketHistoryDiagnostics;
 };
 
 export type StockOpportunityDiscoveryResult = {
@@ -118,6 +120,7 @@ export type StockOpportunityDiscoveryResult = {
     improvingCount: number;
     averageScore: number;
     averageVelocity: number;
+    regimeCoverageScore: number;
   };
 };
 
@@ -133,7 +136,7 @@ export type StockOpportunityDiscoveryResult = {
  */
 export function discoverStockOpportunities(input: StockOpportunityDiscoveryInput): StockOpportunityDiscoveryResult {
   const signals = input.signals.filter((signal) => symbolOf(signal));
-  const marketContext = buildMarketContext(signals);
+  const marketContext = buildMarketContext(signals, input.historyDiagnostics);
   const previous = new Map((input.previousCandidates ?? []).map((candidate) => [candidate.symbol, candidate]));
   const initialCandidates = signals.map((signal) => buildCandidate(signal, input, marketContext, previous));
   const records = buildExplorerRecords(initialCandidates, input.trades ?? []);
@@ -186,6 +189,7 @@ export function discoverStockOpportunities(input: StockOpportunityDiscoveryInput
       improvingCount: enriched.filter((candidate) => candidate.scoreVelocity > 0).length,
       averageScore: round(mean(enriched.map((candidate) => candidate.candidateScore))),
       averageVelocity: round(mean(enriched.map((candidate) => candidate.scoreVelocity))),
+      regimeCoverageScore: round(historyScore(input.historyDiagnostics?.regimeCoverageScore)),
     },
   };
 }
@@ -289,6 +293,9 @@ function factorScores(
   const setupQuality = clamp(number(signal.setupQuality, 50));
   const riskPressure = clamp(number(signal.riskPressure, 50));
   const expectedMove = number(signal.expectedMove, recentMomentum);
+  const regimeAwarenessLift = (context.regimeCoverageScore - 50) * 0.08 +
+    (context.regimeDiversityScore - 50) * 0.05 +
+    (context.historyDepthScore - 50) * 0.03;
 
   return {
     trendEmergence: clamp(50 + trendSpread * 8 + (trendSpread - previousTrendSpread) * 10),
@@ -297,7 +304,7 @@ function factorScores(
     relativeStrengthImprovement: clamp(50 + (expectedMove - context.averageExpectedMove) * 8 + (setupQuality - context.averageSetupQuality) * 0.4),
     volumeExpansion: clamp(averageVolume > 0 ? 50 + ((latestVolume / averageVolume) - 1) * 45 : 50),
     breakoutPreparation: clamp(50 + proximityToHigh(latestClose, high, low) * 35 + Math.max(0, baselineVolatility - recentVolatility) * 8),
-    regimeTransition: clamp(50 + Math.abs(setupQuality - riskPressure) * 0.35 + (signal.signalAction === "Buy" ? 8 : 0)),
+    regimeTransition: clamp(50 + Math.abs(setupQuality - riskPressure) * 0.35 + (signal.signalAction === "Buy" ? 8 : 0) + regimeAwarenessLift),
     breadthImprovement: context.breadthImprovement,
     crossAssetLeadership: clamp(50 + (setupQuality - context.averageSetupQuality) * 0.5 + (context.averageRiskPressure - riskPressure) * 0.35),
   };
@@ -317,15 +324,30 @@ function weightedScore(factors: StockOpportunityFactors) {
   );
 }
 
-function buildMarketContext(signals: StockOpportunitySignal[]) {
+function buildMarketContext(signals: StockOpportunitySignal[], historyDiagnostics?: MarketHistoryDiagnostics) {
   const averageExpectedMove = mean(signals.map((signal) => number(signal.expectedMove, 0)));
   const averageSetupQuality = mean(signals.map((signal) => clamp(number(signal.setupQuality, 50))));
   const averageRiskPressure = mean(signals.map((signal) => clamp(number(signal.riskPressure, 50))));
   const constructive = signals.filter((signal) => number(signal.setupQuality, 50) > number(signal.riskPressure, 50)).length;
   const improving = signals.filter((signal) => number(signal.expectedMove, 0) >= 0).length;
   const breadthImprovement = clamp(((constructive + improving) / Math.max(1, signals.length * 2)) * 100);
+  const regimeCoverageScore = historyScore(historyDiagnostics?.regimeCoverageScore, 50);
+  const historyDepthScore = historyScore(historyDiagnostics?.historyDepthScore, 50);
+  const regimeDiversityScore = historyScore(historyDiagnostics?.regimeDiversityScore, 50);
+  const sampleDiversityScore = historyScore(historyDiagnostics?.sampleDiversityScore, 50);
 
-  return { averageExpectedMove, averageSetupQuality, averageRiskPressure, breadthImprovement };
+  return {
+    averageExpectedMove,
+    averageSetupQuality,
+    averageRiskPressure,
+    breadthImprovement,
+    regimeCoverageScore,
+    historyDepthScore,
+    regimeDiversityScore,
+    sampleDiversityScore,
+    currentRegime: historyDiagnostics?.currentRegime,
+    keyRegimesCovered: historyDiagnostics?.keyRegimesCovered ?? [],
+  };
 }
 
 function genericCandidate(
@@ -490,6 +512,13 @@ function buildGenericDiscoveryInput(args: {
     breadthImprovement: args.context.breadthImprovement,
     systemTrust: args.input.systemTrust ?? 65,
     perceptionAlignment: args.input.perceptionAlignment ?? 65,
+    historyDepthScore: args.context.historyDepthScore,
+    regimeCoverageScore: args.context.regimeCoverageScore,
+    regimeDiversityScore: args.context.regimeDiversityScore,
+    sampleDiversityScore: args.context.sampleDiversityScore,
+    currentRegime: args.context.currentRegime,
+    keyRegimesCovered: args.context.keyRegimesCovered,
+    historyDiagnostics: args.input.historyDiagnostics,
   };
 
   return {
@@ -550,6 +579,7 @@ function buildGenericDiscoveryInput(args: {
           eligible: candidate.eligible,
         },
       })),
+      ...regimeHistoricalStates(args.input.historyDiagnostics, args.input.market),
     ],
     priorOutcomes: args.input.trades?.map((trade, index) => {
       const symbol = String(trade.symbol ?? `trade-${index + 1}`).toUpperCase();
@@ -589,6 +619,7 @@ function buildGenericDiscoveryInput(args: {
         missingEvidence: (args.input.trades?.length ?? 0) >= 3 ? undefined : "similar closed outcomes",
         unlockCondition: "Add similar closed outcomes to discovery memory.",
       },
+      ...historyConstraints(args.input.historyDiagnostics),
       ...args.findings.slice(0, 3).map((finding) => ({
         id: `finding:${finding.findingId}`,
         label: finding.pattern,
@@ -600,6 +631,57 @@ function buildGenericDiscoveryInput(args: {
     ],
     now: "1970-01-01T00:00:00.000Z",
   };
+}
+
+function regimeHistoricalStates(historyDiagnostics: MarketHistoryDiagnostics | undefined, market?: string) {
+  if (!historyDiagnostics) return [];
+  const regimes = historyDiagnostics.keyRegimesCovered?.length
+    ? historyDiagnostics.keyRegimesCovered
+    : Object.keys(historyDiagnostics.regimeCounts ?? {});
+
+  return regimes.slice(0, 8).map((regime) => ({
+    id: `history-regime:${regime}`,
+    label: `${regime} regime context`,
+    state: {
+      market: market ?? "unknown",
+      regime,
+      regimeType: regime,
+      regimeCoverageScore: historyDiagnostics.regimeCoverageScore,
+      historyDepthScore: historyDiagnostics.historyDepthScore,
+      regimeDiversityScore: historyDiagnostics.regimeDiversityScore,
+      sampleDiversityScore: historyDiagnostics.sampleDiversityScore,
+    },
+    metadata: {
+      source: "long-history",
+      regime,
+    },
+  }));
+}
+
+function historyConstraints(historyDiagnostics: MarketHistoryDiagnostics | undefined): DiscoveryInput["constraints"] {
+  if (!historyDiagnostics) return [];
+  return [
+    {
+      id: "history-regime-coverage",
+      label: "Regime coverage",
+      passed: historyDiagnostics.regimeCoverageScore >= 55,
+      severity: "low",
+      score: historyDiagnostics.regimeCoverageScore,
+      missingEvidence: historyDiagnostics.regimeCoverageScore >= 55 ? undefined : "broader long-history regime coverage",
+      unlockCondition: "Extend or repair historical coverage across bull, bear, crash, recovery, and volatility transition regimes.",
+      invalidationCondition: "Invalidate broad discovery confidence if regime coverage narrows below the long-history floor.",
+    },
+    {
+      id: "history-depth",
+      label: "History depth",
+      passed: historyDiagnostics.historyDepthScore >= 55,
+      severity: "low",
+      score: historyDiagnostics.historyDepthScore,
+      missingEvidence: historyDiagnostics.historyDepthScore >= 55 ? undefined : "deeper validated market history",
+      unlockCondition: "Add enough audited history to cover multiple market cycles.",
+      invalidationCondition: "Invalidate long-history confidence if usable depth falls below the audit floor.",
+    },
+  ];
 }
 
 function evidenceForGenericDiscovery(candidate: StockOpportunityCandidate): DiscoveryEvidence[] {
@@ -718,7 +800,7 @@ function volumeSeries(signal: StockOpportunitySignal, bars: StockBar[]) {
 
 function requestedCapacity(signal: StockOpportunitySignal, score: number) {
   const explicit = number(signal.suggestedExposure, 0);
-  if (explicit > 0) return explicit;
+  if (explicit > 0) return Math.min(explicit, maxCapacity(signal));
   /* c8 ignore next */
   if (score >= 72) return Math.min(5, maxCapacity(signal));
   if (score >= 60) return Math.min(2, maxCapacity(signal));
@@ -727,7 +809,8 @@ function requestedCapacity(signal: StockOpportunitySignal, score: number) {
 }
 
 function maxCapacity(signal: StockOpportunitySignal) {
-  return Math.max(1, number(signal.maxPositionPct, 5));
+  if (signal.maxPositionPct != null) return Math.max(0, number(signal.maxPositionPct, 0));
+  return Math.max(1, number(signal.suggestedExposure, 5));
 }
 
 function densityFromPrevious(previousCandidates: StockOpportunityCandidate[] | undefined) {
@@ -782,6 +865,10 @@ function mean(values: number[]) {
 function number(value: unknown, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function historyScore(value: unknown, fallback = 0) {
+  return clamp(number(value, fallback));
 }
 
 function clamp(value: number, min = 0, max = 100) {

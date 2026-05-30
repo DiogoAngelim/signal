@@ -43,6 +43,7 @@ import {
   type DiscoveryIntelligenceDiagnostic,
   type ExecutiveDecisionDiagnostic,
   type ExecutionQualityDiagnostic,
+  type HistoryDiagnostics,
   type JudgementDiagnostic,
   type MarketOption,
   type ReadinessRemediationDiagnostic,
@@ -76,6 +77,8 @@ import {
   buildDashboardExposureSizing,
   requestedExposureForAsset,
   sizeAssetExposure,
+  sizingModeLabelForOperator,
+  sizingModeSentenceForOperator,
 } from "@/lib/sizing";
 import { buildDashboardSemanticMetrics } from "@/lib/semantic-metrics";
 import { buildExecutiveDashboardIA } from "@/lib/dashboard-ia";
@@ -445,6 +448,19 @@ function fmtPlainPct(value: number | null | undefined, digits = 1) {
 function fmtPlainNumber(value: number | null | undefined, digits = 2) {
   if (value == null || !Number.isFinite(value)) return "—";
   return value.toFixed(digits);
+}
+
+function fmtYears(value: number | null | undefined) {
+  if (value == null || !Number.isFinite(value)) return "—";
+  return `${value.toFixed(1)} years`;
+}
+
+function coverageStatusLabel(value: unknown) {
+  const text = String(value ?? "").trim();
+  if (!text) return "Pending";
+  return text
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function marketCode(market: MarketOption | string): string {
@@ -2343,10 +2359,7 @@ export function reconcileResolveUnlockConditionsWithRecognition(input: {
 }
 
 function displaySizingMode(mode: string | undefined) {
-  if (!mode || mode === "none") return "None";
-  if (mode === "micro") return "Micro";
-  if (mode === "maxSafe") return "Max safe";
-  return mode.charAt(0).toUpperCase() + mode.slice(1);
+  return sizingModeLabelForOperator(mode);
 }
 
 export function maximumExposureSubLabel(input: {
@@ -2358,7 +2371,7 @@ export function maximumExposureSubLabel(input: {
     !finiteNumber(input.suggestedMaximumExposurePct) ||
     numeric(input.suggestedMaximumExposurePct) <= 0
   ) {
-    return undefined;
+    return input.sizingMode === "none" ? "Sizing locked by governance" : undefined;
   }
 
   if (input.sizingMode === "micro") return "reduced-size portfolio cap";
@@ -2387,7 +2400,7 @@ function operatorActionLabel(input: {
     return "Micro escalation";
   }
 
-  if (decision.includes("escalate") && mode !== "None") {
+  if (decision.includes("escalate") && input.sizingMode !== "none") {
     return `${mode} escalation`;
   }
 
@@ -2425,10 +2438,9 @@ function expectedMoveScore(value: number | null | undefined) {
 function assetRankReason(stock: IntelligenceStock) {
   const expectedMove = numeric(stock.expectedMove);
   const riskControl = clamp(100 - numeric(stock.riskPressure));
-  const sizingMode = displaySizingMode(stock.sizingMode);
 
   if (numeric(stock.setupQuality) >= 90 && expectedMove < 0.75) {
-    return `High quality mostly comes from fit and risk control; expected move is modest and sizing remains ${sizingMode.toLowerCase()}.`;
+    return `High quality mostly comes from fit and risk control; expected move is modest and sizing remains ${sizingModeSentenceForOperator(stock.sizingMode)}.`;
   }
 
   if (riskControl >= 70 && expectedMove >= 1) {
@@ -4060,21 +4072,13 @@ export default function Dashboard() {
     ],
   );
   const sizingModeMetricValue = hasProvidedSignals
-    ? displaySizingMode(dashboardSizing.sizingMode)
+    ? dashboardSizing.operatorState.sizingModeLabel
     : "—";
-  const sizingModeMetricSub =
-    hasProvidedSignals && dashboardSizing.sizingMode !== "none"
-      ? dashboardSizing.sizingMode === "micro"
-        ? "reduced-size cap"
-        : semanticMetrics.sizing.word.toLowerCase()
-      : undefined;
   const maximumExposureMetricValue = hasProvidedSignals
-    ? dashboardSizing.suggestedMaximumExposurePct <= 0
-      ? "None"
-      : fmtPlainPct(dashboardSizing.suggestedMaximumExposurePct)
+    ? dashboardSizing.operatorState.portfolioCapLabel
     : "—";
   const maximumExposureMetricSub =
-    hasProvidedSignals && dashboardSizing.suggestedMaximumExposurePct > 0
+    hasProvidedSignals
       ? maximumExposureSubLabel({
           sizingMode: dashboardSizing.sizingMode,
           suggestedMaximumExposurePct:
@@ -4941,6 +4945,38 @@ export default function Dashboard() {
 
   const failureFlags = Array.from(new Set(derivedFrontendFailureFlags));
   const robustnessDiagnostics = backtestSummary?.robustnessDiagnostics ?? {};
+  const historyDiagnostics: HistoryDiagnostics =
+    backtestSummary?.historyDiagnostics ??
+    strategyReadiness?.historyDiagnostics ??
+    robustnessDiagnostics?.historyDiagnostics ??
+    backtestSummary?.dataQualityReport?.historyDiagnostics ??
+    {};
+  const historyCoverageYears =
+    finiteNumber(historyDiagnostics?.historyCoverageYears) ??
+    finiteNumber(historyDiagnostics?.availableYears) ??
+    finiteNumber(backtestSummary?.historyCoverageYears);
+  const historyDepthScore =
+    finiteNumber(historyDiagnostics?.historyDepthScore) ??
+    finiteNumber(backtestSummary?.historyDepthScore) ??
+    finiteNumber(robustnessDiagnostics?.historyDepthScore);
+  const regimeCoverageScore =
+    finiteNumber(historyDiagnostics?.regimeCoverageScore) ??
+    finiteNumber(backtestSummary?.regimeCoverageScore) ??
+    finiteNumber(robustnessDiagnostics?.regimeCoverageScore);
+  const regimeDiversityScore =
+    finiteNumber(historyDiagnostics?.regimeDiversityScore) ??
+    finiteNumber(backtestSummary?.regimeDiversityScore) ??
+    finiteNumber(robustnessDiagnostics?.regimeDiversityScore);
+  const sampleDiversityScore =
+    finiteNumber(historyDiagnostics?.sampleDiversityScore) ??
+    finiteNumber(backtestSummary?.sampleDiversityScore) ??
+    finiteNumber(robustnessDiagnostics?.sampleDiversityScore);
+  const historyCoverageStatus = coverageStatusLabel(
+    historyDiagnostics?.coverageStatus ?? backtestSummary?.coverageStatus,
+  );
+  const historyExplanation =
+    historyDiagnostics?.explanation ??
+    "Extended history improves regime awareness and calibration. Recent outcomes still govern sizing restoration.";
   const robustnessScore = finiteNumber(
     backtestSummary?.robustnessScore ?? robustnessDiagnostics?.robustnessScore,
   );
@@ -5923,7 +5959,9 @@ export default function Dashboard() {
     ? maximumExposureMetricValue
     : "Pending";
   const canonicalPerAssetCap =
-    maxAssetExposurePct > 0 ? fmtPlainPct(maxAssetExposurePct) : "None";
+    maxAssetExposurePct > 0
+      ? fmtPlainPct(maxAssetExposurePct)
+      : dashboardSizing.operatorState.zeroExposureLabel;
   const canonicalStarterSize =
     starterExposurePct > 0 ? fmtPlainPct(starterExposurePct) : "Wait";
   const operatorAction = operatorActionLabel({
@@ -6063,7 +6101,7 @@ export default function Dashboard() {
     ? "Loading prices, signals, and governance before issuing a decision."
     : dashboardSizing.suggestedMaximumExposurePct <= 0
       ? `Stay flat for now. ${primaryInvalidationCondition}`
-      : `Use ${displaySizingMode(dashboardSizing.sizingMode).toLowerCase()} exposure in ${actionableTickersLabel}. ${restorationExposureInstruction}`;
+      : `Use ${sizingModeSentenceForOperator(dashboardSizing.sizingMode)} exposure in ${actionableTickersLabel}. ${restorationExposureInstruction}`;
   const restrictionImpactRows = (
     executiveIA.whyNotFullSize.factors.length
       ? executiveIA.whyNotFullSize.factors
@@ -6215,7 +6253,7 @@ export default function Dashboard() {
                 <StatusPill
                   tone={executiveIA.whyNotFullSize.active ? "warn" : "good"}
                 >
-                  {dashboardSizing.sizingMode}
+                  {sizingModeMetricValue}
                 </StatusPill>
               </div>
               <p className="mt-3 line-clamp-2 text-xs leading-5 text-zinc-500">
@@ -6260,12 +6298,7 @@ export default function Dashboard() {
               <ExecutiveMetric
                 label="Max Exposure"
                 value={maximumExposureMetricValue}
-                sub={maximumExposureSubLabel({
-                  sizingMode: dashboardSizing.sizingMode,
-                  suggestedMaximumExposurePct:
-                    dashboardSizing.suggestedMaximumExposurePct,
-                  semanticWord: semanticMetrics.opportunityDensity.word,
-                })}
+                sub={maximumExposureMetricSub}
                 tone={exposureTone}
                 icon={<CircleDollarSign className="h-4 w-4" />}
               />
@@ -6308,7 +6341,7 @@ export default function Dashboard() {
                 <StatusPill
                   tone={executiveIA.whyNotFullSize.active ? "warn" : "good"}
                 >
-                  {dashboardSizing.sizingMode}
+                  {sizingModeMetricValue}
                 </StatusPill>
               </div>
               <p className="mt-4 text-sm leading-6 text-zinc-400">
@@ -6379,7 +6412,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <StatusPill tone={operatorTone}>
-                      {dashboardSizing.sizingMode}
+                      {sizingModeMetricValue}
                     </StatusPill>
                   </div>
                   <p className="mt-4 max-w-4xl text-base leading-7 text-zinc-200">
@@ -7960,7 +7993,7 @@ export default function Dashboard() {
                   </StatusPill>
                 }
               >
-                <div className="grid gap-3 sm:grid-cols-5">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
                   <MiniMetric
                     label="Recognition score"
                     value={
@@ -7978,6 +8011,19 @@ export default function Dashboard() {
                       recognitionDiagnostic
                         ? fmtPlainPct(
                             numeric(recognitionDiagnostic.recurrenceConfidence),
+                            0,
+                          )
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Historical similarity"
+                    value={
+                      recognitionDiagnostic
+                        ? fmtPlainPct(
+                            numeric(
+                              recognitionDiagnostic.historicalSimilarityConfidence,
+                            ),
                             0,
                           )
                         : "—"
@@ -8492,7 +8538,7 @@ export default function Dashboard() {
                           : "warn"
                     }
                   >
-                    {dashboardSizing.sizingMode}
+                    {sizingModeMetricValue}
                   </StatusPill>
                 }
               >
@@ -9544,6 +9590,44 @@ export default function Dashboard() {
                 />
               </div>
 
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <MiniMetric
+                  label="History Coverage"
+                  value={fmtYears(historyCoverageYears)}
+                />
+                <MiniMetric
+                  label="History Depth"
+                  value={
+                    historyDepthScore == null
+                      ? "—"
+                      : `${Math.round(historyDepthScore)}/100`
+                  }
+                />
+                <MiniMetric
+                  label="Regime Coverage"
+                  value={
+                    regimeCoverageScore == null
+                      ? "—"
+                      : `${Math.round(regimeCoverageScore)}/100`
+                  }
+                />
+                <MiniMetric
+                  label="Regime Diversity"
+                  value={
+                    regimeDiversityScore == null
+                      ? "—"
+                      : `${Math.round(regimeDiversityScore)}/100`
+                  }
+                />
+                <MiniMetric
+                  label="Coverage Status"
+                  value={historyCoverageStatus}
+                />
+              </div>
+              <p className="mt-3 text-sm leading-6 text-zinc-300">
+                {historyExplanation}
+              </p>
+
               {indicatorExcellence ? (
                 <div className="mt-4 border-t border-white/10 pt-4 text-sm leading-6 text-zinc-300">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -10270,10 +10354,15 @@ export default function Dashboard() {
               title="Discovery Intelligence audit"
               description="Lifecycle maturity, opportunity economics, governance audits, institutional knowledge, and meta-learning traces."
               summary={
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-3">
                   <MiniMetric
                     label="Score"
                     value={fmtPlainPct(discoveryIntelligenceDiagnostic?.score, 0)}
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Regime coverage"
+                    value={fmtPlainPct(discoveryIntelligenceDiagnostic?.regimeCoverageScore, 0)}
                     emphasis="quiet"
                   />
                   <MiniMetric
@@ -10335,7 +10424,7 @@ export default function Dashboard() {
               title="Overfit/risk diagnostics and strategy audit logs"
               description="Readiness flags, trust review items, robustness, and recent agency audits."
               summary={
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
                   <MiniMetric
                     label="Overfit risk"
                     value={
@@ -10348,6 +10437,24 @@ export default function Dashboard() {
                   <MiniMetric
                     label="Failure flags"
                     value={String(failureFlags.length)}
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="History depth"
+                    value={
+                      historyDepthScore == null
+                        ? "—"
+                        : `${Math.round(historyDepthScore)}/100`
+                    }
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Sample diversity"
+                    value={
+                      sampleDiversityScore == null
+                        ? "—"
+                        : `${Math.round(sampleDiversityScore)}/100`
+                    }
                     emphasis="quiet"
                   />
                   <MiniMetric
