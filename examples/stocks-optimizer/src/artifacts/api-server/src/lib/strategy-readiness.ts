@@ -182,6 +182,7 @@ export type StrategySignalDecision = {
   executionQuality?: StockExecutiveArchitecture["executionQuality"];
   counterfactual?: StockExecutiveArchitecture["counterfactual"];
   discoveryAccountability?: StockExecutiveArchitecture["discoveryAccountability"];
+  discoveryIntelligence?: StockExecutiveArchitecture["discoveryIntelligence"];
   wisdom?: StockExecutiveArchitecture["wisdom"];
   executiveDecision?: StockExecutiveArchitecture["executiveDecision"];
   decisionStates?: StockExecutiveArchitecture["decisionStates"];

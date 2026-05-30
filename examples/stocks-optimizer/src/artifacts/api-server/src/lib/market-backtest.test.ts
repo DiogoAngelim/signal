@@ -106,6 +106,10 @@ test("market backtest builds non-empty historical metrics for a market", async (
   assert.ok(payload.summary.forwardShadow?.confirmedSignalCount > 0, "live buy signals should be confirmed for shadow tracking");
   assert.ok(payload.summary.forwardShadow?.observedSignalCount > 0, "confirmed signals should be recorded as shadow observations");
   assert.equal(payload.summary.forwardShadow?.collectionStatus, "passed");
+  assert.equal(payload.config.name, "US large cap");
+  assert.equal(payload.summary.strategyConfig.name, "US large cap");
+  assert.equal(payload.summary.strategyProfile, "US large cap");
+  assert.equal(payload.summary.strategyProfileKey, "US_LARGE_CAP");
   assert.ok(payload.opportunityDiscovery?.candidates?.length > 0, "opportunity discovery should rank emerging candidates");
   assert.ok(payload.opportunityDiscovery?.density?.density >= 0, "adaptive opportunity density should be present");
   assert.ok(payload.agencyDiagnostics?.summary?.traceCount > 0, "agency diagnostics should trace strategy decisions");
@@ -286,6 +290,8 @@ test("health optimized candidates include protective variants without mutating t
   const config = backtestConfigForMarket("BINANCE");
   const candidates = buildHealthOptimizedConfigCandidates(config);
 
+  assert.equal(config.name, "Crypto liquid");
+  assert.equal(config.profile, "CRYPTO_LIQUID");
   assert.equal(config.id.endsWith(":slow-confirmation"), false);
   assert.ok(candidates.some((candidate) => candidate.id === config.id), "base candidate should remain available");
   assert.ok(candidates.some((candidate) => candidate.id.includes("crypto-low-drawdown")), "crypto profile should include drawdown defense");

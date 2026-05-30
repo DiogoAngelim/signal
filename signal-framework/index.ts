@@ -21,6 +21,37 @@ export * from "./diagnostics/executive-dashboard";
 export * from "./diagnostics/pipeline";
 export * from "./discovery/engine";
 export * from "./discovery-accountability/engine";
+export {
+  evaluateDiscoveryIntelligence,
+  evaluateDiscoveryMaturity as evaluateDiscoveryIntelligenceMaturity,
+  evaluateGovernanceEffectiveness,
+  evaluateInstitutionalKnowledge,
+  evaluateMetaLearning,
+  evaluateOpportunityEconomics as evaluateDiscoveryIntelligenceOpportunityEconomics,
+  runDiscoveryIntelligence,
+  scoreDiscoveryIntelligence,
+} from "./discovery-intelligence/engine";
+export type {
+  DecisionAction as DiscoveryIntelligenceDecisionAction,
+  DecisionRecord as DiscoveryIntelligenceDecisionRecord,
+  DiscoveryIntelligenceInput,
+  DiscoveryIntelligenceResult,
+  DiscoveryIntelligenceStage,
+  DiscoveryMaturity,
+  DiscoveryRecord as DiscoveryIntelligenceDiscoveryRecord,
+  GovernanceEffectiveness,
+  InstitutionalKnowledge,
+  InstitutionalStage,
+  MetaLearning,
+  OpportunityEconomics,
+  OutcomeRecord as DiscoveryIntelligenceOutcomeRecord,
+  Recommendation,
+  RecommendationCategory,
+  RecommendationPriority,
+  RestrictionAudit,
+  RestrictionRecord as DiscoveryIntelligenceRestrictionRecord,
+  TraceRecord as DiscoveryIntelligenceTraceRecord,
+} from "./discovery-intelligence/engine";
 export * from "./executive/engine";
 export * from "./execution-quality/engine";
 export * from "./execution/readiness";

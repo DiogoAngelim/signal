@@ -759,8 +759,8 @@ function runSimpleHistoricalStrategy(
         setupQuality: clampBacktest(50 + candidate.blendedMomentumPct * 18 - candidate.volatilityPct * 2),
         riskPressure: clampBacktest(candidate.volatilityPct * 12),
         regime: useCryptoRelativeMomentum
-          ? `${config.profile} Relative Momentum Learning`
-          : `${config.profile} Momentum Rotation`,
+          ? `${config.name} relative momentum learning`
+          : `${config.name} momentum rotation`,
       });
     }
   }
@@ -822,7 +822,7 @@ function runSimpleHistoricalStrategy(
       stage: "PERCEPTION_ALIGNMENT",
       passed: hasSignal,
       score: signalScore,
-      threshold: `${config.profile} rotation profile`,
+      threshold: `${config.name} rotation profile`,
       reason: hasSignal ? "Candidate matched the market-specific rotation profile" : "No generated candidate reached perception alignment",
       metadata: { bypassedHardFilter: true, mode: "MODE_FULL_PERCEPTION", configId: config.id },
     });
@@ -908,7 +908,7 @@ function runSimpleHistoricalStrategy(
 
   return {
     trades: trades.sort((a, b) => String(a.exitDate).localeCompare(String(b.exitDate))),
-    history: buildStrategyHistoryFromTrades(entries, trades, `${config.profile} Momentum Rotation`, config),
+    history: buildStrategyHistoryFromTrades(entries, trades, `${config.name} momentum rotation`, config),
     auditEvents: audit.events(),
     scoreSamples,
     mode: "MODE_FULL_PERCEPTION",
@@ -3601,6 +3601,7 @@ function buildSignalsFromStrategyRun(
           executionQuality: undefined,
           counterfactual: undefined,
           discoveryAccountability: undefined,
+          discoveryIntelligence: undefined,
           wisdom: undefined,
           executiveDecision: undefined,
           decisionStates: undefined,
@@ -3647,6 +3648,7 @@ function buildSignalsFromStrategyRun(
       executionQuality: decision.executionQuality,
       counterfactual: decision.counterfactual,
       discoveryAccountability: decision.discoveryAccountability,
+      discoveryIntelligence: decision.discoveryIntelligence,
       wisdom: decision.wisdom,
       executiveDecision: decision.executiveDecision,
       decisionStates: decision.decisionStates,
@@ -3690,6 +3692,7 @@ function buildSignalsFromStrategyRun(
         executionQuality: decision.executionQuality,
         counterfactual: decision.counterfactual,
         discoveryAccountability: decision.discoveryAccountability,
+        discoveryIntelligence: decision.discoveryIntelligence,
         wisdom: decision.wisdom,
         executiveDecision: decision.executiveDecision,
         decisionStates: decision.decisionStates,
@@ -3805,7 +3808,9 @@ export async function getOrCreateMarketBacktest(marketInput: string, options: Ma
           {
             ...summarizeRealBacktest(market, history, trades, benchmarkHistory, config),
             configId: config.id,
-            strategyProfile: config.profile,
+            strategyName: config.name,
+            strategyProfile: config.name,
+            strategyProfileKey: config.profile,
             strategyConfig: config,
             commissionBps: 0,
             slippageBps: config.costBps,
@@ -3934,6 +3939,7 @@ export async function getOrCreateMarketBacktest(marketInput: string, options: Ma
   summary.executionQuality = primaryExecutiveSignal?.executionQuality ?? null;
   summary.counterfactual = primaryExecutiveSignal?.counterfactual ?? null;
   summary.discoveryAccountability = primaryExecutiveSignal?.discoveryAccountability ?? null;
+  summary.discoveryIntelligence = primaryExecutiveSignal?.discoveryIntelligence ?? null;
   summary.wisdom = primaryExecutiveSignal?.wisdom ?? null;
   summary.decisionStates = primaryExecutiveSignal?.decisionStates ?? null;
   const diagnostics = wantsDiagnostics
@@ -3979,6 +3985,7 @@ export async function getOrCreateMarketBacktest(marketInput: string, options: Ma
     },
     config: {
       id: summary.configId,
+      name: config.name,
       source: "historical-bars",
       profile: config.profile,
       parameters: config,

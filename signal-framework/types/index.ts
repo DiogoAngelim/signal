@@ -4,6 +4,10 @@ import type {
   DecisionResult,
 } from "../agency/engine";
 import type { CalibrationInput, CalibrationResult } from "../calibration/engine";
+import type {
+  DiscoveryIntelligenceInput,
+  DiscoveryIntelligenceResult,
+} from "../discovery-intelligence/engine";
 import type { DiscoveryInput, DiscoveryResult } from "../discovery/engine";
 import type { JudgementInput, JudgementResult } from "../judgement";
 import type { RecognitionInput, RecognitionResult } from "../recognition/engine";
@@ -413,6 +417,7 @@ export type SignalSnapshot = {
   calibration?: CalibrationResult;
   judgement?: JudgementResult;
   discovery?: DiscoveryResult;
+  discoveryIntelligence?: DiscoveryIntelligenceResult;
   recognition?: RecognitionResult;
   decision?: DecisionResult | null;
   agency?: AgencyResult;
@@ -449,6 +454,7 @@ export type SignalContext = {
   };
   judgement?: Partial<JudgementInput>;
   discovery?: Partial<DiscoveryInput>;
+  discoveryIntelligence?: Partial<DiscoveryIntelligenceInput>;
   recognition?: Partial<RecognitionInput>;
   decision?: DecisionResult | null;
   agency?: AgencyInput;

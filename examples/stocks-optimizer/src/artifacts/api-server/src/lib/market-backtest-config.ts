@@ -1,6 +1,14 @@
+export type MarketBacktestProfile =
+  | "CRYPTO_LIQUID"
+  | "BRAZIL_B3"
+  | "GULF_LARGE_CAP"
+  | "US_LARGE_CAP"
+  | "GLOBAL_LIQUID";
+
 export type MarketBacktestConfig = {
   id: string;
-  profile: string;
+  name: string;
+  profile: MarketBacktestProfile;
   lookbackDays: number;
   holdingDays: number;
   rebalanceDays: number;
@@ -25,7 +33,7 @@ export type MarketBacktestConfig = {
 
 export const MARKET_BACKTEST_CACHE_VERSION = 11;
 
-const BASE_PROFILE: Omit<MarketBacktestConfig, "id" | "profile"> = {
+const BASE_PROFILE: Omit<MarketBacktestConfig, "id" | "name" | "profile"> = {
   lookbackDays: 60,
   holdingDays: 20,
   rebalanceDays: 20,
@@ -48,8 +56,12 @@ const BASE_PROFILE: Omit<MarketBacktestConfig, "id" | "profile"> = {
   trailingStopPct: 9,
 };
 
-const PROFILE_OVERRIDES: Record<string, Partial<MarketBacktestConfig>> = {
+const PROFILE_OVERRIDES: Record<
+  MarketBacktestProfile,
+  Partial<Omit<MarketBacktestConfig, "id" | "profile">>
+> = {
   CRYPTO_LIQUID: {
+    name: "Crypto liquid",
     lookbackDays: 55,
     holdingDays: 7,
     rebalanceDays: 5,
@@ -70,6 +82,7 @@ const PROFILE_OVERRIDES: Record<string, Partial<MarketBacktestConfig>> = {
     trailingStopPct: 7,
   },
   BRAZIL_B3: {
+    name: "Brazil B3",
     lookbackDays: 40,
     holdingDays: 20,
     rebalanceDays: 20,
@@ -83,6 +96,7 @@ const PROFILE_OVERRIDES: Record<string, Partial<MarketBacktestConfig>> = {
     trailingStopPct: 9,
   },
   GULF_LARGE_CAP: {
+    name: "Gulf large cap",
     lookbackDays: 60,
     holdingDays: 20,
     rebalanceDays: 20,
@@ -96,6 +110,7 @@ const PROFILE_OVERRIDES: Record<string, Partial<MarketBacktestConfig>> = {
     trailingStopPct: 8,
   },
   US_LARGE_CAP: {
+    name: "US large cap",
     lookbackDays: 60,
     holdingDays: 20,
     rebalanceDays: 20,
@@ -108,9 +123,12 @@ const PROFILE_OVERRIDES: Record<string, Partial<MarketBacktestConfig>> = {
     stopLossPct: 7,
     trailingStopPct: 9,
   },
+  GLOBAL_LIQUID: {
+    name: "Global liquid",
+  },
 };
 
-export function backtestProfileForMarket(marketInput: string) {
+export function backtestProfileForMarket(marketInput: string): MarketBacktestProfile {
   const market = String(marketInput || "ADX").trim().toUpperCase();
 
   if (/BINANCE|CRYPTO/.test(market)) return "CRYPTO_LIQUID";
@@ -128,6 +146,7 @@ export function backtestConfigForMarket(marketInput: string): MarketBacktestConf
 
   return {
     ...resolved,
+    name: resolved.name ?? profile,
     profile,
     id: `market-rotation-${profile.toLowerCase()}-${market.toLowerCase()}-v${MARKET_BACKTEST_CACHE_VERSION}`,
   };

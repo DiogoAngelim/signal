@@ -1,5 +1,6 @@
 import type { CounterfactualResult } from "../counterfactual/engine";
 import type { DiscoveryAccountabilityResult } from "../discovery-accountability/engine";
+import type { DiscoveryIntelligenceResult } from "../discovery-intelligence/engine";
 import type { ExecutionQualityResult } from "../execution-quality/engine";
 import type { DecisionQualityResult } from "../wisdom/engine";
 import { clamp, mean } from "../math/statistics";
@@ -45,6 +46,7 @@ export type ExecutiveInput = {
   proposedDecision?: ExecutiveAction | string | null;
   discovery?: any;
   discoveryAccountability?: DiscoveryAccountabilityResult | null;
+  discoveryIntelligence?: DiscoveryIntelligenceResult | null;
   recognition?: any;
   belief?: any;
   judgement?: any;
@@ -141,6 +143,7 @@ export function evaluateExecutiveDecision(input: ExecutiveInput = {}): Executive
     ...states.permission.reasons,
     ...states.capacity.reasons,
     input.discoveryAccountability?.unlockConditions,
+    input.discoveryIntelligence?.recommendations?.map((item) => item.message),
     input.wisdom?.counterfactuals?.explanation,
     input.executionQuality?.warnings,
     input.counterfactual?.recommendedLearning,
@@ -221,6 +224,7 @@ function componentScoresFor(input: ExecutiveInput, trust: TrustState) {
   return {
     discovery: score(input.discovery?.confidence, 50),
     discoveryAccountability: score(input.discoveryAccountability?.accountabilityScore, 50),
+    discoveryIntelligence: score(input.discoveryIntelligence?.score, 50),
     recognition: score(input.recognition?.recognitionScore ?? input.recognition?.confidence, 50),
     belief: score(input.belief?.confidence, 50),
     judgement: score(input.judgement?.adjustedConfidence ?? input.judgement?.reliability, 50),
@@ -240,6 +244,7 @@ function confidenceFor(input: ExecutiveInput, scores: Record<string, number>, tr
     explicit,
     scores.discovery,
     scores.discoveryAccountability,
+    scores.discoveryIntelligence,
     scores.recognition,
     scores.belief,
     scores.judgement,
@@ -324,6 +329,7 @@ function strongestEvidenceFor(input: ExecutiveInput, scores: Record<string, numb
     ...toStringArray(input.agency?.reasons),
     ...toStringArray(input.wisdom?.explanation),
     ...toStringArray(input.wisdom?.counterfactuals?.explanation),
+    ...toStringArray(input.discoveryIntelligence?.recommendations?.map((item) => item.message)),
     ...toStringArray(input.executionQuality?.warnings),
     ...toStringArray(input.counterfactual?.recommendedLearning),
   ];
@@ -344,6 +350,7 @@ function primaryLimiterFor(
     states.permission.level !== "approved" ? states.permission.reasons[0] : "",
     states.capacity.mode !== "normal" && states.capacity.mode !== "expanded" ? states.capacity.reasons[0] : "",
     input.wisdom && input.wisdom.wisdomScore < 45 ? input.wisdom.explanation : "",
+    input.discoveryIntelligence && input.discoveryIntelligence.score < 45 ? input.discoveryIntelligence.recommendations[0]?.message : "",
     input.executionQuality?.blockers?.[0],
     input.discoveryAccountability?.blockers?.[0],
   );
@@ -386,6 +393,7 @@ function nextReviewConditionFor(input: ExecutiveInput, states: ReturnType<typeof
   if (decision === "review") return "Review immediately because permission requires human or policy review.";
   if (states.urgency.mode === "act_now" || states.urgency.mode === "act_soon") return "Review after the next execution-quality or risk update.";
   if (input.wisdom && input.wisdom.learningConfidence < 45) return "Review when Wisdom records more comparable outcomes or counterfactuals.";
+  if (input.discoveryIntelligence && input.discoveryIntelligence.score < 45) return "Review when Discovery Intelligence shows the learning loop is creating value.";
   if (input.discoveryAccountability?.status === "immature") return "Review when discovery accountability matures or confirms recurrence.";
   return "Review when trust, permission, capacity, urgency, or invalidation evidence changes.";
 }
@@ -406,6 +414,7 @@ function sourceModulesFor(input: ExecutiveInput) {
   return Object.entries({
     discovery: input.discovery,
     discoveryAccountability: input.discoveryAccountability,
+    discoveryIntelligence: input.discoveryIntelligence,
     recognition: input.recognition,
     belief: input.belief,
     judgement: input.judgement,

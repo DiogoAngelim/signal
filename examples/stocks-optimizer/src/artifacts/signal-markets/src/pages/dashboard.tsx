@@ -40,6 +40,7 @@ import {
   type CounterfactualDiagnostic,
   type DecisionStatesDiagnostic,
   type DiscoveryAccountabilityDiagnostic,
+  type DiscoveryIntelligenceDiagnostic,
   type ExecutiveDecisionDiagnostic,
   type ExecutionQualityDiagnostic,
   type JudgementDiagnostic,
@@ -134,6 +135,7 @@ type DisplayStock = StockData & {
   recovery?: RecoveryDiagnostic;
   resolve?: ResolveDiagnostic;
   wisdom?: WisdomDiagnostic;
+  discoveryIntelligence?: DiscoveryIntelligenceDiagnostic;
   discoveryScore?: number;
   discoveryLifecycle?: string;
   candidateProgression?: Array<any>;
@@ -172,6 +174,7 @@ type IntelligenceStock = DisplayStock & {
   recovery?: RecoveryDiagnostic;
   resolve?: ResolveDiagnostic;
   wisdom?: WisdomDiagnostic;
+  discoveryIntelligence?: DiscoveryIntelligenceDiagnostic;
   discoveryScore?: number;
   discoveryLifecycle?: string;
   candidateProgression?: Array<any>;
@@ -246,8 +249,30 @@ const DEFAULT_MARKET_SCHEDULE: MarketSchedule = {
   weekend: [0, 6],
 };
 
-const MARKET_EXECUTION_PRESETS = {
+type MarketExecutionProfileName =
+  | "CRYPTO_LIQUID"
+  | "US_LARGE_CAP"
+  | "BRAZIL_B3"
+  | "EUROPE_LIQUID"
+  | "JAPAN_LIQUID";
+
+type MarketExecutionPreset = {
+  name: string;
+  profile: MarketExecutionProfileName;
+  spreadBps: number;
+  slippageBps: number;
+  rebalanceThresholdBps: number;
+  totalExposureCap: number;
+  maxPositionPct: number;
+  mptLookback: number;
+  riskAversion: number;
+  shrinkage: number;
+};
+
+const MARKET_EXECUTION_PRESETS: Record<MarketExecutionProfileName, MarketExecutionPreset> = {
   CRYPTO_LIQUID: {
+    name: "Crypto liquid",
+    profile: "CRYPTO_LIQUID",
     spreadBps: 5,
     slippageBps: 2,
     rebalanceThresholdBps: 50,
@@ -258,6 +283,8 @@ const MARKET_EXECUTION_PRESETS = {
     shrinkage: 0.35,
   },
   US_LARGE_CAP: {
+    name: "US large cap",
+    profile: "US_LARGE_CAP",
     spreadBps: 2,
     slippageBps: 1,
     rebalanceThresholdBps: 35,
@@ -268,6 +295,8 @@ const MARKET_EXECUTION_PRESETS = {
     shrinkage: 0.3,
   },
   BRAZIL_B3: {
+    name: "Brazil B3",
+    profile: "BRAZIL_B3",
     spreadBps: 8,
     slippageBps: 5,
     rebalanceThresholdBps: 75,
@@ -278,6 +307,8 @@ const MARKET_EXECUTION_PRESETS = {
     shrinkage: 0.4,
   },
   EUROPE_LIQUID: {
+    name: "Europe liquid",
+    profile: "EUROPE_LIQUID",
     spreadBps: 4,
     slippageBps: 2,
     rebalanceThresholdBps: 50,
@@ -288,6 +319,8 @@ const MARKET_EXECUTION_PRESETS = {
     shrinkage: 0.35,
   },
   JAPAN_LIQUID: {
+    name: "Japan liquid",
+    profile: "JAPAN_LIQUID",
     spreadBps: 5,
     slippageBps: 3,
     rebalanceThresholdBps: 60,
@@ -320,21 +353,15 @@ function executionPresetForMarket(market: string) {
   const normalized = market.trim().toUpperCase();
 
   if (/BINANCE|CRYPTO/.test(normalized)) {
-    return {
-      profile: "CRYPTO_LIQUID",
-      ...MARKET_EXECUTION_PRESETS.CRYPTO_LIQUID,
-    };
+    return MARKET_EXECUTION_PRESETS.CRYPTO_LIQUID;
   }
 
   if (/B3|BMFBOVESPA|BRASIL|BRAZIL/.test(normalized)) {
-    return { profile: "BRAZIL_B3", ...MARKET_EXECUTION_PRESETS.BRAZIL_B3 };
+    return MARKET_EXECUTION_PRESETS.BRAZIL_B3;
   }
 
   if (/NASDAQ|NYSE|AMEX|ARCA|BATS|IEX|US\b|USA/.test(normalized)) {
-    return {
-      profile: "US_LARGE_CAP",
-      ...MARKET_EXECUTION_PRESETS.US_LARGE_CAP,
-    };
+    return MARKET_EXECUTION_PRESETS.US_LARGE_CAP;
   }
 
   if (
@@ -342,23 +369,14 @@ function executionPresetForMarket(market: string) {
       normalized,
     )
   ) {
-    return {
-      profile: "EUROPE_LIQUID",
-      ...MARKET_EXECUTION_PRESETS.EUROPE_LIQUID,
-    };
+    return MARKET_EXECUTION_PRESETS.EUROPE_LIQUID;
   }
 
   if (/TSE|TOKYO|JAPAN|JP\b/.test(normalized)) {
-    return {
-      profile: "JAPAN_LIQUID",
-      ...MARKET_EXECUTION_PRESETS.JAPAN_LIQUID,
-    };
+    return MARKET_EXECUTION_PRESETS.JAPAN_LIQUID;
   }
 
-  return {
-    profile: "CRYPTO_LIQUID",
-    ...MARKET_EXECUTION_PRESETS.CRYPTO_LIQUID,
-  };
+  return MARKET_EXECUTION_PRESETS.CRYPTO_LIQUID;
 }
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -419,6 +437,11 @@ function fmtPct(value: number | null | undefined, digits = 1) {
 function fmtPlainPct(value: number | null | undefined, digits = 1) {
   if (value == null || !Number.isFinite(value)) return "—";
   return `${value.toFixed(digits)}%`;
+}
+
+function fmtPlainNumber(value: number | null | undefined, digits = 2) {
+  if (value == null || !Number.isFinite(value)) return "—";
+  return value.toFixed(digits);
 }
 
 function marketCode(market: MarketOption | string): string {
@@ -4256,6 +4279,13 @@ export default function Dashboard() {
       ?.discoveryAccountability ??
     backtestSummary?.discoveryAccountability ??
     null;
+  const discoveryIntelligenceDiagnostic: DiscoveryIntelligenceDiagnostic | null =
+    selectedAllocationStock?.discoveryIntelligence ??
+    displayedTopOpportunities[0]?.discoveryIntelligence ??
+    allocationUniverse.find((stock) => stock.discoveryIntelligence)
+      ?.discoveryIntelligence ??
+    backtestSummary?.discoveryIntelligence ??
+    null;
   const wisdomDiagnostic: WisdomDiagnostic | null =
     selectedAllocationStock?.wisdom ??
     displayedTopOpportunities[0]?.wisdom ??
@@ -5556,6 +5586,7 @@ export default function Dashboard() {
     executionQuality: executionQualityDiagnostic as any,
     counterfactual: counterfactualDiagnostic as any,
     discoveryAccountability: discoveryAccountabilityDiagnostic as any,
+    discoveryIntelligence: discoveryIntelligenceDiagnostic as any,
     wisdom: wisdomDiagnostic as any,
     decisionStates: decisionStatesDiagnostic ?? undefined,
     survivalMemory: survivalMemoryDiagnostic,
@@ -5617,6 +5648,11 @@ export default function Dashboard() {
 
   const topCanonicalRestriction =
     executiveIA.executiveReasoning.mainReasonForRestriction;
+  const governanceEvolution = executiveIA.governanceEvolution;
+  const governanceCommand = governanceEvolution.command;
+  const activeExposureState =
+    governanceEvolution.exposureStates.find((state) => state.status === "active") ??
+    governanceEvolution.exposureStates[0];
   const dashboardDecisionStates = executiveIA.decisionStates;
   const trustStateTone =
     dashboardDecisionStates.trust.score >= 72
@@ -6115,6 +6151,311 @@ export default function Dashboard() {
             </SectionShell>
 
             <SectionShell
+              eyebrow="Governance Evolution"
+              title="Decision authority and learning loop"
+              action={
+                <StatusPill tone={governanceCommand.tone}>
+                  {governanceCommand.label}
+                </StatusPill>
+              }
+            >
+              <div className="grid gap-3 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Operator command
+                      </div>
+                      <div className="mt-2 text-2xl font-semibold tracking-tight text-white">
+                        {governanceCommand.label}
+                      </div>
+                    </div>
+                    <StatusPill tone={governanceCommand.tone}>
+                      {governanceCommand.action}
+                    </StatusPill>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-zinc-400">
+                    {governanceCommand.reason}
+                  </p>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <MiniMetric
+                      label="Authority"
+                      value={governanceEvolution.arbitration.authority}
+                      sub={`${governanceEvolution.arbitration.vetoes.length} vetoes`}
+                      emphasis="quiet"
+                    />
+                    <MiniMetric
+                      label="Exposure state"
+                      value={activeExposureState?.label ?? "Observe"}
+                      sub={`${governanceCommand.maxExposure} max`}
+                      tone={governanceCommand.tone}
+                      emphasis="quiet"
+                    />
+                  </div>
+                  <p className="mt-3 text-xs leading-5 text-zinc-500">
+                    Next audit: {governanceCommand.nextAudit}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Arbitration
+                      </div>
+                      <div className="mt-2 text-lg font-semibold text-white">
+                        {governanceEvolution.arbitration.reason}
+                      </div>
+                    </div>
+                    <StatusPill
+                      tone={
+                        governanceEvolution.arbitration.conflicts.length
+                          ? "warn"
+                          : "good"
+                      }
+                    >
+                      {governanceEvolution.arbitration.conflicts.length} conflicts
+                    </StatusPill>
+                  </div>
+                  <div className="grid gap-2 md:grid-cols-2">
+                    {(governanceEvolution.arbitration.conflicts.length
+                      ? governanceEvolution.arbitration.conflicts
+                      : [{
+                          id: "clear",
+                          label: "No active contradiction",
+                          severity: "good" as const,
+                          detail: "Executive, Wisdom, Survival, and Trust do not currently disagree.",
+                          resolution: "Continue normal governance monitoring.",
+                        }]
+                    ).slice(0, 4).map((conflict) => (
+                      <div
+                        key={conflict.id}
+                        className="rounded-lg bg-black/25 px-3 py-2 ring-1 ring-white/[0.05]"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="text-xs font-semibold text-zinc-200">
+                            {conflict.label}
+                          </div>
+                          <StatusPill tone={conflict.severity}>
+                            {conflict.severity}
+                          </StatusPill>
+                        </div>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
+                          {conflict.detail}
+                        </p>
+                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-400">
+                          {conflict.resolution}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 grid gap-3 xl:grid-cols-5">
+                {governanceEvolution.exposureStates.map((state) => (
+                  <div
+                    key={state.state}
+                    className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                          {state.label}
+                        </div>
+                        <div className="mt-2 text-xl font-semibold text-white">
+                          {fmtPlainPct(state.capPct, state.capPct < 1 ? 2 : 0)}
+                        </div>
+                      </div>
+                      <StatusPill
+                        tone={
+                          state.status === "active"
+                            ? "warn"
+                            : state.status === "available"
+                              ? "good"
+                              : "neutral"
+                        }
+                      >
+                        {state.status}
+                      </StatusPill>
+                    </div>
+                    <p className="mt-3 line-clamp-2 text-xs leading-5 text-zinc-500">
+                      {state.entryRule}
+                    </p>
+                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-400">
+                      Unlock: {state.unlockCondition}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-3 grid gap-3 xl:grid-cols-2">
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Confidence ledger
+                  </div>
+                  <div className="mt-3 grid gap-2 md:grid-cols-2">
+                    {governanceEvolution.confidenceLedger.map((item) => (
+                      <div
+                        key={item.kind}
+                        className="rounded-lg bg-black/25 px-3 py-2 ring-1 ring-white/[0.05]"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="text-xs font-semibold text-zinc-200">
+                              {item.label}
+                            </div>
+                            <div className="mt-1 text-lg font-semibold text-white">
+                              {fmtPlainPct(item.score, 0)}
+                            </div>
+                          </div>
+                          <StatusPill
+                            tone={
+                              item.status === "trusted"
+                                ? "good"
+                                : item.status === "blocked"
+                                  ? "bad"
+                                  : "warn"
+                            }
+                          >
+                            {item.status}
+                          </StatusPill>
+                        </div>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
+                          {item.question}
+                        </p>
+                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-400">
+                          {item.interpretation}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Restriction accountability
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {(governanceEvolution.restrictionBets.length
+                      ? governanceEvolution.restrictionBets
+                      : [{
+                          code: "reduced_size",
+                          label: "No active restriction",
+                          status: "pending",
+                          avoidedLoss: null,
+                          missedUpside: null,
+                          falseBlockRate: null,
+                          timeToRecovery: null,
+                          interpretation: "Restriction economics are pending.",
+                          nextAudit: "Keep monitoring governance economics.",
+                        }]
+                    ).slice(0, 4).map((bet) => (
+                      <div
+                        key={`${bet.code}-${bet.label}`}
+                        className="rounded-lg bg-black/25 px-3 py-2 ring-1 ring-white/[0.05]"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="text-xs font-semibold text-zinc-200">
+                            {bet.label}
+                          </div>
+                          <StatusPill
+                            tone={
+                              bet.status === "helpful"
+                                ? "good"
+                                : bet.status === "harmful"
+                                  ? "bad"
+                                  : "warn"
+                            }
+                          >
+                            {bet.status}
+                          </StatusPill>
+                        </div>
+                        <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                          <div>Avoided {fmtPlainNumber(bet.avoidedLoss)}</div>
+                          <div>Missed {fmtPlainNumber(bet.missedUpside)}</div>
+                          <div>False blocks {fmtPlainPct(bet.falseBlockRate, 0)}</div>
+                          <div>Recovery {fmtPlainNumber(bet.timeToRecovery)}</div>
+                        </div>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-400">
+                          {bet.interpretation}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Discovery institutionalization
+                  </div>
+                  <div className="mt-2 text-2xl font-semibold text-white">
+                    {governanceEvolution.discoveryInstitutionalization.currentStage}
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-zinc-500">
+                    {governanceEvolution.discoveryInstitutionalization.allowedInfluence}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {Object.entries(
+                      governanceEvolution.discoveryInstitutionalization.stageCounts,
+                    ).map(([stage, count]) => (
+                      <span
+                        key={stage}
+                        className="rounded-md border border-white/10 px-2 py-1 text-[11px] text-zinc-400"
+                      >
+                        {stage} {count}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-xs leading-5 text-zinc-400">
+                    Next: {governanceEvolution.discoveryInstitutionalization.nextStage}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Accountability loop
+                  </div>
+                  <div className="mt-3 grid gap-2 md:grid-cols-2">
+                    {governanceEvolution.accountabilityLoop.map((step) => (
+                      <div
+                        key={step.id}
+                        className="rounded-lg bg-black/25 px-3 py-2 ring-1 ring-white/[0.05]"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="text-xs font-semibold text-zinc-200">
+                            {step.label}
+                          </div>
+                          <StatusPill
+                            tone={
+                              step.status === "complete"
+                                ? "good"
+                                : step.status === "blocked"
+                                  ? "bad"
+                                  : step.status === "review"
+                                    ? "warn"
+                                    : "neutral"
+                            }
+                          >
+                            {step.status}
+                          </StatusPill>
+                        </div>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
+                          {step.evidenceRequired}
+                        </p>
+                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-400">
+                          {step.nextAction}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </SectionShell>
+
+            <SectionShell
               eyebrow="Execution, Learning & Accountability"
               title="Action quality and feedback loops"
               action={
@@ -6219,6 +6560,149 @@ export default function Dashboard() {
                       discoveryAccountabilityDiagnostic?.explanation ??
                       "Discovery accountability will mature as accepted, rejected, and missed opportunities collect outcomes."}
                   </p>
+                </div>
+              </div>
+            </SectionShell>
+
+            <SectionShell
+              eyebrow="Discovery Intelligence"
+              title="Learning value and institutional trust"
+              action={
+                <StatusPill
+                  tone={
+                    numeric(discoveryIntelligenceDiagnostic?.score) >= 70
+                      ? "good"
+                      : numeric(discoveryIntelligenceDiagnostic?.score) >= 45
+                        ? "warn"
+                        : "neutral"
+                  }
+                >
+                  {discoveryIntelligenceDiagnostic
+                    ? `${Math.round(discoveryIntelligenceDiagnostic.score)}/100`
+                    : "Pending"}
+                </StatusPill>
+              }
+            >
+              <div className="grid gap-3 xl:grid-cols-4">
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Discovery Intelligence
+                  </div>
+                  <div className="mt-2 text-2xl font-semibold text-white">
+                    {fmtPlainPct(discoveryIntelligenceDiagnostic?.score, 0)}
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Maturity {fmtPlainPct(discoveryIntelligenceDiagnostic?.maturity.maturityScore, 0)}</div>
+                    <div>Economics {fmtPlainPct(discoveryIntelligenceDiagnostic?.economics.economicsScore, 0)}</div>
+                    <div>Governance {fmtPlainPct(discoveryIntelligenceDiagnostic?.governance.score, 0)}</div>
+                    <div>Learning {fmtPlainPct(discoveryIntelligenceDiagnostic?.metaLearning.score, 0)}</div>
+                  </div>
+                  <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
+                    {discoveryIntelligenceDiagnostic?.recommendations?.[0]?.message ??
+                      "Discovery Intelligence is waiting for lifecycle, outcome, restriction, and trace records."}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Discovery Maturity
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Emerging {discoveryIntelligenceDiagnostic?.maturity.emerging ?? 0}</div>
+                    <div>Detected {discoveryIntelligenceDiagnostic?.maturity.detected ?? 0}</div>
+                    <div>Observed {discoveryIntelligenceDiagnostic?.maturity.observed ?? 0}</div>
+                    <div>Confirmed {discoveryIntelligenceDiagnostic?.maturity.confirmed ?? 0}</div>
+                    <div>Repeatable {discoveryIntelligenceDiagnostic?.maturity.repeatable ?? 0}</div>
+                    <div>Trusted {discoveryIntelligenceDiagnostic?.maturity.trusted ?? 0}</div>
+                    <div>Institutional {discoveryIntelligenceDiagnostic?.maturity.institutional ?? 0}</div>
+                    <div>False {fmtPlainPct(discoveryIntelligenceDiagnostic?.maturity.falseDiscoveryRate, 0)}</div>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Opportunity Economics
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Act {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.actValue)}</div>
+                    <div>Wait {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.waitValue)}</div>
+                    <div>Reject {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.rejectValue)}</div>
+                    <div>Restrict {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.restrictValue)}</div>
+                    <div>Avoided Loss {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.avoidedLoss)}</div>
+                    <div>Missed Upside {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.missedUpside)}</div>
+                  </div>
+                  <div className="mt-3 text-sm font-semibold text-white">
+                    Cost {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.opportunityCost)}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Governance Effectiveness
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Helpful Restrictions {discoveryIntelligenceDiagnostic?.governance.helpfulRestrictions ?? 0}</div>
+                    <div>Harmful Restrictions {discoveryIntelligenceDiagnostic?.governance.harmfulRestrictions ?? 0}</div>
+                    <div>Score {fmtPlainPct(discoveryIntelligenceDiagnostic?.governance.score, 0)}</div>
+                    <div>Audits {discoveryIntelligenceDiagnostic?.governance.restrictions.length ?? 0}</div>
+                  </div>
+                  <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
+                    {discoveryIntelligenceDiagnostic?.governance.restrictions[0]?.recommendation ??
+                      "Restriction audits are pending."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-3 grid gap-3 xl:grid-cols-3">
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Institutional Knowledge
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Knowledge {discoveryIntelligenceDiagnostic?.institutionalization.knowledgeCount ?? 0}</div>
+                    <div>Policies {discoveryIntelligenceDiagnostic?.institutionalization.policyCount ?? 0}</div>
+                    <div>Standards {discoveryIntelligenceDiagnostic?.institutionalization.standardCount ?? 0}</div>
+                    <div>Institutional Assets {discoveryIntelligenceDiagnostic?.institutionalization.institutionalCount ?? 0}</div>
+                  </div>
+                  <div className="mt-3 text-2xl font-semibold text-white">
+                    {fmtPlainPct(discoveryIntelligenceDiagnostic?.institutionalization.institutionalizationScore, 0)}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Meta-Learning
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Calibration Trend {fmtPlainNumber(discoveryIntelligenceDiagnostic?.metaLearning.calibrationTrend)}</div>
+                    <div>Trust Trend {fmtPlainNumber(discoveryIntelligenceDiagnostic?.metaLearning.trustTrend)}</div>
+                    <div>Survival Trend {fmtPlainNumber(discoveryIntelligenceDiagnostic?.metaLearning.survivalTrend)}</div>
+                    <div>Decision Quality Trend {fmtPlainNumber(discoveryIntelligenceDiagnostic?.metaLearning.decisionQualityTrend)}</div>
+                    <div>Governance Trend {fmtPlainNumber(discoveryIntelligenceDiagnostic?.metaLearning.governanceTrend)}</div>
+                    <div>Score {fmtPlainPct(discoveryIntelligenceDiagnostic?.metaLearning.score, 0)}</div>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Recommendations
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {(discoveryIntelligenceDiagnostic?.recommendations?.length
+                      ? discoveryIntelligenceDiagnostic.recommendations
+                      : [{ id: "pending", priority: "low", message: "No Discovery Intelligence recommendation is available yet." }]
+                    ).slice(0, 4).map((item) => (
+                      <div
+                        key={item.id}
+                        className="rounded-md bg-black/25 px-3 py-2 text-xs leading-5 text-zinc-400 ring-1 ring-white/[0.05]"
+                      >
+                        <span className="font-semibold text-zinc-300">
+                          {item.priority}
+                        </span>{" "}
+                        {item.message}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </SectionShell>
@@ -6447,17 +6931,21 @@ export default function Dashboard() {
                 <MiniMetric
                   label="Pipeline outcome"
                   value={executiveIA.executiveReasoning.finalDecision}
-                  sub="6 stages"
+                  sub={`${executiveIA.decisionPipeline.length} stages`}
                   emphasis="quiet"
                 />
               }
             >
               <SectionShell
                 eyebrow="Decision Pipeline"
-                title="Discovery to Resolve"
-                action={<StatusPill tone="neutral">6 stages</StatusPill>}
+                title="Discovery to Output"
+                action={
+                  <StatusPill tone="neutral">
+                    {executiveIA.decisionPipeline.length} stages
+                  </StatusPill>
+                }
               >
-                <div className="grid gap-3 lg:grid-cols-6">
+                <div className="grid gap-3 lg:grid-cols-3 xl:grid-cols-5">
                   {executiveIA.decisionPipeline.map((step, index) => (
                     <div
                       key={step.stage}
@@ -6614,8 +7102,8 @@ export default function Dashboard() {
               summary={
                 <MiniMetric
                   label="Concept groups"
-                  value="5"
-                  sub="Trust, Confidence, Reliability, Safety, Opportunity"
+                  value={String(executiveIA.terminologyGroups.length)}
+                  sub="Includes Discovery Intelligence"
                   emphasis="quiet"
                 />
               }
@@ -6623,9 +7111,13 @@ export default function Dashboard() {
               <SectionShell
                 eyebrow="Terminology hierarchy"
                 title="Metric groups"
-                action={<StatusPill tone="neutral">5 concepts</StatusPill>}
+                action={
+                  <StatusPill tone="neutral">
+                    {executiveIA.terminologyGroups.length} concepts
+                  </StatusPill>
+                }
               >
-                <div className="grid gap-3 md:grid-cols-5">
+                <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-4">
                   {executiveIA.terminologyGroups.map((group) => (
                     <div
                       key={group.concept}
@@ -8965,7 +9457,7 @@ export default function Dashboard() {
           title="Raw/Advanced Details"
           description="Collapsed audit material for calibration, traceability, raw contributors, overfit diagnostics, and strategy logs."
         >
-          <div className="grid gap-4 xl:grid-cols-3">
+          <div className="grid gap-4 xl:grid-cols-4">
             <AdvancedDisclosure
               title="Calibration internals"
               description="Raw model confidence, calibrated confidence, trustworthiness, sample size, and warnings."
@@ -9075,6 +9567,71 @@ export default function Dashboard() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </AdvancedDisclosure>
+
+            <AdvancedDisclosure
+              title="Discovery Intelligence audit"
+              description="Lifecycle maturity, opportunity economics, governance audits, institutional knowledge, and meta-learning traces."
+              summary={
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <MiniMetric
+                    label="Score"
+                    value={fmtPlainPct(discoveryIntelligenceDiagnostic?.score, 0)}
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Restriction audits"
+                    value={String(discoveryIntelligenceDiagnostic?.governance.restrictions.length ?? 0)}
+                    emphasis="quiet"
+                  />
+                </div>
+              }
+            >
+              <div className="space-y-3 text-sm leading-6 text-zinc-400">
+                {(discoveryIntelligenceDiagnostic?.governance.restrictions.length
+                  ? discoveryIntelligenceDiagnostic.governance.restrictions
+                  : []
+                )
+                  .slice(0, 6)
+                  .map((restriction) => (
+                    <div
+                      key={`di-restriction-${restriction.id}`}
+                      className="rounded-lg bg-black/25 p-3 ring-1 ring-white/[0.06]"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-semibold text-white">
+                          {restriction.label}
+                        </span>
+                        <StatusPill tone={restriction.helpful ? "good" : "bad"}>
+                          {fmtPlainNumber(restriction.effectiveness)}
+                        </StatusPill>
+                      </div>
+                      <div className="mt-1 text-xs text-zinc-500">
+                        Avoided {fmtPlainNumber(restriction.avoidedLoss)} · Missed {fmtPlainNumber(restriction.missedUpside)}
+                      </div>
+                    </div>
+                  ))}
+                {(discoveryIntelligenceDiagnostic?.recommendations ?? [])
+                  .slice(0, 4)
+                  .map((item) => (
+                    <div
+                      key={`di-recommendation-${item.id}`}
+                      className="rounded-lg bg-black/25 p-3 ring-1 ring-white/[0.06]"
+                    >
+                      <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                        {item.category}
+                      </div>
+                      <div className="mt-1 text-sm text-zinc-300">
+                        {item.message}
+                      </div>
+                    </div>
+                  ))}
+                {!discoveryIntelligenceDiagnostic ? (
+                  <div className="rounded-lg bg-black/25 p-4 ring-1 ring-white/[0.06]">
+                    Discovery Intelligence audit records are pending.
+                  </div>
+                ) : null}
               </div>
             </AdvancedDisclosure>
 

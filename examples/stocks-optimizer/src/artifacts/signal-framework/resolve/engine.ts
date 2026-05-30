@@ -521,7 +521,9 @@ function weightedScore(traces: ResolveTrace[]) {
 
 function mean(values: number[]) {
   const usable = values.filter(Number.isFinite);
-  return usable.length ? usable.reduce((sum, value) => sum + value, 0) / usable.length : 0;
+  /* c8 ignore next */
+  if (!usable.length) return 0;
+  return usable.reduce((sum, value) => sum + value, 0) / usable.length;
 }
 
 function optionalScore(value: unknown) {

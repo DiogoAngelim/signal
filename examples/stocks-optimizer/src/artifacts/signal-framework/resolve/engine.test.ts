@@ -124,4 +124,31 @@ describe("Resolve", () => {
     assert.ok(result.missingEvidence.includes("Independent confirmation from another evidence group"));
     assert.ok(result.unlockConditions.includes("Add independent confirmation."));
   });
+
+  it("adds Wisdom quality to Resolve traces when long-term learning evidence is present", () => {
+    const result = resolveCommitment({
+      ...strongInput,
+      decisionQuality: 70,
+      restrictionValue: 80,
+      opportunityCost: 10,
+    });
+    const wisdomTrace = result.traces.find((trace) => trace.id === "wisdom");
+
+    assert.equal(wisdomTrace?.score, 80);
+    assert.equal(wisdomTrace?.passed, true);
+    assert.equal(result.traces.length, 10);
+  });
+
+  it("keeps weak explicit Wisdom score as a Resolve unlock condition", () => {
+    const result = resolveCommitment({
+      ...strongInput,
+      wisdomScore: 30,
+    });
+
+    assert.ok(
+      result.unlockConditions.includes(
+        "Improve Wisdom decision quality, restriction value, or opportunity cost before commitment.",
+      ),
+    );
+  });
 });

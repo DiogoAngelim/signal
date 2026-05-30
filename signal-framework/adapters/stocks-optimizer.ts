@@ -39,6 +39,8 @@ export type StocksOptimizerMetricSource = {
   fallbackMode?: boolean;
   now?: number;
   executionProfile?: {
+    name?: string;
+    profile?: string;
     spreadBps?: number;
     slippageBps?: number;
     rebalanceThresholdBps?: number;

@@ -565,7 +565,7 @@ function unlockConditionsFor(recommendation: SurvivalMemoryRecommendation) {
     return ["Wait until similar states show survival cost below 35/100 and no near-ruin match."];
   }
   if (recommendation === "act_with_reduced_size") {
-    return ["Raise survival confidence above 70/100 before normal sizing is restored."];
+    return ["Move Survival Memory from scarred/watch to clear with survival confidence above 70/100 and clean reduced-size outcomes before normal sizing is restored."];
   }
   return [];
 }

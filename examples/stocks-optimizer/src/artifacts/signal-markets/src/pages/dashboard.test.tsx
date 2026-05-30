@@ -19,10 +19,15 @@ describe("Dashboard calibration diagnostics", () => {
     expect(html).toContain("Investment dashboard");
     expect(html).toContain("Executive Reasoning");
     expect(html).toContain("System state in one explanation");
+    expect(html).toContain("Governance Evolution");
+    expect(html).toContain("Decision authority and learning loop");
+    expect(html).toContain("Operator command");
+    expect(html).toContain("Confidence ledger");
+    expect(html).toContain("Restriction accountability");
     expect(html).toContain("Evidence Summary");
     expect(html).toContain("Strongest justification");
     expect(html).toContain("Decision Pipeline");
-    expect(html).toContain("Discovery to Resolve");
+    expect(html).toContain("Discovery to Output");
     expect(html).toContain("Why not full size?");
     expect(html).toContain("What would change the decision?");
     expect(html).toContain("Terminology hierarchy");

@@ -389,6 +389,31 @@ describe("Resolve", () => {
     expect(result.explanation).toContain("Keep observing");
   });
 
+  it("adds Wisdom quality to Resolve traces when long-term learning evidence is present", () => {
+    const result = resolveCommitment({
+      ...strongInput,
+      decisionQuality: 70,
+      restrictionValue: 80,
+      opportunityCost: 10,
+    });
+    const wisdomTrace = result.traces.find((trace) => trace.id === "wisdom");
+
+    expect(wisdomTrace?.score).toBe(80);
+    expect(wisdomTrace?.passed).toBe(true);
+    expect(result.traces).toHaveLength(10);
+  });
+
+  it("keeps weak explicit Wisdom score as a Resolve unlock condition", () => {
+    const result = resolveCommitment({
+      ...strongInput,
+      wisdomScore: 30,
+    });
+
+    expect(result.unlockConditions).toContain(
+      "Improve Wisdom decision quality, restriction value, or opportunity cost before commitment.",
+    );
+  });
+
   it("escalates review recommendations even without explicit review evidence", () => {
     const result = resolveCommitment({
       ...strongInput,

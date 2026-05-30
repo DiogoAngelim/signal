@@ -3,6 +3,7 @@ import {
   buildDecisionPipeline,
   buildEvidenceSummary,
   buildExecutiveDashboardIA,
+  buildGovernanceEvolution,
   buildTerminologyGroups,
   buildWhyNotFullSize,
   extractUnlockInvalidationConditions,
@@ -249,8 +250,10 @@ describe("dashboard executive information architecture", () => {
       "Belief",
       "Judgement",
       "Agency",
-      "Wisdom",
       "Resolve",
+      "Wisdom",
+      "Survival",
+      "Discovery Intelligence",
     ]);
     expect(pipeline.find((step) => step.stage === "Recognition")?.outcome).toBe("passed");
     expect(pipeline.find((step) => step.stage === "Agency")?.outcome).toBe("escalated");
@@ -290,6 +293,7 @@ describe("dashboard executive information architecture", () => {
       "Safety",
       "Opportunity",
       "Wisdom",
+      "Discovery Intelligence",
     ]);
     expect(groups.find((group) => group.concept === "Trust")?.metrics.map((metric) => metric.label)).toContain("Agency trust");
     expect(groups.find((group) => group.concept === "Confidence")?.metrics.map((metric) => metric.label)).toContain("Calibrated confidence");
@@ -321,7 +325,7 @@ describe("dashboard executive information architecture", () => {
     expect(byId["readiness-score"]).toBe("71%");
   });
 
-  it("surfaces Executive, Wisdom, Execution Quality, Counterfactual, Discovery Accountability, and separated states", () => {
+  it("surfaces Executive, Wisdom, Execution Quality, Counterfactual, Discovery Accountability, Discovery Intelligence, and separated states", () => {
     const ia = buildExecutiveDashboardIA({
       ...richState(),
       executionQuality: {
@@ -382,24 +386,150 @@ describe("dashboard executive information architecture", () => {
         explanation: "Discovery is developing.",
         audit: {},
       },
+      discoveryIntelligence: {
+        score: 67,
+        maturity: {
+          emerging: 1,
+          detected: 2,
+          observed: 3,
+          confirmed: 2,
+          repeatable: 1,
+          trusted: 1,
+          institutional: 0,
+          discoveryCount: 10,
+          promotionRate: 60,
+          abandonmentRate: 10,
+          falseDiscoveryRate: 12,
+          noveltyConversionRate: 50,
+          trustedConversionRate: 10,
+          institutionalConversionRate: 0,
+          maturityScore: 58,
+        },
+        economics: {
+          actValue: 8,
+          waitValue: 3,
+          rejectValue: 0,
+          restrictValue: 5,
+          avoidedLoss: 4,
+          missedUpside: 2,
+          opportunityCost: -2,
+          economicsScore: 72,
+        },
+        governance: {
+          score: 64,
+          helpfulRestrictions: 1,
+          harmfulRestrictions: 0,
+          restrictions: [],
+        },
+        institutionalization: {
+          knowledgeCount: 2,
+          policyCount: 1,
+          standardCount: 0,
+          institutionalCount: 0,
+          institutionalizationScore: 35,
+        },
+        metaLearning: {
+          score: 61,
+          calibrationTrend: 4,
+          trustTrend: 3,
+          survivalTrend: -1,
+          decisionQualityTrend: 5,
+          governanceTrend: 2,
+        },
+        recommendations: [{
+          id: "institutionalize",
+          category: "institutionalization",
+          priority: "medium",
+          message: "Convert trusted discoveries into policies.",
+        }],
+      },
     });
 
     expect(ia.executionQuality?.recommendedExecutionMode).toBe("scale_in");
     expect(ia.counterfactual?.shouldAdjustSizingPolicy).toBe(true);
     expect(ia.discoveryAccountability?.status).toBe("developing");
+    expect(ia.discoveryIntelligence?.score).toBe(67);
     expect(ia.decisionStates.trust.status).toBe("provisional");
     expect(ia.decisionStates.permission.level).toBe("review_required");
     expect(ia.traceability.preservedModules.executionQuality).toBe(ia.executionQuality);
+  });
+
+  it("evolves governance into a single command with arbitration and accountability", () => {
+    const state = richState();
+    const evolution = buildGovernanceEvolution({
+      ...state,
+      resolve: { ...state.resolve, decision: "escalate" },
+      survivalMemory: {
+        ...state.survivalMemory,
+        survivalConfidence: 73,
+        recoveryBurden: 18,
+      },
+      wisdom: {
+        decisionQuality: 74,
+        wisdomScore: 86,
+        learningConfidence: 74,
+        counterfactuals: {
+          decisionQuality: 96,
+          avoidedLoss: 100,
+          missedUpside: 4,
+          restrictionValue: 98,
+          counterfactualConfidence: 90,
+          explanation: "Restrictions appear valuable.",
+        },
+        opportunityEconomics: {
+          actionValue: -4,
+          waitValue: -3,
+          rejectValue: 0,
+          urgencyCost: 0,
+          opportunityCost: 0,
+          bestOption: "reject",
+        },
+        discoveryMaturity: {
+          maturityScore: 0,
+          recurrenceRate: 0,
+          noveltyPersistence: 0,
+          conversionRate: 0,
+          trustedDiscoveries: [],
+          lifecycle: [],
+        },
+        agencyEffectiveness: {
+          agencyAccuracy: 100,
+          interventionValue: 50,
+          approvalQuality: 100,
+          rejectionQuality: 50,
+          governanceEffectiveness: 80,
+        },
+        portfolioIntelligence: {
+          concentrationRisk: 0,
+          diversificationQuality: 100,
+          capitalEfficiency: 50,
+          opportunityCoverage: 100,
+          portfolioConvexity: 50,
+          allocationQuality: 80,
+        },
+        explanation: "Wisdom prefers reject.",
+      } as any,
+    });
+
+    expect(evolution.command.action).toBe("review");
+    expect(evolution.command.allowedExposureState).toBe("micro");
+    expect(evolution.command.reason).toContain("governance review");
+    expect(evolution.arbitration.conflicts.map((conflict) => conflict.id)).toContain("executive-wisdom-conflict");
+    expect(evolution.arbitration.conflicts.map((conflict) => conflict.id)).toContain("survival-threshold-status-conflict");
+    expect(evolution.exposureStates.find((item) => item.status === "active")?.state).toBe("micro");
+    expect(evolution.confidenceLedger.find((item) => item.kind === "survival")?.status).toBe("scarred");
+    expect(evolution.restrictionBets[0]?.evidenceRequired).toContain("max adverse excursion");
+    expect(evolution.accountabilityLoop.map((step) => step.id)).toContain("policy-adjustment");
   });
 
   it("handles empty, missing, and partial diagnostic states", () => {
     const empty = buildExecutiveDashboardIA({});
 
     expect(empty.executiveReasoning.finalDecision).toBe("Pending");
-    expect(empty.evidenceSummary).toHaveLength(17);
+    expect(empty.evidenceSummary).toHaveLength(18);
     expect(empty.evidenceSummary.every((item) => item.value === "Pending")).toBe(true);
-    expect(empty.decisionPipeline).toHaveLength(7);
-    expect(empty.terminologyGroups).toHaveLength(6);
+    expect(empty.decisionPipeline).toHaveLength(9);
+    expect(empty.terminologyGroups).toHaveLength(7);
 
     const partial = buildExecutiveDashboardIA({ trustGovernor: { participationMode: "limited", maxExposure: 5 } });
     expect(partial.executiveReasoning.recommendedParticipationMode).toBe("Limited");

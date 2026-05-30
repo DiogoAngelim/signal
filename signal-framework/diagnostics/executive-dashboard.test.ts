@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildDecisionPipeline,
   buildExecutiveDashboardIA,
+  buildGovernanceEvolution,
   extractUnlockInvalidationConditions,
   resolveCanonicalExplanations,
 } from "./executive-dashboard";
@@ -122,7 +123,17 @@ describe("executive dashboard IA integration", () => {
 
     expect(reasons.map((reason) => reason.code).filter((code) => code === "survival_scar")).toHaveLength(1);
     expect(reasons.map((reason) => reason.code)).toContain("trust_below_threshold");
-    expect(pipeline.map((step) => step.stage)).toEqual(["Discovery", "Recognition", "Belief", "Judgement", "Agency", "Wisdom", "Resolve"]);
+    expect(pipeline.map((step) => step.stage)).toEqual([
+      "Discovery",
+      "Recognition",
+      "Belief",
+      "Judgement",
+      "Agency",
+      "Resolve",
+      "Wisdom",
+      "Survival",
+      "Discovery Intelligence",
+    ]);
     expect(pipeline.find((step) => step.stage === "Agency")?.outcome).toBe("escalated");
   });
 
@@ -134,5 +145,71 @@ describe("executive dashboard IA integration", () => {
     expect(extracted.invalidationConditions).toContain("Invalidate if Trust or Judgement falls below the commitment threshold.");
     expect(empty.executiveReasoning.finalDecision).toBe("Pending");
     expect(empty.evidenceSummary.every((item) => item.value === "Pending")).toBe(true);
+  });
+
+  it("builds governance evolution with arbitration, exposure states, and accountability", () => {
+    const evolution = buildGovernanceEvolution({
+      ...state,
+      resolve: { ...state.resolve, decision: "escalate" },
+      survivalMemory: {
+        ...state.survivalMemory,
+        survivalConfidence: 73,
+        recoveryBurden: 18,
+      },
+      wisdom: {
+        decisionQuality: 74,
+        wisdomScore: 86,
+        learningConfidence: 74,
+        counterfactuals: {
+          decisionQuality: 96,
+          avoidedLoss: 100,
+          missedUpside: 4,
+          restrictionValue: 98,
+          counterfactualConfidence: 90,
+          explanation: "Restrictions appear valuable.",
+        },
+        opportunityEconomics: {
+          actionValue: -4,
+          waitValue: -3,
+          rejectValue: 0,
+          urgencyCost: 0,
+          opportunityCost: 0,
+          bestOption: "reject",
+        },
+        discoveryMaturity: {
+          maturityScore: 0,
+          recurrenceRate: 0,
+          noveltyPersistence: 0,
+          conversionRate: 0,
+          trustedDiscoveries: [],
+          lifecycle: [],
+        },
+        agencyEffectiveness: {
+          agencyAccuracy: 100,
+          interventionValue: 50,
+          approvalQuality: 100,
+          rejectionQuality: 50,
+          governanceEffectiveness: 80,
+        },
+        portfolioIntelligence: {
+          concentrationRisk: 0,
+          diversificationQuality: 100,
+          capitalEfficiency: 50,
+          opportunityCoverage: 100,
+          portfolioConvexity: 50,
+          allocationQuality: 80,
+        },
+        explanation: "Wisdom prefers reject.",
+      } as any,
+    });
+
+    expect(evolution.command.action).toBe("review");
+    expect(evolution.command.allowedExposureState).toBe("micro");
+    expect(evolution.arbitration.conflicts.map((conflict) => conflict.id)).toContain("executive-wisdom-conflict");
+    expect(evolution.arbitration.conflicts.map((conflict) => conflict.id)).toContain("survival-threshold-status-conflict");
+    expect(evolution.exposureStates.find((item) => item.status === "active")?.state).toBe("micro");
+    expect(evolution.confidenceLedger.find((item) => item.kind === "survival")?.status).toBe("scarred");
+    expect(evolution.restrictionBets[0]?.evidenceRequired).toContain("max adverse excursion");
+    expect(evolution.accountabilityLoop.map((step) => step.id)).toContain("restriction-bet");
   });
 });

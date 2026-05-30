@@ -2,6 +2,11 @@ import { authorize } from "../agency/engine";
 import { calibrate } from "../calibration/engine";
 import type { CalibrationRunInput } from "../calibration/engine";
 import { evaluateDiagnostics } from "../diagnostics/engine";
+import {
+  evaluateDiscoveryIntelligence,
+  type DecisionAction as DiscoveryIntelligenceDecisionAction,
+  type DiscoveryIntelligenceInput,
+} from "../discovery-intelligence/engine";
 import { discover } from "../discovery/engine";
 import type { DiscoveryInput } from "../discovery/engine";
 import { evaluateExecutionReadiness } from "../execution/readiness";
@@ -209,6 +214,22 @@ export class SignalFrameworkEngine {
     const opportunityDensity = evaluateOpportunityDensity({
       candidates: opportunities,
     });
+    const discoveryIntelligence = evaluateDiscoveryIntelligence(
+      buildDiscoveryIntelligenceInput({
+        context,
+        timestamp,
+        discovery,
+        recognition,
+        judgement,
+        agency,
+        viability,
+        calibration,
+        diagnostics,
+        opportunities,
+        opportunityDensity,
+        history: this.store.history(),
+      }),
+    );
     const events: SignalSnapshot["events"] = [
       {
         type: "cycle.completed",
@@ -251,6 +272,16 @@ export class SignalFrameworkEngine {
         recurrenceConfidence: recognition.recurrenceConfidence,
         noveltyScore: recognition.noveltyScore,
         archetype: recognition.archetype,
+      },
+    });
+    events.push({
+      type: "discovery-intelligence.evaluated",
+      timestamp,
+      payload: {
+        score: discoveryIntelligence.score,
+        maturityScore: discoveryIntelligence.maturity.maturityScore,
+        economicsScore: discoveryIntelligence.economics.economicsScore,
+        governanceScore: discoveryIntelligence.governance.score,
       },
     });
     if (judgement) {
@@ -318,6 +349,7 @@ export class SignalFrameworkEngine {
       calibration,
       judgement,
       discovery,
+      discoveryIntelligence,
       recognition,
       decision,
       agency,
@@ -789,6 +821,236 @@ function buildViabilityInput(args: {
       ...(supplied.context ?? {}),
     },
   };
+}
+
+function buildDiscoveryIntelligenceInput(args: {
+  context: SignalContext;
+  timestamp: number;
+  discovery: NonNullable<SignalSnapshot["discovery"]>;
+  recognition: NonNullable<SignalSnapshot["recognition"]>;
+  judgement?: SignalSnapshot["judgement"];
+  agency: NonNullable<SignalSnapshot["agency"]>;
+  viability?: SignalSnapshot["viability"];
+  calibration: NonNullable<SignalSnapshot["calibration"]>;
+  diagnostics: NonNullable<SignalSnapshot["diagnostics"]>;
+  opportunities: SignalSnapshot["opportunities"];
+  opportunityDensity: NonNullable<SignalSnapshot["opportunityDensity"]>;
+  history: Readonly<SignalSnapshot>[];
+}): DiscoveryIntelligenceInput {
+  const supplied = args.context.discoveryIntelligence ?? {};
+  const decision = args.context.decision;
+  const discoveryRecords = [
+    {
+      id: `${args.context.id ?? args.timestamp}:discovery`,
+      stage: args.discovery.lifecycle.status,
+      previousStage: args.discovery.lifecycle.previousStatus,
+      novelty: args.discovery.novelty,
+      confidence: args.discovery.confidence,
+      trust: args.discovery.trust,
+      maturity: args.discovery.maturity,
+      value: args.discovery.confidence - args.discovery.fragility,
+      converted: args.discovery.confidence >= 70,
+    },
+    ...args.discovery.opportunities.map((opportunity) => ({
+      id: opportunity.id,
+      stage: opportunity.lifecycle.status ?? opportunity.status,
+      previousStage: opportunity.lifecycle.previousStatus,
+      novelty: opportunity.novelty,
+      confidence: opportunity.confidence,
+      trust: opportunity.trust,
+      maturity: opportunity.maturity,
+      value: opportunity.strength,
+      converted: opportunity.confidence >= 70,
+    })),
+    ...args.opportunities.map((opportunity) => ({
+      id: opportunity.opportunityId,
+      stage: opportunity.persistent
+        ? "REPEATABLE"
+        : opportunity.emerging
+          ? "DETECTED"
+          : "OBSERVED",
+      confidence: opportunity.confidence,
+      maturity: opportunity.strength,
+      value: opportunity.strength,
+      converted: opportunity.confidence >= 70,
+    })),
+    ...safeArray(supplied.discoveries),
+  ];
+  const decisionRecords = [
+    ...(decision
+      ? [
+          {
+            id: decision.id ?? `${args.context.id ?? args.timestamp}:decision`,
+            discoveryId: args.discovery.opportunities[0]?.id,
+            action: discoveryIntelligenceAction(args.agency.status),
+            expectedValue: finiteMaybe(
+              decision.expectedValue,
+              decision.impact,
+              decision.confidence,
+            ),
+            alternatives: alternativeValuesForDiscoveryIntelligence({
+              confidence: decision.confidence,
+              risk: decision.risk,
+              opportunity: args.opportunityDensity.quality,
+              agency: args.agency,
+            }),
+            confidence: decision.confidence,
+            timestamp: args.timestamp,
+          },
+        ]
+      : []),
+    ...safeArray(supplied.decisions),
+  ];
+  const outcomeRecords = [
+    ...safeArray(args.context.outcomes).map((outcome) => ({
+      id: `${outcome.signalId}:${outcome.window}`,
+      decisionId: outcome.signalId,
+      value: outcome.realizedMagnitude,
+      success: outcome.realizedDirection !== "unknown" && outcome.realizedDirection !== "flat",
+      timestamp: outcome.evaluatedAt,
+      calibrationScore: args.calibration.trustworthiness,
+      trustScore: args.diagnostics.trust,
+      survivalScore: args.viability?.score,
+      decisionQuality: args.judgement?.adjustedConfidence,
+      governanceScore: args.agency.constraintEvaluation.score,
+    })),
+    ...safeArray(supplied.outcomes),
+  ];
+  const restrictionRecords = [
+    ...args.agency.constraintEvaluation.constraints.map((constraint) => ({
+      id: constraint.id,
+      type: constraint.type,
+      label: constraint.label,
+      decisionId: decision?.id ?? `${args.context.id ?? args.timestamp}:decision`,
+      avoidedLoss: constraint.passed ? 0 : constraint.severity === "critical" ? 25 : 10,
+      missedUpside: constraint.passed ? 0 : Math.max(0, 100 - constraint.score) / 5,
+    })),
+    ...(args.viability?.constraints ?? []).map((constraint) => ({
+      id: constraint.id,
+      type: constraint.type,
+      label: constraint.label,
+      decisionId: args.viability?.decisionRef ?? decision?.id,
+      avoidedLoss: constraint.passed ? 0 : Math.max(0, 100 - constraint.score) / 4,
+      missedUpside: constraint.passed ? 0 : Math.max(0, 100 - (args.viability?.score ?? 0)) / 5,
+    })),
+    ...safeArray(supplied.restrictions),
+  ];
+  const traces = [
+    ...historyDiscoveryIntelligenceTraces(args.history),
+    {
+      id: `${args.context.id ?? args.timestamp}:calibration`,
+      metric: "calibration",
+      value: args.calibration.trustworthiness,
+      timestamp: args.timestamp,
+    },
+    {
+      id: `${args.context.id ?? args.timestamp}:trust`,
+      metric: "trust",
+      value: args.diagnostics.trust,
+      timestamp: args.timestamp,
+    },
+    {
+      id: `${args.context.id ?? args.timestamp}:survival`,
+      metric: "survival",
+      value: args.viability?.score ?? args.agency.executionReadiness,
+      timestamp: args.timestamp,
+    },
+    {
+      id: `${args.context.id ?? args.timestamp}:decision-quality`,
+      metric: "decision quality",
+      value: args.judgement?.adjustedConfidence ?? args.recognition.recognitionScore,
+      timestamp: args.timestamp,
+    },
+    {
+      id: `${args.context.id ?? args.timestamp}:governance`,
+      metric: "governance",
+      value: args.agency.constraintEvaluation.score,
+      timestamp: args.timestamp,
+    },
+    ...safeArray(supplied.traces),
+  ];
+
+  return {
+    discoveries: discoveryRecords,
+    decisions: decisionRecords,
+    outcomes: outcomeRecords,
+    restrictions: restrictionRecords,
+    traces,
+  };
+}
+
+function discoveryIntelligenceAction(
+  agencyStatus: string,
+): DiscoveryIntelligenceDecisionAction {
+  const status = agencyStatus.trim().toLowerCase();
+  if (status === "approved") return "ACT";
+  if (status === "limited") return "RESTRICT";
+  if (status === "denied" || status === "rollback") return "REJECT";
+  return "WAIT";
+}
+
+function alternativeValuesForDiscoveryIntelligence(args: {
+  confidence?: number;
+  risk?: number;
+  opportunity: number;
+  agency: NonNullable<SignalSnapshot["agency"]>;
+}): Partial<Record<DiscoveryIntelligenceDecisionAction, number>> {
+  const opportunity = finiteMaybe(args.opportunity) ?? 0;
+  const confidence = finiteMaybe(args.confidence, args.agency.commitmentConfidence) ?? 0;
+  const risk = finiteMaybe(args.risk) ?? Math.max(0, 100 - args.agency.executionReadiness);
+  const base = (opportunity * 0.45 + confidence * 0.35) / 10 - risk / 12;
+
+  return {
+    ACT: base,
+    WAIT: base * 0.45,
+    REJECT: 0,
+    RESTRICT: base * 0.65,
+  };
+}
+
+function historyDiscoveryIntelligenceTraces(
+  history: Readonly<SignalSnapshot>[],
+) {
+  return history.flatMap((snapshot) => [
+    {
+      id: `${snapshot.id}:di-calibration`,
+      metric: "calibration",
+      value: snapshot.calibration?.trustworthiness,
+      timestamp: snapshot.timestamp,
+    },
+    {
+      id: `${snapshot.id}:di-trust`,
+      metric: "trust",
+      value: snapshot.diagnostics.trust,
+      timestamp: snapshot.timestamp,
+    },
+    {
+      id: `${snapshot.id}:di-survival`,
+      metric: "survival",
+      value: snapshot.viability?.score ?? snapshot.agency?.executionReadiness,
+      timestamp: snapshot.timestamp,
+    },
+    {
+      id: `${snapshot.id}:di-decision-quality`,
+      metric: "decision quality",
+      value: snapshot.judgement?.adjustedConfidence ?? snapshot.recognition?.recognitionScore,
+      timestamp: snapshot.timestamp,
+    },
+    {
+      id: `${snapshot.id}:di-governance`,
+      metric: "governance",
+      value: snapshot.agency?.constraintEvaluation.score,
+      timestamp: snapshot.timestamp,
+    },
+  ]);
+}
+
+function finiteMaybe(...values: unknown[]) {
+  for (const value of values) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return undefined;
 }
 
 function agencyConstraints(agency: NonNullable<SignalSnapshot["agency"]>): ViabilityConstraintInput[] {

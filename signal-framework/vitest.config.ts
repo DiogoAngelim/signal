@@ -15,6 +15,7 @@ export default defineConfig({
         "calibration/engine.ts",
         "calibration/history.ts",
         "discovery/engine.ts",
+        "discovery-intelligence/engine.ts",
         "recognition/engine.ts",
         "recovery/engine.ts",
         "readiness-remediation/engine.ts",

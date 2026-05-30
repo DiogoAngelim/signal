@@ -1,9 +1,11 @@
 import {
   createWisdom,
   evaluateCounterfactuals,
+  evaluateDiscoveryIntelligence,
   type DecisionCounterfactualResult,
   type DecisionOutcomeRecord,
   type DecisionQualityResult,
+  type DiscoveryIntelligenceResult,
 } from "../../../signal-framework";
 import {
   evaluateDecisionStates,
@@ -31,6 +33,7 @@ export type StockExecutiveArchitecture = {
   executionQuality: ExecutionQualityResult;
   counterfactual: DecisionCounterfactualResult;
   discoveryAccountability: DiscoveryAccountabilityResult;
+  discoveryIntelligence: DiscoveryIntelligenceResult;
   wisdom: DecisionQualityResult;
   executiveDecision: ExecutiveDecision;
   decisionStates: {
@@ -239,11 +242,29 @@ export function buildStockExecutiveArchitecture(
     survivalMemory: decision.survivalMemory,
     executionQuality,
   });
+  const discoveryIntelligence = evaluateDiscoveryIntelligence({
+    discoveries: discoveryIntelligenceDiscoveriesFor(signalInput),
+    decisions: discoveryIntelligenceDecisionsFor(signalInput, decision),
+    outcomes: discoveryIntelligenceOutcomesFor(signalInput, decision),
+    restrictions: discoveryIntelligenceRestrictionsFor(
+      decision,
+      counterfactual,
+      executionQuality,
+    ),
+    traces: discoveryIntelligenceTracesFor(
+      signalInput,
+      decision,
+      separated,
+      wisdom,
+      discoveryAccountability,
+    ),
+  });
   const executiveDecision = evaluateExecutiveDecision({
     proposedDecision: proposedDecisionFor(decision),
     confidence: decision.signalConfidence,
     discovery: primaryOpportunity(signalInput)?.discovery ?? primaryOpportunity(signalInput)?.opportunityDiscovery,
     discoveryAccountability,
+    discoveryIntelligence,
     recognition: (decision as any).recognition,
     belief: decision.belief,
     judgement: decision.judgement,
@@ -283,6 +304,7 @@ export function buildStockExecutiveArchitecture(
     executionQuality,
     counterfactual,
     discoveryAccountability,
+    discoveryIntelligence,
     wisdom,
     executiveDecision,
     decisionStates: {
@@ -382,6 +404,217 @@ function discoveryEventsFor(input: StrategySignalInput) {
     wasRejected: normalized(candidate.signalStatus).includes("blocked"),
     wasFalseDiscovery: normalized(candidate.signalStatus).includes("blocked") && Number(candidate.expectedMove ?? 0) <= 0,
   }));
+}
+
+function discoveryIntelligenceDiscoveriesFor(input: StrategySignalInput) {
+  const candidates = (input.opportunityCandidates ?? []).slice(0, 48);
+  const mapped = candidates.map((candidate: any, index) => {
+    const confidence = firstNumber(candidate.confidence, candidate.candidateScore, input.signalConfidence) ?? 50;
+    const expectedValue = firstNumber(candidate.expectedMove, candidate.returnPct, candidate.score, candidate.candidateScore) ?? 0;
+    const stage = candidate.lifecycle?.status ??
+      candidate.discovery?.status ??
+      candidate.status ??
+      (confidence >= 85 ? "TRUSTED" : confidence >= 70 ? "CONFIRMED" : confidence >= 45 ? "OBSERVED" : "DETECTED");
+
+    return {
+      id: String(candidate.symbol ?? candidate.ticker ?? candidate.id ?? `candidate-${index + 1}`),
+      stage,
+      previousStage: candidate.lifecycle?.previousStatus ?? candidate.previousStatus,
+      novelty: firstNumber(candidate.novelty, candidate.discovery?.novelty),
+      confidence,
+      trust: firstNumber(candidate.trust, candidate.trustworthiness, input.readiness.calibration?.trustworthiness),
+      maturity: firstNumber(candidate.maturity, candidate.discovery?.maturity, candidate.lifecycle?.maturity),
+      value: expectedValue,
+      abandoned: normalized(candidate.signalStatus).includes("blocked"),
+      falseDiscovery: normalized(candidate.signalStatus).includes("blocked") && expectedValue <= 0,
+      converted: expectedValue > 0 && confidence >= 60,
+      institutionalStage: candidate.institutionalStage ?? candidate.knowledgeStage,
+    };
+  });
+
+  if (mapped.length) return mapped;
+  return [{
+    id: String(input.symbol || "primary-discovery"),
+    stage: input.signalConfidence >= 70 ? "CONFIRMED" : "OBSERVED",
+    confidence: input.signalConfidence,
+    trust: input.readiness.calibration?.trustworthiness,
+    maturity: input.setupQuality,
+    value: input.expectedEdgePct,
+    converted: input.expectedEdgePct > 0,
+  }];
+}
+
+function discoveryIntelligenceDecisionsFor(
+  input: StrategySignalInput,
+  decision: StockExecutiveArchitectureInput["decision"],
+) {
+  const fullUtility = input.expectedEdgePct - input.riskPressure / 12;
+  const actualShare = scaledShareFor(input, decision);
+  const actualUtility = decision.signalStatus === "blocked" ? 0 : fullUtility * actualShare;
+
+  return [{
+    id: discoveryIntelligenceDecisionId(input),
+    discoveryId: String(input.symbol || "primary-discovery"),
+    action: discoveryIntelligenceActionFor(input, decision),
+    expectedValue: fullUtility,
+    actualValue: actualUtility,
+    alternatives: {
+      ACT: fullUtility,
+      WAIT: Math.max(0, input.expectedEdgePct * 0.45 - input.riskPressure / 16),
+      REJECT: 0,
+      RESTRICT: fullUtility * Math.max(0.25, actualShare || 0.5),
+    },
+    confidence: decision.signalConfidence,
+  }];
+}
+
+function discoveryIntelligenceOutcomesFor(
+  input: StrategySignalInput,
+  decision: StockExecutiveArchitectureInput["decision"],
+) {
+  const fullUtility = input.expectedEdgePct - input.riskPressure / 12;
+  const actualShare = scaledShareFor(input, decision);
+  const actualUtility = decision.signalStatus === "blocked" ? 0 : fullUtility * actualShare;
+  const historical = [...(input.previousTrades ?? []), ...(input.strategyHistory ?? [])]
+    .slice(-48)
+    .map((trade: any, index) => {
+      const value = firstNumber(trade?.returnPct, trade?.return_pct, trade?.profitPct, trade?.value) ?? 0;
+      return {
+        id: `historical-discovery-outcome-${index + 1}`,
+        discoveryId: String(trade?.symbol ?? trade?.ticker ?? input.symbol ?? "historical"),
+        action: trade?.action ?? trade?.signalAction ?? "ACT",
+        value,
+        success: value > 0,
+        calibrationScore: firstNumber(trade?.calibrationScore, trade?.calibratedConfidence, decision.calibratedConfidence),
+        trustScore: firstNumber(trade?.trustScore, trade?.trustworthiness, decision.trustworthiness),
+        survivalScore: firstNumber(trade?.survivalScore, trade?.survivalConfidence, decision.survivalMemory?.survivalConfidence),
+        decisionQuality: firstNumber(trade?.decisionQuality, trade?.confidence, decision.signalConfidence),
+        governanceScore: firstNumber(trade?.governanceScore, decision.trustGovernor?.trustScore, decision.trustworthiness),
+        timestamp: firstNumber(trade?.timestamp, trade?.closedAt, trade?.date, index),
+      };
+    });
+
+  return [
+    {
+      id: `${discoveryIntelligenceDecisionId(input)}:outcome`,
+      decisionId: discoveryIntelligenceDecisionId(input),
+      discoveryId: String(input.symbol || "primary-discovery"),
+      action: discoveryIntelligenceActionFor(input, decision),
+      value: actualUtility,
+      success: actualUtility >= 0,
+      calibrationScore: decision.calibratedConfidence,
+      trustScore: decision.trustworthiness,
+      survivalScore: decision.survivalMemory?.survivalConfidence,
+      decisionQuality: wisdomStatusFor(input, decision) === "approved" ? decision.signalConfidence : decision.calibratedConfidence,
+      governanceScore: decision.trustGovernor?.trustScore ?? decision.trustworthiness,
+    },
+    ...historical,
+  ];
+}
+
+function discoveryIntelligenceRestrictionsFor(
+  decision: StockExecutiveArchitectureInput["decision"],
+  counterfactual: DecisionCounterfactualResult,
+  executionQuality: ExecutionQualityResult,
+) {
+  const restrictions = [];
+  if (decision.rejectionReason) {
+    restrictions.push({
+      id: "decision-governance-restriction",
+      type: decision.sizingMode === "none" ? "trust gate" : "readiness gate",
+      label: decision.rejectionReason,
+      decisionId: discoveryIntelligenceDecisionIdFromDecision(decision),
+      avoidedLoss: counterfactual.avoidedLossScore / 10,
+      missedUpside: counterfactual.missedUpsideScore / 10,
+    });
+  }
+  for (const [index, blocker] of executionQuality.blockers.entries()) {
+    restrictions.push({
+      id: `execution-quality-blocker-${index + 1}`,
+      type: "execution gate",
+      label: blocker,
+      decisionId: discoveryIntelligenceDecisionIdFromDecision(decision),
+      avoidedLoss: executionQuality.score < 50 ? (50 - executionQuality.score) / 5 : 0,
+      missedUpside: counterfactual.cautionCostScore / 20,
+    });
+  }
+  return restrictions;
+}
+
+function discoveryIntelligenceTracesFor(
+  input: StrategySignalInput,
+  decision: StockExecutiveArchitectureInput["decision"],
+  states: ReturnType<typeof evaluateDecisionStates>,
+  wisdom: DecisionQualityResult,
+  discoveryAccountability: DiscoveryAccountabilityResult,
+) {
+  return [
+    {
+      id: "current-calibration",
+      metric: "calibration",
+      value: decision.calibratedConfidence,
+    },
+    {
+      id: "current-trust",
+      metric: "trust",
+      value: states.trust.score,
+    },
+    {
+      id: "current-survival",
+      metric: "survival",
+      value: decision.survivalMemory?.survivalConfidence ?? input.readiness.readinessScore,
+    },
+    {
+      id: "current-decision-quality",
+      metric: "decision quality",
+      value: wisdom.decisionQuality,
+    },
+    {
+      id: "current-governance",
+      metric: "governance",
+      value: discoveryAccountability.accountabilityScore,
+    },
+    ...[...(input.previousTrades ?? []), ...(input.strategyHistory ?? [])].slice(-24).flatMap((trade: any, index) => [
+      {
+        id: `history-${index + 1}:calibration`,
+        metric: "calibration",
+        value: firstNumber(trade?.calibrationScore, trade?.calibratedConfidence),
+        timestamp: firstNumber(trade?.timestamp, trade?.closedAt, index),
+      },
+      {
+        id: `history-${index + 1}:trust`,
+        metric: "trust",
+        value: firstNumber(trade?.trustScore, trade?.trustworthiness),
+        timestamp: firstNumber(trade?.timestamp, trade?.closedAt, index),
+      },
+      {
+        id: `history-${index + 1}:decision-quality`,
+        metric: "decision quality",
+        value: firstNumber(trade?.decisionQuality, trade?.confidence),
+        timestamp: firstNumber(trade?.timestamp, trade?.closedAt, index),
+      },
+    ]),
+  ];
+}
+
+function discoveryIntelligenceActionFor(
+  input: StrategySignalInput,
+  decision: StockExecutiveArchitectureInput["decision"],
+) {
+  if (decision.signalStatus === "blocked") return "REJECT";
+  if (decision.signalStatus === "watch") return "WAIT";
+  if (decision.suggestedExposure < input.rawSuggestedExposurePct) return "RESTRICT";
+  return "ACT";
+}
+
+function discoveryIntelligenceDecisionId(input: StrategySignalInput) {
+  return `discovery-intelligence:${normalized(input.market)}:${normalized(input.symbol) || "primary"}`;
+}
+
+function discoveryIntelligenceDecisionIdFromDecision(
+  decision: StockExecutiveArchitectureInput["decision"],
+) {
+  return `discovery-intelligence:${normalized((decision as any).market)}:${normalized((decision as any).symbol) || "primary"}`;
 }
 
 function restrictionLearningFor(decision: StockExecutiveArchitectureInput["decision"]) {

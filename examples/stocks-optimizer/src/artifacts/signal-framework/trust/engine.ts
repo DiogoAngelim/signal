@@ -665,7 +665,7 @@ function survivalBlockers(survivalMemory: TrustGovernorInput["survivalMemory"], 
       "Survival memory allows only reduced-size recovery exposure.",
       Array.isArray(survivalMemory.unlockConditions) && survivalMemory.unlockConditions.length
         ? survivalMemory.unlockConditions
-        : ["Raise survival confidence above 70/100 before normal sizing is restored."],
+        : ["Move Survival Memory from scarred/watch to clear with survival confidence above 70/100 and clean reduced-size outcomes before normal sizing is restored."],
     )];
   }
 

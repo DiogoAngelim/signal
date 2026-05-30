@@ -321,6 +321,73 @@ export interface DiscoveryAccountabilityDiagnostic {
   explanation: string;
 }
 
+export interface DiscoveryIntelligenceDiagnostic {
+  score: number;
+  maturity: {
+    emerging: number;
+    detected: number;
+    observed: number;
+    confirmed: number;
+    repeatable: number;
+    trusted: number;
+    institutional: number;
+    discoveryCount: number;
+    promotionRate: number;
+    abandonmentRate: number;
+    falseDiscoveryRate: number;
+    noveltyConversionRate: number;
+    trustedConversionRate: number;
+    institutionalConversionRate: number;
+    maturityScore: number;
+  };
+  economics: {
+    actValue: number;
+    waitValue: number;
+    rejectValue: number;
+    restrictValue: number;
+    avoidedLoss: number;
+    missedUpside: number;
+    opportunityCost: number;
+    economicsScore: number;
+  };
+  governance: {
+    score: number;
+    restrictions: Array<{
+      id: string;
+      type: string;
+      label: string;
+      avoidedLoss: number;
+      missedUpside: number;
+      effectiveness: number;
+      helpful: boolean;
+      recommendation: string;
+    }>;
+    helpfulRestrictions: number;
+    harmfulRestrictions: number;
+  };
+  institutionalization: {
+    knowledgeCount: number;
+    policyCount: number;
+    standardCount: number;
+    institutionalCount: number;
+    institutionalizationScore: number;
+  };
+  metaLearning: {
+    score: number;
+    calibrationTrend: number;
+    trustTrend: number;
+    survivalTrend: number;
+    decisionQualityTrend: number;
+    governanceTrend: number;
+  };
+  recommendations: Array<{
+    id: string;
+    category: string;
+    priority: string;
+    message: string;
+  }>;
+}
+
 export interface WisdomDiagnostic {
   decisionQuality: number;
   wisdomScore: number;
@@ -584,6 +651,7 @@ export interface StockQuote {
   executionQuality?: ExecutionQualityDiagnostic;
   counterfactual?: CounterfactualDiagnostic;
   discoveryAccountability?: DiscoveryAccountabilityDiagnostic;
+  discoveryIntelligence?: DiscoveryIntelligenceDiagnostic;
   wisdom?: WisdomDiagnostic;
   executiveDecision?: ExecutiveDecisionDiagnostic;
   decisionStates?: DecisionStatesDiagnostic;
@@ -661,6 +729,7 @@ export type StockData = StockListItem & {
   executionQuality?: ExecutionQualityDiagnostic;
   counterfactual?: CounterfactualDiagnostic;
   discoveryAccountability?: DiscoveryAccountabilityDiagnostic;
+  discoveryIntelligence?: DiscoveryIntelligenceDiagnostic;
   wisdom?: WisdomDiagnostic;
   executiveDecision?: ExecutiveDecisionDiagnostic;
   decisionStates?: DecisionStatesDiagnostic;
