@@ -6,6 +6,7 @@ import {
   ArrowUpRight,
   BarChart3,
   Brain,
+  ChevronDown,
   CheckCircle2,
   CircleDollarSign,
   Clock,
@@ -36,6 +37,11 @@ import {
   registerSignalWatchlist,
   type AllocationAction,
   type BeliefDiagnostic,
+  type CounterfactualDiagnostic,
+  type DecisionStatesDiagnostic,
+  type DiscoveryAccountabilityDiagnostic,
+  type ExecutiveDecisionDiagnostic,
+  type ExecutionQualityDiagnostic,
   type JudgementDiagnostic,
   type MarketOption,
   type ReadinessRemediationDiagnostic,
@@ -48,6 +54,7 @@ import {
   type SurvivalMemoryDiagnostic,
   type TradeSignal,
   type TrustGovernorDiagnostic,
+  type WisdomDiagnostic,
 } from "@/lib/api";
 import MarketPerceptionEngine from "@/components/MarketPerceptionEngine";
 import {
@@ -69,6 +76,7 @@ import {
   sizeAssetExposure,
 } from "@/lib/sizing";
 import { buildDashboardSemanticMetrics } from "@/lib/semantic-metrics";
+import { buildExecutiveDashboardIA } from "@/lib/dashboard-ia";
 
 const STOCK_LIST_PAGE_SIZE = 500;
 const INITIAL_QUOTE_SYMBOL_LIMIT = 140;
@@ -77,8 +85,10 @@ const MIN_QUOTE_COVERAGE_RATIO = 1;
 const QUOTE_BATCH_SIZE = 25;
 const REFRESH_INTERVAL_MS = 60_000;
 const STARTING_PORTFOLIO_VALUE = 1_000;
-const ENABLE_STRATEGY_API = import.meta.env.VITE_ENABLE_STRATEGY_API !== "false";
-const ENABLE_PORTFOLIO_API = import.meta.env.VITE_ENABLE_PORTFOLIO_API === "true";
+const ENABLE_STRATEGY_API =
+  import.meta.env.VITE_ENABLE_STRATEGY_API !== "false";
+const ENABLE_PORTFOLIO_API =
+  import.meta.env.VITE_ENABLE_PORTFOLIO_API === "true";
 
 type MarketSchedule = {
   timeZone: string;
@@ -95,11 +105,22 @@ type DisplayStock = StockData & {
   quoteStatus?: QuoteStatus;
   quoteStatusReason?: string;
   quoteLastAttemptedAt?: number;
-  signalStatus?: "confirmed" | "provided" | "missing" | "watch" | "blocked" | "risk-exit";
+  signalStatus?:
+    | "confirmed"
+    | "provided"
+    | "missing"
+    | "watch"
+    | "blocked"
+    | "risk-exit";
   allocationAction?: AllocationAction;
   sizingMode?: "none" | "micro" | "small" | "normal" | "large" | "maxSafe";
   sizingReasons?: string[];
-  sizingConstraints?: Array<{ id: string; label?: string; passed: boolean; reason?: string }>;
+  sizingConstraints?: Array<{
+    id: string;
+    label?: string;
+    passed: boolean;
+    reason?: string;
+  }>;
   sizingRationale?: string[];
   opportunityDiscovery?: any;
   discovery?: any;
@@ -112,6 +133,7 @@ type DisplayStock = StockData & {
   trustGovernor?: TrustGovernorDiagnostic;
   recovery?: RecoveryDiagnostic;
   resolve?: ResolveDiagnostic;
+  wisdom?: WisdomDiagnostic;
   discoveryScore?: number;
   discoveryLifecycle?: string;
   candidateProgression?: Array<any>;
@@ -131,7 +153,12 @@ type IntelligenceStock = DisplayStock & {
   explanation: string;
   sizingMode?: "none" | "micro" | "small" | "normal" | "large" | "maxSafe";
   sizingReasons?: string[];
-  sizingConstraints?: Array<{ id: string; label?: string; passed: boolean; reason?: string }>;
+  sizingConstraints?: Array<{
+    id: string;
+    label?: string;
+    passed: boolean;
+    reason?: string;
+  }>;
   sizingRationale?: string[];
   opportunityDiscovery?: any;
   discovery?: any;
@@ -144,6 +171,7 @@ type IntelligenceStock = DisplayStock & {
   trustGovernor?: TrustGovernorDiagnostic;
   recovery?: RecoveryDiagnostic;
   resolve?: ResolveDiagnostic;
+  wisdom?: WisdomDiagnostic;
   discoveryScore?: number;
   discoveryLifecycle?: string;
   candidateProgression?: Array<any>;
@@ -151,13 +179,64 @@ type IntelligenceStock = DisplayStock & {
 };
 
 const MARKET_SCHEDULES: Array<{ match: RegExp; schedule: MarketSchedule }> = [
-  { match: /BINANCE|CRYPTO/i, schedule: { timeZone: "UTC", open: [0, 0], close: [24, 0], weekend: [] } },
-  { match: /ADX|DFM|DUBAI|ABU DHABI|UAE/i, schedule: { timeZone: "Asia/Dubai", open: [10, 0], close: [15, 0], weekend: [0, 6] } },
-  { match: /B3|BMFBOVESPA|BRASIL/i, schedule: { timeZone: "America/Sao_Paulo", open: [10, 0], close: [17, 0], weekend: [0, 6] } },
-  { match: /NASDAQ|NYSE|AMEX|ARCA|BATS|IEX|US\b/i, schedule: { timeZone: "America/New_York", open: [9, 30], close: [16, 0], weekend: [0, 6] } },
-  { match: /LSE|LONDON|AIM|UK\b/i, schedule: { timeZone: "Europe/London", open: [8, 0], close: [16, 30], weekend: [0, 6] } },
-  { match: /EURONEXT|PARIS|AMSTERDAM|BRUSSELS|LISBON/i, schedule: { timeZone: "Europe/Paris", open: [9, 0], close: [17, 30], weekend: [0, 6] } },
-  { match: /TSE|TOKYO|JAPAN|JP\b/i, schedule: { timeZone: "Asia/Tokyo", open: [9, 0], close: [15, 0], weekend: [0, 6] } },
+  {
+    match: /BINANCE|CRYPTO/i,
+    schedule: { timeZone: "UTC", open: [0, 0], close: [24, 0], weekend: [] },
+  },
+  {
+    match: /ADX|DFM|DUBAI|ABU DHABI|UAE/i,
+    schedule: {
+      timeZone: "Asia/Dubai",
+      open: [10, 0],
+      close: [15, 0],
+      weekend: [0, 6],
+    },
+  },
+  {
+    match: /B3|BMFBOVESPA|BRASIL/i,
+    schedule: {
+      timeZone: "America/Sao_Paulo",
+      open: [10, 0],
+      close: [17, 0],
+      weekend: [0, 6],
+    },
+  },
+  {
+    match: /NASDAQ|NYSE|AMEX|ARCA|BATS|IEX|US\b/i,
+    schedule: {
+      timeZone: "America/New_York",
+      open: [9, 30],
+      close: [16, 0],
+      weekend: [0, 6],
+    },
+  },
+  {
+    match: /LSE|LONDON|AIM|UK\b/i,
+    schedule: {
+      timeZone: "Europe/London",
+      open: [8, 0],
+      close: [16, 30],
+      weekend: [0, 6],
+    },
+  },
+  {
+    match: /EURONEXT|PARIS|AMSTERDAM|BRUSSELS|LISBON/i,
+    schedule: {
+      timeZone: "Europe/Paris",
+      open: [9, 0],
+      close: [17, 30],
+      weekend: [0, 6],
+    },
+  },
+  {
+    match: /TSE|TOKYO|JAPAN|JP\b/i,
+    schedule: {
+      timeZone: "Asia/Tokyo",
+      open: [9, 0],
+      close: [15, 0],
+      weekend: [0, 6],
+    },
+  },
 ];
 
 const DEFAULT_MARKET_SCHEDULE: MarketSchedule = {
@@ -220,7 +299,6 @@ const MARKET_EXECUTION_PRESETS = {
   },
 };
 
-
 function normalizeStrategyArray(payload: any) {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.data)) return payload.data;
@@ -238,12 +316,14 @@ function normalizeStrategySummary(payload: any) {
   return payload;
 }
 
-
 function executionPresetForMarket(market: string) {
   const normalized = market.trim().toUpperCase();
 
   if (/BINANCE|CRYPTO/.test(normalized)) {
-    return { profile: "CRYPTO_LIQUID", ...MARKET_EXECUTION_PRESETS.CRYPTO_LIQUID };
+    return {
+      profile: "CRYPTO_LIQUID",
+      ...MARKET_EXECUTION_PRESETS.CRYPTO_LIQUID,
+    };
   }
 
   if (/B3|BMFBOVESPA|BRASIL|BRAZIL/.test(normalized)) {
@@ -251,18 +331,34 @@ function executionPresetForMarket(market: string) {
   }
 
   if (/NASDAQ|NYSE|AMEX|ARCA|BATS|IEX|US\b|USA/.test(normalized)) {
-    return { profile: "US_LARGE_CAP", ...MARKET_EXECUTION_PRESETS.US_LARGE_CAP };
+    return {
+      profile: "US_LARGE_CAP",
+      ...MARKET_EXECUTION_PRESETS.US_LARGE_CAP,
+    };
   }
 
-  if (/LSE|LONDON|AIM|UK\b|EURONEXT|PARIS|AMSTERDAM|BRUSSELS|LISBON|EUROPE/.test(normalized)) {
-    return { profile: "EUROPE_LIQUID", ...MARKET_EXECUTION_PRESETS.EUROPE_LIQUID };
+  if (
+    /LSE|LONDON|AIM|UK\b|EURONEXT|PARIS|AMSTERDAM|BRUSSELS|LISBON|EUROPE/.test(
+      normalized,
+    )
+  ) {
+    return {
+      profile: "EUROPE_LIQUID",
+      ...MARKET_EXECUTION_PRESETS.EUROPE_LIQUID,
+    };
   }
 
   if (/TSE|TOKYO|JAPAN|JP\b/.test(normalized)) {
-    return { profile: "JAPAN_LIQUID", ...MARKET_EXECUTION_PRESETS.JAPAN_LIQUID };
+    return {
+      profile: "JAPAN_LIQUID",
+      ...MARKET_EXECUTION_PRESETS.JAPAN_LIQUID,
+    };
   }
 
-  return { profile: "CRYPTO_LIQUID", ...MARKET_EXECUTION_PRESETS.CRYPTO_LIQUID };
+  return {
+    profile: "CRYPTO_LIQUID",
+    ...MARKET_EXECUTION_PRESETS.CRYPTO_LIQUID,
+  };
 }
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -272,7 +368,6 @@ function cx(...classes: Array<string | false | null | undefined>) {
 function clamp(value: number, min = 0, max = 100) {
   return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
 }
-
 
 function asChartData<T = any>(value: any): T[] {
   if (Array.isArray(value)) return value;
@@ -285,7 +380,6 @@ function asChartData<T = any>(value: any): T[] {
 
   return [];
 }
-
 
 function numeric(value: unknown, fallback = 0) {
   if (value == null) return fallback;
@@ -332,28 +426,42 @@ function marketCode(market: MarketOption | string): string {
   const anyMarket = market as any;
   return String(
     anyMarket.code ??
-    anyMarket.value ??
-    anyMarket.id ??
-    anyMarket.name ??
-    anyMarket.label ??
-    "",
+      anyMarket.value ??
+      anyMarket.id ??
+      anyMarket.name ??
+      anyMarket.label ??
+      "",
   );
 }
 
 function marketLabel(market: MarketOption | string): string {
   if (typeof market === "string") return market;
   const anyMarket = market as any;
-  return String(anyMarket.label ?? anyMarket.name ?? anyMarket.code ?? anyMarket.value ?? "");
+  return String(
+    anyMarket.label ??
+      anyMarket.name ??
+      anyMarket.code ??
+      anyMarket.value ??
+      "",
+  );
 }
 
 function resolveMarketSchedule(market: string): MarketSchedule {
   const normalized = market.trim().toUpperCase();
-  return MARKET_SCHEDULES.find((entry) => entry.match.test(normalized))?.schedule ?? DEFAULT_MARKET_SCHEDULE;
+  return (
+    MARKET_SCHEDULES.find((entry) => entry.match.test(normalized))?.schedule ??
+    DEFAULT_MARKET_SCHEDULE
+  );
 }
 
 function getMarketStatus(market: string): "Open" | "Closed" {
   const schedule = resolveMarketSchedule(market);
-  if (schedule.open[0] === 0 && schedule.close[0] === 24 && schedule.weekend.length === 0) return "Open";
+  if (
+    schedule.open[0] === 0 &&
+    schedule.close[0] === 24 &&
+    schedule.weekend.length === 0
+  )
+    return "Open";
 
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone: schedule.timeZone,
@@ -364,18 +472,30 @@ function getMarketStatus(market: string): "Open" | "Closed" {
   });
   const parts = formatter.formatToParts(new Date());
   const hour = Number(parts.find((part) => part.type === "hour")?.value ?? 0);
-  const minute = Number(parts.find((part) => part.type === "minute")?.value ?? 0);
-  const weekdayText = parts.find((part) => part.type === "weekday")?.value ?? "";
-  const weekdayMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  const minute = Number(
+    parts.find((part) => part.type === "minute")?.value ?? 0,
+  );
+  const weekdayText =
+    parts.find((part) => part.type === "weekday")?.value ?? "";
+  const weekdayMap: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
   const day = weekdayMap[weekdayText] ?? 0;
   if (schedule.weekend.includes(day)) return "Closed";
 
   const nowMinutes = hour * 60 + minute;
   const openMinutes = schedule.open[0] * 60 + schedule.open[1];
   const closeMinutes = schedule.close[0] * 60 + schedule.close[1];
-  const isOpen = closeMinutes >= openMinutes
-    ? nowMinutes >= openMinutes && nowMinutes < closeMinutes
-    : nowMinutes >= openMinutes || nowMinutes < closeMinutes;
+  const isOpen =
+    closeMinutes >= openMinutes
+      ? nowMinutes >= openMinutes && nowMinutes < closeMinutes
+      : nowMinutes >= openMinutes || nowMinutes < closeMinutes;
 
   return isOpen ? "Open" : "Closed";
 }
@@ -384,18 +504,28 @@ function normalizedTicker(stock: Partial<DisplayStock> & { symbol?: string }) {
   return String(stock.ticker ?? stock.symbol ?? "").trim();
 }
 
-function instrumentMatchKeys(value: Partial<DisplayStock> | Record<string, any>) {
-  const raw = String(value?.ticker ?? value?.symbol ?? "").trim().toUpperCase();
+function instrumentMatchKeys(
+  value: Partial<DisplayStock> | Record<string, any>,
+) {
+  const raw = String(value?.ticker ?? value?.symbol ?? "")
+    .trim()
+    .toUpperCase();
   const bare = raw.replace(/^[A-Z0-9_]+:/, "");
   return Array.from(new Set([raw, bare].filter(Boolean)));
 }
 
 function stockName(stock: Partial<DisplayStock>) {
-  return String((stock as any).name ?? (stock as any).description ?? normalizedTicker(stock));
+  return String(
+    (stock as any).name ??
+      (stock as any).description ??
+      normalizedTicker(stock),
+  );
 }
 
 function hasStockEvidence(stock: Partial<DisplayStock>) {
-  const history = Array.isArray((stock as any).history) ? (stock as any).history : [];
+  const history = Array.isArray((stock as any).history)
+    ? (stock as any).history
+    : [];
   const price = positiveNumberOrNull((stock as any).price);
   const changePercent = optionalNumber((stock as any).changePercent);
   const signalConfidence = optionalNumber((stock as any).signalConfidence);
@@ -410,12 +540,20 @@ function hasStockEvidence(stock: Partial<DisplayStock>) {
   );
 }
 
-function quoteHasLivePrice(quote: Partial<StockQuote> | Partial<DisplayStock> | Record<string, unknown>) {
-  return positiveNumberOrNull((quote as any).price ?? (quote as any).last ?? (quote as any).close) != null;
+function quoteHasLivePrice(
+  quote: Partial<StockQuote> | Partial<DisplayStock> | Record<string, unknown>,
+) {
+  return (
+    positiveNumberOrNull(
+      (quote as any).price ?? (quote as any).last ?? (quote as any).close,
+    ) != null
+  );
 }
 
 function hasLiveQuoteCoverage(list: DisplayStock[]) {
-  return list.some((item) => item.quoteStatus === "available" || quoteHasLivePrice(item));
+  return list.some(
+    (item) => item.quoteStatus === "available" || quoteHasLivePrice(item),
+  );
 }
 
 function hasSessionMarketCoverage(list: DisplayStock[]) {
@@ -424,8 +562,13 @@ function hasSessionMarketCoverage(list: DisplayStock[]) {
 
 function dataCoverageLabel(stock: Partial<DisplayStock>) {
   if (stock.quoteStatus === "available") return "live quote";
-  if (stock.signalStatus === "provided" || stock.signalStatus === "confirmed") return "signal";
-  if (Array.isArray((stock as any).history) && (stock as any).history.length >= 2) return "history";
+  if (stock.signalStatus === "provided" || stock.signalStatus === "confirmed")
+    return "signal";
+  if (
+    Array.isArray((stock as any).history) &&
+    (stock as any).history.length >= 2
+  )
+    return "history";
   return "pending";
 }
 
@@ -435,13 +578,16 @@ function historyReturns(history?: number[]) {
   for (let i = 1; i < history.length; i += 1) {
     const prev = Number(history[i - 1]);
     const next = Number(history[i]);
-    if (prev > 0 && Number.isFinite(next)) values.push(((next - prev) / prev) * 100);
+    if (prev > 0 && Number.isFinite(next))
+      values.push(((next - prev) / prev) * 100);
   }
   return values;
 }
 
 function mean(values: number[]) {
-  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+  return values.length
+    ? values.reduce((sum, value) => sum + value, 0) / values.length
+    : 0;
 }
 
 function stdev(values: number[]) {
@@ -484,12 +630,24 @@ function metricsFromCurve(curve: Array<any>) {
   const returns = equityReturnsFromCurve(curve);
   const avgReturn = mean(returns);
   const volatility = stdev(returns);
-  const annualizedSharpe = volatility > 0 ? (avgReturn / volatility) * Math.sqrt(252) : null;
+  const annualizedSharpe =
+    volatility > 0 ? (avgReturn / volatility) * Math.sqrt(252) : null;
 
-  const grossProfit = returns.filter((value) => value > 0).reduce((sum, value) => sum + value, 0);
-  const grossLoss = Math.abs(returns.filter((value) => value < 0).reduce((sum, value) => sum + value, 0));
-  const profitFactor = grossLoss === 0 ? (grossProfit > 0 ? Infinity : null) : grossProfit / grossLoss;
-  const winRatePct = returns.length ? (returns.filter((value) => value > 0).length / returns.length) * 100 : null;
+  const grossProfit = returns
+    .filter((value) => value > 0)
+    .reduce((sum, value) => sum + value, 0);
+  const grossLoss = Math.abs(
+    returns.filter((value) => value < 0).reduce((sum, value) => sum + value, 0),
+  );
+  const profitFactor =
+    grossLoss === 0
+      ? grossProfit > 0
+        ? Infinity
+        : null
+      : grossProfit / grossLoss;
+  const winRatePct = returns.length
+    ? (returns.filter((value) => value > 0).length / returns.length) * 100
+    : null;
 
   let peak = numeric(curve[0]?.equity);
   let maxDrawdownPct = 0;
@@ -507,7 +665,10 @@ function metricsFromCurve(curve: Array<any>) {
   const first = curve[0];
 
   return {
-    totalReturnPct: numeric(first?.equity) > 0 ? ((numeric(last?.equity) / numeric(first?.equity)) - 1) * 100 : null,
+    totalReturnPct:
+      numeric(first?.equity) > 0
+        ? (numeric(last?.equity) / numeric(first?.equity) - 1) * 100
+        : null,
     annualizedSharpe,
     profitFactor,
     winRatePct,
@@ -516,7 +677,12 @@ function metricsFromCurve(curve: Array<any>) {
   };
 }
 
-function applyExecutionCostsToCurve(curve: Array<any>, trades: Array<any>, commissionBps: number, slippageBps: number) {
+function applyExecutionCostsToCurve(
+  curve: Array<any>,
+  trades: Array<any>,
+  commissionBps: number,
+  slippageBps: number,
+) {
   const totalCostBps = Math.max(0, commissionBps) + Math.max(0, slippageBps);
 
   if (!curve.length || !trades.length || totalCostBps <= 0) return curve;
@@ -532,10 +698,16 @@ function applyExecutionCostsToCurve(curve: Array<any>, trades: Array<any>, commi
     const entryDate = dateKey(trade.entryDate);
     const exitDate = dateKey(trade.exitDate);
 
-    events.set(entryDate, (events.get(entryDate) ?? 0) + exposure * commissionRate);
+    events.set(
+      entryDate,
+      (events.get(entryDate) ?? 0) + exposure * commissionRate,
+    );
 
     if (exitDate) {
-      events.set(exitDate, (events.get(exitDate) ?? 0) + exposure * commissionRate);
+      events.set(
+        exitDate,
+        (events.get(exitDate) ?? 0) + exposure * commissionRate,
+      );
     }
   }
 
@@ -550,17 +722,20 @@ function applyExecutionCostsToCurve(curve: Array<any>, trades: Array<any>, commi
     }
 
     const adjustedEquity = numeric(point.equity) * dragFactor;
-    const baseEquity = index === 0 ? adjustedEquity : numeric(curve[0]?.equity) * dragFactor;
+    const baseEquity =
+      index === 0 ? adjustedEquity : numeric(curve[0]?.equity) * dragFactor;
 
     return {
       ...point,
       equity: adjustedEquity,
-      returnPct: baseEquity > 0 ? ((adjustedEquity / baseEquity) - 1) * 100 : numeric(point.returnPct),
+      returnPct:
+        baseEquity > 0
+          ? (adjustedEquity / baseEquity - 1) * 100
+          : numeric(point.returnPct),
       commissionAdjusted: true,
     };
   });
 }
-
 
 type ConfidenceGate = {
   key: string;
@@ -610,37 +785,43 @@ export function resolveDashboardNeedDiagnostics(input: {
 
   if (!commitmentBlocked) return input.rawNeeds;
 
-  const trustedConfidence = input.calibratedConfidence ?? input.rawConfidence ?? 50;
+  const trustedConfidence =
+    input.calibratedConfidence ?? input.rawConfidence ?? 50;
   const severity = Math.round(clamp(Math.max(35, 100 - trustedConfidence)));
-  const confidence = Math.round(clamp(
-    input.calibrationTrustworthiness ??
-      input.calibratedConfidence ??
-      input.rawConfidence ??
-      50,
-  ));
-  const explanation = input.strategyReadinessBlocked && calibrationRequiresReview
-    ? "Strategy readiness and calibration gates block participation; wait for readiness and outcome stability before increasing exposure."
-    : input.strategyReadinessBlocked
-      ? "Strategy readiness gates block participation; wait for readiness before increasing exposure."
-    : input.calibrationStatus === "unstable-outcomes"
-      ? "Calibration history has enough samples, but outcomes are unstable; wait for similar signals to become more consistent before increasing participation."
-      : input.calibrationStatus === "poor-calibration"
-        ? "Historical calibration is not reliable enough yet; keep this review-gated before increasing participation."
-        : input.calibrationStatus === "insufficient-history"
-          ? "Calibration history is still insufficient; keep this review-gated before increasing participation."
-          : "Sizing gates set available capacity to zero; wait until commitment capacity reopens.";
+  const confidence = Math.round(
+    clamp(
+      input.calibrationTrustworthiness ??
+        input.calibratedConfidence ??
+        input.rawConfidence ??
+        50,
+    ),
+  );
+  const explanation =
+    input.strategyReadinessBlocked && calibrationRequiresReview
+      ? "Strategy readiness and calibration gates block participation; wait for readiness and outcome stability before increasing exposure."
+      : input.strategyReadinessBlocked
+        ? "Strategy readiness gates block participation; wait for readiness before increasing exposure."
+        : input.calibrationStatus === "unstable-outcomes"
+          ? "Calibration history has enough samples, but outcomes are unstable; wait for similar signals to become more consistent before increasing participation."
+          : input.calibrationStatus === "poor-calibration"
+            ? "Historical calibration is not reliable enough yet; keep this review-gated before increasing participation."
+            : input.calibrationStatus === "insufficient-history"
+              ? "Calibration history is still insufficient; keep this review-gated before increasing participation."
+              : "Sizing gates set available capacity to zero; wait until commitment capacity reopens.";
 
-  return [{
-    needId: `wait:${severity}`,
-    category: "wait",
-    severity,
-    confidence,
-    explanation,
-    recommendations: [
-      "Keep the objective under human review until the blocking gate clears.",
-      "Do not convert improving perception signals into action while commitment is blocked.",
-    ],
-  }];
+  return [
+    {
+      needId: `wait:${severity}`,
+      category: "wait",
+      severity,
+      confidence,
+      explanation,
+      recommendations: [
+        "Keep the objective under human review until the blocking gate clears.",
+        "Do not convert improving perception signals into action while commitment is blocked.",
+      ],
+    },
+  ];
 }
 
 function formatGateNumber(value: unknown, digits = 2) {
@@ -679,23 +860,39 @@ function extractSegmentCount(summary: any) {
 }
 
 function extractBenchmarkPass(summary: any) {
-  if (summary?.benchmarkPassed === true || summary?.benchmarkStatus === "Pass" || summary?.benchmarkComparison === "Pass") {
+  if (
+    summary?.benchmarkPassed === true ||
+    summary?.benchmarkStatus === "Pass" ||
+    summary?.benchmarkComparison === "Pass"
+  ) {
     return true;
   }
 
-  if (summary?.benchmarkPassed === false || summary?.benchmarkStatus === "Failed" || summary?.benchmarkComparison === "Failed") {
+  if (
+    summary?.benchmarkPassed === false ||
+    summary?.benchmarkStatus === "Failed" ||
+    summary?.benchmarkComparison === "Failed"
+  ) {
     return false;
   }
 
-  const excessReturn = finiteNumber(summary?.excessReturnPct ?? summary?.excess_return_pct);
-  const excessSharpe = finiteNumber(summary?.excessSharpe ?? summary?.excess_sharpe);
+  const excessReturn = finiteNumber(
+    summary?.excessReturnPct ?? summary?.excess_return_pct,
+  );
+  const excessSharpe = finiteNumber(
+    summary?.excessSharpe ?? summary?.excess_sharpe,
+  );
 
   if (excessReturn == null && excessSharpe == null) return null;
 
   return (excessReturn ?? 0) >= 0 && (excessSharpe ?? 0) >= -0.1;
 }
 
-function extractRegimeConsistency(summary: any, currentRegime: string, trades: Array<any>) {
+function extractRegimeConsistency(
+  summary: any,
+  currentRegime: string,
+  trades: Array<any>,
+) {
   const explicit =
     finiteNumber(summary?.regimeConsistencyPct) ??
     finiteNumber(summary?.regime_consistency_pct) ??
@@ -706,7 +903,11 @@ function extractRegimeConsistency(summary: any, currentRegime: string, trades: A
 
   const current = normalizeRegimeLabel(currentRegime);
   const regimeTrades = trades
-    .map((trade) => normalizeRegimeLabel(trade.regime ?? trade.marketRegime ?? trade.market_regime))
+    .map((trade) =>
+      normalizeRegimeLabel(
+        trade.regime ?? trade.marketRegime ?? trade.market_regime,
+      ),
+    )
     .filter(Boolean);
 
   if (!current || !regimeTrades.length) return null;
@@ -736,13 +937,18 @@ function extractAverageHoldingDays(summary: any, trades: Array<any>) {
 
       if (explicitTradeDuration != null) return explicitTradeDuration;
 
-      const entry = Date.parse(String(trade.entryDate ?? trade.entry_date ?? ""));
+      const entry = Date.parse(
+        String(trade.entryDate ?? trade.entry_date ?? ""),
+      );
       const exit = Date.parse(String(trade.exitDate ?? trade.exit_date ?? ""));
 
-      if (!Number.isFinite(entry) || !Number.isFinite(exit) || exit < entry) return null;
+      if (!Number.isFinite(entry) || !Number.isFinite(exit) || exit < entry)
+        return null;
       return Math.max(1, Math.round((exit - entry) / 86_400_000));
     })
-    .filter((value): value is number => value != null && Number.isFinite(value));
+    .filter(
+      (value): value is number => value != null && Number.isFinite(value),
+    );
 
   return durations.length ? mean(durations) : null;
 }
@@ -797,7 +1003,9 @@ function computeSurvivalScore(input: {
 }
 
 function productionStage(score: number, gates: ConfidenceGate[]) {
-  const failedBadGates = gates.filter((gate) => !gate.passed && gate.severity === "bad").length;
+  const failedBadGates = gates.filter(
+    (gate) => !gate.passed && gate.severity === "bad",
+  ).length;
 
   if (score >= 85 && failedBadGates === 0) return "Production eligible";
   if (score >= 70 && failedBadGates <= 1) return "Forward-test eligible";
@@ -806,12 +1014,13 @@ function productionStage(score: number, gates: ConfidenceGate[]) {
   return "Not ready";
 }
 
-
 function applyBackendBlockersToConfidenceGates(
   gates: ConfidenceGate[],
   summary: any,
 ): ConfidenceGate[] {
-  const flags = Array.isArray(summary?.failureFlags) ? summary.failureFlags : [];
+  const flags = Array.isArray(summary?.failureFlags)
+    ? summary.failureFlags
+    : [];
 
   const blocked =
     summary?.promotionBlocked === true ||
@@ -856,16 +1065,13 @@ function applyBackendBlockersToConfidenceGates(
   const hasWalkForwardInstability =
     flags.includes("WALK_FORWARD_UNSTABLE") ||
     flags.includes("OVERFIT_WALK_FORWARD_INSTABILITY");
-  const hasProfitFactorOverfit =
-    flags.includes("OVERFIT_PROFIT_FACTOR");
-  const hasParameterInstability =
-    flags.includes("PARAMETER_INSTABILITY");
+  const hasProfitFactorOverfit = flags.includes("OVERFIT_PROFIT_FACTOR");
+  const hasParameterInstability = flags.includes("PARAMETER_INSTABILITY");
   const hasConcentrationDependency =
     flags.includes("OUTLIER_DEPENDENCY") ||
     flags.includes("OVERFIT_TOP_WINNER_DEPENDENCY") ||
     flags.includes("OVERFIT_SEGMENT_CONCENTRATION");
-  const hasLiveSignalMismatch =
-    flags.includes("LIVE_SIGNAL_MISMATCH");
+  const hasLiveSignalMismatch = flags.includes("LIVE_SIGNAL_MISMATCH");
   const hasRobustnessFailure =
     flags.includes("ROBUSTNESS_OVERFIT_RISK") ||
     flags.includes("ROBUSTNESS_EXECUTION_BLOCKED") ||
@@ -880,10 +1086,18 @@ function applyBackendBlockersToConfidenceGates(
     flags.includes("WEAK_BENCHMARK_MARGIN") ||
     summary?.benchmarkStatus === "Failed" ||
     summary?.benchmarkPassed === false ||
-    Number(summary?.excessReturnPct ?? summary?.excess_return_pct ?? summary?.excessReturn ?? 0) < 0;
+    Number(
+      summary?.excessReturnPct ??
+        summary?.excess_return_pct ??
+        summary?.excessReturn ??
+        0,
+    ) < 0;
 
   return gates.map((gate) => {
-    if (gate.key === "walkForward" && (hasInsufficientSegments || hasWalkForwardInstability)) {
+    if (
+      gate.key === "walkForward" &&
+      (hasInsufficientSegments || hasWalkForwardInstability)
+    ) {
       return {
         ...gate,
         passed: false,
@@ -896,12 +1110,17 @@ function applyBackendBlockersToConfidenceGates(
 
     if (gate.key === "sameEngine" && hasLiveSignalMismatch) {
       const forwardShadow = summary?.forwardShadow ?? {};
-      const averageReturn = finiteNumber(forwardShadow?.averageReturnPct ?? forwardShadow?.meanReturnPct);
+      const averageReturn = finiteNumber(
+        forwardShadow?.averageReturnPct ?? forwardShadow?.meanReturnPct,
+      );
 
       return {
         ...gate,
         passed: false,
-        value: averageReturn == null ? "Forward evidence failed" : `Forward avg ${fmtPct(averageReturn)}`,
+        value:
+          averageReturn == null
+            ? "Forward evidence failed"
+            : `Forward avg ${fmtPct(averageReturn)}`,
         severity: "warn",
       };
     }
@@ -910,7 +1129,9 @@ function applyBackendBlockersToConfidenceGates(
       return {
         ...gate,
         passed: false,
-        value: flags.includes("LOW_SHARPE") ? "Sharpe below 1.00" : "Statistically unreliable",
+        value: flags.includes("LOW_SHARPE")
+          ? "Sharpe below 1.00"
+          : "Statistically unreliable",
         severity: "warn",
       };
     }
@@ -924,8 +1145,10 @@ function applyBackendBlockersToConfidenceGates(
           : flags.includes("ZERO_DRAWDOWN_WITH_TRADES")
             ? "Suspicious zero drawdown"
             : flags.includes("INVALID_DRAWDOWN")
-            ? "Unavailable"
-            : fmtPlainPct(summary?.maxDrawdownPct ?? summary?.max_drawdown_pct ?? 0),
+              ? "Unavailable"
+              : fmtPlainPct(
+                  summary?.maxDrawdownPct ?? summary?.max_drawdown_pct ?? 0,
+                ),
         severity: "warn",
       };
     }
@@ -974,7 +1197,9 @@ function applyBackendBlockersToConfidenceGates(
       return {
         ...gate,
         passed: false,
-        value: flags.includes("ROBUSTNESS_EXECUTION_BLOCKED") ? "Safety gate blocked" : gate.value,
+        value: flags.includes("ROBUSTNESS_EXECUTION_BLOCKED")
+          ? "Safety gate blocked"
+          : gate.value,
         severity: "bad",
       };
     }
@@ -982,8 +1207,6 @@ function applyBackendBlockersToConfidenceGates(
     return gate;
   });
 }
-
-
 
 function formatPromotionBlocker(flag: string, summary?: any) {
   if (flag === "NEEDS_FORWARD_SHADOW") {
@@ -1002,20 +1225,27 @@ function formatPromotionBlocker(flag: string, summary?: any) {
     SUSPICIOUS_SHARPE: "Risk-adjusted return is not reliable enough yet",
     ZERO_DRAWDOWN_WITH_TRADES: "The drawdown result looks unrealistic",
     INSUFFICIENT_WALK_FORWARD_SEGMENTS: "More test periods are needed",
-    BENCHMARK_UNDERPERFORMANCE: "The strategy did not beat the simple benchmark",
-    SEVERE_BENCHMARK_UNDERPERFORMANCE: "The strategy was far below the simple benchmark",
+    BENCHMARK_UNDERPERFORMANCE:
+      "The strategy did not beat the simple benchmark",
+    SEVERE_BENCHMARK_UNDERPERFORMANCE:
+      "The strategy was far below the simple benchmark",
     BENCHMARK_COMPARISON_FAILED: "Benchmark comparison failed",
     INVALID_DRAWDOWN: "Drawdown could not be checked",
     BENCHMARK_FAILED: "The strategy failed the benchmark check",
-    WEAK_BENCHMARK_MARGIN: "The benchmark edge is too small after safety margin",
+    WEAK_BENCHMARK_MARGIN:
+      "The benchmark edge is too small after safety margin",
     OVERFIT_PROFIT_FACTOR: "Profit factor or win rate looks too clean",
-    OVERFIT_LOW_DRAWDOWN: "Drawdown is too clean for the return and trade count",
-    OVERFIT_WALK_FORWARD_INSTABILITY: "Walk-forward returns are not stable enough",
-    SYNTHETIC_DATA_FOR_PROMOTION: "Synthetic historical data cannot support live testing",
+    OVERFIT_LOW_DRAWDOWN:
+      "Drawdown is too clean for the return and trade count",
+    OVERFIT_WALK_FORWARD_INSTABILITY:
+      "Walk-forward returns are not stable enough",
+    SYNTHETIC_DATA_FOR_PROMOTION:
+      "Synthetic historical data cannot support live testing",
     DATA_QUALITY_NOT_PROMOTABLE: "Historical data quality is not strong enough",
     PARAMETER_INSTABILITY: "Nearby parameter variants do not preserve the edge",
     OVERFIT_TOP_WINNER_DEPENDENCY: "Results depend too much on a few winners",
-    OVERFIT_SEGMENT_CONCENTRATION: "Returns are too concentrated in one test period",
+    OVERFIT_SEGMENT_CONCENTRATION:
+      "Returns are too concentrated in one test period",
     NEEDS_FORWARD_SHADOW: "Forward shadow evidence is required",
     LOW_SHARPE: "Risk-adjusted return is below the minimum",
     INSUFFICIENT_STRATEGY_EDGE: "Strategy edge is not strong enough",
@@ -1028,14 +1258,19 @@ function formatPromotionBlocker(flag: string, summary?: any) {
   return labels[flag] ?? flag;
 }
 
-function promotionBlockerGroup(flag: string): { key: string; label: string; priority: number } | null {
+function promotionBlockerGroup(
+  flag: string,
+): { key: string; label: string; priority: number } | null {
   const text = String(flag ?? "").toLowerCase();
   const code = String(flag ?? "")
     .trim()
     .toUpperCase()
     .replace(/[^A-Z0-9]+/g, "_");
 
-  if (/DATA|SYNTHETIC|STALE|MARKET_DATA_UNAVAILABLE/.test(code) || text.includes("market data")) {
+  if (
+    /DATA|SYNTHETIC|STALE|MARKET_DATA_UNAVAILABLE/.test(code) ||
+    text.includes("market data")
+  ) {
     return {
       key: "data",
       label: "Confirm data quality and freshness before live testing.",
@@ -1046,7 +1281,8 @@ function promotionBlockerGroup(flag: string): { key: string; label: string; prio
   if (/SHARPE|STRATEGY_EDGE/.test(code) || text.includes("risk-adjusted")) {
     return {
       key: "risk-adjusted-return",
-      label: "Improve risk-adjusted return; current Sharpe is below the live-test minimum.",
+      label:
+        "Improve risk-adjusted return; current Sharpe is below the live-test minimum.",
       priority: 10,
     };
   }
@@ -1054,20 +1290,30 @@ function promotionBlockerGroup(flag: string): { key: string; label: string; prio
   if (/BENCHMARK/.test(code) || text.includes("benchmark")) {
     return {
       key: "benchmark",
-      label: "Rebuild benchmark edge; returns do not clear the benchmark safety margin.",
+      label:
+        "Rebuild benchmark edge; returns do not clear the benchmark safety margin.",
       priority: 20,
     };
   }
 
-  if (/DRAWDOWN|HIGH_DRAWDOWN/.test(code) || text.includes("past loss") || text.includes("drawdown")) {
+  if (
+    /DRAWDOWN|HIGH_DRAWDOWN/.test(code) ||
+    text.includes("past loss") ||
+    text.includes("drawdown")
+  ) {
     return {
       key: "drawdown",
-      label: "Reduce drawdown; past loss level is above the strategy risk limit.",
+      label:
+        "Reduce drawdown; past loss level is above the strategy risk limit.",
       priority: 30,
     };
   }
 
-  if (/WALK_FORWARD|SEGMENT|PERIOD/.test(code) || text.includes("walk-forward") || text.includes("test period")) {
+  if (
+    /WALK_FORWARD|SEGMENT|PERIOD/.test(code) ||
+    text.includes("walk-forward") ||
+    text.includes("test period")
+  ) {
     return {
       key: "walk-forward",
       label: "Stabilize walk-forward results across independent test periods.",
@@ -1078,23 +1324,34 @@ function promotionBlockerGroup(flag: string): { key: string; label: string; prio
   if (/PARAMETER/.test(code) || text.includes("parameter")) {
     return {
       key: "parameter-robustness",
-      label: "Improve parameter robustness; nearby variants do not preserve the edge.",
+      label:
+        "Improve parameter robustness; nearby variants do not preserve the edge.",
       priority: 50,
     };
   }
 
-  if (/OUTLIER|TOP_WINNER|CONCENTRATION/.test(code) || text.includes("few winners") || text.includes("concentrated")) {
+  if (
+    /OUTLIER|TOP_WINNER|CONCENTRATION/.test(code) ||
+    text.includes("few winners") ||
+    text.includes("concentrated")
+  ) {
     return {
       key: "concentration",
-      label: "Reduce concentration risk; results depend too much on a few winners or periods.",
+      label:
+        "Reduce concentration risk; results depend too much on a few winners or periods.",
       priority: 60,
     };
   }
 
-  if (/FORWARD_SHADOW|LIVE_SIGNAL/.test(code) || text.includes("confirmed live") || text.includes("forward signal")) {
+  if (
+    /FORWARD_SHADOW|LIVE_SIGNAL/.test(code) ||
+    text.includes("confirmed live") ||
+    text.includes("forward signal")
+  ) {
     return {
       key: "forward-evidence",
-      label: "Collect more forward-shadow evidence from the same live signal engine.",
+      label:
+        "Collect more forward-shadow evidence from the same live signal engine.",
       priority: 70,
     };
   }
@@ -1119,7 +1376,10 @@ function summarizePromotionBlockers(flags: string[], summary?: any) {
     if (group) {
       const existing = grouped.get(group.key);
       if (!existing || group.priority < existing.priority) {
-        grouped.set(group.key, { label: group.label, priority: group.priority });
+        grouped.set(group.key, {
+          label: group.label,
+          priority: group.priority,
+        });
       }
       continue;
     }
@@ -1141,11 +1401,18 @@ function gateStatusLabel(gate: ConfidenceGate) {
   return "Watch";
 }
 
-
 function productionTone(stage: string): "good" | "warn" | "bad" | "neutral" {
   if (stage === "Production eligible") return "good";
-  if (stage === "Forward-test eligible" || stage === "Research validated" || stage === "Shadow test" || stage === "Paper trade" || stage === "Limited live") return "warn";
-  if (stage === "Not ready" || stage === "Research only" || stage === "Blocked") return "bad";
+  if (
+    stage === "Forward-test eligible" ||
+    stage === "Research validated" ||
+    stage === "Shadow test" ||
+    stage === "Paper trade" ||
+    stage === "Limited live"
+  )
+    return "warn";
+  if (stage === "Not ready" || stage === "Research only" || stage === "Blocked")
+    return "bad";
   return "neutral";
 }
 
@@ -1169,49 +1436,73 @@ function plainStageLabel(value: unknown) {
   return labels[text] ?? text;
 }
 
-
 function inferIntelligence(stock: DisplayStock): IntelligenceStock {
   const returns = historyReturns(stock.history).slice(-30);
-  const recentReturn = returns.length ? returns[returns.length - 1] : numeric(stock.changePercent);
+  const recentReturn = returns.length
+    ? returns[returns.length - 1]
+    : numeric(stock.changePercent);
   const avgReturn = mean(returns);
   const volatility = stdev(returns);
-  const positiveBreadth = returns.length ? (returns.filter((r) => r >= 0).length / returns.length) * 100 : 50;
+  const positiveBreadth = returns.length
+    ? (returns.filter((r) => r >= 0).length / returns.length) * 100
+    : 50;
 
   const hasEvidence = hasStockEvidence(stock);
-  const signalConfidence = numeric((stock as any).signalConfidence, stock.signalAction === "Buy" ? 62 : 50);
+  const signalConfidence = numeric(
+    (stock as any).signalConfidence,
+    stock.signalAction === "Buy" ? 62 : 50,
+  );
 
   const inferredTrendQuality = clamp(
     50 +
-    avgReturn * 8 +
-    positiveBreadth * 0.25 +
-    (stock.status === "Rising" ? 12 : 0) -
-    (stock.status === "Dip" ? 18 : 0) +
-    (hasEvidence ? 0 : -18),
+      avgReturn * 8 +
+      positiveBreadth * 0.25 +
+      (stock.status === "Rising" ? 12 : 0) -
+      (stock.status === "Dip" ? 18 : 0) +
+      (hasEvidence ? 0 : -18),
   );
 
   const inferredRiskPressure = clamp(
     volatility * 12 +
-    Math.max(0, -recentReturn) * 5 +
-    (stock.signalAction === "Sell" ? 20 : 0) +
-    (hasEvidence ? 0 : 18),
+      Math.max(0, -recentReturn) * 5 +
+      (stock.signalAction === "Sell" ? 20 : 0) +
+      (hasEvidence ? 0 : 18),
     0,
     100,
   );
 
-  const trendQuality = clamp(numeric((stock as any).trendQuality, inferredTrendQuality));
-  const riskPressure = clamp(numeric((stock as any).riskPressure, inferredRiskPressure));
+  const trendQuality = clamp(
+    numeric((stock as any).trendQuality, inferredTrendQuality),
+  );
+  const riskPressure = clamp(
+    numeric((stock as any).riskPressure, inferredRiskPressure),
+  );
   const setupQuality = clamp(
     numeric(
       (stock as any).setupQuality,
-      signalConfidence * 0.45 + trendQuality * 0.45 + (100 - riskPressure) * 0.1,
+      signalConfidence * 0.45 +
+        trendQuality * 0.45 +
+        (100 - riskPressure) * 0.1,
     ),
   );
-  const timingQuality = clamp(numeric((stock as any).timingQuality, (setupQuality + trendQuality + positiveBreadth) / 3));
-  const expectedMove = numeric((stock as any).expectedMove, numeric((stock as any).signalReturnPercent, recentReturn || avgReturn));
-  const hasProvidedSignal = stock.signalStatus === "provided" || stock.signalStatus === "confirmed";
+  const timingQuality = clamp(
+    numeric(
+      (stock as any).timingQuality,
+      (setupQuality + trendQuality + positiveBreadth) / 3,
+    ),
+  );
+  const expectedMove = numeric(
+    (stock as any).expectedMove,
+    numeric((stock as any).signalReturnPercent, recentReturn || avgReturn),
+  );
+  const hasProvidedSignal =
+    stock.signalStatus === "provided" || stock.signalStatus === "confirmed";
 
-  const maxExposurePct = positiveNumberOrNull((stock as any).maxPositionPct) ?? 5.5;
-  const upstreamSuggestedExposure = optionalNumber((stock as any).suggestedExposure);
+  const maxExposurePct =
+    positiveNumberOrNull((stock as any).maxPositionPct) ?? 5.5;
+  const upstreamSuggestedExposure = optionalNumber(
+    (stock as any).suggestedExposure,
+  );
   const rawSuggestedExposure = hasProvidedSignal
     ? requestedExposureForAsset({
         signalAction: (stock.signalAction ?? "Hold") as TradeSignal,
@@ -1235,16 +1526,30 @@ function inferIntelligence(stock: DisplayStock): IntelligenceStock {
     maxExposurePct,
     hasEvidence,
   });
-  const suggestedExposure = hasProvidedSignal && stock.signalAction === "Buy" ? assetSizing.suggestedExposurePct : 0;
+  const suggestedExposure =
+    hasProvidedSignal && stock.signalAction === "Buy"
+      ? assetSizing.suggestedExposurePct
+      : 0;
   const resynthesizedBuyExposure =
     hasProvidedSignal &&
     stock.signalAction === "Buy" &&
     rawSuggestedExposure > 0 &&
-    !(Number.isFinite(upstreamSuggestedExposure) && Number(upstreamSuggestedExposure) > 0);
-  const sizingReasons = resynthesizedBuyExposure ? assetSizing.sizingReasons : (stock as any).sizingReasons ?? assetSizing.sizingReasons;
-  const sizingConstraints = resynthesizedBuyExposure ? assetSizing.sizingConstraints : (stock as any).sizingConstraints ?? assetSizing.sizingConstraints;
-  const sizingMode = resynthesizedBuyExposure ? assetSizing.sizingMode : (stock as any).sizingMode ?? assetSizing.sizingMode;
-  const sizingRationale = resynthesizedBuyExposure ? assetSizing.sizingRationale : (stock as any).sizingRationale ?? assetSizing.sizingRationale;
+    !(
+      Number.isFinite(upstreamSuggestedExposure) &&
+      Number(upstreamSuggestedExposure) > 0
+    );
+  const sizingReasons = resynthesizedBuyExposure
+    ? assetSizing.sizingReasons
+    : ((stock as any).sizingReasons ?? assetSizing.sizingReasons);
+  const sizingConstraints = resynthesizedBuyExposure
+    ? assetSizing.sizingConstraints
+    : ((stock as any).sizingConstraints ?? assetSizing.sizingConstraints);
+  const sizingMode = resynthesizedBuyExposure
+    ? assetSizing.sizingMode
+    : ((stock as any).sizingMode ?? assetSizing.sizingMode);
+  const sizingRationale = resynthesizedBuyExposure
+    ? assetSizing.sizingRationale
+    : ((stock as any).sizingRationale ?? assetSizing.sizingRationale);
 
   const mandate =
     stock.signalAction === "Sell" || riskPressure > 72
@@ -1270,12 +1575,12 @@ function inferIntelligence(stock: DisplayStock): IntelligenceStock {
     suggestedExposure <= 0 && sizingReasons.length
       ? sizingReasons[0]
       : mandate === "Avoid / Reduce"
-      ? "Risk is rising faster than the opportunity. Keep the position small until conditions improve."
-      : setupQuality >= 70
-        ? "The trend is improving and risk is controlled. Consider adding gradually."
-        : setupQuality >= 58
-          ? "This looks reasonable, but position size should stay limited until there is more confirmation."
-          : "The signal is not clear enough yet. Wait for stronger confirmation before adding money.";
+        ? "Risk is rising faster than the opportunity. Keep the position small until conditions improve."
+        : setupQuality >= 70
+          ? "The trend is improving and risk is controlled. Consider adding gradually."
+          : setupQuality >= 58
+            ? "This looks reasonable, but position size should stay limited until there is more confirmation."
+            : "The signal is not clear enough yet. Wait for stronger confirmation before adding money.";
 
   return {
     ...stock,
@@ -1294,7 +1599,8 @@ function inferIntelligence(stock: DisplayStock): IntelligenceStock {
     sizingRationale,
     recognition: (stock as any).recognition,
     judgement: (stock as any).judgement,
-    survivalMemory: (stock as any).survivalMemory ?? (stock as any).judgement?.survivalMemory,
+    survivalMemory:
+      (stock as any).survivalMemory ?? (stock as any).judgement?.survivalMemory,
   };
 }
 
@@ -1305,24 +1611,37 @@ function primarySizingReason(stock: Partial<IntelligenceStock>) {
 
 function isOpportunityDensityOnlyBlock(stock: Partial<IntelligenceStock>) {
   const reason = primarySizingReason(stock);
-  return /opportunity density/i.test(reason) && !/calibration|readiness|strategy readiness/i.test(reason);
+  return (
+    /opportunity density/i.test(reason) &&
+    !/calibration|readiness|strategy readiness/i.test(reason)
+  );
 }
 
 function isAgencyBlockedParticipation(stock: Partial<IntelligenceStock>) {
   const agency = (stock as any).agency ?? (stock as any).agencyTrace;
-  const decisionKind = String(agency?.decisionKind ?? agency?.decision ?? "").toLowerCase();
+  const decisionKind = String(
+    agency?.decisionKind ?? agency?.decision ?? "",
+  ).toLowerCase();
 
-  return agency?.allowed === false && /blocked[_\s-]?participation/.test(decisionKind);
+  return (
+    agency?.allowed === false &&
+    /blocked[_\s-]?participation/.test(decisionKind)
+  );
 }
 
 function isCommitmentReviewCandidate(stock: IntelligenceStock) {
-  if (stock.signalStatus === "blocked" || stock.allocationAction === "Blocked" || isAgencyBlockedParticipation(stock)) {
+  if (
+    stock.signalStatus === "blocked" ||
+    stock.allocationAction === "Blocked" ||
+    isAgencyBlockedParticipation(stock)
+  ) {
     return stock.riskPressure < 78 && !isOpportunityDensityOnlyBlock(stock);
   }
 
   if (stock.signalAction !== "Buy") return false;
   if (stock.riskPressure >= 78) return false;
-  if (stock.expectedMove <= 0 && numeric(stock.discoveryScore) < 55) return false;
+  if (stock.expectedMove <= 0 && numeric(stock.discoveryScore) < 55)
+    return false;
   if (isOpportunityDensityOnlyBlock(stock)) return false;
 
   return (
@@ -1370,7 +1689,12 @@ function deriveAllocationAction(
   }
 
   if (context.defensiveReliability) {
-    if (hasExplicitSignal && rawAction === "Buy" && stock.setupQuality >= 84 && stock.riskPressure < 35) {
+    if (
+      hasExplicitSignal &&
+      rawAction === "Buy" &&
+      stock.setupQuality >= 84 &&
+      stock.riskPressure < 35
+    ) {
       return "Buy";
     }
 
@@ -1378,7 +1702,11 @@ function deriveAllocationAction(
   }
 
   if (context.regime === "Capital Preservation Phase") {
-    if (stock.setupQuality >= 82 && stock.riskPressure < 38 && stock.expectedMove > 0) {
+    if (
+      stock.setupQuality >= 82 &&
+      stock.riskPressure < 38 &&
+      stock.expectedMove > 0
+    ) {
       return "Buy";
     }
 
@@ -1426,28 +1754,46 @@ function deriveAllocationAction(
   return "Watch";
 }
 
-function mergeQuotes(current: DisplayStock[], quotes: Array<{ symbol: string } & Partial<StockQuote>>): DisplayStock[] {
+function mergeQuotes(
+  current: DisplayStock[],
+  quotes: Array<{ symbol: string } & Partial<StockQuote>>,
+): DisplayStock[] {
   if (!quotes.length) return current;
-  const map = new Map(quotes.map((quote) => [String(quote.symbol).toUpperCase(), quote]));
+  const map = new Map(
+    quotes.map((quote) => [String(quote.symbol).toUpperCase(), quote]),
+  );
   return current.map((stock) => {
     const quote = map.get(normalizedTicker(stock).toUpperCase());
     if (!quote) return stock;
-    const quotePrice = positiveNumberOrNull((quote as any).price ?? (quote as any).last ?? (quote as any).close);
+    const quotePrice = positiveNumberOrNull(
+      (quote as any).price ?? (quote as any).last ?? (quote as any).close,
+    );
     const stockPrice = positiveNumberOrNull(stock.price);
     const nextPrice = quotePrice ?? stockPrice ?? optionalNumber(stock.price);
     const hasLivePrice = quotePrice != null;
     const quoteHistory = Array.isArray((quote as any).history)
-      ? (quote as any).history.map((value: unknown) => Number(value)).filter((value: number) => Number.isFinite(value) && value > 0)
+      ? (quote as any).history
+          .map((value: unknown) => Number(value))
+          .filter((value: number) => Number.isFinite(value) && value > 0)
       : [];
     const quoteSampleCount = Number((quote as any).sampleCount);
     const stockSampleCount = Number((stock as any).sampleCount);
-    const sampleCount = Number.isFinite(quoteSampleCount) && quoteSampleCount > 0
-      ? quoteSampleCount
-      : quoteHistory.length || (Number.isFinite(stockSampleCount) ? stockSampleCount : 0);
-    const entryPrice = numeric((quote as any).signalEntryPrice, numeric((stock as any).signalEntryPrice, nextPrice));
-    const signalReturnPercent = entryPrice > 0 && nextPrice > 0
-      ? ((nextPrice - entryPrice) / entryPrice) * 100
-      : numeric((quote as any).signalReturnPercent, numeric((stock as any).signalReturnPercent));
+    const sampleCount =
+      Number.isFinite(quoteSampleCount) && quoteSampleCount > 0
+        ? quoteSampleCount
+        : quoteHistory.length ||
+          (Number.isFinite(stockSampleCount) ? stockSampleCount : 0);
+    const entryPrice = numeric(
+      (quote as any).signalEntryPrice,
+      numeric((stock as any).signalEntryPrice, nextPrice),
+    );
+    const signalReturnPercent =
+      entryPrice > 0 && nextPrice > 0
+        ? ((nextPrice - entryPrice) / entryPrice) * 100
+        : numeric(
+            (quote as any).signalReturnPercent,
+            numeric((stock as any).signalReturnPercent),
+          );
     return {
       ...stock,
       ...(quote as any),
@@ -1455,10 +1801,19 @@ function mergeQuotes(current: DisplayStock[], quotes: Array<{ symbol: string } &
       price: nextPrice,
       history: quoteHistory.length ? quoteHistory : stock.history,
       sampleCount,
-      changePercent: numeric((quote as any).changePercent, numeric(stock.changePercent)),
-      signalAction: ((quote as any).signalAction ?? stock.signalAction) as TradeSignal,
-      signalStatus: (quote as any).signalAction ? "provided" : stock.signalStatus ?? "missing",
-      signalConfidence: numeric((quote as any).signalConfidence, numeric((stock as any).signalConfidence)),
+      changePercent: numeric(
+        (quote as any).changePercent,
+        numeric(stock.changePercent),
+      ),
+      signalAction: ((quote as any).signalAction ??
+        stock.signalAction) as TradeSignal,
+      signalStatus: (quote as any).signalAction
+        ? "provided"
+        : (stock.signalStatus ?? "missing"),
+      signalConfidence: numeric(
+        (quote as any).signalConfidence,
+        numeric((stock as any).signalConfidence),
+      ),
       signalEntryPrice: entryPrice,
       signalReturnPercent,
       quoteStatus: hasLivePrice ? "available" : "unavailable",
@@ -1473,7 +1828,10 @@ function mergeQuotes(current: DisplayStock[], quotes: Array<{ symbol: string } &
 function parseMarketsResponse(response: unknown): MarketOption[] {
   if (Array.isArray(response)) return response as MarketOption[];
   const anyResponse = response as any;
-  return (anyResponse?.items ?? anyResponse?.markets ?? anyResponse?.data ?? []) as MarketOption[];
+  return (anyResponse?.items ??
+    anyResponse?.markets ??
+    anyResponse?.data ??
+    []) as MarketOption[];
 }
 
 function parseStockListItem(item: any, marketOpen: boolean): DisplayStock {
@@ -1481,22 +1839,31 @@ function parseStockListItem(item: any, marketOpen: boolean): DisplayStock {
     ...item,
     ticker: String(item.ticker ?? item.symbol ?? ""),
     symbol: String(item.symbol || item.ticker || ""),
-    price: optionalNumber(item.price ?? item.last ?? item.close ?? item.regularMarketPrice),
+    price: optionalNumber(
+      item.price ?? item.last ?? item.close ?? item.regularMarketPrice,
+    ),
     changePercent: numeric(item.changePercent),
     status: (item.status ?? "Stable") as StockStatus,
     signalAction: (item.signalAction ?? "Hold") as TradeSignal,
     signalStatus: item.signalAction ? "provided" : "missing",
-    summary: item.summary ?? (marketOpen ? "Live quote sync in progress." : "Market closed. Quote sync paused."),
-    impact: item.impact ?? (marketOpen
-      ? "Live data will refresh as quote coverage reaches this asset."
-      : "Live quotes and signals will resume when this venue opens."),
+    summary:
+      item.summary ??
+      (marketOpen
+        ? "Live quote sync in progress."
+        : "Market closed. Quote sync paused."),
+    impact:
+      item.impact ??
+      (marketOpen
+        ? "Live data will refresh as quote coverage reaches this asset."
+        : "Live quotes and signals will resume when this venue opens."),
     quoteStatus: marketOpen ? "pending" : "paused",
   };
 }
 
-
 function getInstrumentSymbol(value: any) {
-  return String(value?.symbol ?? value?.ticker ?? value?.code ?? value?.id ?? "")
+  return String(
+    value?.symbol ?? value?.ticker ?? value?.code ?? value?.id ?? "",
+  )
     .trim()
     .toUpperCase();
 }
@@ -1601,26 +1968,6 @@ function mergeInstrumentVisual(candidate: any, visualMap: Map<string, any>) {
   };
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function instrumentSymbol(value: any) {
   return String(value?.symbol ?? value?.ticker ?? value?.code ?? "")
     .trim()
@@ -1679,15 +2026,13 @@ function instrumentVisual(value: any) {
 
     if (
       text &&
-      (
-        lowerKey.includes("svg") ||
+      (lowerKey.includes("svg") ||
         lowerKey.includes("logo") ||
         lowerKey.includes("icon") ||
         lowerKey.includes("image") ||
         text.startsWith("<svg") ||
         text.startsWith("data:image/svg+xml") ||
-        text.endsWith(".svg")
-      )
+        text.endsWith(".svg"))
     ) {
       return text;
     }
@@ -1732,52 +2077,148 @@ function InstrumentAvatar({ instrument }: { instrument: any }) {
   return null;
 }
 
-
-function MiniMetric({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function MiniMetric({
+  label,
+  value,
+  sub,
+  emphasis = "normal",
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  emphasis?: "normal" | "strong" | "quiet";
+  tone?: "good" | "warn" | "bad" | "neutral";
+}) {
   return (
-    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">{label}</div>
-      <div className="mt-2 text-2xl font-semibold tracking-tight text-white">{value}</div>
+    <div
+      className={cx(
+        "min-w-0 rounded-lg bg-white/[0.03] px-4 py-3 ring-1 ring-white/[0.045]",
+        emphasis === "strong" && "bg-[#FDD000]/10 ring-[#FDD000]/25",
+        emphasis === "quiet" && "bg-transparent ring-white/[0.04]",
+      )}
+    >
+      <div className="text-[11px] uppercase tracking-[0.16em] text-zinc-500">
+        {label}
+      </div>
+      <div
+        className={cx(
+          "mt-2 font-semibold tracking-tight",
+          emphasis === "strong" ? "text-3xl text-white" : "text-xl text-white",
+          emphasis === "quiet" && "text-lg text-zinc-200",
+          tone === "good" && emphasis !== "strong" && "text-[#FDD000]",
+          tone === "warn" && "text-[#FDD000]",
+          tone === "bad" && "text-red-200",
+        )}
+      >
+        {value}
+      </div>
       {sub ? <div className="mt-1 text-xs text-zinc-500">{sub}</div> : null}
     </div>
   );
 }
 
-function beliefTone(belief?: BeliefDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+function ExecutiveMetric({
+  label,
+  value,
+  sub,
+  tone = "neutral",
+  icon,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  tone?: "good" | "warn" | "bad" | "neutral";
+  icon?: ReactNode;
+}) {
+  const valueSize =
+    value.length > 14
+      ? "text-xl md:text-[1.75rem]"
+      : value.length >= 9
+        ? "text-2xl md:text-[2rem]"
+        : "text-3xl md:text-4xl";
+
+  return (
+    <div
+      className={cx(
+        "min-h-[112px] min-w-0 rounded-lg bg-black/35 p-3.5 ring-1 ring-white/[0.06] md:p-4",
+        tone === "good" && "bg-[#FDD000]/10 ring-[#FDD000]/25",
+        tone === "warn" && "bg-[#FDD000]/10 ring-[#FDD000]/20",
+        tone === "bad" && "bg-red-500/10 ring-red-300/20",
+      )}
+    >
+      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500 md:text-[11px]">
+        {icon ? <span className="text-[#FDD000]">{icon}</span> : null}
+        {label}
+      </div>
+      <div
+        className={cx(
+          "mt-3 break-words font-semibold leading-none tracking-tight text-white",
+          valueSize,
+        )}
+      >
+        {value}
+      </div>
+      {sub ? (
+        <p className="mt-2 line-clamp-2 text-[11px] leading-5 text-zinc-500 md:text-xs">
+          {sub}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function beliefTone(
+  belief?: BeliefDiagnostic | null,
+): "good" | "warn" | "bad" | "neutral" {
   if (!belief) return "neutral";
   if (belief.verdict === "justified") return "good";
   if (belief.verdict === "contradicted") return "bad";
   return "warn";
 }
 
-function recognitionTone(recognition?: RecognitionDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+function recognitionTone(
+  recognition?: RecognitionDiagnostic | null,
+): "good" | "warn" | "bad" | "neutral" {
   if (!recognition) return "neutral";
   if (recognition.verdict === "recognized") return "good";
-  if (recognition.verdict === "novel" || recognition.verdict === "partially_recognized") return "warn";
+  if (
+    recognition.verdict === "novel" ||
+    recognition.verdict === "partially_recognized"
+  )
+    return "warn";
   if (recognition.verdict === "conflicted") return "bad";
   return "neutral";
 }
 
-export function recognitionClearsDiscoveryNoveltyNarrative(recognition?: RecognitionDiagnostic | null) {
+export function recognitionClearsDiscoveryNoveltyNarrative(
+  recognition?: RecognitionDiagnostic | null,
+) {
   if (!recognition) return false;
 
-  return recognition.verdict === "recognized" &&
+  return (
+    recognition.verdict === "recognized" &&
     recognition.recurrenceConfidence >= 70 &&
     recognition.recognitionScore >= 65 &&
     recognition.noveltyScore <= 35 &&
     recognition.discoveryNoveltyJustified === false &&
     recognition.judgementSimilarityJustified === true &&
-    (recognition.matchedSamples >= 5 || recognition.archetypeConfidence >= 70);
+    (recognition.matchedSamples >= 5 || recognition.archetypeConfidence >= 70)
+  );
 }
 
 export function reconcileDiscoveryInvalidationConditions(
   conditions: string[],
   recognition?: RecognitionDiagnostic | null,
 ) {
-  if (!recognitionClearsDiscoveryNoveltyNarrative(recognition)) return conditions;
+  if (!recognitionClearsDiscoveryNoveltyNarrative(recognition))
+    return conditions;
 
-  const filtered = conditions.filter((condition) => !/too novel|novel to compare|known states/i.test(condition));
-  const archetype = recognition?.archetype?.replace(/_/g, " ") || "recognized state";
+  const filtered = conditions.filter(
+    (condition) => !/too novel|novel to compare|known states/i.test(condition),
+  );
+  const archetype =
+    recognition?.archetype?.replace(/_/g, " ") || "recognized state";
   const recognitionCondition = `Re-open Discovery novelty only if Recognition recurrence falls below 70/100 or the ${archetype} outcome linkage weakens.`;
 
   return Array.from(new Set([...filtered, recognitionCondition]));
@@ -1793,12 +2234,15 @@ export function discoveryRecognitionSentence(input: {
   if (discoveryConfidence == null || discoveryNovelty == null) return "";
 
   const raw = ` Discovery confidence is ${fmtPlainPct(discoveryConfidence, 0)} with ${fmtPlainPct(discoveryNovelty, 0)} novelty.`;
-  if (!recognitionClearsDiscoveryNoveltyNarrative(input.recognition)) return raw;
+  if (!recognitionClearsDiscoveryNoveltyNarrative(input.recognition))
+    return raw;
 
   return `${raw} Recognition rejects that novelty with ${fmtPlainPct(numeric(input.recognition?.recurrenceConfidence), 0)} recurrence.`;
 }
 
-export function recognitionStateRecurrenceLine(recognition?: RecognitionDiagnostic | null) {
+export function recognitionStateRecurrenceLine(
+  recognition?: RecognitionDiagnostic | null,
+) {
   if (!recognitionClearsDiscoveryNoveltyNarrative(recognition)) return "";
 
   return `Recognition state recurrence ${numeric(recognition?.matchedSamples)} matched samples; Discovery outcome memory remains separate.`;
@@ -1811,8 +2255,17 @@ export function reconcileRecoveryBlockersWithRecognition(
   if (!recognitionClearsDiscoveryNoveltyNarrative(recognition)) return blockers;
 
   const matchedSamples = numeric(recognition?.matchedSamples);
-  const hasOutcomeLinkageBlocker = blockers.some((blocker) => /similar outcome sample count|positive similar-outcome ratio/i.test(blocker));
-  const filtered = blockers.filter((blocker) => !/similar outcome sample count|positive similar-outcome ratio/i.test(blocker));
+  const hasOutcomeLinkageBlocker = blockers.some((blocker) =>
+    /similar outcome sample count|positive similar-outcome ratio/i.test(
+      blocker,
+    ),
+  );
+  const filtered = blockers.filter(
+    (blocker) =>
+      !/similar outcome sample count|positive similar-outcome ratio/i.test(
+        blocker,
+      ),
+  );
   const recognitionBlocker = hasOutcomeLinkageBlocker
     ? `Recovery needs survival-safe outcome linkage; Recognition has ${matchedSamples} state matches, but normal sizing still requires reduced-size outcomes with acceptable drawdown and stress.`
     : "";
@@ -1824,9 +2277,11 @@ export function reconcileRecoveryUnlockConditionsWithRecognition(
   conditions: string[],
   recognition?: RecognitionDiagnostic | null,
 ) {
-  if (!recognitionClearsDiscoveryNoveltyNarrative(recognition)) return conditions;
+  if (!recognitionClearsDiscoveryNoveltyNarrative(recognition))
+    return conditions;
 
-  const archetype = recognition?.archetype?.replace(/_/g, " ") || "recognized state";
+  const archetype =
+    recognition?.archetype?.replace(/_/g, " ") || "recognized state";
   return uniqueStrings([
     ...conditions,
     `Close reduced-size outcomes for the ${archetype} archetype with survival cost below the recovery boundary before restoring normal sizing.`,
@@ -1838,11 +2293,17 @@ export function reconcileResolveUnlockConditionsWithRecognition(input: {
   missingEvidence: string[];
   recognition?: RecognitionDiagnostic | null;
 }) {
-  if (!recognitionClearsDiscoveryNoveltyNarrative(input.recognition)) return input.conditions;
+  if (!recognitionClearsDiscoveryNoveltyNarrative(input.recognition))
+    return input.conditions;
 
-  const archetype = input.recognition?.archetype?.replace(/_/g, " ") || "recognized state";
-  const needsReducedSizeReview = input.missingEvidence.some((item) => /reduced-size survival review/i.test(item));
-  const needsAgencyTrust = input.missingEvidence.some((item) => /agency trust/i.test(item));
+  const archetype =
+    input.recognition?.archetype?.replace(/_/g, " ") || "recognized state";
+  const needsReducedSizeReview = input.missingEvidence.some((item) =>
+    /reduced-size survival review/i.test(item),
+  );
+  const needsAgencyTrust = input.missingEvidence.some((item) =>
+    /agency trust/i.test(item),
+  );
 
   return uniqueStrings([
     ...input.conditions,
@@ -1867,7 +2328,10 @@ export function maximumExposureSubLabel(input: {
   suggestedMaximumExposurePct?: number;
   semanticWord?: string;
 }) {
-  if (!finiteNumber(input.suggestedMaximumExposurePct) || numeric(input.suggestedMaximumExposurePct) <= 0) {
+  if (
+    !finiteNumber(input.suggestedMaximumExposurePct) ||
+    numeric(input.suggestedMaximumExposurePct) <= 0
+  ) {
     return undefined;
   }
 
@@ -1883,45 +2347,68 @@ function uniqueStrings(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)));
 }
 
-function judgementTone(judgement?: JudgementDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+function judgementTone(
+  judgement?: JudgementDiagnostic | null,
+): "good" | "warn" | "bad" | "neutral" {
   if (!judgement) return "neutral";
   if (judgement.status === "trusted") return "good";
   if (judgement.status === "blocked") return "bad";
   return "warn";
 }
 
-function trustGovernorTone(trustGovernor?: TrustGovernorDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+function trustGovernorTone(
+  trustGovernor?: TrustGovernorDiagnostic | null,
+): "good" | "warn" | "bad" | "neutral" {
   if (!trustGovernor) return "neutral";
-  if (trustGovernor.participationMode === "normal" || trustGovernor.participationMode === "limited") return "good";
-  if (trustGovernor.participationMode === "blocked" || trustGovernor.participationMode === "exits_only") return "bad";
+  if (
+    trustGovernor.participationMode === "normal" ||
+    trustGovernor.participationMode === "limited"
+  )
+    return "good";
+  if (
+    trustGovernor.participationMode === "blocked" ||
+    trustGovernor.participationMode === "exits_only"
+  )
+    return "bad";
   return "warn";
 }
 
-function resolveTone(resolve?: ResolveDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+function resolveTone(
+  resolve?: ResolveDiagnostic | null,
+): "good" | "warn" | "bad" | "neutral" {
   if (!resolve) return "neutral";
   if (resolve.decision === "commit") return "good";
-  if (resolve.decision === "reject" || resolve.decision === "invalidate") return "bad";
+  if (resolve.decision === "reject" || resolve.decision === "invalidate")
+    return "bad";
   if (resolve.decision === "escalate") return "bad";
   return "warn";
 }
 
-function survivalMemoryTone(survivalMemory?: SurvivalMemoryDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+function survivalMemoryTone(
+  survivalMemory?: SurvivalMemoryDiagnostic | null,
+): "good" | "warn" | "bad" | "neutral" {
   if (!survivalMemory) return "neutral";
   if (survivalMemory.status === "clear") return "good";
   if (survivalMemory.status === "near_ruin") return "bad";
-  if (survivalMemory.status === "scarred" || survivalMemory.status === "watch") return "warn";
+  if (survivalMemory.status === "scarred" || survivalMemory.status === "watch")
+    return "warn";
   return "neutral";
 }
 
-function recoveryTone(recovery?: RecoveryDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+function recoveryTone(
+  recovery?: RecoveryDiagnostic | null,
+): "good" | "warn" | "bad" | "neutral" {
   if (!recovery) return "neutral";
   if (recovery.status === "restored") return "good";
   if (recovery.status === "recovering") return "warn";
-  if (recovery.status === "locked" || recovery.status === "regressed") return "bad";
+  if (recovery.status === "locked" || recovery.status === "regressed")
+    return "bad";
   return "neutral";
 }
 
-function remediationTone(plan?: ReadinessRemediationDiagnostic | null): "good" | "warn" | "bad" | "neutral" {
+function remediationTone(
+  plan?: ReadinessRemediationDiagnostic | null,
+): "good" | "warn" | "bad" | "neutral" {
   if (!plan) return "neutral";
   if (plan.status === "ready") return "good";
   if (plan.status === "blocked") return "bad";
@@ -1939,26 +2426,119 @@ function SectionShell({
   eyebrow,
   title,
   action,
+  description,
   children,
   className,
 }: {
   eyebrow?: string;
   title: string;
   action?: ReactNode;
+  description?: string;
   children: ReactNode;
   className?: string;
 }) {
   return (
-    <section className={cx("rounded-xl border border-white/10 bg-[#0f0f0f] p-5 shadow-2xl shadow-black/20", className)}>
+    <section
+      className={cx(
+        "rounded-lg border border-white/[0.07] bg-[#0d0d0d]/95 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.22)]",
+        className,
+      )}
+    >
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          {eyebrow ? <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#FDD000]">{eyebrow}</div> : null}
-          <h2 className="mt-1 text-lg font-semibold tracking-tight text-white">{title}</h2>
+          {eyebrow ? (
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#FDD000]">
+              {eyebrow}
+            </div>
+          ) : null}
+          <h2 className="mt-1 text-lg font-semibold tracking-tight text-white">
+            {title}
+          </h2>
+          {description ? (
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500">
+              {description}
+            </p>
+          ) : null}
         </div>
         {action ? <div className="shrink-0">{action}</div> : null}
       </div>
       {children}
     </section>
+  );
+}
+
+function DashboardGroup({
+  eyebrow,
+  title,
+  description,
+  children,
+  className,
+}: {
+  eyebrow?: string;
+  title: string;
+  description: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={cx("mb-12 min-w-0", className)}>
+      <div className="mb-5 flex flex-col gap-2 border-t border-white/[0.055] pt-7 md:flex-row md:items-end md:justify-between">
+        <div>
+          {eyebrow ? (
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#FDD000]">
+              {eyebrow}
+            </div>
+          ) : null}
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white md:text-[1.7rem]">
+            {title}
+          </h2>
+        </div>
+        <p className="max-w-2xl text-sm leading-6 text-zinc-500 md:text-right">
+          {description}
+        </p>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function AdvancedDisclosure({
+  title,
+  description,
+  summary,
+  children,
+  className,
+}: {
+  title: string;
+  description?: string;
+  summary?: ReactNode;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <details
+      data-advanced-section={title}
+      className={cx(
+        "group rounded-lg border border-white/[0.07] bg-white/[0.025] p-4",
+        className,
+      )}
+    >
+      <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="text-sm font-semibold tracking-tight text-white">
+            {title}
+          </div>
+          {description ? (
+            <div className="mt-1 max-w-3xl text-xs leading-5 text-zinc-500">
+              {description}
+            </div>
+          ) : null}
+          {summary ? <div className="mt-3">{summary}</div> : null}
+        </div>
+        <ChevronDown className="mt-0.5 h-4 w-4 shrink-0 text-zinc-500 transition group-open:rotate-180" />
+      </summary>
+      <div className="mt-5 border-t border-white/[0.06] pt-5">{children}</div>
+    </details>
   );
 }
 
@@ -1979,7 +2559,10 @@ function QualityBar({ value, label }: { value: number; label?: string }) {
   );
 }
 
-function StatusPill({ children, tone = "neutral" }: { children: ReactNode; tone?: "good" | "warn" | "bad" | "neutral" }) {
+function StatusPill({
+  children,
+  tone = "neutral",
+}: { children: ReactNode; tone?: "good" | "warn" | "bad" | "neutral" }) {
   return (
     <span
       className={cx(
@@ -2008,11 +2591,21 @@ function AllocationLedgerTable({
   onSelectInstrument: (ticker: string) => void;
   loading: boolean;
 }) {
-  const tone = action === "Buy" ? "good" : action === "Sell" ? "bad" : action === "Blocked" ? "warn" : "neutral";
+  const tone =
+    action === "Buy"
+      ? "good"
+      : action === "Sell"
+        ? "bad"
+        : action === "Blocked"
+          ? "warn"
+          : "neutral";
 
   return (
-    <div className="overflow-hidden rounded-xl border border-white/10 bg-[#151515]">
-      <div className="flex flex-col gap-3 border-b border-white/10 bg-white/[0.035] px-4 py-3 md:flex-row md:items-center md:justify-between">
+    <div
+      data-layout="responsive-ledger-row"
+      className="overflow-hidden rounded-lg bg-[#101010] ring-1 ring-white/[0.055]"
+    >
+      <div className="flex flex-col gap-3 bg-white/[0.025] px-4 py-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
           <StatusPill tone={tone}>{action}</StatusPill>
           <div>
@@ -2022,14 +2615,14 @@ function AllocationLedgerTable({
         </div>
       </div>
 
-      <div className="grid grid-cols-[1.1fr_0.55fr_0.55fr_1fr] gap-3 bg-white/[0.025] px-4 py-3 text-[9px] uppercase tracking-[0.16em] text-zinc-500">
+      <div className="hidden grid-cols-[1.1fr_0.55fr_0.55fr_1fr] gap-3 border-t border-white/[0.045] bg-white/[0.018] px-4 py-3 text-[9px] uppercase tracking-[0.16em] text-zinc-500 md:grid">
         <div>Asset</div>
         <div>Max position</div>
         <div>Score</div>
         <div>Why</div>
       </div>
 
-      <div className="max-h-[360px] divide-y divide-white/10 overflow-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-700/60 hover:[&::-webkit-scrollbar-thumb]:bg-zinc-500/80 [&::-webkit-scrollbar-corner]:bg-transparent">
+      <div className="max-h-[360px] divide-y divide-white/[0.045] overflow-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-700/60 hover:[&::-webkit-scrollbar-thumb]:bg-zinc-500/80 [&::-webkit-scrollbar-corner]:bg-transparent">
         {loading ? (
           <div className="flex items-center gap-3 px-4 py-8 text-sm text-zinc-400">
             <RefreshCw className="h-4 w-4 animate-spin" />
@@ -2045,22 +2638,42 @@ function AllocationLedgerTable({
                 key={ticker}
                 type="button"
                 onClick={() => onSelectInstrument(ticker)}
+                data-layout="responsive-ledger-row"
                 className={cx(
-                  "grid w-full grid-cols-[1.1fr_0.55fr_0.55fr_1fr] items-center gap-3 px-4 py-4 text-left text-sm transition hover:bg-white/[0.04]",
+                  "grid w-full grid-cols-1 items-start gap-3 px-4 py-4 text-left text-sm transition hover:bg-white/[0.04] md:grid-cols-[1.1fr_0.55fr_0.55fr_1fr] md:items-center",
                   isSelected && "bg-[#FDD000]/10",
                 )}
               >
                 <div>
                   <div className="font-semibold text-white">{ticker}</div>
-                  <div className="mt-1 line-clamp-1 text-xs text-zinc-500">{stockName(stock)}</div>
+                  <div className="mt-1 line-clamp-1 text-xs text-zinc-500">
+                    {stockName(stock)}
+                  </div>
                   <div className="mt-1 text-[11px] text-zinc-600">
                     {assetSizingLabel(stock)} · {dataCoverageLabel(stock)}
                   </div>
                 </div>
-                <div className="text-zinc-300">{fmtPlainPct(stock.suggestedExposure)}</div>
-                <div className="font-medium text-slate-100">{Math.round(stock.setupQuality)}%</div>
-                <div className="line-clamp-2 text-xs leading-5 text-zinc-500">
-                  {stock.sizingReasons?.[0] ?? stock.rejectionReason ?? stock.explanation}
+                <div className="text-zinc-300">
+                  <span className="mb-1 block text-[10px] uppercase tracking-[0.16em] text-zinc-600 md:hidden">
+                    Max position
+                  </span>
+                  <span>{fmtPlainPct(stock.suggestedExposure)}</span>
+                </div>
+                <div className="font-medium text-slate-100">
+                  <span className="mb-1 block text-[10px] font-normal uppercase tracking-[0.16em] text-zinc-600 md:hidden">
+                    Score
+                  </span>
+                  <span>{Math.round(stock.setupQuality)}%</span>
+                </div>
+                <div className="text-xs leading-5 text-zinc-500">
+                  <span className="mb-1 block text-[10px] uppercase tracking-[0.16em] text-zinc-600 md:hidden">
+                    Why
+                  </span>
+                  <span className="line-clamp-2">
+                    {stock.sizingReasons?.[0] ??
+                      stock.rejectionReason ??
+                      stock.explanation}
+                  </span>
                 </div>
               </button>
             );
@@ -2146,12 +2759,18 @@ function createEmptyMarketData(): MarketScopedDashboardData {
 }
 
 export default function Dashboard() {
-  const [stockVisualMap, setStockVisualMap] = useState<Map<string, any>>(new Map());
+  const [stockVisualMap, setStockVisualMap] = useState<Map<string, any>>(
+    new Map(),
+  );
   const marketStateEngineRef = useRef<MarketStateEngine | null>(null);
   if (marketStateEngineRef.current === null) {
-    marketStateEngineRef.current = new MarketStateEngine(createDefaultMetricRegistry());
+    marketStateEngineRef.current = new MarketStateEngine(
+      createDefaultMetricRegistry(),
+    );
   }
-  const marketDataByMarketRef = useRef(new Map<string, MarketScopedDashboardData>());
+  const marketDataByMarketRef = useRef(
+    new Map<string, MarketScopedDashboardData>(),
+  );
   const activeMarketRef = useRef("");
 
   const [markets, setMarkets] = useState<MarketOption[]>([]);
@@ -2165,10 +2784,14 @@ export default function Dashboard() {
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
   const [isSelectedCardFlipped, setIsSelectedCardFlipped] = useState(false);
-  const [selectedHistory, setSelectedHistory] = useState<Array<{ index: number; date?: string; price: number }>>([]);
+  const [selectedHistory, setSelectedHistory] = useState<
+    Array<{ index: number; date?: string; price: number }>
+  >([]);
   const [selectedHistoryLoading, setSelectedHistoryLoading] = useState(false);
   const [portfolioSummary, setPortfolioSummary] = useState<any | null>(null);
-  const [persistentPortfolioHistory, setPersistentPortfolioHistory] = useState<Array<any>>([]);
+  const [persistentPortfolioHistory, setPersistentPortfolioHistory] = useState<
+    Array<any>
+  >([]);
   const [backtestSummary, setBacktestSummary] = useState<any | null>(null);
   const [backtestHistory, setBacktestHistory] = useState<Array<any>>([]);
   const [walkForwardTrades, setWalkForwardTrades] = useState<Array<any>>([]);
@@ -2176,9 +2799,12 @@ export default function Dashboard() {
   const [frontendSlippageBps, setFrontendSlippageBps] = useState(0);
   const [strategySignals, setStrategySignals] = useState<Array<any>>([]);
   const [strategyRegime, setStrategyRegime] = useState<any | null>(null);
-  const [opportunityDiscovery, setOpportunityDiscovery] = useState<any | null>(null);
+  const [opportunityDiscovery, setOpportunityDiscovery] = useState<any | null>(
+    null,
+  );
   const [agencyDiagnostics, setAgencyDiagnostics] = useState<any | null>(null);
-  const [marketPerceptionSnapshot, setMarketPerceptionSnapshot] = useState<MarketStateSnapshot | null>(null);
+  const [marketPerceptionSnapshot, setMarketPerceptionSnapshot] =
+    useState<MarketStateSnapshot | null>(null);
   const [portfolioRefreshing, setPortfolioRefreshing] = useState(false);
   const [query, setQuery] = useState("");
   const registeredWatchlists = useRef(new Set<string>());
@@ -2193,7 +2819,10 @@ export default function Dashboard() {
     return next;
   }
 
-  function applyMarketDataPatch(market: string, patch: Partial<MarketScopedDashboardData>) {
+  function applyMarketDataPatch(
+    market: string,
+    patch: Partial<MarketScopedDashboardData>,
+  ) {
     if (!market) return;
 
     const next = {
@@ -2211,15 +2840,20 @@ export default function Dashboard() {
     if ("refreshError" in patch) setRefreshError(next.refreshError);
     if ("stockVisualMap" in patch) setStockVisualMap(next.stockVisualMap);
     if ("portfolioSummary" in patch) setPortfolioSummary(next.portfolioSummary);
-    if ("persistentPortfolioHistory" in patch) setPersistentPortfolioHistory(next.persistentPortfolioHistory);
+    if ("persistentPortfolioHistory" in patch)
+      setPersistentPortfolioHistory(next.persistentPortfolioHistory);
     if ("backtestSummary" in patch) setBacktestSummary(next.backtestSummary);
     if ("backtestHistory" in patch) setBacktestHistory(next.backtestHistory);
-    if ("walkForwardTrades" in patch) setWalkForwardTrades(next.walkForwardTrades);
+    if ("walkForwardTrades" in patch)
+      setWalkForwardTrades(next.walkForwardTrades);
     if ("strategySignals" in patch) setStrategySignals(next.strategySignals);
     if ("strategyRegime" in patch) setStrategyRegime(next.strategyRegime);
-    if ("opportunityDiscovery" in patch) setOpportunityDiscovery(next.opportunityDiscovery);
-    if ("agencyDiagnostics" in patch) setAgencyDiagnostics(next.agencyDiagnostics);
-    if ("marketPerceptionSnapshot" in patch) setMarketPerceptionSnapshot(next.marketPerceptionSnapshot);
+    if ("opportunityDiscovery" in patch)
+      setOpportunityDiscovery(next.opportunityDiscovery);
+    if ("agencyDiagnostics" in patch)
+      setAgencyDiagnostics(next.agencyDiagnostics);
+    if ("marketPerceptionSnapshot" in patch)
+      setMarketPerceptionSnapshot(next.marketPerceptionSnapshot);
   }
 
   function renderMarketData(market: string) {
@@ -2252,7 +2886,6 @@ export default function Dashboard() {
     setIsSelectedCardFlipped(false);
   }, [marketFilter]);
 
-
   useEffect(() => {
     let cancelled = false;
     async function loadMarkets() {
@@ -2262,7 +2895,8 @@ export default function Dashboard() {
         const items = parseMarketsResponse(response);
         setMarkets(items);
         const preferred = items[0];
-        if (preferred) setMarketFilter((current) => current || marketCode(preferred));
+        if (preferred)
+          setMarketFilter((current) => current || marketCode(preferred));
       } catch (error) {
         setRefreshError("Could not load markets.");
       }
@@ -2273,10 +2907,15 @@ export default function Dashboard() {
     };
   }, []);
 
-  async function refreshQuotes(market: string, list: DisplayStock[], bypass = false) {
+  async function refreshQuotes(
+    market: string,
+    list: DisplayStock[],
+    bypass = false,
+  ) {
     if (!market || !list.length) return;
     const hasExistingLiveCoverage = hasLiveQuoteCoverage(list);
-    const hasExistingMarketCoverage = hasExistingLiveCoverage || hasSessionMarketCoverage(list);
+    const hasExistingMarketCoverage =
+      hasExistingLiveCoverage || hasSessionMarketCoverage(list);
     const currentMarketStatus = getMarketStatus(market);
     const cachedMarketData = getMarketData(market);
 
@@ -2309,9 +2948,15 @@ export default function Dashboard() {
       let liveQuoteCount = 0;
       const quoteLimit = Math.min(
         MAX_QUOTE_SYMBOL_LIMIT,
-        Math.max(INITIAL_QUOTE_SYMBOL_LIMIT, Math.ceil(list.length * MIN_QUOTE_COVERAGE_RATIO)),
+        Math.max(
+          INITIAL_QUOTE_SYMBOL_LIMIT,
+          Math.ceil(list.length * MIN_QUOTE_COVERAGE_RATIO),
+        ),
       );
-      const symbols = list.map((item) => normalizedTicker(item)).filter(Boolean).slice(0, quoteLimit);
+      const symbols = list
+        .map((item) => normalizedTicker(item))
+        .filter(Boolean)
+        .slice(0, quoteLimit);
       for (let index = 0; index < symbols.length; index += QUOTE_BATCH_SIZE) {
         const batch = symbols.slice(index, index + QUOTE_BATCH_SIZE);
         const response = await fetchStockQuoteBatch(market, batch, {
@@ -2319,16 +2964,24 @@ export default function Dashboard() {
           timeoutMs: 45_000,
           retryCount: bypass || !hasExistingLiveCoverage ? 1 : 0,
         } as any);
-        const quotes = ((response as any).quotes ?? []) as Array<{ symbol: string } & Partial<StockQuote>>;
+        const quotes = ((response as any).quotes ?? []) as Array<
+          { symbol: string } & Partial<StockQuote>
+        >;
         const batchLiveQuotes = quotes.filter(quoteHasLivePrice).length;
         liveQuoteCount += batchLiveQuotes;
         const cached = getMarketData(market);
-        const merged = mergeQuotes(cached.stocks.length ? cached.stocks : list, quotes);
+        const merged = mergeQuotes(
+          cached.stocks.length ? cached.stocks : list,
+          quotes,
+        );
         applyMarketDataPatch(market, {
           stocks: merged,
           lastSyncedAt: batchLiveQuotes > 0 ? Date.now() : cached.lastSyncedAt,
           loading: false,
-          refreshError: batchLiveQuotes > 0 || liveQuoteCount > 0 ? null : cached.refreshError,
+          refreshError:
+            batchLiveQuotes > 0 || liveQuoteCount > 0
+              ? null
+              : cached.refreshError,
         });
       }
       if (liveQuoteCount === 0) {
@@ -2375,11 +3028,19 @@ export default function Dashboard() {
         const items: DisplayStock[] = [];
 
         do {
-          const response = await fetchStockList(market, offset, STOCK_LIST_PAGE_SIZE);
+          const response = await fetchStockList(
+            market,
+            offset,
+            STOCK_LIST_PAGE_SIZE,
+          );
           if (cancelled) return;
           const responseItems = ((response as any).items ?? []) as any[];
           total = Number((response as any).total ?? responseItems.length);
-          items.push(...responseItems.map((item) => parseStockListItem(item, marketOpen)));
+          items.push(
+            ...responseItems.map((item) =>
+              parseStockListItem(item, marketOpen),
+            ),
+          );
           offset += responseItems.length;
         } while (offset < total && offset < 2_000);
 
@@ -2387,7 +3048,9 @@ export default function Dashboard() {
         applyMarketDataPatch(market, {
           stocks: items,
           totalStocks: total || items.length,
-          lastSyncedAt: cached.lastSyncedAt ?? (hasSessionMarketCoverage(items) ? Date.now() : null),
+          lastSyncedAt:
+            cached.lastSyncedAt ??
+            (hasSessionMarketCoverage(items) ? Date.now() : null),
           loading: false,
           refreshError: null,
         });
@@ -2395,7 +3058,10 @@ export default function Dashboard() {
         const key = `${market}:${items.length}`;
         if (!registeredWatchlists.current.has(key)) {
           registeredWatchlists.current.add(key);
-          void registerSignalWatchlist(market, items.map((item) => normalizedTicker(item))).catch(() => {
+          void registerSignalWatchlist(
+            market,
+            items.map((item) => normalizedTicker(item)),
+          ).catch(() => {
             registeredWatchlists.current.delete(key);
           });
         }
@@ -2439,29 +3105,37 @@ export default function Dashboard() {
 
     async function loadStrategySignals() {
       try {
-        const response = await fetchJsonOrNull("/api/strategy?action=live-market", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        const response = await fetchJsonOrNull(
+          "/api/strategy?action=live-market",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              market,
+              limitSymbols: 25,
+            }),
           },
-          body: JSON.stringify({
-            market,
-            limitSymbols: 25,
-          }),
-        });
+        );
 
         const payload = await asJsonOrNull(response);
 
         if (cancelled) return;
 
         applyMarketDataPatch(market, {
-          strategySignals: Array.isArray(payload?.signals) ? payload.signals : [],
+          strategySignals: Array.isArray(payload?.signals)
+            ? payload.signals
+            : [],
           strategyRegime: payload?.regime ?? null,
           opportunityDiscovery: payload?.opportunityDiscovery ?? null,
           agencyDiagnostics: payload?.agencyDiagnostics ?? null,
         });
       } catch (error) {
-        console.warn("Keeping previous backtest/portfolio state after refresh failure", error);
+        console.warn(
+          "Keeping previous backtest/portfolio state after refresh failure",
+          error,
+        );
         if (!cancelled) {
         }
       }
@@ -2507,31 +3181,65 @@ export default function Dashboard() {
         signalAction: signal.signalAction ?? stock.signalAction,
         allocationAction: signal.allocationAction ?? stock.allocationAction,
         signalStatus: signal.signalStatus ?? "provided",
-        suggestedExposure: numeric(signal.suggestedExposure, numeric((stock as any).suggestedExposure)),
-        setupQuality: numeric(signal.setupQuality, numeric((stock as any).setupQuality)),
-        riskPressure: numeric(signal.riskPressure, numeric((stock as any).riskPressure)),
-        trendQuality: numeric(signal.trendQuality, numeric((stock as any).trendQuality)),
-        timingQuality: numeric(signal.timingQuality, numeric((stock as any).timingQuality)),
-        expectedMove: numeric(signal.expectedMove, numeric((stock as any).expectedMove)),
+        suggestedExposure: numeric(
+          signal.suggestedExposure,
+          numeric((stock as any).suggestedExposure),
+        ),
+        setupQuality: numeric(
+          signal.setupQuality,
+          numeric((stock as any).setupQuality),
+        ),
+        riskPressure: numeric(
+          signal.riskPressure,
+          numeric((stock as any).riskPressure),
+        ),
+        trendQuality: numeric(
+          signal.trendQuality,
+          numeric((stock as any).trendQuality),
+        ),
+        timingQuality: numeric(
+          signal.timingQuality,
+          numeric((stock as any).timingQuality),
+        ),
+        expectedMove: numeric(
+          signal.expectedMove,
+          numeric((stock as any).expectedMove),
+        ),
         sizingMode: signal.sizingMode ?? (stock as any).sizingMode,
         sizingReasons: signal.sizingReasons ?? (stock as any).sizingReasons,
-        sizingConstraints: signal.sizingConstraints ?? (stock as any).sizingConstraints,
-        sizingRationale: signal.sizingRationale ?? (stock as any).sizingRationale,
-        opportunityDiscovery: signal.opportunityDiscovery ?? (stock as any).opportunityDiscovery,
-        discovery: signal.opportunityDiscovery?.discovery ?? (stock as any).discovery,
+        sizingConstraints:
+          signal.sizingConstraints ?? (stock as any).sizingConstraints,
+        sizingRationale:
+          signal.sizingRationale ?? (stock as any).sizingRationale,
+        opportunityDiscovery:
+          signal.opportunityDiscovery ?? (stock as any).opportunityDiscovery,
+        discovery:
+          signal.opportunityDiscovery?.discovery ?? (stock as any).discovery,
         agencyTrace: signal.agencyTrace ?? (stock as any).agencyTrace,
         agency: signal.agency ?? (stock as any).agency,
         belief: signal.belief ?? (stock as any).belief ?? null,
         recognition: signal.recognition ?? (stock as any).recognition,
         judgement: signal.judgement ?? (stock as any).judgement,
-        survivalMemory: signal.survivalMemory ?? signal.judgement?.survivalMemory ?? (stock as any).survivalMemory,
+        survivalMemory:
+          signal.survivalMemory ??
+          signal.judgement?.survivalMemory ??
+          (stock as any).survivalMemory,
         trustGovernor: signal.trustGovernor ?? (stock as any).trustGovernor,
         resolve: signal.resolve ?? (stock as any).resolve,
-        discoveryScore: numeric(signal.discoveryScore, numeric((stock as any).discoveryScore)),
-        discoveryLifecycle: signal.discoveryLifecycle ?? (stock as any).discoveryLifecycle,
-        candidateProgression: signal.candidateProgression ?? (stock as any).candidateProgression,
-        adaptiveSuggestedExposure: numeric(signal.adaptiveSuggestedExposure, numeric((stock as any).adaptiveSuggestedExposure)),
-        rejectionReason: signal.rejectionReason ?? (stock as any).rejectionReason,
+        discoveryScore: numeric(
+          signal.discoveryScore,
+          numeric((stock as any).discoveryScore),
+        ),
+        discoveryLifecycle:
+          signal.discoveryLifecycle ?? (stock as any).discoveryLifecycle,
+        candidateProgression:
+          signal.candidateProgression ?? (stock as any).candidateProgression,
+        adaptiveSuggestedExposure: numeric(
+          signal.adaptiveSuggestedExposure,
+          numeric((stock as any).adaptiveSuggestedExposure),
+        ),
+        rejectionReason:
+          signal.rejectionReason ?? (stock as any).rejectionReason,
         regime: signal.regime,
         quoteStatus: stock.quoteStatus ?? "available",
       } as DisplayStock;
@@ -2546,8 +3254,12 @@ export default function Dashboard() {
           name: String(signal.name ?? signal.description ?? ticker),
           description: String(signal.description ?? signal.name ?? ticker),
           market: String(signal.market ?? marketFilter ?? ""),
-          exchange: String(signal.exchange ?? signal.market ?? marketFilter ?? ""),
-          country: String(signal.country ?? signal.market ?? marketFilter ?? ""),
+          exchange: String(
+            signal.exchange ?? signal.market ?? marketFilter ?? "",
+          ),
+          country: String(
+            signal.country ?? signal.market ?? marketFilter ?? "",
+          ),
           price: optionalNumber(signal.price),
           status: "Stable" as StockStatus,
           signalAction: (signal.signalAction ?? "Hold") as TradeSignal,
@@ -2570,7 +3282,8 @@ export default function Dashboard() {
           belief: signal.belief ?? null,
           recognition: signal.recognition,
           judgement: signal.judgement,
-          survivalMemory: signal.survivalMemory ?? signal.judgement?.survivalMemory,
+          survivalMemory:
+            signal.survivalMemory ?? signal.judgement?.survivalMemory,
           trustGovernor: signal.trustGovernor,
           resolve: signal.resolve,
           discoveryScore: numeric(signal.discoveryScore),
@@ -2578,8 +3291,12 @@ export default function Dashboard() {
           candidateProgression: signal.candidateProgression,
           adaptiveSuggestedExposure: numeric(signal.adaptiveSuggestedExposure),
           rejectionReason: signal.rejectionReason,
-          quoteStatus: optionalNumber(signal.price) != null ? "available" : "pending",
-          summary: optionalNumber(signal.price) != null ? "Strategy signal" : "Strategy signal awaiting live quote",
+          quoteStatus:
+            optionalNumber(signal.price) != null ? "available" : "pending",
+          summary:
+            optionalNumber(signal.price) != null
+              ? "Strategy signal"
+              : "Strategy signal awaiting live quote",
         } as DisplayStock;
       });
 
@@ -2587,7 +3304,10 @@ export default function Dashboard() {
   }, [marketFilter, stocks, strategySignals]);
 
   const rawIntelligence = useMemo(
-    () => stocksWithStrategySignals.map(inferIntelligence).sort((a, b) => b.setupQuality - a.setupQuality),
+    () =>
+      stocksWithStrategySignals
+        .map(inferIntelligence)
+        .sort((a, b) => b.setupQuality - a.setupQuality),
     [stocksWithStrategySignals],
   );
 
@@ -2606,17 +3326,14 @@ export default function Dashboard() {
         positiveNumberOrNull(stock.price) != null
       );
     });
-  const backtestDataQuality = backtestSummary?.dataQualityReport ?? backtestSummary?.dataQuality ?? {};
+  const backtestDataQuality =
+    backtestSummary?.dataQualityReport ?? backtestSummary?.dataQuality ?? {};
   const hasRealBacktestMarketData =
     Boolean(backtestSummary?.updatedAt) &&
-    (
-      backtestDataQuality?.promotionEligibleData === true ||
-      (
-        String(backtestDataQuality?.quality ?? "").toLowerCase() === "real" &&
+    (backtestDataQuality?.promotionEligibleData === true ||
+      (String(backtestDataQuality?.quality ?? "").toLowerCase() === "real" &&
         Number(backtestDataQuality?.symbolCount ?? 0) > 0 &&
-        Number(backtestDataQuality?.syntheticSymbols ?? 0) === 0
-      )
-    );
+        Number(backtestDataQuality?.syntheticSymbols ?? 0) === 0));
   const hasStrategyMarketData = strategySignals.some((signal) => {
     return (
       positiveNumberOrNull(signal?.price ?? signal?.entryPrice) != null ||
@@ -2632,46 +3349,71 @@ export default function Dashboard() {
       numeric(signal?.suggestedExposure, 0) > 0
     );
   }).length;
-  const forwardShadowConfirmedCount = Number(forwardShadow?.confirmedSignalCount ?? 0);
-  const forwardShadowObservedCount = Number(forwardShadow?.observedSignalCount ?? 0);
-  const forwardShadowEvaluatedCount = Number(forwardShadow?.evaluatedSignalCount ?? 0);
-  const forwardShadowRequiredCount = Number(forwardShadow?.requiredSignals ?? 0);
+  const forwardShadowConfirmedCount = Number(
+    forwardShadow?.confirmedSignalCount ?? 0,
+  );
+  const forwardShadowObservedCount = Number(
+    forwardShadow?.observedSignalCount ?? 0,
+  );
+  const forwardShadowEvaluatedCount = Number(
+    forwardShadow?.evaluatedSignalCount ?? 0,
+  );
+  const forwardShadowRequiredCount = Number(
+    forwardShadow?.requiredSignals ?? 0,
+  );
   const hasConfirmedForwardSignals =
     confirmedStrategySignalCount > 0 ||
     forwardShadowConfirmedCount > 0 ||
     forwardShadowObservedCount > 0;
 
   const hasProvidedSignals =
-    (hasUsableMarketData || hasRealBacktestMarketData || hasStrategyMarketData) &&
-    (
-      hasConfirmedForwardSignals ||
+    (hasUsableMarketData ||
+      hasRealBacktestMarketData ||
+      hasStrategyMarketData) &&
+    (hasConfirmedForwardSignals ||
       rawIntelligence.some((stock) => {
         const status = String(stock.signalStatus ?? "");
         return status === "provided" || status === "confirmed";
-      })
-    );
+      }));
 
-  const hasMarketData = hasUsableMarketData || hasRealBacktestMarketData || hasStrategyMarketData;
+  const hasMarketData =
+    hasUsableMarketData || hasRealBacktestMarketData || hasStrategyMarketData;
 
-  const rawMarketUniverse = rawCoveredIntelligence.length ? rawCoveredIntelligence : rawIntelligence;
-  const rawOpenPositions = rawCoveredIntelligence.filter((stock) => stock.suggestedExposure > 0);
-  const rawTargetExposure = clamp(rawOpenPositions.reduce((sum, stock) => sum + stock.suggestedExposure, 0), 0, 65);
-  const rawAvgQuality = mean(rawCoveredIntelligence.slice(0, 30).map((item) => item.setupQuality));
-  const rawAvgRisk = mean(rawCoveredIntelligence.slice(0, 30).map((item) => item.riskPressure));
+  const rawMarketUniverse = rawCoveredIntelligence.length
+    ? rawCoveredIntelligence
+    : rawIntelligence;
+  const rawOpenPositions = rawCoveredIntelligence.filter(
+    (stock) => stock.suggestedExposure > 0,
+  );
+  const rawTargetExposure = clamp(
+    rawOpenPositions.reduce((sum, stock) => sum + stock.suggestedExposure, 0),
+    0,
+    65,
+  );
+  const rawAvgQuality = mean(
+    rawCoveredIntelligence.slice(0, 30).map((item) => item.setupQuality),
+  );
+  const rawAvgRisk = mean(
+    rawCoveredIntelligence.slice(0, 30).map((item) => item.riskPressure),
+  );
   const rawBreadth = rawCoveredIntelligence.length
-    ? (rawCoveredIntelligence.filter((item) => item.suggestedExposure > 0).length / rawCoveredIntelligence.length) * 100
+    ? (rawCoveredIntelligence.filter((item) => item.suggestedExposure > 0)
+        .length /
+        rawCoveredIntelligence.length) *
+      100
     : 0;
   const rawConfidence = clamp(rawAvgQuality * 0.75 + (100 - rawAvgRisk) * 0.25);
 
   const lastSyncedLabel = lastSyncedAt
     ? new Date(lastSyncedAt).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : "Not synced";
 
   const lastSyncAgeMs = lastSyncedAt ? Date.now() - lastSyncedAt : null;
-  const staleData = lastSyncAgeMs == null ? false : lastSyncAgeMs > REFRESH_INTERVAL_MS * 3;
+  const staleData =
+    lastSyncAgeMs == null ? false : lastSyncAgeMs > REFRESH_INTERVAL_MS * 3;
 
   const marketStatus = marketFilter ? getMarketStatus(marketFilter) : "Closed";
 
@@ -2698,7 +3440,11 @@ export default function Dashboard() {
         backtestWinRatePct: null,
         backtestReturnPct: null,
         lastSuccessfulSync: lastSyncedAt,
-        expectedAssetCount: rawMarketUniverse.length || rawIntelligence.length || totalStocks || 1,
+        expectedAssetCount:
+          rawMarketUniverse.length ||
+          rawIntelligence.length ||
+          totalStocks ||
+          1,
       }),
     [
       marketFilter,
@@ -2721,7 +3467,8 @@ export default function Dashboard() {
     !(
       marketReliability.status === "healthy" &&
       marketReliability.market.synchronizationStatus === "synced" &&
-      (marketReliability.market.lastSuccessfulSync != null || lastSyncedAt != null)
+      (marketReliability.market.lastSuccessfulSync != null ||
+        lastSyncedAt != null)
     )
       ? refreshError
       : null;
@@ -2730,7 +3477,10 @@ export default function Dashboard() {
     () =>
       rawIntelligence.map((stock) => ({
         ...stock,
-        suggestedExposure: capReliabilityExposure(stock.suggestedExposure, marketReliability),
+        suggestedExposure: capReliabilityExposure(
+          stock.suggestedExposure,
+          marketReliability,
+        ),
       })),
     [rawIntelligence, marketReliability],
   );
@@ -2740,7 +3490,9 @@ export default function Dashboard() {
     [intelligence],
   );
 
-  const marketUniverse = coveredIntelligence.length ? coveredIntelligence : intelligence;
+  const marketUniverse = coveredIntelligence.length
+    ? coveredIntelligence
+    : intelligence;
 
   const filtered = useMemo(() => {
     const q = query.trim().toUpperCase();
@@ -2755,7 +3507,11 @@ export default function Dashboard() {
   }, [marketUniverse, query]);
 
   const selected = useMemo(() => {
-    return filtered.find((item) => normalizedTicker(item) === selectedTicker) ?? filtered[0] ?? null;
+    return (
+      filtered.find((item) => normalizedTicker(item) === selectedTicker) ??
+      filtered[0] ??
+      null
+    );
   }, [filtered, selectedTicker]);
 
   useEffect(() => {
@@ -2771,63 +3527,115 @@ export default function Dashboard() {
     // Backend/API persistence remains the source of truth for validation state.
   }, []);
 
-  const openPositions = coveredIntelligence.filter((stock) => stock.suggestedExposure > 0);
-  const targetExposure = clamp(openPositions.reduce((sum, stock) => sum + stock.suggestedExposure, 0), 0, 65);
+  const openPositions = coveredIntelligence.filter(
+    (stock) => stock.suggestedExposure > 0,
+  );
+  const targetExposure = clamp(
+    openPositions.reduce((sum, stock) => sum + stock.suggestedExposure, 0),
+    0,
+    65,
+  );
   const liveExposure = targetExposure;
   const capitalDeployed = "******";
-  const riskBudget = Math.max(0, STARTING_PORTFOLIO_VALUE * ((targetExposure - liveExposure) / 100));
-  const avgQuality = mean(coveredIntelligence.slice(0, 30).map((item) => item.setupQuality));
-  const avgRisk = mean(coveredIntelligence.slice(0, 30).map((item) => item.riskPressure));
+  const riskBudget = Math.max(
+    0,
+    STARTING_PORTFOLIO_VALUE * ((targetExposure - liveExposure) / 100),
+  );
+  const avgQuality = mean(
+    coveredIntelligence.slice(0, 30).map((item) => item.setupQuality),
+  );
+  const avgRisk = mean(
+    coveredIntelligence.slice(0, 30).map((item) => item.riskPressure),
+  );
   const breadth = coveredIntelligence.length
-    ? (coveredIntelligence.filter((item) => item.suggestedExposure > 0).length / coveredIntelligence.length) * 100
+    ? (coveredIntelligence.filter((item) => item.suggestedExposure > 0).length /
+        coveredIntelligence.length) *
+      100
     : 0;
-  const payloadDiscoveryCandidates = Array.isArray(opportunityDiscovery?.candidates)
+  const payloadDiscoveryCandidates = Array.isArray(
+    opportunityDiscovery?.candidates,
+  )
     ? opportunityDiscovery.candidates
     : [];
   const signalDiscoveryCandidates = strategySignals
     .map((signal) => signal?.opportunityDiscovery)
     .filter(Boolean);
-  const discoveryCandidates = payloadDiscoveryCandidates.length ? payloadDiscoveryCandidates : signalDiscoveryCandidates;
+  const discoveryCandidates = payloadDiscoveryCandidates.length
+    ? payloadDiscoveryCandidates
+    : signalDiscoveryCandidates;
   const discoveryDensityDiagnostics = opportunityDiscovery?.density ?? null;
   const adaptiveOpportunityDensityPct = clamp(
     finiteNumber(discoveryDensityDiagnostics?.density) ??
       (discoveryCandidates.length
-        ? mean(discoveryCandidates.map((candidate: any) => numeric(candidate.candidateScore ?? candidate.genericOpportunity?.strength)))
+        ? mean(
+            discoveryCandidates.map((candidate: any) =>
+              numeric(
+                candidate.candidateScore ??
+                  candidate.genericOpportunity?.strength,
+              ),
+            ),
+          )
         : breadth),
   );
   const discoveryPipelineDiagnostics = opportunityDiscovery?.diagnostics ?? {
     candidateCount: discoveryCandidates.length,
-    eligibleCount: discoveryCandidates.filter((candidate: any) => candidate.eligible).length,
-    improvingCount: discoveryCandidates.filter((candidate: any) => numeric(candidate.scoreVelocity) > 0).length,
+    eligibleCount: discoveryCandidates.filter(
+      (candidate: any) => candidate.eligible,
+    ).length,
+    improvingCount: discoveryCandidates.filter(
+      (candidate: any) => numeric(candidate.scoreVelocity) > 0,
+    ).length,
     averageScore: discoveryCandidates.length
-      ? mean(discoveryCandidates.map((candidate: any) => numeric(candidate.candidateScore)))
+      ? mean(
+          discoveryCandidates.map((candidate: any) =>
+            numeric(candidate.candidateScore),
+          ),
+        )
       : 0,
     averageVelocity: discoveryCandidates.length
-      ? mean(discoveryCandidates.map((candidate: any) => numeric(candidate.scoreVelocity)))
+      ? mean(
+          discoveryCandidates.map((candidate: any) =>
+            numeric(candidate.scoreVelocity),
+          ),
+        )
       : 0,
   };
-  const rawNeedDiagnostics = Array.isArray((marketPerceptionSnapshot?.framework as any)?.needs)
+  const rawNeedDiagnostics = Array.isArray(
+    (marketPerceptionSnapshot?.framework as any)?.needs,
+  )
     ? (marketPerceptionSnapshot?.framework as any).needs
     : [];
-  const frameworkOpportunities = Array.isArray((marketPerceptionSnapshot?.framework as any)?.opportunities)
+  const frameworkOpportunities = Array.isArray(
+    (marketPerceptionSnapshot?.framework as any)?.opportunities,
+  )
     ? (marketPerceptionSnapshot?.framework as any).opportunities
     : [];
-  const discoveryFindings = Array.isArray(opportunityDiscovery?.findings) ? opportunityDiscovery.findings : [];
+  const discoveryFindings = Array.isArray(opportunityDiscovery?.findings)
+    ? opportunityDiscovery.findings
+    : [];
   const leadingDiscoveryCandidate = discoveryCandidates[0] ?? null;
   const genericDiscovery =
     opportunityDiscovery?.discovery ??
     leadingDiscoveryCandidate?.discovery ??
     null;
-  const discoverySupportEvidence = Array.isArray(genericDiscovery?.explanation?.supportingEvidence)
+  const discoverySupportEvidence = Array.isArray(
+    genericDiscovery?.explanation?.supportingEvidence,
+  )
     ? genericDiscovery.explanation.supportingEvidence
     : [];
-  const discoveryContradictoryEvidence = Array.isArray(genericDiscovery?.explanation?.contradictoryEvidence)
+  const discoveryContradictoryEvidence = Array.isArray(
+    genericDiscovery?.explanation?.contradictoryEvidence,
+  )
     ? genericDiscovery.explanation.contradictoryEvidence
     : [];
-  const discoveryMissingEvidence = Array.isArray(genericDiscovery?.missingEvidence)
+  const discoveryMissingEvidence = Array.isArray(
+    genericDiscovery?.missingEvidence,
+  )
     ? genericDiscovery.missingEvidence
     : [];
-  const discoveryInvalidationConditions = Array.isArray(genericDiscovery?.invalidationConditions)
+  const discoveryInvalidationConditions = Array.isArray(
+    genericDiscovery?.invalidationConditions,
+  )
     ? genericDiscovery.invalidationConditions
     : [];
   const discoveryMemory = genericDiscovery?.memory ?? null;
@@ -2848,20 +3656,29 @@ export default function Dashboard() {
       finiteNumber(agencySelfDiagnosis.trust) ??
       0) * 100,
   );
-  const agencyTrustAdjustmentPct = finiteNumber(agencySummary.trustAdjustment) == null
-    ? null
-    : clamp(Number(agencySummary.trustAdjustment) * 100);
-  const agencyTraceCount = numeric(agencySummary.traceCount ?? agencyState.traceCount ?? agencyAudits.length);
+  const agencyTrustAdjustmentPct =
+    finiteNumber(agencySummary.trustAdjustment) == null
+      ? null
+      : clamp(Number(agencySummary.trustAdjustment) * 100);
+  const agencyTraceCount = numeric(
+    agencySummary.traceCount ?? agencyState.traceCount ?? agencyAudits.length,
+  );
   const agencyAllowedActions = numeric(
     agencySummary.allowedActions ??
       agencyAudits.filter((audit: any) => audit?.allowed === true).length,
   );
   const agencyBlockedActions = numeric(agencySummary.blockedActions);
   const agencyMissingOutcomes = numeric(agencySummary.missingOutcomes);
-  const agencyDataReliabilityPct = finiteNumber(agencySelfDiagnosis.dataReliability);
-  const agencySelfDiagnosisCalibrationHealthPct = finiteNumber(agencySelfDiagnosis.calibrationHealth);
+  const agencyDataReliabilityPct = finiteNumber(
+    agencySelfDiagnosis.dataReliability,
+  );
+  const agencySelfDiagnosisCalibrationHealthPct = finiteNumber(
+    agencySelfDiagnosis.calibrationHealth,
+  );
   const agencyOverfitRiskPct = finiteNumber(agencySelfDiagnosis.overfitRisk);
-  const agencyReasons = Array.isArray(agencySelfDiagnosis.reasons) ? agencySelfDiagnosis.reasons : undefined;
+  const agencyReasons = Array.isArray(agencySelfDiagnosis.reasons)
+    ? agencySelfDiagnosis.reasons
+    : undefined;
   const hasAgencyDiagnostics =
     Boolean(agencyDiagnostics) ||
     agencyAudits.length > 0 ||
@@ -2869,9 +3686,7 @@ export default function Dashboard() {
     finiteNumber(agencySelfDiagnosis.trust) != null;
   const strategyReadiness = backtestSummary?.strategyReadiness ?? {};
   const trustGovernor: TrustGovernorDiagnostic | null =
-    backtestSummary?.trustGovernor ??
-    strategyReadiness?.trustGovernor ??
-    null;
+    backtestSummary?.trustGovernor ?? strategyReadiness?.trustGovernor ?? null;
   const readinessRemediation: ReadinessRemediationDiagnostic | null =
     backtestSummary?.readinessRemediation ??
     backtestSummary?.remediationPlan ??
@@ -2883,9 +3698,7 @@ export default function Dashboard() {
     Array.isArray(trustGovernor?.blockedActions) &&
     trustGovernor.blockedActions.includes("new_exposure");
   const trustGovernorPrimaryReason =
-    trustGovernor?.blockers?.[0]?.reason ??
-    trustGovernor?.reasons?.[0] ??
-    "";
+    trustGovernor?.blockers?.[0]?.reason ?? trustGovernor?.reasons?.[0] ?? "";
   const strategyFailureFlags = Array.isArray(backtestSummary?.failureFlags)
     ? backtestSummary.failureFlags
     : [];
@@ -2906,9 +3719,7 @@ export default function Dashboard() {
     finiteNumber(strategyReadiness?.maxConfidence) ??
     finiteNumber(backtestSummary?.promotionConfidence);
   const calibrationDiagnostics =
-    strategyReadiness?.calibration ??
-    backtestSummary?.calibration ??
-    null;
+    strategyReadiness?.calibration ?? backtestSummary?.calibration ?? null;
   const rawConfidenceDisplay =
     finiteNumber(backtestSummary?.rawConfidence) ??
     finiteNumber(strategyReadiness?.rawConfidence) ??
@@ -2923,19 +3734,24 @@ export default function Dashboard() {
     finiteNumber(backtestSummary?.trustworthiness) ??
     finiteNumber(strategyReadiness?.trustworthiness) ??
     finiteNumber(calibrationDiagnostics?.trustworthiness);
-  const calibrationWarnings = Array.isArray(backtestSummary?.calibrationWarnings)
+  const calibrationWarnings = Array.isArray(
+    backtestSummary?.calibrationWarnings,
+  )
     ? backtestSummary.calibrationWarnings
     : Array.isArray(calibrationDiagnostics?.warnings)
       ? calibrationDiagnostics.warnings
       : [];
-  const calibrationSampleSize = numeric(calibrationDiagnostics?.sampleSize ?? 0);
+  const calibrationSampleSize = numeric(
+    calibrationDiagnostics?.sampleSize ?? 0,
+  );
   const rawCalibrationStatus = String(
     backtestSummary?.calibrationStatus ??
       calibrationDiagnostics?.status ??
       (calibrationSampleSize > 0 ? "tracked" : "insufficient-history"),
   );
   const calibrationStatus =
-    rawCalibrationStatus === "trusted" && calibrationWarnings.includes("unstable outcomes")
+    rawCalibrationStatus === "trusted" &&
+    calibrationWarnings.includes("unstable outcomes")
       ? "unstable-outcomes"
       : rawCalibrationStatus;
   const calibrationTone =
@@ -2944,7 +3760,9 @@ export default function Dashboard() {
       : calibrationStatus === "poor-calibration"
         ? "bad"
         : "warn";
-  const calibrationExplanation = calibrationWarnings.includes("unstable outcomes")
+  const calibrationExplanation = calibrationWarnings.includes(
+    "unstable outcomes",
+  )
     ? "Calibration has enough history, but outcomes are unstable. Keep this review-gated until outcomes become more consistent."
     : String(
         backtestSummary?.calibrationExplanation ??
@@ -2962,12 +3780,12 @@ export default function Dashboard() {
     calibrationSampleSize <= 0
       ? "Calibration history is still insufficient."
       : calibrationWarnings.includes("unstable outcomes")
-      ? `Calibration has ${calibrationSampleSize} samples, but outcomes are unstable. The system should stay review-gated until similar signals become more consistent.`
-      : strategyReadinessBlocked
-        ? `Calibration has ${calibrationSampleSize} samples, but strategy readiness gates still block exposure. Calibrated confidence is ${calibratedConfidenceDisplay == null ? "not available" : fmtPlainPct(calibratedConfidenceDisplay, 0)}.`
-        : calibrationConfidenceDrop >= 5
-          ? `Raw confidence is ${fmtPlainPct(rawConfidenceDisplay, 0)}; calibrated confidence is ${fmtPlainPct(calibratedConfidenceDisplay, 0)}. The system is cautious because similar past signals have not yet proven reliable enough.`
-          : `Calibration checks whether past confidence matched actual outcomes across ${calibrationSampleSize} samples.`;
+        ? `Calibration has ${calibrationSampleSize} samples, but outcomes are unstable. The system should stay review-gated until similar signals become more consistent.`
+        : strategyReadinessBlocked
+          ? `Calibration has ${calibrationSampleSize} samples, but strategy readiness gates still block exposure. Calibrated confidence is ${calibratedConfidenceDisplay == null ? "not available" : fmtPlainPct(calibratedConfidenceDisplay, 0)}.`
+          : calibrationConfidenceDrop >= 5
+            ? `Raw confidence is ${fmtPlainPct(rawConfidenceDisplay, 0)}; calibrated confidence is ${fmtPlainPct(calibratedConfidenceDisplay, 0)}. The system is cautious because similar past signals have not yet proven reliable enough.`
+            : `Calibration checks whether past confidence matched actual outcomes across ${calibrationSampleSize} samples.`;
   const calibrationRequiresReview = [
     "insufficient-history",
     "poor-calibration",
@@ -2979,24 +3797,25 @@ export default function Dashboard() {
     strategyCapacityBlocked ||
     calibrationRequiresReview ||
     trustGovernorBlocks;
-  const commitmentBlockReason = trustGovernorBlocks && trustGovernorPrimaryReason
+  const commitmentBlockReason =
+    trustGovernorBlocks && trustGovernorPrimaryReason
       ? trustGovernorPrimaryReason
-    : strategyReadinessBlocked
-      ? "Strategy readiness gates block new exposure."
-    : calibrationRequiresReview
-      ? "Calibration gates block new exposure until outcomes stabilize."
-      : strategyCapacityBlocked
-        ? "Sizing gates block new exposure until commitment capacity reopens."
-        : "";
-  const commitmentBlockLabel = trustGovernorBlocks && trustGovernorPrimaryReason
-    ? "Signal Trust Governor"
-    : calibrationRequiresReview && !strategyReadinessBlocked
-    ? "Calibration"
-    : "Strategy readiness";
-  const reviewIdeasMessage =
-    commitmentBlockReason
-      ? `${commitmentBlockReason} Showing the strongest review candidates instead of buy orders.`
-      : "Showing the strongest review candidates instead of buy orders.";
+      : strategyReadinessBlocked
+        ? "Strategy readiness gates block new exposure."
+        : calibrationRequiresReview
+          ? "Calibration gates block new exposure until outcomes stabilize."
+          : strategyCapacityBlocked
+            ? "Sizing gates block new exposure until commitment capacity reopens."
+            : "";
+  const commitmentBlockLabel =
+    trustGovernorBlocks && trustGovernorPrimaryReason
+      ? "Signal Trust Governor"
+      : calibrationRequiresReview && !strategyReadinessBlocked
+        ? "Calibration"
+        : "Strategy readiness";
+  const reviewIdeasMessage = commitmentBlockReason
+    ? `${commitmentBlockReason} Showing the strongest review candidates instead of buy orders.`
+    : "Showing the strongest review candidates instead of buy orders.";
   const needDiagnostics = resolveDashboardNeedDiagnostics({
     rawNeeds: rawNeedDiagnostics,
     strategyReadinessBlocked,
@@ -3041,7 +3860,10 @@ export default function Dashboard() {
     ],
   );
   const confidence = Math.min(
-    capReliabilityConfidence(clamp(avgQuality * 0.75 + (100 - avgRisk) * 0.25), marketReliability) ?? 0,
+    capReliabilityConfidence(
+      clamp(avgQuality * 0.75 + (100 - avgRisk) * 0.25),
+      marketReliability,
+    ) ?? 0,
     strategyConfidenceCap ?? 100,
   );
   const inferredRegime =
@@ -3080,7 +3902,9 @@ export default function Dashboard() {
     strategyBlockedLabel: commitmentBlockLabel,
     strategyBlockedReason: commitmentBlockReason || undefined,
   });
-  const opportunityParticipationPct = hasProvidedSignals ? adaptiveOpportunityDensityPct : 0;
+  const opportunityParticipationPct = hasProvidedSignals
+    ? adaptiveOpportunityDensityPct
+    : 0;
   const semanticMetrics = useMemo(
     () =>
       buildDashboardSemanticMetrics({
@@ -3089,7 +3913,8 @@ export default function Dashboard() {
         confidencePct: confidence ?? 0,
         riskPct: avgRisk ?? 100,
         avgQualityPct: avgQuality ?? 0,
-        suggestedMaximumExposurePct: dashboardSizing.suggestedMaximumExposurePct,
+        suggestedMaximumExposurePct:
+          dashboardSizing.suggestedMaximumExposurePct,
         strategyCapPct: 65,
         sizingMode: dashboardSizing.sizingMode,
       }),
@@ -3106,23 +3931,26 @@ export default function Dashboard() {
   const sizingModeMetricValue = hasProvidedSignals
     ? displaySizingMode(dashboardSizing.sizingMode)
     : "—";
-  const sizingModeMetricSub = hasProvidedSignals && dashboardSizing.sizingMode !== "none"
-    ? dashboardSizing.sizingMode === "micro"
-      ? "reduced-size cap"
-      : semanticMetrics.sizing.word.toLowerCase()
-    : undefined;
+  const sizingModeMetricSub =
+    hasProvidedSignals && dashboardSizing.sizingMode !== "none"
+      ? dashboardSizing.sizingMode === "micro"
+        ? "reduced-size cap"
+        : semanticMetrics.sizing.word.toLowerCase()
+      : undefined;
   const maximumExposureMetricValue = hasProvidedSignals
     ? dashboardSizing.suggestedMaximumExposurePct <= 0
       ? "None"
       : fmtPlainPct(dashboardSizing.suggestedMaximumExposurePct)
     : "—";
-  const maximumExposureMetricSub = hasProvidedSignals && dashboardSizing.suggestedMaximumExposurePct > 0
-    ? maximumExposureSubLabel({
-      sizingMode: dashboardSizing.sizingMode,
-      suggestedMaximumExposurePct: dashboardSizing.suggestedMaximumExposurePct,
-      semanticWord: semanticMetrics.maximumExposure.word,
-    })
-    : undefined;
+  const maximumExposureMetricSub =
+    hasProvidedSignals && dashboardSizing.suggestedMaximumExposurePct > 0
+      ? maximumExposureSubLabel({
+          sizingMode: dashboardSizing.sizingMode,
+          suggestedMaximumExposurePct:
+            dashboardSizing.suggestedMaximumExposurePct,
+          semanticWord: semanticMetrics.maximumExposure.word,
+        })
+      : undefined;
 
   const allocationContext = useMemo(
     () => ({
@@ -3131,17 +3959,28 @@ export default function Dashboard() {
       breadth,
       targetExposure,
       marketStatus,
-      defensiveReliability: shouldUseDefensiveReliabilityPosture(marketReliability),
+      defensiveReliability:
+        shouldUseDefensiveReliabilityPosture(marketReliability),
       strategyBlocked: commitmentBlocked,
       strategyMaxPositionPct,
     }),
-    [regime, avgRisk, breadth, targetExposure, marketStatus, marketReliability, commitmentBlocked, strategyMaxPositionPct],
+    [
+      regime,
+      avgRisk,
+      breadth,
+      targetExposure,
+      marketStatus,
+      marketReliability,
+      commitmentBlocked,
+      strategyMaxPositionPct,
+    ],
   );
 
   const allocationUniverse = useMemo(
     () =>
       filtered.map((stock) => {
-        const action = ((stock as any).allocationAction ?? deriveAllocationAction(stock, allocationContext)) as AllocationAction;
+        const action = ((stock as any).allocationAction ??
+          deriveAllocationAction(stock, allocationContext)) as AllocationAction;
         const normalizedAction =
           action === "Blocked" &&
           commitmentBlocked &&
@@ -3158,7 +3997,12 @@ export default function Dashboard() {
   );
 
   useEffect(() => {
-    if (!marketFilter || !allocationUniverse.length || (!ENABLE_PORTFOLIO_API && !ENABLE_STRATEGY_API)) return;
+    if (
+      !marketFilter ||
+      !allocationUniverse.length ||
+      (!ENABLE_PORTFOLIO_API && !ENABLE_STRATEGY_API)
+    )
+      return;
 
     const refreshKey = `${marketFilter}:${allocationUniverse.length}`;
 
@@ -3173,28 +4017,31 @@ export default function Dashboard() {
     return () => window.clearTimeout(timeout);
   }, [marketFilter, allocationUniverse]);
 
-
-
   const finalOpenPositions = useMemo(
     () =>
       allocationUniverse.filter((stock) => {
-        return stock.allocationAction === "Buy" && numeric(stock.suggestedExposure) > 0;
+        return (
+          stock.allocationAction === "Buy" &&
+          numeric(stock.suggestedExposure) > 0
+        );
       }),
     [allocationUniverse],
   );
 
-  const ledgerGroups = useMemo(
-    () => {
-      const middleAction: AllocationAction =
-        commitmentBlocked ? "Blocked" : "Watch";
+  const ledgerGroups = useMemo(() => {
+    const middleAction: AllocationAction = commitmentBlocked
+      ? "Blocked"
+      : "Watch";
 
-      return (["Buy", middleAction, "Sell"] as AllocationAction[]).map((action) => ({
+    return (["Buy", middleAction, "Sell"] as AllocationAction[]).map(
+      (action) => ({
         action,
-        items: allocationUniverse.filter((stock) => stock.allocationAction === action),
-      }));
-    },
-    [allocationUniverse, commitmentBlocked],
-  );
+        items: allocationUniverse.filter(
+          (stock) => stock.allocationAction === action,
+        ),
+      }),
+    );
+  }, [allocationUniverse, commitmentBlocked]);
 
   const topOpportunities = useMemo(
     () =>
@@ -3209,12 +4056,11 @@ export default function Dashboard() {
           return (
             numeric(b.setupQuality) +
             numeric(b.suggestedExposure) * 8 -
-            numeric(b.riskPressure) * 0.35
-          ) - (
-              numeric(a.setupQuality) +
+            numeric(b.riskPressure) * 0.35 -
+            (numeric(a.setupQuality) +
               numeric(a.suggestedExposure) * 8 -
-              numeric(a.riskPressure) * 0.35
-            );
+              numeric(a.riskPressure) * 0.35)
+          );
         })
         .slice(0, 8),
     [allocationUniverse],
@@ -3227,56 +4073,78 @@ export default function Dashboard() {
           return (
             stock.allocationAction === "Blocked" &&
             stock.riskPressure < 78 &&
-            (
-              stock.signalAction === "Buy" ||
+            (stock.signalAction === "Buy" ||
               numeric(stock.setupQuality) >= 58 ||
-              numeric(stock.discoveryScore) >= 55
-            )
+              numeric(stock.discoveryScore) >= 55)
           );
         })
         .sort((a, b) => {
           return (
             numeric(b.setupQuality) +
             numeric(b.discoveryScore) * 0.4 -
-            numeric(b.riskPressure) * 0.35
-          ) - (
-              numeric(a.setupQuality) +
+            numeric(b.riskPressure) * 0.35 -
+            (numeric(a.setupQuality) +
               numeric(a.discoveryScore) * 0.4 -
-              numeric(a.riskPressure) * 0.35
-            );
+              numeric(a.riskPressure) * 0.35)
+          );
         })
         .slice(0, 8),
     [allocationUniverse],
   );
 
-  const showingBlockedReviewIdeas = topOpportunities.length === 0 && reviewOpportunities.length > 0;
-  const displayedTopOpportunities = topOpportunities.length ? topOpportunities : reviewOpportunities;
-  const selectedAllocationStock = allocationUniverse.find((stock) => normalizedTicker(stock) === selectedTicker);
+  const showingBlockedReviewIdeas =
+    topOpportunities.length === 0 && reviewOpportunities.length > 0;
+  const displayedTopOpportunities = topOpportunities.length
+    ? topOpportunities
+    : reviewOpportunities;
+  const selectedAllocationStock = allocationUniverse.find(
+    (stock) => normalizedTicker(stock) === selectedTicker,
+  );
   const beliefDiagnostic =
     selectedAllocationStock?.belief ??
     displayedTopOpportunities[0]?.belief ??
     allocationUniverse.find((stock) => stock.belief)?.belief ??
     null;
-  const beliefSupportEvidence = topBeliefEvidence(beliefDiagnostic, "supportingEvidence");
-  const beliefContradictoryEvidence = topBeliefEvidence(beliefDiagnostic, "contradictoryEvidence");
+  const beliefSupportEvidence = topBeliefEvidence(
+    beliefDiagnostic,
+    "supportingEvidence",
+  );
+  const beliefContradictoryEvidence = topBeliefEvidence(
+    beliefDiagnostic,
+    "contradictoryEvidence",
+  );
   const recognitionDiagnostic: RecognitionDiagnostic | null =
     selectedAllocationStock?.recognition ??
     displayedTopOpportunities[0]?.recognition ??
     allocationUniverse.find((stock) => stock.recognition)?.recognition ??
     backtestSummary?.recognitionDiagnostics?.primary ??
     null;
-  const recognitionMissingEvidence = recognitionDiagnostic?.missingEvidence?.length
+  const recognitionMissingEvidence = recognitionDiagnostic?.missingEvidence
+    ?.length
     ? recognitionDiagnostic.missingEvidence
-    : [recognitionDiagnostic ? "No recognition evidence gap reported." : "Recognition is waiting for Discovery and Judgement evidence."];
-  const recognitionInvalidationConditions = recognitionDiagnostic?.invalidationConditions?.length
+    : [
+        recognitionDiagnostic
+          ? "No recognition evidence gap reported."
+          : "Recognition is waiting for Discovery and Judgement evidence.",
+      ];
+  const recognitionInvalidationConditions = recognitionDiagnostic
+    ?.invalidationConditions?.length
     ? recognitionDiagnostic.invalidationConditions
-    : [recognitionDiagnostic ? "No recognition invalidation condition reported." : "Recognition invalidation conditions are pending."];
-  const recognitionClearsDiscoveryNovelty = recognitionClearsDiscoveryNoveltyNarrative(recognitionDiagnostic);
-  const displayedDiscoveryInvalidationConditions = reconcileDiscoveryInvalidationConditions(
-    discoveryInvalidationConditions,
+    : [
+        recognitionDiagnostic
+          ? "No recognition invalidation condition reported."
+          : "Recognition invalidation conditions are pending.",
+      ];
+  const recognitionClearsDiscoveryNovelty =
+    recognitionClearsDiscoveryNoveltyNarrative(recognitionDiagnostic);
+  const displayedDiscoveryInvalidationConditions =
+    reconcileDiscoveryInvalidationConditions(
+      discoveryInvalidationConditions,
+      recognitionDiagnostic,
+    );
+  const discoveryMemoryRecognitionLine = recognitionStateRecurrenceLine(
     recognitionDiagnostic,
   );
-  const discoveryMemoryRecognitionLine = recognitionStateRecurrenceLine(recognitionDiagnostic);
   const judgementDiagnostic =
     selectedAllocationStock?.judgement ??
     displayedTopOpportunities[0]?.judgement ??
@@ -3291,7 +4159,8 @@ export default function Dashboard() {
     displayedTopOpportunities[0]?.survivalMemory ??
     displayedTopOpportunities[0]?.judgement?.survivalMemory ??
     allocationUniverse.find((stock) => stock.survivalMemory)?.survivalMemory ??
-    allocationUniverse.find((stock) => stock.judgement?.survivalMemory)?.judgement?.survivalMemory ??
+    allocationUniverse.find((stock) => stock.judgement?.survivalMemory)
+      ?.judgement?.survivalMemory ??
     backtestSummary?.survivalMemory ??
     strategyReadiness?.survivalMemory ??
     null;
@@ -3299,7 +4168,11 @@ export default function Dashboard() {
     ? survivalMemoryDiagnostic.mainWarnings
     : survivalMemoryDiagnostic?.reasons?.length
       ? survivalMemoryDiagnostic.reasons
-      : [survivalMemoryDiagnostic ? "No survival warnings reported." : "Survival memory is waiting for outcome records with drawdown and stress fields."];
+      : [
+          survivalMemoryDiagnostic
+            ? "No survival warnings reported."
+            : "Survival memory is waiting for outcome records with drawdown and stress fields.",
+        ];
   const recoveryDiagnostic: RecoveryDiagnostic | null =
     selectedAllocationStock?.recovery ??
     displayedTopOpportunities[0]?.recovery ??
@@ -3309,18 +4182,27 @@ export default function Dashboard() {
     null;
   const recoveryBlockers = recoveryDiagnostic?.blockers?.length
     ? recoveryDiagnostic.blockers
-    : [recoveryDiagnostic ? "No recovery blockers reported." : "Recovery diagnostics are pending."];
+    : [
+        recoveryDiagnostic
+          ? "No recovery blockers reported."
+          : "Recovery diagnostics are pending.",
+      ];
   const recoveryUnlockConditions = recoveryDiagnostic?.unlockConditions?.length
     ? recoveryDiagnostic.unlockConditions
-    : [recoveryDiagnostic ? "No recovery unlock conditions reported." : "Recovery unlock conditions are pending."];
+    : [
+        recoveryDiagnostic
+          ? "No recovery unlock conditions reported."
+          : "Recovery unlock conditions are pending.",
+      ];
   const displayedRecoveryBlockers = reconcileRecoveryBlockersWithRecognition(
     recoveryBlockers,
     recognitionDiagnostic,
   );
-  const displayedRecoveryUnlockConditions = reconcileRecoveryUnlockConditionsWithRecognition(
-    recoveryUnlockConditions,
-    recognitionDiagnostic,
-  );
+  const displayedRecoveryUnlockConditions =
+    reconcileRecoveryUnlockConditionsWithRecognition(
+      recoveryUnlockConditions,
+      recognitionDiagnostic,
+    );
   const resolveDiagnostic =
     selectedAllocationStock?.resolve ??
     displayedTopOpportunities[0]?.resolve ??
@@ -3329,19 +4211,70 @@ export default function Dashboard() {
     null;
   const resolveMissingEvidence = resolveDiagnostic?.missingEvidence?.length
     ? resolveDiagnostic.missingEvidence
-    : [resolveDiagnostic ? "No missing evidence reported." : "Resolve evidence is pending."];
+    : [
+        resolveDiagnostic
+          ? "No missing evidence reported."
+          : "Resolve evidence is pending.",
+      ];
   const resolveUnlockConditions = resolveDiagnostic?.unlockConditions?.length
     ? resolveDiagnostic.unlockConditions
-    : [resolveDiagnostic ? "No unlock conditions reported." : "Resolve unlock conditions are pending."];
-  const displayedResolveUnlockConditions = reconcileResolveUnlockConditionsWithRecognition({
-    conditions: resolveUnlockConditions,
-    missingEvidence: resolveMissingEvidence,
-    recognition: recognitionDiagnostic,
-  });
-  const resolveInvalidationConditions = resolveDiagnostic?.invalidationConditions?.length
+    : [
+        resolveDiagnostic
+          ? "No unlock conditions reported."
+          : "Resolve unlock conditions are pending.",
+      ];
+  const displayedResolveUnlockConditions =
+    reconcileResolveUnlockConditionsWithRecognition({
+      conditions: resolveUnlockConditions,
+      missingEvidence: resolveMissingEvidence,
+      recognition: recognitionDiagnostic,
+    });
+  const resolveInvalidationConditions = resolveDiagnostic
+    ?.invalidationConditions?.length
     ? resolveDiagnostic.invalidationConditions
-    : [resolveDiagnostic ? "No invalidation conditions reported." : "Resolve invalidation conditions are pending."];
-
+    : [
+        resolveDiagnostic
+          ? "No invalidation conditions reported."
+          : "Resolve invalidation conditions are pending.",
+      ];
+  const executionQualityDiagnostic: ExecutionQualityDiagnostic | null =
+    selectedAllocationStock?.executionQuality ??
+    displayedTopOpportunities[0]?.executionQuality ??
+    allocationUniverse.find((stock) => stock.executionQuality)?.executionQuality ??
+    backtestSummary?.executionQuality ??
+    null;
+  const counterfactualDiagnostic: CounterfactualDiagnostic | null =
+    selectedAllocationStock?.counterfactual ??
+    displayedTopOpportunities[0]?.counterfactual ??
+    allocationUniverse.find((stock) => stock.counterfactual)?.counterfactual ??
+    backtestSummary?.counterfactual ??
+    null;
+  const discoveryAccountabilityDiagnostic: DiscoveryAccountabilityDiagnostic | null =
+    selectedAllocationStock?.discoveryAccountability ??
+    displayedTopOpportunities[0]?.discoveryAccountability ??
+    allocationUniverse.find((stock) => stock.discoveryAccountability)
+      ?.discoveryAccountability ??
+    backtestSummary?.discoveryAccountability ??
+    null;
+  const wisdomDiagnostic: WisdomDiagnostic | null =
+    selectedAllocationStock?.wisdom ??
+    displayedTopOpportunities[0]?.wisdom ??
+    allocationUniverse.find((stock) => stock.wisdom)?.wisdom ??
+    backtestSummary?.wisdom ??
+    null;
+  const executiveDecisionDiagnostic: ExecutiveDecisionDiagnostic | null =
+    selectedAllocationStock?.executiveDecision ??
+    displayedTopOpportunities[0]?.executiveDecision ??
+    allocationUniverse.find((stock) => stock.executiveDecision)
+      ?.executiveDecision ??
+    backtestSummary?.executiveDecision ??
+    null;
+  const decisionStatesDiagnostic: DecisionStatesDiagnostic | null =
+    selectedAllocationStock?.decisionStates ??
+    displayedTopOpportunities[0]?.decisionStates ??
+    allocationUniverse.find((stock) => stock.decisionStates)?.decisionStates ??
+    backtestSummary?.decisionStates ??
+    null;
 
   useEffect(() => {
     if (!marketFilter || !ENABLE_PORTFOLIO_API) return;
@@ -3354,8 +4287,12 @@ export default function Dashboard() {
 
       try {
         const [summaryResponse, historyResponse] = await Promise.all([
-          fetch(`/api/portfolio?action=summary&market=${encodeURIComponent(market)}`),
-          fetch(`/api/portfolio?action=history&market=${encodeURIComponent(market)}`),
+          fetch(
+            `/api/portfolio?action=summary&market=${encodeURIComponent(market)}`,
+          ),
+          fetch(
+            `/api/portfolio?action=history&market=${encodeURIComponent(market)}`,
+          ),
         ]);
 
         const summary = await asJsonOrNull(summaryResponse);
@@ -3365,7 +4302,7 @@ export default function Dashboard() {
 
         const nextPortfolioSummary = normalizeStrategySummary(summary);
         const nextPortfolioHistory = Array.isArray(history?.data)
-            ? history.data.map((point: any, index: number) => ({
+          ? history.data.map((point: any, index: number) => ({
               index,
               ...point,
               equity: Number(point.equity),
@@ -3373,14 +4310,17 @@ export default function Dashboard() {
               deployedPct: Number(point.deployedPct ?? point.deployed_pct),
               cashPct: Number(point.cashPct ?? point.cash_pct),
             }))
-            : normalizeStrategyArray(history);
+          : normalizeStrategyArray(history);
 
         applyMarketDataPatch(market, {
           portfolioSummary: nextPortfolioSummary,
           persistentPortfolioHistory: nextPortfolioHistory,
         });
       } catch (error) {
-        console.warn("Keeping previous portfolio state after refresh failure", error);
+        console.warn(
+          "Keeping previous portfolio state after refresh failure",
+          error,
+        );
       } finally {
         if (!cancelled) {
           setPortfolioRefreshing(false);
@@ -3410,11 +4350,18 @@ export default function Dashboard() {
       setPortfolioRefreshing(true);
 
       try {
-        const [summaryResponse, historyResponse, tradesResponse] = await Promise.all([
-          fetch(`/api/strategy?action=walk-forward-summary&market=${encodeURIComponent(market)}`),
-          fetch(`/api/strategy?action=walk-forward-history&market=${encodeURIComponent(market)}`),
-          fetch(`/api/strategy?action=walk-forward-trades&market=${encodeURIComponent(market)}&limit=5000`),
-        ]);
+        const [summaryResponse, historyResponse, tradesResponse] =
+          await Promise.all([
+            fetch(
+              `/api/strategy?action=walk-forward-summary&market=${encodeURIComponent(market)}`,
+            ),
+            fetch(
+              `/api/strategy?action=walk-forward-history&market=${encodeURIComponent(market)}`,
+            ),
+            fetch(
+              `/api/strategy?action=walk-forward-trades&market=${encodeURIComponent(market)}&limit=5000`,
+            ),
+          ]);
 
         const summary = await asJsonOrNull(summaryResponse);
         const history = await asJsonOrNull(historyResponse);
@@ -3424,20 +4371,22 @@ export default function Dashboard() {
 
         const nextBacktestSummary = normalizeStrategySummary(summary);
         const nextBacktestHistory = Array.isArray(history?.data)
-            ? history.data.map((point: any, index: number) => ({
+          ? history.data.map((point: any, index: number) => ({
               index,
               ...point,
               equity: Number(point.equity),
               returnPct: Number(point.returnPct ?? point.return_pct),
               deployedPct: Number(point.deployedPct ?? point.deployed_pct),
               cashPct: Number(point.cashPct ?? point.cash_pct),
-              positionsCount: Number(point.positionsCount ?? point.positions_count ?? 0),
+              positionsCount: Number(
+                point.positionsCount ?? point.positions_count ?? 0,
+              ),
             }))
-            : normalizeStrategyArray(history);
+          : normalizeStrategyArray(history);
 
         const nextWalkForwardTrades = Array.isArray(trades?.trades)
-            ? trades.trades
-            : normalizeStrategyArray(trades);
+          ? trades.trades
+          : normalizeStrategyArray(trades);
 
         applyMarketDataPatch(market, {
           backtestSummary: nextBacktestSummary,
@@ -3445,7 +4394,10 @@ export default function Dashboard() {
           walkForwardTrades: nextWalkForwardTrades,
         });
       } catch (error) {
-        console.warn("Keeping previous backtest state after refresh failure", error);
+        console.warn(
+          "Keeping previous backtest state after refresh failure",
+          error,
+        );
       } finally {
         if (!cancelled) {
           setPortfolioRefreshing(false);
@@ -3528,20 +4480,21 @@ export default function Dashboard() {
       let weightedPositionReturn = 0;
 
       for (const stock of positions) {
-        const weight = numeric(stock.suggestedExposure) / totalSuggestedExposure;
+        const weight =
+          numeric(stock.suggestedExposure) / totalSuggestedExposure;
         const basePrice = priceAt(stock, 0);
         const currentPrice = priceAt(stock, index);
 
         const stockReturn =
-          basePrice > 0 && currentPrice > 0
-            ? currentPrice / basePrice - 1
-            : 0;
+          basePrice > 0 && currentPrice > 0 ? currentPrice / basePrice - 1 : 0;
 
         weightedPositionReturn += weight * stockReturn;
       }
 
       const portfolioReturn = deployedFraction * weightedPositionReturn;
-      const equity = initialEquity * (cashFraction + deployedFraction * (1 + weightedPositionReturn));
+      const equity =
+        initialEquity *
+        (cashFraction + deployedFraction * (1 + weightedPositionReturn));
 
       return {
         index,
@@ -3586,7 +4539,9 @@ export default function Dashboard() {
   }, [portfolioReturns]);
 
   const averageDurationDays = useMemo(() => {
-    const active = finalOpenPositions.filter((stock) => numeric(stock.suggestedExposure) > 0);
+    const active = finalOpenPositions.filter(
+      (stock) => numeric(stock.suggestedExposure) > 0,
+    );
 
     if (!active.length) return null;
 
@@ -3634,7 +4589,8 @@ export default function Dashboard() {
     if (!portfolioReturns.length) return null;
 
     return (
-      (portfolioReturns.filter((value) => value > 0).length / portfolioReturns.length) *
+      (portfolioReturns.filter((value) => value > 0).length /
+        portfolioReturns.length) *
       100
     );
   }, [portfolioReturns]);
@@ -3662,29 +4618,46 @@ export default function Dashboard() {
     ? persistentPortfolioHistory
     : portfolioHistory;
 
-  const displayedPortfolioEquity =
-    portfolioSummary?.equity ?? portfolioEquity;
+  const displayedPortfolioEquity = portfolioSummary?.equity ?? portfolioEquity;
 
   const displayedPortfolioReturnPct =
-    portfolioSummary?.totalReturnPct ?? portfolioSummary?.total_return_pct ?? portfolioReturnPct;
+    portfolioSummary?.totalReturnPct ??
+    portfolioSummary?.total_return_pct ??
+    portfolioReturnPct;
 
   const displayedAnnualSharpe =
-    portfolioSummary?.annualizedSharpe ?? portfolioSummary?.annualized_sharpe ?? normalizedAnnualSharpe;
+    portfolioSummary?.annualizedSharpe ??
+    portfolioSummary?.annualized_sharpe ??
+    normalizedAnnualSharpe;
 
   const displayedAverageDurationDays =
-    portfolioSummary?.averageDurationDays ?? portfolioSummary?.average_duration_days ?? averageDurationDays;
+    portfolioSummary?.averageDurationDays ??
+    portfolioSummary?.average_duration_days ??
+    averageDurationDays;
 
   const displayedProfitFactor =
-    portfolioSummary?.profitFactor ?? portfolioSummary?.profit_factor ?? portfolioProfitFactor;
+    portfolioSummary?.profitFactor ??
+    portfolioSummary?.profit_factor ??
+    portfolioProfitFactor;
 
   const displayedWinRatePct =
-    portfolioSummary?.winRatePct ?? portfolioSummary?.win_rate_pct ?? portfolioWinRate;
+    portfolioSummary?.winRatePct ??
+    portfolioSummary?.win_rate_pct ??
+    portfolioWinRate;
 
   const displayedMaxDrawdownPct =
-    portfolioSummary?.maxDrawdownPct ?? portfolioSummary?.max_drawdown_pct ?? portfolioMaxDrawdown;
+    portfolioSummary?.maxDrawdownPct ??
+    portfolioSummary?.max_drawdown_pct ??
+    portfolioMaxDrawdown;
 
   const displayedBacktestHistory = useMemo(
-    () => applyExecutionCostsToCurve(backtestHistory, walkForwardTrades, commissionBps, frontendSlippageBps ?? 0),
+    () =>
+      applyExecutionCostsToCurve(
+        backtestHistory,
+        walkForwardTrades,
+        commissionBps,
+        frontendSlippageBps ?? 0,
+      ),
     [backtestHistory, walkForwardTrades, commissionBps, frontendSlippageBps],
   );
 
@@ -3694,43 +4667,50 @@ export default function Dashboard() {
   );
 
   const displayedBacktestEquity =
-    commissionBps > 0 || (frontendSlippageBps ?? 0) > 0 ? commissionAdjustedBacktestMetrics.equity : backtestSummary?.equity ?? null;
+    commissionBps > 0 || (frontendSlippageBps ?? 0) > 0
+      ? commissionAdjustedBacktestMetrics.equity
+      : (backtestSummary?.equity ?? null);
 
   const displayedBacktestReturnPct =
     commissionBps > 0 || (frontendSlippageBps ?? 0) > 0
       ? commissionAdjustedBacktestMetrics.totalReturnPct
-      : backtestSummary?.totalReturnPct ?? backtestSummary?.total_return_pct ?? null;
+      : (backtestSummary?.totalReturnPct ??
+        backtestSummary?.total_return_pct ??
+        null);
 
   const displayedBacktestSharpe =
     commissionBps > 0 || (frontendSlippageBps ?? 0) > 0
       ? commissionAdjustedBacktestMetrics.annualizedSharpe
-      : backtestSummary?.annualizedSharpe ??
+      : (backtestSummary?.annualizedSharpe ??
         backtestSummary?.annualized_sharpe ??
         backtestSummary?.rawAnnualizedSharpe ??
         backtestSummary?.raw_annualized_sharpe ??
-        null;
+        null);
 
   const displayedBacktestMaxDrawdownPct =
     commissionBps > 0 || (frontendSlippageBps ?? 0) > 0
       ? commissionAdjustedBacktestMetrics.maxDrawdownPct
-      : backtestSummary?.maxDrawdownPct ??
+      : (backtestSummary?.maxDrawdownPct ??
         backtestSummary?.max_drawdown_pct ??
         backtestSummary?.rawMaxDrawdownPct ??
         backtestSummary?.raw_max_drawdown_pct ??
-        null;
+        null);
 
   const displayedBacktestProfitFactor =
     commissionBps > 0 || (frontendSlippageBps ?? 0) > 0
       ? commissionAdjustedBacktestMetrics.profitFactor
-      : backtestSummary?.profitFactor ?? backtestSummary?.profit_factor ?? null;
+      : (backtestSummary?.profitFactor ??
+        backtestSummary?.profit_factor ??
+        null);
 
   const displayedBacktestWinRate =
     commissionBps > 0 || (frontendSlippageBps ?? 0) > 0
       ? commissionAdjustedBacktestMetrics.winRatePct
-      : backtestSummary?.winRatePct ?? backtestSummary?.win_rate_pct ?? null;
+      : (backtestSummary?.winRatePct ?? backtestSummary?.win_rate_pct ?? null);
 
   const hasPersistentPortfolioData =
-    Boolean(portfolioSummary?.updatedAt) || persistentPortfolioHistory.length > 1;
+    Boolean(portfolioSummary?.updatedAt) ||
+    persistentPortfolioHistory.length > 1;
 
   const hasBacktestData =
     Boolean(backtestSummary?.updatedAt) || backtestHistory.length > 1;
@@ -3741,7 +4721,9 @@ export default function Dashboard() {
   const hasBacktestMetrics =
     hasBacktestData && displayedBacktestReturnPct !== null;
 
-  const resolvedWalkForwardHistory = backtestHistory.length ? backtestHistory : portfolioHistory;
+  const resolvedWalkForwardHistory = backtestHistory.length
+    ? backtestHistory
+    : portfolioHistory;
   const resolvedWalkForwardTrades = walkForwardTrades;
   const resolvedWalkForwardSummary = backtestSummary;
 
@@ -3750,11 +4732,21 @@ export default function Dashboard() {
     resolvedWalkForwardTrades.length > 0 ||
     Number(resolvedWalkForwardSummary?.tradeCount ?? 0) > 0;
 
-	  const backtestTradeCount = extractTradeCount(backtestSummary, walkForwardTrades);
-	  const backtestSegmentCount = extractSegmentCount(backtestSummary);
-	  const benchmarkPass = extractBenchmarkPass(backtestSummary);
-	  const regimeConsistencyPct = extractRegimeConsistency(backtestSummary, regime, walkForwardTrades);
-	  const backtestAverageHoldingDays = extractAverageHoldingDays(backtestSummary, walkForwardTrades);
+  const backtestTradeCount = extractTradeCount(
+    backtestSummary,
+    walkForwardTrades,
+  );
+  const backtestSegmentCount = extractSegmentCount(backtestSummary);
+  const benchmarkPass = extractBenchmarkPass(backtestSummary);
+  const regimeConsistencyPct = extractRegimeConsistency(
+    backtestSummary,
+    regime,
+    walkForwardTrades,
+  );
+  const backtestAverageHoldingDays = extractAverageHoldingDays(
+    backtestSummary,
+    walkForwardTrades,
+  );
 
   const backendFailureFlags = Array.isArray(backtestSummary?.failureFlags)
     ? backtestSummary.failureFlags
@@ -3762,14 +4754,22 @@ export default function Dashboard() {
 
   const localFailureFlags = [
     !hasMarketData ? "Market data unavailable" : null,
-    hasMarketData && !hasConfirmedForwardSignals ? "No confirmed live/forward signals" : null,
-    hasBacktestData && displayedBacktestMaxDrawdownPct != null && Number(displayedBacktestMaxDrawdownPct) > 25
+    hasMarketData && !hasConfirmedForwardSignals
+      ? "No confirmed live/forward signals"
+      : null,
+    hasBacktestData &&
+    displayedBacktestMaxDrawdownPct != null &&
+    Number(displayedBacktestMaxDrawdownPct) > 25
       ? "Past loss level was above 25%"
       : null,
-    hasBacktestData && displayedBacktestSharpe != null && Number(displayedBacktestSharpe) < 0.5
+    hasBacktestData &&
+    displayedBacktestSharpe != null &&
+    Number(displayedBacktestSharpe) < 0.5
       ? "Risk-adjusted return is below the minimum"
       : null,
-    hasBacktestData && displayedBacktestProfitFactor != null && Number(displayedBacktestProfitFactor) < 1
+    hasBacktestData &&
+    displayedBacktestProfitFactor != null &&
+    Number(displayedBacktestProfitFactor) < 1
       ? "Profit factor below 1"
       : null,
     staleData ? "Market data appears stale" : null,
@@ -3795,16 +4795,27 @@ export default function Dashboard() {
 
   const failureFlags = Array.from(new Set(derivedFrontendFailureFlags));
   const robustnessDiagnostics = backtestSummary?.robustnessDiagnostics ?? {};
-  const robustnessScore = finiteNumber(backtestSummary?.robustnessScore ?? robustnessDiagnostics?.robustnessScore);
-  const robustnessOverfitRisk = finiteNumber(backtestSummary?.overfitRiskScore ?? robustnessDiagnostics?.overfitRisk);
-  const deploymentReadinessScore = finiteNumber(backtestSummary?.deploymentReadinessScore ?? robustnessDiagnostics?.deploymentReadiness);
+  const robustnessScore = finiteNumber(
+    backtestSummary?.robustnessScore ?? robustnessDiagnostics?.robustnessScore,
+  );
+  const robustnessOverfitRisk = finiteNumber(
+    backtestSummary?.overfitRiskScore ?? robustnessDiagnostics?.overfitRisk,
+  );
+  const deploymentReadinessScore = finiteNumber(
+    backtestSummary?.deploymentReadinessScore ??
+      robustnessDiagnostics?.deploymentReadiness,
+  );
   const backendRobustnessComponent = strategyReadiness?.components?.robustness;
   const backendRobustnessPassed =
     typeof backendRobustnessComponent?.passed === "boolean"
       ? backendRobustnessComponent.passed
       : null;
-  const backendRobustnessScore = finiteNumber(backendRobustnessComponent?.score);
-  const robustnessSafetyGate = String(robustnessDiagnostics?.safetyGate ?? "").toLowerCase();
+  const backendRobustnessScore = finiteNumber(
+    backendRobustnessComponent?.score,
+  );
+  const robustnessSafetyGate = String(
+    robustnessDiagnostics?.safetyGate ?? "",
+  ).toLowerCase();
   const hasRobustnessDiagnostics =
     Boolean(backendRobustnessComponent) ||
     robustnessScore != null ||
@@ -3819,7 +4830,8 @@ export default function Dashboard() {
         (deploymentReadinessScore == null || deploymentReadinessScore >= 60) &&
         robustnessSafetyGate !== "block");
   const robustnessFailureReason =
-    Array.isArray(backendRobustnessComponent?.reasons) && backendRobustnessComponent.reasons.length
+    Array.isArray(backendRobustnessComponent?.reasons) &&
+    backendRobustnessComponent.reasons.length
       ? String(backendRobustnessComponent.reasons[0])
       : "The strategy should stay live-test blocked when robustness or overfit checks are unstable.";
   const robustnessReason = robustnessPassed
@@ -3835,37 +4847,37 @@ export default function Dashboard() {
         : backendRobustnessScore != null
           ? `${Math.round(backendRobustnessScore)}/100`
           : "Healthy";
-  const backendStrategyEdgeComponent = strategyReadiness?.components?.strategyEdge;
+  const backendStrategyEdgeComponent =
+    strategyReadiness?.components?.strategyEdge;
   const backendStrategyEdgePassed =
     typeof backendStrategyEdgeComponent?.passed === "boolean"
       ? backendStrategyEdgeComponent.passed
       : null;
   const strategyEdgePassed =
     backendStrategyEdgePassed ??
-    (
-      displayedBacktestSharpe != null &&
+    (displayedBacktestSharpe != null &&
       Number(displayedBacktestSharpe) >= 1 &&
       hasBacktestMetrics &&
       Number(displayedBacktestReturnPct) > 0 &&
-      backtestTradeCount >= 30
-    );
+      backtestTradeCount >= 30);
   const strategyEdgeReason =
-    Array.isArray(backendStrategyEdgeComponent?.reasons) && backendStrategyEdgeComponent.reasons.length
+    Array.isArray(backendStrategyEdgeComponent?.reasons) &&
+    backendStrategyEdgeComponent.reasons.length
       ? String(backendStrategyEdgeComponent.reasons[0])
       : "Risk-adjusted return should clear the production threshold before new exposure is allowed.";
-  const backendWalkForwardComponent = strategyReadiness?.components?.walkForwardRobustness;
+  const backendWalkForwardComponent =
+    strategyReadiness?.components?.walkForwardRobustness;
   const backendWalkForwardPassed =
     typeof backendWalkForwardComponent?.passed === "boolean"
       ? backendWalkForwardComponent.passed
       : null;
   const walkForwardPassed =
     backendWalkForwardPassed ??
-    (
-      hasBacktestCurve &&
-      (backtestSegmentCount == null || backtestSegmentCount >= 3)
-    );
+    (hasBacktestCurve &&
+      (backtestSegmentCount == null || backtestSegmentCount >= 3));
   const walkForwardReason =
-    Array.isArray(backendWalkForwardComponent?.reasons) && backendWalkForwardComponent.reasons.length
+    Array.isArray(backendWalkForwardComponent?.reasons) &&
+    backendWalkForwardComponent.reasons.length
       ? String(backendWalkForwardComponent.reasons[0])
       : "The strategy should hold up across independent test periods, not only one snapshot.";
   const walkForwardValue =
@@ -3874,40 +4886,54 @@ export default function Dashboard() {
       : hasBacktestCurve
         ? "Available"
         : "Missing";
-  const backendParameterComponent = strategyReadiness?.components?.parameterRobustness;
+  const backendParameterComponent =
+    strategyReadiness?.components?.parameterRobustness;
   const backendParameterPassed =
     typeof backendParameterComponent?.passed === "boolean"
       ? backendParameterComponent.passed
       : null;
-  const parameterStability = strategyReadiness?.parameterStability ?? backtestSummary?.parameterRobustness ?? {};
-  const parameterVariantCount = numeric(parameterStability?.variantCount ?? parameterStability?.variants?.length);
+  const parameterStability =
+    strategyReadiness?.parameterStability ??
+    backtestSummary?.parameterRobustness ??
+    {};
+  const parameterVariantCount = numeric(
+    parameterStability?.variantCount ?? parameterStability?.variants?.length,
+  );
   const parameterPassRate = finiteNumber(parameterStability?.passRate);
   const parameterPassed =
     backendParameterPassed ??
-    (
-      parameterStability?.stable === true &&
+    (parameterStability?.stable === true &&
       parameterVariantCount > 0 &&
-      (parameterPassRate == null || parameterPassRate >= 60)
-    );
+      (parameterPassRate == null || parameterPassRate >= 60));
   const parameterReason =
-    Array.isArray(backendParameterComponent?.reasons) && backendParameterComponent.reasons.length
+    Array.isArray(backendParameterComponent?.reasons) &&
+    backendParameterComponent.reasons.length
       ? String(backendParameterComponent.reasons[0])
       : "Nearby parameter variants should preserve the edge before live exposure is trusted.";
   const parameterValue =
     parameterVariantCount > 0
       ? `${parameterVariantCount} variants${parameterPassRate == null ? "" : `, ${fmtPlainPct(parameterPassRate, 0)} pass`}`
       : "Not evaluated";
-  const backendConcentrationComponent = strategyReadiness?.components?.concentrationControl;
+  const backendConcentrationComponent =
+    strategyReadiness?.components?.concentrationControl;
   const backendConcentrationPassed =
     typeof backendConcentrationComponent?.passed === "boolean"
       ? backendConcentrationComponent.passed
       : null;
-  const concentrationRisk = strategyReadiness?.concentration ?? backtestSummary?.concentrationRisk ?? {};
-  const top1TradeContributionPct = finiteNumber(concentrationRisk?.top1TradeContributionPct);
-  const top5TradeContributionPct = finiteNumber(concentrationRisk?.top5TradeContributionPct);
+  const concentrationRisk =
+    strategyReadiness?.concentration ??
+    backtestSummary?.concentrationRisk ??
+    {};
+  const top1TradeContributionPct = finiteNumber(
+    concentrationRisk?.top1TradeContributionPct,
+  );
+  const top5TradeContributionPct = finiteNumber(
+    concentrationRisk?.top5TradeContributionPct,
+  );
   const concentrationPassed = backendConcentrationPassed ?? true;
   const concentrationReason =
-    Array.isArray(backendConcentrationComponent?.reasons) && backendConcentrationComponent.reasons.length
+    Array.isArray(backendConcentrationComponent?.reasons) &&
+    backendConcentrationComponent.reasons.length
       ? String(backendConcentrationComponent.reasons[0])
       : "Returns should not depend too heavily on a few winning trades or one test period.";
   const concentrationValue =
@@ -3916,22 +4942,28 @@ export default function Dashboard() {
       : top5TradeContributionPct != null
         ? `Top 5 ${fmtPlainPct(top5TradeContributionPct, 0)}`
         : "Distributed";
-  const backendRiskControlComponent = strategyReadiness?.components?.riskControl;
+  const backendRiskControlComponent =
+    strategyReadiness?.components?.riskControl;
   const backendRiskControlPassed =
     typeof backendRiskControlComponent?.passed === "boolean"
       ? backendRiskControlComponent.passed
       : null;
-  const displayedBacktestDrawdownNumber = finiteNumber(displayedBacktestMaxDrawdownPct);
+  const displayedBacktestDrawdownNumber = finiteNumber(
+    displayedBacktestMaxDrawdownPct,
+  );
   const lossControlPassed =
     backendRiskControlPassed ??
-    (displayedBacktestDrawdownNumber != null && displayedBacktestDrawdownNumber <= 25);
+    (displayedBacktestDrawdownNumber != null &&
+      displayedBacktestDrawdownNumber <= 25);
   const lossControlSeverity: ConfidenceGate["severity"] = lossControlPassed
-    ? displayedBacktestDrawdownNumber != null && displayedBacktestDrawdownNumber > 18
+    ? displayedBacktestDrawdownNumber != null &&
+      displayedBacktestDrawdownNumber > 18
       ? "warn"
       : "good"
     : "bad";
   const lossControlReason =
-    Array.isArray(backendRiskControlComponent?.reasons) && backendRiskControlComponent.reasons.length
+    Array.isArray(backendRiskControlComponent?.reasons) &&
+    backendRiskControlComponent.reasons.length
       ? String(backendRiskControlComponent.reasons[0])
       : "Large past losses make the strategy harder to trust.";
 
@@ -3951,7 +4983,8 @@ export default function Dashboard() {
       value: hasConfirmedForwardSignals
         ? `${Math.max(confirmedStrategySignalCount, forwardShadowConfirmedCount)} live, ${forwardShadowObservedCount} shadow, ${forwardShadowEvaluatedCount}/${forwardShadowRequiredCount || "?"} eval`
         : "No confirmed signals",
-      reason: "Current signals should come from the same strategy that was tested in the past.",
+      reason:
+        "Current signals should come from the same strategy that was tested in the past.",
       severity: hasConfirmedForwardSignals ? "good" : "bad",
     },
     {
@@ -3960,13 +4993,19 @@ export default function Dashboard() {
       passed: hasBacktestMetrics && Number(displayedBacktestReturnPct) > 0,
       value: fmtPct(displayedBacktestReturnPct),
       reason: "The tested strategy should be positive after estimated costs.",
-      severity: hasBacktestMetrics && Number(displayedBacktestReturnPct) > 0 ? "good" : "warn",
+      severity:
+        hasBacktestMetrics && Number(displayedBacktestReturnPct) > 0
+          ? "good"
+          : "warn",
     },
     {
       key: "riskAdjusted",
       label: "Strategy edge",
       passed: strategyEdgePassed,
-      value: displayedBacktestSharpe == null ? "—" : Number(displayedBacktestSharpe).toFixed(2),
+      value:
+        displayedBacktestSharpe == null
+          ? "—"
+          : Number(displayedBacktestSharpe).toFixed(2),
       reason: strategyEdgeReason,
       severity: strategyEdgePassed ? "good" : "warn",
     },
@@ -3981,15 +5020,22 @@ export default function Dashboard() {
     {
       key: "profitFactor",
       label: "Profit factor",
-      passed: displayedBacktestProfitFactor != null && Number(displayedBacktestProfitFactor) >= 1.15,
+      passed:
+        displayedBacktestProfitFactor != null &&
+        Number(displayedBacktestProfitFactor) >= 1.15,
       value:
         displayedBacktestProfitFactor == null
           ? "—"
-          : Number(displayedBacktestProfitFactor) >= 999 || displayedBacktestProfitFactor === Infinity
+          : Number(displayedBacktestProfitFactor) >= 999 ||
+              displayedBacktestProfitFactor === Infinity
             ? "∞"
             : Number(displayedBacktestProfitFactor).toFixed(2),
       reason: "Winning trades should outweigh losing trades by a clear margin.",
-      severity: displayedBacktestProfitFactor != null && Number(displayedBacktestProfitFactor) >= 1.15 ? "good" : "warn",
+      severity:
+        displayedBacktestProfitFactor != null &&
+        Number(displayedBacktestProfitFactor) >= 1.15
+          ? "good"
+          : "warn",
     },
     {
       key: "sampleSize",
@@ -4009,16 +5055,31 @@ export default function Dashboard() {
           : benchmarkPass
             ? "Passed"
             : "Failed",
-      reason: "The strategy should compare well with a simple buy-and-hold benchmark.",
-      severity: benchmarkPass === true ? "good" : benchmarkPass === false ? "bad" : "neutral",
+      reason:
+        "The strategy should compare well with a simple buy-and-hold benchmark.",
+      severity:
+        benchmarkPass === true
+          ? "good"
+          : benchmarkPass === false
+            ? "bad"
+            : "neutral",
     },
     {
       key: "regime",
       label: "Similar market check",
       passed: regimeConsistencyPct == null || regimeConsistencyPct >= 50,
-      value: regimeConsistencyPct == null ? "Pending" : fmtPlainPct(regimeConsistencyPct, 0),
-      reason: "Confidence improves when results hold up in similar market conditions.",
-      severity: regimeConsistencyPct == null ? "neutral" : regimeConsistencyPct >= 50 ? "good" : "warn",
+      value:
+        regimeConsistencyPct == null
+          ? "Pending"
+          : fmtPlainPct(regimeConsistencyPct, 0),
+      reason:
+        "Confidence improves when results hold up in similar market conditions.",
+      severity:
+        regimeConsistencyPct == null
+          ? "neutral"
+          : regimeConsistencyPct >= 50
+            ? "good"
+            : "warn",
     },
     {
       key: "parameterRobustness",
@@ -4054,8 +5115,6 @@ export default function Dashboard() {
     },
   ];
 
-  
-  
   useEffect(() => {
     if (!marketFilter) return;
 
@@ -4106,7 +5165,9 @@ export default function Dashboard() {
         if (!cancelled) {
           console.log("[stock visual map]", market, {
             rows: rows.length,
-            withVisual: Array.from(map.values()).filter((item) => Boolean(item.visual)).length,
+            withVisual: Array.from(map.values()).filter((item) =>
+              Boolean(item.visual),
+            ).length,
             sample: rows.slice(0, 3).map((row) => ({
               symbol: instrumentSymbol(row),
               keys: Object.keys(row ?? {}),
@@ -4131,8 +5192,7 @@ export default function Dashboard() {
     };
   }, [marketFilter]);
 
-
-const stockVisualBySymbol = useMemo(() => {
+  const stockVisualBySymbol = useMemo(() => {
     const map = new Map<string, any>();
 
     for (const item of Array.isArray(stocks) ? stocks : []) {
@@ -4179,13 +5239,10 @@ const stockVisualBySymbol = useMemo(() => {
     };
   };
 
-
   const mergeCandidateVisual = (candidate: any) => {
     const symbol = instrumentSymbol(candidate);
     const baseSymbol = instrumentBaseSymbol(candidate);
-    const source =
-      stockVisualMap.get(symbol) ??
-      stockVisualMap.get(baseSymbol);
+    const source = stockVisualMap.get(symbol) ?? stockVisualMap.get(baseSymbol);
 
     if (!source) return candidate;
 
@@ -4202,11 +5259,10 @@ const stockVisualBySymbol = useMemo(() => {
     };
   };
 
-const confidenceGates = applyBackendBlockersToConfidenceGates(
+  const confidenceGates = applyBackendBlockersToConfidenceGates(
     baseConfidenceGates,
     backtestSummary,
   );
-
 
   const hasBackendReadinessTruth =
     Boolean(backtestSummary?.strategyReadiness) ||
@@ -4230,8 +5286,10 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
     maxDrawdownPct: displayedBacktestMaxDrawdownPct,
     profitFactor: displayedBacktestProfitFactor,
     winRatePct: displayedBacktestWinRate,
-    excessReturnPct: backtestSummary?.excessReturnPct ?? backtestSummary?.excess_return_pct,
-    excessSharpe: backtestSummary?.excessSharpe ?? backtestSummary?.excess_sharpe,
+    excessReturnPct:
+      backtestSummary?.excessReturnPct ?? backtestSummary?.excess_return_pct,
+    excessSharpe:
+      backtestSummary?.excessSharpe ?? backtestSummary?.excess_sharpe,
     tradeCount: backtestTradeCount,
     segmentCount: backtestSegmentCount,
     regimeConsistencyPct,
@@ -4248,30 +5306,51 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
       )
     : locallyComputedSurvivalScore;
   const readinessScoreDisplay = hasBackendReadinessTruth
-    ? finiteNumber(backtestSummary?.strategyReadiness?.readinessScore ?? backtestSummary?.readinessScore) ?? survivalScore
+    ? (finiteNumber(
+        backtestSummary?.strategyReadiness?.readinessScore ??
+          backtestSummary?.readinessScore,
+      ) ?? survivalScore)
     : survivalScore;
 
   const confidenceStage = hasBackendReadinessTruth
-    ? String(backtestSummary?.lifecycleStage ?? strategyReadiness?.stage ?? "Research validated")
+    ? String(
+        backtestSummary?.lifecycleStage ??
+          strategyReadiness?.stage ??
+          "Research validated",
+      )
     : productionStage(survivalScore, confidenceGates);
 
   const passedGateCount = confidenceGates.filter((gate) => gate.passed).length;
 
   const lifecycleStageDisplay = hasBackendReadinessTruth
-    ? plainStageLabel(backtestSummary?.readinessStage ?? backtestSummary?.lifecycleStage ?? strategyReadiness?.stage ?? "Research only")
+    ? plainStageLabel(
+        backtestSummary?.readinessStage ??
+          backtestSummary?.lifecycleStage ??
+          strategyReadiness?.stage ??
+          "Research only",
+      )
     : plainStageLabel(backtestSummary?.lifecycleStage ?? confidenceStage);
 
   const promotionStateDisplay = hasBackendPromotionTruth
     ? plainStageLabel(
         backtestSummary?.promotionLabel ??
-        backtestSummary?.readinessLabel ??
-        (backtestSummary?.promotionBlocked ? "Blocked" : backtestSummary?.promotionState ?? confidenceStage),
+          backtestSummary?.readinessLabel ??
+          (backtestSummary?.promotionBlocked
+            ? "Blocked"
+            : (backtestSummary?.promotionState ?? confidenceStage)),
       )
     : hasBackendReadinessTruth
-      ? plainStageLabel(backtestSummary?.promotionLabel ?? backtestSummary?.readinessLabel ?? strategyReadiness?.stage ?? confidenceStage)
+      ? plainStageLabel(
+          backtestSummary?.promotionLabel ??
+            backtestSummary?.readinessLabel ??
+            strategyReadiness?.stage ??
+            confidenceStage,
+        )
       : plainStageLabel(backtestSummary?.promotionState ?? confidenceStage);
   const executionGateDisplay = commitmentBlocked ? "Review gated" : "Open";
-  const executionGateDetail = commitmentBlocked ? commitmentBlockLabel : promotionStateDisplay;
+  const executionGateDetail = commitmentBlocked
+    ? commitmentBlockLabel
+    : promotionStateDisplay;
 
   const validationPostureDisplay = hasBackendPromotionTruth
     ? "Blocked by checks"
@@ -4281,27 +5360,36 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
         ? "Commitment review"
         : plainStageLabel(backtestSummary?.regime ?? regime);
 
-  const readableFailureFlags = summarizePromotionBlockers(failureFlags, backtestSummary);
-  const trustReviewItems = Array.from(new Set([
-    ...readableFailureFlags,
-    calibrationRequiresReview
-      ? calibrationStatus === "unstable-outcomes"
-        ? "Stabilize calibration outcomes; keep review mode until similar closed signals are consistent."
-        : calibrationStatus === "poor-calibration"
-          ? "Improve calibration quality before allowing new exposure."
-          : "Collect enough evaluated outcomes before allowing new exposure."
-      : null,
-    calibrationConfidenceDrop >= 15
-      ? `Reduce raw-vs-calibrated confidence gap (${fmtPlainPct(rawConfidenceDisplay, 0)} raw vs ${fmtPlainPct(calibratedConfidenceDisplay, 0)} calibrated).`
-      : null,
-    calibrationWarnings.includes("overconfidence")
-      ? "Reduce overconfidence warnings by closing outcomes that match predicted confidence."
-      : null,
-    trustGovernorBlocks && trustGovernorPrimaryReason
-      ? `Trust Governor blocks new exposure: ${trustGovernorPrimaryReason}`
-      : null,
-    ...(trustGovernor?.unlockCriteria ?? []).slice(0, 3).map((item) => `Unlock: ${item}`),
-  ].filter(Boolean) as string[])).slice(0, 8);
+  const readableFailureFlags = summarizePromotionBlockers(
+    failureFlags,
+    backtestSummary,
+  );
+  const trustReviewItems = Array.from(
+    new Set(
+      [
+        ...readableFailureFlags,
+        calibrationRequiresReview
+          ? calibrationStatus === "unstable-outcomes"
+            ? "Stabilize calibration outcomes; keep review mode until similar closed signals are consistent."
+            : calibrationStatus === "poor-calibration"
+              ? "Improve calibration quality before allowing new exposure."
+              : "Collect enough evaluated outcomes before allowing new exposure."
+          : null,
+        calibrationConfidenceDrop >= 15
+          ? `Reduce raw-vs-calibrated confidence gap (${fmtPlainPct(rawConfidenceDisplay, 0)} raw vs ${fmtPlainPct(calibratedConfidenceDisplay, 0)} calibrated).`
+          : null,
+        calibrationWarnings.includes("overconfidence")
+          ? "Reduce overconfidence warnings by closing outcomes that match predicted confidence."
+          : null,
+        trustGovernorBlocks && trustGovernorPrimaryReason
+          ? `Trust Governor blocks new exposure: ${trustGovernorPrimaryReason}`
+          : null,
+        ...(trustGovernor?.unlockCriteria ?? [])
+          .slice(0, 3)
+          .map((item) => `Unlock: ${item}`),
+      ].filter(Boolean) as string[],
+    ),
+  ).slice(0, 8);
 
   const executionProfile = useMemo(
     () => executionPresetForMarket(marketFilter || ""),
@@ -4336,7 +5424,8 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
         deploymentReadinessScore,
         calibrationRawConfidence: rawConfidenceDisplay,
         calibrationCalibratedConfidence: calibratedConfidenceDisplay,
-        calibrationHistoricalAccuracy: calibrationDiagnostics?.historicalAccuracy,
+        calibrationHistoricalAccuracy:
+          calibrationDiagnostics?.historicalAccuracy,
         calibrationError: calibrationDiagnostics?.calibrationError,
         calibrationTrustworthiness: calibrationTrustworthinessDisplay,
         calibrationSampleSize,
@@ -4435,7 +5524,9 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
       })
       .then((snapshot) => {
         if (!cancelled) {
-          applyMarketDataPatch(marketFilter, { marketPerceptionSnapshot: snapshot });
+          applyMarketDataPatch(marketFilter, {
+            marketPerceptionSnapshot: snapshot,
+          });
         }
       });
 
@@ -4444,27 +5535,241 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
     };
   }, [marketPerceptionMetrics, marketFilter, loading, marketUniverse.length]);
 
+  const executiveIA = buildExecutiveDashboardIA({
+    discovery: genericDiscovery,
+    discoveryDensity: discoveryDensityDiagnostics,
+    discoveryPipeline: discoveryPipelineDiagnostics,
+    recognition: recognitionDiagnostic,
+    belief: beliefDiagnostic,
+    judgement: judgementDiagnostic,
+    agency: {
+      recommendation: agencyRecommendation,
+      trustPct: agencyTrustPct,
+      blockedActions: agencyBlockedActions,
+      dataReliabilityPct: agencyDataReliabilityPct,
+      calibrationHealthPct: agencyCalibrationHealthPct,
+      reasons: agencyReasons,
+    },
+    agencyDiagnostics,
+    resolve: resolveDiagnostic,
+    executive: executiveDecisionDiagnostic as any,
+    executionQuality: executionQualityDiagnostic as any,
+    counterfactual: counterfactualDiagnostic as any,
+    discoveryAccountability: discoveryAccountabilityDiagnostic as any,
+    wisdom: wisdomDiagnostic as any,
+    decisionStates: decisionStatesDiagnostic ?? undefined,
+    survivalMemory: survivalMemoryDiagnostic,
+    recovery: recoveryDiagnostic,
+    sizing: {
+      sizingMode: dashboardSizing.sizingMode,
+      sizingDecision: dashboardSizing.sizingDecision,
+      suggestedMaximumExposurePct: dashboardSizing.suggestedMaximumExposurePct,
+      limitedReason: dashboardSizing.limitedReason,
+      exposureExplanation: dashboardSizing.exposureExplanation,
+      sizingReasons: dashboardSizing.sizingReasons,
+      sizingRationale: dashboardSizing.sizingRationale,
+    },
+    trustGovernor,
+    calibration: {
+      status: calibrationStatus,
+      rawConfidence: rawConfidenceDisplay,
+      calibratedConfidence: calibratedConfidenceDisplay,
+      trustworthiness: calibrationTrustworthinessDisplay,
+      sampleSize: calibrationSampleSize,
+      warnings: calibrationWarnings,
+      explanation: calibrationExplanation,
+    },
+    readiness: {
+      readinessScore: readinessScoreDisplay,
+      maxPositionPct: strategyMaxPositionPct,
+      maxConfidence: strategyConfidenceCap,
+      blocked: strategyReadinessBlocked,
+      components: strategyReadiness?.components,
+      failureFlags,
+      walkForward: strategyReadiness?.walkForward,
+      stage: lifecycleStageDisplay,
+    },
+    strategyReadiness,
+    strategyHistory: {
+      sharpeRatio: displayedBacktestSharpe,
+      profitFactor: displayedBacktestProfitFactor,
+      maxDrawdownPct: displayedBacktestMaxDrawdownPct,
+      tradeCount: backtestTradeCount,
+      overfitRisk: robustnessOverfitRisk,
+      modelReliability: robustnessScore ?? deploymentReadinessScore,
+      dataReliability: strategyReadiness?.components?.dataReliability?.score,
+      walkForward: strategyReadiness?.walkForward,
+    },
+    backtestSummary,
+    opportunity: {
+      densityPct: adaptiveOpportunityDensityPct,
+      candidateQualityPct:
+        finiteNumber(discoveryDensityDiagnostics?.quality) ??
+        numeric(discoveryPipelineDiagnostics.averageScore),
+      candidateCount: numeric(discoveryPipelineDiagnostics.candidateCount),
+    },
+    riskPct: avgRisk,
+    sourceState: {
+      market: marketFilter,
+      selectedTicker,
+    },
+  });
+
+  const topCanonicalRestriction =
+    executiveIA.executiveReasoning.mainReasonForRestriction;
+  const dashboardDecisionStates = executiveIA.decisionStates;
+  const trustStateTone =
+    dashboardDecisionStates.trust.score >= 72
+      ? "good"
+      : dashboardDecisionStates.trust.score >= 50
+        ? "warn"
+        : "bad";
+  const permissionTone =
+    dashboardDecisionStates.permission.level === "approved"
+      ? "good"
+      : dashboardDecisionStates.permission.level === "blocked"
+        ? "bad"
+        : "warn";
+  const capacityTone =
+    dashboardDecisionStates.capacity.mode === "normal" ||
+    dashboardDecisionStates.capacity.mode === "expanded"
+      ? "good"
+      : dashboardDecisionStates.capacity.mode === "none"
+        ? "bad"
+        : "warn";
+  const urgencyTone =
+    dashboardDecisionStates.urgency.mode === "act_now" ||
+    dashboardDecisionStates.urgency.mode === "act_soon"
+      ? "good"
+      : dashboardDecisionStates.urgency.mode === "wait"
+        ? "warn"
+        : "neutral";
+  const executionQualityTone =
+    executionQualityDiagnostic?.status === "excellent" ||
+    executionQualityDiagnostic?.status === "good"
+      ? "good"
+      : executionQualityDiagnostic?.status === "blocked" ||
+          executionQualityDiagnostic?.status === "poor"
+        ? "bad"
+        : executionQualityDiagnostic
+          ? "warn"
+          : "neutral";
+  const discoveryAccountabilityTone =
+    discoveryAccountabilityDiagnostic?.status === "trusted" ||
+    discoveryAccountabilityDiagnostic?.status === "reliable"
+      ? "good"
+      : discoveryAccountabilityDiagnostic?.status === "immature"
+        ? "warn"
+        : discoveryAccountabilityDiagnostic
+          ? "warn"
+          : "neutral";
+  const counterfactualTone =
+    counterfactualDiagnostic &&
+    counterfactualDiagnostic.avoidedLossScore >
+      counterfactualDiagnostic.missedUpsideScore
+      ? "good"
+      : counterfactualDiagnostic?.missedUpsideScore &&
+          counterfactualDiagnostic.missedUpsideScore >= 55
+        ? "warn"
+        : "neutral";
+  const wisdomTone =
+    wisdomDiagnostic?.wisdomScore != null && wisdomDiagnostic.wisdomScore >= 70
+      ? "good"
+      : wisdomDiagnostic?.wisdomScore != null && wisdomDiagnostic.wisdomScore < 45
+        ? "bad"
+        : wisdomDiagnostic
+          ? "warn"
+          : "neutral";
+  const executiveRestrictionExplanation =
+    topCanonicalRestriction?.explanation ?? dashboardSizing.limitedReason;
+  const currentStrategyStateName = hasMarketData
+    ? regime
+    : "Loading market view";
+  const executiveConfidencePct =
+    calibratedConfidenceDisplay ?? rawConfidenceDisplay ?? confidence ?? null;
+  const executiveTrustPct =
+    (trustGovernor ? finiteNumber(trustGovernor.trustScore) : null) ??
+    finiteNumber(agencyTrustPct) ??
+    calibrationTrustworthinessDisplay ??
+    null;
+  const riskTone =
+    avgRisk == null
+      ? "neutral"
+      : avgRisk < 45
+        ? "good"
+        : avgRisk < 70
+          ? "warn"
+          : "bad";
+  const confidenceTone =
+    executiveConfidencePct == null
+      ? "neutral"
+      : executiveConfidencePct >= 70 &&
+          (executiveTrustPct ?? executiveConfidencePct) >= 70
+        ? "good"
+        : executiveConfidencePct >= 50
+          ? "warn"
+          : "bad";
+  const exposureTone =
+    dashboardSizing.sizingDecision === "blocked"
+      ? "bad"
+      : dashboardSizing.suggestedMaximumExposurePct > 20
+        ? "good"
+        : dashboardSizing.suggestedMaximumExposurePct > 0
+          ? "warn"
+          : "neutral";
+  const postureTone =
+    dashboardSizing.sizingDecision === "allowed"
+      ? "good"
+      : dashboardSizing.sizingDecision === "blocked"
+        ? "bad"
+        : "warn";
+  const executiveDecisionSentence = !hasMarketData
+    ? "Loading prices, signals, and market context before making a posture recommendation."
+    : dashboardSizing.suggestedMaximumExposurePct === 0 &&
+        dashboardSizing.marketHealthPct >= 60
+      ? dashboardSizing.exposureExplanation
+      : avgRisk != null && avgRisk > 72
+        ? "Risk is elevated; keep capital protected and avoid forcing new buys."
+        : targetExposure < 35
+          ? "Conditions are improving, but only the clearest setups justify reduced exposure."
+          : "Market structure supports gradual participation while risk remains controlled.";
+  const confidenceTrustSub =
+    executiveTrustPct == null
+      ? "Trust pending"
+      : `Trusted by governance at ${fmtPlainPct(executiveTrustPct, 0)}`;
+  const venueSyncStatus = `${marketStatus === "Open" ? "Venue open" : "Venue closed"} · ${lastSyncedLabel}`;
+  const strategyHeadlineSize =
+    currentStrategyStateName.length > 38
+      ? "text-3xl md:text-5xl xl:text-6xl"
+      : "text-3xl md:text-6xl";
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <main className="relative mx-auto max-w-[1500px] px-5 py-6 lg:px-8">
-        <header className="mb-6 flex flex-col gap-4 rounded-xl border border-white/10 bg-[#0f0f0f] p-4 lg:flex-row lg:items-center lg:justify-between">
+    <div className="min-h-screen overflow-x-hidden bg-black text-white">
+      <main className="relative mx-auto w-full max-w-[1560px] overflow-x-hidden px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+        <header className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
             <div className="grid h-12 w-12 place-items-center rounded-lg bg-[#FDD000] text-black">
               <Brain className="h-6 w-6" />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#FDD000]">Investment dashboard</div>
-              <h1 className="text-2xl font-semibold tracking-tight text-white">Market overview</h1>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#FDD000]">
+                Investment dashboard
+              </div>
+              <h1 className="text-xl font-semibold tracking-tight text-white">
+                Decision console
+              </h1>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 md:flex-row md:items-center">
+          <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] lg:w-auto lg:grid-cols-[minmax(220px,1fr)_auto]">
             <select
               value={marketFilter}
               onChange={(event) => setMarketFilter(event.target.value)}
-              className="h-11 rounded-lg border border-white/10 bg-black px-4 text-sm text-white outline-none ring-0"
+              className="h-11 w-full min-w-0 rounded-lg border border-white/[0.08] bg-[#080808] px-4 text-sm text-white outline-none ring-0"
             >
+              {!markets.length ? (
+                <option value="">Loading markets</option>
+              ) : null}
               {markets.map((market) => (
                 <option key={marketCode(market)} value={marketCode(market)}>
                   {marketLabel(market)}
@@ -4475,9 +5780,11 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
             <button
               type="button"
               onClick={() => void refreshQuotes(marketFilter, stocks, true)}
-              className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#FDD000] bg-[#FDD000] px-4 text-sm font-semibold text-black transition hover:bg-[#ffe45c]"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-[#FDD000] bg-[#FDD000] px-4 text-sm font-semibold text-black transition hover:bg-[#ffe45c] sm:w-auto"
             >
-              <RefreshCw className={cx("h-4 w-4", refreshingQuotes && "animate-spin")} />
+              <RefreshCw
+                className={cx("h-4 w-4", refreshingQuotes && "animate-spin")}
+              />
               Update data
             </button>
           </div>
@@ -4490,988 +5797,2911 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
           </div>
         ) : null}
 
-        <section className="mb-6 grid min-w-0 items-stretch gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.85fr)]">
-          <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#111] p-7 shadow-2xl shadow-black/30">
-            <div className="max-w-3xl">
-              <div className="mb-4 flex flex-wrap gap-2">
-                <div
-                  className={`top-8 hidden rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] lg:block ${marketStatus === "Open"
-                    ? "border-[#FDD000]/30 bg-[#FDD000]/10 text-[#FDD000]"
-                    : "border-red-300/10 bg-red-300/5 text-red-200"
-                    }`}
-                >
-                  {marketStatus === "Open" ? "Venue Open" : "Venue Closed"} · {lastSyncedLabel}
+        <section
+          data-testid="executive-summary"
+          data-layout="responsive-executive-grid"
+          className="mb-12 grid min-w-0 items-stretch gap-5 rounded-lg border border-white/[0.07] bg-[radial-gradient(circle_at_15%_0%,rgba(253,208,0,0.13),transparent_28%),linear-gradient(135deg,#111,#070707_64%,#050505)] p-4 shadow-[0_28px_90px_rgba(0,0,0,0.38)] sm:p-5 lg:p-7 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]"
+        >
+          <div className="min-w-0">
+            <div className="mb-4 flex flex-wrap items-center gap-2 md:mb-5">
+              <StatusPill tone={marketStatus === "Open" ? "good" : "bad"}>
+                {venueSyncStatus}
+              </StatusPill>
+              <StatusPill tone={riskTone}>
+                Risk state:{" "}
+                {hasMarketData ? semanticMetrics.risk.word : "Pending"}
+              </StatusPill>
+              <span className="rounded-full border border-white/[0.08] bg-black/35 px-3 py-1 text-xs text-zinc-400">
+                {marketFilter || "Market"} strategy state
+              </span>
+            </div>
+
+            <div className="max-w-5xl">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#FDD000]">
+                Executive Summary
+              </div>
+              <h2
+                className={cx(
+                  "mt-3 max-w-5xl text-balance font-semibold leading-[0.95] tracking-tight text-white",
+                  strategyHeadlineSize,
+                )}
+              >
+                {currentStrategyStateName}
+              </h2>
+              <p className="mt-4 max-w-3xl text-base leading-7 text-zinc-300 md:mt-5 md:text-lg">
+                {executiveDecisionSentence}
+              </p>
+            </div>
+
+            <div
+              data-mobile-posture-summary="true"
+              className="mt-5 rounded-lg bg-black/30 p-4 ring-1 ring-white/[0.06] xl:hidden"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                    Primary posture
+                  </div>
+                  <div className="mt-1 text-xl font-semibold tracking-tight text-white">
+                    {executiveIA.executiveReasoning.finalDecision}
+                  </div>
                 </div>
-                <StatusPill tone={avgRisk == null ? "neutral" : avgRisk < 45 ? "good" : avgRisk < 70 ? "warn" : "bad"}>
-                  Risk state: {hasMarketData ? semanticMetrics.risk.word : ""}
+                <StatusPill
+                  tone={executiveIA.whyNotFullSize.active ? "warn" : "good"}
+                >
+                  {dashboardSizing.sizingMode}
                 </StatusPill>
               </div>
-
-              <h2 className="text-4xl font-semibold tracking-tight text-white md:text-5xl">
-                {hasMarketData ? regime : "Loading market view"}
-              </h2>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-300">
-                {!hasMarketData
-                  ? "Loading prices, signals, and basic market context for the selected market."
-                  : dashboardSizing.suggestedMaximumExposurePct === 0 && dashboardSizing.marketHealthPct >= 60
-                    ? dashboardSizing.exposureExplanation
-                  : avgRisk != null && avgRisk > 72
-                    ? "Market conditions look unstable. Keep more money in cash until volatility cools down."
-                  : targetExposure < 35
-                      ? "Conditions are improving, but only a few assets qualify. Keep position sizes small."
-                      : "The trend is improving. Add exposure gradually while risk remains controlled."}
+              <p className="mt-3 line-clamp-2 text-xs leading-5 text-zinc-500">
+                {executiveRestrictionExplanation}
               </p>
-
-              <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <MiniMetric
-                  label="Market Health"
-                  value={hasMarketData ? semanticMetrics.marketHealth.word : "—"}
-                  sub={hasMarketData ? fmtPlainPct(dashboardSizing.marketHealthPct, 0) : undefined}
-                />
-                <MiniMetric
-                  label="Opportunity Density"
-                  value={hasProvidedSignals ? semanticMetrics.opportunityDensity.word : "—"}
-                  sub={hasProvidedSignals ? fmtPlainPct(dashboardSizing.opportunityDensityPct, 0) : undefined}
-                />
-                <MiniMetric
-                  label="Sizing Mode"
-                  value={sizingModeMetricValue}
-                  sub={sizingModeMetricSub}
-                />
-                <MiniMetric
-                  label="Suggested Maximum Exposure"
-                  value={maximumExposureMetricValue}
-                  sub={maximumExposureMetricSub}
-                />
-              </div>
-              {hasMarketData ? (
-                <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)]">
-                  <div className="rounded-lg border border-white/10 bg-white/[0.035] px-4 py-3">
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Why exposure is limited</div>
-                    <p className="mt-1 text-sm leading-6 text-zinc-300">{dashboardSizing.limitedReason}</p>
-                  </div>
-                  <div className="rounded-lg border border-white/10 bg-white/[0.035] px-4 py-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Calibration status</div>
-                        <p className="mt-1 text-sm leading-6 text-zinc-300">{topCalibrationMessage}</p>
-                      </div>
-                      <StatusPill tone={calibrationTone}>
-                        {calibrationStatusLabel}
-                      </StatusPill>
-                    </div>
-                    <div className="mt-3 grid gap-2 text-xs text-zinc-500 sm:grid-cols-3">
-                      <div>
-                        <span className="block text-zinc-600">Raw</span>
-                        <span className="font-semibold text-slate-100">{rawConfidenceDisplay == null ? "—" : fmtPlainPct(rawConfidenceDisplay, 0)}</span>
-                      </div>
-                      <div>
-                        <span className="block text-zinc-600">Calibrated</span>
-                        <span className="font-semibold text-slate-100">{calibratedConfidenceDisplay == null ? "—" : fmtPlainPct(calibratedConfidenceDisplay, 0)}</span>
-                      </div>
-                      <div>
-                        <span className="block text-zinc-600">Trust</span>
-                        <span className="font-semibold text-slate-100">{calibrationTrustworthinessDisplay == null ? "—" : fmtPlainPct(calibrationTrustworthinessDisplay, 0)}</span>
-                      </div>
-                    </div>
-                    {calibrationWarnings.length ? (
-                      <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
-                        Warnings: {calibrationWarnings.slice(0, 3).join(", ")}.
-                      </p>
-                    ) : null}
-                  </div>
+              <div className="mt-4 grid grid-cols-3 gap-3 text-[11px] text-zinc-500">
+                <div>
+                  <span className="block text-zinc-600">Raw</span>
+                  <span className="font-semibold text-slate-100">
+                    {rawConfidenceDisplay == null
+                      ? "—"
+                      : fmtPlainPct(rawConfidenceDisplay, 0)}
+                  </span>
                 </div>
-              ) : null}
+                <div>
+                  <span className="block text-zinc-600">Calibrated</span>
+                  <span className="font-semibold text-slate-100">
+                    {calibratedConfidenceDisplay == null
+                      ? "—"
+                      : fmtPlainPct(calibratedConfidenceDisplay, 0)}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-zinc-600">Trust</span>
+                  <span className="font-semibold text-slate-100">
+                    {calibrationTrustworthinessDisplay == null
+                      ? "—"
+                      : fmtPlainPct(calibrationTrustworthinessDisplay, 0)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 grid grid-cols-1 gap-2.5 sm:mt-8 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
+              <ExecutiveMetric
+                label="Confidence / Trust"
+                value={
+                  executiveConfidencePct == null
+                    ? "Pending"
+                    : fmtPlainPct(executiveConfidencePct, 0)
+                }
+                sub={confidenceTrustSub}
+                tone={confidenceTone}
+                icon={<Gauge className="h-4 w-4" />}
+              />
+              <ExecutiveMetric
+                label="Max Exposure"
+                value={maximumExposureMetricValue}
+                sub={maximumExposureSubLabel({
+                  sizingMode: dashboardSizing.sizingMode,
+                  suggestedMaximumExposurePct:
+                    dashboardSizing.suggestedMaximumExposurePct,
+                  semanticWord: semanticMetrics.opportunityDensity.word,
+                })}
+                tone={exposureTone}
+                icon={<CircleDollarSign className="h-4 w-4" />}
+              />
+              <ExecutiveMetric
+                label="Portfolio Posture"
+                value={
+                  executiveIA.executiveReasoning.recommendedParticipationMode
+                }
+                sub={hasMarketData ? mandate : "Suggested action loading"}
+                tone={postureTone}
+                icon={<Compass className="h-4 w-4" />}
+              />
+              <ExecutiveMetric
+                label="Market Health"
+                value={
+                  hasMarketData ? semanticMetrics.marketHealth.word : "Pending"
+                }
+                sub={
+                  hasMarketData
+                    ? fmtPlainPct(dashboardSizing.marketHealthPct, 0)
+                    : "Awaiting synchronized data"
+                }
+                tone={riskTone}
+                icon={<ShieldCheck className="h-4 w-4" />}
+              />
             </div>
           </div>
 
-          <SectionShell eyebrow="Portfolio posture" title={hasMarketData ? mandate : "Loading suggested action"}>
-            <div className="space-y-5">
-              <p className="text-sm leading-6 text-zinc-400">
-                {!hasMarketData
-                  ? "Waiting for enough market data to make a simple suggestion."
-                  : avgRisk != null && avgRisk > 72
-                    ? "Risk is high. Avoid forcing new buys."
-                    : targetExposure > 30
-                      ? "Risk is acceptable. Increase only the clearest positions."
-                      : "Stay flexible. These are ideas to review, not automatic buy orders."}
-              </p>
-              {hasMarketData ? (
-                <>
-                  <QualityBar value={avgRisk == null ? 0 : 100 - avgRisk} label={`Risk control · ${semanticMetrics.risk.word}`} />
-                  <QualityBar value={opportunityParticipationPct} label={`Opportunity setup density · ${semanticMetrics.opportunityDensity.word}`} />
-                </>
-              ) : (
-                <div className="rounded-lg border border-white/10 bg-white/[0.035] px-4 py-5 text-sm text-zinc-500">
-                  Suggested action is loading...
+          <aside className="hidden min-w-0 flex-col justify-between rounded-lg bg-black/35 p-5 ring-1 ring-white/[0.07] xl:flex">
+            <div>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                    Primary posture
+                  </div>
+                  <div className="mt-2 text-2xl font-semibold tracking-tight text-white">
+                    {executiveIA.executiveReasoning.finalDecision}
+                  </div>
                 </div>
-              )}
+                <StatusPill
+                  tone={executiveIA.whyNotFullSize.active ? "warn" : "good"}
+                >
+                  {dashboardSizing.sizingMode}
+                </StatusPill>
+              </div>
+              <p className="mt-4 text-sm leading-6 text-zinc-400">
+                {executiveRestrictionExplanation}
+              </p>
+              {topCanonicalRestriction ? (
+                <p className="mt-3 text-xs leading-5 text-zinc-500">
+                  Main limiter: {topCanonicalRestriction.label}
+                </p>
+              ) : null}
             </div>
-          </SectionShell>
+
+            <div className="mt-6 space-y-4">
+              <QualityBar
+                value={avgRisk == null ? 0 : 100 - avgRisk}
+                label={`Risk control · ${hasMarketData ? semanticMetrics.risk.word : "Pending"}`}
+              />
+              <QualityBar
+                value={opportunityParticipationPct}
+                label={`Opportunity density · ${hasProvidedSignals ? semanticMetrics.opportunityDensity.word : "Pending"}`}
+              />
+              <div className="grid grid-cols-3 gap-3 text-xs text-zinc-500">
+                <div>
+                  <span className="block text-zinc-600">Raw</span>
+                  <span className="font-semibold text-slate-100">
+                    {rawConfidenceDisplay == null
+                      ? "—"
+                      : fmtPlainPct(rawConfidenceDisplay, 0)}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-zinc-600">Calibrated</span>
+                  <span className="font-semibold text-slate-100">
+                    {calibratedConfidenceDisplay == null
+                      ? "—"
+                      : fmtPlainPct(calibratedConfidenceDisplay, 0)}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-zinc-600">Trust</span>
+                  <span className="font-semibold text-slate-100">
+                    {calibrationTrustworthinessDisplay == null
+                      ? "—"
+                      : fmtPlainPct(calibrationTrustworthinessDisplay, 0)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </aside>
         </section>
 
-        <MarketPerceptionEngine
-          snapshot={marketPerceptionSnapshot}
-          agencyLevel={agencyLevel}
-        />
+        <DashboardGroup
+          eyebrow="Decision layer"
+          title="Executive Summary"
+          description="The first layer keeps the operator focused on state, posture, exposure, and the few conditions that would change the recommendation."
+        >
+          <section className="grid min-w-0 gap-5">
+            <SectionShell
+              eyebrow="Executive Reasoning"
+              title="System state in one explanation"
+              action={
+                <StatusPill
+                  tone={executiveIA.whyNotFullSize.active ? "warn" : "good"}
+                >
+                  {executiveIA.executiveReasoning.finalDecision}
+                </StatusPill>
+              }
+            >
+              <div className="rounded-lg border border-white/10 bg-[#151515] px-5 py-4">
+                <p className="max-w-5xl text-base leading-7 text-zinc-200">
+                  {executiveIA.executiveReasoning.narrative}
+                </p>
+              </div>
 
-        <section className="mb-6 grid min-w-0 items-start gap-5 xl:grid-cols-2">
-          <SectionShell
-            eyebrow="Opportunity diagnostics"
-            title="Opportunity density diagnostics"
-            action={<StatusPill tone={adaptiveOpportunityDensityPct > 45 ? "good" : adaptiveOpportunityDensityPct > 20 ? "warn" : "neutral"}>{fmtPlainPct(adaptiveOpportunityDensityPct, 0)}</StatusPill>}
-          >
-            <div className="grid gap-3 sm:grid-cols-3">
-              <MiniMetric
-                label="Future density"
-                value={fmtPlainPct(adaptiveOpportunityDensityPct, 0)}
-                sub={String(discoveryDensityDiagnostics?.trend ?? "flat")}
-              />
-              <MiniMetric
-                label="Candidate quality"
-                value={fmtPlainPct(finiteNumber(discoveryDensityDiagnostics?.quality) ?? numeric(discoveryPipelineDiagnostics.averageScore), 0)}
-                sub={`${numeric(discoveryPipelineDiagnostics.candidateCount)} candidates`}
-              />
-              <MiniMetric
-                label="Conviction"
-                value={fmtPlainPct(finiteNumber(discoveryDensityDiagnostics?.confidence) ?? confidence ?? 0, 0)}
-                sub={`${numeric(discoveryPipelineDiagnostics.improvingCount)} improving`}
-              />
-            </div>
-            <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-6 text-zinc-400">
-              {discoveryDensityDiagnostics?.explanation ?? "Candidate density is being inferred from current signal progression."}
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-5">
-              <MiniMetric label="Discovery confidence" value={genericDiscovery ? fmtPlainPct(numeric(genericDiscovery.confidence), 0) : "—"} />
-              <MiniMetric label="Maturity" value={genericDiscovery ? fmtPlainPct(numeric(genericDiscovery.maturity), 0) : "—"} />
-              <MiniMetric label="Novelty" value={genericDiscovery ? fmtPlainPct(numeric(genericDiscovery.novelty), 0) : "—"} sub={recognitionClearsDiscoveryNovelty ? "Recognition rejected" : undefined} />
-              <MiniMetric label="Fragility" value={genericDiscovery ? fmtPlainPct(numeric(genericDiscovery.fragility), 0) : "—"} />
-              <MiniMetric label="Next step" value={genericDiscovery?.status?.replace(/_/g, " ") ?? "Pending"} sub={genericDiscovery?.recommendedNextStep} />
-            </div>
-          </SectionShell>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <MiniMetric
+                  label="Final decision"
+                  value={executiveIA.executiveReasoning.finalDecision}
+                />
+                <MiniMetric
+                  label="Participation mode"
+                  value={
+                    executiveIA.executiveReasoning.recommendedParticipationMode
+                  }
+                />
+                <MiniMetric
+                  label="Max exposure"
+                  value={executiveIA.executiveReasoning.maxExposure}
+                />
+              </div>
 
-          <SectionShell
-            eyebrow="Recognition"
-            title="Recognition diagnostics"
-            action={<StatusPill tone={recognitionTone(recognitionDiagnostic)}>{recognitionDiagnostic?.verdict?.replace(/_/g, " ") ?? "Pending"}</StatusPill>}
-          >
-            <div className="grid gap-3 sm:grid-cols-5">
-              <MiniMetric label="Recognition score" value={recognitionDiagnostic ? fmtPlainPct(numeric(recognitionDiagnostic.recognitionScore), 0) : "—"} />
-              <MiniMetric label="Recurrence" value={recognitionDiagnostic ? fmtPlainPct(numeric(recognitionDiagnostic.recurrenceConfidence), 0) : "—"} />
-              <MiniMetric label="Novelty" value={recognitionDiagnostic ? fmtPlainPct(numeric(recognitionDiagnostic.noveltyScore), 0) : "—"} />
-              <MiniMetric label="Archetype" value={recognitionDiagnostic?.archetype?.replace(/_/g, " ") ?? "—"} sub={recognitionDiagnostic ? fmtPlainPct(numeric(recognitionDiagnostic.archetypeConfidence), 0) : undefined} />
-              <MiniMetric label="Matched samples" value={recognitionDiagnostic ? String(numeric(recognitionDiagnostic.matchedSamples)) : "—"} sub={recognitionDiagnostic ? `${numeric(recognitionDiagnostic.matchedPositiveOutcomes)} / ${numeric(recognitionDiagnostic.matchedNegativeOutcomes)} outcomes` : undefined} />
-            </div>
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              <MiniMetric label="Outcome stability" value={recognitionDiagnostic ? fmtPlainPct(numeric(recognitionDiagnostic.outcomeStability), 0) : "—"} />
-              <MiniMetric label="Discovery novelty" value={recognitionDiagnostic ? (recognitionDiagnostic.discoveryNoveltyJustified ? "Justified" : "Rejected") : "—"} />
-              <MiniMetric label="Judgement similarity" value={recognitionDiagnostic ? (recognitionDiagnostic.judgementSimilarityJustified ? "Justified" : "Rejected") : "—"} />
-            </div>
-            <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-6 text-zinc-400">
-              {recognitionDiagnostic?.reason ?? "Recognition diagnostics will appear after comparable states are evaluated."}
-            </div>
-            <div className="mt-4 grid gap-3 lg:grid-cols-2">
-              <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Missing evidence</div>
-                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
-                  {recognitionMissingEvidence.slice(0, 4).map((item: string, index: number) => (
-                    <div key={`${item}-${index}`}>{item}</div>
-                  ))}
+              <div className="mt-4 grid gap-3 md:grid-cols-4">
+                <MiniMetric
+                  label="Trust"
+                  value={fmtPlainPct(dashboardDecisionStates.trust.score, 0)}
+                  sub={dashboardDecisionStates.trust.status.replace(/_/g, " ")}
+                  tone={trustStateTone}
+                />
+                <MiniMetric
+                  label="Permission"
+                  value={dashboardDecisionStates.permission.level.replace(
+                    /_/g,
+                    " ",
+                  )}
+                  sub={
+                    dashboardDecisionStates.permission.allowed
+                      ? "Action may proceed inside governance"
+                      : "Action is not allowed now"
+                  }
+                  tone={permissionTone}
+                />
+                <MiniMetric
+                  label="Capacity"
+                  value={fmtPlainPct(
+                    dashboardDecisionStates.capacity.maxExposure,
+                  )}
+                  sub={dashboardDecisionStates.capacity.mode.replace(/_/g, " ")}
+                  tone={capacityTone}
+                />
+                <MiniMetric
+                  label="Urgency"
+                  value={dashboardDecisionStates.urgency.mode.replace(
+                    /_/g,
+                    " ",
+                  )}
+                  sub={`${Math.round(dashboardDecisionStates.urgency.score)}/100`}
+                  tone={urgencyTone}
+                />
+              </div>
+
+              <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Main reason for restriction
+                  </div>
+                  <div className="mt-2 text-sm font-semibold text-white">
+                    {executiveIA.executiveReasoning.mainReasonForRestriction
+                      ?.label ?? "No active restriction"}
+                  </div>
+                  <p className="mt-1 text-xs leading-5 text-zinc-500">
+                    {executiveIA.executiveReasoning.mainReasonForRestriction
+                      ?.explanation ??
+                      "The current dashboard has not identified a primary limiter."}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Primary unlock condition
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-zinc-300">
+                    {executiveIA.executiveReasoning.primaryUnlockCondition}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Primary invalidation condition
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-zinc-300">
+                    {
+                      executiveIA.executiveReasoning
+                        .primaryInvalidationCondition
+                    }
+                  </p>
                 </div>
               </div>
-              <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Invalidation conditions</div>
-                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
-                  {recognitionInvalidationConditions.slice(0, 4).map((item: string, index: number) => (
-                    <div key={`${item}-${index}`}>{item}</div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </SectionShell>
+            </SectionShell>
 
-          <SectionShell
-            eyebrow="Need detection"
-            title="Need detection diagnostics"
-            action={<StatusPill tone={needDiagnostics.length ? "warn" : "neutral"}>{needDiagnostics.length || "Stable"}</StatusPill>}
-          >
-            <div className="space-y-3">
-              {(needDiagnostics.length ? needDiagnostics : [{
-                needId: "maintain",
-                category: "maintain",
-                severity: 0,
-                confidence: confidence ?? 0,
-                explanation: "No active need is blocking the current objective.",
-                recommendations: [],
-              }]).slice(0, 4).map((need: any) => (
-                <div key={need.needId} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+            <SectionShell
+              eyebrow="Execution, Learning & Accountability"
+              title="Action quality and feedback loops"
+              action={
+                <StatusPill tone={executionQualityTone}>
+                  {executionQualityDiagnostic?.recommendedExecutionMode?.replace(
+                    /_/g,
+                    " ",
+                  ) ?? "Pending"}
+                </StatusPill>
+              }
+            >
+              <div className="grid gap-3 lg:grid-cols-3">
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="text-sm font-semibold text-white">{String(need.category).replace(/-/g, " ")}</div>
-                      <div className="mt-1 text-xs leading-5 text-zinc-500">{need.explanation}</div>
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Execution Quality
+                      </div>
+                      <div className="mt-2 text-2xl font-semibold text-white">
+                        {executionQualityDiagnostic
+                          ? `${Math.round(executionQualityDiagnostic.score)}/100`
+                          : "Pending"}
+                      </div>
                     </div>
-                    <StatusPill tone={numeric(need.severity) > 70 ? "bad" : numeric(need.severity) > 35 ? "warn" : "neutral"}>
-                      {fmtPlainPct(numeric(need.severity), 0)}
+                    <StatusPill tone={executionQualityTone}>
+                      {executionQualityDiagnostic?.status ?? "pending"}
                     </StatusPill>
                   </div>
+                  <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Entry {fmtPlainPct(executionQualityDiagnostic?.entryQuality, 0)}</div>
+                    <div>Exit {fmtPlainPct(executionQualityDiagnostic?.exitQuality, 0)}</div>
+                    <div>Liquidity {fmtPlainPct(executionQualityDiagnostic?.liquidityQuality, 0)}</div>
+                    <div>Slippage {fmtPlainPct(executionQualityDiagnostic?.slippageRisk, 0)}</div>
+                    <div>Timing {fmtPlainPct(executionQualityDiagnostic?.timingUrgency, 0)}</div>
+                    <div>Invalidation {fmtPlainPct(executionQualityDiagnostic?.invalidationClarity, 0)}</div>
+                  </div>
+                  <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
+                    {executionQualityDiagnostic?.blockers?.[0] ??
+                      executionQualityDiagnostic?.warnings?.[0] ??
+                      executionQualityDiagnostic?.explanation ??
+                      "Execution quality will appear when a selected signal carries execution diagnostics."}
+                  </p>
                 </div>
-              ))}
-            </div>
-          </SectionShell>
 
-          <SectionShell
-            eyebrow="Belief"
-            title="Belief diagnostics"
-            action={<StatusPill tone={beliefTone(beliefDiagnostic)}>{beliefDiagnostic?.verdict ?? "Pending"}</StatusPill>}
-          >
-            <div className="grid gap-3 sm:grid-cols-5">
-              <MiniMetric label="Verdict" value={beliefDiagnostic?.verdict ?? "—"} />
-              <MiniMetric label="Confidence" value={beliefDiagnostic ? fmtPlainPct(beliefDiagnostic.confidence, 0) : "—"} />
-              <MiniMetric label="Trustworthiness" value={beliefDiagnostic ? fmtPlainPct(beliefDiagnostic.trustworthiness, 0) : "—"} />
-              <MiniMetric label="Evidence strength" value={beliefDiagnostic ? fmtPlainPct(beliefDiagnostic.evidenceStrength, 0) : "—"} />
-              <MiniMetric label="Fragility" value={beliefDiagnostic ? fmtPlainPct(beliefDiagnostic.fragility, 0) : "—"} />
-            </div>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <MiniMetric label="Evidence agreement" value={beliefDiagnostic ? fmtPlainPct(beliefDiagnostic.evidenceAgreement, 0) : "—"} />
-              <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Reason</div>
-                <div className="mt-2 line-clamp-3 text-sm leading-6 text-zinc-300">
-                  {beliefDiagnostic?.reason ?? "Belief evidence will appear after strategy candidates are evaluated."}
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Top supporting evidence</div>
-                <div className="mt-2 space-y-2">
-                  {(beliefSupportEvidence.length ? beliefSupportEvidence : [{ name: "Pending", weightedStrength: 0, reason: "No supporting evidence is selected yet." }]).map((item: any) => (
-                    <div key={`${item.name}-${item.weightedStrength}`} className="text-xs leading-5 text-zinc-400">
-                      <span className="font-semibold text-slate-200">{item.name}</span>
-                      {item.weightedStrength ? <span className="text-zinc-500"> · {fmtPlainPct(item.weightedStrength, 0)}</span> : null}
-                      <div className="text-zinc-500">{item.reason}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Top contradictory evidence</div>
-                <div className="mt-2 space-y-2">
-                  {(beliefContradictoryEvidence.length ? beliefContradictoryEvidence : [{ name: "Pending", weightedStrength: 0, reason: "No contradictory evidence is selected yet." }]).map((item: any) => (
-                    <div key={`${item.name}-${item.weightedStrength}`} className="text-xs leading-5 text-zinc-400">
-                      <span className="font-semibold text-slate-200">{item.name}</span>
-                      {item.weightedStrength ? <span className="text-zinc-500"> · {fmtPlainPct(item.weightedStrength, 0)}</span> : null}
-                      <div className="text-zinc-500">{item.reason}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </SectionShell>
-
-          <SectionShell
-            eyebrow="Discovery pipeline"
-            title="Discovery pipeline diagnostics"
-            action={<StatusPill tone="neutral">{numeric(discoveryPipelineDiagnostics.candidateCount)} candidates</StatusPill>}
-          >
-            <div className="grid gap-3 sm:grid-cols-4">
-              <MiniMetric label="Eligible" value={String(numeric(discoveryPipelineDiagnostics.eligibleCount))} />
-              <MiniMetric label="Improving" value={String(numeric(discoveryPipelineDiagnostics.improvingCount))} />
-              <MiniMetric label="Avg score" value={fmtPlainPct(numeric(discoveryPipelineDiagnostics.averageScore), 0)} />
-              <MiniMetric label="Velocity" value={numeric(discoveryPipelineDiagnostics.averageVelocity).toFixed(1)} />
-            </div>
-            <div className="mt-4 space-y-2">
-              {discoveryFindings.slice(0, 3).map((finding: any) => (
-                <div key={finding.findingId} className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-5 text-zinc-400">
-                  <span className="font-semibold text-slate-200">{finding.pattern}</span>
-                  <span className="text-zinc-500"> - support {fmtPlainPct(numeric(finding.support), 0)}</span>
-                </div>
-              ))}
-              {!discoveryFindings.length ? (
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-zinc-500">
-                  Explorer findings will appear after recurring outcomes are observed.
-                </div>
-              ) : null}
-            </div>
-            <div className="mt-4 grid gap-3 lg:grid-cols-2">
-              <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Discovery support</div>
-                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
-                  {(discoverySupportEvidence.length ? discoverySupportEvidence : [{ label: "Pending", contribution: 0, reason: "Supporting evidence is pending." }]).slice(0, 4).map((item: any, index: number) => (
-                    <div key={`${item.label}-${index}`}>
-                      <span className="font-semibold text-slate-200">{item.label}</span>
-                      {item.contribution != null ? <span className="text-zinc-500"> · {fmtPlainPct(numeric(item.contribution), 0)}</span> : null}
-                      <div className="text-zinc-500">{item.reason}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Discovery contradictions</div>
-                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
-                  {(discoveryContradictoryEvidence.length ? discoveryContradictoryEvidence : [{ label: "None reported", contribution: 0, reason: "No contradictory discovery evidence is active." }]).slice(0, 4).map((item: any, index: number) => (
-                    <div key={`${item.label}-${index}`}>
-                      <span className="font-semibold text-slate-200">{item.label}</span>
-                      {item.contribution != null ? <span className="text-zinc-500"> · {fmtPlainPct(numeric(item.contribution), 0)}</span> : null}
-                      <div className="text-zinc-500">{item.reason}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 grid gap-3 lg:grid-cols-3">
-              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Missing evidence</div>
-                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
-                  {(discoveryMissingEvidence.length ? discoveryMissingEvidence : ["No missing discovery evidence reported."]).slice(0, 4).map((item: string, index: number) => (
-                    <div key={`${item}-${index}`}>{item}</div>
-                  ))}
-                </div>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Invalidation conditions</div>
-                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
-                  {(displayedDiscoveryInvalidationConditions.length ? displayedDiscoveryInvalidationConditions : ["No discovery invalidation conditions reported."]).slice(0, 4).map((item: string, index: number) => (
-                    <div key={`${item}-${index}`}>{item}</div>
-                  ))}
-                </div>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Memory summary</div>
-                <div className="mt-3 space-y-1 text-xs leading-5 text-zinc-400">
-                  <div>Discovery similar outcomes {numeric(discoveryMemory?.similarOutcomes)}</div>
-                  <div>Discovery success/failure {fmtPlainPct(numeric(discoveryMemory?.successRatio), 0)} / {fmtPlainPct(numeric(discoveryMemory?.failureRatio), 0)}</div>
-                  <div>Discovery predictive {(discoveryMemory?.mostPredictiveEvidence ?? ["Pending"]).slice(0, 2).join(" · ")}</div>
-                  <div>Discovery misleading {(discoveryMemory?.mostMisleadingEvidence ?? ["Pending"]).slice(0, 2).join(" · ")}</div>
-                  {discoveryMemoryRecognitionLine ? <div>{discoveryMemoryRecognitionLine}</div> : null}
-                </div>
-              </div>
-            </div>
-          </SectionShell>
-
-          <SectionShell
-            eyebrow="Sizing"
-            title="Sizing diagnostics"
-            action={<StatusPill tone={dashboardSizing.sizingDecision === "allowed" ? "good" : dashboardSizing.sizingDecision === "blocked" ? "bad" : "warn"}>{dashboardSizing.sizingMode}</StatusPill>}
-          >
-            <div className="grid gap-3 sm:grid-cols-3">
-              <MiniMetric label="Selected step" value={fmtPlainPct(numeric((dashboardSizing.sizingResult as any)?.selectedLadderPct), 0)} />
-              <MiniMetric label="Max exposure" value={fmtPlainPct(dashboardSizing.suggestedMaximumExposurePct)} />
-              <MiniMetric label="Risk" value={fmtPlainPct(avgRisk ?? 100, 0)} />
-            </div>
-            <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
-              {(dashboardSizing.sizingRationale?.length ? dashboardSizing.sizingRationale : dashboardSizing.sizingReasons).slice(0, 3).map((reason) => (
-                <div key={reason} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">{reason}</div>
-              ))}
-            </div>
-          </SectionShell>
-
-          <SectionShell
-            eyebrow="Survival Memory"
-            title="Survival memory diagnostics"
-            action={<StatusPill tone={survivalMemoryTone(survivalMemoryDiagnostic)}>{survivalMemoryDiagnostic?.status?.replace(/_/g, " ") ?? "Pending"}</StatusPill>}
-          >
-            <div className="grid gap-3 sm:grid-cols-3">
-              <MiniMetric label="Survival memory status" value={survivalMemoryDiagnostic?.status?.replace(/_/g, " ") ?? "—"} />
-              <MiniMetric label="Scar count" value={survivalMemoryDiagnostic ? String(survivalMemoryDiagnostic.scarCount) : "—"} />
-              <MiniMetric label="Near-ruin count" value={survivalMemoryDiagnostic ? String(survivalMemoryDiagnostic.nearRuinCount) : "—"} />
-            </div>
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              <MiniMetric label="Average survival cost" value={survivalMemoryDiagnostic ? `${Math.round(numeric(survivalMemoryDiagnostic.averageSurvivalCost))}/100` : "—"} />
-              <MiniMetric label="Recovery burden" value={survivalMemoryDiagnostic ? `${Math.round(numeric(survivalMemoryDiagnostic.recoveryBurden))}/100` : "—"} />
-              <MiniMetric label="Survival confidence" value={survivalMemoryDiagnostic ? `${Math.round(numeric(survivalMemoryDiagnostic.survivalConfidence))}/100` : "—"} />
-            </div>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <MiniMetric
-                label="Current state similarity to past fragile states"
-                value={survivalMemoryDiagnostic ? fmtPlainPct(numeric(survivalMemoryDiagnostic.currentStateSimilarity), 0) : "—"}
-              />
-              <MiniMetric
-                label="Recovery exposure cap"
-                value={survivalMemoryDiagnostic ? fmtPlainPct(numeric(survivalMemoryDiagnostic.maxExposurePct)) : "—"}
-                sub={survivalMemoryDiagnostic?.recommendation?.replace(/_/g, " ")}
-              />
-            </div>
-            <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
-              {survivalWarnings.slice(0, 4).map((warning) => (
-                <div key={warning} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">{warning}</div>
-              ))}
-            </div>
-          </SectionShell>
-
-          <SectionShell
-            eyebrow="Recovery"
-            title="Recovery diagnostics"
-            action={<StatusPill tone={recoveryTone(recoveryDiagnostic)}>{recoveryDiagnostic?.status?.replace(/-/g, " ") ?? "Pending"}</StatusPill>}
-          >
-            <div className="grid gap-3 sm:grid-cols-4">
-              <MiniMetric label="Recovery score" value={recoveryDiagnostic ? `${Math.round(numeric(recoveryDiagnostic.recoveryScore))}/100` : "—"} />
-              <MiniMetric label="Trusted capacity" value={recoveryDiagnostic ? fmtPlainPct(numeric(recoveryDiagnostic.trustedCapacity), 0) : "—"} />
-              <MiniMetric label="Confidence cap lift" value={recoveryDiagnostic ? `+${numeric(recoveryDiagnostic.confidenceCapLift).toFixed(1)}` : "—"} />
-              <MiniMetric
-                label="Recommended exposure cap"
-                value={recoveryDiagnostic ? fmtPlainPct(numeric(recoveryDiagnostic.recommendedExposureCap)) : "—"}
-                sub={recoveryDiagnostic?.mode?.replace(/-/g, " ")}
-              />
-            </div>
-            <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
-              {displayedRecoveryBlockers.slice(0, 3).map((blocker) => (
-                <div key={blocker} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">{blocker}</div>
-              ))}
-            </div>
-            <div className="mt-3 text-xs leading-5 text-zinc-500">
-              Unlock: {displayedRecoveryUnlockConditions.slice(0, 2).join(" ")}
-            </div>
-          </SectionShell>
-
-          <SectionShell
-            eyebrow="Signal Trust Governor"
-            title="Participation decision"
-            action={<StatusPill tone={trustGovernorTone(trustGovernor)}>{trustGovernor?.participationMode?.replace(/_/g, " ") ?? "Pending"}</StatusPill>}
-          >
-            <div className="grid gap-3 sm:grid-cols-3">
-              <MiniMetric label="Trust score" value={trustGovernor ? fmtPlainPct(trustGovernor.trustScore, 0) : "—"} />
-              <MiniMetric label="Confidence cap" value={trustGovernor ? fmtPlainPct(trustGovernor.confidenceCap, 0) : "—"} />
-              <MiniMetric label="Trusted exposure" value={trustGovernor ? fmtPlainPct(trustGovernor.maxExposure) : "—"} />
-            </div>
-            <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
-              {(trustGovernor?.reasons?.length ? trustGovernor.reasons : ["Trust governance will appear after strategy readiness is evaluated."]).slice(0, 3).map((reason) => (
-                <div key={reason} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">{reason}</div>
-              ))}
-            </div>
-            {trustGovernor?.unlockCriteria?.length ? (
-              <div className="mt-3 text-xs leading-5 text-zinc-500">
-                Unlock: {trustGovernor.unlockCriteria.slice(0, 2).join(" ")}
-              </div>
-            ) : null}
-          </SectionShell>
-
-          <SectionShell
-            eyebrow="Remediation"
-            title="Readiness remediation planner"
-            action={<StatusPill tone={remediationTone(readinessRemediation)}>{readinessRemediation?.status?.replace(/_/g, " ") ?? "Pending"}</StatusPill>}
-          >
-            <div className="grid gap-3 sm:grid-cols-3">
-              <MiniMetric label="Top action" value={readinessRemediation?.topAction ?? "—"} />
-              <MiniMetric label="Expected lift" value={readinessRemediation ? `+${readinessRemediation.totalExpectedTrustLift.toFixed(1)}` : "—"} />
-              <MiniMetric label="Execution gate" value={readinessRemediation?.executionGate?.replace(/_/g, " ") ?? "—"} />
-            </div>
-            <div className="mt-4 space-y-2">
-              {(readinessRemediation?.steps?.length ? readinessRemediation.steps : []).slice(0, 4).map((step) => (
-                <div key={step.id} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-semibold text-white">{step.title}</div>
-                      <div className="mt-1 text-xs leading-5 text-zinc-500">{step.reason}</div>
+                    <div>
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Counterfactual
+                      </div>
+                      <div className="mt-2 text-2xl font-semibold text-white">
+                        {counterfactualDiagnostic
+                          ? `${Math.round(counterfactualDiagnostic.restrictionValueScore)}/100`
+                          : "Pending"}
+                      </div>
                     </div>
-                    <StatusPill tone={step.status === "blocked" ? "bad" : "warn"}>+{step.expectedTrustLift.toFixed(1)}</StatusPill>
+                    <StatusPill tone={counterfactualTone}>
+                      {counterfactualDiagnostic?.shouldAdjustSizingPolicy ||
+                      counterfactualDiagnostic?.shouldAdjustDiscoveryPolicy ||
+                      counterfactualDiagnostic?.shouldAdjustRestrictionPolicy
+                        ? "adjust"
+                        : "observe"}
+                    </StatusPill>
                   </div>
-                  <div className="mt-2 text-xs leading-5 text-zinc-500">
-                    {step.evidenceRequired.slice(0, 2).join(" · ")}
+                  <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Avoided loss {fmtPlainPct(counterfactualDiagnostic?.avoidedLossScore, 0)}</div>
+                    <div>Missed upside {fmtPlainPct(counterfactualDiagnostic?.missedUpsideScore, 0)}</div>
+                    <div>Restriction value {fmtPlainPct(counterfactualDiagnostic?.restrictionValueScore, 0)}</div>
+                    <div>Caution cost {fmtPlainPct(counterfactualDiagnostic?.cautionCostScore, 0)}</div>
                   </div>
+                  <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
+                    {counterfactualDiagnostic?.scenarios?.[0]?.summary ??
+                      counterfactualDiagnostic?.explanation ??
+                      "Counterfactual learning will compare acted, waited, normal-size, and ignored-restriction scenarios."}
+                  </p>
                 </div>
-              ))}
-              {readinessRemediation && !readinessRemediation.steps.length ? (
-                <div className="rounded-lg border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-                  No remediation steps are active.
-                </div>
-              ) : null}
-              {!readinessRemediation ? (
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-zinc-500">
-                  Remediation diagnostics are pending.
-                </div>
-              ) : null}
-            </div>
-          </SectionShell>
 
-          <SectionShell
-            eyebrow="Judgement"
-            title="Judgement diagnostics"
-            action={<StatusPill tone={judgementTone(judgementDiagnostic)}>{judgementDiagnostic?.status?.replace(/_/g, " ") ?? "Pending"}</StatusPill>}
-          >
-            <div className="text-sm leading-6 text-zinc-400">
-              Judgement compares the current state with similar historical situations and checks whether past outcomes justify trusting the current signal.
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <MiniMetric label="Adjusted confidence" value={judgementDiagnostic ? fmtPlainPct(judgementDiagnostic.adjustedConfidence, 0) : "—"} />
-              <MiniMetric label="Reliability" value={judgementDiagnostic ? fmtPlainPct(judgementDiagnostic.reliability, 0) : "—"} />
-              <MiniMetric label="Similar samples" value={judgementDiagnostic ? String(judgementDiagnostic.similarSampleSize) : "—"} />
-            </div>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <MiniMetric label="Outcome stability" value={judgementDiagnostic ? fmtPlainPct(judgementDiagnostic.outcomeStability, 0) : "—"} />
-              <MiniMetric label="Overfit risk" value={judgementDiagnostic ? fmtPlainPct(judgementDiagnostic.overfitRisk, 0) : "—"} />
-            </div>
-            <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
-              {(judgementReasons.length ? judgementReasons : ["Judgement will appear after similar historical outcomes are available."]).map((reason) => (
-                <div key={reason} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">{reason}</div>
-              ))}
-            </div>
-          </SectionShell>
-
-          <SectionShell
-            eyebrow="Agency"
-            title="Agency diagnostics"
-            action={<StatusPill tone={agencyRecommendation === "act" ? "good" : agencyRecommendation === "requires_human_review" ? "bad" : "warn"}>{agencyRecommendation.replace(/_/g, " ")}</StatusPill>}
-          >
-            <div className="grid gap-3 sm:grid-cols-3">
-              <MiniMetric
-                label="Trust"
-                value={fmtPlainPct(agencyTrustPct, 0)}
-                sub={agencyTrustAdjustmentPct != null && agencyTrustAdjustmentPct > 0
-                  ? `+${fmtPlainPct(agencyTrustAdjustmentPct, 0)} reduced-size outcome credit`
-                  : undefined}
-              />
-              <MiniMetric label="Calibration" value={agencyCalibrationHealthPct == null ? "—" : fmtPlainPct(agencyCalibrationHealthPct * 100, 0)} />
-              <MiniMetric label="Blocked" value={String(agencyBlockedActions)} />
-            </div>
-            <div className="mt-4 space-y-2">
-              {agencyAudits.slice(0, 3).map((audit: any) => (
-                <div key={audit.traceId ?? audit.symbol} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-semibold text-white">{audit.symbol ?? audit.traceId}</div>
-                      <div className="mt-1 text-xs text-zinc-500">{String(audit.decisionKind ?? "decision").replace(/_/g, " ")}</div>
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Discovery Accountability
+                      </div>
+                      <div className="mt-2 text-2xl font-semibold text-white">
+                        {discoveryAccountabilityDiagnostic
+                          ? `${Math.round(discoveryAccountabilityDiagnostic.accountabilityScore)}/100`
+                          : "Pending"}
+                      </div>
                     </div>
-                    <StatusPill tone={audit.allowed ? "good" : "bad"}>{audit.allowed ? "Allowed" : "Blocked"}</StatusPill>
+                    <StatusPill tone={discoveryAccountabilityTone}>
+                      {discoveryAccountabilityDiagnostic?.status ?? "pending"}
+                    </StatusPill>
                   </div>
-                  <div className="mt-2 text-xs leading-5 text-zinc-500">
-                    {audit.rawConfidence != null && audit.calibratedConfidence != null
-                      ? `Raw ${fmtPlainPct(audit.rawConfidence, 0)} -> calibrated ${fmtPlainPct(audit.calibratedConfidence, 0)}.`
-                      : (audit.violations ?? audit.reasons ?? []).slice(0, 1)[0] ?? `Outcome ${audit.outcomeLabel ?? "unknown"}`}
+                  <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Maturity {fmtPlainPct(discoveryAccountabilityDiagnostic?.maturity, 0)}</div>
+                    <div>False discoveries {fmtPlainPct(discoveryAccountabilityDiagnostic?.falseDiscoveryRate, 0)}</div>
+                    <div>Missed opportunities {fmtPlainPct(discoveryAccountabilityDiagnostic?.missedOpportunityRate, 0)}</div>
+                    <div>Novelty conversion {fmtPlainPct(discoveryAccountabilityDiagnostic?.noveltyToProfitConversion, 0)}</div>
                   </div>
-                </div>
-              ))}
-              {!agencyAudits.length ? (
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-8 text-sm text-zinc-500">
-                  Agency traces will appear after strategy decisions are evaluated.
-                </div>
-              ) : null}
-            </div>
-          </SectionShell>
-
-          <SectionShell
-            eyebrow="Resolve"
-            title="Resolve diagnostics"
-            action={<StatusPill tone={resolveTone(resolveDiagnostic)}>{resolveDiagnostic?.decision?.replace(/_/g, " ") ?? "Pending"}</StatusPill>}
-          >
-            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              <MiniMetric label="Decision" value={resolveDiagnostic?.decision?.replace(/_/g, " ") ?? "—"} />
-              <MiniMetric label="Commitment level" value={resolveDiagnostic?.commitmentLevel?.replace(/_/g, " ") ?? "—"} />
-              <MiniMetric label="Resolve score" value={resolveDiagnostic ? `${Math.round(numeric(resolveDiagnostic.resolveScore))}/100` : "—"} />
-              <MiniMetric label="Required score" value={resolveDiagnostic ? `${Math.round(numeric(resolveDiagnostic.requiredScore))}/100` : "—"} />
-              <MiniMetric label="Human review required" value={resolveDiagnostic ? (resolveDiagnostic.humanReviewRequired ? "Yes" : "No") : "—"} />
-            </div>
-            <div className="mt-4 rounded-lg border border-white/10 bg-[#151515] px-4 py-3 text-sm leading-6 text-zinc-400">
-              {resolveDiagnostic?.explanation ?? "Resolve will appear after Agency, Trust, Judgement, Risk, and sizing evidence are evaluated."}
-            </div>
-            <div className="mt-4 grid gap-3 lg:grid-cols-3">
-              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Missing evidence</div>
-                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
-                  {resolveMissingEvidence.slice(0, 4).map((item, index) => (
-                    <div key={`${item}-${index}`}>{item}</div>
-                  ))}
+                  <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
+                    {discoveryAccountabilityDiagnostic?.blockers?.[0] ??
+                      discoveryAccountabilityDiagnostic?.explanation ??
+                      "Discovery accountability will mature as accepted, rejected, and missed opportunities collect outcomes."}
+                  </p>
                 </div>
               </div>
-              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Unlock conditions</div>
-                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
-                  {displayedResolveUnlockConditions.slice(0, 6).map((item, index) => (
-                    <div key={`${item}-${index}`}>{item}</div>
-                  ))}
-                </div>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Invalidation conditions</div>
-                <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
-                  {resolveInvalidationConditions.slice(0, 4).map((item, index) => (
-                    <div key={`${item}-${index}`}>{item}</div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </SectionShell>
+            </SectionShell>
 
-          <SectionShell
-            eyebrow="Candidate progression"
-            title="Candidate progression view"
-            action={<StatusPill tone={leadingDiscoveryCandidate ? "neutral" : "warn"}>{leadingDiscoveryCandidate?.symbol ?? "Pending"}</StatusPill>}
-          >
-            {leadingDiscoveryCandidate ? (
-              <div className="space-y-3">
-                {(leadingDiscoveryCandidate.progression ?? []).map((point: any, index: number) => (
-                  <div key={`${point.stage}-${index}`} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="text-sm font-semibold text-white">{point.stage}</div>
-                      <div className="text-xs text-[#FDD000]">{fmtPlainPct(numeric(point.score), 0)}</div>
+            <SectionShell
+              eyebrow="Wisdom"
+              title="Decision quality and capital learning"
+              action={
+                <StatusPill tone={wisdomTone}>
+                  {wisdomDiagnostic
+                    ? `${Math.round(wisdomDiagnostic.wisdomScore)}/100`
+                    : "Pending"}
+                </StatusPill>
+              }
+            >
+              <div className="grid gap-3 xl:grid-cols-3">
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Wisdom Summary
+                      </div>
+                      <div className="mt-2 text-2xl font-semibold text-white">
+                        {fmtPlainPct(wisdomDiagnostic?.decisionQuality, 0)}
+                      </div>
                     </div>
-                    <div className="mt-1 text-xs leading-5 text-zinc-500">{point.explanation}</div>
+                    <StatusPill tone={wisdomTone}>
+                      {fmtPlainPct(wisdomDiagnostic?.learningConfidence, 0)}
+                    </StatusPill>
+                  </div>
+                  <p className="mt-3 line-clamp-4 text-xs leading-5 text-zinc-500">
+                    {wisdomDiagnostic?.explanation ??
+                      "Wisdom will appear after decisions include alternatives and outcome memory."}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Counterfactual Review
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Actual {fmtPlainPct(wisdomDiagnostic?.counterfactuals?.actualOutcome?.utility, 0)}</div>
+                    <div>Best {fmtPlainPct(wisdomDiagnostic?.counterfactuals?.bestAlternative?.utility, 0)}</div>
+                    <div>Worst {fmtPlainPct(wisdomDiagnostic?.counterfactuals?.worstAlternative?.utility, 0)}</div>
+                    <div>Quality {fmtPlainPct(wisdomDiagnostic?.counterfactuals?.decisionQuality, 0)}</div>
+                    <div>Avoided {fmtPlainPct(wisdomDiagnostic?.counterfactuals?.avoidedLoss, 0)}</div>
+                    <div>Missed {fmtPlainPct(wisdomDiagnostic?.counterfactuals?.missedUpside, 0)}</div>
+                  </div>
+                  <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
+                    {wisdomDiagnostic?.counterfactuals?.explanation ??
+                      "Actual, best alternative, worst alternative, and restriction value are pending."}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Opportunity Economics
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Act {fmtPlainPct(wisdomDiagnostic?.opportunityEconomics?.actionValue, 0)}</div>
+                    <div>Wait {fmtPlainPct(wisdomDiagnostic?.opportunityEconomics?.waitValue, 0)}</div>
+                    <div>Reject {fmtPlainPct(wisdomDiagnostic?.opportunityEconomics?.rejectValue, 0)}</div>
+                    <div>Scale {fmtPlainPct(wisdomDiagnostic?.opportunityEconomics?.scaleValue, 0)}</div>
+                    <div>Urgency {fmtPlainPct(wisdomDiagnostic?.opportunityEconomics?.urgencyCost, 0)}</div>
+                    <div>Cost {fmtPlainPct(wisdomDiagnostic?.opportunityEconomics?.opportunityCost, 0)}</div>
+                  </div>
+                  <p className="mt-3 text-xs leading-5 text-zinc-500">
+                    Best option:{" "}
+                    <span className="font-semibold text-zinc-300">
+                      {wisdomDiagnostic?.opportunityEconomics?.bestOption ?? "Pending"}
+                    </span>
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Discovery Maturity
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {(wisdomDiagnostic?.discoveryMaturity?.lifecycle?.length
+                      ? wisdomDiagnostic.discoveryMaturity.lifecycle
+                      : [
+                          { stage: "Detected", count: 0 },
+                          { stage: "Observed", count: 0 },
+                          { stage: "Confirmed", count: 0 },
+                          { stage: "Repeatable", count: 0 },
+                          { stage: "Trusted", count: 0 },
+                          { stage: "Institutional", count: 0 },
+                        ]
+                    ).map((item) => (
+                      <span
+                        key={item.stage}
+                        className="rounded-md border border-white/10 px-2 py-1 text-[11px] text-zinc-400"
+                      >
+                        {item.stage} {item.count}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Maturity {fmtPlainPct(wisdomDiagnostic?.discoveryMaturity?.maturityScore, 0)}</div>
+                    <div>Recurrence {fmtPlainPct(wisdomDiagnostic?.discoveryMaturity?.recurrenceRate, 0)}</div>
+                    <div>Novelty {fmtPlainPct(wisdomDiagnostic?.discoveryMaturity?.noveltyPersistence, 0)}</div>
+                    <div>Conversion {fmtPlainPct(wisdomDiagnostic?.discoveryMaturity?.conversionRate, 0)}</div>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Agency Effectiveness
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Accuracy {fmtPlainPct(wisdomDiagnostic?.agencyEffectiveness?.agencyAccuracy, 0)}</div>
+                    <div>Intervention {fmtPlainPct(wisdomDiagnostic?.agencyEffectiveness?.interventionValue, 0)}</div>
+                    <div>Approval {fmtPlainPct(wisdomDiagnostic?.agencyEffectiveness?.approvalQuality, 0)}</div>
+                    <div>Rejection {fmtPlainPct(wisdomDiagnostic?.agencyEffectiveness?.rejectionQuality, 0)}</div>
+                  </div>
+                  <div className="mt-3 text-2xl font-semibold text-white">
+                    {fmtPlainPct(wisdomDiagnostic?.agencyEffectiveness?.governanceEffectiveness, 0)}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Portfolio Intelligence
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                    <div>Concentration {fmtPlainPct(wisdomDiagnostic?.portfolioIntelligence?.concentrationRisk, 0)}</div>
+                    <div>Diversification {fmtPlainPct(wisdomDiagnostic?.portfolioIntelligence?.diversificationQuality, 0)}</div>
+                    <div>Capital {fmtPlainPct(wisdomDiagnostic?.portfolioIntelligence?.capitalEfficiency, 0)}</div>
+                    <div>Coverage {fmtPlainPct(wisdomDiagnostic?.portfolioIntelligence?.opportunityCoverage, 0)}</div>
+                    <div>Convexity {fmtPlainPct(wisdomDiagnostic?.portfolioIntelligence?.portfolioConvexity, 0)}</div>
+                    <div>Allocation {fmtPlainPct(wisdomDiagnostic?.portfolioIntelligence?.allocationQuality, 0)}</div>
+                  </div>
+                </div>
+              </div>
+            </SectionShell>
+
+            <SectionShell
+              eyebrow="Evidence Summary"
+              title="Strongest justification"
+              action={
+                <StatusPill tone="neutral">
+                  {executiveIA.evidenceSummary.length} checks
+                </StatusPill>
+              }
+            >
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {executiveIA.evidenceSummary.slice(0, 4).map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                          {item.label}
+                        </div>
+                        <div className="mt-2 text-xl font-semibold tracking-tight text-white">
+                          {item.value}
+                        </div>
+                      </div>
+                      <StatusPill tone={item.tone}>{item.tone}</StatusPill>
+                    </div>
+                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
+                      {item.detail}
+                    </p>
                   </div>
                 ))}
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-5 text-zinc-400">
-                  <span className="font-semibold text-slate-200">Discovery transition</span>
-                  <div className="mt-1 text-zinc-500">
-                    {leadingDiscoveryCandidate.discovery?.lifecycle?.transitionReason ??
-                      discoveryLifecycle?.transitionReason ??
-                      "Lifecycle transition reason is pending."}
+              </div>
+              <AdvancedDisclosure
+                title="All evidence checks"
+                description="Full audit list for reliability, robustness, calibration, readiness, and validation."
+                summary={
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <MiniMetric
+                      label="Visible first"
+                      value="4"
+                      sub="decision-critical checks"
+                      emphasis="quiet"
+                    />
+                    <MiniMetric
+                      label="Total checks"
+                      value={String(executiveIA.evidenceSummary.length)}
+                      sub="available in audit"
+                      emphasis="quiet"
+                    />
+                    <MiniMetric
+                      label="Primary limiter"
+                      value={topCanonicalRestriction?.label ?? "None"}
+                      emphasis="quiet"
+                    />
                   </div>
+                }
+                className="mt-5"
+              >
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {executiveIA.evidenceSummary.map((item) => (
+                    <div
+                      key={`all-${item.id}`}
+                      className="rounded-lg bg-black/25 px-4 py-3 ring-1 ring-white/[0.055]"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                            {item.label}
+                          </div>
+                          <div className="mt-2 text-xl font-semibold tracking-tight text-white">
+                            {item.value}
+                          </div>
+                        </div>
+                        <StatusPill tone={item.tone}>{item.tone}</StatusPill>
+                      </div>
+                      <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
+                        {item.detail}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            ) : (
-              <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-8 text-sm text-zinc-500">
-                Candidate progression is pending.
-              </div>
-            )}
-          </SectionShell>
+              </AdvancedDisclosure>
+            </SectionShell>
 
-          <SectionShell
-            eyebrow="Lifecycle"
-            title="Opportunity lifecycle"
-            action={<StatusPill tone="neutral">{frameworkOpportunities.length + discoveryCandidates.length} observed</StatusPill>}
-          >
-            <div className="space-y-3">
-              {discoveryCandidates.slice(0, 5).map((candidate: any) => (
-                <div key={candidate.symbol ?? candidate.opportunityId} className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-semibold text-white">{candidate.symbol ?? candidate.opportunityId}</div>
-                      <div className="mt-1 text-xs text-zinc-500">
-                        Detected -&gt; Emerging -&gt; Strengthening -&gt; Eligible -&gt; Sized -&gt; Active -&gt; Closed
+            <AdvancedDisclosure
+              title="Decision pipeline"
+              description="Discovery through Resolve remains available without competing with the executive posture."
+              summary={
+                <MiniMetric
+                  label="Pipeline outcome"
+                  value={executiveIA.executiveReasoning.finalDecision}
+                  sub="6 stages"
+                  emphasis="quiet"
+                />
+              }
+            >
+              <SectionShell
+                eyebrow="Decision Pipeline"
+                title="Discovery to Resolve"
+                action={<StatusPill tone="neutral">6 stages</StatusPill>}
+              >
+                <div className="grid gap-3 lg:grid-cols-6">
+                  {executiveIA.decisionPipeline.map((step, index) => (
+                    <div
+                      key={step.stage}
+                      className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                    >
+                      <div className="mb-3 flex items-center justify-between gap-2">
+                        <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                          {index + 1}
+                        </div>
+                        <StatusPill
+                          tone={
+                            step.outcome === "passed"
+                              ? "good"
+                              : step.outcome === "blocked" ||
+                                  step.outcome === "escalated"
+                                ? "bad"
+                                : "warn"
+                          }
+                        >
+                          {step.outcome}
+                        </StatusPill>
+                      </div>
+                      <div className="text-sm font-semibold text-white">
+                        {step.stage}
+                      </div>
+                      <div className="mt-1 text-xs text-[#FDD000]">
+                        {step.status} · {step.confidenceLabel}
+                      </div>
+                      <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
+                        {step.reason}
+                      </p>
+                      <div className="mt-3 border-t border-white/10 pt-3 text-[11px] leading-5 text-zinc-500">
+                        Next: {step.nextRequiredImprovement}
                       </div>
                     </div>
-                    <StatusPill tone={candidate.lifecycle === "Sized" || candidate.lifecycle === "Active" ? "good" : candidate.lifecycle === "Detected" ? "neutral" : "warn"}>
-                      {candidate.lifecycle ?? candidate.type}
-                    </StatusPill>
+                  ))}
+                </div>
+              </SectionShell>
+            </AdvancedDisclosure>
+
+            <section className="grid min-w-0 items-start gap-5 xl:grid-cols-2">
+              <SectionShell
+                eyebrow="Restrictions"
+                title="Why not full size?"
+                action={
+                  <StatusPill
+                    tone={executiveIA.whyNotFullSize.active ? "warn" : "good"}
+                  >
+                    {executiveIA.whyNotFullSize.mode}
+                  </StatusPill>
+                }
+              >
+                <div className="space-y-3">
+                  {(executiveIA.whyNotFullSize.factors.length
+                    ? executiveIA.whyNotFullSize.factors
+                    : [
+                        {
+                          priority: 1,
+                          code: "reduced_size",
+                          label: "No full-size restriction is active",
+                          explanation:
+                            "The current IA layer does not see a reduced, limited, or blocked participation gate.",
+                          unlockCondition:
+                            "Maintain the active trust, safety, reliability, and opportunity thresholds.",
+                        },
+                      ]
+                  ).map((factor) => (
+                    <div
+                      key={`${factor.code}-${factor.priority}`}
+                      className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[#FDD000]/30 bg-[#FDD000]/10 text-xs font-semibold text-[#FDD000]">
+                          {factor.priority}
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-white">
+                            {factor.label}
+                          </div>
+                          <p className="mt-1 text-xs leading-5 text-zinc-500">
+                            {factor.explanation}
+                          </p>
+                          <p className="mt-2 text-xs leading-5 text-zinc-400">
+                            Unlock: {factor.unlockCondition}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Decision Change"
+                title="What would change the decision?"
+                action={<StatusPill tone="neutral">Unlocks</StatusPill>}
+              >
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Increase exposure
+                    </div>
+                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                      {executiveIA.decisionChange.increaseExposure
+                        .slice(0, 4)
+                        .map((item, index) => (
+                          <div key={`${item}-${index}`}>{item}</div>
+                        ))}
+                    </div>
                   </div>
-                  <div className="mt-2 text-xs leading-5 text-zinc-500">{candidate.explanation ?? candidate.evidence?.[0]}</div>
-                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                    <MiniMetric label="Discovery maturity" value={candidate.discovery ? fmtPlainPct(numeric(candidate.discovery.maturity), 0) : "—"} />
-                    <MiniMetric label="Discovery confidence" value={candidate.discovery ? fmtPlainPct(numeric(candidate.discovery.confidence), 0) : "—"} />
-                    <MiniMetric label="Transition reason" value={candidate.discovery?.status?.replace(/_/g, " ") ?? "Pending"} sub={candidate.discovery?.lifecycle?.transitionReason} />
+                  <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Reduce exposure
+                    </div>
+                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                      {executiveIA.decisionChange.reduceExposure
+                        .slice(0, 4)
+                        .map((item, index) => (
+                          <div key={`${item}-${index}`}>{item}</div>
+                        ))}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Invalidate signal
+                    </div>
+                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                      {executiveIA.decisionChange.invalidateSignal
+                        .slice(0, 4)
+                        .map((item, index) => (
+                          <div key={`${item}-${index}`}>{item}</div>
+                        ))}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Watch to limited to normal
+                    </div>
+                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                      {executiveIA.decisionChange.watchToLimitedToNormal.map(
+                        (item, index) => (
+                          <div key={`${item}-${index}`}>{item}</div>
+                        ),
+                      )}
+                    </div>
                   </div>
                 </div>
-              ))}
-              {!discoveryCandidates.length ? (
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-8 text-sm text-zinc-500">
-                  Opportunity lifecycle is pending.
+              </SectionShell>
+            </section>
+
+            <AdvancedDisclosure
+              title="Terminology hierarchy"
+              description="Metric groups and source mapping for audit review."
+              summary={
+                <MiniMetric
+                  label="Concept groups"
+                  value="5"
+                  sub="Trust, Confidence, Reliability, Safety, Opportunity"
+                  emphasis="quiet"
+                />
+              }
+            >
+              <SectionShell
+                eyebrow="Terminology hierarchy"
+                title="Metric groups"
+                action={<StatusPill tone="neutral">5 concepts</StatusPill>}
+              >
+                <div className="grid gap-3 md:grid-cols-5">
+                  {executiveIA.terminologyGroups.map((group) => (
+                    <div
+                      key={group.concept}
+                      className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                    >
+                      <div className="text-sm font-semibold text-white">
+                        {group.concept}
+                      </div>
+                      <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-500">
+                        {group.description}
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {group.metrics.slice(0, 4).map((metric) => (
+                          <div
+                            key={`${group.concept}-${metric.label}`}
+                            className="border-t border-white/10 pt-2 text-xs leading-5"
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <span className="text-zinc-500">
+                                {metric.label}
+                              </span>
+                              <span className="font-semibold text-slate-100">
+                                {metric.value}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-zinc-600">
+                              {metric.source}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </SectionShell>
+            </AdvancedDisclosure>
+          </section>
+        </DashboardGroup>
+
+        <DashboardGroup
+          eyebrow="Market layer"
+          title="Market Health"
+          description="The premium visual anchor shows how live metrics combine into market state, agreement, dominant pressure, and data reliability."
+        >
+          <MarketPerceptionEngine
+            snapshot={marketPerceptionSnapshot}
+            agencyLevel={agencyLevel}
+            className="mb-0"
+          />
+        </DashboardGroup>
+
+        <DashboardGroup
+          eyebrow="Diagnostics layer"
+          title="Signal Diagnostics"
+          description="Advanced engine detail is available on demand, while the main dashboard stays focused on the decision."
+        >
+          <AdvancedDisclosure
+            title="Signal diagnostics and internal engine traces"
+            description="Open this when you need Discovery, Recognition, Belief, Judgement, Agency, Resolve, lifecycle, and trace-level contributors."
+            summary={
+              <div className="grid gap-3 sm:grid-cols-3">
+                <MiniMetric
+                  label="Pipeline"
+                  value={executiveIA.executiveReasoning.finalDecision}
+                  sub={
+                    executiveIA.executiveReasoning.recommendedParticipationMode
+                  }
+                  emphasis="quiet"
+                />
+                <MiniMetric
+                  label="Discovery"
+                  value={
+                    genericDiscovery?.status?.replace(/_/g, " ") ?? "Pending"
+                  }
+                  sub={
+                    genericDiscovery
+                      ? fmtPlainPct(numeric(genericDiscovery.confidence), 0)
+                      : undefined
+                  }
+                  emphasis="quiet"
+                />
+                <MiniMetric
+                  label="Resolve"
+                  value={
+                    resolveDiagnostic?.decision?.replace(/_/g, " ") ?? "Pending"
+                  }
+                  sub={
+                    resolveDiagnostic
+                      ? `${Math.round(numeric(resolveDiagnostic.resolveScore))}/100`
+                      : undefined
+                  }
+                  emphasis="quiet"
+                />
+              </div>
+            }
+          >
+            <section className="grid min-w-0 items-start gap-5 xl:grid-cols-2">
+              <SectionShell
+                eyebrow="Opportunity diagnostics"
+                title="Opportunity density diagnostics"
+                action={
+                  <StatusPill
+                    tone={
+                      adaptiveOpportunityDensityPct > 45
+                        ? "good"
+                        : adaptiveOpportunityDensityPct > 20
+                          ? "warn"
+                          : "neutral"
+                    }
+                  >
+                    {fmtPlainPct(adaptiveOpportunityDensityPct, 0)}
+                  </StatusPill>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <MiniMetric
+                    label="Future density"
+                    value={fmtPlainPct(adaptiveOpportunityDensityPct, 0)}
+                    sub={String(discoveryDensityDiagnostics?.trend ?? "flat")}
+                  />
+                  <MiniMetric
+                    label="Candidate quality"
+                    value={fmtPlainPct(
+                      finiteNumber(discoveryDensityDiagnostics?.quality) ??
+                        numeric(discoveryPipelineDiagnostics.averageScore),
+                      0,
+                    )}
+                    sub={`${numeric(discoveryPipelineDiagnostics.candidateCount)} candidates`}
+                  />
+                  <MiniMetric
+                    label="Conviction"
+                    value={fmtPlainPct(
+                      finiteNumber(discoveryDensityDiagnostics?.confidence) ??
+                        confidence ??
+                        0,
+                      0,
+                    )}
+                    sub={`${numeric(discoveryPipelineDiagnostics.improvingCount)} improving`}
+                  />
+                </div>
+                <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-6 text-zinc-400">
+                  {discoveryDensityDiagnostics?.explanation ??
+                    "Candidate density is being inferred from current signal progression."}
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-5">
+                  <MiniMetric
+                    label="Discovery confidence"
+                    value={
+                      genericDiscovery
+                        ? fmtPlainPct(numeric(genericDiscovery.confidence), 0)
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Maturity"
+                    value={
+                      genericDiscovery
+                        ? fmtPlainPct(numeric(genericDiscovery.maturity), 0)
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Novelty"
+                    value={
+                      genericDiscovery
+                        ? fmtPlainPct(numeric(genericDiscovery.novelty), 0)
+                        : "—"
+                    }
+                    sub={
+                      recognitionClearsDiscoveryNovelty
+                        ? "Recognition rejected"
+                        : undefined
+                    }
+                  />
+                  <MiniMetric
+                    label="Fragility"
+                    value={
+                      genericDiscovery
+                        ? fmtPlainPct(numeric(genericDiscovery.fragility), 0)
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Next step"
+                    value={
+                      genericDiscovery?.status?.replace(/_/g, " ") ?? "Pending"
+                    }
+                    sub={genericDiscovery?.recommendedNextStep}
+                  />
+                </div>
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Recognition"
+                title="Recognition diagnostics"
+                action={
+                  <StatusPill tone={recognitionTone(recognitionDiagnostic)}>
+                    {recognitionDiagnostic?.verdict?.replace(/_/g, " ") ??
+                      "Pending"}
+                  </StatusPill>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-5">
+                  <MiniMetric
+                    label="Recognition score"
+                    value={
+                      recognitionDiagnostic
+                        ? fmtPlainPct(
+                            numeric(recognitionDiagnostic.recognitionScore),
+                            0,
+                          )
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Recurrence"
+                    value={
+                      recognitionDiagnostic
+                        ? fmtPlainPct(
+                            numeric(recognitionDiagnostic.recurrenceConfidence),
+                            0,
+                          )
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Novelty"
+                    value={
+                      recognitionDiagnostic
+                        ? fmtPlainPct(
+                            numeric(recognitionDiagnostic.noveltyScore),
+                            0,
+                          )
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Archetype"
+                    value={
+                      recognitionDiagnostic?.archetype?.replace(/_/g, " ") ??
+                      "—"
+                    }
+                    sub={
+                      recognitionDiagnostic
+                        ? fmtPlainPct(
+                            numeric(recognitionDiagnostic.archetypeConfidence),
+                            0,
+                          )
+                        : undefined
+                    }
+                  />
+                  <MiniMetric
+                    label="Matched samples"
+                    value={
+                      recognitionDiagnostic
+                        ? String(numeric(recognitionDiagnostic.matchedSamples))
+                        : "—"
+                    }
+                    sub={
+                      recognitionDiagnostic
+                        ? `${numeric(recognitionDiagnostic.matchedPositiveOutcomes)} / ${numeric(recognitionDiagnostic.matchedNegativeOutcomes)} outcomes`
+                        : undefined
+                    }
+                  />
+                </div>
+                <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                  <MiniMetric
+                    label="Outcome stability"
+                    value={
+                      recognitionDiagnostic
+                        ? fmtPlainPct(
+                            numeric(recognitionDiagnostic.outcomeStability),
+                            0,
+                          )
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Discovery novelty"
+                    value={
+                      recognitionDiagnostic
+                        ? recognitionDiagnostic.discoveryNoveltyJustified
+                          ? "Justified"
+                          : "Rejected"
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Judgement similarity"
+                    value={
+                      recognitionDiagnostic
+                        ? recognitionDiagnostic.judgementSimilarityJustified
+                          ? "Justified"
+                          : "Rejected"
+                        : "—"
+                    }
+                  />
+                </div>
+                <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-6 text-zinc-400">
+                  {recognitionDiagnostic?.reason ??
+                    "Recognition diagnostics will appear after comparable states are evaluated."}
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                  <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Missing evidence
+                    </div>
+                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                      {recognitionMissingEvidence
+                        .slice(0, 4)
+                        .map((item: string, index: number) => (
+                          <div key={`${item}-${index}`}>{item}</div>
+                        ))}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Invalidation conditions
+                    </div>
+                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                      {recognitionInvalidationConditions
+                        .slice(0, 4)
+                        .map((item: string, index: number) => (
+                          <div key={`${item}-${index}`}>{item}</div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Need detection"
+                title="Need detection diagnostics"
+                action={
+                  <StatusPill
+                    tone={needDiagnostics.length ? "warn" : "neutral"}
+                  >
+                    {needDiagnostics.length || "Stable"}
+                  </StatusPill>
+                }
+              >
+                <div className="space-y-3">
+                  {(needDiagnostics.length
+                    ? needDiagnostics
+                    : [
+                        {
+                          needId: "maintain",
+                          category: "maintain",
+                          severity: 0,
+                          confidence: confidence ?? 0,
+                          explanation:
+                            "No active need is blocking the current objective.",
+                          recommendations: [],
+                        },
+                      ]
+                  )
+                    .slice(0, 4)
+                    .map((need: any) => (
+                      <div
+                        key={need.needId}
+                        className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="text-sm font-semibold text-white">
+                              {String(need.category).replace(/-/g, " ")}
+                            </div>
+                            <div className="mt-1 text-xs leading-5 text-zinc-500">
+                              {need.explanation}
+                            </div>
+                          </div>
+                          <StatusPill
+                            tone={
+                              numeric(need.severity) > 70
+                                ? "bad"
+                                : numeric(need.severity) > 35
+                                  ? "warn"
+                                  : "neutral"
+                            }
+                          >
+                            {fmtPlainPct(numeric(need.severity), 0)}
+                          </StatusPill>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Belief"
+                title="Belief diagnostics"
+                action={
+                  <StatusPill tone={beliefTone(beliefDiagnostic)}>
+                    {beliefDiagnostic?.verdict ?? "Pending"}
+                  </StatusPill>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-5">
+                  <MiniMetric
+                    label="Verdict"
+                    value={beliefDiagnostic?.verdict ?? "—"}
+                  />
+                  <MiniMetric
+                    label="Confidence"
+                    value={
+                      beliefDiagnostic
+                        ? fmtPlainPct(beliefDiagnostic.confidence, 0)
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Trustworthiness"
+                    value={
+                      beliefDiagnostic
+                        ? fmtPlainPct(beliefDiagnostic.trustworthiness, 0)
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Evidence strength"
+                    value={
+                      beliefDiagnostic
+                        ? fmtPlainPct(beliefDiagnostic.evidenceStrength, 0)
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Fragility"
+                    value={
+                      beliefDiagnostic
+                        ? fmtPlainPct(beliefDiagnostic.fragility, 0)
+                        : "—"
+                    }
+                  />
+                </div>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <MiniMetric
+                    label="Evidence agreement"
+                    value={
+                      beliefDiagnostic
+                        ? fmtPlainPct(beliefDiagnostic.evidenceAgreement, 0)
+                        : "—"
+                    }
+                  />
+                  <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                      Reason
+                    </div>
+                    <div className="mt-2 line-clamp-3 text-sm leading-6 text-zinc-300">
+                      {beliefDiagnostic?.reason ??
+                        "Belief evidence will appear after strategy candidates are evaluated."}
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                      Top supporting evidence
+                    </div>
+                    <div className="mt-2 space-y-2">
+                      {(beliefSupportEvidence.length
+                        ? beliefSupportEvidence
+                        : [
+                            {
+                              name: "Pending",
+                              weightedStrength: 0,
+                              reason: "No supporting evidence is selected yet.",
+                            },
+                          ]
+                      ).map((item: any) => (
+                        <div
+                          key={`${item.name}-${item.weightedStrength}`}
+                          className="text-xs leading-5 text-zinc-400"
+                        >
+                          <span className="font-semibold text-slate-200">
+                            {item.name}
+                          </span>
+                          {item.weightedStrength ? (
+                            <span className="text-zinc-500">
+                              {" "}
+                              · {fmtPlainPct(item.weightedStrength, 0)}
+                            </span>
+                          ) : null}
+                          <div className="text-zinc-500">{item.reason}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                      Top contradictory evidence
+                    </div>
+                    <div className="mt-2 space-y-2">
+                      {(beliefContradictoryEvidence.length
+                        ? beliefContradictoryEvidence
+                        : [
+                            {
+                              name: "Pending",
+                              weightedStrength: 0,
+                              reason:
+                                "No contradictory evidence is selected yet.",
+                            },
+                          ]
+                      ).map((item: any) => (
+                        <div
+                          key={`${item.name}-${item.weightedStrength}`}
+                          className="text-xs leading-5 text-zinc-400"
+                        >
+                          <span className="font-semibold text-slate-200">
+                            {item.name}
+                          </span>
+                          {item.weightedStrength ? (
+                            <span className="text-zinc-500">
+                              {" "}
+                              · {fmtPlainPct(item.weightedStrength, 0)}
+                            </span>
+                          ) : null}
+                          <div className="text-zinc-500">{item.reason}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Discovery pipeline"
+                title="Discovery pipeline diagnostics"
+                action={
+                  <StatusPill tone="neutral">
+                    {numeric(discoveryPipelineDiagnostics.candidateCount)}{" "}
+                    candidates
+                  </StatusPill>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-4">
+                  <MiniMetric
+                    label="Eligible"
+                    value={String(
+                      numeric(discoveryPipelineDiagnostics.eligibleCount),
+                    )}
+                  />
+                  <MiniMetric
+                    label="Improving"
+                    value={String(
+                      numeric(discoveryPipelineDiagnostics.improvingCount),
+                    )}
+                  />
+                  <MiniMetric
+                    label="Avg score"
+                    value={fmtPlainPct(
+                      numeric(discoveryPipelineDiagnostics.averageScore),
+                      0,
+                    )}
+                  />
+                  <MiniMetric
+                    label="Velocity"
+                    value={numeric(
+                      discoveryPipelineDiagnostics.averageVelocity,
+                    ).toFixed(1)}
+                  />
+                </div>
+                <div className="mt-4 space-y-2">
+                  {discoveryFindings.slice(0, 3).map((finding: any) => (
+                    <div
+                      key={finding.findingId}
+                      className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-5 text-zinc-400"
+                    >
+                      <span className="font-semibold text-slate-200">
+                        {finding.pattern}
+                      </span>
+                      <span className="text-zinc-500">
+                        {" "}
+                        - support {fmtPlainPct(numeric(finding.support), 0)}
+                      </span>
+                    </div>
+                  ))}
+                  {!discoveryFindings.length ? (
+                    <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-zinc-500">
+                      Explorer findings will appear after recurring outcomes are
+                      observed.
+                    </div>
+                  ) : null}
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                  <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Discovery support
+                    </div>
+                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                      {(discoverySupportEvidence.length
+                        ? discoverySupportEvidence
+                        : [
+                            {
+                              label: "Pending",
+                              contribution: 0,
+                              reason: "Supporting evidence is pending.",
+                            },
+                          ]
+                      )
+                        .slice(0, 4)
+                        .map((item: any, index: number) => (
+                          <div key={`${item.label}-${index}`}>
+                            <span className="font-semibold text-slate-200">
+                              {item.label}
+                            </span>
+                            {item.contribution != null ? (
+                              <span className="text-zinc-500">
+                                {" "}
+                                · {fmtPlainPct(numeric(item.contribution), 0)}
+                              </span>
+                            ) : null}
+                            <div className="text-zinc-500">{item.reason}</div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Discovery contradictions
+                    </div>
+                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                      {(discoveryContradictoryEvidence.length
+                        ? discoveryContradictoryEvidence
+                        : [
+                            {
+                              label: "None reported",
+                              contribution: 0,
+                              reason:
+                                "No contradictory discovery evidence is active.",
+                            },
+                          ]
+                      )
+                        .slice(0, 4)
+                        .map((item: any, index: number) => (
+                          <div key={`${item.label}-${index}`}>
+                            <span className="font-semibold text-slate-200">
+                              {item.label}
+                            </span>
+                            {item.contribution != null ? (
+                              <span className="text-zinc-500">
+                                {" "}
+                                · {fmtPlainPct(numeric(item.contribution), 0)}
+                              </span>
+                            ) : null}
+                            <div className="text-zinc-500">{item.reason}</div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Missing evidence
+                    </div>
+                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                      {(discoveryMissingEvidence.length
+                        ? discoveryMissingEvidence
+                        : ["No missing discovery evidence reported."]
+                      )
+                        .slice(0, 4)
+                        .map((item: string, index: number) => (
+                          <div key={`${item}-${index}`}>{item}</div>
+                        ))}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Invalidation conditions
+                    </div>
+                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                      {(displayedDiscoveryInvalidationConditions.length
+                        ? displayedDiscoveryInvalidationConditions
+                        : ["No discovery invalidation conditions reported."]
+                      )
+                        .slice(0, 4)
+                        .map((item: string, index: number) => (
+                          <div key={`${item}-${index}`}>{item}</div>
+                        ))}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Memory summary
+                    </div>
+                    <div className="mt-3 space-y-1 text-xs leading-5 text-zinc-400">
+                      <div>
+                        Discovery similar outcomes{" "}
+                        {numeric(discoveryMemory?.similarOutcomes)}
+                      </div>
+                      <div>
+                        Discovery success/failure{" "}
+                        {fmtPlainPct(numeric(discoveryMemory?.successRatio), 0)}{" "}
+                        /{" "}
+                        {fmtPlainPct(numeric(discoveryMemory?.failureRatio), 0)}
+                      </div>
+                      <div>
+                        Discovery predictive{" "}
+                        {(
+                          discoveryMemory?.mostPredictiveEvidence ?? ["Pending"]
+                        )
+                          .slice(0, 2)
+                          .join(" · ")}
+                      </div>
+                      <div>
+                        Discovery misleading{" "}
+                        {(
+                          discoveryMemory?.mostMisleadingEvidence ?? ["Pending"]
+                        )
+                          .slice(0, 2)
+                          .join(" · ")}
+                      </div>
+                      {discoveryMemoryRecognitionLine ? (
+                        <div>{discoveryMemoryRecognitionLine}</div>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Sizing"
+                title="Sizing diagnostics"
+                action={
+                  <StatusPill
+                    tone={
+                      dashboardSizing.sizingDecision === "allowed"
+                        ? "good"
+                        : dashboardSizing.sizingDecision === "blocked"
+                          ? "bad"
+                          : "warn"
+                    }
+                  >
+                    {dashboardSizing.sizingMode}
+                  </StatusPill>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <MiniMetric
+                    label="Selected step"
+                    value={fmtPlainPct(
+                      numeric(
+                        (dashboardSizing.sizingResult as any)
+                          ?.selectedLadderPct,
+                      ),
+                      0,
+                    )}
+                  />
+                  <MiniMetric
+                    label="Max exposure"
+                    value={fmtPlainPct(
+                      dashboardSizing.suggestedMaximumExposurePct,
+                    )}
+                  />
+                  <MiniMetric
+                    label="Risk"
+                    value={fmtPlainPct(avgRisk ?? 100, 0)}
+                  />
+                </div>
+                <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
+                  {(dashboardSizing.sizingRationale?.length
+                    ? dashboardSizing.sizingRationale
+                    : dashboardSizing.sizingReasons
+                  )
+                    .slice(0, 3)
+                    .map((reason) => (
+                      <div
+                        key={reason}
+                        className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                      >
+                        {reason}
+                      </div>
+                    ))}
+                </div>
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Survival Memory"
+                title="Survival memory diagnostics"
+                action={
+                  <StatusPill
+                    tone={survivalMemoryTone(survivalMemoryDiagnostic)}
+                  >
+                    {survivalMemoryDiagnostic?.status?.replace(/_/g, " ") ??
+                      "Pending"}
+                  </StatusPill>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <MiniMetric
+                    label="Survival memory status"
+                    value={
+                      survivalMemoryDiagnostic?.status?.replace(/_/g, " ") ??
+                      "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Scar count"
+                    value={
+                      survivalMemoryDiagnostic
+                        ? String(survivalMemoryDiagnostic.scarCount)
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Near-ruin count"
+                    value={
+                      survivalMemoryDiagnostic
+                        ? String(survivalMemoryDiagnostic.nearRuinCount)
+                        : "—"
+                    }
+                  />
+                </div>
+                <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                  <MiniMetric
+                    label="Average survival cost"
+                    value={
+                      survivalMemoryDiagnostic
+                        ? `${Math.round(numeric(survivalMemoryDiagnostic.averageSurvivalCost))}/100`
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Recovery burden"
+                    value={
+                      survivalMemoryDiagnostic
+                        ? `${Math.round(numeric(survivalMemoryDiagnostic.recoveryBurden))}/100`
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Survival confidence"
+                    value={
+                      survivalMemoryDiagnostic
+                        ? `${Math.round(numeric(survivalMemoryDiagnostic.survivalConfidence))}/100`
+                        : "—"
+                    }
+                  />
+                </div>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <MiniMetric
+                    label="Current state similarity to past fragile states"
+                    value={
+                      survivalMemoryDiagnostic
+                        ? fmtPlainPct(
+                            numeric(
+                              survivalMemoryDiagnostic.currentStateSimilarity,
+                            ),
+                            0,
+                          )
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Recovery exposure cap"
+                    value={
+                      survivalMemoryDiagnostic
+                        ? fmtPlainPct(
+                            numeric(survivalMemoryDiagnostic.maxExposurePct),
+                          )
+                        : "—"
+                    }
+                    sub={survivalMemoryDiagnostic?.recommendation?.replace(
+                      /_/g,
+                      " ",
+                    )}
+                  />
+                </div>
+                <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
+                  {survivalWarnings.slice(0, 4).map((warning) => (
+                    <div
+                      key={warning}
+                      className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                    >
+                      {warning}
+                    </div>
+                  ))}
+                </div>
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Recovery"
+                title="Recovery diagnostics"
+                action={
+                  <StatusPill tone={recoveryTone(recoveryDiagnostic)}>
+                    {recoveryDiagnostic?.status?.replace(/-/g, " ") ??
+                      "Pending"}
+                  </StatusPill>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-4">
+                  <MiniMetric
+                    label="Recovery score"
+                    value={
+                      recoveryDiagnostic
+                        ? `${Math.round(numeric(recoveryDiagnostic.recoveryScore))}/100`
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Trusted capacity"
+                    value={
+                      recoveryDiagnostic
+                        ? fmtPlainPct(
+                            numeric(recoveryDiagnostic.trustedCapacity),
+                            0,
+                          )
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Confidence cap lift"
+                    value={
+                      recoveryDiagnostic
+                        ? `+${numeric(recoveryDiagnostic.confidenceCapLift).toFixed(1)}`
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Recommended exposure cap"
+                    value={
+                      recoveryDiagnostic
+                        ? fmtPlainPct(
+                            numeric(recoveryDiagnostic.recommendedExposureCap),
+                          )
+                        : "—"
+                    }
+                    sub={recoveryDiagnostic?.mode?.replace(/-/g, " ")}
+                  />
+                </div>
+                <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
+                  {displayedRecoveryBlockers.slice(0, 3).map((blocker) => (
+                    <div
+                      key={blocker}
+                      className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                    >
+                      {blocker}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 text-xs leading-5 text-zinc-500">
+                  Unlock:{" "}
+                  {displayedRecoveryUnlockConditions.slice(0, 2).join(" ")}
+                </div>
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Signal Trust Governor"
+                title="Participation decision"
+                action={
+                  <StatusPill tone={trustGovernorTone(trustGovernor)}>
+                    {trustGovernor?.participationMode?.replace(/_/g, " ") ??
+                      "Pending"}
+                  </StatusPill>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <MiniMetric
+                    label="Trust score"
+                    value={
+                      trustGovernor
+                        ? fmtPlainPct(trustGovernor.trustScore, 0)
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Confidence cap"
+                    value={
+                      trustGovernor
+                        ? fmtPlainPct(trustGovernor.confidenceCap, 0)
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Trusted exposure"
+                    value={
+                      trustGovernor
+                        ? fmtPlainPct(trustGovernor.maxExposure)
+                        : "—"
+                    }
+                  />
+                </div>
+                <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
+                  {(trustGovernor?.reasons?.length
+                    ? trustGovernor.reasons
+                    : [
+                        "Trust governance will appear after strategy readiness is evaluated.",
+                      ]
+                  )
+                    .slice(0, 3)
+                    .map((reason) => (
+                      <div
+                        key={reason}
+                        className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                      >
+                        {reason}
+                      </div>
+                    ))}
+                </div>
+                {trustGovernor?.unlockCriteria?.length ? (
+                  <div className="mt-3 text-xs leading-5 text-zinc-500">
+                    Unlock: {trustGovernor.unlockCriteria.slice(0, 2).join(" ")}
+                  </div>
+                ) : null}
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Remediation"
+                title="Readiness remediation planner"
+                action={
+                  <StatusPill tone={remediationTone(readinessRemediation)}>
+                    {readinessRemediation?.status?.replace(/_/g, " ") ??
+                      "Pending"}
+                  </StatusPill>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <MiniMetric
+                    label="Top action"
+                    value={readinessRemediation?.topAction ?? "—"}
+                  />
+                  <MiniMetric
+                    label="Expected lift"
+                    value={
+                      readinessRemediation
+                        ? `+${readinessRemediation.totalExpectedTrustLift.toFixed(1)}`
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Execution gate"
+                    value={
+                      readinessRemediation?.executionGate?.replace(/_/g, " ") ??
+                      "—"
+                    }
+                  />
+                </div>
+                <div className="mt-4 space-y-2">
+                  {(readinessRemediation?.steps?.length
+                    ? readinessRemediation.steps
+                    : []
+                  )
+                    .slice(0, 4)
+                    .map((step) => (
+                      <div
+                        key={step.id}
+                        className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="truncate text-sm font-semibold text-white">
+                              {step.title}
+                            </div>
+                            <div className="mt-1 text-xs leading-5 text-zinc-500">
+                              {step.reason}
+                            </div>
+                          </div>
+                          <StatusPill
+                            tone={step.status === "blocked" ? "bad" : "warn"}
+                          >
+                            +{step.expectedTrustLift.toFixed(1)}
+                          </StatusPill>
+                        </div>
+                        <div className="mt-2 text-xs leading-5 text-zinc-500">
+                          {step.evidenceRequired.slice(0, 2).join(" · ")}
+                        </div>
+                      </div>
+                    ))}
+                  {readinessRemediation &&
+                  !readinessRemediation.steps.length ? (
+                    <div className="rounded-lg border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+                      No remediation steps are active.
+                    </div>
+                  ) : null}
+                  {!readinessRemediation ? (
+                    <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-zinc-500">
+                      Remediation diagnostics are pending.
+                    </div>
+                  ) : null}
+                </div>
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Judgement"
+                title="Judgement diagnostics"
+                action={
+                  <StatusPill tone={judgementTone(judgementDiagnostic)}>
+                    {judgementDiagnostic?.status?.replace(/_/g, " ") ??
+                      "Pending"}
+                  </StatusPill>
+                }
+              >
+                <div className="text-sm leading-6 text-zinc-400">
+                  Judgement compares the current state with similar historical
+                  situations and checks whether past outcomes justify trusting
+                  the current signal.
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <MiniMetric
+                    label="Adjusted confidence"
+                    value={
+                      judgementDiagnostic
+                        ? fmtPlainPct(judgementDiagnostic.adjustedConfidence, 0)
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Reliability"
+                    value={
+                      judgementDiagnostic
+                        ? fmtPlainPct(judgementDiagnostic.reliability, 0)
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Similar samples"
+                    value={
+                      judgementDiagnostic
+                        ? String(judgementDiagnostic.similarSampleSize)
+                        : "—"
+                    }
+                  />
+                </div>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <MiniMetric
+                    label="Outcome stability"
+                    value={
+                      judgementDiagnostic
+                        ? fmtPlainPct(judgementDiagnostic.outcomeStability, 0)
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Overfit risk"
+                    value={
+                      judgementDiagnostic
+                        ? fmtPlainPct(judgementDiagnostic.overfitRisk, 0)
+                        : "—"
+                    }
+                  />
+                </div>
+                <div className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">
+                  {(judgementReasons.length
+                    ? judgementReasons
+                    : [
+                        "Judgement will appear after similar historical outcomes are available.",
+                      ]
+                  ).map((reason) => (
+                    <div
+                      key={reason}
+                      className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                    >
+                      {reason}
+                    </div>
+                  ))}
+                </div>
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Agency"
+                title="Agency diagnostics"
+                action={
+                  <StatusPill
+                    tone={
+                      agencyRecommendation === "act"
+                        ? "good"
+                        : agencyRecommendation === "requires_human_review"
+                          ? "bad"
+                          : "warn"
+                    }
+                  >
+                    {agencyRecommendation.replace(/_/g, " ")}
+                  </StatusPill>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <MiniMetric
+                    label="Trust"
+                    value={fmtPlainPct(agencyTrustPct, 0)}
+                    sub={
+                      agencyTrustAdjustmentPct != null &&
+                      agencyTrustAdjustmentPct > 0
+                        ? `+${fmtPlainPct(agencyTrustAdjustmentPct, 0)} reduced-size outcome credit`
+                        : undefined
+                    }
+                  />
+                  <MiniMetric
+                    label="Calibration"
+                    value={
+                      agencyCalibrationHealthPct == null
+                        ? "—"
+                        : fmtPlainPct(agencyCalibrationHealthPct * 100, 0)
+                    }
+                  />
+                  <MiniMetric
+                    label="Blocked"
+                    value={String(agencyBlockedActions)}
+                  />
+                </div>
+                <div className="mt-4 space-y-2">
+                  {agencyAudits.slice(0, 3).map((audit: any) => (
+                    <div
+                      key={audit.traceId ?? audit.symbol}
+                      className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-semibold text-white">
+                            {audit.symbol ?? audit.traceId}
+                          </div>
+                          <div className="mt-1 text-xs text-zinc-500">
+                            {String(audit.decisionKind ?? "decision").replace(
+                              /_/g,
+                              " ",
+                            )}
+                          </div>
+                        </div>
+                        <StatusPill tone={audit.allowed ? "good" : "bad"}>
+                          {audit.allowed ? "Allowed" : "Blocked"}
+                        </StatusPill>
+                      </div>
+                      <div className="mt-2 text-xs leading-5 text-zinc-500">
+                        {audit.rawConfidence != null &&
+                        audit.calibratedConfidence != null
+                          ? `Raw ${fmtPlainPct(audit.rawConfidence, 0)} -> calibrated ${fmtPlainPct(audit.calibratedConfidence, 0)}.`
+                          : ((audit.violations ?? audit.reasons ?? []).slice(
+                              0,
+                              1,
+                            )[0] ??
+                            `Outcome ${audit.outcomeLabel ?? "unknown"}`)}
+                      </div>
+                    </div>
+                  ))}
+                  {!agencyAudits.length ? (
+                    <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-8 text-sm text-zinc-500">
+                      Agency traces will appear after strategy decisions are
+                      evaluated.
+                    </div>
+                  ) : null}
+                </div>
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Resolve"
+                title="Resolve diagnostics"
+                action={
+                  <StatusPill tone={resolveTone(resolveDiagnostic)}>
+                    {resolveDiagnostic?.decision?.replace(/_/g, " ") ??
+                      "Pending"}
+                  </StatusPill>
+                }
+              >
+                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                  <MiniMetric
+                    label="Decision"
+                    value={
+                      resolveDiagnostic?.decision?.replace(/_/g, " ") ?? "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Commitment level"
+                    value={
+                      resolveDiagnostic?.commitmentLevel?.replace(/_/g, " ") ??
+                      "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Resolve score"
+                    value={
+                      resolveDiagnostic
+                        ? `${Math.round(numeric(resolveDiagnostic.resolveScore))}/100`
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Required score"
+                    value={
+                      resolveDiagnostic
+                        ? `${Math.round(numeric(resolveDiagnostic.requiredScore))}/100`
+                        : "—"
+                    }
+                  />
+                  <MiniMetric
+                    label="Human review required"
+                    value={
+                      resolveDiagnostic
+                        ? resolveDiagnostic.humanReviewRequired
+                          ? "Yes"
+                          : "No"
+                        : "—"
+                    }
+                  />
+                </div>
+                <div className="mt-4 rounded-lg border border-white/10 bg-[#151515] px-4 py-3 text-sm leading-6 text-zinc-400">
+                  {resolveDiagnostic?.explanation ??
+                    "Resolve will appear after Agency, Trust, Judgement, Risk, and sizing evidence are evaluated."}
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Missing evidence
+                    </div>
+                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                      {resolveMissingEvidence.slice(0, 4).map((item, index) => (
+                        <div key={`${item}-${index}`}>{item}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Unlock conditions
+                    </div>
+                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                      {displayedResolveUnlockConditions
+                        .slice(0, 6)
+                        .map((item, index) => (
+                          <div key={`${item}-${index}`}>{item}</div>
+                        ))}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                      Invalidation conditions
+                    </div>
+                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
+                      {resolveInvalidationConditions
+                        .slice(0, 4)
+                        .map((item, index) => (
+                          <div key={`${item}-${index}`}>{item}</div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Candidate progression"
+                title="Candidate progression view"
+                action={
+                  <StatusPill
+                    tone={leadingDiscoveryCandidate ? "neutral" : "warn"}
+                  >
+                    {leadingDiscoveryCandidate?.symbol ?? "Pending"}
+                  </StatusPill>
+                }
+              >
+                {leadingDiscoveryCandidate ? (
+                  <div className="space-y-3">
+                    {(leadingDiscoveryCandidate.progression ?? []).map(
+                      (point: any, index: number) => (
+                        <div
+                          key={`${point.stage}-${index}`}
+                          className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="text-sm font-semibold text-white">
+                              {point.stage}
+                            </div>
+                            <div className="text-xs text-[#FDD000]">
+                              {fmtPlainPct(numeric(point.score), 0)}
+                            </div>
+                          </div>
+                          <div className="mt-1 text-xs leading-5 text-zinc-500">
+                            {point.explanation}
+                          </div>
+                        </div>
+                      ),
+                    )}
+                    <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-5 text-zinc-400">
+                      <span className="font-semibold text-slate-200">
+                        Discovery transition
+                      </span>
+                      <div className="mt-1 text-zinc-500">
+                        {leadingDiscoveryCandidate.discovery?.lifecycle
+                          ?.transitionReason ??
+                          discoveryLifecycle?.transitionReason ??
+                          "Lifecycle transition reason is pending."}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-8 text-sm text-zinc-500">
+                    Candidate progression is pending.
+                  </div>
+                )}
+              </SectionShell>
+
+              <SectionShell
+                eyebrow="Lifecycle"
+                title="Opportunity lifecycle"
+                action={
+                  <StatusPill tone="neutral">
+                    {frameworkOpportunities.length + discoveryCandidates.length}{" "}
+                    observed
+                  </StatusPill>
+                }
+              >
+                <div className="space-y-3">
+                  {discoveryCandidates.slice(0, 5).map((candidate: any) => (
+                    <div
+                      key={candidate.symbol ?? candidate.opportunityId}
+                      className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-semibold text-white">
+                            {candidate.symbol ?? candidate.opportunityId}
+                          </div>
+                          <div className="mt-1 text-xs text-zinc-500">
+                            Detected -&gt; Emerging -&gt; Strengthening -&gt;
+                            Eligible -&gt; Sized -&gt; Active -&gt; Closed
+                          </div>
+                        </div>
+                        <StatusPill
+                          tone={
+                            candidate.lifecycle === "Sized" ||
+                            candidate.lifecycle === "Active"
+                              ? "good"
+                              : candidate.lifecycle === "Detected"
+                                ? "neutral"
+                                : "warn"
+                          }
+                        >
+                          {candidate.lifecycle ?? candidate.type}
+                        </StatusPill>
+                      </div>
+                      <div className="mt-2 text-xs leading-5 text-zinc-500">
+                        {candidate.explanation ?? candidate.evidence?.[0]}
+                      </div>
+                      <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                        <MiniMetric
+                          label="Discovery maturity"
+                          value={
+                            candidate.discovery
+                              ? fmtPlainPct(
+                                  numeric(candidate.discovery.maturity),
+                                  0,
+                                )
+                              : "—"
+                          }
+                        />
+                        <MiniMetric
+                          label="Discovery confidence"
+                          value={
+                            candidate.discovery
+                              ? fmtPlainPct(
+                                  numeric(candidate.discovery.confidence),
+                                  0,
+                                )
+                              : "—"
+                          }
+                        />
+                        <MiniMetric
+                          label="Transition reason"
+                          value={
+                            candidate.discovery?.status?.replace(/_/g, " ") ??
+                            "Pending"
+                          }
+                          sub={candidate.discovery?.lifecycle?.transitionReason}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  {!discoveryCandidates.length ? (
+                    <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-8 text-sm text-zinc-500">
+                      Opportunity lifecycle is pending.
+                    </div>
+                  ) : null}
+                </div>
+              </SectionShell>
+            </section>
+          </AdvancedDisclosure>
+        </DashboardGroup>
+
+        <DashboardGroup
+          eyebrow="Allocation layer"
+          title="Opportunity & Allocation"
+          description="Ideas and ledgers stay scannable after the headline decision, with asset-level evidence available in place."
+        >
+          <section className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(420px,0.85fr)]">
+            <SectionShell
+              eyebrow="Investment ideas"
+              title="Top ideas for this market"
+              action={
+                <StatusPill
+                  tone={showingBlockedReviewIdeas ? "warn" : "neutral"}
+                >
+                  {showingBlockedReviewIdeas ? "Review" : "Top 5"}
+                </StatusPill>
+              }
+            >
+              {!hasMarketData ? (
+                <div className="mt-6 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-8 text-sm text-zinc-500">
+                  Loading ideas for the selected market...
+                </div>
+              ) : showingBlockedReviewIdeas ? (
+                <div className="mt-6 rounded-lg border border-[#FDD000]/25 bg-[#FDD000]/10 px-4 py-4 text-sm leading-6 text-[#FDD000]">
+                  {reviewIdeasMessage}
+                </div>
+              ) : !displayedTopOpportunities.length ? (
+                <div className="mt-6 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-8 text-sm text-zinc-500">
+                  No buy ideas pass the current risk checks.
                 </div>
               ) : null}
-            </div>
-          </SectionShell>
-        </section>
 
-        <section className="mb-6 grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(420px,0.85fr)]">
-          <SectionShell
-            eyebrow="Investment ideas"
-            title="Top ideas for this market"
-            action={<StatusPill tone={showingBlockedReviewIdeas ? "warn" : "neutral"}>{showingBlockedReviewIdeas ? "Review" : "Top 5"}</StatusPill>}
-          >
-            {!hasMarketData ? (
-              <div className="mt-6 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-8 text-sm text-zinc-500">
-                Loading ideas for the selected market...
-              </div>
-            ) : showingBlockedReviewIdeas ? (
-              <div className="mt-6 rounded-lg border border-[#FDD000]/25 bg-[#FDD000]/10 px-4 py-4 text-sm leading-6 text-[#FDD000]">
-                {reviewIdeasMessage}
-              </div>
-            ) : !displayedTopOpportunities.length ? (
-              <div className="mt-6 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-8 text-sm text-zinc-500">
-                No buy ideas pass the current risk checks.
-              </div>
-            ) : null}
+              <div className="mt-6 grid gap-3 lg:grid-cols-2">
+                {hasMarketData &&
+                  displayedTopOpportunities.map((stock, index) => {
+                    const ticker = normalizedTicker(stock);
+                    const isSelected = selected
+                      ? normalizedTicker(selected) === ticker
+                      : false;
+                    const isFlipped = isSelected && isSelectedCardFlipped;
 
-            <div className="mt-6 grid gap-3 lg:grid-cols-2">
-              {hasMarketData && displayedTopOpportunities.map((stock, index) => {
-                const ticker = normalizedTicker(stock);
-                const isSelected = selected ? normalizedTicker(selected) === ticker : false;
-                const isFlipped = isSelected && isSelectedCardFlipped;
-
-                return (
-                  <button
-                    key={ticker}
-                    type="button"
-                    onClick={() => {
-                      if (isSelected) {
-                        setIsSelectedCardFlipped((value) => !value);
-                      } else {
-                        setSelectedTicker(ticker);
-                        setIsSelectedCardFlipped(true);
-                      }
-                    }}
-                    className="relative min-h-[320px] rounded-xl text-left outline-none [perspective:1400px]"
-                    aria-label={isSelected && isFlipped ? "Show asset summary" : "Show asset price history"}
-                  >
-                    <div
-                      className={cx(
-                        "relative min-h-[320px] rounded-xl transition-transform duration-500 [transform-style:preserve-3d]",
-                        isFlipped && "[transform:rotateY(180deg)]",
-                      )}
-                    >
-                      <div
-                        className={cx(
-                          "absolute inset-0 rounded-xl border p-4 transition hover:-translate-y-0.5 hover:bg-white/[0.06] [backface-visibility:hidden]",
-                          isSelected
-                            ? "border-[#FDD000]/50 bg-[#FDD000]/10"
-                            : "border-white/10 bg-white/[0.035]",
-                        )}
+                    return (
+                      <button
+                        key={ticker}
+                        type="button"
+                        onClick={() => {
+                          if (isSelected) {
+                            setIsSelectedCardFlipped((value) => !value);
+                          } else {
+                            setSelectedTicker(ticker);
+                            setIsSelectedCardFlipped(true);
+                          }
+                        }}
+                        className="relative min-h-[320px] rounded-xl text-left outline-none [perspective:1400px]"
+                        aria-label={
+                          isSelected && isFlipped
+                            ? "Show asset summary"
+                            : "Show asset price history"
+                        }
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex min-w-0 items-center gap-3">
-                            <InstrumentAvatar instrument={mergeCandidateVisual(stock)} />
-                            <div className="min-w-0">
-                              <div className="truncate text-lg font-semibold text-white">{ticker}</div>
-                              <div className="mt-1 text-[11px] uppercase tracking-[0.16em] text-zinc-500">
-                                #{index + 1} · {dataCoverageLabel(stock)}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="mt-5 space-y-3">
-                          <QualityBar value={stock.setupQuality} label="Quality score" />
-                          <div className="grid grid-cols-2 gap-2 text-xs text-zinc-400">
-                            <div>
-                              <div className="text-zinc-500">Max position</div>
-                              <div className="font-semibold text-slate-100">{fmtPlainPct(stock.suggestedExposure)}</div>
-                            </div>
-                            <div>
-                              <div className="text-zinc-500">Expected change</div>
-                              <div className="font-semibold text-slate-100">{fmtPct(stock.expectedMove)}</div>
-                            </div>
-                            {stock.judgement ? (
-                              <div>
-                                <div className="text-zinc-500">Judgement</div>
-                                <div className="font-semibold text-slate-100">{stock.judgement.status.replace(/_/g, " ")}</div>
-                              </div>
-                            ) : null}
-                          </div>
-                          <p className="line-clamp-3 text-xs leading-5 text-zinc-400">{stock.explanation}</p>
-                          {stock.discovery ? (
-                            <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs leading-5 text-zinc-400">
-                              <span className="font-semibold text-slate-200">Discovery {stock.discovery.status}</span>
-                              <span className="text-zinc-500"> · confidence {fmtPlainPct(numeric(stock.discovery.confidence), 0)}</span>
-                              <div className="line-clamp-2 text-zinc-500">
-                                {stock.discovery.supportingEvidence?.[0]?.label ?? stock.discovery.explanation}
-                              </div>
-                            </div>
-                          ) : null}
-                        </div>
-                      </div>
-
-                      <div className="absolute inset-0 rounded-xl border border-[#FDD000]/40 bg-black p-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                        <div className="mb-4 flex items-center justify-between gap-3">
-                          <div>
-                            <div className="text-[11px] uppercase tracking-[0.18em] text-[#FDD000]">Price history</div>
-                            <div className="mt-1 text-lg font-semibold text-white">{ticker}</div>
-                            <div className="line-clamp-1 text-xs text-zinc-500">{stockName(stock)}</div>
-                          </div>
-                          <StatusPill tone={stock.expectedMove >= 0 ? "good" : "bad"}>{fmtPct(stock.expectedMove)}</StatusPill>
-                        </div>
-
-                        <div className="h-[200px] min-w-0 overflow-hidden">
-                          {selectedHistoryLoading ? (
-                            <div className="grid h-full place-items-center text-xs text-zinc-500">
-                              Loading return path...
-                            </div>
-                          ) : !isFlipped || history.length < 2 ? (
-                            <div className="grid h-full min-h-[210px] place-items-center text-xs text-zinc-500">
-                              {history.length < 2 ? "Price history unavailable" : "Open price history"}
-                            </div>
-                          ) : (
-                            <ResponsiveContainer width="99%" height={210}>
-                              <AreaChart data={asChartData(history)} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-                                <defs>
-                                  <linearGradient id={`institutionalPath-${ticker}`} x1="0" x2="0" y1="0" y2="1">
-                                    <stop offset="0%" stopColor="#FDD000" stopOpacity={0.28} />
-                                    <stop offset="100%" stopColor="#FDD000" stopOpacity={0} />
-                                  </linearGradient>
-                                </defs>
-                                <XAxis dataKey="index" hide />
-                                <YAxis domain={["dataMin", "dataMax"]} hide />
-                                <Tooltip
-                                  content={({ active, payload }) =>
-                                    active && payload?.length ? (
-                                      <div className="rounded-lg border border-white/10 bg-black px-3 py-2 text-xs text-zinc-200 shadow-xl">
-                                        {fmtCurrency(Number(payload[0].payload.price))}
-                                      </div>
-                                    ) : null
-                                  }
-                                />
-                                <Area
-                                  type="monotone"
-                                  dataKey="price"
-                                  stroke="#FDD000"
-                                  strokeWidth={2.5}
-                                  fill={`url(#institutionalPath-${ticker})`}
-                                  dot={false}
-                                  isAnimationActive={false}
-                                />
-                              </AreaChart>
-                            </ResponsiveContainer>
+                        <div
+                          className={cx(
+                            "relative min-h-[320px] rounded-xl transition-transform duration-500 [transform-style:preserve-3d]",
+                            isFlipped && "[transform:rotateY(180deg)]",
                           )}
+                        >
+                          <div
+                            className={cx(
+                              "absolute inset-0 rounded-xl border p-4 transition hover:-translate-y-0.5 hover:bg-white/[0.06] [backface-visibility:hidden]",
+                              isSelected
+                                ? "border-[#FDD000]/50 bg-[#FDD000]/10"
+                                : "border-white/10 bg-white/[0.035]",
+                            )}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex min-w-0 items-center gap-3">
+                                <InstrumentAvatar
+                                  instrument={mergeCandidateVisual(stock)}
+                                />
+                                <div className="min-w-0">
+                                  <div className="truncate text-lg font-semibold text-white">
+                                    {ticker}
+                                  </div>
+                                  <div className="mt-1 text-[11px] uppercase tracking-[0.16em] text-zinc-500">
+                                    #{index + 1} · {dataCoverageLabel(stock)}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="mt-5 space-y-3">
+                              <QualityBar
+                                value={stock.setupQuality}
+                                label="Quality score"
+                              />
+                              <div className="grid grid-cols-2 gap-2 text-xs text-zinc-400">
+                                <div>
+                                  <div className="text-zinc-500">
+                                    Max position
+                                  </div>
+                                  <div className="font-semibold text-slate-100">
+                                    {fmtPlainPct(stock.suggestedExposure)}
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="text-zinc-500">
+                                    Expected change
+                                  </div>
+                                  <div className="font-semibold text-slate-100">
+                                    {fmtPct(stock.expectedMove)}
+                                  </div>
+                                </div>
+                                {stock.judgement ? (
+                                  <div>
+                                    <div className="text-zinc-500">
+                                      Judgement
+                                    </div>
+                                    <div className="font-semibold text-slate-100">
+                                      {stock.judgement.status.replace(
+                                        /_/g,
+                                        " ",
+                                      )}
+                                    </div>
+                                  </div>
+                                ) : null}
+                              </div>
+                              <p className="line-clamp-3 text-xs leading-5 text-zinc-400">
+                                {stock.explanation}
+                              </p>
+                              {stock.discovery ? (
+                                <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs leading-5 text-zinc-400">
+                                  <span className="font-semibold text-slate-200">
+                                    Discovery {stock.discovery.status}
+                                  </span>
+                                  <span className="text-zinc-500">
+                                    {" "}
+                                    · confidence{" "}
+                                    {fmtPlainPct(
+                                      numeric(stock.discovery.confidence),
+                                      0,
+                                    )}
+                                  </span>
+                                  <div className="line-clamp-2 text-zinc-500">
+                                    {stock.discovery.supportingEvidence?.[0]
+                                      ?.label ?? stock.discovery.explanation}
+                                  </div>
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+
+                          <div className="absolute inset-0 rounded-xl border border-[#FDD000]/40 bg-black p-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                            <div className="mb-4 flex items-center justify-between gap-3">
+                              <div>
+                                <div className="text-[11px] uppercase tracking-[0.18em] text-[#FDD000]">
+                                  Price history
+                                </div>
+                                <div className="mt-1 text-lg font-semibold text-white">
+                                  {ticker}
+                                </div>
+                                <div className="line-clamp-1 text-xs text-zinc-500">
+                                  {stockName(stock)}
+                                </div>
+                              </div>
+                              <StatusPill
+                                tone={stock.expectedMove >= 0 ? "good" : "bad"}
+                              >
+                                {fmtPct(stock.expectedMove)}
+                              </StatusPill>
+                            </div>
+
+                            <div className="h-[200px] min-w-0 overflow-hidden">
+                              {selectedHistoryLoading ? (
+                                <div className="grid h-full place-items-center text-xs text-zinc-500">
+                                  Loading return path...
+                                </div>
+                              ) : !isFlipped || history.length < 2 ? (
+                                <div className="grid h-full min-h-[210px] place-items-center text-xs text-zinc-500">
+                                  {history.length < 2
+                                    ? "Price history unavailable"
+                                    : "Open price history"}
+                                </div>
+                              ) : (
+                                <ResponsiveContainer width="99%" height={210}>
+                                  <AreaChart
+                                    data={asChartData(history)}
+                                    margin={{
+                                      top: 8,
+                                      right: 8,
+                                      bottom: 0,
+                                      left: 0,
+                                    }}
+                                  >
+                                    <defs>
+                                      <linearGradient
+                                        id={`institutionalPath-${ticker}`}
+                                        x1="0"
+                                        x2="0"
+                                        y1="0"
+                                        y2="1"
+                                      >
+                                        <stop
+                                          offset="0%"
+                                          stopColor="#FDD000"
+                                          stopOpacity={0.28}
+                                        />
+                                        <stop
+                                          offset="100%"
+                                          stopColor="#FDD000"
+                                          stopOpacity={0}
+                                        />
+                                      </linearGradient>
+                                    </defs>
+                                    <XAxis dataKey="index" hide />
+                                    <YAxis
+                                      domain={["dataMin", "dataMax"]}
+                                      hide
+                                    />
+                                    <Tooltip
+                                      content={({ active, payload }) =>
+                                        active && payload?.length ? (
+                                          <div className="rounded-lg border border-white/10 bg-black px-3 py-2 text-xs text-zinc-200 shadow-xl">
+                                            {fmtCurrency(
+                                              Number(payload[0].payload.price),
+                                            )}
+                                          </div>
+                                        ) : null
+                                      }
+                                    />
+                                    <Area
+                                      type="monotone"
+                                      dataKey="price"
+                                      stroke="#FDD000"
+                                      strokeWidth={2.5}
+                                      fill={`url(#institutionalPath-${ticker})`}
+                                      dot={false}
+                                      isAnimationActive={false}
+                                    />
+                                  </AreaChart>
+                                </ResponsiveContainer>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </SectionShell>
-
-          <div className="rounded-xl border border-white/10 bg-[#0f0f0f] p-5 shadow-2xl shadow-black/20">
-            <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#FDD000]">
-                  Strategy history
-                </div>
-                <h2 className="mt-1 text-xl font-semibold text-white">Past performance snapshot</h2>
-                <div className="mt-3 flex flex-wrap gap-2 text-xs text-zinc-400">
-                  <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1">
-                    Commission bps {backtestSummary?.commissionBps ?? backtestSummary?.commission_bps ?? 0}
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1">
-                    Slippage bps {backtestSummary?.slippageBps ?? backtestSummary?.slippage_bps ?? 0}
-                  </span>
-                </div>
+                      </button>
+                    );
+                  })}
               </div>
-              <StatusPill tone="warn">Needs review</StatusPill>
-            </div>
+            </SectionShell>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
-              <MiniMetric label="Total Return" value={hasBacktestData ? fmtPct(displayedBacktestReturnPct) : "—"} />
-              <MiniMetric
-                label="Annualized Sharpe Ratio"
-                value={
-                  Number.isFinite(Number(displayedBacktestSharpe))
-                    ? Number(displayedBacktestSharpe).toFixed(2)
-                    : "—"
+            <SectionShell
+              eyebrow="Strategy history"
+              title="Past performance snapshot"
+              description="The visible layer keeps only the performance facts that change posture; benchmark and fee context stays one click away."
+              action={<StatusPill tone="warn">Needs review</StatusPill>}
+            >
+              <div className="grid gap-3 sm:grid-cols-2">
+                <MiniMetric
+                  label="Total Return"
+                  value={
+                    hasBacktestData ? fmtPct(displayedBacktestReturnPct) : "—"
+                  }
+                />
+                <MiniMetric
+                  label="Annualized Sharpe Ratio"
+                  value={
+                    Number.isFinite(Number(displayedBacktestSharpe))
+                      ? Number(displayedBacktestSharpe).toFixed(2)
+                      : "—"
+                  }
+                  sub="Return compared with volatility. Higher is better."
+                />
+                <MiniMetric
+                  label="Win Rate"
+                  value={
+                    hasBacktestData
+                      ? fmtPlainPct(displayedBacktestWinRate)
+                      : "—"
+                  }
+                />
+                <MiniMetric
+                  label="Max Drawdown"
+                  value={
+                    Number.isFinite(Number(displayedBacktestMaxDrawdownPct))
+                      ? fmtPlainPct(displayedBacktestMaxDrawdownPct)
+                      : "—"
+                  }
+                />
+              </div>
+
+              <AdvancedDisclosure
+                title="Backtest detail and benchmark context"
+                description="Fee assumptions, holding time, profit factor, and benchmark deltas."
+                summary={
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <MiniMetric
+                      label="Profit factor"
+                      value={
+                        hasBacktestData
+                          ? Number(displayedBacktestProfitFactor).toFixed(2)
+                          : "—"
+                      }
+                      emphasis="quiet"
+                    />
+                    <MiniMetric
+                      label="Excess return"
+                      value={
+                        hasBacktestData
+                          ? fmtPct(
+                              backtestSummary?.excessReturnPct ??
+                                backtestSummary?.excess_return_pct,
+                            )
+                          : "—"
+                      }
+                      sub="vs equal-weight"
+                      emphasis="quiet"
+                    />
+                    <MiniMetric
+                      label="Trades"
+                      value={String(backtestTradeCount || 0)}
+                      sub="closed trades"
+                      emphasis="quiet"
+                    />
+                  </div>
                 }
-                sub="Return compared with volatility. Higher is better."
-              />
-              <MiniMetric
-                label="Average Holding Time"
-                value={hasBacktestData && backtestAverageHoldingDays != null ? `${Math.round(backtestAverageHoldingDays)}d` : "—"}
-                sub={`${backtestTradeCount || 0} closed trades`}
-              />
-              <MiniMetric label="Profit Factor" value={hasBacktestData ? Number(displayedBacktestProfitFactor).toFixed(2) : "—"} />
-              <MiniMetric label="Win Rate" value={hasBacktestData ? fmtPlainPct(displayedBacktestWinRate) : "—"} />
-              <MiniMetric
-                label="Max Drawdown"
-                value={Number.isFinite(Number(displayedBacktestMaxDrawdownPct)) ? fmtPlainPct(displayedBacktestMaxDrawdownPct) : "—"}
-              />
-              <MiniMetric
-                label="Excess Return"
-                value={hasBacktestData ? fmtPct(backtestSummary?.excessReturnPct ?? backtestSummary?.excess_return_pct) : "—"}
-                sub="vs equal-weight benchmark"
-              />
-              <MiniMetric
-                label="Excess Sharpe"
-                value={
-                  hasBacktestData && (backtestSummary?.excessSharpe ?? backtestSummary?.excess_sharpe) != null
-                    ? Number(backtestSummary?.excessSharpe ?? backtestSummary?.excess_sharpe).toFixed(2)
-                    : "—"
-                }
-                sub="vs equal-weight benchmark"
-              />
-            </div>
+                className="mt-5"
+              >
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <MiniMetric
+                    label="Average Holding Time"
+                    value={
+                      hasBacktestData && backtestAverageHoldingDays != null
+                        ? `${Math.round(backtestAverageHoldingDays)}d`
+                        : "—"
+                    }
+                    sub={`${backtestTradeCount || 0} closed trades`}
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Profit Factor"
+                    value={
+                      hasBacktestData
+                        ? Number(displayedBacktestProfitFactor).toFixed(2)
+                        : "—"
+                    }
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Excess Return"
+                    value={
+                      hasBacktestData
+                        ? fmtPct(
+                            backtestSummary?.excessReturnPct ??
+                              backtestSummary?.excess_return_pct,
+                          )
+                        : "—"
+                    }
+                    sub="vs equal-weight benchmark"
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Excess Sharpe"
+                    value={
+                      hasBacktestData &&
+                      (backtestSummary?.excessSharpe ??
+                        backtestSummary?.excess_sharpe) != null
+                        ? Number(
+                            backtestSummary?.excessSharpe ??
+                              backtestSummary?.excess_sharpe,
+                          ).toFixed(2)
+                        : "—"
+                    }
+                    sub="vs equal-weight benchmark"
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Commission bps"
+                    value={String(
+                      backtestSummary?.commissionBps ??
+                        backtestSummary?.commission_bps ??
+                        0,
+                    )}
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Slippage bps"
+                    value={String(
+                      backtestSummary?.slippageBps ??
+                        backtestSummary?.slippage_bps ??
+                        0,
+                    )}
+                    emphasis="quiet"
+                  />
+                </div>
+              </AdvancedDisclosure>
+            </SectionShell>
+          </section>
+        </DashboardGroup>
 
-          </div>
-        </section>
-
-        <section className="mb-6 grid min-w-0 gap-5">
-          <SectionShell
-            eyebrow="Readiness check"
-            title="Can this strategy be tested live?"
-            action={<StatusPill tone={productionTone(confidenceStage)}>{promotionStateDisplay}</StatusPill>}
-          >
+        <DashboardGroup
+          eyebrow="Constraint layer"
+          title="Risk & Constraints"
+          description="Readiness, calibration, execution gates, and review items sit below the decision so constraints explain rather than overwhelm."
+        >
+          <section className="grid min-w-0 gap-5">
+            <SectionShell
+              eyebrow="Readiness check"
+              title="Can this strategy be tested live?"
+              action={
+                <StatusPill tone={productionTone(confidenceStage)}>
+                  {promotionStateDisplay}
+                </StatusPill>
+              }
+            >
               <p className="max-w-4xl text-sm leading-6 text-zinc-400">
-                This check asks a simple question: is the strategy strong enough to test with real-time data? It reviews past results,
-                risk, number of trades, benchmark comparison, and warning flags. It does not guarantee future performance.
+                This check asks a simple question: is the strategy strong enough
+                to test with real-time data? It reviews past results, risk,
+                number of trades, benchmark comparison, and warning flags. It
+                does not guarantee future performance.
               </p>
 
               <div className="mt-5 grid gap-3 md:grid-cols-3">
                 <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Checks passed</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">{passedGateCount}/{confidenceGates.length} gates</div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Checks passed
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-slate-100">
+                    {passedGateCount}/{confidenceGates.length} gates
+                  </div>
                 </div>
                 <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Readiness score</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">{readinessScoreDisplay}/100</div>
-                  <div className="mt-1 text-[11px] text-zinc-500">Higher means more live-test ready</div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Readiness score
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-slate-100">
+                    {readinessScoreDisplay}/100
+                  </div>
+                  <div className="mt-1 text-[11px] text-zinc-500">
+                    Higher means more live-test ready
+                  </div>
                 </div>
                 <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Execution gate</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">{executionGateDisplay}</div>
-                  <div className="mt-1 text-[11px] text-zinc-500">{executionGateDetail}</div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Execution gate
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-slate-100">
+                    {executionGateDisplay}
+                  </div>
+                  <div className="mt-1 text-[11px] text-zinc-500">
+                    {executionGateDetail}
+                  </div>
                 </div>
               </div>
 
               <div className="mt-5 grid gap-3 md:grid-cols-3">
                 <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Review stage</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">{lifecycleStageDisplay}</div>
-                </div>
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Tested trades</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-100">{backtestTradeCount}</div>
-                  <div className="mt-1 text-[11px] text-zinc-500">{backtestSegmentCount ?? 0} test periods</div>
-                </div>
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Similar market match</div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Review stage
+                  </div>
                   <div className="mt-1 text-sm font-semibold text-slate-100">
-                    {regimeConsistencyPct == null ? "Pending" : fmtPlainPct(regimeConsistencyPct, 0)}
+                    {lifecycleStageDisplay}
                   </div>
-                  <div className="mt-1 text-[11px] text-zinc-500">{validationPostureDisplay}</div>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Tested trades
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-slate-100">
+                    {backtestTradeCount}
+                  </div>
+                  <div className="mt-1 text-[11px] text-zinc-500">
+                    {backtestSegmentCount ?? 0} test periods
+                  </div>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                    Similar market match
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-slate-100">
+                    {regimeConsistencyPct == null
+                      ? "Pending"
+                      : fmtPlainPct(regimeConsistencyPct, 0)}
+                  </div>
+                  <div className="mt-1 text-[11px] text-zinc-500">
+                    {validationPostureDisplay}
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-5 rounded-lg border border-white/10 bg-[#151515] p-4">
-                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <div className="text-sm font-semibold text-white">Calibration</div>
-                    <p className="mt-1 max-w-3xl text-xs leading-5 text-zinc-500">
-                      Calibration checks whether past confidence matched actual outcomes. Raw confidence is what the model currently believes.
-                      Calibrated confidence is what the system is willing to trust based on past evidence.
-                    </p>
+              <AdvancedDisclosure
+                title="Calibration internals and readiness gates"
+                description="Raw confidence, calibrated confidence, trustworthiness, and the full gate checklist."
+                summary={
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <MiniMetric
+                      label="Readiness"
+                      value={`${readinessScoreDisplay}/100`}
+                      sub={`${passedGateCount}/${confidenceGates.length} gates`}
+                      emphasis="quiet"
+                    />
+                    <MiniMetric
+                      label="Calibration"
+                      value={calibrationStatusLabel}
+                      sub={topCalibrationMessage}
+                      emphasis="quiet"
+                    />
+                    <MiniMetric
+                      label="Execution gate"
+                      value={executionGateDisplay}
+                      sub={executionGateDetail}
+                      emphasis="quiet"
+                    />
                   </div>
-                  <StatusPill tone={calibrationTone}>
-                    {calibrationStatusLabel}
-                  </StatusPill>
-                </div>
-                <div className="mt-4 grid gap-3 md:grid-cols-4">
-                  <MiniMetric label="Raw confidence" value={rawConfidenceDisplay == null ? "—" : fmtPlainPct(rawConfidenceDisplay, 0)} />
-                  <MiniMetric label="Calibrated confidence" value={calibratedConfidenceDisplay == null ? "—" : fmtPlainPct(calibratedConfidenceDisplay, 0)} />
-                  <MiniMetric label="Trustworthiness" value={calibrationTrustworthinessDisplay == null ? "—" : fmtPlainPct(calibrationTrustworthinessDisplay, 0)} />
-                  <MiniMetric label="Sample size" value={String(calibrationSampleSize)} />
-                </div>
-                <div className="mt-3 text-xs leading-5 text-zinc-500">
-                  {calibrationExplanation}
-                  {calibrationWarnings.length ? ` Warnings: ${calibrationWarnings.slice(0, 3).join(", ")}.` : ""}
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-3 lg:grid-cols-2">
-                {confidenceGates.map((gate) => (
-                  <div
-                    key={gate.key}
-                    className="rounded-lg border border-white/10 bg-[#151515] p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="font-medium text-white">{gate.label}</div>
-                        <div className="mt-1 text-xs leading-5 text-zinc-500">{gate.reason}</div>
+                }
+                className="mt-5"
+              >
+                <div className="rounded-lg border border-white/10 bg-[#151515] p-4">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <div className="text-sm font-semibold text-white">
+                        Calibration
                       </div>
-                      <StatusPill tone={gate.passed ? "good" : gate.severity}>
-                        {gateStatusLabel(gate)}
-                      </StatusPill>
+                      <p className="mt-1 max-w-3xl text-xs leading-5 text-zinc-500">
+                        Calibration checks whether past confidence matched
+                        actual outcomes. Raw confidence is what the model
+                        currently believes. Calibrated confidence is what the
+                        system is willing to trust based on past evidence.
+                      </p>
                     </div>
-                    <div className="mt-3 text-sm font-semibold text-slate-200">
-                      {String(gate.value)
-                        .replace("1 / 3 segments", "1 of 3 required segments")
-                        .replace("8 signals, blocked", "8 live signals, promotion blocked")}
-                    </div>
+                    <StatusPill tone={calibrationTone}>
+                      {calibrationStatusLabel}
+                    </StatusPill>
                   </div>
-                ))}
-              </div>
+                  <div className="mt-4 grid gap-3 md:grid-cols-4">
+                    <MiniMetric
+                      label="Raw confidence"
+                      value={
+                        rawConfidenceDisplay == null
+                          ? "—"
+                          : fmtPlainPct(rawConfidenceDisplay, 0)
+                      }
+                    />
+                    <MiniMetric
+                      label="Calibrated confidence"
+                      value={
+                        calibratedConfidenceDisplay == null
+                          ? "—"
+                          : fmtPlainPct(calibratedConfidenceDisplay, 0)
+                      }
+                    />
+                    <MiniMetric
+                      label="Trustworthiness"
+                      value={
+                        calibrationTrustworthinessDisplay == null
+                          ? "—"
+                          : fmtPlainPct(calibrationTrustworthinessDisplay, 0)
+                      }
+                    />
+                    <MiniMetric
+                      label="Sample size"
+                      value={String(calibrationSampleSize)}
+                    />
+                  </div>
+                  <div className="mt-3 text-xs leading-5 text-zinc-500">
+                    {calibrationExplanation}
+                    {calibrationWarnings.length
+                      ? ` Warnings: ${calibrationWarnings.slice(0, 3).join(", ")}.`
+                      : ""}
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-3 lg:grid-cols-2">
+                  {confidenceGates.map((gate) => (
+                    <div
+                      key={gate.key}
+                      className="rounded-lg border border-white/10 bg-[#151515] p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="font-medium text-white">
+                            {gate.label}
+                          </div>
+                          <div className="mt-1 text-xs leading-5 text-zinc-500">
+                            {gate.reason}
+                          </div>
+                        </div>
+                        <StatusPill tone={gate.passed ? "good" : gate.severity}>
+                          {gateStatusLabel(gate)}
+                        </StatusPill>
+                      </div>
+                      <div className="mt-3 text-sm font-semibold text-slate-200">
+                        {String(gate.value)
+                          .replace("1 / 3 segments", "1 of 3 required segments")
+                          .replace(
+                            "8 signals, blocked",
+                            "8 live signals, promotion blocked",
+                          )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </AdvancedDisclosure>
 
               {failureFlags.length || trustReviewItems.length ? (
                 <div
@@ -5489,12 +8719,16 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                     )}
                   >
                     <AlertTriangle className="h-4 w-4" />
-                    {failureFlags.length ? "Items to fix" : "Trust items to improve"}
+                    {failureFlags.length
+                      ? "Items to fix"
+                      : "Trust items to improve"}
                   </div>
                   <div
                     className={cx(
                       "space-y-1 text-sm",
-                      failureFlags.length ? "text-rose-100/80" : "text-[#FDD000]/85",
+                      failureFlags.length
+                        ? "text-rose-100/80"
+                        : "text-[#FDD000]/85",
                     )}
                   >
                     {trustReviewItems.map((flag) => (
@@ -5504,139 +8738,418 @@ const confidenceGates = applyBackendBlockersToConfidenceGates(
                 </div>
               ) : (
                 <div className="mt-5 rounded-lg border border-emerald-400/25 bg-emerald-500/10 p-4 text-sm text-emerald-100">
-                  No readiness or trust review items are active for the current market view.
+                  No readiness or trust review items are active for the current
+                  market view.
                 </div>
               )}
-          </SectionShell>
-        </section>
+            </SectionShell>
+          </section>
+        </DashboardGroup>
 
-        <section className="mb-6 grid min-w-0 gap-5">
-          <SectionShell
-            eyebrow="Action lists"
-            title="Buy, watch, and sell lists"
-            action={<StatusPill tone="neutral">{hasMarketData ? `${filtered.length} assets` : "Loading"}</StatusPill>}
-          >
-            <div className="my-4">
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search by ticker or asset name..."
-                className="h-11 w-full rounded-lg border border-white/10 bg-black px-4 text-sm text-white outline-none placeholder:text-zinc-600"
-              />
-            </div>
-
-            <div className="grid gap-4 xl:grid-cols-3">
-              {ledgerGroups.map((group) => (
-                <AllocationLedgerTable
-                  key={group.action}
-                  action={group.action}
-                  items={group.items}
-                  selectedTicker={selectedTicker}
-                  onSelectInstrument={(ticker) => {
-                    setSelectedTicker(ticker);
-                    setIsSelectedCardFlipped(true);
-                  }}
-                  loading={loading}
+        <DashboardGroup
+          eyebrow="Opportunity & Allocation"
+          title="Allocation Ledger"
+          description="The full buy, watch, and sell lists remain available after the main posture and top ideas."
+        >
+          <section className="grid min-w-0 gap-5">
+            <SectionShell
+              eyebrow="Action lists"
+              title="Buy, watch, and sell lists"
+              action={
+                <StatusPill tone="neutral">
+                  {hasMarketData ? `${filtered.length} assets` : "Loading"}
+                </StatusPill>
+              }
+            >
+              <div className="my-4">
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search by ticker or asset name..."
+                  className="h-11 w-full rounded-lg border border-white/10 bg-black px-4 text-sm text-white outline-none placeholder:text-zinc-600"
                 />
-              ))}
-            </div>
-          </SectionShell>
-        </section>
+              </div>
 
-        <section className="mb-6 grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]">
-          <SectionShell eyebrow="Market explanation" title="What the market data means">
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-lg border border-white/10 bg-[#151515] p-4">
-                <div className="mb-4 flex items-center gap-3">
-                  <TrendingUp className="h-5 w-5 text-[#FDD000]" />
-                  <div>
-                    <div className="font-semibold text-white">Trend strength</div>
-                    <div className="text-xs text-zinc-500">How clear the price direction looks</div>
-                  </div>
-                </div>
-                {hasMarketData ? <QualityBar value={hasUsableMarketData && avgQuality != null ? avgQuality : 0} /> : null}
-                <p className="mt-4 text-sm leading-6 text-zinc-400">
-                  {hasMarketData
-                    ? `Trend structure is ${semanticMetrics.trend.word.toLowerCase()}. Focus on the clearest ideas.`
-                    : "Trend strength will appear after market data loads."}
-                  {genericDiscovery
-                    ? discoveryRecognitionSentence({
-                      discoveryConfidence: finiteNumber(genericDiscovery.confidence),
-                      discoveryNovelty: finiteNumber(genericDiscovery.novelty),
-                      recognition: recognitionDiagnostic,
-                    })
-                    : ""}
-                </p>
+              <div className="grid gap-4 xl:grid-cols-3">
+                {ledgerGroups.map((group) => (
+                  <AllocationLedgerTable
+                    key={group.action}
+                    action={group.action}
+                    items={group.items}
+                    selectedTicker={selectedTicker}
+                    onSelectInstrument={(ticker) => {
+                      setSelectedTicker(ticker);
+                      setIsSelectedCardFlipped(true);
+                    }}
+                    loading={loading}
+                  />
+                ))}
               </div>
-              <div className="rounded-lg border border-white/10 bg-[#151515] p-4">
-                <div className="mb-4 flex items-center gap-3">
-                  <ShieldCheck className="h-5 w-5 text-[#FDD000]" />
-                  <div>
-                    <div className="font-semibold text-white">Risk control</div>
-                    <div className="text-xs text-zinc-500">How stable the market looks</div>
-                  </div>
-                </div>
-                {hasMarketData ? <QualityBar value={hasUsableMarketData && avgRisk != null ? 100 - avgRisk : 0} /> : null}
-                <p className="mt-4 text-sm leading-6 text-zinc-400">
-                  {hasMarketData
-                    ? `Risk control is ${semanticMetrics.risk.word.toLowerCase()} with ${semanticMetrics.marketHealth.word.toLowerCase()} market health.`
-                    : "Risk control will appear after live data loads."}
-                </p>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-[#151515] p-4">
-                <div className="mb-4 flex items-center gap-3">
-                  <Layers className="h-5 w-5 text-[#FDD000]" />
-                  <div>
-                    <div className="font-semibold text-white">Position durability</div>
-                    <div className="text-xs text-zinc-500">How suitable the ideas are to hold</div>
-                  </div>
-                </div>
-                {hasMarketData ? <QualityBar value={hasProvidedSignals && avgQuality != null && confidence != null ? clamp((avgQuality + confidence) / 2) : 0} /> : null}
-                <p className="mt-4 text-sm leading-6 text-zinc-400">
-                  {hasMarketData
-                    ? `Position durability is ${semanticMetrics.durability.word.toLowerCase()}, based on trend support, confidence, and risk control.`
-                    : "Position durability will appear after investment ideas load."}
-                </p>
-              </div>
-            </div>
-          </SectionShell>
+            </SectionShell>
+          </section>
+        </DashboardGroup>
 
-          <SectionShell className="min-w-0" eyebrow="Risk and opportunity" title="Risk and opportunity map">
-            <div className="h-[200px] min-w-0 overflow-hidden">
-              {surface.length < 2 ? (
-                <div className="grid h-full min-h-[230px] place-items-center text-xs text-zinc-500">
-                  {hasMarketData ? "The map will appear after confirmed signals are available." : "Loading map..."}
-                </div>
-              ) : (
-                <ResponsiveContainer width="99%" height={230}>
-                  <ScatterChart margin={{ top: 8, right: 10, bottom: 8, left: -20 }}>
-                    <CartesianGrid stroke="rgba(148, 163, 184, 0.08)" />
-                    <XAxis type="number" dataKey="x" name="Trend" domain={[0, 100]} tick={{ fill: "#a1a1aa", fontSize: 11 }} />
-                    <YAxis type="number" dataKey="y" name="Risk control" domain={[0, 100]} tick={{ fill: "#a1a1aa", fontSize: 11 }} />
-                    <Tooltip
-                      cursor={{ strokeDasharray: "3 3" }}
-                      content={({ active, payload }) => {
-                        if (!active || !payload?.length) return null;
-                        const row = payload[0].payload as any;
-                        return (
-                          <div className="rounded-lg border border-white/10 bg-black px-4 py-3 text-xs shadow-xl">
-                            <div className="font-semibold text-white">{row.ticker}</div>
-                            <div className="mt-1 text-zinc-400">Quality score {Math.round(row.stock.setupQuality)}/100</div>
-                            <div className="text-zinc-400">Risk level {Math.round(row.stock.riskPressure)}/100</div>
-                          </div>
-                        );
-                      }}
+        <DashboardGroup
+          eyebrow="System layer"
+          title="System Intelligence"
+          description="Market explanations and maps translate internal scores into the operator-facing narrative."
+        >
+          <section className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]">
+            <SectionShell
+              eyebrow="Market explanation"
+              title="What the market data means"
+            >
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="rounded-lg border border-white/10 bg-[#151515] p-4">
+                  <div className="mb-4 flex items-center gap-3">
+                    <TrendingUp className="h-5 w-5 text-[#FDD000]" />
+                    <div>
+                      <div className="font-semibold text-white">
+                        Trend strength
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        How clear the price direction looks
+                      </div>
+                    </div>
+                  </div>
+                  {hasMarketData ? (
+                    <QualityBar
+                      value={
+                        hasUsableMarketData && avgQuality != null
+                          ? avgQuality
+                          : 0
+                      }
                     />
-                    <Scatter data={asChartData(surface)} fill="#FDD000" />
-                  </ScatterChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-          </SectionShell>
-        </section>
+                  ) : null}
+                  <p className="mt-4 text-sm leading-6 text-zinc-400">
+                    {hasMarketData
+                      ? `Trend structure is ${semanticMetrics.trend.word.toLowerCase()}. Focus on the clearest ideas.`
+                      : "Trend strength will appear after market data loads."}
+                    {genericDiscovery
+                      ? discoveryRecognitionSentence({
+                          discoveryConfidence: finiteNumber(
+                            genericDiscovery.confidence,
+                          ),
+                          discoveryNovelty: finiteNumber(
+                            genericDiscovery.novelty,
+                          ),
+                          recognition: recognitionDiagnostic,
+                        })
+                      : ""}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-[#151515] p-4">
+                  <div className="mb-4 flex items-center gap-3">
+                    <ShieldCheck className="h-5 w-5 text-[#FDD000]" />
+                    <div>
+                      <div className="font-semibold text-white">
+                        Risk control
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        How stable the market looks
+                      </div>
+                    </div>
+                  </div>
+                  {hasMarketData ? (
+                    <QualityBar
+                      value={
+                        hasUsableMarketData && avgRisk != null
+                          ? 100 - avgRisk
+                          : 0
+                      }
+                    />
+                  ) : null}
+                  <p className="mt-4 text-sm leading-6 text-zinc-400">
+                    {hasMarketData
+                      ? `Risk control is ${semanticMetrics.risk.word.toLowerCase()} with ${semanticMetrics.marketHealth.word.toLowerCase()} market health.`
+                      : "Risk control will appear after live data loads."}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-[#151515] p-4">
+                  <div className="mb-4 flex items-center gap-3">
+                    <Layers className="h-5 w-5 text-[#FDD000]" />
+                    <div>
+                      <div className="font-semibold text-white">
+                        Position durability
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        How suitable the ideas are to hold
+                      </div>
+                    </div>
+                  </div>
+                  {hasMarketData ? (
+                    <QualityBar
+                      value={
+                        hasProvidedSignals &&
+                        avgQuality != null &&
+                        confidence != null
+                          ? clamp((avgQuality + confidence) / 2)
+                          : 0
+                      }
+                    />
+                  ) : null}
+                  <p className="mt-4 text-sm leading-6 text-zinc-400">
+                    {hasMarketData
+                      ? `Position durability is ${semanticMetrics.durability.word.toLowerCase()}, based on trend support, confidence, and risk control.`
+                      : "Position durability will appear after investment ideas load."}
+                  </p>
+                </div>
+              </div>
+            </SectionShell>
+
+            <SectionShell
+              className="min-w-0"
+              eyebrow="Risk and opportunity"
+              title="Risk and opportunity map"
+            >
+              <div className="h-[200px] min-w-0 overflow-hidden">
+                {surface.length < 2 ? (
+                  <div className="grid h-full min-h-[230px] place-items-center text-xs text-zinc-500">
+                    {hasMarketData
+                      ? "The map will appear after confirmed signals are available."
+                      : "Loading map..."}
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="99%" height={230}>
+                    <ScatterChart
+                      margin={{ top: 8, right: 10, bottom: 8, left: -20 }}
+                    >
+                      <CartesianGrid stroke="rgba(148, 163, 184, 0.08)" />
+                      <XAxis
+                        type="number"
+                        dataKey="x"
+                        name="Trend"
+                        domain={[0, 100]}
+                        tick={{ fill: "#a1a1aa", fontSize: 11 }}
+                      />
+                      <YAxis
+                        type="number"
+                        dataKey="y"
+                        name="Risk control"
+                        domain={[0, 100]}
+                        tick={{ fill: "#a1a1aa", fontSize: 11 }}
+                      />
+                      <Tooltip
+                        cursor={{ strokeDasharray: "3 3" }}
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          const row = payload[0].payload as any;
+                          return (
+                            <div className="rounded-lg border border-white/10 bg-black px-4 py-3 text-xs shadow-xl">
+                              <div className="font-semibold text-white">
+                                {row.ticker}
+                              </div>
+                              <div className="mt-1 text-zinc-400">
+                                Quality score{" "}
+                                {Math.round(row.stock.setupQuality)}/100
+                              </div>
+                              <div className="text-zinc-400">
+                                Risk level {Math.round(row.stock.riskPressure)}
+                                /100
+                              </div>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Scatter data={asChartData(surface)} fill="#FDD000" />
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </SectionShell>
+          </section>
+        </DashboardGroup>
+
+        <DashboardGroup
+          eyebrow="Audit layer"
+          title="Raw/Advanced Details"
+          description="Collapsed audit material for calibration, traceability, raw contributors, overfit diagnostics, and strategy logs."
+        >
+          <div className="grid gap-4 xl:grid-cols-3">
+            <AdvancedDisclosure
+              title="Calibration internals"
+              description="Raw model confidence, calibrated confidence, trustworthiness, sample size, and warnings."
+              summary={
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <MiniMetric
+                    label="Raw confidence"
+                    value={
+                      rawConfidenceDisplay == null
+                        ? "—"
+                        : fmtPlainPct(rawConfidenceDisplay, 0)
+                    }
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Calibrated"
+                    value={
+                      calibratedConfidenceDisplay == null
+                        ? "—"
+                        : fmtPlainPct(calibratedConfidenceDisplay, 0)
+                    }
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Trust"
+                    value={
+                      calibrationTrustworthinessDisplay == null
+                        ? "—"
+                        : fmtPlainPct(calibrationTrustworthinessDisplay, 0)
+                    }
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Samples"
+                    value={String(calibrationSampleSize)}
+                    emphasis="quiet"
+                  />
+                </div>
+              }
+            >
+              <div className="space-y-3 text-sm leading-6 text-zinc-400">
+                <div className="rounded-lg bg-black/25 p-4 ring-1 ring-white/[0.06]">
+                  {calibrationExplanation}
+                </div>
+                <div className="rounded-lg bg-black/25 p-4 ring-1 ring-white/[0.06]">
+                  {topCalibrationMessage}
+                </div>
+                {calibrationWarnings.length ? (
+                  <div className="rounded-lg bg-[#FDD000]/10 p-4 text-[#FDD000] ring-1 ring-[#FDD000]/20">
+                    {calibrationWarnings.slice(0, 6).join(", ")}
+                  </div>
+                ) : null}
+              </div>
+            </AdvancedDisclosure>
+
+            <AdvancedDisclosure
+              title="Trace details and raw contributors"
+              description="Canonical restrictions, decision-change triggers, and terminology source mapping."
+              summary={
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <MiniMetric
+                    label="Restriction"
+                    value={topCanonicalRestriction?.label ?? "None"}
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Unlocks"
+                    value={String(
+                      executiveIA.decisionChange.increaseExposure.length,
+                    )}
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Concepts"
+                    value={String(executiveIA.terminologyGroups.length)}
+                    emphasis="quiet"
+                  />
+                </div>
+              }
+            >
+              <div className="space-y-4">
+                <div className="rounded-lg bg-black/25 p-4 text-sm leading-6 text-zinc-400 ring-1 ring-white/[0.06]">
+                  {executiveRestrictionExplanation}
+                </div>
+                <div className="grid gap-3">
+                  {executiveIA.terminologyGroups.map((group) => (
+                    <div
+                      key={`raw-${group.concept}`}
+                      className="rounded-lg bg-black/25 p-4 ring-1 ring-white/[0.06]"
+                    >
+                      <div className="text-sm font-semibold text-white">
+                        {group.concept}
+                      </div>
+                      <div className="mt-2 grid gap-2 text-xs leading-5 text-zinc-500">
+                        {group.metrics.map((metric) => (
+                          <div
+                            key={`raw-${group.concept}-${metric.label}`}
+                            className="flex items-center justify-between gap-4"
+                          >
+                            <span>{metric.label}</span>
+                            <span className="font-semibold text-zinc-200">
+                              {metric.value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </AdvancedDisclosure>
+
+            <AdvancedDisclosure
+              title="Overfit/risk diagnostics and strategy audit logs"
+              description="Readiness flags, trust review items, robustness, and recent agency audits."
+              summary={
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <MiniMetric
+                    label="Overfit risk"
+                    value={
+                      robustnessOverfitRisk == null
+                        ? "—"
+                        : fmtPlainPct(robustnessOverfitRisk, 0)
+                    }
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Failure flags"
+                    value={String(failureFlags.length)}
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Agency audits"
+                    value={String(agencyAudits.length)}
+                    emphasis="quiet"
+                  />
+                </div>
+              }
+            >
+              <div className="space-y-3 text-sm leading-6 text-zinc-400">
+                {(failureFlags.length
+                  ? failureFlags.map((flag) =>
+                      formatPromotionBlocker(flag, backtestSummary),
+                    )
+                  : ["No active failure flags."]
+                )
+                  .slice(0, 8)
+                  .map((item, index) => (
+                    <div
+                      key={`flag-${item}-${index}`}
+                      className="rounded-lg bg-black/25 p-3 ring-1 ring-white/[0.06]"
+                    >
+                      {item}
+                    </div>
+                  ))}
+                {agencyAudits.slice(0, 5).map((audit: any) => (
+                  <div
+                    key={`audit-${audit.traceId ?? audit.symbol}`}
+                    className="rounded-lg bg-black/25 p-3 ring-1 ring-white/[0.06]"
+                  >
+                    <div className="font-semibold text-white">
+                      {audit.symbol ?? audit.traceId ?? "Audit trace"}
+                    </div>
+                    <div className="mt-1 text-xs text-zinc-500">
+                      {audit.rawConfidence != null &&
+                      audit.calibratedConfidence != null
+                        ? `Raw ${fmtPlainPct(audit.rawConfidence, 0)} -> calibrated ${fmtPlainPct(audit.calibratedConfidence, 0)}.`
+                        : ((audit.violations ?? audit.reasons ?? []).slice(
+                            0,
+                            1,
+                          )[0] ?? `Outcome ${audit.outcomeLabel ?? "unknown"}`)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </AdvancedDisclosure>
+          </div>
+        </DashboardGroup>
 
         <footer className="pb-8 text-center text-xs text-zinc-600">
-          {totalStocks ? `${totalStocks.toLocaleString()} assets covered in this market` : "Coverage loading"} · Last updated {lastSyncedLabel}
+          {totalStocks
+            ? `${totalStocks.toLocaleString()} assets covered in this market`
+            : "Coverage loading"}{" "}
+          · Last updated {lastSyncedLabel}
         </footer>
       </main>
     </div>

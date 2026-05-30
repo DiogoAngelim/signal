@@ -98,7 +98,9 @@ describe("market perception end-to-end integration", () => {
     });
 
     const layerKeys = Object.keys(MARKET_LAYER_DEFINITIONS);
-    const semanticWords = new Set(loadBundledSemanticLexicon().entries.map((entry) => entry.word));
+    const semanticWords = new Set(
+      loadBundledSemanticLexicon().entries.map((entry) => entry.word),
+    );
     const awarenessWords = new Set([
       "Uncalibrated",
       "Review-gated",
@@ -112,20 +114,32 @@ describe("market perception end-to-end integration", () => {
       "Calibration pending",
     ]);
     const auditLayerLabels = Object.values(snapshot.metrics).flatMap((metric) =>
-      metric.layers.map((mapping) => MARKET_LAYER_DEFINITIONS[mapping.layer].label),
+      metric.layers.map(
+        (mapping) => MARKET_LAYER_DEFINITIONS[mapping.layer].label,
+      ),
     );
 
     expect(Object.keys(snapshot.layers).sort()).toEqual(layerKeys.sort());
-    expect(Object.values(snapshot.layers).every((layer) => semanticWords.has(layer.classification) || awarenessWords.has(layer.classification))).toBe(true);
+    expect(
+      Object.values(snapshot.layers).every(
+        (layer) =>
+          semanticWords.has(layer.classification) ||
+          awarenessWords.has(layer.classification),
+      ),
+    ).toBe(true);
     expect(auditLayerLabels).toContain("Survival");
     expect(snapshot.framework?.synchronization.venueState).toBe("LIVE_SYNCED");
     expect(snapshot.reliability?.status).toBe("healthy");
     expect(snapshot.reliability?.confidenceCap).toBe(100);
-    expect(snapshot.framework?.executionReadiness.state).toMatch(/Constructive|Expanding|Extended|Emerging/);
+    expect(snapshot.framework?.executionReadiness.state).toMatch(
+      /Constructive|Expanding|Extended|Emerging/,
+    );
     expect(snapshot.framework?.rankings[0]?.id).toBe("ADX");
     expect(snapshot.framework?.needs.length).toBeGreaterThan(0);
     expect(snapshot.framework?.opportunities.length).toBeGreaterThan(0);
-    expect(snapshot.framework?.opportunityDensity.density).toBeGreaterThanOrEqual(0);
+    expect(
+      snapshot.framework?.opportunityDensity.density,
+    ).toBeGreaterThanOrEqual(0);
   });
 
   it("server-renders the perception component without the metric-layer label crash", async () => {
@@ -137,8 +151,12 @@ describe("market perception end-to-end integration", () => {
       timestamp: 1_800_000_000_000,
     });
 
-    expect(() => renderToString(<MarketPerceptionEngine snapshot={snapshot} />)).not.toThrow();
-    expect(renderToString(<MarketPerceptionEngine snapshot={snapshot} />)).toContain("Metric registry and raw calculation audit");
+    expect(() =>
+      renderToString(<MarketPerceptionEngine snapshot={snapshot} />),
+    ).not.toThrow();
+    expect(
+      renderToString(<MarketPerceptionEngine snapshot={snapshot} />),
+    ).toContain("Raw contributors and calculation audit");
   });
 
   it("surfaces system self-awareness instead of generic resilience when agency diagnostics are present", async () => {
@@ -171,7 +189,9 @@ describe("market perception end-to-end integration", () => {
     expect(html).toContain("Reduced autonomy");
     expect(html).toContain("System self-awareness");
     expect(html).toContain("Agency recommendation: act with reduced size.");
-    expect(html).toContain("System Self-Awareness<!-- --> is the dominant layer at <!-- -->96<!-- -->/100.");
+    expect(html).toContain(
+      "System Self-Awareness is leading the market state at 96/100",
+    );
     expect(html).toContain("Agency-informed self-awareness 96/100.");
   });
 
@@ -184,13 +204,18 @@ describe("market perception end-to-end integration", () => {
     };
     const engine = new MarketStateEngine(createDefaultMetricRegistry());
     engine.setSource(robustSource);
-    const snapshot = await engine.ingest(buildMarketPerceptionMetrics(robustSource), {
-      market: "BINANCE",
-      timeframe: "live",
-      timestamp: 1_800_000_000_000,
-    });
+    const snapshot = await engine.ingest(
+      buildMarketPerceptionMetrics(robustSource),
+      {
+        market: "BINANCE",
+        timeframe: "live",
+        timestamp: 1_800_000_000_000,
+      },
+    );
     const overfitMetric = snapshot.metrics.overfitRisk;
-    const overfitContributor = snapshot.layers.white.contributors.find((item) => item.metricKey === "overfitRisk");
+    const overfitContributor = snapshot.layers.white.contributors.find(
+      (item) => item.metricKey === "overfitRisk",
+    );
     const html = renderToString(<MarketPerceptionEngine snapshot={snapshot} />);
 
     expect(overfitMetric.raw).toBe(0);
@@ -215,16 +240,27 @@ describe("market perception end-to-end integration", () => {
     const engine = new MarketStateEngine(createDefaultMetricRegistry());
     engine.setSource(calibratedSource);
 
-    const snapshot = await engine.ingest(buildMarketPerceptionMetrics(calibratedSource), {
-      market: "BINANCE",
-      timeframe: "live",
-      timestamp: 1_800_000_000_000,
-    });
+    const snapshot = await engine.ingest(
+      buildMarketPerceptionMetrics(calibratedSource),
+      {
+        market: "BINANCE",
+        timeframe: "live",
+        timestamp: 1_800_000_000_000,
+      },
+    );
 
     expect(snapshot.framework?.calibration?.sampleSize).toBe(42);
-    expect(snapshot.framework?.calibration?.warnings).toContain("poor calibration");
-    expect(snapshot.metrics.calibrationQuality.detail).toContain("raw confidence 90%");
-    expect(snapshot.layers.white.contributors.some((item) => item.metricKey === "memoryDepth")).toBe(true);
+    expect(snapshot.framework?.calibration?.warnings).toContain(
+      "poor calibration",
+    );
+    expect(snapshot.metrics.calibrationQuality.detail).toContain(
+      "raw confidence 90%",
+    );
+    expect(
+      snapshot.layers.white.contributors.some(
+        (item) => item.metricKey === "memoryDepth",
+      ),
+    ).toBe(true);
     expect(snapshot.layers.white.meaning).toContain("calibrated confidence");
   });
 });

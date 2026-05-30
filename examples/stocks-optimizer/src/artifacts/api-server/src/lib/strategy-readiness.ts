@@ -27,6 +27,10 @@ import {
   evaluateTradeCandidateBelief,
   type TradeBeliefDiagnostic,
 } from "./belief-adapter";
+import {
+  buildStockExecutiveArchitecture,
+  type StockExecutiveArchitecture,
+} from "./executive-signal-adapter";
 import { sizeFinancialExposure, type FinancialExposureViabilityInput } from "./financial-sizing";
 import {
   evaluateStockJudgement,
@@ -135,7 +139,7 @@ type StrategyReadinessInput = {
   survivalMemory?: StockSurvivalMemoryDiagnostic;
 };
 
-type StrategySignalInput = {
+export type StrategySignalInput = {
   readiness: StrategyReadinessResult;
   symbol?: string;
   market?: string;
@@ -175,6 +179,12 @@ export type StrategySignalDecision = {
   sizingResult: SizingResult;
   trustGovernor?: TrustGovernorResult;
   recovery?: RecoveryResult;
+  executionQuality?: StockExecutiveArchitecture["executionQuality"];
+  counterfactual?: StockExecutiveArchitecture["counterfactual"];
+  discoveryAccountability?: StockExecutiveArchitecture["discoveryAccountability"];
+  wisdom?: StockExecutiveArchitecture["wisdom"];
+  executiveDecision?: StockExecutiveArchitecture["executiveDecision"];
+  decisionStates?: StockExecutiveArchitecture["decisionStates"];
   viabilityVerdict?: ViabilityVerdict;
   viabilityReason?: string;
   viabilityWarnings?: string[];
@@ -1513,6 +1523,13 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
     viabilityResult: financialSizing.viabilityResult,
     survivalMemory,
   };
+  const withExecutiveArchitecture = (decision: StrategySignalDecision): StrategySignalDecision => ({
+    ...decision,
+    ...buildStockExecutiveArchitecture({
+      signalInput: input,
+      decision,
+    }),
+  });
 
   if (sellRequested) {
     const sellSizingReasons = unique([
@@ -1533,7 +1550,7 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
       ...financialSizing.sizingReasons,
     ]);
 
-    return {
+    return withExecutiveArchitecture({
       signalAction: "Sell",
       allocationAction: "Sell",
       signalStatus: "risk-exit",
@@ -1557,11 +1574,11 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
         benchmarkMultiplier,
         liveSignalMultiplier,
       },
-    };
+    });
   }
 
   if (!buyEligible || suggestedExposure <= 0) {
-    return {
+    return withExecutiveArchitecture({
       signalAction: "Hold",
       allocationAction: commitmentBlocked ? "Blocked" : "Watch",
       signalStatus: commitmentBlocked ? "blocked" : "watch",
@@ -1602,10 +1619,10 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
         benchmarkMultiplier,
         liveSignalMultiplier,
       },
-    };
+    });
   }
 
-  return {
+  return withExecutiveArchitecture({
     signalAction: "Buy",
     allocationAction: "Buy",
     signalStatus: "confirmed",
@@ -1628,7 +1645,7 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
       benchmarkMultiplier,
       liveSignalMultiplier,
     },
-  };
+  });
 }
 
 function hasJudgementEvidence(input: StrategySignalInput) {

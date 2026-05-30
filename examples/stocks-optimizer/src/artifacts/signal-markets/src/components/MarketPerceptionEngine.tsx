@@ -49,7 +49,9 @@ function clamp(value: number, min = 0, max = 100) {
 
 function mean(values: number[]) {
   const finite = values.filter((value) => Number.isFinite(value));
-  return finite.length ? finite.reduce((sum, value) => sum + value, 0) / finite.length : 0;
+  return finite.length
+    ? finite.reduce((sum, value) => sum + value, 0) / finite.length
+    : 0;
 }
 
 function stdev(values: number[]) {
@@ -70,7 +72,8 @@ function formatRaw(value: number | string | null, unit?: string) {
   return value;
 }
 
-type LayerContributor = MarketStateSnapshot["layers"][MarketLayerKey]["contributors"][number];
+type LayerContributor =
+  MarketStateSnapshot["layers"][MarketLayerKey]["contributors"][number];
 type DisplayMetric = MarketStateSnapshot["metrics"][string];
 
 function numericRaw(value: number | string | null) {
@@ -93,9 +96,14 @@ function displayMetricScore(metric: DisplayMetric) {
   return metric.score;
 }
 
-function formatMetricLayers(layers: MarketStateSnapshot["metrics"][string]["layers"]) {
+function formatMetricLayers(
+  layers: MarketStateSnapshot["metrics"][string]["layers"],
+) {
   return layers
-    .map((mapping) => MARKET_LAYER_DEFINITIONS[mapping.layer]?.label ?? String(mapping.layer))
+    .map(
+      (mapping) =>
+        MARKET_LAYER_DEFINITIONS[mapping.layer]?.label ?? String(mapping.layer),
+    )
     .join(", ");
 }
 
@@ -116,23 +124,32 @@ function ratioOrPctToPct(value: unknown) {
 
 function hasAgencyLevel(value: MarketPerceptionEngineProps["agencyLevel"]) {
   if (!value) return false;
-  return Boolean(value.recommendation) || Number.isFinite(Number(value.trustPct));
+  return (
+    Boolean(value.recommendation) || Number.isFinite(Number(value.trustPct))
+  );
 }
 
-function agencyClassification(value: NonNullable<MarketPerceptionEngineProps["agencyLevel"]>) {
+function agencyClassification(
+  value: NonNullable<MarketPerceptionEngineProps["agencyLevel"]>,
+) {
   const recommendation = normalizeAgencyRecommendation(value.recommendation);
   const blockedActions = Number(value.blockedActions ?? 0);
 
-  if (blockedActions > 0 || /blocked|block/.test(recommendation)) return "Commitment blocked";
+  if (blockedActions > 0 || /blocked|block/.test(recommendation))
+    return "Commitment blocked";
   if (/human review|review/.test(recommendation)) return "Human review";
   if (/reduced|small|limited/.test(recommendation)) return "Reduced autonomy";
   if (/act|increase|participat/.test(recommendation)) return "Autonomy ready";
-  if (/wait|maintain|hold|observe/.test(recommendation)) return "Observation only";
+  if (/wait|maintain|hold|observe/.test(recommendation))
+    return "Observation only";
   return "Calibration pending";
 }
 
-function agencyMeaning(value: NonNullable<MarketPerceptionEngineProps["agencyLevel"]>) {
-  const recommendation = normalizeAgencyRecommendation(value.recommendation) || "pending";
+function agencyMeaning(
+  value: NonNullable<MarketPerceptionEngineProps["agencyLevel"]>,
+) {
+  const recommendation =
+    normalizeAgencyRecommendation(value.recommendation) || "pending";
   const trust = Number(value.trustPct);
   const traceCount = Number(value.traceCount ?? 0);
   const blockedActions = Number(value.blockedActions ?? 0);
@@ -144,7 +161,8 @@ function agencyMeaning(value: NonNullable<MarketPerceptionEngineProps["agencyLev
   if (traceCount > 0) parts.push(`Traces ${Math.round(traceCount)}.`);
   parts.push(`Blocked actions ${Math.max(0, blockedActions)}.`);
   parts.push(`Missing outcomes ${Math.max(0, missingOutcomes)}.`);
-  if (overfitRiskPct != null) parts.push(`Agency overfit risk ${Math.round(overfitRiskPct)}%.`);
+  if (overfitRiskPct != null)
+    parts.push(`Agency overfit risk ${Math.round(overfitRiskPct)}%.`);
 
   return parts.join(" ");
 }
@@ -158,23 +176,37 @@ function agencyRecommendationScore(recommendation: string) {
   return 55;
 }
 
-function agencySelfAwarenessScore(value: NonNullable<MarketPerceptionEngineProps["agencyLevel"]>) {
+function agencySelfAwarenessScore(
+  value: NonNullable<MarketPerceptionEngineProps["agencyLevel"]>,
+) {
   const recommendation = normalizeAgencyRecommendation(value.recommendation);
   const trustPct = ratioOrPctToPct(value.trustPct) ?? 0;
   const traceCount = Math.max(0, Number(value.traceCount ?? 0));
   const allowedActions = Math.max(0, Number(value.allowedActions ?? 0));
   const blockedActions = Math.max(0, Number(value.blockedActions ?? 0));
   const missingOutcomes = Math.max(0, Number(value.missingOutcomes ?? 0));
-  const actionCount = Math.max(traceCount, allowedActions + blockedActions, missingOutcomes);
+  const actionCount = Math.max(
+    traceCount,
+    allowedActions + blockedActions,
+    missingOutcomes,
+  );
   const dataReliabilityPct =
     ratioOrPctToPct(value.dataReliabilityPct) ??
     (actionCount > 0 ? clamp(100 - (missingOutcomes / actionCount) * 100) : 0);
-  const calibrationHealthPct = ratioOrPctToPct(value.calibrationHealthPct) ?? trustPct;
+  const calibrationHealthPct =
+    ratioOrPctToPct(value.calibrationHealthPct) ?? trustPct;
   const agencyOverfitRiskPct = ratioOrPctToPct(value.overfitRiskPct);
-  const outcomeCoveragePct = actionCount > 0 ? clamp(100 - (missingOutcomes / actionCount) * 100) : dataReliabilityPct;
-  const policyClearancePct = actionCount > 0 ? clamp(100 - (blockedActions / actionCount) * 100) : 100;
+  const outcomeCoveragePct =
+    actionCount > 0
+      ? clamp(100 - (missingOutcomes / actionCount) * 100)
+      : dataReliabilityPct;
+  const policyClearancePct =
+    actionCount > 0 ? clamp(100 - (blockedActions / actionCount) * 100) : 100;
   const traceCoveragePct = clamp((traceCount / 3) * 100);
-  const overfitControlPct = agencyOverfitRiskPct == null ? Math.max(55, trustPct) : clamp(100 - agencyOverfitRiskPct);
+  const overfitControlPct =
+    agencyOverfitRiskPct == null
+      ? Math.max(55, trustPct)
+      : clamp(100 - agencyOverfitRiskPct);
   const recommendationPct = agencyRecommendationScore(recommendation);
 
   const weightedScore = clamp(
@@ -187,16 +219,26 @@ function agencySelfAwarenessScore(value: NonNullable<MarketPerceptionEngineProps
       trustPct * 0.08 +
       recommendationPct * 0.06,
   );
-  const completeAgencyCoverage = traceCount >= 3 && missingOutcomes === 0 && blockedActions === 0;
+  const completeAgencyCoverage =
+    traceCount >= 3 && missingOutcomes === 0 && blockedActions === 0;
 
-  if (completeAgencyCoverage && /act|reduced|small|limited|increase|participat/.test(recommendation)) {
-    return Math.max(weightedScore, /reduced|small|limited/.test(recommendation) ? 92 : 96);
+  if (
+    completeAgencyCoverage &&
+    /act|reduced|small|limited|increase|participat/.test(recommendation)
+  ) {
+    return Math.max(
+      weightedScore,
+      /reduced|small|limited/.test(recommendation) ? 92 : 96,
+    );
   }
 
   return weightedScore;
 }
 
-function agencySynthesisDetail(value: NonNullable<MarketPerceptionEngineProps["agencyLevel"]>, score: number) {
+function agencySynthesisDetail(
+  value: NonNullable<MarketPerceptionEngineProps["agencyLevel"]>,
+  score: number,
+) {
   const dataReliability = ratioOrPctToPct(value.dataReliabilityPct);
   const calibration = ratioOrPctToPct(value.calibrationHealthPct);
   const overfitRisk = ratioOrPctToPct(value.overfitRiskPct);
@@ -206,11 +248,17 @@ function agencySynthesisDetail(value: NonNullable<MarketPerceptionEngineProps["a
   const missingOutcomes = Math.max(0, Number(value.missingOutcomes ?? 0));
   const parts = [`Agency-informed self-awareness ${Math.round(score)}/100.`];
 
-  if (traceCount > 0) parts.push(`Trace coverage ${Math.round(traceCount)} decisions.`);
-  if (dataReliability != null) parts.push(`Data reliability ${Math.round(dataReliability)}%.`);
-  if (calibration != null) parts.push(`Calibration health ${Math.round(calibration)}%.`);
-  if (overfitRisk != null) parts.push(`Agency overfit risk ${Math.round(overfitRisk)}%.`);
-  parts.push(`Allowed ${Math.round(allowedActions)}, blocked ${Math.round(blockedActions)}, missing outcomes ${Math.round(missingOutcomes)}.`);
+  if (traceCount > 0)
+    parts.push(`Trace coverage ${Math.round(traceCount)} decisions.`);
+  if (dataReliability != null)
+    parts.push(`Data reliability ${Math.round(dataReliability)}%.`);
+  if (calibration != null)
+    parts.push(`Calibration health ${Math.round(calibration)}%.`);
+  if (overfitRisk != null)
+    parts.push(`Agency overfit risk ${Math.round(overfitRisk)}%.`);
+  parts.push(
+    `Allowed ${Math.round(allowedActions)}, blocked ${Math.round(blockedActions)}, missing outcomes ${Math.round(missingOutcomes)}.`,
+  );
 
   return parts.join(" ");
 }
@@ -245,7 +293,8 @@ function agencyMetricState(
   return {
     key: "agencyModuleSelfAwareness",
     label: "Agency-informed self-awareness",
-    description: "System self-awareness synthesized from agency self-diagnosis, trace coverage, policy clearance, and outcome coverage.",
+    description:
+      "System self-awareness synthesized from agency self-diagnosis, trace coverage, policy clearance, and outcome coverage.",
     raw: score,
     unit: "%",
     score,
@@ -292,9 +341,24 @@ function recomputeWithWhiteLayer(
     layers,
     timeframes: {
       ...snapshot.timeframes,
-      intraday: timeframe("intraday", [layers.red.score, layers.orange.score, layers.blue.score, layers.white.score]),
-      swing: timeframe("swing", [layers.yellow.score, layers.green.score, layers.indigo.score, layers.white.score]),
-      macro: timeframe("macro", [layers.violet.score, layers.red.score, layers.green.score, layers.white.score]),
+      intraday: timeframe("intraday", [
+        layers.red.score,
+        layers.orange.score,
+        layers.blue.score,
+        layers.white.score,
+      ]),
+      swing: timeframe("swing", [
+        layers.yellow.score,
+        layers.green.score,
+        layers.indigo.score,
+        layers.white.score,
+      ]),
+      macro: timeframe("macro", [
+        layers.violet.score,
+        layers.red.score,
+        layers.green.score,
+        layers.white.score,
+      ]),
     },
   };
 }
@@ -314,7 +378,11 @@ function applyAgencyLevel(
     meaning: agencyMeaning(agencyLevel!),
     score: displayScore,
     classification: agencyClassification(agencyLevel!),
-    contributors: withAgencySynthesisContributor(whiteLayer.contributors, agencyLevel!, agencyScore),
+    contributors: withAgencySynthesisContributor(
+      whiteLayer.contributors,
+      agencyLevel!,
+      agencyScore,
+    ),
   });
 
   return {
@@ -425,9 +493,22 @@ function drawAura(
   ctx.globalCompositeOperation = "source-over";
 
   const violet = currentScores.violet / 100;
-  const background = ctx.createRadialGradient(cx, cy, radius * 0.06, cx, cy, radius * 1.45);
-  background.addColorStop(0, `rgba(248, 250, 252, ${0.06 + currentScores.white / 1400})`);
-  background.addColorStop(0.24, `rgba(55, 165, 255, ${0.06 + currentScores.blue / 1200})`);
+  const background = ctx.createRadialGradient(
+    cx,
+    cy,
+    radius * 0.06,
+    cx,
+    cy,
+    radius * 1.45,
+  );
+  background.addColorStop(
+    0,
+    `rgba(248, 250, 252, ${0.06 + currentScores.white / 1400})`,
+  );
+  background.addColorStop(
+    0.24,
+    `rgba(55, 165, 255, ${0.06 + currentScores.blue / 1200})`,
+  );
   background.addColorStop(0.58, `rgba(103, 85, 255, ${0.05 + violet * 0.16})`);
   background.addColorStop(1, "rgba(0, 0, 0, 0)");
   ctx.fillStyle = background;
@@ -479,7 +560,8 @@ function drawAura(
   if (red > 46) {
     const fractureCount = Math.floor(5 + red / 9);
     for (let index = 0; index < fractureCount; index += 1) {
-      const angle = (index / fractureCount) * Math.PI * 2 + wave(index, time, 3) * 0.22;
+      const angle =
+        (index / fractureCount) * Math.PI * 2 + wave(index, time, 3) * 0.22;
       const start = radius * (0.62 + (index % 3) * 0.08);
       const end = radius * (0.86 + red / 650);
       ctx.beginPath();
@@ -488,7 +570,10 @@ function drawAura(
         cx + Math.cos(angle + wave(angle, time, 9) * 0.08) * end,
         cy + Math.sin(angle + wave(angle, time, 9) * 0.08) * end,
       );
-      ctx.strokeStyle = colorWithAlpha(MARKET_LAYER_DEFINITIONS.red.color, (red - 35) / 170);
+      ctx.strokeStyle = colorWithAlpha(
+        MARKET_LAYER_DEFINITIONS.red.color,
+        (red - 35) / 170,
+      );
       ctx.lineWidth = 1 + red / 42;
       ctx.stroke();
     }
@@ -496,16 +581,29 @@ function drawAura(
 
   const blue = currentScores.blue;
   for (let index = 0; index < 5; index += 1) {
-    const ripple = ((time * (0.1 + blue / 900) + index / 5) % 1) * radius * 1.12;
+    const ripple =
+      ((time * (0.1 + blue / 900) + index / 5) % 1) * radius * 1.12;
     const alpha = (1 - ripple / (radius * 1.12)) * (0.08 + blue / 360);
     if (blue > 45) {
       ctx.beginPath();
       ctx.arc(cx, cy, Math.max(12, ripple), 0, Math.PI * 2);
-      ctx.strokeStyle = colorWithAlpha(MARKET_LAYER_DEFINITIONS.blue.color, alpha);
+      ctx.strokeStyle = colorWithAlpha(
+        MARKET_LAYER_DEFINITIONS.blue.color,
+        alpha,
+      );
       ctx.lineWidth = 1 + blue / 80;
       ctx.stroke();
     } else {
-      drawBrokenArc(ctx, cx, cy, Math.max(12, ripple), MARKET_LAYER_DEFINITIONS.blue.color, alpha, time, 16);
+      drawBrokenArc(
+        ctx,
+        cx,
+        cy,
+        Math.max(12, ripple),
+        MARKET_LAYER_DEFINITIONS.blue.color,
+        alpha,
+        time,
+        16,
+      );
     }
   }
 
@@ -519,8 +617,17 @@ function drawAura(
     const particleRadius = radius * band + wave(seed, time, 10) * orange * 0.18;
     const size = 1 + orange / 38 + (index % 3);
     ctx.beginPath();
-    ctx.arc(cx + Math.cos(angle) * particleRadius, cy + Math.sin(angle) * particleRadius, size, 0, Math.PI * 2);
-    ctx.fillStyle = colorWithAlpha(MARKET_LAYER_DEFINITIONS.orange.color, 0.08 + orange / 360);
+    ctx.arc(
+      cx + Math.cos(angle) * particleRadius,
+      cy + Math.sin(angle) * particleRadius,
+      size,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fillStyle = colorWithAlpha(
+      MARKET_LAYER_DEFINITIONS.orange.color,
+      0.08 + orange / 360,
+    );
     ctx.fill();
   }
 
@@ -539,8 +646,17 @@ function drawAura(
       cx + Math.cos(angle) * length,
       cy + Math.sin(angle) * length,
     );
-    gradient.addColorStop(0, colorWithAlpha(MARKET_LAYER_DEFINITIONS.yellow.color, 0));
-    gradient.addColorStop(1, colorWithAlpha(MARKET_LAYER_DEFINITIONS.yellow.color, 0.08 + yellow / 330));
+    gradient.addColorStop(
+      0,
+      colorWithAlpha(MARKET_LAYER_DEFINITIONS.yellow.color, 0),
+    );
+    gradient.addColorStop(
+      1,
+      colorWithAlpha(
+        MARKET_LAYER_DEFINITIONS.yellow.color,
+        0.08 + yellow / 330,
+      ),
+    );
     ctx.beginPath();
     ctx.moveTo(cx + Math.cos(angle) * inner, cy + Math.sin(angle) * inner);
     ctx.lineTo(cx + Math.cos(angle) * length, cy + Math.sin(angle) * length);
@@ -553,24 +669,32 @@ function drawAura(
   const orbitCount = 12;
   for (let index = 0; index < orbitCount; index += 1) {
     const sync = green / 100;
-    const angle = (index / orbitCount) * Math.PI * 2 + time * (0.05 + sync * 0.05);
+    const angle =
+      (index / orbitCount) * Math.PI * 2 + time * (0.05 + sync * 0.05);
     const asymmetry = (1 - sync) * wave(angle, time, index) * radius * 0.18;
     const nodeRadius = radius * 0.73 + asymmetry;
     const x = cx + Math.cos(angle) * nodeRadius;
     const y = cy + Math.sin(angle) * nodeRadius * (0.82 + sync * 0.18);
     ctx.beginPath();
     ctx.arc(x, y, 2.2 + green / 48, 0, Math.PI * 2);
-    ctx.fillStyle = colorWithAlpha(MARKET_LAYER_DEFINITIONS.green.color, 0.12 + green / 330);
+    ctx.fillStyle = colorWithAlpha(
+      MARKET_LAYER_DEFINITIONS.green.color,
+      0.12 + green / 330,
+    );
     ctx.fill();
 
     if (green > 50) {
-      const nextAngle = ((index + 1) / orbitCount) * Math.PI * 2 + time * (0.05 + sync * 0.05);
+      const nextAngle =
+        ((index + 1) / orbitCount) * Math.PI * 2 + time * (0.05 + sync * 0.05);
       const nx = cx + Math.cos(nextAngle) * nodeRadius;
       const ny = cy + Math.sin(nextAngle) * nodeRadius * (0.82 + sync * 0.18);
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.lineTo(nx, ny);
-      ctx.strokeStyle = colorWithAlpha(MARKET_LAYER_DEFINITIONS.green.color, green / 600);
+      ctx.strokeStyle = colorWithAlpha(
+        MARKET_LAYER_DEFINITIONS.green.color,
+        green / 600,
+      );
       ctx.lineWidth = 1;
       ctx.stroke();
     }
@@ -579,22 +703,34 @@ function drawAura(
   const indigo = currentScores.indigo;
   const hiddenNodes = 10;
   for (let index = 0; index < hiddenNodes; index += 1) {
-    const angle = (index / hiddenNodes) * Math.PI * 2 + wave(index, time, 7) * 0.34;
+    const angle =
+      (index / hiddenNodes) * Math.PI * 2 + wave(index, time, 7) * 0.34;
     const nodeRadius = radius * (0.24 + ((index * 37) % 58) / 100);
     const x = cx + Math.cos(angle) * nodeRadius;
     const y = cy + Math.sin(angle) * nodeRadius;
     ctx.beginPath();
     ctx.arc(x, y, 1.8 + indigo / 55, 0, Math.PI * 2);
-    ctx.fillStyle = colorWithAlpha(MARKET_LAYER_DEFINITIONS.indigo.color, 0.08 + indigo / 360);
+    ctx.fillStyle = colorWithAlpha(
+      MARKET_LAYER_DEFINITIONS.indigo.color,
+      0.08 + indigo / 360,
+    );
     ctx.fill();
 
     if (indigo > 38 && index > 0) {
-      const previousAngle = ((index - 1) / hiddenNodes) * Math.PI * 2 + wave(index - 1, time, 7) * 0.34;
+      const previousAngle =
+        ((index - 1) / hiddenNodes) * Math.PI * 2 +
+        wave(index - 1, time, 7) * 0.34;
       const previousRadius = radius * (0.24 + (((index - 1) * 37) % 58) / 100);
       ctx.beginPath();
       ctx.moveTo(x, y);
-      ctx.lineTo(cx + Math.cos(previousAngle) * previousRadius, cy + Math.sin(previousAngle) * previousRadius);
-      ctx.strokeStyle = colorWithAlpha(MARKET_LAYER_DEFINITIONS.indigo.color, indigo / 720);
+      ctx.lineTo(
+        cx + Math.cos(previousAngle) * previousRadius,
+        cy + Math.sin(previousAngle) * previousRadius,
+      );
+      ctx.strokeStyle = colorWithAlpha(
+        MARKET_LAYER_DEFINITIONS.indigo.color,
+        indigo / 720,
+      );
       ctx.lineWidth = 1;
       ctx.stroke();
     }
@@ -619,7 +755,11 @@ function drawAura(
   ctx.fillStyle = colorWithAlpha(dominant.color, 0.92);
   ctx.font = "600 12px Inter, system-ui, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText(`${dominant.label.toUpperCase()} ${Math.round(dominant.score)}`, cx, cy + radius * 1.28);
+  ctx.fillText(
+    `${dominant.label.toUpperCase()} ${Math.round(dominant.score)}`,
+    cx,
+    cy + radius * 1.28,
+  );
 }
 
 function MarketAuraCanvas({ snapshot }: { snapshot: MarketStateSnapshot }) {
@@ -660,7 +800,10 @@ function MarketAuraCanvas({ snapshot }: { snapshot: MarketStateSnapshot }) {
       window.cancelAnimationFrame(resizeFrame);
       resizeFrame = window.requestAnimationFrame(() => {
         const rect = canvas.getBoundingClientRect();
-        dpr = Math.min(window.devicePixelRatio || 1, rect.width > 720 ? 1.6 : 1.25);
+        dpr = Math.min(
+          window.devicePixelRatio || 1,
+          rect.width > 720 ? 1.6 : 1.25,
+        );
         canvas.width = Math.max(1, Math.floor(rect.width * dpr));
         canvas.height = Math.max(1, Math.floor(rect.height * dpr));
         const ctx = canvas.getContext("2d");
@@ -675,7 +818,12 @@ function MarketAuraCanvas({ snapshot }: { snapshot: MarketStateSnapshot }) {
     const animate = (now: number) => {
       const ctx = canvas.getContext("2d");
       if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      drawAura(canvas, snapshotRef.current, currentScoresRef.current, now / 1000);
+      drawAura(
+        canvas,
+        snapshotRef.current,
+        currentScoresRef.current,
+        now / 1000,
+      );
       frame = window.requestAnimationFrame(animate);
     };
 
@@ -711,26 +859,35 @@ function ScoreBar({ value, color }: { value: number; color: string }) {
   );
 }
 
-export default function MarketPerceptionEngine({ snapshot, className, agencyLevel }: MarketPerceptionEngineProps) {
+export default function MarketPerceptionEngine({
+  snapshot,
+  className,
+  agencyLevel,
+}: MarketPerceptionEngineProps) {
   const displaySnapshot = useMemo(
     () => applyAgencyLevel(snapshot, agencyLevel),
     [snapshot, agencyLevel],
   );
   const topContributors = useMemo(() => {
     if (!displaySnapshot) return [];
-    return displaySnapshot.layers[displaySnapshot.dominantLayer].contributors.slice(0, 5);
+    return displaySnapshot.layers[
+      displaySnapshot.dominantLayer
+    ].contributors.slice(0, 5);
   }, [displaySnapshot]);
 
   if (!displaySnapshot) return null;
 
   const dominantLayer = displaySnapshot.layers[displaySnapshot.dominantLayer];
   const recentHistory = displaySnapshot.history.slice(-16);
-  const rawMetrics = Object.values(displaySnapshot.metrics).sort((a, b) => b.score - a.score);
+  const rawMetrics = Object.values(displaySnapshot.metrics).sort(
+    (a, b) => b.score - a.score,
+  );
+  const interpretation = `${dominantLayer.label} is leading the market state at ${formatScore(dominantLayer.score)}/100 with ${formatScore(displaySnapshot.agreement)}/100 cross-timeframe agreement.`;
 
   return (
     <section
       className={cx(
-        "mb-6 overflow-hidden rounded-xl border border-white/10 bg-[#080808] p-5 shadow-2xl shadow-black/30",
+        "mb-6 overflow-hidden rounded-lg border border-white/[0.07] bg-[#080808] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.32)]",
         className,
       )}
     >
@@ -744,60 +901,82 @@ export default function MarketPerceptionEngine({ snapshot, className, agencyLeve
             {displaySnapshot.regime}
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
-            {dominantLayer.label} is the dominant layer at {formatScore(dominantLayer.score)}/100.
-            Visual intensity is derived from normalized live metrics, rolling z-scores, percentile rank, and volatility-adjusted scaling.
+            {interpretation} {dominantLayer.meaning}
           </p>
         </div>
 
         <div className="grid grid-cols-3 gap-2 text-center text-xs">
-          <div className="rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2">
+          <div className="rounded-lg bg-white/[0.035] px-3 py-2 ring-1 ring-white/[0.06]">
             <div className="text-zinc-500">Composite</div>
-            <div className="mt-1 text-lg font-semibold text-white">{formatScore(displaySnapshot.compositeScore)}</div>
+            <div className="mt-1 text-lg font-semibold text-white">
+              {formatScore(displaySnapshot.compositeScore)}
+            </div>
           </div>
-          <div className="rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2">
+          <div className="rounded-lg bg-white/[0.035] px-3 py-2 ring-1 ring-white/[0.06]">
             <div className="text-zinc-500">Agreement</div>
-            <div className="mt-1 text-lg font-semibold text-white">{formatScore(displaySnapshot.agreement)}</div>
+            <div className="mt-1 text-lg font-semibold text-white">
+              {formatScore(displaySnapshot.agreement)}
+            </div>
           </div>
-          <div className="rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2">
+          <div className="rounded-lg bg-white/[0.035] px-3 py-2 ring-1 ring-white/[0.06]">
             <div className="text-zinc-500">Trust</div>
-            <div className="mt-1 text-lg font-semibold text-white">{formatScore(displaySnapshot.confidence)}</div>
+            <div className="mt-1 text-lg font-semibold text-white">
+              {formatScore(displaySnapshot.confidence)}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.12fr)_minmax(360px,0.88fr)]">
-        <div className="relative min-w-0 overflow-hidden rounded-lg border border-white/10 bg-black">
+        <div className="relative min-w-0 overflow-hidden rounded-lg bg-black ring-1 ring-white/[0.07]">
           <MarketAuraCanvas snapshot={displaySnapshot} />
           <div className="pointer-events-none absolute left-4 top-4 flex flex-wrap gap-2">
             {TIMEFRAME_KEYS.map((key) => {
               const timeframe = displaySnapshot.timeframes[key];
               return (
-                <div key={key} className="rounded-full border border-white/10 bg-black/60 px-3 py-1 text-[11px] text-zinc-300 backdrop-blur">
-                  {timeframe.label} {formatScore(timeframe.score)} / sync {formatScore(timeframe.agreement)}
+                <div
+                  key={key}
+                  className="rounded-full border border-white/[0.08] bg-black/60 px-3 py-1 text-[11px] text-zinc-300 backdrop-blur"
+                >
+                  {timeframe.label} {formatScore(timeframe.score)} / sync{" "}
+                  {formatScore(timeframe.agreement)}
                 </div>
               );
             })}
           </div>
           <div className="pointer-events-none absolute bottom-4 left-4 right-4 grid gap-2 sm:grid-cols-3">
-            <div className="rounded-lg border border-white/10 bg-black/60 px-3 py-2 backdrop-blur">
-              <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Dominant layer</div>
-              <div className="mt-1 text-sm font-semibold text-white">{dominantLayer.label}</div>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-black/60 px-3 py-2 backdrop-blur">
-              <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Visual signal</div>
-              <div className="mt-1 text-sm font-semibold text-white">{dominantLayer.visualSignal}</div>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-black/60 px-3 py-2 backdrop-blur">
-              <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Last state</div>
+            <div className="rounded-lg border border-white/[0.08] bg-black/60 px-3 py-2 backdrop-blur">
+              <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                Dominant layer
+              </div>
               <div className="mt-1 text-sm font-semibold text-white">
-                {new Date(displaySnapshot.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                {dominantLayer.label}
+              </div>
+            </div>
+            <div className="rounded-lg border border-white/[0.08] bg-black/60 px-3 py-2 backdrop-blur">
+              <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                Visual signal
+              </div>
+              <div className="mt-1 text-sm font-semibold text-white">
+                {dominantLayer.visualSignal}
+              </div>
+            </div>
+            <div className="rounded-lg border border-white/[0.08] bg-black/60 px-3 py-2 backdrop-blur">
+              <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                Last state
+              </div>
+              <div className="mt-1 text-sm font-semibold text-white">
+                {new Date(displaySnapshot.timestamp).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </div>
             </div>
           </div>
         </div>
 
         <div className="grid min-w-0 gap-4">
-          <div className="rounded-lg border border-white/10 bg-[#101010] p-4">
+          <div className="rounded-lg bg-[#101010] p-4 ring-1 ring-white/[0.06]">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
               <Gauge className="h-4 w-4 text-[#FDD000]" />
               Dominant contributors
@@ -807,16 +986,23 @@ export default function MarketPerceptionEngine({ snapshot, className, agencyLeve
                 <div key={`${item.metricKey}-${index}`}>
                   <div className="mb-1 flex items-center justify-between gap-3 text-xs">
                     <span className="truncate text-zinc-300">{item.label}</span>
-                    <span className="text-zinc-500">{formatScore(displayContributorScore(item))}</span>
+                    <span className="text-zinc-500">
+                      {formatScore(displayContributorScore(item))}
+                    </span>
                   </div>
-                  <ScoreBar value={displayContributorScore(item)} color={dominantLayer.color} />
-                  <div className="mt-1 text-[11px] leading-4 text-zinc-500">{item.detail}</div>
+                  <ScoreBar
+                    value={displayContributorScore(item)}
+                    color={dominantLayer.color}
+                  />
+                  <div className="mt-1 text-[11px] leading-4 text-zinc-500">
+                    {item.detail}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="rounded-lg border border-white/10 bg-[#101010] p-4">
+          <div className="rounded-lg bg-[#101010] p-4 ring-1 ring-white/[0.06]">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
               <ShieldCheck className="h-4 w-4 text-[#FDD000]" />
               State diagnostics
@@ -825,36 +1011,51 @@ export default function MarketPerceptionEngine({ snapshot, className, agencyLeve
               <div>
                 <div className="mb-1 flex justify-between text-zinc-500">
                   <span>System self-awareness</span>
-                  <span>{formatScore(displaySnapshot.layers.white.score)}/100</span>
+                  <span>
+                    {formatScore(displaySnapshot.layers.white.score)}/100
+                  </span>
                 </div>
-                <ScoreBar value={displaySnapshot.layers.white.score} color={displaySnapshot.layers.white.color} />
+                <ScoreBar
+                  value={displaySnapshot.layers.white.score}
+                  color={displaySnapshot.layers.white.color}
+                />
               </div>
               <div>
                 <div className="mb-1 flex justify-between text-zinc-500">
                   <span>Structural danger</span>
-                  <span>{formatScore(displaySnapshot.layers.red.score)}/100</span>
+                  <span>
+                    {formatScore(displaySnapshot.layers.red.score)}/100
+                  </span>
                 </div>
-                <ScoreBar value={displaySnapshot.layers.red.score} color={displaySnapshot.layers.red.color} />
+                <ScoreBar
+                  value={displaySnapshot.layers.red.score}
+                  color={displaySnapshot.layers.red.color}
+                />
               </div>
               <div>
                 <div className="mb-1 flex justify-between text-zinc-500">
                   <span>Transition emergence</span>
-                  <span>{formatScore(displaySnapshot.layers.indigo.score)}/100</span>
+                  <span>
+                    {formatScore(displaySnapshot.layers.indigo.score)}/100
+                  </span>
                 </div>
-                <ScoreBar value={displaySnapshot.layers.indigo.score} color={displaySnapshot.layers.indigo.color} />
+                <ScoreBar
+                  value={displaySnapshot.layers.indigo.score}
+                  color={displaySnapshot.layers.indigo.color}
+                />
               </div>
             </div>
           </div>
 
-          <div className="rounded-lg border border-white/10 bg-[#101010] p-4">
+          <div className="rounded-lg bg-[#101010] p-4 ring-1 ring-white/[0.06]">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
               <Radio className="h-4 w-4 text-[#FDD000]" />
               State history
             </div>
             <div className="flex h-24 items-end gap-1">
-              {recentHistory.map((point) => (
+              {recentHistory.map((point, index) => (
                 <div
-                  key={point.timestamp}
+                  key={`${point.timestamp}-${index}`}
                   className="min-w-0 flex-1 rounded-t bg-[#FDD000]/70"
                   style={{ height: `${Math.max(8, point.compositeScore)}%` }}
                   title={`${point.regime}: ${Math.round(point.compositeScore)}`}
@@ -862,9 +1063,25 @@ export default function MarketPerceptionEngine({ snapshot, className, agencyLeve
               ))}
             </div>
             <div className="mt-2 text-[11px] text-zinc-500">
-              {recentHistory.length} persisted perception states in local audit memory.
+              {recentHistory.length} persisted perception states in local audit
+              memory.
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-2 text-[11px] text-zinc-500 sm:grid-cols-4">
+        <div className="rounded-lg bg-white/[0.025] px-3 py-2 ring-1 ring-white/[0.05]">
+          Blue ring: intraday pressure
+        </div>
+        <div className="rounded-lg bg-white/[0.025] px-3 py-2 ring-1 ring-white/[0.05]">
+          Yellow ring: swing coherence
+        </div>
+        <div className="rounded-lg bg-white/[0.025] px-3 py-2 ring-1 ring-white/[0.05]">
+          Violet ring: macro state
+        </div>
+        <div className="rounded-lg bg-white/[0.025] px-3 py-2 ring-1 ring-white/[0.05]">
+          White core: system self-awareness
         </div>
       </div>
 
@@ -874,28 +1091,51 @@ export default function MarketPerceptionEngine({ snapshot, className, agencyLeve
         {LAYER_KEYS.map((key) => {
           const layer = displaySnapshot.layers[key];
           return (
-            <details key={key} className="group rounded-lg border border-white/10 bg-white/[0.03] p-4">
+            <details
+              key={key}
+              className="group rounded-lg border border-white/[0.07] bg-white/[0.025] p-4"
+            >
               <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: layer.color }} />
-                    <span className="font-semibold text-white">{layer.label}</span>
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: layer.color }}
+                    />
+                    <span className="font-semibold text-white">
+                      {layer.label}
+                    </span>
                   </div>
-                  <div className="mt-1 text-xs text-zinc-500">{layer.classification}</div>
+                  <div className="mt-1 text-xs text-zinc-500">
+                    {layer.classification}
+                  </div>
                 </div>
-                <div className="text-lg font-semibold text-white">{formatScore(layer.score)}</div>
+                <div className="text-lg font-semibold text-white">
+                  {formatScore(layer.score)}
+                </div>
               </summary>
               <div className="mt-3">
                 <ScoreBar value={layer.score} color={layer.color} />
-                <p className="mt-3 text-xs leading-5 text-zinc-500">{layer.meaning}</p>
+                <p className="mt-3 text-xs leading-5 text-zinc-500">
+                  {layer.meaning}
+                </p>
                 <div className="mt-3 space-y-2">
                   {layer.contributors.slice(0, 3).map((item, index) => (
-                    <div key={`${item.metricKey}-${index}`} className="rounded-md border border-white/10 bg-black/30 px-3 py-2 text-xs">
+                    <div
+                      key={`${item.metricKey}-${index}`}
+                      className="rounded-md border border-white/10 bg-black/30 px-3 py-2 text-xs"
+                    >
                       <div className="flex justify-between gap-2">
-                        <span className="truncate text-zinc-300">{item.label}</span>
-                        <span className="text-zinc-500">{formatScore(displayContributorScore(item))}</span>
+                        <span className="truncate text-zinc-300">
+                          {item.label}
+                        </span>
+                        <span className="text-zinc-500">
+                          {formatScore(displayContributorScore(item))}
+                        </span>
                       </div>
-                      <div className="mt-1 text-zinc-600">Raw {formatRaw(item.raw, item.unit)}</div>
+                      <div className="mt-1 text-zinc-600">
+                        Raw {formatRaw(item.raw, item.unit)}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -905,10 +1145,10 @@ export default function MarketPerceptionEngine({ snapshot, className, agencyLeve
         })}
       </div>
 
-      <details className="mt-5 rounded-lg border border-white/10 bg-[#101010] p-4">
+      <details className="mt-5 rounded-lg border border-white/[0.07] bg-[#101010] p-4">
         <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-white">
           <Layers className="h-4 w-4 text-[#FDD000]" />
-          Metric registry and raw calculation audit
+          Raw contributors and calculation audit
         </summary>
         <div className="mt-4 overflow-x-auto">
           <table className="min-w-[760px] w-full text-left text-xs">
@@ -925,16 +1165,29 @@ export default function MarketPerceptionEngine({ snapshot, className, agencyLeve
             </thead>
             <tbody>
               {rawMetrics.map((metric) => (
-                <tr key={metric.key} className="border-b border-white/5 align-top">
+                <tr
+                  key={metric.key}
+                  className="border-b border-white/5 align-top"
+                >
                   <td className="py-3 pr-4 text-zinc-200">{metric.label}</td>
-                  <td className="py-3 pr-4 text-zinc-500">{formatRaw(metric.raw, metric.unit)}</td>
-                  <td className="py-3 pr-4 text-zinc-200">{formatScore(displayMetricScore(metric))}</td>
-                  <td className="py-3 pr-4 text-zinc-500">{metric.normalization.zScore.toFixed(2)}</td>
-                  <td className="py-3 pr-4 text-zinc-500">{formatScore(metric.normalization.percentileScore)}</td>
+                  <td className="py-3 pr-4 text-zinc-500">
+                    {formatRaw(metric.raw, metric.unit)}
+                  </td>
+                  <td className="py-3 pr-4 text-zinc-200">
+                    {formatScore(displayMetricScore(metric))}
+                  </td>
+                  <td className="py-3 pr-4 text-zinc-500">
+                    {metric.normalization.zScore.toFixed(2)}
+                  </td>
+                  <td className="py-3 pr-4 text-zinc-500">
+                    {formatScore(metric.normalization.percentileScore)}
+                  </td>
                   <td className="py-3 pr-4 text-zinc-500">
                     {formatMetricLayers(metric.layers)}
                   </td>
-                  <td className="max-w-[340px] py-3 text-zinc-500">{metric.detail}</td>
+                  <td className="max-w-[340px] py-3 text-zinc-500">
+                    {metric.detail}
+                  </td>
                 </tr>
               ))}
             </tbody>

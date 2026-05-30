@@ -231,6 +231,204 @@ export interface TrustGovernorDiagnostic {
   reasons?: string[];
 }
 
+export interface TrustStateDiagnostic {
+  score: number;
+  status: "untrusted" | "provisional" | "trusted" | "highly_trusted";
+  reasons: string[];
+}
+
+export interface PermissionStateDiagnostic {
+  allowed: boolean;
+  level: "blocked" | "review_required" | "limited" | "approved";
+  reasons: string[];
+}
+
+export interface CapacityStateDiagnostic {
+  maxExposure: number;
+  mode: "none" | "micro" | "reduced" | "normal" | "expanded";
+  reasons: string[];
+}
+
+export interface UrgencyStateDiagnostic {
+  score: number;
+  mode: "none" | "wait" | "monitor" | "act_soon" | "act_now";
+  reasons: string[];
+}
+
+export interface DecisionStatesDiagnostic {
+  trust: TrustStateDiagnostic;
+  permission: PermissionStateDiagnostic;
+  capacity: CapacityStateDiagnostic;
+  urgency: UrgencyStateDiagnostic;
+}
+
+export interface ExecutionQualityDiagnostic {
+  score: number;
+  status: "blocked" | "poor" | "acceptable" | "good" | "excellent";
+  entryQuality: number;
+  exitQuality: number;
+  liquidityQuality: number;
+  slippageRisk: number;
+  volatilityRisk: number;
+  timingUrgency: number;
+  scalingQuality: number;
+  invalidationClarity: number;
+  blockers: string[];
+  warnings: string[];
+  recommendedExecutionMode: "do_not_execute" | "wait" | "limit_only" | "small_probe" | "scale_in" | "normal";
+  explanation: string;
+  audit?: Record<string, any>;
+}
+
+export interface CounterfactualDiagnostic {
+  scenarios: Array<{
+    id: string;
+    kind: string;
+    label: string;
+    decision: string;
+    expectedOutcomeScore: number;
+    expectedReturn: number;
+    riskScore: number;
+    regretScore: number;
+    restrictionImpactScore: number;
+    confidence: number;
+    summary: string;
+    assumptions: string[];
+  }>;
+  avoidedLossScore: number;
+  missedUpsideScore: number;
+  restrictionValueScore: number;
+  cautionCostScore: number;
+  recommendedLearning: string[];
+  shouldAdjustRestrictionPolicy: boolean;
+  shouldAdjustDiscoveryPolicy: boolean;
+  shouldAdjustSizingPolicy: boolean;
+  explanation: string;
+}
+
+export interface DiscoveryAccountabilityDiagnostic {
+  accountabilityScore: number;
+  maturity: number;
+  earlyDetectionAccuracy: number;
+  falseDiscoveryRate: number;
+  missedOpportunityRate: number;
+  noveltyToProfitConversion: number;
+  discoveryDecay: number;
+  confirmationLatency: number;
+  status: "immature" | "developing" | "reliable" | "trusted";
+  blockers: string[];
+  unlockConditions: string[];
+  explanation: string;
+}
+
+export interface WisdomDiagnostic {
+  decisionQuality: number;
+  wisdomScore: number;
+  learningConfidence: number;
+  counterfactuals: {
+    decisionQuality: number;
+    avoidedLoss: number;
+    missedUpside: number;
+    restrictionValue: number;
+    counterfactualConfidence: number;
+    actualOutcome?: {
+      id: string;
+      label: string;
+      action: string;
+      kind: string;
+      utility: number;
+      reward: number;
+      cost: number;
+      adverseImpact: number;
+      confidence: number;
+    };
+    bestAlternative?: {
+      id: string;
+      label: string;
+      action: string;
+      kind: string;
+      utility: number;
+      reward: number;
+      cost: number;
+      adverseImpact: number;
+      confidence: number;
+    } | null;
+    worstAlternative?: {
+      id: string;
+      label: string;
+      action: string;
+      kind: string;
+      utility: number;
+      reward: number;
+      cost: number;
+      adverseImpact: number;
+      confidence: number;
+    } | null;
+    explanation: string;
+  };
+  opportunityEconomics: {
+    actionValue: number;
+    waitValue: number;
+    rejectValue: number;
+    scaleValue?: number;
+    urgencyCost: number;
+    opportunityCost: number;
+    bestOption: string;
+  };
+  discoveryMaturity: {
+    maturityScore: number;
+    recurrenceRate: number;
+    noveltyPersistence: number;
+    conversionRate: number;
+    trustedDiscoveries: Array<{ id: string; stage: string; maturityScore: number }>;
+    lifecycle: Array<{ stage: string; count: number }>;
+  };
+  agencyEffectiveness: {
+    agencyAccuracy: number;
+    interventionValue: number;
+    approvalQuality: number;
+    rejectionQuality: number;
+    governanceEffectiveness: number;
+  };
+  portfolioIntelligence: {
+    concentrationRisk: number;
+    diversificationQuality: number;
+    capitalEfficiency: number;
+    opportunityCoverage: number;
+    portfolioConvexity: number;
+    allocationQuality: number;
+  };
+  contributors?: Record<string, Array<{
+    id: string;
+    label: string;
+    value: number;
+    weight: number;
+    contribution: number;
+    reason: string;
+  }>>;
+  explanation: string;
+}
+
+export interface ExecutiveDecisionDiagnostic {
+  decision: "buy" | "sell" | "hold" | "watch" | "avoid" | "escalate" | "deescalate" | "review";
+  participationMode: "none" | "watch" | "limited" | "normal" | "aggressive";
+  confidence: number;
+  trust: number;
+  permission: PermissionStateDiagnostic;
+  capacity: CapacityStateDiagnostic;
+  urgency: UrgencyStateDiagnostic;
+  maxExposure: number;
+  primaryReason: string;
+  primaryLimiter?: string;
+  strongestEvidence: string[];
+  restrictions: Array<{ id: string; label: string; reason: string; severity?: string }>;
+  unlockConditions: Array<{ id: string; description: string; source?: string }>;
+  invalidationConditions: Array<{ id: string; description: string; source?: string }>;
+  nextReviewCondition?: string;
+  explanation: string;
+  audit?: Record<string, any>;
+}
+
 export type RecoveryStatus = "locked" | "recovering" | "restored" | "regressed";
 export type RecoveryMode = "observe" | "reduced-size" | "graduated" | "normal";
 
@@ -383,6 +581,12 @@ export interface StockQuote {
   trustGovernor?: TrustGovernorDiagnostic;
   recovery?: RecoveryDiagnostic;
   resolve?: ResolveDiagnostic;
+  executionQuality?: ExecutionQualityDiagnostic;
+  counterfactual?: CounterfactualDiagnostic;
+  discoveryAccountability?: DiscoveryAccountabilityDiagnostic;
+  wisdom?: WisdomDiagnostic;
+  executiveDecision?: ExecutiveDecisionDiagnostic;
+  decisionStates?: DecisionStatesDiagnostic;
   rejectionReason?: string | null;
   modelId?: string;
   modelLifecycleState?: ModelLifecycleState;
@@ -454,6 +658,12 @@ export type StockData = StockListItem & {
   trustGovernor?: TrustGovernorDiagnostic;
   recovery?: RecoveryDiagnostic;
   resolve?: ResolveDiagnostic;
+  executionQuality?: ExecutionQualityDiagnostic;
+  counterfactual?: CounterfactualDiagnostic;
+  discoveryAccountability?: DiscoveryAccountabilityDiagnostic;
+  wisdom?: WisdomDiagnostic;
+  executiveDecision?: ExecutiveDecisionDiagnostic;
+  decisionStates?: DecisionStatesDiagnostic;
   rejectionReason?: string | null;
   modelId?: string;
   modelLifecycleState?: ModelLifecycleState;

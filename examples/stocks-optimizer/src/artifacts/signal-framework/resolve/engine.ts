@@ -39,6 +39,10 @@ export interface ResolveInput {
   dataReliability?: number;
   beliefConfidence?: number;
   beliefFragility?: number;
+  wisdomScore?: number;
+  decisionQuality?: number;
+  opportunityCost?: number;
+  restrictionValue?: number;
   sizingMode?: string;
   suggestedExposure?: number;
   maxTrustedExposure?: number;
@@ -94,6 +98,10 @@ type NormalizedResolveInput = {
   dataReliability: number | null;
   beliefConfidence: number | null;
   beliefFragility: number | null;
+  wisdomScore: number | null;
+  decisionQuality: number | null;
+  opportunityCost: number | null;
+  restrictionValue: number | null;
   suggestedExposure: number | null;
   maxTrustedExposure: number | null;
   blockedActions: number;
@@ -139,6 +147,7 @@ const TRACE_WEIGHTS = {
   risk: 0.08,
   overfit: 0.06,
   belief: 0.06,
+  wisdom: 0.1,
 };
 
 const REVIEW_RECOMMENDATIONS = new Set([
@@ -237,7 +246,7 @@ function buildTraces(input: NormalizedResolveInput, thresholds: ResolveThreshold
   const riskSafety = 100 - valueOrFallback(input.riskScore, thresholds.maxRiskScore);
   const beliefStability = 100 - valueOrFallback(input.beliefFragility, thresholds.maxBeliefFragility);
 
-  return [
+  const traces = [
     trace("agency", "Agency approval", input.agencyTrust, agencyScore, TRACE_WEIGHTS.agency, thresholds.minAgencyTrust, agencyScore >= thresholds.minAgencyTrust, input.agencyRecommendation || "missing"),
     trace("trust", "Trust score", input.trustScore, valueOrFallback(input.trustScore, 40), TRACE_WEIGHTS.trust, thresholds.minTrustScore, valueOrFallback(input.trustScore, 0) >= thresholds.minTrustScore, "Trust must already permit commitment."),
     trace("confidence", "Calibrated confidence", input.calibratedConfidence, confidenceScore(input), TRACE_WEIGHTS.confidence, thresholds.minCalibratedConfidence, valueOrFallback(input.calibratedConfidence, 0) >= thresholds.minCalibratedConfidence, "Raw confidence cannot outrun calibrated confidence."),
@@ -248,6 +257,17 @@ function buildTraces(input: NormalizedResolveInput, thresholds: ResolveThreshold
     trace("overfit", "Overfit safety", input.overfitRisk, overfitSafety, TRACE_WEIGHTS.overfit, 100 - thresholds.maxOverfitRisk, valueOrFallback(input.overfitRisk, 100) <= thresholds.maxOverfitRisk, "Overfit risk must stay below the policy cap."),
     trace("belief", "Belief stability", input.beliefFragility, beliefStability, TRACE_WEIGHTS.belief, 100 - thresholds.maxBeliefFragility, valueOrFallback(input.beliefFragility, 100) <= thresholds.maxBeliefFragility, "Fragile belief should not be treated as commitment."),
   ];
+
+  if (input.wisdomScore != null || input.decisionQuality != null || input.restrictionValue != null) {
+    const wisdomScore = valueOrFallback(input.wisdomScore, mean([
+      valueOrFallback(input.decisionQuality, 50),
+      valueOrFallback(input.restrictionValue, 50),
+      Math.max(0, 100 - valueOrFallback(input.opportunityCost, 0)),
+    ]));
+    traces.push(trace("wisdom", "Wisdom quality", input.wisdomScore, wisdomScore, TRACE_WEIGHTS.wisdom, 60, wisdomScore >= 60, "Wisdom checks decision quality, restriction value, and opportunity cost before Resolve commits."));
+  }
+
+  return traces;
 }
 
 function normalizeInput(input: ResolveInput): NormalizedResolveInput {
@@ -264,6 +284,10 @@ function normalizeInput(input: ResolveInput): NormalizedResolveInput {
     dataReliability: optionalScore(input.dataReliability),
     beliefConfidence: optionalScore(input.beliefConfidence),
     beliefFragility: optionalScore(input.beliefFragility),
+    wisdomScore: optionalScore(input.wisdomScore),
+    decisionQuality: optionalScore(input.decisionQuality),
+    opportunityCost: optionalScore(input.opportunityCost),
+    restrictionValue: optionalScore(input.restrictionValue),
     suggestedExposure: optionalNonNegative(input.suggestedExposure),
     maxTrustedExposure: optionalNonNegative(input.maxTrustedExposure),
     blockedActions: Math.max(0, Math.round(optionalNonNegative(input.blockedActions) ?? 0)),
@@ -321,6 +345,7 @@ function unlockConditionsFor(input: ResolveInput, normalized: NormalizedResolveI
   if (normalized.riskScore != null && normalized.riskScore > thresholds.maxRiskScore) conditions.push(`Reduce risk score to ${formatScore(thresholds.maxRiskScore)} or lower.`);
   if (normalized.overfitRisk != null && normalized.overfitRisk > thresholds.maxOverfitRisk) conditions.push(`Reduce overfit risk to ${formatScore(thresholds.maxOverfitRisk)} or lower.`);
   if (normalized.beliefFragility != null && normalized.beliefFragility > thresholds.maxBeliefFragility) conditions.push(`Reduce belief fragility to ${formatScore(thresholds.maxBeliefFragility)} or lower.`);
+  if (normalized.wisdomScore != null && normalized.wisdomScore < 45) conditions.push("Improve Wisdom decision quality, restriction value, or opportunity cost before commitment.");
   if (normalized.similarSamples == null || normalized.similarSamples < thresholds.minSimilarSamples) conditions.push(`Observe at least ${thresholds.minSimilarSamples} similar outcome samples.`);
   if (normalized.missingOutcomes > 0) conditions.push("Close or evaluate missing outcomes before raising commitment.");
   if (normalized.blockedActions > 0) conditions.push("Clear blocked agency actions before commitment.");
@@ -381,6 +406,7 @@ function shouldEscalate(normalized: NormalizedResolveInput, context: ResolveCont
   const dataReliability = valueOrFallback(normalized.dataReliability, thresholds.minDataReliability);
   const overfitRisk = valueOrFallback(normalized.overfitRisk, 0);
   const beliefFragility = valueOrFallback(normalized.beliefFragility, 0);
+  const wisdomScore = valueOrFallback(normalized.wisdomScore, 100);
   const strongJudgementWeakAgency =
     valueOrFallback(normalized.judgementReliability, 0) >= thresholds.minJudgementReliability &&
     valueOrFallback(normalized.outcomeStability, 0) >= 60 &&
@@ -389,6 +415,7 @@ function shouldEscalate(normalized: NormalizedResolveInput, context: ResolveCont
   return dataReliability < thresholds.minDataReliability - 20 ||
     overfitRisk > thresholds.maxOverfitRisk + 25 ||
     beliefFragility > thresholds.maxBeliefFragility + 25 ||
+    wisdomScore < 25 ||
     strongJudgementWeakAgency;
 }
 
@@ -405,6 +432,7 @@ function canCommit(normalized: NormalizedResolveInput, context: ResolveContext) 
     valueOrFallback(normalized.riskScore, 100) <= thresholds.maxRiskScore &&
     valueOrFallback(normalized.overfitRisk, 100) <= thresholds.maxOverfitRisk &&
     valueOrFallback(normalized.beliefFragility, 100) <= thresholds.maxBeliefFragility &&
+    valueOrFallback(normalized.wisdomScore, 60) >= 45 &&
     valueOrFallback(normalized.similarSamples, 0) >= thresholds.minSimilarSamples &&
     normalized.blockedActions === 0 &&
     !sizingBlocksCommitment(context.input, normalized);
@@ -489,6 +517,11 @@ function trace(
 function weightedScore(traces: ResolveTrace[]) {
   const totalWeight = traces.reduce((sum, item) => sum + item.weight, 0);
   return traces.reduce((sum, item) => sum + item.score * item.weight, 0) / totalWeight;
+}
+
+function mean(values: number[]) {
+  const usable = values.filter(Number.isFinite);
+  return usable.length ? usable.reduce((sum, value) => sum + value, 0) / usable.length : 0;
 }
 
 function optionalScore(value: unknown) {

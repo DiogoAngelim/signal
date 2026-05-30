@@ -16,6 +16,12 @@ export type StockResolveSignal = StockAgencySignal & {
   agency?: StockAgencySignalAudit;
   recognition?: RecognitionResult;
   resolve?: ResolveOutput;
+  wisdom?: {
+    wisdomScore?: number;
+    decisionQuality?: number;
+    opportunityEconomics?: { opportunityCost?: number };
+    counterfactuals?: { restrictionValue?: number };
+  };
 };
 
 export type StockResolveDiagnostics = {
@@ -76,6 +82,7 @@ export function mapStockSignalToResolveInput(input: {
   ];
   const discovery = input.discovery;
   const recognition = signal.recognition ?? input.recognition ?? summary.recognitionDiagnostics?.primary ?? null;
+  const wisdom = signal.wisdom ?? summary.wisdom ?? null;
   const recognitionClearsDiscovery = recognitionClearsDiscoveryReview(recognition);
 
   if (opensNewExposure && opportunityDensity != null && opportunityDensity < 50) {
@@ -154,6 +161,10 @@ export function mapStockSignalToResolveInput(input: {
       finiteNumber((summary as any).dataQualityReport?.coveragePct),
     beliefConfidence: signal.belief?.confidence,
     beliefFragility: signal.belief?.fragility,
+    wisdomScore: finiteNumber(wisdom?.wisdomScore),
+    decisionQuality: finiteNumber(wisdom?.decisionQuality),
+    opportunityCost: finiteNumber(wisdom?.opportunityEconomics?.opportunityCost),
+    restrictionValue: finiteNumber(wisdom?.counterfactuals?.restrictionValue),
     sizingMode: signal.sizingMode,
     suggestedExposure: signal.suggestedExposure,
     maxTrustedExposure: survivalMaxExposure == null

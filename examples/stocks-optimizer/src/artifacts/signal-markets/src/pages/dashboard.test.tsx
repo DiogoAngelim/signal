@@ -17,6 +17,15 @@ describe("Dashboard calibration diagnostics", () => {
     const html = renderToStaticMarkup(<Dashboard />);
 
     expect(html).toContain("Investment dashboard");
+    expect(html).toContain("Executive Reasoning");
+    expect(html).toContain("System state in one explanation");
+    expect(html).toContain("Evidence Summary");
+    expect(html).toContain("Strongest justification");
+    expect(html).toContain("Decision Pipeline");
+    expect(html).toContain("Discovery to Resolve");
+    expect(html).toContain("Why not full size?");
+    expect(html).toContain("What would change the decision?");
+    expect(html).toContain("Terminology hierarchy");
     expect(html).toContain("Calibration");
     expect(html).toContain("Belief diagnostics");
     expect(html).toContain("Recognition diagnostics");
@@ -52,16 +61,79 @@ describe("Dashboard calibration diagnostics", () => {
     );
   });
 
+  it("renders a decision-first executive summary with the required priority signals", () => {
+    const html = renderToStaticMarkup(<Dashboard />);
+
+    expect(html).toContain('data-testid="executive-summary"');
+    expect(html).toContain('data-layout="responsive-executive-grid"');
+    expect(html).toContain("Confidence / Trust");
+    expect(html).toContain("Max Exposure");
+    expect(html).toContain("Portfolio Posture");
+    expect(html).toContain("Risk state:");
+    expect(html).toContain("Primary posture");
+    expect(html).toContain('data-mobile-posture-summary="true"');
+  });
+
+  it("groups the dashboard into calmer decision layers", () => {
+    const html = renderToStaticMarkup(<Dashboard />);
+
+    expect(html).toContain("Executive Summary");
+    expect(html).toContain("Market Health");
+    expect(html).toContain("Opportunity &amp; Allocation");
+    expect(html).toContain("Risk &amp; Constraints");
+    expect(html).toContain("Signal Diagnostics");
+    expect(html).toContain("System Intelligence");
+    expect(html).toContain("Raw/Advanced Details");
+  });
+
+  it("keeps advanced/internal sections collapsed by default", () => {
+    const html = renderToStaticMarkup(<Dashboard />);
+
+    expect(html).toContain(
+      'data-advanced-section="Signal diagnostics and internal engine traces"',
+    );
+    expect(html).toContain('data-advanced-section="All evidence checks"');
+    expect(html).toContain(
+      'data-advanced-section="Calibration internals and readiness gates"',
+    );
+    expect(html).toContain('data-advanced-section="Calibration internals"');
+    expect(html).toContain(
+      'data-advanced-section="Trace details and raw contributors"',
+    );
+    expect(html).toContain(
+      'data-advanced-section="Overfit/risk diagnostics and strategy audit logs"',
+    );
+    expect(html).toContain(
+      'data-advanced-section="Backtest detail and benchmark context"',
+    );
+    expect(html).not.toContain("<details open");
+  });
+
+  it("keeps responsive dashboard structure on the primary sections", () => {
+    const html = renderToStaticMarkup(<Dashboard />);
+
+    expect(html).toContain("responsive-executive-grid");
+    expect(html).toContain("grid-cols-2");
+    expect(html).toContain("sm:grid-cols-2");
+    expect(html).toContain("xl:grid-cols-4");
+    expect(html).toContain(
+      "xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]",
+    );
+    expect(html).toContain('data-layout="responsive-ledger-row"');
+  });
+
   it("does not display participation needs when commitment gates are blocked", () => {
     const needs = resolveDashboardNeedDiagnostics({
-      rawNeeds: [{
-        needId: "increase-participation:40",
-        category: "increase-participation",
-        severity: 40,
-        confidence: 80,
-        explanation: "Alignment supports graduated participation.",
-        recommendations: [],
-      }],
+      rawNeeds: [
+        {
+          needId: "increase-participation:40",
+          category: "increase-participation",
+          severity: 40,
+          confidence: 80,
+          explanation: "Alignment supports graduated participation.",
+          recommendations: [],
+        },
+      ],
       strategyReadinessBlocked: true,
       strategyMaxPositionPct: 0,
       calibrationStatus: "unstable-outcomes",
@@ -78,14 +150,16 @@ describe("Dashboard calibration diagnostics", () => {
 
   it("describes calibration-only review gates without blaming strategy readiness", () => {
     const needs = resolveDashboardNeedDiagnostics({
-      rawNeeds: [{
-        needId: "increase-participation:40",
-        category: "increase-participation",
-        severity: 40,
-        confidence: 80,
-        explanation: "Alignment supports graduated participation.",
-        recommendations: [],
-      }],
+      rawNeeds: [
+        {
+          needId: "increase-participation:40",
+          category: "increase-participation",
+          severity: 40,
+          confidence: 80,
+          explanation: "Alignment supports graduated participation.",
+          recommendations: [],
+        },
+      ],
       strategyReadinessBlocked: false,
       strategyMaxPositionPct: 5,
       calibrationStatus: "unstable-outcomes",
@@ -100,24 +174,28 @@ describe("Dashboard calibration diagnostics", () => {
   });
 
   it("keeps framework needs when no commitment gate is blocking action", () => {
-    const rawNeeds = [{
-      needId: "increase-participation:40",
-      category: "increase-participation",
-      severity: 40,
-      confidence: 80,
-      explanation: "Alignment supports graduated participation.",
-      recommendations: [],
-    }];
+    const rawNeeds = [
+      {
+        needId: "increase-participation:40",
+        category: "increase-participation",
+        severity: 40,
+        confidence: 80,
+        explanation: "Alignment supports graduated participation.",
+        recommendations: [],
+      },
+    ];
 
-    expect(resolveDashboardNeedDiagnostics({
-      rawNeeds,
-      strategyReadinessBlocked: false,
-      strategyMaxPositionPct: 2,
-      calibrationStatus: "trusted",
-      calibrationTrustworthiness: 82,
-      calibratedConfidence: 72,
-      rawConfidence: 75,
-    })).toBe(rawNeeds);
+    expect(
+      resolveDashboardNeedDiagnostics({
+        rawNeeds,
+        strategyReadinessBlocked: false,
+        strategyMaxPositionPct: 2,
+        calibrationStatus: "trusted",
+        calibrationTrustworthiness: 82,
+        calibratedConfidence: 72,
+        rawConfidence: 75,
+      }),
+    ).toBe(rawNeeds);
   });
 
   it("uses Recognition to reconcile stale Discovery novelty copy", () => {
@@ -141,46 +219,65 @@ describe("Dashboard calibration diagnostics", () => {
     };
 
     expect(recognitionClearsDiscoveryNoveltyNarrative(recognition)).toBe(true);
-    expect(reconcileDiscoveryInvalidationConditions([
-      "Invalidate if opportunity density collapses across candidates.",
-      "The current context remains too novel to compare with known states.",
-    ], recognition)).toEqual([
+    expect(
+      reconcileDiscoveryInvalidationConditions(
+        [
+          "Invalidate if opportunity density collapses across candidates.",
+          "The current context remains too novel to compare with known states.",
+        ],
+        recognition,
+      ),
+    ).toEqual([
       "Invalidate if opportunity density collapses across candidates.",
       "Re-open Discovery novelty only if Recognition recurrence falls below 70/100 or the stable positive state outcome linkage weakens.",
     ]);
-    expect(discoveryRecognitionSentence({
-      discoveryConfidence: 42,
-      discoveryNovelty: 93,
-      recognition,
-    })).toContain("Recognition rejects that novelty with 76% recurrence.");
+    expect(
+      discoveryRecognitionSentence({
+        discoveryConfidence: 42,
+        discoveryNovelty: 93,
+        recognition,
+      }),
+    ).toContain("Recognition rejects that novelty with 76% recurrence.");
     expect(recognitionStateRecurrenceLine(recognition)).toBe(
       "Recognition state recurrence 1313 matched samples; Discovery outcome memory remains separate.",
     );
-    expect(reconcileRecoveryBlockersWithRecognition([
-      "Survival confidence has not cleared the normal-sizing threshold.",
-      "Positive similar-outcome ratio is below restoration threshold.",
-    ], recognition)).toEqual([
+    expect(
+      reconcileRecoveryBlockersWithRecognition(
+        [
+          "Survival confidence has not cleared the normal-sizing threshold.",
+          "Positive similar-outcome ratio is below restoration threshold.",
+        ],
+        recognition,
+      ),
+    ).toEqual([
       "Survival confidence has not cleared the normal-sizing threshold.",
       "Recovery needs survival-safe outcome linkage; Recognition has 1313 state matches, but normal sizing still requires reduced-size outcomes with acceptable drawdown and stress.",
     ]);
-    expect(reconcileRecoveryUnlockConditionsWithRecognition([
-      "Raise survival confidence to at least 70/100 for normal sizing.",
-    ], recognition)).toContain(
+    expect(
+      reconcileRecoveryUnlockConditionsWithRecognition(
+        ["Raise survival confidence to at least 70/100 for normal sizing."],
+        recognition,
+      ),
+    ).toContain(
       "Close reduced-size outcomes for the stable positive state archetype with survival cost below the recovery boundary before restoring normal sizing.",
     );
-    expect(reconcileResolveUnlockConditionsWithRecognition({
-      conditions: ["Raise agency trust to at least 70/100."],
-      missingEvidence: ["Agency trust", "Reduced-size survival review"],
-      recognition,
-    })).toEqual([
+    expect(
+      reconcileResolveUnlockConditionsWithRecognition({
+        conditions: ["Raise agency trust to at least 70/100."],
+        missingEvidence: ["Agency trust", "Reduced-size survival review"],
+        recognition,
+      }),
+    ).toEqual([
       "Raise agency trust to at least 70/100.",
       "Convert additional clean reduced-size outcomes into Agency trust until the average clears 70/100.",
       "Close reduced-size outcomes for the stable positive state archetype with acceptable drawdown and stress before normal sizing is restored.",
     ]);
-    expect(maximumExposureSubLabel({
-      sizingMode: "micro",
-      suggestedMaximumExposurePct: 2,
-      semanticWord: "Dormant",
-    })).toBe("reduced-size portfolio cap");
+    expect(
+      maximumExposureSubLabel({
+        sizingMode: "micro",
+        suggestedMaximumExposurePct: 2,
+        semanticWord: "Dormant",
+      }),
+    ).toBe("reduced-size portfolio cap");
   });
 });

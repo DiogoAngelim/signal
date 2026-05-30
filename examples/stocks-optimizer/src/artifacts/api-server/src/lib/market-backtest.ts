@@ -3598,6 +3598,12 @@ function buildSignalsFromStrategyRun(
           judgement: undefined,
           trustGovernor: undefined,
           recovery: undefined,
+          executionQuality: undefined,
+          counterfactual: undefined,
+          discoveryAccountability: undefined,
+          wisdom: undefined,
+          executiveDecision: undefined,
+          decisionStates: undefined,
           survivalMemory: undefined,
           sizingDiagnostics: null,
         };
@@ -3638,6 +3644,12 @@ function buildSignalsFromStrategyRun(
       judgement: decision.judgement,
       trustGovernor: decision.trustGovernor,
       recovery: decision.recovery,
+      executionQuality: decision.executionQuality,
+      counterfactual: decision.counterfactual,
+      discoveryAccountability: decision.discoveryAccountability,
+      wisdom: decision.wisdom,
+      executiveDecision: decision.executiveDecision,
+      decisionStates: decision.decisionStates,
       survivalMemory: decision.survivalMemory,
       belief: decision.belief,
       explanation:
@@ -3675,6 +3687,12 @@ function buildSignalsFromStrategyRun(
         judgement: decision.judgement,
         trustGovernor: decision.trustGovernor,
         recovery: decision.recovery,
+        executionQuality: decision.executionQuality,
+        counterfactual: decision.counterfactual,
+        discoveryAccountability: decision.discoveryAccountability,
+        wisdom: decision.wisdom,
+        executiveDecision: decision.executiveDecision,
+        decisionStates: decision.decisionStates,
         survivalMemory: decision.survivalMemory,
         belief: decision.belief,
         sizingDiagnostics: decision.sizingDiagnostics,
@@ -3906,6 +3924,18 @@ export async function getOrCreateMarketBacktest(marketInput: string, options: Ma
   });
   summary.recognitionDiagnostics = recognitionApplied.recognitionDiagnostics;
   summary.resolveDiagnostics = resolveApplied.resolveDiagnostics;
+  const executiveSignals = resolveApplied.signals as any[];
+  const primaryExecutiveSignal =
+    executiveSignals.find((signal: any) => signal.signalAction === "Buy" && signal.executiveDecision) ??
+    executiveSignals.find((signal: any) => signal.signalStatus === "watch" && signal.executiveDecision) ??
+    executiveSignals.find((signal: any) => signal.executiveDecision) ??
+    null;
+  summary.executiveDecision = primaryExecutiveSignal?.executiveDecision ?? null;
+  summary.executionQuality = primaryExecutiveSignal?.executionQuality ?? null;
+  summary.counterfactual = primaryExecutiveSignal?.counterfactual ?? null;
+  summary.discoveryAccountability = primaryExecutiveSignal?.discoveryAccountability ?? null;
+  summary.wisdom = primaryExecutiveSignal?.wisdom ?? null;
+  summary.decisionStates = primaryExecutiveSignal?.decisionStates ?? null;
   const diagnostics = wantsDiagnostics
     ? buildSignalDiagnosticsPayload({
         market,
