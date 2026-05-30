@@ -33,6 +33,10 @@ import {
 } from "./executive-signal-adapter";
 import { sizeFinancialExposure, type FinancialExposureViabilityInput } from "./financial-sizing";
 import {
+  buildRestorationProgress,
+  type RestorationProgressDiagnostic,
+} from "./restoration-progress";
+import {
   evaluateStockJudgement,
   judgementExposureGate,
   judgementTrustForAgency,
@@ -66,6 +70,7 @@ export type StrategyReadinessResult = {
   trustworthiness: number;
   trustGovernor: TrustGovernorResult;
   recovery: RecoveryResult;
+  restorationProgress: RestorationProgressDiagnostic;
   readinessRemediation: ReadinessRemediationPlan;
   participationMode: TrustGovernorResult["participationMode"];
   participationBlocked: boolean;
@@ -179,6 +184,7 @@ export type StrategySignalDecision = {
   sizingResult: SizingResult;
   trustGovernor?: TrustGovernorResult;
   recovery?: RecoveryResult;
+  restorationProgress?: RestorationProgressDiagnostic;
   executionQuality?: StockExecutiveArchitecture["executionQuality"];
   counterfactual?: StockExecutiveArchitecture["counterfactual"];
   discoveryAccountability?: StockExecutiveArchitecture["discoveryAccountability"];
@@ -1038,6 +1044,19 @@ export class StrategyReadinessEvaluator {
       currentMaxExposure: trustGovernor.maxExposure,
       targetNormalExposure: readinessMaxPositionPct,
     });
+    const restorationProgress = buildRestorationProgress({
+      survivalMemory: readinessSurvivalMemory,
+      recovery,
+      trustScore: trustGovernor.trustScore,
+      calibratedConfidence: confidenceEvaluation.calibratedConfidence,
+      discoveryConfidence: firstNumber(summary?.discoveryConfidence, summary?.opportunityDiscovery?.confidence) ?? 0,
+      discoveryMaturity: firstNumber(summary?.discoveryMaturity, summary?.opportunityDiscovery?.maturity) ?? 0,
+      dataReliability: dataReliability.score,
+      overfitRisk: firstNumber(robustnessDiagnostics?.overfitRisk, robustnessDiagnostics?.overfitRiskPct) ?? 0,
+      blockedAgencyActionCount: trustGovernor.blockedActions.length,
+      currentExposureCapPct: trustGovernor.maxExposure,
+      targetNormalExposurePct: readinessMaxPositionPct,
+    });
     const readinessRemediation = planReadinessRemediation({
       gates: [
         { id: "dataReliability", label: "Data reliability", category: "data_reliability", passed: dataReliability.passed, score: dataReliability.score, reason: dataReliability.reasons[0] },
@@ -1089,6 +1108,7 @@ export class StrategyReadinessEvaluator {
       trustworthiness: confidenceEvaluation.trustworthiness,
       trustGovernor,
       recovery,
+      restorationProgress,
       readinessRemediation,
       participationMode: trustGovernor.participationMode,
       participationBlocked: !trustGovernor.allowsNewExposure,
@@ -1147,6 +1167,12 @@ export function applyStrategyReadinessToSummary(summary: any, readiness: Strateg
   next.recoveryRecommendedExposureCap = readiness.recovery.recommendedExposureCap;
   next.recoveryCanRestoreSizing = readiness.recovery.canRestoreSizing;
   next.recoveryHumanReviewRequired = readiness.recovery.shouldEscalateHumanReview;
+  next.restorationProgress = readiness.restorationProgress;
+  next.restorationProgressStatus = readiness.restorationProgress.status;
+  next.restorationProgressPct = readiness.restorationProgress.progressPct;
+  next.restorationPrimaryBlocker = readiness.restorationProgress.primaryBlocker;
+  next.cleanReducedSizeOutcomeCount = readiness.restorationProgress.outcomeProof.cleanReducedSizeOutcomeCount;
+  next.requiredCleanReducedSizeOutcomes = readiness.restorationProgress.outcomeProof.requiredCleanOutcomes;
   next.readinessRemediation = readiness.readinessRemediation;
   next.remediationPlan = readiness.readinessRemediation;
   next.remediationStatus = readiness.readinessRemediation.status;
@@ -1435,6 +1461,30 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
     currentMaxExposure: trustGovernor.maxExposure,
     targetNormalExposure: maxPositionPct,
   });
+  const restorationProgress = buildRestorationProgress({
+    survivalMemory,
+    recovery,
+    trustScore: trustGovernor.trustScore,
+    calibratedConfidence: judgementAdjustedConfidence,
+    discoveryConfidence: firstNumber(
+      primaryOpportunity?.discovery?.confidence,
+      primaryOpportunity?.opportunityDiscovery?.confidence,
+      primaryOpportunity?.confidence,
+      primaryOpportunity?.candidateScore,
+    ) ?? 0,
+    discoveryMaturity: firstNumber(
+      primaryOpportunity?.discovery?.maturity,
+      primaryOpportunity?.opportunityDiscovery?.maturity,
+      primaryOpportunity?.maturity,
+    ) ?? 0,
+    dataReliability: input.readiness.components.dataReliability.score,
+    overfitRisk: judgement?.overfitRisk ??
+      firstNumber(input.readiness.robustnessDiagnostics?.overfitRisk, input.readiness.robustnessDiagnostics?.overfitRiskPct) ??
+      0,
+    blockedAgencyActionCount: agencyBlockedCount,
+    currentExposureCapPct: trustGovernor.maxExposure,
+    targetNormalExposurePct: input.readiness.recovery?.audit?.normalized?.targetNormalExposure ?? maxPositionPct,
+  });
   const trustBlocksNewExposure =
     opensNewExposure &&
     trustGovernor.blockers.some((blocker) => blocker.severity === "high" || blocker.severity === "critical");
@@ -1516,6 +1566,7 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
     sizingResult: recoveryAdjustedSizingResult,
     trustGovernor,
     recovery,
+    restorationProgress,
     viabilityVerdict: financialSizing.viabilityVerdict,
     viabilityReason: financialSizing.viabilityReason,
     viabilityWarnings: financialSizing.viabilityWarnings,

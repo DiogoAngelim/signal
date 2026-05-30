@@ -18,7 +18,8 @@ describe("Dashboard calibration diagnostics", () => {
 
     expect(html).toContain("Investment dashboard");
     expect(html).toContain("Executive Reasoning");
-    expect(html).toContain("System state in one explanation");
+    expect(html).toContain("Final action");
+    expect(html).toContain("Operator command");
     expect(html).toContain("Governance Evolution");
     expect(html).toContain("Decision authority and learning loop");
     expect(html).toContain("Operator command");
@@ -31,6 +32,10 @@ describe("Dashboard calibration diagnostics", () => {
     expect(html).toContain("Why not full size?");
     expect(html).toContain("What would change the decision?");
     expect(html).toContain("Terminology hierarchy");
+    expect(html).toContain("Survival Memory Restoration Ledger");
+    expect(html).toContain("Clean proof");
+    expect(html).toContain("Ledger state");
+    expect(html).toContain("Normal sizing restoration");
     expect(html).toContain("Calibration");
     expect(html).toContain("Belief diagnostics");
     expect(html).toContain("Recognition diagnostics");
@@ -75,7 +80,9 @@ describe("Dashboard calibration diagnostics", () => {
     expect(html).toContain("Max Exposure");
     expect(html).toContain("Portfolio Posture");
     expect(html).toContain("Risk state:");
-    expect(html).toContain("Primary posture");
+    expect(html).toContain("Operator command");
+    expect(html).toContain("Portfolio cap");
+    expect(html).toContain("Starter size");
     expect(html).toContain('data-mobile-posture-summary="true"');
   });
 

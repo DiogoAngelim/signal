@@ -8,6 +8,7 @@ import {
   type StrategyReadinessResult,
 } from "./strategy-readiness";
 import { financialExposureBandForSizingMode, sizeFinancialExposure } from "./financial-sizing";
+import { buildRestorationProgress } from "./restoration-progress";
 
 const evaluator = new StrategyReadinessEvaluator();
 
@@ -470,6 +471,14 @@ test("recovery diagnostics keep scarred dashboard-like states recovering and rev
   assert.equal(decision.recovery?.canRestoreSizing, false);
   assert.equal(decision.recovery?.shouldEscalateHumanReview, true);
   assert.ok(decision.recovery?.recommendedExposureCap > 0);
+  assert.equal(decision.restorationProgress?.module, "stocks.restoration-progress");
+  assert.equal(decision.restorationProgress?.status, "collecting_evidence");
+  assert.equal(decision.restorationProgress?.restorationState, "scarred");
+  assert.equal(decision.restorationProgress?.ledger.title, "Survival Memory Restoration Ledger");
+  assert.equal(decision.restorationProgress?.ledger.requiredCleanOutcomes, 3);
+  assert.equal(decision.restorationProgress?.canRestoreSizing, false);
+  assert.equal(decision.restorationProgress?.outcomeProof.cleanReducedSizeOutcomeCount, 0);
+  assert.ok(decision.restorationProgress?.gates.some((gate) => gate.id === "clean-reduced-size-outcomes" && !gate.passed));
   assert.ok(decision.sizingReasons.some((reason) => reason.includes("Recovery is recovering")));
 });
 
@@ -587,6 +596,63 @@ test("recovery can restore normal mode after survival, trust, calibration, agenc
   assert.equal(decision.recovery?.canRestoreSizing, true);
   assert.equal(decision.recovery?.shouldEscalateHumanReview, false);
   assert.equal(decision.recovery?.trustedCapacity, 100);
+  assert.equal(decision.restorationProgress?.status, "restored");
+  assert.equal(decision.restorationProgress?.restorationState, "clear");
+  assert.equal(decision.restorationProgress?.progressPct, 100);
+  assert.equal(decision.restorationProgress?.gates.every((gate) => gate.passed), true);
+});
+
+test("restoration ledger tracks clean reduced-size streaks and survival boundaries", () => {
+  const clean = {
+    timestamp: "2026-05-28T00:00:00.000Z",
+    stateFingerprint: "venue:binance|action:buy",
+    action: "buy",
+    maxExposure: 1,
+    realizedReturn: 1.2,
+    maxDrawdown: 4,
+    maxAdverseExcursion: 6,
+    recoveryTimeBars: 2,
+    volatilityExpansion: 8,
+    tailRisk: 10,
+    liquidityStress: 8,
+    structuralDanger: 9,
+    novelty: 12,
+    opportunityDensity: 35,
+    outcomeClass: "comfortable_survival",
+    survivalCost: 10,
+    scarWeight: 0,
+  };
+  const progress = buildRestorationProgress({
+    survivalMemory: survivalMemory({
+      status: "scarred",
+      recommendation: "act_with_reduced_size",
+      survivalConfidence: 73,
+      maxExposurePct: 2,
+      records: [
+        { ...clean, id: "clean-1", asset: "BNBUSDT" },
+        {
+          ...clean,
+          id: "mae-break",
+          asset: "SOLUSDT",
+          outcomeClass: "barely_survived",
+          maxAdverseExcursion: 36,
+          survivalCost: 34,
+          scarWeight: 0.55,
+        },
+        { ...clean, id: "clean-2", asset: "BNBUSDT" },
+        { ...clean, id: "clean-3", asset: "SOLUSDT" },
+      ],
+    }),
+    currentExposureCapPct: 2,
+    targetNormalExposurePct: 5,
+  });
+
+  assert.equal(progress.restorationState, "watch");
+  assert.equal(progress.outcomeProof.requiredCleanOutcomes, 3);
+  assert.equal(progress.outcomeProof.cleanReducedSizeOutcomeCount, 2);
+  assert.equal(progress.ledger.entries.length, 4);
+  assert.ok(progress.ledger.entries.find((entry) => entry.id === "mae-break")?.boundaryBreaches.includes("MAE"));
+  assert.equal(progress.ledger.exactUnlockCondition, "Close 1 more clean reduced-size outcome without breaching survival boundaries.");
 });
 
 test("recovery handles empty opportunity arrays and agency summary blocker counts", () => {
@@ -1154,6 +1220,11 @@ test("production eligible only when all required gates pass", () => {
   assert.equal(summary.recoveryRecommendedExposureCap, result.recovery.recommendedExposureCap);
   assert.equal(summary.recoveryCanRestoreSizing, result.recovery.canRestoreSizing);
   assert.equal(summary.recoveryHumanReviewRequired, result.recovery.shouldEscalateHumanReview);
+  assert.equal(result.restorationProgress.module, "stocks.restoration-progress");
+  assert.equal(result.restorationProgress.ledger.title, "Survival Memory Restoration Ledger");
+  assert.equal(summary.restorationProgress, result.restorationProgress);
+  assert.equal(summary.restorationProgressStatus, result.restorationProgress.status);
+  assert.equal(summary.restorationProgressPct, result.restorationProgress.progressPct);
   assert.equal(result.stage, "Production eligible");
   assert.equal(result.productionEligible, true);
   assert.equal(result.blocked, false);

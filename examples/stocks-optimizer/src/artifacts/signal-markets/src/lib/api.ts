@@ -517,6 +517,86 @@ export interface RecoveryDiagnostic {
   audit?: Record<string, any>;
 }
 
+export type RestorationProgressStatus =
+  | "blocked"
+  | "collecting_evidence"
+  | "ready_for_restoration"
+  | "restored";
+
+export type SurvivalMemoryRestorationState = "scarred" | "watch" | "limited" | "clear";
+
+export interface RestorationLedgerEntry {
+  id: string;
+  timestamp?: string;
+  asset?: string;
+  maxExposure: number;
+  realizedReturn: number;
+  maxDrawdown: number;
+  maxAdverseExcursion: number;
+  survivalCost: number;
+  outcomeClass: SurvivalOutcomeClass;
+  clean: boolean;
+  boundaryBreaches: string[];
+  maxAdverseExcursionBoundary: number;
+  maxAdverseExcursionRemaining: number;
+  survivalCostBoundary: number;
+  survivalCostRemaining: number;
+}
+
+export interface RestorationProgressDiagnostic {
+  module: "stocks.restoration-progress";
+  name: "Restoration Progress";
+  status: RestorationProgressStatus;
+  restorationState: SurvivalMemoryRestorationState;
+  progressPct: number;
+  summary: string;
+  primaryBlocker: string | null;
+  currentExposureCapPct: number;
+  targetNormalExposurePct: number;
+  canRestoreSizing: boolean;
+  gates: Array<{
+    id: string;
+    label: string;
+    passed: boolean;
+    current: string;
+    target: string;
+    progressPct: number;
+    detail: string;
+    unlockCondition?: string;
+  }>;
+  outcomeProof: {
+    requiredCleanOutcomes: number;
+    reducedSizeOutcomeCount: number;
+    totalCleanReducedSizeOutcomeCount: number;
+    cleanReducedSizeOutcomeCount: number;
+    failedReducedSizeOutcomeCount: number;
+    cleanOutcomeRatio: number;
+    survivalCostBoundary: number;
+    maxDrawdownBoundary: number;
+    maxAdverseExcursionBoundary: number;
+    ledgerEntries: RestorationLedgerEntry[];
+    recentOutcomes: RestorationLedgerEntry[];
+  };
+  ledger: {
+    title: "Survival Memory Restoration Ledger";
+    state: SurvivalMemoryRestorationState;
+    statePath: Array<{
+      state: SurvivalMemoryRestorationState;
+      label: string;
+      passed: boolean;
+      detail: string;
+    }>;
+    entries: RestorationLedgerEntry[];
+    exactUnlockCondition: string;
+    boundarySummary: string;
+    requiredCleanOutcomes: number;
+    cleanReducedSizeOutcomeCount: number;
+    failedReducedSizeOutcomeCount: number;
+  };
+  nextActions: string[];
+  invalidationConditions: string[];
+}
+
 export interface ReadinessRemediationDiagnostic {
   module: "signal.readiness-remediation-planner";
   name: "Readiness Remediation Planner";
@@ -647,6 +727,7 @@ export interface StockQuote {
   survivalMemory?: SurvivalMemoryDiagnostic;
   trustGovernor?: TrustGovernorDiagnostic;
   recovery?: RecoveryDiagnostic;
+  restorationProgress?: RestorationProgressDiagnostic;
   resolve?: ResolveDiagnostic;
   executionQuality?: ExecutionQualityDiagnostic;
   counterfactual?: CounterfactualDiagnostic;
@@ -725,6 +806,7 @@ export type StockData = StockListItem & {
   survivalMemory?: SurvivalMemoryDiagnostic;
   trustGovernor?: TrustGovernorDiagnostic;
   recovery?: RecoveryDiagnostic;
+  restorationProgress?: RestorationProgressDiagnostic;
   resolve?: ResolveDiagnostic;
   executionQuality?: ExecutionQualityDiagnostic;
   counterfactual?: CounterfactualDiagnostic;

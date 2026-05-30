@@ -48,6 +48,7 @@ import {
   type ReadinessRemediationDiagnostic,
   type RecognitionDiagnostic,
   type RecoveryDiagnostic,
+  type RestorationProgressDiagnostic,
   type ResolveDiagnostic,
   type StockData,
   type StockQuote,
@@ -133,6 +134,7 @@ type DisplayStock = StockData & {
   survivalMemory?: SurvivalMemoryDiagnostic;
   trustGovernor?: TrustGovernorDiagnostic;
   recovery?: RecoveryDiagnostic;
+  restorationProgress?: RestorationProgressDiagnostic;
   resolve?: ResolveDiagnostic;
   wisdom?: WisdomDiagnostic;
   discoveryIntelligence?: DiscoveryIntelligenceDiagnostic;
@@ -172,6 +174,7 @@ type IntelligenceStock = DisplayStock & {
   survivalMemory?: SurvivalMemoryDiagnostic;
   trustGovernor?: TrustGovernorDiagnostic;
   recovery?: RecoveryDiagnostic;
+  restorationProgress?: RestorationProgressDiagnostic;
   resolve?: ResolveDiagnostic;
   wisdom?: WisdomDiagnostic;
   discoveryIntelligence?: DiscoveryIntelligenceDiagnostic;
@@ -2366,6 +2369,79 @@ export function maximumExposureSubLabel(input: {
   return `${(input.semanticWord || "portfolio").toLowerCase()} cap`;
 }
 
+function operatorActionLabel(input: {
+  finalDecision?: string;
+  sizingMode?: string;
+  exposurePct?: number | null;
+  hasMarketData: boolean;
+}) {
+  if (!input.hasMarketData) return "Loading";
+
+  const exposurePct = finiteNumber(input.exposurePct) ?? 0;
+  if (exposurePct <= 0) return "Observe";
+
+  const mode = displaySizingMode(input.sizingMode);
+  const decision = String(input.finalDecision ?? "").toLowerCase();
+
+  if (decision.includes("escalate") && mode === "Micro") {
+    return "Micro escalation";
+  }
+
+  if (decision.includes("escalate") && mode !== "None") {
+    return `${mode} escalation`;
+  }
+
+  if (mode === "Micro" || mode === "Small" || mode === "Limited") {
+    return `${mode} participation`;
+  }
+
+  return input.finalDecision || "Review";
+}
+
+function restrictionImpactPct(code?: string, index = 0) {
+  const impactByCode: Record<string, number> = {
+    survival_scar: 70,
+    trust_below_threshold: 18,
+    reduced_size: 14,
+    recovery_incomplete: 12,
+    agency_unresolved: 10,
+    opportunity_density_low: 9,
+    discovery_immature: 7,
+    calibration_review: 6,
+    readiness_blocked: 6,
+    overfit_risk: 5,
+    walk_forward_instability: 5,
+    data_reliability_low: 5,
+  };
+
+  if (code && impactByCode[code] != null) return impactByCode[code];
+  return Math.max(5, 30 - index * 6);
+}
+
+function expectedMoveScore(value: number | null | undefined) {
+  return clamp(50 + numeric(value) * 12, 0, 100);
+}
+
+function assetRankReason(stock: IntelligenceStock) {
+  const expectedMove = numeric(stock.expectedMove);
+  const riskControl = clamp(100 - numeric(stock.riskPressure));
+  const sizingMode = displaySizingMode(stock.sizingMode);
+
+  if (numeric(stock.setupQuality) >= 90 && expectedMove < 0.75) {
+    return `High quality mostly comes from fit and risk control; expected move is modest and sizing remains ${sizingMode.toLowerCase()}.`;
+  }
+
+  if (riskControl >= 70 && expectedMove >= 1) {
+    return `Rank is supported by controlled risk, improving trend quality, and a usable expected move.`;
+  }
+
+  if (stock.allocationAction === "Blocked") {
+    return stock.rejectionReason ?? "Rank is review-only because governance is still blocking allocation.";
+  }
+
+  return stock.sizingReasons?.[0] ?? stock.explanation;
+}
+
 function uniqueStrings(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)));
 }
@@ -2427,6 +2503,16 @@ function recoveryTone(
   if (recovery.status === "locked" || recovery.status === "regressed")
     return "bad";
   return "neutral";
+}
+
+function restorationProgressTone(
+  progress?: RestorationProgressDiagnostic | null,
+): "good" | "warn" | "bad" | "neutral" {
+  if (!progress) return "neutral";
+  if (progress.status === "restored" || progress.status === "ready_for_restoration")
+    return "good";
+  if (progress.status === "blocked") return "bad";
+  return "warn";
 }
 
 function remediationTone(
@@ -3248,6 +3334,9 @@ export default function Dashboard() {
           signal.judgement?.survivalMemory ??
           (stock as any).survivalMemory,
         trustGovernor: signal.trustGovernor ?? (stock as any).trustGovernor,
+        recovery: signal.recovery ?? (stock as any).recovery,
+        restorationProgress:
+          signal.restorationProgress ?? (stock as any).restorationProgress,
         resolve: signal.resolve ?? (stock as any).resolve,
         discoveryScore: numeric(
           signal.discoveryScore,
@@ -3308,6 +3397,8 @@ export default function Dashboard() {
           survivalMemory:
             signal.survivalMemory ?? signal.judgement?.survivalMemory,
           trustGovernor: signal.trustGovernor,
+          recovery: signal.recovery,
+          restorationProgress: signal.restorationProgress,
           resolve: signal.resolve,
           discoveryScore: numeric(signal.discoveryScore),
           discoveryLifecycle: signal.discoveryLifecycle,
@@ -4202,6 +4293,14 @@ export default function Dashboard() {
     allocationUniverse.find((stock) => stock.recovery)?.recovery ??
     backtestSummary?.recovery ??
     strategyReadiness?.recovery ??
+    null;
+  const restorationProgressDiagnostic: RestorationProgressDiagnostic | null =
+    selectedAllocationStock?.restorationProgress ??
+    displayedTopOpportunities[0]?.restorationProgress ??
+    allocationUniverse.find((stock) => stock.restorationProgress)
+      ?.restorationProgress ??
+    backtestSummary?.restorationProgress ??
+    strategyReadiness?.restorationProgress ??
     null;
   const recoveryBlockers = recoveryDiagnostic?.blockers?.length
     ? recoveryDiagnostic.blockers
@@ -5778,6 +5877,162 @@ export default function Dashboard() {
     currentStrategyStateName.length > 38
       ? "text-3xl md:text-5xl xl:text-6xl"
       : "text-3xl md:text-6xl";
+  const actionableTickers = displayedTopOpportunities
+    .filter((stock) => stock.allocationAction === "Buy")
+    .slice(0, 3)
+    .map((stock) => normalizedTicker(stock));
+  const actionableTickersLabel = actionableTickers.length
+    ? actionableTickers.join(", ")
+    : showingBlockedReviewIdeas
+      ? "Review candidates only"
+      : "No eligible buys";
+  const maxAssetExposurePct =
+    displayedTopOpportunities.length > 0
+      ? Math.max(
+          ...displayedTopOpportunities.map((stock) =>
+            numeric(stock.suggestedExposure),
+          ),
+        )
+      : (finiteNumber(strategyMaxPositionPct) ??
+        finiteNumber(dashboardDecisionStates.capacity.maxExposure) ??
+        0);
+  const starterExposurePct = Math.min(
+    maxAssetExposurePct || dashboardSizing.suggestedMaximumExposurePct || 0,
+    finiteNumber(dashboardDecisionStates.capacity.maxExposure) ??
+      maxAssetExposurePct ??
+      0,
+  );
+  const canonicalPortfolioCap = hasProvidedSignals
+    ? maximumExposureMetricValue
+    : "Pending";
+  const canonicalPerAssetCap =
+    maxAssetExposurePct > 0 ? fmtPlainPct(maxAssetExposurePct) : "None";
+  const canonicalStarterSize =
+    starterExposurePct > 0 ? fmtPlainPct(starterExposurePct) : "Wait";
+  const operatorAction = operatorActionLabel({
+    finalDecision: executiveIA.executiveReasoning.finalDecision,
+    sizingMode: dashboardSizing.sizingMode,
+    exposurePct: dashboardSizing.suggestedMaximumExposurePct,
+    hasMarketData,
+  });
+  const operatorTone =
+    !hasMarketData || dashboardSizing.sizingDecision === "blocked"
+      ? dashboardSizing.sizingDecision === "blocked"
+        ? "bad"
+        : "neutral"
+      : dashboardSizing.sizingMode === "micro" ||
+          dashboardSizing.sizingMode === "small"
+        ? "warn"
+        : "good";
+  const primaryUnlockCondition =
+    executiveIA.executiveReasoning.primaryUnlockCondition;
+  const primaryInvalidationCondition =
+    executiveIA.executiveReasoning.primaryInvalidationCondition;
+  const survivalConfidenceValue = finiteNumber(
+    survivalMemoryDiagnostic?.survivalConfidence,
+  );
+  const survivalUnlockThreshold = 70;
+  const survivalProgressPct =
+    survivalConfidenceValue == null
+      ? 0
+      : clamp((survivalConfidenceValue / survivalUnlockThreshold) * 100);
+  const survivalUnlockStatus =
+    restorationProgressDiagnostic?.status === "restored"
+      ? "Normal sizing restored"
+      : restorationProgressDiagnostic?.status === "ready_for_restoration"
+        ? "Ready for restoration review"
+        : survivalConfidenceValue == null
+      ? "Waiting for survival score"
+      : recoveryDiagnostic?.canRestoreSizing
+        ? "Normal sizing restored"
+        : survivalConfidenceValue >= survivalUnlockThreshold
+          ? "Score passed; needs clean confirmation"
+          : `${Math.ceil(survivalUnlockThreshold - survivalConfidenceValue)} pts short`;
+  const unlockProgressTone =
+    restorationProgressDiagnostic != null
+      ? restorationProgressTone(restorationProgressDiagnostic)
+      : recoveryDiagnostic?.canRestoreSizing
+        ? "good"
+        : survivalConfidenceValue != null &&
+            survivalConfidenceValue >= survivalUnlockThreshold
+          ? "warn"
+          : "neutral";
+  const restorationProgressPct =
+    restorationProgressDiagnostic?.progressPct ?? survivalProgressPct;
+  const restorationPrimaryBlocker =
+    restorationProgressDiagnostic?.primaryBlocker ?? primaryUnlockCondition;
+  const restorationOutcomeProof = restorationProgressDiagnostic?.outcomeProof;
+  const restorationLedger = restorationProgressDiagnostic?.ledger;
+  const restorationLedgerEntries =
+    restorationLedger?.entries?.length
+      ? restorationLedger.entries.slice(-3).reverse()
+      : [];
+  const restorationLedgerStateLabel =
+    restorationLedger?.state?.replace(/_/g, " ") ??
+    restorationProgressDiagnostic?.status?.replace(/_/g, " ") ??
+    survivalUnlockStatus;
+  const restorationGatePreview =
+    restorationProgressDiagnostic?.gates?.length
+      ? restorationProgressDiagnostic.gates.slice(0, 4)
+      : [];
+  const restorationNextActions =
+    restorationProgressDiagnostic?.nextActions?.length
+      ? restorationProgressDiagnostic.nextActions
+      : [primaryUnlockCondition];
+  const cleanReducedSizeOutcomeValue = restorationOutcomeProof
+    ? `${restorationOutcomeProof.cleanReducedSizeOutcomeCount}/${restorationOutcomeProof.requiredCleanOutcomes}`
+    : "Pending";
+  const reducedSizeOutcomeSub = restorationOutcomeProof
+    ? `${restorationOutcomeProof.reducedSizeOutcomeCount} reduced-size outcomes / ${restorationOutcomeProof.failedReducedSizeOutcomeCount} boundary breaks`
+    : undefined;
+  const restorationCurrentCapValue = restorationProgressDiagnostic
+    ? fmtPlainPct(restorationProgressDiagnostic.currentExposureCapPct)
+    : canonicalPortfolioCap;
+  const restorationNormalTargetValue = restorationProgressDiagnostic
+    ? fmtPlainPct(restorationProgressDiagnostic.targetNormalExposurePct)
+    : "Pending";
+  const operatorSummary = !hasMarketData
+    ? "Loading prices, signals, and governance before issuing a decision."
+    : dashboardSizing.suggestedMaximumExposurePct <= 0
+      ? `Stay flat for now. ${primaryInvalidationCondition}`
+      : `Use ${displaySizingMode(dashboardSizing.sizingMode).toLowerCase()} exposure in ${actionableTickersLabel}. Normal sizing stays locked until ${primaryUnlockCondition}`;
+  const restrictionImpactRows = (
+    executiveIA.whyNotFullSize.factors.length
+      ? executiveIA.whyNotFullSize.factors
+      : [
+          {
+            priority: 1,
+            code: "clear",
+            label: "No active restriction",
+            explanation:
+              "The current IA layer has not identified a limiting gate.",
+            unlockCondition:
+              "Maintain trust, safety, reliability, and opportunity thresholds.",
+          },
+        ]
+  )
+    .slice(0, 4)
+    .map((factor, index) => ({
+      ...factor,
+      impactPct: restrictionImpactPct(factor.code, index),
+    }));
+  const hiddenRestrictionCount = Math.max(
+    0,
+    executiveIA.whyNotFullSize.factors.length - restrictionImpactRows.length,
+  );
+  const increaseExposureTriggers = uniqueStrings(
+    executiveIA.decisionChange.increaseExposure,
+  ).slice(0, 4);
+  const reduceOrInvalidateTriggers = uniqueStrings([
+    ...executiveIA.decisionChange.reduceExposure,
+    ...executiveIA.decisionChange.invalidateSignal,
+  ]).slice(0, 4);
+  const restorationPathTriggers = uniqueStrings(
+    executiveIA.decisionChange.watchToLimitedToNormal,
+  ).slice(0, 3);
+  const accountabilityHighlights = governanceEvolution.accountabilityLoop
+    .filter((step) => step.status !== "complete")
+    .slice(0, 3);
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-black text-white">
@@ -5876,10 +6131,10 @@ export default function Dashboard() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                    Primary posture
+                    Active limiter
                   </div>
                   <div className="mt-1 text-xl font-semibold tracking-tight text-white">
-                    {executiveIA.executiveReasoning.finalDecision}
+                    {topCanonicalRestriction?.label ?? "No active limiter"}
                   </div>
                 </div>
                 <StatusPill
@@ -5893,27 +6148,23 @@ export default function Dashboard() {
               </p>
               <div className="mt-4 grid grid-cols-3 gap-3 text-[11px] text-zinc-500">
                 <div>
-                  <span className="block text-zinc-600">Raw</span>
+                  <span className="block text-zinc-600">Cap</span>
                   <span className="font-semibold text-slate-100">
-                    {rawConfidenceDisplay == null
-                      ? "—"
-                      : fmtPlainPct(rawConfidenceDisplay, 0)}
+                    {canonicalPortfolioCap}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-zinc-600">Calibrated</span>
+                  <span className="block text-zinc-600">Starter</span>
                   <span className="font-semibold text-slate-100">
-                    {calibratedConfidenceDisplay == null
-                      ? "—"
-                      : fmtPlainPct(calibratedConfidenceDisplay, 0)}
+                    {canonicalStarterSize}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-zinc-600">Trust</span>
+                  <span className="block text-zinc-600">Survival</span>
                   <span className="font-semibold text-slate-100">
-                    {calibrationTrustworthinessDisplay == null
+                    {survivalConfidenceValue == null
                       ? "—"
-                      : fmtPlainPct(calibrationTrustworthinessDisplay, 0)}
+                      : `${Math.round(survivalConfidenceValue)}/100`}
                   </span>
                 </div>
               </div>
@@ -5973,10 +6224,10 @@ export default function Dashboard() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                    Primary posture
+                    Active limiter
                   </div>
                   <div className="mt-2 text-2xl font-semibold tracking-tight text-white">
-                    {executiveIA.executiveReasoning.finalDecision}
+                    {topCanonicalRestriction?.label ?? "No active limiter"}
                   </div>
                 </div>
                 <StatusPill
@@ -5988,11 +6239,6 @@ export default function Dashboard() {
               <p className="mt-4 text-sm leading-6 text-zinc-400">
                 {executiveRestrictionExplanation}
               </p>
-              {topCanonicalRestriction ? (
-                <p className="mt-3 text-xs leading-5 text-zinc-500">
-                  Main limiter: {topCanonicalRestriction.label}
-                </p>
-              ) : null}
             </div>
 
             <div className="mt-6 space-y-4">
@@ -6005,30 +6251,25 @@ export default function Dashboard() {
                 label={`Opportunity density · ${hasProvidedSignals ? semanticMetrics.opportunityDensity.word : "Pending"}`}
               />
               <div className="grid grid-cols-3 gap-3 text-xs text-zinc-500">
-                <div>
-                  <span className="block text-zinc-600">Raw</span>
-                  <span className="font-semibold text-slate-100">
-                    {rawConfidenceDisplay == null
+                <MiniMetric
+                  label="Portfolio cap"
+                  value={canonicalPortfolioCap}
+                  emphasis="quiet"
+                />
+                <MiniMetric
+                  label="Starter"
+                  value={canonicalStarterSize}
+                  emphasis="quiet"
+                />
+                <MiniMetric
+                  label="Survival"
+                  value={
+                    survivalConfidenceValue == null
                       ? "—"
-                      : fmtPlainPct(rawConfidenceDisplay, 0)}
-                  </span>
-                </div>
-                <div>
-                  <span className="block text-zinc-600">Calibrated</span>
-                  <span className="font-semibold text-slate-100">
-                    {calibratedConfidenceDisplay == null
-                      ? "—"
-                      : fmtPlainPct(calibratedConfidenceDisplay, 0)}
-                  </span>
-                </div>
-                <div>
-                  <span className="block text-zinc-600">Trust</span>
-                  <span className="font-semibold text-slate-100">
-                    {calibrationTrustworthinessDisplay == null
-                      ? "—"
-                      : fmtPlainPct(calibrationTrustworthinessDisplay, 0)}
-                  </span>
-                </div>
+                      : `${Math.round(survivalConfidenceValue)}/100`
+                  }
+                  emphasis="quiet"
+                />
               </div>
             </div>
           </aside>
@@ -6042,39 +6283,253 @@ export default function Dashboard() {
           <section className="grid min-w-0 gap-5">
             <SectionShell
               eyebrow="Executive Reasoning"
-              title="System state in one explanation"
+              title="Final action"
               action={
                 <StatusPill
                   tone={executiveIA.whyNotFullSize.active ? "warn" : "good"}
                 >
-                  {executiveIA.executiveReasoning.finalDecision}
+                  {operatorAction}
                 </StatusPill>
               }
             >
-              <div className="rounded-lg border border-white/10 bg-[#151515] px-5 py-4">
-                <p className="max-w-5xl text-base leading-7 text-zinc-200">
-                  {executiveIA.executiveReasoning.narrative}
-                </p>
-              </div>
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)]">
+                <div className="rounded-lg border border-[#FDD000]/25 bg-[#FDD000]/10 px-5 py-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#FDD000]">
+                        Operator command
+                      </div>
+                      <div className="mt-2 text-3xl font-semibold tracking-tight text-white">
+                        {operatorAction}
+                      </div>
+                    </div>
+                    <StatusPill tone={operatorTone}>
+                      {dashboardSizing.sizingMode}
+                    </StatusPill>
+                  </div>
+                  <p className="mt-4 max-w-4xl text-base leading-7 text-zinc-200">
+                    {operatorSummary}
+                  </p>
+                  <div className="mt-5 grid gap-3 md:grid-cols-3">
+                    <MiniMetric
+                      label="Assets"
+                      value={actionableTickersLabel}
+                      sub={showingBlockedReviewIdeas ? reviewIdeasMessage : undefined}
+                      emphasis="quiet"
+                    />
+                    <MiniMetric
+                      label="Portfolio cap"
+                      value={canonicalPortfolioCap}
+                      sub="canonical sizing output"
+                      emphasis="quiet"
+                    />
+                    <MiniMetric
+                      label="Starter size"
+                      value={canonicalStarterSize}
+                      sub="current capacity gate"
+                      emphasis="quiet"
+                    />
+                  </div>
+                </div>
 
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
-                <MiniMetric
-                  label="Final decision"
-                  value={executiveIA.executiveReasoning.finalDecision}
-                />
-                <MiniMetric
-                  label="Participation mode"
-                  value={
-                    executiveIA.executiveReasoning.recommendedParticipationMode
-                  }
-                />
-                <MiniMetric
-                  label="Max exposure"
-                  value={executiveIA.executiveReasoning.maxExposure}
-                />
-              </div>
+                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Primary unlock
+                      </div>
+                      <div className="mt-2 text-lg font-semibold text-white">
+                        {topCanonicalRestriction?.label ?? "No active limiter"}
+                      </div>
+                    </div>
+                    <StatusPill tone={unlockProgressTone}>
+                      {survivalUnlockStatus}
+                    </StatusPill>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-zinc-400">
+                    {primaryUnlockCondition}
+                  </p>
+                  <div className="mt-4">
+                    <div className="mb-1 flex justify-between text-[11px] text-zinc-500">
+                      <span>Survival confidence</span>
+                      <span>
+                        {survivalConfidenceValue == null
+                          ? "Pending"
+                          : `${Math.round(survivalConfidenceValue)}/100`}
+                      </span>
+                    </div>
+	                    <div className="h-2 rounded-full bg-zinc-800">
+	                      <div
+	                        className="h-2 rounded-full bg-[#FDD000]"
+	                        style={{ width: `${restorationProgressPct}%` }}
+	                      />
+	                    </div>
+                  </div>
+                  <div className="mt-4 rounded-lg bg-black/25 px-3 py-2 text-xs leading-5 text-zinc-500 ring-1 ring-white/[0.05]">
+                    Invalidate: {primaryInvalidationCondition}
+                  </div>
+	                </div>
+	              </div>
 
-              <div className="mt-4 grid gap-3 md:grid-cols-4">
+	              <div className="mt-4 rounded-lg border border-white/10 bg-[#101010] px-4 py-4">
+	                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+	                    <div className="min-w-0">
+	                    <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#FDD000]">
+	                      Survival Memory Restoration Ledger
+	                    </div>
+	                    <div className="mt-2 text-lg font-semibold text-white">
+	                      {restorationLedger?.exactUnlockCondition ??
+	                        restorationProgressDiagnostic?.summary ??
+	                        restorationPrimaryBlocker}
+	                    </div>
+	                  </div>
+	                  <StatusPill tone={unlockProgressTone}>
+	                    {restorationLedgerStateLabel}
+	                  </StatusPill>
+	                </div>
+	                {restorationLedger?.boundarySummary ? (
+	                  <p className="mt-3 text-sm leading-6 text-zinc-500">
+	                    {restorationLedger.boundarySummary}
+	                  </p>
+	                ) : null}
+	                <div className="mt-4">
+	                  <QualityBar
+	                    value={restorationProgressPct}
+	                    label="Normal sizing restoration"
+	                  />
+	                </div>
+	                <div className="mt-4 grid gap-3 md:grid-cols-4">
+	                  <MiniMetric
+	                    label="Clean proof"
+	                    value={cleanReducedSizeOutcomeValue}
+	                    sub={reducedSizeOutcomeSub}
+	                    tone={
+	                      restorationOutcomeProof &&
+	                      restorationOutcomeProof.cleanReducedSizeOutcomeCount >=
+	                        restorationOutcomeProof.requiredCleanOutcomes
+	                        ? "good"
+	                        : "warn"
+	                    }
+	                  />
+	                  <MiniMetric
+	                    label="Ledger state"
+	                    value={restorationLedgerStateLabel}
+	                    sub="scarred -> watch -> limited -> clear"
+	                    tone={unlockProgressTone}
+	                  />
+	                  <MiniMetric
+	                    label="Current cap"
+	                    value={restorationCurrentCapValue}
+	                    sub="reduced-size proof lane"
+	                  />
+	                  <MiniMetric
+	                    label="Normal target"
+	                    value={restorationNormalTargetValue}
+	                    sub="restoration destination"
+	                  />
+	                </div>
+	                {restorationLedger?.statePath?.length ? (
+	                  <div className="mt-4 grid gap-2 md:grid-cols-4">
+	                    {restorationLedger.statePath.map((step) => (
+	                      <div
+	                        key={step.state}
+	                        className="rounded-lg border border-white/10 bg-black/20 px-3 py-2"
+	                      >
+	                        <div className="flex items-center justify-between gap-2">
+	                          <div className="min-w-0 text-sm font-medium text-zinc-200">
+	                            {step.label}
+	                          </div>
+	                          <StatusPill tone={step.passed ? "good" : "neutral"}>
+	                            {step.passed ? "clear" : "open"}
+	                          </StatusPill>
+	                        </div>
+	                        <div className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
+	                          {step.detail}
+	                        </div>
+	                      </div>
+	                    ))}
+	                  </div>
+	                ) : null}
+	                <div className="mt-4 grid gap-3 md:grid-cols-1">
+	                  <MiniMetric
+	                    label="Next gate"
+	                    value={
+	                      restorationGatePreview.find((gate) => !gate.passed)
+	                        ?.label ?? "Clear"
+	                    }
+	                    sub={restorationNextActions[0]}
+	                    tone={
+	                      restorationGatePreview.some((gate) => !gate.passed)
+	                        ? "warn"
+	                        : "good"
+	                    }
+	                  />
+	                </div>
+	                {restorationLedgerEntries.length ? (
+	                  <div className="mt-4 overflow-hidden rounded-lg border border-white/10 bg-black/20">
+	                    <div className="grid grid-cols-[minmax(0,1fr)_80px_100px_110px] gap-3 border-b border-white/10 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+	                      <span>Reduced-size trade</span>
+	                      <span>Clean</span>
+	                      <span>MAE</span>
+	                      <span>Cost</span>
+	                    </div>
+	                    {restorationLedgerEntries.map((entry) => (
+	                      <div
+	                        key={entry.id}
+	                        className="grid grid-cols-[minmax(0,1fr)_80px_100px_110px] gap-3 border-b border-white/[0.06] px-3 py-2 text-xs last:border-b-0"
+	                      >
+	                        <div className="min-w-0">
+	                          <div className="truncate font-medium text-zinc-200">
+	                            {entry.asset ?? entry.id}
+	                          </div>
+	                          <div className="truncate text-zinc-600">
+	                            {fmtPlainPct(entry.maxExposure)} cap · {fmtPlainPct(entry.realizedReturn)} result
+	                          </div>
+	                        </div>
+	                        <StatusPill tone={entry.clean ? "good" : "bad"}>
+	                          {entry.clean ? "yes" : "no"}
+	                        </StatusPill>
+	                        <div className="text-zinc-400">
+	                          {Math.round(entry.maxAdverseExcursion)} / {entry.maxAdverseExcursionBoundary}
+	                        </div>
+	                        <div className="truncate text-zinc-400">
+	                          {Math.round(entry.survivalCost)} / {entry.survivalCostBoundary}
+	                        </div>
+	                      </div>
+	                    ))}
+	                  </div>
+	                ) : null}
+	                {restorationGatePreview.length ? (
+	                  <div className="mt-4 grid gap-2 md:grid-cols-2">
+	                    {restorationGatePreview.map((gate) => (
+	                      <div
+	                        key={gate.id}
+	                        className="rounded-lg border border-white/10 bg-black/20 px-3 py-2"
+	                      >
+	                        <div className="flex items-start justify-between gap-3">
+	                          <div className="min-w-0 text-sm font-medium text-zinc-200">
+	                            {gate.label}
+	                          </div>
+	                          <StatusPill tone={gate.passed ? "good" : "warn"}>
+	                            {gate.passed ? "clear" : "open"}
+	                          </StatusPill>
+	                        </div>
+	                        <div className="mt-2 text-xs leading-5 text-zinc-500">
+	                          {gate.current} / target {gate.target}
+	                        </div>
+	                      </div>
+	                    ))}
+	                  </div>
+	                ) : null}
+	              </div>
+
+	              <div className="mt-4 grid gap-3 md:grid-cols-4">
+                <MiniMetric
+                  label="Per-asset cap"
+                  value={canonicalPerAssetCap}
+                  sub="top idea cap"
+                  tone={capacityTone}
+                />
                 <MiniMetric
                   label="Trust"
                   value={fmtPlainPct(dashboardDecisionStates.trust.score, 0)}
@@ -6089,18 +6544,10 @@ export default function Dashboard() {
                   )}
                   sub={
                     dashboardDecisionStates.permission.allowed
-                      ? "Action may proceed inside governance"
-                      : "Action is not allowed now"
+                      ? "Allowed inside governance"
+                      : "Not allowed now"
                   }
                   tone={permissionTone}
-                />
-                <MiniMetric
-                  label="Capacity"
-                  value={fmtPlainPct(
-                    dashboardDecisionStates.capacity.maxExposure,
-                  )}
-                  sub={dashboardDecisionStates.capacity.mode.replace(/_/g, " ")}
-                  tone={capacityTone}
                 />
                 <MiniMetric
                   label="Urgency"
@@ -6112,44 +6559,44 @@ export default function Dashboard() {
                   tone={urgencyTone}
                 />
               </div>
-
-              <div className="mt-4 grid gap-3 lg:grid-cols-3">
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Main reason for restriction
-                  </div>
-                  <div className="mt-2 text-sm font-semibold text-white">
-                    {executiveIA.executiveReasoning.mainReasonForRestriction
-                      ?.label ?? "No active restriction"}
-                  </div>
-                  <p className="mt-1 text-xs leading-5 text-zinc-500">
-                    {executiveIA.executiveReasoning.mainReasonForRestriction
-                      ?.explanation ??
-                      "The current dashboard has not identified a primary limiter."}
-                  </p>
-                </div>
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Primary unlock condition
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-zinc-300">
-                    {executiveIA.executiveReasoning.primaryUnlockCondition}
-                  </p>
-                </div>
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Primary invalidation condition
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-zinc-300">
-                    {
-                      executiveIA.executiveReasoning
-                        .primaryInvalidationCondition
-                    }
-                  </p>
-                </div>
-              </div>
             </SectionShell>
 
+            <AdvancedDisclosure
+              title="Governance and learning audit"
+              description="Decision authority, execution quality, discovery learning, and wisdom diagnostics are preserved here without competing with the live command."
+              summary={
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <MiniMetric
+                    label="Command"
+                    value={governanceCommand.label}
+                    sub={governanceCommand.action}
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Execution"
+                    value={
+                      executionQualityDiagnostic
+                        ? `${Math.round(executionQualityDiagnostic.score)}/100`
+                        : "Pending"
+                    }
+                    sub={
+                      executionQualityDiagnostic?.recommendedExecutionMode?.replace(
+                        /_/g,
+                        " ",
+                      ) ?? "mode pending"
+                    }
+                    emphasis="quiet"
+                  />
+                  <MiniMetric
+                    label="Learning"
+                    value={fmtPlainPct(discoveryIntelligenceDiagnostic?.score, 0)}
+                    sub="Discovery Intelligence"
+                    emphasis="quiet"
+                  />
+                </div>
+              }
+            >
+              <div className="grid gap-5">
             <SectionShell
               eyebrow="Governance Evolution"
               title="Decision authority and learning loop"
@@ -6839,6 +7286,8 @@ export default function Dashboard() {
                 </div>
               </div>
             </SectionShell>
+              </div>
+            </AdvancedDisclosure>
 
             <SectionShell
               eyebrow="Evidence Summary"
@@ -6996,23 +7445,10 @@ export default function Dashboard() {
                   >
                     {executiveIA.whyNotFullSize.mode}
                   </StatusPill>
-                }
-              >
+              }
+            >
                 <div className="space-y-3">
-                  {(executiveIA.whyNotFullSize.factors.length
-                    ? executiveIA.whyNotFullSize.factors
-                    : [
-                        {
-                          priority: 1,
-                          code: "reduced_size",
-                          label: "No full-size restriction is active",
-                          explanation:
-                            "The current IA layer does not see a reduced, limited, or blocked participation gate.",
-                          unlockCondition:
-                            "Maintain the active trust, safety, reliability, and opportunity thresholds.",
-                        },
-                      ]
-                  ).map((factor) => (
+                  {restrictionImpactRows.map((factor) => (
                     <div
                       key={`${factor.code}-${factor.priority}`}
                       className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
@@ -7028,13 +7464,33 @@ export default function Dashboard() {
                           <p className="mt-1 text-xs leading-5 text-zinc-500">
                             {factor.explanation}
                           </p>
-                          <p className="mt-2 text-xs leading-5 text-zinc-400">
+                          <div className="mt-3">
+                            <div className="mb-1 flex justify-between text-[11px] text-zinc-500">
+                              <span>Sizing impact</span>
+                              <span>{factor.impactPct}%</span>
+                            </div>
+                            <div className="h-1.5 rounded-full bg-zinc-800">
+                              <div
+                                className="h-1.5 rounded-full bg-[#FDD000]"
+                                style={{
+                                  width: `${clamp(factor.impactPct)}%`,
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-400">
                             Unlock: {factor.unlockCondition}
                           </p>
                         </div>
                       </div>
                     </div>
                   ))}
+                  {hiddenRestrictionCount ? (
+                    <div className="rounded-lg border border-white/10 bg-white/[0.025] px-4 py-3 text-xs text-zinc-500">
+                      {hiddenRestrictionCount} lower-impact restrictions are in
+                      the raw audit.
+                    </div>
+                  ) : null}
                 </div>
               </SectionShell>
 
@@ -7043,54 +7499,74 @@ export default function Dashboard() {
                 title="What would change the decision?"
                 action={<StatusPill tone="neutral">Unlocks</StatusPill>}
               >
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 lg:grid-cols-3">
                   <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
                     <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
                       Increase exposure
                     </div>
                     <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
-                      {executiveIA.decisionChange.increaseExposure
-                        .slice(0, 4)
-                        .map((item, index) => (
-                          <div key={`${item}-${index}`}>{item}</div>
-                        ))}
+                      {increaseExposureTriggers.map((item, index) => (
+                        <div key={`${item}-${index}`}>{item}</div>
+                      ))}
                     </div>
                   </div>
                   <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
                     <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                      Reduce exposure
+                      Reduce or invalidate
                     </div>
                     <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
-                      {executiveIA.decisionChange.reduceExposure
-                        .slice(0, 4)
-                        .map((item, index) => (
-                          <div key={`${item}-${index}`}>{item}</div>
-                        ))}
+                      {reduceOrInvalidateTriggers.map((item, index) => (
+                        <div key={`${item}-${index}`}>{item}</div>
+                      ))}
                     </div>
                   </div>
                   <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
                     <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                      Invalidate signal
+                      Restoration path
                     </div>
                     <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
-                      {executiveIA.decisionChange.invalidateSignal
-                        .slice(0, 4)
-                        .map((item, index) => (
-                          <div key={`${item}-${index}`}>{item}</div>
-                        ))}
+                      {restorationPathTriggers.map((item, index) => (
+                        <div key={`${item}-${index}`}>{item}</div>
+                      ))}
                     </div>
                   </div>
-                  <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                      Watch to limited to normal
-                    </div>
-                    <div className="mt-3 space-y-2 text-xs leading-5 text-zinc-400">
-                      {executiveIA.decisionChange.watchToLimitedToNormal.map(
-                        (item, index) => (
-                          <div key={`${item}-${index}`}>{item}</div>
-                        ),
-                      )}
-                    </div>
+                </div>
+                <div className="mt-3 rounded-lg border border-white/10 bg-white/[0.025] px-4 py-3">
+                  <div className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                    Accountability next
+                  </div>
+                  <div className="mt-3 grid gap-2 md:grid-cols-3">
+                    {(accountabilityHighlights.length
+                      ? accountabilityHighlights
+                      : governanceEvolution.accountabilityLoop.slice(0, 3)
+                    ).map((step) => (
+                      <div
+                        key={`decision-next-${step.id}`}
+                        className="rounded-md bg-black/25 px-3 py-2 ring-1 ring-white/[0.05]"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-semibold text-zinc-200">
+                            {step.label}
+                          </span>
+                          <StatusPill
+                            tone={
+                              step.status === "complete"
+                                ? "good"
+                                : step.status === "blocked"
+                                  ? "bad"
+                                  : step.status === "review"
+                                    ? "warn"
+                                    : "neutral"
+                            }
+                          >
+                            {step.status}
+                          </StatusPill>
+                        </div>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
+                          {step.nextAction}
+                        </p>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </SectionShell>
@@ -8645,7 +9121,7 @@ export default function Dashboard() {
                             setIsSelectedCardFlipped(true);
                           }
                         }}
-                        className="relative min-h-[320px] rounded-xl text-left outline-none [perspective:1400px]"
+                        className="relative min-h-[430px] rounded-xl text-left outline-none [perspective:1400px]"
                         aria-label={
                           isSelected && isFlipped
                             ? "Show asset summary"
@@ -8654,7 +9130,7 @@ export default function Dashboard() {
                       >
                         <div
                           className={cx(
-                            "relative min-h-[320px] rounded-xl transition-transform duration-500 [transform-style:preserve-3d]",
+                            "relative min-h-[430px] rounded-xl transition-transform duration-500 [transform-style:preserve-3d]",
                             isFlipped && "[transform:rotateY(180deg)]",
                           )}
                         >
@@ -8685,8 +9161,26 @@ export default function Dashboard() {
                             <div className="mt-5 space-y-3">
                               <QualityBar
                                 value={stock.setupQuality}
-                                label="Quality score"
+                                label="Overall quality"
                               />
+                              <div className="grid grid-cols-2 gap-2 rounded-lg border border-white/10 bg-black/20 p-3">
+                                <QualityBar
+                                  value={numeric(stock.trendQuality)}
+                                  label="Trend"
+                                />
+                                <QualityBar
+                                  value={clamp(100 - numeric(stock.riskPressure))}
+                                  label="Risk control"
+                                />
+                                <QualityBar
+                                  value={expectedMoveScore(stock.expectedMove)}
+                                  label="Return setup"
+                                />
+                                <QualityBar
+                                  value={numeric(stock.timingQuality)}
+                                  label="Timing"
+                                />
+                              </div>
                               <div className="grid grid-cols-2 gap-2 text-xs text-zinc-400">
                                 <div>
                                   <div className="text-zinc-500">
@@ -8719,7 +9213,7 @@ export default function Dashboard() {
                                 ) : null}
                               </div>
                               <p className="line-clamp-3 text-xs leading-5 text-zinc-400">
-                                {stock.explanation}
+                                {assetRankReason(stock)}
                               </p>
                               {stock.discovery ? (
                                 <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs leading-5 text-zinc-400">
