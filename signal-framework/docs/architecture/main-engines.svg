@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 760" role="img" aria-labelledby="title desc">
+  <title id="title">Signal main engines</title>
+  <desc id="desc">Signal engines are grouped into perception, evidence, and governance planes that produce an auditable snapshot.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155" />
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .plane { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; }
+      .node { fill: #ffffff; stroke: #334155; stroke-width: 2; }
+      .core { fill: #ecfeff; stroke: #0e7490; stroke-width: 2.4; }
+      .gov { fill: #fff7ed; stroke: #c2410c; stroke-width: 2.2; }
+      .line { fill: none; stroke: #334155; stroke-width: 2.1; marker-end: url(#arrow); }
+      .muted { fill: none; stroke: #94a3b8; stroke-width: 1.8; marker-end: url(#arrow); }
+      .label { fill: #0f172a; font: 600 17px Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+      .small { fill: #475569; font: 13px Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+      .title { fill: #0f172a; font: 700 24px Arial, sans-serif; }
+      .plane-title { fill: #334155; font: 700 14px Arial, sans-serif; letter-spacing: 0.6px; text-transform: uppercase; }
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1280" height="760" />
+  <text class="title" x="44" y="48">Signal main engines</text>
+
+  <rect class="plane" x="44" y="84" width="360" height="594" rx="8" />
+  <text class="plane-title" x="68" y="118">Perception plane</text>
+
+  <rect class="plane" x="460" y="84" width="360" height="594" rx="8" />
+  <text class="plane-title" x="484" y="118">Evidence plane</text>
+
+  <rect class="plane" x="876" y="84" width="360" height="594" rx="8" />
+  <text class="plane-title" x="900" y="118">Governance plane</text>
+
+  <rect class="node" x="100" y="156" width="248" height="58" rx="8" />
+  <text class="label" x="224" y="185">Metric registry</text>
+  <rect class="node" x="100" y="254" width="248" height="58" rx="8" />
+  <text class="label" x="224" y="283">Perception engine</text>
+  <rect class="node" x="100" y="352" width="248" height="58" rx="8" />
+  <text class="label" x="224" y="381">Regime</text>
+  <rect class="node" x="100" y="450" width="248" height="58" rx="8" />
+  <text class="label" x="224" y="479">Diagnostics</text>
+  <rect class="node" x="100" y="548" width="248" height="58" rx="8" />
+  <text class="label" x="224" y="577">Need detection</text>
+
+  <path class="line" d="M 224 214 V 250" />
+  <path class="line" d="M 224 312 V 348" />
+  <path class="line" d="M 224 410 V 446" />
+  <path class="line" d="M 224 508 V 544" />
+
+  <rect class="node" x="516" y="136" width="248" height="58" rx="8" />
+  <text class="label" x="640" y="165">Reflection</text>
+  <rect class="node" x="516" y="224" width="248" height="58" rx="8" />
+  <text class="label" x="640" y="253">Calibration</text>
+  <rect class="node" x="516" y="312" width="248" height="58" rx="8" />
+  <text class="label" x="640" y="341">Judgement</text>
+  <rect class="node" x="516" y="400" width="248" height="58" rx="8" />
+  <text class="label" x="640" y="429">Discovery</text>
+  <rect class="node" x="516" y="488" width="248" height="58" rx="8" />
+  <text class="label" x="640" y="517">Recognition</text>
+  <rect class="node" x="516" y="576" width="248" height="58" rx="8" />
+  <text class="label" x="640" y="605">Belief</text>
+
+  <path class="line" d="M 640 194 V 220" />
+  <path class="line" d="M 640 282 V 308" />
+  <path class="line" d="M 640 370 V 396" />
+  <path class="line" d="M 640 458 V 484" />
+  <path class="line" d="M 640 546 V 572" />
+  <path class="line" d="M 348 283 H 512" />
+
+  <rect class="gov" x="932" y="136" width="248" height="58" rx="8" />
+  <text class="label" x="1056" y="165">Survival memory</text>
+  <rect class="gov" x="932" y="224" width="248" height="58" rx="8" />
+  <text class="label" x="1056" y="253">Trust governor</text>
+  <rect class="gov" x="932" y="312" width="248" height="58" rx="8" />
+  <text class="label" x="1056" y="341">Recovery</text>
+  <rect class="gov" x="932" y="400" width="248" height="58" rx="8" />
+  <text class="label" x="1056" y="429">Sizing</text>
+  <rect class="gov" x="932" y="488" width="248" height="58" rx="8" />
+  <text class="label" x="1056" y="517">Resolve</text>
+  <rect class="core" x="932" y="576" width="248" height="58" rx="8" />
+  <text class="label" x="1056" y="596">Signal snapshot</text>
+  <text class="small" x="1056" y="619">reasons, blockers, unlocks</text>
+
+  <path class="line" d="M 1056 194 V 220" />
+  <path class="line" d="M 1056 282 V 308" />
+  <path class="line" d="M 1056 370 V 396" />
+  <path class="line" d="M 1056 458 V 484" />
+  <path class="line" d="M 1056 546 V 572" />
+  <path class="line" d="M 764 605 H 928" />
+  <path class="muted" d="M 764 253 H 928" />
+  <path class="muted" d="M 764 341 H 928" />
+  <path class="muted" d="M 348 479 H 512" />
+  <path class="muted" d="M 348 577 H 512" />
+</svg>

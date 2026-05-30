@@ -1,0 +1,233 @@
+# Signal Framework
+
+Signal is a domain-neutral framework for turning observed state into governed action.
+
+For the compact system map, see [Signal Framework Architecture](./ARCHITECTURE.md).
+
+The first-class lifecycle is:
+
+```txt
+Perception -> Reflection -> Calibration -> Decision -> Agency -> Action
+```
+
+Each layer has a separate responsibility:
+
+- Perception: what is happening?
+- Reflection: how trustworthy is my understanding?
+- Calibration: how much of the current confidence is supported by past evidence?
+- Decision: what should happen?
+- Agency: should the decision be allowed to proceed?
+- Action: execute the approved intent.
+
+Reflection increases self-awareness. Calibration turns raw confidence into evidence-backed confidence. Agency increases autonomy. These layers do not contain application-specific logic.
+
+## Reflection
+
+Reflection evaluates understanding before a decision is committed. It does not decide what is best, does not approve execution, and does not execute anything.
+
+Use `reflect(input)` to inspect:
+
+- historical predictions, decisions, and outcomes
+- confidence calibration against observed correctness
+- nearest historical states and outcome distributions
+- agreement or contradiction across perception layers
+- missing, stale, unknown, or low-quality inputs
+- counterfactual candidate evaluations
+
+```ts
+import { reflect } from "./signal-framework";
+
+const reflection = reflect({
+  predictions: [
+    { id: "p1", confidence: 80, expectedOutcome: "accepted" },
+  ],
+  outcomes: [
+    { predictionId: "p1", label: "accepted" },
+  ],
+  currentState: { load: 42, mode: "steady" },
+  history: [
+    {
+      id: "prior-1",
+      state: { load: 40, mode: "steady" },
+      outcome: { label: "accepted" },
+    },
+  ],
+  perceptionLayers: {
+    information: 82,
+    quality: 78,
+    stability: 80,
+  },
+  inputs: [
+    { key: "source-a", value: "present", quality: 95 },
+  ],
+  requiredInputs: ["source-a"],
+  candidateDecisions: [
+    { id: "continue", confidence: 76, expectedUtility: 20 },
+    { id: "pause", confidence: 62, expectedUtility: 8, uncertainty: 30 },
+  ],
+});
+
+console.log(reflection.reflectionScore);
+console.log(reflection.recommendedConfidenceCap);
+```
+
+The result is auditable. Component scores, weights, formulas, reasons, known unknowns, and normalized sub-results are returned alongside `reflectionScore`.
+
+## Calibration
+
+Calibration compares prior beliefs with outcomes so later confidence is earned, not merely asserted. It is generic: predictions, outcomes, metadata, and labels can come from any domain.
+
+Use `calibrate(input)` or `calibrateConfidence(input)` to inspect:
+
+- historical accuracy
+- calibration error
+- Brier score when outcomes can be interpreted as binary
+- 0-10, 10-20, ..., 90-100 reliability buckets
+- calibrated confidence
+- trustworthiness
+- warnings such as insufficient history, poor calibration, overconfidence, unstable outcomes, or low trustworthiness
+
+```ts
+import { InMemoryCalibrationStore, calibrate } from "./signal-framework";
+
+const store = new InMemoryCalibrationStore();
+
+await store.record({
+  id: "prior-routing-1",
+  timestamp: "2026-01-01T12:00:00.000Z",
+  prediction: { expectedOutcome: "accepted" },
+  confidence: 82,
+  outcome: { label: "accepted" },
+  metadata: { workflow: "document-routing" },
+});
+
+const calibration = calibrate({
+  current: {
+    prediction: { expectedOutcome: "accepted" },
+    confidence: 90,
+  },
+  history: await store.list({ metadata: { workflow: "document-routing" } }),
+});
+
+console.log(calibration.rawConfidence);
+console.log(calibration.calibratedConfidence);
+console.log(calibration.trustworthiness);
+```
+
+History stores are available for in-process and file-backed memory:
+
+```ts
+import {
+  FileSystemCalibrationStore,
+  InMemoryCalibrationStore,
+} from "./signal-framework";
+
+const volatileHistory = new InMemoryCalibrationStore();
+const durableHistory = new FileSystemCalibrationStore("./signal-history.json");
+```
+
+Calibration never inflates confidence when evidence is thin. If history is insufficient, the result says so explicitly instead of pretending certainty exists.
+
+## Decision
+
+Decision remains the layer that chooses an intent. It may use perception, reflection, and calibration output, but it must not execute the intent. A decision result should be treated as a proposal until Agency authorizes it.
+
+Generic examples:
+
+- A document workflow decides to route a file for review.
+- A support workflow decides to ask for more information.
+- A device-control workflow decides to reduce an actuator setting.
+- A release workflow decides to continue a staged rollout.
+
+## Agency
+
+Agency evaluates whether a supplied decision may proceed. It does not generate a better decision and does not execute the decision.
+
+Use `authorize(input)` or its alias `commit(input)` to evaluate:
+
+- authority level
+- generic constraints
+- human-review policy
+- uncertainty thresholds
+- reflection quality
+- calibrated decision confidence
+- execution readiness
+
+```ts
+import { authorize } from "./signal-framework";
+
+const agency = authorize({
+  decision: {
+    id: "decision-1",
+    type: "route-item",
+    confidence: 82,
+    uncertainty: 18,
+    impact: 30,
+  },
+  reflection: {
+    reflectionScore: reflection.reflectionScore,
+    recommendedConfidenceCap: reflection.recommendedConfidenceCap,
+  },
+  calibration,
+  authority: { level: "operator" },
+  requiredAuthority: "observer",
+  constraints: [
+    { id: "rate", type: "rate-limit", value: 4, limit: 10 },
+    { id: "quality", type: "quality-requirement", value: 90, limit: 70 },
+  ],
+  reviewPolicy: { mode: "review-when-uncertainty-high", uncertaintyThreshold: 60 },
+  execution: { readiness: 90 },
+});
+
+console.log(agency.status);
+console.log(agency.agencyScore);
+console.log(agency.calibratedConfidence);
+```
+
+Possible statuses include `approved`, `denied`, `deferred`, `escalated`, `requires-review`, `limited`, and `rollback`. Custom statuses are supported.
+
+The result is auditable. It includes raw confidence, calibrated confidence, trustworthiness, calibration warnings, authority evaluation, constraint evaluation, review requirements, status-resolution notes, reasons, component scores, weights, and thresholds.
+
+## Action
+
+Action is the only layer that executes. It should consume an approved Agency result and the original decision intent. The framework keeps Agency separate from Action so execution can be replaced, simulated, reviewed, retried, or rolled back without changing decision logic.
+
+## Generic Usage Examples
+
+Document processing:
+
+- Perception reads file metadata and extraction quality.
+- Reflection checks prior extraction accuracy, stale inputs, and layer agreement.
+- Calibration adjusts confidence based on similar file outcomes.
+- Decision proposes routing the file to review or auto-classification.
+- Agency verifies authority, review policy, and quality constraints.
+- Action routes the file only if Agency approves.
+
+Support routing:
+
+- Perception observes message urgency, completeness, and confidence.
+- Reflection checks whether similar cases were handled correctly.
+- Calibration checks whether past urgency confidence matched outcomes.
+- Decision proposes reply, escalation, or request-for-info.
+- Agency checks operator authority and review thresholds.
+- Action sends or queues the approved intent.
+
+Device automation:
+
+- Perception observes sensor values and stability.
+- Reflection checks freshness, missing readings, and historical outcomes.
+- Calibration tempers confidence when past sensor predictions were unreliable.
+- Decision proposes a setting change.
+- Agency checks resource, timing, and safety constraints.
+- Action applies the setting only after approval.
+
+Release governance:
+
+- Perception observes test results, rollout state, and incident signals.
+- Reflection evaluates completeness, consistency, and prior rollout outcomes.
+- Calibration compares prior rollout confidence with realized outcomes.
+- Decision proposes continue, pause, or rollback.
+- Agency checks authority, rate limits, human-review rules, and readiness.
+- Action changes rollout state only when authorized.
+
+These examples are intentionally generic. Application adapters may translate local data into Signal inputs, but Reflection, Calibration, and Agency remain reusable framework capabilities.

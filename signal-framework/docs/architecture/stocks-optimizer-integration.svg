@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">Stocks Optimizer integration with Signal</title>
+  <desc id="desc">Stocks Optimizer owns market data, API, backtests, adapters, and UI. Signal owns generic evidence and governance outputs.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155" />
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .app { fill: #ffffff; stroke: #334155; stroke-width: 2; }
+      .signal { fill: #ecfeff; stroke: #0e7490; stroke-width: 2.4; }
+      .edge { fill: #fff7ed; stroke: #c2410c; stroke-width: 2.2; }
+      .lane { fill: none; stroke: #cbd5e1; stroke-width: 2; stroke-dasharray: 8 8; }
+      .line { fill: none; stroke: #334155; stroke-width: 2.2; marker-end: url(#arrow); }
+      .muted { fill: none; stroke: #64748b; stroke-width: 1.9; marker-end: url(#arrow); }
+      .label { fill: #0f172a; font: 600 17px Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+      .small { fill: #475569; font: 13px Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+      .title { fill: #0f172a; font: 700 24px Arial, sans-serif; }
+      .lane-title { fill: #334155; font: 700 14px Arial, sans-serif; letter-spacing: 0.6px; text-transform: uppercase; }
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1280" height="720" />
+  <text class="title" x="44" y="48">Stocks Optimizer integration</text>
+
+  <rect class="lane" x="44" y="84" width="1192" height="268" rx="8" />
+  <text class="lane-title" x="68" y="118">Stocks Optimizer application</text>
+
+  <rect class="lane" x="44" y="408" width="1192" height="228" rx="8" />
+  <text class="lane-title" x="68" y="442">Signal framework</text>
+
+  <rect class="app" x="92" y="160" width="188" height="68" rx="8" />
+  <text class="label" x="186" y="187">Market data</text>
+  <text class="small" x="186" y="211">lists, quotes, candles</text>
+
+  <path class="line" d="M 280 194 H 342" />
+  <rect class="app" x="346" y="160" width="188" height="68" rx="8" />
+  <text class="label" x="440" y="187">API server</text>
+  <text class="small" x="440" y="211">routes and cache</text>
+
+  <path class="line" d="M 534 194 H 596" />
+  <rect class="app" x="600" y="160" width="188" height="68" rx="8" />
+  <text class="label" x="694" y="187">Backtest</text>
+  <text class="small" x="694" y="211">history and robustness</text>
+
+  <path class="line" d="M 788 194 H 850" />
+  <rect class="app" x="854" y="160" width="188" height="68" rx="8" />
+  <text class="label" x="948" y="187">Readiness</text>
+  <text class="small" x="948" y="211">gates and remediation</text>
+
+  <path class="line" d="M 948 228 V 278 H 788" />
+  <rect class="app" x="600" y="270" width="188" height="68" rx="8" />
+  <text class="label" x="694" y="297">Adapters</text>
+  <text class="small" x="694" y="321">domain to Signal input</text>
+
+  <path class="line" d="M 694 338 V 424" />
+  <rect class="signal" x="600" y="448" width="188" height="68" rx="8" />
+  <text class="label" x="694" y="475">Signal engines</text>
+  <text class="small" x="694" y="499">evidence and governance</text>
+
+  <path class="line" d="M 788 482 H 850" />
+  <rect class="signal" x="854" y="448" width="188" height="68" rx="8" />
+  <text class="label" x="948" y="475">Diagnostics</text>
+  <text class="small" x="948" y="499">reasons and blockers</text>
+
+  <path class="line" d="M 948 448 V 306 H 1042" />
+  <rect class="app" x="1046" y="270" width="150" height="68" rx="8" />
+  <text class="label" x="1121" y="297">Dashboard</text>
+  <text class="small" x="1121" y="321">review surface</text>
+
+  <path class="muted" d="M 1046 304 H 826 V 582 H 792" />
+  <rect class="edge" x="600" y="548" width="188" height="68" rx="8" />
+  <text class="label" x="694" y="575">Action boundary</text>
+  <text class="small" x="694" y="599">app owns execution</text>
+
+  <path class="muted" d="M 534 194 C 558 128, 632 108, 694 160" />
+  <path class="muted" d="M 1121 270 V 92 H 440 V 156" />
+</svg>
