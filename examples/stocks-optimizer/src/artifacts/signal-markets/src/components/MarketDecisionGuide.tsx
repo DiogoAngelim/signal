@@ -268,43 +268,26 @@ export function GoalCard({
 }
 
 export function MarketContextCard({
-  options,
-  onSelect,
   selectedMarket,
   facts,
 }: {
-  options: AssetClassOption[];
-  onSelect: (value: string) => void;
   selectedMarket: string;
   facts: GuideFact[];
 }) {
   return (
     <CardShell
-      title="Market Context"
-      eyebrow="Subtle identity"
+      title="What We See Right Now"
+      eyebrow="After your choice"
       testId="market-context-card"
     >
       <div className="grid min-w-0 gap-3">
-        <div
-          data-testid="market-selector"
-          className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-3"
-        >
-          {options.map((option) => (
-            <button
-              key={option.label}
-              type="button"
-              onClick={() => onSelect(option.value)}
-              aria-pressed={option.active}
-              className={cx(
-                "min-h-11 rounded-md border px-3 py-2 text-left text-sm font-semibold transition",
-                option.active
-                  ? "border-zinc-950 bg-zinc-950 text-white"
-                  : "border-zinc-200 bg-zinc-50 text-zinc-800 hover:border-zinc-400 hover:bg-white",
-              )}
-            >
-              {option.label}
-            </button>
-          ))}
+        <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
+          <div className="text-xs font-medium text-zinc-500">
+            Selected market
+          </div>
+          <div className="mt-1 break-words text-lg font-semibold leading-tight text-zinc-950">
+            {selectedMarket || "Pending"}
+          </div>
         </div>
         <div className="grid min-w-0 gap-2 sm:grid-cols-3">
           {facts.map((fact) => (
@@ -312,8 +295,8 @@ export function MarketContextCard({
           ))}
         </div>
         <p className="break-words text-sm leading-6 text-zinc-600">
-          Signal reads {selectedMarket || "the selected market"} as a decision
-          context, not as a scoreboard.
+          Signal uses this choice to explain conditions, find opportunities,
+          and keep the recommendation focused.
         </p>
       </div>
     </CardShell>
@@ -618,50 +601,42 @@ export function defaultGuideSteps(input: {
   return [
     {
       id: "understand",
-      label: "What is happening now?",
-      question: "The current market setup in plain language.",
+      label: "Choose Market",
+      question: "Start with what you care about.",
       summary: input.reality,
       status: "Goal",
       tone: "neutral",
     },
     {
-      id: "recommendation",
-      label: "What Signal suggests",
-      question: "The safest justified action right now.",
-      summary: input.recommendation,
-      status: "Next",
+      id: "reality",
+      label: "Review Current Conditions",
+      question: "See the plain-language read.",
+      summary: input.reality,
+      status: "Now",
+      tone: input.tone,
+    },
+    {
+      id: "options",
+      label: "Explore Opportunities",
+      question: "Find what deserves attention.",
+      summary: input.options,
+      status: "Ideas",
       tone: input.tone,
     },
     {
       id: "why",
-      label: "Why Signal is confident or cautious",
-      question: "The plain reason behind the recommendation.",
+      label: "Understand Reasoning",
+      question: "Read the reason behind the suggestion.",
       summary: input.focus,
       status: "Reason",
       tone: input.tone,
     },
     {
-      id: "review",
-      label: "What similar past decisions taught Signal",
-      question: "How previous outcomes shape today's caution.",
-      summary: input.review || "Signal has seen similar situations before. Past outcomes increased confidence slightly.",
-      status: "Learning",
-      tone: "neutral",
-    },
-    {
-      id: "tested",
-      label: "What Signal will track after this",
-      question: "The result Signal will compare later.",
-      summary: input.tested ?? input.options,
-      status: "Track",
-      tone: "warn",
-    },
-    {
-      id: "matters",
-      label: "Why this decision matters",
-      question: "Why the choice affects future confidence.",
-      summary: input.why ?? input.focus,
-      status: "Meaning",
+      id: "recommendation",
+      label: "Decide What To Do",
+      question: "Turn the explanation into a next step.",
+      summary: input.recommendation,
+      status: "Next",
       tone: input.tone,
     },
   ];
@@ -698,7 +673,7 @@ export function recommendedNextStep(input: {
   missingEvidence: string;
 }) {
   const action = input.action.toLowerCase();
-  const noExposure = /no new exposure|no exposure|0%|flat|none/i.test(
+  const noExposure = /no new exposure|no exposure|no new allocation|no allocation|0%|flat|none/i.test(
     input.exposureText,
   );
 

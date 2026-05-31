@@ -20,17 +20,18 @@ describe("Dashboard calibration diagnostics", () => {
     expect(html).toContain('data-testid="decision-operating-system"');
     expect(html).toContain("Signal");
     expect(html).toContain('data-state-kind="no-market"');
-    expect(html).toContain("Select a market first.");
+    expect(html).toContain("What would you like to explore today?");
     expect(html).toContain(
-      "Choose a market so Signal can recommend what to do next.",
+      "Choose a market first. Signal will then explain current conditions, surface opportunities, and suggest a next step in plain language.",
     );
     expect(html).toContain("Crypto");
     expect(html).toContain("Stocks");
-    expect(html).toContain("ETFs");
     expect(html).toContain("Forex");
     expect(html).toContain("Commodities");
     expect(html).toContain("Indexes");
-    expect(html).toContain("Learn How Signal Works");
+    expect(html).toContain("Bonds");
+    expect(html).toContain("Companies you can invest in");
+    expect(html).toContain("Fixed income opportunities");
     expect(html).not.toContain('data-testid="decision-step-screen"');
     expect(html).not.toContain('data-testid="primary-answer"');
   });
@@ -87,9 +88,10 @@ describe("Dashboard calibration diagnostics", () => {
   it("reserves persistent navigation signals in the first-run shell", () => {
     const html = renderToStaticMarkup(<Dashboard />);
 
-    expect(html).toContain("Decision readiness");
-    expect(html).toContain('aria-label="Current market"');
-    expect(html).toContain("Update");
+    expect(html).toContain("Choose Market");
+    expect(html).toContain("Review Current Conditions");
+    expect(html).toContain("Explore Opportunities");
+    expect(html).not.toContain('aria-label="Current market"');
   });
 
   it("does not render the old gamified dashboard surface", () => {

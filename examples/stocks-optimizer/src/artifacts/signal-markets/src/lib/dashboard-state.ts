@@ -65,9 +65,9 @@ export function resolveDashboardViewState(
 ): DashboardViewState {
   if (!input.selectedMarket) {
     return baseState("no-market", input, {
-      headline: "Select a market first.",
+      headline: "What would you like to explore today?",
       description:
-        "Choose a market so Signal can recommend what to do next.",
+        "Choose what you care about first. Signal will build the context after that.",
     });
   }
 
@@ -86,9 +86,9 @@ export function resolveDashboardViewState(
 
   if (input.initialLoading && !hasCachedData) {
     return baseState("initial-loading", input, {
-      headline: "Wait for market evidence.",
+      headline: "Checking current conditions.",
       description:
-        "Signal is checking prices, signals, and risk before recommending an action.",
+        "Signal is checking prices, signals, and caution levels before suggesting an action.",
     });
   }
 
@@ -116,14 +116,14 @@ export function resolveDashboardViewState(
     return baseState("partial-data", input, {
       headline: "Review ideas, but keep size small.",
       description:
-        "Opportunity analysis is available, but reliability evidence is incomplete. Wait for a fresh trust update before increasing exposure.",
+        "Opportunity analysis is available, but reliability evidence is incomplete. Wait for a fresh reliability update before increasing allocation.",
     });
   }
 
   if (input.staleData) {
     return baseState("stale-data", input, {
       headline: "Review, but treat data as stale.",
-      description: `Last successful update: ${input.lastSuccessfulUpdateLabel || "Not synced"}. Refresh before increasing exposure.`,
+      description: `Last successful update: ${input.lastSuccessfulUpdateLabel || "Not synced"}. Refresh before increasing allocation.`,
     });
   }
 
@@ -137,6 +137,6 @@ export function resolveDashboardViewState(
   return baseState("success", input, {
     headline: "Start with the recommendation.",
     description:
-      "Signal has enough market context to explain the action, the reason, and the next check.",
+      "Signal has enough current context to explain the action, the reason, and the next check.",
   });
 }

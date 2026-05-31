@@ -3,15 +3,19 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
+  Bitcoin,
   BookOpen,
   CheckCircle2,
   CircleDashed,
-  Clock,
   Database,
+  Gem,
+  Globe2,
+  Landmark,
   RefreshCw,
   Search,
   ShieldCheck,
   Target,
+  TrendingUp,
   Wallet,
   WifiOff,
   Zap,
@@ -35,7 +39,6 @@ import {
   defaultGuideSteps,
   processProgress,
   recommendedNextStep,
-  type AssetClassOption,
   type GuideFact,
   type GuideTone,
 } from "./MarketDecisionGuide";
@@ -183,9 +186,24 @@ function boundedPct(value: number | null | undefined) {
 function investorCopy(value: string) {
   return String(value ?? "")
     .replace(/[_-]+/g, " ")
+    .replace(/\bmarket context\b/gi, "what we see right now")
+    .replace(/\brisk state\b/gi, "current conditions")
+    .replace(/\brisk pressure\b/gi, "caution level")
+    .replace(/\bopportunity density\b/gi, "number of good opportunities")
+    .replace(/\btrust score\b/gi, "reliability")
+    .replace(/\btrust\b/gi, "reliability")
+    .replace(/\bcalibration\b/gi, "confidence check")
+    .replace(/\bsizing mode\b/gi, "suggested caution level")
+    .replace(/\bsuggested maximum exposure\b/gi, "suggested allocation")
+    .replace(/\bmaximum exposure\b/gi, "suggested allocation")
+    .replace(/\bmax exposure\b/gi, "suggested allocation")
+    .replace(/\bexposure\b/gi, "allocation")
+    .replace(/\bmarket health\b/gi, "market stability")
+    .replace(/\bmarket backdrop\b/gi, "current conditions")
+    .replace(/\bcomposite signal\b/gi, "overall assessment")
+    .replace(/\bself awareness\b/gi, "system confidence")
     .replace(/\bgovernance evidence\b/gi, "permission evidence")
     .replace(/\bgovernance\b/gi, "safety review")
-    .replace(/\bcalibration\b/gi, "recent reliability")
     .replace(/\bdiscovery\b/gi, "opportunity search")
     .replace(/\bagency\b/gi, "decision control")
     .replace(/\brecognition\b/gi, "similar past situations")
@@ -195,7 +213,7 @@ function investorCopy(value: string) {
     .replace(/\bsurvival\b/gi, "loss safety")
     .replace(/\bmarket breadth\b/gi, "market participation")
     .replace(/\bbreadth\b/gi, "market participation")
-    .replace(/\bregime\b/gi, "market backdrop")
+    .replace(/\bregime\b/gi, "market environment")
     .replace(/\brisk-adjusted\b/gi, "risk-aware")
     .replace(/\bdrawdown\b/gi, "past loss")
     .replace(/\bnormal sizing\b/gi, "normal size")
@@ -269,9 +287,9 @@ function cleanSentence(value: string) {
 
 function displayExposure(value: string) {
   const normalized = String(value ?? "").trim();
-  if (!normalized) return "No new exposure";
-  if (/^(wait|none|no exposure|0%|0\.0%)$/i.test(normalized)) {
-    return "No new exposure";
+  if (!normalized) return "No new allocation";
+  if (/^(wait|none|no exposure|no new exposure|no allocation|no new allocation|0%|0\.0%)$/i.test(normalized)) {
+    return "No new allocation";
   }
   return normalized;
 }
@@ -325,14 +343,17 @@ function stepIcon(step: DecisionStepId | DecisionPhaseId) {
 
 function friendlyEvidenceLabel(label: string) {
   const normalized = label.toLowerCase();
-  if (normalized.includes("market")) return "Market backdrop";
+  if (normalized.includes("market context")) return "What we see right now";
+  if (normalized.includes("market")) return "Current conditions";
   if (normalized.includes("recognition")) return "Similar past situations";
   if (normalized.includes("signal")) return "Signals agree";
   if (normalized.includes("opportunity")) return "Opportunity quality";
-  if (normalized.includes("risk")) return "Risk control";
+  if (normalized.includes("risk")) return "Current conditions";
   if (normalized.includes("survival")) return "Loss history";
   if (normalized.includes("recovery")) return "Return to normal size";
-  if (normalized.includes("calibration")) return "Recent reliability";
+  if (normalized.includes("calibration")) return "Confidence check";
+  if (normalized.includes("trust")) return "Reliability";
+  if (normalized.includes("regime")) return "Market environment";
   if (normalized.includes("liquidity")) return "Trading conditions";
   if (normalized.includes("governance")) return "Safety review";
   if (normalized.includes("agency")) return "Decision control";
@@ -343,18 +364,24 @@ function friendlyEvidenceLabel(label: string) {
 }
 
 function friendlyMetricLabel(label: string) {
-  if (label === "Confidence") return "Confidence range";
+  if (label === "Confidence") return "System confidence";
   if (label === "Trust") return "Reliability";
-  if (label === "Market Health") return "Market backdrop";
-  if (label === "Opportunity Density") return "Opportunity flow";
-  if (label === "Risk Pressure") return "Risk pressure";
+  if (label === "Trust Score") return "Reliability";
+  if (label === "Market Health") return "Market stability";
+  if (label === "Opportunity Density") return "Number of good opportunities";
+  if (label === "Risk Pressure") return "Current conditions";
+  if (label === "Risk State") return "Current conditions";
   if (label === "Readiness") return "Action readiness";
-  if (label === "Portfolio Cap") return "Portfolio limit";
-  if (label === "Starter Size") return "Starting size";
+  if (label === "Portfolio Cap") return "Portfolio allocation limit";
+  if (label === "Starter Size") return "Starting allocation";
   if (label === "Survival") return "Loss safety";
-  if (label === "Calibration") return "Recent reliability";
-  if (label === "History Depth") return "Historical depth";
-  if (label === "Regime Coverage") return "Market coverage";
+  if (label === "Calibration") return "Confidence check";
+  if (label === "History Depth") return "Similar examples checked";
+  if (label === "Regime Coverage") return "Market environment coverage";
+  if (label === "Composite Signal") return "Overall assessment";
+  if (label === "Self Awareness") return "System confidence";
+  if (label === "Sizing Mode") return "Suggested caution level";
+  if (label === "Suggested Maximum Exposure") return "Suggested allocation";
   return investorCopy(label);
 }
 
@@ -374,25 +401,25 @@ function metricGuidance(metric: DecisionRawMetric) {
         return "Reliability is strong enough to consider the suggested size.";
       if (number >= 45)
         return "Reliability is only partial. Keep size limited.";
-      return "Reliability is too weak for new exposure.";
+      return "Reliability is too weak for new allocation.";
     case "Market Health":
-      if (number == null) return "The market backdrop is still loading.";
+      if (number == null) return "Current conditions are still loading.";
       if (number >= 70)
-        return "The market backdrop supports cautious participation.";
+        return "Current conditions support cautious participation.";
       if (number >= 45)
-        return "The market backdrop is improving, but confirmation is incomplete.";
-      return "The market backdrop is weak. Protect capital.";
+        return "Current conditions are improving, but confirmation is incomplete.";
+      return "Current conditions are weak. Protect capital.";
     case "Opportunity Density":
-      if (number == null) return "Opportunity flow is still loading.";
+      if (number == null) return "The number of good opportunities is still loading.";
       if (number >= 65)
         return "Enough good opportunities are appearing to stay engaged.";
       if (number >= 35) return "Good opportunities are limited. Be selective.";
       return "Few opportunities are strong enough. Wait.";
     case "Risk Pressure":
-      if (number == null) return "Risk pressure is still loading.";
-      if (number >= 70) return "Risk is elevated. Keep exposure defensive.";
-      if (number >= 45) return "Risk is manageable only with disciplined size.";
-      return "Risk looks contained for the suggested action.";
+      if (number == null) return "Current conditions are still loading.";
+      if (number >= 70) return "Conditions are elevated. Keep allocation defensive.";
+      if (number >= 45) return "Conditions are manageable only with disciplined size.";
+      return "Conditions look contained for the suggested action.";
     case "Readiness":
       if (number == null) return "The decision is still forming.";
       if (number >= 70)
@@ -401,7 +428,7 @@ function metricGuidance(metric: DecisionRawMetric) {
         return "Prepare, but wait for the missing evidence before adding risk.";
       return "Do not act yet. The decision is not ready.";
     case "Portfolio Cap":
-      return "Do not exceed this total portfolio exposure for now.";
+      return "Do not exceed this total portfolio allocation for now.";
     case "Starter Size":
       return "Use this as the first size only if the recommendation allows action.";
     case "Survival":
@@ -411,12 +438,12 @@ function metricGuidance(metric: DecisionRawMetric) {
       if (number >= 45) return "Loss history argues for reduced size.";
       return "Loss history argues against adding risk.";
     case "Calibration":
-      if (number == null) return "Recent reliability is still pending.";
+      if (number == null) return "The confidence check is still pending.";
       if (number >= 70)
-        return "Recent reliability supports the recommendation.";
+        return "The confidence check supports the recommendation.";
       if (number >= 45)
-        return "Recent reliability is mixed. Keep the decision cautious.";
-      return "Recent reliability is weak. Wait for cleaner outcomes.";
+        return "The confidence check is mixed. Keep the decision cautious.";
+      return "The confidence check is weak. Wait for cleaner outcomes.";
     case "History Depth":
       if (number == null) return "Comparable history is still pending.";
       if (number >= 70) return "There is enough history to support the view.";
@@ -426,7 +453,7 @@ function metricGuidance(metric: DecisionRawMetric) {
     case "Regime Coverage":
       if (number == null) return "Market coverage is still pending.";
       if (number >= 70)
-        return "The view has held up across enough market backdrops.";
+        return "The view has held up across enough market environments.";
       if (number >= 45)
         return "Coverage is partial. Avoid stretching the size.";
       return "Coverage is too narrow. Wait for broader proof.";
@@ -435,19 +462,85 @@ function metricGuidance(metric: DecisionRawMetric) {
   }
 }
 
-const MARKET_ENTRY_OPTIONS = [
+type MarketEntryOption = {
+  id: "stocks" | "crypto" | "forex" | "commodities" | "indexes" | "bonds";
+  label: string;
+  description: string;
+  shortDescription: string;
+  match: RegExp;
+  fallbackValue: string;
+  preferredValues?: string[];
+  colorClass: string;
+  icon: "stocks" | "crypto" | "forex" | "commodities" | "indexes" | "bonds";
+};
+
+const MARKET_ENTRY_OPTIONS: MarketEntryOption[] = [
   {
+    id: "stocks",
     label: "Stocks",
-    match: /stock|stocks|nasdaq|nyse|amex|us\b/i,
+    description: "Public companies and ETFs",
+    shortDescription: "Companies you can invest in",
+    match: /stock|stocks|nasdaq|nyse|amex|arca|bats|iex|us\b|usa/i,
+    fallbackValue: "US",
+    preferredValues: ["US", "USA", "NASDAQ", "NYSE"],
+    colorClass: "border-emerald-200 bg-emerald-50 text-emerald-950",
+    icon: "stocks",
   },
-  { label: "Crypto", match: /binance|crypto/i },
-  { label: "Forex", match: /forex|fx|currency/i },
-  { label: "ETFs", match: /etf|fund/i },
   {
-    label: "Commodities",
-    match: /commod|future|futures|gold|oil|metal|energy/i,
+    id: "crypto",
+    label: "Crypto",
+    description: "Digital assets and tokens",
+    shortDescription: "Blockchain assets and tokens",
+    match: /binance|crypto|coin|token/i,
+    fallbackValue: "CRYPTO",
+    preferredValues: ["CRYPTO", "BINANCE"],
+    colorClass: "border-violet-200 bg-violet-50 text-violet-950",
+    icon: "crypto",
   },
-  { label: "Indexes", match: /index|indices|spx|ndx|dow/i },
+  {
+    id: "forex",
+    label: "Forex",
+    description: "Global currency markets",
+    shortDescription: "Currencies from around the world",
+    match: /forex|fx|currency|currencies|usd|eur|gbp|jpy/i,
+    fallbackValue: "FOREX",
+    preferredValues: ["FOREX", "FX"],
+    colorClass: "border-sky-200 bg-sky-50 text-sky-950",
+    icon: "forex",
+  },
+  {
+    id: "commodities",
+    label: "Commodities",
+    description: "Gold, oil, agriculture, metals",
+    shortDescription: "Physical goods and resources",
+    match: /commod|future|futures|gold|oil|metal|energy|agriculture/i,
+    fallbackValue: "COMMODITIES",
+    preferredValues: ["COMMODITIES", "FUTURES"],
+    colorClass: "border-amber-200 bg-amber-50 text-amber-950",
+    icon: "commodities",
+  },
+  {
+    id: "indexes",
+    label: "Indexes",
+    description: "Broad market exposure",
+    shortDescription: "Baskets that track whole markets",
+    match: /index|indices|spx|ndx|dow|etf|fund/i,
+    fallbackValue: "ETF",
+    preferredValues: ["ETF", "INDEX", "INDEXES"],
+    colorClass: "border-indigo-200 bg-indigo-50 text-indigo-950",
+    icon: "indexes",
+  },
+  {
+    id: "bonds",
+    label: "Bonds",
+    description: "Fixed income opportunities",
+    shortDescription: "Loans issued by governments and companies",
+    match: /bond|bonds|fixed income|treasury|yield/i,
+    fallbackValue: "BONDS",
+    preferredValues: ["BONDS", "BOND", "FIXED_INCOME"],
+    colorClass: "border-teal-200 bg-teal-50 text-teal-950",
+    icon: "bonds",
+  },
 ];
 
 const GUIDE_GOALS = [
@@ -458,23 +551,110 @@ const GUIDE_GOALS = [
 ];
 
 function marketEntryValue(
-  entry: (typeof MARKET_ENTRY_OPTIONS)[number],
+  entry: MarketEntryOption,
   marketOptions: Array<{ value: string; label: string }>,
 ) {
+  const preferred = entry.preferredValues
+    ?.map((value) => value.toUpperCase())
+    .find((value) =>
+      marketOptions.some((market) => market.value.toUpperCase() === value),
+    );
+  if (preferred) return preferred;
+
   const match = marketOptions.find(
     (market) =>
       entry.match.test(market.value) || entry.match.test(market.label),
   );
-  return match?.value ?? "";
+  return match?.value ?? entry.fallbackValue;
 }
 
-function primaryMarketValue(
-  marketOptions: Array<{ value: string; label: string }>,
-) {
-  const stocks = MARKET_ENTRY_OPTIONS.find((entry) => entry.label === "Stocks");
-  return stocks
-    ? marketEntryValue(stocks, marketOptions)
-    : (marketOptions[0]?.value ?? "");
+function MarketEntryIcon({ icon }: { icon: MarketEntryOption["icon"] }) {
+  if (icon === "stocks") return <TrendingUp className="h-6 w-6" />;
+  if (icon === "crypto") return <Bitcoin className="h-6 w-6" />;
+  if (icon === "forex") return <Globe2 className="h-6 w-6" />;
+  if (icon === "commodities") return <Gem className="h-6 w-6" />;
+  if (icon === "bonds") return <Landmark className="h-6 w-6" />;
+  return <BarChart3 className="h-6 w-6" />;
+}
+
+function MarketChoiceGrid({
+  marketOptions,
+  selectedMarket,
+  onMarketChange,
+  compact = false,
+}: {
+  marketOptions: Array<{ value: string; label: string }>;
+  selectedMarket: string;
+  onMarketChange: (market: string) => void;
+  compact?: boolean;
+}) {
+  const selectedMarketName =
+    marketOptions.find((market) => market.value === selectedMarket)?.label ??
+    selectedMarket;
+
+  return (
+    <div
+      data-testid="market-choice-grid"
+      className={cx(
+        "grid min-w-0 gap-3",
+        compact ? "sm:grid-cols-2 xl:grid-cols-3" : "sm:grid-cols-2 lg:grid-cols-3",
+      )}
+    >
+      {MARKET_ENTRY_OPTIONS.map((entry) => {
+        const value = marketEntryValue(entry, marketOptions);
+        const active =
+          value === selectedMarket ||
+          entry.match.test(selectedMarketName) ||
+          entry.match.test(selectedMarket);
+
+        return (
+          <button
+            key={entry.id}
+            type="button"
+            onClick={() => onMarketChange(value)}
+            aria-pressed={active}
+            className={cx(
+              "group grid min-w-0 grid-cols-[48px_minmax(0,1fr)] gap-3 rounded-lg border p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-zinc-950",
+              compact ? "min-h-[116px]" : "min-h-[148px]",
+              active
+                ? "border-zinc-950 bg-zinc-950 text-white"
+                : "border-zinc-200 bg-white text-zinc-950 hover:border-zinc-400",
+            )}
+          >
+            <span
+              className={cx(
+                "grid h-12 w-12 place-items-center rounded-lg border",
+                active ? "border-white/20 bg-white/10" : entry.colorClass,
+              )}
+            >
+              <MarketEntryIcon icon={entry.icon} />
+            </span>
+            <span className="min-w-0">
+              <span className="block break-words text-lg font-semibold leading-tight">
+                {entry.label}
+              </span>
+              <span
+                className={cx(
+                  "mt-1 block break-words text-sm leading-6",
+                  active ? "text-zinc-300" : "text-zinc-600",
+                )}
+              >
+                {entry.description}
+              </span>
+              <span
+                className={cx(
+                  "mt-3 block break-words text-xs font-semibold leading-5",
+                  active ? "text-zinc-400" : "text-zinc-500",
+                )}
+              >
+                {entry.shortDescription}
+              </span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 function SkeletonBlock({ className }: { className?: string }) {
@@ -680,11 +860,46 @@ function BlockingStateScreen({
   onRefresh: () => void;
   onContinueUsingCachedData?: () => void;
 }) {
-  const [showPrimer, setShowPrimer] = useState(false);
   const isNoMarket = state.kind === "no-market";
   const isConnectionLost = state.kind === "connection-lost";
   const isError = state.kind === "error";
   const isEmpty = state.kind === "empty-results";
+
+  if (isNoMarket) {
+    return (
+      <main
+        data-testid="dashboard-state"
+        data-state-kind={state.kind}
+        data-scroll-region="market-entry"
+        className="signal-scroll-region mx-auto grid h-full min-h-0 w-full max-w-[1880px] place-items-center overflow-y-auto overflow-x-hidden px-4 py-8 lg:px-6"
+      >
+        <section className="grid w-full max-w-6xl gap-7 text-center">
+          <div className="mx-auto grid max-w-3xl gap-3">
+            <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-800 shadow-sm">
+              <Target className="h-5 w-5" />
+            </div>
+            <p className="text-sm font-semibold text-zinc-500">
+              What would you like help with today?
+            </p>
+            <h1 className="break-words text-4xl font-semibold leading-tight text-zinc-950 sm:text-5xl">
+              What would you like to explore today?
+            </h1>
+            <p className="mx-auto max-w-2xl break-words text-base leading-7 text-zinc-600">
+              Choose a market first. Signal will then explain current
+              conditions, surface opportunities, and suggest a next step in
+              plain language.
+            </p>
+          </div>
+
+          <MarketChoiceGrid
+            marketOptions={marketOptions}
+            selectedMarket=""
+            onMarketChange={onMarketChange}
+          />
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main
@@ -730,59 +945,6 @@ function BlockingStateScreen({
             />
           </div>
         </div>
-
-        {isNoMarket ? (
-          <div className="grid gap-4">
-            <div>
-              <div className="text-sm font-semibold text-zinc-500">
-                Available options
-              </div>
-              <div className="mt-2 grid min-w-0 gap-2 sm:grid-cols-2 lg:grid-cols-5">
-                {MARKET_ENTRY_OPTIONS.map((entry) => (
-                  <button
-                    key={entry.label}
-                    type="button"
-                    onClick={() =>
-                      onMarketChange(marketEntryValue(entry, marketOptions))
-                    }
-                    className="min-h-14 min-w-0 break-words rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-left text-sm font-semibold text-zinc-900 transition hover:border-zinc-950 hover:bg-white"
-                  >
-                    {entry.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div
-              data-overflow-policy="sticky-state-actions"
-              className="sticky bottom-2 z-10 flex flex-col gap-2 rounded-lg border border-zinc-200 bg-white/95 p-2 shadow-sm backdrop-blur sm:flex-row md:static md:border-0 md:bg-transparent md:p-0 md:shadow-none"
-            >
-              <StateActionButton
-                icon={<Target className="h-4 w-4" />}
-                onClick={() =>
-                  onMarketChange(primaryMarketValue(marketOptions))
-                }
-              >
-                Select Market
-              </StateActionButton>
-              <StateActionButton
-                icon={<BookOpen className="h-4 w-4" />}
-                variant="secondary"
-                onClick={() => setShowPrimer((current) => !current)}
-              >
-                Learn How Signal Works
-              </StateActionButton>
-            </div>
-
-            {showPrimer ? (
-              <div className="max-w-3xl rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-700">
-                Signal ranks a selected market by opportunity quality, trust,
-                sizing permission, and action readiness before suggesting any
-                exposure.
-              </div>
-            ) : null}
-          </div>
-        ) : null}
 
         {isConnectionLost || isError ? (
           <div
@@ -911,7 +1073,7 @@ function OpportunityPicker({
                     : "text-zinc-500",
                 )}
               >
-                {opportunity.action} at {opportunity.exposureLabel}
+                {opportunity.action} at {displayExposure(opportunity.exposureLabel)}
               </span>
               <span
                 className={cx(
@@ -1099,19 +1261,19 @@ export default function DecisionOperatingSystem({
   const exposureText = displayExposure(suggestedExposure);
   const actionExposureText = displayExposure(actionPlan.exposure);
   const capitalPosture =
-    exposureText === "No new exposure"
+    exposureText === "No new allocation"
       ? "capital flat"
       : lowerFirst(exposureText);
   const actionWithExposure =
-    exposureText === "No new exposure"
+    exposureText === "No new allocation"
       ? `${recommendedAction}; keep capital flat`
       : `${recommendedAction} with ${exposureText}`;
   const sizeLimitInstruction =
-    exposureText === "No new exposure"
-      ? "do not add exposure"
+    exposureText === "No new allocation"
+      ? "do not add allocation"
       : `do not exceed ${lowerFirst(exposureText)}`;
   const sizeSentence =
-    exposureText === "No new exposure"
+    exposureText === "No new allocation"
       ? "Keep capital flat."
       : `Keep size at ${exposureText}.`;
   const missingProofSentence = `Next proof needed: ${cleanSentence(
@@ -1145,7 +1307,7 @@ export default function DecisionOperatingSystem({
             selectedOpportunity?.context,
             selectedOpportunity?.support[0],
             readinessWhy,
-            `The market backdrop is ${investorCopy(marketState)}.`,
+            `Current conditions are ${investorCopy(marketState)}.`,
           ],
           "The opportunity list is waiting for market evidence.",
         ),
@@ -1176,7 +1338,7 @@ export default function DecisionOperatingSystem({
           ],
           "No notes are available yet.",
         ),
-        nextStep: "Sense the market backdrop before changing risk.",
+        nextStep: "Review current conditions before changing allocation.",
         facts: [
           { label: "Opportunity", value: opportunityLabel, tone: selectedTone },
           { label: "Action", value: recommendedAction, tone: readinessTone },
@@ -1197,7 +1359,7 @@ export default function DecisionOperatingSystem({
         id: "sense",
         label: "Sense",
         question: "What is the market saying?",
-        headline: `${marketHealthWord} market backdrop; ${marketStatus}.`,
+        headline: `${marketHealthWord} current conditions; ${marketStatus}.`,
         answer: cleanSentence(marketState),
         why: compactList(
           [
@@ -1206,16 +1368,16 @@ export default function DecisionOperatingSystem({
             readinessWhy,
             mainRisk,
           ],
-          "Market context is still loading.",
+          "Current conditions are still loading.",
         ),
         evidence: compactList(
           [
-            `Market backdrop: ${marketState}.`,
-            `Opportunity flow is ${metricValue(rawMetrics, "Opportunity Density")}.`,
-            `Risk pressure is ${metricValue(rawMetrics, "Risk Pressure")}.`,
+            `Current conditions: ${marketState}.`,
+            `Good opportunities: ${metricValue(rawMetrics, "Opportunity Density")}.`,
+            `Caution level: ${metricValue(rawMetrics, "Risk Pressure")}.`,
             topSupport[0],
           ],
-          "Market evidence is still forming.",
+          "Current-condition evidence is still forming.",
         ),
         numbers: rawMetrics.filter((metric) =>
           [
@@ -1234,7 +1396,7 @@ export default function DecisionOperatingSystem({
           { label: "Market", value: marketHealthWord, tone: readinessTone },
           { label: "Status", value: marketStatus },
           {
-            label: "Risk pressure",
+            label: "Caution level",
             value: riskPressureWord,
             tone: riskNumber != null && riskNumber > 65 ? "warn" : "good",
           },
@@ -1288,7 +1450,7 @@ export default function DecisionOperatingSystem({
           ],
           "No pulse notes are available yet.",
         ),
-        nextStep: "Focus on the core reason before judging trust.",
+        nextStep: "Focus on the core reason before judging reliability.",
         facts: [
           { label: "Lead", value: opportunityLabel, tone: selectedTone },
           {
@@ -1347,7 +1509,7 @@ export default function DecisionOperatingSystem({
           [topRisk[0], missingEvidence, readinessBlocker],
           "No core notes are available yet.",
         ),
-        nextStep: "Judge whether the reason deserves trust.",
+        nextStep: "Judge whether the reason deserves reliability.",
         facts: [
           { label: "Conviction", value: confidenceWord, tone: readinessTone },
           { label: "Support", value: topSupport[0], tone: readinessTone },
@@ -1367,15 +1529,15 @@ export default function DecisionOperatingSystem({
       {
         id: "judgement",
         label: "Judgement",
-        question: "Can I trust it?",
+        question: "How reliable is it?",
         headline:
           failCount > 0
-            ? "Trust is limited, so the decision should stay conservative."
-            : `${trustWord} trust supports the recommendation.`,
+            ? "Reliability is limited, so the decision should stay conservative."
+            : `${trustWord} reliability supports the recommendation.`,
         answer: `${passCount} checks support the decision, ${cautionCount} need care, and ${failCount} block it.`,
         why: compactList(
           [topSupport[0], topRisk[0], missingEvidence, readinessBlocker],
-          "Trust evidence is still forming.",
+          "Reliability evidence is still forming.",
         ),
         evidence: evidenceLadder.map(
           (stage) =>
@@ -1395,12 +1557,12 @@ export default function DecisionOperatingSystem({
             (stage) =>
               `${friendlyEvidenceLabel(stage.label)}: ${statusLabel(stage.status)}.`,
           ),
-          "No trust notes are available yet.",
+          "No reliability notes are available yet.",
         ),
-        nextStep: "Translate that trust into a position size.",
+        nextStep: "Translate that reliability into a position size.",
         facts: [
           {
-            label: "Trust",
+            label: "Reliability",
             value: trustWord,
             tone: failCount > 0 ? "warn" : readinessTone,
           },
@@ -1420,15 +1582,15 @@ export default function DecisionOperatingSystem({
           matters:
             failCount > 0
               ? "At least one blocker remains, so taking full risk would ask too much of the evidence."
-              : "The evidence is coherent enough to explain, but still needs sizing discipline.",
+              : "The evidence is coherent enough to explain, but still needs position-size discipline.",
           next: `Keep the action at ${recommendedAction} until ${lowerFirst(missingEvidence)} is resolved.`,
         },
       },
       {
         id: "sizing",
-        label: "Sizing",
-        question: "How much should I risk?",
-        headline: `${exposureText} is the right size for now.`,
+        label: "Suggested caution level",
+        question: "What allocation is sensible?",
+        headline: `${exposureText} is the right allocation for now.`,
         answer: cleanSentence(actionPlan.riskConstraints),
         why: compactList(
           [
@@ -1437,7 +1599,7 @@ export default function DecisionOperatingSystem({
             readinessWhy,
             mainRisk,
           ],
-          "Sizing is waiting for the risk view.",
+          "Suggested allocation is waiting for the current-conditions view.",
         ),
         evidence: compactList(
           [
@@ -1448,7 +1610,7 @@ export default function DecisionOperatingSystem({
               : "",
             readinessBlocker,
           ],
-          "Sizing evidence is still forming.",
+          "Suggested-allocation evidence is still forming.",
         ),
         numbers: rawMetrics.filter((metric) =>
           [
@@ -1460,13 +1622,13 @@ export default function DecisionOperatingSystem({
         ),
         notes: compactList(
           [readinessBlocker, readinessImprover, actionPlan.invalidation],
-          "No sizing notes are available yet.",
+          "No allocation notes are available yet.",
         ),
         nextStep: "Turn the size into a concrete action.",
         facts: [
-          { label: "Suggested size", value: exposureText, tone: readinessTone },
+          { label: "Suggested allocation", value: exposureText, tone: readinessTone },
           {
-            label: "Risk pressure",
+            label: "Caution level",
             value: riskPressureWord,
             tone: riskNumber != null && riskNumber > 65 ? "warn" : "good",
           },
@@ -1478,7 +1640,7 @@ export default function DecisionOperatingSystem({
           },
         ],
         story: {
-          happened: `The recommended size is ${exposureText}.`,
+          happened: `The suggested allocation is ${exposureText}.`,
           matters: cleanSentence(actionPlan.riskConstraints),
           next: `${recommendedAction}; ${sizeLimitInstruction} until the limiter changes.`,
         },
@@ -1522,7 +1684,7 @@ export default function DecisionOperatingSystem({
         facts: [
           { label: "Action", value: recommendedAction, tone: readinessTone },
           { label: "Asset", value: actionPlan.asset },
-          { label: "Size", value: actionExposureText, tone: readinessTone },
+          { label: "Allocation", value: actionExposureText, tone: readinessTone },
           { label: "Stop reviewing if", value: actionPlan.invalidation },
         ],
         story: {
@@ -1701,20 +1863,6 @@ export default function DecisionOperatingSystem({
     marketOptions.find((market) => market.value === selectedMarket)?.label ??
     selectedMarket ??
     "No market selected";
-  const assetClassOptions: AssetClassOption[] = MARKET_ENTRY_OPTIONS.map(
-    (entry) => {
-      const value = marketEntryValue(entry, marketOptions);
-      const active =
-        value === selectedMarket ||
-        entry.match.test(selectedMarketName) ||
-        entry.match.test(selectedMarket);
-      return {
-        label: entry.label,
-        value,
-        active,
-      };
-    },
-  );
   const safeRecommendation = recommendedNextStep({
     action: recommendedAction,
     exposureText,
@@ -1765,23 +1913,23 @@ export default function DecisionOperatingSystem({
   const guideMarketFacts: GuideFact[] = [
     { label: "Market", value: selectedMarketName || "Pending" },
     { label: "Status", value: marketStatus },
-    { label: "Synced", value: lastSyncedLabel },
+    { label: "Updated", value: lastSyncedLabel },
   ];
   const realityFacts: GuideFact[] = [
-    { label: "Backdrop", value: marketHealthWord, tone: guideTone },
+    { label: "Current conditions", value: marketHealthWord, tone: guideTone },
     {
-      label: "Risk",
+      label: "Caution level",
       value: riskPressureWord,
       tone: riskNumber != null && riskNumber > 65 ? "warn" : "good",
     },
-    { label: "Trust", value: trustWord, tone: trustTone },
-    { label: "Size", value: exposureText, tone: guideTone },
+    { label: "Reliability", value: trustWord, tone: trustTone },
+    { label: "Suggested allocation", value: exposureText, tone: guideTone },
   ];
   const progressSignals = processProgress({
     readiness: readinessProgress,
     risk: riskNumber,
     confidenceRange,
-    hasExposure: exposureText !== "No new exposure",
+    hasExposure: exposureText !== "No new allocation",
   });
   const reviewCheckpoints = compactList(
     [
@@ -1817,12 +1965,25 @@ export default function DecisionOperatingSystem({
     tone: guideTone,
   });
   const refreshNotice = systemNotice;
+  const journeyActiveIndex = !selectedMarket
+    ? 0
+    : state.kind === "initial-loading"
+      ? 1
+      : state.kind === "empty-results"
+        ? 2
+        : 4;
+  const journeySteps = [
+    "Choose Market",
+    "Review Current Conditions",
+    "Explore Opportunities",
+    "Understand Reasoning",
+    "Decide What To Do",
+  ];
 
   const blockingState =
     state.kind === "no-market" ||
     state.kind === "connection-lost" ||
     state.kind === "initial-loading" ||
-    state.kind === "empty-results" ||
     state.kind === "error";
   return (
     <div
@@ -1837,56 +1998,61 @@ export default function DecisionOperatingSystem({
             Signal
           </div>
 
-          <div className="flex min-w-0 flex-1 items-center gap-2 sm:flex-none">
-            <span className="hidden text-xs font-semibold uppercase tracking-normal text-zinc-500 sm:inline">
-              Market
-            </span>
-            <select
-              value={selectedMarket}
-              onChange={(event) => onMarketChange(event.target.value)}
-              aria-label="Current market"
-              className="h-9 w-full min-w-0 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-950 outline-none sm:w-[180px]"
-            >
-              {!selectedMarket ? (
-                <option value="">
-                  {marketOptions.length ? "Select market" : "Loading markets"}
-                </option>
-              ) : null}
-              {selectedMarket && !marketOptions.length ? (
-                <option value="">Loading markets</option>
-              ) : null}
-              {marketOptions.map((market) => (
-                <option key={market.value} value={market.value}>
-                  {market.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div
-            className={cx(
-              "ml-auto hidden h-9 min-w-0 items-center gap-2 rounded-md border px-2.5 text-sm font-semibold sm:inline-flex",
-              toneSurface(readinessTone),
-            )}
+          <nav
+            aria-label="Decision journey"
+            className="signal-scroll-region hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex"
           >
-            <span className="hidden text-[11px] uppercase tracking-normal opacity-70 sm:inline">
-              Decision readiness
-            </span>
-            <span className="max-w-[150px] truncate">{headerReadiness}</span>
-          </div>
+            {journeySteps.map((step, index) => (
+              <span
+                key={step}
+                className={cx(
+                  "whitespace-nowrap rounded-md border px-2.5 py-1 text-xs font-semibold",
+                  index === journeyActiveIndex
+                    ? "border-zinc-950 bg-zinc-950 text-white"
+                    : index < journeyActiveIndex
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : "border-zinc-200 bg-zinc-50 text-zinc-500",
+                )}
+              >
+                {step}
+              </span>
+            ))}
+          </nav>
 
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              onClick={onRefresh}
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-zinc-950 bg-zinc-950 px-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
-            >
-              <RefreshCw
-                className={cx("h-4 w-4", refreshing && "animate-spin")}
-              />
-              <span className="hidden sm:inline">Update</span>
-            </button>
-          </div>
+          {selectedMarket ? (
+            <div className="ml-auto flex min-w-0 shrink items-center gap-2">
+              <span className="hidden text-xs font-semibold uppercase tracking-normal text-zinc-500 sm:inline">
+                Choose market
+              </span>
+              <select
+                value={selectedMarket}
+                onChange={(event) => onMarketChange(event.target.value)}
+                aria-label="Current market"
+                className="h-9 w-full min-w-0 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-950 outline-none sm:w-[190px]"
+              >
+                {selectedMarket &&
+                !marketOptions.some((market) => market.value === selectedMarket) ? (
+                  <option value={selectedMarket}>{selectedMarketName}</option>
+                ) : null}
+                {marketOptions.map((market) => (
+                  <option key={market.value} value={market.value}>
+                    {market.label}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                onClick={onRefresh}
+                className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-zinc-950 bg-zinc-950 px-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
+              >
+                <RefreshCw
+                  className={cx("h-4 w-4", refreshing && "animate-spin")}
+                />
+                <span className="hidden sm:inline">Update</span>
+              </button>
+            </div>
+          ) : null}
         </div>
       </header>
 
@@ -1975,8 +2141,6 @@ export default function DecisionOperatingSystem({
             secondary={
               <>
                 <MarketContextCard
-                  options={assetClassOptions}
-                  onSelect={onMarketChange}
                   selectedMarket={selectedMarketName}
                   facts={guideMarketFacts}
                 />
@@ -2236,7 +2400,7 @@ export default function DecisionOperatingSystem({
                 {[
                   ["Asset", actionPlan.asset],
                   ["Direction", actionPlan.direction],
-                  ["Size", actionExposureText],
+                  ["Allocation", actionExposureText],
                   ["Entry", actionPlan.entryLogic],
                   ["Risk rule", actionPlan.riskConstraints],
                   ["Exit", actionPlan.exitConditions],

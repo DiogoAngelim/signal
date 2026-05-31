@@ -14,7 +14,7 @@ const successState: DashboardViewState = {
   kind: "success",
   headline: "Start with the recommendation.",
   description:
-    "Signal has enough market context to explain the action, the reason, and the next check.",
+    "Signal has enough current context to explain the action, the reason, and the next check.",
   lastSuccessfulUpdateLabel: "12 seconds ago",
   cachedMarketLabel: "US",
   cachedOpportunityCount: 1,
@@ -160,13 +160,11 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).toContain('data-testid="decision-step-screen"');
     expect(html).toContain('data-testid="primary-answer"');
     expect(html).toContain("Build wealth steadily.");
-    expect(html).toContain("What is happening now?");
-    expect(html).toContain("What Signal suggests");
-    expect(html).toContain("Why Signal is confident or cautious");
-    expect(html).toContain("What similar past decisions taught Signal");
-    expect(html).toContain("What Signal will track after this");
-    expect(html).toContain("Why this decision matters");
-    expect(html).toContain("Decision readiness");
+    expect(html).toContain("Choose Market");
+    expect(html).toContain("Review Current Conditions");
+    expect(html).toContain("Explore Opportunities");
+    expect(html).toContain("Understand Reasoning");
+    expect(html).toContain("Decide What To Do");
     expect(html).toContain("Confidence Range");
     expect(html).toContain("58%-84%");
     expect(html).toContain("What We Don&#x27;t Know");
@@ -177,7 +175,7 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).toContain("Patience");
     expect(html).toContain("You Remain In Control");
     expect(html).toContain("Signal guides. You decide.");
-    expect(html).toContain("Trust");
+    expect(html).toContain("Reliability");
     expect(html).toContain("Risk");
     expect(html).toContain("Why");
     expect(html).toContain("Evidence");
@@ -209,7 +207,7 @@ describe("DecisionOperatingSystem states", () => {
 
     expect(html).toContain("safety review blocker");
     expect(html).toContain(
-      "opportunity search and decision control recent reliability are still being checked.",
+      "opportunity search and decision control confidence check are still being checked.",
     );
     expect(html).toContain(
       "opportunity search and return to normal size need decision control confirmation.",
@@ -241,14 +239,15 @@ describe("DecisionOperatingSystem states", () => {
     );
 
     expect(html).toContain('data-state-kind="no-market"');
-    expect(html).toContain("Select a market first.");
+    expect(html).toContain("What would you like to explore today?");
     expect(html).toContain("Crypto");
     expect(html).toContain("Stocks");
-    expect(html).toContain("ETFs");
     expect(html).toContain("Forex");
     expect(html).toContain("Commodities");
     expect(html).toContain("Indexes");
-    expect(html).toContain("Learn How Signal Works");
+    expect(html).toContain("Bonds");
+    expect(html).toContain("Digital assets and tokens");
+    expect(html).toContain("Fixed income opportunities");
     expect(html).not.toContain('data-testid="decision-step-screen"');
   });
 
@@ -455,10 +454,9 @@ describe("DecisionOperatingSystem states", () => {
       />,
     );
 
-    expect(html).toContain('data-scroll-region="blocking-state"');
-    expect(html).toContain('data-overflow-policy="sticky-state-actions"');
-    expect(html).toContain("Select Market");
-    expect(html).toContain("sticky bottom-2");
+    expect(html).toContain('data-scroll-region="market-entry"');
+    expect(html).toContain('data-testid="market-choice-grid"');
+    expect(html).toContain("What would you like help with today?");
   });
 
   it("renders connection, empty, error, partial, stale, refresh, and loading states", () => {
@@ -494,10 +492,9 @@ describe("DecisionOperatingSystem states", () => {
         })}
       />,
     );
-    expect(empty).toContain("Wait for better opportunities.");
-    expect(empty).toContain("Wait for new opportunities");
-    expect(empty).toContain("Change market");
-    expect(empty).toContain("Adjust filters");
+    expect(empty).toContain('data-testid="decision-step-screen"');
+    expect(empty).toContain("No opportunity deserves capital yet.");
+    expect(empty).toContain("Explore Opportunities");
 
     const error = renderToStaticMarkup(
       <DecisionOperatingSystem
@@ -523,7 +520,7 @@ describe("DecisionOperatingSystem states", () => {
             kind: "partial-data",
             headline: "Review ideas, but keep size small.",
             description:
-              "Opportunity analysis is available, but reliability evidence is incomplete. Wait for a fresh trust update before increasing exposure.",
+              "Opportunity analysis is available, but reliability evidence is incomplete. Wait for a fresh reliability update before increasing allocation.",
           },
         })}
       />,
@@ -539,13 +536,13 @@ describe("DecisionOperatingSystem states", () => {
             kind: "stale-data",
             headline: "Review, but treat data as stale.",
             description:
-              "Last successful update: 12 seconds ago. Refresh before increasing exposure.",
+              "Last successful update: 12 seconds ago. Refresh before increasing allocation.",
           },
         })}
       />,
     );
     expect(stale).toContain("Review, but treat data as stale.");
-    expect(stale).toContain("Refresh before increasing exposure.");
+    expect(stale).toContain("Refresh before increasing allocation.");
     expect(stale).toContain('data-testid="decision-step-screen"');
 
     const refreshing = renderToStaticMarkup(
