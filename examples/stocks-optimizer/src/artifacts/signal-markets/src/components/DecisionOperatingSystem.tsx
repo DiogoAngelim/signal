@@ -17,6 +17,28 @@ import {
   Zap,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import {
+  FocusCard,
+  ConfidenceRange,
+  GoalCard,
+  GuideLayout,
+  MarketContextCard,
+  OptionCard,
+  PlanReviewCard,
+  ProgressCard,
+  RealityCheckCard,
+  RecommendationCard,
+  StepRail,
+  UnknownsCard,
+  UserControlCard,
+  createConfidenceRange,
+  defaultGuideSteps,
+  processProgress,
+  recommendedNextStep,
+  type AssetClassOption,
+  type GuideFact,
+  type GuideTone,
+} from "./MarketDecisionGuide";
 
 export type DecisionTone = "good" | "warn" | "bad" | "neutral";
 
@@ -312,7 +334,7 @@ function friendlyEvidenceLabel(label: string) {
 }
 
 function friendlyMetricLabel(label: string) {
-  if (label === "Confidence") return "Conviction";
+  if (label === "Confidence") return "Confidence range";
   if (label === "Trust") return "Reliability";
   if (label === "Market Health") return "Market backdrop";
   if (label === "Opportunity Density") return "Opportunity flow";
@@ -331,12 +353,12 @@ function metricGuidance(metric: DecisionRawMetric) {
   const number = parseMetricNumber(metric.value);
   switch (metric.label) {
     case "Confidence":
-      if (number == null) return "Conviction is still forming.";
+      if (number == null) return "Confidence is still forming.";
       if (number >= 70)
-        return "The system has enough conviction to support the recommendation.";
+        return "The range is constructive, but it is still not certainty.";
       if (number >= 45)
-        return "Conviction is mixed, so keep the action measured.";
-      return "Conviction is weak. Wait for better confirmation.";
+        return "The range is mixed, so keep the action measured.";
+      return "The range is weak. Wait for better confirmation.";
     case "Trust":
       if (number == null) return "Reliability evidence is still pending.";
       if (number >= 70)
@@ -405,15 +427,27 @@ function metricGuidance(metric: DecisionRawMetric) {
 }
 
 const MARKET_ENTRY_OPTIONS = [
-  { label: "Binance", match: /binance|crypto/i, fallback: "BINANCE" },
   {
     label: "Stocks",
     match: /stock|stocks|nasdaq|nyse|amex|us\b/i,
     fallback: "US",
   },
-  { label: "ETFs", match: /etf|fund/i, fallback: "ETF" },
+  { label: "Crypto", match: /binance|crypto/i, fallback: "BINANCE" },
   { label: "Forex", match: /forex|fx|currency/i, fallback: "FOREX" },
-  { label: "Futures", match: /future|futures/i, fallback: "FUTURES" },
+  { label: "ETFs", match: /etf|fund/i, fallback: "ETF" },
+  {
+    label: "Commodities",
+    match: /commod|future|futures|gold|oil|metal|energy/i,
+    fallback: "FUTURES",
+  },
+  { label: "Indexes", match: /index|indices|spx|ndx|dow/i, fallback: "INDEXES" },
+];
+
+const GUIDE_GOALS = [
+  "Build wealth steadily.",
+  "Protect what I have while still making progress.",
+  "Grow aggressively without taking unnecessary risks.",
+  "Recover confidence and capital.",
 ];
 
 function marketEntryValue(
@@ -998,6 +1032,7 @@ export default function DecisionOperatingSystem({
   actionPlan,
   rawMetrics,
 }: DecisionOperatingSystemProps) {
+  const [selectedGoal, setSelectedGoal] = useState(GUIDE_GOALS[0]);
   const selectedOpportunity =
     opportunities.find((item) => item.id === selectedOpportunityId) ??
     opportunities[0] ??
@@ -1635,6 +1670,123 @@ export default function DecisionOperatingSystem({
       "Regime Coverage",
     ].includes(metric.label),
   );
+  const confidenceRange = createConfidenceRange({
+    confidence: confidenceNumber,
+    trust: trustNumber,
+    cautionCount,
+    failCount,
+  });
+  const displaySecondaryMetrics = secondaryMetrics.map((metric) =>
+    metric.label === "Confidence"
+      ? { ...metric, value: confidenceRange.label }
+      : metric,
+  );
+  const guideTone = readinessTone as GuideTone;
+  const selectedMarketName =
+    marketOptions.find((market) => market.value === selectedMarket)?.label ??
+    selectedMarket ??
+    "No market selected";
+  const assetClassOptions: AssetClassOption[] = MARKET_ENTRY_OPTIONS.map(
+    (entry) => {
+      const value = marketEntryValue(entry, marketOptions);
+      const active =
+        value === selectedMarket ||
+        entry.match.test(selectedMarketName) ||
+        entry.match.test(selectedMarket);
+      return {
+        label: entry.label,
+        value,
+        active,
+      };
+    },
+  );
+  const safeRecommendation = recommendedNextStep({
+    action: recommendedAction,
+    exposureText,
+    failCount,
+    risk: riskNumber,
+    missingEvidence,
+  });
+  const unknownItems = compactList(
+    [
+      missingEvidence,
+      selectedOpportunity?.missing[0],
+      evidenceLadder.find((stage) => stage.status === "Caution")?.explanation,
+      evidenceLadder.find((stage) => stage.status === "Fail")?.explanation,
+      "Market participation",
+      "Liquidity conditions",
+      "Macro events",
+      "Unexpected catalysts",
+    ],
+    "Market participation",
+    6,
+  );
+  const focusItems = compactList(
+    [
+      topSupport[0],
+      "Protect capital first.",
+      "Trade only high-quality opportunities.",
+      "Stay selective.",
+      "Keep risk small and consistent.",
+    ],
+    "Stay selective.",
+    5,
+  );
+  const optionSupports = compactList(
+    [selectedOpportunity?.support[0], topSupport[0], readinessImprover],
+    "Wait for stronger confirmation.",
+    4,
+  );
+  const optionRisks = compactList(
+    [
+      selectedOpportunity?.contradictions[0],
+      mainRisk,
+      missingEvidence,
+      "Chasing moves before confirmation.",
+    ],
+    "Chasing moves before confirmation.",
+    4,
+  );
+  const guideMarketFacts: GuideFact[] = [
+    { label: "Market", value: selectedMarketName || "Pending" },
+    { label: "Status", value: marketStatus },
+    { label: "Synced", value: lastSyncedLabel },
+  ];
+  const realityFacts: GuideFact[] = [
+    { label: "Backdrop", value: marketHealthWord, tone: guideTone },
+    {
+      label: "Risk",
+      value: riskPressureWord,
+      tone: riskNumber != null && riskNumber > 65 ? "warn" : "good",
+    },
+    { label: "Trust", value: trustWord, tone: trustTone },
+    { label: "Size", value: exposureText, tone: guideTone },
+  ];
+  const progressSignals = processProgress({
+    readiness: readinessProgress,
+    risk: riskNumber,
+    confidenceRange,
+    hasExposure: exposureText !== "No new exposure",
+  });
+  const reviewCheckpoints = compactList(
+    [
+      `Before acting, confirm ${lowerFirst(missingEvidence)}.`,
+      actionPlan.riskConstraints,
+      actionPlan.invalidation,
+      `Review again after ${lastSyncedLabel}.`,
+    ],
+    "Review after the next market update.",
+    4,
+  );
+  const guideSteps = defaultGuideSteps({
+    goal: selectedGoal,
+    reality: `${marketHealthWord} backdrop with ${riskPressureWord.toLowerCase()} risk.`,
+    focus: focusItems[0] ?? "Stay selective.",
+    options: optionSupports[0] ?? "Wait for better confirmation.",
+    recommendation: safeRecommendation,
+    review: reviewCheckpoints[0] ?? "Review after the next market update.",
+    tone: guideTone,
+  });
   const refreshNotice = systemNotice;
 
   const blockingState =
@@ -1731,172 +1883,131 @@ export default function DecisionOperatingSystem({
             </section>
           ) : null}
 
-          <section
-            data-testid="decision-step-screen"
-            aria-label="Decision default view"
-            className="grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1.18fr)_minmax(320px,0.82fr)]"
-          >
-            <section
-              data-testid="primary-answer"
-              className="grid min-w-0 gap-3 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm sm:p-5"
-            >
-              <div
-                className={cx(
-                  "grid min-w-0 gap-3 rounded-lg border p-4",
-                  toneSurface(readinessTone),
-                )}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="text-xs font-semibold uppercase tracking-normal opacity-70">
-                    Recommended action
-                  </div>
-                  <span className="rounded-md border border-current/20 px-2 py-1 text-xs font-semibold">
-                    {headerReadiness}
-                  </span>
-                </div>
-                <div className="min-w-0">
-                  <h1 className="break-words text-4xl font-semibold leading-none sm:text-5xl">
-                    {investorCopy(recommendedAction)}
-                  </h1>
-                  <p className="mt-3 max-w-3xl break-words text-base font-semibold leading-7 opacity-85">
-                    {cleanSentence(primaryAnswer)}
-                  </p>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-current/15">
-                  <div
-                    className="h-full rounded-full bg-current"
-                    style={{ width: `${readinessProgress}%` }}
+          <GuideLayout
+            stepRail={<StepRail steps={guideSteps} />}
+            primary={
+              <>
+                <GoalCard
+                  goal={selectedGoal}
+                  goals={GUIDE_GOALS}
+                  onGoalChange={setSelectedGoal}
+                  marketLabel={selectedMarketName || "Market pending"}
+                  supportingText={`Every recommendation is judged against this goal. Signal guides the decision; you decide whether the evidence fits your plan.`}
+                />
+
+                <ConfidenceRange
+                  low={confidenceRange.low}
+                  high={confidenceRange.high}
+                  label={confidenceRange.label}
+                  explanation={confidenceRange.explanation}
+                />
+
+                <section id="guide-reality" className="contents">
+                  <RealityCheckCard
+                    facts={realityFacts}
+                    narrative={`${investorCopy(marketState)}. ${investorCopy(readinessWhy)}`}
                   />
-                </div>
-              </div>
+                </section>
 
-              <div className="grid min-w-0 gap-2 md:grid-cols-3">
-                <MeaningTile
-                  label="Reason"
-                  value={reasonSummary}
-                  detail={supportSummary[0]}
-                  tone={readinessTone}
-                />
-                <MeaningTile
-                  label="Trust"
-                  value={trustWord}
-                  detail={trustSummary}
-                  tone={trustTone}
-                />
-                <MeaningTile
-                  label="Risk"
-                  value={riskPressureWord}
-                  detail={mainRisk}
-                  tone={riskNumber != null && riskNumber > 65 ? "warn" : "good"}
-                />
-              </div>
+                <section id="guide-matters" className="contents">
+                  <FocusCard items={focusItems} />
+                </section>
 
-              <section
-                data-overflow-policy="sticky-primary-action"
-                className="sticky bottom-2 z-10 flex min-h-[56px] items-center gap-3 rounded-lg border border-zinc-200 bg-white/95 px-3 py-2 shadow-sm backdrop-blur md:static"
-              >
-                <Zap className="h-4 w-4 shrink-0 text-zinc-500" />
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                    Next step
-                  </div>
-                  <p className="break-words text-sm font-semibold text-zinc-900">
-                    {investorCopy(nextStep)}
-                  </p>
-                </div>
-              </section>
-            </section>
+                <section id="guide-options" className="contents">
+                  <OptionCard
+                    supports={optionSupports}
+                    worksAgainst={optionRisks}
+                  />
+                </section>
 
-            <aside
-              data-testid="opportunity-review"
-              data-overflow-policy="bounded-opportunity-panel"
-              className="grid min-w-0 content-start gap-3 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm"
-            >
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                  Lead opportunity
-                </div>
-                <div className="mt-2 flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="line-clamp-2 break-words text-3xl font-semibold leading-tight text-zinc-950">
-                      {opportunityLabel}
+                <RecommendationCard
+                  recommendation={safeRecommendation}
+                  rationale={`${cleanSentence(primaryAnswer)} ${cleanSentence(readinessBlocker)}`}
+                  nextReview={nextStep}
+                  tone={guideTone}
+                />
+              </>
+            }
+            secondary={
+              <>
+                <MarketContextCard
+                  options={assetClassOptions}
+                  onSelect={onMarketChange}
+                  selectedMarket={selectedMarketName}
+                  facts={guideMarketFacts}
+                />
+
+                <UnknownsCard unknowns={unknownItems} />
+
+                <section
+                  data-testid="opportunity-review"
+                  data-overflow-policy="bounded-opportunity-panel"
+                  className="grid min-w-0 content-start gap-3 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm"
+                >
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+                      Lead opportunity
                     </div>
-                    <div
-                      className={cx(
-                        "mt-1 break-words text-sm font-semibold",
-                        toneText(selectedTone),
-                      )}
-                    >
-                      {selectedOpportunity
-                        ? `${investorCopy(selectedOpportunity.action)} - ${displayExposure(selectedOpportunity.exposureLabel)}`
-                        : actionExposureText}
+                    <div className="mt-2 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="line-clamp-2 break-words text-3xl font-semibold leading-tight text-zinc-950">
+                          {opportunityLabel}
+                        </div>
+                        <div
+                          className={cx(
+                            "mt-1 break-words text-sm font-semibold",
+                            toneText(selectedTone),
+                          )}
+                        >
+                          {selectedOpportunity
+                            ? `${investorCopy(selectedOpportunity.action)} - ${displayExposure(selectedOpportunity.exposureLabel)}`
+                            : actionExposureText}
+                        </div>
+                      </div>
+                      <span
+                        className={cx(
+                          "shrink-0 rounded-md border px-2 py-1 text-xs font-semibold",
+                          toneSurface(selectedTone),
+                        )}
+                      >
+                        {selectedOpportunity
+                          ? displayPct(selectedOpportunity.readinessPct)
+                          : "Pending"}
+                      </span>
                     </div>
                   </div>
-                  <span
-                    className={cx(
-                      "shrink-0 rounded-md border px-2 py-1 text-xs font-semibold",
-                      toneSurface(selectedTone),
-                    )}
-                  >
+
+                  <p className="break-words text-sm leading-6 text-zinc-600">
                     {selectedOpportunity
-                      ? displayPct(selectedOpportunity.readinessPct)
-                      : "Pending"}
-                  </span>
-                </div>
-              </div>
+                      ? cleanSentence(
+                          selectedOpportunity.thesis ||
+                            selectedOpportunity.context,
+                        )
+                      : "No opportunity deserves capital yet."}
+                  </p>
 
-              <p className="break-words text-sm leading-6 text-zinc-600">
-                {selectedOpportunity
-                  ? cleanSentence(
-                      selectedOpportunity.thesis || selectedOpportunity.context,
-                    )
-                  : "No opportunity deserves capital yet."}
-              </p>
+                  <details className="min-w-0 rounded-lg border border-zinc-200 bg-zinc-50">
+                    <summary className="cursor-pointer list-none px-3 py-2 text-sm font-semibold text-zinc-950 marker:hidden [&::-webkit-details-marker]:hidden">
+                      Other opportunities
+                    </summary>
+                    <div className="px-3 pb-3">
+                      <OpportunityPicker
+                        opportunities={opportunities}
+                        selectedOpportunityId={selectedOpportunityId}
+                        onSelectOpportunity={onSelectOpportunity}
+                      />
+                    </div>
+                  </details>
+                </section>
 
-              <div className="grid min-w-0 gap-2 sm:grid-cols-2">
-                <MeaningTile
-                  label="Quality"
-                  value={displayPct(selectedOpportunity?.qualityPct)}
-                  detail="Setup strength"
-                  tone={selectedTone}
-                />
-                <MeaningTile
-                  label="Timing"
-                  value={displayPct(selectedOpportunity?.timingPct)}
-                  detail="Entry patience"
-                  tone={selectedTone}
-                />
-              </div>
-
-              <details className="min-w-0 rounded-lg border border-zinc-200 bg-zinc-50">
-                <summary className="cursor-pointer list-none px-3 py-2 text-sm font-semibold text-zinc-950 marker:hidden [&::-webkit-details-marker]:hidden">
-                  Other opportunities
-                </summary>
-                <div className="px-3 pb-3">
-                  <OpportunityPicker
-                    opportunities={opportunities}
-                    selectedOpportunityId={selectedOpportunityId}
-                    onSelectOpportunity={onSelectOpportunity}
-                  />
-                </div>
-              </details>
-
-              <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
-                <div className="flex items-center gap-2 text-sm font-semibold text-zinc-950">
-                  <Clock className="h-4 w-4 text-zinc-500" />
-                  Context
-                </div>
-                <p className="mt-1 line-clamp-2 text-sm leading-6 text-zinc-600">
-                  {investorCopy(marketState)}. {marketStatus}. {lastSyncedLabel}
-                  .
-                </p>
-                <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                  <span className="truncate">Risk: {riskPressureWord}</span>
-                  <span className="truncate">Action: {readinessState}</span>
-                </div>
-              </div>
-            </aside>
-          </section>
+                <ProgressCard items={progressSignals} />
+                <section id="guide-review" className="contents">
+                  <PlanReviewCard checkpoints={reviewCheckpoints} />
+                </section>
+                <UserControlCard />
+              </>
+            }
+          />
 
           <section className="grid min-w-0 items-start gap-3 lg:grid-cols-2">
             <DisclosurePanel
@@ -1988,29 +2099,29 @@ export default function DecisionOperatingSystem({
 
             <DisclosurePanel
               title="Decision path"
-              summary={`${steps.length} checks behind the recommendation`}
+              summary={`${guideSteps.length} guide steps behind the recommendation`}
               testId="workflow-detail-panel"
             >
               <div className="grid gap-2">
-                {steps.map((step, index) => (
+                {guideSteps.map((step, index) => (
                   <div
                     key={step.id}
                     className="grid min-w-0 grid-cols-[32px_minmax(0,1fr)] gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3"
                   >
                     <span className="grid h-8 w-8 place-items-center rounded-md border border-zinc-200 bg-white text-zinc-700">
-                      {stepIcon(step.id)}
+                      {index + 1}
                     </span>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                          {index + 1}/8
+                          {index + 1}/6
                         </span>
                         <span className="break-words text-sm font-semibold text-zinc-950">
                           {step.label}
                         </span>
                       </div>
                       <p className="mt-1 break-words text-sm leading-6 text-zinc-700">
-                        {step.answer}
+                        {step.summary}
                       </p>
                     </div>
                   </div>
@@ -2046,8 +2157,10 @@ export default function DecisionOperatingSystem({
               testId="supporting-numbers-panel"
             >
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {(secondaryMetrics.length ? secondaryMetrics : rawMetrics).map(
-                  (metric) => (
+                {(displaySecondaryMetrics.length
+                  ? displaySecondaryMetrics
+                  : rawMetrics
+                ).map((metric) => (
                     <div
                       key={metric.label}
                       className="grid min-h-[92px] min-w-0 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2"
@@ -2064,8 +2177,7 @@ export default function DecisionOperatingSystem({
                         {metricGuidance(metric)}
                       </p>
                     </div>
-                  ),
-                )}
+                  ))}
               </div>
             </DisclosurePanel>
 

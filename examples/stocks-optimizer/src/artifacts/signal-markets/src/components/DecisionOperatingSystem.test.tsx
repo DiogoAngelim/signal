@@ -154,28 +154,32 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).toContain('data-state-kind="success"');
     expect(html).toContain('data-testid="decision-step-screen"');
     expect(html).toContain('data-testid="primary-answer"');
-    expect(html).toContain("Intent");
-    expect(html).toContain("Sense");
-    expect(html).toContain("Pulse");
-    expect(html).toContain("Core");
-    expect(html).toContain("Judgement");
-    expect(html).toContain("Sizing");
-    expect(html).toContain("Action");
-    expect(html).toContain("Reflection");
+    expect(html).toContain("Build wealth steadily.");
+    expect(html).toContain("Understand");
+    expect(html).toContain("Reality Check");
+    expect(html).toContain("What Matters");
+    expect(html).toContain("Your Options");
+    expect(html).toContain("Recommended Next Step");
+    expect(html).toContain("Plan &amp; Review");
     expect(html).toContain("Decision readiness");
-    expect(html).toContain("Recommended action");
-    expect(html).toContain("Reason");
+    expect(html).toContain("Confidence Range");
+    expect(html).toContain("58%-84%");
+    expect(html).toContain("What We Don&#x27;t Know");
+    expect(html).toContain("Market participation");
+    expect(html).toContain("Liquidity conditions");
+    expect(html).toContain("Wait for stronger confirmation.");
+    expect(html).toContain("Daily Progress");
+    expect(html).toContain("Patience");
+    expect(html).toContain("You Remain In Control");
+    expect(html).toContain("Signal guides. You decide.");
     expect(html).toContain("Trust");
     expect(html).toContain("Risk");
-    expect(html).toContain("Next step");
     expect(html).toContain("Why");
     expect(html).toContain("Evidence");
     expect(html).toContain("Decision path");
     expect(html).toContain("Metrics");
     expect(html).toContain("Action plan");
-    expect(html).toContain(
-      "The system has enough conviction to support the recommendation.",
-    );
+    expect(html).toContain("The range is mixed, so keep the action measured.");
     expect(html).toContain("Lead opportunity");
   });
 
@@ -233,11 +237,12 @@ describe("DecisionOperatingSystem states", () => {
 
     expect(html).toContain('data-state-kind="no-market"');
     expect(html).toContain("Select a market first.");
-    expect(html).toContain("Binance");
+    expect(html).toContain("Crypto");
     expect(html).toContain("Stocks");
     expect(html).toContain("ETFs");
     expect(html).toContain("Forex");
-    expect(html).toContain("Futures");
+    expect(html).toContain("Commodities");
+    expect(html).toContain("Indexes");
     expect(html).toContain("Learn How Signal Works");
     expect(html).not.toContain('data-testid="decision-step-screen"');
   });
@@ -251,12 +256,56 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).toContain('data-overflow-policy="card-body-scroll"');
     expect(html).toContain('data-overflow-policy="opportunity-list-scroll"');
     expect(html).toContain('data-overflow-policy="bounded-opportunity-panel"');
-    expect(html).toContain('data-overflow-policy="sticky-primary-action"');
+    expect(html).toContain('data-layout="market-decision-guide"');
     expect(html).toContain("h-dvh");
     expect(html).toContain("overflow-x-hidden");
     expect(html.match(/data-overflow-policy="card-body-scroll"/g)?.length).toBe(
       5,
     );
+  });
+
+  it("covers the market decision guide requirements across data modes", () => {
+    const legacy = renderToStaticMarkup(
+      <DecisionOperatingSystem
+        {...props({
+          opportunities: [],
+          selectedOpportunityId: null,
+          evidenceLadder: [],
+          rawMetrics: [
+            { label: "Confidence", value: "42%" },
+            { label: "Trust", value: "Pending" },
+            { label: "Market Health", value: "Pending" },
+            { label: "Risk Pressure", value: "Pending" },
+            { label: "Readiness", value: "35%" },
+          ],
+          recommendedAction: "Hold",
+          suggestedExposure: "No exposure",
+        })}
+      />,
+    );
+    expect(legacy).toContain("No opportunity deserves capital yet.");
+    expect(legacy).toContain("32%-54%");
+    expect(legacy).toContain("Wait for stronger confirmation.");
+
+    const enhanced = renderToStaticMarkup(<DecisionOperatingSystem {...props()} />);
+    expect(enhanced).toContain("AAPL is the clearest opportunity to review.");
+    expect(enhanced).toContain("Trend quality supports continued review.");
+
+    const degraded = renderToStaticMarkup(
+      <DecisionOperatingSystem
+        {...props({
+          state: {
+            ...successState,
+            kind: "partial-data",
+            headline: "Review ideas, but keep size small.",
+            description:
+              "Opportunity analysis is available, but reliability evidence is incomplete. Wait for a fresh trust update before increasing exposure.",
+          },
+        })}
+      />,
+    );
+    expect(degraded).toContain("Review ideas, but keep size small.");
+    expect(degraded).toContain("What We Don&#x27;t Know");
   });
 
   it("keeps long labels and many opportunities inside scrollable regions", () => {

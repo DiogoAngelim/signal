@@ -24,11 +24,12 @@ describe("Dashboard calibration diagnostics", () => {
     expect(html).toContain(
       "Choose a market so Signal can recommend what to do next.",
     );
-    expect(html).toContain("Binance");
+    expect(html).toContain("Crypto");
     expect(html).toContain("Stocks");
     expect(html).toContain("ETFs");
     expect(html).toContain("Forex");
-    expect(html).toContain("Futures");
+    expect(html).toContain("Commodities");
+    expect(html).toContain("Indexes");
     expect(html).toContain("Learn How Signal Works");
     expect(html).not.toContain('data-testid="decision-step-screen"');
     expect(html).not.toContain('data-testid="primary-answer"');

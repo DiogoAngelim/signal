@@ -1,5 +1,21 @@
 const { readAllStocks, marketKey } = require("../_stock-files.js");
 
+const MARKET_GROUPS = {
+  US: new Set(["NASDAQ", "NYSE", "AMEX", "ARCA", "BATS", "IEX"]),
+  CRYPTO: new Set(["BINANCE"]),
+  COMMODITIES: new Set(["CME", "CBOT", "COMEX", "NYMEX", "ICE", "FUTURES"]),
+  INDEXES: new Set(["INDEX", "INDEXES", "SP", "DJ", "NASDAQ_INDEX"])
+};
+
+function matchesSelectedMarket(stock, selectedMarket) {
+  if (stock.market === selectedMarket) return true;
+
+  const group = MARKET_GROUPS[selectedMarket];
+  if (!group) return false;
+
+  return group.has(stock.market);
+}
+
 module.exports = function handler(req, res) {
   try {
     const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
@@ -16,7 +32,7 @@ module.exports = function handler(req, res) {
       return;
     }
 
-    const matches = readAllStocks().filter((stock) => stock.market === selectedMarket);
+    const matches = readAllStocks().filter((stock) => matchesSelectedMarket(stock, selectedMarket));
     const items = matches.slice(offset, offset + limit);
 
     res.status(200).json({

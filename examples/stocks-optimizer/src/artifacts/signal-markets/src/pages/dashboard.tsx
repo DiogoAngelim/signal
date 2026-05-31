@@ -104,11 +104,12 @@ const ENABLE_PORTFOLIO_API =
   import.meta.env.VITE_ENABLE_PORTFOLIO_API === "true";
 
 const DEFAULT_MARKET_OPTIONS: MarketOption[] = [
-  { code: "BINANCE", label: "Binance", count: 0 },
   { code: "US", label: "Stocks", count: 0 },
-  { code: "ETF", label: "ETFs", count: 0 },
+  { code: "BINANCE", label: "Crypto", count: 0 },
   { code: "FOREX", label: "Forex", count: 0 },
-  { code: "FUTURES", label: "Futures", count: 0 },
+  { code: "ETF", label: "ETFs", count: 0 },
+  { code: "FUTURES", label: "Commodities", count: 0 },
+  { code: "INDEXES", label: "Indexes", count: 0 },
 ];
 
 type MarketSchedule = {
