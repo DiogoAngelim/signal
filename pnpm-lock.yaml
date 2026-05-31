@@ -524,6 +524,49 @@ importers:
         specifier: ^2.1.9
         version: 2.1.9(@types/node@20.19.39)(lightningcss@1.32.0)(terser@5.46.1)
 
+  examples/stocks-optimizer/src/artifacts/signal-decision:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.17.16
+        version: 20.19.39
+      '@vitest/coverage-v8':
+        specifier: ^2.1.9
+        version: 2.1.9(vitest@2.1.9(@types/node@20.19.39)(lightningcss@1.32.0)(terser@5.46.1))
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@20.19.39)(lightningcss@1.32.0)(terser@5.46.1)
+
+  examples/stocks-optimizer/src/artifacts/signal-decision-memory:
+    dependencies:
+      '@signal/decision':
+        specifier: workspace:*
+        version: link:../../../../../packages/decision
+      pg:
+        specifier: 'catalog:'
+        version: 8.21.0
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+    devDependencies:
+      '@types/node':
+        specifier: ^20.17.16
+        version: 20.19.39
+      '@types/pg':
+        specifier: 'catalog:'
+        version: 8.20.0
+      '@vitest/coverage-v8':
+        specifier: ^2.1.9
+        version: 2.1.9(vitest@2.1.9(@types/node@20.19.39)(lightningcss@1.32.0)(terser@5.46.1))
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@20.19.39)(lightningcss@1.32.0)(terser@5.46.1)
+
   examples/stocks-optimizer/src/artifacts/signal-markets:
     dependencies:
       '@tanstack/react-query':
