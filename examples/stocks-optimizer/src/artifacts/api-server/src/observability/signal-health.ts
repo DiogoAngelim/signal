@@ -1,3 +1,4 @@
+import { validateSignalEnvironment } from "../config/signal-environment.js";
 import { loadSignalSecurityConfig } from "../security/signal-security.js";
 import { getSignalStore } from "../storage/signal-store.js";
 
@@ -14,11 +15,15 @@ export function buildHealthPayload() {
 
 export async function buildReadinessPayload() {
   const config = loadSignalSecurityConfig();
+  const environment = validateSignalEnvironment();
   const store = getSignalStore();
   const stats = await store.stats();
+  const storageHealth = await store.healthCheck();
+  const queue = await store.queueStats();
   const production = process.env.NODE_ENV === "production";
-  const authReady = config.apiKeys.length > 0;
-  const ready = !production || authReady;
+  const authReady = !production || Boolean(process.env.SIGNAL_BOOTSTRAP_ADMIN_KEY_HASH) || stats.apiKeys > 0;
+  const queueReady = queue.queued < environment.settings.queueMaxDepth;
+  const ready = environment.ok && storageHealth.ok && authReady && queueReady;
 
   return {
     status: ready ? "ready" : "not_ready",
@@ -26,10 +31,13 @@ export async function buildReadinessPayload() {
     timestamp: new Date().toISOString(),
     checks: {
       authConfigured: authReady,
-      storage: "ready",
-      productionSafeDefaults: !production || authReady,
+      storage: storageHealth,
+      queue,
+      queueWithinThreshold: queueReady,
+      productionSafeDefaults: environment.ok,
+      environment,
+      ingestionSignatureConfigured: !config.requireEmitSignature || Boolean(config.signatureSecret),
     },
     stats,
   };
 }
-

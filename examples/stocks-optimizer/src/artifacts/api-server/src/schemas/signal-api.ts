@@ -103,14 +103,47 @@ export const CreateWebhookSchema = z.object({
   description: z.string().trim().max(240).optional(),
 }).strict();
 
+export const SignalApiScopeSchema = z.enum([
+  "signals:read",
+  "signals:emit",
+  "signals:stream",
+  "webhooks:read",
+  "webhooks:write",
+  "audit:read",
+  "admin:keys",
+]);
+
+export const CreateApiKeySchema = z.object({
+  name: z.string().trim().min(1).max(120).optional(),
+  scopes: z.array(SignalApiScopeSchema).min(1).max(20),
+  expiresAt: z.string().datetime({ offset: true }).optional(),
+  rateLimitMax: z.number().int().min(1).max(100_000).optional(),
+  rateLimitWindowMs: z.number().int().min(1_000).max(86_400_000).optional(),
+}).strict();
+
+export const RotateApiKeySchema = z.object({
+  graceSeconds: z.number().int().min(0).max(604_800).default(0),
+}).strict();
+
+export const RotateWebhookSecretSchema = z.object({
+  graceSeconds: z.number().int().min(0).max(604_800).default(86_400),
+}).strict();
+
+export const RedriveQueueSchema = z.object({
+  queue: z.string().trim().min(1).max(120).optional(),
+  ids: z.array(z.string().trim().min(1).max(160)).max(500).optional(),
+}).strict();
+
 export type SignalKind = z.infer<typeof SignalKindSchema>;
 export type SignalStatus = z.infer<typeof SignalStatusSchema>;
 export type SignalEnvelope = z.infer<typeof SignalEnvelopeSchema>;
 export type SignalFilters = z.infer<typeof SignalFilterSchema>;
 export type WebhookFilters = z.infer<typeof WebhookFilterSchema>;
 export type CreateWebhookInput = z.infer<typeof CreateWebhookSchema>;
+export type CreateApiKeyInput = z.infer<typeof CreateApiKeySchema>;
+export type RotateApiKeyInput = z.infer<typeof RotateApiKeySchema>;
+export type RotateWebhookSecretInput = z.infer<typeof RotateWebhookSecretSchema>;
 
 export function parseSignalFilters(input: Record<string, unknown>): SignalFilters {
   return SignalFilterSchema.parse(input);
 }
-

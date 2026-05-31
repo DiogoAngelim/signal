@@ -5,13 +5,17 @@ Do not commit `.env`, `.env.local`, or `.vercel/.env*.local` files. They are int
 ## Required
 
 - `DATABASE_URL`: Postgres connection string for DB-backed API routes.
+- `SIGNAL_STORAGE_DRIVER`: set to `postgres` for production signal API persistence.
+- `SIGNAL_SECRET_ENCRYPTION_KEY`: encryption key material for stored webhook secrets.
+- `SIGNAL_API_KEY_HASH_PEPPER`: pepper for HMAC-hashed managed API keys.
 
 ## Recommended for production
 
 - `ADMIN_SECRET`: bearer token for protected strategy/admin API calls.
 - `PUBLIC_READ_SECRET`: optional read token for public strategy reads.
 - `CRON_SECRET`: shared secret for scheduled/cron endpoints.
-- `SIGNAL_API_KEYS`: comma-separated signal API keys, optionally scoped with roles such as `key:reader|emitter|webhook_admin|auditor`.
+- `SIGNAL_BOOTSTRAP_ADMIN_KEY_PREFIX`: lookup prefix for the temporary bootstrap admin key.
+- `SIGNAL_BOOTSTRAP_ADMIN_KEY_HASH`: HMAC hash for the temporary bootstrap admin key.
 - `SIGNAL_INGESTION_SIGNING_SECRET`: optional HMAC secret for signed signal ingestion.
 - `SIGNAL_REQUIRE_EMIT_SIGNATURE`: set to `true` to require signed signal ingestion.
 
@@ -96,11 +100,22 @@ Do not commit `.env`, `.env.local`, or `.vercel/.env*.local` files. They are int
 - `SIGNAL_API_CORS_ORIGINS`
 - `SIGNAL_API_BODY_LIMIT`
 - `SIGNAL_API_ALLOW_DEV_KEY`
+- `SIGNAL_QUEUE_MAX_DEPTH`
+- `SIGNAL_QUEUE_WORKER_BATCH_SIZE`
+- `SIGNAL_QUEUE_WORKER_POLL_MS`
 - `SIGNAL_SIGNATURE_TOLERANCE_MS`
 - `SIGNAL_STREAM_HEARTBEAT_MS`
+- `SIGNAL_STREAM_MAX_CLIENTS`
+- `SIGNAL_STREAM_WRITE_TIMEOUT_MS`
 - `SIGNAL_WEBHOOK_MAX_ATTEMPTS`
 - `SIGNAL_WEBHOOK_RETRY_BASE_MS`
+- `SIGNAL_WEBHOOK_TIMEOUT_MS`
+- `SIGNAL_WEBHOOK_RESPONSE_MAX_BYTES`
+- `SIGNAL_WEBHOOK_REDIRECT_LIMIT`
 - `SIGNAL_WEBHOOK_ALLOW_PRIVATE_TARGETS`
+- `SIGNAL_BACKUP_POLICY_URL`
+
+`SIGNAL_API_KEYS` is allowed only outside production for local/test bootstrap compatibility. Production keys should be created with `/api/v1/admin/api-keys` and stored durably as hashes.
 
 Vercel also provides platform variables such as `VERCEL`, `VERCEL_URL`, `VERCEL_REGION`, `NODE_ENV`, and `PORT`.
 

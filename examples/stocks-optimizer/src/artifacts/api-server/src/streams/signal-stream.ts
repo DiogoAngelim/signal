@@ -1,4 +1,8 @@
 import type { Request, Response } from "express";
+import { performance } from "node:perf_hooks";
+import { positiveInt } from "../config/signal-environment.js";
+import { ApiProblem } from "../observability/signal-http.js";
+import { incrementSignalCounter, observeSignalLatency } from "../observability/signal-metrics.js";
 import type { SignalFilters } from "../schemas/signal-api.js";
 import { signalMatchesFilters, type SignalRecord, type SignalStorageAdapter } from "../storage/signal-store.js";
 
@@ -16,6 +20,12 @@ export class SignalStreamHub {
   constructor(private readonly store: SignalStorageAdapter) {}
 
   async subscribe(req: Request, res: Response, filters: Partial<SignalFilters>) {
+    const maxClients = positiveInt(process.env.SIGNAL_STREAM_MAX_CLIENTS, 1_000);
+    if (this.clients.size >= maxClients) {
+      incrementSignalCounter("signal.stream.rejected", { reason: "max_clients" });
+      throw new ApiProblem(503, "stream_overloaded", "Signal stream is at its configured client limit.");
+    }
+
     const clientId = cryptoRandomId();
     const heartbeatMs = positiveInt(process.env.SIGNAL_STREAM_HEARTBEAT_MS, 15_000);
 
@@ -40,10 +50,12 @@ export class SignalStreamHub {
     };
 
     this.clients.set(clientId, client);
+    incrementSignalCounter("signal.stream.connected");
 
     req.on("close", () => {
       clearInterval(client.heartbeat);
       this.clients.delete(clientId);
+      incrementSignalCounter("signal.stream.disconnected");
     });
 
     await writeSse(res, {
@@ -61,6 +73,7 @@ export class SignalStreamHub {
   }
 
   async publish(record: SignalRecord) {
+    const startedAt = performance.now();
     const writes: Array<Promise<void>> = [];
 
     for (const client of this.clients.values()) {
@@ -73,6 +86,7 @@ export class SignalStreamHub {
     }
 
     await Promise.allSettled(writes);
+    observeSignalLatency("stream.fanout", performance.now() - startedAt);
   }
 
   clientCount() {
@@ -124,15 +138,22 @@ async function writeSse(
 
   if (res.write(payload)) return;
 
+  const timeoutMs = positiveInt(process.env.SIGNAL_STREAM_WRITE_TIMEOUT_MS, 2_000);
   await new Promise<void>((resolve) => {
-    res.once("drain", resolve);
-    res.once("close", resolve);
-  });
-}
+    const timer = setTimeout(() => {
+      incrementSignalCounter("signal.stream.slow_consumer");
+      res.destroy();
+      resolve();
+    }, timeoutMs);
 
-function positiveInt(value: string | undefined, fallback: number) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+    const done = () => {
+      clearTimeout(timer);
+      resolve();
+    };
+
+    res.once("drain", done);
+    res.once("close", done);
+  });
 }
 
 function cryptoRandomId() {

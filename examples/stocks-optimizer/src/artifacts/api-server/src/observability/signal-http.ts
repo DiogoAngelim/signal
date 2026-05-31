@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import type { ErrorRequestHandler, NextFunction, Request, Response } from "express";
 import type { CorsOptions } from "cors";
+import { incrementSignalCounter } from "./signal-metrics.js";
 
 export class ApiProblem extends Error {
   readonly status: number;
@@ -50,6 +51,7 @@ export function sendApiError(
   message: string,
   details?: unknown,
 ) {
+  incrementSignalCounter("signal.http.error", { status, code });
   res.status(status).json({
     error: {
       code,
@@ -105,4 +107,3 @@ export function createSignalCorsOptions(): CorsOptions {
     },
   };
 }
-

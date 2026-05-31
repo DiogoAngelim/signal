@@ -11,9 +11,11 @@ import {
   signWebhookPayload,
   resetSignalRateLimitersForTests,
 } from "../security/signal-security.js";
+import { verifyWebhookSignatureWithSecrets } from "../security/signal-secrets.js";
 import { buildSignalTrustMetadata } from "../services/signal-distribution.js";
 import { resetSignalServicesForTests } from "../services/signal-distribution.js";
-import { resetSignalStoreForTests } from "../storage/signal-store.js";
+import { getSignalStore, resetSignalStoreForTests } from "../storage/signal-store.js";
+import { validateSignalEnvironment } from "../config/signal-environment.js";
 
 process.env.NODE_ENV = "test";
 process.env.SIGNAL_API_KEYS = "test-key:reader|emitter|webhook_admin|auditor";
@@ -73,6 +75,69 @@ test("REST signal routes require API key auth", async () => {
     assert.equal(response.status, 401);
     assert.equal(body.error.code, "missing_api_key");
     assert.ok(body.error.requestId);
+  });
+});
+
+test("scoped API keys can be created, used, expired, and revoked without exposing hashes", async () => {
+  process.env.SIGNAL_API_KEYS = "admin-test:admin";
+  await resetSignalStoreForTests();
+
+  await withServer(async (baseUrl) => {
+    const created = await apiFetch(baseUrl, "/api/v1/admin/api-keys", {
+      apiKey: "admin-test",
+      method: "POST",
+      body: {
+        name: "read only integration",
+        scopes: ["signals:read"],
+        rateLimitMax: 5,
+        rateLimitWindowMs: 60_000,
+      },
+    });
+
+    assert.equal(created.status, 201);
+    assert.match(created.body.secret, /^sopt_/);
+    assert.equal(created.body.apiKey.name, "read only integration");
+    assert.deepEqual(created.body.apiKey.scopes, ["signals:read"]);
+    assert.equal(JSON.stringify(created.body).includes("secretHash"), false);
+
+    const listed = await apiFetch(baseUrl, "/api/v1/admin/api-keys", { apiKey: "admin-test" });
+    assert.equal(listed.status, 200);
+    assert.equal(listed.body.data.length, 1);
+    assert.equal(JSON.stringify(listed.body).includes(created.body.secret), false);
+
+    const read = await apiFetch(baseUrl, "/api/v1/signals", { apiKey: created.body.secret });
+    assert.equal(read.status, 200);
+
+    const forbidden = await apiFetch(baseUrl, "/api/v1/signals/emit", {
+      apiKey: created.body.secret,
+      method: "POST",
+      body: { signal: sampleSignal() },
+    });
+    assert.equal(forbidden.status, 403);
+    assert.equal(forbidden.body.error.code, "insufficient_scope");
+
+    const expired = await apiFetch(baseUrl, "/api/v1/admin/api-keys", {
+      apiKey: "admin-test",
+      method: "POST",
+      body: {
+        name: "expired integration",
+        scopes: ["signals:read"],
+        expiresAt: new Date(Date.now() - 1_000).toISOString(),
+      },
+    });
+    assert.equal(expired.status, 201);
+    const expiredRead = await apiFetch(baseUrl, "/api/v1/signals", { apiKey: expired.body.secret });
+    assert.equal(expiredRead.status, 401);
+
+    const revoked = await apiFetch(baseUrl, `/api/v1/admin/api-keys/${created.body.apiKey.id}/revoke`, {
+      apiKey: "admin-test",
+      method: "POST",
+    });
+    assert.equal(revoked.status, 200);
+    assert.ok(revoked.body.revokedAt);
+
+    const revokedRead = await apiFetch(baseUrl, "/api/v1/signals", { apiKey: created.body.secret });
+    assert.equal(revokedRead.status, 401);
   });
 });
 
@@ -277,6 +342,134 @@ test("webhooks send signed payloads and retry failed deliveries", async () => {
   }
 });
 
+test("webhook secrets rotate with a previous-secret grace period", async () => {
+  const hookServer = createServer((_req, res) => {
+    res.statusCode = 204;
+    res.end();
+  });
+
+  await listen(hookServer);
+
+  try {
+    const hookBase = serverBaseUrl(hookServer);
+    await withServer(async (baseUrl) => {
+      const created = await apiFetch(baseUrl, "/api/v1/webhooks", {
+        method: "POST",
+        body: {
+          url: `${hookBase}/hook`,
+          secret: "old-webhook-secret",
+        },
+      });
+      assert.equal(created.status, 201);
+
+      const rotated = await apiFetch(baseUrl, `/api/v1/webhooks/${created.body.webhook.id}/rotate-secret`, {
+        method: "POST",
+        body: { graceSeconds: 60 },
+      });
+      assert.equal(rotated.status, 200);
+      assert.notEqual(rotated.body.secret, "old-webhook-secret");
+      assert.ok(rotated.body.previousSecretGraceExpiresAt);
+
+      const body = JSON.stringify({ ok: true });
+      const timestamp = new Date().toISOString();
+      const event = "signal.emitted";
+      const deliveryId = "delivery-rotation-test";
+      const oldSignature = signWebhookPayload({
+        secret: "old-webhook-secret",
+        timestamp,
+        event,
+        deliveryId,
+        body,
+      });
+      const newSignature = signWebhookPayload({
+        secret: rotated.body.secret,
+        timestamp,
+        event,
+        deliveryId,
+        body,
+      });
+
+      assert.equal(verifyWebhookSignatureWithSecrets({
+        currentSecret: rotated.body.secret,
+        previousSecret: "old-webhook-secret",
+        previousSecretExpiresAt: rotated.body.previousSecretGraceExpiresAt,
+        timestamp,
+        event,
+        deliveryId,
+        body,
+        signature: oldSignature,
+      }), true);
+      assert.equal(verifyWebhookSignatureWithSecrets({
+        currentSecret: rotated.body.secret,
+        previousSecret: "old-webhook-secret",
+        previousSecretExpiresAt: new Date(Date.now() - 1_000).toISOString(),
+        timestamp,
+        event,
+        deliveryId,
+        body,
+        signature: oldSignature,
+      }), false);
+      assert.equal(verifyWebhookSignatureWithSecrets({
+        currentSecret: rotated.body.secret,
+        timestamp,
+        event,
+        deliveryId,
+        body,
+        signature: newSignature,
+      }), true);
+    });
+  } finally {
+    await closeServer(hookServer);
+  }
+});
+
+test("webhook queue dead-letters exhausted jobs and supports redrive", async () => {
+  process.env.SIGNAL_WEBHOOK_MAX_ATTEMPTS = "1";
+  process.env.SIGNAL_WEBHOOK_RETRY_BASE_MS = "10";
+
+  const hookServer = createServer((_req, res) => {
+    res.statusCode = 500;
+    res.end();
+  });
+
+  await listen(hookServer);
+
+  try {
+    const hookBase = serverBaseUrl(hookServer);
+    await withServer(async (baseUrl) => {
+      const created = await apiFetch(baseUrl, "/api/v1/webhooks", {
+        method: "POST",
+        body: {
+          url: `${hookBase}/hook`,
+          secret: "dead-letter-secret",
+        },
+      });
+      assert.equal(created.status, 201);
+
+      const emitted = await apiFetch(baseUrl, "/api/v1/signals/emit", {
+        method: "POST",
+        body: { signal: sampleSignal({ symbol: "DLQ" }) },
+      });
+      assert.equal(emitted.status, 202);
+
+      await waitFor(async () => (await getSignalStore().queueStats("signal-webhooks")).deadLetter === 1, 2_000);
+      const stats = await getSignalStore().queueStats("signal-webhooks");
+      assert.equal(stats.deadLetter, 1);
+
+      process.env.SIGNAL_API_KEYS = "admin-test:admin";
+      const redrive = await apiFetch(baseUrl, "/api/v1/admin/queue/redrive", {
+        apiKey: "admin-test",
+        method: "POST",
+        body: { queue: "signal-webhooks" },
+      });
+      assert.equal(redrive.status, 200);
+      assert.equal(redrive.body.redriven, 1);
+    });
+  } finally {
+    await closeServer(hookServer);
+  }
+});
+
 test("emit latency remains on the non-blocking hot path", async () => {
   await withServer(async (baseUrl) => {
     const startedAt = performance.now();
@@ -293,10 +486,69 @@ test("emit latency remains on the non-blocking hot path", async () => {
   });
 });
 
+test("unsafe production signal API config is rejected by environment validation", () => {
+  const previousNodeEnv = process.env.NODE_ENV;
+  const previousStorageDriver = process.env.SIGNAL_STORAGE_DRIVER;
+  const previousDevKey = process.env.SIGNAL_API_ALLOW_DEV_KEY;
+  const previousSecretKey = process.env.SIGNAL_SECRET_ENCRYPTION_KEY;
+  const previousPlainKeys = process.env.SIGNAL_API_KEYS;
+
+  try {
+    process.env.NODE_ENV = "production";
+    process.env.SIGNAL_STORAGE_DRIVER = "memory";
+    process.env.SIGNAL_API_ALLOW_DEV_KEY = "true";
+    delete process.env.SIGNAL_SECRET_ENCRYPTION_KEY;
+    process.env.SIGNAL_API_KEYS = "plain:admin";
+
+    const report = validateSignalEnvironment();
+    assert.equal(report.ok, false);
+    assert.ok(report.errors.some((error) => error.includes("SIGNAL_STORAGE_DRIVER=postgres")));
+    assert.ok(report.errors.some((error) => error.includes("SIGNAL_SECRET_ENCRYPTION_KEY")));
+    assert.ok(report.errors.some((error) => error.includes("plaintext SIGNAL_API_KEYS")));
+  } finally {
+    process.env.NODE_ENV = previousNodeEnv;
+    restoreEnv("SIGNAL_STORAGE_DRIVER", previousStorageDriver);
+    restoreEnv("SIGNAL_API_ALLOW_DEV_KEY", previousDevKey);
+    restoreEnv("SIGNAL_SECRET_ENCRYPTION_KEY", previousSecretKey);
+    restoreEnv("SIGNAL_API_KEYS", previousPlainKeys);
+  }
+});
+
+test("metrics responses do not leak API keys or webhook secrets", async () => {
+  process.env.SIGNAL_API_KEYS = "test-key:admin";
+  await resetSignalStoreForTests();
+
+  await withServer(async (baseUrl) => {
+    const created = await apiFetch(baseUrl, "/api/v1/admin/api-keys", {
+      method: "POST",
+      body: {
+        name: "metrics-secret-check",
+        scopes: ["signals:read"],
+      },
+    });
+    assert.equal(created.status, 201);
+
+    await apiFetch(baseUrl, "/api/v1/webhooks", {
+      method: "POST",
+      body: {
+        url: "http://127.0.0.1:65530/hook",
+        secret: "super-sensitive-webhook-secret",
+      },
+    });
+
+    const metrics = await apiFetch(baseUrl, "/api/v1/metrics");
+    assert.equal(metrics.status, 200);
+    const serialized = JSON.stringify(metrics.body);
+    assert.equal(serialized.includes(created.body.secret), false);
+    assert.equal(serialized.includes("super-sensitive-webhook-secret"), false);
+  });
+});
+
 async function apiFetch(
   baseUrl: string,
   path: string,
   options: {
+    apiKey?: string;
     method?: string;
     headers?: Record<string, string>;
     body?: unknown;
@@ -305,7 +557,7 @@ async function apiFetch(
   const response = await fetch(`${baseUrl}${path}`, {
     method: options.method ?? "GET",
     headers: {
-      Authorization: "Bearer test-key",
+      Authorization: `Bearer ${options.apiKey ?? "test-key"}`,
       ...(options.body == null ? {} : { "Content-Type": "application/json" }),
       ...options.headers,
     },
@@ -368,13 +620,21 @@ async function readUntil(reader: ReadableStreamDefaultReader<Uint8Array>, needle
   throw new Error(`Timed out waiting for ${needle}. Received: ${text}`);
 }
 
-async function waitFor(predicate: () => boolean, timeoutMs: number) {
+async function waitFor(predicate: () => boolean | Promise<boolean>, timeoutMs: number) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    if (predicate()) return;
+    if (await predicate()) return;
     await new Promise((resolve) => setTimeout(resolve, 20));
   }
   throw new Error("Timed out waiting for condition");
+}
+
+function restoreEnv(name: string, value: string | undefined) {
+  if (value == null) {
+    delete process.env[name];
+  } else {
+    process.env[name] = value;
+  }
 }
 
 function sampleSignal(overrides: Partial<SignalEnvelope> = {}): SignalEnvelope {

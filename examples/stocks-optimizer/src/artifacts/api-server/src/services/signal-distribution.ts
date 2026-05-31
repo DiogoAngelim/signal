@@ -15,6 +15,7 @@ import {
 import { SignalStreamHub } from "../streams/signal-stream.js";
 import { SignalWebhookDispatcher } from "../webhooks/signal-webhooks.js";
 import { ApiProblem } from "../observability/signal-http.js";
+import { incrementSignalCounter, observeSignalLatency, snapshotSignalMetrics } from "../observability/signal-metrics.js";
 import { logger } from "../lib/logger.js";
 
 export type SignalEmitContext = {
@@ -69,6 +70,7 @@ export class SignalDistributionService {
     const saved = await this.store.saveSignal(record);
 
     if (saved.saved === false) {
+      incrementSignalCounter("signal.emit.duplicate");
       return {
         accepted: false,
         duplicate: true,
@@ -100,6 +102,8 @@ export class SignalDistributionService {
     void this.webhookDispatcher.enqueueSignal(nextRecord).catch((error) => {
       logger.warn({ err: error, signalId: signal.id }, "Failed to enqueue signal webhooks");
     });
+    incrementSignalCounter("signal.emit.accepted", { kind: signal.kind, status: signal.status });
+    observeSignalLatency("signal.emit", duration(startedAt));
 
     return {
       accepted: true,
@@ -127,8 +131,15 @@ export class SignalDistributionService {
 
   async metrics() {
     const stats = await this.store.stats();
+    const queue = await this.store.queueStats();
     return {
-      ...stats,
+      storage: stats,
+      queue,
+      process: {
+        uptimeMs: Math.round(process.uptime() * 1000),
+        memory: process.memoryUsage(),
+      },
+      metrics: snapshotSignalMetrics(),
       streamClients: this.streamHub.clientCount(),
       timestamp: new Date().toISOString(),
     };
@@ -140,6 +151,12 @@ export class SignalDistributionService {
       versions: ["1.0"],
       transports: ["rest", "sse", "webhook"],
       auth: ["api_key", "optional_hmac_ingestion_signature"],
+      deliverySemantics: {
+        webhookDelivery: "at_least_once",
+        streamDelivery: "best_effort_with_replay",
+        idempotency: "required_signal_idempotency_key",
+        replayCursor: "Last-Event-ID or lastEventId",
+      },
       endpoints: [
         "GET /health",
         "GET /ready",
@@ -152,8 +169,15 @@ export class SignalDistributionService {
         "GET /api/v1/webhooks",
         "DELETE /api/v1/webhooks/:id",
         "POST /api/v1/webhooks/:id/test",
+        "POST /api/v1/webhooks/:id/rotate-secret",
         "GET /api/v1/audit/signals",
         "GET /api/v1/capabilities",
+        "GET /api/v1/openapi.json",
+        "POST /api/v1/admin/api-keys",
+        "GET /api/v1/admin/api-keys",
+        "POST /api/v1/admin/api-keys/:id/rotate",
+        "POST /api/v1/admin/api-keys/:id/revoke",
+        "POST /api/v1/admin/queue/redrive",
       ],
       filters: ["symbol", "venue", "kind", "timeframe", "minTrust"],
       webhookHeaders: [
@@ -162,6 +186,52 @@ export class SignalDistributionService {
         "X-Stocks-Optimizer-Event",
         "X-Stocks-Optimizer-Delivery-Id",
       ],
+    };
+  }
+
+  openApiSpec() {
+    return {
+      openapi: "3.1.0",
+      info: {
+        title: "stocks-optimizer Signal Distribution API",
+        version: "1.0.0",
+      },
+      paths: {
+        "/api/v1/signals": {
+          get: { security: [{ signalApiKey: ["signals:read"] }], responses: { "200": { description: "List signals" } } },
+        },
+        "/api/v1/signals/latest": {
+          get: { security: [{ signalApiKey: ["signals:read"] }], responses: { "200": { description: "Latest signal" } } },
+        },
+        "/api/v1/signals/{id}": {
+          get: { security: [{ signalApiKey: ["signals:read"] }], responses: { "200": { description: "Signal by id" } } },
+        },
+        "/api/v1/signals/emit": {
+          post: { security: [{ signalApiKey: ["signals:emit"] }], responses: { "202": { description: "Signal accepted" } } },
+        },
+        "/api/v1/signals/stream": {
+          get: { security: [{ signalApiKey: ["signals:stream"] }], responses: { "200": { description: "SSE stream" } } },
+        },
+        "/api/v1/webhooks": {
+          get: { security: [{ signalApiKey: ["webhooks:read"] }], responses: { "200": { description: "List webhooks" } } },
+          post: { security: [{ signalApiKey: ["webhooks:write"] }], responses: { "201": { description: "Create webhook" } } },
+        },
+        "/api/v1/audit/signals": {
+          get: { security: [{ signalApiKey: ["audit:read"] }], responses: { "200": { description: "Signal audit trail" } } },
+        },
+        "/api/v1/admin/api-keys": {
+          get: { security: [{ signalApiKey: ["admin:keys"] }], responses: { "200": { description: "List API keys" } } },
+          post: { security: [{ signalApiKey: ["admin:keys"] }], responses: { "201": { description: "Create API key" } } },
+        },
+      },
+      components: {
+        securitySchemes: {
+          signalApiKey: {
+            type: "http",
+            scheme: "bearer",
+          },
+        },
+      },
     };
   }
 }

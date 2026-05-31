@@ -1,17 +1,26 @@
 import { Router, type Request, type Response } from "express";
 import { z } from "zod";
+import { assertSignalProductionReady } from "../config/signal-environment.js";
 import { buildHealthPayload, buildReadinessPayload } from "../observability/signal-health.js";
 import { ApiProblem, getRequestId, sendApiError } from "../observability/signal-http.js";
-import { parseSignalFilters } from "../schemas/signal-api.js";
+import {
+  CreateApiKeySchema,
+  RedriveQueueSchema,
+  RotateApiKeySchema,
+  parseSignalFilters,
+} from "../schemas/signal-api.js";
 import {
   assertProductionAuthReady,
-  requireSignalRoles,
+  createManagedApiKey,
+  requireSignalScopes,
+  revokeManagedApiKey,
+  rotateManagedApiKey,
   signalRateLimit,
   verifySignedIngestionRequest,
 } from "../security/signal-security.js";
 import { getSignalDistributionService, getSignalStreamHub, getSignalWebhookDispatcher } from "../services/signal-distribution.js";
 import { responseForSignal } from "../streams/signal-stream.js";
-import { getSignalStore } from "../storage/signal-store.js";
+import { getSignalStore, publicApiKey } from "../storage/signal-store.js";
 
 export function createSignalApiRouter() {
   const router = Router();
@@ -40,9 +49,13 @@ function mountSignalRoutes(router: Router, prefix: string) {
     res.json(getSignalDistributionService().capabilities());
   });
 
+  router.get(`${prefix}/openapi.json`, (_req, res) => {
+    res.json(getSignalDistributionService().openApiSpec());
+  });
+
   router.get(
     `${prefix}/metrics`,
-    requireSignalRoles(["auditor"]),
+    requireSignalScopes(["audit:read"]),
     signalRateLimit("metrics"),
     async (_req, res, next) => {
       try {
@@ -55,7 +68,7 @@ function mountSignalRoutes(router: Router, prefix: string) {
 
   router.get(
     `${prefix}/signals/stream`,
-    requireSignalRoles(["reader"]),
+    requireSignalScopes(["signals:stream"]),
     signalRateLimit("stream"),
     async (req, res, next) => {
       try {
@@ -69,7 +82,7 @@ function mountSignalRoutes(router: Router, prefix: string) {
 
   router.get(
     `${prefix}/signals/latest`,
-    requireSignalRoles(["reader"]),
+    requireSignalScopes(["signals:read"]),
     signalRateLimit("signals-read"),
     async (req, res, next) => {
       try {
@@ -90,7 +103,7 @@ function mountSignalRoutes(router: Router, prefix: string) {
 
   router.get(
     `${prefix}/signals`,
-    requireSignalRoles(["reader"]),
+    requireSignalScopes(["signals:read"]),
     signalRateLimit("signals-read"),
     async (req, res, next) => {
       try {
@@ -108,7 +121,7 @@ function mountSignalRoutes(router: Router, prefix: string) {
 
   router.get(
     `${prefix}/signals/:id`,
-    requireSignalRoles(["reader"]),
+    requireSignalScopes(["signals:read"]),
     signalRateLimit("signals-read"),
     async (req, res, next) => {
       try {
@@ -128,11 +141,12 @@ function mountSignalRoutes(router: Router, prefix: string) {
 
   router.post(
     `${prefix}/signals/emit`,
-    requireSignalRoles(["emitter"]),
+    requireSignalScopes(["signals:emit"]),
     signalRateLimit("signals-emit"),
     async (req, res, next) => {
       try {
         assertProductionAuthReady();
+        assertSignalProductionReady();
         const canonicalBody = JSON.stringify(req.body?.signal ?? req.body ?? {});
         const signed = await verifySignedIngestionRequest({
           headers: req.headers,
@@ -164,11 +178,11 @@ function mountSignalRoutes(router: Router, prefix: string) {
 
   router.post(
     `${prefix}/webhooks`,
-    requireSignalRoles(["webhook_admin"]),
+    requireSignalScopes(["webhooks:write"]),
     signalRateLimit("webhooks"),
     async (req, res, next) => {
       try {
-        const result = await getSignalWebhookDispatcher().register(req.body);
+        const result = await getSignalWebhookDispatcher().register(req.body, (req as any).signalAuth?.keyId);
         res.status(201).json(result);
       } catch (error) {
         next(normalizeZodError(error, "invalid_webhook", "Webhook registration failed validation."));
@@ -178,7 +192,7 @@ function mountSignalRoutes(router: Router, prefix: string) {
 
   router.get(
     `${prefix}/webhooks`,
-    requireSignalRoles(["webhook_admin"]),
+    requireSignalScopes(["webhooks:read"]),
     signalRateLimit("webhooks"),
     async (_req, res, next) => {
       try {
@@ -191,11 +205,11 @@ function mountSignalRoutes(router: Router, prefix: string) {
 
   router.delete(
     `${prefix}/webhooks/:id`,
-    requireSignalRoles(["webhook_admin"]),
+    requireSignalScopes(["webhooks:write"]),
     signalRateLimit("webhooks"),
     async (req, res, next) => {
       try {
-        const deleted = await getSignalWebhookDispatcher().remove(String(req.params.id));
+        const deleted = await getSignalWebhookDispatcher().remove(String(req.params.id), (req as any).signalAuth?.keyId);
         if (!deleted) {
           sendApiError(req, res, 404, "webhook_not_found", "Webhook subscription was not found.");
           return;
@@ -209,7 +223,7 @@ function mountSignalRoutes(router: Router, prefix: string) {
 
   router.post(
     `${prefix}/webhooks/:id/test`,
-    requireSignalRoles(["webhook_admin"]),
+    requireSignalScopes(["webhooks:write"]),
     signalRateLimit("webhooks"),
     async (req, res, next) => {
       try {
@@ -220,9 +234,26 @@ function mountSignalRoutes(router: Router, prefix: string) {
     },
   );
 
+  router.post(
+    `${prefix}/webhooks/:id/rotate-secret`,
+    requireSignalScopes(["webhooks:write"]),
+    signalRateLimit("webhooks"),
+    async (req, res, next) => {
+      try {
+        res.json(await getSignalWebhookDispatcher().rotateSecret(
+          String(req.params.id),
+          req.body,
+          (req as any).signalAuth?.keyId,
+        ));
+      } catch (error) {
+        next(normalizeZodError(error, "invalid_webhook_rotation", "Webhook secret rotation failed validation."));
+      }
+    },
+  );
+
   router.get(
     `${prefix}/audit/signals`,
-    requireSignalRoles(["auditor"]),
+    requireSignalScopes(["audit:read"]),
     signalRateLimit("audit"),
     async (req, res, next) => {
       try {
@@ -230,6 +261,76 @@ function mountSignalRoutes(router: Router, prefix: string) {
         res.json({ data: await getSignalDistributionService().audit(limit) });
       } catch (error) {
         next(error);
+      }
+    },
+  );
+
+  router.get(
+    `${prefix}/admin/api-keys`,
+    requireSignalScopes(["admin:keys"]),
+    signalRateLimit("admin-api-keys"),
+    async (_req, res, next) => {
+      try {
+        const keys = await getSignalStore().listApiKeys();
+        res.json({ data: keys.map(publicApiKey) });
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
+
+  router.post(
+    `${prefix}/admin/api-keys`,
+    requireSignalScopes(["admin:keys"]),
+    signalRateLimit("admin-api-keys"),
+    async (req, res, next) => {
+      try {
+        const input = CreateApiKeySchema.parse(req.body);
+        res.status(201).json(await createManagedApiKey(input, (req as any).signalAuth?.keyId));
+      } catch (error) {
+        next(normalizeZodError(error, "invalid_api_key_request", "API key creation failed validation."));
+      }
+    },
+  );
+
+  router.post(
+    `${prefix}/admin/api-keys/:id/rotate`,
+    requireSignalScopes(["admin:keys"]),
+    signalRateLimit("admin-api-keys"),
+    async (req, res, next) => {
+      try {
+        const input = RotateApiKeySchema.parse(req.body ?? {});
+        res.json(await rotateManagedApiKey(String(req.params.id), input, (req as any).signalAuth?.keyId));
+      } catch (error) {
+        next(normalizeZodError(error, "invalid_api_key_rotation", "API key rotation failed validation."));
+      }
+    },
+  );
+
+  router.post(
+    `${prefix}/admin/api-keys/:id/revoke`,
+    requireSignalScopes(["admin:keys"]),
+    signalRateLimit("admin-api-keys"),
+    async (req, res, next) => {
+      try {
+        res.json(await revokeManagedApiKey(String(req.params.id), (req as any).signalAuth?.keyId));
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
+
+  router.post(
+    `${prefix}/admin/queue/redrive`,
+    requireSignalScopes(["admin:keys"]),
+    signalRateLimit("admin-queue"),
+    async (req, res, next) => {
+      try {
+        const input = RedriveQueueSchema.parse(req.body ?? {});
+        const redriven = await getSignalStore().redriveDeadLetterJobs(input.queue, input.ids);
+        res.json({ redriven });
+      } catch (error) {
+        next(normalizeZodError(error, "invalid_redrive_request", "Queue redrive failed validation."));
       }
     },
   );
