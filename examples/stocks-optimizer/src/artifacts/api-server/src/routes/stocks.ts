@@ -14,6 +14,17 @@ import {
 } from "../lib/signal-email.js";
 import { loadTradingViewHistoricalBars } from "../lib/tradingview-history.js";
 import { sizeFinancialExposure } from "../lib/financial-sizing.js";
+import {
+  accountabilityGetOperation,
+  decisionCapabilitiesPayload,
+  enrichStrategySignals,
+  evaluateDecisionOperation,
+  predictScenariosOperation,
+  recordDecisionOutcomeOperation,
+  replayDecisionOperation,
+  simulateOperation,
+  summarizeStrategyDecisionIntelligence,
+} from "../lib/decision-intelligence.js";
 
 
 
@@ -44,6 +55,38 @@ function shouldSkipLocalQuoteSymbol(symbol: string) {
 
 
 const router: IRouter = Router();
+
+router.get("/decision/capabilities", (_req, res) => {
+  res.json(decisionCapabilitiesPayload());
+});
+
+router.post("/decision/evaluate.v1", (req, res) => {
+  res.json(evaluateDecisionOperation(req.body ?? {}));
+});
+
+router.post("/decision/replay.v1", (req, res) => {
+  res.json(replayDecisionOperation(req.body ?? {}));
+});
+
+router.post("/decision/outcome.record.v1", (req, res) => {
+  res.json(recordDecisionOutcomeOperation(req.body ?? {}));
+});
+
+router.get("/decision/accountability.get.v1", (req, res) => {
+  res.json(accountabilityGetOperation(req.query ?? {}));
+});
+
+router.post("/decision/accountability.get.v1", (req, res) => {
+  res.json(accountabilityGetOperation(req.body ?? {}));
+});
+
+router.post("/decision/scenarios.predict.v1", (req, res) => {
+  res.json(predictScenariosOperation(req.body ?? {}));
+});
+
+router.post("/decision/simulate.v1", (req, res) => {
+  res.json(simulateOperation(req.body ?? {}));
+});
 
 function forcedWalkForwardHistory() {
   return Array.from({ length: 180 }, (_, index) => {
@@ -433,12 +476,13 @@ function buildMinimalStrategyPayload(market: string, limitSymbols = 80) {
     };
   }).filter((signal) => signal.symbol);
 
-  const buyCount = signals.filter((signal) => signal.signalAction === "Buy").length;
-  const avgRisk = signals.length
-    ? signals.reduce((sum, signal) => sum + strategyNumeric(signal.riskPressure), 0) / signals.length
+  const decisionSignals = enrichStrategySignals(signals, { market });
+  const buyCount = decisionSignals.filter((signal) => signal.signalAction === "Buy").length;
+  const avgRisk = decisionSignals.length
+    ? decisionSignals.reduce((sum, signal) => sum + strategyNumeric(signal.riskPressure), 0) / decisionSignals.length
     : 0;
-  const avgQuality = signals.length
-    ? signals.reduce((sum, signal) => sum + strategyNumeric(signal.setupQuality), 0) / signals.length
+  const avgQuality = decisionSignals.length
+    ? decisionSignals.reduce((sum, signal) => sum + strategyNumeric(signal.setupQuality), 0) / decisionSignals.length
     : 0;
 
   const regime =
@@ -455,7 +499,8 @@ function buildMinimalStrategyPayload(market: string, limitSymbols = 80) {
   return {
     ok: true,
     market,
-    signals,
+    signals: decisionSignals,
+    decisionIntelligence: summarizeStrategyDecisionIntelligence(decisionSignals),
     regime: {
       regime,
       configId: "local-walk-forward-v1",
@@ -556,6 +601,20 @@ async function handleStrategyRoute(req: any, res: any) {
     }
 
     if (action === "walk-forward-market" || action === "live-market") {
+      const regime = {
+        regime: history.at(-1)?.regime ?? "Constructive Trend Environment",
+        survivalScore: summary.survivalScore ?? 0,
+        configId: summary.configId ?? "local-walk-forward-v1",
+      };
+      const signals = enrichStrategySignals(
+        Array.isArray(portfolioPayload.signals) ? portfolioPayload.signals : [],
+        {
+          market,
+          summary,
+          regime,
+        },
+      );
+
       res.json({
         ok: true,
         market,
@@ -564,12 +623,9 @@ async function handleStrategyRoute(req: any, res: any) {
           id: summary.configId ?? "local-walk-forward-v1",
           source: "portfolio-market-cache",
         },
-        regime: {
-          regime: history.at(-1)?.regime ?? "Constructive Trend Environment",
-          survivalScore: summary.survivalScore ?? 0,
-          configId: summary.configId ?? "local-walk-forward-v1",
-        },
-        signals: Array.isArray(portfolioPayload.signals) ? portfolioPayload.signals : [],
+        regime,
+        signals,
+        decisionIntelligence: summarizeStrategyDecisionIntelligence(signals),
         opportunityDiscovery: portfolioPayload.opportunityDiscovery ?? null,
         agencyDiagnostics: portfolioPayload.agencyDiagnostics ?? null,
         resolveDiagnostics: portfolioPayload.resolveDiagnostics ?? summary.resolveDiagnostics ?? null,

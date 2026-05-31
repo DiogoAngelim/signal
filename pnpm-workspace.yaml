@@ -1,4 +1,5 @@
 packages:
+  - "packages/decision"
   - "packages/agency"
   - "packages/semantic-state"
   - "examples/stocks-optimizer"

@@ -163,6 +163,18 @@ type DisplayStock = StockData & {
   candidateProgression?: Array<any>;
   adaptiveSuggestedExposure?: number;
   rejectionReason?: string | null;
+  decisionIntelligence?: any;
+  coherenceScore?: number;
+  coherenceStatus?: string;
+  consensusLevel?: number;
+  predictionScenarios?: Array<any>;
+  simulationRecommendation?: string;
+  wisdomDecision?: string;
+  outcomeAccuracy?: number | null;
+  accountabilitySummary?: string;
+  decisionReplayAvailable?: boolean;
+  actionAllowed?: boolean;
+  actionScale?: number;
 };
 
 type IntelligenceStock = DisplayStock & {
@@ -3413,6 +3425,35 @@ export default function Dashboard() {
         ),
         rejectionReason:
           signal.rejectionReason ?? (stock as any).rejectionReason,
+        decisionIntelligence:
+          signal.decisionIntelligence ?? (stock as any).decisionIntelligence,
+        coherenceScore: numeric(
+          signal.coherenceScore,
+          numeric((stock as any).coherenceScore),
+        ),
+        coherenceStatus:
+          signal.coherenceStatus ?? (stock as any).coherenceStatus,
+        consensusLevel: numeric(
+          signal.consensusLevel,
+          numeric((stock as any).consensusLevel),
+        ),
+        predictionScenarios:
+          signal.predictionScenarios ?? (stock as any).predictionScenarios,
+        simulationRecommendation:
+          signal.simulationRecommendation ??
+          (stock as any).simulationRecommendation,
+        wisdomDecision:
+          signal.wisdomDecision ?? (stock as any).wisdomDecision,
+        outcomeAccuracy:
+          signal.outcomeAccuracy ?? (stock as any).outcomeAccuracy,
+        accountabilitySummary:
+          signal.accountabilitySummary ?? (stock as any).accountabilitySummary,
+        decisionReplayAvailable:
+          signal.decisionReplayAvailable ??
+          (stock as any).decisionReplayAvailable,
+        actionAllowed:
+          signal.actionAllowed ?? (stock as any).actionAllowed,
+        actionScale: numeric(signal.actionScale, numeric((stock as any).actionScale)),
         regime: signal.regime,
         quoteStatus: stock.quoteStatus ?? "available",
       } as DisplayStock;
@@ -3466,6 +3507,18 @@ export default function Dashboard() {
           candidateProgression: signal.candidateProgression,
           adaptiveSuggestedExposure: numeric(signal.adaptiveSuggestedExposure),
           rejectionReason: signal.rejectionReason,
+          decisionIntelligence: signal.decisionIntelligence,
+          coherenceScore: numeric(signal.coherenceScore),
+          coherenceStatus: signal.coherenceStatus,
+          consensusLevel: numeric(signal.consensusLevel),
+          predictionScenarios: signal.predictionScenarios,
+          simulationRecommendation: signal.simulationRecommendation,
+          wisdomDecision: signal.wisdomDecision,
+          outcomeAccuracy: signal.outcomeAccuracy,
+          accountabilitySummary: signal.accountabilitySummary,
+          decisionReplayAvailable: signal.decisionReplayAvailable,
+          actionAllowed: signal.actionAllowed,
+          actionScale: numeric(signal.actionScale),
           quoteStatus:
             optionalNumber(signal.price) != null ? "available" : "pending",
           summary:
@@ -6391,13 +6444,61 @@ export default function Dashboard() {
         finiteNumber(stock.discoveryScore) ??
         finiteNumber((stock.discovery as any)?.score) ??
         qualityPct;
+      const decisionIntelligence = (stock as any).decisionIntelligence ?? {};
+      const coherencePct =
+        finiteNumber((stock as any).coherenceScore) ??
+        finiteNumber(decisionIntelligence?.coherenceScore);
+      const consensusPct =
+        finiteNumber((stock as any).consensusLevel) ??
+        finiteNumber(decisionIntelligence?.consensusLevel);
+      const stockActionScale = finiteNumber((stock as any).actionScale);
+      const intelligenceActionScale = finiteNumber(
+        decisionIntelligence?.actionScale,
+      );
+      const actionScalePct =
+        stockActionScale != null
+          ? stockActionScale * 100
+          : intelligenceActionScale != null
+            ? intelligenceActionScale * 100
+            : null;
+      const predictionScenarios = Array.isArray(
+        (stock as any).predictionScenarios,
+      )
+        ? (stock as any).predictionScenarios
+        : Array.isArray(decisionIntelligence?.predictionScenarios)
+          ? decisionIntelligence.predictionScenarios
+          : [];
+      const highestDownside = predictionScenarios.length
+        ? Math.max(
+            ...predictionScenarios.map((scenario: any) =>
+              numeric(scenario?.downsideRisk),
+            ),
+          )
+        : null;
+      const simulationRecommendation = String(
+        (stock as any).simulationRecommendation ??
+          decisionIntelligence?.simulationRecommendation ??
+          "",
+      );
+      const wisdomDecision = String(
+        (stock as any).wisdomDecision ??
+          decisionIntelligence?.wisdomDecision ??
+          "",
+      );
+      const guide = Array.isArray(decisionIntelligence?.guide)
+        ? decisionIntelligence.guide
+        : [];
+      const plainGuide = (step: number) =>
+        String(guide.find((item: any) => item?.step === step)?.text ?? "").trim();
       const readinessPct = clamp(
-        qualityPct * 0.3 +
+        qualityPct * 0.24 +
+          (coherencePct ?? qualityPct) * 0.2 +
           (trustPct ?? qualityPct) * 0.22 +
-          (100 - riskPct) * 0.2 +
+          (100 - riskPct) * 0.16 +
           timingPct * 0.14 +
-          trendPct * 0.09 +
-          discoveryPct * 0.05,
+          trendPct * 0.08 +
+          discoveryPct * 0.04 +
+          (consensusPct ?? qualityPct) * 0.06,
       );
       const failedConstraints = (stock.sizingConstraints ?? [])
         .filter((constraint) => constraint && !constraint.passed)
@@ -6446,10 +6547,15 @@ export default function Dashboard() {
           `${marketFilter || "The market"} is in ${currentStrategyStateName}; participation is ${executiveIA.executiveReasoning.recommendedParticipationMode}.`,
         support: compactDecisionLines(
           [
+            decisionIntelligence?.humanSummary,
+            plainGuide(1),
             stock.sizingRationale,
             stock.sizingReasons,
             stock.discoveryLifecycle
               ? `Discovery lifecycle: ${stock.discoveryLifecycle}`
+              : "",
+            coherencePct != null
+              ? `Signal agreement is ${fmtPlainPct(coherencePct, 0)}.`
               : "",
             trendPct >= 60 ? "Trend quality supports continued review." : "",
           ],
@@ -6457,6 +6563,16 @@ export default function Dashboard() {
         ),
         contradictions: compactDecisionLines(
           [
+            plainGuide(2),
+            highestDownside != null && highestDownside >= 70
+              ? "Prediction includes high downside risk."
+              : "",
+            simulationRecommendation === "wait"
+              ? "Simulation prefers waiting over full action."
+              : "",
+            wisdomDecision === "avoid"
+              ? "Wisdom blocks the action to protect survival."
+              : "",
             failedConstraints,
             stock.rejectionReason,
             riskPct >= 70 ? "Risk pressure is elevated." : "",
@@ -6481,11 +6597,39 @@ export default function Dashboard() {
         drivers: compactDecisionLines(
           [
             `Quality ${fmtPlainPct(qualityPct, 0)}`,
+            coherencePct != null
+              ? `Coherence ${fmtPlainPct(coherencePct, 0)}`
+              : "",
+            consensusPct != null
+              ? `Consensus ${fmtPlainPct(consensusPct, 0)}`
+              : "",
+            actionScalePct != null
+              ? `Action scale ${fmtPlainPct(actionScalePct, 0)}`
+              : "",
             `Timing ${fmtPlainPct(timingPct, 0)}`,
             `Risk ${fmtPlainPct(riskPct, 0)}`,
           ],
           `${ticker} is being monitored by the decision engine.`,
         ),
+        decisionIntelligence,
+        coherenceScore: coherencePct ?? null,
+        coherenceStatus:
+          (stock as any).coherenceStatus ??
+          decisionIntelligence?.coherenceStatus ??
+          null,
+        consensusLevel: consensusPct ?? null,
+        simulationRecommendation: simulationRecommendation || null,
+        wisdomDecision: wisdomDecision || null,
+        outcomeAccuracy:
+          finiteNumber((stock as any).outcomeAccuracy) ??
+          finiteNumber(decisionIntelligence?.outcomeAccuracy),
+        actionAllowed:
+          (stock as any).actionAllowed ??
+          decisionIntelligence?.actionAllowed ??
+          null,
+        actionScale:
+          finiteNumber((stock as any).actionScale) ??
+          finiteNumber(decisionIntelligence?.actionScale),
       };
     });
   const selectedDecisionOpportunityId =
@@ -6499,6 +6643,40 @@ export default function Dashboard() {
     ) ??
     decisionOpportunities[0] ??
     null;
+  const primaryDecisionIntelligence =
+    primaryDecisionOpportunity?.decisionIntelligence ?? null;
+  const primaryDecisionGuide = Array.isArray(primaryDecisionIntelligence?.guide)
+    ? primaryDecisionIntelligence.guide
+    : [];
+  const decisionGuideText = (step: number) =>
+    String(
+      primaryDecisionGuide.find((item: any) => item?.step === step)?.text ?? "",
+    ).trim();
+  const primaryCoherenceScore =
+    primaryDecisionOpportunity?.coherenceScore ??
+    finiteNumber(primaryDecisionIntelligence?.coherenceScore);
+  const primaryConsensusLevel =
+    primaryDecisionOpportunity?.consensusLevel ??
+    finiteNumber(primaryDecisionIntelligence?.consensusLevel);
+  const primarySimulationRecommendation = String(
+    primaryDecisionOpportunity?.simulationRecommendation ??
+      primaryDecisionIntelligence?.simulationRecommendation ??
+      "",
+  );
+  const primaryWisdomDecision = String(
+    primaryDecisionOpportunity?.wisdomDecision ??
+      primaryDecisionIntelligence?.wisdomDecision ??
+      "",
+  );
+  const primaryOutcomeAccuracy =
+    primaryDecisionOpportunity?.outcomeAccuracy ??
+    finiteNumber(primaryDecisionIntelligence?.outcomeAccuracy);
+  const primaryActionScalePct =
+    primaryDecisionOpportunity?.actionScale != null
+      ? primaryDecisionOpportunity.actionScale * 100
+      : finiteNumber(primaryDecisionIntelligence?.actionScale) != null
+        ? finiteNumber(primaryDecisionIntelligence?.actionScale)! * 100
+        : null;
   const decisionReadinessPct = hasMarketData
     ? clamp(
         (readinessScoreDisplay ?? 50) * 0.28 +
@@ -6568,6 +6746,15 @@ export default function Dashboard() {
         : "Market context is loading.",
     },
     {
+      id: "decision-coherence",
+      label: "Decision Coherence",
+      status: decisionStageStatus(primaryCoherenceScore),
+      explanation:
+        primaryCoherenceScore == null
+          ? "Signal coherence is still forming."
+          : `Signal coherence is ${fmtPlainPct(primaryCoherenceScore, 0)} with consensus at ${fmtPlainPct(primaryConsensusLevel, 0)}.`,
+    },
+    {
       id: "signal-agreement",
       label: "Signal Agreement",
       status: decisionStageStatus(executiveConfidencePct),
@@ -6606,7 +6793,38 @@ export default function Dashboard() {
       explanation:
         calibrationTrustworthinessDisplay == null
           ? "Calibration trustworthiness is pending."
-          : `Calibration trustworthiness is ${fmtPlainPct(calibrationTrustworthinessDisplay, 0)} across ${calibrationSampleSize ?? 0} samples.`,
+        : `Calibration trustworthiness is ${fmtPlainPct(calibrationTrustworthinessDisplay, 0)} across ${calibrationSampleSize ?? 0} samples.`,
+    },
+    {
+      id: "prediction-simulation",
+      label: "Prediction & Simulation",
+      status:
+        primarySimulationRecommendation === "block"
+          ? "Fail"
+          : primarySimulationRecommendation === "wait"
+            ? "Caution"
+            : "Pass",
+      explanation:
+        decisionGuideText(4) ||
+        (primarySimulationRecommendation
+          ? `Simulation recommends ${primarySimulationRecommendation}.`
+          : "Simulation is comparing action paths."),
+    },
+    {
+      id: "wisdom",
+      label: "Wisdom",
+      status:
+        primaryWisdomDecision === "avoid"
+          ? "Fail"
+          : primaryWisdomDecision === "wait" ||
+              primaryWisdomDecision === "proceed-small"
+            ? "Caution"
+            : "Pass",
+      explanation:
+        decisionGuideText(6) ||
+        (primaryWisdomDecision
+          ? `Wisdom says ${primaryWisdomDecision}.`
+          : "Wisdom prioritizes long-term survival over short-term upside."),
     },
     {
       id: "liquidity",
@@ -6709,9 +6927,15 @@ export default function Dashboard() {
     },
   ];
   const decisionRawMetrics = [
+    { label: "Coherence", value: fmtPlainPct(primaryCoherenceScore, 0) },
+    { label: "Consensus", value: fmtPlainPct(primaryConsensusLevel, 0) },
     { label: "Confidence", value: fmtPlainPct(executiveConfidencePct, 0) },
     { label: "Trust", value: fmtPlainPct(executiveTrustPct, 0) },
     { label: "Market Health", value: fmtPlainPct(dashboardSizing.marketHealthPct, 0) },
+    { label: "Simulation", value: primarySimulationRecommendation || "Pending" },
+    { label: "Wisdom", value: primaryWisdomDecision || "Pending" },
+    { label: "Action Scale", value: fmtPlainPct(primaryActionScalePct, 0) },
+    { label: "Outcome Accuracy", value: fmtPlainPct(primaryOutcomeAccuracy, 0) },
     { label: "Opportunity Density", value: fmtPlainPct(adaptiveOpportunityDensityPct, 0) },
     { label: "Risk Pressure", value: fmtPlainPct(avgRisk, 0) },
     { label: "Readiness", value: fmtPlainPct(decisionReadinessPct, 0) },

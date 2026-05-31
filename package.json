@@ -16,7 +16,7 @@
     "deploy:vercel:examples": "node ./scripts/deploy-vercel-examples.mjs --prod",
     "deploy:vercel:examples:preview": "node ./scripts/deploy-vercel-examples.mjs",
     "test": "pnpm build && pnpm -r --sort run test",
-    "coverage": "pnpm --filter @signal/agency run test:coverage && pnpm --filter @signal/semantic-state run test:coverage && pnpm --filter @signal/protocol run test:coverage && pnpm --filter @signal/runtime run test:coverage && pnpm --filter @signal/binding-http run test:coverage && pnpm --filter @signal/sdk-node run test:coverage && pnpm --filter @signal/idempotency-postgres run test:coverage && pnpm --filter @signal/examples run test:coverage && pnpm --filter @signal/reference-server run test:coverage",
+    "coverage": "pnpm --filter @signal/agency run test:coverage && pnpm --filter @signal/decision run test:coverage && pnpm --filter @signal/semantic-state run test:coverage && pnpm --filter @signal/protocol run test:coverage && pnpm --filter @signal/runtime run test:coverage && pnpm --filter @signal/binding-http run test:coverage && pnpm --filter @signal/sdk-node run test:coverage && pnpm --filter @signal/idempotency-postgres run test:coverage && pnpm --filter @signal/examples run test:coverage && pnpm --filter @signal/reference-server run test:coverage",
     "lint": "pnpm -r --sort run lint",
     "format": "biome format --write .",
     "check": "biome check .",

@@ -70,6 +70,15 @@ export type DecisionOpportunity = {
   missing: string[];
   invalidations: string[];
   drivers: string[];
+  decisionIntelligence?: any;
+  coherenceScore?: number | null;
+  coherenceStatus?: string | null;
+  consensusLevel?: number | null;
+  simulationRecommendation?: string | null;
+  wisdomDecision?: string | null;
+  outcomeAccuracy?: number | null;
+  actionAllowed?: boolean | null;
+  actionScale?: number | null;
 };
 
 export type DecisionStepId = "opportunity" | "trust" | "size" | "action";
@@ -1658,9 +1667,15 @@ export default function DecisionOperatingSystem({
   const secondaryMetrics = rawMetrics.filter((metric) =>
     [
       "Confidence",
+      "Coherence",
+      "Consensus",
       "Trust",
       "Risk Pressure",
       "Market Health",
+      "Simulation",
+      "Wisdom",
+      "Action Scale",
+      "Outcome Accuracy",
       "Readiness",
       "Starter Size",
       "Portfolio Cap",
@@ -1778,13 +1793,26 @@ export default function DecisionOperatingSystem({
     "Review after the next market update.",
     4,
   );
+  const testedSummary =
+    workflow.find((step) => step.id === "size")?.detail ||
+    "Signal compared acting fully, acting smaller, waiting, and blocking action.";
+  const whySummary =
+    reasonSummary ||
+    "The recommendation balances opportunity, risk, and survival.";
+  const learningSummary =
+    actionPlan.invalidation ||
+    "This decision will be tracked so future confidence can improve.";
   const guideSteps = defaultGuideSteps({
     goal: selectedGoal,
     reality: `${marketHealthWord} backdrop with ${riskPressureWord.toLowerCase()} risk.`,
-    focus: focusItems[0] ?? "Stay selective.",
-    options: optionSupports[0] ?? "Wait for better confirmation.",
+    focus: optionSupports[0] ?? "Wait for better confirmation.",
+    options:
+      selectedOpportunity?.drivers[0] ??
+      "Signal is preparing for several possible paths.",
+    tested: testedSummary,
     recommendation: safeRecommendation,
-    review: reviewCheckpoints[0] ?? "Review after the next market update.",
+    why: whySummary,
+    review: learningSummary,
     tone: guideTone,
   });
   const refreshNotice = systemNotice;
@@ -1920,6 +1948,21 @@ export default function DecisionOperatingSystem({
                   />
                 </section>
 
+                <section id="guide-tested" className="contents">
+                  <FocusCard
+                    title="What Signal Tested"
+                    items={compactList(
+                      [
+                        testedSummary,
+                        actionPlan.portfolioImpact,
+                        actionPlan.riskConstraints,
+                      ],
+                      "Signal compared acting fully, acting smaller, waiting, and blocking action.",
+                      3,
+                    )}
+                  />
+                </section>
+
                 <RecommendationCard
                   recommendation={safeRecommendation}
                   rationale={`${cleanSentence(primaryAnswer)} ${cleanSentence(readinessBlocker)}`}
@@ -2010,45 +2053,47 @@ export default function DecisionOperatingSystem({
           />
 
           <section className="grid min-w-0 items-start gap-3 lg:grid-cols-2">
-            <DisclosurePanel
-              title="Why"
-              summary={reasonSummary}
-              defaultOpen
-              testId="decision-summary-panel"
-            >
-              <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                    Supports
+            <div id="guide-why" className="contents">
+              <DisclosurePanel
+                title="Why"
+                summary={reasonSummary}
+                defaultOpen
+                testId="decision-summary-panel"
+              >
+                <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+                  <div className="min-w-0">
+                    <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+                      Supports
+                    </div>
+                    <div className="mt-2 grid gap-2">
+                      {supportSummary.map((item) => (
+                        <p
+                          key={item}
+                          className="break-words text-sm leading-6 text-zinc-700"
+                        >
+                          {investorCopy(item)}
+                        </p>
+                      ))}
+                    </div>
                   </div>
-                  <div className="mt-2 grid gap-2">
-                    {supportSummary.map((item) => (
-                      <p
-                        key={item}
-                        className="break-words text-sm leading-6 text-zinc-700"
-                      >
-                        {investorCopy(item)}
-                      </p>
-                    ))}
+                  <div className="min-w-0">
+                    <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+                      Watch
+                    </div>
+                    <div className="mt-2 grid gap-2">
+                      {riskSummary.map((item) => (
+                        <p
+                          key={item}
+                          className="break-words text-sm leading-6 text-zinc-700"
+                        >
+                          {investorCopy(item)}
+                        </p>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                    Watch
-                  </div>
-                  <div className="mt-2 grid gap-2">
-                    {riskSummary.map((item) => (
-                      <p
-                        key={item}
-                        className="break-words text-sm leading-6 text-zinc-700"
-                      >
-                        {investorCopy(item)}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </DisclosurePanel>
+              </DisclosurePanel>
+            </div>
 
             <DisclosurePanel
               title="Evidence"
@@ -2114,7 +2159,7 @@ export default function DecisionOperatingSystem({
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                          {index + 1}/6
+                          {index + 1}/{guideSteps.length}
                         </span>
                         <span className="break-words text-sm font-semibold text-zinc-950">
                           {step.label}

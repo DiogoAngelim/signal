@@ -55,6 +55,7 @@ Signal may carry transport-independent hints such as `context.deadlineAt`, but i
 
 - `packages/protocol`: messages, names, results, errors, capabilities, and JSON-schema artifacts
 - `packages/runtime`: Node.js reference runtime, idempotency helpers, dispatcher, replay-safe utilities
+- `packages/decision`: generic coherence, prediction, simulation, wisdom, outcome, accountability, and decision-record layer
 - `packages/sdk-node`: explicit registration helpers for Node applications
 - `packages/binding-http`: thin Fastify binding for Signal queries, mutations, and capabilities
 - `packages/idempotency-postgres`: PostgreSQL-backed idempotency store

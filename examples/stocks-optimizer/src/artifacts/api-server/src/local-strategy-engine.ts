@@ -1,4 +1,8 @@
 import { sizeFinancialExposure } from "./lib/financial-sizing";
+import {
+  enrichStrategySignals,
+  summarizeStrategyDecisionIntelligence,
+} from "./lib/decision-intelligence";
 
 type StrategyPoint = {
   date: string;
@@ -570,6 +574,15 @@ export function runLocalWalkForwardStrategy(input: {
     })
     .filter(Boolean)
     .sort((a: any, b: any) => b.setupQuality - a.setupQuality);
+  const decisionSignals = enrichStrategySignals(signals as any[], {
+    market,
+    summary: best.summary,
+    regime: {
+      regime: best.history[best.history.length - 1]?.regime ?? "Unknown",
+      configId: best.config.id,
+      survivalScore: best.summary.survivalScore,
+    },
+  });
 
   const payload = {
     ok: true,
@@ -580,7 +593,8 @@ export function runLocalWalkForwardStrategy(input: {
       configId: best.config.id,
       survivalScore: best.summary.survivalScore,
     },
-    signals,
+    signals: decisionSignals,
+    decisionIntelligence: summarizeStrategyDecisionIntelligence(decisionSignals),
     summary: {
       market,
       ...best.summary,

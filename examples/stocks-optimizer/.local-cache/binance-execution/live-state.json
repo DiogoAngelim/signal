@@ -63725,6 +63725,1490 @@
       },
       "createdAt": "2026-05-31T19:58:40.523Z",
       "updatedAt": "2026-05-31T19:58:40.523Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780257582231",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780257582231",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T19:59:42.231Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T19:59:44.073Z",
+      "updatedAt": "2026-05-31T19:59:44.073Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780257582231",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780257582231",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T19:59:42.231Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T19:59:44.091Z",
+      "updatedAt": "2026-05-31T19:59:44.091Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780257645976",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780257645976",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:00:45.976Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:00:47.747Z",
+      "updatedAt": "2026-05-31T20:00:47.747Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780257645976",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780257645976",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:00:45.976Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:00:47.765Z",
+      "updatedAt": "2026-05-31T20:00:47.765Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780257709638",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780257709638",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:01:49.638Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:01:52.992Z",
+      "updatedAt": "2026-05-31T20:01:52.992Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780257709638",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780257709638",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:01:49.638Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:01:53.018Z",
+      "updatedAt": "2026-05-31T20:01:53.018Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780257775232",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780257775232",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:02:55.232Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:02:57.077Z",
+      "updatedAt": "2026-05-31T20:02:57.077Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780257775232",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780257775232",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:02:55.232Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:02:57.102Z",
+      "updatedAt": "2026-05-31T20:02:57.102Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780257839366",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780257839366",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:03:59.366Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:04:01.233Z",
+      "updatedAt": "2026-05-31T20:04:01.233Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780257839366",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780257839366",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:03:59.366Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:04:01.250Z",
+      "updatedAt": "2026-05-31T20:04:01.250Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780257903211",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780257903211",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:05:03.211Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:05:05.011Z",
+      "updatedAt": "2026-05-31T20:05:05.011Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780257903211",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780257903211",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:05:03.211Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:05:05.039Z",
+      "updatedAt": "2026-05-31T20:05:05.039Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780257966747",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780257966747",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:06:06.747Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:06:08.583Z",
+      "updatedAt": "2026-05-31T20:06:08.583Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780257966747",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780257966747",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:06:06.747Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:06:08.598Z",
+      "updatedAt": "2026-05-31T20:06:08.598Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258030483",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258030483",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:07:10.483Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:07:12.235Z",
+      "updatedAt": "2026-05-31T20:07:12.235Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258030483",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258030483",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:07:10.483Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:07:12.264Z",
+      "updatedAt": "2026-05-31T20:07:12.264Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258093997",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258093997",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:08:13.997Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:08:15.753Z",
+      "updatedAt": "2026-05-31T20:08:15.753Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258093997",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258093997",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:08:13.997Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:08:15.776Z",
+      "updatedAt": "2026-05-31T20:08:15.776Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258157628",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258157628",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:09:17.628Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:09:19.327Z",
+      "updatedAt": "2026-05-31T20:09:19.327Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258157628",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258157628",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:09:17.628Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:09:19.351Z",
+      "updatedAt": "2026-05-31T20:09:19.351Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258221071",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258221071",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:10:21.071Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:10:23.005Z",
+      "updatedAt": "2026-05-31T20:10:23.005Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258221071",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258221071",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:10:21.071Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:10:23.074Z",
+      "updatedAt": "2026-05-31T20:10:23.074Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258284901",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258284901",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:11:24.901Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:11:26.680Z",
+      "updatedAt": "2026-05-31T20:11:26.680Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258284901",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258284901",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:11:24.901Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:11:26.701Z",
+      "updatedAt": "2026-05-31T20:11:26.701Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258348420",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258348420",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:12:28.420Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:12:30.096Z",
+      "updatedAt": "2026-05-31T20:12:30.096Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258348420",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258348420",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:12:28.420Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:12:30.113Z",
+      "updatedAt": "2026-05-31T20:12:30.113Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258411864",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258411864",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:13:31.864Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:13:33.630Z",
+      "updatedAt": "2026-05-31T20:13:33.630Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258411864",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258411864",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:13:31.864Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:13:33.658Z",
+      "updatedAt": "2026-05-31T20:13:33.658Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258475453",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258475453",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:14:35.453Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:14:37.190Z",
+      "updatedAt": "2026-05-31T20:14:37.190Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258475453",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258475453",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:14:35.453Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:14:37.213Z",
+      "updatedAt": "2026-05-31T20:14:37.213Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258538978",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258538978",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:15:38.978Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:15:40.845Z",
+      "updatedAt": "2026-05-31T20:15:40.845Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258538978",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258538978",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:15:38.978Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:15:40.864Z",
+      "updatedAt": "2026-05-31T20:15:40.864Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258602791",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258602791",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:16:42.791Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:16:44.522Z",
+      "updatedAt": "2026-05-31T20:16:44.522Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258602791",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258602791",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:16:42.791Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:16:44.546Z",
+      "updatedAt": "2026-05-31T20:16:44.546Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258666423",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258666423",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:17:46.423Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:17:48.353Z",
+      "updatedAt": "2026-05-31T20:17:48.353Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258666423",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258666423",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:17:46.423Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:17:48.377Z",
+      "updatedAt": "2026-05-31T20:17:48.377Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258730255",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258730255",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:18:50.255Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:18:51.995Z",
+      "updatedAt": "2026-05-31T20:18:51.995Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258730255",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258730255",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:18:50.255Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:18:52.019Z",
+      "updatedAt": "2026-05-31T20:18:52.019Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258793804",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258793804",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:19:53.804Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:19:55.571Z",
+      "updatedAt": "2026-05-31T20:19:55.571Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258793804",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258793804",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:19:53.804Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:19:55.596Z",
+      "updatedAt": "2026-05-31T20:19:55.596Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258857357",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258857357",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:20:57.357Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:20:59.200Z",
+      "updatedAt": "2026-05-31T20:20:59.200Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258857357",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258857357",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:20:57.357Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:20:59.227Z",
+      "updatedAt": "2026-05-31T20:20:59.227Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258921130",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258921130",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:22:01.130Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:22:03.006Z",
+      "updatedAt": "2026-05-31T20:22:03.006Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258921130",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258921130",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:22:01.130Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:22:03.027Z",
+      "updatedAt": "2026-05-31T20:22:03.027Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780258984781",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780258984781",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:23:04.781Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:23:06.781Z",
+      "updatedAt": "2026-05-31T20:23:06.781Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780258984781",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780258984781",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:23:04.781Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:23:06.807Z",
+      "updatedAt": "2026-05-31T20:23:06.807Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780259049934",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780259049934",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:24:09.934Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:24:12.571Z",
+      "updatedAt": "2026-05-31T20:24:12.571Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780259049934",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780259049934",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:24:09.934Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:24:12.611Z",
+      "updatedAt": "2026-05-31T20:24:12.611Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780259115196",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780259115196",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:25:15.196Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:25:17.184Z",
+      "updatedAt": "2026-05-31T20:25:17.184Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780259115196",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780259115196",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:25:15.196Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:25:17.221Z",
+      "updatedAt": "2026-05-31T20:25:17.221Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780259180114",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780259180114",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:26:20.114Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:26:22.033Z",
+      "updatedAt": "2026-05-31T20:26:22.033Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780259180114",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780259180114",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:26:20.114Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:26:22.060Z",
+      "updatedAt": "2026-05-31T20:26:22.060Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780259243924",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780259243924",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:27:23.924Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:27:25.928Z",
+      "updatedAt": "2026-05-31T20:27:25.928Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780259243924",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780259243924",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:27:23.924Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:27:25.956Z",
+      "updatedAt": "2026-05-31T20:27:25.956Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780259307797",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "confidence_below_threshold",
+        "trust_below_threshold",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780259307797",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 41,
+        "trust": 26.65,
+        "calibratedConfidence": 26.65,
+        "appSizePct": 1,
+        "expectedMovePct": -0.6021585549121022,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:28:27.797Z",
+        "price": 81.71
+      },
+      "createdAt": "2026-05-31T20:28:29.890Z",
+      "updatedAt": "2026-05-31T20:28:29.890Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:HOLD:1780259307797",
+      "status": "rejected",
+      "reasons": [
+        "hold_decision"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:HOLD:1780259307797",
+        "symbol": "BNBUSDT",
+        "action": "HOLD",
+        "confidence": 41,
+        "trust": 6.62,
+        "calibratedConfidence": 6.619999999999997,
+        "appSizePct": 0,
+        "expectedMovePct": 2.8843060121940045,
+        "riskState": "blocked",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T20:28:27.797Z",
+        "price": 709.22
+      },
+      "createdAt": "2026-05-31T20:28:29.982Z",
+      "updatedAt": "2026-05-31T20:28:29.982Z"
     }
   ],
   "orders": [
@@ -63773,426 +65257,6 @@
     }
   ],
   "snapshots": [
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T10:57:10.984Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T10:58:15.345Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T10:59:19.643Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:00:24.271Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:01:29.271Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:02:33.518Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:03:37.747Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:04:42.150Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:05:46.587Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:06:51.112Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:07:55.348Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:08:59.789Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:10:04.214Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:11:08.945Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:12:41.812Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:14:08.177Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:15:12.652Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:16:17.776Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:17:22.189Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:18:26.707Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:19:31.072Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:20:35.402Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:21:41.264Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:22:45.987Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:23:49.281Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:24:52.751Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:25:56.317Z"
-    },
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T11:26:59.768Z"
-    },
     {
       "expectedPositions": {
         "BNBUSDT": 0.014
@@ -71272,10 +72336,430 @@
         "position_drift:BNBUSDT"
       ],
       "createdAt": "2026-05-31T19:58:40.308Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T19:59:43.990Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:00:47.677Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:01:52.842Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:02:56.934Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:04:01.127Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:05:04.853Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:06:08.497Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:07:12.104Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:08:15.631Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:09:19.240Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:10:22.707Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:11:26.519Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:12:30.012Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:13:33.502Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:14:37.054Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:15:40.727Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:16:44.409Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:17:48.240Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:18:51.865Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:19:55.436Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:20:59.060Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:22:02.870Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:23:06.654Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:24:12.417Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:25:16.931Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:26:21.861Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:27:25.640Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T20:28:29.671Z"
     }
   ],
   "account": {
-    "syncedAt": "2026-05-31T19:58:42.022Z",
+    "syncedAt": "2026-05-31T20:28:31.533Z",
     "equity": 10.93376283,
     "availableEquity": 10.93376283,
     "balances": {
@@ -74334,7 +75818,7 @@
   "killSwitch": {
     "active": true,
     "reason": "reconciliation_drift:position_drift:BNBUSDT",
-    "updatedAt": "2026-05-31T19:58:40.330Z"
+    "updatedAt": "2026-05-31T20:28:29.717Z"
   },
   "circuitBreaker": {
     "state": "closed",
@@ -74342,16 +75826,16 @@
     "openedAt": null
   },
   "metrics": {
-    "decisions_received": 2467,
-    "decisions_rejected": 2465,
+    "decisions_received": 2523,
+    "decisions_rejected": 2521,
     "decisions_approved": 2,
     "orders_attempted": 2,
     "capital_reserved": 20.540239999999997,
     "capital_released": 10.45422,
-    "api_failures": 8,
+    "api_failures": 9,
     "orders_accepted": 1,
     "order_latency_ms": 283,
-    "reconciliation_drift": 1154,
-    "kill_switch_activations": 1154
+    "reconciliation_drift": 1182,
+    "kill_switch_activations": 1182
   }
 }

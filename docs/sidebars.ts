@@ -13,6 +13,7 @@ const sidebars: SidebarsConfig = {
         "concepts/idempotency",
         "concepts/versioning",
         "concepts/order-and-replay",
+        "concepts/decision-layer",
       ],
     },
     {

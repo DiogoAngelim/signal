@@ -17,7 +17,9 @@ export type GuideStepId =
   | "reality"
   | "matters"
   | "options"
+  | "tested"
   | "recommendation"
+  | "why"
   | "review";
 
 export type GuideStep = {
@@ -84,7 +86,9 @@ function stepIcon(id: GuideStepId) {
   if (id === "reality") return <Compass className="h-4 w-4" />;
   if (id === "matters") return <Layers className="h-4 w-4" />;
   if (id === "options") return <SlidersHorizontal className="h-4 w-4" />;
+  if (id === "tested") return <CircleDashed className="h-4 w-4" />;
   if (id === "recommendation") return <ShieldCheck className="h-4 w-4" />;
+  if (id === "why") return <CheckCircle2 className="h-4 w-4" />;
   return <RefreshCw className="h-4 w-4" />;
 }
 
@@ -605,57 +609,67 @@ export function defaultGuideSteps(input: {
   reality: string;
   focus: string;
   options: string;
+  tested?: string;
   recommendation: string;
+  why?: string;
   review: string;
   tone?: GuideTone;
 }): GuideStep[] {
   return [
     {
       id: "understand",
-      label: "Understand",
-      question: "What are you trying to achieve?",
+      label: "What is happening?",
+      question: "Where things stand right now.",
       summary: input.goal,
       status: "Goal",
       tone: "neutral",
     },
     {
-      id: "reality",
-      label: "Reality Check",
-      question: "Where things stand right now.",
+      id: "matters",
+      label: "What matters?",
+      question: "What is most likely to help or hurt.",
       summary: input.reality,
       status: "Context",
       tone: "neutral",
     },
     {
-      id: "matters",
-      label: "What Matters",
-      question: "What is most likely to help.",
+      id: "options",
+      label: "What could happen next?",
+      question: "Possible paths Signal is preparing for.",
       summary: input.focus,
       status: "Focus",
       tone: input.tone,
     },
     {
-      id: "options",
-      label: "Your Options",
-      question: "What supports your goal and what works against it.",
-      summary: input.options,
+      id: "tested",
+      label: "What did Signal test?",
+      question: "The action paths compared before recommending.",
+      summary: input.tested ?? input.options,
       status: "Tradeoffs",
       tone: "warn",
     },
     {
       id: "recommendation",
-      label: "Recommended Next Step",
+      label: "What should I do now?",
       question: "The safest justified action right now.",
       summary: input.recommendation,
       status: "Next",
       tone: input.tone,
     },
     {
+      id: "why",
+      label: "Why?",
+      question: "The plain reason behind the recommendation.",
+      summary: input.why ?? input.focus,
+      status: "Reason",
+      tone: input.tone,
+    },
+    {
       id: "review",
-      label: "Plan & Review",
-      question: "Stay on track and adapt.",
+      label: "What will Signal learn from this?",
+      question: "How the decision improves future confidence.",
       summary: input.review,
-      status: "Review",
+      status: "Learning",
       tone: "neutral",
     },
   ];
