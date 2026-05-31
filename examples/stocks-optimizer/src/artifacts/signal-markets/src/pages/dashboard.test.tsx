@@ -19,25 +19,25 @@ describe("Dashboard calibration diagnostics", () => {
 
     expect(html).toContain('data-testid="decision-operating-system"');
     expect(html).toContain('data-testid="decision-step-screen"');
-    expect(html).toContain('data-active-step="intent"');
-    expect(html).toContain("Decision Operating System");
-    expect(html).toContain("Market State");
-    expect(html).toContain("Decision Readiness");
-    expect(html).toContain("Recommended Action");
-    expect(html).toContain("Suggested Exposure");
+    expect(html).toContain('data-active-step="opportunity"');
+    expect(html).toContain("Signal Investment Brief");
+    expect(html).toContain("Recommended action");
+    expect(html).toContain("Opportunity");
+    expect(html).toContain("Trust");
+    expect(html).toContain("Size");
+    expect(html).toContain("Action");
   });
 
-  it("renders one active decision question with the repeated step structure", () => {
+  it("renders one active investor question with the repeated story structure", () => {
     const html = renderToStaticMarkup(<Dashboard />);
 
-    expect(html).toContain("What decision am I trying to make?");
-    expect(html).toContain("Decision Summary");
-    expect(html).toContain('data-testid="supporting-evidence-panel"');
-    expect(html).toContain("Supporting Evidence");
-    expect(html).toContain("Recommended Next Step");
-    expect(html).toContain("Current Decision");
+    expect(html).toContain("What deserves attention?");
+    expect(html).toContain("What happened");
+    expect(html).toContain("Why it matters");
+    expect(html).toContain("What to do");
+    expect(html).toContain('data-testid="primary-answer"');
     expect(html).not.toContain("What is happening?");
-    expect(html).not.toContain("What opportunity matters most?");
+    expect(html).not.toContain("What decision am I trying to make?");
   });
 
   it("holds executive summary metrics steady during quote refresh", () => {
@@ -89,31 +89,32 @@ describe("Dashboard calibration diagnostics", () => {
     ).toEqual({ ...transient, market: "ETF" });
   });
 
-  it("renders the eight-step decision workflow", () => {
+  it("renders the four-step investor decision flow", () => {
     const html = renderToStaticMarkup(<Dashboard />);
 
-    expect(html).toContain("Intent");
-    expect(html).toContain("Sense");
-    expect(html).toContain("Pulse");
-    expect(html).toContain("Core");
-    expect(html).toContain("Judgement");
-    expect(html).toContain("Sizing");
+    expect(html).toContain("Opportunity");
+    expect(html).toContain("Trust");
+    expect(html).toContain("Size");
     expect(html).toContain("Action");
-    expect(html).toContain("Reflection");
+    expect(html).not.toContain("Intent");
+    expect(html).not.toContain("Sense");
+    expect(html).not.toContain("Pulse");
+    expect(html).not.toContain("Core");
+    expect(html).not.toContain("Judgement");
+    expect(html).not.toContain("Reflection");
   });
 
-  it("keeps metrics and diagnostics behind progressive disclosure modes", () => {
+  it("keeps numbers and system notes behind progressive disclosure modes", () => {
     const html = renderToStaticMarkup(<Dashboard />);
 
-    expect(html).toContain("Default");
+    expect(html).toContain("Answer");
+    expect(html).toContain("Why");
     expect(html).toContain("Evidence");
-    expect(html).toContain("Advanced");
-    expect(html).toContain("Expert");
-    expect(html).toContain("Debug");
-    expect(html).toContain("Conclusion view");
-    expect(html).not.toContain("Advanced view");
-    expect(html).not.toContain("Expert view");
-    expect(html).not.toContain("Debug view");
+    expect(html).toContain("Numbers");
+    expect(html).toContain("Notes");
+    expect(html).not.toContain("Advanced");
+    expect(html).not.toContain("Expert");
+    expect(html).not.toContain("Debug");
     expect(html).not.toContain("<details open");
   });
 

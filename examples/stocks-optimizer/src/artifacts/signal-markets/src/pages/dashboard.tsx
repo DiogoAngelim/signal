@@ -6625,45 +6625,21 @@ export default function Dashboard() {
   };
   const decisionWorkflow: DecisionWorkflowStep[] = [
     {
-      id: "intent",
-      label: "Intent",
-      question: "What decision am I trying to make?",
-      output: `${operatorAction} with ${canonicalStarterSize} starter size.`,
-      detail: operatorSummary,
-      status: "Intent set",
-    },
-    {
-      id: "sense",
-      label: "Sense",
-      question: "What is happening?",
-      output: currentStrategyStateName,
-      detail: executiveDecisionSentence,
-      status: hasMarketData ? "Market read" : "Sync pending",
-    },
-    {
-      id: "pulse",
-      label: "Pulse",
-      question: "What opportunity matters most?",
+      id: "opportunity",
+      label: "Opportunity",
+      question: "What deserves attention?",
       output: primaryDecisionOpportunity
         ? `${primaryDecisionOpportunity.ticker} leads the ranked list.`
         : "No ranked opportunity yet.",
-      detail: `${decisionOpportunities.length} opportunities are ranked by quality, trust, timing, risk, and sizing permission.`,
-      status: `${decisionOpportunities.length} ranked`,
-    },
-    {
-      id: "core",
-      label: "Core",
-      question: "Why does this opportunity exist?",
-      output: primaryDecisionOpportunity?.thesis ?? "Thesis pending.",
       detail:
         primaryDecisionOpportunity?.context ??
         "The system is waiting for enough context to explain the opportunity.",
-      status: "Thesis",
+      status: hasMarketData ? `${decisionOpportunities.length} ranked` : "Waiting for data",
     },
     {
-      id: "judgement",
-      label: "Judgement",
-      question: "Can I trust this?",
+      id: "trust",
+      label: "Trust",
+      question: "Can I trust it?",
       output: decisionEvidenceLadder
         .map((stage) => stage.status)
         .includes("Fail")
@@ -6673,12 +6649,12 @@ export default function Dashboard() {
       status: "Trust report",
     },
     {
-      id: "sizing",
-      label: "Sizing",
-      question: "How much risk is appropriate?",
+      id: "size",
+      label: "Size",
+      question: "How much should I risk?",
       output: decisionActionPlan.exposure,
       detail: dashboardSizing.exposureExplanation,
-      status: dashboardSizing.sizingMode,
+      status: displaySizingMode(dashboardSizing.sizingMode),
     },
     {
       id: "action",
@@ -6687,15 +6663,6 @@ export default function Dashboard() {
       output: decisionActionPlan.nextAction,
       detail: `${decisionActionPlan.asset}: ${decisionActionPlan.direction} at ${decisionActionPlan.exposure}.`,
       status: operatorAction,
-    },
-    {
-      id: "reflection",
-      label: "Reflection",
-      question: "What happened?",
-      output: "Outcome review pending.",
-      detail:
-        "Expected outcome, observed outcome, forecast error, and model adjustments will update after the next review cycle.",
-      status: "Learning loop",
     },
   ];
   const decisionRawMetrics = [

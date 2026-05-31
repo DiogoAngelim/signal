@@ -4,16 +4,13 @@ import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
+  BarChart3,
   CheckCircle2,
   CircleDashed,
   Clock,
-  Compass,
-  Gauge,
-  ListChecks,
   RefreshCw,
   Search,
   ShieldCheck,
-  SlidersHorizontal,
   Target,
   Wallet,
   XCircle,
@@ -52,15 +49,7 @@ export type DecisionOpportunity = {
   drivers: string[];
 };
 
-export type DecisionStepId =
-  | "intent"
-  | "sense"
-  | "pulse"
-  | "core"
-  | "judgement"
-  | "sizing"
-  | "action"
-  | "reflection";
+export type DecisionStepId = "opportunity" | "trust" | "size" | "action";
 
 export type DecisionWorkflowStep = {
   id: DecisionStepId;
@@ -119,22 +108,25 @@ export type DecisionOperatingSystemProps = {
   rawMetrics: DecisionRawMetric[];
 };
 
-type DisclosureLevel = "default" | "evidence" | "advanced" | "expert" | "debug";
+type DetailLevel = "answer" | "why" | "evidence" | "numbers" | "notes";
 
-type StageViewModel = {
+type InvestmentStep = {
   id: DecisionStepId;
   label: string;
   question: string;
-  summaryLabel: string;
-  summary: string;
-  evidenceTitle: string;
+  headline: string;
+  answer: string;
+  why: string[];
   evidence: string[];
+  numbers: DecisionRawMetric[];
+  notes: string[];
   nextStep: string;
-  primaryFacts: Array<{ label: string; value: string; tone?: DecisionTone }>;
-  details: string[];
-  metrics: DecisionRawMetric[];
-  diagnostics: string[];
-  raw: string[];
+  facts: Array<{ label: string; value: string; tone?: DecisionTone }>;
+  story: {
+    happened: string;
+    matters: string;
+    next: string;
+  };
 };
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -146,18 +138,95 @@ function boundedPct(value: number | null | undefined) {
   return Math.min(100, Math.max(0, Number(value)));
 }
 
-function toneBorder(tone: DecisionTone) {
-  if (tone === "good") return "border-emerald-400/40 bg-emerald-400/10 text-emerald-100";
-  if (tone === "warn") return "border-amber-300/45 bg-amber-300/10 text-amber-100";
-  if (tone === "bad") return "border-red-400/40 bg-red-400/10 text-red-100";
-  return "border-zinc-700 bg-zinc-950 text-zinc-200";
+function investorCopy(value: string) {
+  return String(value ?? "")
+    .replace(/\bgovernance evidence\b/gi, "permission evidence")
+    .replace(/\bgovernance\b/gi, "permission")
+    .replace(/\bcalibration\b/gi, "historical reliability")
+    .replace(/\bdiscovery\b/gi, "opportunity search")
+    .replace(/\bagency\b/gi, "decision control")
+    .replace(/\bnormal-sizing\b/gi, "normal size");
+}
+
+function compactList(
+  values: Array<string | null | undefined>,
+  fallback: string,
+  limit = 4,
+) {
+  const items = Array.from(
+    new Set(
+      values
+        .map((value) => investorCopy(String(value ?? "").trim()))
+        .filter(Boolean),
+    ),
+  ).slice(0, limit);
+  return items.length ? items : [fallback];
+}
+
+function metricValue(
+  metrics: DecisionRawMetric[],
+  label: string,
+  fallback = "Pending",
+) {
+  return metrics.find((metric) => metric.label === label)?.value ?? fallback;
+}
+
+function parseMetricNumber(value: string) {
+  const match = value.match(/-?\d+(\.\d+)?/);
+  if (!match) return null;
+  const number = Number(match[0]);
+  return Number.isFinite(number) ? number : null;
+}
+
+function qualityWord(value: number | null, inverted = false) {
+  if (value == null) return "Pending";
+  const score = inverted ? 100 - value : value;
+  if (score >= 75) return "High";
+  if (score >= 55) return "Moderate";
+  if (score >= 35) return "Low";
+  return "Very low";
+}
+
+function riskWord(value: number | null) {
+  if (value == null) return "Pending";
+  if (value >= 72) return "Elevated";
+  if (value >= 48) return "Manageable";
+  return "Contained";
+}
+
+function lowerFirst(value: string) {
+  const copy = investorCopy(value);
+  if (!copy) return copy;
+  return copy.charAt(0).toLowerCase() + copy.slice(1);
+}
+
+function cleanSentence(value: string) {
+  const trimmed = investorCopy(String(value ?? "").trim());
+  if (!trimmed) return "";
+  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+}
+
+function displayExposure(value: string) {
+  const normalized = String(value ?? "").trim();
+  if (!normalized) return "No new exposure";
+  if (/^(wait|none|no exposure|0%|0\.0%)$/i.test(normalized)) {
+    return "No new exposure";
+  }
+  return normalized;
 }
 
 function toneText(tone: DecisionTone) {
-  if (tone === "good") return "text-emerald-300";
-  if (tone === "warn") return "text-amber-200";
-  if (tone === "bad") return "text-red-300";
-  return "text-zinc-300";
+  if (tone === "good") return "text-emerald-700";
+  if (tone === "warn") return "text-amber-700";
+  if (tone === "bad") return "text-red-700";
+  return "text-zinc-700";
+}
+
+function toneSurface(tone: DecisionTone) {
+  if (tone === "good") return "border-emerald-200 bg-emerald-50 text-emerald-900";
+  if (tone === "warn") return "border-amber-200 bg-amber-50 text-amber-950";
+  if (tone === "bad") return "border-red-200 bg-red-50 text-red-950";
+  return "border-zinc-200 bg-white text-zinc-800";
 }
 
 function statusTone(status: EvidenceStageStatus): DecisionTone {
@@ -166,15 +235,10 @@ function statusTone(status: EvidenceStageStatus): DecisionTone {
   return "warn";
 }
 
-function stageIcon(stage: DecisionStepId) {
-  if (stage === "intent") return <Compass className="h-4 w-4" />;
-  if (stage === "sense") return <Gauge className="h-4 w-4" />;
-  if (stage === "pulse") return <Target className="h-4 w-4" />;
-  if (stage === "core") return <ListChecks className="h-4 w-4" />;
-  if (stage === "judgement") return <ShieldCheck className="h-4 w-4" />;
-  if (stage === "sizing") return <Wallet className="h-4 w-4" />;
-  if (stage === "action") return <Zap className="h-4 w-4" />;
-  return <Clock className="h-4 w-4" />;
+function statusLabel(status: EvidenceStageStatus) {
+  if (status === "Pass") return "Supports";
+  if (status === "Fail") return "Blocks";
+  return "Needs care";
 }
 
 function statusIcon(status: EvidenceStageStatus) {
@@ -183,68 +247,122 @@ function statusIcon(status: EvidenceStageStatus) {
   return <CircleDashed className="h-4 w-4" />;
 }
 
-function metricValue(metrics: DecisionRawMetric[], label: string, fallback = "Pending") {
-  return metrics.find((metric) => metric.label === label)?.value ?? fallback;
+function stepIcon(step: DecisionStepId) {
+  if (step === "opportunity") return <Target className="h-4 w-4" />;
+  if (step === "trust") return <ShieldCheck className="h-4 w-4" />;
+  if (step === "size") return <Wallet className="h-4 w-4" />;
+  return <Zap className="h-4 w-4" />;
 }
 
-function compactList(values: Array<string | null | undefined>, fallback: string, limit = 4) {
-  const items = Array.from(
-    new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean)),
-  ).slice(0, limit);
-  return items.length ? items : [fallback];
+function friendlyEvidenceLabel(label: string) {
+  const normalized = label.toLowerCase();
+  if (normalized.includes("market")) return "Market backdrop";
+  if (normalized.includes("signal")) return "Signals agree";
+  if (normalized.includes("opportunity")) return "Opportunity quality";
+  if (normalized.includes("risk")) return "Risk control";
+  if (normalized.includes("survival")) return "Loss history";
+  if (normalized.includes("calibration")) return "Historical reliability";
+  if (normalized.includes("liquidity")) return "Trading conditions";
+  if (normalized.includes("governance")) return "Permission to invest";
+  if (normalized.includes("execution")) return "Trading quality";
+  if (normalized.includes("readiness")) return "Decision readiness";
+  return label;
 }
 
-function GlobalMetric({
-  label,
-  value,
-  tone = "neutral",
-}: {
-  label: string;
-  value: string;
-  tone?: DecisionTone;
-}) {
-  return (
-    <div className="min-w-0 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2">
-      <div className="truncate text-[11px] text-zinc-500">{label}</div>
-      <div className={cx("mt-1 truncate text-sm font-semibold", toneText(tone))}>
-        {value}
-      </div>
-    </div>
-  );
+function friendlyMetricLabel(label: string) {
+  if (label === "Confidence") return "Conviction";
+  if (label === "Trust") return "Reliability";
+  if (label === "Market Health") return "Market backdrop";
+  if (label === "Opportunity Density") return "Opportunity flow";
+  if (label === "Risk Pressure") return "Risk pressure";
+  if (label === "Readiness") return "Action readiness";
+  if (label === "Portfolio Cap") return "Portfolio limit";
+  if (label === "Starter Size") return "Starting size";
+  if (label === "Survival") return "Loss safety";
+  if (label === "Calibration") return "Historical reliability";
+  if (label === "History Depth") return "Historical depth";
+  if (label === "Regime Coverage") return "Market coverage";
+  return label;
 }
 
-function DisclosureButton({
-  level,
+function metricMeaning(metric: DecisionRawMetric) {
+  const number = parseMetricNumber(metric.value);
+  switch (metric.label) {
+    case "Confidence":
+      return number == null
+        ? "The view is still forming."
+        : `${qualityWord(number)} conviction in the current recommendation.`;
+    case "Trust":
+      return number == null
+        ? "Reliability evidence is still pending."
+        : `${qualityWord(number)} reliability after history, fit, and risk checks.`;
+    case "Market Health":
+      return number == null
+        ? "Market condition is still loading."
+        : `${qualityWord(number)} backdrop for taking risk.`;
+    case "Opportunity Density":
+      return number == null
+        ? "The opportunity set is still loading."
+        : `${qualityWord(number)} number of ideas worth reviewing.`;
+    case "Risk Pressure":
+      return number == null
+        ? "Risk pressure is still loading."
+        : `${riskWord(number)} pressure against taking new risk.`;
+    case "Readiness":
+      return number == null
+        ? "The decision is still forming."
+        : `${qualityWord(number)} readiness to act now.`;
+    case "Portfolio Cap":
+      return "Maximum total portfolio exposure currently allowed.";
+    case "Starter Size":
+      return "First position size suggested before stronger confirmation.";
+    case "Survival":
+      return number == null
+        ? "Loss-history protection is still loading."
+        : `${qualityWord(number)} evidence that the strategy can survive stress.`;
+    case "Calibration":
+      return number == null
+        ? "Historical reliability is still loading."
+        : `${qualityWord(number)} alignment between past forecasts and outcomes.`;
+    case "History Depth":
+      return number == null
+        ? "Historical depth is still loading."
+        : `${qualityWord(number)} amount of comparable history.`;
+    case "Regime Coverage":
+      return number == null
+        ? "Market-regime coverage is still loading."
+        : `${qualityWord(number)} coverage across different market conditions.`;
+    default:
+      return "Supporting number for the current recommendation.";
+  }
+}
+
+function DetailButton({
   active,
+  children,
   onClick,
 }: {
-  level: DisclosureLevel;
   active: boolean;
+  children: React.ReactNode;
   onClick: () => void;
 }) {
-  const labels: Record<DisclosureLevel, string> = {
-    default: "Default",
-    evidence: "Evidence",
-    advanced: "Advanced",
-    expert: "Expert",
-    debug: "Debug",
-  };
-
   return (
     <button
       type="button"
       onClick={onClick}
       className={cx(
-        "h-9 rounded-md px-3 text-xs font-semibold transition",
-        active ? "bg-zinc-100 text-black" : "text-zinc-400 hover:bg-zinc-900",
+        "h-9 rounded-md px-3 text-sm font-semibold transition",
+        active
+          ? "bg-zinc-950 text-white"
+          : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900",
       )}
     >
-      {labels[level]}
+      {children}
     </button>
   );
 }
 
-function FactCard({
+function FactTile({
   label,
   value,
   tone = "neutral",
@@ -254,76 +372,61 @@ function FactCard({
   tone?: DecisionTone;
 }) {
   return (
-    <div className="min-w-0 rounded-lg border border-zinc-800 bg-black px-4 py-3">
-      <div className="text-xs text-zinc-500">{label}</div>
-      <div className={cx("mt-1 truncate text-lg font-semibold", toneText(tone))}>
-        {value}
+    <div className="min-w-0 rounded-lg border border-zinc-200 bg-white p-3">
+      <div className="text-xs font-medium text-zinc-500">{label}</div>
+      <div className={cx("mt-1 break-words text-base font-semibold leading-snug", toneText(tone))}>
+        {investorCopy(value)}
       </div>
     </div>
   );
 }
 
-function DetailPanel({
-  disclosure,
-  stage,
+function StoryLine({
+  label,
+  children,
+  icon,
 }: {
-  disclosure: DisclosureLevel;
-  stage: StageViewModel;
+  label: string;
+  children: React.ReactNode;
+  icon: React.ReactNode;
 }) {
-  if (disclosure === "default") {
-    return null;
-  }
-
-  if (disclosure === "evidence") {
-    return (
-      <div className="h-full min-h-0 overflow-y-auto pr-1">
-        <div className="grid gap-2">
-          {stage.details.map((item) => (
-            <div key={item} className="rounded-lg border border-zinc-800 bg-black p-3 text-sm leading-6 text-zinc-300">
-              {item}
-            </div>
-          ))}
-        </div>
+  return (
+    <div className="grid grid-cols-[32px_minmax(0,1fr)] gap-3 rounded-lg border border-zinc-200 bg-white p-4">
+      <div className="grid h-8 w-8 place-items-center rounded-md bg-zinc-100 text-zinc-700">
+        {icon}
       </div>
-    );
-  }
-
-  if (disclosure === "advanced") {
-    return (
-      <div className="h-full min-h-0 overflow-y-auto pr-1">
-        <div className="grid gap-2 sm:grid-cols-2">
-          {stage.metrics.map((metric) => (
-            <div key={metric.label} className="rounded-lg border border-zinc-800 bg-black p-3">
-              <div className="text-xs text-zinc-500">{metric.label}</div>
-              <div className="mt-1 text-base font-semibold text-zinc-50">
-                {metric.value}
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="min-w-0">
+        <div className="text-sm font-semibold text-zinc-950">{label}</div>
+        <p className="mt-1 line-clamp-3 text-sm leading-6 text-zinc-600">
+          {children}
+        </p>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
-  if (disclosure === "expert") {
-    return (
-      <div className="h-full min-h-0 overflow-y-auto pr-1">
-        <div className="grid gap-2">
-          {stage.diagnostics.map((item) => (
-            <div key={item} className="rounded-lg border border-zinc-800 bg-black p-3 text-sm leading-6 text-zinc-300">
-              {item}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+function EvidenceRow({ stage }: { stage: DecisionEvidenceStage }) {
+  const tone = statusTone(stage.status);
 
   return (
-    <div className="h-full min-h-0 overflow-y-auto pr-1">
-      <pre className="min-h-full whitespace-pre-wrap rounded-lg border border-zinc-800 bg-black p-3 text-xs leading-5 text-zinc-400">
-        {stage.raw.join("\n")}
-      </pre>
+    <div className="grid grid-cols-[24px_minmax(0,1fr)_auto] items-start gap-3 rounded-lg border border-zinc-200 bg-white p-3">
+      <span className={cx("mt-0.5", toneText(tone))}>{statusIcon(stage.status)}</span>
+      <div className="min-w-0">
+        <div className="text-sm font-semibold text-zinc-950">
+          {friendlyEvidenceLabel(stage.label)}
+        </div>
+        <p className="mt-1 line-clamp-2 text-sm leading-6 text-zinc-600">
+          {investorCopy(stage.explanation)}
+        </p>
+      </div>
+      <span
+        className={cx(
+          "rounded-md border px-2 py-1 text-xs font-semibold",
+          toneSurface(tone),
+        )}
+      >
+        {statusLabel(stage.status)}
+      </span>
     </div>
   );
 }
@@ -339,15 +442,16 @@ function OpportunityPicker({
 }) {
   if (!opportunities.length) {
     return (
-      <div className="rounded-lg border border-zinc-800 bg-black p-4 text-sm leading-6 text-zinc-400">
-        No opportunity has cleared the attention filter yet.
+      <div className="rounded-lg border border-zinc-200 bg-white p-4 text-sm leading-6 text-zinc-600">
+        No opportunity deserves attention yet. Keep capital flat until the
+        evidence improves.
       </div>
     );
   }
 
   return (
-    <div className="grid h-full min-h-0 auto-rows-min gap-2 overflow-y-auto pr-1">
-      {opportunities.slice(0, 8).map((opportunity) => {
+    <div className="grid min-h-0 gap-2 overflow-y-auto pr-1">
+      {opportunities.slice(0, 6).map((opportunity) => {
         const tone: DecisionTone =
           opportunity.readinessPct >= 72
             ? "good"
@@ -361,26 +465,150 @@ function OpportunityPicker({
             type="button"
             onClick={() => onSelectOpportunity(opportunity.id)}
             className={cx(
-              "grid min-h-[68px] grid-cols-[minmax(0,1fr)_64px] gap-3 rounded-lg border p-3 text-left",
+              "grid min-h-[76px] grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-lg border p-3 text-left transition",
               selectedOpportunityId === opportunity.id
-                ? "border-cyan-300/45 bg-cyan-300/10"
-                : "border-zinc-800 bg-black hover:border-zinc-700",
+                ? "border-zinc-950 bg-zinc-950 text-white"
+                : "border-zinc-200 bg-white text-zinc-950 hover:border-zinc-400",
             )}
           >
             <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold text-zinc-50">
-                {opportunity.ticker} · {opportunity.action}
+              <span className="block truncate text-sm font-semibold">
+                {opportunity.ticker}
               </span>
-              <span className="mt-1 block truncate text-xs text-zinc-500">
+              <span
+                className={cx(
+                  "mt-1 block truncate text-xs",
+                  selectedOpportunityId === opportunity.id
+                    ? "text-zinc-300"
+                    : "text-zinc-500",
+                )}
+              >
+                {opportunity.action} at {opportunity.exposureLabel}
+              </span>
+              <span
+                className={cx(
+                  "mt-1 block truncate text-xs",
+                  selectedOpportunityId === opportunity.id
+                    ? "text-zinc-400"
+                    : "text-zinc-500",
+                )}
+              >
                 {opportunity.name}
               </span>
             </span>
-            <span className={cx("text-right text-xl font-semibold", toneText(tone))}>
-              {Math.round(opportunity.readinessPct)}
+            <span
+              className={cx(
+                "rounded-md border px-2 py-1 text-xs font-semibold",
+                selectedOpportunityId === opportunity.id
+                  ? "border-white/20 bg-white/10 text-white"
+                  : toneSurface(tone),
+              )}
+            >
+              {qualityWord(opportunity.readinessPct)}
             </span>
           </button>
         );
       })}
+    </div>
+  );
+}
+
+function DetailPanel({
+  level,
+  step,
+  evidenceLadder,
+}: {
+  level: DetailLevel;
+  step: InvestmentStep;
+  evidenceLadder: DecisionEvidenceStage[];
+}) {
+  if (level === "answer") {
+    return (
+      <div className="grid h-full min-h-0 gap-3 overflow-y-auto pr-1 lg:grid-rows-3">
+        <StoryLine label="What happened" icon={<Activity className="h-4 w-4" />}>
+          {step.story.happened}
+        </StoryLine>
+        <StoryLine label="Why it matters" icon={<ShieldCheck className="h-4 w-4" />}>
+          {step.story.matters}
+        </StoryLine>
+        <StoryLine label="What to do" icon={<Zap className="h-4 w-4" />}>
+          {step.story.next}
+        </StoryLine>
+      </div>
+    );
+  }
+
+  if (level === "why") {
+    return (
+      <div className="grid h-full min-h-0 gap-2 overflow-y-auto pr-1">
+        {step.why.map((item) => (
+          <div
+            key={item}
+            className="rounded-lg border border-zinc-200 bg-white p-4 text-sm leading-6 text-zinc-700"
+          >
+            {item}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (level === "evidence") {
+    const evidenceRows = evidenceLadder.length
+      ? evidenceLadder
+      : step.evidence.map((item, index) => ({
+          id: `${step.id}-${index}`,
+          label: "Evidence",
+          status: "Caution" as EvidenceStageStatus,
+          explanation: item,
+        }));
+
+    return (
+      <div className="grid h-full min-h-0 gap-2 overflow-y-auto pr-1">
+        {evidenceRows.slice(0, 10).map((stage) => (
+          <EvidenceRow key={stage.id} stage={stage} />
+        ))}
+      </div>
+    );
+  }
+
+  if (level === "numbers") {
+    return (
+      <div className="grid h-full min-h-0 auto-rows-min gap-2 overflow-y-auto pr-1 md:grid-cols-2">
+        {step.numbers.map((metric) => (
+          <div
+            key={metric.label}
+            className="rounded-lg border border-zinc-200 bg-white p-4"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-sm font-semibold text-zinc-950">
+                  {friendlyMetricLabel(metric.label)}
+                </div>
+                <p className="mt-1 text-sm leading-6 text-zinc-600">
+                  {metricMeaning(metric)}
+                </p>
+              </div>
+              <div className="shrink-0 text-base font-semibold text-zinc-950">
+                {metric.value}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid h-full min-h-0 gap-2 overflow-y-auto pr-1">
+      {step.notes.map((item) => (
+        <div
+          key={item}
+          className="rounded-lg border border-zinc-200 bg-white p-4 text-sm leading-6 text-zinc-700"
+        >
+          {item}
+        </div>
+      ))}
     </div>
   );
 }
@@ -415,12 +643,17 @@ export default function DecisionOperatingSystem({
   actionPlan,
   rawMetrics,
 }: DecisionOperatingSystemProps) {
-  const [activeStageId, setActiveStageId] = useState<DecisionStepId>("intent");
-  const [disclosure, setDisclosure] = useState<DisclosureLevel>("default");
+  const [activeStepId, setActiveStepId] = useState<DecisionStepId>("opportunity");
+  const [detailLevel, setDetailLevel] = useState<DetailLevel>("answer");
+
   const selectedOpportunity =
     opportunities.find((item) => item.id === selectedOpportunityId) ??
     opportunities[0] ??
     null;
+  const trustNumber = parseMetricNumber(metricValue(rawMetrics, "Trust"));
+  const confidenceNumber = parseMetricNumber(metricValue(rawMetrics, "Confidence"));
+  const riskNumber = parseMetricNumber(metricValue(rawMetrics, "Risk Pressure"));
+  const marketHealthNumber = parseMetricNumber(metricValue(rawMetrics, "Market Health"));
   const selectedTone: DecisionTone =
     selectedOpportunity == null
       ? "neutral"
@@ -432,8 +665,10 @@ export default function DecisionOperatingSystem({
   const passCount = evidenceLadder.filter((item) => item.status === "Pass").length;
   const cautionCount = evidenceLadder.filter((item) => item.status === "Caution").length;
   const failCount = evidenceLadder.filter((item) => item.status === "Fail").length;
-  const stageStatus = Object.fromEntries(workflow.map((step) => [step.id, step.status]));
-  const topEvidence = compactList(
+  const workflowStatus = Object.fromEntries(
+    workflow.map((step) => [step.id, step.status]),
+  ) as Partial<Record<DecisionStepId, string>>;
+  const topSupport = compactList(
     [
       selectedOpportunity?.support[0],
       selectedOpportunity?.drivers[0],
@@ -442,293 +677,322 @@ export default function DecisionOperatingSystem({
     "Evidence is still forming.",
     3,
   );
-  const topRisks = compactList(
+  const topRisk = compactList(
     [
       selectedOpportunity?.contradictions[0],
       mainRisk,
       selectedOpportunity?.missing[0],
     ],
-    "No promoted risk.",
+    "No major risk is being promoted.",
     3,
   );
+  const opportunityLabel = selectedOpportunity?.ticker ?? bestOpportunityLabel;
+  const trustWord = qualityWord(trustNumber ?? selectedOpportunity?.trustPct ?? null);
+  const confidenceWord = qualityWord(confidenceNumber);
+  const riskPressureWord = riskWord(riskNumber);
+  const marketHealthWord = qualityWord(marketHealthNumber);
+  const exposureText = displayExposure(suggestedExposure);
+  const actionExposureText = displayExposure(actionPlan.exposure);
+  const capitalPosture =
+    exposureText === "No new exposure" ? "capital flat" : lowerFirst(exposureText);
+  const sizePosture =
+    exposureText === "No new exposure"
+      ? "capital stays flat"
+      : `size stays at ${exposureText}`;
+  const actionWithExposure =
+    exposureText === "No new exposure"
+      ? `${recommendedAction}; keep capital flat`
+      : `${recommendedAction} with ${exposureText}`;
+  const sizeLimitInstruction =
+    exposureText === "No new exposure"
+      ? "do not add exposure"
+      : `do not exceed ${lowerFirst(exposureText)}`;
+  const primaryAnswer = selectedOpportunity
+    ? `${recommendedAction}: ${opportunityLabel} deserves review, but ${sizePosture} until ${lowerFirst(missingEvidence)} improves.`
+    : `${recommendedAction}: no opportunity deserves capital yet; keep ${capitalPosture} until ${lowerFirst(missingEvidence)} improves.`;
 
-  const stages = useMemo<StageViewModel[]>(
+  const steps = useMemo<InvestmentStep[]>(
     () => [
       {
-        id: "intent",
-        label: "Intent",
-        question: "What decision am I trying to make?",
-        summaryLabel: "Decision intent",
-        summary: "Decide whether capital should be allocated now, watched, or held flat until evidence improves.",
-        evidenceTitle: "Operating frame",
-        evidence: ["Goal: protect capital while identifying the highest-quality opportunity.", "Horizon: today's briefing cycle.", `Risk profile: ${readinessState}.`, `Constraint: ${mainRisk}.`],
-        nextStep: "Move to Sense to read the market state.",
-        primaryFacts: [
-          { label: "Goal", value: recommendedAction },
-          { label: "Horizon", value: "Today" },
-          { label: "Risk profile", value: readinessState, tone: readinessTone },
-          { label: "Constraint", value: mainRisk },
-        ],
-        details: compactList(
-          [executiveNarrative, readinessWhy, readinessBlocker],
-          "Intent is waiting for market context.",
+        id: "opportunity",
+        label: "Opportunity",
+        question: "What deserves attention?",
+        headline: selectedOpportunity
+          ? `${selectedOpportunity.ticker} is the clearest opportunity to review.`
+          : "No opportunity is ready for attention yet.",
+        answer: selectedOpportunity
+          ? cleanSentence(selectedOpportunity.thesis)
+          : cleanSentence(executiveNarrative),
+        why: compactList(
+          [
+            selectedOpportunity?.context,
+            selectedOpportunity?.support[0],
+            readinessWhy,
+            `The market backdrop is ${investorCopy(marketState)}.`,
+          ],
+          "The opportunity list is waiting for market evidence.",
         ),
-        metrics: rawMetrics.slice(0, 4),
-        diagnostics: compactList([readinessImprover, readinessBlocker, missingEvidence], "No diagnostic promoted."),
-        raw: [`marketState=${marketState}`, `readiness=${Math.round(boundedPct(readinessPct))}`, `action=${recommendedAction}`, `exposure=${suggestedExposure}`],
-      },
-      {
-        id: "sense",
-        label: "Sense",
-        question: "What is happening?",
-        summaryLabel: "Market read",
-        summary: executiveNarrative,
-        evidenceTitle: "Market insights",
-        evidence: [`Market state: ${marketState}.`, `Opportunity density: ${metricValue(rawMetrics, "Opportunity Density")}.`, `Participation: ${recommendedAction}.`, `Liquidity: ${marketStatus}.`],
-        nextStep: "Move to Pulse to see what deserves attention.",
-        primaryFacts: [
-          { label: "Market State", value: marketState, tone: readinessTone },
-          { label: "Opportunity Density", value: metricValue(rawMetrics, "Opportunity Density") },
-          { label: "Participation", value: recommendedAction },
-          { label: "Liquidity", value: marketStatus },
-        ],
-        details: compactList([executiveNarrative, readinessWhy, `Last sync: ${lastSyncedLabel}`], "Market read is pending."),
-        metrics: rawMetrics.filter((metric) => ["Market Health", "Opportunity Density", "Risk Pressure", "Readiness"].includes(metric.label)),
-        diagnostics: compactList([mainRisk, missingEvidence, readinessBlocker], "No sense diagnostic promoted."),
-        raw: rawMetrics.map((metric) => `${metric.label}: ${metric.value}`),
-      },
-      {
-        id: "pulse",
-        label: "Pulse",
-        question: "What opportunity matters most?",
-        summaryLabel: "Attention target",
-        summary: selectedOpportunity
-          ? `${selectedOpportunity.ticker} is the active opportunity to review.`
-          : `${bestOpportunityLabel} is not investable yet.`,
-        evidenceTitle: "Top opportunities",
-        evidence: selectedOpportunity
-          ? compactList([selectedOpportunity.thesis, ...selectedOpportunity.drivers], "Opportunity evidence is pending.", 4)
-          : ["Opportunity ranking is waiting for synchronized market data."],
-        nextStep: "Move to Core to understand the thesis.",
-        primaryFacts: [
-          { label: "Best Opportunity", value: bestOpportunityLabel, tone: selectedTone },
-          { label: "Action", value: selectedOpportunity?.action ?? recommendedAction },
-          { label: "Exposure", value: selectedOpportunity?.exposureLabel ?? suggestedExposure },
-          { label: "Search", value: "Hidden in details" },
-        ],
-        details: compactList(
-          selectedOpportunity
-            ? [selectedOpportunity.context, ...selectedOpportunity.support, ...selectedOpportunity.contradictions]
-            : ["No ranked opportunity yet."],
-          "No opportunity detail.",
-        ),
-        metrics: [
-          { label: "Opportunity Quality", value: selectedOpportunity ? `${Math.round(selectedOpportunity.qualityPct)}%` : "Pending" },
-          { label: "Trust", value: selectedOpportunity?.trustPct == null ? "Pending" : `${Math.round(selectedOpportunity.trustPct)}%` },
-          { label: "Timing", value: selectedOpportunity ? `${Math.round(selectedOpportunity.timingPct)}%` : "Pending" },
-          { label: "Risk", value: selectedOpportunity ? `${Math.round(selectedOpportunity.riskPct)}%` : "Pending" },
-        ],
-        diagnostics: compactList(selectedOpportunity?.missing ?? [], missingEvidence),
-        raw: opportunities.slice(0, 8).map((item) => `${item.ticker}: action=${item.action}, readiness=${Math.round(item.readinessPct)}, exposure=${item.exposureLabel}`),
-      },
-      {
-        id: "core",
-        label: "Core",
-        question: "Why does this opportunity exist?",
-        summaryLabel: "Core thesis",
-        summary: selectedOpportunity?.thesis ?? "No thesis is ready until an opportunity clears Pulse.",
-        evidenceTitle: "Thesis support",
         evidence: compactList(
-          [selectedOpportunity?.context, selectedOpportunity?.support[0], selectedOpportunity?.drivers[0]],
-          "Thesis evidence is pending.",
-          4,
-        ),
-        nextStep: "Move to Judgement to decide whether to trust it.",
-        primaryFacts: [
-          { label: "Thesis", value: selectedOpportunity?.ticker ?? "Pending" },
-          { label: "Why now", value: selectedOpportunity?.drivers[0] ?? "Pending" },
-          { label: "Key evidence", value: selectedOpportunity?.support[0] ?? "Pending" },
-          { label: "Key risk", value: selectedOpportunity?.contradictions[0] ?? mainRisk },
-        ],
-        details: compactList(
           selectedOpportunity
-            ? [selectedOpportunity.thesis, selectedOpportunity.context, ...selectedOpportunity.support, ...selectedOpportunity.contradictions]
-            : ["Core thesis is pending."],
-          "Core thesis is pending.",
+            ? [
+                selectedOpportunity.thesis,
+                ...selectedOpportunity.support,
+                ...selectedOpportunity.drivers,
+              ]
+            : [executiveNarrative],
+          "No opportunity evidence is ready yet.",
         ),
-        metrics: rawMetrics.slice(0, 6),
-        diagnostics: compactList(selectedOpportunity?.invalidations ?? [], "No invalidation promoted."),
-        raw: selectedOpportunity
-          ? [`ticker=${selectedOpportunity.ticker}`, `quality=${selectedOpportunity.qualityPct}`, `risk=${selectedOpportunity.riskPct}`, `timing=${selectedOpportunity.timingPct}`]
-          : ["opportunity=null"],
+        numbers: rawMetrics.filter((metric) =>
+          ["Opportunity Density", "Market Health", "Confidence", "Readiness"].includes(
+            metric.label,
+          ),
+        ),
+        notes: compactList(
+          [
+            `Selected market: ${selectedMarket || "Pending"}.`,
+            `Last sync: ${lastSyncedLabel}.`,
+            `Opportunity count: ${opportunities.length}.`,
+            readinessImprover,
+          ],
+          "No notes are available yet.",
+        ),
+        nextStep: "Check whether the evidence is trustworthy before changing risk.",
+        facts: [
+          { label: "Opportunity", value: opportunityLabel, tone: selectedTone },
+          { label: "Action", value: recommendedAction, tone: readinessTone },
+          { label: "Market", value: marketHealthWord, tone: readinessTone },
+          { label: "Missing", value: missingEvidence },
+        ],
+        story: {
+          happened: selectedOpportunity
+            ? `${selectedOpportunity.ticker} rose to the top of the attention list.`
+            : "No clean opportunity has appeared yet.",
+          matters: selectedOpportunity
+            ? cleanSentence(selectedOpportunity.context)
+            : cleanSentence(executiveNarrative),
+          next: `${actionWithExposure}; revisit when ${lowerFirst(missingEvidence)} improves.`,
+        },
       },
       {
-        id: "judgement",
-        label: "Judgement",
+        id: "trust",
+        label: "Trust",
         question: "Can I trust it?",
-        summaryLabel: "Trust report",
-        summary: `${passCount}/10 evidence stages pass; trust is ${failCount > 0 ? "limited" : "explainable"}.`,
-        evidenceTitle: "Trust formation",
-        evidence: compactList([topEvidence[0], topRisks[0], missingEvidence], "Trust evidence is pending.", 4),
-        nextStep: "Move to Sizing to translate trust into exposure.",
-        primaryFacts: [
-          { label: "Why trust exists", value: topEvidence[0], tone: "good" },
-          { label: "Why limited", value: topRisks[0], tone: topRisks[0] === "No promoted risk." ? "good" : "warn" },
-          { label: "Missing evidence", value: missingEvidence },
-          { label: "Confidence", value: metricValue(rawMetrics, "Confidence") },
+        headline:
+          failCount > 0
+            ? "Trust is limited, so the decision should stay conservative."
+            : `${trustWord} trust supports the recommendation.`,
+        answer: `${passCount} checks support the decision, ${cautionCount} need care, and ${failCount} block it.`,
+        why: compactList(
+          [
+            topSupport[0],
+            topRisk[0],
+            missingEvidence,
+            readinessBlocker,
+          ],
+          "Trust evidence is still forming.",
+        ),
+        evidence: evidenceLadder.map(
+          (stage) =>
+            `${friendlyEvidenceLabel(stage.label)} ${statusLabel(stage.status).toLowerCase()}: ${investorCopy(stage.explanation)}`,
+        ),
+        numbers: rawMetrics.filter((metric) =>
+          ["Trust", "Confidence", "Survival", "Calibration", "History Depth"].includes(
+            metric.label,
+          ),
+        ),
+        notes: compactList(
+          evidenceLadder.map(
+            (stage) =>
+              `${friendlyEvidenceLabel(stage.label)}: ${statusLabel(stage.status)}.`,
+          ),
+          "No trust notes are available yet.",
+        ),
+        nextStep: "Translate that trust into a position size.",
+        facts: [
+          { label: "Trust", value: trustWord, tone: failCount > 0 ? "warn" : readinessTone },
+          { label: "Conviction", value: confidenceWord, tone: readinessTone },
+          { label: "Main risk", value: topRisk[0], tone: topRisk[0] === "No major risk is being promoted." ? "good" : "warn" },
+          { label: "Missing", value: missingEvidence },
         ],
-        details: evidenceLadder.map((stage) => `${stage.label}: ${stage.status}. ${stage.explanation}`),
-        metrics: [
-          { label: "Pass", value: String(passCount) },
-          { label: "Caution", value: String(cautionCount) },
-          { label: "Fail", value: String(failCount) },
-          { label: "Trust", value: metricValue(rawMetrics, "Trust") },
-        ],
-        diagnostics: evidenceLadder.map((stage) => `${stage.id}: ${stage.status}`),
-        raw: evidenceLadder.map((stage) => JSON.stringify(stage)),
+        story: {
+          happened: `${passCount} pieces of evidence support the current view.`,
+          matters:
+            failCount > 0
+              ? "At least one blocker remains, so taking full risk would ask too much of the evidence."
+              : "The evidence is coherent enough to explain, but still needs sizing discipline.",
+          next: `Keep the action at ${recommendedAction} until ${lowerFirst(missingEvidence)} is resolved.`,
+        },
       },
       {
-        id: "sizing",
-        label: "Sizing",
+        id: "size",
+        label: "Size",
         question: "How much should I risk?",
-        summaryLabel: "Sizing conclusion",
-        summary: `${suggestedExposure} suggested exposure with ${metricValue(rawMetrics, "Portfolio Cap")} portfolio cap.`,
-        evidenceTitle: "Risk translation",
-        evidence: compactList([actionPlan.portfolioImpact, actionPlan.riskConstraints, readinessWhy], "Sizing evidence is pending.", 4),
-        nextStep: "Move to Action to see the exact instruction.",
-        primaryFacts: [
-          { label: "Suggested Exposure", value: suggestedExposure, tone: readinessTone },
-          { label: "Maximum Exposure", value: metricValue(rawMetrics, "Portfolio Cap") },
-          { label: "Portfolio Impact", value: actionPlan.portfolioImpact },
-          { label: "Risk Explanation", value: actionPlan.riskConstraints },
+        headline: `${exposureText} is the right size for now.`,
+        answer: cleanSentence(actionPlan.riskConstraints),
+        why: compactList(
+          [
+            actionPlan.portfolioImpact,
+            actionPlan.riskConstraints,
+            readinessWhy,
+            mainRisk,
+          ],
+          "Sizing is waiting for the risk view.",
+        ),
+        evidence: compactList(
+          [
+            actionPlan.portfolioImpact,
+            actionPlan.riskConstraints,
+            selectedOpportunity?.maxExposureLabel
+              ? `Per-asset cap is ${selectedOpportunity.maxExposureLabel}.`
+              : "",
+            readinessBlocker,
+          ],
+          "Sizing evidence is still forming.",
+        ),
+        numbers: rawMetrics.filter((metric) =>
+          ["Starter Size", "Portfolio Cap", "Risk Pressure", "Readiness"].includes(
+            metric.label,
+          ),
+        ),
+        notes: compactList(
+          [readinessBlocker, readinessImprover, actionPlan.invalidation],
+          "No sizing notes are available yet.",
+        ),
+        nextStep: "Turn the size into a concrete action.",
+        facts: [
+          { label: "Suggested size", value: exposureText, tone: readinessTone },
+          { label: "Risk pressure", value: riskPressureWord, tone: riskNumber != null && riskNumber > 65 ? "warn" : "good" },
+          { label: "Portfolio effect", value: actionPlan.portfolioImpact },
+          { label: "Limiter", value: mainRisk, tone: mainRisk === "No active limiter" ? "good" : "warn" },
         ],
-        details: compactList([actionPlan.exposure, actionPlan.portfolioImpact, actionPlan.riskConstraints], "Sizing is pending."),
-        metrics: rawMetrics.filter((metric) => ["Portfolio Cap", "Starter Size", "Risk Pressure", "Readiness"].includes(metric.label)),
-        diagnostics: compactList([readinessBlocker, readinessImprover, mainRisk], "No sizing diagnostic promoted."),
-        raw: [`exposure=${actionPlan.exposure}`, `portfolioImpact=${actionPlan.portfolioImpact}`, `risk=${actionPlan.riskConstraints}`],
+        story: {
+          happened: `The recommended size is ${exposureText}.`,
+          matters: cleanSentence(actionPlan.riskConstraints),
+          next: `${recommendedAction}; ${sizeLimitInstruction} until the limiter changes.`,
+        },
       },
       {
         id: "action",
         label: "Action",
         question: "What should I do?",
-        summaryLabel: "Recommended action",
-        summary: `${recommendedAction}: ${actionPlan.entryLogic}`,
-        evidenceTitle: "Execution conditions",
-        evidence: compactList([actionPlan.entryLogic, actionPlan.riskConstraints, actionPlan.exitConditions, actionPlan.invalidation], "Action evidence is pending.", 4),
-        nextStep: "Move to Reflection after the action window resolves.",
-        primaryFacts: [
+        headline: `${recommendedAction} now.`,
+        answer: cleanSentence(actionPlan.entryLogic),
+        why: compactList(
+          [
+            actionPlan.entryLogic,
+            actionPlan.exitConditions,
+            actionPlan.invalidation,
+            readinessBlocker,
+          ],
+          "The action plan is waiting for market confirmation.",
+        ),
+        evidence: compactList(
+          [
+            actionPlan.entryLogic,
+            actionPlan.riskConstraints,
+            actionPlan.exitConditions,
+            actionPlan.invalidation,
+          ],
+          "Action evidence is still forming.",
+        ),
+        numbers: rawMetrics.filter((metric) =>
+          ["Readiness", "Confidence", "Trust", "Starter Size"].includes(
+            metric.label,
+          ),
+        ),
+        notes: Object.entries(actionPlan).map(
+          ([key, value]) => `${key}: ${investorCopy(value)}`,
+        ),
+        nextStep: "Review the outcome after the next market update.",
+        facts: [
           { label: "Action", value: recommendedAction, tone: readinessTone },
-          { label: "Reason", value: actionPlan.entryLogic },
-          { label: "Conditions", value: actionPlan.exitConditions },
-          { label: "Invalidations", value: actionPlan.invalidation },
+          { label: "Asset", value: actionPlan.asset },
+          { label: "Size", value: actionExposureText, tone: readinessTone },
+          { label: "Stop reviewing if", value: actionPlan.invalidation },
         ],
-        details: compactList([actionPlan.entryLogic, actionPlan.riskConstraints, actionPlan.exitConditions, actionPlan.invalidation], "Action plan is pending."),
-        metrics: rawMetrics.filter((metric) => ["Readiness", "Confidence", "Trust", "Starter Size"].includes(metric.label)),
-        diagnostics: compactList([readinessBlocker, missingEvidence, mainRisk], "No action diagnostic promoted."),
-        raw: Object.entries(actionPlan).map(([key, value]) => `${key}=${value}`),
-      },
-      {
-        id: "reflection",
-        label: "Reflection",
-        question: "What happened?",
-        summaryLabel: "Learning state",
-        summary: "Outcome review is pending until the next observed result.",
-        evidenceTitle: "Reflection frame",
-        evidence: [actionPlan.portfolioImpact, "Actual: pending next review.", "Error: open.", readinessImprover],
-        nextStep: "Return to Intent for the next decision cycle.",
-        primaryFacts: [
-          { label: "Expected", value: actionPlan.portfolioImpact },
-          { label: "Actual", value: "Pending next review" },
-          { label: "Error", value: "Open" },
-          { label: "Lesson", value: readinessImprover },
-        ],
-        details: compactList([actionPlan.portfolioImpact, readinessImprover, readinessBlocker], "Reflection is pending."),
-        metrics: rawMetrics.filter((metric) => ["Readiness", "Confidence", "Risk Pressure", "Trust"].includes(metric.label)),
-        diagnostics: compactList([readinessImprover, readinessBlocker], "No reflection diagnostic promoted."),
-        raw: [`expected=${actionPlan.portfolioImpact}`, "actual=pending", "forecastError=open"],
+        story: {
+          happened: `The current recommendation is ${recommendedAction}.`,
+          matters: cleanSentence(actionPlan.entryLogic),
+          next: cleanSentence(actionPlan.exitConditions),
+        },
       },
     ],
     [
       actionPlan,
-      bestOpportunityLabel,
       cautionCount,
+      confidenceWord,
       evidenceLadder,
       executiveNarrative,
       failCount,
       lastSyncedLabel,
       mainRisk,
+      marketHealthWord,
       marketState,
-      marketStatus,
       missingEvidence,
-      opportunities,
+      opportunities.length,
+      opportunityLabel,
       passCount,
       rawMetrics,
       readinessBlocker,
       readinessImprover,
-      readinessPct,
-      readinessState,
       readinessTone,
       readinessWhy,
       recommendedAction,
+      riskNumber,
+      riskPressureWord,
+      selectedMarket,
       selectedOpportunity,
       selectedTone,
       suggestedExposure,
-      topEvidence,
-      topRisks,
+      exposureText,
+      actionExposureText,
+      capitalPosture,
+      sizePosture,
+      actionWithExposure,
+      sizeLimitInstruction,
+      topRisk,
+      topSupport,
+      trustWord,
     ],
   );
 
   const activeIndex = Math.max(
     0,
-    stages.findIndex((stage) => stage.id === activeStageId),
+    steps.findIndex((step) => step.id === activeStepId),
   );
-  const activeStage = stages[activeIndex] ?? stages[0];
+  const activeStep = steps[activeIndex] ?? steps[0];
   const canGoBack = activeIndex > 0;
-  const canGoForward = activeIndex < stages.length - 1;
+  const canGoForward = activeIndex < steps.length - 1;
 
-  const moveStage = (direction: -1 | 1) => {
-    const next = stages[activeIndex + direction];
+  const moveStep = (direction: -1 | 1) => {
+    const next = steps[activeIndex + direction];
     if (next) {
-      setActiveStageId(next.id);
-      setDisclosure("default");
+      setActiveStepId(next.id);
+      setDetailLevel("answer");
     }
   };
 
   return (
     <div
       data-testid="decision-operating-system"
-      className="h-screen overflow-hidden bg-[#070808] text-zinc-100"
+      className="min-h-screen overflow-y-auto bg-[#f6f7f5] text-zinc-950 md:h-screen md:overflow-hidden"
     >
-      <header className="sticky top-0 z-20 border-b border-zinc-800 bg-black">
-        <div className="mx-auto grid h-[92px] w-full max-w-[1520px] grid-cols-[300px_minmax(0,1fr)_360px] items-center gap-4 px-4 sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-lg border border-cyan-300/40 bg-cyan-300/10 text-cyan-200">
-              <Compass className="h-5 w-5" />
+      <header className="border-b border-zinc-200 bg-white">
+        <div className="mx-auto grid min-h-[76px] w-full max-w-[1520px] gap-3 px-4 py-3 md:grid-cols-[minmax(0,1fr)_420px] md:items-center md:px-6 lg:px-8">
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-zinc-500">
+              Signal Investment Brief
             </div>
-            <div className="min-w-0">
-              <div className="text-xs text-zinc-500">Signal Command Center</div>
-              <h1 className="truncate text-lg font-semibold text-zinc-50">
-                Decision Operating System
-              </h1>
-            </div>
+            <h1 className="line-clamp-3 break-words text-lg font-semibold leading-snug text-zinc-950 sm:line-clamp-2 sm:text-xl">
+              {primaryAnswer}
+            </h1>
           </div>
 
-          <div className="grid min-w-0 grid-cols-4 gap-2">
-            <GlobalMetric label="Market State" value={marketState} tone={readinessTone} />
-            <GlobalMetric
-              label="Decision Readiness"
-              value={`${Math.round(boundedPct(readinessPct))}% · ${readinessState}`}
-              tone={readinessTone}
-            />
-            <GlobalMetric label="Recommended Action" value={recommendedAction} tone={readinessTone} />
-            <GlobalMetric label="Suggested Exposure" value={suggestedExposure} tone={readinessTone} />
-          </div>
-
-          <div className="grid w-[360px] grid-cols-[minmax(0,1fr)_auto] gap-2">
+          <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
             <select
               value={selectedMarket}
               onChange={(event) => onMarketChange(event.target.value)}
-              className="h-10 min-w-0 rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-zinc-100 outline-none"
+              className="h-10 min-w-0 rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-950 outline-none"
             >
               {!marketOptions.length ? <option value="">Loading markets</option> : null}
               {marketOptions.map((market) => (
@@ -740,7 +1004,7 @@ export default function DecisionOperatingSystem({
             <button
               type="button"
               onClick={onRefresh}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-amber-300/45 bg-amber-300 px-3 text-sm font-semibold text-black transition hover:bg-amber-200"
+              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-zinc-950 bg-zinc-950 px-3 text-sm font-semibold text-white transition hover:bg-zinc-800 sm:w-auto"
             >
               <RefreshCw className={cx("h-4 w-4", refreshing && "animate-spin")} />
               Update
@@ -749,217 +1013,227 @@ export default function DecisionOperatingSystem({
         </div>
       </header>
 
-      <main className="mx-auto grid h-[calc(100vh-92px)] w-full max-w-[1520px] grid-rows-[56px_minmax(0,1fr)] gap-3 px-4 py-3 sm:px-6 lg:px-8">
-        <nav
-          aria-label="Decision workflow"
-          className="grid grid-cols-8 gap-2 rounded-lg border border-zinc-800 bg-black p-2"
+      <main className="mx-auto grid w-full max-w-[1520px] gap-3 px-4 py-3 md:h-[calc(100vh-76px)] md:grid-rows-[auto_minmax(0,1fr)] md:overflow-hidden md:px-6 lg:px-8">
+        <section
+          data-testid="primary-answer"
+          className="grid gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm lg:grid-cols-[minmax(0,1fr)_520px]"
         >
-          {stages.map((stage, index) => {
-            const active = stage.id === activeStage.id;
-            return (
-              <button
-                key={stage.id}
-                type="button"
-                onClick={() => {
-                  setActiveStageId(stage.id);
-                  setDisclosure("default");
-                }}
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span
                 className={cx(
-                  "flex min-w-0 items-center justify-center gap-2 rounded-md px-2 text-sm font-semibold transition",
-                  active
-                    ? "bg-zinc-100 text-black"
-                    : "border border-transparent text-zinc-400 hover:border-zinc-800 hover:bg-zinc-950",
+                  "rounded-md border px-2.5 py-1 text-sm font-semibold",
+                  toneSurface(readinessTone),
                 )}
               >
-                <span className="hidden text-xs text-zinc-500 xl:inline">{index + 1}</span>
-                {stageIcon(stage.id)}
-                <span className="truncate">{stage.label}</span>
-              </button>
-            );
-          })}
-        </nav>
+                {recommendedAction}
+              </span>
+              <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-sm font-semibold text-zinc-700">
+                {marketStatus}
+              </span>
+              <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-sm font-semibold text-zinc-700">
+                {lastSyncedLabel}
+              </span>
+            </div>
+            <h2 className="mt-3 break-words text-2xl font-semibold leading-tight text-zinc-950 sm:text-3xl">
+              {activeStep.headline}
+            </h2>
+            <p className="mt-2 max-w-4xl text-base leading-7 text-zinc-600">
+              {activeStep.answer}
+            </p>
+          </div>
+
+          <div className="grid min-w-0 gap-2 sm:grid-cols-2">
+            <FactTile label="Opportunity" value={opportunityLabel} tone={selectedTone} />
+            <FactTile label="Trust" value={trustWord} tone={failCount > 0 ? "warn" : readinessTone} />
+            <FactTile label="Size" value={exposureText} tone={readinessTone} />
+            <FactTile label="Main risk" value={mainRisk} tone={mainRisk === "No active limiter" ? "good" : "warn"} />
+          </div>
+        </section>
 
         <section
           data-testid="decision-step-screen"
-          data-active-step={activeStage.id}
-          className="min-h-0 overflow-hidden"
+          data-active-step={activeStep.id}
+          className="grid min-h-0 gap-3 md:grid-cols-[220px_minmax(0,1fr)_340px] md:overflow-hidden"
         >
-          <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-lg border border-zinc-800 bg-black">
-            <div className="border-b border-zinc-800 p-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 text-sm text-cyan-200">
-                    {stageIcon(activeStage.id)}
-                    <span>{activeStage.label}</span>
-                    <span className="text-zinc-600">/</span>
-                    <span className="text-zinc-500">{stageStatus[activeStage.id] ?? "Ready"}</span>
-                  </div>
-                  <h2 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-50">
-                    {activeStage.question}
-                  </h2>
+          <nav
+            aria-label="Investment decision flow"
+            className="grid auto-rows-min gap-2 rounded-lg border border-zinc-200 bg-white p-2"
+          >
+            {steps.map((step, index) => {
+              const active = step.id === activeStep.id;
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveStepId(step.id);
+                    setDetailLevel("answer");
+                  }}
+                  className={cx(
+                    "grid min-h-[70px] grid-cols-[32px_minmax(0,1fr)] items-center gap-3 rounded-md p-3 text-left transition",
+                    active
+                      ? "bg-zinc-950 text-white"
+                      : "text-zinc-700 hover:bg-zinc-100",
+                  )}
+                >
+                  <span
+                    className={cx(
+                      "grid h-8 w-8 place-items-center rounded-md border",
+                      active ? "border-white/20 bg-white/10" : "border-zinc-200 bg-white",
+                    )}
+                  >
+                    {stepIcon(step.id)}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold">
+                      {index + 1}. {step.label}
+                    </span>
+                    <span
+                      className={cx(
+                        "mt-0.5 block truncate text-xs",
+                        active ? "text-zinc-300" : "text-zinc-500",
+                      )}
+                    >
+                      {workflowStatus[step.id] ?? "Ready"}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-3 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 text-sm font-semibold text-zinc-500">
+                  {stepIcon(activeStep.id)}
+                  {activeStep.question}
                 </div>
-                <div className="grid grid-cols-5 rounded-lg border border-zinc-800 bg-zinc-950 p-1">
-                  {(["default", "evidence", "advanced", "expert", "debug"] as DisclosureLevel[]).map((level) => (
-                    <DisclosureButton
+                <h3 className="mt-1 break-words text-xl font-semibold leading-tight text-zinc-950 sm:text-2xl">
+                  {activeStep.headline}
+                </h3>
+              </div>
+              <div className="grid grid-cols-2 gap-1 rounded-lg border border-zinc-200 bg-white p-1 sm:grid-cols-5">
+                {(["answer", "why", "evidence", "numbers", "notes"] as DetailLevel[]).map(
+                  (level) => (
+                    <DetailButton
                       key={level}
-                      level={level}
-                      active={disclosure === level}
-                      onClick={() => setDisclosure(level)}
+                      active={detailLevel === level}
+                      onClick={() => setDetailLevel(level)}
+                    >
+                      {level === "answer"
+                        ? "Answer"
+                        : level === "why"
+                          ? "Why"
+                          : level === "evidence"
+                            ? "Evidence"
+                            : level === "numbers"
+                              ? "Numbers"
+                              : "Notes"}
+                    </DetailButton>
+                  ),
+                )}
+              </div>
+            </div>
+
+            {refreshError ? (
+              <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{refreshError}</span>
+              </div>
+            ) : null}
+
+            <div className="min-h-0 overflow-hidden">
+              <DetailPanel
+                level={detailLevel}
+                step={activeStep}
+                evidenceLadder={evidenceLadder}
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 bg-white p-3">
+              <p className="line-clamp-2 text-sm font-semibold leading-6 text-zinc-800">
+                {activeStep.nextStep}
+              </p>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  disabled={!canGoBack}
+                  onClick={() => moveStep(-1)}
+                  className="grid h-10 w-10 place-items-center rounded-lg border border-zinc-300 text-zinc-700 transition enabled:hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-35"
+                  aria-label="Previous step"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  disabled={!canGoForward}
+                  onClick={() => moveStep(1)}
+                  className="grid h-10 w-10 place-items-center rounded-lg border border-zinc-950 bg-zinc-950 text-white transition enabled:hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-35"
+                  aria-label="Next step"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <aside className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-3 overflow-hidden rounded-lg border border-zinc-200 bg-white p-4">
+            <div className="border-b border-zinc-200 pb-3">
+              <div className="text-sm font-semibold text-zinc-500">
+                Recommended action
+              </div>
+              <div className={cx("mt-1 text-3xl font-semibold", toneText(readinessTone))}>
+                {recommendedAction}
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <FactTile label="Size" value={actionExposureText} tone={readinessTone} />
+                <FactTile label="Trust" value={trustWord} tone={failCount > 0 ? "warn" : readinessTone} />
+              </div>
+            </div>
+
+            <div className="min-h-0 overflow-hidden">
+              {activeStep.id === "opportunity" ? (
+                <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-zinc-950">
+                    <Search className="h-4 w-4 text-zinc-500" />
+                    Opportunities needing attention
+                  </div>
+                  <OpportunityPicker
+                    opportunities={opportunities}
+                    selectedOpportunityId={selectedOpportunityId}
+                    onSelectOpportunity={onSelectOpportunity}
+                  />
+                </div>
+              ) : (
+                <div className="grid h-full min-h-0 auto-rows-min gap-2 overflow-y-auto pr-1">
+                  {activeStep.facts.map((fact) => (
+                    <FactTile
+                      key={fact.label}
+                      label={fact.label}
+                      value={fact.value}
+                      tone={fact.tone}
                     />
                   ))}
                 </div>
-              </div>
-              {refreshError ? (
-                <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-300/45 bg-amber-300/10 px-3 py-2 text-sm text-amber-100">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>{refreshError}</span>
-                </div>
-              ) : null}
+              )}
             </div>
 
-            <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_320px] gap-3 overflow-hidden p-4">
-              <div className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-3 overflow-hidden">
-                <section className="rounded-lg border border-zinc-800 bg-zinc-950 p-3">
-                  <div className="text-xs text-zinc-500">Decision Summary</div>
-                  <h3 className="mt-1 text-xl font-semibold text-zinc-50">
-                    {activeStage.summaryLabel}
-                  </h3>
-                  <p className="mt-1 line-clamp-2 text-sm leading-6 text-zinc-300">
-                    {activeStage.summary}
-                  </p>
-                </section>
-
-                <section
-                  data-testid="supporting-evidence-panel"
-                  className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-lg border border-cyan-300/25 bg-zinc-950 p-3 shadow-[0_0_0_1px_rgba(103,232,249,0.06)]"
-                >
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 text-xs text-zinc-500">
-                      <SlidersHorizontal className="h-4 w-4" />
-                      Supporting Evidence · {disclosure === "default" ? "Conclusion view" : `${disclosure[0].toUpperCase()}${disclosure.slice(1)} view`}
-                    </div>
-                    {activeStage.id === "pulse" ? (
-                      <div className="flex items-center gap-2 text-xs text-zinc-500">
-                        <Search className="h-4 w-4" />
-                        Search remains optional
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="min-h-0 overflow-hidden">
-                    {activeStage.id === "pulse" && disclosure === "default" ? (
-                      <OpportunityPicker
-                        opportunities={opportunities}
-                        selectedOpportunityId={selectedOpportunityId}
-                        onSelectOpportunity={onSelectOpportunity}
-                      />
-                    ) : disclosure === "default" ? (
-                      <div className="grid h-full min-h-0 auto-rows-fr gap-3 overflow-y-auto pr-1 md:grid-cols-2">
-                        {activeStage.evidence.slice(0, 4).map((item) => (
-                          <div
-                            key={item}
-                            className="flex min-h-0 rounded-md border border-zinc-800 bg-black px-3 py-2 text-sm leading-6 text-zinc-200"
-                          >
-                            <span className="line-clamp-6 self-center">{item}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <DetailPanel disclosure={disclosure} stage={activeStage} />
-                    )}
-                  </div>
-                </section>
-
-                <section className="rounded-lg border border-zinc-800 bg-zinc-950 p-3">
-                  <div className="text-xs text-zinc-500">Recommended Next Step</div>
-                  <div className="mt-1 flex items-center justify-between gap-4">
-                    <p className="line-clamp-2 text-sm font-semibold leading-6 text-zinc-50">
-                      {activeStage.nextStep}
-                    </p>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <button
-                        type="button"
-                        disabled={!canGoBack}
-                        onClick={() => moveStage(-1)}
-                        className="grid h-10 w-10 place-items-center rounded-lg border border-zinc-800 text-zinc-300 transition enabled:hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-35"
-                        aria-label="Previous step"
-                      >
-                        <ArrowLeft className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        disabled={!canGoForward}
-                        onClick={() => moveStage(1)}
-                        className="grid h-10 w-10 place-items-center rounded-lg border border-amber-300/45 bg-amber-300 text-black transition enabled:hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-35"
-                        aria-label="Next step"
-                      >
-                        <ArrowRight className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                </section>
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-zinc-950">
+                <Clock className="h-4 w-4 text-zinc-500" />
+                Current context
               </div>
-
-              <aside className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 p-4">
-                <div className="border-b border-zinc-800 pb-4">
-                  <div className="text-xs text-zinc-500">Current Decision</div>
-                  <div className="mt-1 text-2xl font-semibold text-zinc-50">
-                    {activeStage.label}
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    <FactCard label="Action" value={recommendedAction} tone={readinessTone} />
-                    <FactCard label="Exposure" value={suggestedExposure} tone={readinessTone} />
-                  </div>
-                </div>
-
-                <div className="min-h-0 overflow-y-auto pt-4">
-                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-zinc-50">
-                    <Activity className="h-4 w-4 text-cyan-200" />
-                    Decision Readiness
-                  </div>
-                  <div className={cx("text-6xl font-semibold", toneText(readinessTone))}>
-                    {Math.round(boundedPct(readinessPct))}%
-                  </div>
-                  <div className="mt-3 h-2 overflow-hidden rounded-sm bg-zinc-800">
-                    <div
-                      className={cx(
-                        "h-full rounded-sm",
-                        readinessTone === "good" && "bg-emerald-300",
-                        readinessTone === "warn" && "bg-amber-300",
-                        readinessTone === "bad" && "bg-red-300",
-                        readinessTone === "neutral" && "bg-cyan-300",
-                      )}
-                      style={{ width: `${boundedPct(readinessPct)}%` }}
-                    />
-                  </div>
-
-                  <div className="mt-4 grid gap-2">
-                    {evidenceLadder.slice(0, 5).map((stage) => {
-                      const tone = statusTone(stage.status);
-                      return (
-                        <div
-                          key={stage.id}
-                          className="grid grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-2 rounded-md border border-zinc-800 bg-black px-3 py-2"
-                        >
-                          <span className={toneText(tone)}>{statusIcon(stage.status)}</span>
-                          <span className="truncate text-xs text-zinc-300">{stage.label}</span>
-                          <span className={cx("rounded border px-1.5 py-0.5 text-[10px]", toneBorder(tone))}>
-                            {stage.status}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <div className="mt-4 rounded-lg border border-zinc-800 bg-black p-3">
-                    <div className="text-xs text-zinc-500">System State</div>
-                    <div className="mt-1 text-sm leading-6 text-zinc-200">
-                      {marketStatus} · {lastSyncedLabel}
-                    </div>
-                  </div>
-                </div>
-              </aside>
+              <p className="mt-1 line-clamp-2 text-sm leading-6 text-zinc-600">
+                {investorCopy(marketState)}. {marketStatus}. {lastSyncedLabel}.
+              </p>
+              <div className="mt-3 flex items-center gap-2 text-sm text-zinc-500">
+                <BarChart3 className="h-4 w-4" />
+                Action state: {readinessState}
+              </div>
             </div>
-          </div>
+          </aside>
         </section>
       </main>
     </div>
