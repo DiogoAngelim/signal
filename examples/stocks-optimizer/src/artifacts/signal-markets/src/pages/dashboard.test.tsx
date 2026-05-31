@@ -10,6 +10,7 @@ import Dashboard, {
   reconcileRecoveryUnlockConditionsWithRecognition,
   reconcileResolveUnlockConditionsWithRecognition,
   resolveDashboardNeedDiagnostics,
+  selectStableExecutiveSummaryMetrics,
 } from "./dashboard";
 
 describe("Dashboard calibration diagnostics", () => {
@@ -96,6 +97,55 @@ describe("Dashboard calibration diagnostics", () => {
     expect(html).toContain("Portfolio cap");
     expect(html).toContain("Starter size");
     expect(html).toContain('data-mobile-posture-summary="true"');
+  });
+
+  it("holds executive summary metrics steady during quote refresh", () => {
+    const previous = {
+      market: "US",
+      confidenceValue: "86%",
+      confidenceSub: "Trusted by governance at 71%",
+      confidenceTone: "good" as const,
+      maxExposureValue: "No exposure",
+      maxExposureSub: "Sizing locked by governance",
+      exposureTone: "bad" as const,
+      portfolioPostureValue: "Limited",
+      portfolioPostureSub: "Wait for confirmation",
+      postureTone: "warn" as const,
+      marketHealthValue: "Smooth",
+      marketHealthSub: "74%",
+      marketHealthTone: "good" as const,
+    };
+    const transient = {
+      ...previous,
+      confidenceValue: "42%",
+      confidenceSub: "Trust pending",
+      maxExposureValue: "Pending",
+      portfolioPostureValue: "Loading",
+      marketHealthValue: "Pending",
+      marketHealthSub: "Awaiting synchronized data",
+    };
+
+    expect(
+      selectStableExecutiveSummaryMetrics({
+        current: transient,
+        previous,
+        refreshing: true,
+      }),
+    ).toBe(previous);
+    expect(
+      selectStableExecutiveSummaryMetrics({
+        current: transient,
+        previous,
+        refreshing: false,
+      }),
+    ).toBe(transient);
+    expect(
+      selectStableExecutiveSummaryMetrics({
+        current: { ...transient, market: "ETF" },
+        previous,
+        refreshing: true,
+      }),
+    ).toEqual({ ...transient, market: "ETF" });
   });
 
   it("groups the dashboard into calmer decision layers", () => {

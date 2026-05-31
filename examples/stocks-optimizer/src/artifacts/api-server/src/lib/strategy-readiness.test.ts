@@ -154,6 +154,34 @@ function survivalMemory(overrides: Record<string, unknown> = {}) {
   } as any;
 }
 
+function cleanReducedSizeRecord(id: string, overrides: Record<string, unknown> = {}) {
+  return {
+    id,
+    timestamp: "2026-05-28T00:00:00.000Z",
+    stateFingerprint: "venue:binance|action:buy",
+    action: "buy",
+    maxExposure: 1,
+    realizedReturn: 1.2,
+    maxDrawdown: 4,
+    maxAdverseExcursion: 6,
+    recoveryTimeBars: 2,
+    volatilityExpansion: 8,
+    tailRisk: 10,
+    liquidityStress: 8,
+    structuralDanger: 9,
+    novelty: 12,
+    opportunityDensity: 35,
+    outcomeClass: "comfortable_survival",
+    survivalCost: 10,
+    scarWeight: 0,
+    ...overrides,
+  };
+}
+
+function cleanReducedSizeRecords(count = 3) {
+  return Array.from({ length: count }, (_, index) => cleanReducedSizeRecord(`clean-${index + 1}`));
+}
+
 function hasFlag(result: StrategyReadinessResult, flag: string) {
   return result.failureFlags.includes(flag);
 }
@@ -252,6 +280,46 @@ test("outlier-dependent returns block readiness and report trade concentration m
   assert.equal(result.concentration.top1TradeContributionPct > 45, true);
   assert.equal(result.concentration.top5TradeContributionPct > 80, true);
   assert.equal(hasFlag(result, "OUTLIER_DEPENDENCY"), true);
+  assert.equal(hasFlag(result, "OVERFIT_TOP_WINNER_DEPENDENCY"), true);
+});
+
+test("loss-limit walk-forward failures do not masquerade as concentration dependency", () => {
+  const result = evaluate({
+    walkForwardSegments: walkForward(5, 5, -12),
+    summary: {
+      walkForwardSegments: walkForward(5, 5, -12),
+    },
+    trades: trades(40, 1.2),
+  });
+
+  assert.equal(result.components.walkForwardRobustness.passed, false);
+  assert.equal(result.walkForward.periodConcentrated, false);
+  assert.equal(result.components.concentrationControl.passed, true);
+  assert.equal(hasFlag(result, "WALK_FORWARD_UNSTABLE"), true);
+  assert.equal(hasFlag(result, "OUTLIER_DEPENDENCY"), false);
+});
+
+test("non-positive median trade return blocks concentration clearance", () => {
+  const medianNegativeTrades = [
+    ...Array.from({ length: 21 }, (_, index) => ({
+      symbol: `LOSS${index}`,
+      returnPct: -0.05,
+      entryExposure: 5,
+    })),
+    ...Array.from({ length: 20 }, (_, index) => ({
+      symbol: `WIN${index}`,
+      returnPct: 0.25,
+      entryExposure: 5,
+    })),
+  ];
+  const result = evaluate({ trades: medianNegativeTrades });
+
+  assert.equal(result.concentration.medianTradeReturnPositive, false);
+  assert.equal(result.components.concentrationControl.passed, false);
+  assert.equal(result.components.concentrationControl.reasons.includes("Median trade return is not positive."), true);
+  assert.equal(hasFlag(result, "OUTLIER_DEPENDENCY"), true);
+  assert.equal(hasFlag(result, "MEDIAN_TRADE_RETURN_NOT_POSITIVE"), true);
+  assert.equal(hasFlag(result, "OVERFIT_TOP_WINNER_DEPENDENCY"), false);
 });
 
 test("zero max-position readiness cannot produce buy ideas", () => {
@@ -666,6 +734,7 @@ test("recovery can restore normal mode after survival, trust, calibration, agenc
       maxExposurePct: 3.2,
       mainWarnings: ["Controlled survival scars are improving."],
       reasons: ["Recovery evidence is improving."],
+      records: cleanReducedSizeRecords(),
     }),
     previousTrades: judgementTrades([...Array(120).fill(6), ...Array(8).fill(-1)]),
     opportunityCandidates: [
@@ -687,6 +756,60 @@ test("recovery can restore normal mode after survival, trust, calibration, agenc
   assert.equal(decision.restorationProgress?.restorationState, "clear");
   assert.equal(decision.restorationProgress?.progressPct, 100);
   assert.equal(decision.restorationProgress?.gates.every((gate) => gate.passed), true);
+});
+
+test("restoration blocks normal sizing until clean reduced-size outcomes clear", () => {
+  const ready = {
+    ...evaluate(),
+    maxConfidence: 82,
+    rawConfidence: 86,
+    calibratedConfidence: 74,
+    trustworthiness: 82,
+    maxPositionPct: 5.5,
+    robustnessDiagnostics: { overfitRisk: 24 },
+  };
+  const decision = classifyStrategySignal({
+    readiness: ready,
+    rawAction: "Buy",
+    expectedEdgePct: 6,
+    rawSuggestedExposurePct: 4,
+    setupQuality: 100,
+    riskPressure: 18,
+    volatilityPct: 2,
+    liquidityScore: 95,
+    signalConfidence: 86,
+    survivalMemory: survivalMemory({
+      status: "scarred",
+      recommendation: "act_with_reduced_size",
+      scarCount: 12,
+      nearRuinCount: 0,
+      averageSurvivalCost: 18,
+      recoveryBurden: 6,
+      survivalConfidence: 76,
+      currentStateSimilarity: 24,
+      exposureMultiplier: 0.58,
+      confidencePenalty: 0,
+      maxExposurePct: 3.2,
+      mainWarnings: ["Controlled survival scars are improving."],
+      reasons: ["Recovery evidence is improving."],
+    }),
+    previousTrades: judgementTrades([...Array(120).fill(6), ...Array(8).fill(-1)]),
+    opportunityCandidates: [
+      {
+        symbol: "SOLUSDT",
+        candidateScore: 78,
+        discovery: { confidence: 68, maturity: 66, novelty: 28 },
+      },
+    ],
+    agencyResult: { blockedActions: [] },
+  });
+
+  assert.equal(decision.recovery?.canRestoreSizing, true);
+  assert.equal(decision.restorationProgress?.canRestoreSizing, false);
+  assert.equal(decision.restorationProgress?.status, "collecting_evidence");
+  assert.equal(decision.restorationProgress?.restorationState, "watch");
+  assert.equal(decision.restorationProgress?.gates.find((gate) => gate.id === "clean-reduced-size-outcomes")?.passed, false);
+  assert.equal(decision.restorationProgress?.gates.find((gate) => gate.id === "survival-status")?.passed, false);
 });
 
 test("restoration ledger tracks clean reduced-size streaks and survival boundaries", () => {
@@ -796,9 +919,11 @@ test("restoration proof lane can advance after an older boundary break is follow
   assert.equal(progress.outcomeProof.cleanReducedSizeOutcomeCount, 3);
   assert.equal(progress.outcomeProof.remainingCleanReducedSizeOutcomes, 0);
   assert.equal(progress.gates.find((gate) => gate.id === "clean-reduced-size-outcomes")?.passed, true);
-  assert.equal(progress.restorationState, "limited");
+  assert.equal(progress.gates.find((gate) => gate.id === "survival-status")?.passed, true);
+  assert.equal(progress.restorationState, "clear");
   assert.equal(progress.actionPlan.status, "ready_for_review");
-  assert.match(progress.actionPlan.activeInstruction, /Promote Survival Memory/);
+  assert.equal(progress.ledger.exactUnlockCondition, "Survival Memory restoration ledger is clear; normal sizing can proceed through downstream controls.");
+  assert.equal(progress.actionPlan.steps.find((step) => step.id === "clear-survival-memory")?.status, "done");
 });
 
 test("restoration plan blocks clean proof while survival confidence and proof lane capacity are missing", () => {
@@ -1105,7 +1230,7 @@ test("unstable calibration outcomes require review even with enough samples", ()
     },
     trades: Array.from({ length: 36 }, (_, index) => ({
       symbol: `ALT${index}`,
-      returnPct: index % 2 === 0 ? 1.2 : -1.2,
+      returnPct: index % 2 === 0 ? 1.2 : -1.1,
       confidence: 50,
     })),
   });

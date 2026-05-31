@@ -151,12 +151,15 @@ describe("market perception end-to-end integration", () => {
       timestamp: 1_800_000_000_000,
     });
 
-    expect(() =>
-      renderToString(<MarketPerceptionEngine snapshot={snapshot} />),
-    ).not.toThrow();
-    expect(
-      renderToString(<MarketPerceptionEngine snapshot={snapshot} />),
-    ).toContain("Raw contributors and calculation audit");
+    let html = "";
+
+    expect(() => {
+      html = renderToString(<MarketPerceptionEngine snapshot={snapshot} />);
+    }).not.toThrow();
+    expect(html).toContain("Raw contributors and calculation audit");
+    expect(html).toContain("Real-time market aura visualization");
+    expect(html).toContain("Perception modules");
+    expect(html).toContain("Recognition field");
   });
 
   it("surfaces system self-awareness instead of generic resilience when agency diagnostics are present", async () => {

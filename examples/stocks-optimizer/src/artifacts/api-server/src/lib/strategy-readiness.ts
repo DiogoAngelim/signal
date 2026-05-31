@@ -110,7 +110,10 @@ export type StrategyReadinessResult = {
     positiveSegmentCount: number;
     weakestPeriod: { index: number; returnPct: number } | null;
     bestPeriodContributionPct: number;
+    contributionDistributed?: boolean;
+    periodConcentrated?: boolean;
     effectivePositiveSegmentCount?: number;
+    broadPositiveParticipation?: boolean;
     stable: boolean;
   };
   parameterStability: {
@@ -126,6 +129,8 @@ export type StrategyReadinessResult = {
     bestPeriodContributionPct: number;
     medianTradeReturnPct: number;
     returnSkew: number;
+    periodConcentrated?: boolean;
+    medianTradeReturnPositive?: boolean;
     outlierDependent: boolean;
   };
   robustnessDiagnostics?: any;
@@ -546,6 +551,7 @@ function evaluateWalkForward(summary: any, inputSegments: any[], config: any) {
       bestPeriodContributionPct <= periodContributionLimitPct &&
       effectivePositiveSegmentCount >= Math.min(2, Math.max(1, returns.length * 0.6))
     );
+  const periodConcentrated = positiveReturns.length > 0 && positiveTotal > 0 && !contributionDistributed;
   const stable =
     returns.length >= minimumSegments &&
     positiveSegmentCount >= Math.ceil(returns.length * 0.67) &&
@@ -558,7 +564,7 @@ function evaluateWalkForward(summary: any, inputSegments: any[], config: any) {
     reasons.push("Too few walk-forward windows are profitable.");
   }
   if (weakestReturn <= -10) reasons.push("Weakest walk-forward window breaches the loss limit.");
-  if (!contributionDistributed) reasons.push("One period contributes too much of the return.");
+  if (periodConcentrated) reasons.push("One period contributes too much of the return.");
 
   return {
     component: component(
@@ -571,9 +577,11 @@ function evaluateWalkForward(summary: any, inputSegments: any[], config: any) {
       positiveSegmentCount,
       weakestPeriod: weakestIndex >= 0 ? { index: weakestIndex, returnPct: weakestReturn } : null,
       bestPeriodContributionPct,
-      stable,
+      contributionDistributed,
+      periodConcentrated,
       effectivePositiveSegmentCount,
       broadPositiveParticipation,
+      stable,
     },
   };
 }
@@ -610,7 +618,7 @@ function evaluateParameterRobustness(parameterRobustness: any) {
   };
 }
 
-function evaluateConcentration(trades: any[], bestPeriodContributionPct: number, walkForwardStable: boolean) {
+function evaluateConcentration(trades: any[], bestPeriodContributionPct: number, periodConcentrated: boolean) {
   const tradeReturns = trades
     .map((trade) => numberOrNull(trade?.returnPct ?? trade?.return_pct))
     .filter((value: number | null): value is number => value != null);
@@ -623,21 +631,26 @@ function evaluateConcentration(trades: any[], bestPeriodContributionPct: number,
   const top5TradeContributionPct = positiveContributionTotal > 0 ? top5Contribution / positiveContributionTotal * 100 : 0;
   const medianTradeReturnPct = median(tradeReturns);
   const returnSkew = skew(tradeReturns);
+  const medianTradeReturnPositive = tradeReturns.length > 0 && medianTradeReturnPct > 0;
+  const medianTradeReturnBlocked = tradeReturns.length > 0 && !medianTradeReturnPositive;
   const outlierDependent =
     top1TradeContributionPct > 45 ||
     top5TradeContributionPct > 80 ||
-    !walkForwardStable ||
+    periodConcentrated ||
+    medianTradeReturnBlocked ||
     (returnSkew > 4 && top1TradeContributionPct > 35);
   const reasons: string[] = [];
+  const medianPenalty = medianTradeReturnBlocked ? 70 : 0;
 
   if (top1TradeContributionPct > 45) reasons.push("Top trade contributes too much of positive PnL.");
   if (top5TradeContributionPct > 80) reasons.push("Top five trades contribute too much of positive PnL.");
-  if (!walkForwardStable) reasons.push("Best period contributes too much of total return.");
+  if (periodConcentrated) reasons.push("Best period contributes too much of total return.");
+  if (medianTradeReturnBlocked) reasons.push("Median trade return is not positive.");
   if (returnSkew > 4 && top1TradeContributionPct > 35) reasons.push("Return skew indicates outlier dependence.");
 
   return {
     component: component(
-      outlierDependent ? clamp(100 - Math.max(top1TradeContributionPct, top5TradeContributionPct, bestPeriodContributionPct)) : 100,
+      outlierDependent ? clamp(100 - Math.max(top1TradeContributionPct, top5TradeContributionPct, bestPeriodContributionPct, medianPenalty)) : 100,
       !outlierDependent,
       reasons,
     ),
@@ -647,6 +660,8 @@ function evaluateConcentration(trades: any[], bestPeriodContributionPct: number,
       bestPeriodContributionPct,
       medianTradeReturnPct,
       returnSkew,
+      periodConcentrated,
+      medianTradeReturnPositive,
       outlierDependent,
     },
   };
@@ -907,6 +922,7 @@ function flagsForEvaluation(
   parameterRobustness: StrategyReadinessComponent,
   concentrationControl: StrategyReadinessComponent,
   robustnessGate: StrategyReadinessComponent,
+  concentration: StrategyReadinessResult["concentration"],
   summary: any,
 ) {
   const flags: string[] = Array.isArray(summary?.failureFlags) ? [...summary.failureFlags] : [];
@@ -923,7 +939,18 @@ function flagsForEvaluation(
   if (!walkForwardRobustness.passed) flags.push("WALK_FORWARD_UNSTABLE", "OVERFIT_WALK_FORWARD_INSTABILITY");
   if (!liveSignalConsistency.passed) flags.push("LIVE_SIGNAL_MISMATCH");
   if (!parameterRobustness.passed) flags.push("PARAMETER_INSTABILITY");
-  if (!concentrationControl.passed) flags.push("OUTLIER_DEPENDENCY", "OVERFIT_TOP_WINNER_DEPENDENCY");
+  if (!concentrationControl.passed) {
+    flags.push("OUTLIER_DEPENDENCY");
+    if (
+      concentration.top1TradeContributionPct > 45 ||
+      concentration.top5TradeContributionPct > 80 ||
+      (concentration.returnSkew > 4 && concentration.top1TradeContributionPct > 35)
+    ) {
+      flags.push("OVERFIT_TOP_WINNER_DEPENDENCY");
+    }
+    if (concentration.periodConcentrated === true) flags.push("OVERFIT_SEGMENT_CONCENTRATION");
+    if (concentration.medianTradeReturnPositive === false) flags.push("MEDIAN_TRADE_RETURN_NOT_POSITIVE");
+  }
   if (!robustnessGate.passed) {
     const gate = String(summary?.robustnessDiagnostics?.safetyGate ?? "").toLowerCase();
     flags.push(gate === "block" ? "ROBUSTNESS_EXECUTION_BLOCKED" : "ROBUSTNESS_OVERFIT_RISK");
@@ -977,7 +1004,7 @@ export class StrategyReadinessEvaluator {
     const concentrationEvaluation = evaluateConcentration(
       trades,
       walkForwardEvaluation.walkForward.bestPeriodContributionPct,
-      walkForwardEvaluation.walkForward.stable,
+      walkForwardEvaluation.walkForward.periodConcentrated === true,
     );
     const liveSignalConsistency = evaluateLiveSignalConsistency(input.forwardShadow ?? summary.forwardShadow, config);
     const robustnessDiagnostics = input.robustnessDiagnostics ?? summary.robustnessDiagnostics;
@@ -1012,6 +1039,7 @@ export class StrategyReadinessEvaluator {
       parameterEvaluation.component,
       concentrationEvaluation.component,
       robustnessGate,
+      concentrationEvaluation.concentration,
       summary,
     );
     const survivalFlags = survivalMemory.status === "near_ruin" ? ["SURVIVAL_NEAR_RUIN"] : [];

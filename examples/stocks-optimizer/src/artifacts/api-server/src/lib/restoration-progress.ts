@@ -202,15 +202,28 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
   const judgementReliability = numberOr(normalized.judgementReliability, 0);
   const outcomeStability = numberOr(normalized.outcomeStability, 0);
   const evidenceAgreement = numberOr(normalized.evidenceAgreement, 0);
-  const canRestoreSizing = recovery?.canRestoreSizing === true;
   const cleanOutcomeGatePassed =
     outcomeProof.cleanReducedSizeOutcomeCount >= outcomeProof.requiredCleanOutcomes &&
     outcomeProof.activeProofBoundaryBreakCount === 0;
+  const survivalConfidencePassed = survivalConfidence >= thresholds.minSurvivalConfidenceForRestore;
+  const promotableSurvivalStatus =
+    survivalMemory?.status === "scarred" ||
+    survivalMemory?.status === "watch";
+  const survivalMemoryClear =
+    survivalMemory?.status === "clear" ||
+    (
+      promotableSurvivalStatus &&
+      survivalConfidencePassed &&
+      cleanOutcomeGatePassed
+    );
+  const survivalStatusLabel = survivalMemoryClear
+    ? "clear"
+    : readableStatus(survivalMemory?.status);
   const gates: RestorationProgressGate[] = [
     gate({
       id: "survival-confidence",
       label: "Survival confidence",
-      passed: canRestoreSizing || survivalConfidence >= thresholds.minSurvivalConfidenceForRestore,
+      passed: survivalConfidencePassed,
       currentValue: survivalConfidence,
       targetValue: thresholds.minSurvivalConfidenceForRestore,
       current: `${Math.round(survivalConfidence)}/100`,
@@ -221,10 +234,10 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     gate({
       id: "survival-status",
       label: "Survival status",
-      passed: canRestoreSizing || survivalMemory?.status === "clear",
-      currentValue: survivalMemory?.status === "clear" ? 100 : 0,
+      passed: survivalMemoryClear,
+      currentValue: survivalMemoryClear ? 100 : 0,
       targetValue: 100,
-      current: readableStatus(survivalMemory?.status),
+      current: survivalStatusLabel,
       target: "clear",
       detail: "Survival Memory must move out of scarred/watch before normal sizing returns.",
       unlockCondition: "Clear scarred/watch Survival Memory with clean reduced-size proof.",
@@ -232,7 +245,7 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     gate({
       id: "clean-reduced-size-outcomes",
       label: "Clean reduced-size outcomes",
-      passed: canRestoreSizing || cleanOutcomeGatePassed,
+      passed: cleanOutcomeGatePassed,
       currentValue: outcomeProof.cleanReducedSizeOutcomeCount,
       targetValue: outcomeProof.requiredCleanOutcomes,
       current: `${outcomeProof.cleanReducedSizeOutcomeCount}/${outcomeProof.requiredCleanOutcomes}`,
@@ -243,7 +256,7 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     gate({
       id: "trust-score",
       label: "Trust score",
-      passed: canRestoreSizing || trustScore >= thresholds.minTrustScoreForRestore,
+      passed: trustScore >= thresholds.minTrustScoreForRestore,
       currentValue: trustScore,
       targetValue: thresholds.minTrustScoreForRestore,
       current: `${Math.round(trustScore)}/100`,
@@ -254,7 +267,7 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     gate({
       id: "calibrated-confidence",
       label: "Calibrated confidence",
-      passed: canRestoreSizing || calibratedConfidence >= thresholds.minCalibratedConfidenceForRestore,
+      passed: calibratedConfidence >= thresholds.minCalibratedConfidenceForRestore,
       currentValue: calibratedConfidence,
       targetValue: thresholds.minCalibratedConfidenceForRestore,
       current: `${Math.round(calibratedConfidence)}/100`,
@@ -265,14 +278,12 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     gate({
       id: "outcome-linkage",
       label: "Outcome linkage",
-      passed: canRestoreSizing ||
-        (
-          sampleCount >= thresholds.minSimilarSamplesForRestore &&
-          positiveOutcomeRatio >= thresholds.minPositiveOutcomeRatioForRestore &&
-          judgementReliability >= thresholds.minJudgementReliabilityForRestore &&
-          outcomeStability >= thresholds.minOutcomeStabilityForRestore &&
-          evidenceAgreement >= thresholds.minEvidenceAgreementForRestore
-        ),
+      passed:
+        sampleCount >= thresholds.minSimilarSamplesForRestore &&
+        positiveOutcomeRatio >= thresholds.minPositiveOutcomeRatioForRestore &&
+        judgementReliability >= thresholds.minJudgementReliabilityForRestore &&
+        outcomeStability >= thresholds.minOutcomeStabilityForRestore &&
+        evidenceAgreement >= thresholds.minEvidenceAgreementForRestore,
       currentValue: Math.min(
         sampleCount / Math.max(1, thresholds.minSimilarSamplesForRestore) * 100,
         positiveOutcomeRatio / Math.max(0.01, thresholds.minPositiveOutcomeRatioForRestore) * 100,
@@ -286,11 +297,9 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     gate({
       id: "discovery-maturity",
       label: "Discovery maturity",
-      passed: canRestoreSizing ||
-        (
-          discoveryConfidence >= thresholds.minDiscoveryConfidenceForRestore &&
-          discoveryMaturity >= thresholds.minDiscoveryMaturityForRestore
-        ),
+      passed:
+        discoveryConfidence >= thresholds.minDiscoveryConfidenceForRestore &&
+        discoveryMaturity >= thresholds.minDiscoveryMaturityForRestore,
       currentValue: Math.min(discoveryConfidence, discoveryMaturity),
       targetValue: Math.min(
         thresholds.minDiscoveryConfidenceForRestore,
@@ -304,12 +313,10 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     gate({
       id: "risk-and-agency",
       label: "Risk and agency",
-      passed: canRestoreSizing ||
-        (
-          dataReliability >= thresholds.minDataReliability &&
-          overfitRisk <= thresholds.maxOverfitRisk &&
-          blockedAgencyActionCount === 0
-        ),
+      passed:
+        dataReliability >= thresholds.minDataReliability &&
+        overfitRisk <= thresholds.maxOverfitRisk &&
+        blockedAgencyActionCount === 0,
       currentValue: Math.min(
         dataReliability,
         clamp(100 - overfitRisk),
@@ -323,14 +330,15 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     }),
   ];
   const failedGates = gates.filter((item) => !item.passed);
+  const canRestoreSizing = recovery?.canRestoreSizing === true && failedGates.length === 0;
   const status = statusFor(canRestoreSizing, recovery?.status, failedGates);
   const restorationState = restorationStateFor({
     canRestoreSizing,
     survivalStatus: survivalMemory?.status,
+    survivalMemoryClear,
     survivalConfidence,
     cleanOutcomeGatePassed,
     cleanReducedSizeOutcomeCount: outcomeProof.cleanReducedSizeOutcomeCount,
-    activeProofBoundaryBreakCount: outcomeProof.activeProofBoundaryBreakCount,
     threshold: thresholds.minSurvivalConfidenceForRestore,
   });
   const ledger = buildRestorationLedger({
@@ -338,7 +346,7 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     outcomeProof,
     survivalConfidence,
     survivalConfidenceThreshold: thresholds.minSurvivalConfidenceForRestore,
-    survivalStatus: survivalMemory?.status,
+    survivalMemoryClear,
     canRestoreSizing,
   });
   const actionPlan = buildRestorationActionPlan({
@@ -348,7 +356,7 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     targetNormalExposurePct,
     survivalConfidence,
     survivalConfidenceThreshold: thresholds.minSurvivalConfidenceForRestore,
-    survivalStatus: survivalMemory?.status,
+    survivalMemoryClear,
     canRestoreSizing,
   });
   const progressPct = canRestoreSizing
@@ -448,14 +456,14 @@ function buildRestorationLedger(input: {
   outcomeProof: RestorationOutcomeProof;
   survivalConfidence: number;
   survivalConfidenceThreshold: number;
-  survivalStatus?: string | null;
+  survivalMemoryClear: boolean;
   canRestoreSizing: boolean;
 }): SurvivalMemoryRestorationLedger {
   const cleanProofPassed =
     input.outcomeProof.cleanReducedSizeOutcomeCount >= input.outcomeProof.requiredCleanOutcomes &&
     input.outcomeProof.activeProofBoundaryBreakCount === 0;
   const confidencePassed = input.survivalConfidence >= input.survivalConfidenceThreshold;
-  const statusClear = input.survivalStatus === "clear" || input.canRestoreSizing;
+  const statusClear = input.survivalMemoryClear;
   const entries = input.outcomeProof.ledgerEntries;
   const latestEntry = entries[entries.length - 1];
   const remainingClean = Math.max(
@@ -514,14 +522,14 @@ function buildRestorationActionPlan(input: {
   targetNormalExposurePct: number;
   survivalConfidence: number;
   survivalConfidenceThreshold: number;
-  survivalStatus?: string | null;
+  survivalMemoryClear: boolean;
   canRestoreSizing: boolean;
 }): RestorationActionPlan {
   const remainingClean = input.outcomeProof.remainingCleanReducedSizeOutcomes;
   const confidencePassed = input.survivalConfidence >= input.survivalConfidenceThreshold;
   const cleanProofPassed =
     remainingClean === 0 && input.outcomeProof.activeProofBoundaryBreakCount === 0;
-  const statusClear = input.survivalStatus === "clear" || input.canRestoreSizing;
+  const statusClear = input.survivalMemoryClear;
   const resetRequired = input.outcomeProof.activeProofBoundaryBreakCount > 0;
   const proofLaneOpen = input.canRestoreSizing || input.currentExposureCapPct > 0;
   const planStatus: RestorationActionPlan["status"] = input.canRestoreSizing
@@ -772,28 +780,15 @@ function gate(input: {
 function restorationStateFor(input: {
   canRestoreSizing: boolean;
   survivalStatus?: string | null;
+  survivalMemoryClear: boolean;
   survivalConfidence: number;
   cleanOutcomeGatePassed: boolean;
   cleanReducedSizeOutcomeCount: number;
-  activeProofBoundaryBreakCount: number;
   threshold: number;
 }): SurvivalMemoryRestorationState {
   if (input.canRestoreSizing) return "clear";
   if (input.survivalStatus === "near_ruin") return "scarred";
-  if (
-    input.survivalStatus === "clear" &&
-    input.survivalConfidence >= input.threshold &&
-    input.cleanOutcomeGatePassed
-  ) {
-    return "clear";
-  }
-  if (
-    input.survivalConfidence >= input.threshold &&
-    input.cleanOutcomeGatePassed &&
-    input.activeProofBoundaryBreakCount === 0
-  ) {
-    return "limited";
-  }
+  if (input.survivalMemoryClear && input.cleanOutcomeGatePassed) return "clear";
   if (input.survivalConfidence >= input.threshold || input.cleanReducedSizeOutcomeCount > 0) {
     return "watch";
   }

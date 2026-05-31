@@ -32,7 +32,7 @@ export type MarketBacktestConfig = {
   takeProfitPct: number;
 };
 
-export const MARKET_BACKTEST_CACHE_VERSION = 17;
+export const MARKET_BACKTEST_CACHE_VERSION = 20;
 
 const BASE_PROFILE: Omit<MarketBacktestConfig, "id" | "name" | "profile"> = {
   lookbackDays: 60,

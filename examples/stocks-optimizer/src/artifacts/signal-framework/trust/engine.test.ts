@@ -156,6 +156,46 @@ describe("Signal Trust Governor", () => {
     assert.equal(result.primaryBlocker, "robustness_overfit_risk");
     assert.match(result.unlockCriteria.join(" "), /overfit risk/i);
     assert.equal(result.blockers.some((blocker) => blocker.id === "strategy_readiness_blocked"), false);
+    assert.equal(result.blockers.some((blocker) => blocker.id === "capacity_unavailable"), false);
+  });
+
+  it("uses concentration unlock criteria for the exact failed concentration dimensions", () => {
+    const result = evaluateTrustGovernor({
+      rawConfidence: 85,
+      calibratedConfidence: 80,
+      maxExposure: 0,
+      requestedExposure: 3,
+      opensNewExposure: true,
+      calibration: {
+        warnings: [],
+        calibratedConfidence: 80,
+        trustworthiness: 84,
+        status: "trusted",
+      },
+      reliability: { score: 96, status: "healthy", confidenceCap: 96 },
+      strategy: {
+        blocked: true,
+        stage: "Research only",
+        productionEligible: false,
+        readinessScore: 82,
+        maxConfidence: 70,
+        maxPositionPct: 0,
+        failureFlags: [
+          "OUTLIER_DEPENDENCY",
+          "OVERFIT_SEGMENT_CONCENTRATION",
+          "MEDIAN_TRADE_RETURN_NOT_POSITIVE",
+        ],
+      },
+    });
+
+    const concentration = result.blockers.find((blocker) => blocker.id === "concentration_dependency");
+
+    assert.equal(result.primaryBlocker, "concentration_dependency");
+    assert.equal(concentration?.reason, "Results depend too much on one validation period.");
+    assert.ok(result.unlockCriteria.includes("Reduce period concentration across independent test windows."));
+    assert.ok(result.unlockCriteria.includes("Confirm median trade return stays positive."));
+    assert.equal(result.unlockCriteria.includes("Reduce top-winner concentration."), false);
+    assert.equal(result.blockers.some((blocker) => blocker.id === "capacity_unavailable"), false);
   });
 
   it("uses paper mode when trust is low but no hard blocker is present", () => {

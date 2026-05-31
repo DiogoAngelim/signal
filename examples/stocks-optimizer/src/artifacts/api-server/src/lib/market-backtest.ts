@@ -2095,6 +2095,26 @@ function buildTopWinnerDependency(trades: any[]) {
   };
 }
 
+function buildTradeOutcomeDistributionDiagnostics(trades: any[]) {
+  const returns = (Array.isArray(trades) ? trades : [])
+    .map((trade) => finiteMetricOrNull(trade?.returnPct ?? trade?.return_pct ?? trade?.profitPct))
+    .filter((value): value is number => value != null);
+  const positiveCount = returns.filter((value) => value > 0).length;
+  const medianTradeReturnPct = medianBacktest(returns);
+  const averageTradeReturnPct = returns.length
+    ? returns.reduce((sum, value) => sum + value, 0) / returns.length
+    : null;
+
+  return {
+    tradeCount: returns.length,
+    positiveTradeCount: positiveCount,
+    positiveTradeSharePct: returns.length ? positiveCount / returns.length * 100 : 0,
+    medianTradeReturnPct,
+    averageTradeReturnPct,
+    medianTradeReturnPositive: medianTradeReturnPct != null && medianTradeReturnPct > 0,
+  };
+}
+
 function buildSegmentConcentrationDiagnostics(walkForwardSegments: any[]) {
   const returns = (Array.isArray(walkForwardSegments) ? walkForwardSegments : [])
     .map((segment) => finiteMetricOrNull(segment?.returnPct))
@@ -2124,6 +2144,57 @@ function buildSegmentConcentrationDiagnostics(walkForwardSegments: any[]) {
     medianSegmentReturnPct,
     broadPositiveParticipation,
     concentrated: bestSegmentContributionPct != null && bestSegmentContributionPct > 70 && !broadPositiveParticipation,
+  };
+}
+
+function buildSelectionConcentrationDiagnostics(summary: any) {
+  const segmentConcentration = summary?.segmentConcentration ?? {};
+  const topWinnerDependency = summary?.topWinnerDependency ?? {};
+  const tradeOutcomeDistribution = summary?.tradeOutcomeDistribution ?? {};
+  const bestSegmentContributionPct =
+    finiteMetricOrNull(segmentConcentration?.bestSegmentContributionPct) ??
+    finiteMetricOrNull(summary?.strategyReadiness?.walkForward?.bestPeriodContributionPct) ??
+    100;
+  const broadPositiveParticipation =
+    segmentConcentration?.broadPositiveParticipation === true ||
+    summary?.strategyReadiness?.walkForward?.broadPositiveParticipation === true;
+  const topOneDependencyPct = finiteMetricOrNull(topWinnerDependency?.topOneDependencyPct) ?? 0;
+  const topThreeDependencyPct = finiteMetricOrNull(topWinnerDependency?.topThreeDependencyPct) ?? 0;
+  const topTenPctDependencyPct = finiteMetricOrNull(topWinnerDependency?.topTenPctDependencyPct) ?? 0;
+  const medianTradeReturnPct =
+    finiteMetricOrNull(tradeOutcomeDistribution?.medianTradeReturnPct) ??
+    finiteMetricOrNull(summary?.strategyReadiness?.concentration?.medianTradeReturnPct);
+  const periodDistributed = bestSegmentContributionPct <= 60 || broadPositiveParticipation;
+  const topWinnersDistributed =
+    topWinnerDependency?.dependencyDetected !== true &&
+    topOneDependencyPct <= 45 &&
+    topThreeDependencyPct <= 75 &&
+    topTenPctDependencyPct <= 85;
+  const medianTradeReturnPositive = medianTradeReturnPct != null && medianTradeReturnPct > 0;
+  const periodPenalty = Math.max(0, bestSegmentContributionPct - 60) * 1.4;
+  const topWinnerPenalty =
+    Math.max(0, topOneDependencyPct - 40) * 1.2 +
+    Math.max(0, topThreeDependencyPct - 70) * 0.8 +
+    Math.max(0, topTenPctDependencyPct - 82) * 0.55 +
+    (topWinnerDependency?.dependencyDetected === true ? 18 : 0);
+  const medianPenalty =
+    medianTradeReturnPct == null
+      ? 12
+      : medianTradeReturnPct > 0
+        ? 0
+        : Math.min(45, 18 + Math.abs(medianTradeReturnPct) * 5);
+
+  return {
+    clear: periodDistributed && topWinnersDistributed && medianTradeReturnPositive,
+    score: Number(clampBacktest(100 - periodPenalty - topWinnerPenalty - medianPenalty).toFixed(2)),
+    periodDistributed,
+    topWinnersDistributed,
+    medianTradeReturnPositive,
+    bestSegmentContributionPct,
+    topOneDependencyPct,
+    topThreeDependencyPct,
+    topTenPctDependencyPct,
+    medianTradeReturnPct,
   };
 }
 
@@ -2226,6 +2297,7 @@ export function scoreStrategyHealthForSelection(
   const sharpe = metricOrZero(summary?.annualizedSharpe ?? summary?.sharpeRatio);
   const drawdownPct = metricOrZero(summary?.maxDrawdownPct);
   const profitFactor = metricOrZero(summary?.profitFactor);
+  const concentration = buildSelectionConcentrationDiagnostics(summary);
   const segments = Array.isArray(summary?.walkForwardSegments) ? summary.walkForwardSegments : [];
   const segmentReturns = segments
     .map((segment: any) => finiteMetricOrNull(segment?.returnPct))
@@ -2257,7 +2329,10 @@ export function scoreStrategyHealthForSelection(
       : Math.max(0, 60 - (parameterPassRate ?? 0)) * 1.2 +
         Math.max(0, 70 - (benchmarkSurvivalRate ?? 0)) * 1.1 +
         (parameterRobustness?.stable === false ? 24 : 0);
-  const concentrationPenalty = Math.max(0, bestSegmentContributionPct - 60) * 0.65;
+  const concentrationPenalty =
+    Math.max(0, bestSegmentContributionPct - 60) * 0.65 +
+    Math.max(0, 75 - concentration.score) * 1.25 +
+    (concentration.clear ? 0 : 18);
 
   if (tradeCount <= 0 || drawdownPct <= 0) return -1_000;
   if (totalReturnPct <= 0) return -1_200 + Math.max(-80, Math.min(80, excessReturnPct)) - drawdownPct;
@@ -2272,6 +2347,7 @@ export function scoreStrategyHealthForSelection(
     Math.min(30, Math.max(0, profitFactor - 1) * 15) +
     Math.min(30, tradeCount / minimumTrades * 30) +
     positiveSegmentShare * 18 +
+    Math.max(0, concentration.score - 65) * 0.45 +
     benchmarkBonus +
     riskBonus +
     edgeBonus -
@@ -2359,6 +2435,20 @@ export function buildHealthOptimizedConfigCandidates(config: MarketBacktestConfi
         stopLossPct: 4.5,
         trailingStopPct: 6,
       }, "crypto-low-drawdown"),
+      variantConfig(config, {
+        lookbackDays: 34,
+        holdingDays: 14,
+        rebalanceDays: 10,
+        maxPositions: 1,
+        targetExposurePct: 18,
+        maxPositionPct: 18,
+        minMomentumPct: 0.4,
+        volatilityCapPct: 30,
+        candidateScoreShareFloor: 0.45,
+        marketMomentumFloorPct: 10,
+        stopLossPct: 5.5,
+        trailingStopPct: 6.5,
+      }, "crypto-distributed-survival"),
       variantConfig(config, {
         lookbackDays: 45,
         holdingDays: 5,
@@ -2583,6 +2673,56 @@ export function buildHealthOptimizedConfigCandidates(config: MarketBacktestConfi
     );
   }
 
+  if (profile === "BRAZIL_B3") {
+    candidates.push(
+      variantConfig(config, {
+        lookbackDays: 55,
+        holdingDays: 12,
+        rebalanceDays: 10,
+        maxPositions: 6,
+        targetExposurePct: 72,
+        maxPositionPct: 12,
+        minMomentumPct: 0.1,
+        volatilityCapPct: 8.5,
+        candidateScoreShareFloor: 0.08,
+        marketMomentumFloorPct: 8.5,
+        stopLossPct: 5.5,
+        trailingStopPct: 7,
+        takeProfitPct: 6,
+      }, "b3-distributed-quality"),
+      variantConfig(config, {
+        lookbackDays: 34,
+        holdingDays: 10,
+        rebalanceDays: 5,
+        maxPositions: 8,
+        targetExposurePct: 64,
+        maxPositionPct: 8,
+        minMomentumPct: 0.25,
+        volatilityCapPct: 8,
+        candidateScoreShareFloor: 0.12,
+        marketMomentumFloorPct: 9,
+        stopLossPct: 5,
+        trailingStopPct: 6,
+        takeProfitPct: 5,
+      }, "b3-median-return"),
+      variantConfig(config, {
+        lookbackDays: 70,
+        holdingDays: 15,
+        rebalanceDays: 10,
+        maxPositions: 5,
+        targetExposurePct: 60,
+        maxPositionPct: 12,
+        minMomentumPct: 0.3,
+        volatilityCapPct: 7.5,
+        candidateScoreShareFloor: 0.15,
+        marketMomentumFloorPct: 9,
+        stopLossPct: 5.5,
+        trailingStopPct: 7,
+        takeProfitPct: 7,
+      }, "b3-period-balance"),
+    );
+  }
+
   const seen = new Set<string>();
   return candidates.filter((candidate) => {
     const key = [
@@ -2621,15 +2761,45 @@ function evaluateHealthOptimizedConfig(
   );
   const healthScore = scoreStrategyHealthForSelection(summary, config, parameterRobustness);
   const indicatorExcellence = buildIndicatorExcellenceDiagnostics(summary, parameterRobustness);
+  const concentration = buildSelectionConcentrationDiagnostics(summary);
   const benchmarkMarginRequiredPct = Math.max(2, metricOrZero(summary?.benchmarkMarginRequiredPct) || 2);
+  const tradeCount = metricOrZero(summary?.tradeCount);
+  const totalReturnPct = metricOrZero(summary?.totalReturnPct ?? summary?.portfolioReturnPct);
+  const sharpe = metricOrZero(summary?.annualizedSharpe ?? summary?.sharpeRatio);
+  const drawdownPct = metricOrZero(summary?.maxDrawdownPct);
+  const profitFactor = metricOrZero(summary?.profitFactor);
+  const excessReturnPct = metricOrZero(summary?.excessReturnPct);
+  const minimumTrades = Math.max(1, metricOrZero(config.minimumTrades) || 30);
+  const controlledPayoffEdge =
+    sharpe >= 0.85 &&
+    drawdownPct > 0 &&
+    drawdownPct <= 12 &&
+    profitFactor >= 2.2 &&
+    excessReturnPct >= 10 &&
+    totalReturnPct >= 100 &&
+    tradeCount >= minimumTrades * 2;
+  const strategyEdgePass = sharpe >= 1 || controlledPayoffEdge;
+  const benchmarkPass = excessReturnPct >= benchmarkMarginRequiredPct;
+  const riskPass = drawdownPct > 0 && drawdownPct <= 25;
+  const parameterPass =
+    parameterRobustness?.stable === true &&
+    metricOrZero(parameterRobustness?.passRate) >= 60 &&
+    metricOrZero(parameterRobustness?.benchmarkSurvivalRate) >= 70;
+  const readinessGateCount = [
+    strategyEdgePass,
+    benchmarkPass,
+    riskPass,
+    parameterPass,
+    concentration.clear,
+  ].filter(Boolean).length;
   const selectionEligible =
-    metricOrZero(summary?.tradeCount) >= Math.max(1, metricOrZero(config.minimumTrades) || 30) &&
-    metricOrZero(summary?.totalReturnPct ?? summary?.portfolioReturnPct) > 0 &&
-    metricOrZero(summary?.excessReturnPct) >= benchmarkMarginRequiredPct &&
-    metricOrZero(summary?.annualizedSharpe ?? summary?.sharpeRatio) >= 1 &&
-    metricOrZero(summary?.maxDrawdownPct) > 0 &&
-    metricOrZero(summary?.maxDrawdownPct) <= 25 &&
-    parameterRobustness?.stable === true;
+    tradeCount >= minimumTrades &&
+    totalReturnPct > 0 &&
+    benchmarkPass &&
+    strategyEdgePass &&
+    riskPass &&
+    parameterPass &&
+    concentration.clear;
 
   return {
     config,
@@ -2637,6 +2807,15 @@ function evaluateHealthOptimizedConfig(
     parameterRobustness,
     healthScore,
     indicatorExcellence,
+    concentration,
+    readinessGateCount,
+    selectionGates: {
+      strategyEdgePass,
+      benchmarkPass,
+      riskPass,
+      parameterPass,
+      concentrationClear: concentration.clear,
+    },
     selectionEligible,
   };
 }
@@ -2808,8 +2987,15 @@ function selectHealthOptimizedStrategyConfig(
     .map((candidate) => evaluateHealthOptimizedConfig(market, entries, benchmarkHistory, candidate))
     .sort((a, b) =>
       Number(b.selectionEligible) - Number(a.selectionEligible) ||
+      b.readinessGateCount - a.readinessGateCount ||
+      Number(b.selectionGates.parameterPass) - Number(a.selectionGates.parameterPass) ||
+      Number(b.selectionGates.benchmarkPass) - Number(a.selectionGates.benchmarkPass) ||
+      Number(b.selectionGates.strategyEdgePass) - Number(a.selectionGates.strategyEdgePass) ||
+      Number(b.selectionGates.riskPass) - Number(a.selectionGates.riskPass) ||
       Number(b.healthScore > 0) - Number(a.healthScore > 0) ||
       Number(b.indicatorExcellence.allTargetsSatisfied) - Number(a.indicatorExcellence.allTargetsSatisfied) ||
+      Number(b.concentration.clear) - Number(a.concentration.clear) ||
+      b.concentration.score - a.concentration.score ||
       b.indicatorExcellence.score - a.indicatorExcellence.score ||
       b.healthScore - a.healthScore
     );
@@ -2843,6 +3029,16 @@ function selectHealthOptimizedStrategyConfig(
         annualizedSharpe: Number(metricOrZero(evaluation.summary.annualizedSharpe).toFixed(2)),
         maxDrawdownPct: Number(metricOrZero(evaluation.summary.maxDrawdownPct).toFixed(2)),
         tradeCount: metricOrZero(evaluation.summary.tradeCount),
+        concentrationScore: evaluation.concentration.score,
+        concentrationClear: evaluation.concentration.clear,
+        bestSegmentContributionPct: Number(metricOrZero(evaluation.concentration.bestSegmentContributionPct).toFixed(2)),
+        topOneDependencyPct: Number(metricOrZero(evaluation.concentration.topOneDependencyPct).toFixed(2)),
+        medianTradeReturnPct:
+          evaluation.concentration.medianTradeReturnPct == null
+            ? null
+            : Number(evaluation.concentration.medianTradeReturnPct.toFixed(2)),
+        readinessGateCount: evaluation.readinessGateCount,
+        selectionGates: evaluation.selectionGates,
         parameterPassRate: Number(metricOrZero(evaluation.parameterRobustness?.passRate).toFixed(2)),
         benchmarkSurvivalRate: Number(metricOrZero(evaluation.parameterRobustness?.benchmarkSurvivalRate).toFixed(2)),
         selectionEligible: evaluation.selectionEligible,
@@ -3291,6 +3487,7 @@ function finalizeSummaryFromHistory(summary: any, history: any[], trades: any[] 
   next.segmentCount = walkForwardSegments.length;
   next.walkForwardSegments = walkForwardSegments;
   next.topWinnerDependency = buildTopWinnerDependency(trades);
+  next.tradeOutcomeDistribution = buildTradeOutcomeDistributionDiagnostics(trades);
   next.segmentConcentration = buildSegmentConcentrationDiagnostics(walkForwardSegments);
 
   const finalized = finalizePromotionTruth(next);

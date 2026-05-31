@@ -12,6 +12,7 @@ import {
 type MarketPerceptionEngineProps = {
   snapshot: MarketStateSnapshot | null;
   className?: string;
+  visualContext?: MarketPerceptionVisualContext | null;
   agencyLevel?: {
     recommendation?: string | null;
     trustPct?: number | null;
@@ -23,6 +24,66 @@ type MarketPerceptionEngineProps = {
     calibrationHealthPct?: number | null;
     overfitRiskPct?: number | null;
     reasons?: string[];
+  } | null;
+};
+
+type MarketPerceptionVisualContext = {
+  historyDiagnostics?: {
+    historyCoverageYears?: number | null;
+    historyDepthScore?: number | null;
+    regimeCoverageScore?: number | null;
+    regimeDiversityScore?: number | null;
+    sampleDiversityScore?: number | null;
+    coverageStatus?: string | null;
+    currentRegime?: string | null;
+    keyRegimesCovered?: string[];
+    regimeCounts?: Record<string, number>;
+  } | null;
+  recognition?: {
+    recognitionScore?: number | null;
+    recurrenceConfidence?: number | null;
+    historicalSimilarityConfidence?: number | null;
+    noveltyScore?: number | null;
+    archetype?: string | null;
+    verdict?: string | null;
+    matchedSamples?: number | null;
+  } | null;
+  opportunityDiscovery?: {
+    density?: {
+      density?: number | null;
+      futureDensity?: number | null;
+      quality?: number | null;
+      confidence?: number | null;
+    } | null;
+    diagnostics?: {
+      candidateCount?: number | null;
+      eligibleCount?: number | null;
+      improvingCount?: number | null;
+      averageScore?: number | null;
+      averageVelocity?: number | null;
+      regimeCoverageScore?: number | null;
+    } | null;
+    candidates?: Array<{
+      symbol?: string;
+      lifecycle?: string;
+      candidateScore?: number;
+      scoreVelocity?: number;
+      adaptiveSizing?: { size?: number; mode?: string } | null;
+    }>;
+  } | null;
+  operatorState?: {
+    status?: "pending" | "locked" | "active" | string;
+    sizingModeLabel?: string;
+    portfolioCapLabel?: string;
+    zeroExposureLabel?: string;
+  } | null;
+  robustness?: {
+    robustnessScore?: number | null;
+    overfitRisk?: number | null;
+    generalizationConfidence?: number | null;
+    deploymentReadiness?: number | null;
+    deploymentReadinessScore?: number | null;
+    safetyGate?: string | null;
   } | null;
 };
 
@@ -407,6 +468,29 @@ function hexToRgb(hex: string) {
 function colorWithAlpha(hex: string, alpha: number) {
   const { r, g, b } = hexToRgb(hex);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function finiteVisualNumber(value: unknown) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function visualScore(value: unknown, fallback = 0) {
+  return clamp(finiteVisualNumber(value) ?? fallback);
+}
+
+function shortText(value: string | null | undefined, max = 28) {
+  const text = String(value ?? "").trim();
+  if (!text) return "-";
+  return text.length > max ? `${text.slice(0, max - 1)}...` : text;
+}
+
+function readableToken(value: string | null | undefined) {
+  const text = String(value ?? "").trim();
+  if (!text) return "Pending";
+  return text
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function wave(angle: number, time: number, seed: number) {
@@ -859,9 +943,371 @@ function ScoreBar({ value, color }: { value: number; color: string }) {
   );
 }
 
+type PerceptionModuleTrack = {
+  label: string;
+  value: number;
+  valueLabel?: string;
+  color?: string;
+};
+
+type PerceptionModule = {
+  id: string;
+  label: string;
+  value: string;
+  detail: string;
+  status: string;
+  score: number;
+  color: string;
+  tracks: PerceptionModuleTrack[];
+};
+
+function countCoveredRegimes(
+  history: MarketPerceptionVisualContext["historyDiagnostics"],
+) {
+  if (history?.keyRegimesCovered?.length) {
+    return history.keyRegimesCovered.length;
+  }
+  return Object.keys(history?.regimeCounts ?? {}).length;
+}
+
+function buildPerceptionModules(
+  snapshot: MarketStateSnapshot,
+  visualContext: MarketPerceptionVisualContext | null | undefined,
+): PerceptionModule[] {
+  const history = visualContext?.historyDiagnostics;
+  const recognition = visualContext?.recognition;
+  const discovery = visualContext?.opportunityDiscovery;
+  const operatorState = visualContext?.operatorState;
+  const robustness = visualContext?.robustness;
+
+  const historyCoverage = visualScore(
+    history?.regimeCoverageScore ?? history?.sampleDiversityScore,
+    snapshot.layers.violet.score,
+  );
+  const historyDepth = visualScore(
+    history?.historyDepthScore,
+    snapshot.layers.white.score,
+  );
+  const historyDiversity = visualScore(
+    history?.regimeDiversityScore,
+    historyCoverage,
+  );
+  const coverageYears = finiteVisualNumber(history?.historyCoverageYears);
+  const coveredRegimes = countCoveredRegimes(history);
+
+  const recognitionScore = visualScore(
+    recognition?.historicalSimilarityConfidence ??
+      recognition?.recurrenceConfidence ??
+      recognition?.recognitionScore,
+    snapshot.layers.indigo.score,
+  );
+  const noveltyScore = visualScore(
+    recognition?.noveltyScore,
+    100 - recognitionScore,
+  );
+  const matchedSamples = Math.max(
+    0,
+    Math.round(finiteVisualNumber(recognition?.matchedSamples) ?? 0),
+  );
+
+  const candidateCount = Math.max(
+    0,
+    Math.round(
+      finiteVisualNumber(discovery?.diagnostics?.candidateCount) ??
+        discovery?.candidates?.length ??
+        snapshot.framework?.opportunities?.length ??
+        0,
+    ),
+  );
+  const eligibleCount = Math.max(
+    0,
+    Math.round(finiteVisualNumber(discovery?.diagnostics?.eligibleCount) ?? 0),
+  );
+  const improvingCount = Math.max(
+    0,
+    Math.round(finiteVisualNumber(discovery?.diagnostics?.improvingCount) ?? 0),
+  );
+  const opportunityDensity = visualScore(
+    discovery?.density?.density ?? discovery?.density?.futureDensity,
+    snapshot.framework?.opportunityDensity?.density ??
+      snapshot.layers.green.score,
+  );
+  const opportunityQuality = visualScore(
+    discovery?.density?.quality ?? discovery?.diagnostics?.averageScore,
+    snapshot.layers.yellow.score,
+  );
+  const eligibilityScore = candidateCount
+    ? clamp((eligibleCount / candidateCount) * 100)
+    : opportunityDensity;
+  const opportunityScore = clamp(
+    mean([opportunityDensity, opportunityQuality, eligibilityScore]),
+  );
+
+  const sizingStatus = operatorState?.status ?? "pending";
+  const sizingScore =
+    sizingStatus === "active" ? 90 : sizingStatus === "locked" ? 18 : 48;
+  const sizingColor =
+    sizingStatus === "active"
+      ? MARKET_LAYER_DEFINITIONS.green.color
+      : sizingStatus === "locked"
+        ? MARKET_LAYER_DEFINITIONS.red.color
+        : "#FDD000";
+
+  const robustnessScore = visualScore(
+    robustness?.robustnessScore,
+    snapshot.layers.white.score,
+  );
+  const overfitRisk = visualScore(
+    robustness?.overfitRisk,
+    finiteVisualNumber(snapshot.metrics.overfitRisk?.raw) ??
+      100 - robustnessScore,
+  );
+  const deploymentReadiness = visualScore(
+    robustness?.deploymentReadinessScore ?? robustness?.deploymentReadiness,
+    snapshot.confidence,
+  );
+  const generalization = visualScore(
+    robustness?.generalizationConfidence,
+    robustnessScore,
+  );
+  const safetyScore = clamp(
+    mean([
+      robustnessScore,
+      100 - overfitRisk,
+      deploymentReadiness,
+      generalization,
+    ]),
+  );
+
+  return [
+    {
+      id: "history",
+      label: "History lens",
+      value: formatScore(historyCoverage),
+      detail: `${
+        coverageYears != null ? `${coverageYears.toFixed(1)}y` : "Live"
+      } / ${coveredRegimes || 1} regimes`,
+      status: readableToken(history?.coverageStatus ?? history?.currentRegime),
+      score: historyCoverage,
+      color: MARKET_LAYER_DEFINITIONS.violet.color,
+      tracks: [
+        {
+          label: "Depth",
+          value: historyDepth,
+          color: MARKET_LAYER_DEFINITIONS.white.color,
+        },
+        {
+          label: "Diversity",
+          value: historyDiversity,
+          color: MARKET_LAYER_DEFINITIONS.violet.color,
+        },
+      ],
+    },
+    {
+      id: "recognition",
+      label: "Recognition field",
+      value: formatScore(recognitionScore),
+      detail: `${matchedSamples} matches / novelty ${formatScore(noveltyScore)}`,
+      status: shortText(
+        readableToken(recognition?.archetype ?? recognition?.verdict),
+        24,
+      ),
+      score: recognitionScore,
+      color: MARKET_LAYER_DEFINITIONS.indigo.color,
+      tracks: [
+        {
+          label: "Similarity",
+          value: recognitionScore,
+          color: MARKET_LAYER_DEFINITIONS.indigo.color,
+        },
+        {
+          label: "Novelty",
+          value: noveltyScore,
+          color: MARKET_LAYER_DEFINITIONS.orange.color,
+        },
+      ],
+    },
+    {
+      id: "opportunity",
+      label: "Opportunity flow",
+      value: formatScore(opportunityScore),
+      detail: `${candidateCount} candidates / ${eligibleCount} eligible`,
+      status:
+        improvingCount > 0
+          ? `${improvingCount} improving`
+          : readableToken(snapshot.framework?.executionReadiness?.state),
+      score: opportunityScore,
+      color: MARKET_LAYER_DEFINITIONS.green.color,
+      tracks: [
+        {
+          label: "Density",
+          value: opportunityDensity,
+          color: MARKET_LAYER_DEFINITIONS.green.color,
+        },
+        {
+          label: "Quality",
+          value: opportunityQuality,
+          color: MARKET_LAYER_DEFINITIONS.yellow.color,
+        },
+      ],
+    },
+    {
+      id: "sizing",
+      label: "Sizing gate",
+      value: readableToken(sizingStatus),
+      detail: shortText(
+        operatorState?.portfolioCapLabel ??
+          operatorState?.zeroExposureLabel ??
+          operatorState?.sizingModeLabel,
+        34,
+      ),
+      status: shortText(operatorState?.sizingModeLabel, 24),
+      score: sizingScore,
+      color: sizingColor,
+      tracks: [
+        {
+          label: "Gate",
+          value: sizingScore,
+          color: sizingColor,
+        },
+        {
+          label: "Trust",
+          value: snapshot.confidence,
+          color: MARKET_LAYER_DEFINITIONS.white.color,
+        },
+      ],
+    },
+    {
+      id: "robustness",
+      label: "Robustness envelope",
+      value: formatScore(safetyScore),
+      detail: `Overfit ${formatScore(overfitRisk)} / readiness ${formatScore(deploymentReadiness)}`,
+      status: readableToken(robustness?.safetyGate),
+      score: safetyScore,
+      color: MARKET_LAYER_DEFINITIONS.white.color,
+      tracks: [
+        {
+          label: "Model",
+          value: robustnessScore,
+          color: MARKET_LAYER_DEFINITIONS.white.color,
+        },
+        {
+          label: "Generalize",
+          value: generalization,
+          color: MARKET_LAYER_DEFINITIONS.blue.color,
+        },
+      ],
+    },
+  ];
+}
+
+function ModuleSignalGlyph({
+  score,
+  color,
+}: {
+  score: number;
+  color: string;
+}) {
+  const degrees = clamp(score) * 3.6;
+
+  return (
+    <div
+      className="relative h-9 w-9 shrink-0 rounded-full p-px"
+      style={{
+        background: `conic-gradient(${color} ${degrees}deg, rgba(255,255,255,0.08) 0deg)`,
+      }}
+    >
+      <div className="flex h-full w-full items-center justify-center rounded-full bg-[#101010]">
+        <span
+          className="h-2.5 w-2.5 rounded-full"
+          style={{
+            backgroundColor: color,
+            boxShadow: `0 0 18px ${colorWithAlpha(color, 0.62)}`,
+          }}
+        />
+        </div>
+    </div>
+  );
+}
+
+function PerceptionModulesPanel({
+  snapshot,
+  visualContext,
+}: {
+  snapshot: MarketStateSnapshot;
+  visualContext?: MarketPerceptionVisualContext | null;
+}) {
+  const modules = buildPerceptionModules(snapshot, visualContext);
+
+  return (
+    <div className="rounded-lg bg-[#101010] p-4 ring-1 ring-white/[0.06]">
+      <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+        <Layers className="h-4 w-4 text-[#FDD000]" />
+        Perception modules
+        </div>
+      <div className="grid gap-3">
+        {modules.map((module) => (
+          <div
+            key={module.id}
+            className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 border-t border-white/[0.06] pt-3 first:border-t-0 first:pt-0"
+          >
+            <ModuleSignalGlyph score={module.score} color={module.color} />
+            <div className="min-w-0">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="truncate text-xs font-medium text-zinc-300">
+                    {module.label}
+                  </div>
+                  <div className="mt-1 truncate text-[11px] text-zinc-500">
+                    {module.detail}
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div
+                    className="max-w-28 truncate text-sm font-semibold text-white"
+                    title={module.value}
+                  >
+                    {module.value}
+                  </div>
+                  <div
+                    className="max-w-28 truncate text-[10px] uppercase tracking-[0.14em] text-zinc-600"
+                    title={module.status}
+                  >
+                    {module.status}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2">
+                <ScoreBar value={module.score} color={module.color} />
+              </div>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                {module.tracks.map((track) => (
+                  <div key={track.label} className="min-w-0">
+                    <div className="mb-1 flex items-center justify-between gap-2 text-[10px] text-zinc-600">
+                      <span className="truncate">{track.label}</span>
+                      <span className="shrink-0">
+                        {track.valueLabel ?? formatScore(track.value)}
+                      </span>
+                    </div>
+                    <ScoreBar
+                      value={track.value}
+                      color={track.color ?? module.color}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function MarketPerceptionEngine({
   snapshot,
   className,
+  visualContext,
   agencyLevel,
 }: MarketPerceptionEngineProps) {
   const displaySnapshot = useMemo(
@@ -976,6 +1422,11 @@ export default function MarketPerceptionEngine({
         </div>
 
         <div className="grid min-w-0 gap-4">
+          <PerceptionModulesPanel
+            snapshot={displaySnapshot}
+            visualContext={visualContext}
+          />
+
           <div className="rounded-lg bg-[#101010] p-4 ring-1 ring-white/[0.06]">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
               <Gauge className="h-4 w-4 text-[#FDD000]" />

@@ -284,6 +284,7 @@ function collectBlockers(input: {
     ? input.input.strategy.failureFlags.filter(Boolean)
     : [];
   const strategyFlagBlockers = blockersForStrategyFlags(flags);
+  const survivalMemoryBlockers = survivalBlockers(input.input.survivalMemory, input.input.opensNewExposure !== false);
   const gap = input.rawConfidence - input.calibratedConfidence;
   const beliefVerdict = normalizedStatus(input.input.belief?.verdict);
   const agencyStatus = normalizedStatus(input.input.agency?.status);
@@ -299,7 +300,7 @@ function collectBlockers(input: {
   }
 
   blockers.push(...strategyFlagBlockers);
-  blockers.push(...survivalBlockers(input.input.survivalMemory, input.input.opensNewExposure !== false));
+  blockers.push(...survivalMemoryBlockers);
 
   if ((input.input.strategy?.blocked === true || flags.length > 0) && strategyFlagBlockers.length === 0) {
     blockers.push(blocker(
@@ -311,7 +312,12 @@ function collectBlockers(input: {
     ));
   }
 
-  if (input.rawMaxExposure <= 0 && input.input.opensNewExposure !== false) {
+  const zeroCapacityExplainedByReadiness =
+    input.input.strategy?.blocked === true ||
+    flags.length > 0 ||
+    strategyFlagBlockers.length > 0 ||
+    survivalMemoryBlockers.length > 0;
+  if (input.rawMaxExposure <= 0 && input.input.opensNewExposure !== false && !zeroCapacityExplainedByReadiness) {
     blockers.push(blocker(
       "capacity_unavailable",
       "Capacity unavailable",
@@ -430,14 +436,33 @@ function blockersForStrategyFlags(flags: string[]) {
   if (
     normalizedFlags.has("OUTLIER_DEPENDENCY") ||
     normalizedFlags.has("OVERFIT_TOP_WINNER_DEPENDENCY") ||
-    normalizedFlags.has("OVERFIT_SEGMENT_CONCENTRATION")
+    normalizedFlags.has("OVERFIT_SEGMENT_CONCENTRATION") ||
+    normalizedFlags.has("MEDIAN_TRADE_RETURN_NOT_POSITIVE")
   ) {
+    const hasTopWinnerDependency = normalizedFlags.has("OVERFIT_TOP_WINNER_DEPENDENCY");
+    const hasSegmentConcentration = normalizedFlags.has("OVERFIT_SEGMENT_CONCENTRATION");
+    const hasMedianFailure = normalizedFlags.has("MEDIAN_TRADE_RETURN_NOT_POSITIVE");
+    const unlockCriteria = [
+      ...(hasTopWinnerDependency ? ["Reduce top-winner concentration."] : []),
+      ...(hasSegmentConcentration ? ["Reduce period concentration across independent test windows."] : []),
+      ...(hasMedianFailure ? ["Confirm median trade return stays positive."] : []),
+    ];
+    const reason = hasTopWinnerDependency && hasSegmentConcentration
+      ? "Results depend too much on a few winners or periods."
+      : hasTopWinnerDependency
+        ? "Results depend too much on a few winning trades."
+        : hasSegmentConcentration
+          ? "Results depend too much on one validation period."
+          : hasMedianFailure
+            ? "Median trade return is not positive enough to trust new exposure."
+            : "Return concentration is too high to trust new exposure.";
+
     blockers.push(blocker(
       "concentration_dependency",
       "Concentration dependency",
       "high",
-      "Results depend too much on a few winners or periods.",
-      ["Reduce top-winner and period concentration.", "Confirm median trade return stays positive."],
+      reason,
+      unlockCriteria.length ? unlockCriteria : ["Reduce return concentration."],
     ));
   }
 

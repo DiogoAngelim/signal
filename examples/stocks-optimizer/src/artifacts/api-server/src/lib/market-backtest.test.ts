@@ -202,6 +202,19 @@ test("anti-overfit gates separate historical robustness from promotion evidence"
   assert.equal(flags.has("OVERFIT_LOW_DRAWDOWN"), false);
   assert.equal(flags.has("NEEDS_FORWARD_SHADOW"), false);
   assert.equal(flags.has("SYNTHETIC_DATA_FOR_PROMOTION"), false);
+  assert.equal(flags.has("OUTLIER_DEPENDENCY"), false);
+  assert.equal(flags.has("MEDIAN_TRADE_RETURN_NOT_POSITIVE"), false);
+  assert.equal(flags.has("OVERFIT_SEGMENT_CONCENTRATION"), false);
+  const healthOptimization = payload.summary.strategyHealthOptimization;
+  const candidates = healthOptimization?.candidates ?? [];
+  const selectedCandidate = candidates[0];
+  assert.ok(selectedCandidate, "health optimizer should expose the selected BINANCE candidate first");
+  assert.ok(
+    candidates.every((candidate: any) => candidate.readinessGateCount <= selectedCandidate.readinessGateCount),
+    "selection should prioritize readiness gates before cosmetic concentration cleanliness",
+  );
+  assert.equal(typeof selectedCandidate.selectionGates.benchmarkPass, "boolean");
+  assert.equal(typeof selectedCandidate.selectionGates.parameterPass, "boolean");
   assert.ok(payload.summary.forwardShadow?.observedSignalCount > 0);
 });
 
@@ -345,6 +358,63 @@ test("strategy health objective rejects benchmark-failing fragile neighbors", ()
   );
 });
 
+test("strategy health objective prefers distributed median-positive outcomes", () => {
+  const config = backtestConfigForMarket("B3");
+  const concentrated = scoreStrategyHealthForSelection({
+    totalReturnPct: 72,
+    excessReturnPct: 8,
+    annualizedSharpe: 1.18,
+    maxDrawdownPct: 13,
+    profitFactor: 2.1,
+    tradeCount: 84,
+    benchmarkMarginRequiredPct: 2,
+    walkForwardSegments: [{ returnPct: 38 }, { returnPct: 14 }, { returnPct: 3 }],
+    segmentConcentration: { bestSegmentContributionPct: 69 },
+    topWinnerDependency: {
+      dependencyDetected: true,
+      topOneDependencyPct: 58,
+      topThreeDependencyPct: 83,
+      topTenPctDependencyPct: 89,
+    },
+    tradeOutcomeDistribution: {
+      medianTradeReturnPct: -0.15,
+    },
+  }, config, {
+    stable: true,
+    passRate: 80,
+    benchmarkSurvivalRate: 82,
+  });
+  const distributed = scoreStrategyHealthForSelection({
+    totalReturnPct: 54,
+    excessReturnPct: 6,
+    annualizedSharpe: 1.1,
+    maxDrawdownPct: 14,
+    profitFactor: 1.8,
+    tradeCount: 84,
+    benchmarkMarginRequiredPct: 2,
+    walkForwardSegments: [{ returnPct: 18 }, { returnPct: 15 }, { returnPct: 12 }],
+    segmentConcentration: { bestSegmentContributionPct: 40 },
+    topWinnerDependency: {
+      dependencyDetected: false,
+      topOneDependencyPct: 24,
+      topThreeDependencyPct: 48,
+      topTenPctDependencyPct: 62,
+    },
+    tradeOutcomeDistribution: {
+      medianTradeReturnPct: 0.32,
+    },
+  }, config, {
+    stable: true,
+    passRate: 80,
+    benchmarkSurvivalRate: 82,
+  });
+
+  assert.ok(
+    distributed > concentrated,
+    "selection should prefer lower concentration and a positive median trade over higher headline return",
+  );
+});
+
 test("health optimized candidates include protective variants without mutating the base config", () => {
   const config = backtestConfigForMarket("BINANCE");
   const candidates = buildHealthOptimizedConfigCandidates(config);
@@ -354,9 +424,19 @@ test("health optimized candidates include protective variants without mutating t
   assert.equal(config.id.endsWith(":slow-confirmation"), false);
   assert.ok(candidates.some((candidate) => candidate.id === config.id), "base candidate should remain available");
   assert.ok(candidates.some((candidate) => candidate.id.includes("crypto-low-drawdown")), "crypto profile should include drawdown defense");
+  assert.ok(candidates.some((candidate) => candidate.id.includes("crypto-distributed-survival")), "crypto profile should include distributed survival confirmation");
   assert.ok(candidates.some((candidate) => candidate.id.includes("crypto-benchmark-balanced")), "crypto profile should include benchmark-balanced confirmation");
   assert.ok(candidates.some((candidate) => candidate.maxPositionPct < config.maxPositionPct), "nearby variants should reduce concentration risk");
   assert.ok(candidates.every((candidate) => candidate.stopLossPct > 0 && candidate.trailingStopPct > 0));
+});
+
+test("B3 health candidates include concentration-reduction variants", () => {
+  const config = backtestConfigForMarket("B3");
+  const candidates = buildHealthOptimizedConfigCandidates(config);
+
+  assert.ok(candidates.some((candidate) => candidate.id.includes("b3-distributed-quality")));
+  assert.ok(candidates.some((candidate) => candidate.id.includes("b3-median-return")));
+  assert.ok(candidates.some((candidate) => candidate.maxPositions > config.maxPositions && candidate.maxPositionPct < config.maxPositionPct));
 });
 
 test("diagnostic raw technical mode emits explainable trades and survival analytics", async () => {

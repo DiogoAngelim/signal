@@ -2362,6 +2362,40 @@ function displaySizingMode(mode: string | undefined) {
   return sizingModeLabelForOperator(mode);
 }
 
+type ExecutiveMetricTone = "good" | "warn" | "bad" | "neutral";
+
+export type ExecutiveSummaryMetricSnapshot = {
+  market: string;
+  confidenceValue: string;
+  confidenceSub?: string;
+  confidenceTone: ExecutiveMetricTone;
+  maxExposureValue: string;
+  maxExposureSub?: string;
+  exposureTone: ExecutiveMetricTone;
+  portfolioPostureValue: string;
+  portfolioPostureSub: string;
+  postureTone: ExecutiveMetricTone;
+  marketHealthValue: string;
+  marketHealthSub: string;
+  marketHealthTone: ExecutiveMetricTone;
+};
+
+export function selectStableExecutiveSummaryMetrics(input: {
+  current: ExecutiveSummaryMetricSnapshot;
+  previous: ExecutiveSummaryMetricSnapshot | null;
+  refreshing: boolean;
+}) {
+  if (
+    input.refreshing &&
+    input.previous != null &&
+    input.previous.market === input.current.market
+  ) {
+    return input.previous;
+  }
+
+  return input.current;
+}
+
 export function maximumExposureSubLabel(input: {
   sizingMode?: string;
   suggestedMaximumExposurePct?: number;
@@ -2892,6 +2926,8 @@ export default function Dashboard() {
   const marketDataByMarketRef = useRef(
     new Map<string, MarketScopedDashboardData>(),
   );
+  const executiveSummaryMetricSnapshotRef =
+    useRef<ExecutiveSummaryMetricSnapshot | null>(null);
   const activeMarketRef = useRef("");
 
   const [markets, setMarkets] = useState<MarketOption[]>([]);
@@ -5998,7 +6034,7 @@ export default function Dashboard() {
         ? "Ready for restoration review"
         : survivalConfidenceValue == null
       ? "Waiting for survival score"
-      : recoveryDiagnostic?.canRestoreSizing
+      : restorationProgressDiagnostic == null && recoveryDiagnostic?.canRestoreSizing
         ? "Normal sizing restored"
         : survivalConfidenceValue >= survivalUnlockThreshold
           ? "Score passed; needs clean confirmation"
@@ -6146,6 +6182,40 @@ export default function Dashboard() {
   const accountabilityHighlights = governanceEvolution.accountabilityLoop
     .filter((step) => step.status !== "complete")
     .slice(0, 3);
+  const currentExecutiveSummaryMetrics: ExecutiveSummaryMetricSnapshot = {
+    market: marketFilter,
+    confidenceValue:
+      executiveConfidencePct == null
+        ? "Pending"
+        : fmtPlainPct(executiveConfidencePct, 0),
+    confidenceSub: confidenceTrustSub,
+    confidenceTone,
+    maxExposureValue: maximumExposureMetricValue,
+    maxExposureSub: maximumExposureMetricSub,
+    exposureTone,
+    portfolioPostureValue:
+      executiveIA.executiveReasoning.recommendedParticipationMode,
+    portfolioPostureSub: hasMarketData ? mandate : "Suggested action loading",
+    postureTone,
+    marketHealthValue: hasMarketData
+      ? semanticMetrics.marketHealth.word
+      : "Pending",
+    marketHealthSub: hasMarketData
+      ? fmtPlainPct(dashboardSizing.marketHealthPct, 0)
+      : "Awaiting synchronized data",
+    marketHealthTone: riskTone,
+  };
+  const executiveSummaryMetrics = selectStableExecutiveSummaryMetrics({
+    current: currentExecutiveSummaryMetrics,
+    previous: executiveSummaryMetricSnapshotRef.current,
+    refreshing: refreshingQuotes,
+  });
+
+  useEffect(() => {
+    if (!refreshingQuotes) {
+      executiveSummaryMetricSnapshotRef.current = currentExecutiveSummaryMetrics;
+    }
+  });
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-black text-white">
@@ -6286,42 +6356,30 @@ export default function Dashboard() {
             <div className="mt-5 grid grid-cols-1 gap-2.5 sm:mt-8 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
               <ExecutiveMetric
                 label="Confidence / Trust"
-                value={
-                  executiveConfidencePct == null
-                    ? "Pending"
-                    : fmtPlainPct(executiveConfidencePct, 0)
-                }
-                sub={confidenceTrustSub}
-                tone={confidenceTone}
+                value={executiveSummaryMetrics.confidenceValue}
+                sub={executiveSummaryMetrics.confidenceSub}
+                tone={executiveSummaryMetrics.confidenceTone}
                 icon={<Gauge className="h-4 w-4" />}
               />
               <ExecutiveMetric
                 label="Max Exposure"
-                value={maximumExposureMetricValue}
-                sub={maximumExposureMetricSub}
-                tone={exposureTone}
+                value={executiveSummaryMetrics.maxExposureValue}
+                sub={executiveSummaryMetrics.maxExposureSub}
+                tone={executiveSummaryMetrics.exposureTone}
                 icon={<CircleDollarSign className="h-4 w-4" />}
               />
               <ExecutiveMetric
                 label="Portfolio Posture"
-                value={
-                  executiveIA.executiveReasoning.recommendedParticipationMode
-                }
-                sub={hasMarketData ? mandate : "Suggested action loading"}
-                tone={postureTone}
+                value={executiveSummaryMetrics.portfolioPostureValue}
+                sub={executiveSummaryMetrics.portfolioPostureSub}
+                tone={executiveSummaryMetrics.postureTone}
                 icon={<Compass className="h-4 w-4" />}
               />
               <ExecutiveMetric
                 label="Market Health"
-                value={
-                  hasMarketData ? semanticMetrics.marketHealth.word : "Pending"
-                }
-                sub={
-                  hasMarketData
-                    ? fmtPlainPct(dashboardSizing.marketHealthPct, 0)
-                    : "Awaiting synchronized data"
-                }
-                tone={riskTone}
+                value={executiveSummaryMetrics.marketHealthValue}
+                sub={executiveSummaryMetrics.marketHealthSub}
+                tone={executiveSummaryMetrics.marketHealthTone}
                 icon={<ShieldCheck className="h-4 w-4" />}
               />
             </div>
@@ -7838,6 +7896,21 @@ export default function Dashboard() {
           <MarketPerceptionEngine
             snapshot={marketPerceptionSnapshot}
             agencyLevel={agencyLevel}
+            visualContext={{
+              historyDiagnostics,
+              recognition: recognitionDiagnostic,
+              opportunityDiscovery,
+              operatorState: dashboardSizing.operatorState,
+              robustness: {
+                robustnessScore,
+                overfitRisk: robustnessOverfitRisk,
+                deploymentReadiness: deploymentReadinessScore,
+                generalizationConfidence:
+                  backtestSummary?.generalizationConfidence ??
+                  robustnessDiagnostics?.generalizationConfidence,
+                safetyGate: robustnessDiagnostics?.safetyGate,
+              },
+            }}
             className="mb-0"
           />
         </DashboardGroup>
