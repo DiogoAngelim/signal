@@ -1,7 +1,8 @@
 import Link from "@docusaurus/Link";
 import Layout from "@theme/Layout";
+import type { ReactElement } from "react";
 
-export default function Home(): JSX.Element {
+export default function Home(): ReactElement {
   return (
     <Layout
       title="Signal Protocol v1"
@@ -21,13 +22,21 @@ export default function Home(): JSX.Element {
               <li>Operations use explicit names such as `post.publish.v1`.</li>
               <li>Mutations declare idempotency behavior explicitly.</li>
               <li>Successful replays surface logical replay metadata.</li>
-              <li>Capability documents show exactly what a runtime supports.</li>
+              <li>
+                Capability documents show exactly what a runtime supports.
+              </li>
             </ul>
             <div className="margin-top--lg">
-              <Link className="button button--primary margin-right--md" to="/docs/introduction">
+              <Link
+                className="button button--primary margin-right--md"
+                to="/docs/introduction"
+              >
                 Read the introduction
               </Link>
-              <Link className="button button--secondary" to="/docs/reference/envelope">
+              <Link
+                className="button button--secondary"
+                to="/docs/reference/envelope"
+              >
                 View the envelope
               </Link>
             </div>

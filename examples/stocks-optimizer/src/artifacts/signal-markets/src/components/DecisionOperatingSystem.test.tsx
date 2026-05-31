@@ -1,14 +1,20 @@
+// @vitest-environment happy-dom
+
 import type { DashboardViewState } from "@/lib/dashboard-state";
 import {
   parseDashboardMarketOptions,
   parseDashboardQuoteBatchResponse,
   parseDashboardStockListResponse,
 } from "@/lib/dashboard-data-adapter";
+import { act, type ReactElement } from "react";
+import { createRoot, type Root } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import DecisionOperatingSystem, {
   type DecisionOperatingSystemProps,
 } from "./DecisionOperatingSystem";
+
+(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 const successState: DashboardViewState = {
   kind: "success",
@@ -152,6 +158,39 @@ function props(
   };
 }
 
+function renderInteractive(
+  component: ReactElement,
+): { container: HTMLElement; cleanup: () => void } {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  let root: Root | null = null;
+
+  act(() => {
+    root = createRoot(container);
+    root.render(component);
+  });
+
+  return {
+    container,
+    cleanup: () => {
+      act(() => root?.unmount());
+      container.remove();
+    },
+  };
+}
+
+function stepButton(container: HTMLElement, stepId: string) {
+  return container.querySelector(
+    `[data-testid="workflow-step-${stepId}"]`,
+  ) as HTMLButtonElement;
+}
+
+function stepPanel(container: HTMLElement, stepId: string) {
+  return container.querySelector(
+    `[data-testid="guided-panel-${stepId}"]`,
+  ) as HTMLElement;
+}
+
 describe("DecisionOperatingSystem states", () => {
   it("renders an action-first success shell with deeper detail collapsed", () => {
     const html = renderToStaticMarkup(<DecisionOperatingSystem {...props()} />);
@@ -248,7 +287,8 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).toContain("Bonds");
     expect(html).toContain("Digital assets and tokens");
     expect(html).toContain("Fixed income opportunities");
-    expect(html).not.toContain('data-testid="decision-step-screen"');
+    expect(html).toContain('data-testid="decision-step-screen"');
+    expect(html).toContain('aria-label="Workflow steps"');
   });
 
   it("declares one bounded scroll strategy for the shell, details, lists, and action row", () => {
@@ -576,5 +616,128 @@ describe("DecisionOperatingSystem states", () => {
     );
     expect(loading).toContain('data-state-kind="initial-loading"');
     expect(loading).not.toContain("Loading...");
+  });
+
+  it("uses the sidebar as the only workflow navigation surface", () => {
+    const html = renderToStaticMarkup(<DecisionOperatingSystem {...props()} />);
+
+    expect(html).toContain('aria-label="Workflow steps"');
+    expect(html).toContain('data-testid="workflow-progress-summary"');
+    expect(html).not.toContain('aria-label="Decision journey"');
+  });
+
+  it("clicking workflow steps updates active state, content, and progress", () => {
+    const { container, cleanup } = renderInteractive(
+      <DecisionOperatingSystem {...props()} />,
+    );
+
+    try {
+      expect(stepButton(container, "choose-market").dataset.active).toBe("true");
+      expect(stepPanel(container, "choose-market").hidden).toBe(false);
+      expect(stepPanel(container, "review-current-conditions").hidden).toBe(
+        true,
+      );
+      expect(
+        container.querySelector('[data-testid="workflow-progress-summary"]')
+          ?.textContent,
+      ).toContain("1 complete");
+
+      act(() => {
+        stepButton(container, "review-current-conditions").click();
+      });
+
+      expect(stepButton(container, "choose-market").dataset.active).toBe("false");
+      expect(stepButton(container, "review-current-conditions").dataset.active).toBe(
+        "true",
+      );
+      expect(stepButton(container, "review-current-conditions").dataset.status).toBe(
+        "inProgress",
+      );
+      expect(stepPanel(container, "choose-market").hidden).toBe(true);
+      expect(stepPanel(container, "review-current-conditions").hidden).toBe(
+        false,
+      );
+    } finally {
+      cleanup();
+    }
+  });
+
+  it("supports keyboard activation and visible focus styling for sidebar steps", () => {
+    const { container, cleanup } = renderInteractive(
+      <DecisionOperatingSystem {...props()} />,
+    );
+
+    try {
+      const opportunities = stepButton(container, "explore-opportunities");
+      opportunities.focus();
+
+      expect(document.activeElement).toBe(opportunities);
+      expect(opportunities.className).toContain("focus-visible:outline");
+
+      act(() => {
+        opportunities.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
+        );
+      });
+
+      expect(opportunities.dataset.active).toBe("true");
+      expect(stepPanel(container, "explore-opportunities").hidden).toBe(false);
+
+      const decision = stepButton(container, "decide-what-to-do");
+      act(() => {
+        decision.dispatchEvent(
+          new KeyboardEvent("keydown", { key: " ", bubbles: true }),
+        );
+      });
+
+      expect(decision.dataset.active).toBe("true");
+      expect(decision.getAttribute("aria-current")).toBe("step");
+      expect(decision.getAttribute("aria-controls")).toBe(
+        "guided-panel-decide-what-to-do",
+      );
+    } finally {
+      cleanup();
+    }
+  });
+
+  it("renders status indicators and updates market completion state", () => {
+    const selected = renderToStaticMarkup(<DecisionOperatingSystem {...props()} />);
+    expect(selected).toContain(
+      'data-testid="workflow-step-status-choose-market"',
+    );
+    expect(selected).toContain('data-status="completed"');
+    expect(selected).toContain("Completed");
+
+    const unselected = renderToStaticMarkup(
+      <DecisionOperatingSystem {...props({ selectedMarket: "" })} />,
+    );
+    expect(unselected).toContain('data-status="inProgress"');
+    expect(unselected).toContain("0 complete");
+  });
+
+  it("keeps inactive workflow content hidden from the visible step area", () => {
+    const { container, cleanup } = renderInteractive(
+      <DecisionOperatingSystem {...props()} />,
+    );
+
+    try {
+      const inactivePanels = Array.from(
+        container.querySelectorAll<HTMLElement>(
+          '[data-testid^="guided-panel-"][data-active="false"]',
+        ),
+      );
+
+      expect(inactivePanels.length).toBe(4);
+      expect(inactivePanels.every((panel) => panel.hidden)).toBe(true);
+
+      act(() => {
+        stepButton(container, "understand-reasoning").click();
+      });
+
+      expect(stepPanel(container, "understand-reasoning").hidden).toBe(false);
+      expect(stepPanel(container, "choose-market").hidden).toBe(true);
+    } finally {
+      cleanup();
+    }
   });
 });

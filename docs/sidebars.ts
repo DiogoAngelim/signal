@@ -3,6 +3,7 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 const sidebars: SidebarsConfig = {
   tutorialSidebar: [
     "introduction",
+    "architecture",
     {
       type: "category",
       label: "Concepts",
@@ -28,6 +29,11 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "Readiness",
+      items: ["readiness/ecosystem-audit"],
+    },
+    {
+      type: "category",
       label: "Guides",
       items: [
         "guides/quickstart",
@@ -42,6 +48,7 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Examples",
       items: [
+        "examples/stocks-optimizer",
         "examples/minimal-runtime-flow",
         "examples/post-publication-flow",
         "examples/http-post-publication-flow",

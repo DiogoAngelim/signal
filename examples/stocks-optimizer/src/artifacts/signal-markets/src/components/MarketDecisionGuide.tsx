@@ -1,9 +1,14 @@
-import type { ReactNode } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
+import {
+  GUIDED_STEPS,
+  GUIDED_STEP_STATUS_LABELS,
+  type GuidedStepId,
+  type GuidedStepStatus,
+} from "@/lib/guided-workflow";
 import {
   CheckCircle2,
   CircleDashed,
   Compass,
-  Layers,
   RefreshCw,
   ShieldCheck,
   SlidersHorizontal,
@@ -12,15 +17,7 @@ import {
 
 export type GuideTone = "good" | "warn" | "bad" | "neutral";
 
-export type GuideStepId =
-  | "understand"
-  | "reality"
-  | "matters"
-  | "options"
-  | "tested"
-  | "recommendation"
-  | "why"
-  | "review";
+export type GuideStepId = GuidedStepId;
 
 export type GuideStep = {
   id: GuideStepId;
@@ -82,13 +79,14 @@ function toneText(tone: GuideTone = "neutral") {
 }
 
 function stepIcon(id: GuideStepId) {
-  if (id === "understand") return <Target className="h-4 w-4" />;
-  if (id === "reality") return <Compass className="h-4 w-4" />;
-  if (id === "matters") return <Layers className="h-4 w-4" />;
-  if (id === "options") return <SlidersHorizontal className="h-4 w-4" />;
-  if (id === "tested") return <CircleDashed className="h-4 w-4" />;
-  if (id === "recommendation") return <ShieldCheck className="h-4 w-4" />;
-  if (id === "why") return <CheckCircle2 className="h-4 w-4" />;
+  if (id === "choose-market") return <Target className="h-4 w-4" />;
+  if (id === "review-current-conditions")
+    return <Compass className="h-4 w-4" />;
+  if (id === "explore-opportunities")
+    return <SlidersHorizontal className="h-4 w-4" />;
+  if (id === "understand-reasoning")
+    return <CheckCircle2 className="h-4 w-4" />;
+  if (id === "decide-what-to-do") return <ShieldCheck className="h-4 w-4" />;
   return <RefreshCw className="h-4 w-4" />;
 }
 
@@ -157,29 +155,70 @@ export function GuideLayout({
 
 export function StepRail({
   steps,
-  activeStepId = "recommendation",
+  activeStepId,
+  stepStatuses,
+  completedCount,
+  remainingCount,
+  onStepChange,
 }: {
   steps: GuideStep[];
-  activeStepId?: GuideStepId;
+  activeStepId: GuideStepId;
+  stepStatuses: Record<GuideStepId, GuidedStepStatus>;
+  completedCount: number;
+  remainingCount: number;
+  onStepChange: (stepId: GuideStepId) => void;
 }) {
+  function activateStep(
+    event: KeyboardEvent<HTMLButtonElement>,
+    stepId: GuideStepId,
+  ) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    onStepChange(stepId);
+  }
+
   return (
     <nav
       data-testid="step-rail"
-      aria-label="Guide steps"
+      aria-label="Workflow steps"
       className="signal-scroll-region flex min-w-0 gap-2 overflow-x-auto rounded-lg border border-zinc-200 bg-white p-2 shadow-sm xl:grid xl:overflow-visible"
     >
+      <div
+        data-testid="workflow-progress-summary"
+        aria-live="polite"
+        className="grid min-w-[210px] content-start gap-1 rounded-md border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 xl:min-w-0"
+      >
+        <span className="text-[11px] uppercase tracking-normal text-zinc-500">
+          Guided workflow
+        </span>
+        <span>
+          Step {steps.findIndex((step) => step.id === activeStepId) + 1} of{" "}
+          {steps.length}
+        </span>
+        <span>
+          {completedCount} complete · {remainingCount} remaining
+        </span>
+      </div>
       {steps.map((step, index) => {
         const active = step.id === activeStepId;
+        const status = stepStatuses[step.id] ?? "notStarted";
         return (
-          <a
+          <button
             key={step.id}
-            href={`#guide-${step.id}`}
+            type="button"
             aria-current={active ? "step" : undefined}
+            aria-controls={`guided-panel-${step.id}`}
+            data-testid={`workflow-step-${step.id}`}
+            data-active={active ? "true" : "false"}
+            data-status={status}
+            onClick={() => onStepChange(step.id)}
+            onKeyDown={(event) => activateStep(event, step.id)}
             className={cx(
               "grid min-h-[82px] min-w-[210px] grid-cols-[32px_minmax(0,1fr)] gap-3 rounded-md border p-3 text-left transition xl:min-w-0",
               active
                 ? "border-zinc-950 bg-zinc-950 text-white"
-                : "border-zinc-200 bg-zinc-50 text-zinc-950 hover:border-zinc-400",
+                : "border-zinc-200 bg-zinc-50 text-zinc-950 hover:border-zinc-400 hover:bg-white",
+              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950",
             )}
           >
             <span
@@ -202,8 +241,26 @@ export function StepRail({
               <span className="mt-1 line-clamp-2 block break-words text-xs leading-5 opacity-70">
                 {step.question}
               </span>
+              <span
+                data-testid={`workflow-step-status-${step.id}`}
+                aria-label={`${step.label}: ${GUIDED_STEP_STATUS_LABELS[status]}`}
+                className={cx(
+                  "mt-2 inline-flex rounded-md border px-1.5 py-0.5 text-[11px] font-semibold",
+                  active
+                    ? "border-white/20 bg-white/10 text-white"
+                    : status === "completed"
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : status === "needsAttention"
+                        ? "border-amber-200 bg-amber-50 text-amber-800"
+                        : status === "inProgress"
+                          ? "border-sky-200 bg-sky-50 text-sky-800"
+                          : "border-zinc-200 bg-white text-zinc-500",
+                )}
+              >
+                {GUIDED_STEP_STATUS_LABELS[status]}
+              </span>
             </span>
-          </a>
+          </button>
         );
       })}
     </nav>
@@ -225,7 +282,7 @@ export function GoalCard({
 }) {
   return (
     <section
-      id="guide-understand"
+      id="guide-choose-market"
       data-testid="primary-answer"
       className="grid min-w-0 gap-5 rounded-lg border border-zinc-200 bg-[linear-gradient(135deg,#ffffff_0%,#f7fbf9_48%,#eef5fb_100%)] p-5 shadow-[0_24px_70px_rgba(15,23,42,0.08)] sm:p-6"
     >
@@ -406,7 +463,7 @@ export function RecommendationCard({
 }) {
   return (
     <section
-      id="guide-recommendation"
+      id="guide-decide-what-to-do"
       data-testid="recommendation-card"
       className={cx(
         "grid min-w-0 gap-4 rounded-lg border p-5 shadow-[0_24px_65px_rgba(15,23,42,0.08)]",
@@ -598,48 +655,29 @@ export function defaultGuideSteps(input: {
   review: string;
   tone?: GuideTone;
 }): GuideStep[] {
-  return [
-    {
-      id: "understand",
-      label: "Choose Market",
-      question: "Start with what you care about.",
-      summary: input.reality,
-      status: "Goal",
-      tone: "neutral",
-    },
-    {
-      id: "reality",
-      label: "Review Current Conditions",
-      question: "See the plain-language read.",
-      summary: input.reality,
-      status: "Now",
-      tone: input.tone,
-    },
-    {
-      id: "options",
-      label: "Explore Opportunities",
-      question: "Find what deserves attention.",
-      summary: input.options,
-      status: "Ideas",
-      tone: input.tone,
-    },
-    {
-      id: "why",
-      label: "Understand Reasoning",
-      question: "Read the reason behind the suggestion.",
-      summary: input.focus,
-      status: "Reason",
-      tone: input.tone,
-    },
-    {
-      id: "recommendation",
-      label: "Decide What To Do",
-      question: "Turn the explanation into a next step.",
-      summary: input.recommendation,
-      status: "Next",
-      tone: input.tone,
-    },
-  ];
+  const summaries: Record<GuideStepId, string> = {
+    "choose-market": input.goal,
+    "review-current-conditions": input.reality,
+    "explore-opportunities": input.options,
+    "understand-reasoning": input.focus,
+    "decide-what-to-do": input.recommendation,
+  };
+  const statuses: Record<GuideStepId, string> = {
+    "choose-market": "Market",
+    "review-current-conditions": "Now",
+    "explore-opportunities": "Ideas",
+    "understand-reasoning": "Reason",
+    "decide-what-to-do": "Next",
+  };
+
+  return GUIDED_STEPS.map((step) => ({
+    id: step.id,
+    label: step.title,
+    question: step.description,
+    summary: summaries[step.id],
+    status: statuses[step.id],
+    tone: step.id === "choose-market" ? "neutral" : input.tone,
+  }));
 }
 
 export function createConfidenceRange(input: {

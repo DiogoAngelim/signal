@@ -1,5 +1,15 @@
 import type { DashboardViewState } from "@/lib/dashboard-state";
 import {
+  DEFAULT_GUIDED_STEP_ID,
+  GUIDED_STEPS,
+  GUIDED_STEP_STATUS_LABELS,
+  createGuidedStepStatuses,
+  getGuidedStepById,
+  getGuidedStepNumber,
+  type GuidedStepId,
+  type GuidedStepStatus,
+} from "@/lib/guided-workflow";
+import {
   Activity,
   AlertTriangle,
   BarChart3,
@@ -853,12 +863,24 @@ function BlockingStateScreen({
   onMarketChange,
   onRefresh,
   onContinueUsingCachedData,
+  guideSteps,
+  activeStep,
+  stepStatuses,
+  completedStepCount,
+  remainingStepCount,
+  onStepChange,
 }: {
   state: DashboardViewState;
   marketOptions: Array<{ value: string; label: string }>;
   onMarketChange: (market: string) => void;
   onRefresh: () => void;
   onContinueUsingCachedData?: () => void;
+  guideSteps: ReturnType<typeof defaultGuideSteps>;
+  activeStep: GuidedStepId;
+  stepStatuses: Record<GuidedStepId, GuidedStepStatus>;
+  completedStepCount: number;
+  remainingStepCount: number;
+  onStepChange: (stepId: GuidedStepId) => void;
 }) {
   const isNoMarket = state.kind === "no-market";
   const isConnectionLost = state.kind === "connection-lost";
@@ -871,32 +893,75 @@ function BlockingStateScreen({
         data-testid="dashboard-state"
         data-state-kind={state.kind}
         data-scroll-region="market-entry"
-        className="signal-scroll-region mx-auto grid h-full min-h-0 w-full max-w-[1880px] place-items-center overflow-y-auto overflow-x-hidden px-4 py-8 lg:px-6"
+        className="signal-scroll-region mx-auto grid h-full min-h-0 w-full max-w-[1640px] content-start gap-3 overflow-y-auto overflow-x-hidden px-3 py-3 lg:px-4"
       >
-        <section className="grid w-full max-w-6xl gap-7 text-center">
-          <div className="mx-auto grid max-w-3xl gap-3">
-            <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-800 shadow-sm">
-              <Target className="h-5 w-5" />
-            </div>
-            <p className="text-sm font-semibold text-zinc-500">
-              What would you like help with today?
-            </p>
-            <h1 className="break-words text-4xl font-semibold leading-tight text-zinc-950 sm:text-5xl">
-              What would you like to explore today?
-            </h1>
-            <p className="mx-auto max-w-2xl break-words text-base leading-7 text-zinc-600">
-              Choose a market first. Signal will then explain current
-              conditions, surface opportunities, and suggest a next step in
-              plain language.
-            </p>
-          </div>
+        <GuideLayout
+          stepRail={
+            <StepRail
+              steps={guideSteps}
+              activeStepId={activeStep}
+              stepStatuses={stepStatuses}
+              completedCount={completedStepCount}
+              remainingCount={remainingStepCount}
+              onStepChange={onStepChange}
+            />
+          }
+          primary={
+            <>
+              <GuidedStepPanel
+                stepId="choose-market"
+                activeStepId={activeStep}
+                status={stepStatuses["choose-market"]}
+              >
+                <section className="grid w-full gap-7 rounded-lg border border-zinc-200 bg-white p-5 text-center shadow-sm sm:p-6">
+                  <div className="mx-auto grid max-w-3xl gap-3">
+                    <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-800 shadow-sm">
+                      <Target className="h-5 w-5" />
+                    </div>
+                    <p className="text-sm font-semibold text-zinc-500">
+                      What would you like help with today?
+                    </p>
+                    <h2 className="break-words text-4xl font-semibold leading-tight text-zinc-950 sm:text-5xl">
+                      What would you like to explore today?
+                    </h2>
+                    <p className="mx-auto max-w-2xl break-words text-base leading-7 text-zinc-600">
+                      Choose a market first. Signal will then explain current
+                      conditions, surface opportunities, and suggest a next step
+                      in plain language.
+                    </p>
+                  </div>
 
-          <MarketChoiceGrid
-            marketOptions={marketOptions}
-            selectedMarket=""
-            onMarketChange={onMarketChange}
+                  <MarketChoiceGrid
+                    marketOptions={marketOptions}
+                    selectedMarket=""
+                    onMarketChange={onMarketChange}
+                  />
+                </section>
+              </GuidedStepPanel>
+
+              {GUIDED_STEPS.filter((step) => step.id !== "choose-market").map(
+                (step) => (
+                  <GuidedStepPanel
+                    key={step.id}
+                    stepId={step.id}
+                    activeStepId={activeStep}
+                    status={stepStatuses[step.id]}
+                  >
+                    <BlockingStepPlaceholder stepId={step.id} />
+                  </GuidedStepPanel>
+                ),
+              )}
+            </>
+          }
+          secondary={
+            <WorkflowProgressCard
+              activeStepId={activeStep}
+              completedCount={completedStepCount}
+              remainingCount={remainingStepCount}
+              statuses={stepStatuses}
+            />
+          }
           />
-        </section>
       </main>
     );
   }
@@ -1169,6 +1234,140 @@ function DisclosurePanel({
   );
 }
 
+function guidedStatusTone(status: GuidedStepStatus): DecisionTone {
+  if (status === "completed") return "good";
+  if (status === "needsAttention") return "warn";
+  if (status === "inProgress") return "neutral";
+  return "neutral";
+}
+
+function GuidedStepPanel({
+  stepId,
+  activeStepId,
+  status,
+  children,
+}: {
+  stepId: GuidedStepId;
+  activeStepId: GuidedStepId;
+  status: GuidedStepStatus;
+  children: React.ReactNode;
+}) {
+  const step = getGuidedStepById(stepId);
+  const active = stepId === activeStepId;
+
+  return (
+    <section
+      id={`guided-panel-${stepId}`}
+      data-testid={`guided-panel-${stepId}`}
+      data-active={active ? "true" : "false"}
+      data-status={status}
+      aria-labelledby={`guided-panel-heading-${stepId}`}
+      aria-hidden={active ? undefined : "true"}
+      hidden={!active}
+      className={cx("grid min-w-0 content-start gap-3", !active && "hidden")}
+    >
+      <div className="grid min-w-0 gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs font-semibold text-zinc-600">
+            Step {getGuidedStepNumber(stepId)} of {GUIDED_STEPS.length}
+          </span>
+          <span
+            data-testid={`guided-panel-status-${stepId}`}
+            className={cx(
+              "rounded-md border px-2 py-1 text-xs font-semibold",
+              toneSurface(guidedStatusTone(status)),
+            )}
+          >
+            {GUIDED_STEP_STATUS_LABELS[status]}
+          </span>
+        </div>
+        <h1
+          id={`guided-panel-heading-${stepId}`}
+          className="break-words text-2xl font-semibold leading-tight text-zinc-950"
+        >
+          {step.title}
+        </h1>
+        <p className="max-w-3xl break-words text-sm leading-6 text-zinc-600">
+          {step.description}
+        </p>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function BlockingStepPlaceholder({ stepId }: { stepId: GuidedStepId }) {
+  const step = getGuidedStepById(stepId);
+
+  return (
+    <section className="grid min-w-0 gap-3 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+      <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+        Waiting for market
+      </div>
+      <h2 className="break-words text-2xl font-semibold leading-tight text-zinc-950">
+        {step.title}
+      </h2>
+      <p className="break-words text-sm leading-6 text-zinc-600">
+        Select a market and venue first. This step will become useful once the
+        market context is available.
+      </p>
+    </section>
+  );
+}
+
+function WorkflowProgressCard({
+  activeStepId,
+  completedCount,
+  remainingCount,
+  statuses,
+}: {
+  activeStepId: GuidedStepId;
+  completedCount: number;
+  remainingCount: number;
+  statuses: Record<GuidedStepId, GuidedStepStatus>;
+}) {
+  const activeStep = getGuidedStepById(activeStepId);
+
+  return (
+    <section
+      data-testid="workflow-progress-card"
+      className="grid min-w-0 gap-3 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm"
+    >
+      <div>
+        <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+          Progress
+        </div>
+        <div className="mt-1 break-words text-lg font-semibold leading-tight text-zinc-950">
+          {activeStep.title}
+        </div>
+        <p className="mt-1 break-words text-sm leading-6 text-zinc-600">
+          {completedCount} complete · {remainingCount} remaining
+        </p>
+      </div>
+      <div className="grid gap-2">
+        {GUIDED_STEPS.map((step) => {
+          const status = statuses[step.id];
+          return (
+            <div
+              key={step.id}
+              data-testid={`workflow-progress-item-${step.id}`}
+              data-status={status}
+              className="flex min-w-0 items-center justify-between gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2"
+            >
+              <span className="min-w-0 break-words text-sm font-semibold text-zinc-800">
+                {step.title}
+              </span>
+              <span className="shrink-0 text-xs font-semibold text-zinc-500">
+                {GUIDED_STEP_STATUS_LABELS[status]}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default function DecisionOperatingSystem({
   state,
   marketOptions,
@@ -1202,6 +1401,21 @@ export default function DecisionOperatingSystem({
   rawMetrics,
 }: DecisionOperatingSystemProps) {
   const [selectedGoal, setSelectedGoal] = useState(GUIDE_GOALS[0]);
+  const [activeStep, setActiveStep] = useState<GuidedStepId>(
+    DEFAULT_GUIDED_STEP_ID,
+  );
+  const [visitedSteps, setVisitedSteps] = useState<Set<GuidedStepId>>(
+    () => new Set([DEFAULT_GUIDED_STEP_ID]),
+  );
+  function handleStepChange(stepId: GuidedStepId) {
+    setActiveStep(stepId);
+    setVisitedSteps((current) => {
+      const next = new Set(current);
+      next.add(stepId);
+      return next;
+    });
+  }
+
   const selectedOpportunity =
     opportunities.find((item) => item.id === selectedOpportunityId) ??
     opportunities[0] ??
@@ -1863,6 +2077,18 @@ export default function DecisionOperatingSystem({
     marketOptions.find((market) => market.value === selectedMarket)?.label ??
     selectedMarket ??
     "No market selected";
+  const marketAndVenueSelected = Boolean(
+    selectedMarket && selectedMarketName !== "No market selected",
+  );
+  const stepStatuses = createGuidedStepStatuses({
+    activeStepId: activeStep,
+    visitedStepIds: visitedSteps,
+    marketAndVenueSelected,
+  });
+  const completedStepCount = GUIDED_STEPS.filter(
+    (step) => stepStatuses[step.id] === "completed",
+  ).length;
+  const remainingStepCount = GUIDED_STEPS.length - completedStepCount;
   const safeRecommendation = recommendedNextStep({
     action: recommendedAction,
     exposureText,
@@ -1965,21 +2191,6 @@ export default function DecisionOperatingSystem({
     tone: guideTone,
   });
   const refreshNotice = systemNotice;
-  const journeyActiveIndex = !selectedMarket
-    ? 0
-    : state.kind === "initial-loading"
-      ? 1
-      : state.kind === "empty-results"
-        ? 2
-        : 4;
-  const journeySteps = [
-    "Choose Market",
-    "Review Current Conditions",
-    "Explore Opportunities",
-    "Understand Reasoning",
-    "Decide What To Do",
-  ];
-
   const blockingState =
     state.kind === "no-market" ||
     state.kind === "connection-lost" ||
@@ -1997,27 +2208,6 @@ export default function DecisionOperatingSystem({
           <div className="shrink-0 text-sm font-semibold tracking-normal text-zinc-950">
             Signal
           </div>
-
-          <nav
-            aria-label="Decision journey"
-            className="signal-scroll-region hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex"
-          >
-            {journeySteps.map((step, index) => (
-              <span
-                key={step}
-                className={cx(
-                  "whitespace-nowrap rounded-md border px-2.5 py-1 text-xs font-semibold",
-                  index === journeyActiveIndex
-                    ? "border-zinc-950 bg-zinc-950 text-white"
-                    : index < journeyActiveIndex
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                      : "border-zinc-200 bg-zinc-50 text-zinc-500",
-                )}
-              >
-                {step}
-              </span>
-            ))}
-          </nav>
 
           {selectedMarket ? (
             <div className="ml-auto flex min-w-0 shrink items-center gap-2">
@@ -2065,6 +2255,12 @@ export default function DecisionOperatingSystem({
           onMarketChange={onMarketChange}
           onRefresh={onRefresh}
           onContinueUsingCachedData={onContinueUsingCachedData}
+          guideSteps={guideSteps}
+          activeStep={activeStep}
+          stepStatuses={stepStatuses}
+          completedStepCount={completedStepCount}
+          remainingStepCount={remainingStepCount}
+          onStepChange={handleStepChange}
         />
       ) : (
         <main
@@ -2079,43 +2275,131 @@ export default function DecisionOperatingSystem({
           ) : null}
 
           <GuideLayout
-            stepRail={<StepRail steps={guideSteps} />}
+            stepRail={
+              <StepRail
+                steps={guideSteps}
+                activeStepId={activeStep}
+                stepStatuses={stepStatuses}
+                completedCount={completedStepCount}
+                remainingCount={remainingStepCount}
+                onStepChange={handleStepChange}
+              />
+            }
             primary={
               <>
-                <GoalCard
-                  goal={selectedGoal}
-                  goals={GUIDE_GOALS}
-                  onGoalChange={setSelectedGoal}
-                  marketLabel={selectedMarketName || "Market pending"}
-                  supportingText={`Every recommendation is judged against this goal. Signal guides the decision; you decide whether the evidence fits your plan.`}
-                />
+                <GuidedStepPanel
+                  stepId="choose-market"
+                  activeStepId={activeStep}
+                  status={stepStatuses["choose-market"]}
+                >
+                  <GoalCard
+                    goal={selectedGoal}
+                    goals={GUIDE_GOALS}
+                    onGoalChange={setSelectedGoal}
+                    marketLabel={selectedMarketName || "Market pending"}
+                    supportingText={`Every recommendation is judged against this goal. Signal guides the decision; you decide whether the evidence fits your plan.`}
+                  />
+                </GuidedStepPanel>
 
-                <ConfidenceRange
-                  low={confidenceRange.low}
-                  high={confidenceRange.high}
-                  label={confidenceRange.label}
-                  explanation={confidenceRange.explanation}
-                />
-
-                <section id="guide-reality" className="contents">
+                <GuidedStepPanel
+                  stepId="review-current-conditions"
+                  activeStepId={activeStep}
+                  status={stepStatuses["review-current-conditions"]}
+                >
                   <RealityCheckCard
                     facts={realityFacts}
                     narrative={`${investorCopy(marketState)}. ${investorCopy(readinessWhy)}`}
                   />
-                </section>
 
-                <section id="guide-matters" className="contents">
+                  <ConfidenceRange
+                    low={confidenceRange.low}
+                    high={confidenceRange.high}
+                    label={confidenceRange.label}
+                    explanation={confidenceRange.explanation}
+                  />
+
                   <FocusCard items={focusItems} />
-                </section>
+                  <UnknownsCard unknowns={unknownItems} />
+                  <ProgressCard items={progressSignals} />
+                </GuidedStepPanel>
 
-                <section id="guide-options" className="contents">
+                <GuidedStepPanel
+                  stepId="explore-opportunities"
+                  activeStepId={activeStep}
+                  status={stepStatuses["explore-opportunities"]}
+                >
                   <OptionCard
                     supports={optionSupports}
                     worksAgainst={optionRisks}
                   />
-                </section>
 
-                <section id="guide-tested" className="contents">
+                  <section
+                    data-testid="opportunity-review"
+                    data-overflow-policy="bounded-opportunity-panel"
+                    className="grid min-w-0 content-start gap-3 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm"
+                  >
+                    <div>
+                      <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+                        Lead opportunity
+                      </div>
+                      <div className="mt-2 flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="line-clamp-2 break-words text-3xl font-semibold leading-tight text-zinc-950">
+                            {opportunityLabel}
+                          </div>
+                          <div
+                            className={cx(
+                              "mt-1 break-words text-sm font-semibold",
+                              toneText(selectedTone),
+                            )}
+                          >
+                            {selectedOpportunity
+                              ? `${investorCopy(selectedOpportunity.action)} - ${displayExposure(selectedOpportunity.exposureLabel)}`
+                              : actionExposureText}
+                          </div>
+                        </div>
+                        <span
+                          className={cx(
+                            "shrink-0 rounded-md border px-2 py-1 text-xs font-semibold",
+                            toneSurface(selectedTone),
+                          )}
+                        >
+                          {selectedOpportunity
+                            ? displayPct(selectedOpportunity.readinessPct)
+                            : "Pending"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="break-words text-sm leading-6 text-zinc-600">
+                      {selectedOpportunity
+                        ? cleanSentence(
+                            selectedOpportunity.thesis ||
+                              selectedOpportunity.context,
+                          )
+                        : "No opportunity deserves capital yet."}
+                    </p>
+
+                    <details className="min-w-0 rounded-lg border border-zinc-200 bg-zinc-50">
+                      <summary className="cursor-pointer list-none px-3 py-2 text-sm font-semibold text-zinc-950 marker:hidden [&::-webkit-details-marker]:hidden">
+                        Other opportunities
+                      </summary>
+                      <div className="px-3 pb-3">
+                        <OpportunityPicker
+                          opportunities={opportunities}
+                          selectedOpportunityId={selectedOpportunityId}
+                          onSelectOpportunity={onSelectOpportunity}
+                        />
+                      </div>
+                    </details>
+                  </section>
+                </GuidedStepPanel>
+
+                <GuidedStepPanel
+                  stepId="understand-reasoning"
+                  activeStepId={activeStep}
+                  status={stepStatuses["understand-reasoning"]}
+                >
                   <FocusCard
                     title="What Signal Tested"
                     items={compactList(
@@ -2128,290 +2412,234 @@ export default function DecisionOperatingSystem({
                       3,
                     )}
                   />
-                </section>
 
-                <RecommendationCard
-                  recommendation={safeRecommendation}
-                  rationale={`${cleanSentence(primaryAnswer)} ${cleanSentence(readinessBlocker)}`}
-                  nextReview={nextStep}
-                  tone={guideTone}
-                />
+                  <DisclosurePanel
+                    title="Why"
+                    summary={reasonSummary}
+                    defaultOpen
+                    testId="decision-summary-panel"
+                  >
+                    <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+                      <div className="min-w-0">
+                        <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+                          Supports
+                        </div>
+                        <div className="mt-2 grid gap-2">
+                          {supportSummary.map((item) => (
+                            <p
+                              key={item}
+                              className="break-words text-sm leading-6 text-zinc-700"
+                            >
+                              {investorCopy(item)}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+                          Watch
+                        </div>
+                        <div className="mt-2 grid gap-2">
+                          {riskSummary.map((item) => (
+                            <p
+                              key={item}
+                              className="break-words text-sm leading-6 text-zinc-700"
+                            >
+                              {investorCopy(item)}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </DisclosurePanel>
+
+                  <DisclosurePanel
+                    title="Evidence"
+                    summary={trustSummary}
+                    testId="evidence-summary-panel"
+                  >
+                    <div className="grid gap-2">
+                      {(evidenceLadder.length ? evidenceLadder : evidencePreview).map(
+                        (stage) => (
+                          <div
+                            key={stage.id}
+                            className="grid min-w-0 grid-cols-[24px_minmax(0,1fr)_auto] items-start gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2 text-sm leading-5 text-zinc-700"
+                          >
+                            <span
+                              className={cx(
+                                "grid h-6 w-6 place-items-center rounded-md",
+                                statusTone(stage.status) === "good" &&
+                                  "bg-emerald-50 text-emerald-700",
+                                statusTone(stage.status) === "warn" &&
+                                  "bg-amber-50 text-amber-700",
+                                statusTone(stage.status) === "bad" &&
+                                  "bg-red-50 text-red-700",
+                              )}
+                            >
+                              {statusIcon(stage.status)}
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block break-words font-semibold text-zinc-950">
+                                {friendlyEvidenceLabel(stage.label)}
+                              </span>
+                              <span className="block break-words text-zinc-600">
+                                {investorCopy(stage.explanation)}
+                              </span>
+                            </span>
+                            <span
+                              className={cx(
+                                "rounded-md border px-1.5 py-0.5 text-[11px] font-semibold",
+                                toneSurface(statusTone(stage.status)),
+                              )}
+                            >
+                              {statusLabel(stage.status)}
+                            </span>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </DisclosurePanel>
+
+                  <DisclosurePanel
+                    title="Decision path"
+                    summary={`${guideSteps.length} guide steps behind the recommendation`}
+                    testId="workflow-detail-panel"
+                  >
+                    <div className="grid gap-2">
+                      {guideSteps.map((step, index) => (
+                        <div
+                          key={step.id}
+                          className="grid min-w-0 grid-cols-[32px_minmax(0,1fr)] gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3"
+                        >
+                          <span className="grid h-8 w-8 place-items-center rounded-md border border-zinc-200 bg-white text-zinc-700">
+                            {index + 1}
+                          </span>
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+                                {index + 1}/{guideSteps.length}
+                              </span>
+                              <span className="break-words text-sm font-semibold text-zinc-950">
+                                {step.label}
+                              </span>
+                            </div>
+                            <p className="mt-1 break-words text-sm leading-6 text-zinc-700">
+                              {step.summary}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                      {workflow.length ? (
+                        <div className="grid gap-2 border-t border-zinc-200 pt-3">
+                          {workflow.map((step) => (
+                            <div
+                              key={step.id}
+                              className="min-w-0 rounded-lg border border-zinc-200 bg-white p-3"
+                            >
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div className="break-words text-sm font-semibold text-zinc-950">
+                                  {investorCopy(step.label)}
+                                </div>
+                                <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs font-semibold text-zinc-600">
+                                  {investorCopy(step.status)}
+                                </span>
+                              </div>
+                              <p className="mt-1 break-words text-sm leading-6 text-zinc-700">
+                                {investorCopy(step.output)}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  </DisclosurePanel>
+                </GuidedStepPanel>
+
+                <GuidedStepPanel
+                  stepId="decide-what-to-do"
+                  activeStepId={activeStep}
+                  status={stepStatuses["decide-what-to-do"]}
+                >
+                  <RecommendationCard
+                    recommendation={safeRecommendation}
+                    rationale={`${cleanSentence(primaryAnswer)} ${cleanSentence(readinessBlocker)}`}
+                    nextReview={nextStep}
+                    tone={guideTone}
+                  />
+
+                  <PlanReviewCard checkpoints={reviewCheckpoints} />
+
+                  <DisclosurePanel
+                    title="Action plan"
+                    summary={nextStep}
+                    testId="action-plan-panel"
+                  >
+                    <div className="grid min-w-0 gap-2 sm:grid-cols-2">
+                      {[
+                        ["Asset", actionPlan.asset],
+                        ["Direction", actionPlan.direction],
+                        ["Allocation", actionExposureText],
+                        ["Entry", actionPlan.entryLogic],
+                        ["Risk rule", actionPlan.riskConstraints],
+                        ["Exit", actionPlan.exitConditions],
+                        ["Change your mind if", actionPlan.invalidation],
+                        ["Portfolio effect", actionPlan.portfolioImpact],
+                      ].map(([label, value]) => (
+                        <FactTile key={label} label={label} value={value} />
+                      ))}
+                    </div>
+                  </DisclosurePanel>
+
+                  <DisclosurePanel
+                    title="Metrics"
+                    summary="Secondary context"
+                    testId="supporting-numbers-panel"
+                  >
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {(displaySecondaryMetrics.length
+                        ? displaySecondaryMetrics
+                        : rawMetrics
+                      ).map((metric) => (
+                        <div
+                          key={metric.label}
+                          className="grid min-h-[92px] min-w-0 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0 break-words text-xs font-medium text-zinc-500">
+                              {friendlyMetricLabel(metric.label)}
+                            </div>
+                            <div className="shrink-0 break-words text-sm font-semibold text-zinc-950">
+                              {metric.value}
+                            </div>
+                          </div>
+                          <p className="mt-1 break-words text-xs leading-5 text-zinc-700">
+                            {metricGuidance(metric)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </DisclosurePanel>
+
+                  <UserControlCard />
+                </GuidedStepPanel>
               </>
             }
             secondary={
               <>
+                <WorkflowProgressCard
+                  activeStepId={activeStep}
+                  completedCount={completedStepCount}
+                  remainingCount={remainingStepCount}
+                  statuses={stepStatuses}
+                />
+
                 <MarketContextCard
                   selectedMarket={selectedMarketName}
                   facts={guideMarketFacts}
                 />
-
-                <UnknownsCard unknowns={unknownItems} />
-
-                <section
-                  data-testid="opportunity-review"
-                  data-overflow-policy="bounded-opportunity-panel"
-                  className="grid min-w-0 content-start gap-3 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm"
-                >
-                  <div>
-                    <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                      Lead opportunity
-                    </div>
-                    <div className="mt-2 flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="line-clamp-2 break-words text-3xl font-semibold leading-tight text-zinc-950">
-                          {opportunityLabel}
-                        </div>
-                        <div
-                          className={cx(
-                            "mt-1 break-words text-sm font-semibold",
-                            toneText(selectedTone),
-                          )}
-                        >
-                          {selectedOpportunity
-                            ? `${investorCopy(selectedOpportunity.action)} - ${displayExposure(selectedOpportunity.exposureLabel)}`
-                            : actionExposureText}
-                        </div>
-                      </div>
-                      <span
-                        className={cx(
-                          "shrink-0 rounded-md border px-2 py-1 text-xs font-semibold",
-                          toneSurface(selectedTone),
-                        )}
-                      >
-                        {selectedOpportunity
-                          ? displayPct(selectedOpportunity.readinessPct)
-                          : "Pending"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <p className="break-words text-sm leading-6 text-zinc-600">
-                    {selectedOpportunity
-                      ? cleanSentence(
-                          selectedOpportunity.thesis ||
-                            selectedOpportunity.context,
-                        )
-                      : "No opportunity deserves capital yet."}
-                  </p>
-
-                  <details className="min-w-0 rounded-lg border border-zinc-200 bg-zinc-50">
-                    <summary className="cursor-pointer list-none px-3 py-2 text-sm font-semibold text-zinc-950 marker:hidden [&::-webkit-details-marker]:hidden">
-                      Other opportunities
-                    </summary>
-                    <div className="px-3 pb-3">
-                      <OpportunityPicker
-                        opportunities={opportunities}
-                        selectedOpportunityId={selectedOpportunityId}
-                        onSelectOpportunity={onSelectOpportunity}
-                      />
-                    </div>
-                  </details>
-                </section>
-
-                <ProgressCard items={progressSignals} />
-                <section id="guide-review" className="contents">
-                  <PlanReviewCard checkpoints={reviewCheckpoints} />
-                </section>
-                <UserControlCard />
               </>
             }
           />
-
-          <section className="grid min-w-0 items-start gap-3 lg:grid-cols-2">
-            <div id="guide-why" className="contents">
-              <DisclosurePanel
-                title="Why"
-                summary={reasonSummary}
-                defaultOpen
-                testId="decision-summary-panel"
-              >
-                <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-                  <div className="min-w-0">
-                    <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                      Supports
-                    </div>
-                    <div className="mt-2 grid gap-2">
-                      {supportSummary.map((item) => (
-                        <p
-                          key={item}
-                          className="break-words text-sm leading-6 text-zinc-700"
-                        >
-                          {investorCopy(item)}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                      Watch
-                    </div>
-                    <div className="mt-2 grid gap-2">
-                      {riskSummary.map((item) => (
-                        <p
-                          key={item}
-                          className="break-words text-sm leading-6 text-zinc-700"
-                        >
-                          {investorCopy(item)}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </DisclosurePanel>
-            </div>
-
-            <DisclosurePanel
-              title="Evidence"
-              summary={trustSummary}
-              testId="evidence-summary-panel"
-            >
-              <div className="grid gap-2">
-                {(evidenceLadder.length ? evidenceLadder : evidencePreview).map(
-                  (stage) => (
-                    <div
-                      key={stage.id}
-                      className="grid min-w-0 grid-cols-[24px_minmax(0,1fr)_auto] items-start gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2 text-sm leading-5 text-zinc-700"
-                    >
-                      <span
-                        className={cx(
-                          "grid h-6 w-6 place-items-center rounded-md",
-                          statusTone(stage.status) === "good" &&
-                            "bg-emerald-50 text-emerald-700",
-                          statusTone(stage.status) === "warn" &&
-                            "bg-amber-50 text-amber-700",
-                          statusTone(stage.status) === "bad" &&
-                            "bg-red-50 text-red-700",
-                        )}
-                      >
-                        {statusIcon(stage.status)}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block break-words font-semibold text-zinc-950">
-                          {friendlyEvidenceLabel(stage.label)}
-                        </span>
-                        <span className="block break-words text-zinc-600">
-                          {investorCopy(stage.explanation)}
-                        </span>
-                      </span>
-                      <span
-                        className={cx(
-                          "rounded-md border px-1.5 py-0.5 text-[11px] font-semibold",
-                          toneSurface(statusTone(stage.status)),
-                        )}
-                      >
-                        {statusLabel(stage.status)}
-                      </span>
-                    </div>
-                  ),
-                )}
-              </div>
-            </DisclosurePanel>
-
-            <DisclosurePanel
-              title="Decision path"
-              summary={`${guideSteps.length} guide steps behind the recommendation`}
-              testId="workflow-detail-panel"
-            >
-              <div className="grid gap-2">
-                {guideSteps.map((step, index) => (
-                  <div
-                    key={step.id}
-                    className="grid min-w-0 grid-cols-[32px_minmax(0,1fr)] gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3"
-                  >
-                    <span className="grid h-8 w-8 place-items-center rounded-md border border-zinc-200 bg-white text-zinc-700">
-                      {index + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                          {index + 1}/{guideSteps.length}
-                        </span>
-                        <span className="break-words text-sm font-semibold text-zinc-950">
-                          {step.label}
-                        </span>
-                      </div>
-                      <p className="mt-1 break-words text-sm leading-6 text-zinc-700">
-                        {step.summary}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {workflow.length ? (
-                  <div className="grid gap-2 border-t border-zinc-200 pt-3">
-                    {workflow.map((step) => (
-                      <div
-                        key={step.id}
-                        className="min-w-0 rounded-lg border border-zinc-200 bg-white p-3"
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="break-words text-sm font-semibold text-zinc-950">
-                            {investorCopy(step.label)}
-                          </div>
-                          <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs font-semibold text-zinc-600">
-                            {investorCopy(step.status)}
-                          </span>
-                        </div>
-                        <p className="mt-1 break-words text-sm leading-6 text-zinc-700">
-                          {investorCopy(step.output)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            </DisclosurePanel>
-
-            <DisclosurePanel
-              title="Metrics"
-              summary="Secondary context"
-              testId="supporting-numbers-panel"
-            >
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {(displaySecondaryMetrics.length
-                  ? displaySecondaryMetrics
-                  : rawMetrics
-                ).map((metric) => (
-                    <div
-                      key={metric.label}
-                      className="grid min-h-[92px] min-w-0 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0 break-words text-xs font-medium text-zinc-500">
-                          {friendlyMetricLabel(metric.label)}
-                        </div>
-                        <div className="shrink-0 break-words text-sm font-semibold text-zinc-950">
-                          {metric.value}
-                        </div>
-                      </div>
-                      <p className="mt-1 break-words text-xs leading-5 text-zinc-700">
-                        {metricGuidance(metric)}
-                      </p>
-                    </div>
-                  ))}
-              </div>
-            </DisclosurePanel>
-
-            <DisclosurePanel
-              title="Action plan"
-              summary={nextStep}
-              testId="action-plan-panel"
-            >
-              <div className="grid min-w-0 gap-2 sm:grid-cols-2">
-                {[
-                  ["Asset", actionPlan.asset],
-                  ["Direction", actionPlan.direction],
-                  ["Allocation", actionExposureText],
-                  ["Entry", actionPlan.entryLogic],
-                  ["Risk rule", actionPlan.riskConstraints],
-                  ["Exit", actionPlan.exitConditions],
-                  ["Change your mind if", actionPlan.invalidation],
-                  ["Portfolio effect", actionPlan.portfolioImpact],
-                ].map(([label, value]) => (
-                  <FactTile key={label} label={label} value={value} />
-                ))}
-              </div>
-            </DisclosurePanel>
-          </section>
         </main>
       )}
     </div>

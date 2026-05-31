@@ -1,11 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "pnpm --dir examples/stocks/src install",
-  "buildCommand": "pnpm --dir examples/stocks/src run build && node ./copy-public.mjs",
-  "outputDirectory": "public",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter stocks-optimizer build",
+  "outputDirectory": "examples/stocks-optimizer/src/artifacts/signal-markets/dist",
   "functions": {
     "api/index.js": {
-      "includeFiles": "examples/stocks/src/artifacts/**",
+      "includeFiles": "examples/stocks-optimizer/src/artifacts/api-server/dist/**",
       "maxDuration": 60
     }
   },

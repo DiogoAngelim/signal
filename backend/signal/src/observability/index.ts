@@ -1,6 +1,7 @@
 import pino, { type Logger } from "pino";
 
 const MAX_LATENCY_SAMPLES = 1000;
+const logLevelEnvName = "LOG_LEVEL";
 
 export type StructuredLogger = Pick<
   Logger,
@@ -8,7 +9,7 @@ export type StructuredLogger = Pick<
 >;
 
 export const logger = pino({
-  level: process.env.LOG_LEVEL ?? "info",
+  level: process.env[logLevelEnvName] ?? "info",
 });
 
 export const createLogger = (

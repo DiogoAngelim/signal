@@ -16,6 +16,23 @@ import { createFrameworkError, createFrameworkErrorCause } from "./errors";
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
+type ValidatableEnvelopeRecord = Record<string, unknown> & {
+  kind?: unknown;
+  lifecycle?: unknown;
+  messageId?: unknown;
+  meta?: unknown;
+  name?: unknown;
+  payload?: unknown;
+  protocol?: unknown;
+  timestamp?: unknown;
+  traceId?: unknown;
+};
+
+type EnvelopeMetaRecord = Record<string, unknown> & {
+  idempotencyKey?: unknown;
+  replay?: unknown;
+};
+
 const hasOwn = (value: Record<string, unknown>, key: string): boolean =>
   Object.prototype.hasOwnProperty.call(value, key);
 
@@ -40,7 +57,7 @@ const createIssue = (
 });
 
 const collectStructuralIssues = (
-  envelope: Record<string, unknown>,
+  envelope: ValidatableEnvelopeRecord,
 ): { issues: ValidationIssue[]; protocolInvalid: boolean } => {
   const issues: ValidationIssue[] = [];
   let protocolInvalid = false;
@@ -114,12 +131,14 @@ const collectStructuralIssues = (
     );
   }
 
-  if ("meta" in envelope && envelope.meta !== undefined) {
-    if (!isRecord(envelope.meta)) {
+  const meta = envelope.meta;
+  if ("meta" in envelope && meta !== undefined) {
+    if (!isRecord(meta)) {
       issues.push(createIssue("meta", "Meta must be an object", "meta.type"));
     } else {
+      const metaRecord = meta as EnvelopeMetaRecord;
       const allowedMetaKeys = new Set(["idempotencyKey", "replay"]);
-      for (const key of Object.keys(envelope.meta)) {
+      for (const key of Object.keys(meta)) {
         if (!allowedMetaKeys.has(key)) {
           issues.push(
             createIssue(`meta.${key}`, "Unknown meta field", "meta.allowed"),
@@ -128,9 +147,9 @@ const collectStructuralIssues = (
       }
 
       if (
-        "idempotencyKey" in envelope.meta &&
-        envelope.meta.idempotencyKey !== undefined &&
-        !isNonEmptyString(envelope.meta.idempotencyKey)
+        "idempotencyKey" in meta &&
+        metaRecord.idempotencyKey !== undefined &&
+        !isNonEmptyString(metaRecord.idempotencyKey)
       ) {
         issues.push(
           createIssue(
@@ -142,9 +161,9 @@ const collectStructuralIssues = (
       }
 
       if (
-        "replay" in envelope.meta &&
-        envelope.meta.replay !== undefined &&
-        typeof envelope.meta.replay !== "boolean"
+        "replay" in meta &&
+        metaRecord.replay !== undefined &&
+        typeof metaRecord.replay !== "boolean"
       ) {
         issues.push(
           createIssue("meta.replay", "Replay must be a boolean", "meta.replay"),
@@ -227,9 +246,9 @@ export async function validateEnvelope(
       );
       const meta = validatedEnvelope.meta
         ? {
-          idempotencyKey: validatedEnvelope.meta.idempotencyKey,
-          replay: validatedEnvelope.meta.replay,
-        }
+            idempotencyKey: validatedEnvelope.meta.idempotencyKey,
+            replay: validatedEnvelope.meta.replay,
+          }
         : undefined;
 
       if (existing) {
@@ -300,11 +319,13 @@ export function isValidatedEnvelope(
     return false;
   }
 
-  if (input.lifecycle !== "validated") {
+  const envelope = input as ValidatableEnvelopeRecord;
+
+  if (envelope.lifecycle !== "validated") {
     return false;
   }
 
-  return collectStructuralIssues(input).issues.length === 0;
+  return collectStructuralIssues(envelope).issues.length === 0;
 }
 
 export function assertValidatedEnvelope(input: SignalContextEnvelope): void {

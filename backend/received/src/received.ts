@@ -13,6 +13,28 @@ import { createFrameworkError, createFrameworkErrorCause } from "./errors";
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
+type ReceivableEnvelopeRecord = Record<string, unknown> & {
+  context?: unknown;
+  kind?: unknown;
+  lifecycle?: unknown;
+  messageId?: unknown;
+  meta?: unknown;
+  name?: unknown;
+  payload?: unknown;
+  protocol?: unknown;
+  timestamp?: unknown;
+  traceId?: unknown;
+};
+
+type EnvelopeContextRecord = Record<string, unknown> & {
+  traceId?: unknown;
+};
+
+type EnvelopeMetaRecord = Record<string, unknown> & {
+  idempotencyKey?: unknown;
+  replay?: unknown;
+};
+
 const hasOwn = (value: Record<string, unknown>, key: string): boolean =>
   Object.prototype.hasOwnProperty.call(value, key);
 
@@ -37,17 +59,19 @@ const createIssue = (
 });
 
 const getTraceIdFromEnvelope = (
-  envelope: Record<string, unknown>,
+  envelope: ReceivableEnvelopeRecord,
 ): string | undefined => {
-  if (isNonEmptyString(envelope.traceId)) {
-    return envelope.traceId;
+  const traceId = envelope.traceId;
+  if (isNonEmptyString(traceId)) {
+    return traceId;
   }
 
-  if (
-    isRecord(envelope.context) &&
-    isNonEmptyString(envelope.context.traceId)
-  ) {
-    return envelope.context.traceId;
+  const context = envelope.context;
+  if (isRecord(context)) {
+    const envelopeContext = context as EnvelopeContextRecord;
+    if (isNonEmptyString(envelopeContext.traceId)) {
+      return envelopeContext.traceId;
+    }
   }
 
   return undefined;
@@ -64,7 +88,7 @@ const collectReceivableIssues = (
     return { issues, protocolInvalid };
   }
 
-  const envelope = input as Record<string, unknown>;
+  const envelope = input as ReceivableEnvelopeRecord;
 
   if ("protocol" in envelope && envelope.protocol !== undefined) {
     if (envelope.protocol !== signalProtocolVersion) {
@@ -163,7 +187,9 @@ export async function receiveEnvelope(
   const { issues, protocolInvalid } = collectReceivableIssues(input);
 
   if (issues.length > 0) {
-    const traceId = isRecord(input) ? getTraceIdFromEnvelope(input) : undefined;
+    const traceId = isRecord(input)
+      ? getTraceIdFromEnvelope(input as ReceivableEnvelopeRecord)
+      : undefined;
     const error = createFrameworkError(
       protocolInvalid ? "PROTOCOL_ERROR" : "VALIDATION_ERROR",
       "Envelope intake failed",
@@ -173,7 +199,7 @@ export async function receiveEnvelope(
     return { ok: false, error };
   }
 
-  const envelope = input as Record<string, unknown>;
+  const envelope = input as ReceivableEnvelopeRecord;
   const now = options.now ?? (() => new Date().toISOString());
   const idFactory = options.idFactory ?? randomUUID;
   const traceId = getTraceIdFromEnvelope(envelope) ?? idFactory();
@@ -199,17 +225,20 @@ export async function receiveEnvelope(
     try {
       const existing = await options.store.getByMessageId(messageId);
       if (!existing) {
-        const meta = isRecord(envelope.meta)
-          ? {
-            idempotencyKey: isNonEmptyString(envelope.meta.idempotencyKey)
-              ? envelope.meta.idempotencyKey
+        const envelopeMeta = envelope.meta;
+        let meta: LocalSignalRecord["meta"];
+        if (isRecord(envelopeMeta)) {
+          const metaRecord = envelopeMeta as EnvelopeMetaRecord;
+          meta = {
+            idempotencyKey: isNonEmptyString(metaRecord.idempotencyKey)
+              ? metaRecord.idempotencyKey
               : undefined,
             replay:
-              typeof envelope.meta.replay === "boolean"
-                ? envelope.meta.replay
+              typeof metaRecord.replay === "boolean"
+                ? metaRecord.replay
                 : undefined,
-          }
-          : undefined;
+          };
+        }
 
         const record: LocalSignalRecord = {
           id: idFactory(),
@@ -258,35 +287,37 @@ export function isReceivedEnvelope(
     return false;
   }
 
-  if (input.lifecycle !== "received") {
+  const envelope = input as ReceivableEnvelopeRecord;
+
+  if (envelope.lifecycle !== "received") {
     return false;
   }
 
-  if (input.protocol !== signalProtocolVersion) {
+  if (envelope.protocol !== signalProtocolVersion) {
     return false;
   }
 
-  if (!isValidKind(input.kind)) {
+  if (!isValidKind(envelope.kind)) {
     return false;
   }
 
-  if (!isNonEmptyString(input.name)) {
+  if (!isNonEmptyString(envelope.name)) {
     return false;
   }
 
-  if (!isNonEmptyString(input.messageId)) {
+  if (!isNonEmptyString(envelope.messageId)) {
     return false;
   }
 
-  if (!isValidTimestamp(input.timestamp)) {
+  if (!isValidTimestamp(envelope.timestamp)) {
     return false;
   }
 
-  if (!isNonEmptyString(input.traceId)) {
+  if (!isNonEmptyString(envelope.traceId)) {
     return false;
   }
 
-  if (!hasOwn(input, "payload") || input.payload === undefined) {
+  if (!hasOwn(envelope, "payload") || envelope.payload === undefined) {
     return false;
   }
 
@@ -297,7 +328,9 @@ export function assertReceivableEnvelope(input: unknown): void {
   const { issues, protocolInvalid } = collectReceivableIssues(input);
 
   if (issues.length > 0) {
-    const traceId = isRecord(input) ? getTraceIdFromEnvelope(input) : undefined;
+    const traceId = isRecord(input)
+      ? getTraceIdFromEnvelope(input as ReceivableEnvelopeRecord)
+      : undefined;
     throw createFrameworkErrorCause(
       protocolInvalid ? "PROTOCOL_ERROR" : "VALIDATION_ERROR",
       "Envelope intake failed",

@@ -1,0 +1,70 @@
+---
+title: Architecture
+---
+
+import SignalArchitectureDiagram from "../src/components/SignalArchitectureDiagram";
+
+# Architecture
+
+Signal is a protocol-first runtime. A caller sends a standard envelope. The
+runtime executes a registered operation. The result carries enough context to
+inspect what happened later.
+
+<SignalArchitectureDiagram />
+
+## Five-Minute Model
+
+Signal has four stable layers:
+
+- **Signal Spec**: RFCs, fixtures, and JSON schemas that define the public contract.
+- **Signal Core**: envelope validation, operation names, result shape, errors, and capabilities.
+- **Signal Runtime**: registry, query execution, mutation execution, event dispatch, idempotency, replay metadata, and trace context.
+- **Bindings and Apps**: HTTP binding, reference server, SDK helpers, examples, and downstream systems such as Stocks-Optimizer.
+
+The runtime does not know a business domain. It only knows how to execute
+registered queries, mutations, events, and decision operations.
+
+## Runtime Flow
+
+```text
+User
+-> Signal Client
+-> Envelope
+-> Query / Mutation / Event / Decision
+-> Runtime
+-> Handler
+-> Trace
+-> Result
+-> Outcome / Audit Store
+```
+
+The envelope is the public boundary. The handler is domain code. The runtime
+keeps those two concerns separate.
+
+## Capability Declarations
+
+Capability documents are derived from the registered runtime surface. They show
+which queries, mutations, events, subscriptions, bindings, and runtime features
+are actually available.
+
+Use capabilities to audit what a deployed runtime supports before integrating
+against it.
+
+## Tracing and Outcomes
+
+Signal carries context such as correlation id, causation id, trace id,
+idempotency key, deadline, delivery metadata, auth, and meta. Successful results
+can include outcome metadata such as `completed` or `replayed`.
+
+Decision packages and downstream systems can store richer evidence: assumptions,
+confidence, uncertainty, versions, outcomes, and replay snapshots.
+
+## Stocks-Optimizer Integration
+
+Stocks-Optimizer is a downstream implementation. It translates market evidence
+into Signal decision inputs, uses Signal decision and memory packages for
+decision records, and exposes integration surfaces for API consumers, SSE
+streams, webhooks, audit logs, and execution workers.
+
+Signal should stay generic. Stocks-Optimizer should demonstrate how a real
+system uses Signal without moving market-specific logic into the protocol.

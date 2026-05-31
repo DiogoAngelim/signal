@@ -218,6 +218,14 @@ Runnable examples live in `packages/examples/`:
 
 ## Specs And Docs
 
+- Public docs source: `docs/`
+- Architecture page: `docs/docs/architecture.mdx`
+- Architecture SVG: `docs/static/img/signal-architecture.svg`
+- Protocol RFCs: `spec/`
+- JSON schemas: `schemas/`
+- Readiness audit: `docs/docs/readiness/ecosystem-audit.md`
+- Stocks-Optimizer integration docs: `examples/stocks-optimizer/docs/`
+
 - `spec/`: RFCs and conformance fixtures
 - `schemas/`: published JSON-schema artifacts
 - `docs/`: Docusaurus docs
@@ -239,10 +247,9 @@ A Signal-compatible implementation must preserve:
 The Node runtime is the reference implementation, not the only valid one.
 # Example Apps
 
-Signal no longer includes a standalone frontend workspace. UI demos live in `examples/`:
+Signal keeps one maintained example app in `examples/`:
 
-- `examples/weather/` - Weather Signal app + server. See `examples/weather/replit.md` for setup and commands.
-- `examples/stocks/` - Signal Markets UI demo. See `examples/stocks/src/replit.md` for details.
+- `examples/stocks-optimizer/` - Stocks Optimizer app, API, and integration docs.
 
 ## npm Module: signal-protocol
 

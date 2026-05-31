@@ -32,7 +32,8 @@ describe("Dashboard calibration diagnostics", () => {
     expect(html).toContain("Bonds");
     expect(html).toContain("Companies you can invest in");
     expect(html).toContain("Fixed income opportunities");
-    expect(html).not.toContain('data-testid="decision-step-screen"');
+    expect(html).toContain('data-testid="decision-step-screen"');
+    expect(html).toContain('aria-label="Workflow steps"');
     expect(html).not.toContain('data-testid="primary-answer"');
   });
 

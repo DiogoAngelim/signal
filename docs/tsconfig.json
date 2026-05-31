@@ -8,7 +8,7 @@
     "paths": {
       "@site/*": ["./*"]
     },
-    "types": ["node"]
+    "types": ["node", "react", "react-dom"]
   },
   "include": ["src/**/*", "docusaurus.config.ts", "sidebars.ts"],
   "exclude": ["build", "node_modules"]

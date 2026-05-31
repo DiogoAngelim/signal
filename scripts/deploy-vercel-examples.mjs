@@ -11,11 +11,11 @@ const repoRoot = path.resolve(__dirname, "..");
 const vercelTeam = "diogos-projects-c462ac73";
 
 const targets = [
-  { name: "forex", cwd: path.join(repoRoot, "examples/forex"), project: "forex" },
-  { name: "stocks", cwd: path.join(repoRoot, "examples/stocks"), project: "stocks-optimizer" },
-  // cleanBeforeBuild: wipe node_modules before vercel build to avoid stale native binaries
-  // (esbuild / rollup host/binary version mismatch when reusing a cached install).
-  { name: "weather", cwd: path.join(repoRoot, "examples/weather"), project: "weather-signal", cleanBeforeBuild: true },
+  {
+    name: "stocks-optimizer",
+    cwd: path.join(repoRoot, "examples/stocks-optimizer"),
+    project: "stocks-optimizer",
+  },
 ];
 
 const extraArgs = process.argv.slice(2);
@@ -134,7 +134,6 @@ for (const target of targets) {
   }
 
   // Build locally to avoid Vercel remote install instability in this monorepo.
-  // Some examples (weather) need a clean node_modules to avoid stale native binary mismatches.
   if (target.cleanBeforeBuild) {
     const nodeModulesPath = path.join(target.cwd, "node_modules");
     console.log(`Removing ${nodeModulesPath} before build to ensure fresh native binaries...`);

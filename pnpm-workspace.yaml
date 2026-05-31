@@ -1,9 +1,9 @@
 packages:
-  - "packages/decision"
-  - "packages/decision-memory"
-  - "packages/db"
-  - "packages/agency"
-  - "packages/semantic-state"
+  - "packages/*"
+  - "backend/*"
+  - "apps/*"
+  - "docs"
+  - "landing"
   - "examples/stocks-optimizer"
   - "examples/stocks-optimizer/src/artifacts/*"
 
