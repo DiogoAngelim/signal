@@ -67092,6 +67092,58 @@
       },
       "createdAt": "2026-05-31T21:07:45.900Z",
       "updatedAt": "2026-05-31T21:07:45.900Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:SOLUSDT:EXIT:1780261727826",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "reconciliation_drift",
+        "exchange_filter_violation",
+        "exchange_filter_violation"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:SOLUSDT:EXIT:1780261727826",
+        "symbol": "SOLUSDT",
+        "action": "EXIT",
+        "confidence": 83,
+        "trust": 87.3,
+        "calibratedConfidence": 83,
+        "appSizePct": 1,
+        "expectedMovePct": -0.5969278361018682,
+        "riskState": "risk-exit",
+        "sizingMode": "none",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T21:08:47.826Z",
+        "price": 81.86
+      },
+      "createdAt": "2026-05-31T21:08:49.821Z",
+      "updatedAt": "2026-05-31T21:08:49.821Z"
+    },
+    {
+      "decisionId": "stocks-optimizer:BNBUSDT:BUY:1780261727826",
+      "status": "rejected",
+      "reasons": [
+        "kill_switch_active",
+        "reconciliation_drift"
+      ],
+      "decision": {
+        "id": "stocks-optimizer:BNBUSDT:BUY:1780261727826",
+        "symbol": "BNBUSDT",
+        "action": "BUY",
+        "confidence": 71.73,
+        "trust": 70.5,
+        "calibratedConfidence": 56.269999999999996,
+        "appSizePct": 0.1736111111111111,
+        "expectedMovePct": 2.8888836337770396,
+        "riskState": "confirmed",
+        "sizingMode": "micro",
+        "strategyId": "stocks-optimizer",
+        "timestamp": "2026-05-31T21:08:47.826Z",
+        "price": 710.22
+      },
+      "createdAt": "2026-05-31T21:08:49.877Z",
+      "updatedAt": "2026-05-31T21:08:49.877Z"
     }
   ],
   "orders": [
@@ -67140,21 +67192,6 @@
     }
   ],
   "snapshots": [
-    {
-      "expectedPositions": {
-        "BNBUSDT": 0.014
-      },
-      "actualPositions": {
-        "BNBUSDT": 0.0139895
-      },
-      "reservedCapital": 10.08602,
-      "activeExposure": 10.08602,
-      "driftDetected": true,
-      "driftReasons": [
-        "position_drift:BNBUSDT"
-      ],
-      "createdAt": "2026-05-31T12:07:24.004Z"
-    },
     {
       "expectedPositions": {
         "BNBUSDT": 0.014
@@ -74639,10 +74676,25 @@
         "position_drift:BNBUSDT"
       ],
       "createdAt": "2026-05-31T21:07:45.658Z"
+    },
+    {
+      "expectedPositions": {
+        "BNBUSDT": 0.014
+      },
+      "actualPositions": {
+        "BNBUSDT": 0.0139895
+      },
+      "reservedCapital": 10.08602,
+      "activeExposure": 10.08602,
+      "driftDetected": true,
+      "driftReasons": [
+        "position_drift:BNBUSDT"
+      ],
+      "createdAt": "2026-05-31T21:08:49.540Z"
     }
   ],
   "account": {
-    "syncedAt": "2026-05-31T21:07:47.559Z",
+    "syncedAt": "2026-05-31T21:08:51.540Z",
     "equity": 10.93376283,
     "availableEquity": 10.93376283,
     "balances": {
@@ -74663,7 +74715,7 @@
         "locked": 0
       },
       "BNB": {
-        "free": 0,
+        "free": 0.0139895,
         "locked": 0
       },
       "QTUM": {
@@ -75428,10 +75480,6 @@
       },
       "NKN": {
         "free": 0,
-        "locked": 0
-      },
-      "LDBNB": {
-        "free": 0.01394948,
         "locked": 0
       },
       "GBP": {
@@ -77701,7 +77749,7 @@
   "killSwitch": {
     "active": true,
     "reason": "reconciliation_drift:position_drift:BNBUSDT",
-    "updatedAt": "2026-05-31T21:07:45.693Z"
+    "updatedAt": "2026-05-31T21:08:49.587Z"
   },
   "circuitBreaker": {
     "state": "closed",
@@ -77709,8 +77757,8 @@
     "openedAt": null
   },
   "metrics": {
-    "decisions_received": 2595,
-    "decisions_rejected": 2593,
+    "decisions_received": 2597,
+    "decisions_rejected": 2595,
     "decisions_approved": 2,
     "orders_attempted": 2,
     "capital_reserved": 20.540239999999997,
@@ -77718,7 +77766,7 @@
     "api_failures": 9,
     "orders_accepted": 1,
     "order_latency_ms": 283,
-    "reconciliation_drift": 1218,
-    "kill_switch_activations": 1218
+    "reconciliation_drift": 1219,
+    "kill_switch_activations": 1219
   }
 }
