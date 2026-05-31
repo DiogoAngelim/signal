@@ -31,6 +31,7 @@ import {
   YAxis,
 } from "recharts";
 import {
+  fetchMarkets,
   fetchStockList,
   fetchStockQuoteBatch,
   registerSignalWatchlist,
@@ -58,6 +59,10 @@ import {
   type TrustGovernorDiagnostic,
   type WisdomDiagnostic,
 } from "@/lib/api";
+import {
+  parseDashboardStrategyLiveMarket,
+  parseDashboardTimeSeriesResponse,
+} from "@/lib/dashboard-data-adapter";
 import CommandCenter from "@/components/CommandCenter";
 import DecisionOperatingSystem, {
   type DecisionEvidenceStage,
@@ -102,15 +107,6 @@ const ENABLE_STRATEGY_API =
   import.meta.env.VITE_ENABLE_STRATEGY_API !== "false";
 const ENABLE_PORTFOLIO_API =
   import.meta.env.VITE_ENABLE_PORTFOLIO_API === "true";
-
-const DEFAULT_MARKET_OPTIONS: MarketOption[] = [
-  { code: "US", label: "Stocks", count: 0 },
-  { code: "BINANCE", label: "Crypto", count: 0 },
-  { code: "FOREX", label: "Forex", count: 0 },
-  { code: "ETF", label: "ETFs", count: 0 },
-  { code: "FUTURES", label: "Commodities", count: 0 },
-  { code: "INDEXES", label: "Indexes", count: 0 },
-];
 
 type MarketSchedule = {
   timeZone: string;
@@ -2950,8 +2946,9 @@ export default function Dashboard() {
     useRef<ExecutiveSummaryMetricSnapshot | null>(null);
   const activeMarketRef = useRef("");
 
-  const [markets] = useState<MarketOption[]>(DEFAULT_MARKET_OPTIONS);
+  const [markets, setMarkets] = useState<MarketOption[]>([]);
   const [marketFilter, setMarketFilter] = useState("");
+  const [refreshNonce, setRefreshNonce] = useState(0);
   activeMarketRef.current = marketFilter;
   const [stocks, setStocks] = useState<DisplayStock[]>([]);
   const [totalStocks, setTotalStocks] = useState(0);
@@ -2992,6 +2989,30 @@ export default function Dashboard() {
   const [meaningText, setMeaningText] = useState("");
   const registeredWatchlists = useRef(new Set<string>());
   const refreshedPortfolioMarkets = useRef(new Set<string>());
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMarkets() {
+      try {
+        const items = await fetchMarkets();
+        if (!cancelled) {
+          setMarkets(items);
+        }
+      } catch (error) {
+        console.warn("Could not load markets", error);
+        if (!cancelled) {
+          setMarkets([]);
+        }
+      }
+    }
+
+    void loadMarkets();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshNonce]);
 
   function getMarketData(market: string) {
     const existing = marketDataByMarketRef.current.get(market);
@@ -3270,7 +3291,7 @@ export default function Dashboard() {
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [marketFilter]);
+  }, [marketFilter, refreshNonce]);
 
   useEffect(() => {
     if (!marketFilter || !ENABLE_STRATEGY_API) {
@@ -3301,17 +3322,17 @@ export default function Dashboard() {
           },
         );
 
-        const payload = await asJsonOrNull(response);
+        const payload = parseDashboardStrategyLiveMarket(
+          await asJsonOrNull(response),
+        );
 
         if (cancelled) return;
 
         applyMarketDataPatch(market, {
-          strategySignals: Array.isArray(payload?.signals)
-            ? payload.signals
-            : [],
-          strategyRegime: payload?.regime ?? null,
-          opportunityDiscovery: payload?.opportunityDiscovery ?? null,
-          agencyDiagnostics: payload?.agencyDiagnostics ?? null,
+          strategySignals: payload.signals,
+          strategyRegime: payload.regime,
+          opportunityDiscovery: payload.opportunityDiscovery,
+          agencyDiagnostics: payload.agencyDiagnostics,
         });
       } catch (error) {
         console.warn(
@@ -3333,7 +3354,7 @@ export default function Dashboard() {
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [marketFilter]);
+  }, [marketFilter, refreshNonce]);
 
   const stocksWithStrategySignals = useMemo(() => {
     if (!strategySignals.length) return stocks;
@@ -3756,7 +3777,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     refreshedPortfolioMarkets.current.clear();
-  }, [marketFilter]);
+  }, [marketFilter, refreshNonce]);
 
   useEffect(() => {
     // Disabled damaged selected-history refresh effect after syntax recovery.
@@ -4585,8 +4606,9 @@ export default function Dashboard() {
         if (cancelled) return;
 
         const nextPortfolioSummary = normalizeStrategySummary(summary);
-        const nextPortfolioHistory = Array.isArray(history?.data)
-          ? history.data.map((point: any, index: number) => ({
+        const parsedHistory = parseDashboardTimeSeriesResponse(history);
+        const nextPortfolioHistory = parsedHistory.data.length
+          ? parsedHistory.data.map((point: any, index: number) => ({
               index,
               ...point,
               equity: Number(point.equity),
@@ -4622,7 +4644,7 @@ export default function Dashboard() {
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [marketFilter]);
+  }, [marketFilter, refreshNonce]);
 
   useEffect(() => {
     if (!marketFilter || !ENABLE_STRATEGY_API) return;
@@ -4654,8 +4676,10 @@ export default function Dashboard() {
         if (cancelled) return;
 
         const nextBacktestSummary = normalizeStrategySummary(summary);
-        const nextBacktestHistory = Array.isArray(history?.data)
-          ? history.data.map((point: any, index: number) => ({
+        const parsedHistory = parseDashboardTimeSeriesResponse(history);
+        const parsedTrades = parseDashboardTimeSeriesResponse(trades);
+        const nextBacktestHistory = parsedHistory.data.length
+          ? parsedHistory.data.map((point: any, index: number) => ({
               index,
               ...point,
               equity: Number(point.equity),
@@ -4668,8 +4692,8 @@ export default function Dashboard() {
             }))
           : normalizeStrategyArray(history);
 
-        const nextWalkForwardTrades = Array.isArray(trades?.trades)
-          ? trades.trades
+        const nextWalkForwardTrades = parsedTrades.data.length
+          ? parsedTrades.data
           : normalizeStrategyArray(trades);
 
         applyMarketDataPatch(market, {
@@ -4699,7 +4723,7 @@ export default function Dashboard() {
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [marketFilter]);
+  }, [marketFilter, refreshNonce]);
 
   const surface = useMemo(
     () =>
@@ -5506,7 +5530,7 @@ export default function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, [marketFilter]);
+  }, [marketFilter, refreshNonce]);
 
   const stockVisualBySymbol = useMemo(() => {
     const map = new Map<string, any>();
@@ -6971,6 +6995,7 @@ export default function Dashboard() {
     cachedMarketLabel: marketFilter || "No market selected",
     lastSuccessfulUpdateLabel,
     missingTrustAnalysis: trustAnalysisUnavailable,
+    staleData,
   });
 
   return (
@@ -6982,9 +7007,12 @@ export default function Dashboard() {
       }))}
       selectedMarket={marketFilter}
       onMarketChange={setMarketFilter}
-      onRefresh={() => void refreshQuotes(marketFilter, stocks, true)}
+      onRefresh={() => {
+        setRefreshNonce((current) => current + 1);
+        void refreshQuotes(marketFilter, stocks, true);
+      }}
       onContinueUsingCachedData={() => setContinueWithCachedData(true)}
-      refreshing={refreshingQuotes}
+      refreshing={refreshingQuotes || portfolioRefreshing}
       refreshError={visibleRefreshError}
       marketState={currentStrategyStateName}
       marketStatus={marketStatus === "Open" ? "Venue open" : "Venue closed"}

@@ -24,6 +24,13 @@ import {
   shouldProtectBacktestUrl,
 } from "./persistent-backtest-cache";
 import { sanitizePromotionState } from "./promotion-sanity";
+import {
+  type DashboardQuoteBatchResponse,
+  type DashboardStockListResponse,
+  parseDashboardMarketOptions,
+  parseDashboardQuoteBatchResponse,
+  parseDashboardStockListResponse,
+} from "./dashboard-data-adapter";
 export type StockStatus = "Stable" | "Rising" | "Watch" | "Dip";
 export type TradeSignal = "Hold" | "Buy" | "Sell";
 export type AllocationAction = TradeSignal | "Watch" | "Blocked";
@@ -1063,6 +1070,11 @@ export class ApiRequestError extends Error {
   ) {
     super(message);
     this.name = "ApiRequestError";
+    this.status = options?.status;
+    this.retryable = options?.retryable ?? false;
+    this.timedOut = options?.timedOut ?? false;
+  }
+}
 
 function sanitizeBacktestApiPayload<T>(url: string, payload: T): T {
   if (
@@ -1089,14 +1101,15 @@ function sanitizeBacktestApiPayload<T>(url: string, payload: T): T {
   if (
     anyPayload &&
     typeof anyPayload === "object" &&
-    ("tradeCount" in anyPayload || "survivalScore" in anyPayload || "backtestStatus" in anyPayload)
+    ("tradeCount" in anyPayload ||
+      "survivalScore" in anyPayload ||
+      "backtestStatus" in anyPayload)
   ) {
     return sanitizePromotionState(anyPayload) as T;
   }
 
   return payload;
 }
-
 
 function protectBacktestApiPayload<T>(url: string, method: string, payload: T): T {
   if (!shouldProtectBacktestUrl(url)) return payload;
@@ -1109,13 +1122,6 @@ function protectBacktestApiPayload<T>(url: string, method: string, payload: T): 
   }
 
   return sanitizeBacktestApiPayload(url, recovered);
-}
-
-
-    this.status = options?.status;
-    this.retryable = options?.retryable ?? false;
-    this.timedOut = options?.timedOut ?? false;
-  }
 }
 
 function delay(ms: number) {
@@ -1192,8 +1198,13 @@ async function request<T>(
         });
       }
 
-      const body = (await response.json()) as { data: T };
-      return body.data;
+      const body = (await response.json()) as { data?: T } | T;
+      const data =
+        body && typeof body === "object" && "data" in body
+          ? (body as { data: T }).data
+          : (body as T);
+      const method = String(fetchOptions.method ?? "GET").toUpperCase();
+      return protectBacktestApiPayload(rawPath, method, data);
     } catch (error) {
       const normalized =
         error instanceof ApiRequestError
@@ -1225,47 +1236,21 @@ async function request<T>(
   throw new ApiRequestError("Request failed", { retryable: false });
 }
 
-export async function fetchMarkets(): Promise<any[]> {
+export async function fetchMarkets(): Promise<MarketOption[]> {
   const response = await request<any>("/api/stocks/markets");
-
-  if (Array.isArray(response)) return response;
-  if (Array.isArray(response?.data)) return response.data;
-  if (Array.isArray(response?.items)) return response.items;
-  if (Array.isArray(response?.markets)) return response.markets;
-
-  return [];
+  return parseDashboardMarketOptions(response);
 }
 
 export async function fetchStockList(
   market: string,
   offset = 0,
   limit = 50,
-): Promise<any> {
-  const response = await request<any>(
+): Promise<DashboardStockListResponse> {
+  const response = await request<unknown>(
     `/api/stocks/list?market=${encodeURIComponent(market)}&offset=${offset}&limit=${limit}`,
   );
 
-  const items =
-    Array.isArray(response)
-      ? response
-      : Array.isArray(response?.data)
-        ? response.data
-        : Array.isArray(response?.items)
-          ? response.items
-          : Array.isArray(response?.stocks)
-            ? response.stocks
-            : [];
-
-  console.log("[api] fetchStockList", { market, items, response });
-  return {
-    ...response,
-    data: items,
-    items,
-    total: Number(response?.total ?? items.length),
-    offset: Number(response?.offset ?? offset),
-    limit: Number(response?.limit ?? limit),
-    market: response?.market ?? market,
-  };
+  return parseDashboardStockListResponse(response, { market, offset, limit });
 }
 
 export async function fetchStockQuoteBatch(
@@ -1276,8 +1261,8 @@ export async function fetchStockQuoteBatch(
     timeoutMs?: number;
     retryCount?: number;
   },
-): Promise<{ quotes: any[] }> {
-  const response = await request<any>("/api/stocks/quotes", {
+): Promise<DashboardQuoteBatchResponse> {
+  const response = await request<unknown>("/api/stocks/quotes", {
     method: "POST",
     body: JSON.stringify({
       market,
@@ -1288,19 +1273,10 @@ export async function fetchStockQuoteBatch(
     }),
   });
 
-  const quotes =
-    Array.isArray(response)
-      ? response
-      : Array.isArray(response?.quotes)
-        ? response.quotes
-        : Array.isArray(response?.data)
-          ? response.data
-          : Array.isArray(response?.items)
-            ? response.items
-            : [];
-
-  console.log("[api] fetchStockQuoteBatch", { market, symbols, quotes });
-  return { quotes };
+  return parseDashboardQuoteBatchResponse(response, {
+    market,
+    requestedSymbols: symbols,
+  });
 }
 
 export async function fetchStockQuotes(
@@ -1447,14 +1423,5 @@ export async function reviewPortfolioDecisionOutcomes(input: {
     body: JSON.stringify(input),
     timeoutMs: 30_000,
     retryCount: 0,
-  });
-}
-
-export async function emitFakeSignal(
-  data: Partial<StockData> & { symbol?: string; market?: string } = {},
-): Promise<{ emitted: boolean }> {
-  return request<{ emitted: boolean }>("/stocks/signals/fake", {
-    method: "POST",
-    body: JSON.stringify(data),
   });
 }

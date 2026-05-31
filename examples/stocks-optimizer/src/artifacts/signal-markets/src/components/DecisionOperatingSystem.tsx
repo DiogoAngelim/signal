@@ -439,17 +439,15 @@ const MARKET_ENTRY_OPTIONS = [
   {
     label: "Stocks",
     match: /stock|stocks|nasdaq|nyse|amex|us\b/i,
-    fallback: "US",
   },
-  { label: "Crypto", match: /binance|crypto/i, fallback: "BINANCE" },
-  { label: "Forex", match: /forex|fx|currency/i, fallback: "FOREX" },
-  { label: "ETFs", match: /etf|fund/i, fallback: "ETF" },
+  { label: "Crypto", match: /binance|crypto/i },
+  { label: "Forex", match: /forex|fx|currency/i },
+  { label: "ETFs", match: /etf|fund/i },
   {
     label: "Commodities",
     match: /commod|future|futures|gold|oil|metal|energy/i,
-    fallback: "FUTURES",
   },
-  { label: "Indexes", match: /index|indices|spx|ndx|dow/i, fallback: "INDEXES" },
+  { label: "Indexes", match: /index|indices|spx|ndx|dow/i },
 ];
 
 const GUIDE_GOALS = [
@@ -467,7 +465,7 @@ function marketEntryValue(
     (market) =>
       entry.match.test(market.value) || entry.match.test(market.label),
   );
-  return match?.value ?? entry.fallback;
+  return match?.value ?? "";
 }
 
 function primaryMarketValue(
@@ -476,7 +474,7 @@ function primaryMarketValue(
   const stocks = MARKET_ENTRY_OPTIONS.find((entry) => entry.label === "Stocks");
   return stocks
     ? marketEntryValue(stocks, marketOptions)
-    : (marketOptions[0]?.value ?? "US");
+    : (marketOptions[0]?.value ?? "");
 }
 
 function SkeletonBlock({ className }: { className?: string }) {
@@ -1126,7 +1124,9 @@ export default function DecisionOperatingSystem({
     state.kind === "no-market" ? "No market selected" : readinessState;
   const headerMarket = selectedMarket || "No market selected";
   const systemNotice =
-    state.kind === "refreshing" || state.kind === "partial-data"
+    state.kind === "refreshing" ||
+    state.kind === "partial-data" ||
+    state.kind === "stale-data"
       ? `${cleanSentence(state.headline)} ${cleanSentence(state.description)}`
       : refreshError;
 

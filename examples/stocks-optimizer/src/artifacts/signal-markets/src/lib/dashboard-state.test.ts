@@ -57,6 +57,9 @@ describe("dashboard state resolver", () => {
       resolveDashboardViewState({ ...baseInput, missingTrustAnalysis: true })
         .kind,
     ).toBe("partial-data");
+    expect(
+      resolveDashboardViewState({ ...baseInput, staleData: true }).kind,
+    ).toBe("stale-data");
     expect(resolveDashboardViewState(baseInput).kind).toBe("success");
   });
 
@@ -81,5 +84,8 @@ describe("dashboard state resolver", () => {
       resolveDashboardViewState({ ...baseInput, missingTrustAnalysis: true })
         .headline,
     ).toBe("Review ideas, but keep size small.");
+    expect(
+      resolveDashboardViewState({ ...baseInput, staleData: true }).headline,
+    ).toBe("Review, but treat data as stale.");
   });
 });

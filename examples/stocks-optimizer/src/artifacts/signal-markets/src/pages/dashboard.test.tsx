@@ -102,6 +102,18 @@ describe("Dashboard calibration diagnostics", () => {
     expect(html).not.toContain("Skill Tree");
   });
 
+  it("does not render production mock market data before live data arrives", () => {
+    const html = renderToStaticMarkup(<Dashboard />);
+
+    expect(html).not.toContain("Apple Inc.");
+    expect(html).not.toContain("Microsoft Corp.");
+    expect(html).not.toContain("Tesla Inc.");
+    expect(html).not.toContain("SPDR S&amp;P 500 ETF");
+    expect(html).not.toContain("Mostly Stable");
+    expect(html).not.toContain("Temporary fake");
+    expect(html).not.toContain("fake Buy");
+  });
+
   it("does not display participation needs when commitment gates are blocked", () => {
     const needs = resolveDashboardNeedDiagnostics({
       rawNeeds: [

@@ -6,6 +6,7 @@ export type DashboardViewStateKind =
   | "empty-results"
   | "error"
   | "partial-data"
+  | "stale-data"
   | "success";
 
 export type DashboardViewState = {
@@ -33,6 +34,7 @@ export type DashboardViewStateInput = {
   cachedMarketLabel?: string | null;
   lastSuccessfulUpdateLabel?: string | null;
   missingTrustAnalysis?: boolean;
+  staleData?: boolean;
 };
 
 function baseState(
@@ -115,6 +117,13 @@ export function resolveDashboardViewState(
       headline: "Review ideas, but keep size small.",
       description:
         "Opportunity analysis is available, but reliability evidence is incomplete. Wait for a fresh trust update before increasing exposure.",
+    });
+  }
+
+  if (input.staleData) {
+    return baseState("stale-data", input, {
+      headline: "Review, but treat data as stale.",
+      description: `Last successful update: ${input.lastSuccessfulUpdateLabel || "Not synced"}. Refresh before increasing exposure.`,
     });
   }
 

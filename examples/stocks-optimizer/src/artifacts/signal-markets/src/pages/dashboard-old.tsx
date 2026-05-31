@@ -37,7 +37,6 @@ import {
 } from "lucide-react";
 import {
   ApiRequestError,
-  emitFakeSignal,
   fetchSignalHistory,
   fetchMarkets,
   fetchStockList,
@@ -1895,59 +1894,6 @@ export default function Dashboard() {
       ws?.close();
     };
   }, [WS_URLS.join("|")]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    (window as any).signalMarketsFakeSignal = async (
-      data: Partial<StockData> & { symbol?: string } = {},
-    ) => {
-      try {
-        await emitFakeSignal({ market: marketFilterRef.current || "DEV", ...data });
-      } catch {
-      }
-
-      const symbol = data.symbol ?? data.ticker ?? "BINANCE:POLBRL";
-      const price = Number(data.price ?? 0.47);
-      const signal = {
-        symbol,
-        ticker: symbol,
-        name: data.name ?? "Temporary fake signal",
-        price,
-        changePercent: data.changePercent ?? 1.5,
-        status: data.status ?? "Rising",
-        high52: data.high52 ?? price,
-        low52: data.low52 ?? 0.46,
-        history: data.history ?? [0.46, price],
-        summary: data.summary ?? "Temporary fake Buy + Rising signal.",
-        impact: data.impact ?? "Dev-only browser console signal.",
-        signalAction: data.signalAction ?? "Buy",
-        signalConfidence: data.signalConfidence ?? 88,
-        signalSource: data.signalSource ?? "heuristic",
-        signalEmittedAt: data.signalEmittedAt ?? new Date().toISOString(),
-        signalEntryPrice: data.signalEntryPrice ?? 0.46,
-        ...data,
-      } satisfies Partial<StockData> & { symbol: string };
-
-      toast(describeSignalToast(signal));
-      setSignalHistory((current) => [
-        makeLocalSignalEvent(signal, marketFilterRef.current),
-        ...current,
-      ].slice(0, 100));
-      setStocks((prev) => {
-        const idx = prev.findIndex((stock) => stock.ticker === symbol);
-        if (idx === -1) return [signal as StockData, ...prev];
-        return prev.map((stock, index) =>
-          index === idx ? { ...stock, ...signal } : stock,
-        );
-      });
-      setUpdateMsg(`Fake signal received for ${symbol}.`);
-    };
-
-    return () => {
-      delete (window as any).signalMarketsFakeSignal;
-    };
-  }, []);
 
   async function refreshVisibleQuotes(reason: string) {
     const currentStocks = stocksRef.current;

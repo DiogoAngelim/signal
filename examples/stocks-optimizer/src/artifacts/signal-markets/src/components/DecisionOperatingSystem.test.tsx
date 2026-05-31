@@ -1,4 +1,9 @@
 import type { DashboardViewState } from "@/lib/dashboard-state";
+import {
+  parseDashboardMarketOptions,
+  parseDashboardQuoteBatchResponse,
+  parseDashboardStockListResponse,
+} from "@/lib/dashboard-data-adapter";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import DecisionOperatingSystem, {
@@ -308,6 +313,82 @@ describe("DecisionOperatingSystem states", () => {
     expect(degraded).toContain("What We Don&#x27;t Know");
   });
 
+  it("renders values passed through the live API adapter contract", () => {
+    const markets = parseDashboardMarketOptions({
+      data: [{ code: "LSE", label: "London Stocks", count: 2134 }],
+    });
+    const stocks = parseDashboardStockListResponse(
+      {
+        data: [
+          {
+            symbol: "VOD.L",
+            name: "Vodafone Group",
+            exchange: "LSE",
+            price: 71.2,
+          },
+        ],
+      },
+      { market: "LSE", offset: 0, limit: 50 },
+    );
+    const quotes = parseDashboardQuoteBatchResponse(
+      {
+        quotes: [
+          {
+            symbol: "VOD.L",
+            price: 71.2,
+            changePercent: 2.4,
+          },
+        ],
+      },
+      { market: "LSE", requestedSymbols: ["VOD.L"] },
+    );
+    const stock = stocks.items[0];
+    const quote = quotes.quotes[0];
+
+    const html = renderToStaticMarkup(
+      <DecisionOperatingSystem
+        {...props({
+          marketOptions: markets.map((market) => ({
+            value: market.code,
+            label: market.label,
+          })),
+          selectedMarket: markets[0]?.code ?? "",
+          marketState: "London trend confirmation",
+          marketStatus: "Venue open",
+          lastSyncedLabel: "2026-05-31 17:45 ET",
+          bestOpportunityLabel: stock?.symbol ?? "",
+          opportunities: [
+            {
+              ...props().opportunities[0],
+              id: stock?.symbol ?? "VOD.L",
+              ticker: stock?.symbol ?? "VOD.L",
+              name: stock?.name ?? "Vodafone Group",
+              readinessPct: 88,
+              thesis: `${stock?.name ?? "Vodafone Group"} is ranked from live LSE data.`,
+              drivers: [
+                `Price ${quote?.price}`,
+                `Change ${quote?.changePercent}%`,
+              ],
+            },
+          ],
+          selectedOpportunityId: stock?.symbol ?? "VOD.L",
+          rawMetrics: [
+            { label: "Live Price", value: String(quote?.price) },
+            { label: "Live Change", value: `${quote?.changePercent}%` },
+          ],
+        })}
+      />,
+    );
+
+    expect(html).toContain("LSE");
+    expect(html).toContain("Vodafone Group");
+    expect(html).toContain("London trend confirmation");
+    expect(html).toContain("2026-05-31 17:45 ET");
+    expect(html).toContain("Live Price");
+    expect(html).toContain("71.2");
+    expect(html).not.toContain("Apple");
+  });
+
   it("keeps long labels and many opportunities inside scrollable regions", () => {
     const longText =
       "Extremely Long Opportunity Name With Many Words And No Useful Short Alias For A Narrow Viewport";
@@ -380,7 +461,7 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).toContain("sticky bottom-2");
   });
 
-  it("renders connection, empty, error, partial, refresh, and loading states", () => {
+  it("renders connection, empty, error, partial, stale, refresh, and loading states", () => {
     const connection = renderToStaticMarkup(
       <DecisionOperatingSystem
         {...props({
@@ -449,6 +530,23 @@ describe("DecisionOperatingSystem states", () => {
     );
     expect(partial).toContain("Review ideas, but keep size small.");
     expect(partial).toContain('data-testid="decision-step-screen"');
+
+    const stale = renderToStaticMarkup(
+      <DecisionOperatingSystem
+        {...props({
+          state: {
+            ...successState,
+            kind: "stale-data",
+            headline: "Review, but treat data as stale.",
+            description:
+              "Last successful update: 12 seconds ago. Refresh before increasing exposure.",
+          },
+        })}
+      />,
+    );
+    expect(stale).toContain("Review, but treat data as stale.");
+    expect(stale).toContain("Refresh before increasing exposure.");
+    expect(stale).toContain('data-testid="decision-step-screen"');
 
     const refreshing = renderToStaticMarkup(
       <DecisionOperatingSystem
