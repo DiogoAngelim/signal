@@ -11,6 +11,8 @@ import { discover } from "../discovery/engine";
 import type { DiscoveryInput } from "../discovery/engine";
 import { evaluateExecutionReadiness } from "../execution/readiness";
 import { evaluateJudgement } from "../judgement";
+import { evaluateLegacy } from "../legacy/engine";
+import type { LegacyInput } from "../legacy/engine";
 import { clamp, immutable, mean, stdev } from "../math/statistics";
 import type { MetricRegistry } from "../metrics/registry";
 import { detectNeeds } from "../need-detection/engine";
@@ -230,6 +232,22 @@ export class SignalFrameworkEngine {
         history: this.store.history(),
       }),
     );
+    const legacy = evaluateLegacy(
+      buildLegacyInput({
+        context,
+        timestamp,
+        perception,
+        diagnostics,
+        discovery,
+        discoveryIntelligence,
+        recognition,
+        judgement,
+        agency,
+        viability,
+        executionReadiness,
+        previousLegacy: this.store.latest()?.legacy,
+      }),
+    );
     const events: SignalSnapshot["events"] = [
       {
         type: "cycle.completed",
@@ -284,6 +302,22 @@ export class SignalFrameworkEngine {
         governanceScore: discoveryIntelligence.governance.score,
       },
     });
+    events.push({
+      type: "legacy.evaluated",
+      timestamp,
+      payload: {
+        score: legacy.score,
+        reputation: legacy.reputation.rank,
+        title: legacy.title.name,
+      },
+    });
+    for (const event of legacy.events) {
+      events.push({
+        type: event.type,
+        timestamp,
+        payload: event.payload,
+      });
+    }
     if (judgement) {
       events.push({
         type: `judgement.${judgement.status}`,
@@ -351,6 +385,7 @@ export class SignalFrameworkEngine {
       discovery,
       discoveryIntelligence,
       recognition,
+      legacy,
       decision,
       agency,
       viability,
@@ -976,6 +1011,56 @@ function buildDiscoveryIntelligenceInput(args: {
     outcomes: outcomeRecords,
     restrictions: restrictionRecords,
     traces,
+  };
+}
+
+function buildLegacyInput(args: {
+  context: SignalContext;
+  timestamp: number;
+  perception: PerceptionEvaluation;
+  diagnostics: NonNullable<SignalSnapshot["diagnostics"]>;
+  discovery: NonNullable<SignalSnapshot["discovery"]>;
+  discoveryIntelligence: NonNullable<SignalSnapshot["discoveryIntelligence"]>;
+  recognition: NonNullable<SignalSnapshot["recognition"]>;
+  judgement?: SignalSnapshot["judgement"];
+  agency: NonNullable<SignalSnapshot["agency"]>;
+  viability?: SignalSnapshot["viability"];
+  executionReadiness: NonNullable<SignalSnapshot["executionReadiness"]>;
+  previousLegacy?: SignalSnapshot["legacy"];
+}): LegacyInput {
+  const supplied = args.context.legacy ?? {};
+  const suppliedScores = supplied.scores ?? {};
+  const recoveryScore = finiteMaybe(suppliedScores.recovery);
+  const governanceApproved = args.agency.status === "approved" || (finiteMaybe(suppliedScores.governance) ?? 0) >= 80;
+
+  return {
+    now: supplied.now ?? new Date(args.timestamp).toISOString(),
+    history: supplied.history ?? args.previousLegacy?.history,
+    eventLog: supplied.eventLog,
+    config: supplied.config,
+    scores: {
+      trust: args.diagnostics.trust,
+      recovery: recoveryScore,
+      governance: args.discoveryIntelligence.governance.score,
+      survival: args.perception.layers.survival?.score,
+      agency: args.agency.agencyScore,
+      wisdom: args.discoveryIntelligence.metaLearning.score,
+      discovery: args.discovery.maturity,
+      recognition: args.recognition.recognitionScore,
+      judgement: args.judgement?.trust,
+      readiness: args.executionReadiness.readinessScore,
+      viability: args.viability?.score,
+      institutionalization: args.discoveryIntelligence.institutionalization.institutionalizationScore,
+      ...(suppliedScores ?? {}),
+    },
+    counters: {
+      ...(supplied.counters ?? {}),
+    },
+    flags: {
+      governanceApproved,
+      recoveryComplete: (recoveryScore ?? 0) >= 80,
+      ...(supplied.flags ?? {}),
+    },
   };
 }
 

@@ -21,3 +21,7 @@ Capability documents describe the actual runtime surface.
 - cancellation
 - idempotency
 - replay safety
+
+## Signal Framework Capabilities
+
+Framework modules can expose typed capability surfaces alongside protocol operations. `signal.legacy` publishes durable progression outputs and the `legacy.*` event catalog for achievements, badges, milestones, unlocks, titles, reputation, campaigns, prestige, and victories.

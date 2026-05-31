@@ -10,7 +10,7 @@ Signal owns:
 
 - metric normalization and perception layers
 - reflection, calibration, judgement, recognition, and discovery
-- trust, survival memory, recovery, resolve, viability, and sizing
+- trust, survival memory, recovery, legacy, resolve, viability, and sizing
 - auditable reasons, blockers, unlock conditions, and invalidation conditions
 
 Applications own:
@@ -41,6 +41,7 @@ The snapshot can include:
 - reflection and calibration state
 - discovery, recognition, judgement, and belief
 - survival memory, trust, recovery, sizing, and resolve outputs
+- legacy reputation, titles, achievements, badges, milestones, campaigns, unlocks, and prestige
 - reasons, blockers, warnings, unlock conditions, and invalidation conditions
 
 ## Stocks Optimizer Integration
@@ -77,5 +78,6 @@ The app-specific adapters translate stock and crypto data into generic Signal in
 - Treat every confidence value as evidence-bound.
 - Prefer explicit blockers over hidden penalties.
 - Keep risk gates composable: survival, calibration, trust, recovery, resolve, and sizing should be independently inspectable.
+- Keep Identity presentational: titles and permanent accomplishments should come from Legacy.
 - Do not let recognition of a familiar state bypass survival or trust restoration.
 - Do not execute from framework output without an application-owned action boundary.

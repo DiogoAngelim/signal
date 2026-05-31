@@ -10,6 +10,7 @@ import type {
 } from "../discovery-intelligence/engine";
 import type { DiscoveryInput, DiscoveryResult } from "../discovery/engine";
 import type { JudgementInput, JudgementResult } from "../judgement";
+import type { LegacyInput, LegacyOutput } from "../legacy/engine";
 import type { RecognitionInput, RecognitionResult } from "../recognition/engine";
 import type { ReflectionInput, ReflectionResult } from "../reflection/engine";
 import type { ViabilityInput, ViabilityResult } from "../viability/engine";
@@ -422,6 +423,7 @@ export type SignalSnapshot = {
   decision?: DecisionResult | null;
   agency?: AgencyResult;
   viability?: ViabilityResult;
+  legacy?: LegacyOutput;
   regime: RegimeState;
   synchronization: SynchronizationState;
   diagnostics: DiagnosticsState;
@@ -459,6 +461,7 @@ export type SignalContext = {
   decision?: DecisionResult | null;
   agency?: AgencyInput;
   viability?: Partial<ViabilityInput>;
+  legacy?: Partial<LegacyInput>;
   observations?: ObservationPoint[];
   signals?: SignalRecord[];
   outcomes?: SignalOutcome[];

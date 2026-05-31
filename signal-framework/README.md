@@ -18,6 +18,7 @@ Each layer has a separate responsibility:
 - Decision: what should happen?
 - Agency: should the decision be allowed to proceed?
 - Action: execute the approved intent.
+- Legacy: what durable accomplishments were earned?
 
 Reflection increases self-awareness. Calibration turns raw confidence into evidence-backed confidence. Agency increases autonomy. These layers do not contain application-specific logic.
 
@@ -191,6 +192,14 @@ The result is auditable. It includes raw confidence, calibrated confidence, trus
 ## Action
 
 Action is the only layer that executes. It should consume an approved Agency result and the original decision intent. The framework keeps Agency separate from Action so execution can be replaced, simulated, reviewed, retried, or rolled back without changing decision logic.
+
+## Legacy
+
+Legacy records permanent operator progression after recovery and before identity presentation. It calculates reputation, selects operator titles, unlocks achievements and badges, tracks campaign completions, stores milestones and unlock history, and detects prestige eligibility.
+
+Use `evaluateLegacy(input)` with domain-neutral scores, counters, flags, prior history, and optional custom rules. Identity surfaces should consume `legacy.title` and `legacy.history` rather than deriving accomplishments directly.
+
+See [Signal Legacy](./legacy/README.md) for the lifecycle, rule model, event catalog, persistence pattern, and migration guide.
 
 ## Generic Usage Examples
 

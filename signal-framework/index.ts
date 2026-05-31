@@ -56,6 +56,7 @@ export * from "./executive/engine";
 export * from "./execution-quality/engine";
 export * from "./execution/readiness";
 export * from "./judgement";
+export * from "./legacy/engine";
 export * from "./math/statistics";
 export * from "./metrics/normalization";
 export * from "./metrics/registry";

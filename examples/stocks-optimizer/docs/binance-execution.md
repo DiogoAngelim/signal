@@ -212,10 +212,26 @@ BUY quantity. Market orders remain disabled; take-profit exits use `LIMIT` or
 `LIMIT_MAKER` only. If a signal does not include `expectedMovePct`, the worker
 skips take-profit for that order instead of inventing a target.
 
+When a take-profit exit is accepted, the worker records the source BUY signal in
+`BINANCE_WORKER_CLEARED_SIGNALS_FILE` and filters that fingerprint out of future
+decision pulls. This prevents the same completed signal from being re-bought
+while the optimizer is still publishing it. The record is pruned automatically
+once the strategy emits a materially different signal for that symbol.
+
 Manual worker check:
 
 ```sh
 curl -X POST http://localhost:8787/take-profit/check \
+  -H 'Authorization: Bearer <BINANCE_WORKER_ADMIN_SECRET>'
+```
+
+Inspect or reset cleared signals:
+
+```sh
+curl http://localhost:8787/cleared-signals \
+  -H 'Authorization: Bearer <BINANCE_WORKER_ADMIN_SECRET>'
+
+curl -X DELETE http://localhost:8787/cleared-signals \
   -H 'Authorization: Bearer <BINANCE_WORKER_ADMIN_SECRET>'
 ```
 

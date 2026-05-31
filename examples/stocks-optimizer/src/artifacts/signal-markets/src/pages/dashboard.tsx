@@ -59,7 +59,15 @@ import {
   type TrustGovernorDiagnostic,
   type WisdomDiagnostic,
 } from "@/lib/api";
+import CommandCenter from "@/components/CommandCenter";
+import DecisionOperatingSystem, {
+  type DecisionEvidenceStage,
+  type DecisionOpportunity,
+  type DecisionTone,
+  type DecisionWorkflowStep,
+} from "@/components/DecisionOperatingSystem";
 import MarketPerceptionEngine from "@/components/MarketPerceptionEngine";
+import { buildCommandCenterViewModel } from "@/lib/command-center";
 import {
   MarketStateEngine,
   buildMarketPerceptionMetrics,
@@ -5908,7 +5916,7 @@ export default function Dashboard() {
     topCanonicalRestriction?.explanation ?? dashboardSizing.limitedReason;
   const currentStrategyStateName = hasMarketData
     ? regime
-    : "Loading market view";
+    : "Awaiting market confirmation";
   const executiveConfidencePct =
     calibratedConfidenceDisplay ?? rawConfidenceDisplay ?? confidence ?? null;
   const executiveTrustPct =
@@ -5948,7 +5956,7 @@ export default function Dashboard() {
         ? "bad"
         : "warn";
   const executiveDecisionSentence = !hasMarketData
-    ? "Loading prices, signals, and market context before making a posture recommendation."
+    ? "Do not allocate capital until prices, signals, and governance evidence are synchronized."
     : dashboardSizing.suggestedMaximumExposurePct === 0 &&
         dashboardSizing.marketHealthPct >= 60
       ? dashboardSizing.exposureExplanation
@@ -6000,12 +6008,14 @@ export default function Dashboard() {
       : dashboardSizing.operatorState.zeroExposureLabel;
   const canonicalStarterSize =
     starterExposurePct > 0 ? fmtPlainPct(starterExposurePct) : "Wait";
-  const operatorAction = operatorActionLabel({
-    finalDecision: executiveIA.executiveReasoning.finalDecision,
-    sizingMode: dashboardSizing.sizingMode,
-    exposurePct: dashboardSizing.suggestedMaximumExposurePct,
-    hasMarketData,
-  });
+  const operatorAction = !hasMarketData
+    ? "Wait"
+    : operatorActionLabel({
+        finalDecision: executiveIA.executiveReasoning.finalDecision,
+        sizingMode: dashboardSizing.sizingMode,
+        exposurePct: dashboardSizing.suggestedMaximumExposurePct,
+        hasMarketData,
+      });
   const operatorTone =
     !hasMarketData || dashboardSizing.sizingDecision === "blocked"
       ? dashboardSizing.sizingDecision === "blocked"
@@ -6182,6 +6192,565 @@ export default function Dashboard() {
   const accountabilityHighlights = governanceEvolution.accountabilityLoop
     .filter((step) => step.status !== "complete")
     .slice(0, 3);
+  const commandCenterModel = buildCommandCenterViewModel({
+    market: marketFilter || "Market",
+    strategyState: currentStrategyStateName,
+    operatorAction,
+    operatorSummary,
+    finalDecision: executiveIA.executiveReasoning.finalDecision,
+    participationMode:
+      executiveIA.executiveReasoning.recommendedParticipationMode,
+    sizingMode: dashboardSizing.sizingMode,
+    exposurePct: dashboardSizing.suggestedMaximumExposurePct,
+    topRestriction: topCanonicalRestriction
+      ? {
+          label: topCanonicalRestriction.label,
+          explanation: topCanonicalRestriction.explanation,
+          unlockCondition: primaryUnlockCondition,
+          invalidationCondition: primaryInvalidationCondition,
+        }
+      : null,
+    trustScore:
+      (trustGovernor ? finiteNumber(trustGovernor.trustScore) : null) ??
+      (hasAgencyDiagnostics ? agencyTrustPct : null) ??
+      calibrationTrustworthinessDisplay,
+    survivalConfidence: survivalConfidenceValue,
+    readinessScore: readinessScoreDisplay,
+    historyDepthScore,
+    historyCoverageYears,
+    regimeCoverageScore,
+    sampleDiversityScore,
+    calibrationTrustworthiness: calibrationTrustworthinessDisplay,
+    calibrationSampleSize,
+    knowledgeCompletenessScore:
+      finiteNumber(
+        discoveryIntelligenceDiagnostic?.institutionalization
+          ?.institutionalizationScore,
+      ) ??
+      finiteNumber(wisdomDiagnostic?.discoveryMaturity?.maturityScore) ??
+      finiteNumber(discoveryAccountabilityDiagnostic?.maturity),
+    dataReliabilityScore:
+      finiteNumber(strategyReadiness?.components?.dataReliability?.score) ??
+      agencyDataReliabilityPct,
+    agencyMaturityScore: agencyTrustPct,
+    memoryDepthScore: historyDepthScore,
+    discoveryScore:
+      finiteNumber(discoveryIntelligenceDiagnostic?.score) ??
+      finiteNumber(discoveryAccountabilityDiagnostic?.accountabilityScore),
+    recognitionScore: finiteNumber(recognitionDiagnostic?.recognitionScore),
+    judgementScore:
+      finiteNumber(judgementDiagnostic?.trust) ??
+      finiteNumber(judgementDiagnostic?.reliability) ??
+      finiteNumber(judgementDiagnostic?.calibration),
+    recoveryScore:
+      finiteNumber(recoveryDiagnostic?.recoveryScore) ?? restorationProgressPct,
+    wisdomScore: finiteNumber(wisdomDiagnostic?.wisdomScore),
+    riskControlScore: avgRisk == null ? null : 100 - avgRisk,
+    overfitRiskScore:
+      robustnessOverfitRisk ??
+      finiteNumber(judgementDiagnostic?.overfitRisk) ??
+      agencyOverfitRiskPct,
+    restorationProgress: restorationProgressDiagnostic,
+    recovery: recoveryDiagnostic,
+    trustGovernor,
+    readinessRemediation,
+    activeRestrictions: restrictionImpactRows
+      .filter((restriction) => restriction.code !== "clear")
+      .map((restriction) => ({
+        code: restriction.code,
+        label: restriction.label,
+        explanation: restriction.explanation,
+        unlockCondition: restriction.unlockCondition,
+        progressPct: 100 - restriction.impactPct,
+      })),
+    unlockConditions: increaseExposureTriggers,
+    invalidationConditions: reduceOrInvalidateTriggers,
+    nextActions: restorationPathTriggers,
+    cleanOutcomeCount: restorationOutcomeProof?.cleanReducedSizeOutcomeCount,
+    requiredCleanOutcomeCount: restorationOutcomeProof?.requiredCleanOutcomes,
+    activeBoundaryBreakCount: restorationActiveBoundaryBreaks,
+    historicalMatches:
+      finiteNumber(recognitionDiagnostic?.matchedSamples) ??
+      finiteNumber(judgementDiagnostic?.similarSampleSize),
+    normalSizingRestored:
+      restorationProgressDiagnostic?.canRestoreSizing === true ||
+      recoveryDiagnostic?.canRestoreSizing === true ||
+      dashboardSizing.sizingMode === "normal",
+    governanceApproved:
+      dashboardDecisionStates.permission.allowed === true &&
+      (dashboardDecisionStates.capacity.mode === "normal" ||
+        dashboardDecisionStates.capacity.mode === "expanded"),
+    hasSurvivalScar:
+      (survivalMemoryDiagnostic?.scarCount ?? 0) > 0 ||
+      ["scarred", "watch", "limited"].includes(
+        String(restorationProgressDiagnostic?.restorationState ?? ""),
+      ),
+  });
+
+  const decisionToneForPct = (
+    value: number | null | undefined,
+    reverse = false,
+  ): DecisionTone => {
+    if (value == null || !Number.isFinite(Number(value))) return "neutral";
+    const normalized = clamp(Number(value));
+    if (reverse) {
+      if (normalized <= 38) return "good";
+      if (normalized <= 68) return "warn";
+      return "bad";
+    }
+    if (normalized >= 72) return "good";
+    if (normalized >= 48) return "warn";
+    return "bad";
+  };
+  const decisionStageStatus = (
+    value: number | null | undefined,
+    reverse = false,
+  ): "Pass" | "Caution" | "Fail" => {
+    const tone = decisionToneForPct(value, reverse);
+    if (tone === "good") return "Pass";
+    if (tone === "bad") return "Fail";
+    return "Caution";
+  };
+  const compactDecisionLines = (values: Array<unknown>, fallback: string) => {
+    const lines = uniqueStrings(
+      values
+        .flat()
+        .map((value) => String(value ?? "").trim())
+        .filter(Boolean),
+    ).slice(0, 3);
+    return lines.length ? lines : [fallback];
+  };
+
+  const decisionOpportunitySource = displayedTopOpportunities.length
+    ? displayedTopOpportunities
+    : allocationUniverse
+        .filter((stock) => hasStockEvidence(stock))
+        .sort(
+          (a, b) =>
+            numeric(b.setupQuality) -
+            numeric(b.riskPressure) * 0.3 -
+            (numeric(a.setupQuality) - numeric(a.riskPressure) * 0.3),
+        )
+        .slice(0, 6);
+  const decisionOpportunities: DecisionOpportunity[] =
+    decisionOpportunitySource.map((stock) => {
+      const ticker = normalizedTicker(stock) || "PENDING";
+      const qualityPct = clamp(numeric(stock.setupQuality));
+      const trustPct =
+        finiteNumber(stock.trustGovernor?.trustScore) ??
+        finiteNumber(stock.judgement?.trust) ??
+        finiteNumber(stock.judgement?.reliability) ??
+        executiveTrustPct;
+      const riskPct = clamp(numeric(stock.riskPressure));
+      const timingPct = clamp(numeric(stock.timingQuality));
+      const trendPct = clamp(numeric(stock.trendQuality));
+      const discoveryPct =
+        finiteNumber(stock.discoveryScore) ??
+        finiteNumber((stock.discovery as any)?.score) ??
+        qualityPct;
+      const readinessPct = clamp(
+        qualityPct * 0.3 +
+          (trustPct ?? qualityPct) * 0.22 +
+          (100 - riskPct) * 0.2 +
+          timingPct * 0.14 +
+          trendPct * 0.09 +
+          discoveryPct * 0.05,
+      );
+      const failedConstraints = (stock.sizingConstraints ?? [])
+        .filter((constraint) => constraint && !constraint.passed)
+        .map(
+          (constraint) =>
+            constraint.reason ??
+            constraint.label ??
+            "A sizing constraint is still unresolved.",
+        );
+      const discoveryMissing = Array.isArray(
+        (stock.discovery as any)?.missingEvidence,
+      )
+        ? (stock.discovery as any).missingEvidence
+        : [];
+      const discoveryInvalidations = Array.isArray(
+        (stock.discovery as any)?.invalidationConditions,
+      )
+        ? (stock.discovery as any).invalidationConditions
+        : [];
+
+      return {
+        id: ticker,
+        ticker,
+        name: stockName(stock),
+        action: String(
+          stock.allocationAction ?? stock.signalAction ?? operatorAction,
+        ),
+        readinessPct,
+        exposureLabel:
+          numeric(stock.suggestedExposure) > 0
+            ? fmtPlainPct(numeric(stock.suggestedExposure))
+            : "Watch",
+        maxExposureLabel:
+          numeric(stock.suggestedExposure) > 0
+            ? fmtPlainPct(numeric(stock.suggestedExposure))
+            : canonicalPerAssetCap,
+        qualityPct,
+        trustPct: trustPct ?? null,
+        riskPct,
+        timingPct,
+        thesis:
+          stock.explanation ??
+          `${ticker} is ranked by opportunity quality, timing, trend, risk pressure, and current allocation permission.`,
+        context:
+          stock.mandate ??
+          `${marketFilter || "The market"} is in ${currentStrategyStateName}; participation is ${executiveIA.executiveReasoning.recommendedParticipationMode}.`,
+        support: compactDecisionLines(
+          [
+            stock.sizingRationale,
+            stock.sizingReasons,
+            stock.discoveryLifecycle
+              ? `Discovery lifecycle: ${stock.discoveryLifecycle}`
+              : "",
+            trendPct >= 60 ? "Trend quality supports continued review." : "",
+          ],
+          `${ticker} is inside the ranked opportunity set.`,
+        ),
+        contradictions: compactDecisionLines(
+          [
+            failedConstraints,
+            stock.rejectionReason,
+            riskPct >= 70 ? "Risk pressure is elevated." : "",
+            numeric(stock.suggestedExposure) <= 0
+              ? "Exposure has not cleared sizing permission."
+              : "",
+          ],
+          "No promoted contradiction.",
+        ),
+        missing: compactDecisionLines(
+          [
+            discoveryMissing,
+            failedConstraints,
+            numeric(stock.suggestedExposure) <= 0 ? primaryUnlockCondition : "",
+          ],
+          primaryUnlockCondition,
+        ),
+        invalidations: compactDecisionLines(
+          [discoveryInvalidations, primaryInvalidationCondition],
+          primaryInvalidationCondition,
+        ),
+        drivers: compactDecisionLines(
+          [
+            `Quality ${fmtPlainPct(qualityPct, 0)}`,
+            `Timing ${fmtPlainPct(timingPct, 0)}`,
+            `Risk ${fmtPlainPct(riskPct, 0)}`,
+          ],
+          `${ticker} is being monitored by the decision engine.`,
+        ),
+      };
+    });
+  const selectedDecisionOpportunityId =
+    selectedTicker &&
+    decisionOpportunities.some((opportunity) => opportunity.id === selectedTicker)
+      ? selectedTicker
+      : decisionOpportunities[0]?.id ?? null;
+  const primaryDecisionOpportunity =
+    decisionOpportunities.find(
+      (opportunity) => opportunity.id === selectedDecisionOpportunityId,
+    ) ??
+    decisionOpportunities[0] ??
+    null;
+  const decisionReadinessPct = hasMarketData
+    ? clamp(
+        (readinessScoreDisplay ?? 50) * 0.28 +
+          dashboardSizing.marketHealthPct * 0.18 +
+          (executiveTrustPct ?? 50) * 0.18 +
+          (executiveConfidencePct ?? 50) * 0.14 +
+          (100 - (avgRisk ?? 50)) * 0.12 +
+          (dashboardSizing.suggestedMaximumExposurePct > 0 ? 75 : 35) * 0.1,
+      )
+    : 0;
+  const decisionReadinessState = !hasMarketData
+    ? "Observe"
+    : dashboardSizing.sizingDecision === "blocked" || decisionReadinessPct < 25
+      ? "Not Investable"
+      : decisionReadinessPct < 40
+        ? "Observe"
+        : decisionReadinessPct < 55
+          ? "Watch"
+          : decisionReadinessPct < 70
+            ? "Prepare"
+            : decisionReadinessPct < 85
+              ? "Ready"
+              : "Execute";
+  const decisionReadinessTone = decisionToneForPct(decisionReadinessPct);
+  const bestOpportunityLabel =
+    primaryDecisionOpportunity?.ticker ??
+    (showingBlockedReviewIdeas ? "Review candidates" : "Pending");
+  const mainRiskLabel = !hasMarketData
+    ? "Data unavailable"
+    : topCanonicalRestriction?.label ?? "No active limiter";
+  const missingEvidenceLabel = !hasMarketData
+    ? "Market data synchronization"
+    : primaryDecisionOpportunity?.missing[0] ??
+      primaryUnlockCondition ??
+      "Market confirmation";
+  const readinessWhy = hasMarketData
+    ? (executiveIA.executiveReasoning as any).summary ?? executiveDecisionSentence
+    : "Prices, signals, and governance evidence are still synchronizing.";
+  const readinessImprover =
+    !hasMarketData
+      ? "Restore market and strategy data sync."
+      : increaseExposureTriggers[0] ??
+        primaryDecisionOpportunity?.support[0] ??
+        "Improve market confirmation and sizing permission.";
+  const readinessBlocker =
+    !hasMarketData
+      ? "No market data has cleared the briefing gate."
+      : reduceOrInvalidateTriggers[0] ??
+        topCanonicalRestriction?.explanation ??
+        "No hard blocker is currently promoted.";
+  const executionStatus = String(executionQualityDiagnostic?.status ?? "");
+  const executionStatusPct =
+    executionStatus === "excellent" || executionStatus === "good"
+      ? 78
+      : executionStatus === "blocked" || executionStatus === "poor"
+        ? 30
+        : 55;
+  const decisionEvidenceLadder: DecisionEvidenceStage[] = [
+    {
+      id: "market-context",
+      label: "Market Context",
+      status: hasMarketData
+        ? decisionStageStatus(dashboardSizing.marketHealthPct)
+        : "Caution",
+      explanation: hasMarketData
+        ? `${currentStrategyStateName} with market health at ${fmtPlainPct(dashboardSizing.marketHealthPct, 0)}.`
+        : "Market context is loading.",
+    },
+    {
+      id: "signal-agreement",
+      label: "Signal Agreement",
+      status: decisionStageStatus(executiveConfidencePct),
+      explanation: `Confidence is ${fmtPlainPct(executiveConfidencePct, 0)} after calibration and signal agreement.`,
+    },
+    {
+      id: "opportunity-quality",
+      label: "Opportunity Quality",
+      status: decisionStageStatus(primaryDecisionOpportunity?.qualityPct),
+      explanation: primaryDecisionOpportunity
+        ? `${primaryDecisionOpportunity.ticker} quality is ${fmtPlainPct(primaryDecisionOpportunity.qualityPct, 0)}.`
+        : "No ranked opportunity has cleared the evidence filter.",
+    },
+    {
+      id: "risk-control",
+      label: "Risk Control",
+      status: decisionStageStatus(avgRisk, true),
+      explanation:
+        avgRisk == null
+          ? "Risk pressure is pending."
+          : `Risk pressure is ${fmtPlainPct(avgRisk, 0)} across covered opportunities.`,
+    },
+    {
+      id: "survival-memory",
+      label: "Survival Memory",
+      status: decisionStageStatus(survivalConfidenceValue),
+      explanation:
+        survivalConfidenceValue == null
+          ? "Survival memory has not reported a confidence value."
+          : `Survival confidence is ${fmtPlainPct(survivalConfidenceValue, 0)}.`,
+    },
+    {
+      id: "calibration",
+      label: "Calibration",
+      status: decisionStageStatus(calibrationTrustworthinessDisplay),
+      explanation:
+        calibrationTrustworthinessDisplay == null
+          ? "Calibration trustworthiness is pending."
+          : `Calibration trustworthiness is ${fmtPlainPct(calibrationTrustworthinessDisplay, 0)} across ${calibrationSampleSize ?? 0} samples.`,
+    },
+    {
+      id: "liquidity",
+      label: "Liquidity",
+      status: decisionStageStatus(executionStatusPct),
+      explanation:
+        (executionQualityDiagnostic as any)?.liquidityExplanation ??
+        "Execution quality is inferred from current readiness and venue state.",
+    },
+    {
+      id: "governance",
+      label: "Governance",
+      status: dashboardDecisionStates.permission.allowed
+        ? "Pass"
+        : dashboardDecisionStates.permission.level === "blocked"
+          ? "Fail"
+          : "Caution",
+      explanation: `Permission is ${dashboardDecisionStates.permission.level.replace(/_/g, " ")}.`,
+    },
+    {
+      id: "execution-quality",
+      label: "Execution Quality",
+      status: decisionStageStatus(executionStatusPct),
+      explanation:
+        (executionQualityDiagnostic as any)?.summary ??
+        `Execution status is ${executionStatus || "pending"}.`,
+    },
+    {
+      id: "decision-readiness",
+      label: "Decision Readiness",
+      status: decisionStageStatus(decisionReadinessPct),
+      explanation: `${decisionReadinessState} at ${fmtPlainPct(decisionReadinessPct, 0)}.`,
+    },
+  ];
+  const decisionActionPlan = {
+    asset: primaryDecisionOpportunity?.ticker ?? "Pending",
+    direction: operatorAction,
+    exposure: primaryDecisionOpportunity?.exposureLabel ?? canonicalStarterSize,
+    entryLogic:
+      !hasMarketData
+        ? "Wait for market data synchronization before changing exposure."
+        : primaryDecisionOpportunity?.support[0] ??
+          "Wait for market confirmation before changing exposure.",
+    riskConstraints:
+      !hasMarketData
+        ? "No new exposure while the market feed is unavailable."
+        : primaryDecisionOpportunity?.contradictions[0] ??
+          topCanonicalRestriction?.explanation ??
+          "Respect current portfolio and per-asset caps.",
+    exitConditions:
+      reduceOrInvalidateTriggers[0] ??
+      primaryDecisionOpportunity?.invalidations[0] ??
+      primaryInvalidationCondition,
+    invalidation:
+      primaryDecisionOpportunity?.invalidations[0] ??
+      primaryInvalidationCondition,
+    portfolioImpact: `Portfolio cap ${canonicalPortfolioCap}; per-asset cap ${primaryDecisionOpportunity?.maxExposureLabel ?? canonicalPerAssetCap}.`,
+    nextAction: operatorAction,
+  };
+  const decisionWorkflow: DecisionWorkflowStep[] = [
+    {
+      id: "intent",
+      label: "Intent",
+      question: "What decision am I trying to make?",
+      output: `${operatorAction} with ${canonicalStarterSize} starter size.`,
+      detail: operatorSummary,
+      status: "Intent set",
+    },
+    {
+      id: "sense",
+      label: "Sense",
+      question: "What is happening?",
+      output: currentStrategyStateName,
+      detail: executiveDecisionSentence,
+      status: hasMarketData ? "Market read" : "Sync pending",
+    },
+    {
+      id: "pulse",
+      label: "Pulse",
+      question: "What opportunity matters most?",
+      output: primaryDecisionOpportunity
+        ? `${primaryDecisionOpportunity.ticker} leads the ranked list.`
+        : "No ranked opportunity yet.",
+      detail: `${decisionOpportunities.length} opportunities are ranked by quality, trust, timing, risk, and sizing permission.`,
+      status: `${decisionOpportunities.length} ranked`,
+    },
+    {
+      id: "core",
+      label: "Core",
+      question: "Why does this opportunity exist?",
+      output: primaryDecisionOpportunity?.thesis ?? "Thesis pending.",
+      detail:
+        primaryDecisionOpportunity?.context ??
+        "The system is waiting for enough context to explain the opportunity.",
+      status: "Thesis",
+    },
+    {
+      id: "judgement",
+      label: "Judgement",
+      question: "Can I trust this?",
+      output: decisionEvidenceLadder
+        .map((stage) => stage.status)
+        .includes("Fail")
+        ? "Trust is constrained."
+        : "Trust is explainable.",
+      detail: `The evidence ladder is ${decisionEvidenceLadder.filter((stage) => stage.status === "Pass").length}/10 pass with ${decisionEvidenceLadder.filter((stage) => stage.status === "Caution").length} cautions.`,
+      status: "Trust report",
+    },
+    {
+      id: "sizing",
+      label: "Sizing",
+      question: "How much risk is appropriate?",
+      output: decisionActionPlan.exposure,
+      detail: dashboardSizing.exposureExplanation,
+      status: dashboardSizing.sizingMode,
+    },
+    {
+      id: "action",
+      label: "Action",
+      question: "What exactly should I do?",
+      output: decisionActionPlan.nextAction,
+      detail: `${decisionActionPlan.asset}: ${decisionActionPlan.direction} at ${decisionActionPlan.exposure}.`,
+      status: operatorAction,
+    },
+    {
+      id: "reflection",
+      label: "Reflection",
+      question: "What happened?",
+      output: "Outcome review pending.",
+      detail:
+        "Expected outcome, observed outcome, forecast error, and model adjustments will update after the next review cycle.",
+      status: "Learning loop",
+    },
+  ];
+  const decisionRawMetrics = [
+    { label: "Confidence", value: fmtPlainPct(executiveConfidencePct, 0) },
+    { label: "Trust", value: fmtPlainPct(executiveTrustPct, 0) },
+    { label: "Market Health", value: fmtPlainPct(dashboardSizing.marketHealthPct, 0) },
+    { label: "Opportunity Density", value: fmtPlainPct(adaptiveOpportunityDensityPct, 0) },
+    { label: "Risk Pressure", value: fmtPlainPct(avgRisk, 0) },
+    { label: "Readiness", value: fmtPlainPct(decisionReadinessPct, 0) },
+    { label: "Portfolio Cap", value: canonicalPortfolioCap },
+    { label: "Starter Size", value: canonicalStarterSize },
+    { label: "Survival", value: fmtPlainPct(survivalConfidenceValue, 0) },
+    { label: "Calibration", value: fmtPlainPct(calibrationTrustworthinessDisplay, 0) },
+    { label: "History Depth", value: historyDepthScore == null ? "—" : fmtPlainPct(historyDepthScore, 0) },
+    { label: "Regime Coverage", value: regimeCoverageScore == null ? "—" : fmtPlainPct(regimeCoverageScore, 0) },
+  ];
+
+  return (
+    <DecisionOperatingSystem
+      marketOptions={markets.map((market) => ({
+        value: marketCode(market),
+        label: marketLabel(market),
+      }))}
+      selectedMarket={marketFilter}
+      onMarketChange={setMarketFilter}
+      onRefresh={() => void refreshQuotes(marketFilter, stocks, true)}
+      refreshing={refreshingQuotes}
+      refreshError={visibleRefreshError}
+      marketState={currentStrategyStateName}
+      marketStatus={marketStatus === "Open" ? "Venue open" : "Venue closed"}
+      lastSyncedLabel={lastSyncedLabel}
+      readinessPct={decisionReadinessPct}
+      readinessState={decisionReadinessState}
+      readinessTone={decisionReadinessTone}
+      bestOpportunityLabel={bestOpportunityLabel}
+      recommendedAction={operatorAction}
+      suggestedExposure={
+        primaryDecisionOpportunity?.exposureLabel ?? canonicalStarterSize
+      }
+      mainRisk={mainRiskLabel}
+      missingEvidence={missingEvidenceLabel}
+      executiveNarrative={executiveDecisionSentence}
+      readinessWhy={readinessWhy}
+      readinessImprover={readinessImprover}
+      readinessBlocker={readinessBlocker}
+      opportunities={decisionOpportunities}
+      selectedOpportunityId={selectedDecisionOpportunityId}
+      onSelectOpportunity={setSelectedTicker}
+      evidenceLadder={decisionEvidenceLadder}
+      workflow={decisionWorkflow}
+      actionPlan={decisionActionPlan}
+      rawMetrics={decisionRawMetrics}
+    />
+  );
+
   const currentExecutiveSummaryMetrics: ExecutiveSummaryMetricSnapshot = {
     market: marketFilter,
     confidenceValue:
@@ -6227,10 +6796,10 @@ export default function Dashboard() {
             </div>
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#FDD000]">
-                Investment dashboard
+                Command Center
               </div>
               <h1 className="text-xl font-semibold tracking-tight text-white">
-                Decision console
+                Signal command center
               </h1>
             </div>
           </div>
@@ -6270,6 +6839,8 @@ export default function Dashboard() {
             {visibleRefreshError}
           </div>
         ) : null}
+
+        <CommandCenter model={commandCenterModel} />
 
         <section
           data-testid="executive-summary"

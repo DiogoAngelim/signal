@@ -14,89 +14,30 @@ import Dashboard, {
 } from "./dashboard";
 
 describe("Dashboard calibration diagnostics", () => {
-  it("renders calibration diagnostics without breaking the existing dashboard shell", () => {
+  it("renders the Decision Operating System shell", () => {
     const html = renderToStaticMarkup(<Dashboard />);
 
-    expect(html).toContain("Investment dashboard");
-    expect(html).toContain("Executive Reasoning");
-    expect(html).toContain("Final action");
-    expect(html).toContain("Operator command");
-    expect(html).toContain("Governance Evolution");
-    expect(html).toContain("Decision authority and learning loop");
-    expect(html).toContain("Operator command");
-    expect(html).toContain("Confidence ledger");
-    expect(html).toContain("Restriction accountability");
-    expect(html).toContain("Evidence Summary");
-    expect(html).toContain("Strongest justification");
-    expect(html).toContain("Decision Pipeline");
-    expect(html).toContain("Discovery to Output");
-    expect(html).toContain("Why not full size?");
-    expect(html).toContain("What would change the decision?");
-    expect(html).toContain("Terminology hierarchy");
-    expect(html).toContain("Survival Memory Restoration Ledger");
-    expect(html).toContain("Clean proof");
-    expect(html).toContain("Ledger state");
-    expect(html).toContain("Normal sizing restoration");
-    expect(html).toContain("Restoration action plan");
-    expect(html).toContain("Remaining clean outcomes");
-    expect(html).toContain("Active lane breaks");
-    expect(html).toContain("Calibration");
-    expect(html).toContain("Belief diagnostics");
-    expect(html).toContain("Recognition diagnostics");
-    expect(html).toContain("Recurrence");
-    expect(html).toContain("Historical similarity");
-    expect(html).toContain("Judgement similarity");
-    expect(html).toContain("History Coverage");
-    expect(html).toContain("History Depth");
-    expect(html).toContain("Regime Coverage");
-    expect(html).toContain("Regime Diversity");
-    expect(html).toContain("Coverage Status");
-    expect(html).toContain(
-      "Extended history improves regime awareness and calibration. Recent outcomes still govern sizing restoration.",
-    );
-    expect(html).toContain("Judgement diagnostics");
-    expect(html).toContain("Survival memory diagnostics");
-    expect(html).toContain("Survival memory status");
-    expect(html).toContain("Scar count");
-    expect(html).toContain("Near-ruin count");
-    expect(html).toContain("Average survival cost");
-    expect(html).toContain("Recovery burden");
-    expect(html).toContain("Survival confidence");
-    expect(html).toContain("Current state similarity to past fragile states");
-    expect(html).toContain("Resolve diagnostics");
-    expect(html).toContain("Discovery confidence");
-    expect(html).toContain("Discovery support");
-    expect(html).toContain("Discovery contradictions");
-    expect(html).toContain("Memory summary");
-    expect(html).toContain("Human review required");
-    expect(html).toContain(
-      "Judgement compares the current state with similar historical situations and checks whether past outcomes justify trusting the current signal.",
-    );
-    expect(html).toContain("Evidence agreement");
-    expect(html).toContain("Top supporting evidence");
-    expect(html).toContain("Top contradictory evidence");
-    expect(html).toContain("Raw confidence");
-    expect(html).toContain("Calibrated confidence");
-    expect(html).toContain("Trustworthiness");
-    expect(html).toContain("Readiness remediation planner");
-    expect(html).toContain(
-      "Calibration checks whether past confidence matched actual outcomes.",
-    );
+    expect(html).toContain('data-testid="decision-operating-system"');
+    expect(html).toContain('data-testid="decision-step-screen"');
+    expect(html).toContain('data-active-step="intent"');
+    expect(html).toContain("Decision Operating System");
+    expect(html).toContain("Market State");
+    expect(html).toContain("Decision Readiness");
+    expect(html).toContain("Recommended Action");
+    expect(html).toContain("Suggested Exposure");
   });
 
-  it("renders a decision-first executive summary with the required priority signals", () => {
+  it("renders one active decision question with the repeated step structure", () => {
     const html = renderToStaticMarkup(<Dashboard />);
 
-    expect(html).toContain('data-testid="executive-summary"');
-    expect(html).toContain('data-layout="responsive-executive-grid"');
-    expect(html).toContain("Confidence / Trust");
-    expect(html).toContain("Max Exposure");
-    expect(html).toContain("Portfolio Posture");
-    expect(html).toContain("Risk state:");
-    expect(html).toContain("Operator command");
-    expect(html).toContain("Portfolio cap");
-    expect(html).toContain("Starter size");
-    expect(html).toContain('data-mobile-posture-summary="true"');
+    expect(html).toContain("What decision am I trying to make?");
+    expect(html).toContain("Decision Summary");
+    expect(html).toContain('data-testid="supporting-evidence-panel"');
+    expect(html).toContain("Supporting Evidence");
+    expect(html).toContain("Recommended Next Step");
+    expect(html).toContain("Current Decision");
+    expect(html).not.toContain("What is happening?");
+    expect(html).not.toContain("What opportunity matters most?");
   });
 
   it("holds executive summary metrics steady during quote refresh", () => {
@@ -148,52 +89,42 @@ describe("Dashboard calibration diagnostics", () => {
     ).toEqual({ ...transient, market: "ETF" });
   });
 
-  it("groups the dashboard into calmer decision layers", () => {
+  it("renders the eight-step decision workflow", () => {
     const html = renderToStaticMarkup(<Dashboard />);
 
-    expect(html).toContain("Executive Summary");
-    expect(html).toContain("Market Health");
-    expect(html).toContain("Opportunity &amp; Allocation");
-    expect(html).toContain("Risk &amp; Constraints");
-    expect(html).toContain("Signal Diagnostics");
-    expect(html).toContain("System Intelligence");
-    expect(html).toContain("Raw/Advanced Details");
+    expect(html).toContain("Intent");
+    expect(html).toContain("Sense");
+    expect(html).toContain("Pulse");
+    expect(html).toContain("Core");
+    expect(html).toContain("Judgement");
+    expect(html).toContain("Sizing");
+    expect(html).toContain("Action");
+    expect(html).toContain("Reflection");
   });
 
-  it("keeps advanced/internal sections collapsed by default", () => {
+  it("keeps metrics and diagnostics behind progressive disclosure modes", () => {
     const html = renderToStaticMarkup(<Dashboard />);
 
-    expect(html).toContain(
-      'data-advanced-section="Signal diagnostics and internal engine traces"',
-    );
-    expect(html).toContain('data-advanced-section="All evidence checks"');
-    expect(html).toContain(
-      'data-advanced-section="Calibration internals and readiness gates"',
-    );
-    expect(html).toContain('data-advanced-section="Calibration internals"');
-    expect(html).toContain(
-      'data-advanced-section="Trace details and raw contributors"',
-    );
-    expect(html).toContain(
-      'data-advanced-section="Overfit/risk diagnostics and strategy audit logs"',
-    );
-    expect(html).toContain(
-      'data-advanced-section="Backtest detail and benchmark context"',
-    );
+    expect(html).toContain("Default");
+    expect(html).toContain("Evidence");
+    expect(html).toContain("Advanced");
+    expect(html).toContain("Expert");
+    expect(html).toContain("Debug");
+    expect(html).toContain("Conclusion view");
+    expect(html).not.toContain("Advanced view");
+    expect(html).not.toContain("Expert view");
+    expect(html).not.toContain("Debug view");
     expect(html).not.toContain("<details open");
   });
 
-  it("keeps responsive dashboard structure on the primary sections", () => {
+  it("does not render the old gamified dashboard surface", () => {
     const html = renderToStaticMarkup(<Dashboard />);
 
-    expect(html).toContain("responsive-executive-grid");
-    expect(html).toContain("grid-cols-2");
-    expect(html).toContain("sm:grid-cols-2");
-    expect(html).toContain("xl:grid-cols-4");
-    expect(html).toContain(
-      "xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]",
-    );
-    expect(html).toContain('data-layout="responsive-ledger-row"');
+    expect(html).not.toContain('data-testid="command-center"');
+    expect(html).not.toContain("Operator Level");
+    expect(html).not.toContain("Campaign Progress");
+    expect(html).not.toContain("Boss Battles");
+    expect(html).not.toContain("Skill Tree");
   });
 
   it("does not display participation needs when commitment gates are blocked", () => {

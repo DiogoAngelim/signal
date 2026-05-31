@@ -41,6 +41,31 @@ type IgnoredSignalBaseline = {
   }>;
 };
 
+type ClearedSignalRecord = {
+  fingerprint: string;
+  clearedAt: string;
+  reason: "take_profit_reached";
+  strategyId?: string;
+  symbol: string;
+  action: string;
+  riskState?: string;
+  sizingMode?: string;
+  appSizePct: number;
+  buyOrderId: string;
+  buyClientOrderId: string;
+  takeProfitDecisionId: string;
+  entryPrice: number;
+  currentPrice: number;
+  targetPrice: number;
+  expectedMovePct: number;
+};
+
+type ClearedSignalStore = {
+  updatedAt: string;
+  fingerprints: string[];
+  signals: ClearedSignalRecord[];
+};
+
 type TakeProfitOrderType = "LIMIT" | "LIMIT_MAKER";
 
 type TakeProfitCandidate = {
@@ -173,6 +198,11 @@ function ignoreBaselineFile() {
     path.resolve(process.cwd(), ".local-cache/binance-execution/ignored-current-signals.json");
 }
 
+function clearedSignalsFile() {
+  return envString("BINANCE_WORKER_CLEARED_SIGNALS_FILE") ||
+    path.resolve(process.cwd(), ".local-cache/binance-execution/cleared-signals.json");
+}
+
 function readIgnoredBaseline(): IgnoredSignalBaseline | null {
   try {
     const file = ignoreBaselineFile();
@@ -186,6 +216,55 @@ function readIgnoredBaseline(): IgnoredSignalBaseline | null {
     };
   } catch {
     return null;
+  }
+}
+
+function emptyClearedSignalStore(): ClearedSignalStore {
+  return {
+    updatedAt: new Date(0).toISOString(),
+    fingerprints: [],
+    signals: [],
+  };
+}
+
+function isClearedSignalRecord(value: unknown): value is ClearedSignalRecord {
+  const record = value as Partial<ClearedSignalRecord>;
+  return Boolean(
+    record &&
+      typeof record.fingerprint === "string" &&
+      typeof record.clearedAt === "string" &&
+      typeof record.symbol === "string" &&
+      typeof record.action === "string" &&
+      typeof record.buyOrderId === "string" &&
+      typeof record.buyClientOrderId === "string" &&
+      typeof record.takeProfitDecisionId === "string" &&
+      Number.isFinite(Number(record.appSizePct)) &&
+      Number.isFinite(Number(record.entryPrice)) &&
+      Number.isFinite(Number(record.currentPrice)) &&
+      Number.isFinite(Number(record.targetPrice)) &&
+      Number.isFinite(Number(record.expectedMovePct))
+  );
+}
+
+function readClearedSignalStore(): ClearedSignalStore {
+  try {
+    const file = clearedSignalsFile();
+    if (!fs.existsSync(file)) return emptyClearedSignalStore();
+    const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as Partial<ClearedSignalStore>;
+    const signals = Array.isArray(parsed.signals)
+      ? parsed.signals.filter(isClearedSignalRecord)
+      : [];
+    const fingerprints = Array.from(new Set([
+      ...(Array.isArray(parsed.fingerprints) ? parsed.fingerprints.map(String) : []),
+      ...signals.map((signal) => signal.fingerprint),
+    ]));
+    return {
+      updatedAt: String(parsed.updatedAt ?? new Date(0).toISOString()),
+      fingerprints,
+      signals,
+    };
+  } catch {
+    return emptyClearedSignalStore();
   }
 }
 
@@ -208,11 +287,36 @@ function writeIgnoredBaseline(decisions: BinanceExecutionDecision[]) {
   return baseline;
 }
 
+function writeClearedSignalStore(signals: ClearedSignalRecord[]) {
+  const deduped = new Map<string, ClearedSignalRecord>();
+  for (const signal of signals) deduped.set(signal.fingerprint, signal);
+  const normalizedSignals = Array.from(deduped.values())
+    .sort((a, b) => Date.parse(a.clearedAt) - Date.parse(b.clearedAt))
+    .slice(-500);
+  const store: ClearedSignalStore = {
+    updatedAt: new Date().toISOString(),
+    fingerprints: normalizedSignals.map((signal) => signal.fingerprint),
+    signals: normalizedSignals,
+  };
+  const file = clearedSignalsFile();
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(store, null, 2), "utf8");
+  return store;
+}
+
 function clearIgnoredBaseline() {
   try {
     fs.rmSync(ignoreBaselineFile(), { force: true });
   } catch {
     // Clearing the optional baseline should not prevent other worker actions.
+  }
+}
+
+function clearClearedSignals() {
+  try {
+    fs.rmSync(clearedSignalsFile(), { force: true });
+  } catch {
+    // Clearing the optional cleared-signal ledger should not prevent other worker actions.
   }
 }
 
@@ -227,9 +331,76 @@ function decisionFingerprint(decision: BinanceExecutionDecision) {
   ].join("|");
 }
 
+function clearReachedSignal(input: {
+  order: ExecutionOrderRecord;
+  decision: BinanceExecutionDecision;
+  entryPrice: number;
+  currentPrice: number;
+  targetPrice: number;
+  expectedMovePct: number;
+}) {
+  const fingerprint = decisionFingerprint(input.decision);
+  const signal: ClearedSignalRecord = {
+    fingerprint,
+    clearedAt: new Date().toISOString(),
+    reason: "take_profit_reached",
+    strategyId: input.decision.strategyId,
+    symbol: input.decision.symbol,
+    action: input.decision.action,
+    riskState: input.decision.riskState,
+    sizingMode: input.decision.sizingMode,
+    appSizePct: Number(input.decision.appSizePct),
+    buyOrderId: input.order.id,
+    buyClientOrderId: input.order.clientOrderId,
+    takeProfitDecisionId: takeProfitDecisionId(input.order),
+    entryPrice: input.entryPrice,
+    currentPrice: input.currentPrice,
+    targetPrice: input.targetPrice,
+    expectedMovePct: input.expectedMovePct,
+  };
+  const current = readClearedSignalStore();
+  return writeClearedSignalStore([
+    ...current.signals.filter((existing) => existing.fingerprint !== fingerprint),
+    signal,
+  ]);
+}
+
+function refreshClearedSignals(currentDecisions: BinanceExecutionDecision[]) {
+  const store = readClearedSignalStore();
+  if (!store.signals.length) return store;
+
+  const currentBySymbol = new Map<string, Set<string>>();
+  for (const decision of currentDecisions) {
+    const key = [
+      String(decision.strategyId ?? ""),
+      String(decision.symbol ?? "").toUpperCase(),
+    ].join("|");
+    const fingerprints = currentBySymbol.get(key) ?? new Set<string>();
+    fingerprints.add(decisionFingerprint(decision));
+    currentBySymbol.set(key, fingerprints);
+  }
+
+  const signals = store.signals.filter((signal) => {
+    const key = [
+      String(signal.strategyId ?? ""),
+      String(signal.symbol ?? "").toUpperCase(),
+    ].join("|");
+    const currentFingerprints = currentBySymbol.get(key);
+    return !currentFingerprints || currentFingerprints.has(signal.fingerprint);
+  });
+
+  return signals.length === store.signals.length
+    ? store
+    : writeClearedSignalStore(signals);
+}
+
 function filterIgnoredDecisions(decisions: BinanceExecutionDecision[]) {
   const baseline = readIgnoredBaseline();
-  const ignored = new Set(baseline?.fingerprints ?? []);
+  const cleared = refreshClearedSignals(decisions);
+  const ignored = new Set([
+    ...(baseline?.fingerprints ?? []),
+    ...cleared.fingerprints,
+  ]);
   const accepted: BinanceExecutionDecision[] = [];
   const skipped: BinanceExecutionDecision[] = [];
 
@@ -245,6 +416,7 @@ function filterIgnoredDecisions(decisions: BinanceExecutionDecision[]) {
     accepted,
     skipped,
     baseline,
+    cleared,
   };
 }
 
@@ -453,6 +625,17 @@ async function checkTakeProfitOrders(trigger = "manual"): Promise<TakeProfitChec
         expectedMovePct,
         result,
       });
+
+      if (result.status !== "failed" && result.status !== "rejected" && decision) {
+        clearReachedSignal({
+          order,
+          decision,
+          entryPrice,
+          currentPrice,
+          targetPrice,
+          expectedMovePct,
+        });
+      }
     } catch (error) {
       candidates.push({
         ...baseCandidate,
@@ -472,6 +655,21 @@ async function checkTakeProfitOrders(trigger = "manual"): Promise<TakeProfitChec
     checkedAt,
     inspectedOrderCount: buyOrders.length,
     candidates,
+  };
+}
+
+function mergeTakeProfitResults(
+  first: TakeProfitCheckResult,
+  second: TakeProfitCheckResult | null,
+): TakeProfitCheckResult {
+  if (!second) return first;
+  return {
+    ok: first.ok && second.ok,
+    enabled: first.enabled || second.enabled,
+    trigger: first.trigger,
+    checkedAt: second.checkedAt,
+    inspectedOrderCount: Math.max(first.inspectedOrderCount, second.inspectedOrderCount),
+    candidates: [...first.candidates, ...second.candidates],
   };
 }
 
@@ -504,13 +702,13 @@ async function runOnce(options: RunOptions = {}) {
   runInFlight = true;
   try {
     const decisionPayload = await fetchDecisionPayload(options);
+    const preExecutionTakeProfit = await checkTakeProfitOrders(options.trigger ?? "manual");
     const decisions = decisionPayload.decisions ?? [];
     const filtered = filterIgnoredDecisions(decisions);
     if (requireIgnoredBaseline && !filtered.baseline) {
-      const takeProfit = await checkTakeProfitOrders(options.trigger ?? "manual");
       lastRunAt = new Date().toISOString();
       lastRun = {
-        ok: takeProfit.ok,
+        ok: preExecutionTakeProfit.ok,
         skipped: true,
         reason: "ignored_signal_baseline_missing",
         trigger: options.trigger ?? "manual",
@@ -520,7 +718,8 @@ async function runOnce(options: RunOptions = {}) {
         decisionCount: decisions.length,
         acceptedDecisionCount: 0,
         ignoredDecisionCount: 0,
-        takeProfit,
+        clearedSignalCount: filtered.cleared.signals.length,
+        takeProfit: preExecutionTakeProfit,
         ranAt: lastRunAt,
       };
       return lastRun;
@@ -529,9 +728,13 @@ async function runOnce(options: RunOptions = {}) {
     const results = filtered.accepted.length
       ? await executionModule.executeDecisions(filtered.accepted)
       : (await executionModule.syncAccountState(), []);
-    const takeProfit = await checkTakeProfitOrders(options.trigger ?? "manual");
+    const postExecutionTakeProfit = filtered.accepted.length
+      ? await checkTakeProfitOrders(options.trigger ?? "manual")
+      : null;
+    const takeProfit = mergeTakeProfitResults(preExecutionTakeProfit, postExecutionTakeProfit);
     const ok = results.every((result) => result.status !== "failed" && result.status !== "rejected") && takeProfit.ok;
     lastRunAt = new Date().toISOString();
+    const cleared = readClearedSignalStore();
     lastRun = {
       ok,
       trigger: options.trigger ?? "manual",
@@ -542,6 +745,7 @@ async function runOnce(options: RunOptions = {}) {
       acceptedDecisionCount: filtered.accepted.length,
       ignoredDecisionCount: filtered.skipped.length,
       ignoredBaselineCreatedAt: filtered.baseline?.createdAt ?? null,
+      clearedSignalCount: cleared.signals.length,
       results,
       takeProfit,
       ranAt: lastRunAt,
@@ -587,6 +791,7 @@ app.get("/state", async (req, res) => {
       lastRun,
       optimizerBaseUrl: optimizerBaseUrl(),
       ignoredBaseline: readIgnoredBaseline(),
+      clearedSignals: readClearedSignalStore(),
     },
     execution: executionModule.getExecutionState(),
   });
@@ -620,6 +825,21 @@ app.delete("/ignored-signals", async (req, res) => {
   if (!requireAdmin(req, res)) return;
   clearIgnoredBaseline();
   res.json({ ok: true, cleared: true, file: ignoreBaselineFile() });
+});
+
+app.get("/cleared-signals", async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  res.json({
+    ok: true,
+    file: clearedSignalsFile(),
+    clearedSignals: readClearedSignalStore(),
+  });
+});
+
+app.delete("/cleared-signals", async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  clearClearedSignals();
+  res.json({ ok: true, cleared: true, file: clearedSignalsFile() });
 });
 
 app.post("/sync", async (req, res) => {
