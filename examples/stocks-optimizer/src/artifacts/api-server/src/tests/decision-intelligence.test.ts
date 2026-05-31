@@ -5,7 +5,9 @@ import {
   decisionCapabilitiesPayload,
   enrichStrategySignal,
   evaluateDecisionOperation,
+  recordDecisionOperation,
   recordDecisionOutcomeOperation,
+  recordDecisionOutcomeOperationAsync,
 } from "../lib/decision-intelligence.js";
 
 test("decision intelligence enriches strategy signals with required governance fields", () => {
@@ -91,4 +93,30 @@ test("decision operations expose protocol-style capabilities and persisted accou
   assert.equal(outcome.outcome.decisionId, "test-decision");
   assert.equal(accountability.found, true);
   assert.equal(accountability.accountability.decisionId, "test-decision");
+});
+
+test("decision outcomes tolerate externally recorded partial coherence", async () => {
+  const decisionId = `external-partial-${Date.now()}`;
+  await recordDecisionOperation({
+    record: {
+      decisionId,
+      createdAt: new Date().toISOString(),
+      source: "test",
+      observation: { target: "external" },
+      coherence: { score: 64, status: "tension" },
+      action: { action: "HOLD", allowed: false },
+      humanSummary: "External partial decision record.",
+      retentionTier: "hot",
+    },
+  });
+
+  const outcome = await recordDecisionOutcomeOperationAsync({
+    decisionId,
+    expectedConfidence: 61,
+    actualSuccessScore: 58,
+  });
+
+  assert.equal(outcome.event, "decision.outcome_recorded.v1");
+  assert.equal(outcome.outcome.decisionId, decisionId);
+  assert.equal(outcome.record.accountability?.decisionId, decisionId);
 });

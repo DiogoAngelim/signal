@@ -359,8 +359,27 @@ function rememberDecisionOutcome(outcome: ReturnType<typeof evaluateOutcome>) {
 function normalizeSharedRecord(record: any) {
   return {
     ...record,
+    coherence: normalizeCoherenceAssessment(record?.coherence, record?.modules),
     source: String(record?.source ?? SIGNAL_SOURCE_ID),
     retentionTier: normalizeRetentionTier(record?.retentionTier),
+  };
+}
+
+function normalizeCoherenceAssessment(value: any, modules: any = {}): CoherenceAssessment {
+  const fallback = assessCoherence(moduleInputsFrom(modules));
+  const score = numberOrUndefined(value?.score) ?? fallback.score;
+  const status = coherenceStatusOrUndefined(value?.status) ?? fallback.status;
+  return {
+    score,
+    status,
+    contradictions: Array.isArray(value?.contradictions) ? value.contradictions : fallback.contradictions,
+    consensusLevel: numberOrUndefined(value?.consensusLevel) ?? fallback.consensusLevel,
+    actionAllowed: typeof value?.actionAllowed === "boolean" ? value.actionAllowed : fallback.actionAllowed,
+    actionScale: numberOrUndefined(value?.actionScale) ?? fallback.actionScale,
+    trustAdjustment: numberOrUndefined(value?.trustAdjustment) ?? fallback.trustAdjustment,
+    agencyAdjustment: numberOrUndefined(value?.agencyAdjustment) ?? fallback.agencyAdjustment,
+    confidenceAdjustment: numberOrUndefined(value?.confidenceAdjustment) ?? fallback.confidenceAdjustment,
+    explanation: Array.isArray(value?.explanation) ? value.explanation.map((line: unknown) => String(line)) : fallback.explanation,
   };
 }
 
@@ -443,6 +462,20 @@ function uniqueOperations<T extends { name: string }>(operations: T[]): T[] {
 
 function retentionTierOrUndefined(value: unknown) {
   if (value === "hot" || value === "warm" || value === "cold" || value === "expired") return value;
+  return undefined;
+}
+
+function coherenceStatusOrUndefined(value: unknown): CoherenceAssessment["status"] | undefined {
+  if (
+    value === "aligned" ||
+    value === "stable" ||
+    value === "tension" ||
+    value === "unstable" ||
+    value === "contradictory" ||
+    value === "blocked"
+  ) {
+    return value;
+  }
   return undefined;
 }
 
