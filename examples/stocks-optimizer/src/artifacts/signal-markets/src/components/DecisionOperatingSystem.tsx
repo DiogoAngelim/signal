@@ -355,8 +355,7 @@ function metricGuidance(metric: DecisionRawMetric) {
       if (number == null) return "Opportunity flow is still loading.";
       if (number >= 65)
         return "Enough good opportunities are appearing to stay engaged.";
-      if (number >= 35)
-        return "Good opportunities are limited. Be selective.";
+      if (number >= 35) return "Good opportunities are limited. Be selective.";
       return "Few opportunities are strong enough. Wait.";
     case "Risk Pressure":
       if (number == null) return "Risk pressure is still loading.";
@@ -378,8 +377,7 @@ function metricGuidance(metric: DecisionRawMetric) {
       if (number == null) return "Loss-history protection is still pending.";
       if (number >= 70)
         return "Loss history supports the current risk boundary.";
-      if (number >= 45)
-        return "Loss history argues for reduced size.";
+      if (number >= 45) return "Loss history argues for reduced size.";
       return "Loss history argues against adding risk.";
     case "Calibration":
       if (number == null) return "Recent reliability is still pending.";
@@ -391,7 +389,8 @@ function metricGuidance(metric: DecisionRawMetric) {
     case "History Depth":
       if (number == null) return "Comparable history is still pending.";
       if (number >= 70) return "There is enough history to support the view.";
-      if (number >= 45) return "History is usable, but not deep enough for full size.";
+      if (number >= 45)
+        return "History is usable, but not deep enough for full size.";
       return "History is too thin. Keep the decision conservative.";
     case "Regime Coverage":
       if (number == null) return "Market coverage is still pending.";
@@ -901,6 +900,72 @@ function OpportunityPicker({
   );
 }
 
+function MeaningTile({
+  label,
+  value,
+  detail,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  detail?: string;
+  tone?: DecisionTone;
+}) {
+  return (
+    <div className={cx("min-w-0 rounded-lg border p-3", toneSurface(tone))}>
+      <div className="text-xs font-semibold uppercase tracking-normal opacity-70">
+        {label}
+      </div>
+      <div className="mt-1 break-words text-xl font-semibold leading-tight">
+        {investorCopy(value)}
+      </div>
+      {detail ? (
+        <p className="mt-2 break-words text-sm leading-6 opacity-80">
+          {investorCopy(detail)}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function DisclosurePanel({
+  title,
+  summary,
+  children,
+  defaultOpen = false,
+  testId,
+}: {
+  title: string;
+  summary: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+  testId?: string;
+}) {
+  return (
+    <details
+      data-testid={testId}
+      className="group min-w-0 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm"
+      open={defaultOpen}
+    >
+      <summary className="grid cursor-pointer list-none gap-1 border-b border-zinc-200 px-4 py-3 marker:hidden sm:grid-cols-[minmax(0,1fr)_minmax(180px,0.7fr)] sm:items-center [&::-webkit-details-marker]:hidden">
+        <span className="break-words text-sm font-semibold text-zinc-950">
+          {title}
+        </span>
+        <span className="break-words text-sm leading-6 text-zinc-500 sm:text-right">
+          {investorCopy(summary)}
+        </span>
+      </summary>
+      <ScrollBoundary
+        policy="card-body-scroll"
+        regionClassName="max-h-[28rem] px-4 py-3"
+        fade="zinc"
+      >
+        {children}
+      </ScrollBoundary>
+    </details>
+  );
+}
+
 export default function DecisionOperatingSystem({
   state,
   marketOptions,
@@ -933,9 +998,6 @@ export default function DecisionOperatingSystem({
   actionPlan,
   rawMetrics,
 }: DecisionOperatingSystemProps) {
-  const [activeStepId, setActiveStepId] =
-    useState<DecisionPhaseId>("intent");
-
   const selectedOpportunity =
     opportunities.find((item) => item.id === selectedOpportunityId) ??
     opportunities[0] ??
@@ -967,9 +1029,6 @@ export default function DecisionOperatingSystem({
   const failCount = evidenceLadder.filter(
     (item) => item.status === "Fail",
   ).length;
-  const workflowStatus = Object.fromEntries(
-    workflow.map((step) => [step.id, step.status]),
-  ) as Partial<Record<DecisionStepId, string>>;
   const topSupport = compactList(
     [
       selectedOpportunity?.support[0],
@@ -1001,10 +1060,6 @@ export default function DecisionOperatingSystem({
     exposureText === "No new exposure"
       ? "capital flat"
       : lowerFirst(exposureText);
-  const sizePosture =
-    exposureText === "No new exposure"
-      ? "capital stays flat"
-      : `size stays at ${exposureText}`;
   const actionWithExposure =
     exposureText === "No new exposure"
       ? `${recommendedAction}; keep capital flat`
@@ -1013,15 +1068,22 @@ export default function DecisionOperatingSystem({
     exposureText === "No new exposure"
       ? "do not add exposure"
       : `do not exceed ${lowerFirst(exposureText)}`;
+  const sizeSentence =
+    exposureText === "No new exposure"
+      ? "Keep capital flat."
+      : `Keep size at ${exposureText}.`;
+  const missingProofSentence = `Next proof needed: ${cleanSentence(
+    lowerFirst(missingEvidence),
+  )}`;
   const primaryAnswer = selectedOpportunity
-    ? `${recommendedAction}: ${opportunityLabel} deserves review, but ${sizePosture} until ${lowerFirst(missingEvidence)} improves.`
-    : `${recommendedAction}: no opportunity deserves capital yet; keep ${capitalPosture} until ${lowerFirst(missingEvidence)} improves.`;
+    ? `${recommendedAction}: ${opportunityLabel} is the lead idea. ${sizeSentence} ${missingProofSentence}`
+    : `${recommendedAction}: no opportunity deserves capital yet. ${sizeSentence} ${missingProofSentence}`;
   const headerReadiness =
     state.kind === "no-market" ? "No market selected" : readinessState;
   const headerMarket = selectedMarket || "No market selected";
   const systemNotice =
     state.kind === "refreshing" || state.kind === "partial-data"
-      ? `${state.headline}: ${state.description}`
+      ? `${cleanSentence(state.headline)} ${cleanSentence(state.description)}`
       : refreshError;
 
   const steps = useMemo<InvestmentStep[]>(
@@ -1185,8 +1247,14 @@ export default function DecisionOperatingSystem({
         nextStep: "Focus on the core reason before judging trust.",
         facts: [
           { label: "Lead", value: opportunityLabel, tone: selectedTone },
-          { label: "Quality", value: displayPct(selectedOpportunity?.qualityPct) },
-          { label: "Timing", value: displayPct(selectedOpportunity?.timingPct) },
+          {
+            label: "Quality",
+            value: displayPct(selectedOpportunity?.qualityPct),
+          },
+          {
+            label: "Timing",
+            value: displayPct(selectedOpportunity?.timingPct),
+          },
           { label: "Missing", value: missingEvidence },
         ],
         story: {
@@ -1444,9 +1512,12 @@ export default function DecisionOperatingSystem({
           "No reflection evidence is ready yet.",
         ),
         numbers: rawMetrics.filter((metric) =>
-          ["Calibration", "History Depth", "Regime Coverage", "Readiness"].includes(
-            metric.label,
-          ),
+          [
+            "Calibration",
+            "History Depth",
+            "Regime Coverage",
+            "Readiness",
+          ].includes(metric.label),
         ),
         notes: compactList(
           [systemNotice, `Last sync: ${lastSyncedLabel}.`, readinessImprover],
@@ -1455,7 +1526,11 @@ export default function DecisionOperatingSystem({
         nextStep: "Review the outcome after the next market update.",
         facts: [
           { label: "Next action", value: actionPlan.nextAction },
-          { label: "Invalidation", value: actionPlan.invalidation, tone: "warn" },
+          {
+            label: "Invalidation",
+            value: actionPlan.invalidation,
+            tone: "warn",
+          },
           { label: "Exit", value: actionPlan.exitConditions },
           { label: "Improve when", value: readinessImprover },
         ],
@@ -1507,31 +1582,6 @@ export default function DecisionOperatingSystem({
     ],
   );
 
-  const activeIndex = Math.max(
-    0,
-    steps.findIndex((step) => step.id === activeStepId),
-  );
-  const activeStep = steps[activeIndex] ?? steps[0];
-  const phaseStatus: Record<DecisionPhaseId, string> = {
-    intent: headerReadiness,
-    sense: marketStatus,
-    pulse: selectedOpportunity ? opportunityLabel : "Waiting",
-    core: confidenceWord,
-    judgement: workflowStatus.trust ?? trustWord,
-    sizing: exposureText,
-    action: recommendedAction,
-    reflection: lastSyncedLabel,
-  };
-  const visibleReason = compactList(
-    activeStep.why,
-    "The reason is still forming.",
-    3,
-  );
-  const visibleDiagnostics = compactList(
-    [systemNotice, ...activeStep.notes],
-    "No extra cautions are active.",
-    4,
-  );
   const trustTone: DecisionTone =
     failCount > 0
       ? "bad"
@@ -1542,6 +1592,50 @@ export default function DecisionOperatingSystem({
           : "neutral";
   const readinessProgress = boundedPct(readinessPct);
   const evidencePreview = evidenceLadder.slice(0, 5);
+  const reasonSummary = selectedOpportunity
+    ? cleanSentence(selectedOpportunity.context || selectedOpportunity.thesis)
+    : cleanSentence(executiveNarrative || readinessWhy);
+  const supportSummary = compactList(
+    [
+      selectedOpportunity?.thesis,
+      selectedOpportunity?.support[0],
+      selectedOpportunity?.drivers[0],
+      readinessWhy,
+    ],
+    "The supporting reason is still forming.",
+    4,
+  );
+  const riskSummary = compactList(
+    [
+      mainRisk,
+      selectedOpportunity?.contradictions[0],
+      selectedOpportunity?.missing[0],
+      readinessBlocker,
+    ],
+    "No major risk is being promoted.",
+    4,
+  );
+  const trustSummary = `${passCount} supports / ${cautionCount} caution / ${failCount} block`;
+  const nextStep =
+    actionPlan.nextAction ||
+    steps.find((step) => step.id === "action")?.nextStep ||
+    "Review after the next market update.";
+  const secondaryMetrics = rawMetrics.filter((metric) =>
+    [
+      "Confidence",
+      "Trust",
+      "Risk Pressure",
+      "Market Health",
+      "Readiness",
+      "Starter Size",
+      "Portfolio Cap",
+      "Survival",
+      "Calibration",
+      "History Depth",
+      "Regime Coverage",
+    ].includes(metric.label),
+  );
+  const refreshNotice = systemNotice;
 
   const blockingState =
     state.kind === "no-market" ||
@@ -1629,106 +1723,44 @@ export default function DecisionOperatingSystem({
         <main
           data-testid="decision-main-scroll"
           data-scroll-region="decision-main"
-          className="signal-scroll-region mx-auto grid h-full min-h-0 w-full max-w-[1880px] gap-2 overflow-y-auto overflow-x-hidden px-3 py-2 md:grid-cols-[248px_minmax(0,1fr)] md:overflow-hidden lg:px-4"
+          className="signal-scroll-region mx-auto grid h-full min-h-0 w-full max-w-[1640px] content-start gap-3 overflow-y-auto overflow-x-hidden px-3 py-3 lg:px-4"
         >
-          <nav
-            aria-label="Decision workflow"
-            data-overflow-policy="responsive-workflow-nav"
-            className="sticky top-0 z-20 grid min-h-0 min-w-0 rounded-lg border border-zinc-200 bg-white p-2 shadow-sm md:static md:grid-rows-[auto_minmax(0,1fr)_auto] md:shadow-none"
-          >
-            <div className="hidden px-2 pb-2 text-xs font-semibold uppercase tracking-normal text-zinc-500 md:block">
-              Workflow
-            </div>
-
-            <ScrollBoundary
-              policy="horizontal-tabs"
-              testId="workflow-tab-list"
-              horizontal
-              fade="none"
-              regionClassName="flex gap-1 pb-1 md:grid md:auto-rows-min md:overflow-x-hidden md:overflow-y-auto md:pb-0 md:pr-1"
-            >
-              {steps.map((step, index) => {
-                const active = step.id === activeStep.id;
-                return (
-                  <button
-                    key={step.id}
-                    type="button"
-                    onClick={() => setActiveStepId(step.id)}
-                    className={cx(
-                      "grid min-h-[58px] w-[138px] shrink-0 grid-cols-[30px_minmax(0,1fr)] items-center gap-2 rounded-md px-2.5 py-2 text-left transition md:w-full md:shrink",
-                      active
-                        ? "bg-zinc-950 text-white"
-                        : "text-zinc-700 hover:bg-zinc-100",
-                    )}
-                  >
-                    <span
-                      className={cx(
-                        "grid h-7 w-7 place-items-center rounded-md border",
-                        active
-                          ? "border-white/20 bg-white/10"
-                          : "border-zinc-200 bg-white text-zinc-700",
-                      )}
-                    >
-                      {stepIcon(step.id)}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-semibold">
-                        {step.label}
-                      </span>
-                      <span
-                        className={cx(
-                          "mt-0.5 block truncate text-xs",
-                          active ? "text-zinc-300" : "text-zinc-500",
-                        )}
-                      >
-                        {index + 1}/8 - {phaseStatus[step.id]}
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
-            </ScrollBoundary>
-
-            <div className="mt-2 hidden border-t border-zinc-200 px-2 pt-2 md:block">
-              <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                Active
-              </div>
-              <div className="mt-1 truncate text-sm font-semibold text-zinc-950">
-                {activeStep.label}
-              </div>
-            </div>
-          </nav>
+          {refreshNotice ? (
+            <section className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-950">
+              {investorCopy(refreshNotice)}
+            </section>
+          ) : null}
 
           <section
             data-testid="decision-step-screen"
-            data-active-step={activeStep.id}
-            className="grid min-h-0 min-w-0 gap-2 md:h-full md:grid-rows-[auto_minmax(0,1fr)] md:overflow-hidden"
+            aria-label="Decision default view"
+            className="grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1.18fr)_minmax(320px,0.82fr)]"
           >
             <section
-              aria-label="Decision priority strip"
-              className="grid min-w-0 gap-2 lg:grid-cols-[minmax(240px,0.72fr)_minmax(0,1.35fr)_minmax(260px,0.78fr)]"
+              data-testid="primary-answer"
+              className="grid min-w-0 gap-3 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm sm:p-5"
             >
               <div
                 className={cx(
-                  "grid min-w-0 gap-2 rounded-lg border p-3",
+                  "grid min-w-0 gap-3 rounded-lg border p-4",
                   toneSurface(readinessTone),
                 )}
               >
-                <div className="text-xs font-semibold uppercase tracking-normal opacity-70">
-                  Recommended action
-                </div>
-                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
-                  <div className="min-w-0">
-                    <div className="break-words text-2xl font-semibold leading-tight">
-                      {recommendedAction}
-                    </div>
-                    <div className="mt-1 break-words text-sm font-semibold opacity-80">
-                      {actionExposureText}
-                    </div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-xs font-semibold uppercase tracking-normal opacity-70">
+                    Recommended action
                   </div>
                   <span className="rounded-md border border-current/20 px-2 py-1 text-xs font-semibold">
                     {headerReadiness}
                   </span>
+                </div>
+                <div className="min-w-0">
+                  <h1 className="break-words text-4xl font-semibold leading-none sm:text-5xl">
+                    {investorCopy(recommendedAction)}
+                  </h1>
+                  <p className="mt-3 max-w-3xl break-words text-base font-semibold leading-7 opacity-85">
+                    {cleanSentence(primaryAnswer)}
+                  </p>
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-current/15">
                   <div
@@ -1738,263 +1770,325 @@ export default function DecisionOperatingSystem({
                 </div>
               </div>
 
-              <div className="min-w-0 rounded-lg border border-zinc-200 bg-white p-3">
-                <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                      {stepIcon(activeStep.id)}
-                      Current step
-                    </div>
-                    <div className="mt-1 text-sm font-semibold text-zinc-700">
-                      {activeStep.question}
-                    </div>
-                    <h2 className="mt-1 break-words text-xl font-semibold leading-tight text-zinc-950">
-                      {activeStep.headline}
-                    </h2>
-                  </div>
-                  <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs font-semibold text-zinc-600">
-                    {activeIndex + 1}/8
-                  </span>
-                </div>
+              <div className="grid min-w-0 gap-2 md:grid-cols-3">
+                <MeaningTile
+                  label="Reason"
+                  value={reasonSummary}
+                  detail={supportSummary[0]}
+                  tone={readinessTone}
+                />
+                <MeaningTile
+                  label="Trust"
+                  value={trustWord}
+                  detail={trustSummary}
+                  tone={trustTone}
+                />
+                <MeaningTile
+                  label="Risk"
+                  value={riskPressureWord}
+                  detail={mainRisk}
+                  tone={riskNumber != null && riskNumber > 65 ? "warn" : "good"}
+                />
               </div>
 
-              <div
-                className={cx(
-                  "grid min-w-0 gap-2 rounded-lg border p-3",
-                  toneSurface(trustTone),
-                )}
+              <section
+                data-overflow-policy="sticky-primary-action"
+                className="sticky bottom-2 z-10 flex min-h-[56px] items-center gap-3 rounded-lg border border-zinc-200 bg-white/95 px-3 py-2 shadow-sm backdrop-blur md:static"
               >
-                <div className="text-xs font-semibold uppercase tracking-normal opacity-70">
-                  Trust summary
-                </div>
-                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
-                  <div className="min-w-0">
-                    <div className="text-2xl font-semibold leading-tight">
-                      {trustWord}
-                    </div>
-                    <div className="mt-1 truncate text-sm font-semibold opacity-80">
-                      {passCount} supports / {cautionCount} caution /{" "}
-                      {failCount} block
-                    </div>
+                <Zap className="h-4 w-4 shrink-0 text-zinc-500" />
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+                    Next step
                   </div>
-                  <ShieldCheck className="h-5 w-5 opacity-80" />
+                  <p className="break-words text-sm font-semibold text-zinc-900">
+                    {investorCopy(nextStep)}
+                  </p>
                 </div>
-              </div>
+              </section>
             </section>
 
-            <div className="grid min-h-0 min-w-0 gap-2 overflow-hidden xl:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_380px]">
-              <article
-                data-testid="active-decision-step"
-                className="grid min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-2 overflow-hidden"
-              >
-                <div className="grid min-h-0 gap-2 overflow-hidden lg:grid-cols-2 lg:grid-rows-2">
-                  <DecisionPanel
-                    ariaLabel="Decision summary"
-                    testId="decision-summary-panel"
-                    title="Decision summary"
-                  >
-                    <div className="mt-2 grid gap-2">
-                      <p className="break-words text-sm leading-6 text-zinc-700">
-                        {activeStep.story.happened}
-                      </p>
-                      <p className="break-words text-sm leading-6 text-zinc-700">
-                        {activeStep.story.matters}
-                      </p>
-                      <p className="break-words text-sm font-semibold leading-6 text-zinc-950">
-                        {activeStep.story.next}
-                      </p>
-                    </div>
-                  </DecisionPanel>
-
-                  <DecisionPanel
-                    ariaLabel="Evidence summary"
-                    testId="evidence-summary-panel"
-                    title="Evidence summary"
-                  >
-                    <div className="mt-2 grid gap-1.5">
-                      {evidencePreview.map((stage) => (
-                        <div
-                          key={stage.id}
-                          className="grid min-w-0 grid-cols-[20px_minmax(0,1fr)_auto] items-start gap-2 text-sm leading-5 text-zinc-700"
-                        >
-                          <span
-                            className={cx(
-                              "mt-0.5 grid h-5 w-5 place-items-center rounded-md",
-                              statusTone(stage.status) === "good" &&
-                                "bg-emerald-50 text-emerald-700",
-                              statusTone(stage.status) === "warn" &&
-                                "bg-amber-50 text-amber-700",
-                              statusTone(stage.status) === "bad" &&
-                                "bg-red-50 text-red-700",
-                            )}
-                          >
-                            {statusIcon(stage.status)}
-                          </span>
-                          <span className="min-w-0">
-                            <span className="block break-words font-semibold text-zinc-950">
-                              {friendlyEvidenceLabel(stage.label)}
-                            </span>
-                            <span className="block break-words text-zinc-600">
-                              {investorCopy(stage.explanation)}
-                            </span>
-                          </span>
-                          <span
-                            className={cx(
-                              "rounded-md border px-1.5 py-0.5 text-[11px] font-semibold",
-                              toneSurface(statusTone(stage.status)),
-                            )}
-                          >
-                            {statusLabel(stage.status)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </DecisionPanel>
-
-                  <DecisionPanel
-                    ariaLabel="Reason and risk"
-                    testId="reason-risk-panel"
-                    title="Reason and risk"
-                  >
-                    <div className="mt-2 grid gap-2">
-                      {visibleReason.map((item) => (
-                        <p
-                          key={item}
-                          className="break-words text-sm leading-6 text-zinc-700"
-                        >
-                          {item}
-                        </p>
-                      ))}
-                    </div>
-                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                      <div className="min-w-0 rounded-md bg-zinc-50 px-2.5 py-2">
-                        <div className="break-words text-xs font-medium text-zinc-500">
-                          Main risk
-                        </div>
-                        <div className="mt-1 break-words text-sm font-semibold text-zinc-950">
-                          {investorCopy(mainRisk)}
-                        </div>
-                      </div>
-                      <div className="min-w-0 rounded-md bg-zinc-50 px-2.5 py-2">
-                        <div className="break-words text-xs font-medium text-zinc-500">
-                          Size limit
-                        </div>
-                        <div className="mt-1 break-words text-sm font-semibold text-zinc-950">
-                          {actionExposureText}
-                        </div>
-                      </div>
-                    </div>
-                  </DecisionPanel>
-
-                  <DecisionPanel
-                    ariaLabel="Supporting numbers"
-                    testId="supporting-numbers-panel"
-                    title="Supporting numbers"
-                  >
-                    <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      {activeStep.numbers.slice(0, 4).map((metric) => (
-                        <div
-                          key={metric.label}
-                          className="grid min-h-[82px] min-w-0 rounded-md bg-zinc-50 px-2.5 py-2"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0 break-words text-xs font-medium text-zinc-500">
-                              {friendlyMetricLabel(metric.label)}
-                            </div>
-                            <div className="shrink-0 break-words text-sm font-semibold text-zinc-950">
-                              {metric.value}
-                            </div>
-                          </div>
-                          <p className="mt-1 break-words text-xs leading-5 text-zinc-700">
-                            {metricGuidance(metric)}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-2 grid gap-1.5">
-                      {visibleDiagnostics.slice(0, 2).map((item) => (
-                        <p
-                          key={item}
-                          className="break-words text-sm leading-5 text-zinc-600"
-                        >
-                          {investorCopy(item)}
-                        </p>
-                      ))}
-                    </div>
-                  </DecisionPanel>
+            <aside
+              data-testid="opportunity-review"
+              data-overflow-policy="bounded-opportunity-panel"
+              className="grid min-w-0 content-start gap-3 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm"
+            >
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+                  Lead opportunity
                 </div>
-
-                <section
-                  data-overflow-policy="sticky-primary-action"
-                  className="sticky bottom-0 z-10 flex min-h-[52px] items-center gap-3 rounded-lg border border-zinc-200 bg-white/95 px-3 py-2 shadow-sm backdrop-blur md:static md:bg-white md:shadow-none"
-                >
-                  <Zap className="h-4 w-4 shrink-0 text-zinc-500" />
+                <div className="mt-2 flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                      Recommended next step
+                    <div className="line-clamp-2 break-words text-3xl font-semibold leading-tight text-zinc-950">
+                      {opportunityLabel}
                     </div>
-                    <p className="break-words text-sm font-semibold text-zinc-900">
-                      {activeStep.nextStep}
-                    </p>
-                  </div>
-                </section>
-              </article>
-
-              <aside
-                data-testid="opportunity-review"
-                data-overflow-policy="bounded-opportunity-panel"
-                className="grid min-h-[420px] min-w-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-2 overflow-hidden rounded-lg border border-zinc-200 bg-white p-3 md:min-h-0"
-              >
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                    Opportunity review
-                  </div>
-                  <div className="mt-1 flex items-end justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="line-clamp-2 break-words text-2xl font-semibold leading-tight text-zinc-950">
-                        {opportunityLabel}
-                      </div>
-                      <div className={cx("break-words text-sm", toneText(selectedTone))}>
-                        {trustWord} trust - {exposureText}
-                      </div>
-                    </div>
-                    <span
+                    <div
                       className={cx(
-                        "shrink-0 rounded-md border px-2 py-1 text-xs font-semibold",
-                        toneSurface(selectedTone),
+                        "mt-1 break-words text-sm font-semibold",
+                        toneText(selectedTone),
+                      )}
+                    >
+                      {selectedOpportunity
+                        ? `${investorCopy(selectedOpportunity.action)} - ${displayExposure(selectedOpportunity.exposureLabel)}`
+                        : actionExposureText}
+                    </div>
+                  </div>
+                  <span
+                    className={cx(
+                      "shrink-0 rounded-md border px-2 py-1 text-xs font-semibold",
+                      toneSurface(selectedTone),
                     )}
                   >
                     {selectedOpportunity
                       ? displayPct(selectedOpportunity.readinessPct)
                       : "Pending"}
                   </span>
-                  </div>
                 </div>
+              </div>
 
-                <div className="min-h-0 overflow-hidden">
+              <p className="break-words text-sm leading-6 text-zinc-600">
+                {selectedOpportunity
+                  ? cleanSentence(
+                      selectedOpportunity.thesis || selectedOpportunity.context,
+                    )
+                  : "No opportunity deserves capital yet."}
+              </p>
+
+              <div className="grid min-w-0 gap-2 sm:grid-cols-2">
+                <MeaningTile
+                  label="Quality"
+                  value={displayPct(selectedOpportunity?.qualityPct)}
+                  detail="Setup strength"
+                  tone={selectedTone}
+                />
+                <MeaningTile
+                  label="Timing"
+                  value={displayPct(selectedOpportunity?.timingPct)}
+                  detail="Entry patience"
+                  tone={selectedTone}
+                />
+              </div>
+
+              <details className="min-w-0 rounded-lg border border-zinc-200 bg-zinc-50">
+                <summary className="cursor-pointer list-none px-3 py-2 text-sm font-semibold text-zinc-950 marker:hidden [&::-webkit-details-marker]:hidden">
+                  Other opportunities
+                </summary>
+                <div className="px-3 pb-3">
                   <OpportunityPicker
                     opportunities={opportunities}
                     selectedOpportunityId={selectedOpportunityId}
                     onSelectOpportunity={onSelectOpportunity}
                   />
                 </div>
+              </details>
 
-                <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-zinc-950">
-                    <Clock className="h-4 w-4 text-zinc-500" />
-                    Context
+              <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+                <div className="flex items-center gap-2 text-sm font-semibold text-zinc-950">
+                  <Clock className="h-4 w-4 text-zinc-500" />
+                  Context
+                </div>
+                <p className="mt-1 line-clamp-2 text-sm leading-6 text-zinc-600">
+                  {investorCopy(marketState)}. {marketStatus}. {lastSyncedLabel}
+                  .
+                </p>
+                <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                  <span className="truncate">Risk: {riskPressureWord}</span>
+                  <span className="truncate">Action: {readinessState}</span>
+                </div>
+              </div>
+            </aside>
+          </section>
+
+          <section className="grid min-w-0 items-start gap-3 lg:grid-cols-2">
+            <DisclosurePanel
+              title="Why"
+              summary={reasonSummary}
+              defaultOpen
+              testId="decision-summary-panel"
+            >
+              <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+                    Supports
                   </div>
-                  <p className="mt-1 line-clamp-2 text-sm leading-6 text-zinc-600">
-                    {investorCopy(marketState)}. {marketStatus}.{" "}
-                    {lastSyncedLabel}.
-                  </p>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <span className="truncate">Risk: {riskPressureWord}</span>
-                    <span className="truncate">Action: {readinessState}</span>
+                  <div className="mt-2 grid gap-2">
+                    {supportSummary.map((item) => (
+                      <p
+                        key={item}
+                        className="break-words text-sm leading-6 text-zinc-700"
+                      >
+                        {investorCopy(item)}
+                      </p>
+                    ))}
                   </div>
                 </div>
-              </aside>
-            </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+                    Watch
+                  </div>
+                  <div className="mt-2 grid gap-2">
+                    {riskSummary.map((item) => (
+                      <p
+                        key={item}
+                        className="break-words text-sm leading-6 text-zinc-700"
+                      >
+                        {investorCopy(item)}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </DisclosurePanel>
+
+            <DisclosurePanel
+              title="Evidence"
+              summary={trustSummary}
+              testId="evidence-summary-panel"
+            >
+              <div className="grid gap-2">
+                {(evidenceLadder.length ? evidenceLadder : evidencePreview).map(
+                  (stage) => (
+                    <div
+                      key={stage.id}
+                      className="grid min-w-0 grid-cols-[24px_minmax(0,1fr)_auto] items-start gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2 text-sm leading-5 text-zinc-700"
+                    >
+                      <span
+                        className={cx(
+                          "grid h-6 w-6 place-items-center rounded-md",
+                          statusTone(stage.status) === "good" &&
+                            "bg-emerald-50 text-emerald-700",
+                          statusTone(stage.status) === "warn" &&
+                            "bg-amber-50 text-amber-700",
+                          statusTone(stage.status) === "bad" &&
+                            "bg-red-50 text-red-700",
+                        )}
+                      >
+                        {statusIcon(stage.status)}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block break-words font-semibold text-zinc-950">
+                          {friendlyEvidenceLabel(stage.label)}
+                        </span>
+                        <span className="block break-words text-zinc-600">
+                          {investorCopy(stage.explanation)}
+                        </span>
+                      </span>
+                      <span
+                        className={cx(
+                          "rounded-md border px-1.5 py-0.5 text-[11px] font-semibold",
+                          toneSurface(statusTone(stage.status)),
+                        )}
+                      >
+                        {statusLabel(stage.status)}
+                      </span>
+                    </div>
+                  ),
+                )}
+              </div>
+            </DisclosurePanel>
+
+            <DisclosurePanel
+              title="Decision path"
+              summary={`${steps.length} checks behind the recommendation`}
+              testId="workflow-detail-panel"
+            >
+              <div className="grid gap-2">
+                {steps.map((step, index) => (
+                  <div
+                    key={step.id}
+                    className="grid min-w-0 grid-cols-[32px_minmax(0,1fr)] gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3"
+                  >
+                    <span className="grid h-8 w-8 place-items-center rounded-md border border-zinc-200 bg-white text-zinc-700">
+                      {stepIcon(step.id)}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+                          {index + 1}/8
+                        </span>
+                        <span className="break-words text-sm font-semibold text-zinc-950">
+                          {step.label}
+                        </span>
+                      </div>
+                      <p className="mt-1 break-words text-sm leading-6 text-zinc-700">
+                        {step.answer}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {workflow.length ? (
+                  <div className="grid gap-2 border-t border-zinc-200 pt-3">
+                    {workflow.map((step) => (
+                      <div
+                        key={step.id}
+                        className="min-w-0 rounded-lg border border-zinc-200 bg-white p-3"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="break-words text-sm font-semibold text-zinc-950">
+                            {investorCopy(step.label)}
+                          </div>
+                          <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs font-semibold text-zinc-600">
+                            {investorCopy(step.status)}
+                          </span>
+                        </div>
+                        <p className="mt-1 break-words text-sm leading-6 text-zinc-700">
+                          {investorCopy(step.output)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            </DisclosurePanel>
+
+            <DisclosurePanel
+              title="Metrics"
+              summary="Secondary context"
+              testId="supporting-numbers-panel"
+            >
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {(secondaryMetrics.length ? secondaryMetrics : rawMetrics).map(
+                  (metric) => (
+                    <div
+                      key={metric.label}
+                      className="grid min-h-[92px] min-w-0 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 break-words text-xs font-medium text-zinc-500">
+                          {friendlyMetricLabel(metric.label)}
+                        </div>
+                        <div className="shrink-0 break-words text-sm font-semibold text-zinc-950">
+                          {metric.value}
+                        </div>
+                      </div>
+                      <p className="mt-1 break-words text-xs leading-5 text-zinc-700">
+                        {metricGuidance(metric)}
+                      </p>
+                    </div>
+                  ),
+                )}
+              </div>
+            </DisclosurePanel>
+
+            <DisclosurePanel
+              title="Action plan"
+              summary={nextStep}
+              testId="action-plan-panel"
+            >
+              <div className="grid min-w-0 gap-2 sm:grid-cols-2">
+                {[
+                  ["Asset", actionPlan.asset],
+                  ["Direction", actionPlan.direction],
+                  ["Size", actionExposureText],
+                  ["Entry", actionPlan.entryLogic],
+                  ["Risk rule", actionPlan.riskConstraints],
+                  ["Exit", actionPlan.exitConditions],
+                  ["Change your mind if", actionPlan.invalidation],
+                  ["Portfolio effect", actionPlan.portfolioImpact],
+                ].map(([label, value]) => (
+                  <FactTile key={label} label={label} value={value} />
+                ))}
+              </div>
+            </DisclosurePanel>
           </section>
         </main>
       )}

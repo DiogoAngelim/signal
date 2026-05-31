@@ -148,12 +148,12 @@ function props(
 }
 
 describe("DecisionOperatingSystem states", () => {
-  it("renders the normal success shell without changing workflow structure", () => {
+  it("renders an action-first success shell with deeper detail collapsed", () => {
     const html = renderToStaticMarkup(<DecisionOperatingSystem {...props()} />);
 
     expect(html).toContain('data-state-kind="success"');
     expect(html).toContain('data-testid="decision-step-screen"');
-    expect(html).toContain("What decision is being made?");
+    expect(html).toContain('data-testid="primary-answer"');
     expect(html).toContain("Intent");
     expect(html).toContain("Sense");
     expect(html).toContain("Pulse");
@@ -164,15 +164,19 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).toContain("Reflection");
     expect(html).toContain("Decision readiness");
     expect(html).toContain("Recommended action");
-    expect(html).toContain("Current step");
-    expect(html).toContain("Decision summary");
-    expect(html).toContain("Trust summary");
-    expect(html).toContain("Evidence summary");
-    expect(html).toContain("Supporting numbers");
+    expect(html).toContain("Reason");
+    expect(html).toContain("Trust");
+    expect(html).toContain("Risk");
+    expect(html).toContain("Next step");
+    expect(html).toContain("Why");
+    expect(html).toContain("Evidence");
+    expect(html).toContain("Decision path");
+    expect(html).toContain("Metrics");
+    expect(html).toContain("Action plan");
     expect(html).toContain(
       "The system has enough conviction to support the recommendation.",
     );
-    expect(html).toContain("Opportunity review");
+    expect(html).toContain("Lead opportunity");
   });
 
   it("translates internal terms before they reach the default decision surface", () => {
@@ -238,22 +242,21 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).not.toContain('data-testid="decision-step-screen"');
   });
 
-  it("declares one bounded scroll strategy for the shell, tabs, cards, lists, and action row", () => {
+  it("declares one bounded scroll strategy for the shell, details, lists, and action row", () => {
     const html = renderToStaticMarkup(<DecisionOperatingSystem {...props()} />);
 
     expect(html).toContain('data-overflow-policy="contained-app-shell"');
     expect(html).toContain('data-testid="decision-main-scroll"');
-    expect(html).toContain('data-overflow-policy="horizontal-tabs"');
-    expect(html).toContain('data-testid="workflow-tab-list"');
+    expect(html).toContain('data-testid="workflow-detail-panel"');
     expect(html).toContain('data-overflow-policy="card-body-scroll"');
     expect(html).toContain('data-overflow-policy="opportunity-list-scroll"');
     expect(html).toContain('data-overflow-policy="bounded-opportunity-panel"');
     expect(html).toContain('data-overflow-policy="sticky-primary-action"');
     expect(html).toContain("h-dvh");
     expect(html).toContain("overflow-x-hidden");
-    expect(
-      html.match(/data-overflow-policy="card-body-scroll"/g)?.length,
-    ).toBe(4);
+    expect(html.match(/data-overflow-policy="card-body-scroll"/g)?.length).toBe(
+      5,
+    );
   });
 
   it("keeps long labels and many opportunities inside scrollable regions", () => {
