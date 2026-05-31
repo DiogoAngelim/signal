@@ -17,6 +17,7 @@
   "dependencies": {
     "@signal/agency": "workspace:*",
     "@signal/decision": "workspace:*",
+    "@signal/decision-memory": "workspace:*",
     "@workspace/api-zod": "workspace:*",
     "@workspace/db": "workspace:*",
     "cookie-parser": "^1.4.7",

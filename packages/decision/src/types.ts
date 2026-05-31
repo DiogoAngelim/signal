@@ -237,6 +237,7 @@ export type WisdomInput = {
 export interface SignalDecisionRecord {
   decisionId: string;
   createdAt: string;
+  source: string;
   observation: unknown;
   discovery?: unknown;
   judgment?: unknown;
@@ -251,11 +252,13 @@ export interface SignalDecisionRecord {
   outcome?: OutcomeEvaluation;
   accountability?: AccountabilityReport;
   humanSummary: string;
+  retentionTier: "hot" | "warm" | "cold" | "expired";
 }
 
 export type DecisionRecordInput = {
   decisionId: string;
   createdAt?: string;
+  source?: string;
   observation: unknown;
   discovery?: unknown;
   judgment?: unknown;
@@ -270,6 +273,7 @@ export type DecisionRecordInput = {
   outcome?: OutcomeEvaluation;
   accountability?: AccountabilityReport;
   humanSummary?: string;
+  retentionTier?: "hot" | "warm" | "cold" | "expired";
 };
 
 export type DecisionReplayComparison = {
@@ -294,6 +298,7 @@ export type DecisionRecordStore = {
 
 export type DecisionPipelineInput = {
   decisionId: string;
+  source?: string;
   observation: unknown;
   modules: DecisionModuleInputs;
   prediction?: PredictionInput;
@@ -301,6 +306,7 @@ export type DecisionPipelineInput = {
   action?: unknown;
   outcome?: OutcomeEvaluationInput;
   createdAt?: string;
+  retentionTier?: "hot" | "warm" | "cold" | "expired";
 };
 
 export type DecisionPipelineResult = {

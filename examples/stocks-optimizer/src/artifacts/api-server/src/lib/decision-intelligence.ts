@@ -18,13 +18,30 @@ import {
   type SimulationInput,
   type WisdomInput,
 } from "@signal/decision";
+import {
+  CompactionJob,
+  createDecisionMemoryStoreFromEnv,
+  listDecisionMemoryOperations,
+  normalizeRetentionTier,
+  summarizeDecisionRecords,
+  type DecisionMemoryStore,
+} from "@signal/decision-memory";
 
 const decisionStore = createInMemoryDecisionRecordStore();
+const sharedDecisionMemory: DecisionMemoryStore = createDecisionMemoryStoreFromEnv({
+  ...process.env,
+  SIGNAL_SOURCE_ID: process.env.SIGNAL_SOURCE_ID ?? "stocks-optimizer",
+});
+const SIGNAL_SOURCE_ID = process.env.SIGNAL_SOURCE_ID ?? "stocks-optimizer";
 
 export function decisionCapabilitiesPayload() {
+  const operations = uniqueOperations([
+    ...listDecisionOperations(),
+    ...listDecisionMemoryOperations(),
+  ]);
   return {
-    operations: listDecisionOperations(),
-    events: listDecisionOperations().filter((operation) => operation.kind === "event"),
+    operations,
+    events: operations.filter((operation) => operation.kind === "event"),
   };
 }
 
@@ -48,6 +65,15 @@ export function enrichStrategySignal<T extends Record<string, any>>(
     : 0;
   const highDownside = result.predictionScenarios.some((scenario) => scenario.downsideRisk >= 72);
   const actionAllowed = result.actionAllowed && scale > 0;
+  const sharedRecord = sharedStrategyDecisionRecord({
+    record: result.record,
+    signal,
+    context,
+    adjustedExposure,
+    originalExposure,
+    scale,
+    actionAllowed,
+  });
   const decisionIntelligence = {
     coherenceScore: result.coherenceScore,
     coherenceStatus: result.coherenceStatus,
@@ -60,17 +86,23 @@ export function enrichStrategySignal<T extends Record<string, any>>(
     decisionReplayAvailable: result.decisionReplayAvailable,
     actionAllowed,
     actionScale: scale,
-    humanSummary: result.record.humanSummary,
-    guide: buildHumanDecisionGuide(result.record),
-    record: result.record,
+    humanSummary: sharedRecord.humanSummary,
+    guide: buildHumanDecisionGuide(sharedRecord),
+    record: sharedRecord,
+    memory: {
+      source: sharedRecord.source,
+      retentionTier: sharedRecord.retentionTier,
+      remembered: true,
+      summary: "Signal will remember this decision and compare it with the result later.",
+    },
   };
   const sizingReasons = [
     ...arrayOfStrings(signal["sizingReasons"]),
-    result.record.humanSummary,
-    ...result.record.coherence.explanation,
+    sharedRecord.humanSummary,
+    ...sharedRecord.coherence.explanation,
   ];
 
-  decisionStore.save(result.record);
+  rememberDecisionRecord(sharedRecord);
 
   return {
     ...signal,
@@ -83,7 +115,7 @@ export function enrichStrategySignal<T extends Record<string, any>>(
     signalStatus: actionAllowed ? signal["signalStatus"] ?? "provided" : signal["signalAction"] === "Buy" ? "blocked" : signal["signalStatus"] ?? "provided",
     sizingMode: sizingModeFor(scale, signal["sizingMode"]),
     sizingReasons,
-    humanExplanation: result.record.humanSummary,
+    humanExplanation: sharedRecord.humanSummary,
     coherenceScore: result.coherenceScore,
     coherenceStatus: result.coherenceStatus,
     consensusLevel: result.consensusLevel,
@@ -120,8 +152,8 @@ export function summarizeStrategyDecisionIntelligence(signals: readonly Record<s
 export function evaluateDecisionOperation(payload: any) {
   const input = genericDecisionInput(payload);
   const result = evaluateDecision(input);
-  decisionStore.save(result.record);
-  return result;
+  const record = rememberDecisionRecord(result.record);
+  return { ...result, record };
 }
 
 export function replayDecisionOperation(payload: any) {
@@ -158,10 +190,110 @@ export function recordDecisionOutcomeOperation(payload: any) {
   });
   const accountability = createAccountabilityReport({ record, outcome });
   const saved = decisionStore.save({ ...record, accountability });
+  rememberDecisionOutcome(outcome);
+  rememberDecisionRecord(saved);
   return {
     outcome,
     record: saved,
     event: "decision.outcome_recorded.v1",
+  };
+}
+
+export async function recordDecisionOperation(payload: any) {
+  const record = payload?.record && typeof payload.record === "object"
+    ? normalizeSharedRecord(payload.record)
+    : normalizeSharedRecord(evaluateDecision(genericDecisionInput(payload)).record);
+  const saved = await sharedDecisionMemory.saveDecisionRecord(record);
+  decisionStore.save(saved);
+  return {
+    record: saved,
+    event: "decision.recorded.v1",
+  };
+}
+
+export async function getDecisionOperation(payload: any) {
+  const decisionId = String(payload?.decisionId ?? "").trim();
+  const record = (await sharedDecisionMemory.getDecisionRecord(decisionId)) ?? decisionStore.get(decisionId);
+  return {
+    decisionId,
+    found: Boolean(record),
+    record: record ?? null,
+  };
+}
+
+export async function listDecisionOperation(payload: any) {
+  const retentionTier = retentionTierOrUndefined(payload?.retentionTier);
+  const records = await sharedDecisionMemory.listDecisionRecords({
+    source: stringOrUndefined(payload?.source),
+    ...(retentionTier ? { retentionTier } : {}),
+    limit: numberOrUndefined(payload?.limit),
+  });
+  return {
+    records,
+    count: records.length,
+  };
+}
+
+export async function recordDecisionOutcomeOperationAsync(payload: any) {
+  const result = recordDecisionOutcomeOperation(payload);
+  await sharedDecisionMemory.recordOutcome(result.outcome);
+  return result;
+}
+
+export async function compactDecisionMemoryOperation(payload: any) {
+  return new CompactionJob({ store: sharedDecisionMemory }).run({
+    source: stringOrUndefined(payload?.source),
+    limit: numberOrUndefined(payload?.limit),
+  });
+}
+
+export async function decisionMemorySummaryOperation(payload: any) {
+  if (payload?.generate === true) {
+    const records = await sharedDecisionMemory.listDecisionRecords({
+      source: stringOrUndefined(payload?.source),
+      limit: numberOrUndefined(payload?.limit) ?? 100,
+    });
+    const outcomes = await sharedDecisionMemory.listOutcomes();
+    await sharedDecisionMemory.saveSummary(summarizeDecisionRecords({
+      records,
+      outcomes,
+      source: stringOrUndefined(payload?.source) ?? records[0]?.source ?? SIGNAL_SOURCE_ID,
+    }));
+  }
+  const summaries = await sharedDecisionMemory.listSummaries({
+    source: stringOrUndefined(payload?.source),
+    limit: numberOrUndefined(payload?.limit),
+  });
+  return {
+    summaries,
+    count: summaries.length,
+  };
+}
+
+export async function updateDecisionCalibrationOperation(payload: any) {
+  const now = new Date().toISOString();
+  const decisionId = stringOrUndefined(payload?.decisionId);
+  const source = stringOrUndefined(payload?.source) ?? SIGNAL_SOURCE_ID;
+  const calibration = await sharedDecisionMemory.recordCalibration({
+    calibrationId: stringOrUndefined(payload?.calibrationId) ?? `calibration:${decisionId ?? "global"}:${Date.now()}`,
+    ...(decisionId ? { decisionId } : {}),
+    source,
+    createdAt: stringOrUndefined(payload?.createdAt) ?? now,
+    impact: numeric(payload?.calibrationImpact, 0),
+    calibration: payload?.calibration ?? payload ?? {},
+  });
+  const trust = await sharedDecisionMemory.recordTrust({
+    trustId: stringOrUndefined(payload?.trustId) ?? `trust:${decisionId ?? "global"}:${Date.now()}`,
+    ...(decisionId ? { decisionId } : {}),
+    source,
+    createdAt: calibration.createdAt,
+    impact: numeric(payload?.trustImpact, 0),
+    trust: payload?.trust ?? payload ?? {},
+  });
+  return {
+    calibration,
+    trust,
+    event: "decision.calibration_updated.v1",
   };
 }
 
@@ -207,6 +339,119 @@ export function simulateOperation(payload: any) {
       : undefined,
     currentExposure: numeric(payload?.currentExposure, 0),
   } satisfies SimulationInput);
+}
+
+function rememberDecisionRecord(record: ReturnType<typeof normalizeSharedRecord>) {
+  const normalized = normalizeSharedRecord(record);
+  decisionStore.save(normalized);
+  void sharedDecisionMemory.saveDecisionRecord(normalized).catch((error) => {
+    logDecisionMemoryWarning("decision record persistence failed", error);
+  });
+  return normalized;
+}
+
+function rememberDecisionOutcome(outcome: ReturnType<typeof evaluateOutcome>) {
+  void sharedDecisionMemory.recordOutcome(outcome).catch((error) => {
+    logDecisionMemoryWarning("decision outcome persistence failed", error);
+  });
+}
+
+function normalizeSharedRecord(record: any) {
+  return {
+    ...record,
+    source: String(record?.source ?? SIGNAL_SOURCE_ID),
+    retentionTier: normalizeRetentionTier(record?.retentionTier),
+  };
+}
+
+function sharedStrategyDecisionRecord(input: {
+  record: ReturnType<typeof evaluateDecision>["record"];
+  signal: Record<string, any>;
+  context: Record<string, any>;
+  adjustedExposure: number;
+  originalExposure: number;
+  scale: number;
+  actionAllowed: boolean;
+}) {
+  const symbol = String(input.signal["symbol"] ?? input.signal["ticker"] ?? "asset").trim();
+  const market = String(input.context["market"] ?? input.signal["market"] ?? "").trim().toUpperCase();
+  const trust = firstNumber([
+    input.signal["trustworthiness"],
+    input.signal["trust"],
+    input.signal["trustGovernor"]?.trustScore,
+    input.context["summary"]?.trustworthiness,
+  ], input.record.coherence.score);
+  const confidence = firstNumber([
+    input.signal["calibratedConfidence"],
+    input.signal["signalConfidence"],
+    input.signal["setupQuality"],
+    input.record.coherence.score,
+  ], input.record.coherence.score);
+  const marketState = input.context["regime"] ?? {
+    regime: input.signal["regime"] ?? input.context["summary"]?.regime,
+    survivalScore: input.context["summary"]?.survivalScore,
+  };
+  return normalizeSharedRecord({
+    ...input.record,
+    source: SIGNAL_SOURCE_ID,
+    observation: {
+      ...(isPlainRecord(input.record.observation) ? input.record.observation : { value: input.record.observation }),
+      marketVenue: market,
+      marketState,
+      selectedAssets: symbol ? [symbol] : [],
+      confidence,
+      trust,
+      coherenceScore: input.record.coherence.score,
+      wisdomDecision: input.record.wisdom?.decision,
+      predictionScenarios: input.record.prediction,
+      simulationResult: input.record.simulation,
+      suggestedExposure: input.adjustedExposure,
+      requestedExposure: input.originalExposure,
+      positionSizing: {
+        scale: input.scale,
+        sizingMode: input.signal["sizingMode"],
+        sizingResult: input.signal["sizingResult"],
+        maxPositionPct: input.signal["maxPositionPct"],
+      },
+      actionAllowed: input.actionAllowed,
+      humanExplanation: input.record.humanSummary,
+      timestamp: input.record.createdAt,
+    },
+    action: {
+      ...(isPlainRecord(input.record.action) ? input.record.action : {}),
+      action: input.signal["allocationAction"] ?? input.signal["signalAction"] ?? "Hold",
+      symbol,
+      allowed: input.actionAllowed,
+      requestedExposure: input.originalExposure,
+      suggestedExposure: input.adjustedExposure,
+      scale: input.scale,
+    },
+    retentionTier: "hot",
+  });
+}
+
+function uniqueOperations<T extends { name: string }>(operations: T[]): T[] {
+  const seen = new Set<string>();
+  const result: T[] = [];
+  for (const operation of operations) {
+    if (seen.has(operation.name)) continue;
+    seen.add(operation.name);
+    result.push(operation);
+  }
+  return result;
+}
+
+function retentionTierOrUndefined(value: unknown) {
+  if (value === "hot" || value === "warm" || value === "cold" || value === "expired") return value;
+  return undefined;
+}
+
+let decisionMemoryWarningLogged = false;
+
+function logDecisionMemoryWarning(message: string, error: unknown) {
+  if (decisionMemoryWarningLogged) return;
+  decisionMemoryWarningLogged = true;
+  console.warn(message, error instanceof Error ? error.message : String(error));
 }
 
 function strategyDecisionInput(signal: Record<string, any>, context: Record<string, any>): DecisionPipelineInput {
@@ -259,9 +504,13 @@ function strategyDecisionInput(signal: Record<string, any>, context: Record<stri
 
   return {
     decisionId: String(signal["decisionId"] ?? `${context["market"] ?? "market"}:${symbol}:${action}:${context["summary"]?.updatedAt ?? "latest"}`),
+    source: SIGNAL_SOURCE_ID,
     observation: {
       market: context["market"],
+      marketVenue: context["market"],
+      source: SIGNAL_SOURCE_ID,
       symbol,
+      selectedAssets: [symbol],
       action,
       setupQuality,
       riskPressure,
@@ -301,6 +550,7 @@ function strategyDecisionInput(signal: Record<string, any>, context: Record<stri
       symbol,
       requestedExposure: signal["suggestedExposure"],
     },
+    retentionTier: "hot",
   };
 }
 
@@ -439,4 +689,8 @@ function stringOrUndefined(value: unknown): string | undefined {
 function arrayOfStrings(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value.map((item) => String(item ?? "").trim()).filter(Boolean);
+}
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return value != null && typeof value === "object" && !Array.isArray(value);
 }

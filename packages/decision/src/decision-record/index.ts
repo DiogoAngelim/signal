@@ -13,6 +13,7 @@ export function createDecisionRecord(input: DecisionRecordInput): SignalDecision
   const provisional: SignalDecisionRecord = {
     decisionId: input.decisionId,
     createdAt: input.createdAt ?? nowIso(),
+    source: input.source ?? "signal",
     observation: input.observation,
     ...(input.discovery === undefined ? {} : { discovery: input.discovery }),
     ...(input.judgment === undefined ? {} : { judgment: input.judgment }),
@@ -27,6 +28,7 @@ export function createDecisionRecord(input: DecisionRecordInput): SignalDecision
     ...(input.outcome === undefined ? {} : { outcome: input.outcome }),
     ...(input.accountability === undefined ? {} : { accountability: input.accountability }),
     humanSummary: input.humanSummary ?? "",
+    retentionTier: input.retentionTier ?? "hot",
   };
   return {
     ...provisional,

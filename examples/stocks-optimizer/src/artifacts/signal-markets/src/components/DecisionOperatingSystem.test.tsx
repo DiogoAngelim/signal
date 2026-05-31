@@ -155,12 +155,12 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).toContain('data-testid="decision-step-screen"');
     expect(html).toContain('data-testid="primary-answer"');
     expect(html).toContain("Build wealth steadily.");
-    expect(html).toContain("What is happening?");
-    expect(html).toContain("What matters?");
-    expect(html).toContain("What could happen next?");
-    expect(html).toContain("What did Signal test?");
-    expect(html).toContain("What should I do now?");
-    expect(html).toContain("What will Signal learn from this?");
+    expect(html).toContain("What is happening now?");
+    expect(html).toContain("What Signal suggests");
+    expect(html).toContain("Why Signal is confident or cautious");
+    expect(html).toContain("What similar past decisions taught Signal");
+    expect(html).toContain("What Signal will track after this");
+    expect(html).toContain("Why this decision matters");
     expect(html).toContain("Decision readiness");
     expect(html).toContain("Confidence Range");
     expect(html).toContain("58%-84%");

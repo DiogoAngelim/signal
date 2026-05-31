@@ -9,7 +9,9 @@ const externalizeNpmButBundleWorkspace = {
         args.path === "@signal/agency" ||
         args.path.startsWith("@signal/agency/") ||
         args.path === "@signal/decision" ||
-        args.path.startsWith("@signal/decision/")
+        args.path.startsWith("@signal/decision/") ||
+        args.path === "@signal/decision-memory" ||
+        args.path.startsWith("@signal/decision-memory/")
       ) {
         return null;
       }

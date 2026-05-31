@@ -5,12 +5,18 @@ Do not commit `.env`, `.env.local`, or `.vercel/.env*.local` files. They are int
 ## Required
 
 - `DATABASE_URL`: Postgres connection string for DB-backed API routes.
+- `SIGNAL_MEMORY_ENABLED`: set to `true` to persist shared Signal decision memory.
+- `SIGNAL_MEMORY_PROVIDER`: set to `postgres` for Neon or any compatible Postgres database.
+- `SIGNAL_SOURCE_ID`: stable source label for records from this app, usually `stocks-optimizer`.
 - `SIGNAL_STORAGE_DRIVER`: set to `postgres` for production signal API persistence.
 - `SIGNAL_SECRET_ENCRYPTION_KEY`: encryption key material for stored webhook secrets.
 - `SIGNAL_API_KEY_HASH_PEPPER`: pepper for HMAC-hashed managed API keys.
 
 ## Recommended for production
 
+- `SIGNAL_MEMORY_RETENTION_HOT_DAYS`: default `30`.
+- `SIGNAL_MEMORY_RETENTION_WARM_DAYS`: default `180`.
+- `SIGNAL_MEMORY_RETENTION_COLD_DAYS`: default `365`.
 - `ADMIN_SECRET`: bearer token for protected strategy/admin API calls.
 - `PUBLIC_READ_SECRET`: optional read token for public strategy reads.
 - `CRON_SECRET`: shared secret for scheduled/cron endpoints.

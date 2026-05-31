@@ -1799,9 +1799,10 @@ export default function DecisionOperatingSystem({
   const whySummary =
     reasonSummary ||
     "The recommendation balances opportunity, risk, and survival.";
-  const learningSummary =
-    actionPlan.invalidation ||
-    "This decision will be tracked so future confidence can improve.";
+  const similarDecisionLesson =
+    selectedOpportunity?.decisionIntelligence?.memory?.summary ||
+    "Signal has seen similar situations before. Past outcomes increased confidence slightly.";
+  const learningSummary = `${similarDecisionLesson} Signal will remember this decision and compare it with the result later.`;
   const guideSteps = defaultGuideSteps({
     goal: selectedGoal,
     reality: `${marketHealthWord} backdrop with ${riskPressureWord.toLowerCase()} risk.`,

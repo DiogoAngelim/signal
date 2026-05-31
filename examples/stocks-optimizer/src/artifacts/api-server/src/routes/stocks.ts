@@ -15,15 +15,28 @@ import {
 import { loadTradingViewHistoricalBars } from "../lib/tradingview-history.js";
 import { sizeFinancialExposure } from "../lib/financial-sizing.js";
 import {
+  listPortfolioDecisionAudit,
+  listPortfolioDecisionMemory,
+  listPortfolioDecisionOutcomes,
+  recordPortfolioDecisionMemory,
+  reviewPortfolioDecisionOutcomes,
+} from "../lib/portfolio-decision-memory.js";
+import {
   accountabilityGetOperation,
+  compactDecisionMemoryOperation,
   decisionCapabilitiesPayload,
+  decisionMemorySummaryOperation,
   enrichStrategySignals,
   evaluateDecisionOperation,
+  getDecisionOperation,
+  listDecisionOperation,
+  recordDecisionOperation,
   predictScenariosOperation,
-  recordDecisionOutcomeOperation,
+  recordDecisionOutcomeOperationAsync,
   replayDecisionOperation,
   simulateOperation,
   summarizeStrategyDecisionIntelligence,
+  updateDecisionCalibrationOperation,
 } from "../lib/decision-intelligence.js";
 
 
@@ -64,12 +77,56 @@ router.post("/decision/evaluate.v1", (req, res) => {
   res.json(evaluateDecisionOperation(req.body ?? {}));
 });
 
+router.post("/decision/record.v1", async (req, res, next) => {
+  try {
+    res.json(await recordDecisionOperation(req.body ?? {}));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/decision/get.v1", async (req, res, next) => {
+  try {
+    res.json(await getDecisionOperation(req.query ?? {}));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/decision/get.v1", async (req, res, next) => {
+  try {
+    res.json(await getDecisionOperation(req.body ?? {}));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/decision/list.v1", async (req, res, next) => {
+  try {
+    res.json(await listDecisionOperation(req.query ?? {}));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/decision/list.v1", async (req, res, next) => {
+  try {
+    res.json(await listDecisionOperation(req.body ?? {}));
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post("/decision/replay.v1", (req, res) => {
   res.json(replayDecisionOperation(req.body ?? {}));
 });
 
-router.post("/decision/outcome.record.v1", (req, res) => {
-  res.json(recordDecisionOutcomeOperation(req.body ?? {}));
+router.post("/decision/outcome.record.v1", async (req, res, next) => {
+  try {
+    res.json(await recordDecisionOutcomeOperationAsync(req.body ?? {}));
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.get("/decision/accountability.get.v1", (req, res) => {
@@ -86,6 +143,38 @@ router.post("/decision/scenarios.predict.v1", (req, res) => {
 
 router.post("/decision/simulate.v1", (req, res) => {
   res.json(simulateOperation(req.body ?? {}));
+});
+
+router.post("/decision/memory.compact.v1", async (req, res, next) => {
+  try {
+    res.json(await compactDecisionMemoryOperation(req.body ?? {}));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/decision/memory.summary.v1", async (req, res, next) => {
+  try {
+    res.json(await decisionMemorySummaryOperation(req.query ?? {}));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/decision/memory.summary.v1", async (req, res, next) => {
+  try {
+    res.json(await decisionMemorySummaryOperation(req.body ?? {}));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/decision/calibration.update.v1", async (req, res, next) => {
+  try {
+    res.json(await updateDecisionCalibrationOperation(req.body ?? {}));
+  } catch (error) {
+    next(error);
+  }
 });
 
 function forcedWalkForwardHistory() {
@@ -1009,6 +1098,55 @@ async function handleStocksQuotesRoute(req: any, res: any) {
 
 
 router.post("/stocks/quotes", handleStocksQuotesRoute);
+
+router.get("/stocks/portfolio-decisions", async (req, res, next) => {
+  try {
+    res.json(await listPortfolioDecisionMemory({
+      market: String(req.query.market ?? ""),
+      limit: Number(req.query.limit ?? 50),
+    }));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/stocks/portfolio-decisions", async (req, res, next) => {
+  try {
+    res.json(await recordPortfolioDecisionMemory(req.body ?? {}));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/stocks/portfolio-decisions/audit", async (req, res, next) => {
+  try {
+    res.json(await listPortfolioDecisionAudit({
+      market: String(req.query.market ?? ""),
+      limit: Number(req.query.limit ?? 50),
+    }));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/stocks/portfolio-decisions/outcomes", async (req, res, next) => {
+  try {
+    res.json(await listPortfolioDecisionOutcomes({
+      market: String(req.query.market ?? ""),
+      limit: Number(req.query.limit ?? 50),
+    }));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/stocks/portfolio-decisions/outcomes", async (req, res, next) => {
+  try {
+    res.json(await reviewPortfolioDecisionOutcomes(req.body ?? {}));
+  } catch (error) {
+    next(error);
+  }
+});
 
 
 async function loadStockRowForHistory(market: string, symbol: string) {

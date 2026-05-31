@@ -31,6 +31,7 @@ export function evaluateDecision(input: DecisionPipelineInput): DecisionPipeline
   const outcome = input.outcome ? evaluateOutcome(input.outcome) : undefined;
   const preliminaryRecord = createDecisionRecord({
     decisionId: input.decisionId,
+    source: input.source,
     createdAt: input.createdAt,
     observation: input.observation,
     discovery: input.modules.discovery,
@@ -43,12 +44,14 @@ export function evaluateDecision(input: DecisionPipelineInput): DecisionPipeline
     wisdom,
     action: actionPermitted(coherence.actionAllowed, simulation.recommendedAction, wisdom.decision) ? input.action : undefined,
     outcome,
+    retentionTier: input.retentionTier,
   });
   const accountability = createAccountabilityReport({ record: preliminaryRecord, outcome });
   const record = createDecisionRecord({
     ...preliminaryRecord,
     accountability,
     humanSummary: createHumanDecisionSummary(preliminaryRecord),
+    retentionTier: input.retentionTier ?? preliminaryRecord.retentionTier,
   });
   const guide = buildHumanDecisionGuide(record);
 

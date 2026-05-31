@@ -1,6 +1,7 @@
 packages:
   - .
   - ../../packages/decision
+  - ../../packages/decision-memory
   - src/artifacts/*
 
 catalog:
