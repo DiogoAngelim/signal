@@ -1,0 +1,14 @@
+{
+  "name": "@signal/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "db:migrate": "node ./scripts/migrate.mjs",
+    "db:check": "node ./scripts/check.mjs",
+    "db:studio": "node ./scripts/studio.mjs"
+  },
+  "dependencies": {
+    "pg": "catalog:"
+  }
+}

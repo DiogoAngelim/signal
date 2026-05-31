@@ -1,6 +1,7 @@
 packages:
   - "packages/decision"
   - "packages/decision-memory"
+  - "packages/db"
   - "packages/agency"
   - "packages/semantic-state"
   - "examples/stocks-optimizer"
