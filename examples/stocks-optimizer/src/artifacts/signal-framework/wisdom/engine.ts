@@ -1,4 +1,5 @@
 import { clamp, mean, numeric, stdev } from "../math/statistics";
+import type { MeaningResult } from "../meaning/engine";
 import type { PruningCandidateAssessment, PruningRecommendedAction, PruningResult } from "../pruning/engine";
 
 export type WisdomDecisionStatus =
@@ -348,6 +349,7 @@ export type DecisionQualityInput = {
   reflection?: unknown;
   agency?: unknown;
   pruning?: Partial<PruningResult> | PruningCandidateAssessment[];
+  meaning?: Partial<MeaningResult> | null;
   survivalMemory?: unknown;
   discovery?: unknown;
 };
@@ -371,6 +373,7 @@ export type DecisionQualityResult = {
   recommendedAction: string;
   survivalAdjustment: number;
   pruning?: WisdomPruningAdjustment;
+  meaning?: WisdomMeaningAdjustment;
   explanation: string;
   formulas: string[];
 };
@@ -384,6 +387,17 @@ export type WisdomPruningAdjustment = {
   confidenceAdjustment: number;
   recommendedAction: PruningRecommendedAction;
   survivalContribution: number;
+  warnings: string[];
+};
+
+export type WisdomMeaningAdjustment = {
+  gravityScore: number;
+  needConfidence: number;
+  falseConfidenceRisk: number;
+  confidenceAdjustment: number;
+  decisionPenalty: number;
+  safetyPriority: number;
+  recommendedAction: "allow" | "scale" | "review" | "block";
   warnings: string[];
 };
 
@@ -842,6 +856,7 @@ export function evaluateDecisionQuality(input: DecisionQualityInput = {}): Decis
   const reflectionScore = scoreFromUnknown(input.reflection, ["reflectionScore", "score"], 50);
   const survivalScore = scoreFromUnknown(input.survivalMemory, ["survivalConfidence", "score"], 50);
   const pruning = pruningAdjustmentFor(input.pruning);
+  const meaning = meaningAdjustmentFor(input.meaning);
   const economicsScore = economicsScoreFor(opportunityEconomics);
   const decisionQuality = roundScore(mean([
     counterfactuals.decisionQuality,
@@ -851,13 +866,13 @@ export function evaluateDecisionQuality(input: DecisionQualityInput = {}): Decis
     portfolioIntelligence.allocationQuality,
     reflectionScore,
     survivalScore,
-  ]) + pruning.robustnessAdjustment * 0.12 - pruning.falseConfidenceRisk * 0.08);
+  ]) + pruning.robustnessAdjustment * 0.12 - pruning.falseConfidenceRisk * 0.08 - meaning.decisionPenalty);
   const learningConfidence = roundScore(mean([
     counterfactuals.counterfactualConfidence,
     Math.min(100, history.length * 5),
     discoveryMaturity.maturityScore,
     agencyEffectiveness.agencyAccuracy,
-  ]) + pruning.confidenceAdjustment);
+  ]) + pruning.confidenceAdjustment + meaning.confidenceAdjustment);
   const wisdomScore = roundScore(mean([
     decisionQuality,
     learningConfidence,
@@ -865,20 +880,22 @@ export function evaluateDecisionQuality(input: DecisionQualityInput = {}): Decis
     Math.max(0, 100 - opportunityEconomics.opportunityCost),
   ]));
   const justifiedConfidence = roundScore(learningConfidence - pruning.falseConfidenceRisk * 0.32 + pruning.evidenceConfidence * 0.12);
-  const falseConfidenceRisk = roundScore(pruning.falseConfidenceRisk);
+  const falseConfidenceRisk = roundScore(Math.max(pruning.falseConfidenceRisk, meaning.falseConfidenceRisk));
   const robustnessScore = roundScore(mean([
     portfolioIntelligence.diversificationQuality,
     100 - falseConfidenceRisk,
     pruning.evidenceConfidence,
+    100 - meaning.falseConfidenceRisk,
   ]));
   const antifragilityScore = roundScore(mean([
     survivalScore,
     counterfactuals.restrictionValue,
     pruning.survivalContribution,
     pruning.ignoranceEffectivenessScore,
+    meaning.safetyPriority,
   ]));
-  const survivalAdjustment = roundScore(50 + (pruning.survivalContribution - pruning.pruningScore) * 0.35);
-  const recommendedAction = wisdomRecommendedAction(opportunityEconomics.bestOption, pruning);
+  const survivalAdjustment = roundScore(50 + (pruning.survivalContribution - pruning.pruningScore) * 0.35 - meaning.falseConfidenceRisk * 0.18);
+  const recommendedAction = wisdomRecommendedAction(opportunityEconomics.bestOption, pruning, meaning);
   const scores = {
     decisionQuality: audit(
       decisionQuality,
@@ -892,6 +909,7 @@ export function evaluateDecisionQuality(input: DecisionQualityInput = {}): Decis
         contributor("reflection", "Reflection", reflectionScore, 0.11, "Reflection quality supplied by the caller."),
         contributor("survival", "Survival memory", survivalScore, 0.11, "Long-term survival evidence supplied by the caller."),
         contributor("pruning", "Pruning restraint", 100 - pruning.falseConfidenceRisk, 0.08, "Whether noisy, stale, redundant, or overfit evidence has been restrained."),
+        contributor("meaning", "Meaning alignment", 100 - meaning.falseConfidenceRisk, 0.08, "Whether the desire has been transformed into a safe positive goal."),
       ],
     ),
     wisdomScore: audit(
@@ -913,6 +931,7 @@ export function evaluateDecisionQuality(input: DecisionQualityInput = {}): Decis
         contributor("discovery-maturity", "Discovery maturity", discoveryMaturity.maturityScore, 0.2, "Mature discovery histories increase confidence."),
         contributor("agency-accuracy", "Agency accuracy", agencyEffectiveness.agencyAccuracy, 0.2, "Agency outcome correctness."),
         contributor("pruning-evidence", "Pruning evidence", pruning.evidenceConfidence, 0.1, "Pruning cannot increase confidence when evidence is weak."),
+        contributor("meaning-confidence", "Meaning confidence", meaning.needConfidence * 100, 0.1, "Low need confidence lowers learning confidence."),
       ],
     ),
   };
@@ -931,6 +950,7 @@ export function evaluateDecisionQuality(input: DecisionQualityInput = {}): Decis
     sourceModules: unique([
       ...sourceModulesFor(input),
       ...(input.pruning ? ["pruning"] : []),
+      ...(input.meaning ? ["meaning"] : []),
       "counterfactuals",
       "opportunityEconomics",
       "discoveryMaturity",
@@ -944,12 +964,14 @@ export function evaluateDecisionQuality(input: DecisionQualityInput = {}): Decis
     recommendedAction,
     survivalAdjustment,
     ...(input.pruning ? { pruning } : {}),
-    explanation: `Wisdom score is ${wisdomScore}/100 with decision quality ${decisionQuality}/100, learning confidence ${learningConfidence}/100, and pruning false-confidence risk ${falseConfidenceRisk}/100.`,
+    ...(input.meaning ? { meaning } : {}),
+    explanation: `Wisdom score is ${wisdomScore}/100 with decision quality ${decisionQuality}/100, learning confidence ${learningConfidence}/100, false-confidence risk ${falseConfidenceRisk}/100, and Meaning gravity ${meaning.gravityScore}/10.`,
     formulas: [
       ...Object.values(scores).map((score) => score.formula),
       "justifiedConfidence = learning confidence adjusted down by pruning false-confidence risk and weak evidence",
       "robustnessScore = diversification, pruning evidence confidence, and low false-confidence risk",
       "recommendedAction escalates review when pruning finds ignored, quarantined, stale, noisy, or low-evidence drivers",
+      "meaningAdjustment reduces confidence and escalates review when literal desire is unsafe or ambiguous",
     ],
   };
 }
@@ -1467,7 +1489,62 @@ function pruningAdjustmentFor(input: DecisionQualityInput["pruning"]): WisdomPru
   };
 }
 
-function wisdomRecommendedAction(bestOption: OpportunityEconomicsResult["bestOption"], pruning: WisdomPruningAdjustment) {
+function meaningAdjustmentFor(input: DecisionQualityInput["meaning"]): WisdomMeaningAdjustment {
+  if (!input || typeof input !== "object") {
+    return {
+      gravityScore: 0,
+      needConfidence: 0.7,
+      falseConfidenceRisk: 0,
+      confidenceAdjustment: 0,
+      decisionPenalty: 0,
+      safetyPriority: 50,
+      recommendedAction: "allow",
+      warnings: [],
+    };
+  }
+  const gravityScore = clamp(numeric(input.gravityScore, input.purposeInputs?.gravityScore ?? 0), -10, 10);
+  const needConfidence = clamp(numeric(input.needConfidence, input.purposeInputs?.needConfidence ?? 0.5), 0, 1);
+  const literalDesireUnsafe = Boolean(input.purposeInputs?.literalDesireUnsafe ?? gravityScore <= -5);
+  const safetyPriority = clamp(numeric(input.purposeInputs?.safetyPriority, 55 + Math.max(0, -gravityScore) * 5));
+  const falseConfidenceRisk = roundScore(
+    Math.max(0, -gravityScore) * 7 +
+      Math.max(0, 0.55 - needConfidence) * 65 +
+      (literalDesireUnsafe ? 12 : 0),
+  );
+  const confidenceAdjustment = -roundScore(falseConfidenceRisk * 0.22 + Math.max(0, 0.65 - needConfidence) * 20);
+  const decisionPenalty = roundScore(falseConfidenceRisk * 0.08 + (literalDesireUnsafe ? 4 : 0));
+  const recommendedAction = gravityScore <= -9
+    ? "block"
+    : gravityScore <= -7 || needConfidence < 0.45
+      ? "review"
+      : gravityScore <= -5
+        ? "scale"
+        : "allow";
+
+  return {
+    gravityScore,
+    needConfidence,
+    falseConfidenceRisk,
+    confidenceAdjustment,
+    decisionPenalty,
+    safetyPriority,
+    recommendedAction,
+    warnings: [
+      ...safeStrings(input.riskWarnings),
+      ...(literalDesireUnsafe ? ["Meaning transformed an unsafe literal desire; Wisdom must not optimize the literal request."] : []),
+      ...(needConfidence < 0.45 ? ["Meaning confidence is low; Wisdom should escalate review."] : []),
+    ],
+  };
+}
+
+function wisdomRecommendedAction(
+  bestOption: OpportunityEconomicsResult["bestOption"],
+  pruning: WisdomPruningAdjustment,
+  meaning: WisdomMeaningAdjustment,
+) {
+  if (meaning.recommendedAction === "block") return "review";
+  if (meaning.recommendedAction === "review") return "review";
+  if (meaning.recommendedAction === "scale") return bestOption === "action" ? "scale" : bestOption;
   if (pruning.recommendedAction === "quarantine") return "review";
   if (pruning.recommendedAction === "ignore") return "review";
   if (pruning.recommendedAction === "review") return "review";
@@ -1657,6 +1734,12 @@ function sum(values: number[]) {
 
 function unique(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)));
+}
+
+function safeStrings(value: unknown) {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+    : [];
 }
 
 function normalized(value: unknown) {

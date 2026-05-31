@@ -14,6 +14,7 @@ import { evaluateJudgement } from "../judgement";
 import { evaluateLegacy } from "../legacy/engine";
 import type { LegacyInput } from "../legacy/engine";
 import { clamp, immutable, mean, numeric, stdev } from "../math/statistics";
+import { evaluateMeaning } from "../meaning/engine";
 import type { MetricRegistry } from "../metrics/registry";
 import { detectNeeds } from "../need-detection/engine";
 import { evaluateOpportunityDensity } from "../opportunity-discovery/density";
@@ -135,10 +136,12 @@ export class SignalFrameworkEngine {
         decision,
       }),
     );
+    const meaning = context.meaning ? evaluateMeaning(context.meaning) : undefined;
     const pruning = evaluatePruning(
       buildPruningInput({
         context,
         timestamp,
+        meaning,
         perception: rawPerception,
         reflection,
         calibration,
@@ -159,6 +162,7 @@ export class SignalFrameworkEngine {
             discovery,
             recognition,
             pruning,
+            meaning,
             decision,
           }),
         )
@@ -182,6 +186,7 @@ export class SignalFrameworkEngine {
       reflection: context.agency?.reflection ?? reflection,
       calibration: context.agency?.calibration ?? calibration,
       pruning: context.agency?.pruning ?? pruning,
+      meaning: context.agency?.meaning ?? meaning,
     });
     const viability = context.viability || decision
       ? evaluateViability(
@@ -332,6 +337,17 @@ export class SignalFrameworkEngine {
         candidates: pruning.candidates.length,
       },
     });
+    if (meaning) {
+      events.push({
+        type: `meaning.${meaning.gravityLabel}`,
+        timestamp,
+        payload: {
+          gravityScore: meaning.gravityScore,
+          primaryNeed: meaning.primaryNeed,
+          actionPermission: meaning.purposeInputs.actionPermission,
+        },
+      });
+    }
     if (purpose) {
       events.push({
         type: `purpose.${purpose.recommendedAction}`,
@@ -439,6 +455,7 @@ export class SignalFrameworkEngine {
       recognition,
       legacy,
       pruning,
+      meaning,
       purpose,
       decision,
       agency,
@@ -870,6 +887,7 @@ function buildRecognitionInput(args: {
 function buildPruningInput(args: {
   context: SignalContext;
   timestamp: number;
+  meaning?: SignalSnapshot["meaning"];
   perception: PerceptionEvaluation;
   reflection: NonNullable<SignalSnapshot["reflection"]>;
   calibration: NonNullable<SignalSnapshot["calibration"]>;
@@ -894,6 +912,7 @@ function buildPruningInput(args: {
   return {
     ...supplied,
     now: supplied.now ?? args.timestamp,
+    meaning: supplied.meaning ?? args.meaning,
     candidates,
   };
 }
@@ -907,6 +926,7 @@ function buildPurposeInput(args: {
   discovery: NonNullable<SignalSnapshot["discovery"]>;
   recognition: NonNullable<SignalSnapshot["recognition"]>;
   pruning: NonNullable<SignalSnapshot["pruning"]>;
+  meaning?: SignalSnapshot["meaning"];
   decision: SignalContext["decision"];
 }): PurposeInput {
   const supplied = args.context.purpose;
@@ -976,6 +996,7 @@ function buildPurposeInput(args: {
     },
     decision: supplied.decision ?? args.decision,
     pruning: supplied.pruning ?? args.pruning,
+    meaning: supplied.meaning ?? args.meaning,
     selfModel: supplied.selfModel ?? {
       score: selfLayer?.score,
       confidence: selfLayer?.confidence,

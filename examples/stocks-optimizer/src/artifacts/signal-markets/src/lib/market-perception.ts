@@ -1,6 +1,7 @@
 import {
   SignalFrameworkEngine,
   buildStocksLeadershipObservations,
+  buildStocksMeaningViewModel,
   buildStocksOptimizerMetrics,
   buildStocksPruningInput,
   buildStocksPruningViewModel,
@@ -18,6 +19,7 @@ import {
   type SignalContext,
   type SignalSnapshot,
   type StocksOptimizerMetricSource as MarketPerceptionMetricSource,
+  type StocksMeaningViewModel,
   type StocksPruningViewModel,
   type StocksPurposeViewModel,
 } from "../../../signal-framework";
@@ -109,6 +111,7 @@ export type MarketStateSnapshot = {
   metrics: Record<string, MetricState>;
   history: MarketStateTransition[];
   reliability?: MarketReliabilityResult;
+  meaning?: StocksMeaningViewModel;
   pruning?: StocksPruningViewModel;
   purpose?: StocksPurposeViewModel;
   framework?: Pick<
@@ -119,6 +122,7 @@ export type MarketStateSnapshot = {
     | "calibration"
     | "agency"
     | "pruning"
+    | "meaning"
     | "purpose"
     | "needs"
     | "opportunities"
@@ -275,6 +279,19 @@ export class MarketStateEngine {
       metrics: reliabilityAdjustedInputs,
       synchronization: this.lastSource ? buildStocksSynchronization(this.lastSource) : undefined,
       calibration,
+      meaning: this.lastSource?.meaningText
+        ? {
+            text: this.lastSource.meaningText,
+            context: {
+              domain: "stocks-optimizer",
+              currentGoal: "sustainable market progress",
+              safetyConstraints: [
+                "Protect risk of ruin before optimizing return.",
+                "Do not let revenge, panic recovery, or speed pressure increase exposure.",
+              ],
+            },
+          }
+        : undefined,
       pruning: this.lastSource ? buildStocksPruningInput(this.lastSource, { now: timestamp }) : undefined,
       purpose: this.lastSource ? buildStocksPurposeInput(this.lastSource, { now: timestamp }) : undefined,
       observations: this.lastSource ? buildStocksLeadershipObservations(this.lastSource.stocks, timestamp) : [],
@@ -343,6 +360,7 @@ function adaptSnapshot(
     metrics: adaptMetrics(snapshot.metrics),
     history: history.slice(),
     reliability,
+    meaning: buildStocksMeaningViewModel(snapshot.meaning),
     pruning: buildStocksPruningViewModel(snapshot.pruning),
     purpose: buildStocksPurposeViewModel(snapshot.purpose),
     framework: {
@@ -352,6 +370,7 @@ function adaptSnapshot(
       calibration: snapshot.calibration,
       agency: snapshot.agency,
       pruning: snapshot.pruning,
+      meaning: snapshot.meaning,
       purpose: snapshot.purpose,
       needs: snapshot.needs,
       opportunities: snapshot.opportunities,

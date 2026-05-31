@@ -1,4 +1,8 @@
 import { clamp, mean, numeric, signRatio, stdev } from "../math/statistics";
+import {
+  evaluateMeaning,
+  type MeaningResult,
+} from "../meaning/engine";
 import { MetricRegistry } from "../metrics/registry";
 import {
   evaluatePurpose,
@@ -57,6 +61,8 @@ export type StocksOptimizerMetricSource = {
     riskAversion?: number;
   };
   ambition?: number | null;
+  meaningText?: string | null;
+  meaning?: Partial<MeaningResult> | null;
   behavioralEvents?: PurposeBehaviorObservation[];
   expectationRecords?: PurposeExpectationRecord[];
   frictionRecords?: PurposeFrictionRecord[];
@@ -91,6 +97,19 @@ export type StocksPurposeViewModel = {
   purposeConfidence: number;
   primaryFocus: string;
   explanation: string;
+  warnings: string[];
+};
+
+export type StocksMeaningViewModel = {
+  mode: "legacy" | "enhanced" | "degraded";
+  whatYouSeemToWant: string;
+  whatThisReallyPointsTo: string;
+  saferGoal: string;
+  whyAdjusted: string;
+  whatWeWillProtect: string[];
+  gravityScore: number;
+  gravityLabel: string;
+  confidence: number;
   warnings: string[];
 };
 
@@ -302,9 +321,10 @@ export function buildStocksLeadershipObservations(stocks: Array<Record<string, a
 
 export function buildStocksPruningInput(
   input: StocksOptimizerMetricSource,
-  options: { now?: string | number | Date } = {},
+  options: { now?: string | number | Date; meaning?: Partial<MeaningResult> | null } = {},
 ): PruningInput {
   const stocks = Array.isArray(input.stocks) ? input.stocks : [];
+  const meaning = options.meaning === undefined ? evaluateStocksMeaning(input) : options.meaning;
   const actionCounts = stocks.reduce<Record<string, number>>((counts, stock) => {
     const action = String(stock.signalAction ?? stock.allocationAction ?? "Hold");
     counts[action] = (counts[action] ?? 0) + 1;
@@ -317,20 +337,44 @@ export function buildStocksPruningInput(
 
   return {
     now: options.now ?? input.now ?? "1970-01-01T00:00:00.000Z",
+    meaning,
     candidates,
   };
 }
 
 export function evaluateStocksPruning(
   input: StocksOptimizerMetricSource,
-  options: { now?: string | number | Date } = {},
+  options: { now?: string | number | Date; meaning?: Partial<MeaningResult> | null } = {},
 ): PruningResult {
   return evaluatePruning(buildStocksPruningInput(input, options));
 }
 
+export function evaluateStocksMeaning(input: StocksOptimizerMetricSource): MeaningResult | null {
+  if (input.meaning && typeof input.meaning === "object" && input.meaning.module === "meaning") {
+    return input.meaning as MeaningResult;
+  }
+  const text = String(input.meaningText ?? "").trim();
+  if (!text) return null;
+  return evaluateMeaning({
+    text,
+    context: {
+      domain: "stocks-optimizer",
+      currentGoal: "sustainable market progress",
+      safetyConstraints: [
+        "Protect risk of ruin before optimizing return.",
+        "Do not let revenge, panic recovery, or speed pressure increase exposure.",
+      ],
+    },
+  });
+}
+
 export function buildStocksPurposeInput(
   input: StocksOptimizerMetricSource,
-  options: { now?: string | number | Date; pruning?: Partial<PruningResult> | null } = {},
+  options: {
+    now?: string | number | Date;
+    pruning?: Partial<PruningResult> | null;
+    meaning?: Partial<MeaningResult> | null;
+  } = {},
 ): PurposeInput {
   const stocks = Array.isArray(input.stocks) ? input.stocks : [];
   const avgRisk = numeric(input.avgRisk, 50);
@@ -346,6 +390,12 @@ export function buildStocksPurposeInput(
   const actionCount = Math.max(1, buyCount + sellCount);
   const reversalPressure = sellCount / actionCount > 0.55;
   const ambition = score(input.ambition, 50);
+  const meaning = options.meaning === undefined ? evaluateStocksMeaning(input) : options.meaning;
+  const meaningSafetyPriority = numeric(meaning?.purposeInputs?.safetyPriority, 55);
+  const meaningUnsafe = Boolean(meaning?.purposeInputs?.literalDesireUnsafe);
+  const meaningSurvivalCap = meaningUnsafe
+    ? clamp(95 - Math.max(0, -numeric(meaning?.gravityScore, 0)) * 5)
+    : 100;
   const derivedBehavior: PurposeBehaviorObservation = {
     ambitionSignal: clamp(input.targetExposure * 1.35 + confidence * 0.35),
     patience: clamp(100 - avgRisk * 0.55 - (input.staleData ? 12 : 0)),
@@ -392,11 +442,11 @@ export function buildStocksPurposeInput(
     expectations: [derivedExpectation, ...safeArray(input.expectationRecords)],
     friction: [derivedFriction, ...safeArray(input.frictionRecords)],
     currentPath: {
-      desiredFuture: "sustainable market progress",
+      desiredFuture: meaning?.transformedGoal ?? "sustainable market progress",
       alignment: clamp(avgQuality * 0.34 + confidence * 0.28 + input.breadth * 0.2 + survivalScore * 0.18),
       progress: derivedExpectation.progress,
-      survivability: survivalScore,
-      sustainability: clamp(survivalScore * 0.54 + (100 - avgRisk) * 0.26 + calibrationTrust * 0.2),
+      survivability: Math.min(survivalScore, meaningSurvivalCap),
+      sustainability: clamp(survivalScore * 0.46 + (100 - avgRisk) * 0.22 + calibrationTrust * 0.18 + meaningSafetyPriority * 0.14),
       behaviorFit: clamp(calibrationTrust * 0.42 + survivalScore * 0.32 + (100 - avgRisk) * 0.26),
       clarity: derivedFriction.clarity,
       usefulness: clamp(avgQuality * 0.34 + confidence * 0.28 + input.breadth * 0.22 + survivalScore * 0.16),
@@ -408,13 +458,14 @@ export function buildStocksPurposeInput(
       expectedReturn: numeric(input.backtestReturnPct, 0),
       expectedValue: clamp(avgQuality * 0.5 + confidence * 0.3 + input.targetExposure * 0.2),
       alignment: clamp(avgQuality * 0.34 + confidence * 0.28 + input.breadth * 0.2 + survivalScore * 0.18),
-      survivability: survivalScore,
-      priority: clamp(input.targetExposure * 1.2 + confidence * 0.35),
+      survivability: Math.min(survivalScore, meaningSurvivalCap),
+      priority: clamp(input.targetExposure * 1.2 + confidence * 0.35 + numeric(meaning?.purposeInputs?.ambitionAdjustment, 0) * 0.2),
       friction: 100 - numeric(derivedFriction.simplicity, 0),
       uncertainty: 100 - confidence,
     },
     survivalScore,
     pruning: options.pruning,
+    meaning,
     evidenceQuality: input.hasProvidedSignals ? (input.hasBacktestData ? 84 : 62) : 40,
     now: options.now ?? input.now,
   };
@@ -422,10 +473,15 @@ export function buildStocksPurposeInput(
 
 export function evaluateStocksPurpose(
   input: StocksOptimizerMetricSource,
-  options: { now?: string | number | Date; pruning?: Partial<PruningResult> | null } = {},
+  options: {
+    now?: string | number | Date;
+    pruning?: Partial<PruningResult> | null;
+    meaning?: Partial<MeaningResult> | null;
+  } = {},
 ): PurposeResult {
-  const pruning = options.pruning === undefined ? evaluateStocksPruning(input, options) : options.pruning;
-  return evaluatePurpose(buildStocksPurposeInput(input, { ...options, pruning }));
+  const meaning = options.meaning === undefined ? evaluateStocksMeaning(input) : options.meaning;
+  const pruning = options.pruning === undefined ? evaluateStocksPruning(input, { ...options, meaning }) : options.pruning;
+  return evaluatePurpose(buildStocksPurposeInput(input, { ...options, pruning, meaning }));
 }
 
 export function buildStocksPurposeViewModel(purpose?: Partial<PurposeResult> | null): StocksPurposeViewModel {
@@ -463,6 +519,42 @@ export function buildStocksPurposeViewModel(purpose?: Partial<PurposeResult> | n
     primaryFocus: focusForPurpose(purpose),
     explanation: String(purpose.explanation ?? "Purpose reviewed ambition, behavior, progress, trust, and sustainability."),
     warnings: safeStringArray(purpose.warnings),
+  };
+}
+
+export function buildStocksMeaningViewModel(meaning?: Partial<MeaningResult> | null): StocksMeaningViewModel {
+  if (!meaning) {
+    return {
+      mode: "legacy",
+      whatYouSeemToWant: "No goal text yet",
+      whatThisReallyPointsTo: "Purpose will use the existing market posture.",
+      saferGoal: "Keep progress sustainable while protecting survival.",
+      whyAdjusted: "Nothing was adjusted because no goal text was supplied.",
+      whatWeWillProtect: ["Risk of ruin", "Recovery capacity", "Decision clarity"],
+      gravityScore: 0,
+      gravityLabel: "neutral",
+      confidence: 0,
+      warnings: [],
+    };
+  }
+
+  const confidence = clamp(numeric(meaning.needConfidence, 0) * 100);
+  const adjusted = numeric(meaning.gravityScore, 0) < 0 || meaning.purposeInputs?.literalDesireUnsafe;
+  return {
+    mode: confidence < 45 ? "degraded" : "enhanced",
+    whatYouSeemToWant: String(meaning.surfaceDesire ?? "Clarify the goal."),
+    whatThisReallyPointsTo: meaning.primaryNeed
+      ? `A need for ${meaningNeedPhrase(meaning)}.`
+      : "A need for sustainable progress.",
+    saferGoal: String(meaning.transformedGoal ?? meaning.positiveGoal ?? "Keep progress sustainable while protecting survival."),
+    whyAdjusted: adjusted
+      ? "We adjusted the literal desire because the direct path could weaken safety or recovery."
+      : "The goal is already constructive, so we kept it and added normal guardrails.",
+    whatWeWillProtect: safeStringArray(meaning.safetyConstraints).slice(0, 4),
+    gravityScore: numeric(meaning.gravityScore, 0),
+    gravityLabel: String(meaning.gravityLabel ?? "neutral"),
+    confidence,
+    warnings: safeStringArray(meaning.riskWarnings),
   };
 }
 
@@ -512,6 +604,20 @@ export function adjustStocksExposureForPruning(
   return exposure;
 }
 
+export function adjustStocksExposureForMeaning(
+  suggestedExposure: number,
+  meaning?: Partial<MeaningResult> | null,
+) {
+  const exposure = clamp(suggestedExposure);
+  if (!meaning) return exposure;
+  const action = meaning.purposeInputs?.actionPermission;
+  if (action === "block") return 0;
+  if (action === "review") return Math.min(exposure, 20);
+  if (action === "reduce") return Math.min(exposure, exposure * 0.5);
+  if (numeric(meaning.gravityScore, 0) <= -5) return Math.min(exposure, exposure * 0.65);
+  return exposure;
+}
+
 function focusForPurpose(purpose: Partial<PurposeResult>) {
   if (numeric(purpose.survivabilityScore, 100) < 55) return "Protecting progress";
   if (numeric(purpose.frictionScore, 100) < 55) return "Reducing stress";
@@ -519,6 +625,14 @@ function focusForPurpose(purpose: Partial<PurposeResult>) {
   if (numeric(purpose.goalProgressScore, 0) >= 72) return "Building momentum";
   if (numeric(purpose.purposeProfile?.opportunityPreference, 0) >= 72) return "Pursuing growth";
   return "Preserving flexibility";
+}
+
+function meaningNeedPhrase(meaning: Partial<MeaningResult>) {
+  const needs = [meaning.primaryNeed, ...safeStringArray(meaning.secondaryNeeds)].filter(Boolean);
+  if (!needs.length) return "sustainable progress";
+  if (needs.length === 1) return String(needs[0]);
+  if (needs.length === 2) return `${needs[0]} and ${needs[1]}`;
+  return `${needs.slice(0, -1).join(", ")}, and ${needs[needs.length - 1]}`;
 }
 
 function score(value: unknown, fallback = 0) {

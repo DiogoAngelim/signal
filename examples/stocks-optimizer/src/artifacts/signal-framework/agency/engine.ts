@@ -1,5 +1,6 @@
 import { clamp, mean } from "../math/statistics";
 import type { CalibrationResult } from "../calibration/engine";
+import type { MeaningResult } from "../meaning/engine";
 import type { PruningCandidateAssessment, PruningResult } from "../pruning/engine";
 import type { ReflectionResult } from "../reflection/engine";
 
@@ -90,6 +91,7 @@ export type AgencyInput = {
     warnings?: string[];
   };
   pruning?: Partial<PruningResult> | PruningCandidateAssessment[];
+  meaning?: Partial<MeaningResult> | null;
   reflection?:
     | Partial<ReflectionResult>
     | { reflectionScore?: number; recommendedConfidenceCap?: number };
@@ -126,6 +128,16 @@ export type PruningGateEvaluation = {
   reducedCandidateIds: string[];
   quarantinedCandidateIds: string[];
   preservedCandidateIds: string[];
+  reasons: string[];
+};
+
+export type MeaningGateEvaluation = {
+  score: number;
+  safeToAct: boolean;
+  executionCap: number;
+  action: "allow" | "reduce" | "review" | "block";
+  gravityScore: number;
+  needConfidence: number;
   reasons: string[];
 };
 
@@ -190,6 +202,7 @@ export type AgencyResult = {
   constraintEvaluation: ConstraintEvaluation;
   reviewRequirement: ReviewRequirement;
   pruningGate: PruningGateEvaluation;
+  meaningGate: MeaningGateEvaluation;
   reasons: string[];
   audit: {
     componentScores: Record<string, number>;
@@ -248,6 +261,7 @@ export function authorize(input: AgencyInput): AgencyResult {
     uncertainty,
   );
   const pruningGate = evaluatePruningGate(input.pruning);
+  const meaningGate = evaluateMeaningGate(input.meaning);
   const baseExecutionReadiness = normalizeScore(
     input.execution?.readiness,
     mean([
@@ -257,10 +271,12 @@ export function authorize(input: AgencyInput): AgencyResult {
       decision.confidence,
       100 - uncertainty,
       ...(input.pruning ? [pruningGate.score] : []),
+      ...(input.meaning ? [meaningGate.score] : []),
     ]),
   );
   const executionReadiness = Math.min(
     pruningGate.executionCap,
+    meaningGate.executionCap,
     capReadiness(baseExecutionReadiness, {
       reviewRequired: reviewRequirement.required,
       constraintEvaluation,
@@ -275,6 +291,7 @@ export function authorize(input: AgencyInput): AgencyResult {
     decisionConfidence: decision.confidence,
     executionReadiness,
     pruningSafety: pruningGate.score,
+    meaningSafety: meaningGate.score,
   };
   const agencyScore = weightedScore(componentScores, DEFAULT_WEIGHTS);
   const commitmentConfidence = clamp(
@@ -285,6 +302,7 @@ export function authorize(input: AgencyInput): AgencyResult {
       constraintEvaluation.score,
       100 - uncertainty,
       ...(input.pruning ? [pruningGate.score] : []),
+      ...(input.meaning ? [meaningGate.score] : []),
     ]),
   );
   const statusResolution: string[] = [];
@@ -300,6 +318,7 @@ export function authorize(input: AgencyInput): AgencyResult {
     constraintEvaluation,
     reviewRequirement,
     pruningGate,
+    meaningGate,
     statusResolution,
   });
 
@@ -323,6 +342,7 @@ export function authorize(input: AgencyInput): AgencyResult {
     constraintEvaluation,
     reviewRequirement,
     pruningGate,
+    meaningGate,
     reasons: reasonsFor({
       input,
       decision,
@@ -335,6 +355,7 @@ export function authorize(input: AgencyInput): AgencyResult {
       constraintEvaluation,
       reviewRequirement,
       pruningGate,
+      meaningGate,
       status,
     }),
     audit: {
@@ -346,6 +367,7 @@ export function authorize(input: AgencyInput): AgencyResult {
         "commitmentConfidence = mean(calibrated decision confidence, reflection quality, authority score, constraint compliance, uncertainty control)",
         "executionReadiness = readiness input or mean core governance components, capped by review and blocking conditions",
         "pruningSafety blocks quarantined decision drivers and caps execution when only reduced evidence remains",
+        "meaningSafety blocks, reviews, or reduces actions driven by unsafe literal desire",
         "agencyScore = weighted mean of authority, constraints, uncertainty control, reflection quality, calibrated decision confidence, and execution readiness",
       ],
       statusResolution,
@@ -720,6 +742,69 @@ function evaluatePruningGate(pruning: AgencyInput["pruning"]): PruningGateEvalua
   };
 }
 
+function evaluateMeaningGate(meaning: AgencyInput["meaning"]): MeaningGateEvaluation {
+  if (!meaning || typeof meaning !== "object") {
+    return {
+      score: 100,
+      safeToAct: true,
+      executionCap: 100,
+      action: "allow",
+      gravityScore: 0,
+      needConfidence: 0.7,
+      reasons: ["No Meaning restrictions were supplied."],
+    };
+  }
+
+  const gravityScore = clamp(
+    numeric(meaning.gravityScore, meaning.purposeInputs?.gravityScore ?? 0),
+    -10,
+    10,
+  );
+  const needConfidence = clamp(
+    numeric(meaning.needConfidence, meaning.purposeInputs?.needConfidence ?? 0.5),
+    0,
+    1,
+  );
+  const literalDesireUnsafe = Boolean(meaning.purposeInputs?.literalDesireUnsafe ?? gravityScore <= -5);
+  const action = gravityScore <= -9
+    ? "block"
+    : gravityScore <= -7 || needConfidence < 0.45
+      ? "review"
+      : gravityScore <= -5
+        ? "reduce"
+        : "allow";
+  const score = clamp(
+    100 -
+      Math.max(0, -gravityScore) * 6 -
+      Math.max(0, 0.6 - needConfidence) * 55 -
+      (literalDesireUnsafe ? 12 : 0),
+  );
+  const executionCap = action === "block"
+    ? 0
+    : action === "review"
+      ? Math.min(45, score)
+      : action === "reduce"
+        ? Math.min(70, score)
+        : 100;
+  const reasons = [
+    `Meaning gravity is ${Math.round(gravityScore)}/10 with ${Math.round(needConfidence * 100)}% need confidence.`,
+    ...(literalDesireUnsafe
+      ? ["Agency must act on the transformed positive goal, not the unsafe literal desire."]
+      : ["Meaning permits action on the positive goal with normal safety checks."]),
+    ...(meaning.transformedGoal ? [`Transformed goal: ${meaning.transformedGoal}`] : []),
+  ];
+
+  return {
+    score,
+    safeToAct: action !== "block",
+    executionCap,
+    action,
+    gravityScore,
+    needConfidence,
+    reasons,
+  };
+}
+
 function idsForAction(candidates: Array<Partial<PruningCandidateAssessment>>, action: string) {
   return candidates
     .filter((candidate) => candidate.recommendedAction === action)
@@ -738,6 +823,7 @@ function resolveStatus(input: {
   constraintEvaluation: ConstraintEvaluation;
   reviewRequirement: ReviewRequirement;
   pruningGate: PruningGateEvaluation;
+  meaningGate: MeaningGateEvaluation;
   statusResolution: string[];
 }): AgencyStatus {
   if (input.input.execution?.rollbackRequested === true) {
@@ -748,6 +834,11 @@ function resolveStatus(input: {
   if (!input.decision.present) {
     input.statusResolution.push("No decision was supplied.");
     return "deferred";
+  }
+
+  if (input.meaningGate.action === "block") {
+    input.statusResolution.push("Meaning blocked the unsafe literal desire before action.");
+    return "denied";
   }
 
   if (!input.authorityEvaluation.sufficient) {
@@ -794,6 +885,11 @@ function resolveStatus(input: {
     return input.reviewRequirement.status;
   }
 
+  if (input.meaningGate.action === "review") {
+    input.statusResolution.push("Meaning requires review before acting on the transformed goal.");
+    return "requires-review";
+  }
+
   if (!input.pruningGate.safeToAct) {
     input.statusResolution.push("Pruning blocked action because evidence depends on ignored or quarantined drivers.");
     return input.pruningGate.quarantinedCandidateIds.length > 0 ? "denied" : "requires-review";
@@ -803,6 +899,11 @@ function resolveStatus(input: {
     input.statusResolution.push(
       "Only non-hard constraints failed; proceeding with limits.",
     );
+    return "limited";
+  }
+
+  if (input.meaningGate.action === "reduce") {
+    input.statusResolution.push("Meaning reduced action because the literal desire was risky.");
     return "limited";
   }
 
@@ -832,6 +933,7 @@ function reasonsFor(input: {
   constraintEvaluation: ConstraintEvaluation;
   reviewRequirement: ReviewRequirement;
   pruningGate: PruningGateEvaluation;
+  meaningGate: MeaningGateEvaluation;
   status: AgencyStatus;
 }) {
   const reasons = [
@@ -842,6 +944,7 @@ function reasonsFor(input: {
     `Uncertainty is ${formatPercent(input.uncertainty)}.`,
     `Execution readiness is ${formatPercent(input.executionReadiness)}.`,
     `Pruning safety is ${formatPercent(input.pruningGate.score)}.`,
+    `Meaning safety is ${formatPercent(input.meaningGate.score)}.`,
   ];
 
   if (input.input.calibration) {
@@ -864,6 +967,7 @@ function reasonsFor(input: {
   for (const reason of input.input.execution?.reasons ?? [])
     reasons.push(reason);
   for (const reason of input.pruningGate.reasons) reasons.push(reason);
+  for (const reason of input.meaningGate.reasons) reasons.push(reason);
   if (input.status === "approved") reasons.push("Agency approved commitment.");
   if (input.status === "limited")
     reasons.push("Agency limited commitment due to non-hard constraints.");

@@ -11,6 +11,7 @@ import type {
 import type { DiscoveryInput, DiscoveryResult } from "../discovery/engine";
 import type { JudgementInput, JudgementResult } from "../judgement";
 import type { LegacyInput, LegacyOutput } from "../legacy/engine";
+import type { MeaningInput, MeaningResult } from "../meaning/engine";
 import type { PruningInput, PruningResult } from "../pruning/engine";
 import type { PurposeInput, PurposeResult } from "../purpose/engine";
 import type { RecognitionInput, RecognitionResult } from "../recognition/engine";
@@ -427,6 +428,7 @@ export type SignalSnapshot = {
   viability?: ViabilityResult;
   legacy?: LegacyOutput;
   pruning?: PruningResult;
+  meaning?: MeaningResult;
   purpose?: PurposeResult;
   regime: RegimeState;
   synchronization: SynchronizationState;
@@ -463,6 +465,7 @@ export type SignalContext = {
   discoveryIntelligence?: Partial<DiscoveryIntelligenceInput>;
   recognition?: Partial<RecognitionInput>;
   pruning?: Partial<PruningInput>;
+  meaning?: MeaningInput;
   purpose?: Partial<Omit<PurposeInput, "ambition">> & Pick<PurposeInput, "ambition">;
   decision?: DecisionResult | null;
   agency?: AgencyInput;

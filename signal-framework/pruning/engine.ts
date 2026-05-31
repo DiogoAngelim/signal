@@ -1,4 +1,5 @@
 import { clamp, mean, numeric } from "../math/statistics";
+import type { MeaningResult } from "../meaning/engine";
 
 export type PruningCandidateType =
   | "raw-signal"
@@ -67,6 +68,7 @@ export type PruningCandidateInput = {
 
 export type PruningInput = PruningCandidateInput & {
   candidates?: PruningCandidateInput[];
+  meaning?: Partial<MeaningResult> | null;
   now?: string | number | Date;
   strictValidation?: boolean;
 };
@@ -305,7 +307,11 @@ export class PruningValidationError extends Error {
 
 export function evaluatePruning(input: PruningInput = {}): PruningResult {
   const timestamp = toIsoTimestamp(input.now);
-  const candidates = normalizeCandidates(input);
+  const meaningCandidates = meaningPruningCandidates(input.meaning, timestamp);
+  const baseCandidates = normalizeCandidates(input);
+  const candidates = meaningCandidates.length && baseCandidates.length === 1 && baseCandidates[0]?.candidateId === "no-candidates"
+    ? meaningCandidates
+    : [...meaningCandidates, ...baseCandidates];
   const assessments = candidates.map((candidate, index) =>
     evaluateCandidate(candidate, {
       index,
@@ -855,6 +861,105 @@ function normalizeCandidates(input: PruningInput): PruningCandidateInput[] {
       uncertainty: 100,
     },
   ];
+}
+
+function meaningPruningCandidates(
+  meaning: PruningInput["meaning"],
+  timestamp: string,
+): PruningCandidateInput[] {
+  if (!meaning || typeof meaning !== "object") return [];
+  const gravityScore = clamp(numeric(meaning.gravityScore, meaning.purposeInputs?.gravityScore ?? 0), -10, 10);
+  const needConfidence = clamp(numeric(meaning.needConfidence, meaning.purposeInputs?.needConfidence ?? 0.5), 0, 1);
+  const unsafe = Boolean(meaning.purposeInputs?.literalDesireUnsafe ?? gravityScore <= -5);
+  const safetyPriority = clamp(numeric(meaning.purposeInputs?.safetyPriority, 55 + Math.max(0, -gravityScore) * 5));
+  const pressure = clamp(Math.max(0, -gravityScore) * 10);
+  const candidates: PruningCandidateInput[] = [];
+
+  if (unsafe || needConfidence < 0.45) {
+    candidates.push({
+      candidateId: "meaning:literal-desire",
+      candidateType: "policy",
+      sourceModule: "meaning",
+      currentWeight: pressure,
+      historicalUtility: unsafe ? 18 : 35,
+      predictiveContribution: unsafe ? 16 : 35,
+      decisionContribution: unsafe ? 12 : 34,
+      redundancyScore: 0,
+      noiseScore: clamp(pressure + (needConfidence < 0.45 ? 18 : 0)),
+      volatilitySensitivity: pressure,
+      regimeStability: 45,
+      evidenceQuality: clamp(needConfidence * 100),
+      sampleSize: 1,
+      staleDataRisk: 0,
+      contradictionRate: unsafe ? pressure : 24,
+      falsePositiveRate: unsafe ? clamp(pressure * 0.8) : 20,
+      falseNegativeRate: 0,
+      complexityCost: unsafe ? 72 : 45,
+      maintenanceCost: 20,
+      latencyCost: 0,
+      userClarityCost: unsafe ? 70 : 45,
+      overfitRisk: unsafe ? pressure : 35,
+      explainabilityValue: 75,
+      survivalValue: unsafe ? 20 : 45,
+      recentOutcomeImpact: unsafe ? -60 : -15,
+      counterfactualImpact: unsafe ? -50 : -12,
+      confidenceImpact: unsafe ? -45 : -20,
+      trustImpact: unsafe ? -45 : -16,
+      uncertainty: clamp(100 - needConfidence * 100),
+      governanceFlags: unsafe ? ["requires-review"] : [],
+      selfModelWarnings: [
+        ...safeStrings(meaning.riskWarnings),
+        ...(needConfidence < 0.45 ? ["Meaning confidence is low; do not let literal desire dominate pruning."] : []),
+      ],
+      timestamp,
+      metadata: {
+        surfaceDesire: meaning.surfaceDesire,
+        transformedGoal: meaning.transformedGoal,
+      },
+    });
+  }
+
+  if (safeStrings(meaning.safetyConstraints).length > 0 || safetyPriority >= 75) {
+    candidates.push({
+      candidateId: "meaning:safety-constraints",
+      candidateType: "policy",
+      sourceModule: "meaning",
+      currentWeight: safetyPriority,
+      historicalUtility: safetyPriority,
+      predictiveContribution: safetyPriority,
+      decisionContribution: safetyPriority,
+      redundancyScore: 0,
+      noiseScore: 0,
+      volatilitySensitivity: 10,
+      regimeStability: 70,
+      evidenceQuality: clamp(Math.max(55, needConfidence * 100)),
+      sampleSize: 1,
+      staleDataRisk: 0,
+      contradictionRate: 0,
+      falsePositiveRate: 0,
+      falseNegativeRate: 0,
+      complexityCost: 20,
+      maintenanceCost: 10,
+      latencyCost: 0,
+      userClarityCost: 12,
+      overfitRisk: 0,
+      explainabilityValue: 88,
+      survivalValue: Math.max(82, safetyPriority),
+      recentOutcomeImpact: 20,
+      counterfactualImpact: 25,
+      confidenceImpact: 0,
+      trustImpact: 12,
+      uncertainty: clamp(100 - needConfidence * 100),
+      governanceFlags: ["survival-critical", "do-not-ignore"],
+      selfModelWarnings: meaning.safetyConstraints,
+      timestamp,
+      metadata: {
+        transformedGoal: meaning.transformedGoal,
+      },
+    });
+  }
+
+  return candidates;
 }
 
 function scoreReader(candidate: PruningCandidateInput) {

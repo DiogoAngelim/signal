@@ -1,4 +1,5 @@
 import { clamp, mean, numeric } from "../math/statistics";
+import type { MeaningResult } from "../meaning/engine";
 import type { PruningCandidateAssessment, PruningResult } from "../pruning/engine";
 import type { DecisionQualityResult, WisdomSummary } from "../wisdom/engine";
 
@@ -94,6 +95,7 @@ export type PurposeInput = {
   currentPath?: PurposePathInput;
   decision?: PurposeDecisionInput | null;
   survivalScore?: number;
+  meaning?: Partial<MeaningResult> | null;
   wisdom?: Partial<DecisionQualityResult | WisdomSummary> | PurposeModuleContext | null;
   pruning?: Partial<PruningResult> | PruningCandidateAssessment[] | null;
   selfModel?: PurposeModuleContext | null;
@@ -269,6 +271,7 @@ export function evaluatePurpose(input: PurposeInput): PurposeResult {
       ? [input.friction]
       : [];
   const pruning = normalizePruning(input.pruning);
+  const meaning = normalizeMeaning(input.meaning);
   const moduleScores = collectModuleScores(input);
   const behavioralIdentity = learnBehavioralIdentity({
     ambition,
@@ -281,7 +284,10 @@ export function evaluatePurpose(input: PurposeInput): PurposeResult {
   const frictionScore = scoreFriction(frictionRecords, input.decision);
   const clarityScore = firstScore(input.currentPath?.clarity, frictionScore, 70);
   const usefulnessScore = firstScore(input.currentPath?.usefulness, moduleScores.wisdom, input.currentPath?.progress, 62);
-  const survivabilityScore = survivalScoreFor(input, purposeProfile, pruning);
+  const baseSurvivabilityScore = survivalScoreFor(input, purposeProfile, pruning);
+  const survivabilityScore = meaning
+    ? roundScore(Math.min(baseSurvivabilityScore, meaning.survivabilityCap))
+    : baseSurvivabilityScore;
   const behaviorFitScore = roundScore(mean([
     100 - identityConflict * 0.78,
     behavioralIdentity.disciplineScore,
@@ -307,6 +313,7 @@ export function evaluatePurpose(input: PurposeInput): PurposeResult {
   const desiredFutureAlignment = roundScore(firstScore(
     input.currentPath?.alignment,
     input.decision?.alignment,
+    meaning?.alignmentScore,
     mean([goalProgressScore, purposeProfile.growthPreference, 100 - purposeProfile.certaintyPreference * 0.2]),
   ));
   const alignmentScore = roundScore(mean([
@@ -368,7 +375,7 @@ export function evaluatePurpose(input: PurposeInput): PurposeResult {
       sampleConfidence || 42,
       100 - identityConflict * 0.65,
       expectationCalibrationScore,
-    ]) - pruning.falseConfidenceRisk * 0.12,
+    ]) - pruning.falseConfidenceRisk * 0.12 - (meaning?.confidencePenalty ?? 0),
   );
   const priority = decisionPriority({
     input,
@@ -377,6 +384,7 @@ export function evaluatePurpose(input: PurposeInput): PurposeResult {
     purposeConfidence,
     expectationCalibrationScore,
     identityConflict,
+    meaning,
   });
   const warnings = warningsFor({
     input,
@@ -387,12 +395,14 @@ export function evaluatePurpose(input: PurposeInput): PurposeResult {
     frictionScore,
     purposeConfidence,
     pruning,
+    meaning,
   });
   const purposeStatement = buildPurposeStatement({
     ambition,
     ambitionIntensity,
     profile: purposeProfile,
     behavioralAmbition: behavioralIdentity.behavioralAmbition,
+    meaning,
   });
   const trace = buildTrace({
     alignmentScore,
@@ -408,6 +418,7 @@ export function evaluatePurpose(input: PurposeInput): PurposeResult {
     frictionScore,
     purposeConfidence,
     identityConflict,
+    meaning,
   });
 
   return {
@@ -575,6 +586,72 @@ type NormalizedPruning = {
   survivalContribution: number;
 };
 
+type NormalizedMeaning = {
+  gravityScore: number;
+  needConfidence: number;
+  positiveGoal: string;
+  transformedGoal: string;
+  literalDesireUnsafe: boolean;
+  actionPermission: string;
+  safetyPriority: number;
+  confidencePenalty: number;
+  survivabilityCap: number;
+  alignmentScore: number;
+  warnings: string[];
+  safetyConstraints: string[];
+};
+
+function normalizeMeaning(input: PurposeInput["meaning"]): NormalizedMeaning | null {
+  if (!input || typeof input !== "object") return null;
+  const record = input as Partial<MeaningResult> & Record<string, unknown>;
+  const purposeInputs = record.purposeInputs ?? {};
+  const gravityScore = clamp(
+    numeric(record.gravityScore, numeric((purposeInputs as Record<string, unknown>).gravityScore, 0)),
+    -10,
+    10,
+  );
+  const needConfidence = clamp(
+    numeric(record.needConfidence, numeric((purposeInputs as Record<string, unknown>).needConfidence, 0.5)),
+    0,
+    1,
+  );
+  const literalDesireUnsafe = Boolean(
+    record.purposeInputs?.literalDesireUnsafe ?? gravityScore <= -5,
+  );
+  const actionPermission = String(record.purposeInputs?.actionPermission ?? (
+    gravityScore <= -9 ? "block" : gravityScore <= -7 ? "review" : gravityScore <= -5 ? "reduce" : "allow"
+  ));
+  const safetyPriority = clamp(numeric(record.purposeInputs?.safetyPriority, 55 + Math.max(0, -gravityScore) * 5));
+  const confidencePenalty = roundScore(
+    Math.max(0, -gravityScore) * 1.8 +
+      Math.max(0, 0.65 - needConfidence) * 55 +
+      (literalDesireUnsafe ? 4 : 0),
+  );
+  const survivabilityCap = literalDesireUnsafe
+    ? roundScore(95 - Math.max(0, -gravityScore) * 5.5)
+    : 100;
+  const alignmentScore = roundScore(
+    literalDesireUnsafe
+      ? 62 - Math.max(0, -gravityScore) * 2 + needConfidence * 16
+      : 64 + Math.max(0, gravityScore) * 3 + needConfidence * 8,
+  );
+
+  return {
+    gravityScore,
+    needConfidence,
+    positiveGoal: String(record.positiveGoal ?? record.purposeInputs?.positiveGoal ?? ""),
+    transformedGoal: String(record.transformedGoal ?? record.purposeInputs?.transformedGoal ?? ""),
+    literalDesireUnsafe,
+    actionPermission,
+    safetyPriority,
+    confidencePenalty,
+    survivabilityCap,
+    alignmentScore,
+    warnings: safeArray(record.riskWarnings).map(String),
+    safetyConstraints: safeArray(record.safetyConstraints).map(String),
+  };
+}
+
 function normalizePruning(input: PurposeInput["pruning"]): NormalizedPruning {
   const candidates = Array.isArray(input)
     ? input
@@ -639,6 +716,7 @@ function decisionPriority(input: {
   purposeConfidence: number;
   expectationCalibrationScore: number;
   identityConflict: number;
+  meaning: NormalizedMeaning | null;
 }): { recommendedAction: PurposeRecommendedAction; priorityAdjustment: number } {
   const decision = input.input.decision;
   const returnPressure = firstScore(decision?.expectedReturn, decision?.expectedValue, decision?.priority, 50);
@@ -650,6 +728,24 @@ function decisionPriority(input: {
   const effectiveSurvival = explicitSurvival == null
     ? input.survivabilityScore
     : Math.min(input.survivabilityScore, explicitSurvival);
+  if (input.meaning?.actionPermission === "block") {
+    return {
+      recommendedAction: "protect-survival",
+      priorityAdjustment: roundScore(-42 + effectiveSurvival * 0.18, -100, 100),
+    };
+  }
+  if (input.meaning?.actionPermission === "review") {
+    return {
+      recommendedAction: "review-identity",
+      priorityAdjustment: roundScore(-26 + input.meaning.gravityScore * 0.8, -100, 100),
+    };
+  }
+  if (input.meaning?.actionPermission === "reduce") {
+    return {
+      recommendedAction: "reduce-priority",
+      priorityAdjustment: roundScore(-18 + input.meaning.gravityScore * 0.5, -100, 100),
+    };
+  }
   if (effectiveSurvival < 45) {
     return {
       recommendedAction: "protect-survival",
@@ -691,7 +787,15 @@ function buildPurposeStatement(input: {
   ambitionIntensity: number;
   profile: PurposeProfile;
   behavioralAmbition: number;
+  meaning: NormalizedMeaning | null;
 }) {
+  if (input.meaning?.transformedGoal) {
+    const guardrail = input.meaning.literalDesireUnsafe
+      ? "survival, safety, and recovery capacity"
+      : "sustainability and trust";
+    return `I am working toward ${sentenceFragment(input.meaning.transformedGoal)} while respecting ${guardrail}.`;
+  }
+
   const effectiveAmbition = Math.min(input.ambition, Math.max(input.behavioralAmbition, input.ambition * 0.72));
   const sacrifice = effectiveAmbition >= 82
     ? "comfort and short-term certainty"
@@ -730,6 +834,7 @@ function warningsFor(input: {
   frictionScore: number;
   purposeConfidence: number;
   pruning: NormalizedPruning;
+  meaning: NormalizedMeaning | null;
 }) {
   const warnings: string[] = [];
   if (input.identityConflict >= 24) warnings.push("Declared ambition and observed behavior are materially different.");
@@ -739,6 +844,10 @@ function warningsFor(input: {
   if (input.frictionScore < 55) warnings.push("Friction is high; simplify the path before asking for more participation.");
   if (input.purposeConfidence < 50) warnings.push("Purpose confidence is limited by weak evidence or identity conflict.");
   if (input.pruning.falseConfidenceRisk >= 25) warnings.push("Pruning found evidence that could create false confidence.");
+  if (input.meaning?.literalDesireUnsafe) warnings.push("Meaning transformed an unsafe literal desire before Purpose alignment.");
+  if (input.meaning && input.meaning.needConfidence < 0.45) warnings.push("Meaning confidence is low; Purpose should stay in degraded mode.");
+  for (const warning of input.meaning?.warnings ?? []) warnings.push(warning);
+  for (const constraint of input.meaning?.safetyConstraints ?? []) warnings.push(`Meaning safety constraint: ${constraint}`);
   for (const warning of safeArray(warningsFrom(input.input.wisdom))) warnings.push(String(warning));
   for (const warning of safeArray(warningsFrom(input.input.selfModel))) warnings.push(String(warning));
   for (const warning of safeArray(warningsFrom(input.input.governance))) warnings.push(String(warning));
@@ -772,8 +881,9 @@ function buildTrace(input: {
   frictionScore: number;
   purposeConfidence: number;
   identityConflict: number;
+  meaning: NormalizedMeaning | null;
 }): PurposeTraceEntry[] {
-  return [
+  const traceEntries = [
     trace("alignment", "Alignment", input.alignmentScore, 0.2, "How well the path advances the desired future and fits observed behavior."),
     trace("satisfaction", "Satisfaction", input.satisfactionScore, 0.17, "Probability the user feels helped toward the future they want."),
     trace("retention", "Retention", input.retentionScore, 0.14, "Probability the user can keep engaging over time."),
@@ -788,6 +898,13 @@ function buildTrace(input: {
     trace("confidence", "Purpose confidence", input.purposeConfidence, 1, "Evidence strength after identity conflict and pruning risk."),
     trace("identity-conflict", "Identity conflict", input.identityConflict, 1, "Distance between declared ambition and observed behavior."),
   ];
+  if (input.meaning) {
+    traceEntries.push(
+      trace("meaning-gravity", "Meaning gravity", 50 + input.meaning.gravityScore * 5, 1, "Human-need gravity from literal desire to transformed goal."),
+      trace("meaning-confidence", "Meaning confidence", input.meaning.needConfidence * 100, 1, "Confidence in the mapped positive human need."),
+    );
+  }
+  return traceEntries;
 }
 
 function trace(id: string, label: string, scoreValue: number, weight: number, reason: string): PurposeTraceEntry {
@@ -861,6 +978,15 @@ function warningsFrom(context: unknown) {
   if (!context || typeof context !== "object") return [];
   const warnings = (context as Record<string, unknown>).warnings;
   return Array.isArray(warnings) ? warnings : [];
+}
+
+function sentenceFragment(value: string) {
+  return value
+    .trim()
+    .replace(/[.!?]+$/g, "")
+    .replace(/^I am working toward\s+/i, "")
+    .replace(/^I want to\s+/i, "")
+    .replace(/^I want\s+/i, "");
 }
 
 function finiteMaybe(value: unknown) {

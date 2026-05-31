@@ -2152,7 +2152,7 @@ function MiniMetric({
       </div>
       <div
         className={cx(
-          "mt-2 font-semibold tracking-tight",
+          "mt-2 break-words font-semibold leading-snug tracking-tight",
           emphasis === "strong" ? "text-3xl text-white" : "text-xl text-white",
           emphasis === "quiet" && "text-lg text-zinc-200",
           tone === "good" && emphasis !== "strong" && "text-[#FDD000]",
@@ -2976,6 +2976,7 @@ export default function Dashboard() {
   const [portfolioRefreshing, setPortfolioRefreshing] = useState(false);
   const [query, setQuery] = useState("");
   const [ambition, setAmbition] = useState(50);
+  const [meaningText, setMeaningText] = useState("");
   const registeredWatchlists = useRef(new Set<string>());
   const refreshedPortfolioMarkets = useRef(new Set<string>());
 
@@ -3792,6 +3793,7 @@ export default function Dashboard() {
     ? (marketPerceptionSnapshot?.framework as any).opportunities
     : [];
   const purposeView = marketPerceptionSnapshot?.purpose;
+  const meaningView = marketPerceptionSnapshot?.meaning;
   const purposeTone =
     purposeView == null || purposeView.mode === "legacy"
       ? "neutral"
@@ -3806,6 +3808,14 @@ export default function Dashboard() {
   const purposeSubLabel = purposeView
     ? `${purposeView.primaryFocus} · trust ${fmtPlainPct(purposeView.alignmentTrustScore, 0)}`
     : "Building momentum";
+  const meaningTone =
+    meaningView == null || meaningView.mode === "legacy"
+      ? "neutral"
+      : meaningView.gravityScore <= -7
+        ? "bad"
+        : meaningView.gravityScore < 0 || meaningView.mode === "degraded"
+          ? "warn"
+          : "good";
   const discoveryFindings = Array.isArray(opportunityDiscovery?.findings)
     ? opportunityDiscovery.findings
     : [];
@@ -5690,6 +5700,7 @@ export default function Dashboard() {
         fallbackMode: marketReliability.market.fallbackMode,
         executionProfile,
         ambition,
+        meaningText: meaningText.trim() || undefined,
       }),
     [
       marketStatus,
@@ -5725,6 +5736,7 @@ export default function Dashboard() {
       marketReliability,
       executionProfile,
       ambition,
+      meaningText,
     ],
   );
 
@@ -5769,6 +5781,7 @@ export default function Dashboard() {
       fallbackMode: marketReliability.market.fallbackMode,
       executionProfile,
       ambition,
+      meaningText: meaningText.trim() || undefined,
     };
 
     marketStateEngineRef.current?.setSource(perceptionSource);
@@ -6979,6 +6992,70 @@ export default function Dashboard() {
                     value={ambition}
                   />
                 </div>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-lg bg-black/25 px-4 py-4 ring-1 ring-white/[0.06]">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0 lg:max-w-2xl">
+                  <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500 md:text-[11px]">
+                    <Brain className="h-4 w-4 text-[#FDD000]" />
+                    Goal alignment
+                  </div>
+                  <textarea
+                    aria-label="Goal alignment"
+                    className="mt-3 min-h-[74px] w-full resize-none rounded-md border border-white/[0.08] bg-black/35 px-3 py-2 text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-[#FDD000]/45"
+                    onChange={(event) => setMeaningText(event.target.value)}
+                    placeholder="I want to grow aggressively but I do not want to blow up."
+                    value={meaningText}
+                  />
+                </div>
+                <div className="shrink-0">
+                  <StatusPill tone={meaningTone}>
+                    {meaningView && meaningView.mode !== "legacy"
+                      ? `${Math.round(meaningView.gravityScore)}/10`
+                      : "Legacy"}
+                  </StatusPill>
+                </div>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                <MiniMetric
+                  label="What you seem to want"
+                  value={meaningView?.whatYouSeemToWant ?? "No goal text yet"}
+                  emphasis="quiet"
+                />
+                <MiniMetric
+                  label="What this really points to"
+                  value={
+                    meaningView?.whatThisReallyPointsTo ??
+                    "Existing market posture"
+                  }
+                  emphasis="quiet"
+                />
+                <MiniMetric
+                  label="Safer goal"
+                  value={
+                    meaningView?.saferGoal ??
+                    "Sustainable progress with survival protected"
+                  }
+                  emphasis="quiet"
+                />
+                <MiniMetric
+                  label="Why we adjusted it"
+                  value={
+                    meaningView?.whyAdjusted ??
+                    "No goal text was supplied"
+                  }
+                  emphasis="quiet"
+                />
+                <MiniMetric
+                  label="What we will protect"
+                  value={
+                    meaningView?.whatWeWillProtect?.slice(0, 2).join(" · ") ||
+                    "Risk of ruin · Recovery capacity"
+                  }
+                  emphasis="quiet"
+                />
               </div>
             </div>
 
