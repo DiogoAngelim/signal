@@ -1,21 +1,46 @@
 import { Pool, type PoolConfig } from "pg";
-import { assessCoherence, type OutcomeEvaluation, type SignalDecisionRecord } from "@signal/decision";
+import {
+  assessCoherence,
+  createRealitySnapshotForDecision,
+  type OutcomeEvaluation,
+  type RealitySnapshot,
+  type SignalDecisionRecord,
+} from "@signal/decision";
 import { normalizeRetentionTier } from "./retention";
 import type {
   CalibrationHistoryEntry,
   DecisionMemoryStore,
   DecisionRecordFilter,
   MemorySummary,
+  RealitySnapshotFilter,
   ReplaySnapshot,
   RetentionJobRecord,
   TrustHistoryEntry,
 } from "./types";
 
 export const SIGNAL_DECISION_MEMORY_MIGRATION_SQL = `
+CREATE TABLE IF NOT EXISTS signal_reality_snapshots (
+  snapshot_id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL,
+  data_quality DOUBLE PRECISION NOT NULL DEFAULT 50,
+  freshness_score DOUBLE PRECISION NOT NULL DEFAULT 50,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  source_ref JSONB,
+  metadata JSONB,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_reality_snapshots_source_created_at
+  ON signal_reality_snapshots (source, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signal_reality_snapshots_created_at
+  ON signal_reality_snapshots (created_at DESC);
+
 CREATE TABLE IF NOT EXISTS signal_decision_records (
   decision_id TEXT PRIMARY KEY,
   created_at TIMESTAMPTZ NOT NULL,
   source TEXT NOT NULL,
+  reality_snapshot_id TEXT NOT NULL,
   observation JSONB NOT NULL DEFAULT '{}'::jsonb,
   discovery JSONB,
   judgment JSONB,
@@ -43,6 +68,40 @@ CREATE INDEX IF NOT EXISTS idx_signal_decision_records_source
   ON signal_decision_records (source);
 CREATE INDEX IF NOT EXISTS idx_signal_decision_records_retention_tier
   ON signal_decision_records (retention_tier);
+
+ALTER TABLE signal_decision_records
+  ADD COLUMN IF NOT EXISTS reality_snapshot_id TEXT;
+
+INSERT INTO signal_reality_snapshots (
+  snapshot_id,
+  source,
+  created_at,
+  data_quality,
+  freshness_score,
+  payload,
+  metadata
+)
+SELECT
+  COALESCE(NULLIF(reality_snapshot_id, ''), CONCAT('reality:', decision_id)),
+  source,
+  created_at,
+  50,
+  50,
+  jsonb_build_object('observation', observation),
+  jsonb_build_object('decisionId', decision_id, 'capture', 'legacy-observation')
+FROM signal_decision_records
+WHERE reality_snapshot_id IS NULL OR reality_snapshot_id = ''
+ON CONFLICT (snapshot_id) DO NOTHING;
+
+UPDATE signal_decision_records
+SET reality_snapshot_id = CONCAT('reality:', decision_id)
+WHERE reality_snapshot_id IS NULL OR reality_snapshot_id = '';
+
+ALTER TABLE signal_decision_records
+  ALTER COLUMN reality_snapshot_id SET NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_signal_decision_records_reality_snapshot_id
+  ON signal_decision_records (reality_snapshot_id);
 
 CREATE TABLE IF NOT EXISTS signal_outcomes (
   outcome_id TEXT PRIMARY KEY,
@@ -146,6 +205,7 @@ type DecisionRow = {
   decision_id: string;
   created_at: string | Date;
   source: string;
+  reality_snapshot_id: string;
   observation: unknown;
   discovery: unknown;
   judgment: unknown;
@@ -161,6 +221,17 @@ type DecisionRow = {
   accountability: unknown;
   human_summary: string;
   retention_tier: string;
+};
+
+type RealitySnapshotRow = {
+  snapshot_id: string;
+  source: string;
+  created_at: string | Date;
+  data_quality: number;
+  freshness_score: number;
+  payload: unknown;
+  source_ref: RealitySnapshot["sourceRef"] | null;
+  metadata: RealitySnapshot["metadata"] | null;
 };
 
 export class NeonPostgresAdapter implements DecisionMemoryStore {
@@ -195,15 +266,87 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     await this.pool.end();
   }
 
+  async saveRealitySnapshot(snapshot: RealitySnapshot): Promise<RealitySnapshot> {
+    await this.ensureReady();
+    await this.pool.query(
+      `
+      INSERT INTO signal_reality_snapshots (
+        snapshot_id,
+        source,
+        created_at,
+        data_quality,
+        freshness_score,
+        payload,
+        source_ref,
+        metadata,
+        updated_at
+      )
+      VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8::jsonb,NOW())
+      ON CONFLICT (snapshot_id) DO UPDATE SET
+        source = EXCLUDED.source,
+        created_at = EXCLUDED.created_at,
+        data_quality = EXCLUDED.data_quality,
+        freshness_score = EXCLUDED.freshness_score,
+        payload = EXCLUDED.payload,
+        source_ref = EXCLUDED.source_ref,
+        metadata = EXCLUDED.metadata,
+        updated_at = NOW()
+      `,
+      [
+        snapshot.snapshotId,
+        snapshot.source,
+        snapshot.createdAt,
+        snapshot.dataQuality,
+        snapshot.freshnessScore,
+        jsonb(snapshot.payload),
+        jsonb(snapshot.sourceRef),
+        jsonb(snapshot.metadata),
+      ],
+    );
+    return snapshot;
+  }
+
+  async getRealitySnapshot(snapshotId: string): Promise<RealitySnapshot | undefined> {
+    await this.ensureReady();
+    const result = await this.pool.query<RealitySnapshotRow>(
+      "SELECT * FROM signal_reality_snapshots WHERE snapshot_id = $1 LIMIT 1",
+      [snapshotId],
+    );
+    return result.rows[0] ? rowToRealitySnapshot(result.rows[0]) : undefined;
+  }
+
+  async listRealitySnapshots(filter: RealitySnapshotFilter = {}): Promise<RealitySnapshot[]> {
+    await this.ensureReady();
+    const where: string[] = [];
+    const params: unknown[] = [];
+    addCondition(where, params, filter.snapshotId, "snapshot_id =");
+    addCondition(where, params, filter.source, "source =");
+    addCondition(where, params, filter.createdBefore, "created_at <");
+    addCondition(where, params, filter.createdAfter, "created_at >");
+    const limit = clampLimit(filter.limit);
+    params.push(limit);
+    const sql = `
+      SELECT *
+      FROM signal_reality_snapshots
+      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+      ORDER BY created_at DESC
+      LIMIT $${params.length}
+    `;
+    const result = await this.pool.query<RealitySnapshotRow>(sql, params);
+    return result.rows.map(rowToRealitySnapshot);
+  }
+
   async saveDecisionRecord(record: SignalDecisionRecord): Promise<SignalDecisionRecord> {
     await this.ensureReady();
     const normalized = normalizeRecord(record, this.source);
+    await this.saveRealitySnapshot(normalized.realitySnapshot ?? createRealitySnapshotForDecision(normalized));
     await this.pool.query(
       `
       INSERT INTO signal_decision_records (
         decision_id,
         created_at,
         source,
+        reality_snapshot_id,
         observation,
         discovery,
         judgment,
@@ -223,14 +366,15 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
         updated_at
       )
       VALUES (
-        $1,$2,$3,$4::jsonb,$5::jsonb,$6::jsonb,$7::jsonb,$8::jsonb,$9::jsonb,$10::jsonb,
-        $11::jsonb,$12::jsonb,$13::jsonb,$14::jsonb,$15::jsonb,$16::jsonb,$17,$18,
-        CASE WHEN $18 IN ('warm','cold','expired') THEN NOW() ELSE NULL END,
+        $1,$2,$3,$4,$5::jsonb,$6::jsonb,$7::jsonb,$8::jsonb,$9::jsonb,$10::jsonb,$11::jsonb,
+        $12::jsonb,$13::jsonb,$14::jsonb,$15::jsonb,$16::jsonb,$17::jsonb,$18,$19,
+        CASE WHEN $19 IN ('warm','cold','expired') THEN NOW() ELSE NULL END,
         NOW()
       )
       ON CONFLICT (decision_id) DO UPDATE SET
         created_at = EXCLUDED.created_at,
         source = EXCLUDED.source,
+        reality_snapshot_id = EXCLUDED.reality_snapshot_id,
         observation = EXCLUDED.observation,
         discovery = EXCLUDED.discovery,
         judgment = EXCLUDED.judgment,
@@ -253,6 +397,7 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
         normalized.decisionId,
         normalized.createdAt,
         normalized.source,
+        normalized.realitySnapshotId,
         jsonb(normalized.observation),
         jsonb(normalized.discovery),
         jsonb(normalized.judgment),
@@ -279,7 +424,10 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
       "SELECT * FROM signal_decision_records WHERE decision_id = $1 LIMIT 1",
       [decisionId],
     );
-    return result.rows[0] ? rowToDecision(result.rows[0]) : undefined;
+    if (!result.rows[0]) return undefined;
+    const record = rowToDecision(result.rows[0]);
+    const snapshot = await this.getRealitySnapshot(record.realitySnapshotId);
+    return snapshot ? { ...record, realitySnapshot: snapshot } : record;
   }
 
   async listDecisionRecords(filter: DecisionRecordFilter = {}): Promise<SignalDecisionRecord[]> {
@@ -698,9 +846,19 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
 }
 
 function normalizeRecord(record: SignalDecisionRecord, source: string): SignalDecisionRecord {
+  const snapshot = record.realitySnapshot ?? createRealitySnapshotForDecision({
+    decisionId: record.decisionId,
+    source: record.source || source,
+    createdAt: record.createdAt,
+    observation: record.observation,
+    realitySnapshotId: record.realitySnapshotId,
+  });
+
   return {
     ...record,
     source: record.source || source,
+    realitySnapshotId: snapshot.snapshotId,
+    realitySnapshot: snapshot,
     retentionTier: normalizeRetentionTier(record.retentionTier),
   };
 }
@@ -710,6 +868,7 @@ function rowToDecision(row: DecisionRow): SignalDecisionRecord {
     decisionId: row.decision_id,
     createdAt: toIso(row.created_at),
     source: row.source,
+    realitySnapshotId: row.reality_snapshot_id,
     observation: row.observation,
     ...(row.discovery == null ? {} : { discovery: row.discovery }),
     ...(row.judgment == null ? {} : { judgment: row.judgment }),
@@ -725,6 +884,19 @@ function rowToDecision(row: DecisionRow): SignalDecisionRecord {
     ...(row.accountability == null ? {} : { accountability: row.accountability as SignalDecisionRecord["accountability"] }),
     humanSummary: row.human_summary,
     retentionTier: normalizeRetentionTier(row.retention_tier),
+  };
+}
+
+function rowToRealitySnapshot(row: RealitySnapshotRow): RealitySnapshot {
+  return {
+    snapshotId: row.snapshot_id,
+    source: row.source,
+    createdAt: toIso(row.created_at),
+    dataQuality: Number(row.data_quality),
+    freshnessScore: Number(row.freshness_score),
+    payload: row.payload,
+    ...(row.source_ref == null ? {} : { sourceRef: row.source_ref }),
+    ...(row.metadata == null ? {} : { metadata: row.metadata }),
   };
 }
 

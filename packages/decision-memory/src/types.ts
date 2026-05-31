@@ -3,6 +3,7 @@ import type {
   CoherenceAssessment,
   DecisionReplayComparison,
   OutcomeEvaluation,
+  RealitySnapshot,
   SignalDecisionRecord,
 } from "@signal/decision";
 
@@ -28,6 +29,14 @@ export type DecisionRecordFilter = {
   source?: string;
   retentionTier?: RetentionTier;
   decisionId?: string;
+  createdBefore?: string;
+  createdAfter?: string;
+  limit?: number;
+};
+
+export type RealitySnapshotFilter = {
+  source?: string;
+  snapshotId?: string;
   createdBefore?: string;
   createdAfter?: string;
   limit?: number;
@@ -116,6 +125,12 @@ export type DecisionRecordStore = {
   deleteDecisionRecord?(decisionId: string): Promise<void>;
 };
 
+export type RealityStore = {
+  saveRealitySnapshot(snapshot: RealitySnapshot): Promise<RealitySnapshot>;
+  getRealitySnapshot(snapshotId: string): Promise<RealitySnapshot | undefined>;
+  listRealitySnapshots(filter?: RealitySnapshotFilter): Promise<RealitySnapshot[]>;
+};
+
 export type OutcomeStore = {
   recordOutcome(outcome: OutcomeEvaluation): Promise<OutcomeEvaluation>;
   listOutcomes(decisionId?: string): Promise<OutcomeEvaluation[]>;
@@ -143,7 +158,8 @@ export type RetentionJobStore = {
   updateRetentionJob(jobId: string, patch: Partial<RetentionJobRecord>): Promise<RetentionJobRecord | undefined>;
 };
 
-export type DecisionMemoryStore = DecisionRecordStore &
+export type DecisionMemoryStore = RealityStore &
+  DecisionRecordStore &
   OutcomeStore &
   ReplayStore &
   CalibrationStore &

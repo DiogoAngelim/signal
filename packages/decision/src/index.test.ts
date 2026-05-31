@@ -7,6 +7,7 @@ import {
   createAccountabilityReport,
   createDecisionRecord,
   createInMemoryDecisionRecordStore,
+  createRealitySnapshot,
   evaluateDecision,
   evaluateOutcome,
   generatePredictionScenarios,
@@ -118,6 +119,14 @@ describe("@signal/decision", () => {
     });
     const record = createDecisionRecord({
       decisionId: "decision:3",
+      realitySnapshot: createRealitySnapshot({
+        snapshotId: "reality:decision:3",
+        source: "test",
+        createdAt: "2026-05-31T00:00:00.000Z",
+        dataQuality: 0.8,
+        freshnessScore: 0.9,
+        payload: { kind: "candidate" },
+      }),
       observation: { kind: "candidate" },
       coherence,
     });
@@ -136,6 +145,8 @@ describe("@signal/decision", () => {
     store.save({ ...record, accountability: report });
 
     expect(report.replayResult).toBe("changed-decision");
+    expect(record.realitySnapshotId).toBe("reality:decision:3");
+    expect(record.realitySnapshot?.dataQuality).toBe(80);
     expect(replay.differences.length).toBeGreaterThan(0);
     expect(guide.map((step) => step.title)).toEqual([
       "What is happening?",
@@ -191,6 +202,8 @@ describe("@signal/decision", () => {
     registerDecisionOperations(registry);
 
     expect(result.record.accountability?.decisionId).toBe("decision:4");
+    expect(result.record.realitySnapshotId).toBe("reality:decision:4");
+    expect(result.record.realitySnapshot?.payload).toMatchObject({ source: "test" });
     expect(result.predictionScenarios.length).toBe(3);
     expect(result.outcomeAccuracy).toBeGreaterThan(80);
     expect(result.decisionReplayAvailable).toBe(true);

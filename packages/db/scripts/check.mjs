@@ -8,6 +8,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 const expectedTables = [
+  "signal_reality_snapshots",
   "signal_decision_records",
   "signal_outcomes",
   "signal_replay_snapshots",

@@ -40,6 +40,10 @@ test("decision intelligence enriches strategy signals with required governance f
   assert.equal(signal.decisionReplayAvailable, true);
   assert.equal(typeof signal.actionAllowed, "boolean");
   assert.equal(typeof signal.actionScale, "number");
+  assert.match(signal.decisionIntelligence.realitySnapshotId, /^reality:/);
+  assert.equal(signal.decisionIntelligence.record.realitySnapshot.payload.marketVenue, "BINANCE");
+  assert.deepEqual(signal.decisionIntelligence.record.realitySnapshot.payload.assetUniverse, ["BTCUSDT"]);
+  assert.equal(signal.decisionIntelligence.record.realitySnapshot.metadata.rawHistoricalMarketDataStored, false);
   assert.ok(signal.suggestedExposure <= 5);
 });
 
@@ -90,6 +94,7 @@ test("decision operations expose protocol-style capabilities and persisted accou
   const accountability = accountabilityGetOperation({ decisionId: "test-decision" });
 
   assert.equal(result.record.decisionId, "test-decision");
+  assert.equal(typeof result.record.realitySnapshotId, "string");
   assert.equal(outcome.outcome.decisionId, "test-decision");
   assert.equal(accountability.found, true);
   assert.equal(accountability.accountability.decisionId, "test-decision");
@@ -119,4 +124,5 @@ test("decision outcomes tolerate externally recorded partial coherence", async (
   assert.equal(outcome.event, "decision.outcome_recorded.v1");
   assert.equal(outcome.outcome.decisionId, decisionId);
   assert.equal(outcome.record.accountability?.decisionId, decisionId);
+  assert.match(outcome.record.realitySnapshotId, /^reality:/);
 });

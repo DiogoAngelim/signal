@@ -34,6 +34,8 @@ export type {
   ExpiredMemoryMode,
   MemorySummary,
   OutcomeStore,
+  RealitySnapshotFilter,
+  RealityStore,
   ReplaySnapshot,
   ReplayStore,
   RetentionJobRecord,

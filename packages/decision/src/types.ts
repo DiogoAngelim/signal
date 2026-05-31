@@ -58,6 +58,37 @@ export type NormalizedModuleState = {
   metadata?: Record<string, unknown>;
 };
 
+export type RealitySource = {
+  sourceId: string;
+  name?: string;
+  sourceType?: "human" | "api" | "sensor" | "database" | "model" | "system" | "other";
+  reliabilityScore?: number;
+  freshnessWindowMs?: number;
+  metadata?: Record<string, unknown>;
+};
+
+export interface RealitySnapshot {
+  snapshotId: string;
+  source: string;
+  createdAt: string;
+  dataQuality: number;
+  freshnessScore: number;
+  payload: unknown;
+  sourceRef?: RealitySource;
+  metadata?: Record<string, unknown>;
+}
+
+export type RealitySnapshotInput = {
+  snapshotId?: string;
+  source?: string;
+  createdAt?: string;
+  dataQuality?: number;
+  freshnessScore?: number;
+  payload: unknown;
+  sourceRef?: RealitySource;
+  metadata?: Record<string, unknown>;
+};
+
 export type CoherenceStatus =
   | "aligned"
   | "stable"
@@ -238,6 +269,8 @@ export interface SignalDecisionRecord {
   decisionId: string;
   createdAt: string;
   source: string;
+  realitySnapshotId: string;
+  realitySnapshot?: RealitySnapshot;
   observation: unknown;
   discovery?: unknown;
   judgment?: unknown;
@@ -259,6 +292,8 @@ export type DecisionRecordInput = {
   decisionId: string;
   createdAt?: string;
   source?: string;
+  realitySnapshotId?: string;
+  realitySnapshot?: RealitySnapshotInput | RealitySnapshot;
   observation: unknown;
   discovery?: unknown;
   judgment?: unknown;
@@ -299,6 +334,8 @@ export type DecisionRecordStore = {
 export type DecisionPipelineInput = {
   decisionId: string;
   source?: string;
+  realitySnapshotId?: string;
+  realitySnapshot?: RealitySnapshotInput | RealitySnapshot;
   observation: unknown;
   modules: DecisionModuleInputs;
   prediction?: PredictionInput;

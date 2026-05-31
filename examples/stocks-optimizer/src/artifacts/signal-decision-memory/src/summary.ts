@@ -99,6 +99,7 @@ export function compactDecisionRecord(
     decisionId: record.decisionId,
     source: record.source,
     createdAt: record.createdAt,
+    realitySnapshotId: record.realitySnapshotId,
     observation: compactObservation,
     coherence: record.coherence,
     prediction: record.prediction?.map((scenario) => ({
@@ -119,6 +120,7 @@ export function anonymizeExpiredRecord(record: SignalDecisionRecord): SignalDeci
     decisionId: record.decisionId,
     source: record.source,
     createdAt: record.createdAt,
+    realitySnapshotId: record.realitySnapshotId,
     observation: {
       expired: true,
       source: record.source,

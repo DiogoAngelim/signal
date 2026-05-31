@@ -7,13 +7,26 @@ import type {
   SignalDecisionRecord,
 } from "../types";
 import { createHumanDecisionSummary } from "../human-language";
+import { createRealitySnapshotForDecision } from "../reality";
 import { nowIso } from "../utils";
 
 export function createDecisionRecord(input: DecisionRecordInput): SignalDecisionRecord {
+  const createdAt = input.createdAt ?? nowIso();
+  const source = input.source ?? "signal";
+  const realitySnapshot = createRealitySnapshotForDecision({
+    decisionId: input.decisionId,
+    source,
+    createdAt,
+    observation: input.observation,
+    realitySnapshotId: input.realitySnapshotId,
+    realitySnapshot: input.realitySnapshot,
+  });
   const provisional: SignalDecisionRecord = {
     decisionId: input.decisionId,
-    createdAt: input.createdAt ?? nowIso(),
-    source: input.source ?? "signal",
+    createdAt,
+    source,
+    realitySnapshotId: realitySnapshot.snapshotId,
+    realitySnapshot,
     observation: input.observation,
     ...(input.discovery === undefined ? {} : { discovery: input.discovery }),
     ...(input.judgment === undefined ? {} : { judgment: input.judgment }),

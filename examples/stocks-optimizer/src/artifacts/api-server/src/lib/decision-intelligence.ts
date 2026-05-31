@@ -4,6 +4,7 @@ import {
   createAccountabilityReport,
   createDecisionRecord,
   createInMemoryDecisionRecordStore,
+  createRealitySnapshot,
   evaluateDecision,
   evaluateOutcome,
   generatePredictionScenarios,
@@ -86,11 +87,13 @@ export function enrichStrategySignal<T extends Record<string, any>>(
     decisionReplayAvailable: result.decisionReplayAvailable,
     actionAllowed,
     actionScale: scale,
+    realitySnapshotId: sharedRecord.realitySnapshotId,
     humanSummary: sharedRecord.humanSummary,
     guide: buildHumanDecisionGuide(sharedRecord),
     record: sharedRecord,
     memory: {
       source: sharedRecord.source,
+      realitySnapshotId: sharedRecord.realitySnapshotId,
       retentionTier: sharedRecord.retentionTier,
       remembered: true,
       summary: "Signal will remember this decision and compare it with the result later.",
@@ -357,10 +360,27 @@ function rememberDecisionOutcome(outcome: ReturnType<typeof evaluateOutcome>) {
 }
 
 function normalizeSharedRecord(record: any) {
+  const source = String(record?.source ?? SIGNAL_SOURCE_ID);
+  const createdAt = String(record?.createdAt ?? new Date().toISOString());
+  const observation = record?.observation ?? {};
+  const realitySnapshot = record?.realitySnapshot ?? createRealitySnapshot({
+    snapshotId: stringOrUndefined(record?.realitySnapshotId) ?? `reality:${record?.decisionId ?? Date.now()}`,
+    source,
+    createdAt,
+    payload: observation,
+    metadata: {
+      decisionId: String(record?.decisionId ?? "decision:unknown"),
+      capture: "derived-from-decision-record",
+    },
+  });
   return {
     ...record,
+    createdAt,
+    observation,
     coherence: normalizeCoherenceAssessment(record?.coherence, record?.modules),
-    source: String(record?.source ?? SIGNAL_SOURCE_ID),
+    source,
+    realitySnapshotId: realitySnapshot.snapshotId,
+    realitySnapshot,
     retentionTier: normalizeRetentionTier(record?.retentionTier),
   };
 }
@@ -490,6 +510,7 @@ function logDecisionMemoryWarning(message: string, error: unknown) {
 function strategyDecisionInput(signal: Record<string, any>, context: Record<string, any>): DecisionPipelineInput {
   const symbol = String(signal["symbol"] ?? signal["ticker"] ?? "asset").trim();
   const action = String(signal["allocationAction"] ?? signal["signalAction"] ?? "Hold");
+  const marketVenue = String(context["market"] ?? signal["market"] ?? "").trim().toUpperCase();
   const setupQuality = numeric(signal["setupQuality"], 50);
   const riskPressure = numeric(signal["riskPressure"], 50);
   const expectedMove = numeric(signal["expectedMove"], numeric(signal["changePercent"], 0));
@@ -534,13 +555,29 @@ function strategyDecisionInput(signal: Record<string, any>, context: Record<stri
     awareness: firstNumber([signal["executionQuality"]?.score, signal["executionQuality"]?.qualityScore, 100 - riskPressure], 100 - riskPressure),
     agency: action === "Buy" ? clamp(55 + numeric(signal["suggestedExposure"], 0) * 5) : action === "Sell" ? 58 : 42,
   };
+  const realitySnapshot = marketRealitySnapshot({
+    signal,
+    context,
+    symbol,
+    marketVenue,
+    action,
+    setupQuality,
+    riskPressure,
+    expectedMove,
+    trust,
+    calibration,
+    recovery,
+    historyReliability,
+  });
 
   return {
     decisionId: String(signal["decisionId"] ?? `${context["market"] ?? "market"}:${symbol}:${action}:${context["summary"]?.updatedAt ?? "latest"}`),
     source: SIGNAL_SOURCE_ID,
+    realitySnapshotId: realitySnapshot.snapshotId,
+    realitySnapshot,
     observation: {
-      market: context["market"],
-      marketVenue: context["market"],
+      market: marketVenue,
+      marketVenue,
       source: SIGNAL_SOURCE_ID,
       symbol,
       selectedAssets: [symbol],
@@ -587,10 +624,89 @@ function strategyDecisionInput(signal: Record<string, any>, context: Record<stri
   };
 }
 
+function marketRealitySnapshot(input: {
+  signal: Record<string, any>;
+  context: Record<string, any>;
+  symbol: string;
+  marketVenue: string;
+  action: string;
+  setupQuality: number;
+  riskPressure: number;
+  expectedMove: number;
+  trust: number;
+  calibration: number;
+  recovery: number;
+  historyReliability: number;
+}) {
+  const timestamp = String(
+    input.signal["timestamp"] ??
+      input.signal["updatedAt"] ??
+      input.context["summary"]?.updatedAt ??
+      new Date().toISOString(),
+  );
+  const marketState = input.context["regime"] ?? {
+    regime: input.signal["regime"] ?? input.context["summary"]?.regime ?? "unknown",
+    survivalScore: input.context["summary"]?.survivalScore,
+    riskPressure: input.riskPressure,
+  };
+  const indicatorSnapshot = {
+    setupQuality: input.setupQuality,
+    riskPressure: input.riskPressure,
+    expectedMove: input.expectedMove,
+    trust: input.trust,
+    calibration: input.calibration,
+    recovery: input.recovery,
+    historyReliability: input.historyReliability,
+    suggestedExposure: numeric(input.signal["suggestedExposure"], 0),
+    signalAction: input.signal["signalAction"] ?? input.action,
+  };
+  const sourceRef = {
+    sourceId: SIGNAL_SOURCE_ID,
+    sourceType: "api" as const,
+    reliabilityScore: input.trust,
+    freshnessWindowMs: numeric(process.env.STOCK_SIGNAL_SNAPSHOT_FRESHNESS_MS, 15 * 60 * 1000),
+    metadata: {
+      adapter: "stocks-optimizer",
+      rawHistoryStored: false,
+    },
+  };
+
+  return createRealitySnapshot({
+    snapshotId: [
+      "reality",
+      SIGNAL_SOURCE_ID,
+      input.marketVenue || "market",
+      input.symbol || "asset",
+      timestamp,
+    ].map(snapshotSegment).join(":"),
+    source: SIGNAL_SOURCE_ID,
+    createdAt: timestamp,
+    dataQuality: clamp((input.setupQuality + input.trust + input.calibration + input.historyReliability) / 4),
+    freshnessScore: freshnessScoreFrom(timestamp, sourceRef.freshnessWindowMs),
+    payload: {
+      marketVenue: input.marketVenue,
+      marketState,
+      assetUniverse: input.symbol ? [input.symbol] : [],
+      indicatorSnapshot,
+      timestamp,
+    },
+    sourceRef,
+    metadata: {
+      domain: "finance",
+      storagePolicy: "decision-explanation-only",
+      rawHistoricalMarketDataStored: false,
+    },
+  });
+}
+
 function genericDecisionInput(payload: any): DecisionPipelineInput {
   if (payload?.modules) {
     return {
       decisionId: String(payload.decisionId ?? `decision:${Date.now()}`),
+      source: stringOrUndefined(payload.source) ?? SIGNAL_SOURCE_ID,
+      createdAt: stringOrUndefined(payload.createdAt),
+      realitySnapshotId: stringOrUndefined(payload.realitySnapshotId),
+      realitySnapshot: payload.realitySnapshot,
       observation: payload.observation ?? {},
       modules: moduleInputsFrom(payload.modules),
       prediction: predictionInputFrom(payload.prediction ?? payload),
@@ -712,6 +828,19 @@ function numeric(value: unknown, fallback = 0): number {
 
 function clamp(value: number, min = 0, max = 100): number {
   return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
+}
+
+function freshnessScoreFrom(timestamp: string, freshnessWindowMs: number): number {
+  const createdAt = Date.parse(timestamp);
+  if (!Number.isFinite(createdAt)) return 50;
+  const ageMs = Math.max(0, Date.now() - createdAt);
+  if (ageMs <= freshnessWindowMs) return 100;
+  return clamp(100 - ((ageMs - freshnessWindowMs) / Math.max(freshnessWindowMs, 1)) * 50);
+}
+
+function snapshotSegment(value: unknown): string {
+  const text = String(value ?? "").trim().toLowerCase();
+  return text.replace(/[^a-z0-9_.-]+/g, "-") || "unknown";
 }
 
 function stringOrUndefined(value: unknown): string | undefined {

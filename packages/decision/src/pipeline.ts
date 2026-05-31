@@ -33,6 +33,8 @@ export function evaluateDecision(input: DecisionPipelineInput): DecisionPipeline
     decisionId: input.decisionId,
     source: input.source,
     createdAt: input.createdAt,
+    realitySnapshotId: input.realitySnapshotId,
+    realitySnapshot: input.realitySnapshot,
     observation: input.observation,
     discovery: input.modules.discovery,
     judgment: input.modules.judgment,

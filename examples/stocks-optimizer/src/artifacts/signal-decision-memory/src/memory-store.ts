@@ -1,15 +1,17 @@
-import type { OutcomeEvaluation, SignalDecisionRecord } from "@signal/decision";
+import { createRealitySnapshotForDecision, type OutcomeEvaluation, type RealitySnapshot, type SignalDecisionRecord } from "@signal/decision";
 import type {
   CalibrationHistoryEntry,
   DecisionMemoryStore,
   DecisionRecordFilter,
   MemorySummary,
+  RealitySnapshotFilter,
   ReplaySnapshot,
   RetentionJobRecord,
   TrustHistoryEntry,
 } from "./types";
 
 export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
+  private readonly realitySnapshots = new Map<string, RealitySnapshot>();
   private readonly decisions = new Map<string, SignalDecisionRecord>();
   private readonly outcomes = new Map<string, OutcomeEvaluation>();
   private readonly replaySnapshots = new Map<string, ReplaySnapshot>();
@@ -18,9 +20,33 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
   private readonly summaries = new Map<string, MemorySummary>();
   private readonly retentionJobs = new Map<string, RetentionJobRecord>();
 
+  async saveRealitySnapshot(snapshot: RealitySnapshot): Promise<RealitySnapshot> {
+    this.realitySnapshots.set(snapshot.snapshotId, snapshot);
+    return snapshot;
+  }
+
+  async getRealitySnapshot(snapshotId: string): Promise<RealitySnapshot | undefined> {
+    return this.realitySnapshots.get(snapshotId);
+  }
+
+  async listRealitySnapshots(filter: RealitySnapshotFilter = {}): Promise<RealitySnapshot[]> {
+    const limit = clampLimit(filter.limit);
+    const snapshots = [...this.realitySnapshots.values()]
+      .filter((snapshot) => matchesRealityFilter(snapshot, filter))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return snapshots.slice(0, limit);
+  }
+
   async saveDecisionRecord(record: SignalDecisionRecord): Promise<SignalDecisionRecord> {
-    this.decisions.set(record.decisionId, record);
-    return record;
+    const realitySnapshot = record.realitySnapshot ?? createRealitySnapshotForDecision(record);
+    const normalized = {
+      ...record,
+      realitySnapshotId: realitySnapshot.snapshotId,
+      realitySnapshot,
+    };
+    await this.saveRealitySnapshot(realitySnapshot);
+    this.decisions.set(record.decisionId, normalized);
+    return normalized;
   }
 
   async getDecisionRecord(decisionId: string): Promise<SignalDecisionRecord | undefined> {
@@ -116,6 +142,7 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
   }
 
   clear(): void {
+    this.realitySnapshots.clear();
     this.decisions.clear();
     this.outcomes.clear();
     this.replaySnapshots.clear();
@@ -128,6 +155,14 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
 
 export function createInMemoryDecisionMemoryStore(): InMemoryDecisionMemoryStore {
   return new InMemoryDecisionMemoryStore();
+}
+
+function matchesRealityFilter(snapshot: RealitySnapshot, filter: RealitySnapshotFilter): boolean {
+  if (filter.snapshotId && snapshot.snapshotId !== filter.snapshotId) return false;
+  if (filter.source && snapshot.source !== filter.source) return false;
+  if (filter.createdBefore && snapshot.createdAt >= filter.createdBefore) return false;
+  if (filter.createdAfter && snapshot.createdAt <= filter.createdAfter) return false;
+  return true;
 }
 
 function matchesFilter(record: SignalDecisionRecord, filter: DecisionRecordFilter): boolean {

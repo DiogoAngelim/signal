@@ -7,6 +7,7 @@ export { applyOutcomeFeedback, evaluateOutcome } from "./outcomes";
 export { DECISION_OPERATION_DEFINITIONS, listDecisionOperations, registerDecisionOperations } from "./operations";
 export { evaluateDecision } from "./pipeline";
 export { bestPurposeScenario, generatePredictionScenarios, mostDangerousScenario, mostLikelyScenario } from "./prediction";
+export { compactRealityPayload, createRealitySnapshot, createRealitySnapshotForDecision } from "./reality";
 export { simulateDecisionPaths } from "./simulation";
 export { assessWisdom } from "./wisdom";
 export type {
@@ -32,6 +33,9 @@ export type {
   OutcomeHorizon,
   PredictionInput,
   PredictionScenario,
+  RealitySnapshot,
+  RealitySnapshotInput,
+  RealitySource,
   SignalDecisionRecord,
   SimulationInput,
   SimulationPathResult,

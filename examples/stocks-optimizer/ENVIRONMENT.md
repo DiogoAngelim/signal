@@ -128,3 +128,5 @@ Vercel also provides platform variables such as `VERCEL`, `VERCEL_URL`, `VERCEL_
 ## Long-history defaults
 
 Backtests default to `STOCK_BACKTEST_HISTORY_BARS=3780` and `STOCK_BACKTEST_LOOKBACK_YEARS=15`. Extended history feeds calibration, discovery, recognition, trust, and overfit diagnostics, but it does not restore sizing or bypass Survival Memory/recovery governance.
+
+Signal decision memory writes compact market context into `signal_reality_snapshots` using the existing `DATABASE_URL`; it stores the venue, market state, asset universe, indicators, and timestamp needed to replay a decision, not raw historical market data.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assessCoherence, createDecisionRecord, evaluateOutcome } from "@signal/decision";
+import { assessCoherence, createDecisionRecord, createRealitySnapshot, evaluateOutcome } from "@signal/decision";
 import {
   CompactionJob,
   MemoryLifecycle,
@@ -41,6 +41,15 @@ describe("@signal/decision-memory", () => {
 
   it("stores decisions, outcomes, replay snapshots, calibration, trust, and summaries in memory", async () => {
     const store = createInMemoryDecisionMemoryStore();
+    const realitySnapshot = createRealitySnapshot({
+      snapshotId: "reality:decision:1",
+      source: "stocks-optimizer",
+      createdAt: "2026-05-31T00:00:00.000Z",
+      dataQuality: 92,
+      freshnessScore: 88,
+      payload: { marketVenue: "BINANCE", assetUniverse: ["BTCUSDT"] },
+    });
+    await store.saveRealitySnapshot(realitySnapshot);
     const saved = await store.saveDecisionRecord(record("decision:1"));
     const outcome = evaluateOutcome({
       decisionId: saved.decisionId,
@@ -77,6 +86,8 @@ describe("@signal/decision-memory", () => {
     await store.saveSummary(summary);
 
     expect(await store.getDecisionRecord(saved.decisionId)).toMatchObject({ decisionId: saved.decisionId });
+    expect(await store.getRealitySnapshot("reality:decision:1")).toMatchObject({ source: "stocks-optimizer" });
+    expect(await store.listRealitySnapshots({ source: "stocks-optimizer" })).not.toHaveLength(0);
     expect(await store.listOutcomes(saved.decisionId)).toHaveLength(1);
     expect(await store.listReplaySnapshots(saved.decisionId)).toHaveLength(1);
     expect(await store.listCalibrationHistory(saved.decisionId)).toHaveLength(1);
@@ -103,10 +114,17 @@ describe("@signal/decision-memory", () => {
   it("exposes versioned operations and executable handlers", async () => {
     const store = createInMemoryDecisionMemoryStore();
     const operations = createDecisionMemoryOperations(store);
+    const realityOperation = operations.find((operation) => operation.name === "reality.snapshot.record.v1");
     const recordOperation = operations.find((operation) => operation.name === "decision.record.v1");
     const summaryOperation = operations.find((operation) => operation.name === "decision.memory.summary.v1");
 
     expect(listDecisionMemoryOperations().map((operation) => operation.name)).toContain("decision.memory.compact.v1");
+    expect(listDecisionMemoryOperations().map((operation) => operation.name)).toContain("reality.snapshot.record.v1");
+    await realityOperation?.handler({
+      snapshotId: "reality:operation:1",
+      source: "stocks-optimizer",
+      payload: { marketVenue: "BINANCE" },
+    });
     expect(recordOperation).toBeTruthy();
     await recordOperation?.handler({
       decisionId: "operation:1",
@@ -116,11 +134,13 @@ describe("@signal/decision-memory", () => {
     });
     const summary = await summaryOperation?.handler({ generate: true, source: "stocks-optimizer" });
     expect(summary).toMatchObject({ count: 1 });
+    expect(await store.getRealitySnapshot("reality:operation:1")).toMatchObject({ source: "stocks-optimizer" });
   });
 
   it("ships idempotent Postgres migrations for all shared memory tables", () => {
     for (const table of [
       "signal_decision_records",
+      "signal_reality_snapshots",
       "signal_outcomes",
       "signal_replay_snapshots",
       "signal_calibration_history",

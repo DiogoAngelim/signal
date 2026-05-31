@@ -3,10 +3,12 @@ import {
   assessCoherence,
   compareReplay,
   createDecisionRecord,
+  createRealitySnapshot,
   evaluateOutcome,
   type CoherenceAssessment,
   type DecisionModuleInputs,
   type OutcomeEvaluation,
+  type RealitySnapshot,
   type SignalDecisionRecord,
 } from "@signal/decision";
 import { CompactionJob } from "./compaction";
@@ -20,6 +22,9 @@ import type {
 } from "./types";
 
 export const DECISION_MEMORY_OPERATION_DEFINITIONS = [
+  operation("mutation", "reality.snapshot.record.v1", "Capture a replayable external reality snapshot.", true),
+  operation("query", "reality.snapshot.get.v1", "Read a captured external reality snapshot.", true),
+  operation("query", "reality.snapshot.list.v1", "List captured external reality snapshots.", true),
   operation("mutation", "decision.record.v1", "Record a durable shared Signal decision.", true),
   operation("query", "decision.get.v1", "Read a durable shared Signal decision.", true),
   operation("query", "decision.list.v1", "List durable shared Signal decisions.", true),
@@ -33,6 +38,7 @@ export const DECISION_MEMORY_OPERATION_DEFINITIONS = [
   operation("event", "decision.compacted.v1", "Decision memory was compacted.", true),
   operation("event", "decision.replayed.v1", "A decision was replayed.", true),
   operation("event", "decision.calibration_updated.v1", "Calibration or trust history was updated.", true),
+  operation("event", "reality.snapshot_recorded.v1", "A reality snapshot was saved.", true),
 ] as const;
 
 export type DecisionMemoryRegistryLike = {
@@ -64,6 +70,49 @@ export function createDecisionMemoryOperations(
   policy: RetentionPolicy = DEFAULT_RETENTION_POLICY,
 ) {
   return [
+    {
+      name: "reality.snapshot.record.v1",
+      kind: "mutation" as const,
+      inputSchema: z.record(z.string(), z.unknown()),
+      resultSchema: z.record(z.string(), z.unknown()),
+      idempotency: "optional" as const,
+      emits: ["reality.snapshot_recorded.v1"],
+      async handler(input: Record<string, unknown>, context: OperationContext = {}) {
+        const snapshot = realitySnapshotFromInput(input);
+        const saved = await store.saveRealitySnapshot(snapshot);
+        await context.emit?.("reality.snapshot_recorded.v1", {
+          snapshotId: saved.snapshotId,
+          source: saved.source,
+        });
+        return { snapshot: saved, event: "reality.snapshot_recorded.v1" };
+      },
+      normalizeIdempotencyInput(input: Record<string, unknown>) {
+        return { snapshotId: input["snapshotId"] };
+      },
+    },
+    {
+      name: "reality.snapshot.get.v1",
+      kind: "query" as const,
+      inputSchema: z.object({ snapshotId: z.string().min(1) }),
+      resultSchema: z.record(z.string(), z.unknown()),
+      async handler(input: { snapshotId: string }) {
+        const snapshot = await store.getRealitySnapshot(input.snapshotId);
+        return { snapshotId: input.snapshotId, found: Boolean(snapshot), snapshot: snapshot ?? null };
+      },
+    },
+    {
+      name: "reality.snapshot.list.v1",
+      kind: "query" as const,
+      inputSchema: z.object({
+        source: z.string().optional(),
+        limit: z.number().optional(),
+      }),
+      resultSchema: z.record(z.string(), z.unknown()),
+      async handler(input: { source?: string; limit?: number }) {
+        const snapshots = await store.listRealitySnapshots(input);
+        return { snapshots, count: snapshots.length };
+      },
+    },
     {
       name: "decision.record.v1",
       kind: "mutation" as const,
@@ -237,12 +286,19 @@ function operation(kind: "query" | "mutation" | "event", name: string, descripti
 
 function recordFromInput(input: Record<string, unknown>): SignalDecisionRecord {
   if (input["record"] && typeof input["record"] === "object") {
-    return input["record"] as SignalDecisionRecord;
+    const record = input["record"] as SignalDecisionRecord;
+    return createDecisionRecord({
+      ...record,
+      realitySnapshotId: record.realitySnapshotId,
+      realitySnapshot: record.realitySnapshot,
+    });
   }
   return createDecisionRecord({
     decisionId: String(input["decisionId"] ?? `decision:${Date.now()}`),
     source: String(input["source"] ?? process.env["SIGNAL_SOURCE_ID"] ?? "signal"),
     createdAt: String(input["createdAt"] ?? new Date().toISOString()),
+    realitySnapshotId: stringOrUndefined(input["realitySnapshotId"]),
+    realitySnapshot: objectOrUndefined(input["realitySnapshot"]) as RealitySnapshot | undefined,
     observation: input["observation"] ?? {},
     discovery: input["discovery"],
     judgment: input["judgment"],
@@ -258,6 +314,22 @@ function recordFromInput(input: Record<string, unknown>): SignalDecisionRecord {
     accountability: input["accountability"] as SignalDecisionRecord["accountability"],
     humanSummary: stringOrUndefined(input["humanSummary"]),
     retentionTier: normalizeRetentionTier(input["retentionTier"]),
+  });
+}
+
+function realitySnapshotFromInput(input: Record<string, unknown>): RealitySnapshot {
+  if (input["snapshot"] && typeof input["snapshot"] === "object") {
+    return createRealitySnapshot(input["snapshot"] as RealitySnapshot);
+  }
+  return createRealitySnapshot({
+    snapshotId: stringOrUndefined(input["snapshotId"]),
+    source: stringOrUndefined(input["source"]) ?? process.env["SIGNAL_SOURCE_ID"] ?? "signal",
+    createdAt: stringOrUndefined(input["createdAt"]),
+    dataQuality: numberOrUndefined(input["dataQuality"]),
+    freshnessScore: numberOrUndefined(input["freshnessScore"]),
+    payload: input["payload"] ?? {},
+    sourceRef: objectOrUndefined(input["sourceRef"]) as RealitySnapshot["sourceRef"],
+    metadata: objectOrUndefined(input["metadata"]) as Record<string, unknown> | undefined,
   });
 }
 
@@ -299,6 +371,11 @@ function moduleInputs(value: unknown): DecisionModuleInputs {
 function stringOrUndefined(value: unknown): string | undefined {
   const text = String(value ?? "").trim();
   return text || undefined;
+}
+
+function objectOrUndefined(value: unknown): Record<string, unknown> | undefined {
+  if (value && typeof value === "object" && !Array.isArray(value)) return value as Record<string, unknown>;
+  return undefined;
 }
 
 function numberOrUndefined(value: unknown): number | undefined {

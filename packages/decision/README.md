@@ -2,13 +2,21 @@
 
 Generic decision intelligence for Signal.
 
-This package is additive to the protocol/runtime architecture. It provides a typed strategic layer for coherence, outcomes, accountability, prediction, simulation, wisdom, decision records, and human-language explanations without binding Signal to a transport or a domain.
+This package is additive to the protocol/runtime architecture. It provides a typed strategic layer for reality snapshots, coherence, outcomes, accountability, prediction, simulation, wisdom, decision records, and human-language explanations without binding Signal to a transport or a domain.
 
 ```ts
 import { evaluateDecision } from "@signal/decision";
 
 const result = evaluateDecision({
   decisionId: "example:1",
+  realitySnapshot: {
+    snapshotId: "reality:example:1",
+    source: "example-source",
+    createdAt: new Date().toISOString(),
+    dataQuality: 90,
+    freshnessScore: 90,
+    payload: { event: "candidate-ready" },
+  },
   observation: { event: "candidate-ready" },
   modules: {
     discovery: 82,
