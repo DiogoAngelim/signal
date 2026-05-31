@@ -178,6 +178,45 @@ test("Discovery reports contradictions, foresight, lifecycle transitions, and do
   }
 });
 
+test("Discovery infers regime coverage from historical states when explicit scores are absent", () => {
+  const result = discover({
+    state: { demand: "high", reliability: 80 },
+    candidates: [{ id: "regime", score: 62, confidence: 64 }],
+    historicalStates: [
+      { id: "bull-state", state: { regime: "bull", reliability: 80 } },
+      { id: "bear-state", state: { regimeType: "bear", reliability: 62 } },
+      { id: "recovery-state", metadata: { regime: "recovery" }, state: { reliability: 72 } },
+    ],
+  });
+
+  assert.equal(result.regimeCoverageScore, 60);
+  assert.equal(result.metadata.module, "discovery");
+});
+
+test("Discovery infers regime coverage from nested history diagnostics", () => {
+  const result = discover({
+    state: {
+      historyDiagnostics: {
+        keyRegimesCovered: ["crash", "", "volatility_transition"],
+      },
+    },
+    candidates: [{ id: "nested-regime", score: 58, confidence: 60 }],
+  });
+
+  assert.equal(result.regimeCoverageScore, 40);
+});
+
+test("Discovery infers regime coverage from state-level regime labels", () => {
+  const result = discover({
+    state: {
+      keyRegimesCovered: ["bull", "bear", ""],
+    },
+    candidates: [{ id: "state-regime", score: 58, confidence: 60 }],
+  });
+
+  assert.equal(result.regimeCoverageScore, 40);
+});
+
 test("Discovery covers aggregate, fallback, scoped evidence, and next-step paths", () => {
   const aggregate = discover({
     subjectId: "aggregate-subject",

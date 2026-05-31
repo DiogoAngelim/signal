@@ -127,6 +127,148 @@ test("stock Recognition uses long-history regime coverage for historical similar
   );
 });
 
+test("stock Recognition derives history samples from regime counts when labels are absent", () => {
+  const result = applyStockRecognitionDiagnostics({
+    market: "NASDAQ",
+    signals: [signal({ judgement: undefined })],
+    trades: [],
+    summary: {
+      historyDiagnostics: {
+        historyCoverageYears: 12,
+        historyDepthScore: 82,
+        regimeCoverageScore: 76,
+        regimeDiversityScore: 74,
+        sampleDiversityScore: 72,
+        coverageStatus: "partial",
+        currentRegime: "sideways",
+        regimeCounts: { bull: 15, recovery: 7 },
+      },
+    },
+    opportunityDiscovery: {
+      candidates: [{ symbol: "AAA", candidateScore: 76 }],
+      discovery: { confidence: 34, novelty: 80, memory: { similarOutcomes: 0 } },
+    },
+  });
+  const recognition = result.signals[0]?.recognition;
+
+  assert.ok((recognition?.historicalSimilarityConfidence ?? 0) > 0);
+  assert.equal(
+    result.recognitionDiagnostics.signals[0]?.historicalSimilarityConfidence,
+    recognition?.historicalSimilarityConfidence,
+  );
+});
+
+test("stock Recognition handles count-free history diagnostics as neutral evidence", () => {
+  const result = applyStockRecognitionDiagnostics({
+    market: "NASDAQ",
+    signals: [signal({ judgement: undefined })],
+    trades: [],
+    summary: {
+      historyDiagnostics: {
+        historyCoverageYears: 8,
+        historyDepthScore: 75,
+        regimeCoverageScore: 68,
+        regimeDiversityScore: 66,
+        sampleDiversityScore: 64,
+        coverageStatus: "partial",
+        keyRegimesCovered: ["bull"],
+      },
+    },
+    opportunityDiscovery: {
+      candidates: [{ symbol: "AAA", candidateScore: 70 }],
+      discovery: { confidence: 32, novelty: 78, memory: { similarOutcomes: 0 } },
+    },
+  });
+
+  assert.ok((result.signals[0]?.recognition.historicalSimilarityConfidence ?? 0) > 0);
+  assert.ok(result.signals[0]?.recognition.archetype.length);
+});
+
+test("stock Recognition tolerates zero-count history diagnostics", () => {
+  const result = applyStockRecognitionDiagnostics({
+    market: "NASDAQ",
+    signals: [signal({ judgement: undefined })],
+    trades: [],
+    summary: {
+      historyDiagnostics: {
+        historyCoverageYears: 8,
+        historyDepthScore: 75,
+        regimeCoverageScore: 68,
+        regimeDiversityScore: 66,
+        sampleDiversityScore: 64,
+        coverageStatus: "partial",
+        keyRegimesCovered: [],
+        regimeCounts: { bull: 0 },
+      },
+    },
+  });
+
+  assert.ok(result.signals[0]?.recognition.missingEvidence.length);
+});
+
+test("stock Recognition handles missing history regime counts", () => {
+  const result = applyStockRecognitionDiagnostics({
+    market: "NASDAQ",
+    signals: [signal({ judgement: undefined })],
+    trades: [],
+    summary: {
+      historyDiagnostics: {
+        historyCoverageYears: 8,
+        historyDepthScore: 70,
+        coverageStatus: "partial",
+        keyRegimesCovered: [],
+      },
+    },
+  });
+
+  assert.ok(result.signals[0]?.recognition.missingEvidence.length);
+});
+
+test("stock Recognition defaults sparse history diagnostic scores", () => {
+  const result = applyStockRecognitionDiagnostics({
+    market: "NASDAQ",
+    signals: [signal({ judgement: undefined })],
+    trades: [],
+    summary: {
+      historyDiagnostics: {
+        historyCoverageYears: 8,
+        coverageStatus: "partial",
+        keyRegimesCovered: ["bull"],
+      },
+    },
+    opportunityDiscovery: {
+      candidates: [{ symbol: "AAA", candidateScore: 70 }],
+      discovery: { confidence: 32, novelty: 78, memory: { similarOutcomes: 0 } },
+    },
+  });
+
+  assert.ok((result.signals[0]?.recognition.historicalSimilarityConfidence ?? 0) >= 0);
+  assert.ok(result.signals[0]?.recognition.archetype.length);
+});
+
+test("stock Recognition reads history diagnostics from robustness diagnostics fallback", () => {
+  const result = applyStockRecognitionDiagnostics({
+    market: "NASDAQ",
+    signals: [signal({ judgement: undefined })],
+    trades: [],
+    summary: {
+      robustnessDiagnostics: {
+        historyDiagnostics: {
+          historyCoverageYears: 8,
+          historyDepthScore: 78,
+          regimeCoverageScore: 72,
+          regimeDiversityScore: 70,
+          sampleDiversityScore: 68,
+          coverageStatus: "partial",
+          keyRegimesCovered: ["bear"],
+        },
+      },
+    },
+  });
+
+  assert.ok((result.signals[0]?.recognition.historicalSimilarityConfidence ?? 0) >= 0);
+});
+
 test("stock Recognition accepts strong aggregate Judgement as a guarded archetype", () => {
   const result = applyStockRecognitionDiagnostics({
     market: "BINANCE",

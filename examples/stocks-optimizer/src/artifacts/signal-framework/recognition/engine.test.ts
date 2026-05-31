@@ -222,6 +222,39 @@ test("Recognition accepts explicit archetypes as state patterns with extra recov
   assert.equal(result.judgementSimilarityJustified, true);
 });
 
+test("Recognition gives partial credit when current regime is not represented", () => {
+  const result = recognizeState(base({
+    outcomeSamples: positiveSamples(10),
+    historyDiagnostics: {
+      historyDepthScore: 90,
+      regimeCoverageScore: 78,
+      regimeDiversityScore: 76,
+      sampleDiversityScore: 74,
+      currentRegime: "sideways",
+      keyRegimesCovered: ["bull", "bear"],
+    },
+  }));
+
+  assert.ok(result.historicalSimilarityConfidence > 0);
+  assert.ok(result.recurrenceConfidence >= result.historicalSimilarityConfidence * 0.2);
+});
+
+test("Recognition scores history diagnostics when current regime is absent", () => {
+  const result = recognizeState(base({
+    outcomeSamples: positiveSamples(10),
+    historyDiagnostics: {
+      historyDepthScore: 88,
+      regimeCoverageScore: 80,
+      regimeDiversityScore: 78,
+      sampleDiversityScore: 76,
+      keyRegimesCovered: ["bull", "bear", "crash"],
+    },
+  }));
+
+  assert.ok(result.historicalSimilarityConfidence > 0);
+  assert.ok(result.recurrenceConfidence > 0);
+});
+
 test("Recognition chooses explicit archetypes deterministically when confidence ties", () => {
   const archetype = {
     state: currentState,

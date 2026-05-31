@@ -4,13 +4,24 @@ import { createServer } from "node:http";
 import { WebSocketServer } from "ws";
 import binanceExecutionRouter from "./routes/binance-execution.js";
 import stocksRouter from "./routes/stocks.js";
+import { createSignalApiRouter } from "./api/signal-routes.js";
 import { setSignalBroadcast, startBackgroundSignalEngine } from "./lib/signal-backend.js";
 import { getOrCreateMarketBacktest } from "./lib/market-backtest.js";
+import { buildHealthPayload, buildReadinessPayload } from "./observability/signal-health.js";
+import {
+  apiErrorHandler,
+  createSignalCorsOptions,
+  requestIdMiddleware,
+  secureHeadersMiddleware,
+} from "./observability/signal-http.js";
 
 const app = express();
 
-app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+app.disable("x-powered-by");
+app.use(requestIdMiddleware);
+app.use(secureHeadersMiddleware);
+app.use(cors(createSignalCorsOptions()));
+app.use(express.json({ limit: process.env.SIGNAL_API_BODY_LIMIT ?? process.env.REQUEST_BODY_LIMIT ?? "1mb" }));
 
 
 const logger = {
@@ -46,7 +57,22 @@ if (rawPort && (Number.isNaN(port) || port <= 0)) {
 
 
 
+app.get("/health", (_req, res) => {
+  res.json(buildHealthPayload());
+});
+
+app.get("/ready", async (_req, res, next) => {
+  try {
+    const payload = await buildReadinessPayload();
+    res.status(payload.status === "ready" ? 200 : 503).json(payload);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.use(createSignalApiRouter());
 app.use(stocksRouter);
+app.use("/api", createSignalApiRouter());
 app.use("/api", stocksRouter);
 app.use(binanceExecutionRouter);
 app.use("/api", binanceExecutionRouter);
@@ -344,6 +370,8 @@ app.all("/api/portfolio", async (req, res) => {
     });
   }
 });
+
+app.use(apiErrorHandler);
 
 
 

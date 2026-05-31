@@ -520,6 +520,23 @@ test("long-history may improve trust and calibration but cannot clear Survival M
   assert.equal(lockedDecision.recovery?.canRestoreSizing, false);
 });
 
+test("low long-history scores do not grant calibration credit", () => {
+  const lowHistory = {
+    ...longHistoryDiagnostics,
+    historyDepthScore: 70,
+    regimeCoverageScore: 70,
+    regimeDiversityScore: 70,
+    sampleDiversityScore: 70,
+    coverageStatus: "partial" as const,
+  };
+  const result = evaluator.evaluate(passingInput({
+    summary: { historyDiagnostics: lowHistory },
+    dataQualityReport: { ...dataQualityReport, historyDiagnostics: lowHistory },
+  }));
+
+  assert.equal((result as any).extendedHistoryCredit, undefined);
+});
+
 test("readiness recovery includes near-ruin survival flags and summary discovery fallbacks", () => {
   const result = evaluator.evaluate({
     ...passingInput({

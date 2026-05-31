@@ -11,6 +11,9 @@ Do not commit `.env`, `.env.local`, or `.vercel/.env*.local` files. They are int
 - `ADMIN_SECRET`: bearer token for protected strategy/admin API calls.
 - `PUBLIC_READ_SECRET`: optional read token for public strategy reads.
 - `CRON_SECRET`: shared secret for scheduled/cron endpoints.
+- `SIGNAL_API_KEYS`: comma-separated signal API keys, optionally scoped with roles such as `key:reader|emitter|webhook_admin|auditor`.
+- `SIGNAL_INGESTION_SIGNING_SECRET`: optional HMAC secret for signed signal ingestion.
+- `SIGNAL_REQUIRE_EMIT_SIGNATURE`: set to `true` to require signed signal ingestion.
 
 ## Optional services and tuning
 
@@ -88,6 +91,16 @@ Do not commit `.env`, `.env.local`, or `.vercel/.env*.local` files. They are int
 - `STRATEGY_JOB_LEASE_SECONDS`
 - `STRATEGY_HEAVY_JOB_COOLDOWN_SECONDS`
 - `WORKER_ID`
+- `SIGNAL_API_RATE_LIMIT_MAX`
+- `SIGNAL_API_RATE_LIMIT_WINDOW_MS`
+- `SIGNAL_API_CORS_ORIGINS`
+- `SIGNAL_API_BODY_LIMIT`
+- `SIGNAL_API_ALLOW_DEV_KEY`
+- `SIGNAL_SIGNATURE_TOLERANCE_MS`
+- `SIGNAL_STREAM_HEARTBEAT_MS`
+- `SIGNAL_WEBHOOK_MAX_ATTEMPTS`
+- `SIGNAL_WEBHOOK_RETRY_BASE_MS`
+- `SIGNAL_WEBHOOK_ALLOW_PRIVATE_TARGETS`
 
 Vercel also provides platform variables such as `VERCEL`, `VERCEL_URL`, `VERCEL_REGION`, `NODE_ENV`, and `PORT`.
 

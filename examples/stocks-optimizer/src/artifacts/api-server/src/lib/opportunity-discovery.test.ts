@@ -194,6 +194,73 @@ test("long-history discovery improves regime awareness without opening zero-cap 
   assert.ok(candidate.factors.regimeTransition > 60);
 });
 
+test("long-history discovery can derive regime states from regime counts", () => {
+  const result = discoverStockOpportunities({
+    signals: [
+      signal({
+        symbol: "COUNTED",
+        signalAction: "Buy",
+        suggestedExposure: undefined,
+        maxPositionPct: undefined,
+        setupQuality: 82,
+        riskPressure: 24,
+        expectedMove: 3,
+      }),
+    ],
+    barsBySymbol: { COUNTED: bars(100, 0.005, 160_000) },
+    historyDiagnostics: {
+      symbolCount: 1,
+      requestedYears: 15,
+      historyCoverageYears: 15,
+      coveragePct: 100,
+      historyDepthScore: 50,
+      regimeCoverageScore: 76,
+      regimeDiversityScore: 74,
+      sampleDiversityScore: 73,
+      temporalConcentrationScore: 18,
+      coverageStatus: "partial",
+      currentRegime: "bull" as const,
+      keyRegimesCovered: [],
+      regimeCounts: { bull: 50, recovery: 25 },
+      totalBars: 900,
+      auditQualityScore: 92,
+      auditWarnings: [],
+      explanation: "Regime counts are available even without key regime labels.",
+    },
+  });
+
+  assert.equal(result.discovery.regimeCoverageScore, 76);
+  assert.ok(result.discovery.contextMatch.some((match) => match.label.includes("regime context")));
+});
+
+test("long-history discovery handles missing regime counts conservatively", () => {
+  const result = discoverStockOpportunities({
+    signals: [signal({ symbol: "NOCOUNTS", signalAction: "Hold", setupQuality: 58 })],
+    historyDiagnostics: {
+      symbolCount: 1,
+      requestedYears: 10,
+      historyCoverageYears: 4,
+      coveragePct: 40,
+      historyDepthScore: 54,
+      regimeCoverageScore: 40,
+      regimeDiversityScore: 38,
+      sampleDiversityScore: 42,
+      temporalConcentrationScore: 30,
+      coverageStatus: "partial",
+      currentRegime: "bear" as const,
+      keyRegimesCovered: [],
+      regimeCounts: undefined as any,
+      totalBars: 200,
+      auditQualityScore: 70,
+      auditWarnings: [],
+      explanation: "History is sparse and regime counts are not available.",
+    },
+  });
+
+  assert.equal(result.discovery.regimeCoverageScore, 40);
+  assert.ok(result.discovery.missingEvidence.includes("broader long-history regime coverage"));
+});
+
 test("generic Discovery handles sparse prior outcomes and constraint fallbacks", () => {
   const previous = discoverStockOpportunities({
     signals: [signal({ symbol: "SPARSE", setupQuality: 52, expectedMove: 0.4 })],
