@@ -2975,6 +2975,7 @@ export default function Dashboard() {
     useState<MarketStateSnapshot | null>(null);
   const [portfolioRefreshing, setPortfolioRefreshing] = useState(false);
   const [query, setQuery] = useState("");
+  const [ambition, setAmbition] = useState(50);
   const registeredWatchlists = useRef(new Set<string>());
   const refreshedPortfolioMarkets = useRef(new Set<string>());
 
@@ -3790,6 +3791,21 @@ export default function Dashboard() {
   )
     ? (marketPerceptionSnapshot?.framework as any).opportunities
     : [];
+  const purposeView = marketPerceptionSnapshot?.purpose;
+  const purposeTone =
+    purposeView == null || purposeView.mode === "legacy"
+      ? "neutral"
+      : purposeView.purposeScore >= 72
+        ? "good"
+        : purposeView.purposeScore >= 52
+          ? "warn"
+          : "bad";
+  const purposeScoreLabel = purposeView
+    ? `${Math.round(purposeView.purposeScore)}/100`
+    : "Pending";
+  const purposeSubLabel = purposeView
+    ? `${purposeView.primaryFocus} · trust ${fmtPlainPct(purposeView.alignmentTrustScore, 0)}`
+    : "Building momentum";
   const discoveryFindings = Array.isArray(opportunityDiscovery?.findings)
     ? opportunityDiscovery.findings
     : [];
@@ -5673,6 +5689,7 @@ export default function Dashboard() {
         partialApiFailures: marketReliability.market.partialApiFailures,
         fallbackMode: marketReliability.market.fallbackMode,
         executionProfile,
+        ambition,
       }),
     [
       marketStatus,
@@ -5707,6 +5724,7 @@ export default function Dashboard() {
       totalStocks,
       marketReliability,
       executionProfile,
+      ambition,
     ],
   );
 
@@ -5750,6 +5768,7 @@ export default function Dashboard() {
       partialApiFailures: marketReliability.market.partialApiFailures,
       fallbackMode: marketReliability.market.fallbackMode,
       executionProfile,
+      ambition,
     };
 
     marketStateEngineRef.current?.setSource(perceptionSource);
@@ -6929,7 +6948,41 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="mt-5 grid grid-cols-1 gap-2.5 sm:mt-8 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
+            <div className="mt-5 rounded-lg bg-black/25 px-4 py-3 ring-1 ring-white/[0.06] sm:mt-8">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500 md:text-[11px]">
+                    <Sparkles className="h-4 w-4 text-[#FDD000]" />
+                    Ambition
+                  </div>
+                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-zinc-300">
+                    {purposeView?.purposeStatement ??
+                      "I am willing to sacrifice unnecessary urgency to achieve meaningful progress within a steady adaptive pace while respecting survivability."}
+                  </p>
+                </div>
+                <div className="w-full shrink-0 md:w-[280px]">
+                  <div className="mb-2 flex items-center justify-between text-xs text-zinc-500">
+                    <span>{purposeView?.primaryFocus ?? "Building momentum"}</span>
+                    <span className="font-semibold text-zinc-200">
+                      {Math.round(ambition)}/100
+                    </span>
+                  </div>
+                  <input
+                    aria-label="Ambition"
+                    className="h-2 w-full accent-[#FDD000]"
+                    max={100}
+                    min={0}
+                    onChange={(event) =>
+                      setAmbition(clamp(Number(event.target.value), 0, 100))
+                    }
+                    type="range"
+                    value={ambition}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-5">
               <ExecutiveMetric
                 label="Confidence / Trust"
                 value={executiveSummaryMetrics.confidenceValue}
@@ -6957,6 +7010,13 @@ export default function Dashboard() {
                 sub={executiveSummaryMetrics.marketHealthSub}
                 tone={executiveSummaryMetrics.marketHealthTone}
                 icon={<ShieldCheck className="h-4 w-4" />}
+              />
+              <ExecutiveMetric
+                label="Purpose"
+                value={purposeScoreLabel}
+                sub={purposeSubLabel}
+                tone={purposeTone}
+                icon={<Sparkles className="h-4 w-4" />}
               />
             </div>
           </div>

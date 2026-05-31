@@ -1,5 +1,13 @@
 import { clamp, mean, numeric, signRatio, stdev } from "../math/statistics";
 import { MetricRegistry } from "../metrics/registry";
+import {
+  evaluatePurpose,
+  type PurposeBehaviorObservation,
+  type PurposeExpectationRecord,
+  type PurposeFrictionRecord,
+  type PurposeInput,
+  type PurposeResult,
+} from "../purpose/engine";
 import { evaluatePruning, type PruningCandidateInput, type PruningInput, type PruningResult } from "../pruning/engine";
 import type { MetricInput, ObservationPoint, SynchronizationInput, VenueState } from "../types";
 
@@ -48,6 +56,10 @@ export type StocksOptimizerMetricSource = {
     totalExposureCap?: number;
     riskAversion?: number;
   };
+  ambition?: number | null;
+  behavioralEvents?: PurposeBehaviorObservation[];
+  expectationRecords?: PurposeExpectationRecord[];
+  frictionRecords?: PurposeFrictionRecord[];
 };
 
 export type StocksPruningViewModel = {
@@ -61,6 +73,23 @@ export type StocksPruningViewModel = {
   preservedSignals: string[];
   survivalCriticalSignals: string[];
   frontendHiddenSignals: string[];
+  explanation: string;
+  warnings: string[];
+};
+
+export type StocksPurposeViewModel = {
+  mode: "legacy" | "enhanced" | "degraded";
+  ambition: number;
+  behavioralAmbition: number;
+  purposeStatement: string;
+  purposeScore: number;
+  satisfactionScore: number;
+  alignmentTrustScore: number;
+  retentionScore: number;
+  advocacyScore: number;
+  goalProgressScore: number;
+  purposeConfidence: number;
+  primaryFocus: string;
   explanation: string;
   warnings: string[];
 };
@@ -299,6 +328,144 @@ export function evaluateStocksPruning(
   return evaluatePruning(buildStocksPruningInput(input, options));
 }
 
+export function buildStocksPurposeInput(
+  input: StocksOptimizerMetricSource,
+  options: { now?: string | number | Date; pruning?: Partial<PruningResult> | null } = {},
+): PurposeInput {
+  const stocks = Array.isArray(input.stocks) ? input.stocks : [];
+  const avgRisk = numeric(input.avgRisk, 50);
+  const avgQuality = numeric(input.avgQuality, 50);
+  const confidence = numeric(input.confidence, 50);
+  const survivalScore = numeric(input.survivalScore, confidence);
+  const calibrationTrust = numeric(input.calibrationTrustworthiness, survivalScore);
+  const calibrationAccuracy = numeric(input.calibrationHistoricalAccuracy, calibrationTrust);
+  const calibrationError = Math.abs(numeric(input.calibrationError, confidence - calibrationAccuracy));
+  const maxDrawdown = numeric(input.backtestMaxDrawdownPct, avgRisk / 2);
+  const buyCount = stocks.filter((stock) => stock.signalAction === "Buy" || stock.allocationAction === "Buy").length;
+  const sellCount = stocks.filter((stock) => stock.signalAction === "Sell" || stock.allocationAction === "Sell").length;
+  const actionCount = Math.max(1, buyCount + sellCount);
+  const reversalPressure = sellCount / actionCount > 0.55;
+  const ambition = score(input.ambition, 50);
+  const derivedBehavior: PurposeBehaviorObservation = {
+    ambitionSignal: clamp(input.targetExposure * 1.35 + confidence * 0.35),
+    patience: clamp(100 - avgRisk * 0.55 - (input.staleData ? 12 : 0)),
+    discipline: clamp(calibrationTrust * 0.64 + survivalScore * 0.36),
+    consistency: clamp(numeric(input.deploymentReadinessScore, survivalScore)),
+    recovery: survivalScore,
+    conviction: confidence,
+    adaptation: clamp(input.breadth * 0.55 + avgQuality * 0.45),
+    stressTolerance: clamp(100 - avgRisk - maxDrawdown * 0.6),
+    confidenceCalibration: clamp(100 - calibrationError),
+    panicExit: input.failureFlags.some((flag) => /panic|kill|drift|blocked/i.test(flag)),
+    regret: clamp(maxDrawdown * 1.8 + calibrationError * 0.7),
+    reversal: reversalPressure,
+    sustainedProgress: numeric(input.backtestReturnPct, 0) > 0 && survivalScore >= 55,
+    timestamp: options.now ?? input.now,
+  };
+  const derivedExpectation: PurposeExpectationRecord = {
+    expectedExperience: confidence,
+    expectedOutcome: numeric(input.backtestReturnPct, avgQuality),
+    actualExperience: clamp(100 - avgRisk),
+    actualOutcome: calibrationAccuracy,
+    disappointment: clamp(Math.max(0, calibrationError - 8) + Math.max(0, -numeric(input.backtestReturnPct, 0))),
+    surprise: clamp(input.staleData ? 35 : calibrationError),
+    regret: derivedBehavior.regret,
+    confidenceShock: clamp(Math.max(0, numeric(input.calibrationRawConfidence, confidence) - numeric(input.calibrationCalibratedConfidence, confidence))),
+    expectationShock: clamp(calibrationError),
+    progress: clamp(avgQuality * 0.36 + confidence * 0.24 + Math.max(0, numeric(input.backtestReturnPct, 0)) * 0.8 + input.breadth * 0.2),
+    timestamp: options.now ?? input.now,
+  };
+  const derivedFriction: PurposeFrictionRecord = {
+    complexity: clamp(Math.min(100, stocks.length / 2) + input.failureFlags.length * 8),
+    mentalEffort: clamp(input.failureFlags.length * 12 + (input.staleData ? 24 : 8)),
+    attentionRequired: clamp(Math.max(0, avgRisk - 45) + Math.abs(input.targetExposure - input.breadth) * 0.4),
+    interactionBurden: clamp(input.partialApiFailures ? input.partialApiFailures * 14 : 10),
+    cognitiveLoad: clamp((input.hasBacktestData ? 18 : 42) + input.failureFlags.length * 6),
+    clarity: clamp(100 - input.failureFlags.length * 12 - (input.staleData ? 24 : 0)),
+    simplicity: clamp(92 - stocks.length * 0.4 - input.failureFlags.length * 10),
+    timestamp: options.now ?? input.now,
+  };
+
+  return {
+    ambition,
+    behavior: [derivedBehavior, ...safeArray(input.behavioralEvents)],
+    expectations: [derivedExpectation, ...safeArray(input.expectationRecords)],
+    friction: [derivedFriction, ...safeArray(input.frictionRecords)],
+    currentPath: {
+      desiredFuture: "sustainable market progress",
+      alignment: clamp(avgQuality * 0.34 + confidence * 0.28 + input.breadth * 0.2 + survivalScore * 0.18),
+      progress: derivedExpectation.progress,
+      survivability: survivalScore,
+      sustainability: clamp(survivalScore * 0.54 + (100 - avgRisk) * 0.26 + calibrationTrust * 0.2),
+      behaviorFit: clamp(calibrationTrust * 0.42 + survivalScore * 0.32 + (100 - avgRisk) * 0.26),
+      clarity: derivedFriction.clarity,
+      usefulness: clamp(avgQuality * 0.34 + confidence * 0.28 + input.breadth * 0.22 + survivalScore * 0.16),
+      evidenceQuality: input.hasProvidedSignals ? (input.hasBacktestData ? 82 : 64) : 42,
+    },
+    decision: {
+      action: input.targetExposure > 0 ? "participate" : "wait",
+      confidence,
+      expectedReturn: numeric(input.backtestReturnPct, 0),
+      expectedValue: clamp(avgQuality * 0.5 + confidence * 0.3 + input.targetExposure * 0.2),
+      alignment: clamp(avgQuality * 0.34 + confidence * 0.28 + input.breadth * 0.2 + survivalScore * 0.18),
+      survivability: survivalScore,
+      priority: clamp(input.targetExposure * 1.2 + confidence * 0.35),
+      friction: 100 - numeric(derivedFriction.simplicity, 0),
+      uncertainty: 100 - confidence,
+    },
+    survivalScore,
+    pruning: options.pruning,
+    evidenceQuality: input.hasProvidedSignals ? (input.hasBacktestData ? 84 : 62) : 40,
+    now: options.now ?? input.now,
+  };
+}
+
+export function evaluateStocksPurpose(
+  input: StocksOptimizerMetricSource,
+  options: { now?: string | number | Date; pruning?: Partial<PruningResult> | null } = {},
+): PurposeResult {
+  const pruning = options.pruning === undefined ? evaluateStocksPruning(input, options) : options.pruning;
+  return evaluatePurpose(buildStocksPurposeInput(input, { ...options, pruning }));
+}
+
+export function buildStocksPurposeViewModel(purpose?: Partial<PurposeResult> | null): StocksPurposeViewModel {
+  if (!purpose) {
+    return {
+      mode: "legacy",
+      ambition: 50,
+      behavioralAmbition: 50,
+      purposeStatement: "I am willing to sacrifice unnecessary urgency to achieve meaningful progress within a steady adaptive pace while respecting survivability.",
+      purposeScore: 0,
+      satisfactionScore: 0,
+      alignmentTrustScore: 0,
+      retentionScore: 0,
+      advocacyScore: 0,
+      goalProgressScore: 0,
+      purposeConfidence: 0,
+      primaryFocus: "Building momentum",
+      explanation: "Purpose is not available yet. Existing dashboard data remains usable.",
+      warnings: [],
+    };
+  }
+
+  return {
+    mode: numeric(purpose.purposeConfidence, 0) < 45 ? "degraded" : "enhanced",
+    ambition: clamp(numeric(purpose.ambition, 50)),
+    behavioralAmbition: clamp(numeric(purpose.behavioralAmbition, purpose.ambition ?? 50)),
+    purposeStatement: String(purpose.purposeStatement ?? "Purpose statement is being calibrated."),
+    purposeScore: clamp(numeric(purpose.purposeScore, 0)),
+    satisfactionScore: clamp(numeric(purpose.satisfactionScore, 0)),
+    alignmentTrustScore: clamp(numeric(purpose.alignmentTrustScore, 0)),
+    retentionScore: clamp(numeric(purpose.retentionScore, 0)),
+    advocacyScore: clamp(numeric(purpose.advocacyScore, 0)),
+    goalProgressScore: clamp(numeric(purpose.goalProgressScore, 0)),
+    purposeConfidence: clamp(numeric(purpose.purposeConfidence, 0)),
+    primaryFocus: focusForPurpose(purpose),
+    explanation: String(purpose.explanation ?? "Purpose reviewed ambition, behavior, progress, trust, and sustainability."),
+    warnings: safeStringArray(purpose.warnings),
+  };
+}
+
 export function buildStocksPruningViewModel(pruning?: Partial<PruningResult> | null): StocksPruningViewModel {
   if (!pruning) {
     return {
@@ -343,6 +510,19 @@ export function adjustStocksExposureForPruning(
   if (pruning.recommendedAction === "review" || pruning.recommendedAction === "isolate") return Math.min(exposure, 25);
   if (pruning.recommendedAction === "reduce") return Math.min(exposure, exposure * 0.5);
   return exposure;
+}
+
+function focusForPurpose(purpose: Partial<PurposeResult>) {
+  if (numeric(purpose.survivabilityScore, 100) < 55) return "Protecting progress";
+  if (numeric(purpose.frictionScore, 100) < 55) return "Reducing stress";
+  if (numeric(purpose.behavioralAmbition, 50) + 18 < numeric(purpose.ambition, 50)) return "Staying disciplined";
+  if (numeric(purpose.goalProgressScore, 0) >= 72) return "Building momentum";
+  if (numeric(purpose.purposeProfile?.opportunityPreference, 0) >= 72) return "Pursuing growth";
+  return "Preserving flexibility";
+}
+
+function score(value: unknown, fallback = 0) {
+  return clamp(numeric(value, fallback));
 }
 
 function stockPruningCandidate(
@@ -487,6 +667,10 @@ function dashboardMetricPruningCandidates(input: StocksOptimizerMetricSource): P
 
 function safeStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.map((item) => String(item)) : [];
+}
+
+function safeArray<T>(value: T[] | readonly T[] | null | undefined): T[] {
+  return Array.isArray(value) ? [...value] : [];
 }
 
 function historyReturns(history: unknown) {

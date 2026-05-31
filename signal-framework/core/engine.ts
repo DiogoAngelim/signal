@@ -24,6 +24,7 @@ import {
   classifyPerceptionLayer,
 } from "../perception/layers";
 import { evaluatePruning, type PruningCandidateInput, type PruningInput } from "../pruning/engine";
+import { evaluatePurpose, type PurposeInput } from "../purpose/engine";
 import { rankLeadership } from "../ranking/leadership";
 import { reflect } from "../reflection/engine";
 import { recognizeState } from "../recognition/engine";
@@ -147,6 +148,21 @@ export class SignalFrameworkEngine {
         decision,
       }),
     );
+    const purpose = context.purpose
+      ? evaluatePurpose(
+          buildPurposeInput({
+            context,
+            perception: rawPerception,
+            reflection,
+            calibration,
+            judgement,
+            discovery,
+            recognition,
+            pruning,
+            decision,
+          }),
+        )
+      : undefined;
     const agencyDecision =
       judgement && decision
         ? {
@@ -316,6 +332,18 @@ export class SignalFrameworkEngine {
         candidates: pruning.candidates.length,
       },
     });
+    if (purpose) {
+      events.push({
+        type: `purpose.${purpose.recommendedAction}`,
+        timestamp,
+        payload: {
+          purposeScore: purpose.purposeScore,
+          alignmentScore: purpose.alignmentScore,
+          behavioralAmbition: purpose.behavioralAmbition,
+          satisfactionScore: purpose.satisfactionScore,
+        },
+      });
+    }
     events.push({
       type: "discovery-intelligence.evaluated",
       timestamp,
@@ -411,6 +439,7 @@ export class SignalFrameworkEngine {
       recognition,
       legacy,
       pruning,
+      purpose,
       decision,
       agency,
       viability,
@@ -866,6 +895,102 @@ function buildPruningInput(args: {
     ...supplied,
     now: supplied.now ?? args.timestamp,
     candidates,
+  };
+}
+
+function buildPurposeInput(args: {
+  context: SignalContext;
+  perception: PerceptionEvaluation;
+  reflection: NonNullable<SignalSnapshot["reflection"]>;
+  calibration: NonNullable<SignalSnapshot["calibration"]>;
+  judgement?: SignalSnapshot["judgement"];
+  discovery: NonNullable<SignalSnapshot["discovery"]>;
+  recognition: NonNullable<SignalSnapshot["recognition"]>;
+  pruning: NonNullable<SignalSnapshot["pruning"]>;
+  decision: SignalContext["decision"];
+}): PurposeInput {
+  const supplied = args.context.purpose;
+  if (!supplied) {
+    throw new Error("Purpose requires an ambition input.");
+  }
+  const survivalLayer = args.perception.layers.survival;
+  const selfLayer = args.perception.layers.selfAwareness;
+  const outcomeProgress = args.context.outcomes?.length
+    ? mean(args.context.outcomes.map((outcome) => clamp(50 + outcome.realizedMagnitude * 10)))
+    : undefined;
+
+  return {
+    ...supplied,
+    behavior: [
+      {
+        discipline: args.calibration.trustworthiness,
+        consistency: args.reflection.reflectionScore,
+        recovery: survivalLayer?.score,
+        conviction: args.decision?.confidence ?? args.calibration.calibratedConfidence,
+        adaptation: args.discovery.confidence,
+        stressTolerance: survivalLayer ? 100 - survivalLayer.uncertainty : undefined,
+        confidenceCalibration: clamp(100 - Math.abs(args.calibration.calibrationError)),
+        panicExit: args.context.agency?.execution?.blocked === true,
+        regret: args.judgement?.status === "blocked" ? 45 : undefined,
+        sustainedProgress: outcomeProgress != null ? outcomeProgress >= 55 : undefined,
+      },
+      ...safeArray(supplied.behavior),
+    ],
+    expectations: [
+      {
+        expectedExperience: args.decision?.confidence ?? args.calibration.rawConfidence,
+        expectedOutcome: args.decision?.expectedValue ?? args.perception.compositeScore,
+        actualExperience: args.calibration.trustworthiness,
+        actualOutcome: outcomeProgress ?? args.perception.compositeScore,
+        disappointment: outcomeProgress == null ? undefined : Math.max(0, 55 - outcomeProgress),
+        surprise: Math.abs(args.calibration.calibrationError),
+        confidenceShock: Math.max(0, args.calibration.rawConfidence - args.calibration.calibratedConfidence),
+        expectationShock: Math.abs(args.calibration.calibrationError),
+        progress: outcomeProgress,
+      },
+      ...safeArray(supplied.expectations),
+    ],
+    currentPath: {
+      alignment: mean([
+        args.perception.compositeScore,
+        args.discovery.confidence,
+        args.recognition.recognitionScore,
+        args.pruning.evidenceConfidence,
+      ]),
+      progress: outcomeProgress ?? args.discovery.maturity,
+      survivability: survivalLayer?.score,
+      sustainability: mean([
+        survivalLayer?.score ?? 60,
+        args.calibration.trustworthiness,
+        args.perception.confidence,
+      ]),
+      behaviorFit: mean([
+        args.reflection.reflectionScore,
+        args.calibration.trustworthiness,
+        selfLayer?.score ?? 60,
+      ]),
+      clarity: args.reflection.knowledgeCompleteness.completenessScore,
+      usefulness: args.discovery.confidence,
+      evidenceQuality: args.pruning.evidenceConfidence,
+      ...(supplied.currentPath ?? {}),
+    },
+    decision: supplied.decision ?? args.decision,
+    pruning: supplied.pruning ?? args.pruning,
+    selfModel: supplied.selfModel ?? {
+      score: selfLayer?.score,
+      confidence: selfLayer?.confidence,
+    },
+    governance: supplied.governance ?? {
+      score: args.judgement?.trust ?? args.calibration.trustworthiness,
+      confidence: args.judgement?.reliability ?? args.calibration.trustworthiness,
+      status: args.judgement?.status,
+    },
+    outcome: supplied.outcome ?? {
+      score: outcomeProgress,
+      confidence: outcomeProgress == null ? 40 : 70,
+    },
+    recovery: supplied.recovery,
+    evidenceQuality: supplied.evidenceQuality ?? args.pruning.evidenceConfidence,
   };
 }
 

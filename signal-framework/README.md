@@ -7,7 +7,7 @@ For the compact system map, see [Signal Framework Architecture](./ARCHITECTURE.m
 The first-class lifecycle is:
 
 ```txt
-Perception -> Reflection -> Calibration -> Decision -> Pruning -> Agency -> Action
+Perception -> Reflection -> Calibration -> Decision -> Pruning -> Purpose -> Agency -> Action
 ```
 
 Each layer has a separate responsibility:
@@ -17,6 +17,7 @@ Each layer has a separate responsibility:
 - Calibration: how much of the current confidence is supported by past evidence?
 - Decision: what should happen?
 - Pruning: what evidence should be kept, reduced, isolated, quarantined, ignored, or reviewed?
+- Purpose: is this decision aligned with the human's desired future and sustainable behavior?
 - Agency: should the decision be allowed to proceed?
 - Action: execute the approved intent.
 - Legacy: what durable accomplishments were earned?
@@ -241,6 +242,38 @@ Safety rules:
 
 See [Signal Pruning](./pruning/README.md) for the scoring model, storage
 interfaces, integration notes, and examples.
+
+## Purpose
+
+Purpose is Signal's generic human alignment layer. It consumes one required
+input, `ambition`, then derives the rest of the profile automatically. Ambition
+means desired future intensity, not risk tolerance.
+
+Use `evaluatePurpose(input)` to inspect whether a path is helping the user move
+toward the future they want in a way they can sustain:
+
+```ts
+import { evaluatePurpose } from "./signal-framework";
+
+const purpose = evaluatePurpose({
+  ambition: 72,
+  currentPath: { progress: 68, survivability: 82 },
+  behavior: [{ discipline: 70, patience: 64, stressTolerance: 62 }],
+});
+
+console.log(purpose.purposeStatement);
+console.log(purpose.satisfactionScore);
+console.log(purpose.alignmentTrustScore);
+```
+
+Purpose outputs `purposeScore`, `alignmentScore`, `satisfactionScore`,
+`retentionScore`, `advocacyScore`, `goalProgressScore`,
+`alignmentTrustScore`, `behavioralAmbition`, `purposeStatement`,
+`purposeConfidence`, warnings, explanation, and trace data. It can lower
+priority when high expected return is poorly aligned with the user, and it never
+overrides survival.
+
+See [Signal Purpose](./purpose/README.md) for the model and integration notes.
 
 ## Action
 

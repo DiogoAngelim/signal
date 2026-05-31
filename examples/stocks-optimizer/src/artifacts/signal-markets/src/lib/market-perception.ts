@@ -4,6 +4,8 @@ import {
   buildStocksOptimizerMetrics,
   buildStocksPruningInput,
   buildStocksPruningViewModel,
+  buildStocksPurposeInput,
+  buildStocksPurposeViewModel,
   buildStocksSynchronization,
   createStocksMetricRegistry,
   type MetricContribution as FrameworkMetricContribution,
@@ -17,6 +19,7 @@ import {
   type SignalSnapshot,
   type StocksOptimizerMetricSource as MarketPerceptionMetricSource,
   type StocksPruningViewModel,
+  type StocksPurposeViewModel,
 } from "../../../signal-framework";
 import {
   applyReliabilityToMetricInputs,
@@ -107,6 +110,7 @@ export type MarketStateSnapshot = {
   history: MarketStateTransition[];
   reliability?: MarketReliabilityResult;
   pruning?: StocksPruningViewModel;
+  purpose?: StocksPurposeViewModel;
   framework?: Pick<
     SignalSnapshot,
     | "synchronization"
@@ -115,6 +119,7 @@ export type MarketStateSnapshot = {
     | "calibration"
     | "agency"
     | "pruning"
+    | "purpose"
     | "needs"
     | "opportunities"
     | "opportunityDensity"
@@ -271,6 +276,7 @@ export class MarketStateEngine {
       synchronization: this.lastSource ? buildStocksSynchronization(this.lastSource) : undefined,
       calibration,
       pruning: this.lastSource ? buildStocksPruningInput(this.lastSource, { now: timestamp }) : undefined,
+      purpose: this.lastSource ? buildStocksPurposeInput(this.lastSource, { now: timestamp }) : undefined,
       observations: this.lastSource ? buildStocksLeadershipObservations(this.lastSource.stocks, timestamp) : [],
       metadata: {
         market: context.market,
@@ -338,6 +344,7 @@ function adaptSnapshot(
     history: history.slice(),
     reliability,
     pruning: buildStocksPruningViewModel(snapshot.pruning),
+    purpose: buildStocksPurposeViewModel(snapshot.purpose),
     framework: {
       synchronization: snapshot.synchronization,
       diagnostics: snapshot.diagnostics,
@@ -345,6 +352,7 @@ function adaptSnapshot(
       calibration: snapshot.calibration,
       agency: snapshot.agency,
       pruning: snapshot.pruning,
+      purpose: snapshot.purpose,
       needs: snapshot.needs,
       opportunities: snapshot.opportunities,
       opportunityDensity: snapshot.opportunityDensity,

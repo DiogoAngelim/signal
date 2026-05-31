@@ -77,6 +77,7 @@ const source = {
   backtestProfitFactor: 1.7,
   backtestWinRatePct: 58,
   backtestReturnPct: 14.5,
+  ambition: 72,
   executionProfile: {
     spreadBps: 2,
     slippageBps: 1,
@@ -137,6 +138,10 @@ describe("market perception end-to-end integration", () => {
     expect(snapshot.framework?.rankings[0]?.id).toBe("ADX");
     expect(snapshot.framework?.needs.length).toBeGreaterThan(0);
     expect(snapshot.framework?.opportunities.length).toBeGreaterThan(0);
+    expect(snapshot.purpose?.ambition).toBe(72);
+    expect(snapshot.framework?.purpose?.purposeStatement).toContain(
+      "I am willing",
+    );
     expect(
       snapshot.framework?.opportunityDensity.density,
     ).toBeGreaterThanOrEqual(0);
