@@ -1,5 +1,6 @@
 import { clamp, mean, numeric, signRatio, stdev } from "../math/statistics";
 import { MetricRegistry } from "../metrics/registry";
+import { evaluatePruning, type PruningCandidateInput, type PruningInput, type PruningResult } from "../pruning/engine";
 import type { MetricInput, ObservationPoint, SynchronizationInput, VenueState } from "../types";
 
 export type StocksOptimizerMetricSource = {
@@ -47,6 +48,21 @@ export type StocksOptimizerMetricSource = {
     totalExposureCap?: number;
     riskAversion?: number;
   };
+};
+
+export type StocksPruningViewModel = {
+  mode: "legacy" | "enhanced" | "degraded";
+  pruningScore: number;
+  ignoranceEffectivenessScore: number;
+  recommendedAction: string;
+  ignoredSignals: string[];
+  reducedSignals: string[];
+  quarantinedSignals: string[];
+  preservedSignals: string[];
+  survivalCriticalSignals: string[];
+  frontendHiddenSignals: string[];
+  explanation: string;
+  warnings: string[];
 };
 
 export function createStocksMetricRegistry() {
@@ -253,6 +269,224 @@ export function buildStocksLeadershipObservations(stocks: Array<Record<string, a
       },
     }));
   });
+}
+
+export function buildStocksPruningInput(
+  input: StocksOptimizerMetricSource,
+  options: { now?: string | number | Date } = {},
+): PruningInput {
+  const stocks = Array.isArray(input.stocks) ? input.stocks : [];
+  const actionCounts = stocks.reduce<Record<string, number>>((counts, stock) => {
+    const action = String(stock.signalAction ?? stock.allocationAction ?? "Hold");
+    counts[action] = (counts[action] ?? 0) + 1;
+    return counts;
+  }, {});
+  const candidates: PruningCandidateInput[] = [
+    ...stocks.map((stock) => stockPruningCandidate(stock, input, actionCounts)),
+    ...dashboardMetricPruningCandidates(input),
+  ];
+
+  return {
+    now: options.now ?? input.now ?? "1970-01-01T00:00:00.000Z",
+    candidates,
+  };
+}
+
+export function evaluateStocksPruning(
+  input: StocksOptimizerMetricSource,
+  options: { now?: string | number | Date } = {},
+): PruningResult {
+  return evaluatePruning(buildStocksPruningInput(input, options));
+}
+
+export function buildStocksPruningViewModel(pruning?: Partial<PruningResult> | null): StocksPruningViewModel {
+  if (!pruning) {
+    return {
+      mode: "legacy",
+      pruningScore: 0,
+      ignoranceEffectivenessScore: 0,
+      recommendedAction: "keep",
+      ignoredSignals: [],
+      reducedSignals: [],
+      quarantinedSignals: [],
+      preservedSignals: [],
+      survivalCriticalSignals: [],
+      frontendHiddenSignals: [],
+      explanation: "Pruning is not available yet. Existing dashboard data remains usable.",
+      warnings: [],
+    };
+  }
+
+  return {
+    mode: pruning.degradedMode ? "degraded" : "enhanced",
+    pruningScore: clamp(numeric(pruning.pruningScore, 0)),
+    ignoranceEffectivenessScore: clamp(numeric(pruning.ignoranceEffectivenessScore, 0)),
+    recommendedAction: String(pruning.recommendedAction ?? "review"),
+    ignoredSignals: safeStringArray(pruning.ignoredSignals),
+    reducedSignals: safeStringArray(pruning.reducedSignals),
+    quarantinedSignals: safeStringArray(pruning.quarantinedSignals),
+    preservedSignals: safeStringArray(pruning.preservedSignals),
+    survivalCriticalSignals: safeStringArray(pruning.survivalCriticalSignals),
+    frontendHiddenSignals: safeStringArray(pruning.frontendHiddenSignals),
+    explanation: String(pruning.explanation ?? "Pruning reviewed signal quality."),
+    warnings: safeStringArray(pruning.warnings),
+  };
+}
+
+export function adjustStocksExposureForPruning(
+  suggestedExposure: number,
+  pruning?: Partial<PruningResult> | null,
+) {
+  const exposure = clamp(suggestedExposure);
+  if (!pruning) return exposure;
+  if (pruning.recommendedAction === "ignore" || pruning.recommendedAction === "quarantine") return 0;
+  if (pruning.recommendedAction === "review" || pruning.recommendedAction === "isolate") return Math.min(exposure, 25);
+  if (pruning.recommendedAction === "reduce") return Math.min(exposure, exposure * 0.5);
+  return exposure;
+}
+
+function stockPruningCandidate(
+  stock: Record<string, any>,
+  input: StocksOptimizerMetricSource,
+  actionCounts: Record<string, number>,
+): PruningCandidateInput {
+  const id = String(stock.ticker ?? stock.symbol ?? stock.name ?? "unknown");
+  const action = String(stock.signalAction ?? stock.allocationAction ?? "Hold");
+  const setupQuality = numeric(stock.setupQuality, input.avgQuality ?? 50);
+  const trendQuality = numeric(stock.trendQuality, input.avgQuality ?? 50);
+  const timingQuality = numeric(stock.timingQuality, input.avgQuality ?? 50);
+  const riskPressure = numeric(stock.riskPressure, input.avgRisk ?? 50);
+  const expectedMove = numeric(stock.expectedMove, latestChange(stock));
+  const historyVolatility = stdev(historyReturns(stock.history).slice(-30));
+  const evidenceQuality = mean([
+    stock.quoteStatus === "available" ? 95 : 35,
+    stock.signalStatus === "provided" || stock.signalAction ? 90 : 35,
+    input.hasBacktestData ? Math.min(100, input.backtestTradeCount * 1.2) : 30,
+  ]);
+  const winRate = numeric(input.backtestWinRatePct, 50);
+  const overfitRisk = numeric(
+    input.robustnessOverfitRisk,
+    Math.max(0, 100 - numeric(input.robustnessScore, 65)) +
+      (numeric(input.backtestProfitFactor, 0) > 4 ? 15 : 0) +
+      (winRate > 90 ? 12 : 0),
+  );
+  const useful = mean([setupQuality, trendQuality, timingQuality, Math.min(100, Math.abs(expectedMove) * 18)]);
+  const duplicateActionCount = Math.max(0, (actionCounts[action] ?? 1) - 1);
+  const survivalValue = action === "Sell" || action === "Blocked" || riskPressure >= 75
+    ? Math.max(input.survivalScore, riskPressure)
+    : input.survivalScore * 0.48;
+
+  return {
+    candidateId: id,
+    candidateType: "raw-signal",
+    sourceModule: "stocks-optimizer",
+    currentWeight: numeric(stock.suggestedExposure, 0) * 10,
+    historicalUtility: useful,
+    predictiveContribution: Math.min(100, Math.abs(expectedMove) * 18 + trendQuality * 0.5),
+    decisionContribution: Math.min(100, numeric(stock.suggestedExposure, 0) * 12 + setupQuality * 0.35),
+    redundancyScore: Math.min(100, duplicateActionCount * 24),
+    noiseScore: clamp(riskPressure * 0.48 + historyVolatility * 8 + (input.staleData ? 28 : 0)),
+    volatilitySensitivity: clamp(historyVolatility * 12 + Math.abs(expectedMove) * 4),
+    regimeStability: clamp(mean([numeric(input.avgQuality, 50), 100 - numeric(input.avgRisk, 50), input.breadth])),
+    evidenceQuality,
+    sampleSize: input.backtestTradeCount,
+    staleDataRisk: input.staleData ? 85 : 0,
+    contradictionRate: action === "Buy" && riskPressure >= 70 ? 75 : action === "Sell" && setupQuality >= 75 ? 60 : 0,
+    falsePositiveRate: clamp(100 - winRate),
+    falseNegativeRate: clamp(100 - winRate),
+    complexityCost: 22,
+    maintenanceCost: 14,
+    latencyCost: numeric(input.executionProfile?.spreadBps, 0) + numeric(input.executionProfile?.slippageBps, 0),
+    userClarityCost: action === "Hold" && Math.abs(expectedMove) < 0.5 ? 62 : 24,
+    overfitRisk,
+    explainabilityValue: stock.signalReason || stock.explanation ? 80 : 45,
+    survivalValue,
+    recentOutcomeImpact: numeric(stock.recentOutcomeImpact, 0),
+    counterfactualImpact: numeric(stock.counterfactualImpact, 0),
+    governanceFlags: survivalValue >= 80 ? ["survival-critical"] : [],
+    selfModelWarnings: input.calibrationWarnings,
+    confidenceImpact: numeric(input.confidence, 50) - 50,
+    trustImpact: numeric(input.calibrationTrustworthiness, input.survivalScore) - 50,
+    uncertainty: 100 - numeric(input.confidence, 50),
+    timestamp: input.now,
+    metadata: { action },
+  };
+}
+
+function dashboardMetricPruningCandidates(input: StocksOptimizerMetricSource): PruningCandidateInput[] {
+  const staleRisk = input.staleData ? 85 : 0;
+  return [
+    {
+      candidateId: "dashboard:backtest-summary",
+      candidateType: "frontend-insight",
+      sourceModule: "stocks-optimizer",
+      currentWeight: 50,
+      historicalUtility: input.hasBacktestData ? 68 : 20,
+      predictiveContribution: input.hasBacktestData ? 62 : 15,
+      decisionContribution: input.hasBacktestData ? 56 : 10,
+      redundancyScore: input.hasBacktestData ? 35 : 0,
+      noiseScore: input.hasBacktestData ? 20 : 70,
+      volatilitySensitivity: 20,
+      regimeStability: numeric(input.robustnessScore, 50),
+      evidenceQuality: input.hasBacktestData ? Math.min(100, input.backtestTradeCount * 1.2) : 20,
+      sampleSize: input.backtestTradeCount,
+      staleDataRisk: staleRisk,
+      contradictionRate: numeric(input.robustnessOverfitRisk, 0) >= 70 ? 65 : 0,
+      falsePositiveRate: clamp(100 - numeric(input.backtestWinRatePct, 50)),
+      falseNegativeRate: clamp(100 - numeric(input.backtestWinRatePct, 50)),
+      complexityCost: 46,
+      maintenanceCost: 30,
+      latencyCost: 0,
+      userClarityCost: 68,
+      overfitRisk: numeric(input.robustnessOverfitRisk, 100 - numeric(input.robustnessScore, 50)),
+      explainabilityValue: 62,
+      survivalValue: 35,
+      recentOutcomeImpact: 0,
+      counterfactualImpact: 0,
+      confidenceImpact: numeric(input.confidence, 50) - 50,
+      trustImpact: numeric(input.calibrationTrustworthiness, input.survivalScore) - 50,
+      uncertainty: 100 - numeric(input.confidence, 50),
+      timestamp: input.now,
+    },
+    {
+      candidateId: "dashboard:survival-warning",
+      candidateType: "frontend-insight",
+      sourceModule: "stocks-optimizer",
+      currentWeight: 100,
+      historicalUtility: input.survivalScore,
+      predictiveContribution: input.survivalScore,
+      decisionContribution: Math.max(input.survivalScore, numeric(input.avgRisk, 50)),
+      redundancyScore: 0,
+      noiseScore: 100 - input.survivalScore,
+      volatilitySensitivity: numeric(input.avgRisk, 50),
+      regimeStability: 100 - numeric(input.avgRisk, 50),
+      evidenceQuality: input.hasProvidedSignals ? 80 : 45,
+      sampleSize: input.expectedAssetCount ?? input.stocks.length,
+      staleDataRisk: staleRisk,
+      contradictionRate: 0,
+      falsePositiveRate: 0,
+      falseNegativeRate: 0,
+      complexityCost: 18,
+      maintenanceCost: 8,
+      latencyCost: 0,
+      userClarityCost: 10,
+      overfitRisk: 0,
+      explainabilityValue: 90,
+      survivalValue: Math.max(85, input.survivalScore),
+      recentOutcomeImpact: 0,
+      counterfactualImpact: 35,
+      governanceFlags: ["survival-critical", "frontend-primary"],
+      selfModelWarnings: input.failureFlags,
+      confidenceImpact: 0,
+      trustImpact: input.survivalScore - 50,
+      uncertainty: input.staleData ? 55 : 15,
+      timestamp: input.now,
+    },
+  ];
+}
+
+function safeStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.map((item) => String(item)) : [];
 }
 
 function historyReturns(history: unknown) {

@@ -1,5 +1,6 @@
 import { clamp, mean } from "../math/statistics";
 import type { CalibrationResult } from "../calibration/engine";
+import type { PruningCandidateAssessment, PruningResult } from "../pruning/engine";
 import type { ReflectionResult } from "../reflection/engine";
 
 export type AgencyStatus =
@@ -88,6 +89,7 @@ export type AgencyInput = {
   calibration?: Partial<CalibrationResult> & {
     warnings?: string[];
   };
+  pruning?: Partial<PruningResult> | PruningCandidateAssessment[];
   reflection?:
     | Partial<ReflectionResult>
     | { reflectionScore?: number; recommendedConfidenceCap?: number };
@@ -113,6 +115,18 @@ export type AgencyInput = {
   statusOnInsufficientAuthority?: AgencyStatus;
   statusOnConstraintViolation?: AgencyStatus;
   statusOnLowConfidence?: AgencyStatus;
+};
+
+export type PruningGateEvaluation = {
+  score: number;
+  safeToAct: boolean;
+  nonPrunedEvidenceScore: number;
+  executionCap: number;
+  ignoredCandidateIds: string[];
+  reducedCandidateIds: string[];
+  quarantinedCandidateIds: string[];
+  preservedCandidateIds: string[];
+  reasons: string[];
 };
 
 export type AuthorityEvaluation = {
@@ -175,6 +189,7 @@ export type AgencyResult = {
   authorityEvaluation: AuthorityEvaluation;
   constraintEvaluation: ConstraintEvaluation;
   reviewRequirement: ReviewRequirement;
+  pruningGate: PruningGateEvaluation;
   reasons: string[];
   audit: {
     componentScores: Record<string, number>;
@@ -232,6 +247,7 @@ export function authorize(input: AgencyInput): AgencyResult {
     reflectionScore,
     uncertainty,
   );
+  const pruningGate = evaluatePruningGate(input.pruning);
   const baseExecutionReadiness = normalizeScore(
     input.execution?.readiness,
     mean([
@@ -240,13 +256,17 @@ export function authorize(input: AgencyInput): AgencyResult {
       reflectionScore,
       decision.confidence,
       100 - uncertainty,
+      ...(input.pruning ? [pruningGate.score] : []),
     ]),
   );
-  const executionReadiness = capReadiness(baseExecutionReadiness, {
-    reviewRequired: reviewRequirement.required,
-    constraintEvaluation,
-    executionBlocked: input.execution?.blocked === true,
-  });
+  const executionReadiness = Math.min(
+    pruningGate.executionCap,
+    capReadiness(baseExecutionReadiness, {
+      reviewRequired: reviewRequirement.required,
+      constraintEvaluation,
+      executionBlocked: input.execution?.blocked === true,
+    }),
+  );
   const componentScores = {
     authority: authorityEvaluation.score,
     constraints: constraintEvaluation.score,
@@ -254,6 +274,7 @@ export function authorize(input: AgencyInput): AgencyResult {
     reflectionQuality: reflectionScore,
     decisionConfidence: decision.confidence,
     executionReadiness,
+    pruningSafety: pruningGate.score,
   };
   const agencyScore = weightedScore(componentScores, DEFAULT_WEIGHTS);
   const commitmentConfidence = clamp(
@@ -263,6 +284,7 @@ export function authorize(input: AgencyInput): AgencyResult {
       authorityEvaluation.score,
       constraintEvaluation.score,
       100 - uncertainty,
+      ...(input.pruning ? [pruningGate.score] : []),
     ]),
   );
   const statusResolution: string[] = [];
@@ -277,6 +299,7 @@ export function authorize(input: AgencyInput): AgencyResult {
     authorityEvaluation,
     constraintEvaluation,
     reviewRequirement,
+    pruningGate,
     statusResolution,
   });
 
@@ -299,6 +322,7 @@ export function authorize(input: AgencyInput): AgencyResult {
     authorityEvaluation,
     constraintEvaluation,
     reviewRequirement,
+    pruningGate,
     reasons: reasonsFor({
       input,
       decision,
@@ -310,6 +334,7 @@ export function authorize(input: AgencyInput): AgencyResult {
       authorityEvaluation,
       constraintEvaluation,
       reviewRequirement,
+      pruningGate,
       status,
     }),
     audit: {
@@ -320,6 +345,7 @@ export function authorize(input: AgencyInput): AgencyResult {
         "calibrated decision confidence = min(raw decision confidence, calibrated confidence)",
         "commitmentConfidence = mean(calibrated decision confidence, reflection quality, authority score, constraint compliance, uncertainty control)",
         "executionReadiness = readiness input or mean core governance components, capped by review and blocking conditions",
+        "pruningSafety blocks quarantined decision drivers and caps execution when only reduced evidence remains",
         "agencyScore = weighted mean of authority, constraints, uncertainty control, reflection quality, calibrated decision confidence, and execution readiness",
       ],
       statusResolution,
@@ -619,6 +645,87 @@ function capReadiness(
   return clamp(capped);
 }
 
+function evaluatePruningGate(pruning: AgencyInput["pruning"]): PruningGateEvaluation {
+  const candidates = Array.isArray(pruning)
+    ? pruning
+    : Array.isArray(pruning?.candidates)
+      ? pruning.candidates
+      : pruning && pruning.candidateId
+        ? [pruning as PruningCandidateAssessment]
+        : [];
+  if (candidates.length === 0) {
+    return {
+      score: 100,
+      safeToAct: true,
+      nonPrunedEvidenceScore: 100,
+      executionCap: 100,
+      ignoredCandidateIds: [],
+      reducedCandidateIds: [],
+      quarantinedCandidateIds: [],
+      preservedCandidateIds: [],
+      reasons: ["No pruning restrictions were supplied."],
+    };
+  }
+
+  const ignoredCandidateIds = idsForAction(candidates, "ignore");
+  const reducedCandidateIds = idsForAction(candidates, "reduce");
+  const quarantinedCandidateIds = idsForAction(candidates, "quarantine");
+  const preservedCandidateIds = candidates
+    .filter((candidate) => candidate.recommendedAction === "keep" || candidate.survivalContribution >= 75)
+    .map((candidate) => candidate.candidateId);
+  const nonPrunedEvidenceScore = clamp(
+    mean(
+      candidates
+        .filter((candidate) => !["ignore", "quarantine"].includes(candidate.recommendedAction))
+        .map((candidate) => mean([candidate.keepScore, candidate.evidenceConfidence, candidate.utilityContribution])),
+    ),
+  );
+  const ignoredPressure = ignoredCandidateIds.length > 0 ? 18 : 0;
+  const quarantinePressure = quarantinedCandidateIds.length > 0 ? 34 : 0;
+  const reducedPressure = reducedCandidateIds.length > 0 ? 8 : 0;
+  const score = clamp(nonPrunedEvidenceScore - ignoredPressure - quarantinePressure - reducedPressure);
+  const safeToAct = quarantinedCandidateIds.length === 0 && !(ignoredCandidateIds.length > 0 && nonPrunedEvidenceScore < 65);
+  const executionCap = quarantinedCandidateIds.length > 0
+    ? 0
+    : ignoredCandidateIds.length > 0
+      ? Math.min(55, score)
+      : reducedCandidateIds.length > 0
+        ? Math.min(78, score)
+        : 100;
+  const reasons = [
+    ...(quarantinedCandidateIds.length
+      ? [`Avoid acting on quarantined pruning candidate(s): ${quarantinedCandidateIds.join(", ")}.`]
+      : []),
+    ...(ignoredCandidateIds.length
+      ? [`Ignored pruning candidate(s) cannot carry the decision: ${ignoredCandidateIds.join(", ")}.`]
+      : []),
+    ...(reducedCandidateIds.length
+      ? [`Reduced pruning candidate(s) lower execution size or confidence: ${reducedCandidateIds.join(", ")}.`]
+      : []),
+    ...(preservedCandidateIds.length
+      ? [`Preserved candidate(s) remain available as non-pruned evidence: ${preservedCandidateIds.join(", ")}.`]
+      : []),
+  ];
+
+  return {
+    score,
+    safeToAct,
+    nonPrunedEvidenceScore,
+    executionCap,
+    ignoredCandidateIds,
+    reducedCandidateIds,
+    quarantinedCandidateIds,
+    preservedCandidateIds,
+    reasons: reasons.length ? reasons : ["Pruning found no action blockers."],
+  };
+}
+
+function idsForAction(candidates: Array<Partial<PruningCandidateAssessment>>, action: string) {
+  return candidates
+    .filter((candidate) => candidate.recommendedAction === action)
+    .map((candidate) => String(candidate.candidateId ?? "unknown-candidate"));
+}
+
 function resolveStatus(input: {
   input: AgencyInput;
   decision: ReturnType<typeof normalizeDecision>;
@@ -630,6 +737,7 @@ function resolveStatus(input: {
   authorityEvaluation: AuthorityEvaluation;
   constraintEvaluation: ConstraintEvaluation;
   reviewRequirement: ReviewRequirement;
+  pruningGate: PruningGateEvaluation;
   statusResolution: string[];
 }): AgencyStatus {
   if (input.input.execution?.rollbackRequested === true) {
@@ -686,6 +794,11 @@ function resolveStatus(input: {
     return input.reviewRequirement.status;
   }
 
+  if (!input.pruningGate.safeToAct) {
+    input.statusResolution.push("Pruning blocked action because evidence depends on ignored or quarantined drivers.");
+    return input.pruningGate.quarantinedCandidateIds.length > 0 ? "denied" : "requires-review";
+  }
+
   if (!input.constraintEvaluation.passed) {
     input.statusResolution.push(
       "Only non-hard constraints failed; proceeding with limits.",
@@ -718,6 +831,7 @@ function reasonsFor(input: {
   authorityEvaluation: AuthorityEvaluation;
   constraintEvaluation: ConstraintEvaluation;
   reviewRequirement: ReviewRequirement;
+  pruningGate: PruningGateEvaluation;
   status: AgencyStatus;
 }) {
   const reasons = [
@@ -727,6 +841,7 @@ function reasonsFor(input: {
     `Reflection quality is ${formatPercent(input.reflectionScore)}.`,
     `Uncertainty is ${formatPercent(input.uncertainty)}.`,
     `Execution readiness is ${formatPercent(input.executionReadiness)}.`,
+    `Pruning safety is ${formatPercent(input.pruningGate.score)}.`,
   ];
 
   if (input.input.calibration) {
@@ -748,6 +863,7 @@ function reasonsFor(input: {
     reasons.push(violation.reason);
   for (const reason of input.input.execution?.reasons ?? [])
     reasons.push(reason);
+  for (const reason of input.pruningGate.reasons) reasons.push(reason);
   if (input.status === "approved") reasons.push("Agency approved commitment.");
   if (input.status === "limited")
     reasons.push("Agency limited commitment due to non-hard constraints.");

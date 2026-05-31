@@ -2,6 +2,8 @@ import {
   SignalFrameworkEngine,
   buildStocksLeadershipObservations,
   buildStocksOptimizerMetrics,
+  buildStocksPruningInput,
+  buildStocksPruningViewModel,
   buildStocksSynchronization,
   createStocksMetricRegistry,
   type MetricContribution as FrameworkMetricContribution,
@@ -14,6 +16,7 @@ import {
   type SignalContext,
   type SignalSnapshot,
   type StocksOptimizerMetricSource as MarketPerceptionMetricSource,
+  type StocksPruningViewModel,
 } from "../../../signal-framework";
 import {
   applyReliabilityToMetricInputs,
@@ -103,6 +106,7 @@ export type MarketStateSnapshot = {
   metrics: Record<string, MetricState>;
   history: MarketStateTransition[];
   reliability?: MarketReliabilityResult;
+  pruning?: StocksPruningViewModel;
   framework?: Pick<
     SignalSnapshot,
     | "synchronization"
@@ -110,6 +114,7 @@ export type MarketStateSnapshot = {
     | "reflection"
     | "calibration"
     | "agency"
+    | "pruning"
     | "needs"
     | "opportunities"
     | "opportunityDensity"
@@ -265,6 +270,7 @@ export class MarketStateEngine {
       metrics: reliabilityAdjustedInputs,
       synchronization: this.lastSource ? buildStocksSynchronization(this.lastSource) : undefined,
       calibration,
+      pruning: this.lastSource ? buildStocksPruningInput(this.lastSource, { now: timestamp }) : undefined,
       observations: this.lastSource ? buildStocksLeadershipObservations(this.lastSource.stocks, timestamp) : [],
       metadata: {
         market: context.market,
@@ -331,12 +337,14 @@ function adaptSnapshot(
     metrics: adaptMetrics(snapshot.metrics),
     history: history.slice(),
     reliability,
+    pruning: buildStocksPruningViewModel(snapshot.pruning),
     framework: {
       synchronization: snapshot.synchronization,
       diagnostics: snapshot.diagnostics,
       reflection: snapshot.reflection,
       calibration: snapshot.calibration,
       agency: snapshot.agency,
+      pruning: snapshot.pruning,
       needs: snapshot.needs,
       opportunities: snapshot.opportunities,
       opportunityDensity: snapshot.opportunityDensity,

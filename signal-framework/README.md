@@ -7,7 +7,7 @@ For the compact system map, see [Signal Framework Architecture](./ARCHITECTURE.m
 The first-class lifecycle is:
 
 ```txt
-Perception -> Reflection -> Calibration -> Decision -> Agency -> Action
+Perception -> Reflection -> Calibration -> Decision -> Pruning -> Agency -> Action
 ```
 
 Each layer has a separate responsibility:
@@ -16,11 +16,12 @@ Each layer has a separate responsibility:
 - Reflection: how trustworthy is my understanding?
 - Calibration: how much of the current confidence is supported by past evidence?
 - Decision: what should happen?
+- Pruning: what evidence should be kept, reduced, isolated, quarantined, ignored, or reviewed?
 - Agency: should the decision be allowed to proceed?
 - Action: execute the approved intent.
 - Legacy: what durable accomplishments were earned?
 
-Reflection increases self-awareness. Calibration turns raw confidence into evidence-backed confidence. Agency increases autonomy. These layers do not contain application-specific logic.
+Reflection increases self-awareness. Calibration turns raw confidence into evidence-backed confidence. Pruning improves what the system chooses to ignore. Agency increases autonomy. These layers do not contain application-specific logic.
 
 ## Reflection
 
@@ -188,6 +189,58 @@ console.log(agency.calibratedConfidence);
 Possible statuses include `approved`, `denied`, `deferred`, `escalated`, `requires-review`, `limited`, and `rollback`. Custom statuses are supported.
 
 The result is auditable. It includes raw confidence, calibrated confidence, trustworthiness, calibration warnings, authority evaluation, constraint evaluation, review requirements, status-resolution notes, reasons, component scores, weights, and thresholds.
+
+## Pruning
+
+Pruning is Signal's generic restraint layer. It improves ignorance effectiveness:
+signals, rules, metrics, explanations, and recommendation contributors that
+should be ignored are ignored precisely, while useful and survival-critical
+evidence is preserved.
+
+Use `evaluatePruning(input)` to inspect candidates:
+
+```ts
+import { evaluatePruning } from "./signal-framework";
+
+const pruning = evaluatePruning({
+  candidates: [
+    {
+      candidateId: "source-a",
+      candidateType: "raw-signal",
+      sourceModule: "recognition",
+      historicalUtility: 18,
+      predictiveContribution: 12,
+      decisionContribution: 10,
+      noiseScore: 88,
+      overfitRisk: 72,
+      evidenceQuality: 80,
+      sampleSize: 64,
+      survivalValue: 20,
+    },
+  ],
+});
+
+console.log(pruning.recommendedAction);
+console.log(pruning.ignoredSignals);
+console.log(pruning.trace);
+```
+
+Pruning outputs `pruningScore`, `ignoranceEffectivenessScore`, action scores,
+penalties, `evidenceConfidence`, warnings, missing inputs, degraded-mode status,
+trace data, contributing factors, and opposing factors. Allowed actions are
+`keep`, `reduce`, `isolate`, `quarantine`, `ignore`, and `review`.
+
+Safety rules:
+
+- Useful but redundant evidence is reduced and preserved as backup evidence.
+- Noisy low-utility evidence is ignored only when evidence is adequate.
+- Overfit evidence is quarantined until cross-regime validation improves trust.
+- Weak evidence cannot increase confidence.
+- Survival-critical evidence is kept unless evidence against it is extremely strong.
+- Frontend-confusing evidence can be hidden from primary views without deleting it.
+
+See [Signal Pruning](./pruning/README.md) for the scoring model, storage
+interfaces, integration notes, and examples.
 
 ## Action
 

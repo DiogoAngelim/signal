@@ -13,7 +13,7 @@ import { evaluateExecutionReadiness } from "../execution/readiness";
 import { evaluateJudgement } from "../judgement";
 import { evaluateLegacy } from "../legacy/engine";
 import type { LegacyInput } from "../legacy/engine";
-import { clamp, immutable, mean, stdev } from "../math/statistics";
+import { clamp, immutable, mean, numeric, stdev } from "../math/statistics";
 import type { MetricRegistry } from "../metrics/registry";
 import { detectNeeds } from "../need-detection/engine";
 import { evaluateOpportunityDensity } from "../opportunity-discovery/density";
@@ -23,6 +23,7 @@ import {
   PERCEPTION_LAYER_ORDER,
   classifyPerceptionLayer,
 } from "../perception/layers";
+import { evaluatePruning, type PruningCandidateInput, type PruningInput } from "../pruning/engine";
 import { rankLeadership } from "../ranking/leadership";
 import { reflect } from "../reflection/engine";
 import { recognizeState } from "../recognition/engine";
@@ -133,6 +134,19 @@ export class SignalFrameworkEngine {
         decision,
       }),
     );
+    const pruning = evaluatePruning(
+      buildPruningInput({
+        context,
+        timestamp,
+        perception: rawPerception,
+        reflection,
+        calibration,
+        judgement,
+        discovery,
+        recognition,
+        decision,
+      }),
+    );
     const agencyDecision =
       judgement && decision
         ? {
@@ -151,6 +165,7 @@ export class SignalFrameworkEngine {
       decision: agencyDecision,
       reflection: context.agency?.reflection ?? reflection,
       calibration: context.agency?.calibration ?? calibration,
+      pruning: context.agency?.pruning ?? pruning,
     });
     const viability = context.viability || decision
       ? evaluateViability(
@@ -293,6 +308,15 @@ export class SignalFrameworkEngine {
       },
     });
     events.push({
+      type: `pruning.${pruning.recommendedAction}`,
+      timestamp,
+      payload: {
+        pruningScore: pruning.pruningScore,
+        ignoranceEffectivenessScore: pruning.ignoranceEffectivenessScore,
+        candidates: pruning.candidates.length,
+      },
+    });
+    events.push({
       type: "discovery-intelligence.evaluated",
       timestamp,
       payload: {
@@ -386,6 +410,7 @@ export class SignalFrameworkEngine {
       discoveryIntelligence,
       recognition,
       legacy,
+      pruning,
       decision,
       agency,
       viability,
@@ -811,6 +836,235 @@ function buildRecognitionInput(args: {
       ...judgementOutcomeSamples,
     ],
   };
+}
+
+function buildPruningInput(args: {
+  context: SignalContext;
+  timestamp: number;
+  perception: PerceptionEvaluation;
+  reflection: NonNullable<SignalSnapshot["reflection"]>;
+  calibration: NonNullable<SignalSnapshot["calibration"]>;
+  judgement?: SignalSnapshot["judgement"];
+  discovery: NonNullable<SignalSnapshot["discovery"]>;
+  recognition: NonNullable<SignalSnapshot["recognition"]>;
+  decision: SignalContext["decision"];
+}): PruningInput {
+  const supplied = args.context.pruning ?? {};
+  const suppliedCandidate = supplied.candidateId || supplied.candidateType || supplied.sourceModule
+    ? [candidateOnly(supplied)]
+    : [];
+  const candidates: PruningCandidateInput[] = [
+    ...signalsToPruningCandidates(args.context, args.timestamp),
+    ...metricsToPruningCandidates(args.context, args.perception, args.timestamp),
+    ...decisionToPruningCandidate(args),
+    ...discoveryToPruningCandidates(args),
+    ...suppliedCandidate,
+    ...safeArray(supplied.candidates),
+  ];
+
+  return {
+    ...supplied,
+    now: supplied.now ?? args.timestamp,
+    candidates,
+  };
+}
+
+function signalsToPruningCandidates(context: SignalContext, timestamp: number): PruningCandidateInput[] {
+  const outcomeBySignalId = new Map((context.outcomes ?? []).map((outcome) => [outcome.signalId, outcome]));
+  return safeArray(context.signals).map((signal) => {
+    const outcome = outcomeBySignalId.get(signal.id);
+    const compositionValues = Object.values(signal.composition ?? {}).map((value) => numeric(value, 0));
+    const correct = outcome ? outcome.realizedDirection === signal.expectedDirection : undefined;
+    return {
+      candidateId: signal.id,
+      candidateType: "raw-signal",
+      sourceModule: "signal-journal",
+      currentWeight: compositionValues.length ? clamp(mean(compositionValues)) : signal.confidence,
+      historicalUtility: correct == null ? 45 : correct ? 78 : 22,
+      predictiveContribution: signal.confidence,
+      decisionContribution: clamp(Math.abs(signal.expectedMagnitude) * 10),
+      redundancyScore: 0,
+      noiseScore: correct === false ? 68 : 100 - signal.confidence,
+      volatilitySensitivity: numeric(signal.executionAssumptions?.volatilitySensitivity, 25),
+      regimeStability: 55,
+      evidenceQuality: outcome ? 72 : 38,
+      sampleSize: outcome ? 1 : 0,
+      staleDataRisk: staleRiskForTimestamp(signal.timestamp, timestamp),
+      contradictionRate: correct === false ? 65 : 0,
+      falsePositiveRate: correct === false && signal.expectedDirection === "up" ? 70 : 0,
+      falseNegativeRate: correct === false && signal.expectedDirection === "down" ? 70 : 0,
+      complexityCost: Object.keys(signal.composition ?? {}).length * 7,
+      maintenanceCost: 10,
+      latencyCost: 0,
+      userClarityCost: 15,
+      overfitRisk: 100 - signal.confidence,
+      explainabilityValue: compositionValues.length ? 65 : 35,
+      survivalValue: numeric(signal.executionAssumptions?.survivalValue, 35),
+      recentOutcomeImpact: correct == null ? 0 : correct ? 35 : -35,
+      counterfactualImpact: 0,
+      confidenceImpact: signal.confidence - 50,
+      trustImpact: 0,
+      uncertainty: 100 - signal.confidence,
+      timestamp: signal.timestamp,
+    };
+  });
+}
+
+function metricsToPruningCandidates(
+  context: SignalContext,
+  perception: PerceptionEvaluation,
+  timestamp: number,
+): PruningCandidateInput[] {
+  const timestamps = metricTimestampByKey(context);
+  return Object.values(perception.metrics).map((metric) => {
+    const maxLayerWeight = metric.layers.length ? Math.max(...metric.layers.map((layer) => layer.weight)) : 1;
+    const supportsSurvival = metric.layers.some((layer) => layer.layer === "survival");
+    const supportsSelfAwareness = metric.layers.some((layer) => layer.layer === "selfAwareness");
+    const zScore = numeric(metric.normalization?.zScore, 0);
+    const timestampForMetric = timestamps[metric.key];
+    const ageRisk = staleRiskForTimestamp(timestampForMetric, timestamp);
+    const noiseScore = clamp(100 - metric.confidence + Math.abs(zScore) * 10);
+    return {
+      candidateId: `metric:${metric.key}`,
+      candidateType: "derived-metric",
+      sourceModule: "perception",
+      currentWeight: clamp(maxLayerWeight * 100),
+      historicalUtility: metric.score,
+      predictiveContribution: metric.score,
+      decisionContribution: clamp(metric.score * 0.5 + metric.confidence * 0.5),
+      redundancyScore: 0,
+      noiseScore,
+      volatilitySensitivity: clamp(Math.abs(zScore) * 15),
+      regimeStability: perception.agreement,
+      evidenceQuality: metric.confidence,
+      sampleSize: metric.confidence >= 80 ? 30 : 8,
+      staleDataRisk: ageRisk,
+      contradictionRate: supportsSelfAwareness && metric.key.toLowerCase().includes("overfit") ? metric.score : 0,
+      falsePositiveRate: 0,
+      falseNegativeRate: 0,
+      complexityCost: metric.detail && metric.detail.length > 220 ? 45 : 18,
+      maintenanceCost: 12,
+      latencyCost: 0,
+      userClarityCost: metric.detail && metric.detail.length > 260 ? 55 : 20,
+      overfitRisk: metric.key.toLowerCase().includes("overfit") ? metric.score : Math.max(0, 100 - metric.confidence),
+      explainabilityValue: metric.detail ? 70 : 35,
+      survivalValue: supportsSurvival ? metric.score : supportsSelfAwareness ? 55 : 35,
+      recentOutcomeImpact: 0,
+      counterfactualImpact: 0,
+      confidenceImpact: metric.confidence - 50,
+      trustImpact: 0,
+      uncertainty: 100 - metric.confidence,
+      timestamp: timestampForMetric,
+      governanceFlags: supportsSurvival ? ["survival-critical"] : [],
+    };
+  });
+}
+
+function decisionToPruningCandidate(args: {
+  context: SignalContext;
+  timestamp: number;
+  reflection: NonNullable<SignalSnapshot["reflection"]>;
+  calibration: NonNullable<SignalSnapshot["calibration"]>;
+  judgement?: SignalSnapshot["judgement"];
+  recognition: NonNullable<SignalSnapshot["recognition"]>;
+  decision: SignalContext["decision"];
+}): PruningCandidateInput[] {
+  const decision = args.decision;
+  if (!decision) return [];
+  const metadata = decision.metadata ?? {};
+  const confidence = finiteMaybe(decision.confidence, args.calibration.calibratedConfidence) ?? 0;
+  const uncertainty = finiteMaybe(decision.uncertainty, 100 - confidence) ?? Math.max(0, 100 - confidence);
+  return [{
+    candidateId: decision.id ?? `${args.context.id ?? args.timestamp}:decision`,
+    candidateType: "recommendation-contributor",
+    sourceModule: "decision",
+    currentWeight: confidence,
+    historicalUtility: args.judgement?.trust ?? args.calibration.historicalAccuracy,
+    predictiveContribution: confidence,
+    decisionContribution: finiteMaybe(decision.impact, decision.expectedValue, confidence),
+    redundancyScore: 0,
+    noiseScore: uncertainty,
+    volatilitySensitivity: finiteMaybe(metadata.volatilitySensitivity, 25),
+    regimeStability: args.recognition.recurrenceConfidence,
+    evidenceQuality: args.calibration.trustworthiness,
+    sampleSize: args.calibration.sampleSize,
+    staleDataRisk: 0,
+    contradictionRate: args.judgement?.status === "blocked" ? 85 : args.judgement?.status === "review_required" ? 55 : 0,
+    falsePositiveRate: 0,
+    falseNegativeRate: 0,
+    complexityCost: finiteMaybe(metadata.complexityCost, 20),
+    maintenanceCost: finiteMaybe(metadata.maintenanceCost, 15),
+    latencyCost: finiteMaybe(metadata.latencyCost, 0),
+    userClarityCost: finiteMaybe(metadata.userClarityCost, 20),
+    overfitRisk: args.judgement?.overfitRisk ?? Math.max(0, confidence - args.calibration.trustworthiness),
+    explainabilityValue: args.reflection.knowledgeCompleteness.score,
+    survivalValue: finiteMaybe(metadata.survivalValue, 35),
+    recentOutcomeImpact: 0,
+    counterfactualImpact: 0,
+    confidenceImpact: confidence - 50,
+    trustImpact: args.calibration.trustworthiness - 50,
+    uncertainty,
+  }];
+}
+
+function discoveryToPruningCandidates(args: {
+  discovery: NonNullable<SignalSnapshot["discovery"]>;
+  recognition: NonNullable<SignalSnapshot["recognition"]>;
+}): PruningCandidateInput[] {
+  return args.discovery.opportunities.slice(0, 5).map((opportunity) => ({
+    candidateId: opportunity.id,
+    candidateType: "historical-pattern",
+    sourceModule: "discovery",
+    currentWeight: opportunity.strength,
+    historicalUtility: opportunity.trust,
+    predictiveContribution: opportunity.confidence,
+    decisionContribution: opportunity.readiness,
+    redundancyScore: 0,
+    noiseScore: opportunity.fragility,
+    volatilitySensitivity: opportunity.fragility,
+    regimeStability: args.recognition.recurrenceConfidence,
+    evidenceQuality: opportunity.confidence,
+    sampleSize: opportunity.supportingEvidence.length + opportunity.contradictoryEvidence.length,
+    staleDataRisk: opportunity.lifecycle.decayRisk,
+    contradictionRate: opportunity.contradictoryEvidence.length * 12,
+    falsePositiveRate: 0,
+    falseNegativeRate: 0,
+    complexityCost: opportunity.traces.length * 2,
+    maintenanceCost: 10,
+    latencyCost: 0,
+    userClarityCost: opportunity.explanation.length > 180 ? 45 : 20,
+    overfitRisk: opportunity.fragility,
+    explainabilityValue: opportunity.explanation.length ? 70 : 35,
+    survivalValue: 35,
+    recentOutcomeImpact: 0,
+    counterfactualImpact: 0,
+    confidenceImpact: opportunity.confidence - 50,
+    trustImpact: opportunity.trust - 50,
+    uncertainty: 100 - opportunity.confidence,
+  }));
+}
+
+function candidateOnly(input: Partial<PruningInput>): PruningCandidateInput {
+  const { candidates: _candidates, now: _now, strictValidation: _strictValidation, ...candidate } = input;
+  return candidate;
+}
+
+function staleRiskForTimestamp(value: unknown, now: number) {
+  if (value == null) return 35;
+  const timestamp = Number(value instanceof Date ? value.getTime() : value);
+  if (!Number.isFinite(timestamp)) {
+    const parsed = Date.parse(String(value));
+    if (!Number.isFinite(parsed)) return 35;
+    return staleRiskForAge(now - parsed);
+  }
+  return staleRiskForAge(now - timestamp);
+}
+
+function staleRiskForAge(ageMs: number) {
+  if (!Number.isFinite(ageMs) || ageMs < 0) return 0;
+  if (ageMs <= 60_000) return 0;
+  if (ageMs >= 60 * 60_000) return 100;
+  return clamp((ageMs / (60 * 60_000)) * 100);
 }
 
 function buildViabilityInput(args: {

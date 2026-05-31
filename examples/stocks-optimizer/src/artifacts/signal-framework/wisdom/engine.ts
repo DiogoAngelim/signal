@@ -1,4 +1,5 @@
 import { clamp, mean, numeric, stdev } from "../math/statistics";
+import type { PruningCandidateAssessment, PruningRecommendedAction, PruningResult } from "../pruning/engine";
 
 export type WisdomDecisionStatus =
   | "approved"
@@ -346,6 +347,7 @@ export type DecisionQualityInput = {
   portfolioIntelligence?: PortfolioIntelligenceResult;
   reflection?: unknown;
   agency?: unknown;
+  pruning?: Partial<PruningResult> | PruningCandidateAssessment[];
   survivalMemory?: unknown;
   discovery?: unknown;
 };
@@ -362,8 +364,27 @@ export type DecisionQualityResult = {
   contributors: Record<"decisionQuality" | "wisdomScore" | "learningConfidence", WisdomContributor[]>;
   scores: Record<"decisionQuality" | "wisdomScore" | "learningConfidence", WisdomScoreAudit>;
   sourceModules: string[];
+  justifiedConfidence: number;
+  falseConfidenceRisk: number;
+  robustnessScore: number;
+  antifragilityScore: number;
+  recommendedAction: string;
+  survivalAdjustment: number;
+  pruning?: WisdomPruningAdjustment;
   explanation: string;
   formulas: string[];
+};
+
+export type WisdomPruningAdjustment = {
+  pruningScore: number;
+  ignoranceEffectivenessScore: number;
+  evidenceConfidence: number;
+  falseConfidenceRisk: number;
+  robustnessAdjustment: number;
+  confidenceAdjustment: number;
+  recommendedAction: PruningRecommendedAction;
+  survivalContribution: number;
+  warnings: string[];
 };
 
 export type WisdomSummary = {
@@ -820,6 +841,7 @@ export function evaluateDecisionQuality(input: DecisionQualityInput = {}): Decis
   const portfolioIntelligence = input.portfolioIntelligence ?? evaluatePortfolioIntelligence();
   const reflectionScore = scoreFromUnknown(input.reflection, ["reflectionScore", "score"], 50);
   const survivalScore = scoreFromUnknown(input.survivalMemory, ["survivalConfidence", "score"], 50);
+  const pruning = pruningAdjustmentFor(input.pruning);
   const economicsScore = economicsScoreFor(opportunityEconomics);
   const decisionQuality = roundScore(mean([
     counterfactuals.decisionQuality,
@@ -829,19 +851,34 @@ export function evaluateDecisionQuality(input: DecisionQualityInput = {}): Decis
     portfolioIntelligence.allocationQuality,
     reflectionScore,
     survivalScore,
-  ]));
+  ]) + pruning.robustnessAdjustment * 0.12 - pruning.falseConfidenceRisk * 0.08);
   const learningConfidence = roundScore(mean([
     counterfactuals.counterfactualConfidence,
     Math.min(100, history.length * 5),
     discoveryMaturity.maturityScore,
     agencyEffectiveness.agencyAccuracy,
-  ]));
+  ]) + pruning.confidenceAdjustment);
   const wisdomScore = roundScore(mean([
     decisionQuality,
     learningConfidence,
     counterfactuals.restrictionValue,
     Math.max(0, 100 - opportunityEconomics.opportunityCost),
   ]));
+  const justifiedConfidence = roundScore(learningConfidence - pruning.falseConfidenceRisk * 0.32 + pruning.evidenceConfidence * 0.12);
+  const falseConfidenceRisk = roundScore(pruning.falseConfidenceRisk);
+  const robustnessScore = roundScore(mean([
+    portfolioIntelligence.diversificationQuality,
+    100 - falseConfidenceRisk,
+    pruning.evidenceConfidence,
+  ]));
+  const antifragilityScore = roundScore(mean([
+    survivalScore,
+    counterfactuals.restrictionValue,
+    pruning.survivalContribution,
+    pruning.ignoranceEffectivenessScore,
+  ]));
+  const survivalAdjustment = roundScore(50 + (pruning.survivalContribution - pruning.pruningScore) * 0.35);
+  const recommendedAction = wisdomRecommendedAction(opportunityEconomics.bestOption, pruning);
   const scores = {
     decisionQuality: audit(
       decisionQuality,
@@ -854,6 +891,7 @@ export function evaluateDecisionQuality(input: DecisionQualityInput = {}): Decis
         contributor("portfolio", "Portfolio intelligence", portfolioIntelligence.allocationQuality, 0.14, "Portfolio-level capital allocation quality."),
         contributor("reflection", "Reflection", reflectionScore, 0.11, "Reflection quality supplied by the caller."),
         contributor("survival", "Survival memory", survivalScore, 0.11, "Long-term survival evidence supplied by the caller."),
+        contributor("pruning", "Pruning restraint", 100 - pruning.falseConfidenceRisk, 0.08, "Whether noisy, stale, redundant, or overfit evidence has been restrained."),
       ],
     ),
     wisdomScore: audit(
@@ -874,6 +912,7 @@ export function evaluateDecisionQuality(input: DecisionQualityInput = {}): Decis
         contributor("memory-depth", "Memory depth", Math.min(100, history.length * 5), 0.25, "Persisted outcome records."),
         contributor("discovery-maturity", "Discovery maturity", discoveryMaturity.maturityScore, 0.2, "Mature discovery histories increase confidence."),
         contributor("agency-accuracy", "Agency accuracy", agencyEffectiveness.agencyAccuracy, 0.2, "Agency outcome correctness."),
+        contributor("pruning-evidence", "Pruning evidence", pruning.evidenceConfidence, 0.1, "Pruning cannot increase confidence when evidence is weak."),
       ],
     ),
   };
@@ -891,14 +930,27 @@ export function evaluateDecisionQuality(input: DecisionQualityInput = {}): Decis
     scores,
     sourceModules: unique([
       ...sourceModulesFor(input),
+      ...(input.pruning ? ["pruning"] : []),
       "counterfactuals",
       "opportunityEconomics",
       "discoveryMaturity",
       "agencyEffectiveness",
       "portfolioIntelligence",
     ]),
-    explanation: `Wisdom score is ${wisdomScore}/100 with decision quality ${decisionQuality}/100 and learning confidence ${learningConfidence}/100.`,
-    formulas: Object.values(scores).map((score) => score.formula),
+    justifiedConfidence,
+    falseConfidenceRisk,
+    robustnessScore,
+    antifragilityScore,
+    recommendedAction,
+    survivalAdjustment,
+    ...(input.pruning ? { pruning } : {}),
+    explanation: `Wisdom score is ${wisdomScore}/100 with decision quality ${decisionQuality}/100, learning confidence ${learningConfidence}/100, and pruning false-confidence risk ${falseConfidenceRisk}/100.`,
+    formulas: [
+      ...Object.values(scores).map((score) => score.formula),
+      "justifiedConfidence = learning confidence adjusted down by pruning false-confidence risk and weak evidence",
+      "robustnessScore = diversification, pruning evidence confidence, and low false-confidence risk",
+      "recommendedAction escalates review when pruning finds ignored, quarantined, stale, noisy, or low-evidence drivers",
+    ],
   };
 }
 
@@ -1351,6 +1403,104 @@ function economicsScoreFor(economics: OpportunityEconomicsResult) {
   const bestValue = Math.max(economics.actionValue, economics.waitValue, economics.rejectValue, economics.scaleValue);
   if (bestValue === 0 && selectedValue === 0) return 50;
   return roundScore(100 - Math.max(0, bestValue - selectedValue));
+}
+
+function pruningAdjustmentFor(input: DecisionQualityInput["pruning"]): WisdomPruningAdjustment {
+  if (!input) {
+    return {
+      pruningScore: 0,
+      ignoranceEffectivenessScore: 100,
+      evidenceConfidence: 100,
+      falseConfidenceRisk: 0,
+      robustnessAdjustment: 0,
+      confidenceAdjustment: 0,
+      recommendedAction: "keep",
+      survivalContribution: 50,
+      warnings: [],
+    };
+  }
+  const candidates = Array.isArray(input)
+    ? input
+    : Array.isArray(input.candidates)
+      ? input.candidates
+      : [input];
+  const fallbackSource = Array.isArray(input) ? {} : input;
+  const recommendedAction = strongestPruningAction(
+    candidates.map((candidate) => candidate.recommendedAction).filter(Boolean) as PruningRecommendedAction[],
+  );
+  const pruningScore = scoreMean(candidates, "pruningScore", fallbackSource);
+  const ignoranceEffectivenessScore = scoreMean(candidates, "ignoranceEffectivenessScore", fallbackSource, 50);
+  const evidenceConfidence = scoreMean(candidates, "evidenceConfidence", fallbackSource, 50);
+  const overfitPenalty = scoreMean(candidates, "overfitPenalty", fallbackSource);
+  const noisePenalty = scoreMean(candidates, "noisePenalty", fallbackSource);
+  const clarityPenalty = scoreMean(candidates, "clarityPenalty", fallbackSource);
+  const survivalContribution = Math.max(...candidates.map((candidate) => score(candidate.survivalContribution, 50)), score(fallbackSource.survivalContribution, 50));
+  const weakEvidence = clamp(100 - evidenceConfidence);
+  const actionRisk = recommendedAction === "ignore" ? 18 : recommendedAction === "quarantine" ? 24 : recommendedAction === "review" ? 10 : 0;
+  const falseConfidenceRisk = roundScore(
+    pruningScore * 0.26 +
+      overfitPenalty * 0.24 +
+      noisePenalty * 0.18 +
+      clarityPenalty * 0.08 +
+      weakEvidence * 0.2 +
+      actionRisk -
+      survivalContribution * 0.06,
+  );
+  const robustnessAdjustment = roundScore(
+    ignoranceEffectivenessScore * 0.18 + evidenceConfidence * 0.14 - overfitPenalty * 0.22 - noisePenalty * 0.1 - pruningScore * 0.08,
+  ) - 20;
+  const confidenceAdjustment = -roundScore(falseConfidenceRisk * 0.2 + weakEvidence * 0.08);
+  const warnings = unique(
+    candidates.flatMap((candidate) => Array.isArray(candidate.warnings) ? candidate.warnings : []),
+  );
+
+  return {
+    pruningScore,
+    ignoranceEffectivenessScore,
+    evidenceConfidence,
+    falseConfidenceRisk,
+    robustnessAdjustment,
+    confidenceAdjustment,
+    recommendedAction,
+    survivalContribution,
+    warnings,
+  };
+}
+
+function wisdomRecommendedAction(bestOption: OpportunityEconomicsResult["bestOption"], pruning: WisdomPruningAdjustment) {
+  if (pruning.recommendedAction === "quarantine") return "review";
+  if (pruning.recommendedAction === "ignore") return "review";
+  if (pruning.recommendedAction === "review") return "review";
+  if (pruning.recommendedAction === "reduce") return bestOption === "action" ? "scale" : bestOption;
+  if (pruning.evidenceConfidence < 40) return "review";
+  return bestOption;
+}
+
+function strongestPruningAction(actions: PruningRecommendedAction[]) {
+  if (!actions.length) return "keep";
+  return actions.sort((left, right) => pruningActionRank(right) - pruningActionRank(left))[0] ?? "keep";
+}
+
+function pruningActionRank(action: PruningRecommendedAction) {
+  if (action === "ignore") return 6;
+  if (action === "quarantine") return 5;
+  if (action === "review") return 4;
+  if (action === "isolate") return 3;
+  if (action === "reduce") return 2;
+  return 1;
+}
+
+function scoreMean(
+  candidates: Array<Partial<PruningCandidateAssessment>>,
+  key: keyof PruningCandidateAssessment,
+  fallbackSource: Partial<PruningResult> | Partial<PruningCandidateAssessment>,
+  fallback = 0,
+) {
+  const direct = score((fallbackSource as Record<string, unknown>)[key as string], fallback);
+  const values = candidates
+    .map((candidate) => optionalScore((candidate as Record<string, unknown>)[key as string]))
+    .filter((value): value is number => value != null);
+  return values.length ? roundScore(mean(values)) : direct;
 }
 
 function sourceModulesFor(input: DecisionQualityInput) {

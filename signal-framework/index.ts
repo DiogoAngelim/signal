@@ -66,6 +66,7 @@ export * from "./opportunity-discovery/engine";
 export * from "./opportunity-explorer/engine";
 export * from "./perception/engine";
 export * from "./perception/layers";
+export * from "./pruning/engine";
 export * from "./reflection/engine";
 export * from "./recovery/engine";
 export * from "./recognition/engine";
