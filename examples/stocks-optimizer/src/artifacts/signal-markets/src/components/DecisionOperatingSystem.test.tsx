@@ -238,6 +238,96 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).not.toContain('data-testid="decision-step-screen"');
   });
 
+  it("declares one bounded scroll strategy for the shell, tabs, cards, lists, and action row", () => {
+    const html = renderToStaticMarkup(<DecisionOperatingSystem {...props()} />);
+
+    expect(html).toContain('data-overflow-policy="contained-app-shell"');
+    expect(html).toContain('data-testid="decision-main-scroll"');
+    expect(html).toContain('data-overflow-policy="horizontal-tabs"');
+    expect(html).toContain('data-testid="workflow-tab-list"');
+    expect(html).toContain('data-overflow-policy="card-body-scroll"');
+    expect(html).toContain('data-overflow-policy="opportunity-list-scroll"');
+    expect(html).toContain('data-overflow-policy="bounded-opportunity-panel"');
+    expect(html).toContain('data-overflow-policy="sticky-primary-action"');
+    expect(html).toContain("h-dvh");
+    expect(html).toContain("overflow-x-hidden");
+    expect(
+      html.match(/data-overflow-policy="card-body-scroll"/g)?.length,
+    ).toBe(4);
+  });
+
+  it("keeps long labels and many opportunities inside scrollable regions", () => {
+    const longText =
+      "Extremely Long Opportunity Name With Many Words And No Useful Short Alias For A Narrow Viewport";
+    const manyOpportunities = Array.from({ length: 12 }, (_, index) => ({
+      ...props().opportunities[0],
+      id: `LONG-${index}`,
+      ticker: `LONG-TICKER-${index}`,
+      name: `${longText} ${index}`,
+      thesis: `${longText} should remain readable without forcing the page wider.`,
+      context: `${longText} has a long explanation that should scroll inside the designed panel instead of escaping the card.`,
+      support: [`${longText} support detail ${index}`],
+      contradictions: [`${longText} risk detail ${index}`],
+      missing: [`${longText} missing confirmation ${index}`],
+      invalidations: [`${longText} invalidation ${index}`],
+      drivers: [`${longText} driver ${index}`],
+    }));
+
+    const html = renderToStaticMarkup(
+      <DecisionOperatingSystem
+        {...props({
+          marketOptions: [
+            {
+              value: "VERY-LONG-MARKET-CODE-WITHOUT-BREAKPOINTS",
+              label: "Very Long Market Name That Should Not Stretch Header",
+            },
+            ...props().marketOptions,
+          ],
+          selectedMarket: "VERY-LONG-MARKET-CODE-WITHOUT-BREAKPOINTS",
+          opportunities: manyOpportunities,
+          selectedOpportunityId: "LONG-0",
+          bestOpportunityLabel: "LONG-TICKER-0",
+          mainRisk: longText,
+          readinessWhy: `${longText} because the explanation is intentionally verbose.`,
+          missingEvidence: `${longText} confirmation`,
+        })}
+      />,
+    );
+
+    expect(html).toContain(longText);
+    expect(html).toContain('data-overflow-policy="opportunity-list-scroll"');
+    expect(html).toContain("max-h-[22rem]");
+    expect(html).toContain("break-words");
+    expect(html).toContain("line-clamp-2");
+    expect(html).not.toContain("min-w-[760px]");
+  });
+
+  it("keeps blocking-state actions sticky when empty, error, or first-run content grows", () => {
+    const html = renderToStaticMarkup(
+      <DecisionOperatingSystem
+        {...props({
+          state: {
+            ...successState,
+            kind: "no-market",
+            headline: "Select a market first.",
+            description:
+              "Choose a market so Signal can recommend what to do next.",
+            cachedMarketLabel:
+              "Very Long Cached Market Label That Should Wrap Inside The Tile",
+            cachedOpportunityCount: 0,
+            cachedMarketItemCount: 0,
+          },
+          selectedMarket: "",
+        })}
+      />,
+    );
+
+    expect(html).toContain('data-scroll-region="blocking-state"');
+    expect(html).toContain('data-overflow-policy="sticky-state-actions"');
+    expect(html).toContain("Select Market");
+    expect(html).toContain("sticky bottom-2");
+  });
+
   it("renders connection, empty, error, partial, refresh, and loading states", () => {
     const connection = renderToStaticMarkup(
       <DecisionOperatingSystem

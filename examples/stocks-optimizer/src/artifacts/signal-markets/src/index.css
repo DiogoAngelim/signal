@@ -254,8 +254,18 @@
     @apply border-border;
   }
 
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    min-width: 0;
+  }
+
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    overflow: hidden;
   }
 }
 
@@ -368,5 +378,54 @@
   .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
+  }
+
+  .signal-shell,
+  .signal-shell * {
+    min-width: 0;
+  }
+
+  .signal-scroll-region {
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(113, 113, 122, 0.42) transparent;
+  }
+
+  .signal-scroll-region::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .signal-scroll-region::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .signal-scroll-region::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(113, 113, 122, 0.34);
+  }
+
+  .signal-scroll-region:hover::-webkit-scrollbar-thumb {
+    background: rgba(82, 82, 91, 0.56);
+  }
+
+  .signal-scroll-fade::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 1.75rem;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--signal-fade-color, #fff));
+  }
+
+  .signal-scroll-fade-zinc::after {
+    --signal-fade-color: #fafafa;
+  }
+
+  .signal-scroll-fade-dark::after {
+    --signal-fade-color: #0c0f12;
   }
 }

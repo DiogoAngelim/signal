@@ -1601,16 +1601,20 @@ export default function MarketPerceptionEngine({
           <Layers className="h-4 w-4 text-[#FDD000]" />
           Raw contributors and calculation audit
         </summary>
-        <div className="mt-4 overflow-x-auto">
-          <table className="min-w-[760px] w-full text-left text-xs">
+        <div
+          data-overflow-policy="table-x-scroll"
+          data-scroll-region="market-perception-table"
+          className="signal-scroll-region mt-4 min-w-0 overflow-x-auto overflow-y-hidden"
+        >
+          <table className="w-full min-w-[760px] table-fixed text-left text-xs">
             <thead className="border-b border-white/10 text-zinc-500">
               <tr>
-                <th className="py-2 pr-4 font-medium">Metric</th>
-                <th className="py-2 pr-4 font-medium">Raw</th>
-                <th className="py-2 pr-4 font-medium">Score</th>
-                <th className="py-2 pr-4 font-medium">Z</th>
-                <th className="py-2 pr-4 font-medium">Percentile</th>
-                <th className="py-2 pr-4 font-medium">Layers</th>
+                <th className="w-[18%] py-2 pr-4 font-medium">Metric</th>
+                <th className="w-[11%] py-2 pr-4 font-medium">Raw</th>
+                <th className="w-[10%] py-2 pr-4 font-medium">Score</th>
+                <th className="w-[8%] py-2 pr-4 font-medium">Z</th>
+                <th className="w-[12%] py-2 pr-4 font-medium">Percentile</th>
+                <th className="w-[16%] py-2 pr-4 font-medium">Layers</th>
                 <th className="py-2 font-medium">Calculation</th>
               </tr>
             </thead>
@@ -1620,23 +1624,25 @@ export default function MarketPerceptionEngine({
                   key={metric.key}
                   className="border-b border-white/5 align-top"
                 >
-                  <td className="py-3 pr-4 text-zinc-200">{metric.label}</td>
-                  <td className="py-3 pr-4 text-zinc-500">
+                  <td className="break-words py-3 pr-4 text-zinc-200">
+                    {metric.label}
+                  </td>
+                  <td className="break-words py-3 pr-4 text-zinc-500">
                     {formatRaw(metric.raw, metric.unit)}
                   </td>
-                  <td className="py-3 pr-4 text-zinc-200">
+                  <td className="break-words py-3 pr-4 text-zinc-200">
                     {formatScore(displayMetricScore(metric))}
                   </td>
-                  <td className="py-3 pr-4 text-zinc-500">
+                  <td className="break-words py-3 pr-4 text-zinc-500">
                     {metric.normalization.zScore.toFixed(2)}
                   </td>
-                  <td className="py-3 pr-4 text-zinc-500">
+                  <td className="break-words py-3 pr-4 text-zinc-500">
                     {formatScore(metric.normalization.percentileScore)}
                   </td>
-                  <td className="py-3 pr-4 text-zinc-500">
+                  <td className="break-words py-3 pr-4 text-zinc-500">
                     {formatMetricLayers(metric.layers)}
                   </td>
-                  <td className="max-w-[340px] py-3 text-zinc-500">
+                  <td className="break-words py-3 text-zinc-500">
                     {metric.detail}
                   </td>
                 </tr>

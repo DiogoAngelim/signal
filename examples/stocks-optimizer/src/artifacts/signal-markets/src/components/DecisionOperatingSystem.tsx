@@ -448,7 +448,8 @@ function InitialLoadingState() {
     <main
       data-testid="dashboard-state"
       data-state-kind="initial-loading"
-      className="mx-auto grid w-full max-w-[1880px] gap-2 px-3 py-2 md:h-full md:min-h-0 md:grid-rows-[auto_minmax(0,1fr)] md:overflow-hidden lg:px-4"
+      data-scroll-region="initial-loading"
+      className="signal-scroll-region mx-auto grid h-full min-h-0 w-full max-w-[1880px] gap-2 overflow-y-auto overflow-x-hidden px-3 py-2 md:grid-rows-[auto_minmax(0,1fr)] lg:px-4"
       aria-busy="true"
     >
       <section className="grid gap-3 rounded-lg border border-zinc-200 bg-white p-3 shadow-sm lg:grid-cols-[minmax(0,1fr)_minmax(320px,520px)]">
@@ -552,6 +553,80 @@ function StateActionButton({
   );
 }
 
+function ScrollBoundary({
+  children,
+  className,
+  regionClassName,
+  testId,
+  policy,
+  horizontal = false,
+  fade = "white",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  regionClassName?: string;
+  testId?: string;
+  policy: string;
+  horizontal?: boolean;
+  fade?: "white" | "zinc" | "none";
+}) {
+  return (
+    <div
+      data-overflow-policy={policy}
+      className={cx(
+        "relative min-h-0 min-w-0 overflow-hidden",
+        fade !== "none" && "signal-scroll-fade",
+        fade === "zinc" && "signal-scroll-fade-zinc",
+        className,
+      )}
+    >
+      <div
+        data-testid={testId}
+        data-scroll-region={policy}
+        className={cx(
+          "signal-scroll-region min-h-0 min-w-0",
+          horizontal
+            ? "overflow-x-auto overflow-y-hidden"
+            : "overflow-y-auto overflow-x-hidden",
+          regionClassName,
+        )}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function DecisionPanel({
+  title,
+  children,
+  ariaLabel,
+  testId,
+}: {
+  title: string;
+  children: React.ReactNode;
+  ariaLabel: string;
+  testId: string;
+}) {
+  return (
+    <section
+      aria-label={ariaLabel}
+      data-testid={testId}
+      className="grid min-h-[168px] max-h-[320px] min-w-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-lg border border-zinc-200 bg-white md:max-h-none"
+    >
+      <div className="border-b border-zinc-200 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-normal text-zinc-500">
+        {title}
+      </div>
+      <ScrollBoundary
+        policy="card-body-scroll"
+        regionClassName="h-full px-3 py-2.5"
+      >
+        {children}
+      </ScrollBoundary>
+    </section>
+  );
+}
+
 function BlockingStateScreen({
   state,
   marketOptions,
@@ -575,9 +650,10 @@ function BlockingStateScreen({
     <main
       data-testid="dashboard-state"
       data-state-kind={state.kind}
-      className="mx-auto grid w-full max-w-[1880px] content-start gap-2 px-3 py-2 md:h-full md:min-h-0 md:overflow-hidden lg:px-4"
+      data-scroll-region="blocking-state"
+      className="signal-scroll-region mx-auto grid h-full min-h-0 w-full max-w-[1880px] content-start gap-2 overflow-y-auto overflow-x-hidden px-3 py-2 lg:px-4"
     >
-      <section className="grid content-start gap-5 self-start rounded-lg border border-zinc-200 bg-white p-4 shadow-sm md:min-h-0 md:p-5">
+      <section className="grid min-w-0 content-start gap-5 self-start overflow-hidden rounded-lg border border-zinc-200 bg-white p-4 shadow-sm md:min-h-0 md:p-5">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
           <div className="min-w-0">
             <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-700">
@@ -621,7 +697,7 @@ function BlockingStateScreen({
               <div className="text-sm font-semibold text-zinc-500">
                 Available options
               </div>
-              <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+              <div className="mt-2 grid min-w-0 gap-2 sm:grid-cols-2 lg:grid-cols-5">
                 {MARKET_ENTRY_OPTIONS.map((entry) => (
                   <button
                     key={entry.label}
@@ -629,7 +705,7 @@ function BlockingStateScreen({
                     onClick={() =>
                       onMarketChange(marketEntryValue(entry, marketOptions))
                     }
-                    className="min-h-14 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-left text-sm font-semibold text-zinc-900 transition hover:border-zinc-950 hover:bg-white"
+                    className="min-h-14 min-w-0 break-words rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-left text-sm font-semibold text-zinc-900 transition hover:border-zinc-950 hover:bg-white"
                   >
                     {entry.label}
                   </button>
@@ -637,7 +713,10 @@ function BlockingStateScreen({
               </div>
             </div>
 
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <div
+              data-overflow-policy="sticky-state-actions"
+              className="sticky bottom-2 z-10 flex flex-col gap-2 rounded-lg border border-zinc-200 bg-white/95 p-2 shadow-sm backdrop-blur sm:flex-row md:static md:border-0 md:bg-transparent md:p-0 md:shadow-none"
+            >
               <StateActionButton
                 icon={<Target className="h-4 w-4" />}
                 onClick={() =>
@@ -666,7 +745,10 @@ function BlockingStateScreen({
         ) : null}
 
         {isConnectionLost || isError ? (
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div
+            data-overflow-policy="sticky-state-actions"
+            className="sticky bottom-2 z-10 flex flex-col gap-2 rounded-lg border border-zinc-200 bg-white/95 p-2 shadow-sm backdrop-blur sm:flex-row md:static md:border-0 md:bg-transparent md:p-0 md:shadow-none"
+          >
             <StateActionButton
               icon={<RefreshCw className="h-4 w-4" />}
               onClick={onRefresh}
@@ -718,7 +800,9 @@ function FactTile({
 }) {
   return (
     <div className="min-w-0 rounded-lg border border-zinc-200 bg-white p-3">
-      <div className="text-xs font-medium text-zinc-500">{label}</div>
+      <div className="break-words text-xs font-medium text-zinc-500">
+        {label}
+      </div>
       <div
         className={cx(
           "mt-1 break-words text-base font-semibold leading-snug",
@@ -742,7 +826,7 @@ function OpportunityPicker({
 }) {
   if (!opportunities.length) {
     return (
-      <div className="rounded-lg border border-zinc-200 bg-white p-4 text-sm leading-6 text-zinc-600">
+      <div className="min-w-0 rounded-lg border border-zinc-200 bg-white p-4 text-sm leading-6 text-zinc-600">
         No opportunity deserves attention yet. Keep capital flat until the
         evidence improves.
       </div>
@@ -750,7 +834,11 @@ function OpportunityPicker({
   }
 
   return (
-    <div className="grid min-h-0 gap-2 overflow-y-auto pr-1">
+    <ScrollBoundary
+      policy="opportunity-list-scroll"
+      testId="opportunity-list-scroll"
+      regionClassName="grid max-h-[22rem] gap-2 pr-1 md:max-h-none"
+    >
       {opportunities.slice(0, 6).map((opportunity) => {
         const tone: DecisionTone =
           opportunity.readinessPct >= 72
@@ -765,19 +853,19 @@ function OpportunityPicker({
             type="button"
             onClick={() => onSelectOpportunity(opportunity.id)}
             className={cx(
-              "grid min-h-[76px] grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-lg border p-3 text-left transition",
+              "grid min-h-[76px] min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-lg border p-3 text-left transition",
               selectedOpportunityId === opportunity.id
                 ? "border-zinc-950 bg-zinc-950 text-white"
                 : "border-zinc-200 bg-white text-zinc-950 hover:border-zinc-400",
             )}
           >
             <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold">
+              <span className="block break-words text-sm font-semibold leading-snug">
                 {opportunity.ticker}
               </span>
               <span
                 className={cx(
-                  "mt-1 block truncate text-xs",
+                  "mt-1 block break-words text-xs leading-5",
                   selectedOpportunityId === opportunity.id
                     ? "text-zinc-300"
                     : "text-zinc-500",
@@ -787,7 +875,7 @@ function OpportunityPicker({
               </span>
               <span
                 className={cx(
-                  "mt-1 block truncate text-xs",
+                  "mt-1 line-clamp-2 break-words text-xs leading-5",
                   selectedOpportunityId === opportunity.id
                     ? "text-zinc-400"
                     : "text-zinc-500",
@@ -798,7 +886,7 @@ function OpportunityPicker({
             </span>
             <span
               className={cx(
-                "rounded-md border px-2 py-1 text-xs font-semibold",
+                "shrink-0 rounded-md border px-2 py-1 text-xs font-semibold",
                 selectedOpportunityId === opportunity.id
                   ? "border-white/20 bg-white/10 text-white"
                   : toneSurface(tone),
@@ -809,7 +897,7 @@ function OpportunityPicker({
           </button>
         );
       })}
-    </div>
+    </ScrollBoundary>
   );
 }
 
@@ -1465,15 +1553,16 @@ export default function DecisionOperatingSystem({
     <div
       data-testid="decision-operating-system"
       data-state-kind={state.kind}
-      className="min-h-screen overflow-y-auto bg-[#f3f4f1] text-zinc-950 md:grid md:h-screen md:grid-rows-[52px_minmax(0,1fr)] md:overflow-hidden"
+      data-overflow-policy="contained-app-shell"
+      className="signal-shell grid h-dvh min-h-dvh max-h-dvh w-full max-w-full grid-rows-[52px_minmax(0,1fr)] overflow-hidden bg-[#f3f4f1] text-zinc-950"
     >
-      <header className="h-[52px] border-b border-zinc-200 bg-white/95">
-        <div className="mx-auto flex h-[52px] w-full max-w-[1880px] items-center gap-3 px-3 lg:px-4">
+      <header className="h-[52px] shrink-0 border-b border-zinc-200 bg-white/95">
+        <div className="mx-auto flex h-[52px] w-full max-w-[1880px] items-center gap-3 overflow-hidden px-3 lg:px-4">
           <div className="shrink-0 text-sm font-semibold tracking-normal text-zinc-950">
             Signal
           </div>
 
-          <div className="flex min-w-0 items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-2 sm:flex-none">
             <span className="hidden text-xs font-semibold uppercase tracking-normal text-zinc-500 sm:inline">
               Market
             </span>
@@ -1481,7 +1570,7 @@ export default function DecisionOperatingSystem({
               value={selectedMarket}
               onChange={(event) => onMarketChange(event.target.value)}
               aria-label="Current market"
-              className="h-9 w-[132px] min-w-0 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-950 outline-none sm:w-[180px]"
+              className="h-9 w-full min-w-0 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-950 outline-none sm:w-[180px]"
             >
               {!selectedMarket ? (
                 <option value="">
@@ -1501,7 +1590,7 @@ export default function DecisionOperatingSystem({
 
           <div
             className={cx(
-              "ml-auto inline-flex h-9 min-w-0 items-center gap-2 rounded-md border px-2.5 text-sm font-semibold",
+              "ml-auto hidden h-9 min-w-0 items-center gap-2 rounded-md border px-2.5 text-sm font-semibold sm:inline-flex",
               toneSurface(readinessTone),
             )}
           >
@@ -1537,16 +1626,27 @@ export default function DecisionOperatingSystem({
           onContinueUsingCachedData={onContinueUsingCachedData}
         />
       ) : (
-        <main className="mx-auto grid w-full max-w-[1880px] gap-2 px-3 py-2 md:h-full md:min-h-0 md:grid-cols-[248px_minmax(0,1fr)] md:overflow-hidden lg:px-4">
+        <main
+          data-testid="decision-main-scroll"
+          data-scroll-region="decision-main"
+          className="signal-scroll-region mx-auto grid h-full min-h-0 w-full max-w-[1880px] gap-2 overflow-y-auto overflow-x-hidden px-3 py-2 md:grid-cols-[248px_minmax(0,1fr)] md:overflow-hidden lg:px-4"
+        >
           <nav
             aria-label="Decision workflow"
-            className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] rounded-lg border border-zinc-200 bg-white p-2"
+            data-overflow-policy="responsive-workflow-nav"
+            className="sticky top-0 z-20 grid min-h-0 min-w-0 rounded-lg border border-zinc-200 bg-white p-2 shadow-sm md:static md:grid-rows-[auto_minmax(0,1fr)_auto] md:shadow-none"
           >
-            <div className="px-2 pb-2 text-xs font-semibold uppercase tracking-normal text-zinc-500">
+            <div className="hidden px-2 pb-2 text-xs font-semibold uppercase tracking-normal text-zinc-500 md:block">
               Workflow
             </div>
 
-            <div className="grid min-h-0 auto-rows-min gap-1 overflow-visible pr-1 md:overflow-y-auto">
+            <ScrollBoundary
+              policy="horizontal-tabs"
+              testId="workflow-tab-list"
+              horizontal
+              fade="none"
+              regionClassName="flex gap-1 pb-1 md:grid md:auto-rows-min md:overflow-x-hidden md:overflow-y-auto md:pb-0 md:pr-1"
+            >
               {steps.map((step, index) => {
                 const active = step.id === activeStep.id;
                 return (
@@ -1555,7 +1655,7 @@ export default function DecisionOperatingSystem({
                     type="button"
                     onClick={() => setActiveStepId(step.id)}
                     className={cx(
-                      "grid min-h-[58px] grid-cols-[30px_minmax(0,1fr)] items-center gap-2 rounded-md px-2.5 py-2 text-left transition",
+                      "grid min-h-[58px] w-[138px] shrink-0 grid-cols-[30px_minmax(0,1fr)] items-center gap-2 rounded-md px-2.5 py-2 text-left transition md:w-full md:shrink",
                       active
                         ? "bg-zinc-950 text-white"
                         : "text-zinc-700 hover:bg-zinc-100",
@@ -1587,9 +1687,9 @@ export default function DecisionOperatingSystem({
                   </button>
                 );
               })}
-            </div>
+            </ScrollBoundary>
 
-            <div className="mt-2 border-t border-zinc-200 px-2 pt-2">
+            <div className="mt-2 hidden border-t border-zinc-200 px-2 pt-2 md:block">
               <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
                 Active
               </div>
@@ -1602,11 +1702,11 @@ export default function DecisionOperatingSystem({
           <section
             data-testid="decision-step-screen"
             data-active-step={activeStep.id}
-            className="grid min-h-0 gap-2 md:h-full md:overflow-hidden md:grid-rows-[auto_minmax(0,1fr)]"
+            className="grid min-h-0 min-w-0 gap-2 md:h-full md:grid-rows-[auto_minmax(0,1fr)] md:overflow-hidden"
           >
             <section
               aria-label="Decision priority strip"
-              className="grid gap-2 lg:grid-cols-[minmax(240px,0.72fr)_minmax(0,1.35fr)_minmax(260px,0.78fr)]"
+              className="grid min-w-0 gap-2 lg:grid-cols-[minmax(240px,0.72fr)_minmax(0,1.35fr)_minmax(260px,0.78fr)]"
             >
               <div
                 className={cx(
@@ -1622,7 +1722,7 @@ export default function DecisionOperatingSystem({
                     <div className="break-words text-2xl font-semibold leading-tight">
                       {recommendedAction}
                     </div>
-                    <div className="mt-1 truncate text-sm font-semibold opacity-80">
+                    <div className="mt-1 break-words text-sm font-semibold opacity-80">
                       {actionExposureText}
                     </div>
                   </div>
@@ -1648,7 +1748,7 @@ export default function DecisionOperatingSystem({
                     <div className="mt-1 text-sm font-semibold text-zinc-700">
                       {activeStep.question}
                     </div>
-                    <h2 className="mt-1 line-clamp-2 break-words text-xl font-semibold leading-tight text-zinc-950">
+                    <h2 className="mt-1 break-words text-xl font-semibold leading-tight text-zinc-950">
                       {activeStep.headline}
                     </h2>
                   </div>
@@ -1682,44 +1782,40 @@ export default function DecisionOperatingSystem({
               </div>
             </section>
 
-            <div className="grid min-h-0 gap-2 overflow-hidden xl:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_380px]">
+            <div className="grid min-h-0 min-w-0 gap-2 overflow-hidden xl:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_380px]">
               <article
                 data-testid="active-decision-step"
                 className="grid min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-2 overflow-hidden"
               >
                 <div className="grid min-h-0 gap-2 overflow-hidden lg:grid-cols-2 lg:grid-rows-2">
-                  <section
-                    aria-label="Decision summary"
-                    className="min-h-0 overflow-hidden rounded-lg border border-zinc-200 bg-white p-3"
+                  <DecisionPanel
+                    ariaLabel="Decision summary"
+                    testId="decision-summary-panel"
+                    title="Decision summary"
                   >
-                    <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                      Decision summary
-                    </div>
                     <div className="mt-2 grid gap-2">
-                      <p className="line-clamp-2 text-sm leading-6 text-zinc-700">
+                      <p className="break-words text-sm leading-6 text-zinc-700">
                         {activeStep.story.happened}
                       </p>
-                      <p className="line-clamp-3 text-sm leading-6 text-zinc-700">
+                      <p className="break-words text-sm leading-6 text-zinc-700">
                         {activeStep.story.matters}
                       </p>
-                      <p className="line-clamp-2 text-sm font-semibold leading-6 text-zinc-950">
+                      <p className="break-words text-sm font-semibold leading-6 text-zinc-950">
                         {activeStep.story.next}
                       </p>
                     </div>
-                  </section>
+                  </DecisionPanel>
 
-                  <section
-                    aria-label="Evidence summary"
-                    className="min-h-0 overflow-hidden rounded-lg border border-zinc-200 bg-white p-3"
+                  <DecisionPanel
+                    ariaLabel="Evidence summary"
+                    testId="evidence-summary-panel"
+                    title="Evidence summary"
                   >
-                    <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                      Evidence summary
-                    </div>
                     <div className="mt-2 grid gap-1.5">
                       {evidencePreview.map((stage) => (
                         <div
                           key={stage.id}
-                          className="grid grid-cols-[20px_minmax(0,1fr)_auto] items-start gap-2 text-sm leading-5 text-zinc-700"
+                          className="grid min-w-0 grid-cols-[20px_minmax(0,1fr)_auto] items-start gap-2 text-sm leading-5 text-zinc-700"
                         >
                           <span
                             className={cx(
@@ -1735,10 +1831,10 @@ export default function DecisionOperatingSystem({
                             {statusIcon(stage.status)}
                           </span>
                           <span className="min-w-0">
-                            <span className="block truncate font-semibold text-zinc-950">
+                            <span className="block break-words font-semibold text-zinc-950">
                               {friendlyEvidenceLabel(stage.label)}
                             </span>
-                            <span className="line-clamp-1 text-zinc-600">
+                            <span className="block break-words text-zinc-600">
                               {investorCopy(stage.explanation)}
                             </span>
                           </span>
@@ -1753,61 +1849,63 @@ export default function DecisionOperatingSystem({
                         </div>
                       ))}
                     </div>
-                  </section>
+                  </DecisionPanel>
 
-                  <section className="min-h-0 overflow-hidden rounded-lg border border-zinc-200 bg-white p-3">
-                    <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                      Reason and risk
-                    </div>
+                  <DecisionPanel
+                    ariaLabel="Reason and risk"
+                    testId="reason-risk-panel"
+                    title="Reason and risk"
+                  >
                     <div className="mt-2 grid gap-2">
                       {visibleReason.map((item) => (
                         <p
                           key={item}
-                          className="line-clamp-2 text-sm leading-6 text-zinc-700"
+                          className="break-words text-sm leading-6 text-zinc-700"
                         >
                           {item}
                         </p>
                       ))}
                     </div>
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      <div className="rounded-md bg-zinc-50 px-2.5 py-2">
-                        <div className="truncate text-xs font-medium text-zinc-500">
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      <div className="min-w-0 rounded-md bg-zinc-50 px-2.5 py-2">
+                        <div className="break-words text-xs font-medium text-zinc-500">
                           Main risk
                         </div>
-                        <div className="mt-1 truncate text-sm font-semibold text-zinc-950">
+                        <div className="mt-1 break-words text-sm font-semibold text-zinc-950">
                           {investorCopy(mainRisk)}
                         </div>
                       </div>
-                      <div className="rounded-md bg-zinc-50 px-2.5 py-2">
-                        <div className="truncate text-xs font-medium text-zinc-500">
+                      <div className="min-w-0 rounded-md bg-zinc-50 px-2.5 py-2">
+                        <div className="break-words text-xs font-medium text-zinc-500">
                           Size limit
                         </div>
-                        <div className="mt-1 truncate text-sm font-semibold text-zinc-950">
+                        <div className="mt-1 break-words text-sm font-semibold text-zinc-950">
                           {actionExposureText}
                         </div>
                       </div>
                     </div>
-                  </section>
+                  </DecisionPanel>
 
-                  <section className="min-h-0 overflow-hidden rounded-lg border border-zinc-200 bg-white p-3">
-                    <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
-                      Supporting numbers
-                    </div>
+                  <DecisionPanel
+                    ariaLabel="Supporting numbers"
+                    testId="supporting-numbers-panel"
+                    title="Supporting numbers"
+                  >
                     <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                       {activeStep.numbers.slice(0, 4).map((metric) => (
                         <div
                           key={metric.label}
-                          className="grid min-h-[82px] rounded-md bg-zinc-50 px-2.5 py-2"
+                          className="grid min-h-[82px] min-w-0 rounded-md bg-zinc-50 px-2.5 py-2"
                         >
                           <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0 text-xs font-medium text-zinc-500">
+                            <div className="min-w-0 break-words text-xs font-medium text-zinc-500">
                               {friendlyMetricLabel(metric.label)}
                             </div>
-                            <div className="shrink-0 text-sm font-semibold text-zinc-950">
+                            <div className="shrink-0 break-words text-sm font-semibold text-zinc-950">
                               {metric.value}
                             </div>
                           </div>
-                          <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-700">
+                          <p className="mt-1 break-words text-xs leading-5 text-zinc-700">
                             {metricGuidance(metric)}
                           </p>
                         </div>
@@ -1817,22 +1915,25 @@ export default function DecisionOperatingSystem({
                       {visibleDiagnostics.slice(0, 2).map((item) => (
                         <p
                           key={item}
-                          className="line-clamp-1 text-sm leading-5 text-zinc-600"
+                          className="break-words text-sm leading-5 text-zinc-600"
                         >
                           {investorCopy(item)}
                         </p>
                       ))}
                     </div>
-                  </section>
+                  </DecisionPanel>
                 </div>
 
-                <section className="flex min-h-[52px] items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-2">
+                <section
+                  data-overflow-policy="sticky-primary-action"
+                  className="sticky bottom-0 z-10 flex min-h-[52px] items-center gap-3 rounded-lg border border-zinc-200 bg-white/95 px-3 py-2 shadow-sm backdrop-blur md:static md:bg-white md:shadow-none"
+                >
                   <Zap className="h-4 w-4 shrink-0 text-zinc-500" />
                   <div className="min-w-0">
                     <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
                       Recommended next step
                     </div>
-                    <p className="line-clamp-1 text-sm font-semibold text-zinc-900">
+                    <p className="break-words text-sm font-semibold text-zinc-900">
                       {activeStep.nextStep}
                     </p>
                   </div>
@@ -1841,7 +1942,8 @@ export default function DecisionOperatingSystem({
 
               <aside
                 data-testid="opportunity-review"
-                className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-2 overflow-hidden rounded-lg border border-zinc-200 bg-white p-3"
+                data-overflow-policy="bounded-opportunity-panel"
+                className="grid min-h-[420px] min-w-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-2 overflow-hidden rounded-lg border border-zinc-200 bg-white p-3 md:min-h-0"
               >
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
@@ -1849,10 +1951,10 @@ export default function DecisionOperatingSystem({
                   </div>
                   <div className="mt-1 flex items-end justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="truncate text-2xl font-semibold text-zinc-950">
+                      <div className="line-clamp-2 break-words text-2xl font-semibold leading-tight text-zinc-950">
                         {opportunityLabel}
                       </div>
-                      <div className={cx("truncate text-sm", toneText(selectedTone))}>
+                      <div className={cx("break-words text-sm", toneText(selectedTone))}>
                         {trustWord} trust - {exposureText}
                       </div>
                     </div>
