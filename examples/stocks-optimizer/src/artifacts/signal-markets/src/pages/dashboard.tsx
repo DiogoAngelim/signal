@@ -31,7 +31,6 @@ import {
   YAxis,
 } from "recharts";
 import {
-  fetchMarkets,
   fetchStockList,
   fetchStockQuoteBatch,
   registerSignalWatchlist,
@@ -68,6 +67,7 @@ import DecisionOperatingSystem, {
 } from "@/components/DecisionOperatingSystem";
 import MarketPerceptionEngine from "@/components/MarketPerceptionEngine";
 import { buildCommandCenterViewModel } from "@/lib/command-center";
+import { resolveDashboardViewState } from "@/lib/dashboard-state";
 import {
   MarketStateEngine,
   buildMarketPerceptionMetrics,
@@ -102,6 +102,14 @@ const ENABLE_STRATEGY_API =
   import.meta.env.VITE_ENABLE_STRATEGY_API !== "false";
 const ENABLE_PORTFOLIO_API =
   import.meta.env.VITE_ENABLE_PORTFOLIO_API === "true";
+
+const DEFAULT_MARKET_OPTIONS: MarketOption[] = [
+  { code: "BINANCE", label: "Binance", count: 0 },
+  { code: "US", label: "Stocks", count: 0 },
+  { code: "ETF", label: "ETFs", count: 0 },
+  { code: "FOREX", label: "Forex", count: 0 },
+  { code: "FUTURES", label: "Futures", count: 0 },
+];
 
 type MarketSchedule = {
   timeZone: string;
@@ -1875,15 +1883,6 @@ function mergeQuotes(
   });
 }
 
-function parseMarketsResponse(response: unknown): MarketOption[] {
-  if (Array.isArray(response)) return response as MarketOption[];
-  const anyResponse = response as any;
-  return (anyResponse?.items ??
-    anyResponse?.markets ??
-    anyResponse?.data ??
-    []) as MarketOption[];
-}
-
 function parseStockListItem(item: any, marketOpen: boolean): DisplayStock {
   return {
     ...item,
@@ -2938,13 +2937,17 @@ export default function Dashboard() {
     useRef<ExecutiveSummaryMetricSnapshot | null>(null);
   const activeMarketRef = useRef("");
 
-  const [markets, setMarkets] = useState<MarketOption[]>([]);
+  const [markets] = useState<MarketOption[]>(DEFAULT_MARKET_OPTIONS);
   const [marketFilter, setMarketFilter] = useState("");
   activeMarketRef.current = marketFilter;
   const [stocks, setStocks] = useState<DisplayStock[]>([]);
   const [totalStocks, setTotalStocks] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshingQuotes, setRefreshingQuotes] = useState(false);
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator === "undefined" ? true : navigator.onLine,
+  );
+  const [continueWithCachedData, setContinueWithCachedData] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
@@ -3049,26 +3052,25 @@ export default function Dashboard() {
     renderMarketData(marketFilter);
     setSelectedTicker(null);
     setIsSelectedCardFlipped(false);
+    setContinueWithCachedData(false);
   }, [marketFilter]);
 
   useEffect(() => {
-    let cancelled = false;
-    async function loadMarkets() {
-      try {
-        const response = await fetchMarkets();
-        if (cancelled) return;
-        const items = parseMarketsResponse(response);
-        setMarkets(items);
-        const preferred = items[0];
-        if (preferred)
-          setMarketFilter((current) => current || marketCode(preferred));
-      } catch (error) {
-        setRefreshError("Could not load markets.");
-      }
-    }
-    void loadMarkets();
+    if (typeof window === "undefined") return;
+
+    const updateOnlineStatus = () => {
+      const online = window.navigator.onLine;
+      setIsOnline(online);
+      if (online) setContinueWithCachedData(false);
+    };
+
+    updateOnlineStatus();
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
+
     return () => {
-      cancelled = true;
+      window.removeEventListener("online", updateOnlineStatus);
+      window.removeEventListener("offline", updateOnlineStatus);
     };
   }, []);
 
@@ -3584,6 +3586,14 @@ export default function Dashboard() {
   const lastSyncAgeMs = lastSyncedAt ? Date.now() - lastSyncedAt : null;
   const staleData =
     lastSyncAgeMs == null ? false : lastSyncAgeMs > REFRESH_INTERVAL_MS * 3;
+  const lastSuccessfulUpdateLabel =
+    lastSyncAgeMs == null
+      ? lastSyncedLabel
+      : lastSyncAgeMs < 60_000
+        ? `${Math.max(1, Math.round(lastSyncAgeMs / 1000))} seconds ago`
+        : lastSyncAgeMs < 3_600_000
+          ? `${Math.max(1, Math.round(lastSyncAgeMs / 60_000))} minutes ago`
+          : `${Math.max(1, Math.round(lastSyncAgeMs / 3_600_000))} hours ago`;
 
   const marketStatus = marketFilter ? getMarketStatus(marketFilter) : "Closed";
 
@@ -6679,9 +6689,36 @@ export default function Dashboard() {
     { label: "History Depth", value: historyDepthScore == null ? "—" : fmtPlainPct(historyDepthScore, 0) },
     { label: "Regime Coverage", value: regimeCoverageScore == null ? "—" : fmtPlainPct(regimeCoverageScore, 0) },
   ];
+  const trustAnalysisUnavailable =
+    hasMarketData &&
+    !loading &&
+    trustGovernor == null &&
+    beliefDiagnostic == null &&
+    recognitionDiagnostic == null &&
+    judgementDiagnostic == null &&
+    calibrationTrustworthinessDisplay == null;
+  const dashboardViewState = resolveDashboardViewState({
+    selectedMarket: marketFilter,
+    isOnline,
+    continueWithCachedData,
+    initialLoading: loading,
+    refreshing: refreshingQuotes || portfolioRefreshing,
+    errorMessage: visibleRefreshError,
+    hasMarketData,
+    qualifiedOpportunityCount: decisionOpportunities.length,
+    cachedOpportunityCount:
+      decisionOpportunities.length ||
+      topOpportunities.length ||
+      reviewOpportunities.length,
+    cachedMarketItemCount: marketUniverse.length || stocks.length || totalStocks,
+    cachedMarketLabel: marketFilter || "No market selected",
+    lastSuccessfulUpdateLabel,
+    missingTrustAnalysis: trustAnalysisUnavailable,
+  });
 
   return (
     <DecisionOperatingSystem
+      state={dashboardViewState}
       marketOptions={markets.map((market) => ({
         value: marketCode(market),
         label: marketLabel(market),
@@ -6689,6 +6726,7 @@ export default function Dashboard() {
       selectedMarket={marketFilter}
       onMarketChange={setMarketFilter}
       onRefresh={() => void refreshQuotes(marketFilter, stocks, true)}
+      onContinueUsingCachedData={() => setContinueWithCachedData(true)}
       refreshing={refreshingQuotes}
       refreshError={visibleRefreshError}
       marketState={currentStrategyStateName}

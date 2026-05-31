@@ -14,30 +14,24 @@ import Dashboard, {
 } from "./dashboard";
 
 describe("Dashboard calibration diagnostics", () => {
-  it("renders the Decision Operating System shell", () => {
+  it("renders the guided first-run state before a market is selected", () => {
     const html = renderToStaticMarkup(<Dashboard />);
 
     expect(html).toContain('data-testid="decision-operating-system"');
-    expect(html).toContain('data-testid="decision-step-screen"');
-    expect(html).toContain('data-active-step="opportunity"');
-    expect(html).toContain("Signal Investment Brief");
-    expect(html).toContain("Recommended action");
-    expect(html).toContain("Opportunity");
-    expect(html).toContain("Trust");
-    expect(html).toContain("Size");
-    expect(html).toContain("Action");
-  });
-
-  it("renders one active investor question with the repeated story structure", () => {
-    const html = renderToStaticMarkup(<Dashboard />);
-
-    expect(html).toContain("What deserves attention?");
-    expect(html).toContain("What happened");
-    expect(html).toContain("Why it matters");
-    expect(html).toContain("What to do");
-    expect(html).toContain('data-testid="primary-answer"');
-    expect(html).not.toContain("What is happening?");
-    expect(html).not.toContain("What decision am I trying to make?");
+    expect(html).toContain("Signal");
+    expect(html).toContain('data-state-kind="no-market"');
+    expect(html).toContain("Select a market first.");
+    expect(html).toContain(
+      "Choose a market so Signal can recommend what to do next.",
+    );
+    expect(html).toContain("Binance");
+    expect(html).toContain("Stocks");
+    expect(html).toContain("ETFs");
+    expect(html).toContain("Forex");
+    expect(html).toContain("Futures");
+    expect(html).toContain("Learn How Signal Works");
+    expect(html).not.toContain('data-testid="decision-step-screen"');
+    expect(html).not.toContain('data-testid="primary-answer"');
   });
 
   it("holds executive summary metrics steady during quote refresh", () => {
@@ -89,33 +83,12 @@ describe("Dashboard calibration diagnostics", () => {
     ).toEqual({ ...transient, market: "ETF" });
   });
 
-  it("renders the four-step investor decision flow", () => {
+  it("reserves persistent navigation signals in the first-run shell", () => {
     const html = renderToStaticMarkup(<Dashboard />);
 
-    expect(html).toContain("Opportunity");
-    expect(html).toContain("Trust");
-    expect(html).toContain("Size");
-    expect(html).toContain("Action");
-    expect(html).not.toContain("Intent");
-    expect(html).not.toContain("Sense");
-    expect(html).not.toContain("Pulse");
-    expect(html).not.toContain("Core");
-    expect(html).not.toContain("Judgement");
-    expect(html).not.toContain("Reflection");
-  });
-
-  it("keeps numbers and system notes behind progressive disclosure modes", () => {
-    const html = renderToStaticMarkup(<Dashboard />);
-
-    expect(html).toContain("Answer");
-    expect(html).toContain("Why");
-    expect(html).toContain("Evidence");
-    expect(html).toContain("Numbers");
-    expect(html).toContain("Notes");
-    expect(html).not.toContain("Advanced");
-    expect(html).not.toContain("Expert");
-    expect(html).not.toContain("Debug");
-    expect(html).not.toContain("<details open");
+    expect(html).toContain("Decision readiness");
+    expect(html).toContain('aria-label="Current market"');
+    expect(html).toContain("Update");
   });
 
   it("does not render the old gamified dashboard surface", () => {
