@@ -21,9 +21,11 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": [
+    "api/**/*.ts",
+    "server/**/*.ts",
     "packages/**/*.ts",
-    "index.ts",
-    "test/**/*.ts"
+    "examples/**/*.ts",
+    "index.ts"
   ],
   "exclude": [
     "node_modules",

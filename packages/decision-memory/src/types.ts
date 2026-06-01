@@ -1,6 +1,7 @@
 import type {
   AccountabilityReport,
   CoherenceAssessment,
+  DecisionModuleInputs,
   DecisionReplayComparison,
   OutcomeEvaluation,
   RealitySnapshot,
@@ -15,6 +16,30 @@ import type {
   RegimeSnapshot,
   Thesis,
 } from "./learning";
+
+export type MemoryScope = {
+  appId: string;
+  domain: string;
+  decisionId: string;
+  timestamp: string;
+};
+
+export type MemoryRecordKind =
+  | "Decision"
+  | "Outcome"
+  | "Review"
+  | "Lesson"
+  | "Correction"
+  | "Replay"
+  | "Calibration"
+  | "Similarity";
+
+export type MemoryRecordGovernance = {
+  scope: MemoryScope;
+  correlationId: string;
+  version: "v1";
+  recordKind: MemoryRecordKind;
+};
 
 export type RetentionTier = "hot" | "warm" | "cold" | "expired";
 export type ExpiredMemoryMode = "delete" | "anonymize";
@@ -35,6 +60,8 @@ export type DecisionMemoryConfig = {
 };
 
 export type DecisionRecordFilter = {
+  appId?: string;
+  domain?: string;
   source?: string;
   retentionTier?: RetentionTier;
   decisionId?: string;
@@ -44,6 +71,8 @@ export type DecisionRecordFilter = {
 };
 
 export type RealitySnapshotFilter = {
+  appId?: string;
+  domain?: string;
   source?: string;
   snapshotId?: string;
   createdBefore?: string;
@@ -52,6 +81,8 @@ export type RealitySnapshotFilter = {
 };
 
 export type LearningRecordFilter = {
+  appId?: string;
+  domain?: string;
   source?: string;
   decisionId?: string;
   thesisId?: string;
@@ -65,6 +96,11 @@ export type LearningRecordFilter = {
 export type ReplaySnapshot = {
   snapshotId: string;
   decisionId: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
   createdAt: string;
   source: string;
   snapshot: unknown;
@@ -74,6 +110,11 @@ export type ReplaySnapshot = {
 export type CalibrationHistoryEntry = {
   calibrationId: string;
   decisionId?: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
   createdAt: string;
   source: string;
   impact: number;
@@ -83,6 +124,11 @@ export type CalibrationHistoryEntry = {
 export type TrustHistoryEntry = {
   trustId: string;
   decisionId?: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
   createdAt: string;
   source: string;
   impact: number;
@@ -91,6 +137,8 @@ export type TrustHistoryEntry = {
 
 export type MemorySummary = {
   summaryId: string;
+  appId?: string;
+  domain?: string;
   source: string;
   createdAt: string;
   windowStart?: string;
@@ -170,7 +218,7 @@ export type CalibrationStore = {
 
 export type SummaryStore = {
   saveSummary(summary: MemorySummary): Promise<MemorySummary>;
-  listSummaries(filter?: { source?: string; limit?: number }): Promise<MemorySummary[]>;
+  listSummaries(filter?: { appId?: string; domain?: string; source?: string; limit?: number }): Promise<MemorySummary[]>;
 };
 
 export type RetentionJobStore = {
@@ -214,4 +262,137 @@ export type DecisionMemoryReplayResult = {
   record?: SignalDecisionRecord;
   accountability?: AccountabilityReport;
   currentCoherence?: CoherenceAssessment;
+};
+
+export type DecisionRecordContractInput = {
+  scope: MemoryScope;
+  correlationId?: string;
+  record?: SignalDecisionRecord;
+  observation?: unknown;
+  source?: string;
+  modules?: DecisionModuleInputs;
+  coherence?: CoherenceAssessment;
+  action?: unknown;
+  humanSummary?: string;
+  retentionTier?: RetentionTier;
+};
+
+export type OutcomeRecordContractInput = {
+  scope: MemoryScope;
+  correlationId?: string;
+  outcome?: OutcomeEvaluation;
+  expectedConfidence?: number;
+  expectedRisk?: number;
+  actualSuccessScore?: number;
+  purposeAlignment?: number;
+  needAlignment?: number;
+  realizedReward?: number;
+  riskTaken?: number;
+  unexpected?: boolean;
+  inconclusive?: boolean;
+  lessons?: string[];
+};
+
+export type ReviewRecordContractInput = {
+  scope: MemoryScope;
+  correlationId?: string;
+  review?: DecisionReview;
+  classification?: DecisionReview["classification"];
+  whatWasRecommended?: string;
+  whyRecommended?: string;
+  whatHappened?: string;
+  lesson?: string;
+  confidenceAdjustment?: number;
+  trustAdjustment?: number;
+};
+
+export type LessonRecordContractInput = {
+  scope: MemoryScope;
+  correlationId?: string;
+  lesson?: string;
+  changes?: string[];
+  confidenceAdjustment?: number;
+  trustAdjustment?: number;
+  thesisId?: string;
+  regimeSnapshotId?: string;
+};
+
+export type SimilarityQueryContractInput = {
+  scope: MemoryScope;
+  current?: RegimeSnapshot;
+  limit?: number;
+  threshold?: number;
+};
+
+export type SimilarityQueryContractResult = {
+  scope: MemoryScope;
+  similarCases: Array<{
+    decisionId: string;
+    similarityScore: number;
+    outcomeSummary: string;
+    lessonReferences: string[];
+  }>;
+  similarityScore: number;
+  outcomeDistribution: Record<string, number>;
+  lessonReferences: string[];
+};
+
+export type CalibrationQueryContractInput = {
+  scope: MemoryScope;
+  limit?: number;
+};
+
+export type CalibrationQueryContractResult = {
+  scope: MemoryScope;
+  confidenceAccuracy: number;
+  overconfidence: boolean;
+  underconfidence: boolean;
+  historicalCalibration: {
+    sampleSize: number;
+    averageCalibrationScore: number;
+    reliabilityTrend: CalibrationRecord["reliabilityTrend"];
+  };
+  records: CalibrationRecord[];
+};
+
+export type MemoryTimelineEntry = {
+  kind: MemoryRecordKind;
+  id: string;
+  timestamp: string;
+  correlationId?: string;
+  version?: string;
+  record: unknown;
+};
+
+export type MemoryTimelineContractInput = {
+  scope: MemoryScope;
+  includeCorrections?: boolean;
+};
+
+export type MemoryTimelineContractResult = {
+  scope: MemoryScope;
+  decision: SignalDecisionRecord | null;
+  outcomes: OutcomeEvaluation[];
+  reviews: DecisionReview[];
+  lessons: LearningRecord[];
+  entries: MemoryTimelineEntry[];
+  orphanLessons: LearningRecord[];
+};
+
+export type MemoryStatsContractInput = {
+  scope: Omit<MemoryScope, "decisionId" | "timestamp"> & {
+    decisionId?: string;
+    timestamp?: string;
+  };
+};
+
+export type MemoryStatsContractResult = {
+  appId: string;
+  domain: string;
+  decisions: number;
+  outcomes: number;
+  reviews: number;
+  lessons: number;
+  calibrationRecords: number;
+  replaySnapshots: number;
 };

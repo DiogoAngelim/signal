@@ -1,4 +1,5 @@
 import { createRealitySnapshotForDecision, type OutcomeEvaluation, type RealitySnapshot, type SignalDecisionRecord } from "@signal/decision";
+import { matchesMemoryScope } from "./contracts";
 import type {
   CalibrationRecord,
   DecisionReview,
@@ -135,9 +136,13 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return summary;
   }
 
-  async listSummaries(filter: { source?: string; limit?: number } = {}): Promise<MemorySummary[]> {
+  async listSummaries(filter: { appId?: string; domain?: string; source?: string; limit?: number } = {}): Promise<MemorySummary[]> {
     return [...this.summaries.values()]
-      .filter((summary) => !filter.source || summary.source === filter.source)
+      .filter((summary) =>
+        (!filter.source || summary.source === filter.source) &&
+        (!filter.appId || summary.appId === filter.appId) &&
+        (!filter.domain || summary.domain === filter.domain),
+      )
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .slice(0, clampLimit(filter.limit));
   }
@@ -151,6 +156,8 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return [...this.evidence.values()]
       .filter((evidence) => matchesLearningFilter({
         source: evidence.source,
+        appId: evidence.appId,
+        domain: evidence.domain,
         decisionId: evidence.decisionId,
         thesisId: evidence.thesisId,
         regimeSnapshotId: evidence.regimeSnapshotId,
@@ -173,6 +180,8 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return [...this.theses.values()]
       .filter((thesis) => matchesLearningFilter({
         source: thesis.source,
+        appId: thesis.appId,
+        domain: thesis.domain,
         thesisId: thesis.thesisId,
         createdAt: thesis.createdAt,
       }, filter))
@@ -193,6 +202,9 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return [...this.regimeSnapshots.values()]
       .filter((snapshot) => matchesLearningFilter({
         source: snapshot.source,
+        appId: snapshot.appId,
+        domain: snapshot.domain,
+        decisionId: snapshot.decisionId,
         regimeSnapshotId: snapshot.regimeSnapshotId,
         venue: snapshot.venue,
         createdAt: snapshot.timestamp,
@@ -210,6 +222,8 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return [...this.decisionReviews.values()]
       .filter((review) => matchesLearningFilter({
         source: review.source,
+        appId: review.appId,
+        domain: review.domain,
         decisionId: review.decisionId,
         createdAt: review.reviewedAt,
       }, filter))
@@ -226,6 +240,8 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return [...this.learningRecords.values()]
       .filter((record) => matchesLearningFilter({
         source: record.source,
+        appId: record.appId,
+        domain: record.domain,
         decisionId: record.decisionId,
         thesisId: record.thesisId,
         regimeSnapshotId: record.regimeSnapshotId,
@@ -244,6 +260,8 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return [...this.calibrationRecords.values()]
       .filter((record) => matchesLearningFilter({
         source: record.source,
+        appId: record.appId,
+        domain: record.domain,
         decisionId: record.decisionId,
         createdAt: record.createdAt,
       }, filter))
@@ -260,6 +278,8 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return [...this.processQualityRecords.values()]
       .filter((record) => matchesLearningFilter({
         source: record.source,
+        appId: record.appId,
+        domain: record.domain,
         decisionId: record.decisionId,
         createdAt: record.createdAt,
       }, filter))
@@ -307,6 +327,7 @@ export function createInMemoryDecisionMemoryStore(): InMemoryDecisionMemoryStore
 }
 
 function matchesRealityFilter(snapshot: RealitySnapshot, filter: RealitySnapshotFilter): boolean {
+  if (!matchesMemoryScope(snapshot, filter)) return false;
   if (filter.snapshotId && snapshot.snapshotId !== filter.snapshotId) return false;
   if (filter.source && snapshot.source !== filter.source) return false;
   if (filter.createdBefore && snapshot.createdAt >= filter.createdBefore) return false;
@@ -315,7 +336,12 @@ function matchesRealityFilter(snapshot: RealitySnapshot, filter: RealitySnapshot
 }
 
 function matchesFilter(record: SignalDecisionRecord, filter: DecisionRecordFilter): boolean {
-  if (filter.decisionId && record.decisionId !== filter.decisionId) return false;
+  if (!matchesMemoryScope(record, filter)) return false;
+  if (
+    filter.decisionId &&
+    record.decisionId !== filter.decisionId &&
+    !matchesMemoryScope(record, { decisionId: filter.decisionId })
+  ) return false;
   if (filter.source && record.source !== filter.source) return false;
   if (filter.retentionTier && record.retentionTier !== filter.retentionTier) return false;
   if (filter.createdBefore && record.createdAt >= filter.createdBefore) return false;
@@ -325,6 +351,8 @@ function matchesFilter(record: SignalDecisionRecord, filter: DecisionRecordFilte
 
 function matchesLearningFilter(
   record: {
+    appId?: string;
+    domain?: string;
     source?: string;
     decisionId?: string;
     thesisId?: string;
@@ -334,6 +362,8 @@ function matchesLearningFilter(
   },
   filter: LearningRecordFilter,
 ): boolean {
+  if (filter.appId && record.appId !== filter.appId) return false;
+  if (filter.domain && record.domain !== filter.domain) return false;
   if (filter.source && record.source !== filter.source) return false;
   if (filter.decisionId && record.decisionId !== filter.decisionId) return false;
   if (filter.thesisId && record.thesisId !== filter.thesisId) return false;

@@ -16,6 +16,12 @@ export function evaluateOutcome(input: OutcomeEvaluationInput): OutcomeEvaluatio
   return {
     outcomeId: input.outcomeId ?? stableId("outcome", input.decisionId),
     decisionId: input.decisionId,
+    ...(input.appId === undefined ? {} : { appId: input.appId }),
+    ...(input.domain === undefined ? {} : { domain: input.domain }),
+    ...(input.timestamp === undefined ? {} : { timestamp: input.timestamp }),
+    ...(input.correlationId === undefined ? {} : { correlationId: input.correlationId }),
+    ...(input.version === undefined ? {} : { version: input.version }),
+    ...(input.originalDecisionId === undefined ? {} : { originalDecisionId: input.originalDecisionId }),
     category: classifyOutcome({
       successScore,
       purposeAlignment,
@@ -31,6 +37,7 @@ export function evaluateOutcome(input: OutcomeEvaluationInput): OutcomeEvaluatio
     trustImpact,
     calibrationImpact,
     lessons: lessonsFor(input, successScore, confidenceAccuracy, riskEfficiency),
+    ...(input.metadata === undefined ? {} : { metadata: input.metadata }),
   };
 }
 

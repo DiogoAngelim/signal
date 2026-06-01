@@ -3,15 +3,12 @@ name: Signal core
 on:
   pull_request:
     paths:
-      - "apps/reference-server/**"
+      - "api/**"
+      - "client/**"
+      - "server/**"
       - "docs/**"
-      - "landing/**"
-      - "packages/binding-http/**"
-      - "packages/examples/**"
-      - "packages/idempotency-postgres/**"
-      - "packages/protocol/**"
-      - "packages/runtime/**"
-      - "packages/sdk-node/**"
+      - "examples/**"
+      - "packages/**"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - ".github/workflows/signal-core.yml"
@@ -20,15 +17,12 @@ on:
       - main
       - "codex/**"
     paths:
-      - "apps/reference-server/**"
+      - "api/**"
+      - "client/**"
+      - "server/**"
       - "docs/**"
-      - "landing/**"
-      - "packages/binding-http/**"
-      - "packages/examples/**"
-      - "packages/idempotency-postgres/**"
-      - "packages/protocol/**"
-      - "packages/runtime/**"
-      - "packages/sdk-node/**"
+      - "examples/**"
+      - "packages/**"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - ".github/workflows/signal-core.yml"
@@ -51,6 +45,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm --filter "@digelim/*" test
+
       - run: pnpm --filter @signal/protocol test
 
       - run: pnpm --filter @signal/runtime test
@@ -63,8 +59,4 @@ jobs:
 
       - run: pnpm --filter @signal/reference-server typecheck
 
-      - run: pnpm --filter @signal/docs typecheck
-
-      - run: pnpm --filter @signal/docs build
-
-      - run: pnpm --filter @signal/landing build
+      - run: pnpm --filter @signal/emergency-awareness typecheck

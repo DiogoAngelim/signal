@@ -892,7 +892,7 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return summary;
   }
 
-  async listSummaries(filter: { source?: string; limit?: number } = {}): Promise<MemorySummary[]> {
+  async listSummaries(filter: { appId?: string; domain?: string; source?: string; limit?: number } = {}): Promise<MemorySummary[]> {
     await this.ensureReady();
     const params: unknown[] = [];
     const where = filter.source ? "WHERE source = $1" : "";

@@ -12,12 +12,19 @@ import {
   type SignalDecisionRecord,
 } from "@signal/decision";
 import { CompactionJob } from "./compaction";
+import { MEMORY_SCOPE_METADATA_KEY, assertMemoryScope, createDecisionMemoryContractAdapter, memoryStorageDecisionId } from "./contracts";
 import { DEFAULT_RETENTION_POLICY, normalizeRetentionTier } from "./retention";
 import { summarizeDecisionRecords } from "./summary";
 import type {
   CalibrationHistoryEntry,
   DecisionMemoryStore,
+  DecisionRecordContractInput,
+  LessonRecordContractInput,
+  MemoryScope,
+  OutcomeRecordContractInput,
   RetentionPolicy,
+  ReviewRecordContractInput,
+  SimilarityQueryContractInput,
   TrustHistoryEntry,
 } from "./types";
 
@@ -28,6 +35,13 @@ export const DECISION_MEMORY_OPERATION_DEFINITIONS = [
   operation("mutation", "decision.record.v1", "Record a durable shared Signal decision.", true),
   operation("query", "decision.get.v1", "Read a durable shared Signal decision.", true),
   operation("query", "decision.list.v1", "List durable shared Signal decisions.", true),
+  operation("mutation", "outcome.record.v1", "Record a scoped durable decision outcome.", true),
+  operation("mutation", "review.record.v1", "Record a scoped durable decision review.", true),
+  operation("mutation", "lesson.record.v1", "Record a scoped durable decision lesson.", true),
+  operation("query", "similarity.query.v1", "Query scoped similar cases and outcome distribution.", true),
+  operation("query", "calibration.query.v1", "Query scoped calibration history.", true),
+  operation("query", "memory.timeline.v1", "Reconstruct a scoped decision timeline.", true),
+  operation("query", "memory.stats.v1", "Read scoped memory statistics.", true),
   operation("mutation", "decision.outcome.record.v1", "Record a durable decision outcome.", true),
   operation("query", "decision.replay.v1", "Replay a decision from durable memory.", true),
   operation("mutation", "decision.memory.compact.v1", "Compact old decision memory into durable lessons.", true),
@@ -69,6 +83,7 @@ export function createDecisionMemoryOperations(
   store: DecisionMemoryStore,
   policy: RetentionPolicy = DEFAULT_RETENTION_POLICY,
 ) {
+  const contracts = createDecisionMemoryContractAdapter(store);
   return [
     {
       name: "reality.snapshot.record.v1",
@@ -78,8 +93,21 @@ export function createDecisionMemoryOperations(
       idempotency: "optional" as const,
       emits: ["reality.snapshot_recorded.v1"],
       async handler(input: Record<string, unknown>, context: OperationContext = {}) {
+        const scope = scopeFromInput(input);
         const snapshot = realitySnapshotFromInput(input);
-        const saved = await store.saveRealitySnapshot(snapshot);
+        const saved = await store.saveRealitySnapshot({
+          ...snapshot,
+          source: scope.appId,
+          metadata: {
+            ...(snapshot.metadata ?? {}),
+            [MEMORY_SCOPE_METADATA_KEY]: {
+              scope,
+              correlationId: stringOrUndefined(input["correlationId"]) ?? `corr:reality:${snapshot.snapshotId}`,
+              version: "v1",
+              recordKind: "Decision",
+            },
+          },
+        });
         await context.emit?.("reality.snapshot_recorded.v1", {
           snapshotId: saved.snapshotId,
           source: saved.source,
@@ -93,23 +121,28 @@ export function createDecisionMemoryOperations(
     {
       name: "reality.snapshot.get.v1",
       kind: "query" as const,
-      inputSchema: z.object({ snapshotId: z.string().min(1) }),
+      inputSchema: z.record(z.string(), z.unknown()),
       resultSchema: z.record(z.string(), z.unknown()),
-      async handler(input: { snapshotId: string }) {
-        const snapshot = await store.getRealitySnapshot(input.snapshotId);
-        return { snapshotId: input.snapshotId, found: Boolean(snapshot), snapshot: snapshot ?? null };
+      async handler(input: Record<string, unknown>) {
+        scopeFromInput(input);
+        const snapshotId = String(input["snapshotId"] ?? "");
+        const snapshot = await store.getRealitySnapshot(snapshotId);
+        return { snapshotId, found: Boolean(snapshot), snapshot: snapshot ?? null };
       },
     },
     {
       name: "reality.snapshot.list.v1",
       kind: "query" as const,
-      inputSchema: z.object({
-        source: z.string().optional(),
-        limit: z.number().optional(),
-      }),
+      inputSchema: z.record(z.string(), z.unknown()),
       resultSchema: z.record(z.string(), z.unknown()),
-      async handler(input: { source?: string; limit?: number }) {
-        const snapshots = await store.listRealitySnapshots(input);
+      async handler(input: Record<string, unknown>) {
+        const scope = scopeFromInput(input);
+        const snapshots = await store.listRealitySnapshots({
+          appId: scope.appId,
+          domain: scope.domain,
+          source: scope.appId,
+          limit: typeof input["limit"] === "number" ? input["limit"] : undefined,
+        });
         return { snapshots, count: snapshots.length };
       },
     },
@@ -121,37 +154,131 @@ export function createDecisionMemoryOperations(
       idempotency: "optional" as const,
       emits: ["decision.recorded.v1"],
       async handler(input: Record<string, unknown>, context: OperationContext = {}) {
-        const record = recordFromInput(input);
-        const saved = await store.saveDecisionRecord(record);
-        await context.emit?.("decision.recorded.v1", { decisionId: saved.decisionId, source: saved.source });
+        const saved = await contracts.recordDecision(input as DecisionRecordContractInput);
+        await context.emit?.("decision.recorded.v1", {
+          decisionId: saved.originalDecisionId ?? saved.decisionId,
+          appId: saved.appId,
+          domain: saved.domain,
+          source: saved.source,
+        });
         return { record: saved, event: "decision.recorded.v1" };
       },
       normalizeIdempotencyInput(input: Record<string, unknown>) {
-        return { decisionId: input["decisionId"] };
+        return { scope: input["scope"] };
       },
     },
     {
       name: "decision.get.v1",
       kind: "query" as const,
-      inputSchema: z.object({ decisionId: z.string().min(1) }),
+      inputSchema: z.record(z.string(), z.unknown()),
       resultSchema: z.record(z.string(), z.unknown()),
-      async handler(input: { decisionId: string }) {
-        const record = await store.getDecisionRecord(input.decisionId);
-        return { decisionId: input.decisionId, found: Boolean(record), record: record ?? null };
+      async handler(input: Record<string, unknown>) {
+        const scope = scopeFromInput(input);
+        const decisionId = memoryStorageDecisionId(scope);
+        const record = await store.getDecisionRecord(decisionId);
+        return { decisionId: scope.decisionId, found: Boolean(record), record: record ?? null };
       },
     },
     {
       name: "decision.list.v1",
       kind: "query" as const,
-      inputSchema: z.object({
-        source: z.string().optional(),
-        retentionTier: z.enum(["hot", "warm", "cold", "expired"]).optional(),
-        limit: z.number().optional(),
-      }),
+      inputSchema: z.record(z.string(), z.unknown()),
       resultSchema: z.record(z.string(), z.unknown()),
-      async handler(input: { source?: string; retentionTier?: "hot" | "warm" | "cold" | "expired"; limit?: number }) {
-        const records = await store.listDecisionRecords(input);
+      async handler(input: Record<string, unknown>) {
+        const scope = scopeFromInput(input);
+        const records = await store.listDecisionRecords({
+          appId: scope.appId,
+          domain: scope.domain,
+          source: scope.appId,
+          retentionTier: input["retentionTier"] as "hot" | "warm" | "cold" | "expired" | undefined,
+          limit: typeof input["limit"] === "number" ? input["limit"] : undefined,
+        });
         return { records, count: records.length };
+      },
+    },
+    {
+      name: "outcome.record.v1",
+      kind: "mutation" as const,
+      inputSchema: z.record(z.string(), z.unknown()),
+      resultSchema: z.record(z.string(), z.unknown()),
+      idempotency: "optional" as const,
+      emits: ["decision.outcome_recorded.v1"],
+      async handler(input: Record<string, unknown>, context: OperationContext = {}) {
+        const saved = await contracts.recordOutcome(input as OutcomeRecordContractInput);
+        await context.emit?.("decision.outcome_recorded.v1", {
+          decisionId: saved.originalDecisionId ?? saved.decisionId,
+          outcomeId: saved.outcomeId,
+          appId: saved.appId,
+          domain: saved.domain,
+        });
+        return { outcome: saved, event: "decision.outcome_recorded.v1" };
+      },
+      normalizeIdempotencyInput(input: Record<string, unknown>) {
+        return { scope: input["scope"], outcomeId: (input["outcome"] as Record<string, unknown> | undefined)?.["outcomeId"] };
+      },
+    },
+    {
+      name: "review.record.v1",
+      kind: "mutation" as const,
+      inputSchema: z.record(z.string(), z.unknown()),
+      resultSchema: z.record(z.string(), z.unknown()),
+      idempotency: "optional" as const,
+      async handler(input: Record<string, unknown>) {
+        const review = await contracts.recordReview(input as ReviewRecordContractInput);
+        return { review, event: "review.recorded.v1" };
+      },
+      normalizeIdempotencyInput(input: Record<string, unknown>) {
+        return { scope: input["scope"], reviewId: (input["review"] as Record<string, unknown> | undefined)?.["reviewId"] };
+      },
+    },
+    {
+      name: "lesson.record.v1",
+      kind: "mutation" as const,
+      inputSchema: z.record(z.string(), z.unknown()),
+      resultSchema: z.record(z.string(), z.unknown()),
+      idempotency: "optional" as const,
+      async handler(input: Record<string, unknown>) {
+        const lesson = await contracts.recordLesson(input as LessonRecordContractInput);
+        return { lesson, event: "lesson.recorded.v1" };
+      },
+      normalizeIdempotencyInput(input: Record<string, unknown>) {
+        return { scope: input["scope"] };
+      },
+    },
+    {
+      name: "similarity.query.v1",
+      kind: "query" as const,
+      inputSchema: z.record(z.string(), z.unknown()),
+      resultSchema: z.record(z.string(), z.unknown()),
+      async handler(input: Record<string, unknown>) {
+        return contracts.querySimilarity(input as SimilarityQueryContractInput);
+      },
+    },
+    {
+      name: "calibration.query.v1",
+      kind: "query" as const,
+      inputSchema: z.record(z.string(), z.unknown()),
+      resultSchema: z.record(z.string(), z.unknown()),
+      async handler(input: Record<string, unknown>) {
+        return contracts.queryCalibration(input as Parameters<typeof contracts.queryCalibration>[0]);
+      },
+    },
+    {
+      name: "memory.timeline.v1",
+      kind: "query" as const,
+      inputSchema: z.record(z.string(), z.unknown()),
+      resultSchema: z.record(z.string(), z.unknown()),
+      async handler(input: Record<string, unknown>) {
+        return contracts.timeline(input as Parameters<typeof contracts.timeline>[0]);
+      },
+    },
+    {
+      name: "memory.stats.v1",
+      kind: "query" as const,
+      inputSchema: z.record(z.string(), z.unknown()),
+      resultSchema: z.record(z.string(), z.unknown()),
+      async handler(input: Record<string, unknown>) {
+        return contracts.stats(input as Parameters<typeof contracts.stats>[0]);
       },
     },
     {
@@ -162,13 +289,17 @@ export function createDecisionMemoryOperations(
       idempotency: "optional" as const,
       emits: ["decision.outcome_recorded.v1"],
       async handler(input: Record<string, unknown>, context: OperationContext = {}) {
-        const outcome = outcomeFromInput(input);
-        const saved = await store.recordOutcome(outcome);
-        await context.emit?.("decision.outcome_recorded.v1", { decisionId: saved.decisionId, outcomeId: saved.outcomeId });
+        const saved = await contracts.recordOutcome(input as OutcomeRecordContractInput);
+        await context.emit?.("decision.outcome_recorded.v1", {
+          decisionId: saved.originalDecisionId ?? saved.decisionId,
+          outcomeId: saved.outcomeId,
+          appId: saved.appId,
+          domain: saved.domain,
+        });
         return { outcome: saved, event: "decision.outcome_recorded.v1" };
       },
       normalizeIdempotencyInput(input: Record<string, unknown>) {
-        return { outcomeId: input["outcomeId"], decisionId: input["decisionId"] };
+        return { scope: input["scope"], outcomeId: (input["outcome"] as Record<string, unknown> | undefined)?.["outcomeId"] };
       },
     },
     {
@@ -177,14 +308,19 @@ export function createDecisionMemoryOperations(
       inputSchema: z.record(z.string(), z.unknown()),
       resultSchema: z.record(z.string(), z.unknown()),
       async handler(input: Record<string, unknown>) {
-        const decisionId = String(input["decisionId"] ?? "");
+        const scope = scopeFromInput(input);
+        const decisionId = memoryStorageDecisionId(scope);
         const record = await store.getDecisionRecord(decisionId);
-        if (!record) return { decisionId, replayResult: "inconclusive", explanation: "Decision was not found." };
+        if (!record) return { decisionId: scope.decisionId, replayResult: "inconclusive", explanation: "Decision was not found." };
         const current = currentCoherenceFrom(input);
         const replay = current ? compareReplay(record.decisionId, record.coherence, current) : undefined;
         await store.saveReplaySnapshot({
           snapshotId: `replay:${decisionId}:${Date.now()}`,
           decisionId,
+          appId: scope.appId,
+          domain: scope.domain,
+          timestamp: scope.timestamp,
+          version: "v1",
           createdAt: new Date().toISOString(),
           source: record.source,
           retentionTier: normalizeRetentionTier(record.retentionTier),
@@ -209,16 +345,28 @@ export function createDecisionMemoryOperations(
     {
       name: "decision.memory.summary.v1",
       kind: "query" as const,
-      inputSchema: z.object({ source: z.string().optional(), limit: z.number().optional(), generate: z.boolean().optional() }),
+      inputSchema: z.record(z.string(), z.unknown()),
       resultSchema: z.record(z.string(), z.unknown()),
-      async handler(input: { source?: string; limit?: number; generate?: boolean }) {
-        if (input.generate) {
-          const records = await store.listDecisionRecords({ source: input.source, limit: input.limit ?? 100 });
+      async handler(input: Record<string, unknown>) {
+        const scope = scopeFromInput(input);
+        const limit = typeof input["limit"] === "number" ? input["limit"] : undefined;
+        if (input["generate"]) {
+          const records = await store.listDecisionRecords({
+            appId: scope.appId,
+            domain: scope.domain,
+            source: scope.appId,
+            limit: limit ?? 100,
+          });
           const outcomes = await store.listOutcomes();
-          const summary = summarizeDecisionRecords({ records, outcomes, source: input.source ?? records[0]?.source });
-          await store.saveSummary(summary);
+          const summary = summarizeDecisionRecords({ records, outcomes, source: scope.appId });
+          await store.saveSummary({ ...summary, appId: scope.appId, domain: scope.domain });
         }
-        const summaries = await store.listSummaries({ source: input.source, limit: input.limit });
+        const summaries = await store.listSummaries({
+          appId: scope.appId,
+          domain: scope.domain,
+          source: scope.appId,
+          limit,
+        });
         return { summaries, count: summaries.length };
       },
     },
@@ -272,6 +420,10 @@ export function createDecisionMemoryOperations(
 type OperationContext = {
   emit?: (name: string, payload: unknown) => Promise<unknown>;
 };
+
+function scopeFromInput(input: Record<string, unknown>): MemoryScope {
+  return assertMemoryScope(input["scope"] as MemoryScope | undefined);
+}
 
 function operation(kind: "query" | "mutation" | "event", name: string, description: string, replaySafe: boolean) {
   return {

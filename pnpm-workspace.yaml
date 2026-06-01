@@ -1,9 +1,9 @@
 packages:
+  - "api/*"
+  - "client/*"
   - "packages/*"
-  - "backend/*"
-  - "apps/*"
-  - "docs"
-  - "landing"
+  - "server/*"
+  - "examples/*"
 
 catalog:
   "@replit/vite-plugin-cartographer": "latest"

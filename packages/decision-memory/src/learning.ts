@@ -5,6 +5,11 @@ export type Horizon = "short-term" | "medium-term" | "long-term";
 
 export type Evidence = {
   evidenceId: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
   observedAt: string;
   label: string;
   description: string;
@@ -25,6 +30,11 @@ export type DisconfirmingEvidence = Evidence & {
 
 export type Thesis = {
   thesisId: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
   source: string;
   title: string;
   description: string;
@@ -41,6 +51,11 @@ export type Thesis = {
 
 export type RegimeSnapshot = {
   regimeSnapshotId: string;
+  appId?: string;
+  domain?: string;
+  decisionId?: string;
+  correlationId?: string;
+  version?: string;
   source: string;
   marketCategory: string;
   venue: string;
@@ -67,6 +82,11 @@ export type RegimeSnapshot = {
 
 export type DecisionRecord = {
   decisionId: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
   source: string;
   createdAt: string;
   marketCategory: string;
@@ -91,6 +111,11 @@ export type DecisionRecord = {
 export type DecisionOutcome = {
   outcomeId: string;
   decisionId: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
   source: string;
   recordedAt: string;
   classification: DecisionOutcomeJudgment;
@@ -105,6 +130,11 @@ export type DecisionOutcome = {
 
 export type CalibrationRecord = {
   calibrationRecordId: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
   source: string;
   createdAt: string;
   decisionId?: string;
@@ -122,6 +152,11 @@ export type CalibrationRecord = {
 
 export type ProcessQualityRecord = {
   processQualityId: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
   source: string;
   createdAt: string;
   decisionId?: string;
@@ -145,6 +180,11 @@ export type ProcessQualityRecord = {
 export type DecisionReview = {
   reviewId: string;
   decisionId: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
   source: string;
   reviewedAt: string;
   classification: DecisionOutcomeJudgment;
@@ -159,6 +199,11 @@ export type DecisionReview = {
 
 export type LearningRecord = {
   learningId: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
   source: string;
   createdAt: string;
   decisionId?: string;

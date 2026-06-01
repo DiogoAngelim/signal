@@ -133,6 +133,12 @@ export type OutcomeHorizon = "short-term" | "medium-term" | "long-term";
 export interface OutcomeEvaluation {
   outcomeId: string;
   decisionId: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
+  originalDecisionId?: string;
   category: OutcomeCategory;
   successScore: number;
   purposeAlignment: number;
@@ -142,11 +148,18 @@ export interface OutcomeEvaluation {
   trustImpact: number;
   calibrationImpact: number;
   lessons: string[];
+  metadata?: Record<string, unknown>;
 }
 
 export type OutcomeEvaluationInput = {
   outcomeId?: string;
   decisionId: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
+  originalDecisionId?: string;
   horizon?: OutcomeHorizon;
   expectedConfidence?: number;
   expectedRisk?: number;
@@ -158,6 +171,7 @@ export type OutcomeEvaluationInput = {
   unexpected?: boolean;
   inconclusive?: boolean;
   lessons?: string[];
+  metadata?: Record<string, unknown>;
 };
 
 export type OutcomeFeedback = {
@@ -269,6 +283,12 @@ export interface SignalDecisionRecord {
   decisionId: string;
   createdAt: string;
   source: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
+  originalDecisionId?: string;
   realitySnapshotId: string;
   realitySnapshot?: RealitySnapshot;
   observation: unknown;
@@ -292,6 +312,12 @@ export type DecisionRecordInput = {
   decisionId: string;
   createdAt?: string;
   source?: string;
+  appId?: string;
+  domain?: string;
+  timestamp?: string;
+  correlationId?: string;
+  version?: string;
+  originalDecisionId?: string;
   realitySnapshotId?: string;
   realitySnapshot?: RealitySnapshotInput | RealitySnapshot;
   observation: unknown;

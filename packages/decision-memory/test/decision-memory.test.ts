@@ -14,12 +14,14 @@ import {
   buildMindChangeTriggers,
   buildProcessQualityRecord,
   createDecisionMemoryOperations,
+  createDecisionMemoryContractAdapter,
   createInvestorLearningAssessment,
   createInMemoryDecisionMemoryStore,
   createLearningRecordFromReview,
   decisionMemoryConfigFromEnv,
   findSimilarRegimes,
   listDecisionMemoryOperations,
+  memoryStorageDecisionId,
   rankOpportunities,
   retentionTierForCreatedAt,
   summarizeDecisionRecords,
@@ -111,6 +113,164 @@ describe("@signal/decision-memory", () => {
     expect(await store.listCalibrationHistory(saved.decisionId)).toHaveLength(1);
     expect(await store.listTrustHistory(saved.decisionId)).toHaveLength(1);
     expect(await store.listSummaries({ source: saved.source })).toHaveLength(1);
+  });
+
+  it("enforces scoped append-only memory contracts and reconstructs the decision timeline", async () => {
+    const store = createInMemoryDecisionMemoryStore();
+    const memory = createDecisionMemoryContractAdapter(store);
+    const scope = {
+      appId: "stocks-optimizer",
+      domain: "capital-allocation",
+      decisionId: "decision:scoped:1",
+      timestamp: "2026-06-01T12:00:00.000Z",
+    };
+
+    await expect(memory.recordDecision({
+      scope: undefined as never,
+      modules: { discovery: 80 },
+    })).rejects.toThrow(/scope/i);
+
+    const decision = await memory.recordDecision({
+      scope,
+      correlationId: "corr:scoped:1",
+      observation: { symbol: "AAPL" },
+      modules: { discovery: 82, trust: 76, calibration: 70, recovery: 80 },
+      action: { action: "Buy small" },
+    });
+    const outcome = await memory.recordOutcome({
+      scope: { ...scope, timestamp: "2026-06-02T12:00:00.000Z" },
+      actualSuccessScore: 78,
+      expectedConfidence: 74,
+      lessons: ["Small sizing preserved recovery capacity."],
+    });
+    const review = await memory.recordReview({
+      scope: { ...scope, timestamp: "2026-06-03T12:00:00.000Z" },
+      classification: "correct",
+      whatWasRecommended: "Buy small",
+      whyRecommended: "Evidence and survival memory supported limited exposure.",
+      whatHappened: "The position worked without breaching survival limits.",
+      lesson: "Keep reduced-size entries when recovery evidence is still maturing.",
+    });
+    const lesson = await memory.recordLesson({
+      scope: { ...scope, timestamp: "2026-06-04T12:00:00.000Z" },
+      lesson: "Reduced-size exposure can preserve optionality in recovering regimes.",
+      changes: ["Keep survival memory above sizing pressure."],
+    });
+
+    await expect(memory.recordDecision({
+      scope,
+      modules: { discovery: 82 },
+    })).rejects.toThrow(/append-only/i);
+
+    const timeline = await memory.timeline({ scope });
+    const calibration = await memory.queryCalibration({ scope });
+
+    expect(decision.decisionId).toBe(memoryStorageDecisionId(scope));
+    expect(decision.originalDecisionId).toBe(scope.decisionId);
+    expect(outcome.originalDecisionId).toBe(scope.decisionId);
+    expect(review.decisionId).toBe(decision.decisionId);
+    expect(lesson.decisionId).toBe(decision.decisionId);
+    expect(timeline.entries.map((entry) => entry.kind)).toEqual(["Decision", "Outcome", "Review", "Lesson"]);
+    expect(timeline.orphanLessons).toHaveLength(0);
+    expect(calibration.historicalCalibration.sampleSize).toBe(1);
+    expect(calibration.confidenceAccuracy).toBeGreaterThan(0);
+  });
+
+  it("hard-isolates Stocks Optimizer and Emergency Awareness memory", async () => {
+    const store = createInMemoryDecisionMemoryStore();
+    const memory = createDecisionMemoryContractAdapter(store);
+    const stocksScope = {
+      appId: "stocks-optimizer",
+      domain: "capital-allocation",
+      decisionId: "shared-decision-id",
+      timestamp: "2026-06-01T12:00:00.000Z",
+    };
+    const emergencyScope = {
+      appId: "emergency-awareness",
+      domain: "climate-risk",
+      decisionId: "shared-decision-id",
+      timestamp: "2026-06-01T12:05:00.000Z",
+    };
+
+    await memory.recordDecision({
+      scope: stocksScope,
+      observation: { symbol: "MSFT" },
+      modules: { discovery: 75, trust: 72 },
+      action: { action: "Watch" },
+    });
+    await memory.recordLesson({
+      scope: { ...stocksScope, timestamp: "2026-06-02T12:00:00.000Z" },
+      lesson: "Capital allocation lesson stays in Stocks Optimizer.",
+    });
+    await memory.recordDecision({
+      scope: emergencyScope,
+      observation: { concern: "heat-alert" },
+      modules: { discovery: 78, trust: 74, reflection: 70 },
+      action: { action: "Escalate warning" },
+    });
+    await memory.recordLesson({
+      scope: { ...emergencyScope, timestamp: "2026-06-02T13:00:00.000Z" },
+      lesson: "Emergency warning lesson stays in Emergency Awareness.",
+    });
+
+    const stocksTimeline = await memory.timeline({ scope: stocksScope });
+    const emergencyTimeline = await memory.timeline({ scope: emergencyScope });
+    const stocksStats = await memory.stats({ scope: { appId: "stocks-optimizer", domain: "capital-allocation" } });
+    const emergencyStats = await memory.stats({ scope: { appId: "emergency-awareness", domain: "climate-risk" } });
+
+    expect(stocksTimeline.lessons.map((item) => item.lesson).join(" ")).toContain("Stocks Optimizer");
+    expect(stocksTimeline.lessons.map((item) => item.lesson).join(" ")).not.toContain("Emergency Awareness");
+    expect(emergencyTimeline.lessons.map((item) => item.lesson).join(" ")).toContain("Emergency Awareness");
+    expect(emergencyTimeline.lessons.map((item) => item.lesson).join(" ")).not.toContain("Stocks Optimizer");
+    expect(stocksStats).toMatchObject({ decisions: 1, lessons: 1 });
+    expect(emergencyStats).toMatchObject({ decisions: 1, lessons: 1 });
+  });
+
+  it("uses existing regime similarity behind similarity.query.v1 semantics", async () => {
+    const store = createInMemoryDecisionMemoryStore();
+    const memory = createDecisionMemoryContractAdapter(store);
+    const currentScope = {
+      appId: "stocks-optimizer",
+      domain: "capital-allocation",
+      decisionId: "similarity-current",
+      timestamp: "2026-06-01T12:00:00.000Z",
+    };
+    const priorScope = {
+      ...currentScope,
+      decisionId: "similarity-prior",
+      timestamp: "2026-05-01T12:00:00.000Z",
+    };
+
+    await memory.recordDecision({
+      scope: priorScope,
+      modules: { discovery: 80, trust: 75, calibration: 70 },
+      action: { action: "Buy small" },
+    });
+    await memory.recordOutcome({
+      scope: { ...priorScope, timestamp: "2026-05-03T12:00:00.000Z" },
+      actualSuccessScore: 82,
+      expectedConfidence: 76,
+      lessons: ["Similar limited entries worked."],
+    });
+    await memory.recordLesson({
+      scope: { ...priorScope, timestamp: "2026-05-04T12:00:00.000Z" },
+      lesson: "Similar limited entries worked.",
+    });
+    await memory.recordDecision({
+      scope: currentScope,
+      modules: { discovery: 81, trust: 74, calibration: 72 },
+      action: { action: "Buy small" },
+    });
+
+    const result = await memory.querySimilarity({
+      scope: currentScope,
+      threshold: 0.5,
+    });
+
+    expect(result.similarCases[0]?.decisionId).toBe(priorScope.decisionId);
+    expect(result.similarCases[0]?.similarityScore).toBeGreaterThan(0.5);
+    expect(result.lessonReferences).toHaveLength(1);
+    expect(result.outcomeDistribution.correct).toBe(1);
   });
 
   it("validates learning models and stores learning records without duplicating decision storage", async () => {
@@ -365,24 +525,42 @@ describe("@signal/decision-memory", () => {
     const operations = createDecisionMemoryOperations(store);
     const realityOperation = operations.find((operation) => operation.name === "reality.snapshot.record.v1");
     const recordOperation = operations.find((operation) => operation.name === "decision.record.v1");
+    const outcomeOperation = operations.find((operation) => operation.name === "outcome.record.v1");
+    const timelineOperation = operations.find((operation) => operation.name === "memory.timeline.v1");
     const summaryOperation = operations.find((operation) => operation.name === "decision.memory.summary.v1");
+    const scope = {
+      appId: "stocks-optimizer",
+      domain: "capital-allocation",
+      decisionId: "operation:1",
+      timestamp: "2026-06-01T00:00:00.000Z",
+    };
 
     expect(listDecisionMemoryOperations().map((operation) => operation.name)).toContain("decision.memory.compact.v1");
     expect(listDecisionMemoryOperations().map((operation) => operation.name)).toContain("reality.snapshot.record.v1");
+    expect(listDecisionMemoryOperations().map((operation) => operation.name)).toContain("outcome.record.v1");
+    expect(listDecisionMemoryOperations().map((operation) => operation.name)).toContain("memory.timeline.v1");
     await realityOperation?.handler({
+      scope,
       snapshotId: "reality:operation:1",
       source: "stocks-optimizer",
       payload: { marketVenue: "BINANCE" },
     });
     expect(recordOperation).toBeTruthy();
     await recordOperation?.handler({
-      decisionId: "operation:1",
+      scope,
       observation: { venue: "BINANCE" },
       source: "stocks-optimizer",
       modules: { discovery: 80, trust: 72, purpose: 70, recovery: 80 },
     });
-    const summary = await summaryOperation?.handler({ generate: true, source: "stocks-optimizer" });
+    await outcomeOperation?.handler({
+      scope: { ...scope, timestamp: "2026-06-02T00:00:00.000Z" },
+      actualSuccessScore: 82,
+      expectedConfidence: 76,
+    });
+    const timeline = await timelineOperation?.handler({ scope });
+    const summary = await summaryOperation?.handler({ scope, generate: true });
     expect(summary).toMatchObject({ count: 1 });
+    expect(timeline).toMatchObject({ entries: expect.any(Array) });
     expect(await store.getRealitySnapshot("reality:operation:1")).toMatchObject({ source: "stocks-optimizer" });
   });
 

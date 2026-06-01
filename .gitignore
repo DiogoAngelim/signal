@@ -18,7 +18,6 @@ out
 .local-cache
 repo.txt
 .signal-example-training
-apps/reference-server/dist
 docs/build
 docs/.docusaurus
 .vercel
