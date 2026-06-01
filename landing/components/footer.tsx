@@ -1,4 +1,5 @@
 import { CircleDot, GitBranch } from "lucide-react";
+import Link from "next/link";
 
 export function Footer() {
   return (
@@ -13,12 +14,12 @@ export function Footer() {
         </div>
 
         <div className="flex flex-wrap items-center gap-5">
-          <a
+          <Link
             href="/docs/what-is-signal"
             className="transition-colors hover:text-foreground"
           >
             Docs
-          </a>
+          </Link>
           <a
             href="https://github.com/DiogoAngelim/signal"
             target="_blank"

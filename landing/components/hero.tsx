@@ -1,4 +1,5 @@
 import { ArrowDown, BookOpen, CheckCircle2, GitBranch } from "lucide-react";
+import Link from "next/link";
 
 const situationRows = [
   {
@@ -50,13 +51,13 @@ export function Hero() {
               Read the reasoning
               <ArrowDown className="h-4 w-4" />
             </a>
-            <a
+            <Link
               href="/docs/what-is-signal"
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition-colors hover:border-primary/50"
             >
               <BookOpen className="h-4 w-4" />
               Open docs
-            </a>
+            </Link>
             <a
               href="https://github.com/DiogoAngelim/signal"
               target="_blank"

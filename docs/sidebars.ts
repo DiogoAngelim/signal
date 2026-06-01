@@ -26,7 +26,7 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "Level 5: Contribute",
-      items: ["contribute/repository-map"],
+      items: ["contribute/repository-map", "contribute/infrastructure-grade-audit"],
     },
   ],
 };

@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS signal_idempotency_records (
   payload_fingerprint text NOT NULL,
   status signal_idempotency_status NOT NULL DEFAULT 'pending',
   result jsonb,
+  result_meta jsonb,
   error jsonb,
   message_id text,
   created_at timestamptz NOT NULL DEFAULT now(),

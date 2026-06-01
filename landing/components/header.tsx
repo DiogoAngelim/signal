@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { BookOpen, CircleDot, GitBranch, Menu, X } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const navLinks = [
@@ -34,14 +35,14 @@ export function Header() {
     >
       <div className="mx-auto max-w-7xl px-6 py-4 sm:px-8 lg:px-12">
         <nav className="flex items-center justify-between gap-6">
-          <a href="/" className="flex min-w-0 items-center gap-3">
+          <Link href="/" className="flex min-w-0 items-center gap-3">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-primary">
               <CircleDot className="h-5 w-5" />
             </span>
             <span className="truncate text-lg font-semibold tracking-normal text-foreground">
               Signal
             </span>
-          </a>
+          </Link>
 
           <div className="hidden items-center gap-7 md:flex">
             {navLinks.map((link) => (
@@ -56,13 +57,13 @@ export function Header() {
           </div>
 
           <div className="hidden items-center gap-3 md:flex">
-            <a
+            <Link
               href="/docs/what-is-signal"
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary/50"
             >
               <BookOpen className="h-4 w-4" />
               Docs
-            </a>
+            </Link>
             <a
               href="https://github.com/DiogoAngelim/signal"
               target="_blank"
@@ -101,13 +102,13 @@ export function Header() {
                   {link.label}
                 </a>
               ))}
-              <a
+              <Link
                 href="/docs/what-is-signal"
                 className="rounded-lg px-2 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Docs
-              </a>
+              </Link>
             </div>
           </div>
         ) : null}

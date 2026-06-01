@@ -56,12 +56,12 @@ export function DocsRoutePage({
                 Open docs site
                 <ArrowRight className="h-4 w-4" />
               </a>
-              <a
+              <Link
                 href={primaryHref}
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition-colors hover:border-primary/50"
               >
                 {primaryLabel}
-              </a>
+              </Link>
             </div>
           </div>
 

@@ -1,4 +1,5 @@
 import { ArrowRight, BookOpen, GitBranch } from "lucide-react";
+import Link from "next/link";
 
 export function CTA() {
   return (
@@ -18,14 +19,14 @@ export function CTA() {
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row lg:shrink-0">
-          <a
+          <Link
             href="/docs/start/quick-start"
             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <BookOpen className="h-4 w-4" />
             Quick start
             <ArrowRight className="h-4 w-4" />
-          </a>
+          </Link>
           <a
             href="https://github.com/DiogoAngelim/signal"
             target="_blank"

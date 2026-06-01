@@ -1,19 +1,87 @@
 import { clamp, mean, numeric, signRatio, stdev } from "../math/statistics";
-import {
-  evaluateMeaning,
-  type MeaningResult,
-} from "../meaning/engine";
+import { type MeaningResult, evaluateMeaning } from "../meaning/engine";
 import { MetricRegistry } from "../metrics/registry";
 import {
-  evaluatePurpose,
+  type PruningCandidateInput,
+  type PruningInput,
+  type PruningResult,
+  evaluatePruning,
+} from "../pruning/engine";
+import {
   type PurposeBehaviorObservation,
   type PurposeExpectationRecord,
   type PurposeFrictionRecord,
   type PurposeInput,
   type PurposeResult,
+  evaluatePurpose,
 } from "../purpose/engine";
-import { evaluatePruning, type PruningCandidateInput, type PruningInput, type PruningResult } from "../pruning/engine";
-import type { MetricInput, ObservationPoint, SynchronizationInput, VenueState } from "../types";
+import type {
+  MetricInput,
+  ObservationPoint,
+  SynchronizationInput,
+  VenueState,
+} from "../types";
+
+type CommitmentPolicyName =
+  | "conservative"
+  | "balanced"
+  | "aggressive"
+  | "exploratory"
+  | "preservation"
+  | "compounding"
+  | "custom";
+
+type CommitmentConstraint = {
+  id: string;
+  type?: "hard" | "soft";
+  severity?: "low" | "medium" | "high" | "critical";
+  passed?: boolean;
+  targetId?: string;
+  maxCommitment?: number;
+  maxCommitmentRatio?: number;
+  reductionFactor?: number;
+  reason?: string;
+};
+
+type CommitmentDecision = {
+  id: string;
+  label?: string;
+  confidence?: number;
+  userTrust?: number;
+  systemConfidence?: number;
+  historicalReliability?: number;
+  risk?: number;
+  expectedUtility?: number;
+  maxCommitment?: number;
+  outcomeSeries?: number[];
+  metadata?: Record<string, unknown>;
+};
+
+type CommitmentEvaluateInput = {
+  decisions?: CommitmentDecision[];
+  resource?: {
+    available?: number;
+    requested?: number;
+    maximum?: number;
+  };
+  policy?: CommitmentPolicyName;
+  strategy?: "risk_adjusted";
+  constraints?: CommitmentConstraint[];
+  now?: string;
+  metadata?: Record<string, unknown>;
+};
+
+type CommitmentResult = {
+  status: "blocked" | "deferred" | "recommended";
+  totalRecommended: number;
+  normalizedCommitment: number;
+  recommendations: Array<{
+    targetId: string;
+    amount: number;
+  }>;
+  reasons: string[];
+  limitedBy: string[];
+};
 
 export type StocksOptimizerMetricSource = {
   marketStatus: "Open" | "Closed";
@@ -110,6 +178,33 @@ export type StocksMeaningViewModel = {
   gravityScore: number;
   gravityLabel: string;
   confidence: number;
+  warnings: string[];
+};
+
+export type StocksCommitmentKind = "trade" | "investment";
+
+export type StocksCommitmentRequest = {
+  contributionAmount: number;
+  commitmentKind: StocksCommitmentKind;
+};
+
+export type StocksCommitmentUnitRecommendation = {
+  ticker: string;
+  amount: number;
+  price: number;
+  units: number;
+};
+
+export type StocksCommitmentViewModel = {
+  mode: "enhanced" | "degraded";
+  status: CommitmentResult["status"];
+  commitmentKind: StocksCommitmentKind;
+  goal: string;
+  contributionAmount: number;
+  totalRecommended: number;
+  normalizedCommitment: number;
+  recommendations: StocksCommitmentUnitRecommendation[];
+  explanation: string;
   warnings: string[];
 };
 
@@ -353,7 +448,7 @@ export function evaluateStocksMeaning(input: StocksOptimizerMetricSource): Meani
   if (input.meaning && typeof input.meaning === "object" && input.meaning.module === "meaning") {
     return input.meaning as MeaningResult;
   }
-  const text = String(input.meaningText ?? "").trim();
+  const text = stocksGoalText(input);
   if (!text) return null;
   return evaluateMeaning({
     text,
@@ -482,6 +577,94 @@ export function evaluateStocksPurpose(
   const meaning = options.meaning === undefined ? evaluateStocksMeaning(input) : options.meaning;
   const pruning = options.pruning === undefined ? evaluateStocksPruning(input, { ...options, meaning }) : options.pruning;
   return evaluatePurpose(buildStocksPurposeInput(input, { ...options, pruning, meaning }));
+}
+
+function evaluateCommitmentModule(input: CommitmentEvaluateInput): CommitmentResult {
+  let commitment: { evaluateCommitment(value: CommitmentEvaluateInput): CommitmentResult };
+  try {
+    commitment = require("@signal/commitment");
+  } catch {
+    commitment = require("../../packages/commitment/src");
+  }
+  return commitment.evaluateCommitment(input);
+}
+
+export function buildStocksCommitmentInput(
+  input: StocksOptimizerMetricSource,
+  request: StocksCommitmentRequest,
+  options: { now?: string | number | Date; meaning?: Partial<MeaningResult> | null } = {},
+): CommitmentEvaluateInput {
+  const commitmentKind = normalizeCommitmentKind(request.commitmentKind);
+  const contributionAmount = Math.max(0, numeric(request.contributionAmount, 0));
+  const meaning = options.meaning === undefined ? evaluateStocksMeaning(input) : options.meaning;
+
+  return {
+    decisions: stocksCommitmentDecisions(input, contributionAmount),
+    resource: {
+      available: contributionAmount,
+      requested: contributionAmount,
+      maximum: contributionAmount,
+    },
+    policy: stocksCommitmentPolicy(commitmentKind, meaning),
+    strategy: "risk_adjusted",
+    constraints: stocksCommitmentConstraints(input, commitmentKind, meaning),
+    now: commitmentNow(options.now ?? input.now),
+    metadata: {
+      source: "stocks-optimizer",
+      commitmentKind,
+      goal: stocksCommitmentGoal(input, meaning),
+    },
+  };
+}
+
+export function evaluateStocksCommitment(
+  input: StocksOptimizerMetricSource,
+  request: StocksCommitmentRequest,
+  options: { now?: string | number | Date; meaning?: Partial<MeaningResult> | null } = {},
+): StocksCommitmentViewModel {
+  const meaning = options.meaning === undefined ? evaluateStocksMeaning(input) : options.meaning;
+  const commitment = evaluateCommitmentModule(buildStocksCommitmentInput(input, request, { ...options, meaning }));
+  return buildStocksCommitmentViewModel(input, request, commitment, { meaning });
+}
+
+export function buildStocksCommitmentViewModel(
+  input: StocksOptimizerMetricSource,
+  request: StocksCommitmentRequest,
+  commitment: CommitmentResult,
+  options: { meaning?: Partial<MeaningResult> | null } = {},
+): StocksCommitmentViewModel {
+  const commitmentKind = normalizeCommitmentKind(request.commitmentKind);
+  const contributionAmount = Math.max(0, numeric(request.contributionAmount, 0));
+  const stockMap = stockMapByCommitmentId(input.stocks);
+  const recommendations = commitment.recommendations
+    .map((recommendation): StocksCommitmentUnitRecommendation | null => {
+      const stock = stockMap.get(recommendation.targetId);
+      const price = stock ? stockPrice(stock) : 0;
+      if (recommendation.amount <= 0 || price <= 0) return null;
+      const amount = roundCurrency(recommendation.amount);
+      const roundedPrice = roundCurrency(price);
+      return {
+        ticker: recommendation.targetId,
+        amount,
+        price: roundedPrice,
+        units: roundUnits(amount / roundedPrice),
+      };
+    })
+    .filter((recommendation): recommendation is StocksCommitmentUnitRecommendation => recommendation != null);
+  const warnings = stocksCommitmentWarnings(input, commitment, recommendations);
+
+  return {
+    mode: commitment.status === "recommended" ? "enhanced" : "degraded",
+    status: commitment.status,
+    commitmentKind,
+    goal: stocksCommitmentGoal(input, options.meaning),
+    contributionAmount: roundCurrency(contributionAmount),
+    totalRecommended: roundCurrency(commitment.totalRecommended),
+    normalizedCommitment: commitment.normalizedCommitment,
+    recommendations,
+    explanation: commitment.reasons[0] ?? "Commitment reviewed the contribution against the current goal and signal quality.",
+    warnings,
+  };
 }
 
 export function buildStocksPurposeViewModel(purpose?: Partial<PurposeResult> | null): StocksPurposeViewModel {
@@ -777,6 +960,218 @@ function dashboardMetricPruningCandidates(input: StocksOptimizerMetricSource): P
       timestamp: input.now,
     },
   ];
+}
+
+function stocksCommitmentDecisions(input: StocksOptimizerMetricSource, contributionAmount: number): CommitmentDecision[] {
+  const candidates = (Array.isArray(input.stocks) ? input.stocks : [])
+    .map((stock, index) => ({
+      id: stockCommitmentId(stock, index),
+      stock,
+      price: stockPrice(stock),
+      suggestedExposure: Math.max(0, numeric(stock.suggestedExposure, 0)),
+    }))
+    .filter((candidate) => candidate.price > 0 && stockCanReceiveCommitment(candidate.stock));
+  const totalSuggestedExposure = candidates.reduce((sum, candidate) => sum + candidate.suggestedExposure, 0);
+
+  return candidates
+    .filter((candidate) => totalSuggestedExposure <= 0 || candidate.suggestedExposure > 0)
+    .map((candidate) => {
+      const stock = candidate.stock;
+      const setupQuality = score(stock.setupQuality, input.avgQuality ?? 50);
+      const trendQuality = score(stock.trendQuality, input.avgQuality ?? 50);
+      const timingQuality = score(stock.timingQuality, input.avgQuality ?? 50);
+      const expectedMoveScore = clamp(50 + numeric(stock.expectedMove, latestChange(stock)) * 6);
+      const signalConfidence = score(stock.signalConfidence ?? stock.confidence, input.confidence ?? 50);
+      const calibrationTrust = score(input.calibrationTrustworthiness, input.survivalScore);
+      const quoteTrust = stock.quoteStatus === "available" || candidate.price > 0 ? 85 : 45;
+      const signalTrust = stock.signalStatus === "provided" || Boolean(stock.signalAction) ? 85 : 45;
+      const maxCommitment = totalSuggestedExposure > 0 && contributionAmount > 0
+        ? roundCurrency((contributionAmount * candidate.suggestedExposure) / totalSuggestedExposure)
+        : undefined;
+
+      return {
+        id: candidate.id,
+        label: candidate.id,
+        confidence: signalConfidence / 100,
+        userTrust: mean([calibrationTrust, quoteTrust, signalTrust]) / 100,
+        systemConfidence: score(input.deploymentReadinessScore, input.survivalScore) / 100,
+        historicalReliability: score(input.calibrationHistoricalAccuracy, input.backtestWinRatePct ?? calibrationTrust) / 100,
+        risk: score(stock.riskPressure, input.avgRisk ?? 50) / 100,
+        expectedUtility: mean([setupQuality, trendQuality, timingQuality, expectedMoveScore]) / 100,
+        ...(maxCommitment != null ? { maxCommitment } : {}),
+        outcomeSeries: historyReturns(stock.history).slice(-20).map((value) => value / 100),
+        metadata: { price: candidate.price },
+      };
+    });
+}
+
+function stocksCommitmentConstraints(
+  input: StocksOptimizerMetricSource,
+  commitmentKind: StocksCommitmentKind,
+  meaning?: Partial<MeaningResult> | null,
+): CommitmentConstraint[] {
+  const constraints: CommitmentConstraint[] = [];
+  const actionPermission = meaning?.purposeInputs?.actionPermission;
+
+  if (actionPermission === "block") {
+    constraints.push({
+      id: "meaning_goal_block",
+      type: "hard",
+      severity: "critical",
+      passed: false,
+      reason: "The main goal blocks new commitment.",
+    });
+  } else if (actionPermission === "review" || actionPermission === "reduce") {
+    constraints.push({
+      id: "meaning_goal_review",
+      type: "soft",
+      severity: commitmentKind === "trade" ? "high" : "medium",
+      passed: false,
+      reason: "The main goal calls for a smaller commitment.",
+    });
+  }
+
+  if (input.staleData) {
+    constraints.push({
+      id: "stale_market_data",
+      type: "soft",
+      severity: commitmentKind === "trade" ? "high" : "medium",
+      passed: false,
+      reason: "Market data is stale.",
+    });
+  }
+
+  if (input.failureFlags.length > 0) {
+    constraints.push({
+      id: "readiness_flags",
+      type: "soft",
+      severity: "medium",
+      passed: false,
+      reason: "Readiness flags are present.",
+    });
+  }
+
+  if (commitmentKind === "trade" && input.marketStatus === "Closed") {
+    constraints.push({
+      id: "market_closed",
+      type: "soft",
+      severity: "medium",
+      passed: false,
+      reason: "The market is closed for trade commitment.",
+    });
+  }
+
+  return constraints;
+}
+
+function stocksCommitmentPolicy(
+  commitmentKind: StocksCommitmentKind,
+  meaning?: Partial<MeaningResult> | null,
+): CommitmentPolicyName {
+  const goal = String(meaning?.transformedGoal ?? meaning?.positiveGoal ?? "").toLowerCase();
+  if (/protect|safety|capital|survival|recover|uncertainty|steady/.test(goal)) {
+    return commitmentKind === "trade" ? "conservative" : "preservation";
+  }
+  if (commitmentKind === "investment" && /compound|freedom|durable|progress|growth|excellent/.test(goal)) {
+    return "compounding";
+  }
+  return commitmentKind === "trade" ? "conservative" : "balanced";
+}
+
+function stocksCommitmentGoal(
+  input: StocksOptimizerMetricSource,
+  meaning?: Partial<MeaningResult> | null,
+) {
+  const goalText = stocksGoalText(input);
+  return String(
+    meaning?.transformedGoal ??
+      meaning?.positiveGoal ??
+      (goalText || undefined) ??
+      "sustainable market progress",
+  );
+}
+
+function stocksGoalText(input: StocksOptimizerMetricSource) {
+  const source = input as Record<string, unknown>;
+  return String(input.meaningText ?? source.mainGoal ?? source.goal ?? "").trim();
+}
+
+function stocksCommitmentWarnings(
+  input: StocksOptimizerMetricSource,
+  commitment: CommitmentResult,
+  recommendations: StocksCommitmentUnitRecommendation[],
+) {
+  const warnings: string[] = [];
+  if (commitment.status !== "recommended") warnings.push(...commitment.reasons.slice(0, 2));
+  if (commitment.limitedBy.includes("missing_decision")) warnings.push("No priced buy candidates were available.");
+  if (commitment.status === "recommended" && recommendations.length === 0) {
+    warnings.push("Commitment recommended capital, but no priced units could be calculated.");
+  }
+  return uniqueStrings([...warnings, ...safeStringArray(input.calibrationWarnings)]);
+}
+
+function stockCanReceiveCommitment(stock: Record<string, unknown>) {
+  const action = String(stock.signalAction ?? stock.allocationAction ?? "").toLowerCase();
+  if (/sell|block|avoid|skip/.test(action)) return false;
+  return numeric(stock.suggestedExposure, 0) > 0 || /buy|accumulate|add|invest/.test(action);
+}
+
+function stockMapByCommitmentId(stocks: Array<Record<string, unknown>>) {
+  const result = new Map<string, Record<string, unknown>>();
+  for (const [index, stock] of (Array.isArray(stocks) ? stocks : []).entries()) {
+    result.set(stockCommitmentId(stock, index), stock);
+  }
+  return result;
+}
+
+function stockCommitmentId(stock: Record<string, unknown>, index: number) {
+  return String(stock.ticker ?? stock.symbol ?? stock.name ?? `stock-${index + 1}`).trim() || `stock-${index + 1}`;
+}
+
+function stockPrice(stock: Record<string, unknown>) {
+  const quote = stock.quote && typeof stock.quote === "object" ? stock.quote as Record<string, unknown> : {};
+  return firstPositiveNumber(
+    stock.price,
+    stock.lastPrice,
+    stock.currentPrice,
+    stock.markPrice,
+    stock.quotePrice,
+    stock.latestPrice,
+    stock.close,
+    quote.price,
+    quote.lastPrice,
+    quote.latestPrice,
+  );
+}
+
+function firstPositiveNumber(...values: unknown[]) {
+  for (const value of values) {
+    const result = numeric(value, Number.NaN);
+    if (result > 0) return result;
+  }
+  return 0;
+}
+
+function normalizeCommitmentKind(value: StocksCommitmentKind) {
+  return value === "trade" ? "trade" : "investment";
+}
+
+function commitmentNow(value: string | number | Date | null | undefined) {
+  if (value == null) return undefined;
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date.toISOString() : undefined;
+}
+
+function roundCurrency(value: number) {
+  return Math.round(numeric(value, 0) * 100) / 100;
+}
+
+function roundUnits(value: number) {
+  return Math.round(numeric(value, 0) * 1_000_000) / 1_000_000;
+}
+
+function uniqueStrings(values: string[]) {
+  return [...new Set(values.filter(Boolean))];
 }
 
 function safeStringArray(value: unknown): string[] {
