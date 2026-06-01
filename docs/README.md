@@ -449,12 +449,12 @@ Runnable examples in `examples/runtime`:
 
 Application examples:
 
-| Example | Path | Command |
-| --- | --- | --- |
-| Aware | `examples/aware` | `pnpm --filter @signal/aware dev` |
-| Climate Forecast | `examples/climate-forecast` | `pnpm --filter @signal/climate-forecast test` |
-| Emergency Awareness | `client/emergency-awareness` | `pnpm --filter @signal/emergency-awareness dev` |
-| Stocks Optimizer | `examples/stocks-optimizer` | Preserved example state in this checkout; it is not currently a pnpm workspace package. |
+| Example | Path | Command | Live URL |
+| --- | --- | --- | --- |
+| Aware | `examples/aware` | `pnpm --filter @signal/aware dev` | <https://aware-guide.vercel.app> |
+| Climate Forecast | `examples/climate-forecast` | `pnpm --filter @signal/climate-forecast test` | Code/package example; no Vercel app. |
+| Emergency Awareness | `client/emergency-awareness` | `pnpm --filter @signal/emergency-awareness dev` | <https://weather-awareness.vercel.app> |
+| Stocks Optimizer | `examples/stocks-optimizer` | Preserved example state in this checkout; it is not currently a pnpm workspace package. | <https://stocks-optimizer.vercel.app> |
 
 Reference server:
 

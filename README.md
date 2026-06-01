@@ -49,6 +49,12 @@ pnpm -r --if-present --sort run test:coverage
 
 Read the full documentation in [docs/README.md](docs/README.md).
 
+## Example App Links
+
+- Aware: <https://aware-guide.vercel.app>
+- Emergency Awareness: <https://weather-awareness.vercel.app>
+- Stocks Optimizer: <https://stocks-optimizer.vercel.app>
+
 ## License
 
 MIT
