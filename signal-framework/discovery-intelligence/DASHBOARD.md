@@ -1,50 +1,51 @@
-# Discovery Intelligence Dashboard
+# Discovery Intelligence Guidance
 
-Dashboard surfaces should include these sections:
+Stocks Optimizer should lead as a capital allocation guide, not as a metrics
+dashboard. Discovery Intelligence remains available, but it is evidence below
+the guidance layer.
 
-## Discovery Intelligence
+## First Screen
 
-- Score
+Render the experience in this order:
 
-## Discovery Maturity
+1. What seems reasonable right now
+2. Suggested participation
+3. Why participation remains here
+4. What could change this plan
+5. Evidence
 
-- Emerging
-- Detected
-- Observed
-- Confirmed
-- Repeatable
-- Trusted
-- Institutional
+The first layer should be a short narrative in plain language. Do not lead with
+scores, confidence, trust, diagnostics, market health, or internal module names.
 
-## Opportunity Economics
+The second layer should show the suggested capital plan:
 
-- Act
-- Wait
-- Reject
-- Restrict
-- Avoided Loss
-- Missed Upside
-- Opportunity Cost
+- cash to keep uncommitted
+- strongest qualifying opportunities
+- total participation
 
-## Governance Effectiveness
+The third layer should explain the plan in calm allocator language. Prefer
+"Similar situations have generally behaved well" or "Participation remains
+limited" over raw metrics.
 
-- Helpful Restrictions
-- Harmful Restrictions
-- Restriction audit list
+The fourth layer should make plan evolution transparent:
 
-## Institutional Knowledge
+- participation may increase if reliability improves, more opportunities
+  qualify, and conditions remain stable
+- participation may decrease if conditions weaken, reliability deteriorates, or
+  participation narrows
 
-- Knowledge
-- Policies
-- Standards
-- Institutional Assets
+## Evidence Layer
 
-## Meta-Learning
+Discovery Intelligence details can appear after the guidance layers:
 
-- Calibration Trend
-- Trust Trend
-- Survival Trend
-- Decision Quality Trend
-- Governance Trend
+- discovery maturity
+- opportunity economics
+- governance effectiveness
+- institutional knowledge
+- meta-learning
+- restriction audits
+- calibration and trust trends
 
-The stocks optimizer dashboard renders these in Executive Summary and preserves audit details in the Audit Layer.
+The stocks optimizer renders these as progressive disclosure and preserves audit
+details for review. Evidence supports the plan; it should not define the first
+impression.

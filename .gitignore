@@ -15,6 +15,7 @@ coverage
 out
 *.tsbuildinfo
 *.zip
+.local-cache
 repo.txt
 .signal-example-training
 apps/reference-server/dist

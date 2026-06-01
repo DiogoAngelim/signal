@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildCapitalGuidance,
   buildDecisionPipeline,
   buildExecutiveDashboardIA,
   buildGovernanceEvolution,
@@ -112,9 +113,62 @@ describe("executive dashboard IA integration", () => {
     expect(ia.executiveReasoning.finalDecision).toBe("Wait");
     expect(ia.executiveReasoning.recommendedParticipationMode).toBe("Micro");
     expect(ia.executiveReasoning.mainReasonForRestriction?.code).toBe("survival_scar");
+    expect(ia.capitalGuidance.hero.heading).toBe("What Seems Reasonable Right Now");
     expect(ia.evidenceSummary.find((item) => item.id === "similar-samples")?.value).toBe("1313");
     expect(ia.whyNotFullSize.factors[0]?.code).toBe("survival_scar");
     expect(ia.traceability.preservedModules.resolve).toBe(state.resolve);
+  });
+
+  it("builds clarity-first capital guidance before diagnostics", () => {
+    const guidance = buildCapitalGuidance({
+      ...state,
+      resolve: {
+        ...state.resolve,
+        decision: "commit",
+      },
+      sizing: {
+        ...state.sizing,
+        allocations: [
+          {
+            symbol: "AAPL",
+            allocationPct: 1.2,
+            reason: "Strongest qualifying opportunity.",
+          },
+          {
+            symbol: "MSFT",
+            allocationPct: 0.8,
+            reason: "Second strongest qualifying opportunity.",
+          },
+        ],
+      },
+    });
+
+    expect(guidance.hero.narrative).toContain(
+      "Participating gradually appears reasonable",
+    );
+    expect(guidance.hero.narrative).not.toMatch(
+      /\d|%|confidence|score|diagnostic|terminal/i,
+    );
+    expect(guidance.participationPlan.items.map((item) => item.label)).toEqual([
+      "Cash",
+      "AAPL",
+      "MSFT",
+    ]);
+    expect(guidance.participationPlan.cashPct).toBe(98);
+    expect(guidance.participationPlan.deployedPct).toBe(2);
+    expect(guidance.whyParticipationRemainsHere.reasons).toContain(
+      "Similar situations have generally behaved well.",
+    );
+    expect(
+      guidance.whatCouldChangeThisPlan.participationMayIncreaseIf,
+    ).toContain("Reliability continues improving.");
+    expect(
+      guidance.whatCouldChangeThisPlan.participationMayDecreaseIf,
+    ).toContain("Reliability deteriorates.");
+    expect(
+      guidance.evidence.items.find((item) => item.id === "similar-samples")
+        ?.value,
+    ).toBe("1313");
   });
 
   it("deduplicates repeated explanations and preserves pipeline order", () => {

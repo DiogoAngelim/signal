@@ -232,6 +232,52 @@ export type ExecutiveReasoning = {
   primaryInvalidationCondition: string;
 };
 
+export type CapitalGuidancePosture =
+  | "wait"
+  | "observe"
+  | "gradual"
+  | "normal"
+  | "reduce"
+  | "review";
+
+export type CapitalGuidancePlanItem = {
+  id: string;
+  label: string;
+  allocationPct: number;
+  role: "cash" | "asset";
+  rationale: string;
+};
+
+export type CapitalGuidance = {
+  hero: {
+    heading: "What Seems Reasonable Right Now";
+    narrative: string;
+    posture: CapitalGuidancePosture;
+    tone: ExecutiveTone;
+  };
+  participationPlan: {
+    heading: "Suggested Participation";
+    summary: string;
+    cashPct: number;
+    deployedPct: number;
+    items: CapitalGuidancePlanItem[];
+  };
+  whyParticipationRemainsHere: {
+    heading: "Why Participation Remains Here";
+    reasons: string[];
+  };
+  whatCouldChangeThisPlan: {
+    heading: "What Could Change This Plan";
+    participationMayIncreaseIf: string[];
+    participationMayDecreaseIf: string[];
+  };
+  evidence: {
+    heading: "Evidence";
+    disclosure: "Available for review";
+    items: EvidenceSummaryItem[];
+  };
+};
+
 export type ExecutiveDashboardIA = {
   executive: ExecutiveDecision | null;
   executionQuality: ExecutionQualityResult | null;
@@ -245,6 +291,7 @@ export type ExecutiveDashboardIA = {
     capacity: CapacityState;
     urgency: UrgencyState;
   };
+  capitalGuidance: CapitalGuidance;
   executiveReasoning: ExecutiveReasoning;
   evidenceSummary: EvidenceSummaryItem[];
   canonicalReasons: CanonicalReason[];
@@ -413,6 +460,7 @@ export function buildExecutiveDashboardIA(input: ExecutiveDashboardInput = {}): 
   const decisionChange = buildDecisionChangeMap(input, canonicalReasons, extracted);
   const terminologyGroups = buildTerminologyGroups(input);
   const decisionStates = buildDecisionStates(input);
+  const capitalGuidance = buildCapitalGuidance(input, canonicalReasons, evidenceSummary, decisionChange, decisionStates);
   const governanceEvolution = buildGovernanceEvolution(input, canonicalReasons, extracted, decisionStates);
 
   return {
@@ -423,6 +471,7 @@ export function buildExecutiveDashboardIA(input: ExecutiveDashboardInput = {}): 
     discoveryIntelligence: input.discoveryIntelligence ?? null,
     wisdom: input.wisdom ?? null,
     decisionStates,
+    capitalGuidance,
     executiveReasoning,
     evidenceSummary,
     canonicalReasons,
@@ -454,6 +503,62 @@ export function buildExecutiveDashboardIA(input: ExecutiveDashboardInput = {}): 
         strategyHistory: input.strategyHistory ?? input.backtestSummary ?? null,
       },
       originalState: input.sourceState ?? null,
+    },
+  };
+}
+
+export function buildCapitalGuidance(
+  input: ExecutiveDashboardInput = {},
+  canonicalReasons = resolveCanonicalExplanations(input),
+  evidenceSummary = buildEvidenceSummary(input),
+  decisionChange = buildDecisionChangeMap(input, canonicalReasons),
+  decisionStates = buildDecisionStates(input),
+): CapitalGuidance {
+  const posture = capitalGuidancePostureFor(input, decisionStates);
+  const participationPlan = buildParticipationPlan(
+    input,
+    decisionStates,
+    posture,
+  );
+  const hero = {
+    heading: "What Seems Reasonable Right Now" as const,
+    narrative: heroNarrativeFor(
+      posture,
+      canonicalReasons,
+      participationPlan.deployedPct,
+    ),
+    posture,
+    tone: capitalGuidanceToneFor(posture),
+  };
+  const whyParticipationRemainsHere = {
+    heading: "Why Participation Remains Here" as const,
+    reasons: plainParticipationReasons(
+      input,
+      canonicalReasons,
+      participationPlan.deployedPct,
+    ),
+  };
+  const whatCouldChangeThisPlan = {
+    heading: "What Could Change This Plan" as const,
+    participationMayIncreaseIf: plainIncreaseConditions(
+      canonicalReasons,
+      decisionChange,
+    ),
+    participationMayDecreaseIf: plainDecreaseConditions(
+      canonicalReasons,
+      decisionChange,
+    ),
+  };
+
+  return {
+    hero,
+    participationPlan,
+    whyParticipationRemainsHere,
+    whatCouldChangeThisPlan,
+    evidence: {
+      heading: "Evidence",
+      disclosure: "Available for review",
+      items: evidenceSummary,
     },
   };
 }
@@ -1020,13 +1125,414 @@ export function buildTerminologyGroups(input: ExecutiveDashboardInput = {}): Ter
   ];
 }
 
+function buildParticipationPlan(
+  input: ExecutiveDashboardInput,
+  decisionStates: ExecutiveDashboardIA["decisionStates"],
+  posture: CapitalGuidancePosture,
+): CapitalGuidance["participationPlan"] {
+  const participationPct = participationPctFor(input, decisionStates, posture);
+  const assetItems = buildAssetPlanItems(input, participationPct);
+  const deployedPct = roundAllocation(
+    assetItems.reduce((sum, item) => sum + item.allocationPct, 0),
+  );
+  const cashPct = roundAllocation(Math.max(0, 100 - deployedPct));
+
+  return {
+    heading: "Suggested Participation",
+    summary: participationSummaryFor(deployedPct, assetItems.length, posture),
+    cashPct,
+    deployedPct,
+    items: [
+      {
+        id: "cash",
+        label: "Cash",
+        allocationPct: cashPct,
+        role: "cash",
+        rationale:
+          deployedPct > 0
+            ? "Kept available while the evidence continues to develop."
+            : "Kept available until the current plan becomes clearer.",
+      },
+      ...assetItems,
+    ],
+  };
+}
+
+function buildAssetPlanItems(
+  input: ExecutiveDashboardInput,
+  participationPct: number,
+): CapitalGuidancePlanItem[] {
+  if (participationPct <= 0) return [];
+
+  const candidates = allocationCandidates(input)
+    .map((candidate, index) => ({
+      id: allocationId(candidate, index),
+      label: allocationLabel(candidate, index),
+      allocationPct: allocationPct(candidate),
+      strength: allocationStrength(candidate),
+      rationale: allocationRationale(candidate),
+    }))
+    .filter((candidate) => candidate.label)
+    .sort(
+      (a, b) =>
+        (b.allocationPct ?? 0) - (a.allocationPct ?? 0) ||
+        b.strength - a.strength,
+    )
+    .slice(0, 4);
+
+  if (!candidates.length) {
+    return [
+      {
+        id: "qualified-opportunities",
+        label: "Qualified opportunities",
+        allocationPct: roundAllocation(participationPct),
+        role: "asset",
+        rationale:
+          "Participation stays grouped until individual opportunities qualify clearly.",
+      },
+    ];
+  }
+
+  const explicit = candidates.filter(
+    (candidate) =>
+      candidate.allocationPct != null && candidate.allocationPct > 0,
+  );
+  if (explicit.length) {
+    const total = explicit.reduce(
+      (sum, item) => sum + (item.allocationPct ?? 0),
+      0,
+    );
+    const scale = total > participationPct ? participationPct / total : 1;
+    return explicit
+      .map((candidate) => ({
+        id: candidate.id,
+        label: candidate.label,
+        allocationPct: roundAllocation((candidate.allocationPct ?? 0) * scale),
+        role: "asset" as const,
+        rationale: candidate.rationale,
+      }))
+      .filter((item) => item.allocationPct > 0);
+  }
+
+  const totalStrength =
+    candidates.reduce((sum, item) => sum + item.strength, 0) ||
+    candidates.length;
+  return candidates
+    .map((candidate) => ({
+      id: candidate.id,
+      label: candidate.label,
+      allocationPct: roundAllocation(
+        participationPct * ((candidate.strength || 1) / totalStrength),
+      ),
+      role: "asset" as const,
+      rationale: candidate.rationale,
+    }))
+    .filter((item) => item.allocationPct > 0);
+}
+
+function participationPctFor(
+  input: ExecutiveDashboardInput,
+  decisionStates: ExecutiveDashboardIA["decisionStates"],
+  posture: CapitalGuidancePosture,
+) {
+  if (posture === "wait" || posture === "observe") return 0;
+
+  const explicit = percentish(
+    input.sizing?.targetExposurePct,
+    input.sizing?.targetExposure,
+    input.sizing?.suggestedParticipationPct,
+    input.resolve?.targetParticipationPct,
+    input.resolve?.targetExposurePct,
+    input.executive?.maxExposure,
+    decisionStates.capacity.maxExposure,
+    input.trustGovernor?.maxExposure,
+    input.sizing?.suggestedMaximumExposurePct,
+    input.sizing?.maxExposure,
+    input.recovery?.recommendedExposureCap,
+    input.readiness?.maxPositionPct,
+  );
+  if (explicit != null) return roundAllocation(clampPercent(explicit));
+  if (posture === "normal") return 20;
+  if (posture === "gradual") return 5;
+  return 0;
+}
+
+function participationSummaryFor(
+  deployedPct: number,
+  assetCount: number,
+  posture: CapitalGuidancePosture,
+) {
+  if (deployedPct <= 0) return "No new participation appears reasonable yet.";
+  if (posture === "normal")
+    return "Participation can move beyond a starter position while monitoring remains active.";
+  if (assetCount <= 1)
+    return "Participation remains intentionally narrow and conservative.";
+  return "Participation is spread across the strongest qualifying opportunities.";
+}
+
+function capitalGuidancePostureFor(
+  input: ExecutiveDashboardInput,
+  decisionStates: ExecutiveDashboardIA["decisionStates"],
+): CapitalGuidancePosture {
+  const finalDecision = normalized(finalDecisionLabel(input));
+  const mode = normalizedParticipationMode(input);
+
+  if (/sell|reduce|deescalate|invalidate|reject|avoid/.test(finalDecision))
+    return "reduce";
+  if (/review|escalat/.test(finalDecision)) return "review";
+  if (
+    !decisionStates.permission.allowed ||
+    decisionStates.permission.level === "blocked" ||
+    ["blocked", "exits only", "none"].includes(mode)
+  ) {
+    return "wait";
+  }
+  if (/wait|watch|hold|pending/.test(finalDecision) || mode === "watch")
+    return "observe";
+  if (
+    [
+      "micro",
+      "probe",
+      "paper",
+      "small",
+      "limited",
+      "reduced",
+      "reduced size",
+    ].includes(mode)
+  )
+    return "gradual";
+  if (
+    decisionStates.capacity.maxExposure > 0 &&
+    decisionStates.capacity.maxExposure < 10
+  )
+    return "gradual";
+  if (
+    /act|buy|commit|approved/.test(finalDecision) ||
+    ["normal", "aggressive", "full", "approved"].includes(mode)
+  )
+    return "normal";
+  return "observe";
+}
+
+function capitalGuidanceToneFor(
+  posture: CapitalGuidancePosture,
+): ExecutiveTone {
+  if (posture === "normal") return "good";
+  if (posture === "reduce" || posture === "wait") return "bad";
+  if (posture === "review") return "warn";
+  return "neutral";
+}
+
+function heroNarrativeFor(
+  posture: CapitalGuidancePosture,
+  canonicalReasons: CanonicalReason[],
+  deployedPct: number,
+) {
+  if (posture === "reduce") {
+    return "Conditions have weakened enough that protecting capital appears more reasonable than adding to the plan. Reducing participation keeps the system from relying on evidence that no longer holds.";
+  }
+  if (posture === "wait") {
+    return "Conditions are not clear enough to add capital. Staying mostly uncommitted appears reasonable while the system waits for reliability and participation to improve.";
+  }
+  if (posture === "observe" || deployedPct <= 0) {
+    return "Conditions are still forming. Observation appears reasonable for now, with capital kept available until the evidence becomes steadier.";
+  }
+  if (posture === "review") {
+    return "Conditions are mixed enough that review appears reasonable before capital changes. The plan should stay conservative until the conflict is resolved.";
+  }
+  if (posture === "normal" && !canonicalReasons.length) {
+    return "Conditions appear stable and the evidence is broadly supportive. Participating at the normal plan level appears reasonable while monitoring continues.";
+  }
+  return "Conditions continue to improve, although evidence remains incomplete. Participating gradually appears reasonable, with most capital kept uncommitted while reliability continues to strengthen.";
+}
+
+function plainParticipationReasons(
+  input: ExecutiveDashboardInput,
+  canonicalReasons: CanonicalReason[],
+  deployedPct: number,
+) {
+  return uniqueStrings([
+    ...plainSupportReasons(input, deployedPct),
+    ...canonicalReasons.slice(0, 4).map(plainReasonFor),
+  ]).slice(0, 5);
+}
+
+function plainSupportReasons(
+  input: ExecutiveDashboardInput,
+  deployedPct: number,
+) {
+  const reasons: string[] = [];
+  if (input.recognition?.verdict === "recognized")
+    reasons.push("Similar situations have generally behaved well.");
+  if (
+    input.belief?.verdict === "justified" ||
+    input.judgement?.status === "trusted"
+  ) {
+    reasons.push(
+      "The current opportunity has enough support to stay on the plan.",
+    );
+  }
+  if (deployedPct > 0) {
+    reasons.push(
+      deployedPct < 10
+        ? "Participation is improving, but it remains intentionally limited."
+        : "Participation has enough support to move beyond observation.",
+    );
+  } else {
+    reasons.push(
+      "New participation is paused until the picture becomes clearer.",
+    );
+  }
+  if (
+    dataReliabilityScore(input) != null &&
+    Number(dataReliabilityScore(input)) >= 70
+  ) {
+    reasons.push(
+      "The available data is stable enough to keep evaluating the plan.",
+    );
+  }
+  if (!reasons.length)
+    reasons.push(
+      "The system is still collecting enough evidence to make the next step clearer.",
+    );
+  return reasons;
+}
+
+function plainReasonFor(reason: CanonicalReason) {
+  switch (reason.code) {
+    case "survival_scar":
+      return "Recent similar periods still need proof that progress can continue without giving back too much.";
+    case "trust_below_threshold":
+      return "The evidence is improving, but it has not been reliable long enough to justify a larger commitment.";
+    case "reduced_size":
+      return "Gradual participation leaves room to learn from current conditions before adding more capital.";
+    case "recovery_incomplete":
+      return "The system is still rebuilding room after earlier pressure.";
+    case "agency_unresolved":
+      return "Some governance checks still need review before participation can expand.";
+    case "opportunity_density_low":
+      return "Only a small number of opportunities qualify right now.";
+    case "discovery_immature":
+      return "The opportunity set is promising but still early.";
+    case "calibration_review":
+      return "Past outcomes still need more consistency.";
+    case "readiness_blocked":
+      return "Live readiness checks are not yet clean enough.";
+    case "overfit_risk":
+      return "Historical performance still needs stronger proof that it can hold up.";
+    case "walk_forward_instability":
+      return "Independent periods have not been stable enough yet.";
+    case "data_reliability_low":
+      return "The evidence feed is not reliable enough for a larger plan.";
+  }
+}
+
+function plainIncreaseConditions(
+  canonicalReasons: CanonicalReason[],
+  decisionChange: DecisionChangeMap,
+) {
+  return uniqueStrings([
+    ...canonicalReasons.flatMap((reason) => increaseConditionsFor(reason.code)),
+    ...decisionChange.increaseExposure.map(plainCondition),
+    "Conditions remain stable.",
+  ]).slice(0, 5);
+}
+
+function plainDecreaseConditions(
+  canonicalReasons: CanonicalReason[],
+  decisionChange: DecisionChangeMap,
+) {
+  return uniqueStrings([
+    ...canonicalReasons.flatMap((reason) => decreaseConditionsFor(reason.code)),
+    ...decisionChange.reduceExposure.map(plainCondition),
+    "Conditions weaken.",
+    "Reliability deteriorates.",
+    "Participation narrows significantly.",
+  ]).slice(0, 5);
+}
+
+function increaseConditionsFor(code: CanonicalReasonCode) {
+  if (
+    code === "survival_scar" ||
+    code === "recovery_incomplete" ||
+    code === "reduced_size"
+  ) {
+    return [
+      "Reduced-size outcomes stay clean.",
+      "Recovery pressure continues easing.",
+    ];
+  }
+  if (
+    code === "trust_below_threshold" ||
+    code === "calibration_review" ||
+    code === "walk_forward_instability"
+  ) {
+    return [
+      "Reliability continues improving.",
+      "Historical evidence remains consistent.",
+    ];
+  }
+  if (code === "opportunity_density_low" || code === "discovery_immature") {
+    return [
+      "More opportunities qualify.",
+      "Participation broadens across the opportunity set.",
+    ];
+  }
+  if (code === "readiness_blocked" || code === "data_reliability_low") {
+    return ["Operational evidence stays fresh and stable."];
+  }
+  if (code === "agency_unresolved") return ["Governance review clears."];
+  if (code === "overfit_risk") return ["Robustness evidence improves."];
+  return [];
+}
+
+function decreaseConditionsFor(code: CanonicalReasonCode) {
+  if (code === "survival_scar" || code === "recovery_incomplete")
+    return ["Recovery pressure returns."];
+  if (code === "trust_below_threshold" || code === "calibration_review")
+    return ["Reliability deteriorates."];
+  if (code === "opportunity_density_low" || code === "discovery_immature")
+    return ["Participation narrows significantly."];
+  if (code === "readiness_blocked" || code === "data_reliability_low")
+    return ["Data quality degrades."];
+  if (code === "overfit_risk" || code === "walk_forward_instability")
+    return ["Historical evidence weakens."];
+  return [];
+}
+
+function plainCondition(value: string) {
+  const text = normalized(value);
+  if (/data|quote|signal|fresh/.test(text))
+    return "Data quality remains dependable.";
+  if (
+    /trust|calibration|confidence|outcome|walk-forward|walk forward|reliability/.test(
+      text,
+    )
+  )
+    return "Reliability continues improving.";
+  if (/survival|recovery|drawdown|adverse|scar/.test(text))
+    return "Recovery pressure continues easing.";
+  if (/opportunity|density|candidate|discovery|recognition/.test(text))
+    return "More opportunities qualify.";
+  if (/readiness|gate|capacity/.test(text))
+    return "Readiness checks remain clean.";
+  if (/risk|weaken|regress|deteriorat|collapse/.test(text))
+    return "Conditions weaken.";
+  return value;
+}
+
 function buildExecutiveReasoning(
   input: ExecutiveDashboardInput,
   canonicalReasons: CanonicalReason[],
   extracted: ReturnType<typeof extractUnlockInvalidationConditions>,
 ): ExecutiveReasoning {
   const finalDecision = finalDecisionLabel(input);
-  const participationMode = readable(normalizedParticipationMode(input) || "pending");
+  const participationMode = readable(
+    normalizedParticipationMode(input) || "pending",
+  );
+  const decisionStates = buildDecisionStates(input);
+  const posture = capitalGuidancePostureFor(input, decisionStates);
+  const participationPct = participationPctFor(input, decisionStates, posture);
   const maxExposureValue = firstFinite(
     input.trustGovernor?.maxExposure,
     input.sizing?.suggestedMaximumExposurePct,
@@ -1034,24 +1540,14 @@ function buildExecutiveReasoning(
     input.recovery?.recommendedExposureCap,
     input.readiness?.maxPositionPct,
   );
-  const maxExposure = maxExposureValue == null ? "Pending" : pctValue(maxExposureValue);
+  const maxExposure =
+    maxExposureValue == null ? "Pending" : pctValue(maxExposureValue);
   const mainReason = canonicalReasons[0] ?? null;
-  const opportunityPhrase = opportunityPhraseFor(input);
-  const reliabilityPhrase = reliabilityPhraseFor(input);
-  const riskPhrase = riskPhraseFor(input);
-  const wisdomPhrase = input.wisdom
-    ? `Wisdom scores decision quality at ${pctValue(input.wisdom.decisionQuality)} with ${pctValue(input.wisdom.counterfactuals.restrictionValue)} restriction value`
-    : "Wisdom is still collecting outcome memory";
-  const discoveryIntelligencePhrase = input.discoveryIntelligence
-    ? `Discovery Intelligence scores the learning loop at ${pctValue(input.discoveryIntelligence.score)}`
-    : "Discovery Intelligence is still collecting lifecycle and outcome evidence";
-  const recoveryPhrase = canonicalReasons.some((reason) => reason.code === "recovery_incomplete" || reason.code === "survival_scar")
-    ? "recovery is incomplete"
-    : "recovery is not the active limiter";
-  const restrictionPhrase = mainReason
-    ? `${mainReason.label.toLowerCase()} remains active`
-    : "no primary restriction is active";
-  const narrative = `${opportunityPhrase} with ${reliabilityPhrase} reliability and ${riskPhrase}. ${wisdomPhrase}. ${discoveryIntelligencePhrase}. However, ${restrictionPhrase}, so governance recommends ${participationMode.toLowerCase()} participation. The opportunity is ${opportunityPhrase.includes("positive") || opportunityPhrase.includes("real") ? "real" : "not fully proven"}, but ${recoveryPhrase}.`;
+  const narrative = heroNarrativeFor(
+    posture,
+    canonicalReasons,
+    participationPct,
+  );
 
   return {
     narrative,
@@ -1949,9 +2445,136 @@ function metric(label: string, value: string, source: string) {
   return { label, value, source };
 }
 
+function allocationCandidates(
+  input: ExecutiveDashboardInput,
+): Array<Record<string, unknown>> {
+  return [
+    ...recordArray(input.sizing?.allocations),
+    ...recordArray(input.sizing?.suggestedAllocations),
+    ...recordArray(input.sizing?.allocationPlan),
+    ...recordArray(input.resolve?.allocations),
+    ...recordArray(input.resolve?.participationPlan),
+    ...recordArray(input.opportunity?.candidates),
+    ...recordArray(input.opportunity?.opportunities),
+    ...recordArray(input.discovery?.candidates),
+    ...recordArray(input.discoveryDensity?.candidates),
+  ];
+}
+
+function recordArray(value: unknown): Array<Record<string, unknown>> {
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => recordArray(item));
+  }
+  if (value == null || typeof value !== "object") return [];
+
+  const record = value as Record<string, unknown>;
+  if (Array.isArray(record.items)) return recordArray(record.items);
+  if (Array.isArray(record.allocations)) return recordArray(record.allocations);
+  if (Array.isArray(record.targets)) return recordArray(record.targets);
+  if (Array.isArray(record.candidates)) return recordArray(record.candidates);
+
+  const numericEntries = Object.entries(record).filter(
+    ([, entryValue]) => firstFinite(entryValue) != null,
+  );
+  const hasIdentity = [
+    "id",
+    "label",
+    "name",
+    "symbol",
+    "ticker",
+    "targetId",
+  ].some((key) => record[key] != null);
+  if (hasIdentity) return [record];
+  if (numericEntries.length) {
+    return numericEntries.map(([key, entryValue]) => ({
+      id: key,
+      label: readable(key),
+      allocationPct: entryValue,
+    }));
+  }
+  return [];
+}
+
+function allocationId(candidate: Record<string, unknown>, index: number) {
+  return String(
+    candidate.id ??
+      candidate.targetId ??
+      candidate.symbol ??
+      candidate.ticker ??
+      candidate.name ??
+      candidate.label ??
+      `asset-${index + 1}`,
+  );
+}
+
+function allocationLabel(candidate: Record<string, unknown>, index: number) {
+  return String(
+    candidate.label ??
+      candidate.name ??
+      candidate.symbol ??
+      candidate.ticker ??
+      candidate.targetId ??
+      candidate.id ??
+      `Opportunity ${index + 1}`,
+  );
+}
+
+function allocationPct(candidate: Record<string, unknown>) {
+  const explicit = firstFinite(
+    candidate.allocationPct,
+    candidate.targetPct,
+    candidate.targetAllocationPct,
+    candidate.suggestedPct,
+    candidate.suggestedExposurePct,
+    candidate.suggestedExposure,
+    candidate.allocation,
+    candidate.weightPct,
+  );
+  if (explicit != null) return explicit;
+  return percentish(candidate.weight);
+}
+
+function allocationStrength(candidate: Record<string, unknown>) {
+  const strength = percentish(
+    candidate.strength,
+    candidate.score,
+    candidate.quality,
+    candidate.confidence,
+    candidate.priority,
+    candidate.weight,
+  );
+  return Math.max(1, strength ?? 1);
+}
+
+function allocationRationale(candidate: Record<string, unknown>) {
+  return firstMeaningful(
+    candidate.rationale,
+    candidate.reason,
+    candidate.explanation,
+    candidate.signalReason,
+    "Currently one of the stronger qualifying opportunities.",
+  );
+}
+
 function roundExposure(value: number) {
   if (!Number.isFinite(value)) return 0;
   return Math.round(Math.max(0, value) * 100) / 100;
+}
+
+function roundAllocation(value: number) {
+  if (!Number.isFinite(value)) return 0;
+  return Math.round(Math.max(0, value) * 100) / 100;
+}
+
+function clampPercent(value: number) {
+  if (!Number.isFinite(value)) return 0;
+  return Math.min(100, Math.max(0, value));
+}
+
+function percentish(...values: unknown[]) {
+  const value = firstFinite(...values);
+  if (value == null) return null;
+  return value > 0 && value <= 1 ? value * 100 : value;
 }
 
 function pctValue(value: unknown, digits = 0) {
