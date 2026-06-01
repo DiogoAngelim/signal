@@ -5,12 +5,12 @@ export default function EnvelopePage() {
     <DocsRoutePage
       eyebrow="Docs / Reference"
       title="Protocol"
-      summary="Every Signal message is a named, versioned envelope with a payload and optional context."
+      summary="Every Signal message keeps intent, payload, and context visible enough to explain later."
       canonicalHref="https://diogoangelim.github.io/signal/docs/reference/protocol"
       primaryLabel="Open API reference"
       primaryHref="/docs/reference/api"
     >
-      <pre className="overflow-x-auto rounded-2xl border border-white/10 bg-black/20 p-4 text-xs leading-6 text-foreground">
+      <pre className="overflow-x-auto rounded-lg border border-border bg-muted p-4 text-xs leading-6 text-foreground">
         <code>{`{
   "protocol": "signal.v1",
   "kind": "query",

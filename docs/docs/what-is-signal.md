@@ -5,8 +5,26 @@ sidebar_position: 1
 
 # What Is Signal?
 
-Signal helps applications communicate through **Queries**, **Mutations**, and
-**Events** using a predictable protocol.
+Signal helps teams understand what is happening across a workflow before they
+ask the system to act again.
+
+Its default view is simple:
+
+> Current state should be readable. Important changes should be explicit. Facts
+> should remain visible after the moment passes.
+
+Signal does this with three ordinary concepts.
+
+## Understanding
+
+Queries observe current state without changing it.
+
+Mutations describe intentional changes. When a mutation is retried, idempotency
+can help the system return the same logical result instead of creating a second
+change.
+
+Events preserve facts so other systems can react, replay, or inspect what
+happened later.
 
 ```ts
 runtime.query("note.get.v1", { noteId: "note_1001" });
@@ -23,12 +41,16 @@ runtime.publish("post.published.v1", {
 });
 ```
 
+## Reasoning
+
 Use Signal when your app needs one clear contract for:
 
 - reading data
 - changing data
 - announcing facts
 - exposing the same behavior through HTTP or another transport
+
+## Evidence
 
 Signal is small on purpose. It gives you names, payloads, results, errors,
 idempotency, and capability discovery. Your application keeps its own database,
@@ -38,12 +60,13 @@ business rules, auth, jobs, and UI.
 
 ## What You Learned
 
-Signal is a predictable way to run Queries, Mutations, and Events.
+Signal keeps understanding first, with reasoning and evidence available when you
+need more detail.
 
 ## Next Recommended Page
 
 [Quick Start](start/quick-start.md)
 
-Estimated reading time: 1 minute.
+Estimated reading time: 2 minutes.
 
 </div>

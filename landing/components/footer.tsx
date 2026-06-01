@@ -1,42 +1,34 @@
-import { Book, BookOpen, Heart, Zap } from "lucide-react";
+import { CircleDot, GitBranch } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="relative border-t border-border py-12">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary via-secondary to-accent">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-semibold">Signal</span>
-            <span className="text-muted-foreground text-sm">Protocol v1</span>
-          </div>
+    <footer className="border-t border-border bg-background py-10">
+      <div className="mx-auto flex max-w-7xl flex-col gap-5 px-6 text-sm text-muted-foreground sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12">
+        <div className="flex items-center gap-3">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card text-primary">
+            <CircleDot className="h-4 w-4" />
+          </span>
+          <span className="font-semibold text-foreground">Signal</span>
+          <span>Protocol v1</span>
+        </div>
 
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <a
-              href="https://github.com/DiogoAngelim/signal"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 hover:text-foreground transition-colors"
-            >
-              <Book />
-              View the Repository
-            </a>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <span>Maintained by</span>
-            <Heart className="w-4 h-4 text-brain-core-rose fill-brain-core-rose" />
-            <a
-              href="https://github.com/DiogoAngelim"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground hover:text-primary transition-colors"
-            >
-              Diogo Angelim
-            </a>
-          </div>
+        <div className="flex flex-wrap items-center gap-5">
+          <a
+            href="/docs/what-is-signal"
+            className="transition-colors hover:text-foreground"
+          >
+            Docs
+          </a>
+          <a
+            href="https://github.com/DiogoAngelim/signal"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
+          >
+            <GitBranch className="h-4 w-4" />
+            GitHub
+          </a>
+          <span>Maintained by Diogo Angelim</span>
         </div>
       </div>
     </footer>

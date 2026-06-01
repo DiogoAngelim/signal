@@ -1,49 +1,39 @@
-import { ArrowRight, Book, BookOpen, Zap } from "lucide-react";
+import { ArrowRight, BookOpen, GitBranch } from "lucide-react";
 
 export function CTA() {
   return (
-    <section className="relative py-32">
-      {/* Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-primary/20 via-secondary/10 to-accent/20 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary via-secondary to-accent mb-8 glow-amber">
-          <Zap className="w-10 h-10 text-white" />
+    <section className="border-t border-border bg-muted py-20">
+      <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 sm:px-8 lg:flex-row lg:items-end lg:justify-between lg:px-12">
+        <div className="max-w-3xl">
+          <p className="text-sm font-medium uppercase tracking-normal text-muted-foreground">
+            Next step
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-normal text-foreground sm:text-4xl">
+            Start with one understandable workflow.
+          </h2>
+          <p className="mt-4 text-base leading-7 text-muted-foreground">
+            Run the reference path, inspect the returned result, and decide
+            whether Signal makes the situation easier for your team to explain.
+          </p>
         </div>
 
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-balance">
-          Read the protocol,{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
-            then map it to your own flow
-          </span>{" "}
-          .
-        </h2>
-
-        <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-          Start with the quickstart, inspect the envelope, and compare the
-          payment capture, escrow release, and onboarding examples with your own
-          implementation.
-        </p>
-
-        <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col gap-3 sm:flex-row lg:shrink-0">
           <a
-            href="https://github.com/DiogoAngelim/signal/blob/main/docs/docs/what-is-signal.md"
-            className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-primary via-secondary to-accent text-white font-semibold rounded-xl hover:opacity-90 transition-all glow-amber"
+            href="/docs/start/quick-start"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            <BookOpen className="w-5 h-5" />
-            Quickstart
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <BookOpen className="h-4 w-4" />
+            Quick start
+            <ArrowRight className="h-4 w-4" />
           </a>
           <a
             href="https://github.com/DiogoAngelim/signal"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-border bg-card/50 text-foreground font-semibold rounded-xl hover:bg-card hover:border-muted-foreground/30 transition-all"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition-colors hover:border-primary/50"
           >
-            <Book />
-            View the Repository
+            <GitBranch className="h-4 w-4" />
+            Repository
           </a>
         </div>
       </div>

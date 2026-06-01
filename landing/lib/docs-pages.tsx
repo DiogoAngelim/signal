@@ -23,7 +23,7 @@ function bullets(items: string[]) {
 
 function codeBlock(code: string) {
   return (
-    <pre className="overflow-x-auto rounded-2xl border border-white/10 bg-black/20 p-4 text-xs leading-6 text-foreground">
+    <pre className="overflow-x-auto rounded-lg border border-border bg-muted p-4 text-xs leading-6 text-foreground">
       <code>{code}</code>
     </pre>
   );
@@ -35,14 +35,14 @@ export const docsPages: DocsPageEntry[] = [
     eyebrow: "Docs / Start",
     title: "What Is Signal?",
     summary:
-      "Signal helps applications communicate through Queries, Mutations, and Events using a predictable protocol.",
+      "Signal helps teams understand operational workflows by separating what reads, what changes, and what happened.",
     primaryLabel: "Open quick start",
     primaryHref: "/docs/start/quick-start",
     canonicalHref: "https://diogoangelim.github.io/signal/docs/what-is-signal",
     body: bullets([
-      "Queries ask for data.",
-      "Mutations change data.",
-      "Events announce facts.",
+      "Queries observe current state.",
+      "Mutations describe intentional changes.",
+      "Events preserve facts that other systems may need later.",
     ]),
   },
   {
@@ -50,7 +50,7 @@ export const docsPages: DocsPageEntry[] = [
     eyebrow: "Docs / Start",
     title: "Quick Start",
     summary:
-      "Install dependencies, start the reference server, send one Query, publish one Event, and observe it.",
+      "Run one small workflow first, then inspect the result and the emitted facts.",
     primaryLabel: "Build first app",
     primaryHref: "/docs/build/first-app",
     canonicalHref:
@@ -64,14 +64,14 @@ pnpm --filter @signal/reference-server start`),
     eyebrow: "Docs / Build",
     title: "Build Your First App",
     summary:
-      "Register one Query, one Mutation, and one Event with the Node SDK.",
+      "Register one read, one change, and one fact before expanding the surface area.",
     primaryLabel: "Open HTTP server",
     primaryHref: "/docs/build/http-server",
     canonicalHref: "https://diogoangelim.github.io/signal/docs/build/first-app",
     body: bullets([
-      "Use `defineQuery` for reads.",
-      "Use `defineMutation` for writes.",
-      "Use `defineEvent` for facts.",
+      "Use `defineQuery` when the caller only needs to understand state.",
+      "Use `defineMutation` when the caller intends a durable change.",
+      "Use `defineEvent` when other systems need a fact to remain visible.",
     ]),
   },
   {
@@ -79,7 +79,7 @@ pnpm --filter @signal/reference-server start`),
     eyebrow: "Docs / Build",
     title: "HTTP Server",
     summary:
-      "Expose a Signal runtime through HTTP without changing your operation handlers.",
+      "Expose the same understanding layer through HTTP without changing operation handlers.",
     primaryLabel: "Open examples",
     primaryHref: "/docs/examples/runnable-examples",
     canonicalHref:
@@ -93,7 +93,7 @@ POST /signal/mutation/:name`),
     eyebrow: "Docs / Examples",
     title: "Runnable Examples",
     summary:
-      "Run the packaged examples to see Signal behavior before building your own app.",
+      "Run the examples before adopting the protocol inside a production workflow.",
     primaryLabel: "Core ideas",
     primaryHref: "/docs/understand/core-ideas",
     canonicalHref:
@@ -107,15 +107,15 @@ pnpm --filter @signal/examples post-publication`),
     eyebrow: "Docs / Understand",
     title: "Core Ideas",
     summary:
-      "Understand Queries, Mutations, Events, and Capabilities after you have seen Signal run.",
+      "Understand the four ideas that keep Signal readable before the implementation details appear.",
     primaryLabel: "Architecture",
     primaryHref: "/docs/understand/architecture",
     canonicalHref:
       "https://diogoangelim.github.io/signal/docs/understand/core-ideas",
     body: bullets([
-      "Queries should not change state.",
-      "Mutations can require idempotency.",
-      "Events should be safe for replay-aware consumers.",
+      "Queries should make state visible without changing it.",
+      "Mutations can require idempotency so retries remain understandable.",
+      "Events should be safe for consumers that need to replay facts.",
     ]),
   },
   {
@@ -123,7 +123,7 @@ pnpm --filter @signal/examples post-publication`),
     eyebrow: "Docs / Understand",
     title: "Architecture",
     summary:
-      "Application to Source to Signal to Runtime to Action to Adapter to Result.",
+      "Application to Source to Signal to Runtime to Action to Adapter to Result, kept in that order for clarity.",
     primaryLabel: "API reference",
     primaryHref: "/docs/reference/api",
     canonicalHref:
@@ -138,7 +138,8 @@ pnpm --filter @signal/examples post-publication`),
     slug: ["reference", "api"],
     eyebrow: "Docs / Reference",
     title: "API Reference",
-    summary: "Find the packages and functions most apps use first.",
+    summary:
+      "Find the packages and functions most teams need after the situation is clear.",
     primaryLabel: "Protocol reference",
     primaryHref: "/docs/reference/protocol",
     canonicalHref: "https://diogoangelim.github.io/signal/docs/reference/api",
@@ -153,7 +154,7 @@ pnpm --filter @signal/examples post-publication`),
     eyebrow: "Docs / Reference",
     title: "Protocol Reference",
     summary:
-      "A Signal message is a named, versioned envelope with a payload and optional context.",
+      "A Signal message is a named, versioned envelope that preserves intent and context.",
     primaryLabel: "Errors",
     primaryHref: "/docs/reference/errors",
     canonicalHref:
@@ -170,7 +171,7 @@ pnpm --filter @signal/examples post-publication`),
     eyebrow: "Docs / Reference",
     title: "Errors",
     summary:
-      "Signal failures return stable codes, categories, messages, and retry hints.",
+      "Signal failures return stable codes, categories, messages, and retry hints so failures can be explained.",
     primaryLabel: "Repository map",
     primaryHref: "/docs/contribute/repository-map",
     canonicalHref:
@@ -186,7 +187,7 @@ pnpm --filter @signal/examples post-publication`),
     eyebrow: "Docs / Contribute",
     title: "Repository Map",
     summary:
-      "See what is public, what is compatibility code, what was removed, and where to contribute safely.",
+      "See what is public, what is compatibility code, and where changes can be made with context.",
     primaryLabel: "Start again",
     primaryHref: "/docs/what-is-signal",
     canonicalHref:

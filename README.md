@@ -1,13 +1,13 @@
 # What Is Signal?
 
-Signal helps applications communicate through **Queries**, **Mutations**, and
-**Events** using a predictable protocol.
+Signal helps teams understand operational workflows through **Queries**,
+**Mutations**, and **Events**.
 
 Use Signal when you want one clear way to:
 
-- ask for data with a Query
-- change something with a Mutation
-- announce that something happened with an Event
+- observe current state with a Query
+- describe an intentional change with a Mutation
+- preserve what happened with an Event
 - expose the same behavior through HTTP or another transport later
 
 Here is the whole idea:

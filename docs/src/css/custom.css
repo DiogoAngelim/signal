@@ -1,45 +1,58 @@
 :root {
-  --ifm-color-primary: #24515f;
-  --ifm-color-primary-dark: #1f4652;
-  --ifm-color-primary-darker: #1b3f4a;
-  --ifm-color-primary-darkest: #14313a;
-  --ifm-color-primary-light: #2f6674;
-  --ifm-color-primary-lighter: #377484;
-  --ifm-color-primary-lightest: #438798;
+  --ifm-color-primary: #2f6550;
+  --ifm-color-primary-dark: #285744;
+  --ifm-color-primary-darker: #234d3c;
+  --ifm-color-primary-darkest: #1d4032;
+  --ifm-color-primary-light: #3b755f;
+  --ifm-color-primary-lighter: #4a866e;
+  --ifm-color-primary-lightest: #5c977f;
   --ifm-font-family-base: "Inter", "Segoe UI", sans-serif;
   --ifm-font-family-monospace: "SFMono-Regular", "Consolas", monospace;
 }
 
 .hero--signal {
-  min-height: 72vh;
-  background: #f7f9f8;
-  color: #172026;
-  border-bottom: 1px solid #d8e1df;
+  min-height: 78vh;
+  align-items: center;
+  background: #f7f8f6;
+  color: #1b1f1d;
+  border-bottom: 1px solid #cfd8d2;
 }
 
 .signal-home-copy {
-  max-width: 50rem;
+  max-width: 58rem;
 }
 
 .signal-home-copy h1 {
-  max-width: 14ch;
-  font-size: clamp(2.75rem, 7vw, 5.25rem);
+  max-width: 13ch;
+  font-size: 4rem;
   letter-spacing: 0;
-  line-height: 0.95;
+  line-height: 0.98;
 }
 
 .signal-home-copy p {
-  max-width: 40rem;
-  font-size: 1.2rem;
+  max-width: 48rem;
+  color: #66716b;
+  font-size: 1.08rem;
+  line-height: 1.75;
+}
+
+.signal-home-copy .signal-home-lede {
+  color: #1b1f1d;
+  font-size: 1.35rem;
+  line-height: 1.55;
 }
 
 .signal-eyebrow {
   margin-bottom: 0.75rem;
-  color: #51615f;
+  color: #66716b;
   font-size: 0.9rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
+}
+
+.button {
+  border-radius: 8px;
 }
 
 .signal-architecture-diagram {
@@ -59,4 +72,16 @@
   border-top: 1px solid var(--ifm-color-emphasis-200);
   margin-top: 3rem;
   padding-top: 1rem;
+}
+
+@media (min-width: 768px) {
+  .signal-home-copy h1 {
+    font-size: 6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .signal-home-copy h1 {
+    font-size: 3.2rem;
+  }
 }

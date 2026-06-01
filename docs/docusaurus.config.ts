@@ -3,7 +3,7 @@ import { themes } from "prism-react-renderer";
 
 const config: Config = {
   title: "Signal",
-  tagline: "Queries, Mutations, and Events for application communication",
+  tagline: "Understanding first, with reasoning and evidence behind it",
   favicon: "img/favicon.ico",
   url: "https://diogoangelim.github.io",
   baseUrl: "/signal/",
@@ -36,9 +36,22 @@ const config: Config = {
       title: "Signal",
       items: [
         { to: "/docs/what-is-signal", label: "Start", position: "left" },
-        { to: "/docs/start/quick-start", label: "Quick Start", position: "left" },
-        { to: "/docs/reference/api", label: "Reference", position: "left" },
-        { href: "https://github.com/DiogoAngelim/signal", label: "GitHub", position: "right" },
+        {
+          to: "/docs/start/quick-start",
+          label: "Quick Start",
+          position: "left",
+        },
+        {
+          to: "/docs/understand/core-ideas",
+          label: "Understand",
+          position: "left",
+        },
+        { to: "/docs/reference/api", label: "Evidence", position: "left" },
+        {
+          href: "https://github.com/DiogoAngelim/signal",
+          label: "GitHub",
+          position: "right",
+        },
       ],
     },
     footer: {
@@ -55,8 +68,14 @@ const config: Config = {
         {
           title: "Project",
           items: [
-            { label: "Protocol", href: "https://github.com/DiogoAngelim/signal/tree/main/spec" },
-            { label: "Landing", href: "https://diogoangelim.github.io/signal/" },
+            {
+              label: "Protocol",
+              href: "https://github.com/DiogoAngelim/signal/tree/main/spec",
+            },
+            {
+              label: "Landing",
+              href: "https://diogoangelim.github.io/signal/",
+            },
           ],
         },
       ],

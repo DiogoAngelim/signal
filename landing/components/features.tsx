@@ -1,255 +1,254 @@
-type Scenario = {
-  id: string;
+import {
+  ChevronDown,
+  ClipboardList,
+  FileText,
+  SearchCheck,
+} from "lucide-react";
+
+type DetailGroup = {
+  title: string;
+  lines: string[];
+};
+
+type PracticeScenario = {
   title: string;
   person: string;
   role: string;
-  company: string;
-  companyType: string;
   avatar: string;
-  logo: string;
-  pain: string;
-  solution: string;
-  outcome: string;
+  observation: string;
 };
 
-const scenarios: Scenario[] = [
+const reasoningGroups: DetailGroup[] = [
   {
-    id: "payment-capture",
-    title: "Payment capture",
-    person: "Maya Chen",
-    role: "Payments Lead",
-    company: "Payoneer",
-    companyType: "Payments Platform",
-    avatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=240&q=80",
-    logo: "https://s3-symbol-logo.tradingview.com/payoneer.svg",
-    pain: "The same payment can be processed twice when systems retry a request after a timeout or network failure.",
-    solution:
-      "Each payment request is handled as one durable action. If the same request comes back, the system returns the same result instead of charging again.",
-    outcome:
-      "One payment, one result, and a clean audit trail that other systems can trust.",
+    title: "Why this view currently holds",
+    lines: [
+      "Queries, mutations, and events give teams distinct words for different kinds of work.",
+      "Idempotent mutations make retry behavior easier to explain after a timeout or failure.",
+      "Capability documents help callers see what a runtime supports before depending on it.",
+    ],
   },
   {
-    id: "escrow-release",
-    title: "Escrow release",
-    person: "Jordan Bell",
-    role: "Operations Manager",
-    company: "PayPal",
-    companyType: "Payments Platform",
-    avatar:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=240&q=80",
-    logo: "https://s3-symbol-logo.tradingview.com/paypal.svg",
-    pain: "More than one internal system may try to release the same funds, which creates real financial risk.",
-    solution:
-      "The release is recorded once as a verified action. Duplicate attempts become safe retries instead of duplicate transfers.",
-    outcome:
-      "Funds move once, operations stay calm, and compliance teams can trace every step.",
+    title: "What remains uncertain",
+    lines: [
+      "The clearest production boundary depends on each team's existing source of truth.",
+      "Some older compatibility areas still need context before they should guide new adoption.",
+      "The protocol is easier to trust after it has been exercised inside one real workflow.",
+    ],
   },
   {
-    id: "user-onboarding",
-    title: "User onboarding",
-    person: "Ava Patel",
-    role: "Platform Engineer",
-    company: "Apple",
-    companyType: "Consumer Platform",
-    avatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=240&q=80",
-    logo: "https://s3-symbol-logo.tradingview.com/apple.svg",
-    pain: "Account creation usually triggers several follow-up steps, and retries can accidentally create duplicates or partial setups.",
-    solution:
-      "The account is created once, then welcome emails, provisioning, and downstream tasks happen safely around that single source of truth.",
-    outcome:
-      "Cleaner onboarding, fewer support issues, and a flow that is easy to understand.",
-  },
-  {
-    id: "read-model-queries",
-    title: "Read-only queries",
-    person: "Elena Rossi",
-    role: "Support Lead",
-    company: "Oracle",
-    companyType: "Enterprise Software",
-    avatar:
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=240&q=80",
-    logo: "https://s3-symbol-logo.tradingview.com/oracle.svg",
-    pain: "Some APIs blur reading and writing, which makes them hard to trust and risky to retry.",
-    solution:
-      "Read actions are kept read-only. They return status and data without changing anything in the system.",
-    outcome:
-      "Support gets reliable answers, retries stay harmless, and behavior remains clear.",
+    title: "What would change the view",
+    lines: [
+      "More reviewed workflows show that retry, replay, and capability discovery stay understandable.",
+      "Documentation and examples continue to remove implementation ambiguity.",
+      "A team finds that its current transport already gives the same clarity with less change.",
+    ],
   },
 ];
 
-function PersonCluster({
-  avatar,
-  person,
-  role,
-  company,
-}: {
-  avatar: string;
-  person: string;
-  role: string;
-  company: string;
-}) {
-  return (
-    <div className="flex min-w-0 items-center gap-4">
-      <div className="relative shrink-0">
-        <div className="absolute inset-0 rounded-full bg-primary/15 blur-md" />
-        <img
-          src={avatar}
-          alt={`${person}, ${role}`}
-          className="relative h-14 w-14 rounded-full object-cover ring-1 ring-border"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
+const evidenceGroups: DetailGroup[] = [
+  {
+    title: "Protocol evidence",
+    lines: [
+      "Named envelopes keep the operation, payload, and result shape visible.",
+      "Structured errors give callers stable reasons instead of ad hoc failure text.",
+      "Capabilities describe available operations without requiring private implementation knowledge.",
+    ],
+  },
+  {
+    title: "Runtime evidence",
+    lines: [
+      "The reference server demonstrates query, mutation, and event paths together.",
+      "Mutation idempotency records a logical result so retries do not become duplicate changes.",
+      "Observed events make downstream facts inspectable after an operation completes.",
+    ],
+  },
+  {
+    title: "Adoption evidence",
+    lines: [
+      "The smallest useful trial is one workflow with a clear read, one change, and one emitted fact.",
+      "The docs should answer what happened first, then reveal implementation details as needed.",
+      "Internal scores and diagnostics belong behind the explanation, not ahead of it.",
+    ],
+  },
+];
 
-      <div className="min-w-0">
-        <p className="truncate text-sm font-medium tracking-[-0.01em] text-foreground">
-          {person}
-        </p>
-        <p className="truncate text-sm text-muted-foreground">
-          {role} · {company}
-        </p>
-      </div>
-    </div>
-  );
-}
+const scenarios: PracticeScenario[] = [
+  {
+    title: "Payment capture",
+    person: "Maya Chen",
+    role: "Payments lead",
+    avatar:
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=240&q=80",
+    observation:
+      "The useful question is whether this charge has already reached a durable result.",
+  },
+  {
+    title: "Escrow release",
+    person: "Jordan Bell",
+    role: "Operations manager",
+    avatar:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=240&q=80",
+    observation:
+      "The useful question is whether funds can move once while every retry remains explainable.",
+  },
+  {
+    title: "User onboarding",
+    person: "Ava Patel",
+    role: "Platform engineer",
+    avatar:
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=240&q=80",
+    observation:
+      "The useful question is whether follow-up work stays attached to one known account state.",
+  },
+];
 
-function CompanyBadge({
-  logo,
-  companyType,
-  company,
-}: {
-  logo: string;
-  companyType: string;
-  company: string;
-}) {
-  return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-3 py-1.5 backdrop-blur-xl">
-      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-card/80">
-        <img
-          src={logo}
-          alt={`${company} logo`}
-          className="h-3.5 w-3.5 object-contain opacity-90"
-          loading="lazy"
-          decoding="async"
-        />
-      </span>
-      <span className="text-xs font-medium tracking-[-0.01em] text-muted-foreground">
-        {companyType}
-      </span>
-    </div>
-  );
-}
-
-function SectionBlock({
+function DetailLayer({
+  id,
+  icon: Icon,
   label,
-  value,
-  emphasis = false,
+  title,
+  intro,
+  groups,
 }: {
+  id: string;
+  icon: typeof SearchCheck;
   label: string;
-  value: string;
-  emphasis?: boolean;
+  title: string;
+  intro: string;
+  groups: DetailGroup[];
 }) {
   return (
-    <div className="space-y-1.5">
-      <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
-        {label}
-      </p>
-      <p
-        className={`text-sm leading-6 tracking-[-0.01em] ${
-          emphasis ? "text-foreground" : "text-muted-foreground"
-        }`}
-      >
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function ScenarioCard({ item, index }: { item: Scenario; index: number }) {
-  return (
-    <article
-      className="
-        group relative flex h-full flex-col overflow-hidden rounded-[28px]
-        border border-border bg-card/60 p-6
-        shadow-[0_12px_48px_rgba(0,0,0,0.22)]
-        backdrop-blur-2xl transition-all duration-300
-        hover:-translate-y-0.5 hover:border-primary/25 hover:bg-card/75
-      "
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(223,114,71,0.12),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(39,102,166,0.10),transparent_32%)] opacity-90" />
-      <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-border/80 to-transparent" />
-
-      <div className="relative z-10 flex h-full flex-col">
-        <div className="flex items-start justify-between gap-4">
-          <CompanyBadge
-            logo={item.logo}
-            companyType={item.companyType}
-            company={item.company}
-          />
-        </div>
-
-        <div className="mt-5">
-          <PersonCluster
-            avatar={item.avatar}
-            person={item.person}
-            role={item.role}
-            company={item.company}
-          />
-        </div>
-
-        <div className="mt-6 space-y-4">
-          <h3 className="text-xl font-semibold tracking-[-0.03em] text-foreground">
-            {item.title}
-          </h3>
-
-          <div className="rounded-[24px] border border-border bg-background/50 p-4 shadow-inner">
-            <div className="space-y-4">
-              <SectionBlock label="Problem" value={item.pain} />
-              <SectionBlock label="Solution" value={item.solution} />
-              <SectionBlock label="Result" value={item.outcome} />
+    <section id={id} className="border-b border-border py-24">
+      <div className="mx-auto max-w-5xl px-6 sm:px-8 lg:px-12">
+        <div className="grid gap-8 lg:grid-cols-[0.42fr_0.58fr]">
+          <div>
+            <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-card text-primary">
+              <Icon className="h-5 w-5" />
             </div>
+            <p className="text-sm font-medium uppercase tracking-normal text-muted-foreground">
+              {label}
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-normal text-foreground sm:text-4xl">
+              {title}
+            </h2>
+            <p className="mt-4 text-base leading-7 text-muted-foreground">
+              {intro}
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {groups.map((group) => (
+              <details
+                key={group.title}
+                className="group rounded-lg border border-border bg-card p-5"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-foreground">
+                  {group.title}
+                  <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+                </summary>
+                <ul className="mt-5 space-y-3 text-sm leading-6 text-muted-foreground">
+                  {group.lines.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </details>
+            ))}
           </div>
         </div>
       </div>
-    </article>
+    </section>
+  );
+}
+
+function Practice() {
+  return (
+    <section id="practice" className="py-24">
+      <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+        <div className="max-w-3xl">
+          <p className="text-sm font-medium uppercase tracking-normal text-muted-foreground">
+            In practice
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-normal text-foreground sm:text-4xl">
+            The interface starts with the situation, not the machinery.
+          </h2>
+          <p className="mt-4 text-base leading-7 text-muted-foreground">
+            These workflows still rely on the protocol, runtime, and transport
+            details. The visible experience simply begins with what a person
+            needs to understand.
+          </p>
+        </div>
+
+        <div className="mt-12 grid gap-5 lg:grid-cols-3">
+          {scenarios.map((scenario) => (
+            <article
+              key={scenario.title}
+              className="rounded-lg border border-border bg-card p-5"
+            >
+              <div className="flex items-center gap-4">
+                <img
+                  src={scenario.avatar}
+                  alt={`${scenario.person}, ${scenario.role}`}
+                  className="h-14 w-14 rounded-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div>
+                  <h3 className="text-lg font-semibold tracking-normal text-foreground">
+                    {scenario.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {scenario.person}, {scenario.role}
+                  </p>
+                </div>
+              </div>
+              <p className="mt-5 text-sm leading-6 text-muted-foreground">
+                {scenario.observation}
+              </p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
 export function Features() {
   return (
-    <section id="use-cases" className="relative overflow-hidden py-32">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/5 to-transparent" />
-      <div className="absolute bottom-0 right-[-8rem] h-[20rem] w-[20rem] rounded-full bg-secondary/10 blur-3xl" />
-
-      <div className="relative mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
-        <div className="mx-auto mb-14 max-w-3xl text-center">
-          <p className="mb-4 text-xs font-medium uppercase tracking-[0.32em] text-muted-foreground">
-            Real workflows
-          </p>
-
-          <h2 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl lg:text-5xl">
-            <span className="text-foreground">System behavior,</span>
-            <br className="hidden sm:block" />{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
-              shown through real teams.
-            </span>
-          </h2>
-
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-            A clearer way to show what the platform does: familiar roles,
-            concrete operational problems, and outcomes people can understand
-            quickly.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:gap-8">
-          {scenarios.map((item, index) => (
-            <ScenarioCard key={item.id} item={item} index={index} />
-          ))}
-        </div>
-      </div>
-    </section>
+    <>
+      <DetailLayer
+        id="reasoning"
+        icon={SearchCheck}
+        label="Reasoning"
+        title="Why this understanding is reasonable"
+        intro="The reasoning layer is available when a reader wants more context. It stays quiet until they ask for it."
+        groups={reasoningGroups}
+      />
+      <DetailLayer
+        id="evidence"
+        icon={FileText}
+        label="Evidence"
+        title="The details remain available"
+        intro="Evidence supports the understanding without replacing it. Technical material belongs here, behind the main explanation."
+        groups={evidenceGroups}
+      />
+      <DetailLayer
+        id="checks"
+        icon={ClipboardList}
+        label="Checks"
+        title="What to look for before broad adoption"
+        intro="Signal should become more visible only where it helps people reason about reality with less effort."
+        groups={[
+          {
+            title: "A small first trial",
+            lines: [
+              "Choose one workflow where retries, facts, and results are currently difficult to explain.",
+              "Run the reference server locally and compare the returned result with the existing operational record.",
+              "Keep the rollout gradual until the team can describe the situation plainly.",
+            ],
+          },
+        ]}
+      />
+      <Practice />
+    </>
   );
 }

@@ -4,8 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Signal",
   description:
-    "Signal is a transport-agnostic application protocol for queries, mutations, and events.",
+    "Signal helps teams understand operational workflows through clear queries, mutations, events, and evidence.",
   keywords: [
+    "operational clarity",
     "application protocol",
     "queries",
     "mutations",
@@ -17,13 +18,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Signal",
     description:
-      "Signal defines envelopes, semantics, and bindings for versioned queries, mutations, and events.",
+      "Signal keeps workflow understanding first, with reasoning and evidence available when teams need more detail.",
     type: "website",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0c0a17",
+  themeColor: "#f7f8f6",
   width: "device-width",
   initialScale: 1,
 };

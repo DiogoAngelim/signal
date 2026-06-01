@@ -6,16 +6,23 @@ export default function Home(): ReactElement {
   return (
     <Layout
       title="Signal"
-      description="Signal helps applications communicate through Queries, Mutations, and Events using a predictable protocol."
+      description="Signal helps teams understand operational workflows through clear queries, mutations, events, and evidence."
     >
       <main className="hero hero--signal">
         <div className="container margin-vert--xl">
           <div className="signal-home-copy">
             <p className="signal-eyebrow">Signal</p>
-            <h1>Queries, Mutations, and Events</h1>
+            <h1>Current understanding</h1>
+            <p className="signal-home-lede">
+              Signal helps teams understand what is happening across a workflow
+              before they ask the system to act again. Reads stay separate from
+              changes, changes can be retried without confusion, and facts
+              remain visible after the moment passes.
+            </p>
             <p>
-              Signal gives your app one predictable way to ask for data, change
-              data, and announce what happened.
+              Start with one small operational flow, inspect the returned
+              result, then reveal the protocol details only when they help the
+              situation become clearer.
             </p>
             <div className="margin-top--lg">
               <Link
