@@ -1,4 +1,24 @@
 export { CompactionJob } from "./compaction";
+export {
+  buildConvictionProfile,
+  buildMindChangeTriggers,
+  buildReadinessProfile,
+  buildRegimeSnapshot,
+  buildTimeHorizonViews,
+  createDecisionReview,
+  createInvestorLearningAssessment,
+  createLearningRecordFromReview,
+  createThesis,
+  evaluatePortfolioContext,
+  findSimilarRegimes,
+  generateInvestorNarrative,
+  rankOpportunities,
+  regimeSimilarity,
+  updateThesisStatus,
+  validateDecisionRecord,
+  validateRegimeSnapshot,
+  validateThesis,
+} from "./learning";
 export { createInMemoryDecisionMemoryStore, InMemoryDecisionMemoryStore } from "./memory-store";
 export { NeonPostgresAdapter, SIGNAL_DECISION_MEMORY_MIGRATION_SQL } from "./postgres";
 export {
@@ -32,6 +52,8 @@ export type {
   DecisionRecordFilter,
   DecisionRecordStore,
   ExpiredMemoryMode,
+  LearningRecordFilter,
+  LearningStore,
   MemorySummary,
   OutcomeStore,
   RealitySnapshotFilter,
@@ -45,6 +67,33 @@ export type {
   SummaryStore,
   TrustHistoryEntry,
 } from "./types";
+export type {
+  ConvictionProfile,
+  DecisionOutcome,
+  DecisionOutcomeJudgment,
+  DecisionRecord,
+  DecisionReview,
+  DisconfirmingEvidence,
+  Evidence,
+  EvidenceDirection,
+  Horizon,
+  InvestorLearningAssessment,
+  InvestorLearningInput,
+  InvestorNarrative,
+  LearningRecord,
+  MindChangeTrigger,
+  OpportunityRankingInput,
+  OpportunityRankingResult,
+  PortfolioContext,
+  RankedOpportunity,
+  ReadinessProfile,
+  RegimeSnapshot,
+  SimilarRegime,
+  Thesis,
+  ThesisStatus,
+  TimeHorizonView,
+  ValidationResult,
+} from "./learning";
 
 import { createInMemoryDecisionMemoryStore } from "./memory-store";
 import { NeonPostgresAdapter } from "./postgres";

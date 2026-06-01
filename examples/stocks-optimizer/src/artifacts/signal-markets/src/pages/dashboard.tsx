@@ -6469,6 +6469,7 @@ export default function Dashboard() {
         finiteNumber((stock.discovery as any)?.score) ??
         qualityPct;
       const decisionIntelligence = (stock as any).decisionIntelligence ?? {};
+      const learning = (stock as any).learning ?? decisionIntelligence?.learning ?? null;
       const coherencePct =
         finiteNumber((stock as any).coherenceScore) ??
         finiteNumber(decisionIntelligence?.coherenceScore);
@@ -6564,13 +6565,18 @@ export default function Dashboard() {
         riskPct,
         timingPct,
         thesis:
+          learning?.thesis?.description ??
           stock.explanation ??
           `${ticker} is ranked by opportunity quality, timing, trend, risk pressure, and current allocation permission.`,
         context:
+          learning?.narrative?.whyItMatters ??
           stock.mandate ??
           `${marketFilter || "The market"} is in ${currentStrategyStateName}; participation is ${executiveIA.executiveReasoning.recommendedParticipationMode}.`,
         support: compactDecisionLines(
           [
+            Array.isArray(learning?.evidence?.supporting)
+              ? learning.evidence.supporting.map((item: any) => item?.description)
+              : [],
             decisionIntelligence?.humanSummary,
             plainGuide(1),
             stock.sizingRationale,
@@ -6587,6 +6593,9 @@ export default function Dashboard() {
         ),
         contradictions: compactDecisionLines(
           [
+            Array.isArray(learning?.evidence?.contradicting)
+              ? learning.evidence.contradicting.map((item: any) => item?.description)
+              : [],
             plainGuide(2),
             highestDownside != null && highestDownside >= 70
               ? "Prediction includes high downside risk."
@@ -6608,6 +6617,7 @@ export default function Dashboard() {
         ),
         missing: compactDecisionLines(
           [
+            learning?.evidence?.missing,
             discoveryMissing,
             failedConstraints,
             numeric(stock.suggestedExposure) <= 0 ? primaryUnlockCondition : "",
@@ -6615,7 +6625,7 @@ export default function Dashboard() {
           primaryUnlockCondition,
         ),
         invalidations: compactDecisionLines(
-          [discoveryInvalidations, primaryInvalidationCondition],
+          [learning?.evidence?.invalidationConditions, discoveryInvalidations, primaryInvalidationCondition],
           primaryInvalidationCondition,
         ),
         drivers: compactDecisionLines(
@@ -6654,6 +6664,7 @@ export default function Dashboard() {
         actionScale:
           finiteNumber((stock as any).actionScale) ??
           finiteNumber(decisionIntelligence?.actionScale),
+        learning,
       };
     });
   const selectedDecisionOpportunityId =
@@ -6955,6 +6966,7 @@ export default function Dashboard() {
     { label: "Consensus", value: fmtPlainPct(primaryConsensusLevel, 0) },
     { label: "Confidence", value: fmtPlainPct(executiveConfidencePct, 0) },
     { label: "Trust", value: fmtPlainPct(executiveTrustPct, 0) },
+    { label: "Conviction", value: fmtPlainPct(primaryDecisionOpportunity?.learning?.conviction?.conviction, 0) },
     { label: "Market Health", value: fmtPlainPct(dashboardSizing.marketHealthPct, 0) },
     { label: "Simulation", value: primarySimulationRecommendation || "Pending" },
     { label: "Wisdom", value: primaryWisdomDecision || "Pending" },
@@ -6963,7 +6975,10 @@ export default function Dashboard() {
     { label: "Opportunity Density", value: fmtPlainPct(adaptiveOpportunityDensityPct, 0) },
     { label: "Risk Pressure", value: fmtPlainPct(avgRisk, 0) },
     { label: "Readiness", value: fmtPlainPct(decisionReadinessPct, 0) },
+    { label: "Decision Readiness", value: fmtPlainPct(primaryDecisionOpportunity?.learning?.readiness?.readiness, 0) },
     { label: "Portfolio Cap", value: canonicalPortfolioCap },
+    { label: "Portfolio Contribution", value: fmtPlainPct(primaryDecisionOpportunity?.learning?.portfolioContext?.expectedRiskAdjustedContribution, 0) },
+    { label: "Similar Regimes", value: String(primaryDecisionOpportunity?.learning?.similarRegimes?.length ?? 0) },
     { label: "Starter Size", value: canonicalStarterSize },
     { label: "Survival", value: fmtPlainPct(survivalConfidenceValue, 0) },
     { label: "Calibration", value: fmtPlainPct(calibrationTrustworthinessDisplay, 0) },

@@ -156,6 +156,77 @@ CREATE INDEX IF NOT EXISTS idx_signal_memory_summaries_source_created_at
 CREATE INDEX IF NOT EXISTS idx_signal_memory_summaries_retention_tier
   ON signal_memory_summaries (retention_tier);
 
+CREATE TABLE IF NOT EXISTS signal_theses (
+  thesis_id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('emerging','strengthening','stable','weakening','invalidated')),
+  confidence DOUBLE PRECISION NOT NULL DEFAULT 50,
+  created_at TIMESTAMPTZ NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL,
+  thesis JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_theses_source_updated_at
+  ON signal_theses (source, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signal_theses_status
+  ON signal_theses (status);
+
+CREATE TABLE IF NOT EXISTS signal_regime_snapshots (
+  regime_snapshot_id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  market_category TEXT NOT NULL,
+  venue TEXT NOT NULL,
+  captured_at TIMESTAMPTZ NOT NULL,
+  market_health DOUBLE PRECISION NOT NULL DEFAULT 50,
+  risk_state TEXT NOT NULL,
+  trust DOUBLE PRECISION NOT NULL DEFAULT 50,
+  confidence DOUBLE PRECISION NOT NULL DEFAULT 50,
+  readiness DOUBLE PRECISION NOT NULL DEFAULT 50,
+  opportunity_density DOUBLE PRECISION NOT NULL DEFAULT 0,
+  final_recommendation TEXT NOT NULL,
+  eventual_outcome JSONB,
+  snapshot JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_regime_snapshots_source_captured_at
+  ON signal_regime_snapshots (source, captured_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signal_regime_snapshots_venue_captured_at
+  ON signal_regime_snapshots (venue, captured_at DESC);
+
+CREATE TABLE IF NOT EXISTS signal_decision_reviews (
+  review_id TEXT PRIMARY KEY,
+  decision_id TEXT NOT NULL,
+  source TEXT NOT NULL,
+  reviewed_at TIMESTAMPTZ NOT NULL,
+  classification TEXT NOT NULL CHECK (classification IN ('correct','wrong','early','late','inconclusive')),
+  review JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_decision_reviews_decision_id
+  ON signal_decision_reviews (decision_id);
+CREATE INDEX IF NOT EXISTS idx_signal_decision_reviews_source_reviewed_at
+  ON signal_decision_reviews (source, reviewed_at DESC);
+
+CREATE TABLE IF NOT EXISTS signal_learning_records (
+  learning_id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  decision_id TEXT,
+  thesis_id TEXT,
+  regime_snapshot_id TEXT,
+  created_at TIMESTAMPTZ NOT NULL,
+  lesson TEXT NOT NULL,
+  learning JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_learning_records_source_created_at
+  ON signal_learning_records (source, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signal_learning_records_decision_id
+  ON signal_learning_records (decision_id);
+CREATE INDEX IF NOT EXISTS idx_signal_learning_records_thesis_id
+  ON signal_learning_records (thesis_id);
+
 CREATE TABLE IF NOT EXISTS signal_retention_jobs (
   job_id TEXT PRIMARY KEY,
   job_type TEXT NOT NULL,

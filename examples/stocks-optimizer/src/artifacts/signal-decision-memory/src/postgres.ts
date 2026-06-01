@@ -6,11 +6,13 @@ import {
   type RealitySnapshot,
   type SignalDecisionRecord,
 } from "@signal/decision";
+import type { DecisionReview, LearningRecord, RegimeSnapshot, Thesis } from "./learning";
 import { normalizeRetentionTier } from "./retention";
 import type {
   CalibrationHistoryEntry,
   DecisionMemoryStore,
   DecisionRecordFilter,
+  LearningRecordFilter,
   MemorySummary,
   RealitySnapshotFilter,
   ReplaySnapshot,
@@ -177,6 +179,77 @@ CREATE INDEX IF NOT EXISTS idx_signal_memory_summaries_source_created_at
 CREATE INDEX IF NOT EXISTS idx_signal_memory_summaries_retention_tier
   ON signal_memory_summaries (retention_tier);
 
+CREATE TABLE IF NOT EXISTS signal_theses (
+  thesis_id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('emerging','strengthening','stable','weakening','invalidated')),
+  confidence DOUBLE PRECISION NOT NULL DEFAULT 50,
+  created_at TIMESTAMPTZ NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL,
+  thesis JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_theses_source_updated_at
+  ON signal_theses (source, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signal_theses_status
+  ON signal_theses (status);
+
+CREATE TABLE IF NOT EXISTS signal_regime_snapshots (
+  regime_snapshot_id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  market_category TEXT NOT NULL,
+  venue TEXT NOT NULL,
+  captured_at TIMESTAMPTZ NOT NULL,
+  market_health DOUBLE PRECISION NOT NULL DEFAULT 50,
+  risk_state TEXT NOT NULL,
+  trust DOUBLE PRECISION NOT NULL DEFAULT 50,
+  confidence DOUBLE PRECISION NOT NULL DEFAULT 50,
+  readiness DOUBLE PRECISION NOT NULL DEFAULT 50,
+  opportunity_density DOUBLE PRECISION NOT NULL DEFAULT 0,
+  final_recommendation TEXT NOT NULL,
+  eventual_outcome JSONB,
+  snapshot JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_regime_snapshots_source_captured_at
+  ON signal_regime_snapshots (source, captured_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signal_regime_snapshots_venue_captured_at
+  ON signal_regime_snapshots (venue, captured_at DESC);
+
+CREATE TABLE IF NOT EXISTS signal_decision_reviews (
+  review_id TEXT PRIMARY KEY,
+  decision_id TEXT NOT NULL,
+  source TEXT NOT NULL,
+  reviewed_at TIMESTAMPTZ NOT NULL,
+  classification TEXT NOT NULL CHECK (classification IN ('correct','wrong','early','late','inconclusive')),
+  review JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_decision_reviews_decision_id
+  ON signal_decision_reviews (decision_id);
+CREATE INDEX IF NOT EXISTS idx_signal_decision_reviews_source_reviewed_at
+  ON signal_decision_reviews (source, reviewed_at DESC);
+
+CREATE TABLE IF NOT EXISTS signal_learning_records (
+  learning_id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  decision_id TEXT,
+  thesis_id TEXT,
+  regime_snapshot_id TEXT,
+  created_at TIMESTAMPTZ NOT NULL,
+  lesson TEXT NOT NULL,
+  learning JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_learning_records_source_created_at
+  ON signal_learning_records (source, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signal_learning_records_decision_id
+  ON signal_learning_records (decision_id);
+CREATE INDEX IF NOT EXISTS idx_signal_learning_records_thesis_id
+  ON signal_learning_records (thesis_id);
+
 CREATE TABLE IF NOT EXISTS signal_retention_jobs (
   job_id TEXT PRIMARY KEY,
   job_type TEXT NOT NULL,
@@ -232,6 +305,35 @@ type RealitySnapshotRow = {
   payload: unknown;
   source_ref: RealitySnapshot["sourceRef"] | null;
   metadata: RealitySnapshot["metadata"] | null;
+};
+
+type ThesisRow = {
+  thesis_id: string;
+  source: string;
+  title: string;
+  description: string;
+  status: Thesis["status"];
+  confidence: number;
+  created_at: string | Date;
+  updated_at: string | Date;
+  thesis: Thesis;
+};
+
+type RegimeSnapshotRow = {
+  regime_snapshot_id: string;
+  source: string;
+  market_category: string;
+  venue: string;
+  captured_at: string | Date;
+  market_health: number;
+  risk_state: string;
+  trust: number;
+  confidence: number;
+  readiness: number;
+  opportunity_density: number;
+  final_recommendation: string;
+  eventual_outcome: RegimeSnapshot["eventualOutcome"] | null;
+  snapshot: RegimeSnapshot;
 };
 
 export class NeonPostgresAdapter implements DecisionMemoryStore {
@@ -769,6 +871,282 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     }));
   }
 
+  async saveThesis(thesis: Thesis): Promise<Thesis> {
+    await this.ensureReady();
+    await this.pool.query(
+      `
+      INSERT INTO signal_theses (
+        thesis_id,
+        source,
+        title,
+        description,
+        status,
+        confidence,
+        created_at,
+        updated_at,
+        thesis
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)
+      ON CONFLICT (thesis_id) DO UPDATE SET
+        source = EXCLUDED.source,
+        title = EXCLUDED.title,
+        description = EXCLUDED.description,
+        status = EXCLUDED.status,
+        confidence = EXCLUDED.confidence,
+        created_at = EXCLUDED.created_at,
+        updated_at = EXCLUDED.updated_at,
+        thesis = EXCLUDED.thesis
+      `,
+      [
+        thesis.thesisId,
+        thesis.source,
+        thesis.title,
+        thesis.description,
+        thesis.status,
+        thesis.confidence,
+        thesis.createdAt,
+        thesis.updatedAt,
+        jsonb(thesis),
+      ],
+    );
+    return thesis;
+  }
+
+  async getThesis(thesisId: string): Promise<Thesis | undefined> {
+    await this.ensureReady();
+    const result = await this.pool.query<ThesisRow>(
+      "SELECT * FROM signal_theses WHERE thesis_id = $1 LIMIT 1",
+      [thesisId],
+    );
+    return result.rows[0] ? rowToThesis(result.rows[0]) : undefined;
+  }
+
+  async listTheses(filter: LearningRecordFilter = {}): Promise<Thesis[]> {
+    await this.ensureReady();
+    const where: string[] = [];
+    const params: unknown[] = [];
+    addCondition(where, params, filter.source, "source =");
+    addCondition(where, params, filter.thesisId, "thesis_id =");
+    addCondition(where, params, filter.createdBefore, "created_at <");
+    addCondition(where, params, filter.createdAfter, "created_at >");
+    params.push(clampLimit(filter.limit));
+    const result = await this.pool.query<ThesisRow>(
+      `
+      SELECT *
+      FROM signal_theses
+      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+      ORDER BY updated_at DESC
+      LIMIT $${params.length}
+      `,
+      params,
+    );
+    return result.rows.map(rowToThesis);
+  }
+
+  async saveRegimeSnapshot(snapshot: RegimeSnapshot): Promise<RegimeSnapshot> {
+    await this.ensureReady();
+    await this.pool.query(
+      `
+      INSERT INTO signal_regime_snapshots (
+        regime_snapshot_id,
+        source,
+        market_category,
+        venue,
+        captured_at,
+        market_health,
+        risk_state,
+        trust,
+        confidence,
+        readiness,
+        opportunity_density,
+        final_recommendation,
+        eventual_outcome,
+        snapshot
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb,$14::jsonb)
+      ON CONFLICT (regime_snapshot_id) DO UPDATE SET
+        source = EXCLUDED.source,
+        market_category = EXCLUDED.market_category,
+        venue = EXCLUDED.venue,
+        captured_at = EXCLUDED.captured_at,
+        market_health = EXCLUDED.market_health,
+        risk_state = EXCLUDED.risk_state,
+        trust = EXCLUDED.trust,
+        confidence = EXCLUDED.confidence,
+        readiness = EXCLUDED.readiness,
+        opportunity_density = EXCLUDED.opportunity_density,
+        final_recommendation = EXCLUDED.final_recommendation,
+        eventual_outcome = EXCLUDED.eventual_outcome,
+        snapshot = EXCLUDED.snapshot
+      `,
+      [
+        snapshot.regimeSnapshotId,
+        snapshot.source,
+        snapshot.marketCategory,
+        snapshot.venue,
+        snapshot.timestamp,
+        snapshot.marketHealth,
+        snapshot.riskState,
+        snapshot.trust,
+        snapshot.confidence,
+        snapshot.readiness,
+        snapshot.opportunityDensity,
+        snapshot.finalRecommendation,
+        jsonb(snapshot.eventualOutcome),
+        jsonb(snapshot),
+      ],
+    );
+    return snapshot;
+  }
+
+  async getRegimeSnapshot(regimeSnapshotId: string): Promise<RegimeSnapshot | undefined> {
+    await this.ensureReady();
+    const result = await this.pool.query<RegimeSnapshotRow>(
+      "SELECT * FROM signal_regime_snapshots WHERE regime_snapshot_id = $1 LIMIT 1",
+      [regimeSnapshotId],
+    );
+    return result.rows[0] ? rowToRegimeSnapshot(result.rows[0]) : undefined;
+  }
+
+  async listRegimeSnapshots(filter: LearningRecordFilter = {}): Promise<RegimeSnapshot[]> {
+    await this.ensureReady();
+    const where: string[] = [];
+    const params: unknown[] = [];
+    addCondition(where, params, filter.source, "source =");
+    addCondition(where, params, filter.regimeSnapshotId, "regime_snapshot_id =");
+    addCondition(where, params, filter.venue, "venue =");
+    addCondition(where, params, filter.createdBefore, "captured_at <");
+    addCondition(where, params, filter.createdAfter, "captured_at >");
+    params.push(clampLimit(filter.limit));
+    const result = await this.pool.query<RegimeSnapshotRow>(
+      `
+      SELECT *
+      FROM signal_regime_snapshots
+      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+      ORDER BY captured_at DESC
+      LIMIT $${params.length}
+      `,
+      params,
+    );
+    return result.rows.map(rowToRegimeSnapshot);
+  }
+
+  async saveDecisionReview(review: DecisionReview): Promise<DecisionReview> {
+    await this.ensureReady();
+    await this.pool.query(
+      `
+      INSERT INTO signal_decision_reviews (
+        review_id,
+        decision_id,
+        source,
+        reviewed_at,
+        classification,
+        review
+      )
+      VALUES ($1,$2,$3,$4,$5,$6::jsonb)
+      ON CONFLICT (review_id) DO UPDATE SET
+        decision_id = EXCLUDED.decision_id,
+        source = EXCLUDED.source,
+        reviewed_at = EXCLUDED.reviewed_at,
+        classification = EXCLUDED.classification,
+        review = EXCLUDED.review
+      `,
+      [
+        review.reviewId,
+        review.decisionId,
+        review.source,
+        review.reviewedAt,
+        review.classification,
+        jsonb(review),
+      ],
+    );
+    return review;
+  }
+
+  async listDecisionReviews(filter: LearningRecordFilter = {}): Promise<DecisionReview[]> {
+    await this.ensureReady();
+    const where: string[] = [];
+    const params: unknown[] = [];
+    addCondition(where, params, filter.source, "source =");
+    addCondition(where, params, filter.decisionId, "decision_id =");
+    addCondition(where, params, filter.createdBefore, "reviewed_at <");
+    addCondition(where, params, filter.createdAfter, "reviewed_at >");
+    params.push(clampLimit(filter.limit));
+    const result = await this.pool.query<{ review: DecisionReview }>(
+      `
+      SELECT review
+      FROM signal_decision_reviews
+      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+      ORDER BY reviewed_at DESC
+      LIMIT $${params.length}
+      `,
+      params,
+    );
+    return result.rows.map((row) => row.review);
+  }
+
+  async saveLearningRecord(record: LearningRecord): Promise<LearningRecord> {
+    await this.ensureReady();
+    await this.pool.query(
+      `
+      INSERT INTO signal_learning_records (
+        learning_id,
+        source,
+        decision_id,
+        thesis_id,
+        regime_snapshot_id,
+        created_at,
+        lesson,
+        learning
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb)
+      ON CONFLICT (learning_id) DO UPDATE SET
+        source = EXCLUDED.source,
+        decision_id = EXCLUDED.decision_id,
+        thesis_id = EXCLUDED.thesis_id,
+        regime_snapshot_id = EXCLUDED.regime_snapshot_id,
+        created_at = EXCLUDED.created_at,
+        lesson = EXCLUDED.lesson,
+        learning = EXCLUDED.learning
+      `,
+      [
+        record.learningId,
+        record.source,
+        record.decisionId ?? null,
+        record.thesisId ?? null,
+        record.regimeSnapshotId ?? null,
+        record.createdAt,
+        record.lesson,
+        jsonb(record),
+      ],
+    );
+    return record;
+  }
+
+  async listLearningRecords(filter: LearningRecordFilter = {}): Promise<LearningRecord[]> {
+    await this.ensureReady();
+    const where: string[] = [];
+    const params: unknown[] = [];
+    addCondition(where, params, filter.source, "source =");
+    addCondition(where, params, filter.decisionId, "decision_id =");
+    addCondition(where, params, filter.thesisId, "thesis_id =");
+    addCondition(where, params, filter.regimeSnapshotId, "regime_snapshot_id =");
+    addCondition(where, params, filter.createdBefore, "created_at <");
+    addCondition(where, params, filter.createdAfter, "created_at >");
+    params.push(clampLimit(filter.limit));
+    const result = await this.pool.query<{ learning: LearningRecord }>(
+      `
+      SELECT learning
+      FROM signal_learning_records
+      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+      ORDER BY created_at DESC
+      LIMIT $${params.length}
+      `,
+      params,
+    );
+    return result.rows.map((row) => row.learning);
+  }
+
   async saveRetentionJob(job: RetentionJobRecord): Promise<RetentionJobRecord> {
     await this.ensureReady();
     await this.pool.query(
@@ -897,6 +1275,41 @@ function rowToRealitySnapshot(row: RealitySnapshotRow): RealitySnapshot {
     payload: row.payload,
     ...(row.source_ref == null ? {} : { sourceRef: row.source_ref }),
     ...(row.metadata == null ? {} : { metadata: row.metadata }),
+  };
+}
+
+function rowToThesis(row: ThesisRow): Thesis {
+  return {
+    ...row.thesis,
+    thesisId: row.thesis.thesisId ?? row.thesis_id,
+    source: row.thesis.source ?? row.source,
+    title: row.thesis.title ?? row.title,
+    description: row.thesis.description ?? row.description,
+    status: row.thesis.status ?? row.status,
+    confidence: Number(row.thesis.confidence ?? row.confidence),
+    createdAt: row.thesis.createdAt ?? toIso(row.created_at),
+    updatedAt: row.thesis.updatedAt ?? toIso(row.updated_at),
+  };
+}
+
+function rowToRegimeSnapshot(row: RegimeSnapshotRow): RegimeSnapshot {
+  return {
+    ...row.snapshot,
+    regimeSnapshotId: row.snapshot.regimeSnapshotId ?? row.regime_snapshot_id,
+    source: row.snapshot.source ?? row.source,
+    marketCategory: row.snapshot.marketCategory ?? row.market_category,
+    venue: row.snapshot.venue ?? row.venue,
+    timestamp: row.snapshot.timestamp ?? toIso(row.captured_at),
+    marketHealth: Number(row.snapshot.marketHealth ?? row.market_health),
+    riskState: row.snapshot.riskState ?? row.risk_state,
+    trust: Number(row.snapshot.trust ?? row.trust),
+    confidence: Number(row.snapshot.confidence ?? row.confidence),
+    readiness: Number(row.snapshot.readiness ?? row.readiness),
+    opportunityDensity: Number(row.snapshot.opportunityDensity ?? row.opportunity_density),
+    finalRecommendation: row.snapshot.finalRecommendation ?? row.final_recommendation,
+    ...(row.snapshot.eventualOutcome ?? row.eventual_outcome
+      ? { eventualOutcome: row.snapshot.eventualOutcome ?? row.eventual_outcome ?? undefined }
+      : {}),
   };
 }
 

@@ -6,6 +6,12 @@ import type {
   RealitySnapshot,
   SignalDecisionRecord,
 } from "@signal/decision";
+import type {
+  DecisionReview,
+  LearningRecord,
+  RegimeSnapshot,
+  Thesis,
+} from "./learning";
 
 export type RetentionTier = "hot" | "warm" | "cold" | "expired";
 export type ExpiredMemoryMode = "delete" | "anonymize";
@@ -37,6 +43,17 @@ export type DecisionRecordFilter = {
 export type RealitySnapshotFilter = {
   source?: string;
   snapshotId?: string;
+  createdBefore?: string;
+  createdAfter?: string;
+  limit?: number;
+};
+
+export type LearningRecordFilter = {
+  source?: string;
+  decisionId?: string;
+  thesisId?: string;
+  regimeSnapshotId?: string;
+  venue?: string;
   createdBefore?: string;
   createdAfter?: string;
   limit?: number;
@@ -158,12 +175,26 @@ export type RetentionJobStore = {
   updateRetentionJob(jobId: string, patch: Partial<RetentionJobRecord>): Promise<RetentionJobRecord | undefined>;
 };
 
+export type LearningStore = {
+  saveThesis(thesis: Thesis): Promise<Thesis>;
+  getThesis(thesisId: string): Promise<Thesis | undefined>;
+  listTheses(filter?: LearningRecordFilter): Promise<Thesis[]>;
+  saveRegimeSnapshot(snapshot: RegimeSnapshot): Promise<RegimeSnapshot>;
+  getRegimeSnapshot(regimeSnapshotId: string): Promise<RegimeSnapshot | undefined>;
+  listRegimeSnapshots(filter?: LearningRecordFilter): Promise<RegimeSnapshot[]>;
+  saveDecisionReview(review: DecisionReview): Promise<DecisionReview>;
+  listDecisionReviews(filter?: LearningRecordFilter): Promise<DecisionReview[]>;
+  saveLearningRecord(record: LearningRecord): Promise<LearningRecord>;
+  listLearningRecords(filter?: LearningRecordFilter): Promise<LearningRecord[]>;
+};
+
 export type DecisionMemoryStore = RealityStore &
   DecisionRecordStore &
   OutcomeStore &
   ReplayStore &
   CalibrationStore &
   SummaryStore &
+  LearningStore &
   RetentionJobStore & {
     migrate?(): Promise<void>;
     close?(): Promise<void>;

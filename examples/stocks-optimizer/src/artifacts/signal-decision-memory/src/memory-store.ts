@@ -1,8 +1,10 @@
 import { createRealitySnapshotForDecision, type OutcomeEvaluation, type RealitySnapshot, type SignalDecisionRecord } from "@signal/decision";
+import type { DecisionReview, LearningRecord, RegimeSnapshot, Thesis } from "./learning";
 import type {
   CalibrationHistoryEntry,
   DecisionMemoryStore,
   DecisionRecordFilter,
+  LearningRecordFilter,
   MemorySummary,
   RealitySnapshotFilter,
   ReplaySnapshot,
@@ -18,6 +20,10 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
   private readonly calibrationHistory = new Map<string, CalibrationHistoryEntry>();
   private readonly trustHistory = new Map<string, TrustHistoryEntry>();
   private readonly summaries = new Map<string, MemorySummary>();
+  private readonly theses = new Map<string, Thesis>();
+  private readonly regimeSnapshots = new Map<string, RegimeSnapshot>();
+  private readonly decisionReviews = new Map<string, DecisionReview>();
+  private readonly learningRecords = new Map<string, LearningRecord>();
   private readonly retentionJobs = new Map<string, RetentionJobRecord>();
 
   async saveRealitySnapshot(snapshot: RealitySnapshot): Promise<RealitySnapshot> {
@@ -125,6 +131,81 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
       .slice(0, clampLimit(filter.limit));
   }
 
+  async saveThesis(thesis: Thesis): Promise<Thesis> {
+    this.theses.set(thesis.thesisId, thesis);
+    return thesis;
+  }
+
+  async getThesis(thesisId: string): Promise<Thesis | undefined> {
+    return this.theses.get(thesisId);
+  }
+
+  async listTheses(filter: LearningRecordFilter = {}): Promise<Thesis[]> {
+    return [...this.theses.values()]
+      .filter((thesis) => matchesLearningFilter({
+        source: thesis.source,
+        thesisId: thesis.thesisId,
+        createdAt: thesis.createdAt,
+      }, filter))
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+      .slice(0, clampLimit(filter.limit));
+  }
+
+  async saveRegimeSnapshot(snapshot: RegimeSnapshot): Promise<RegimeSnapshot> {
+    this.regimeSnapshots.set(snapshot.regimeSnapshotId, snapshot);
+    return snapshot;
+  }
+
+  async getRegimeSnapshot(regimeSnapshotId: string): Promise<RegimeSnapshot | undefined> {
+    return this.regimeSnapshots.get(regimeSnapshotId);
+  }
+
+  async listRegimeSnapshots(filter: LearningRecordFilter = {}): Promise<RegimeSnapshot[]> {
+    return [...this.regimeSnapshots.values()]
+      .filter((snapshot) => matchesLearningFilter({
+        source: snapshot.source,
+        regimeSnapshotId: snapshot.regimeSnapshotId,
+        venue: snapshot.venue,
+        createdAt: snapshot.timestamp,
+      }, filter))
+      .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+      .slice(0, clampLimit(filter.limit));
+  }
+
+  async saveDecisionReview(review: DecisionReview): Promise<DecisionReview> {
+    this.decisionReviews.set(review.reviewId, review);
+    return review;
+  }
+
+  async listDecisionReviews(filter: LearningRecordFilter = {}): Promise<DecisionReview[]> {
+    return [...this.decisionReviews.values()]
+      .filter((review) => matchesLearningFilter({
+        source: review.source,
+        decisionId: review.decisionId,
+        createdAt: review.reviewedAt,
+      }, filter))
+      .sort((a, b) => b.reviewedAt.localeCompare(a.reviewedAt))
+      .slice(0, clampLimit(filter.limit));
+  }
+
+  async saveLearningRecord(record: LearningRecord): Promise<LearningRecord> {
+    this.learningRecords.set(record.learningId, record);
+    return record;
+  }
+
+  async listLearningRecords(filter: LearningRecordFilter = {}): Promise<LearningRecord[]> {
+    return [...this.learningRecords.values()]
+      .filter((record) => matchesLearningFilter({
+        source: record.source,
+        decisionId: record.decisionId,
+        thesisId: record.thesisId,
+        regimeSnapshotId: record.regimeSnapshotId,
+        createdAt: record.createdAt,
+      }, filter))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, clampLimit(filter.limit));
+  }
+
   async saveRetentionJob(job: RetentionJobRecord): Promise<RetentionJobRecord> {
     this.retentionJobs.set(job.jobId, job);
     return job;
@@ -149,6 +230,10 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     this.calibrationHistory.clear();
     this.trustHistory.clear();
     this.summaries.clear();
+    this.theses.clear();
+    this.regimeSnapshots.clear();
+    this.decisionReviews.clear();
+    this.learningRecords.clear();
     this.retentionJobs.clear();
   }
 }
@@ -171,6 +256,27 @@ function matchesFilter(record: SignalDecisionRecord, filter: DecisionRecordFilte
   if (filter.retentionTier && record.retentionTier !== filter.retentionTier) return false;
   if (filter.createdBefore && record.createdAt >= filter.createdBefore) return false;
   if (filter.createdAfter && record.createdAt <= filter.createdAfter) return false;
+  return true;
+}
+
+function matchesLearningFilter(
+  record: {
+    source?: string;
+    decisionId?: string;
+    thesisId?: string;
+    regimeSnapshotId?: string;
+    venue?: string;
+    createdAt?: string;
+  },
+  filter: LearningRecordFilter,
+): boolean {
+  if (filter.source && record.source !== filter.source) return false;
+  if (filter.decisionId && record.decisionId !== filter.decisionId) return false;
+  if (filter.thesisId && record.thesisId !== filter.thesisId) return false;
+  if (filter.regimeSnapshotId && record.regimeSnapshotId !== filter.regimeSnapshotId) return false;
+  if (filter.venue && record.venue !== filter.venue) return false;
+  if (filter.createdBefore && (record.createdAt ?? "") >= filter.createdBefore) return false;
+  if (filter.createdAfter && (record.createdAt ?? "") <= filter.createdAfter) return false;
   return true;
 }
 

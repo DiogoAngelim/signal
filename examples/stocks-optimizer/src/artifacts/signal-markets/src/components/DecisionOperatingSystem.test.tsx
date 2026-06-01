@@ -78,6 +78,68 @@ function props(
         missing: ["fresh confirmation"],
         invalidations: ["Invalidate if breadth collapses."],
         drivers: ["Quality 82%"],
+        learning: {
+          thesis: {
+            title: "AAPL Review thesis",
+            description: "AAPL is being evaluated because evidence supports a measured review.",
+            status: "strengthening",
+            confidence: 74,
+          },
+          evidence: {
+            supporting: [{ description: "Trend quality supports continued review." }],
+            contradicting: [],
+            missing: ["fresh confirmation"],
+            invalidationConditions: ["Invalidate if breadth collapses."],
+          },
+          similarRegimes: [],
+          mindChangeTriggers: [
+            {
+              label: "Breadth weakens",
+              reason: "Market participation below 40 would weaken the view.",
+            },
+          ],
+          conviction: {
+            confidence: 72,
+            trust: 76,
+            conviction: 73,
+            explanation: "Conviction is separated from readiness.",
+          },
+          readiness: {
+            readiness: 74,
+            actionLanguage: "act-small",
+            explanation: "Readiness, not confidence alone, drives action language.",
+          },
+          horizons: [
+            { horizon: "short-term", view: "constructive", action: "Review", confidence: 72 },
+            { horizon: "medium-term", view: "neutral", action: "Track", confidence: 70 },
+            { horizon: "long-term", view: "cautious", action: "Stay measured", confidence: 68 },
+          ],
+          opportunityRanking: {
+            bestOpportunity: { label: "AAPL" },
+            otherOpportunities: [],
+            notReadyYet: [],
+            explanation: "AAPL ranks above alternatives because readiness is strongest.",
+          },
+          portfolioContext: {
+            summary: "Portfolio context is unavailable; Signal is evaluating standalone evidence only.",
+            warnings: [],
+          },
+          narrative: {
+            action: "Review; readiness says act small.",
+            whatChanged: "Similar regimes will appear after more snapshots are collected.",
+            whatIsHappening: "AAPL has the clearest current thesis.",
+            whyItMatters: "AAPL ranks above alternatives.",
+            uncertainty: "fresh confirmation",
+            mindChange: "Market participation below 40 would weaken the view.",
+          },
+          learningRecords: [],
+          emptyStates: [
+            "No previous decisions have been reviewed yet.",
+            "Similar regimes will appear after more snapshots are collected.",
+            "No contradicting evidence has been found yet.",
+            "Outcome learning starts after decisions are reviewed.",
+          ],
+        },
       },
     ],
     selectedOpportunityId: "AAPL",
@@ -144,10 +206,14 @@ function props(
     rawMetrics: [
       { label: "Confidence", value: "72%" },
       { label: "Trust", value: "76%" },
+      { label: "Conviction", value: "73%" },
       { label: "Market Health", value: "74%" },
       { label: "Opportunity Density", value: "42%" },
       { label: "Risk Pressure", value: "34%" },
       { label: "Readiness", value: "72%" },
+      { label: "Decision Readiness", value: "74%" },
+      { label: "Portfolio Contribution", value: "Pending" },
+      { label: "Similar Regimes", value: "0" },
       { label: "Starter Size", value: "2%" },
       { label: "Portfolio Cap", value: "2%" },
       { label: "Survival", value: "70%" },
@@ -218,6 +284,12 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).toContain("Risk");
     expect(html).toContain("Why");
     expect(html).toContain("Evidence");
+    expect(html).toContain("Investor Judgment");
+    expect(html).toContain("Current Thesis");
+    expect(html).toContain("Contradicting Evidence");
+    expect(html).toContain("Mind Change Triggers");
+    expect(html).toContain("Portfolio Context");
+    expect(html).toContain("No previous decisions have been reviewed yet.");
     expect(html).toContain("Decision path");
     expect(html).toContain("Metrics");
     expect(html).toContain("Action plan");
@@ -304,7 +376,7 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).toContain("h-dvh");
     expect(html).toContain("overflow-x-hidden");
     expect(html.match(/data-overflow-policy="card-body-scroll"/g)?.length).toBe(
-      5,
+      6,
     );
   });
 

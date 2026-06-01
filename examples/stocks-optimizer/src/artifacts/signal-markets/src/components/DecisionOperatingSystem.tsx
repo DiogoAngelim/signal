@@ -92,6 +92,7 @@ export type DecisionOpportunity = {
   outcomeAccuracy?: number | null;
   actionAllowed?: boolean | null;
   actionScale?: number | null;
+  learning?: any;
 };
 
 export type DecisionStepId = "opportunity" | "trust" | "size" | "action";
@@ -377,6 +378,10 @@ function friendlyMetricLabel(label: string) {
   if (label === "Confidence") return "System confidence";
   if (label === "Trust") return "Reliability";
   if (label === "Trust Score") return "Reliability";
+  if (label === "Conviction") return "Conviction";
+  if (label === "Decision Readiness") return "Decision readiness";
+  if (label === "Portfolio Contribution") return "Portfolio contribution";
+  if (label === "Similar Regimes") return "Similar regimes";
   if (label === "Market Health") return "Market stability";
   if (label === "Opportunity Density") return "Number of good opportunities";
   if (label === "Risk Pressure") return "Current conditions";
@@ -1234,6 +1239,243 @@ function DisclosurePanel({
   );
 }
 
+function learningText(value: unknown, fallback = "Pending") {
+  const text = investorCopy(String(value ?? "").trim());
+  return text || fallback;
+}
+
+function learningList(values: unknown, fallback: string, limit = 4) {
+  if (Array.isArray(values)) {
+    const mapped = values
+      .map((item) =>
+        typeof item === "string"
+          ? item
+          : (item?.description ?? item?.summary ?? item?.lesson ?? item?.reason ?? item?.label),
+      )
+      .map((item) => investorCopy(String(item ?? "").trim()))
+      .filter(Boolean);
+    const unique = Array.from(new Set(mapped)).slice(0, limit);
+    return unique.length ? unique : [fallback];
+  }
+  return [fallback];
+}
+
+function LearningSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="grid min-w-0 gap-2 border-t border-zinc-200 pt-3 first:border-t-0 first:pt-0">
+      <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+        {title}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function InvestorLearningPanel({ learning }: { learning?: any }) {
+  const thesis = learning?.thesis ?? {};
+  const evidence = learning?.evidence ?? {};
+  const narrative = learning?.narrative ?? {};
+  const conviction = learning?.conviction ?? {};
+  const readiness = learning?.readiness ?? {};
+  const ranking = learning?.opportunityRanking ?? {};
+  const portfolio = learning?.portfolioContext ?? {};
+  const similarRegimes = Array.isArray(learning?.similarRegimes)
+    ? learning.similarRegimes
+    : [];
+  const emptyStates = learningList(
+    learning?.emptyStates,
+    "Outcome learning starts after decisions are reviewed.",
+    4,
+  );
+  const supports = learningList(
+    evidence.supporting,
+    "Supporting evidence is still forming.",
+    5,
+  );
+  const contradicts = learningList(
+    evidence.contradicting,
+    emptyStates.find((item) => /contradicting evidence/i.test(item)) ??
+      "No contradicting evidence has been found yet.",
+    5,
+  );
+  const triggers = learningList(
+    learning?.mindChangeTriggers,
+    "What would change the view will appear as more evidence is collected.",
+    5,
+  );
+  const lessons = learningList(
+    learning?.learningRecords,
+    emptyStates.find((item) => /outcome learning|previous decisions/i.test(item)) ??
+      "No previous decisions have been reviewed yet.",
+    4,
+  );
+  const horizonLines = Array.isArray(learning?.horizons)
+    ? learning.horizons.map((view: any) =>
+        `${learningText(view.horizon)}: ${learningText(view.view)}. ${learningText(view.action)}`,
+      )
+    : ["Horizon views are still forming."];
+  const similarLines = similarRegimes.length
+    ? similarRegimes.slice(0, 3).map((item: any) =>
+        `${Math.round(Number(item.similarity ?? 0) * 100)}% similar: ${learningText(item.whatHappened)}`,
+      )
+    : [
+        emptyStates.find((item) => /similar regimes/i.test(item)) ??
+          "Similar regimes will appear after more snapshots are collected.",
+      ];
+  const otherOpportunities = Array.isArray(ranking.otherOpportunities)
+    ? ranking.otherOpportunities.map((item: any) => item.label)
+    : [];
+  const notReady = Array.isArray(ranking.notReadyYet)
+    ? ranking.notReadyYet.map((item: any) => item.label)
+    : [];
+
+  return (
+    <DisclosurePanel
+      title="Investor Judgment"
+      summary={learningText(narrative.action, "Learning output is still forming.")}
+      testId="investor-learning-panel"
+    >
+      <div className="grid min-w-0 gap-3">
+        <LearningSection title="Current Thesis">
+          <p className="break-words text-sm font-semibold leading-6 text-zinc-950">
+            {learningText(thesis.title, "Current thesis is still forming.")}
+          </p>
+          <p className="break-words text-sm leading-6 text-zinc-700">
+            {learningText(thesis.description, "Signal has not formed a durable thesis yet.")}
+          </p>
+        </LearningSection>
+
+        <LearningSection title="Supporting Evidence">
+          <div className="grid gap-1">
+            {supports.map((item) => (
+              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+                {item}
+              </p>
+            ))}
+          </div>
+        </LearningSection>
+
+        <LearningSection title="Contradicting Evidence">
+          <div className="grid gap-1">
+            {contradicts.map((item) => (
+              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+                {item}
+              </p>
+            ))}
+          </div>
+        </LearningSection>
+
+        <LearningSection title="Similar Regimes">
+          <div className="grid gap-1">
+            {similarLines.map((item) => (
+              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+                {item}
+              </p>
+            ))}
+          </div>
+        </LearningSection>
+
+        <LearningSection title="What Changed">
+          <p className="break-words text-sm leading-6 text-zinc-700">
+            {learningText(narrative.whatChanged, "No reviewed change has been detected yet.")}
+          </p>
+        </LearningSection>
+
+        <LearningSection title="Conviction">
+          <div className="grid gap-2 sm:grid-cols-3">
+            <FactTile label="Confidence" value={`${Math.round(Number(conviction.confidence ?? 0))}%`} />
+            <FactTile label="Reliability" value={`${Math.round(Number(conviction.trust ?? 0))}%`} />
+            <FactTile label="Conviction" value={`${Math.round(Number(conviction.conviction ?? 0))}%`} />
+          </div>
+          <p className="break-words text-sm leading-6 text-zinc-700">
+            {learningText(conviction.explanation, "Conviction is still being separated from readiness.")}
+          </p>
+        </LearningSection>
+
+        <LearningSection title="Decision Readiness">
+          <p className="break-words text-sm leading-6 text-zinc-700">
+            {learningText(readiness.explanation, "Readiness is still forming.")}
+          </p>
+          <p className="break-words text-sm font-semibold leading-6 text-zinc-950">
+            {learningText(readiness.actionLanguage, "observe")}
+          </p>
+        </LearningSection>
+
+        <LearningSection title="Mind Change Triggers">
+          <div className="grid gap-1">
+            {triggers.map((item) => (
+              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+                {item}
+              </p>
+            ))}
+          </div>
+        </LearningSection>
+
+        <LearningSection title="Opportunity Cost">
+          <p className="break-words text-sm leading-6 text-zinc-700">
+            {learningText(ranking.explanation, "No opportunity is ready enough to rank as best right now.")}
+          </p>
+          <p className="break-words text-xs leading-5 text-zinc-500">
+            Best: {learningText(ranking.bestOpportunity?.label, "None")} | Other: {otherOpportunities.join(", ") || "None"} | Not ready: {notReady.join(", ") || "None"}
+          </p>
+        </LearningSection>
+
+        <LearningSection title="Time Horizon Views">
+          <div className="grid gap-1">
+            {horizonLines.map((item) => (
+              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+                {item}
+              </p>
+            ))}
+          </div>
+        </LearningSection>
+
+        <LearningSection title="Portfolio Context">
+          <p className="break-words text-sm leading-6 text-zinc-700">
+            {learningText(portfolio.summary, "Portfolio context is unavailable.")}
+          </p>
+          {learningList(portfolio.warnings, "", 3).filter(Boolean).map((item) => (
+            <p key={item} className="break-words text-xs leading-5 text-zinc-500">
+              {item}
+            </p>
+          ))}
+        </LearningSection>
+
+        <LearningSection title="Reflection / Lessons">
+          <div className="grid gap-1">
+            {lessons.map((item) => (
+              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+                {item}
+              </p>
+            ))}
+          </div>
+        </LearningSection>
+
+        <LearningSection title="Investor Narrative">
+          <div className="grid gap-1">
+            {[
+              narrative.whatIsHappening,
+              narrative.whyItMatters,
+              narrative.uncertainty,
+              narrative.mindChange,
+            ].map((item) => learningText(item, "")).filter(Boolean).map((item) => (
+              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+                {item}
+              </p>
+            ))}
+          </div>
+        </LearningSection>
+      </div>
+    </DisclosurePanel>
+  );
+}
+
 function guidedStatusTone(status: GuidedStepStatus): DecisionTone {
   if (status === "completed") return "good";
   if (status === "needsAttention") return "warn";
@@ -1419,6 +1661,10 @@ export default function DecisionOperatingSystem({
   const selectedOpportunity =
     opportunities.find((item) => item.id === selectedOpportunityId) ??
     opportunities[0] ??
+    null;
+  const selectedLearning =
+    selectedOpportunity?.learning ??
+    selectedOpportunity?.decisionIntelligence?.learning ??
     null;
   const trustNumber = parseMetricNumber(metricValue(rawMetrics, "Trust"));
   const confidenceNumber = parseMetricNumber(
@@ -2045,17 +2291,21 @@ export default function DecisionOperatingSystem({
       "Confidence",
       "Coherence",
       "Consensus",
-      "Trust",
-      "Risk Pressure",
-      "Market Health",
-      "Simulation",
-      "Wisdom",
-      "Action Scale",
-      "Outcome Accuracy",
-      "Readiness",
-      "Starter Size",
-      "Portfolio Cap",
-      "Survival",
+            "Trust",
+            "Conviction",
+            "Risk Pressure",
+            "Market Health",
+            "Simulation",
+            "Wisdom",
+            "Action Scale",
+            "Outcome Accuracy",
+            "Readiness",
+            "Decision Readiness",
+            "Starter Size",
+            "Portfolio Cap",
+            "Portfolio Contribution",
+            "Similar Regimes",
+            "Survival",
       "Calibration",
       "History Depth",
       "Regime Coverage",
@@ -2174,6 +2424,7 @@ export default function DecisionOperatingSystem({
     reasonSummary ||
     "The recommendation balances opportunity, risk, and survival.";
   const similarDecisionLesson =
+    selectedLearning?.narrative?.whatChanged ||
     selectedOpportunity?.decisionIntelligence?.memory?.summary ||
     "Signal has seen similar situations before. Past outcomes increased confidence slightly.";
   const learningSummary = `${similarDecisionLesson} Signal will remember this decision and compare it with the result later.`;
@@ -2499,6 +2750,8 @@ export default function DecisionOperatingSystem({
                       )}
                     </div>
                   </DisclosurePanel>
+
+                  <InvestorLearningPanel learning={selectedLearning} />
 
                   <DisclosurePanel
                     title="Decision path"
