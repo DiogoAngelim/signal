@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
 
 interface Node {
   id: number;
@@ -134,8 +134,8 @@ function buildConnections(): Connection[] {
   }
 
   for (let i = 1; i <= 6; i++) {
-    const targets = [7 + ((i - 1) * 2) % 10, 7 + ((i - 1) * 2 + 1) % 10];
-    targets.forEach((target) => {
+    const targets = [7 + (((i - 1) * 2) % 10), 7 + (((i - 1) * 2 + 1) % 10)];
+    for (const target of targets) {
       if (target < 17) {
         connections.push({
           id: connId++,
@@ -144,14 +144,14 @@ function buildConnections(): Connection[] {
           delay: round(i * 0.15),
         });
       }
-    });
+    }
   }
 
   for (let i = 7; i < 17; i++) {
     connections.push({
       id: connId++,
       fromId: i,
-      toId: 17 + ((i - 7) * 2) % 20,
+      toId: 17 + (((i - 7) * 2) % 20),
       delay: round((i - 7) * 0.1),
     });
   }
@@ -177,41 +177,45 @@ export function NeuralIllustration() {
     return { x, y };
   }, []);
 
-  const handlePointerDown = useCallback((e: React.PointerEvent, nodeId: number) => {
-    e.preventDefault();
-    (e.target as Element).setPointerCapture(e.pointerId);
-    setDraggedNode(nodeId);
-  }, []);
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent, nodeId: number) => {
+      e.preventDefault();
+      (e.target as Element).setPointerCapture(e.pointerId);
+      setDraggedNode(nodeId);
+    },
+    [],
+  );
 
-  const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (draggedNode === null) return;
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (draggedNode === null) return;
 
-    const { x, y } = getSVGCoordinates(e.clientX, e.clientY);
+      const { x, y } = getSVGCoordinates(e.clientX, e.clientY);
 
-    setNodes(prevNodes =>
-      prevNodes.map(node =>
-        node.id === draggedNode
-          ? { ...node, cx: x, cy: y }
-          : node
-      )
-    );
-  }, [draggedNode, getSVGCoordinates]);
+      setNodes((prevNodes) =>
+        prevNodes.map((node) =>
+          node.id === draggedNode ? { ...node, cx: x, cy: y } : node,
+        ),
+      );
+    },
+    [draggedNode, getSVGCoordinates],
+  );
 
   const handlePointerUp = useCallback(() => {
     if (draggedNode === null) return;
 
     // Animate back to original position
-    setNodes(prevNodes =>
-      prevNodes.map(node =>
+    setNodes((prevNodes) =>
+      prevNodes.map((node) =>
         node.id === draggedNode
           ? { ...node, cx: node.baseCx, cy: node.baseCy }
-          : node
-      )
+          : node,
+      ),
     );
     setDraggedNode(null);
   }, [draggedNode]);
 
-  const getNodeById = (id: number) => nodes.find(n => n.id === id);
+  const getNodeById = (id: number) => nodes.find((n) => n.id === id);
 
   return (
     <div className="relative w-full max-w-lg aspect-square animate-float">
@@ -219,7 +223,9 @@ export function NeuralIllustration() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(223,114,71,0.16)_0%,transparent_50%)] blur-2xl" />
 
       <svg
+        aria-label="Signal neural network illustration"
         ref={svgRef}
+        role="img"
         viewBox="0 0 500 500"
         className="w-full h-full cursor-grab active:cursor-grabbing"
         xmlns="http://www.w3.org/2000/svg"
@@ -289,7 +295,8 @@ export function NeuralIllustration() {
                 className={draggedNode === null ? "animate-neural" : ""}
                 style={{
                   animationDelay: `${conn.delay}s`,
-                  transition: draggedNode !== null ? "none" : "all 0.3s ease-out"
+                  transition:
+                    draggedNode !== null ? "none" : "all 0.3s ease-out",
                 }}
               />
             );
@@ -330,7 +337,8 @@ export function NeuralIllustration() {
             key={node.id}
             style={{
               cursor: "grab",
-              transition: draggedNode === node.id ? "none" : "all 0.3s ease-out"
+              transition:
+                draggedNode === node.id ? "none" : "all 0.3s ease-out",
             }}
           >
             {/* Extra glow for core */}
@@ -372,7 +380,7 @@ export function NeuralIllustration() {
               style={{
                 animationDelay: `${node.delay}s`,
                 pointerEvents: "none",
-                transition: "r 0.15s ease-out"
+                transition: "r 0.15s ease-out",
               }}
             />
           </g>
@@ -380,25 +388,27 @@ export function NeuralIllustration() {
 
         {/* Radiating energy lines from center */}
         <g opacity="0.4">
-          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle) => {
-            const coreNode = getNodeById(0);
-            const cx = coreNode?.cx ?? CENTER_X;
-            const cy = coreNode?.cy ?? CENTER_Y;
-            return (
-              <line
-                key={angle}
-                x1={cx}
-                y1={cy}
-                x2={cx + Math.cos((angle * Math.PI) / 180) * 220}
-                y2={cy + Math.sin((angle * Math.PI) / 180) * 180}
-                stroke="rgba(85, 156, 205, 0.16)"
-                strokeWidth="0.5"
-                strokeDasharray="4 8"
-                className={draggedNode === null ? "animate-neural" : ""}
-                style={{ animationDelay: `${angle / 100}s` }}
-              />
-            );
-          })}
+          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map(
+            (angle) => {
+              const coreNode = getNodeById(0);
+              const cx = coreNode?.cx ?? CENTER_X;
+              const cy = coreNode?.cy ?? CENTER_Y;
+              return (
+                <line
+                  key={angle}
+                  x1={cx}
+                  y1={cy}
+                  x2={cx + Math.cos((angle * Math.PI) / 180) * 220}
+                  y2={cy + Math.sin((angle * Math.PI) / 180) * 180}
+                  stroke="rgba(85, 156, 205, 0.16)"
+                  strokeWidth="0.5"
+                  strokeDasharray="4 8"
+                  className={draggedNode === null ? "animate-neural" : ""}
+                  style={{ animationDelay: `${angle / 100}s` }}
+                />
+              );
+            },
+          )}
         </g>
       </svg>
     </div>

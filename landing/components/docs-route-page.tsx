@@ -1,6 +1,6 @@
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRight } from "lucide-react";
 
 type DocsRoutePageProps = {
   eyebrow: string;
@@ -44,7 +44,9 @@ export function DocsRoutePage({
 
         <section className="grid flex-1 gap-8 py-10 lg:grid-cols-[1.4fr_0.6fr]">
           <div className="space-y-6">
-            <p className="max-w-2xl text-lg leading-8 text-muted-foreground">{summary}</p>
+            <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
+              {summary}
+            </p>
             <div className="flex flex-col gap-3 sm:flex-row">
               <a
                 href={canonicalHref}

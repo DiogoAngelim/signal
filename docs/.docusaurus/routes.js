@@ -4,16 +4,28 @@ import ComponentCreator from '@docusaurus/ComponentCreator';
 export default [
   {
     path: '/signal/docs',
-    component: ComponentCreator('/signal/docs', '650'),
+    component: ComponentCreator('/signal/docs', '762'),
     routes: [
       {
         path: '/signal/docs',
-        component: ComponentCreator('/signal/docs', 'bb1'),
+        component: ComponentCreator('/signal/docs', '9da'),
         routes: [
           {
             path: '/signal/docs',
-            component: ComponentCreator('/signal/docs', 'c7f'),
+            component: ComponentCreator('/signal/docs', '67d'),
             routes: [
+              {
+                path: '/signal/docs/architecture',
+                component: ComponentCreator('/signal/docs/architecture', '2a5'),
+                exact: true,
+                sidebar: "tutorialSidebar"
+              },
+              {
+                path: '/signal/docs/concepts/decision-layer',
+                component: ComponentCreator('/signal/docs/concepts/decision-layer', '636'),
+                exact: true,
+                sidebar: "tutorialSidebar"
+              },
               {
                 path: '/signal/docs/concepts/events',
                 component: ComponentCreator('/signal/docs/concepts/events', '0db'),
@@ -75,6 +87,12 @@ export default [
                 sidebar: "tutorialSidebar"
               },
               {
+                path: '/signal/docs/examples/stocks-optimizer',
+                component: ComponentCreator('/signal/docs/examples/stocks-optimizer', 'e57'),
+                exact: true,
+                sidebar: "tutorialSidebar"
+              },
+              {
                 path: '/signal/docs/examples/storage-backed-idempotency-flow',
                 component: ComponentCreator('/signal/docs/examples/storage-backed-idempotency-flow', 'd6a'),
                 exact: true,
@@ -119,6 +137,12 @@ export default [
               {
                 path: '/signal/docs/introduction',
                 component: ComponentCreator('/signal/docs/introduction', '674'),
+                exact: true,
+                sidebar: "tutorialSidebar"
+              },
+              {
+                path: '/signal/docs/readiness/ecosystem-audit',
+                component: ComponentCreator('/signal/docs/readiness/ecosystem-audit', '378'),
                 exact: true,
                 sidebar: "tutorialSidebar"
               },

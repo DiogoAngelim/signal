@@ -156,6 +156,24 @@ CREATE INDEX IF NOT EXISTS idx_signal_memory_summaries_source_created_at
 CREATE INDEX IF NOT EXISTS idx_signal_memory_summaries_retention_tier
   ON signal_memory_summaries (retention_tier);
 
+CREATE TABLE IF NOT EXISTS signal_evidence (
+  evidence_id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  decision_id TEXT,
+  thesis_id TEXT,
+  regime_snapshot_id TEXT,
+  observed_at TIMESTAMPTZ NOT NULL,
+  direction TEXT NOT NULL CHECK (direction IN ('supporting','contradicting','missing')),
+  evidence JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_evidence_source_observed_at
+  ON signal_evidence (source, observed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signal_evidence_decision_id
+  ON signal_evidence (decision_id);
+CREATE INDEX IF NOT EXISTS idx_signal_evidence_thesis_id
+  ON signal_evidence (thesis_id);
+
 CREATE TABLE IF NOT EXISTS signal_theses (
   thesis_id TEXT PRIMARY KEY,
   source TEXT NOT NULL,
@@ -226,6 +244,38 @@ CREATE INDEX IF NOT EXISTS idx_signal_learning_records_decision_id
   ON signal_learning_records (decision_id);
 CREATE INDEX IF NOT EXISTS idx_signal_learning_records_thesis_id
   ON signal_learning_records (thesis_id);
+
+CREATE TABLE IF NOT EXISTS signal_calibration_records (
+  calibration_record_id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  decision_id TEXT,
+  created_at TIMESTAMPTZ NOT NULL,
+  calibration_error DOUBLE PRECISION NOT NULL DEFAULT 0,
+  calibration_score DOUBLE PRECISION NOT NULL DEFAULT 0,
+  reliability_trend TEXT NOT NULL,
+  calibration JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_calibration_records_source_created_at
+  ON signal_calibration_records (source, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signal_calibration_records_decision_id
+  ON signal_calibration_records (decision_id);
+
+CREATE TABLE IF NOT EXISTS signal_process_quality_records (
+  process_quality_id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  decision_id TEXT,
+  created_at TIMESTAMPTZ NOT NULL,
+  process_quality_score DOUBLE PRECISION NOT NULL DEFAULT 0,
+  outcome_quality_score DOUBLE PRECISION,
+  classification TEXT NOT NULL,
+  process JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_process_quality_records_source_created_at
+  ON signal_process_quality_records (source, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signal_process_quality_records_decision_id
+  ON signal_process_quality_records (decision_id);
 
 CREATE TABLE IF NOT EXISTS signal_retention_jobs (
   job_id TEXT PRIMARY KEY,

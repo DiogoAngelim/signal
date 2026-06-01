@@ -12,6 +12,9 @@ export type Evidence = {
   strength: number;
   confidence: number;
   source?: string;
+  decisionId?: string;
+  thesisId?: string;
+  regimeSnapshotId?: string;
   metadata?: Record<string, unknown>;
 };
 
@@ -100,6 +103,45 @@ export type DecisionOutcome = {
   metadata?: Record<string, unknown>;
 };
 
+export type CalibrationRecord = {
+  calibrationRecordId: string;
+  source: string;
+  createdAt: string;
+  decisionId?: string;
+  predictedConfidence: number;
+  actualOutcomeScore: number | null;
+  calibrationError: number;
+  calibrationScore: number;
+  overconfidenceSignal: boolean;
+  underconfidenceSignal: boolean;
+  reliabilityTrend: "aligned" | "overconfident" | "underconfident" | "insufficient-data";
+  sampleSize: number;
+  explanation: string;
+  metadata?: Record<string, unknown>;
+};
+
+export type ProcessQualityRecord = {
+  processQualityId: string;
+  source: string;
+  createdAt: string;
+  decisionId?: string;
+  processQualityScore: number;
+  outcomeQualityScore: number | null;
+  classification:
+    | "sound_process"
+    | "weak_process"
+    | "lucky_win"
+    | "unlucky_loss"
+    | "inconclusive";
+  evidenceQualityScore: number;
+  disconfirmationScore: number;
+  uncertaintyScore: number;
+  sizingScore: number;
+  readinessScore: number;
+  learningNote: string;
+  metadata?: Record<string, unknown>;
+};
+
 export type DecisionReview = {
   reviewId: string;
   decisionId: string;
@@ -127,6 +169,23 @@ export type LearningRecord = {
   confidenceAdjustment: number;
   trustAdjustment: number;
   metadata?: Record<string, unknown>;
+};
+
+export type BeliefFreshnessProfile = {
+  freshness: number;
+  ageDays: number;
+  status: "fresh" | "aging" | "stale" | "unsupported";
+  confidenceAfterDecay: number;
+  decayApplied: number;
+  explanation: string;
+};
+
+export type DisconfirmationProfile = {
+  supportingEvidence: Evidence[];
+  contradictingEvidence: DisconfirmingEvidence[];
+  missingEvidence: string[];
+  invalidationConditions: string[];
+  question: string;
 };
 
 export type MindChangeTrigger = {
@@ -267,6 +326,10 @@ export type InvestorLearningAssessment = {
   decisionRecord: DecisionRecord;
   review: DecisionReview | null;
   learningRecords: LearningRecord[];
+  calibration: CalibrationRecord;
+  processQuality: ProcessQualityRecord;
+  beliefFreshness: BeliefFreshnessProfile;
+  disconfirmation: DisconfirmationProfile;
   mindChangeTriggers: MindChangeTrigger[];
   conviction: ConvictionProfile;
   readiness: ReadinessProfile;
@@ -339,6 +402,7 @@ export function createInvestorLearningAssessment(input: InvestorLearningInput): 
     direction: "supporting",
     fallbackStrength: confidence,
     fallbackLabel: "Supporting evidence",
+    decisionId: input.decisionId,
   });
   const contradicting = evidenceFromStrings({
     values: input.contradictingEvidence,
@@ -347,6 +411,7 @@ export function createInvestorLearningAssessment(input: InvestorLearningInput): 
     direction: "contradicting",
     fallbackStrength: clampScore(input.riskPressure, 50),
     fallbackLabel: "Contradicting evidence",
+    decisionId: input.decisionId,
   }) as DisconfirmingEvidence[];
   const missing = uniqueStrings(input.missingEvidence ?? []);
   const invalidationConditions = uniqueStrings(input.invalidationConditions ?? []);
@@ -373,6 +438,8 @@ export function createInvestorLearningAssessment(input: InvestorLearningInput): 
       invalidationConditions,
     },
   );
+  const beliefFreshness = evaluateBeliefFreshness(thesis, createdAt);
+  const disconfirmation = assessDisconfirmation(thesis);
   const regimeSnapshot = buildRegimeSnapshot({
     source,
     decisionId: input.decisionId,
@@ -490,6 +557,17 @@ export function createInvestorLearningAssessment(input: InvestorLearningInput): 
     rationale: thesis.description,
     metadata: input.metadata,
   };
+  const calibration = buildCalibrationRecord({
+    decisionRecord,
+    outcome: input.outcome,
+    reviewedOutcomes: input.reviewedOutcomes,
+    createdAt,
+  });
+  const processQuality = buildProcessQualityRecord({
+    decisionRecord,
+    outcome: input.outcome,
+    createdAt,
+  });
   const narrative = generateInvestorNarrative({
     thesis,
     conviction,
@@ -520,6 +598,10 @@ export function createInvestorLearningAssessment(input: InvestorLearningInput): 
     decisionRecord,
     review,
     learningRecords,
+    calibration,
+    processQuality,
+    beliefFreshness,
+    disconfirmation,
     mindChangeTriggers,
     conviction,
     readiness,
@@ -772,6 +854,178 @@ export function createLearningRecordFromReview(
     confidenceAdjustment: review.confidenceAdjustment,
     trustAdjustment: review.trustAdjustment,
     metadata: { classification: review.classification },
+  };
+}
+
+export function buildCalibrationRecord(input: {
+  decisionRecord: DecisionRecord;
+  outcome?: DecisionOutcome;
+  reviewedOutcomes?: readonly DecisionReview[];
+  createdAt?: string;
+}): CalibrationRecord {
+  const createdAt = input.createdAt ?? input.outcome?.recordedAt ?? new Date().toISOString();
+  const actualOutcomeScore = input.outcome ? scoreOutcome(input.outcome) : null;
+  const calibrationError = actualOutcomeScore == null
+    ? 0
+    : round(input.decisionRecord.confidence - actualOutcomeScore, 2);
+  const sampleSize = (input.reviewedOutcomes?.length ?? 0) + (input.outcome ? 1 : 0);
+  const reviewBias = average(input.reviewedOutcomes?.map((review) => review.confidenceAdjustment) ?? [], 0);
+  const reliabilityTrend = actualOutcomeScore == null && sampleSize === 0
+    ? "insufficient-data"
+    : calibrationError > 12 || reviewBias < -1
+      ? "overconfident"
+      : calibrationError < -12 || reviewBias > 1
+        ? "underconfident"
+        : "aligned";
+  const calibrationScore = actualOutcomeScore == null
+    ? 0
+    : clampScore(100 - Math.abs(calibrationError), 0);
+
+  return {
+    calibrationRecordId: idFor("calibration-record", input.decisionRecord.decisionId, createdAt),
+    source: input.decisionRecord.source,
+    createdAt,
+    decisionId: input.decisionRecord.decisionId,
+    predictedConfidence: input.decisionRecord.confidence,
+    actualOutcomeScore,
+    calibrationError,
+    calibrationScore,
+    overconfidenceSignal: reliabilityTrend === "overconfident",
+    underconfidenceSignal: reliabilityTrend === "underconfident",
+    reliabilityTrend,
+    sampleSize,
+    explanation: actualOutcomeScore == null
+      ? "Calibration will improve after more outcomes are reviewed."
+      : `Predicted confidence differed from the reviewed outcome by ${Math.abs(calibrationError)} points.`,
+  };
+}
+
+export function buildProcessQualityRecord(input: {
+  decisionRecord: DecisionRecord;
+  outcome?: DecisionOutcome;
+  createdAt?: string;
+}): ProcessQualityRecord {
+  const createdAt = input.createdAt ?? input.outcome?.recordedAt ?? new Date().toISOString();
+  const supportStrength = average(input.decisionRecord.supportingEvidence.map((item) => item.strength), input.decisionRecord.confidence);
+  const contradictionPressure = average(input.decisionRecord.contradictingEvidence.map((item) => item.strength), 0);
+  const evidenceQualityScore = clampScore(supportStrength - contradictionPressure * 0.25);
+  const disconfirmationScore = clampScore(
+    (input.decisionRecord.contradictingEvidence.length > 0 ? 45 : 20) +
+      Math.min(input.decisionRecord.invalidationConditions.length, 3) * 15 +
+      Math.min(input.decisionRecord.missingEvidence.length, 3) * 8,
+    50,
+  );
+  const uncertaintyScore = clampScore(
+    100 - Math.max(0, input.decisionRecord.confidence - 78) - input.decisionRecord.missingEvidence.length * 8,
+    70,
+  );
+  const readinessScore = input.decisionRecord.exposure > 0
+    ? clampScore(input.decisionRecord.readiness)
+    : clampScore(100 - Math.max(0, 45 - input.decisionRecord.readiness));
+  const sizingScore = clampScore(
+    input.decisionRecord.exposure <= exposureCapFor(input.decisionRecord.readiness)
+      ? 90 - contradictionPressure * 0.2
+      : 45 - (input.decisionRecord.exposure - exposureCapFor(input.decisionRecord.readiness)) * 4,
+    65,
+  );
+  const processQualityScore = clampScore(
+    evidenceQualityScore * 0.25 +
+      disconfirmationScore * 0.2 +
+      uncertaintyScore * 0.2 +
+      sizingScore * 0.2 +
+      readinessScore * 0.15,
+  );
+  const outcomeQualityScore = input.outcome ? scoreOutcome(input.outcome) : null;
+  const classification = classifyProcessQuality(processQualityScore, outcomeQualityScore);
+
+  return {
+    processQualityId: idFor("process-quality", input.decisionRecord.decisionId, createdAt),
+    source: input.decisionRecord.source,
+    createdAt,
+    decisionId: input.decisionRecord.decisionId,
+    processQualityScore,
+    outcomeQualityScore,
+    classification,
+    evidenceQualityScore,
+    disconfirmationScore,
+    uncertaintyScore,
+    sizingScore,
+    readinessScore,
+    learningNote: processLearningNote(classification),
+  };
+}
+
+export function evaluateBeliefFreshness(
+  thesis: Thesis,
+  asOf: string | Date = new Date(),
+): BeliefFreshnessProfile {
+  const observedDates = [
+    thesis.updatedAt,
+    ...thesis.supportingEvidence.map((item) => item.observedAt),
+    ...thesis.contradictingEvidence.map((item) => item.observedAt),
+  ];
+  const latestEvidenceAt = latestValidDate(observedDates);
+  const asOfDate = typeof asOf === "string" ? new Date(asOf) : asOf;
+  const hasEvidence = thesis.supportingEvidence.length + thesis.contradictingEvidence.length > 0;
+  const ageDays = latestEvidenceAt
+    ? Math.max(0, Math.floor((asOfDate.getTime() - latestEvidenceAt.getTime()) / 86_400_000))
+    : Number.POSITIVE_INFINITY;
+  const status: BeliefFreshnessProfile["status"] = !hasEvidence
+    ? "unsupported"
+    : ageDays <= 7
+      ? "fresh"
+      : ageDays <= 30
+        ? "aging"
+        : "stale";
+  const decayApplied = status === "fresh"
+    ? 0
+    : status === "aging"
+      ? Math.min(10, ageDays * 0.25)
+      : status === "stale"
+        ? Math.min(35, 8 + ageDays * 0.35)
+        : 20;
+  const confidenceAfterDecay = clampScore(thesis.confidence - decayApplied, thesis.confidence);
+  const freshness = status === "unsupported" ? 0 : clampScore(100 - decayApplied * 2);
+
+  return {
+    freshness,
+    ageDays: Number.isFinite(ageDays) ? ageDays : 0,
+    status,
+    confidenceAfterDecay,
+    decayApplied: round(decayApplied, 2),
+    explanation: status === "fresh"
+      ? "This thesis has fresh evidence."
+      : status === "unsupported"
+        ? "This thesis has not received fresh evidence yet."
+        : `Evidence is ${ageDays} day(s) old, so conviction should decay unless refreshed.`,
+  };
+}
+
+export function applyBeliefDecay(
+  thesis: Thesis,
+  asOf: string | Date = new Date(),
+): Thesis {
+  const freshness = evaluateBeliefFreshness(thesis, asOf);
+  return {
+    ...thesis,
+    confidence: freshness.confidenceAfterDecay,
+    status: freshness.status === "stale" && thesis.status !== "invalidated"
+      ? "weakening"
+      : thesis.status,
+    metadata: {
+      ...thesis.metadata,
+      beliefFreshness: freshness,
+    },
+  };
+}
+
+export function assessDisconfirmation(thesis: Thesis): DisconfirmationProfile {
+  return {
+    supportingEvidence: thesis.supportingEvidence,
+    contradictingEvidence: thesis.contradictingEvidence,
+    missingEvidence: thesis.missingEvidence,
+    invalidationConditions: thesis.invalidationConditions,
+    question: "What could make this wrong?",
   };
 }
 
@@ -1042,6 +1296,118 @@ export function generateInvestorNarrative(input: {
   };
 }
 
+export class RegimeMemoryEngine {
+  private readonly snapshots: RegimeSnapshot[];
+
+  constructor(initialSnapshots: readonly RegimeSnapshot[] = []) {
+    this.snapshots = [...initialSnapshots];
+  }
+
+  remember(snapshot: RegimeSnapshot): RegimeSnapshot {
+    const existingIndex = this.snapshots.findIndex(
+      (item) => item.regimeSnapshotId === snapshot.regimeSnapshotId,
+    );
+    if (existingIndex >= 0) this.snapshots.splice(existingIndex, 1);
+    this.snapshots.unshift(snapshot);
+    return snapshot;
+  }
+
+  list(): RegimeSnapshot[] {
+    return [...this.snapshots];
+  }
+
+  findSimilar(current: RegimeSnapshot, options?: { limit?: number; threshold?: number }): SimilarRegime[] {
+    return findSimilarRegimes(current, this.snapshots, options);
+  }
+}
+
+export class ReflectionEngine {
+  reviewDecision(input: Parameters<typeof createDecisionReview>[0]): DecisionReview {
+    return createDecisionReview(input);
+  }
+
+  createLearningRecord(
+    review: DecisionReview,
+    context?: { source?: string; thesisId?: string; regimeSnapshotId?: string },
+  ): LearningRecord {
+    return createLearningRecordFromReview(review, context);
+  }
+}
+
+export class ProcessQualityEngine {
+  evaluate(input: Parameters<typeof buildProcessQualityRecord>[0]): ProcessQualityRecord {
+    return buildProcessQualityRecord(input);
+  }
+}
+
+export class CalibrationEngine {
+  evaluate(input: Parameters<typeof buildCalibrationRecord>[0]): CalibrationRecord {
+    return buildCalibrationRecord(input);
+  }
+}
+
+export class BeliefDecayEngine {
+  evaluate(thesis: Thesis, asOf?: string | Date): BeliefFreshnessProfile {
+    return evaluateBeliefFreshness(thesis, asOf);
+  }
+
+  apply(thesis: Thesis, asOf?: string | Date): Thesis {
+    return applyBeliefDecay(thesis, asOf);
+  }
+}
+
+export class ThesisEngine {
+  create(input: Parameters<typeof createThesis>[0]): Thesis {
+    return createThesis(input);
+  }
+
+  update(thesis: Thesis, patch: Parameters<typeof updateThesisStatus>[1]): Thesis {
+    return updateThesisStatus(thesis, patch);
+  }
+}
+
+export class DisconfirmationEngine {
+  assess(thesis: Thesis): DisconfirmationProfile {
+    return assessDisconfirmation(thesis);
+  }
+}
+
+export class MindChangeEngine {
+  buildTriggers(input: Parameters<typeof buildMindChangeTriggers>[0]): MindChangeTrigger[] {
+    return buildMindChangeTriggers(input);
+  }
+}
+
+export class ConvictionEngine {
+  buildProfile(input: Parameters<typeof buildConvictionProfile>[0]): ConvictionProfile {
+    return buildConvictionProfile(input);
+  }
+}
+
+export class ReadinessEngine {
+  buildProfile(input: Parameters<typeof buildReadinessProfile>[0]): ReadinessProfile {
+    return buildReadinessProfile(input);
+  }
+}
+
+export class OpportunityCostEngine {
+  rank(input: readonly OpportunityRankingInput[]): OpportunityRankingResult {
+    return rankOpportunities(input);
+  }
+}
+
+export class TimeHorizonEngine {
+  buildViews(input: Parameters<typeof buildTimeHorizonViews>[0]): TimeHorizonView[] {
+    return buildTimeHorizonViews(input);
+  }
+}
+
+export class NarrativeEngine {
+  generate(input: Parameters<typeof generateInvestorNarrative>[0]): InvestorNarrative {
+    return generateInvestorNarrative(input);
+  }
+}
+
 function learningEmptyStates(input: {
   similarRegimes: SimilarRegime[];
   reviewedOutcomes?: readonly DecisionReview[];
@@ -1063,6 +1429,9 @@ function evidenceFromStrings(input: {
   direction: EvidenceDirection;
   fallbackStrength: number;
   fallbackLabel: string;
+  decisionId?: string;
+  thesisId?: string;
+  regimeSnapshotId?: string;
 }): Evidence[] {
   return uniqueStrings(input.values ?? []).map((description, index) => ({
     evidenceId: idFor("evidence", input.direction, description),
@@ -1073,6 +1442,9 @@ function evidenceFromStrings(input: {
     strength: clampScore(input.fallbackStrength, 50),
     confidence: clampScore(input.fallbackStrength, 50),
     source: input.source,
+    ...(input.decisionId ? { decisionId: input.decisionId } : {}),
+    ...(input.thesisId ? { thesisId: input.thesisId } : {}),
+    ...(input.regimeSnapshotId ? { regimeSnapshotId: input.regimeSnapshotId } : {}),
     ...(input.direction === "contradicting" && /invalidate|block|collapse|falls?|deteriorates?|weakens?/i.test(description)
       ? { invalidates: true }
       : {}),
@@ -1098,6 +1470,66 @@ function horizonView(input: {
     action: input.action,
     risks: uniqueStrings(input.risks).slice(0, 3),
   };
+}
+
+function scoreOutcome(outcome: DecisionOutcome): number {
+  if (Number.isFinite(outcome.confidenceAccuracy)) {
+    return clampScore(outcome.confidenceAccuracy, 50);
+  }
+
+  if (outcome.classification === "correct") return 100;
+  if (outcome.classification === "wrong") return 0;
+  if (outcome.classification === "early" || outcome.classification === "late") return 55;
+  return 50;
+}
+
+function exposureCapFor(readiness: number): number {
+  if (readiness >= 80) return 8;
+  if (readiness >= 68) return 4;
+  if (readiness >= 55) return 2;
+  return 0;
+}
+
+function classifyProcessQuality(
+  processQualityScore: number,
+  outcomeQualityScore: number | null,
+): ProcessQualityRecord["classification"] {
+  if (outcomeQualityScore == null) {
+    return processQualityScore >= 65 ? "sound_process" : "inconclusive";
+  }
+
+  if (processQualityScore >= 65 && outcomeQualityScore < 45) return "unlucky_loss";
+  if (processQualityScore < 65 && outcomeQualityScore >= 65) return "lucky_win";
+  if (processQualityScore >= 65) return "sound_process";
+  return "weak_process";
+}
+
+function processLearningNote(classification: ProcessQualityRecord["classification"]): string {
+  if (classification === "unlucky_loss") {
+    return "The process was sound even though the outcome was poor; avoid learning the wrong lesson from an unlucky loss.";
+  }
+
+  if (classification === "lucky_win") {
+    return "The outcome was good, but the process was weak; avoid reinforcing a lucky win.";
+  }
+
+  if (classification === "weak_process") {
+    return "Improve evidence quality, disconfirmation, sizing, or readiness before trusting a similar decision.";
+  }
+
+  if (classification === "sound_process") {
+    return "The decision process was coherent; future learning should focus on calibration and outcome follow-through.";
+  }
+
+  return "Process quality will become clearer after the decision has a reviewed outcome.";
+}
+
+function latestValidDate(values: readonly string[]): Date | null {
+  const dates = values
+    .map((value) => new Date(value))
+    .filter((date) => !Number.isNaN(date.getTime()))
+    .sort((a, b) => b.getTime() - a.getTime());
+  return dates[0] ?? null;
 }
 
 function validationResult(errors: string[]): ValidationResult {

@@ -23,8 +23,7 @@ const scenarios: Scenario[] = [
     avatar:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=240&q=80",
     logo: "https://s3-symbol-logo.tradingview.com/payoneer.svg",
-    pain:
-      "The same payment can be processed twice when systems retry a request after a timeout or network failure.",
+    pain: "The same payment can be processed twice when systems retry a request after a timeout or network failure.",
     solution:
       "Each payment request is handled as one durable action. If the same request comes back, the system returns the same result instead of charging again.",
     outcome:
@@ -40,8 +39,7 @@ const scenarios: Scenario[] = [
     avatar:
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=240&q=80",
     logo: "https://s3-symbol-logo.tradingview.com/paypal.svg",
-    pain:
-      "More than one internal system may try to release the same funds, which creates real financial risk.",
+    pain: "More than one internal system may try to release the same funds, which creates real financial risk.",
     solution:
       "The release is recorded once as a verified action. Duplicate attempts become safe retries instead of duplicate transfers.",
     outcome:
@@ -57,8 +55,7 @@ const scenarios: Scenario[] = [
     avatar:
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=240&q=80",
     logo: "https://s3-symbol-logo.tradingview.com/apple.svg",
-    pain:
-      "Account creation usually triggers several follow-up steps, and retries can accidentally create duplicates or partial setups.",
+    pain: "Account creation usually triggers several follow-up steps, and retries can accidentally create duplicates or partial setups.",
     solution:
       "The account is created once, then welcome emails, provisioning, and downstream tasks happen safely around that single source of truth.",
     outcome:
@@ -74,8 +71,7 @@ const scenarios: Scenario[] = [
     avatar:
       "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=240&q=80",
     logo: "https://s3-symbol-logo.tradingview.com/oracle.svg",
-    pain:
-      "Some APIs blur reading and writing, which makes them hard to trust and risky to retry.",
+    pain: "Some APIs blur reading and writing, which makes them hard to trust and risky to retry.",
     solution:
       "Read actions are kept read-only. They return status and data without changing anything in the system.",
     outcome:
@@ -161,8 +157,9 @@ function SectionBlock({
         {label}
       </p>
       <p
-        className={`text-sm leading-6 tracking-[-0.01em] ${emphasis ? "text-foreground" : "text-muted-foreground"
-          }`}
+        className={`text-sm leading-6 tracking-[-0.01em] ${
+          emphasis ? "text-foreground" : "text-muted-foreground"
+        }`}
       >
         {value}
       </p>
@@ -186,7 +183,6 @@ function ScenarioCard({ item, index }: { item: Scenario; index: number }) {
 
       <div className="relative z-10 flex h-full flex-col">
         <div className="flex items-start justify-between gap-4">
-
           <CompanyBadge
             logo={item.logo}
             companyType={item.companyType}
@@ -211,10 +207,7 @@ function ScenarioCard({ item, index }: { item: Scenario; index: number }) {
           <div className="rounded-[24px] border border-border bg-background/50 p-4 shadow-inner">
             <div className="space-y-4">
               <SectionBlock label="Problem" value={item.pain} />
-              <SectionBlock
-                label="Solution"
-                value={item.solution}
-              />
+              <SectionBlock label="Solution" value={item.solution} />
               <SectionBlock label="Result" value={item.outcome} />
             </div>
           </div>

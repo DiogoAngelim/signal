@@ -16,8 +16,8 @@
   },
   "sidebar": "tutorialSidebar",
   "previous": {
-    "title": "Conformance",
-    "permalink": "/signal/docs/reference/conformance"
+    "title": "Ecosystem Readiness Audit",
+    "permalink": "/signal/docs/readiness/ecosystem-audit"
   },
   "next": {
     "title": "Define Your First Query",

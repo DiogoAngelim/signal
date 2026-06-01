@@ -1,6 +1,6 @@
-import { notFound } from "next/navigation";
 import { DocsRoutePage } from "@/components/docs-route-page";
 import { docsPages, findDocsPage } from "@/lib/docs-pages";
+import { notFound } from "next/navigation";
 
 type SlugParams = {
   slug: string[];

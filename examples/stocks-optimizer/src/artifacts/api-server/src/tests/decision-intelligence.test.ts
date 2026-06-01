@@ -48,6 +48,10 @@ test("decision intelligence enriches strategy signals with required governance f
   assert.equal(signal.learning.conviction.confidence, 78);
   assert.equal(typeof signal.learning.readiness.actionJustified, "boolean");
   assert.equal(typeof signal.learning.readiness.actionLanguage, "string");
+  assert.equal(typeof signal.learning.calibration.reliabilityTrend, "string");
+  assert.equal(typeof signal.learning.processQuality.processQualityScore, "number");
+  assert.equal(typeof signal.learning.beliefFreshness.status, "string");
+  assert.equal(signal.learning.disconfirmation.question, "What could make this wrong?");
   assert.ok(Array.isArray(signal.learning.mindChangeTriggers));
   assert.ok(signal.learning.narrative.whatIsHappening);
   assert.ok(signal.learning.emptyStates.includes("Outcome learning starts after decisions are reviewed."));
@@ -81,6 +85,9 @@ test("decision operations expose protocol-style capabilities and persisted accou
   assert.ok(capabilities.operations.some((operation: any) => operation.name === "decision.evaluate.v1"));
   assert.ok(capabilities.events.some((operation: any) => operation.name === "decision.blocked.v1"));
   assert.ok(capabilities.learning.answers.includes("mind-change-triggers"));
+  assert.ok(capabilities.learning.answers.includes("calibration"));
+  assert.ok(capabilities.learning.answers.includes("process-quality"));
+  assert.ok(capabilities.learning.answers.includes("belief-freshness"));
 
   const result = evaluateDecisionOperation({
     decisionId: "test-decision",

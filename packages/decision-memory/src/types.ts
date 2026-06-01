@@ -7,8 +7,11 @@ import type {
   SignalDecisionRecord,
 } from "@signal/decision";
 import type {
+  CalibrationRecord,
   DecisionReview,
+  Evidence,
   LearningRecord,
+  ProcessQualityRecord,
   RegimeSnapshot,
   Thesis,
 } from "./learning";
@@ -176,6 +179,8 @@ export type RetentionJobStore = {
 };
 
 export type LearningStore = {
+  saveEvidence(evidence: Evidence): Promise<Evidence>;
+  listEvidence(filter?: LearningRecordFilter): Promise<Evidence[]>;
   saveThesis(thesis: Thesis): Promise<Thesis>;
   getThesis(thesisId: string): Promise<Thesis | undefined>;
   listTheses(filter?: LearningRecordFilter): Promise<Thesis[]>;
@@ -186,6 +191,10 @@ export type LearningStore = {
   listDecisionReviews(filter?: LearningRecordFilter): Promise<DecisionReview[]>;
   saveLearningRecord(record: LearningRecord): Promise<LearningRecord>;
   listLearningRecords(filter?: LearningRecordFilter): Promise<LearningRecord[]>;
+  saveCalibrationRecord(record: CalibrationRecord): Promise<CalibrationRecord>;
+  listCalibrationRecords(filter?: LearningRecordFilter): Promise<CalibrationRecord[]>;
+  saveProcessQualityRecord(record: ProcessQualityRecord): Promise<ProcessQualityRecord>;
+  listProcessQualityRecords(filter?: LearningRecordFilter): Promise<ProcessQualityRecord[]>;
 };
 
 export type DecisionMemoryStore = RealityStore &

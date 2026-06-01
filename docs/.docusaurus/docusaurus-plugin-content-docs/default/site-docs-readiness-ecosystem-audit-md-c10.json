@@ -1,0 +1,26 @@
+{
+  "id": "readiness/ecosystem-audit",
+  "title": "Ecosystem Readiness Audit",
+  "description": "Status: initial public-readiness audit.",
+  "source": "@site/docs/readiness/ecosystem-audit.md",
+  "sourceDirName": "readiness",
+  "slug": "/readiness/ecosystem-audit",
+  "permalink": "/signal/docs/readiness/ecosystem-audit",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/readiness/ecosystem-audit.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Ecosystem Readiness Audit"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Conformance",
+    "permalink": "/signal/docs/reference/conformance"
+  },
+  "next": {
+    "title": "Quickstart",
+    "permalink": "/signal/docs/guides/quickstart"
+  }
+}

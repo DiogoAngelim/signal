@@ -11,6 +11,16 @@
           "mainDocId": "introduction",
           "docs": [
             {
+              "id": "architecture",
+              "path": "/signal/docs/architecture",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "concepts/decision-layer",
+              "path": "/signal/docs/concepts/decision-layer",
+              "sidebar": "tutorialSidebar"
+            },
+            {
               "id": "concepts/events",
               "path": "/signal/docs/concepts/events",
               "sidebar": "tutorialSidebar"
@@ -61,6 +71,11 @@
               "sidebar": "tutorialSidebar"
             },
             {
+              "id": "examples/stocks-optimizer",
+              "path": "/signal/docs/examples/stocks-optimizer",
+              "sidebar": "tutorialSidebar"
+            },
+            {
               "id": "examples/storage-backed-idempotency-flow",
               "path": "/signal/docs/examples/storage-backed-idempotency-flow",
               "sidebar": "tutorialSidebar"
@@ -98,6 +113,11 @@
             {
               "id": "introduction",
               "path": "/signal/docs/introduction",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "readiness/ecosystem-audit",
+              "path": "/signal/docs/readiness/ecosystem-audit",
               "sidebar": "tutorialSidebar"
             },
             {

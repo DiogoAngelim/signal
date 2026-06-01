@@ -1,10 +1,10 @@
+import type { PulseEngine, PulseInput } from "@digelim/05.pulse";
+import type { CoreDecision, CoreEngine } from "@digelim/06.core";
 import {
   type ActionDefinition,
   ActionExecutor,
   type ActionResult,
 } from "@digelim/07.action";
-import type { CoreDecision, CoreEngine } from "@digelim/06.core";
-import type { PulseEngine, PulseInput } from "@digelim/05.pulse";
 import type { ResultRecorder } from "@digelim/08.result";
 import {
   LifecycleTracker,

@@ -7,9 +7,11 @@ export default {
   "243157cb": [() => import(/* webpackChunkName: "243157cb" */ "@site/docs/examples/post-publication-flow.md"), "@site/docs/examples/post-publication-flow.md", require.resolveWeak("@site/docs/examples/post-publication-flow.md")],
   "286cdff1": [() => import(/* webpackChunkName: "286cdff1" */ "@site/docs/concepts/versioning.md"), "@site/docs/concepts/versioning.md", require.resolveWeak("@site/docs/concepts/versioning.md")],
   "2d607dc4": [() => import(/* webpackChunkName: "2d607dc4" */ "@site/docs/guides/define-your-first-mutation.md"), "@site/docs/guides/define-your-first-mutation.md", require.resolveWeak("@site/docs/guides/define-your-first-mutation.md")],
+  "3adba2c5": [() => import(/* webpackChunkName: "3adba2c5" */ "@site/docs/concepts/decision-layer.md"), "@site/docs/concepts/decision-layer.md", require.resolveWeak("@site/docs/concepts/decision-layer.md")],
   "4996348c": [() => import(/* webpackChunkName: "4996348c" */ "@site/docs/concepts/queries.md"), "@site/docs/concepts/queries.md", require.resolveWeak("@site/docs/concepts/queries.md")],
   "49c5e09f": [() => import(/* webpackChunkName: "49c5e09f" */ "@site/docs/guides/emit-and-consume-events.md"), "@site/docs/guides/emit-and-consume-events.md", require.resolveWeak("@site/docs/guides/emit-and-consume-events.md")],
   "525287b5": [() => import(/* webpackChunkName: "525287b5" */ "@generated/docusaurus-plugin-content-docs/default/p/signal-docs-50e.json"), "@generated/docusaurus-plugin-content-docs/default/p/signal-docs-50e.json", require.resolveWeak("@generated/docusaurus-plugin-content-docs/default/p/signal-docs-50e.json")],
+  "55a6f08a": [() => import(/* webpackChunkName: "55a6f08a" */ "@site/docs/examples/stocks-optimizer.md"), "@site/docs/examples/stocks-optimizer.md", require.resolveWeak("@site/docs/examples/stocks-optimizer.md")],
   "5e95c892": [() => import(/* webpackChunkName: "5e95c892" */ "@theme/DocsRoot"), "@theme/DocsRoot", require.resolveWeak("@theme/DocsRoot")],
   "5e9f5e1a": [() => import(/* webpackChunkName: "5e9f5e1a" */ "@generated/docusaurus.config"), "@generated/docusaurus.config", require.resolveWeak("@generated/docusaurus.config")],
   "7a86d7cc": [() => import(/* webpackChunkName: "7a86d7cc" */ "@site/docs/examples/minimal-runtime-flow.md"), "@site/docs/examples/minimal-runtime-flow.md", require.resolveWeak("@site/docs/examples/minimal-runtime-flow.md")],
@@ -27,6 +29,8 @@ export default {
   "a94703ab": [() => import(/* webpackChunkName: "a94703ab" */ "@theme/DocRoot"), "@theme/DocRoot", require.resolveWeak("@theme/DocRoot")],
   "aba21aa0": [() => import(/* webpackChunkName: "aba21aa0" */ "@generated/docusaurus-plugin-content-docs/default/__plugin.json"), "@generated/docusaurus-plugin-content-docs/default/__plugin.json", require.resolveWeak("@generated/docusaurus-plugin-content-docs/default/__plugin.json")],
   "b79009e4": [() => import(/* webpackChunkName: "b79009e4" */ "@site/docs/guides/in-process-runtime.md"), "@site/docs/guides/in-process-runtime.md", require.resolveWeak("@site/docs/guides/in-process-runtime.md")],
+  "c1077cbd": [() => import(/* webpackChunkName: "c1077cbd" */ "@site/docs/readiness/ecosystem-audit.md"), "@site/docs/readiness/ecosystem-audit.md", require.resolveWeak("@site/docs/readiness/ecosystem-audit.md")],
   "c49f74d8": [() => import(/* webpackChunkName: "c49f74d8" */ "@site/docs/concepts/mutations.md"), "@site/docs/concepts/mutations.md", require.resolveWeak("@site/docs/concepts/mutations.md")],
   "c64ce652": [() => import(/* webpackChunkName: "c64ce652" */ "@site/docs/guides/http-binding.md"), "@site/docs/guides/http-binding.md", require.resolveWeak("@site/docs/guides/http-binding.md")],
-  "dc365ce2": [() => import(/* webpackChunkName: "dc365ce2" */ "@site/docs/examples/custom-transport-skeleton.md"), "@site/docs/examples/custom-transport-skeleton.md", require.resolveWeak("@site/docs/examples/custom-transport-skeleton.md")],};
+  "dc365ce2": [() => import(/* webpackChunkName: "dc365ce2" */ "@site/docs/examples/custom-transport-skeleton.md"), "@site/docs/examples/custom-transport-skeleton.md", require.resolveWeak("@site/docs/examples/custom-transport-skeleton.md")],
+  "fd532226": [() => import(/* webpackChunkName: "fd532226" */ "@site/docs/architecture.mdx"), "@site/docs/architecture.mdx", require.resolveWeak("@site/docs/architecture.mdx")],};

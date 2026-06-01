@@ -9,13 +9,13 @@ import {
 
 export type SyncTransportResult =
   | {
-    ok: true;
-  }
+      ok: true;
+    }
   | {
-    ok: false;
-    error: string;
-    retryable?: boolean;
-  };
+      ok: false;
+      error: string;
+      retryable?: boolean;
+    };
 
 export interface SyncTransport {
   deliver(record: LocalSignalRecord): Promise<SyncTransportResult>;

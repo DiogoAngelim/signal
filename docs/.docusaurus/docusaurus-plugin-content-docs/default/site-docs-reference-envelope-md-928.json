@@ -16,8 +16,8 @@
   },
   "sidebar": "tutorialSidebar",
   "previous": {
-    "title": "Order and Replay",
-    "permalink": "/signal/docs/concepts/order-and-replay"
+    "title": "Decision Layer",
+    "permalink": "/signal/docs/concepts/decision-layer"
   },
   "next": {
     "title": "Capabilities",

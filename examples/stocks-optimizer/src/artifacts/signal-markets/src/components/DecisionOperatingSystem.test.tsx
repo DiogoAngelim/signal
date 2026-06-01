@@ -109,6 +109,24 @@ function props(
             actionLanguage: "act-small",
             explanation: "Readiness, not confidence alone, drives action language.",
           },
+          calibration: {
+            calibrationScore: 73,
+            reliabilityTrend: "aligned",
+            sampleSize: 4,
+            explanation: "Confidence has matched reviewed outcomes closely enough.",
+          },
+          processQuality: {
+            processQualityScore: 78,
+            outcomeQualityScore: null,
+            readinessScore: 74,
+            learningNote: "Process quality will become clearer after the decision has a reviewed outcome.",
+          },
+          beliefFreshness: {
+            freshness: 92,
+            status: "fresh",
+            confidenceAfterDecay: 74,
+            explanation: "This thesis has fresh evidence.",
+          },
           horizons: [
             { horizon: "short-term", view: "constructive", action: "Review", confidence: 72 },
             { horizon: "medium-term", view: "neutral", action: "Track", confidence: 70 },
@@ -287,6 +305,9 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).toContain("Investor Judgment");
     expect(html).toContain("Current Thesis");
     expect(html).toContain("Contradicting Evidence");
+    expect(html).toContain("Calibration");
+    expect(html).toContain("Process Quality");
+    expect(html).toContain("Belief Freshness");
     expect(html).toContain("Mind Change Triggers");
     expect(html).toContain("Portfolio Context");
     expect(html).toContain("No previous decisions have been reviewed yet.");
@@ -323,11 +344,8 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).toContain(
       "opportunity search and return to normal size need decision control confirmation.",
     );
-    expect(html).not.toContain("Governance");
-    expect(html).not.toContain("Calibration");
-    expect(html).not.toContain("Discovery");
-    expect(html).not.toContain("Agency");
-    expect(html).not.toContain("Recovery");
+    expect(html).not.toContain("Governance Calibration");
+    expect(html).not.toContain("Discovery and Recovery need Agency confirmation.");
   });
 
   it("renders the guided no-market state with required actions", () => {

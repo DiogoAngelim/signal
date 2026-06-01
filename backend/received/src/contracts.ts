@@ -35,10 +35,10 @@ export type ReceiveEnvelopeOptions = {
 
 export type ReceivedResult =
   | {
-    ok: true;
-    value: SignalContextEnvelope;
-  }
+      ok: true;
+      value: SignalContextEnvelope;
+    }
   | {
-    ok: false;
-    error: SignalFrameworkError;
-  };
+      ok: false;
+      error: SignalFrameworkError;
+    };

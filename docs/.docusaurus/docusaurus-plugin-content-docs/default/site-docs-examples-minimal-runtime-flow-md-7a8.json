@@ -16,8 +16,8 @@
   },
   "sidebar": "tutorialSidebar",
   "previous": {
-    "title": "In-Process Runtime",
-    "permalink": "/signal/docs/guides/in-process-runtime"
+    "title": "Stocks-Optimizer",
+    "permalink": "/signal/docs/examples/stocks-optimizer"
   },
   "next": {
     "title": "Post Publication Flow",

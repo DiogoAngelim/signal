@@ -1,10 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { assessCoherence, createDecisionRecord, createRealitySnapshot, evaluateOutcome } from "@signal/decision";
 import {
+  BeliefDecayEngine,
+  CalibrationEngine,
   CompactionJob,
+  ProcessQualityEngine,
+  RegimeMemoryEngine,
+  ThesisEngine,
   MemoryLifecycle,
   SIGNAL_DECISION_MEMORY_MIGRATION_SQL,
+  applyBeliefDecay,
+  buildCalibrationRecord,
   buildMindChangeTriggers,
+  buildProcessQualityRecord,
   createDecisionMemoryOperations,
   createInvestorLearningAssessment,
   createInMemoryDecisionMemoryStore,
@@ -133,12 +141,22 @@ describe("@signal/decision-memory", () => {
     expect(validateThesis(assessment.thesis)).toEqual({ valid: true, errors: [] });
     expect(validateRegimeSnapshot(assessment.regimeSnapshot)).toEqual({ valid: true, errors: [] });
     expect(validateDecisionRecord(assessment.decisionRecord)).toEqual({ valid: true, errors: [] });
+    expect(assessment.calibration.reliabilityTrend).toBe("insufficient-data");
+    expect(assessment.processQuality.processQualityScore).toBeGreaterThan(0);
+    expect(assessment.beliefFreshness.status).toBe("fresh");
+    expect(assessment.disconfirmation.question).toBe("What could make this wrong?");
+    await store.saveEvidence(assessment.evidence.supporting[0]!);
     await store.saveThesis(assessment.thesis);
     await store.saveRegimeSnapshot(assessment.regimeSnapshot);
+    await store.saveCalibrationRecord(assessment.calibration);
+    await store.saveProcessQualityRecord(assessment.processQuality);
     for (const learning of assessment.learningRecords) await store.saveLearningRecord(learning);
 
+    expect(await store.listEvidence({ source: "stocks-optimizer" })).toHaveLength(1);
     expect(await store.getThesis(assessment.thesis.thesisId)).toMatchObject({ title: assessment.thesis.title });
     expect(await store.getRegimeSnapshot(assessment.regimeSnapshot.regimeSnapshotId)).toMatchObject({ venue: "BINANCE" });
+    expect(await store.listCalibrationRecords({ decisionId: assessment.decisionRecord.decisionId })).toHaveLength(1);
+    expect(await store.listProcessQualityRecords({ decisionId: assessment.decisionRecord.decisionId })).toHaveLength(1);
     expect(await store.listTheses({ source: "stocks-optimizer" })).toHaveLength(1);
     expect(await store.listRegimeSnapshots({ venue: "BINANCE" })).toHaveLength(1);
     expect(await store.listLearningRecords({ source: "stocks-optimizer" })).toHaveLength(0);
@@ -183,11 +201,40 @@ describe("@signal/decision-memory", () => {
     });
     expect(assessment.review).not.toBeNull();
     const review = assessment.review!;
+    const calibration = buildCalibrationRecord({
+      decisionRecord: assessment.decisionRecord,
+      outcome: {
+        outcomeId: "outcome:calibration",
+        decisionId: "phase2:review",
+        source: "stocks-optimizer",
+        recordedAt: "2026-06-01T00:00:00.000Z",
+        classification: "wrong",
+        confidenceAccuracy: 20,
+        summary: "Confidence was too high.",
+        lessons: ["Lower confidence in similar weak-readiness states."],
+      },
+    });
+    const process = buildProcessQualityRecord({
+      decisionRecord: assessment.decisionRecord,
+      outcome: assessment.review
+        ? {
+            outcomeId: "outcome:process",
+            decisionId: "phase2:review",
+            source: "stocks-optimizer",
+            recordedAt: "2026-06-01T00:00:00.000Z",
+            classification: "early",
+            summary: "The decision was early.",
+            lessons: ["Readiness lagged conviction."],
+          }
+        : undefined,
+    });
 
     expect(assessment.conviction.confidence).toBe(82);
     expect(assessment.readiness.actionJustified).toBe(false);
     expect(assessment.readiness.actionLanguage).toBe("watch");
     expect(review.classification).toBe("early");
+    expect(calibration.overconfidenceSignal).toBe(true);
+    expect(process.learningNote).toMatch(/process|outcome/i);
     expect(createLearningRecordFromReview(review).lesson).toContain("readiness");
   });
 
@@ -244,6 +291,59 @@ describe("@signal/decision-memory", () => {
     expect(assessment.narrative.action).toContain("readiness");
   });
 
+  it("exposes engine facades for durable investor judgment behaviors", () => {
+    const thesis = new ThesisEngine().create({
+      source: "stocks-optimizer",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      venue: "US",
+      symbol: "AAPL",
+      recommendation: "Watch",
+      confidence: 80,
+      supportingEvidence: [{
+        evidenceId: "evidence:old",
+        observedAt: "2026-01-01T00:00:00.000Z",
+        label: "Old evidence",
+        description: "Old evidence supported the thesis.",
+        direction: "supporting",
+        strength: 80,
+        confidence: 80,
+      }],
+    });
+    const decayed = applyBeliefDecay(thesis, "2026-03-15T00:00:00.000Z");
+    const memory = new RegimeMemoryEngine([regime("similar", 72, 74, 70, "Watch")]);
+    const current = regime("current-engine", 73, 73, 69, "Watch");
+    const process = new ProcessQualityEngine().evaluate({
+      decisionRecord: createInvestorLearningAssessment({
+        decisionId: "phase2:engine",
+        source: "stocks-optimizer",
+        venue: "US",
+        symbol: "AAPL",
+        recommendation: "Watch",
+        confidence: 70,
+        trust: 70,
+        readiness: 60,
+        supportingEvidence: ["Current evidence supports watching."],
+        invalidationConditions: ["Invalidate if breadth weakens."],
+      }).decisionRecord,
+    });
+    const calibration = new CalibrationEngine().evaluate({
+      decisionRecord: createInvestorLearningAssessment({
+        decisionId: "phase2:calibration-engine",
+        source: "stocks-optimizer",
+        venue: "US",
+        symbol: "MSFT",
+        recommendation: "Watch",
+        confidence: 70,
+      }).decisionRecord,
+    });
+
+    expect(new BeliefDecayEngine().evaluate(thesis, "2026-03-15T00:00:00.000Z").status).toBe("stale");
+    expect(decayed.confidence).toBeLessThan(thesis.confidence);
+    expect(memory.findSimilar(current, { threshold: 0.7 })).toHaveLength(1);
+    expect(process.processQualityScore).toBeGreaterThan(0);
+    expect(calibration.explanation).toContain("Calibration will improve");
+  });
+
   it("compacts old records into lessons and removes expired raw inputs", async () => {
     const store = createInMemoryDecisionMemoryStore();
     await store.saveDecisionRecord(record("warm-decision", "2026-01-01T00:00:00.000Z"));
@@ -291,11 +391,14 @@ describe("@signal/decision-memory", () => {
       "signal_decision_records",
       "signal_reality_snapshots",
       "signal_outcomes",
+      "signal_evidence",
       "signal_theses",
       "signal_regime_snapshots",
       "signal_replay_snapshots",
       "signal_decision_reviews",
       "signal_learning_records",
+      "signal_calibration_records",
+      "signal_process_quality_records",
       "signal_calibration_history",
       "signal_trust_history",
       "signal_memory_summaries",

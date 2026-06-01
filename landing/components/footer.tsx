@@ -1,4 +1,4 @@
-import { Zap, BookOpen, Heart, Book } from "lucide-react";
+import { Book, BookOpen, Heart, Zap } from "lucide-react";
 
 export function Footer() {
   return (

@@ -98,10 +98,16 @@ export function decisionCapabilitiesPayload() {
         "supporting-evidence",
         "contradicting-evidence",
         "similar-regimes",
+        "what-changed",
+        "reflection",
+        "calibration",
+        "process-quality",
+        "belief-freshness",
         "conviction",
         "readiness",
         "mind-change-triggers",
         "opportunity-cost",
+        "time-horizon-views",
         "portfolio-context",
         "investor-narrative",
       ],
@@ -563,10 +569,14 @@ function rememberInvestorLearning(assessment: InvestorLearningAssessment) {
   }
 
   void Promise.all([
+    ...assessment.evidence.supporting.map((evidence) => sharedDecisionMemory.saveEvidence(evidence)),
+    ...assessment.evidence.contradicting.map((evidence) => sharedDecisionMemory.saveEvidence(evidence)),
     sharedDecisionMemory.saveThesis(assessment.thesis),
     sharedDecisionMemory.saveRegimeSnapshot(assessment.regimeSnapshot),
     ...(assessment.review ? [sharedDecisionMemory.saveDecisionReview(assessment.review)] : []),
     ...assessment.learningRecords.map((record) => sharedDecisionMemory.saveLearningRecord(record)),
+    sharedDecisionMemory.saveCalibrationRecord(assessment.calibration),
+    sharedDecisionMemory.saveProcessQualityRecord(assessment.processQuality),
   ]).catch((error) => {
     logDecisionMemoryWarning("investor learning persistence failed", error);
   });

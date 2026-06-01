@@ -4,10 +4,21 @@ export function CosmicBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden">
       {/* SVG Noise Texture */}
-      <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
+      <svg
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full opacity-[0.04]"
+        role="presentation"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <defs>
           <filter id="noise" x="0%" y="0%" width="100%" height="100%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" result="noise" />
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.8"
+              numOctaves="4"
+              stitchTiles="stitch"
+              result="noise"
+            />
             <feColorMatrix type="saturate" values="0" />
           </filter>
         </defs>
@@ -21,7 +32,12 @@ export function CosmicBackground() {
       <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(12,10,23,0.34)_0%,transparent_60%)] blur-2xl" />
 
       {/* Flowing energy lines - decorative SVG */}
-      <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
+      <svg
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full opacity-20"
+        role="presentation"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <defs>
           <linearGradient id="lineGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="rgba(223,114,71,0)" />

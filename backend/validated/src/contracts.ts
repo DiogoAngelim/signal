@@ -35,11 +35,11 @@ export type ValidateEnvelopeOptions = {
 
 export type ValidationResult =
   | {
-    ok: true;
-    value: SignalContextEnvelope;
-  }
+      ok: true;
+      value: SignalContextEnvelope;
+    }
   | {
-    ok: false;
-    error: SignalFrameworkError;
-    issues: ValidationIssue[];
-  };
+      ok: false;
+      error: SignalFrameworkError;
+      issues: ValidationIssue[];
+    };

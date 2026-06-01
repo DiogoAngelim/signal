@@ -1,5 +1,13 @@
 import { createRealitySnapshotForDecision, type OutcomeEvaluation, type RealitySnapshot, type SignalDecisionRecord } from "@signal/decision";
-import type { DecisionReview, LearningRecord, RegimeSnapshot, Thesis } from "./learning";
+import type {
+  CalibrationRecord,
+  DecisionReview,
+  Evidence,
+  LearningRecord,
+  ProcessQualityRecord,
+  RegimeSnapshot,
+  Thesis,
+} from "./learning";
 import type {
   CalibrationHistoryEntry,
   DecisionMemoryStore,
@@ -20,10 +28,13 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
   private readonly calibrationHistory = new Map<string, CalibrationHistoryEntry>();
   private readonly trustHistory = new Map<string, TrustHistoryEntry>();
   private readonly summaries = new Map<string, MemorySummary>();
+  private readonly evidence = new Map<string, Evidence>();
   private readonly theses = new Map<string, Thesis>();
   private readonly regimeSnapshots = new Map<string, RegimeSnapshot>();
   private readonly decisionReviews = new Map<string, DecisionReview>();
   private readonly learningRecords = new Map<string, LearningRecord>();
+  private readonly calibrationRecords = new Map<string, CalibrationRecord>();
+  private readonly processQualityRecords = new Map<string, ProcessQualityRecord>();
   private readonly retentionJobs = new Map<string, RetentionJobRecord>();
 
   async saveRealitySnapshot(snapshot: RealitySnapshot): Promise<RealitySnapshot> {
@@ -131,6 +142,24 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
       .slice(0, clampLimit(filter.limit));
   }
 
+  async saveEvidence(evidence: Evidence): Promise<Evidence> {
+    this.evidence.set(evidence.evidenceId, evidence);
+    return evidence;
+  }
+
+  async listEvidence(filter: LearningRecordFilter = {}): Promise<Evidence[]> {
+    return [...this.evidence.values()]
+      .filter((evidence) => matchesLearningFilter({
+        source: evidence.source,
+        decisionId: evidence.decisionId,
+        thesisId: evidence.thesisId,
+        regimeSnapshotId: evidence.regimeSnapshotId,
+        createdAt: evidence.observedAt,
+      }, filter))
+      .sort((a, b) => b.observedAt.localeCompare(a.observedAt))
+      .slice(0, clampLimit(filter.limit));
+  }
+
   async saveThesis(thesis: Thesis): Promise<Thesis> {
     this.theses.set(thesis.thesisId, thesis);
     return thesis;
@@ -206,6 +235,38 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
       .slice(0, clampLimit(filter.limit));
   }
 
+  async saveCalibrationRecord(record: CalibrationRecord): Promise<CalibrationRecord> {
+    this.calibrationRecords.set(record.calibrationRecordId, record);
+    return record;
+  }
+
+  async listCalibrationRecords(filter: LearningRecordFilter = {}): Promise<CalibrationRecord[]> {
+    return [...this.calibrationRecords.values()]
+      .filter((record) => matchesLearningFilter({
+        source: record.source,
+        decisionId: record.decisionId,
+        createdAt: record.createdAt,
+      }, filter))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, clampLimit(filter.limit));
+  }
+
+  async saveProcessQualityRecord(record: ProcessQualityRecord): Promise<ProcessQualityRecord> {
+    this.processQualityRecords.set(record.processQualityId, record);
+    return record;
+  }
+
+  async listProcessQualityRecords(filter: LearningRecordFilter = {}): Promise<ProcessQualityRecord[]> {
+    return [...this.processQualityRecords.values()]
+      .filter((record) => matchesLearningFilter({
+        source: record.source,
+        decisionId: record.decisionId,
+        createdAt: record.createdAt,
+      }, filter))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, clampLimit(filter.limit));
+  }
+
   async saveRetentionJob(job: RetentionJobRecord): Promise<RetentionJobRecord> {
     this.retentionJobs.set(job.jobId, job);
     return job;
@@ -230,10 +291,13 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     this.calibrationHistory.clear();
     this.trustHistory.clear();
     this.summaries.clear();
+    this.evidence.clear();
     this.theses.clear();
     this.regimeSnapshots.clear();
     this.decisionReviews.clear();
     this.learningRecords.clear();
+    this.calibrationRecords.clear();
+    this.processQualityRecords.clear();
     this.retentionJobs.clear();
   }
 }

@@ -6,7 +6,15 @@ import {
   type RealitySnapshot,
   type SignalDecisionRecord,
 } from "@signal/decision";
-import type { DecisionReview, LearningRecord, RegimeSnapshot, Thesis } from "./learning";
+import type {
+  CalibrationRecord,
+  DecisionReview,
+  Evidence,
+  LearningRecord,
+  ProcessQualityRecord,
+  RegimeSnapshot,
+  Thesis,
+} from "./learning";
 import { normalizeRetentionTier } from "./retention";
 import type {
   CalibrationHistoryEntry,
@@ -179,6 +187,24 @@ CREATE INDEX IF NOT EXISTS idx_signal_memory_summaries_source_created_at
 CREATE INDEX IF NOT EXISTS idx_signal_memory_summaries_retention_tier
   ON signal_memory_summaries (retention_tier);
 
+CREATE TABLE IF NOT EXISTS signal_evidence (
+  evidence_id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  decision_id TEXT,
+  thesis_id TEXT,
+  regime_snapshot_id TEXT,
+  observed_at TIMESTAMPTZ NOT NULL,
+  direction TEXT NOT NULL CHECK (direction IN ('supporting','contradicting','missing')),
+  evidence JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_evidence_source_observed_at
+  ON signal_evidence (source, observed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signal_evidence_decision_id
+  ON signal_evidence (decision_id);
+CREATE INDEX IF NOT EXISTS idx_signal_evidence_thesis_id
+  ON signal_evidence (thesis_id);
+
 CREATE TABLE IF NOT EXISTS signal_theses (
   thesis_id TEXT PRIMARY KEY,
   source TEXT NOT NULL,
@@ -249,6 +275,38 @@ CREATE INDEX IF NOT EXISTS idx_signal_learning_records_decision_id
   ON signal_learning_records (decision_id);
 CREATE INDEX IF NOT EXISTS idx_signal_learning_records_thesis_id
   ON signal_learning_records (thesis_id);
+
+CREATE TABLE IF NOT EXISTS signal_calibration_records (
+  calibration_record_id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  decision_id TEXT,
+  created_at TIMESTAMPTZ NOT NULL,
+  calibration_error DOUBLE PRECISION NOT NULL DEFAULT 0,
+  calibration_score DOUBLE PRECISION NOT NULL DEFAULT 0,
+  reliability_trend TEXT NOT NULL,
+  calibration JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_calibration_records_source_created_at
+  ON signal_calibration_records (source, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signal_calibration_records_decision_id
+  ON signal_calibration_records (decision_id);
+
+CREATE TABLE IF NOT EXISTS signal_process_quality_records (
+  process_quality_id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  decision_id TEXT,
+  created_at TIMESTAMPTZ NOT NULL,
+  process_quality_score DOUBLE PRECISION NOT NULL DEFAULT 0,
+  outcome_quality_score DOUBLE PRECISION,
+  classification TEXT NOT NULL,
+  process JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_signal_process_quality_records_source_created_at
+  ON signal_process_quality_records (source, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signal_process_quality_records_decision_id
+  ON signal_process_quality_records (decision_id);
 
 CREATE TABLE IF NOT EXISTS signal_retention_jobs (
   job_id TEXT PRIMARY KEY,
@@ -871,6 +929,68 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     }));
   }
 
+  async saveEvidence(evidence: Evidence): Promise<Evidence> {
+    await this.ensureReady();
+    await this.pool.query(
+      `
+      INSERT INTO signal_evidence (
+        evidence_id,
+        source,
+        decision_id,
+        thesis_id,
+        regime_snapshot_id,
+        observed_at,
+        direction,
+        evidence
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb)
+      ON CONFLICT (evidence_id) DO UPDATE SET
+        source = EXCLUDED.source,
+        decision_id = EXCLUDED.decision_id,
+        thesis_id = EXCLUDED.thesis_id,
+        regime_snapshot_id = EXCLUDED.regime_snapshot_id,
+        observed_at = EXCLUDED.observed_at,
+        direction = EXCLUDED.direction,
+        evidence = EXCLUDED.evidence
+      `,
+      [
+        evidence.evidenceId,
+        evidence.source ?? this.source,
+        evidence.decisionId ?? null,
+        evidence.thesisId ?? null,
+        evidence.regimeSnapshotId ?? null,
+        evidence.observedAt,
+        evidence.direction,
+        jsonb(evidence),
+      ],
+    );
+    return evidence;
+  }
+
+  async listEvidence(filter: LearningRecordFilter = {}): Promise<Evidence[]> {
+    await this.ensureReady();
+    const where: string[] = [];
+    const params: unknown[] = [];
+    addCondition(where, params, filter.source, "source =");
+    addCondition(where, params, filter.decisionId, "decision_id =");
+    addCondition(where, params, filter.thesisId, "thesis_id =");
+    addCondition(where, params, filter.regimeSnapshotId, "regime_snapshot_id =");
+    addCondition(where, params, filter.createdBefore, "observed_at <");
+    addCondition(where, params, filter.createdAfter, "observed_at >");
+    params.push(clampLimit(filter.limit));
+    const result = await this.pool.query<{ evidence: Evidence }>(
+      `
+      SELECT evidence
+      FROM signal_evidence
+      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+      ORDER BY observed_at DESC
+      LIMIT $${params.length}
+      `,
+      params,
+    );
+    return result.rows.map((row) => row.evidence);
+  }
+
   async saveThesis(thesis: Thesis): Promise<Thesis> {
     await this.ensureReady();
     await this.pool.query(
@@ -1145,6 +1265,126 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
       params,
     );
     return result.rows.map((row) => row.learning);
+  }
+
+  async saveCalibrationRecord(record: CalibrationRecord): Promise<CalibrationRecord> {
+    await this.ensureReady();
+    await this.pool.query(
+      `
+      INSERT INTO signal_calibration_records (
+        calibration_record_id,
+        source,
+        decision_id,
+        created_at,
+        calibration_error,
+        calibration_score,
+        reliability_trend,
+        calibration
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb)
+      ON CONFLICT (calibration_record_id) DO UPDATE SET
+        source = EXCLUDED.source,
+        decision_id = EXCLUDED.decision_id,
+        created_at = EXCLUDED.created_at,
+        calibration_error = EXCLUDED.calibration_error,
+        calibration_score = EXCLUDED.calibration_score,
+        reliability_trend = EXCLUDED.reliability_trend,
+        calibration = EXCLUDED.calibration
+      `,
+      [
+        record.calibrationRecordId,
+        record.source,
+        record.decisionId ?? null,
+        record.createdAt,
+        record.calibrationError,
+        record.calibrationScore,
+        record.reliabilityTrend,
+        jsonb(record),
+      ],
+    );
+    return record;
+  }
+
+  async listCalibrationRecords(filter: LearningRecordFilter = {}): Promise<CalibrationRecord[]> {
+    await this.ensureReady();
+    const where: string[] = [];
+    const params: unknown[] = [];
+    addCondition(where, params, filter.source, "source =");
+    addCondition(where, params, filter.decisionId, "decision_id =");
+    addCondition(where, params, filter.createdBefore, "created_at <");
+    addCondition(where, params, filter.createdAfter, "created_at >");
+    params.push(clampLimit(filter.limit));
+    const result = await this.pool.query<{ calibration: CalibrationRecord }>(
+      `
+      SELECT calibration
+      FROM signal_calibration_records
+      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+      ORDER BY created_at DESC
+      LIMIT $${params.length}
+      `,
+      params,
+    );
+    return result.rows.map((row) => row.calibration);
+  }
+
+  async saveProcessQualityRecord(record: ProcessQualityRecord): Promise<ProcessQualityRecord> {
+    await this.ensureReady();
+    await this.pool.query(
+      `
+      INSERT INTO signal_process_quality_records (
+        process_quality_id,
+        source,
+        decision_id,
+        created_at,
+        process_quality_score,
+        outcome_quality_score,
+        classification,
+        process
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb)
+      ON CONFLICT (process_quality_id) DO UPDATE SET
+        source = EXCLUDED.source,
+        decision_id = EXCLUDED.decision_id,
+        created_at = EXCLUDED.created_at,
+        process_quality_score = EXCLUDED.process_quality_score,
+        outcome_quality_score = EXCLUDED.outcome_quality_score,
+        classification = EXCLUDED.classification,
+        process = EXCLUDED.process
+      `,
+      [
+        record.processQualityId,
+        record.source,
+        record.decisionId ?? null,
+        record.createdAt,
+        record.processQualityScore,
+        record.outcomeQualityScore,
+        record.classification,
+        jsonb(record),
+      ],
+    );
+    return record;
+  }
+
+  async listProcessQualityRecords(filter: LearningRecordFilter = {}): Promise<ProcessQualityRecord[]> {
+    await this.ensureReady();
+    const where: string[] = [];
+    const params: unknown[] = [];
+    addCondition(where, params, filter.source, "source =");
+    addCondition(where, params, filter.decisionId, "decision_id =");
+    addCondition(where, params, filter.createdBefore, "created_at <");
+    addCondition(where, params, filter.createdAfter, "created_at >");
+    params.push(clampLimit(filter.limit));
+    const result = await this.pool.query<{ process: ProcessQualityRecord }>(
+      `
+      SELECT process
+      FROM signal_process_quality_records
+      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+      ORDER BY created_at DESC
+      LIMIT $${params.length}
+      `,
+      params,
+    );
+    return result.rows.map((row) => row.process);
   }
 
   async saveRetentionJob(job: RetentionJobRecord): Promise<RetentionJobRecord> {

@@ -1,12 +1,12 @@
-import type { ActionDefinition } from "@digelim/07.action";
 import type { Intent, IntentNormalizer } from "@digelim/01.intent";
+import type { SourceNormalizer } from "@digelim/04.source";
 import type { PulseInput } from "@digelim/05.pulse";
+import type { ActionDefinition } from "@digelim/07.action";
 import type {
   SenseExecutionResult,
   SenseOrchestrator,
 } from "@digelim/09.sense";
 import { LifecycleTracker, createLogger } from "@digelim/12.signal";
-import type { SourceNormalizer } from "@digelim/04.source";
 
 export class AppGateway {
   constructor(

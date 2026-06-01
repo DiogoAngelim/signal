@@ -3,7 +3,8 @@ import { cn } from "@/lib/utils";
 const packages = [
   {
     name: "core",
-    description: "Envelope, naming, result model, errors, and capability documents",
+    description:
+      "Envelope, naming, result model, errors, and capability documents",
     color: "from-brain-core-light via-brain-core-glow to-brain-core-rose",
   },
   {
@@ -14,12 +15,14 @@ const packages = [
   {
     name: "transport",
     description: "HTTP binding, in-process execution, and event dispatch",
-    color: "from-brain-core-light/80 via-brain-core-glow/80 to-brain-core-rose/80",
+    color:
+      "from-brain-core-light/80 via-brain-core-glow/80 to-brain-core-rose/80",
   },
   {
     name: "http",
     description: "Query and mutation routes plus capability declaration",
-    color: "from-brain-core-rose/80 via-brain-core-root/80 to-brain-core-light/80",
+    color:
+      "from-brain-core-rose/80 via-brain-core-root/80 to-brain-core-light/80",
   },
   {
     name: "security",
@@ -34,9 +37,18 @@ const packages = [
 ];
 
 const lifecycle = [
-  { phase: "SPECIFIED", description: "RFCs define names, envelope fields, and semantics" },
-  { phase: "REGISTERED", description: "Operations are added to the runtime with schemas" },
-  { phase: "RUNNING", description: "Queries execute, mutations can emit, events can replay" },
+  {
+    phase: "SPECIFIED",
+    description: "RFCs define names, envelope fields, and semantics",
+  },
+  {
+    phase: "REGISTERED",
+    description: "Operations are added to the runtime with schemas",
+  },
+  {
+    phase: "RUNNING",
+    description: "Queries execute, mutations can emit, events can replay",
+  },
 ];
 
 export function Architecture() {
@@ -71,7 +83,7 @@ export function Architecture() {
                   <div
                     className={cn(
                       "flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br flex items-center justify-center",
-                      pkg.color
+                      pkg.color,
                     )}
                   >
                     <span className="text-xs font-bold text-background">
@@ -100,12 +112,17 @@ export function Architecture() {
 
               <div className="space-y-4">
                 {lifecycle.map((item, index) => (
-                  <div key={item.phase} className="relative flex items-start gap-4">
+                  <div
+                    key={item.phase}
+                    className="relative flex items-start gap-4"
+                  >
                     {/* Dot */}
                     <div
                       className={cn(
                         "relative z-10 flex-shrink-0 w-10 h-10 rounded-full border-2 flex items-center justify-center",
-                        index === 2 ? "border-primary bg-primary/20" : "border-border bg-card"
+                        index === 2
+                          ? "border-primary bg-primary/20"
+                          : "border-border bg-card",
                       )}
                     >
                       <span className="text-xs font-bold">{index + 1}</span>
@@ -115,7 +132,7 @@ export function Architecture() {
                       <p
                         className={cn(
                           "font-mono text-sm font-semibold",
-                          index === 2 ? "text-primary" : "text-foreground"
+                          index === 2 ? "text-primary" : "text-foreground",
                         )}
                       >
                         {item.phase}
@@ -134,23 +151,33 @@ export function Architecture() {
               <div className="text-muted-foreground">
                 <span className="text-primary">const</span> runtime ={" "}
                 <span className="text-primary">new</span>{" "}
-                <span className="text-secondary-foreground">SignalRuntime</span>();{" "}
-                <span className="text-muted-foreground/60">{"// SPECIFIED"}</span>
+                <span className="text-secondary-foreground">SignalRuntime</span>
+                ();{" "}
+                <span className="text-muted-foreground/60">
+                  {"// SPECIFIED"}
+                </span>
               </div>
               <div className="text-muted-foreground mt-1">
-                runtime.<span className="text-accent">registerMutation</span>("payment.capture.v1", mutation);{" "}
-                <span className="text-muted-foreground/60">{"// REGISTERED"}</span>
+                runtime.<span className="text-accent">registerMutation</span>
+                ("payment.capture.v1", mutation);{" "}
+                <span className="text-muted-foreground/60">
+                  {"// REGISTERED"}
+                </span>
               </div>
               <div className="text-muted-foreground mt-1">
                 <span className="text-primary">await</span> runtime.
-                <span className="text-accent">mutation</span>("payment.capture.v1", payload, {"{ idempotencyKey }"});{" "}
+                <span className="text-accent">mutation</span>
+                ("payment.capture.v1", payload, {"{ idempotencyKey }"});{" "}
                 <span className="text-muted-foreground/60">{"// RUNNING"}</span>
               </div>
               <div className="text-muted-foreground mt-1">
                 <span className="text-primary">const</span> replay ={" "}
                 <span className="text-primary">await</span> runtime.
-                <span className="text-accent">mutation</span>("payment.capture.v1", payload, {"{ idempotencyKey }"});{" "}
-                <span className="text-muted-foreground/60">{"// same logical result"}</span>
+                <span className="text-accent">mutation</span>
+                ("payment.capture.v1", payload, {"{ idempotencyKey }"});{" "}
+                <span className="text-muted-foreground/60">
+                  {"// same logical result"}
+                </span>
               </div>
             </div>
           </div>

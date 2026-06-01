@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Check, Copy } from "lucide-react";
+import { useState } from "react";
 
 const tabs = [
   {
@@ -112,13 +112,14 @@ export function CodeExample() {
                 <div className="ml-4 flex gap-1">
                   {tabs.map((tab) => (
                     <button
+                      type="button"
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
                       className={cn(
                         "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
                         activeTab === tab.id
                           ? "bg-primary/20 text-primary"
-                          : "text-muted-foreground hover:text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
                       )}
                     >
                       {tab.label}
@@ -127,6 +128,7 @@ export function CodeExample() {
                 </div>
               </div>
               <button
+                type="button"
                 onClick={copyToClipboard}
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
@@ -149,15 +151,20 @@ export function CodeExample() {
               <pre className="text-sm font-mono leading-relaxed">
                 <code className="text-muted-foreground">
                   {activeCode.split("\n").map((line, i) => (
-                    <div key={i} className="flex">
+                    <div key={`${i}-${line}`} className="flex">
                       <span className="w-8 text-border select-none">
                         {i + 1}
                       </span>
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: highlightSyntax(line),
-                        }}
-                      />
+                      <span>
+                        {highlightSyntax(line).map((part) => (
+                          <span
+                            key={`${part.offset}-${part.text}`}
+                            className={part.className}
+                          >
+                            {part.text}
+                          </span>
+                        ))}
+                      </span>
                     </div>
                   ))}
                 </code>
@@ -170,23 +177,52 @@ export function CodeExample() {
   );
 }
 
-function highlightSyntax(line: string): string {
-  return line
-    .replace(
-      /("[^"]*"|'[^']*')/g,
-      '<span class="text-brain-tissue">$1</span>'
+type SyntaxPart = {
+  text: string;
+  offset: number;
+  className?: string;
+};
+
+const syntaxPattern =
+  /("[^"]*"|'[^']*'|\/\/.*$|\b(?:import|from|const|await|async|return|new)\b|\b(?:defineQuery|defineMutation|defineEvent|createSignalRuntime|registerQuery|registerMutation|registerEvent|mutation|query|emit|start|close)\b|\b(?:SignalRuntime|SignalDispatcher|createMemoryIdempotencyStore)\b)/g;
+
+function highlightSyntax(line: string): SyntaxPart[] {
+  const parts: SyntaxPart[] = [];
+  let cursor = 0;
+
+  for (const match of line.matchAll(syntaxPattern)) {
+    const text = match[0];
+    const offset = match.index ?? 0;
+    if (offset > cursor) {
+      parts.push({ text: line.slice(cursor, offset), offset: cursor });
+    }
+    parts.push({ text, offset, className: syntaxClassName(text) });
+    cursor = offset + text.length;
+  }
+
+  if (cursor < line.length) {
+    parts.push({ text: line.slice(cursor), offset: cursor });
+  }
+
+  return parts.length ? parts : [{ text: line, offset: 0 }];
+}
+
+function syntaxClassName(text: string): string | undefined {
+  if (/^\/\//.test(text)) return "text-muted-foreground/60";
+  if (/^["']/.test(text)) return "text-brain-tissue";
+  if (
+    /^(defineQuery|defineMutation|defineEvent|createSignalRuntime|registerQuery|registerMutation|registerEvent|mutation|query|emit|start|close)$/.test(
+      text,
     )
-    .replace(/(\/\/.*$)/g, '<span class="text-muted-foreground/60">$1</span>')
-    .replace(
-      /\b(import|from|const|await|async|return|new)\b/g,
-      '<span class="text-primary">$1</span>'
-    )
-    .replace(
-      /\b(defineQuery|defineMutation|defineEvent|createSignalRuntime|registerQuery|registerMutation|registerEvent|mutation|query|emit|start|close)\b/g,
-      '<span class="text-accent">$1</span>'
-    )
-    .replace(
-      /\b(SignalRuntime|SignalDispatcher|createMemoryIdempotencyStore)\b/g,
-      '<span class="text-brain-core-light">$1</span>'
-    );
+  ) {
+    return "text-accent";
+  }
+  if (
+    /^(SignalRuntime|SignalDispatcher|createMemoryIdempotencyStore)$/.test(text)
+  ) {
+    return "text-brain-core-light";
+  }
+  if (/^(import|from|const|await|async|return|new)$/.test(text))
+    return "text-primary";
+  return undefined;
 }

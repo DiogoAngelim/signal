@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Menu, X, BookOpen, Zap, Book } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Book, BookOpen, Menu, X, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const navLinks = [
   { href: "#use-cases", label: "Use cases" },
@@ -29,12 +29,12 @@ export function Header() {
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
           ? "bg-background/80 backdrop-blur-xl border-b border-border"
-          : "bg-transparent"
+          : "bg-transparent",
       )}
     >
       <div className="mx-auto max-w-7xl px-6 py-4">
         <nav className="flex items-center justify-between">
-          <a href="#" className="flex items-center gap-2 group">
+          <a href="/" className="flex items-center gap-2 group">
             <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary via-secondary to-accent">
               <Zap className="w-5 h-5 text-white" />
               <div className="absolute inset-0 rounded-xl bg-primary/20 blur-xl group-hover:bg-primary/30 transition-colors" />
@@ -75,6 +75,7 @@ export function Header() {
           </div>
 
           <button
+            type="button"
             className="md:hidden text-foreground"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"

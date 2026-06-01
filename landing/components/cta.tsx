@@ -23,8 +23,8 @@ export function CTA() {
 
         <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
           Start with the quickstart, inspect the envelope, and compare the
-          payment capture, escrow release, and onboarding examples with your
-          own implementation.
+          payment capture, escrow release, and onboarding examples with your own
+          implementation.
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">

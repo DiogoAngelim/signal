@@ -1,0 +1,24 @@
+{
+  "id": "concepts/decision-layer",
+  "title": "Decision Layer",
+  "description": "Signal remains protocol-first: versioned queries, mutations, events, idempotency, runtime execution, transport bindings, and replay safety are still the foundation. The decision layer is an additive package for systems that need to decide whether, how much, and why to act.",
+  "source": "@site/docs/concepts/decision-layer.md",
+  "sourceDirName": "concepts",
+  "slug": "/concepts/decision-layer",
+  "permalink": "/signal/docs/concepts/decision-layer",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/DiogoAngelim/signal/tree/main/docs/docs/concepts/decision-layer.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Order and Replay",
+    "permalink": "/signal/docs/concepts/order-and-replay"
+  },
+  "next": {
+    "title": "Envelope",
+    "permalink": "/signal/docs/reference/envelope"
+  }
+}

@@ -11,11 +11,12 @@ const platforms = [
     code: `POST /signal/query
 POST /signal/mutation
 GET /signal/capabilities`,
-    description: "Expose queries, mutations, and capability documents over HTTP",
+    description:
+      "Expose queries, mutations, and capability documents over HTTP",
   },
   {
     name: "Reference server",
-    code: `pnpm --filter @signal/reference-server dev`,
+    code: "pnpm --filter @signal/reference-server dev",
     description:
       "Run the Node.js implementation that demonstrates payment capture, escrow release, and onboarding end to end",
   },
@@ -33,9 +34,9 @@ export function Deployment() {
             </span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            The first release includes an in-process binding and an HTTP binding.
-            Both execute the same protocol surface for the real examples in the
-            repository.
+            The first release includes an in-process binding and an HTTP
+            binding. Both execute the same protocol surface for the real
+            examples in the repository.
           </p>
         </div>
 
@@ -47,7 +48,7 @@ export function Deployment() {
                 "group relative p-6 rounded-2xl border transition-all duration-300",
                 index === 0
                   ? "bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/8 border-primary/30"
-                  : "bg-card/50 border-border hover:border-brain-core-glow/20"
+                  : "bg-card/50 border-border hover:border-brain-core-glow/20",
               )}
             >
               {index === 0 && (
@@ -76,7 +77,8 @@ export function Deployment() {
             HTTP Endpoints
           </h3>
           <p className="text-center text-sm text-muted-foreground mb-6">
-            The HTTP binding carries protocol fields, request context, capability data, and retry metadata.
+            The HTTP binding carries protocol fields, request context,
+            capability data, and retry metadata.
           </p>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center">

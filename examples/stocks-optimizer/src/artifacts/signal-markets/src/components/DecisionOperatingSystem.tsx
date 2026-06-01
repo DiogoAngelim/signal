@@ -1283,6 +1283,9 @@ function InvestorLearningPanel({ learning }: { learning?: any }) {
   const narrative = learning?.narrative ?? {};
   const conviction = learning?.conviction ?? {};
   const readiness = learning?.readiness ?? {};
+  const calibration = learning?.calibration ?? {};
+  const processQuality = learning?.processQuality ?? {};
+  const beliefFreshness = learning?.beliefFreshness ?? {};
   const ranking = learning?.opportunityRanking ?? {};
   const portfolio = learning?.portfolioContext ?? {};
   const similarRegimes = Array.isArray(learning?.similarRegimes)
@@ -1384,6 +1387,46 @@ function InvestorLearningPanel({ learning }: { learning?: any }) {
         <LearningSection title="What Changed">
           <p className="break-words text-sm leading-6 text-zinc-700">
             {learningText(narrative.whatChanged, "No reviewed change has been detected yet.")}
+          </p>
+        </LearningSection>
+
+        <LearningSection title="Calibration">
+          <div className="grid gap-2 sm:grid-cols-3">
+            <FactTile label="Score" value={`${Math.round(Number(calibration.calibrationScore ?? 0))}%`} />
+            <FactTile label="Trend" value={learningText(calibration.reliabilityTrend, "insufficient data")} />
+            <FactTile label="Samples" value={String(calibration.sampleSize ?? 0)} />
+          </div>
+          <p className="break-words text-sm leading-6 text-zinc-700">
+            {learningText(calibration.explanation, "Calibration will improve after more outcomes are reviewed.")}
+          </p>
+        </LearningSection>
+
+        <LearningSection title="Process Quality">
+          <div className="grid gap-2 sm:grid-cols-3">
+            <FactTile label="Process" value={`${Math.round(Number(processQuality.processQualityScore ?? 0))}%`} />
+            <FactTile
+              label="Outcome"
+              value={
+                processQuality.outcomeQualityScore == null
+                  ? "Pending"
+                  : `${Math.round(Number(processQuality.outcomeQualityScore))}%`
+              }
+            />
+            <FactTile label="Readiness" value={`${Math.round(Number(processQuality.readinessScore ?? 0))}%`} />
+          </div>
+          <p className="break-words text-sm leading-6 text-zinc-700">
+            {learningText(processQuality.learningNote, "Process quality will become clearer after the decision has a reviewed outcome.")}
+          </p>
+        </LearningSection>
+
+        <LearningSection title="Belief Freshness">
+          <div className="grid gap-2 sm:grid-cols-3">
+            <FactTile label="Freshness" value={`${Math.round(Number(beliefFreshness.freshness ?? 0))}%`} />
+            <FactTile label="Status" value={learningText(beliefFreshness.status, "unsupported")} />
+            <FactTile label="After decay" value={`${Math.round(Number(beliefFreshness.confidenceAfterDecay ?? 0))}%`} />
+          </div>
+          <p className="break-words text-sm leading-6 text-zinc-700">
+            {learningText(beliefFreshness.explanation, "This thesis has not received fresh evidence yet.")}
           </p>
         </LearningSection>
 

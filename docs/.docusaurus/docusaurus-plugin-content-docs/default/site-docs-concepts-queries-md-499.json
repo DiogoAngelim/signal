@@ -16,8 +16,8 @@
   },
   "sidebar": "tutorialSidebar",
   "previous": {
-    "title": "Signal Protocol v1",
-    "permalink": "/signal/docs/introduction"
+    "title": "Architecture",
+    "permalink": "/signal/docs/architecture"
   },
   "next": {
     "title": "Mutations",

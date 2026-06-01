@@ -12,7 +12,10 @@ export function Hero() {
 
       {/* Ambient glow spots */}
       <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] bg-[radial-gradient(circle,rgba(223,114,71,0.09)_0%,transparent_60%)] blur-2xl animate-pulse-glow" />
-      <div className="absolute bottom-1/4 right-1/3 w-[300px] h-[300px] bg-[radial-gradient(circle,rgba(39,102,166,0.12)_0%,transparent_60%)] blur-2xl animate-pulse-glow" style={{ animationDelay: "3s" }} />
+      <div
+        className="absolute bottom-1/4 right-1/3 w-[300px] h-[300px] bg-[radial-gradient(circle,rgba(39,102,166,0.12)_0%,transparent_60%)] blur-2xl animate-pulse-glow"
+        style={{ animationDelay: "3s" }}
+      />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -23,11 +26,15 @@ export function Hero() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
-              <span className="text-sm text-muted-foreground">Signal Protocol v1</span>
+              <span className="text-sm text-muted-foreground">
+                Signal Protocol v1
+              </span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-balance">
-              <span className="text-foreground">A transport-agnostic application protocol for </span>
+              <span className="text-foreground">
+                A transport-agnostic application protocol for{" "}
+              </span>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
                 queries, mutations, and events
               </span>
@@ -50,7 +57,9 @@ export function Hero() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-border/60 bg-card/40 backdrop-blur-sm text-foreground font-semibold rounded-lg hover:bg-card/70 hover:border-brain-core-glow/50 transition-all"
-              > <Book> </Book>
+              >
+                {" "}
+                <Book> </Book>
                 View the Repository
               </a>
             </div>
@@ -74,10 +83,14 @@ export function Hero() {
             <div className="mt-10 inline-flex items-center gap-3 px-4 py-3 rounded-lg bg-card/60 border border-border/50 backdrop-blur-sm font-mono text-sm inner-glow">
               <Terminal className="w-4 h-4 text-primary" />
               <code className="text-muted-foreground">
-                pnpm add <span className="text-foreground">@signal/sdk-node</span>{" "}
-                <span className="text-muted-foreground"># reference runtime</span>
+                pnpm add{" "}
+                <span className="text-foreground">@signal/sdk-node</span>{" "}
+                <span className="text-muted-foreground">
+                  # reference runtime
+                </span>
               </code>
               <button
+                type="button"
                 className="ml-2 text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Copy install command"
               >

@@ -1,5 +1,5 @@
-import type { ActionResult } from "@digelim/07.action";
 import type { CoreDecision } from "@digelim/06.core";
+import type { ActionResult } from "@digelim/07.action";
 import type { SignalEnvelope } from "@digelim/12.signal";
 
 export type ResultRecord = {

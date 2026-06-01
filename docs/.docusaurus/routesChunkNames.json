@@ -1,16 +1,24 @@
 {
-  "/signal/docs-650": {
+  "/signal/docs-762": {
     "__comp": "5e95c892",
     "__context": {
       "plugin": "aba21aa0"
     }
   },
-  "/signal/docs-bb1": {
+  "/signal/docs-9da": {
     "__comp": "a7bd4aaa",
     "__props": "525287b5"
   },
-  "/signal/docs-c7f": {
+  "/signal/docs-67d": {
     "__comp": "a94703ab"
+  },
+  "/signal/docs/architecture-2a5": {
+    "__comp": "17896441",
+    "content": "fd532226"
+  },
+  "/signal/docs/concepts/decision-layer-636": {
+    "__comp": "17896441",
+    "content": "3adba2c5"
   },
   "/signal/docs/concepts/events-0db": {
     "__comp": "17896441",
@@ -52,6 +60,10 @@
     "__comp": "17896441",
     "content": "243157cb"
   },
+  "/signal/docs/examples/stocks-optimizer-e57": {
+    "__comp": "17896441",
+    "content": "55a6f08a"
+  },
   "/signal/docs/examples/storage-backed-idempotency-flow-d6a": {
     "__comp": "17896441",
     "content": "94034681"
@@ -83,6 +95,10 @@
   "/signal/docs/introduction-674": {
     "__comp": "17896441",
     "content": "a09c2993"
+  },
+  "/signal/docs/readiness/ecosystem-audit-378": {
+    "__comp": "17896441",
+    "content": "c1077cbd"
   },
   "/signal/docs/reference/capabilities-354": {
     "__comp": "17896441",
