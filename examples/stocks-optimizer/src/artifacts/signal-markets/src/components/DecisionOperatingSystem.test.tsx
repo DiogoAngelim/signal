@@ -564,6 +564,95 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).not.toContain("min-w-[760px]");
   });
 
+  it("renders Signal Commitment controls, summary, execution, invalidation, and monitoring", () => {
+    const html = renderToStaticMarkup(
+      <DecisionOperatingSystem
+        {...props({
+          commitment: {
+            source: "signal.commitment",
+            summary: {
+              status: "recommended",
+              mode: "micro",
+              policy: { name: "compounding" },
+              availableCapital: 1000,
+              totalRecommended: 42,
+              uncommittedCapital: 958,
+              normalizedCommitment: 0.042,
+              monitorFirst: "risk above 34%",
+              why: ["Strategy risk_adjusted produced deterministic target weights."],
+            },
+            result: {
+              reasons: ["Strategy risk_adjusted produced deterministic target weights."],
+              invalidation: {
+                triggers: [
+                  {
+                    id: "target-AAPL-risk-increase",
+                    targetId: "AAPL",
+                    severity: "medium",
+                    condition: "risk rises above 34%",
+                  },
+                ],
+              },
+              monitoringPlan: {
+                metrics: [
+                  {
+                    id: "risk",
+                    targetId: "AAPL",
+                    threshold: 0.34,
+                    direction: "above",
+                  },
+                ],
+                futureChecks: ["Re-evaluate when confidence, trust, risk, or resource changes."],
+              },
+            },
+            executionPlan: [
+              {
+                symbol: "AAPL",
+                action: "Buy",
+                commitmentAmount: 42,
+                allocationPct: 4.2,
+                estimatedUnits: 1,
+                reasons: ["Confidence clears policy minimum."],
+                limitedBy: [],
+                mode: "micro",
+              },
+            ],
+          },
+          commitmentChangeExplanation: [
+            "Available capital changed from $500.00 to $1,000.00.",
+          ],
+          commitmentControls: {
+            availableCapital: 1000,
+            intent: "investing",
+            riskPreference: "balanced",
+            trustOverrideEnabled: true,
+            trustOverridePct: 80,
+            maxSinglePositionPct: "5",
+            maxPortfolioCommitmentPct: "20",
+            onAvailableCapitalChange: vi.fn(),
+            onIntentChange: vi.fn(),
+            onRiskPreferenceChange: vi.fn(),
+            onTrustOverrideEnabledChange: vi.fn(),
+            onTrustOverridePctChange: vi.fn(),
+            onMaxSinglePositionPctChange: vi.fn(),
+            onMaxPortfolioCommitmentPctChange: vi.fn(),
+          },
+        })}
+      />,
+    );
+
+    expect(html).toContain('data-testid="signal-commitment-client"');
+    expect(html).toContain("Available Capital");
+    expect(html).toContain("Recommended Commitment");
+    expect(html).toContain("Why This");
+    expect(html).toContain("What Changed");
+    expect(html).toContain("Invalidation");
+    expect(html).toContain("Monitoring");
+    expect(html).toContain("$42.00");
+    expect(html).toContain("AAPL");
+    expect(html).toContain("risk rises above 34%");
+  });
+
   it("keeps blocking-state actions sticky when empty, error, or first-run content grows", () => {
     const html = renderToStaticMarkup(
       <DecisionOperatingSystem

@@ -26,6 +26,7 @@ export type DashboardQuoteBatchResponse = {
 
 export type DashboardStrategyLiveMarket = {
   signals: Array<Record<string, unknown>>;
+  commitment: Record<string, unknown> | null;
   regime: Record<string, unknown> | null;
   opportunityDiscovery: Record<string, unknown> | null;
   agencyDiagnostics: Record<string, unknown> | null;
@@ -311,6 +312,7 @@ export function parseDashboardStrategyLiveMarket(
 
   return {
     signals: recordArray(record.signals),
+    commitment: optionalRecord(record.commitment),
     regime: optionalRecord(record.regime),
     opportunityDiscovery: optionalRecord(record.opportunityDiscovery),
     agencyDiagnostics: optionalRecord(record.agencyDiagnostics),

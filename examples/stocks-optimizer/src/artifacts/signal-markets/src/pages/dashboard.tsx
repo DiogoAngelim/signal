@@ -475,6 +475,82 @@ function fmtPlainNumber(value: number | null | undefined, digits = 2) {
   return value.toFixed(digits);
 }
 
+function explainCommitmentChange(previous: any | null, current: any | null) {
+  if (!current || current.source !== "signal.commitment") {
+    return ["Commitment output is waiting for the strategy API."];
+  }
+
+  if (!previous || previous.source !== "signal.commitment") {
+    return [
+      `First commitment snapshot: ${fmtCurrency(numeric(current.summary?.totalRecommended))} recommended from ${fmtCurrency(numeric(current.summary?.availableCapital))}.`,
+    ];
+  }
+
+  const previousInput = previous.input ?? {};
+  const currentInput = current.input ?? {};
+  const previousSummary = previous.summary ?? {};
+  const currentSummary = current.summary ?? {};
+  const changes: string[] = [];
+
+  if (numeric(previousInput.availableCapital) !== numeric(currentInput.availableCapital)) {
+    changes.push(
+      `Available capital changed from ${fmtCurrency(numeric(previousInput.availableCapital))} to ${fmtCurrency(numeric(currentInput.availableCapital))}.`,
+    );
+  }
+
+  if (String(previousInput.intent ?? "") !== String(currentInput.intent ?? "")) {
+    changes.push(
+      `Commitment mode changed from ${String(previousInput.intent ?? "auto")} to ${String(currentInput.intent ?? "auto")}.`,
+    );
+  }
+
+  if (String(previousInput.riskPreference ?? "") !== String(currentInput.riskPreference ?? "")) {
+    changes.push(
+      `Risk preference changed from ${String(previousInput.riskPreference ?? "auto")} to ${String(currentInput.riskPreference ?? "auto")}.`,
+    );
+  }
+
+  if (numeric(previousInput.trustOverride, -1) !== numeric(currentInput.trustOverride, -1)) {
+    changes.push(
+      currentInput.trustOverride == null
+        ? "Trust override was removed; Signal trust evidence is back in control."
+        : `Trust override changed to ${fmtPlainPct(numeric(currentInput.trustOverride) * 100, 0)}.`,
+    );
+  }
+
+  if (numeric(previousInput.maxSinglePositionPct, -1) !== numeric(currentInput.maxSinglePositionPct, -1)) {
+    changes.push(
+      currentInput.maxSinglePositionPct == null
+        ? "Single-position override was removed."
+        : `Single-position cap changed to ${fmtPlainPct(numeric(currentInput.maxSinglePositionPct), 1)}.`,
+    );
+  }
+
+  if (numeric(previousInput.maxPortfolioCommitmentPct, -1) !== numeric(currentInput.maxPortfolioCommitmentPct, -1)) {
+    changes.push(
+      currentInput.maxPortfolioCommitmentPct == null
+        ? "Portfolio commitment cap override was removed."
+        : `Portfolio commitment cap changed to ${fmtPlainPct(numeric(currentInput.maxPortfolioCommitmentPct), 1)}.`,
+    );
+  }
+
+  if (numeric(previousSummary.totalRecommended) !== numeric(currentSummary.totalRecommended)) {
+    changes.push(
+      `Recommended commitment moved from ${fmtCurrency(numeric(previousSummary.totalRecommended))} to ${fmtCurrency(numeric(currentSummary.totalRecommended))}.`,
+    );
+  }
+
+  if (String(previousSummary.status ?? "") !== String(currentSummary.status ?? "")) {
+    changes.push(
+      `Commitment status changed from ${String(previousSummary.status ?? "pending")} to ${String(currentSummary.status ?? "pending")}.`,
+    );
+  }
+
+  return changes.length
+    ? uniqueStrings(changes).slice(0, 6)
+    : ["No material commitment inputs changed since the previous strategy snapshot."];
+}
+
 function fmtYears(value: number | null | undefined) {
   if (value == null || !Number.isFinite(value)) return "—";
   return `${value.toFixed(1)} years`;
@@ -2903,6 +2979,7 @@ type MarketScopedDashboardData = {
   walkForwardTrades: Array<any>;
   strategySignals: Array<any>;
   strategyRegime: any | null;
+  strategyCommitment: any | null;
   opportunityDiscovery: any | null;
   agencyDiagnostics: any | null;
   marketPerceptionSnapshot: MarketStateSnapshot | null;
@@ -2923,6 +3000,7 @@ function createEmptyMarketData(): MarketScopedDashboardData {
     walkForwardTrades: [],
     strategySignals: [],
     strategyRegime: null,
+    strategyCommitment: null,
     opportunityDiscovery: null,
     agencyDiagnostics: null,
     marketPerceptionSnapshot: null,
@@ -2977,6 +3055,28 @@ export default function Dashboard() {
   const [frontendSlippageBps, setFrontendSlippageBps] = useState(0);
   const [strategySignals, setStrategySignals] = useState<Array<any>>([]);
   const [strategyRegime, setStrategyRegime] = useState<any | null>(null);
+  const [strategyCommitment, setStrategyCommitment] = useState<any | null>(
+    null,
+  );
+  const [commitmentChangeExplanation, setCommitmentChangeExplanation] =
+    useState<string[]>([]);
+  const previousCommitmentRef = useRef<any | null>(null);
+  const [commitmentAvailableCapital, setCommitmentAvailableCapital] =
+    useState(STARTING_PORTFOLIO_VALUE);
+  const [commitmentIntent, setCommitmentIntent] = useState<
+    "trading" | "investing"
+  >("investing");
+  const [commitmentRiskPreference, setCommitmentRiskPreference] = useState<
+    "conservative" | "balanced" | "aggressive"
+  >("balanced");
+  const [commitmentTrustOverrideEnabled, setCommitmentTrustOverrideEnabled] =
+    useState(false);
+  const [commitmentTrustOverridePct, setCommitmentTrustOverridePct] =
+    useState(70);
+  const [commitmentMaxSinglePositionPct, setCommitmentMaxSinglePositionPct] =
+    useState("");
+  const [commitmentMaxPortfolioPct, setCommitmentMaxPortfolioPct] =
+    useState("");
   const [opportunityDiscovery, setOpportunityDiscovery] = useState<any | null>(
     null,
   );
@@ -3052,6 +3152,8 @@ export default function Dashboard() {
       setWalkForwardTrades(next.walkForwardTrades);
     if ("strategySignals" in patch) setStrategySignals(next.strategySignals);
     if ("strategyRegime" in patch) setStrategyRegime(next.strategyRegime);
+    if ("strategyCommitment" in patch)
+      setStrategyCommitment(next.strategyCommitment);
     if ("opportunityDiscovery" in patch)
       setOpportunityDiscovery(next.opportunityDiscovery);
     if ("agencyDiagnostics" in patch)
@@ -3076,6 +3178,7 @@ export default function Dashboard() {
     setWalkForwardTrades(data.walkForwardTrades);
     setStrategySignals(data.strategySignals);
     setStrategyRegime(data.strategyRegime);
+    setStrategyCommitment(data.strategyCommitment);
     setOpportunityDiscovery(data.opportunityDiscovery);
     setAgencyDiagnostics(data.agencyDiagnostics);
     setMarketPerceptionSnapshot(data.marketPerceptionSnapshot);
@@ -3298,6 +3401,7 @@ export default function Dashboard() {
       if (!marketFilter) {
         setStrategySignals([]);
         setStrategyRegime(null);
+        setStrategyCommitment(null);
         setOpportunityDiscovery(null);
       }
       return;
@@ -3308,6 +3412,12 @@ export default function Dashboard() {
 
     async function loadStrategySignals() {
       try {
+        const maxSinglePositionPct = finiteNumber(
+          commitmentMaxSinglePositionPct,
+        );
+        const maxPortfolioCommitmentPct = finiteNumber(
+          commitmentMaxPortfolioPct,
+        );
         const response = await fetchJsonOrNull(
           "/api/strategy?action=live-market",
           {
@@ -3318,6 +3428,20 @@ export default function Dashboard() {
             body: JSON.stringify({
               market,
               limitSymbols: 25,
+              commitment: {
+                availableCapital: commitmentAvailableCapital,
+                intent: commitmentIntent,
+                riskPreference: commitmentRiskPreference,
+                ...(commitmentTrustOverrideEnabled
+                  ? { trustOverride: commitmentTrustOverridePct }
+                  : {}),
+                ...(maxSinglePositionPct != null
+                  ? { maxSinglePositionPct }
+                  : {}),
+                ...(maxPortfolioCommitmentPct != null
+                  ? { maxPortfolioCommitmentPct }
+                  : {}),
+              },
             }),
           },
         );
@@ -3328,9 +3452,17 @@ export default function Dashboard() {
 
         if (cancelled) return;
 
+        const changeExplanation = explainCommitmentChange(
+          previousCommitmentRef.current,
+          payload.commitment,
+        );
+        previousCommitmentRef.current = payload.commitment;
+        setCommitmentChangeExplanation(changeExplanation);
+
         applyMarketDataPatch(market, {
           strategySignals: payload.signals,
           strategyRegime: payload.regime,
+          strategyCommitment: payload.commitment,
           opportunityDiscovery: payload.opportunityDiscovery,
           agencyDiagnostics: payload.agencyDiagnostics,
         });
@@ -3354,7 +3486,17 @@ export default function Dashboard() {
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [marketFilter, refreshNonce]);
+  }, [
+    marketFilter,
+    refreshNonce,
+    commitmentAvailableCapital,
+    commitmentIntent,
+    commitmentRiskPreference,
+    commitmentTrustOverrideEnabled,
+    commitmentTrustOverridePct,
+    commitmentMaxSinglePositionPct,
+    commitmentMaxPortfolioPct,
+  ]);
 
   const stocksWithStrategySignals = useMemo(() => {
     if (!strategySignals.length) return stocks;
@@ -6128,16 +6270,46 @@ export default function Dashboard() {
       : dashboardSizing.operatorState.zeroExposureLabel;
   const canonicalStarterSize =
     starterExposurePct > 0 ? fmtPlainPct(starterExposurePct) : "Wait";
+  const hasSignalCommitment =
+    strategyCommitment?.source === "signal.commitment";
+  const commitmentSummary = hasSignalCommitment
+    ? (strategyCommitment?.summary ?? null)
+    : null;
+  const commitmentExecutionPlan = hasSignalCommitment &&
+    Array.isArray(strategyCommitment?.executionPlan)
+    ? strategyCommitment.executionPlan
+    : [];
+  const primaryCommitmentPlan =
+    commitmentExecutionPlan.find(
+      (row: any) => numeric(row.commitmentAmount) > 0,
+    ) ??
+    commitmentExecutionPlan.find((row: any) => row.action !== "Watch") ??
+    commitmentExecutionPlan[0] ??
+    null;
+  const commitmentExposureLabel =
+    primaryCommitmentPlan && numeric(primaryCommitmentPlan.allocationPct) > 0
+      ? fmtPlainPct(numeric(primaryCommitmentPlan.allocationPct))
+      : "No new allocation";
+  const commitmentRecommendedAction = primaryCommitmentPlan
+    ? String(primaryCommitmentPlan.action ?? "Watch")
+    : null;
   const operatorAction = !hasMarketData
     ? "Wait"
-    : operatorActionLabel({
+    : commitmentRecommendedAction ??
+      operatorActionLabel({
         finalDecision: executiveIA.executiveReasoning.finalDecision,
         sizingMode: dashboardSizing.sizingMode,
         exposurePct: dashboardSizing.suggestedMaximumExposurePct,
         hasMarketData,
       });
   const operatorTone =
-    !hasMarketData || dashboardSizing.sizingDecision === "blocked"
+    hasSignalCommitment
+      ? commitmentSummary?.status === "recommended"
+        ? "good"
+        : commitmentSummary?.status === "blocked"
+          ? "bad"
+          : "warn"
+      : !hasMarketData || dashboardSizing.sizingDecision === "blocked"
       ? dashboardSizing.sizingDecision === "blocked"
         ? "bad"
         : "neutral"
@@ -6894,30 +7066,56 @@ export default function Dashboard() {
       explanation: `${decisionReadinessState} at ${fmtPlainPct(decisionReadinessPct, 0)}.`,
     },
   ];
+  const commitmentPlanReason = primaryCommitmentPlan?.reasons?.[0];
+  const commitmentPlanLimiter =
+    primaryCommitmentPlan?.limitedBy?.[0] ??
+    commitmentSummary?.limitedBy?.[0] ??
+    null;
+  const commitmentPlanInvalidation =
+    primaryCommitmentPlan?.invalidationTriggers?.[0] ??
+    strategyCommitment?.result?.invalidation?.policyViolations?.[0] ??
+    strategyCommitment?.result?.invalidation?.resourceViolations?.[0] ??
+    null;
   const decisionActionPlan = {
-    asset: primaryDecisionOpportunity?.ticker ?? "Pending",
-    direction: operatorAction,
-    exposure: primaryDecisionOpportunity?.exposureLabel ?? canonicalStarterSize,
+    asset:
+      (hasSignalCommitment ? primaryCommitmentPlan?.symbol : null) ??
+      primaryDecisionOpportunity?.ticker ??
+      "Pending",
+    direction: commitmentRecommendedAction ?? operatorAction,
+    exposure: hasSignalCommitment
+      ? commitmentExposureLabel
+      : primaryDecisionOpportunity?.exposureLabel ?? canonicalStarterSize,
     entryLogic:
-      !hasMarketData
-        ? "Wait for market data synchronization before changing exposure."
-        : primaryDecisionOpportunity?.support[0] ??
-          "Wait for market confirmation before changing exposure.",
+      hasSignalCommitment
+        ? commitmentPlanReason ??
+          "Signal Commitment evaluated the eligible strategy signals."
+        : !hasMarketData
+          ? "Wait for market data synchronization before changing exposure."
+          : primaryDecisionOpportunity?.support[0] ??
+            "Wait for market confirmation before changing exposure.",
     riskConstraints:
-      !hasMarketData
-        ? "No new exposure while the market feed is unavailable."
-        : primaryDecisionOpportunity?.contradictions[0] ??
-          topCanonicalRestriction?.explanation ??
-          "Respect current portfolio and per-asset caps.",
+      hasSignalCommitment
+        ? commitmentPlanLimiter
+          ? `Limited by ${commitmentPlanLimiter}.`
+          : "Use only the amount returned by Signal Commitment."
+        : !hasMarketData
+          ? "No new exposure while the market feed is unavailable."
+          : primaryDecisionOpportunity?.contradictions[0] ??
+            topCanonicalRestriction?.explanation ??
+            "Respect current portfolio and per-asset caps.",
     exitConditions:
+      (hasSignalCommitment ? commitmentPlanInvalidation : null) ??
       reduceOrInvalidateTriggers[0] ??
       primaryDecisionOpportunity?.invalidations[0] ??
       primaryInvalidationCondition,
     invalidation:
+      (hasSignalCommitment ? commitmentPlanInvalidation : null) ??
       primaryDecisionOpportunity?.invalidations[0] ??
       primaryInvalidationCondition,
-    portfolioImpact: `Portfolio cap ${canonicalPortfolioCap}; per-asset cap ${primaryDecisionOpportunity?.maxExposureLabel ?? canonicalPerAssetCap}.`,
-    nextAction: operatorAction,
+    portfolioImpact: hasSignalCommitment
+      ? `${fmtCurrency(numeric(commitmentSummary?.totalRecommended))} committed from ${fmtCurrency(numeric(commitmentSummary?.availableCapital))}; ${fmtCurrency(numeric(commitmentSummary?.uncommittedCapital))} remains uncommitted.`
+      : `Portfolio cap ${canonicalPortfolioCap}; per-asset cap ${primaryDecisionOpportunity?.maxExposureLabel ?? canonicalPerAssetCap}.`,
+    nextAction: commitmentRecommendedAction ?? operatorAction,
   };
   const decisionWorkflow: DecisionWorkflowStep[] = [
     {
@@ -6982,6 +7180,9 @@ export default function Dashboard() {
     { label: "Portfolio Contribution", value: fmtPlainPct(primaryDecisionOpportunity?.learning?.portfolioContext?.expectedRiskAdjustedContribution, 0) },
     { label: "Similar Regimes", value: String(primaryDecisionOpportunity?.learning?.similarRegimes?.length ?? 0) },
     { label: "Starter Size", value: canonicalStarterSize },
+    { label: "Committed Capital", value: fmtCurrency(numeric(commitmentSummary?.totalRecommended)) },
+    { label: "Uncommitted Capital", value: fmtCurrency(numeric(commitmentSummary?.uncommittedCapital)) },
+    { label: "Commitment Mode", value: String(commitmentSummary?.mode ?? "Pending") },
     { label: "Survival", value: fmtPlainPct(survivalConfidenceValue, 0) },
     { label: "Calibration", value: fmtPlainPct(calibrationTrustworthinessDisplay, 0) },
     { label: "History Depth", value: historyDepthScore == null ? "—" : fmtPlainPct(historyDepthScore, 0) },
@@ -7040,7 +7241,9 @@ export default function Dashboard() {
       bestOpportunityLabel={bestOpportunityLabel}
       recommendedAction={operatorAction}
       suggestedExposure={
-        primaryDecisionOpportunity?.exposureLabel ?? canonicalStarterSize
+        hasSignalCommitment
+          ? commitmentExposureLabel
+          : primaryDecisionOpportunity?.exposureLabel ?? canonicalStarterSize
       }
       mainRisk={mainRiskLabel}
       missingEvidence={missingEvidenceLabel}
@@ -7055,6 +7258,24 @@ export default function Dashboard() {
       workflow={decisionWorkflow}
       actionPlan={decisionActionPlan}
       rawMetrics={decisionRawMetrics}
+      commitment={strategyCommitment}
+      commitmentChangeExplanation={commitmentChangeExplanation}
+      commitmentControls={{
+        availableCapital: commitmentAvailableCapital,
+        intent: commitmentIntent,
+        riskPreference: commitmentRiskPreference,
+        trustOverrideEnabled: commitmentTrustOverrideEnabled,
+        trustOverridePct: commitmentTrustOverridePct,
+        maxSinglePositionPct: commitmentMaxSinglePositionPct,
+        maxPortfolioCommitmentPct: commitmentMaxPortfolioPct,
+        onAvailableCapitalChange: setCommitmentAvailableCapital,
+        onIntentChange: setCommitmentIntent,
+        onRiskPreferenceChange: setCommitmentRiskPreference,
+        onTrustOverrideEnabledChange: setCommitmentTrustOverrideEnabled,
+        onTrustOverridePctChange: setCommitmentTrustOverridePct,
+        onMaxSinglePositionPctChange: setCommitmentMaxSinglePositionPct,
+        onMaxPortfolioCommitmentPctChange: setCommitmentMaxPortfolioPct,
+      }}
     />
   );
 

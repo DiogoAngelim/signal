@@ -38,6 +38,11 @@ import {
   summarizeStrategyDecisionIntelligence,
   updateDecisionCalibrationOperation,
 } from "../lib/decision-intelligence.js";
+import {
+  annotateSignalsWithCommitment,
+  buildStocksCommitment,
+  commitmentProfileFromRequest,
+} from "../lib/stock-commitment-client.js";
 
 
 
@@ -703,6 +708,17 @@ async function handleStrategyRoute(req: any, res: any) {
           regime,
         },
       );
+      const commitmentProfile = commitmentProfileFromRequest(req, {
+        availableCapital: strategyNumeric(summary.equity, 1000),
+      });
+      const commitment = buildStocksCommitment({
+        market,
+        signals,
+        summary,
+        regime,
+        profile: commitmentProfile,
+      });
+      const committedSignals = annotateSignalsWithCommitment(signals, commitment);
 
       res.json({
         ok: true,
@@ -713,8 +729,9 @@ async function handleStrategyRoute(req: any, res: any) {
           source: "portfolio-market-cache",
         },
         regime,
-        signals,
-        decisionIntelligence: summarizeStrategyDecisionIntelligence(signals),
+        signals: committedSignals,
+        commitment,
+        decisionIntelligence: summarizeStrategyDecisionIntelligence(committedSignals),
         opportunityDiscovery: portfolioPayload.opportunityDiscovery ?? null,
         agencyDiagnostics: portfolioPayload.agencyDiagnostics ?? null,
         resolveDiagnostics: portfolioPayload.resolveDiagnostics ?? summary.resolveDiagnostics ?? null,

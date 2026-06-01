@@ -100,6 +100,11 @@ describe("dashboard data adapter", () => {
       regime: { state: "constructive" },
       opportunityDiscovery: { qualified: 4 },
       agencyDiagnostics: { trust: 71 },
+      commitment: {
+        source: "signal.commitment",
+        summary: { totalRecommended: 420 },
+        executionPlan: [{ symbol: "AAPL", commitmentAmount: 420 }],
+      },
       summary: { recommendation: "Review AAPL" },
       decisionIntelligence: { confidence: 78 },
     });
@@ -115,6 +120,11 @@ describe("dashboard data adapter", () => {
     expect(parsed.regime).toEqual({ state: "constructive" });
     expect(parsed.opportunityDiscovery).toEqual({ qualified: 4 });
     expect(parsed.agencyDiagnostics).toEqual({ trust: 71 });
+    expect(parsed.commitment).toEqual({
+      source: "signal.commitment",
+      summary: { totalRecommended: 420 },
+      executionPlan: [{ symbol: "AAPL", commitmentAmount: 420 }],
+    });
     expect(parsed.summary).toEqual({ recommendation: "Review AAPL" });
     expect(parsed.decisionIntelligence).toEqual({ confidence: 78 });
   });

@@ -8,6 +8,8 @@ const externalizeNpmButBundleWorkspace = {
         args.path.startsWith("@workspace/") ||
         args.path === "@signal/agency" ||
         args.path.startsWith("@signal/agency/") ||
+        args.path === "@signal/commitment" ||
+        args.path.startsWith("@signal/commitment/") ||
         args.path === "@signal/decision" ||
         args.path.startsWith("@signal/decision/") ||
         args.path === "@signal/decision-memory" ||

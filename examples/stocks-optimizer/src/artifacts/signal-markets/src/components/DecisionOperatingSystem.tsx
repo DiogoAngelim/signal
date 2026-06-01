@@ -133,6 +133,25 @@ export type DecisionRawMetric = {
   value: string;
 };
 
+export type CommitmentControlProps = {
+  availableCapital: number;
+  intent: "trading" | "investing";
+  riskPreference: "conservative" | "balanced" | "aggressive";
+  trustOverrideEnabled: boolean;
+  trustOverridePct: number;
+  maxSinglePositionPct: string;
+  maxPortfolioCommitmentPct: string;
+  onAvailableCapitalChange: (value: number) => void;
+  onIntentChange: (value: "trading" | "investing") => void;
+  onRiskPreferenceChange: (
+    value: "conservative" | "balanced" | "aggressive",
+  ) => void;
+  onTrustOverrideEnabledChange: (value: boolean) => void;
+  onTrustOverridePctChange: (value: number) => void;
+  onMaxSinglePositionPctChange: (value: string) => void;
+  onMaxPortfolioCommitmentPctChange: (value: string) => void;
+};
+
 export type DecisionOperatingSystemProps = {
   state: DashboardViewState;
   marketOptions: Array<{ value: string; label: string }>;
@@ -164,6 +183,9 @@ export type DecisionOperatingSystemProps = {
   workflow: DecisionWorkflowStep[];
   actionPlan: DecisionActionPlan;
   rawMetrics: DecisionRawMetric[];
+  commitment?: any | null;
+  commitmentChangeExplanation?: string[];
+  commitmentControls?: CommitmentControlProps;
 };
 
 type InvestmentStep = {
@@ -1087,6 +1109,344 @@ function FactTile({
   );
 }
 
+function money(value: unknown) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "Pending";
+  return number.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  });
+}
+
+function pct(value: unknown, digits = 1) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "Pending";
+  return `${number.toFixed(digits)}%`;
+}
+
+function commitmentRowTone(action: string): DecisionTone {
+  if (action === "Buy") return "good";
+  if (action === "Blocked") return "bad";
+  if (action === "Sell") return "warn";
+  return "neutral";
+}
+
+function CommitmentClientPanel({
+  commitment,
+  changeExplanation,
+  controls,
+}: {
+  commitment?: any | null;
+  changeExplanation?: string[];
+  controls: CommitmentControlProps;
+}) {
+  const summary = commitment?.summary ?? {};
+  const result = commitment?.result ?? {};
+  const rows = Array.isArray(commitment?.executionPlan)
+    ? commitment.executionPlan
+    : [];
+  const invalidationTriggers = Array.isArray(result?.invalidation?.triggers)
+    ? result.invalidation.triggers
+    : [];
+  const monitoringMetrics = Array.isArray(result?.monitoringPlan?.metrics)
+    ? result.monitoringPlan.metrics
+    : [];
+  const futureChecks = Array.isArray(result?.monitoringPlan?.futureChecks)
+    ? result.monitoringPlan.futureChecks
+    : [];
+  const why = Array.isArray(summary?.why) ? summary.why : result?.reasons ?? [];
+  const changes = changeExplanation?.length
+    ? changeExplanation
+    : ["No previous commitment snapshot is available yet."];
+
+  return (
+    <section
+      data-testid="signal-commitment-client"
+      className="grid min-w-0 gap-3 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="text-xs font-semibold uppercase tracking-normal text-zinc-500">
+            Signal Commitment
+          </div>
+          <h2 className="mt-1 break-words text-2xl font-semibold leading-tight text-zinc-950">
+            {summary?.status
+              ? `${investorCopy(String(summary.status))} commitment`
+              : "Commitment pending"}
+          </h2>
+          <p className="mt-1 break-words text-sm leading-6 text-zinc-600">
+            {summary?.totalRecommended != null
+              ? `${money(summary.totalRecommended)} recommended from ${money(summary.availableCapital)}.`
+              : "The strategy API will return the canonical commitment result."}
+          </p>
+        </div>
+        <span
+          className={cx(
+            "shrink-0 rounded-md border px-2 py-1 text-xs font-semibold",
+            toneSurface(
+              summary?.status === "recommended"
+                ? "good"
+                : summary?.status === "blocked"
+                  ? "bad"
+                  : "warn",
+            ),
+          )}
+        >
+          {investorCopy(String(summary?.policy?.name ?? "policy pending"))}
+        </span>
+      </div>
+
+      <div
+        data-testid="commitment-investor-inputs"
+        className="grid gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3 md:grid-cols-2 xl:grid-cols-4"
+      >
+        <label className="grid gap-1 text-sm font-semibold text-zinc-700">
+          Available Capital
+          <input
+            type="number"
+            min={0}
+            value={controls.availableCapital}
+            onChange={(event) =>
+              controls.onAvailableCapitalChange(
+                Math.max(0, Number(event.target.value) || 0),
+              )
+            }
+            className="h-10 min-w-0 rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 outline-none focus:border-zinc-950"
+          />
+        </label>
+
+        <div className="grid gap-1 text-sm font-semibold text-zinc-700">
+          Mode
+          <div className="grid grid-cols-2 rounded-md border border-zinc-300 bg-white p-1">
+            {(["investing", "trading"] as const).map((item) => (
+              <button
+                key={item}
+                type="button"
+                aria-pressed={controls.intent === item}
+                onClick={() => controls.onIntentChange(item)}
+                className={cx(
+                  "h-8 rounded px-2 text-xs font-semibold capitalize",
+                  controls.intent === item
+                    ? "bg-zinc-950 text-white"
+                    : "text-zinc-600 hover:bg-zinc-100",
+                )}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <label className="grid gap-1 text-sm font-semibold text-zinc-700">
+          Risk Preference
+          <select
+            value={controls.riskPreference}
+            onChange={(event) =>
+              controls.onRiskPreferenceChange(
+                event.target.value as CommitmentControlProps["riskPreference"],
+              )
+            }
+            className="h-10 min-w-0 rounded-md border border-zinc-300 bg-white px-3 text-sm capitalize text-zinc-950 outline-none focus:border-zinc-950"
+          >
+            <option value="conservative">Conservative</option>
+            <option value="balanced">Balanced</option>
+            <option value="aggressive">Aggressive</option>
+          </select>
+        </label>
+
+        <div className="grid gap-1 text-sm font-semibold text-zinc-700">
+          Trust Override
+          <label className="flex h-10 min-w-0 items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-700">
+            <input
+              type="checkbox"
+              checked={controls.trustOverrideEnabled}
+              onChange={(event) =>
+                controls.onTrustOverrideEnabledChange(event.target.checked)
+              }
+              className="h-4 w-4"
+            />
+            <span>{controls.trustOverrideEnabled ? pct(controls.trustOverridePct, 0) : "Use Signal"}</span>
+          </label>
+          {controls.trustOverrideEnabled ? (
+            <input
+              aria-label="Trust override percentage"
+              type="range"
+              min={0}
+              max={100}
+              value={controls.trustOverridePct}
+              onChange={(event) =>
+                controls.onTrustOverridePctChange(Number(event.target.value))
+              }
+              className="h-2 w-full accent-zinc-950"
+            />
+          ) : null}
+        </div>
+
+        <label className="grid gap-1 text-sm font-semibold text-zinc-700 md:col-span-1 xl:col-span-2">
+          Single-Position Cap
+          <input
+            inputMode="decimal"
+            placeholder="Auto"
+            value={controls.maxSinglePositionPct}
+            onChange={(event) =>
+              controls.onMaxSinglePositionPctChange(event.target.value)
+            }
+            className="h-10 min-w-0 rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 outline-none placeholder:text-zinc-400 focus:border-zinc-950"
+          />
+        </label>
+
+        <label className="grid gap-1 text-sm font-semibold text-zinc-700 md:col-span-1 xl:col-span-2">
+          Portfolio Commitment Cap
+          <input
+            inputMode="decimal"
+            placeholder="Auto"
+            value={controls.maxPortfolioCommitmentPct}
+            onChange={(event) =>
+              controls.onMaxPortfolioCommitmentPctChange(event.target.value)
+            }
+            className="h-10 min-w-0 rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 outline-none placeholder:text-zinc-400 focus:border-zinc-950"
+          />
+        </label>
+      </div>
+
+      <div
+        data-testid="commitment-summary"
+        className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4"
+      >
+        <FactTile label="Recommended" value={money(summary?.totalRecommended)} />
+        <FactTile label="Uncommitted" value={money(summary?.uncommittedCapital)} />
+        <FactTile label="Commitment" value={pct(Number(summary?.normalizedCommitment ?? 0) * 100)} />
+        <FactTile label="Monitor First" value={String(summary?.monitorFirst ?? "Pending")} />
+      </div>
+
+      <DisclosurePanel
+        title="Recommended Commitment"
+        summary={`${rows.filter((row: any) => Number(row.commitmentAmount) > 0).length} executable rows`}
+        defaultOpen
+        testId="recommended-commitment-panel"
+      >
+        <div className="grid gap-2">
+          {rows.length ? (
+            rows.slice(0, 8).map((row: any) => (
+              <div
+                key={`${row.symbol}-${row.action}`}
+                className="grid min-w-0 gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3 lg:grid-cols-[minmax(86px,0.35fr)_minmax(0,1fr)_minmax(116px,0.45fr)]"
+              >
+                <div className="min-w-0">
+                  <div className="break-words text-sm font-semibold text-zinc-950">
+                    {row.symbol}
+                  </div>
+                  <span
+                    className={cx(
+                      "mt-1 inline-flex rounded-md border px-2 py-1 text-xs font-semibold",
+                      toneSurface(commitmentRowTone(String(row.action))),
+                    )}
+                  >
+                    {investorCopy(String(row.action))}
+                  </span>
+                </div>
+                <div className="min-w-0 text-sm leading-6 text-zinc-700">
+                  <div className="font-semibold text-zinc-950">
+                    {money(row.commitmentAmount)} · {pct(row.allocationPct)}
+                    {row.estimatedUnits != null
+                      ? ` · ${row.estimatedUnits} units`
+                      : ""}
+                  </div>
+                  <div className="break-words">
+                    {investorCopy(String(row.reasons?.[0] ?? "No reason supplied."))}
+                  </div>
+                </div>
+                <div className="min-w-0 text-xs leading-5 text-zinc-500">
+                  {investorCopy(String(row.limitedBy?.[0] ?? row.mode ?? "No limiter"))}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="break-words text-sm leading-6 text-zinc-600">
+              No execution rows have been returned yet.
+            </p>
+          )}
+        </div>
+      </DisclosurePanel>
+
+      <DisclosurePanel
+        title="Why This"
+        summary={why[0] ?? "Waiting for commitment reasons"}
+        testId="commitment-why-panel"
+      >
+        <div className="grid gap-2">
+          {(why.length ? why : ["Signal Commitment has not returned reasons yet."]).map((item: string) => (
+            <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+              {investorCopy(item)}
+            </p>
+          ))}
+        </div>
+      </DisclosurePanel>
+
+      <DisclosurePanel
+        title="What Changed"
+        summary={changes[0]}
+        testId="commitment-change-panel"
+      >
+        <div className="grid gap-2">
+          {changes.map((item) => (
+            <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+              {investorCopy(item)}
+            </p>
+          ))}
+        </div>
+      </DisclosurePanel>
+
+      <DisclosurePanel
+        title="Invalidation"
+        summary={`${invalidationTriggers.length} triggers`}
+        testId="commitment-invalidation-panel"
+      >
+        <div className="grid gap-2">
+          {invalidationTriggers.length ? (
+            invalidationTriggers.slice(0, 8).map((trigger: any) => (
+              <FactTile
+                key={`${trigger.id}-${trigger.targetId ?? "portfolio"}`}
+                label={String(trigger.targetId ?? trigger.severity ?? "Portfolio")}
+                value={String(trigger.condition ?? "Review commitment.")}
+                tone={trigger.severity === "high" || trigger.severity === "critical" ? "bad" : "warn"}
+              />
+            ))
+          ) : (
+            <p className="break-words text-sm leading-6 text-zinc-600">
+              No invalidation triggers have been returned yet.
+            </p>
+          )}
+        </div>
+      </DisclosurePanel>
+
+      <DisclosurePanel
+        title="Monitoring"
+        summary={`${monitoringMetrics.length} metrics`}
+        testId="commitment-monitoring-panel"
+      >
+        <div className="grid gap-2 sm:grid-cols-2">
+          {monitoringMetrics.slice(0, 8).map((metric: any) => (
+            <FactTile
+              key={`${metric.targetId ?? "portfolio"}-${metric.id}-${metric.direction}`}
+              label={String(metric.targetId ?? metric.id)}
+              value={`${investorCopy(String(metric.id))} ${metric.direction} ${pct(Number(metric.threshold ?? 0) * 100)}`}
+            />
+          ))}
+        </div>
+        <div className="mt-3 grid gap-1">
+          {futureChecks.map((item: string) => (
+            <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+              {investorCopy(item)}
+            </p>
+          ))}
+        </div>
+      </DisclosurePanel>
+    </section>
+  );
+}
+
 function OpportunityPicker({
   opportunities,
   selectedOpportunityId,
@@ -1376,8 +1736,8 @@ function InvestorLearningPanel({ learning }: { learning?: any }) {
 
         <LearningSection title="Similar Regimes">
           <div className="grid gap-1">
-            {similarLines.map((item) => (
-              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+            {similarLines.map((item, index) => (
+              <p key={`${item}-${index}`} className="break-words text-sm leading-6 text-zinc-700">
                 {item}
               </p>
             ))}
@@ -1684,6 +2044,9 @@ export default function DecisionOperatingSystem({
   workflow,
   actionPlan,
   rawMetrics,
+  commitment,
+  commitmentChangeExplanation,
+  commitmentControls,
 }: DecisionOperatingSystemProps) {
   const [selectedGoal, setSelectedGoal] = useState(GUIDE_GOALS[0]);
   const [activeStep, setActiveStep] = useState<GuidedStepId>(
@@ -2856,6 +3219,14 @@ export default function DecisionOperatingSystem({
                   activeStepId={activeStep}
                   status={stepStatuses["decide-what-to-do"]}
                 >
+                  {commitmentControls ? (
+                    <CommitmentClientPanel
+                      commitment={commitment}
+                      changeExplanation={commitmentChangeExplanation}
+                      controls={commitmentControls}
+                    />
+                  ) : null}
+
                   <RecommendationCard
                     recommendation={safeRecommendation}
                     rationale={`${cleanSentence(primaryAnswer)} ${cleanSentence(readinessBlocker)}`}
