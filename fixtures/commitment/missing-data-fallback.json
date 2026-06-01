@@ -1,0 +1,30 @@
+{
+  "name": "missing-data-fallback",
+  "assumptions": [
+    "Sharpe-like strategy requires aligned outcome series.",
+    "Exploratory policy falls back to equal weight when outcome data is missing."
+  ],
+  "input": {
+    "strategy": "sharpe_like",
+    "policy": "exploratory",
+    "resource": { "available": 1000 },
+    "decisions": [
+      { "id": "new-a", "confidence": 0.4, "trust": 0.5, "risk": 0.5 },
+      { "id": "new-b", "confidence": 0.45, "trust": 0.52, "risk": 0.45 }
+    ],
+    "seed": "missing-data",
+    "now": "2026-06-01T00:00:00Z"
+  },
+  "expectations": {
+    "status": "recommended",
+    "strategy": "equal_weight",
+    "totalRecommended": 10.016094,
+    "normalizedCommitment": 0.010016,
+    "limitedBy": ["strategy_fallback"],
+    "cappedBy": [],
+    "recommendations": [
+      { "targetId": "new-a", "amount": 5.008047, "normalizedCommitment": 0.005008, "weight": 0.5, "mode": "observe" },
+      { "targetId": "new-b", "amount": 5.008047, "normalizedCommitment": 0.005008, "weight": 0.5, "mode": "observe" }
+    ]
+  }
+}

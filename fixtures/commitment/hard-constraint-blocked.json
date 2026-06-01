@@ -1,0 +1,26 @@
+{
+  "name": "hard-constraint-blocked",
+  "assumptions": [
+    "A critical hard constraint blocks commitment before strategy allocation.",
+    "Blocked results still include invalidation and monitoring sections."
+  ],
+  "input": {
+    "strategy": "risk_adjusted",
+    "policy": "balanced",
+    "resource": { "available": 100 },
+    "decision": { "id": "blocked", "confidence": 0.9, "trust": 0.9, "risk": 0.1 },
+    "constraints": [
+      { "id": "compliance", "type": "hard", "severity": "critical", "passed": false, "reason": "External rule failed." }
+    ],
+    "now": "2026-06-01T00:00:00Z"
+  },
+  "expectations": {
+    "status": "blocked",
+    "strategy": "risk_adjusted",
+    "totalRecommended": 0,
+    "normalizedCommitment": 0,
+    "limitedBy": ["hard_constraint"],
+    "cappedBy": [],
+    "recommendations": []
+  }
+}

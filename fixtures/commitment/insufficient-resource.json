@@ -1,0 +1,24 @@
+{
+  "name": "insufficient-resource",
+  "assumptions": [
+    "No available abstract resource means no commitment, regardless of confidence."
+  ],
+  "input": {
+    "strategy": "risk_adjusted",
+    "policy": "balanced",
+    "resource": { "available": 0 },
+    "decision": { "id": "ready", "confidence": 0.9, "trust": 0.9, "risk": 0.1 },
+    "now": "2026-06-01T00:00:00Z"
+  },
+  "expectations": {
+    "status": "deferred",
+    "strategy": "risk_adjusted",
+    "totalRecommended": 0,
+    "normalizedCommitment": 0,
+    "limitedBy": ["resource_available"],
+    "cappedBy": [],
+    "recommendations": [
+      { "targetId": "ready", "amount": 0, "normalizedCommitment": 0, "weight": 0, "mode": "none" }
+    ]
+  }
+}

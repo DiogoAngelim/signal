@@ -1,0 +1,29 @@
+{
+  "name": "normal-balanced",
+  "assumptions": [
+    "Two eligible decisions compete for one abstract resource pool.",
+    "Risk-adjusted strategy distributes commitment by confidence, trust, risk, and utility."
+  ],
+  "input": {
+    "strategy": "risk_adjusted",
+    "policy": "balanced",
+    "resource": { "available": 1000 },
+    "decisions": [
+      { "id": "alpha", "label": "Alpha", "confidence": 0.8, "trust": 0.75, "risk": 0.3, "expectedUtility": 0.7 },
+      { "id": "beta", "label": "Beta", "confidence": 0.65, "trust": 0.7, "risk": 0.4, "expectedUtility": 0.6 }
+    ],
+    "now": "2026-06-01T00:00:00Z"
+  },
+  "expectations": {
+    "status": "recommended",
+    "strategy": "risk_adjusted",
+    "totalRecommended": 302.3712,
+    "normalizedCommitment": 0.302371,
+    "limitedBy": [],
+    "cappedBy": [],
+    "recommendations": [
+      { "targetId": "alpha", "amount": 182.668187, "normalizedCommitment": 0.182668, "weight": 0.604119, "mode": "limited" },
+      { "targetId": "beta", "amount": 119.703013, "normalizedCommitment": 0.119703, "weight": 0.395881, "mode": "limited" }
+    ]
+  }
+}

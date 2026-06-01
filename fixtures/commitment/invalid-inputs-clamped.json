@@ -1,0 +1,27 @@
+{
+  "name": "invalid-inputs-clamped",
+  "assumptions": [
+    "Numeric scores above 1 are interpreted as percentages.",
+    "Invalid trust falls back to confidence.",
+    "Invalid dates are normalized to the deterministic epoch timestamp."
+  ],
+  "input": {
+    "strategy": "risk_adjusted",
+    "policy": "balanced",
+    "resource": { "available": 100 },
+    "decision": { "id": "messy", "confidence": 140, "trust": "bad", "risk": -0.5, "expectedUtility": 2 },
+    "now": "not-a-date"
+  },
+  "expectations": {
+    "status": "recommended",
+    "strategy": "risk_adjusted",
+    "totalRecommended": 45.6,
+    "normalizedCommitment": 0.456,
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "limitedBy": [],
+    "cappedBy": [],
+    "recommendations": [
+      { "targetId": "messy", "amount": 45.6, "normalizedCommitment": 0.456, "weight": 1, "mode": "elevated" }
+    ]
+  }
+}
