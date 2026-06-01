@@ -17,6 +17,42 @@ export type SignalOperationKind = SignalKind;
 
 export type SignalSchema<T> = z.ZodType<T>;
 
+export interface SignalRunOptions {
+  kind?: SignalOperationKind;
+  context?: Record<string, unknown>;
+  meta?: Record<string, unknown>;
+}
+
+export interface SignalExecuteInput {
+  kind: SignalOperationKind;
+  name: string;
+  payload?: unknown;
+  context?: Record<string, unknown>;
+  meta?: Record<string, unknown>;
+}
+
+export interface SignalExecuteSuccess<TData = unknown> {
+  ok: true;
+  data: TData;
+  meta: Record<string, unknown>;
+}
+
+export interface SignalExecuteFailure {
+  ok: false;
+  error: {
+    code: string;
+    message: string;
+    details?: unknown;
+    category?: string;
+    retryable?: boolean;
+  };
+  meta: Record<string, unknown>;
+}
+
+export type SignalExecuteResult<TData = unknown> =
+  | SignalExecuteSuccess<TData>
+  | SignalExecuteFailure;
+
 export interface SignalRequestContext {
   correlationId?: string;
   causationId?: string;

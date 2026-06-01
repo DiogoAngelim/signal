@@ -2,15 +2,17 @@ import type { FastifyInstance } from "fastify";
 import type { SignalCapabilities } from "@signal/protocol";
 import { createReferenceServer, createReferenceRuntime } from "./lib/runtime";
 import { registerHealthRoute } from "./routes/health";
+import { registerObservedEventsRoute } from "./routes/observed-events";
 
 export async function startReferenceServer(): Promise<{
   app: FastifyInstance;
   port: number;
   capabilities: SignalCapabilities;
 }> {
-  const { runtime } = createReferenceRuntime();
+  const { runtime, subscribers } = createReferenceRuntime();
   const app = createReferenceServer(runtime);
   registerHealthRoute(app);
+  registerObservedEventsRoute(app, subscribers);
 
   const port = Number(process.env["SIGNAL_HTTP_PORT"] ?? 3001);
 

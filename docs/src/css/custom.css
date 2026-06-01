@@ -1,25 +1,45 @@
 :root {
-  --ifm-color-primary: #1c396e;
-  --ifm-color-primary-dark: #173060;
-  --ifm-color-primary-darker: #142a56;
-  --ifm-color-primary-darkest: #102348;
-  --ifm-color-primary-light: #27508f;
-  --ifm-color-primary-lighter: #2d5da3;
-  --ifm-color-primary-lightest: #3569b6;
+  --ifm-color-primary: #24515f;
+  --ifm-color-primary-dark: #1f4652;
+  --ifm-color-primary-darker: #1b3f4a;
+  --ifm-color-primary-darkest: #14313a;
+  --ifm-color-primary-light: #2f6674;
+  --ifm-color-primary-lighter: #377484;
+  --ifm-color-primary-lightest: #438798;
   --ifm-font-family-base: "Inter", "Segoe UI", sans-serif;
   --ifm-font-family-monospace: "SFMono-Regular", "Consolas", monospace;
 }
 
 .hero--signal {
-  background:
-    radial-gradient(circle at top left, rgba(28, 57, 110, 0.18), transparent 42%),
-    radial-gradient(circle at top right, rgba(223, 114, 71, 0.12), transparent 36%),
-    linear-gradient(180deg, #0c0a17 0%, #0f1d40 50%, #0c0a17 100%);
-  color: #e1dccd;
+  min-height: 72vh;
+  background: #f7f9f8;
+  color: #172026;
+  border-bottom: 1px solid #d8e1df;
 }
 
 .signal-home-copy {
   max-width: 50rem;
+}
+
+.signal-home-copy h1 {
+  max-width: 14ch;
+  font-size: clamp(2.75rem, 7vw, 5.25rem);
+  letter-spacing: 0;
+  line-height: 0.95;
+}
+
+.signal-home-copy p {
+  max-width: 40rem;
+  font-size: 1.2rem;
+}
+
+.signal-eyebrow {
+  margin-bottom: 0.75rem;
+  color: #51615f;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .signal-architecture-diagram {
@@ -31,43 +51,12 @@
   width: 100%;
   height: auto;
   border: 1px solid var(--ifm-color-emphasis-200);
-  border-radius: 12px;
-  background: #f8fafc;
-}
-
-.signal-architecture-diagram figcaption {
-  margin-top: 0.75rem;
-  color: var(--ifm-color-emphasis-700);
-  font-size: 0.95rem;
-}
-
-.signal-architecture-checkpoints {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.signal-architecture-checkpoints section {
-  border: 1px solid var(--ifm-color-emphasis-200);
   border-radius: 8px;
-  padding: 1rem;
-  background: var(--ifm-background-surface-color);
+  background: #ffffff;
 }
 
-.signal-architecture-checkpoints h3 {
-  margin: 0 0 0.4rem;
-  font-size: 1rem;
-}
-
-.signal-architecture-checkpoints p {
-  margin: 0;
-  color: var(--ifm-color-emphasis-700);
-  font-size: 0.92rem;
-}
-
-@media (max-width: 800px) {
-  .signal-architecture-checkpoints {
-    grid-template-columns: 1fr;
-  }
+.signal-next {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  margin-top: 3rem;
+  padding-top: 1rem;
 }

@@ -3,7 +3,7 @@ import { themes } from "prism-react-renderer";
 
 const config: Config = {
   title: "Signal",
-  tagline: "A transport-agnostic application protocol",
+  tagline: "Queries, Mutations, and Events for application communication",
   favicon: "img/favicon.ico",
   url: "https://diogoangelim.github.io",
   baseUrl: "/signal/",
@@ -35,8 +35,9 @@ const config: Config = {
     navbar: {
       title: "Signal",
       items: [
-        { to: "/docs/introduction", label: "Docs", position: "left" },
-        { to: "/docs/reference/envelope", label: "Reference", position: "left" },
+        { to: "/docs/what-is-signal", label: "Start", position: "left" },
+        { to: "/docs/start/quick-start", label: "Quick Start", position: "left" },
+        { to: "/docs/reference/api", label: "Reference", position: "left" },
         { href: "https://github.com/DiogoAngelim/signal", label: "GitHub", position: "right" },
       ],
     },
@@ -46,9 +47,9 @@ const config: Config = {
         {
           title: "Docs",
           items: [
-            { label: "Introduction", to: "/docs/introduction" },
-            { label: "Quickstart", to: "/docs/guides/quickstart" },
-            { label: "Envelope", to: "/docs/reference/envelope" },
+            { label: "What Is Signal?", to: "/docs/what-is-signal" },
+            { label: "Quick Start", to: "/docs/start/quick-start" },
+            { label: "API Reference", to: "/docs/reference/api" },
           ],
         },
         {

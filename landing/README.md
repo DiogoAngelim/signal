@@ -4,7 +4,8 @@ This folder contains the public homepage for Signal.
 
 ## What It Is
 
-The landing site is the public front door for the project. It should stay short, clear, and aligned with the protocol-first story used in the docs.
+The landing site is the public front door for the project. It should stay short,
+clear, and aligned with the beginner-first docs.
 
 ## Run Locally
 
@@ -22,9 +23,10 @@ The site is configured for static export and GitHub Pages.
 
 ## What It Should Link To
 
-- the docs introduction
-- the envelope reference
-- the quickstart
+- What Is Signal?
+- the Quick Start
+- Build Your First App
+- the API reference
 - the reference implementation
 
 ## What To Avoid

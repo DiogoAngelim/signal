@@ -1,6 +1,0 @@
-.vercel
-.env*
-!/.env.example
-!/src/artifacts/api-server/.env.example
-src/artifacts/api-server/.coverage/
-src/artifacts/api-server/.local-cache/

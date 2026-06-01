@@ -4,8 +4,6 @@ packages:
   - "apps/*"
   - "docs"
   - "landing"
-  - "examples/stocks-optimizer"
-  - "examples/stocks-optimizer/src/artifacts/*"
 
 catalog:
   "@replit/vite-plugin-cartographer": "latest"

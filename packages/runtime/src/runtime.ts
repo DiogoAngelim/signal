@@ -1,11 +1,16 @@
 import type { SignalCapabilities, SignalEnvelope } from "@signal/protocol";
+import { ZodError } from "zod";
 import { buildCapabilities } from "./capabilities";
 import {
   createInProcessDispatcher,
   createReplaySafeSubscriber,
 } from "./dispatcher";
 import { dispatchEvent } from "./event";
-import { normalizeRequestContext } from "./execution";
+import {
+  createExecutionSuccessMeta,
+  normalizeRequestContext,
+  toSignalFailure,
+} from "./execution";
 import { executeMutation } from "./mutation";
 import { PerceptionLayer } from "./perception";
 import { executeQuery } from "./query";
@@ -13,12 +18,17 @@ import { SignalRegistry } from "./registry";
 import type {
   SignalBinding,
   SignalDispatcher,
+  SignalExecuteFailure,
+  SignalExecuteInput,
+  SignalExecuteResult,
   SignalExecutionContext,
   SignalExecutionResult,
   SignalIdempotencyStore,
   SignalMutationDefinition,
   SignalOperationDefinition,
+  SignalOperationKind,
   SignalQueryDefinition,
+  SignalRunOptions,
   SignalRuntimeOptions,
   SignalSubscriptionOptions,
 } from "./types";
@@ -35,6 +45,63 @@ function createDefaultContext(
       throw new Error("emit is only available inside mutation handlers");
     },
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function createExecuteFailure(
+  code: string,
+  message: string,
+  details?: unknown,
+): SignalExecuteFailure {
+  return {
+    ok: false,
+    error: {
+      code,
+      message,
+      details,
+    },
+    meta: {},
+  };
+}
+
+function toExecuteFailure(error: {
+  code: string;
+  message: string;
+  details?: unknown;
+  category?: string;
+  retryable?: boolean;
+}): SignalExecuteFailure {
+  return {
+    ok: false,
+    error: {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      category: error.category,
+      retryable: error.retryable,
+    },
+    meta: {},
+  };
+}
+
+function toExecuteMeta(meta: unknown): Record<string, unknown> {
+  return isRecord(meta) ? { ...meta } : {};
+}
+
+function toExecuteRequest(
+  context: Record<string, unknown> | undefined,
+  meta: Record<string, unknown> | undefined,
+): Partial<SignalExecutionContext["request"]> {
+  const request = isRecord(context) ? { ...context } : {};
+  const { meta: requestMeta } = request;
+  const contextMeta = isRecord(requestMeta) ? requestMeta : undefined;
+  return {
+    ...request,
+    meta: isRecord(meta) ? meta : contextMeta,
+  } as Partial<SignalExecutionContext["request"]>;
 }
 
 export class SignalRuntime implements SignalBinding {
@@ -172,6 +239,155 @@ export class SignalRuntime implements SignalBinding {
     return result;
   }
 
+  /**
+   * Beginner layer: run one registered operation by name and receive one
+   * normalized result. Pass kind to keep protocol routing explicit.
+   */
+  async run<TData = unknown>(
+    name: string,
+    payload?: unknown,
+    options: SignalRunOptions = {},
+  ): Promise<SignalExecuteResult<TData>> {
+    if (options.kind) {
+      return this.execute<TData>({
+        kind: options.kind,
+        name,
+        payload,
+        context: options.context,
+        meta: options.meta,
+      });
+    }
+
+    const kinds = this.findRegisteredKinds(name);
+
+    if (kinds.length === 0) {
+      return createExecuteFailure(
+        "OPERATION_NOT_FOUND",
+        `Unknown operation: ${name}`,
+        {
+          name,
+        },
+      );
+    }
+
+    if (kinds.length > 1) {
+      return createExecuteFailure(
+        "AMBIGUOUS_OPERATION_KIND",
+        `Operation kind is ambiguous for ${name}; pass options.kind to run it explicitly.`,
+        {
+          name,
+          kinds,
+        },
+      );
+    }
+
+    const kind = kinds[0] as SignalOperationKind;
+
+    return this.execute<TData>({
+      kind,
+      name,
+      payload,
+      context: options.context,
+      meta: options.meta,
+    });
+  }
+
+  /**
+   * Protocol layer: explicitly route by operation kind while preserving the
+   * existing query, mutation, and event execution paths underneath.
+   */
+  async execute<TData = unknown>(
+    input: SignalExecuteInput,
+  ): Promise<SignalExecuteResult<TData>> {
+    const request = toExecuteRequest(input.context, input.meta);
+
+    switch (input.kind) {
+      case "query": {
+        const result = await this.query<unknown, TData>(
+          input.name,
+          input.payload,
+          request,
+        );
+        if (!result.ok) {
+          return toExecuteFailure(result.error);
+        }
+        return {
+          ok: true,
+          data: result.result,
+          meta: toExecuteMeta(result.meta),
+        };
+      }
+      case "mutation": {
+        const result = await this.mutation<unknown, TData>(
+          input.name,
+          input.payload,
+          request,
+        );
+        if (!result.ok) {
+          return toExecuteFailure(result.error);
+        }
+        return {
+          ok: true,
+          data: result.result,
+          meta: toExecuteMeta(result.meta),
+        };
+      }
+      case "event": {
+        const normalizedRequest = normalizeRequestContext(request);
+        const startedAt = Date.now();
+        try {
+          const envelope = await this.publish(
+            input.name,
+            input.payload,
+            normalizedRequest,
+          );
+          return {
+            ok: true,
+            data: envelope as TData,
+            meta: toExecuteMeta(
+              createExecutionSuccessMeta({
+                outcome: "completed",
+                envelope,
+                request: normalizedRequest,
+                startedAt,
+                idempotency: {
+                  status: "not-applicable",
+                },
+              }),
+            ),
+          };
+        } catch (error) {
+          if (error instanceof ZodError) {
+            return toExecuteFailure(
+              toSignalFailure(
+                {
+                  code: "VALIDATION_ERROR",
+                  message: error.message,
+                  details: { issues: error.issues },
+                },
+                "VALIDATION_ERROR",
+                "Event payload validation failed",
+              ),
+            );
+          }
+
+          return toExecuteFailure(
+            toSignalFailure(error, "INTERNAL_ERROR", "Event publish failed"),
+          );
+        }
+      }
+      default:
+        return createExecuteFailure(
+          "UNSUPPORTED_OPERATION_KIND",
+          `Unsupported operation kind: ${String(input.kind)}`,
+          {
+            kind: input.kind,
+            supportedKinds: ["query", "mutation", "event"],
+          },
+        );
+    }
+  }
+
   publish<TPayload>(
     name: string,
     payload: TPayload,
@@ -210,6 +426,28 @@ export class SignalRuntime implements SignalBinding {
 
   lock(): void {
     this.registry.lock();
+  }
+
+  private findRegisteredKinds(name: string): SignalOperationKind[] {
+    const kinds: SignalOperationKind[] = [];
+    if (
+      this.registry.listQueries().some((definition) => definition.name === name)
+    ) {
+      kinds.push("query");
+    }
+    if (
+      this.registry
+        .listMutations()
+        .some((definition) => definition.name === name)
+    ) {
+      kinds.push("mutation");
+    }
+    if (
+      this.registry.listEvents().some((definition) => definition.name === name)
+    ) {
+      kinds.push("event");
+    }
+    return kinds;
   }
 }
 

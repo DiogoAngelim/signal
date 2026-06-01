@@ -5,16 +5,15 @@ export default function ReferenceIndexPage() {
     <DocsRoutePage
       eyebrow="Docs / Reference"
       title="Reference"
-      summary="The reference section covers the envelope, capabilities, errors, and conformance guidance for Signal v1."
-      canonicalHref="https://diogoangelim.github.io/signal/docs/reference/envelope"
-      primaryLabel="Open the envelope reference"
-      primaryHref="/docs/reference/envelope"
+      summary="Find the packages, functions, protocol fields, and errors most Signal apps use."
+      canonicalHref="https://diogoangelim.github.io/signal/docs/reference/api"
+      primaryLabel="Open API reference"
+      primaryHref="/docs/reference/api"
     >
       <ul className="space-y-2 text-sm leading-6 text-muted-foreground">
-        <li>Envelope</li>
-        <li>Capabilities</li>
+        <li>API</li>
+        <li>Protocol</li>
         <li>Errors</li>
-        <li>Conformance</li>
       </ul>
     </DocsRoutePage>
   );

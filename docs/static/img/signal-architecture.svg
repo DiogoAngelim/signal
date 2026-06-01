@@ -1,158 +1,56 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
-  <title id="title">Signal architecture flow</title>
-  <desc id="desc">A user sends work through a Signal client, envelope, operation router, runtime, handler, trace, result, and outcome audit store. Signal Core, Signal Spec, Signal Server, capabilities, tracing, outcomes, and Stocks-Optimizer integration are shown as supporting layers.</desc>
-  <defs>
-    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
-      <path d="M2 2 L10 6 L2 10 Z" fill="#355f7d" />
-    </marker>
-    <filter id="shadow" x="-10%" y="-20%" width="120%" height="140%">
-      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#0d1b2a" flood-opacity="0.14" />
-    </filter>
-    <style>
-      .background { fill: #f8fafc; }
-      .title { fill: #102033; font: 700 30px Arial, sans-serif; }
-      .subtitle { fill: #475569; font: 400 15px Arial, sans-serif; }
-      .label { fill: #0f172a; font: 700 16px Arial, sans-serif; }
-      .small { fill: #475569; font: 400 12px Arial, sans-serif; }
-      .tiny { fill: #475569; font: 400 11px Arial, sans-serif; }
-      .box { stroke-width: 1.5; rx: 10; filter: url(#shadow); }
-      .flow { fill: #ffffff; stroke: #b8c7d6; }
-      .core { fill: #edf7f2; stroke: #80a98c; }
-      .spec { fill: #fff6e8; stroke: #d6a756; }
-      .server { fill: #eef4ff; stroke: #7893c9; }
-      .store { fill: #f3eefc; stroke: #9a82c7; }
-      .stocks { fill: #eef8fb; stroke: #5c9aaa; }
-      .lane { fill: #ffffff; stroke: #d7dee8; stroke-dasharray: 6 6; }
-      .arrow { stroke: #355f7d; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
-      .soft-arrow { stroke: #70899f; stroke-width: 1.8; fill: none; marker-end: url(#arrow); stroke-dasharray: 5 5; }
-    </style>
-  </defs>
-
-  <rect class="background" width="1200" height="760" rx="22" />
-
-  <text class="title" x="48" y="58">Signal Architecture</text>
-  <text class="subtitle" x="48" y="86">The public contract is the envelope. The runtime executes registered operations. Evidence flows into traces, results, outcomes, and audit storage.</text>
-
-  <rect class="lane" x="36" y="112" width="1128" height="316" rx="18" />
-  <text class="small" x="58" y="140">Runtime execution path</text>
-
-  <g>
-    <rect class="box flow" x="58" y="178" width="112" height="82" />
-    <text class="label" x="94" y="210">User</text>
-    <text class="tiny" x="78" y="234">asks or acts</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="720" viewBox="0 0 960 720" role="img" aria-labelledby="title desc">
+  <title id="title">Signal architecture</title>
+  <desc id="desc">Application flows through Source, Signal, Runtime, Action, Adapter, and Result. Queries, Mutations, and Events enter Signal.</desc>
+  <rect width="960" height="720" fill="#ffffff"/>
+  <g fill="#172026" font-family="Inter, Segoe UI, Arial, sans-serif" text-anchor="middle">
+    <text x="480" y="58" font-size="34" font-weight="700">Signal Flow</text>
+    <text x="480" y="92" font-size="16" fill="#51615f">Application communication through Queries, Mutations, and Events</text>
   </g>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle">
+    <rect x="330" y="126" width="300" height="58" rx="8" fill="#e9f2f0" stroke="#24515f"/>
+    <text x="480" y="163" fill="#172026">Application</text>
+    <path d="M480 194v38" stroke="#24515f" stroke-width="4" stroke-linecap="round"/>
+    <path d="M470 222l10 14 10-14" fill="none" stroke="#24515f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <g>
-    <rect class="box flow" x="204" y="178" width="138" height="82" />
-    <text class="label" x="232" y="210">Signal Client</text>
-    <text class="tiny" x="224" y="234">SDK or binding</text>
+    <rect x="330" y="242" width="300" height="58" rx="8" fill="#f8f3e8" stroke="#8b6f2f"/>
+    <text x="480" y="279" fill="#172026">Source</text>
+    <path d="M480 310v38" stroke="#24515f" stroke-width="4" stroke-linecap="round"/>
+    <path d="M470 338l10 14 10-14" fill="none" stroke="#24515f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <rect x="330" y="358" width="300" height="58" rx="8" fill="#eef0fa" stroke="#46527a"/>
+    <text x="480" y="395" fill="#172026">Signal</text>
+    <path d="M480 426v38" stroke="#24515f" stroke-width="4" stroke-linecap="round"/>
+    <path d="M470 454l10 14 10-14" fill="none" stroke="#24515f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <rect x="330" y="474" width="300" height="58" rx="8" fill="#f2ece8" stroke="#7a4f39"/>
+    <text x="480" y="511" fill="#172026">Runtime</text>
+    <path d="M480 542v38" stroke="#24515f" stroke-width="4" stroke-linecap="round"/>
+    <path d="M470 570l10 14 10-14" fill="none" stroke="#24515f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <rect x="90" y="600" width="210" height="58" rx="8" fill="#f4f5f3" stroke="#65706d"/>
+    <text x="195" y="637" fill="#172026">Action</text>
+    <rect x="375" y="600" width="210" height="58" rx="8" fill="#f4f5f3" stroke="#65706d"/>
+    <text x="480" y="637" fill="#172026">Adapter</text>
+    <rect x="660" y="600" width="210" height="58" rx="8" fill="#e9f2f0" stroke="#24515f"/>
+    <text x="765" y="637" fill="#172026">Result</text>
+
+    <path d="M330 629h-30" stroke="#24515f" stroke-width="4" stroke-linecap="round"/>
+    <path d="M630 629h30" stroke="#24515f" stroke-width="4" stroke-linecap="round"/>
+    <path d="M585 629h68" stroke="#24515f" stroke-width="4" stroke-linecap="round"/>
+    <path d="M645 619l14 10-14 10" fill="none" stroke="#24515f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
-
-  <g>
-    <rect class="box flow" x="376" y="178" width="138" height="82" />
-    <text class="label" x="412" y="210">Envelope</text>
-    <text class="tiny" x="399" y="234">protocol + payload</text>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" text-anchor="middle">
+    <rect x="74" y="352" width="170" height="44" rx="8" fill="#ffffff" stroke="#24515f"/>
+    <text x="159" y="381" font-size="18" font-weight="700" fill="#24515f">Queries</text>
+    <rect x="74" y="410" width="170" height="44" rx="8" fill="#ffffff" stroke="#24515f"/>
+    <text x="159" y="439" font-size="18" font-weight="700" fill="#24515f">Mutations</text>
+    <rect x="74" y="468" width="170" height="44" rx="8" fill="#ffffff" stroke="#24515f"/>
+    <text x="159" y="497" font-size="18" font-weight="700" fill="#24515f">Events</text>
+    <path d="M244 374h72" stroke="#24515f" stroke-width="3" stroke-linecap="round"/>
+    <path d="M244 432h72" stroke="#24515f" stroke-width="3" stroke-linecap="round"/>
+    <path d="M244 490h72" stroke="#24515f" stroke-width="3" stroke-linecap="round"/>
+    <path d="M304 364l14 10-14 10" fill="none" stroke="#24515f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M304 422l14 10-14 10" fill="none" stroke="#24515f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M304 480l14 10-14 10" fill="none" stroke="#24515f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
-
-  <g>
-    <rect class="box flow" x="548" y="154" width="166" height="130" />
-    <text class="label" x="582" y="184">Operation</text>
-    <text class="tiny" x="574" y="209">query</text>
-    <text class="tiny" x="574" y="229">mutation</text>
-    <text class="tiny" x="574" y="249">event</text>
-    <text class="tiny" x="636" y="209">decision</text>
-  </g>
-
-  <g>
-    <rect class="box flow" x="748" y="178" width="126" height="82" />
-    <text class="label" x="780" y="210">Runtime</text>
-    <text class="tiny" x="770" y="234">registry + guards</text>
-  </g>
-
-  <g>
-    <rect class="box flow" x="908" y="178" width="126" height="82" />
-    <text class="label" x="940" y="210">Handler</text>
-    <text class="tiny" x="931" y="234">domain code</text>
-  </g>
-
-  <g>
-    <rect class="box flow" x="748" y="322" width="126" height="70" />
-    <text class="label" x="789" y="351">Trace</text>
-    <text class="tiny" x="769" y="374">what and why</text>
-  </g>
-
-  <g>
-    <rect class="box flow" x="908" y="322" width="126" height="70" />
-    <text class="label" x="943" y="351">Result</text>
-    <text class="tiny" x="926" y="374">ok or error</text>
-  </g>
-
-  <g>
-    <rect class="box store" x="1068" y="305" width="82" height="104" />
-    <text class="label" x="1088" y="335">Audit</text>
-    <text class="tiny" x="1087" y="358">outcome</text>
-    <text class="tiny" x="1087" y="376">evidence</text>
-    <text class="tiny" x="1087" y="394">version</text>
-  </g>
-
-  <path class="arrow" d="M170 219 H204" />
-  <path class="arrow" d="M342 219 H376" />
-  <path class="arrow" d="M514 219 H548" />
-  <path class="arrow" d="M714 219 H748" />
-  <path class="arrow" d="M874 219 H908" />
-  <path class="arrow" d="M971 260 V322" />
-  <path class="arrow" d="M908 357 H874" />
-  <path class="arrow" d="M1034 357 H1068" />
-  <path class="soft-arrow" d="M811 322 V260" />
-
-  <rect class="lane" x="36" y="464" width="1128" height="236" rx="18" />
-  <text class="small" x="58" y="492">Supporting layers</text>
-
-  <g>
-    <rect class="box core" x="58" y="530" width="176" height="112" />
-    <text class="label" x="94" y="562">Signal Core</text>
-    <text class="tiny" x="82" y="588">Envelope</text>
-    <text class="tiny" x="82" y="606">names</text>
-    <text class="tiny" x="82" y="624">results and errors</text>
-  </g>
-
-  <g>
-    <rect class="box spec" x="270" y="530" width="176" height="112" />
-    <text class="label" x="306" y="562">Signal Spec</text>
-    <text class="tiny" x="294" y="588">RFCs</text>
-    <text class="tiny" x="294" y="606">fixtures</text>
-    <text class="tiny" x="294" y="624">JSON schemas</text>
-  </g>
-
-  <g>
-    <rect class="box server" x="482" y="530" width="176" height="112" />
-    <text class="label" x="514" y="562">Signal Server</text>
-    <text class="tiny" x="506" y="588">HTTP binding</text>
-    <text class="tiny" x="506" y="606">capabilities route</text>
-    <text class="tiny" x="506" y="624">reference app</text>
-  </g>
-
-  <g>
-    <rect class="box store" x="694" y="530" width="176" height="112" />
-    <text class="label" x="722" y="562">Auditability</text>
-    <text class="tiny" x="718" y="588">traces</text>
-    <text class="tiny" x="718" y="606">outcomes</text>
-    <text class="tiny" x="718" y="624">decision memory</text>
-  </g>
-
-  <g>
-    <rect class="box stocks" x="906" y="530" width="212" height="112" />
-    <text class="label" x="944" y="562">Stocks-Optimizer</text>
-    <text class="tiny" x="930" y="588">market evidence</text>
-    <text class="tiny" x="930" y="606">Signal decisions</text>
-    <text class="tiny" x="930" y="624">API, SSE, webhooks</text>
-  </g>
-
-  <path class="soft-arrow" d="M146 530 V260" />
-  <path class="soft-arrow" d="M358 530 V260" />
-  <path class="soft-arrow" d="M570 530 V284" />
-  <path class="soft-arrow" d="M782 530 V392" />
-  <path class="soft-arrow" d="M1012 530 V409" />
-
-  <text class="small" x="58" y="718">Read left to right: user intent becomes an envelope, the runtime selects a registered query, mutation, event, or decision handler, and the result is tied back to trace and outcome evidence.</text>
 </svg>

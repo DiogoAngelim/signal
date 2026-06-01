@@ -4,16 +4,16 @@ export default function IntroductionPage() {
   return (
     <DocsRoutePage
       eyebrow="Docs / Introduction"
-      title="Introduction"
-      summary="Signal is a transport-agnostic application protocol for versioned queries, explicit mutations, and immutable events."
-      canonicalHref="https://diogoangelim.github.io/signal/docs/introduction"
-      primaryLabel="Open the envelope reference"
-      primaryHref="/docs/reference/envelope"
+      title="What Is Signal?"
+      summary="Signal helps applications communicate through Queries, Mutations, and Events using a predictable protocol."
+      canonicalHref="https://diogoangelim.github.io/signal/docs/what-is-signal"
+      primaryLabel="Open quick start"
+      primaryHref="/docs/start/quick-start"
     >
       <ul className="space-y-2 text-sm leading-6 text-muted-foreground">
-        <li>Queries are read-only.</li>
-        <li>Mutations declare idempotency.</li>
-        <li>Events are immutable facts.</li>
+        <li>Queries ask for data.</li>
+        <li>Mutations change data.</li>
+        <li>Events announce facts.</li>
       </ul>
     </DocsRoutePage>
   );

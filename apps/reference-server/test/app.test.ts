@@ -9,16 +9,23 @@ const runtimeMock = vi.hoisted(() => ({
         publishedEvents: [],
       }),
     },
+    subscribers: {
+      seen: [],
+    },
   })),
   createReferenceServer: vi.fn(() => ({
     listen: vi.fn(async () => undefined),
   })),
   registerHealthRoute: vi.fn(),
+  registerObservedEventsRoute: vi.fn(),
 }));
 
 vi.mock("../src/lib/runtime", () => runtimeMock);
 vi.mock("../src/routes/health", () => ({
   registerHealthRoute: runtimeMock.registerHealthRoute,
+}));
+vi.mock("../src/routes/observed-events", () => ({
+  registerObservedEventsRoute: runtimeMock.registerObservedEventsRoute,
 }));
 
 import { startReferenceServer } from "../src/app";
@@ -32,6 +39,10 @@ describe("reference app bootstrap", () => {
     expect(runtimeMock.createReferenceRuntime).toHaveBeenCalled();
     expect(runtimeMock.createReferenceServer).toHaveBeenCalled();
     expect(runtimeMock.registerHealthRoute).toHaveBeenCalled();
+    expect(runtimeMock.registerObservedEventsRoute).toHaveBeenCalledWith(
+      expect.anything(),
+      { seen: [] },
+    );
     expect(result.port).toBe(4123);
     expect(result.capabilities).toEqual({
       queries: [],

@@ -5,15 +5,15 @@ export default function DocsHomePage() {
     <DocsRoutePage
       eyebrow="Docs"
       title="Signal docs"
-      summary="This route exists so links from the landing site resolve locally. The full protocol documentation lives in the Docusaurus docs site."
-      canonicalHref="https://diogoangelim.github.io/signal/docs/introduction"
-      primaryLabel="Read introduction"
-      primaryHref="/docs/introduction"
+      summary="Start with What Is Signal?, then run the Quick Start, then build your first app."
+      canonicalHref="https://diogoangelim.github.io/signal/docs/what-is-signal"
+      primaryLabel="Start here"
+      primaryHref="/docs/what-is-signal"
     >
       <ul className="space-y-2 text-sm leading-6 text-muted-foreground">
-        <li>Protocol overview and terms.</li>
-        <li>Envelope, result, and error references.</li>
-        <li>Guides for quickstart and bindings.</li>
+        <li>What Is Signal?</li>
+        <li>Quick Start</li>
+        <li>Build Your First App</li>
       </ul>
     </DocsRoutePage>
   );

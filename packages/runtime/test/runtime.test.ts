@@ -947,6 +947,163 @@ describe("runtime", () => {
     expect(seen).toEqual([event.context?.causationId ?? "missing"]);
   });
 
+  it("executes explicit protocol operations with normalized data results", async () => {
+    const runtime = new SignalRuntime({
+      dispatcher: createInProcessDispatcher(),
+      idempotencyStore: createMemoryIdempotencyStore(),
+    });
+    const seen: string[] = [];
+
+    runtime.registerQuery(
+      defineQuery({
+        name: "layer.status.v1",
+        kind: "query",
+        inputSchema: z.object({ id: z.string() }),
+        resultSchema: z.object({ id: z.string(), status: z.string() }),
+        handler: (input) => ({ id: input.id, status: "ready" }),
+      }),
+    );
+    runtime.registerMutation(
+      defineMutation({
+        name: "layer.save.v1",
+        kind: "mutation",
+        idempotency: "required",
+        inputSchema: z.object({ id: z.string() }),
+        resultSchema: z.object({ id: z.string(), saved: z.boolean() }),
+        handler: (input) => ({ id: input.id, saved: true }),
+      }),
+    );
+    runtime.registerEvent(
+      defineEvent({
+        name: "layer.changed.v1",
+        kind: "event",
+        inputSchema: z.object({ id: z.string() }),
+        resultSchema: z.object({ id: z.string() }),
+        handler: (payload) => payload,
+      }),
+    );
+    runtime.subscribe("layer.changed.v1", async (event) => {
+      seen.push(event.name);
+    });
+
+    const query = await runtime.execute({
+      kind: "query",
+      name: "layer.status.v1",
+      payload: { id: "one" },
+      context: { correlationId: "corr-layer" },
+    });
+    const mutation = await runtime.execute({
+      kind: "mutation",
+      name: "layer.save.v1",
+      payload: { id: "one" },
+      context: { idempotencyKey: "save-layer-1" },
+    });
+    const event = await runtime.execute({
+      kind: "event",
+      name: "layer.changed.v1",
+      payload: { id: "one" },
+      meta: { source: "execute" },
+    });
+    const invalid = await runtime.execute({
+      kind: "query",
+      name: "layer.status.v1",
+      payload: {},
+    });
+
+    expect(query).toMatchObject({
+      ok: true,
+      data: { id: "one", status: "ready" },
+    });
+    expect(mutation).toMatchObject({
+      ok: true,
+      data: { id: "one", saved: true },
+    });
+    expect(event.ok && event.data).toMatchObject({
+      kind: "event",
+      name: "layer.changed.v1",
+    });
+    expect(event.ok && event.meta.context).toMatchObject({
+      messageId: expect.any(String),
+    });
+    expect(invalid.ok).toBe(false);
+    expect(invalid.ok === false && invalid.error.code).toBe("VALIDATION_ERROR");
+    expect(seen).toEqual(["layer.changed.v1"]);
+  });
+
+  it("runs inferred operations and fails safely when inference is ambiguous", async () => {
+    const runtime = new SignalRuntime({
+      dispatcher: createInProcessDispatcher(),
+      idempotencyStore: createMemoryIdempotencyStore(),
+    });
+
+    runtime.registerQuery(
+      defineQuery({
+        name: "layer.inferred.v1",
+        kind: "query",
+        inputSchema: z.object({ value: z.string() }),
+        resultSchema: z.object({ value: z.string() }),
+        handler: (input) => input,
+      }),
+    );
+    runtime.registerMutation(
+      defineMutation({
+        name: "layer.explicit.v1",
+        kind: "mutation",
+        idempotency: "required",
+        inputSchema: z.object({ value: z.string() }),
+        resultSchema: z.object({ value: z.string(), mutated: z.boolean() }),
+        handler: (input) => ({ value: input.value, mutated: true }),
+      }),
+    );
+    runtime.registerQuery(
+      defineQuery({
+        name: "layer.ambiguous.v1",
+        kind: "query",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ kind: z.literal("query") }),
+        handler: () => ({ kind: "query" as const }),
+      }),
+    );
+    runtime.registerEvent(
+      defineEvent({
+        name: "layer.ambiguous.v1",
+        kind: "event",
+        inputSchema: z.object({}),
+        resultSchema: z.object({}),
+        handler: (payload) => payload,
+      }),
+    );
+
+    const inferred = await runtime.run("layer.inferred.v1", { value: "ok" });
+    const explicit = await runtime.run(
+      "layer.explicit.v1",
+      { value: "ok" },
+      {
+        kind: "mutation",
+        context: { idempotencyKey: "explicit-run-1" },
+      },
+    );
+    const missing = await runtime.run("layer.missing.v1", {});
+    const ambiguous = await runtime.run("layer.ambiguous.v1", {});
+
+    expect(inferred).toMatchObject({
+      ok: true,
+      data: { value: "ok" },
+    });
+    expect(explicit).toMatchObject({
+      ok: true,
+      data: { value: "ok", mutated: true },
+    });
+    expect(missing.ok).toBe(false);
+    expect(missing.ok === false && missing.error.code).toBe(
+      "OPERATION_NOT_FOUND",
+    );
+    expect(ambiguous.ok).toBe(false);
+    expect(ambiguous.ok === false && ambiguous.error.code).toBe(
+      "AMBIGUOUS_OPERATION_KIND",
+    );
+  });
+
   it("locks via the runtime API", () => {
     const runtime = new SignalRuntime();
     runtime.lock();
