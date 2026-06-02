@@ -5,7 +5,9 @@ import {
   adjustStocksExposureForPruning,
   buildStocksMeaningViewModel,
   buildStocksCommitmentInput,
+  buildStocksEvidenceViewModel,
   evaluateStocksCommitment,
+  evaluateStocksEvidence,
   buildStocksPruningViewModel,
   buildStocksPurposeViewModel,
   evaluateStocksMeaning,
@@ -99,6 +101,27 @@ describe("stocks optimizer commitment adapter", () => {
       "BETA",
     ]);
     expect(input.decisions?.[0]?.metadata).toEqual({ price: 25 });
+  });
+
+  it("exposes honest evidence reasoning for Stocks Optimizer", () => {
+    const result = evaluateStocksEvidence({
+      ...source("I want steady progress."),
+      confidence: 92,
+      staleData: true,
+      hasBacktestData: false,
+      backtestTradeCount: 0,
+      calibrationSampleSize: 1,
+      calibrationWarnings: ["poor calibration"],
+      failureFlags: ["readiness drift"],
+    });
+    const view = buildStocksEvidenceViewModel(result);
+
+    expect(view.confidence).toBeLessThanOrEqual(view.confidenceLimit);
+    expect(view.action).toMatch(/reduce|wait|observe|unknown|insufficient_evidence/);
+    expect(view.whatWeDoNotKnow.join(" ")).toMatch(/calibration|reviewed outcomes/i);
+    expect(view.whatWeakensThis.join(" ")).toMatch(/stale|poor calibration|readiness/i);
+    expect(view.whyThisMatters).toContain("Confidence is capped");
+    expect(view.governance.evidenceQuality.explanation).toContain("averages");
   });
 });
 

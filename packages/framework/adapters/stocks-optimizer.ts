@@ -1,4 +1,13 @@
 import { clamp, mean, numeric, signRatio, stdev } from "../math/statistics";
+import {
+  type EvidenceItem,
+  type SignalEvidenceAction,
+  type SignalEvidenceAssessment,
+  type SignalEvidenceInput,
+  type SignalGovernanceBars,
+  type SignalOutcomeReview,
+  evaluateSignalEvidence,
+} from "../evidence/engine";
 import { type MeaningResult, evaluateMeaning } from "../meaning/engine";
 import { MetricRegistry } from "../metrics/registry";
 import {
@@ -113,6 +122,8 @@ export type StocksOptimizerMetricSource = {
   calibrationSampleSize?: number | null;
   calibrationStatus?: string | null;
   calibrationWarnings?: string[];
+  evidence?: Partial<SignalEvidenceInput> | null;
+  outcomeReviews?: SignalOutcomeReview[];
   lastSuccessfulSync?: number | null;
   expectedAssetCount?: number;
   exchangeSynchronized?: boolean;
@@ -205,6 +216,23 @@ export type StocksCommitmentViewModel = {
   normalizedCommitment: number;
   recommendations: StocksCommitmentUnitRecommendation[];
   explanation: string;
+  warnings: string[];
+};
+
+export type StocksEvidenceViewModel = {
+  mode: "enhanced" | "degraded";
+  action: SignalEvidenceAction;
+  confidence: number;
+  confidenceLimit: number;
+  whatWeKnow: string[];
+  whatWeDoNotKnow: string[];
+  whatSupportsThis: string[];
+  whatWeakensThis: string[];
+  whatChangedSinceLastReview: string[];
+  whyThisMatters: string;
+  whatCouldChangeThis: string[];
+  nextReasonableStep: string;
+  governance: SignalGovernanceBars;
   warnings: string[];
 };
 
@@ -625,6 +653,120 @@ export function evaluateStocksCommitment(
   const meaning = options.meaning === undefined ? evaluateStocksMeaning(input) : options.meaning;
   const commitment = evaluateCommitmentModule(buildStocksCommitmentInput(input, request, { ...options, meaning }));
   return buildStocksCommitmentViewModel(input, request, commitment, { meaning });
+}
+
+export function buildStocksEvidenceInput(input: StocksOptimizerMetricSource): SignalEvidenceInput {
+  const overlay = input.evidence ?? {};
+  const now = input.now ?? Date.now();
+  const observedAt = timestampString(now);
+  const stocks = Array.isArray(input.stocks) ? input.stocks : [];
+  const stockCount = Math.max(1, stocks.length);
+  const quoteCoverage = (stocks.filter((stock) => stock.quoteStatus === "available" || stockPrice(stock) > 0).length / stockCount) * 100;
+  const signalCoverage = (stocks.filter((stock) => stock.signalStatus === "provided" || Boolean(stock.signalAction)).length / stockCount) * 100;
+  const avgRisk = score(input.avgRisk, 50);
+  const avgQuality = score(input.avgQuality, 50);
+  const confidence = score(input.confidence, 50);
+  const calibratedConfidence = score(input.calibrationCalibratedConfidence, input.calibrationRawConfidence ?? confidence);
+  const calibrationAccuracy = score(input.calibrationHistoricalAccuracy, input.backtestWinRatePct ?? 50);
+  const calibrationError = Math.abs(numeric(input.calibrationError, confidence - calibrationAccuracy));
+  const calibrationQuality = clamp(100 - calibrationError);
+  const calibrationTrust = score(input.calibrationTrustworthiness, calibrationQuality);
+  const sampleSize = Math.max(0, numeric(input.calibrationSampleSize, 0));
+  const backtestDepth = input.hasBacktestData ? Math.min(100, input.backtestTradeCount * 1.2) : 0;
+  const overfitRisk = score(input.robustnessOverfitRisk, Math.max(0, 100 - numeric(input.robustnessScore, 65)));
+  const supportingEvidence: EvidenceItem[] = [
+    evidenceItem("freshness", "Current data freshness", input.staleData ? "Data is stale, so freshness does not support action yet." : "Current data is fresh enough to review.", input.staleData ? 25 : 90, observedAt, "freshness"),
+    evidenceItem("coverage", "Coverage", `Quote coverage is ${pct(quoteCoverage)} and signal coverage is ${pct(signalCoverage)}.`, mean([quoteCoverage, signalCoverage]), observedAt, "coverage"),
+    evidenceItem("quality", "Setup quality", `Average setup quality is ${pct(avgQuality)} while average risk is ${pct(avgRisk)}.`, clamp(avgQuality * 0.62 + (100 - avgRisk) * 0.38), observedAt, "quality"),
+    evidenceItem("survival", "Survival score", `Survival score is ${pct(input.survivalScore)}.`, input.survivalScore, observedAt, "survival"),
+    evidenceItem("calibration", "Calibration", `Calibrated confidence is ${pct(calibratedConfidence)} with calibration trust at ${pct(calibrationTrust)}.`, mean([calibratedConfidence, calibrationTrust, calibrationQuality]), observedAt, "calibration"),
+    ...(input.hasBacktestData
+      ? [evidenceItem("review-depth", "Reviewed history", `Historical evidence includes ${Math.round(input.backtestTradeCount)} reviewed trades.`, backtestDepth, observedAt, "history")]
+      : []),
+  ];
+  const contradictingEvidence: EvidenceItem[] = [
+    ...(input.staleData
+      ? [evidenceItem("stale-data", "Stale data", "Some current data is stale, which weakens the case.", 82, observedAt, "freshness", true)]
+      : []),
+    ...input.failureFlags.map((flag, index) =>
+      evidenceItem(`readiness-flag:${index + 1}`, "Readiness flag", String(flag), 72, observedAt, "readiness"),
+    ),
+    ...safeStringArray(input.calibrationWarnings).map((warning, index) =>
+      evidenceItem(`calibration-warning:${index + 1}`, "Calibration warning", String(warning), /poor|overconfidence|low/i.test(warning) ? 78 : 56, observedAt, "calibration"),
+    ),
+    ...(calibrationError >= 18
+      ? [evidenceItem("calibration-gap", "Confidence gap", `Raw confidence and observed accuracy differ by ${calibrationError.toFixed(1)} points.`, calibrationError * 3, observedAt, "calibration")]
+      : []),
+    ...(overfitRisk >= 55
+      ? [evidenceItem("overfit-risk", "Overfit risk", `Robustness evidence still shows ${pct(overfitRisk)} residual overfit risk.`, overfitRisk, observedAt, "robustness")]
+      : []),
+    ...(!input.hasBacktestData
+      ? [evidenceItem("missing-history", "Missing reviewed history", "Backtest or reviewed outcome evidence is not available yet.", 70, observedAt, "history")]
+      : []),
+  ];
+  const unknowns = uniqueStrings([
+    ...(input.hasBacktestData ? [] : ["How this behaves after reviewed outcomes are available."]),
+    ...(sampleSize >= 12 ? [] : ["Whether calibration will hold with more reviewed outcomes."]),
+    ...(input.fallbackMode ? ["Whether fallback mode changes the evidence quality."] : []),
+    ...(input.partialApiFailures ? ["Whether partial API failures are hiding relevant changes."] : []),
+    ...(overlay.unknowns ?? []),
+  ]);
+  const assumptions = uniqueStrings([
+    "Recent observations remain representative until the next review.",
+    "Current coverage is sufficient to describe the decision state.",
+    ...(overlay.assumptions ?? []),
+  ]);
+  const invalidationConditions = uniqueStrings([
+    "Current data becomes stale.",
+    "Calibration weakens after reviewed outcomes.",
+    "Contradicting evidence increases faster than supporting evidence.",
+    "Risk rises without a matching improvement in evidence quality.",
+    ...(overlay.invalidationConditions ?? []),
+  ]);
+
+  return {
+    ...overlay,
+    supportingEvidence: [...supportingEvidence, ...(overlay.supportingEvidence ?? [])],
+    contradictingEvidence: [...contradictingEvidence, ...(overlay.contradictingEvidence ?? [])],
+    assumptions,
+    unknowns,
+    calibration: overlay.calibration ?? mean([calibrationQuality, calibrationTrust, sampleSize >= 12 ? 75 : 45]),
+    confidence: overlay.confidence ?? confidence,
+    outcomeReviews: overlay.outcomeReviews ?? input.outcomeReviews ?? [],
+    invalidationConditions,
+    evidenceFreshness: overlay.evidenceFreshness ?? (input.staleData ? 25 : 90),
+    evidenceAgeDays: overlay.evidenceAgeDays ?? (input.staleData ? 2 : 0),
+    lastReviewedAt: overlay.lastReviewedAt,
+    now,
+  };
+}
+
+export function evaluateStocksEvidence(input: StocksOptimizerMetricSource): SignalEvidenceAssessment {
+  return evaluateSignalEvidence(buildStocksEvidenceInput(input));
+}
+
+export function buildStocksEvidenceViewModel(
+  assessment?: SignalEvidenceAssessment | null,
+): StocksEvidenceViewModel {
+  const result = assessment ?? evaluateSignalEvidence();
+  return {
+    mode: result.evidence.confidenceLimit < 45 || result.action === "unknown" || result.action === "insufficient_evidence"
+      ? "degraded"
+      : "enhanced",
+    action: result.action,
+    confidence: result.evidence.confidence,
+    confidenceLimit: result.evidence.confidenceLimit,
+    whatWeKnow: result.narrative.whatWeKnow,
+    whatWeDoNotKnow: result.narrative.whatWeDoNotKnow,
+    whatSupportsThis: result.narrative.whatSupportsThis,
+    whatWeakensThis: result.narrative.whatWeakensThis,
+    whatChangedSinceLastReview: result.narrative.whatChangedSinceLastReview,
+    whyThisMatters: result.narrative.whyThisMatters,
+    whatCouldChangeThis: result.narrative.whatCouldChangeThis,
+    nextReasonableStep: stocksNextStepText(result.action),
+    governance: result.governance,
+    warnings: result.warnings,
+  };
 }
 
 export function buildStocksCommitmentViewModel(
@@ -1108,6 +1250,43 @@ function stocksCommitmentWarnings(
     warnings.push("Commitment recommended capital, but no priced units could be calculated.");
   }
   return uniqueStrings([...warnings, ...safeStringArray(input.calibrationWarnings)]);
+}
+
+function stocksNextStepText(action: SignalEvidenceAction) {
+  if (action === "proceed") return "The next reasonable step is to proceed, while keeping review conditions visible.";
+  if (action === "proceed_carefully") return "The next reasonable step is to proceed carefully with a measured commitment.";
+  if (action === "observe") return "The evidence is still developing. The next reasonable step is to observe.";
+  if (action === "wait") return "This supports waiting until the stale or conflicting evidence improves.";
+  if (action === "reduce") return "This weakens the case. The next reasonable step is to reduce until the contradiction is resolved.";
+  if (action === "unknown") return "The honest answer is unknown. The next reasonable step is to keep learning.";
+  return "The evidence is insufficient. The next reasonable step is to avoid forcing action.";
+}
+
+function evidenceItem(
+  id: string,
+  label: string,
+  summary: string,
+  strength: number,
+  observedAt: string,
+  diversityGroup: string,
+  invalidates = false,
+): EvidenceItem {
+  return {
+    id,
+    label,
+    summary,
+    strength: clamp(strength),
+    confidence: clamp(strength),
+    source: "stocks-optimizer",
+    observedAt,
+    diversityGroup,
+    ...(invalidates ? { invalidates: true } : {}),
+  };
+}
+
+function timestampString(value: string | number | Date) {
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date.toISOString() : new Date().toISOString();
 }
 
 function stockCanReceiveCommitment(stock: Record<string, unknown>) {

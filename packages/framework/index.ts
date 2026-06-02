@@ -20,6 +20,7 @@ export * from "./diagnostics/executive-dashboard";
 export * from "./diagnostics/pipeline";
 export * from "./discovery/engine";
 export * from "./discovery-accountability/engine";
+export * from "./evidence/engine";
 export {
   evaluateDiscoveryIntelligence,
   evaluateDiscoveryMaturity as evaluateDiscoveryIntelligenceMaturity,

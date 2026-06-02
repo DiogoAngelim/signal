@@ -15,6 +15,7 @@
     "db:studio": "node ./server/db/scripts/studio.mjs",
     "db:check": "node ./server/db/scripts/check.mjs",
     "dev": "pnpm --filter @signal/reference-server dev",
+    "dev:algai-parent-dashboard": "pnpm --filter @signal/algai-parent-dashboard dev",
     "dev:aware": "pnpm --filter @signal/aware dev",
     "dev:emergency": "pnpm --filter @signal/emergency-awareness dev",
     "dev:server": "pnpm --filter @signal/reference-server dev",

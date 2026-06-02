@@ -1,0 +1,9 @@
+<svg width="240" height="160" viewBox="0 0 240 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AlgAI learning path mark">
+  <rect width="240" height="160" rx="24" fill="#F7FAF7"/>
+  <path d="M35 111C52 90 71 81 92 84C113 87 123 105 145 102C164 99 175 84 194 55" stroke="#2F6F73" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="67" cy="76" r="18" fill="#F2C14E"/>
+  <circle cx="137" cy="62" r="22" fill="#7AA95C"/>
+  <circle cx="179" cy="101" r="16" fill="#E66F51"/>
+  <path d="M78 116H161" stroke="#183B3D" stroke-width="8" stroke-linecap="round"/>
+  <path d="M94 132H145" stroke="#8BA6A9" stroke-width="6" stroke-linecap="round"/>
+</svg>
