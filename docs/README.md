@@ -13,16 +13,22 @@ and validation commands.
 
 ## Index
 
-- [Folder Structure](#folder-structure)
-- [Architecture](#architecture)
-- [Install And Build](#install-and-build)
-- [Build An Application On Signal](#build-an-application-on-signal)
-- [HTTP Usage](#http-usage)
-- [Runtime Usage](#runtime-usage)
-- [Idempotency](#idempotency)
-- [Events And Subscribers](#events-and-subscribers)
-- [Examples](#examples)
-- [Developer Checks](#developer-checks)
+- Repository Map
+  - [Folder Structure](#folder-structure)
+  - [Module Catalog](#module-catalog)
+  - [Architecture](#architecture)
+- Core Concepts
+  - [Stewardship](#stewardship)
+  - [Idempotency](#idempotency)
+  - [Events And Subscribers](#events-and-subscribers)
+- Build And Use
+  - [Install And Build](#install-and-build)
+  - [Build An Application On Signal](#build-an-application-on-signal)
+  - [HTTP Usage](#http-usage)
+  - [Runtime Usage](#runtime-usage)
+  - [Examples](#examples)
+- Validation
+  - [Developer Checks](#developer-checks)
 
 ## Folder Structure
 
@@ -32,34 +38,87 @@ folder that owns its runtime responsibility.
 | Folder | Owns | Put Code Here When |
 | --- | --- | --- |
 | `api/` | Client/server interface packages | The package defines protocol, runtime, SDK, HTTP binding, or adapters that both apps and servers can use. |
-| `client/` | Frontend applications | The code is a user-facing browser application. |
 | `server/` | Backend services and server-only packages | The code runs on the backend, owns persistence, exposes a service, or belongs to the backend pipeline. |
-| `examples/` | Runnable examples and example-only integrations | The code demonstrates Signal usage or is not intended as a reusable package API. |
+| `examples/` | Runnable examples, browser apps, and example-only integrations | The code demonstrates Signal usage or is not intended as a reusable package API. |
 | `packages/` | Reusable domain packages | The package is reusable application/domain logic that is not tied to a specific server, client, or example. |
 | `docs/` | Developer documentation | Documentation belongs in this single Markdown file unless generated docs are intentionally introduced later. |
-| `schemas/` | Published JSON schemas | The file describes protocol payloads or envelope schemas. |
-| `spec/` | Protocol RFCs and fixtures | The file captures protocol design decisions or compatibility fixtures. |
-| `fixtures/` | Shared test fixtures | The file is reusable test data. |
+| `spec/` | Protocol RFCs and contract assets | The file captures protocol design decisions, published schemas, or compatibility fixtures. |
+| `spec/contracts/schemas/` | Published JSON schemas | The file describes protocol payloads or envelope schemas. |
+| `spec/contracts/fixtures/` | Shared contract fixtures | The file is reusable protocol or package test data. |
 | `scripts/` | Workspace automation | The script validates or maintains the repo. |
-
-Important package locations:
-
-| Package | Path | Purpose |
-| --- | --- | --- |
-| `@signal/protocol` | `api/protocol` | Operation names, envelopes, errors, result metadata, and capability contracts. |
-| `@signal/runtime` | `api/runtime` | Query, mutation, event execution, dispatch, idempotency, and capability discovery. |
-| `@signal/sdk-node` | `api/sdk-node` | Node helpers for defining operations and creating a runtime. |
-| `@signal/binding-http` | `api/binding-http` | Fastify HTTP routes for Signal runtimes. |
-| `@signal/idempotency-postgres` | `api/idempotency-postgres` | PostgreSQL idempotency storage. |
-| `@signal/reference-server` | `server/reference-server` | Minimal backend service that exposes Signal over HTTP. |
-| `@signal/examples` | `examples/runtime` | Runnable operation and transport examples. |
-| `@signal/climate-forecast` | `examples/climate-forecast` | Example-only forecast normalization package. |
-| `@signal/aware` | `examples/aware` | Product-style example application. |
-| `@signal/emergency-awareness` | `client/emergency-awareness` | Frontend application consuming Signal-style domain logic. |
-| `@signal/framework` | `packages/framework` | Preserved framework package, including compatibility modules such as `legacy` and the Stocks Optimizer adapter. |
 
 Create a `public/` folder inside an app only when that app owns static assets.
 There are no root-level shared public assets in the current workspace.
+
+## Module Catalog
+
+Use this section to choose where a change belongs. The core runtime package is
+`api/runtime`; `examples/operation-examples` is only a runnable demo package
+named `@signal/examples`.
+
+### API Modules
+
+| Package | Path | Purpose |
+| --- | --- | --- |
+| `@signal/protocol` | `api/protocol` | Canonical Signal contract surface: operation names, kinds, envelopes, errors, results, capabilities, and JSON schema objects. |
+| `@signal/runtime` | `api/runtime` | Core in-process execution: registry, query/mutation/event calls, `run()`/`execute()`, idempotency, subscribers, dispatch, perception, and capability discovery. |
+| `@signal/sdk-node` | `api/sdk-node` | Node ergonomics for defining queries, mutations, events, and creating a runtime. |
+| `@signal/binding-http` | `api/binding-http` | Fastify routes that adapt HTTP requests into Signal runtime calls. |
+| `@signal/idempotency-postgres` | `api/idempotency-postgres` | PostgreSQL-backed idempotency store for retry-safe mutations. |
+| `@digelim/signal-protocol` | `api/signal-protocol` | Legacy/demo protocol package with server and client assets; keep compatibility here unless a change belongs to the canonical `@signal/*` API packages. |
+
+### Domain Packages
+
+| Package | Path | Purpose |
+| --- | --- | --- |
+| `@signal/agency` | `packages/agency` | Agency pipeline primitives for state evaluation, calibration, learning, memory, outcomes, policy, and self-diagnosis. |
+| `@signal/commitment` | `packages/commitment` | Generic commitment evaluator that turns decisions, trust, constraints, resources, and policy into recommended commitment. |
+| `@signal/decision` | `packages/decision` | Decision intelligence modules: reality, prediction, simulation, outcomes, accountability, coherence, wisdom, human-language summaries, and Stewardship. |
+| `@signal/decision-memory` | `packages/decision-memory` | Durable decision memory, learning records, retention, compaction, summaries, Neon/Postgres storage, and Signal memory operations. |
+| `@signal/framework` | `packages/framework` | Preserved framework surface with legacy, diagnostics, perception, purpose, meaning, sizing, recovery, wisdom, Stocks Optimizer adapters, and related compatibility modules. |
+| `@signal/semantic-state` | `packages/semantic-state` | Semantic-state resolver and bundled lexicon for mapping numeric dimensions to named states. |
+
+### Server Modules
+
+| Package | Path | Purpose |
+| --- | --- | --- |
+| `@signal/reference-server` | `server/reference-server` | Minimal HTTP service that wires `@signal/examples` operations into `@signal/runtime` and exposes them through `@signal/binding-http`. |
+| `@signal/db` | `server/db` | Database scripts, migrations, and adapters used by server-side Signal storage. |
+| `@digelim/01.intent` | `server/intent` | Intent module and capability metadata for the older numbered server stack. |
+| `@digelim/02.received` | `server/received` | Received-input contracts, errors, and intake helpers. |
+| `@digelim/03.validated` | `server/validated` | Validation contracts, errors, and validated-state helpers. |
+| `@digelim/04.source` | `server/source` | Source module and source capability metadata. |
+| `@digelim/05.pulse` | `server/pulse` | Pulse domain/runtime package for the numbered evaluation flow. |
+| `@digelim/06.core` | `server/core` | Core evaluation module and capability metadata. |
+| `@digelim/07.action` | `server/action` | Action module and capability metadata. |
+| `@digelim/08.result` | `server/result` | Result module and capability metadata. |
+| `@digelim/09.sense` | `server/sense` | Sense module and capability metadata. |
+| `@digelim/10.app` | `server/app` | Application-level composition of the numbered server modules. |
+| `@digelim/11.adapter` | `server/adapter` | Fastify handlers, routes, server setup, and capability route adapters for the numbered stack. |
+| `@digelim/12.signal` | `server/signal` | Legacy Signal protocol/runtime/security/observability package used by the numbered stack. |
+| `@digelim/13.store` | `server/store` | Store contracts, errors, and in-memory store implementation. |
+| `@digelim/14.idempotency` | `server/idempotency` | Idempotency contracts, errors, and in-memory idempotency store. |
+| `@digelim/15.sync` | `server/sync` | Synchronization contracts and transport interfaces. |
+
+### Example Modules
+
+| Package | Path | Purpose |
+| --- | --- | --- |
+| `@signal/examples` | `examples/operation-examples` | Runnable operation, runtime, idempotency, HTTP, storage, Kafka/PostgreSQL, and transport examples. |
+| `@signal/aware` | `examples/aware` | Product-style example application that consumes Signal decision and memory packages. |
+| `@signal/climate-forecast` | `examples/climate-forecast` | Example-only forecast normalization package used by Weather Awareness. |
+| `@signal/emergency-awareness` | `examples/weather-awareness` | Frontend application consuming Signal-style risk and guidance logic. |
+| `dyslexia-translator` | `examples/algai` | Standalone example app with its own backend/frontend structure. |
+| Stocks Optimizer state | `examples/stocks-optimizer` | Preserved app state in this checkout; it is not currently a pnpm workspace package. |
+
+### Contract Assets
+
+| Path | Purpose |
+| --- | --- |
+| `spec/RFC-*.md` | Protocol and runtime design records. |
+| `spec/contracts/schemas/` | Published JSON schema files for envelopes, results, errors, capabilities, and operation payloads. |
+| `spec/contracts/fixtures/protocol/` | Protocol conformance fixtures used by `api/protocol` tests. |
+| `spec/contracts/fixtures/commitment/` | Golden commitment fixtures used by `@signal/commitment` tests. |
 
 ## Architecture
 
@@ -79,7 +138,7 @@ flowchart LR
   Server["server/reference-server<br/>default HTTP service"]
   Client["HTTP client or frontend"]
   Examples["examples/*<br/>runnable integrations"]
-  Schemas["schemas/ and spec/<br/>published contracts"]
+  Schemas["spec/contracts<br/>schemas and fixtures"]
 
   Developer --> SDK
   Developer --> Domain
@@ -105,10 +164,108 @@ Dependency direction should stay simple:
 - `api/sdk-node` makes operation definitions ergonomic.
 - `api/binding-http` adapts HTTP requests into runtime calls.
 - `server/*` composes backend services and persistence.
-- `client/*` and `examples/*` consume core packages.
+- `examples/*` consume core packages.
 - `packages/*` holds reusable domain logic.
 
 Core packages must not depend on product apps or examples.
+
+## Stewardship
+
+Stewardship is a domain-agnostic layer in `@signal/decision` that helps
+applications protect what matters by interpreting memory, outcomes,
+governance, threats, protections, and uncertainty.
+
+It sits above the decision-process layers:
+
+```txt
+Decision Memory -> Outcome Review -> Governance -> Stewardship
+```
+
+Its purpose is to answer:
+
+- What matters?
+- What threatens it?
+- What protects it?
+- What has been learned?
+- What remains uncertain?
+- What would make this decision safer?
+- What is the smallest responsible next step?
+- What should be monitored after action?
+
+### Contract
+
+Use `assessStewardship(input: StewardshipInput): StewardshipAssessment`.
+
+The input shape is intentionally generic:
+
+```ts
+import { assessStewardship } from "@signal/decision";
+
+const assessment = assessStewardship({
+  subject: {
+    id: "subject:water-system",
+    label: "Water system",
+    domain: "infrastructure",
+    importance: "critical",
+    desiredState: "safe, useful, and available",
+  },
+  memory: {
+    evidence: [],
+    lessons: [],
+  },
+  threats: [],
+  protections: [],
+  uncertainties: [],
+});
+```
+
+The output includes:
+
+- `subject`
+- `whatMatters`
+- `threats`
+- `protections`
+- `lessons`
+- `governance`
+- `recommendation`
+- `smallestResponsibleNextStep`
+- `monitoringPlan`
+- `uncertaintySummary`
+- `rationale`
+- `disclaimers`
+
+Recommendation actions are generic:
+
+```txt
+observe | monitor | preserve | proceed_gradually | reduce_exposure |
+intervene | pause | stop | review_again
+```
+
+### Governance
+
+Governance evaluates whether the decision process is trustworthy enough to
+continue. It does not decide whether the decision is correct.
+
+It classifies evidence quality, evidence durability, review depth, repetition
+strength, uncertainty visibility, risk visibility, reversibility,
+concentration risk, accountability clarity, policy compliance, missing
+information, and contradiction level.
+
+### Non-Goals
+
+Stewardship does not make predictions, claim certainty, maximize action, or
+issue domain-specific instructions. Product applications must adapt their
+domain language at the boundary.
+
+### Integration Pattern
+
+Applications should map their local context into `StewardshipInput`, call
+`assessStewardship`, then present the resulting assessment in product language.
+
+Stocks Optimizer is one consumer: it maps capital-preservation goals,
+portfolio guardrails, instrument risk, allocation caps, reviewed lessons, and
+financial disclaimers into Signal Stewardship. The reusable stewardship logic
+remains in Signal.
 
 ## Install And Build
 
@@ -146,10 +303,9 @@ set.
 ## Build An Application On Signal
 
 1. Choose the owner folder.
-   - Frontend application: `client/<app-name>`.
    - Backend service: `server/<service-name>`.
    - Reusable domain package: `packages/<package-name>`.
-   - Runnable demo or integration: `examples/<example-name>`.
+   - Frontend app, runnable demo, or integration: `examples/<example-name>`.
 
 2. Depend on the Signal packages you need.
 
@@ -426,13 +582,13 @@ side effects when the same event is delivered again.
 
 ## Examples
 
-Build the runtime examples first:
+Build the operation examples first:
 
 ```bash
 pnpm --filter @signal/examples... build
 ```
 
-Runnable examples in `examples/runtime`:
+Runnable examples in `examples/operation-examples`:
 
 | Example | Command | Notes |
 | --- | --- | --- |
@@ -453,7 +609,7 @@ Application examples:
 | --- | --- | --- | --- |
 | Aware | `examples/aware` | `pnpm --filter @signal/aware dev` | <https://aware-guide.vercel.app> |
 | Climate Forecast | `examples/climate-forecast` | `pnpm --filter @signal/climate-forecast test` | Code/package example; no Vercel app. |
-| Emergency Awareness | `client/emergency-awareness` | `pnpm --filter @signal/emergency-awareness dev` | <https://weather-awareness.vercel.app> |
+| Emergency Awareness | `examples/weather-awareness` | `pnpm --filter @signal/emergency-awareness dev` | <https://weather-awareness.vercel.app> |
 | Stocks Optimizer | `examples/stocks-optimizer` | Preserved example state in this checkout; it is not currently a pnpm workspace package. | <https://stocks-optimizer.vercel.app> |
 
 Reference server:

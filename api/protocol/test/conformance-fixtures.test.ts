@@ -10,7 +10,7 @@ import {
 function readFixture(name: string) {
   return JSON.parse(
     readFileSync(
-      join(__dirname, "../../../spec/fixtures", name),
+      join(__dirname, "../../../spec/contracts/fixtures/protocol", name),
       "utf8"
     )
   );

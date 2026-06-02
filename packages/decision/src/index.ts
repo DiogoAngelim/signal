@@ -9,7 +9,36 @@ export { evaluateDecision } from "./pipeline";
 export { bestPurposeScenario, generatePredictionScenarios, mostDangerousScenario, mostLikelyScenario } from "./prediction";
 export { compactRealityPayload, createRealitySnapshot, createRealitySnapshotForDecision } from "./reality";
 export { simulateDecisionPaths } from "./simulation";
+export { assessStewardship, consumeStewardshipMemory, evaluateStewardshipGovernance, interpretStewardshipOutcomes, selectStewardshipAction } from "./stewardship";
 export { assessWisdom } from "./wisdom";
+export type {
+  StewardshipAssessment,
+  StewardshipConcentrationRisk,
+  StewardshipContext,
+  StewardshipEvidence,
+  StewardshipEvidenceQuality,
+  StewardshipGovernanceAssessment,
+  StewardshipGovernanceInputs,
+  StewardshipGovernanceStatus,
+  StewardshipImportance,
+  StewardshipInput,
+  StewardshipLesson,
+  StewardshipLessonOutcome,
+  StewardshipMemoryInput,
+  StewardshipNextStep,
+  StewardshipOutcomeReview,
+  StewardshipPolicyCompliance,
+  StewardshipProtection,
+  StewardshipRecommendation,
+  StewardshipRecommendationAction,
+  StewardshipReversibility,
+  StewardshipSeverity,
+  StewardshipStrength,
+  StewardshipSubject,
+  StewardshipThreat,
+  StewardshipUncertainty,
+  StewardshipVisibility,
+} from "./stewardship";
 export type {
   AccountabilityReport,
   CoherenceAssessment,

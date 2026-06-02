@@ -33,7 +33,10 @@ type Fixture = {
   };
 };
 
-const fixturesDir = path.resolve(__dirname, "../../../fixtures/commitment");
+const fixturesDir = path.resolve(
+  __dirname,
+  "../../../spec/contracts/fixtures/commitment",
+);
 
 function loadFixtures(): Fixture[] {
   return readdirSync(fixturesDir)

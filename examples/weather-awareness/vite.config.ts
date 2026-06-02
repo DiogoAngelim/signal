@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@signal/climate-forecast": fileURLToPath(new URL("../../examples/climate-forecast/src/index.ts", import.meta.url))
+      "@signal/climate-forecast": fileURLToPath(new URL("../climate-forecast/src/index.ts", import.meta.url))
     }
   },
   build: {

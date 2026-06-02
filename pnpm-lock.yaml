@@ -202,52 +202,6 @@ importers:
         specifier: ^2.1.9
         version: 2.1.9(@types/node@20.19.39)(happy-dom@20.9.0)(lightningcss@1.32.0)(terser@5.46.1)
 
-  client/emergency-awareness:
-    dependencies:
-      '@signal/climate-forecast':
-        specifier: workspace:*
-        version: link:../../examples/climate-forecast
-      '@signal/decision-memory':
-        specifier: workspace:*
-        version: link:../../packages/decision-memory
-      '@signal/runtime':
-        specifier: workspace:*
-        version: link:../../api/runtime
-      lucide-react:
-        specifier: 'catalog:'
-        version: 1.17.0(react@19.2.7)
-      react:
-        specifier: 'catalog:'
-        version: 19.2.7
-      react-dom:
-        specifier: 'catalog:'
-        version: 19.2.7(react@19.2.7)
-      zod:
-        specifier: ^3.24.2
-        version: 3.25.76
-    devDependencies:
-      '@types/node':
-        specifier: ^20.17.16
-        version: 20.19.39
-      '@types/react':
-        specifier: 'catalog:'
-        version: 19.2.16
-      '@types/react-dom':
-        specifier: 'catalog:'
-        version: 19.2.3(@types/react@19.2.16)
-      '@vitejs/plugin-react':
-        specifier: 'catalog:'
-        version: 6.0.2(vite@8.0.16(@types/node@20.19.39)(esbuild@0.28.0)(jiti@2.6.1)(terser@5.46.1)(tsx@4.22.4)(yaml@2.9.0))
-      typescript:
-        specifier: ^5.7.3
-        version: 5.9.3
-      vite:
-        specifier: 'catalog:'
-        version: 8.0.16(@types/node@20.19.39)(esbuild@0.28.0)(jiti@2.6.1)(terser@5.46.1)(tsx@4.22.4)(yaml@2.9.0)
-      vitest:
-        specifier: ^2.1.9
-        version: 2.1.9(@types/node@20.19.39)(happy-dom@20.9.0)(lightningcss@1.32.0)(terser@5.46.1)
-
   examples/aware:
     dependencies:
       '@signal/decision':
@@ -309,7 +263,7 @@ importers:
         specifier: ^2.1.9
         version: 2.1.9(@types/node@20.19.39)(happy-dom@20.9.0)(lightningcss@1.32.0)(terser@5.46.1)
 
-  examples/runtime:
+  examples/operation-examples:
     dependencies:
       '@signal/binding-http':
         specifier: workspace:*
@@ -345,6 +299,52 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
+
+  examples/weather-awareness:
+    dependencies:
+      '@signal/climate-forecast':
+        specifier: workspace:*
+        version: link:../climate-forecast
+      '@signal/decision-memory':
+        specifier: workspace:*
+        version: link:../../packages/decision-memory
+      '@signal/runtime':
+        specifier: workspace:*
+        version: link:../../api/runtime
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.17.0(react@19.2.7)
+      react:
+        specifier: 'catalog:'
+        version: 19.2.7
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.7(react@19.2.7)
+      zod:
+        specifier: ^3.24.2
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^20.17.16
+        version: 20.19.39
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.16
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.3(@types/react@19.2.16)
+      '@vitejs/plugin-react':
+        specifier: 'catalog:'
+        version: 6.0.2(vite@8.0.16(@types/node@20.19.39)(esbuild@0.28.0)(jiti@2.6.1)(terser@5.46.1)(tsx@4.22.4)(yaml@2.9.0))
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+      vite:
+        specifier: 'catalog:'
+        version: 8.0.16(@types/node@20.19.39)(esbuild@0.28.0)(jiti@2.6.1)(terser@5.46.1)(tsx@4.22.4)(yaml@2.9.0)
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@20.19.39)(happy-dom@20.9.0)(lightningcss@1.32.0)(terser@5.46.1)
 
   packages/agency:
     devDependencies:
@@ -541,7 +541,7 @@ importers:
         version: link:../../api/binding-http
       '@signal/examples':
         specifier: workspace:*
-        version: link:../../examples/runtime
+        version: link:../../examples/operation-examples
       '@signal/idempotency-postgres':
         specifier: workspace:*
         version: link:../../api/idempotency-postgres
