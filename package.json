@@ -18,7 +18,6 @@
     "dev": "pnpm --filter @signal/reference-server dev",
     "dev:algai-parent-dashboard": "pnpm --filter @signal/algai-parent-dashboard dev",
     "dev:aware": "pnpm --filter @signal/aware dev",
-    "dev:emergency": "pnpm --filter @signal/emergency-awareness dev",
     "dev:server": "pnpm --filter @signal/reference-server dev",
     "test": "pnpm build && pnpm -r --sort run test",
     "test:library": "pnpm build:library && pnpm -r --sort --filter './api/**' --filter './packages/**' --filter './server/**' run test",

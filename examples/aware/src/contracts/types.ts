@@ -113,6 +113,18 @@ export type BriefingItem = {
   rank: number;
 };
 
+export type WeatherSignal = {
+  id: string;
+  signal: "weather.heat" | "weather.heavy_rain" | "weather.uv";
+  label: "Heat" | "Rain" | "UV";
+  attentionLevel: AttentionLevel;
+  attentionLabel: string;
+  severity: 0 | 1 | 2 | 3 | 4;
+  meaning: string;
+  updatedAt: string;
+  sourceIds: string[];
+};
+
 export type Briefing = {
   id: string;
   region: Region;
@@ -122,6 +134,7 @@ export type Briefing = {
   summary: string;
   itemCountText: string;
   items: BriefingItem[];
+  weatherSignals: WeatherSignal[];
   degraded: boolean;
   degradedMessage?: string;
   sources: EvidenceSource[];

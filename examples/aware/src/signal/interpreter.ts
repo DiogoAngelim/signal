@@ -9,7 +9,8 @@ import type {
   SafetyAction,
   SafetyObservation,
   SafetyRisk,
-  SourceReliability
+  SourceReliability,
+  WeatherSignal
 } from "../contracts.js";
 import { attentionLabels } from "../contracts.js";
 
@@ -40,6 +41,7 @@ export function createBriefingFromObservations(input: {
   const generatedAt = input.generatedAt ?? new Date().toISOString();
   const risks = interpretRisks(input.collection.observations);
   const items = risks.map((risk, index) => itemFromRisk(risk, input.collection.sources, index + 1));
+  const weatherSignals = weatherSignalsFromObservations(input.collection.observations);
   const attentionLevel = items.reduce<AttentionLevel>(
     (highest, item) => attentionRank[item.attentionLevel] > attentionRank[highest] ? item.attentionLevel : highest,
     "normal"
@@ -55,6 +57,7 @@ export function createBriefingFromObservations(input: {
     summary: summaryFor(input.collection.region.name, attentionLevel, items.length, degraded),
     itemCountText: itemCountText(items.length),
     items,
+    weatherSignals,
     degraded,
     degradedMessage: degraded
       ? "Some sources are unavailable right now. We are showing what can still be supported."
@@ -74,6 +77,32 @@ export function createBriefingFromObservations(input: {
         : "Decision memory is scoped to examples/aware and can be enabled by the runtime."
     }
   };
+}
+
+function weatherSignalsFromObservations(observations: readonly SafetyObservation[]): WeatherSignal[] {
+  const order: WeatherSignal["signal"][] = ["weather.heat", "weather.heavy_rain", "weather.uv"];
+  const weather = observations.filter((observation): observation is SafetyObservation & { signal: WeatherSignal["signal"] } =>
+    order.includes(observation.signal as WeatherSignal["signal"])
+  );
+  return weather
+    .map((observation) => ({
+      id: riskId(observation),
+      signal: observation.signal,
+      label: weatherSignalLabel(observation.signal),
+      attentionLevel: observation.attentionHint,
+      attentionLabel: attentionLabels[observation.attentionHint],
+      severity: observation.severity,
+      meaning: observation.plainLanguage,
+      updatedAt: observation.source.updatedAt || observation.observedAt,
+      sourceIds: [observation.source.id]
+    }))
+    .sort((left, right) => order.indexOf(left.signal) - order.indexOf(right.signal));
+}
+
+function weatherSignalLabel(signal: WeatherSignal["signal"]): WeatherSignal["label"] {
+  if (signal === "weather.heat") return "Heat";
+  if (signal === "weather.heavy_rain") return "Rain";
+  return "UV";
 }
 
 export function interpretRisks(observations: readonly SafetyObservation[]): SafetyRisk[] {

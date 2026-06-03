@@ -142,8 +142,6 @@ named `@signal/examples`.
 | `@signal/examples` | `examples/operation-examples` | Runnable operation, runtime, idempotency, HTTP, storage, Kafka/PostgreSQL, and transport examples. |
 | `@signal/aware` | `examples/aware` | Product-style example application that consumes Signal decision and memory packages. |
 | `@signal/algai-parent-dashboard` | `examples/algai-parent-dashboard` | Parent-facing AlgAI dashboard example built with Vite and React. |
-| `@signal/climate-forecast` | `examples/climate-forecast` | Example-only forecast normalization package used by Weather Awareness. |
-| `@signal/emergency-awareness` | `examples/weather-awareness` | Frontend application consuming Signal-style risk and guidance logic. |
 | `dyslexia-translator` | `examples/algai` | Standalone example app with its own backend/frontend structure. |
 | Stocks Optimizer state | `examples/stocks-optimizer` | Preserved app state in this checkout; it is not currently a pnpm workspace package. |
 
@@ -966,8 +964,6 @@ Application examples:
 | --- | --- | --- | --- |
 | Aware | `examples/aware` | `pnpm --filter @signal/aware dev` | <https://aware-guide.vercel.app> |
 | AlgAI Parent Dashboard | `examples/algai-parent-dashboard` | `pnpm --filter @signal/algai-parent-dashboard dev` | Local/package example; no Vercel app recorded here. |
-| Climate Forecast | `examples/climate-forecast` | `pnpm --filter @signal/climate-forecast test` | Code/package example; no Vercel app. |
-| Emergency Awareness | `examples/weather-awareness` | `pnpm --filter @signal/emergency-awareness dev` | <https://weather-awareness.vercel.app> |
 | Stocks Optimizer | `examples/stocks-optimizer` | Preserved example state in this checkout; it is not currently a pnpm workspace package. | <https://stocks-optimizer.vercel.app> |
 
 Reference server:

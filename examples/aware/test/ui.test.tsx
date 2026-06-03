@@ -37,6 +37,10 @@ describe("Aware frontend rendering", () => {
 
     expect(empty).toContain("Where are you today?");
     expect(empty).toContain("Start with a city or region.");
+    expect(empty).toContain("Weather awareness map");
+    expect(empty).toContain("Zoom in");
+    expect(empty).not.toContain("No clear concern");
+    expect(empty).not.toContain("Pay attention");
     expect(loading).toContain("Looking now.");
   });
 
@@ -48,7 +52,13 @@ describe("Aware frontend rendering", () => {
     const emergency = withEmergencyItem(urgency);
 
     expect(renderBriefing(normal)).toContain("Nothing unusual requires attention");
-    expect(renderBriefing(warning)).toContain("Warning");
+    const warningHtml = renderBriefing(warning);
+    expect(warningHtml).toContain("Warning");
+    expect(warningHtml).toContain("Sun exposure may be strong");
+    expect(warningHtml).toContain("Some weather conditions may affect plans today.");
+    expect(warningHtml).toContain("Reduce Exposure");
+    expect(warningHtml).not.toContain("Weather signals");
+    expect(warningHtml).not.toContain("weather-signal");
     expect(renderBriefing(urgency)).toContain("Urgency");
     expect(renderBriefing(emergency)).toContain("Emergency");
     expect(renderBriefing(degraded)).toContain("Evidence is limited");
