@@ -6,6 +6,7 @@ import type {
   DecisionReplayComparison,
   SignalDecisionRecord,
 } from "../types";
+import { assessDecisionEvidence } from "../assessment";
 import { createHumanDecisionSummary } from "../human-language";
 import { createRealitySnapshotForDecision } from "../reality";
 import { nowIso } from "../utils";
@@ -21,6 +22,15 @@ export function createDecisionRecord(input: DecisionRecordInput): SignalDecision
     realitySnapshotId: input.realitySnapshotId,
     realitySnapshot: input.realitySnapshot,
   });
+  const assessment = input.assessment
+    ? "confidence" in input.assessment && "journal" in input.assessment
+      ? input.assessment
+      : assessDecisionEvidence({
+          ...input.assessment,
+          decisionId: input.assessment.decisionId ?? input.decisionId,
+          createdAt: input.assessment.createdAt ?? createdAt,
+        })
+    : undefined;
   const provisional: SignalDecisionRecord = {
     decisionId: input.decisionId,
     createdAt,
@@ -46,6 +56,7 @@ export function createDecisionRecord(input: DecisionRecordInput): SignalDecision
     ...(input.action === undefined ? {} : { action: input.action }),
     ...(input.outcome === undefined ? {} : { outcome: input.outcome }),
     ...(input.accountability === undefined ? {} : { accountability: input.accountability }),
+    ...(assessment === undefined ? {} : { assessment }),
     humanSummary: input.humanSummary ?? "",
     retentionTier: input.retentionTier ?? "hot",
   };

@@ -75,6 +75,20 @@ export interface EvidenceItem {
   confidence: "early" | "repeated" | "confirmed";
 }
 
+export interface LearningDecisionQuality {
+  supportingEvidence: string[];
+  assumptions: string[];
+  contradictoryIndicators: string[];
+  unknowns: string[];
+  lessons: string[];
+  nextActions: string[];
+  nextBestEvidence: {
+    title: string;
+    whyItMatters: string;
+    expectedImpact: string;
+  };
+}
+
 export interface StudentLearningSummary {
   student: StudentIdentity;
   accessStatus: "validated-parent";
@@ -100,6 +114,7 @@ export interface StudentLearningSummary {
     detail: string;
     whyNow: string;
   };
+  decisionQuality: LearningDecisionQuality;
   evidenceHistory: EvidenceItem[];
   dashboardPermissions: {
     studentId: string;

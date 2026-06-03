@@ -101,6 +101,7 @@ export type StewardshipLesson = {
   confidence?: number;
   durability?: StewardshipEvidenceQuality | number;
   evidenceIds?: string[];
+  sourceOutcomeReviewId?: string;
 };
 
 export type StewardshipOutcomeReview = {
@@ -114,6 +115,7 @@ export type StewardshipOutcomeReview = {
   durability?: StewardshipEvidenceQuality | number;
   reviewDepth?: number;
   lessons?: string[];
+  evidenceIds?: string[];
   uncertainty?: string;
 };
 
@@ -166,12 +168,75 @@ export type StewardshipNextStep = {
   reversible: boolean;
 };
 
+export type StewardshipLedgerTraceability = {
+  decisionLinked: boolean;
+  outcomeReviewed: boolean;
+  lessonLinked: boolean;
+  evidenceLinked: boolean;
+  missingEvidenceReferences: string[];
+  score: number;
+  complete: boolean;
+};
+
+export type StewardshipLedgerDecisionTrace = {
+  id: string;
+  subjectId: string;
+  subjectLabel: string;
+  linked: boolean;
+  missing: string[];
+};
+
+export type StewardshipLedgerOutcomeTrace = {
+  id: string;
+  label: string;
+  outcome: StewardshipLessonOutcome;
+  known: boolean;
+  lessonIds: string[];
+  evidenceIds: string[];
+  linkedEvidenceIds: string[];
+  missingEvidenceIds: string[];
+};
+
+export type StewardshipLedgerLessonTrace = {
+  id: string;
+  label: string;
+  outcome: StewardshipLessonOutcome;
+  summary: string;
+  repetition: number;
+  evidenceIds: string[];
+  linkedEvidenceIds: string[];
+  missingEvidenceIds: string[];
+  sourceOutcomeReviewId?: string;
+};
+
+export type StewardshipLedgerEvidenceTrace = {
+  id: string;
+  label: string;
+  quality: StewardshipEvidenceQuality | number;
+  durability: StewardshipEvidenceQuality | number;
+  usedByLessonIds: string[];
+  usedByThreatIds: string[];
+  usedByProtectionIds: string[];
+  orphaned: boolean;
+};
+
+export type StewardshipLedger = {
+  decision: StewardshipLedgerDecisionTrace;
+  outcomes: StewardshipLedgerOutcomeTrace[];
+  lessons: StewardshipLedgerLessonTrace[];
+  evidence: StewardshipLedgerEvidenceTrace[];
+  traceability: StewardshipLedgerTraceability;
+  gaps: string[];
+  warnings: string[];
+};
+
 export type StewardshipAssessment = {
   subject: StewardshipSubject;
   whatMatters: string[];
   threats: StewardshipThreat[];
   protections: StewardshipProtection[];
   lessons: StewardshipLesson[];
+  ledger: StewardshipLedger;
   governance: StewardshipGovernanceAssessment;
   recommendation: StewardshipRecommendation;
   smallestResponsibleNextStep: StewardshipNextStep;

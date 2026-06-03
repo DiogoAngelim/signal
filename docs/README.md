@@ -1,34 +1,85 @@
 # Signal Developer Documentation
 
-Signal is a TypeScript workspace for building applications around explicit
-operational contracts. A Signal application defines:
+Signal makes dangerous backend operations explicit, replay-safe, and
+auditable.
 
-- **Queries** for reading state.
-- **Mutations** for intentional state changes.
-- **Events** for facts that already happened.
+It is a production correctness standard for versioned Queries, Mutations, and
+Events. The decision-quality packages still help applications reason under
+uncertainty, but the adoption-critical surface is the correctness layer around
+dangerous backend operations.
+
+Signal also provides explicit operational contracts:
+
+- **Queries** read state.
+- **Mutations** make intentional state changes.
+- **Events** record facts that already happened.
 
 This document is the developer-oriented source of truth for the repository
-shape, module architecture, application build flow, examples, runtime usage,
-and validation commands.
+shape, operation contracts, reference proof, application build flow, examples,
+runtime usage, focused architecture audits, and validation commands.
+
+## Fast Orientation
+
+In 10 seconds: Signal makes dangerous backend operations explicit,
+replay-safe, and auditable.
+
+In 30 seconds: applications define reads as Queries, dangerous state changes as
+Mutations, and completed facts as Events. Signal gives those operations stable
+names, schemas, idempotency, replay metadata, subscriber dedupe, audit evidence,
+and certification.
+
+In 5 minutes after dependencies are installed:
+
+1. Run `pnpm proof:reference`.
+2. Observe `payment.capture.v1` execute as a high-risk mutation.
+3. Observe safe retry and replay with the same idempotency key.
+4. Observe conflict with the same idempotency key and changed intent.
+5. Observe redacted audit, outbox, subscriber dedupe, and certification evidence.
+
+If a new engineer cannot explain the system with the line below, the docs or
+the change are too complicated:
+
+```txt
+Signal makes dangerous backend operations explicit, replay-safe, and auditable.
+```
 
 ## Index
 
 - Repository Map
+  - [Constitution](#constitution)
   - [Folder Structure](#folder-structure)
   - [Module Catalog](#module-catalog)
   - [Architecture](#architecture)
+  - [Focused Audits](#focused-audits)
 - Core Concepts
-  - [Stewardship](#stewardship)
+  - [Decision Quality](#decision-quality)
+  - [Decision Operation Catalog](#decision-operation-catalog)
+  - [Stewardship Ledger](#stewardship-ledger)
   - [Idempotency](#idempotency)
   - [Events And Subscribers](#events-and-subscribers)
 - Build And Use
   - [Install And Build](#install-and-build)
+  - [Reference Proof](#reference-proof)
   - [Build An Application On Signal](#build-an-application-on-signal)
+  - [Extend Correctly](#extend-correctly)
   - [HTTP Usage](#http-usage)
   - [Runtime Usage](#runtime-usage)
+  - [Operate Safely In Production](#operate-safely-in-production)
   - [Examples](#examples)
 - Validation
   - [Developer Checks](#developer-checks)
+
+## Constitution
+
+Read [docs/constitution.md](constitution.md) before changing shared Signal
+behavior. The short version is:
+
+- Signal is a correctness layer.
+- Signal is protocol-first and transport-independent.
+- Queries, Mutations, and Events are explicit contracts.
+- Dangerous mutations must declare risk.
+- Production guarantees require executable evidence.
+- Simplicity beats flexibility.
 
 ## Folder Structure
 
@@ -41,7 +92,7 @@ folder that owns its runtime responsibility.
 | `server/` | Backend services and server-only packages | The code runs on the backend, owns persistence, exposes a service, or belongs to the backend pipeline. |
 | `examples/` | Runnable examples, browser apps, and example-only integrations | The code demonstrates Signal usage or is not intended as a reusable package API. |
 | `packages/` | Reusable domain packages | The package is reusable application/domain logic that is not tied to a specific server, client, or example. |
-| `docs/` | Developer documentation | Documentation belongs in this single Markdown file unless generated docs are intentionally introduced later. |
+| `docs/` | Developer documentation | Orientation belongs in `docs/README.md`, rules belong in `docs/constitution.md`, and narrow audit notes belong in focused `docs/*-audit.md` files. |
 | `spec/` | Protocol RFCs and contract assets | The file captures protocol design decisions, published schemas, or compatibility fixtures. |
 | `spec/contracts/schemas/` | Published JSON schemas | The file describes protocol payloads or envelope schemas. |
 | `spec/contracts/fixtures/` | Shared contract fixtures | The file is reusable protocol or package test data. |
@@ -65,7 +116,6 @@ named `@signal/examples`.
 | `@signal/sdk-node` | `api/sdk-node` | Node ergonomics for defining queries, mutations, events, and creating a runtime. |
 | `@signal/binding-http` | `api/binding-http` | Fastify routes that adapt HTTP requests into Signal runtime calls. |
 | `@signal/idempotency-postgres` | `api/idempotency-postgres` | PostgreSQL-backed idempotency store for retry-safe mutations. |
-| `@digelim/signal-protocol` | `api/signal-protocol` | Legacy/demo protocol package with server and client assets; keep compatibility here unless a change belongs to the canonical `@signal/*` API packages. |
 
 ### Domain Packages
 
@@ -73,32 +123,16 @@ named `@signal/examples`.
 | --- | --- | --- |
 | `@signal/agency` | `packages/agency` | Agency pipeline primitives for state evaluation, calibration, learning, memory, outcomes, policy, and self-diagnosis. |
 | `@signal/commitment` | `packages/commitment` | Generic commitment evaluator that turns decisions, trust, constraints, resources, and policy into recommended commitment. |
-| `@signal/decision` | `packages/decision` | Decision intelligence modules: reality, prediction, simulation, outcomes, accountability, coherence, wisdom, human-language summaries, and Stewardship. |
+| `@signal/decision` | `packages/decision` | Domain-agnostic decision-quality model. New code should prefer the `@signal/decision/core` subpath for evidence assessment, confidence caps, journals, outcome reviews, learning, records, coherence, and pipeline evaluation. |
 | `@signal/decision-memory` | `packages/decision-memory` | Durable decision memory, learning records, retention, compaction, summaries, Neon/Postgres storage, and Signal memory operations. |
-| `@signal/framework` | `packages/framework` | Preserved framework surface with legacy, diagnostics, perception, purpose, meaning, sizing, recovery, wisdom, Stocks Optimizer adapters, and related compatibility modules. |
 | `@signal/semantic-state` | `packages/semantic-state` | Semantic-state resolver and bundled lexicon for mapping numeric dimensions to named states. |
 
 ### Server Modules
 
 | Package | Path | Purpose |
 | --- | --- | --- |
-| `@signal/reference-server` | `server/reference-server` | Minimal HTTP service that wires `@signal/examples` operations into `@signal/runtime` and exposes them through `@signal/binding-http`. |
+| `@signal/reference-server` | `server/reference-server` | Minimal HTTP service that registers local reference operations, exposes them through `@signal/binding-http`, and proves the high-risk payment-capture path. |
 | `@signal/db` | `server/db` | Database scripts, migrations, and adapters used by server-side Signal storage. |
-| `@digelim/01.intent` | `server/intent` | Intent module and capability metadata for the older numbered server stack. |
-| `@digelim/02.received` | `server/received` | Received-input contracts, errors, and intake helpers. |
-| `@digelim/03.validated` | `server/validated` | Validation contracts, errors, and validated-state helpers. |
-| `@digelim/04.source` | `server/source` | Source module and source capability metadata. |
-| `@digelim/05.pulse` | `server/pulse` | Pulse domain/runtime package for the numbered evaluation flow. |
-| `@digelim/06.core` | `server/core` | Core evaluation module and capability metadata. |
-| `@digelim/07.action` | `server/action` | Action module and capability metadata. |
-| `@digelim/08.result` | `server/result` | Result module and capability metadata. |
-| `@digelim/09.sense` | `server/sense` | Sense module and capability metadata. |
-| `@digelim/10.app` | `server/app` | Application-level composition of the numbered server modules. |
-| `@digelim/11.adapter` | `server/adapter` | Fastify handlers, routes, server setup, and capability route adapters for the numbered stack. |
-| `@digelim/12.signal` | `server/signal` | Legacy Signal protocol/runtime/security/observability package used by the numbered stack. |
-| `@digelim/13.store` | `server/store` | Store contracts, errors, and in-memory store implementation. |
-| `@digelim/14.idempotency` | `server/idempotency` | Idempotency contracts, errors, and in-memory idempotency store. |
-| `@digelim/15.sync` | `server/sync` | Synchronization contracts and transport interfaces. |
 
 ### Example Modules
 
@@ -106,6 +140,7 @@ named `@signal/examples`.
 | --- | --- | --- |
 | `@signal/examples` | `examples/operation-examples` | Runnable operation, runtime, idempotency, HTTP, storage, Kafka/PostgreSQL, and transport examples. |
 | `@signal/aware` | `examples/aware` | Product-style example application that consumes Signal decision and memory packages. |
+| `@signal/algai-parent-dashboard` | `examples/algai-parent-dashboard` | Parent-facing AlgAI dashboard example built with Vite and React. |
 | `@signal/climate-forecast` | `examples/climate-forecast` | Example-only forecast normalization package used by Weather Awareness. |
 | `@signal/emergency-awareness` | `examples/weather-awareness` | Frontend application consuming Signal-style risk and guidance logic. |
 | `dyslexia-translator` | `examples/algai` | Standalone example app with its own backend/frontend structure. |
@@ -169,103 +204,268 @@ Dependency direction should stay simple:
 
 Core packages must not depend on product apps or examples.
 
-## Stewardship
+## Focused Audits
 
-Stewardship is a domain-agnostic layer in `@signal/decision` that helps
-applications protect what matters by interpreting memory, outcomes,
-governance, threats, protections, and uncertainty.
+Keep the docs front door short. When a change needs deeper quality or
+architecture evidence, add a focused audit document and link it here.
 
-It sits above the decision-process layers:
+| Document | Purpose |
+| --- | --- |
+| [Constitution](constitution.md) | Signal's correctness rules, category boundaries, and evidence rule. |
+| [Stewardship Evolution Audit](stewardship-evolution-audit.md) | Assessment of the decision stewardship ledger batch, remaining persistence/UI boundaries, and validation evidence. |
+
+## Decision Quality
+
+`@signal/decision` is the reusable package for decisions under uncertainty.
+New work should start from the simple model below and use the older scenario,
+wisdom, stewardship, and memory helpers only when they support that model.
 
 ```txt
-Decision Memory -> Outcome Review -> Governance -> Stewardship
+Evidence -> Assessment -> Decision -> Outcome -> Learning
 ```
 
-Its purpose is to answer:
+### Evidence
 
-- What matters?
-- What threatens it?
-- What protects it?
-- What has been learned?
-- What remains uncertain?
-- What would make this decision safer?
-- What is the smallest responsible next step?
-- What should be monitored after action?
+Evidence is any observable reason a decision might be reasonable or unsafe.
+Signal keeps evidence domain-agnostic. Applications translate domain language
+into generic evidence fields:
 
-### Contract
+- `quality`
+- `reliability`
+- `freshness`
+- `independence`
+- `replication`
+- `calibration`
+- `traceability`
+- `direction`: `supporting`, `contradicting`, or `neutral`
 
-Use `assessStewardship(input: StewardshipInput): StewardshipAssessment`.
+### Assessment
 
-The input shape is intentionally generic:
+Assessment makes uncertainty visible before action. It distinguishes:
+
+- `known`
+- `unknowns`
+- `assumptions`
+- `contradicted`
+
+Use `assessDecisionEvidence(input)` when an application needs a lightweight,
+auditable assessment:
 
 ```ts
-import { assessStewardship } from "@signal/decision";
+import { assessDecisionEvidence } from "@signal/decision";
 
-const assessment = assessStewardship({
-  subject: {
-    id: "subject:water-system",
-    label: "Water system",
-    domain: "infrastructure",
-    importance: "critical",
-    desiredState: "safe, useful, and available",
-  },
-  memory: {
-    evidence: [],
-    lessons: [],
-  },
-  threats: [],
-  protections: [],
-  uncertainties: [],
+const assessment = assessDecisionEvidence({
+  decisionId: "decision:demo",
+  evidence: [
+    {
+      label: "Direct observation",
+      direction: "supporting",
+      quality: 72,
+      reliability: 75,
+      freshness: 82,
+      independence: 60,
+      replication: 50,
+      calibration: 68,
+      traceability: 90,
+    },
+  ],
+  known: ["The current state is observable."],
+  unknowns: ["Whether the condition will persist."],
+  assumptions: ["The observation remains relevant long enough to act."],
+  desiredConfidence: 85,
+  reversibility: "high",
 });
 ```
 
-The output includes:
+The assessment returns:
 
-- `subject`
-- `whatMatters`
-- `threats`
-- `protections`
-- `lessons`
-- `governance`
-- `recommendation`
-- `smallestResponsibleNextStep`
-- `monitoringPlan`
-- `uncertaintySummary`
-- `rationale`
-- `disclaimers`
+- `evidenceQuality`: evidence quality, reliability, freshness, independence,
+  replication, contradiction pressure, calibration, traceability, and coverage.
+- `confidence`: requested confidence, capped confidence, and the cap sources.
+- `governance`: derived auditability, explainability, challengeability,
+  traceability, evidence coverage, contradiction visibility, and assumption
+  visibility.
+- `stewardship`: derived importance, threat pressure, optionality, resilience,
+  reversibility, and a conservative recommendation.
+- `nextBestEvidence`: the one piece of information that would most improve the
+  decision.
+- `journal`: evidence, assumptions, contradictions, unknowns, and reasoning
+  captured before the outcome is known.
 
-Recommendation actions are generic:
+Confidence must not exceed evidence quality. Contradictions, exposed
+assumptions, and unresolved unknowns can lower the cap further. This protects
+honesty; it does not try to be pessimistic.
 
-```txt
-observe | monitor | preserve | proceed_gradually | reduce_exposure |
-intervene | pause | stop | review_again
+### Decision
+
+Use `evaluateDecision(input)` when the assessment should flow into the existing
+decision pipeline:
+
+```ts
+import { evaluateDecision } from "@signal/decision";
+
+const result = evaluateDecision({
+  decisionId: "decision:demo",
+  observation: { source: "example" },
+  modules: {
+    discovery: 78,
+    judgment: 74,
+    purpose: 80,
+    need: 70,
+    trust: 68,
+    recovery: 75,
+    calibration: 72,
+    agency: 62,
+  },
+  assessment: {
+    evidence: [{ label: "Traceable signal", quality: 64, traceability: 90 }],
+    unknowns: ["Whether it repeats."],
+    assumptions: ["The signal is not noise."],
+    desiredConfidence: 90,
+    reversibility: "medium",
+  },
+});
 ```
 
-### Governance
+When `assessment` is supplied, pipeline confidence is capped by the assessment.
+The decision record keeps the journal so later outcome reviews are protected
+from hindsight bias.
 
-Governance evaluates whether the decision process is trustworthy enough to
-continue. It does not decide whether the decision is correct.
+### Outcome
 
-It classifies evidence quality, evidence durability, review depth, repetition
-strength, uncertainty visibility, risk visibility, reversibility,
-concentration risk, accountability clarity, policy compliance, missing
-information, and contradiction level.
+Outcome review answers practical questions:
 
-### Non-Goals
+- What happened?
+- What surprised us?
+- Which assumptions failed?
+- Which assumptions survived?
+- Which evidence mattered?
+- Which evidence misled us?
+- What should change next time?
 
-Stewardship does not make predictions, claim certainty, maximize action, or
-issue domain-specific instructions. Product applications must adapt their
-domain language at the boundary.
+Use `reviewDecisionOutcome(input)` directly or pass `review` into
+`evaluateOutcome(input)`.
 
-### Integration Pattern
+```ts
+import { reviewDecisionOutcome } from "@signal/decision";
 
-Applications should map their local context into `StewardshipInput`, call
-`assessStewardship`, then present the resulting assessment in product language.
+const review = reviewDecisionOutcome({
+  decisionId: "decision:demo",
+  whatHappened: "The action worked briefly, then failed.",
+  why: "Freshness decayed faster than expected.",
+  assumptions: [
+    { assumptionId: "assumption:fresh", label: "Evidence stays fresh", status: "failed" },
+  ],
+  evidence: [
+    { evidenceId: "evidence:direct", label: "Direct observation", role: "mattered" },
+  ],
+  whatShouldChange: "Require a freshness check before repeating.",
+});
+```
 
-Stocks Optimizer is one consumer: it maps capital-preservation goals,
-portfolio guardrails, instrument risk, allocation caps, reviewed lessons, and
-financial disclaimers into Signal Stewardship. The reusable stewardship logic
-remains in Signal.
+### Learning
+
+Learning stays deliberately small:
+
+```txt
+What happened?
+Why?
+What should change?
+```
+
+Repeated lessons can be derived with `deriveLearningPatterns(learnings)`.
+Patterns track frequency, confirmations, contradictions, and survival rate.
+They improve explanations and process quality; they must not inflate decision
+confidence.
+
+### Ownership Boundary
+
+Signal owns:
+
+- evidence
+- assessment
+- decisions
+- outcome reviews
+- learning
+
+Applications own:
+
+- domain language
+- domain APIs
+- domain UX
+- domain metrics
+
+Adapters translate application-specific facts into Signal's generic fields.
+For example, Stocks Optimizer should translate market, portfolio, and broker
+details into supporting evidence, contradictory evidence, assumptions,
+unknowns, and next-best evidence. AlgAI should translate student progress,
+learning constraints, parent/educator concerns, unknowns, and next actions into
+the same generic model.
+
+### Decision API Surface
+
+Use `@signal/decision/core` for new application code:
+
+```ts
+import { assessDecisionEvidence, evaluateDecision, reviewDecisionOutcome } from "@signal/decision/core";
+```
+
+The root `@signal/decision` export remains broad for existing consumers. Older
+names such as scenario, prediction, simulation, stewardship, and memory helpers
+should be interpreted as compatibility surfaces or derived views. Prefer the
+evidence-centered core subpath for new code.
+
+## Decision Operation Catalog
+
+`@signal/decision` also exposes a versioned operation catalog for applications
+that want to register decision behavior into a Signal-style registry:
+
+```ts
+import {
+  listDecisionOperations,
+  registerDecisionOperations,
+} from "@signal/decision";
+
+const operations = listDecisionOperations();
+console.log(operations.map((operation) => operation.name));
+
+const registry = {
+  registerQuery(definition: { name: string }) {
+    console.log(definition.name);
+  },
+  registerMutation(definition: { name: string }) {
+    console.log(definition.name);
+  },
+  registerEvent(definition: { name: string }) {
+    console.log(definition.name);
+  },
+};
+
+registerDecisionOperations(registry);
+```
+
+The catalog includes decision records, evaluation, replay, outcome recording,
+memory compaction, accountability, scenario exploration, simulation, and related
+decision events. These definitions are a catalog and compatibility surface; an
+application still owns the concrete storage, transport, and product language.
+
+## Stewardship Ledger
+
+The stewardship layer now carries a traceability ledger. Use
+`assessment.ledger` or `createStewardshipLedger(input)` when a product needs to
+show which decisions, outcome reviews, lessons, evidence, threats, and
+protections support a recommendation.
+
+The ledger reports:
+
+- traceability score
+- missing decision or outcome links
+- missing evidence references
+- warnings for threats or protections without evidence
+
+Persist ledger summaries through existing decision-memory storage when durable
+history is needed. Do not create a separate stewardship database or add
+domain-specific labels to shared Signal schemas.
 
 ## Install And Build
 
@@ -299,6 +499,43 @@ pnpm --filter @signal/reference-server start
 
 The reference server listens on `127.0.0.1:3001` unless `SIGNAL_HTTP_PORT` is
 set.
+
+## Reference Proof
+
+Run the local proof from the repository root:
+
+```bash
+pnpm proof:reference
+```
+
+The proof executes the complete high-risk path:
+
+- confirms `payment.capture.v1` is declared as a required-idempotency mutation
+  that emits `payment.captured.v1`
+- proves authorization runs before idempotency reservation
+- executes the dangerous payment-capture mutation
+- retries the same logical request and observes replay
+- changes the normalized payload and observes `IDEMPOTENCY_CONFLICT`
+- observes redacted audit evidence, outbox evidence, and subscriber delivery
+- verifies another tenant cannot read the evidence
+- re-dispatches the event and observes subscriber dedupe
+- runs `reference.certification.v1`
+
+This is the five-minute adoption path. If this proof becomes hard to run or
+hard to explain, fix that before adding features.
+
+For a production-like idempotency proof, set `DATABASE_URL` and run:
+
+```bash
+pnpm proof:reference:postgres
+```
+
+This uses the PostgreSQL idempotency store and fails fast if `DATABASE_URL` is
+not set. Run the idempotency migration before using a fresh database:
+
+```bash
+pnpm db:migrate
+```
 
 ## Build An Application On Signal
 
@@ -414,6 +651,31 @@ const response = await app.inject({
 });
 ```
 
+## Extend Correctly
+
+Use this checklist before adding or changing Signal behavior:
+
+- Put code in the folder that owns the responsibility: protocol in `api/`,
+  backend and persistence in `server/`, reusable decision logic in `packages/`,
+  and product-specific language or UI in an application.
+- Keep core Signal packages domain-agnostic. Convert domain facts into generic
+  evidence, assumptions, unknowns, contradictions, decisions, outcomes, and
+  learning records.
+- Add a new operation version instead of changing the input, output, or meaning
+  of an existing public operation.
+- Validate handler input and output with schemas.
+- Make mutations idempotent when callers may retry them.
+- Emit events only for facts that have already happened.
+- Keep subscriber side effects replay-safe.
+- Preserve trace, correlation, causation, and idempotency metadata across nested
+  work.
+- Run the targeted package tests and the library checks before publishing a
+  shared change.
+
+Correct extension usually means adding less than expected: translate domain
+complexity at the application boundary, then reuse the smallest Signal contract
+that proves what changed.
+
 ## HTTP Usage
 
 The default HTTP binding exposes:
@@ -425,6 +687,14 @@ The default HTTP binding exposes:
 | `POST` | `/signal/query/:name` | Execute a query. |
 | `POST` | `/signal/mutation/:name` | Execute a mutation. |
 | `GET` | `/signal/observed-events` | Reference-server observed event list. |
+
+The reference server intentionally exposes two kinds of operations:
+
+- minimal smoke/demo operations: `note.get.v1`, `post.get.v1`,
+  `post.publish.v1`, and `post.published.v1`
+- the adoption proof operations: `payment.capture.v1`,
+  `payment.capture.get.v1`, `payment.captured.v1`, and
+  `reference.certification.v1`
 
 Request bodies use this shape:
 
@@ -448,12 +718,12 @@ curl -X POST http://127.0.0.1:3001/signal/query/note.get.v1 \
   -d '{"payload":{"noteId":"note_1001"}}'
 ```
 
-Mutation example:
+High-risk mutation example:
 
 ```bash
-curl -X POST http://127.0.0.1:3001/signal/mutation/post.publish.v1 \
+curl -X POST http://127.0.0.1:3001/signal/mutation/payment.capture.v1 \
   -H 'content-type: application/json' \
-  -d '{"payload":{"postId":"post_1001","title":"Protocol first","body":"Signal keeps transport and execution concerns separate."},"idempotencyKey":"publish-post_1001-001"}'
+  -d '{"idempotencyKey":"tenant_acme:capture:docs","auth":{"actor":{"id":"ops_alice"},"subject":"tenant:tenant_acme","scopes":["payment:capture","tenant:tenant_acme"]},"payload":{"tenantId":"tenant_acme","authorizationId":"auth_docs","amountCents":12500,"currency":"USD","paymentMethod":{"token":"tok_live_secret","last4":"4242"},"risk":{"declared":true,"classification":"high","reason":"Customer-visible payment capture moves funds.","approvedBy":"ops_alice"}}}'
 ```
 
 Successful responses preserve the same envelope shape:
@@ -509,6 +779,37 @@ await runtime.mutation(
 );
 ```
 
+High-risk runtime calls should pass auth, tenant, correlation, and idempotency
+metadata explicitly:
+
+```ts
+await runtime.mutation(
+  "payment.capture.v1",
+  {
+    tenantId: "tenant_acme",
+    authorizationId: "auth_runtime_docs",
+    amountCents: 12500,
+    currency: "USD",
+    paymentMethod: { token: "tok_live_secret", last4: "4242" },
+    risk: {
+      declared: true,
+      classification: "high",
+      reason: "Customer-visible payment capture moves funds.",
+      approvedBy: "ops_alice",
+    },
+  },
+  {
+    idempotencyKey: "tenant_acme:capture:runtime_docs",
+    correlationId: "corr-runtime-docs",
+    auth: {
+      actor: { id: "ops_alice" },
+      subject: "tenant:tenant_acme",
+      scopes: ["payment:capture", "tenant:tenant_acme"],
+    },
+  }
+);
+```
+
 Operation naming rules:
 
 - Use `domain.action.v1` or `resource.fact.v1`.
@@ -516,6 +817,38 @@ Operation naming rules:
 - Use query names for reads, mutation names for commands, and event names for
   completed facts.
 - Keep payload schemas explicit with `zod`.
+
+## Operate Safely In Production
+
+Before operating Signal in production, make these facts true:
+
+- Every public operation has a versioned name, explicit input schema, explicit
+  result schema, and tests around the runtime call.
+- Read paths are queries and do not change durable state.
+- State-changing paths are mutations and use `idempotency: "required"` when
+  retries are possible.
+- Production idempotency uses a durable store such as
+  `@signal/idempotency-postgres`; in-memory stores are for tests and local
+  development.
+- Events are named as completed facts, emitted after logical state is known, and
+  consumed by replay-safe subscribers.
+- Auth, tenant, actor, correlation, causation, trace, and source metadata are
+  explicit context, not ambient process state.
+- Protocol errors remain structured and machine-readable.
+- Breaking changes use a new operation version.
+- Capability output is generated from the real runtime registry.
+- Shared package changes pass `pnpm typecheck:library`, `pnpm lint:library`,
+  `pnpm test:library`, and `pnpm verify:exports`.
+
+Operational warning signs:
+
+- A mutation without an idempotency policy.
+- An event describing a hoped-for future state.
+- A handler that trusts raw transport details instead of validated payload and
+  explicit context.
+- A domain-specific concept added to a shared Signal package when an adapter
+  could translate it.
+- A public operation changed in place instead of versioned.
 
 ## Idempotency
 
@@ -608,6 +941,7 @@ Application examples:
 | Example | Path | Command | Live URL |
 | --- | --- | --- | --- |
 | Aware | `examples/aware` | `pnpm --filter @signal/aware dev` | <https://aware-guide.vercel.app> |
+| AlgAI Parent Dashboard | `examples/algai-parent-dashboard` | `pnpm --filter @signal/algai-parent-dashboard dev` | Local/package example; no Vercel app recorded here. |
 | Climate Forecast | `examples/climate-forecast` | `pnpm --filter @signal/climate-forecast test` | Code/package example; no Vercel app. |
 | Emergency Awareness | `examples/weather-awareness` | `pnpm --filter @signal/emergency-awareness dev` | <https://weather-awareness.vercel.app> |
 | Stocks Optimizer | `examples/stocks-optimizer` | Preserved example state in this checkout; it is not currently a pnpm workspace package. | <https://stocks-optimizer.vercel.app> |
@@ -624,6 +958,7 @@ pnpm --filter @signal/reference-server start
 Use these before publishing structural or contract changes:
 
 ```bash
+pnpm release:library
 pnpm test
 pnpm -r --if-present --sort run test:coverage
 pnpm typecheck

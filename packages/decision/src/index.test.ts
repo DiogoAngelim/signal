@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyOutcomeFeedback,
+  assessDecisionEvidence,
   assessCoherence,
   assessWisdom,
   buildHumanDecisionGuide,
@@ -8,14 +9,21 @@ import {
   createDecisionRecord,
   createInMemoryDecisionRecordStore,
   createRealitySnapshot,
+  deriveLearningPatterns,
   evaluateDecision,
   evaluateOutcome,
   generatePredictionScenarios,
+  reviewDecisionOutcome,
   listDecisionOperations,
   registerDecisionOperations,
   replayDecision,
   simulateDecisionPaths,
 } from "./index";
+import {
+  assessDecisionEvidence as assessDecisionEvidenceFromCore,
+  evaluateDecision as evaluateDecisionFromCore,
+  reviewDecisionOutcome as reviewDecisionOutcomeFromCore,
+} from "./core";
 
 describe("@signal/decision", () => {
   it("detects coherence contradictions and blocks unsafe agency", () => {
@@ -211,5 +219,159 @@ describe("@signal/decision", () => {
     expect(registry.queries).toContain("decision.scenarios.predict.v1");
     expect(registry.mutations).toContain("decision.outcome.record.v1");
     expect(registry.events).toContain("decision.blocked.v1");
+  });
+
+  it("assesses evidence visibility, caps confidence, and identifies next best evidence", () => {
+    const assessment = assessDecisionEvidence({
+      decisionId: "decision:evidence",
+      evidence: [
+        {
+          evidenceId: "evidence:primary",
+          label: "Primary observation",
+          direction: "supporting",
+          quality: 70,
+          reliability: 72,
+          freshness: 80,
+          independence: 55,
+          replication: 50,
+          calibration: 64,
+          traceability: 90,
+          strength: 74,
+        },
+        {
+          evidenceId: "evidence:challenge",
+          label: "Conflicting observation",
+          direction: "contradicting",
+          quality: 58,
+          reliability: 62,
+          freshness: 70,
+          independence: 75,
+          replication: 45,
+          calibration: 60,
+          traceability: 86,
+          strength: 68,
+        },
+      ],
+      known: [{ label: "Current state is observable", evidenceIds: ["evidence:primary"] }],
+      unknowns: ["Whether the condition persists"],
+      assumptions: [{ label: "The observation remains relevant", evidenceIds: ["evidence:primary"], reviewAfter: "outcome" }],
+      contradicted: [{ label: "All evidence points the same way", evidenceIds: ["evidence:challenge"] }],
+      desiredConfidence: 92,
+      importance: 84,
+      threats: [{ label: "Loss of optionality", severity: 75, likelihood: 60 }],
+      optionality: 68,
+      resilience: 62,
+      reversibility: { canUndo: true, cost: 30, speed: 80 },
+    });
+
+    expect(assessment.evidenceQuality.quality).toBeGreaterThan(40);
+    expect(assessment.confidence.capped).toBeLessThanOrEqual(assessment.evidenceQuality.quality);
+    expect(assessment.governance.contradictionVisibility).toBe(100);
+    expect(assessment.journal.assumptionsUsed).toEqual(["The observation remains relevant"]);
+    expect(assessment.journal.contradictionsPresent).toContain("All evidence points the same way");
+    expect(assessment.stewardship.reversibility.level).toBe("high");
+    expect(assessment.nextBestEvidence.question).toMatch(/contradictory evidence/i);
+  });
+
+  it("exposes an evidence-centered core entrypoint for new consumers", () => {
+    expect(assessDecisionEvidenceFromCore).toBe(assessDecisionEvidence);
+    expect(evaluateDecisionFromCore).toBe(evaluateDecision);
+    expect(reviewDecisionOutcomeFromCore).toBe(reviewDecisionOutcome);
+  });
+
+  it("threads assessment through records and constrains pipeline confidence", () => {
+    const result = evaluateDecision({
+      decisionId: "decision:assessment-pipeline",
+      observation: { source: "test" },
+      modules: {
+        discovery: 84,
+        judgment: 82,
+        purpose: 80,
+        need: 78,
+        trust: 76,
+        recovery: 78,
+        calibration: 79,
+        agency: 70,
+      },
+      prediction: {
+        confidence: 95,
+        labels: ["conditions improve", "conditions weaken"],
+      },
+      assessment: {
+        evidence: [
+          {
+            label: "Thin but traceable signal",
+            direction: "supporting",
+            quality: 48,
+            reliability: 50,
+            freshness: 52,
+            independence: 46,
+            replication: 42,
+            calibration: 44,
+            traceability: 70,
+          },
+        ],
+        known: ["A signal exists"],
+        unknowns: ["Whether it repeats"],
+        assumptions: ["The signal is not noise"],
+        desiredConfidence: 95,
+        reversibility: "high",
+      },
+    });
+
+    expect(result.record.assessment?.confidence.capped).toBeLessThan(95);
+    expect(Math.max(...result.predictionScenarios.map((scenario) => scenario.confidence))).toBeLessThanOrEqual(
+      result.record.assessment?.confidence.cap ?? 100,
+    );
+    expect(result.record.accountability?.modulesInvolved).toContain("assessment");
+    expect(result.actionScale).toBeLessThanOrEqual(0.45);
+  });
+
+  it("reviews outcomes, generates simple learning, and derives repeated learning patterns", () => {
+    const review = reviewDecisionOutcome({
+      reviewId: "review:1",
+      decisionId: "decision:review",
+      whatHappened: "The action worked initially, then failed when conditions changed.",
+      why: "A freshness assumption failed.",
+      assumptions: [
+        { assumptionId: "assumption:fresh", label: "Evidence stays fresh", status: "failed" },
+        { assumptionId: "assumption:reversible", label: "Action remains reversible", status: "survived" },
+      ],
+      evidence: [
+        { evidenceId: "evidence:1", label: "Opening signal", role: "mattered" },
+        { evidenceId: "evidence:2", label: "Old comparison", role: "misleading" },
+      ],
+      whatShouldChange: "Require freshness checks before repeating.",
+    });
+    const outcome = evaluateOutcome({
+      decisionId: "decision:review",
+      actualSuccessScore: 42,
+      expectedConfidence: 82,
+      review: {
+        decisionId: "decision:review",
+        whatHappened: "The outcome was weaker than the decision expected.",
+        why: "Contradictory evidence arrived late.",
+        assumptions: [{ assumptionId: "assumption:fresh", label: "Evidence stays fresh", status: "failed" }],
+        whatShouldChange: "Require freshness checks before repeating.",
+      },
+    });
+    const patterns = deriveLearningPatterns([
+      review.learning,
+      outcome.review?.learning ?? review.learning,
+      {
+        ...review.learning,
+        learningId: "learning:confirmed",
+        outcome: "confirmed",
+      },
+    ]);
+
+    expect(review.assumptionFailures.map((item) => item.label)).toEqual(["Evidence stays fresh"]);
+    expect(review.evidenceThatMisled.map((item) => item.label)).toEqual(["Old comparison"]);
+    expect(review.learning.whatShouldChange).toBe("Require freshness checks before repeating.");
+    expect(outcome.review?.learning.outcome).toBe("contradicted");
+    expect(patterns[0]?.frequency).toBe(3);
+    expect(patterns[0]?.confirmations).toBe(1);
+    expect(patterns[0]?.contradictions).toBe(2);
+    expect(patterns[0]?.explanation).toMatch(/process quality/i);
   });
 });

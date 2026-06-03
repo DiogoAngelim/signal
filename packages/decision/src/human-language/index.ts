@@ -70,13 +70,19 @@ export function buildHumanDecisionGuide(record: SignalDecisionRecord): HumanDeci
       step: 6,
       title: "Why?",
       text: whyText(record),
-      why: record.wisdom?.reason,
+      why: [
+        ...(record.assessment?.journal.assumptionsUsed.map((item) => `Assumption: ${item}`) ?? []),
+        ...(record.assessment?.journal.unknownsPresent.map((item) => `Unknown: ${item}`) ?? []),
+        ...(record.wisdom?.reason ?? []),
+      ],
     },
     {
       step: 7,
       title: "What will Signal learn from this?",
       text: record.outcome
         ? `This decision will update trust by ${record.outcome.trustImpact} and calibration by ${record.outcome.calibrationImpact}.`
+        : record.assessment
+          ? `Next best evidence: ${record.assessment.nextBestEvidence.question}`
         : "This decision will be tracked so future confidence can improve.",
     },
   ];
@@ -128,6 +134,9 @@ function nextActionText(
 }
 
 function whyText(record: SignalDecisionRecord): string {
+  if (record.assessment?.confidence.capped !== undefined && record.assessment.confidence.capped < record.assessment.confidence.requested) {
+    return record.assessment.confidence.explanation.at(-1) ?? "Confidence was capped by evidence quality.";
+  }
   if (record.coherence.contradictions.length) {
     return record.coherence.contradictions[0]?.recommendation ?? "Signal is reducing action because the evidence is mixed.";
   }

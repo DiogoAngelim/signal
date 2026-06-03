@@ -57,7 +57,7 @@ export class MemoryAdapter implements SignalDB {
    */
   async findOne<T = any>(collection: string, query: any): Promise<T | null> {
     const results = await this.find<T>(collection, query);
-    return results.length > 0 ? results[0] : null;
+    return results[0] ?? null;
   }
 
   /**

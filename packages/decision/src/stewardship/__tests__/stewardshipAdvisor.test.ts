@@ -20,6 +20,7 @@ describe("assessStewardship", () => {
         desiredState: "safe, useful, and available",
       },
       context: {
+        decisionId: "decision:water-system:1",
         accountabilityOwner: "Operations lead",
         policyCompliance: "compliant",
         reversibility: "high",
@@ -36,21 +37,23 @@ describe("assessStewardship", () => {
             durability: "strong",
           },
         ],
-        lessons: [
-          {
-            id: "lesson:1",
-            label: "Gradual change",
-            summary: "Small reversible changes preserved availability.",
-            outcome: "confirmed",
-            repetition: 3,
-          },
-        ],
       },
-      threats: [{ id: "threat:1", label: "Demand spike", severity: "medium", mitigated: true }],
-      protections: [{ id: "protection:1", label: "Capacity buffer", strength: "strong", durability: "strong" }],
+      outcomeReviews: [
+        {
+          id: "review:water-system:1",
+          label: "Gradual change",
+          outcome: "confirmed",
+          repeated: 3,
+          lessons: ["Small reversible changes preserved availability."],
+          evidenceIds: ["evidence:1"],
+        },
+      ],
+      threats: [{ id: "threat:1", label: "Demand spike", severity: "medium", mitigated: true, evidenceIds: ["evidence:1"] }],
+      protections: [{ id: "protection:1", label: "Capacity buffer", strength: "strong", durability: "strong", evidenceIds: ["evidence:1"] }],
     });
 
     expect(assessment.whatMatters[0]).toContain("Water system should remain safe, useful, and available.");
+    expect(assessment.ledger.traceability.complete).toBe(true);
     expect(assessment.governance.trustworthyEnough).toBe(true);
     expect(assessment.recommendation.action).toBe("proceed_gradually");
     expect(assessment.smallestResponsibleNextStep.description).toContain("smallest reversible step");

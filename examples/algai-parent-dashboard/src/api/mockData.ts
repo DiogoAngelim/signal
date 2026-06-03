@@ -215,6 +215,38 @@ export const demoLearningSummaries: StudentLearningSummary[] = [
       detail: "After each reading time, ask Mia to share one detail that changed her understanding.",
       whyNow: "Reading confidence is growing, and short shared practice can strengthen the pattern."
     },
+    decisionQuality: {
+      supportingEvidence: [
+        "Two reading reflections now include supporting details.",
+        "Writing drafts are clearer after a short outline.",
+        "Homework samples were stronger after an earlier start."
+      ],
+      assumptions: [
+        "Short reading practice at home will feel calm enough to repeat.",
+        "The latest classroom note reflects Mia's current comfort level."
+      ],
+      contradictoryIndicators: [
+        "Focus still fades near the end of longer math work.",
+        "Help-seeking has appeared once, but not yet across subjects."
+      ],
+      unknowns: [
+        "Whether short breaks improve long math tasks.",
+        "Whether asking questions becomes comfortable without prompting."
+      ],
+      lessons: [
+        "Specific feedback works better than broad encouragement.",
+        "Earlier routines appear to protect homework quality."
+      ],
+      nextActions: [
+        "Keep reading practice short and specific.",
+        "Ask the teacher which math step should be reviewed first."
+      ],
+      nextBestEvidence: {
+        title: "One fresh math sample after a two-minute reset",
+        whyItMatters: "It would show whether the focus support changes the actual work, not just the mood.",
+        expectedImpact: "Clarifies whether home practice should add short breaks before harder problems."
+      }
+    },
     evidenceHistory: [
       {
         id: "evidence-1",
@@ -341,6 +373,34 @@ export const demoLearningSummaries: StudentLearningSummary[] = [
       title: "Practice one short pattern together.",
       detail: "Ask Noah to say the rule before solving the final item.",
       whyNow: "The evidence shows that spoken rules help him check his thinking."
+    },
+    decisionQuality: {
+      supportingEvidence: [
+        "Noah named the rule during a number pattern activity.",
+        "One AlgAI reflection shows clearer pattern language."
+      ],
+      assumptions: [
+        "Saying the rule out loud will transfer to similar short problems."
+      ],
+      contradictoryIndicators: [
+        "Reading pause evidence is still early and may not hold in longer passages."
+      ],
+      unknowns: [
+        "Which reading clue should home practice reinforce first.",
+        "Whether the pattern explanation holds when the sequence gets harder."
+      ],
+      lessons: [
+        "Spoken rules help Noah check his thinking before answering."
+      ],
+      nextActions: [
+        "Use one short pattern instead of a long worksheet.",
+        "Ask for the rule before the final answer."
+      ],
+      nextBestEvidence: {
+        title: "A second pattern activity with a harder final item",
+        whyItMatters: "It would show whether the pattern language survives a small increase in difficulty.",
+        expectedImpact: "Helps decide whether to keep practicing the same skill or move on."
+      }
     },
     evidenceHistory: [
       {

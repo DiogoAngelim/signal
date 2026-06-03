@@ -65,6 +65,17 @@ export async function executeMutation<TInput, TResult>(
       auth: context.request.auth ?? null,
     });
 
+    if (definition.authorize) {
+      await definition.authorize(validatedInput, {
+        request: context.request,
+        envelope,
+        startedAt: context.startedAt,
+        emit: async () => {
+          throw new Error("emit is only available inside mutation handlers");
+        },
+      });
+    }
+
     if (definition.idempotency === "required" && !idempotencyKey) {
       return toFailure<TResult>(
         createSignalError("BAD_REQUEST", "An idempotency key is required for this mutation")

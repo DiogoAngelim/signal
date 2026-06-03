@@ -8,6 +8,7 @@ import {
   RegimeMemoryEngine,
   ThesisEngine,
   MemoryLifecycle,
+  NeonPostgresAdapter,
   SIGNAL_DECISION_MEMORY_MIGRATION_SQL,
   applyBeliefDecay,
   buildCalibrationRecord,
@@ -586,7 +587,406 @@ describe("@signal/decision-memory", () => {
     }
     expect(SIGNAL_DECISION_MEMORY_MIGRATION_SQL).toContain("CREATE INDEX IF NOT EXISTS");
   });
+
+  it("maps Neon/Postgres persistence calls through SQL rows without a live database", async () => {
+    const pool = new FakePool();
+    const adapter = new NeonPostgresAdapter({
+      pool: pool as never,
+      autoMigrate: false,
+      source: "signal-test",
+    });
+    const decision = record("postgres-decision");
+    const outcome = evaluateOutcome({
+      decisionId: decision.decisionId,
+      actualSuccessScore: 80,
+      expectedConfidence: 72,
+      expectedRisk: 30,
+    });
+    const assessment = createInvestorLearningAssessment({
+      decisionId: decision.decisionId,
+      source: "signal-test",
+      marketCategory: "stocks",
+      venue: "US",
+      symbol: "AAPL",
+      recommendation: "Watch",
+      confidence: 70,
+      supportingEvidence: ["Evidence supports watching."],
+      outcome: {
+        outcomeId: "outcome:postgres-review",
+        decisionId: decision.decisionId,
+        source: "signal-test",
+        recordedAt: "2026-06-01T00:00:00.000Z",
+        classification: "inconclusive",
+        summary: "The outcome is still forming.",
+        lessons: ["Wait for more evidence."],
+      },
+    });
+    const realitySnapshot = createRealitySnapshot({
+      snapshotId: "reality:postgres-decision",
+      source: "signal-test",
+      createdAt: "2026-06-01T00:00:00.000Z",
+      dataQuality: 88,
+      freshnessScore: 84,
+      payload: { market: "US" },
+    });
+    const replay = {
+      snapshotId: "replay:postgres",
+      decisionId: decision.decisionId,
+      source: "signal-test",
+      createdAt: "2026-06-01T00:00:00.000Z",
+      retentionTier: "hot" as const,
+      snapshot: { replay: true },
+    };
+    const summary = summarizeDecisionRecords({ records: [decision], outcomes: [outcome] });
+    const retentionJob = {
+      jobId: "retention:postgres",
+      jobType: "compact" as const,
+      status: "running" as const,
+      startedAt: "2026-06-01T00:00:00.000Z",
+      policy: { hotDays: 30, warmDays: 120, coldDays: 365 },
+    };
+
+    await adapter.migrate();
+    await adapter.saveRealitySnapshot(realitySnapshot);
+    await adapter.saveDecisionRecord(decision);
+    await adapter.recordOutcome(outcome);
+    await adapter.saveReplaySnapshot(replay);
+    await adapter.recordCalibration({
+      calibrationId: "calibration:postgres",
+      decisionId: decision.decisionId,
+      source: "signal-test",
+      createdAt: "2026-06-01T00:00:00.000Z",
+      impact: 4,
+      calibration: { confidence: 72 },
+    });
+    await adapter.recordTrust({
+      trustId: "trust:postgres",
+      decisionId: decision.decisionId,
+      source: "signal-test",
+      createdAt: "2026-06-01T00:00:00.000Z",
+      impact: 3,
+      trust: { trust: 75 },
+    });
+    await adapter.saveSummary(summary);
+    await adapter.saveEvidence(assessment.evidence.supporting[0]!);
+    await adapter.saveThesis(assessment.thesis);
+    await adapter.saveRegimeSnapshot(assessment.regimeSnapshot);
+    await adapter.saveDecisionReview(assessment.review!);
+    await adapter.saveLearningRecord(assessment.learningRecords[0]!);
+    await adapter.saveCalibrationRecord(assessment.calibration);
+    await adapter.saveProcessQualityRecord(assessment.processQuality);
+    await adapter.saveRetentionJob(retentionJob);
+
+    expect(await adapter.getRealitySnapshot(realitySnapshot.snapshotId)).toMatchObject({
+      source: "signal-test",
+    });
+    expect(await adapter.listRealitySnapshots({ source: "signal-test", limit: 2 })).toHaveLength(1);
+    expect(await adapter.getDecisionRecord(decision.decisionId)).toMatchObject({
+      decisionId: decision.decisionId,
+      realitySnapshot: expect.objectContaining({ source: "signal-test" }),
+    });
+    expect(await adapter.listDecisionRecords({ source: "signal-test", retentionTier: "hot" })).toHaveLength(1);
+    expect(await adapter.listOutcomes(decision.decisionId)).toHaveLength(1);
+    expect(await adapter.listReplaySnapshots(decision.decisionId)).toEqual([replay]);
+    expect(await adapter.listCalibrationHistory(decision.decisionId)).toHaveLength(1);
+    expect(await adapter.listTrustHistory(decision.decisionId)).toHaveLength(1);
+    expect(await adapter.listSummaries({ source: "signal-test", limit: 1 })).toHaveLength(1);
+    expect(await adapter.listEvidence({ source: "signal-test" })).toHaveLength(1);
+    expect(await adapter.getThesis(assessment.thesis.thesisId)).toMatchObject({
+      thesisId: assessment.thesis.thesisId,
+    });
+    expect(await adapter.listTheses({ source: "signal-test" })).toHaveLength(1);
+    expect(await adapter.getRegimeSnapshot(assessment.regimeSnapshot.regimeSnapshotId)).toMatchObject({
+      venue: "US",
+    });
+    expect(await adapter.listRegimeSnapshots({ venue: "US" })).toHaveLength(1);
+    expect(await adapter.listDecisionReviews({ decisionId: decision.decisionId })).toHaveLength(1);
+    expect(await adapter.listLearningRecords({ decisionId: decision.decisionId })).toHaveLength(1);
+    expect(await adapter.listCalibrationRecords({ decisionId: decision.decisionId })).toHaveLength(1);
+    expect(await adapter.listProcessQualityRecords({ decisionId: decision.decisionId })).toHaveLength(1);
+    expect(await adapter.updateRetentionJob("retention:postgres", {
+      status: "completed",
+      completedAt: "2026-06-01T00:01:00.000Z",
+      result: { compacted: 1 },
+    })).toMatchObject({ status: "completed", result: { compacted: 1 } });
+    expect(await adapter.updateRetentionJob("retention:missing", { status: "failed" })).toBeUndefined();
+
+    await adapter.deleteDecisionRecord(decision.decisionId);
+    await adapter.close();
+
+    expect(pool.closed).toBe(true);
+    expect(pool.calls.some((call) => call.sql.includes("signal_decision_records"))).toBe(true);
+    expect(pool.calls.some((call) => call.sql === SIGNAL_DECISION_MEMORY_MIGRATION_SQL)).toBe(true);
+  });
 });
+
+class FakePool {
+  readonly calls: Array<{ sql: string; params: unknown[] }> = [];
+  closed = false;
+
+  async query(sqlInput: unknown, params: unknown[] = []) {
+    const sql = String(sqlInput);
+    this.calls.push({ sql, params });
+
+    if (sql.includes("signal_reality_snapshots")) {
+      return { rows: [realityRow()] };
+    }
+    if (sql.includes("signal_decision_records") && sql.includes("SELECT")) {
+      return { rows: [decisionRow()] };
+    }
+    if (sql.includes("SELECT outcome")) {
+      return { rows: [{ outcome: outcomeRow() }] };
+    }
+    if (sql.includes("signal_replay_snapshots") && sql.includes("SELECT")) {
+      return { rows: [replayRow()] };
+    }
+    if (sql.includes("signal_calibration_history") && sql.includes("SELECT")) {
+      return { rows: [calibrationHistoryRow()] };
+    }
+    if (sql.includes("signal_trust_history") && sql.includes("SELECT")) {
+      return { rows: [trustHistoryRow()] };
+    }
+    if (sql.includes("signal_memory_summaries") && sql.includes("SELECT")) {
+      return { rows: [summaryRow()] };
+    }
+    if (sql.includes("SELECT evidence")) {
+      return { rows: [{ evidence: evidenceRow() }] };
+    }
+    if (sql.includes("signal_theses") && sql.includes("SELECT")) {
+      return { rows: [thesisRow()] };
+    }
+    if (sql.includes("signal_regime_snapshots") && sql.includes("SELECT")) {
+      return { rows: [regimeRow()] };
+    }
+    if (sql.includes("SELECT review")) {
+      return { rows: [{ review: reviewRow() }] };
+    }
+    if (sql.includes("SELECT learning")) {
+      return { rows: [{ learning: learningRow() }] };
+    }
+    if (sql.includes("SELECT calibration")) {
+      return { rows: [{ calibration: calibrationRecordRow() }] };
+    }
+    if (sql.includes("SELECT process")) {
+      return { rows: [{ process: processQualityRow() }] };
+    }
+    if (sql.includes("signal_retention_jobs") && sql.includes("SELECT")) {
+      return params[0] === "retention:missing" ? { rows: [] } : { rows: [retentionJobRow()] };
+    }
+    return { rows: [] };
+  }
+
+  async end() {
+    this.closed = true;
+  }
+}
+
+function realityRow() {
+  return {
+    snapshot_id: "reality:postgres-decision",
+    source: "signal-test",
+    created_at: "2026-06-01T00:00:00.000Z",
+    data_quality: 88,
+    freshness_score: 84,
+    payload: { market: "US" },
+    source_ref: null,
+    metadata: { test: true },
+  };
+}
+
+function decisionRow() {
+  return {
+    decision_id: "postgres-decision",
+    created_at: "2026-06-01T00:00:00.000Z",
+    source: "signal-test",
+    reality_snapshot_id: "reality:postgres-decision",
+    observation: { raw: "payload" },
+    discovery: null,
+    judgment: null,
+    purpose: null,
+    need: null,
+    coherence: null,
+    prediction: null,
+    simulation: null,
+    wisdom: null,
+    agency: null,
+    action: { action: "Watch" },
+    outcome: null,
+    accountability: null,
+    human_summary: "Decision captured.",
+    retention_tier: "hot",
+  };
+}
+
+function outcomeRow() {
+  return evaluateOutcome({
+    decisionId: "postgres-decision",
+    actualSuccessScore: 80,
+    expectedConfidence: 72,
+    expectedRisk: 30,
+  });
+}
+
+function replayRow() {
+  return {
+    snapshot_id: "replay:postgres",
+    decision_id: "postgres-decision",
+    source: "signal-test",
+    created_at: "2026-06-01T00:00:00.000Z",
+    retention_tier: "hot",
+    snapshot: { replay: true },
+  };
+}
+
+function calibrationHistoryRow() {
+  return {
+    calibration_id: "calibration:postgres",
+    decision_id: "postgres-decision",
+    source: "signal-test",
+    created_at: "2026-06-01T00:00:00.000Z",
+    impact: 4,
+    calibration: { confidence: 72 },
+  };
+}
+
+function trustHistoryRow() {
+  return {
+    trust_id: "trust:postgres",
+    decision_id: "postgres-decision",
+    source: "signal-test",
+    created_at: "2026-06-01T00:00:00.000Z",
+    impact: 3,
+    trust: { trust: 75 },
+  };
+}
+
+function summaryRow() {
+  return {
+    summary_id: "summary:postgres",
+    source: "signal-test",
+    created_at: "2026-06-01T00:00:00.000Z",
+    window_start: null,
+    window_end: null,
+    retention_tier: "warm",
+    human_summary: "Summary.",
+    summary: { decisions: 1 },
+  };
+}
+
+function evidenceRow() {
+  return {
+    evidenceId: "evidence:postgres",
+    source: "signal-test",
+    observedAt: "2026-06-01T00:00:00.000Z",
+    label: "Evidence",
+    description: "Evidence supports the decision.",
+    direction: "supporting" as const,
+    strength: 70,
+    confidence: 70,
+  };
+}
+
+function thesisRow() {
+  const thesis = createInvestorLearningAssessment({
+    decisionId: "postgres-decision",
+    source: "signal-test",
+    venue: "US",
+    symbol: "AAPL",
+    recommendation: "Watch",
+    confidence: 70,
+  }).thesis;
+
+  return {
+    thesis_id: thesis.thesisId,
+    source: thesis.source,
+    title: thesis.title,
+    description: thesis.description,
+    status: thesis.status,
+    confidence: thesis.confidence,
+    created_at: thesis.createdAt,
+    updated_at: thesis.updatedAt,
+    thesis,
+  };
+}
+
+function regimeRow() {
+  const snapshot = regime("postgres", 70, 72, 68, "Watch");
+  return {
+    regime_snapshot_id: snapshot.regimeSnapshotId,
+    source: snapshot.source,
+    market_category: snapshot.marketCategory,
+    venue: snapshot.venue,
+    captured_at: snapshot.timestamp,
+    market_health: snapshot.marketHealth,
+    risk_state: snapshot.riskState,
+    trust: snapshot.trust,
+    confidence: snapshot.confidence,
+    readiness: snapshot.readiness,
+    opportunity_density: snapshot.opportunityDensity,
+    final_recommendation: snapshot.finalRecommendation,
+    eventual_outcome: null,
+    snapshot,
+  };
+}
+
+function reviewRow() {
+  return {
+    reviewId: "review:postgres",
+    decisionId: "postgres-decision",
+    source: "signal-test",
+    reviewedAt: "2026-06-01T00:00:00.000Z",
+    classification: "inconclusive" as const,
+    whatWasRecommended: "Watch",
+    whyRecommended: "Evidence supported waiting.",
+    whatHappened: "Outcome is still forming.",
+    lesson: "Wait for more evidence.",
+  };
+}
+
+function learningRow() {
+  return {
+    learningId: "learning:postgres",
+    source: "signal-test",
+    decisionId: "postgres-decision",
+    createdAt: "2026-06-01T00:00:00.000Z",
+    lesson: "Wait for more evidence.",
+  };
+}
+
+function calibrationRecordRow() {
+  return createInvestorLearningAssessment({
+    decisionId: "postgres-decision",
+    source: "signal-test",
+    venue: "US",
+    symbol: "AAPL",
+    recommendation: "Watch",
+    confidence: 70,
+  }).calibration;
+}
+
+function processQualityRow() {
+  return createInvestorLearningAssessment({
+    decisionId: "postgres-decision",
+    source: "signal-test",
+    venue: "US",
+    symbol: "AAPL",
+    recommendation: "Watch",
+    confidence: 70,
+  }).processQuality;
+}
+
+function retentionJobRow() {
+  return {
+    job_id: "retention:postgres",
+    job_type: "compact",
+    status: "running",
+    started_at: "2026-06-01T00:00:00.000Z",
+    completed_at: null,
+    policy: { hotDays: 30, warmDays: 120, coldDays: 365 },
+    result: null,
+    error: null,
+  };
+}
 
 function record(decisionId: string, createdAt = "2026-05-31T00:00:00.000Z") {
   return createDecisionRecord({

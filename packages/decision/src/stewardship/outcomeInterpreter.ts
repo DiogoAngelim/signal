@@ -10,7 +10,7 @@ export function interpretStewardshipOutcomes(reviews: StewardshipOutcomeReview[]
 
   reviews.forEach((review, index) => {
     const reviewId = review.id ?? stableId("review", `${index}`);
-    const known = review.known ?? review.outcome !== undefined;
+    const known = review.known ?? (review.outcome !== undefined);
     const outcome = known ? review.outcome ?? "mixed" : "unknown";
     const label = review.label ?? `Outcome review ${index + 1}`;
     const statements = uniqueStrings(review.lessons ?? []);
@@ -22,6 +22,8 @@ export function interpretStewardshipOutcomes(reviews: StewardshipOutcomeReview[]
         summary: review.summary ?? "Outcome review did not produce a durable lesson yet.",
         outcome,
         repetition: Math.max(1, Math.round(Number(review.repeated) || 1)),
+        sourceOutcomeReviewId: reviewId,
+        ...(review.evidenceIds?.length ? { evidenceIds: review.evidenceIds } : {}),
         ...(review.confidence === undefined ? {} : { confidence: review.confidence }),
         ...(review.durability === undefined ? {} : { durability: review.durability }),
       });
@@ -33,6 +35,8 @@ export function interpretStewardshipOutcomes(reviews: StewardshipOutcomeReview[]
           summary,
           outcome,
           repetition: Math.max(1, Math.round(Number(review.repeated) || 1)),
+          sourceOutcomeReviewId: reviewId,
+          ...(review.evidenceIds?.length ? { evidenceIds: review.evidenceIds } : {}),
           ...(review.confidence === undefined ? {} : { confidence: review.confidence }),
           ...(review.durability === undefined ? {} : { durability: review.durability }),
         });

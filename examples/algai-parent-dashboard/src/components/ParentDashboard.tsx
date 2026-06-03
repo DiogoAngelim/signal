@@ -290,6 +290,14 @@ export function LearningReview({ dashboard }: { dashboard: StudentLearningSummar
     ["What stayed stable", dashboard.learningReview.stable],
     ["Still needs more evidence", dashboard.learningReview.stillNeedsProof]
   ] as const;
+  const qualityGroups = [
+    ["Supporting evidence", dashboard.decisionQuality.supportingEvidence],
+    ["Assumptions", dashboard.decisionQuality.assumptions],
+    ["Contradictory indicators", dashboard.decisionQuality.contradictoryIndicators],
+    ["Unknowns", dashboard.decisionQuality.unknowns],
+    ["Lessons", dashboard.decisionQuality.lessons],
+    ["Next actions", dashboard.decisionQuality.nextActions]
+  ] as const;
 
   return (
     <section className="dashboard-section">
@@ -310,6 +318,33 @@ export function LearningReview({ dashboard }: { dashboard: StudentLearningSummar
             </ul>
           </article>
         ))}
+      </div>
+
+      <div className="decision-quality-panel">
+        <div className="decision-quality-panel__header">
+          <div>
+            <p className="eyebrow">Decision quality</p>
+            <h3>What AlgAI knows and still needs to check</h3>
+          </div>
+          <span>{dashboard.decisionQuality.nextBestEvidence.title}</span>
+        </div>
+        <div className="decision-quality-grid">
+          {qualityGroups.map(([title, items]) => (
+            <article className="quality-column" key={title}>
+              <h4>{title}</h4>
+              <ul>
+                {items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+        <div className="next-evidence">
+          <strong>Next best evidence</strong>
+          <p>{dashboard.decisionQuality.nextBestEvidence.whyItMatters}</p>
+          <span>{dashboard.decisionQuality.nextBestEvidence.expectedImpact}</span>
+        </div>
       </div>
 
       <div className="timeline">

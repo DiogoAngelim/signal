@@ -2,6 +2,7 @@ import { uniqueStrings } from "../utils";
 import { evaluateStewardshipGovernance } from "./governanceEvaluator";
 import { consumeStewardshipMemory } from "./memoryConsumer";
 import { interpretStewardshipOutcomes } from "./outcomeInterpreter";
+import { createStewardshipLedger } from "./stewardshipLedger";
 import {
   actionSummary,
   defaultDisclaimers,
@@ -30,6 +31,15 @@ export function assessStewardship(input: StewardshipInput = {}): StewardshipAsse
   const threats = normalizeThreats(input.threats);
   const protections = normalizeProtections(input.protections);
   const uncertainties = normalizeUncertainties([...(input.uncertainties ?? []), ...outcomeInterpretation.uncertainties]);
+  const ledger = createStewardshipLedger({
+    subject,
+    context: input.context,
+    evidence,
+    lessons,
+    outcomeReviews: input.outcomeReviews,
+    threats,
+    protections,
+  });
   const governance = evaluateStewardshipGovernance({
     evidence,
     lessons,
@@ -69,6 +79,7 @@ export function assessStewardship(input: StewardshipInput = {}): StewardshipAsse
     threats,
     protections,
     lessons,
+    ledger,
     governance,
     recommendation,
     smallestResponsibleNextStep: {

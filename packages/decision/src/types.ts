@@ -89,6 +89,280 @@ export type RealitySnapshotInput = {
   metadata?: Record<string, unknown>;
 };
 
+export type DecisionEvidenceDirection = "supporting" | "contradicting" | "neutral";
+
+export type AssessmentFactStatus = "known" | "unknown" | "assumed" | "contradicted";
+
+export type DecisionReversibility = "unknown" | "low" | "medium" | "high";
+
+export type DecisionOutcomeReviewAssumptionStatus = "failed" | "survived" | "untested";
+
+export type DecisionOutcomeReviewEvidenceRole = "mattered" | "misleading" | "neutral";
+
+export type DecisionLearningOutcome = "confirmed" | "contradicted" | "mixed" | "unknown";
+
+export type DecisionEvidenceInput = {
+  evidenceId?: string;
+  label: string;
+  summary?: string;
+  direction?: DecisionEvidenceDirection;
+  quality?: number;
+  reliability?: number;
+  freshness?: number;
+  independence?: number;
+  replication?: number;
+  calibration?: number;
+  traceability?: number;
+  strength?: number;
+  source?: string;
+  observedAt?: string;
+  supports?: string[];
+  contradicts?: string[];
+  metadata?: Record<string, unknown>;
+};
+
+export type DecisionEvidence = {
+  evidenceId: string;
+  label: string;
+  summary: string;
+  direction: DecisionEvidenceDirection;
+  quality: number;
+  reliability: number;
+  freshness: number;
+  independence: number;
+  replication: number;
+  calibration: number;
+  traceability: number;
+  strength: number;
+  source?: string;
+  observedAt?: string;
+  supports: string[];
+  contradicts: string[];
+  metadata?: Record<string, unknown>;
+};
+
+export type AssessmentFactInput =
+  | string
+  | {
+      factId?: string;
+      label: string;
+      summary?: string;
+      evidenceIds?: string[];
+      reviewAfter?: string;
+      metadata?: Record<string, unknown>;
+    };
+
+export type AssessmentFact = {
+  factId: string;
+  label: string;
+  summary: string;
+  status: AssessmentFactStatus;
+  evidenceIds: string[];
+  reviewAfter?: string;
+  metadata?: Record<string, unknown>;
+};
+
+export type DecisionThreatInput =
+  | string
+  | {
+      threatId?: string;
+      label: string;
+      severity?: number;
+      likelihood?: number;
+      evidenceIds?: string[];
+      metadata?: Record<string, unknown>;
+    };
+
+export type DecisionThreat = {
+  threatId: string;
+  label: string;
+  severity: number;
+  likelihood: number;
+  evidenceIds: string[];
+  metadata?: Record<string, unknown>;
+};
+
+export type DecisionReversibilityInput =
+  | number
+  | DecisionReversibility
+  | {
+      canUndo?: boolean;
+      cost?: number;
+      speed?: number;
+      score?: number;
+      notes?: string[];
+    };
+
+export type DecisionReversibilityAssessment = {
+  level: DecisionReversibility;
+  score: number;
+  canUndo: boolean;
+  cost: number;
+  speed: number;
+  notes: string[];
+};
+
+export type DecisionEvidenceQualityAssessment = {
+  quality: number;
+  reliability: number;
+  freshness: number;
+  independence: number;
+  replication: number;
+  contradictionPressure: number;
+  calibration: number;
+  traceability: number;
+  coverage: number;
+  explanation: string[];
+};
+
+export type DecisionConfidenceDiscipline = {
+  requested: number;
+  capped: number;
+  cap: number;
+  evidenceQualityCap: number;
+  contradictionCap: number;
+  assumptionCap: number;
+  unknownCoverageCap: number;
+  explanation: string[];
+};
+
+export type DecisionGovernanceAssessment = {
+  score: number;
+  auditability: number;
+  explainability: number;
+  challengeability: number;
+  traceability: number;
+  evidenceCoverage: number;
+  contradictionVisibility: number;
+  assumptionVisibility: number;
+  warnings: string[];
+  blockers: string[];
+  explanation: string[];
+};
+
+export type DecisionStewardshipAssessment = {
+  importance: number;
+  threatPressure: number;
+  optionality: number;
+  resilience: number;
+  reversibility: DecisionReversibilityAssessment;
+  recommendation: "proceed" | "proceed-reversibly" | "wait" | "reduce" | "avoid";
+  explanation: string[];
+};
+
+export type DecisionNextBestEvidence = {
+  question: string;
+  whyItMatters: string;
+  expectedImpact: string;
+  expectedUncertaintyReduction: number;
+};
+
+export type DecisionJournal = {
+  decisionId: string;
+  createdAt: string;
+  evidenceUsed: string[];
+  assumptionsUsed: string[];
+  contradictionsPresent: string[];
+  unknownsPresent: string[];
+  reasoningSummary: string;
+};
+
+export type DecisionAssessmentInput = {
+  decisionId?: string;
+  createdAt?: string;
+  evidence?: DecisionEvidenceInput[];
+  known?: AssessmentFactInput[];
+  unknowns?: AssessmentFactInput[];
+  assumptions?: AssessmentFactInput[];
+  contradicted?: AssessmentFactInput[];
+  desiredConfidence?: number;
+  importance?: number;
+  threats?: DecisionThreatInput[];
+  optionality?: number;
+  resilience?: number;
+  reversibility?: DecisionReversibilityInput;
+  reasoningSummary?: string;
+  nextBestEvidence?: Partial<DecisionNextBestEvidence>;
+};
+
+export type DecisionAssessment = {
+  decisionId?: string;
+  createdAt: string;
+  evidence: DecisionEvidence[];
+  known: AssessmentFact[];
+  unknowns: AssessmentFact[];
+  assumptions: AssessmentFact[];
+  contradicted: AssessmentFact[];
+  evidenceQuality: DecisionEvidenceQualityAssessment;
+  confidence: DecisionConfidenceDiscipline;
+  governance: DecisionGovernanceAssessment;
+  stewardship: DecisionStewardshipAssessment;
+  nextBestEvidence: DecisionNextBestEvidence;
+  journal: DecisionJournal;
+  explanation: string[];
+};
+
+export type DecisionOutcomeReviewAssumption = {
+  assumptionId: string;
+  label: string;
+  status: DecisionOutcomeReviewAssumptionStatus;
+  why?: string;
+};
+
+export type DecisionOutcomeReviewEvidence = {
+  evidenceId: string;
+  label: string;
+  role: DecisionOutcomeReviewEvidenceRole;
+  why?: string;
+};
+
+export type DecisionOutcomeReviewInput = {
+  reviewId?: string;
+  decisionId: string;
+  reviewedAt?: string;
+  whatHappened: string;
+  why?: string;
+  surprises?: string[];
+  assumptions?: DecisionOutcomeReviewAssumption[];
+  evidence?: DecisionOutcomeReviewEvidence[];
+  whatShouldChange?: string;
+  lessons?: string[];
+};
+
+export type DecisionLearning = {
+  learningId: string;
+  decisionId: string;
+  whatHappened: string;
+  why: string;
+  whatShouldChange: string;
+  outcome: DecisionLearningOutcome;
+};
+
+export type DecisionOutcomeReview = {
+  reviewId: string;
+  decisionId: string;
+  reviewedAt: string;
+  whatHappened: string;
+  why: string;
+  surprises: string[];
+  assumptionFailures: DecisionOutcomeReviewAssumption[];
+  assumptionSurvivals: DecisionOutcomeReviewAssumption[];
+  evidenceThatMattered: DecisionOutcomeReviewEvidence[];
+  evidenceThatMisled: DecisionOutcomeReviewEvidence[];
+  lessons: string[];
+  learning: DecisionLearning;
+};
+
+export type DecisionLearningPattern = {
+  patternId: string;
+  lesson: string;
+  frequency: number;
+  confirmations: number;
+  contradictions: number;
+  survivalRate: number;
+  explanation: string;
+};
+
 export type CoherenceStatus =
   | "aligned"
   | "stable"
@@ -148,6 +422,7 @@ export interface OutcomeEvaluation {
   trustImpact: number;
   calibrationImpact: number;
   lessons: string[];
+  review?: DecisionOutcomeReview;
   metadata?: Record<string, unknown>;
 }
 
@@ -171,6 +446,7 @@ export type OutcomeEvaluationInput = {
   unexpected?: boolean;
   inconclusive?: boolean;
   lessons?: string[];
+  review?: DecisionOutcomeReviewInput;
   metadata?: Record<string, unknown>;
 };
 
@@ -304,6 +580,7 @@ export interface SignalDecisionRecord {
   action?: unknown;
   outcome?: OutcomeEvaluation;
   accountability?: AccountabilityReport;
+  assessment?: DecisionAssessment;
   humanSummary: string;
   retentionTier: "hot" | "warm" | "cold" | "expired";
 }
@@ -333,6 +610,7 @@ export type DecisionRecordInput = {
   action?: unknown;
   outcome?: OutcomeEvaluation;
   accountability?: AccountabilityReport;
+  assessment?: DecisionAssessmentInput | DecisionAssessment;
   humanSummary?: string;
   retentionTier?: "hot" | "warm" | "cold" | "expired";
 };
@@ -365,6 +643,7 @@ export type DecisionPipelineInput = {
   observation: unknown;
   modules: DecisionModuleInputs;
   prediction?: PredictionInput;
+  assessment?: DecisionAssessmentInput;
   wisdom?: WisdomInput;
   action?: unknown;
   outcome?: OutcomeEvaluationInput;

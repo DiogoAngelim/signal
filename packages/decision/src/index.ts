@@ -1,3 +1,10 @@
+export {
+  assessDecisionEvidence,
+  createDecisionJournal,
+  deriveLearningPatterns,
+  generateDecisionLearning,
+  reviewDecisionOutcome,
+} from "./assessment";
 export { createAccountabilityReport, replayDecision } from "./accountability";
 export { assessCoherence, detectCoherenceConflicts } from "./coherence";
 export { attachAccountability, compareReplay, createDecisionRecord, createInMemoryDecisionRecordStore } from "./decision-record";
@@ -9,7 +16,14 @@ export { evaluateDecision } from "./pipeline";
 export { bestPurposeScenario, generatePredictionScenarios, mostDangerousScenario, mostLikelyScenario } from "./prediction";
 export { compactRealityPayload, createRealitySnapshot, createRealitySnapshotForDecision } from "./reality";
 export { simulateDecisionPaths } from "./simulation";
-export { assessStewardship, consumeStewardshipMemory, evaluateStewardshipGovernance, interpretStewardshipOutcomes, selectStewardshipAction } from "./stewardship";
+export {
+  assessStewardship,
+  consumeStewardshipMemory,
+  createStewardshipLedger,
+  evaluateStewardshipGovernance,
+  interpretStewardshipOutcomes,
+  selectStewardshipAction,
+} from "./stewardship";
 export { assessWisdom } from "./wisdom";
 export type {
   StewardshipAssessment,
@@ -22,6 +36,12 @@ export type {
   StewardshipGovernanceStatus,
   StewardshipImportance,
   StewardshipInput,
+  StewardshipLedger,
+  StewardshipLedgerDecisionTrace,
+  StewardshipLedgerEvidenceTrace,
+  StewardshipLedgerLessonTrace,
+  StewardshipLedgerOutcomeTrace,
+  StewardshipLedgerTraceability,
   StewardshipLesson,
   StewardshipLessonOutcome,
   StewardshipMemoryInput,
@@ -41,18 +61,46 @@ export type {
 } from "./stewardship";
 export type {
   AccountabilityReport,
+  AssessmentFact,
+  AssessmentFactInput,
+  AssessmentFactStatus,
   CoherenceAssessment,
   CoherenceConflict,
   CoherenceConflictSeverity,
   CoherenceStatus,
+  DecisionAssessment,
+  DecisionAssessmentInput,
+  DecisionConfidenceDiscipline,
+  DecisionEvidence,
+  DecisionEvidenceDirection,
+  DecisionEvidenceInput,
+  DecisionEvidenceQualityAssessment,
+  DecisionGovernanceAssessment,
+  DecisionJournal,
+  DecisionLearning,
+  DecisionLearningOutcome,
+  DecisionLearningPattern,
   DecisionModuleInputs,
   DecisionModuleName,
+  DecisionNextBestEvidence,
   DecisionOperationDefinition,
+  DecisionOutcomeReview,
+  DecisionOutcomeReviewAssumption,
+  DecisionOutcomeReviewAssumptionStatus,
+  DecisionOutcomeReviewEvidence,
+  DecisionOutcomeReviewEvidenceRole,
+  DecisionOutcomeReviewInput,
   DecisionPipelineInput,
   DecisionPipelineResult,
   DecisionRecordInput,
   DecisionRecordStore,
+  DecisionReversibility,
+  DecisionReversibilityAssessment,
+  DecisionReversibilityInput,
   DecisionReplayComparison,
+  DecisionStewardshipAssessment,
+  DecisionThreat,
+  DecisionThreatInput,
   ModuleStateInput,
   NormalizedModuleState,
   OutcomeCategory,

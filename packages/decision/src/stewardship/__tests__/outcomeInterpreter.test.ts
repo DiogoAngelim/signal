@@ -24,12 +24,15 @@ describe("interpretStewardshipOutcomes", () => {
         id: "review:early",
         outcome: "too_early",
         lessons: ["The early result should not be over-weighted."],
+        evidenceIds: ["evidence:early-review"],
         uncertainty: "Too early to judge durability.",
       },
     ]);
 
     expect(result.lessons).toHaveLength(1);
     expect(result.lessons[0]?.summary).toBe("The early result should not be over-weighted.");
+    expect(result.lessons[0]?.sourceOutcomeReviewId).toBe("review:early");
+    expect(result.lessons[0]?.evidenceIds).toEqual(["evidence:early-review"]);
     expect(result.uncertainties[0]?.description).toBe("Too early to judge durability.");
   });
 
