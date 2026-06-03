@@ -91,6 +91,7 @@ folder that owns its runtime responsibility.
 | `api/` | Client/server interface packages | The package defines protocol, runtime, SDK, HTTP binding, or adapters that both apps and servers can use. |
 | `server/` | Backend services and server-only packages | The code runs on the backend, owns persistence, exposes a service, or belongs to the backend pipeline. |
 | `examples/` | Runnable examples, browser apps, and example-only integrations | The code demonstrates Signal usage or is not intended as a reusable package API. |
+| `frontend/` | Reserved local frontend support | Keep shared frontend helpers here only when they are not an app, package, or published workspace module. Current runnable frontends live in `examples/`. |
 | `packages/` | Reusable domain packages | The package is reusable application/domain logic that is not tied to a specific server, client, or example. |
 | `docs/` | Developer documentation | Orientation belongs in `docs/README.md`, rules belong in `docs/constitution.md`, and narrow audit notes belong in focused `docs/*-audit.md` files. |
 | `spec/` | Protocol RFCs and contract assets | The file captures protocol design decisions, published schemas, or compatibility fixtures. |
@@ -161,35 +162,55 @@ The diagram below is Mermaid, so Markdown viewers that support Mermaid render it
 as an illustration instead of ASCII art.
 
 ```mermaid
-flowchart LR
-  Developer["Developer application<br/>client, server, or example"]
-  Domain["packages/*<br/>domain logic"]
-  SDK["@signal/sdk-node<br/>defineQuery / defineMutation / defineEvent"]
-  Protocol["@signal/protocol<br/>names, schemas, envelopes, errors"]
-  Runtime["@signal/runtime<br/>execution, metadata, capabilities"]
-  Dispatcher["event dispatcher<br/>subscribers and replay safety"]
-  Idempotency["idempotency store<br/>memory or Postgres"]
-  HTTP["@signal/binding-http<br/>Fastify routes"]
-  Server["server/reference-server<br/>default HTTP service"]
-  Client["HTTP client or frontend"]
-  Examples["examples/*<br/>runnable integrations"]
-  Schemas["spec/contracts<br/>schemas and fixtures"]
+flowchart TB
+  subgraph Apps["Applications and examples"]
+    Browser["Browser or API client"]
+    ExampleApps["examples/*<br/>runnable apps and demos"]
+    Backend["server/reference-server<br/>production-style service"]
+  end
 
-  Developer --> SDK
-  Developer --> Domain
-  Examples --> SDK
-  Examples --> Domain
-  SDK --> Runtime
-  Protocol --> SDK
-  Protocol --> Runtime
+  subgraph Interface["Signal interface packages"]
+    Http["@signal/binding-http<br/>HTTP transport"]
+    Sdk["@signal/sdk-node<br/>operation definitions"]
+  end
+
+  subgraph Core["Signal correctness core"]
+    Runtime["@signal/runtime<br/>execute, replay, audit, dispatch"]
+    Protocol["@signal/protocol<br/>names, kinds, envelopes, errors"]
+    Idempotency["idempotency store<br/>memory or Postgres"]
+    Events["event dispatcher<br/>subscriber dedupe"]
+  end
+
+  subgraph Domain["Reusable decision packages"]
+    Decision["@signal/decision<br/>evidence, assessment, learning"]
+    Memory["@signal/decision-memory<br/>durable learning records"]
+    Support["agency, commitment,<br/>semantic-state"]
+  end
+
+  subgraph Contracts["Published contracts"]
+    Rfcs["spec/RFC-*.md"]
+    Schemas["spec/contracts<br/>schemas and fixtures"]
+    Constitution["docs/constitution.md"]
+  end
+
+  Browser --> Http
+  ExampleApps --> Http
+  ExampleApps --> Sdk
+  ExampleApps --> Decision
+  ExampleApps --> Support
+  Backend --> Http
+  Backend --> Sdk
+  Backend --> Decision
+  Http --> Runtime
+  Sdk --> Runtime
   Runtime --> Protocol
-  Runtime --> Dispatcher
   Runtime --> Idempotency
-  HTTP --> Runtime
-  Server --> HTTP
-  Server --> SDK
-  Client --> HTTP
+  Runtime --> Events
   Schemas --> Protocol
+  Rfcs --> Protocol
+  Constitution --> Protocol
+  Memory --> Decision
+  Support --> Decision
 ```
 
 Dependency direction should stay simple:
@@ -199,8 +220,11 @@ Dependency direction should stay simple:
 - `api/sdk-node` makes operation definitions ergonomic.
 - `api/binding-http` adapts HTTP requests into runtime calls.
 - `server/*` composes backend services and persistence.
-- `examples/*` consume core packages.
-- `packages/*` holds reusable domain logic.
+- `examples/*` consume core packages and own runnable frontend/product demos.
+- `frontend/*` is not a workspace package today; keep production app code in
+  `examples/*` unless the workspace shape changes.
+- `packages/*` holds reusable domain logic that can feed applications through
+  adapters.
 
 Core packages must not depend on product apps or examples.
 

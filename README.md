@@ -55,6 +55,7 @@ api/                 client/server interface packages
 server/              backend packages and reference server
 examples/            runnable examples and example-only integrations
 packages/            reusable Signal domain packages
+frontend/            reserved local frontend support, not a workspace package
 docs/README.md       single documentation index
 docs/constitution.md Signal standard and change rules
 docs/*-audit.md      focused architecture and quality audits
@@ -63,9 +64,10 @@ spec/contracts/      published schemas and shared fixtures
 ```
 
 Core protocol/runtime code lives in `api/`. Backend implementation packages
-live in `server/`. Example-only packages, including operation examples and
-climate forecast, live in `examples/`. Published schemas and shared fixtures
-live together under `spec/contracts/`. The landing app was removed.
+live in `server/`. Example-only packages and runnable frontends live in
+`examples/`. `frontend/` is reserved local support and is not currently a
+pnpm workspace package. Published schemas and shared fixtures live together
+under `spec/contracts/`. The landing app was removed.
 
 `@signal/decision` owns the reusable decision-quality model: evidence
 assessment, confidence caps, assumption and contradiction visibility, decision
