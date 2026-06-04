@@ -10,3 +10,6 @@
 [submodule "examples/forex/lib/tradingview-data"]
 	path = examples/forex/lib/tradingview-data
 	url = git@github.com:DiogoAngelim/tradingview-data.git
+[submodule "examples/algai"]
+	path = examples/algai
+	url = git@github.com:DiogoAngelim/algai.git

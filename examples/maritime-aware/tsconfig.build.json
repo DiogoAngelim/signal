@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": false,
+    "rootDir": "src"
+  },
+  "include": [
+    "src/api/**/*.ts",
+    "src/adapters/**/*.ts",
+    "src/contracts/**/*.ts",
+    "src/fixtures/**/*.ts",
+    "src/map/**/*.ts",
+    "src/signal/**/*.ts",
+    "src/index.ts"
+  ]
+}

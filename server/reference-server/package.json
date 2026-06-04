@@ -1,0 +1,39 @@
+{
+  "name": "@signal/reference-server",
+  "version": "0.1.0",
+  "private": false,
+  "type": "commonjs",
+  "main": "dist/app.js",
+  "types": "dist/app.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/app.js",
+      "require": "./dist/app.js",
+      "types": "./dist/app.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "pnpm run typecheck",
+    "dev": "node dist/app.js",
+    "start": "node dist/app.js",
+    "proof": "pnpm run build && node dist/reference-proof.js",
+    "proof:postgres": "pnpm run build && node dist/reference-proof.js --postgres",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@signal/binding-http": "workspace:*",
+    "@signal/idempotency-postgres": "workspace:*",
+    "@signal/protocol": "workspace:*",
+    "@signal/runtime": "workspace:*",
+    "@signal/sdk-node": "workspace:*",
+    "fastify": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.16",
+    "typescript": "^5.7.3"
+  }
+}

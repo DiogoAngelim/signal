@@ -1,0 +1,81 @@
+export {
+  assessDecisionEvidence,
+  createDecisionJournal,
+  deriveLearningPatterns,
+  generateDecisionLearning,
+  reviewDecisionOutcome,
+} from "./assessment";
+export { createAccountabilityReport, replayDecision } from "./accountability";
+export { assessCoherence, detectCoherenceConflicts } from "./coherence";
+export {
+  attachAccountability,
+  compareReplay,
+  createDecisionRecord,
+  createInMemoryDecisionRecordStore,
+} from "./decision-record";
+export {
+  accountabilityHumanSummary,
+  buildHumanDecisionGuide,
+  createHumanDecisionSummary,
+} from "./human-language";
+export type { HumanDecisionGuideStep } from "./human-language";
+export { applyOutcomeFeedback, evaluateOutcome } from "./outcomes";
+export { evaluateDecision } from "./pipeline";
+export {
+  compactRealityPayload,
+  createRealitySnapshot,
+  createRealitySnapshotForDecision,
+} from "./reality";
+export type {
+  AccountabilityReport,
+  AssessmentFact,
+  AssessmentFactInput,
+  AssessmentFactStatus,
+  CoherenceAssessment,
+  CoherenceConflict,
+  CoherenceConflictSeverity,
+  CoherenceStatus,
+  DecisionAssessment,
+  DecisionAssessmentInput,
+  DecisionConfidenceDiscipline,
+  DecisionEvidence,
+  DecisionEvidenceDirection,
+  DecisionEvidenceInput,
+  DecisionEvidenceQualityAssessment,
+  DecisionGovernanceAssessment,
+  DecisionJournal,
+  DecisionLearning,
+  DecisionLearningOutcome,
+  DecisionLearningPattern,
+  DecisionModuleInputs,
+  DecisionModuleName,
+  DecisionNextBestEvidence,
+  DecisionOutcomeReview,
+  DecisionOutcomeReviewAssumption,
+  DecisionOutcomeReviewAssumptionStatus,
+  DecisionOutcomeReviewEvidence,
+  DecisionOutcomeReviewEvidenceRole,
+  DecisionOutcomeReviewInput,
+  DecisionPipelineInput,
+  DecisionPipelineResult,
+  DecisionRecordInput,
+  DecisionRecordStore,
+  DecisionReplayComparison,
+  DecisionReversibility,
+  DecisionReversibilityAssessment,
+  DecisionReversibilityInput,
+  DecisionStewardshipAssessment,
+  DecisionThreat,
+  DecisionThreatInput,
+  ModuleStateInput,
+  NormalizedModuleState,
+  OutcomeCategory,
+  OutcomeEvaluation,
+  OutcomeEvaluationInput,
+  OutcomeFeedback,
+  OutcomeHorizon,
+  RealitySnapshot,
+  RealitySnapshotInput,
+  RealitySource,
+  SignalDecisionRecord,
+} from "./types";

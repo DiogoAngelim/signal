@@ -1,0 +1,25 @@
+{
+  "name": "low-confidence-deferred",
+  "assumptions": [
+    "A positive decision does not imply commitment.",
+    "Balanced policy requires confidence above its threshold."
+  ],
+  "input": {
+    "strategy": "risk_adjusted",
+    "policy": "balanced",
+    "resource": { "available": 100 },
+    "decision": { "id": "thin", "confidence": 0.3, "trust": 0.8, "risk": 0.2 },
+    "now": "2026-06-01T00:00:00Z"
+  },
+  "expectations": {
+    "status": "deferred",
+    "strategy": "risk_adjusted",
+    "totalRecommended": 0,
+    "normalizedCommitment": 0,
+    "limitedBy": ["policy_gate", "confidence_threshold"],
+    "cappedBy": [],
+    "recommendations": [
+      { "targetId": "thin", "amount": 0, "normalizedCommitment": 0, "weight": 0, "mode": "none" }
+    ]
+  }
+}

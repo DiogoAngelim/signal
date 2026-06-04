@@ -1,0 +1,28 @@
+{
+  "name": "@signal/algai-parent-dashboard",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build && pnpm run typecheck",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "pnpm run typecheck",
+    "test": "vitest run --environment node --globals",
+    "clean": "rm -rf dist coverage"
+  },
+  "dependencies": {
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.16",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "typescript": "^5.7.3",
+    "vite": "catalog:",
+    "vitest": "^2.1.9"
+  }
+}

@@ -3,6 +3,7 @@ node_modules
 dist
 build
 coverage
+.docusaurus
 .tmp
 *.log
 .DS_Store
@@ -13,6 +14,10 @@ coverage
 .next
 out
 *.tsbuildinfo
-apps/reference-server/dist
+*.zip
+.local-cache
+repo.txt
+.signal-example-training
 docs/build
+docs/.docusaurus
 .vercel

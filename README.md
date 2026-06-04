@@ -1,261 +1,111 @@
-# Signal Protocol v1
+# Signal
 
-Signal is a protocol-first, transport-independent application protocol and Node.js reference runtime for versioned queries, mutations, and events.
+Signal makes dangerous backend operations explicit, replay-safe, and
+auditable.
 
-Signal is not a payments framework. It is the execution kernel and public contract that downstream systems can build on.
+It is a production correctness standard for versioned **Queries**,
+**Mutations**, and **Events**. It is not a framework replacement, workflow
+engine, message broker, database, auth provider, API gateway, full-stack
+platform, or payment network.
 
-## What Signal Is
+## Understand Signal Fast
 
-- a public protocol contract for messages, names, results, errors, and capabilities
-- a reference runtime for explicit query, mutation, and event execution
-- a thin binding model for HTTP and future transports
-- a pluggable foundation for idempotency storage, replay-safe consumers, and delivery metadata
+In 10 seconds: Signal makes dangerous backend operations explicit,
+replay-safe, and auditable.
 
-## What Signal Is Not
+In 30 seconds: applications define reads as Queries, dangerous state changes as
+Mutations, and completed facts as Events. Signal gives those operations stable
+names, schemas, idempotency, replay metadata, subscriber dedupe, audit evidence,
+and certification.
 
-- not a payment processor
-- not a retry scheduler
-- not a workflow engine
-- not an ORM or dependency injection container
-- not a broker-specific framework
+In 5 minutes, a developer should be able to run the reference proof, execute a
+dangerous mutation, retry it safely, observe replay, observe conflict, observe
+emitted events, observe audit evidence, and run certification.
 
-## Core Guarantees
-
-- operations are explicit and versioned: `note.get.v1`, `post.publish.v1`, `post.published.v1`
-- every message uses the standard Signal structure
-- queries are read-only
-- mutations declare idempotency explicitly: `required`, `optional`, or `none`
-- same idempotency key plus same normalized payload yields the same logical result
-- same idempotency key plus different normalized payload yields conflict
-- events are immutable facts and consumers must be replay-safe
-- context, auth, meta, and delivery metadata remain explicit and transport-independent
-- capabilities are derived from the actual runtime surface
-
-## Layering
-
-- Protocol: public contract
-- Runtime: execution kernel
-- Bindings: transport adapters
-- Storage: pluggable persistence for idempotency and replay state
-- Domain modules: downstream systems built on top of Signal
-
-## Client Session Guidance
-
-Signal keeps execution and transport semantics explicit, but long-running browser session behavior remains a downstream concern.
-
-- browser clients should set request timeouts and treat deadlines as application policy
-- browser clients should use retry and backoff for transient HTTP failures instead of expecting the runtime to schedule retries
-- browser clients should surface stale-state UI when refresh loops pause or fail
-- browser clients should refresh on visibility or connectivity changes when they depend on periodic polling
-- background notifications should be delivered by app-level infrastructure such as web push, email, or another server-side channel
-
-Signal may carry transport-independent hints such as `context.deadlineAt`, but it does not manage browser tab lifecycle, polling loops, reconnection policy, or push delivery for downstream applications.
-
-## Packages
-
-- `packages/protocol`: messages, names, results, errors, capabilities, and JSON-schema artifacts
-- `packages/runtime`: Node.js reference runtime, idempotency helpers, dispatcher, replay-safe utilities
-- `packages/sdk-node`: explicit registration helpers for Node applications
-- `packages/binding-http`: thin Fastify binding for Signal queries, mutations, and capabilities
-- `packages/idempotency-postgres`: PostgreSQL-backed idempotency store
-- `packages/examples`: runnable generic examples
-- `apps/reference-server`: runnable reference server
-
-## Quick Start
+## Start Here
 
 ```bash
 pnpm install
-pnpm build
+pnpm proof:reference
+```
+
+The proof executes `payment.capture.v1`, retries it with the same idempotency
+key, forces an idempotency conflict, verifies redacted audit and outbox
+evidence, checks subscriber dedupe, and runs `reference.certification.v1`.
+
+To inspect the HTTP binding too:
+
+```bash
+pnpm --filter @signal/reference-server... build
 pnpm --filter @signal/reference-server start
 ```
 
-Inspect the runtime surface:
+Then call the dangerous mutation:
 
 ```bash
-curl http://127.0.0.1:3001/signal/capabilities
-```
-
-Run a query:
-
-```bash
-curl -X POST http://127.0.0.1:3001/signal/query/note.get.v1 \
+curl -X POST http://127.0.0.1:3001/signal/mutation/payment.capture.v1 \
   -H 'content-type: application/json' \
-  -d '{
-    "payload": {
-      "noteId": "note_1001"
-    }
-  }'
+  -d '{"idempotencyKey":"tenant_acme:capture:readme","auth":{"actor":{"id":"ops_alice"},"subject":"tenant:tenant_acme","scopes":["payment:capture","tenant:tenant_acme"]},"payload":{"tenantId":"tenant_acme","authorizationId":"auth_readme","amountCents":12500,"currency":"USD","paymentMethod":{"token":"tok_live_secret","last4":"4242"},"risk":{"declared":true,"classification":"high","reason":"Customer-visible payment capture moves funds.","approvedBy":"ops_alice"}}}'
 ```
 
-Run an idempotent mutation:
+## Folder Shape
+
+```txt
+api/                 client/server interface packages
+server/              backend packages and reference server
+examples/            runnable examples and example-only integrations
+packages/            reusable Signal domain packages
+frontend/            reserved local frontend support, not a workspace package
+docs/README.md       single documentation index
+docs/constitution.md Signal standard and change rules
+docs/*-audit.md      focused architecture and quality audits
+spec/                protocol RFCs and contract assets
+spec/contracts/      published schemas and shared fixtures
+```
+
+Core protocol/runtime code lives in `api/`. Backend implementation packages
+live in `server/`. Example-only packages and runnable frontends live in
+`examples/`. `frontend/` is reserved local support and is not currently a
+pnpm workspace package. Published schemas and shared fixtures live together
+under `spec/contracts/`. The landing app was removed.
+
+`@signal/decision` owns the reusable decision-quality model: evidence
+assessment, confidence caps, assumption and contradiction visibility, decision
+journals, outcome reviews, learning records, and derived stewardship/governance
+views. New application code should prefer `@signal/decision/core`; product apps
+own their domain language, APIs, metrics, and UX.
+
+## Common Commands
 
 ```bash
-curl -X POST http://127.0.0.1:3001/signal/mutation/post.publish.v1 \
-  -H 'content-type: application/json' \
-  -d '{
-    "payload": {
-      "postId": "post_1001",
-      "title": "Protocol first",
-      "body": "Signal keeps transport and execution concerns separate."
-    },
-    "idempotencyKey": "publish-post_1001-001",
-    "context": {
-      "correlationId": "corr-post-1001"
-    }
-  }'
+pnpm proof:reference
+pnpm proof:reference:postgres # requires DATABASE_URL
+pnpm db:migrate              # requires DATABASE_URL
+pnpm release:library
+pnpm test
+pnpm typecheck
+pnpm lint
+pnpm verify:exports
+pnpm -r --if-present --sort run test:coverage
 ```
 
-## In-Process Usage
+Before production changes, run the non-example library surface when you are not
+working on apps:
 
-```ts
-import { createSignalRuntime, defineMutation, defineQuery } from "@signal/sdk-node";
-import { createInProcessDispatcher, createMemoryIdempotencyStore } from "@signal/runtime";
-import { z } from "zod";
-
-const runtime = createSignalRuntime({
-  dispatcher: createInProcessDispatcher(),
-  idempotencyStore: createMemoryIdempotencyStore(),
-  runtimeName: "signal-local",
-});
-
-runtime.registerQuery(
-  defineQuery({
-    name: "note.get.v1",
-    kind: "query",
-    inputSchema: z.object({ noteId: z.string().min(1) }),
-    resultSchema: z.object({
-      noteId: z.string().min(1),
-      body: z.string().min(1),
-    }),
-    handler: async (input) => ({
-      noteId: input.noteId,
-      body: "Signal keeps protocol contracts explicit.",
-    }),
-  })
-);
-
-runtime.registerMutation(
-  defineMutation({
-    name: "post.publish.v1",
-    kind: "mutation",
-    idempotency: "required",
-    emits: ["post.published.v1"],
-    inputSchema: z.object({
-      postId: z.string().min(1),
-      title: z.string().min(1),
-      body: z.string().min(1),
-    }),
-    resultSchema: z.object({
-      postId: z.string().min(1),
-      status: z.literal("published"),
-    }),
-    handler: async (input, context) => {
-      await context.emit("post.published.v1", {
-        postId: input.postId,
-        title: input.title,
-        publishedAt: new Date().toISOString(),
-      });
-
-      return {
-        postId: input.postId,
-        status: "published",
-      };
-    },
-  })
-);
+```bash
+pnpm typecheck:library
+pnpm lint:library
+pnpm test:library
+pnpm verify:exports
 ```
 
-## Protocol Surface
+Read the full documentation in [docs/README.md](docs/README.md).
 
-The v1 envelope includes:
+## Example App Links
 
-- `protocol`
-- `kind`
-- `name`
-- `messageId`
-- `timestamp`
-- `payload`
-- optional `source`
-- optional `context`
-- optional `delivery`
-- optional `auth`
-- optional `meta`
+- Aware: <https://aware-guide.vercel.app>
+- Stocks Optimizer: <https://stocks-optimizer.vercel.app>
 
-The reference runtime also recognizes:
+## License
 
-- `context.idempotencyKey`
-- `context.deadlineAt`
-- `context.trace`
-- `delivery.attempt`
-- `delivery.consumerId`
-- `delivery.replayed`
-
-Successful results can include logical outcome metadata such as:
-
-- `meta.outcome = "completed"`
-- `meta.outcome = "replayed"`
-
-Failures are structured and categorized, for example:
-
-- `VALIDATION_ERROR`
-- `BUSINESS_REJECTION`
-- `IDEMPOTENCY_CONFLICT`
-- `DEADLINE_EXCEEDED`
-- `CANCELLED`
-- `UNSUPPORTED_OPERATION`
-
-## Examples
-
-Runnable examples live in `packages/examples/`:
-
-- `minimal-runtime`
-- `post-publication`
-- `http-post-publication`
-- `capabilities-inspection`
-- `storage-backed-idempotency`
-- `custom-transport-skeleton`
-
-## Specs And Docs
-
-- `spec/`: RFCs and conformance fixtures
-- `schemas/`: published JSON-schema artifacts
-- `docs/`: Docusaurus docs
-- `START_HERE.md`: repo reading path
-- `QUICK_REFERENCE.md`: API and contract cheat sheet
-
-## Conformance Direction
-
-A Signal-compatible implementation must preserve:
-
-- envelope validation
-- versioned names
-- query, mutation, and event semantics
-- structured results and errors
-- explicit idempotency semantics
-- replay-safe event consumption assumptions
-- capability discovery
-
-The Node runtime is the reference implementation, not the only valid one.
-# Example Apps
-
-Signal no longer includes a standalone frontend workspace. UI demos live in `examples/`:
-
-- `examples/weather/` - Weather Signal app + server. See `examples/weather/replit.md` for setup and commands.
-- `examples/stocks/` - Signal Markets UI demo. See `examples/stocks/src/replit.md` for details.
-
-## npm Module: signal-protocol
-
-This repo includes a publishable package at [packages/signal-protocol](packages/signal-protocol).
-It bundles the API routes plus the built client assets to avoid shipping frontend dependencies.
-
-Build the package (includes client assets):
-
-```
-pnpm -C packages/signal-protocol run prepack
-```
-
-Publish (run this manually):
-
-```
-pnpm -C packages/signal-protocol publish --access public
-```
+MIT

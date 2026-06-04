@@ -1,0 +1,30 @@
+{
+  "name": "over-constrained-allocation",
+  "assumptions": [
+    "Global caps reduce total allocatable commitment.",
+    "Target caps can leave allocatable commitment unallocated."
+  ],
+  "input": {
+    "strategy": "equal_weight",
+    "policy": "balanced",
+    "resource": { "available": 1000 },
+    "decisions": [
+      { "id": "a", "confidence": 0.9, "trust": 0.9, "risk": 0.1, "maxCommitment": 50 },
+      { "id": "b", "confidence": 0.9, "trust": 0.9, "risk": 0.1, "maxCommitment": 40 }
+    ],
+    "constraints": [{ "id": "global-max", "maxCommitment": 300 }],
+    "now": "2026-06-01T00:00:00Z"
+  },
+  "expectations": {
+    "status": "recommended",
+    "strategy": "equal_weight",
+    "totalRecommended": 90,
+    "normalizedCommitment": 0.09,
+    "limitedBy": ["constraint_cap", "target_caps"],
+    "cappedBy": ["constraint.global_cap", "target.0.cap", "target.1.cap"],
+    "recommendations": [
+      { "targetId": "a", "amount": 50, "normalizedCommitment": 0.05, "weight": 0.166667, "mode": "micro" },
+      { "targetId": "b", "amount": 40, "normalizedCommitment": 0.04, "weight": 0.133333, "mode": "micro" }
+    ]
+  }
+}

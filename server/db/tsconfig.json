@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "outDir": "dist",
+    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "types": ["node"]
+  },
+  "include": ["index.ts", "errors.ts", "types.ts", "adapters/**/*.ts"],
+  "exclude": ["dist", "node_modules", "test/**/*.ts"]
+}

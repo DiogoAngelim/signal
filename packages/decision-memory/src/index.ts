@@ -1,0 +1,162 @@
+export { CompactionJob } from "./compaction";
+export {
+  BeliefDecayEngine,
+  CalibrationEngine,
+  ConvictionEngine,
+  DisconfirmationEngine,
+  MindChangeEngine,
+  NarrativeEngine,
+  OpportunityCostEngine,
+  ProcessQualityEngine,
+  ReadinessEngine,
+  ReflectionEngine,
+  RegimeMemoryEngine,
+  ThesisEngine,
+  TimeHorizonEngine,
+  applyBeliefDecay,
+  buildConvictionProfile,
+  buildCalibrationRecord,
+  buildMindChangeTriggers,
+  buildProcessQualityRecord,
+  buildReadinessProfile,
+  buildRegimeSnapshot,
+  buildTimeHorizonViews,
+  assessDisconfirmation,
+  createDecisionReview,
+  createInvestorLearningAssessment,
+  createLearningRecordFromReview,
+  createThesis,
+  evaluateBeliefFreshness,
+  evaluatePortfolioContext,
+  findSimilarRegimes,
+  generateInvestorNarrative,
+  rankOpportunities,
+  regimeSimilarity,
+  updateThesisStatus,
+  validateDecisionRecord,
+  validateRegimeSnapshot,
+  validateThesis,
+} from "./learning";
+export { createInMemoryDecisionMemoryStore, InMemoryDecisionMemoryStore } from "./memory-store";
+export {
+  DecisionMemoryContractAdapter,
+  MEMORY_CONTRACT_VERSION,
+  MEMORY_SCOPE_METADATA_KEY,
+  MemoryAppendOnlyError,
+  MemoryScopeError,
+  assertMemoryScope,
+  createDecisionMemoryContractAdapter,
+  matchesMemoryScope,
+  memoryScopeFromRecord,
+  memoryStorageDecisionId,
+} from "./contracts";
+export { NeonPostgresAdapter, SIGNAL_DECISION_MEMORY_MIGRATION_SQL } from "./postgres";
+export {
+  DEFAULT_RETENTION_POLICY,
+  MemoryLifecycle,
+  decisionMemoryConfigFromEnv,
+  normalizeRetentionPolicy,
+  normalizeRetentionTier,
+  retentionPolicyFromEnv,
+  retentionTierForCreatedAt,
+  withLifecycleTier,
+} from "./retention";
+export {
+  DECISION_MEMORY_OPERATION_DEFINITIONS,
+  createDecisionMemoryOperations,
+  listDecisionMemoryOperations,
+  registerDecisionMemoryOperations,
+} from "./operations";
+export {
+  anonymizeExpiredRecord,
+  compactDecisionRecord,
+  summarizeDecisionRecords,
+} from "./summary";
+export type {
+  CalibrationHistoryEntry,
+  CalibrationQueryContractInput,
+  CalibrationQueryContractResult,
+  CompactionJobInput,
+  CompactionJobResult,
+  DecisionMemoryConfig,
+  DecisionMemoryReplayResult,
+  DecisionMemoryStore,
+  DecisionRecordContractInput,
+  DecisionRecordFilter,
+  DecisionRecordStore,
+  ExpiredMemoryMode,
+  LessonRecordContractInput,
+  LearningRecordFilter,
+  LearningStore,
+  MemoryRecordGovernance,
+  MemoryRecordKind,
+  MemorySummary,
+  MemoryScope,
+  MemoryStatsContractInput,
+  MemoryStatsContractResult,
+  MemoryTimelineContractInput,
+  MemoryTimelineContractResult,
+  MemoryTimelineEntry,
+  OutcomeRecordContractInput,
+  OutcomeStore,
+  RealitySnapshotFilter,
+  RealityStore,
+  ReviewRecordContractInput,
+  ReplaySnapshot,
+  ReplayStore,
+  RetentionJobRecord,
+  RetentionJobStore,
+  RetentionPolicy,
+  RetentionTier,
+  SimilarityQueryContractInput,
+  SimilarityQueryContractResult,
+  SummaryStore,
+  TrustHistoryEntry,
+} from "./types";
+export type {
+  BeliefFreshnessProfile,
+  CalibrationRecord,
+  ConvictionProfile,
+  DecisionOutcome,
+  DecisionOutcomeJudgment,
+  DecisionRecord,
+  DecisionReview,
+  DisconfirmationProfile,
+  DisconfirmingEvidence,
+  Evidence,
+  EvidenceDirection,
+  Horizon,
+  InvestorLearningAssessment,
+  InvestorLearningInput,
+  InvestorNarrative,
+  LearningRecord,
+  MindChangeTrigger,
+  OpportunityRankingInput,
+  OpportunityRankingResult,
+  PortfolioContext,
+  ProcessQualityRecord,
+  RankedOpportunity,
+  ReadinessProfile,
+  RegimeSnapshot,
+  SimilarRegime,
+  Thesis,
+  ThesisStatus,
+  TimeHorizonView,
+  ValidationResult,
+} from "./learning";
+
+import { createInMemoryDecisionMemoryStore } from "./memory-store";
+import { NeonPostgresAdapter } from "./postgres";
+import { decisionMemoryConfigFromEnv } from "./retention";
+import type { DecisionMemoryStore } from "./types";
+
+export function createDecisionMemoryStoreFromEnv(env: NodeJS.ProcessEnv = process.env): DecisionMemoryStore {
+  const config = decisionMemoryConfigFromEnv(env);
+  if (!config.enabled || config.provider === "memory" || !config.databaseUrl) {
+    return createInMemoryDecisionMemoryStore();
+  }
+  return new NeonPostgresAdapter({
+    connectionString: config.databaseUrl,
+    source: config.source,
+  });
+}

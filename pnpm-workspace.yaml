@@ -1,6 +1,18 @@
 packages:
+  - "api/*"
   - "packages/*"
-  - "packages/examples/*"
-  - "apps/*"
-  - "docs"
-  - "landing"
+  - "server/*"
+  - "examples/*"
+
+catalog:
+  "@types/pg": "8.20.0"
+  "@types/react": "19.2.16"
+  "@types/react-dom": "19.2.3"
+  "@vitejs/plugin-react": "6.0.2"
+  "esbuild": "0.28.0"
+  "lucide-react": "1.17.0"
+  "pg": "8.21.0"
+  "react": "19.2.7"
+  "react-dom": "19.2.7"
+  "vite": "8.0.16"
+  "zod": "4.4.3"
