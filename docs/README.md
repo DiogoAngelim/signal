@@ -144,7 +144,7 @@ named `@signal/examples`.
 | `@signal/aware` | `examples/aware` | Product-style example application that consumes Signal decision and memory packages. |
 | `@signal/algai-parent-dashboard` | `examples/algai-parent-dashboard` | Parent-facing AlgAI dashboard example built with Vite and React. |
 | `dyslexia-translator` | `examples/algai` | Standalone example app with its own backend/frontend structure. |
-| Stocks Optimizer state | `examples/stocks-optimizer` | Preserved app state in this checkout; it is not currently a pnpm workspace package. |
+| Stocks Optimizer | `examples/stocks-optimizer` | Recovered application workspace. Its `@workspace/signal-markets` app maps investment concepts into generic Signal contracts through an adapter. |
 
 ### Contract Assets
 
@@ -1136,7 +1136,7 @@ Application examples:
 | --- | --- | --- | --- |
 | Aware | `examples/aware` | `pnpm --filter @signal/aware dev` | <https://aware-guide.vercel.app> |
 | AlgAI Parent Dashboard | `examples/algai-parent-dashboard` | `pnpm --filter @signal/algai-parent-dashboard dev` | Local/package example; no Vercel app recorded here. |
-| Stocks Optimizer | `examples/stocks-optimizer` | Preserved example state in this checkout; it is not currently a pnpm workspace package. | <https://stocks-optimizer.vercel.app> |
+| Stocks Optimizer | `examples/stocks-optimizer` | `pnpm --filter stocks-optimizer build` | <https://stocks-optimizer.vercel.app> |
 
 Reference server:
 

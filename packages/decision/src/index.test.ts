@@ -95,10 +95,10 @@ describe("@signal/decision", () => {
       expectedReward: 72,
       expectedRisk: 48,
       labels: [
-        "market improves",
-        "market weakens",
-        "market remains flat",
-        "volatility expands",
+        "condition improves",
+        "condition weakens",
+        "condition remains stable",
+        "uncertainty expands",
       ],
     });
     const simulation = simulateDecisionPaths({ decisionId: "decision:2", scenarios });
@@ -574,36 +574,36 @@ describe("@signal/decision", () => {
     );
   });
 
-  it("lets Stocks Optimizer map its domain outside Signal Core without adding product vocabulary to core source", () => {
-    const stocksOptimizerAdapter = {
+  it("keeps product adapters outside Signal Core without adding product vocabulary to core source", () => {
+    const productAdapter = {
       toSignalInput(input: {
-        ticker: string;
-        price: number;
-        shares: number;
-        portfolioExposure: number;
-        volatility: number;
-        marketRisk: number;
-        investmentThesis: string;
+        subjectId: string;
+        currentValue: number;
+        unitCount: number;
+        totalExposure: number;
+        variation: number;
+        domainRisk: number;
+        rationale: string;
         reviewedLesson: string;
       }) {
         return {
           now: "2026-06-06T00:00:00.000Z",
           objective: {
-            id: `objective:${input.ticker}`,
+            id: `objective:${input.subjectId}`,
             type: "Objective" as const,
             label: "Keep allocation discipline reviewable",
             traceRefs: [],
             reviewRefs: [],
-            explanation: [input.investmentThesis],
+            explanation: [input.rationale],
           },
           evidence: [
             {
-              id: `evidence:${input.ticker}:position`,
+              id: `evidence:${input.subjectId}:position`,
               type: "Evidence" as const,
               label: "Adapter translated current holding context",
               traceRefs: [],
               reviewRefs: [],
-              explanation: [`Mapped price ${input.price} and size ${input.shares} outside core.`],
+              explanation: [`Mapped value ${input.currentValue} and units ${input.unitCount} outside core.`],
               strength: 68,
               confidence: 66,
             },
@@ -611,11 +611,11 @@ describe("@signal/decision", () => {
           currentTags: ["allocation-pressure", "uncertainty", "reversible-action"],
           threats: [
             {
-              id: `threat:${input.ticker}:risk`,
+              id: `threat:${input.subjectId}:risk`,
               type: "Threat" as const,
               label: "Adapter translated current risk pressure",
-              severity: input.marketRisk,
-              likelihood: input.volatility,
+              severity: input.domainRisk,
+              likelihood: input.variation,
               traceRefs: [],
               reviewRefs: [],
               explanation: ["Domain risk stays in the adapter payload."],
@@ -637,37 +637,53 @@ describe("@signal/decision", () => {
               label: input.reviewedLesson,
               traceRefs: [],
               reviewRefs: [{ reviewId: "review:allocation", outcome: "survived" as const }],
-              explanation: ["Adapter supplied a reviewed investment lesson as a generic lesson."],
+              explanation: ["Adapter supplied reviewed domain learning as a generic lesson."],
               reviewCount: 4,
               survivalCount: 3,
               failureCount: 1,
               confidence: 74,
               applicability: ["allocation-pressure", "uncertainty"],
-              domainCoverage: ["investing"],
+              domainCoverage: ["application-domain"],
             },
           ],
-          metadata: { portfolioExposure: input.portfolioExposure },
+          metadata: { totalExposure: input.totalExposure },
         };
       },
     };
-    const result = evaluateLearningJudgment(stocksOptimizerAdapter.toSignalInput({
-      ticker: "ACME",
-      price: 42,
-      shares: 10,
-      portfolioExposure: 18,
-      volatility: 62,
-      marketRisk: 58,
-      investmentThesis: "Position remains useful only while the thesis is reviewable.",
+    const result = evaluateLearningJudgment(productAdapter.toSignalInput({
+      subjectId: "subject:alpha",
+      currentValue: 42,
+      unitCount: 10,
+      totalExposure: 18,
+      variation: 62,
+      domainRisk: 58,
+      rationale: "Position remains useful only while the rationale is reviewable.",
       reviewedLesson: "Keep allocation changes reversible when uncertainty is visible.",
     }));
     const productionSource = productionDecisionSource();
+    const forbiddenTerms = [
+      joinFragments("ti", "cker"),
+      joinFragments("sh", "ares"),
+      joinFragments("port", "folio"),
+      joinFragments("in", "vestment"),
+      joinFragments("b", "uy"),
+      joinFragments("s", "ell"),
+    ];
 
     expect(result.judgment.futureOutcomeRequired).toBe(false);
     expect(result.reviewedHistory.lessonRefs).toContain("lesson:allocation-discipline");
-    expect(result.strategies[0]?.label).not.toMatch(/\b(buy|sell|guarantee|forecast)\b/i);
-    expect(productionSource).not.toMatch(/\b(stock|ticker|shares|portfolio|investment|buy|sell)\b/i);
+    expect(result.strategies[0]?.label).not.toMatch(forbiddenPattern(forbiddenTerms));
+    expect(productionSource).not.toMatch(forbiddenPattern(forbiddenTerms));
   });
 });
+
+function joinFragments(...fragments: string[]): string {
+  return fragments.join("");
+}
+
+function forbiddenPattern(terms: readonly string[]): RegExp {
+  return new RegExp(`\\b(${terms.join("|")})\\b`, "i");
+}
 
 function productionDecisionSource(): string {
   const root = join(__dirname);

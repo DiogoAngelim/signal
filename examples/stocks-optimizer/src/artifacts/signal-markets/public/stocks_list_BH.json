@@ -1,0 +1,174 @@
+[
+  {
+    "symbol": "BFM",
+    "name": "Bahrain Flour Mills Company BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/bahrain-flour-mills.svg"
+  },
+  {
+    "symbol": "BMB",
+    "name": "Bahrain Middle East Bank BSC",
+    "market": "BAHRAIN"
+  },
+  {
+    "symbol": "BMMI",
+    "name": "BMMI BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/bmmi-bsc.svg"
+  },
+  {
+    "symbol": "BNH",
+    "name": "Bahrain National Holding Company BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/bahrain-national-holding-co.svg"
+  },
+  {
+    "symbol": "CINECO",
+    "name": "Bahrain Cinema Co. BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/bahrain-cinema.svg"
+  },
+  {
+    "symbol": "CPARK",
+    "name": "Bahrain Car Parks Company (Amakin) B.S.C.",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/bahrain-car-parks-company-amakin-bsc.svg"
+  },
+  {
+    "symbol": "DUTYF",
+    "name": "Bahrain Duty Free Shop Complex",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/bahrain-duty-free-shop-complex-co.svg"
+  },
+  {
+    "symbol": "EBRIT",
+    "name": "Eskan Bank Realty Income Trust",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/eskan-bank-realty-income-trust.svg"
+  },
+  {
+    "symbol": "ESTERAD",
+    "name": "Esterad Investment Co. BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/esterad-investment.svg"
+  },
+  {
+    "symbol": "FAMILY",
+    "name": "Bahrain Family Leisure Co. BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/bahrain-family-leisure-bsc.svg"
+  },
+  {
+    "symbol": "GFH",
+    "name": "GFH Financial Group BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/gfh-financial-group.svg"
+  },
+  {
+    "symbol": "GHG",
+    "name": "Gulf Hotels Group",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-hotels-group.svg"
+  },
+  {
+    "symbol": "HOPE",
+    "name": "Hope Ventures Holding B.S.C. (c)",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/hope-ventures-bsc-c.svg"
+  },
+  {
+    "symbol": "INOVEST",
+    "name": "Inovest BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/inovest-bsc.svg"
+  },
+  {
+    "symbol": "ITHMR",
+    "name": "Ithmaar Holding BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/ithmaar-holding.svg"
+  },
+  {
+    "symbol": "KFH",
+    "name": "Kuwait Finance House K.S.C.",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-finance-house.svg"
+  },
+  {
+    "symbol": "KHALEEJI",
+    "name": "Khaleeji Bank B.S.C.",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/khaleeji-commercial-bank-bsc.svg"
+  },
+  {
+    "symbol": "NBB",
+    "name": "National Bank of Bahrain BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/national-bank-of-bahrain.svg"
+  },
+  {
+    "symbol": "NHOTEL",
+    "name": "National Hotels Company BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/national-hotels.svg"
+  },
+  {
+    "symbol": "POLTRY",
+    "name": "Delmon Poultry Company",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/delmon-poultry-bsc.svg"
+  },
+  {
+    "symbol": "SALAM",
+    "name": "Al Salam Bank B.S.C.",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/al-salam-bank.svg"
+  },
+  {
+    "symbol": "SEEF",
+    "name": "Seef Properties B.S.C",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/seef-properties.svg"
+  },
+  {
+    "symbol": "SILAH",
+    "name": "Silah Gulf B.S.C.(c)",
+    "market": "BAHRAIN"
+  },
+  {
+    "symbol": "SOLID",
+    "name": "Solidarity Bahrain BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/solidarity-bahrain-bsc.svg"
+  },
+  {
+    "symbol": "TAKAFUL",
+    "name": "Takaful International Company BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/takaful-international-company-bsc.svg"
+  },
+  {
+    "symbol": "TRAFCO",
+    "name": "TRAFCO Group BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/trafco-group-bsc.svg"
+  },
+  {
+    "symbol": "UGH",
+    "name": "United Gulf Holding Company B.S.C.",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/united-gulf-bsc.svg"
+  },
+  {
+    "symbol": "UGIC",
+    "name": "United Gulf Investment Corporation BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-investmen-fund.svg"
+  },
+  {
+    "symbol": "ZAINBH",
+    "name": "Zain Bahrain BSC",
+    "market": "BAHRAIN",
+    "image": "https://s3-symbol-logo.tradingview.com/zain-bahrain-bsc.svg"
+  }
+]

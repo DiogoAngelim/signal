@@ -1,0 +1,1537 @@
+[
+  {
+    "symbol": "CABO.N0000",
+    "name": "Cargo Boat Development Co. Ltd.",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/cargo-boat-development-company.svg"
+  },
+  {
+    "symbol": "CALF.N0000",
+    "name": "Dialog Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/dialog-finance.svg"
+  },
+  {
+    "symbol": "CALH.N0000",
+    "name": "Capital Alliance Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/capital-alliance.svg"
+  },
+  {
+    "symbol": "CALT.N0000",
+    "name": "Capital Alliance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/capital-alliance.svg"
+  },
+  {
+    "symbol": "CARE.N0000",
+    "name": "Printcare PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/printcare-ceylon.svg"
+  },
+  {
+    "symbol": "CARG.N0000",
+    "name": "Cargills (Ceylon) Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/cargills-ceylon.svg"
+  },
+  {
+    "symbol": "CARS.N0000",
+    "name": "Carson Cumberbatch PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/carson-cumberbatch.svg"
+  },
+  {
+    "symbol": "CBNK.N0000",
+    "name": "Cargills Bank Ltd",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/cargills-bank-plc.svg"
+  },
+  {
+    "symbol": "CCS.N0000",
+    "name": "Ceylon Cold Stores Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ceylon-cold-stores.svg"
+  },
+  {
+    "symbol": "CDB.N0000",
+    "name": "Citizens Development Business Finance Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/citizens-developme.svg"
+  },
+  {
+    "symbol": "CDB.X0000",
+    "name": "Citizens Development Business Finance Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/citizens-developme.svg"
+  },
+  {
+    "symbol": "CERA.N0000",
+    "name": "Lanka Ceramic PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lanka-ceramic.svg"
+  },
+  {
+    "symbol": "CFI.N0000",
+    "name": "Colombo Fort Investments PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/colombo-fort-invmn.svg"
+  },
+  {
+    "symbol": "CFIN.N0000",
+    "name": "Central Finance Company PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/central-finance.svg"
+  },
+  {
+    "symbol": "CFLB.N0000",
+    "name": "Colombo Fort Land & Building Company PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/colombo-fort-invmn.svg"
+  },
+  {
+    "symbol": "CFVF.N0000",
+    "name": "First Capital Holdings Public Limited Company",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/first-cap-hldg.svg"
+  },
+  {
+    "symbol": "CHL.N0000",
+    "name": "Ceylon Hospitals Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ceylon-hospitals.svg"
+  },
+  {
+    "symbol": "CHL.X0000",
+    "name": "Ceylon Hospitals Plc Nonvoting",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ceylon-hospitals.svg"
+  },
+  {
+    "symbol": "CHMX.N0000",
+    "name": "Chemanex Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/chemanex.svg"
+  },
+  {
+    "symbol": "CHOT.N0000",
+    "name": "Ceylon Hotels Corporation PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ceylon-hotels.svg"
+  },
+  {
+    "symbol": "CHOU.N0000",
+    "name": "City Housing & Real Estate Company PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/city-housing-and-rea.svg"
+  },
+  {
+    "symbol": "CIC.N0000",
+    "name": "CIC Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/cic-holdings.svg"
+  },
+  {
+    "symbol": "CIC.X0000",
+    "name": "CIC Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/cic-holdings.svg"
+  },
+  {
+    "symbol": "CIND.N0000",
+    "name": "Central Industries PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/central-industries.svg"
+  },
+  {
+    "symbol": "CINS.N0000",
+    "name": "Ceylinco holdings plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ceylo-insurance.svg"
+  },
+  {
+    "symbol": "CINS.X0000",
+    "name": "Ceylinco holdings plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ceylo-insurance.svg"
+  },
+  {
+    "symbol": "CINV.N0000",
+    "name": "Ceylon Investment Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/carson-cumberbatch.svg"
+  },
+  {
+    "symbol": "CIT.N0000",
+    "name": "Colombo Investment Trust Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/colombo-investment.svg"
+  },
+  {
+    "symbol": "CITH.N0000",
+    "name": "Hikkaduwa Beach Resort PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hikkaduwa-beach-r.svg"
+  },
+  {
+    "symbol": "CITW.N0000",
+    "name": "Waskaduwa Beach Resort PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hikkaduwa-beach-r.svg"
+  },
+  {
+    "symbol": "CLND.N0000",
+    "name": "Colombo Land & Development Co. Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/colombo-land-and-dev.svg"
+  },
+  {
+    "symbol": "COCO.N0000",
+    "name": "Renuka Foods Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/renuka-holdings.svg"
+  },
+  {
+    "symbol": "COCO.X0000",
+    "name": "Renuka Foods Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/renuka-holdings.svg"
+  },
+  {
+    "symbol": "COCR.N0000",
+    "name": "Commercial Credit & Finance Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/commercial-cdt.svg"
+  },
+  {
+    "symbol": "COLO.N0000",
+    "name": "C M Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/cm-holdings.svg"
+  },
+  {
+    "symbol": "COMB.N0000",
+    "name": "Commercial Bank of Ceylon Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/commercial-bank-of-ceylon.svg"
+  },
+  {
+    "symbol": "COMB.X0000",
+    "name": "Commercial Bank of Ceylon Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/commercial-bank-of-ceylon.svg"
+  },
+  {
+    "symbol": "COMD.N0000",
+    "name": "Commercial Development Co. Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/commercial-develop.svg"
+  },
+  {
+    "symbol": "CONN.N0000",
+    "name": "Hayleys Leisure PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hayleys-leisure-pl.svg"
+  },
+  {
+    "symbol": "COOP.N0000",
+    "name": "Co-operative Insurance Company PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/co-operative-insu.svg"
+  },
+  {
+    "symbol": "CPRT.N0000",
+    "name": "Kerner Haus Global Solutions PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ceylon-printers.svg"
+  },
+  {
+    "symbol": "CRL.N0000",
+    "name": "Softlogic Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/softlogic-finance.svg"
+  },
+  {
+    "symbol": "CSD.N0000",
+    "name": "Seylan Developments Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/seylan-devs.svg"
+  },
+  {
+    "symbol": "CSF.N0000",
+    "name": "Nation Lanka Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/nation-lanka-fin.svg"
+  },
+  {
+    "symbol": "CSLK.N0000",
+    "name": "Cable Solutions PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/cable-solutions.svg"
+  },
+  {
+    "symbol": "CTBL.N0000",
+    "name": "Ceylon Tea Brokers Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ceylon-tea-brokers.svg"
+  },
+  {
+    "symbol": "CTC.N0000",
+    "name": "Ceylon Tobacco Company Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ceylon-tobacco-co.svg"
+  },
+  {
+    "symbol": "CTEA.N0000",
+    "name": "Dilmah Ceylon Tea Company Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/dilmah-ceylon-tea.svg"
+  },
+  {
+    "symbol": "CTHR.N0000",
+    "name": "C T Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ct-holdings.svg"
+  },
+  {
+    "symbol": "CTLD.N0000",
+    "name": "CT Land Development Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ct-land-devmnt.svg"
+  },
+  {
+    "symbol": "CWL.N0000",
+    "name": "Chrissworld PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/chrissworld.svg"
+  },
+  {
+    "symbol": "CWM.N0000",
+    "name": "C. W. Mackie PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/cwmackie-and-compa.svg"
+  },
+  {
+    "symbol": "DFCC.N0000",
+    "name": "DFCC Bank PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/dfcc-bank.svg"
+  },
+  {
+    "symbol": "DIAL.N0000",
+    "name": "Dialog Axiata PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/xl-axiata-tbk.svg"
+  },
+  {
+    "symbol": "DIMO.N0000",
+    "name": "Diesel & Motor Engineering PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/diesel-and-motor-eng.svg"
+  },
+  {
+    "symbol": "DIPD.N0000",
+    "name": "Dipped Products PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/dipped-products.svg"
+  },
+  {
+    "symbol": "DIST.N0000",
+    "name": "Distilleries Company of Sri Lanka Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/distilleries-co-sl.svg"
+  },
+  {
+    "symbol": "DOCK.N0000",
+    "name": "Colombo Dockyard Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/colombo-dockyard.svg"
+  },
+  {
+    "symbol": "DPL.N0000",
+    "name": "Dankotuwa Porcelain Ltd.",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/dankotuwa-porcelai.svg"
+  },
+  {
+    "symbol": "EAST.N0000",
+    "name": "East West Properties PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/east-west-prop.svg"
+  },
+  {
+    "symbol": "EBCR.N0000",
+    "name": "E B Creasy and Company PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/creasy-eb-and-co.svg"
+  },
+  {
+    "symbol": "ECL.N0000",
+    "name": "E-Channelling PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/e-channelling.svg"
+  },
+  {
+    "symbol": "EDEN.N0000",
+    "name": "Eden Hotel Lanka Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/eden-hotel-lanka.svg"
+  },
+  {
+    "symbol": "ELPL.N0000",
+    "name": "Elpitiya Plantations Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/elpitiya-plantatn.svg"
+  },
+  {
+    "symbol": "EMER.N0000",
+    "name": "Eastern Merchants PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/eastern-merchants.svg"
+  },
+  {
+    "symbol": "EML.N0000",
+    "name": "E M L Consultants PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/eml-consultants-pl.svg"
+  },
+  {
+    "symbol": "ETWO.N0000",
+    "name": "Equity Two Ltd.",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/carson-cumberbatch.svg"
+  },
+  {
+    "symbol": "EXT.N0000",
+    "name": "Exterminators PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/exterminators.svg"
+  },
+  {
+    "symbol": "FCT.N0000",
+    "name": "First Capital Treasuries PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/first-cap-hldg.svg"
+  },
+  {
+    "symbol": "GEST.N0000",
+    "name": "Gestetner of Ceylon Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/gestetner-of-ceylon.svg"
+  },
+  {
+    "symbol": "GHLL.N0000",
+    "name": "Galadari Hotels (Lanka) Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/galadari-hotels.svg"
+  },
+  {
+    "symbol": "GLAS.N0000",
+    "name": "PGP Glass Ceylon PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/pgp-glass-ceylon-p.svg"
+  },
+  {
+    "symbol": "GRAN.N0000",
+    "name": "Ceylon Grain Elevators Ltd",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ceylon-grain-elev.svg"
+  },
+  {
+    "symbol": "GREG.N0000",
+    "name": "Ambeon Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ambeon-holdings-pl.svg"
+  },
+  {
+    "symbol": "GREG.P0002",
+    "name": "Environ Res Invest 7% Non-Cum Prf Npv",
+    "market": "CSELK"
+  },
+  {
+    "symbol": "GUAR.N0000",
+    "name": "Ceylon Guardian Investment Trust PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ceylon-guardian.svg"
+  },
+  {
+    "symbol": "HAPU.N0000",
+    "name": "Hapugastenne Plantations Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hapugastenne-plant.svg"
+  },
+  {
+    "symbol": "HARI.N0000",
+    "name": "Harischandra Mills PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/harischandra-mills.svg"
+  },
+  {
+    "symbol": "HASU.N0000",
+    "name": "HNB Assurance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hnb-assurance.svg"
+  },
+  {
+    "symbol": "HAYC.N0000",
+    "name": "Haycarb PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/haycarb.svg"
+  },
+  {
+    "symbol": "HAYL.N0000",
+    "name": "Hayleys PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hayleys.svg"
+  },
+  {
+    "symbol": "HBS.N0000",
+    "name": "hSenid Business Solutions Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hsenid-business-so.svg"
+  },
+  {
+    "symbol": "HDFC.N0000",
+    "name": "Housing Development Finance Corporation Bank of Sri Lanka",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hdfc-bk-sri-lanka.svg"
+  },
+  {
+    "symbol": "HELA.N0000",
+    "name": "Hela Apparel Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hela-apparel-holdi.svg"
+  },
+  {
+    "symbol": "HEXP.N0000",
+    "name": "Hayleys Fibre PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hayleys-fibre.svg"
+  },
+  {
+    "symbol": "HHL.N0000",
+    "name": "Hemas Holdings Ltd.",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hemas-holding.svg"
+  },
+  {
+    "symbol": "HNB.N0000",
+    "name": "Hatton National Bank PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hatton-national-bk.svg"
+  },
+  {
+    "symbol": "HNB.X0000",
+    "name": "Hatton National Bank PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hatton-national-bk.svg"
+  },
+  {
+    "symbol": "HNBF.N0000",
+    "name": "HNB Finance Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hnb-finance.svg"
+  },
+  {
+    "symbol": "HNBF.X0000",
+    "name": "HNB Finance Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hnb-finance.svg"
+  },
+  {
+    "symbol": "HOPL.N0000",
+    "name": "Horana Plantations PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/horana-plantations.svg"
+  },
+  {
+    "symbol": "HPFL.N0000",
+    "name": "Lotus Hydro Power Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lotus-hydro-power.svg"
+  },
+  {
+    "symbol": "HPL.N0000",
+    "name": "Hatton Plantations PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hatton-plantations.svg"
+  },
+  {
+    "symbol": "HPWR.N0000",
+    "name": "Resus Energy Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/resus-energy.svg"
+  },
+  {
+    "symbol": "HSIG.N0000",
+    "name": "Hotel Sigirya PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hotel-sigiriya.svg"
+  },
+  {
+    "symbol": "HUNA.N0000",
+    "name": "Hunas Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hunas-holdings.svg"
+  },
+  {
+    "symbol": "HUNT.N0000",
+    "name": "Hunter & Company PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hunter-and-co.svg"
+  },
+  {
+    "symbol": "HVA.N0000",
+    "name": "HVA Foods PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hvar0000n.svg"
+  },
+  {
+    "symbol": "INME.N0000",
+    "name": "InsureMe Insurance Brokers Limited",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/insureme-insurance-brokers-limited.svg"
+  },
+  {
+    "symbol": "JAT.N0000",
+    "name": "JAT Holdings Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/jat-holdings.svg"
+  },
+  {
+    "symbol": "JETS.N0000",
+    "name": "Jetwing Symphony PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/jetwing-symphony.svg"
+  },
+  {
+    "symbol": "JFP.N0000",
+    "name": "J.F. Packaging PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/jf-packaging-limited.svg"
+  },
+  {
+    "symbol": "JINS.N0000",
+    "name": "Janashakthi Insurance Company PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/janashakthi-insura.svg"
+  },
+  {
+    "symbol": "JKH.N0000",
+    "name": "John Keells Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/johnkeellshldgs-gd.svg"
+  },
+  {
+    "symbol": "JKL.N0000",
+    "name": "John Keells Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/john-keells-hotels.svg"
+  },
+  {
+    "symbol": "KAHA.N0000",
+    "name": "Kahawatte Plantations PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/kahawatte-plantati.svg"
+  },
+  {
+    "symbol": "KCAB.N0000",
+    "name": "Kelani Cables Limited",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/kelani-cables.svg"
+  },
+  {
+    "symbol": "KDL.N0000",
+    "name": "Kelsey Developments PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/kelsey-development.svg"
+  },
+  {
+    "symbol": "KFP.N0000",
+    "name": "Keells Food Products PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/keells-food-prod.svg"
+  },
+  {
+    "symbol": "KGAL.N0000",
+    "name": "Kegalle Plantations PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/kegalle-plantation.svg"
+  },
+  {
+    "symbol": "KHC.N0000",
+    "name": "Kandy Hotels Company (1938) PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/kandy-hotels.svg"
+  },
+  {
+    "symbol": "KHC.P0002",
+    "name": "Kandy Hotels 7% Non Cum Prf Npv",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/kandy-hotels.svg"
+  },
+  {
+    "symbol": "KHL.N0000",
+    "name": "John Keells Hotels PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/john-keells-hotels.svg"
+  },
+  {
+    "symbol": "KOTA.N0000",
+    "name": "Kotagala Plantations Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/kotagala-plantatns.svg"
+  },
+  {
+    "symbol": "KPHL.N0000",
+    "name": "Kapruka Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/kapruka-holdings-p.svg"
+  },
+  {
+    "symbol": "KVAL.N0000",
+    "name": "Kelani Valley Plantations PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/talawakelle-tea-es.svg"
+  },
+  {
+    "symbol": "LALU.N0000",
+    "name": "Lanka Aluminium Industries PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lanka-alum-inds.svg"
+  },
+  {
+    "symbol": "LAMB.N0000",
+    "name": "Kotmale Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/kotmale-hldgs.svg"
+  },
+  {
+    "symbol": "LCBF.N0000",
+    "name": "Lanka Credit & Business Finance Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lanka-credit-busin.svg"
+  },
+  {
+    "symbol": "LCEY.N0000",
+    "name": "Lankem Ceylon PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lankem-ceylon.svg"
+  },
+  {
+    "symbol": "LDEV.N0000",
+    "name": "Lankem Developments PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lankem-ceylon.svg"
+  },
+  {
+    "symbol": "LFIN.N0000",
+    "name": "L B Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lb-finance.svg"
+  },
+  {
+    "symbol": "LGIL.N0000",
+    "name": "LOLC General Insurance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lolc-general-insur.svg"
+  },
+  {
+    "symbol": "LGL.N0000",
+    "name": "LAUGFS Gas PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/laugfs-gas.svg"
+  },
+  {
+    "symbol": "LGL.X0000",
+    "name": "LAUGFS Gas PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/laugfs-gas.svg"
+  },
+  {
+    "symbol": "LHCL.N0000",
+    "name": "Lanka Hospitals Corp. Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lanka-hospitals-co.svg"
+  },
+  {
+    "symbol": "LHL.N0000",
+    "name": "Lighthouse Hotel PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/jetwing-symphony.svg"
+  },
+  {
+    "symbol": "LIOC.N0000",
+    "name": "Lanka IOC Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lanka-ioc.svg"
+  },
+  {
+    "symbol": "LION.N0000",
+    "name": "Lion Brewery (Ceylon) Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lion-brewery-ceyln.svg"
+  },
+  {
+    "symbol": "LITE.N0000",
+    "name": "Laxapana PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/laxapana-batteries.svg"
+  },
+  {
+    "symbol": "LLUB.N0000",
+    "name": "Chevron Lubricants Lanka Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/chevron.svg"
+  },
+  {
+    "symbol": "LMF.N0000",
+    "name": "Lanka Milk Foods (CWE) Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lanka-milk-food.svg"
+  },
+  {
+    "symbol": "LOFC.N0000",
+    "name": "LOLC Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lolc-finance.svg"
+  },
+  {
+    "symbol": "LOLC.N0000",
+    "name": "LOLC Holdings Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lolc-holdings.svg"
+  },
+  {
+    "symbol": "LPL.N0000",
+    "name": "LAUGFS Power Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/laugfs-power.svg"
+  },
+  {
+    "symbol": "LPL.X0000",
+    "name": "LAUGFS Power Plc Non-Voting",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/laugfs-power.svg"
+  },
+  {
+    "symbol": "LPRT.N0000",
+    "name": "Lake House Printers & Publishers PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lake-house-printer.svg"
+  },
+  {
+    "symbol": "LUMX.N0000",
+    "name": "Luminex PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/luminex.svg"
+  },
+  {
+    "symbol": "LVEF.N0000",
+    "name": "LVL Energy Fund PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lvl-energy-fd.svg"
+  },
+  {
+    "symbol": "LVEN.N0000",
+    "name": "Lanka Ventures Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lanka-ventures.svg"
+  },
+  {
+    "symbol": "LWL.N0000",
+    "name": "Lanka Walltile Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lanka-tiles.svg"
+  },
+  {
+    "symbol": "MADU.N0000",
+    "name": "Madulsima Plantations PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/melsta.svg"
+  },
+  {
+    "symbol": "MAL.N0000",
+    "name": "Malwatte Valley Plantations Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/malwatte-valley-pl.svg"
+  },
+  {
+    "symbol": "MAL.X0000",
+    "name": "Malwatte Valley Plantations Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/malwatte-valley-pl.svg"
+  },
+  {
+    "symbol": "MARA.N0000",
+    "name": "Marawila Resorts PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/marawila-resorts.svg"
+  },
+  {
+    "symbol": "MASK.N0000",
+    "name": "Maskeliya Plantations Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/maskeliya-plant.svg"
+  },
+  {
+    "symbol": "MBSL.N0000",
+    "name": "Merchant Bank of Sri Lanka & Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/merchant-bk-of-sri.svg"
+  },
+  {
+    "symbol": "MCPL.N0000",
+    "name": "Mahaweli Coconut Plantations PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/mahaweli-coconut.svg"
+  },
+  {
+    "symbol": "MDL.N0000",
+    "name": "Myland Developments PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/myland-development.svg"
+  },
+  {
+    "symbol": "MEL.N0000",
+    "name": "Greentech Energy Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/mackwoods-energy.svg"
+  },
+  {
+    "symbol": "MELS.N0000",
+    "name": "Melstacorp Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/melsta.svg"
+  },
+  {
+    "symbol": "MERC.N0000",
+    "name": "Mercantile Investments & Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/mercantile-inv.svg"
+  },
+  {
+    "symbol": "MFL.N0000",
+    "name": "Multi Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/multi-finance.svg"
+  },
+  {
+    "symbol": "MFPE.N0000",
+    "name": "Maharaja Foods Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/maharaja-foods-plc.svg"
+  },
+  {
+    "symbol": "MGT.N0000",
+    "name": "Hayleys Fabric PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hayleys-fabric.svg"
+  },
+  {
+    "symbol": "MHDL.N0000",
+    "name": "Millennium Housing Developers PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/millennium-housing.svg"
+  },
+  {
+    "symbol": "MRH.N0000",
+    "name": "Mahaweli Reach Hotels Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/mahaweli-reach-htl.svg"
+  },
+  {
+    "symbol": "MSL.N0000",
+    "name": "Mercantile Shipping Company PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/mercantile-shippng.svg"
+  },
+  {
+    "symbol": "MULL.N0000",
+    "name": "Muller & Phipps (Ceylon) PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/creasy-eb-and-co.svg"
+  },
+  {
+    "symbol": "NAMU.N0000",
+    "name": "Namunukula Plantations PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/namunukula-plantat.svg"
+  },
+  {
+    "symbol": "NDB.N0000",
+    "name": "National Development Bank PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/national-dev-bk.svg"
+  },
+  {
+    "symbol": "NEH.N0000",
+    "name": "Nuwara Eliya Hotels Company Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/nuwara-eliya-hotel.svg"
+  },
+  {
+    "symbol": "NHL.N0000",
+    "name": "Nawaloka Hospitals Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/nawaloka-hospitals.svg"
+  },
+  {
+    "symbol": "NTB.N0000",
+    "name": "Nations Trust Bank Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/nations-trust-bank.svg"
+  },
+  {
+    "symbol": "NTB.X0000",
+    "name": "Nations Trust Bank Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/nations-trust-bank.svg"
+  },
+  {
+    "symbol": "ODEL.N0000",
+    "name": "Odel PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/odel.svg"
+  },
+  {
+    "symbol": "OFEQ.N0000",
+    "name": "Office Equipment PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/office-equipment.svg"
+  },
+  {
+    "symbol": "ONAL.N0000",
+    "name": "On'ally Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/onally-holdings.svg"
+  },
+  {
+    "symbol": "OSEA.N0000",
+    "name": "Overseas Realty (Ceylon) Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/overseas-realty-ceylon.svg"
+  },
+  {
+    "symbol": "PABC.N0000",
+    "name": "Pan Asia Banking Corporation PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/pan-asia-banking-oration.svg"
+  },
+  {
+    "symbol": "PACK.N0000",
+    "name": "Ex-Pack Corrugated Cartons PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ex-pack-corrugated.svg"
+  },
+  {
+    "symbol": "PALM.N0000",
+    "name": "Palm Garden Hotels Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/palm-garden-hotels.svg"
+  },
+  {
+    "symbol": "PAP.N0000",
+    "name": "Panasian Power Ltd.",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/panasian-power.svg"
+  },
+  {
+    "symbol": "PARA.N0000",
+    "name": "Paragon Ceylon PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/paragon-ceylon.svg"
+  },
+  {
+    "symbol": "PARQ.N0000",
+    "name": "Swisstek (Ceylon) PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/swisstek-ceylon.svg"
+  },
+  {
+    "symbol": "PEG.N0000",
+    "name": "Pegasus Hotels of Ceylon PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/pegasus-htls-ceyln.svg"
+  },
+  {
+    "symbol": "PHAR.N0000",
+    "name": "Colombo City Holdings Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/colombo-city-hldgs.svg"
+  },
+  {
+    "symbol": "PINS.N0000",
+    "name": "People's Insurance Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/peoples-insuranc.svg"
+  },
+  {
+    "symbol": "PKME.N0000",
+    "name": "Digital Mobility Solutions Lanka PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/digital-mobility-s.svg"
+  },
+  {
+    "symbol": "PLC.N0000",
+    "name": "People's Leasing & Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/peoples-leasing-and-f.svg"
+  },
+  {
+    "symbol": "PLR.N0000",
+    "name": "Prime Lands Residencies PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/prime-lands-reside.svg"
+  },
+  {
+    "symbol": "PMB.N0000",
+    "name": "PMF Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/pmf-finance.svg"
+  },
+  {
+    "symbol": "RAL.N0000",
+    "name": "Renuka Agri Foods Ltd.",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/renuka-holdings.svg"
+  },
+  {
+    "symbol": "RCH.N0000",
+    "name": "Renuka Hotels Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/renuka-hotels.svg"
+  },
+  {
+    "symbol": "RCL.N0000",
+    "name": "Royal Ceramics Lanka PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/royal-ceramics.svg"
+  },
+  {
+    "symbol": "REEF.N0000",
+    "name": "Citrus Leisure PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hikkaduwa-beach-r.svg"
+  },
+  {
+    "symbol": "RENU.N0000",
+    "name": "Renuka City Hotels PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/renuka-hotels.svg"
+  },
+  {
+    "symbol": "REXP.N0000",
+    "name": "Richard Pieris Exports PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/richard-pieris-exp.svg"
+  },
+  {
+    "symbol": "RFL.N0000",
+    "name": "Ramboda Falls PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ramboda-falls.svg"
+  },
+  {
+    "symbol": "RGEM.N0000",
+    "name": "Radiant Gems International PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/radiant-gems-intl.svg"
+  },
+  {
+    "symbol": "RHL.N0000",
+    "name": "Renuka Holdings Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/renuka-holdings.svg"
+  },
+  {
+    "symbol": "RHL.X0000",
+    "name": "Renuka Holdings Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/renuka-holdings.svg"
+  },
+  {
+    "symbol": "RHTL.N0000",
+    "name": "Fortress Resorts PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/fortress-resorts.svg"
+  },
+  {
+    "symbol": "RICH.N0000",
+    "name": "Richard Pieris & Co PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/namunukula-plantat.svg"
+  },
+  {
+    "symbol": "RIL.N0000",
+    "name": "RIL Property Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/r-i-l-property.svg"
+  },
+  {
+    "symbol": "RPBH.N0000",
+    "name": "Royal Palms Beach Hotels PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/royal-palms-beach.svg"
+  },
+  {
+    "symbol": "RWSL.N0000",
+    "name": "Raigam Wayamba Salterns Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/raigam-wayamba-sal.svg"
+  },
+  {
+    "symbol": "SAMP.N0000",
+    "name": "Sampath Bank PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/sampath-bank.svg"
+  },
+  {
+    "symbol": "SCAP.N0000",
+    "name": "Softlogic Capital Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/softlogic-finance.svg"
+  },
+  {
+    "symbol": "SDB.N0000",
+    "name": "Sanasa Developement Bank Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/chemanex.svg"
+  },
+  {
+    "symbol": "SDF.N0000",
+    "name": "Sarvodaya Development Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/sarvodaya-developm.svg"
+  },
+  {
+    "symbol": "SEMB.N0000",
+    "name": "SMB Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/smb-finance.svg"
+  },
+  {
+    "symbol": "SEMB.X0000",
+    "name": "SMB Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/smb-finance.svg"
+  },
+  {
+    "symbol": "SERV.N0000",
+    "name": "Kingsbury PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/the-kingsbury.svg"
+  },
+  {
+    "symbol": "SEYB.N0000",
+    "name": "Seylan Bank PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/seylan-bank.svg"
+  },
+  {
+    "symbol": "SEYB.X0000",
+    "name": "Seylan Bank PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/seylan-bank.svg"
+  },
+  {
+    "symbol": "SFCL.N0000",
+    "name": "Senkadagala Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/senkadagala-financ.svg"
+  },
+  {
+    "symbol": "SFIN.N0000",
+    "name": "Singer Finance (Lanka) Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/singer-sri-lanka.svg"
+  },
+  {
+    "symbol": "SHAW.N0000",
+    "name": "Lee Hedges PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lee-hedges.svg"
+  },
+  {
+    "symbol": "SHL.N0000",
+    "name": "Softlogic Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/softlogic-finance.svg"
+  },
+  {
+    "symbol": "SHOT.N0000",
+    "name": "Serendib Hotels Ltd",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/serendib-hotels.svg"
+  },
+  {
+    "symbol": "SHOT.X0000",
+    "name": "Serendib Hotels Ltd",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/serendib-hotels.svg"
+  },
+  {
+    "symbol": "SIGV.N0000",
+    "name": "Sigiriya Village Hotels PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/sigiriya-village.svg"
+  },
+  {
+    "symbol": "SIL.N0000",
+    "name": "Samson International PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/samson-internation.svg"
+  },
+  {
+    "symbol": "SING.N0000",
+    "name": "Standard Capital Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/standard-capital.svg"
+  },
+  {
+    "symbol": "SINH.N0000",
+    "name": "Singhe Hospitals PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/singhe-hospitals.svg"
+  },
+  {
+    "symbol": "SINS.N0000",
+    "name": "Singer (Sri Lanka) PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/singer-sri-lanka.svg"
+  },
+  {
+    "symbol": "SIRA.N0000",
+    "name": "Sierra Cables PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/sierra-cables.svg"
+  },
+  {
+    "symbol": "SLND.N0000",
+    "name": "Serendib Land PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/serendib-land.svg"
+  },
+  {
+    "symbol": "SLTL.N0000",
+    "name": "Sri Lanka Telecom Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/sri-lanka-telecom.svg"
+  },
+  {
+    "symbol": "SMOT.N0000",
+    "name": "Sathosa Motors PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/isuzu-motors.svg"
+  },
+  {
+    "symbol": "SOY.N0000",
+    "name": "Convenience Foods Lanka PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/convenience-foods.svg"
+  },
+  {
+    "symbol": "SPEN.N0000",
+    "name": "Aitken Spence PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/browns-beach-hotel.svg"
+  },
+  {
+    "symbol": "STAF.N0000",
+    "name": "Dolphin Hotels PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/dolphin-hotels.svg"
+  },
+  {
+    "symbol": "SUN.N0000",
+    "name": "Sunshine Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/sunshine-holding.svg"
+  },
+  {
+    "symbol": "SWAD.N0000",
+    "name": "Swadeshi Industrial Works Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/swadeshi-indl.svg"
+  },
+  {
+    "symbol": "TAFL.N0000",
+    "name": "Three Acre Farms Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/three-acre-farms.svg"
+  },
+  {
+    "symbol": "TAJ.N0000",
+    "name": "Tal Lanka Hotels Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/tal-lanka-hotels-p.svg"
+  },
+  {
+    "symbol": "TANG.N0000",
+    "name": "Tangerine Beach Hotels PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/tangerine-beach.svg"
+  },
+  {
+    "symbol": "TAP.N0000",
+    "name": "Ambeon Capital PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ambeon-holdings-pl.svg"
+  },
+  {
+    "symbol": "TESS.N0000",
+    "name": "Tess Agro PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/tess-agro.svg"
+  },
+  {
+    "symbol": "TESS.X0000",
+    "name": "Tess Agro PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/tess-agro.svg"
+  },
+  {
+    "symbol": "TILE.N0000",
+    "name": "Lanka Tiles PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/lanka-tiles.svg"
+  },
+  {
+    "symbol": "TJL.N0000",
+    "name": "Teejay Lanka Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/teejay-lanka.svg"
+  },
+  {
+    "symbol": "TKYO.N0000",
+    "name": "Tokyo Cement Company (Lanka) PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/tokyo-cement-lanka.svg"
+  },
+  {
+    "symbol": "TKYO.X0000",
+    "name": "Tokyo Cement Company (Lanka) PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/tokyo-cement-lanka.svg"
+  },
+  {
+    "symbol": "TPL.N0000",
+    "name": "Talawakelle Tea Estates Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/talawakelle-tea-es.svg"
+  },
+  {
+    "symbol": "TRAN.N0000",
+    "name": "Trans Asia Hotels PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/trans-asia-hotels-plc.svg"
+  },
+  {
+    "symbol": "TSML.N0000",
+    "name": "Tea Smallholder Factories Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/johnkeellshldgs-gd.svg"
+  },
+  {
+    "symbol": "TYRE.N0000",
+    "name": "Kelani Tyres PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/kelani-tyres.svg"
+  },
+  {
+    "symbol": "UAL.N0000",
+    "name": "Union Assurance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/union-assurance.svg"
+  },
+  {
+    "symbol": "UBC.N0000",
+    "name": "Union Bank of Colombo PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/union-bk-of-colomb.svg"
+  },
+  {
+    "symbol": "UBF.N0000",
+    "name": "UB Finance PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/ub-finance-plc.svg"
+  },
+  {
+    "symbol": "UCAR.N0000",
+    "name": "Union Chemicals Lanka PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/union-chemicals.svg"
+  },
+  {
+    "symbol": "UDPL.N0000",
+    "name": "Udapussellawa Plantations PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/hapugastenne-plant.svg"
+  },
+  {
+    "symbol": "UML.N0000",
+    "name": "United Motors Lanka PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/united-motors.svg"
+  },
+  {
+    "symbol": "VFIN.N0000",
+    "name": "Vallibel Finance Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/vallibel-fin.svg"
+  },
+  {
+    "symbol": "VLL.N0000",
+    "name": "Vidullanka PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/renuka-holdings.svg"
+  },
+  {
+    "symbol": "VLL.X0000",
+    "name": "Vidullanka Plc",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/renuka-holdings.svg"
+  },
+  {
+    "symbol": "VONE.N0000",
+    "name": "Vallibel One PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/vallibel-one.svg"
+  },
+  {
+    "symbol": "VPEL.N0000",
+    "name": "Vallibel Power Erathna PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/vallibel-power-era.svg"
+  },
+  {
+    "symbol": "WAPO.N0000",
+    "name": "Galle Face Capital Partners PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/galle-face-capital.svg"
+  },
+  {
+    "symbol": "WATA.N0000",
+    "name": "Watawala Plantations PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/york-arcade-hldgs.svg"
+  },
+  {
+    "symbol": "WIND.N0000",
+    "name": "Windforce PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/windforce.svg"
+  },
+  {
+    "symbol": "WLTH.N0000",
+    "name": "Wealthtrust Securities PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/wealthtrust-securities-limited.svg"
+  },
+  {
+    "symbol": "YORK.N0000",
+    "name": "York Arcade Holdings PLC",
+    "market": "CSELK",
+    "image": "https://s3-symbol-logo.tradingview.com/york-arcade-hldgs.svg"
+  }
+]

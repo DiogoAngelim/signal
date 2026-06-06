@@ -1,0 +1,5751 @@
+[
+  {
+    "symbol": "1A0.SI",
+    "name": "Katrina Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/katrina.svg"
+  },
+  {
+    "symbol": "1A1.SI",
+    "name": "Wong Fong Industries Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/wong-fong-ind.svg"
+  },
+  {
+    "symbol": "1AZ.SI",
+    "name": "Audience Analytics Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/audience.svg"
+  },
+  {
+    "symbol": "1B0.SI",
+    "name": "mm2 Asia Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mm2-asia-ltd.svg"
+  },
+  {
+    "symbol": "1B1.SI",
+    "name": "HC Surgical Specialists Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hc-surgical.svg"
+  },
+  {
+    "symbol": "1B6.SI",
+    "name": "Ocean Sky International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ocean-sky-international-ltd.svg"
+  },
+  {
+    "symbol": "1C0.SI",
+    "name": "Emerging Towns & Cities Singapore Ltd",
+    "market": "SGX"
+  },
+  {
+    "symbol": "1D0.SI",
+    "name": "Kimly Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/kimly.svg"
+  },
+  {
+    "symbol": "1D1.SI",
+    "name": "UnUsUal Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/unusual.svg"
+  },
+  {
+    "symbol": "1D3.SI",
+    "name": "Autagco Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/autagco.svg"
+  },
+  {
+    "symbol": "1D4.SI",
+    "name": "Aoxin Q&M Dental Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/aoxin-q-and-m.svg"
+  },
+  {
+    "symbol": "1D5.SI",
+    "name": "Capital World Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/capital-world.svg"
+  },
+  {
+    "symbol": "1E3.SI",
+    "name": "Sanli Environmental Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sanli-env.svg"
+  },
+  {
+    "symbol": "1F0.SI",
+    "name": "Shopper360 Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/shopper360.svg"
+  },
+  {
+    "symbol": "1F1.SI",
+    "name": "Y Ventures Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/y-ventures.svg"
+  },
+  {
+    "symbol": "1F2.SI",
+    "name": "Union Gas Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/union-gas.svg"
+  },
+  {
+    "symbol": "1F3.SI",
+    "name": "Aspen (Group) Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/aspen.svg"
+  },
+  {
+    "symbol": "1H2.SI",
+    "name": "Olive Tree Estates Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/olive-tree.svg"
+  },
+  {
+    "symbol": "1H3.SI",
+    "name": "Clearbridge Health Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/clearbridge-health-ltd.svg"
+  },
+  {
+    "symbol": "1H8.SI",
+    "name": "LY Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ly.svg"
+  },
+  {
+    "symbol": "1J4.SI",
+    "name": "JEP Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/jep.svg"
+  },
+  {
+    "symbol": "1J5.SI",
+    "name": "Hyphens Pharma International Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hyphens-pharma.svg"
+  },
+  {
+    "symbol": "1J7.SI",
+    "name": "Jawala Inc.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/jawala.svg"
+  },
+  {
+    "symbol": "1L2.SI",
+    "name": "Hiap Seng Industries Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hiap-seng-ind.svg"
+  },
+  {
+    "symbol": "1MZ.SI",
+    "name": "Nam Cheong Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/namcheong.svg"
+  },
+  {
+    "symbol": "1R6.SI",
+    "name": "Avi-Tech Holdings Pte. Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/avi-tech-hldg.svg"
+  },
+  {
+    "symbol": "1U8.SI",
+    "name": "Rich Capital Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/rich-capital-limited.svg"
+  },
+  {
+    "symbol": "1V3.SI",
+    "name": "Mooreast Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mooreast.svg"
+  },
+  {
+    "symbol": "1Y1.SI",
+    "name": "9R Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/9r.svg"
+  },
+  {
+    "symbol": "40B.SI",
+    "name": "Healthbank Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/healthbank.svg"
+  },
+  {
+    "symbol": "40F.SI",
+    "name": "Alita Resources Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "40N.SI",
+    "name": "Versalink Holdings Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/versalink.svg"
+  },
+  {
+    "symbol": "40T.SI",
+    "name": "ISEC Healthcare Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/isec.svg"
+  },
+  {
+    "symbol": "40V.SI",
+    "name": "Alset International Limited.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/alset.svg"
+  },
+  {
+    "symbol": "40W.SI",
+    "name": "ZICO Holdings Inc.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/zico-hldgs.svg"
+  },
+  {
+    "symbol": "41B.SI",
+    "name": "Huationg Global Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/huationg-global.svg"
+  },
+  {
+    "symbol": "41F.SI",
+    "name": "GSS Energy Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gss-energy.svg"
+  },
+  {
+    "symbol": "41H.SI",
+    "name": "BlackGold Natural Resources Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "41O.SI",
+    "name": "LHN Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/lhn-limited.svg"
+  },
+  {
+    "symbol": "41T.SI",
+    "name": "GCCP Resources Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gccp.svg"
+  },
+  {
+    "symbol": "42C.SI",
+    "name": "iX Biopharma Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ix-biopharma.svg"
+  },
+  {
+    "symbol": "42E.SI",
+    "name": "Choo Chiang Holdings Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/choo-chiang.svg"
+  },
+  {
+    "symbol": "42F.SI",
+    "name": "Totm Technologies Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/totm-tech.svg"
+  },
+  {
+    "symbol": "42L.SI",
+    "name": "Taka Jewellery Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/taka-jewellery.svg"
+  },
+  {
+    "symbol": "42N.SI",
+    "name": "IPS Securex Holdings Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ips-securex.svg"
+  },
+  {
+    "symbol": "42R.SI",
+    "name": "JUMBO Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/jumbo.svg"
+  },
+  {
+    "symbol": "42S.SI",
+    "name": "Astaka Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/astaka-ltd.svg"
+  },
+  {
+    "symbol": "42T.SI",
+    "name": "Trendlines Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-trendlines-ltd.svg"
+  },
+  {
+    "symbol": "42W.SI",
+    "name": "Zixin Group Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/zixin.svg"
+  },
+  {
+    "symbol": "42Z.SI",
+    "name": "Eindec Corp. Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/eindec.svg"
+  },
+  {
+    "symbol": "43A.SI",
+    "name": "GS Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gs-hldg.svg"
+  },
+  {
+    "symbol": "43B.SI",
+    "name": "Secura Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/secura.svg"
+  },
+  {
+    "symbol": "43E.SI",
+    "name": "VCPlus Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/vcplus.svg"
+  },
+  {
+    "symbol": "43F.SI",
+    "name": "AcroMeta Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/acrometa.svg"
+  },
+  {
+    "symbol": "43Q.SI",
+    "name": "Advancer Global Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/advancer-global.svg"
+  },
+  {
+    "symbol": "49B.SI",
+    "name": "AMOS Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/phc.svg"
+  },
+  {
+    "symbol": "500.SI",
+    "name": "Tai Sin Electric Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tai-sin-electric.svg"
+  },
+  {
+    "symbol": "504.SI",
+    "name": "HS Optimus Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hs-optimus.svg"
+  },
+  {
+    "symbol": "505.SI",
+    "name": "Asiamedic Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/asiamedic.svg"
+  },
+  {
+    "symbol": "508.SI",
+    "name": "Fuji Offset Plates Manufacturing Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/fuji-offset.svg"
+  },
+  {
+    "symbol": "51O.SI",
+    "name": "MSM International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/msmintl.svg"
+  },
+  {
+    "symbol": "532.SI",
+    "name": "DISA Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/disa.svg"
+  },
+  {
+    "symbol": "533.SI",
+    "name": "ABR Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/abr.svg"
+  },
+  {
+    "symbol": "53W.SI",
+    "name": "Attika Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/attika.svg"
+  },
+  {
+    "symbol": "540.SI",
+    "name": "Tung Lok Restaurants (2000) Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tung-lok-rest.svg"
+  },
+  {
+    "symbol": "541.SI",
+    "name": "Abundance International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/abundance-intl.svg"
+  },
+  {
+    "symbol": "543.SI",
+    "name": "Noel Gifts International Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/noel-gifts-intl.svg"
+  },
+  {
+    "symbol": "544.SI",
+    "name": "CSE Global Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cse-global-ltd.svg"
+  },
+  {
+    "symbol": "546.SI",
+    "name": "Medtecs International Corporation Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/medtecs.svg"
+  },
+  {
+    "symbol": "554.SI",
+    "name": "King Wan Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/king-wan.svg"
+  },
+  {
+    "symbol": "558.SI",
+    "name": "UMS Integration Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ums.svg"
+  },
+  {
+    "symbol": "566.SI",
+    "name": "SHS Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/shs.svg"
+  },
+  {
+    "symbol": "569.SI",
+    "name": "VicPlas International Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/vicplas.svg"
+  },
+  {
+    "symbol": "570.SI",
+    "name": "Abundante Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/abundante.svg"
+  },
+  {
+    "symbol": "575.SI",
+    "name": "ASTI Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/asti-limited.svg"
+  },
+  {
+    "symbol": "579.SI",
+    "name": "Oceanus Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/oceanus.svg"
+  },
+  {
+    "symbol": "580.SI",
+    "name": "Santak Holdings Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "581.SI",
+    "name": "Sunrise Shares Holdings Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sunrise-shares.svg"
+  },
+  {
+    "symbol": "583.SI",
+    "name": "Progen Holdings Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/progen.svg"
+  },
+  {
+    "symbol": "584.SI",
+    "name": "AJJ Medtech Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ajj-medtech.svg"
+  },
+  {
+    "symbol": "585.SI",
+    "name": "Asian Micro Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/asian-micro.svg"
+  },
+  {
+    "symbol": "594.SI",
+    "name": "CapAllianz Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/capallianz.svg"
+  },
+  {
+    "symbol": "595.SI",
+    "name": "GKE Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gke.svg"
+  },
+  {
+    "symbol": "596.SI",
+    "name": "Pavillon Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/pavillon.svg"
+  },
+  {
+    "symbol": "5AB.SI",
+    "name": "Trek 2000 International Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/trek-2000-intl-watch-list.svg"
+  },
+  {
+    "symbol": "5AE.SI",
+    "name": "Pollux Properties Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/green-power-station-plc.svg"
+  },
+  {
+    "symbol": "5AI.SI",
+    "name": "H2G Green Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/h2g-green.svg"
+  },
+  {
+    "symbol": "5AL.SI",
+    "name": "Annica Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/annica.svg"
+  },
+  {
+    "symbol": "5AU.SI",
+    "name": "AP Oil International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ap-oil.svg"
+  },
+  {
+    "symbol": "5BI.SI",
+    "name": "Polaris Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/polaris.svg"
+  },
+  {
+    "symbol": "5BS.SI",
+    "name": "Sen Yue Holdings Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "5CF.SI",
+    "name": "OKP Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/okp.svg"
+  },
+  {
+    "symbol": "5CR.SI",
+    "name": "Asiatic Group (Holdings) Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/asiatic.svg"
+  },
+  {
+    "symbol": "5CT.SI",
+    "name": "Ecowise Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ecowise.svg"
+  },
+  {
+    "symbol": "5DD.SI",
+    "name": "Micro-Mechanics (Holdings) Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/micro-mechanics-ltd.svg"
+  },
+  {
+    "symbol": "5DM.SI",
+    "name": "Ying Li International Real Estate Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ying-li-intl.svg"
+  },
+  {
+    "symbol": "5DN.SI",
+    "name": "Ezra Holdings Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "5DO.SI",
+    "name": "Sakae Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sakae.svg"
+  },
+  {
+    "symbol": "5DP.SI",
+    "name": "Heeton Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/heeton.svg"
+  },
+  {
+    "symbol": "5DS.SI",
+    "name": "MegaChem Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/megachem.svg"
+  },
+  {
+    "symbol": "5DX.SI",
+    "name": "Meta Health Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/meta-health.svg"
+  },
+  {
+    "symbol": "5E2.SI",
+    "name": "Seatrium Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sembcorp-ind.svg"
+  },
+  {
+    "symbol": "5EB.SI",
+    "name": "CFM Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cfm.svg"
+  },
+  {
+    "symbol": "5EF.SI",
+    "name": "Adventus Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/adventus.svg"
+  },
+  {
+    "symbol": "5EG.SI",
+    "name": "Zhongxin Fruit & Juice Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/zhongxin-fruit.svg"
+  },
+  {
+    "symbol": "5EN.SI",
+    "name": "Midas Holdings Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "5EV.SI",
+    "name": "Hosen Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hosen.svg"
+  },
+  {
+    "symbol": "5EW.SI",
+    "name": "Sevens Atelier Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sevens-atelier.svg"
+  },
+  {
+    "symbol": "5F4.SI",
+    "name": "Figtree Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/figtree.svg"
+  },
+  {
+    "symbol": "5F7.SI",
+    "name": "Wilton Resources Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/wilton-resources.svg"
+  },
+  {
+    "symbol": "5FW.SI",
+    "name": "Acesian Partners Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/acesian-partners.svg"
+  },
+  {
+    "symbol": "5FX.SI",
+    "name": "New Wave Holdings Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/new-wave.svg"
+  },
+  {
+    "symbol": "5G1.SI",
+    "name": "EuroSports Global Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/eurosports-gbl.svg"
+  },
+  {
+    "symbol": "5G2.SI",
+    "name": "Kim Heng Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/kim-heng.svg"
+  },
+  {
+    "symbol": "5G9.SI",
+    "name": "Tritech Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tritech.svg"
+  },
+  {
+    "symbol": "5GD.SI",
+    "name": "Sunpower Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sunpower.svg"
+  },
+  {
+    "symbol": "5GI.SI",
+    "name": "Interra Resources Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "5GJ.SI",
+    "name": "AusGroup Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "5GZ.SI",
+    "name": "HGH Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hgh.svg"
+  },
+  {
+    "symbol": "5HG.SI",
+    "name": "Edition Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/edition.svg"
+  },
+  {
+    "symbol": "5HH.SI",
+    "name": "Prospera Global Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/prosperaglobal.svg"
+  },
+  {
+    "symbol": "5HV.SI",
+    "name": "Koh Brothers Eco Engineering Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/koh-eco.svg"
+  },
+  {
+    "symbol": "5I1.SI",
+    "name": "KOP Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/kop.svg"
+  },
+  {
+    "symbol": "5IC.SI",
+    "name": "Sing Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/singholdings.svg"
+  },
+  {
+    "symbol": "5IE.SI",
+    "name": "Lorenzo International Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "5IF.SI",
+    "name": "Natural Cool Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/natural-cool-ltd.svg"
+  },
+  {
+    "symbol": "5IG.SI",
+    "name": "Gallant Venture Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gallant-venture.svg"
+  },
+  {
+    "symbol": "5JK.SI",
+    "name": "Hiap Hoe Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hiap-hoe.svg"
+  },
+  {
+    "symbol": "5JS.SI",
+    "name": "Indofood Agri Resources Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/indofood-agri-resources-ltd.svg"
+  },
+  {
+    "symbol": "5KI.SI",
+    "name": "Soup Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/soup-ltd.svg"
+  },
+  {
+    "symbol": "5LE.SI",
+    "name": "Sitra Holdings (International) Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sitra.svg"
+  },
+  {
+    "symbol": "5LY.SI",
+    "name": "Marco Polo Marine Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/marco-polo-marine-ltd.svg"
+  },
+  {
+    "symbol": "5MD.SI",
+    "name": "Soon Lian Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/soon-lian.svg"
+  },
+  {
+    "symbol": "5ML.SI",
+    "name": "Old Chang Kee Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/old-chang-kee.svg"
+  },
+  {
+    "symbol": "5MZ.SI",
+    "name": "Kingsmen Creatives Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/kingsmen-creatives-ltd.svg"
+  },
+  {
+    "symbol": "5NF.SI",
+    "name": "Mencast Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mencast.svg"
+  },
+  {
+    "symbol": "5NV.SI",
+    "name": "Chasen Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/chasen.svg"
+  },
+  {
+    "symbol": "5OC.SI",
+    "name": "Koyo International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/koyo-intl.svg"
+  },
+  {
+    "symbol": "5OI.SI",
+    "name": "Japan Foods Holding Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/japan-foods.svg"
+  },
+  {
+    "symbol": "5OQ.SI",
+    "name": "Teho International, Inc. Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/teho-intl.svg"
+  },
+  {
+    "symbol": "5OR.SI",
+    "name": "Heatec Jietong Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/heatec-jietong.svg"
+  },
+  {
+    "symbol": "5OX.SI",
+    "name": "Mary Chia Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mary-chia.svg"
+  },
+  {
+    "symbol": "5PC.SI",
+    "name": "Goodland Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/goodland.svg"
+  },
+  {
+    "symbol": "5PD.SI",
+    "name": "Hengyang Petrochemical Logistics Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hengyang-petro.svg"
+  },
+  {
+    "symbol": "5PF.SI",
+    "name": "Jason Marine Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/jason-marine.svg"
+  },
+  {
+    "symbol": "5PO.SI",
+    "name": "Hiap Tong Corporation Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hiap-tong.svg"
+  },
+  {
+    "symbol": "5QY.SI",
+    "name": "Net Pacific Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/net-pacific-fin.svg"
+  },
+  {
+    "symbol": "5RA.SI",
+    "name": "Asia-Pacific Strategic Investments Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ap-strategic.svg"
+  },
+  {
+    "symbol": "5RC.SI",
+    "name": "ES Group (Holdings) Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/es.svg"
+  },
+  {
+    "symbol": "5RE.SI",
+    "name": "Asia Vets Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/asia-vets.svg"
+  },
+  {
+    "symbol": "5RF.SI",
+    "name": "Mercurius Capital Investment Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "5SO.SI",
+    "name": "Duty Free International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/duty-free-intl.svg"
+  },
+  {
+    "symbol": "5SR.SI",
+    "name": "Zhongmin Baihui Retail Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/zhongmin-baihui.svg"
+  },
+  {
+    "symbol": "5SY.SI",
+    "name": "OneApex Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/oneapex.svg"
+  },
+  {
+    "symbol": "5TI.SI",
+    "name": "SDAI Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "5TJ.SI",
+    "name": "Far East Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/far-east.svg"
+  },
+  {
+    "symbol": "5TP.SI",
+    "name": "CNMC Goldmine Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cnmc-goldmine.svg"
+  },
+  {
+    "symbol": "5TT.SI",
+    "name": "Keong Hong Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/keong-hong-watch-list.svg"
+  },
+  {
+    "symbol": "5UA.SI",
+    "name": "Luminor Financial Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/luminor.svg"
+  },
+  {
+    "symbol": "5UF.SI",
+    "name": "Aspial Lifestyle Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/aspial-lifestyle.svg"
+  },
+  {
+    "symbol": "5UL.SI",
+    "name": "Atlantic Navigation Holdings (Singapore) Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/atlantic-nav.svg"
+  },
+  {
+    "symbol": "5UX.SI",
+    "name": "Oxley Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/oxley.svg"
+  },
+  {
+    "symbol": "5VC.SI",
+    "name": "Kori Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/kori.svg"
+  },
+  {
+    "symbol": "5VI.SI",
+    "name": "Boldtek Holdings Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "5VJ.SI",
+    "name": "Halcyon Agri Corp. Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "5VP.SI",
+    "name": "GDS Global Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gds-global.svg"
+  },
+  {
+    "symbol": "5VS.SI",
+    "name": "Hafary Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hafary.svg"
+  },
+  {
+    "symbol": "5WA.SI",
+    "name": "OUE Healthcare Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/oue-healthcare.svg"
+  },
+  {
+    "symbol": "5WF.SI",
+    "name": "ISOTeam Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/isoteam.svg"
+  },
+  {
+    "symbol": "5WG.SI",
+    "name": "Singapore Kitchen Equipment Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "5WH.SI",
+    "name": "Rex International Holding Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/rex-intl.svg"
+  },
+  {
+    "symbol": "5WJ.SI",
+    "name": "MoneyMax Financial Services Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/moneymax-fin.svg"
+  },
+  {
+    "symbol": "5WV.SI",
+    "name": "AsiaPhos Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/asiaphos.svg"
+  },
+  {
+    "symbol": "600.SI",
+    "name": "Hyflux Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hyflux.svg"
+  },
+  {
+    "symbol": "8A1.SI",
+    "name": "Heptamax International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/forise-int.svg"
+  },
+  {
+    "symbol": "8A8.SI",
+    "name": "China Medical System Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/china-medical-system-ltd.svg"
+  },
+  {
+    "symbol": "8AZ.SI",
+    "name": "Aztech Global Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/aztech-gbl.svg"
+  },
+  {
+    "symbol": "8K7.SI",
+    "name": "UG Healthcare Corp. Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ug-healthcare.svg"
+  },
+  {
+    "symbol": "8YY.SI",
+    "name": "Embracing Future Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/biolidics.svg"
+  },
+  {
+    "symbol": "8YZ.SI",
+    "name": "Yangzijiang Maritime Development Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/yangzijiang-maritime-development-ltd.svg"
+  },
+  {
+    "symbol": "9CI.SI",
+    "name": "CapitaLand Investment Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/capitalandinvest.svg"
+  },
+  {
+    "symbol": "9G2.SI",
+    "name": "Singapore Institute of Advanced Medicine Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sam.svg"
+  },
+  {
+    "symbol": "9I7.SI",
+    "name": "Bromat Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/bromat.svg"
+  },
+  {
+    "symbol": "9MT.SI",
+    "name": "MetaOptics Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/metaoptics-ltd.svg"
+  },
+  {
+    "symbol": "9QX.SI",
+    "name": "Beverly Wilshire Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/beverlyjcg.svg"
+  },
+  {
+    "symbol": "9VW.SI",
+    "name": "Spackman Entertainment Group Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/spackman-equities.svg"
+  },
+  {
+    "symbol": "A04.SI",
+    "name": "ASL Marine Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/asl-marine.svg"
+  },
+  {
+    "symbol": "A30.SI",
+    "name": "Aspial Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/aspial.svg"
+  },
+  {
+    "symbol": "A31.SI",
+    "name": "Addvalue Technologies Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/addvalue-tech-watch-list.svg"
+  },
+  {
+    "symbol": "A33.SI",
+    "name": "Southern Archipelago Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/southern-arch.svg"
+  },
+  {
+    "symbol": "A50.SI",
+    "name": "Thomson Medical Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/thomson-medical.svg"
+  },
+  {
+    "symbol": "A52.SI",
+    "name": "Annaik Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/annaik.svg"
+  },
+  {
+    "symbol": "A55.SI",
+    "name": "Asia Enterprises Holding Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/asia-enterprises.svg"
+  },
+  {
+    "symbol": "A78.SI",
+    "name": "Shen Yao Holdings Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "AAJ",
+    "name": "SunMoon Food Co. Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sunmoonfood.svg"
+  },
+  {
+    "symbol": "AAJ.SI",
+    "name": "SunMoon Food Co. Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sunmoonfood.svg"
+  },
+  {
+    "symbol": "ADN.SI",
+    "name": "First Sponsor Group Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-sponsor.svg"
+  },
+  {
+    "symbol": "AGS.SI",
+    "name": "Hour Glass Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/thehourglass.svg"
+  },
+  {
+    "symbol": "AIY.SI",
+    "name": "iFAST Corporation Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ifast.svg"
+  },
+  {
+    "symbol": "AJ2.SI",
+    "name": "Ouhua Energy Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ouhua-energy.svg"
+  },
+  {
+    "symbol": "AOF",
+    "name": "Amplefield Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/amplefield-ltd.svg"
+  },
+  {
+    "symbol": "AOF.SI",
+    "name": "Amplefield Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/amplefield-ltd.svg"
+  },
+  {
+    "symbol": "AP4.SI",
+    "name": "Riverstone Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/riverstone.svg"
+  },
+  {
+    "symbol": "AVP.SI",
+    "name": "AvePoint, Inc. Class A",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/avepoint.svg"
+  },
+  {
+    "symbol": "AVX",
+    "name": "HL Global Enterprises Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hl-global-ent.svg"
+  },
+  {
+    "symbol": "AVX.SI",
+    "name": "HL Global Enterprises Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hl-global-ent.svg"
+  },
+  {
+    "symbol": "AWC",
+    "name": "Brook Crompton Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/brook-crompton.svg"
+  },
+  {
+    "symbol": "AWC.SI",
+    "name": "Brook Crompton Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/brook-crompton.svg"
+  },
+  {
+    "symbol": "AWG",
+    "name": "Ascent Bridge Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ascent-bridge-watch-list.svg"
+  },
+  {
+    "symbol": "AWG.SI",
+    "name": "Ascent Bridge Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ascent-bridge-watch-list.svg"
+  },
+  {
+    "symbol": "AWI",
+    "name": "Thakral Corporation Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/thakral.svg"
+  },
+  {
+    "symbol": "AWI.SI",
+    "name": "Thakral Corporation Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/thakral.svg"
+  },
+  {
+    "symbol": "AWK",
+    "name": "Fuxing China Group Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/fuxing-china.svg"
+  },
+  {
+    "symbol": "AWK.SI",
+    "name": "Fuxing China Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/fuxing-china.svg"
+  },
+  {
+    "symbol": "AWM",
+    "name": "Shanghai Turbo Enterprises Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/shanghai-turbo-watch-list.svg"
+  },
+  {
+    "symbol": "AWM.SI",
+    "name": "Shanghai Turbo Enterprises Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/shanghai-turbo-watch-list.svg"
+  },
+  {
+    "symbol": "AWV",
+    "name": "Captii Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/captii.svg"
+  },
+  {
+    "symbol": "AWV.SI",
+    "name": "Captii Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/captii.svg"
+  },
+  {
+    "symbol": "AWX",
+    "name": "AEM Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/aem.svg"
+  },
+  {
+    "symbol": "AWX.SI",
+    "name": "AEM Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/aem.svg"
+  },
+  {
+    "symbol": "AWZ",
+    "name": "Multi-Chem Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/multi-chem.svg"
+  },
+  {
+    "symbol": "AWZ.SI",
+    "name": "Multi-Chem Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/multi-chem.svg"
+  },
+  {
+    "symbol": "AYN",
+    "name": "Global Testing Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/global-testing.svg"
+  },
+  {
+    "symbol": "AYN.SI",
+    "name": "Global Testing Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/global-testing.svg"
+  },
+  {
+    "symbol": "AYV",
+    "name": "Acma Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/acma.svg"
+  },
+  {
+    "symbol": "AYV.SI",
+    "name": "Acma Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/acma.svg"
+  },
+  {
+    "symbol": "AZA",
+    "name": "IPC Corporation Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ipc-watch-list.svg"
+  },
+  {
+    "symbol": "AZA.SI",
+    "name": "IPC Corporation Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ipc-watch-list.svg"
+  },
+  {
+    "symbol": "AZG",
+    "name": "8Telecom International Holdings Co., Ltd.",
+    "market": ""
+  },
+  {
+    "symbol": "AZG.SI",
+    "name": "8Telecom International Holdings Co., Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "AZR",
+    "name": "United Food Holdings Ltd.",
+    "market": ""
+  },
+  {
+    "symbol": "AZR.SI",
+    "name": "United Food Holdings Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "AZT",
+    "name": "NutryFarm International Ltd.",
+    "market": ""
+  },
+  {
+    "symbol": "AZT.SI",
+    "name": "NutryFarm International Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "B0Z.SI",
+    "name": "China Fishery Group Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "B28.SI",
+    "name": "Bonvests Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/bonvests.svg"
+  },
+  {
+    "symbol": "B49.SI",
+    "name": "World Precision Machinery Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/world-precision.svg"
+  },
+  {
+    "symbol": "B58.SI",
+    "name": "Banyan Tree Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/banyan-tree-ltd.svg"
+  },
+  {
+    "symbol": "B61.SI",
+    "name": "Bukit Sembawang Estates Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/bukit-sembawang.svg"
+  },
+  {
+    "symbol": "B69.SI",
+    "name": "Broadway Industrial Group Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "BAC",
+    "name": "Camsing Healthcare Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/camsing-hc-watch-list.svg"
+  },
+  {
+    "symbol": "BAC.SI",
+    "name": "Camsing Healthcare Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/camsing-hc-watch-list.svg"
+  },
+  {
+    "symbol": "BAI",
+    "name": "Digilife Technologies Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/digilife-tech.svg"
+  },
+  {
+    "symbol": "BAI.SI",
+    "name": "Digilife Technologies Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/digilife-tech.svg"
+  },
+  {
+    "symbol": "BAZ",
+    "name": "Lion Asiapac Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/lion-asiapac.svg"
+  },
+  {
+    "symbol": "BAZ.SI",
+    "name": "Lion Asiapac Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/lion-asiapac.svg"
+  },
+  {
+    "symbol": "BBP",
+    "name": "Hor Kew Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hor-kew.svg"
+  },
+  {
+    "symbol": "BBP.SI",
+    "name": "Hor Kew Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hor-kew.svg"
+  },
+  {
+    "symbol": "BBW",
+    "name": "Azeus Systems Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/azeus.svg"
+  },
+  {
+    "symbol": "BBW.SI",
+    "name": "Azeus Systems Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/azeus.svg"
+  },
+  {
+    "symbol": "BCD",
+    "name": "China Yuanbang Property Holdings Ltd.",
+    "market": ""
+  },
+  {
+    "symbol": "BCD.SI",
+    "name": "China Yuanbang Property Holdings Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "BCV",
+    "name": "Qian Hu Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/qian-hu.svg"
+  },
+  {
+    "symbol": "BCV.SI",
+    "name": "Qian Hu Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/qian-hu.svg"
+  },
+  {
+    "symbol": "BCY",
+    "name": "Powermatic Data Systems Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/powermatic-data.svg"
+  },
+  {
+    "symbol": "BCY.SI",
+    "name": "Powermatic Data Systems Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/powermatic-data.svg"
+  },
+  {
+    "symbol": "BCZ",
+    "name": "Travelite Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/travelite.svg"
+  },
+  {
+    "symbol": "BCZ.SI",
+    "name": "Travelite Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/travelite.svg"
+  },
+  {
+    "symbol": "BDA",
+    "name": "PNE Industries Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/pne-industries.svg"
+  },
+  {
+    "symbol": "BDA.SI",
+    "name": "PNE Industries Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/pne-industries.svg"
+  },
+  {
+    "symbol": "BDR.SI",
+    "name": "Willas-Array Electronics (Holdings) Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/willas-array-electronics.svg"
+  },
+  {
+    "symbol": "BDU",
+    "name": "Federal International (2000) Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/federal-int.svg"
+  },
+  {
+    "symbol": "BDU.SI",
+    "name": "Federal International (2000) Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/federal-int.svg"
+  },
+  {
+    "symbol": "BDX",
+    "name": "GSH Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/gsh.svg"
+  },
+  {
+    "symbol": "BDX.SI",
+    "name": "GSH Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gsh.svg"
+  },
+  {
+    "symbol": "BEC",
+    "name": "BRC Asia Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/brc-asia.svg"
+  },
+  {
+    "symbol": "BEC.SI",
+    "name": "BRC Asia Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/brc-asia.svg"
+  },
+  {
+    "symbol": "BEH.SI",
+    "name": "China International Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/china-intl.svg"
+  },
+  {
+    "symbol": "BEI",
+    "name": "LHT Holdings Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/lht.svg"
+  },
+  {
+    "symbol": "BEI.SI",
+    "name": "LHT Holdings Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/lht.svg"
+  },
+  {
+    "symbol": "BEW",
+    "name": "JB Foods Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/jb-foods.svg"
+  },
+  {
+    "symbol": "BEW.SI",
+    "name": "JB Foods Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/jb-foods.svg"
+  },
+  {
+    "symbol": "BEZ",
+    "name": "Beng Kuang Marine Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/beng-kuang.svg"
+  },
+  {
+    "symbol": "BEZ.SI",
+    "name": "Beng Kuang Marine Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/beng-kuang.svg"
+  },
+  {
+    "symbol": "BFI",
+    "name": "Tiong Seng Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tiong-seng-watch-list.svg"
+  },
+  {
+    "symbol": "BFI.SI",
+    "name": "Tiong Seng Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tiong-seng-watch-list.svg"
+  },
+  {
+    "symbol": "BFK",
+    "name": "Pharmesis International Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/pharmesis-intl.svg"
+  },
+  {
+    "symbol": "BFK.SI",
+    "name": "Pharmesis International Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/pharmesis-intl.svg"
+  },
+  {
+    "symbol": "BFT.SI",
+    "name": "Lincotrade & Associates Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/lincotrade.svg"
+  },
+  {
+    "symbol": "BFU",
+    "name": "Tye Soon Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tye-soon.svg"
+  },
+  {
+    "symbol": "BFU.SI",
+    "name": "Tye Soon Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tye-soon.svg"
+  },
+  {
+    "symbol": "BGO",
+    "name": "Universal Resource & Services Ltd.",
+    "market": ""
+  },
+  {
+    "symbol": "BGO.SI",
+    "name": "Universal Resource & Services Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "BHD",
+    "name": "China Mining International Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/china-mining.svg"
+  },
+  {
+    "symbol": "BHD.SI",
+    "name": "China Mining International Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/china-mining.svg"
+  },
+  {
+    "symbol": "BHK",
+    "name": "SIIC Environment Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/siic-environment-ltd.svg"
+  },
+  {
+    "symbol": "BHK.SI",
+    "name": "SIIC Environment Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/siic-environment-ltd.svg"
+  },
+  {
+    "symbol": "BHU",
+    "name": "SUTL Enterprise Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sutl-enterprise.svg"
+  },
+  {
+    "symbol": "BHU.SI",
+    "name": "SUTL Enterprise Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sutl-enterprise.svg"
+  },
+  {
+    "symbol": "BIP",
+    "name": "Vibrant Group Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/vibrant.svg"
+  },
+  {
+    "symbol": "BIP.SI",
+    "name": "Vibrant Group Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/vibrant.svg"
+  },
+  {
+    "symbol": "BIX",
+    "name": "Ellipsiz Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ellipsiz.svg"
+  },
+  {
+    "symbol": "BIX.SI",
+    "name": "Ellipsiz Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ellipsiz.svg"
+  },
+  {
+    "symbol": "BJD",
+    "name": "Vibropower Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/vibropower.svg"
+  },
+  {
+    "symbol": "BJD.SI",
+    "name": "Vibropower Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/vibropower.svg"
+  },
+  {
+    "symbol": "BJV",
+    "name": "Yamada Green Resources Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/yamada-green-res.svg"
+  },
+  {
+    "symbol": "BJV.SI",
+    "name": "Yamada Green Resources Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/yamada-green-res.svg"
+  },
+  {
+    "symbol": "BJZ",
+    "name": "Koda Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/koda.svg"
+  },
+  {
+    "symbol": "BJZ.SI",
+    "name": "Koda Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/koda.svg"
+  },
+  {
+    "symbol": "BKA",
+    "name": "Sin Heng Heavy Machinery Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sin-heng-mach.svg"
+  },
+  {
+    "symbol": "BKA.SI",
+    "name": "Sin Heng Heavy Machinery Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sin-heng-mach.svg"
+  },
+  {
+    "symbol": "BKK.SI",
+    "name": "Luxking Group Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/luxking.svg"
+  },
+  {
+    "symbol": "BKV",
+    "name": "China Shenshan Orchard Holdings Co., Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/shenshan.svg"
+  },
+  {
+    "symbol": "BKV.SI",
+    "name": "China Shenshan Orchard Holdings Co., Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/shenshan.svg"
+  },
+  {
+    "symbol": "BKW",
+    "name": "Datapulse Technology Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/datapulse-tech-watch-list.svg"
+  },
+  {
+    "symbol": "BKW.SI",
+    "name": "Datapulse Technology Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/datapulse-tech-watch-list.svg"
+  },
+  {
+    "symbol": "BKX",
+    "name": "Yongmao Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/yongmao.svg"
+  },
+  {
+    "symbol": "BKX.SI",
+    "name": "Yongmao Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/yongmao.svg"
+  },
+  {
+    "symbol": "BKZ",
+    "name": "Suntar Eco-City Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/suntar-eco-city.svg"
+  },
+  {
+    "symbol": "BKZ.SI",
+    "name": "Suntar Eco-City Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/suntar-eco-city.svg"
+  },
+  {
+    "symbol": "BLR",
+    "name": "Darco Water Technologies Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/darco-water-tech.svg"
+  },
+  {
+    "symbol": "BLR.SI",
+    "name": "Darco Water Technologies Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/darco-water-tech.svg"
+  },
+  {
+    "symbol": "BLS",
+    "name": "Hotung Investment Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hotung-inv.svg"
+  },
+  {
+    "symbol": "BLS.SI",
+    "name": "Hotung Investment Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hotung-inv.svg"
+  },
+  {
+    "symbol": "BLU.SI",
+    "name": "GRP Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/grp-watch-list.svg"
+  },
+  {
+    "symbol": "BLZ",
+    "name": "Advanced Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/advanced.svg"
+  },
+  {
+    "symbol": "BLZ.SI",
+    "name": "Advanced Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/advanced.svg"
+  },
+  {
+    "symbol": "BMT",
+    "name": "Coolan Group Limited",
+    "market": ""
+  },
+  {
+    "symbol": "BMT.SI",
+    "name": "Coolan Group Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "BN2.SI",
+    "name": "Valuetronics Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/valuetronics.svg"
+  },
+  {
+    "symbol": "BN4.SI",
+    "name": "Keppel Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/keppel.svg"
+  },
+  {
+    "symbol": "BNE",
+    "name": "Kencana Agri Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/kencana-agri.svg"
+  },
+  {
+    "symbol": "BNE.SI",
+    "name": "Kencana Agri Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/kencana-agri.svg"
+  },
+  {
+    "symbol": "BPF",
+    "name": "YHI International Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/yhi-intl.svg"
+  },
+  {
+    "symbol": "BPF.SI",
+    "name": "YHI International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/yhi-intl.svg"
+  },
+  {
+    "symbol": "BQC",
+    "name": "A-Smart Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/a-smart.svg"
+  },
+  {
+    "symbol": "BQC.SI",
+    "name": "A-Smart Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/a-smart.svg"
+  },
+  {
+    "symbol": "BQD",
+    "name": "Envictus International Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/envictus.svg"
+  },
+  {
+    "symbol": "BQD.SI",
+    "name": "Envictus International Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/envictus.svg"
+  },
+  {
+    "symbol": "BQF",
+    "name": "XMH Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/xmh.svg"
+  },
+  {
+    "symbol": "BQF.SI",
+    "name": "XMH Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/xmh.svg"
+  },
+  {
+    "symbol": "BQM",
+    "name": "Tiong Woon Corporation Holding Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tiong-woon.svg"
+  },
+  {
+    "symbol": "BQM.SI",
+    "name": "Tiong Woon Corporation Holding Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tiong-woon.svg"
+  },
+  {
+    "symbol": "BQN",
+    "name": "BH Global Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/bh-global-ltd.svg"
+  },
+  {
+    "symbol": "BQN.SI",
+    "name": "BH Global Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/bh-global-ltd.svg"
+  },
+  {
+    "symbol": "BQP",
+    "name": "Southern Packaging Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/southern-pkg.svg"
+  },
+  {
+    "symbol": "BQP.SI",
+    "name": "Southern Packaging Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/southern-pkg.svg"
+  },
+  {
+    "symbol": "BRD.SI",
+    "name": "Sapphire Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sapphire.svg"
+  },
+  {
+    "symbol": "BRS.SI",
+    "name": "USP Group Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "BS6.SI",
+    "name": "Yangzijiang Shipbuilding (Holdings) Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/yzj-shipbldg-sgd.svg"
+  },
+  {
+    "symbol": "BSL",
+    "name": "Raffles Medical Group Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/raffles-medical.svg"
+  },
+  {
+    "symbol": "BSL.SI",
+    "name": "Raffles Medical Group Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/raffles-medical.svg"
+  },
+  {
+    "symbol": "BTE",
+    "name": "Bund Center Investment Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/bund-center.svg"
+  },
+  {
+    "symbol": "BTE.SI",
+    "name": "Bund Center Investment Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/bund-center.svg"
+  },
+  {
+    "symbol": "BTF",
+    "name": "Debao Property Development Ltd.",
+    "market": ""
+  },
+  {
+    "symbol": "BTF.SI",
+    "name": "Debao Property Development Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "BTG",
+    "name": "HG Metal Manufacturing Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hg-metal.svg"
+  },
+  {
+    "symbol": "BTG.SI",
+    "name": "HG Metal Manufacturing Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hg-metal.svg"
+  },
+  {
+    "symbol": "BTJ",
+    "name": "A-Sonic Aerospace Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/a-sonic-aerospace.svg"
+  },
+  {
+    "symbol": "BTJ.SI",
+    "name": "A-Sonic Aerospace Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/a-sonic-aerospace.svg"
+  },
+  {
+    "symbol": "BTM",
+    "name": "Penguin International Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/penguin-intl.svg"
+  },
+  {
+    "symbol": "BTM.SI",
+    "name": "Penguin International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/penguin-intl.svg"
+  },
+  {
+    "symbol": "BTP",
+    "name": "Baker Technology Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/baker-technology.svg"
+  },
+  {
+    "symbol": "BTP.SI",
+    "name": "Baker Technology Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/baker-technology.svg"
+  },
+  {
+    "symbol": "BTX",
+    "name": "Anchun International Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/anchun-intl.svg"
+  },
+  {
+    "symbol": "BTX.SI",
+    "name": "Anchun International Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/anchun-intl.svg"
+  },
+  {
+    "symbol": "BVA",
+    "name": "Top Glove Corporation Bhd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/top-glove.svg"
+  },
+  {
+    "symbol": "BVA.SI",
+    "name": "Top Glove Corporation Bhd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/top-glove.svg"
+  },
+  {
+    "symbol": "BWM",
+    "name": "Zheneng Jinjiang Environment Holding Co., Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/zheneng-jinjiang.svg"
+  },
+  {
+    "symbol": "BWM.SI",
+    "name": "Zheneng Jinjiang Environment Holding Co., Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/zheneng-jinjiang.svg"
+  },
+  {
+    "symbol": "BXE",
+    "name": "CDW Holding Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/cdw.svg"
+  },
+  {
+    "symbol": "BXE.SI",
+    "name": "CDW Holding Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cdw.svg"
+  },
+  {
+    "symbol": "BYS",
+    "name": "UPL Limited Sponsored GDR RegS",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/upl.svg"
+  },
+  {
+    "symbol": "C04.SI",
+    "name": "Casa Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/casa.svg"
+  },
+  {
+    "symbol": "C05.SI",
+    "name": "Chemical Industries Far East Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/chemical-ind.svg"
+  },
+  {
+    "symbol": "C06.SI",
+    "name": "CSC Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/csc.svg"
+  },
+  {
+    "symbol": "C07.SI",
+    "name": "Jardine Cycle & Carriage Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/jardine.svg"
+  },
+  {
+    "symbol": "C09.SI",
+    "name": "City Developments Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/citydev.svg"
+  },
+  {
+    "symbol": "C13.SI",
+    "name": "CH Offshore Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ch-offshore-watch-list.svg"
+  },
+  {
+    "symbol": "C33.SI",
+    "name": "Chuan Hup Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/chuan-hup.svg"
+  },
+  {
+    "symbol": "C41.SI",
+    "name": "Cortina Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cortina.svg"
+  },
+  {
+    "symbol": "C52.SI",
+    "name": "Comfortdelgro Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/comfortdelgro.svg"
+  },
+  {
+    "symbol": "C6L.SI",
+    "name": "Singapore Airlines Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/singapore-airlines.svg"
+  },
+  {
+    "symbol": "C70.SI",
+    "name": "City Developments Ltd Pref.Shs 2004-Non-Red.Conv.Non-Cum.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/citydev.svg"
+  },
+  {
+    "symbol": "C76.SI",
+    "name": "Creative Technology Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/creative-technology-ltd.svg"
+  },
+  {
+    "symbol": "C8R.SI",
+    "name": "Jiutian Chemical Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/jiutian-chemical.svg"
+  },
+  {
+    "symbol": "C9Q.SI",
+    "name": "Sinostar PEC Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sinostar-pec.svg"
+  },
+  {
+    "symbol": "CC3",
+    "name": "StarHub Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/starhub.svg"
+  },
+  {
+    "symbol": "CC3.SI",
+    "name": "StarHub Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/starhub.svg"
+  },
+  {
+    "symbol": "CHJ",
+    "name": "Uni-Asia Group Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/uni-asia-grp.svg"
+  },
+  {
+    "symbol": "CHJ.SI",
+    "name": "Uni-Asia Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/uni-asia-grp.svg"
+  },
+  {
+    "symbol": "CHZ",
+    "name": "HRnetGroup Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hrnetgroup.svg"
+  },
+  {
+    "symbol": "CHZ.SI",
+    "name": "HRnetGroup Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hrnetgroup.svg"
+  },
+  {
+    "symbol": "CIN",
+    "name": "Courage Investment Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/courage-investment-ltd.svg"
+  },
+  {
+    "symbol": "CIN.SI",
+    "name": "Courage Investment Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/courage-investment-ltd.svg"
+  },
+  {
+    "symbol": "CJN",
+    "name": "British and Malayan Holdings Limited",
+    "market": ""
+  },
+  {
+    "symbol": "CJN.SI",
+    "name": "British and Malayan Holdings Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "CLN",
+    "name": "APAC Realty Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/apac-realty.svg"
+  },
+  {
+    "symbol": "CLN.SI",
+    "name": "APAC Realty Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/apac-realty.svg"
+  },
+  {
+    "symbol": "CNE",
+    "name": "MindChamps PreSchool Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/mindchamps.svg"
+  },
+  {
+    "symbol": "CNE.SI",
+    "name": "MindChamps PreSchool Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mindchamps.svg"
+  },
+  {
+    "symbol": "CTO",
+    "name": "Hong Lai Huat Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hong-lai-huat.svg"
+  },
+  {
+    "symbol": "CTO.SI",
+    "name": "Hong Lai Huat Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hong-lai-huat.svg"
+  },
+  {
+    "symbol": "CYW",
+    "name": "TrickleStar Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tricklestar.svg"
+  },
+  {
+    "symbol": "CYW.SI",
+    "name": "TrickleStar Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tricklestar.svg"
+  },
+  {
+    "symbol": "D01",
+    "name": "DFI Retail Group Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/dfi-retail-group.svg"
+  },
+  {
+    "symbol": "D01.SI",
+    "name": "DFI Retail Group Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/dfi-retail-group.svg"
+  },
+  {
+    "symbol": "D03",
+    "name": "Del Monte Pacific Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/del-monte-pac.svg"
+  },
+  {
+    "symbol": "D03.SI",
+    "name": "Del Monte Pacific Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/del-monte-pac.svg"
+  },
+  {
+    "symbol": "D05",
+    "name": "DBS Group Holdings Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/dbs.svg"
+  },
+  {
+    "symbol": "D05.SI",
+    "name": "DBS Group Holdings Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/dbs.svg"
+  },
+  {
+    "symbol": "DM0",
+    "name": "PSC Corporation Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/psc.svg"
+  },
+  {
+    "symbol": "DM0.SI",
+    "name": "PSC Corporation Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/psc.svg"
+  },
+  {
+    "symbol": "DRX",
+    "name": "ST Group Food Industries Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/st-food.svg"
+  },
+  {
+    "symbol": "DRX.SI",
+    "name": "ST Group Food Industries Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/st-food.svg"
+  },
+  {
+    "symbol": "DU4",
+    "name": "Mermaid Maritime Public Co., Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/mermaid-maritime.svg"
+  },
+  {
+    "symbol": "DU4.SI",
+    "name": "Mermaid Maritime Public Co., Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mermaid-maritime.svg"
+  },
+  {
+    "symbol": "E27",
+    "name": "Place Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/the-place-hldg.svg"
+  },
+  {
+    "symbol": "E27.SI",
+    "name": "Place Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-place-hldg.svg"
+  },
+  {
+    "symbol": "E28",
+    "name": "Frencken Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/frencken.svg"
+  },
+  {
+    "symbol": "E28.SI",
+    "name": "Frencken Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/frencken.svg"
+  },
+  {
+    "symbol": "E3B",
+    "name": "Wee Hur Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/wee-hur.svg"
+  },
+  {
+    "symbol": "E3B.SI",
+    "name": "Wee Hur Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/wee-hur.svg"
+  },
+  {
+    "symbol": "E5H",
+    "name": "Golden Agri-Resources Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/golden-energy.svg"
+  },
+  {
+    "symbol": "E5H.SI",
+    "name": "Golden Agri-Resources Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/golden-energy.svg"
+  },
+  {
+    "symbol": "E6R",
+    "name": "Le Tree Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/samko-timber.svg"
+  },
+  {
+    "symbol": "E6R.SI",
+    "name": "Le Tree Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/samko-timber.svg"
+  },
+  {
+    "symbol": "E9L",
+    "name": "Joyas International Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/joyas-intl.svg"
+  },
+  {
+    "symbol": "E9L.SI",
+    "name": "Joyas International Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/joyas-intl.svg"
+  },
+  {
+    "symbol": "EB5",
+    "name": "First Resources Ltd. (Singapore)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/first-resources.svg"
+  },
+  {
+    "symbol": "EB5.SI",
+    "name": "First Resources Ltd. (Singapore)",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/first-resources.svg"
+  },
+  {
+    "symbol": "EH5",
+    "name": "United Overseas Australia Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/uoa.svg"
+  },
+  {
+    "symbol": "EH5.SI",
+    "name": "United Overseas Australia Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/uoa.svg"
+  },
+  {
+    "symbol": "EMI",
+    "name": "Emperador Inc.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/emperador.svg"
+  },
+  {
+    "symbol": "EMI.SI",
+    "name": "Emperador Inc.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/emperador.svg"
+  },
+  {
+    "symbol": "ENV",
+    "name": "LS 2 Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ls-2.svg"
+  },
+  {
+    "symbol": "ENV.SI",
+    "name": "LS 2 Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ls-2.svg"
+  },
+  {
+    "symbol": "ER0",
+    "name": "KSH Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ksh-limited.svg"
+  },
+  {
+    "symbol": "ER0.SI",
+    "name": "KSH Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ksh-limited.svg"
+  },
+  {
+    "symbol": "F03",
+    "name": "Food Empire Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/food-empire.svg"
+  },
+  {
+    "symbol": "F03.SI",
+    "name": "Food Empire Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/food-empire.svg"
+  },
+  {
+    "symbol": "F10",
+    "name": "FJ Benjamin Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/fj-benjamin.svg"
+  },
+  {
+    "symbol": "F10.SI",
+    "name": "FJ Benjamin Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/fj-benjamin.svg"
+  },
+  {
+    "symbol": "F13",
+    "name": "Fu Yu Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/fu-yu.svg"
+  },
+  {
+    "symbol": "F13.SI",
+    "name": "Fu Yu Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/fu-yu.svg"
+  },
+  {
+    "symbol": "F17",
+    "name": "GuocoLand Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/guocoland.svg"
+  },
+  {
+    "symbol": "F17.SI",
+    "name": "GuocoLand Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/guocoland.svg"
+  },
+  {
+    "symbol": "F1E",
+    "name": "Low Keng Huat Singapore Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/low-keng-huat.svg"
+  },
+  {
+    "symbol": "F1E.SI",
+    "name": "Low Keng Huat Singapore Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/low-keng-huat.svg"
+  },
+  {
+    "symbol": "F34",
+    "name": "Wilmar International Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/wilmar.svg"
+  },
+  {
+    "symbol": "F34.SI",
+    "name": "Wilmar International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/wilmar.svg"
+  },
+  {
+    "symbol": "F83",
+    "name": "COSCO Shipping International Singapore Co Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/cosco-shipping.svg"
+  },
+  {
+    "symbol": "F83.SI",
+    "name": "COSCO Shipping International Singapore Co Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cosco-shipping.svg"
+  },
+  {
+    "symbol": "F86",
+    "name": "MYP Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/myp.svg"
+  },
+  {
+    "symbol": "F86.SI",
+    "name": "MYP Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/myp.svg"
+  },
+  {
+    "symbol": "F99",
+    "name": "Fraser & Neave Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/f-and-n.svg"
+  },
+  {
+    "symbol": "F99.SI",
+    "name": "Fraser & Neave Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/f-and-n.svg"
+  },
+  {
+    "symbol": "F9D",
+    "name": "Boustead Singapore Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/boustead.svg"
+  },
+  {
+    "symbol": "F9D.SI",
+    "name": "Boustead Singapore Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/boustead.svg"
+  },
+  {
+    "symbol": "FQ7",
+    "name": "Salt Investments Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/salt-investments-watch-list.svg"
+  },
+  {
+    "symbol": "FQ7.SI",
+    "name": "Salt Investments Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/salt-investments-watch-list.svg"
+  },
+  {
+    "symbol": "G07",
+    "name": "Great Eastern Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/great-eastern.svg"
+  },
+  {
+    "symbol": "G07.SI",
+    "name": "Great Eastern Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/great-eastern.svg"
+  },
+  {
+    "symbol": "G0I",
+    "name": "Nam Lee Pressed Metal Industries Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/nam-lee-metal.svg"
+  },
+  {
+    "symbol": "G0I.SI",
+    "name": "Nam Lee Pressed Metal Industries Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/nam-lee-metal.svg"
+  },
+  {
+    "symbol": "G13",
+    "name": "Genting Singapore Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/genting-sing.svg"
+  },
+  {
+    "symbol": "G13.SI",
+    "name": "Genting Singapore Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/genting-sing.svg"
+  },
+  {
+    "symbol": "G20",
+    "name": "GP Industries Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/gp-industries.svg"
+  },
+  {
+    "symbol": "G20.SI",
+    "name": "GP Industries Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gp-industries.svg"
+  },
+  {
+    "symbol": "G50",
+    "name": "Grand Banks Yachts Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/grand-banks.svg"
+  },
+  {
+    "symbol": "G50.SI",
+    "name": "Grand Banks Yachts Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/grand-banks.svg"
+  },
+  {
+    "symbol": "G92",
+    "name": "China Aviation Oil (Singapore) Corporation Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/china-aviation.svg"
+  },
+  {
+    "symbol": "G92.SI",
+    "name": "China Aviation Oil (Singapore) Corporation Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/china-aviation.svg"
+  },
+  {
+    "symbol": "GEH",
+    "name": "Goodwill Entertainment Holding Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/goodwill.svg"
+  },
+  {
+    "symbol": "GEH.SI",
+    "name": "Goodwill Entertainment Holding Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/goodwill.svg"
+  },
+  {
+    "symbol": "GRQ",
+    "name": "UpHealth Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/don-agro.svg"
+  },
+  {
+    "symbol": "GRQ.SI",
+    "name": "UpHealth Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/don-agro.svg"
+  },
+  {
+    "symbol": "GU5",
+    "name": "China Kunda Technology Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/chinakundatech.svg"
+  },
+  {
+    "symbol": "GU5.SI",
+    "name": "China Kunda Technology Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/chinakundatech.svg"
+  },
+  {
+    "symbol": "H02",
+    "name": "Haw Par Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/haw-par.svg"
+  },
+  {
+    "symbol": "H02.SI",
+    "name": "Haw Par Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/haw-par.svg"
+  },
+  {
+    "symbol": "H07",
+    "name": "Stamford Land Corporation Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/stamford-land.svg"
+  },
+  {
+    "symbol": "H07.SI",
+    "name": "Stamford Land Corporation Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/stamford-land.svg"
+  },
+  {
+    "symbol": "H12",
+    "name": "Hotel Royal Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hotel-royal.svg"
+  },
+  {
+    "symbol": "H12.SI",
+    "name": "Hotel Royal Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hotel-royal.svg"
+  },
+  {
+    "symbol": "H13",
+    "name": "Ho Bee Land Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ho-bee-land.svg"
+  },
+  {
+    "symbol": "H13.SI",
+    "name": "Ho Bee Land Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ho-bee-land.svg"
+  },
+  {
+    "symbol": "H15",
+    "name": "Hotel Properties Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hpl.svg"
+  },
+  {
+    "symbol": "H15.SI",
+    "name": "Hotel Properties Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hpl.svg"
+  },
+  {
+    "symbol": "H18",
+    "name": "Hotel Grand Central Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hotel-grand.svg"
+  },
+  {
+    "symbol": "H18.SI",
+    "name": "Hotel Grand Central Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hotel-grand.svg"
+  },
+  {
+    "symbol": "H20",
+    "name": "Hoe Leong Corporation Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hoe-leong.svg"
+  },
+  {
+    "symbol": "H20.SI",
+    "name": "Hoe Leong Corporation Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hoe-leong.svg"
+  },
+  {
+    "symbol": "H22",
+    "name": "Hong Leong Asia Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hong-leong-asia.svg"
+  },
+  {
+    "symbol": "H22.SI",
+    "name": "Hong Leong Asia Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hong-leong-asia.svg"
+  },
+  {
+    "symbol": "H30",
+    "name": "Hong Fok Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hong-fok.svg"
+  },
+  {
+    "symbol": "H30.SI",
+    "name": "Hong Fok Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hong-fok.svg"
+  },
+  {
+    "symbol": "H78",
+    "name": "Hongkong Land Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hongkongland.svg"
+  },
+  {
+    "symbol": "H78.SI",
+    "name": "Hongkong Land Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hongkongland.svg"
+  },
+  {
+    "symbol": "HBBD",
+    "name": "Alibaba Group Holding Limited Shs UnSp Singapore Depositary Receipt Repr 1/5 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/alibaba.svg"
+  },
+  {
+    "symbol": "HBBD.SI",
+    "name": "Alibaba Group Holding Limited Shs UnSp Singapore Depositary Receipt Repr 1/5 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/alibaba.svg"
+  },
+  {
+    "symbol": "HBND",
+    "name": "Bank of China Limited Shs UnSp Singapore Depositary Receipt Repr 1 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-of-china.svg"
+  },
+  {
+    "symbol": "HBND.SI",
+    "name": "Bank of China Limited Shs UnSp Singapore Depositary Receipt Repr 1 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-of-china.svg"
+  },
+  {
+    "symbol": "HBUD",
+    "name": "Baidu, Inc. Shs UnSp Singapore Depositary Receipt Repr 1/10 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/baidu.svg"
+  },
+  {
+    "symbol": "HBUD.SI",
+    "name": "Baidu, Inc. Shs UnSp Singapore Depositary Receipt Repr 1/10 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/baidu.svg"
+  },
+  {
+    "symbol": "HCCD",
+    "name": "Contemporary Amperex Technology Co., Limited Shs UnSp Singapore Depositary Receipt Repr 1/30 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/contemporary-amper.svg"
+  },
+  {
+    "symbol": "HCCD.SI",
+    "name": "Contemporary Amperex Technology Co., Limited Shs UnSp Singapore Depositary Receipt Repr 1/30 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/contemporary-amper.svg"
+  },
+  {
+    "symbol": "HCMD",
+    "name": "China Mobile Limited Shs UnSp Singapore Depositary Receipt Repr 1/5 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/china-mobile.svg"
+  },
+  {
+    "symbol": "HCMD.SI",
+    "name": "China Mobile Limited Shs UnSp Singapore Depositary Receipt Repr 1/5 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/china-mobile.svg"
+  },
+  {
+    "symbol": "HHZD",
+    "name": "Horizon Robotics UnSp Singapore Depositary Receipt Repr 1 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/horizon-robotics.svg"
+  },
+  {
+    "symbol": "HHZD.SI",
+    "name": "Horizon Robotics UnSp Singapore Depositary Receipt Repr 1 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/horizon-robotics.svg"
+  },
+  {
+    "symbol": "HJDD",
+    "name": "JD.com, Inc. Shs UnSp Singapore Depositary Receipt Repr 1/10 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/jd-com.svg"
+  },
+  {
+    "symbol": "HJDD.SI",
+    "name": "JD.com, Inc. Shs UnSp Singapore Depositary Receipt Repr 1/10 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/jd-com.svg"
+  },
+  {
+    "symbol": "HKB",
+    "name": "AMTD IDEA Group Class A",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/amtd-ib-ov.svg"
+  },
+  {
+    "symbol": "HKB.SI",
+    "name": "AMTD IDEA Group Class A",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/amtd-ib-ov.svg"
+  },
+  {
+    "symbol": "HLPD",
+    "name": "Laopu Gold Co., Ltd. Shs UnSp Singapore Depositary Receipt Repr 1/50 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/laopu-gold-co-ltd.svg"
+  },
+  {
+    "symbol": "HLPD.SI",
+    "name": "Laopu Gold Co., Ltd. Shs UnSp Singapore Depositary Receipt Repr 1/50 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/laopu-gold-co-ltd.svg"
+  },
+  {
+    "symbol": "HLS",
+    "name": "Helens International Holdings Company Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/helens-intl-hldgs-co-ltd.svg"
+  },
+  {
+    "symbol": "HLS.SI",
+    "name": "Helens International Holdings Company Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/helens-intl-hldgs-co-ltd.svg"
+  },
+  {
+    "symbol": "HMN",
+    "name": "CapitaLand Ascott Trust",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ascott-trust.svg"
+  },
+  {
+    "symbol": "HMN.SI",
+    "name": "CapitaLand Ascott Trust",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ascott-trust.svg"
+  },
+  {
+    "symbol": "HMTD",
+    "name": "Meituan Shs UnSp Singapore Depositary Receipt Repr 1/5 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/meituan.svg"
+  },
+  {
+    "symbol": "HMTD.SI",
+    "name": "Meituan Shs UnSp Singapore Depositary Receipt Repr 1/5 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/meituan.svg"
+  },
+  {
+    "symbol": "HPAD",
+    "name": "Ping An Insurance (Group) Company of China, Ltd. Shs UnSp Singapore Depositary Receipt Repr 1/2 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ping-an.svg"
+  },
+  {
+    "symbol": "HPAD.SI",
+    "name": "Ping An Insurance (Group) Company of China, Ltd. Shs UnSp Singapore Depositary Receipt Repr 1/2 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ping-an.svg"
+  },
+  {
+    "symbol": "HPCD",
+    "name": "PetroChina Co., Ltd. Shs UnSp Singapore Depositary Receipt Repr 2/1 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/petrochina.svg"
+  },
+  {
+    "symbol": "HPCD.SI",
+    "name": "PetroChina Co., Ltd. Shs UnSp Singapore Depositary Receipt Repr 2/1 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/petrochina.svg"
+  },
+  {
+    "symbol": "HPPD",
+    "name": "Pop Mart International Group Limited Shs UnSp Singapore Depositary Receipt Repr 1/20 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/pop-mart-intl-grp-ltd.svg"
+  },
+  {
+    "symbol": "HPPD.SI",
+    "name": "Pop Mart International Group Limited Shs UnSp Singapore Depositary Receipt Repr 1/20 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/pop-mart-intl-grp-ltd.svg"
+  },
+  {
+    "symbol": "HQU",
+    "name": "Oiltek International Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/oiltek.svg"
+  },
+  {
+    "symbol": "HQU.SI",
+    "name": "Oiltek International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/oiltek.svg"
+  },
+  {
+    "symbol": "HSHD",
+    "name": "HSBC Holdings Plc Shs UnSp Singapore Depositary Receipt Repr 1/5 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hsbc.svg"
+  },
+  {
+    "symbol": "HSHD.SI",
+    "name": "HSBC Holdings Plc Shs UnSp Singapore Depositary Receipt Repr 1/5 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hsbc.svg"
+  },
+  {
+    "symbol": "HSMD",
+    "name": "Semiconductor Manufacturing International Corp. UnSp Singapore Depositary Receipt Repr 1/5 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/semiconductor-manufacturing-international.svg"
+  },
+  {
+    "symbol": "HSMD.SI",
+    "name": "Semiconductor Manufacturing International Corp. UnSp Singapore Depositary Receipt Repr 1/5 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/semiconductor-manufacturing-international.svg"
+  },
+  {
+    "symbol": "HTCD",
+    "name": "Tencent Holdings Ltd Shs UnSp Singapore Depositary Receipt Repr 1/10 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tencent.svg"
+  },
+  {
+    "symbol": "HTCD.SI",
+    "name": "Tencent Holdings Ltd Shs UnSp Singapore Depositary Receipt Repr 1/10 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tencent.svg"
+  },
+  {
+    "symbol": "HTGD",
+    "name": "Trip.com Group Ltd. Shs UnSp Singapore Depositary Receipt Repr 1/50 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ctrip-com-international.svg"
+  },
+  {
+    "symbol": "HTGD.SI",
+    "name": "Trip.com Group Ltd. Shs UnSp Singapore Depositary Receipt Repr 1/50 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ctrip-com-international.svg"
+  },
+  {
+    "symbol": "HXXD",
+    "name": "Xiaomi Corporation Shs UnSp Singapore Depositary Receipt Repr 1/2 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/xiaomi.svg"
+  },
+  {
+    "symbol": "HXXD.SI",
+    "name": "Xiaomi Corporation Shs UnSp Singapore Depositary Receipt Repr 1/2 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/xiaomi.svg"
+  },
+  {
+    "symbol": "HYDD",
+    "name": "BYD Company Limited Shs UnSp Singapore Depositary Receipt Repr 1/10 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/byd-electronic.svg"
+  },
+  {
+    "symbol": "HYDD.SI",
+    "name": "BYD Company Limited Shs UnSp Singapore Depositary Receipt Repr 1/10 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/byd-electronic.svg"
+  },
+  {
+    "symbol": "HZGD",
+    "name": "Zijin Gold International Company Limited Shs UnSp Singapore Depositary Receipt Repr 1/10 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/zijin-gold-international-company-limited.svg"
+  },
+  {
+    "symbol": "HZGD.SI",
+    "name": "Zijin Gold International Company Limited Shs UnSp Singapore Depositary Receipt Repr 1/10 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/zijin-gold-international-company-limited.svg"
+  },
+  {
+    "symbol": "I06",
+    "name": "Intraco Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/intraco-watch-list.svg"
+  },
+  {
+    "symbol": "I06.SI",
+    "name": "Intraco Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/intraco-watch-list.svg"
+  },
+  {
+    "symbol": "I07",
+    "name": "ISDN Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/isdn.svg"
+  },
+  {
+    "symbol": "I07.SI",
+    "name": "ISDN Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/isdn.svg"
+  },
+  {
+    "symbol": "I11",
+    "name": "Renaissance United Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/renaissance-united-watch-list.svg"
+  },
+  {
+    "symbol": "I11.SI",
+    "name": "Renaissance United Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/renaissance-united-watch-list.svg"
+  },
+  {
+    "symbol": "I49",
+    "name": "IFS Capital Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ifs-capital.svg"
+  },
+  {
+    "symbol": "I49.SI",
+    "name": "IFS Capital Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ifs-capital.svg"
+  },
+  {
+    "symbol": "IBKD",
+    "name": "PT Bank Central Asia Tbk UnSp Singapore Depositary Receipt Repr 2/1 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-central-asia.svg"
+  },
+  {
+    "symbol": "IBKD.SI",
+    "name": "PT Bank Central Asia Tbk UnSp Singapore Depositary Receipt Repr 2/1 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-central-asia.svg"
+  },
+  {
+    "symbol": "IICD",
+    "name": "PT Indofood CBP Sukses Makmur Tbk Shs UnSp Singapore Depositary Receipt Repr 2/1 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/indofood-cbp.svg"
+  },
+  {
+    "symbol": "IICD.SI",
+    "name": "PT Indofood CBP Sukses Makmur Tbk Shs UnSp Singapore Depositary Receipt Repr 2/1 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/indofood-cbp.svg"
+  },
+  {
+    "symbol": "ITKD",
+    "name": "PT Telkom Indonesia (Persero) Tbk Shs UnSp Singapore Depositary Receipt Repr 5/1 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/telekom-indonesia.svg"
+  },
+  {
+    "symbol": "ITKD.SI",
+    "name": "PT Telkom Indonesia (Persero) Tbk Shs UnSp Singapore Depositary Receipt Repr 5/1 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/telekom-indonesia.svg"
+  },
+  {
+    "symbol": "ITS",
+    "name": "Info-Tech Systems Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/info-tech.svg"
+  },
+  {
+    "symbol": "ITS.SI",
+    "name": "Info-Tech Systems Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/info-tech.svg"
+  },
+  {
+    "symbol": "J03",
+    "name": "Jadason Enterprises Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/jadason-watch-list.svg"
+  },
+  {
+    "symbol": "J03.SI",
+    "name": "Jadason Enterprises Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/jadason-watch-list.svg"
+  },
+  {
+    "symbol": "J2T",
+    "name": "Hock Lian Seng Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hock-lian-seng.svg"
+  },
+  {
+    "symbol": "J2T.SI",
+    "name": "Hock Lian Seng Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hock-lian-seng.svg"
+  },
+  {
+    "symbol": "J36",
+    "name": "Jardine Matheson Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/jardine.svg"
+  },
+  {
+    "symbol": "J36.SI",
+    "name": "Jardine Matheson Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/jardine.svg"
+  },
+  {
+    "symbol": "K03",
+    "name": "Khong Guan Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/khong-guan.svg"
+  },
+  {
+    "symbol": "K03.SI",
+    "name": "Khong Guan Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/khong-guan.svg"
+  },
+  {
+    "symbol": "K29",
+    "name": "Karin Technology Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/karin-tech.svg"
+  },
+  {
+    "symbol": "K29.SI",
+    "name": "Karin Technology Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/karin-tech.svg"
+  },
+  {
+    "symbol": "K6S",
+    "name": "Prudential plc",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/prudential-plc.svg"
+  },
+  {
+    "symbol": "K6S.SI",
+    "name": "Prudential plc",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/prudential-plc.svg"
+  },
+  {
+    "symbol": "K75",
+    "name": "Koh Brothers Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/koh-bros.svg"
+  },
+  {
+    "symbol": "K75.SI",
+    "name": "Koh Brothers Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/koh-bros.svg"
+  },
+  {
+    "symbol": "KJ5",
+    "name": "BBR Holdings (S) Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/bbr.svg"
+  },
+  {
+    "symbol": "KJ5.SI",
+    "name": "BBR Holdings (S) Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/bbr.svg"
+  },
+  {
+    "symbol": "KUH",
+    "name": "TSH Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tsh.svg"
+  },
+  {
+    "symbol": "KUH.SI",
+    "name": "TSH Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tsh.svg"
+  },
+  {
+    "symbol": "KUO",
+    "name": "International Cement Group Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/intl-cement.svg"
+  },
+  {
+    "symbol": "KUO.SI",
+    "name": "International Cement Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/intl-cement.svg"
+  },
+  {
+    "symbol": "KUX",
+    "name": "OIO Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/oio.svg"
+  },
+  {
+    "symbol": "KUX.SI",
+    "name": "OIO Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/oio.svg"
+  },
+  {
+    "symbol": "KYB",
+    "name": "Food Innovators Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/foodinnovators.svg"
+  },
+  {
+    "symbol": "KYB.SI",
+    "name": "Food Innovators Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/foodinnovators.svg"
+  },
+  {
+    "symbol": "L02",
+    "name": "Metis Energy Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/metis-energy-watch-list.svg"
+  },
+  {
+    "symbol": "L02.SI",
+    "name": "Metis Energy Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/metis-energy-watch-list.svg"
+  },
+  {
+    "symbol": "L19",
+    "name": "Lum Chang Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/lum-chang.svg"
+  },
+  {
+    "symbol": "L19.SI",
+    "name": "Lum Chang Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/lum-chang.svg"
+  },
+  {
+    "symbol": "L23",
+    "name": "Enviro-Hub Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/enviro-hub.svg"
+  },
+  {
+    "symbol": "L23.SI",
+    "name": "Enviro-Hub Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/enviro-hub.svg"
+  },
+  {
+    "symbol": "L38",
+    "name": "AF Global Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/af-global.svg"
+  },
+  {
+    "symbol": "L38.SI",
+    "name": "AF Global Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/af-global.svg"
+  },
+  {
+    "symbol": "LCC",
+    "name": "Lum Chang Creations Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/lum-chang-creations-limited.svg"
+  },
+  {
+    "symbol": "LCC.SI",
+    "name": "Lum Chang Creations Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/lum-chang-creations-limited.svg"
+  },
+  {
+    "symbol": "LGH",
+    "name": "Leong Guan Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/leong-guan-ltd.svg"
+  },
+  {
+    "symbol": "LGH.SI",
+    "name": "Leong Guan Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/leong-guan-ltd.svg"
+  },
+  {
+    "symbol": "LIW",
+    "name": "Eagle Hospitality Trust",
+    "market": ""
+  },
+  {
+    "symbol": "LIW.SI",
+    "name": "Eagle Hospitality Trust",
+    "market": "SGX"
+  },
+  {
+    "symbol": "LJ3",
+    "name": "OUE Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/oue.svg"
+  },
+  {
+    "symbol": "LJ3.SI",
+    "name": "OUE Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/oue.svg"
+  },
+  {
+    "symbol": "LMS",
+    "name": "LMS Compliance Limited.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/lms-compliance.svg"
+  },
+  {
+    "symbol": "LMS.SI",
+    "name": "LMS Compliance Limited.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/lms-compliance.svg"
+  },
+  {
+    "symbol": "LS9",
+    "name": "Leader Environmental Technologies Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/leader-env.svg"
+  },
+  {
+    "symbol": "LS9.SI",
+    "name": "Leader Environmental Technologies Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/leader-env.svg"
+  },
+  {
+    "symbol": "LUY",
+    "name": "Raffles Infrastructure Holdings Ltd.",
+    "market": ""
+  },
+  {
+    "symbol": "LUY.SI",
+    "name": "Raffles Infrastructure Holdings Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "LVR",
+    "name": "17LIVE Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/vertex-spac.svg"
+  },
+  {
+    "symbol": "LVR.SI",
+    "name": "17LIVE Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/vertex-spac.svg"
+  },
+  {
+    "symbol": "LYY",
+    "name": "SinoCloud Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sinocloud-grp.svg"
+  },
+  {
+    "symbol": "LYY.SI",
+    "name": "SinoCloud Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sinocloud-grp.svg"
+  },
+  {
+    "symbol": "M01",
+    "name": "Metro Holdings Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/metro.svg"
+  },
+  {
+    "symbol": "M01.SI",
+    "name": "Metro Holdings Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/metro.svg"
+  },
+  {
+    "symbol": "M03",
+    "name": "Miyoshi Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/miyoshi.svg"
+  },
+  {
+    "symbol": "M03.SI",
+    "name": "Miyoshi Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/miyoshi.svg"
+  },
+  {
+    "symbol": "M05",
+    "name": "MTQ Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/mtq.svg"
+  },
+  {
+    "symbol": "M05.SI",
+    "name": "MTQ Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mtq.svg"
+  },
+  {
+    "symbol": "M11",
+    "name": "Manufacturing Integration Technology Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/mfg-integration-watch-list.svg"
+  },
+  {
+    "symbol": "M11.SI",
+    "name": "Manufacturing Integration Technology Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mfg-integration-watch-list.svg"
+  },
+  {
+    "symbol": "M12",
+    "name": "MARUWA CO., LTD.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/maruwa-co-ltd-npv.svg"
+  },
+  {
+    "symbol": "M12.SI",
+    "name": "MARUWA CO., LTD.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/maruwa-co-ltd-npv.svg"
+  },
+  {
+    "symbol": "M14",
+    "name": "InnoTek Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/innotek.svg"
+  },
+  {
+    "symbol": "M14.SI",
+    "name": "InnoTek Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/innotek.svg"
+  },
+  {
+    "symbol": "M15",
+    "name": "Nanyang New Development Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/matex-intl.svg"
+  },
+  {
+    "symbol": "M15.SI",
+    "name": "Nanyang New Development Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/matex-intl.svg"
+  },
+  {
+    "symbol": "MF6",
+    "name": "Mun Siong Engineering Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/mun-siong-engg.svg"
+  },
+  {
+    "symbol": "MF6.SI",
+    "name": "Mun Siong Engineering Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mun-siong-engg.svg"
+  },
+  {
+    "symbol": "MIJ",
+    "name": "Alliance Healthcare Group Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/alliance-hc.svg"
+  },
+  {
+    "symbol": "MIJ.SI",
+    "name": "Alliance Healthcare Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/alliance-hc.svg"
+  },
+  {
+    "symbol": "MR7",
+    "name": "Nordic Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/nordic.svg"
+  },
+  {
+    "symbol": "MR7.SI",
+    "name": "Nordic Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/nordic.svg"
+  },
+  {
+    "symbol": "MV4",
+    "name": "Mewah International Inc.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/mewah-intl.svg"
+  },
+  {
+    "symbol": "MV4.SI",
+    "name": "Mewah International Inc.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mewah-intl.svg"
+  },
+  {
+    "symbol": "MZH",
+    "name": "Nanofilm Technologies International Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/nanofilm.svg"
+  },
+  {
+    "symbol": "MZH.SI",
+    "name": "Nanofilm Technologies International Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/nanofilm.svg"
+  },
+  {
+    "symbol": "N01",
+    "name": "Nera Telecommunications Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/neratel.svg"
+  },
+  {
+    "symbol": "N01.SI",
+    "name": "Nera Telecommunications Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/neratel.svg"
+  },
+  {
+    "symbol": "N02",
+    "name": "NSL Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/nsl.svg"
+  },
+  {
+    "symbol": "N02.SI",
+    "name": "NSL Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/nsl.svg"
+  },
+  {
+    "symbol": "N08",
+    "name": "New Toyo International Holdings Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/new-toyo.svg"
+  },
+  {
+    "symbol": "N08.SI",
+    "name": "New Toyo International Holdings Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/new-toyo.svg"
+  },
+  {
+    "symbol": "N0Z",
+    "name": "Combine Will International Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/combine-will.svg"
+  },
+  {
+    "symbol": "N0Z.SI",
+    "name": "Combine Will International Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/combine-will.svg"
+  },
+  {
+    "symbol": "N2H",
+    "name": "Hyflux Ltd 6 % Cum.Non-Conv.Pref.Shs 2011-Perpetual Class A Reg S",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hyflux.svg"
+  },
+  {
+    "symbol": "N2H.SI",
+    "name": "Hyflux Ltd 6 % Cum.Non-Conv.Pref.Shs 2011-Perpetual Class A Reg S",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hyflux.svg"
+  },
+  {
+    "symbol": "N32",
+    "name": "Nippecraft Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/nippecraft.svg"
+  },
+  {
+    "symbol": "N32.SI",
+    "name": "Nippecraft Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/nippecraft.svg"
+  },
+  {
+    "symbol": "N33",
+    "name": "Nomura Holdings, Inc.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/nomura.svg"
+  },
+  {
+    "symbol": "N33.SI",
+    "name": "Nomura Holdings, Inc.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/nomura.svg"
+  },
+  {
+    "symbol": "NC2",
+    "name": "Sri Trang Agro-Industry Public Co. Ltd.(Alien Mkt)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sri-trang-agro-industry.svg"
+  },
+  {
+    "symbol": "NC2.SI",
+    "name": "Sri Trang Agro-Industry Public Co. Ltd.(Alien Mkt)",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sri-trang-agro-industry.svg"
+  },
+  {
+    "symbol": "NEX",
+    "name": "Reclaims Global Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/reclaims-global.svg"
+  },
+  {
+    "symbol": "NEX.SI",
+    "name": "Reclaims Global Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/reclaims-global.svg"
+  },
+  {
+    "symbol": "NHD",
+    "name": "Jubilee Industries Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/jubilee.svg"
+  },
+  {
+    "symbol": "NHD.SI",
+    "name": "Jubilee Industries Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/jubilee.svg"
+  },
+  {
+    "symbol": "NIO",
+    "name": "NIO Inc. Class A",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/nio.svg"
+  },
+  {
+    "symbol": "NIO.SI",
+    "name": "NIO Inc. Class A",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/nio.svg"
+  },
+  {
+    "symbol": "NPW",
+    "name": "Malaysia Smelting Corp. Bhd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/malaysia-smelting-corporation.svg"
+  },
+  {
+    "symbol": "NPW.SI",
+    "name": "Malaysia Smelting Corp. Bhd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/malaysia-smelting-corporation.svg"
+  },
+  {
+    "symbol": "NR7",
+    "name": "Raffles Education Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/raffles-edu.svg"
+  },
+  {
+    "symbol": "NR7.SI",
+    "name": "Raffles Education Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/raffles-edu.svg"
+  },
+  {
+    "symbol": "NXR",
+    "name": "iWOW Technology Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/iwow-tech.svg"
+  },
+  {
+    "symbol": "NXR.SI",
+    "name": "iWOW Technology Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/iwow-tech.svg"
+  },
+  {
+    "symbol": "O08",
+    "name": "Ossia International Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ossia-intl.svg"
+  },
+  {
+    "symbol": "O08.SI",
+    "name": "Ossia International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ossia-intl.svg"
+  },
+  {
+    "symbol": "O10",
+    "name": "Far East Orchard Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/far-east-orchard.svg"
+  },
+  {
+    "symbol": "O10.SI",
+    "name": "Far East Orchard Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/far-east-orchard.svg"
+  },
+  {
+    "symbol": "O39",
+    "name": "Oversea-Chinese Banking Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ocbc.svg"
+  },
+  {
+    "symbol": "O39.SI",
+    "name": "Oversea-Chinese Banking Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ocbc.svg"
+  },
+  {
+    "symbol": "O6Z",
+    "name": "Lonza Group AG",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/lonza-n.svg"
+  },
+  {
+    "symbol": "O6Z.SI",
+    "name": "Lonza Group AG",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/lonza-n.svg"
+  },
+  {
+    "symbol": "O9E",
+    "name": "Parkson Retail Asia Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/parkson-retail.svg"
+  },
+  {
+    "symbol": "O9E.SI",
+    "name": "Parkson Retail Asia Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/parkson-retail.svg"
+  },
+  {
+    "symbol": "OAJ",
+    "name": "Fortress Minerals Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/fortressminerals.svg"
+  },
+  {
+    "symbol": "OAJ.SI",
+    "name": "Fortress Minerals Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/fortressminerals.svg"
+  },
+  {
+    "symbol": "OMK",
+    "name": "Vividthree Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/vividthree.svg"
+  },
+  {
+    "symbol": "OMK.SI",
+    "name": "Vividthree Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/vividthree.svg"
+  },
+  {
+    "symbol": "OTS",
+    "name": "OTS Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ots.svg"
+  },
+  {
+    "symbol": "OTS.SI",
+    "name": "OTS Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ots.svg"
+  },
+  {
+    "symbol": "OTX",
+    "name": "Medinex Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/medinex.svg"
+  },
+  {
+    "symbol": "OTX.SI",
+    "name": "Medinex Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/medinex.svg"
+  },
+  {
+    "symbol": "OU8",
+    "name": "Centurion Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/centurion.svg"
+  },
+  {
+    "symbol": "OU8.SI",
+    "name": "Centurion Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/centurion.svg"
+  },
+  {
+    "symbol": "OV8",
+    "name": "Sheng Siong Group Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sheng-siong.svg"
+  },
+  {
+    "symbol": "OV8.SI",
+    "name": "Sheng Siong Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sheng-siong.svg"
+  },
+  {
+    "symbol": "OYY",
+    "name": "PropNex Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/propnex.svg"
+  },
+  {
+    "symbol": "OYY.SI",
+    "name": "PropNex Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/propnex.svg"
+  },
+  {
+    "symbol": "P11",
+    "name": "Pacific Andes Resources Development Limited",
+    "market": ""
+  },
+  {
+    "symbol": "P11.SI",
+    "name": "Pacific Andes Resources Development Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "P15",
+    "name": "Pacific Century Regional Developments Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/pacific-century.svg"
+  },
+  {
+    "symbol": "P15.SI",
+    "name": "Pacific Century Regional Developments Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/pacific-century.svg"
+  },
+  {
+    "symbol": "P34",
+    "name": "Delfi Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/delfi.svg"
+  },
+  {
+    "symbol": "P34.SI",
+    "name": "Delfi Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/delfi.svg"
+  },
+  {
+    "symbol": "P36",
+    "name": "Pan Hong Holdings Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/pan-hong.svg"
+  },
+  {
+    "symbol": "P36.SI",
+    "name": "Pan Hong Holdings Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/pan-hong.svg"
+  },
+  {
+    "symbol": "P52",
+    "name": "Pan-United Corporation Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/panunited.svg"
+  },
+  {
+    "symbol": "P52.SI",
+    "name": "Pan-United Corporation Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/panunited.svg"
+  },
+  {
+    "symbol": "P74",
+    "name": "China Kangda Food Co. Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/china-kangda-food-company-limited.svg"
+  },
+  {
+    "symbol": "P74.SI",
+    "name": "China Kangda Food Co. Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/china-kangda-food-company-limited.svg"
+  },
+  {
+    "symbol": "P8A",
+    "name": "Cordlife Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/cordlife.svg"
+  },
+  {
+    "symbol": "P8A.SI",
+    "name": "Cordlife Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cordlife.svg"
+  },
+  {
+    "symbol": "P8Z",
+    "name": "Bumitama Agri Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/bumitama-agri.svg"
+  },
+  {
+    "symbol": "P8Z.SI",
+    "name": "Bumitama Agri Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/bumitama-agri.svg"
+  },
+  {
+    "symbol": "P9D",
+    "name": "Civmec Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/civmec-limited.svg"
+  },
+  {
+    "symbol": "P9D.SI",
+    "name": "Civmec Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/civmec-limited.svg"
+  },
+  {
+    "symbol": "PA3",
+    "name": "TA Corporation Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ta.svg"
+  },
+  {
+    "symbol": "PA3.SI",
+    "name": "TA Corporation Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ta.svg"
+  },
+  {
+    "symbol": "PCT",
+    "name": "PC Partner Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/pc-partner-ltd.svg"
+  },
+  {
+    "symbol": "PCT.SI",
+    "name": "PC Partner Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/pc-partner-ltd.svg"
+  },
+  {
+    "symbol": "PH0",
+    "name": "Hatten Land Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hatten-land.svg"
+  },
+  {
+    "symbol": "PH0.SI",
+    "name": "Hatten Land Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hatten-land.svg"
+  },
+  {
+    "symbol": "PPC",
+    "name": "ProsperCap Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/prospercap.svg"
+  },
+  {
+    "symbol": "PPC.SI",
+    "name": "ProsperCap Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/prospercap.svg"
+  },
+  {
+    "symbol": "PRH",
+    "name": "Livingstone Health Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/livingstone.svg"
+  },
+  {
+    "symbol": "PRH.SI",
+    "name": "Livingstone Health Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/livingstone.svg"
+  },
+  {
+    "symbol": "Q01",
+    "name": "QAF Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/qaf.svg"
+  },
+  {
+    "symbol": "Q01.SI",
+    "name": "QAF Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/qaf.svg"
+  },
+  {
+    "symbol": "Q0F",
+    "name": "IHH Healthcare Bhd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ihh.svg"
+  },
+  {
+    "symbol": "Q0F.SI",
+    "name": "IHH Healthcare Bhd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ihh.svg"
+  },
+  {
+    "symbol": "Q0X",
+    "name": "Ley Choon Group Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ley-choon.svg"
+  },
+  {
+    "symbol": "Q0X.SI",
+    "name": "Ley Choon Group Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ley-choon.svg"
+  },
+  {
+    "symbol": "QC7",
+    "name": "Q & M Dental Group (Singapore) Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/qandm-dental.svg"
+  },
+  {
+    "symbol": "QC7.SI",
+    "name": "Q & M Dental Group (Singapore) Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/qandm-dental.svg"
+  },
+  {
+    "symbol": "QES",
+    "name": "China Sunsine Chemical Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/chinasunsine.svg"
+  },
+  {
+    "symbol": "QES.SI",
+    "name": "China Sunsine Chemical Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/chinasunsine.svg"
+  },
+  {
+    "symbol": "QNS",
+    "name": "Southern Alliance Mining Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/southernalliance.svg"
+  },
+  {
+    "symbol": "QNS.SI",
+    "name": "Southern Alliance Mining Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/southernalliance.svg"
+  },
+  {
+    "symbol": "QS9",
+    "name": "Global Invacom Group Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/global-invacom-limited-ord-npv-di.svg"
+  },
+  {
+    "symbol": "QS9.SI",
+    "name": "Global Invacom Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/global-invacom-limited-ord-npv-di.svg"
+  },
+  {
+    "symbol": "QZG",
+    "name": "Accrelist Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/accrelist-ltd.svg"
+  },
+  {
+    "symbol": "QZG.SI",
+    "name": "Accrelist Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/accrelist-ltd.svg"
+  },
+  {
+    "symbol": "R14",
+    "name": "Eneco Energy Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/eneco-energy-watch-list.svg"
+  },
+  {
+    "symbol": "R14.SI",
+    "name": "Eneco Energy Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/eneco-energy-watch-list.svg"
+  },
+  {
+    "symbol": "RC5",
+    "name": "Triyards Holdings Ltd.",
+    "market": ""
+  },
+  {
+    "symbol": "RC5.SI",
+    "name": "Triyards Holdings Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "RCU",
+    "name": "Assurance Healthcare Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/assurance-hc.svg"
+  },
+  {
+    "symbol": "RCU.SI",
+    "name": "Assurance Healthcare Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/assurance-hc.svg"
+  },
+  {
+    "symbol": "RDR",
+    "name": "Incredible Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/incredible.svg"
+  },
+  {
+    "symbol": "RDR.SI",
+    "name": "Incredible Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/incredible.svg"
+  },
+  {
+    "symbol": "RE4",
+    "name": "Geo Energy Resources Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/geo-energy-res.svg"
+  },
+  {
+    "symbol": "RE4.SI",
+    "name": "Geo Energy Resources Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/geo-energy-res.svg"
+  },
+  {
+    "symbol": "RQ1",
+    "name": "Overseas Education Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/overseas-edu.svg"
+  },
+  {
+    "symbol": "RQ1.SI",
+    "name": "Overseas Education Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/overseas-edu.svg"
+  },
+  {
+    "symbol": "RXS",
+    "name": "Pacific Radiance Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/pacificradiance.svg"
+  },
+  {
+    "symbol": "RXS.SI",
+    "name": "Pacific Radiance Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/pacificradiance.svg"
+  },
+  {
+    "symbol": "S07",
+    "name": "Shangri-La Asia Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/shangri-la-hkd.svg"
+  },
+  {
+    "symbol": "S07.SI",
+    "name": "Shangri-La Asia Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/shangri-la-hkd.svg"
+  },
+  {
+    "symbol": "S08",
+    "name": "Singapore Post Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/singpost.svg"
+  },
+  {
+    "symbol": "S08.SI",
+    "name": "Singapore Post Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/singpost.svg"
+  },
+  {
+    "symbol": "S19",
+    "name": "Singapore Shipping Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/singshipping.svg"
+  },
+  {
+    "symbol": "S19.SI",
+    "name": "Singapore Shipping Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/singshipping.svg"
+  },
+  {
+    "symbol": "S20",
+    "name": "Straits Trading Co. Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/straits-trading.svg"
+  },
+  {
+    "symbol": "S20.SI",
+    "name": "Straits Trading Co. Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/straits-trading.svg"
+  },
+  {
+    "symbol": "S23",
+    "name": "Singapura Finance Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/spura-finance.svg"
+  },
+  {
+    "symbol": "S23.SI",
+    "name": "Singapura Finance Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/spura-finance.svg"
+  },
+  {
+    "symbol": "S29",
+    "name": "Stamford Tyres Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/stamford-tyres.svg"
+  },
+  {
+    "symbol": "S29.SI",
+    "name": "Stamford Tyres Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/stamford-tyres.svg"
+  },
+  {
+    "symbol": "S2D",
+    "name": "Tosei Corporation",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tosei.svg"
+  },
+  {
+    "symbol": "S2D.SI",
+    "name": "Tosei Corporation",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tosei.svg"
+  },
+  {
+    "symbol": "S35",
+    "name": "Sing Investments & Finance Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sing-inv-and-fin.svg"
+  },
+  {
+    "symbol": "S35.SI",
+    "name": "Sing Investments & Finance Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sing-inv-and-fin.svg"
+  },
+  {
+    "symbol": "S3N",
+    "name": "Global Resource Construction Ltd.",
+    "market": ""
+  },
+  {
+    "symbol": "S3N.SI",
+    "name": "Global Resource Construction Ltd.",
+    "market": "SGX"
+  },
+  {
+    "symbol": "S41",
+    "name": "Hong Leong Finance Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/hong-leong-fin.svg"
+  },
+  {
+    "symbol": "S41.SI",
+    "name": "Hong Leong Finance Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/hong-leong-fin.svg"
+  },
+  {
+    "symbol": "S44",
+    "name": "EnGro Corp. Ltd. (Singapore)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/engro.svg"
+  },
+  {
+    "symbol": "S44.SI",
+    "name": "EnGro Corp. Ltd. (Singapore)",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/engro.svg"
+  },
+  {
+    "symbol": "S56",
+    "name": "Samudera Shipping Line Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/samuderashipping.svg"
+  },
+  {
+    "symbol": "S56.SI",
+    "name": "Samudera Shipping Line Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/samuderashipping.svg"
+  },
+  {
+    "symbol": "S58",
+    "name": "SATS Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sats.svg"
+  },
+  {
+    "symbol": "S58.SI",
+    "name": "SATS Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sats.svg"
+  },
+  {
+    "symbol": "S59",
+    "name": "SIA Engineering Co. Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sia-engineering.svg"
+  },
+  {
+    "symbol": "S59.SI",
+    "name": "SIA Engineering Co. Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sia-engineering.svg"
+  },
+  {
+    "symbol": "S61",
+    "name": "SBS Transit Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sbs-transit.svg"
+  },
+  {
+    "symbol": "S61.SI",
+    "name": "SBS Transit Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sbs-transit.svg"
+  },
+  {
+    "symbol": "S63",
+    "name": "Singapore Technologies Engineering Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/st-engineering.svg"
+  },
+  {
+    "symbol": "S63.SI",
+    "name": "Singapore Technologies Engineering Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/st-engineering.svg"
+  },
+  {
+    "symbol": "S68",
+    "name": "Singapore Exchange Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sgx.svg"
+  },
+  {
+    "symbol": "S68.SI",
+    "name": "Singapore Exchange Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sgx.svg"
+  },
+  {
+    "symbol": "S69",
+    "name": "Serial System Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/serial-system.svg"
+  },
+  {
+    "symbol": "S69.SI",
+    "name": "Serial System Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/serial-system.svg"
+  },
+  {
+    "symbol": "S71",
+    "name": "Sunright Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sunright.svg"
+  },
+  {
+    "symbol": "S71.SI",
+    "name": "Sunright Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sunright.svg"
+  },
+  {
+    "symbol": "S85",
+    "name": "Straco Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/straco.svg"
+  },
+  {
+    "symbol": "S85.SI",
+    "name": "Straco Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/straco.svg"
+  },
+  {
+    "symbol": "S9B",
+    "name": "Amcorp Global Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/amcorp-global.svg"
+  },
+  {
+    "symbol": "S9B.SI",
+    "name": "Amcorp Global Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/amcorp-global.svg"
+  },
+  {
+    "symbol": "SEB",
+    "name": "Stoneweg European Stapled Trust",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/stoneweg-eutrust-eur.svg"
+  },
+  {
+    "symbol": "SEB.SI",
+    "name": "Stoneweg European Stapled Trust",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/stoneweg-eutrust-eur.svg"
+  },
+  {
+    "symbol": "SEG",
+    "name": "Concord New Energy Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/concord-new-energy-ltd.svg"
+  },
+  {
+    "symbol": "SEG.SI",
+    "name": "Concord New Energy Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/concord-new-energy-ltd.svg"
+  },
+  {
+    "symbol": "SEJ",
+    "name": "NoonTalk Media Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/noontalk-media.svg"
+  },
+  {
+    "symbol": "SEJ.SI",
+    "name": "NoonTalk Media Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/noontalk-media.svg"
+  },
+  {
+    "symbol": "SES",
+    "name": "Shanaya Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/shanaya.svg"
+  },
+  {
+    "symbol": "SES.SI",
+    "name": "Shanaya Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/shanaya.svg"
+  },
+  {
+    "symbol": "SET",
+    "name": "Stoneweg European Stapled Trust",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/stoneweg-eutrust-eur.svg"
+  },
+  {
+    "symbol": "SET.SI",
+    "name": "Stoneweg European Stapled Trust",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/stoneweg-eutrust-eur.svg"
+  },
+  {
+    "symbol": "SGR",
+    "name": "Sheffield Green",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sheffield-green.svg"
+  },
+  {
+    "symbol": "SGR.SI",
+    "name": "Sheffield Green",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sheffield-green.svg"
+  },
+  {
+    "symbol": "SHE",
+    "name": "Soon Hock Enterprise Holding Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/soon-hock-enterprise-limited.svg"
+  },
+  {
+    "symbol": "SHE.SI",
+    "name": "Soon Hock Enterprise Holding Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/soon-hock-enterprise-limited.svg"
+  },
+  {
+    "symbol": "SJY",
+    "name": "MeGroup Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/megroup.svg"
+  },
+  {
+    "symbol": "SJY.SI",
+    "name": "MeGroup Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/megroup.svg"
+  },
+  {
+    "symbol": "SO7",
+    "name": "Yangzijiang Shipbuilding (Holdings) Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/yzj-shipbldg-sgd.svg"
+  },
+  {
+    "symbol": "SO7.SI",
+    "name": "Yangzijiang Shipbuilding (Holdings) Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/yzj-shipbldg-sgd.svg"
+  },
+  {
+    "symbol": "STC",
+    "name": "Comba Telecom Systems Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/comba.svg"
+  },
+  {
+    "symbol": "STC.SI",
+    "name": "Comba Telecom Systems Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/comba.svg"
+  },
+  {
+    "symbol": "STG",
+    "name": "Sri Trang Gloves (Thailand) Public Co. Ltd.(Alien Mkt)",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sri-trang-gloves.svg"
+  },
+  {
+    "symbol": "STG.SI",
+    "name": "Sri Trang Gloves (Thailand) Public Co. Ltd.(Alien Mkt)",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sri-trang-gloves.svg"
+  },
+  {
+    "symbol": "T09",
+    "name": "TT International Limited",
+    "market": ""
+  },
+  {
+    "symbol": "T09.SI",
+    "name": "TT International Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "T12",
+    "name": "Tat Seng Packaging Group Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tat-seng-pkg.svg"
+  },
+  {
+    "symbol": "T12.SI",
+    "name": "Tat Seng Packaging Group Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tat-seng-pkg.svg"
+  },
+  {
+    "symbol": "T13",
+    "name": "RH Petrogas Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/rh-petrogas.svg"
+  },
+  {
+    "symbol": "T13.SI",
+    "name": "RH Petrogas Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/rh-petrogas.svg"
+  },
+  {
+    "symbol": "T14",
+    "name": "Tianjin Pharmaceutical Da Ren Tang Group Corporation Limited Class S",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tianjin-zx-usd.svg"
+  },
+  {
+    "symbol": "T14.SI",
+    "name": "Tianjin Pharmaceutical Da Ren Tang Group Corporation Limited Class S",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tianjin-zx-usd.svg"
+  },
+  {
+    "symbol": "T15",
+    "name": "Tan Chong International Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/h-tcil-hk.svg"
+  },
+  {
+    "symbol": "T15.SI",
+    "name": "Tan Chong International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/h-tcil-hk.svg"
+  },
+  {
+    "symbol": "T24",
+    "name": "Tuan Sing Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tuan-sing-ltd.svg"
+  },
+  {
+    "symbol": "T24.SI",
+    "name": "Tuan Sing Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tuan-sing-ltd.svg"
+  },
+  {
+    "symbol": "T41",
+    "name": "Telechoice International Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/telechoice-intl.svg"
+  },
+  {
+    "symbol": "T41.SI",
+    "name": "Telechoice International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/telechoice-intl.svg"
+  },
+  {
+    "symbol": "T43",
+    "name": "Yunnan Energy International Co. Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/yunnan-energy-intl-co-ltd.svg"
+  },
+  {
+    "symbol": "T43.SI",
+    "name": "Yunnan Energy International Co. Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/yunnan-energy-intl-co-ltd.svg"
+  },
+  {
+    "symbol": "T4B",
+    "name": "Sino Grandness Food Industry Group Limited",
+    "market": ""
+  },
+  {
+    "symbol": "T4B.SI",
+    "name": "Sino Grandness Food Industry Group Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "T55",
+    "name": "TIH Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tih.svg"
+  },
+  {
+    "symbol": "T55.SI",
+    "name": "TIH Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tih.svg"
+  },
+  {
+    "symbol": "T6I",
+    "name": "ValueMax Group Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/valuemax.svg"
+  },
+  {
+    "symbol": "T6I.SI",
+    "name": "ValueMax Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/valuemax.svg"
+  },
+  {
+    "symbol": "TADD",
+    "name": "Advanced Info Service Public Co., Ltd. Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/advanced-info-service-public-company.svg"
+  },
+  {
+    "symbol": "TADD.SI",
+    "name": "Advanced Info Service Public Co., Ltd. Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/advanced-info-service-public-company.svg"
+  },
+  {
+    "symbol": "TAP",
+    "name": "Assembly Place Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/assembly-place-ltd.svg"
+  },
+  {
+    "symbol": "TAP.SI",
+    "name": "Assembly Place Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/assembly-place-ltd.svg"
+  },
+  {
+    "symbol": "TATD",
+    "name": "Airports of Thailand Public Co Ltd Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/airports-of-thailand.svg"
+  },
+  {
+    "symbol": "TATD.SI",
+    "name": "Airports of Thailand Public Co Ltd Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/airports-of-thailand.svg"
+  },
+  {
+    "symbol": "TBDD",
+    "name": "Bangkok Dusit Medical Services Public Co. Ltd. UnSp Singapore Depositary Receipt Repr 2/1 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/bangkok-dusit-medical-services.svg"
+  },
+  {
+    "symbol": "TBDD.SI",
+    "name": "Bangkok Dusit Medical Services Public Co. Ltd. UnSp Singapore Depositary Receipt Repr 2/1 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/bangkok-dusit-medical-services.svg"
+  },
+  {
+    "symbol": "TCPD",
+    "name": "CP ALL Public Company Limited Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/cp-all.svg"
+  },
+  {
+    "symbol": "TCPD.SI",
+    "name": "CP ALL Public Company Limited Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/cp-all.svg"
+  },
+  {
+    "symbol": "TCU",
+    "name": "Credit Bureau Asia Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/creditbureauasia.svg"
+  },
+  {
+    "symbol": "TCU.SI",
+    "name": "Credit Bureau Asia Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/creditbureauasia.svg"
+  },
+  {
+    "symbol": "TDED",
+    "name": "Delta Electronics (Thailand) Public Co. Ltd. Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-electronics.svg"
+  },
+  {
+    "symbol": "TDED.SI",
+    "name": "Delta Electronics (Thailand) Public Co. Ltd. Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/delta-electronics.svg"
+  },
+  {
+    "symbol": "TGUD",
+    "name": "Gulf Development Public Company Limited Shs UnSp Singapore Depositary Receipt Repr 1 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-development-public-company-lim-foreign.svg"
+  },
+  {
+    "symbol": "TGUD.SI",
+    "name": "Gulf Development Public Company Limited Shs UnSp Singapore Depositary Receipt Repr 1 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-development-public-company-lim-foreign.svg"
+  },
+  {
+    "symbol": "TKKD",
+    "name": "Kasikornbank Public Co. Ltd. Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/kasikornbank.svg"
+  },
+  {
+    "symbol": "TKKD.SI",
+    "name": "Kasikornbank Public Co. Ltd. Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/kasikornbank.svg"
+  },
+  {
+    "symbol": "TKU",
+    "name": "Toku Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/toku-ltd.svg"
+  },
+  {
+    "symbol": "TKU.SI",
+    "name": "Toku Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/toku-ltd.svg"
+  },
+  {
+    "symbol": "TPED",
+    "name": "PTT Exploration & Production Plc Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ptt-exploration-and-production.svg"
+  },
+  {
+    "symbol": "TPED.SI",
+    "name": "PTT Exploration & Production Plc Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ptt-exploration-and-production.svg"
+  },
+  {
+    "symbol": "TPFD",
+    "name": "Charoen Pokphand Foods Public Co. Ltd. UnSp Singapore Depositary Receipt Repr 2/1 Sh",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/charoen-pokphand-foods.svg"
+  },
+  {
+    "symbol": "TPFD.SI",
+    "name": "Charoen Pokphand Foods Public Co. Ltd. UnSp Singapore Depositary Receipt Repr 2/1 Sh",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/charoen-pokphand-foods.svg"
+  },
+  {
+    "symbol": "TQ5",
+    "name": "Frasers Property Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/frasers-property-thailand-public-company.svg"
+  },
+  {
+    "symbol": "TQ5.SI",
+    "name": "Frasers Property Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/frasers-property-thailand-public-company.svg"
+  },
+  {
+    "symbol": "TSCD",
+    "name": "Siam Cement Public Co. Ltd. Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/the-siam-cement-public-company-limited.svg"
+  },
+  {
+    "symbol": "TSCD.SI",
+    "name": "Siam Cement Public Co. Ltd. Shs Singapore Depositary Receipt Repr 1 NDVR",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/the-siam-cement-public-company-limited.svg"
+  },
+  {
+    "symbol": "TSH",
+    "name": "TSH Resources Bhd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tsh-resources-bhd.svg"
+  },
+  {
+    "symbol": "TSH.SI",
+    "name": "TSH Resources Bhd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tsh-resources-bhd.svg"
+  },
+  {
+    "symbol": "TVV",
+    "name": "OxPay Financial Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/oxpay-financial.svg"
+  },
+  {
+    "symbol": "TVV.SI",
+    "name": "OxPay Financial Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/oxpay-financial.svg"
+  },
+  {
+    "symbol": "TWL",
+    "name": "Memiontec Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/memiontec-ltd.svg"
+  },
+  {
+    "symbol": "TWL.SI",
+    "name": "Memiontec Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/memiontec-ltd.svg"
+  },
+  {
+    "symbol": "U06",
+    "name": "Singapore Land Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/singaporelandgrp.svg"
+  },
+  {
+    "symbol": "U06.SI",
+    "name": "Singapore Land Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/singaporelandgrp.svg"
+  },
+  {
+    "symbol": "U10",
+    "name": "UOB-Kay Hian Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/uob-kay-hian.svg"
+  },
+  {
+    "symbol": "U10.SI",
+    "name": "UOB-Kay Hian Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/uob-kay-hian.svg"
+  },
+  {
+    "symbol": "U11",
+    "name": "United Overseas Bank Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/uob.svg"
+  },
+  {
+    "symbol": "U11.SI",
+    "name": "United Overseas Bank Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/uob.svg"
+  },
+  {
+    "symbol": "U13",
+    "name": "United Overseas Insurance Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/uob.svg"
+  },
+  {
+    "symbol": "U13.SI",
+    "name": "United Overseas Insurance Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/uob.svg"
+  },
+  {
+    "symbol": "U14",
+    "name": "UOL Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/uol.svg"
+  },
+  {
+    "symbol": "U14.SI",
+    "name": "UOL Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/uol.svg"
+  },
+  {
+    "symbol": "U77",
+    "name": "Sarine Technologies Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sarine-tech.svg"
+  },
+  {
+    "symbol": "U77.SI",
+    "name": "Sarine Technologies Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sarine-tech.svg"
+  },
+  {
+    "symbol": "U96",
+    "name": "Sembcorp Industries Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sembcorp-ind.svg"
+  },
+  {
+    "symbol": "U96.SI",
+    "name": "Sembcorp Industries Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sembcorp-ind.svg"
+  },
+  {
+    "symbol": "U9E",
+    "name": "China Everbright Water Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/china-everbright.svg"
+  },
+  {
+    "symbol": "U9E.SI",
+    "name": "China Everbright Water Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/china-everbright.svg"
+  },
+  {
+    "symbol": "UIX",
+    "name": "China Environmental Resources Group Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/china-env-res.svg"
+  },
+  {
+    "symbol": "UIX.SI",
+    "name": "China Environmental Resources Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/china-env-res.svg"
+  },
+  {
+    "symbol": "ULG",
+    "name": "UltraGreen.ai Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ultragreenai-limited.svg"
+  },
+  {
+    "symbol": "ULG.SI",
+    "name": "UltraGreen.ai Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ultragreenai-limited.svg"
+  },
+  {
+    "symbol": "URR",
+    "name": "Sim Leisure Group Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/sim-leisure.svg"
+  },
+  {
+    "symbol": "URR.SI",
+    "name": "Sim Leisure Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/sim-leisure.svg"
+  },
+  {
+    "symbol": "UUK",
+    "name": "Pasture Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/pasture.svg"
+  },
+  {
+    "symbol": "UUK.SI",
+    "name": "Pasture Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/pasture.svg"
+  },
+  {
+    "symbol": "UV1",
+    "name": "Regal International Group Limited",
+    "market": ""
+  },
+  {
+    "symbol": "UV1.SI",
+    "name": "Regal International Group Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "UZF",
+    "name": "Dezign Format Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/dezign-format-limited.svg"
+  },
+  {
+    "symbol": "UZF.SI",
+    "name": "Dezign Format Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/dezign-format-limited.svg"
+  },
+  {
+    "symbol": "V03",
+    "name": "Venture Corporation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/venture.svg"
+  },
+  {
+    "symbol": "V03.SI",
+    "name": "Venture Corporation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/venture.svg"
+  },
+  {
+    "symbol": "V2Y",
+    "name": "OceanScape International Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/v2y.svg"
+  },
+  {
+    "symbol": "V2Y.SI",
+    "name": "OceanScape International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/v2y.svg"
+  },
+  {
+    "symbol": "V3M",
+    "name": "Metech International Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/metech-intl.svg"
+  },
+  {
+    "symbol": "V3M.SI",
+    "name": "Metech International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/metech-intl.svg"
+  },
+  {
+    "symbol": "V7R",
+    "name": "Resources Global Development Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/resourcesgbl.svg"
+  },
+  {
+    "symbol": "V7R.SI",
+    "name": "Resources Global Development Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/resourcesgbl.svg"
+  },
+  {
+    "symbol": "V8Y",
+    "name": "Quantum Healthcare Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/quantum-health.svg"
+  },
+  {
+    "symbol": "V8Y.SI",
+    "name": "Quantum Healthcare Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/quantum-health.svg"
+  },
+  {
+    "symbol": "VC2",
+    "name": "Olam Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/olam.svg"
+  },
+  {
+    "symbol": "VC2.SI",
+    "name": "Olam Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/olam.svg"
+  },
+  {
+    "symbol": "VI2",
+    "name": "Trans-China Automotive Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/tc-auto.svg"
+  },
+  {
+    "symbol": "VI2.SI",
+    "name": "Trans-China Automotive Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/tc-auto.svg"
+  },
+  {
+    "symbol": "VIN",
+    "name": "Vin's Holdings Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/vins.svg"
+  },
+  {
+    "symbol": "VIN.SI",
+    "name": "Vin's Holdings Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/vins.svg"
+  },
+  {
+    "symbol": "VVL",
+    "name": "Alpha DX Group Limited",
+    "market": ""
+  },
+  {
+    "symbol": "VVL.SI",
+    "name": "Alpha DX Group Limited",
+    "market": "SGX"
+  },
+  {
+    "symbol": "W05",
+    "name": "Wing Tai Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/wing-tai.svg"
+  },
+  {
+    "symbol": "W05.SI",
+    "name": "Wing Tai Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/wing-tai.svg"
+  },
+  {
+    "symbol": "W8W",
+    "name": "Coliwoo Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/coliwoo-ltd.svg"
+  },
+  {
+    "symbol": "W8W.SI",
+    "name": "Coliwoo Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/coliwoo-ltd.svg"
+  },
+  {
+    "symbol": "WJ9",
+    "name": "Advanced Systems Automation Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/advancedsystems.svg"
+  },
+  {
+    "symbol": "WJ9.SI",
+    "name": "Advanced Systems Automation Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/advancedsystems.svg"
+  },
+  {
+    "symbol": "WJP",
+    "name": "Vicom Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/vicom-ltd.svg"
+  },
+  {
+    "symbol": "WJP.SI",
+    "name": "Vicom Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/vicom-ltd.svg"
+  },
+  {
+    "symbol": "WKS",
+    "name": "Winking Studios Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/winking-studios-limited-ord-sgd-004-di.svg"
+  },
+  {
+    "symbol": "WKS.SI",
+    "name": "Winking Studios Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/winking-studios-limited-ord-sgd-004-di.svg"
+  },
+  {
+    "symbol": "WPC",
+    "name": "Vallianz Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/vallianz.svg"
+  },
+  {
+    "symbol": "WPC.SI",
+    "name": "Vallianz Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/vallianz.svg"
+  },
+  {
+    "symbol": "X5N",
+    "name": "Avarga Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/avarga-ltd.svg"
+  },
+  {
+    "symbol": "X5N.SI",
+    "name": "Avarga Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/avarga-ltd.svg"
+  },
+  {
+    "symbol": "XCF",
+    "name": "KTMG Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ktmg.svg"
+  },
+  {
+    "symbol": "XCF.SI",
+    "name": "KTMG Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ktmg.svg"
+  },
+  {
+    "symbol": "XHV",
+    "name": "Serial Achieva Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/serial-achieva.svg"
+  },
+  {
+    "symbol": "XHV.SI",
+    "name": "Serial Achieva Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/serial-achieva.svg"
+  },
+  {
+    "symbol": "XJB",
+    "name": "G.H.Y Culture & Media Holding Co., Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ghy-culture.svg"
+  },
+  {
+    "symbol": "XJB.SI",
+    "name": "G.H.Y Culture & Media Holding Co., Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ghy-culture.svg"
+  },
+  {
+    "symbol": "XVG",
+    "name": "Aedge Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/aedge.svg"
+  },
+  {
+    "symbol": "XVG.SI",
+    "name": "Aedge Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/aedge.svg"
+  },
+  {
+    "symbol": "XWA",
+    "name": "AEM Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/aem.svg"
+  },
+  {
+    "symbol": "XWA.SI",
+    "name": "AEM Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/aem.svg"
+  },
+  {
+    "symbol": "XZB",
+    "name": "Skylink Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/skylink-limited.svg"
+  },
+  {
+    "symbol": "XZB.SI",
+    "name": "Skylink Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/skylink-limited.svg"
+  },
+  {
+    "symbol": "XZL",
+    "name": "Acrophyte Hospitality Trust",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ara-htrust-usd.svg"
+  },
+  {
+    "symbol": "XZL.SI",
+    "name": "Acrophyte Hospitality Trust",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ara-htrust-usd.svg"
+  },
+  {
+    "symbol": "Y03",
+    "name": "Yeo Hiap Seng Ltd",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/yeo-hiap-seng.svg"
+  },
+  {
+    "symbol": "Y03.SI",
+    "name": "Yeo Hiap Seng Ltd",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/yeo-hiap-seng.svg"
+  },
+  {
+    "symbol": "Y06",
+    "name": "Green Build Technology Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/green-build-watch-list.svg"
+  },
+  {
+    "symbol": "Y06.SI",
+    "name": "Green Build Technology Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/green-build-watch-list.svg"
+  },
+  {
+    "symbol": "Y35",
+    "name": "AnAn International Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/anan-intl.svg"
+  },
+  {
+    "symbol": "Y35.SI",
+    "name": "AnAn International Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/anan-intl.svg"
+  },
+  {
+    "symbol": "Y3D",
+    "name": "mDR Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/mdr-limited.svg"
+  },
+  {
+    "symbol": "Y3D.SI",
+    "name": "mDR Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/mdr-limited.svg"
+  },
+  {
+    "symbol": "Y8E",
+    "name": "Samurai 2K Aerosol Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/samurai-2k.svg"
+  },
+  {
+    "symbol": "Y8E.SI",
+    "name": "Samurai 2K Aerosol Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/samurai-2k.svg"
+  },
+  {
+    "symbol": "Y92",
+    "name": "Thai Beverage Public Co., Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/thaibev.svg"
+  },
+  {
+    "symbol": "Y92.SI",
+    "name": "Thai Beverage Public Co., Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/thaibev.svg"
+  },
+  {
+    "symbol": "YF8",
+    "name": "Yangzijiang Financial Holding Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/yzj-fin-hldg.svg"
+  },
+  {
+    "symbol": "YF8.SI",
+    "name": "Yangzijiang Financial Holding Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/yzj-fin-hldg.svg"
+  },
+  {
+    "symbol": "YK9",
+    "name": "YKGI Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ykgi.svg"
+  },
+  {
+    "symbol": "YK9.SI",
+    "name": "YKGI Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ykgi.svg"
+  },
+  {
+    "symbol": "YSV",
+    "name": "Khen Energy Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/charismaenergy.svg"
+  },
+  {
+    "symbol": "YSV.SI",
+    "name": "Khen Energy Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/charismaenergy.svg"
+  },
+  {
+    "symbol": "YYB",
+    "name": "Bacui Technologies International Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/arion-ent.svg"
+  },
+  {
+    "symbol": "YYB.SI",
+    "name": "Bacui Technologies International Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/arion-ent.svg"
+  },
+  {
+    "symbol": "Z25",
+    "name": "Yanlord Land Group Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/yanlord-land.svg"
+  },
+  {
+    "symbol": "Z25.SI",
+    "name": "Yanlord Land Group Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/yanlord-land.svg"
+  },
+  {
+    "symbol": "Z4D",
+    "name": "Medi Lifestyle Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/medilifestyle.svg"
+  },
+  {
+    "symbol": "Z4D.SI",
+    "name": "Medi Lifestyle Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/medilifestyle.svg"
+  },
+  {
+    "symbol": "Z59",
+    "name": "Yoma Strategic Holdings Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/yoma-strategic-ltd.svg"
+  },
+  {
+    "symbol": "Z59.SI",
+    "name": "Yoma Strategic Holdings Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/yoma-strategic-ltd.svg"
+  },
+  {
+    "symbol": "Z74",
+    "name": "Singapore Telecommunications Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/singtel.svg"
+  },
+  {
+    "symbol": "Z74.SI",
+    "name": "Singapore Telecommunications Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/singtel.svg"
+  },
+  {
+    "symbol": "Z77",
+    "name": "Singapore Telecommunications Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/singtel.svg"
+  },
+  {
+    "symbol": "Z77.SI",
+    "name": "Singapore Telecommunications Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/singtel.svg"
+  },
+  {
+    "symbol": "ZB9",
+    "name": "Union Steel Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/unionsteel.svg"
+  },
+  {
+    "symbol": "ZB9.SI",
+    "name": "Union Steel Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/unionsteel.svg"
+  },
+  {
+    "symbol": "ZBA",
+    "name": "Infinity Development Holdings Co. Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/infinity-development-co-ltd.svg"
+  },
+  {
+    "symbol": "ZBA.SI",
+    "name": "Infinity Development Holdings Co. Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/infinity-development-co-ltd.svg"
+  },
+  {
+    "symbol": "ZKX",
+    "name": "Ever Glory United Holdings Limited",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/ever-glory.svg"
+  },
+  {
+    "symbol": "ZKX.SI",
+    "name": "Ever Glory United Holdings Limited",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/ever-glory.svg"
+  },
+  {
+    "symbol": "ZQM",
+    "name": "Soilbuild Construction Group Ltd.",
+    "market": "",
+    "image": "https://s3-symbol-logo.tradingview.com/soilbuild-construction-ltd.svg"
+  },
+  {
+    "symbol": "ZQM.SI",
+    "name": "Soilbuild Construction Group Ltd.",
+    "market": "SGX",
+    "image": "https://s3-symbol-logo.tradingview.com/soilbuild-construction-ltd.svg"
+  }
+]

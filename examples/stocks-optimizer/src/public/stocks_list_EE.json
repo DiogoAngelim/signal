@@ -1,0 +1,169 @@
+[
+  {
+    "symbol": "AIR",
+    "name": "Airobot Technologies AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/airobot-technologies.svg"
+  },
+  {
+    "symbol": "CPA1T",
+    "name": "Coop Pank AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/coop-pank.svg"
+  },
+  {
+    "symbol": "EEG1T",
+    "name": "Ekspress Grupp AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ekspress-grupp.svg"
+  },
+  {
+    "symbol": "EJTC",
+    "name": "Estonian Japan Trading Company AS",
+    "market": "OMXTSE"
+  },
+  {
+    "symbol": "GRB2G",
+    "name": "Grab2go AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/grab2go-as.svg"
+  },
+  {
+    "symbol": "HAE1T",
+    "name": "Harju Elekter Group AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/harju-elekter.svg"
+  },
+  {
+    "symbol": "HPR1T",
+    "name": "Hepsor AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/hepsor.svg"
+  },
+  {
+    "symbol": "INF1T",
+    "name": "Infortar AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/infortar.svg"
+  },
+  {
+    "symbol": "LHV1T",
+    "name": "LHV Group AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lhv-group.svg"
+  },
+  {
+    "symbol": "LINDA",
+    "name": "Linda Nektar AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/linda-nektar.svg"
+  },
+  {
+    "symbol": "MAGIC",
+    "name": "TextMagic AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/textmagic.svg"
+  },
+  {
+    "symbol": "MODE",
+    "name": "Modera AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/modera.svg"
+  },
+  {
+    "symbol": "MOLNR",
+    "name": "J. Molner AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jmolner-as.svg"
+  },
+  {
+    "symbol": "MRK1T",
+    "name": "Merko Ehitus AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/merko-ehitus.svg"
+  },
+  {
+    "symbol": "NCN1T",
+    "name": "Nordecon AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nordecon.svg"
+  },
+  {
+    "symbol": "PKG1T",
+    "name": "Pro Kapital Grupp AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pro-kapital-grupp.svg"
+  },
+  {
+    "symbol": "PNKTD",
+    "name": "Punktid Technologies AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/punktid-technologies.svg"
+  },
+  {
+    "symbol": "PRF1T",
+    "name": "PRFoods AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/prfoods.svg"
+  },
+  {
+    "symbol": "PRIMO",
+    "name": "Primostar Group AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/primostar-as.svg"
+  },
+  {
+    "symbol": "ROBUS",
+    "name": "Robus Group AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/robus.svg"
+  },
+  {
+    "symbol": "SAUNA",
+    "name": "Saunum Group AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/saunum-group.svg"
+  },
+  {
+    "symbol": "SFG1T",
+    "name": "Silvano Fashion Group AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/silvano-fashion-group.svg"
+  },
+  {
+    "symbol": "SKN1T",
+    "name": "Nordic Fibreboard AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nordic-fibreboard.svg"
+  },
+  {
+    "symbol": "TAL1T",
+    "name": "Tallink Grupp AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tallink-grupp.svg"
+  },
+  {
+    "symbol": "TKM1T",
+    "name": "TKM Grupp AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tallinna-kaubamaja-grupp.svg"
+  },
+  {
+    "symbol": "TPD1T",
+    "name": "Trigon Property Development AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/trigon-property-development.svg"
+  },
+  {
+    "symbol": "TSM1T",
+    "name": "Tallinna Sadam AS",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tallinna-sadam.svg"
+  },
+  {
+    "symbol": "TVE1T",
+    "name": "Tallinna Vesi AS Class A",
+    "market": "OMXTSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tallinna-vesi.svg"
+  }
+]
