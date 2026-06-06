@@ -1,7 +1,10 @@
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   applyOutcomeFeedback,
   assessDecisionEvidence,
+  assessSignalLessonSurvival,
   assessCoherence,
   assessWisdom,
   buildHumanDecisionGuide,
@@ -9,8 +12,10 @@ import {
   createDecisionRecord,
   createInMemoryDecisionRecordStore,
   createRealitySnapshot,
+  createSignalRelationshipMemory,
   deriveLearningPatterns,
   evaluateDecision,
+  evaluateLearningJudgment,
   evaluateOutcome,
   generatePredictionScenarios,
   reviewDecisionOutcome,
@@ -18,6 +23,7 @@ import {
   registerDecisionOperations,
   replayDecision,
   simulateDecisionPaths,
+  SIGNAL_UNIVERSAL_LIFECYCLE,
 } from "./index";
 import {
   assessDecisionEvidence as assessDecisionEvidenceFromCore,
@@ -374,4 +380,308 @@ describe("@signal/decision", () => {
     expect(patterns[0]?.contradictions).toBe(2);
     expect(patterns[0]?.explanation).toMatch(/process quality/i);
   });
+
+  it("applies reviewed history to a generic current judgment before a new outcome exists", () => {
+    const result = evaluateLearningJudgment({
+      now: "2026-06-06T00:00:00.000Z",
+      objective: {
+        id: "objective:capacity",
+        type: "Objective",
+        label: "Keep service capacity resilient",
+        traceRefs: [],
+        reviewRefs: [],
+        explanation: ["Generic objective."],
+        priority: 80,
+      },
+      evidence: [
+        {
+          id: "evidence:load",
+          type: "Evidence",
+          label: "Recent load is observable",
+          traceRefs: [],
+          reviewRefs: [],
+          explanation: ["Fresh operating evidence."],
+          strength: 76,
+          confidence: 72,
+        },
+      ],
+      currentTags: ["capacity-pressure", "reversible-action", "fresh-evidence"],
+      reviewedSituations: [
+        {
+          id: "situation:reviewed-capacity",
+          label: "reviewed reversible capacity change",
+          tags: ["capacity-pressure", "reversible-action"],
+          decisionRef: "decision:past-capacity",
+          outcomeRef: "outcome:past-capacity",
+          reviewRef: { reviewId: "review:past-capacity", outcome: "survived" },
+          lessonRefs: ["lesson:keep-reversible"],
+          relationshipRefs: ["relationship:lesson-applies"],
+        },
+      ],
+      lessons: [
+        {
+          id: "lesson:keep-reversible",
+          type: "Lesson",
+          label: "Keep reversible changes small until evidence repeats",
+          traceRefs: [{ refId: "review:past-capacity", refType: "Review" }],
+          reviewRefs: [{ reviewId: "review:past-capacity", outcome: "survived" }],
+          explanation: ["Repeatedly survived review."],
+          reviewCount: 3,
+          survivalCount: 3,
+          failureCount: 0,
+          confidence: 78,
+          applicability: ["capacity-pressure", "reversible-action"],
+          domainCoverage: ["operations"],
+        },
+      ],
+      relationships: [
+        {
+          id: "relationship:lesson-applies",
+          type: "Relationship",
+          label: "Reviewed lesson applies to current judgment",
+          sourceType: "Lesson",
+          sourceId: "lesson:keep-reversible",
+          relationType: "applies_to",
+          targetType: "Judgment",
+          targetId: "judgment:objective:capacity",
+          traceRefs: [{ refId: "review:past-capacity", refType: "Review" }],
+          reviewRefs: [{ reviewId: "review:past-capacity", outcome: "survived" }],
+          explanation: ["The same reversible pressure pattern was reviewed before."],
+          strength: 82,
+          confidence: 78,
+          createdAt: "2026-06-06T00:00:00.000Z",
+          updatedAt: "2026-06-06T00:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(SIGNAL_UNIVERSAL_LIFECYCLE).toContain("Reviewed History");
+    expect(result.similarityMatches[0]?.situation.id).toBe("situation:reviewed-capacity");
+    expect(result.reviewedHistory.lessonRefs).toContain("lesson:keep-reversible");
+    expect(result.judgment.futureOutcomeRequired).toBe(false);
+    expect(result.judgment.lessonRefs).toContain("lesson:keep-reversible");
+    expect(result.strategies[0]?.quality).toBeGreaterThan(40);
+    expect(result.rationale.join(" ")).toMatch(/Previously reviewed situations suggest/i);
+  });
+
+  it("traces relationship memory from review to lesson to judgment", () => {
+    const memory = createSignalRelationshipMemory([
+      {
+        id: "relationship:review-generated-lesson",
+        type: "Relationship",
+        label: "Review generated lesson",
+        sourceType: "Review",
+        sourceId: "review:1",
+        relationType: "generated",
+        targetType: "Lesson",
+        targetId: "lesson:1",
+        traceRefs: [{ refId: "outcome:1", refType: "Outcome" }],
+        reviewRefs: [{ reviewId: "review:1", outcome: "survived" }],
+        explanation: ["The review converted an outcome into a reusable lesson."],
+        strength: 90,
+        confidence: 84,
+        createdAt: "2026-06-06T00:00:00.000Z",
+        updatedAt: "2026-06-06T00:00:00.000Z",
+      },
+      {
+        id: "relationship:lesson-applied-judgment",
+        type: "Relationship",
+        label: "Lesson applied to judgment",
+        sourceType: "Lesson",
+        sourceId: "lesson:1",
+        relationType: "applies_to",
+        targetType: "Judgment",
+        targetId: "judgment:1",
+        traceRefs: [{ refId: "review:1", refType: "Review" }],
+        reviewRefs: [{ reviewId: "review:1", outcome: "survived" }],
+        explanation: ["The reviewed lesson constrains the present judgment."],
+        strength: 88,
+        confidence: 82,
+        createdAt: "2026-06-06T00:00:00.000Z",
+        updatedAt: "2026-06-06T00:00:00.000Z",
+      },
+      {
+        id: "relationship:similarity-resembles-history",
+        type: "Relationship",
+        label: "Similarity resembles reviewed history",
+        sourceType: "Similarity",
+        sourceId: "similarity:1",
+        relationType: "resembles",
+        targetType: "ReviewedHistory",
+        targetId: "history:1",
+        traceRefs: [{ refId: "review:1", refType: "Review" }],
+        reviewRefs: [{ reviewId: "review:1", outcome: "survived" }],
+        explanation: ["Similarity is grounded in a reviewed case."],
+        strength: 80,
+        confidence: 76,
+        createdAt: "2026-06-06T00:00:00.000Z",
+        updatedAt: "2026-06-06T00:00:00.000Z",
+      },
+    ]);
+
+    expect(memory.lookup({ relationType: "applies_to" })).toHaveLength(1);
+    expect(memory.explain({ sourceId: "lesson:1" })[0]?.explanation).toMatch(/constrains/);
+    expect(memory.lineage("lesson:1").reviewRefs.map((ref) => ref.reviewId)).toEqual(["review:1"]);
+    expect(memory.lineage("judgment:1").lessonRefs).toEqual(["lesson:1"]);
+    expect(memory.lineage("similarity:1").similarityRefs).toEqual(["similarity:1"]);
+  });
+
+  it("tracks lesson survival and keeps review, verification, outcome, lesson, strategy, and execution separate", () => {
+    const lessons = assessSignalLessonSurvival([
+      {
+        id: "lesson:repeat",
+        type: "Lesson",
+        label: "Repeated reviewed lesson",
+        traceRefs: [],
+        reviewRefs: [{ reviewId: "review:repeat", outcome: "survived" }],
+        explanation: ["Survived repeatedly."],
+        reviewCount: 5,
+        survivalCount: 4,
+        failureCount: 1,
+        confidence: 82,
+        applicability: ["reversible-action"],
+        domainCoverage: ["operations", "support"],
+      },
+      {
+        id: "lesson:weak",
+        type: "Lesson",
+        label: "Single weak lesson",
+        traceRefs: [],
+        reviewRefs: [],
+        explanation: ["Not reviewed yet."],
+        reviewCount: 0,
+        survivalCount: 0,
+        failureCount: 1,
+        confidence: 55,
+        applicability: [],
+        domainCoverage: [],
+      },
+    ]);
+    const concepts = [
+      { id: "outcome:1", type: "Outcome" },
+      { id: "review:1", type: "Review" },
+      { id: "verification:1", type: "Verification" },
+      { id: "lesson:1", type: "Lesson" },
+      { id: "strategy:1", type: "Strategy", quality: 70 },
+      { id: "execution:1", type: "Execution", quality: 40 },
+    ];
+
+    expect(lessons[0]?.lessonId).toBe("lesson:repeat");
+    expect(lessons[0]?.survivalRate).toBe(80);
+    expect(new Set(concepts.map((concept) => concept.type)).size).toBe(concepts.length);
+    expect(concepts.find((concept) => concept.type === "Strategy")?.quality).not.toBe(
+      concepts.find((concept) => concept.type === "Execution")?.quality,
+    );
+  });
+
+  it("lets Stocks Optimizer map its domain outside Signal Core without adding product vocabulary to core source", () => {
+    const stocksOptimizerAdapter = {
+      toSignalInput(input: {
+        ticker: string;
+        price: number;
+        shares: number;
+        portfolioExposure: number;
+        volatility: number;
+        marketRisk: number;
+        investmentThesis: string;
+        reviewedLesson: string;
+      }) {
+        return {
+          now: "2026-06-06T00:00:00.000Z",
+          objective: {
+            id: `objective:${input.ticker}`,
+            type: "Objective" as const,
+            label: "Keep allocation discipline reviewable",
+            traceRefs: [],
+            reviewRefs: [],
+            explanation: [input.investmentThesis],
+          },
+          evidence: [
+            {
+              id: `evidence:${input.ticker}:position`,
+              type: "Evidence" as const,
+              label: "Adapter translated current holding context",
+              traceRefs: [],
+              reviewRefs: [],
+              explanation: [`Mapped price ${input.price} and size ${input.shares} outside core.`],
+              strength: 68,
+              confidence: 66,
+            },
+          ],
+          currentTags: ["allocation-pressure", "uncertainty", "reversible-action"],
+          threats: [
+            {
+              id: `threat:${input.ticker}:risk`,
+              type: "Threat" as const,
+              label: "Adapter translated current risk pressure",
+              severity: input.marketRisk,
+              likelihood: input.volatility,
+              traceRefs: [],
+              reviewRefs: [],
+              explanation: ["Domain risk stays in the adapter payload."],
+            },
+          ],
+          reviewedSituations: [
+            {
+              id: "situation:reviewed-allocation",
+              label: "reviewed allocation adjustment",
+              tags: ["allocation-pressure", "uncertainty"],
+              reviewRef: { reviewId: "review:allocation", outcome: "survived" as const },
+              lessonRefs: ["lesson:allocation-discipline"],
+            },
+          ],
+          lessons: [
+            {
+              id: "lesson:allocation-discipline",
+              type: "Lesson" as const,
+              label: input.reviewedLesson,
+              traceRefs: [],
+              reviewRefs: [{ reviewId: "review:allocation", outcome: "survived" as const }],
+              explanation: ["Adapter supplied a reviewed investment lesson as a generic lesson."],
+              reviewCount: 4,
+              survivalCount: 3,
+              failureCount: 1,
+              confidence: 74,
+              applicability: ["allocation-pressure", "uncertainty"],
+              domainCoverage: ["investing"],
+            },
+          ],
+          metadata: { portfolioExposure: input.portfolioExposure },
+        };
+      },
+    };
+    const result = evaluateLearningJudgment(stocksOptimizerAdapter.toSignalInput({
+      ticker: "ACME",
+      price: 42,
+      shares: 10,
+      portfolioExposure: 18,
+      volatility: 62,
+      marketRisk: 58,
+      investmentThesis: "Position remains useful only while the thesis is reviewable.",
+      reviewedLesson: "Keep allocation changes reversible when uncertainty is visible.",
+    }));
+    const productionSource = productionDecisionSource();
+
+    expect(result.judgment.futureOutcomeRequired).toBe(false);
+    expect(result.reviewedHistory.lessonRefs).toContain("lesson:allocation-discipline");
+    expect(result.strategies[0]?.label).not.toMatch(/\b(buy|sell|guarantee|forecast)\b/i);
+    expect(productionSource).not.toMatch(/\b(stock|ticker|shares|portfolio|investment|buy|sell)\b/i);
+  });
 });
+
+function productionDecisionSource(): string {
+  const root = join(__dirname);
+  return productionFiles(root)
+    .map((file) => readFileSync(file, "utf8"))
+    .join("\n");
+}
+
+function productionFiles(dir: string): string[] {
+  return readdirSync(dir).flatMap((entry) => {
+    const path = join(dir, entry);
+    const stat = statSync(path);
+    if (stat.isDirectory()) return productionFiles(path);
+    if (!entry.endsWith(".ts") || entry.endsWith(".test.ts")) return [];
+    return [path];
+  });
+}

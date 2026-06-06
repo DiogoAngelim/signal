@@ -53,6 +53,7 @@ Signal makes dangerous backend operations explicit, replay-safe, and auditable.
   - [Focused Audits](#focused-audits)
 - Core Concepts
   - [Decision Quality](#decision-quality)
+  - [Learning-Informed Judgment](#learning-informed-judgment)
   - [Decision Operation Catalog](#decision-operation-catalog)
   - [Stewardship Ledger](#stewardship-ledger)
   - [Idempotency](#idempotency)
@@ -399,6 +400,177 @@ Repeated lessons can be derived with `deriveLearningPatterns(learnings)`.
 Patterns track frequency, confirmations, contradictions, and survival rate.
 They improve explanations and process quality; they must not inflate decision
 confidence.
+
+## Learning-Informed Judgment
+
+`@signal/decision/core` also exposes a generic judgment infrastructure for
+reviewed historical learning. It extends the simple decision-quality model
+without turning Signal into an application or a prediction engine.
+
+The universal lifecycle is:
+
+```txt
+Objective
+-> Resources
+-> Allocation
+-> Position
+-> State
+-> Evaluation
+-> Constraints
+-> Threats
+-> Assumptions
+-> Similarity
+-> Reviewed History
+-> Judgment
+-> Tradeoffs
+-> Strategies
+-> Execution
+-> Outcome
+-> Observation
+-> Review
+-> Verification
+-> Lesson
+```
+
+Signal core owns the generic contracts in that lifecycle. Adapters own domain
+mappings and terminology. Applications own workflows, UX, and product-specific
+behavior. Stocks Optimizer is an application and adapter; Signal must never
+depend on it.
+
+### Relationship Memory
+
+Relationships are institutional memory, not loose metadata. A relationship
+connects a source entity to a target entity with a typed relation such as
+`supports`, `contradicts`, `limits`, `validates`, `refutes`, `resembles`,
+`generated`, or `applies_to`. Use:
+
+```ts
+import { createSignalRelationshipMemory } from "@signal/decision/core";
+
+const memory = createSignalRelationshipMemory(relationships);
+const lineage = memory.lineage("judgment:current");
+```
+
+The lineage tells an application which reviews, lessons, similarities, and
+judgments explain why entities are connected.
+
+### Similarity And Reviewed History
+
+Similarity transfers reviewed learning into present judgment. It answers:
+
+- What resembles this?
+- What happened previously?
+- Which lessons survived?
+- Which assumptions repeatedly failed?
+- Which strategies repeatedly succeeded or failed?
+
+Similarity is not prediction. It does not say what will happen. It says which
+reviewed situations are relevant enough to inform today's judgment.
+
+Reviewed history may contain prior decisions, outcomes, reviews, assumptions,
+lessons, and relationships. Signal should prefer reviewed history over
+speculative explanations.
+
+### Lesson Survival
+
+Lessons track review count, survival count, failure count, confidence,
+applicability, and domain coverage. `assessSignalLessonSurvival(lessons)` ranks
+lessons so repeated, reviewed, surviving lessons are preferred over persuasive
+but unreviewed explanations.
+
+Outcome, Review, Verification, and Lesson remain separate concepts:
+
+- Outcome records what happened.
+- Review explains why it happened and what should change.
+- Verification checks whether a claim or target is valid.
+- Lesson is reusable learning extracted from review.
+
+Strategy quality and execution quality are separate too. A good strategy can be
+poorly executed, and clean execution can still apply a weak strategy.
+
+### Generic Learning Example
+
+```ts
+import { evaluateLearningJudgment } from "@signal/decision/core";
+
+const result = evaluateLearningJudgment({
+  objective: {
+    id: "objective:capacity",
+    type: "Objective",
+    label: "Keep service capacity resilient",
+    traceRefs: [],
+    reviewRefs: [],
+    explanation: ["Generic objective."],
+  },
+  currentTags: ["capacity-pressure", "reversible-action"],
+  evidence: [{
+    id: "evidence:load",
+    type: "Evidence",
+    label: "Recent load is observable",
+    traceRefs: [],
+    reviewRefs: [],
+    explanation: ["Current evidence."],
+    strength: 76,
+    confidence: 72,
+  }],
+  reviewedSituations: [{
+    id: "situation:reviewed-capacity",
+    label: "reviewed reversible capacity change",
+    tags: ["capacity-pressure", "reversible-action"],
+    reviewRef: { reviewId: "review:past-capacity", outcome: "survived" },
+    lessonRefs: ["lesson:keep-reversible"],
+  }],
+  lessons: [{
+    id: "lesson:keep-reversible",
+    type: "Lesson",
+    label: "Keep reversible changes small until evidence repeats",
+    traceRefs: [],
+    reviewRefs: [{ reviewId: "review:past-capacity", outcome: "survived" }],
+    explanation: ["Repeatedly survived review."],
+    reviewCount: 3,
+    survivalCount: 3,
+    failureCount: 0,
+    confidence: 78,
+    applicability: ["capacity-pressure", "reversible-action"],
+    domainCoverage: ["operations"],
+  }],
+});
+
+console.log(result.judgment.futureOutcomeRequired); // false
+console.log(result.rationale);
+```
+
+This produces current state, evaluation, similarity matches, reviewed history,
+judgment, tradeoffs, strategies, and rationale without waiting for a new
+outcome.
+
+### Stocks Optimizer Boundary
+
+Stocks Optimizer should translate its domain outside Signal core:
+
+```txt
+ticker                    -> domain identifier
+price + shares            -> position
+portfolio exposure        -> state
+volatility                -> evaluation
+market risk               -> threat
+investment thesis         -> assumption
+allocation adjustment     -> strategy
+investment outcome        -> outcome
+postmortem                -> review
+investment lesson         -> lesson
+```
+
+The app can then call `evaluateLearningJudgment` with generic Signal
+contracts. User-facing output should emphasize reviewed history, similarity,
+surviving lessons, uncertainty, reversibility, optionality, and allocation
+discipline. Prefer language like "This resembles...", "Previously reviewed
+situations suggest...", and "The strongest surviving lesson is...". Avoid
+certainty, guaranteed outcomes, and buy/sell directives in Signal-generated
+judgment text.
+
+Signal remains infrastructure. Stocks Optimizer consumes Signal through an
+adapter and owns all investment terminology, data sources, APIs, and UI.
 
 ### Ownership Boundary
 

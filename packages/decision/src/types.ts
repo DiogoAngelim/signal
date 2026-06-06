@@ -676,3 +676,349 @@ export type DecisionOperationDefinition = {
   idempotent: boolean;
   replaySafe: boolean;
 };
+
+export type SignalLifecycleEntityType =
+  | "Objective"
+  | "Resource"
+  | "Allocation"
+  | "Position"
+  | "State"
+  | "Evaluation"
+  | "Constraint"
+  | "Threat"
+  | "Assumption"
+  | "Similarity"
+  | "ReviewedHistory"
+  | "Judgment"
+  | "Tradeoff"
+  | "Strategy"
+  | "Execution"
+  | "Outcome"
+  | "Observation"
+  | "Review"
+  | "Verification"
+  | "Lesson"
+  | "Relationship"
+  | "Evidence";
+
+export type SignalTraceRef = {
+  refId: string;
+  refType?: SignalLifecycleEntityType | string;
+  role?: string;
+  explanation?: string;
+};
+
+export type SignalReviewRef = {
+  reviewId: string;
+  reviewedAt?: string;
+  reviewer?: string;
+  outcome?: "survived" | "failed" | "mixed" | "untested";
+  explanation?: string;
+};
+
+export type SignalContractBase<TType extends SignalLifecycleEntityType> = {
+  id: string;
+  type: TType;
+  label: string;
+  createdAt?: string;
+  updatedAt?: string;
+  traceRefs: SignalTraceRef[];
+  reviewRefs: SignalReviewRef[];
+  explanation: string[];
+  metadata?: Record<string, unknown>;
+};
+
+export type SignalObjective = SignalContractBase<"Objective"> & {
+  desiredState?: string;
+  priority?: number;
+};
+
+export type SignalResource = SignalContractBase<"Resource"> & {
+  capacity?: number;
+  availability?: number;
+};
+
+export type SignalAllocation = SignalContractBase<"Allocation"> & {
+  objectiveId?: string;
+  resourceIds: string[];
+  amount?: number;
+};
+
+export type SignalPosition = SignalContractBase<"Position"> & {
+  resourceId?: string;
+  allocationId?: string;
+  quantity?: number;
+};
+
+export type SignalState = SignalContractBase<"State"> & {
+  positionIds: string[];
+  quality: number;
+  uncertainty: number;
+};
+
+export type SignalEvaluation = SignalContractBase<"Evaluation"> & {
+  stateId?: string;
+  score: number;
+  confidence: number;
+};
+
+export type SignalConstraint = SignalContractBase<"Constraint"> & {
+  severity: number;
+  binding: boolean;
+};
+
+export type SignalThreat = SignalContractBase<"Threat"> & {
+  severity: number;
+  likelihood: number;
+};
+
+export type SignalAssumption = SignalContractBase<"Assumption"> & {
+  confidence: number;
+  status: "untested" | "survived" | "failed" | "revised";
+};
+
+export type SignalSimilarity = SignalContractBase<"Similarity"> & {
+  sourceId: string;
+  targetId: string;
+  score: number;
+  basis: string[];
+  lessonRefs: string[];
+};
+
+export type SignalReviewedHistory = SignalContractBase<"ReviewedHistory"> & {
+  decisionRefs: string[];
+  outcomeRefs: string[];
+  reviewRefs: SignalReviewRef[];
+  assumptionRefs: string[];
+  lessonRefs: string[];
+  relationshipRefs: string[];
+};
+
+export type SignalJudgment = SignalContractBase<"Judgment"> & {
+  objectiveRefs: string[];
+  evidenceRefs: string[];
+  stateRef?: string;
+  constraintRefs: string[];
+  threatRefs: string[];
+  assumptionRefs: string[];
+  reviewedHistoryRefs: string[];
+  lessonRefs: string[];
+  relationshipRefs: string[];
+  confidence: number;
+  uncertainty: number;
+  posture: "proceed" | "proceed-reversibly" | "wait" | "reduce" | "avoid";
+  futureOutcomeRequired: boolean;
+};
+
+export type SignalTradeoff = SignalContractBase<"Tradeoff"> & {
+  optionIds: string[];
+  benefit: string;
+  cost: string;
+  reversibility: DecisionReversibility;
+};
+
+export type SignalStrategy = SignalContractBase<"Strategy"> & {
+  judgmentId?: string;
+  tradeoffIds: string[];
+  quality: number;
+  reversible: boolean;
+};
+
+export type SignalExecution = SignalContractBase<"Execution"> & {
+  strategyId?: string;
+  quality: number;
+  status: "planned" | "running" | "completed" | "blocked" | "abandoned";
+};
+
+export type SignalOutcome = SignalContractBase<"Outcome"> & {
+  strategyId?: string;
+  executionId?: string;
+  observedScore?: number;
+};
+
+export type SignalObservation = SignalContractBase<"Observation"> & {
+  observedAt?: string;
+  payload?: unknown;
+};
+
+export type SignalReview = SignalContractBase<"Review"> & {
+  outcomeId?: string;
+  whatHappened: string;
+  why: string;
+  assumptionRefs: string[];
+  lessonRefs: string[];
+  whatShouldChange: string;
+};
+
+export type SignalVerification = SignalContractBase<"Verification"> & {
+  targetId: string;
+  verified: boolean;
+  method: string;
+};
+
+export type SignalLesson = SignalContractBase<"Lesson"> & {
+  reviewCount: number;
+  survivalCount: number;
+  failureCount: number;
+  confidence: number;
+  applicability: string[];
+  domainCoverage: string[];
+};
+
+export type SignalEvidence = SignalContractBase<"Evidence"> & {
+  strength: number;
+  confidence: number;
+};
+
+export type SignalRelationshipType =
+  | "supports"
+  | "contradicts"
+  | "depends_on"
+  | "affects"
+  | "weakens"
+  | "strengthens"
+  | "limits"
+  | "produces"
+  | "validates"
+  | "refutes"
+  | "resembles"
+  | "generated"
+  | "applies_to";
+
+export type SignalRelationship = SignalContractBase<"Relationship"> & {
+  sourceType: SignalLifecycleEntityType;
+  sourceId: string;
+  relationType: SignalRelationshipType;
+  targetType: SignalLifecycleEntityType;
+  targetId: string;
+  strength: number;
+  confidence: number;
+  reviewRefs: SignalReviewRef[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SignalLifecycleContract =
+  | SignalObjective
+  | SignalResource
+  | SignalAllocation
+  | SignalPosition
+  | SignalState
+  | SignalEvaluation
+  | SignalConstraint
+  | SignalThreat
+  | SignalAssumption
+  | SignalSimilarity
+  | SignalReviewedHistory
+  | SignalJudgment
+  | SignalTradeoff
+  | SignalStrategy
+  | SignalExecution
+  | SignalOutcome
+  | SignalObservation
+  | SignalReview
+  | SignalVerification
+  | SignalLesson
+  | SignalRelationship
+  | SignalEvidence;
+
+export type SignalRelationshipLookup = {
+  sourceId?: string;
+  targetId?: string;
+  relationType?: SignalRelationshipType;
+  entityId?: string;
+  reviewId?: string;
+};
+
+export type SignalRelationshipExplanation = {
+  relationshipId: string;
+  sourceId: string;
+  targetId: string;
+  relationType: SignalRelationshipType;
+  explanation: string;
+  reviewRefs: SignalReviewRef[];
+  strength: number;
+  confidence: number;
+};
+
+export type SignalRelationshipMemory = {
+  relationships: SignalRelationship[];
+  lookup(query?: SignalRelationshipLookup): SignalRelationship[];
+  explain(query?: SignalRelationshipLookup): SignalRelationshipExplanation[];
+  lineage(entityId: string): SignalLineage;
+};
+
+export type SignalLineage = {
+  entityId: string;
+  relationships: SignalRelationshipExplanation[];
+  reviewRefs: SignalReviewRef[];
+  lessonRefs: string[];
+  judgmentRefs: string[];
+  similarityRefs: string[];
+  explanation: string[];
+};
+
+export type SignalLessonSurvival = {
+  lessonId: string;
+  survivalCount: number;
+  failureCount: number;
+  reviewCount: number;
+  confidence: number;
+  survivalRate: number;
+  applicability: string[];
+  domainCoverage: string[];
+  preferenceScore: number;
+  explanation: string;
+};
+
+export type SignalReviewedSituation = {
+  id: string;
+  label: string;
+  tags: string[];
+  decisionRef?: string;
+  outcomeRef?: string;
+  reviewRef?: SignalReviewRef;
+  assumptionRefs?: string[];
+  lessonRefs?: string[];
+  relationshipRefs?: string[];
+  explanation?: string[];
+  metadata?: Record<string, unknown>;
+};
+
+export type SignalSimilarityMatch = SignalSimilarity & {
+  situation: SignalReviewedSituation;
+  lessons: SignalLessonSurvival[];
+};
+
+export type SignalLearningRuntimeInput = {
+  objective: SignalObjective;
+  objectives?: SignalObjective[];
+  resources?: SignalResource[];
+  evidence?: SignalEvidence[];
+  positions?: SignalPosition[];
+  state?: SignalState;
+  evaluation?: SignalEvaluation;
+  constraints?: SignalConstraint[];
+  threats?: SignalThreat[];
+  assumptions?: SignalAssumption[];
+  currentTags?: string[];
+  reviewedSituations?: SignalReviewedSituation[];
+  priorReviews?: SignalReview[];
+  lessons?: SignalLesson[];
+  relationships?: SignalRelationship[];
+  now?: string;
+};
+
+export type SignalLearningRuntimeResult = {
+  state: SignalState;
+  evaluation: SignalEvaluation;
+  constraints: SignalConstraint[];
+  threats: SignalThreat[];
+  assumptions: SignalAssumption[];
+  similarityMatches: SignalSimilarityMatch[];
+  reviewedHistory: SignalReviewedHistory;
+  judgment: SignalJudgment;
+  tradeoffs: SignalTradeoff[];
+  strategies: SignalStrategy[];
+  rationale: string[];
+};
