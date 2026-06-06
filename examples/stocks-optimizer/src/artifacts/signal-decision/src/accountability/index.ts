@@ -17,10 +17,17 @@ export function createAccountabilityReport(input: {
     ? compareReplay(input.record.decisionId, input.record.coherence, input.currentCoherence)
     : defaultReplay(input.record);
   const supportingEvidence = [
+    ...(input.record.assessment?.evidence
+      .filter((item) => item.direction === "supporting")
+      .map((item) => item.summary) ?? []),
     ...input.record.coherence.explanation.filter((line) => !/contradict|block|pause/i.test(line)),
     ...(input.record.wisdom?.decision === "proceed" ? input.record.wisdom.reason : []),
   ];
   const conflictingEvidence = [
+    ...(input.record.assessment?.evidence
+      .filter((item) => item.direction === "contradicting")
+      .map((item) => item.summary) ?? []),
+    ...(input.record.assessment?.contradicted.map((item) => item.summary) ?? []),
     ...input.record.coherence.contradictions.map((conflict) => conflict.description),
     ...(input.record.wisdom?.decision === "avoid" ? input.record.wisdom.reason : []),
   ];
@@ -60,6 +67,7 @@ function modulesInvolved(record: SignalDecisionRecord): string[] {
   if (record.wisdom !== undefined) modules.push("wisdom");
   if (record.agency !== undefined) modules.push("agency");
   if (record.outcome !== undefined) modules.push("outcome");
+  if (record.assessment !== undefined) modules.push("assessment");
   return modules;
 }
 

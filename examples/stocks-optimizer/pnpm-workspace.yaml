@@ -1,7 +1,6 @@
 packages:
   - .
   - src/artifacts/*
-  - ../../packages/decision
 
 catalog:
   '@replit/vite-plugin-cartographer': latest

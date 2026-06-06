@@ -1,4 +1,5 @@
 import type { DecisionModuleName, OutcomeEvaluation, OutcomeEvaluationInput, OutcomeFeedback } from "../types";
+import { reviewDecisionOutcome } from "../assessment";
 import { asScore, clamp, stableId, uniqueStrings } from "../utils";
 
 export function evaluateOutcome(input: OutcomeEvaluationInput): OutcomeEvaluation {
@@ -12,10 +13,21 @@ export function evaluateOutcome(input: OutcomeEvaluationInput): OutcomeEvaluatio
   const confidenceAccuracy = clamp(100 - Math.abs(expectedConfidence - successScore));
   const trustImpact = Math.round((successScore - 50) * 0.35 + (purposeAlignment - 50) * 0.2 + (riskEfficiency - 50) * 0.15);
   const calibrationImpact = Math.round((confidenceAccuracy - 50) * 0.35);
+  const review = input.review ? reviewDecisionOutcome(input.review) : undefined;
+  const lessons = uniqueStrings([
+    ...lessonsFor(input, successScore, confidenceAccuracy, riskEfficiency),
+    ...(review?.lessons ?? []),
+  ]);
 
   return {
     outcomeId: input.outcomeId ?? stableId("outcome", input.decisionId),
     decisionId: input.decisionId,
+    ...(input.appId === undefined ? {} : { appId: input.appId }),
+    ...(input.domain === undefined ? {} : { domain: input.domain }),
+    ...(input.timestamp === undefined ? {} : { timestamp: input.timestamp }),
+    ...(input.correlationId === undefined ? {} : { correlationId: input.correlationId }),
+    ...(input.version === undefined ? {} : { version: input.version }),
+    ...(input.originalDecisionId === undefined ? {} : { originalDecisionId: input.originalDecisionId }),
     category: classifyOutcome({
       successScore,
       purposeAlignment,
@@ -30,7 +42,9 @@ export function evaluateOutcome(input: OutcomeEvaluationInput): OutcomeEvaluatio
     confidenceAccuracy: Math.round(confidenceAccuracy),
     trustImpact,
     calibrationImpact,
-    lessons: lessonsFor(input, successScore, confidenceAccuracy, riskEfficiency),
+    lessons,
+    ...(review === undefined ? {} : { review }),
+    ...(input.metadata === undefined ? {} : { metadata: input.metadata }),
   };
 }
 

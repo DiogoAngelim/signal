@@ -7,8 +7,17 @@ export {
 } from "./assessment";
 export { createAccountabilityReport, replayDecision } from "./accountability";
 export { assessCoherence, detectCoherenceConflicts } from "./coherence";
-export { attachAccountability, compareReplay, createDecisionRecord, createInMemoryDecisionRecordStore } from "./decision-record";
-export { accountabilityHumanSummary, buildHumanDecisionGuide, createHumanDecisionSummary } from "./human-language";
+export {
+  attachAccountability,
+  compareReplay,
+  createDecisionRecord,
+  createInMemoryDecisionRecordStore,
+} from "./decision-record";
+export {
+  accountabilityHumanSummary,
+  buildHumanDecisionGuide,
+  createHumanDecisionSummary,
+} from "./human-language";
 export type { HumanDecisionGuideStep } from "./human-language";
 export {
   assessSignalLessonSurvival,
@@ -22,54 +31,12 @@ export {
   traceSignalLineage,
 } from "./learning-judgment";
 export { applyOutcomeFeedback, evaluateOutcome } from "./outcomes";
-export { DECISION_OPERATION_DEFINITIONS, listDecisionOperations, registerDecisionOperations } from "./operations";
 export { evaluateDecision } from "./pipeline";
-export { bestPurposeScenario, generatePredictionScenarios, mostDangerousScenario, mostLikelyScenario } from "./prediction";
-export { compactRealityPayload, createRealitySnapshot, createRealitySnapshotForDecision } from "./reality";
-export { simulateDecisionPaths } from "./simulation";
 export {
-  assessStewardship,
-  consumeStewardshipMemory,
-  createStewardshipLedger,
-  evaluateStewardshipGovernance,
-  interpretStewardshipOutcomes,
-  selectStewardshipAction,
-} from "./stewardship";
-export { assessWisdom } from "./wisdom";
-export type {
-  StewardshipAssessment,
-  StewardshipConcentrationRisk,
-  StewardshipContext,
-  StewardshipEvidence,
-  StewardshipEvidenceQuality,
-  StewardshipGovernanceAssessment,
-  StewardshipGovernanceInputs,
-  StewardshipGovernanceStatus,
-  StewardshipImportance,
-  StewardshipInput,
-  StewardshipLedger,
-  StewardshipLedgerDecisionTrace,
-  StewardshipLedgerEvidenceTrace,
-  StewardshipLedgerLessonTrace,
-  StewardshipLedgerOutcomeTrace,
-  StewardshipLedgerTraceability,
-  StewardshipLesson,
-  StewardshipLessonOutcome,
-  StewardshipMemoryInput,
-  StewardshipNextStep,
-  StewardshipOutcomeReview,
-  StewardshipPolicyCompliance,
-  StewardshipProtection,
-  StewardshipRecommendation,
-  StewardshipRecommendationAction,
-  StewardshipReversibility,
-  StewardshipSeverity,
-  StewardshipStrength,
-  StewardshipSubject,
-  StewardshipThreat,
-  StewardshipUncertainty,
-  StewardshipVisibility,
-} from "./stewardship";
+  compactRealityPayload,
+  createRealitySnapshot,
+  createRealitySnapshotForDecision,
+} from "./reality";
 export type {
   AccountabilityReport,
   AssessmentFact,
@@ -94,7 +61,6 @@ export type {
   DecisionModuleInputs,
   DecisionModuleName,
   DecisionNextBestEvidence,
-  DecisionOperationDefinition,
   DecisionOutcomeReview,
   DecisionOutcomeReviewAssumption,
   DecisionOutcomeReviewAssumptionStatus,
@@ -105,10 +71,10 @@ export type {
   DecisionPipelineResult,
   DecisionRecordInput,
   DecisionRecordStore,
+  DecisionReplayComparison,
   DecisionReversibility,
   DecisionReversibilityAssessment,
   DecisionReversibilityInput,
-  DecisionReplayComparison,
   DecisionStewardshipAssessment,
   DecisionThreat,
   DecisionThreatInput,
@@ -119,8 +85,6 @@ export type {
   OutcomeEvaluationInput,
   OutcomeFeedback,
   OutcomeHorizon,
-  PredictionInput,
-  PredictionScenario,
   RealitySnapshot,
   RealitySnapshotInput,
   RealitySource,
@@ -162,10 +126,4 @@ export type {
   SignalTraceRef,
   SignalTradeoff,
   SignalVerification,
-  SimulationInput,
-  SimulationPathResult,
-  SimulationRecommendation,
-  SimulationResult,
-  WisdomAssessment,
-  WisdomInput,
 } from "./types";

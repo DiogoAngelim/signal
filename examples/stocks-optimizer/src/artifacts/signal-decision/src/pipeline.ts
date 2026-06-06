@@ -1,5 +1,6 @@
 import type { DecisionPipelineInput, DecisionPipelineResult, PredictionScenario } from "./types";
 import { createAccountabilityReport } from "./accountability";
+import { assessDecisionEvidence } from "./assessment";
 import { assessCoherence } from "./coherence";
 import { createDecisionRecord } from "./decision-record";
 import { buildHumanDecisionGuide, createHumanDecisionSummary } from "./human-language";
@@ -10,11 +11,19 @@ import { assessWisdom } from "./wisdom";
 
 export function evaluateDecision(input: DecisionPipelineInput): DecisionPipelineResult {
   const coherence = assessCoherence(input.modules);
-  const predictionScenarios = generatePredictionScenarios({
+  const assessment = input.assessment
+    ? assessDecisionEvidence({
+        ...input.assessment,
+        decisionId: input.assessment.decisionId ?? input.decisionId,
+        createdAt: input.assessment.createdAt ?? input.createdAt,
+      })
+    : undefined;
+  const cappedConfidence = assessment?.confidence.capped ?? coherence.score;
+  const predictionScenarios = capPredictionScenarioConfidence(generatePredictionScenarios({
     ...input.prediction,
     currentScore: input.prediction?.currentScore ?? coherence.score,
-    confidence: input.prediction?.confidence ?? coherence.score,
-  });
+    confidence: Math.min(input.prediction?.confidence ?? coherence.score, cappedConfidence),
+  }), assessment?.confidence.cap);
   const simulation = simulateDecisionPaths({
     decisionId: input.decisionId,
     scenarios: predictionScenarios,
@@ -26,7 +35,7 @@ export function evaluateDecision(input: DecisionPipelineInput): DecisionPipeline
     expectedReward: input.wisdom?.expectedReward ?? averageReward(predictionScenarios),
     downsideRisk: input.wisdom?.downsideRisk ?? highestDownside,
     uncertainty: input.wisdom?.uncertainty ?? averageUncertainty(predictionScenarios),
-    confidence: input.wisdom?.confidence ?? coherence.score,
+    confidence: Math.min(input.wisdom?.confidence ?? coherence.score, cappedConfidence),
   });
   const outcome = input.outcome ? evaluateOutcome(input.outcome) : undefined;
   const preliminaryRecord = createDecisionRecord({
@@ -44,8 +53,9 @@ export function evaluateDecision(input: DecisionPipelineInput): DecisionPipeline
     prediction: predictionScenarios,
     simulation,
     wisdom,
-    action: actionPermitted(coherence.actionAllowed, simulation.recommendedAction, wisdom.decision) ? input.action : undefined,
+    action: actionPermitted(coherence.actionAllowed, simulation.recommendedAction, wisdom.decision, assessment) ? input.action : undefined,
     outcome,
+    assessment,
     retentionTier: input.retentionTier,
   });
   const accountability = createAccountabilityReport({ record: preliminaryRecord, outcome });
@@ -68,8 +78,8 @@ export function evaluateDecision(input: DecisionPipelineInput): DecisionPipeline
     ...(outcome === undefined ? {} : { outcomeAccuracy: outcome.confidenceAccuracy }),
     accountabilitySummary: accountability.humanExplanation || guide[5]?.text || record.humanSummary,
     decisionReplayAvailable: true,
-    actionAllowed: actionPermitted(coherence.actionAllowed, simulation.recommendedAction, wisdom.decision),
-    actionScale: finalActionScale(coherence.actionScale, simulation.recommendedAction, wisdom.decision),
+    actionAllowed: actionPermitted(coherence.actionAllowed, simulation.recommendedAction, wisdom.decision, assessment),
+    actionScale: finalActionScale(coherence.actionScale, simulation.recommendedAction, wisdom.decision, assessment),
   };
 }
 
@@ -77,15 +87,37 @@ function actionPermitted(
   coherenceAllows: boolean,
   simulationRecommendation: string,
   wisdomDecision: string,
+  assessment: ReturnType<typeof assessDecisionEvidence> | undefined,
 ): boolean {
-  return coherenceAllows && simulationRecommendation !== "block" && wisdomDecision !== "avoid";
+  return coherenceAllows
+    && simulationRecommendation !== "block"
+    && wisdomDecision !== "avoid"
+    && assessmentAllowsAction(assessment);
 }
 
-function finalActionScale(coherenceScale: number, simulationRecommendation: string, wisdomDecision: string): number {
+function finalActionScale(
+  coherenceScale: number,
+  simulationRecommendation: string,
+  wisdomDecision: string,
+  assessment: ReturnType<typeof assessDecisionEvidence> | undefined,
+): number {
   if (wisdomDecision === "avoid" || simulationRecommendation === "block") return 0;
   if (wisdomDecision === "wait" || simulationRecommendation === "wait") return 0;
-  if (wisdomDecision === "proceed-small" || simulationRecommendation === "reduce") return Math.min(coherenceScale, 0.45);
+  if (assessment?.stewardship.recommendation === "avoid" || assessment?.stewardship.recommendation === "wait") return 0;
+  if (
+    wisdomDecision === "proceed-small"
+    || simulationRecommendation === "reduce"
+    || assessment?.stewardship.recommendation === "reduce"
+    || assessment?.stewardship.recommendation === "proceed-reversibly"
+  ) return Math.min(coherenceScale, 0.45);
   return coherenceScale;
+}
+
+function assessmentAllowsAction(assessment: ReturnType<typeof assessDecisionEvidence> | undefined): boolean {
+  if (!assessment) return true;
+  return assessment.governance.blockers.length === 0
+    && assessment.stewardship.recommendation !== "avoid"
+    && assessment.stewardship.recommendation !== "wait";
 }
 
 function maxDownside(scenarios: readonly PredictionScenario[]): number {
@@ -102,4 +134,15 @@ function averageUncertainty(scenarios: readonly PredictionScenario[]): number {
   return scenarios.length
     ? scenarios.reduce((sum, scenario) => sum + scenario.uncertainty, 0) / scenarios.length
     : 50;
+}
+
+function capPredictionScenarioConfidence(
+  scenarios: readonly PredictionScenario[],
+  confidenceCap: number | undefined,
+): PredictionScenario[] {
+  if (confidenceCap === undefined) return [...scenarios];
+  return scenarios.map((scenario) => ({
+    ...scenario,
+    confidence: Math.min(scenario.confidence, confidenceCap),
+  }));
 }

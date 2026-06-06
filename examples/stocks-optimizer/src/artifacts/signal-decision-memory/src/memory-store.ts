@@ -1,5 +1,14 @@
 import { createRealitySnapshotForDecision, type OutcomeEvaluation, type RealitySnapshot, type SignalDecisionRecord } from "@signal/decision";
-import type { DecisionReview, LearningRecord, RegimeSnapshot, Thesis } from "./learning";
+import { matchesMemoryScope } from "./contracts";
+import type {
+  CalibrationRecord,
+  DecisionReview,
+  Evidence,
+  LearningRecord,
+  ProcessQualityRecord,
+  RegimeSnapshot,
+  Thesis,
+} from "./learning";
 import type {
   CalibrationHistoryEntry,
   DecisionMemoryStore,
@@ -20,10 +29,13 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
   private readonly calibrationHistory = new Map<string, CalibrationHistoryEntry>();
   private readonly trustHistory = new Map<string, TrustHistoryEntry>();
   private readonly summaries = new Map<string, MemorySummary>();
+  private readonly evidence = new Map<string, Evidence>();
   private readonly theses = new Map<string, Thesis>();
   private readonly regimeSnapshots = new Map<string, RegimeSnapshot>();
   private readonly decisionReviews = new Map<string, DecisionReview>();
   private readonly learningRecords = new Map<string, LearningRecord>();
+  private readonly calibrationRecords = new Map<string, CalibrationRecord>();
+  private readonly processQualityRecords = new Map<string, ProcessQualityRecord>();
   private readonly retentionJobs = new Map<string, RetentionJobRecord>();
 
   async saveRealitySnapshot(snapshot: RealitySnapshot): Promise<RealitySnapshot> {
@@ -124,10 +136,34 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return summary;
   }
 
-  async listSummaries(filter: { source?: string; limit?: number } = {}): Promise<MemorySummary[]> {
+  async listSummaries(filter: { appId?: string; domain?: string; source?: string; limit?: number } = {}): Promise<MemorySummary[]> {
     return [...this.summaries.values()]
-      .filter((summary) => !filter.source || summary.source === filter.source)
+      .filter((summary) =>
+        (!filter.source || summary.source === filter.source) &&
+        (!filter.appId || summary.appId === filter.appId) &&
+        (!filter.domain || summary.domain === filter.domain),
+      )
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, clampLimit(filter.limit));
+  }
+
+  async saveEvidence(evidence: Evidence): Promise<Evidence> {
+    this.evidence.set(evidence.evidenceId, evidence);
+    return evidence;
+  }
+
+  async listEvidence(filter: LearningRecordFilter = {}): Promise<Evidence[]> {
+    return [...this.evidence.values()]
+      .filter((evidence) => matchesLearningFilter({
+        source: evidence.source,
+        appId: evidence.appId,
+        domain: evidence.domain,
+        decisionId: evidence.decisionId,
+        thesisId: evidence.thesisId,
+        regimeSnapshotId: evidence.regimeSnapshotId,
+        createdAt: evidence.observedAt,
+      }, filter))
+      .sort((a, b) => b.observedAt.localeCompare(a.observedAt))
       .slice(0, clampLimit(filter.limit));
   }
 
@@ -144,6 +180,8 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return [...this.theses.values()]
       .filter((thesis) => matchesLearningFilter({
         source: thesis.source,
+        appId: thesis.appId,
+        domain: thesis.domain,
         thesisId: thesis.thesisId,
         createdAt: thesis.createdAt,
       }, filter))
@@ -164,6 +202,9 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return [...this.regimeSnapshots.values()]
       .filter((snapshot) => matchesLearningFilter({
         source: snapshot.source,
+        appId: snapshot.appId,
+        domain: snapshot.domain,
+        decisionId: snapshot.decisionId,
         regimeSnapshotId: snapshot.regimeSnapshotId,
         venue: snapshot.venue,
         createdAt: snapshot.timestamp,
@@ -181,6 +222,8 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return [...this.decisionReviews.values()]
       .filter((review) => matchesLearningFilter({
         source: review.source,
+        appId: review.appId,
+        domain: review.domain,
         decisionId: review.decisionId,
         createdAt: review.reviewedAt,
       }, filter))
@@ -197,9 +240,47 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return [...this.learningRecords.values()]
       .filter((record) => matchesLearningFilter({
         source: record.source,
+        appId: record.appId,
+        domain: record.domain,
         decisionId: record.decisionId,
         thesisId: record.thesisId,
         regimeSnapshotId: record.regimeSnapshotId,
+        createdAt: record.createdAt,
+      }, filter))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, clampLimit(filter.limit));
+  }
+
+  async saveCalibrationRecord(record: CalibrationRecord): Promise<CalibrationRecord> {
+    this.calibrationRecords.set(record.calibrationRecordId, record);
+    return record;
+  }
+
+  async listCalibrationRecords(filter: LearningRecordFilter = {}): Promise<CalibrationRecord[]> {
+    return [...this.calibrationRecords.values()]
+      .filter((record) => matchesLearningFilter({
+        source: record.source,
+        appId: record.appId,
+        domain: record.domain,
+        decisionId: record.decisionId,
+        createdAt: record.createdAt,
+      }, filter))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, clampLimit(filter.limit));
+  }
+
+  async saveProcessQualityRecord(record: ProcessQualityRecord): Promise<ProcessQualityRecord> {
+    this.processQualityRecords.set(record.processQualityId, record);
+    return record;
+  }
+
+  async listProcessQualityRecords(filter: LearningRecordFilter = {}): Promise<ProcessQualityRecord[]> {
+    return [...this.processQualityRecords.values()]
+      .filter((record) => matchesLearningFilter({
+        source: record.source,
+        appId: record.appId,
+        domain: record.domain,
+        decisionId: record.decisionId,
         createdAt: record.createdAt,
       }, filter))
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -230,10 +311,13 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     this.calibrationHistory.clear();
     this.trustHistory.clear();
     this.summaries.clear();
+    this.evidence.clear();
     this.theses.clear();
     this.regimeSnapshots.clear();
     this.decisionReviews.clear();
     this.learningRecords.clear();
+    this.calibrationRecords.clear();
+    this.processQualityRecords.clear();
     this.retentionJobs.clear();
   }
 }
@@ -243,6 +327,7 @@ export function createInMemoryDecisionMemoryStore(): InMemoryDecisionMemoryStore
 }
 
 function matchesRealityFilter(snapshot: RealitySnapshot, filter: RealitySnapshotFilter): boolean {
+  if (!matchesMemoryScope(snapshot, filter)) return false;
   if (filter.snapshotId && snapshot.snapshotId !== filter.snapshotId) return false;
   if (filter.source && snapshot.source !== filter.source) return false;
   if (filter.createdBefore && snapshot.createdAt >= filter.createdBefore) return false;
@@ -251,7 +336,12 @@ function matchesRealityFilter(snapshot: RealitySnapshot, filter: RealitySnapshot
 }
 
 function matchesFilter(record: SignalDecisionRecord, filter: DecisionRecordFilter): boolean {
-  if (filter.decisionId && record.decisionId !== filter.decisionId) return false;
+  if (!matchesMemoryScope(record, filter)) return false;
+  if (
+    filter.decisionId &&
+    record.decisionId !== filter.decisionId &&
+    !matchesMemoryScope(record, { decisionId: filter.decisionId })
+  ) return false;
   if (filter.source && record.source !== filter.source) return false;
   if (filter.retentionTier && record.retentionTier !== filter.retentionTier) return false;
   if (filter.createdBefore && record.createdAt >= filter.createdBefore) return false;
@@ -261,6 +351,8 @@ function matchesFilter(record: SignalDecisionRecord, filter: DecisionRecordFilte
 
 function matchesLearningFilter(
   record: {
+    appId?: string;
+    domain?: string;
     source?: string;
     decisionId?: string;
     thesisId?: string;
@@ -270,6 +362,8 @@ function matchesLearningFilter(
   },
   filter: LearningRecordFilter,
 ): boolean {
+  if (filter.appId && record.appId !== filter.appId) return false;
+  if (filter.domain && record.domain !== filter.domain) return false;
   if (filter.source && record.source !== filter.source) return false;
   if (filter.decisionId && record.decisionId !== filter.decisionId) return false;
   if (filter.thesisId && record.thesisId !== filter.thesisId) return false;

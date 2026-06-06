@@ -145,21 +145,6 @@ importers:
         specifier: ^4.1.7
         version: 4.1.7(@types/node@25.9.1)(@vitest/coverage-v8@4.1.7)(happy-dom@20.9.0)(vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))
 
-  ../../packages/decision:
-    devDependencies:
-      '@types/node':
-        specifier: ^20.17.16
-        version: 20.19.41
-      '@vitest/coverage-v8':
-        specifier: ^2.1.9
-        version: 2.1.9(vitest@2.1.9(@types/node@20.19.41)(happy-dom@20.9.0)(lightningcss@1.32.0))
-      typescript:
-        specifier: ^5.7.3
-        version: 5.9.3
-      vitest:
-        specifier: ^2.1.9
-        version: 2.1.9(@types/node@20.19.41)(happy-dom@20.9.0)(lightningcss@1.32.0)
-
   src/artifacts/api-client-react:
     dependencies:
       '@tanstack/react-query':
@@ -179,7 +164,7 @@ importers:
         version: link:../signal-agency
       '@signal/decision':
         specifier: workspace:*
-        version: link:../../../../../packages/decision
+        version: link:../signal-decision
       '@signal/decision-memory':
         specifier: workspace:*
         version: link:../signal-decision-memory
@@ -530,7 +515,7 @@ importers:
     dependencies:
       '@signal/decision':
         specifier: workspace:*
-        version: link:../../../../../packages/decision
+        version: link:../signal-decision
       pg:
         specifier: 'catalog:'
         version: 8.21.0
@@ -558,7 +543,7 @@ importers:
     dependencies:
       '@signal/decision':
         specifier: workspace:*
-        version: link:../../../../../packages/decision
+        version: link:../signal-decision
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.100.14(react@19.2.6)
