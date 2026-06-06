@@ -9,10 +9,15 @@ node_modules
 
 dist
 **/dist
+!examples/maritime-aware/dist
+!examples/maritime-aware/dist/**
+!examples/maritime-aware/api
+!examples/maritime-aware/api/**
 !examples/stocks/src/lib/**/dist
 !examples/stocks/src/lib/**/dist/**
 coverage
 **/coverage
+**/coverage/**
 **/.coverage
 **/.cache
 **/.vite
@@ -41,3 +46,25 @@ test
 spec
 schemas
 public
+
+# Allow the maritime-aware monorepo packages required by the Vercel build helper
+!packages
+!packages/decision
+!packages/decision/**
+!packages/decision-memory
+!packages/decision-memory/**
+!packages/runtime
+!packages/runtime/**
+packages/**/coverage
+packages/**/coverage/**
+!api
+!api/protocol
+!api/protocol/**
+api/protocol/coverage
+api/protocol/coverage/**
+!api/runtime
+!api/runtime/**
+api/runtime/coverage
+api/runtime/coverage/**
+api/**/coverage
+api/**/coverage/**

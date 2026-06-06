@@ -1,0 +1,2368 @@
+[
+  {
+    "symbol": "AFMC",
+    "name": "Agrofirma Mtsenskaya",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/agrofirma-mtsenskaya.svg"
+  },
+  {
+    "symbol": "AGRT",
+    "name": "Agregat",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/agregat.svg"
+  },
+  {
+    "symbol": "AKRN",
+    "name": "Acron",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/acron.svg"
+  },
+  {
+    "symbol": "ALRS",
+    "name": "ALROSA",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/alrosa.svg"
+  },
+  {
+    "symbol": "APRI",
+    "name": "APRI",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/apri.svg"
+  },
+  {
+    "symbol": "CARM",
+    "name": "STG",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/stg.svg"
+  },
+  {
+    "symbol": "CBOM",
+    "name": "MKB",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-bank-of-moscow.svg"
+  },
+  {
+    "symbol": "CENH",
+    "name": "AO \"Centerenergyholding\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "CENHP",
+    "name": "PAO \"Centerenergyholding\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "CHGZ",
+    "name": "RN-Western Siberia",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rn-western-siberia.svg"
+  },
+  {
+    "symbol": "CHKZ",
+    "name": "CKPZ",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/chelyabinsk-forge-and.svg"
+  },
+  {
+    "symbol": "CHMF",
+    "name": "Severstal",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/severstal.svg"
+  },
+  {
+    "symbol": "CHMK",
+    "name": "CMK",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/chelyabinsk-met-pl.svg"
+  },
+  {
+    "symbol": "CNRU",
+    "name": "IPJSC Cian",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/cian.svg"
+  },
+  {
+    "symbol": "CNTL",
+    "name": "Centrlnyi Telegraf",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/central-telegraph.svg"
+  },
+  {
+    "symbol": "CNTLP",
+    "name": "Centrlnyi Telegraf",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/central-telegraph.svg"
+  },
+  {
+    "symbol": "DAHF",
+    "name": "AO DAL'KHIMFARM ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "DATA",
+    "name": "Arenadata Group",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/arenadata-group.svg"
+  },
+  {
+    "symbol": "DELI",
+    "name": "Carsharing Russia",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/delimobil.svg"
+  },
+  {
+    "symbol": "DGBZ",
+    "name": "Dorogobuzh",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/dorogobuzh.svg"
+  },
+  {
+    "symbol": "DGIT",
+    "name": "AO \"Dorogi i Mosty\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-dorogi-i-mosty-ord.svg"
+  },
+  {
+    "symbol": "DGTL",
+    "name": "AO \"TSIFROVYE PRIVYCHKI\"",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-tsifrovye-privychki.svg"
+  },
+  {
+    "symbol": "DIAS",
+    "name": "Diasoft",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/diasoft.svg"
+  },
+  {
+    "symbol": "DIOD",
+    "name": "Zavod DIOD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/diod.svg"
+  },
+  {
+    "symbol": "DOMRF",
+    "name": "PJSC DOM.RF",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pjsc-domrf.svg"
+  },
+  {
+    "symbol": "DORS",
+    "name": "PAO \"Doriss\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pao-doriss-ord.svg"
+  },
+  {
+    "symbol": "DVEC",
+    "name": "DEC",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/far-eastern-energy.svg"
+  },
+  {
+    "symbol": "DZRD",
+    "name": "DZRD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/donskoy-factory-of.svg"
+  },
+  {
+    "symbol": "DZRDP",
+    "name": "DZRD pref.",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/donskoy-factory-of.svg"
+  },
+  {
+    "symbol": "EELT",
+    "name": "European Eltech",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/european-eltech.svg"
+  },
+  {
+    "symbol": "ELFV",
+    "name": "El5-Ener",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/enel.svg"
+  },
+  {
+    "symbol": "ELMT",
+    "name": "ELEMENT",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/element.svg"
+  },
+  {
+    "symbol": "ELST",
+    "name": "METAL PLANT ELECTROSTAL ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/metal-plant-electrostal-ord.svg"
+  },
+  {
+    "symbol": "EMGL",
+    "name": "AO \"Elektromagistral\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-elektromagistral-pfr.svg"
+  },
+  {
+    "symbol": "EMGLP",
+    "name": "AO \"Elektromagistral\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-elektromagistral-pfr.svg"
+  },
+  {
+    "symbol": "ENPG",
+    "name": "EN+ GROUP IPJSC ORD SHS",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/en-plus-group.svg"
+  },
+  {
+    "symbol": "ETLN",
+    "name": "Etalon Group",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/etalon.svg"
+  },
+  {
+    "symbol": "EUTR",
+    "name": "EvroTrans",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/evrotrans.svg"
+  },
+  {
+    "symbol": "FEES",
+    "name": "FGC ROSSETI",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/fsk-ees.svg"
+  },
+  {
+    "symbol": "FESH",
+    "name": "DVMP",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/far-eastern-shipping.svg"
+  },
+  {
+    "symbol": "FIXR",
+    "name": "Fix Price PJSC",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/fix-price-pjsc.svg"
+  },
+  {
+    "symbol": "FLOT",
+    "name": "Sovcomflot",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pao-sovcomflot.svg"
+  },
+  {
+    "symbol": "GAZA",
+    "name": "Gaz",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gaz-public-joint.svg"
+  },
+  {
+    "symbol": "GAZAP",
+    "name": "Gaz (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gaz-public-joint.svg"
+  },
+  {
+    "symbol": "GAZC",
+    "name": "Gazkon",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazkon-ao.svg"
+  },
+  {
+    "symbol": "GAZP",
+    "name": "Gazprom",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "GAZS",
+    "name": "Gaz-servis",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gaz-servis-ao.svg"
+  },
+  {
+    "symbol": "GAZT",
+    "name": "GAZ-Tek PAO",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gaz-tek-pao-ao.svg"
+  },
+  {
+    "symbol": "GCHE",
+    "name": "Cherkizovo Group",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/cherkizovo-group.svg"
+  },
+  {
+    "symbol": "GECO",
+    "name": "GENETICO",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/genetico.svg"
+  },
+  {
+    "symbol": "GEMA",
+    "name": "IMCB PJSC",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/intl-med-cntr-of-b.svg"
+  },
+  {
+    "symbol": "GEMC",
+    "name": "IPJSC UMG",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ipjsc.svg"
+  },
+  {
+    "symbol": "GGOK",
+    "name": "PAO \"Gai Min and process\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pao-gai-min-and-process-ord.svg"
+  },
+  {
+    "symbol": "GLRX",
+    "name": "PJSC GLORAX",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pjsc-glorax.svg"
+  },
+  {
+    "symbol": "GMKN",
+    "name": "NorNickel GMK",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/norilsk.svg"
+  },
+  {
+    "symbol": "GNYAP",
+    "name": "AO \"Gazpromneft-Yaroslavl\" PFR",
+    "market": "RUS"
+  },
+  {
+    "symbol": "GPVNP",
+    "name": "AO \"Giprovostokneft\" PFR",
+    "market": "RUS"
+  },
+  {
+    "symbol": "GRNT",
+    "name": "CityInnovativeTechnologies",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/city-innovative-te.svg"
+  },
+  {
+    "symbol": "GSEN",
+    "name": "\"Globalstroy-Engineering\" ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "GSGZ",
+    "name": "AO \"Giprospetsgaz\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/sistema-pjsfc.svg"
+  },
+  {
+    "symbol": "GSGZP",
+    "name": "AO \"Giprospetsgaz\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/sistema-pjsfc.svg"
+  },
+  {
+    "symbol": "GSRB",
+    "name": "GAZORASPREDELENIYE UFA ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "GTRK",
+    "name": "GTM",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/globaltruck-mgmt.svg"
+  },
+  {
+    "symbol": "GZAV",
+    "name": "Gazpromavt",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/inter-rao-ues.svg"
+  },
+  {
+    "symbol": "GZAVP",
+    "name": "\"Gazprom avtomatizatsiya\" PRF",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/inter-rao-ues.svg"
+  },
+  {
+    "symbol": "GZES",
+    "name": "GAZENERGOSERVIS",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazenergoservis.svg"
+  },
+  {
+    "symbol": "HEAD",
+    "name": "IPJSC Headhunter",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/headhunter.svg"
+  },
+  {
+    "symbol": "HIMCP",
+    "name": "Himprom",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/khimprom.svg"
+  },
+  {
+    "symbol": "HNFG",
+    "name": "HENDERSON",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/henderson.svg"
+  },
+  {
+    "symbol": "HYDR",
+    "name": "RusGidro",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rushydro.svg"
+  },
+  {
+    "symbol": "HYPR",
+    "name": "AO \"New Energy\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-new-energy-ord.svg"
+  },
+  {
+    "symbol": "IGST",
+    "name": "Izhstal 2ao",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/izhstal-pao-pubic.svg"
+  },
+  {
+    "symbol": "IGSTP",
+    "name": "Izhstal",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/izhstal-pao-pubic.svg"
+  },
+  {
+    "symbol": "IRAO",
+    "name": "Inter RAO",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/inter-rao-ues.svg"
+  },
+  {
+    "symbol": "IRKT",
+    "name": "Yakovlev-3",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/irkut-corporation.svg"
+  },
+  {
+    "symbol": "IVAT",
+    "name": "PJSC IVA",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pjsc-iva.svg"
+  },
+  {
+    "symbol": "IVOG",
+    "name": "AO \"\"GR Ivanovo\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "IVOGP",
+    "name": "AO \"\"GR Ivanovo\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "JNOS",
+    "name": "Slavneft-JANOS",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/slavneft-yaroslavn.svg"
+  },
+  {
+    "symbol": "JNOSP",
+    "name": "Slavneft-JANOS (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/slavneft-yaroslavn.svg"
+  },
+  {
+    "symbol": "KAZT",
+    "name": "Kuib.Azot",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/kuibyshevazot.svg"
+  },
+  {
+    "symbol": "KAZTP",
+    "name": "Kuibishevazot",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/kuibyshevazot.svg"
+  },
+  {
+    "symbol": "KBSB",
+    "name": "TNS energo Kuban Company",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tns-energo-kuban.svg"
+  },
+  {
+    "symbol": "KCHE",
+    "name": "Kamchatskenergo",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/kamchatskenergo-p.svg"
+  },
+  {
+    "symbol": "KCHEP",
+    "name": "Kamchatskenergo (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/kamchatskenergo-p.svg"
+  },
+  {
+    "symbol": "KEMZP",
+    "name": "AO \"KEMZ\" PRF",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-kemz-prf.svg"
+  },
+  {
+    "symbol": "KESK",
+    "name": "AO \"Komi energosbyt komp\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-komi-energosbyt-komp-ord.svg"
+  },
+  {
+    "symbol": "KESKP",
+    "name": "AO \"Komi energosbyt komp\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-komi-energosbyt-komp-ord.svg"
+  },
+  {
+    "symbol": "KFAR",
+    "name": "PAO \"Kraspharma\" ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "KFBA",
+    "name": "INGRAD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ingrad.svg"
+  },
+  {
+    "symbol": "KGKC",
+    "name": "Kurganskaja Gener.Kompanija",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/kurgan-generation.svg"
+  },
+  {
+    "symbol": "KGKCP",
+    "name": "Kurganskaja Gener.Kompanija",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/kurgan-generation.svg"
+  },
+  {
+    "symbol": "KLGNP",
+    "name": "AO \"Kaluganefteprodukt\" PFR",
+    "market": "RUS"
+  },
+  {
+    "symbol": "KLOG",
+    "name": "GAZORASPREDELENIYE KALUGA ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "KLSB",
+    "name": "Kalugsk. Sbyt. Company",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/kaluga-power-sale.svg"
+  },
+  {
+    "symbol": "KLVZ",
+    "name": "KLVZ KRISTALL",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/klvz-kristall.svg"
+  },
+  {
+    "symbol": "KMAZ",
+    "name": "KAMAZ",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/kamaz.svg"
+  },
+  {
+    "symbol": "KMEZ",
+    "name": "Kovrov Mech. Zavod",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/kovrov-mechanical.svg"
+  },
+  {
+    "symbol": "KMTX",
+    "name": "AO \"Komiteks\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-komiteks-ord.svg"
+  },
+  {
+    "symbol": "KMTZ",
+    "name": "AO \"KOSOGORSK METALL ZAV\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/kgiw.svg"
+  },
+  {
+    "symbol": "KMTZP",
+    "name": "AO \"KOSOGORSK METALL ZAV\" PFR",
+    "market": "RUS"
+  },
+  {
+    "symbol": "KOGK",
+    "name": "Korshunovskii GOK",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/korshynov-mining.svg"
+  },
+  {
+    "symbol": "KRKN",
+    "name": "Saratovskiy NPZ",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/saratov-oil-refine.svg"
+  },
+  {
+    "symbol": "KRKNP",
+    "name": "Saratovskiy NPZ",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/saratov-oil-refine.svg"
+  },
+  {
+    "symbol": "KRKOP",
+    "name": "TKZ Krasny Kotelshchik",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/krasny-kotelshchik.svg"
+  },
+  {
+    "symbol": "KRNF",
+    "name": "AO \"Krasnoyarskoilprod\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-krasnoyarskoilprod-ord.svg"
+  },
+  {
+    "symbol": "KRNFP",
+    "name": "AO \"Krasnoyarskoilproduct\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-krasnoyarskoilprod-ord.svg"
+  },
+  {
+    "symbol": "KROT",
+    "name": "KrasnyiOctyabr",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/krasnyj-octyabr.svg"
+  },
+  {
+    "symbol": "KROTP",
+    "name": "KrasnyiOctabr-1(pr)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/krasnyj-octyabr.svg"
+  },
+  {
+    "symbol": "KRSB",
+    "name": "Krashojarskenergosbyt",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/krasnoyarskenergos.svg"
+  },
+  {
+    "symbol": "KRSBP",
+    "name": "Krashojarskenergosbyt pref.",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/krasnoyarskenergos.svg"
+  },
+  {
+    "symbol": "KRVA",
+    "name": "KRASNY VOSTOK AGRO ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "KSIN",
+    "name": "Sintez",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/sintez-pref.svg"
+  },
+  {
+    "symbol": "KSINP",
+    "name": "Sintez pref",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/sintez-pref.svg"
+  },
+  {
+    "symbol": "KTSB",
+    "name": "KSB",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/kostromskaya-sbyto.svg"
+  },
+  {
+    "symbol": "KTSBP",
+    "name": "KSB",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/kostromskaya-sbyto.svg"
+  },
+  {
+    "symbol": "KUNP",
+    "name": "\"NC Kubannefteproduct\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "KUNPP",
+    "name": "\"NC Kubannefteproduct\" PRF",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "KUOG",
+    "name": "AO \"Kurganoblgaz\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "KUZB",
+    "name": "Bank \"Kuzneckiy\"",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/kuznetsky-bank-pub.svg"
+  },
+  {
+    "symbol": "KZIZ",
+    "name": "Krasnogorsk zavod Zvereva",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/krasnogorsk-zavod-zvereva-pref.svg"
+  },
+  {
+    "symbol": "KZIZP",
+    "name": "Krasnogorsk zavod Zvereva pref",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/krasnogorsk-zavod-zvereva-pref.svg"
+  },
+  {
+    "symbol": "KZKMP",
+    "name": "AO \"Kazan zav kompr mash\" PFR",
+    "market": "RUS"
+  },
+  {
+    "symbol": "KZMS",
+    "name": "PAO \"Krasn zav met setok\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pao-krasn-zav-met-setok-ord.svg"
+  },
+  {
+    "symbol": "KZOS",
+    "name": "PAO Organicheskiy Sintez",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/organichesky-sinte.svg"
+  },
+  {
+    "symbol": "KZOSP",
+    "name": "PAO Organicheskiy Sintez",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/organichesky-sinte.svg"
+  },
+  {
+    "symbol": "KZRU",
+    "name": "AO \"UK Kuzbassrazrezugol'\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-uk-kuzbassrazrezugol-ord.svg"
+  },
+  {
+    "symbol": "KZSB",
+    "name": "PAO \"Kuzbass Pow Company\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/mechel.svg"
+  },
+  {
+    "symbol": "LDNH",
+    "name": "OA \"Sladonezh\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/oa-sladonezh-ord.svg"
+  },
+  {
+    "symbol": "LEAS",
+    "name": "Europlan",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/europlan.svg"
+  },
+  {
+    "symbol": "LEGS",
+    "name": "AO \"Lengazspetsstroy\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-lengazspetsstroy-ord.svg"
+  },
+  {
+    "symbol": "LENT",
+    "name": "Lenta IPJSC ORD SHS",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/lenta.svg"
+  },
+  {
+    "symbol": "LEOG",
+    "name": "AO \"GR Leningradskaya obl\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "LIFE",
+    "name": "Farmsintez",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pharmsynthez.svg"
+  },
+  {
+    "symbol": "LKOH",
+    "name": "LUKOIL",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/lukoil.svg"
+  },
+  {
+    "symbol": "LMBZ",
+    "name": "Lambumiz",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/lambumiz.svg"
+  },
+  {
+    "symbol": "LNZL",
+    "name": "Lenzoloto",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/lenzoloto.svg"
+  },
+  {
+    "symbol": "LNZLP",
+    "name": "Lenzoloto pref.",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/lenzoloto.svg"
+  },
+  {
+    "symbol": "LPOG",
+    "name": "AO \"GR Lipetsk\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "LPSB",
+    "name": "LESK",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/lipetsk-power-sale.svg"
+  },
+  {
+    "symbol": "LSNG",
+    "name": "Rosseti LenEnrg",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosseti.svg"
+  },
+  {
+    "symbol": "LSNGP",
+    "name": "Rosseti LenEnrg (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosseti.svg"
+  },
+  {
+    "symbol": "LSRG",
+    "name": "LSR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/lsr-group.svg"
+  },
+  {
+    "symbol": "LVHK",
+    "name": "Levenguk",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/levenhuk-inc.svg"
+  },
+  {
+    "symbol": "MAGE",
+    "name": "Magadanenergo",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/magadanenergo.svg"
+  },
+  {
+    "symbol": "MAGEP",
+    "name": "Magadanenergo",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/magadanenergo.svg"
+  },
+  {
+    "symbol": "MAGN",
+    "name": "MMK",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/magnitogorsk.svg"
+  },
+  {
+    "symbol": "MBNK",
+    "name": "MTS Bank",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/mtsbank.svg"
+  },
+  {
+    "symbol": "MDMG",
+    "name": "MD Medical Group IPJSC",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/md-medical-ipjsc.svg"
+  },
+  {
+    "symbol": "MESS",
+    "name": "PAO \"Mosenergoset'stroy\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pao-mosenergoset-stroy-ord.svg"
+  },
+  {
+    "symbol": "METZ",
+    "name": "PAO \"Nadezhdi Metallurg\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pao-nadezhdi-metallurg-ord.svg"
+  },
+  {
+    "symbol": "METZP",
+    "name": "PAO \"Nadezhd Metall Plant\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pao-nadezhdi-metallurg-ord.svg"
+  },
+  {
+    "symbol": "MFGS",
+    "name": "Megion",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/slavneft-megionnef.svg"
+  },
+  {
+    "symbol": "MFGSP",
+    "name": "Megion (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/slavneft-megionnef.svg"
+  },
+  {
+    "symbol": "MGKL",
+    "name": "MGKL",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/mgkl.svg"
+  },
+  {
+    "symbol": "MGNT",
+    "name": "Magnit",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/magnit.svg"
+  },
+  {
+    "symbol": "MGNZ",
+    "name": "SMZ",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/solikamsk-magnesiu.svg"
+  },
+  {
+    "symbol": "MGTS",
+    "name": "MGTS-5",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/moscow-city-teleph.svg"
+  },
+  {
+    "symbol": "MGTSP",
+    "name": "MGTS-4",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/moscow-city-teleph.svg"
+  },
+  {
+    "symbol": "MISB",
+    "name": "TNS energo Mariy El",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tns-energo-mari-el.svg"
+  },
+  {
+    "symbol": "MISBP",
+    "name": "TNS energo Mariy El (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tns-energo-mari-el.svg"
+  },
+  {
+    "symbol": "MMMZ",
+    "name": "MMK-METIZ ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/magnitogorsk.svg"
+  },
+  {
+    "symbol": "MOEK",
+    "name": "JSC \"MIPC\"",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "MOEX",
+    "name": "MoscowExchange",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/moscow-exchange.svg"
+  },
+  {
+    "symbol": "MRKC",
+    "name": "Rosseti Centr",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosseti.svg"
+  },
+  {
+    "symbol": "MRKK",
+    "name": "Rosseti Severnyy Kavkaz",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosseti.svg"
+  },
+  {
+    "symbol": "MRKP",
+    "name": "Rosseti Centr i Privoljye",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosseti.svg"
+  },
+  {
+    "symbol": "MRKS",
+    "name": "Rosseti Sibir",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosseti.svg"
+  },
+  {
+    "symbol": "MRKU",
+    "name": "Rosseti Ural",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/idgc-of-urals-jsc.svg"
+  },
+  {
+    "symbol": "MRKV",
+    "name": "Rosseti Volga",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosseti.svg"
+  },
+  {
+    "symbol": "MRKY",
+    "name": "Rosseti South",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosseti.svg"
+  },
+  {
+    "symbol": "MRKZ",
+    "name": "Rosseti Severo-Zapad",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosseti.svg"
+  },
+  {
+    "symbol": "MRSB",
+    "name": "Mordovskaya EnergoSbyt Comp.",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/mordovia-energy-re.svg"
+  },
+  {
+    "symbol": "MSNG",
+    "name": "MosEnrg",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/mosenergo.svg"
+  },
+  {
+    "symbol": "MSRS",
+    "name": "Rosseti Moscow Region",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosseti.svg"
+  },
+  {
+    "symbol": "MSTS",
+    "name": "AO \"Mostostroy-11\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-mostostroy-11-ord.svg"
+  },
+  {
+    "symbol": "MSTT",
+    "name": "Mostotrest",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/mostotrest.svg"
+  },
+  {
+    "symbol": "MTLR",
+    "name": "Mechel",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/mechel.svg"
+  },
+  {
+    "symbol": "MTLRP",
+    "name": "Mechel pref.",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/mechel.svg"
+  },
+  {
+    "symbol": "MTPV",
+    "name": "\"Vanino Port\" AO ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/vanino-port-ao-ord.svg"
+  },
+  {
+    "symbol": "MTPVP",
+    "name": "\"Vanino Port\" AO PRF",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/vanino-port-ao-ord.svg"
+  },
+  {
+    "symbol": "MTSS",
+    "name": "MTS",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/mts.svg"
+  },
+  {
+    "symbol": "MTVG",
+    "name": "AO \"Metrovagonmash\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-metrovagonmash-ord.svg"
+  },
+  {
+    "symbol": "MVID",
+    "name": "M.video",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/m-video.svg"
+  },
+  {
+    "symbol": "MYNT",
+    "name": "AO \"Rosn Murmanskneftprod\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "MYNTP",
+    "name": "AO \"Rosn Murmanskneftprod\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "NAUK",
+    "name": "NPO Nauka",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/npo-nauka.svg"
+  },
+  {
+    "symbol": "NFAZ",
+    "name": "NEFAZ PAO",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/nefaz-ptc.svg"
+  },
+  {
+    "symbol": "NKES",
+    "name": "AO Novgorodoblelektro ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "NKHP",
+    "name": "NKHP",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/novorossiysk-grain.svg"
+  },
+  {
+    "symbol": "NKNC",
+    "name": "Niznekamskneftekhim",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/nizhnekamskneftekhim.svg"
+  },
+  {
+    "symbol": "NKNCP",
+    "name": "Niznekamskneftekhim (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/nizhnekamskneftekhim.svg"
+  },
+  {
+    "symbol": "NKSH",
+    "name": "Nizhnekamskshina",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/nizhnekamskshina-c.svg"
+  },
+  {
+    "symbol": "NLMK",
+    "name": "NLMK",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/novolipetsk.svg"
+  },
+  {
+    "symbol": "NMTP",
+    "name": "NMTP",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/novorossiysk-comme.svg"
+  },
+  {
+    "symbol": "NNSB",
+    "name": "TNS energo Nizhniy-Novgorod",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tns-energo-nn.svg"
+  },
+  {
+    "symbol": "NNSBP",
+    "name": "TNS energo Nizhniy Novg. pref",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tns-energo-nn.svg"
+  },
+  {
+    "symbol": "NOLE",
+    "name": "AO \"Novorosleseksport\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-novorosleseksport-ord.svg"
+  },
+  {
+    "symbol": "NOMP",
+    "name": "Novoship",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/novoship-pref.svg"
+  },
+  {
+    "symbol": "NOMPP",
+    "name": "Novoship pref",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/novoship-pref.svg"
+  },
+  {
+    "symbol": "NOVG",
+    "name": "AO \"GR Velikiy Novgorod\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "NPOF",
+    "name": "PAO \"FIZIKA\" ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "NSVZ",
+    "name": "Nauka-Svyaz",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/nauka-telecom.svg"
+  },
+  {
+    "symbol": "NTZL",
+    "name": "NITEL",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/nitel.svg"
+  },
+  {
+    "symbol": "NVTK",
+    "name": "NOVATEK",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/novatek.svg"
+  },
+  {
+    "symbol": "OBNE",
+    "name": "Obneftegazgeologia",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/slavneft.svg"
+  },
+  {
+    "symbol": "OBNEP",
+    "name": "Obneftegazgeologia pref",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/slavneft.svg"
+  },
+  {
+    "symbol": "OGKB",
+    "name": "OGK-2",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ogk-2.svg"
+  },
+  {
+    "symbol": "OKEY",
+    "name": "GDR OKEY Group ORD SHS",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/o-key-sa.svg"
+  },
+  {
+    "symbol": "OMOG",
+    "name": "\"Omskoblgaz\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/omskoblgaz-ord.svg"
+  },
+  {
+    "symbol": "OMZZP",
+    "name": "OMZ (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/united-heavy-mach.svg"
+  },
+  {
+    "symbol": "ORFE",
+    "name": "PJSC \"Orsknefteorgsintez\" ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "ORGN",
+    "name": "AO \"Organika\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-organika-ord.svg"
+  },
+  {
+    "symbol": "OZON",
+    "name": "OZON",
+    "market": "RUS"
+  },
+  {
+    "symbol": "OZPH",
+    "name": "Ozon Pharmaceuticals",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ozon-pharmaceuticals.svg"
+  },
+  {
+    "symbol": "PAZA",
+    "name": "Pavlovo Bus",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pavlovo-bus.svg"
+  },
+  {
+    "symbol": "PBDT",
+    "name": "AO \"Pobedit\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-pobedit-ord.svg"
+  },
+  {
+    "symbol": "PDNZ",
+    "name": "AO \"PERV DINASOVIY ZAVOD\" ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "PHOR",
+    "name": "PhosAgro",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/phosagro.svg"
+  },
+  {
+    "symbol": "PIKK",
+    "name": "PIK SZ",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pik-group.svg"
+  },
+  {
+    "symbol": "PLUS",
+    "name": "AO \"PLUS\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-plus-ord.svg"
+  },
+  {
+    "symbol": "PLZL",
+    "name": "Polus",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/polyus.svg"
+  },
+  {
+    "symbol": "PMSB",
+    "name": "Perm' EnergoSbyt",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/perm-energy-supply.svg"
+  },
+  {
+    "symbol": "PMSBP",
+    "name": "Perm' EnergoSbyt (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/perm-energy-supply.svg"
+  },
+  {
+    "symbol": "POSI",
+    "name": "PJSC Positive Group",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/positive-gp.svg"
+  },
+  {
+    "symbol": "PRFN",
+    "name": "TEPLANT vostok",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/chelyabinsk-plant.svg"
+  },
+  {
+    "symbol": "PRIM",
+    "name": "PAO \"Prim Shipp Corp\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pao-prim-shipp-ord.svg"
+  },
+  {
+    "symbol": "PRMB",
+    "name": "AKB Primorye",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/primorye-comm-bank.svg"
+  },
+  {
+    "symbol": "PRMD",
+    "name": "iPROMOMED",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/promomed.svg"
+  },
+  {
+    "symbol": "RAES",
+    "name": "AO \"Regio elektrich seti\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-regio-elektrich-seti-ord.svg"
+  },
+  {
+    "symbol": "RAGR",
+    "name": "RUSAGRO GROUP",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rusagro.svg"
+  },
+  {
+    "symbol": "RASP",
+    "name": "Raspadskaya",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/raspadskaya.svg"
+  },
+  {
+    "symbol": "RBCM",
+    "name": "GK RBK",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rbc.svg"
+  },
+  {
+    "symbol": "RBTY",
+    "name": "RBT",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rbt.svg"
+  },
+  {
+    "symbol": "RDRB",
+    "name": "RosDor Bank",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosdorbank.svg"
+  },
+  {
+    "symbol": "RENI",
+    "name": "Renaissance Insurance",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/renaissance-insura.svg"
+  },
+  {
+    "symbol": "RGSS",
+    "name": "Rosgosstrakh",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosgosstrakh-ins.svg"
+  },
+  {
+    "symbol": "RKKE",
+    "name": "RKK Energia",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/energia-rocket-and.svg"
+  },
+  {
+    "symbol": "RNCU",
+    "name": "\"NC Kurgannefteprodukt\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "RNCUP",
+    "name": "\"NC Kurgannefteprodukt\" PRF",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "RNFT",
+    "name": "RussNeft NK",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/russneft.svg"
+  },
+  {
+    "symbol": "ROLO",
+    "name": "Rusolovo PAO",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rusolovo.svg"
+  },
+  {
+    "symbol": "ROSN",
+    "name": "Rosneft",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "ROST",
+    "name": "ROSINTER RESTAURANTS",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosinter-restauran.svg"
+  },
+  {
+    "symbol": "RTBGP",
+    "name": "PAO \"GR Rostov-na-Donu\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "RTGZ",
+    "name": "Gazprom gazorasp. Rostov",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "RTKM",
+    "name": "Rostelecom",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rostelecom.svg"
+  },
+  {
+    "symbol": "RTKMP",
+    "name": "Rostelecom- (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rostelecom.svg"
+  },
+  {
+    "symbol": "RTLM",
+    "name": "Rostselmash PJSC ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "RTLMP",
+    "name": "Rostselmash PJSC PRF",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rostselmash-pjsc-prf.svg"
+  },
+  {
+    "symbol": "RTSB",
+    "name": "TNS energo Rostov-na-Dony",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tns-energo-rostov.svg"
+  },
+  {
+    "symbol": "RTSBP",
+    "name": "TNS energo Rostov-na-Dony(prf)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tns-energo-rostov.svg"
+  },
+  {
+    "symbol": "RUAL",
+    "name": "RUSAL",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rusal.svg"
+  },
+  {
+    "symbol": "RUSI",
+    "name": "RUSS-INVEST IC",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/investment-co-ic.svg"
+  },
+  {
+    "symbol": "RYAZP",
+    "name": "AO Rjazan Oil Produkt PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "RZOG",
+    "name": "AO \"GR Ryazanskaya obl\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "RZSB",
+    "name": "JSC \"Ryazanenergosbyt\"",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ryazanenergosbyt.svg"
+  },
+  {
+    "symbol": "SAGO",
+    "name": "SamaraEnergo",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/samaraenergo.svg"
+  },
+  {
+    "symbol": "SAGOP",
+    "name": "SamaraEnergo(pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/samaraenergo.svg"
+  },
+  {
+    "symbol": "SARE",
+    "name": "SaratovEnergo",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/saratovenergo.svg"
+  },
+  {
+    "symbol": "SAREP",
+    "name": "SaratovEnergo (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/saratovenergo.svg"
+  },
+  {
+    "symbol": "SARN",
+    "name": "Saratovnefteprodukt",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "SARNP",
+    "name": "PAO \"Saratovnefteprodukt\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "SBEN",
+    "name": "\"Novosibirskenergosbyt\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/novosibirskenergosbyt-prf.svg"
+  },
+  {
+    "symbol": "SBENP",
+    "name": "\"Novosibirskenergosbyt\" PRF",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/novosibirskenergosbyt-prf.svg"
+  },
+  {
+    "symbol": "SBER",
+    "name": "Sberbank",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/sberbank.svg"
+  },
+  {
+    "symbol": "SBERP",
+    "name": "Sberbank (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/sberbank.svg"
+  },
+  {
+    "symbol": "SBPL",
+    "name": "AO \"EnergosbyT Plyus\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/t-plus.svg"
+  },
+  {
+    "symbol": "SELG",
+    "name": "Seligdar",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/seligdar.svg"
+  },
+  {
+    "symbol": "SEMP",
+    "name": "Northern Shipping Company ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/northern-shipping-company-prf.svg"
+  },
+  {
+    "symbol": "SEMPP",
+    "name": "Northern Shipping Company PRF",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/northern-shipping-company-prf.svg"
+  },
+  {
+    "symbol": "SFIN",
+    "name": "SFI",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/sfi.svg"
+  },
+  {
+    "symbol": "SGAZ",
+    "name": "AO \"Saratovgaz\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "SGMA",
+    "name": "AO \"SiGMA\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-sigma-ord.svg"
+  },
+  {
+    "symbol": "SGZH",
+    "name": "Segezha",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/segezha-group.svg"
+  },
+  {
+    "symbol": "SIBN",
+    "name": "Gazprom neft",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "SKAI",
+    "name": "SEBRYAKOV ASBEST ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "SKBP",
+    "name": "AO \"Solikamskbumprom\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-solikamskbumprom-ord.svg"
+  },
+  {
+    "symbol": "SKCM",
+    "name": "AO \"Sebryakovtsement\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-sebryakovtsement-ord.svg"
+  },
+  {
+    "symbol": "SLAV",
+    "name": "SLAVNEFT",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/slavneft.svg"
+  },
+  {
+    "symbol": "SLEN",
+    "name": "Sakhalinenergo",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/sakhalinenergo.svg"
+  },
+  {
+    "symbol": "SMLT",
+    "name": "Samolet",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/samolet-group.svg"
+  },
+  {
+    "symbol": "SMNF",
+    "name": "Smolensknefteprodukt",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "SMNFP",
+    "name": "Smolensknefteprodukt pref",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "SMOG",
+    "name": "AO \"GR Smolensk\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "SNFG",
+    "name": "\"Saratovneftegaz\" ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "SNFGP",
+    "name": "\"Saratovneftegaz\" PRF",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/saratovneftegaz-prf.svg"
+  },
+  {
+    "symbol": "SNGS",
+    "name": "Surgut",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/surgutneftegas.svg"
+  },
+  {
+    "symbol": "SNGSP",
+    "name": "Surgut-pref",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/surgutneftegas.svg"
+  },
+  {
+    "symbol": "SOFL",
+    "name": "Softline",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/softline.svg"
+  },
+  {
+    "symbol": "SPBE",
+    "name": "SPB Exchange",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/spb.svg"
+  },
+  {
+    "symbol": "SROG",
+    "name": "Gazprom gazoraspr.Saratov.obl",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "STGR",
+    "name": "OA \"Svetlogradagromash\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/oa-svetlogradagromash-ord.svg"
+  },
+  {
+    "symbol": "STKG",
+    "name": "\"Gazprom GR Stavropol\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "STKGP",
+    "name": "AO \"GR Stavropol\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "STSB",
+    "name": "StavropolEnergoSbyt",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/stavropolenergosby.svg"
+  },
+  {
+    "symbol": "STSBP",
+    "name": "StavropolEnergoSbyt (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/stavropolenergosby.svg"
+  },
+  {
+    "symbol": "SUMZ",
+    "name": "AO \"SUMZ\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-sumz-ord.svg"
+  },
+  {
+    "symbol": "SVAV",
+    "name": "Sollers Avto",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/sollers-auto.svg"
+  },
+  {
+    "symbol": "SVCB",
+    "name": "Sovcombank",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/sovcombank.svg"
+  },
+  {
+    "symbol": "SVET",
+    "name": "Svetofor Group",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/svetofor-group.svg"
+  },
+  {
+    "symbol": "SVETP",
+    "name": "Svetofor Group ps",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/svetofor-group.svg"
+  },
+  {
+    "symbol": "SVFR",
+    "name": "JSC \"SVH-FREIGHT\" ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "SVOG",
+    "name": "AO \"GR Yekaterinburg\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "T",
+    "name": "IPJSC TCS Holding",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tcs-group-holding.svg"
+  },
+  {
+    "symbol": "TASB",
+    "name": "Tambov EnergoSbyt Company",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tambov-power-suppl.svg"
+  },
+  {
+    "symbol": "TATN",
+    "name": "Tatneft-3",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tatneft.svg"
+  },
+  {
+    "symbol": "TATNP",
+    "name": "Tatneft (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tatneft.svg"
+  },
+  {
+    "symbol": "TERL",
+    "name": "TERNEYLES ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "TGKA",
+    "name": "TGK-1",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tgc-1.svg"
+  },
+  {
+    "symbol": "TGKB",
+    "name": "TGK-2",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/territorial-gener.svg"
+  },
+  {
+    "symbol": "TGKBP",
+    "name": "TGK-2 pref",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/territorial-gener.svg"
+  },
+  {
+    "symbol": "TGKJ",
+    "name": "Forward Energy",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/forward-energy.svg"
+  },
+  {
+    "symbol": "TGKN",
+    "name": "TGK-14",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tgc-14.svg"
+  },
+  {
+    "symbol": "TLNP",
+    "name": "Tulanefteprodukt ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "TLNPP",
+    "name": "Tulanefteprodukt PRF",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "TMTP",
+    "name": "AO \"Tuapse comm sea port\" ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "TNFP",
+    "name": "AO \"Tatnefteprom\" ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "TNFPP",
+    "name": "AO \"Tatnefteprom\" PFR",
+    "market": "RUS"
+  },
+  {
+    "symbol": "TNSE",
+    "name": "PAO GK \"TNS energo\"",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tns-energo-public.svg"
+  },
+  {
+    "symbol": "TNYA",
+    "name": "AO \"RN-Yaroslavl\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-rn-yaroslavl-pfr.svg"
+  },
+  {
+    "symbol": "TNYAP",
+    "name": "AO \"RN-Yaroslavl\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-rn-yaroslavl-pfr.svg"
+  },
+  {
+    "symbol": "TOGZ",
+    "name": "AO \"GR Tambov\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "TORS",
+    "name": "PAO Rosseti Tomsk",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tomsk-distribution.svg"
+  },
+  {
+    "symbol": "TORSP",
+    "name": "PAO Rosseti Tomsk",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tomsk-distribution.svg"
+  },
+  {
+    "symbol": "TRMK",
+    "name": "TMK",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tmk-pao.svg"
+  },
+  {
+    "symbol": "TRNFP",
+    "name": "Transneft (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/transneft.svg"
+  },
+  {
+    "symbol": "TTLK",
+    "name": "Tattelekom",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tattelecom.svg"
+  },
+  {
+    "symbol": "TTMZ",
+    "name": "PAO \"Tutaev Motor Plant\" ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "TTMZP",
+    "name": "PAO \"Tutaev Motor Plant\" PFR",
+    "market": "RUS"
+  },
+  {
+    "symbol": "TUMN",
+    "name": "PAO \"TYUMEN MOTOROSTROI\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pao-tyumen-motorostroi-ord.svg"
+  },
+  {
+    "symbol": "TUMNP",
+    "name": "PAO \"TYUMEN MOTOROSTR\" PFR",
+    "market": "RUS"
+  },
+  {
+    "symbol": "TUOG",
+    "name": "GAZORASPREDELENIYE TULA ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "TUZA",
+    "name": "Tuimaz. Zavod Avtobetonovozov",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tuimazinskiy-zavod.svg"
+  },
+  {
+    "symbol": "TVEO",
+    "name": "Gazprom gazoraspr. Tver",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "TYPM",
+    "name": "PAO \"Tyazhpressmash\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pao-tyazhpressmash-pfr.svg"
+  },
+  {
+    "symbol": "TYPMP",
+    "name": "PAO \"Tyazhpressmash\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pao-tyazhpressmash-pfr.svg"
+  },
+  {
+    "symbol": "TZEP",
+    "name": "Elektropribor",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/elektropribor-pref.svg"
+  },
+  {
+    "symbol": "TZEPP",
+    "name": "Elektropribor pref",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/elektropribor-pref.svg"
+  },
+  {
+    "symbol": "UDMN",
+    "name": "Udmurtneft",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/rosneft.svg"
+  },
+  {
+    "symbol": "UELM",
+    "name": "AO \"URALELECTROMED\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-uralelectromed-ord.svg"
+  },
+  {
+    "symbol": "UFOSP",
+    "name": "Ufaorgsintez pref",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ufaorgsintez-pref.svg"
+  },
+  {
+    "symbol": "UGLD",
+    "name": "UGC",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ugc.svg"
+  },
+  {
+    "symbol": "UKUZ",
+    "name": "Uzhnyi Kuzbass",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/southern-kuzbass-c.svg"
+  },
+  {
+    "symbol": "ULEN",
+    "name": "AO \"Ulyanovskenergo\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-ulyanovskenergo-ord.svg"
+  },
+  {
+    "symbol": "ULENP",
+    "name": "AO \"Ulyanovskenergo\" PFR",
+    "market": "RUS"
+  },
+  {
+    "symbol": "UNAC",
+    "name": "Ob.aviastroitelnaya korp.",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/united-aircraft-co.svg"
+  },
+  {
+    "symbol": "UNKL",
+    "name": "Uzhno-Uralskiy nikel. komb.",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/southern-urals-nic.svg"
+  },
+  {
+    "symbol": "UPRO",
+    "name": "Unipro PAO",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/unipro.svg"
+  },
+  {
+    "symbol": "URAG",
+    "name": "PJSC \"Uralasbest\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pjsc-uralasbest-ord.svg"
+  },
+  {
+    "symbol": "URAL",
+    "name": "AO \"URAL'SKIYE AVIALINII\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-ural-skiye-avialinii-ord.svg"
+  },
+  {
+    "symbol": "URKZ",
+    "name": "Uralskaya kuznica",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/urals-stampings.svg"
+  },
+  {
+    "symbol": "USBN",
+    "name": "BANK URALSIB",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-uralsib.svg"
+  },
+  {
+    "symbol": "UTAR",
+    "name": "UTAir Aviacompany",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/utair-aviation.svg"
+  },
+  {
+    "symbol": "UWGN",
+    "name": "OVK",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/united-wagon-company.svg"
+  },
+  {
+    "symbol": "VARN",
+    "name": "PAO \"Varieganneft\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/russneft.svg"
+  },
+  {
+    "symbol": "VARNP",
+    "name": "PAO \"Varieganneft\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/russneft.svg"
+  },
+  {
+    "symbol": "VAZZP",
+    "name": "AO \"Volzhsky Abrasive Works\" P",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-volzhsky-abrasive-works-p.svg"
+  },
+  {
+    "symbol": "VDOK",
+    "name": "Vyshnevolotskiy MDOK",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/fsk-ees.svg"
+  },
+  {
+    "symbol": "VEON-RX",
+    "name": "VEON Ltd. ORD SHS",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/veon.svg"
+  },
+  {
+    "symbol": "VFLT",
+    "name": "VOLGA SHIPPING ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/volga-shipping-prf.svg"
+  },
+  {
+    "symbol": "VFLTP",
+    "name": "VOLGA SHIPPING PRF",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/volga-shipping-prf.svg"
+  },
+  {
+    "symbol": "VGSB",
+    "name": "Volgograd Energo Sbyt",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/volgogradenergosby.svg"
+  },
+  {
+    "symbol": "VGSBP",
+    "name": "Volgograd Energo Sbyt (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/volgogradenergosby.svg"
+  },
+  {
+    "symbol": "VJGZ",
+    "name": "Var'eganneftegaz",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/nnk-varyogannefteg.svg"
+  },
+  {
+    "symbol": "VJGZP",
+    "name": "Var'eganneftegaz",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/nnk-varyogannefteg.svg"
+  },
+  {
+    "symbol": "VKCO",
+    "name": "VK International Public JS Com",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/mail-ru-group.svg"
+  },
+  {
+    "symbol": "VLHZ",
+    "name": "VHZ",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/vladimir-chemical.svg"
+  },
+  {
+    "symbol": "VLOG",
+    "name": "AO \"GR Vladimir\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "VMTP",
+    "name": "PAO \"Comm Port of Vlad\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pao-comm-port-of-vlad-ord.svg"
+  },
+  {
+    "symbol": "VNIP",
+    "name": "\"VNIPIgazdobycha\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/vnipigazdobycha-ord.svg"
+  },
+  {
+    "symbol": "VNIPP",
+    "name": "AO \"VNIPIgazdobycha\" PFR",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/vnipigazdobycha-ord.svg"
+  },
+  {
+    "symbol": "VOAD",
+    "name": "PAO \"Vologodavtodor\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/pao-vologodavtodor-ord.svg"
+  },
+  {
+    "symbol": "VOGZ",
+    "name": "Gazprom gazoraspr. Voronezh",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "VRSB",
+    "name": "TNS energo Voroneg",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tns-energo-voronez.svg"
+  },
+  {
+    "symbol": "VRSBP",
+    "name": "TNS energo Voroneg",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tns-energo-voronez.svg"
+  },
+  {
+    "symbol": "VSEH",
+    "name": "VI.ru",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/viru.svg"
+  },
+  {
+    "symbol": "VSMO",
+    "name": "Corp. VSMPO-AVISMA",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/vsmpo-avisma.svg"
+  },
+  {
+    "symbol": "VSYD",
+    "name": "Viborgskii sudostr. Zavod",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/vyborg-shipyard-p.svg"
+  },
+  {
+    "symbol": "VSYDP",
+    "name": "Viborgskii sudostr. Zavod",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/vyborg-shipyard-p.svg"
+  },
+  {
+    "symbol": "VTBR",
+    "name": "VTB",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/vtbr.svg"
+  },
+  {
+    "symbol": "VTGK",
+    "name": "T Plus",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/t-plus.svg"
+  },
+  {
+    "symbol": "WTCM",
+    "name": "CMT",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/world-trade-center.svg"
+  },
+  {
+    "symbol": "WTCMP",
+    "name": "CMT (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/world-trade-center.svg"
+  },
+  {
+    "symbol": "WUSH",
+    "name": "WHOOSH Holding",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/whoosh.svg"
+  },
+  {
+    "symbol": "X5",
+    "name": "X5 Corporate Center",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/x5-corporate-center.svg"
+  },
+  {
+    "symbol": "YAKG",
+    "name": "YaTEK",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/yakutsk-fuel-and-ene.svg"
+  },
+  {
+    "symbol": "YDEX",
+    "name": "YANDEX",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/yandex.svg"
+  },
+  {
+    "symbol": "YKEN",
+    "name": "YakutskEnergo",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/yakutskenergo.svg"
+  },
+  {
+    "symbol": "YKENP",
+    "name": "YakutskEnergo",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/yakutskenergo.svg"
+  },
+  {
+    "symbol": "YROG",
+    "name": "\"Gazprom GR Yaroslavl\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/gazprom.svg"
+  },
+  {
+    "symbol": "YRSB",
+    "name": "TNS energo Yaroslavl'",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tns-energo-yarosav.svg"
+  },
+  {
+    "symbol": "YRSBP",
+    "name": "TNS energo Yaroslavl' (pref)",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/tns-energo-yarosav.svg"
+  },
+  {
+    "symbol": "ZAYM",
+    "name": "Zaymer",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/zaymer.svg"
+  },
+  {
+    "symbol": "ZHDY",
+    "name": "AO \"Railways of Yakutia\" ORD",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/ao-railways-of-yakutia-ord.svg"
+  },
+  {
+    "symbol": "ZILL",
+    "name": "ZIL",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/likhachov-plant-pj.svg"
+  },
+  {
+    "symbol": "ZILLP",
+    "name": "AMO ZIL pref",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/likhachov-plant-pj.svg"
+  },
+  {
+    "symbol": "ZSGP",
+    "name": "PAO \"ZAPSIBGAZPROM\" ORD",
+    "market": "RUS"
+  },
+  {
+    "symbol": "ZVEZ",
+    "name": "Zvezda",
+    "market": "RUS",
+    "image": "https://s3-symbol-logo.tradingview.com/zvezda.svg"
+  }
+]

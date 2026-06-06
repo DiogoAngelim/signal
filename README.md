@@ -72,8 +72,26 @@ under `spec/contracts/`. The landing app was removed.
 `@signal/decision` owns the reusable decision-quality model: evidence
 assessment, confidence caps, assumption and contradiction visibility, decision
 journals, outcome reviews, learning records, and derived stewardship/governance
-views. New application code should prefer `@signal/decision/core`; product apps
-own their domain language, APIs, metrics, and UX.
+views. It also exposes a generic learning-judgment runtime for relationship
+memory, similarity, reviewed history, lesson survival, and present judgment
+before a new outcome exists. New application code should prefer
+`@signal/decision/core`; product apps own their domain language, APIs, metrics,
+and UX.
+
+The reusable decision lifecycle is:
+
+```txt
+Objective -> Resources -> Allocation -> Position -> State -> Evaluation
+-> Constraints -> Threats -> Assumptions -> Similarity -> Reviewed History
+-> Judgment -> Tradeoffs -> Strategies -> Execution -> Outcome
+-> Observation -> Review -> Verification -> Lesson
+```
+
+Signal is not a prediction engine. It helps applications make reviewable,
+learning-informed judgments from current evidence and reviewed history. Stocks
+Optimizer remains an application/adapter that translates investment concepts
+into Signal's generic contracts; Signal core does not depend on Stocks
+Optimizer.
 
 ## Common Commands
 

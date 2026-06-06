@@ -1,0 +1,30 @@
+node_modules
+.vercel
+dist
+build
+coverage
+.cache
+.local-cache
+*.log
+.DS_Store
+
+# local/generated data
+data
+cache
+tmp
+temp
+.local
+backtests
+*.sqlite
+*.db
+*.parquet
+*.csv
+*.zip
+*.tar
+*.gz
+
+# parent/monorepo accidental payloads
+../signal-markets/node_modules
+../signal-markets/dist
+../../.local-cache
+../../../.local-cache

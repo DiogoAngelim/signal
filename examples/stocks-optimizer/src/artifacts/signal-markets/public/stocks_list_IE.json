@@ -1,0 +1,121 @@
+[
+  {
+    "symbol": "DD8A",
+    "name": "CRH PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/crh.svg"
+  },
+  {
+    "symbol": "DQ7A",
+    "name": "Donegal Investment Group PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/donegal-investment-plc.svg"
+  },
+  {
+    "symbol": "EG7",
+    "name": "FBD Holdings PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/fbd-plc.svg"
+  },
+  {
+    "symbol": "GL9",
+    "name": "Glanbia PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/glanbia-plc-ord-eur0-06-cdi.svg"
+  },
+  {
+    "symbol": "GRP",
+    "name": "Greencoat Renewables PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/greencoat-renewables-plc.svg"
+  },
+  {
+    "symbol": "GVR",
+    "name": "Glenveagh Properties PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/glenveagh-properties-plc-cdi.svg"
+  },
+  {
+    "symbol": "HMSO",
+    "name": "Hammerson PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/hammerson.svg"
+  },
+  {
+    "symbol": "HSW",
+    "name": "Hostelworld Group PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/hostelworld-plc.svg"
+  },
+  {
+    "symbol": "IR5B",
+    "name": "Irish Continental Group PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/irish-continental-plc-c.svg"
+  },
+  {
+    "symbol": "IRES",
+    "name": "Irish Residential Properties REIT PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/irish-residential-properties.svg"
+  },
+  {
+    "symbol": "KMR",
+    "name": "Kenmare Resources PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/kenmare-resources-plc-cdi.svg"
+  },
+  {
+    "symbol": "KRX",
+    "name": "Kingspan Group PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/kingspan.svg"
+  },
+  {
+    "symbol": "KRZ",
+    "name": "Kerry Group PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/kerry-group.svg"
+  },
+  {
+    "symbol": "MIO",
+    "name": "Mincon Group PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/mincon-plc.svg"
+  },
+  {
+    "symbol": "MLC",
+    "name": "Malin Corporation PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/malin-plc.svg"
+  },
+  {
+    "symbol": "OIZ",
+    "name": "Origin Enterprises PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/origin-enterprises-plc.svg"
+  },
+  {
+    "symbol": "PTSB",
+    "name": "Permanent TSB Group Holdings PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/permanent-tsb-plc.svg"
+  },
+  {
+    "symbol": "RYA",
+    "name": "Ryanair Holdings PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/ryanair.svg"
+  },
+  {
+    "symbol": "SENUS",
+    "name": "Senus PLC",
+    "market": "Euronext Dublin"
+  },
+  {
+    "symbol": "UPR",
+    "name": "Uniphar PLC",
+    "market": "Euronext Dublin",
+    "image": "https://s3-symbol-logo.tradingview.com/uniphar-plc.svg"
+  }
+]

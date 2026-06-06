@@ -1,7 +1,8 @@
 import { build } from "esbuild";
 import { rm, mkdir } from "node:fs/promises";
-import { dirname } from "node:path";
+import { dirname, resolve } from "node:path";
 
+const outputRoot = resolve(process.cwd(), process.env.API_OUTPUT_ROOT ?? "api");
 const routes = [
   ["api-src/areas/search.ts", "api/areas/search.js"],
   ["api-src/areas/[areaId]/guide.ts", "api/areas/[areaId]/guide.js"],
@@ -11,13 +12,14 @@ const routes = [
   ["api-src/reviews.ts", "api/reviews.js"]
 ];
 
-await rm("api", { recursive: true, force: true });
+await rm(outputRoot, { recursive: true, force: true });
 
 for (const [entry, outfile] of routes) {
-  await mkdir(dirname(outfile), { recursive: true });
+  const target = resolve(outputRoot, outfile);
+  await mkdir(dirname(target), { recursive: true });
   await build({
     entryPoints: [entry],
-    outfile,
+    outfile: target,
     bundle: true,
     platform: "node",
     target: "node24",

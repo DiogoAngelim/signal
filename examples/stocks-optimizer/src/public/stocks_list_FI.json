@@ -1,0 +1,1123 @@
+[
+  {
+    "symbol": "ALEX",
+    "name": "Alexandria Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/alexandria-oyj.svg"
+  },
+  {
+    "symbol": "BEER",
+    "name": "Nokian Panimo Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/nokian-panimo-oyj.svg"
+  },
+  {
+    "symbol": "CANATU",
+    "name": "CANATU PLC",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/lifeline-spac-i-plc-a.svg"
+  },
+  {
+    "symbol": "CANATUIW29",
+    "name": "CANATU PLC Company Warrant 2024-17.10.29 on CANATU Series A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/lifeline-spac-i-plc-a.svg"
+  },
+  {
+    "symbol": "CAPMAN",
+    "name": "CapMan Oyj Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/capman-plc.svg"
+  },
+  {
+    "symbol": "CITYVA",
+    "name": "Cityvarasto Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/cityvarasto-oyj.svg"
+  },
+  {
+    "symbol": "CONSTI",
+    "name": "Consti Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/consti-plc.svg"
+  },
+  {
+    "symbol": "CTH1V",
+    "name": "Componenta Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/componenta-oyj.svg"
+  },
+  {
+    "symbol": "CTY1S",
+    "name": "Citycon Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/citycon-oyj.svg"
+  },
+  {
+    "symbol": "DETEC",
+    "name": "Detection Technology Oy",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/detection-technology-oyj.svg"
+  },
+  {
+    "symbol": "DIGIA",
+    "name": "Digia Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/digia-plc.svg"
+  },
+  {
+    "symbol": "DIGIGR",
+    "name": "Digitalist Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/digitalist-oyj.svg"
+  },
+  {
+    "symbol": "DOV1V",
+    "name": "Dovre Group Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/dovre-oyj.svg"
+  },
+  {
+    "symbol": "DUELL",
+    "name": "Duell Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/duell-oyj.svg"
+  },
+  {
+    "symbol": "DWF",
+    "name": "Digital Workforce Services Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/digital-workforce-services-oyj.svg"
+  },
+  {
+    "symbol": "EAGLE",
+    "name": "Eagle Filters Group Plc Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/loudspring-plc.svg"
+  },
+  {
+    "symbol": "EASOR",
+    "name": "Easor Oyj",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "ECOUP",
+    "name": "EcoUp Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ecoup-oyj.svg"
+  },
+  {
+    "symbol": "EEZY",
+    "name": "Eezy Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/eezy-oyj.svg"
+  },
+  {
+    "symbol": "ELEAV",
+    "name": "Elecster Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/elecster-oyj-a-shs.svg"
+  },
+  {
+    "symbol": "ELISA",
+    "name": "Elisa Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/elisa.svg"
+  },
+  {
+    "symbol": "ENENTO",
+    "name": "Enento Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/enento-oyj.svg"
+  },
+  {
+    "symbol": "EQV1V",
+    "name": "eQ Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/eq-oyj.svg"
+  },
+  {
+    "symbol": "ERIBR",
+    "name": "Telefonaktiebolaget LM Ericsson Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ericsson.svg"
+  },
+  {
+    "symbol": "ESENSE",
+    "name": "Enersense International Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/enersense-international-oyj.svg"
+  },
+  {
+    "symbol": "ETTE",
+    "name": "Etteplan Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/etteplan-oyj.svg"
+  },
+  {
+    "symbol": "EVLI",
+    "name": "Evli Plc Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/evli-oyj.svg"
+  },
+  {
+    "symbol": "EXL1V",
+    "name": "Exel Composites Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/exel-composites-oyj.svg"
+  },
+  {
+    "symbol": "FARON",
+    "name": "Faron Pharmaceuticals Oy",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/faron-pharmaceuticals-oy.svg"
+  },
+  {
+    "symbol": "FARONU0126",
+    "name": "Faron Pharmaceuticals Oy Rights 2026-02.04.26 For Shares Faron Pharmac Rg",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "FIA1S",
+    "name": "Finnair Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/finnair-oyj.svg"
+  },
+  {
+    "symbol": "FOAMIT",
+    "name": "Foamit Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/partnera-oyj.svg"
+  },
+  {
+    "symbol": "FODELIA",
+    "name": "Fodelia Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/fodelia-oyj.svg"
+  },
+  {
+    "symbol": "FONDIA",
+    "name": "Fondia Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/fondia-oyj.svg"
+  },
+  {
+    "symbol": "FORTUM",
+    "name": "Fortum Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/fortum.svg"
+  },
+  {
+    "symbol": "FRAMERY",
+    "name": "Framery Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/framery-oyj.svg"
+  },
+  {
+    "symbol": "FSECURE",
+    "name": "F-Secure Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/f-secure.svg"
+  },
+  {
+    "symbol": "FSKRS",
+    "name": "Fiskars Oyj Abp",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/fiskars.svg"
+  },
+  {
+    "symbol": "GLA1V",
+    "name": "Glaston Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/glaston.svg"
+  },
+  {
+    "symbol": "GOFORE",
+    "name": "Gofore Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/gofore-plc.svg"
+  },
+  {
+    "symbol": "GRK",
+    "name": "GRK Infra Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/grk-infra-plc.svg"
+  },
+  {
+    "symbol": "HARVIA",
+    "name": "Harvia Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/harvia-plc.svg"
+  },
+  {
+    "symbol": "HEALTH",
+    "name": "Nightingale Health Oyj Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/nightingale-health-oyj-b.svg"
+  },
+  {
+    "symbol": "HIAB",
+    "name": "Hiab Oyj Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/cargotec-oyj.svg"
+  },
+  {
+    "symbol": "HKFOODS",
+    "name": "HKFoods Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/hkscan-oyj-a.svg"
+  },
+  {
+    "symbol": "HONBS",
+    "name": "Honkarakenne Oyj Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/honkarakenne-oyj-b-shs.svg"
+  },
+  {
+    "symbol": "HOPEA_H",
+    "name": "Svenska Handelsbanken AB Certificate 2011-22.3.41 on Silver Futures USD rolling contract",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "HRTIS",
+    "name": "Herantis Pharma Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/herantis-pharma-oyj.svg"
+  },
+  {
+    "symbol": "HUH1V",
+    "name": "Huhtamaki Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/huhtamaki-oyj.svg"
+  },
+  {
+    "symbol": "ICP1V",
+    "name": "Incap Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/incap.svg"
+  },
+  {
+    "symbol": "ILKKA1",
+    "name": "Ilkka Oyj TEMP",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ilkka-oyj.svg"
+  },
+  {
+    "symbol": "ILKKA2",
+    "name": "Ilkka Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ilkka-oyj.svg"
+  },
+  {
+    "symbol": "INDERES",
+    "name": "Inderes Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/inderes-oyj.svg"
+  },
+  {
+    "symbol": "INVEST",
+    "name": "Investors House Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/investors-house-oyj.svg"
+  },
+  {
+    "symbol": "KALMAR",
+    "name": "Kalmar Corporation Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kalmar-oyj-b.svg"
+  },
+  {
+    "symbol": "KAMUX",
+    "name": "Kamux Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kamux.svg"
+  },
+  {
+    "symbol": "KCR",
+    "name": "Konecranes Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/konecranes-plc.svg"
+  },
+  {
+    "symbol": "KELAS",
+    "name": "Kesla Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kesla-oyj-a.svg"
+  },
+  {
+    "symbol": "KEMIRA",
+    "name": "Kemira Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kemira-oyj.svg"
+  },
+  {
+    "symbol": "KEMPOWR",
+    "name": "Kempower Oy",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kempower-oyj.svg"
+  },
+  {
+    "symbol": "KESKOA",
+    "name": "Kesko Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kesko-b.svg"
+  },
+  {
+    "symbol": "KESKOB",
+    "name": "Kesko Oyj Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kesko-b.svg"
+  },
+  {
+    "symbol": "KHG",
+    "name": "KH Group Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/sievi-capital-oyj-sievi-capital-ord-shs.svg"
+  },
+  {
+    "symbol": "KNEBV",
+    "name": "KONE Oyj Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kone.svg"
+  },
+  {
+    "symbol": "KOSKI",
+    "name": "Koskisen Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/koskisen-oyj.svg"
+  },
+  {
+    "symbol": "KREATE",
+    "name": "Kreate Group Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kreate-plc.svg"
+  },
+  {
+    "symbol": "KSL",
+    "name": "Keskisuomalainen Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/keskisuomalainen-oyj-a.svg"
+  },
+  {
+    "symbol": "KULTA_H",
+    "name": "Svenska Handelsbanken AB Certificate 2011-22.3.41 on USD Gold Futures rolling Contract",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "KULTAYHTIOT_BAC_2",
+    "name": "BNP Paribas Arbitrage Issuance BV Structured Instrument 2023-23.03.29 on SolGolMinDec4",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "LAMOR",
+    "name": "Lamor Corporation Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/lamor-oyj.svg"
+  },
+  {
+    "symbol": "LAPWALL",
+    "name": "LapWall Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/lapwall-oyj.svg"
+  },
+  {
+    "symbol": "LASTIK",
+    "name": "Lassila & Tikanoja Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/lassila-and-tikanoja-plc.svg"
+  },
+  {
+    "symbol": "LEADD",
+    "name": "LeadDesk Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/leaddesk-oyj.svg"
+  },
+  {
+    "symbol": "LEHTO",
+    "name": "Lehto Group PLC",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/lehto-oyj.svg"
+  },
+  {
+    "symbol": "LEMON",
+    "name": "Lemonsoft Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/lemonsoft-oyj.svg"
+  },
+  {
+    "symbol": "LINDEX",
+    "name": "Lindex Group plc Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/stockmann-plc.svg"
+  },
+  {
+    "symbol": "LK_EUROOPPA_31",
+    "name": "BNP Paribas Arbitrage Issuance BV Structured Instrument 2023-04.07.28 on ITRAXX",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "LKE_KASVU_13",
+    "name": "BNP Paribas Arbitrage Issuance BV Structured Instrument 2022-07.01.28 on ITRAXX",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "LKE_KASVU_14",
+    "name": "BNP Paribas Arbitrage Issuance BV Structured Note 2023-07.01.28 on iTraxx",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "LKE_KASVU_15",
+    "name": "BNP Paribas Arbitrage Issuance BV Structured Instrument 2023-07.01.28 on iTraxx Europe Crossover S38 V1",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "LKE_KASVU_16",
+    "name": "BNP Paribas Arbitrage Issuance BV Structured Instrument 2023-05.07.28 on iTraxx",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "LKE_KASVU_17",
+    "name": "BNP Paribas Arbitrage Issuance BV Structured Instrument 2023-04.07.28 on iTraxx",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "LKE_KASVU_18",
+    "name": "BNP Paribas Arbitrage Issuance BV 40 % Structured Note 2023-04.07.28 on",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "LKE_KASVU_19",
+    "name": "BNP Paribas Arbitrage Issuance BV 47.8 % p.a. Structured Note 2023- 08.01.29 on ITRAXX EUROPE",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "LKE_TUOTTO_14",
+    "name": "BNP Paribas Arbitrage Issuance BV 7.70 % (P.a) Structure Note 2023-08.01.29 on",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "LKPA_KASVU_5",
+    "name": "BNP Paribas Arbitrage Issuance BV Structured Instrument 2023-07.07.28 on CDX NA HY 39",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "LKPA_KASVU_6",
+    "name": "BNP Paribas Arbitrage Issuance BV Structured Instrument 2023-07.07.28 on",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "LKPA_KASVU_7",
+    "name": "BNP Paribas Arbitrage Issuance BV Structure Note 2023-08.01.29 on",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "LOIHDE",
+    "name": "Loihde Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/loihde-oyj.svg"
+  },
+  {
+    "symbol": "LUMO",
+    "name": "Lumo Homes Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/kojamo-plc.svg"
+  },
+  {
+    "symbol": "LUOTEA",
+    "name": "Luotea Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/luotea-plc.svg"
+  },
+  {
+    "symbol": "MANTA",
+    "name": "Mandatum Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/mandatum-oyj.svg"
+  },
+  {
+    "symbol": "MARAS",
+    "name": "Martela Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/martela-oyj-a.svg"
+  },
+  {
+    "symbol": "MEKKO",
+    "name": "Marimekko Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/marimekko.svg"
+  },
+  {
+    "symbol": "MERUS",
+    "name": "Merus Power Plc Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/merus-power-oyj.svg"
+  },
+  {
+    "symbol": "METSA",
+    "name": "Metsa Board Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/metsa-board-oyj-b.svg"
+  },
+  {
+    "symbol": "METSB",
+    "name": "Metsa Board Oyj Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/metsa-board-oyj-b.svg"
+  },
+  {
+    "symbol": "METSO",
+    "name": "Metso Corporation",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/metso-outotec-oyj.svg"
+  },
+  {
+    "symbol": "MODU",
+    "name": "Modulight Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/modulight-oyj.svg"
+  },
+  {
+    "symbol": "MUSTI",
+    "name": "Musti Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/musti-plc.svg"
+  },
+  {
+    "symbol": "NANOFH",
+    "name": "Nanoform Finland Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/nanoform-finland-oyj.svg"
+  },
+  {
+    "symbol": "NDA_FI",
+    "name": "Nordea Bank Abp",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/nordea-bank-abp.svg"
+  },
+  {
+    "symbol": "NESTE",
+    "name": "Neste Corporation",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/neste.svg"
+  },
+  {
+    "symbol": "NETUM",
+    "name": "Netum Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/netum-oyj.svg"
+  },
+  {
+    "symbol": "NLG1V",
+    "name": "Nurminen Logistics Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/nurminen-logistics-plc.svg"
+  },
+  {
+    "symbol": "NOHO",
+    "name": "NoHo Partners Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/noho-partners-oyj.svg"
+  },
+  {
+    "symbol": "NOKIA",
+    "name": "Nokia Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/nokia.svg"
+  },
+  {
+    "symbol": "NORRH",
+    "name": "Norrhydro Group Oy",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/norrhydro-oyj.svg"
+  },
+  {
+    "symbol": "NXTMH",
+    "name": "Nexstim PLC",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/nexstim-oyj.svg"
+  },
+  {
+    "symbol": "OLVAS",
+    "name": "Olvi Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/olvi-plc-a.svg"
+  },
+  {
+    "symbol": "OMASP",
+    "name": "Oma Savings Bank Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/oma-saastopankki-oyj.svg"
+  },
+  {
+    "symbol": "OPTOMED",
+    "name": "Optomed Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/optomed-plc.svg"
+  },
+  {
+    "symbol": "ORIOLA",
+    "name": "Oriola Corp Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/oriola-b.svg"
+  },
+  {
+    "symbol": "ORNAV",
+    "name": "Orion Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/orion.svg"
+  },
+  {
+    "symbol": "ORNBV",
+    "name": "Orion Oyj Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/orion.svg"
+  },
+  {
+    "symbol": "ORTHEX",
+    "name": "Orthex Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/orthex-plc.svg"
+  },
+  {
+    "symbol": "OUT1V",
+    "name": "Outokumpu Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/outokumpu-oyj.svg"
+  },
+  {
+    "symbol": "OVARO",
+    "name": "Ovaro Kiinteistosijoitus Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ovaro-kiinteistosijoitus-oyj.svg"
+  },
+  {
+    "symbol": "PALLAS",
+    "name": "Pallas Air Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/pallas-air-oyj.svg"
+  },
+  {
+    "symbol": "PAMPALO",
+    "name": "Endomines Finland Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/endomines-finland-oyj.svg"
+  },
+  {
+    "symbol": "PIHLIS",
+    "name": "Pihlajalinna Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/pihlajalinna-oyj.svg"
+  },
+  {
+    "symbol": "PIIPPO",
+    "name": "Piippo Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/piippo-oyj.svg"
+  },
+  {
+    "symbol": "PNA1V",
+    "name": "Panostaja Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/panostaja-oyj.svg"
+  },
+  {
+    "symbol": "PON1V",
+    "name": "Ponsse Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ponsse-oyj-1.svg"
+  },
+  {
+    "symbol": "POSTI",
+    "name": "Posti Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/posti.svg"
+  },
+  {
+    "symbol": "PUUILO",
+    "name": "Puuilo Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/puuilo-plc.svg"
+  },
+  {
+    "symbol": "QPR1V",
+    "name": "QPR Software Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/qpr-software-plc.svg"
+  },
+  {
+    "symbol": "QTCOM",
+    "name": "Qt Group Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/qt-oyj.svg"
+  },
+  {
+    "symbol": "RAIKV",
+    "name": "Raisio Plc Class K",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/raisio-plc-vaihto-osake.svg"
+  },
+  {
+    "symbol": "RAIVV",
+    "name": "Raisio Plc Class V",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/raisio-plc-vaihto-osake.svg"
+  },
+  {
+    "symbol": "RAP1V",
+    "name": "Rapala VMC Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/rapala-vmc.svg"
+  },
+  {
+    "symbol": "RAUTE",
+    "name": "Raute Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/raute-a.svg"
+  },
+  {
+    "symbol": "REBL",
+    "name": "Rebl Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/punamusta-media-oyj.svg"
+  },
+  {
+    "symbol": "REG1V",
+    "name": "Revenio Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/revenio.svg"
+  },
+  {
+    "symbol": "REKA",
+    "name": "Reka Industrial Plc Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/neoindus-6-24.svg"
+  },
+  {
+    "symbol": "RELAIS",
+    "name": "Relais Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/relais-oyj.svg"
+  },
+  {
+    "symbol": "REMEDY",
+    "name": "Remedy Entertainment Oy",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/remedy-entertainment-oyj.svg"
+  },
+  {
+    "symbol": "ROBIT",
+    "name": "Robit PLC",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/robit-plc-robit-ord-shs.svg"
+  },
+  {
+    "symbol": "SAGCV",
+    "name": "Saga Furs Oyj Class C",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/saga-furs-oyj-c.svg"
+  },
+  {
+    "symbol": "SAMPO",
+    "name": "Sampo Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/sampo-plc-a.svg"
+  },
+  {
+    "symbol": "SANOMA",
+    "name": "Sanoma Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/sanoma.svg"
+  },
+  {
+    "symbol": "SBI",
+    "name": "Sunborn International Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/rush-factory-plc.svg"
+  },
+  {
+    "symbol": "SCANFL",
+    "name": "Scanfil Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/scanfil-plc.svg"
+  },
+  {
+    "symbol": "SFOODS",
+    "name": "Solar Foods Oyj Class K",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/solar-foods-oyj.svg"
+  },
+  {
+    "symbol": "SIILI",
+    "name": "Siili Solutions Oy",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/siili-solutions-oyj.svg"
+  },
+  {
+    "symbol": "SITOWS",
+    "name": "Sitowise Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/sitowise-plc.svg"
+  },
+  {
+    "symbol": "SOLTEQ",
+    "name": "Solteq Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/solteq-oyj-solteq-ord-shs.svg"
+  },
+  {
+    "symbol": "SOLWERS",
+    "name": "Solwers Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/solwers-oyj.svg"
+  },
+  {
+    "symbol": "SOSI1",
+    "name": "Sotkamo Silver AB",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/sotkamo-silver-ab.svg"
+  },
+  {
+    "symbol": "SPINN",
+    "name": "Spinnova Oy",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/spinnova-oyj.svg"
+  },
+  {
+    "symbol": "SPRING",
+    "name": "Springvest Oy",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/springvest-oyj.svg"
+  },
+  {
+    "symbol": "SRV1V",
+    "name": "SRV Yhtiot Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/srv-yhti-t-oyj-registered-shares-on.svg"
+  },
+  {
+    "symbol": "SSABAH",
+    "name": "SSAB AB Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ssab-ab-ser-b.svg"
+  },
+  {
+    "symbol": "SSABBH",
+    "name": "SSAB AB Class B",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ssab-ab-ser-b.svg"
+  },
+  {
+    "symbol": "SSH1V",
+    "name": "SSH Communications Security Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/ssh-communications-security-oyj.svg"
+  },
+  {
+    "symbol": "STEAV",
+    "name": "Stora Enso Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/stora-enso.svg"
+  },
+  {
+    "symbol": "STERV",
+    "name": "Stora Enso Oyj Class R",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/stora-enso.svg"
+  },
+  {
+    "symbol": "SUMMA",
+    "name": "Summa Defence Plc Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/savosolar-plc.svg"
+  },
+  {
+    "symbol": "SUY1V",
+    "name": "Suominen Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/suominen-oyj.svg"
+  },
+  {
+    "symbol": "TAALA",
+    "name": "Taaleri Plc",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/taaleri-oyj.svg"
+  },
+  {
+    "symbol": "TALLINK",
+    "name": "Tallink Grupp AS Finnish Depository Receipt Repr 1 Sh",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/tallink-grupp.svg"
+  },
+  {
+    "symbol": "TAMTRON",
+    "name": "Tamtron Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/tamtron-oyj.svg"
+  },
+  {
+    "symbol": "TEKOVA",
+    "name": "Tekova Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/tekova-oyj.svg"
+  },
+  {
+    "symbol": "TELIA1",
+    "name": "Telia Company AB",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/telia-company-ab.svg"
+  },
+  {
+    "symbol": "TEM1V",
+    "name": "Tecnotree Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/tecnotree.svg"
+  },
+  {
+    "symbol": "TIETO",
+    "name": "TietoEVRY Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/tietoevry.svg"
+  },
+  {
+    "symbol": "TITAN",
+    "name": "Titanium Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/titanium-oyj.svg"
+  },
+  {
+    "symbol": "TLT1V",
+    "name": "Teleste Corporation",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/teleste.svg"
+  },
+  {
+    "symbol": "TNOM",
+    "name": "Talenom Oyj",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "TOIVO",
+    "name": "Toivo Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/toivo-oyj.svg"
+  },
+  {
+    "symbol": "TOKMAN",
+    "name": "Tokmanni Group Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/tokmanni-oyj.svg"
+  },
+  {
+    "symbol": "TRACKER_CO2_NORDEAF",
+    "name": "Nordea Bank Abp Exchange Traded Product 2024-open end on 1xBull SPARK/HANETF Open",
+    "market": "OMXHEX"
+  },
+  {
+    "symbol": "TRH1V",
+    "name": "Trainers' House Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/trainers-house-plc.svg"
+  },
+  {
+    "symbol": "TTALO",
+    "name": "Terveystalo Oy Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/terveystalo-plc.svg"
+  },
+  {
+    "symbol": "TULAV",
+    "name": "Tulikivi Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/tulikivi-oyj-a.svg"
+  },
+  {
+    "symbol": "TYRES",
+    "name": "Nokian Renkaat Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/nokian-tyres-plc.svg"
+  },
+  {
+    "symbol": "UNITED",
+    "name": "United Bankers Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/united-bankers-oyj.svg"
+  },
+  {
+    "symbol": "UPM",
+    "name": "UPM-Kymmene Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/upm-kymmene.svg"
+  },
+  {
+    "symbol": "VAIAS",
+    "name": "Vaisala Oyj Class A",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/vaisala-a.svg"
+  },
+  {
+    "symbol": "VALMT",
+    "name": "Valmet Corp",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/valmet.svg"
+  },
+  {
+    "symbol": "VERK",
+    "name": "Verkkokauppa.com Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/verkkokauppacom-oyj.svg"
+  },
+  {
+    "symbol": "VIAFIN",
+    "name": "Viafin Service Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/viafin-service-oyj.svg"
+  },
+  {
+    "symbol": "VIK1V",
+    "name": "Viking Line Abp",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/viking-line-abp.svg"
+  },
+  {
+    "symbol": "VINCIT",
+    "name": "Vincit Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/vinci.svg"
+  },
+  {
+    "symbol": "WETTERI",
+    "name": "Wetteri Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/soprano-oyj.svg"
+  },
+  {
+    "symbol": "WITH",
+    "name": "WithSecure Corporation",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/f-secure-oyj-f-secure-ord-shs.svg"
+  },
+  {
+    "symbol": "WITTED",
+    "name": "Witted Megacorp Oy",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/witted-megacorp-oyj.svg"
+  },
+  {
+    "symbol": "WRT1V",
+    "name": "Wartsila Oyj Abp",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/wartsila.svg"
+  },
+  {
+    "symbol": "WUF1V",
+    "name": "Wulff-Yhtiot Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/wulff-plc.svg"
+  },
+  {
+    "symbol": "YIT",
+    "name": "YIT Oyj",
+    "market": "OMXHEX",
+    "image": "https://s3-symbol-logo.tradingview.com/yit.svg"
+  }
+]

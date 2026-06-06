@@ -1,0 +1,732 @@
+[
+  {
+    "symbol": "2CC.NZ",
+    "name": "2 Cheap Cars Group Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/2-cheap-cars.svg"
+  },
+  {
+    "symbol": "AFC.NZ",
+    "name": "AFC Group Holdings Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/afc-group.svg"
+  },
+  {
+    "symbol": "AFT.NZ",
+    "name": "AFT Pharmaceuticals Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/aft-pharmaceutical-npv.svg"
+  },
+  {
+    "symbol": "AGL.NZ",
+    "name": "Accordant Group Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/accordant-grp-ltd-npv.svg"
+  },
+  {
+    "symbol": "AIA.NZ",
+    "name": "Auckland International Airport Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/auckland.svg"
+  },
+  {
+    "symbol": "AIR.NZ",
+    "name": "Air New Zealand Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/air-new-zealand.svg"
+  },
+  {
+    "symbol": "ALF.NZ",
+    "name": "Allied Farmers Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/allied-farmers-npv.svg"
+  },
+  {
+    "symbol": "ANZ.NZ",
+    "name": "ANZ Group Holdings Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/australia-and-new-zealand-banking.svg"
+  },
+  {
+    "symbol": "AOF.NZ",
+    "name": "AoFrio Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/wellington-drive-t-npv.svg"
+  },
+  {
+    "symbol": "APL.NZ",
+    "name": "Asset Plus Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/asset-plus-limited-units-npv.svg"
+  },
+  {
+    "symbol": "ARB.NZ",
+    "name": "ArborGen Holdings Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/arborgen-ltd-npv.svg"
+  },
+  {
+    "symbol": "ARG.NZ",
+    "name": "Argosy Property Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/argosy-property-lt-npv.svg"
+  },
+  {
+    "symbol": "ATM.NZ",
+    "name": "a2 Milk Company Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/a2-milk.svg"
+  },
+  {
+    "symbol": "BAI.NZ",
+    "name": "Being AI Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/ascension-capital-npv.svg"
+  },
+  {
+    "symbol": "BFG.NZ",
+    "name": "Burger Fuel Group Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/burger-fuel-ord-npv.svg"
+  },
+  {
+    "symbol": "BGP.NZ",
+    "name": "Briscoe Group Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/briscoe-npv.svg"
+  },
+  {
+    "symbol": "BLT.NZ",
+    "name": "BLIS Technologies Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/blis-technologies-npv.svg"
+  },
+  {
+    "symbol": "BPG.NZ",
+    "name": "Black Pearl Group Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/black-pearl-npv.svg"
+  },
+  {
+    "symbol": "BRW.NZ",
+    "name": "Bremworth Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/bremworth-ltd-npv.svg"
+  },
+  {
+    "symbol": "CCC.NZ",
+    "name": "Cooks Coffee Company Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/cooks-global-foods-npv.svg"
+  },
+  {
+    "symbol": "CDI.NZ",
+    "name": "CDL Investments NZ Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/cdl-investments-npv.svg"
+  },
+  {
+    "symbol": "CEN.NZ",
+    "name": "Contact Energy Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/contact-energy-npv.svg"
+  },
+  {
+    "symbol": "CHI.NZ",
+    "name": "Channel Infrastructure NZ Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/nz-refining-co-npv.svg"
+  },
+  {
+    "symbol": "CMO.NZ",
+    "name": "Colonial Motor Co Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/colonial-motor-co-npv.svg"
+  },
+  {
+    "symbol": "CNU.NZ",
+    "name": "Chorus Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/chorus-ltd-npv.svg"
+  },
+  {
+    "symbol": "CRP.NZ",
+    "name": "Chatham Rock Phosphate Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/chatham-rock-phosp-npv.svg"
+  },
+  {
+    "symbol": "CVT.NZ",
+    "name": "Comvita Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/comvita-npv.svg"
+  },
+  {
+    "symbol": "DGL.NZ",
+    "name": "Delegat Group Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/delegat-ltd-npv.svg"
+  },
+  {
+    "symbol": "DOW.NZ",
+    "name": "Downer EDI Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/downer-edi-limited.svg"
+  },
+  {
+    "symbol": "EBO.NZ",
+    "name": "EBOS Group Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/ebos-limited-npv.svg"
+  },
+  {
+    "symbol": "ENS.NZ",
+    "name": "Enprise Group Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/enprise-nz-npv-nzx-listing.svg"
+  },
+  {
+    "symbol": "ERD.NZ",
+    "name": "EROAD Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/eroad-limited-npv.svg"
+  },
+  {
+    "symbol": "FBU.NZ",
+    "name": "Fletcher Building Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/fletcher-building-npv.svg"
+  },
+  {
+    "symbol": "FCG.NZ",
+    "name": "Fonterra Co-operative Group Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/fonterra.svg"
+  },
+  {
+    "symbol": "FPH.NZ",
+    "name": "Fisher & Paykel Healthcare Corporation Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/paykel.svg"
+  },
+  {
+    "symbol": "FRW.NZ",
+    "name": "Freightways Group Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/freightways-ltd-npv.svg"
+  },
+  {
+    "symbol": "FWL.NZ",
+    "name": "Foley Wines Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/foley-wines-ltd-npv.svg"
+  },
+  {
+    "symbol": "GEN.NZ",
+    "name": "General Capital Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/general-capital-npv.svg"
+  },
+  {
+    "symbol": "GNE.NZ",
+    "name": "Genesis Energy Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/genesis-energy-ltd-npv.svg"
+  },
+  {
+    "symbol": "GTK.NZ",
+    "name": "Gentrack Group Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/gentrack-ltd-npv.svg"
+  },
+  {
+    "symbol": "GXH.NZ",
+    "name": "Green Cross Health Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/green-cross-health-npv.svg"
+  },
+  {
+    "symbol": "HGH.NZ",
+    "name": "Heartland Group Holdings Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/heartland-hl-npv.svg"
+  },
+  {
+    "symbol": "HLG.NZ",
+    "name": "Hallenstein Glasson Holdings Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/hallenstein-glassn-npv.svg"
+  },
+  {
+    "symbol": "IFT.NZ",
+    "name": "Infratil Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/infratil-ltd-npv.svg"
+  },
+  {
+    "symbol": "IKE.NZ",
+    "name": "ikeGPS Group Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/ikegps-ltd-npv.svg"
+  },
+  {
+    "symbol": "IPL.NZ",
+    "name": "Investore Property Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/investore-prop-ltd-npv.svg"
+  },
+  {
+    "symbol": "IPR.NZ",
+    "name": "IPERION Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/southern-charter-npv.svg"
+  },
+  {
+    "symbol": "KFLWI.NZ",
+    "name": "Kingfish Ltd. Warrant 2026-01.05.Kingfish",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/kingfish-ltd-npv.svg"
+  },
+  {
+    "symbol": "KMD.NZ",
+    "name": "KMD Brands Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/kmd-brands-ltd-npv.svg"
+  },
+  {
+    "symbol": "KPG.NZ",
+    "name": "Kiwi Property Group Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/kiwi-property-grp-npv.svg"
+  },
+  {
+    "symbol": "LIC.NZ",
+    "name": "Livestock Improvement Corporation Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/livestock-improvem-npv.svg"
+  },
+  {
+    "symbol": "LOC.NZ",
+    "name": "Locate Technologies Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/locate-technologies-limited.svg"
+  },
+  {
+    "symbol": "MCK.NZ",
+    "name": "Millennium & Copthorne Hotels New Zealand Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/millennium-and-copth-npv.svg"
+  },
+  {
+    "symbol": "MCKPA.NZ",
+    "name": "Millennium & Copthorne Hotels New Zealand Ltd Red Pref Registered Shs",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/millennium-and-copth-npv.svg"
+  },
+  {
+    "symbol": "MCY.NZ",
+    "name": "Mercury NZ Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/mercury.svg"
+  },
+  {
+    "symbol": "MEE.NZ",
+    "name": "Me Today Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/me-today-ltd-npv.svg"
+  },
+  {
+    "symbol": "MEEWA.NZ",
+    "name": "Me Today Ltd Warrant 2025-30.10.26 On Me Today",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/me-today-ltd-npv.svg"
+  },
+  {
+    "symbol": "MEEWB.NZ",
+    "name": "Me Today Ltd warrant 2025-29.10.27 on Me Today",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/me-today-ltd-npv.svg"
+  },
+  {
+    "symbol": "MEL.NZ",
+    "name": "Meridian Energy Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/meridian-energy.svg"
+  },
+  {
+    "symbol": "MEX.NZ",
+    "name": "Minerals Exploration Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/uvre-limited.svg"
+  },
+  {
+    "symbol": "MFB.NZ",
+    "name": "My Food Bag Group Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/my-food-bag-npv.svg"
+  },
+  {
+    "symbol": "MFT.NZ",
+    "name": "Mainfreight Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/mainfreight-ltd-npv.svg"
+  },
+  {
+    "symbol": "MHJ.NZ",
+    "name": "Michael Hill International Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/michael-hill-intl-npv-new.svg"
+  },
+  {
+    "symbol": "MKR.NZ",
+    "name": "Manuka Resources Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/manuka-resources-ltd.svg"
+  },
+  {
+    "symbol": "MOV.NZ",
+    "name": "MOVe Logistics Group Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/move-logistics-gp-npv.svg"
+  },
+  {
+    "symbol": "MPG.NZ",
+    "name": "Metro Performance Glass Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/metro-performance-npv.svg"
+  },
+  {
+    "symbol": "NPH.NZ",
+    "name": "Napier Port Holdings Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/napier-port-holdin-npv.svg"
+  },
+  {
+    "symbol": "NTL.NZ",
+    "name": "New Talisman Gold Mines Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/new-talisman-gold-npv.svg"
+  },
+  {
+    "symbol": "NTLRH.NZ",
+    "name": "New Talisman Gold Mines Ltd Rights 2026-26.03.26 for Shares",
+    "market": "NZX"
+  },
+  {
+    "symbol": "NZK.NZ",
+    "name": "New Zealand King Salmon Investments Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/new-zealand-king-s-npv.svg"
+  },
+  {
+    "symbol": "NZL.NZ",
+    "name": "New Zealand Rural Land Co. Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/new-zealand-rural-npv.svg"
+  },
+  {
+    "symbol": "NZLWA.NZ",
+    "name": "New Zealand Rural Land Co. Ltd. Warrant 2023-30.11.27 on NZRLC",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/new-zealand-rural-npv.svg"
+  },
+  {
+    "symbol": "NZM.NZ",
+    "name": "NZME Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/nzme-ltd-npv.svg"
+  },
+  {
+    "symbol": "NZX.NZ",
+    "name": "NZX Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/nzx-limited-npv.svg"
+  },
+  {
+    "symbol": "OCA.NZ",
+    "name": "Oceania Healthcare Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/oceania-healthcare-npv.svg"
+  },
+  {
+    "symbol": "PCT.NZ",
+    "name": "Precinct Properties NZ Ltd & Precinct Properties Investments Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/precinct-propertie-units-npv.svg"
+  },
+  {
+    "symbol": "PEB.NZ",
+    "name": "Pacific Edge Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/pacific-edge-ltd-npv.svg"
+  },
+  {
+    "symbol": "PFI.NZ",
+    "name": "Property For Industry Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/property-for-ind-npv.svg"
+  },
+  {
+    "symbol": "PGW.NZ",
+    "name": "PGG Wrightson Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/pgg-wrightson-ltd-npv.svg"
+  },
+  {
+    "symbol": "PHL.NZ",
+    "name": "Promisia Healthcare Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/promisia-healthcar-npv.svg"
+  },
+  {
+    "symbol": "PHLWA.NZ",
+    "name": "Promisia Healthcare Ltd Warrant 2024-24.03.27 on Promisia Health",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/promisia-healthcar-npv.svg"
+  },
+  {
+    "symbol": "POT.NZ",
+    "name": "Port of Tauranga Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/port-of-tauranga-npv-post-consolidation.svg"
+  },
+  {
+    "symbol": "PYS.NZ",
+    "name": "PaySauce Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/paysauce-ltd-npv.svg"
+  },
+  {
+    "symbol": "RAD.NZ",
+    "name": "Radius Residential Care Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/radius-residential-npv.svg"
+  },
+  {
+    "symbol": "RAK.NZ",
+    "name": "Rakon Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/rakon-limited-npv.svg"
+  },
+  {
+    "symbol": "RGI.NZ",
+    "name": "Rua Gold Inc",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/rua-gold.svg"
+  },
+  {
+    "symbol": "RTO.NZ",
+    "name": "RTO Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/blackwell-global-h-npv.svg"
+  },
+  {
+    "symbol": "RUA.NZ",
+    "name": "Rua Bioscience Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/rua-bioscience-npv.svg"
+  },
+  {
+    "symbol": "RYM.NZ",
+    "name": "Ryman Healthcare Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/ryman-healthcare.svg"
+  },
+  {
+    "symbol": "SAN.NZ",
+    "name": "Sanford Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/sanford-npv.svg"
+  },
+  {
+    "symbol": "SCL.NZ",
+    "name": "Scales Corp. Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/scales-lt-npv.svg"
+  },
+  {
+    "symbol": "SCT.NZ",
+    "name": "Scott Technology Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/scott-technology-npv.svg"
+  },
+  {
+    "symbol": "SDL.NZ",
+    "name": "Solution Dynamics Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/solution-dynamics-npv.svg"
+  },
+  {
+    "symbol": "SEK.NZ",
+    "name": "Seeka Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/seeka-ltd-npv.svg"
+  },
+  {
+    "symbol": "SKC.NZ",
+    "name": "SkyCity Entertainment Group Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/skycity-ent-gp-npv.svg"
+  },
+  {
+    "symbol": "SKL.NZ",
+    "name": "Skellerup Holdings Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/skellerup-npv.svg"
+  },
+  {
+    "symbol": "SKO.NZ",
+    "name": "Serko Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/serko-limited-npv.svg"
+  },
+  {
+    "symbol": "SKT.NZ",
+    "name": "SKY Network Television Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/sky-network-televi-npv.svg"
+  },
+  {
+    "symbol": "SMI.NZ",
+    "name": "Santana Minerals Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/santana-minerals-limited-npv.svg"
+  },
+  {
+    "symbol": "SML.NZ",
+    "name": "Synlait Milk Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/synlait-milk-ltd-npv.svg"
+  },
+  {
+    "symbol": "SPG.NZ",
+    "name": "Stride Property Group",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/stride-ppty-ltd-and-npv-units.svg"
+  },
+  {
+    "symbol": "SPK.NZ",
+    "name": "Spark New Zealand Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/spark-nz.svg"
+  },
+  {
+    "symbol": "SPN.NZ",
+    "name": "South Port New Zealand Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/south-port-nz-npv.svg"
+  },
+  {
+    "symbol": "STU.NZ",
+    "name": "Steel & Tube Holdings Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/steel-and-tube-hldgs-npv.svg"
+  },
+  {
+    "symbol": "SUM.NZ",
+    "name": "Summerset Group Holdings Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/summerset-ho-npv.svg"
+  },
+  {
+    "symbol": "SVR.NZ",
+    "name": "Savor Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/savor-ltd-npv.svg"
+  },
+  {
+    "symbol": "TAH.NZ",
+    "name": "Third Age Health Services Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/third-age-health-s-npv.svg"
+  },
+  {
+    "symbol": "TCM.NZ",
+    "name": "Taiko Critical Minerals Limited",
+    "market": "NZX"
+  },
+  {
+    "symbol": "TGG.NZ",
+    "name": "T&G Global Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/tandg-global-ltd-npv.svg"
+  },
+  {
+    "symbol": "THL.NZ",
+    "name": "Tourism Holdings Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/tourism-npv.svg"
+  },
+  {
+    "symbol": "TRA.NZ",
+    "name": "Turners Automotive Group Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/turners-automotive-npv.svg"
+  },
+  {
+    "symbol": "TRU.NZ",
+    "name": "TruScreen Group Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/truscreen-lt-npv.svg"
+  },
+  {
+    "symbol": "TWL.NZ",
+    "name": "Trade Window Holdings Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/trade-window-hldgs-npv.svg"
+  },
+  {
+    "symbol": "TWR.NZ",
+    "name": "Tower Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/tower-ltd-npv.svg"
+  },
+  {
+    "symbol": "VCT.NZ",
+    "name": "Vector Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/vector-npv.svg"
+  },
+  {
+    "symbol": "VGL.NZ",
+    "name": "Vista Group International Ltd",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/vista-intl-npv-post-consolidation.svg"
+  },
+  {
+    "symbol": "VNT.NZ",
+    "name": "Ventia Services Group Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/ventia-services-group-limited.svg"
+  },
+  {
+    "symbol": "VSL.NZ",
+    "name": "Vulcan Steel Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/vulcan-steel-limit-npv.svg"
+  },
+  {
+    "symbol": "WBC.NZ",
+    "name": "Westpac Banking Corporation",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/westpac.svg"
+  },
+  {
+    "symbol": "WCO.NZ",
+    "name": "WasteCo Group Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/wasteco-ltd-npv.svg"
+  },
+  {
+    "symbol": "WHS.NZ",
+    "name": "Warehouse Group Ltd.",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/warehouse-npv.svg"
+  },
+  {
+    "symbol": "WIN.NZ",
+    "name": "Winton Land Limited",
+    "market": "NZX",
+    "image": "https://s3-symbol-logo.tradingview.com/winton-land-ltd-npv.svg"
+  }
+]

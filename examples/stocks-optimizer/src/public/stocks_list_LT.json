@@ -1,0 +1,134 @@
+[
+  {
+    "symbol": "CTS1L",
+    "name": "City Service SE",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/city-service.svg"
+  },
+  {
+    "symbol": "EWA1L",
+    "name": "East West Agro AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/east-west-agro.svg"
+  },
+  {
+    "symbol": "GRG1L",
+    "name": "Grigeo Group AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/grigeo.svg"
+  },
+  {
+    "symbol": "IGN1L",
+    "name": "Ignitis Grupe AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ignitis-grupe.svg"
+  },
+  {
+    "symbol": "INC1L",
+    "name": "INVL Technology",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/invl-technology.svg"
+  },
+  {
+    "symbol": "INL1L",
+    "name": "INVL Baltic Farmland AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/invl-baltic-farmland.svg"
+  },
+  {
+    "symbol": "INR1L",
+    "name": "INVL Baltic Real Estate UTIB EUR",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/invl-baltic-real-estate.svg"
+  },
+  {
+    "symbol": "IVL1L",
+    "name": "Invalda INVL AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/invalda-invl.svg"
+  },
+  {
+    "symbol": "K2LT",
+    "name": "K2 LT AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/k2-lt.svg"
+  },
+  {
+    "symbol": "KNE1L",
+    "name": "KN Energies AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/klaipedos-nafta.svg"
+  },
+  {
+    "symbol": "KNR1L",
+    "name": "Kauno Energija AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kauno-energija.svg"
+  },
+  {
+    "symbol": "LGD1L",
+    "name": "Litgrid AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/litgrid.svg"
+  },
+  {
+    "symbol": "NEOFI",
+    "name": "NEO Finance AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/neo-finance.svg"
+  },
+  {
+    "symbol": "NTU1L",
+    "name": "Novaturas AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/novaturas.svg"
+  },
+  {
+    "symbol": "PZV1L",
+    "name": "Pieno Zvaigzdes AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pieno-zvaigzdes.svg"
+  },
+  {
+    "symbol": "ROE1L",
+    "name": "AB Artea Bankas",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/siauliu-bankas.svg"
+  },
+  {
+    "symbol": "RSU1L",
+    "name": "Rokiskio suris AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rokiskio-suris.svg"
+  },
+  {
+    "symbol": "TEL1L",
+    "name": "Telia Lietuva AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/telia-lietuva.svg"
+  },
+  {
+    "symbol": "UTR1L",
+    "name": "Utenos Trikotazas AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/utenos-trikotazas.svg"
+  },
+  {
+    "symbol": "VBL1L",
+    "name": "Vilniaus Baldai AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/vilniaus-baldai.svg"
+  },
+  {
+    "symbol": "VLP1L",
+    "name": "Vilkyskiu Pienine AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/vilkyskiu-pienine.svg"
+  },
+  {
+    "symbol": "ZMP1L",
+    "name": "Zemaitijos Pienas AB",
+    "market": "OMXVSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zemaitijos-pienas.svg"
+  }
+]

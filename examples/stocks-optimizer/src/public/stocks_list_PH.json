@@ -1,0 +1,2004 @@
+[
+  {
+    "symbol": "AAA.PS",
+    "name": "Asia Amalgamated Holdings Corp.",
+    "market": "PSE"
+  },
+  {
+    "symbol": "AB.PS",
+    "name": "Atok-Big Wedge Co., Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/atok-big-wedge-company.svg"
+  },
+  {
+    "symbol": "ABA.PS",
+    "name": "AbaCore Capital Holdings Inc",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/abacore-capital.svg"
+  },
+  {
+    "symbol": "ABS.PS",
+    "name": "ABS-CBN Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/abs-cbn.svg"
+  },
+  {
+    "symbol": "ABSP.PS",
+    "name": "ABS-CBN Holdings Corporation Shs Philippine Depository Receipts Repr. 1 sh",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/abs-cbn-pdr-each-repr-1-ord-shs-php1.svg"
+  },
+  {
+    "symbol": "AC.PS",
+    "name": "Ayala Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ayala.svg"
+  },
+  {
+    "symbol": "ACR.PS",
+    "name": "Alsons Consolidated Resources Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/alsons-consolidated-resources.svg"
+  },
+  {
+    "symbol": "AEV.PS",
+    "name": "Aboitiz Equity Ventures Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/aboitiz-equity-ventures.svg"
+  },
+  {
+    "symbol": "AGI.PS",
+    "name": "Alliance Global Group Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/alliance-global.svg"
+  },
+  {
+    "symbol": "ALI.PS",
+    "name": "Ayala Land Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ayala-land.svg"
+  },
+  {
+    "symbol": "ANS.PS",
+    "name": "A. Soriano Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/a-soriano.svg"
+  },
+  {
+    "symbol": "APC.PS",
+    "name": "APC Group Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/apc.svg"
+  },
+  {
+    "symbol": "APO.PS",
+    "name": "Anglo Philippine Holdings Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/anglo-philippine.svg"
+  },
+  {
+    "symbol": "APX.PS",
+    "name": "Apex Mining Co. Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/apex-mining-company.svg"
+  },
+  {
+    "symbol": "AR.PS",
+    "name": "Abra Mining & Industrial Corp.",
+    "market": "PSE"
+  },
+  {
+    "symbol": "ARA.PS",
+    "name": "Araneta Properties Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/araneta-properties.svg"
+  },
+  {
+    "symbol": "AT.PS",
+    "name": "Atlas Consolidated Mining & Development Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/atlas-consolidated-mining.svg"
+  },
+  {
+    "symbol": "ATI.PS",
+    "name": "Asian Terminals, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/asian-terminals.svg"
+  },
+  {
+    "symbol": "ATN.PS",
+    "name": "ATN Holdings Inc. Class A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/atn-a.svg"
+  },
+  {
+    "symbol": "ATNB.PS",
+    "name": "ATN Holdings Inc. Class B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/atn-a.svg"
+  },
+  {
+    "symbol": "BC.PS",
+    "name": "Benguet Corp. Class A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/benguet.svg"
+  },
+  {
+    "symbol": "BCB.PS",
+    "name": "Benguet Corp. Class B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/benguet.svg"
+  },
+  {
+    "symbol": "BCP.PS",
+    "name": "Benguet Corp Conv.Pref.Shs A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/benguet.svg"
+  },
+  {
+    "symbol": "BDO.PS",
+    "name": "BDO Unibank, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/bdo-unibank.svg"
+  },
+  {
+    "symbol": "BEL.PS",
+    "name": "Belle Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/belle.svg"
+  },
+  {
+    "symbol": "BH.PS",
+    "name": "BHI Holdings Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/bhi.svg"
+  },
+  {
+    "symbol": "BHI.PS",
+    "name": "Boulevard Holdings Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/boulevard.svg"
+  },
+  {
+    "symbol": "BMM.PS",
+    "name": "Bogo-Medellin Milling Co., Inc.",
+    "market": "PSE"
+  },
+  {
+    "symbol": "BPI.PS",
+    "name": "Bank of the Philippine Islands",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/bank-of-the-philippine-islands.svg"
+  },
+  {
+    "symbol": "BRN.PS",
+    "name": "A Brown Co., Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/a-brown-company.svg"
+  },
+  {
+    "symbol": "BSC.PS",
+    "name": "Basic Energy Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/basic-energy.svg"
+  },
+  {
+    "symbol": "CA.PS",
+    "name": "Concrete Aggregates Corp. Class A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/concrete-aggregates-b.svg"
+  },
+  {
+    "symbol": "CAT.PS",
+    "name": "Central Azucarera de Tarlac, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/central-azucarera-de-tarlac.svg"
+  },
+  {
+    "symbol": "CBC.PS",
+    "name": "China Banking Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/china-banking.svg"
+  },
+  {
+    "symbol": "CDC.PS",
+    "name": "Cityland Development Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cityland-development.svg"
+  },
+  {
+    "symbol": "CEB.PS",
+    "name": "Cebu Air Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cebu-air.svg"
+  },
+  {
+    "symbol": "CEBCP.PS",
+    "name": "Cebu Air Inc. Non-cum Conv Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cebu-air.svg"
+  },
+  {
+    "symbol": "CEI.PS",
+    "name": "Crown Equities Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/crown-equities.svg"
+  },
+  {
+    "symbol": "CEU.PS",
+    "name": "Centro Escolar University",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/centro-escolar-university.svg"
+  },
+  {
+    "symbol": "CHP.PS",
+    "name": "Concreat Holdings Philippines, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/concreat-philippines.svg"
+  },
+  {
+    "symbol": "CIC.PS",
+    "name": "Concepcion Industrial Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/concepcion-industrial.svg"
+  },
+  {
+    "symbol": "CLI.PS",
+    "name": "Cebu Landmasters, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cebu-landmasters.svg"
+  },
+  {
+    "symbol": "CLIA1.PS",
+    "name": "Cebu Landmasters, Inc. Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cebu-landmasters.svg"
+  },
+  {
+    "symbol": "CLIA2.PS",
+    "name": "Cebu Landmasters, Inc. Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cebu-landmasters.svg"
+  },
+  {
+    "symbol": "CNPF.PS",
+    "name": "Century Pacific Food, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/century-pacific-food.svg"
+  },
+  {
+    "symbol": "CNVRG.PS",
+    "name": "Converge Information & Communications Technology Solutions Inc",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/converge-information-and-communications-technology-solutions.svg"
+  },
+  {
+    "symbol": "COAL.PS",
+    "name": "Coal Asia Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/coal-asia.svg"
+  },
+  {
+    "symbol": "COL.PS",
+    "name": "COL Financial Group, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/col-financial.svg"
+  },
+  {
+    "symbol": "COSCO.PS",
+    "name": "Cosco Capital, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cosco-capital.svg"
+  },
+  {
+    "symbol": "CPG.PS",
+    "name": "Century Properties Group Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/century-properties.svg"
+  },
+  {
+    "symbol": "CPGPB.PS",
+    "name": "Century Properties Group Inc. Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/century-properties.svg"
+  },
+  {
+    "symbol": "CPM.PS",
+    "name": "Century Peak Holdings Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/century-peak-hldgs.svg"
+  },
+  {
+    "symbol": "CREC.PS",
+    "name": "Citicore Renewable Energy Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/citicore-renewable-energy-corpor.svg"
+  },
+  {
+    "symbol": "CROWN.PS",
+    "name": "Crown Asia Chemicals Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/crown-asia-chemicals.svg"
+  },
+  {
+    "symbol": "CSB.PS",
+    "name": "Citystate Savings Bank Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/citystate-savings-bank.svg"
+  },
+  {
+    "symbol": "CTS.PS",
+    "name": "CTS Global Equity Group, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cts-global-equity.svg"
+  },
+  {
+    "symbol": "CYBR.PS",
+    "name": "Cyber Bay Corp.",
+    "market": "PSE"
+  },
+  {
+    "symbol": "DD.PS",
+    "name": "DoubleDragon Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/doubledragon.svg"
+  },
+  {
+    "symbol": "DDPR.PS",
+    "name": "DoubleDragon Corporation Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/doubledragon.svg"
+  },
+  {
+    "symbol": "DELM.PS",
+    "name": "Del Monte Pacific Limited",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/del-monte-pac.svg"
+  },
+  {
+    "symbol": "DFNN.PS",
+    "name": "DFNN Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dfnn.svg"
+  },
+  {
+    "symbol": "DHI.PS",
+    "name": "Dominion Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dominion.svg"
+  },
+  {
+    "symbol": "DITO.PS",
+    "name": "Dito CME Holdings Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dito-cme.svg"
+  },
+  {
+    "symbol": "DIZ.PS",
+    "name": "Dizon Copper Silver Mines Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dizon-copper-silver-mines.svg"
+  },
+  {
+    "symbol": "DMC.PS",
+    "name": "DMCI Holdings Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dmci.svg"
+  },
+  {
+    "symbol": "DMCP.PS",
+    "name": "Dmci Holdings Inc Conv. Pfd Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dmci.svg"
+  },
+  {
+    "symbol": "DMPA1.PS",
+    "name": "Del Monte Pacific Ltd Pref Registered Series A-1",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/del-monte-pac.svg"
+  },
+  {
+    "symbol": "DMPA2.PS",
+    "name": "Del Monte Pacific Ltd Pref Registered Shs Series A-2",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/del-monte-pac.svg"
+  },
+  {
+    "symbol": "DMW.PS",
+    "name": "D.M. Wenceslao & Associates, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dm-wenceslao-and-associates-incorporated.svg"
+  },
+  {
+    "symbol": "DNL.PS",
+    "name": "D&L Industries, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dandl-industries.svg"
+  },
+  {
+    "symbol": "DTEL.PS",
+    "name": "PLDT, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pldt.svg"
+  },
+  {
+    "symbol": "DWC.PS",
+    "name": "Discovery World Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/discovery-world.svg"
+  },
+  {
+    "symbol": "ECP.PS",
+    "name": "Easycall Communications Philippines, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/easycall-communications-phils.svg"
+  },
+  {
+    "symbol": "ECVC.PS",
+    "name": "East coast vulcan mining corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/east-coast-vulcan.svg"
+  },
+  {
+    "symbol": "EEI.PS",
+    "name": "EEI Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/eei.svg"
+  },
+  {
+    "symbol": "EEIPA.PS",
+    "name": "EEI Corporation Pfd Registered Shs Series A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/eei.svg"
+  },
+  {
+    "symbol": "EEIPB.PS",
+    "name": "EEI Corporation Pfd Registered Shs Series B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/eei.svg"
+  },
+  {
+    "symbol": "EEIPD.PS",
+    "name": "EEI Corporation Pfd Registered shares",
+    "market": "PSE"
+  },
+  {
+    "symbol": "EG.PS",
+    "name": "IP E-Game Ventures Inc.",
+    "market": "PSE"
+  },
+  {
+    "symbol": "EGRN.PS",
+    "name": "Everwoods Green Resources & Holdings, Inc",
+    "market": "PSE"
+  },
+  {
+    "symbol": "ELI.PS",
+    "name": "Empire East Land Holdings Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/empire-east-land.svg"
+  },
+  {
+    "symbol": "EMI.PS",
+    "name": "Emperador Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/emperador.svg"
+  },
+  {
+    "symbol": "ENEX.PS",
+    "name": "ENEX Energy Corp",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/enex-energy.svg"
+  },
+  {
+    "symbol": "EURO.PS",
+    "name": "Euro-Med Laboratories Philippines, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/euro-med-laboratories-phils.svg"
+  },
+  {
+    "symbol": "EW.PS",
+    "name": "East West Banking Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/east-west-banking.svg"
+  },
+  {
+    "symbol": "FAF.PS",
+    "name": "First Abacus Financial Holdings Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/first-abacus-fin-hldgs.svg"
+  },
+  {
+    "symbol": "FB.PS",
+    "name": "San Miguel Food & Beverage, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel-food-and-beverage.svg"
+  },
+  {
+    "symbol": "FBP.PS",
+    "name": "San Miguel Food and Beverage Inc 8 % Non-Cum Pfd Registered",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel-food-and-beverage.svg"
+  },
+  {
+    "symbol": "FBP2.PS",
+    "name": "San Miguel Food and Beverage Inc 5.6569 % Cum Pfd Registered Shs Series 2",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel-food-and-beverage.svg"
+  },
+  {
+    "symbol": "FCG.PS",
+    "name": "Figaro Culinary Group, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/figaro-culinary.svg"
+  },
+  {
+    "symbol": "FDC.PS",
+    "name": "Filinvest Development Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/filinvest-development.svg"
+  },
+  {
+    "symbol": "FDCPA.PS",
+    "name": "Filinvest Development Corporation Pfd Registered Shs Series A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/filinvest-development.svg"
+  },
+  {
+    "symbol": "FDCPB.PS",
+    "name": "Filinvest Development Corporation Pfd Registered Shs Series B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/filinvest-development.svg"
+  },
+  {
+    "symbol": "FERRO.PS",
+    "name": "Ferronoux Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ferronoux.svg"
+  },
+  {
+    "symbol": "FEU.PS",
+    "name": "Far Eastern University, Incorporated",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/far-eastern-university.svg"
+  },
+  {
+    "symbol": "FGEN.PS",
+    "name": "First Gen Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/first-gen.svg"
+  },
+  {
+    "symbol": "FGENG.PS",
+    "name": "First Gen Corporation Pfd",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/first-gen.svg"
+  },
+  {
+    "symbol": "FJP.PS",
+    "name": "F&J Prince Holdings Corp. Class A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/fandj-prince-b.svg"
+  },
+  {
+    "symbol": "FJPB.PS",
+    "name": "F&J Prince Holdings Corp. Class B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/fandj-prince-b.svg"
+  },
+  {
+    "symbol": "FLI.PS",
+    "name": "Filinvest Land Incorporated",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/filinvest-development.svg"
+  },
+  {
+    "symbol": "FNI.PS",
+    "name": "Global Ferronickel Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/global-ferronickel.svg"
+  },
+  {
+    "symbol": "FOOD.PS",
+    "name": "Alliance Select Foods International, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/alliance-select-foods.svg"
+  },
+  {
+    "symbol": "FPH.PS",
+    "name": "First Philippine Holdings Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/first-philippine.svg"
+  },
+  {
+    "symbol": "FPI.PS",
+    "name": "Forum Pacific Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/forum-pacific.svg"
+  },
+  {
+    "symbol": "FRUIT.PS",
+    "name": "Fruitas Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/fruitas.svg"
+  },
+  {
+    "symbol": "FYN.PS",
+    "name": "Filsyn Corp. Class A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/filsyn-a.svg"
+  },
+  {
+    "symbol": "FYNB.PS",
+    "name": "Filsyn Corp. Class B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/filsyn-a.svg"
+  },
+  {
+    "symbol": "GEO.PS",
+    "name": "GeoGrace Resources Philippines Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/geograce-reources-phils.svg"
+  },
+  {
+    "symbol": "GERI.PS",
+    "name": "Global-Estate Resorts, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/global-estate-resorts.svg"
+  },
+  {
+    "symbol": "GLO.PS",
+    "name": "Globe Telecom Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/globe-telecom.svg"
+  },
+  {
+    "symbol": "GLOBA.PS",
+    "name": "Globe Telecom Inc. Pfd Registered Shs Non-voting perpetual series A pfd shs",
+    "market": "PSE"
+  },
+  {
+    "symbol": "GLOBB.PS",
+    "name": "Globe Telecom Inc. Pfd Registered Shs Non-voting perpetual series B pfd shs",
+    "market": "PSE"
+  },
+  {
+    "symbol": "GLOPA.PS",
+    "name": "Globe Telecom Inc. Preferred Shs -Series A-",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/globe-telecom.svg"
+  },
+  {
+    "symbol": "GLOPP.PS",
+    "name": "Globe Telecom Inc Preferred Shs Non-voting -Series A-",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/globe-telecom.svg"
+  },
+  {
+    "symbol": "GMA7.PS",
+    "name": "GMA Network, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gma-network-common.svg"
+  },
+  {
+    "symbol": "GMAP.PS",
+    "name": "GMA Holdings, Inc. Shs Philippine Depository Receipts",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gma-pdr.svg"
+  },
+  {
+    "symbol": "GPH.PS",
+    "name": "Grand Plaza Hotel Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/grand-plaza-hotel.svg"
+  },
+  {
+    "symbol": "GREEN.PS",
+    "name": "Greenergy Holdings Incorporated",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/greenergy.svg"
+  },
+  {
+    "symbol": "GSMI.PS",
+    "name": "Ginebra San Miguel, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ginebra-san-miguel.svg"
+  },
+  {
+    "symbol": "GTCAP.PS",
+    "name": "GT Capital Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gt-capital.svg"
+  },
+  {
+    "symbol": "GTPPA.PS",
+    "name": "GT Capital Holdings, Inc. 4.6299 % Pfd Registered Shs Series A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gt-capital.svg"
+  },
+  {
+    "symbol": "GTPPB.PS",
+    "name": "GT Capital Holdings, Inc. 5.0949 % Pfd Registered Shs Series B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gt-capital.svg"
+  },
+  {
+    "symbol": "HI.PS",
+    "name": "House of Investments, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ipeople.svg"
+  },
+  {
+    "symbol": "HOME.PS",
+    "name": "AllHome Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/allhome.svg"
+  },
+  {
+    "symbol": "HTI.PS",
+    "name": "Haus Talk, Inc",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/haus-talk.svg"
+  },
+  {
+    "symbol": "I.PS",
+    "name": "I-Remit, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/i-remit.svg"
+  },
+  {
+    "symbol": "ICT.PS",
+    "name": "International Container Terminal Services, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/int-l-container-terminals.svg"
+  },
+  {
+    "symbol": "IDC.PS",
+    "name": "Italpinas Development Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/italpinas-development.svg"
+  },
+  {
+    "symbol": "IMI.PS",
+    "name": "Integrated Micro-Electronics, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/integrated-micro-electronics.svg"
+  },
+  {
+    "symbol": "IMP.PS",
+    "name": "Imperial Resources, Inc. (Philippines)",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/imperial-resources.svg"
+  },
+  {
+    "symbol": "INFRA.PS",
+    "name": "Philippine Infradev Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/philippine-infradev.svg"
+  },
+  {
+    "symbol": "ION.PS",
+    "name": "Ionics Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ionics.svg"
+  },
+  {
+    "symbol": "IPM.PS",
+    "name": "IPM Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ipm.svg"
+  },
+  {
+    "symbol": "IPO.PS",
+    "name": "iPeople Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ipeople.svg"
+  },
+  {
+    "symbol": "IS.PS",
+    "name": "Island Information & Technology Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/island-info-and-tech.svg"
+  },
+  {
+    "symbol": "JAS.PS",
+    "name": "Jackstones, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jackstones.svg"
+  },
+  {
+    "symbol": "JFC.PS",
+    "name": "Jollibee Foods Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jollibee-foods.svg"
+  },
+  {
+    "symbol": "JFCPA.PS",
+    "name": "Jollibee Foods Corp. Pfd Registered Shs Series A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jollibee-foods.svg"
+  },
+  {
+    "symbol": "JFCPB.PS",
+    "name": "Jollibee Foods Corp. Pfd Registered Shs Series B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jollibee-foods.svg"
+  },
+  {
+    "symbol": "JGS.PS",
+    "name": "JG Summit Holdings Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jg-summit.svg"
+  },
+  {
+    "symbol": "JOH.PS",
+    "name": "Jolliville Holdings Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jolliville.svg"
+  },
+  {
+    "symbol": "KEEPR.PS",
+    "name": "Keepers Holdings. Inc",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/the-keepers.svg"
+  },
+  {
+    "symbol": "KEP.PS",
+    "name": "Keppel Philippines Properties, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/keppel-phils-properties.svg"
+  },
+  {
+    "symbol": "KPPI.PS",
+    "name": "Kepwealth Property Phils, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kepwealth-property-phils.svg"
+  },
+  {
+    "symbol": "LAND.PS",
+    "name": "City & Land Developers, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/city-and-land-developers.svg"
+  },
+  {
+    "symbol": "LBC.PS",
+    "name": "LBC Express Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lbc-express.svg"
+  },
+  {
+    "symbol": "LC.PS",
+    "name": "Lepanto Consolidated Mining Co Class A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lepanto-consolidated-mining-b.svg"
+  },
+  {
+    "symbol": "LCB.PS",
+    "name": "Lepanto Consolidated Mining Co Class B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lepanto-consolidated-mining-b.svg"
+  },
+  {
+    "symbol": "LFM.PS",
+    "name": "Liberty Flour Mills Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/liberty-flour-mills.svg"
+  },
+  {
+    "symbol": "LMG.PS",
+    "name": "LMG CORP",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lmg.svg"
+  },
+  {
+    "symbol": "LODE.PS",
+    "name": "Lodestar Investment Holdings Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lodestar-investment-hldg.svg"
+  },
+  {
+    "symbol": "LOTO.PS",
+    "name": "Pacific Online Systems Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pacific-online-systems.svg"
+  },
+  {
+    "symbol": "LPC.PS",
+    "name": "LFM Properties Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lfm-properties.svg"
+  },
+  {
+    "symbol": "LPZ.PS",
+    "name": "Lopez Holdings Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lopez.svg"
+  },
+  {
+    "symbol": "LSC.PS",
+    "name": "Lorenzo Shipping Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lorenzo-shipping.svg"
+  },
+  {
+    "symbol": "LTG.PS",
+    "name": "LT Group, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/lt.svg"
+  },
+  {
+    "symbol": "MA.PS",
+    "name": "Manila Mining Corporation Class A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/manila-mining-b.svg"
+  },
+  {
+    "symbol": "MAB.PS",
+    "name": "Manila Mining Corporation Class B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/manila-mining-b.svg"
+  },
+  {
+    "symbol": "MAC.PS",
+    "name": "MacroAsia Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/macroasia.svg"
+  },
+  {
+    "symbol": "MACAY.PS",
+    "name": "Macay Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/macay.svg"
+  },
+  {
+    "symbol": "MAH.PS",
+    "name": "Metro Alliance Holdings & Equities Corp. Class A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/metro-alliance-b.svg"
+  },
+  {
+    "symbol": "MAHB.PS",
+    "name": "Metro Alliance Holdings & Equities Corp. Class B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/metro-alliance-b.svg"
+  },
+  {
+    "symbol": "MARC.PS",
+    "name": "Marcventures Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/marcventures.svg"
+  },
+  {
+    "symbol": "MAXS.PS",
+    "name": "Max's Group Inc",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/max-s.svg"
+  },
+  {
+    "symbol": "MB.PS",
+    "name": "Manila Bulletin Publishing Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mla-bulletin-publishing.svg"
+  },
+  {
+    "symbol": "MBC.PS",
+    "name": "Manila Broadcasting Co.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/manila-broadcasting-company.svg"
+  },
+  {
+    "symbol": "MBT.PS",
+    "name": "Metropolitan Bank & Trust Co.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/metropolitan-bank-and-trust-com.svg"
+  },
+  {
+    "symbol": "MED.PS",
+    "name": "Medco Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/medco.svg"
+  },
+  {
+    "symbol": "MEDIC.PS",
+    "name": "Medilines Distributors, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/medilines-distributors-incorporated.svg"
+  },
+  {
+    "symbol": "MEG.PS",
+    "name": "Megaworld Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/megaworld.svg"
+  },
+  {
+    "symbol": "MER.PS",
+    "name": "Manila Electric Co.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/manila-electric-company.svg"
+  },
+  {
+    "symbol": "MFC.PS",
+    "name": "Manulife Financial Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/manulife.svg"
+  },
+  {
+    "symbol": "MFIN.PS",
+    "name": "Makati Finance Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/makati-finance.svg"
+  },
+  {
+    "symbol": "MG.PS",
+    "name": "Millennium Global Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/millennium-global.svg"
+  },
+  {
+    "symbol": "MGH.PS",
+    "name": "Metro Global Holdings Corporation",
+    "market": "PSE"
+  },
+  {
+    "symbol": "MHC.PS",
+    "name": "Mabuhay Holdings Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mabuhay.svg"
+  },
+  {
+    "symbol": "MJC.PS",
+    "name": "Manila Jockey Club Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/manila-jockey-club.svg"
+  },
+  {
+    "symbol": "MJIC.PS",
+    "name": "MJC Investments Corporation",
+    "market": "PSE"
+  },
+  {
+    "symbol": "MM.PS",
+    "name": "Merrymart Consumer Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/merrymart-consumer.svg"
+  },
+  {
+    "symbol": "MONDE.PS",
+    "name": "Monde Nissin Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/monde-nissin.svg"
+  },
+  {
+    "symbol": "MRC.PS",
+    "name": "MRC Allied, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mrc-allied-incorporated.svg"
+  },
+  {
+    "symbol": "MRSGI.PS",
+    "name": "Metro Retail Stores Group, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/metro-retail-stores.svg"
+  },
+  {
+    "symbol": "MVC.PS",
+    "name": "Mabuhay Vinyl Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mabuhay-vinyl.svg"
+  },
+  {
+    "symbol": "MWC.PS",
+    "name": "Manila Water Co. Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/manila-water-company.svg"
+  },
+  {
+    "symbol": "MWIDE.PS",
+    "name": "Megawide Construction Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mwide-prefs-series-2b.svg"
+  },
+  {
+    "symbol": "MWP.PS",
+    "name": "Megawide Construction Corp Pfd Registered",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mwide-prefs-series-2b.svg"
+  },
+  {
+    "symbol": "MWP2A.PS",
+    "name": "Megawide Construction Corporation Non-cum Pfd Registered Shs Series 2A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mwide-prefs-series-2b.svg"
+  },
+  {
+    "symbol": "MWP2B.PS",
+    "name": "Megawide Construction Corporation Non-cum Pfd Registered Shs Series 2B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mwide-prefs-series-2b.svg"
+  },
+  {
+    "symbol": "MWP4.PS",
+    "name": "Megawide Construction Corporation Pfd Registered Shs Pfd Rg Shs Ser 4/Called for Red 29.04.25 at PHP 100 a Sh",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mwide-prefs-series-2b.svg"
+  },
+  {
+    "symbol": "MWP5.PS",
+    "name": "Megawide Construction Corporation Non voting Pfd Registered Shs Series 5",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mwide-prefs-series-2b.svg"
+  },
+  {
+    "symbol": "MWP6A.PS",
+    "name": "Megawide Construction Corporation Pfd Registered Shs Non-Voting Perpetual Series 6A Pfd Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mwide-prefs-series-2b.svg"
+  },
+  {
+    "symbol": "MWP6B.PS",
+    "name": "Megawide Construction Corporation Pfd Registered Shs Non-Voting Perpetual Series 6B Pfd Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mwide-prefs-series-2b.svg"
+  },
+  {
+    "symbol": "MWP6C.PS",
+    "name": "Megawide Construction Corporation Pfd Registered Shs Non-Voting Perpetual Series 6C Pfd Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mwide-prefs-series-2b.svg"
+  },
+  {
+    "symbol": "MWP7A.PS",
+    "name": "Megawide Construction Corporation Pfd Registered Shs Non-Voting Perpetual Series 7A Pfd Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mwide-prefs-series-2b.svg"
+  },
+  {
+    "symbol": "MWP7B.PS",
+    "name": "Megawide Construction Corporation Pfd Registered Shs Non-Voting Perpetual Series 7B Pfd Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mwide-prefs-series-2b.svg"
+  },
+  {
+    "symbol": "MYNLD.PS",
+    "name": "Maynilad Water Services, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/maynilad-water-services.svg"
+  },
+  {
+    "symbol": "NI.PS",
+    "name": "NiHAO Mineral Resources International, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nihao-mineral-resources-int-l.svg"
+  },
+  {
+    "symbol": "NIKL.PS",
+    "name": "Nickel Asia Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nickel-asia.svg"
+  },
+  {
+    "symbol": "NOW.PS",
+    "name": "Now Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/now.svg"
+  },
+  {
+    "symbol": "NRCP.PS",
+    "name": "National Reinsurance Corporation of the Philippines",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/national-reinsurance.svg"
+  },
+  {
+    "symbol": "OGP.PS",
+    "name": "OceanaGold Philippines, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/oceanagold-philippines.svg"
+  },
+  {
+    "symbol": "OM.PS",
+    "name": "Omico Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/omico.svg"
+  },
+  {
+    "symbol": "OPM.PS",
+    "name": "Oriental Petroleum & Minerals Corp. Class A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/oriental-petroleum-and-mineral-b.svg"
+  },
+  {
+    "symbol": "OPMB.PS",
+    "name": "Oriental Petroleum & Minerals Corp. Class B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/oriental-petroleum-and-mineral-b.svg"
+  },
+  {
+    "symbol": "ORE.PS",
+    "name": "Oriental Peninsula Resources Group, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/oriental-peninsula-res.svg"
+  },
+  {
+    "symbol": "OV.PS",
+    "name": "Philodrill Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/the-philodril.svg"
+  },
+  {
+    "symbol": "PA.PS",
+    "name": "Pacifica Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pacifica.svg"
+  },
+  {
+    "symbol": "PAL.PS",
+    "name": "PAL Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pal.svg"
+  },
+  {
+    "symbol": "PAX.PS",
+    "name": "Paxys Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/paxys.svg"
+  },
+  {
+    "symbol": "PBB.PS",
+    "name": "Philippine Business Bank",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/philippine-business-bank.svg"
+  },
+  {
+    "symbol": "PBC.PS",
+    "name": "Philippine Bank of Communications, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/philippine-bank-of-comm.svg"
+  },
+  {
+    "symbol": "PCOR.PS",
+    "name": "Petron Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/petron.svg"
+  },
+  {
+    "symbol": "PERC.PS",
+    "name": "PetroEnergy Resources Corporation.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/petroenergy-resources.svg"
+  },
+  {
+    "symbol": "PGOLD.PS",
+    "name": "Puregold Price Club Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/puregold-price-club.svg"
+  },
+  {
+    "symbol": "PHA.PS",
+    "name": "Premiere Horizon Alliance Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/premiere-horizon-alliance.svg"
+  },
+  {
+    "symbol": "PHC.PS",
+    "name": "Philcomsat Holdings Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/philcomsat.svg"
+  },
+  {
+    "symbol": "PHES.PS",
+    "name": "Philippine Estates Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/philippine-estates.svg"
+  },
+  {
+    "symbol": "PHN.PS",
+    "name": "Phinma Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/phinma.svg"
+  },
+  {
+    "symbol": "PHR.PS",
+    "name": "PH Resorts Group Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ph-resorts.svg"
+  },
+  {
+    "symbol": "PIZZA.PS",
+    "name": "Shakey's Pizza Asia Ventures, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shakey-s-pizza-asia-ventures.svg"
+  },
+  {
+    "symbol": "PLUS.PS",
+    "name": "DigiPlus Interactive Corp",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/leisure-and-resorts-world.svg"
+  },
+  {
+    "symbol": "PMPC.PS",
+    "name": "Panasonic Manufacturing Philippines Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/panasonic.svg"
+  },
+  {
+    "symbol": "PNB.PS",
+    "name": "Philippine National Bank",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/philippine-national-bank.svg"
+  },
+  {
+    "symbol": "PNC.PS",
+    "name": "Philippine National Construction Corp.",
+    "market": "PSE"
+  },
+  {
+    "symbol": "PNX.PS",
+    "name": "Phoenix Petroleum Philippines Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/phoenix-petroleum-philippines.svg"
+  },
+  {
+    "symbol": "PNX3A.PS",
+    "name": "Phoenix Petroleum Philippines INC 7.4278 % Cum.Pfd Shs Series 3-A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/phoenix-petroleum-philippines.svg"
+  },
+  {
+    "symbol": "PNX3B.PS",
+    "name": "Phoenix Petroleum Philippines Inc. 8.1078 % Cum.Pfd Shs Series 3-B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/phoenix-petroleum-philippines.svg"
+  },
+  {
+    "symbol": "PNX4.PS",
+    "name": "Phoenix Petroleum Philippines Inc. 7.5673 % Cum Pfd Registered Shs Series 4",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/phoenix-petroleum-philippines.svg"
+  },
+  {
+    "symbol": "PNXP.PS",
+    "name": "Phoenix Petroleum Philippines Inc. Pfd.Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/phoenix-petroleum-philippines.svg"
+  },
+  {
+    "symbol": "PORT.PS",
+    "name": "Globalport 900, Inc.",
+    "market": "PSE"
+  },
+  {
+    "symbol": "PPC.PS",
+    "name": "Pryce Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pryce.svg"
+  },
+  {
+    "symbol": "PRC.PS",
+    "name": "Philippine Racing Club, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/philippine-racing-club.svg"
+  },
+  {
+    "symbol": "PRF2A.PS",
+    "name": "Petron Corporation Pfd.Shs Series 2A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/petron.svg"
+  },
+  {
+    "symbol": "PRF2B.PS",
+    "name": "Petron Corporation Pfd.Shs Series 2B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/petron.svg"
+  },
+  {
+    "symbol": "PRF3A.PS",
+    "name": "Petron Corp. Non-Cum Pfd Registered Shs Series -3A-",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/petron.svg"
+  },
+  {
+    "symbol": "PRF3B.PS",
+    "name": "Petron Corp. Pfd Registered Shs Series -3B-",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/petron.svg"
+  },
+  {
+    "symbol": "PRF4A.PS",
+    "name": "Petron Corp. Pfd Registered Shs Non-Voting Perpetual Series 4A",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/petron.svg"
+  },
+  {
+    "symbol": "PRF4B.PS",
+    "name": "Petron Corp.Pfd Registered Shs Non-Voting Perpetual Series 4B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/petron.svg"
+  },
+  {
+    "symbol": "PRF4C.PS",
+    "name": "Petron Corp. Pfd Registered Shs Non-Voting Perpetual Series 4C",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/petron.svg"
+  },
+  {
+    "symbol": "PRF4D.PS",
+    "name": "Petron Corp. Pfd Registered Shs Non-Voting Perpetual Series 4D Pfd Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/petron.svg"
+  },
+  {
+    "symbol": "PRF4E.PS",
+    "name": "Petron Corp. Pfd Registered shs Non-Voting Perpetual Series 4E Preferred Shares",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/petron.svg"
+  },
+  {
+    "symbol": "PRIM.PS",
+    "name": "Prime Media Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/prime-media.svg"
+  },
+  {
+    "symbol": "PRMX.PS",
+    "name": "Primex Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/primex.svg"
+  },
+  {
+    "symbol": "PSB.PS",
+    "name": "Philippine Savings Bank",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/philippine-savings-bank.svg"
+  },
+  {
+    "symbol": "PSE.PS",
+    "name": "Philippine Stock Exchange, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/the-philippine-stock-exchange.svg"
+  },
+  {
+    "symbol": "PTC.PS",
+    "name": "Philippine Trust Co.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/philippine-trust-company.svg"
+  },
+  {
+    "symbol": "PTT.PS",
+    "name": "PT & T Corp",
+    "market": "PSE"
+  },
+  {
+    "symbol": "PX.PS",
+    "name": "Philex Mining Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/philex-mining.svg"
+  },
+  {
+    "symbol": "PXP.PS",
+    "name": "PXP Energy Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pxp-energy.svg"
+  },
+  {
+    "symbol": "RCB.PS",
+    "name": "Rizal Commercial Banking Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rizal-commercial-banking.svg"
+  },
+  {
+    "symbol": "RCI.PS",
+    "name": "Roxas and Co. Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/roxas-and-company.svg"
+  },
+  {
+    "symbol": "REDC.PS",
+    "name": "Repower Energy Development Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/repower-energy-development.svg"
+  },
+  {
+    "symbol": "REG.PS",
+    "name": "Republic Glass Holdings Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/republic-glass.svg"
+  },
+  {
+    "symbol": "RFM.PS",
+    "name": "RFM Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rfm.svg"
+  },
+  {
+    "symbol": "RLC.PS",
+    "name": "Robinsons Land Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/robinsons-land.svg"
+  },
+  {
+    "symbol": "RLT.PS",
+    "name": "Philippine Realty & Holdings Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/philippine-realty-and-hldgs.svg"
+  },
+  {
+    "symbol": "ROCK.PS",
+    "name": "Rockwell Land Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rockwell-land.svg"
+  },
+  {
+    "symbol": "ROX.PS",
+    "name": "Roxas Holdings Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/roxas.svg"
+  },
+  {
+    "symbol": "RRHI.PS",
+    "name": "Robinsons Retail Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/robinsons-retail.svg"
+  },
+  {
+    "symbol": "RSLG1.PS",
+    "name": "Raslag Corp Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/raslag.svg"
+  },
+  {
+    "symbol": "SBS.PS",
+    "name": "SBS Philippines Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sbs-philippines.svg"
+  },
+  {
+    "symbol": "SCC.PS",
+    "name": "Semirara Mining & Power Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/semirara-mining-and-power.svg"
+  },
+  {
+    "symbol": "SECB.PS",
+    "name": "Security Bank Corp. (Philippines)",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/security-bank.svg"
+  },
+  {
+    "symbol": "SEVN.PS",
+    "name": "Philippine Seven Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/philippine-seven.svg"
+  },
+  {
+    "symbol": "SFI.PS",
+    "name": "Swift Foods Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/swift-foods.svg"
+  },
+  {
+    "symbol": "SFIP.PS",
+    "name": "Swift Foods Inc Convertible Preferred Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/swift-foods.svg"
+  },
+  {
+    "symbol": "SGI.PS",
+    "name": "Solid Group Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/solid.svg"
+  },
+  {
+    "symbol": "SGP.PS",
+    "name": "Synergy Grid & Development Philippines, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/synergy-grid-and-dev-t-phils.svg"
+  },
+  {
+    "symbol": "SHLPH.PS",
+    "name": "Shell Pilipinas Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pilipinas-shell-petroleum.svg"
+  },
+  {
+    "symbol": "SHNG.PS",
+    "name": "Shang Properties, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shang-properties.svg"
+  },
+  {
+    "symbol": "SLF.PS",
+    "name": "Sun Life Financial Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sun-life.svg"
+  },
+  {
+    "symbol": "SLI.PS",
+    "name": "Sta. Lucia Land,Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sta-lucia-land.svg"
+  },
+  {
+    "symbol": "SM.PS",
+    "name": "SM Investments Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sm-prime.svg"
+  },
+  {
+    "symbol": "SMC.PS",
+    "name": "San Miguel Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2E.PS",
+    "name": "San Miguel Corp 6.3255 % Pfd Shs Series 2-E",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2F.PS",
+    "name": "San Miguel Corporation 6.8072 % Pfd Registered Shs Series 2 F",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2G.PS",
+    "name": "San Miguel Corp 6.5793 % Pfd Shs Series 2-G",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2H.PS",
+    "name": "San Miguel Corporation 6.3222 % Cum Pfd Registered Shs Series 2 H",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2I.PS",
+    "name": "San Miguel Corporation 6.3355 % Non Red Cum Pfd Registered Shs Series -2-I",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2J.PS",
+    "name": "San Miguel Corporation Pfd Registered Shs Series 2 J",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2K.PS",
+    "name": "San Miguel Corporation Non-Cum Pfd Registered Shs Series 2K",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2L.PS",
+    "name": "San Miguel Corporation Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2M.PS",
+    "name": "San Miguel Corporation Pfd Registered Shs Series 2 M",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2N.PS",
+    "name": "San Miguel Corporation Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2O.PS",
+    "name": "San Miguel Corporation Series 2 Preferred Shares - Subseries 2O",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2P.PS",
+    "name": "San Miguel Corporation Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2Q.PS",
+    "name": "San Miguel Corporation Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2R.PS",
+    "name": "San Miguel Corporation Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2S.PS",
+    "name": "San Miguel Corporation Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2T.PS",
+    "name": "San Miguel Corporation Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMC2U.PS",
+    "name": "San Miguel Corporation Pfd Registered Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMCP1.PS",
+    "name": "San Miguel Corporation 8 % Cum Red Pref Registered Shs 2010- Series 1",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/san-miguel.svg"
+  },
+  {
+    "symbol": "SMPH.PS",
+    "name": "SM Prime Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sm-prime.svg"
+  },
+  {
+    "symbol": "SOC.PS",
+    "name": "SOCResources, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/socresources.svg"
+  },
+  {
+    "symbol": "SPC.PS",
+    "name": "SPC Power Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/spc-power.svg"
+  },
+  {
+    "symbol": "SPM.PS",
+    "name": "Seafront Resources Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/seafront-resources.svg"
+  },
+  {
+    "symbol": "SPNEC.PS",
+    "name": "SP New Energy Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/solar-philippines-nueva-ecija.svg"
+  },
+  {
+    "symbol": "SRDC.PS",
+    "name": "Supercity Realty Development Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/supercity-realty-development.svg"
+  },
+  {
+    "symbol": "SSI.PS",
+    "name": "SSI Group, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ssi.svg"
+  },
+  {
+    "symbol": "STI.PS",
+    "name": "STI Education Systems Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sti-education-systems.svg"
+  },
+  {
+    "symbol": "STN.PS",
+    "name": "Steniel Manufacturing Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/steniel-manufacturing.svg"
+  },
+  {
+    "symbol": "STR.PS",
+    "name": "Vistamalls, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/vistamalls.svg"
+  },
+  {
+    "symbol": "SUN.PS",
+    "name": "Suntrust Resort Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/suntrust-resort.svg"
+  },
+  {
+    "symbol": "T.PS",
+    "name": "TKC Metals Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tkc-metals.svg"
+  },
+  {
+    "symbol": "TBGI.PS",
+    "name": "Transpacific Broadband Group International, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/transpacific-broadband.svg"
+  },
+  {
+    "symbol": "TCB2A.PS",
+    "name": "Cirtek Holdings Philippines Corporation Non-Cum Pfd Registered",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cirtek-philippines.svg"
+  },
+  {
+    "symbol": "TCB2B.PS",
+    "name": "Cirtek Holdings Philippines Corporation Class B",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cirtek-philippines.svg"
+  },
+  {
+    "symbol": "TCB2C.PS",
+    "name": "Cirtek Holdings Philippines Corporation Pfd Registered Shs -B2-2C-",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cirtek-philippines.svg"
+  },
+  {
+    "symbol": "TCB2D.PS",
+    "name": "Cirtek Holdings Philippines Corporation Pfd Registered Shs -B2-2D-",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cirtek-philippines.svg"
+  },
+  {
+    "symbol": "TECH.PS",
+    "name": "Cirtek Holdings Philippines Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/cirtek-philippines.svg"
+  },
+  {
+    "symbol": "TEL.PS",
+    "name": "PLDT, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pldt.svg"
+  },
+  {
+    "symbol": "TFC.PS",
+    "name": "PTFC Redevelopment Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ptfc-redevelopment.svg"
+  },
+  {
+    "symbol": "TFHI.PS",
+    "name": "Top Frontier Investment Holdings, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/top-frontier-investment-hldgs.svg"
+  },
+  {
+    "symbol": "TLII.PS",
+    "name": "PLDT, Inc. 5 3/4 % Cum.Conv.Pfd Shs Series -II-",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/pldt.svg"
+  },
+  {
+    "symbol": "TOP.PS",
+    "name": "Top Line Business Development Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/top-line-business-development.svg"
+  },
+  {
+    "symbol": "TUGS.PS",
+    "name": "Harbor Star Shipping Services, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/harbor-star-shipping-services.svg"
+  },
+  {
+    "symbol": "UBP.PS",
+    "name": "Union Bank of the Philippines",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/union-bank-of-the-philippines.svg"
+  },
+  {
+    "symbol": "UNH.PS",
+    "name": "Uniholdings Inc",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/uniholdings.svg"
+  },
+  {
+    "symbol": "UPM.PS",
+    "name": "United Paragon Mining Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/united-paragon-mining.svg"
+  },
+  {
+    "symbol": "UPSON.PS",
+    "name": "Upson International Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/upson-international.svg"
+  },
+  {
+    "symbol": "URC.PS",
+    "name": "Universal Robina Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/universal-robina.svg"
+  },
+  {
+    "symbol": "V.PS",
+    "name": "Vantage Equities, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/vantage-equities.svg"
+  },
+  {
+    "symbol": "VITA.PS",
+    "name": "Vitarich Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/vitarich.svg"
+  },
+  {
+    "symbol": "VLC.PS",
+    "name": "Villar Land Holdings Corp.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/villar-land.svg"
+  },
+  {
+    "symbol": "VLL.PS",
+    "name": "Vista Land & Lifescapes, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/vista-land-and-lifescapes.svg"
+  },
+  {
+    "symbol": "VLL2A.PS",
+    "name": "Vista Land & Lifescapes, Inc. Series 2A Preferred Shares Non-Voting Perpetual Series of VLL2A Pfd Shs",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/vista-land-and-lifescapes.svg"
+  },
+  {
+    "symbol": "VLL2B.PS",
+    "name": "Vista Land & Lifescapes, Inc. Series 2B Preferred Shares Non- Voting Perpetual seried of 2B series",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/vista-land-and-lifescapes.svg"
+  },
+  {
+    "symbol": "VMC.PS",
+    "name": "Victorias Milling Co., Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/victorias-milling-company.svg"
+  },
+  {
+    "symbol": "VVT.PS",
+    "name": "Vivant Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/vivant.svg"
+  },
+  {
+    "symbol": "WEB.PS",
+    "name": "PhilWeb Corporation",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/philweb.svg"
+  },
+  {
+    "symbol": "WIN.PS",
+    "name": "Wellex Industries Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/wellex-industries.svg"
+  },
+  {
+    "symbol": "WLCON.PS",
+    "name": "Wilcon Depot, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/wilcon-depot.svg"
+  },
+  {
+    "symbol": "WPI.PS",
+    "name": "Waterfront Philippines, Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/waterfront-philippines.svg"
+  },
+  {
+    "symbol": "X.PS",
+    "name": "Xurpas Inc",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/xurpas.svg"
+  },
+  {
+    "symbol": "XG.PS",
+    "name": "NexGen Energy Corp",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/nexgen-energy.svg"
+  },
+  {
+    "symbol": "ZHI.PS",
+    "name": "Zeus Holdings Inc.",
+    "market": "PSE",
+    "image": "https://s3-symbol-logo.tradingview.com/zeus.svg"
+  }
+]

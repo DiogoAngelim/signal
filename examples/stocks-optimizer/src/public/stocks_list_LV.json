@@ -1,0 +1,67 @@
+[
+  {
+    "symbol": "DGR1R",
+    "name": "DelfinGroup AS",
+    "market": "OMXRSE",
+    "image": "https://s3-symbol-logo.tradingview.com/delfingroup.svg"
+  },
+  {
+    "symbol": "EGG",
+    "name": "APF Holdings AS",
+    "market": "OMXRSE",
+    "image": "https://s3-symbol-logo.tradingview.com/apf.svg"
+  },
+  {
+    "symbol": "ELEVR",
+    "name": "Eleving Group",
+    "market": "OMXRSE",
+    "image": "https://s3-symbol-logo.tradingview.com/eleving-group.svg"
+  },
+  {
+    "symbol": "FRGTE",
+    "name": "Frigate AS",
+    "market": "OMXRSE"
+  },
+  {
+    "symbol": "IDX1R",
+    "name": "IPAS Indexo",
+    "market": "OMXRSE",
+    "image": "https://s3-symbol-logo.tradingview.com/indexo.svg"
+  },
+  {
+    "symbol": "KALVE",
+    "name": "Kalve Coffee AS",
+    "market": "OMXRSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kalve-coffee.svg"
+  },
+  {
+    "symbol": "MDARA",
+    "name": "MADARA Cosmetics AS",
+    "market": "OMXRSE",
+    "image": "https://s3-symbol-logo.tradingview.com/madara-cosmetics.svg"
+  },
+  {
+    "symbol": "RKB1R",
+    "name": "Rigas Kugu Buvetava JSC",
+    "market": "OMXRSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rigas-kugu-buvetava.svg"
+  },
+  {
+    "symbol": "SAF1R",
+    "name": "SAF Tehnika A/S",
+    "market": "OMXRSE",
+    "image": "https://s3-symbol-logo.tradingview.com/saf-tehnika.svg"
+  },
+  {
+    "symbol": "SCM1R",
+    "name": "Siguldas Ciltslietu Un Maksligas Apseklosanas Stacija A/S",
+    "market": "OMXRSE",
+    "image": "https://s3-symbol-logo.tradingview.com/siguldas-cmas.svg"
+  },
+  {
+    "symbol": "VIRSI",
+    "name": "VIRSI-A AS",
+    "market": "OMXRSE",
+    "image": "https://s3-symbol-logo.tradingview.com/virsi-a.svg"
+  }
+]

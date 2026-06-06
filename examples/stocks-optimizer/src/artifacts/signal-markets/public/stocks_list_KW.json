@@ -1,0 +1,671 @@
+[
+  {
+    "symbol": "ABK",
+    "name": "Al Ahli Bank Of Kuwait",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/al-ahli-bank-of-kuwait.svg"
+  },
+  {
+    "symbol": "ALG",
+    "name": "Ali Alghanim Sons Automotive Company",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ali-alghanim-sons-automotive-co-kscc.svg"
+  },
+  {
+    "symbol": "ASC",
+    "name": "Automated Systems Co. KSCC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/automated-systems-co-kpsc.svg"
+  },
+  {
+    "symbol": "BPCC",
+    "name": "Boubyan Petrochemical Co. (K.S.C.)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/boubyan-petrochemical-co-kscp.svg"
+  },
+  {
+    "symbol": "CABLE",
+    "name": "Gulf Cables and Electrical Industries Group Co.(K.S.C.P)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-cable-and-electrical-industries-co-kscp.svg"
+  },
+  {
+    "symbol": "CATTL",
+    "name": "Livestock Transport & Trading Co. KSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/livestock-transport-and-trading-co-ksc.svg"
+  },
+  {
+    "symbol": "CBK",
+    "name": "Commercial Bank of Kuwait K.S.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/commercial-bank-of-kuwait.svg"
+  },
+  {
+    "symbol": "CGC",
+    "name": "Combined Group Contracting Co. SAKC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/combined-contracting-kscp.svg"
+  },
+  {
+    "symbol": "CLEANING",
+    "name": "National Cleaning Company",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/national-cleaning-co-kscp.svg"
+  },
+  {
+    "symbol": "COAST",
+    "name": "Coast Investment & Development Co. K.S.C.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/coast-investment-and-development.svg"
+  },
+  {
+    "symbol": "DALQANRE",
+    "name": "Dalqan Real Estate Co. KSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dalqan-real-estate-co-ksc.svg"
+  },
+  {
+    "symbol": "DIGITUS",
+    "name": "Digitus Group for Digital Infrastructure Data Centers & Communications KSCP",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/hayat-communications.svg"
+  },
+  {
+    "symbol": "DIGITUS126",
+    "name": "Digitus Group for Digital Infrastructure Data Centers & Communications KSCP Rights 2026-18.02.26 For shares",
+    "market": "KSE"
+  },
+  {
+    "symbol": "EKTTITAB",
+    "name": "Ekttitab Holding Co. (S.A.K.)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ekttitab-holding-c.svg"
+  },
+  {
+    "symbol": "EMIRATES",
+    "name": "Kuwait Emirates Holding Company K.S.C.P",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-emirates-co-kscp.svg"
+  },
+  {
+    "symbol": "ENERGYH",
+    "name": "Energy House Holding Co.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/the-energy-house.svg"
+  },
+  {
+    "symbol": "EQUIPMENT",
+    "name": "Equipment Holding Co. KSCP",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/equipment.svg"
+  },
+  {
+    "symbol": "EQUIPMENT126",
+    "name": "Equipment Holding Company KSCC Rights 2026-16.02.26 For Shares",
+    "market": "KSE"
+  },
+  {
+    "symbol": "ERESCO",
+    "name": "Al-Enmaa Real Estate Company KSCP",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/al-enmaa-real-estate.svg"
+  },
+  {
+    "symbol": "FACIL",
+    "name": "Commercial Facilities Co. SAK",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/commercial-facilities-co-sak.svg"
+  },
+  {
+    "symbol": "FTI",
+    "name": "First Takaful Insurance Co. KSCC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/first-takaful-insurance.svg"
+  },
+  {
+    "symbol": "FUTUREKID",
+    "name": "Future Kid Entertainment Real Estate Co. KSCC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/future-kid-entertainment-and-real-estate.svg"
+  },
+  {
+    "symbol": "GBK",
+    "name": "Gulf Bank K.S.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-bank-kscp.svg"
+  },
+  {
+    "symbol": "GFC",
+    "name": "Gulf Franchising Holding Co. Kscc",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-franchising.svg"
+  },
+  {
+    "symbol": "GFH",
+    "name": "GFH Financial Group BSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gfh-financial-group.svg"
+  },
+  {
+    "symbol": "GIH",
+    "name": "Gulf Investment House KSCC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-investment-house.svg"
+  },
+  {
+    "symbol": "GINS",
+    "name": "Gulf Insurance Group K.S.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/gulf-insurance.svg"
+  },
+  {
+    "symbol": "HUMANSOFT",
+    "name": "Human Soft Holding Co. KSCC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/human-soft.svg"
+  },
+  {
+    "symbol": "IFA",
+    "name": "International Financial Advisors Holding K.P.S.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/international-financial-advisors.svg"
+  },
+  {
+    "symbol": "IFAHR",
+    "name": "IFA Hotels & Resorts Co. (K.S.C.)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/ifa-hotels-and-resorts.svg"
+  },
+  {
+    "symbol": "INJAZZAT",
+    "name": "Injazzat Real Estate Development. Co. C.S.C. Closed",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/injazzat-real-estate-development.svg"
+  },
+  {
+    "symbol": "INOVEST",
+    "name": "Inovest BSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/inovest-bsc.svg"
+  },
+  {
+    "symbol": "INTEGRATED",
+    "name": "Integrated Holding Co. KCSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/integrated-co-ksc.svg"
+  },
+  {
+    "symbol": "IPG",
+    "name": "Independent Petroleum Group SAK",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/independent-petroleum-kscp.svg"
+  },
+  {
+    "symbol": "JAZEERA",
+    "name": "Jazeera Airways Co. (KSC)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jazeera-airways-co-kscp.svg"
+  },
+  {
+    "symbol": "JTC",
+    "name": "JTC Logistics Transportation & Stevedoring Co. K.S.C.P",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/jassim-transport-and-stevedoring-co-kscc.svg"
+  },
+  {
+    "symbol": "KAMCO",
+    "name": "KAMCO Investment Company K.S.C.P.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kamco-investment.svg"
+  },
+  {
+    "symbol": "KBT",
+    "name": "Kuwait Business Town Real Estate Co. KSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-business-town-real-estate.svg"
+  },
+  {
+    "symbol": "KCEM",
+    "name": "Kuwait Cement Company K.P.S.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-cement-kpsc.svg"
+  },
+  {
+    "symbol": "KCIN",
+    "name": "Kuwait National Cinema Co.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-national-cinema.svg"
+  },
+  {
+    "symbol": "KCPC",
+    "name": "Kuwait Co for Process Plant Construction & Contracting KSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/the-kuwait-company-for-process-plant-construction-and-contracting-ksc.svg"
+  },
+  {
+    "symbol": "KFH",
+    "name": "Kuwait Finance House K.S.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-finance-house.svg"
+  },
+  {
+    "symbol": "KFIC",
+    "name": "KFIC Invest K.S.C.P",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kfic-invest-kscp.svg"
+  },
+  {
+    "symbol": "KFOUC",
+    "name": "Kuwait Foundry Company (S.A.K)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-foundry.svg"
+  },
+  {
+    "symbol": "KGL",
+    "name": "Kuwait & Gulf Link Transport Co. KSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-and-gulf-link-transport.svg"
+  },
+  {
+    "symbol": "KHOT",
+    "name": "Kuwait Hotels Co. SAK",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-hotels-co-kscp.svg"
+  },
+  {
+    "symbol": "KIB",
+    "name": "Kuwait International Bank KSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-international-bank.svg"
+  },
+  {
+    "symbol": "KINS",
+    "name": "Kuwait Insurance Company S.A.K.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-insurance-co-sak.svg"
+  },
+  {
+    "symbol": "KINV",
+    "name": "Kuwait Investment Company S.A.K.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-investment-co-kscp.svg"
+  },
+  {
+    "symbol": "KMEFIC",
+    "name": "Kuwait & Middle East Financial Investment Co. KSCC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-and-middle-east-financial-investment.svg"
+  },
+  {
+    "symbol": "KPPC",
+    "name": "Privatization Holding Co. KSCC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/privatization.svg"
+  },
+  {
+    "symbol": "KPROJ",
+    "name": "Kuwait Projects Company Holding (K.S.C.P.)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-projects.svg"
+  },
+  {
+    "symbol": "KRE",
+    "name": "Kuwait Real Estate Company",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-real-estate-co-ksc.svg"
+  },
+  {
+    "symbol": "KUWAITRE",
+    "name": "Kuwait Reinsurance Co.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-reinsurance-co-kspc.svg"
+  },
+  {
+    "symbol": "MABANEE",
+    "name": "Mabanee Company (SAKC)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mabanee-co-kpsc.svg"
+  },
+  {
+    "symbol": "MADAR",
+    "name": "Al Madar Kuwait Holding Co.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/al-madar-investment-co-ksc.svg"
+  },
+  {
+    "symbol": "MANAZEL",
+    "name": "Manazel Holding Co.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/manazel.svg"
+  },
+  {
+    "symbol": "MARAKEZ",
+    "name": "Real Estate Trade Centers Co. KSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/real-estate-trade-centers.svg"
+  },
+  {
+    "symbol": "MARKAZ",
+    "name": "Kuwait Financial Centre KPSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-financial-centre.svg"
+  },
+  {
+    "symbol": "MASAKEN",
+    "name": "Al Masaken International Real Estate Development Co.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/al-masaken-international-real-estate-development.svg"
+  },
+  {
+    "symbol": "MASHAER",
+    "name": "Mashaer Holding Company K.S.C.(Public)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mashaer.svg"
+  },
+  {
+    "symbol": "MAZAYA",
+    "name": "Al-Mazaya Holding Co. SAKC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/al-mazaya-holding.svg"
+  },
+  {
+    "symbol": "MENA",
+    "name": "MENA Real Estate Company KSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mena-real-estate.svg"
+  },
+  {
+    "symbol": "MEZZAN",
+    "name": "Mezzan Holding Company KSCC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mezzan-co.svg"
+  },
+  {
+    "symbol": "MIDAN",
+    "name": "Al-Maidan Clinic for Oral Health Services Co. (K.S.C.C)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/al-maidan-clinic-for-oral-health-services-co-ksc.svg"
+  },
+  {
+    "symbol": "MKHZN",
+    "name": "Agility Public Warehousing Co. K.S.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/agility-public-war.svg"
+  },
+  {
+    "symbol": "MRC",
+    "name": "Metal & Recycling Co. K.S.C.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/metal-and-recycling-co-ksc.svg"
+  },
+  {
+    "symbol": "MUBARRAD",
+    "name": "Mubarrad Holding Co. (K.S.C.C)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mubarrad-transport.svg"
+  },
+  {
+    "symbol": "MUNSHAAT",
+    "name": "Munshaat Real Estate Projects Co. K.S.C.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/munshaat-real-estate-projects.svg"
+  },
+  {
+    "symbol": "MUNTAZAHAT",
+    "name": "Kuwait Resorts Company K.P.S.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-resorts.svg"
+  },
+  {
+    "symbol": "NAPESCO",
+    "name": "National Petroleum Services Co. KSCC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/national-petroleum-services.svg"
+  },
+  {
+    "symbol": "NBK",
+    "name": "National Bank of Kuwait K.S.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/national-bank-of-kuwait.svg"
+  },
+  {
+    "symbol": "NCCI",
+    "name": "National Consumer Holding Company",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/national-consumer-co.svg"
+  },
+  {
+    "symbol": "NICBM",
+    "name": "National Industries Company for Building Materials",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/national-industries-ksc.svg"
+  },
+  {
+    "symbol": "NIH",
+    "name": "National International Co. (Holding) (K.S.C.)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/natl-international.svg"
+  },
+  {
+    "symbol": "NIND",
+    "name": "National Industries Group (Holding) SAK",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/national-industries-group.svg"
+  },
+  {
+    "symbol": "NINV",
+    "name": "National Investments Co. KSC Closed",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/national-investments-co.svg"
+  },
+  {
+    "symbol": "NOOR",
+    "name": "Noor Financial Investment Co. KSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/noor-financial-investment-co.svg"
+  },
+  {
+    "symbol": "NRE",
+    "name": "National Real Estate Co. S.A.K.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/national-real-estate-co-ksc.svg"
+  },
+  {
+    "symbol": "OOREDOO",
+    "name": "National Mobile Telecommunications Company K.S.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/national-mobile-telecommunications.svg"
+  },
+  {
+    "symbol": "OSOS",
+    "name": "Osos Holding Group Company (K.S.C.)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/osos-co.svg"
+  },
+  {
+    "symbol": "OSOUL",
+    "name": "Osoul Investment Co. (K.S.C.) Closed",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/osoul-investment.svg"
+  },
+  {
+    "symbol": "OULAFUEL",
+    "name": "Oula Fuel Marketing Company K.S.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/oula-fuel-marketing.svg"
+  },
+  {
+    "symbol": "PAPCO",
+    "name": "Palms Agro Production Co. KSCC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/palms-agro-production.svg"
+  },
+  {
+    "symbol": "PAPER",
+    "name": "Shuaiba Industrial Co. (K.S.C)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/shuaiba-industrial.svg"
+  },
+  {
+    "symbol": "PCEM",
+    "name": "Kuwait Portland Cement Co. KSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-portland-cement.svg"
+  },
+  {
+    "symbol": "QIC",
+    "name": "Umm Al-Qaiwain General Investments Co PSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/umm-al-qaiwain-general-investment-co-psc.svg"
+  },
+  {
+    "symbol": "RASIYAT",
+    "name": "Rasiyat Holding Company",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/rasiyat-company-kpsc.svg"
+  },
+  {
+    "symbol": "SANAM",
+    "name": "Sanam Group Holding Co K.S.C.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sanam-real-estate.svg"
+  },
+  {
+    "symbol": "SECH",
+    "name": "Securities House (K.S.C)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/the-securities-house-ksc.svg"
+  },
+  {
+    "symbol": "SENERGY",
+    "name": "Senergy Holding Company (K.S.C.P)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/senergy-co.svg"
+  },
+  {
+    "symbol": "SHIP",
+    "name": "Heavy Engineering Industries & Shipbuilding Co. (KSC)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/heavy-engineering-industries-and-shipbuilding.svg"
+  },
+  {
+    "symbol": "SOKOUK",
+    "name": "Sokouk Holding Co.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/sokouk.svg"
+  },
+  {
+    "symbol": "SOOR",
+    "name": "Soor Fuel Marketing Co. KSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/soor-fuel-marketing.svg"
+  },
+  {
+    "symbol": "SPEC",
+    "name": "Specialties Group Holding Company K.S.C. (Closed)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/specialities.svg"
+  },
+  {
+    "symbol": "SRE",
+    "name": "Salhia Real Estate Co. K.S.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/salhia-real-estate.svg"
+  },
+  {
+    "symbol": "STC",
+    "name": "Kuwait Telecommunications Co.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/kuwait-telecommunications.svg"
+  },
+  {
+    "symbol": "TAHSSILAT",
+    "name": "Credit Rating & Collection KSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/credit-rating-and-collection.svg"
+  },
+  {
+    "symbol": "TAM",
+    "name": "Tamdeen Real Estate Co. K.S.C.C.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tamdeen-real-estate-co-ksc.svg"
+  },
+  {
+    "symbol": "TAMINV",
+    "name": "Tamdeen Investment Co., (K.S.C)",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tamdeen-real-estate-co-ksc.svg"
+  },
+  {
+    "symbol": "THURAYA",
+    "name": "Dar Al-Thuraya Real Estate Co.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/dar-al-thuraya-real-estate.svg"
+  },
+  {
+    "symbol": "TIJARA",
+    "name": "Tijara & Realestate Investment Co. K.S.C. Closed",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/tijara-and-real-estate-investment.svg"
+  },
+  {
+    "symbol": "TROLLEY",
+    "name": "Trolley General Trading Company K.S.C.C.",
+    "market": "KSE"
+  },
+  {
+    "symbol": "UNICAP",
+    "name": "UniCap Investment and Finance-Kuwaiti Public Shareholding Company",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/unicap-investment-and-finance.svg"
+  },
+  {
+    "symbol": "UPAC",
+    "name": "United Projects Company for Aviation Services KSCP",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/united-projects-co-for-aviation-services.svg"
+  },
+  {
+    "symbol": "URC",
+    "name": "United Real Estate Company",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/united-real-estate-ksc.svg"
+  },
+  {
+    "symbol": "VALMORE",
+    "name": "Valmore Holding",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/egyptian-kuwaiti.svg"
+  },
+  {
+    "symbol": "WARBABANK",
+    "name": "Warba Bank KSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/warba-bank.svg"
+  },
+  {
+    "symbol": "WARBACAP",
+    "name": "Warba Capital Holding Co.",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/warba-capital-co.svg"
+  },
+  {
+    "symbol": "WETHAQ",
+    "name": "Wethaq Takaful Insurance Co. KCSC",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/wethaq-takaful-insurance.svg"
+  },
+  {
+    "symbol": "WINSRE",
+    "name": "Warba Insurance and Reinsurance Company",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/warba-insurance-and-reinsurance-co-kscp.svg"
+  },
+  {
+    "symbol": "ZAIN",
+    "name": "Mobile Telecommunications Company K.S.C.P",
+    "market": "KSE",
+    "image": "https://s3-symbol-logo.tradingview.com/mobile-telecommunications.svg"
+  }
+]

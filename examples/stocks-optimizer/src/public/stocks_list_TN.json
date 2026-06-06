@@ -1,0 +1,422 @@
+[
+  {
+    "symbol": "AB",
+    "name": "Amen Bank",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/amen-bank.svg"
+  },
+  {
+    "symbol": "AL",
+    "name": "Air Liquide Tunisie SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/air-liquide-tunisie.svg"
+  },
+  {
+    "symbol": "AMS",
+    "name": "Ateliers Mecaniques du Sahel SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/les-ateliers-mecaniques-du-sahel.svg"
+  },
+  {
+    "symbol": "ATB",
+    "name": "Arab Tunisian Bank SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-tunisian-bank.svg"
+  },
+  {
+    "symbol": "ATL",
+    "name": "Arab Tunisian Lease SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/arab-tunisian-lease.svg"
+  },
+  {
+    "symbol": "BH",
+    "name": "BH Bank",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/bh-bank.svg"
+  },
+  {
+    "symbol": "BHL",
+    "name": "BH Leasing SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/bh-bank.svg"
+  },
+  {
+    "symbol": "BL",
+    "name": "Best Lease",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/best-lease.svg"
+  },
+  {
+    "symbol": "BNA",
+    "name": "Banque Nationale Agricole",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/banque-nationale-agricole.svg"
+  },
+  {
+    "symbol": "BTE",
+    "name": "Banque de Tunisie & des Emirats d'Investissement BTE Act.",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/banque-de-tunisie-et-des-emirates.svg"
+  },
+  {
+    "symbol": "CC",
+    "name": "Carthage Cement",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/carthage-cement.svg"
+  },
+  {
+    "symbol": "CELL",
+    "name": "Cellcom SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/cellcom-sa.svg"
+  },
+  {
+    "symbol": "CIL",
+    "name": "Compagnie Internationale de Leasing",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/compagnie-internationale-de-leasing.svg"
+  },
+  {
+    "symbol": "CITY",
+    "name": "City Cars SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/kia.svg"
+  },
+  {
+    "symbol": "DH",
+    "name": "Delice Holding SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/delice-holding.svg"
+  },
+  {
+    "symbol": "ECYCL",
+    "name": "Eurocycles SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/euro-cycles.svg"
+  },
+  {
+    "symbol": "ELBEN",
+    "name": "Elbene Industrie",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/elbene-industrie.svg"
+  },
+  {
+    "symbol": "GIF",
+    "name": "Generale Industrielle de Filtration GIF FILTER SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-generale-industrielle-de-filtration.svg"
+  },
+  {
+    "symbol": "HL",
+    "name": "Hannibal Lease SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/hannibal-lease.svg"
+  },
+  {
+    "symbol": "ICF",
+    "name": "Industries Chimiques du Fluor",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/industries-chimiques-du-fluor.svg"
+  },
+  {
+    "symbol": "LNDOR",
+    "name": "Land'Or SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/landor.svg"
+  },
+  {
+    "symbol": "LSTR",
+    "name": "ELECTROSTAR",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/electrostar.svg"
+  },
+  {
+    "symbol": "MAG",
+    "name": "Societe Magasin General SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/magasin-general.svg"
+  },
+  {
+    "symbol": "MGR",
+    "name": "Societe Tunisienne des Marches de Gros SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-tunisienne-des-marches-de-gros.svg"
+  },
+  {
+    "symbol": "MIP",
+    "name": "Maghreb International Publicite SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/maghreb-international-publicite.svg"
+  },
+  {
+    "symbol": "MNP",
+    "name": "La Societe Nouvelle Maison de la Ville de Tunis-Monoprix SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-nouvelle-maison.svg"
+  },
+  {
+    "symbol": "MPBS",
+    "name": "Manufacture de Panneaux Bois du Sud SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/manufacture-de-panneaux-bois-du-sud.svg"
+  },
+  {
+    "symbol": "NAKL",
+    "name": "Ennakl",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/ennakl-automobiles.svg"
+  },
+  {
+    "symbol": "NBL",
+    "name": "NEW BODY LINE",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/new-body-line.svg"
+  },
+  {
+    "symbol": "OTH",
+    "name": "One Tech Holding SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/one-tech-holding.svg"
+  },
+  {
+    "symbol": "PGH",
+    "name": "Poulina Group Holding SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/poulina-group-holding.svg"
+  },
+  {
+    "symbol": "PLAST",
+    "name": "Office Plast SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-officeplast.svg"
+  },
+  {
+    "symbol": "SAH",
+    "name": "Societe d'Articles Hygieniques SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-darticles-hygieniques.svg"
+  },
+  {
+    "symbol": "SAM",
+    "name": "Societe Atelier du Meuble Interieurs SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-atelier-du-meuble-interieurs.svg"
+  },
+  {
+    "symbol": "SCB",
+    "name": "Les Ciments de Bizerte SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/les-ciments-de-bizerte.svg"
+  },
+  {
+    "symbol": "SFBT",
+    "name": "Societe de Fabrication des Boissons de Tunisie SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-de-fabrication-des-boissons-de-tunisie.svg"
+  },
+  {
+    "symbol": "SIAME",
+    "name": "Societe Industrielle d'Appareillage et de Materiels Electriques SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-industrielle-dappareillage.svg"
+  },
+  {
+    "symbol": "SIMPA",
+    "name": "Societe Immobiliere et de participations SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-immobiliere-et-de-participation.svg"
+  },
+  {
+    "symbol": "SIPHA",
+    "name": "Societe des Industries Pharmaceutiques de Tunisie SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-des-industries-pharmaceutiques-de-tunisie.svg"
+  },
+  {
+    "symbol": "SITEX",
+    "name": "Societe Industrielle des Textiles SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-industrielle-des-textiles.svg"
+  },
+  {
+    "symbol": "SITS",
+    "name": "Societe Immobiliere Tuniso-Seoudienne SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-immobiliere-tuniso-seoudienne.svg"
+  },
+  {
+    "symbol": "SMART",
+    "name": "Smart Tunisie",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/smart-tunisie.svg"
+  },
+  {
+    "symbol": "SMD",
+    "name": "Sanimed SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/sanimed.svg"
+  },
+  {
+    "symbol": "SOKNA",
+    "name": "ESSOUKNA Societe Anonyme",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/essoukna.svg"
+  },
+  {
+    "symbol": "SOMOC",
+    "name": "Societe moderne de ceramique SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-moderne-de-ceramiques.svg"
+  },
+  {
+    "symbol": "SOPAT",
+    "name": "Societe de Production Agricole Teboulba S.A.",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-de-production-agricole-teboulba.svg"
+  },
+  {
+    "symbol": "SOTEM",
+    "name": "SOTEMAIL SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societea-tunisiennea-daemail.svg"
+  },
+  {
+    "symbol": "SOTET",
+    "name": "Societe Tunisienne d'Entreprises de Telecommunications",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-tunisienne-dentreprises-de-telecommunications.svg"
+  },
+  {
+    "symbol": "SOTUV",
+    "name": "Societe Tunisienne de Verreries SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-tunisienne-de-verreries.svg"
+  },
+  {
+    "symbol": "SPHAX",
+    "name": "Syphax Airlines SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/syphax-airlines.svg"
+  },
+  {
+    "symbol": "STA",
+    "name": "Societe Tunisienne d'Automobiles SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-tunisienne-de-laautomobile.svg"
+  },
+  {
+    "symbol": "STAR",
+    "name": "Societe Tunisienne d'Assurances & de Reassurances",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-tunisienne-dassurances-et-de-reassurances.svg"
+  },
+  {
+    "symbol": "STB",
+    "name": "Societe Tunisienne de Banque",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-tunisienne-de-banque.svg"
+  },
+  {
+    "symbol": "STIP",
+    "name": "Societe Tunisienne des Industries de Pneumatiques",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-tunisienne-des-industries-de-pneumatiques.svg"
+  },
+  {
+    "symbol": "STPAP",
+    "name": "Sotipapier SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-industrielle-du-papier-et-du-carton.svg"
+  },
+  {
+    "symbol": "STPIL",
+    "name": "Societe de Transport des Hydrocarbures par Pipelines SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-de-transport-des-hydrocarbures-par-pipelines.svg"
+  },
+  {
+    "symbol": "STS",
+    "name": "Societe Tunisienne du Sucre SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-tunisienne-du-sucre.svg"
+  },
+  {
+    "symbol": "TAIR",
+    "name": "Societe Tunisienne de l'Air SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-tunisienne-de-lair.svg"
+  },
+  {
+    "symbol": "TGH",
+    "name": "Tawasol Group Holding SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/tawasol-group-holding.svg"
+  },
+  {
+    "symbol": "TJARI",
+    "name": "Banque Attijari de Tunisie SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/attijari-leasing.svg"
+  },
+  {
+    "symbol": "TJL",
+    "name": "Attijari Leasing SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/attijari-leasing.svg"
+  },
+  {
+    "symbol": "TLNET",
+    "name": "Telnet Holding SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/telnet-holding.svg"
+  },
+  {
+    "symbol": "TLS",
+    "name": "Tunisie Leasing & Factoring SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/tunisie-leasing-et-factoring.svg"
+  },
+  {
+    "symbol": "TPR",
+    "name": "Tunisie Profiles Aluminium",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/tunisie-profiles-aluminium.svg"
+  },
+  {
+    "symbol": "TRE",
+    "name": "Societe Tunisienne de Reassurance",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/la-societe-tunisienne-de-reassurance.svg"
+  },
+  {
+    "symbol": "UADH",
+    "name": "Universal Auto Distributors Holding SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/universal-auto-distributors-holding.svg"
+  },
+  {
+    "symbol": "UBCI",
+    "name": "Union Bancaire pour le Commerce et l'Industrie SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/union-bancaire-pour-le-commerce-et-lindustrie.svg"
+  },
+  {
+    "symbol": "UIB",
+    "name": "Union Internationale de Banques",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/societe-generale.svg"
+  },
+  {
+    "symbol": "UMED",
+    "name": "Unite de Fabrication de Medicaments",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/unite-de-fabrication-de-medicaments.svg"
+  },
+  {
+    "symbol": "WIFAK",
+    "name": "Wifack International Bank SA",
+    "market": "BVMT",
+    "image": "https://s3-symbol-logo.tradingview.com/wifack-international-bank.svg"
+  }
+]

@@ -1,0 +1,1195 @@
+[
+  {
+    "symbol": "480S.MC",
+    "name": "Soluciones Cuatroochenta SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/soluciones-cuatroochenta-sa.svg"
+  },
+  {
+    "symbol": "A3M.MC",
+    "name": "Atresmedia Corporacion de Medios de Comunicacion SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/atresmedia-medios-de-comunicacion.svg"
+  },
+  {
+    "symbol": "ACS.MC",
+    "name": "ACS, Actividades de Construccion y Servicios SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/acs-actividades-de-construccion-y-servicios.svg"
+  },
+  {
+    "symbol": "ACX.MC",
+    "name": "Acerinox SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/acerinox.svg"
+  },
+  {
+    "symbol": "ADX.MC",
+    "name": "Audax Renovables SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/audax-renovables.svg"
+  },
+  {
+    "symbol": "ADZ.MC",
+    "name": "Adolfo Dominguez, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/adolfo-dominguez-sa.svg"
+  },
+  {
+    "symbol": "AEDAS.MC",
+    "name": "AEDAS Homes SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/aedas-homes.svg"
+  },
+  {
+    "symbol": "AENA.MC",
+    "name": "Aena SME SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/aena.svg"
+  },
+  {
+    "symbol": "AGIL.MC",
+    "name": "Agile Content SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/agile-content-sa.svg"
+  },
+  {
+    "symbol": "AI.MC",
+    "name": "Airtificial Intelligence Structures SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/airtificial-intelligence-structures-sa.svg"
+  },
+  {
+    "symbol": "AIR.MC",
+    "name": "Airbus SE",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/airbus.svg"
+  },
+  {
+    "symbol": "ALC.MC",
+    "name": "Altia Consultores S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/altia-consultores.svg"
+  },
+  {
+    "symbol": "ALM.MC",
+    "name": "Almirall SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/almirall.svg"
+  },
+  {
+    "symbol": "ALNT.MC",
+    "name": "Alantra Partners SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/alantra-partners.svg"
+  },
+  {
+    "symbol": "ALQ.MC",
+    "name": "Alquiber Quality SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/alquiber-quality-sa.svg"
+  },
+  {
+    "symbol": "AMEN.MC",
+    "name": "Aeternal Mentis SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/aeternal-mentis.svg"
+  },
+  {
+    "symbol": "AMP.MC",
+    "name": "Amper, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/amper.svg"
+  },
+  {
+    "symbol": "AMS.MC",
+    "name": "Amadeus IT Group SA Class A",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/amadeus.svg"
+  },
+  {
+    "symbol": "ANA.MC",
+    "name": "Acciona SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/acciona.svg"
+  },
+  {
+    "symbol": "ANE.MC",
+    "name": "Corporacion Acciona Energias Renovables SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/corporacion-acciona.svg"
+  },
+  {
+    "symbol": "APAM.MC",
+    "name": "Aperam S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/aperam.svg"
+  },
+  {
+    "symbol": "APG.MC",
+    "name": "Axon Partners Group SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/axon-partners.svg"
+  },
+  {
+    "symbol": "ART.MC",
+    "name": "Arteche Lantegi Elkartea SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/arteche-lantegi-elkartea.svg"
+  },
+  {
+    "symbol": "ATRY.MC",
+    "name": "Atrys Health SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/atrys-health.svg"
+  },
+  {
+    "symbol": "ATSI.MC",
+    "name": "Aplicaciones y Tratamiento de Sistemas, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/aplicaciones-y-tratamientos.svg"
+  },
+  {
+    "symbol": "AZK.MC",
+    "name": "Azkoyen, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/azkoyen-sa.svg"
+  },
+  {
+    "symbol": "BBVA.MC",
+    "name": "Banco Bilbao Vizcaya Argentaria, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-bilbao-vizcaya-argentaria.svg"
+  },
+  {
+    "symbol": "BKT.MC",
+    "name": "Bankinter SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/bankinter.svg"
+  },
+  {
+    "symbol": "BKY.MC",
+    "name": "Berkeley Energia Limited",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/berkeley-energia.svg"
+  },
+  {
+    "symbol": "BST.MC",
+    "name": "Biotechnology Assets SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/adl-bionatur-solutions-sa.svg"
+  },
+  {
+    "symbol": "CABK.MC",
+    "name": "CaixaBank SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/caixabank.svg"
+  },
+  {
+    "symbol": "CAF.MC",
+    "name": "Construcciones y Auxiliar de Ferrocarriles, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/construcciones-y-auxiliar-de-ferrocarriles.svg"
+  },
+  {
+    "symbol": "CAM.MC",
+    "name": "Caja de Ahorros del Mediterraneo, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/cuotas-participativas-de-caja-de-ahorros-del-mediterraneo.svg"
+  },
+  {
+    "symbol": "CASH.MC",
+    "name": "Prosegur Cash SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/prosegur-compania-de-seguridad.svg"
+  },
+  {
+    "symbol": "CBAV.MC",
+    "name": "Clinica Baviera SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/clinica-baviera.svg"
+  },
+  {
+    "symbol": "CCEP.MC",
+    "name": "Coca-Cola Europacific Partners plc",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/coca-cola.svg"
+  },
+  {
+    "symbol": "CEV.MC",
+    "name": "Compania Espanola de Viviendas en Alquiler, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/compania-espanola-de-viviendas-alquiler.svg"
+  },
+  {
+    "symbol": "CIE.MC",
+    "name": "CIE Automotive, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/cie-automotive.svg"
+  },
+  {
+    "symbol": "CIRSA.MC",
+    "name": "Cirsa Enterprises, S.A.U.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/cirsa-enterprises-slu.svg"
+  },
+  {
+    "symbol": "CITY.MC",
+    "name": "Club De Futbol Intercity SAD",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/club-de-futbol-intercity-sad.svg"
+  },
+  {
+    "symbol": "CLEO.MC",
+    "name": "Compania Levantina de Edificacion y Obras Publicas, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/compania-levantina-edificacion-de-obras-publicas-sa-cleop.svg"
+  },
+  {
+    "symbol": "CLNX.MC",
+    "name": "Cellnex Telecom S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/cellnex-telecom.svg"
+  },
+  {
+    "symbol": "CLR.MC",
+    "name": "Clerhp Estructuras SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/clerhp-estructuras-sa.svg"
+  },
+  {
+    "symbol": "COM.MC",
+    "name": "Catenon SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/catenon-sa.svg"
+  },
+  {
+    "symbol": "COXE.MC",
+    "name": "Cox Energy America SAB de CV Class A",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/cox-energy-america-sab-de-cv.svg"
+  },
+  {
+    "symbol": "COXG.MC",
+    "name": "COX ABG Group SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/cox-abg-sa.svg"
+  },
+  {
+    "symbol": "DESA.MC",
+    "name": "Desarrollos Especialos de Sistomas de Anclajo, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/desarrollos-especiales-de-sistemas-de-anclaje-sa.svg"
+  },
+  {
+    "symbol": "DIA.MC",
+    "name": "Distribuidora Internacional de Alimentacion SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/distribuidora-internacional-de-alimentacion.svg"
+  },
+  {
+    "symbol": "DOM.MC",
+    "name": "Global Dominion Access SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/global-dominion-access.svg"
+  },
+  {
+    "symbol": "DOMO.MC",
+    "name": "Domo Activos SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/domo-activos-sa.svg"
+  },
+  {
+    "symbol": "EAT.MC",
+    "name": "AmRest Holdings SE",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/amrest-se.svg"
+  },
+  {
+    "symbol": "EBRO.MC",
+    "name": "Ebro Foods SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/ebro-foods.svg"
+  },
+  {
+    "symbol": "EBROM.MC",
+    "name": "Ebro EV Motors SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/ev-motors-sa.svg"
+  },
+  {
+    "symbol": "ECR.MC",
+    "name": "Ercros, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/ercros.svg"
+  },
+  {
+    "symbol": "EDR.MC",
+    "name": "eDreams ODIGEO",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/edreams-odigeo.svg"
+  },
+  {
+    "symbol": "EEP.MC",
+    "name": "EuroEspes, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/euroespes-sa.svg"
+  },
+  {
+    "symbol": "EIDF.MC",
+    "name": "Energia, Innovacion y Desarrollo Fotovoltaico SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/energia-innovacion-derrollo-fotovoltaico.svg"
+  },
+  {
+    "symbol": "ELE.MC",
+    "name": "Endesa S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/endesa.svg"
+  },
+  {
+    "symbol": "ELZ.MC",
+    "name": "ASTURIANA DE LAMINADOS S.A",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/asturiana-de-laminados-sa.svg"
+  },
+  {
+    "symbol": "ENC.MC",
+    "name": "ENCE Energia y Celulosa SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/emce-energia-celulo.svg"
+  },
+  {
+    "symbol": "END.MC",
+    "name": "Endurance Motive SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/endurance-motive-sa.svg"
+  },
+  {
+    "symbol": "ENER.MC",
+    "name": "Ecoener SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-ecoener.svg"
+  },
+  {
+    "symbol": "ENG.MC",
+    "name": "Enagas SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/enagas.svg"
+  },
+  {
+    "symbol": "ENO.MC",
+    "name": "Elecnor S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/elecnor.svg"
+  },
+  {
+    "symbol": "ENRS.MC",
+    "name": "Enerside Energy SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/enerside-energy-sa.svg"
+  },
+  {
+    "symbol": "ETC.MC",
+    "name": "Energy Solar Tech, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/energy-solar-tech.svg"
+  },
+  {
+    "symbol": "EZE.MC",
+    "name": "Grupo Ezentis SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-ezentis-sa.svg"
+  },
+  {
+    "symbol": "FACE.MC",
+    "name": "Facephi Biometria SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/facephi-biometra-sa.svg"
+  },
+  {
+    "symbol": "FAE.MC",
+    "name": "Faes Farma, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/faes-farma.svg"
+  },
+  {
+    "symbol": "FCC.MC",
+    "name": "Fomento de Construcciones y Contratas, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/fomento-de-construcciones-y-contratas.svg"
+  },
+  {
+    "symbol": "FDR.MC",
+    "name": "Fluidra, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/fluidra.svg"
+  },
+  {
+    "symbol": "FER.MC",
+    "name": "Ferrovial SE",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/ferrovial.svg"
+  },
+  {
+    "symbol": "GAM.MC",
+    "name": "General de Alquiler de Maquinaria, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/general-de-alquiler-de-maquinaria-sa.svg"
+  },
+  {
+    "symbol": "GEST.MC",
+    "name": "Gestamp Automocion S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/gestamp-automocion.svg"
+  },
+  {
+    "symbol": "GGR.MC",
+    "name": "Greening Group Global S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-greening-2022.svg"
+  },
+  {
+    "symbol": "GIGA.MC",
+    "name": "Gigas Hosting SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/gigas-hosting-sa.svg"
+  },
+  {
+    "symbol": "GRE.MC",
+    "name": "Grenergy Renovables S.A",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/grenergy-renovables.svg"
+  },
+  {
+    "symbol": "GRF.MC",
+    "name": "Grifols, S.A. Class A",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/grifols.svg"
+  },
+  {
+    "symbol": "GRF.P.MC",
+    "name": "Grifols, S.A. Pref Class B",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/grifols.svg"
+  },
+  {
+    "symbol": "GRI.MC",
+    "name": "GRINO ECOLOGIC S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/grio-ecologic-sa.svg"
+  },
+  {
+    "symbol": "GSJ.MC",
+    "name": "Grupo Empresarial San Jose, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-emprerial-jose.svg"
+  },
+  {
+    "symbol": "HAN.MC",
+    "name": "Hannun SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/hannun-sa.svg"
+  },
+  {
+    "symbol": "HBX.MC",
+    "name": "Hbx Group International Plc",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/hbx-international-plc.svg"
+  },
+  {
+    "symbol": "HLZ.MC",
+    "name": "Holaluz Clidom SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/holaluz-clidom.svg"
+  },
+  {
+    "symbol": "HOME.MC",
+    "name": "Neinor Homes SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/neinor-homes.svg"
+  },
+  {
+    "symbol": "IAG.MC",
+    "name": "International Consolidated Airlines Group SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/international-consolidated-airlines-group.svg"
+  },
+  {
+    "symbol": "IBE.MC",
+    "name": "Iberdrola SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/iberdrola.svg"
+  },
+  {
+    "symbol": "IBG.MC",
+    "name": "Iberpapel Gestion, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/iberpapel-gestion.svg"
+  },
+  {
+    "symbol": "IDR.MC",
+    "name": "Indra Sistemas, S.A. Class A",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/indra-sistemas.svg"
+  },
+  {
+    "symbol": "IFLEX.MC",
+    "name": "IFLEX FLEXIBLE PACKAGING, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/iflex-flexible-packaging-sa.svg"
+  },
+  {
+    "symbol": "IKM.MC",
+    "name": "1nKemia IUCT Group SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/1nkemia-iuct-sa.svg"
+  },
+  {
+    "symbol": "IMC.MC",
+    "name": "INMOCEMENTO SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/inmocemento-sa.svg"
+  },
+  {
+    "symbol": "INDXA.MC",
+    "name": "Indexa Capital Group, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/indexa-capital-sa.svg"
+  },
+  {
+    "symbol": "ISE.MC",
+    "name": "Innovative Solutions Ecosystem SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/innovative-solutions-ecosystem-sa.svg"
+  },
+  {
+    "symbol": "ISUR.MC",
+    "name": "Inmobiliaria del Sur, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/inmobiliaria-del-sur.svg"
+  },
+  {
+    "symbol": "ITX.MC",
+    "name": "Industria de Diseno Textil, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/inditex.svg"
+  },
+  {
+    "symbol": "IZER.MC",
+    "name": "Izertis SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/izertis.svg"
+  },
+  {
+    "symbol": "KOM.MC",
+    "name": "Plasticos Compuestos SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/plasticos-compuestos-sa.svg"
+  },
+  {
+    "symbol": "LAB.MC",
+    "name": "Labiana Health SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/labiana-health-sa.svg"
+  },
+  {
+    "symbol": "LDA.MC",
+    "name": "Linea Directa Aseguradora SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/linea-directa-aseguradora.svg"
+  },
+  {
+    "symbol": "LGT.MC",
+    "name": "Lingotes Especiales, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/lingotes-especiales-sa.svg"
+  },
+  {
+    "symbol": "LIB.MC",
+    "name": "Libertas 7 SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/libertas-7.svg"
+  },
+  {
+    "symbol": "LLN.MC",
+    "name": "LleidaNetworks Serveis Telematics SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/lleidanetworks.svg"
+  },
+  {
+    "symbol": "LLYC.MC",
+    "name": "Llorente & Cuenca SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/llorente-cuenca.svg"
+  },
+  {
+    "symbol": "LOG.MC",
+    "name": "Logista Integral, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/logista.svg"
+  },
+  {
+    "symbol": "MAKS.MC",
+    "name": "Making Science Group SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/making-science-group.svg"
+  },
+  {
+    "symbol": "MAP.MC",
+    "name": "Mapfre SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/mapfre.svg"
+  },
+  {
+    "symbol": "MCM.MC",
+    "name": "Miquel y Costas & Miquel, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/miquel-costas-miquel.svg"
+  },
+  {
+    "symbol": "MDF.MC",
+    "name": "Duro Felguera S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/duro-felguera-sa.svg"
+  },
+  {
+    "symbol": "MEL.MC",
+    "name": "Melia Hotels International, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/melia-hotels-international.svg"
+  },
+  {
+    "symbol": "MFEA.MC",
+    "name": "MFE-MediaForEurope NV Class A",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/mfe-a.svg"
+  },
+  {
+    "symbol": "MTB.MC",
+    "name": "Montebalito, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/montebalito-sa.svg"
+  },
+  {
+    "symbol": "MTS.MC",
+    "name": "ArcelorMittal SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/arcelormittal.svg"
+  },
+  {
+    "symbol": "MVC.MC",
+    "name": "Metrovacesa SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/metrovace-madrid.svg"
+  },
+  {
+    "symbol": "NBI.MC",
+    "name": "NBI Bearings Europe SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/nbi-bearings-europe-sa.svg"
+  },
+  {
+    "symbol": "NEA.MC",
+    "name": "Nicolas Correa, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/nicolas-correa.svg"
+  },
+  {
+    "symbol": "NTGY.MC",
+    "name": "Naturgy Energy Group, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/naturgy.svg"
+  },
+  {
+    "symbol": "NTH.MC",
+    "name": "Naturhouse Health SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/naturhouse-health-sa.svg"
+  },
+  {
+    "symbol": "NXT.MC",
+    "name": "Nueva Expresion Textil, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/nueva-expresin-textil-sa.svg"
+  },
+  {
+    "symbol": "NYE.MC",
+    "name": "Nyesa Valores Corporacion, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/nyesa-valores-corporacion-sa.svg"
+  },
+  {
+    "symbol": "NZI.MC",
+    "name": "NZI Technical Protection SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/nzi-technical-protection-sa.svg"
+  },
+  {
+    "symbol": "OHLA.MC",
+    "name": "Obrascon Huarte Lain SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/obrascon-hauarte-lain.svg"
+  },
+  {
+    "symbol": "OLE.MC",
+    "name": "DEOLEO, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/deoleo.svg"
+  },
+  {
+    "symbol": "OPTS.MC",
+    "name": "Optare Solutions SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/optare-solutions-sa.svg"
+  },
+  {
+    "symbol": "ORY.MC",
+    "name": "Oryzon Genomics SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/oryzon-genomics.svg"
+  },
+  {
+    "symbol": "PANG.MC",
+    "name": "Pangaea Oncology SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/pangaea-oncology-sa.svg"
+  },
+  {
+    "symbol": "PAR.MC",
+    "name": "Parlem Telecom Companyia de Telecomunicacions SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/parlem-telecom-companyia-de-telecomunicacions-sa.svg"
+  },
+  {
+    "symbol": "PHM.MC",
+    "name": "Pharma Mar SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/pharma-mar.svg"
+  },
+  {
+    "symbol": "PRM.MC",
+    "name": "PRIM, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/prim.svg"
+  },
+  {
+    "symbol": "PRS.MC",
+    "name": "Promotora de Informaciones, S.A. Class A",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/promotora-de-informaciones.svg"
+  },
+  {
+    "symbol": "PSG.MC",
+    "name": "Prosegur Compania de Seguridad SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/prosegur-compania-de-seguridad.svg"
+  },
+  {
+    "symbol": "PUIG.MC",
+    "name": "Puig Brands, S.A. Class B",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/puig-brands.svg"
+  },
+  {
+    "symbol": "PVA.MC",
+    "name": "Pescanova, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/pescanovasa.svg"
+  },
+  {
+    "symbol": "R4.MC",
+    "name": "RENTA 4 BANCO SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/renta-4-banco.svg"
+  },
+  {
+    "symbol": "RBT.MC",
+    "name": "Robot, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/robot-sa.svg"
+  },
+  {
+    "symbol": "RDG.MC",
+    "name": "Redegal SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/redegal-sa.svg"
+  },
+  {
+    "symbol": "RED.MC",
+    "name": "Redeia Corporacion SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/red-electrica.svg"
+  },
+  {
+    "symbol": "REN.MC",
+    "name": "Renta Corporacion Real Estate, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/renta-corporacion-real-estate-sa.svg"
+  },
+  {
+    "symbol": "REP.MC",
+    "name": "Repsol SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/repsol.svg"
+  },
+  {
+    "symbol": "RIO.MC",
+    "name": "Bodegas Riojanas, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/bodegas-riojanassa.svg"
+  },
+  {
+    "symbol": "RJF.MC",
+    "name": "LABORATORIO REIG JOFRE, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/laboratorio-reig-jofre.svg"
+  },
+  {
+    "symbol": "RLIA.MC",
+    "name": "Realia Business, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/realia-business.svg"
+  },
+  {
+    "symbol": "ROVI.MC",
+    "name": "Laboratorios Farmaceuticos Rovi, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/laboratorios-farmaceuticos.svg"
+  },
+  {
+    "symbol": "RSS.MC",
+    "name": "Revenga Ingenieros S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/revenga-ingenieros-sa.svg"
+  },
+  {
+    "symbol": "SAB.MC",
+    "name": "Banco de Sabadell SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-de-sabadell.svg"
+  },
+  {
+    "symbol": "SAI.B.MC",
+    "name": "Substrate Artificial Intelligence SA Class B",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/substrate-artificial-intelligence-sa.svg"
+  },
+  {
+    "symbol": "SAI.MC",
+    "name": "Substrate Artificial Intelligence SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/substrate-artificial-intelligence-sa.svg"
+  },
+  {
+    "symbol": "SAN.MC",
+    "name": "Banco Santander, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/santander.svg"
+  },
+  {
+    "symbol": "SCBTT.MC",
+    "name": "BETTER CONSULTANTS, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/better-consultants-sa.svg"
+  },
+  {
+    "symbol": "SCBYT.MC",
+    "name": "Bytetravel, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/bytetravel-sa.svg"
+  },
+  {
+    "symbol": "SCCHP.MC",
+    "name": "Caminho Propicio Sic Imobiliaria Fechada SA",
+    "market": "BME"
+  },
+  {
+    "symbol": "SCCMM.MC",
+    "name": "COMMCENTER, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/commcenter-sa.svg"
+  },
+  {
+    "symbol": "SCGV.MC",
+    "name": "Grandvoyage Travel SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/grandvoyage-travel-sa.svg"
+  },
+  {
+    "symbol": "SCO.MC",
+    "name": "Seresco SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/seresco-sa.svg"
+  },
+  {
+    "symbol": "SCSS.MC",
+    "name": "Innovative Simply Solar SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/innovative-simply-solar-sa.svg"
+  },
+  {
+    "symbol": "SCYR.MC",
+    "name": "Sacyr SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/sacyr.svg"
+  },
+  {
+    "symbol": "SEC.MC",
+    "name": "Secuoya Grupo de Comunicacion SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/secuoya-grupo-de-comunicacion-sa.svg"
+  },
+  {
+    "symbol": "SLR.MC",
+    "name": "Solaria Energia y Medio Ambiente, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/solaria-energia-y-medio-ambiente.svg"
+  },
+  {
+    "symbol": "SNG.MC",
+    "name": "Singular People SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/singular-people-sa.svg"
+  },
+  {
+    "symbol": "SOL.MC",
+    "name": "Soltec Power Holdings SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/soltec-power-holdings.svg"
+  },
+  {
+    "symbol": "SPH.MC",
+    "name": "Profithol SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/profithol-sa.svg"
+  },
+  {
+    "symbol": "SQRL.MC",
+    "name": "Squirrel Media SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/squirrel-media.svg"
+  },
+  {
+    "symbol": "STNA.MC",
+    "name": "Santa Ana Global Enterprises SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/santa-ana-global-enterprises-sa.svg"
+  },
+  {
+    "symbol": "TEF.MC",
+    "name": "Telefonica SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/telefonica.svg"
+  },
+  {
+    "symbol": "TLGO.MC",
+    "name": "Talgo SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/talgo.svg"
+  },
+  {
+    "symbol": "TQT.MC",
+    "name": "Technomeca Aerospace SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/technomeca-aerospace-sa.svg"
+  },
+  {
+    "symbol": "TRE.MC",
+    "name": "Tecnicas Reunidas SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/tecnicas-reunidas.svg"
+  },
+  {
+    "symbol": "TRG.MC",
+    "name": "Tubos Reunidos, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/tubos-reunidos-sa.svg"
+  },
+  {
+    "symbol": "TRTK.MC",
+    "name": "Tree Technology SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/tree-technology-sa.svg"
+  },
+  {
+    "symbol": "TUB.MC",
+    "name": "Tubacex, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/tubacex.svg"
+  },
+  {
+    "symbol": "UBS.MC",
+    "name": "Urbas Grupo Financiero, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/ubs-group.svg"
+  },
+  {
+    "symbol": "UMB.MC",
+    "name": "Umbrella Global Energy SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/umbrella-solar-investment-sa.svg"
+  },
+  {
+    "symbol": "UNI.MC",
+    "name": "Unicaja Banco S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/unicaja-banco.svg"
+  },
+  {
+    "symbol": "VANA.MC",
+    "name": "Vanadi Coffee SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/vanadi-coffee-sa.svg"
+  },
+  {
+    "symbol": "VID.MC",
+    "name": "Vidrala SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/vidrala.svg"
+  },
+  {
+    "symbol": "VIS.MC",
+    "name": "Viscofan, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/viscofan.svg"
+  },
+  {
+    "symbol": "VOC.MC",
+    "name": "Vocento, S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/vocento.svg"
+  },
+  {
+    "symbol": "VYT.MC",
+    "name": "Vytrus Biotech SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/vytrus-biotech-sa.svg"
+  },
+  {
+    "symbol": "XAXIA.MC",
+    "name": "AXIA Energia SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/centrais-eletr-bras-sa.svg"
+  },
+  {
+    "symbol": "XAXIC.MC",
+    "name": "AXIA Energia SA Non-Cum Perp Pfd Registered Shs C",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/axia-energiapnc-n1.svg"
+  },
+  {
+    "symbol": "XBBAR.MC",
+    "name": "Banco BBVA Argentina SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/banco-bilbao-vizcaya-argentaria.svg"
+  },
+  {
+    "symbol": "XBBDC.MC",
+    "name": "Banco Bradesco SA Pfd",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/bradesco.svg"
+  },
+  {
+    "symbol": "XBRK.MC",
+    "name": "Braskem S.A. Pfd A",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/braskem.svg"
+  },
+  {
+    "symbol": "XBRPO.MC",
+    "name": "Bradespar S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/bradespar.svg"
+  },
+  {
+    "symbol": "XBRPP.MC",
+    "name": "Bradespar SA Pfd",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/bradespar.svg"
+  },
+  {
+    "symbol": "XCMIG.MC",
+    "name": "Companhia Energetica de Minas Gerais SA Pfd",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/cemig.svg"
+  },
+  {
+    "symbol": "XCOPO.MC",
+    "name": "Companhia Paranaense de Energia",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/cia-paranaense.svg"
+  },
+  {
+    "symbol": "XEKT.MC",
+    "name": "Grupo Elektra SAB de CV",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/grupo-elektra-sab-de-cv.svg"
+  },
+  {
+    "symbol": "XGGB.MC",
+    "name": "Gerdau S.A. Pfd",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/gerdau.svg"
+  },
+  {
+    "symbol": "XNEO.MC",
+    "name": "Neoenergia SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/neoenergia.svg"
+  },
+  {
+    "symbol": "XNOR.MC",
+    "name": "Grupo Financiero Banorte SAB de CV Class O",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/banorte.svg"
+  },
+  {
+    "symbol": "XPBR.MC",
+    "name": "Petroleo Brasileiro SA",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/brasileiro-petrobras.svg"
+  },
+  {
+    "symbol": "XPBRA.MC",
+    "name": "Petroleo Brasileiro SA Pfd",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/brasileiro-petrobras.svg"
+  },
+  {
+    "symbol": "XSIGF.MC",
+    "name": "Sigma Foods, S.A.B. de C.V.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/alfa.svg"
+  },
+  {
+    "symbol": "XTZA.MC",
+    "name": "TV Azteca SAB de CV UNIT",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/tv-azteca-sab-de-cv.svg"
+  },
+  {
+    "symbol": "XUSI.MC",
+    "name": "Usinas Siderurgicas de Minas Gerais SA-Usiminas Pfd A",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/usiminas-pna-n1.svg"
+  },
+  {
+    "symbol": "XUSIO.MC",
+    "name": "Usinas Siderurgicas de Minas Gerais SA-Usiminas",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/usiminas-pna-n1.svg"
+  },
+  {
+    "symbol": "XVALO.MC",
+    "name": "Vale S.A.",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/vale.svg"
+  },
+  {
+    "symbol": "XVOLB.MC",
+    "name": "Volcan Compania Minera S.A.A. Class B",
+    "market": "BME",
+    "image": "https://s3-symbol-logo.tradingview.com/volcan-compania-minera.svg"
+  }
+]
