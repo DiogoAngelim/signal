@@ -289,7 +289,7 @@ function number(value: unknown) {
 }
 
 function clamp(value: number, min = 0, max = 100) {
-  /* c8 ignore next 1 */
+  
   if (!Number.isFinite(value)) return min;
   return Math.min(max, Math.max(min, value));
 }

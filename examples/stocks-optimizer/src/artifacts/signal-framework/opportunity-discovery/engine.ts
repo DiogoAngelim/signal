@@ -1,4 +1,4 @@
-/* c8 ignore next */
+
 import { clamp, mean, stdev } from "../math/statistics";
 import type {
   DetectedNeed,
@@ -20,14 +20,14 @@ const CONCEPT_LABEL: Record<OpportunityType, string> = {
   transition: "Transition",
 };
 
-/**
- * Opportunity Discovery surfaces candidates before a domain adapter decides
- * what to do with them.
- *
- * The framework is built around reusable structural concepts: emergence,
- * acceleration, compression, expansion, alignment, divergence, persistence,
- * and transition. It does not contain trading terms or domain assumptions.
- */
+
+
+
+
+
+
+
+
 export function discoverOpportunities(input: OpportunityDiscoveryInput): OpportunityCandidate[] {
   const candidates: OpportunityCandidate[] = [];
 
@@ -49,7 +49,7 @@ export function discoverOpportunities(input: OpportunityDiscoveryInput): Opportu
     .filter((candidate) => candidate.strength > 0)
     .sort((left, right) => {
       const strengthDelta = right.strength - left.strength;
-      /* c8 ignore next */
+      
       return strengthDelta === 0 ? left.opportunityId.localeCompare(right.opportunityId) : strengthDelta;
     });
 }
@@ -143,7 +143,7 @@ function globalCandidates(input: OpportunityDiscoveryInput): OpportunityCandidat
   }
 
   if ((intelligence?.contradictions ?? 0) > 0 || hasNeed(needs, "wait")) {
-    /* c8 ignore next */
+    
     candidates.push(candidate("system:divergence", "divergence", 45 + (intelligence?.contradictions ?? 0) * 8, confidence, [
       "Contradictory evidence is active and may resolve into a transition.",
     ], false));
@@ -219,8 +219,8 @@ function number(value: unknown) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-/* c8 ignore start */
+
 function round(value: number) {
   return Number(value.toFixed(2));
 }
-/* c8 ignore stop */
+

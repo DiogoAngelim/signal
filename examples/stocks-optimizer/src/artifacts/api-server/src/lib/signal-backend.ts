@@ -31,7 +31,7 @@ function safeDatabasePrice(value: any) {
     if (Number.isFinite(parsed) && parsed > 0) return parsed;
   }
 
-  // Database column is NOT NULL. Use 0 only for unavailable/unpriced symbols.
+  
   return 0;
 }
 
@@ -113,17 +113,17 @@ function normalizeBinanceSnapshotSymbol(symbol: string) {
 
   if (!raw) return raw;
 
-  // Binance liquid spot and USD-margined futures generally use USDT.
+  
   if (raw.endsWith("USDT") || raw.endsWith("USDC") || raw.endsWith("BUSD") || raw.endsWith("FDUSD")) {
     return raw;
   }
 
-  // Convert common app/provider USD notation to Binance USDT notation.
+  
   if (raw.endsWith("USD")) {
     return `${raw.slice(0, -3)}USDT`;
   }
 
-  // If the symbol is just a base asset, default to USDT.
+  
   if (!/(USDT|USDC|BUSD|FDUSD|BTC|ETH)$/.test(raw)) {
     return `${raw}USDT`;
   }
@@ -856,7 +856,7 @@ async function runRefreshCycle(): Promise<number> {
   for (const group of grouped.values()) {
     try {
       const updatedSignals = await refreshScope(group.scope, group.symbols);
-      // Broadcast updated signals after refresh
+      
       if (signalBroadcast && updatedSignals.length) {
         await storeSignalEvents(group.scope, updatedSignals);
         signalBroadcast({

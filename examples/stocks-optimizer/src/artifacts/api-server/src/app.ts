@@ -55,7 +55,7 @@ app.get("/ready", async (_req, res, next) => {
 
 app.use("/api", router);
 
-// Serve frontend static files in production
+
 if (
   !process.env.VERCEL &&
   (process.env.NODE_ENV === "production" ||
@@ -66,7 +66,7 @@ if (
     "../../signal-markets/dist/public",
   );
   app.use(express.static(frontendPath));
-  // Catch-all: serve index.html for any non-API route
+  
   app.get("/{*splat}", (req, res) => {
     res.sendFile(path.join(frontendPath, "index.html"));
   });

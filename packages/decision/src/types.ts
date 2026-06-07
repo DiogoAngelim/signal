@@ -212,6 +212,7 @@ export type DecisionEvidenceQualityAssessment = {
   calibration: number;
   traceability: number;
   coverage: number;
+  missingEvidenceReferences?: string[];
   explanation: string[];
 };
 
@@ -257,6 +258,30 @@ export type DecisionNextBestEvidence = {
   expectedUncertaintyReduction: number;
 };
 
+export type DecisionJournalTraceRefType =
+  | "evidence"
+  | "known"
+  | "unknown"
+  | "assumption"
+  | "contradiction"
+  | "threat";
+
+export type DecisionJournalTraceRef = {
+  refId: string;
+  refType: DecisionJournalTraceRefType;
+  label: string;
+  evidenceIds: string[];
+  linkedEvidenceIds: string[];
+  missingEvidenceIds: string[];
+};
+
+export type DecisionJournalTraceability = {
+  complete: boolean;
+  evidenceReferenceCoverage: number;
+  missingEvidenceReferences: string[];
+  explanation: string[];
+};
+
 export type DecisionJournal = {
   decisionId: string;
   createdAt: string;
@@ -265,6 +290,8 @@ export type DecisionJournal = {
   contradictionsPresent: string[];
   unknownsPresent: string[];
   reasoningSummary: string;
+  traceRefs?: DecisionJournalTraceRef[];
+  traceability?: DecisionJournalTraceability;
 };
 
 export type DecisionAssessmentInput = {

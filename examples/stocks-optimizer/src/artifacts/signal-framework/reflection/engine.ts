@@ -1045,7 +1045,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function stableString(value: unknown) {
-  /* v8 ignore next -- callers normalize null state values before string comparison. */
+  
   if (value == null) return "";
   if (typeof value !== "object") return String(value);
   return JSON.stringify(

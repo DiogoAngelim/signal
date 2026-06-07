@@ -126,18 +126,18 @@ export type SeparatedDecisionStates = {
   };
 };
 
-/**
- * Separates model reliability, action permission, exposure capacity, and timing urgency.
- *
- * @example
- * const states = evaluateDecisionStates({
- *   trustGovernor: { trustScore: 82, allowsNewExposure: true, maxExposure: 8 },
- *   opportunity: 76,
- *   risk: 34,
- * });
- * states.permission.allowed; // true
- * states.capacity.mode; // "reduced"
- */
+
+
+
+
+
+
+
+
+
+
+
+
 export function evaluateDecisionStates(input: DecisionStateInput = {}): SeparatedDecisionStates {
   const trust = trustStateFor(input);
   const permission = permissionStateFor(input, trust);

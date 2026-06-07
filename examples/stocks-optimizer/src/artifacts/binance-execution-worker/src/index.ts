@@ -308,7 +308,7 @@ function clearIgnoredBaseline() {
   try {
     fs.rmSync(ignoreBaselineFile(), { force: true });
   } catch {
-    // Clearing the optional baseline should not prevent other worker actions.
+    
   }
 }
 
@@ -316,7 +316,7 @@ function clearClearedSignals() {
   try {
     fs.rmSync(clearedSignalsFile(), { force: true });
   } catch {
-    // Clearing the optional cleared-signal ledger should not prevent other worker actions.
+    
   }
 }
 

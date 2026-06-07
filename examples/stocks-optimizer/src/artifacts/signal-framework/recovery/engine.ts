@@ -1,4 +1,4 @@
-/* c8 ignore next */
+
 import { clamp } from "../math/statistics";
 
 export type RecoveryStatus = "locked" | "recovering" | "restored" | "regressed";
@@ -564,7 +564,7 @@ function roundRatio(value: number) {
   return Number(value.toFixed(4));
 }
 
-/* c8 ignore next 3 */
+
 function unique(values: string[]) {
   return Array.from(new Set(values));
 }

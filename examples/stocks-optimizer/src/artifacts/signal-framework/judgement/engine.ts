@@ -1,4 +1,4 @@
-/* c8 ignore next */
+
 import { clamp, mean, stdev } from "../math/statistics";
 
 export type JudgementStatus = "trusted" | "cautious" | "review_required" | "blocked";
@@ -843,7 +843,7 @@ function formatPercent(value: number) {
   return `${Math.round(value)}%`;
 }
 
-/* c8 ignore next 3 */
+
 function unique(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)));
 }

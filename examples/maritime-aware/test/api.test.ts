@@ -25,7 +25,7 @@ describe("Maritime API", () => {
       now
     });
     const guide = await service.app.getGuide("santos-port-br");
-    const sources = await handleMaritimeApiRequest(new Request(`http://local.test/api/guides/${encodeURIComponent(guide.id)}/sources`), service);
+    const sources = await handleMaritimeApiRequest(new Request(`http:
     const feedback = await handleMaritimeApiRequest(new Request("http://local.test/api/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Idempotency-Key": "api-feedback" },

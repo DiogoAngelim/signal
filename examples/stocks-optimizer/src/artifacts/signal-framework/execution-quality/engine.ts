@@ -62,19 +62,19 @@ const WEIGHTS = {
   staleDataSafety: 0.04,
 };
 
-/**
- * Scores whether a proposed action can be executed cleanly.
- * It does not judge whether the opportunity itself is attractive.
- *
- * @example
- * const execution = evaluateExecutionQuality({
- *   entryQuality: 76,
- *   liquidityQuality: 84,
- *   slippageRisk: 18,
- *   invalidationClarity: 80,
- * });
- * execution.recommendedExecutionMode; // "scale_in" or "normal"
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function evaluateExecutionQuality(input: ExecutionQualityInput = {}): ExecutionQualityResult {
   const entryQuality = score(input.entryQuality, 50);
   const exitQuality = score(input.exitQuality, 55);

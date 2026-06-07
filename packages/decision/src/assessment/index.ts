@@ -10,6 +10,9 @@ import type {
   DecisionEvidenceQualityAssessment,
   DecisionGovernanceAssessment,
   DecisionJournal,
+  DecisionJournalTraceability,
+  DecisionJournalTraceRef,
+  DecisionJournalTraceRefType,
   DecisionLearning,
   DecisionLearningOutcome,
   DecisionLearningPattern,
@@ -25,6 +28,10 @@ import type {
 } from "../types";
 import { asScore, average, clamp, nowIso, stableId, uniqueStrings } from "../utils";
 
+type EvidenceReferenceTraceability = DecisionJournalTraceability & {
+  traceRefs: DecisionJournalTraceRef[];
+};
+
 export function assessDecisionEvidence(input: DecisionAssessmentInput = {}): DecisionAssessment {
   const createdAt = input.createdAt ?? nowIso();
   const evidence = normalizeEvidence(input.evidence ?? []);
@@ -32,18 +39,27 @@ export function assessDecisionEvidence(input: DecisionAssessmentInput = {}): Dec
   const unknowns = normalizeFacts(input.unknowns ?? [], "unknown", "unknown");
   const assumptions = normalizeFacts(input.assumptions ?? [], "assumed", "assumption");
   const contradicted = normalizeFacts(input.contradicted ?? [], "contradicted", "contradiction");
-  const evidenceQuality = assessEvidenceQuality(evidence, known, unknowns, assumptions, contradicted);
+  const threats = normalizeThreats(input.threats ?? []);
+  const referenceTraceability = assessEvidenceReferenceTraceability(
+    evidence,
+    { known, unknowns, assumptions, contradicted },
+    threats,
+  );
+  const evidenceQuality = assessEvidenceQuality(evidence, contradicted, referenceTraceability);
   const confidence = assessConfidence(input.desiredConfidence, evidenceQuality, assumptions, unknowns);
   const nextBestEvidence = chooseNextBestEvidence(input.nextBestEvidence, evidenceQuality, assumptions, unknowns, contradicted);
   const governance = assessGovernance(evidenceQuality, confidence, assumptions, unknowns, contradicted, nextBestEvidence);
-  const stewardship = assessStewardshipFromAssessment(input, evidenceQuality, confidence, governance);
+  const stewardship = assessStewardshipFromAssessment(input, threats, evidenceQuality, confidence, governance);
   const journal = createDecisionJournal({
     decisionId: input.decisionId ?? "decision:unassigned",
     createdAt,
     evidence,
+    known,
     assumptions,
     unknowns,
     contradicted,
+    threats,
+    traceability: referenceTraceability,
     reasoningSummary: input.reasoningSummary,
   });
 
@@ -74,14 +90,27 @@ export function createDecisionJournal(input: {
   decisionId: string;
   createdAt?: string;
   evidence: readonly DecisionEvidence[];
+  known?: readonly AssessmentFact[];
   assumptions: readonly AssessmentFact[];
   unknowns: readonly AssessmentFact[];
   contradicted: readonly AssessmentFact[];
+  threats?: readonly DecisionThreat[];
+  traceability?: EvidenceReferenceTraceability;
   reasoningSummary?: string;
 }): DecisionJournal {
   const contradictionEvidence = input.evidence
     .filter((item) => item.direction === "contradicting")
     .map((item) => item.label);
+  const traceability = input.traceability ?? assessEvidenceReferenceTraceability(
+    input.evidence,
+    {
+      known: input.known ?? [],
+      unknowns: input.unknowns,
+      assumptions: input.assumptions,
+      contradicted: input.contradicted,
+    },
+    input.threats ?? [],
+  );
 
   return {
     decisionId: input.decisionId,
@@ -94,6 +123,8 @@ export function createDecisionJournal(input: {
     ]),
     unknownsPresent: input.unknowns.map((item) => item.label),
     reasoningSummary: input.reasoningSummary?.trim() || "Decision context captured before the outcome was known.",
+    traceRefs: traceability.traceRefs,
+    traceability: journalTraceability(traceability),
   };
 }
 
@@ -242,20 +273,18 @@ function normalizeFacts(
 
 function assessEvidenceQuality(
   evidence: readonly DecisionEvidence[],
-  known: readonly AssessmentFact[],
-  unknowns: readonly AssessmentFact[],
-  assumptions: readonly AssessmentFact[],
   contradicted: readonly AssessmentFact[],
+  traceability: EvidenceReferenceTraceability,
 ): DecisionEvidenceQualityAssessment {
   const reliability = averageEvidence(evidence, "reliability");
   const freshness = averageEvidence(evidence, "freshness");
   const independence = averageEvidence(evidence, "independence");
   const replication = averageEvidence(evidence, "replication");
   const calibration = averageEvidence(evidence, "calibration");
-  const traceability = averageEvidence(evidence, "traceability");
+  const evidenceTraceabilityScore = averageEvidence(evidence, "traceability");
   const rawQuality = averageEvidence(evidence, "quality");
   const contradictionPressure = assessContradictionPressure(evidence, contradicted);
-  const coverage = assessCoverage(evidence, known, unknowns, assumptions, contradicted);
+  const referenceCoverage = traceability.evidenceReferenceCoverage;
   const quality = Math.round(clamp(average([
     rawQuality,
     reliability,
@@ -263,8 +292,8 @@ function assessEvidenceQuality(
     independence,
     replication,
     calibration,
-    traceability,
-    coverage,
+    evidenceTraceabilityScore,
+    referenceCoverage,
   ], 0) - contradictionPressure * 0.12));
   const explanation = [
     evidence.length
@@ -273,7 +302,8 @@ function assessEvidenceQuality(
     contradictionPressure > 0
       ? `Contradiction pressure is ${Math.round(contradictionPressure)}/100.`
       : "No contradictory evidence was declared.",
-    `Traceability is ${Math.round(traceability)}/100.`,
+    `Traceability is ${Math.round(evidenceTraceabilityScore)}/100.`,
+    ...traceability.explanation,
   ];
 
   return {
@@ -284,8 +314,9 @@ function assessEvidenceQuality(
     replication: Math.round(replication),
     contradictionPressure: Math.round(contradictionPressure),
     calibration: Math.round(calibration),
-    traceability: Math.round(traceability),
-    coverage: Math.round(coverage),
+    traceability: Math.round(evidenceTraceabilityScore),
+    coverage: referenceCoverage,
+    missingEvidenceReferences: traceability.missingEvidenceReferences,
     explanation,
   };
 }
@@ -377,6 +408,9 @@ function assessGovernance(
   if (!assumptions.length) warnings.push("No assumptions were declared; verify this is intentional.");
   if (!unknowns.length) warnings.push("No unknowns were declared; hidden uncertainty may remain.");
   if (evidenceQuality.contradictionPressure >= 45) warnings.push("Contradiction pressure is high enough to require challenge.");
+  if (evidenceQuality.missingEvidenceReferences?.length) {
+    warnings.push(`Missing evidence references: ${evidenceQuality.missingEvidenceReferences.join(", ")}.`);
+  }
   if (evidenceQuality.quality <= 20) blockers.push("Evidence quality is too weak to support confident action.");
   if (confidence.cap <= 25) blockers.push("Confidence is capped too low for a strong decision.");
 
@@ -401,11 +435,11 @@ function assessGovernance(
 
 function assessStewardshipFromAssessment(
   input: DecisionAssessmentInput,
+  threats: readonly DecisionThreat[],
   evidenceQuality: DecisionEvidenceQualityAssessment,
   confidence: DecisionConfidenceDiscipline,
   governance: DecisionGovernanceAssessment,
 ): DecisionStewardshipAssessment {
-  const threats = normalizeThreats(input.threats ?? []);
   const threatPressure = Math.round(average(threats.map((item) => (item.severity * item.likelihood) / 100), 0));
   const importance = Math.round(asScore(input.importance, 50));
   const optionality = Math.round(asScore(input.optionality, 50));
@@ -598,18 +632,107 @@ function assessContradictionPressure(
   return clamp(evidencePressure + contradicted.length * 12);
 }
 
-function assessCoverage(
+function assessEvidenceReferenceTraceability(
   evidence: readonly DecisionEvidence[],
-  known: readonly AssessmentFact[],
-  unknowns: readonly AssessmentFact[],
-  assumptions: readonly AssessmentFact[],
-  contradicted: readonly AssessmentFact[],
-): number {
-  if (!evidence.length) return 0;
-  const facts = [...known, ...unknowns, ...assumptions, ...contradicted];
-  if (!facts.length) return 60;
-  const covered = facts.filter((fact) => fact.evidenceIds.length > 0).length;
-  return clamp((covered / facts.length) * 100);
+  facts: {
+    known: readonly AssessmentFact[];
+    unknowns: readonly AssessmentFact[];
+    assumptions: readonly AssessmentFact[];
+    contradicted: readonly AssessmentFact[];
+  },
+  threats: readonly DecisionThreat[],
+): EvidenceReferenceTraceability {
+  const evidenceIds = new Set(evidence.map((item) => item.evidenceId));
+  const evidenceTraces = evidence.map((item): DecisionJournalTraceRef => ({
+    refId: item.evidenceId,
+    refType: "evidence",
+    label: item.label,
+    evidenceIds: [item.evidenceId],
+    linkedEvidenceIds: [item.evidenceId],
+    missingEvidenceIds: [],
+  }));
+  const referenceTraces: DecisionJournalTraceRef[] = [
+    ...facts.known.map((fact) => factTrace(fact, "known", evidenceIds)),
+    ...facts.unknowns.map((fact) => factTrace(fact, "unknown", evidenceIds)),
+    ...facts.assumptions.map((fact) => factTrace(fact, "assumption", evidenceIds)),
+    ...facts.contradicted.map((fact) => factTrace(fact, "contradiction", evidenceIds)),
+    ...threats.map((threat) => threatTrace(threat, evidenceIds)),
+  ];
+  const missingEvidenceReferences = uniqueStrings(referenceTraces.flatMap((trace) => trace.missingEvidenceIds));
+  const uncoveredReferences = referenceTraces.filter((trace) => trace.linkedEvidenceIds.length === 0);
+  const evidenceReferenceCoverage = !evidence.length
+    ? 0
+    : referenceTraces.length
+      ? Math.round(clamp(((referenceTraces.length - uncoveredReferences.length) / referenceTraces.length) * 100))
+      : 60;
+  const complete = missingEvidenceReferences.length === 0 && uncoveredReferences.length === 0;
+
+  return {
+    traceRefs: [...evidenceTraces, ...referenceTraces],
+    complete,
+    evidenceReferenceCoverage,
+    missingEvidenceReferences,
+    explanation: [
+      `Evidence reference coverage is ${evidenceReferenceCoverage}/100.`,
+      uncoveredReferences.length
+        ? `${uncoveredReferences.length} assessment reference(s) are not linked to supplied evidence.`
+        : "All assessment references are linked to supplied evidence.",
+      missingEvidenceReferences.length
+        ? `Missing evidence references: ${missingEvidenceReferences.join(", ")}.`
+        : "All declared evidence references resolve to supplied evidence.",
+    ],
+  };
+}
+
+function factTrace(
+  fact: AssessmentFact,
+  refType: DecisionJournalTraceRefType,
+  evidenceIds: ReadonlySet<string>,
+): DecisionJournalTraceRef {
+  return referenceTrace({
+    refId: fact.factId,
+    refType,
+    label: fact.label,
+    referencedEvidenceIds: fact.evidenceIds,
+    evidenceIds,
+  });
+}
+
+function threatTrace(threat: DecisionThreat, evidenceIds: ReadonlySet<string>): DecisionJournalTraceRef {
+  return referenceTrace({
+    refId: threat.threatId,
+    refType: "threat",
+    label: threat.label,
+    referencedEvidenceIds: threat.evidenceIds,
+    evidenceIds,
+  });
+}
+
+function referenceTrace(input: {
+  refId: string;
+  refType: DecisionJournalTraceRefType;
+  label: string;
+  referencedEvidenceIds: readonly string[];
+  evidenceIds: ReadonlySet<string>;
+}): DecisionJournalTraceRef {
+  const referencedEvidenceIds = uniqueStrings(input.referencedEvidenceIds);
+  return {
+    refId: input.refId,
+    refType: input.refType,
+    label: input.label,
+    evidenceIds: referencedEvidenceIds,
+    linkedEvidenceIds: referencedEvidenceIds.filter((evidenceId) => input.evidenceIds.has(evidenceId)),
+    missingEvidenceIds: referencedEvidenceIds.filter((evidenceId) => !input.evidenceIds.has(evidenceId)),
+  };
+}
+
+function journalTraceability(traceability: EvidenceReferenceTraceability): DecisionJournalTraceability {
+  return {
+    complete: traceability.complete,
+    evidenceReferenceCoverage: traceability.evidenceReferenceCoverage,
+    missingEvidenceReferences: traceability.missingEvidenceReferences,
+    explanation: [...traceability.explanation],
+  };
 }
 
 function assumptionExposure(assumptions: readonly AssessmentFact[]): number {

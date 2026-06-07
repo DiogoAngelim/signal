@@ -17,8 +17,8 @@ fi
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
-# Live mode is intentionally env-gated. The execution module will fail closed if
-# any live approval is missing.
+
+
 export BINANCE_MODE="${BINANCE_MODE:-testnet}"
 export BINANCE_LIVE_TRADING_ENABLED="${BINANCE_LIVE_TRADING_ENABLED:-false}"
 export BINANCE_CONFIRM_LIVE_TRADING="${BINANCE_CONFIRM_LIVE_TRADING:-false}"

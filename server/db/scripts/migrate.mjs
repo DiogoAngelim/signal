@@ -28,5 +28,5 @@ try {
 }
 
 function shouldUseSsl(connectionString) {
-  return /sslmode=require/i.test(connectionString) || /\.neon\.tech\//i.test(connectionString);
+  return /sslmode=require/i.test(connectionString) || /\.neon\.tech\
 }

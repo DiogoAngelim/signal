@@ -46,7 +46,7 @@ export function createAirQualityAdapter(context: AdapterContext): SafetyDataAdap
           const live = await collectLiveAirQuality(region, context);
           if (live) return live;
         } catch {
-          // Fall back to fixture data.
+          
         }
       }
       return collectFixtureAirQuality(region, context);

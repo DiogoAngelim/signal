@@ -7,7 +7,7 @@ const commonNode = {
   sourcemap: true
 };
 
-// Local long-running server build
+
 await build({
   ...commonNode,
   format: "esm",
@@ -15,7 +15,7 @@ await build({
   outfile: "dist/index.mjs"
 });
 
-// Vercel serverless app build
+
 await build({
   ...commonNode,
   format: "cjs",

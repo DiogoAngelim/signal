@@ -128,7 +128,7 @@ export class AccountSync {
       try {
         trades.push(...await this.client.myTrades({ symbol, limit: 100 }));
       } catch {
-        // Trade history is useful for reconciliation, but account sync should still return balances/open orders.
+        
       }
     }
     return trades;

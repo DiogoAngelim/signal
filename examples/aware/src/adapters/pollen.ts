@@ -28,7 +28,7 @@ export function createPollenAdapter(context: AdapterContext): SafetyDataAdapter 
           const live = await collectLivePollen(region, context);
           if (live) return live;
         } catch {
-          // Fall back to fixtures.
+          
         }
       }
       return collectFixturePollen(region, context);

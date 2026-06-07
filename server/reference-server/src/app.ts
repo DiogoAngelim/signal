@@ -47,9 +47,9 @@ async function main() {
   );
 }
 
-/* c8 ignore start */
+
 main().catch((error) => {
   console.error(error);
   process.exit(1);
 });
-/* c8 ignore end */
+

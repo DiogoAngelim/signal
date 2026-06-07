@@ -67,16 +67,16 @@ export type CounterfactualResult = {
   audit: Record<string, unknown>;
 };
 
-/**
- * Builds hypothetical and later realized learning for decisions not taken.
- *
- * @example
- * const result = evaluateCounterfactuals({
- *   actualDecision: { decision: "watch", opportunity: 68, risk: 28, maxExposure: 0 },
- *   normalSizeDecision: { decision: "buy", expectedReturn: 9, risk: 40, maxExposure: 10 },
- * });
- * result.missedUpsideScore; // high when caution likely blocked upside
- */
+
+
+
+
+
+
+
+
+
+
 export function evaluateCounterfactuals(input: CounterfactualInput = {}): CounterfactualResult {
   const scenarios = applyRealizedOutcomes([
     ...scenarioInputs(input),

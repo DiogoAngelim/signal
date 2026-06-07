@@ -1,4 +1,4 @@
-/* c8 ignore next */
+
 import { clamp, mean } from "../math/statistics";
 import type {
   DiscoveryFinding,
@@ -8,14 +8,14 @@ import type {
 
 const MIN_SUPPORT = 2;
 
-/**
- * Opportunity Explorer converts rejected and completed candidates into rules.
- *
- * The explorer is deterministic by design. It counts observable evidence and
- * feature recurrence, emits explainable findings, and feeds only named
- * opportunity concepts back into discovery. There is no model fitting or hidden
- * state beyond the stored records supplied to the class.
- */
+
+
+
+
+
+
+
+
 export class OpportunityExplorer {
   private readonly records: OpportunityOutcomeRecord[] = [];
 
@@ -44,7 +44,7 @@ export function analyzeOpportunityOutcomes(records: OpportunityOutcomeRecord[]):
 
   return findings.sort((left, right) => {
     const confidenceDelta = right.confidence - left.confidence;
-    /* c8 ignore next */
+    
     return confidenceDelta === 0 ? left.findingId.localeCompare(right.findingId) : confidenceDelta;
   });
 }
@@ -53,7 +53,7 @@ function featureFindings(records: OpportunityOutcomeRecord[]): DiscoveryFinding[
   const winners = records.filter((record) => record.outcome === "winning");
   if (winners.length < MIN_SUPPORT) return [];
 
-  /* c8 ignore next */
+  
   const features = new Set(winners.flatMap((record) => Object.keys(record.features ?? {})));
   const findings: DiscoveryFinding[] = [];
 
@@ -116,8 +116,8 @@ function typesFor(records: OpportunityOutcomeRecord[]): OpportunityType[] {
   return Array.from(new Set(types)).sort();
 }
 
-/* c8 ignore start */
+
 function round(value: number) {
   return Number(value.toFixed(2));
 }
-/* c8 ignore stop */
+

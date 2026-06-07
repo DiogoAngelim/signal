@@ -133,7 +133,7 @@ function encryptionKey() {
     const decoded = Buffer.from(configured, "base64");
     if (decoded.length === 32) return decoded;
   } catch {
-    // Fall through to deterministic hashing of deployment-provided secret material.
+    
   }
 
   return crypto.createHash("sha256").update(configured).digest();

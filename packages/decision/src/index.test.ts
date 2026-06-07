@@ -279,6 +279,48 @@ describe("@signal/decision", () => {
     expect(assessment.nextBestEvidence.question).toMatch(/contradictory evidence/i);
   });
 
+  it("does not count missing evidence references as traceable coverage", () => {
+    const assessment = assessDecisionEvidence({
+      decisionId: "decision:missing-evidence-reference",
+      evidence: [
+        {
+          evidenceId: "evidence:present",
+          label: "Present observation",
+          direction: "supporting",
+          quality: 80,
+          traceability: 90,
+        },
+      ],
+      known: [{ factId: "known:linked", label: "Known fact", evidenceIds: ["evidence:present"] }],
+      assumptions: [{ factId: "assumption:broken", label: "Broken assumption", evidenceIds: ["evidence:missing"] }],
+      contradicted: [{
+        factId: "contradiction:partial",
+        label: "Partially traceable contradiction",
+        evidenceIds: ["evidence:present", "evidence:missing"],
+      }],
+      threats: [{ threatId: "threat:broken", label: "Threat with missing evidence", evidenceIds: ["evidence:threat-missing"] }],
+      reversibility: "medium",
+    });
+
+    expect(assessment.evidenceQuality.coverage).toBe(50);
+    expect(assessment.evidenceQuality.missingEvidenceReferences).toEqual([
+      "evidence:missing",
+      "evidence:threat-missing",
+    ]);
+    expect(assessment.journal.traceability?.complete).toBe(false);
+    expect(assessment.journal.traceability?.evidenceReferenceCoverage).toBe(50);
+    expect(assessment.journal.traceability?.missingEvidenceReferences).toEqual([
+      "evidence:missing",
+      "evidence:threat-missing",
+    ]);
+    expect(assessment.journal.traceRefs?.find((trace) => trace.refId === "assumption:broken")).toMatchObject({
+      refType: "assumption",
+      linkedEvidenceIds: [],
+      missingEvidenceIds: ["evidence:missing"],
+    });
+    expect(assessment.governance.warnings.join(" ")).toContain("evidence:threat-missing");
+  });
+
   it("exposes an evidence-centered core entrypoint for new consumers", () => {
     expect(assessDecisionEvidenceFromCore).toBe(assessDecisionEvidence);
     expect(evaluateDecisionFromCore).toBe(evaluateDecision);

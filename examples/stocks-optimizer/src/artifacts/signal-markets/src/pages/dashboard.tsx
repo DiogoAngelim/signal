@@ -4299,8 +4299,8 @@ export default function Dashboard() {
     if (refreshedPortfolioMarkets.current.has(refreshKey)) return;
 
     const timeout = window.setTimeout(() => {
-      // Delayed persistent refresh disabled locally.
-      // Backend/API persistence now protects Historical Strategy Validation state.
+      
+      
       setPortfolioRefreshing(false);
     }, 1_250);
 

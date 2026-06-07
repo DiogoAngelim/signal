@@ -591,7 +591,7 @@ function serverBaseUrl(server: Server) {
   if (!address || typeof address !== "object") {
     throw new Error("Expected server to listen on a TCP address");
   }
-  return `http://127.0.0.1:${(address as AddressInfo).port}`;
+  return `http:
 }
 
 async function closeServer(server: Server) {

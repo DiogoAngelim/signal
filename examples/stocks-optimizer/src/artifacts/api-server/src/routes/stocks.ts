@@ -1152,7 +1152,7 @@ router.post("/stocks/portfolio-decisions/outcomes", async (req, res, next) => {
 async function loadStockRowForHistory(market: string, symbol: string) {
   try {
     const port = process.env.PORT ?? "4010";
-    const internalBase = process.env.INTERNAL_API_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${port}`);
+    const internalBase = process.env.INTERNAL_API_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http:
     const response = await fetch(
       `${internalBase}/api/stocks/list?market=${encodeURIComponent(market)}&offset=0&limit=5000`,
     );

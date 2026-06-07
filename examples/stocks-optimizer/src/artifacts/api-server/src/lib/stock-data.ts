@@ -68,17 +68,17 @@ function normalizeBinanceSnapshotSymbol(symbol: string) {
 
   if (!raw) return raw;
 
-  // Binance liquid spot and USD-margined futures generally use USDT.
+  
   if (raw.endsWith("USDT") || raw.endsWith("USDC") || raw.endsWith("BUSD") || raw.endsWith("FDUSD")) {
     return raw;
   }
 
-  // Convert common app/provider USD notation to Binance USDT notation.
+  
   if (raw.endsWith("USD")) {
     return `${raw.slice(0, -3)}USDT`;
   }
 
-  // If the symbol is just a base asset, default to USDT.
+  
   if (!/(USDT|USDC|BUSD|FDUSD|BTC|ETH)$/.test(raw)) {
     return `${raw}USDT`;
   }
@@ -182,7 +182,7 @@ async function yahooChartRowsForProviderSymbol(symbol: string, options: TradingV
   if (!hasTimeRemaining(options, 3_500)) return [];
 
   const encoded = encodeURIComponent(symbol.includes(":") ? symbol.split(":").at(-1) ?? symbol : symbol);
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encoded}?range=6mo&interval=1d&includePrePost=false&events=div%2Csplits`;
+  const url = `https:
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TRADINGVIEW_TIMEOUT_MS);
@@ -292,8 +292,8 @@ function normalizeYahooCsvSymbol(symbol: string) {
   }
 
   if (/^EURONEXT:/i.test(raw)) {
-    // Generic EURONEXT is not enough for Yahoo CSV.
-    // Keep existing suffix if present; otherwise leave base symbol unchanged.
+    
+    
     return withoutPrefix;
   }
 

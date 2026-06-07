@@ -1,4 +1,4 @@
-/* c8 ignore start */
+
 export type SizingMode = "none" | "micro" | "small" | "normal" | "large" | "maxSafe";
 
 export type SizingDecision = "blocked" | "deferred" | "allowed";
@@ -52,7 +52,7 @@ type NormalizedCapacity = {
   value: number | undefined;
   specified: boolean;
 };
-/* c8 ignore stop */
+
 
 const CONSTRAINT_REDUCTION: Record<NonNullable<SizingConstraint["severity"]>, number> = {
   low: 0.9,
@@ -345,7 +345,7 @@ function modeFor(normalizedSize: number): SizingMode {
 }
 
 function clampUnit(value: number) {
-  /* c8 ignore next */
+  
   if (!Number.isFinite(value)) return 0;
   return Math.min(1, Math.max(0, value));
 }
@@ -362,7 +362,7 @@ function formatNumber(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
 }
 
-/* c8 ignore next 3 */
+
 function unique(values: string[]) {
   return Array.from(new Set(values));
 }

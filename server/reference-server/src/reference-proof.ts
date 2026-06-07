@@ -350,11 +350,11 @@ async function main() {
   console.log(JSON.stringify(proof, null, 2));
 }
 
-/* c8 ignore start */
+
 if (require.main === module) {
   main().catch((error) => {
     console.error(error instanceof Error ? error.message : error);
     process.exit(1);
   });
 }
-/* c8 ignore end */
+

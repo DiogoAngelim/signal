@@ -1,16 +1,16 @@
-/* c8 ignore next */
+
 import { clamp, mean } from "../math/statistics";
 import type { OpportunityCandidate, OpportunityDensityInput, OpportunityDensityState } from "../types";
 
-/**
- * Adaptive opportunity density estimates future opportunity potential.
- *
- * It intentionally measures the candidate surface rather than final actions:
- * count, quality, velocity, persistence, diversity, and conviction are blended
- * into one deterministic diagnostic that adapters can explain to users.
- */
+
+
+
+
+
+
+
 export function evaluateOpportunityDensity(input: OpportunityDensityInput): OpportunityDensityState {
-  /* c8 ignore next */
+  
   const candidates = input.candidates ?? [];
 
   if (!candidates.length) {
@@ -39,7 +39,7 @@ export function evaluateOpportunityDensity(input: OpportunityDensityInput): Oppo
       conviction * 0.14,
   ));
   const previous = input.previousDensity;
-  /* c8 ignore next */
+  
   const trend = previous == null ? "flat" : density > previous + 3 ? "improving" : density < previous - 3 ? "weakening" : "flat";
 
   return {
@@ -57,8 +57,8 @@ function meanScore(candidates: OpportunityCandidate[], key: "strength" | "confid
   return clamp(mean(candidates.map((candidate) => candidate[key])));
 }
 
-/* c8 ignore start */
+
 function round(value: number) {
   return Number(value.toFixed(2));
 }
-/* c8 ignore stop */
+

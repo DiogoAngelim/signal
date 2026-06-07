@@ -88,7 +88,7 @@ function toExecuteFailure(error: {
 }
 
 function toExecuteMeta(meta: unknown): Record<string, unknown> {
-  /* c8 ignore next -- protocol result metadata is object-shaped; this keeps the public execute API defensive. */
+  
   return isRecord(meta) ? { ...meta } : {};
 }
 
@@ -240,10 +240,10 @@ export class SignalRuntime implements SignalBinding {
     return result;
   }
 
-  /**
-   * Beginner layer: run one registered operation by name and receive one
-   * normalized result. Pass kind to keep protocol routing explicit.
-   */
+  
+
+
+
   async run<TData = unknown>(
     name: string,
     payload?: unknown,
@@ -293,10 +293,10 @@ export class SignalRuntime implements SignalBinding {
     });
   }
 
-  /**
-   * Protocol layer: explicitly route by operation kind while preserving the
-   * existing query, mutation, and event execution paths underneath.
-   */
+  
+
+
+
   async execute<TData = unknown>(
     input: SignalExecuteInput,
   ): Promise<SignalExecuteResult<TData>> {

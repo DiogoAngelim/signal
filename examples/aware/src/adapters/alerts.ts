@@ -48,7 +48,7 @@ export function createOfficialAlertsAdapter(context: AdapterContext): SafetyData
           const live = await collectLiveAlerts(region, context);
           if (live) return live;
         } catch {
-          // Fall back to fixture data.
+          
         }
       }
       return collectFixtureAlerts(region, context);
@@ -61,7 +61,7 @@ async function collectLiveAlerts(region: Region, context: AdapterContext): Promi
   const params = new URLSearchParams({
     point: `${region.latitude},${region.longitude}`
   });
-  const response = await context.fetcher(`https://api.weather.gov/alerts/active?${params.toString()}`, {
+  const response = await context.fetcher(`https:
     headers: {
       "Accept": "application/geo+json, application/json",
       "User-Agent": "Signal Aware Example (https://github.com/)"

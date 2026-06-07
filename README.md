@@ -22,6 +22,49 @@ In 5 minutes, a developer should be able to run the reference proof, execute a
 dangerous mutation, retry it safely, observe replay, observe conflict, observe
 emitted events, observe audit evidence, and run certification.
 
+## What Signal Makes Possible
+
+Signal makes judgment representable as system state. Decisions can carry
+evidence, uncertainty, execution history, outcome review, and learning across
+time.
+
+### Structural Shift
+
+| Without Signal | With Signal |
+| --- | --- |
+| Implicit decisions | Explicit decision objects |
+| Execution logs | Decision lifecycle history |
+| Stateless systems | Outcome-aware systems |
+| Reactive logic | Learning systems |
+| Opaque behavior | Auditable judgment |
+
+### System Capability Classes
+
+- **Decision-tracking systems** preserve decisions, evidence, constraints, and
+  review state as software state.
+- **Outcome-learning systems** connect outcomes back to prior judgment so later
+  decisions can use reviewed history.
+- **Audit-first execution systems** make risk, authorization, replay, and result
+  evidence part of the execution record.
+- **Stewardship-aware systems** represent responsibility, policy, constraints,
+  and review obligations in the decision lifecycle.
+- **Uncertainty-aware systems** keep unknowns, assumptions, contradictions,
+  confidence, and evidence limits visible.
+
+### Newly Possible Properties
+
+- Decisions persist across time and teams.
+- Reasoning is traceable.
+- Execution is reviewable and reversible in record.
+- Systems improve from outcomes.
+- Uncertainty becomes first-class state.
+
+### Mental Model Shift
+
+```txt
+software executes logic -> software manages evolving judgment
+```
+
 ## Start Here
 
 ```bash

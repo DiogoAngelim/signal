@@ -289,7 +289,7 @@ async function fetchTradingViewScannerQuotes(market, symbols) {
 
   if (!requests.length) return [];
 
-  const response = await fetch(`https://scanner.tradingview.com/${scannerMarket}/scan`, {
+  const response = await fetch(`https:
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -36,7 +36,7 @@ export function createWeatherAdapter(context: AdapterContext): SafetyDataAdapter
           const live = await collectLiveWeather(region, context);
           if (live) return live;
         } catch {
-          // Fall through to the fixture. Degraded evidence is handled in the source note.
+          
         }
       }
       return collectFixtureWeather(region, context);

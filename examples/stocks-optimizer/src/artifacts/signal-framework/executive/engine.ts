@@ -95,20 +95,20 @@ export type ExecutiveDecision = {
   audit: ExecutiveAudit;
 };
 
-/**
- * Synthesizes prior decision modules into one final generic decision authority.
- *
- * @example
- * const executive = evaluateExecutiveDecision({
- *   proposedDecision: "buy",
- *   confidence: 78,
- *   trust: { score: 74, status: "trusted", reasons: ["Historical outcomes are stable."] },
- *   permission: { allowed: true, level: "limited", reasons: ["Execution is acceptable."] },
- *   capacity: { maxExposure: 4, mode: "reduced", reasons: ["Recovery cap is active."] },
- * });
- * executive.decision; // "buy"
- * executive.participationMode; // "limited"
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function evaluateExecutiveDecision(input: ExecutiveInput = {}): ExecutiveDecision {
   const restrictions = normalizeRestrictions(input);
   const states = evaluateDecisionStates({
