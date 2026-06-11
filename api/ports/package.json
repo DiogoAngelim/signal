@@ -1,0 +1,29 @@
+{
+  "name": "@signal/ports",
+  "version": "0.1.0",
+  "description": "Pure port interfaces for Signal runtime dependency inversion",
+  "type": "commonjs",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "biome check src/",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@signal/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.7.3"
+  }
+}

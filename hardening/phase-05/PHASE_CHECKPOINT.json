@@ -1,8 +1,13 @@
 {
   "phase": 5,
-  "status": "COMPLETE",
-  "validation": { "schemaValid": true, "filesPresent": true, "criteriaSatisfied": true },
-  "artifacts": ["hardening/phase-05/SLOS.md", "hardening/phase-05/PHASE_CHECKPOINT.json"],
-  "blockingIssues": [],
-  "evidence": ["8 SLOs defined at 100% target", "Deterministic execution = 100%", "Audit correctness = 100%", "Replay correctness = 100%"]
+  "name": "Event Ownership",
+  "status": "COMPLETED",
+  "completedAt": "2026-06-11T10:16:40Z",
+  "summary": "Runtime is the ONLY event authority. Event lifecycle (create, dispatch, subscribe) is owned exclusively by runtime. Domain cannot emit events - emit() is only available inside mutation handlers and throws if called outside.",
+  "verification": {
+    "eventCreation": "runtime only (dispatchEvent function)",
+    "eventDispatch": "EventPort only",
+    "domainEmits": "BLOCKED (throws if called outside mutation handlers)"
+  },
+  "nextPhase": 6
 }

@@ -4,14 +4,13 @@ import {
   type SignalEnvelope,
   type SignalErrorEnvelope,
 } from "@signal/protocol";
+import type { EventPort, StoragePort } from "@signal/ports";
 import { fingerprint } from "./hash";
 import { dispatchEvent } from "./event";
 import { ZodError } from "zod";
 import type {
-  SignalDispatcher,
   SignalExecutionContext,
   SignalExecutionResult,
-  SignalIdempotencyStore,
 } from "./types";
 import type { SignalRegistry } from "./registry";
 import {
@@ -29,8 +28,8 @@ function toFailure<TResult>(error: SignalErrorEnvelope): SignalExecutionResult<T
 
 export async function executeMutation<TInput, TResult>(
   registry: SignalRegistry,
-  dispatcher: SignalDispatcher | undefined,
-  idempotencyStore: SignalIdempotencyStore | undefined,
+  eventPort: EventPort,
+  storagePort: StoragePort | undefined,
   name: string,
   input: TInput,
   context: SignalExecutionContext,
@@ -82,8 +81,8 @@ export async function executeMutation<TInput, TResult>(
       );
     }
 
-    if (idempotencyStore && idempotencyKey && definition && definition.idempotency !== "none") {
-      const reservation = await idempotencyStore.reserve({
+    if (storagePort && idempotencyKey && definition && definition.idempotency !== "none") {
+      const reservation = await storagePort.reserve({
         operationName: name,
         idempotencyKey,
         payloadFingerprint,
@@ -166,10 +165,10 @@ export async function executeMutation<TInput, TResult>(
     const validatedResult = definition.resultSchema.parse(result);
 
     for (const eventEnvelope of emittedEvents) {
-      await dispatcher?.dispatch(eventEnvelope);
+      await eventPort.dispatch(eventEnvelope);
     }
 
-    if (idempotencyStore && idempotencyKey && definition && definition.idempotency !== "none") {
+    if (storagePort && idempotencyKey && definition && definition.idempotency !== "none") {
       const meta = createExecutionSuccessMeta({
         outcome: "completed",
         envelope,
@@ -185,7 +184,7 @@ export async function executeMutation<TInput, TResult>(
         },
       });
 
-      await idempotencyStore.complete({
+      await storagePort.complete({
         operationName: name,
         idempotencyKey,
         payloadFingerprint,
@@ -227,12 +226,12 @@ export async function executeMutation<TInput, TResult>(
 
       if (
         reservedRecord &&
-        idempotencyStore &&
+        storagePort &&
         idempotencyKey &&
         definition &&
         definition.idempotency !== "none"
       ) {
-        await idempotencyStore.fail({
+        await storagePort.fail({
           operationName: name,
           idempotencyKey,
           payloadFingerprint,
@@ -247,12 +246,12 @@ export async function executeMutation<TInput, TResult>(
 
     if (
       reservedRecord &&
-      idempotencyStore &&
+      storagePort &&
       idempotencyKey &&
       definition &&
       definition.idempotency !== "none"
     ) {
-      await idempotencyStore.fail({
+      await storagePort.fail({
         operationName: name,
         idempotencyKey,
         payloadFingerprint,

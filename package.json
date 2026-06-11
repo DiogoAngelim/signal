@@ -25,6 +25,7 @@
     "coverage:library": "pnpm -r --sort --filter './api/**' --filter './packages/**' --filter './server/**' --if-present run test:coverage",
     "lint": "pnpm -r --sort run lint",
     "lint:library": "pnpm -r --sort --filter './api/**' --filter './packages/**' --filter './server/**' run lint",
+    "arch:check": "depcruise --config .dependency-cruiser.js packages/kernel/src api/protocol/src api/ports/src api/runtime/src api/sdk-node/src api/binding-http server/db packages/agency/src packages/commitment/src packages/decision/src packages/decision-memory/src packages/semantic-state/src signal-cli/src",
     "verify:exports": "node ./scripts/verify-package-entrypoints.mjs",
     "proof:reference": "pnpm --filter @signal/reference-server proof",
     "proof:reference:postgres": "pnpm --filter @signal/reference-server proof:postgres",
@@ -42,6 +43,7 @@
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^20.17.16",
     "@vitest/coverage-v8": "^2.1.9",
+    "dependency-cruiser": "^16.0.0",
     "typescript": "^5.7.3",
     "vite": "^8.0.10",
     "vitest": "^2.1.9"

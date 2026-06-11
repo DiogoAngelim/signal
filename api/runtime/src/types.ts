@@ -9,7 +9,6 @@ import type {
   SignalResultMeta,
 } from "@signal/protocol";
 import type { z } from "zod";
-import type { PerceptionLayer, PerceptionLayerOptions } from "./perception";
 
 export type { SignalErrorEnvelope } from "@signal/protocol";
 
@@ -138,54 +137,6 @@ export type SignalExecutionResult<TResult = unknown> =
   | SignalExecutionOutcome<TResult>
   | SignalExecutionFailure;
 
-export interface SignalIdempotencyRecord {
-  operationName: string;
-  idempotencyKey: string;
-  payloadFingerprint: string;
-  status: "pending" | "completed" | "failed";
-  result?: unknown;
-  resultMeta?: SignalResultMeta;
-  error?: SignalErrorEnvelope;
-  createdAt: string;
-  updatedAt: string;
-  messageId?: string;
-}
-
-export interface SignalIdempotencyReservation {
-  state: "reserved" | "replayed" | "conflict" | "inflight";
-  record?: SignalIdempotencyRecord;
-}
-
-export interface SignalIdempotencyStore {
-  reserve(input: {
-    operationName: string;
-    idempotencyKey: string;
-    payloadFingerprint: string;
-  }): Promise<SignalIdempotencyReservation>;
-  complete(input: {
-    operationName: string;
-    idempotencyKey: string;
-    payloadFingerprint: string;
-    result: unknown;
-    resultMeta?: SignalResultMeta;
-    messageId?: string;
-  }): Promise<void>;
-  fail(input: {
-    operationName: string;
-    idempotencyKey: string;
-    payloadFingerprint: string;
-    error: SignalErrorEnvelope;
-  }): Promise<void>;
-}
-
-export interface SignalDispatcher {
-  dispatch(envelope: SignalEnvelope): Promise<void>;
-  subscribe(
-    name: string,
-    handler: (envelope: SignalEnvelope) => void | Promise<void>,
-  ): () => void;
-}
-
 export interface SignalConsumerDeduper {
   remember(input: {
     consumerId: string;
@@ -199,15 +150,6 @@ export interface SignalSubscriptionOptions {
   description?: string;
   replaySafe?: boolean;
   deduper?: SignalConsumerDeduper;
-}
-
-export interface SignalRuntimeOptions {
-  protocol?: string;
-  idempotencyStore?: SignalIdempotencyStore;
-  dispatcher?: SignalDispatcher;
-  perception?: PerceptionLayer | PerceptionLayerOptions | false;
-  runtimeName?: string;
-  bindings?: SignalCapabilities["bindings"];
 }
 
 export interface SignalCapabilityProvider {

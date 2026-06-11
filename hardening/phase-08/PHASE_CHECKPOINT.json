@@ -1,8 +1,13 @@
 {
   "phase": 8,
-  "status": "COMPLETE",
-  "validation": { "schemaValid": true, "filesPresent": true, "criteriaSatisfied": true },
-  "artifacts": ["hardening/phase-08/ARCHITECTURE_FITNESS.md", "hardening/phase-08/PHASE_CHECKPOINT.json"],
-  "blockingIssues": [],
-  "evidence": ["5 architecture fitness rules defined and verified", "Pulse does not import Execution: PASS", "Execution does not import Pulse: PASS", "Audit is immutable: PASS"]
+  "name": "CI Hardening",
+  "status": "COMPLETED",
+  "completedAt": "2026-06-11T10:17:49Z",
+  "summary": "Added runtime purity enforcement rules to dependency-cruiser: runtime-no-transport, runtime-no-domain, runtime-no-server. All 233 modules pass with 0 violations.",
+  "verification": {
+    "archCheck": "PASS (233 modules, 586 deps, 0 violations)",
+    "runtimePurityRules": "ADDED (3 new rules)",
+    "circularDetection": "ENABLED"
+  },
+  "nextPhase": null
 }

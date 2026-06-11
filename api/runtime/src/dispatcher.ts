@@ -1,7 +1,8 @@
 import { createSignalEnvelope, type SignalEnvelope } from "@signal/protocol";
-import type { SignalConsumerDeduper, SignalDispatcher } from "./types";
+import type { EventPort } from "@signal/ports";
+import type { SignalConsumerDeduper } from "./types";
 
-export function createInProcessDispatcher(): SignalDispatcher {
+export function createInProcessDispatcher(): EventPort {
   const subscribers = new Map<
     string,
     Set<(envelope: SignalEnvelope) => void | Promise<void>>

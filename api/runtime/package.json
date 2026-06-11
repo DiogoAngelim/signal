@@ -21,6 +21,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@signal/ports": "workspace:*",
     "@signal/protocol": "workspace:*",
     "zod": "^3.24.2"
   },

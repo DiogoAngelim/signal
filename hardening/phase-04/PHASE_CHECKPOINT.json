@@ -1,8 +1,13 @@
 {
   "phase": 4,
-  "status": "COMPLETE",
-  "validation": { "schemaValid": true, "filesPresent": true, "criteriaSatisfied": true },
-  "artifacts": ["hardening/phase-04/SUPPLY_CHAIN.md", "hardening/phase-04/PHASE_CHECKPOINT.json"],
-  "blockingIssues": [],
-  "evidence": ["Dependencies listed: 4 runtime + 5 dev", "Vulnerability check: pnpm audit clean; overrides applied", "Pinning strategy: lockfile + frozen-lockfile + override policy"]
+  "name": "Domain Isolation",
+  "status": "COMPLETED",
+  "completedAt": "2026-06-11T10:16:16Z",
+  "summary": "Domain packages (@signal/decision) are pure functions with no runtime imports. DecisionPort interface provides abstraction for invoking domain logic. Runtime depends only on ports, not domain packages.",
+  "verification": {
+    "decisionPackageDependencies": "NONE (pure functions only)",
+    "decisionPort": "DEFINED in @signal/ports",
+    "runtimeDoesNotImportDomain": "VERIFIED"
+  },
+  "nextPhase": 5
 }

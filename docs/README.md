@@ -158,6 +158,7 @@ named `@signal/examples`.
 | Package | Path | Purpose |
 | --- | --- | --- |
 | `@signal/protocol` | `api/protocol` | Canonical Signal contract surface: operation names, kinds, envelopes, errors, results, capabilities, and JSON schema objects. |
+| `@signal/ports` | `api/ports` | Pure port interfaces for dependency inversion: EventPort, StoragePort, DecisionPort, ObservabilityPort, RuntimePort. |
 | `@signal/runtime` | `api/runtime` | Core in-process execution: registry, query/mutation/event calls, `run()`/`execute()`, idempotency, subscribers, dispatch, perception, and capability discovery. |
 | `@signal/sdk-node` | `api/sdk-node` | Node ergonomics for defining queries, mutations, events, and creating a runtime. |
 | `@signal/binding-http` | `api/binding-http` | Fastify routes that adapt HTTP requests into Signal runtime calls. |
@@ -217,11 +218,17 @@ flowchart TB
     Sdk["@signal/sdk-node<br/>operation definitions"]
   end
 
+  subgraph Ports["@signal/ports (pure interfaces)"]
+    EventPort["EventPort"]
+    StoragePort["StoragePort"]
+    DecisionPort["DecisionPort"]
+    ObservabilityPort["ObservabilityPort"]
+    RuntimePort["RuntimePort"]
+  end
+
   subgraph Core["Signal correctness core"]
     Runtime["@signal/runtime<br/>execute, replay, audit, dispatch"]
     Protocol["@signal/protocol<br/>names, kinds, envelopes, errors"]
-    Idempotency["idempotency store<br/>memory or Postgres"]
-    Events["event dispatcher<br/>subscriber dedupe"]
   end
 
   subgraph Domain["Reusable decision packages"]
@@ -244,11 +251,12 @@ flowchart TB
   Backend --> Http
   Backend --> Sdk
   Backend --> Decision
+  Http --> Ports
+  Sdk --> Ports
   Http --> Runtime
   Sdk --> Runtime
+  Runtime --> Ports
   Runtime --> Protocol
-  Runtime --> Idempotency
-  Runtime --> Events
   Schemas --> Protocol
   Rfcs --> Protocol
   Constitution --> Protocol
@@ -256,18 +264,34 @@ flowchart TB
   Support --> Decision
 ```
 
-Dependency direction should stay simple:
+### Dependency Rules (Enforced in CI)
 
-- `api/protocol` defines the contract surface.
-- `api/runtime` executes the contract surface.
-- `api/sdk-node` makes operation definitions ergonomic.
-- `api/binding-http` adapts HTTP requests into runtime calls.
-- `server/*` composes backend services and persistence.
-- `examples/*` consume core packages and own runnable frontend/product demos.
-- `frontend/*` is not a workspace package today; keep production app code in
-  `examples/*` unless the workspace shape changes.
-- `packages/*` holds reusable domain logic that can feed applications through
-  adapters.
+The system enforces strict unidirectional dependency boundaries:
+
+| Layer | Packages | Role | Forbidden Dependencies |
+|-------|----------|------|------------------------|
+| **Signal** | `packages/kernel`, `api/protocol` | Pure market logic, type definitions | ❌ → Optimizer/Execution/Post-Trade |
+| **Ports** | `api/ports` | Pure interfaces only | ❌ → runtime/domain/interface |
+| **Optimizer** | `packages/agency`, `packages/commitment`, `packages/decision`, `packages/decision-memory`, `packages/semantic-state` | Financial authority: risk, calibration, commitment, decision-making | ❌ → Signal/Execution/Post-Trade |
+| **Execution** | `api/runtime`, `api/sdk-node`, `api/binding-http`, `server/db` | Infrastructure: runtime dispatch, HTTP binding, database | ❌ → Signal/Optimizer |
+| **Post-Trade** | `signal-cli` | Read-only audit, verification, replay | ❌ → any upstream |
+
+### Runtime Purity Rules
+
+`@signal/runtime` is a pure correctness kernel that must not import:
+- ❌ HTTP or SDK transport layers (`api/sdk-node`, `api/binding-http`)
+- ❌ Domain logic (`packages/agency`, `packages/commitment`, `packages/decision`, etc.)
+- ❌ Server infrastructure (`server/db`)
+
+Runtime is constructed with injected ports:
+```typescript
+const runtime = new SignalRuntime({
+  eventPort,        // required
+  storagePort,       // optional (for idempotency)
+  decisionPort,      // optional (for domain logic)
+  observabilityPort, // optional (for lifecycle hooks)
+});
+```
 
 Core packages must not depend on product apps or examples.
 

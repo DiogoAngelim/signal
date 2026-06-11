@@ -1,5 +1,12 @@
 import type { SignalCapabilities, SignalEnvelope } from "@signal/protocol";
 import { ZodError } from "zod";
+import type {
+  DecisionPort,
+  EventPort,
+  ObservabilityPort,
+  RuntimeMode,
+  StoragePort,
+} from "@signal/ports";
 import { buildCapabilities } from "./capabilities";
 import {
   createInProcessDispatcher,
@@ -12,24 +19,20 @@ import {
   toSignalFailure,
 } from "./execution";
 import { executeMutation } from "./mutation";
-import { PerceptionLayer } from "./perception";
 import { executeQuery } from "./query";
 import { SignalRegistry } from "./registry";
 import type {
   SignalBinding,
-  SignalDispatcher,
   SignalExecuteFailure,
   SignalExecuteInput,
   SignalExecuteResult,
   SignalExecutionContext,
   SignalExecutionResult,
-  SignalIdempotencyStore,
   SignalMutationDefinition,
   SignalOperationDefinition,
   SignalOperationKind,
   SignalQueryDefinition,
   SignalRunOptions,
-  SignalRuntimeOptions,
   SignalSubscriptionOptions,
 } from "./types";
 
@@ -88,7 +91,6 @@ function toExecuteFailure(error: {
 }
 
 function toExecuteMeta(meta: unknown): Record<string, unknown> {
-  
   return isRecord(meta) ? { ...meta } : {};
 }
 
@@ -105,12 +107,52 @@ function toExecuteRequest(
   } as Partial<SignalExecutionContext["request"]>;
 }
 
+/**
+ * Runtime options using injected ports instead of concrete implementations.
+ * This is the dependency-inverted constructor for SignalRuntime.
+ */
+export interface SignalRuntimeOptions {
+  /** Event port for dispatching and subscribing to events (required) */
+  eventPort: EventPort;
+  /** Storage port for idempotency (optional) */
+  storagePort?: StoragePort;
+  /** Decision port for invoking domain logic (optional) */
+  decisionPort?: DecisionPort;
+  /** Observability port for lifecycle hooks (optional) */
+  observabilityPort?: ObservabilityPort;
+  /** Runtime name identifier */
+  runtimeName?: string;
+  /** Execution mode (live, replay, audit) */
+  mode?: RuntimeMode;
+  /** Bindings configuration for capabilities */
+  bindings?: SignalCapabilities["bindings"];
+}
+
+/**
+ * SignalRuntime — Core correctness kernel for Signal protocol.
+ *
+ * Responsibilities:
+ * - Deterministic execution of queries, mutations, and events
+ * - Command dispatch and routing
+ * - Event lifecycle coordination (runtime is the ONLY event authority)
+ * - Idempotency enforcement at entry boundary
+ * - Replay-safe execution
+ *
+ * Rules:
+ * - Depends ONLY on Ports + Protocol (no domain imports)
+ * - No transport awareness
+ * - No side effects in domain logic
+ * - Events owned exclusively here
+ */
 export class SignalRuntime implements SignalBinding {
   readonly registry = new SignalRegistry();
-  readonly dispatcher: SignalDispatcher;
-  readonly perception?: PerceptionLayer;
-  readonly idempotencyStore?: SignalIdempotencyStore;
+  private readonly eventPort: EventPort;
+  private readonly storagePort?: StoragePort;
+  private readonly decisionPort?: DecisionPort;
+  private readonly observabilityPort?: ObservabilityPort;
   readonly runtimeName: string;
+  readonly mode: RuntimeMode;
+  readonly isReplay: boolean;
   private readonly bindings: SignalCapabilities["bindings"];
   private readonly subscriptions: Array<{
     name: string;
@@ -119,16 +161,18 @@ export class SignalRuntime implements SignalBinding {
     description?: string;
   }> = [];
 
-  constructor(options: SignalRuntimeOptions = {}) {
-    this.perception = resolvePerceptionLayer(options.perception);
-    this.dispatcher = this.perception
-      ? createPerceptionAwareDispatcher(
-          options.dispatcher ?? createInProcessDispatcher(),
-          this.perception,
-        )
-      : (options.dispatcher ?? createInProcessDispatcher());
-    this.idempotencyStore = options.idempotencyStore;
+  constructor(options: SignalRuntimeOptions) {
+    if (!options.eventPort) {
+      throw new Error("eventPort is required to construct SignalRuntime");
+    }
+
+    this.eventPort = options.eventPort;
+    this.storagePort = options.storagePort;
+    this.decisionPort = options.decisionPort;
+    this.observabilityPort = options.observabilityPort;
     this.runtimeName = options.runtimeName ?? "signal-node-reference";
+    this.mode = options.mode ?? "live";
+    this.isReplay = this.mode === "replay" || this.mode === "audit";
     this.bindings = options.bindings ?? {
       inProcess: true,
       http: {
@@ -175,7 +219,7 @@ export class SignalRuntime implements SignalBinding {
           })
         : handler;
 
-    return this.dispatcher.subscribe(name, subscriber);
+    return this.eventPort.subscribe(name, subscriber);
   }
 
   async query<TInput, TResult>(
@@ -183,6 +227,17 @@ export class SignalRuntime implements SignalBinding {
     input: TInput,
     request: Partial<SignalExecutionContext["request"]> = {},
   ): Promise<SignalExecutionResult<TResult>> {
+    const startedAt = Date.now();
+
+    this.observabilityPort?.emit({
+      event: "execution.start",
+      operationName: name,
+      operationKind: "query",
+      correlationId: request.correlationId,
+      traceId: request.traceId,
+      isReplay: this.isReplay,
+    });
+
     const result = await executeQuery<TInput, TResult>(
       this.registry,
       name,
@@ -200,9 +255,23 @@ export class SignalRuntime implements SignalBinding {
         meta: request.meta,
       }),
     );
+
+    const durationMs = Date.now() - startedAt;
+
     if (result.ok) {
-      this.perception?.observeEnvelope(result.envelope);
+      this.observabilityPort?.emit({
+        event: "execution.end",
+        operationName: name,
+        operationKind: "query",
+        messageId: result.envelope.messageId,
+        correlationId: request.correlationId,
+        traceId: request.traceId,
+        durationMs,
+        outcome: "completed",
+        isReplay: this.isReplay,
+      });
     }
+
     return result;
   }
 
@@ -213,10 +282,21 @@ export class SignalRuntime implements SignalBinding {
       idempotencyKey?: string;
     } = {},
   ): Promise<SignalExecutionResult<TResult>> {
+    const startedAt = Date.now();
+
+    this.observabilityPort?.emit({
+      event: "execution.start",
+      operationName: name,
+      operationKind: "mutation",
+      correlationId: request.correlationId,
+      traceId: request.traceId,
+      isReplay: this.isReplay,
+    });
+
     const result = await executeMutation<TInput, TResult>(
       this.registry,
-      this.dispatcher,
-      this.idempotencyStore,
+      this.eventPort,
+      this.storagePort,
       name,
       input,
       createDefaultContext({
@@ -234,15 +314,25 @@ export class SignalRuntime implements SignalBinding {
       }),
       request.idempotencyKey,
     );
+
+    const durationMs = Date.now() - startedAt;
+
     if (result.ok) {
-      this.perception?.observeEnvelope(result.envelope);
+      this.observabilityPort?.emit({
+        event: "execution.end",
+        operationName: name,
+        operationKind: "mutation",
+        messageId: result.envelope.messageId,
+        correlationId: request.correlationId,
+        traceId: request.traceId,
+        durationMs,
+        outcome: "completed",
+        isReplay: this.isReplay,
+      });
     }
+
     return result;
   }
-
-  
-
-
 
   async run<TData = unknown>(
     name: string,
@@ -293,10 +383,6 @@ export class SignalRuntime implements SignalBinding {
     });
   }
 
-  
-
-
-
   async execute<TData = unknown>(
     input: SignalExecuteInput,
   ): Promise<SignalExecuteResult<TData>> {
@@ -342,6 +428,19 @@ export class SignalRuntime implements SignalBinding {
             input.payload,
             normalizedRequest,
           );
+
+          this.observabilityPort?.emit({
+            event: "event.emitted",
+            operationName: input.name,
+            operationKind: "event",
+            messageId: envelope.messageId,
+            correlationId: normalizedRequest.correlationId,
+            traceId: normalizedRequest.traceId,
+            durationMs: Date.now() - startedAt,
+            outcome: "completed",
+            isReplay: this.isReplay,
+          });
+
           return {
             ok: true,
             data: envelope as TData,
@@ -396,7 +495,7 @@ export class SignalRuntime implements SignalBinding {
   ): Promise<SignalEnvelope<TPayload>> {
     return dispatchEvent(
       this.registry,
-      this.dispatcher,
+      this.eventPort,
       name,
       payload,
       createDefaultContext({
@@ -421,7 +520,11 @@ export class SignalRuntime implements SignalBinding {
       this.registry,
       this.bindings,
       [...this.subscriptions],
-      { perception: Boolean(this.perception) },
+      {
+        decision: Boolean(this.decisionPort),
+        storage: Boolean(this.storagePort),
+        observability: Boolean(this.observabilityPort),
+      },
     );
   }
 
@@ -450,31 +553,4 @@ export class SignalRuntime implements SignalBinding {
     }
     return kinds;
   }
-}
-
-function resolvePerceptionLayer(
-  option: SignalRuntimeOptions["perception"],
-): PerceptionLayer | undefined {
-  if (option === false) {
-    return undefined;
-  }
-  if (option instanceof PerceptionLayer) {
-    return option;
-  }
-  return new PerceptionLayer(option ?? {});
-}
-
-function createPerceptionAwareDispatcher(
-  dispatcher: SignalDispatcher,
-  perception: PerceptionLayer,
-): SignalDispatcher {
-  return {
-    async dispatch(envelope): Promise<void> {
-      perception.observeEnvelope(envelope);
-      await dispatcher.dispatch(envelope);
-    },
-    subscribe(name, handler): () => void {
-      return dispatcher.subscribe(name, handler);
-    },
-  };
 }

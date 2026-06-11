@@ -1,8 +1,14 @@
 {
   "phase": 6,
-  "status": "COMPLETE",
-  "validation": { "schemaValid": true, "filesPresent": true, "criteriaSatisfied": true },
-  "artifacts": ["hardening/phase-06/REPLAY_CERTIFICATION.md", "hardening/phase-06/PHASE_CHECKPOINT.json"],
-  "blockingIssues": [],
-  "evidence": ["Hash chain described: SHA-256 with stableStringify", "Replay procedure defined: 4-step process", "Deterministic proof included: theorem + proof + corollary"]
+  "name": "Idempotency + Replay",
+  "status": "COMPLETED",
+  "completedAt": "2026-06-11T10:16:51Z",
+  "summary": "Idempotency model uses hash(envelope + execution context) as key. StoragePort handles persistence with reserve/complete/fail lifecycle. Replay mode is supported via RuntimeMode. createReplaySafeSubscriber ensures deterministic replay.",
+  "verification": {
+    "idempotencyKey": "hash(envelope + execution context)",
+    "storagePort": "reserve/complete/fail lifecycle",
+    "replayMode": "supported via RuntimeMode",
+    "determinism": "createReplaySafeSubscriber ensures no duplicate processing"
+  },
+  "nextPhase": 7
 }

@@ -1,5 +1,6 @@
 import { createSignalEnvelope, type SignalEnvelope } from "@signal/protocol";
-import type { SignalDispatcher, SignalExecutionContext } from "./types";
+import type { EventPort } from "@signal/ports";
+import type { SignalExecutionContext } from "./types";
 import type { SignalRegistry } from "./registry";
 import {
   throwIfExecutionBlocked,
@@ -9,7 +10,7 @@ import {
 
 export async function dispatchEvent<TPayload>(
   registry: SignalRegistry,
-  dispatcher: SignalDispatcher | undefined,
+  eventPort: EventPort | undefined,
   name: string,
   payload: TPayload,
   context: SignalExecutionContext,
@@ -34,7 +35,7 @@ export async function dispatchEvent<TPayload>(
     meta,
   });
 
-  await dispatcher?.dispatch(envelope);
+  await eventPort?.dispatch(envelope);
 
   return envelope as SignalEnvelope<TPayload>;
 }

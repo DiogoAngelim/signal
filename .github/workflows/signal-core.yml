@@ -45,6 +45,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm arch:check
+
       - run: pnpm --filter "@digelim/*" test
 
       - run: pnpm --filter @signal/protocol test

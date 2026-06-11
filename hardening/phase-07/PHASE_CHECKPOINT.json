@@ -1,8 +1,13 @@
 {
   "phase": 7,
-  "status": "COMPLETE",
-  "validation": { "schemaValid": true, "filesPresent": true, "criteriaSatisfied": true },
-  "artifacts": ["hardening/phase-07/INVARIANTS.md", "hardening/phase-07/PHASE_CHECKPOINT.json"],
-  "blockingIssues": [],
-  "evidence": ["12 runtime invariants listed", "8 CI-style local test categories defined"]
+  "name": "Observability",
+  "status": "COMPLETED",
+  "completedAt": "2026-06-11T10:17:21Z",
+  "summary": "ObservabilityPort is wired through runtime. Lifecycle hooks emit: execution.start, execution.end, event.emitted, replay.mode.active, idempotency.hit. No direct logging inside runtime - all observability flows through ObservabilityPort.",
+  "verification": {
+    "observabilityPort": "wired in SignalRuntime constructor",
+    "lifecycleEvents": "execution.start, execution.end, event.emitted, replay.mode.active, idempotency.hit",
+    "noDirectLogging": "VERIFIED"
+  },
+  "nextPhase": 8
 }
