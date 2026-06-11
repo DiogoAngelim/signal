@@ -1,0 +1,174 @@
+graph TD
+    subgraph EXTERNAL["External Services"]
+        TV[TradingView API]
+        BN[Binance API]
+        MEXT[Other Market APIs]
+    end
+
+    subgraph INGESTION["Market Data Ingestion"]
+        MDI[Market Data Ingestor]
+        QUOTE[Quote Sync Worker]
+        PRE[Preprocessor<br/>Normalize / Clean / Aggregate]
+    end
+
+    subgraph STORAGE["Data Layer"]
+        PG[(PostgreSQL<br/>Drizzle ORM)]
+        REDIS[(Redis Cache)]
+        MEM[(In-Memory Store)]
+    end
+
+    subgraph ENGINE["Signal Engine — Kernel Pipeline"]
+        direction TB
+        GEN["① Generate<br/>Feature Extraction"]
+        ANA["② Analyze<br/>Pattern Detection"]
+        SCR["③ Score<br/>Evaluation / Filtering"]
+        AGG["④ Aggregate<br/>Decision Output"]
+    end
+
+    subgraph STRATEGY["Strategy & Indicator Modules"]
+        IND[Technical Indicators<br/>RSI / MACD / Bollinger]
+        STR[Strategy Engine<br/>Rules / Heuristics]
+        CAL[Calibration & Policy<br/>Agency Module]
+    end
+
+    subgraph DECISION["Decision Intelligence"]
+        DEC[Decision Records<br/>& Assessment]
+        WIS[Stewardship &<br/>Wisdom Layer]
+        DMEM[Decision Memory<br/>Durable Store]
+    end
+
+    subgraph TRACE["Signal Trace & Verification"]
+        TRC[Trace Recorder<br/>Hash Chain]
+        CAN[Canonicalizer<br/>Deterministic JSON]
+        RPL[Replay Engine<br/>Verification]
+    end
+
+    subgraph QUEUE["Event Queue / Stream"]
+        WS[WebSocket Server<br/>Real-time Broadcast]
+        WHK[Webhook Dispatcher<br/>Signal Webhooks]
+        BGQ[Background Engine<br/>Poll Loop]
+    end
+
+    subgraph BACKEND["API Gateway / Backend"]
+        API[Express API Server<br/>REST + WS]
+        ROUTE[Route Handlers<br/>/signals /stocks /decisions /portfolio]
+        MW[Middleware<br/>Auth / CORS / Logging / ReqID]
+    end
+
+    subgraph EXECUTION["Execution Layer"]
+        BEX[Binance Execution<br/>Worker]
+        ORDM[Order Manager]
+    end
+
+    subgraph FRONTEND["UI / Dashboard"]
+        DASH[React SPA Dashboard<br/>Signal Markets]
+        CHART[Chart Components<br/>TradingView Widget]
+        SIGVIEW[Signal Feed &<br/>Decision Panel]
+    end
+
+    subgraph OUTPUT["Output Distribution"]
+        UIUPD[UI Real-time Updates]
+        APIRES[API JSON Responses]
+        ALERTS[Webhook / Alerts<br/>External Consumers]
+        TRADES[Trade Execution<br/>Orders]
+    end
+
+    %% External → Ingestion
+    TV -->|quotes / symbols| MDI
+    BN -->|orderbook / trades| MDI
+    MEXT -->|market data| MDI
+    TV -->|price sync| QUOTE
+
+    %% Ingestion → Preprocessing
+    MDI -->|raw ticks| PRE
+    QUOTE -->|quotes| PRE
+
+    %% Preprocessing → Storage
+    PRE -->|cleaned data| PG
+    PRE -->|hot data| REDIS
+    PRE -->|session state| MEM
+
+    %% Storage → Engine
+    PG -->|historical features| GEN
+    REDIS -->|cached quotes| GEN
+    MEM -->|runtime state| GEN
+
+    %% Engine pipeline flow
+    GEN -->|features| ANA
+    ANA -->|analysis| SCR
+    SCR -->|scored signals| AGG
+
+    %% Strategy feeds into engine stages
+    IND -->|indicator values| ANA
+    STR -->|strategy signals| SCR
+    CAL -->|policy constraints| SCR
+
+    %% Decision intelligence
+    AGG -->|decision candidates| DEC
+    DEC -->|assessed decisions| WIS
+    WIS -->|stewardship output| DMEM
+    DMEM -->|memory recall| ANA
+
+    %% Trace wraps the pipeline
+    GEN -->|step trace| TRC
+    ANA -->|step trace| TRC
+    SCR -->|step trace| TRC
+    AGG -->|step trace| TRC
+    TRC -->|canonical input| CAN
+    CAN -->|stable JSON| RPL
+
+    %% Engine → Queue / Stream
+    AGG -->|signal packages| WS
+    AGG -->|signal events| WHK
+    BGQ -->|trigger cycle| GEN
+
+    %% Backend
+    API --> MW
+    MW --> ROUTE
+    ROUTE -->|query| PG
+    ROUTE -->|cache lookup| REDIS
+    ROUTE -->|invoke| GEN
+
+    %% Queue → Output
+    WS -->|push signal| UIUPD
+    WHK -->|POST payload| ALERTS
+    ROUTE -->|JSON| APIRES
+
+    %% Execution
+    AGG -->|trade signal| BEX
+    BEX -->|order| ORDM
+    ORDM -->|execute| BN
+    ORDM -->|trade confirm| TRADES
+
+    %% Frontend
+    UIUPD -->|live update| DASH
+    DASH --> CHART
+    DASH --> SIGVIEW
+    APIRES -->|fetch data| DASH
+
+    %% Styling
+    classDef external fill:#ff6b6b,color:#fff,stroke:#c0392b
+    classDef ingestion fill:#f39c12,color:#fff,stroke:#d68910
+    classDef storage fill:#8e44ad,color:#fff,stroke:#6c3483
+    classDef engine fill:#2980b9,color:#fff,stroke:#1f618d
+    classDef strategy fill:#1abc9c,color:#fff,stroke:#16a085
+    classDef decision fill:#16a085,color:#fff,stroke:#0e6655
+    classDef trace fill:#7f8c8d,color:#fff,stroke:#566573
+    classDef queue fill:#e67e22,color:#fff,stroke:#ca6f1e
+    classDef backend fill:#3498db,color:#fff,stroke:#217dbb
+    classDef execution fill:#e74c3c,color:#fff,stroke:#c0392b
+    classDef frontend fill:#27ae60,color:#fff,stroke:#1e8449
+    classDef output fill:#2ecc71,color:#fff,stroke:#27ae60
+
+    class TV,BN,MEXT external
+    class MDI,QUOTE,PRE ingestion
+    class PG,REDIS,MEM storage
+    class GEN,ANA,SCR,AGG engine
+    class IND,STR,CAL strategy
+    class DEC,WIS,DMEM decision
+    class TRC,CAN,RPL trace
+    class WS,WHK,BGQ queue
+    class API,ROUTE,MW backend
+    class BEX,ORDM execution
+    class DASH,CHART,SIGVIEW frontend
+    class UIUPD,APIRES,ALERTS,TRADES output

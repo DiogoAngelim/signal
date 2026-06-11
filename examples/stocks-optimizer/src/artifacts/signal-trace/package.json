@@ -1,0 +1,16 @@
+{
+  "name": "signal-trace",
+  "version": "1.0.0",
+  "description": "Deterministic execution trace layer over stocks optimizer engine",
+  "type": "module",
+  "main": "src/adapter.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --loader ts-node/esm src/adapter.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

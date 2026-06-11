@@ -1,0 +1,32 @@
+{
+  "name": "@signal/kernel",
+  "version": "0.1.0",
+  "private": false,
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "pnpm run typecheck",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rm -rf dist coverage"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.16",
+    "@vitest/coverage-v8": "^2.1.9",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.9"
+  }
+}
