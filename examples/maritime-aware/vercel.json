@@ -1,6 +1,0 @@
-{
-  "framework": "vite",
-  "installCommand": "corepack pnpm -C .. install",
-  "buildCommand": "./examples/maritime-aware/scripts/vercel-build.sh",
-  "outputDirectory": "examples/maritime-aware/dist/web"
-}

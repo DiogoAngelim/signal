@@ -35,7 +35,8 @@
     "clean": "pnpm -r --sort run clean",
     "release": "pnpm build && pnpm test && pnpm lint",
     "release:library": "pnpm verify:exports && pnpm typecheck:library && pnpm test:library && pnpm lint:library",
-    "publish:all": "pnpm -r --sort --filter ./api/** --filter ./packages/** publish --access public"
+    "publish:all": "pnpm -r --sort --filter ./api/** --filter ./packages/** publish --access public",
+    "verify": "signal verify"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

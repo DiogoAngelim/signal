@@ -469,7 +469,7 @@ function tileUrlsForViewport(model: MapModel, scale: number) {
       const wrappedTileX = modulo(tileX, maxTile);
       const screen = worldToScreen({ x: tileX * tileSize, y: tileY * tileSize }, model, scale);
       tiles.push({
-        url: `https:
+        url: `https://tile.openstreetmap.org/${model.zoom}/${wrappedTileX}/${tileY}.png`,
         left: screen.x,
         top: screen.y,
         size: scaledTileSize

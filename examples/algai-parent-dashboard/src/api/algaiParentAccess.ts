@@ -47,7 +47,7 @@ export function getAlgaiStudentAppUrl(): string {
 }
 
 function joinApiPath(baseUrl: string, path: string): string {
-  return `${baseUrl.replace(/\/$/u, "")}/${path.replace(/^\
+  return `${baseUrl.replace(/\/$/u, "")}/${path.replace(/^\//u, "")}`;
 }
 
 export function buildAlgaiLoginUrl(): string {

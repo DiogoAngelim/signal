@@ -182,7 +182,7 @@ async function yahooChartRowsForProviderSymbol(symbol: string, options: TradingV
   if (!hasTimeRemaining(options, 3_500)) return [];
 
   const encoded = encodeURIComponent(symbol.includes(":") ? symbol.split(":").at(-1) ?? symbol : symbol);
-  const url = `https:
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encoded}?range=6mo&interval=1d&includePrePost=false&events=div%2Csplits`;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TRADINGVIEW_TIMEOUT_MS);

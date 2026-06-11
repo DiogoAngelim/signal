@@ -61,7 +61,7 @@ async function collectLiveAlerts(region: Region, context: AdapterContext): Promi
   const params = new URLSearchParams({
     point: `${region.latitude},${region.longitude}`
   });
-  const response = await context.fetcher(`https:
+  const response = await context.fetcher(`https://api.weather.gov/alerts/active?${params.toString()}`, {
     headers: {
       "Accept": "application/geo+json, application/json",
       "User-Agent": "Signal Aware Example (https://github.com/)"

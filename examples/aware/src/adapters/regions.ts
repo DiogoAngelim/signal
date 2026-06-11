@@ -101,7 +101,7 @@ async function searchAddressApi(query: string, limit: number, fetcher: typeof fe
     limit: String(Math.min(limit, 8))
   });
   const response = await fetchWithTimeout(
-    `https:
+    `https://nominatim.openstreetmap.org/search?${params.toString()}`,
     {
       headers: {
         "Accept": "application/json",

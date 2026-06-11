@@ -33,7 +33,7 @@ async function toRequest(req: IncomingMessage): Promise<Request> {
     }
   }
   const body = req.method === "GET" || req.method === "HEAD" ? undefined : (await readBody(req)).toString();
-  return new Request(`${protocol}:
+  return new Request(`${protocol}://${host}${req.url ?? "/"}`, {
     method: req.method,
     headers,
     body

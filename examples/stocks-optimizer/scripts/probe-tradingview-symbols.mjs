@@ -54,7 +54,7 @@ function variants(raw) {
 
 async function fetchYahooChart(symbol) {
   const encoded = encodeURIComponent(symbol);
-  const url = `https:
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encoded}?range=5d&interval=1d`;
 
   try {
     const res = await fetch(url, {

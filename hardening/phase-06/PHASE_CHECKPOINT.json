@@ -1,0 +1,8 @@
+{
+  "phase": 6,
+  "status": "COMPLETE",
+  "validation": { "schemaValid": true, "filesPresent": true, "criteriaSatisfied": true },
+  "artifacts": ["hardening/phase-06/REPLAY_CERTIFICATION.md", "hardening/phase-06/PHASE_CHECKPOINT.json"],
+  "blockingIssues": [],
+  "evidence": ["Hash chain described: SHA-256 with stableStringify", "Replay procedure defined: 4-step process", "Deterministic proof included: theorem + proof + corollary"]
+}
