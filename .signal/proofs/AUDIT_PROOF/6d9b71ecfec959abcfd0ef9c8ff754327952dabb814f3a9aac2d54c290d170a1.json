@@ -1,0 +1,1 @@
+{"details":{"buildCommand":"pnpm build","buildPassed":true,"noDrift":true,"outputDir":"dist","postVerify":true,"preVerify":true},"hashes":["f998ad02978e0df96e53f16b59d951b8e28b7f3134b79e067de464a68a2311cd","ddbe6d2ec2d06623a32396a069c17ff69d4ab47ba92b91fea08f0c8a02a7a020"],"result":"PASS","timestamp":"NOT_ALLOWED_IN_HASH_LOGIC","type":"AUDIT_PROOF","valid":true}
