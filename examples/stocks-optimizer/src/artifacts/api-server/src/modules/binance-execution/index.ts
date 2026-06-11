@@ -22,6 +22,7 @@ import type {
   BinanceSymbolInfo,
   ExecutionResult,
 } from "./types";
+import type { Position } from "../portfolio-risk/types";
 
 export * from "./types";
 export * from "./config";
@@ -86,6 +87,12 @@ export class BinanceExecutionModule {
     }
   }
 
+  /**
+   * @deprecated Use executePositions() instead.
+   *
+   * Executing a single decision bypasses the Portfolio & Risk layer.
+   * The canonical path is: Signal → RiskEngine → Position → executePositions()
+   */
   async executeDecision(decision: BinanceExecutionDecision): Promise<ExecutionResult> {
     const [result] = await this.executeDecisions([decision]);
     return result;
@@ -136,6 +143,20 @@ export class BinanceExecutionModule {
 
     this.persistRuntime();
     return results;
+  }
+
+  /**
+   * Execute Position objects from the Portfolio & Risk layer.
+   *
+   * This is the NEW canonical entry point for the 4-layer architecture:
+   *   Signal → Portfolio & Risk → Position → Execution
+   *
+   * Execution MUST NOT interpret signals or risk logic.
+   * It only converts Position → Order and submits.
+   */
+  async executePositions(positions: Position[]): Promise<ExecutionResult[]> {
+    const decisions = positions.map(positionToDecision);
+    return this.executeDecisions(decisions);
   }
 
   async cancelOrder(orderId: string) {
@@ -401,6 +422,16 @@ function dryRunSymbolInfo(symbol: string): BinanceSymbolInfo {
   };
 }
 
+/**
+ * @deprecated Use the Portfolio & Risk layer instead.
+ *
+ * This function bypasses the Portfolio & Risk layer by converting signals
+ * directly to execution decisions. The canonical path is:
+ *   Signal → SignalAdapter → RiskEngine → Position → executePositions()
+ *
+ * This function is retained for backward compatibility only.
+ * New code MUST route through the Portfolio & Risk layer.
+ */
 export function mapStrategySignalToBinanceDecision(signal: Record<string, unknown>, strategyId = "stocks-optimizer"): BinanceExecutionDecision {
   const symbol = String(signal.symbol ?? signal.ticker ?? "").trim().toUpperCase();
   const actionText = String(signal.allocationAction ?? signal.signalAction ?? "Hold").trim().toUpperCase();
@@ -452,4 +483,25 @@ function firstFiniteNumber(values: unknown[]) {
     if (Number.isFinite(parsed)) return parsed;
   }
   return undefined;
+}
+
+/**
+ * Convert a Position (from Portfolio & Risk layer) to a BinanceExecutionDecision.
+ *
+ * This is the bridge between the Portfolio & Risk layer and the Execution layer.
+ * Execution MUST NOT interpret signals or risk logic — it only converts
+ * Position → Order and submits.
+ */
+function positionToDecision(position: Position): BinanceExecutionDecision {
+  const action = position.direction === "long" ? "BUY" : position.direction === "short" ? "EXIT" : "HOLD";
+  return {
+    id: `position:${position.asset}:${action}:${Date.now()}`,
+    symbol: position.asset.toUpperCase(),
+    action,
+    confidence: 0,
+    trust: 0,
+    appSizePct: position.size > 0 ? 1 : 0,
+    suggestedNotional: position.size > 0 ? position.size : undefined,
+    timestamp: new Date().toISOString(),
+  } as BinanceExecutionDecision;
 }

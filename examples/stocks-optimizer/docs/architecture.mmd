@@ -42,6 +42,12 @@ graph TD
         DMEM["Decision Memory<br/>Durable Store"]
     end
 
+    subgraph RISK["🧭 Portfolio & Risk Layer — THE CORE"]
+        SADPT["Signal Adapter<br/>Schema Validation"]
+        RENG["Risk Engine<br/>Signal → Position"]
+        MON["Monitoring<br/>PnL / Slippage / Logs"]
+    end
+
     subgraph TRACE["🔍 Signal Trace & Verification"]
         TRC["Trace Recorder<br/>Hash Chain"]
         CAN["Canonicalizer<br/>Deterministic JSON"]
@@ -138,11 +144,14 @@ graph TD
     WHK -->|"POST payload"| ALERTS
     ROUTE -->|"JSON"| APIRES
 
-    %% ── Execution path ────────────────────────────────────────────
-    AGG -->|"trade signal"| BEX
+    %% ── 4-Layer Execution Path ────────────────────────────────────
+    AGG -->|"raw signals"| SADPT
+    SADPT -->|"validated signals"| RENG
+    RENG -->|"positions"| BEX
     BEX -->|"order"| ORDM
     ORDM -->|"execute"| BN
     ORDM -->|"trade confirm"| TRADES
+    RENG -.->|"signal→outcome"| MON
 
     %% ── Frontend consumption ──────────────────────────────────────
     UIUPD -->|"live update"| DASH
@@ -161,6 +170,7 @@ graph TD
     classDef queue fill:#e67e22,color:#fff,stroke:#ca6f1e,stroke-width:2px
     classDef backend fill:#3498db,color:#fff,stroke:#217dbb,stroke-width:2px
     classDef execution fill:#e74c3c,color:#fff,stroke:#c0392b,stroke-width:2px
+    classDef risk fill:#9b59b6,color:#fff,stroke:#7d3c98,stroke-width:3px
     classDef frontend fill:#27ae60,color:#fff,stroke:#1e8449,stroke-width:2px
     classDef output fill:#2ecc71,color:#fff,stroke:#27ae60,stroke-width:2px
 
@@ -170,6 +180,7 @@ graph TD
     class GEN,ANA,SCR,AGG engine
     class IND,STR,CAL strategy
     class DEC,WIS,DMEM decision
+    class SADPT,RENG,MON risk
     class TRC,CAN,RPL trace
     class WS,WHK,BGQ queue
     class API,ROUTE,MW backend
