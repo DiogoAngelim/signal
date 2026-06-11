@@ -1,15 +1,18 @@
-
 const { query } = require("./_lib/db.js");
 const { getCache, setCache, acquireLock } = require("./_quote-cache.js");
 
 const STARTING_EQUITY = 1000;
 
 function marketKey(value) {
-  return String(value || "").trim().toUpperCase();
+  return String(value || "")
+    .trim()
+    .toUpperCase();
 }
 
 function mean(values) {
-  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+  return values.length
+    ? values.reduce((sum, value) => sum + value, 0) / values.length
+    : 0;
 }
 
 function stdev(values) {
@@ -81,12 +84,6 @@ function parseCsv(csv) {
 function routeName(req) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
 
-  
-  
-  
-  
-  
-  
   return String(url.searchParams.get("action") || "").trim();
 }
 
@@ -95,8 +92,6 @@ function getBody(req) {
   if (typeof req.body === "string") return JSON.parse(req.body || "{}");
   return req.body;
 }
-
-
 
 async function handleBacktestMigrate(req, res) {
   if (req.method !== "POST" && req.method !== "GET") {
@@ -166,11 +161,10 @@ async function handleBacktestMigrate(req, res) {
     tables: [
       "strategy_signal_history",
       "portfolio_backtest_equity_curve",
-      "portfolio_backtest_metrics"
-    ]
+      "portfolio_backtest_metrics",
+    ],
   });
 }
-
 
 async function handleMigrate(req, res) {
   if (req.method !== "POST") {
@@ -254,12 +248,10 @@ async function handleMigrate(req, res) {
       "stock_price_history",
       "portfolio_snapshots",
       "portfolio_equity_curve",
-      "portfolio_metrics"
-    ]
+      "portfolio_metrics",
+    ],
   });
 }
-
-
 
 async function handleDebug(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
@@ -340,8 +332,6 @@ async function handleDebug(req, res) {
     metrics: metrics.rows[0] ?? null,
   });
 }
-
-
 
 async function handleBacktestSummary(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
@@ -457,7 +447,10 @@ async function handleBacktestHistory(req, res) {
 
   const data = rows.map((row, index) => ({
     index,
-    date: row.date instanceof Date ? row.date.toISOString().slice(0, 10) : String(row.date),
+    date:
+      row.date instanceof Date
+        ? row.date.toISOString().slice(0, 10)
+        : String(row.date),
     equity: Number(row.equity),
     returnPct: Number(row.return_pct),
     deployedPct: Number(row.deployed_pct),
@@ -481,7 +474,6 @@ async function handleBacktestHistory(req, res) {
     cached: false,
   });
 }
-
 
 async function handleSummary(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
@@ -579,7 +571,10 @@ async function handleHistory(req, res) {
 
   const data = rows.map((row, index) => ({
     index,
-    date: row.date instanceof Date ? row.date.toISOString().slice(0, 10) : String(row.date),
+    date:
+      row.date instanceof Date
+        ? row.date.toISOString().slice(0, 10)
+        : String(row.date),
     equity: Number(row.equity),
     returnPct: Number(row.return_pct),
     deployedPct: Number(row.deployed_pct),
@@ -816,7 +811,9 @@ async function loadLatestPositions(market) {
   );
 
   return rows.filter((row) => {
-    return row.allocation_action === "Buy" && Number(row.suggested_exposure) > 0;
+    return (
+      row.allocation_action === "Buy" && Number(row.suggested_exposure) > 0
+    );
   });
 }
 
@@ -849,7 +846,10 @@ function buildEquityCurve({ positions, historyRows }) {
     }
 
     bySymbol.get(symbol).push({
-      date: row.date instanceof Date ? row.date.toISOString().slice(0, 10) : String(row.date),
+      date:
+        row.date instanceof Date
+          ? row.date.toISOString().slice(0, 10)
+          : String(row.date),
       close: Number(row.close),
     });
   }
@@ -857,7 +857,9 @@ function buildEquityCurve({ positions, historyRows }) {
   const allDates = Array.from(
     new Set(
       historyRows.map((row) =>
-        row.date instanceof Date ? row.date.toISOString().slice(0, 10) : String(row.date),
+        row.date instanceof Date
+          ? row.date.toISOString().slice(0, 10)
+          : String(row.date),
       ),
     ),
   ).sort();
@@ -883,14 +885,18 @@ function buildEquityCurve({ positions, historyRows }) {
         symbolHistory.filter((point) => point.date <= date).at(-1) ||
         first;
 
-      const symbolWeight = Number(position.suggested_exposure || 0) / totalExposure;
-      const symbolReturn = first && current ? pctReturn(first.close, current.close) : 0;
+      const symbolWeight =
+        Number(position.suggested_exposure || 0) / totalExposure;
+      const symbolReturn =
+        first && current ? pctReturn(first.close, current.close) : 0;
 
       weightedReturn += symbolWeight * symbolReturn;
     }
 
     const portfolioReturn = deployedFraction * weightedReturn;
-    const equity = STARTING_EQUITY * (cashFraction + deployedFraction * (1 + weightedReturn));
+    const equity =
+      STARTING_EQUITY *
+      (cashFraction + deployedFraction * (1 + weightedReturn));
 
     return {
       date,
@@ -923,12 +929,18 @@ function computeMetrics(curve) {
 
   const avgReturn = mean(returns);
   const volatility = stdev(returns);
-  const annualizedSharpe = volatility > 0 ? (avgReturn / volatility) * Math.sqrt(252) : null;
+  const annualizedSharpe =
+    volatility > 0 ? (avgReturn / volatility) * Math.sqrt(252) : null;
 
-  const grossProfit = returns.filter((value) => value > 0).reduce((sum, value) => sum + value, 0);
-  const grossLoss = Math.abs(returns.filter((value) => value < 0).reduce((sum, value) => sum + value, 0));
+  const grossProfit = returns
+    .filter((value) => value > 0)
+    .reduce((sum, value) => sum + value, 0);
+  const grossLoss = Math.abs(
+    returns.filter((value) => value < 0).reduce((sum, value) => sum + value, 0),
+  );
 
-  const profitFactor = grossLoss === 0 ? (grossProfit > 0 ? 999 : null) : grossProfit / grossLoss;
+  const profitFactor =
+    grossLoss === 0 ? (grossProfit > 0 ? 999 : null) : grossProfit / grossLoss;
 
   const winRatePct = returns.length
     ? (returns.filter((value) => value > 0).length / returns.length) * 100
@@ -941,7 +953,10 @@ function computeMetrics(curve) {
     peak = Math.max(peak, point.equity);
 
     if (peak > 0) {
-      maxDrawdownPct = Math.max(maxDrawdownPct, ((peak - point.equity) / peak) * 100);
+      maxDrawdownPct = Math.max(
+        maxDrawdownPct,
+        ((peak - point.equity) / peak) * 100,
+      );
     }
   }
 
@@ -972,7 +987,14 @@ async function saveCurve(market, curve) {
         cash_pct = EXCLUDED.cash_pct,
         updated_at = now()
       `,
-      [market, point.date, point.equity, point.returnPct, point.deployedPct, point.cashPct],
+      [
+        market,
+        point.date,
+        point.equity,
+        point.returnPct,
+        point.deployedPct,
+        point.cashPct,
+      ],
     );
   }
 }
@@ -1016,7 +1038,6 @@ async function saveMetrics(market, metrics) {
   );
 }
 
-
 async function syncHistoryForSymbols({ market, symbols, limit = 8 }) {
   const results = [];
 
@@ -1035,8 +1056,6 @@ async function syncHistoryForSymbols({ market, symbols, limit = 8 }) {
   return results;
 }
 
-
-
 async function loadRefreshableMarkets() {
   const { rows } = await query(
     `
@@ -1051,7 +1070,6 @@ async function loadRefreshableMarkets() {
   return rows.map((row) => marketKey(row.market)).filter(Boolean);
 }
 
-
 async function handleCronRefresh(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const secret = url.searchParams.get("secret");
@@ -1061,7 +1079,9 @@ async function handleCronRefresh(req, res) {
     return;
   }
 
-  const requestedMarkets = String(url.searchParams.get("markets") || "ALL").trim();
+  const requestedMarkets = String(
+    url.searchParams.get("markets") || "ALL",
+  ).trim();
   const discoveredMarkets =
     requestedMarkets.toUpperCase() === "ALL"
       ? await loadRefreshableMarkets()
@@ -1070,14 +1090,23 @@ async function handleCronRefresh(req, res) {
           .map((item) => marketKey(item))
           .filter(Boolean);
 
-  const marketLimit = Math.min(25, Math.max(1, Number(url.searchParams.get("marketLimit") || 8)));
+  const marketLimit = Math.min(
+    25,
+    Math.max(1, Number(url.searchParams.get("marketLimit") || 8)),
+  );
   const markets = discoveredMarkets.slice(0, marketLimit);
 
-  const limit = Math.min(8, Math.max(1, Number(url.searchParams.get("limit") || 2)));
+  const limit = Math.min(
+    8,
+    Math.max(1, Number(url.searchParams.get("limit") || 2)),
+  );
   const results = [];
 
   for (const market of markets) {
-    const lock = await acquireLock(`lock:portfolio-cron-refresh:${market}`, 120);
+    const lock = await acquireLock(
+      `lock:portfolio-cron-refresh:${market}`,
+      120,
+    );
 
     if (!lock.acquired) {
       results.push({ market, ok: true, status: "already_refreshing" });
@@ -1174,8 +1203,6 @@ async function handleCronRefresh(req, res) {
   });
 }
 
-
-
 function rollingWindow(values, endIndex, length) {
   const start = Math.max(0, endIndex - length + 1);
   return values.slice(start, endIndex + 1);
@@ -1189,8 +1216,12 @@ function calculateBacktestSignal({ closes, index }) {
     return null;
   }
 
-  const window20 = rollingWindow(closes, index, 20).map((row) => Number(row.close)).filter(Number.isFinite);
-  const window60 = rollingWindow(closes, index, 60).map((row) => Number(row.close)).filter(Number.isFinite);
+  const window20 = rollingWindow(closes, index, 20)
+    .map((row) => Number(row.close))
+    .filter(Number.isFinite);
+  const window60 = rollingWindow(closes, index, 60)
+    .map((row) => Number(row.close))
+    .filter(Number.isFinite);
 
   if (window20.length < 10 || window60.length < 20) {
     return {
@@ -1242,7 +1273,9 @@ function calculateBacktestSignal({ closes, index }) {
     100,
     Math.max(
       0,
-      volatility * 12 + Math.max(0, -recentReturn) * 5 + (price < avg60 ? 12 : 0),
+      volatility * 12 +
+        Math.max(0, -recentReturn) * 5 +
+        (price < avg60 ? 12 : 0),
     ),
   );
 
@@ -1260,10 +1293,18 @@ function calculateBacktestSignal({ closes, index }) {
   let allocationAction = "Hold";
   let suggestedExposure = 0;
 
-  if (setupQuality >= 68 && riskPressure <= 55 && price > avg20 && avg20 > avg60) {
+  if (
+    setupQuality >= 68 &&
+    riskPressure <= 55 &&
+    price > avg20 &&
+    avg20 > avg60
+  ) {
     signalAction = "Buy";
     allocationAction = "Buy";
-    suggestedExposure = Math.min(5.5, Math.max(0.5, (setupQuality - riskPressure * 0.35) / 15));
+    suggestedExposure = Math.min(
+      5.5,
+      Math.max(0.5, (setupQuality - riskPressure * 0.35) / 15),
+    );
   } else if (riskPressure >= 75 || (price < avg60 && recentReturn < -1.5)) {
     signalAction = "Sell";
     allocationAction = "Sell";
@@ -1285,9 +1326,14 @@ function calculateBacktestSignal({ closes, index }) {
 function inferHistoricalRegime({ signals }) {
   if (!signals.length) return "No Historical Coverage";
 
-  const avgQuality = mean(signals.map((item) => Number(item.setupQuality || 0)));
+  const avgQuality = mean(
+    signals.map((item) => Number(item.setupQuality || 0)),
+  );
   const avgRisk = mean(signals.map((item) => Number(item.riskPressure || 0)));
-  const exposure = signals.reduce((sum, item) => sum + Number(item.suggestedExposure || 0), 0);
+  const exposure = signals.reduce(
+    (sum, item) => sum + Number(item.suggestedExposure || 0),
+    0,
+  );
 
   if (avgRisk > 72) return "Capital Preservation Phase";
   if (exposure < 12) return "Defensive Environment";
@@ -1350,7 +1396,10 @@ function groupPriceRowsBySymbol(rows) {
 
     bySymbol.get(symbol).push({
       symbol,
-      date: row.date instanceof Date ? row.date.toISOString().slice(0, 10) : String(row.date),
+      date:
+        row.date instanceof Date
+          ? row.date.toISOString().slice(0, 10)
+          : String(row.date),
       close: Number(row.close),
     });
   }
@@ -1441,10 +1490,15 @@ function buildBacktestCurve({ bySymbol, signalRows }) {
 
     const dailySignals = byDate.get(date) || [];
     const buys = dailySignals.filter((item) => {
-      return item.allocationAction === "Buy" && Number(item.suggestedExposure) > 0;
+      return (
+        item.allocationAction === "Buy" && Number(item.suggestedExposure) > 0
+      );
     });
 
-    const totalExposure = buys.reduce((sum, item) => sum + Number(item.suggestedExposure || 0), 0);
+    const totalExposure = buys.reduce(
+      (sum, item) => sum + Number(item.suggestedExposure || 0),
+      0,
+    );
     const deployedFraction = Math.min(1, Math.max(0, totalExposure / 100));
     const cashFraction = 1 - deployedFraction;
 
@@ -1557,7 +1611,6 @@ async function saveBacktestMetrics(market, metrics) {
   );
 }
 
-
 async function handleRefreshMarket(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
@@ -1572,7 +1625,10 @@ async function handleRefreshMarket(req, res) {
     return;
   }
 
-  const lock = await acquireLock(`lock:portfolio-refresh-market:${market}`, 120);
+  const lock = await acquireLock(
+    `lock:portfolio-refresh-market:${market}`,
+    120,
+  );
 
   if (!lock.acquired) {
     res.status(202).json({
@@ -1599,7 +1655,8 @@ async function handleRefreshMarket(req, res) {
       reason: "NO_BUY_POSITIONS",
       positions: 0,
       symbols: [],
-      message: "No Buy positions with positive suggested exposure were found for this market.",
+      message:
+        "No Buy positions with positive suggested exposure were found for this market.",
     });
     return;
   }
@@ -1672,9 +1729,6 @@ async function handleRefreshMarket(req, res) {
     metrics,
   });
 }
-
-
-
 
 async function loadBacktestableMarkets() {
   const { rows } = await query(
@@ -1814,8 +1868,6 @@ async function runBacktestForMarket({ market, limitSymbols }) {
   };
 }
 
-
-
 async function handleCronBacktest(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const secret = url.searchParams.get("secret");
@@ -1825,7 +1877,9 @@ async function handleCronBacktest(req, res) {
     return;
   }
 
-  const requestedMarkets = String(url.searchParams.get("markets") || "ALL").trim();
+  const requestedMarkets = String(
+    url.searchParams.get("markets") || "ALL",
+  ).trim();
 
   const discoveredMarkets =
     requestedMarkets.toUpperCase() === "ALL"
@@ -1835,14 +1889,23 @@ async function handleCronBacktest(req, res) {
           .map((item) => marketKey(item))
           .filter(Boolean);
 
-  const marketLimit = Math.min(12, Math.max(1, Number(url.searchParams.get("marketLimit") || 4)));
-  const limitSymbols = Math.min(30, Math.max(2, Number(url.searchParams.get("limitSymbols") || 8)));
+  const marketLimit = Math.min(
+    12,
+    Math.max(1, Number(url.searchParams.get("marketLimit") || 4)),
+  );
+  const limitSymbols = Math.min(
+    30,
+    Math.max(2, Number(url.searchParams.get("limitSymbols") || 8)),
+  );
   const markets = discoveredMarkets.slice(0, marketLimit);
 
   const results = [];
 
   for (const market of markets) {
-    const lock = await acquireLock(`lock:portfolio-cron-backtest:${market}`, 180);
+    const lock = await acquireLock(
+      `lock:portfolio-cron-backtest:${market}`,
+      180,
+    );
 
     if (!lock.acquired) {
       results.push({
@@ -1874,7 +1937,6 @@ async function handleCronBacktest(req, res) {
   });
 }
 
-
 async function handleBacktestMarket(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
@@ -1883,14 +1945,20 @@ async function handleBacktestMarket(req, res) {
 
   const body = getBody(req);
   const market = marketKey(body.market);
-  const limitSymbols = Math.min(80, Math.max(2, Number(body.limitSymbols || body.limit || 20)));
+  const limitSymbols = Math.min(
+    80,
+    Math.max(2, Number(body.limitSymbols || body.limit || 20)),
+  );
 
   if (!market) {
     res.status(400).json({ error: "MARKET_REQUIRED" });
     return;
   }
 
-  const lock = await acquireLock(`lock:portfolio-backtest-market:${market}`, 180);
+  const lock = await acquireLock(
+    `lock:portfolio-backtest-market:${market}`,
+    180,
+  );
 
   if (!lock.acquired) {
     res.status(202).json({
@@ -1904,7 +1972,6 @@ async function handleBacktestMarket(req, res) {
   const result = await runBacktestForMarket({ market, limitSymbols });
   res.status(200).json(result);
 }
-
 
 async function handleRebuild(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
@@ -1938,7 +2005,8 @@ async function handleRebuild(req, res) {
       reason: "NO_BUY_POSITIONS",
       positions: 0,
       points: 0,
-      message: "No Buy positions with positive suggested exposure were found in portfolio_snapshots."
+      message:
+        "No Buy positions with positive suggested exposure were found in portfolio_snapshots.",
     });
     return;
   }
@@ -1951,7 +2019,8 @@ async function handleRebuild(req, res) {
       positions: positions.length,
       symbols,
       points: 0,
-      message: "Buy positions exist, but no 4-year price history rows exist for those symbols."
+      message:
+        "Buy positions exist, but no 4-year price history rows exist for those symbols.",
     });
     return;
   }
@@ -1966,7 +2035,7 @@ async function handleRebuild(req, res) {
       reason: "INSUFFICIENT_CURVE_POINTS",
       positions: positions.length,
       historyRows: historyRows.length,
-      points: curve.length
+      points: curve.length,
     });
     return;
   }

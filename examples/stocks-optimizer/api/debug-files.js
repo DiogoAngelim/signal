@@ -10,7 +10,7 @@ module.exports = function handler(_req, res) {
     "src/artifacts/signal-markets/dist/public",
     "src/artifacts/api-server/dist/public",
     "src/public",
-    "public"
+    "public",
   ].filter(Boolean);
 
   res.status(200).json({
@@ -19,7 +19,7 @@ module.exports = function handler(_req, res) {
       STOCKS_PUBLIC_DIR: process.env.STOCKS_PUBLIC_DIR || null,
       NODE_ENV: process.env.NODE_ENV || null,
       VERCEL: process.env.VERCEL || null,
-      SERVE_FRONTEND: process.env.SERVE_FRONTEND || null
+      SERVE_FRONTEND: process.env.SERVE_FRONTEND || null,
     },
     files: candidates.map((candidate) => {
       const absolute = path.isAbsolute(candidate)
@@ -31,9 +31,12 @@ module.exports = function handler(_req, res) {
         absolute,
         exists: fs.existsSync(absolute),
         sample: fs.existsSync(absolute)
-          ? fs.readdirSync(absolute).filter((name) => name.startsWith("stocks_list_")).slice(0, 10)
-          : []
+          ? fs
+              .readdirSync(absolute)
+              .filter((name) => name.startsWith("stocks_list_"))
+              .slice(0, 10)
+          : [],
       };
-    })
+    }),
   });
 };

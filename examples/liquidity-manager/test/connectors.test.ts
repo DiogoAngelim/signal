@@ -7,7 +7,7 @@ import {
   SampleDataConnector,
   maskCpf,
   normalizeRawTransactions,
-  parseManualCsv
+  parseManualCsv,
 } from "../src/index.js";
 
 const NOW = new Date("2026-06-03T12:00:00.000Z");
@@ -16,17 +16,23 @@ describe("financial data connectors", () => {
   it("loads sample data and creates normalized transactions", async () => {
     const connector = new SampleDataConnector({ now: () => NOW });
     const result = await connector.connect({ userId: "u1" });
-    const rawTransactions = await connector.fetchTransactions(result.connection.id);
+    const rawTransactions = await connector.fetchTransactions(
+      result.connection.id,
+    );
     const normalized = normalizeRawTransactions({
       rawTransactions,
       userId: "u1",
-      connectionId: result.connection.id
+      connectionId: result.connection.id,
     });
 
     expect(result.ok).toBe(true);
     expect(rawTransactions.length).toBeGreaterThan(100);
-    expect(normalized.some((transaction) => transaction.direction === "inflow")).toBe(true);
-    expect(normalized.some((transaction) => transaction.direction === "outflow")).toBe(true);
+    expect(
+      normalized.some((transaction) => transaction.direction === "inflow"),
+    ).toBe(true);
+    expect(
+      normalized.some((transaction) => transaction.direction === "outflow"),
+    ).toBe(true);
   });
 
   it("normalizes valid manual CSV uploads", async () => {
@@ -35,9 +41,11 @@ describe("financial data connectors", () => {
       userId: "u1",
       csv: `date,description,amount,category,balance
 2026-05-01,Salary,5000,Income,9000
-2026-05-02,Rent,-2200,Housing,6800`
+2026-05-02,Rent,-2200,Housing,6800`,
     });
-    const transactions = await connector.fetchTransactions(result.connection.id);
+    const transactions = await connector.fetchTransactions(
+      result.connection.id,
+    );
     const balances = await connector.fetchBalances(result.connection.id);
 
     expect(result.ok).toBe(true);
@@ -56,19 +64,22 @@ describe("financial data connectors", () => {
           source: "nubank",
           amount: -219.16,
           description: "Aplicação RDB",
-          date: NOW
+          date: NOW,
         },
         {
           id: "rdb-rescue",
           source: "nubank",
           amount: 219.16,
           description: "Resgate RDB",
-          date: NOW
-        }
-      ]
+          date: NOW,
+        },
+      ],
     });
 
-    expect(normalized.map((transaction) => transaction.type)).toEqual(["transfer", "transfer"]);
+    expect(normalized.map((transaction) => transaction.type)).toEqual([
+      "transfer",
+      "transfer",
+    ]);
   });
 
   it("returns useful manual upload errors", () => {
@@ -94,18 +105,18 @@ describe("financial data connectors", () => {
                 source: "nubank",
                 amount: 5000,
                 description: "Salary deposit",
-                date: new Date("2026-05-25T12:00:00.000Z")
-              }
-            ]
+                date: new Date("2026-05-25T12:00:00.000Z"),
+              },
+            ],
           };
-        }
-      }
+        },
+      },
     });
 
     const result = await connector.connect({
       userId: "u1",
       cpf: "123.456.789-09",
-      password: "never-store-this"
+      password: "never-store-this",
     });
     const persisted = JSON.stringify(result.connection);
 
@@ -122,7 +133,7 @@ describe("financial data connectors", () => {
     const result = await connector.connect({
       userId: "u1",
       cpf: "12345678909",
-      password: "temporary"
+      password: "temporary",
     });
 
     expect(result.ok).toBe(false);
@@ -136,18 +147,20 @@ describe("financial data connectors", () => {
       adapter: {
         async createSession() {
           throw new Error("raw upstream detail with secret-token-value");
-        }
-      }
+        },
+      },
     });
 
     const result = await connector.connect({
       userId: "u1",
       cpf: "12345678909",
-      password: "temporary"
+      password: "temporary",
     });
 
     expect(result.ok).toBe(false);
-    expect(result.message).toBe("Could not connect to Nubank automatically. Upload a Nubank statement instead.");
+    expect(result.message).toBe(
+      "Could not connect to Nubank automatically. Upload a Nubank statement instead.",
+    );
     expect(result.message).not.toContain("secret-token-value");
   });
 

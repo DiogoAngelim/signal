@@ -81,7 +81,7 @@ export function createSignalError(
     category?: SignalErrorCategory;
     retryable?: boolean;
     details?: Record<string, unknown>;
-  } = {}
+  } = {},
 ): SignalErrorEnvelope {
   const defaults = getSignalErrorDefaults(code);
 
@@ -101,7 +101,7 @@ export function createProtocolError(
     category?: SignalErrorCategory;
     retryable?: boolean;
     details?: Record<string, unknown>;
-  } = {}
+  } = {},
 ): Error & SignalErrorEnvelope {
   const error = new Error(message) as Error & SignalErrorEnvelope;
   const defaults = getSignalErrorDefaults(code);
@@ -113,7 +113,9 @@ export function createProtocolError(
   return error;
 }
 
-export function signalErrorHttpStatus(error: Pick<SignalErrorEnvelope, "code" | "category">): number {
+export function signalErrorHttpStatus(
+  error: Pick<SignalErrorEnvelope, "code" | "category">,
+): number {
   switch (error.code) {
     case "BAD_REQUEST":
     case "VALIDATION_ERROR":

@@ -5,7 +5,8 @@ export function resolveOutcome(input: OutcomeInput = {}): OutcomeResult {
   const reward = optionalNonNegative(input.reward, "reward");
   const loss = optionalNonNegative(input.loss, "loss");
   const durationMs = optionalNonNegative(input.durationMs, "durationMs");
-  const outcomeLabel = input.outcomeLabel ?? inferOutcomeLabel(success, reward, loss);
+  const outcomeLabel =
+    input.outcomeLabel ?? inferOutcomeLabel(success, reward, loss);
 
   return {
     success,

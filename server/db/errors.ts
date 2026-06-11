@@ -23,7 +23,11 @@ export class SignalVersionMismatchError extends SignalDBError {
   readonly expectedVersion?: number;
   readonly actualVersion?: number;
 
-  constructor(message = "Version mismatch", expectedVersion?: number, actualVersion?: number) {
+  constructor(
+    message = "Version mismatch",
+    expectedVersion?: number,
+    actualVersion?: number,
+  ) {
     super("VERSION_MISMATCH", message, 409);
     this.name = "SignalVersionMismatchError";
     this.expectedVersion = expectedVersion;

@@ -1,13 +1,24 @@
 import { clamp, mean } from "../math/statistics";
 
-export type DiscoveryAccountabilityStatus = "immature" | "developing" | "reliable" | "trusted";
+export type DiscoveryAccountabilityStatus =
+  | "immature"
+  | "developing"
+  | "reliable"
+  | "trusted";
 
 export type DiscoveryAccountabilityEvent = {
   id?: string;
   detectedAt?: string | number | Date;
   confirmedAt?: string | number | Date;
   rejectedAt?: string | number | Date;
-  outcome?: "positive" | "negative" | "neutral" | "unknown" | "missed" | "rejected" | string;
+  outcome?:
+    | "positive"
+    | "negative"
+    | "neutral"
+    | "unknown"
+    | "missed"
+    | "rejected"
+    | string;
   profitScore?: number;
   valueScore?: number;
   confidence?: number;
@@ -27,7 +38,11 @@ export type DiscoveryAccountabilityInput = {
     maturity?: number;
     novelty?: number;
     trust?: number;
-    opportunities?: Array<{ confidence?: number; maturity?: number; novelty?: number }>;
+    opportunities?: Array<{
+      confidence?: number;
+      maturity?: number;
+      novelty?: number;
+    }>;
   } | null;
   events?: DiscoveryAccountabilityEvent[];
   rejectedOutcomes?: DiscoveryAccountabilityEvent[];
@@ -51,38 +66,67 @@ export type DiscoveryAccountabilityResult = {
   audit: Record<string, unknown>;
 };
 
-
-
-
-
-
-
-
-
-
-
 export function evaluateDiscoveryAccountability(
   input: DiscoveryAccountabilityInput = {},
 ): DiscoveryAccountabilityResult {
-  const events = [...(input.events ?? []), ...(input.rejectedOutcomes ?? []), ...(input.missedOpportunities ?? [])];
+  const events = [
+    ...(input.events ?? []),
+    ...(input.rejectedOutcomes ?? []),
+    ...(input.missedOpportunities ?? []),
+  ];
   const discovered = events.filter((event) => !event.wasMissedOpportunity);
   const positives = events.filter(isPositive);
-  const early = discovered.filter((event) => event.wasEarly || confirmationLatencyDays(event) <= 3);
+  const early = discovered.filter(
+    (event) => event.wasEarly || confirmationLatencyDays(event) <= 3,
+  );
   const earlyPositive = early.filter(isPositive);
-  const falseDiscoveries = discovered.filter((event) => event.wasFalseDiscovery || isNegative(event));
-  const missed = events.filter((event) => event.wasMissedOpportunity || normalized(event.outcome) === "missed");
+  const falseDiscoveries = discovered.filter(
+    (event) => event.wasFalseDiscovery || isNegative(event),
+  );
+  const missed = events.filter(
+    (event) =>
+      event.wasMissedOpportunity || normalized(event.outcome) === "missed",
+  );
   const novel = discovered.filter((event) => score(event.novelty, 0) >= 55);
-  const profitableNovel = novel.filter((event) => score(event.profitScore ?? event.valueScore, 0) >= 55 || isPositive(event));
-  const confirmationLatencies = discovered.map(confirmationLatencyDays).filter(Number.isFinite);
-  const currentMaturity = score(input.discovery?.maturity, mean(input.discovery?.opportunities?.map((item) => score(item.maturity, 0)) ?? []));
+  const profitableNovel = novel.filter(
+    (event) =>
+      score(event.profitScore ?? event.valueScore, 0) >= 55 ||
+      isPositive(event),
+  );
+  const confirmationLatencies = discovered
+    .map(confirmationLatencyDays)
+    .filter(Number.isFinite);
+  const currentMaturity = score(
+    input.discovery?.maturity,
+    mean(
+      input.discovery?.opportunities?.map((item) => score(item.maturity, 0)) ??
+        [],
+    ),
+  );
   const sampleMaturity = clamp(discovered.length * 8);
-  const maturity = roundScore(mean([currentMaturity, sampleMaturity].filter(Number.isFinite)));
-  const earlyDetectionAccuracy = pct(earlyPositive.length, early.length, input.discovery?.confidence ?? 35);
+  const maturity = roundScore(
+    mean([currentMaturity, sampleMaturity].filter(Number.isFinite)),
+  );
+  const earlyDetectionAccuracy = pct(
+    earlyPositive.length,
+    early.length,
+    input.discovery?.confidence ?? 35,
+  );
   const falseDiscoveryRate = pct(falseDiscoveries.length, discovered.length, 0);
-  const missedOpportunityRate = pct(missed.length, missed.length + positives.length, 0);
-  const noveltyToProfitConversion = pct(profitableNovel.length, novel.length, score(input.discovery?.trust, 35));
+  const missedOpportunityRate = pct(
+    missed.length,
+    missed.length + positives.length,
+    0,
+  );
+  const noveltyToProfitConversion = pct(
+    profitableNovel.length,
+    novel.length,
+    score(input.discovery?.trust, 35),
+  );
   const discoveryDecay = decayFor(discovered, input.now);
-  const confirmationLatency = roundScore(mean(confirmationLatencies.length ? confirmationLatencies : [0]));
+  const confirmationLatency = roundScore(
+    mean(confirmationLatencies.length ? confirmationLatencies : [0]),
+  );
   const accountabilityScore = roundScore(
     earlyDetectionAccuracy * 0.22 +
       (100 - falseDiscoveryRate) * 0.18 +
@@ -114,7 +158,12 @@ export function evaluateDiscoveryAccountability(
     status,
     blockers,
     unlockConditions,
-    explanation: explanationFor(status, accountabilityScore, maturity, blockers),
+    explanation: explanationFor(
+      status,
+      accountabilityScore,
+      maturity,
+      blockers,
+    ),
     audit: {
       eventCount: events.length,
       discoveredCount: discovered.length,
@@ -142,36 +191,59 @@ function blockersFor(input: {
 }) {
   return unique([
     input.maturity < 45 ? "Discovery maturity is still immature." : "",
-    normalized(input.input.discovery?.status) === "emerging" && score(input.input.discovery?.confidence, 0) < 60
+    normalized(input.input.discovery?.status) === "emerging" &&
+    score(input.input.discovery?.confidence, 0) < 60
       ? "Emerging discovery has not yet earned statistical confidence."
       : "",
     input.falseDiscoveryRate > 35 ? "False discovery rate is too high." : "",
-    input.missedOpportunityRate > 35 ? "Missed opportunity rate is too high." : "",
-    input.noveltyToProfitConversion < 45 ? "Novel discoveries are not converting to profitable outcomes yet." : "",
-    input.confirmationLatency > 7 ? "Confirmation latency is too slow for early discovery claims." : "",
+    input.missedOpportunityRate > 35
+      ? "Missed opportunity rate is too high."
+      : "",
+    input.noveltyToProfitConversion < 45
+      ? "Novel discoveries are not converting to profitable outcomes yet."
+      : "",
+    input.confirmationLatency > 7
+      ? "Confirmation latency is too slow for early discovery claims."
+      : "",
   ]);
 }
 
 function unlockConditionsFor(blockers: string[]) {
-  if (!blockers.length) return ["Maintain accountability with fresh accepted and rejected discovery outcomes."];
+  if (!blockers.length)
+    return [
+      "Maintain accountability with fresh accepted and rejected discovery outcomes.",
+    ];
   return blockers.map((blocker) => {
-    if (blocker.includes("maturity")) return "Raise discovery maturity with more confirmed outcome samples.";
-    if (blocker.includes("Emerging")) return "Confirm emerging discoveries with recurrence or profitable follow-through.";
-    if (blocker.includes("False")) return "Lower false discoveries by tracking rejected and invalidated candidates.";
-    if (blocker.includes("Missed")) return "Review rejected discoveries that later became profitable opportunities.";
-    if (blocker.includes("Novel")) return "Require novelty evidence to convert into measured profit or value.";
+    if (blocker.includes("maturity"))
+      return "Raise discovery maturity with more confirmed outcome samples.";
+    if (blocker.includes("Emerging"))
+      return "Confirm emerging discoveries with recurrence or profitable follow-through.";
+    if (blocker.includes("False"))
+      return "Lower false discoveries by tracking rejected and invalidated candidates.";
+    if (blocker.includes("Missed"))
+      return "Review rejected discoveries that later became profitable opportunities.";
+    if (blocker.includes("Novel"))
+      return "Require novelty evidence to convert into measured profit or value.";
     return "Reduce confirmation latency with faster post-detection validation.";
   });
 }
 
-function explanationFor(status: DiscoveryAccountabilityStatus, accountabilityScore: number, maturity: number, blockers: string[]) {
+function explanationFor(
+  status: DiscoveryAccountabilityStatus,
+  accountabilityScore: number,
+  maturity: number,
+  blockers: string[],
+) {
   if (blockers.length) {
     return `Discovery accountability is ${status}: ${blockers[0]}`;
   }
   return `Discovery accountability is ${status} with score ${accountabilityScore}/100 and maturity ${maturity}/100.`;
 }
 
-function statusFor(scoreValue: number, maturity: number): DiscoveryAccountabilityStatus {
+function statusFor(
+  scoreValue: number,
+  maturity: number,
+): DiscoveryAccountabilityStatus {
   if (scoreValue >= 82 && maturity >= 78) return "trusted";
   if (scoreValue >= 68 && maturity >= 62) return "reliable";
   if (scoreValue >= 48 && maturity >= 40) return "developing";
@@ -180,12 +252,21 @@ function statusFor(scoreValue: number, maturity: number): DiscoveryAccountabilit
 
 function isPositive(event: DiscoveryAccountabilityEvent) {
   const outcome = normalized(event.outcome);
-  return outcome === "positive" || outcome === "success" || score(event.profitScore ?? event.valueScore, 0) >= 55;
+  return (
+    outcome === "positive" ||
+    outcome === "success" ||
+    score(event.profitScore ?? event.valueScore, 0) >= 55
+  );
 }
 
 function isNegative(event: DiscoveryAccountabilityEvent) {
   const outcome = normalized(event.outcome);
-  return outcome === "negative" || outcome === "failure" || outcome === "invalidated" || event.wasFalseDiscovery === true;
+  return (
+    outcome === "negative" ||
+    outcome === "failure" ||
+    outcome === "invalidated" ||
+    event.wasFalseDiscovery === true
+  );
 }
 
 function confirmationLatencyDays(event: DiscoveryAccountabilityEvent) {
@@ -195,18 +276,24 @@ function confirmationLatencyDays(event: DiscoveryAccountabilityEvent) {
   return Math.max(0, (confirmed - detected) / 86_400_000);
 }
 
-function decayFor(events: DiscoveryAccountabilityEvent[], nowInput: DiscoveryAccountabilityInput["now"]) {
+function decayFor(
+  events: DiscoveryAccountabilityEvent[],
+  nowInput: DiscoveryAccountabilityInput["now"],
+) {
   if (!events.length) return 70;
   const now = toTime(nowInput) ?? Date.now();
   const ages = events.map((event) => {
-    const timestamp = toTime(event.confirmedAt ?? event.rejectedAt ?? event.detectedAt) ?? now;
+    const timestamp =
+      toTime(event.confirmedAt ?? event.rejectedAt ?? event.detectedAt) ?? now;
     return Math.max(0, (now - timestamp) / 86_400_000);
   });
   return roundScore(Math.min(100, mean(ages) * 3));
 }
 
 function pct(numerator: number, denominator: number, fallback: number) {
-  return denominator > 0 ? roundScore((numerator / denominator) * 100) : roundScore(fallback);
+  return denominator > 0
+    ? roundScore((numerator / denominator) * 100)
+    : roundScore(fallback);
 }
 
 function score(value: unknown, fallback: number) {
@@ -219,12 +306,20 @@ function roundScore(value: number) {
 }
 
 function normalized(value: unknown) {
-  return String(value ?? "").trim().toLowerCase().replace(/_/g, " ");
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/_/g, " ");
 }
 
 function toTime(value: unknown) {
   if (value == null || value === "") return null;
-  const time = value instanceof Date ? value.getTime() : typeof value === "number" ? value : new Date(String(value)).getTime();
+  const time =
+    value instanceof Date
+      ? value.getTime()
+      : typeof value === "number"
+        ? value
+        : new Date(String(value)).getTime();
   return Number.isFinite(time) ? time : null;
 }
 

@@ -48,7 +48,8 @@ function firstString(record: Record<string, unknown>, keys: string[]) {
   for (const key of keys) {
     const value = record[key];
     if (typeof value === "string" && value.trim()) return value.trim();
-    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+    if (typeof value === "number" && Number.isFinite(value))
+      return String(value);
   }
 
   return "";
@@ -138,7 +139,12 @@ function normalizeMarketOption(value: unknown): MarketOption | null {
 }
 
 export function parseDashboardMarketOptions(payload: unknown): MarketOption[] {
-  const rows = arrayFromPayload(payload, ["data", "items", "markets", "results"]);
+  const rows = arrayFromPayload(payload, [
+    "data",
+    "items",
+    "markets",
+    "results",
+  ]);
   const seen = new Set<string>();
   const options: MarketOption[] = [];
 
@@ -157,17 +163,23 @@ function normalizeStockListItem(
   context: { market: string },
 ): StockData | null {
   const record = asRecord(value);
-  const symbol = firstString(record, ["symbol", "ticker", "code", "id"]).toUpperCase();
+  const symbol = firstString(record, [
+    "symbol",
+    "ticker",
+    "code",
+    "id",
+  ]).toUpperCase();
 
   if (!symbol) return null;
 
-  const market = firstString(record, [
-    "market",
-    "exchange",
-    "scopeCode",
-    "marketCode",
-    "venue",
-  ]) || context.market;
+  const market =
+    firstString(record, [
+      "market",
+      "exchange",
+      "scopeCode",
+      "marketCode",
+      "venue",
+    ]) || context.market;
 
   const history = Array.isArray(record.history)
     ? record.history
@@ -178,7 +190,12 @@ function normalizeStockListItem(
   return {
     ...record,
     symbol,
-    ticker: firstString(record, ["ticker", "symbol", "code", "id"]).toUpperCase(),
+    ticker: firstString(record, [
+      "ticker",
+      "symbol",
+      "code",
+      "id",
+    ]).toUpperCase(),
     name:
       firstString(record, ["name", "description", "label", "displayName"]) ||
       symbol,
@@ -230,9 +247,17 @@ export function parseDashboardStockListResponse(
   };
 }
 
-function normalizeQuote(value: unknown, context: { market: string }): StockQuote | null {
+function normalizeQuote(
+  value: unknown,
+  context: { market: string },
+): StockQuote | null {
   const record = asRecord(value);
-  const symbol = firstString(record, ["symbol", "ticker", "code", "id"]).toUpperCase();
+  const symbol = firstString(record, [
+    "symbol",
+    "ticker",
+    "code",
+    "id",
+  ]).toUpperCase();
 
   if (!symbol) return null;
 
@@ -252,8 +277,14 @@ function normalizeQuote(value: unknown, context: { market: string }): StockQuote
   return {
     ...record,
     symbol,
-    ticker: firstString(record, ["ticker", "symbol", "code", "id"]).toUpperCase(),
-    market: firstString(record, ["market", "exchange", "venue"]) || context.market,
+    ticker: firstString(record, [
+      "ticker",
+      "symbol",
+      "code",
+      "id",
+    ]).toUpperCase(),
+    market:
+      firstString(record, ["market", "exchange", "venue"]) || context.market,
     price,
     last: optionalNumber(record.last) ?? price,
     close: optionalNumber(record.close) ?? price,
@@ -275,7 +306,12 @@ export function parseDashboardQuoteBatchResponse(
   context: { market: string; requestedSymbols: string[] },
 ): DashboardQuoteBatchResponse {
   const record = asRecord(payload);
-  const quotes = arrayFromPayload(payload, ["quotes", "data", "items", "results"])
+  const quotes = arrayFromPayload(payload, [
+    "quotes",
+    "data",
+    "items",
+    "results",
+  ])
     .map((item) => normalizeQuote(item, context))
     .filter((item): item is StockQuote => item != null);
   const unavailableSymbols = stringArray(record.unavailableSymbols);

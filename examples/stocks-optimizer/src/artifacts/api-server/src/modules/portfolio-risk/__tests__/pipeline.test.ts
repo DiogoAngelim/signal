@@ -15,13 +15,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  validateSignal,
+  DEFAULT_PORTFOLIO_RISK_CONFIG,
   adaptStrategySignal,
   adaptStrategySignals,
   evaluatePortfolioRisk,
-  runTradingPipeline,
   monitoringStore,
-  DEFAULT_PORTFOLIO_RISK_CONFIG,
+  runTradingPipeline,
+  validateSignal,
 } from "../index";
 import type { ValidatedSignal } from "../types";
 
@@ -53,9 +53,27 @@ const MOCK_RAW_SIGNALS = [
 ];
 
 const validatedSignals: ValidatedSignal[] = [
-  { asset: "AAPL", direction: "long", strength: 0.8, confidence: 0.7, timestamp: Date.now() },
-  { asset: "TSLA", direction: "short", strength: 0.6, confidence: 0.5, timestamp: Date.now() },
-  { asset: "GOOG", direction: "flat", strength: 0.3, confidence: 0.2, timestamp: Date.now() },
+  {
+    asset: "AAPL",
+    direction: "long",
+    strength: 0.8,
+    confidence: 0.7,
+    timestamp: Date.now(),
+  },
+  {
+    asset: "TSLA",
+    direction: "short",
+    strength: 0.6,
+    confidence: 0.5,
+    timestamp: Date.now(),
+  },
+  {
+    asset: "GOOG",
+    direction: "flat",
+    strength: 0.3,
+    confidence: 0.2,
+    timestamp: Date.now(),
+  },
 ];
 
 // ── Signal Adapter Tests ──────────────────────────────────────────
@@ -140,7 +158,9 @@ test("Risk Engine: respects max exposure per asset", () => {
     config: { maxExposurePerAsset: 0.2 },
   });
 
-  const aaplPosition = result.positions.find((p) => p.position.asset === "AAPL");
+  const aaplPosition = result.positions.find(
+    (p) => p.position.asset === "AAPL",
+  );
   if (aaplPosition) {
     // 20% of 100k = 20k max, already 15k exposed, so max 5k more
     assert.ok(aaplPosition.position.size <= 5_000 + 0.01);
@@ -159,7 +179,10 @@ test("Risk Engine: respects total portfolio exposure limit", () => {
     config: { maxTotalExposure: 0.5 },
   });
 
-  const totalNewExposure = result.positions.reduce((sum, p) => sum + p.position.size, 0);
+  const totalNewExposure = result.positions.reduce(
+    (sum, p) => sum + p.position.size,
+    0,
+  );
   assert.ok(totalNewExposure <= 5_000 + 0.01);
 });
 
@@ -197,14 +220,28 @@ test("Risk Engine: is deterministic — same inputs produce same outputs", () =>
 
   assert.equal(result1.positions.length, result2.positions.length);
   for (let i = 0; i < result1.positions.length; i++) {
-    assert.equal(result1.positions[i].position.size, result2.positions[i].position.size);
-    assert.equal(result1.positions[i].position.asset, result2.positions[i].position.asset);
+    assert.equal(
+      result1.positions[i].position.size,
+      result2.positions[i].position.size,
+    );
+    assert.equal(
+      result1.positions[i].position.asset,
+      result2.positions[i].position.asset,
+    );
   }
 });
 
 test("Risk Engine: rejects signals below minimum confidence", () => {
   const result = evaluatePortfolioRisk({
-    signals: [{ asset: "LOW", direction: "long", strength: 0.8, confidence: 0.05, timestamp: Date.now() }],
+    signals: [
+      {
+        asset: "LOW",
+        direction: "long",
+        strength: 0.8,
+        confidence: 0.05,
+        timestamp: Date.now(),
+      },
+    ],
     equity: 100_000,
     availableEquity: 50_000,
     currentExposureByAsset: {},
@@ -215,7 +252,9 @@ test("Risk Engine: rejects signals below minimum confidence", () => {
 
   assert.equal(result.positions.length, 0);
   assert.equal(result.rejected.length, 1);
-  assert.ok(result.rejected[0].reasons[0].includes("confidence_below_threshold"));
+  assert.ok(
+    result.rejected[0].reasons[0].includes("confidence_below_threshold"),
+  );
 });
 
 // ── Pipeline Tests ────────────────────────────────────────────────
@@ -249,7 +288,13 @@ test("Pipeline: records signal outcomes in monitoring store", async () => {
 // ── Architecture Invariant Tests ──────────────────────────────────
 
 test("Invariant: Signal adapter does NOT modify signal logic", () => {
-  const raw = { symbol: "AAPL", direction: "long", strength: 0.75, confidence: 0.65, timestamp: 12345 };
+  const raw = {
+    symbol: "AAPL",
+    direction: "long",
+    strength: 0.75,
+    confidence: 0.65,
+    timestamp: 12345,
+  };
   const result = adaptStrategySignal(raw);
 
   assert.ok(result);
@@ -261,7 +306,15 @@ test("Invariant: Signal adapter does NOT modify signal logic", () => {
 
 test("Invariant: Position contains only financial decision data", () => {
   const result = evaluatePortfolioRisk({
-    signals: [{ asset: "AAPL", direction: "long", strength: 0.8, confidence: 0.7, timestamp: Date.now() }],
+    signals: [
+      {
+        asset: "AAPL",
+        direction: "long",
+        strength: 0.8,
+        confidence: 0.7,
+        timestamp: Date.now(),
+      },
+    ],
     equity: 100_000,
     availableEquity: 50_000,
     currentExposureByAsset: {},
@@ -282,7 +335,15 @@ test("Invariant: Risk engine is the ONLY place with financial decisions", () => 
   const baseFraction = DEFAULT_PORTFOLIO_RISK_CONFIG.baseSizeFraction;
 
   const result = evaluatePortfolioRisk({
-    signals: [{ asset: "AAPL", direction: "long", strength, confidence, timestamp: Date.now() }],
+    signals: [
+      {
+        asset: "AAPL",
+        direction: "long",
+        strength,
+        confidence,
+        timestamp: Date.now(),
+      },
+    ],
     equity,
     availableEquity: equity,
     currentExposureByAsset: {},

@@ -1,6 +1,6 @@
+import { buildCommandCenterViewModel } from "@/lib/command-center";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { buildCommandCenterViewModel } from "@/lib/command-center";
 import CommandCenter from "./CommandCenter";
 
 describe("CommandCenter component", () => {

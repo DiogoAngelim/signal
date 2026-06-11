@@ -24,7 +24,9 @@ export const signalResultMetaSchema = z
     replay: z
       .object({
         replayed: z.boolean(),
-        reason: z.enum(["idempotency", "event-redelivery", "event-replay"]).optional(),
+        reason: z
+          .enum(["idempotency", "event-redelivery", "event-replay"])
+          .optional(),
         originalMessageId: z.string().min(1).optional(),
       })
       .optional(),
@@ -35,7 +37,9 @@ export const signalResultMetaSchema = z
       .optional(),
     delivery: z
       .object({
-        mode: z.enum(["in-process", "at-least-once", "exactly-once"]).optional(),
+        mode: z
+          .enum(["in-process", "at-least-once", "exactly-once"])
+          .optional(),
         attempt: z.number().int().positive().optional(),
         consumerId: z.string().min(1).optional(),
         replayed: z.boolean().optional(),
@@ -78,7 +82,8 @@ export type SignalResultMeta = z.infer<typeof signalResultMetaSchema>;
 
 export function ok<T>(
   result: T,
-  meta?: Omit<SignalResultMeta, "outcome"> & Partial<Pick<SignalResultMeta, "outcome">>
+  meta?: Omit<SignalResultMeta, "outcome"> &
+    Partial<Pick<SignalResultMeta, "outcome">>,
 ): SignalSuccess<T> {
   return {
     ok: true,

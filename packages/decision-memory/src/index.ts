@@ -37,7 +37,10 @@ export {
   validateRegimeSnapshot,
   validateThesis,
 } from "./learning";
-export { createInMemoryDecisionMemoryStore, InMemoryDecisionMemoryStore } from "./memory-store";
+export {
+  createInMemoryDecisionMemoryStore,
+  InMemoryDecisionMemoryStore,
+} from "./memory-store";
 export {
   DecisionMemoryContractAdapter,
   MEMORY_CONTRACT_VERSION,
@@ -50,7 +53,10 @@ export {
   memoryScopeFromRecord,
   memoryStorageDecisionId,
 } from "./contracts";
-export { NeonPostgresAdapter, SIGNAL_DECISION_MEMORY_MIGRATION_SQL } from "./postgres";
+export {
+  NeonPostgresAdapter,
+  SIGNAL_DECISION_MEMORY_MIGRATION_SQL,
+} from "./postgres";
 export {
   DEFAULT_RETENTION_POLICY,
   MemoryLifecycle,
@@ -150,7 +156,9 @@ import { NeonPostgresAdapter } from "./postgres";
 import { decisionMemoryConfigFromEnv } from "./retention";
 import type { DecisionMemoryStore } from "./types";
 
-export function createDecisionMemoryStoreFromEnv(env: NodeJS.ProcessEnv = process.env): DecisionMemoryStore {
+export function createDecisionMemoryStoreFromEnv(
+  env: NodeJS.ProcessEnv = process.env,
+): DecisionMemoryStore {
   const config = decisionMemoryConfigFromEnv(env);
   if (!config.enabled || config.provider === "memory" || !config.databaseUrl) {
     return createInMemoryDecisionMemoryStore();

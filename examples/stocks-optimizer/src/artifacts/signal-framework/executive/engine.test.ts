@@ -53,12 +53,21 @@ describe("generic executive decision architecture", () => {
     });
     const counterfactual = evaluateCounterfactuals({
       actualDecision: { decision: "hold", confidence: 55, risk: 20 },
-      ignoredRestrictionDecision: { decision: "buy", confidence: 70, opportunity: 78, risk: 92, maxExposure: 20 },
+      ignoredRestrictionDecision: {
+        decision: "buy",
+        confidence: 70,
+        opportunity: 78,
+        risk: 92,
+        maxExposure: 20,
+      },
       restrictions: [{ reason: "Liquidity lock", avoidedLossScore: 80 }],
     });
 
     assert.equal(accountability.status, "immature");
-    assert.equal(counterfactual.avoidedLossScore > counterfactual.missedUpsideScore, true);
+    assert.equal(
+      counterfactual.avoidedLossScore > counterfactual.missedUpsideScore,
+      true,
+    );
   });
 
   it("makes Executive the final synthesized authority", () => {
@@ -78,10 +87,21 @@ describe("generic executive decision architecture", () => {
       opportunity: 82,
       risk: 30,
       belief: { confidence: 76, reason: "Belief supports action." },
-      judgement: { adjustedConfidence: 74, reasons: ["Similar states were profitable."] },
+      judgement: {
+        adjustedConfidence: 74,
+        reasons: ["Similar states were profitable."],
+      },
       resolve: { decision: "commit", resolveScore: 77 },
-      trust: { score: 74, status: "trusted", reasons: ["Historical reliability is stable."] },
-      permission: { allowed: true, level: "limited", reasons: ["Reduced-size approval."] },
+      trust: {
+        score: 74,
+        status: "trusted",
+        reasons: ["Historical reliability is stable."],
+      },
+      permission: {
+        allowed: true,
+        level: "limited",
+        reasons: ["Reduced-size approval."],
+      },
       capacity: { maxExposure: 4, mode: "reduced", reasons: ["Recovery cap."] },
       urgency: { score: 72, mode: "act_soon", reasons: ["Window is timely."] },
       executionQuality,
@@ -91,16 +111,33 @@ describe("generic executive decision architecture", () => {
     assert.equal(decision.decision, "buy");
     assert.equal(decision.participationMode, "limited");
     assert.equal(decision.maxExposure, 4);
-    assert.equal(decision.strongestEvidence.includes("Backtest and live shadow evidence agree."), true);
+    assert.equal(
+      decision.strongestEvidence.includes(
+        "Backtest and live shadow evidence agree.",
+      ),
+      true,
+    );
   });
 
   it("blocks high-confidence actions when permission or execution is blocked", () => {
     const decision = evaluateExecutiveDecision({
       proposedDecision: "buy",
       confidence: 94,
-      trust: { score: 90, status: "highly_trusted", reasons: ["Strong history."] },
-      permission: { allowed: false, level: "blocked", reasons: ["Venue permission lock."] },
-      capacity: { maxExposure: 25, mode: "normal", reasons: ["Capacity exists."] },
+      trust: {
+        score: 90,
+        status: "highly_trusted",
+        reasons: ["Strong history."],
+      },
+      permission: {
+        allowed: false,
+        level: "blocked",
+        reasons: ["Venue permission lock."],
+      },
+      capacity: {
+        maxExposure: 25,
+        mode: "normal",
+        reasons: ["Capacity exists."],
+      },
     });
     const executionBlocked = evaluateExecutiveDecision({
       proposedDecision: "buy",

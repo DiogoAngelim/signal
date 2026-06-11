@@ -4,10 +4,14 @@ import path from "node:path";
 
 const rootDir = process.cwd();
 
-const workspaceList = spawnSync("pnpm", ["list", "-r", "--json", "--depth", "-1"], {
-  cwd: rootDir,
-  encoding: "utf8",
-});
+const workspaceList = spawnSync(
+  "pnpm",
+  ["list", "-r", "--json", "--depth", "-1"],
+  {
+    cwd: rootDir,
+    encoding: "utf8",
+  },
+);
 
 if (workspaceList.status !== 0) {
   process.stderr.write(workspaceList.stderr);
@@ -19,7 +23,11 @@ const missingTargets = [];
 let checkedTargets = 0;
 
 function isLocalTarget(value) {
-  return typeof value === "string" && !value.startsWith("/") && !/^[a-z]+:/i.test(value);
+  return (
+    typeof value === "string" &&
+    !value.startsWith("/") &&
+    !/^[a-z]+:/i.test(value)
+  );
 }
 
 function collectTargets(value, label, targets) {
@@ -35,7 +43,9 @@ function collectTargets(value, label, targets) {
   }
 
   if (Array.isArray(value)) {
-    value.forEach((item, index) => collectTargets(item, `${label}[${index}]`, targets));
+    value.forEach((item, index) =>
+      collectTargets(item, `${label}[${index}]`, targets),
+    );
     return;
   }
 

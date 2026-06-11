@@ -8,7 +8,13 @@
     "strategy": "confidence_weighted",
     "policy": "aggressive",
     "resource": { "available": 500, "requested": 120 },
-    "decision": { "id": "ship", "confidence": 0.92, "trust": 0.88, "risk": 0.2, "expectedUtility": 0.75 },
+    "decision": {
+      "id": "ship",
+      "confidence": 0.92,
+      "trust": 0.88,
+      "risk": 0.2,
+      "expectedUtility": 0.75
+    },
     "now": "2026-06-01T00:00:00Z"
   },
   "expectations": {
@@ -19,7 +25,13 @@
     "limitedBy": [],
     "cappedBy": ["resource.requested"],
     "recommendations": [
-      { "targetId": "ship", "amount": 120, "normalizedCommitment": 0.24, "weight": 1, "mode": "normal" }
+      {
+        "targetId": "ship",
+        "amount": 120,
+        "normalizedCommitment": 0.24,
+        "weight": 1,
+        "mode": "normal"
+      }
     ]
   }
 }

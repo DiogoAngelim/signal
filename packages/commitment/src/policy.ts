@@ -46,7 +46,14 @@ export const DEFAULT_SHARPE_LIKE_CONFIG: Readonly<{
 
 function policy(
   name: CommitmentPolicyName,
-  values: Omit<CommitmentPolicy, "name" | "version" | "softConstraintReduction" | "hardConstraintReduction" | "sharpeLike"> & {
+  values: Omit<
+    CommitmentPolicy,
+    | "name"
+    | "version"
+    | "softConstraintReduction"
+    | "hardConstraintReduction"
+    | "sharpeLike"
+  > & {
     version?: string;
     fallbackStrategy?: CommitmentStrategyName;
     sharpeLike?: SharpeLikeConfig;
@@ -59,11 +66,18 @@ function policy(
     softConstraintReduction,
     hardConstraintReduction,
     sharpeLike: {
-      objective: values.sharpeLike?.objective ?? DEFAULT_SHARPE_LIKE_CONFIG.objective,
+      objective:
+        values.sharpeLike?.objective ?? DEFAULT_SHARPE_LIKE_CONFIG.objective,
       rounds: values.sharpeLike?.rounds ?? DEFAULT_SHARPE_LIKE_CONFIG.rounds,
-      refinementPasses: values.sharpeLike?.refinementPasses ?? DEFAULT_SHARPE_LIKE_CONFIG.refinementPasses,
-      refinementPoolSize: values.sharpeLike?.refinementPoolSize ?? DEFAULT_SHARPE_LIKE_CONFIG.refinementPoolSize,
-      refinementScale: values.sharpeLike?.refinementScale ?? DEFAULT_SHARPE_LIKE_CONFIG.refinementScale,
+      refinementPasses:
+        values.sharpeLike?.refinementPasses ??
+        DEFAULT_SHARPE_LIKE_CONFIG.refinementPasses,
+      refinementPoolSize:
+        values.sharpeLike?.refinementPoolSize ??
+        DEFAULT_SHARPE_LIKE_CONFIG.refinementPoolSize,
+      refinementScale:
+        values.sharpeLike?.refinementScale ??
+        DEFAULT_SHARPE_LIKE_CONFIG.refinementScale,
       objectiveWeights: {
         ...DEFAULT_SHARPE_LIKE_CONFIG.objectiveWeights,
         ...(values.sharpeLike?.objectiveWeights ?? {}),
@@ -76,7 +90,8 @@ function policy(
 
 export const BUILT_IN_COMMITMENT_POLICIES = Object.freeze({
   conservative: policy("conservative", {
-    description: "Requires stronger confidence and trust, keeps commitment small, and treats risk conservatively.",
+    description:
+      "Requires stronger confidence and trust, keeps commitment small, and treats risk conservatively.",
     minConfidence: 0.65,
     minTrust: 0.7,
     maxCommitmentRatio: 0.35,
@@ -89,7 +104,8 @@ export const BUILT_IN_COMMITMENT_POLICIES = Object.freeze({
     monitoringSensitivity: 0.85,
   }),
   balanced: policy("balanced", {
-    description: "Balances confidence, trust, constraints, and risk into moderate commitment.",
+    description:
+      "Balances confidence, trust, constraints, and risk into moderate commitment.",
     minConfidence: 0.55,
     minTrust: 0.55,
     maxCommitmentRatio: 0.6,
@@ -102,7 +118,8 @@ export const BUILT_IN_COMMITMENT_POLICIES = Object.freeze({
     monitoringSensitivity: 0.7,
   }),
   aggressive: policy("aggressive", {
-    description: "Allows larger commitment when confidence and trust clear lower thresholds.",
+    description:
+      "Allows larger commitment when confidence and trust clear lower thresholds.",
     minConfidence: 0.45,
     minTrust: 0.45,
     maxCommitmentRatio: 0.85,
@@ -115,7 +132,8 @@ export const BUILT_IN_COMMITMENT_POLICIES = Object.freeze({
     monitoringSensitivity: 0.6,
   }),
   exploratory: policy("exploratory", {
-    description: "Permits small tests under uncertainty while preventing large commitment.",
+    description:
+      "Permits small tests under uncertainty while preventing large commitment.",
     minConfidence: 0.25,
     minTrust: 0.3,
     maxCommitmentRatio: 0.12,
@@ -128,7 +146,8 @@ export const BUILT_IN_COMMITMENT_POLICIES = Object.freeze({
     monitoringSensitivity: 0.9,
   }),
   preservation: policy("preservation", {
-    description: "Prioritizes capital, capacity, and reversibility over growth.",
+    description:
+      "Prioritizes capital, capacity, and reversibility over growth.",
     minConfidence: 0.6,
     minTrust: 0.75,
     maxCommitmentRatio: 0.25,
@@ -141,7 +160,8 @@ export const BUILT_IN_COMMITMENT_POLICIES = Object.freeze({
     monitoringSensitivity: 0.95,
   }),
   compounding: policy("compounding", {
-    description: "Allows steady commitment where trust and repeatability support it.",
+    description:
+      "Allows steady commitment where trust and repeatability support it.",
     minConfidence: 0.6,
     minTrust: 0.6,
     maxCommitmentRatio: 0.75,
@@ -168,14 +188,21 @@ export const BUILT_IN_COMMITMENT_POLICIES = Object.freeze({
   }),
 } satisfies Record<CommitmentPolicyName, CommitmentPolicy>);
 
-export function resolveCommitmentPolicy(input?: CommitmentPolicyName | Partial<CommitmentPolicy>): CommitmentPolicy {
+export function resolveCommitmentPolicy(
+  input?: CommitmentPolicyName | Partial<CommitmentPolicy>,
+): CommitmentPolicy {
   if (!input) return clonePolicy(BUILT_IN_COMMITMENT_POLICIES.balanced);
   if (typeof input === "string") {
-    return clonePolicy(BUILT_IN_COMMITMENT_POLICIES[input] ?? BUILT_IN_COMMITMENT_POLICIES.balanced);
+    return clonePolicy(
+      BUILT_IN_COMMITMENT_POLICIES[input] ??
+        BUILT_IN_COMMITMENT_POLICIES.balanced,
+    );
   }
 
   const baseName = input.name ?? "custom";
-  const base = BUILT_IN_COMMITMENT_POLICIES[baseName] ?? BUILT_IN_COMMITMENT_POLICIES.custom;
+  const base =
+    BUILT_IN_COMMITMENT_POLICIES[baseName] ??
+    BUILT_IN_COMMITMENT_POLICIES.custom;
   return {
     ...clonePolicy(base),
     ...input,

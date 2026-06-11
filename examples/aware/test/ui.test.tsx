@@ -2,12 +2,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { createFixtureAwareAdapters } from "../src/adapters.js";
 import type { Briefing } from "../src/contracts.js";
+import { BriefingCard, BriefingView, HomeScreen } from "../src/frontend/App.js";
 import { createAwareSignalApp } from "../src/signal.js";
-import {
-  BriefingCard,
-  BriefingView,
-  HomeScreen
-} from "../src/frontend/App.js";
 
 const noop = () => undefined;
 const now = () => new Date("2026-06-01T12:40:00.000Z");
@@ -22,7 +18,7 @@ describe("Aware frontend rendering", () => {
         onQueryChange={noop}
         onSearch={noop}
         onChooseRegion={noop}
-      />
+      />,
     );
     const loading = renderToStaticMarkup(
       <HomeScreen
@@ -32,7 +28,7 @@ describe("Aware frontend rendering", () => {
         onQueryChange={noop}
         onSearch={noop}
         onChooseRegion={noop}
-      />
+      />,
     );
 
     expect(empty).toContain("Where are you today?");
@@ -51,11 +47,15 @@ describe("Aware frontend rendering", () => {
     const degraded = await briefingFor("miami-fl", "source-unavailable");
     const emergency = withEmergencyItem(urgency);
 
-    expect(renderBriefing(normal)).toContain("Nothing unusual requires attention");
+    expect(renderBriefing(normal)).toContain(
+      "Nothing unusual requires attention",
+    );
     const warningHtml = renderBriefing(warning);
     expect(warningHtml).toContain("Warning");
     expect(warningHtml).toContain("Sun exposure may be strong");
-    expect(warningHtml).toContain("Some weather conditions may affect plans today.");
+    expect(warningHtml).toContain(
+      "Some weather conditions may affect plans today.",
+    );
     expect(warningHtml).toContain("Reduce Exposure");
     expect(warningHtml).not.toContain("Weather signals");
     expect(warningHtml).not.toContain("weather-signal");
@@ -66,7 +66,9 @@ describe("Aware frontend rendering", () => {
 
   it("does not expose raw technical metrics on a collapsed first-screen card", async () => {
     const briefing = await briefingFor("new-york-ny", "poor-air-quality-day");
-    const html = renderToStaticMarkup(<BriefingCard item={briefing.items[0]!} />);
+    const html = renderToStaticMarkup(
+      <BriefingCard item={briefing.items[0]!} />,
+    );
 
     expect(html).toContain("Air may be harder to breathe");
     expect(html).not.toMatch(/\bAQI\b|usAqi|pm25|UV|precipitationMm|°|178|58/);
@@ -76,7 +78,7 @@ describe("Aware frontend rendering", () => {
     const briefings = [
       await briefingFor("miami-fl", "multiple-simultaneous-risks"),
       await briefingFor("new-york-ny", "poor-air-quality-day"),
-      await briefingFor("san-juan-pr", "mosquito-activity-warning")
+      await briefingFor("san-juan-pr", "mosquito-activity-warning"),
     ];
     const html = briefings.map(renderBriefing).join("\n").toLowerCase();
 
@@ -87,10 +89,13 @@ describe("Aware frontend rendering", () => {
   });
 });
 
-async function briefingFor(regionId: string, fixtureId: Parameters<typeof createFixtureAwareAdapters>[0]): Promise<Briefing> {
+async function briefingFor(
+  regionId: string,
+  fixtureId: Parameters<typeof createFixtureAwareAdapters>[0],
+): Promise<Briefing> {
   const app = createAwareSignalApp({
     adapters: createFixtureAwareAdapters(fixtureId),
-    now
+    now,
   });
   return app.getBriefing(regionId);
 }
@@ -106,7 +111,7 @@ function renderBriefing(briefing: Briefing): string {
       onSearch={noop}
       onChooseRegion={noop}
       onRefresh={noop}
-    />
+    />,
   );
 }
 
@@ -116,16 +121,17 @@ function withEmergencyItem(briefing: Briefing): Briefing {
     ...briefing,
     attentionLevel: "emergency",
     attentionLabel: "Emergency",
-    summary: "Immediate protective action may be needed. Follow local official guidance.",
+    summary:
+      "Immediate protective action may be needed. Follow local official guidance.",
     items: [
       {
         ...first,
         attentionLevel: "emergency",
         attentionLabel: "Emergency",
         meaning: "Immediate protective action may be needed.",
-        primaryAction: "Shelter"
+        primaryAction: "Shelter",
       },
-      ...briefing.items.slice(1)
-    ]
+      ...briefing.items.slice(1),
+    ],
   };
 }

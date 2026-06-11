@@ -6,14 +6,14 @@
  * Commands: verify, replay, test, build, init, audit, install-hooks
  */
 
-import { executeInit } from "../commands/init.js";
-import { executeVerify } from "../commands/verify.js";
-import { executeReplay } from "../commands/replay.js";
-import { executeTest } from "../commands/test.js";
-import { executeBuild } from "../commands/build.js";
 import { executeAudit } from "../commands/audit.js";
+import { executeBuild } from "../commands/build.js";
+import { executeInit } from "../commands/init.js";
 import { executeInstallHooks } from "../commands/installHooks.js";
 import { pushCommand } from "../commands/push.js";
+import { executeReplay } from "../commands/replay.js";
+import { executeTest } from "../commands/test.js";
+import { executeVerify } from "../commands/verify.js";
 
 // ─── Argument Parsing ───────────────────────────────────────────────────────
 
@@ -37,7 +37,8 @@ function parseArgs(argv: string[]): {
   const flags: Record<string, string> = {};
 
   for (let i = 0; i < rest.length; i++) {
-    const arg = rest[i]!;
+    const arg = rest[i];
+    if (!arg) continue;
     if (arg.startsWith("--")) {
       const key = arg.slice(2);
       const next = rest[i + 1];
@@ -108,7 +109,7 @@ Exit Codes:
 function main(): void {
   const { command, args, flags } = parseArgs(process.argv);
 
-  if (flags["help"] || command === "" || command === "help") {
+  if (flags.help || command === "" || command === "help") {
     printHelp();
     process.exit(0);
   }
@@ -117,52 +118,60 @@ function main(): void {
     case "init": {
       executeInit();
       process.exit(0);
+      break;
     }
 
     case "verify": {
       const valid = executeVerify();
       process.exit(valid ? 0 : 1);
+      break;
     }
 
     case "replay": {
-      const from = Number(flags["from"] ?? 0);
-      const to = Number(flags["to"] ?? -1); // -1 means "last phase"
+      const from = Number(flags.from ?? 0);
+      const to = Number(flags.to ?? -1); // -1 means "last phase"
       const valid = executeReplay({
-        from: isNaN(from) ? 0 : from,
-        to: isNaN(to) ? -1 : to,
+        from: Number.isNaN(from) ? 0 : from,
+        to: Number.isNaN(to) ? -1 : to,
       });
       process.exit(valid ? 0 : 1);
+      break;
     }
 
     case "test": {
       // Allow custom test command via --command or after --
-      const testCommand = flags["command"]
-        ?? (args.length > 0 ? args.join(" ") : undefined);
+      const testCommand =
+        flags.command ?? (args.length > 0 ? args.join(" ") : undefined);
       const valid = executeTest(testCommand);
       process.exit(valid ? 0 : 1);
+      break;
     }
 
     case "build": {
-      const buildCommand = flags["command"]
-        ?? (args.length > 0 ? args.join(" ") : undefined);
-      const outputDir = flags["output"] ?? "dist";
+      const buildCommand =
+        flags.command ?? (args.length > 0 ? args.join(" ") : undefined);
+      const outputDir = flags.output ?? "dist";
       const valid = executeBuild(buildCommand, outputDir);
       process.exit(valid ? 0 : 1);
+      break;
     }
 
     case "audit": {
       const valid = executeAudit();
       process.exit(valid ? 0 : 1);
+      break;
     }
 
     case "push": {
       pushCommand();
       process.exit(0);
+      break;
     }
 
     case "install-hooks": {
       const success = executeInstallHooks();
       process.exit(success ? 0 : 1);
+      break;
     }
 
     default:

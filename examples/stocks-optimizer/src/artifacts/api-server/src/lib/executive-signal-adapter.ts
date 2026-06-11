@@ -1,33 +1,36 @@
 import {
-  createWisdom,
-  evaluateCounterfactuals,
-  evaluateDiscoveryIntelligence,
   type DecisionCounterfactualResult,
   type DecisionOutcomeRecord,
   type DecisionQualityResult,
   type DiscoveryIntelligenceResult,
+  createWisdom,
+  evaluateCounterfactuals,
+  evaluateDiscoveryIntelligence,
 } from "../../../signal-framework";
 import {
-  evaluateDecisionStates,
   type CapacityState,
   type PermissionState,
   type TrustState,
   type UrgencyState,
+  evaluateDecisionStates,
 } from "../../../signal-framework/decision-states/engine";
 import {
-  evaluateDiscoveryAccountability,
   type DiscoveryAccountabilityResult,
+  evaluateDiscoveryAccountability,
 } from "../../../signal-framework/discovery-accountability/engine";
 import {
-  evaluateExecutiveDecision,
+  type ExecutionQualityResult,
+  evaluateExecutionQuality,
+} from "../../../signal-framework/execution-quality/engine";
+import {
   type ExecutiveAction,
   type ExecutiveDecision,
+  evaluateExecutiveDecision,
 } from "../../../signal-framework/executive/engine";
-import {
-  evaluateExecutionQuality,
-  type ExecutionQualityResult,
-} from "../../../signal-framework/execution-quality/engine";
-import type { StrategySignalDecision, StrategySignalInput } from "./strategy-readiness";
+import type {
+  StrategySignalDecision,
+  StrategySignalInput,
+} from "./strategy-readiness";
 
 export type StockExecutiveArchitecture = {
   executionQuality: ExecutionQualityResult;
@@ -91,7 +94,9 @@ export function buildStockExecutiveArchitecture(
   });
   const discoveryAccountability = evaluateDiscoveryAccountability({
     discovery: {
-      status: primaryOpportunity(signalInput)?.discovery?.status ?? primaryOpportunity(signalInput)?.lifecycle?.status,
+      status:
+        primaryOpportunity(signalInput)?.discovery?.status ??
+        primaryOpportunity(signalInput)?.lifecycle?.status,
       confidence: firstNumber(
         primaryOpportunity(signalInput)?.discovery?.confidence,
         primaryOpportunity(signalInput)?.confidence,
@@ -132,7 +137,10 @@ export function buildStockExecutiveArchitecture(
       reason: "Raw candidate before governance restrictions.",
     },
     normalSizeDecision: {
-      decision: signalInput.rawAction === "Buy" ? "buy" : signalInput.rawAction.toLowerCase(),
+      decision:
+        signalInput.rawAction === "Buy"
+          ? "buy"
+          : signalInput.rawAction.toLowerCase(),
       confidence: decision.rawConfidence,
       trust: decision.trustworthiness,
       opportunity: opportunityScoreFor(signalInput),
@@ -158,7 +166,10 @@ export function buildStockExecutiveArchitecture(
           trust: decision.trustworthiness,
           opportunity: opportunityScoreFor(signalInput),
           risk: Math.min(100, signalInput.riskPressure + 25),
-          maxExposure: Math.max(signalInput.rawSuggestedExposurePct, signalInput.readiness.maxPositionPct),
+          maxExposure: Math.max(
+            signalInput.rawSuggestedExposurePct,
+            signalInput.readiness.maxPositionPct,
+          ),
           expectedReturn: signalInput.expectedEdgePct,
           reason: `Ignored restriction: ${decision.rejectionReason}`,
         }
@@ -174,15 +185,18 @@ export function buildStockExecutiveArchitecture(
     reflection: { score: signalInput.readiness.readinessScore },
     agency: signalInput.agencyResult,
     survivalMemory: decision.survivalMemory,
-    discovery: primaryOpportunity(signalInput)?.discovery ?? primaryOpportunity(signalInput)?.opportunityDiscovery,
+    discovery:
+      primaryOpportunity(signalInput)?.discovery ??
+      primaryOpportunity(signalInput)?.opportunityDiscovery,
     opportunityEconomics: wisdomEngine.evaluateOpportunityEconomics({
-      selected: decision.signalStatus === "blocked"
-        ? "reject"
-        : decision.signalStatus === "watch"
-          ? "wait"
-          : decision.suggestedExposure < signalInput.rawSuggestedExposurePct
-            ? "scale"
-            : "action",
+      selected:
+        decision.signalStatus === "blocked"
+          ? "reject"
+          : decision.signalStatus === "watch"
+            ? "wait"
+            : decision.suggestedExposure < signalInput.rawSuggestedExposurePct
+              ? "scale"
+              : "action",
       action: {
         expectedReward: signalInput.expectedEdgePct,
         expectedRisk: signalInput.riskPressure / 12,
@@ -199,8 +213,11 @@ export function buildStockExecutiveArchitecture(
         confidence: 100,
       },
       scale: {
-        expectedReward: signalInput.expectedEdgePct * scaledShareFor(signalInput, decision),
-        expectedRisk: (signalInput.riskPressure / 12) * scaledShareFor(signalInput, decision),
+        expectedReward:
+          signalInput.expectedEdgePct * scaledShareFor(signalInput, decision),
+        expectedRisk:
+          (signalInput.riskPressure / 12) *
+          scaledShareFor(signalInput, decision),
         confidence: decision.trustworthiness,
       },
     }),
@@ -211,7 +228,10 @@ export function buildStockExecutiveArchitecture(
       opportunities: wisdomPortfolioOpportunities(signalInput),
       currentAllocations: wisdomAllocationsFor(signalInput, decision),
       capitalConstraints: {
-        availableCapital: Math.max(100, signalInput.readiness.maxPositionPct * 10),
+        availableCapital: Math.max(
+          100,
+          signalInput.readiness.maxPositionPct * 10,
+        ),
         maxAllocationPerOpportunity: signalInput.readiness.maxPositionPct,
       },
       riskProfile: {
@@ -234,7 +254,9 @@ export function buildStockExecutiveArchitecture(
     urgency: {
       score: timingUrgencyFor(signalInput, decision),
       mode: urgencyModeFor(timingUrgencyFor(signalInput, decision)),
-      reasons: ["Mapped from expected edge, risk pressure, and execution timing."],
+      reasons: [
+        "Mapped from expected edge, risk pressure, and execution timing.",
+      ],
     },
     trustGovernor: decision.trustGovernor,
     calibration: signalInput.readiness.calibration,
@@ -278,7 +300,9 @@ export function buildStockExecutiveArchitecture(
   const executiveDecision = evaluateExecutiveDecision({
     proposedDecision: proposedDecisionFor(decision),
     confidence: decision.signalConfidence,
-    discovery: primaryOpportunity(signalInput)?.discovery ?? primaryOpportunity(signalInput)?.opportunityDiscovery,
+    discovery:
+      primaryOpportunity(signalInput)?.discovery ??
+      primaryOpportunity(signalInput)?.opportunityDiscovery,
     discoveryAccountability,
     discoveryIntelligence,
     recognition: (decision as any).recognition,
@@ -297,18 +321,20 @@ export function buildStockExecutiveArchitecture(
     risk: signalInput.riskPressure,
     opportunity: opportunityScoreFor(signalInput),
     restrictions: decision.rejectionReason
-      ? [{
-          id: "market-decision-rejection",
-          label: "Market decision rejection",
-          reason: decision.rejectionReason,
-          severity: decision.signalStatus === "blocked" ? "high" : "medium",
-          blocksAction: decision.signalStatus === "blocked",
-          unlockCondition: decision.sizingReasons[0],
-        }]
+      ? [
+          {
+            id: "market-decision-rejection",
+            label: "Market decision rejection",
+            reason: decision.rejectionReason,
+            severity: decision.signalStatus === "blocked" ? "high" : "medium",
+            blocksAction: decision.signalStatus === "blocked",
+            unlockCondition: decision.sizingReasons[0],
+          },
+        ]
       : [],
     historicalEvidence: [
       ...decision.sizingReasons.slice(0, 3),
-      ...((decision.judgement?.reasons ?? []).slice(0, 2)),
+      ...(decision.judgement?.reasons ?? []).slice(0, 2),
     ],
     executionQuality,
     counterfactual,
@@ -332,7 +358,12 @@ export function buildStockExecutiveArchitecture(
   };
 }
 
-function proposedDecisionFor(decision: Pick<StrategySignalDecision, "signalAction" | "allocationAction" | "signalStatus">): ExecutiveAction {
+function proposedDecisionFor(
+  decision: Pick<
+    StrategySignalDecision,
+    "signalAction" | "allocationAction" | "signalStatus"
+  >,
+): ExecutiveAction {
   if (decision.signalAction === "Sell") return "sell";
   if (decision.signalAction === "Buy") return "buy";
   if (decision.allocationAction === "Blocked") return "avoid";
@@ -340,12 +371,16 @@ function proposedDecisionFor(decision: Pick<StrategySignalDecision, "signalActio
   return "hold";
 }
 
-function permissionForDecision(decision: StockExecutiveArchitectureInput["decision"]): PermissionState {
+function permissionForDecision(
+  decision: StockExecutiveArchitectureInput["decision"],
+): PermissionState {
   if (decision.signalStatus === "blocked") {
     return {
       allowed: false,
       level: "blocked",
-      reasons: [decision.rejectionReason ?? "Signal is blocked by strategy governance."],
+      reasons: [
+        decision.rejectionReason ?? "Signal is blocked by strategy governance.",
+      ],
     };
   }
   if (decision.rejectionReason) {
@@ -355,11 +390,16 @@ function permissionForDecision(decision: StockExecutiveArchitectureInput["decisi
       reasons: [decision.rejectionReason],
     };
   }
-  if (decision.suggestedExposure > 0 && decision.suggestedExposure < decision.maxPositionPct) {
+  if (
+    decision.suggestedExposure > 0 &&
+    decision.suggestedExposure < decision.maxPositionPct
+  ) {
     return {
       allowed: true,
       level: "limited",
-      reasons: ["Exposure is allowed but capped below normal position capacity."],
+      reasons: [
+        "Exposure is allowed but capped below normal position capacity.",
+      ],
     };
   }
   return {
@@ -369,20 +409,28 @@ function permissionForDecision(decision: StockExecutiveArchitectureInput["decisi
   };
 }
 
-function capacityForDecision(decision: StockExecutiveArchitectureInput["decision"]): CapacityState {
-  const maxExposure = Math.max(0, decision.suggestedExposure || decision.trustGovernor?.maxExposure || 0);
+function capacityForDecision(
+  decision: StockExecutiveArchitectureInput["decision"],
+): CapacityState {
+  const maxExposure = Math.max(
+    0,
+    decision.suggestedExposure || decision.trustGovernor?.maxExposure || 0,
+  );
   return {
     maxExposure,
-    mode: maxExposure <= 0
-      ? "none"
-      : maxExposure <= 1.5
-        ? "micro"
-        : maxExposure < 10
-          ? "reduced"
-          : maxExposure <= 25
-            ? "normal"
-            : "expanded",
-    reasons: decision.sizingReasons.length ? decision.sizingReasons : ["Mapped from strategy sizing result."],
+    mode:
+      maxExposure <= 0
+        ? "none"
+        : maxExposure <= 1.5
+          ? "micro"
+          : maxExposure < 10
+            ? "reduced"
+            : maxExposure <= 25
+              ? "normal"
+              : "expanded",
+    reasons: decision.sizingReasons.length
+      ? decision.sizingReasons
+      : ["Mapped from strategy sizing result."],
   };
 }
 
@@ -391,8 +439,12 @@ function executionBlockersFor(
   decision: StockExecutiveArchitectureInput["decision"],
 ) {
   return [
-    input.liquidityScore != null && input.liquidityScore < 20 ? "Asset liquidity is too weak for clean execution." : "",
-    decision.signalStatus === "blocked" && decision.rejectionReason ? decision.rejectionReason : "",
+    input.liquidityScore != null && input.liquidityScore < 20
+      ? "Asset liquidity is too weak for clean execution."
+      : "",
+    decision.signalStatus === "blocked" && decision.rejectionReason
+      ? decision.rejectionReason
+      : "",
   ].filter(Boolean);
 }
 
@@ -401,63 +453,122 @@ function executionWarningsFor(
   decision: StockExecutiveArchitectureInput["decision"],
 ) {
   return [
-    input.riskPressure > 65 ? "Risk pressure is elevated for immediate execution." : "",
-    decision.sizingMode === "micro" || decision.sizingMode === "none" ? "Execution should stay small or wait until capacity improves." : "",
+    input.riskPressure > 65
+      ? "Risk pressure is elevated for immediate execution."
+      : "",
+    decision.sizingMode === "micro" || decision.sizingMode === "none"
+      ? "Execution should stay small or wait until capacity improves."
+      : "",
   ].filter(Boolean);
 }
 
 function discoveryEventsFor(input: StrategySignalInput) {
-  return (input.opportunityCandidates ?? []).slice(0, 12).map((candidate: any, index) => ({
-    id: String(candidate.symbol ?? candidate.id ?? index),
-    outcome: Number(candidate.expectedMove ?? candidate.returnPct ?? candidate.score ?? candidate.candidateScore ?? 0) > 0
-      ? "positive"
-      : "unknown",
-    profitScore: firstNumber(candidate.expectedMove, candidate.returnPct, candidate.score, candidate.candidateScore),
-    confidence: firstNumber(candidate.confidence, candidate.candidateScore),
-    maturity: firstNumber(candidate.maturity, candidate.lifecycle?.maturity),
-    novelty: firstNumber(candidate.novelty, candidate.discovery?.novelty),
-    wasEarly: normalized(candidate.lifecycle?.status ?? candidate.status).includes("emerging"),
-    wasRejected: normalized(candidate.signalStatus).includes("blocked"),
-    wasFalseDiscovery: normalized(candidate.signalStatus).includes("blocked") && Number(candidate.expectedMove ?? 0) <= 0,
-  }));
+  return (input.opportunityCandidates ?? [])
+    .slice(0, 12)
+    .map((candidate: any, index) => ({
+      id: String(candidate.symbol ?? candidate.id ?? index),
+      outcome:
+        Number(
+          candidate.expectedMove ??
+            candidate.returnPct ??
+            candidate.score ??
+            candidate.candidateScore ??
+            0,
+        ) > 0
+          ? "positive"
+          : "unknown",
+      profitScore: firstNumber(
+        candidate.expectedMove,
+        candidate.returnPct,
+        candidate.score,
+        candidate.candidateScore,
+      ),
+      confidence: firstNumber(candidate.confidence, candidate.candidateScore),
+      maturity: firstNumber(candidate.maturity, candidate.lifecycle?.maturity),
+      novelty: firstNumber(candidate.novelty, candidate.discovery?.novelty),
+      wasEarly: normalized(
+        candidate.lifecycle?.status ?? candidate.status,
+      ).includes("emerging"),
+      wasRejected: normalized(candidate.signalStatus).includes("blocked"),
+      wasFalseDiscovery:
+        normalized(candidate.signalStatus).includes("blocked") &&
+        Number(candidate.expectedMove ?? 0) <= 0,
+    }));
 }
 
 function discoveryIntelligenceDiscoveriesFor(input: StrategySignalInput) {
   const candidates = (input.opportunityCandidates ?? []).slice(0, 48);
   const mapped = candidates.map((candidate: any, index) => {
-    const confidence = firstNumber(candidate.confidence, candidate.candidateScore, input.signalConfidence) ?? 50;
-    const expectedValue = firstNumber(candidate.expectedMove, candidate.returnPct, candidate.score, candidate.candidateScore) ?? 0;
-    const stage = candidate.lifecycle?.status ??
+    const confidence =
+      firstNumber(
+        candidate.confidence,
+        candidate.candidateScore,
+        input.signalConfidence,
+      ) ?? 50;
+    const expectedValue =
+      firstNumber(
+        candidate.expectedMove,
+        candidate.returnPct,
+        candidate.score,
+        candidate.candidateScore,
+      ) ?? 0;
+    const stage =
+      candidate.lifecycle?.status ??
       candidate.discovery?.status ??
       candidate.status ??
-      (confidence >= 85 ? "TRUSTED" : confidence >= 70 ? "CONFIRMED" : confidence >= 45 ? "OBSERVED" : "DETECTED");
+      (confidence >= 85
+        ? "TRUSTED"
+        : confidence >= 70
+          ? "CONFIRMED"
+          : confidence >= 45
+            ? "OBSERVED"
+            : "DETECTED");
 
     return {
-      id: String(candidate.symbol ?? candidate.ticker ?? candidate.id ?? `candidate-${index + 1}`),
+      id: String(
+        candidate.symbol ??
+          candidate.ticker ??
+          candidate.id ??
+          `candidate-${index + 1}`,
+      ),
       stage,
-      previousStage: candidate.lifecycle?.previousStatus ?? candidate.previousStatus,
+      previousStage:
+        candidate.lifecycle?.previousStatus ?? candidate.previousStatus,
       novelty: firstNumber(candidate.novelty, candidate.discovery?.novelty),
       confidence,
-      trust: firstNumber(candidate.trust, candidate.trustworthiness, input.readiness.calibration?.trustworthiness),
-      maturity: firstNumber(candidate.maturity, candidate.discovery?.maturity, candidate.lifecycle?.maturity),
+      trust: firstNumber(
+        candidate.trust,
+        candidate.trustworthiness,
+        input.readiness.calibration?.trustworthiness,
+      ),
+      maturity: firstNumber(
+        candidate.maturity,
+        candidate.discovery?.maturity,
+        candidate.lifecycle?.maturity,
+      ),
       value: expectedValue,
       abandoned: normalized(candidate.signalStatus).includes("blocked"),
-      falseDiscovery: normalized(candidate.signalStatus).includes("blocked") && expectedValue <= 0,
+      falseDiscovery:
+        normalized(candidate.signalStatus).includes("blocked") &&
+        expectedValue <= 0,
       converted: expectedValue > 0 && confidence >= 60,
-      institutionalStage: candidate.institutionalStage ?? candidate.knowledgeStage,
+      institutionalStage:
+        candidate.institutionalStage ?? candidate.knowledgeStage,
     };
   });
 
   if (mapped.length) return mapped;
-  return [{
-    id: String(input.symbol || "primary-discovery"),
-    stage: input.signalConfidence >= 70 ? "CONFIRMED" : "OBSERVED",
-    confidence: input.signalConfidence,
-    trust: input.readiness.calibration?.trustworthiness,
-    maturity: input.setupQuality,
-    value: input.expectedEdgePct,
-    converted: input.expectedEdgePct > 0,
-  }];
+  return [
+    {
+      id: String(input.symbol || "primary-discovery"),
+      stage: input.signalConfidence >= 70 ? "CONFIRMED" : "OBSERVED",
+      confidence: input.signalConfidence,
+      trust: input.readiness.calibration?.trustworthiness,
+      maturity: input.setupQuality,
+      value: input.expectedEdgePct,
+      converted: input.expectedEdgePct > 0,
+    },
+  ];
 }
 
 function discoveryIntelligenceDecisionsFor(
@@ -466,22 +577,28 @@ function discoveryIntelligenceDecisionsFor(
 ) {
   const fullUtility = input.expectedEdgePct - input.riskPressure / 12;
   const actualShare = scaledShareFor(input, decision);
-  const actualUtility = decision.signalStatus === "blocked" ? 0 : fullUtility * actualShare;
+  const actualUtility =
+    decision.signalStatus === "blocked" ? 0 : fullUtility * actualShare;
 
-  return [{
-    id: discoveryIntelligenceDecisionId(input),
-    discoveryId: String(input.symbol || "primary-discovery"),
-    action: discoveryIntelligenceActionFor(input, decision),
-    expectedValue: fullUtility,
-    actualValue: actualUtility,
-    alternatives: {
-      ACT: fullUtility,
-      WAIT: Math.max(0, input.expectedEdgePct * 0.45 - input.riskPressure / 16),
-      REJECT: 0,
-      RESTRICT: fullUtility * Math.max(0.25, actualShare || 0.5),
+  return [
+    {
+      id: discoveryIntelligenceDecisionId(input),
+      discoveryId: String(input.symbol || "primary-discovery"),
+      action: discoveryIntelligenceActionFor(input, decision),
+      expectedValue: fullUtility,
+      actualValue: actualUtility,
+      alternatives: {
+        ACT: fullUtility,
+        WAIT: Math.max(
+          0,
+          input.expectedEdgePct * 0.45 - input.riskPressure / 16,
+        ),
+        REJECT: 0,
+        RESTRICT: fullUtility * Math.max(0.25, actualShare || 0.5),
+      },
+      confidence: decision.signalConfidence,
     },
-    confidence: decision.signalConfidence,
-  }];
+  ];
 }
 
 function discoveryIntelligenceOutcomesFor(
@@ -490,23 +607,60 @@ function discoveryIntelligenceOutcomesFor(
 ) {
   const fullUtility = input.expectedEdgePct - input.riskPressure / 12;
   const actualShare = scaledShareFor(input, decision);
-  const actualUtility = decision.signalStatus === "blocked" ? 0 : fullUtility * actualShare;
-  const historical = [...(input.previousTrades ?? []), ...(input.strategyHistory ?? [])]
+  const actualUtility =
+    decision.signalStatus === "blocked" ? 0 : fullUtility * actualShare;
+  const historical = [
+    ...(input.previousTrades ?? []),
+    ...(input.strategyHistory ?? []),
+  ]
     .slice(-48)
     .map((trade: any, index) => {
-      const value = firstNumber(trade?.returnPct, trade?.return_pct, trade?.profitPct, trade?.value) ?? 0;
+      const value =
+        firstNumber(
+          trade?.returnPct,
+          trade?.return_pct,
+          trade?.profitPct,
+          trade?.value,
+        ) ?? 0;
       return {
         id: `historical-discovery-outcome-${index + 1}`,
-        discoveryId: String(trade?.symbol ?? trade?.ticker ?? input.symbol ?? "historical"),
+        discoveryId: String(
+          trade?.symbol ?? trade?.ticker ?? input.symbol ?? "historical",
+        ),
         action: trade?.action ?? trade?.signalAction ?? "ACT",
         value,
         success: value > 0,
-        calibrationScore: firstNumber(trade?.calibrationScore, trade?.calibratedConfidence, decision.calibratedConfidence),
-        trustScore: firstNumber(trade?.trustScore, trade?.trustworthiness, decision.trustworthiness),
-        survivalScore: firstNumber(trade?.survivalScore, trade?.survivalConfidence, decision.survivalMemory?.survivalConfidence),
-        decisionQuality: firstNumber(trade?.decisionQuality, trade?.confidence, decision.signalConfidence),
-        governanceScore: firstNumber(trade?.governanceScore, decision.trustGovernor?.trustScore, decision.trustworthiness),
-        timestamp: firstNumber(trade?.timestamp, trade?.closedAt, trade?.date, index),
+        calibrationScore: firstNumber(
+          trade?.calibrationScore,
+          trade?.calibratedConfidence,
+          decision.calibratedConfidence,
+        ),
+        trustScore: firstNumber(
+          trade?.trustScore,
+          trade?.trustworthiness,
+          decision.trustworthiness,
+        ),
+        survivalScore: firstNumber(
+          trade?.survivalScore,
+          trade?.survivalConfidence,
+          decision.survivalMemory?.survivalConfidence,
+        ),
+        decisionQuality: firstNumber(
+          trade?.decisionQuality,
+          trade?.confidence,
+          decision.signalConfidence,
+        ),
+        governanceScore: firstNumber(
+          trade?.governanceScore,
+          decision.trustGovernor?.trustScore,
+          decision.trustworthiness,
+        ),
+        timestamp: firstNumber(
+          trade?.timestamp,
+          trade?.closedAt,
+          trade?.date,
+          index,
+        ),
       };
     });
 
@@ -521,8 +675,12 @@ function discoveryIntelligenceOutcomesFor(
       calibrationScore: decision.calibratedConfidence,
       trustScore: decision.trustworthiness,
       survivalScore: decision.survivalMemory?.survivalConfidence,
-      decisionQuality: wisdomStatusFor(input, decision) === "approved" ? decision.signalConfidence : decision.calibratedConfidence,
-      governanceScore: decision.trustGovernor?.trustScore ?? decision.trustworthiness,
+      decisionQuality:
+        wisdomStatusFor(input, decision) === "approved"
+          ? decision.signalConfidence
+          : decision.calibratedConfidence,
+      governanceScore:
+        decision.trustGovernor?.trustScore ?? decision.trustworthiness,
     },
     ...historical,
   ];
@@ -550,7 +708,8 @@ function discoveryIntelligenceRestrictionsFor(
       type: "execution gate",
       label: blocker,
       decisionId: discoveryIntelligenceDecisionIdFromDecision(decision),
-      avoidedLoss: executionQuality.score < 50 ? (50 - executionQuality.score) / 5 : 0,
+      avoidedLoss:
+        executionQuality.score < 50 ? (50 - executionQuality.score) / 5 : 0,
       missedUpside: counterfactual.cautionCostScore / 20,
     });
   }
@@ -578,7 +737,9 @@ function discoveryIntelligenceTracesFor(
     {
       id: "current-survival",
       metric: "survival",
-      value: decision.survivalMemory?.survivalConfidence ?? input.readiness.readinessScore,
+      value:
+        decision.survivalMemory?.survivalConfidence ??
+        input.readiness.readinessScore,
     },
     {
       id: "current-decision-quality",
@@ -598,26 +759,31 @@ function discoveryIntelligenceTracesFor(
         input.readiness.robustnessDiagnostics?.regimeCoverageScore,
       ),
     },
-    ...[...(input.previousTrades ?? []), ...(input.strategyHistory ?? [])].slice(-24).flatMap((trade: any, index) => [
-      {
-        id: `history-${index + 1}:calibration`,
-        metric: "calibration",
-        value: firstNumber(trade?.calibrationScore, trade?.calibratedConfidence),
-        timestamp: firstNumber(trade?.timestamp, trade?.closedAt, index),
-      },
-      {
-        id: `history-${index + 1}:trust`,
-        metric: "trust",
-        value: firstNumber(trade?.trustScore, trade?.trustworthiness),
-        timestamp: firstNumber(trade?.timestamp, trade?.closedAt, index),
-      },
-      {
-        id: `history-${index + 1}:decision-quality`,
-        metric: "decision quality",
-        value: firstNumber(trade?.decisionQuality, trade?.confidence),
-        timestamp: firstNumber(trade?.timestamp, trade?.closedAt, index),
-      },
-    ]),
+    ...[...(input.previousTrades ?? []), ...(input.strategyHistory ?? [])]
+      .slice(-24)
+      .flatMap((trade: any, index) => [
+        {
+          id: `history-${index + 1}:calibration`,
+          metric: "calibration",
+          value: firstNumber(
+            trade?.calibrationScore,
+            trade?.calibratedConfidence,
+          ),
+          timestamp: firstNumber(trade?.timestamp, trade?.closedAt, index),
+        },
+        {
+          id: `history-${index + 1}:trust`,
+          metric: "trust",
+          value: firstNumber(trade?.trustScore, trade?.trustworthiness),
+          timestamp: firstNumber(trade?.timestamp, trade?.closedAt, index),
+        },
+        {
+          id: `history-${index + 1}:decision-quality`,
+          metric: "decision quality",
+          value: firstNumber(trade?.decisionQuality, trade?.confidence),
+          timestamp: firstNumber(trade?.timestamp, trade?.closedAt, index),
+        },
+      ]),
   ];
 }
 
@@ -627,7 +793,8 @@ function discoveryIntelligenceActionFor(
 ) {
   if (decision.signalStatus === "blocked") return "REJECT";
   if (decision.signalStatus === "watch") return "WAIT";
-  if (decision.suggestedExposure < input.rawSuggestedExposurePct) return "RESTRICT";
+  if (decision.suggestedExposure < input.rawSuggestedExposurePct)
+    return "RESTRICT";
   return "ACT";
 }
 
@@ -641,64 +808,111 @@ function discoveryIntelligenceDecisionIdFromDecision(
   return `discovery-intelligence:${normalized((decision as any).market)}:${normalized((decision as any).symbol) || "primary"}`;
 }
 
-function restrictionLearningFor(decision: StockExecutiveArchitectureInput["decision"]) {
+function restrictionLearningFor(
+  decision: StockExecutiveArchitectureInput["decision"],
+) {
   if (!decision.rejectionReason) return [];
-  return [{
-    reason: decision.rejectionReason,
-    avoidedLossScore: decision.signalStatus === "blocked" ? 70 : 35,
-    blockedUpsideScore: decision.signalStatus === "watch" ? 45 : 15,
-  }];
+  return [
+    {
+      reason: decision.rejectionReason,
+      avoidedLossScore: decision.signalStatus === "blocked" ? 70 : 35,
+      blockedUpsideScore: decision.signalStatus === "watch" ? 45 : 15,
+    },
+  ];
 }
 
 function primaryOpportunity(input: StrategySignalInput) {
   const symbol = normalized(input.symbol);
-  return (input.opportunityCandidates ?? []).find((candidate: any) => normalized(candidate.symbol ?? candidate.ticker) === symbol) ??
+  return (
+    (input.opportunityCandidates ?? []).find(
+      (candidate: any) =>
+        normalized(candidate.symbol ?? candidate.ticker) === symbol,
+    ) ??
     input.opportunityCandidates?.[0] ??
-    null;
+    null
+  );
 }
 
 function slippageRiskFor(input: StrategySignalInput) {
-  const spreadPct = firstNumber((input as any).spreadPct, (input as any).estimatedSpreadPct);
+  const spreadPct = firstNumber(
+    (input as any).spreadPct,
+    (input as any).estimatedSpreadPct,
+  );
   if (spreadPct != null) return clamp(spreadPct * 12);
-  return clamp((100 - (input.liquidityScore ?? 55)) * 0.5 + input.volatilityPct * 4);
+  return clamp(
+    (100 - (input.liquidityScore ?? 55)) * 0.5 + input.volatilityPct * 4,
+  );
 }
 
 function volatilityRiskFor(volatilityPct: number) {
   return clamp(volatilityPct * 8);
 }
 
-function timingUrgencyFor(input: StrategySignalInput, decision: StockExecutiveArchitectureInput["decision"]) {
-  return clamp(input.signalConfidence * 0.45 + Math.max(0, input.expectedEdgePct) * 4 + (100 - input.riskPressure) * 0.2 + (decision.suggestedExposure > 0 ? 12 : 0));
+function timingUrgencyFor(
+  input: StrategySignalInput,
+  decision: StockExecutiveArchitectureInput["decision"],
+) {
+  return clamp(
+    input.signalConfidence * 0.45 +
+      Math.max(0, input.expectedEdgePct) * 4 +
+      (100 - input.riskPressure) * 0.2 +
+      (decision.suggestedExposure > 0 ? 12 : 0),
+  );
 }
 
-function scalingQualityFor(input: StrategySignalInput, decision: StockExecutiveArchitectureInput["decision"]) {
-  if (decision.suggestedExposure <= 0) return decision.signalStatus === "blocked" ? 25 : 45;
+function scalingQualityFor(
+  input: StrategySignalInput,
+  decision: StockExecutiveArchitectureInput["decision"],
+) {
+  if (decision.suggestedExposure <= 0)
+    return decision.signalStatus === "blocked" ? 25 : 45;
   const target = Math.max(1, input.readiness.maxPositionPct);
   return clamp(100 - Math.abs(target - decision.suggestedExposure) * 4);
 }
 
-function invalidationClarityFor(decision: StockExecutiveArchitectureInput["decision"]) {
-  const hasJudgement = Boolean(decision.judgement?.warnings?.length || decision.judgement?.reasons?.length);
+function invalidationClarityFor(
+  decision: StockExecutiveArchitectureInput["decision"],
+) {
+  const hasJudgement = Boolean(
+    decision.judgement?.warnings?.length || decision.judgement?.reasons?.length,
+  );
   const hasSizingReasons = decision.sizingReasons.length > 0;
   const hasRejection = Boolean(decision.rejectionReason);
-  return clamp((hasJudgement ? 35 : 0) + (hasSizingReasons ? 35 : 0) + (hasRejection ? 20 : 10));
+  return clamp(
+    (hasJudgement ? 35 : 0) +
+      (hasSizingReasons ? 35 : 0) +
+      (hasRejection ? 20 : 10),
+  );
 }
 
 function staleDataRiskFor(input: StrategySignalInput) {
-  const attemptedAt = firstNumber((input as any).quoteLastAttemptedAt, (input as any).lastUpdatedAt);
+  const attemptedAt = firstNumber(
+    (input as any).quoteLastAttemptedAt,
+    (input as any).lastUpdatedAt,
+  );
   if (attemptedAt == null) return 25;
   const ageMinutes = Math.max(0, Date.now() - attemptedAt) / 60_000;
   return clamp(ageMinutes * 3);
 }
 
 function opportunityScoreFor(input: StrategySignalInput) {
-  return clamp(input.setupQuality * 0.5 + Math.max(0, input.expectedEdgePct) * 4 + (input.signalConfidence * 0.2));
+  return clamp(
+    input.setupQuality * 0.5 +
+      Math.max(0, input.expectedEdgePct) * 4 +
+      input.signalConfidence * 0.2,
+  );
 }
 
-function nextReviewConditionFor(input: StrategySignalInput, decision: StockExecutiveArchitectureInput["decision"]) {
-  if (decision.signalStatus === "blocked") return "Review when the blocking readiness, calibration, trust, or survival condition clears.";
-  if (decision.signalStatus === "watch") return "Review when expected edge, execution quality, or capacity improves.";
-  if (input.rawAction === "Buy") return "Review after the next quote, spread, and invalidation update.";
+function nextReviewConditionFor(
+  input: StrategySignalInput,
+  decision: StockExecutiveArchitectureInput["decision"],
+) {
+  if (decision.signalStatus === "blocked")
+    return "Review when the blocking readiness, calibration, trust, or survival condition clears.";
+  if (decision.signalStatus === "watch")
+    return "Review when expected edge, execution quality, or capacity improves.";
+  if (input.rawAction === "Buy")
+    return "Review after the next quote, spread, and invalidation update.";
   return "Review if risk pressure, edge, or exit evidence changes.";
 }
 
@@ -706,12 +920,15 @@ function wisdomRecordFor(
   input: StrategySignalInput,
   decision: StockExecutiveArchitectureInput["decision"],
 ): DecisionOutcomeRecord {
-  const fullSize = Math.max(input.rawSuggestedExposurePct, input.readiness.maxPositionPct, decision.maxPositionPct);
+  const fullSize = Math.max(
+    input.rawSuggestedExposurePct,
+    input.readiness.maxPositionPct,
+    decision.maxPositionPct,
+  );
   const actualShare = scaledShareFor(input, decision);
   const fullUtility = input.expectedEdgePct - input.riskPressure / 12;
-  const actualUtility = decision.signalStatus === "blocked"
-    ? 0
-    : fullUtility * actualShare;
+  const actualUtility =
+    decision.signalStatus === "blocked" ? 0 : fullUtility * actualShare;
 
   return {
     id: `wisdom:${normalized(input.market)}:${normalized(input.symbol) || "unknown"}`,
@@ -779,7 +996,10 @@ function wisdomRecordFor(
         expectedRisk: Math.max(0, input.riskPressure / 16),
         expectedConfidence: decision.calibratedConfidence,
         counterfactualResult: {
-          value: Math.max(0, input.expectedEdgePct * 0.45 - input.riskPressure / 16),
+          value: Math.max(
+            0,
+            input.expectedEdgePct * 0.45 - input.riskPressure / 16,
+          ),
           reward: Math.max(0, input.expectedEdgePct * 0.45),
           adverseImpact: Math.max(0, input.riskPressure / 16),
           confidence: decision.calibratedConfidence,
@@ -788,7 +1008,9 @@ function wisdomRecordFor(
     ],
     agency: input.agencyResult,
     survivalMemory: decision.survivalMemory,
-    discovery: primaryOpportunity(input)?.discovery ?? primaryOpportunity(input)?.opportunityDiscovery,
+    discovery:
+      primaryOpportunity(input)?.discovery ??
+      primaryOpportunity(input)?.opportunityDiscovery,
   };
 }
 
@@ -799,24 +1021,47 @@ function wisdomStatusFor(
   if (decision.signalStatus === "blocked") return "blocked";
   if (decision.signalStatus === "watch") return "delayed";
   if (decision.rejectionReason) return "rejected";
-  if (decision.suggestedExposure > 0 && decision.suggestedExposure < input.rawSuggestedExposurePct) return "reduced-size";
+  if (
+    decision.suggestedExposure > 0 &&
+    decision.suggestedExposure < input.rawSuggestedExposurePct
+  )
+    return "reduced-size";
   return "approved";
 }
 
 function wisdomMemoryFor(input: StrategySignalInput): DecisionOutcomeRecord[] {
-  const trades = [...(input.previousTrades ?? []), ...(input.strategyHistory ?? [])].slice(-120);
+  const trades = [
+    ...(input.previousTrades ?? []),
+    ...(input.strategyHistory ?? []),
+  ].slice(-120);
   return trades.map((trade: any, index) => {
-    const value = firstNumber(trade?.returnPct, trade?.return_pct, trade?.profitPct, trade?.value) ?? 0;
-    const adverseImpact = Math.abs(firstNumber(trade?.maxDrawdown, trade?.maxDrawdownPct, trade?.adverseImpact, trade?.risk) ?? Math.min(0, value));
+    const value =
+      firstNumber(
+        trade?.returnPct,
+        trade?.return_pct,
+        trade?.profitPct,
+        trade?.value,
+      ) ?? 0;
+    const adverseImpact = Math.abs(
+      firstNumber(
+        trade?.maxDrawdown,
+        trade?.maxDrawdownPct,
+        trade?.adverseImpact,
+        trade?.risk,
+      ) ?? Math.min(0, value),
+    );
     return {
       id: `historical-outcome-${index + 1}`,
-      action: normalized(trade?.action ?? trade?.signalAction ?? "observed") || "observed",
+      action:
+        normalized(trade?.action ?? trade?.signalAction ?? "observed") ||
+        "observed",
       status: value >= 0 ? "approved" : "blocked",
       realizedResult: {
         value,
         reward: Math.max(0, value),
         adverseImpact,
-        confidence: firstNumber(trade?.confidence, trade?.signalConfidence) ?? 50,
+        confidence:
+          firstNumber(trade?.confidence, trade?.signalConfidence) ?? 50,
       },
       alternatives: [
         {
@@ -834,31 +1079,101 @@ function wisdomMemoryFor(input: StrategySignalInput): DecisionOutcomeRecord[] {
 }
 
 function wisdomDiscoveriesFor(input: StrategySignalInput) {
-  return (input.opportunityCandidates ?? []).slice(0, 24).map((candidate: any, index) => ({
-    id: String(candidate.symbol ?? candidate.id ?? index),
-    status: candidate.lifecycle?.status ?? candidate.discovery?.status ?? candidate.status,
-    detectedAt: candidate.detectedAt ?? candidate.createdAt,
-    confirmationCount: firstNumber(candidate.confirmationCount, candidate.discovery?.confirmationCount, candidate.confirmations),
-    recurrenceCount: firstNumber(candidate.recurrenceCount, candidate.lifecycle?.recurrenceCount, candidate.recurrence),
-    observationCount: firstNumber(candidate.observationCount, candidate.lifecycle?.observationCount, candidate.samples),
-    conversionCount: firstNumber(candidate.conversionCount, candidate.lifecycle?.conversionCount, 1),
-    successCount: firstNumber(candidate.successCount, Number(candidate.expectedMove ?? candidate.returnPct ?? candidate.score ?? 0) > 0 ? 1 : 0),
-    novelty: firstNumber(candidate.novelty, candidate.discovery?.novelty),
-    maturityScore: firstNumber(candidate.maturity, candidate.discovery?.maturity, candidate.lifecycle?.maturity),
-  }));
+  return (input.opportunityCandidates ?? [])
+    .slice(0, 24)
+    .map((candidate: any, index) => ({
+      id: String(candidate.symbol ?? candidate.id ?? index),
+      status:
+        candidate.lifecycle?.status ??
+        candidate.discovery?.status ??
+        candidate.status,
+      detectedAt: candidate.detectedAt ?? candidate.createdAt,
+      confirmationCount: firstNumber(
+        candidate.confirmationCount,
+        candidate.discovery?.confirmationCount,
+        candidate.confirmations,
+      ),
+      recurrenceCount: firstNumber(
+        candidate.recurrenceCount,
+        candidate.lifecycle?.recurrenceCount,
+        candidate.recurrence,
+      ),
+      observationCount: firstNumber(
+        candidate.observationCount,
+        candidate.lifecycle?.observationCount,
+        candidate.samples,
+      ),
+      conversionCount: firstNumber(
+        candidate.conversionCount,
+        candidate.lifecycle?.conversionCount,
+        1,
+      ),
+      successCount: firstNumber(
+        candidate.successCount,
+        Number(
+          candidate.expectedMove ?? candidate.returnPct ?? candidate.score ?? 0,
+        ) > 0
+          ? 1
+          : 0,
+      ),
+      novelty: firstNumber(candidate.novelty, candidate.discovery?.novelty),
+      maturityScore: firstNumber(
+        candidate.maturity,
+        candidate.discovery?.maturity,
+        candidate.lifecycle?.maturity,
+      ),
+    }));
 }
 
 function wisdomPortfolioOpportunities(input: StrategySignalInput) {
-  return (input.opportunityCandidates ?? []).slice(0, 24).map((candidate: any, index) => ({
-    id: String(candidate.symbol ?? candidate.ticker ?? candidate.id ?? `candidate-${index + 1}`),
-    expectedValue: firstNumber(candidate.expectedMove, candidate.returnPct, candidate.score, candidate.candidateScore) ?? 0,
-    expectedRisk: firstNumber(candidate.riskPressure, candidate.risk, input.riskPressure) ?? 0,
-    allocation: firstNumber(candidate.suggestedExposure, candidate.allocation, 0) ?? 0,
-    group: String(candidate.sector ?? candidate.group ?? candidate.market ?? "ungrouped"),
-    upside: Math.max(0, firstNumber(candidate.expectedMove, candidate.returnPct, candidate.score) ?? 0),
-    downside: firstNumber(candidate.riskPressure, candidate.risk, input.riskPressure) ?? 0,
-    confidence: firstNumber(candidate.confidence, candidate.candidateScore, input.signalConfidence) ?? 50,
-  }));
+  return (input.opportunityCandidates ?? [])
+    .slice(0, 24)
+    .map((candidate: any, index) => ({
+      id: String(
+        candidate.symbol ??
+          candidate.ticker ??
+          candidate.id ??
+          `candidate-${index + 1}`,
+      ),
+      expectedValue:
+        firstNumber(
+          candidate.expectedMove,
+          candidate.returnPct,
+          candidate.score,
+          candidate.candidateScore,
+        ) ?? 0,
+      expectedRisk:
+        firstNumber(
+          candidate.riskPressure,
+          candidate.risk,
+          input.riskPressure,
+        ) ?? 0,
+      allocation:
+        firstNumber(candidate.suggestedExposure, candidate.allocation, 0) ?? 0,
+      group: String(
+        candidate.sector ?? candidate.group ?? candidate.market ?? "ungrouped",
+      ),
+      upside: Math.max(
+        0,
+        firstNumber(
+          candidate.expectedMove,
+          candidate.returnPct,
+          candidate.score,
+        ) ?? 0,
+      ),
+      downside:
+        firstNumber(
+          candidate.riskPressure,
+          candidate.risk,
+          input.riskPressure,
+        ) ?? 0,
+      confidence:
+        firstNumber(
+          candidate.confidence,
+          candidate.candidateScore,
+          input.signalConfidence,
+        ) ?? 50,
+    }));
 }
 
 function wisdomAllocationsFor(
@@ -866,11 +1181,18 @@ function wisdomAllocationsFor(
   decision: StockExecutiveArchitectureInput["decision"],
 ) {
   const symbol = String(input.symbol ?? "primary");
-  const allocations: Record<string, number> = { [symbol]: Math.max(0, decision.suggestedExposure) };
+  const allocations: Record<string, number> = {
+    [symbol]: Math.max(0, decision.suggestedExposure),
+  };
   for (const candidate of input.opportunityCandidates ?? []) {
-    const id = String(candidate.symbol ?? candidate.ticker ?? candidate.id ?? "");
+    const id = String(
+      candidate.symbol ?? candidate.ticker ?? candidate.id ?? "",
+    );
     if (id && allocations[id] == null) {
-      allocations[id] = Math.max(0, firstNumber(candidate.suggestedExposure, candidate.allocation, 0) ?? 0);
+      allocations[id] = Math.max(
+        0,
+        firstNumber(candidate.suggestedExposure, candidate.allocation, 0) ?? 0,
+      );
     }
   }
   return allocations;
@@ -880,7 +1202,13 @@ function scaledShareFor(
   input: StrategySignalInput,
   decision: StockExecutiveArchitectureInput["decision"],
 ) {
-  const raw = Math.max(1, input.rawSuggestedExposurePct || input.readiness.maxPositionPct || decision.maxPositionPct || 1);
+  const raw = Math.max(
+    1,
+    input.rawSuggestedExposurePct ||
+      input.readiness.maxPositionPct ||
+      decision.maxPositionPct ||
+      1,
+  );
   return clamp(decision.suggestedExposure / raw, 0, 1);
 }
 
@@ -912,5 +1240,7 @@ function clamp(value: number, min = 0, max = 100) {
 }
 
 function normalized(value: unknown) {
-  return String(value ?? "").trim().toLowerCase();
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
 }

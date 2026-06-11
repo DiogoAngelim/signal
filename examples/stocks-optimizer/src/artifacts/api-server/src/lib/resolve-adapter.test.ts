@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  type StockResolveSignal,
   applyStockResolveDiagnostics,
   mapStockSignalToResolveInput,
   recognitionClearsDiscoveryReview,
-  type StockResolveSignal,
 } from "./resolve-adapter";
 
 describe("stocks Resolve adapter", () => {
@@ -35,8 +35,16 @@ describe("stocks Resolve adapter", () => {
     assert.equal(input.similarSamples, 24);
     assert.equal(input.positiveOutcomes, 20);
     assert.equal(input.negativeOutcomes, 4);
-    assert.ok((input.evidence?.missingEvidence as string[]).includes("Broader opportunity density across independent candidates"));
-    assert.ok((input.evidence?.unlockConditions as string[]).includes("Increase opportunity density above the app review threshold."));
+    assert.ok(
+      (input.evidence?.missingEvidence as string[]).includes(
+        "Broader opportunity density across independent candidates",
+      ),
+    );
+    assert.ok(
+      (input.evidence?.unlockConditions as string[]).includes(
+        "Increase opportunity density above the app review threshold.",
+      ),
+    );
   });
 
   it("falls back through summary, readiness, and alternate reliability sources", () => {
@@ -148,8 +156,16 @@ describe("stocks Resolve adapter", () => {
       opportunityDiscovery: { density: { confidence: 44 } },
     });
 
-    assert.ok(futureDensity.signals[0]?.resolve.missingEvidence.includes("Broader opportunity density across independent candidates"));
-    assert.ok(confidenceDensity.signals[0]?.resolve.missingEvidence.includes("Broader opportunity density across independent candidates"));
+    assert.ok(
+      futureDensity.signals[0]?.resolve.missingEvidence.includes(
+        "Broader opportunity density across independent candidates",
+      ),
+    );
+    assert.ok(
+      confidenceDensity.signals[0]?.resolve.missingEvidence.includes(
+        "Broader opportunity density across independent candidates",
+      ),
+    );
   });
 
   it("enriches Resolve missing evidence and invalidation conditions from generic Discovery", () => {
@@ -220,18 +236,33 @@ describe("stocks Resolve adapter", () => {
           },
           missingEvidence: ["independent confirmation"],
           invalidationConditions: ["Discovery invalidates if support fails."],
-          recommendedNextStep: "Resolve missing evidence: independent confirmation.",
+          recommendedNextStep:
+            "Resolve missing evidence: independent confirmation.",
           traces: [],
-          metadata: { module: "discovery", version: "v1", createdAt: "1970-01-01T00:00:00.000Z" },
+          metadata: {
+            module: "discovery",
+            version: "v1",
+            createdAt: "1970-01-01T00:00:00.000Z",
+          },
         },
       },
     });
 
     const resolve = result.signals[0]?.resolve;
     assert.ok(resolve?.missingEvidence.includes("independent confirmation"));
-    assert.ok(resolve?.missingEvidence.includes("Discovery confidence above the app review threshold"));
-    assert.ok(resolve?.unlockConditions.includes("Collect independent confirmation."));
-    assert.ok(resolve?.invalidationConditions.includes("Discovery invalidates if support fails."));
+    assert.ok(
+      resolve?.missingEvidence.includes(
+        "Discovery confidence above the app review threshold",
+      ),
+    );
+    assert.ok(
+      resolve?.unlockConditions.includes("Collect independent confirmation."),
+    );
+    assert.ok(
+      resolve?.invalidationConditions.includes(
+        "Discovery invalidates if support fails.",
+      ),
+    );
   });
 
   it("lets strong Recognition evidence clear the Discovery confidence review item", () => {
@@ -269,12 +300,37 @@ describe("stocks Resolve adapter", () => {
     });
 
     assert.equal(recognitionClearsDiscoveryReview(recognized), true);
-    assert.equal(recognitionClearsDiscoveryReview(archetypeOnlyRecognition), true);
-    assert.equal(result.signals[0]?.resolve.missingEvidence.includes("Discovery confidence above the app review threshold"), false);
-    assert.equal((input.evidence?.missingEvidence as string[]).includes("Discovery confidence above the app review threshold"), false);
-    assert.equal((summaryFallback.evidence?.missingEvidence as string[]).includes("Discovery confidence above the app review threshold"), false);
-    assert.equal(summaryFallback.evidence?.recognition, archetypeOnlyRecognition);
-    assert.ok((input.evidence?.unlockConditions as string[]).includes("Recognition recurrence evidence clears the Discovery confidence review item."));
+    assert.equal(
+      recognitionClearsDiscoveryReview(archetypeOnlyRecognition),
+      true,
+    );
+    assert.equal(
+      result.signals[0]?.resolve.missingEvidence.includes(
+        "Discovery confidence above the app review threshold",
+      ),
+      false,
+    );
+    assert.equal(
+      (input.evidence?.missingEvidence as string[]).includes(
+        "Discovery confidence above the app review threshold",
+      ),
+      false,
+    );
+    assert.equal(
+      (summaryFallback.evidence?.missingEvidence as string[]).includes(
+        "Discovery confidence above the app review threshold",
+      ),
+      false,
+    );
+    assert.equal(
+      summaryFallback.evidence?.recognition,
+      archetypeOnlyRecognition,
+    );
+    assert.ok(
+      (input.evidence?.unlockConditions as string[]).includes(
+        "Recognition recurrence evidence clears the Discovery confidence review item.",
+      ),
+    );
   });
 
   it("preserves the Discovery confidence review item when Recognition is absent or insufficient", () => {
@@ -301,9 +357,22 @@ describe("stocks Resolve adapter", () => {
     });
 
     assert.equal(recognitionClearsDiscoveryReview(null), false);
-    assert.equal(recognitionClearsDiscoveryReview(insufficient.evidence?.recognition as any), false);
-    assert.ok((absent.evidence?.missingEvidence as string[]).includes("Discovery confidence above the app review threshold"));
-    assert.ok((insufficient.evidence?.missingEvidence as string[]).includes("Discovery confidence above the app review threshold"));
+    assert.equal(
+      recognitionClearsDiscoveryReview(
+        insufficient.evidence?.recognition as any,
+      ),
+      false,
+    );
+    assert.ok(
+      (absent.evidence?.missingEvidence as string[]).includes(
+        "Discovery confidence above the app review threshold",
+      ),
+    );
+    assert.ok(
+      (insufficient.evidence?.missingEvidence as string[]).includes(
+        "Discovery confidence above the app review threshold",
+      ),
+    );
   });
 
   it("summarizes empty, rejected, invalidated, and waiting resolve decisions", () => {
@@ -387,7 +456,9 @@ describe("stocks Resolve adapter", () => {
     const resolve = result.signals[0]?.resolve;
     assert.equal(resolve?.decision, "escalate");
     assert.equal(resolve?.humanReviewRequired, true);
-    assert.ok(resolve?.missingEvidence.includes("Agency approval for this action"));
+    assert.ok(
+      resolve?.missingEvidence.includes("Agency approval for this action"),
+    );
     assert.ok(resolve?.missingEvidence.includes("Unblocked agency action"));
     assert.equal(result.resolveDiagnostics.primary?.decision, "escalate");
   });
@@ -409,33 +480,43 @@ describe("stocks Resolve adapter", () => {
   it("waits when Survival Memory shows near-ruin similar states", () => {
     const result = applyStockResolveDiagnostics({
       market: "BINANCE",
-      signals: [stockSignal({
-        survivalMemory: {
-          module: "stocks.survival-memory",
-          name: "Survival Memory",
-          status: "near_ruin",
-          recommendation: "wait",
-          recordCount: 5,
-          matchedCount: 5,
-          scarCount: 4,
-          nearRuinCount: 2,
-          averageSurvivalCost: 74,
-          recoveryBurden: 68,
-          survivalConfidence: 26,
-          currentStateSimilarity: 82,
-          exposureMultiplier: 0,
-          confidencePenalty: 56,
-          maxExposurePct: 0,
-          stateFingerprint: "venue:binance|action:buy",
-          mainWarnings: ["Similar states include near-ruin survival patterns."],
-          reasons: ["Wait because similar states had unacceptable survival cost."],
-          missingEvidence: ["Survival memory clearance"],
-          unlockConditions: ["Wait until similar states show survival cost below 35/100 and no near-ruin match."],
-          invalidationConditions: ["Invalidate if liquidity or tail pressure remains elevated in the current state."],
-          fragileMatches: [],
-          records: [],
-        },
-      })],
+      signals: [
+        stockSignal({
+          survivalMemory: {
+            module: "stocks.survival-memory",
+            name: "Survival Memory",
+            status: "near_ruin",
+            recommendation: "wait",
+            recordCount: 5,
+            matchedCount: 5,
+            scarCount: 4,
+            nearRuinCount: 2,
+            averageSurvivalCost: 74,
+            recoveryBurden: 68,
+            survivalConfidence: 26,
+            currentStateSimilarity: 82,
+            exposureMultiplier: 0,
+            confidencePenalty: 56,
+            maxExposurePct: 0,
+            stateFingerprint: "venue:binance|action:buy",
+            mainWarnings: [
+              "Similar states include near-ruin survival patterns.",
+            ],
+            reasons: [
+              "Wait because similar states had unacceptable survival cost.",
+            ],
+            missingEvidence: ["Survival memory clearance"],
+            unlockConditions: [
+              "Wait until similar states show survival cost below 35/100 and no near-ruin match.",
+            ],
+            invalidationConditions: [
+              "Invalidate if liquidity or tail pressure remains elevated in the current state.",
+            ],
+            fragileMatches: [],
+            records: [],
+          },
+        }),
+      ],
       summary: stockSummary(),
       agencyDiagnostics: agencyDiagnostics("act", 86),
       opportunityDiscovery: { density: { density: 82 } },
@@ -444,7 +525,11 @@ describe("stocks Resolve adapter", () => {
     const resolve = result.signals[0]?.resolve;
     assert.equal(resolve?.decision, "wait");
     assert.ok(resolve?.missingEvidence.includes("Survival memory clearance"));
-    assert.ok(resolve?.unlockConditions.some((condition) => condition.includes("survival cost below 35/100")));
+    assert.ok(
+      resolve?.unlockConditions.some((condition) =>
+        condition.includes("survival cost below 35/100"),
+      ),
+    );
     assert.ok(resolve?.explanation.includes("Resolve waits"));
   });
 
@@ -501,17 +586,40 @@ describe("stocks Resolve adapter", () => {
       agencyDiagnostics: agencyDiagnostics("act", 86),
     });
 
-    assert.ok((wait.evidence?.unlockConditions as string[]).includes("Wait until similar states show acceptable survival cost before opening exposure."));
-    assert.ok((wait.evidence?.invalidationConditions as string[]).includes("Invalidate if similar states repeat unacceptable adverse excursion."));
+    assert.ok(
+      (wait.evidence?.unlockConditions as string[]).includes(
+        "Wait until similar states show acceptable survival cost before opening exposure.",
+      ),
+    );
+    assert.ok(
+      (wait.evidence?.invalidationConditions as string[]).includes(
+        "Invalidate if similar states repeat unacceptable adverse excursion.",
+      ),
+    );
     assert.equal(wait.maxTrustedExposure, 0.6);
-    assert.ok((reduced.evidence?.missingEvidence as string[]).includes("Reduced-size survival review"));
-    assert.ok((reduced.evidence?.unlockConditions as string[]).includes("Restore normal sizing only after survival confidence improves."));
-    assert.ok((recognizedReduced.evidence?.unlockConditions as string[]).some((condition) =>
-      condition.includes("reduced-size outcomes with acceptable drawdown and stress cost"),
-    ));
-    assert.ok((recognizedReduced.evidence?.invalidationConditions as string[]).includes(
-      "Do not restore normal sizing from Recognition state recurrence alone if survival-cost outcome linkage remains missing.",
-    ));
+    assert.ok(
+      (reduced.evidence?.missingEvidence as string[]).includes(
+        "Reduced-size survival review",
+      ),
+    );
+    assert.ok(
+      (reduced.evidence?.unlockConditions as string[]).includes(
+        "Restore normal sizing only after survival confidence improves.",
+      ),
+    );
+    assert.ok(
+      (recognizedReduced.evidence?.unlockConditions as string[]).some(
+        (condition) =>
+          condition.includes(
+            "reduced-size outcomes with acceptable drawdown and stress cost",
+          ),
+      ),
+    );
+    assert.ok(
+      (recognizedReduced.evidence?.invalidationConditions as string[]).includes(
+        "Do not restore normal sizing from Recognition state recurrence alone if survival-cost outcome linkage remains missing.",
+      ),
+    );
     assert.equal(reduced.maxTrustedExposure, 1.2);
     assert.equal(survivalOnly.maxTrustedExposure, 0.4);
   });
@@ -521,14 +629,20 @@ describe("stocks Resolve adapter", () => {
       market: "BINANCE",
       signals: [stockSignal()],
       summary: stockSummary({
-        strategyReadiness: readiness({ components: { dataReliability: { score: 35, passed: false } } }),
+        strategyReadiness: readiness({
+          components: { dataReliability: { score: 35, passed: false } },
+        }),
       }),
       agencyDiagnostics: agencyDiagnostics("act", 86),
       opportunityDiscovery: { density: { density: 82 } },
     });
 
     assert.equal(result.signals[0]?.resolve.decision, "escalate");
-    assert.ok(result.signals[0]?.resolve.unlockConditions.includes("Restore data reliability to at least 70/100."));
+    assert.ok(
+      result.signals[0]?.resolve.unlockConditions.includes(
+        "Restore data reliability to at least 70/100.",
+      ),
+    );
   });
 
   it("escalates high overfit risk even when trust is otherwise strong", () => {
@@ -541,7 +655,11 @@ describe("stocks Resolve adapter", () => {
     });
 
     assert.equal(result.signals[0]?.resolve.decision, "escalate");
-    assert.ok(result.signals[0]?.resolve.unlockConditions.includes("Reduce overfit risk to 35/100 or lower."));
+    assert.ok(
+      result.signals[0]?.resolve.unlockConditions.includes(
+        "Reduce overfit risk to 35/100 or lower.",
+      ),
+    );
   });
 
   it("keeps limited live readiness review-gated until approval and sizing are available", () => {
@@ -551,7 +669,11 @@ describe("stocks Resolve adapter", () => {
         stockSignal({
           allocationAction: "Blocked",
           suggestedExposure: 0,
-          trustGovernor: trustGovernor({ maxExposure: 0, participationMode: "paper", requiresReview: true }),
+          trustGovernor: trustGovernor({
+            maxExposure: 0,
+            participationMode: "paper",
+            requiresReview: true,
+          }),
           agency: agencyAudit({
             allowed: false,
             requiresApproval: true,
@@ -561,8 +683,15 @@ describe("stocks Resolve adapter", () => {
         }),
       ],
       summary: stockSummary({
-        trustGovernor: trustGovernor({ maxExposure: 0, participationMode: "paper", requiresReview: true }),
-        strategyReadiness: readiness({ stage: "Limited live", maxPositionPct: 0 }),
+        trustGovernor: trustGovernor({
+          maxExposure: 0,
+          participationMode: "paper",
+          requiresReview: true,
+        }),
+        strategyReadiness: readiness({
+          stage: "Limited live",
+          maxPositionPct: 0,
+        }),
       }),
       agencyDiagnostics: agencyDiagnostics("requires_human_review", 72),
       opportunityDiscovery: { density: { density: 82 } },
@@ -577,7 +706,12 @@ describe("stocks Resolve adapter", () => {
 
   it("annotates signals without changing buy, watch, or sell list decisions", () => {
     const source = [
-      stockSignal({ symbol: "BUY", ticker: "BUY", allocationAction: "Buy", signalAction: "Buy" }),
+      stockSignal({
+        symbol: "BUY",
+        ticker: "BUY",
+        allocationAction: "Buy",
+        signalAction: "Buy",
+      }),
       stockSignal({
         symbol: "WATCH",
         ticker: "WATCH",
@@ -605,13 +739,25 @@ describe("stocks Resolve adapter", () => {
       opportunityDiscovery: { density: { density: 82 } },
     });
 
-    assert.deepEqual(result.signals.map((signal) => signal.allocationAction), ["Buy", "Watch", "Sell"]);
-    assert.deepEqual(result.signals.map((signal) => signal.signalAction), ["Buy", "Hold", "Sell"]);
-    assert.ok(result.signals.every((signal) => signal.resolve.metadata.module === "resolve"));
+    assert.deepEqual(
+      result.signals.map((signal) => signal.allocationAction),
+      ["Buy", "Watch", "Sell"],
+    );
+    assert.deepEqual(
+      result.signals.map((signal) => signal.signalAction),
+      ["Buy", "Hold", "Sell"],
+    );
+    assert.ok(
+      result.signals.every(
+        (signal) => signal.resolve.metadata.module === "resolve",
+      ),
+    );
   });
 });
 
-function stockSignal(overrides: Partial<StockResolveSignal> = {}): StockResolveSignal {
+function stockSignal(
+  overrides: Partial<StockResolveSignal> = {},
+): StockResolveSignal {
   return {
     symbol: "AAA",
     ticker: "AAA",
@@ -767,11 +913,19 @@ function survivalMemory(overrides: Record<string, unknown> = {}) {
     confidencePenalty: 36,
     maxExposurePct: 1.2,
     stateFingerprint: "venue:binance|action:buy",
-    mainWarnings: ["Similar states were profitable but carried unacceptable drawdown or stress."],
-    reasons: ["Cap exposure to 40% of the normal limit before opportunity sizing expands it."],
+    mainWarnings: [
+      "Similar states were profitable but carried unacceptable drawdown or stress.",
+    ],
+    reasons: [
+      "Cap exposure to 40% of the normal limit before opportunity sizing expands it.",
+    ],
     missingEvidence: ["Reduced-size survival review"],
-    unlockConditions: ["Raise survival confidence above 70/100 before normal sizing is restored."],
-    invalidationConditions: ["Invalidate if similar states repeat max adverse excursion above the survival boundary."],
+    unlockConditions: [
+      "Raise survival confidence above 70/100 before normal sizing is restored.",
+    ],
+    invalidationConditions: [
+      "Invalidate if similar states repeat max adverse excursion above the survival boundary.",
+    ],
     fragileMatches: [],
     records: [],
     ...overrides,
@@ -857,7 +1011,11 @@ function lowConfidenceDiscovery() {
     invalidationConditions: ["Discovery invalidates if support fails."],
     recommendedNextStep: "Resolve missing evidence: similar closed outcomes.",
     traces: [],
-    metadata: { module: "discovery", version: "v1", createdAt: "1970-01-01T00:00:00.000Z" },
+    metadata: {
+      module: "discovery",
+      version: "v1",
+      createdAt: "1970-01-01T00:00:00.000Z",
+    },
   };
 }
 
@@ -879,6 +1037,10 @@ function strongRecognition() {
     reason: "Recurring stable state.",
     missingEvidence: [],
     invalidationConditions: ["Invalidate if recurrence disappears."],
-    metadata: { module: "recognition" as const, version: "v1" as const, createdAt: "1970-01-01T00:00:00.000Z" },
+    metadata: {
+      module: "recognition" as const,
+      version: "v1" as const,
+      createdAt: "1970-01-01T00:00:00.000Z",
+    },
   };
 }

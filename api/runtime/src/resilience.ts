@@ -14,15 +14,25 @@ export const DEFAULT_RETRY_POLICY: RetryPolicy = {
   maxAttempts: 3,
   backoffMs: 100,
   maxBackoffMs: 5000,
-  retryableCodes: new Set(["RETRYABLE_ERROR", "TRANSPORT_ERROR", "INTERNAL_ERROR"]),
+  retryableCodes: new Set([
+    "RETRYABLE_ERROR",
+    "TRANSPORT_ERROR",
+    "INTERNAL_ERROR",
+  ]),
 };
 
-export function isRetryable(code: string, policy: RetryPolicy = DEFAULT_RETRY_POLICY): boolean {
+export function isRetryable(
+  code: string,
+  policy: RetryPolicy = DEFAULT_RETRY_POLICY,
+): boolean {
   return policy.retryableCodes.has(code);
 }
 
-export function calculateBackoff(attempt: number, policy: RetryPolicy = DEFAULT_RETRY_POLICY): number {
-  const exponential = policy.backoffMs * Math.pow(2, attempt);
+export function calculateBackoff(
+  attempt: number,
+  policy: RetryPolicy = DEFAULT_RETRY_POLICY,
+): number {
+  const exponential = policy.backoffMs * 2 ** attempt;
   return Math.min(exponential, policy.maxBackoffMs);
 }
 
@@ -47,7 +57,9 @@ export function createCircuitBreaker(
   };
 }
 
-export function recordFailure(breaker: CircuitBreakerState): CircuitBreakerState {
+export function recordFailure(
+  breaker: CircuitBreakerState,
+): CircuitBreakerState {
   const failureCount = breaker.failureCount + 1;
   return {
     ...breaker,
@@ -57,7 +69,9 @@ export function recordFailure(breaker: CircuitBreakerState): CircuitBreakerState
   };
 }
 
-export function recordSuccess(breaker: CircuitBreakerState): CircuitBreakerState {
+export function recordSuccess(
+  breaker: CircuitBreakerState,
+): CircuitBreakerState {
   return {
     ...breaker,
     failureCount: 0,

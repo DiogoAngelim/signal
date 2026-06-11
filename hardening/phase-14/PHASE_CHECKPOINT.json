@@ -1,7 +1,11 @@
 {
   "phase": 14,
   "status": "COMPLETE",
-  "validation": { "schemaValid": true, "filesPresent": true, "criteriaSatisfied": true },
+  "validation": {
+    "schemaValid": true,
+    "filesPresent": true,
+    "criteriaSatisfied": true
+  },
   "artifacts": [
     "hardening/phase-14/verification-schema-validation.json",
     "hardening/phase-14/verification-artifact-presence.json",

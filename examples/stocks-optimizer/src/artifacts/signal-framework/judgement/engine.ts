@@ -1,7 +1,10 @@
-
 import { clamp, mean, stdev } from "../math/statistics";
 
-export type JudgementStatus = "trusted" | "cautious" | "review_required" | "blocked";
+export type JudgementStatus =
+  | "trusted"
+  | "cautious"
+  | "review_required"
+  | "blocked";
 
 export type JudgementOutcome = {
   id?: string;
@@ -106,12 +109,29 @@ const OUTCOME_EPSILON = 0.000001;
 export function evaluateJudgement(input: JudgementInput): JudgementResult {
   const warnings: string[] = [];
   const source = input ?? ({} as JudgementInput);
-  const currentState = recordOrEmpty(source.currentState, "currentState", warnings);
-  const proposedDecision = optionalRecord(source.proposedDecision, "proposedDecision", warnings);
-  const proposedAction = optionalRecord(source.proposedAction, "proposedAction", warnings);
+  const currentState = recordOrEmpty(
+    source.currentState,
+    "currentState",
+    warnings,
+  );
+  const proposedDecision = optionalRecord(
+    source.proposedDecision,
+    "proposedDecision",
+    warnings,
+  );
+  const proposedAction = optionalRecord(
+    source.proposedAction,
+    "proposedAction",
+    warnings,
+  );
   const context = optionalRecord(source.context, "context", warnings);
   const options = optionsFromContext(context);
-  const rawConfidence = confidenceFrom(currentState, proposedDecision, proposedAction, context);
+  const rawConfidence = confidenceFrom(
+    currentState,
+    proposedDecision,
+    proposedAction,
+    context,
+  );
   const currentProfile = profileFor({
     state: currentState,
     decision: proposedDecision,
@@ -120,9 +140,15 @@ export function evaluateJudgement(input: JudgementInput): JudgementResult {
   });
   const records = collectHistoricalRecords(source, warnings);
   const similar = records
-    .map((record) => ({ ...record, similarity: similarityBetween(currentProfile, record.profile) }))
+    .map((record) => ({
+      ...record,
+      similarity: similarityBetween(currentProfile, record.profile),
+    }))
     .filter((record) => record.similarity >= options.similarityThreshold)
-    .sort((left, right) => right.similarity - left.similarity || left.index - right.index);
+    .sort(
+      (left, right) =>
+        right.similarity - left.similarity || left.index - right.index,
+    );
   const outcomes = similar
     .map((record) => record.outcome)
     .filter((value): value is number => Number.isFinite(value));
@@ -130,7 +156,11 @@ export function evaluateJudgement(input: JudgementInput): JudgementResult {
   const evidence = evidenceFrom(similar.length, outcomes);
   const expectedOutcome = outcomes.length ? evidence.averageOutcome : undefined;
   const expectedScore = expectedScoreFromEvidence(evidence);
-  const calibrationGap = calibrationGapFor(rawConfidence, expectedScore, similar);
+  const calibrationGap = calibrationGapFor(
+    rawConfidence,
+    expectedScore,
+    similar,
+  );
   const calibration = roundScore(100 - calibrationGap * 1.15);
   const outcomeStability = stabilityFor(outcomes, evidence.consistency ?? 0);
   const overfitRisk = overfitRiskFor({
@@ -230,22 +260,50 @@ export function evaluateJudgement(input: JudgementInput): JudgementResult {
 export const judge = evaluateJudgement;
 export const judgeDecision = evaluateJudgement;
 
-function collectHistoricalRecords(input: JudgementInput, warnings: string[]): HistoricalRecord[] {
-  const outcomes = arrayOrEmpty(input?.historicalOutcomes, "historicalOutcomes", warnings);
+function collectHistoricalRecords(
+  input: JudgementInput,
+  warnings: string[],
+): HistoricalRecord[] {
+  const outcomes = arrayOrEmpty(
+    input?.historicalOutcomes,
+    "historicalOutcomes",
+    warnings,
+  );
   const traces = arrayOrEmpty(input?.traces, "traces", warnings);
-  const outcomeRecords = outcomes.map((outcome, index) => recordFromOutcome(outcome, index));
-  const traceRecords = traces.map((trace, index) => recordFromTrace(trace, outcomes.length + index));
-  return [...outcomeRecords, ...traceRecords].filter((record) => record.profile.size > 0);
+  const outcomeRecords = outcomes.map((outcome, index) =>
+    recordFromOutcome(outcome, index),
+  );
+  const traceRecords = traces.map((trace, index) =>
+    recordFromTrace(trace, outcomes.length + index),
+  );
+  return [...outcomeRecords, ...traceRecords].filter(
+    (record) => record.profile.size > 0,
+  );
 }
 
-function recordFromOutcome(outcome: JudgementOutcome, index: number): HistoricalRecord {
+function recordFromOutcome(
+  outcome: JudgementOutcome,
+  index: number,
+): HistoricalRecord {
   const metadata = optionalPlainRecord(outcome?.metadata);
   return {
     index,
     profile: profileFor({
-      state: firstRecord(outcome?.state, outcome?.currentState, metadata?.state),
-      decision: firstRecord(outcome?.decision, outcome?.proposedDecision, metadata?.decision),
-      action: firstRecord(outcome?.action, outcome?.proposedAction, metadata?.action),
+      state: firstRecord(
+        outcome?.state,
+        outcome?.currentState,
+        metadata?.state,
+      ),
+      decision: firstRecord(
+        outcome?.decision,
+        outcome?.proposedDecision,
+        metadata?.decision,
+      ),
+      action: firstRecord(
+        outcome?.action,
+        outcome?.proposedAction,
+        metadata?.action,
+      ),
       context: firstRecord(outcome?.context, metadata?.context),
     }),
     outcome: outcomeValueFor(outcome),
@@ -253,14 +311,30 @@ function recordFromOutcome(outcome: JudgementOutcome, index: number): Historical
   };
 }
 
-function recordFromTrace(trace: JudgementTrace, index: number): HistoricalRecord {
+function recordFromTrace(
+  trace: JudgementTrace,
+  index: number,
+): HistoricalRecord {
   const metadata = optionalPlainRecord(trace?.metadata);
   return {
     index,
     profile: profileFor({
-      state: firstRecord(trace?.currentState, trace?.state, trace?.perception, metadata?.state),
-      decision: firstRecord(trace?.decision, trace?.proposedDecision, metadata?.decision),
-      action: firstRecord(trace?.action, trace?.proposedAction, metadata?.action),
+      state: firstRecord(
+        trace?.currentState,
+        trace?.state,
+        trace?.perception,
+        metadata?.state,
+      ),
+      decision: firstRecord(
+        trace?.decision,
+        trace?.proposedDecision,
+        metadata?.decision,
+      ),
+      action: firstRecord(
+        trace?.action,
+        trace?.proposedAction,
+        metadata?.action,
+      ),
       context: firstRecord(trace?.context, metadata?.context),
     }),
     outcome: outcomeValueFor(trace),
@@ -282,10 +356,16 @@ function profileFor(input: {
   return features;
 }
 
-function flattenInto(features: Map<string, FeatureValue>, prefix: string, value: unknown) {
+function flattenInto(
+  features: Map<string, FeatureValue>,
+  prefix: string,
+  value: unknown,
+) {
   if (!value || typeof value !== "object") return;
 
-  for (const [key, child] of Object.entries(value as Record<string, unknown>).sort(([left], [right]) => left.localeCompare(right))) {
+  for (const [key, child] of Object.entries(
+    value as Record<string, unknown>,
+  ).sort(([left], [right]) => left.localeCompare(right))) {
     const path = `${prefix}.${key}`;
     if (isPlainRecord(child)) {
       flattenInto(features, path, child);
@@ -306,7 +386,11 @@ function featureValue(value: unknown): FeatureValue | undefined {
   }
   if (Array.isArray(value)) {
     const items = value
-      .map((item) => String(item ?? "").trim().toLowerCase())
+      .map((item) =>
+        String(item ?? "")
+          .trim()
+          .toLowerCase(),
+      )
       .filter(Boolean)
       .sort();
     return items.length ? Array.from(new Set(items)) : undefined;
@@ -314,14 +398,20 @@ function featureValue(value: unknown): FeatureValue | undefined {
   return undefined;
 }
 
-function similarityBetween(current: Map<string, FeatureValue>, historical: Map<string, FeatureValue>) {
+function similarityBetween(
+  current: Map<string, FeatureValue>,
+  historical: Map<string, FeatureValue>,
+) {
   let totalWeight = 0;
   let weightedSimilarity = 0;
 
   for (const [key, currentValue] of current) {
     if (!historical.has(key)) continue;
 
-    const itemSimilarity = valueSimilarity(currentValue, historical.get(key) as FeatureValue);
+    const itemSimilarity = valueSimilarity(
+      currentValue,
+      historical.get(key) as FeatureValue,
+    );
     const weight = featureWeight(key);
     totalWeight += weight;
     weightedSimilarity += itemSimilarity * weight;
@@ -373,14 +463,29 @@ function tokens(value: string) {
   return value.split(/[^a-z0-9]+/i).filter(Boolean);
 }
 
-function evidenceFrom(similarStates: number, outcomes: number[]): JudgementResult["evidence"] {
-  const positiveOutcomes = outcomes.filter((value) => value > OUTCOME_EPSILON).length;
-  const negativeOutcomes = outcomes.filter((value) => value < -OUTCOME_EPSILON).length;
+function evidenceFrom(
+  similarStates: number,
+  outcomes: number[],
+): JudgementResult["evidence"] {
+  const positiveOutcomes = outcomes.filter(
+    (value) => value > OUTCOME_EPSILON,
+  ).length;
+  const negativeOutcomes = outcomes.filter(
+    (value) => value < -OUTCOME_EPSILON,
+  ).length;
   const neutralOutcomes = outcomes.length - positiveOutcomes - negativeOutcomes;
-  const averageOutcome = outcomes.length ? roundSigned(mean(outcomes)) : undefined;
-  const winRate = outcomes.length ? roundScore((positiveOutcomes / outcomes.length) * 100) : undefined;
+  const averageOutcome = outcomes.length
+    ? roundSigned(mean(outcomes))
+    : undefined;
+  const winRate = outcomes.length
+    ? roundScore((positiveOutcomes / outcomes.length) * 100)
+    : undefined;
   const consistency = outcomes.length
-    ? roundScore((Math.max(positiveOutcomes, negativeOutcomes, neutralOutcomes) / outcomes.length) * 100)
+    ? roundScore(
+        (Math.max(positiveOutcomes, negativeOutcomes, neutralOutcomes) /
+          outcomes.length) *
+          100,
+      )
     : undefined;
 
   return {
@@ -395,18 +500,34 @@ function evidenceFrom(similarStates: number, outcomes: number[]): JudgementResul
 }
 
 function expectedScoreFromEvidence(evidence: JudgementResult["evidence"]) {
-  const outcomeScore = evidence.averageOutcome == null ? 50 : clamp(50 + evidence.averageOutcome / 2, 0, 100);
+  const outcomeScore =
+    evidence.averageOutcome == null
+      ? 50
+      : clamp(50 + evidence.averageOutcome / 2, 0, 100);
   const winRate = evidence.winRate ?? 50;
   return roundScore(mean([outcomeScore, winRate]));
 }
 
-function calibrationGapFor(rawConfidence: number, expectedScore: number, similar: SimilarRecord[]) {
+function calibrationGapFor(
+  rawConfidence: number,
+  expectedScore: number,
+  similar: SimilarRecord[],
+) {
   const currentGap = Math.abs(rawConfidence - expectedScore);
   const historicalGaps = similar
     .filter((record) => record.confidence != null && record.outcome != null)
-    .map((record) => Math.abs((record.confidence as number) - clamp(50 + (record.outcome as number) / 2, 0, 100)));
+    .map((record) =>
+      Math.abs(
+        (record.confidence as number) -
+          clamp(50 + (record.outcome as number) / 2, 0, 100),
+      ),
+    );
 
-  return roundScore(historicalGaps.length ? mean([currentGap, mean(historicalGaps)]) : currentGap);
+  return roundScore(
+    historicalGaps.length
+      ? mean([currentGap, mean(historicalGaps)])
+      : currentGap,
+  );
 }
 
 function stabilityFor(outcomes: number[], consistency: number) {
@@ -425,11 +546,19 @@ function overfitRiskFor(input: {
   similarSampleSize: number;
   strongSampleSize: number;
 }) {
-  const sampleScore = clamp((input.similarSampleSize / input.strongSampleSize) * 100, 0, 100);
+  const sampleScore = clamp(
+    (input.similarSampleSize / input.strongSampleSize) * 100,
+    0,
+    100,
+  );
   const sampleRisk = 100 - sampleScore;
   const instabilityRisk = 100 - input.outcomeStability;
   const calibrationRisk = 100 - input.calibration;
-  const highConfidenceRisk = clamp(Math.max(0, input.rawConfidence - input.expectedScore) * 1.15, 0, 100);
+  const highConfidenceRisk = clamp(
+    Math.max(0, input.rawConfidence - input.expectedScore) * 1.15,
+    0,
+    100,
+  );
   const concentrationRisk = similarityConcentrationRisk(input.similar);
   const estimated = roundScore(
     sampleRisk * 0.28 +
@@ -440,14 +569,19 @@ function overfitRiskFor(input: {
   );
   const explicit = explicitOverfitRisk(input.context);
 
-  return explicit == null ? estimated : roundScore(Math.max(explicit, estimated * 0.5 + explicit * 0.5));
+  return explicit == null
+    ? estimated
+    : roundScore(Math.max(explicit, estimated * 0.5 + explicit * 0.5));
 }
 
 function similarityConcentrationRisk(similar: SimilarRecord[]) {
   if (similar.length < 2) return 80;
   const total = similar.reduce((sum, record) => sum + record.similarity, 0);
   if (total <= 0) return 80;
-  const topShare = similar.slice(0, 3).reduce((sum, record) => sum + record.similarity, 0) / total * 100;
+  const topShare =
+    (similar.slice(0, 3).reduce((sum, record) => sum + record.similarity, 0) /
+      total) *
+    100;
   return roundScore(clamp((topShare - 45) * 1.5, 0, 100));
 }
 
@@ -459,7 +593,11 @@ function reliabilityFor(input: {
   consistency: number;
   overfitRisk: number;
 }) {
-  const sampleScore = clamp((input.similarSampleSize / input.strongSampleSize) * 100, 0, 100);
+  const sampleScore = clamp(
+    (input.similarSampleSize / input.strongSampleSize) * 100,
+    0,
+    100,
+  );
   return roundScore(
     sampleScore * 0.28 +
       input.outcomeStability * 0.28 +
@@ -498,11 +636,14 @@ function classifyJudgement(input: {
   negativeOutcomes: number;
   winRate: number;
 }): JudgementStatus {
-  if (input.similarSampleSize < input.minimumSimilarSamples) return "review_required";
+  if (input.similarSampleSize < input.minimumSimilarSamples)
+    return "review_required";
   if (
     input.overfitRisk >= 85 ||
     (input.overfitRisk >= 75 && input.reliability < 45) ||
-    (input.rawConfidence >= 75 && input.expectedScore <= 35 && input.calibration < 50)
+    (input.rawConfidence >= 75 &&
+      input.expectedScore <= 35 &&
+      input.calibration < 50)
   ) {
     return "blocked";
   }
@@ -541,7 +682,8 @@ function adjustedConfidenceFor(input: {
 }) {
   if (input.status === "blocked") return 0;
 
-  const evidencePenalty = Math.max(0, input.rawConfidence - input.expectedScore) * 0.55;
+  const evidencePenalty =
+    Math.max(0, input.rawConfidence - input.expectedScore) * 0.55;
   let adjusted = input.rawConfidence - evidencePenalty;
 
   if (input.outcomeStability < 60) {
@@ -569,7 +711,13 @@ function adjustedConfidenceFor(input: {
     input.expectedScore > input.rawConfidence + 5;
 
   if (strongPositiveEvidence) {
-    return roundScore(Math.min(100, input.rawConfidence + Math.min(8, (input.expectedScore - input.rawConfidence) * 0.25)));
+    return roundScore(
+      Math.min(
+        100,
+        input.rawConfidence +
+          Math.min(8, (input.expectedScore - input.rawConfidence) * 0.25),
+      ),
+    );
   }
 
   return roundScore(Math.min(input.rawConfidence, Math.max(0, adjusted)));
@@ -594,26 +742,40 @@ function reasonsFor(input: {
   ];
 
   if (input.similarSampleSize < input.minimumSimilarSamples) {
-    reasons.push(`Only ${input.similarSampleSize} similar outcome(s) were usable; minimum is ${input.minimumSimilarSamples}.`);
+    reasons.push(
+      `Only ${input.similarSampleSize} similar outcome(s) were usable; minimum is ${input.minimumSimilarSamples}.`,
+    );
   } else {
-    reasons.push(`Similar outcomes show ${input.evidence.positiveOutcomes} positive, ${input.evidence.negativeOutcomes} negative, and ${input.evidence.neutralOutcomes} neutral result(s).`);
+    reasons.push(
+      `Similar outcomes show ${input.evidence.positiveOutcomes} positive, ${input.evidence.negativeOutcomes} negative, and ${input.evidence.neutralOutcomes} neutral result(s).`,
+    );
   }
 
   if ((input.evidence.winRate ?? 0) >= 70 && input.outcomeStability >= 70) {
     reasons.push("Similar historical outcomes were consistently positive.");
   }
   if (input.rawConfidence >= 75 && input.outcomeStability < 60) {
-    reasons.push("Raw confidence is high, but similar outcomes are not stable enough to trust fully.");
+    reasons.push(
+      "Raw confidence is high, but similar outcomes are not stable enough to trust fully.",
+    );
   }
   if (input.calibration < 60) {
-    reasons.push(`Calibration is weak: expected evidence score ${formatPercent(input.expectedScore)} differs from raw confidence by ${formatPercent(input.calibrationGap)}.`);
+    reasons.push(
+      `Calibration is weak: expected evidence score ${formatPercent(input.expectedScore)} differs from raw confidence by ${formatPercent(input.calibrationGap)}.`,
+    );
   }
   if (input.overfitRisk >= 65) {
-    reasons.push(`Overfit risk is elevated at ${formatPercent(input.overfitRisk)}.`);
+    reasons.push(
+      `Overfit risk is elevated at ${formatPercent(input.overfitRisk)}.`,
+    );
   }
 
-  reasons.push(`Reliability is ${formatPercent(input.reliability)} and outcome stability is ${formatPercent(input.outcomeStability)}.`);
-  reasons.push(`Status is ${input.status}; confidence adjusted from ${formatPercent(input.rawConfidence)} to ${formatPercent(input.adjustedConfidence)}.`);
+  reasons.push(
+    `Reliability is ${formatPercent(input.reliability)} and outcome stability is ${formatPercent(input.outcomeStability)}.`,
+  );
+  reasons.push(
+    `Status is ${input.status}; confidence adjusted from ${formatPercent(input.rawConfidence)} to ${formatPercent(input.adjustedConfidence)}.`,
+  );
 
   return unique(reasons);
 }
@@ -664,21 +826,47 @@ function outcomeValueFor(value: unknown): number | undefined {
     object.value,
     object.score,
     object.returnPct,
-    object.metadata && isPlainRecord(object.metadata) ? object.metadata.outcome : undefined,
+    object.metadata && isPlainRecord(object.metadata)
+      ? object.metadata.outcome
+      : undefined,
   );
 
   if (direct != null) return normalizeOutcomeNumber(direct);
 
   const nested = firstRecord(object.outcome, object.result);
-  const nestedNumber = firstNumber(nested?.value, nested?.score, nested?.returnPct, nested?.reward);
+  const nestedNumber = firstNumber(
+    nested?.value,
+    nested?.score,
+    nested?.returnPct,
+    nested?.reward,
+  );
   if (nestedNumber != null) return normalizeOutcomeNumber(nestedNumber);
 
-  const success = firstBoolean(object.success, nested?.success, nested?.correct, nested?.passed);
+  const success = firstBoolean(
+    object.success,
+    nested?.success,
+    nested?.correct,
+    nested?.passed,
+  );
   if (success != null) return success ? 100 : -100;
 
-  const label = String(nested?.label ?? nested?.outcomeLabel ?? object.outcome ?? object.result ?? "").toLowerCase();
-  if (["success", "win", "positive", "passed", "correct", "true"].includes(label)) return 100;
-  if (["failure", "loss", "negative", "failed", "incorrect", "false"].includes(label)) return -100;
+  const label = String(
+    nested?.label ??
+      nested?.outcomeLabel ??
+      object.outcome ??
+      object.result ??
+      "",
+  ).toLowerCase();
+  if (
+    ["success", "win", "positive", "passed", "correct", "true"].includes(label)
+  )
+    return 100;
+  if (
+    ["failure", "loss", "negative", "failed", "incorrect", "false"].includes(
+      label,
+    )
+  )
+    return -100;
   if (["neutral", "mixed", "partial", "flat"].includes(label)) return 0;
 
   return undefined;
@@ -686,7 +874,12 @@ function outcomeValueFor(value: unknown): number | undefined {
 
 function confidenceValueFor(value: unknown) {
   const object = isPlainRecord(value) ? value : {};
-  return firstScore(object.confidence, object.rawConfidence, object.calibratedConfidence, object.adjustedConfidence);
+  return firstScore(
+    object.confidence,
+    object.rawConfidence,
+    object.calibratedConfidence,
+    object.adjustedConfidence,
+  );
 }
 
 function confidenceFrom(
@@ -710,18 +903,32 @@ function confidenceFrom(
   ) as number;
 }
 
-function optionsFromContext(context: Record<string, unknown>): JudgementOptions {
+function optionsFromContext(
+  context: Record<string, unknown>,
+): JudgementOptions {
   return {
     minimumSimilarSamples: Math.max(
       1,
-      Math.round(firstNumber(context.minimumSimilarSamples, context.minSimilarSamples, context.minimumSamples) ?? DEFAULT_MINIMUM_SIMILAR_SAMPLES),
+      Math.round(
+        firstNumber(
+          context.minimumSimilarSamples,
+          context.minSimilarSamples,
+          context.minimumSamples,
+        ) ?? DEFAULT_MINIMUM_SIMILAR_SAMPLES,
+      ),
     ),
     strongSampleSize: Math.max(
       1,
-      Math.round(firstNumber(context.strongSampleSize, context.sufficientSamples) ?? DEFAULT_STRONG_SAMPLE_SIZE),
+      Math.round(
+        firstNumber(context.strongSampleSize, context.sufficientSamples) ??
+          DEFAULT_STRONG_SAMPLE_SIZE,
+      ),
     ),
     similarityThreshold: clamp(
-      firstNumber(context.similarityThreshold, context.judgementSimilarityThreshold) ?? DEFAULT_SIMILARITY_THRESHOLD,
+      firstNumber(
+        context.similarityThreshold,
+        context.judgementSimilarityThreshold,
+      ) ?? DEFAULT_SIMILARITY_THRESHOLD,
       0,
       1,
     ),
@@ -759,10 +966,16 @@ function filterContextForSimilarity(context: Record<string, unknown>) {
     "robustnessDiagnostics",
     "robustness",
   ]);
-  return Object.fromEntries(Object.entries(context).filter(([key]) => !ignored.has(key)));
+  return Object.fromEntries(
+    Object.entries(context).filter(([key]) => !ignored.has(key)),
+  );
 }
 
-function arrayOrEmpty<T>(value: T[] | undefined, field: string, warnings: string[]) {
+function arrayOrEmpty<T>(
+  value: T[] | undefined,
+  field: string,
+  warnings: string[],
+) {
   if (value == null) return [];
   if (Array.isArray(value)) return value;
   warnings.push(`${field} was not an array`);
@@ -824,7 +1037,12 @@ function normalizeOutcomeNumber(value: number) {
 }
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value) && !(value instanceof Date);
+  return (
+    Boolean(value) &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    !(value instanceof Date)
+  );
 }
 
 function roundScore(value: number) {
@@ -842,7 +1060,6 @@ function roundRatio(value: number) {
 function formatPercent(value: number) {
   return `${Math.round(value)}%`;
 }
-
 
 function unique(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)));

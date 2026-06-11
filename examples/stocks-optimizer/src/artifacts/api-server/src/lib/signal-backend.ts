@@ -1,16 +1,16 @@
 import { pool } from "@workspace/db";
+import { logger } from "./logger";
+import { appendLiveMarketContextOccurrences } from "./market-context-occurrences";
+import { sendSignalNotificationEmails } from "./signal-email";
 import {
+  type StockQuote,
   attachSignalsToQuotes,
   fetchMarketQuotes,
   fetchQuotes,
   listMarkets,
   loadMarketList,
   loadStockList,
-  type StockQuote,
 } from "./stock-data";
-import { appendLiveMarketContextOccurrences } from "./market-context-occurrences";
-import { logger } from "./logger";
-import { sendSignalNotificationEmails } from "./signal-email";
 
 function safeDatabasePrice(value: any) {
   const candidates = [
@@ -31,11 +31,8 @@ function safeDatabasePrice(value: any) {
     if (Number.isFinite(parsed) && parsed > 0) return parsed;
   }
 
-  
   return 0;
 }
-
-
 
 function coerceSignalSnapshotPrice(snapshot: any) {
   const candidates = [
@@ -58,8 +55,6 @@ function coerceSignalSnapshotPrice(snapshot: any) {
 
   return null;
 }
-
-
 
 function normalizedSnapshotPrice(value: any) {
   const candidates = [
@@ -84,11 +79,13 @@ function snapshotHasValidPrice(value: any) {
   return normalizedSnapshotPrice(value) !== null;
 }
 
-
-
 function shouldUseBinanceFallbackProvider(market: unknown, symbol: unknown) {
-  const marketValue = String(market ?? "").trim().toUpperCase();
-  const symbolValue = String(symbol ?? "").trim().toUpperCase();
+  const marketValue = String(market ?? "")
+    .trim()
+    .toUpperCase();
+  const symbolValue = String(symbol ?? "")
+    .trim()
+    .toUpperCase();
 
   if (process.env.ENABLE_BINANCE_FALLBACK !== "true") {
     return false;
@@ -101,8 +98,6 @@ function shouldUseBinanceFallbackProvider(market: unknown, symbol: unknown) {
   );
 }
 
-
-
 function normalizeBinanceSnapshotSymbol(symbol: string) {
   const raw = String(symbol ?? "")
     .trim()
@@ -113,17 +108,19 @@ function normalizeBinanceSnapshotSymbol(symbol: string) {
 
   if (!raw) return raw;
 
-  
-  if (raw.endsWith("USDT") || raw.endsWith("USDC") || raw.endsWith("BUSD") || raw.endsWith("FDUSD")) {
+  if (
+    raw.endsWith("USDT") ||
+    raw.endsWith("USDC") ||
+    raw.endsWith("BUSD") ||
+    raw.endsWith("FDUSD")
+  ) {
     return raw;
   }
 
-  
   if (raw.endsWith("USD")) {
     return `${raw.slice(0, -3)}USDT`;
   }
 
-  
   if (!/(USDT|USDC|BUSD|FDUSD|BTC|ETH)$/.test(raw)) {
     return `${raw}USDT`;
   }
@@ -131,10 +128,10 @@ function normalizeBinanceSnapshotSymbol(symbol: string) {
   return raw;
 }
 
-
-
 function shouldSkipLocalQuoteSymbol(symbol: string) {
-  const value = String(symbol ?? "").trim().toUpperCase();
+  const value = String(symbol ?? "")
+    .trim()
+    .toUpperCase();
 
   return (
     !value ||
@@ -144,8 +141,6 @@ function shouldSkipLocalQuoteSymbol(symbol: string) {
     value.includes("DUMMY")
   );
 }
-
-
 
 export type SignalScopeType = "market" | "exchange";
 
@@ -177,7 +172,7 @@ const REFRESH_INTERVAL_MS = Number(
 );
 const SNAPSHOT_FRESHNESS_MS = Number(
   process.env.STOCK_SIGNAL_SNAPSHOT_FRESHNESS_MS ??
-  Math.max(REFRESH_INTERVAL_MS * 2, 120_000),
+    Math.max(REFRESH_INTERVAL_MS * 2, 120_000),
 );
 const WATCH_TTL_MS = Number(
   process.env.STOCK_SIGNAL_WATCH_TTL_MS ?? 24 * 60 * 60 * 1000,
@@ -257,7 +252,6 @@ const runtimeState: Omit<
 let schemaReady: Promise<void> | null = null;
 let engineStarted = false;
 
-
 function normalizeBinanceApiSymbol(symbol: string) {
   return symbol
     .replace(/^BINANCE:/, "")
@@ -278,7 +272,10 @@ function parseBooleanEnv(
 
 function parseBootstrapScopes(value: string): SignalScope[] {
   const normalizedValue = value.trim().toLowerCase();
-  if (!normalizedValue || ["*", "all", "markets:all", "market:*"].includes(normalizedValue)) {
+  if (
+    !normalizedValue ||
+    ["*", "all", "markets:all", "market:*"].includes(normalizedValue)
+  ) {
     return discoverAllMarketScopes();
   }
 
@@ -308,10 +305,13 @@ function parseBootstrapScopes(value: string): SignalScope[] {
 
 function discoverAllMarketScopes(): SignalScope[] {
   const marketScopes = listMarkets()
-    .map((market) => ({
-      scopeType: "market",
-      scopeCode: normalizeScopeCode(market.code),
-    }) satisfies SignalScope)
+    .map(
+      (market) =>
+        ({
+          scopeType: "market",
+          scopeCode: normalizeScopeCode(market.code),
+        }) satisfies SignalScope,
+    )
     .filter((scope) => Boolean(scope.scopeCode));
 
   return marketScopes.length
@@ -792,16 +792,20 @@ async function refreshScope(
 
   const allQuotesWithSignals: StockQuote[] = [];
 
-  for (let index = 0; index < scopedSymbols.length; index += SIGNAL_REFRESH_CHUNK_SIZE) {
+  for (
+    let index = 0;
+    index < scopedSymbols.length;
+    index += SIGNAL_REFRESH_CHUNK_SIZE
+  ) {
     const chunk = scopedSymbols.slice(index, index + SIGNAL_REFRESH_CHUNK_SIZE);
     const quotes =
       scope.scopeType === "market"
         ? await fetchMarketQuotes(scope.scopeCode, chunk, {
-          bypassCache: true,
-        })
+            bypassCache: true,
+          })
         : await fetchQuotes(scope.scopeCode, chunk, {
-          bypassCache: true,
-        });
+            bypassCache: true,
+          });
     const quotesWithSignals = await attachSignalsToQuotes(
       quotes,
       scope.scopeCode,
@@ -817,7 +821,10 @@ async function refreshScope(
   return allQuotesWithSignals;
 }
 
-function filterSymbolsForScope(scope: SignalScope, symbols: string[]): string[] {
+function filterSymbolsForScope(
+  scope: SignalScope,
+  symbols: string[],
+): string[] {
   const sourceItems =
     scope.scopeType === "market"
       ? loadMarketList(scope.scopeCode)
@@ -826,7 +833,9 @@ function filterSymbolsForScope(scope: SignalScope, symbols: string[]): string[] 
     return symbols;
   }
 
-  const allowedSymbols = new Set(sourceItems.map((item) => normalizeSymbol(item.symbol)));
+  const allowedSymbols = new Set(
+    sourceItems.map((item) => normalizeSymbol(item.symbol)),
+  );
   return symbols.filter((symbol) => allowedSymbols.has(symbol));
 }
 
@@ -856,7 +865,7 @@ async function runRefreshCycle(): Promise<number> {
   for (const group of grouped.values()) {
     try {
       const updatedSignals = await refreshScope(group.scope, group.symbols);
-      
+
       if (signalBroadcast && updatedSignals.length) {
         await storeSignalEvents(group.scope, updatedSignals);
         signalBroadcast({
@@ -1076,7 +1085,7 @@ export async function storeSignalSnapshots(
     return;
   }
 
-await pool.query(
+  await pool.query(
     `
       INSERT INTO ${SNAPSHOT_TABLE} (
         scope_type,
@@ -1217,8 +1226,8 @@ export async function getSignalEvents(
     `,
     hasScope
       ? [
-          scope!.scopeType!,
-          normalizeScopeCode(scope!.scopeCode!),
+          scope?.scopeType!,
+          normalizeScopeCode(scope?.scopeCode!),
           normalizedLimit,
         ]
       : [normalizedLimit],
@@ -1267,12 +1276,16 @@ export function setSignalBroadcast(fn: (data: any) => void) {
   signalBroadcast = fn;
 }
 
-export function emitFakeFrontendSignal(data?: Partial<StockQuote> & {
-  symbol?: string;
-  name?: string;
-  ticker?: string;
-}) {
-  const symbol = normalizeSymbol(data?.symbol ?? data?.ticker ?? "BINANCE:POLBRL");
+export function emitFakeFrontendSignal(
+  data?: Partial<StockQuote> & {
+    symbol?: string;
+    name?: string;
+    ticker?: string;
+  },
+) {
+  const symbol = normalizeSymbol(
+    data?.symbol ?? data?.ticker ?? "BINANCE:POLBRL",
+  );
   const price = Number(data?.price ?? 0.47);
   const entryPrice = Number(data?.signalEntryPrice ?? 0.46);
   const now = new Date().toISOString();
@@ -1290,7 +1303,8 @@ export function emitFakeFrontendSignal(data?: Partial<StockQuote> & {
     low52: Number(data?.low52 ?? entryPrice),
     history: data?.history ?? [entryPrice, price],
     summary: data?.summary ?? "Temporary fake Buy + Rising signal.",
-    impact: data?.impact ?? "Dev-only signal emitted from the API console trigger.",
+    impact:
+      data?.impact ?? "Dev-only signal emitted from the API console trigger.",
     signalAction: data?.signalAction ?? "Buy",
     signalConfidence: Number(data?.signalConfidence ?? 88),
     signalSource: data?.signalSource ?? "heuristic",

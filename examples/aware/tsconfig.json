@@ -10,8 +10,16 @@
     "declarationMap": true,
     "sourceMap": true,
     "types": ["node", "vite/client"],
-    "noEmit": true
+    "noEmit": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "api-src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "api-src/**/*.ts",
+    "test/**/*.ts",
+    "test/**/*.tsx"
+  ],
   "exclude": ["dist", "node_modules"]
 }

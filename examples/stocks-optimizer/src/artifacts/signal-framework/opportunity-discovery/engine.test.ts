@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { discoverOpportunities } from "./engine";
 import type { DiscoveryFinding, OpportunityCandidate } from "../types";
+import { discoverOpportunities } from "./engine";
 
 const finding: DiscoveryFinding = {
   findingId: "feature:coherence",
@@ -35,9 +35,16 @@ test("discovers seeded and observed opportunity concepts deterministically", () 
       { id: "fading", values: [10, 9, 8] },
     ],
   });
-  const byId = new Map(candidates.map((candidate) => [candidate.opportunityId, candidate]));
+  const byId = new Map(
+    candidates.map((candidate) => [candidate.opportunityId, candidate]),
+  );
 
-  assert.equal(byId.get("manual:alignment")?.evidence.some((item) => item.startsWith("Explorer finding:")), true);
+  assert.equal(
+    byId
+      .get("manual:alignment")
+      ?.evidence.some((item) => item.startsWith("Explorer finding:")),
+    true,
+  );
   assert.equal(byId.get("fast:acceleration")?.type, "acceleration");
   assert.equal(byId.get("coiled:compression")?.type, "compression");
   assert.equal(byId.get("steady:persistence")?.persistent, true);
@@ -58,27 +65,51 @@ test("discovers system-level alignment, expansion, compression, divergence, and 
       },
     },
     intelligence: { contradictions: 2, transitionDetected: true },
-    needs: [{
-      needId: "wait:60",
-      category: "wait",
-      severity: 60,
-      confidence: 70,
-      explanation: "Conflicts are active.",
-      recommendations: [],
-    }],
+    needs: [
+      {
+        needId: "wait:60",
+        category: "wait",
+        severity: 60,
+        confidence: 70,
+        explanation: "Conflicts are active.",
+        recommendations: [],
+      },
+    ],
   });
 
   assert.deepEqual(
     new Set(candidates.map((candidate) => candidate.type)),
-    new Set(["alignment", "expansion", "compression", "divergence", "transition"]),
+    new Set([
+      "alignment",
+      "expansion",
+      "compression",
+      "divergence",
+      "transition",
+    ]),
   );
 });
 
 test("deduplicates by keeping the strongest candidate", () => {
   const candidates = discoverOpportunities({
     seeds: [
-      { opportunityId: "same", type: "alignment", strength: 30, confidence: 50, evidence: ["weak"], emerging: true, persistent: false },
-      { opportunityId: "same", type: "alignment", strength: 80, confidence: 50, evidence: ["strong"], emerging: true, persistent: false },
+      {
+        opportunityId: "same",
+        type: "alignment",
+        strength: 30,
+        confidence: 50,
+        evidence: ["weak"],
+        emerging: true,
+        persistent: false,
+      },
+      {
+        opportunityId: "same",
+        type: "alignment",
+        strength: 80,
+        confidence: 50,
+        evidence: ["strong"],
+        emerging: true,
+        persistent: false,
+      },
     ],
   });
 
@@ -89,7 +120,13 @@ test("deduplicates by keeping the strongest candidate", () => {
 test("uses seed defaults and need-driven system candidates", () => {
   const candidates = discoverOpportunities({
     seeds: [
-      { opportunityId: "defaulted", type: "emergence", strength: 50, confidence: 50, evidence: ["seed"] } as any,
+      {
+        opportunityId: "defaulted",
+        type: "emergence",
+        strength: 50,
+        confidence: 50,
+        evidence: ["seed"],
+      } as any,
     ],
     perception: {
       compositeScore: "bad" as any,
@@ -102,12 +139,28 @@ test("uses seed defaults and need-driven system candidates", () => {
     },
     intelligence: { contradictions: 0, transitionDetected: false },
     needs: [
-      { needId: "wait:55", category: "wait", severity: 55, confidence: 55, explanation: "wait", recommendations: [] },
-      { needId: "discover-opportunities:55", category: "discover-opportunities", severity: 55, confidence: 55, explanation: "discover", recommendations: [] },
+      {
+        needId: "wait:55",
+        category: "wait",
+        severity: 55,
+        confidence: 55,
+        explanation: "wait",
+        recommendations: [],
+      },
+      {
+        needId: "discover-opportunities:55",
+        category: "discover-opportunities",
+        severity: 55,
+        confidence: 55,
+        explanation: "discover",
+        recommendations: [],
+      },
     ],
   });
 
-  const byId = new Map(candidates.map((candidate) => [candidate.opportunityId, candidate]));
+  const byId = new Map(
+    candidates.map((candidate) => [candidate.opportunityId, candidate]),
+  );
   assert.equal(byId.get("defaulted")?.emerging, true);
   assert.equal(byId.get("defaulted")?.persistent, false);
   assert.equal(byId.has("system:divergence"), true);

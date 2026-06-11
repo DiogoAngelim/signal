@@ -15,11 +15,14 @@ module.exports = {
       comment: "Ports layer must not import from Optimizer layer",
       severity: "error",
       from: { path: "^api/ports" },
-      to: { path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)" },
+      to: {
+        path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)",
+      },
     },
     {
       name: "ports-no-kernel",
-      comment: "Ports layer must not import from kernel (use @signal/protocol for shared types)",
+      comment:
+        "Ports layer must not import from kernel (use @signal/protocol for shared types)",
       severity: "error",
       from: { path: "^api/ports" },
       to: { path: "^packages/kernel" },
@@ -39,7 +42,9 @@ module.exports = {
       comment: "Signal layer must not import from Optimizer layer",
       severity: "error",
       from: { path: "^(packages/kernel|api/protocol)" },
-      to: { path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)" },
+      to: {
+        path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)",
+      },
     },
     {
       name: "signal-no-execution",
@@ -60,23 +65,30 @@ module.exports = {
     // NOTE: Optimizer → api/protocol (type-only) is ALLOWED (shared contracts)
     {
       name: "optimizer-no-kernel",
-      comment: "Optimizer layer must not import from kernel (use @signal/protocol for shared types)",
+      comment:
+        "Optimizer layer must not import from kernel (use @signal/protocol for shared types)",
       severity: "error",
-      from: { path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)" },
+      from: {
+        path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)",
+      },
       to: { path: "^packages/kernel" },
     },
     {
       name: "optimizer-no-execution",
       comment: "Optimizer layer must not import from Execution layer",
       severity: "error",
-      from: { path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)" },
+      from: {
+        path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)",
+      },
       to: { path: "^(api/runtime|api/sdk-node|api/binding-http|server/db)" },
     },
     {
       name: "optimizer-no-posttrade",
       comment: "Optimizer layer must not import from Post-Trade layer",
       severity: "error",
-      from: { path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)" },
+      from: {
+        path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)",
+      },
       to: { path: "^(signal-cli)" },
     },
 
@@ -85,17 +97,21 @@ module.exports = {
     // NOTE: Execution → api/runtime is ALLOWED (sdk-node → runtime)
     {
       name: "execution-no-kernel",
-      comment: "Execution layer must not import from kernel (use @signal/protocol for shared types)",
+      comment:
+        "Execution layer must not import from kernel (use @signal/protocol for shared types)",
       severity: "error",
       from: { path: "^(api/runtime|api/sdk-node|api/binding-http|server/db)" },
       to: { path: "^packages/kernel" },
     },
     {
       name: "execution-no-optimizer",
-      comment: "Execution layer must not import from Optimizer layer",
+      comment:
+        "Execution layer must not import from Optimizer layer (except sdk-node which aggregates all packages as SDK facade)",
       severity: "error",
-      from: { path: "^(api/runtime|api/sdk-node|api/binding-http|server/db)" },
-      to: { path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)" },
+      from: { path: "^(api/runtime|api/binding-http|server/db)" },
+      to: {
+        path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)",
+      },
     },
 
     // ─── POST-TRADE LAYER: must not import from any upstream layer ───
@@ -104,7 +120,9 @@ module.exports = {
       comment: "Post-Trade layer must not import from any upstream layer",
       severity: "error",
       from: { path: "^(signal-cli)" },
-      to: { path: "^(packages/kernel|api/protocol|packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state|api/runtime|api/sdk-node|api/binding-http|server/db)" },
+      to: {
+        path: "^(packages/kernel|api/protocol|packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state|api/runtime|api/sdk-node|api/binding-http|server/db)",
+      },
     },
 
     // ─── CIRCULAR DEPENDENCIES ───
@@ -126,10 +144,13 @@ module.exports = {
     },
     {
       name: "runtime-no-domain",
-      comment: "Runtime must not import domain logic directly (use DecisionPort)",
+      comment:
+        "Runtime must not import domain logic directly (use DecisionPort)",
       severity: "error",
       from: { path: "^api/runtime/src" },
-      to: { path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)" },
+      to: {
+        path: "^(packages/agency|packages/commitment|packages/decision|packages/decision-memory|packages/semantic-state)",
+      },
     },
     {
       name: "runtime-no-server",

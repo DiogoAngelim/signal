@@ -1,8 +1,15 @@
 {
   "phase": 15,
   "status": "COMPLETE",
-  "validation": { "schemaValid": true, "filesPresent": true, "criteriaSatisfied": true },
-  "artifacts": ["hardening/phase-15/FINAL_AUDIT.md", "hardening/phase-15/PHASE_CHECKPOINT.json"],
+  "validation": {
+    "schemaValid": true,
+    "filesPresent": true,
+    "criteriaSatisfied": true
+  },
+  "artifacts": [
+    "hardening/phase-15/FINAL_AUDIT.md",
+    "hardening/phase-15/PHASE_CHECKPOINT.json"
+  ],
   "blockingIssues": [],
   "evidence": [
     "Full system audit: 16/16 phases COMPLETE",

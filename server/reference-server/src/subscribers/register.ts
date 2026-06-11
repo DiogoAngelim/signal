@@ -1,4 +1,4 @@
-import type { SignalRuntime } from "@signal/runtime";
+import type { SignalRuntime } from "@signal/sdk-node";
 import type { HighRiskPaymentStore } from "../operations/high-risk-payment";
 
 function captureIdFromPayload(payload: unknown): string | undefined {
@@ -10,7 +10,7 @@ function captureIdFromPayload(payload: unknown): string | undefined {
     return undefined;
   }
 
-  const captureId = (payload as Record<string, unknown>)["captureId"];
+  const captureId = (payload as Record<string, unknown>).captureId;
   return typeof captureId === "string" && captureId ? captureId : undefined;
 }
 

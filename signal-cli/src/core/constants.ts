@@ -61,9 +61,7 @@ export const IGNORED_PATTERNS = [
 ];
 
 // File extensions to ignore when hashing
-export const IGNORED_EXTENSIONS = new Set([
-  ".map",
-]);
+export const IGNORED_EXTENSIONS = new Set([".map"]);
 
 // State version
 export const STATE_VERSION = 1;

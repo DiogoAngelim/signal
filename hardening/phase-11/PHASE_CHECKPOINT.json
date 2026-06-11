@@ -1,8 +1,19 @@
 {
   "phase": 11,
   "status": "COMPLETE",
-  "validation": { "schemaValid": true, "filesPresent": true, "criteriaSatisfied": true },
-  "artifacts": ["hardening/phase-11/GOVERNANCE.md", "hardening/phase-11/PHASE_CHECKPOINT.json"],
+  "validation": {
+    "schemaValid": true,
+    "filesPresent": true,
+    "criteriaSatisfied": true
+  },
+  "artifacts": [
+    "hardening/phase-11/GOVERNANCE.md",
+    "hardening/phase-11/PHASE_CHECKPOINT.json"
+  ],
   "blockingIssues": [],
-  "evidence": ["Rollback strategy: git revert + lockfile + schema versioning", "Policy lifecycle: 5 states (proposed → retired)", "5 policy categories with enforcement mechanisms"]
+  "evidence": [
+    "Rollback strategy: git revert + lockfile + schema versioning",
+    "Policy lifecycle: 5 states (proposed → retired)",
+    "5 policy categories with enforcement mechanisms"
+  ]
 }

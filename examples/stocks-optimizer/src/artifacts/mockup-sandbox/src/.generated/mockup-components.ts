@@ -1,5 +1,2 @@
-
 type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
-export const modules: ModuleMap = {
-
-};
+export const modules: ModuleMap = {};

@@ -1,8 +1,19 @@
 {
   "phase": 13,
   "status": "COMPLETE",
-  "validation": { "schemaValid": true, "filesPresent": true, "criteriaSatisfied": true },
-  "artifacts": ["hardening/phase-13/PERFORMANCE.md", "hardening/phase-13/PHASE_CHECKPOINT.json"],
+  "validation": {
+    "schemaValid": true,
+    "filesPresent": true,
+    "criteriaSatisfied": true
+  },
+  "artifacts": [
+    "hardening/phase-13/PERFORMANCE.md",
+    "hardening/phase-13/PHASE_CHECKPOINT.json"
+  ],
   "blockingIssues": [],
-  "evidence": ["Before/after comparison: +2.5% overhead on full mutation path", "All performance budgets met: mutation <10ms, query <5ms, audit <1ms", "No regressions in core execution path"]
+  "evidence": [
+    "Before/after comparison: +2.5% overhead on full mutation path",
+    "All performance budgets met: mutation <10ms, query <5ms, audit <1ms",
+    "No regressions in core execution path"
+  ]
 }

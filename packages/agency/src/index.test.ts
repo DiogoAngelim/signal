@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  type AgencyDecision,
   calibrateConfidence,
   createAgencyPipeline,
   createInMemoryAgencyMemory,
@@ -10,7 +11,6 @@ import {
   resolveOutcome,
   runAgencyCycle,
   toCausalChain,
-  type AgencyDecision,
 } from ".";
 
 describe("public index", () => {
@@ -23,7 +23,9 @@ describe("public index", () => {
     const memory = createInMemoryAgencyMemory([trace]);
     const pipeline = createAgencyPipeline({ memory });
     const evaluation = evaluateAgencyState(memory.list());
-    const calibration = calibrateConfidence(memory.list(), { minimumSamples: 1 });
+    const calibration = calibrateConfidence(memory.list(), {
+      minimumSamples: 1,
+    });
     const learning = learnFromTraces(memory.list(), calibration);
 
     expect(trace.traceId).toBe("agency-1");
@@ -33,10 +35,12 @@ describe("public index", () => {
     expect(resolveOutcome({ success: false }).outcomeLabel).toBe("negative");
     expect(evaluatePolicy({ decision }).allowed).toBe(true);
     expect(toCausalChain(trace).decision).toBe(decision);
-    expect(diagnoseAgencyState({
-      history: memory.list(),
-      calibration,
-      learning,
-    }).trust).toBeGreaterThan(0);
+    expect(
+      diagnoseAgencyState({
+        history: memory.list(),
+        calibration,
+        learning,
+      }).trust,
+    ).toBeGreaterThan(0);
   });
 });

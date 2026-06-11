@@ -10,7 +10,7 @@
  * - Coerce types for safe consumption (no logic changes)
  */
 
-import type { Signal, ValidatedSignal, SignalDirection } from "./types";
+import type { Signal, SignalDirection, ValidatedSignal } from "./types";
 
 /**
  * Validate a raw signal from the signal engine.
@@ -31,43 +31,59 @@ export function validateSignal(raw: unknown): ValidatedSignal | null {
   const record = raw as Record<string, unknown>;
 
   // Asset validation
-  const asset = String(record.asset ?? record.symbol ?? record.ticker ?? "").trim();
+  const asset = String(
+    record.asset ?? record.symbol ?? record.ticker ?? "",
+  ).trim();
   if (!asset) {
     logInvalidSignal(raw, "missing asset/symbol/ticker");
     return null;
   }
 
   // Direction validation
-  const rawDirection = String(record.direction ?? record.signalAction ?? record.allocationAction ?? "flat").trim().toLowerCase();
+  const rawDirection = String(
+    record.direction ??
+      record.signalAction ??
+      record.allocationAction ??
+      "flat",
+  )
+    .trim()
+    .toLowerCase();
   const direction = normalizeDirection(rawDirection);
   if (direction !== rawDirection) {
-    warnings.push(`direction normalized from "${rawDirection}" to "${direction}"`);
+    warnings.push(
+      `direction normalized from "${rawDirection}" to "${direction}"`,
+    );
   }
 
   // Strength validation
   const rawStrength = Number(record.strength ?? record.setupQuality ?? 0);
   const strength = Number.isFinite(rawStrength)
     ? rawStrength > 1
-      ? clamp01(rawStrength / 100)  // 0-100 scale → normalize to 0-1
-      : clamp01(rawStrength)         // already 0-1 scale
+      ? clamp01(rawStrength / 100) // 0-100 scale → normalize to 0-1
+      : clamp01(rawStrength) // already 0-1 scale
     : 0;
   if (!Number.isFinite(rawStrength)) {
     warnings.push(`strength is not finite: ${String(record.strength)}`);
   } else if (rawStrength > 1 && rawStrength <= 100) {
-    warnings.push(`strength appears to be 0-100 scale, normalized to 0-1`);
+    warnings.push("strength appears to be 0-100 scale, normalized to 0-1");
   }
 
   // Confidence validation
-  const rawConfidence = Number(record.confidence ?? record.signalConfidence ?? record.calibratedConfidence ?? 0);
+  const rawConfidence = Number(
+    record.confidence ??
+      record.signalConfidence ??
+      record.calibratedConfidence ??
+      0,
+  );
   const confidence = Number.isFinite(rawConfidence)
     ? rawConfidence > 1
-      ? clamp01(rawConfidence / 100)  // 0-100 scale → normalize to 0-1
-      : clamp01(rawConfidence)         // already 0-1 scale
+      ? clamp01(rawConfidence / 100) // 0-100 scale → normalize to 0-1
+      : clamp01(rawConfidence) // already 0-1 scale
     : 0;
   if (!Number.isFinite(rawConfidence)) {
     warnings.push(`confidence is not finite: ${String(record.confidence)}`);
   } else if (rawConfidence > 1 && rawConfidence <= 100) {
-    warnings.push(`confidence appears to be 0-100 scale, normalized to 0-1`);
+    warnings.push("confidence appears to be 0-100 scale, normalized to 0-1");
   }
 
   // Timestamp validation
@@ -79,7 +95,7 @@ export function validateSignal(raw: unknown): ValidatedSignal | null {
       logInvalidSignal(raw, `invalid timestamp: ${String(rawTimestamp)}`);
       return null;
     }
-    warnings.push(`timestamp parsed from ISO string`);
+    warnings.push("timestamp parsed from ISO string");
   }
 
   // Horizon validation (optional)
@@ -91,7 +107,8 @@ export function validateSignal(raw: unknown): ValidatedSignal | null {
     direction,
     strength,
     confidence,
-    timestamp: Number.isFinite(timestamp) && timestamp > 0 ? timestamp : Date.now(),
+    timestamp:
+      Number.isFinite(timestamp) && timestamp > 0 ? timestamp : Date.now(),
     horizon,
     _validated: true,
     _validationWarnings: warnings,
@@ -117,7 +134,9 @@ export function validateSignals(raws: unknown[]): ValidatedSignal[] {
  * into the canonical Signal schema. This is a mapping adapter —
  * it does NOT change any signal logic.
  */
-export function adaptStrategySignal(signal: Record<string, unknown>): ValidatedSignal | null {
+export function adaptStrategySignal(
+  signal: Record<string, unknown>,
+): ValidatedSignal | null {
   // Use direction field if available, otherwise map from action fields
   const rawDirection = signal.direction
     ? String(signal.direction)
@@ -129,7 +148,10 @@ export function adaptStrategySignal(signal: Record<string, unknown>): ValidatedS
     asset: signal.symbol ?? signal.ticker,
     direction: rawDirection,
     strength: signal.strength ?? signal.setupQuality ?? signal.trendQuality,
-    confidence: signal.confidence ?? signal.calibratedConfidence ?? signal.signalConfidence,
+    confidence:
+      signal.confidence ??
+      signal.calibratedConfidence ??
+      signal.signalConfidence,
     timestamp: signal.timestamp ?? signal.updatedAt,
     horizon: signal.horizon,
   });
@@ -138,8 +160,12 @@ export function adaptStrategySignal(signal: Record<string, unknown>): ValidatedS
 /**
  * Batch-adapt strategy signals.
  */
-export function adaptStrategySignals(signals: Record<string, unknown>[]): ValidatedSignal[] {
-  return validateSignals(signals.map(adaptStrategySignal).filter(Boolean) as ValidatedSignal[]);
+export function adaptStrategySignals(
+  signals: Record<string, unknown>[],
+): ValidatedSignal[] {
+  return validateSignals(
+    signals.map(adaptStrategySignal).filter(Boolean) as ValidatedSignal[],
+  );
 }
 
 // ── Internal helpers ────────────────────────────────────────────────
@@ -157,7 +183,9 @@ function mapActionToDirection(action: string): SignalDirection {
   return "flat";
 }
 
-function isValidHorizon(value: unknown): value is "scalp" | "intraday" | "swing" {
+function isValidHorizon(
+  value: unknown,
+): value is "scalp" | "intraday" | "swing" {
   return value === "scalp" || value === "intraday" || value === "swing";
 }
 

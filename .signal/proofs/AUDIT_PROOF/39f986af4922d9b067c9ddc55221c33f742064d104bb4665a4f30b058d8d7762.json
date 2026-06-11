@@ -1,1 +1,18 @@
-{"details":{"buildCommand":"pnpm build","buildPassed":true,"noDrift":true,"outputDir":"dist","postVerify":true,"preVerify":true},"hashes":["ddbe6d2ec2d06623a32396a069c17ff69d4ab47ba92b91fea08f0c8a02a7a020","731d0b33391e561fa1b662e227bbf5159a0ce68c3a2de0691f324995f9d975ea"],"result":"PASS","timestamp":"NOT_ALLOWED_IN_HASH_LOGIC","type":"AUDIT_PROOF","valid":true}
+{
+  "details": {
+    "buildCommand": "pnpm build",
+    "buildPassed": true,
+    "noDrift": true,
+    "outputDir": "dist",
+    "postVerify": true,
+    "preVerify": true
+  },
+  "hashes": [
+    "ddbe6d2ec2d06623a32396a069c17ff69d4ab47ba92b91fea08f0c8a02a7a020",
+    "731d0b33391e561fa1b662e227bbf5159a0ce68c3a2de0691f324995f9d975ea"
+  ],
+  "result": "PASS",
+  "timestamp": "NOT_ALLOWED_IN_HASH_LOGIC",
+  "type": "AUDIT_PROOF",
+  "valid": true
+}

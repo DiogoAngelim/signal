@@ -4,7 +4,11 @@ import type { JudgementResult } from "../judgement/engine";
 import { clamp, mean } from "../math/statistics";
 import type { ReflectionResult } from "../reflection/engine";
 import type { ReliabilityResult } from "../reliability/engine";
-import type { SurvivalMemoryAnalysis, SurvivalMemoryRecommendation, SurvivalMemoryStatus } from "../survival-memory/engine";
+import type {
+  SurvivalMemoryAnalysis,
+  SurvivalMemoryRecommendation,
+  SurvivalMemoryStatus,
+} from "../survival-memory/engine";
 
 export type TrustParticipationMode =
   | "blocked"
@@ -41,7 +45,9 @@ export type TrustGovernorPolicy = {
   limitedExposureMultiplier?: number;
 };
 
-export type TrustSurvivalMemoryInput = Partial<Omit<SurvivalMemoryAnalysis, "status" | "recommendation">> & {
+export type TrustSurvivalMemoryInput = Partial<
+  Omit<SurvivalMemoryAnalysis, "status" | "recommendation">
+> & {
   status?: SurvivalMemoryStatus | string;
   recommendation?: SurvivalMemoryRecommendation | string;
   maxExposurePct?: number;
@@ -160,15 +166,26 @@ const CALIBRATION_REVIEW_STATUSES = new Set([
 
 const BLOCKING_BELIEF_VERDICTS = new Set(["uncertain", "contradicted"]);
 
-export function evaluateTrustGovernor(input: TrustGovernorInput): TrustGovernorResult {
+export function evaluateTrustGovernor(
+  input: TrustGovernorInput,
+): TrustGovernorResult {
   const policy = { ...DEFAULT_POLICY, ...(input.policy ?? {}) };
-  const rawConfidence = score(input.rawConfidence, score(input.strategy?.maxConfidence, 50));
+  const rawConfidence = score(
+    input.rawConfidence,
+    score(input.strategy?.maxConfidence, 50),
+  );
   const calibratedConfidence = score(
     input.calibratedConfidence ?? input.calibration?.calibratedConfidence,
     rawConfidence,
   );
-  const configuredMaxExposure = percent(input.maxExposure ?? input.strategy?.maxPositionPct, 0);
-  const rawMaxExposure = survivalAdjustedMaxExposure(input.survivalMemory, configuredMaxExposure);
+  const configuredMaxExposure = percent(
+    input.maxExposure ?? input.strategy?.maxPositionPct,
+    0,
+  );
+  const rawMaxExposure = survivalAdjustedMaxExposure(
+    input.survivalMemory,
+    configuredMaxExposure,
+  );
   const requestedExposure = percent(input.requestedExposure, rawMaxExposure);
   const calibrationStatus = normalizedStatus(input.calibration?.status);
   const calibrationWarnings = normalizedWarnings(input.calibration?.warnings);
@@ -182,7 +199,12 @@ export function evaluateTrustGovernor(input: TrustGovernorInput): TrustGovernorR
     policy,
   });
   const componentScores = {
-    calibration: calibrationScore(input, calibratedConfidence, calibrationStatus, calibrationWarnings),
+    calibration: calibrationScore(
+      input,
+      calibratedConfidence,
+      calibrationStatus,
+      calibrationWarnings,
+    ),
     judgement: judgementScore(input.judgement),
     reliability: reliabilityScore(input.reliability),
     reflection: reflectionScore(input.reflection),
@@ -216,12 +238,20 @@ export function evaluateTrustGovernor(input: TrustGovernorInput): TrustGovernorR
     requestedExposure,
     policy,
   });
-  const allowsNewExposure = participationMode === "micro" || participationMode === "limited" || participationMode === "normal";
-  const requiresReview = blockers.length > 0 || participationMode === "paper" || participationMode === "exits_only";
+  const allowsNewExposure =
+    participationMode === "micro" ||
+    participationMode === "limited" ||
+    participationMode === "normal";
+  const requiresReview =
+    blockers.length > 0 ||
+    participationMode === "paper" ||
+    participationMode === "exits_only";
   const allowedActions = allowedActionsFor(participationMode);
   const blockedActions = blockedActionsFor(participationMode);
   const primaryBlocker = blockers[0]?.id;
-  const unlockCriteria = unique(blockers.flatMap((blocker) => blocker.unlockCriteria));
+  const unlockCriteria = unique(
+    blockers.flatMap((blocker) => blocker.unlockCriteria),
+  );
 
   return {
     module: "signal.trust-governor",
@@ -284,32 +314,53 @@ function collectBlockers(input: {
     ? input.input.strategy.failureFlags.filter(Boolean)
     : [];
   const strategyFlagBlockers = blockersForStrategyFlags(flags);
-  const survivalMemoryBlockers = survivalBlockers(input.input.survivalMemory, input.input.opensNewExposure !== false);
+  const survivalMemoryBlockers = survivalBlockers(
+    input.input.survivalMemory,
+    input.input.opensNewExposure !== false,
+  );
   const gap = input.rawConfidence - input.calibratedConfidence;
   const beliefVerdict = normalizedStatus(input.input.belief?.verdict);
   const agencyStatus = normalizedStatus(input.input.agency?.status);
 
-  if (reliabilityStatus === "invalid" || reliabilityStatus === "stale" || reliabilityScoreValue < 35 || reliabilityCap < 35) {
-    blockers.push(blocker(
-      "data_reliability_unusable",
-      "Data reliability unusable",
-      "critical",
-      "Market data reliability is too weak to trust new exposure.",
-      ["Restore fresh, complete, non-stale market data.", "Raise reliability confidence cap above 35%."],
-    ));
+  if (
+    reliabilityStatus === "invalid" ||
+    reliabilityStatus === "stale" ||
+    reliabilityScoreValue < 35 ||
+    reliabilityCap < 35
+  ) {
+    blockers.push(
+      blocker(
+        "data_reliability_unusable",
+        "Data reliability unusable",
+        "critical",
+        "Market data reliability is too weak to trust new exposure.",
+        [
+          "Restore fresh, complete, non-stale market data.",
+          "Raise reliability confidence cap above 35%.",
+        ],
+      ),
+    );
   }
 
   blockers.push(...strategyFlagBlockers);
   blockers.push(...survivalMemoryBlockers);
 
-  if ((input.input.strategy?.blocked === true || flags.length > 0) && strategyFlagBlockers.length === 0) {
-    blockers.push(blocker(
-      "strategy_readiness_blocked",
-      "Strategy readiness blocked",
-      "high",
-      "Strategy readiness gates do not allow new exposure.",
-      ["Clear readiness failure flags.", "Keep benchmark, drawdown, robustness, and walk-forward checks passing."],
-    ));
+  if (
+    (input.input.strategy?.blocked === true || flags.length > 0) &&
+    strategyFlagBlockers.length === 0
+  ) {
+    blockers.push(
+      blocker(
+        "strategy_readiness_blocked",
+        "Strategy readiness blocked",
+        "high",
+        "Strategy readiness gates do not allow new exposure.",
+        [
+          "Clear readiness failure flags.",
+          "Keep benchmark, drawdown, robustness, and walk-forward checks passing.",
+        ],
+      ),
+    );
   }
 
   const zeroCapacityExplainedByReadiness =
@@ -317,78 +368,123 @@ function collectBlockers(input: {
     flags.length > 0 ||
     strategyFlagBlockers.length > 0 ||
     survivalMemoryBlockers.length > 0;
-  if (input.rawMaxExposure <= 0 && input.input.opensNewExposure !== false && !zeroCapacityExplainedByReadiness) {
-    blockers.push(blocker(
-      "capacity_unavailable",
-      "Capacity unavailable",
-      "high",
-      "No trusted exposure capacity is currently available.",
-      ["Restore a positive trusted max exposure cap."],
-    ));
+  if (
+    input.rawMaxExposure <= 0 &&
+    input.input.opensNewExposure !== false &&
+    !zeroCapacityExplainedByReadiness
+  ) {
+    blockers.push(
+      blocker(
+        "capacity_unavailable",
+        "Capacity unavailable",
+        "high",
+        "No trusted exposure capacity is currently available.",
+        ["Restore a positive trusted max exposure cap."],
+      ),
+    );
   }
 
   if (status && CALIBRATION_REVIEW_STATUSES.has(status)) {
     blockers.push(calibrationBlockerForStatus(status));
   } else if (warnings.includes("unstable outcomes")) {
     blockers.push(calibrationBlockerForStatus("unstable-outcomes"));
-  } else if (warnings.includes("poor calibration") || warnings.includes("overconfidence")) {
+  } else if (
+    warnings.includes("poor calibration") ||
+    warnings.includes("overconfidence")
+  ) {
     blockers.push(calibrationBlockerForStatus("poor-calibration"));
   }
 
   if (gap >= input.policy.maxRawCalibratedGap) {
-    blockers.push(blocker(
-      "raw_calibrated_confidence_gap",
-      "Raw/calibrated gap",
-      gap >= 25 ? "high" : "medium",
-      "Raw confidence is materially higher than calibrated confidence.",
-      ["Reduce the raw-vs-calibrated confidence gap below the policy threshold.", "Close more outcomes that match predicted confidence."],
-    ));
+    blockers.push(
+      blocker(
+        "raw_calibrated_confidence_gap",
+        "Raw/calibrated gap",
+        gap >= 25 ? "high" : "medium",
+        "Raw confidence is materially higher than calibrated confidence.",
+        [
+          "Reduce the raw-vs-calibrated confidence gap below the policy threshold.",
+          "Close more outcomes that match predicted confidence.",
+        ],
+      ),
+    );
   }
 
   if (input.input.judgement?.status === "blocked") {
-    blockers.push(blocker(
-      "judgement_blocked",
-      "Judgement blocked",
-      "high",
-      "Similar historical states do not justify new exposure.",
-      ["Improve similar-state outcome stability.", "Reduce overfit risk in similar historical samples."],
-    ));
+    blockers.push(
+      blocker(
+        "judgement_blocked",
+        "Judgement blocked",
+        "high",
+        "Similar historical states do not justify new exposure.",
+        [
+          "Improve similar-state outcome stability.",
+          "Reduce overfit risk in similar historical samples.",
+        ],
+      ),
+    );
   } else if (input.input.judgement?.status === "review_required") {
-    blockers.push(blocker(
-      "judgement_review_required",
-      "Judgement requires review",
-      "high",
-      "Similar historical states require human review before new exposure.",
-      ["Raise judgement reliability and outcome stability above review thresholds."],
-    ));
+    blockers.push(
+      blocker(
+        "judgement_review_required",
+        "Judgement requires review",
+        "high",
+        "Similar historical states require human review before new exposure.",
+        [
+          "Raise judgement reliability and outcome stability above review thresholds.",
+        ],
+      ),
+    );
   }
 
   if (BLOCKING_BELIEF_VERDICTS.has(beliefVerdict)) {
-    blockers.push(blocker(
-      `belief_${beliefVerdict}`,
-      "Belief unresolved",
-      "high",
-      `Belief is ${beliefVerdict}, so new exposure is not justified.`,
-      ["Resolve contradictory evidence.", "Raise belief confidence above the justified threshold."],
-    ));
+    blockers.push(
+      blocker(
+        `belief_${beliefVerdict}`,
+        "Belief unresolved",
+        "high",
+        `Belief is ${beliefVerdict}, so new exposure is not justified.`,
+        [
+          "Resolve contradictory evidence.",
+          "Raise belief confidence above the justified threshold.",
+        ],
+      ),
+    );
   } else if (beliefVerdict === "weak") {
-    blockers.push(blocker(
-      "belief_weak",
-      "Belief weak",
-      "medium",
-      "Belief is weak and should be reviewed before increasing participation.",
-      ["Raise evidence strength, coverage, and agreement enough to justify the claim."],
-    ));
+    blockers.push(
+      blocker(
+        "belief_weak",
+        "Belief weak",
+        "medium",
+        "Belief is weak and should be reviewed before increasing participation.",
+        [
+          "Raise evidence strength, coverage, and agreement enough to justify the claim.",
+        ],
+      ),
+    );
   }
 
-  if (["denied", "deferred", "requires-review", "requires_human_review", "escalated"].includes(agencyStatus)) {
-    blockers.push(blocker(
-      "agency_review_gate",
-      "Agency review gate",
-      agencyStatus === "denied" ? "high" : "medium",
-      "Agency policy does not fully approve commitment.",
-      ["Clear agency policy violations.", "Resolve human review requirements."],
-    ));
+  if (
+    [
+      "denied",
+      "deferred",
+      "requires-review",
+      "requires_human_review",
+      "escalated",
+    ].includes(agencyStatus)
+  ) {
+    blockers.push(
+      blocker(
+        "agency_review_gate",
+        "Agency review gate",
+        agencyStatus === "denied" ? "high" : "medium",
+        "Agency policy does not fully approve commitment.",
+        [
+          "Clear agency policy violations.",
+          "Resolve human review requirements.",
+        ],
+      ),
+    );
   }
 
   return uniqueBlockers(blockers);
@@ -406,31 +502,48 @@ function blockersForStrategyFlags(flags: string[]) {
   );
 
   if (normalizedFlags.has("ROBUSTNESS_EXECUTION_BLOCKED")) {
-    blockers.push(blocker(
-      "robustness_execution_blocked",
-      "Robustness execution blocked",
-      "high",
-      "The robustness safety gate blocks new execution.",
-      ["Clear the robustness safety gate.", "Keep overfit risk at or below 30%.", "Keep deployment readiness above 60%."],
-    ));
+    blockers.push(
+      blocker(
+        "robustness_execution_blocked",
+        "Robustness execution blocked",
+        "high",
+        "The robustness safety gate blocks new execution.",
+        [
+          "Clear the robustness safety gate.",
+          "Keep overfit risk at or below 30%.",
+          "Keep deployment readiness above 60%.",
+        ],
+      ),
+    );
   } else if (normalizedFlags.has("ROBUSTNESS_OVERFIT_RISK")) {
-    blockers.push(blocker(
-      "robustness_overfit_risk",
-      "Robustness overfit risk",
-      "high",
-      "Robustness overfit risk is above the execution threshold.",
-      ["Reduce overfit risk to 30% or lower.", "Keep deployment readiness above 60%.", "Retest on independent periods before allowing exposure."],
-    ));
+    blockers.push(
+      blocker(
+        "robustness_overfit_risk",
+        "Robustness overfit risk",
+        "high",
+        "Robustness overfit risk is above the execution threshold.",
+        [
+          "Reduce overfit risk to 30% or lower.",
+          "Keep deployment readiness above 60%.",
+          "Retest on independent periods before allowing exposure.",
+        ],
+      ),
+    );
   }
 
   if (normalizedFlags.has("PARAMETER_INSTABILITY")) {
-    blockers.push(blocker(
-      "parameter_instability",
-      "Parameter instability",
-      "high",
-      "Nearby strategy variants do not preserve the edge.",
-      ["Improve parameter pass rate.", "Verify nearby variants still beat the benchmark safety margin."],
-    ));
+    blockers.push(
+      blocker(
+        "parameter_instability",
+        "Parameter instability",
+        "high",
+        "Nearby strategy variants do not preserve the edge.",
+        [
+          "Improve parameter pass rate.",
+          "Verify nearby variants still beat the benchmark safety margin.",
+        ],
+      ),
+    );
   }
 
   if (
@@ -439,41 +552,61 @@ function blockersForStrategyFlags(flags: string[]) {
     normalizedFlags.has("OVERFIT_SEGMENT_CONCENTRATION") ||
     normalizedFlags.has("MEDIAN_TRADE_RETURN_NOT_POSITIVE")
   ) {
-    const hasTopWinnerDependency = normalizedFlags.has("OVERFIT_TOP_WINNER_DEPENDENCY");
-    const hasSegmentConcentration = normalizedFlags.has("OVERFIT_SEGMENT_CONCENTRATION");
-    const hasMedianFailure = normalizedFlags.has("MEDIAN_TRADE_RETURN_NOT_POSITIVE");
+    const hasTopWinnerDependency = normalizedFlags.has(
+      "OVERFIT_TOP_WINNER_DEPENDENCY",
+    );
+    const hasSegmentConcentration = normalizedFlags.has(
+      "OVERFIT_SEGMENT_CONCENTRATION",
+    );
+    const hasMedianFailure = normalizedFlags.has(
+      "MEDIAN_TRADE_RETURN_NOT_POSITIVE",
+    );
     const unlockCriteria = [
       ...(hasTopWinnerDependency ? ["Reduce top-winner concentration."] : []),
-      ...(hasSegmentConcentration ? ["Reduce period concentration across independent test windows."] : []),
-      ...(hasMedianFailure ? ["Confirm median trade return stays positive."] : []),
+      ...(hasSegmentConcentration
+        ? ["Reduce period concentration across independent test windows."]
+        : []),
+      ...(hasMedianFailure
+        ? ["Confirm median trade return stays positive."]
+        : []),
     ];
-    const reason = hasTopWinnerDependency && hasSegmentConcentration
-      ? "Results depend too much on a few winners or periods."
-      : hasTopWinnerDependency
-        ? "Results depend too much on a few winning trades."
-        : hasSegmentConcentration
-          ? "Results depend too much on one validation period."
-          : hasMedianFailure
-            ? "Median trade return is not positive enough to trust new exposure."
-            : "Return concentration is too high to trust new exposure.";
+    const reason =
+      hasTopWinnerDependency && hasSegmentConcentration
+        ? "Results depend too much on a few winners or periods."
+        : hasTopWinnerDependency
+          ? "Results depend too much on a few winning trades."
+          : hasSegmentConcentration
+            ? "Results depend too much on one validation period."
+            : hasMedianFailure
+              ? "Median trade return is not positive enough to trust new exposure."
+              : "Return concentration is too high to trust new exposure.";
 
-    blockers.push(blocker(
-      "concentration_dependency",
-      "Concentration dependency",
-      "high",
-      reason,
-      unlockCriteria.length ? unlockCriteria : ["Reduce return concentration."],
-    ));
+    blockers.push(
+      blocker(
+        "concentration_dependency",
+        "Concentration dependency",
+        "high",
+        reason,
+        unlockCriteria.length
+          ? unlockCriteria
+          : ["Reduce return concentration."],
+      ),
+    );
   }
 
   if (normalizedFlags.has("SURVIVAL_NEAR_RUIN")) {
-    blockers.push(blocker(
-      "survival_near_ruin",
-      "Survival near-ruin",
-      "high",
-      "Survival memory identifies near-ruin patterns; new exposure must wait for recovery evidence.",
-      ["Wait until similar states show survival cost below 35/100 and no near-ruin match.", "Restore a positive recovery exposure cap."],
-    ));
+    blockers.push(
+      blocker(
+        "survival_near_ruin",
+        "Survival near-ruin",
+        "high",
+        "Survival memory identifies near-ruin patterns; new exposure must wait for recovery evidence.",
+        [
+          "Wait until similar states show survival cost below 35/100 and no near-ruin match.",
+          "Restore a positive recovery exposure cap.",
+        ],
+      ),
+    );
   }
 
   return blockers;
@@ -486,7 +619,11 @@ function calibrationBlockerForStatus(status: string) {
       "Calibration unstable outcomes",
       "high",
       "Calibration has samples, but similar outcomes are unstable.",
-      ["Observe more closed outcomes in similar states.", "Keep outcome stability above the review threshold.", "Reduce overconfidence warnings."],
+      [
+        "Observe more closed outcomes in similar states.",
+        "Keep outcome stability above the review threshold.",
+        "Reduce overconfidence warnings.",
+      ],
     );
   }
 
@@ -496,7 +633,10 @@ function calibrationBlockerForStatus(status: string) {
       "Calibration insufficient history",
       "high",
       "Calibration history is insufficient for trusted new exposure.",
-      ["Collect the minimum number of evaluated outcomes.", "Keep new exposure in paper or review mode until history is usable."],
+      [
+        "Collect the minimum number of evaluated outcomes.",
+        "Keep new exposure in paper or review mode until history is usable.",
+      ],
     );
   }
 
@@ -505,7 +645,11 @@ function calibrationBlockerForStatus(status: string) {
     "Calibration poor",
     "high",
     "Historical calibration does not support trusting the raw signal yet.",
-    ["Improve calibration quality.", "Reduce overconfidence warnings.", "Close outcomes that match predicted confidence."],
+    [
+      "Improve calibration quality.",
+      "Reduce overconfidence warnings.",
+      "Close outcomes that match predicted confidence.",
+    ],
   );
 }
 
@@ -515,15 +659,34 @@ function calibrationScore(
   status: string,
   warnings: string[],
 ) {
-  const trustworthiness = score(input.calibration?.trustworthiness, calibratedConfidence);
-  const historicalAccuracy = score(input.calibration?.historicalAccuracy, trustworthiness);
-  const calibrationError = Math.abs(Number(input.calibration?.calibrationError ?? 0));
+  const trustworthiness = score(
+    input.calibration?.trustworthiness,
+    calibratedConfidence,
+  );
+  const historicalAccuracy = score(
+    input.calibration?.historicalAccuracy,
+    trustworthiness,
+  );
+  const calibrationError = Math.abs(
+    Number(input.calibration?.calibrationError ?? 0),
+  );
   const quality = clamp(100 - calibrationError);
-  let result = mean([calibratedConfidence, trustworthiness, historicalAccuracy, quality]);
+  let result = mean([
+    calibratedConfidence,
+    trustworthiness,
+    historicalAccuracy,
+    quality,
+  ]);
 
-  if (status === "unstable-outcomes" || warnings.includes("unstable outcomes")) result -= 18;
-  if (status === "poor-calibration" || warnings.includes("poor calibration")) result -= 14;
-  if (status === "insufficient-history" || warnings.includes("insufficient history")) result -= 12;
+  if (status === "unstable-outcomes" || warnings.includes("unstable outcomes"))
+    result -= 18;
+  if (status === "poor-calibration" || warnings.includes("poor calibration"))
+    result -= 14;
+  if (
+    status === "insufficient-history" ||
+    warnings.includes("insufficient history")
+  )
+    result -= 12;
   if (warnings.includes("overconfidence")) result -= 8;
   if (warnings.includes("low trustworthiness")) result -= 10;
 
@@ -537,7 +700,13 @@ function judgementScore(judgement: TrustGovernorInput["judgement"]) {
   const stability = score(judgement.outcomeStability, trust);
   const calibration = score(judgement.calibration, trust);
   const overfitSafety = clamp(100 - score(judgement.overfitRisk, 50));
-  let result = mean([trust, reliability, stability, calibration, overfitSafety]);
+  let result = mean([
+    trust,
+    reliability,
+    stability,
+    calibration,
+    overfitSafety,
+  ]);
 
   if (judgement.status === "blocked") result = Math.min(result, 20);
   if (judgement.status === "review_required") result = Math.min(result, 45);
@@ -594,7 +763,11 @@ function agencyScore(agency: TrustGovernorInput["agency"]) {
 
   if (status === "denied") result = Math.min(result, 20);
   if (status === "deferred") result = Math.min(result, 45);
-  if (status === "requires-review" || status === "requires_human_review" || status === "escalated") {
+  if (
+    status === "requires-review" ||
+    status === "requires_human_review" ||
+    status === "escalated"
+  ) {
     result = Math.min(result, 55);
   }
   if (status === "limited") result = Math.min(result, 72);
@@ -607,13 +780,18 @@ function survivalScore(survivalMemory: TrustGovernorInput["survivalMemory"]) {
 
   const status = normalizedStatus(survivalMemory.status);
   const recommendation = normalizedStatus(survivalMemory.recommendation);
-  const confidence = score(survivalMemory.survivalConfidence, status === "empty" ? 75 : 70);
-  const multiplierScore = ratioScore(survivalMemory.exposureMultiplier, 1) * 100;
+  const confidence = score(
+    survivalMemory.survivalConfidence,
+    status === "empty" ? 75 : 70,
+  );
+  const multiplierScore =
+    ratioScore(survivalMemory.exposureMultiplier, 1) * 100;
   const costSafety = clamp(100 - score(survivalMemory.averageSurvivalCost, 0));
   const penaltySafety = clamp(100 - score(survivalMemory.confidencePenalty, 0));
   let result = mean([confidence, multiplierScore, costSafety, penaltySafety]);
 
-  if (recommendation === "wait" || status === "near-ruin") result = Math.min(result, 35);
+  if (recommendation === "wait" || status === "near-ruin")
+    result = Math.min(result, 35);
   if (recommendation === "act-with-reduced-size") result = Math.min(result, 65);
   if (status === "scarred") result = Math.min(result, 60);
   if (status === "watch") result = Math.min(result, 75);
@@ -630,7 +808,15 @@ function confidenceCapFor(input: {
     input.rawConfidence,
     input.calibratedConfidence,
     score(input.input.reliability?.confidenceCap, 100),
-    score((input.input.reflection as { recommendedConfidenceCap?: number } | null | undefined)?.recommendedConfidenceCap, 100),
+    score(
+      (
+        input.input.reflection as
+          | { recommendedConfidenceCap?: number }
+          | null
+          | undefined
+      )?.recommendedConfidenceCap,
+      100,
+    ),
   ];
 
   if (input.input.judgement?.adjustedConfidence != null) {
@@ -654,13 +840,18 @@ function confidenceCapFor(input: {
   }
 
   if (input.input.survivalMemory?.confidencePenalty != null) {
-    caps.push(clamp(100 - score(input.input.survivalMemory.confidencePenalty, 0)));
+    caps.push(
+      clamp(100 - score(input.input.survivalMemory.confidencePenalty, 0)),
+    );
   }
 
   return roundScore(Math.min(...caps.filter(Number.isFinite)));
 }
 
-function survivalBlockers(survivalMemory: TrustGovernorInput["survivalMemory"], opensNewExposure: boolean): TrustBlocker[] {
+function survivalBlockers(
+  survivalMemory: TrustGovernorInput["survivalMemory"],
+  opensNewExposure: boolean,
+): TrustBlocker[] {
   if (!survivalMemory || !opensNewExposure) return [];
 
   const status = normalizedStatus(survivalMemory.status);
@@ -668,30 +859,51 @@ function survivalBlockers(survivalMemory: TrustGovernorInput["survivalMemory"], 
   const nearRuinCount = finiteNumber(survivalMemory.nearRuinCount) ?? 0;
   const scarCount = finiteNumber(survivalMemory.scarCount) ?? 0;
   const exposureMultiplier = ratioScore(survivalMemory.exposureMultiplier, 1);
-  const unlockCriteria = Array.isArray(survivalMemory.unlockConditions) && survivalMemory.unlockConditions.length
-    ? survivalMemory.unlockConditions
-    : ["Wait until similar states show survival cost below 35/100 and no near-ruin match.", "Restore a positive recovery exposure cap."];
+  const unlockCriteria =
+    Array.isArray(survivalMemory.unlockConditions) &&
+    survivalMemory.unlockConditions.length
+      ? survivalMemory.unlockConditions
+      : [
+          "Wait until similar states show survival cost below 35/100 and no near-ruin match.",
+          "Restore a positive recovery exposure cap.",
+        ];
 
-  if (recommendation === "wait" || status === "near-ruin" || nearRuinCount > 0 && exposureMultiplier <= 0.2 || exposureMultiplier === 0) {
-    return [blocker(
-      "survival_memory_wait",
-      "Survival memory wait",
-      "high",
-      "Survival memory blocks new exposure until recovery evidence clears the near-ruin pattern.",
-      unlockCriteria,
-    )];
+  if (
+    recommendation === "wait" ||
+    status === "near-ruin" ||
+    (nearRuinCount > 0 && exposureMultiplier <= 0.2) ||
+    exposureMultiplier === 0
+  ) {
+    return [
+      blocker(
+        "survival_memory_wait",
+        "Survival memory wait",
+        "high",
+        "Survival memory blocks new exposure until recovery evidence clears the near-ruin pattern.",
+        unlockCriteria,
+      ),
+    ];
   }
 
-  if (recommendation === "act-with-reduced-size" || scarCount > 0 || exposureMultiplier < 0.85) {
-    return [blocker(
-      "survival_reduced_size",
-      "Survival reduced size",
-      "medium",
-      "Survival memory allows only reduced-size recovery exposure.",
-      Array.isArray(survivalMemory.unlockConditions) && survivalMemory.unlockConditions.length
-        ? survivalMemory.unlockConditions
-        : ["Move Survival Memory from scarred/watch to clear with survival confidence above 70/100 and clean reduced-size outcomes before normal sizing is restored."],
-    )];
+  if (
+    recommendation === "act-with-reduced-size" ||
+    scarCount > 0 ||
+    exposureMultiplier < 0.85
+  ) {
+    return [
+      blocker(
+        "survival_reduced_size",
+        "Survival reduced size",
+        "medium",
+        "Survival memory allows only reduced-size recovery exposure.",
+        Array.isArray(survivalMemory.unlockConditions) &&
+          survivalMemory.unlockConditions.length
+          ? survivalMemory.unlockConditions
+          : [
+              "Move Survival Memory from scarred/watch to clear with survival confidence above 70/100 and clean reduced-size outcomes before normal sizing is restored.",
+            ],
+      ),
+    ];
   }
 
   return [];
@@ -704,13 +916,18 @@ function participationModeFor(input: {
   blockers: TrustBlocker[];
   policy: Required<typeof DEFAULT_POLICY>;
 }): TrustParticipationMode {
-  const critical = input.blockers.some((blocker) => blocker.severity === "critical");
+  const critical = input.blockers.some(
+    (blocker) => blocker.severity === "critical",
+  );
   const hard = input.blockers.some((blocker) => blocker.severity === "high");
 
   if (critical) return "blocked";
   if (hard) return "exits_only";
   if (input.rawMaxExposure <= 0) return "exits_only";
-  if (input.trustScore < input.policy.paperTrustThreshold || input.confidenceCap < input.policy.paperTrustThreshold) {
+  if (
+    input.trustScore < input.policy.paperTrustThreshold ||
+    input.confidenceCap < input.policy.paperTrustThreshold
+  ) {
     return "paper";
   }
   if (input.trustScore < input.policy.microTrustThreshold) return "micro";
@@ -725,10 +942,26 @@ function exposureFor(input: {
   requestedExposure: number;
   policy: Required<typeof DEFAULT_POLICY>;
 }) {
-  if (input.mode === "blocked" || input.mode === "exits_only" || input.mode === "paper") return 0;
-  if (input.mode === "micro") return roundExposure(Math.min(input.rawMaxExposure, input.policy.microMaxExposurePct));
+  if (
+    input.mode === "blocked" ||
+    input.mode === "exits_only" ||
+    input.mode === "paper"
+  )
+    return 0;
+  if (input.mode === "micro")
+    return roundExposure(
+      Math.min(input.rawMaxExposure, input.policy.microMaxExposurePct),
+    );
   if (input.mode === "limited") {
-    return roundExposure(Math.min(input.rawMaxExposure, Math.max(input.policy.microMaxExposurePct, input.rawMaxExposure * input.policy.limitedExposureMultiplier)));
+    return roundExposure(
+      Math.min(
+        input.rawMaxExposure,
+        Math.max(
+          input.policy.microMaxExposurePct,
+          input.rawMaxExposure * input.policy.limitedExposureMultiplier,
+        ),
+      ),
+    );
   }
   return roundExposure(input.rawMaxExposure);
 }
@@ -745,7 +978,8 @@ function survivalAdjustedMaxExposure(
   const recommendation = normalizedStatus(survivalMemory.recommendation);
 
   if (maxExposurePct != null) caps.push(Math.max(0, maxExposurePct));
-  if (maxExposurePct == null && exposureMultiplier < 1) caps.push(configuredMaxExposure * exposureMultiplier);
+  if (maxExposurePct == null && exposureMultiplier < 1)
+    caps.push(configuredMaxExposure * exposureMultiplier);
   if (recommendation === "wait") caps.push(0);
 
   return roundExposure(Math.min(...caps));
@@ -759,29 +993,63 @@ function survivalAuditFor(
 
   return {
     survivalRecovery: {
-      ...(survivalMemory.status == null ? {} : { status: String(survivalMemory.status) }),
-      ...(survivalMemory.recommendation == null ? {} : { recommendation: String(survivalMemory.recommendation) }),
-      ...(survivalMemory.exposureMultiplier == null ? {} : { exposureMultiplier: ratioScore(survivalMemory.exposureMultiplier, 1) }),
-      ...(survivalMemory.survivalConfidence == null ? {} : { survivalConfidence: score(survivalMemory.survivalConfidence, 0) }),
-      ...(survivalMemory.confidencePenalty == null ? {} : { confidencePenalty: score(survivalMemory.confidencePenalty, 0) }),
-      ...(survivalMemory.maxExposurePct == null ? {} : { maxExposurePct: percent(survivalMemory.maxExposurePct, 0) }),
+      ...(survivalMemory.status == null
+        ? {}
+        : { status: String(survivalMemory.status) }),
+      ...(survivalMemory.recommendation == null
+        ? {}
+        : { recommendation: String(survivalMemory.recommendation) }),
+      ...(survivalMemory.exposureMultiplier == null
+        ? {}
+        : {
+            exposureMultiplier: ratioScore(
+              survivalMemory.exposureMultiplier,
+              1,
+            ),
+          }),
+      ...(survivalMemory.survivalConfidence == null
+        ? {}
+        : { survivalConfidence: score(survivalMemory.survivalConfidence, 0) }),
+      ...(survivalMemory.confidencePenalty == null
+        ? {}
+        : { confidencePenalty: score(survivalMemory.confidencePenalty, 0) }),
+      ...(survivalMemory.maxExposurePct == null
+        ? {}
+        : { maxExposurePct: percent(survivalMemory.maxExposurePct, 0) }),
       trustedMaxExposure,
     },
   };
 }
 
-function allowedActionsFor(mode: TrustParticipationMode): TrustGovernorAction[] {
+function allowedActionsFor(
+  mode: TrustParticipationMode,
+): TrustGovernorAction[] {
   if (mode === "blocked") return ["observe"];
   if (mode === "exits_only") return ["observe", "risk_reducing_exits"];
-  if (mode === "paper") return ["observe", "paper_trade", "risk_reducing_exits"];
-  return ["observe", "paper_trade", "risk_reducing_exits", "new_exposure", "increase_position"];
+  if (mode === "paper")
+    return ["observe", "paper_trade", "risk_reducing_exits"];
+  return [
+    "observe",
+    "paper_trade",
+    "risk_reducing_exits",
+    "new_exposure",
+    "increase_position",
+  ];
 }
 
-function blockedActionsFor(mode: TrustParticipationMode): TrustGovernorAction[] {
+function blockedActionsFor(
+  mode: TrustParticipationMode,
+): TrustGovernorAction[] {
   if (mode === "normal" || mode === "limited" || mode === "micro") return [];
   if (mode === "paper") return ["new_exposure", "increase_position"];
-  if (mode === "exits_only") return ["paper_trade", "new_exposure", "increase_position"];
-  return ["paper_trade", "risk_reducing_exits", "new_exposure", "increase_position"];
+  if (mode === "exits_only")
+    return ["paper_trade", "new_exposure", "increase_position"];
+  return [
+    "paper_trade",
+    "risk_reducing_exits",
+    "new_exposure",
+    "increase_position",
+  ];
 }
 
 function contradictionsFor(input: {
@@ -799,17 +1067,37 @@ function contradictionsFor(input: {
   const reliabilityStatus = normalizedStatus(input.input.reliability?.status);
   const agencyStatus = normalizedStatus(input.input.agency?.status);
 
-  if ((judgementStatus === "trusted" || judgementStatus === "cautious") && calibrationBlocked) {
-    contradictions.push("Judgement finds similar history usable, but calibration still requires review.");
+  if (
+    (judgementStatus === "trusted" || judgementStatus === "cautious") &&
+    calibrationBlocked
+  ) {
+    contradictions.push(
+      "Judgement finds similar history usable, but calibration still requires review.",
+    );
   }
-  if (input.input.strategy?.productionEligible === true && input.blockers.length > 0) {
-    contradictions.push("Backtest readiness is production-eligible, but trust gates still block live participation.");
+  if (
+    input.input.strategy?.productionEligible === true &&
+    input.blockers.length > 0
+  ) {
+    contradictions.push(
+      "Backtest readiness is production-eligible, but trust gates still block live participation.",
+    );
   }
-  if ((reliabilityStatus === "healthy" || reliabilityStatus === "") && input.blockers.some((blocker) => blocker.id.startsWith("calibration_"))) {
-    contradictions.push("Market data is reliable, but model calibration is not stable enough for new exposure.");
+  if (
+    (reliabilityStatus === "healthy" || reliabilityStatus === "") &&
+    input.blockers.some((blocker) => blocker.id.startsWith("calibration_"))
+  ) {
+    contradictions.push(
+      "Market data is reliable, but model calibration is not stable enough for new exposure.",
+    );
   }
-  if ((agencyStatus === "approved" || agencyStatus === "act") && input.blockers.length > 0) {
-    contradictions.push("Agency approval conflicts with unresolved trust blockers.");
+  if (
+    (agencyStatus === "approved" || agencyStatus === "act") &&
+    input.blockers.length > 0
+  ) {
+    contradictions.push(
+      "Agency approval conflicts with unresolved trust blockers.",
+    );
   }
 
   return unique(contradictions);
@@ -830,7 +1118,9 @@ function reasonsFor(input: {
   if (input.blockers.length) {
     reasons.push(input.blockers[0].reason);
   } else if (input.maxExposure > 0) {
-    reasons.push(`Trusted maximum exposure is ${formatExposure(input.maxExposure)}.`);
+    reasons.push(
+      `Trusted maximum exposure is ${formatExposure(input.maxExposure)}.`,
+    );
   }
 
   if (input.contradictions.length) {
@@ -856,8 +1146,14 @@ function blocker(
   };
 }
 
-function weightedScore(scores: Record<string, number>, weights: Record<string, number>) {
-  const totalWeight = Object.values(weights).reduce((sum, value) => sum + value, 0);
+function weightedScore(
+  scores: Record<string, number>,
+  weights: Record<string, number>,
+) {
+  const totalWeight = Object.values(weights).reduce(
+    (sum, value) => sum + value,
+    0,
+  );
   const weighted = Object.entries(weights).reduce(
     (sum, [key, weight]) => sum + score(scores[key], 0) * weight,
     0,
@@ -868,7 +1164,9 @@ function weightedScore(scores: Record<string, number>, weights: Record<string, n
 function score(value: unknown, fallback: number) {
   const numberValue = Number(value);
   if (!Number.isFinite(numberValue)) return clamp(fallback);
-  return roundScore(Math.abs(numberValue) <= 1 ? numberValue * 100 : numberValue);
+  return roundScore(
+    Math.abs(numberValue) <= 1 ? numberValue * 100 : numberValue,
+  );
 }
 
 function ratioScore(value: unknown, fallback: number) {
@@ -897,7 +1195,13 @@ function normalizedStatus(value: unknown) {
 
 function normalizedWarnings(value: unknown) {
   return Array.isArray(value)
-    ? value.map((item) => String(item ?? "").trim().toLowerCase()).filter(Boolean)
+    ? value
+        .map((item) =>
+          String(item ?? "")
+            .trim()
+            .toLowerCase(),
+        )
+        .filter(Boolean)
     : [];
 }
 
@@ -912,7 +1216,9 @@ function uniqueBlockers(blockers: TrustBlocker[]) {
     if (!byId.has(blocker.id)) byId.set(blocker.id, blocker);
   }
 
-  return Array.from(byId.values()).sort((left, right) => severityRank(right.severity) - severityRank(left.severity));
+  return Array.from(byId.values()).sort(
+    (left, right) => severityRank(right.severity) - severityRank(left.severity),
+  );
 }
 
 function severityRank(severity: TrustBlockerSeverity) {

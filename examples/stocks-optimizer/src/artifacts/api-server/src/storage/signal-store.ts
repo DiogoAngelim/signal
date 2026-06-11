@@ -1,7 +1,11 @@
 import crypto from "node:crypto";
 import pg from "pg";
 import type { Pool as PgPool, PoolConfig } from "pg";
-import type { SignalEnvelope, SignalFilters, WebhookFilters } from "../schemas/signal-api.js";
+import type {
+  SignalEnvelope,
+  SignalFilters,
+  WebhookFilters,
+} from "../schemas/signal-api.js";
 
 const { Pool } = pg;
 
@@ -13,7 +17,10 @@ export type SignalTrustMetadata = {
   exposureCap: number;
   reason: string;
   rejectionReason?: string;
-  moduleContributionSummary: Record<string, { present: boolean; score?: number }>;
+  moduleContributionSummary: Record<
+    string,
+    { present: boolean; score?: number }
+  >;
   timestampFreshnessMs: number;
   dataFreshness: "fresh" | "stale" | "unknown";
   actionability: "actionable" | "informational" | "blocked";
@@ -114,7 +121,12 @@ export type WebhookDeliveryAttempt = {
   nextAttemptAt?: string;
 };
 
-export type QueueJobStatus = "queued" | "running" | "succeeded" | "failed" | "dead_letter";
+export type QueueJobStatus =
+  | "queued"
+  | "running"
+  | "succeeded"
+  | "failed"
+  | "dead_letter";
 
 export type QueueJobRecord = {
   id: string;
@@ -167,39 +179,88 @@ export interface SignalReplayStore {
 
 export interface SignalStorageAdapter extends SignalReplayStore {
   readonly driver: StoreStats["driver"];
-  saveSignal(record: SignalRecord): Promise<{ saved: true } | { saved: false; duplicate: SignalRecord }>;
+  saveSignal(
+    record: SignalRecord,
+  ): Promise<{ saved: true } | { saved: false; duplicate: SignalRecord }>;
   getSignal(id: string): Promise<SignalRecord | null>;
-  getLatestSignal(filters?: Partial<SignalFilters>): Promise<SignalRecord | null>;
+  getLatestSignal(
+    filters?: Partial<SignalFilters>,
+  ): Promise<SignalRecord | null>;
   listSignals(filters?: Partial<SignalFilters>): Promise<SignalRecord[]>;
   findByIdempotencyKey(key: string): Promise<SignalRecord | null>;
-  appendAudit(record: Omit<SignalAuditRecord, "id" | "createdAt">): Promise<SignalAuditRecord>;
+  appendAudit(
+    record: Omit<SignalAuditRecord, "id" | "createdAt">,
+  ): Promise<SignalAuditRecord>;
   listAudit(limit?: number): Promise<SignalAuditRecord[]>;
-  createWebhook(input: Omit<WebhookSubscription, "id" | "createdAt" | "updatedAt" | "active">): Promise<WebhookSubscription>;
+  createWebhook(
+    input: Omit<
+      WebhookSubscription,
+      "id" | "createdAt" | "updatedAt" | "active"
+    >,
+  ): Promise<WebhookSubscription>;
   listWebhooks(): Promise<WebhookSubscription[]>;
   getWebhook(id: string): Promise<WebhookSubscription | null>;
   deleteWebhook(id: string): Promise<boolean>;
-  rotateWebhookSecret(id: string, patch: {
-    secretCiphertext: string;
-    secretPreview: string;
-    previousSecretCiphertext?: string;
-    previousSecretExpiresAt?: string;
-  }): Promise<WebhookSubscription | null>;
-  appendDeliveryAttempt(record: Omit<WebhookDeliveryAttempt, "id" | "createdAt">): Promise<WebhookDeliveryAttempt>;
-  updateDeliveryAttempt(id: string, patch: Partial<Omit<WebhookDeliveryAttempt, "id" | "createdAt">>): Promise<void>;
+  rotateWebhookSecret(
+    id: string,
+    patch: {
+      secretCiphertext: string;
+      secretPreview: string;
+      previousSecretCiphertext?: string;
+      previousSecretExpiresAt?: string;
+    },
+  ): Promise<WebhookSubscription | null>;
+  appendDeliveryAttempt(
+    record: Omit<WebhookDeliveryAttempt, "id" | "createdAt">,
+  ): Promise<WebhookDeliveryAttempt>;
+  updateDeliveryAttempt(
+    id: string,
+    patch: Partial<Omit<WebhookDeliveryAttempt, "id" | "createdAt">>,
+  ): Promise<void>;
   hasDelivery(deliveryKey: string): Promise<boolean>;
   markDelivery(deliveryKey: string): Promise<boolean>;
-  createApiKey(input: Omit<ApiKeyRecord, "id" | "createdAt" | "updatedAt" | "lastUsedAt" | "revokedAt">): Promise<ApiKeyRecord>;
+  createApiKey(
+    input: Omit<
+      ApiKeyRecord,
+      "id" | "createdAt" | "updatedAt" | "lastUsedAt" | "revokedAt"
+    >,
+  ): Promise<ApiKeyRecord>;
   listApiKeys(): Promise<ApiKeyRecord[]>;
   getApiKey(id: string): Promise<ApiKeyRecord | null>;
   getApiKeyByPrefix(prefix: string): Promise<ApiKeyRecord | null>;
-  updateApiKey(id: string, patch: Partial<Omit<ApiKeyRecord, "id" | "createdAt">>): Promise<ApiKeyRecord | null>;
+  updateApiKey(
+    id: string,
+    patch: Partial<Omit<ApiKeyRecord, "id" | "createdAt">>,
+  ): Promise<ApiKeyRecord | null>;
   recordApiKeyUse(id: string, usedAt: string): Promise<void>;
-  appendSecretRotation(record: Omit<SecretRotationRecord, "id" | "createdAt">): Promise<SecretRotationRecord>;
+  appendSecretRotation(
+    record: Omit<SecretRotationRecord, "id" | "createdAt">,
+  ): Promise<SecretRotationRecord>;
   listSecretRotations(limit?: number): Promise<SecretRotationRecord[]>;
-  enqueueQueueJob(input: Omit<QueueJobRecord, "id" | "status" | "attempts" | "lockedAt" | "lockedBy" | "lastError" | "createdAt" | "updatedAt">): Promise<QueueJobRecord>;
-  claimQueueJobs(queue: string, workerId: string, limit: number, lockMs?: number): Promise<QueueJobRecord[]>;
+  enqueueQueueJob(
+    input: Omit<
+      QueueJobRecord,
+      | "id"
+      | "status"
+      | "attempts"
+      | "lockedAt"
+      | "lockedBy"
+      | "lastError"
+      | "createdAt"
+      | "updatedAt"
+    >,
+  ): Promise<QueueJobRecord>;
+  claimQueueJobs(
+    queue: string,
+    workerId: string,
+    limit: number,
+    lockMs?: number,
+  ): Promise<QueueJobRecord[]>;
   completeQueueJob(id: string): Promise<void>;
-  failQueueJob(id: string, input: { error: string; nextRunAt?: string; deadLetter?: boolean }): Promise<void>;
+  failQueueJob(
+    id: string,
+    input: { error: string; nextRunAt?: string; deadLetter?: boolean },
+  ): Promise<void>;
   queueStats(queue?: string): Promise<QueueStats>;
   redriveDeadLetterJobs(queue?: string, ids?: string[]): Promise<number>;
   stats(): Promise<StoreStats>;
@@ -224,7 +285,9 @@ export class MemorySignalStore implements SignalStorageAdapter {
   private readonly queueJobs = new Map<string, QueueJobRecord>();
   private sequence = 0;
 
-  async saveSignal(record: SignalRecord): Promise<{ saved: true } | { saved: false; duplicate: SignalRecord }> {
+  async saveSignal(
+    record: SignalRecord,
+  ): Promise<{ saved: true } | { saved: false; duplicate: SignalRecord }> {
     this.pruneReplayKeys();
     const duplicateId = this.idempotency.get(record.signal.idempotencyKey);
     if (duplicateId) {
@@ -242,7 +305,10 @@ export class MemorySignalStore implements SignalStorageAdapter {
     };
 
     this.signals.set(nextRecord.signal.id, nextRecord);
-    this.idempotency.set(nextRecord.signal.idempotencyKey, nextRecord.signal.id);
+    this.idempotency.set(
+      nextRecord.signal.idempotencyKey,
+      nextRecord.signal.id,
+    );
     this.orderedSignals.push(nextRecord);
     this.latestSignals.set(latestKey(nextRecord.signal), nextRecord);
     return { saved: true };
@@ -252,7 +318,9 @@ export class MemorySignalStore implements SignalStorageAdapter {
     return this.signals.get(id) ?? null;
   }
 
-  async getLatestSignal(filters: Partial<SignalFilters> = {}): Promise<SignalRecord | null> {
+  async getLatestSignal(
+    filters: Partial<SignalFilters> = {},
+  ): Promise<SignalRecord | null> {
     if (filters.symbol || filters.venue || filters.timeframe) {
       const key = latestKey({
         symbol: String(filters.symbol ?? "*"),
@@ -271,7 +339,9 @@ export class MemorySignalStore implements SignalStorageAdapter {
     return null;
   }
 
-  async listSignals(filters: Partial<SignalFilters> = {}): Promise<SignalRecord[]> {
+  async listSignals(
+    filters: Partial<SignalFilters> = {},
+  ): Promise<SignalRecord[]> {
     const limit = Math.max(1, Math.min(Number(filters.limit ?? 100), 500));
     const afterSequence = sequenceFromCursor(filters.after);
     return this.orderedSignals
@@ -283,10 +353,12 @@ export class MemorySignalStore implements SignalStorageAdapter {
 
   async findByIdempotencyKey(key: string): Promise<SignalRecord | null> {
     const id = this.idempotency.get(key);
-    return id ? this.signals.get(id) ?? null : null;
+    return id ? (this.signals.get(id) ?? null) : null;
   }
 
-  async appendAudit(record: Omit<SignalAuditRecord, "id" | "createdAt">): Promise<SignalAuditRecord> {
+  async appendAudit(
+    record: Omit<SignalAuditRecord, "id" | "createdAt">,
+  ): Promise<SignalAuditRecord> {
     const auditRecord = {
       ...record,
       id: crypto.randomUUID(),
@@ -300,7 +372,12 @@ export class MemorySignalStore implements SignalStorageAdapter {
     return this.audit.slice(-Math.max(1, Math.min(limit, 500))).reverse();
   }
 
-  async createWebhook(input: Omit<WebhookSubscription, "id" | "createdAt" | "updatedAt" | "active">): Promise<WebhookSubscription> {
+  async createWebhook(
+    input: Omit<
+      WebhookSubscription,
+      "id" | "createdAt" | "updatedAt" | "active"
+    >,
+  ): Promise<WebhookSubscription> {
     const now = new Date().toISOString();
     const subscription: WebhookSubscription = {
       ...input,
@@ -314,7 +391,9 @@ export class MemorySignalStore implements SignalStorageAdapter {
   }
 
   async listWebhooks(): Promise<WebhookSubscription[]> {
-    return Array.from(this.webhooks.values()).filter((webhook) => webhook.active);
+    return Array.from(this.webhooks.values()).filter(
+      (webhook) => webhook.active,
+    );
   }
 
   async getWebhook(id: string): Promise<WebhookSubscription | null> {
@@ -332,12 +411,15 @@ export class MemorySignalStore implements SignalStorageAdapter {
     return true;
   }
 
-  async rotateWebhookSecret(id: string, patch: {
-    secretCiphertext: string;
-    secretPreview: string;
-    previousSecretCiphertext?: string;
-    previousSecretExpiresAt?: string;
-  }): Promise<WebhookSubscription | null> {
+  async rotateWebhookSecret(
+    id: string,
+    patch: {
+      secretCiphertext: string;
+      secretPreview: string;
+      previousSecretCiphertext?: string;
+      previousSecretExpiresAt?: string;
+    },
+  ): Promise<WebhookSubscription | null> {
     const webhook = this.webhooks.get(id);
     if (!webhook) return null;
     const updated = {
@@ -349,7 +431,9 @@ export class MemorySignalStore implements SignalStorageAdapter {
     return updated;
   }
 
-  async appendDeliveryAttempt(record: Omit<WebhookDeliveryAttempt, "id" | "createdAt">): Promise<WebhookDeliveryAttempt> {
+  async appendDeliveryAttempt(
+    record: Omit<WebhookDeliveryAttempt, "id" | "createdAt">,
+  ): Promise<WebhookDeliveryAttempt> {
     const attempt = {
       ...record,
       id: crypto.randomUUID(),
@@ -359,7 +443,10 @@ export class MemorySignalStore implements SignalStorageAdapter {
     return attempt;
   }
 
-  async updateDeliveryAttempt(id: string, patch: Partial<Omit<WebhookDeliveryAttempt, "id" | "createdAt">>) {
+  async updateDeliveryAttempt(
+    id: string,
+    patch: Partial<Omit<WebhookDeliveryAttempt, "id" | "createdAt">>,
+  ) {
     const attempt = this.deliveryAttempts.get(id);
     if (!attempt) return;
     this.deliveryAttempts.set(id, { ...attempt, ...patch });
@@ -375,7 +462,12 @@ export class MemorySignalStore implements SignalStorageAdapter {
     return true;
   }
 
-  async createApiKey(input: Omit<ApiKeyRecord, "id" | "createdAt" | "updatedAt" | "lastUsedAt" | "revokedAt">): Promise<ApiKeyRecord> {
+  async createApiKey(
+    input: Omit<
+      ApiKeyRecord,
+      "id" | "createdAt" | "updatedAt" | "lastUsedAt" | "revokedAt"
+    >,
+  ): Promise<ApiKeyRecord> {
     if (this.apiKeyPrefixes.has(input.prefix)) {
       throw new Error(`Duplicate API key prefix: ${input.prefix}`);
     }
@@ -393,7 +485,9 @@ export class MemorySignalStore implements SignalStorageAdapter {
   }
 
   async listApiKeys(): Promise<ApiKeyRecord[]> {
-    return Array.from(this.apiKeys.values()).sort((left, right) => left.createdAt.localeCompare(right.createdAt));
+    return Array.from(this.apiKeys.values()).sort((left, right) =>
+      left.createdAt.localeCompare(right.createdAt),
+    );
   }
 
   async getApiKey(id: string): Promise<ApiKeyRecord | null> {
@@ -402,10 +496,13 @@ export class MemorySignalStore implements SignalStorageAdapter {
 
   async getApiKeyByPrefix(prefix: string): Promise<ApiKeyRecord | null> {
     const id = this.apiKeyPrefixes.get(prefix);
-    return id ? this.apiKeys.get(id) ?? null : null;
+    return id ? (this.apiKeys.get(id) ?? null) : null;
   }
 
-  async updateApiKey(id: string, patch: Partial<Omit<ApiKeyRecord, "id" | "createdAt">>): Promise<ApiKeyRecord | null> {
+  async updateApiKey(
+    id: string,
+    patch: Partial<Omit<ApiKeyRecord, "id" | "createdAt">>,
+  ): Promise<ApiKeyRecord | null> {
     const existing = this.apiKeys.get(id);
     if (!existing) return null;
     const updated = {
@@ -421,7 +518,9 @@ export class MemorySignalStore implements SignalStorageAdapter {
     await this.updateApiKey(id, { lastUsedAt: usedAt });
   }
 
-  async appendSecretRotation(record: Omit<SecretRotationRecord, "id" | "createdAt">): Promise<SecretRotationRecord> {
+  async appendSecretRotation(
+    record: Omit<SecretRotationRecord, "id" | "createdAt">,
+  ): Promise<SecretRotationRecord> {
     const rotation = {
       ...record,
       id: crypto.randomUUID(),
@@ -432,14 +531,29 @@ export class MemorySignalStore implements SignalStorageAdapter {
   }
 
   async listSecretRotations(limit = 100): Promise<SecretRotationRecord[]> {
-    return this.secretRotations.slice(-Math.max(1, Math.min(limit, 500))).reverse();
+    return this.secretRotations
+      .slice(-Math.max(1, Math.min(limit, 500)))
+      .reverse();
   }
 
-  async enqueueQueueJob(input: Omit<QueueJobRecord, "id" | "status" | "attempts" | "lockedAt" | "lockedBy" | "lastError" | "createdAt" | "updatedAt">): Promise<QueueJobRecord> {
-    const existing = Array.from(this.queueJobs.values()).find((job) =>
-      job.queue === input.queue &&
-      job.dedupeKey === input.dedupeKey &&
-      !["succeeded", "dead_letter"].includes(job.status),
+  async enqueueQueueJob(
+    input: Omit<
+      QueueJobRecord,
+      | "id"
+      | "status"
+      | "attempts"
+      | "lockedAt"
+      | "lockedBy"
+      | "lastError"
+      | "createdAt"
+      | "updatedAt"
+    >,
+  ): Promise<QueueJobRecord> {
+    const existing = Array.from(this.queueJobs.values()).find(
+      (job) =>
+        job.queue === input.queue &&
+        job.dedupeKey === input.dedupeKey &&
+        !["succeeded", "dead_letter"].includes(job.status),
     );
     if (existing) return existing;
 
@@ -456,13 +570,24 @@ export class MemorySignalStore implements SignalStorageAdapter {
     return job;
   }
 
-  async claimQueueJobs(queue: string, workerId: string, limit: number, lockMs = 30_000): Promise<QueueJobRecord[]> {
+  async claimQueueJobs(
+    queue: string,
+    workerId: string,
+    limit: number,
+    lockMs = 30_000,
+  ): Promise<QueueJobRecord[]> {
     const nowMs = Date.now();
     const now = new Date(nowMs).toISOString();
     const lockExpiredBefore = nowMs - lockMs;
     const jobs = Array.from(this.queueJobs.values())
       .filter((job) => job.queue === queue)
-      .filter((job) => job.status === "queued" || (job.status === "running" && job.lockedAt && Date.parse(job.lockedAt) < lockExpiredBefore))
+      .filter(
+        (job) =>
+          job.status === "queued" ||
+          (job.status === "running" &&
+            job.lockedAt &&
+            Date.parse(job.lockedAt) < lockExpiredBefore),
+      )
       .filter((job) => Date.parse(job.runAt) <= nowMs)
       .sort((left, right) => left.runAt.localeCompare(right.runAt))
       .slice(0, Math.max(1, limit));
@@ -493,7 +618,10 @@ export class MemorySignalStore implements SignalStorageAdapter {
     });
   }
 
-  async failQueueJob(id: string, input: { error: string; nextRunAt?: string; deadLetter?: boolean }): Promise<void> {
+  async failQueueJob(
+    id: string,
+    input: { error: string; nextRunAt?: string; deadLetter?: boolean },
+  ): Promise<void> {
     const job = this.queueJobs.get(id);
     if (!job) return;
     this.queueJobs.set(id, {
@@ -508,7 +636,9 @@ export class MemorySignalStore implements SignalStorageAdapter {
   }
 
   async queueStats(queue?: string): Promise<QueueStats> {
-    const jobs = Array.from(this.queueJobs.values()).filter((job) => !queue || job.queue === queue);
+    const jobs = Array.from(this.queueJobs.values()).filter(
+      (job) => !queue || job.queue === queue,
+    );
     const oldest = jobs
       .filter((job) => job.status === "queued")
       .map((job) => job.createdAt)
@@ -558,11 +688,15 @@ export class MemorySignalStore implements SignalStorageAdapter {
       driver: this.driver,
       signals: this.signals.size,
       audits: this.audit.length,
-      webhooks: Array.from(this.webhooks.values()).filter((webhook) => webhook.active).length,
+      webhooks: Array.from(this.webhooks.values()).filter(
+        (webhook) => webhook.active,
+      ).length,
       deliveryAttempts: this.deliveryAttempts.size,
       idempotencyKeys: this.idempotency.size,
       queueJobs: this.queueJobs.size,
-      deadLetterJobs: Array.from(this.queueJobs.values()).filter((job) => job.status === "dead_letter").length,
+      deadLetterJobs: Array.from(this.queueJobs.values()).filter(
+        (job) => job.status === "dead_letter",
+      ).length,
       apiKeys: this.apiKeys.size,
       secretRotations: this.secretRotations.length,
     };
@@ -606,10 +740,15 @@ export class PostgresSignalStore implements SignalStorageAdapter {
   private readonly pool: PgPool;
 
   constructor(config: PoolConfig | PgPool) {
-    this.pool = typeof (config as PgPool).query === "function" ? config as PgPool : new Pool(config as PoolConfig);
+    this.pool =
+      typeof (config as PgPool).query === "function"
+        ? (config as PgPool)
+        : new Pool(config as PoolConfig);
   }
 
-  async saveSignal(record: SignalRecord): Promise<{ saved: true } | { saved: false; duplicate: SignalRecord }> {
+  async saveSignal(
+    record: SignalRecord,
+  ): Promise<{ saved: true } | { saved: false; duplicate: SignalRecord }> {
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
@@ -636,9 +775,14 @@ export class PostgresSignalStore implements SignalStorageAdapter {
 
       if (!inserted.rowCount) {
         await client.query("ROLLBACK");
-        const duplicate = await this.findDuplicateSignal(record.signal.id, record.signal.idempotencyKey);
+        const duplicate = await this.findDuplicateSignal(
+          record.signal.id,
+          record.signal.idempotencyKey,
+        );
         if (duplicate) return { saved: false, duplicate };
-        throw new Error("Signal insert conflicted but duplicate record could not be loaded.");
+        throw new Error(
+          "Signal insert conflicted but duplicate record could not be loaded.",
+        );
       }
 
       const sequence = Number(inserted.rows[0].sequence);
@@ -658,7 +802,13 @@ export class PostgresSignalStore implements SignalStorageAdapter {
          VALUES ($1,$2,$3,$4,$5,NOW())
          ON CONFLICT (venue, symbol, timeframe)
          DO UPDATE SET signal_id = EXCLUDED.signal_id, sequence = EXCLUDED.sequence, updated_at = NOW()`,
-        [record.signal.venue, record.signal.symbol, record.signal.timeframe, record.signal.id, sequence],
+        [
+          record.signal.venue,
+          record.signal.symbol,
+          record.signal.timeframe,
+          record.signal.id,
+          sequence,
+        ],
       );
       await client.query("COMMIT");
       return { saved: true };
@@ -671,16 +821,23 @@ export class PostgresSignalStore implements SignalStorageAdapter {
   }
 
   async getSignal(id: string): Promise<SignalRecord | null> {
-    const result = await this.pool.query<{ record: SignalRecord }>("SELECT record FROM signal_records WHERE id = $1", [id]);
+    const result = await this.pool.query<{ record: SignalRecord }>(
+      "SELECT record FROM signal_records WHERE id = $1",
+      [id],
+    );
     return result.rows[0]?.record ?? null;
   }
 
-  async getLatestSignal(filters: Partial<SignalFilters> = {}): Promise<SignalRecord | null> {
+  async getLatestSignal(
+    filters: Partial<SignalFilters> = {},
+  ): Promise<SignalRecord | null> {
     const listed = await this.listSignals({ ...filters, limit: 1 });
     return listed[0] ?? null;
   }
 
-  async listSignals(filters: Partial<SignalFilters> = {}): Promise<SignalRecord[]> {
+  async listSignals(
+    filters: Partial<SignalFilters> = {},
+  ): Promise<SignalRecord[]> {
     const limit = Math.max(1, Math.min(Number(filters.limit ?? 100), 500));
     const values: unknown[] = [];
     const where: string[] = [];
@@ -730,7 +887,9 @@ export class PostgresSignalStore implements SignalStorageAdapter {
     return result.rows[0]?.record ?? null;
   }
 
-  async appendAudit(record: Omit<SignalAuditRecord, "id" | "createdAt">): Promise<SignalAuditRecord> {
+  async appendAudit(
+    record: Omit<SignalAuditRecord, "id" | "createdAt">,
+  ): Promise<SignalAuditRecord> {
     const id = crypto.randomUUID();
     const result = await this.pool.query<{ created_at: Date }>(
       `INSERT INTO signal_audit_logs (id, signal_id, message_id, action, actor, request_id, metadata)
@@ -773,7 +932,12 @@ export class PostgresSignalStore implements SignalStorageAdapter {
     }));
   }
 
-  async createWebhook(input: Omit<WebhookSubscription, "id" | "createdAt" | "updatedAt" | "active">): Promise<WebhookSubscription> {
+  async createWebhook(
+    input: Omit<
+      WebhookSubscription,
+      "id" | "createdAt" | "updatedAt" | "active"
+    >,
+  ): Promise<WebhookSubscription> {
     const id = crypto.randomUUID();
     const result = await this.pool.query(
       `INSERT INTO signal_webhook_subscriptions (
@@ -800,12 +964,17 @@ export class PostgresSignalStore implements SignalStorageAdapter {
   }
 
   async listWebhooks(): Promise<WebhookSubscription[]> {
-    const result = await this.pool.query("SELECT * FROM signal_webhook_subscriptions WHERE active = true ORDER BY created_at DESC");
+    const result = await this.pool.query(
+      "SELECT * FROM signal_webhook_subscriptions WHERE active = true ORDER BY created_at DESC",
+    );
     return result.rows.map(rowToWebhook);
   }
 
   async getWebhook(id: string): Promise<WebhookSubscription | null> {
-    const result = await this.pool.query("SELECT * FROM signal_webhook_subscriptions WHERE id = $1", [id]);
+    const result = await this.pool.query(
+      "SELECT * FROM signal_webhook_subscriptions WHERE id = $1",
+      [id],
+    );
     return result.rows[0] ? rowToWebhook(result.rows[0]) : null;
   }
 
@@ -817,12 +986,15 @@ export class PostgresSignalStore implements SignalStorageAdapter {
     return (result.rowCount ?? 0) > 0;
   }
 
-  async rotateWebhookSecret(id: string, patch: {
-    secretCiphertext: string;
-    secretPreview: string;
-    previousSecretCiphertext?: string;
-    previousSecretExpiresAt?: string;
-  }): Promise<WebhookSubscription | null> {
+  async rotateWebhookSecret(
+    id: string,
+    patch: {
+      secretCiphertext: string;
+      secretPreview: string;
+      previousSecretCiphertext?: string;
+      previousSecretExpiresAt?: string;
+    },
+  ): Promise<WebhookSubscription | null> {
     const result = await this.pool.query(
       `UPDATE signal_webhook_subscriptions
        SET secret_ciphertext = $2,
@@ -843,7 +1015,9 @@ export class PostgresSignalStore implements SignalStorageAdapter {
     return result.rows[0] ? rowToWebhook(result.rows[0]) : null;
   }
 
-  async appendDeliveryAttempt(record: Omit<WebhookDeliveryAttempt, "id" | "createdAt">): Promise<WebhookDeliveryAttempt> {
+  async appendDeliveryAttempt(
+    record: Omit<WebhookDeliveryAttempt, "id" | "createdAt">,
+  ): Promise<WebhookDeliveryAttempt> {
     const id = crypto.randomUUID();
     const result = await this.pool.query(
       `INSERT INTO signal_webhook_delivery_attempts (
@@ -870,7 +1044,10 @@ export class PostgresSignalStore implements SignalStorageAdapter {
     };
   }
 
-  async updateDeliveryAttempt(id: string, patch: Partial<Omit<WebhookDeliveryAttempt, "id" | "createdAt">>) {
+  async updateDeliveryAttempt(
+    id: string,
+    patch: Partial<Omit<WebhookDeliveryAttempt, "id" | "createdAt">>,
+  ) {
     await this.pool.query(
       `UPDATE signal_webhook_delivery_attempts
        SET status = COALESCE($2, status),
@@ -889,7 +1066,10 @@ export class PostgresSignalStore implements SignalStorageAdapter {
   }
 
   async hasDelivery(deliveryKey: string): Promise<boolean> {
-    const result = await this.pool.query("SELECT 1 FROM signal_delivery_dedupe WHERE delivery_key = $1", [deliveryKey]);
+    const result = await this.pool.query(
+      "SELECT 1 FROM signal_delivery_dedupe WHERE delivery_key = $1",
+      [deliveryKey],
+    );
     return (result.rowCount ?? 0) > 0;
   }
 
@@ -901,7 +1081,12 @@ export class PostgresSignalStore implements SignalStorageAdapter {
     return (result.rowCount ?? 0) > 0;
   }
 
-  async createApiKey(input: Omit<ApiKeyRecord, "id" | "createdAt" | "updatedAt" | "lastUsedAt" | "revokedAt">): Promise<ApiKeyRecord> {
+  async createApiKey(
+    input: Omit<
+      ApiKeyRecord,
+      "id" | "createdAt" | "updatedAt" | "lastUsedAt" | "revokedAt"
+    >,
+  ): Promise<ApiKeyRecord> {
     const id = crypto.randomUUID();
     const result = await this.pool.query(
       `INSERT INTO signal_api_keys (
@@ -929,21 +1114,32 @@ export class PostgresSignalStore implements SignalStorageAdapter {
   }
 
   async listApiKeys(): Promise<ApiKeyRecord[]> {
-    const result = await this.pool.query("SELECT * FROM signal_api_keys ORDER BY created_at ASC");
+    const result = await this.pool.query(
+      "SELECT * FROM signal_api_keys ORDER BY created_at ASC",
+    );
     return result.rows.map(rowToApiKey);
   }
 
   async getApiKey(id: string): Promise<ApiKeyRecord | null> {
-    const result = await this.pool.query("SELECT * FROM signal_api_keys WHERE id = $1", [id]);
+    const result = await this.pool.query(
+      "SELECT * FROM signal_api_keys WHERE id = $1",
+      [id],
+    );
     return result.rows[0] ? rowToApiKey(result.rows[0]) : null;
   }
 
   async getApiKeyByPrefix(prefix: string): Promise<ApiKeyRecord | null> {
-    const result = await this.pool.query("SELECT * FROM signal_api_keys WHERE prefix = $1", [prefix]);
+    const result = await this.pool.query(
+      "SELECT * FROM signal_api_keys WHERE prefix = $1",
+      [prefix],
+    );
     return result.rows[0] ? rowToApiKey(result.rows[0]) : null;
   }
 
-  async updateApiKey(id: string, patch: Partial<Omit<ApiKeyRecord, "id" | "createdAt">>): Promise<ApiKeyRecord | null> {
+  async updateApiKey(
+    id: string,
+    patch: Partial<Omit<ApiKeyRecord, "id" | "createdAt">>,
+  ): Promise<ApiKeyRecord | null> {
     const existing = await this.getApiKey(id);
     if (!existing) return null;
     const next = { ...existing, ...patch };
@@ -978,10 +1174,15 @@ export class PostgresSignalStore implements SignalStorageAdapter {
   }
 
   async recordApiKeyUse(id: string, usedAt: string): Promise<void> {
-    await this.pool.query("UPDATE signal_api_keys SET last_used_at = $2, updated_at = NOW() WHERE id = $1", [id, usedAt]);
+    await this.pool.query(
+      "UPDATE signal_api_keys SET last_used_at = $2, updated_at = NOW() WHERE id = $1",
+      [id, usedAt],
+    );
   }
 
-  async appendSecretRotation(record: Omit<SecretRotationRecord, "id" | "createdAt">): Promise<SecretRotationRecord> {
+  async appendSecretRotation(
+    record: Omit<SecretRotationRecord, "id" | "createdAt">,
+  ): Promise<SecretRotationRecord> {
     const id = crypto.randomUUID();
     const result = await this.pool.query(
       `INSERT INTO signal_secret_rotations (
@@ -1024,7 +1225,19 @@ export class PostgresSignalStore implements SignalStorageAdapter {
     }));
   }
 
-  async enqueueQueueJob(input: Omit<QueueJobRecord, "id" | "status" | "attempts" | "lockedAt" | "lockedBy" | "lastError" | "createdAt" | "updatedAt">): Promise<QueueJobRecord> {
+  async enqueueQueueJob(
+    input: Omit<
+      QueueJobRecord,
+      | "id"
+      | "status"
+      | "attempts"
+      | "lockedAt"
+      | "lockedBy"
+      | "lastError"
+      | "createdAt"
+      | "updatedAt"
+    >,
+  ): Promise<QueueJobRecord> {
     const id = crypto.randomUUID();
     const result = await this.pool.query(
       `INSERT INTO signal_queue_jobs (id, queue, dedupe_key, payload, status, attempts, max_attempts, run_at)
@@ -1032,12 +1245,24 @@ export class PostgresSignalStore implements SignalStorageAdapter {
        ON CONFLICT (queue, dedupe_key) WHERE status IN ('queued', 'running', 'failed')
        DO UPDATE SET updated_at = signal_queue_jobs.updated_at
        RETURNING *`,
-      [id, input.queue, input.dedupeKey, JSON.stringify(input.payload), input.maxAttempts, input.runAt],
+      [
+        id,
+        input.queue,
+        input.dedupeKey,
+        JSON.stringify(input.payload),
+        input.maxAttempts,
+        input.runAt,
+      ],
     );
     return rowToQueueJob(result.rows[0]);
   }
 
-  async claimQueueJobs(queue: string, workerId: string, limit: number, lockMs = 30_000): Promise<QueueJobRecord[]> {
+  async claimQueueJobs(
+    queue: string,
+    workerId: string,
+    limit: number,
+    lockMs = 30_000,
+  ): Promise<QueueJobRecord[]> {
     const result = await this.pool.query(
       `WITH candidates AS (
          SELECT id
@@ -1073,7 +1298,10 @@ export class PostgresSignalStore implements SignalStorageAdapter {
     );
   }
 
-  async failQueueJob(id: string, input: { error: string; nextRunAt?: string; deadLetter?: boolean }): Promise<void> {
+  async failQueueJob(
+    id: string,
+    input: { error: string; nextRunAt?: string; deadLetter?: boolean },
+  ): Promise<void> {
     await this.pool.query(
       `UPDATE signal_queue_jobs
        SET status = $2,
@@ -1083,7 +1311,12 @@ export class PostgresSignalStore implements SignalStorageAdapter {
            last_error = $4,
            updated_at = NOW()
        WHERE id = $1`,
-      [id, input.deadLetter ? "dead_letter" : "queued", input.nextRunAt ?? null, safeError(input.error)],
+      [
+        id,
+        input.deadLetter ? "dead_letter" : "queued",
+        input.nextRunAt ?? null,
+        safeError(input.error),
+      ],
     );
   }
 
@@ -1095,14 +1328,21 @@ export class PostgresSignalStore implements SignalStorageAdapter {
        GROUP BY status`,
       queue ? [queue] : [],
     );
-    const stats: QueueStats = { queued: 0, running: 0, succeeded: 0, failed: 0, deadLetter: 0 };
+    const stats: QueueStats = {
+      queued: 0,
+      running: 0,
+      succeeded: 0,
+      failed: 0,
+      deadLetter: 0,
+    };
     for (const row of result.rows) {
       if (row.status === "queued") stats.queued = row.count;
       if (row.status === "running") stats.running = row.count;
       if (row.status === "succeeded") stats.succeeded = row.count;
       if (row.status === "failed") stats.failed = row.count;
       if (row.status === "dead_letter") stats.deadLetter = row.count;
-      if (row.status === "queued" && row.oldest) stats.oldestQueuedAt = row.oldest.toISOString();
+      if (row.status === "queued" && row.oldest)
+        stats.oldestQueuedAt = row.oldest.toISOString();
     }
     return stats;
   }
@@ -1207,9 +1447,12 @@ export class PostgresSignalStore implements SignalStorageAdapter {
     `);
   }
 
-  private async findDuplicateSignal(id: string, idempotencyKey: string): Promise<SignalRecord | null> {
+  private async findDuplicateSignal(
+    id: string,
+    idempotencyKey: string,
+  ): Promise<SignalRecord | null> {
     const result = await this.pool.query<{ record: SignalRecord }>(
-      `SELECT record FROM signal_records WHERE id = $1 OR idempotency_key = $2 LIMIT 1`,
+      "SELECT record FROM signal_records WHERE id = $1 OR idempotency_key = $2 LIMIT 1",
       [id, idempotencyKey],
     );
     return result.rows[0]?.record ?? null;
@@ -1219,7 +1462,9 @@ export class PostgresSignalStore implements SignalStorageAdapter {
 let singleton: SignalStorageAdapter = createSignalStoreFromEnvironment();
 
 export function createSignalStoreFromEnvironment(): SignalStorageAdapter {
-  const driver = process.env.SIGNAL_STORAGE_DRIVER ?? (process.env.DATABASE_URL ? "postgres" : "memory");
+  const driver =
+    process.env.SIGNAL_STORAGE_DRIVER ??
+    (process.env.DATABASE_URL ? "postgres" : "memory");
 
   if (driver === "postgres") {
     if (!process.env.DATABASE_URL) {
@@ -1228,8 +1473,14 @@ export function createSignalStoreFromEnvironment(): SignalStorageAdapter {
     return new PostgresSignalStore({
       connectionString: process.env.DATABASE_URL,
       max: positiveInt(process.env.SIGNAL_DATABASE_POOL_MAX, 10),
-      idleTimeoutMillis: positiveInt(process.env.SIGNAL_DATABASE_IDLE_TIMEOUT_MS, 30_000),
-      connectionTimeoutMillis: positiveInt(process.env.SIGNAL_DATABASE_CONNECT_TIMEOUT_MS, 5_000),
+      idleTimeoutMillis: positiveInt(
+        process.env.SIGNAL_DATABASE_IDLE_TIMEOUT_MS,
+        30_000,
+      ),
+      connectionTimeoutMillis: positiveInt(
+        process.env.SIGNAL_DATABASE_CONNECT_TIMEOUT_MS,
+        5_000,
+      ),
     });
   }
 
@@ -1265,19 +1516,32 @@ export function publicApiKey(record: ApiKeyRecord) {
   };
 }
 
-export function signalMatchesFilters(record: SignalRecord, filters: Partial<SignalFilters | WebhookFilters> = {}) {
+export function signalMatchesFilters(
+  record: SignalRecord,
+  filters: Partial<SignalFilters | WebhookFilters> = {},
+) {
   const signal = record.signal;
   const webhookFilters = filters as WebhookFilters;
   const queryFilters = filters as SignalFilters;
-  const symbols = webhookFilters.symbols?.map(normalize) ?? (queryFilters.symbol ? [normalize(queryFilters.symbol)] : []);
-  const venues = webhookFilters.venues?.map(normalize) ?? (queryFilters.venue ? [normalize(queryFilters.venue)] : []);
-  const kinds = webhookFilters.kinds ?? (queryFilters.kind ? [queryFilters.kind] : []);
+  const symbols =
+    webhookFilters.symbols?.map(normalize) ??
+    (queryFilters.symbol ? [normalize(queryFilters.symbol)] : []);
+  const venues =
+    webhookFilters.venues?.map(normalize) ??
+    (queryFilters.venue ? [normalize(queryFilters.venue)] : []);
+  const kinds =
+    webhookFilters.kinds ?? (queryFilters.kind ? [queryFilters.kind] : []);
   const minTrust = webhookFilters.minTrust ?? queryFilters.minTrust;
 
-  if (symbols.length && !symbols.includes(normalize(signal.symbol))) return false;
+  if (symbols.length && !symbols.includes(normalize(signal.symbol)))
+    return false;
   if (venues.length && !venues.includes(normalize(signal.venue))) return false;
   if (kinds.length && !kinds.includes(signal.kind)) return false;
-  if (queryFilters.timeframe && normalize(queryFilters.timeframe) !== normalize(signal.timeframe)) return false;
+  if (
+    queryFilters.timeframe &&
+    normalize(queryFilters.timeframe) !== normalize(signal.timeframe)
+  )
+    return false;
   if (minTrust != null && signal.trust < Number(minTrust)) return false;
   return true;
 }
@@ -1289,7 +1553,8 @@ function rowToWebhook(row: any): WebhookSubscription {
     secretCiphertext: row.secret_ciphertext,
     secretPreview: row.secret_preview,
     previousSecretCiphertext: row.previous_secret_ciphertext ?? undefined,
-    previousSecretExpiresAt: row.previous_secret_expires_at?.toISOString?.() ?? undefined,
+    previousSecretExpiresAt:
+      row.previous_secret_expires_at?.toISOString?.() ?? undefined,
     events: row.events ?? [],
     filters: row.filters ?? {},
     description: row.description ?? undefined,
@@ -1335,12 +1600,16 @@ function rowToQueueJob(row: any): QueueJobRecord {
   };
 }
 
-function latestKey(input: Pick<SignalEnvelope, "symbol" | "venue" | "timeframe">) {
+function latestKey(
+  input: Pick<SignalEnvelope, "symbol" | "venue" | "timeframe">,
+) {
   return `${normalize(input.venue)}:${normalize(input.symbol)}:${normalize(input.timeframe)}`;
 }
 
 function normalize(value: unknown) {
-  return String(value ?? "").trim().toUpperCase();
+  return String(value ?? "")
+    .trim()
+    .toUpperCase();
 }
 
 function sequenceFromCursor(value: unknown) {

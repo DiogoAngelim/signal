@@ -1,14 +1,16 @@
-
-import { evaluateOpportunityDensity } from "../../../signal-framework/opportunity-discovery/density";
-import { analyzeOpportunityOutcomes } from "../../../signal-framework/opportunity-explorer/engine";
 import {
-  discover as discoverGeneric,
   type DiscoveredOpportunity,
   type DiscoveryEvidence,
   type DiscoveryInput,
   type DiscoveryResult,
+  discover as discoverGeneric,
 } from "../../../signal-framework/discovery/engine";
-import { sizeAdaptiveOpportunity, type AdaptiveSizingResult } from "../../../signal-framework/sizing/adaptive";
+import { evaluateOpportunityDensity } from "../../../signal-framework/opportunity-discovery/density";
+import { analyzeOpportunityOutcomes } from "../../../signal-framework/opportunity-explorer/engine";
+import {
+  type AdaptiveSizingResult,
+  sizeAdaptiveOpportunity,
+} from "../../../signal-framework/sizing/adaptive";
 import type {
   DetectedNeed,
   DiscoveryFinding,
@@ -63,7 +65,6 @@ export type StockOpportunityFactors = {
   crossAssetLeadership: number;
 };
 
-
 export type StockOpportunityLifecycle =
   | "Detected"
   | "Emerging"
@@ -72,7 +73,6 @@ export type StockOpportunityLifecycle =
   | "Sized"
   | "Active"
   | "Closed";
-
 
 export type StockOpportunityProgressionPoint = {
   stage: StockOpportunityLifecycle;
@@ -124,43 +124,51 @@ export type StockOpportunityDiscoveryResult = {
   };
 };
 
-
-
-
-
-
-
-
-
-
-
-export function discoverStockOpportunities(input: StockOpportunityDiscoveryInput): StockOpportunityDiscoveryResult {
+export function discoverStockOpportunities(
+  input: StockOpportunityDiscoveryInput,
+): StockOpportunityDiscoveryResult {
   const signals = input.signals.filter((signal) => symbolOf(signal));
   const marketContext = buildMarketContext(signals, input.historyDiagnostics);
-  const previous = new Map((input.previousCandidates ?? []).map((candidate) => [candidate.symbol, candidate]));
-  const initialCandidates = signals.map((signal) => buildCandidate(signal, input, marketContext, previous));
+  const previous = new Map(
+    (input.previousCandidates ?? []).map((candidate) => [
+      candidate.symbol,
+      candidate,
+    ]),
+  );
+  const initialCandidates = signals.map((signal) =>
+    buildCandidate(signal, input, marketContext, previous),
+  );
   const records = buildExplorerRecords(initialCandidates, input.trades ?? []);
   const findings = analyzeOpportunityOutcomes(records);
-  const boosted = initialCandidates.map((candidate) => applyFindings(candidate, findings));
+  const boosted = initialCandidates.map((candidate) =>
+    applyFindings(candidate, findings),
+  );
   const ranked = boosted
     .sort((left, right) => {
       const scoreDelta = right.candidateScore - left.candidateScore;
-      return scoreDelta === 0 ? left.symbol.localeCompare(right.symbol) : scoreDelta;
+      return scoreDelta === 0
+        ? left.symbol.localeCompare(right.symbol)
+        : scoreDelta;
     })
     .map((candidate, index) => ({ ...candidate, rank: index + 1 }));
   const density = evaluateOpportunityDensity({
     candidates: ranked.map((candidate) => candidate.genericOpportunity),
     previousDensity: densityFromPrevious(input.previousCandidates),
   });
-  const discovery = discoverGeneric(buildGenericDiscoveryInput({
-    input,
-    candidates: ranked,
-    density,
-    context: marketContext,
-    findings,
-  }));
+  const discovery = discoverGeneric(
+    buildGenericDiscoveryInput({
+      input,
+      candidates: ranked,
+      density,
+      context: marketContext,
+      findings,
+    }),
+  );
   const discoveredByCandidate = new Map(
-    discovery.opportunities.map((opportunity) => [discoveryCandidateKey(opportunity), opportunity]),
+    discovery.opportunities.map((opportunity) => [
+      discoveryCandidateKey(opportunity),
+      opportunity,
+    ]),
   );
   const enriched = ranked.map((candidate) => {
     const matchedDiscovery = discoveredByCandidate.get(candidate.symbol);
@@ -170,12 +178,11 @@ export function discoverStockOpportunities(input: StockOpportunityDiscoveryInput
         discovery: matchedDiscovery,
       };
     }
-    
+
     return {
       ...candidate,
       discovery: null,
     };
-    
   });
 
   return {
@@ -186,10 +193,18 @@ export function discoverStockOpportunities(input: StockOpportunityDiscoveryInput
     diagnostics: {
       candidateCount: enriched.length,
       eligibleCount: enriched.filter((candidate) => candidate.eligible).length,
-      improvingCount: enriched.filter((candidate) => candidate.scoreVelocity > 0).length,
-      averageScore: round(mean(enriched.map((candidate) => candidate.candidateScore))),
-      averageVelocity: round(mean(enriched.map((candidate) => candidate.scoreVelocity))),
-      regimeCoverageScore: round(historyScore(input.historyDiagnostics?.regimeCoverageScore)),
+      improvingCount: enriched.filter(
+        (candidate) => candidate.scoreVelocity > 0,
+      ).length,
+      averageScore: round(
+        mean(enriched.map((candidate) => candidate.candidateScore)),
+      ),
+      averageVelocity: round(
+        mean(enriched.map((candidate) => candidate.scoreVelocity)),
+      ),
+      regimeCoverageScore: round(
+        historyScore(input.historyDiagnostics?.regimeCoverageScore),
+      ),
     },
   };
 }
@@ -206,20 +221,34 @@ function buildCandidate(
   const candidateScore = round(weightedScore(factors));
   const prior = previous.get(symbol);
   const previousScore = prior?.candidateScore ?? null;
-  const scoreVelocity = round(candidateScore - (previousScore ?? Math.max(0, candidateScore - velocityProxy(factors))));
+  const scoreVelocity = round(
+    candidateScore -
+      (previousScore ?? Math.max(0, candidateScore - velocityProxy(factors))),
+  );
   const lifecycle = lifecycleFor(signal, candidateScore);
-  const eligible = lifecycle === "Eligible" || lifecycle === "Sized" || lifecycle === "Active";
-  const genericOpportunity = genericCandidate(symbol, factors, candidateScore, eligible);
+  const eligible =
+    lifecycle === "Eligible" || lifecycle === "Sized" || lifecycle === "Active";
+  const genericOpportunity = genericCandidate(
+    symbol,
+    factors,
+    candidateScore,
+    eligible,
+  );
   const adaptiveSizing = sizeAdaptiveOpportunity({
     targetRef: symbol,
-    
+
     actionRef: String(signal.signalAction ?? "Hold"),
     opportunityQuality: candidateScore,
-    
-    signalConfidence: number(signal.signalConfidence, signal.setupQuality ?? candidateScore),
+
+    signalConfidence: number(
+      signal.signalConfidence,
+      signal.setupQuality ?? candidateScore,
+    ),
     marketParticipation: factors.breadthImprovement,
     riskControl: 100 - clamp(number(signal.riskPressure, 50)),
-    perceptionAlignment: input.perceptionAlignment ?? mean([factors.trendEmergence, factors.relativeStrengthImprovement]),
+    perceptionAlignment:
+      input.perceptionAlignment ??
+      mean([factors.trendEmergence, factors.relativeStrengthImprovement]),
     systemTrust: input.systemTrust ?? 65,
     discoveryStrength: genericOpportunity.strength,
     risk: clamp(number(signal.riskPressure, 50)),
@@ -253,7 +282,8 @@ function buildCandidate(
     candidateScore,
     previousScore,
     scoreVelocity,
-    lifecycle: lifecycle === "Eligible" && adaptiveSizing.size > 0 ? "Sized" : lifecycle,
+    lifecycle:
+      lifecycle === "Eligible" && adaptiveSizing.size > 0 ? "Sized" : lifecycle,
     eligible,
     factors,
     evidence: evidenceFor(factors, signal, scoreVelocity),
@@ -278,35 +308,64 @@ function factorScores(
   const previousShortAverage = mean(closes.slice(-16, -6));
   const previousLongAverage = mean(closes.slice(-36, -6));
   const trendSpread = pctMove(longAverage, shortAverage);
-  const previousTrendSpread = pctMove(previousLongAverage, previousShortAverage);
+  const previousTrendSpread = pctMove(
+    previousLongAverage,
+    previousShortAverage,
+  );
   const recentVolatility = stdev(returns(closes.slice(-12))) * 100;
   const baselineVolatility = stdev(returns(closes.slice(-36))) * 100;
-  
+
   const latestClose = closes.at(-1) ?? number(signal.price, 0);
-  
+
   const high = Math.max(...closes, number(signal.high52, latestClose));
-  
+
   const low = Math.min(...closes, number(signal.low52, latestClose));
-  
+
   const latestVolume = volumes.at(-1) ?? number(signal.volume, 0);
   const averageVolume = mean(volumes.slice(-20));
   const setupQuality = clamp(number(signal.setupQuality, 50));
   const riskPressure = clamp(number(signal.riskPressure, 50));
   const expectedMove = number(signal.expectedMove, recentMomentum);
-  const regimeAwarenessLift = (context.regimeCoverageScore - 50) * 0.08 +
+  const regimeAwarenessLift =
+    (context.regimeCoverageScore - 50) * 0.08 +
     (context.regimeDiversityScore - 50) * 0.05 +
     (context.historyDepthScore - 50) * 0.03;
 
   return {
-    trendEmergence: clamp(50 + trendSpread * 8 + (trendSpread - previousTrendSpread) * 10),
-    momentumAcceleration: clamp(50 + (recentMomentum - priorMomentum) * 16 + expectedMove * 3),
-    volatilityCompression: clamp(50 + (baselineVolatility - recentVolatility) * 12),
-    relativeStrengthImprovement: clamp(50 + (expectedMove - context.averageExpectedMove) * 8 + (setupQuality - context.averageSetupQuality) * 0.4),
-    volumeExpansion: clamp(averageVolume > 0 ? 50 + ((latestVolume / averageVolume) - 1) * 45 : 50),
-    breakoutPreparation: clamp(50 + proximityToHigh(latestClose, high, low) * 35 + Math.max(0, baselineVolatility - recentVolatility) * 8),
-    regimeTransition: clamp(50 + Math.abs(setupQuality - riskPressure) * 0.35 + (signal.signalAction === "Buy" ? 8 : 0) + regimeAwarenessLift),
+    trendEmergence: clamp(
+      50 + trendSpread * 8 + (trendSpread - previousTrendSpread) * 10,
+    ),
+    momentumAcceleration: clamp(
+      50 + (recentMomentum - priorMomentum) * 16 + expectedMove * 3,
+    ),
+    volatilityCompression: clamp(
+      50 + (baselineVolatility - recentVolatility) * 12,
+    ),
+    relativeStrengthImprovement: clamp(
+      50 +
+        (expectedMove - context.averageExpectedMove) * 8 +
+        (setupQuality - context.averageSetupQuality) * 0.4,
+    ),
+    volumeExpansion: clamp(
+      averageVolume > 0 ? 50 + (latestVolume / averageVolume - 1) * 45 : 50,
+    ),
+    breakoutPreparation: clamp(
+      50 +
+        proximityToHigh(latestClose, high, low) * 35 +
+        Math.max(0, baselineVolatility - recentVolatility) * 8,
+    ),
+    regimeTransition: clamp(
+      50 +
+        Math.abs(setupQuality - riskPressure) * 0.35 +
+        (signal.signalAction === "Buy" ? 8 : 0) +
+        regimeAwarenessLift,
+    ),
     breadthImprovement: context.breadthImprovement,
-    crossAssetLeadership: clamp(50 + (setupQuality - context.averageSetupQuality) * 0.5 + (context.averageRiskPressure - riskPressure) * 0.35),
+    crossAssetLeadership: clamp(
+      50 +
+        (setupQuality - context.averageSetupQuality) * 0.5 +
+        (context.averageRiskPressure - riskPressure) * 0.35,
+    ),
   };
 }
 
@@ -324,17 +383,45 @@ function weightedScore(factors: StockOpportunityFactors) {
   );
 }
 
-function buildMarketContext(signals: StockOpportunitySignal[], historyDiagnostics?: MarketHistoryDiagnostics) {
-  const averageExpectedMove = mean(signals.map((signal) => number(signal.expectedMove, 0)));
-  const averageSetupQuality = mean(signals.map((signal) => clamp(number(signal.setupQuality, 50))));
-  const averageRiskPressure = mean(signals.map((signal) => clamp(number(signal.riskPressure, 50))));
-  const constructive = signals.filter((signal) => number(signal.setupQuality, 50) > number(signal.riskPressure, 50)).length;
-  const improving = signals.filter((signal) => number(signal.expectedMove, 0) >= 0).length;
-  const breadthImprovement = clamp(((constructive + improving) / Math.max(1, signals.length * 2)) * 100);
-  const regimeCoverageScore = historyScore(historyDiagnostics?.regimeCoverageScore, 50);
-  const historyDepthScore = historyScore(historyDiagnostics?.historyDepthScore, 50);
-  const regimeDiversityScore = historyScore(historyDiagnostics?.regimeDiversityScore, 50);
-  const sampleDiversityScore = historyScore(historyDiagnostics?.sampleDiversityScore, 50);
+function buildMarketContext(
+  signals: StockOpportunitySignal[],
+  historyDiagnostics?: MarketHistoryDiagnostics,
+) {
+  const averageExpectedMove = mean(
+    signals.map((signal) => number(signal.expectedMove, 0)),
+  );
+  const averageSetupQuality = mean(
+    signals.map((signal) => clamp(number(signal.setupQuality, 50))),
+  );
+  const averageRiskPressure = mean(
+    signals.map((signal) => clamp(number(signal.riskPressure, 50))),
+  );
+  const constructive = signals.filter(
+    (signal) =>
+      number(signal.setupQuality, 50) > number(signal.riskPressure, 50),
+  ).length;
+  const improving = signals.filter(
+    (signal) => number(signal.expectedMove, 0) >= 0,
+  ).length;
+  const breadthImprovement = clamp(
+    ((constructive + improving) / Math.max(1, signals.length * 2)) * 100,
+  );
+  const regimeCoverageScore = historyScore(
+    historyDiagnostics?.regimeCoverageScore,
+    50,
+  );
+  const historyDepthScore = historyScore(
+    historyDiagnostics?.historyDepthScore,
+    50,
+  );
+  const regimeDiversityScore = historyScore(
+    historyDiagnostics?.regimeDiversityScore,
+    50,
+  );
+  const sampleDiversityScore = historyScore(
+    historyDiagnostics?.sampleDiversityScore,
+    50,
+  );
 
   return {
     averageExpectedMove,
@@ -361,44 +448,74 @@ function genericCandidate(
     opportunityId: `${symbol}:${type}`,
     type,
     strength: round(clamp((strength + score) / 2)),
-    confidence: round(clamp(score * 0.72 + factors.crossAssetLeadership * 0.28)),
-    evidence: [`${type} evidence is the strongest improving structure for ${symbol}.`],
+    confidence: round(
+      clamp(score * 0.72 + factors.crossAssetLeadership * 0.28),
+    ),
+    evidence: [
+      `${type} evidence is the strongest improving structure for ${symbol}.`,
+    ],
     emerging: score >= 45,
-    persistent: eligible || factors.trendEmergence >= 62 || factors.relativeStrengthImprovement >= 62,
+    persistent:
+      eligible ||
+      factors.trendEmergence >= 62 ||
+      factors.relativeStrengthImprovement >= 62,
   };
 }
 
-function dominantOpportunityType(factors: StockOpportunityFactors): [OpportunityType, number] {
+function dominantOpportunityType(
+  factors: StockOpportunityFactors,
+): [OpportunityType, number] {
   const entries: Array<[OpportunityType, number]> = [
     ["emergence", factors.trendEmergence],
     ["acceleration", factors.momentumAcceleration],
     ["compression", factors.volatilityCompression],
     ["expansion", factors.volumeExpansion],
-    ["alignment", mean([factors.breadthImprovement, factors.crossAssetLeadership])],
+    [
+      "alignment",
+      mean([factors.breadthImprovement, factors.crossAssetLeadership]),
+    ],
     ["transition", factors.regimeTransition],
-    ["persistence", mean([factors.trendEmergence, factors.relativeStrengthImprovement])],
+    [
+      "persistence",
+      mean([factors.trendEmergence, factors.relativeStrengthImprovement]),
+    ],
   ];
   entries.sort((left, right) => right[1] - left[1]);
   return entries[0];
 }
 
-function evidenceFor(factors: StockOpportunityFactors, signal: StockOpportunitySignal, velocity: number) {
-  
+function evidenceFor(
+  factors: StockOpportunityFactors,
+  signal: StockOpportunitySignal,
+  velocity: number,
+) {
   const evidence = [
     `Trend emergence ${round(factors.trendEmergence)} and momentum acceleration ${round(factors.momentumAcceleration)}.`,
     `Volatility compression ${round(factors.volatilityCompression)} with breakout preparation ${round(factors.breakoutPreparation)}.`,
     `Relative strength improvement ${round(factors.relativeStrengthImprovement)} and leadership ${round(factors.crossAssetLeadership)}.`,
   ];
-  
-  if (factors.volumeExpansion >= 58) evidence.push(`Volume expansion confirms participation at ${round(factors.volumeExpansion)}.`);
-  if (velocity > 0) evidence.push(`Candidate score improved by ${round(velocity)} points.`);
-  if (signal.signalAction === "Buy") evidence.push("The current strategy signal is already eligible for allocation review.");
+
+  if (factors.volumeExpansion >= 58)
+    evidence.push(
+      `Volume expansion confirms participation at ${round(factors.volumeExpansion)}.`,
+    );
+  if (velocity > 0)
+    evidence.push(`Candidate score improved by ${round(velocity)} points.`);
+  if (signal.signalAction === "Buy")
+    evidence.push(
+      "The current strategy signal is already eligible for allocation review.",
+    );
   return evidence;
 }
 
-function explanationFor(symbol: string, score: number, velocity: number, factors: StockOpportunityFactors) {
-  
-  const direction = velocity > 0 ? "improving" : velocity < 0 ? "cooling" : "stable";
+function explanationFor(
+  symbol: string,
+  score: number,
+  velocity: number,
+  factors: StockOpportunityFactors,
+) {
+  const direction =
+    velocity > 0 ? "improving" : velocity < 0 ? "cooling" : "stable";
   const strongest = dominantOpportunityType(factors)[0];
   return `${symbol} is ${direction}; ${strongest} is the strongest evidence cluster and the candidate score is ${round(score)}.`;
 }
@@ -412,24 +529,58 @@ function progressionFor(
   const emerging = clamp((detected + score) / 2);
   const strengthening = clamp(score - 6);
   const points: StockOpportunityProgressionPoint[] = [
-    { stage: "Detected", score: round(detected), explanation: "Initial evidence became visible in the discovery scan." },
+    {
+      stage: "Detected",
+      score: round(detected),
+      explanation: "Initial evidence became visible in the discovery scan.",
+    },
   ];
-  if (score >= 45) points.push({ stage: "Emerging", score: round(emerging), explanation: "Multiple evidence groups started improving together." });
-  if (score >= 60) points.push({ stage: "Strengthening", score: round(strengthening), explanation: "Improvement persisted across quality, timing, or leadership factors." });
-  if (score >= 72) points.push({ stage: "Eligible", score: round(score), explanation: "Candidate quality is high enough for sizing review." });
-  if (lifecycle === "Sized" || lifecycle === "Active" || lifecycle === "Closed") {
-    points.push({ stage: lifecycle, score: round(score), explanation: `Candidate transitioned to ${lifecycle.toLowerCase()} with an explainable allocation state.` });
+  if (score >= 45)
+    points.push({
+      stage: "Emerging",
+      score: round(emerging),
+      explanation: "Multiple evidence groups started improving together.",
+    });
+  if (score >= 60)
+    points.push({
+      stage: "Strengthening",
+      score: round(strengthening),
+      explanation:
+        "Improvement persisted across quality, timing, or leadership factors.",
+    });
+  if (score >= 72)
+    points.push({
+      stage: "Eligible",
+      score: round(score),
+      explanation: "Candidate quality is high enough for sizing review.",
+    });
+  if (
+    lifecycle === "Sized" ||
+    lifecycle === "Active" ||
+    lifecycle === "Closed"
+  ) {
+    points.push({
+      stage: lifecycle,
+      score: round(score),
+      explanation: `Candidate transitioned to ${lifecycle.toLowerCase()} with an explainable allocation state.`,
+    });
   }
   return points;
 }
 
-function lifecycleFor(signal: StockOpportunitySignal, score: number): StockOpportunityLifecycle {
+function lifecycleFor(
+  signal: StockOpportunitySignal,
+  score: number,
+): StockOpportunityLifecycle {
   const exposure = number(signal.suggestedExposure, 0);
-  
-  if (String(signal.signalStatus ?? "").toLowerCase() === "closed") return "Closed";
-  
-  if (String(signal.signalStatus ?? "").toLowerCase() === "active") return "Active";
-  if (score >= 72 && signal.signalAction === "Buy" && exposure > 0) return "Eligible";
+
+  if (String(signal.signalStatus ?? "").toLowerCase() === "closed")
+    return "Closed";
+
+  if (String(signal.signalStatus ?? "").toLowerCase() === "active")
+    return "Active";
+  if (score >= 72 && signal.signalAction === "Buy" && exposure > 0)
+    return "Eligible";
   if (score >= 60) return "Strengthening";
   if (score >= 45) return "Emerging";
   return "Detected";
@@ -439,17 +590,22 @@ function buildExplorerRecords(
   candidates: StockOpportunityCandidate[],
   trades: Array<Record<string, unknown>>,
 ): OpportunityOutcomeRecord[] {
-  
-  const tradeBySymbol = new Map(trades.map((trade) => [String(trade.symbol ?? "").toUpperCase(), trade]));
+  const tradeBySymbol = new Map(
+    trades.map((trade) => [String(trade.symbol ?? "").toUpperCase(), trade]),
+  );
   return candidates.map((candidate) => {
     const trade = tradeBySymbol.get(candidate.symbol);
-    
+
     const returnPct = number(trade?.returnPct ?? trade?.profitPct, 0);
-    
+
     const outcome: OpportunityOutcomeRecord["outcome"] = trade
-      ? returnPct >= 0 ? "winning" : "losing"
-      : candidate.lifecycle === "Detected" ? "blocked" : "almost-qualified";
-    
+      ? returnPct >= 0
+        ? "winning"
+        : "losing"
+      : candidate.lifecycle === "Detected"
+        ? "blocked"
+        : "almost-qualified";
+
     return {
       opportunityId: candidate.genericOpportunity.opportunityId,
       outcome,
@@ -457,7 +613,8 @@ function buildExplorerRecords(
       features: {
         trendEmergence: candidate.factors.trendEmergence >= 60,
         momentumAcceleration: candidate.factors.momentumAcceleration >= 60,
-        relativeStrengthImprovement: candidate.factors.relativeStrengthImprovement >= 60,
+        relativeStrengthImprovement:
+          candidate.factors.relativeStrengthImprovement >= 60,
         volatilityCompression: candidate.factors.volatilityCompression >= 60,
       },
       evidence: candidate.evidence,
@@ -469,10 +626,15 @@ function applyFindings(
   candidate: StockOpportunityCandidate,
   findings: DiscoveryFinding[],
 ): StockOpportunityCandidate {
-  const matched = findings.filter((finding) => finding.feedsOpportunityTypes.includes(candidate.genericOpportunity.type));
+  const matched = findings.filter((finding) =>
+    finding.feedsOpportunityTypes.includes(candidate.genericOpportunity.type),
+  );
   if (!matched.length) return candidate;
 
-  const boost = Math.min(6, mean(matched.map((finding) => finding.confidence)) * 0.04);
+  const boost = Math.min(
+    6,
+    mean(matched.map((finding) => finding.confidence)) * 0.04,
+  );
   const candidateScore = round(clamp(candidate.candidateScore + boost));
   return {
     ...candidate,
@@ -482,11 +644,17 @@ function applyFindings(
       ...candidate.evidence,
       ...matched.map((finding) => `Explorer insight: ${finding.pattern}.`),
     ],
-    progression: progressionFor(candidateScore, candidate.previousScore, candidate.lifecycle),
+    progression: progressionFor(
+      candidateScore,
+      candidate.previousScore,
+      candidate.lifecycle,
+    ),
     genericOpportunity: {
       ...candidate.genericOpportunity,
       strength: round(clamp(candidate.genericOpportunity.strength + boost)),
-      confidence: round(clamp(candidate.genericOpportunity.confidence + boost * 0.5)),
+      confidence: round(
+        clamp(candidate.genericOpportunity.confidence + boost * 0.5),
+      ),
     },
   };
 }
@@ -502,10 +670,17 @@ function buildGenericDiscoveryInput(args: {
   const state = {
     market: args.input.market ?? "unknown",
     candidateCount: args.candidates.length,
-    eligibleCount: args.candidates.filter((candidate) => candidate.eligible).length,
-    improvingCount: args.candidates.filter((candidate) => candidate.scoreVelocity > 0).length,
-    averageScore: round(mean(args.candidates.map((candidate) => candidate.candidateScore))),
-    averageVelocity: round(mean(args.candidates.map((candidate) => candidate.scoreVelocity))),
+    eligibleCount: args.candidates.filter((candidate) => candidate.eligible)
+      .length,
+    improvingCount: args.candidates.filter(
+      (candidate) => candidate.scoreVelocity > 0,
+    ).length,
+    averageScore: round(
+      mean(args.candidates.map((candidate) => candidate.candidateScore)),
+    ),
+    averageVelocity: round(
+      mean(args.candidates.map((candidate) => candidate.scoreVelocity)),
+    ),
     opportunityDensity: args.density.density,
     opportunityQuality: args.density.quality,
     densityConfidence: args.density.confidence,
@@ -535,7 +710,9 @@ function buildGenericDiscoveryInput(args: {
       strength: candidate.genericOpportunity.strength,
       confidence: candidate.genericOpportunity.confidence,
       maturity: lifecycleMaturity(candidate.lifecycle),
-      readiness: candidate.eligible ? 78 : Math.min(70, candidate.candidateScore),
+      readiness: candidate.eligible
+        ? 78
+        : Math.min(70, candidate.candidateScore),
       lifecycleStatus: genericLifecycle(candidate.lifecycle),
       previousScore: candidate.previousScore,
       velocity: candidate.scoreVelocity,
@@ -548,8 +725,14 @@ function buildGenericDiscoveryInput(args: {
       invalidationConditions: [
         `Invalidate ${candidate.symbol} if the leading evidence cluster stops improving.`,
         ...candidate.adaptiveSizing.constraints
-          .filter((constraint) => constraint.type === "hard" && !constraint.passed)
-          .map((constraint) => constraint.reason ?? `Hard constraint ${constraint.id} remains unresolved.`),
+          .filter(
+            (constraint) => constraint.type === "hard" && !constraint.passed,
+          )
+          .map(
+            (constraint) =>
+              constraint.reason ??
+              `Hard constraint ${constraint.id} remains unresolved.`,
+          ),
       ],
       metadata: {
         rank: candidate.rank,
@@ -557,7 +740,9 @@ function buildGenericDiscoveryInput(args: {
         lifecycle: candidate.lifecycle,
       },
     })),
-    evidence: args.candidates.flatMap((candidate) => evidenceForGenericDiscovery(candidate)),
+    evidence: args.candidates.flatMap((candidate) =>
+      evidenceForGenericDiscovery(candidate),
+    ),
     historicalStates: [
       ...args.candidates.map((candidate) => ({
         id: `candidate-context:${candidate.symbol}`,
@@ -579,7 +764,10 @@ function buildGenericDiscoveryInput(args: {
           eligible: candidate.eligible,
         },
       })),
-      ...regimeHistoricalStates(args.input.historyDiagnostics, args.input.market),
+      ...regimeHistoricalStates(
+        args.input.historyDiagnostics,
+        args.input.market,
+      ),
     ],
     priorOutcomes: args.input.trades?.map((trade, index) => {
       const symbol = String(trade.symbol ?? `trade-${index + 1}`).toUpperCase();
@@ -592,10 +780,17 @@ function buildGenericDiscoveryInput(args: {
           score: number(trade.setupQuality, 50),
           eligible: returnPct >= 0,
         },
-        outcome: returnPct > 0 ? "positive" : returnPct < 0 ? "negative" : "neutral",
+        outcome:
+          returnPct > 0 ? "positive" : returnPct < 0 ? "negative" : "neutral",
         value: returnPct,
-        predictiveEvidence: returnPct > 0 ? ["Prior positive result", "Candidate evidence persisted"] : [],
-        misleadingEvidence: returnPct < 0 ? ["Prior candidate failed after initial evidence"] : [],
+        predictiveEvidence:
+          returnPct > 0
+            ? ["Prior positive result", "Candidate evidence persisted"]
+            : [],
+        misleadingEvidence:
+          returnPct < 0
+            ? ["Prior candidate failed after initial evidence"]
+            : [],
         failureModes: returnPct < 0 ? ["Evidence did not persist"] : [],
       };
     }),
@@ -606,9 +801,14 @@ function buildGenericDiscoveryInput(args: {
         passed: args.density.density >= 35,
         severity: "medium",
         score: args.density.density,
-        missingEvidence: args.density.density < 35 ? "broader independent opportunity density" : undefined,
-        unlockCondition: "Improve independent opportunity density across candidates.",
-        invalidationCondition: "Invalidate if opportunity density collapses across candidates.",
+        missingEvidence:
+          args.density.density < 35
+            ? "broader independent opportunity density"
+            : undefined,
+        unlockCondition:
+          "Improve independent opportunity density across candidates.",
+        invalidationCondition:
+          "Invalidate if opportunity density collapses across candidates.",
       },
       {
         id: "generic-memory-depth",
@@ -616,7 +816,10 @@ function buildGenericDiscoveryInput(args: {
         passed: (args.input.trades?.length ?? 0) >= 3,
         severity: "low",
         score: Math.min(100, (args.input.trades?.length ?? 0) * 20),
-        missingEvidence: (args.input.trades?.length ?? 0) >= 3 ? undefined : "similar closed outcomes",
+        missingEvidence:
+          (args.input.trades?.length ?? 0) >= 3
+            ? undefined
+            : "similar closed outcomes",
         unlockCondition: "Add similar closed outcomes to discovery memory.",
       },
       ...historyConstraints(args.input.historyDiagnostics),
@@ -633,7 +836,10 @@ function buildGenericDiscoveryInput(args: {
   };
 }
 
-function regimeHistoricalStates(historyDiagnostics: MarketHistoryDiagnostics | undefined, market?: string) {
+function regimeHistoricalStates(
+  historyDiagnostics: MarketHistoryDiagnostics | undefined,
+  market?: string,
+) {
   if (!historyDiagnostics) return [];
   const regimes = historyDiagnostics.keyRegimesCovered?.length
     ? historyDiagnostics.keyRegimesCovered
@@ -658,7 +864,9 @@ function regimeHistoricalStates(historyDiagnostics: MarketHistoryDiagnostics | u
   }));
 }
 
-function historyConstraints(historyDiagnostics: MarketHistoryDiagnostics | undefined): DiscoveryInput["constraints"] {
+function historyConstraints(
+  historyDiagnostics: MarketHistoryDiagnostics | undefined,
+): DiscoveryInput["constraints"] {
   if (!historyDiagnostics) return [];
   return [
     {
@@ -667,9 +875,14 @@ function historyConstraints(historyDiagnostics: MarketHistoryDiagnostics | undef
       passed: historyDiagnostics.regimeCoverageScore >= 55,
       severity: "low",
       score: historyDiagnostics.regimeCoverageScore,
-      missingEvidence: historyDiagnostics.regimeCoverageScore >= 55 ? undefined : "broader long-history regime coverage",
-      unlockCondition: "Extend or repair historical coverage across bull, bear, crash, recovery, and volatility transition regimes.",
-      invalidationCondition: "Invalidate broad discovery confidence if regime coverage narrows below the long-history floor.",
+      missingEvidence:
+        historyDiagnostics.regimeCoverageScore >= 55
+          ? undefined
+          : "broader long-history regime coverage",
+      unlockCondition:
+        "Extend or repair historical coverage across bull, bear, crash, recovery, and volatility transition regimes.",
+      invalidationCondition:
+        "Invalidate broad discovery confidence if regime coverage narrows below the long-history floor.",
     },
     {
       id: "history-depth",
@@ -677,15 +890,24 @@ function historyConstraints(historyDiagnostics: MarketHistoryDiagnostics | undef
       passed: historyDiagnostics.historyDepthScore >= 55,
       severity: "low",
       score: historyDiagnostics.historyDepthScore,
-      missingEvidence: historyDiagnostics.historyDepthScore >= 55 ? undefined : "deeper validated market history",
-      unlockCondition: "Add enough audited history to cover multiple market cycles.",
-      invalidationCondition: "Invalidate long-history confidence if usable depth falls below the audit floor.",
+      missingEvidence:
+        historyDiagnostics.historyDepthScore >= 55
+          ? undefined
+          : "deeper validated market history",
+      unlockCondition:
+        "Add enough audited history to cover multiple market cycles.",
+      invalidationCondition:
+        "Invalidate long-history confidence if usable depth falls below the audit floor.",
     },
   ];
 }
 
-function evidenceForGenericDiscovery(candidate: StockOpportunityCandidate): DiscoveryEvidence[] {
-  const factorEntries = Object.entries(candidate.factors) as Array<[keyof StockOpportunityFactors, number]>;
+function evidenceForGenericDiscovery(
+  candidate: StockOpportunityCandidate,
+): DiscoveryEvidence[] {
+  const factorEntries = Object.entries(candidate.factors) as Array<
+    [keyof StockOpportunityFactors, number]
+  >;
   const support = factorEntries
     .filter(([, value]) => value >= 58)
     .sort((left, right) => right[1] - left[1])
@@ -711,11 +933,12 @@ function evidenceForGenericDiscovery(candidate: StockOpportunityCandidate): Disc
           strength: 100 - candidate.factors.breadthImprovement,
           confidence: 70,
           group: "candidate factors",
-          description: "The candidate is not yet supported by broad participation.",
+          description:
+            "The candidate is not yet supported by broad participation.",
           misleading: true,
         }
       : null,
-    
+
     candidate.factors.regimeTransition < 45
       ? {
           id: `${candidate.symbol}:transition-contradiction`,
@@ -736,7 +959,9 @@ function evidenceForGenericDiscovery(candidate: StockOpportunityCandidate): Disc
 }
 
 function evidenceIdsForCandidate(candidate: StockOpportunityCandidate) {
-  return Object.keys(candidate.factors).map((key) => `${candidate.symbol}:${key}`);
+  return Object.keys(candidate.factors).map(
+    (key) => `${candidate.symbol}:${key}`,
+  );
 }
 
 function genericLifecycle(lifecycle: StockOpportunityLifecycle) {
@@ -758,14 +983,16 @@ function lifecycleMaturity(lifecycle: StockOpportunityLifecycle) {
 
 function discoveryCandidateKey(opportunity: DiscoveredOpportunity) {
   if (opportunity.candidateId) return opportunity.candidateId;
-  
+
   return opportunity.id;
 }
 
-function constraintEvidenceLabel(constraint: AdaptiveSizingResult["constraints"][number]) {
+function constraintEvidenceLabel(
+  constraint: AdaptiveSizingResult["constraints"][number],
+) {
   if (constraint.reason) return constraint.reason;
   if (constraint.label) return constraint.label;
-  
+
   return constraint.id;
 }
 
@@ -778,30 +1005,37 @@ function barsFor(
   barsBySymbol: StockOpportunityDiscoveryInput["barsBySymbol"],
 ): StockBar[] {
   const symbol = symbolOf(signal);
-  
+
   if (barsBySymbol instanceof Map) return barsBySymbol.get(symbol) ?? [];
   return barsBySymbol?.[symbol] ?? [];
 }
 
 function closeSeries(signal: StockOpportunitySignal, bars: StockBar[]) {
-  
-  const barCloses = bars.map((bar) => number(bar.close ?? bar.price, Number.NaN)).filter(Number.isFinite);
-  const history = (signal.history ?? []).map((value) => number(value, Number.NaN)).filter(Number.isFinite);
+  const barCloses = bars
+    .map((bar) => number(bar.close ?? bar.price, Number.NaN))
+    .filter(Number.isFinite);
+  const history = (signal.history ?? [])
+    .map((value) => number(value, Number.NaN))
+    .filter(Number.isFinite);
   const merged = barCloses.length >= 6 ? barCloses : history;
   const price = number(signal.price, merged.at(-1) ?? 1);
   return merged.length >= 3 ? merged : [price * 0.97, price * 0.99, price];
 }
 
 function volumeSeries(signal: StockOpportunitySignal, bars: StockBar[]) {
-  const volumes = bars.map((bar) => number(bar.volume, Number.NaN)).filter(Number.isFinite);
+  const volumes = bars
+    .map((bar) => number(bar.volume, Number.NaN))
+    .filter(Number.isFinite);
   const latest = number(signal.volume, 0);
-  return volumes.length >= 3 ? volumes : [latest * 0.9, latest * 0.95, latest].filter((value) => value > 0);
+  return volumes.length >= 3
+    ? volumes
+    : [latest * 0.9, latest * 0.95, latest].filter((value) => value > 0);
 }
 
 function requestedCapacity(signal: StockOpportunitySignal, score: number) {
   const explicit = number(signal.suggestedExposure, 0);
   if (explicit > 0) return Math.min(explicit, maxCapacity(signal));
-  
+
   if (score >= 72) return Math.min(5, maxCapacity(signal));
   if (score >= 60) return Math.min(2, maxCapacity(signal));
   if (score >= 45) return Math.min(1, maxCapacity(signal));
@@ -809,26 +1043,37 @@ function requestedCapacity(signal: StockOpportunitySignal, score: number) {
 }
 
 function maxCapacity(signal: StockOpportunitySignal) {
-  if (signal.maxPositionPct != null) return Math.max(0, number(signal.maxPositionPct, 0));
+  if (signal.maxPositionPct != null)
+    return Math.max(0, number(signal.maxPositionPct, 0));
   return Math.max(1, number(signal.suggestedExposure, 5));
 }
 
-function densityFromPrevious(previousCandidates: StockOpportunityCandidate[] | undefined) {
+function densityFromPrevious(
+  previousCandidates: StockOpportunityCandidate[] | undefined,
+) {
   if (!previousCandidates?.length) return undefined;
-  return evaluateOpportunityDensity({ candidates: previousCandidates.map((candidate) => candidate.genericOpportunity) }).density;
+  return evaluateOpportunityDensity({
+    candidates: previousCandidates.map(
+      (candidate) => candidate.genericOpportunity,
+    ),
+  }).density;
 }
 
 function symbolOf(signal: StockOpportunitySignal) {
-  
-  return String(signal.symbol ?? signal.ticker ?? "").trim().toUpperCase();
+  return String(signal.symbol ?? signal.ticker ?? "")
+    .trim()
+    .toUpperCase();
 }
 
 function velocityProxy(factors: StockOpportunityFactors) {
-  return Math.max(4, mean([
-    Math.max(0, factors.trendEmergence - 50),
-    Math.max(0, factors.momentumAcceleration - 50),
-    Math.max(0, factors.relativeStrengthImprovement - 50),
-  ]));
+  return Math.max(
+    4,
+    mean([
+      Math.max(0, factors.trendEmergence - 50),
+      Math.max(0, factors.momentumAcceleration - 50),
+      Math.max(0, factors.relativeStrengthImprovement - 50),
+    ]),
+  );
 }
 
 function returns(values: number[]) {
@@ -842,7 +1087,9 @@ function returns(values: number[]) {
 }
 
 function pctMove(previous: number | undefined, current: number | undefined) {
-  return previous && current && previous > 0 ? ((current - previous) / previous) * 100 : 0;
+  return previous && current && previous > 0
+    ? ((current - previous) / previous) * 100
+    : 0;
 }
 
 function proximityToHigh(price: number, high: number, low: number) {
@@ -851,7 +1098,6 @@ function proximityToHigh(price: number, high: number, low: number) {
 }
 
 function stdev(values: number[]) {
-  
   if (values.length < 2) return 0;
   const average = mean(values);
   return Math.sqrt(mean(values.map((value) => (value - average) ** 2)));
@@ -859,7 +1105,9 @@ function stdev(values: number[]) {
 
 function mean(values: number[]) {
   const usable = values.filter(Number.isFinite);
-  return usable.length ? usable.reduce((sum, value) => sum + value, 0) / usable.length : 0;
+  return usable.length
+    ? usable.reduce((sum, value) => sum + value, 0) / usable.length
+    : 0;
 }
 
 function number(value: unknown, fallback = 0) {
@@ -872,7 +1120,6 @@ function historyScore(value: unknown, fallback = 0) {
 }
 
 function clamp(value: number, min = 0, max = 100) {
-  
   return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
 }
 

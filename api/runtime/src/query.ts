@@ -1,9 +1,4 @@
-import {
-  createSignalEnvelope,
-  createSignalError,
-} from "@signal/protocol";
-import type { SignalExecutionContext, SignalExecutionResult } from "./types";
-import type { SignalRegistry } from "./registry";
+import { createSignalEnvelope, createSignalError } from "@signal/protocol";
 import { ZodError } from "zod";
 import {
   createExecutionSuccessMeta,
@@ -12,12 +7,14 @@ import {
   toEnvelopeDelivery,
   toSignalFailure,
 } from "./execution";
+import type { SignalRegistry } from "./registry";
+import type { SignalExecutionContext, SignalExecutionResult } from "./types";
 
 export async function executeQuery<TInput, TResult>(
   registry: SignalRegistry,
   name: string,
   input: TInput,
-  context: SignalExecutionContext
+  context: SignalExecutionContext,
 ): Promise<SignalExecutionResult<TResult>> {
   try {
     throwIfExecutionBlocked(context.request);

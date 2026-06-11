@@ -9,7 +9,7 @@ const commands = [
 
 for (const [command, args] of commands) {
   const result = spawnSync(command, args, {
-    cwd: __dirname + "/..",
+    cwd: `${__dirname}/..`,
     stdio: "inherit",
   });
 

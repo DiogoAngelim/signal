@@ -54,10 +54,18 @@ export class CircuitBreaker {
     };
   }
 
-  hydrate(value?: { state?: CircuitBreakerState; failureCount?: number; openedAt?: string | null }) {
+  hydrate(value?: {
+    state?: CircuitBreakerState;
+    failureCount?: number;
+    openedAt?: string | null;
+  }) {
     this.stateValue = value?.state ?? "closed";
-    this.failureCountValue = Number.isFinite(value?.failureCount) ? Number(value?.failureCount) : 0;
+    this.failureCountValue = Number.isFinite(value?.failureCount)
+      ? Number(value?.failureCount)
+      : 0;
     this.openedAtValue = value?.openedAt ?? null;
-    this.lastFailureAt = this.openedAtValue ? Date.parse(this.openedAtValue) : 0;
+    this.lastFailureAt = this.openedAtValue
+      ? Date.parse(this.openedAtValue)
+      : 0;
   }
 }

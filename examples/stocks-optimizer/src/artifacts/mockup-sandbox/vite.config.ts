@@ -1,8 +1,8 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import path from "path";
+import path from "node:path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 import { mockupPreviewPlugin } from "./mockupPreviewPlugin";
 
 const rawPort = process.env.PORT ?? "5173";

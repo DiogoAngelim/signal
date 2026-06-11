@@ -9,7 +9,13 @@
     "strategy": "risk_adjusted",
     "policy": "balanced",
     "resource": { "available": 100 },
-    "decision": { "id": "messy", "confidence": 140, "trust": "bad", "risk": -0.5, "expectedUtility": 2 },
+    "decision": {
+      "id": "messy",
+      "confidence": 140,
+      "trust": "bad",
+      "risk": -0.5,
+      "expectedUtility": 2
+    },
     "now": "not-a-date"
   },
   "expectations": {
@@ -21,7 +27,13 @@
     "limitedBy": [],
     "cappedBy": [],
     "recommendations": [
-      { "targetId": "messy", "amount": 45.6, "normalizedCommitment": 0.456, "weight": 1, "mode": "elevated" }
+      {
+        "targetId": "messy",
+        "amount": 45.6,
+        "normalizedCommitment": 0.456,
+        "weight": 1,
+        "mode": "elevated"
+      }
     ]
   }
 }

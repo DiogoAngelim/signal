@@ -1,4 +1,9 @@
-import type { AgencyTrace, CalibrationConfig, CalibrationReliability, CalibrationResult } from "../types";
+import type {
+  AgencyTrace,
+  CalibrationConfig,
+  CalibrationReliability,
+  CalibrationResult,
+} from "../types";
 
 const DEFAULT_MINIMUM_SAMPLES = 3;
 const DEFAULT_ALIGNMENT_TOLERANCE = 0.1;
@@ -8,7 +13,9 @@ export function calibrateConfidence(
   history: readonly AgencyTrace[],
   config: CalibrationConfig = {},
 ): CalibrationResult {
-  const completed = history.filter((trace) => typeof trace.outcome?.success === "boolean");
+  const completed = history.filter(
+    (trace) => typeof trace.outcome?.success === "boolean",
+  );
   const sampleSize = completed.length;
   if (sampleSize === 0) {
     return {
@@ -19,25 +26,42 @@ export function calibrateConfidence(
     };
   }
 
-  const averageConfidence = average(completed.map((trace) => unitValue(trace.decision.confidence)));
-  const successRate = average(completed.map((trace) => (trace.outcome?.success === true ? 1 : 0)));
+  const averageConfidence = average(
+    completed.map((trace) => unitValue(trace.decision.confidence)),
+  );
+  const successRate = average(
+    completed.map((trace) => (trace.outcome?.success === true ? 1 : 0)),
+  );
   const calibrationError = round(averageConfidence - successRate);
-  const minimumSamples = positiveInteger(config.minimumSamples ?? DEFAULT_MINIMUM_SAMPLES, "minimumSamples");
-  const alignmentTolerance = unitValue(config.alignmentTolerance ?? DEFAULT_ALIGNMENT_TOLERANCE);
-  const adjustmentRate = unitValue(config.adjustmentRate ?? DEFAULT_ADJUSTMENT_RATE);
-  const reliability = sampleSize < minimumSamples
-    ? "insufficient_data"
-    : reliabilityFromError(calibrationError, alignmentTolerance);
+  const minimumSamples = positiveInteger(
+    config.minimumSamples ?? DEFAULT_MINIMUM_SAMPLES,
+    "minimumSamples",
+  );
+  const alignmentTolerance = unitValue(
+    config.alignmentTolerance ?? DEFAULT_ALIGNMENT_TOLERANCE,
+  );
+  const adjustmentRate = unitValue(
+    config.adjustmentRate ?? DEFAULT_ADJUSTMENT_RATE,
+  );
+  const reliability =
+    sampleSize < minimumSamples
+      ? "insufficient_data"
+      : reliabilityFromError(calibrationError, alignmentTolerance);
 
   return {
-    calibratedConfidence: round(clamp(averageConfidence - calibrationError * adjustmentRate)),
+    calibratedConfidence: round(
+      clamp(averageConfidence - calibrationError * adjustmentRate),
+    ),
     calibrationError,
     reliability,
     sampleSize,
   };
 }
 
-function reliabilityFromError(error: number, tolerance: number): CalibrationReliability {
+function reliabilityFromError(
+  error: number,
+  tolerance: number,
+): CalibrationReliability {
   if (error > tolerance) {
     return "overconfident";
   }

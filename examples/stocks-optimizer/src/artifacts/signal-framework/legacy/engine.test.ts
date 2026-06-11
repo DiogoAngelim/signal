@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  type LegacyEvent,
   LegacyMemoryStore,
   createLegacyHistory,
   evaluateLegacy,
   replayLegacyEvents,
-  type LegacyEvent,
 } from "./engine";
 
 const NOW = "2026-05-31T12:00:00.000Z";
@@ -43,23 +43,52 @@ test("Legacy calculates durable progression outputs", () => {
   assert.ok(legacy.reputation.score >= 80);
   assert.equal(legacy.title.name, "Institutional Operator");
 
-  const achievementIds = legacy.achievements.filter((achievement) => achievement.unlocked).map((achievement) => achievement.id);
-  for (const id of ["first-clean-outcome", "three-clean-outcomes", "recovery-complete", "governance-approved", "institutional-operator"]) {
+  const achievementIds = legacy.achievements
+    .filter((achievement) => achievement.unlocked)
+    .map((achievement) => achievement.id);
+  for (const id of [
+    "first-clean-outcome",
+    "three-clean-outcomes",
+    "recovery-complete",
+    "governance-approved",
+    "institutional-operator",
+  ]) {
     assert.ok(achievementIds.includes(id), `expected achievement ${id}`);
   }
 
   const badgeIds = legacy.badges.map((badge) => badge.id);
-  for (const id of ["recovery-specialist", "risk-master", "governance-champion", "institutional-operator"]) {
+  for (const id of [
+    "recovery-specialist",
+    "risk-master",
+    "governance-champion",
+    "institutional-operator",
+  ]) {
     assert.ok(badgeIds.includes(id), `expected badge ${id}`);
   }
 
-  const completedCampaignIds = legacy.campaigns.filter((campaign) => campaign.status === "completed").map((campaign) => campaign.id);
-  for (const id of ["restore-operating-authorization", "trust-restoration", "governance-clearance", "recovery-program"]) {
-    assert.ok(completedCampaignIds.includes(id), `expected completed campaign ${id}`);
+  const completedCampaignIds = legacy.campaigns
+    .filter((campaign) => campaign.status === "completed")
+    .map((campaign) => campaign.id);
+  for (const id of [
+    "restore-operating-authorization",
+    "trust-restoration",
+    "governance-clearance",
+    "recovery-program",
+  ]) {
+    assert.ok(
+      completedCampaignIds.includes(id),
+      `expected completed campaign ${id}`,
+    );
   }
 
-  assert.ok(legacy.unlocks.map((unlock) => unlock.id).includes("prestige-eligibility"));
-  assert.ok(legacy.milestones.map((milestone) => milestone.id).includes("institutional-authorization"));
+  assert.ok(
+    legacy.unlocks.map((unlock) => unlock.id).includes("prestige-eligibility"),
+  );
+  assert.ok(
+    legacy.milestones
+      .map((milestone) => milestone.id)
+      .includes("institutional-authorization"),
+  );
   assert.equal(legacy.prestige.unlocked, true);
   assert.equal(legacy.prestige.level, 1);
 });
@@ -87,7 +116,10 @@ test("Legacy emits replay-safe idempotent events", () => {
   ]) {
     assert.ok(eventTypes.includes(type as never), `expected event ${type}`);
   }
-  assert.equal(new Set(first.events.map((event) => event.idempotencyKey)).size, first.events.length);
+  assert.equal(
+    new Set(first.events.map((event) => event.idempotencyKey)).size,
+    first.events.length,
+  );
   assert.deepEqual(second.events, []);
 });
 
@@ -110,9 +142,22 @@ test("Legacy preserves immutable history when current scores regress", () => {
     flags: {},
   });
 
-  assert.ok(regressed.history.achievements.map((achievement) => achievement.id).includes("institutional-operator"));
-  assert.ok(regressed.history.unlocks.map((unlock) => unlock.id).includes("prestige-eligibility"));
-  assert.equal(regressed.history.campaigns.find((campaign) => campaign.id === "recovery-program")?.status, "completed");
+  assert.ok(
+    regressed.history.achievements
+      .map((achievement) => achievement.id)
+      .includes("institutional-operator"),
+  );
+  assert.ok(
+    regressed.history.unlocks
+      .map((unlock) => unlock.id)
+      .includes("prestige-eligibility"),
+  );
+  assert.equal(
+    regressed.history.campaigns.find(
+      (campaign) => campaign.id === "recovery-program",
+    )?.status,
+    "completed",
+  );
   assert.equal(regressed.prestige.unlocked, true);
   assert.equal(regressed.title.name, "Institutional Operator");
 });
@@ -144,7 +189,12 @@ test("Legacy supports configurable domain-neutral rules", () => {
           description: "Two domain-neutral completions were recorded.",
           rarity: "common",
           category: "custom",
-          condition: { kind: "counter", counter: "completions", operator: ">=", value: 2 },
+          condition: {
+            kind: "counter",
+            counter: "completions",
+            operator: ">=",
+            value: 2,
+          },
         },
       ],
       badges: [],
@@ -157,7 +207,12 @@ test("Legacy supports configurable domain-neutral rules", () => {
           name: "Quality Operator",
           priority: 1,
           reason: "Quality is high enough for a custom title.",
-          condition: { kind: "score", metric: "quality", operator: ">=", value: 85 },
+          condition: {
+            kind: "score",
+            metric: "quality",
+            operator: ">=",
+            value: 85,
+          },
         },
       ],
       victories: [],

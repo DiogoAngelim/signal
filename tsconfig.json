@@ -2,9 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
-    "lib": [
-      "ES2020"
-    ],
+    "lib": ["ES2020"],
     "outDir": "./dist",
     "rootDir": "./",
     "strict": true,
@@ -27,8 +25,5 @@
     "examples/**/*.ts",
     "index.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "exclude": ["node_modules", "dist"]
 }

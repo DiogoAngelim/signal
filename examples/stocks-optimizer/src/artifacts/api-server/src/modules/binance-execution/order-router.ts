@@ -1,13 +1,13 @@
 import type { BinanceHttpClient } from "./client";
-import type { ExecutionMetrics } from "./metrics";
+import type { ExecutionStateStore } from "./execution-state";
 import { DryRunSimulator } from "./market-data";
+import type { ExecutionMetrics } from "./metrics";
 import {
   normalizePrice,
   normalizeQuantity,
   validateOrderAgainstExchangeFilters,
 } from "./order-validator";
 import { createClientOrderId } from "./signer";
-import type { ExecutionStateStore } from "./execution-state";
 import type {
   AccountState,
   BinanceExecutionConfig,
@@ -42,23 +42,35 @@ export class OrderRouter {
     const decision = input.decision;
     const side = decision.action === "BUY" ? "BUY" : "SELL";
     const requestedType = String(decision.orderType ?? "").toUpperCase();
-    const type = requestedType === "LIMIT" || requestedType === "MARKET" ? requestedType : "LIMIT_MAKER";
+    const type =
+      requestedType === "LIMIT" || requestedType === "MARKET"
+        ? requestedType
+        : "LIMIT_MAKER";
     const rawPrice =
       Number(decision.limitPrice) ||
       Number(decision.price) ||
       this.simulator.referencePrice(decision.symbol, 1);
-    const price = type === "MARKET" ? undefined : normalizePrice(rawPrice, input.symbolInfo);
-    const accountQuantity = input.account.balances[input.symbolInfo.baseAsset ?? ""]?.free ?? 0;
+    const price =
+      type === "MARKET"
+        ? undefined
+        : normalizePrice(rawPrice, input.symbolInfo);
+    const accountQuantity =
+      input.account.balances[input.symbolInfo.baseAsset ?? ""]?.free ?? 0;
     const requestedExitQuantity = Number(decision.exitQuantity);
-    const rawQuantity = decision.action === "EXIT" && accountQuantity > 0
-      ? Math.min(
-          accountQuantity,
-          Number.isFinite(requestedExitQuantity) && requestedExitQuantity > 0
-            ? requestedExitQuantity
-            : accountQuantity,
-        )
-      : (input.notional / (price ?? rawPrice));
-    const quantity = normalizeQuantity(rawQuantity, input.symbolInfo, type === "MARKET");
+    const rawQuantity =
+      decision.action === "EXIT" && accountQuantity > 0
+        ? Math.min(
+            accountQuantity,
+            Number.isFinite(requestedExitQuantity) && requestedExitQuantity > 0
+              ? requestedExitQuantity
+              : accountQuantity,
+          )
+        : input.notional / (price ?? rawPrice);
+    const quantity = normalizeQuantity(
+      rawQuantity,
+      input.symbolInfo,
+      type === "MARKET",
+    );
     const notional = Number(((price ?? rawPrice) * quantity).toFixed(8));
 
     return {
@@ -81,10 +93,16 @@ export class OrderRouter {
     };
   }
 
-  validateOrder(order: NormalizedOrderRequest, symbolInfo: BinanceSymbolInfo, account: AccountState) {
+  validateOrder(
+    order: NormalizedOrderRequest,
+    symbolInfo: BinanceSymbolInfo,
+    account: AccountState,
+  ) {
     const baseBalance = account.balances[symbolInfo.baseAsset ?? ""]?.free ?? 0;
     return validateOrderAgainstExchangeFilters(order, symbolInfo, {
-      openOrderCount: account.openOrders.filter((openOrder) => openOrder.symbol === order.symbol).length,
+      openOrderCount: account.openOrders.filter(
+        (openOrder) => openOrder.symbol === order.symbol,
+      ).length,
       currentPositionQty: baseBalance,
     });
   }
@@ -95,12 +113,15 @@ export class OrderRouter {
     const startedAt = Date.now();
 
     try {
-      const response = this.config.mode === "dry_run"
-        ? this.simulator.placeOrder(order)
-        : await this.client!.createOrder(order);
+      const response =
+        this.config.mode === "dry_run"
+          ? this.simulator.placeOrder(order)
+          : await this.client?.createOrder(order);
       const record = this.toOrderRecord(order, response);
       this.store.saveOrder(record);
-      this.metrics.increment(record.status === "FILLED" ? "orders_filled" : "orders_accepted");
+      this.metrics.increment(
+        record.status === "FILLED" ? "orders_filled" : "orders_accepted",
+      );
       this.metrics.record("order_latency_ms", Date.now() - startedAt);
 
       if (record.status === "REJECTED" || record.status === "CANCELED") {
@@ -140,7 +161,7 @@ export class OrderRouter {
     }
 
     if (this.config.mode !== "dry_run") {
-      await this.client!.cancelOrder({
+      await this.client?.cancelOrder({
         symbol: existing.symbol,
         orderId: /^\d+$/.test(orderId) ? orderId : undefined,
         origClientOrderId: /^\d+$/.test(orderId) ? undefined : orderId,
@@ -159,11 +180,12 @@ export class OrderRouter {
   }
 
   async cancelAll(symbol?: string) {
-    if (this.config.mode !== "dry_run") await this.client!.cancelAll(symbol);
+    if (this.config.mode !== "dry_run") await this.client?.cancelAll(symbol);
     const cancelled: ExecutionOrderRecord[] = [];
     for (const order of this.store.records().orders) {
       if (symbol && order.symbol !== symbol) continue;
-      if (!["NEW", "PARTIALLY_FILLED"].includes(order.status.toUpperCase())) continue;
+      if (!["NEW", "PARTIALLY_FILLED"].includes(order.status.toUpperCase()))
+        continue;
       const updated = this.store.updateOrder(order.id, { status: "CANCELED" });
       if (updated) cancelled.push(updated);
       this.store.releaseReservationsForDecision(order.decisionId);
@@ -187,7 +209,10 @@ export class OrderRouter {
     return reservation;
   }
 
-  private toOrderRecord(order: NormalizedOrderRequest, response: BinanceOpenOrder): ExecutionOrderRecord {
+  private toOrderRecord(
+    order: NormalizedOrderRequest,
+    response: BinanceOpenOrder,
+  ): ExecutionOrderRecord {
     const status = response.status ?? "NEW";
     const now = new Date().toISOString();
     return {
@@ -198,7 +223,10 @@ export class OrderRouter {
       side: order.side,
       type: order.type,
       status,
-      quantity: Number(response.executedQty) > 0 ? Number(response.executedQty) : order.quantity,
+      quantity:
+        Number(response.executedQty) > 0
+          ? Number(response.executedQty)
+          : order.quantity,
       price: Number(response.price) || order.price,
       notional: order.notional,
       mode: this.config.mode,

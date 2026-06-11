@@ -26,7 +26,11 @@ test("decision intelligence enriches strategy signals with required governance f
     },
     {
       market: "BINANCE",
-      summary: { survivalScore: 74, tradeCount: 44, updatedAt: "2026-05-31T00:00:00.000Z" },
+      summary: {
+        survivalScore: 74,
+        tradeCount: 44,
+        updatedAt: "2026-05-31T00:00:00.000Z",
+      },
     },
   );
 
@@ -41,16 +45,30 @@ test("decision intelligence enriches strategy signals with required governance f
   assert.equal(typeof signal.actionAllowed, "boolean");
   assert.equal(typeof signal.actionScale, "number");
   assert.match(signal.decisionIntelligence.realitySnapshotId, /^reality:/);
-  assert.equal(signal.decisionIntelligence.record.realitySnapshot.payload.marketVenue, "BINANCE");
-  assert.deepEqual(signal.decisionIntelligence.record.realitySnapshot.payload.assetUniverse, ["BTCUSDT"]);
-  assert.equal(signal.decisionIntelligence.record.realitySnapshot.metadata.rawHistoricalMarketDataStored, false);
+  assert.equal(
+    signal.decisionIntelligence.record.realitySnapshot.payload.marketVenue,
+    "BINANCE",
+  );
+  assert.deepEqual(
+    signal.decisionIntelligence.record.realitySnapshot.payload.assetUniverse,
+    ["BTCUSDT"],
+  );
+  assert.equal(
+    signal.decisionIntelligence.record.realitySnapshot.metadata
+      .rawHistoricalMarketDataStored,
+    false,
+  );
   assert.equal(signal.learning.thesis.status, "strengthening");
   assert.equal(signal.learning.conviction.confidence, 78);
   assert.equal(typeof signal.learning.readiness.actionJustified, "boolean");
   assert.equal(typeof signal.learning.readiness.actionLanguage, "string");
   assert.ok(Array.isArray(signal.learning.mindChangeTriggers));
   assert.ok(signal.learning.narrative.whatIsHappening);
-  assert.ok(signal.learning.emptyStates.includes("Outcome learning starts after decisions are reviewed."));
+  assert.ok(
+    signal.learning.emptyStates.includes(
+      "Outcome learning starts after decisions are reviewed.",
+    ),
+  );
   assert.ok(signal.suggestedExposure <= 5);
 });
 
@@ -78,8 +96,16 @@ test("decision intelligence blocks or scales unsafe buy signals", () => {
 
 test("decision operations expose protocol-style capabilities and persisted accountability", () => {
   const capabilities = decisionCapabilitiesPayload();
-  assert.ok(capabilities.operations.some((operation: any) => operation.name === "decision.evaluate.v1"));
-  assert.ok(capabilities.events.some((operation: any) => operation.name === "decision.blocked.v1"));
+  assert.ok(
+    capabilities.operations.some(
+      (operation: any) => operation.name === "decision.evaluate.v1",
+    ),
+  );
+  assert.ok(
+    capabilities.events.some(
+      (operation: any) => operation.name === "decision.blocked.v1",
+    ),
+  );
   assert.ok(capabilities.learning.answers.includes("mind-change-triggers"));
 
   const result = evaluateDecisionOperation({
@@ -101,7 +127,9 @@ test("decision operations expose protocol-style capabilities and persisted accou
     actualSuccessScore: 81,
     expectedConfidence: 76,
   });
-  const accountability = accountabilityGetOperation({ decisionId: "test-decision" });
+  const accountability = accountabilityGetOperation({
+    decisionId: "test-decision",
+  });
 
   assert.equal(result.record.decisionId, "test-decision");
   assert.equal(typeof result.record.realitySnapshotId, "string");

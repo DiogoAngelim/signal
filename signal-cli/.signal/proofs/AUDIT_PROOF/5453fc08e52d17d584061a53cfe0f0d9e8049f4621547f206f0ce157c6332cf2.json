@@ -1,1 +1,18 @@
-{"details":{"chainValid":true,"deterministicScore":100,"invariants":{"chainLinkage":true,"hashRecomputation":true,"replayConsistency":true},"phaseCount":0,"replayValid":true},"hashes":[],"result":"PASS","timestamp":"NOT_ALLOWED_IN_HASH_LOGIC","type":"AUDIT_PROOF","valid":true}
+{
+  "details": {
+    "chainValid": true,
+    "deterministicScore": 100,
+    "invariants": {
+      "chainLinkage": true,
+      "hashRecomputation": true,
+      "replayConsistency": true
+    },
+    "phaseCount": 0,
+    "replayValid": true
+  },
+  "hashes": [],
+  "result": "PASS",
+  "timestamp": "NOT_ALLOWED_IN_HASH_LOGIC",
+  "type": "AUDIT_PROOF",
+  "valid": true
+}

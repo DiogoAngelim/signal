@@ -5,7 +5,11 @@
  * Subclasses override `doAggregate()` to delegate to existing code.
  */
 
-import type { Aggregator, AggregatorInput, AggregatorOutput } from "../interfaces/Aggregator";
+import type {
+  Aggregator,
+  AggregatorInput,
+  AggregatorOutput,
+} from "../interfaces/Aggregator";
 
 export abstract class BaseAggregator implements Aggregator {
   abstract readonly id: string;
@@ -19,5 +23,7 @@ export abstract class BaseAggregator implements Aggregator {
    * Override this method to wrap an existing aggregation module.
    * The input is the combined scored results; the output is the final decision.
    */
-  protected abstract doAggregate(input: AggregatorInput): Promise<AggregatorOutput>;
+  protected abstract doAggregate(
+    input: AggregatorInput,
+  ): Promise<AggregatorOutput>;
 }

@@ -15,13 +15,13 @@
  */
 
 import { execSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 // Resolve CLI path relative to this file so it works from any CWD
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const SIGNAL = `node ${resolve(__dirname, "../cli/index.js")}`;
+const SIGNAL = `npx tsx ${resolve(__dirname, "../cli/index.ts")}`;
 
 /**
  * Execute a command via execSync with stdio inherit.
@@ -65,7 +65,7 @@ export function pushCommand(): void {
 
     // ─── COMMIT + PUSH ───────────────────────────────────────────────────
     console.log("SIGNAL: Committing and pushing...");
-    run(`git add -A`);
+    run("git add -A");
     run(`git commit -m "feat: deterministic contract pipeline push"`);
     run("git push origin main");
     console.log("");

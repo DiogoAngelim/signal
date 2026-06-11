@@ -1,4 +1,24 @@
 import {
+  CompactionJob,
+  type DecisionMemoryStore,
+  type InvestorLearningAssessment,
+  NeonPostgresAdapter,
+  type OpportunityRankingInput,
+  type RegimeSnapshot,
+  createInMemoryDecisionMemoryStore,
+  createInvestorLearningAssessment,
+  decisionMemoryConfigFromEnv,
+  normalizeRetentionTier,
+  summarizeDecisionRecords,
+} from "@signal/decision-memory";
+import {
+  type CoherenceAssessment,
+  type DecisionModuleInputs,
+  type DecisionPipelineInput,
+  type OutcomeEvaluationInput,
+  type PredictionInput,
+  type SimulationInput,
+  type WisdomInput,
   assessCoherence,
   buildHumanDecisionGuide,
   createAccountabilityReport,
@@ -11,59 +31,108 @@ import {
   listDecisionOperations,
   replayDecision,
   simulateDecisionPaths,
-  type CoherenceAssessment,
-  type DecisionModuleInputs,
-  type DecisionPipelineInput,
-  type OutcomeEvaluationInput,
-  type PredictionInput,
-  type SimulationInput,
-  type WisdomInput,
-} from "@signal/decision";
-import { CompactionJob } from "../../../signal-decision-memory/src/compaction";
-import {
-  createInvestorLearningAssessment,
-  type InvestorLearningAssessment,
-  type OpportunityRankingInput,
-  type RegimeSnapshot,
-} from "../../../signal-decision-memory/src/learning";
-import { createInMemoryDecisionMemoryStore } from "../../../signal-decision-memory/src/memory-store";
-import { NeonPostgresAdapter } from "../../../signal-decision-memory/src/postgres";
-import {
-  decisionMemoryConfigFromEnv,
-  normalizeRetentionTier,
-} from "../../../signal-decision-memory/src/retention";
-import { summarizeDecisionRecords } from "../../../signal-decision-memory/src/summary";
-import type { DecisionMemoryStore } from "../../../signal-decision-memory/src/types";
+} from "@signal/sdk-node";
 
 const decisionStore = createInMemoryDecisionRecordStore();
-const sharedDecisionMemory: DecisionMemoryStore = createStocksDecisionMemoryStoreFromEnv({
-  ...process.env,
-  SIGNAL_SOURCE_ID: process.env.SIGNAL_SOURCE_ID ?? "stocks-optimizer",
-});
+const sharedDecisionMemory: DecisionMemoryStore =
+  createStocksDecisionMemoryStoreFromEnv({
+    ...process.env,
+    SIGNAL_SOURCE_ID: process.env.SIGNAL_SOURCE_ID ?? "stocks-optimizer",
+  });
 const SIGNAL_SOURCE_ID = process.env.SIGNAL_SOURCE_ID ?? "stocks-optimizer";
 const recentRegimeSnapshots: RegimeSnapshot[] = [];
 const MAX_RECENT_REGIME_SNAPSHOTS = 250;
 const DECISION_MEMORY_OPERATION_DEFINITIONS = [
-  operationDefinition("mutation", "reality.snapshot.record.v1", "Capture a replayable external reality snapshot."),
-  operationDefinition("query", "reality.snapshot.get.v1", "Read a captured external reality snapshot."),
-  operationDefinition("query", "reality.snapshot.list.v1", "List captured external reality snapshots."),
-  operationDefinition("mutation", "decision.record.v1", "Record a durable shared Signal decision."),
-  operationDefinition("query", "decision.get.v1", "Read a durable shared Signal decision."),
-  operationDefinition("query", "decision.list.v1", "List durable shared Signal decisions."),
-  operationDefinition("mutation", "decision.outcome.record.v1", "Record a durable decision outcome."),
-  operationDefinition("query", "decision.replay.v1", "Replay a decision from durable memory."),
-  operationDefinition("mutation", "decision.memory.compact.v1", "Compact old decision memory into durable lessons."),
-  operationDefinition("query", "decision.memory.summary.v1", "Read durable memory summaries."),
-  operationDefinition("mutation", "decision.calibration.update.v1", "Record calibration and trust updates."),
-  operationDefinition("event", "decision.recorded.v1", "A decision record was saved."),
-  operationDefinition("event", "decision.outcome_recorded.v1", "A decision outcome was saved."),
-  operationDefinition("event", "decision.compacted.v1", "Decision memory was compacted."),
-  operationDefinition("event", "decision.replayed.v1", "A decision was replayed."),
-  operationDefinition("event", "decision.calibration_updated.v1", "Calibration or trust history was updated."),
-  operationDefinition("event", "reality.snapshot_recorded.v1", "A reality snapshot was saved."),
+  operationDefinition(
+    "mutation",
+    "reality.snapshot.record.v1",
+    "Capture a replayable external reality snapshot.",
+  ),
+  operationDefinition(
+    "query",
+    "reality.snapshot.get.v1",
+    "Read a captured external reality snapshot.",
+  ),
+  operationDefinition(
+    "query",
+    "reality.snapshot.list.v1",
+    "List captured external reality snapshots.",
+  ),
+  operationDefinition(
+    "mutation",
+    "decision.record.v1",
+    "Record a durable shared Signal decision.",
+  ),
+  operationDefinition(
+    "query",
+    "decision.get.v1",
+    "Read a durable shared Signal decision.",
+  ),
+  operationDefinition(
+    "query",
+    "decision.list.v1",
+    "List durable shared Signal decisions.",
+  ),
+  operationDefinition(
+    "mutation",
+    "decision.outcome.record.v1",
+    "Record a durable decision outcome.",
+  ),
+  operationDefinition(
+    "query",
+    "decision.replay.v1",
+    "Replay a decision from durable memory.",
+  ),
+  operationDefinition(
+    "mutation",
+    "decision.memory.compact.v1",
+    "Compact old decision memory into durable lessons.",
+  ),
+  operationDefinition(
+    "query",
+    "decision.memory.summary.v1",
+    "Read durable memory summaries.",
+  ),
+  operationDefinition(
+    "mutation",
+    "decision.calibration.update.v1",
+    "Record calibration and trust updates.",
+  ),
+  operationDefinition(
+    "event",
+    "decision.recorded.v1",
+    "A decision record was saved.",
+  ),
+  operationDefinition(
+    "event",
+    "decision.outcome_recorded.v1",
+    "A decision outcome was saved.",
+  ),
+  operationDefinition(
+    "event",
+    "decision.compacted.v1",
+    "Decision memory was compacted.",
+  ),
+  operationDefinition(
+    "event",
+    "decision.replayed.v1",
+    "A decision was replayed.",
+  ),
+  operationDefinition(
+    "event",
+    "decision.calibration_updated.v1",
+    "Calibration or trust history was updated.",
+  ),
+  operationDefinition(
+    "event",
+    "reality.snapshot_recorded.v1",
+    "A reality snapshot was saved.",
+  ),
 ];
 
-function createStocksDecisionMemoryStoreFromEnv(env: NodeJS.ProcessEnv): DecisionMemoryStore {
+function createStocksDecisionMemoryStoreFromEnv(
+  env: NodeJS.ProcessEnv,
+): DecisionMemoryStore {
   const config = decisionMemoryConfigFromEnv(env);
   if (!config.enabled || config.provider === "memory" || !config.databaseUrl) {
     return createInMemoryDecisionMemoryStore();
@@ -74,7 +143,11 @@ function createStocksDecisionMemoryStoreFromEnv(env: NodeJS.ProcessEnv): Decisio
   });
 }
 
-function operationDefinition(kind: "query" | "mutation" | "event", name: string, description: string) {
+function operationDefinition(
+  kind: "query" | "mutation" | "event",
+  name: string,
+  description: string,
+) {
   return {
     name,
     kind,
@@ -113,10 +186,12 @@ export function enrichStrategySignals<T extends Record<string, any>>(
   signals: T[],
   context: Record<string, any> = {},
 ): Array<T & Record<string, any>> {
-  return signals.map((signal) => enrichStrategySignal(signal, {
-    ...context,
-    opportunityCandidates: context["opportunityCandidates"] ?? signals,
-  }));
+  return signals.map((signal) =>
+    enrichStrategySignal(signal, {
+      ...context,
+      opportunityCandidates: context.opportunityCandidates ?? signals,
+    }),
+  );
 }
 
 export function enrichStrategySignal<T extends Record<string, any>>(
@@ -126,11 +201,13 @@ export function enrichStrategySignal<T extends Record<string, any>>(
   const input = strategyDecisionInput(signal, context);
   const result = evaluateDecision(input);
   const scale = exposureScale(result, signal);
-  const originalExposure = numeric(signal["suggestedExposure"], 0);
+  const originalExposure = numeric(signal.suggestedExposure, 0);
   const adjustedExposure = shouldExpose(signal, result.actionAllowed)
     ? clamp(originalExposure * scale, 0, originalExposure)
     : 0;
-  const highDownside = result.predictionScenarios.some((scenario) => scenario.downsideRisk >= 72);
+  const highDownside = result.predictionScenarios.some(
+    (scenario) => scenario.downsideRisk >= 72,
+  );
   const actionAllowed = result.actionAllowed && scale > 0;
   const sharedRecord = sharedStrategyDecisionRecord({
     record: result.record,
@@ -172,12 +249,13 @@ export function enrichStrategySignal<T extends Record<string, any>>(
       realitySnapshotId: sharedRecord.realitySnapshotId,
       retentionTier: sharedRecord.retentionTier,
       remembered: true,
-      summary: "Signal will remember this decision and compare it with the result later.",
+      summary:
+        "Signal will remember this decision and compare it with the result later.",
     },
     learning,
   };
   const sizingReasons = [
-    ...arrayOfStrings(signal["sizingReasons"]),
+    ...arrayOfStrings(signal.sizingReasons),
     sharedRecord.humanSummary,
     ...sharedRecord.coherence.explanation,
   ];
@@ -188,13 +266,37 @@ export function enrichStrategySignal<T extends Record<string, any>>(
   return {
     ...signal,
     suggestedExposure: adjustedExposure,
-    maxPositionPct: Math.min(numeric(signal["maxPositionPct"], adjustedExposure || 5.5), adjustedExposure || numeric(signal["maxPositionPct"], 5.5)),
-    signalConfidence: clamp(numeric(signal["signalConfidence"], numeric(signal["setupQuality"], result.coherenceScore)) + result.record.coherence.confidenceAdjustment),
-    calibratedConfidence: clamp(numeric(signal["calibratedConfidence"], result.coherenceScore) + result.record.coherence.confidenceAdjustment),
-    riskState: riskStateFor(result.coherenceStatus, result.wisdomDecision, result.simulationRecommendation, highDownside),
-    allocationAction: allocationActionFor(signal, actionAllowed, result.simulationRecommendation),
-    signalStatus: actionAllowed ? signal["signalStatus"] ?? "provided" : signal["signalAction"] === "Buy" ? "blocked" : signal["signalStatus"] ?? "provided",
-    sizingMode: sizingModeFor(scale, signal["sizingMode"]),
+    maxPositionPct: Math.min(
+      numeric(signal.maxPositionPct, adjustedExposure || 5.5),
+      adjustedExposure || numeric(signal.maxPositionPct, 5.5),
+    ),
+    signalConfidence: clamp(
+      numeric(
+        signal.signalConfidence,
+        numeric(signal.setupQuality, result.coherenceScore),
+      ) + result.record.coherence.confidenceAdjustment,
+    ),
+    calibratedConfidence: clamp(
+      numeric(signal.calibratedConfidence, result.coherenceScore) +
+        result.record.coherence.confidenceAdjustment,
+    ),
+    riskState: riskStateFor(
+      result.coherenceStatus,
+      result.wisdomDecision,
+      result.simulationRecommendation,
+      highDownside,
+    ),
+    allocationAction: allocationActionFor(
+      signal,
+      actionAllowed,
+      result.simulationRecommendation,
+    ),
+    signalStatus: actionAllowed
+      ? (signal.signalStatus ?? "provided")
+      : signal.signalAction === "Buy"
+        ? "blocked"
+        : (signal.signalStatus ?? "provided"),
+    sizingMode: sizingModeFor(scale, signal.sizingMode),
     sizingReasons,
     humanExplanation: sharedRecord.humanSummary,
     coherenceScore: result.coherenceScore,
@@ -213,21 +315,35 @@ export function enrichStrategySignal<T extends Record<string, any>>(
   };
 }
 
-export function summarizeStrategyDecisionIntelligence(signals: readonly Record<string, any>[]) {
+export function summarizeStrategyDecisionIntelligence(
+  signals: readonly Record<string, any>[],
+) {
   const decisions = signals
-    .map((signal) => signal["decisionIntelligence"])
-    .filter((value): value is Record<string, any> => value != null && typeof value === "object");
-  const coherenceScores = decisions.map((decision) => numeric(decision["coherenceScore"], 0));
-  const allowedCount = decisions.filter((decision) => decision["actionAllowed"] === true).length;
+    .map((signal) => signal.decisionIntelligence)
+    .filter(
+      (value): value is Record<string, any> =>
+        value != null && typeof value === "object",
+    );
+  const coherenceScores = decisions.map((decision) =>
+    numeric(decision.coherenceScore, 0),
+  );
+  const allowedCount = decisions.filter(
+    (decision) => decision.actionAllowed === true,
+  ).length;
   const blockedCount = decisions.length - allowedCount;
   return {
     count: decisions.length,
     averageCoherenceScore: coherenceScores.length
-      ? Math.round(coherenceScores.reduce((sum, value) => sum + value, 0) / coherenceScores.length)
+      ? Math.round(
+          coherenceScores.reduce((sum, value) => sum + value, 0) /
+            coherenceScores.length,
+        )
       : null,
     allowedCount,
     blockedCount,
-    primarySummary: String(decisions[0]?.["humanSummary"] ?? "Signal is still forming a decision."),
+    primarySummary: String(
+      decisions[0]?.humanSummary ?? "Signal is still forming a decision.",
+    ),
   };
 }
 
@@ -249,8 +365,10 @@ export function replayDecisionOperation(payload: any) {
     };
   }
   const current = payload?.currentCoherence
-    ? payload.currentCoherence as CoherenceAssessment
-    : assessCoherence(moduleInputsFrom(payload?.currentModules ?? payload?.modules ?? {}));
+    ? (payload.currentCoherence as CoherenceAssessment)
+    : assessCoherence(
+        moduleInputsFrom(payload?.currentModules ?? payload?.modules ?? {}),
+      );
   const replay = replayDecision({ record, currentCoherence: current });
   return {
     replay,
@@ -261,7 +379,9 @@ export function replayDecisionOperation(payload: any) {
 export function recordDecisionOutcomeOperation(payload: any) {
   const outcome = evaluateOutcome(outcomeInputFrom(payload));
   const existing = decisionStore.get(outcome.decisionId);
-  const coherence = existing?.coherence ?? assessCoherence(moduleInputsFrom(payload?.modules ?? {}));
+  const coherence =
+    existing?.coherence ??
+    assessCoherence(moduleInputsFrom(payload?.modules ?? {}));
   const record = createDecisionRecord({
     ...(existing ?? {
       decisionId: outcome.decisionId,
@@ -282,9 +402,12 @@ export function recordDecisionOutcomeOperation(payload: any) {
 }
 
 export async function recordDecisionOperation(payload: any) {
-  const record = payload?.record && typeof payload.record === "object"
-    ? normalizeSharedRecord(payload.record)
-    : normalizeSharedRecord(evaluateDecision(genericDecisionInput(payload)).record);
+  const record =
+    payload?.record && typeof payload.record === "object"
+      ? normalizeSharedRecord(payload.record)
+      : normalizeSharedRecord(
+          evaluateDecision(genericDecisionInput(payload)).record,
+        );
   const saved = await sharedDecisionMemory.saveDecisionRecord(record);
   decisionStore.save(saved);
   return {
@@ -295,7 +418,9 @@ export async function recordDecisionOperation(payload: any) {
 
 export async function getDecisionOperation(payload: any) {
   const decisionId = String(payload?.decisionId ?? "").trim();
-  const record = (await sharedDecisionMemory.getDecisionRecord(decisionId)) ?? decisionStore.get(decisionId);
+  const record =
+    (await sharedDecisionMemory.getDecisionRecord(decisionId)) ??
+    decisionStore.get(decisionId);
   return {
     decisionId,
     found: Boolean(record),
@@ -336,11 +461,16 @@ export async function decisionMemorySummaryOperation(payload: any) {
       limit: numberOrUndefined(payload?.limit) ?? 100,
     });
     const outcomes = await sharedDecisionMemory.listOutcomes();
-    await sharedDecisionMemory.saveSummary(summarizeDecisionRecords({
-      records,
-      outcomes,
-      source: stringOrUndefined(payload?.source) ?? records[0]?.source ?? SIGNAL_SOURCE_ID,
-    }));
+    await sharedDecisionMemory.saveSummary(
+      summarizeDecisionRecords({
+        records,
+        outcomes,
+        source:
+          stringOrUndefined(payload?.source) ??
+          records[0]?.source ??
+          SIGNAL_SOURCE_ID,
+      }),
+    );
   }
   const summaries = await sharedDecisionMemory.listSummaries({
     source: stringOrUndefined(payload?.source),
@@ -357,7 +487,9 @@ export async function updateDecisionCalibrationOperation(payload: any) {
   const decisionId = stringOrUndefined(payload?.decisionId);
   const source = stringOrUndefined(payload?.source) ?? SIGNAL_SOURCE_ID;
   const calibration = await sharedDecisionMemory.recordCalibration({
-    calibrationId: stringOrUndefined(payload?.calibrationId) ?? `calibration:${decisionId ?? "global"}:${Date.now()}`,
+    calibrationId:
+      stringOrUndefined(payload?.calibrationId) ??
+      `calibration:${decisionId ?? "global"}:${Date.now()}`,
     ...(decisionId ? { decisionId } : {}),
     source,
     createdAt: stringOrUndefined(payload?.createdAt) ?? now,
@@ -365,7 +497,9 @@ export async function updateDecisionCalibrationOperation(payload: any) {
     calibration: payload?.calibration ?? payload ?? {},
   });
   const trust = await sharedDecisionMemory.recordTrust({
-    trustId: stringOrUndefined(payload?.trustId) ?? `trust:${decisionId ?? "global"}:${Date.now()}`,
+    trustId:
+      stringOrUndefined(payload?.trustId) ??
+      `trust:${decisionId ?? "global"}:${Date.now()}`,
     ...(decisionId ? { decisionId } : {}),
     source,
     createdAt: calibration.createdAt,
@@ -389,7 +523,8 @@ export function accountabilityGetOperation(payload: any) {
       accountability: null,
     };
   }
-  const accountability = record.accountability ?? createAccountabilityReport({ record });
+  const accountability =
+    record.accountability ?? createAccountabilityReport({ record });
   if (!record.accountability) {
     decisionStore.save({ ...record, accountability });
   }
@@ -433,81 +568,123 @@ function buildInvestorLearningAssessment(input: {
   actionAllowed: boolean;
   highDownside: boolean;
 }): InvestorLearningAssessment {
-  const symbol = String(input.signal["symbol"] ?? input.signal["ticker"] ?? "asset").trim().toUpperCase();
-  const venue = String(input.context["market"] ?? input.signal["market"] ?? "").trim().toUpperCase() || "UNKNOWN";
-  const recommendation = String(input.signal["allocationAction"] ?? input.signal["signalAction"] ?? input.sharedRecord.action?.["action"] ?? "Observe");
-  const confidence = firstNumber([
-    input.signal["calibratedConfidence"],
-    input.signal["signalConfidence"],
-    input.signal["setupQuality"],
+  const symbol = String(input.signal.symbol ?? input.signal.ticker ?? "asset")
+    .trim()
+    .toUpperCase();
+  const venue =
+    String(input.context.market ?? input.signal.market ?? "")
+      .trim()
+      .toUpperCase() || "UNKNOWN";
+  const recommendation = String(
+    input.signal.allocationAction ??
+      input.signal.signalAction ??
+      input.sharedRecord.action?.action ??
+      "Observe",
+  );
+  const confidence = firstNumber(
+    [
+      input.signal.calibratedConfidence,
+      input.signal.signalConfidence,
+      input.signal.setupQuality,
+      input.result.coherenceScore,
+    ],
     input.result.coherenceScore,
-  ], input.result.coherenceScore);
-  const trust = firstNumber([
-    input.signal["trustworthiness"],
-    input.signal["trust"],
-    input.signal["judgement"]?.trust,
-    input.signal["trustGovernor"]?.trustScore,
-    input.context["summary"]?.trustworthiness,
-    input.result.coherenceScore,
-  ], confidence);
-  const riskPressure = firstNumber([
-    input.signal["riskPressure"],
-    input.signal["judgement"]?.overfitRisk,
-    input.context["summary"]?.maxDrawdownPct,
-  ], 50);
-  const readiness = firstNumber([
-    input.signal["readiness"]?.readinessScore,
-    input.signal["strategyReadiness"]?.readinessScore,
-    input.context["summary"]?.readinessScore,
-    input.actionAllowed ? confidence : Math.min(confidence, 42),
-  ], input.actionAllowed ? confidence : 35);
-  const marketHealth = firstNumber([
-    input.context["summary"]?.marketHealth,
-    input.context["summary"]?.survivalScore,
-    input.signal["marketHealth"],
-    100 - riskPressure,
-  ], 100 - riskPressure);
-  const opportunityDensity = firstNumber([
-    input.context["opportunityDiscovery"]?.density,
-    input.context["opportunityDiscovery"]?.score,
-    input.signal["opportunityDiscovery"]?.score,
-    input.signal["discoveryScore"],
+  );
+  const trust = firstNumber(
+    [
+      input.signal.trustworthiness,
+      input.signal.trust,
+      input.signal.judgement?.trust,
+      input.signal.trustGovernor?.trustScore,
+      input.context.summary?.trustworthiness,
+      input.result.coherenceScore,
+    ],
     confidence,
-  ], confidence);
+  );
+  const riskPressure = firstNumber(
+    [
+      input.signal.riskPressure,
+      input.signal.judgement?.overfitRisk,
+      input.context.summary?.maxDrawdownPct,
+    ],
+    50,
+  );
+  const readiness = firstNumber(
+    [
+      input.signal.readiness?.readinessScore,
+      input.signal.strategyReadiness?.readinessScore,
+      input.context.summary?.readinessScore,
+      input.actionAllowed ? confidence : Math.min(confidence, 42),
+    ],
+    input.actionAllowed ? confidence : 35,
+  );
+  const marketHealth = firstNumber(
+    [
+      input.context.summary?.marketHealth,
+      input.context.summary?.survivalScore,
+      input.signal.marketHealth,
+      100 - riskPressure,
+    ],
+    100 - riskPressure,
+  );
+  const opportunityDensity = firstNumber(
+    [
+      input.context.opportunityDiscovery?.density,
+      input.context.opportunityDiscovery?.score,
+      input.signal.opportunityDiscovery?.score,
+      input.signal.discoveryScore,
+      confidence,
+    ],
+    confidence,
+  );
   const supportingEvidence = uniqueLearningLines([
     input.sharedRecord.humanSummary,
     input.result.accountabilitySummary,
-    ...arrayOfStrings(input.signal["sizingReasons"]),
-    ...arrayOfStrings(input.signal["sizingRationale"]),
+    ...arrayOfStrings(input.signal.sizingReasons),
+    ...arrayOfStrings(input.signal.sizingRationale),
     ...arrayOfStrings(input.result.record.coherence.explanation),
-    input.signal["discoveryLifecycle"] ? `Discovery lifecycle: ${input.signal["discoveryLifecycle"]}.` : "",
+    input.signal.discoveryLifecycle
+      ? `Discovery lifecycle: ${input.signal.discoveryLifecycle}.`
+      : "",
   ]).slice(0, 8);
-  const failedConstraints = Array.isArray(input.signal["sizingConstraints"])
-    ? input.signal["sizingConstraints"]
+  const failedConstraints = Array.isArray(input.signal.sizingConstraints)
+    ? input.signal.sizingConstraints
         .filter((constraint: any) => constraint && constraint.passed === false)
-        .map((constraint: any) => String(constraint.reason ?? constraint.label ?? "Sizing constraint remains unresolved."))
+        .map((constraint: any) =>
+          String(
+            constraint.reason ??
+              constraint.label ??
+              "Sizing constraint remains unresolved.",
+          ),
+        )
     : [];
-  const contradictionDescriptions = Array.isArray(input.result.record.coherence.contradictions)
-    ? input.result.record.coherence.contradictions.map((item) => item.description)
+  const contradictionDescriptions = Array.isArray(
+    input.result.record.coherence.contradictions,
+  )
+    ? input.result.record.coherence.contradictions.map(
+        (item) => item.description,
+      )
     : [];
   const contradictingEvidence = uniqueLearningLines([
     ...failedConstraints,
     ...contradictionDescriptions,
     input.highDownside ? "Prediction includes high downside risk." : "",
     riskPressure >= 70 ? "Risk pressure is elevated." : "",
-    input.adjustedExposure <= 0 && recommendation === "Buy" ? "Exposure has not cleared readiness permission." : "",
+    input.adjustedExposure <= 0 && recommendation === "Buy"
+      ? "Exposure has not cleared readiness permission."
+      : "",
   ]).slice(0, 8);
   const missingEvidence = uniqueLearningLines([
-    ...arrayOfStrings(input.signal["discovery"]?.missingEvidence),
-    ...arrayOfStrings(input.signal["recognition"]?.missingEvidence),
-    ...arrayOfStrings(input.signal["trustGovernor"]?.unlockCriteria),
+    ...arrayOfStrings(input.signal.discovery?.missingEvidence),
+    ...arrayOfStrings(input.signal.recognition?.missingEvidence),
+    ...arrayOfStrings(input.signal.trustGovernor?.unlockCriteria),
     input.actionAllowed ? "" : "Action permission has not cleared.",
     "More reviewed outcomes for similar regimes.",
   ]).slice(0, 6);
   const invalidationConditions = uniqueLearningLines([
-    ...arrayOfStrings(input.signal["discovery"]?.invalidationConditions),
-    ...arrayOfStrings(input.signal["recognition"]?.invalidationConditions),
-    ...arrayOfStrings(input.signal["trustGovernor"]?.contradictions),
+    ...arrayOfStrings(input.signal.discovery?.invalidationConditions),
+    ...arrayOfStrings(input.signal.recognition?.invalidationConditions),
+    ...arrayOfStrings(input.signal.trustGovernor?.contradictions),
     "Participation deteriorates.",
     "Volatility expands.",
     "Trust falls below the action threshold.",
@@ -522,22 +699,42 @@ function buildInvestorLearningAssessment(input: {
     recommendation,
     createdAt: input.sharedRecord.createdAt,
     marketHealth,
-    riskState: String(input.signal["riskState"] ?? input.context["regime"]?.regime ?? "mixed"),
+    riskState: String(
+      input.signal.riskState ?? input.context.regime?.regime ?? "mixed",
+    ),
     riskPressure,
     trust,
     confidence,
     readiness,
     exposure: input.adjustedExposure,
     opportunityDensity,
-    volatility: firstNumber([input.signal["volatilityPct"], input.signal["volatility"], riskPressure], riskPressure),
-    breadth: firstNumber([input.signal["breadth"], input.context["summary"]?.breadth, marketHealth], marketHealth),
-    participation: firstNumber([input.signal["participation"], input.context["summary"]?.participation, opportunityDensity], opportunityDensity),
+    volatility: firstNumber(
+      [input.signal.volatilityPct, input.signal.volatility, riskPressure],
+      riskPressure,
+    ),
+    breadth: firstNumber(
+      [input.signal.breadth, input.context.summary?.breadth, marketHealth],
+      marketHealth,
+    ),
+    participation: firstNumber(
+      [
+        input.signal.participation,
+        input.context.summary?.participation,
+        opportunityDensity,
+      ],
+      opportunityDensity,
+    ),
     supportingEvidence,
     contradictingEvidence,
     missingEvidence,
     invalidationConditions,
-    similarRegimeHistory: recentRegimeSnapshots.filter((snapshot) => !venue || snapshot.venue === venue).slice(0, 80),
-    alternatives: learningAlternatives(input.context["opportunityCandidates"], input.signal),
+    similarRegimeHistory: recentRegimeSnapshots
+      .filter((snapshot) => !venue || snapshot.venue === venue)
+      .slice(0, 80),
+    alternatives: learningAlternatives(
+      input.context.opportunityCandidates,
+      input.signal,
+    ),
     portfolioContext: learningPortfolioContext(input.context, input.signal, {
       riskPressure,
       confidence,
@@ -554,7 +751,8 @@ function buildInvestorLearningAssessment(input: {
 
 function rememberInvestorLearning(assessment: InvestorLearningAssessment) {
   const existingIndex = recentRegimeSnapshots.findIndex(
-    (snapshot) => snapshot.regimeSnapshotId === assessment.regimeSnapshot.regimeSnapshotId,
+    (snapshot) =>
+      snapshot.regimeSnapshotId === assessment.regimeSnapshot.regimeSnapshotId,
   );
   if (existingIndex >= 0) recentRegimeSnapshots.splice(existingIndex, 1);
   recentRegimeSnapshots.unshift(assessment.regimeSnapshot);
@@ -565,32 +763,55 @@ function rememberInvestorLearning(assessment: InvestorLearningAssessment) {
   void Promise.all([
     sharedDecisionMemory.saveThesis(assessment.thesis),
     sharedDecisionMemory.saveRegimeSnapshot(assessment.regimeSnapshot),
-    ...(assessment.review ? [sharedDecisionMemory.saveDecisionReview(assessment.review)] : []),
-    ...assessment.learningRecords.map((record) => sharedDecisionMemory.saveLearningRecord(record)),
+    ...(assessment.review
+      ? [sharedDecisionMemory.saveDecisionReview(assessment.review)]
+      : []),
+    ...assessment.learningRecords.map((record) =>
+      sharedDecisionMemory.saveLearningRecord(record),
+    ),
   ]).catch((error) => {
     logDecisionMemoryWarning("investor learning persistence failed", error);
   });
 }
 
-function learningAlternatives(value: unknown, fallbackSignal: Record<string, any>): OpportunityRankingInput[] {
+function learningAlternatives(
+  value: unknown,
+  fallbackSignal: Record<string, any>,
+): OpportunityRankingInput[] {
   const rows = Array.isArray(value) && value.length ? value : [fallbackSignal];
   return rows
     .map((candidate: any, index) => {
-      const symbol = String(candidate?.symbol ?? candidate?.ticker ?? fallbackSignal["symbol"] ?? `candidate-${index + 1}`).trim().toUpperCase();
-      const risk = numeric(candidate?.riskPressure, numeric(fallbackSignal["riskPressure"], 50));
-      const readiness = firstNumber([
-        candidate?.readiness?.readinessScore,
-        candidate?.calibratedConfidence,
-        candidate?.signalConfidence,
-        candidate?.setupQuality,
-      ], 45);
+      const symbol = String(
+        candidate?.symbol ??
+          candidate?.ticker ??
+          fallbackSignal.symbol ??
+          `candidate-${index + 1}`,
+      )
+        .trim()
+        .toUpperCase();
+      const risk = numeric(
+        candidate?.riskPressure,
+        numeric(fallbackSignal.riskPressure, 50),
+      );
+      const readiness = firstNumber(
+        [
+          candidate?.readiness?.readinessScore,
+          candidate?.calibratedConfidence,
+          candidate?.signalConfidence,
+          candidate?.setupQuality,
+        ],
+        45,
+      );
       const quality = numeric(candidate?.setupQuality, readiness);
-      const trust = firstNumber([
-        candidate?.trustworthiness,
-        candidate?.trust,
-        candidate?.judgement?.trust,
-        candidate?.trustGovernor?.trustScore,
-      ], readiness);
+      const trust = firstNumber(
+        [
+          candidate?.trustworthiness,
+          candidate?.trust,
+          candidate?.judgement?.trust,
+          candidate?.trustGovernor?.trustScore,
+        ],
+        readiness,
+      );
       const exposure = numeric(candidate?.suggestedExposure, 0);
       return {
         id: symbol,
@@ -611,16 +832,24 @@ function learningAlternatives(value: unknown, fallbackSignal: Record<string, any
 function learningPortfolioContext(
   context: Record<string, any>,
   signal: Record<string, any>,
-  values: { riskPressure: number; confidence: number; exposure: number; originalExposure: number },
+  values: {
+    riskPressure: number;
+    confidence: number;
+    exposure: number;
+    originalExposure: number;
+  },
 ) {
-  const summary = context["summary"];
+  const summary = context.summary;
   if (!isPlainRecord(summary)) return undefined;
-  const concentrationRisk = firstNumber([
-    signal["concentration"]?.top1TradeContributionPct,
-    signal["judgement"]?.overfitRisk,
-    summary["maxDrawdownPct"],
+  const concentrationRisk = firstNumber(
+    [
+      signal.concentration?.top1TradeContributionPct,
+      signal.judgement?.overfitRisk,
+      summary.maxDrawdownPct,
+      values.riskPressure,
+    ],
     values.riskPressure,
-  ], values.riskPressure);
+  );
   const expectedRiskAdjustedContribution = Math.max(
     0,
     values.confidence - values.riskPressure * 0.35 + values.exposure * 3,
@@ -629,14 +858,18 @@ function learningPortfolioContext(
     hasData: true,
     concentrationRisk,
     diversificationBenefit: Math.max(0, 100 - concentrationRisk),
-    exposureOverlap: values.originalExposure > 0 ? Math.min(100, values.originalExposure * 12) : 0,
+    exposureOverlap:
+      values.originalExposure > 0
+        ? Math.min(100, values.originalExposure * 12)
+        : 0,
     riskContribution: values.riskPressure,
     expectedRiskAdjustedContribution,
     summary: `Portfolio context uses current market summary; expected risk-adjusted contribution is ${Math.round(expectedRiskAdjustedContribution)}/100.`,
-    warnings: concentrationRisk >= 70 ? ["Concentration risk is elevated."] : [],
+    warnings:
+      concentrationRisk >= 70 ? ["Concentration risk is elevated."] : [],
     metadata: {
-      configId: summary["configId"],
-      tradeCount: summary["tradeCount"],
+      configId: summary.configId,
+      tradeCount: summary.tradeCount,
     },
   };
 }
@@ -650,10 +883,14 @@ function marketCategoryFor(venue: string) {
 }
 
 function uniqueLearningLines(values: readonly unknown[]) {
-  return Array.from(new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean)));
+  return Array.from(
+    new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean)),
+  );
 }
 
-function rememberDecisionRecord(record: ReturnType<typeof normalizeSharedRecord>) {
+function rememberDecisionRecord(
+  record: ReturnType<typeof normalizeSharedRecord>,
+) {
   const normalized = normalizeSharedRecord(record);
   decisionStore.save(normalized);
   void sharedDecisionMemory.saveDecisionRecord(normalized).catch((error) => {
@@ -672,16 +909,20 @@ function normalizeSharedRecord(record: any) {
   const source = String(record?.source ?? SIGNAL_SOURCE_ID);
   const createdAt = String(record?.createdAt ?? new Date().toISOString());
   const observation = record?.observation ?? {};
-  const realitySnapshot = record?.realitySnapshot ?? createRealitySnapshot({
-    snapshotId: stringOrUndefined(record?.realitySnapshotId) ?? `reality:${record?.decisionId ?? Date.now()}`,
-    source,
-    createdAt,
-    payload: observation,
-    metadata: {
-      decisionId: String(record?.decisionId ?? "decision:unknown"),
-      capture: "derived-from-decision-record",
-    },
-  });
+  const realitySnapshot =
+    record?.realitySnapshot ??
+    createRealitySnapshot({
+      snapshotId:
+        stringOrUndefined(record?.realitySnapshotId) ??
+        `reality:${record?.decisionId ?? Date.now()}`,
+      source,
+      createdAt,
+      payload: observation,
+      metadata: {
+        decisionId: String(record?.decisionId ?? "decision:unknown"),
+        capture: "derived-from-decision-record",
+      },
+    });
   return {
     ...record,
     createdAt,
@@ -694,21 +935,36 @@ function normalizeSharedRecord(record: any) {
   };
 }
 
-function normalizeCoherenceAssessment(value: any, modules: any = {}): CoherenceAssessment {
+function normalizeCoherenceAssessment(
+  value: any,
+  modules: any = {},
+): CoherenceAssessment {
   const fallback = assessCoherence(moduleInputsFrom(modules));
   const score = numberOrUndefined(value?.score) ?? fallback.score;
   const status = coherenceStatusOrUndefined(value?.status) ?? fallback.status;
   return {
     score,
     status,
-    contradictions: Array.isArray(value?.contradictions) ? value.contradictions : fallback.contradictions,
-    consensusLevel: numberOrUndefined(value?.consensusLevel) ?? fallback.consensusLevel,
-    actionAllowed: typeof value?.actionAllowed === "boolean" ? value.actionAllowed : fallback.actionAllowed,
+    contradictions: Array.isArray(value?.contradictions)
+      ? value.contradictions
+      : fallback.contradictions,
+    consensusLevel:
+      numberOrUndefined(value?.consensusLevel) ?? fallback.consensusLevel,
+    actionAllowed:
+      typeof value?.actionAllowed === "boolean"
+        ? value.actionAllowed
+        : fallback.actionAllowed,
     actionScale: numberOrUndefined(value?.actionScale) ?? fallback.actionScale,
-    trustAdjustment: numberOrUndefined(value?.trustAdjustment) ?? fallback.trustAdjustment,
-    agencyAdjustment: numberOrUndefined(value?.agencyAdjustment) ?? fallback.agencyAdjustment,
-    confidenceAdjustment: numberOrUndefined(value?.confidenceAdjustment) ?? fallback.confidenceAdjustment,
-    explanation: Array.isArray(value?.explanation) ? value.explanation.map((line: unknown) => String(line)) : fallback.explanation,
+    trustAdjustment:
+      numberOrUndefined(value?.trustAdjustment) ?? fallback.trustAdjustment,
+    agencyAdjustment:
+      numberOrUndefined(value?.agencyAdjustment) ?? fallback.agencyAdjustment,
+    confidenceAdjustment:
+      numberOrUndefined(value?.confidenceAdjustment) ??
+      fallback.confidenceAdjustment,
+    explanation: Array.isArray(value?.explanation)
+      ? value.explanation.map((line: unknown) => String(line))
+      : fallback.explanation,
   };
 }
 
@@ -721,29 +977,41 @@ function sharedStrategyDecisionRecord(input: {
   scale: number;
   actionAllowed: boolean;
 }) {
-  const symbol = String(input.signal["symbol"] ?? input.signal["ticker"] ?? "asset").trim();
-  const market = String(input.context["market"] ?? input.signal["market"] ?? "").trim().toUpperCase();
-  const trust = firstNumber([
-    input.signal["trustworthiness"],
-    input.signal["trust"],
-    input.signal["trustGovernor"]?.trustScore,
-    input.context["summary"]?.trustworthiness,
-  ], input.record.coherence.score);
-  const confidence = firstNumber([
-    input.signal["calibratedConfidence"],
-    input.signal["signalConfidence"],
-    input.signal["setupQuality"],
+  const symbol = String(
+    input.signal.symbol ?? input.signal.ticker ?? "asset",
+  ).trim();
+  const market = String(input.context.market ?? input.signal.market ?? "")
+    .trim()
+    .toUpperCase();
+  const trust = firstNumber(
+    [
+      input.signal.trustworthiness,
+      input.signal.trust,
+      input.signal.trustGovernor?.trustScore,
+      input.context.summary?.trustworthiness,
+    ],
     input.record.coherence.score,
-  ], input.record.coherence.score);
-  const marketState = input.context["regime"] ?? {
-    regime: input.signal["regime"] ?? input.context["summary"]?.regime,
-    survivalScore: input.context["summary"]?.survivalScore,
+  );
+  const confidence = firstNumber(
+    [
+      input.signal.calibratedConfidence,
+      input.signal.signalConfidence,
+      input.signal.setupQuality,
+      input.record.coherence.score,
+    ],
+    input.record.coherence.score,
+  );
+  const marketState = input.context.regime ?? {
+    regime: input.signal.regime ?? input.context.summary?.regime,
+    survivalScore: input.context.summary?.survivalScore,
   };
   return normalizeSharedRecord({
     ...input.record,
     source: SIGNAL_SOURCE_ID,
     observation: {
-      ...(isPlainRecord(input.record.observation) ? input.record.observation : { value: input.record.observation }),
+      ...(isPlainRecord(input.record.observation)
+        ? input.record.observation
+        : { value: input.record.observation }),
       marketVenue: market,
       marketState,
       selectedAssets: symbol ? [symbol] : [],
@@ -757,9 +1025,9 @@ function sharedStrategyDecisionRecord(input: {
       requestedExposure: input.originalExposure,
       positionSizing: {
         scale: input.scale,
-        sizingMode: input.signal["sizingMode"],
-        sizingResult: input.signal["sizingResult"],
-        maxPositionPct: input.signal["maxPositionPct"],
+        sizingMode: input.signal.sizingMode,
+        sizingResult: input.signal.sizingResult,
+        maxPositionPct: input.signal.maxPositionPct,
       },
       actionAllowed: input.actionAllowed,
       humanExplanation: input.record.humanSummary,
@@ -767,7 +1035,8 @@ function sharedStrategyDecisionRecord(input: {
     },
     action: {
       ...(isPlainRecord(input.record.action) ? input.record.action : {}),
-      action: input.signal["allocationAction"] ?? input.signal["signalAction"] ?? "Hold",
+      action:
+        input.signal.allocationAction ?? input.signal.signalAction ?? "Hold",
       symbol,
       allowed: input.actionAllowed,
       requestedExposure: input.originalExposure,
@@ -790,11 +1059,19 @@ function uniqueOperations<T extends { name: string }>(operations: T[]): T[] {
 }
 
 function retentionTierOrUndefined(value: unknown) {
-  if (value === "hot" || value === "warm" || value === "cold" || value === "expired") return value;
+  if (
+    value === "hot" ||
+    value === "warm" ||
+    value === "cold" ||
+    value === "expired"
+  )
+    return value;
   return undefined;
 }
 
-function coherenceStatusOrUndefined(value: unknown): CoherenceAssessment["status"] | undefined {
+function coherenceStatusOrUndefined(
+  value: unknown,
+): CoherenceAssessment["status"] | undefined {
   if (
     value === "aligned" ||
     value === "stable" ||
@@ -816,53 +1093,110 @@ function logDecisionMemoryWarning(message: string, error: unknown) {
   console.warn(message, error instanceof Error ? error.message : String(error));
 }
 
-function strategyDecisionInput(signal: Record<string, any>, context: Record<string, any>): DecisionPipelineInput {
-  const symbol = String(signal["symbol"] ?? signal["ticker"] ?? "asset").trim();
-  const action = String(signal["allocationAction"] ?? signal["signalAction"] ?? "Hold");
-  const marketVenue = String(context["market"] ?? signal["market"] ?? "").trim().toUpperCase();
-  const setupQuality = numeric(signal["setupQuality"], 50);
-  const riskPressure = numeric(signal["riskPressure"], 50);
-  const expectedMove = numeric(signal["expectedMove"], numeric(signal["changePercent"], 0));
-  const trust = firstNumber([
-    signal["trustworthiness"],
-    signal["trust"],
-    signal["trustGovernor"]?.trustScore,
-    signal["judgement"]?.trust,
-    signal["judgement"]?.reliability,
-    context["summary"]?.trustworthiness,
-  ], setupQuality);
-  const calibration = firstNumber([
-    signal["calibratedConfidence"],
-    signal["judgement"]?.calibration,
-    context["summary"]?.calibratedConfidence,
-    trust,
-  ], trust);
-  const recovery = firstNumber([
-    signal["recovery"]?.recoveryScore,
-    signal["restorationProgress"]?.progressPct,
-    signal["restorationProgress"]?.restorationProgress,
-    100 - riskPressure,
-  ], 100 - riskPressure);
-  const historyReliability = firstNumber([
-    context["summary"]?.survivalScore,
-    signal["survivalMemory"]?.survivalConfidence,
-    signal["judgement"]?.survivalMemory?.survivalConfidence,
+function strategyDecisionInput(
+  signal: Record<string, any>,
+  context: Record<string, any>,
+): DecisionPipelineInput {
+  const symbol = String(signal.symbol ?? signal.ticker ?? "asset").trim();
+  const action = String(
+    signal.allocationAction ?? signal.signalAction ?? "Hold",
+  );
+  const marketVenue = String(context.market ?? signal.market ?? "")
+    .trim()
+    .toUpperCase();
+  const setupQuality = numeric(signal.setupQuality, 50);
+  const riskPressure = numeric(signal.riskPressure, 50);
+  const expectedMove = numeric(
+    signal.expectedMove,
+    numeric(signal.changePercent, 0),
+  );
+  const trust = firstNumber(
+    [
+      signal.trustworthiness,
+      signal.trust,
+      signal.trustGovernor?.trustScore,
+      signal.judgement?.trust,
+      signal.judgement?.reliability,
+      context.summary?.trustworthiness,
+    ],
     setupQuality,
-  ], setupQuality);
-  const modules: DecisionModuleInputs = {
-    discovery: firstNumber([signal["discoveryScore"], signal["opportunityDiscovery"]?.score, setupQuality], setupQuality),
-    judgment: firstNumber([signal["signalConfidence"], signal["judgement"]?.adjustedConfidence, setupQuality], setupQuality),
-    purpose: action === "Buy" ? clamp(setupQuality - riskPressure * 0.15) : 64,
-    need: clamp(50 + Math.abs(expectedMove) * 5 + Math.max(0, setupQuality - 60) * 0.4),
+  );
+  const calibration = firstNumber(
+    [
+      signal.calibratedConfidence,
+      signal.judgement?.calibration,
+      context.summary?.calibratedConfidence,
+      trust,
+    ],
     trust,
-    reflection: firstNumber([context["summary"]?.readinessScore, calibration], calibration),
+  );
+  const recovery = firstNumber(
+    [
+      signal.recovery?.recoveryScore,
+      signal.restorationProgress?.progressPct,
+      signal.restorationProgress?.restorationProgress,
+      100 - riskPressure,
+    ],
+    100 - riskPressure,
+  );
+  const historyReliability = firstNumber(
+    [
+      context.summary?.survivalScore,
+      signal.survivalMemory?.survivalConfidence,
+      signal.judgement?.survivalMemory?.survivalConfidence,
+      setupQuality,
+    ],
+    setupQuality,
+  );
+  const modules: DecisionModuleInputs = {
+    discovery: firstNumber(
+      [signal.discoveryScore, signal.opportunityDiscovery?.score, setupQuality],
+      setupQuality,
+    ),
+    judgment: firstNumber(
+      [
+        signal.signalConfidence,
+        signal.judgement?.adjustedConfidence,
+        setupQuality,
+      ],
+      setupQuality,
+    ),
+    purpose: action === "Buy" ? clamp(setupQuality - riskPressure * 0.15) : 64,
+    need: clamp(
+      50 + Math.abs(expectedMove) * 5 + Math.max(0, setupQuality - 60) * 0.4,
+    ),
+    trust,
+    reflection: firstNumber(
+      [context.summary?.readinessScore, calibration],
+      calibration,
+    ),
     recovery,
     memory: historyReliability,
-    learning: firstNumber([context["summary"]?.tradeCount != null ? Math.min(100, Number(context["summary"].tradeCount) * 2) : undefined, historyReliability], historyReliability),
+    learning: firstNumber(
+      [
+        context.summary?.tradeCount != null
+          ? Math.min(100, Number(context.summary.tradeCount) * 2)
+          : undefined,
+        historyReliability,
+      ],
+      historyReliability,
+    ),
     calibration,
     identity: action === "Buy" && riskPressure > 72 ? 42 : 68,
-    awareness: firstNumber([signal["executionQuality"]?.score, signal["executionQuality"]?.qualityScore, 100 - riskPressure], 100 - riskPressure),
-    agency: action === "Buy" ? clamp(55 + numeric(signal["suggestedExposure"], 0) * 5) : action === "Sell" ? 58 : 42,
+    awareness: firstNumber(
+      [
+        signal.executionQuality?.score,
+        signal.executionQuality?.qualityScore,
+        100 - riskPressure,
+      ],
+      100 - riskPressure,
+    ),
+    agency:
+      action === "Buy"
+        ? clamp(55 + numeric(signal.suggestedExposure, 0) * 5)
+        : action === "Sell"
+          ? 58
+          : 42,
   };
   const realitySnapshot = marketRealitySnapshot({
     signal,
@@ -880,7 +1214,10 @@ function strategyDecisionInput(signal: Record<string, any>, context: Record<stri
   });
 
   return {
-    decisionId: String(signal["decisionId"] ?? `${context["market"] ?? "market"}:${symbol}:${action}:${context["summary"]?.updatedAt ?? "latest"}`),
+    decisionId: String(
+      signal.decisionId ??
+        `${context.market ?? "market"}:${symbol}:${action}:${context.summary?.updatedAt ?? "latest"}`,
+    ),
     source: SIGNAL_SOURCE_ID,
     realitySnapshotId: realitySnapshot.snapshotId,
     realitySnapshot,
@@ -894,7 +1231,7 @@ function strategyDecisionInput(signal: Record<string, any>, context: Record<stri
       setupQuality,
       riskPressure,
       expectedMove,
-      regime: signal["regime"] ?? context["regime"]?.regime,
+      regime: signal.regime ?? context.regime?.regime,
     },
     modules,
     prediction: {
@@ -918,7 +1255,9 @@ function strategyDecisionInput(signal: Record<string, any>, context: Record<stri
     wisdom: {
       expectedReward: clamp(setupQuality + Math.max(0, expectedMove) * 4),
       downsideRisk: clamp(riskPressure + Math.max(0, -expectedMove) * 8),
-      irreversibleRisk: clamp(riskPressure * 0.85 + numeric(signal["suggestedExposure"], 0) * 4),
+      irreversibleRisk: clamp(
+        riskPressure * 0.85 + numeric(signal.suggestedExposure, 0) * 4,
+      ),
       survivalPriority: 88,
       longTermAlignment: historyReliability,
       shortTermTemptation: clamp(setupQuality + Math.max(0, expectedMove) * 5),
@@ -927,7 +1266,7 @@ function strategyDecisionInput(signal: Record<string, any>, context: Record<stri
     action: {
       action,
       symbol,
-      requestedExposure: signal["suggestedExposure"],
+      requestedExposure: signal.suggestedExposure,
     },
     retentionTier: "hot",
   };
@@ -948,14 +1287,14 @@ function marketRealitySnapshot(input: {
   historyReliability: number;
 }) {
   const timestamp = String(
-    input.signal["timestamp"] ??
-      input.signal["updatedAt"] ??
-      input.context["summary"]?.updatedAt ??
+    input.signal.timestamp ??
+      input.signal.updatedAt ??
+      input.context.summary?.updatedAt ??
       new Date().toISOString(),
   );
-  const marketState = input.context["regime"] ?? {
-    regime: input.signal["regime"] ?? input.context["summary"]?.regime ?? "unknown",
-    survivalScore: input.context["summary"]?.survivalScore,
+  const marketState = input.context.regime ?? {
+    regime: input.signal.regime ?? input.context.summary?.regime ?? "unknown",
+    survivalScore: input.context.summary?.survivalScore,
     riskPressure: input.riskPressure,
   };
   const indicatorSnapshot = {
@@ -966,14 +1305,17 @@ function marketRealitySnapshot(input: {
     calibration: input.calibration,
     recovery: input.recovery,
     historyReliability: input.historyReliability,
-    suggestedExposure: numeric(input.signal["suggestedExposure"], 0),
-    signalAction: input.signal["signalAction"] ?? input.action,
+    suggestedExposure: numeric(input.signal.suggestedExposure, 0),
+    signalAction: input.signal.signalAction ?? input.action,
   };
   const sourceRef = {
     sourceId: SIGNAL_SOURCE_ID,
     sourceType: "api" as const,
     reliabilityScore: input.trust,
-    freshnessWindowMs: numeric(process.env.STOCK_SIGNAL_SNAPSHOT_FRESHNESS_MS, 15 * 60 * 1000),
+    freshnessWindowMs: numeric(
+      process.env.STOCK_SIGNAL_SNAPSHOT_FRESHNESS_MS,
+      15 * 60 * 1000,
+    ),
     metadata: {
       adapter: "stocks-optimizer",
       rawHistoryStored: false,
@@ -987,10 +1329,18 @@ function marketRealitySnapshot(input: {
       input.marketVenue || "market",
       input.symbol || "asset",
       timestamp,
-    ].map(snapshotSegment).join(":"),
+    ]
+      .map(snapshotSegment)
+      .join(":"),
     source: SIGNAL_SOURCE_ID,
     createdAt: timestamp,
-    dataQuality: clamp((input.setupQuality + input.trust + input.calibration + input.historyReliability) / 4),
+    dataQuality: clamp(
+      (input.setupQuality +
+        input.trust +
+        input.calibration +
+        input.historyReliability) /
+        4,
+    ),
     freshnessScore: freshnessScoreFrom(timestamp, sourceRef.freshnessWindowMs),
     payload: {
       marketVenue: input.marketVenue,
@@ -1025,16 +1375,21 @@ function genericDecisionInput(payload: any): DecisionPipelineInput {
     };
   }
 
-  return strategyDecisionInput(payload?.signal ?? payload ?? {}, payload?.context ?? {});
+  return strategyDecisionInput(
+    payload?.signal ?? payload ?? {},
+    payload?.context ?? {},
+  );
 }
 
 function moduleInputsFrom(value: any): DecisionModuleInputs {
-  if (value == null || typeof value !== "object" || Array.isArray(value)) return {};
+  if (value == null || typeof value !== "object" || Array.isArray(value))
+    return {};
   return value as DecisionModuleInputs;
 }
 
 function predictionInputFrom(value: any): PredictionInput {
-  if (value == null || typeof value !== "object" || Array.isArray(value)) return {};
+  if (value == null || typeof value !== "object" || Array.isArray(value))
+    return {};
   return {
     decisionId: stringOrUndefined(value.decisionId),
     currentScore: numberOrUndefined(value.currentScore),
@@ -1044,8 +1399,12 @@ function predictionInputFrom(value: any): PredictionInput {
     purposeAlignment: numberOrUndefined(value.purposeAlignment),
     needAlignment: numberOrUndefined(value.needAlignment),
     confidence: numberOrUndefined(value.confidence),
-    labels: Array.isArray(value.labels) ? value.labels.map((label: unknown) => String(label)) : undefined,
-    assumptions: Array.isArray(value.assumptions) ? value.assumptions.map((assumption: unknown) => String(assumption)) : undefined,
+    labels: Array.isArray(value.labels)
+      ? value.labels.map((label: unknown) => String(label))
+      : undefined,
+    assumptions: Array.isArray(value.assumptions)
+      ? value.assumptions.map((assumption: unknown) => String(assumption))
+      : undefined,
   };
 }
 
@@ -1063,26 +1422,44 @@ function outcomeInputFrom(value: any): OutcomeEvaluationInput {
     riskTaken: numberOrUndefined(value?.riskTaken),
     unexpected: value?.unexpected === true,
     inconclusive: value?.inconclusive === true,
-    lessons: Array.isArray(value?.lessons) ? value.lessons.map((lesson: unknown) => String(lesson)) : undefined,
+    lessons: Array.isArray(value?.lessons)
+      ? value.lessons.map((lesson: unknown) => String(lesson))
+      : undefined,
   };
 }
 
-function exposureScale(result: ReturnType<typeof evaluateDecision>, signal: Record<string, any>): number {
+function exposureScale(
+  result: ReturnType<typeof evaluateDecision>,
+  signal: Record<string, any>,
+): number {
   let scale = result.actionScale;
   if (result.coherenceScore < 40) scale = 0;
   else if (result.coherenceScore < 60) scale = Math.min(scale, 0.1);
   else if (result.coherenceScore < 75) scale = Math.min(scale, 0.45);
   else if (result.coherenceScore < 90) scale = Math.min(scale, 0.75);
   if (result.wisdomDecision === "avoid") scale = 0;
-  if (result.simulationRecommendation === "wait" || result.simulationRecommendation === "block") scale = 0;
-  if (result.predictionScenarios.some((scenario) => scenario.downsideRisk >= 72)) scale *= 0.65;
-  if (result.outcomeAccuracy != null && result.outcomeAccuracy < 55) scale *= 0.75;
-  if (String(signal["signalAction"] ?? "").toLowerCase() !== "buy") scale = 0;
+  if (
+    result.simulationRecommendation === "wait" ||
+    result.simulationRecommendation === "block"
+  )
+    scale = 0;
+  if (
+    result.predictionScenarios.some((scenario) => scenario.downsideRisk >= 72)
+  )
+    scale *= 0.65;
+  if (result.outcomeAccuracy != null && result.outcomeAccuracy < 55)
+    scale *= 0.75;
+  if (String(signal.signalAction ?? "").toLowerCase() !== "buy") scale = 0;
   return Number(clamp(scale, 0, 1).toFixed(3));
 }
 
-function shouldExpose(signal: Record<string, any>, actionAllowed: boolean): boolean {
-  return actionAllowed && String(signal["signalAction"] ?? "").toLowerCase() === "buy";
+function shouldExpose(
+  signal: Record<string, any>,
+  actionAllowed: boolean,
+): boolean {
+  return (
+    actionAllowed && String(signal.signalAction ?? "").toLowerCase() === "buy"
+  );
 }
 
 function allocationActionFor(
@@ -1090,8 +1467,10 @@ function allocationActionFor(
   actionAllowed: boolean,
   simulationRecommendation: string,
 ): string {
-  const action = String(signal["allocationAction"] ?? signal["signalAction"] ?? "Hold");
-  if (String(signal["signalAction"] ?? "").toLowerCase() !== "buy") return action;
+  const action = String(
+    signal.allocationAction ?? signal.signalAction ?? "Hold",
+  );
+  if (String(signal.signalAction ?? "").toLowerCase() !== "buy") return action;
   if (!actionAllowed) return "Blocked";
   if (simulationRecommendation === "wait") return "Watch";
   return action;
@@ -1111,9 +1490,15 @@ function riskStateFor(
   simulationRecommendation: string,
   highDownside: boolean,
 ): string {
-  if (wisdomDecision === "avoid" || simulationRecommendation === "block" || coherenceStatus === "blocked") return "blocked";
+  if (
+    wisdomDecision === "avoid" ||
+    simulationRecommendation === "block" ||
+    coherenceStatus === "blocked"
+  )
+    return "blocked";
   if (simulationRecommendation === "wait") return "wait";
-  if (highDownside || coherenceStatus === "contradictory") return "reduced-risk";
+  if (highDownside || coherenceStatus === "contradictory")
+    return "reduced-risk";
   return "decision-aware";
 }
 
@@ -1139,16 +1524,23 @@ function clamp(value: number, min = 0, max = 100): number {
   return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
 }
 
-function freshnessScoreFrom(timestamp: string, freshnessWindowMs: number): number {
+function freshnessScoreFrom(
+  timestamp: string,
+  freshnessWindowMs: number,
+): number {
   const createdAt = Date.parse(timestamp);
   if (!Number.isFinite(createdAt)) return 50;
   const ageMs = Math.max(0, Date.now() - createdAt);
   if (ageMs <= freshnessWindowMs) return 100;
-  return clamp(100 - ((ageMs - freshnessWindowMs) / Math.max(freshnessWindowMs, 1)) * 50);
+  return clamp(
+    100 - ((ageMs - freshnessWindowMs) / Math.max(freshnessWindowMs, 1)) * 50,
+  );
 }
 
 function snapshotSegment(value: unknown): string {
-  const text = String(value ?? "").trim().toLowerCase();
+  const text = String(value ?? "")
+    .trim()
+    .toLowerCase();
   return text.replace(/[^a-z0-9_.-]+/g, "-") || "unknown";
 }
 

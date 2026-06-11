@@ -7,34 +7,38 @@ import type {
   ViabilityVerdict,
 } from "../../../signal-framework";
 import {
-  calibrate,
   type CalibrationInput,
   type CalibrationResult,
+  calibrate,
 } from "../../../signal-framework/calibration/engine";
 import {
-  planReadinessRemediation,
   type ReadinessRemediationPlan,
+  planReadinessRemediation,
 } from "../../../signal-framework/readiness-remediation/engine";
 import {
-  evaluateRecovery,
   type RecoveryResult,
+  evaluateRecovery,
 } from "../../../signal-framework/recovery/engine";
 import {
-  evaluateTrustGovernor,
   type TrustGovernorResult,
+  evaluateTrustGovernor,
 } from "../../../signal-framework/trust/engine";
 import {
-  evaluateTradeCandidateBelief,
   type TradeBeliefDiagnostic,
+  evaluateTradeCandidateBelief,
 } from "./belief-adapter";
 import {
-  buildStockExecutiveArchitecture,
   type StockExecutiveArchitecture,
+  buildStockExecutiveArchitecture,
 } from "./executive-signal-adapter";
-import { sizeFinancialExposure, type FinancialExposureViabilityInput } from "./financial-sizing";
 import {
-  buildRestorationProgress,
+  type FinancialExposureViabilityInput,
+  sizeFinancialExposure,
+} from "./financial-sizing";
+import type { MarketHistoryDiagnostics } from "./historical-dataset";
+import {
   type RestorationProgressDiagnostic,
+  buildRestorationProgress,
 } from "./restoration-progress";
 import {
   evaluateStockJudgement,
@@ -42,10 +46,9 @@ import {
   judgementTrustForAgency,
 } from "./stock-judgement";
 import {
-  buildStockSurvivalMemory,
   type StockSurvivalMemoryDiagnostic,
+  buildStockSurvivalMemory,
 } from "./survival-memory-adapter";
-import type { MarketHistoryDiagnostics } from "./historical-dataset";
 
 export type StrategyReadinessStage =
   | "Research only"
@@ -76,7 +79,11 @@ export type StrategyReadinessResult = {
   participationMode: TrustGovernorResult["participationMode"];
   participationBlocked: boolean;
   calibration: CalibrationResult & {
-    status: "trusted" | "insufficient-history" | "poor-calibration" | "unstable-outcomes";
+    status:
+      | "trusted"
+      | "insufficient-history"
+      | "poor-calibration"
+      | "unstable-outcomes";
     explanation: string;
   };
   maxPositionPct: number;
@@ -252,14 +259,18 @@ function unique(values: string[]) {
 }
 
 function average(values: number[]) {
-  return values.reduce((sum, value) => sum + value, 0) / Math.max(1, values.length);
+  return (
+    values.reduce((sum, value) => sum + value, 0) / Math.max(1, values.length)
+  );
 }
 
 function median(values: number[]) {
   const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
   if (!sorted.length) return 0;
   const middle = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  return sorted.length % 2
+    ? sorted[middle]
+    : (sorted[middle - 1] + sorted[middle]) / 2;
 }
 
 function skew(values: number[]) {
@@ -273,9 +284,13 @@ function skew(values: number[]) {
 }
 
 function contributionForTrade(trade: any) {
-  const returnPct = numberOrZero(trade?.returnPct ?? trade?.return_pct ?? trade?.profitPct);
-  const exposurePct = firstNumber(trade?.entryExposure, trade?.exposurePct, trade?.weightPct) ?? 100;
-  return returnPct * Math.max(0, exposurePct) / 100;
+  const returnPct = numberOrZero(
+    trade?.returnPct ?? trade?.return_pct ?? trade?.profitPct,
+  );
+  const exposurePct =
+    firstNumber(trade?.entryExposure, trade?.exposurePct, trade?.weightPct) ??
+    100;
+  return (returnPct * Math.max(0, exposurePct)) / 100;
 }
 
 type TradeCalibrationProfile = {
@@ -289,9 +304,13 @@ type TradeCalibrationProfile = {
   hasPositiveEdge: boolean;
 };
 
-function tradeCalibrationProfile(trades: any[]): TradeCalibrationProfile | null {
+function tradeCalibrationProfile(
+  trades: any[],
+): TradeCalibrationProfile | null {
   const returns = trades
-    .map((trade) => numberOrNull(trade?.returnPct ?? trade?.return_pct ?? trade?.profitPct))
+    .map((trade) =>
+      numberOrNull(trade?.returnPct ?? trade?.return_pct ?? trade?.profitPct),
+    )
     .filter((value: number | null): value is number => value != null);
 
   if (!returns.length) return null;
@@ -299,14 +318,19 @@ function tradeCalibrationProfile(trades: any[]): TradeCalibrationProfile | null 
   const positiveReturns = returns.filter((value) => value > 0);
   const negativeReturns = returns.filter((value) => value < 0);
   const grossProfit = positiveReturns.reduce((sum, value) => sum + value, 0);
-  const grossLoss = Math.abs(negativeReturns.reduce((sum, value) => sum + value, 0));
+  const grossLoss = Math.abs(
+    negativeReturns.reduce((sum, value) => sum + value, 0),
+  );
   const totalMagnitude = grossProfit + grossLoss;
   const averageReturnPct = average(returns);
-  const averageAbsoluteReturnPct = average(returns.map((value) => Math.abs(value)));
-  const winRatePct = positiveReturns.length / returns.length * 100;
-  const payoffSharePct = totalMagnitude > 0 ? grossProfit / totalMagnitude * 100 : 50;
+  const averageAbsoluteReturnPct = average(
+    returns.map((value) => Math.abs(value)),
+  );
+  const winRatePct = (positiveReturns.length / returns.length) * 100;
+  const payoffSharePct =
+    totalMagnitude > 0 ? (grossProfit / totalMagnitude) * 100 : 50;
   const expectancyScorePct = clamp(
-    50 + averageReturnPct / Math.max(1, averageAbsoluteReturnPct) * 75,
+    50 + (averageReturnPct / Math.max(1, averageAbsoluteReturnPct)) * 75,
   );
   const outcomeQualityPct = clamp(
     payoffSharePct * 0.45 + expectancyScorePct * 0.4 + winRatePct * 0.15,
@@ -320,11 +344,15 @@ function tradeCalibrationProfile(trades: any[]): TradeCalibrationProfile | null 
     expectancyScorePct,
     outcomeQualityPct,
     hasMixedOutcomes: positiveReturns.length > 0 && negativeReturns.length > 0,
-    hasPositiveEdge: averageReturnPct > 0 && payoffSharePct >= 58 && outcomeQualityPct >= 58,
+    hasPositiveEdge:
+      averageReturnPct > 0 && payoffSharePct >= 58 && outcomeQualityPct >= 58,
   };
 }
 
-function calibrationCorrectnessForTrade(trade: any, profile: TradeCalibrationProfile | null) {
+function calibrationCorrectnessForTrade(
+  trade: any,
+  profile: TradeCalibrationProfile | null,
+) {
   const contribution = contributionForTrade(trade);
   if (!profile) {
     return 0.5;
@@ -332,13 +360,15 @@ function calibrationCorrectnessForTrade(trade: any, profile: TradeCalibrationPro
 
   const individualScore = contribution > 0 ? 1 : contribution < 0 ? 0 : 0.5;
   return clamp(
-    individualScore * 0.25 + profile.outcomeQualityPct / 100 * 0.75,
+    individualScore * 0.25 + (profile.outcomeQualityPct / 100) * 0.75,
     0,
     1,
   );
 }
 
-function calibrationWarningsForTradeProfile(profile: TradeCalibrationProfile | null) {
+function calibrationWarningsForTradeProfile(
+  profile: TradeCalibrationProfile | null,
+) {
   if (
     profile &&
     profile.count >= 12 &&
@@ -379,12 +409,16 @@ function confidenceForTradeCalibration(trade: any, fallback: number) {
   }
 
   const setupScore = clamp(setupQuality ?? fallback);
-  const riskAdjustedScore = clamp(100 - clamp(riskPressure ?? (100 - fallback)));
+  const riskAdjustedScore = clamp(100 - clamp(riskPressure ?? 100 - fallback));
 
   return clamp(setupScore * 0.64 + riskAdjustedScore * 0.36);
 }
 
-function component(score: number, passed: boolean, reasons: string[]): StrategyReadinessComponent {
+function component(
+  score: number,
+  passed: boolean,
+  reasons: string[],
+): StrategyReadinessComponent {
   return {
     score: Math.round(clamp(score)),
     passed,
@@ -393,10 +427,14 @@ function component(score: number, passed: boolean, reasons: string[]): StrategyR
 }
 
 function evaluateDataReliability(dataQuality: any) {
-  const quality = String(dataQuality?.quality ?? dataQuality?.sourceStatus ?? "").toLowerCase();
+  const quality = String(
+    dataQuality?.quality ?? dataQuality?.sourceStatus ?? "",
+  ).toLowerCase();
   const syntheticSymbols = numberOrZero(dataQuality?.syntheticSymbols);
   const fallbackSymbols = numberOrZero(dataQuality?.fallbackSymbols);
-  const duplicateTimestampSymbols = numberOrZero(dataQuality?.duplicateTimestampSymbols);
+  const duplicateTimestampSymbols = numberOrZero(
+    dataQuality?.duplicateTimestampSymbols,
+  );
   const promotionEligibleData = dataQuality?.promotionEligibleData === true;
   const passed =
     promotionEligibleData &&
@@ -407,37 +445,76 @@ function evaluateDataReliability(dataQuality: any) {
     duplicateTimestampSymbols === 0;
   const reasons: string[] = [];
 
-  if (!promotionEligibleData) reasons.push("Historical data is not promotable.");
-  if (quality === "synthetic") reasons.push("Synthetic data cannot support live testing.");
-  if (quality === "fallback") reasons.push("Fallback data cannot support live testing.");
-  if (syntheticSymbols > 0 || fallbackSymbols > 0) reasons.push("Some symbols came from non-real data sources.");
-  if (duplicateTimestampSymbols > 0) reasons.push("Duplicate timestamps reduce bar reliability.");
+  if (!promotionEligibleData)
+    reasons.push("Historical data is not promotable.");
+  if (quality === "synthetic")
+    reasons.push("Synthetic data cannot support live testing.");
+  if (quality === "fallback")
+    reasons.push("Fallback data cannot support live testing.");
+  if (syntheticSymbols > 0 || fallbackSymbols > 0)
+    reasons.push("Some symbols came from non-real data sources.");
+  if (duplicateTimestampSymbols > 0)
+    reasons.push("Duplicate timestamps reduce bar reliability.");
 
-  return component(passed ? 100 : quality === "real" ? 65 : 25, passed, reasons);
+  return component(
+    passed ? 100 : quality === "real" ? 65 : 25,
+    passed,
+    reasons,
+  );
 }
 
 function evaluateBenchmarks(summary: any, config: any) {
   const strategyReturnPct = numberOrZero(
-    firstNumber(summary?.totalReturnPct, summary?.portfolioReturnPct, summary?.returnPct),
+    firstNumber(
+      summary?.totalReturnPct,
+      summary?.portfolioReturnPct,
+      summary?.returnPct,
+    ),
   );
   const equalWeightReturnPct = numberOrZero(
     firstNumber(summary?.equalWeightReturnPct, summary?.benchmarkReturnPct),
   );
   const buyHoldReturnPct = numberOrZero(
-    firstNumber(summary?.buyHoldReturnPct, summary?.buyAndHoldReturnPct, summary?.buyHoldBenchmarkReturnPct, equalWeightReturnPct),
+    firstNumber(
+      summary?.buyHoldReturnPct,
+      summary?.buyAndHoldReturnPct,
+      summary?.buyHoldBenchmarkReturnPct,
+      equalWeightReturnPct,
+    ),
   );
-  const costPenaltyPct = Math.max(0.25, numberOrZero(firstNumber(summary?.slippageBps, summary?.commissionBps, config?.costBps)) / 100);
+  const costPenaltyPct = Math.max(
+    0.25,
+    numberOrZero(
+      firstNumber(
+        summary?.slippageBps,
+        summary?.commissionBps,
+        config?.costBps,
+      ),
+    ) / 100,
+  );
   const safetyMarginPct = Math.max(
     2,
-    numberOrZero(firstNumber(config?.benchmarkSafetyMarginPct, summary?.benchmarkMarginRequiredPct)),
+    numberOrZero(
+      firstNumber(
+        config?.benchmarkSafetyMarginPct,
+        summary?.benchmarkMarginRequiredPct,
+      ),
+    ),
   );
-  const bestBaselineReturnPct = Math.max(equalWeightReturnPct, buyHoldReturnPct, 0);
-  const excessReturnAfterCostsPct = strategyReturnPct - bestBaselineReturnPct - costPenaltyPct;
+  const bestBaselineReturnPct = Math.max(
+    equalWeightReturnPct,
+    buyHoldReturnPct,
+    0,
+  );
+  const excessReturnAfterCostsPct =
+    strategyReturnPct - bestBaselineReturnPct - costPenaltyPct;
   const passed = excessReturnAfterCostsPct >= safetyMarginPct;
   const reasons: string[] = [];
 
   if (!passed) {
-    reasons.push("Strategy does not beat the strongest benchmark by the required safety margin after costs.");
+    reasons.push(
+      "Strategy does not beat the strongest benchmark by the required safety margin after costs.",
+    );
   }
 
   return {
@@ -462,11 +539,23 @@ function evaluateBenchmarks(summary: any, config: any) {
 
 function evaluateStrategyEdge(summary: any, config: any) {
   const sharpe = firstNumber(summary?.annualizedSharpe, summary?.sharpeRatio);
-  const totalReturnPct = numberOrZero(firstNumber(summary?.totalReturnPct, summary?.portfolioReturnPct));
-  const excessReturnPct = numberOrZero(firstNumber(summary?.excessReturnPct, summary?.excessReturn));
-  const drawdownPct = firstNumber(summary?.maxDrawdownPct, summary?.max_drawdown_pct);
-  const profitFactor = firstNumber(summary?.profitFactor, summary?.profit_factor);
-  const tradeCount = numberOrZero(firstNumber(summary?.tradeCount, summary?.closedTrades));
+  const totalReturnPct = numberOrZero(
+    firstNumber(summary?.totalReturnPct, summary?.portfolioReturnPct),
+  );
+  const excessReturnPct = numberOrZero(
+    firstNumber(summary?.excessReturnPct, summary?.excessReturn),
+  );
+  const drawdownPct = firstNumber(
+    summary?.maxDrawdownPct,
+    summary?.max_drawdown_pct,
+  );
+  const profitFactor = firstNumber(
+    summary?.profitFactor,
+    summary?.profit_factor,
+  );
+  const tradeCount = numberOrZero(
+    firstNumber(summary?.tradeCount, summary?.closedTrades),
+  );
   const minimumTrades = Math.max(1, numberOrZero(config?.minimumTrades) || 30);
   const controlledPayoffEdge =
     sharpe != null &&
@@ -487,26 +576,37 @@ function evaluateStrategyEdge(summary: any, config: any) {
     totalReturnPct > 0 &&
     tradeCount >= minimumTrades;
 
-  if (sharpe == null || sharpe < sharpeFloor) reasons.push("Risk-adjusted return is below the production threshold.");
+  if (sharpe == null || sharpe < sharpeFloor)
+    reasons.push("Risk-adjusted return is below the production threshold.");
   if (totalReturnPct <= 0) reasons.push("Strategy return is not positive.");
-  if (tradeCount < minimumTrades) reasons.push("Trade sample is too small for promotion.");
+  if (tradeCount < minimumTrades)
+    reasons.push("Trade sample is too small for promotion.");
 
   return component(
-    clamp((sharpe ?? 0) * 35 + Math.min(totalReturnPct, 35) + Math.min(20, tradeCount / minimumTrades * 20)),
+    clamp(
+      (sharpe ?? 0) * 35 +
+        Math.min(totalReturnPct, 35) +
+        Math.min(20, (tradeCount / minimumTrades) * 20),
+    ),
     passed,
     reasons,
   );
 }
 
 function evaluateRiskControl(summary: any) {
-  const drawdown = firstNumber(summary?.maxDrawdownPct, summary?.max_drawdown_pct);
+  const drawdown = firstNumber(
+    summary?.maxDrawdownPct,
+    summary?.max_drawdown_pct,
+  );
   const maxAllowedDrawdownPct = 25;
   const reasons: string[] = [];
-  const passed = drawdown != null && drawdown > 0 && drawdown <= maxAllowedDrawdownPct;
+  const passed =
+    drawdown != null && drawdown > 0 && drawdown <= maxAllowedDrawdownPct;
 
   if (drawdown == null) reasons.push("Drawdown is unavailable.");
   if (drawdown === 0) reasons.push("Drawdown is suspiciously zero.");
-  if (drawdown != null && drawdown > maxAllowedDrawdownPct) reasons.push("Max drawdown is above the risk limit.");
+  if (drawdown != null && drawdown > maxAllowedDrawdownPct)
+    reasons.push("Max drawdown is above the risk limit.");
 
   return component(
     drawdown == null ? 10 : clamp(100 - drawdown * 3),
@@ -516,21 +616,32 @@ function evaluateRiskControl(summary: any) {
 }
 
 function evaluateWalkForward(summary: any, inputSegments: any[], config: any) {
-  const rawSegments = inputSegments.length ? inputSegments : Array.isArray(summary?.walkForwardSegments) ? summary.walkForwardSegments : [];
+  const rawSegments = inputSegments.length
+    ? inputSegments
+    : Array.isArray(summary?.walkForwardSegments)
+      ? summary.walkForwardSegments
+      : [];
   const returns = rawSegments
-    .map((segment: any) => numberOrNull(segment?.returnPct ?? segment?.return_pct))
+    .map((segment: any) =>
+      numberOrNull(segment?.returnPct ?? segment?.return_pct),
+    )
     .filter((value: number | null): value is number => value != null);
-  const minimumSegments = Math.max(3, numberOrZero(config?.minimumWalkForwardSegments) || 3);
+  const minimumSegments = Math.max(
+    3,
+    numberOrZero(config?.minimumWalkForwardSegments) || 3,
+  );
   const positiveSegmentCount = returns.filter((value) => value > 0).length;
   const positiveReturns = returns.filter((value) => value > 0);
   const positiveTotal = positiveReturns.reduce((sum, value) => sum + value, 0);
-  const positiveShares = positiveReturns.map((value) => value / Math.max(0.000001, positiveTotal));
+  const positiveShares = positiveReturns.map(
+    (value) => value / Math.max(0.000001, positiveTotal),
+  );
   const effectivePositiveSegmentCount = positiveShares.length
     ? 1 / positiveShares.reduce((sum, value) => sum + value ** 2, 0)
     : 0;
   const bestPeriodContributionPct =
     positiveReturns.length && positiveTotal > 0
-      ? Math.max(...positiveReturns) / positiveTotal * 100
+      ? (Math.max(...positiveReturns) / positiveTotal) * 100
       : 0;
   const periodContributionLimitPct = Math.max(
     60,
@@ -547,11 +658,11 @@ function evaluateWalkForward(summary: any, inputSegments: any[], config: any) {
     bestPeriodContributionPct <= Math.max(periodContributionLimitPct, 85);
   const contributionDistributed =
     broadPositiveParticipation ||
-    (
-      bestPeriodContributionPct <= periodContributionLimitPct &&
-      effectivePositiveSegmentCount >= Math.min(2, Math.max(1, returns.length * 0.6))
-    );
-  const periodConcentrated = positiveReturns.length > 0 && positiveTotal > 0 && !contributionDistributed;
+    (bestPeriodContributionPct <= periodContributionLimitPct &&
+      effectivePositiveSegmentCount >=
+        Math.min(2, Math.max(1, returns.length * 0.6)));
+  const periodConcentrated =
+    positiveReturns.length > 0 && positiveTotal > 0 && !contributionDistributed;
   const stable =
     returns.length >= minimumSegments &&
     positiveSegmentCount >= Math.ceil(returns.length * 0.67) &&
@@ -559,23 +670,35 @@ function evaluateWalkForward(summary: any, inputSegments: any[], config: any) {
     contributionDistributed;
   const reasons: string[] = [];
 
-  if (returns.length < minimumSegments) reasons.push("Not enough chronological walk-forward windows.");
-  if (positiveSegmentCount < Math.ceil(Math.max(returns.length, minimumSegments) * 0.67)) {
+  if (returns.length < minimumSegments)
+    reasons.push("Not enough chronological walk-forward windows.");
+  if (
+    positiveSegmentCount <
+    Math.ceil(Math.max(returns.length, minimumSegments) * 0.67)
+  ) {
     reasons.push("Too few walk-forward windows are profitable.");
   }
-  if (weakestReturn <= -10) reasons.push("Weakest walk-forward window breaches the loss limit.");
-  if (periodConcentrated) reasons.push("One period contributes too much of the return.");
+  if (weakestReturn <= -10)
+    reasons.push("Weakest walk-forward window breaches the loss limit.");
+  if (periodConcentrated)
+    reasons.push("One period contributes too much of the return.");
 
   return {
     component: component(
-      clamp((positiveSegmentCount / Math.max(1, returns.length)) * 70 + (100 - bestPeriodContributionPct) * 0.3),
+      clamp(
+        (positiveSegmentCount / Math.max(1, returns.length)) * 70 +
+          (100 - bestPeriodContributionPct) * 0.3,
+      ),
       stable,
       reasons,
     ),
     walkForward: {
       segmentCount: returns.length,
       positiveSegmentCount,
-      weakestPeriod: weakestIndex >= 0 ? { index: weakestIndex, returnPct: weakestReturn } : null,
+      weakestPeriod:
+        weakestIndex >= 0
+          ? { index: weakestIndex, returnPct: weakestReturn }
+          : null,
       bestPeriodContributionPct,
       contributionDistributed,
       periodConcentrated,
@@ -587,9 +710,13 @@ function evaluateWalkForward(summary: any, inputSegments: any[], config: any) {
 }
 
 function evaluateParameterRobustness(parameterRobustness: any) {
-  const variants = Array.isArray(parameterRobustness?.variants) ? parameterRobustness.variants : [];
+  const variants = Array.isArray(parameterRobustness?.variants)
+    ? parameterRobustness.variants
+    : [];
   const passRate = numberOrZero(parameterRobustness?.passRate);
-  const benchmarkSurvivalRate = numberOrZero(parameterRobustness?.benchmarkSurvivalRate);
+  const benchmarkSurvivalRate = numberOrZero(
+    parameterRobustness?.benchmarkSurvivalRate,
+  );
   const stable =
     parameterRobustness?.stable === true &&
     variants.length > 0 &&
@@ -597,10 +724,13 @@ function evaluateParameterRobustness(parameterRobustness: any) {
     benchmarkSurvivalRate >= 70;
   const reasons: string[] = [];
 
-  if (!variants.length) reasons.push("Nearby parameter variants have not been evaluated.");
+  if (!variants.length)
+    reasons.push("Nearby parameter variants have not been evaluated.");
   if (passRate < 60) reasons.push("Too few nearby variants preserve the edge.");
-  if (benchmarkSurvivalRate < 70) reasons.push("Nearby variants do not consistently beat the benchmark.");
-  if (parameterRobustness?.stable === false) reasons.push("Parameter robustness audit marked the setup unstable.");
+  if (benchmarkSurvivalRate < 70)
+    reasons.push("Nearby variants do not consistently beat the benchmark.");
+  if (parameterRobustness?.stable === false)
+    reasons.push("Parameter robustness audit marked the setup unstable.");
 
   return {
     component: component(
@@ -618,21 +748,44 @@ function evaluateParameterRobustness(parameterRobustness: any) {
   };
 }
 
-function evaluateConcentration(trades: any[], bestPeriodContributionPct: number, periodConcentrated: boolean) {
+function evaluateConcentration(
+  trades: any[],
+  bestPeriodContributionPct: number,
+  periodConcentrated: boolean,
+) {
   const tradeReturns = trades
     .map((trade) => numberOrNull(trade?.returnPct ?? trade?.return_pct))
     .filter((value: number | null): value is number => value != null);
-  const contributions = trades.map(contributionForTrade).filter(Number.isFinite);
-  const positiveContributions = contributions.filter((value) => value > 0).sort((a, b) => b - a);
-  const positiveContributionTotal = positiveContributions.reduce((sum, value) => sum + value, 0);
-  const top1Contribution = positiveContributions.slice(0, 1).reduce((sum, value) => sum + value, 0);
-  const top5Contribution = positiveContributions.slice(0, 5).reduce((sum, value) => sum + value, 0);
-  const top1TradeContributionPct = positiveContributionTotal > 0 ? top1Contribution / positiveContributionTotal * 100 : 0;
-  const top5TradeContributionPct = positiveContributionTotal > 0 ? top5Contribution / positiveContributionTotal * 100 : 0;
+  const contributions = trades
+    .map(contributionForTrade)
+    .filter(Number.isFinite);
+  const positiveContributions = contributions
+    .filter((value) => value > 0)
+    .sort((a, b) => b - a);
+  const positiveContributionTotal = positiveContributions.reduce(
+    (sum, value) => sum + value,
+    0,
+  );
+  const top1Contribution = positiveContributions
+    .slice(0, 1)
+    .reduce((sum, value) => sum + value, 0);
+  const top5Contribution = positiveContributions
+    .slice(0, 5)
+    .reduce((sum, value) => sum + value, 0);
+  const top1TradeContributionPct =
+    positiveContributionTotal > 0
+      ? (top1Contribution / positiveContributionTotal) * 100
+      : 0;
+  const top5TradeContributionPct =
+    positiveContributionTotal > 0
+      ? (top5Contribution / positiveContributionTotal) * 100
+      : 0;
   const medianTradeReturnPct = median(tradeReturns);
   const returnSkew = skew(tradeReturns);
-  const medianTradeReturnPositive = tradeReturns.length > 0 && medianTradeReturnPct > 0;
-  const medianTradeReturnBlocked = tradeReturns.length > 0 && !medianTradeReturnPositive;
+  const medianTradeReturnPositive =
+    tradeReturns.length > 0 && medianTradeReturnPct > 0;
+  const medianTradeReturnBlocked =
+    tradeReturns.length > 0 && !medianTradeReturnPositive;
   const outlierDependent =
     top1TradeContributionPct > 45 ||
     top5TradeContributionPct > 80 ||
@@ -642,15 +795,30 @@ function evaluateConcentration(trades: any[], bestPeriodContributionPct: number,
   const reasons: string[] = [];
   const medianPenalty = medianTradeReturnBlocked ? 70 : 0;
 
-  if (top1TradeContributionPct > 45) reasons.push("Top trade contributes too much of positive PnL.");
-  if (top5TradeContributionPct > 80) reasons.push("Top five trades contribute too much of positive PnL.");
-  if (periodConcentrated) reasons.push("Best period contributes too much of total return.");
-  if (medianTradeReturnBlocked) reasons.push("Median trade return is not positive.");
-  if (returnSkew > 4 && top1TradeContributionPct > 35) reasons.push("Return skew indicates outlier dependence.");
+  if (top1TradeContributionPct > 45)
+    reasons.push("Top trade contributes too much of positive PnL.");
+  if (top5TradeContributionPct > 80)
+    reasons.push("Top five trades contribute too much of positive PnL.");
+  if (periodConcentrated)
+    reasons.push("Best period contributes too much of total return.");
+  if (medianTradeReturnBlocked)
+    reasons.push("Median trade return is not positive.");
+  if (returnSkew > 4 && top1TradeContributionPct > 35)
+    reasons.push("Return skew indicates outlier dependence.");
 
   return {
     component: component(
-      outlierDependent ? clamp(100 - Math.max(top1TradeContributionPct, top5TradeContributionPct, bestPeriodContributionPct, medianPenalty)) : 100,
+      outlierDependent
+        ? clamp(
+            100 -
+              Math.max(
+                top1TradeContributionPct,
+                top5TradeContributionPct,
+                bestPeriodContributionPct,
+                medianPenalty,
+              ),
+          )
+        : 100,
       !outlierDependent,
       reasons,
     ),
@@ -669,46 +837,82 @@ function evaluateConcentration(trades: any[], bestPeriodContributionPct: number,
 
 function evaluateLiveSignalConsistency(forwardShadow: any, config: any) {
   const evaluated = numberOrZero(forwardShadow?.evaluatedSignalCount);
-  const required = Math.max(1, numberOrZero(forwardShadow?.requiredSignals) || numberOrZero(config?.minimumForwardSignals) || 20);
-  const hitRate = firstNumber(forwardShadow?.hitRatePct, forwardShadow?.hitRate) ?? 0;
-  const averageReturnPct = firstNumber(forwardShadow?.averageReturnPct, forwardShadow?.meanReturnPct) ?? 0;
-  const passed = forwardShadow?.passed === true && evaluated >= required && averageReturnPct >= 0;
+  const required = Math.max(
+    1,
+    numberOrZero(forwardShadow?.requiredSignals) ||
+      numberOrZero(config?.minimumForwardSignals) ||
+      20,
+  );
+  const hitRate =
+    firstNumber(forwardShadow?.hitRatePct, forwardShadow?.hitRate) ?? 0;
+  const averageReturnPct =
+    firstNumber(
+      forwardShadow?.averageReturnPct,
+      forwardShadow?.meanReturnPct,
+    ) ?? 0;
+  const passed =
+    forwardShadow?.passed === true &&
+    evaluated >= required &&
+    averageReturnPct >= 0;
   const reasons: string[] = [];
 
-  if (evaluated < required) reasons.push("Forward shadow evidence has not reached the required sample.");
-  if (averageReturnPct < 0) reasons.push("Forward shadow average return is negative.");
-  if (forwardShadow?.passed === false) reasons.push("Forward shadow audit is marked failed.");
+  if (evaluated < required)
+    reasons.push(
+      "Forward shadow evidence has not reached the required sample.",
+    );
+  if (averageReturnPct < 0)
+    reasons.push("Forward shadow average return is negative.");
+  if (forwardShadow?.passed === false)
+    reasons.push("Forward shadow audit is marked failed.");
 
   return component(
-    clamp((evaluated / required) * 55 + Math.max(0, hitRate - 40) + Math.max(0, averageReturnPct) * 4),
+    clamp(
+      (evaluated / required) * 55 +
+        Math.max(0, hitRate - 40) +
+        Math.max(0, averageReturnPct) * 4,
+    ),
     passed,
     reasons,
   );
 }
 
 function evaluateRobustnessGate(summary: any, diagnostics: any) {
-  const robustness = diagnostics ?? summary?.robustnessDiagnostics ?? summary?.signalRobustness;
+  const robustness =
+    diagnostics ?? summary?.robustnessDiagnostics ?? summary?.signalRobustness;
 
   if (!robustness) {
     return component(100, true, []);
   }
 
-  const overfitRisk = firstNumber(robustness?.overfitRisk, robustness?.overfitRiskPct) ?? 100;
-  const deploymentReadiness = firstNumber(robustness?.deploymentReadiness, robustness?.deploymentReadinessScore) ?? 0;
-  const robustnessScore = firstNumber(robustness?.robustnessScore) ?? Math.max(0, 100 - overfitRisk);
+  const overfitRisk =
+    firstNumber(robustness?.overfitRisk, robustness?.overfitRiskPct) ?? 100;
+  const deploymentReadiness =
+    firstNumber(
+      robustness?.deploymentReadiness,
+      robustness?.deploymentReadinessScore,
+    ) ?? 0;
+  const robustnessScore =
+    firstNumber(robustness?.robustnessScore) ?? Math.max(0, 100 - overfitRisk);
   const safetyGate = String(robustness?.safetyGate ?? "").toLowerCase();
   const passed =
-    overfitRisk <= 30 &&
-    deploymentReadiness >= 60 &&
-    safetyGate !== "block";
+    overfitRisk <= 30 && deploymentReadiness >= 60 && safetyGate !== "block";
   const reasons: string[] = [];
 
-  if (overfitRisk > 30) reasons.push("Robustness overfit risk is above the production threshold.");
-  if (deploymentReadiness < 60) reasons.push("Deployment readiness is below the robustness floor.");
-  if (safetyGate === "block") reasons.push("Robustness safety gate blocks execution.");
+  if (overfitRisk > 30)
+    reasons.push("Robustness overfit risk is above the production threshold.");
+  if (deploymentReadiness < 60)
+    reasons.push("Deployment readiness is below the robustness floor.");
+  if (safetyGate === "block")
+    reasons.push("Robustness safety gate blocks execution.");
 
   return component(
-    clamp(Math.min(robustnessScore, 100 - overfitRisk * 0.35, deploymentReadiness + 10)),
+    clamp(
+      Math.min(
+        robustnessScore,
+        100 - overfitRisk * 0.35,
+        deploymentReadiness + 10,
+      ),
+    ),
     passed,
     reasons,
   );
@@ -726,7 +930,11 @@ function confidenceCapFromFailures(flags: string[]) {
   if (flags.includes("ROBUSTNESS_OVERFIT_RISK")) cap = Math.min(cap, 55);
   if (flags.includes("ROBUSTNESS_EXECUTION_BLOCKED")) cap = Math.min(cap, 35);
   if (flags.includes("SURVIVAL_NEAR_RUIN")) cap = Math.min(cap, 35);
-  if (flags.includes("DATA_QUALITY_NOT_PROMOTABLE") || flags.includes("SYNTHETIC_DATA_FOR_PROMOTION")) cap = Math.min(cap, 20);
+  if (
+    flags.includes("DATA_QUALITY_NOT_PROMOTABLE") ||
+    flags.includes("SYNTHETIC_DATA_FOR_PROMOTION")
+  )
+    cap = Math.min(cap, 20);
   return cap;
 }
 
@@ -738,7 +946,14 @@ function evaluateModelConfidence(
   historyDiagnostics?: MarketHistoryDiagnostics,
 ) {
   const rawConfidence = clamp(
-    numberOrZero(firstNumber(summary?.modelConfidence, summary?.promotionConfidence, summary?.survivalScore, 50)),
+    numberOrZero(
+      firstNumber(
+        summary?.modelConfidence,
+        summary?.promotionConfidence,
+        summary?.survivalScore,
+        50,
+      ),
+    ),
   );
   const nonDataCaps = componentScores.map((item) => item.score);
   const readinessScore = Math.round(average(nonDataCaps));
@@ -763,7 +978,9 @@ function evaluateModelConfidence(
     : [
         "Model confidence is capped by strategy readiness gates.",
         ...(rawConfidence - calibration.calibratedConfidence >= 10
-          ? ["The system sees a signal, but historical calibration does not yet support acting aggressively."]
+          ? [
+              "The system sees a signal, but historical calibration does not yet support acting aggressively.",
+            ]
           : []),
       ];
 
@@ -791,7 +1008,10 @@ function readinessCalibration(input: {
       id: `readiness-component-${index}`,
       prediction: { expectedOutcome: "pass", component: index },
       confidence: input.rawConfidence,
-      outcome: { label: item.passed ? "success" : "failure", correct: item.passed },
+      outcome: {
+        label: item.passed ? "success" : "failure",
+        correct: item.passed,
+      },
       metadata: { source: "strategy-readiness" },
     })),
     ...input.trades.map((trade, index) => {
@@ -799,11 +1019,21 @@ function readinessCalibration(input: {
       const correctness = calibrationCorrectnessForTrade(trade, tradeProfile);
       return {
         id: String(trade?.id ?? trade?.symbol ?? `trade-${index}`),
-        timestamp: typeof trade?.exitDate === "string" ? trade.exitDate : typeof trade?.entryDate === "string" ? trade.entryDate : undefined,
+        timestamp:
+          typeof trade?.exitDate === "string"
+            ? trade.exitDate
+            : typeof trade?.entryDate === "string"
+              ? trade.entryDate
+              : undefined,
         prediction: { expectedOutcome: "positive" },
         confidence: confidenceForTradeCalibration(trade, input.rawConfidence),
         outcome: {
-          label: contribution > 0 ? "success" : contribution < 0 ? "failure" : "partial",
+          label:
+            contribution > 0
+              ? "success"
+              : contribution < 0
+                ? "failure"
+                : "partial",
           correct: correctness,
         },
         metadata: {
@@ -837,7 +1067,10 @@ function readinessCalibration(input: {
       now: latestCalibrationTimestamp(input.trades),
     },
   });
-  const creditedResult = applyHistoryCalibrationCredit(result, input.historyDiagnostics);
+  const creditedResult = applyHistoryCalibrationCredit(
+    result,
+    input.historyDiagnostics,
+  );
   const calibrationWarnings = result.warnings.filter((warning) => {
     const conservativeCalibration =
       warning === "poor calibration" &&
@@ -851,42 +1084,57 @@ function readinessCalibration(input: {
     ...calibrationWarnings,
     ...calibrationWarningsForTradeProfile(tradeProfile),
   ]);
-  const poorCalibrationWarnings = new Set(["poor calibration", "overconfidence", "low trustworthiness"]);
+  const poorCalibrationWarnings = new Set([
+    "poor calibration",
+    "overconfidence",
+    "low trustworthiness",
+  ]);
   const status: StrategyReadinessResult["calibration"]["status"] =
     warnings.includes("insufficient history")
       ? "insufficient-history"
       : warnings.includes("unstable outcomes")
         ? "unstable-outcomes"
-      : warnings.some((warning) => poorCalibrationWarnings.has(warning))
-        ? "poor-calibration"
-        : "trusted";
+        : warnings.some((warning) => poorCalibrationWarnings.has(warning))
+          ? "poor-calibration"
+          : "trusted";
   const explanation =
     status === "insufficient-history"
       ? "Calibration history is still insufficient."
       : status === "unstable-outcomes"
         ? "Calibration has enough history, but outcomes are unstable. Keep this review-gated until outcomes become more consistent."
-      : status === "poor-calibration"
-        ? "The system sees a signal, but historical calibration does not yet support acting aggressively."
-        : "Calibration checks show past confidence has been reliable enough for this readiness level.";
+        : status === "poor-calibration"
+          ? "The system sees a signal, but historical calibration does not yet support acting aggressively."
+          : "Calibration checks show past confidence has been reliable enough for this readiness level.";
 
   return { ...creditedResult, warnings, status, explanation };
 }
 
-function applyHistoryCalibrationCredit(result: CalibrationResult, historyDiagnostics?: MarketHistoryDiagnostics): CalibrationResult & { extendedHistoryCredit?: number } {
+function applyHistoryCalibrationCredit(
+  result: CalibrationResult,
+  historyDiagnostics?: MarketHistoryDiagnostics,
+): CalibrationResult & { extendedHistoryCredit?: number } {
   if (!historyDiagnostics) return result;
 
-  const credit = Math.min(8,
-    Math.max(0, numberOrZero(historyDiagnostics.historyDepthScore) - 70) * 0.06 +
-      Math.max(0, numberOrZero(historyDiagnostics.regimeCoverageScore) - 70) * 0.06 +
-      Math.max(0, numberOrZero(historyDiagnostics.regimeDiversityScore) - 70) * 0.04 +
-      Math.max(0, numberOrZero(historyDiagnostics.sampleDiversityScore) - 70) * 0.04,
+  const credit = Math.min(
+    8,
+    Math.max(0, numberOrZero(historyDiagnostics.historyDepthScore) - 70) *
+      0.06 +
+      Math.max(0, numberOrZero(historyDiagnostics.regimeCoverageScore) - 70) *
+        0.06 +
+      Math.max(0, numberOrZero(historyDiagnostics.regimeDiversityScore) - 70) *
+        0.04 +
+      Math.max(0, numberOrZero(historyDiagnostics.sampleDiversityScore) - 70) *
+        0.04,
   );
   if (credit <= 0) return result;
 
   const calibratedCredit = Math.min(5, credit * 0.55);
   return {
     ...result,
-    calibratedConfidence: Math.min(result.rawConfidence, clamp(result.calibratedConfidence + calibratedCredit)),
+    calibratedConfidence: Math.min(
+      result.rawConfidence,
+      clamp(result.calibratedConfidence + calibratedCredit),
+    ),
     trustworthiness: clamp(result.trustworthiness + credit),
     extendedHistoryCredit: Number(credit.toFixed(2)),
   };
@@ -894,21 +1142,35 @@ function applyHistoryCalibrationCredit(result: CalibrationResult, historyDiagnos
 
 function latestCalibrationTimestamp(trades: any[]) {
   const timestamps = trades
-    .flatMap((trade) => [trade?.exitDate, trade?.entryDate, trade?.closedAt, trade?.timestamp])
-    .map((value) => typeof value === "string" || typeof value === "number" ? new Date(value).getTime() : Number.NaN)
+    .flatMap((trade) => [
+      trade?.exitDate,
+      trade?.entryDate,
+      trade?.closedAt,
+      trade?.timestamp,
+    ])
+    .map((value) =>
+      typeof value === "string" || typeof value === "number"
+        ? new Date(value).getTime()
+        : Number.NaN,
+    )
     .filter(Number.isFinite);
   if (!timestamps.length) return undefined;
   return new Date(Math.max(...timestamps)).toISOString();
 }
 
-function historyDiagnosticsFromInput(input: StrategyReadinessInput, robustnessDiagnostics: any): MarketHistoryDiagnostics | undefined {
+function historyDiagnosticsFromInput(
+  input: StrategyReadinessInput,
+  robustnessDiagnostics: any,
+): MarketHistoryDiagnostics | undefined {
   const diagnostics =
     input.historyDiagnostics ??
     input.summary?.historyDiagnostics ??
     input.dataQualityReport?.historyDiagnostics ??
     robustnessDiagnostics?.historyDiagnostics;
-  return diagnostics && typeof diagnostics === "object" && !Array.isArray(diagnostics)
-    ? diagnostics as MarketHistoryDiagnostics
+  return diagnostics &&
+    typeof diagnostics === "object" &&
+    !Array.isArray(diagnostics)
+    ? (diagnostics as MarketHistoryDiagnostics)
     : undefined;
 }
 
@@ -925,18 +1187,33 @@ function flagsForEvaluation(
   concentration: StrategyReadinessResult["concentration"],
   summary: any,
 ) {
-  const flags: string[] = Array.isArray(summary?.failureFlags) ? [...summary.failureFlags] : [];
+  const flags: string[] = Array.isArray(summary?.failureFlags)
+    ? [...summary.failureFlags]
+    : [];
 
-  if (!dataReliability.passed) flags.push(summary?.dataQualityReport?.quality === "synthetic" ? "SYNTHETIC_DATA_FOR_PROMOTION" : "DATA_QUALITY_NOT_PROMOTABLE");
+  if (!dataReliability.passed)
+    flags.push(
+      summary?.dataQualityReport?.quality === "synthetic"
+        ? "SYNTHETIC_DATA_FOR_PROMOTION"
+        : "DATA_QUALITY_NOT_PROMOTABLE",
+    );
   if (!strategyEdge.passed) {
     const sharpe = firstNumber(summary?.annualizedSharpe, summary?.sharpeRatio);
-    flags.push(sharpe == null || strategyEdge.reasons.some((reason) => /risk-adjusted|sharpe/i.test(reason)) ? "LOW_SHARPE" : "INSUFFICIENT_STRATEGY_EDGE");
+    flags.push(
+      sharpe == null ||
+        strategyEdge.reasons.some((reason) =>
+          /risk-adjusted|sharpe/i.test(reason),
+        )
+        ? "LOW_SHARPE"
+        : "INSUFFICIENT_STRATEGY_EDGE",
+    );
   }
   if (!benchmarkEdge.passed) {
     flags.push("BENCHMARK_FAILED", "WEAK_BENCHMARK_MARGIN");
   }
   if (!riskControl.passed) flags.push("HIGH_DRAWDOWN");
-  if (!walkForwardRobustness.passed) flags.push("WALK_FORWARD_UNSTABLE", "OVERFIT_WALK_FORWARD_INSTABILITY");
+  if (!walkForwardRobustness.passed)
+    flags.push("WALK_FORWARD_UNSTABLE", "OVERFIT_WALK_FORWARD_INSTABILITY");
   if (!liveSignalConsistency.passed) flags.push("LIVE_SIGNAL_MISMATCH");
   if (!parameterRobustness.passed) flags.push("PARAMETER_INSTABILITY");
   if (!concentrationControl.passed) {
@@ -944,22 +1221,36 @@ function flagsForEvaluation(
     if (
       concentration.top1TradeContributionPct > 45 ||
       concentration.top5TradeContributionPct > 80 ||
-      (concentration.returnSkew > 4 && concentration.top1TradeContributionPct > 35)
+      (concentration.returnSkew > 4 &&
+        concentration.top1TradeContributionPct > 35)
     ) {
       flags.push("OVERFIT_TOP_WINNER_DEPENDENCY");
     }
-    if (concentration.periodConcentrated === true) flags.push("OVERFIT_SEGMENT_CONCENTRATION");
-    if (concentration.medianTradeReturnPositive === false) flags.push("MEDIAN_TRADE_RETURN_NOT_POSITIVE");
+    if (concentration.periodConcentrated === true)
+      flags.push("OVERFIT_SEGMENT_CONCENTRATION");
+    if (concentration.medianTradeReturnPositive === false)
+      flags.push("MEDIAN_TRADE_RETURN_NOT_POSITIVE");
   }
   if (!robustnessGate.passed) {
-    const gate = String(summary?.robustnessDiagnostics?.safetyGate ?? "").toLowerCase();
-    flags.push(gate === "block" ? "ROBUSTNESS_EXECUTION_BLOCKED" : "ROBUSTNESS_OVERFIT_RISK");
+    const gate = String(
+      summary?.robustnessDiagnostics?.safetyGate ?? "",
+    ).toLowerCase();
+    flags.push(
+      gate === "block"
+        ? "ROBUSTNESS_EXECUTION_BLOCKED"
+        : "ROBUSTNESS_OVERFIT_RISK",
+    );
   }
 
   return unique(flags);
 }
 
-function chooseStage(corePassed: boolean, livePassed: boolean, readinessScore: number, maxConfidence: number): StrategyReadinessStage {
+function chooseStage(
+  corePassed: boolean,
+  livePassed: boolean,
+  readinessScore: number,
+  maxConfidence: number,
+): StrategyReadinessStage {
   if (!corePassed) return "Research only";
   if (!livePassed) return "Shadow test";
   if (readinessScore < 70 || maxConfidence < 60) return "Paper trade";
@@ -967,23 +1258,41 @@ function chooseStage(corePassed: boolean, livePassed: boolean, readinessScore: n
   return "Production eligible";
 }
 
-function riskFirstMaxPositionPct(stage: StrategyReadinessStage, result: {
-  configMaxPositionPct: number;
-  readinessScore: number;
-  benchmarkExcessPct: number;
-  drawdownPct: number;
-  liveSignalScore: number;
-  overfitRiskPct: number;
-}) {
+function riskFirstMaxPositionPct(
+  stage: StrategyReadinessStage,
+  result: {
+    configMaxPositionPct: number;
+    readinessScore: number;
+    benchmarkExcessPct: number;
+    drawdownPct: number;
+    liveSignalScore: number;
+    overfitRiskPct: number;
+  },
+) {
   if (stage === "Research only") return 0;
-  const stageMultiplier = stage === "Production eligible" ? 1 : stage === "Limited live" ? 0.45 : 0.18;
+  const stageMultiplier =
+    stage === "Production eligible"
+      ? 1
+      : stage === "Limited live"
+        ? 0.45
+        : 0.18;
   const confidenceMultiplier = clamp(result.readinessScore, 0, 100) / 100;
   const benchmarkMultiplier = clamp(result.benchmarkExcessPct / 12, 0.2, 1);
   const drawdownMultiplier = clamp(1 - result.drawdownPct / 50, 0.2, 1);
   const liveMultiplier = clamp(result.liveSignalScore / 100, 0.25, 1);
   const robustnessMultiplier = clamp(1 - result.overfitRiskPct / 120, 0.2, 1);
 
-  return Number((result.configMaxPositionPct * stageMultiplier * confidenceMultiplier * benchmarkMultiplier * drawdownMultiplier * liveMultiplier * robustnessMultiplier).toFixed(2));
+  return Number(
+    (
+      result.configMaxPositionPct *
+      stageMultiplier *
+      confidenceMultiplier *
+      benchmarkMultiplier *
+      drawdownMultiplier *
+      liveMultiplier *
+      robustnessMultiplier
+    ).toFixed(2),
+  );
 }
 
 export class StrategyReadinessEvaluator {
@@ -991,7 +1300,11 @@ export class StrategyReadinessEvaluator {
     const summary = input.summary ?? {};
     const trades = Array.isArray(input.trades) ? input.trades : [];
     const config = input.config ?? {};
-    const dataReliability = evaluateDataReliability(input.dataQualityReport ?? summary.dataQualityReport ?? summary.dataQuality);
+    const dataReliability = evaluateDataReliability(
+      input.dataQualityReport ??
+        summary.dataQualityReport ??
+        summary.dataQuality,
+    );
     const benchmarkEvaluation = evaluateBenchmarks(summary, config);
     const strategyEdge = evaluateStrategyEdge(summary, config);
     const riskControl = evaluateRiskControl(summary);
@@ -1000,35 +1313,61 @@ export class StrategyReadinessEvaluator {
       Array.isArray(input.walkForwardSegments) ? input.walkForwardSegments : [],
       config,
     );
-    const parameterEvaluation = evaluateParameterRobustness(input.parameterRobustness ?? summary.parameterRobustness);
+    const parameterEvaluation = evaluateParameterRobustness(
+      input.parameterRobustness ?? summary.parameterRobustness,
+    );
     const concentrationEvaluation = evaluateConcentration(
       trades,
       walkForwardEvaluation.walkForward.bestPeriodContributionPct,
       walkForwardEvaluation.walkForward.periodConcentrated === true,
     );
-    const liveSignalConsistency = evaluateLiveSignalConsistency(input.forwardShadow ?? summary.forwardShadow, config);
-    const robustnessDiagnostics = input.robustnessDiagnostics ?? summary.robustnessDiagnostics;
-    const historyDiagnostics = historyDiagnosticsFromInput(input, robustnessDiagnostics);
-    const robustnessGate = evaluateRobustnessGate(summary, robustnessDiagnostics);
-    const survivalMemory = input.survivalMemory ?? buildStockSurvivalMemory({
-      market: input.market,
-      rawAction: "Buy",
-      setupQuality: firstNumber(summary?.modelConfidence, summary?.promotionConfidence, summary?.survivalScore, 50)!,
-      riskPressure: Math.min(100, numberOrZero(firstNumber(summary?.maxDrawdownPct, summary?.max_drawdown_pct)) * 3),
-      rawSuggestedExposurePct: numberOrZero(config.maxPositionPct) || 20,
-      maxPositionPct: numberOrZero(config.maxPositionPct) || 20,
-      readiness: {
-        ...summary,
-        historyDiagnostics,
-        robustnessDiagnostics,
-        walkForward: walkForwardEvaluation.walkForward,
-        parameterStability: parameterEvaluation.parameterStability,
-        concentration: concentrationEvaluation.concentration,
-      },
-      trades,
-      strategyHistory: Array.isArray(summary?.walkForwardSegments) ? summary.walkForwardSegments : [],
-      requireExplicitSurvivalFields: true,
-    });
+    const liveSignalConsistency = evaluateLiveSignalConsistency(
+      input.forwardShadow ?? summary.forwardShadow,
+      config,
+    );
+    const robustnessDiagnostics =
+      input.robustnessDiagnostics ?? summary.robustnessDiagnostics;
+    const historyDiagnostics = historyDiagnosticsFromInput(
+      input,
+      robustnessDiagnostics,
+    );
+    const robustnessGate = evaluateRobustnessGate(
+      summary,
+      robustnessDiagnostics,
+    );
+    const survivalMemory =
+      input.survivalMemory ??
+      buildStockSurvivalMemory({
+        market: input.market,
+        rawAction: "Buy",
+        setupQuality: firstNumber(
+          summary?.modelConfidence,
+          summary?.promotionConfidence,
+          summary?.survivalScore,
+          50,
+        )!,
+        riskPressure: Math.min(
+          100,
+          numberOrZero(
+            firstNumber(summary?.maxDrawdownPct, summary?.max_drawdown_pct),
+          ) * 3,
+        ),
+        rawSuggestedExposurePct: numberOrZero(config.maxPositionPct) || 20,
+        maxPositionPct: numberOrZero(config.maxPositionPct) || 20,
+        readiness: {
+          ...summary,
+          historyDiagnostics,
+          robustnessDiagnostics,
+          walkForward: walkForwardEvaluation.walkForward,
+          parameterStability: parameterEvaluation.parameterStability,
+          concentration: concentrationEvaluation.concentration,
+        },
+        trades,
+        strategyHistory: Array.isArray(summary?.walkForwardSegments)
+          ? summary.walkForwardSegments
+          : [],
+        requireExplicitSurvivalFields: true,
+      });
     const flags = flagsForEvaluation(
       dataReliability,
       strategyEdge,
@@ -1042,7 +1381,8 @@ export class StrategyReadinessEvaluator {
       concentrationEvaluation.concentration,
       summary,
     );
-    const survivalFlags = survivalMemory.status === "near_ruin" ? ["SURVIVAL_NEAR_RUIN"] : [];
+    const survivalFlags =
+      survivalMemory.status === "near_ruin" ? ["SURVIVAL_NEAR_RUIN"] : [];
     const allFlags = unique([...flags, ...survivalFlags]);
     const confidenceEvaluation = evaluateModelConfidence(
       summary,
@@ -1078,12 +1418,21 @@ export class StrategyReadinessEvaluator {
     const readinessMaxPositionPct = riskFirstMaxPositionPct(stage, {
       configMaxPositionPct: numberOrZero(config.maxPositionPct) || 20,
       readinessScore: confidenceEvaluation.readinessScore,
-      benchmarkExcessPct: benchmarkEvaluation.benchmarks.excessReturnAfterCostsPct,
-      drawdownPct: numberOrZero(firstNumber(summary?.maxDrawdownPct, summary?.max_drawdown_pct)),
+      benchmarkExcessPct:
+        benchmarkEvaluation.benchmarks.excessReturnAfterCostsPct,
+      drawdownPct: numberOrZero(
+        firstNumber(summary?.maxDrawdownPct, summary?.max_drawdown_pct),
+      ),
       liveSignalScore: liveSignalConsistency.score,
-      overfitRiskPct: firstNumber(robustnessDiagnostics?.overfitRisk, robustnessDiagnostics?.overfitRiskPct) ?? 0,
+      overfitRiskPct:
+        firstNumber(
+          robustnessDiagnostics?.overfitRisk,
+          robustnessDiagnostics?.overfitRiskPct,
+        ) ?? 0,
     });
-    const maxPositionPct = Number((readinessMaxPositionPct * survivalMemory.exposureMultiplier).toFixed(2));
+    const maxPositionPct = Number(
+      (readinessMaxPositionPct * survivalMemory.exposureMultiplier).toFixed(2),
+    );
     const readinessSurvivalMemory = {
       ...survivalMemory,
       maxExposurePct: maxPositionPct,
@@ -1100,7 +1449,9 @@ export class StrategyReadinessEvaluator {
       parameterRobustness: parameterEvaluation.component,
       concentrationControl: concentrationEvaluation.component,
     };
-    const reasons = unique(Object.values(components).flatMap((item) => item.reasons));
+    const reasons = unique(
+      Object.values(components).flatMap((item) => item.reasons),
+    );
     const readinessBlocked = stage === "Research only";
     const trustGovernor = evaluateTrustGovernor({
       rawConfidence: confidenceEvaluation.rawConfidence,
@@ -1125,7 +1476,9 @@ export class StrategyReadinessEvaluator {
       },
       survivalMemory: readinessSurvivalMemory,
     });
-    const tradeContributions = trades.map(contributionForTrade).filter(Number.isFinite);
+    const tradeContributions = trades
+      .map(contributionForTrade)
+      .filter(Number.isFinite);
     const recovery = evaluateRecovery({
       survivalConfidence: readinessSurvivalMemory.survivalConfidence,
       scarCount: readinessSurvivalMemory.scarCount,
@@ -1137,18 +1490,40 @@ export class StrategyReadinessEvaluator {
       calibratedConfidence: confidenceEvaluation.calibratedConfidence,
       rawConfidence: confidenceEvaluation.rawConfidence,
       judgementReliability: confidenceEvaluation.trustworthiness,
-      similarSampleCount: Math.max(confidenceEvaluation.calibration.sampleSize, tradeContributions.length),
-      positiveSimilarOutcomes: tradeContributions.filter((value) => value > 0).length,
-      negativeSimilarOutcomes: tradeContributions.filter((value) => value < 0).length,
-      neutralSimilarOutcomes: tradeContributions.filter((value) => value === 0).length,
+      similarSampleCount: Math.max(
+        confidenceEvaluation.calibration.sampleSize,
+        tradeContributions.length,
+      ),
+      positiveSimilarOutcomes: tradeContributions.filter((value) => value > 0)
+        .length,
+      negativeSimilarOutcomes: tradeContributions.filter((value) => value < 0)
+        .length,
+      neutralSimilarOutcomes: tradeContributions.filter((value) => value === 0)
+        .length,
       outcomeStability: confidenceEvaluation.trustworthiness,
-      overfitRisk: firstNumber(robustnessDiagnostics?.overfitRisk, robustnessDiagnostics?.overfitRiskPct) ?? 0,
-      beliefFragility: firstNumber(summary?.beliefFragility, summary?.opportunityFragility) ?? 0,
-      evidenceAgreement: firstNumber(summary?.evidenceAgreement, summary?.signalAgreement) ?? confidenceEvaluation.trustworthiness,
+      overfitRisk:
+        firstNumber(
+          robustnessDiagnostics?.overfitRisk,
+          robustnessDiagnostics?.overfitRiskPct,
+        ) ?? 0,
+      beliefFragility:
+        firstNumber(summary?.beliefFragility, summary?.opportunityFragility) ??
+        0,
+      evidenceAgreement:
+        firstNumber(summary?.evidenceAgreement, summary?.signalAgreement) ??
+        confidenceEvaluation.trustworthiness,
       dataReliability: dataReliability.score,
       blockedAgencyActionCount: trustGovernor.blockedActions.length,
-      discoveryConfidence: firstNumber(summary?.discoveryConfidence, summary?.opportunityDiscovery?.confidence) ?? 0,
-      discoveryMaturity: firstNumber(summary?.discoveryMaturity, summary?.opportunityDiscovery?.maturity) ?? 0,
+      discoveryConfidence:
+        firstNumber(
+          summary?.discoveryConfidence,
+          summary?.opportunityDiscovery?.confidence,
+        ) ?? 0,
+      discoveryMaturity:
+        firstNumber(
+          summary?.discoveryMaturity,
+          summary?.opportunityDiscovery?.maturity,
+        ) ?? 0,
       novelty: firstNumber(summary?.novelty, summary?.opportunityNovelty) ?? 50,
       currentSizingMode: trustGovernor.participationMode,
       currentMaxExposure: trustGovernor.maxExposure,
@@ -1159,26 +1534,117 @@ export class StrategyReadinessEvaluator {
       recovery,
       trustScore: trustGovernor.trustScore,
       calibratedConfidence: confidenceEvaluation.calibratedConfidence,
-      discoveryConfidence: firstNumber(summary?.discoveryConfidence, summary?.opportunityDiscovery?.confidence) ?? 0,
-      discoveryMaturity: firstNumber(summary?.discoveryMaturity, summary?.opportunityDiscovery?.maturity) ?? 0,
+      discoveryConfidence:
+        firstNumber(
+          summary?.discoveryConfidence,
+          summary?.opportunityDiscovery?.confidence,
+        ) ?? 0,
+      discoveryMaturity:
+        firstNumber(
+          summary?.discoveryMaturity,
+          summary?.opportunityDiscovery?.maturity,
+        ) ?? 0,
       dataReliability: dataReliability.score,
-      overfitRisk: firstNumber(robustnessDiagnostics?.overfitRisk, robustnessDiagnostics?.overfitRiskPct) ?? 0,
+      overfitRisk:
+        firstNumber(
+          robustnessDiagnostics?.overfitRisk,
+          robustnessDiagnostics?.overfitRiskPct,
+        ) ?? 0,
       blockedAgencyActionCount: trustGovernor.blockedActions.length,
       currentExposureCapPct: trustGovernor.maxExposure,
       targetNormalExposurePct: readinessMaxPositionPct,
     });
     const readinessRemediation = planReadinessRemediation({
       gates: [
-        { id: "dataReliability", label: "Data reliability", category: "data_reliability", passed: dataReliability.passed, score: dataReliability.score, reason: dataReliability.reasons[0] },
-        { id: "strategyEdge", label: "Strategy edge", category: "strategy_edge", passed: strategyEdge.passed, score: strategyEdge.score, reason: strategyEdge.reasons[0], targetScore: 70 },
-        { id: "benchmarkEdge", label: "Benchmark edge", category: "benchmark", passed: benchmarkEvaluation.component.passed, score: benchmarkEvaluation.component.score, reason: benchmarkEvaluation.component.reasons[0], targetScore: 70 },
-        { id: "riskControl", label: "Risk control", category: "risk_control", passed: riskControl.passed, score: riskControl.score, reason: riskControl.reasons[0], targetScore: 75 },
-        { id: "walkForwardRobustness", label: "Walk-forward stability", category: "walk_forward", passed: walkForwardEvaluation.component.passed, score: walkForwardEvaluation.component.score, reason: walkForwardEvaluation.component.reasons[0], targetScore: 70 },
-        { id: "liveSignalConsistency", label: "Live signal consistency", category: "live_signal", passed: liveSignalConsistency.passed, score: liveSignalConsistency.score, reason: liveSignalConsistency.reasons[0], targetScore: 70 },
-        { id: "robustness", label: "Robustness risk", category: "robustness", passed: robustnessGate.passed, score: robustnessGate.score, reason: robustnessGate.reasons[0], targetScore: 70 },
-        { id: "parameterRobustness", label: "Parameter robustness", category: "parameter_stability", passed: parameterEvaluation.component.passed, score: parameterEvaluation.component.score, reason: parameterEvaluation.component.reasons[0], targetScore: 70 },
-        { id: "concentrationControl", label: "Return concentration", category: "concentration", passed: concentrationEvaluation.component.passed, score: concentrationEvaluation.component.score, reason: concentrationEvaluation.component.reasons[0], targetScore: 70 },
-        { id: "modelConfidence", label: "Model confidence", category: "strategy_edge", passed: confidenceEvaluation.component.passed, score: confidenceEvaluation.component.score, reason: confidenceEvaluation.component.reasons[0], targetScore: 70 },
+        {
+          id: "dataReliability",
+          label: "Data reliability",
+          category: "data_reliability",
+          passed: dataReliability.passed,
+          score: dataReliability.score,
+          reason: dataReliability.reasons[0],
+        },
+        {
+          id: "strategyEdge",
+          label: "Strategy edge",
+          category: "strategy_edge",
+          passed: strategyEdge.passed,
+          score: strategyEdge.score,
+          reason: strategyEdge.reasons[0],
+          targetScore: 70,
+        },
+        {
+          id: "benchmarkEdge",
+          label: "Benchmark edge",
+          category: "benchmark",
+          passed: benchmarkEvaluation.component.passed,
+          score: benchmarkEvaluation.component.score,
+          reason: benchmarkEvaluation.component.reasons[0],
+          targetScore: 70,
+        },
+        {
+          id: "riskControl",
+          label: "Risk control",
+          category: "risk_control",
+          passed: riskControl.passed,
+          score: riskControl.score,
+          reason: riskControl.reasons[0],
+          targetScore: 75,
+        },
+        {
+          id: "walkForwardRobustness",
+          label: "Walk-forward stability",
+          category: "walk_forward",
+          passed: walkForwardEvaluation.component.passed,
+          score: walkForwardEvaluation.component.score,
+          reason: walkForwardEvaluation.component.reasons[0],
+          targetScore: 70,
+        },
+        {
+          id: "liveSignalConsistency",
+          label: "Live signal consistency",
+          category: "live_signal",
+          passed: liveSignalConsistency.passed,
+          score: liveSignalConsistency.score,
+          reason: liveSignalConsistency.reasons[0],
+          targetScore: 70,
+        },
+        {
+          id: "robustness",
+          label: "Robustness risk",
+          category: "robustness",
+          passed: robustnessGate.passed,
+          score: robustnessGate.score,
+          reason: robustnessGate.reasons[0],
+          targetScore: 70,
+        },
+        {
+          id: "parameterRobustness",
+          label: "Parameter robustness",
+          category: "parameter_stability",
+          passed: parameterEvaluation.component.passed,
+          score: parameterEvaluation.component.score,
+          reason: parameterEvaluation.component.reasons[0],
+          targetScore: 70,
+        },
+        {
+          id: "concentrationControl",
+          label: "Return concentration",
+          category: "concentration",
+          passed: concentrationEvaluation.component.passed,
+          score: concentrationEvaluation.component.score,
+          reason: concentrationEvaluation.component.reasons[0],
+          targetScore: 70,
+        },
+        {
+          id: "modelConfidence",
+          label: "Model confidence",
+          category: "strategy_edge",
+          passed: confidenceEvaluation.component.passed,
+          score: confidenceEvaluation.component.score,
+          reason: confidenceEvaluation.component.reasons[0],
+          targetScore: 70,
+        },
       ],
       failureFlags: allFlags,
       calibration: {
@@ -1238,23 +1704,57 @@ export class StrategyReadinessEvaluator {
   }
 }
 
-export function applyStrategyReadinessToSummary(summary: any, readiness: StrategyReadinessResult) {
+export function applyStrategyReadinessToSummary(
+  summary: any,
+  readiness: StrategyReadinessResult,
+) {
   const next = { ...(summary ?? {}) };
   const flags = unique(readiness.failureFlags);
   const blockedFromReadiness = readiness.blocked || flags.length > 0;
 
   next.strategyReadiness = readiness;
-  next.robustnessDiagnostics = readiness.robustnessDiagnostics ?? next.robustnessDiagnostics;
-  next.historyDiagnostics = readiness.historyDiagnostics ?? next.historyDiagnostics ?? next.robustnessDiagnostics?.historyDiagnostics;
-  next.historyCoverageYears = firstNumber(next.historyDiagnostics?.historyCoverageYears, next.historyCoverageYears) ?? next.historyCoverageYears;
-  next.historyDepthScore = firstNumber(next.historyDiagnostics?.historyDepthScore, next.historyDepthScore) ?? next.historyDepthScore;
-  next.regimeCoverageScore = firstNumber(next.historyDiagnostics?.regimeCoverageScore, next.regimeCoverageScore) ?? next.regimeCoverageScore;
-  next.regimeDiversityScore = firstNumber(next.historyDiagnostics?.regimeDiversityScore, next.regimeDiversityScore) ?? next.regimeDiversityScore;
-  next.sampleDiversityScore = firstNumber(next.historyDiagnostics?.sampleDiversityScore, next.sampleDiversityScore) ?? next.sampleDiversityScore;
-  next.coverageStatus = next.historyDiagnostics?.coverageStatus ?? next.coverageStatus;
-  next.robustnessScore = firstNumber(next.robustnessDiagnostics?.robustnessScore) ?? next.robustnessScore;
-  next.overfitRiskScore = firstNumber(next.robustnessDiagnostics?.overfitRisk) ?? next.overfitRiskScore;
-  next.deploymentReadinessScore = firstNumber(next.robustnessDiagnostics?.deploymentReadiness) ?? next.deploymentReadinessScore;
+  next.robustnessDiagnostics =
+    readiness.robustnessDiagnostics ?? next.robustnessDiagnostics;
+  next.historyDiagnostics =
+    readiness.historyDiagnostics ??
+    next.historyDiagnostics ??
+    next.robustnessDiagnostics?.historyDiagnostics;
+  next.historyCoverageYears =
+    firstNumber(
+      next.historyDiagnostics?.historyCoverageYears,
+      next.historyCoverageYears,
+    ) ?? next.historyCoverageYears;
+  next.historyDepthScore =
+    firstNumber(
+      next.historyDiagnostics?.historyDepthScore,
+      next.historyDepthScore,
+    ) ?? next.historyDepthScore;
+  next.regimeCoverageScore =
+    firstNumber(
+      next.historyDiagnostics?.regimeCoverageScore,
+      next.regimeCoverageScore,
+    ) ?? next.regimeCoverageScore;
+  next.regimeDiversityScore =
+    firstNumber(
+      next.historyDiagnostics?.regimeDiversityScore,
+      next.regimeDiversityScore,
+    ) ?? next.regimeDiversityScore;
+  next.sampleDiversityScore =
+    firstNumber(
+      next.historyDiagnostics?.sampleDiversityScore,
+      next.sampleDiversityScore,
+    ) ?? next.sampleDiversityScore;
+  next.coverageStatus =
+    next.historyDiagnostics?.coverageStatus ?? next.coverageStatus;
+  next.robustnessScore =
+    firstNumber(next.robustnessDiagnostics?.robustnessScore) ??
+    next.robustnessScore;
+  next.overfitRiskScore =
+    firstNumber(next.robustnessDiagnostics?.overfitRisk) ??
+    next.overfitRiskScore;
+  next.deploymentReadinessScore =
+    firstNumber(next.robustnessDiagnostics?.deploymentReadiness) ??
+    next.deploymentReadinessScore;
   next.readinessStage = readiness.stage;
   next.lifecycleStage = readiness.stage;
   next.promotionState = readiness.stage;
@@ -1269,8 +1769,14 @@ export function applyStrategyReadinessToSummary(summary: any, readiness: Strateg
   next.failureFlags = flags;
   next.automaticFailureDetected = blockedFromReadiness;
   next.automaticFailureReasons = readiness.reasons;
-  next.survivalScore = Math.min(numberOrZero(next.survivalScore), readiness.maxConfidence);
-  next.promotionConfidence = Math.min(numberOrZero(next.promotionConfidence ?? next.survivalScore), readiness.maxConfidence);
+  next.survivalScore = Math.min(
+    numberOrZero(next.survivalScore),
+    readiness.maxConfidence,
+  );
+  next.promotionConfidence = Math.min(
+    numberOrZero(next.promotionConfidence ?? next.survivalScore),
+    readiness.maxConfidence,
+  );
   next.modelConfidence = readiness.maxConfidence;
   next.rawConfidence = readiness.rawConfidence;
   next.calibratedConfidence = readiness.calibratedConfidence;
@@ -1282,20 +1788,25 @@ export function applyStrategyReadinessToSummary(summary: any, readiness: Strateg
   next.recoveryScore = readiness.recovery.recoveryScore;
   next.recoveryTrustedCapacity = readiness.recovery.trustedCapacity;
   next.recoveryConfidenceCapLift = readiness.recovery.confidenceCapLift;
-  next.recoveryRecommendedExposureCap = readiness.recovery.recommendedExposureCap;
+  next.recoveryRecommendedExposureCap =
+    readiness.recovery.recommendedExposureCap;
   next.recoveryCanRestoreSizing = readiness.recovery.canRestoreSizing;
-  next.recoveryHumanReviewRequired = readiness.recovery.shouldEscalateHumanReview;
+  next.recoveryHumanReviewRequired =
+    readiness.recovery.shouldEscalateHumanReview;
   next.restorationProgress = readiness.restorationProgress;
   next.restorationProgressStatus = readiness.restorationProgress.status;
   next.restorationProgressPct = readiness.restorationProgress.progressPct;
   next.restorationPrimaryBlocker = readiness.restorationProgress.primaryBlocker;
-  next.cleanReducedSizeOutcomeCount = readiness.restorationProgress.outcomeProof.cleanReducedSizeOutcomeCount;
-  next.requiredCleanReducedSizeOutcomes = readiness.restorationProgress.outcomeProof.requiredCleanOutcomes;
+  next.cleanReducedSizeOutcomeCount =
+    readiness.restorationProgress.outcomeProof.cleanReducedSizeOutcomeCount;
+  next.requiredCleanReducedSizeOutcomes =
+    readiness.restorationProgress.outcomeProof.requiredCleanOutcomes;
   next.readinessRemediation = readiness.readinessRemediation;
   next.remediationPlan = readiness.readinessRemediation;
   next.remediationStatus = readiness.readinessRemediation.status;
   next.remediationTopAction = readiness.readinessRemediation.topAction;
-  next.remediationExpectedTrustLift = readiness.readinessRemediation.totalExpectedTrustLift;
+  next.remediationExpectedTrustLift =
+    readiness.readinessRemediation.totalExpectedTrustLift;
   next.participationMode = readiness.participationMode;
   next.participationBlocked = readiness.participationBlocked;
   next.trustedMaxExposurePct = readiness.trustGovernor.maxExposure;
@@ -1311,12 +1822,15 @@ export function applyStrategyReadinessToSummary(summary: any, readiness: Strateg
   next.calibrationExplanation = readiness.calibration.explanation;
   next.maxPositionPct = readiness.maxPositionPct;
   next.benchmarkPassed = readiness.components.benchmarkEdge.passed;
-  next.benchmarkStatus = readiness.components.benchmarkEdge.passed ? "Pass" : "Failed";
+  next.benchmarkStatus = readiness.components.benchmarkEdge.passed
+    ? "Pass"
+    : "Failed";
   next.benchmarkComparison = next.benchmarkStatus;
   next.benchmarkReturnPct = readiness.benchmarks.equalWeightReturnPct;
   next.buyHoldBenchmarkReturnPct = readiness.benchmarks.buyHoldReturnPct;
   next.cashBenchmarkReturnPct = readiness.benchmarks.cashReturnPct;
-  next.excessReturnAfterCostsPct = readiness.benchmarks.excessReturnAfterCostsPct;
+  next.excessReturnAfterCostsPct =
+    readiness.benchmarks.excessReturnAfterCostsPct;
   next.benchmarkMarginRequiredPct = readiness.benchmarks.safetyMarginPct;
   next.robustnessPassed = readiness.components.robustness.passed;
   next.survivalMemory = readiness.survivalMemory;
@@ -1325,10 +1839,17 @@ export function applyStrategyReadinessToSummary(summary: any, readiness: Strateg
   next.survivalNearRuinCount = readiness.survivalMemory?.nearRuinCount ?? 0;
   next.averageSurvivalCost = readiness.survivalMemory?.averageSurvivalCost ?? 0;
   next.survivalRecoveryBurden = readiness.survivalMemory?.recoveryBurden ?? 0;
-  next.survivalConfidence = readiness.survivalMemory?.survivalConfidence ?? readiness.maxConfidence;
+  next.survivalConfidence =
+    readiness.survivalMemory?.survivalConfidence ?? readiness.maxConfidence;
   if (readiness.survivalMemory) {
-    next.survivalScore = Math.min(numberOrZero(next.survivalScore), readiness.survivalMemory.survivalConfidence);
-    next.promotionConfidence = Math.min(numberOrZero(firstNumber(next.promotionConfidence, next.survivalScore)), readiness.survivalMemory.survivalConfidence);
+    next.survivalScore = Math.min(
+      numberOrZero(next.survivalScore),
+      readiness.survivalMemory.survivalConfidence,
+    );
+    next.promotionConfidence = Math.min(
+      numberOrZero(firstNumber(next.promotionConfidence, next.survivalScore)),
+      readiness.survivalMemory.survivalConfidence,
+    );
   }
   next.walkForwardPassed = readiness.components.walkForwardRobustness.passed;
   next.weakestWalkForwardPeriod = readiness.walkForward.weakestPeriod;
@@ -1341,7 +1862,9 @@ export function applyStrategyReadinessToSummary(summary: any, readiness: Strateg
   return next;
 }
 
-export function classifyStrategySignal(input: StrategySignalInput): StrategySignalDecision {
+export function classifyStrategySignal(
+  input: StrategySignalInput,
+): StrategySignalDecision {
   const rawConfidence = clamp(input.signalConfidence);
   const calibrationStatus = input.readiness.calibration?.status;
   const calibrationReviewRequired =
@@ -1356,31 +1879,41 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
     ),
   );
   const cappedConfidence = calibratedConfidence;
-  const sellRequested = input.rawAction === "Sell" || input.expectedEdgePct < 0 || input.riskPressure >= 82;
+  const sellRequested =
+    input.rawAction === "Sell" ||
+    input.expectedEdgePct < 0 ||
+    input.riskPressure >= 82;
   const riskPassed = input.riskPressure < 72 && input.volatilityPct <= 12;
-  const opensNewExposure = input.rawAction === "Buy" && input.expectedEdgePct > 0;
-  const survivalMemory = input.survivalMemory ?? buildStockSurvivalMemory({
-    market: input.market,
-    symbol: input.symbol,
-    rawAction: input.rawAction,
-    setupQuality: input.setupQuality,
-    riskPressure: input.riskPressure,
-    volatilityPct: input.volatilityPct,
-    liquidityScore: input.liquidityScore,
-    expectedEdgePct: input.expectedEdgePct,
-    rawSuggestedExposurePct: input.rawSuggestedExposurePct,
-    maxPositionPct: input.readiness.maxPositionPct,
-    readiness: input.readiness,
-    trades: input.previousTrades,
-    strategyHistory: input.strategyHistory,
-    requireExplicitSurvivalFields: true,
-  });
+  const opensNewExposure =
+    input.rawAction === "Buy" && input.expectedEdgePct > 0;
+  const survivalMemory =
+    input.survivalMemory ??
+    buildStockSurvivalMemory({
+      market: input.market,
+      symbol: input.symbol,
+      rawAction: input.rawAction,
+      setupQuality: input.setupQuality,
+      riskPressure: input.riskPressure,
+      volatilityPct: input.volatilityPct,
+      liquidityScore: input.liquidityScore,
+      expectedEdgePct: input.expectedEdgePct,
+      rawSuggestedExposurePct: input.rawSuggestedExposurePct,
+      maxPositionPct: input.readiness.maxPositionPct,
+      readiness: input.readiness,
+      trades: input.previousTrades,
+      strategyHistory: input.strategyHistory,
+      requireExplicitSurvivalFields: true,
+    });
   const maxPositionPct = opensNewExposure
-    ? Math.min(input.readiness.maxPositionPct, survivalMemory.maxExposurePct || input.readiness.maxPositionPct)
+    ? Math.min(
+        input.readiness.maxPositionPct,
+        survivalMemory.maxExposurePct || input.readiness.maxPositionPct,
+      )
     : input.readiness.maxPositionPct;
-  const survivalAdjustedConfidence = opensNewExposure && survivalMemory.scarCount > 0
-    ? Math.min(cappedConfidence, survivalMemory.survivalConfidence)
-    : cappedConfidence;
+  const survivalAdjustedConfidence =
+    opensNewExposure && survivalMemory.scarCount > 0
+      ? Math.min(cappedConfidence, survivalMemory.survivalConfidence)
+      : cappedConfidence;
   const belief = evaluateTradeCandidateBelief(
     {
       symbol: input.symbol,
@@ -1404,10 +1937,12 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
         input.readiness.robustnessDiagnostics?.overfitRiskPct,
         0,
       ),
-      maxDrawdownPct: input.readiness.benchmarks.strategyReturnPct < 0
-        ? Math.abs(input.readiness.benchmarks.strategyReturnPct)
-        : undefined,
-      top1TradeContributionPct: input.readiness.concentration.top1TradeContributionPct,
+      maxDrawdownPct:
+        input.readiness.benchmarks.strategyReturnPct < 0
+          ? Math.abs(input.readiness.benchmarks.strategyReturnPct)
+          : undefined,
+      top1TradeContributionPct:
+        input.readiness.concentration.top1TradeContributionPct,
       concentrationRisk: input.readiness.concentration.outlierDependent
         ? Math.max(
             input.readiness.concentration.top1TradeContributionPct,
@@ -1421,41 +1956,73 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
     {
       trendStrength: input.setupQuality,
       candidateQuality: input.setupQuality,
-      opportunityDensity: maxPositionPct > 0
-        ? (input.rawSuggestedExposurePct / maxPositionPct) * 100
-        : 0,
+      opportunityDensity:
+        maxPositionPct > 0
+          ? (input.rawSuggestedExposurePct / maxPositionPct) * 100
+          : 0,
       liquidityScore: input.liquidityScore,
       volatilityPct: input.volatilityPct,
       riskPressure: input.riskPressure,
       dataReliability: input.readiness.components.dataReliability.score,
       walkForwardRobustness: input.readiness.components.walkForwardRobustness,
       parameterRobustness: input.readiness.components.parameterRobustness,
-      similarMarketMatch: clamp(50 + input.readiness.benchmarks.excessReturnAfterCostsPct * 2.5),
+      similarMarketMatch: clamp(
+        50 + input.readiness.benchmarks.excessReturnAfterCostsPct * 2.5,
+      ),
       lifecycleStage: input.readiness.stage,
     },
   );
-  const beliefPreventsNewExposure = opensNewExposure && belief.verdict !== "justified";
+  const beliefPreventsNewExposure =
+    opensNewExposure && belief.verdict !== "justified";
   const beliefBlocksNewExposure =
     opensNewExposure &&
     (belief.verdict === "uncertain" || belief.verdict === "contradicted");
   const beliefRequiresReview = opensNewExposure && belief.verdict === "weak";
   const beliefAdjustedConfidence = opensNewExposure
-    ? Math.min(survivalAdjustedConfidence, belief.confidence, belief.trustworthiness)
+    ? Math.min(
+        survivalAdjustedConfidence,
+        belief.confidence,
+        belief.trustworthiness,
+      )
     : survivalAdjustedConfidence;
   const volatilityMultiplier = clamp(1 - input.volatilityPct / 18, 0.2, 1);
-  const drawdownMultiplier = clamp(1 - numberOrZero(input.readiness.concentration.bestPeriodContributionPct) / 160, 0.35, 1);
-  const liquidityMultiplier = clamp(numberOrZero(input.liquidityScore ?? 70) / 100, 0.25, 1);
+  const drawdownMultiplier = clamp(
+    1 -
+      numberOrZero(input.readiness.concentration.bestPeriodContributionPct) /
+        160,
+    0.35,
+    1,
+  );
+  const liquidityMultiplier = clamp(
+    numberOrZero(input.liquidityScore ?? 70) / 100,
+    0.25,
+    1,
+  );
   const confidenceMultiplier = clamp(beliefAdjustedConfidence / 100, 0.25, 1);
-  const benchmarkMultiplier = clamp(input.readiness.benchmarks.excessReturnAfterCostsPct / 14, 0.2, 1);
-  const liveSignalMultiplier = clamp(input.readiness.components.liveSignalConsistency.score / 100, 0.25, 1);
-  const rawSizedExposure = Math.min(input.rawSuggestedExposurePct, maxPositionPct) *
+  const benchmarkMultiplier = clamp(
+    input.readiness.benchmarks.excessReturnAfterCostsPct / 14,
+    0.2,
+    1,
+  );
+  const liveSignalMultiplier = clamp(
+    input.readiness.components.liveSignalConsistency.score / 100,
+    0.25,
+    1,
+  );
+  const rawSizedExposure =
+    Math.min(input.rawSuggestedExposurePct, maxPositionPct) *
     volatilityMultiplier *
     drawdownMultiplier *
     liquidityMultiplier *
     confidenceMultiplier *
     benchmarkMultiplier *
     liveSignalMultiplier;
-  const sizingConstraints = buildSignalSizingConstraints(input, riskPassed, beliefAdjustedConfidence, belief);
+  const sizingConstraints = buildSignalSizingConstraints(
+    input,
+    riskPassed,
+    beliefAdjustedConfidence,
+    belief,
+  );
   const financialSizing = sizeFinancialExposure({
     targetRef: "strategy-signal",
     actionRef: input.rawAction,
@@ -1467,7 +2034,13 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
     maxExposurePct: maxPositionPct,
     constraints: sizingConstraints,
     survivalMemory,
-    viability: buildSignalViabilityInput(input, sizingConstraints, beliefAdjustedConfidence, riskPassed, belief),
+    viability: buildSignalViabilityInput(
+      input,
+      sizingConstraints,
+      beliefAdjustedConfidence,
+      riskPassed,
+      belief,
+    ),
   });
   const judgement = hasJudgementEvidence(input)
     ? evaluateStockJudgement({
@@ -1492,13 +2065,21 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
         survivalMemory,
       })
     : undefined;
-  const judgementGate = judgementExposureGate(judgement, financialSizing.suggestedExposurePct);
-  const judgementBlocksNewExposure = opensNewExposure && !judgementGate.allowsNewExposure;
-  const judgementRequiresReviewForNewExposure = judgement != null && !judgementGate.allowsNewExposure;
+  const judgementGate = judgementExposureGate(
+    judgement,
+    financialSizing.suggestedExposurePct,
+  );
+  const judgementBlocksNewExposure =
+    opensNewExposure && !judgementGate.allowsNewExposure;
+  const judgementRequiresReviewForNewExposure =
+    judgement != null && !judgementGate.allowsNewExposure;
   const judgementAdjustedConfidence = judgement
     ? Math.min(beliefAdjustedConfidence, judgement.adjustedConfidence)
     : beliefAdjustedConfidence;
-  const judgementTrustworthiness = judgementTrustForAgency(input.readiness.trustworthiness, judgement);
+  const judgementTrustworthiness = judgementTrustForAgency(
+    input.readiness.trustworthiness,
+    judgement,
+  );
   const trustGovernor = evaluateTrustGovernor({
     rawConfidence,
     calibratedConfidence,
@@ -1510,7 +2091,9 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
     belief,
     reliability: {
       score: input.readiness.components.dataReliability.score,
-      status: input.readiness.components.dataReliability.passed ? "healthy" : "degraded",
+      status: input.readiness.components.dataReliability.passed
+        ? "healthy"
+        : "degraded",
       confidenceCap: input.readiness.components.dataReliability.score,
     },
     strategy: {
@@ -1524,18 +2107,21 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
     },
     survivalMemory,
   });
-  const primaryOpportunity = Array.isArray(input.opportunityCandidates) ? input.opportunityCandidates[0] ?? {} : {};
-  const agencyBlockedCount =
-    Array.isArray(input.agencyResult?.blockedActions)
-      ? input.agencyResult.blockedActions.length
-      : Array.isArray(input.agencyResult?.violations)
-        ? input.agencyResult.violations.length
-        : Number(firstNumber(
+  const primaryOpportunity = Array.isArray(input.opportunityCandidates)
+    ? (input.opportunityCandidates[0] ?? {})
+    : {};
+  const agencyBlockedCount = Array.isArray(input.agencyResult?.blockedActions)
+    ? input.agencyResult.blockedActions.length
+    : Array.isArray(input.agencyResult?.violations)
+      ? input.agencyResult.violations.length
+      : Number(
+          firstNumber(
             input.agencyResult?.blockedActions,
             input.agencyResult?.summary?.blockedActions,
             input.agencyResult?.blocked,
             trustGovernor.blockedActions.length,
-          ));
+          ),
+        );
   const recovery = evaluateRecovery({
     survivalConfidence: survivalMemory.survivalConfidence,
     scarCount: survivalMemory.scarCount,
@@ -1547,34 +2133,43 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
     calibratedConfidence: judgementAdjustedConfidence,
     rawConfidence,
     judgementReliability: judgement?.reliability ?? judgementTrustworthiness,
-    similarSampleCount: judgement?.similarSampleSize ?? input.readiness.calibration?.sampleSize,
+    similarSampleCount:
+      judgement?.similarSampleSize ?? input.readiness.calibration?.sampleSize,
     positiveSimilarOutcomes: judgement?.evidence?.positiveOutcomes,
     negativeSimilarOutcomes: judgement?.evidence?.negativeOutcomes,
     neutralSimilarOutcomes: judgement?.evidence?.neutralOutcomes,
-    outcomeStability: judgement?.outcomeStability ?? input.readiness.trustworthiness,
-    overfitRisk: judgement?.overfitRisk ??
-      firstNumber(input.readiness.robustnessDiagnostics?.overfitRisk, input.readiness.robustnessDiagnostics?.overfitRiskPct) ??
+    outcomeStability:
+      judgement?.outcomeStability ?? input.readiness.trustworthiness,
+    overfitRisk:
+      judgement?.overfitRisk ??
+      firstNumber(
+        input.readiness.robustnessDiagnostics?.overfitRisk,
+        input.readiness.robustnessDiagnostics?.overfitRiskPct,
+      ) ??
       0,
     beliefFragility: belief.fragility,
     evidenceAgreement: belief.evidenceAgreement,
     dataReliability: input.readiness.components.dataReliability.score,
     blockedAgencyActionCount: agencyBlockedCount,
-    discoveryConfidence: firstNumber(
-      primaryOpportunity?.discovery?.confidence,
-      primaryOpportunity?.opportunityDiscovery?.confidence,
-      primaryOpportunity?.confidence,
-      primaryOpportunity?.candidateScore,
-    ) ?? 0,
-    discoveryMaturity: firstNumber(
-      primaryOpportunity?.discovery?.maturity,
-      primaryOpportunity?.opportunityDiscovery?.maturity,
-      primaryOpportunity?.maturity,
-    ) ?? 0,
-    novelty: firstNumber(
-      primaryOpportunity?.discovery?.novelty,
-      primaryOpportunity?.opportunityDiscovery?.novelty,
-      primaryOpportunity?.novelty,
-    ) ?? 50,
+    discoveryConfidence:
+      firstNumber(
+        primaryOpportunity?.discovery?.confidence,
+        primaryOpportunity?.opportunityDiscovery?.confidence,
+        primaryOpportunity?.confidence,
+        primaryOpportunity?.candidateScore,
+      ) ?? 0,
+    discoveryMaturity:
+      firstNumber(
+        primaryOpportunity?.discovery?.maturity,
+        primaryOpportunity?.opportunityDiscovery?.maturity,
+        primaryOpportunity?.maturity,
+      ) ?? 0,
+    novelty:
+      firstNumber(
+        primaryOpportunity?.discovery?.novelty,
+        primaryOpportunity?.opportunityDiscovery?.novelty,
+        primaryOpportunity?.novelty,
+      ) ?? 50,
     currentSizingMode: trustGovernor.participationMode,
     currentMaxExposure: trustGovernor.maxExposure,
     targetNormalExposure: maxPositionPct,
@@ -1584,30 +2179,43 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
     recovery,
     trustScore: trustGovernor.trustScore,
     calibratedConfidence: judgementAdjustedConfidence,
-    discoveryConfidence: firstNumber(
-      primaryOpportunity?.discovery?.confidence,
-      primaryOpportunity?.opportunityDiscovery?.confidence,
-      primaryOpportunity?.confidence,
-      primaryOpportunity?.candidateScore,
-    ) ?? 0,
-    discoveryMaturity: firstNumber(
-      primaryOpportunity?.discovery?.maturity,
-      primaryOpportunity?.opportunityDiscovery?.maturity,
-      primaryOpportunity?.maturity,
-    ) ?? 0,
+    discoveryConfidence:
+      firstNumber(
+        primaryOpportunity?.discovery?.confidence,
+        primaryOpportunity?.opportunityDiscovery?.confidence,
+        primaryOpportunity?.confidence,
+        primaryOpportunity?.candidateScore,
+      ) ?? 0,
+    discoveryMaturity:
+      firstNumber(
+        primaryOpportunity?.discovery?.maturity,
+        primaryOpportunity?.opportunityDiscovery?.maturity,
+        primaryOpportunity?.maturity,
+      ) ?? 0,
     dataReliability: input.readiness.components.dataReliability.score,
-    overfitRisk: judgement?.overfitRisk ??
-      firstNumber(input.readiness.robustnessDiagnostics?.overfitRisk, input.readiness.robustnessDiagnostics?.overfitRiskPct) ??
+    overfitRisk:
+      judgement?.overfitRisk ??
+      firstNumber(
+        input.readiness.robustnessDiagnostics?.overfitRisk,
+        input.readiness.robustnessDiagnostics?.overfitRiskPct,
+      ) ??
       0,
     blockedAgencyActionCount: agencyBlockedCount,
     currentExposureCapPct: trustGovernor.maxExposure,
-    targetNormalExposurePct: input.readiness.recovery?.audit?.normalized?.targetNormalExposure ?? maxPositionPct,
+    targetNormalExposurePct:
+      input.readiness.recovery?.audit?.normalized?.targetNormalExposure ??
+      maxPositionPct,
   });
   const trustBlocksNewExposure =
     opensNewExposure &&
-    trustGovernor.blockers.some((blocker) => blocker.severity === "high" || blocker.severity === "critical");
-  const calibrationBlocksNewExposure = calibrationReviewRequired && opensNewExposure;
-  const survivalBlocksNewExposure = opensNewExposure && survivalMemory.recommendation === "wait";
+    trustGovernor.blockers.some(
+      (blocker) =>
+        blocker.severity === "high" || blocker.severity === "critical",
+    );
+  const calibrationBlocksNewExposure =
+    calibrationReviewRequired && opensNewExposure;
+  const survivalBlocksNewExposure =
+    opensNewExposure && survivalMemory.recommendation === "wait";
   const buyEligible =
     input.rawAction === "Buy" &&
     input.expectedEdgePct > 0 &&
@@ -1621,11 +2229,13 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
     maxPositionPct > 0 &&
     financialSizing.sizingDecision === "allowed" &&
     financialSizing.suggestedExposurePct > 0;
-  const suggestedExposure = buyEligible ? Math.min(
-    judgementGate.adjustedExposurePct,
-    trustGovernor.maxExposure,
-    recovery.recommendedExposureCap,
-  ) : 0;
+  const suggestedExposure = buyEligible
+    ? Math.min(
+        judgementGate.adjustedExposurePct,
+        trustGovernor.maxExposure,
+        recovery.recommendedExposureCap,
+      )
+    : 0;
   const calibrationReasons = calibrationBlocksNewExposure
     ? [
         calibrationStatus === "unstable-outcomes"
@@ -1635,24 +2245,30 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
             : "The system sees a signal, but historical calibration does not yet support acting aggressively.",
       ]
     : rawConfidence - cappedConfidence >= 10 && opensNewExposure
-      ? ["The system sees a signal, but historical calibration does not yet support acting aggressively."]
+      ? [
+          "The system sees a signal, but historical calibration does not yet support acting aggressively.",
+        ]
       : [];
-  const readinessReasons = input.readiness.blocked && !calibrationBlocksNewExposure
-    ? ["Strategy readiness is blocked; calibrated confidence does not support acting aggressively."]
-    : [];
+  const readinessReasons =
+    input.readiness.blocked && !calibrationBlocksNewExposure
+      ? [
+          "Strategy readiness is blocked; calibrated confidence does not support acting aggressively.",
+        ]
+      : [];
   const beliefReasons = beliefPreventsNewExposure
     ? [`Belief ${belief.verdict}: ${belief.reason}`]
     : [];
   const judgementReasons = opensNewExposure ? judgementGate.reasons : [];
-  const trustReasons = opensNewExposure && trustGovernor.reasons.length
-    ? trustGovernor.reasons
-    : [];
-  const recoveryReasons = opensNewExposure && recovery.reasons.length
-    ? recovery.reasons
-    : [];
-  const survivalReasons = opensNewExposure && survivalMemory.scarCount > 0
-    ? survivalMemory.reasons
-    : [];
+  const trustReasons =
+    opensNewExposure && trustGovernor.reasons.length
+      ? trustGovernor.reasons
+      : [];
+  const recoveryReasons =
+    opensNewExposure && recovery.reasons.length ? recovery.reasons : [];
+  const survivalReasons =
+    opensNewExposure && survivalMemory.scarCount > 0
+      ? survivalMemory.reasons
+      : [];
   const commitmentBlocked =
     input.readiness.blocked ||
     maxPositionPct <= 0 ||
@@ -1679,7 +2295,16 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
   );
   const sizingFields = {
     sizingMode: recoveryAdjustedSizingResult.mode,
-    sizingReasons: unique([...readinessReasons, ...calibrationReasons, ...survivalReasons, ...beliefReasons, ...trustReasons, ...recoveryReasons, ...financialSizing.sizingReasons, ...judgementReasons]),
+    sizingReasons: unique([
+      ...readinessReasons,
+      ...calibrationReasons,
+      ...survivalReasons,
+      ...beliefReasons,
+      ...trustReasons,
+      ...recoveryReasons,
+      ...financialSizing.sizingReasons,
+      ...judgementReasons,
+    ]),
     sizingConstraints: financialSizing.sizingConstraints,
     sizingResult: recoveryAdjustedSizingResult,
     trustGovernor,
@@ -1693,7 +2318,9 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
     viabilityResult: financialSizing.viabilityResult,
     survivalMemory,
   };
-  const withExecutiveArchitecture = (decision: StrategySignalDecision): StrategySignalDecision => ({
+  const withExecutiveArchitecture = (
+    decision: StrategySignalDecision,
+  ): StrategySignalDecision => ({
     ...decision,
     ...buildStockExecutiveArchitecture({
       signalInput: input,
@@ -1713,9 +2340,9 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
         ? "Risk-reducing exits remain allowed while calibration blocks new exposure."
         : survivalBlocksNewExposure
           ? "Risk-reducing exits remain allowed while Survival Memory blocks new exposure."
-        : trustGovernor.participationMode === "exits_only"
-          ? "Risk-reducing exits remain allowed while the Signal Trust Governor blocks new exposure."
-        : "Risk exit or negative edge; no new exposure is opened.",
+          : trustGovernor.participationMode === "exits_only"
+            ? "Risk-reducing exits remain allowed while the Signal Trust Governor blocks new exposure."
+            : "Risk exit or negative edge; no new exposure is opened.",
       ...readinessReasons,
       ...financialSizing.sizingReasons,
     ]);
@@ -1765,21 +2392,21 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
         ? "Calibration requires review"
         : survivalBlocksNewExposure
           ? "Survival memory blocks new exposure"
-        : input.readiness.blocked
-          ? "Strategy readiness is blocked"
-          : judgement?.status === "blocked"
-            ? "Judgement blocks new exposure"
-          : judgement?.status === "review_required"
-            ? "Judgement requires review"
-          : beliefBlocksNewExposure
-            ? `Belief ${belief.verdict} blocks new exposure`
-          : beliefRequiresReview
-            ? "Belief requires review"
-          : trustBlocksNewExposure
-            ? trustGovernor.blockers[0]!.label
-          : !riskPassed
-            ? "Risk checks did not pass"
-            : "Viability checks did not pass",
+          : input.readiness.blocked
+            ? "Strategy readiness is blocked"
+            : judgement?.status === "blocked"
+              ? "Judgement blocks new exposure"
+              : judgement?.status === "review_required"
+                ? "Judgement requires review"
+                : beliefBlocksNewExposure
+                  ? `Belief ${belief.verdict} blocks new exposure`
+                  : beliefRequiresReview
+                    ? "Belief requires review"
+                    : trustBlocksNewExposure
+                      ? trustGovernor.blockers[0]?.label
+                      : !riskPassed
+                        ? "Risk checks did not pass"
+                        : "Viability checks did not pass",
       ...sizingFields,
       sizingDiagnostics: {
         volatilityMultiplier,
@@ -1820,14 +2447,18 @@ export function classifyStrategySignal(input: StrategySignalInput): StrategySign
 
 function hasJudgementEvidence(input: StrategySignalInput) {
   return (
-    Array.isArray(input.previousTrades) && input.previousTrades.length > 0
-  ) || (
-    Array.isArray(input.strategyHistory) && input.strategyHistory.length > 0
-  ) || (
-    input.forwardShadow != null && numberOrZero(firstNumber(input.forwardShadow.evaluatedSignalCount, input.forwardShadow.evaluatedSignals)) > 0
-  ) || (
-    Array.isArray(input.opportunityCandidates) && input.opportunityCandidates.length > 0
-  ) || (
+    (Array.isArray(input.previousTrades) && input.previousTrades.length > 0) ||
+    (Array.isArray(input.strategyHistory) &&
+      input.strategyHistory.length > 0) ||
+    (input.forwardShadow != null &&
+      numberOrZero(
+        firstNumber(
+          input.forwardShadow.evaluatedSignalCount,
+          input.forwardShadow.evaluatedSignals,
+        ),
+      ) > 0) ||
+    (Array.isArray(input.opportunityCandidates) &&
+      input.opportunityCandidates.length > 0) ||
     input.agencyResult != null
   );
 }
@@ -1857,7 +2488,9 @@ function applyJudgementToSizingResult(
     return {
       ...sizingResult,
       size: roundSizing(sizingResult.size * gate.exposureMultiplier),
-      normalizedSize: roundSizing(sizingResult.normalizedSize * gate.exposureMultiplier),
+      normalizedSize: roundSizing(
+        sizingResult.normalizedSize * gate.exposureMultiplier,
+      ),
       reasons,
     };
   }
@@ -1880,7 +2513,11 @@ function applyTrustGovernorToSizingResult(
   if (!trustGovernor.allowsNewExposure) {
     return {
       ...sizingResult,
-      decision: sizingResult.decision === "blocked" || trustGovernor.participationMode === "blocked" ? "blocked" : "deferred",
+      decision:
+        sizingResult.decision === "blocked" ||
+        trustGovernor.participationMode === "blocked"
+          ? "blocked"
+          : "deferred",
       mode: "none",
       size: 0,
       normalizedSize: 0,
@@ -1941,7 +2578,8 @@ function buildSignalSizingConstraints(
   belief: TradeBeliefDiagnostic,
 ): SizingConstraint[] {
   const liquidityScore = numberOrZero(input.liquidityScore ?? 70);
-  const opensNewExposure = input.rawAction === "Buy" && input.expectedEdgePct > 0;
+  const opensNewExposure =
+    input.rawAction === "Buy" && input.expectedEdgePct > 0;
   return [
     {
       id: "signal-persistence",
@@ -1949,7 +2587,8 @@ function buildSignalSizingConstraints(
       type: "soft",
       passed: input.readiness.components.liveSignalConsistency.passed,
       severity: "medium",
-      reason: "Forward signal persistence is not strong enough for full position sizing.",
+      reason:
+        "Forward signal persistence is not strong enough for full position sizing.",
     },
     {
       id: "cross-timeframe-agreement",
@@ -1965,7 +2604,9 @@ function buildSignalSizingConstraints(
       id: "liquidity-data-availability",
       label: "Liquidity and data availability",
       type: "hard",
-      passed: input.readiness.components.dataReliability.passed && liquidityScore >= 35,
+      passed:
+        input.readiness.components.dataReliability.passed &&
+        liquidityScore >= 35,
       severity: "high",
       reason: "Liquidity or data completeness is insufficient for sizing.",
     },
@@ -1981,7 +2622,9 @@ function buildSignalSizingConstraints(
       id: "confidence-stability",
       label: "Confidence stability",
       type: "soft",
-      passed: input.readiness.components.modelConfidence.passed && cappedConfidence >= 35,
+      passed:
+        input.readiness.components.modelConfidence.passed &&
+        cappedConfidence >= 35,
       severity: "medium",
       reason: "Confidence is unstable or capped by readiness checks.",
     },
@@ -1989,7 +2632,10 @@ function buildSignalSizingConstraints(
       id: "opportunity-density",
       label: "Opportunity density",
       type: "hard",
-      passed: input.rawAction === "Buy" && input.expectedEdgePct > 0 && input.rawSuggestedExposurePct > 0,
+      passed:
+        input.rawAction === "Buy" &&
+        input.expectedEdgePct > 0 &&
+        input.rawSuggestedExposurePct > 0,
       severity: "high",
       reason: "Actionable opportunity density is too low for new exposure.",
     },
@@ -2028,7 +2674,9 @@ function buildSignalViabilityInput(
   belief: TradeBeliefDiagnostic,
 ): FinancialExposureViabilityInput {
   const liquidityScore = numberOrZero(input.liquidityScore ?? 70);
-  const benchmarkExcess = numberOrZero(input.readiness.benchmarks.excessReturnAfterCostsPct);
+  const benchmarkExcess = numberOrZero(
+    input.readiness.benchmarks.excessReturnAfterCostsPct,
+  );
   const expectedBenefit = clamp(
     input.setupQuality * 0.42 +
       input.readiness.components.strategyEdge.score * 0.22 +
@@ -2078,7 +2726,10 @@ function buildSignalViabilityInput(
         label: "Belief justification",
         type: "hard",
         hard: true,
-        passed: input.rawAction !== "Buy" || input.expectedEdgePct <= 0 || belief.verdict === "justified",
+        passed:
+          input.rawAction !== "Buy" ||
+          input.expectedEdgePct <= 0 ||
+          belief.verdict === "justified",
         severity: belief.verdict === "weak" ? "high" : "critical",
         reason: `Belief ${belief.verdict}: ${belief.reason}`,
         dimension: "belief",

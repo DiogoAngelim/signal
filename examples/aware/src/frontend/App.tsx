@@ -12,12 +12,18 @@ import {
   Search,
   Shield,
   Sun,
-  Wind
+  Wind,
 } from "lucide-react";
 import { useState } from "react";
-import type { AttentionLevel, Briefing, BriefingItem, Region, WeatherSignal } from "../contracts.js";
-import { createAwareBrowserClient, type AwareBrowserClient } from "./client.js";
+import type {
+  AttentionLevel,
+  Briefing,
+  BriefingItem,
+  Region,
+  WeatherSignal,
+} from "../contracts.js";
 import { WeatherMapBackground } from "./WeatherMapBackground.js";
+import { type AwareBrowserClient, createAwareBrowserClient } from "./client.js";
 
 type AppStatus = "idle" | "searching" | "loading-briefing" | "ready" | "error";
 
@@ -61,7 +67,9 @@ export function App({ client = defaultClient }: AwareAppProps) {
       setStatus("ready");
     } catch {
       setStatus("error");
-      setMessage("Some sources are unavailable right now. We are showing what can still be supported.");
+      setMessage(
+        "Some sources are unavailable right now. We are showing what can still be supported.",
+      );
     }
   }
 
@@ -123,13 +131,28 @@ export function HomeScreen(props: {
             placeholder="Search city or region"
             aria-label="Search city or region"
           />
-          <button type="submit" disabled={loading || !props.query.trim()} aria-label="Search">
-            {loading ? <Loader2 className="spin" size={18} aria-hidden="true" /> : <Search size={18} aria-hidden="true" />}
+          <button
+            type="submit"
+            disabled={loading || !props.query.trim()}
+            aria-label="Search"
+          >
+            {loading ? (
+              <Loader2 className="spin" size={18} aria-hidden="true" />
+            ) : (
+              <Search size={18} aria-hidden="true" />
+            )}
           </button>
         </form>
-        <StatusLine status={props.status} message={props.message} empty={!props.results.length && !props.query} />
+        <StatusLine
+          status={props.status}
+          message={props.message}
+          empty={!props.results.length && !props.query}
+        />
         {props.results.length > 0 ? (
-          <RegionResults regions={props.results} onChooseRegion={props.onChooseRegion} />
+          <RegionResults
+            regions={props.results}
+            onChooseRegion={props.onChooseRegion}
+          />
         ) : null}
       </section>
     </main>
@@ -147,7 +170,8 @@ export function BriefingView(props: {
   onChooseRegion(region: Region): void;
   onRefresh(): void;
 }) {
-  const loading = props.status === "searching" || props.status === "loading-briefing";
+  const loading =
+    props.status === "searching" || props.status === "loading-briefing";
   const visibleItems = nonWeatherItems(props.briefing);
   return (
     <main className="aware-app">
@@ -162,43 +186,82 @@ export function BriefingView(props: {
               placeholder="Search city or region"
               aria-label="Search city or region"
             />
-            <button type="submit" disabled={loading || !props.query.trim()} aria-label="Search">
-              {props.status === "searching" ? <Loader2 className="spin" size={17} aria-hidden="true" /> : <Search size={17} aria-hidden="true" />}
+            <button
+              type="submit"
+              disabled={loading || !props.query.trim()}
+              aria-label="Search"
+            >
+              {props.status === "searching" ? (
+                <Loader2 className="spin" size={17} aria-hidden="true" />
+              ) : (
+                <Search size={17} aria-hidden="true" />
+              )}
             </button>
           </form>
         </div>
-        <button className="icon-button" type="button" onClick={props.onRefresh} aria-label="Refresh briefing" title="Refresh briefing">
-          <RefreshCw size={18} aria-hidden="true" className={props.status === "loading-briefing" ? "spin" : undefined} />
+        <button
+          className="icon-button"
+          type="button"
+          onClick={props.onRefresh}
+          aria-label="Refresh briefing"
+          title="Refresh briefing"
+        >
+          <RefreshCw
+            size={18}
+            aria-hidden="true"
+            className={props.status === "loading-briefing" ? "spin" : undefined}
+          />
         </button>
       </header>
 
       {props.results.length > 0 ? (
         <div className="fixed-search-results">
-          <RegionResults regions={props.results} onChooseRegion={props.onChooseRegion} compact />
+          <RegionResults
+            regions={props.results}
+            onChooseRegion={props.onChooseRegion}
+            compact
+          />
         </div>
       ) : null}
 
       <section className="briefing-hero" aria-labelledby="briefing-title">
         <div className="location-line">
           <MapPin size={18} aria-hidden="true" />
-          <span>{props.briefing.region.name}, {props.briefing.region.adminArea}</span>
+          <span>
+            {props.briefing.region.name}, {props.briefing.region.adminArea}
+          </span>
         </div>
         <h1 id="briefing-title">{props.briefing.summary}</h1>
         <div className="briefing-meta">
-          <AttentionBadge level={props.briefing.attentionLevel} label={props.briefing.attentionLabel} />
+          <AttentionBadge
+            level={props.briefing.attentionLevel}
+            label={props.briefing.attentionLabel}
+          />
           <span>{props.briefing.itemCountText}</span>
         </div>
       </section>
 
       {props.briefing.degraded ? (
-        <p className="degraded-banner"><Info size={17} aria-hidden="true" />{props.briefing.degradedMessage}</p>
+        <p className="degraded-banner">
+          <Info size={17} aria-hidden="true" />
+          {props.briefing.degradedMessage}
+        </p>
       ) : null}
-      {props.message ? <p className="degraded-banner"><Info size={17} aria-hidden="true" />{props.message}</p> : null}
+      {props.message ? (
+        <p className="degraded-banner">
+          <Info size={17} aria-hidden="true" />
+          {props.message}
+        </p>
+      ) : null}
 
       <section className="briefing-list" aria-label="Things worth knowing">
         {props.status === "loading-briefing" ? <LoadingBriefing /> : null}
         <WeatherGuidanceCard briefing={props.briefing} />
-        {visibleItems.length ? visibleItems.map((item) => <BriefingCard key={item.id} item={item} />) : null}
+        {visibleItems.length
+          ? visibleItems.map((item) => (
+              <BriefingCard key={item.id} item={item} />
+            ))
+          : null}
         {!props.briefing.weatherSignals.length && !visibleItems.length ? (
           <NormalState />
         ) : null}
@@ -213,11 +276,16 @@ export function BriefingCard({ item }: { item: BriefingItem }) {
   return (
     <article className={`briefing-card level-${item.attentionLevel}`}>
       <div className="card-main">
-        <div className="card-icon" aria-hidden="true">{iconFor(item)}</div>
+        <div className="card-icon" aria-hidden="true">
+          {iconFor(item)}
+        </div>
         <div className="card-copy">
           <div className="card-heading">
             <h2>{item.title}</h2>
-            <AttentionBadge level={item.attentionLevel} label={item.attentionLabel} />
+            <AttentionBadge
+              level={item.attentionLevel}
+              label={item.attentionLabel}
+            />
           </div>
           <p>{item.meaning}</p>
           <div className="primary-action">
@@ -226,7 +294,12 @@ export function BriefingCard({ item }: { item: BriefingItem }) {
           </div>
         </div>
       </div>
-      <button className="learn-more" type="button" onClick={() => setOpen((current) => !current)} aria-expanded={open}>
+      <button
+        className="learn-more"
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+      >
         <span>Learn more</span>
         <ChevronDown size={18} aria-hidden="true" />
       </button>
@@ -277,7 +350,9 @@ function WeatherGuidanceCard({ briefing }: { briefing: Briefing }) {
 }
 
 function nonWeatherItems(briefing: Briefing): BriefingItem[] {
-  const weatherIds = new Set(briefing.weatherSignals.map((signal) => signal.id));
+  const weatherIds = new Set(
+    briefing.weatherSignals.map((signal) => signal.id),
+  );
   return briefing.items.filter((item) => !weatherIds.has(item.id));
 }
 
@@ -285,7 +360,9 @@ function weatherGuidanceItem(briefing: Briefing): BriefingItem | undefined {
   if (!briefing.weatherSignals.length) return undefined;
   const dominant = dominantWeatherSignal(briefing.weatherSignals);
   const sources = briefing.sources.filter((source) =>
-    briefing.weatherSignals.some((signal) => signal.sourceIds.includes(source.id))
+    briefing.weatherSignals.some((signal) =>
+      signal.sourceIds.includes(source.id),
+    ),
   );
   const copy = weatherCopyFor(briefing.weatherSignals, dominant);
   return {
@@ -300,16 +377,17 @@ function weatherGuidanceItem(briefing: Briefing): BriefingItem | undefined {
     whatYouCanDo: copy.actions,
     whenItMatters: copy.when,
     plainLanguageExplanation: copy.explanation,
-    fallbackBehavior: "If weather evidence becomes unavailable, Aware keeps this guidance cautious and asks people to check official local guidance.",
+    fallbackBehavior:
+      "If weather evidence becomes unavailable, Aware keeps this guidance cautious and asks people to check official local guidance.",
     reliability: reliabilityForSources(sources),
     freshnessStatus: freshnessForSources(sources),
     updatedAt: latestSourceUpdate(sources, briefing.generatedAt),
     sources,
     technicalDetails: briefing.weatherSignals.map((signal) => ({
       label: signal.label,
-      value: signal.attentionLabel
+      value: signal.attentionLabel,
     })),
-    rank: 0
+    rank: 0,
   };
 }
 
@@ -321,7 +399,10 @@ function dominantWeatherSignal(signals: WeatherSignal[]): WeatherSignal {
   })[0]!;
 }
 
-function weatherCopyFor(signals: WeatherSignal[], dominant: WeatherSignal): {
+function weatherCopyFor(
+  signals: WeatherSignal[],
+  dominant: WeatherSignal,
+): {
   title: string;
   meaning: string;
   action: BriefingItem["primaryAction"];
@@ -334,12 +415,19 @@ function weatherCopyFor(signals: WeatherSignal[], dominant: WeatherSignal): {
   if (!elevated.length) {
     return {
       title: "Weather looks steady right now",
-      meaning: "Heat, rain, and UV do not stand out in the available weather evidence.",
+      meaning:
+        "Heat, rain, and UV do not stand out in the available weather evidence.",
       action: "Observe",
-      why: ["The current weather signals do not show unusual heat, rain, or UV concern."],
-      actions: ["Keep normal plans flexible.", "Check local official guidance if conditions change."],
+      why: [
+        "The current weather signals do not show unusual heat, rain, or UV concern.",
+      ],
+      actions: [
+        "Keep normal plans flexible.",
+        "Check local official guidance if conditions change.",
+      ],
       when: "Today.",
-      explanation: "Aware keeps weather visible because small changes can still affect outdoor plans."
+      explanation:
+        "Aware keeps weather visible because small changes can still affect outdoor plans.",
     };
   }
 
@@ -348,16 +436,18 @@ function weatherCopyFor(signals: WeatherSignal[], dominant: WeatherSignal): {
     .map((signal) => `${signal.label.toLowerCase()} is also worth noticing`);
   return {
     title: titleForWeatherSignal(dominant),
-    meaning: dominant.severity >= 3
-      ? "Taking action soon is recommended."
-      : dominant.severity >= 2
-        ? "Some weather conditions may affect plans today."
-        : "Weather is worth noticing, no major action needed.",
+    meaning:
+      dominant.severity >= 3
+        ? "Taking action soon is recommended."
+        : dominant.severity >= 2
+          ? "Some weather conditions may affect plans today."
+          : "Weather is worth noticing, no major action needed.",
     action: actionForWeatherSignal(dominant),
     why: [dominant.meaning, ...otherSignals],
     actions: actionsForWeatherSignal(dominant),
     when: whenForWeatherSignal(dominant),
-    explanation: "Weather guidance is regional and cautious. Use it to plan outdoor time, travel, and exposure, then follow local official guidance if it differs."
+    explanation:
+      "Weather guidance is regional and cautious. Use it to plan outdoor time, travel, and exposure, then follow local official guidance if it differs.",
   };
 }
 
@@ -367,46 +457,84 @@ function titleForWeatherSignal(signal: WeatherSignal): string {
   return "Sun exposure may be strong";
 }
 
-function actionForWeatherSignal(signal: WeatherSignal): BriefingItem["primaryAction"] {
-  if (signal.signal === "weather.heavy_rain") return signal.severity >= 3 ? "Delay Activity" : "Prepare";
-  if (signal.signal === "weather.heat") return signal.severity >= 3 ? "Reduce Exposure" : "Prepare";
+function actionForWeatherSignal(
+  signal: WeatherSignal,
+): BriefingItem["primaryAction"] {
+  if (signal.signal === "weather.heavy_rain")
+    return signal.severity >= 3 ? "Delay Activity" : "Prepare";
+  if (signal.signal === "weather.heat")
+    return signal.severity >= 3 ? "Reduce Exposure" : "Prepare";
   return "Reduce Exposure";
 }
 
 function actionsForWeatherSignal(signal: WeatherSignal): string[] {
-  const followGuidance = "Follow local official guidance if it differs from this briefing.";
+  const followGuidance =
+    "Follow local official guidance if it differs from this briefing.";
   if (signal.signal === "weather.heavy_rain") {
-    return ["Keep travel plans flexible.", "Avoid optional travel through low-lying areas if conditions worsen.", followGuidance];
+    return [
+      "Keep travel plans flexible.",
+      "Avoid optional travel through low-lying areas if conditions worsen.",
+      followGuidance,
+    ];
   }
   if (signal.signal === "weather.heat") {
-    return ["Move harder outdoor activity to cooler parts of the day.", "Plan shade and water breaks.", followGuidance];
+    return [
+      "Move harder outdoor activity to cooler parts of the day.",
+      "Plan shade and water breaks.",
+      followGuidance,
+    ];
   }
-  return ["Use shade for longer outdoor time.", "Consider protective clothing or sunscreen.", followGuidance];
+  return [
+    "Use shade for longer outdoor time.",
+    "Consider protective clothing or sunscreen.",
+    followGuidance,
+  ];
 }
 
 function whenForWeatherSignal(signal: WeatherSignal): string {
-  if (signal.signal === "weather.heavy_rain") return "Most relevant for travel and outdoor plans today.";
-  if (signal.signal === "weather.heat") return "Most relevant during the warmest part of the day.";
+  if (signal.signal === "weather.heavy_rain")
+    return "Most relevant for travel and outdoor plans today.";
+  if (signal.signal === "weather.heat")
+    return "Most relevant during the warmest part of the day.";
   return "Most relevant around midday and early afternoon.";
 }
 
-function reliabilityForSources(sources: BriefingItem["sources"]): BriefingItem["reliability"] {
+function reliabilityForSources(
+  sources: BriefingItem["sources"],
+): BriefingItem["reliability"] {
   if (!sources.length) return "limited";
-  if (sources.some((source) => source.reliability === "limited" || source.status !== "available")) return "limited";
-  if (sources.some((source) => source.reliability === "medium")) return "medium";
+  if (
+    sources.some(
+      (source) =>
+        source.reliability === "limited" || source.status !== "available",
+    )
+  )
+    return "limited";
+  if (sources.some((source) => source.reliability === "medium"))
+    return "medium";
   return "high";
 }
 
-function freshnessForSources(sources: BriefingItem["sources"]): BriefingItem["freshnessStatus"] {
+function freshnessForSources(
+  sources: BriefingItem["sources"],
+): BriefingItem["freshnessStatus"] {
   if (!sources.length) return "missing";
-  if (sources.some((source) => source.freshness === "missing")) return "missing";
+  if (sources.some((source) => source.freshness === "missing"))
+    return "missing";
   if (sources.some((source) => source.freshness === "stale")) return "stale";
   if (sources.some((source) => source.freshness === "recent")) return "recent";
   return "fresh";
 }
 
-function latestSourceUpdate(sources: BriefingItem["sources"], fallback: string): string {
-  return [...sources].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))[0]?.updatedAt ?? fallback;
+function latestSourceUpdate(
+  sources: BriefingItem["sources"],
+  fallback: string,
+): string {
+  return (
+    [...sources].sort((left, right) =>
+      right.updatedAt.localeCompare(left.updatedAt),
+    )[0]?.updatedAt ?? fallback
+  );
 }
 
 function weatherOrder(signal: WeatherSignal["signal"]): number {
@@ -421,13 +549,22 @@ function RegionResults(props: {
   onChooseRegion(region: Region): void;
 }) {
   return (
-    <div className={props.compact ? "region-results compact" : "region-results"} aria-label="Region results">
+    <div
+      className={props.compact ? "region-results compact" : "region-results"}
+      aria-label="Region results"
+    >
       {props.regions.map((region) => (
-        <button key={region.id} type="button" onClick={() => props.onChooseRegion(region)}>
+        <button
+          key={region.id}
+          type="button"
+          onClick={() => props.onChooseRegion(region)}
+        >
           <MapPin size={17} aria-hidden="true" />
           <span>
             <strong>{region.name}</strong>
-            <small>{region.adminArea}, {region.country}</small>
+            <small>
+              {region.adminArea}, {region.country}
+            </small>
           </span>
         </button>
       ))}
@@ -435,15 +572,34 @@ function RegionResults(props: {
   );
 }
 
-function StatusLine(props: { status: AppStatus; message?: string; empty: boolean }) {
+function StatusLine(props: {
+  status: AppStatus;
+  message?: string;
+  empty: boolean;
+}) {
   if (props.status === "searching") {
-    return <p className="status-line"><Loader2 className="spin" size={17} aria-hidden="true" />Looking now.</p>;
+    return (
+      <p className="status-line">
+        <Loader2 className="spin" size={17} aria-hidden="true" />
+        Looking now.
+      </p>
+    );
   }
   if (props.message) {
-    return <p className="status-line"><Info size={17} aria-hidden="true" />{props.message}</p>;
+    return (
+      <p className="status-line">
+        <Info size={17} aria-hidden="true" />
+        {props.message}
+      </p>
+    );
   }
   if (props.empty) {
-    return <p className="status-line muted"><CheckCircle2 size={17} aria-hidden="true" />Start with a city or region.</p>;
+    return (
+      <p className="status-line muted">
+        <CheckCircle2 size={17} aria-hidden="true" />
+        Start with a city or region.
+      </p>
+    );
   }
   return null;
 }
@@ -470,12 +626,17 @@ function InfoBlock({ title, lines }: { title: string; lines: string[] }) {
   return (
     <section className="info-block">
       <h3>{title}</h3>
-      {lines.map((line) => <p key={line}>{line}</p>)}
+      {lines.map((line) => (
+        <p key={line}>{line}</p>
+      ))}
     </section>
   );
 }
 
-function AttentionBadge({ level, label }: { level: AttentionLevel; label: string }) {
+function AttentionBadge({
+  level,
+  label,
+}: { level: AttentionLevel; label: string }) {
   return <span className={`attention-badge badge-${level}`}>{label}</span>;
 }
 
@@ -497,6 +658,6 @@ function formatUpdatedTime(value: string): string {
     month: "short",
     day: "numeric",
     hour: "numeric",
-    minute: "2-digit"
+    minute: "2-digit",
   });
 }

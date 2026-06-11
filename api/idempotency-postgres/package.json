@@ -21,8 +21,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@signal/ports": "workspace:*",
     "@signal/protocol": "workspace:*",
-    "@signal/runtime": "workspace:*",
     "drizzle-orm": "^0.45.2",
     "pg": "^8.13.1"
   },

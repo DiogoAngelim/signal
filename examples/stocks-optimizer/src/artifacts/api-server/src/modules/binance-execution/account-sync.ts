@@ -1,7 +1,7 @@
 import type { BinanceHttpClient } from "./client";
 import { allSymbolsAllowed } from "./config";
-import { baseAssetForSymbol, quoteAssetForSymbol } from "./market-data";
 import type { ExecutionStateStore } from "./execution-state";
+import { baseAssetForSymbol, quoteAssetForSymbol } from "./market-data";
 import type {
   AccountState,
   BinanceExecutionConfig,
@@ -19,9 +19,10 @@ export class AccountSync {
   ) {}
 
   async sync() {
-    const account = this.config.mode === "dry_run"
-      ? this.dryRunAccount()
-      : await this.binanceAccount();
+    const account =
+      this.config.mode === "dry_run"
+        ? this.dryRunAccount()
+        : await this.binanceAccount();
     this.store.saveAccountState(account);
     return account;
   }
@@ -41,7 +42,8 @@ export class AccountSync {
     };
 
     for (const order of records.orders) {
-      if (!["FILLED", "PARTIALLY_FILLED"].includes(order.status.toUpperCase())) continue;
+      if (!["FILLED", "PARTIALLY_FILLED"].includes(order.status.toUpperCase()))
+        continue;
       const base = baseAssetForSymbol(order.symbol);
       const current = balances[base] ?? { free: 0, locked: 0 };
       current.free += order.side === "BUY" ? order.quantity : -order.quantity;
@@ -54,31 +56,42 @@ export class AccountSync {
       availableEquity: Math.max(0, equity - reserved),
       balances,
       openOrders: records.orders
-        .filter((order) => ["NEW", "PARTIALLY_FILLED"].includes(order.status.toUpperCase()))
-        .map((order): BinanceOpenOrder => ({
-          symbol: order.symbol,
-          orderId: Number(order.id.replace(/\D/g, "")) || 0,
-          clientOrderId: order.clientOrderId,
-          price: String(order.price ?? 0),
-          origQty: String(order.quantity),
-          executedQty: order.status.toUpperCase() === "PARTIALLY_FILLED" ? String(order.quantity) : "0",
-          status: order.status,
-          side: order.side,
-          type: order.type,
-        })),
+        .filter((order) =>
+          ["NEW", "PARTIALLY_FILLED"].includes(order.status.toUpperCase()),
+        )
+        .map(
+          (order): BinanceOpenOrder => ({
+            symbol: order.symbol,
+            orderId: Number(order.id.replace(/\D/g, "")) || 0,
+            clientOrderId: order.clientOrderId,
+            price: String(order.price ?? 0),
+            origQty: String(order.quantity),
+            executedQty:
+              order.status.toUpperCase() === "PARTIALLY_FILLED"
+                ? String(order.quantity)
+                : "0",
+            status: order.status,
+            side: order.side,
+            type: order.type,
+          }),
+        ),
       fills: records.orders
-        .filter((order) => ["FILLED", "PARTIALLY_FILLED"].includes(order.status.toUpperCase()))
-        .map((order): BinanceTrade => ({
-          id: Number(order.id.replace(/\D/g, "")) || 0,
-          orderId: Number(order.id.replace(/\D/g, "")) || 0,
-          price: String(order.price ?? 0),
-          qty: String(order.quantity),
-          quoteQty: String(order.notional),
-          commission: "0",
-          commissionAsset: quoteAssetForSymbol(order.symbol),
-          time: Date.parse(order.createdAt),
-          isBuyer: order.side === "BUY",
-        })),
+        .filter((order) =>
+          ["FILLED", "PARTIALLY_FILLED"].includes(order.status.toUpperCase()),
+        )
+        .map(
+          (order): BinanceTrade => ({
+            id: Number(order.id.replace(/\D/g, "")) || 0,
+            orderId: Number(order.id.replace(/\D/g, "")) || 0,
+            price: String(order.price ?? 0),
+            qty: String(order.quantity),
+            quoteQty: String(order.notional),
+            commission: "0",
+            commissionAsset: quoteAssetForSymbol(order.symbol),
+            time: Date.parse(order.createdAt),
+            isBuyer: order.side === "BUY",
+          }),
+        ),
     };
   }
 
@@ -111,7 +124,10 @@ export class AccountSync {
     return {
       syncedAt: new Date().toISOString(),
       equity,
-      availableEquity: Array.from(quoteAssets).reduce((sum, asset) => sum + (balances[asset]?.free ?? 0), 0),
+      availableEquity: Array.from(quoteAssets).reduce(
+        (sum, asset) => sum + (balances[asset]?.free ?? 0),
+        0,
+      ),
       balances,
       openOrders: openOrders ?? [],
       fills,
@@ -126,29 +142,39 @@ export class AccountSync {
       : this.config.allowedSymbols;
     for (const symbol of symbols.slice(0, 20)) {
       try {
-        trades.push(...await this.client.myTrades({ symbol, limit: 100 }));
-      } catch {
-        
-      }
+        trades.push(...(await this.client.myTrades({ symbol, limit: 100 })));
+      } catch {}
     }
     return trades;
   }
 
-  private refreshTrackedOrderStatuses(openOrders: BinanceOpenOrder[], fills: BinanceTrade[]) {
-    const openByClientOrderId = new Map(openOrders.map((order) => [order.clientOrderId, order]));
-    const openByOrderId = new Map(openOrders.map((order) => [String(order.orderId), order]));
+  private refreshTrackedOrderStatuses(
+    openOrders: BinanceOpenOrder[],
+    fills: BinanceTrade[],
+  ) {
+    const openByClientOrderId = new Map(
+      openOrders.map((order) => [order.clientOrderId, order]),
+    );
+    const openByOrderId = new Map(
+      openOrders.map((order) => [String(order.orderId), order]),
+    );
     const fillsByOrderId = new Map<string, BinanceTrade[]>();
 
     for (const fill of fills) {
       const orderId = String(fill.orderId);
-      fillsByOrderId.set(orderId, [...(fillsByOrderId.get(orderId) ?? []), fill]);
+      fillsByOrderId.set(orderId, [
+        ...(fillsByOrderId.get(orderId) ?? []),
+        fill,
+      ]);
     }
 
     for (const order of this.store.records().orders) {
       const status = order.status.toUpperCase();
       if (!["NEW", "PARTIALLY_FILLED"].includes(status)) continue;
 
-      const openOrder = openByClientOrderId.get(order.clientOrderId) ?? openByOrderId.get(order.id);
+      const openOrder =
+        openByClientOrderId.get(order.clientOrderId) ??
+        openByOrderId.get(order.id);
       if (openOrder) {
         const executedQty = Number(openOrder.executedQty) || 0;
         const price = Number(openOrder.price) || order.price;
@@ -156,31 +182,52 @@ export class AccountSync {
           status: openOrder.status,
           quantity: executedQty > 0 ? executedQty : order.quantity,
           price,
-          notional: price ? Number((price * (executedQty > 0 ? executedQty : order.quantity)).toFixed(8)) : order.notional,
+          notional: price
+            ? Number(
+                (
+                  price * (executedQty > 0 ? executedQty : order.quantity)
+                ).toFixed(8),
+              )
+            : order.notional,
         });
         continue;
       }
 
       const orderFills = fillsByOrderId.get(order.id) ?? [];
-      const filledQuantity = orderFills.reduce((sum, fill) => sum + (Number(fill.qty) || 0), 0);
+      const filledQuantity = orderFills.reduce(
+        (sum, fill) => sum + (Number(fill.qty) || 0),
+        0,
+      );
       if (filledQuantity <= 0) continue;
 
-      const quoteQuantity = orderFills.reduce((sum, fill) => sum + (Number(fill.quoteQty) || 0), 0);
-      const averagePrice = quoteQuantity > 0 ? quoteQuantity / filledQuantity : order.price;
+      const quoteQuantity = orderFills.reduce(
+        (sum, fill) => sum + (Number(fill.quoteQty) || 0),
+        0,
+      );
+      const averagePrice =
+        quoteQuantity > 0 ? quoteQuantity / filledQuantity : order.price;
       this.store.updateOrder(order.id, {
-        status: filledQuantity + 1e-12 >= order.quantity ? "FILLED" : "PARTIALLY_FILLED",
+        status:
+          filledQuantity + 1e-12 >= order.quantity
+            ? "FILLED"
+            : "PARTIALLY_FILLED",
         quantity: Number(filledQuantity.toFixed(12)),
         price: averagePrice,
-        notional: quoteQuantity > 0 ? Number(quoteQuantity.toFixed(8)) : order.notional,
+        notional:
+          quoteQuantity > 0 ? Number(quoteQuantity.toFixed(8)) : order.notional,
       });
     }
   }
 }
 
-function trackedSymbols(store: ExecutionStateStore, openOrders: BinanceOpenOrder[]) {
+function trackedSymbols(
+  store: ExecutionStateStore,
+  openOrders: BinanceOpenOrder[],
+) {
   const symbols = new Set<string>();
   for (const order of store.records().orders) symbols.add(order.symbol);
-  for (const reservation of store.records().reservations) symbols.add(reservation.symbol);
+  for (const reservation of store.records().reservations)
+    symbols.add(reservation.symbol);
   for (const order of openOrders) symbols.add(order.symbol);
   return Array.from(symbols).filter(Boolean);
 }

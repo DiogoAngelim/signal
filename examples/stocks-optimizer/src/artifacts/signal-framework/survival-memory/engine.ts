@@ -1,15 +1,28 @@
-
 export type SurvivalOutcomeClass =
   | "comfortable_survival"
   | "stressed_survival"
   | "barely_survived"
   | "failed_survival";
 
-export type SurvivalAction = "buy" | "sell" | "hold" | "watch" | "reduce" | "exit";
+export type SurvivalAction =
+  | "buy"
+  | "sell"
+  | "hold"
+  | "watch"
+  | "reduce"
+  | "exit";
 
-export type SurvivalMemoryStatus = "empty" | "clear" | "watch" | "scarred" | "near_ruin";
+export type SurvivalMemoryStatus =
+  | "empty"
+  | "clear"
+  | "watch"
+  | "scarred"
+  | "near_ruin";
 
-export type SurvivalMemoryRecommendation = "act" | "act_with_reduced_size" | "wait";
+export type SurvivalMemoryRecommendation =
+  | "act"
+  | "act_with_reduced_size"
+  | "wait";
 
 export interface SurvivalMemoryRecord {
   id: string;
@@ -119,18 +132,26 @@ export function calculateSurvivalCost(input: SurvivalCostInput): number {
   const recoveryTime = scoreRecovery(input.recoveryTimeBars);
   return roundScore(
     normalizeMagnitude(input.maxDrawdown) * SURVIVAL_COST_WEIGHTS.maxDrawdown +
-      normalizeMagnitude(input.maxAdverseExcursion) * SURVIVAL_COST_WEIGHTS.maxAdverseExcursion +
+      normalizeMagnitude(input.maxAdverseExcursion) *
+        SURVIVAL_COST_WEIGHTS.maxAdverseExcursion +
       recoveryTime * SURVIVAL_COST_WEIGHTS.recoveryTime +
-      normalizeScore(input.volatilityExpansion) * SURVIVAL_COST_WEIGHTS.volatilityExpansion +
+      normalizeScore(input.volatilityExpansion) *
+        SURVIVAL_COST_WEIGHTS.volatilityExpansion +
       normalizeScore(input.tailRisk) * SURVIVAL_COST_WEIGHTS.tailRisk +
-      normalizeScore(input.liquidityStress) * SURVIVAL_COST_WEIGHTS.liquidityStress +
-      normalizeScore(input.structuralDanger) * SURVIVAL_COST_WEIGHTS.structuralDanger +
+      normalizeScore(input.liquidityStress) *
+        SURVIVAL_COST_WEIGHTS.liquidityStress +
+      normalizeScore(input.structuralDanger) *
+        SURVIVAL_COST_WEIGHTS.structuralDanger +
       normalizeScore(input.novelty) * SURVIVAL_COST_WEIGHTS.novelty,
   );
 }
 
-export function classifySurvivalOutcome(input: SurvivalClassificationInput): SurvivalOutcomeClass {
-  const survivalCost = normalizeScore(input.survivalCost ?? calculateSurvivalCost(input));
+export function classifySurvivalOutcome(
+  input: SurvivalClassificationInput,
+): SurvivalOutcomeClass {
+  const survivalCost = normalizeScore(
+    input.survivalCost ?? calculateSurvivalCost(input),
+  );
   const realizedReturn = number(input.realizedReturn);
   const maxDrawdown = normalizeMagnitude(input.maxDrawdown);
   const adverse = normalizeMagnitude(input.maxAdverseExcursion);
@@ -145,12 +166,11 @@ export function classifySurvivalOutcome(input: SurvivalClassificationInput): Sur
     adverse >= 45 ||
     survivalCost >= 85 ||
     realizedReturn <= -12 ||
-    (realizedReturn < 0 && (
-      survivalCost >= 58 ||
-      maxDrawdown >= 25 ||
-      adverse >= 30 ||
-      stressPeak >= 70
-    ))
+    (realizedReturn < 0 &&
+      (survivalCost >= 58 ||
+        maxDrawdown >= 25 ||
+        adverse >= 30 ||
+        stressPeak >= 70))
   ) {
     return "failed_survival";
   }
@@ -180,16 +200,23 @@ export function classifySurvivalOutcome(input: SurvivalClassificationInput): Sur
   return "comfortable_survival";
 }
 
-export function scarWeightForOutcome(outcomeClass: SurvivalOutcomeClass, survivalCost: number): number {
+export function scarWeightForOutcome(
+  outcomeClass: SurvivalOutcomeClass,
+  survivalCost: number,
+): number {
   const costRatio = normalizeScore(survivalCost) / 100;
 
   if (outcomeClass === "failed_survival") return 1;
-  if (outcomeClass === "barely_survived") return roundRatio(Math.max(0.55, costRatio * 0.9));
-  if (outcomeClass === "stressed_survival") return roundRatio(Math.max(0.18, costRatio * 0.55));
+  if (outcomeClass === "barely_survived")
+    return roundRatio(Math.max(0.55, costRatio * 0.9));
+  if (outcomeClass === "stressed_survival")
+    return roundRatio(Math.max(0.18, costRatio * 0.55));
   return 0;
 }
 
-export function buildSurvivalMemoryRecord(input: SurvivalMemoryRecordInput): SurvivalMemoryRecord {
+export function buildSurvivalMemoryRecord(
+  input: SurvivalMemoryRecordInput,
+): SurvivalMemoryRecord {
   const survivalCost = calculateSurvivalCost(input);
   const outcomeClass = classifySurvivalOutcome({ ...input, survivalCost });
   const scarWeight = scarWeightForOutcome(outcomeClass, survivalCost);
@@ -211,13 +238,23 @@ export function buildSurvivalMemoryRecord(input: SurvivalMemoryRecordInput): Sur
     ...(input.asset ? { asset: input.asset } : {}),
     ...(input.venue ? { venue: input.venue } : {}),
     ...(input.regime ? { regime: input.regime } : {}),
-    stateFingerprint: input.stateFingerprint ?? fingerprintSurvivalState(input.state ?? {}),
+    stateFingerprint:
+      input.stateFingerprint ?? fingerprintSurvivalState(input.state ?? {}),
     action,
     maxExposure: roundScore(normalizeScore(input.maxExposure)),
     realizedReturn: roundScore(number(input.realizedReturn)),
     maxDrawdown: roundScore(normalizeMagnitude(input.maxDrawdown)),
-    maxAdverseExcursion: roundScore(normalizeMagnitude(input.maxAdverseExcursion)),
-    ...(input.recoveryTimeBars == null ? {} : { recoveryTimeBars: Math.max(0, Math.round(number(input.recoveryTimeBars))) }),
+    maxAdverseExcursion: roundScore(
+      normalizeMagnitude(input.maxAdverseExcursion),
+    ),
+    ...(input.recoveryTimeBars == null
+      ? {}
+      : {
+          recoveryTimeBars: Math.max(
+            0,
+            Math.round(number(input.recoveryTimeBars)),
+          ),
+        }),
     volatilityExpansion: roundScore(normalizeScore(input.volatilityExpansion)),
     tailRisk: roundScore(normalizeScore(input.tailRisk)),
     liquidityStress: roundScore(normalizeScore(input.liquidityStress)),
@@ -231,26 +268,54 @@ export function buildSurvivalMemoryRecord(input: SurvivalMemoryRecordInput): Sur
   };
 }
 
-export function evaluateSurvivalMemory(input: SurvivalMemoryAnalysisInput = {}): SurvivalMemoryAnalysis {
+export function evaluateSurvivalMemory(
+  input: SurvivalMemoryAnalysisInput = {},
+): SurvivalMemoryAnalysis {
   const records = Array.isArray(input.records) ? input.records : [];
-  const currentFingerprint = input.stateFingerprint ?? fingerprintSurvivalState(input.currentState ?? {});
+  const currentFingerprint =
+    input.stateFingerprint ??
+    fingerprintSurvivalState(input.currentState ?? {});
   const threshold = clampRatio(input.similarityThreshold ?? 0.35);
   const matched = records
     .map((record) => ({
       record,
-      similarity: similarityForFingerprint(currentFingerprint, record.stateFingerprint),
+      similarity: similarityForFingerprint(
+        currentFingerprint,
+        record.stateFingerprint,
+      ),
     }))
     .filter((match) => match.similarity >= threshold)
-    .sort((left, right) => right.similarity - left.similarity || right.record.id.localeCompare(left.record.id));
-  const effectiveMatches = matched.length ? matched : records.map((record) => ({ record, similarity: 0 }));
-  const fragileMatches = effectiveMatches.filter((match) => isSurvivalScar(match.record));
-  const nearRuinMatches = effectiveMatches.filter((match) => isNearRuin(match.record));
-  const severeNearRuinMatches = nearRuinMatches.filter((match) => isSevereNearRuin(match.record));
+    .sort(
+      (left, right) =>
+        right.similarity - left.similarity ||
+        right.record.id.localeCompare(left.record.id),
+    );
+  const effectiveMatches = matched.length
+    ? matched
+    : records.map((record) => ({ record, similarity: 0 }));
+  const fragileMatches = effectiveMatches.filter((match) =>
+    isSurvivalScar(match.record),
+  );
+  const nearRuinMatches = effectiveMatches.filter((match) =>
+    isNearRuin(match.record),
+  );
+  const severeNearRuinMatches = nearRuinMatches.filter((match) =>
+    isSevereNearRuin(match.record),
+  );
   const scarRate = ratio(fragileMatches.length, effectiveMatches.length);
   const nearRuinRate = ratio(nearRuinMatches.length, effectiveMatches.length);
-  const severeNearRuinRate = ratio(severeNearRuinMatches.length, effectiveMatches.length);
-  const averageSurvivalCost = average(effectiveMatches.map((match) => match.record.survivalCost));
-  const recoveryBurden = average(effectiveMatches.map((match) => scoreRecovery(match.record.recoveryTimeBars)));
+  const severeNearRuinRate = ratio(
+    severeNearRuinMatches.length,
+    effectiveMatches.length,
+  );
+  const averageSurvivalCost = average(
+    effectiveMatches.map((match) => match.record.survivalCost),
+  );
+  const recoveryBurden = average(
+    effectiveMatches.map((match) =>
+      scoreRecovery(match.record.recoveryTimeBars),
+    ),
+  );
   const currentStateSimilarity = fragileMatches.length
     ? Math.max(...fragileMatches.map((match) => match.similarity))
     : 0;
@@ -339,7 +404,9 @@ export function evaluateSurvivalMemory(input: SurvivalMemoryAnalysisInput = {}):
   };
 }
 
-export function fingerprintSurvivalState(state: Record<string, unknown>): string {
+export function fingerprintSurvivalState(
+  state: Record<string, unknown>,
+): string {
   const tokens = Object.entries(state)
     .flatMap(([key, value]) => fingerprintTokens(key, value))
     .filter(Boolean)
@@ -383,12 +450,14 @@ function similarityForFingerprint(current: string, historical: string): number {
   return intersection / union.size;
 }
 
-function notesForRecord(input: SurvivalMemoryRecordInput & {
-  action: SurvivalAction;
-  survivalCost: number;
-  outcomeClass: SurvivalOutcomeClass;
-  scarWeight: number;
-}) {
+function notesForRecord(
+  input: SurvivalMemoryRecordInput & {
+    action: SurvivalAction;
+    survivalCost: number;
+    outcomeClass: SurvivalOutcomeClass;
+    scarWeight: number;
+  },
+) {
   const notes: string[] = [];
   const profitable = number(input.realizedReturn) > 0;
 
@@ -401,35 +470,45 @@ function notesForRecord(input: SurvivalMemoryRecordInput & {
   if (normalizeMagnitude(input.maxDrawdown) >= 25) {
     notes.push("Large drawdown created survival scar tissue.");
   }
-  if (normalizeScore(input.tailRisk) >= 70 || normalizeScore(input.liquidityStress) >= 70) {
-    notes.push("Tail or liquidity pressure made the signal structurally fragile.");
+  if (
+    normalizeScore(input.tailRisk) >= 70 ||
+    normalizeScore(input.liquidityStress) >= 70
+  ) {
+    notes.push(
+      "Tail or liquidity pressure made the signal structurally fragile.",
+    );
   }
 
   return notes;
 }
 
 function isSurvivalScar(record: SurvivalMemoryRecord) {
-  return record.scarWeight >= 0.18 || record.outcomeClass !== "comfortable_survival";
+  return (
+    record.scarWeight >= 0.18 || record.outcomeClass !== "comfortable_survival"
+  );
 }
 
 function isNearRuin(record: SurvivalMemoryRecord) {
-  return record.outcomeClass === "failed_survival" ||
-    record.outcomeClass === "barely_survived" && (
-      record.survivalCost >= 65 ||
-      record.maxDrawdown >= 30 ||
-      record.maxAdverseExcursion >= 35 ||
-      record.tailRisk >= 80 ||
-      record.liquidityStress >= 80
-    );
+  return (
+    record.outcomeClass === "failed_survival" ||
+    (record.outcomeClass === "barely_survived" &&
+      (record.survivalCost >= 65 ||
+        record.maxDrawdown >= 30 ||
+        record.maxAdverseExcursion >= 35 ||
+        record.tailRisk >= 80 ||
+        record.liquidityStress >= 80))
+  );
 }
 
 function isSevereNearRuin(record: SurvivalMemoryRecord) {
-  return record.outcomeClass === "failed_survival" ||
+  return (
+    record.outcomeClass === "failed_survival" ||
     record.survivalCost >= 75 ||
     record.maxDrawdown >= 45 ||
     record.maxAdverseExcursion >= 45 ||
     record.tailRisk >= 90 ||
-    record.liquidityStress >= 90;
+    record.liquidityStress >= 90
+  );
 }
 
 function exposureMultiplierFor(input: {
@@ -446,11 +525,25 @@ function exposureMultiplierFor(input: {
     input.severeNearRuinRate >= 0.2 &&
     (input.nearRuinSimilarity >= 0.5 || input.averageSurvivalCost >= 55);
 
-  if (input.severeNearRuinCount >= 2 && severeCluster && input.averageSurvivalCost >= 65) return 0;
+  if (
+    input.severeNearRuinCount >= 2 &&
+    severeCluster &&
+    input.averageSurvivalCost >= 65
+  )
+    return 0;
   if (severeCluster && input.averageSurvivalCost >= 35) return 0.2;
   if (input.averageSurvivalCost >= 70) return 0.25;
-  if (input.averageSurvivalCost >= 55 || input.nearRuinRate >= 0.5 && input.averageSurvivalCost >= 35) return 0.4;
-  if (input.averageSurvivalCost >= 35 || input.scarRate >= 0.5 || input.nearRuinRate >= 0.2) return 0.65;
+  if (
+    input.averageSurvivalCost >= 55 ||
+    (input.nearRuinRate >= 0.5 && input.averageSurvivalCost >= 35)
+  )
+    return 0.4;
+  if (
+    input.averageSurvivalCost >= 35 ||
+    input.scarRate >= 0.5 ||
+    input.nearRuinRate >= 0.2
+  )
+    return 0.65;
   return 1;
 }
 
@@ -470,12 +563,22 @@ function statusFor(input: {
 
   if (
     input.averageSurvivalCost >= 70 ||
-    severeCluster && input.averageSurvivalCost >= 35
+    (severeCluster && input.averageSurvivalCost >= 35)
   ) {
     return "near_ruin";
   }
-  if (input.averageSurvivalCost >= 55 || input.nearRuinRate >= 0.5 || input.scarRate >= 0.65) return "scarred";
-  if (input.scarRate > 0 || input.nearRuinRate > 0 || input.averageSurvivalCost >= 30) return "watch";
+  if (
+    input.averageSurvivalCost >= 55 ||
+    input.nearRuinRate >= 0.5 ||
+    input.scarRate >= 0.65
+  )
+    return "scarred";
+  if (
+    input.scarRate > 0 ||
+    input.nearRuinRate > 0 ||
+    input.averageSurvivalCost >= 30
+  )
+    return "watch";
   return "clear";
 }
 
@@ -487,30 +590,48 @@ function survivalConfidenceFor(input: {
   severeNearRuinRate: number;
   currentStateSimilarity: number;
 }) {
-  const controlledRecovery = input.averageSurvivalCost < 35 && input.recoveryBurden < 20;
+  const controlledRecovery =
+    input.averageSurvivalCost < 35 && input.recoveryBurden < 20;
   const stabilizingRecoveryCredit = controlledRecovery
-    ? clampScore((35 - input.averageSurvivalCost) * 0.6 + (20 - input.recoveryBurden) * 0.25)
+    ? clampScore(
+        (35 - input.averageSurvivalCost) * 0.6 +
+          (20 - input.recoveryBurden) * 0.25,
+      )
     : 0;
   const scarPenaltyScale = controlledRecovery ? 0.45 : 1;
-  const nearRuinPenaltyScale = controlledRecovery ? 0.25 : input.averageSurvivalCost < 45 ? 0.65 : 1;
-  const severePenaltyScale = controlledRecovery ? 0.25 : input.averageSurvivalCost < 45 ? 0.6 : 1;
+  const nearRuinPenaltyScale = controlledRecovery
+    ? 0.25
+    : input.averageSurvivalCost < 45
+      ? 0.65
+      : 1;
+  const severePenaltyScale = controlledRecovery
+    ? 0.25
+    : input.averageSurvivalCost < 45
+      ? 0.6
+      : 1;
   const similarityPenaltyScale = controlledRecovery ? 0.6 : 1;
 
-  return roundScore(clampScore(
-    100 -
-      input.averageSurvivalCost * 0.65 -
-      input.scarRate * 12 * scarPenaltyScale -
-      input.nearRuinRate * 18 * nearRuinPenaltyScale -
-      input.severeNearRuinRate * 35 * severePenaltyScale -
-      input.currentStateSimilarity * 6 * similarityPenaltyScale -
-      input.recoveryBurden * 0.08 +
-      stabilizingRecoveryCredit,
-  ));
+  return roundScore(
+    clampScore(
+      100 -
+        input.averageSurvivalCost * 0.65 -
+        input.scarRate * 12 * scarPenaltyScale -
+        input.nearRuinRate * 18 * nearRuinPenaltyScale -
+        input.severeNearRuinRate * 35 * severePenaltyScale -
+        input.currentStateSimilarity * 6 * similarityPenaltyScale -
+        input.recoveryBurden * 0.08 +
+        stabilizingRecoveryCredit,
+    ),
+  );
 }
 
-function recommendationFor(status: SurvivalMemoryStatus, exposureMultiplier: number): SurvivalMemoryRecommendation {
+function recommendationFor(
+  status: SurvivalMemoryStatus,
+  exposureMultiplier: number,
+): SurvivalMemoryRecommendation {
   if (status === "near_ruin" || exposureMultiplier === 0) return "wait";
-  if (status === "scarred" || status === "watch" || exposureMultiplier < 0.85) return "act_with_reduced_size";
+  if (status === "scarred" || status === "watch" || exposureMultiplier < 0.85)
+    return "act_with_reduced_size";
   return "act";
 }
 
@@ -526,11 +647,20 @@ function warningsFor(input: {
   if (input.nearRuinCount > 0) {
     warnings.push("Similar states include near-ruin survival patterns.");
   }
-  if (input.fragileMatches.some((record) => record.realizedReturn > 0 && record.outcomeClass === "barely_survived")) {
-    warnings.push("Similar states were profitable but carried unacceptable drawdown or stress.");
+  if (
+    input.fragileMatches.some(
+      (record) =>
+        record.realizedReturn > 0 && record.outcomeClass === "barely_survived",
+    )
+  ) {
+    warnings.push(
+      "Similar states were profitable but carried unacceptable drawdown or stress.",
+    );
   }
   if (input.averageSurvivalCost >= 35) {
-    warnings.push(`Average survival cost is elevated at ${Math.round(input.averageSurvivalCost)}/100.`);
+    warnings.push(
+      `Average survival cost is elevated at ${Math.round(input.averageSurvivalCost)}/100.`,
+    );
   }
   if (input.recoveryBurden >= 50) {
     warnings.push("Recovery burden is high after adverse moves.");
@@ -560,7 +690,9 @@ function reasonsFor(input: {
   if (input.recommendation === "wait") {
     reasons.push("Wait because similar states had unacceptable survival cost.");
   } else if (input.recommendation === "act_with_reduced_size") {
-    reasons.push(`Cap exposure to ${Math.round(input.exposureMultiplier * 100)}% of the normal limit before opportunity sizing expands it.`);
+    reasons.push(
+      `Cap exposure to ${Math.round(input.exposureMultiplier * 100)}% of the normal limit before opportunity sizing expands it.`,
+    );
   }
 
   return unique([...reasons, ...input.mainWarnings]);
@@ -568,24 +700,37 @@ function reasonsFor(input: {
 
 function missingEvidenceFor(recommendation: SurvivalMemoryRecommendation) {
   if (recommendation === "wait") return ["Survival memory clearance"];
-  if (recommendation === "act_with_reduced_size") return ["Reduced-size survival review"];
+  if (recommendation === "act_with_reduced_size")
+    return ["Reduced-size survival review"];
   return [];
 }
 
 function unlockConditionsFor(recommendation: SurvivalMemoryRecommendation) {
   if (recommendation === "wait") {
-    return ["Wait until similar states show survival cost below 35/100 and no near-ruin match."];
+    return [
+      "Wait until similar states show survival cost below 35/100 and no near-ruin match.",
+    ];
   }
   if (recommendation === "act_with_reduced_size") {
-    return ["Move Survival Memory from scarred/watch to clear with survival confidence above 70/100 and clean reduced-size outcomes before normal sizing is restored."];
+    return [
+      "Move Survival Memory from scarred/watch to clear with survival confidence above 70/100 and clean reduced-size outcomes before normal sizing is restored.",
+    ];
   }
   return [];
 }
 
-function invalidationConditionsFor(recommendation: SurvivalMemoryRecommendation) {
-  const base = ["Invalidate if similar states repeat max adverse excursion above the survival boundary."];
+function invalidationConditionsFor(
+  recommendation: SurvivalMemoryRecommendation,
+) {
+  const base = [
+    "Invalidate if similar states repeat max adverse excursion above the survival boundary.",
+  ];
   if (recommendation === "act") return [];
-  if (recommendation === "wait") return [...base, "Invalidate if liquidity or tail pressure remains elevated in the current state."];
+  if (recommendation === "wait")
+    return [
+      ...base,
+      "Invalidate if liquidity or tail pressure remains elevated in the current state.",
+    ];
   return base;
 }
 
@@ -600,7 +745,7 @@ function normalizeAction(action: unknown): SurvivalAction {
 }
 
 function scoreRecovery(recoveryTimeBars: unknown) {
-  return clampScore(number(recoveryTimeBars) / 60 * 100);
+  return clampScore((number(recoveryTimeBars) / 60) * 100);
 }
 
 function scoreBucket(value: number) {
@@ -618,11 +763,12 @@ function normalizeMagnitude(value: unknown) {
 
 function normalizeScore(value: unknown) {
   const parsed = number(value);
-  return clampScore(Math.abs(parsed) < 1 && parsed !== 0 ? parsed * 100 : parsed);
+  return clampScore(
+    Math.abs(parsed) < 1 && parsed !== 0 ? parsed * 100 : parsed,
+  );
 }
 
 function clampScore(value: number) {
-  
   if (!Number.isFinite(value)) return 0;
   return Math.min(100, Math.max(0, value));
 }
@@ -639,7 +785,8 @@ function average(values: number[]) {
 }
 
 function ratio(count: number, total: number) {
-  if (!Number.isFinite(count) || !Number.isFinite(total) || total <= 0) return 0;
+  if (!Number.isFinite(count) || !Number.isFinite(total) || total <= 0)
+    return 0;
   return clampRatio(count / total);
 }
 
@@ -669,7 +816,6 @@ function unique(values: string[]) {
 function roundScore(value: number) {
   return Math.round(clampScore(value) * 100) / 100;
 }
-
 
 function roundRatio(value: number) {
   return Math.round(clampRatio(value) * 100) / 100;

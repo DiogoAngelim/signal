@@ -9,7 +9,8 @@ export const signalEnvelopeJsonSchema = {
     kind: { enum: ["query", "mutation", "event"] },
     name: {
       type: "string",
-      pattern: "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*\\.[a-z][a-z0-9-]*\\.v[1-9][0-9]*$",
+      pattern:
+        "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*\\.[a-z][a-z0-9-]*\\.v[1-9][0-9]*$",
     },
     messageId: { type: "string", minLength: 1 },
     timestamp: { type: "string", format: "date-time" },

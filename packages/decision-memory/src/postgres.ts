@@ -1,11 +1,11 @@
-import { Pool, type PoolConfig } from "pg";
 import {
-  assessCoherence,
-  createRealitySnapshotForDecision,
   type OutcomeEvaluation,
   type RealitySnapshot,
   type SignalDecisionRecord,
+  assessCoherence,
+  createRealitySnapshotForDecision,
 } from "@signal/decision";
+import { Pool, type PoolConfig } from "pg";
 import type {
   CalibrationRecord,
   DecisionReview,
@@ -401,21 +401,24 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
   private migrated: Promise<void> | undefined;
 
   constructor(options: NeonPostgresAdapterOptions = {}) {
-    const connectionString = options.connectionString ?? process.env["DATABASE_URL"];
+    const connectionString =
+      options.connectionString ?? process.env.DATABASE_URL;
     if (!options.pool && !connectionString) {
       throw new Error("DATABASE_URL is required for NeonPostgresAdapter");
     }
 
-    this.pool = options.pool ?? new Pool({
-      connectionString,
-      ssl: resolveSsl(connectionString, options.ssl),
-      max: options.max ?? 3,
-      idleTimeoutMillis: 10_000,
-      connectionTimeoutMillis: 10_000,
-      allowExitOnIdle: true,
-    });
+    this.pool =
+      options.pool ??
+      new Pool({
+        connectionString,
+        ssl: resolveSsl(connectionString, options.ssl),
+        max: options.max ?? 3,
+        idleTimeoutMillis: 10_000,
+        connectionTimeoutMillis: 10_000,
+        allowExitOnIdle: true,
+      });
     this.autoMigrate = options.autoMigrate !== false;
-    this.source = options.source ?? process.env["SIGNAL_SOURCE_ID"] ?? "signal";
+    this.source = options.source ?? process.env.SIGNAL_SOURCE_ID ?? "signal";
   }
 
   async migrate(): Promise<void> {
@@ -426,7 +429,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     await this.pool.end();
   }
 
-  async saveRealitySnapshot(snapshot: RealitySnapshot): Promise<RealitySnapshot> {
+  async saveRealitySnapshot(
+    snapshot: RealitySnapshot,
+  ): Promise<RealitySnapshot> {
     await this.ensureReady();
     await this.pool.query(
       `
@@ -466,7 +471,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return snapshot;
   }
 
-  async getRealitySnapshot(snapshotId: string): Promise<RealitySnapshot | undefined> {
+  async getRealitySnapshot(
+    snapshotId: string,
+  ): Promise<RealitySnapshot | undefined> {
     await this.ensureReady();
     const result = await this.pool.query<RealitySnapshotRow>(
       "SELECT * FROM signal_reality_snapshots WHERE snapshot_id = $1 LIMIT 1",
@@ -475,7 +482,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return result.rows[0] ? rowToRealitySnapshot(result.rows[0]) : undefined;
   }
 
-  async listRealitySnapshots(filter: RealitySnapshotFilter = {}): Promise<RealitySnapshot[]> {
+  async listRealitySnapshots(
+    filter: RealitySnapshotFilter = {},
+  ): Promise<RealitySnapshot[]> {
     await this.ensureReady();
     const where: string[] = [];
     const params: unknown[] = [];
@@ -496,10 +505,15 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return result.rows.map(rowToRealitySnapshot);
   }
 
-  async saveDecisionRecord(record: SignalDecisionRecord): Promise<SignalDecisionRecord> {
+  async saveDecisionRecord(
+    record: SignalDecisionRecord,
+  ): Promise<SignalDecisionRecord> {
     await this.ensureReady();
     const normalized = normalizeRecord(record, this.source);
-    await this.saveRealitySnapshot(normalized.realitySnapshot ?? createRealitySnapshotForDecision(normalized));
+    await this.saveRealitySnapshot(
+      normalized.realitySnapshot ??
+        createRealitySnapshotForDecision(normalized),
+    );
     await this.pool.query(
       `
       INSERT INTO signal_decision_records (
@@ -578,7 +592,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return normalized;
   }
 
-  async getDecisionRecord(decisionId: string): Promise<SignalDecisionRecord | undefined> {
+  async getDecisionRecord(
+    decisionId: string,
+  ): Promise<SignalDecisionRecord | undefined> {
     await this.ensureReady();
     const result = await this.pool.query<DecisionRow>(
       "SELECT * FROM signal_decision_records WHERE decision_id = $1 LIMIT 1",
@@ -590,7 +606,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return snapshot ? { ...record, realitySnapshot: snapshot } : record;
   }
 
-  async listDecisionRecords(filter: DecisionRecordFilter = {}): Promise<SignalDecisionRecord[]> {
+  async listDecisionRecords(
+    filter: DecisionRecordFilter = {},
+  ): Promise<SignalDecisionRecord[]> {
     await this.ensureReady();
     const where: string[] = [];
     const params: unknown[] = [];
@@ -614,7 +632,10 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
 
   async deleteDecisionRecord(decisionId: string): Promise<void> {
     await this.ensureReady();
-    await this.pool.query("DELETE FROM signal_decision_records WHERE decision_id = $1", [decisionId]);
+    await this.pool.query(
+      "DELETE FROM signal_decision_records WHERE decision_id = $1",
+      [decisionId],
+    );
   }
 
   async recordOutcome(outcome: OutcomeEvaluation): Promise<OutcomeEvaluation> {
@@ -734,7 +755,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     }));
   }
 
-  async recordCalibration(entry: CalibrationHistoryEntry): Promise<CalibrationHistoryEntry> {
+  async recordCalibration(
+    entry: CalibrationHistoryEntry,
+  ): Promise<CalibrationHistoryEntry> {
     await this.ensureReady();
     await this.pool.query(
       `
@@ -798,7 +821,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return entry;
   }
 
-  async listCalibrationHistory(decisionId?: string): Promise<CalibrationHistoryEntry[]> {
+  async listCalibrationHistory(
+    decisionId?: string,
+  ): Promise<CalibrationHistoryEntry[]> {
     await this.ensureReady();
     const result = await this.pool.query<{
       calibration_id: string;
@@ -892,7 +917,14 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return summary;
   }
 
-  async listSummaries(filter: { appId?: string; domain?: string; source?: string; limit?: number } = {}): Promise<MemorySummary[]> {
+  async listSummaries(
+    filter: {
+      appId?: string;
+      domain?: string;
+      source?: string;
+      limit?: number;
+    } = {},
+  ): Promise<MemorySummary[]> {
     await this.ensureReady();
     const params: unknown[] = [];
     const where = filter.source ? "WHERE source = $1" : "";
@@ -974,7 +1006,12 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     addCondition(where, params, filter.source, "source =");
     addCondition(where, params, filter.decisionId, "decision_id =");
     addCondition(where, params, filter.thesisId, "thesis_id =");
-    addCondition(where, params, filter.regimeSnapshotId, "regime_snapshot_id =");
+    addCondition(
+      where,
+      params,
+      filter.regimeSnapshotId,
+      "regime_snapshot_id =",
+    );
     addCondition(where, params, filter.createdBefore, "observed_at <");
     addCondition(where, params, filter.createdAfter, "observed_at >");
     params.push(clampLimit(filter.limit));
@@ -1119,7 +1156,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return snapshot;
   }
 
-  async getRegimeSnapshot(regimeSnapshotId: string): Promise<RegimeSnapshot | undefined> {
+  async getRegimeSnapshot(
+    regimeSnapshotId: string,
+  ): Promise<RegimeSnapshot | undefined> {
     await this.ensureReady();
     const result = await this.pool.query<RegimeSnapshotRow>(
       "SELECT * FROM signal_regime_snapshots WHERE regime_snapshot_id = $1 LIMIT 1",
@@ -1128,12 +1167,19 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return result.rows[0] ? rowToRegimeSnapshot(result.rows[0]) : undefined;
   }
 
-  async listRegimeSnapshots(filter: LearningRecordFilter = {}): Promise<RegimeSnapshot[]> {
+  async listRegimeSnapshots(
+    filter: LearningRecordFilter = {},
+  ): Promise<RegimeSnapshot[]> {
     await this.ensureReady();
     const where: string[] = [];
     const params: unknown[] = [];
     addCondition(where, params, filter.source, "source =");
-    addCondition(where, params, filter.regimeSnapshotId, "regime_snapshot_id =");
+    addCondition(
+      where,
+      params,
+      filter.regimeSnapshotId,
+      "regime_snapshot_id =",
+    );
     addCondition(where, params, filter.venue, "venue =");
     addCondition(where, params, filter.createdBefore, "captured_at <");
     addCondition(where, params, filter.createdAfter, "captured_at >");
@@ -1183,7 +1229,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return review;
   }
 
-  async listDecisionReviews(filter: LearningRecordFilter = {}): Promise<DecisionReview[]> {
+  async listDecisionReviews(
+    filter: LearningRecordFilter = {},
+  ): Promise<DecisionReview[]> {
     await this.ensureReady();
     const where: string[] = [];
     const params: unknown[] = [];
@@ -1243,14 +1291,21 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return record;
   }
 
-  async listLearningRecords(filter: LearningRecordFilter = {}): Promise<LearningRecord[]> {
+  async listLearningRecords(
+    filter: LearningRecordFilter = {},
+  ): Promise<LearningRecord[]> {
     await this.ensureReady();
     const where: string[] = [];
     const params: unknown[] = [];
     addCondition(where, params, filter.source, "source =");
     addCondition(where, params, filter.decisionId, "decision_id =");
     addCondition(where, params, filter.thesisId, "thesis_id =");
-    addCondition(where, params, filter.regimeSnapshotId, "regime_snapshot_id =");
+    addCondition(
+      where,
+      params,
+      filter.regimeSnapshotId,
+      "regime_snapshot_id =",
+    );
     addCondition(where, params, filter.createdBefore, "created_at <");
     addCondition(where, params, filter.createdAfter, "created_at >");
     params.push(clampLimit(filter.limit));
@@ -1267,7 +1322,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return result.rows.map((row) => row.learning);
   }
 
-  async saveCalibrationRecord(record: CalibrationRecord): Promise<CalibrationRecord> {
+  async saveCalibrationRecord(
+    record: CalibrationRecord,
+  ): Promise<CalibrationRecord> {
     await this.ensureReady();
     await this.pool.query(
       `
@@ -1305,7 +1362,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return record;
   }
 
-  async listCalibrationRecords(filter: LearningRecordFilter = {}): Promise<CalibrationRecord[]> {
+  async listCalibrationRecords(
+    filter: LearningRecordFilter = {},
+  ): Promise<CalibrationRecord[]> {
     await this.ensureReady();
     const where: string[] = [];
     const params: unknown[] = [];
@@ -1327,7 +1386,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return result.rows.map((row) => row.calibration);
   }
 
-  async saveProcessQualityRecord(record: ProcessQualityRecord): Promise<ProcessQualityRecord> {
+  async saveProcessQualityRecord(
+    record: ProcessQualityRecord,
+  ): Promise<ProcessQualityRecord> {
     await this.ensureReady();
     await this.pool.query(
       `
@@ -1365,7 +1426,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
     return record;
   }
 
-  async listProcessQualityRecords(filter: LearningRecordFilter = {}): Promise<ProcessQualityRecord[]> {
+  async listProcessQualityRecords(
+    filter: LearningRecordFilter = {},
+  ): Promise<ProcessQualityRecord[]> {
     await this.ensureReady();
     const where: string[] = [];
     const params: unknown[] = [];
@@ -1439,7 +1502,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
       policy: RetentionJobRecord["policy"];
       result: unknown;
       error: string | null;
-    }>("SELECT * FROM signal_retention_jobs WHERE job_id = $1 LIMIT 1", [jobId]);
+    }>("SELECT * FROM signal_retention_jobs WHERE job_id = $1 LIMIT 1", [
+      jobId,
+    ]);
     const row = existing.rows[0];
     if (!row) return undefined;
     const merged: RetentionJobRecord = {
@@ -1447,7 +1512,9 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
       jobType: patch.jobType ?? row.job_type,
       status: patch.status ?? row.status,
       startedAt: patch.startedAt ?? toIso(row.started_at),
-      completedAt: patch.completedAt ?? (row.completed_at ? toIso(row.completed_at) : undefined),
+      completedAt:
+        patch.completedAt ??
+        (row.completed_at ? toIso(row.completed_at) : undefined),
       policy: patch.policy ?? row.policy,
       result: patch.result ?? row.result,
       error: patch.error ?? row.error ?? undefined,
@@ -1463,14 +1530,19 @@ export class NeonPostgresAdapter implements DecisionMemoryStore {
   }
 }
 
-function normalizeRecord(record: SignalDecisionRecord, source: string): SignalDecisionRecord {
-  const snapshot = record.realitySnapshot ?? createRealitySnapshotForDecision({
-    decisionId: record.decisionId,
-    source: record.source || source,
-    createdAt: record.createdAt,
-    observation: record.observation,
-    realitySnapshotId: record.realitySnapshotId,
-  });
+function normalizeRecord(
+  record: SignalDecisionRecord,
+  source: string,
+): SignalDecisionRecord {
+  const snapshot =
+    record.realitySnapshot ??
+    createRealitySnapshotForDecision({
+      decisionId: record.decisionId,
+      source: record.source || source,
+      createdAt: record.createdAt,
+      observation: record.observation,
+      realitySnapshotId: record.realitySnapshotId,
+    });
 
   return {
     ...record,
@@ -1492,14 +1564,30 @@ function rowToDecision(row: DecisionRow): SignalDecisionRecord {
     ...(row.judgment == null ? {} : { judgment: row.judgment }),
     ...(row.purpose == null ? {} : { purpose: row.purpose }),
     ...(row.need == null ? {} : { need: row.need }),
-    coherence: row.coherence == null ? assessCoherence({}) : row.coherence as SignalDecisionRecord["coherence"],
-    ...(row.prediction == null ? {} : { prediction: row.prediction as SignalDecisionRecord["prediction"] }),
-    ...(row.simulation == null ? {} : { simulation: row.simulation as SignalDecisionRecord["simulation"] }),
-    ...(row.wisdom == null ? {} : { wisdom: row.wisdom as SignalDecisionRecord["wisdom"] }),
+    coherence:
+      row.coherence == null
+        ? assessCoherence({})
+        : (row.coherence as SignalDecisionRecord["coherence"]),
+    ...(row.prediction == null
+      ? {}
+      : { prediction: row.prediction as SignalDecisionRecord["prediction"] }),
+    ...(row.simulation == null
+      ? {}
+      : { simulation: row.simulation as SignalDecisionRecord["simulation"] }),
+    ...(row.wisdom == null
+      ? {}
+      : { wisdom: row.wisdom as SignalDecisionRecord["wisdom"] }),
     ...(row.agency == null ? {} : { agency: row.agency }),
     ...(row.action == null ? {} : { action: row.action }),
-    ...(row.outcome == null ? {} : { outcome: row.outcome as SignalDecisionRecord["outcome"] }),
-    ...(row.accountability == null ? {} : { accountability: row.accountability as SignalDecisionRecord["accountability"] }),
+    ...(row.outcome == null
+      ? {}
+      : { outcome: row.outcome as SignalDecisionRecord["outcome"] }),
+    ...(row.accountability == null
+      ? {}
+      : {
+          accountability:
+            row.accountability as SignalDecisionRecord["accountability"],
+        }),
     humanSummary: row.human_summary,
     retentionTier: normalizeRetentionTier(row.retention_tier),
   };
@@ -1545,24 +1633,41 @@ function rowToRegimeSnapshot(row: RegimeSnapshotRow): RegimeSnapshot {
     trust: Number(row.snapshot.trust ?? row.trust),
     confidence: Number(row.snapshot.confidence ?? row.confidence),
     readiness: Number(row.snapshot.readiness ?? row.readiness),
-    opportunityDensity: Number(row.snapshot.opportunityDensity ?? row.opportunity_density),
-    finalRecommendation: row.snapshot.finalRecommendation ?? row.final_recommendation,
-    ...(row.snapshot.eventualOutcome ?? row.eventual_outcome
-      ? { eventualOutcome: row.snapshot.eventualOutcome ?? row.eventual_outcome ?? undefined }
+    opportunityDensity: Number(
+      row.snapshot.opportunityDensity ?? row.opportunity_density,
+    ),
+    finalRecommendation:
+      row.snapshot.finalRecommendation ?? row.final_recommendation,
+    ...((row.snapshot.eventualOutcome ?? row.eventual_outcome)
+      ? {
+          eventualOutcome:
+            row.snapshot.eventualOutcome ?? row.eventual_outcome ?? undefined,
+        }
       : {}),
   };
 }
 
-function resolveSsl(connectionString: string | undefined, ssl: NeonPostgresAdapterOptions["ssl"]): PoolConfig["ssl"] | undefined {
+function resolveSsl(
+  connectionString: string | undefined,
+  ssl: NeonPostgresAdapterOptions["ssl"],
+): PoolConfig["ssl"] | undefined {
   if (ssl !== undefined) return ssl;
   if (!connectionString) return undefined;
-  if (/sslmode=require/i.test(connectionString) || /\.neon\.tech\//i.test(connectionString)) {
+  if (
+    /sslmode=require/i.test(connectionString) ||
+    /\.neon\.tech\//i.test(connectionString)
+  ) {
     return { rejectUnauthorized: false };
   }
   return undefined;
 }
 
-function addCondition(where: string[], params: unknown[], value: unknown, expression: string): void {
+function addCondition(
+  where: string[],
+  params: unknown[],
+  value: unknown,
+  expression: string,
+): void {
   if (value === undefined || value === "") return;
   params.push(value);
   where.push(`${expression} $${params.length}`);
@@ -1579,5 +1684,7 @@ function jsonb(value: unknown): string {
 }
 
 function toIso(value: string | Date): string {
-  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+  return value instanceof Date
+    ? value.toISOString()
+    : new Date(value).toISOString();
 }

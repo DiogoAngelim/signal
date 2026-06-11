@@ -4,14 +4,16 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import {
+  type BinanceExecutionDecision,
   BinanceRateLimitError,
+  type BinanceSymbolInfo,
   CircuitBreaker,
   ExecutionMetrics,
   ExecutionStateStore,
   PositionReconciler,
   RateLimiter,
-  allocateProportionalNotional,
   allSymbolsAllowed,
+  allocateProportionalNotional,
   canonicalQuery,
   createBinanceExecutionModule,
   createClientOrderId,
@@ -21,8 +23,6 @@ import {
   normalizeQuantity,
   signQuery,
   validateOrderAgainstExchangeFilters,
-  type BinanceExecutionDecision,
-  type BinanceSymbolInfo,
 } from "../index";
 
 const symbolInfo: BinanceSymbolInfo = {
@@ -31,9 +31,24 @@ const symbolInfo: BinanceSymbolInfo = {
   baseAsset: "BTC",
   quoteAsset: "USDT",
   filters: [
-    { filterType: "LOT_SIZE", minQty: "0.001", maxQty: "100", stepSize: "0.001" },
-    { filterType: "MARKET_LOT_SIZE", minQty: "0.001", maxQty: "100", stepSize: "0.001" },
-    { filterType: "PRICE_FILTER", minPrice: "0.01", maxPrice: "1000000", tickSize: "0.01" },
+    {
+      filterType: "LOT_SIZE",
+      minQty: "0.001",
+      maxQty: "100",
+      stepSize: "0.001",
+    },
+    {
+      filterType: "MARKET_LOT_SIZE",
+      minQty: "0.001",
+      maxQty: "100",
+      stepSize: "0.001",
+    },
+    {
+      filterType: "PRICE_FILTER",
+      minPrice: "0.01",
+      maxPrice: "1000000",
+      tickSize: "0.01",
+    },
     { filterType: "MIN_NOTIONAL", minNotional: "10" },
     { filterType: "NOTIONAL", minNotional: "10", maxNotional: "100000" },
     { filterType: "MAX_NUM_ORDERS", maxNumOrders: 2 },
@@ -42,11 +57,15 @@ const symbolInfo: BinanceSymbolInfo = {
 };
 
 function stateFile(name: string) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), `binance-execution-${name}-`));
+  const dir = fs.mkdtempSync(
+    path.join(os.tmpdir(), `binance-execution-${name}-`),
+  );
   return path.join(dir, "state.json");
 }
 
-function decision(overrides: Partial<BinanceExecutionDecision> & Record<string, unknown> = {}): BinanceExecutionDecision {
+function decision(
+  overrides: Partial<BinanceExecutionDecision> & Record<string, unknown> = {},
+): BinanceExecutionDecision {
   return {
     id: "decision-1",
     symbol: "BTCUSDT",
@@ -61,7 +80,12 @@ function decision(overrides: Partial<BinanceExecutionDecision> & Record<string, 
 }
 
 test("signer creates canonical signed payloads and idempotent client order ids", () => {
-  const query = canonicalQuery({ symbol: "BTCUSDT", side: "BUY", timestamp: 10, ignored: undefined });
+  const query = canonicalQuery({
+    symbol: "BTCUSDT",
+    side: "BUY",
+    timestamp: 10,
+    ignored: undefined,
+  });
   const signature = signQuery(query, "secret");
   const clientOrderId = createClientOrderId({
     decisionId: "decision-1",
@@ -71,68 +95,95 @@ test("signer creates canonical signed payloads and idempotent client order ids",
   });
 
   assert.equal(query, "side=BUY&symbol=BTCUSDT&timestamp=10");
-  assert.equal(signature, "91840934ce0b3ad73dfa100fcb753aec5d66350692c25dac301400d0e871ab8a");
-  assert.equal(clientOrderId, createClientOrderId({
-    decisionId: "decision-1",
-    strategyId: "strategy",
-    symbol: "BTCUSDT",
-    action: "BUY",
-  }));
+  assert.equal(
+    signature,
+    "91840934ce0b3ad73dfa100fcb753aec5d66350692c25dac301400d0e871ab8a",
+  );
+  assert.equal(
+    clientOrderId,
+    createClientOrderId({
+      decisionId: "decision-1",
+      strategyId: "strategy",
+      symbol: "BTCUSDT",
+      action: "BUY",
+    }),
+  );
   assert.ok(clientOrderId.length <= 36);
 });
 
 test("config uses writable serverless state path on Vercel", () => {
-  const config = loadBinanceExecutionConfig({}, {
-    ...process.env,
-    VERCEL: "1",
-    BINANCE_MODE: "dry_run",
-    BINANCE_ALLOWED_SYMBOLS: "BTCUSDT",
-  });
+  const config = loadBinanceExecutionConfig(
+    {},
+    {
+      ...process.env,
+      VERCEL: "1",
+      BINANCE_MODE: "dry_run",
+      BINANCE_ALLOWED_SYMBOLS: "BTCUSDT",
+    },
+  );
 
-  assert.equal(config.stateFile, path.join(os.tmpdir(), "binance-execution-state.json"));
+  assert.equal(
+    config.stateFile,
+    path.join(os.tmpdir(), "binance-execution-state.json"),
+  );
 });
 
 test("config requires explicit env approvals for live mode", () => {
-  const blocked = loadBinanceExecutionConfig({}, {
-    ...process.env,
-    BINANCE_MODE: "live",
-    BINANCE_API_KEY: "key",
-    BINANCE_API_SECRET: "secret",
-    BINANCE_ALLOWED_SYMBOLS: "BTCUSDT",
-    BINANCE_LIVE_TRADING_ENABLED: "true",
-    BINANCE_CONFIRM_LIVE_TRADING: "true",
-    BINANCE_RISK_GUARD_LIVE_TRADING_APPROVED: "false",
-  });
-  const approved = loadBinanceExecutionConfig({}, {
-    ...process.env,
-    BINANCE_MODE: "live",
-    BINANCE_API_KEY: "key",
-    BINANCE_API_SECRET: "secret",
-    BINANCE_ALLOWED_SYMBOLS: "BTCUSDT",
-    BINANCE_LIVE_TRADING_ENABLED: "true",
-    BINANCE_CONFIRM_LIVE_TRADING: "true",
-    BINANCE_RISK_GUARD_LIVE_TRADING_APPROVED: "true",
-  });
+  const blocked = loadBinanceExecutionConfig(
+    {},
+    {
+      ...process.env,
+      BINANCE_MODE: "live",
+      BINANCE_API_KEY: "key",
+      BINANCE_API_SECRET: "secret",
+      BINANCE_ALLOWED_SYMBOLS: "BTCUSDT",
+      BINANCE_LIVE_TRADING_ENABLED: "true",
+      BINANCE_CONFIRM_LIVE_TRADING: "true",
+      BINANCE_RISK_GUARD_LIVE_TRADING_APPROVED: "false",
+    },
+  );
+  const approved = loadBinanceExecutionConfig(
+    {},
+    {
+      ...process.env,
+      BINANCE_MODE: "live",
+      BINANCE_API_KEY: "key",
+      BINANCE_API_SECRET: "secret",
+      BINANCE_ALLOWED_SYMBOLS: "BTCUSDT",
+      BINANCE_LIVE_TRADING_ENABLED: "true",
+      BINANCE_CONFIRM_LIVE_TRADING: "true",
+      BINANCE_RISK_GUARD_LIVE_TRADING_APPROVED: "true",
+    },
+  );
 
-  assert.equal(blocked.validationErrors.includes("live_trading_not_approved"), true);
-  assert.equal(approved.validationErrors.includes("live_trading_not_approved"), false);
+  assert.equal(
+    blocked.validationErrors.includes("live_trading_not_approved"),
+    true,
+  );
+  assert.equal(
+    approved.validationErrors.includes("live_trading_not_approved"),
+    false,
+  );
 });
 
 test("config supports system-managed execution caps", () => {
-  const config = loadBinanceExecutionConfig({}, {
-    ...process.env,
-    BINANCE_MODE: "live",
-    BINANCE_API_KEY: "key",
-    BINANCE_API_SECRET: "secret",
-    BINANCE_ALLOWED_SYMBOLS: "*",
-    BINANCE_LIVE_TRADING_ENABLED: "true",
-    BINANCE_CONFIRM_LIVE_TRADING: "true",
-    BINANCE_RISK_GUARD_LIVE_TRADING_APPROVED: "true",
-    BINANCE_MAX_NOTIONAL_PER_ORDER: "system",
-    BINANCE_MAX_DAILY_NOTIONAL: "system",
-    BINANCE_MAX_OPEN_ORDERS: "system",
-    BINANCE_ALLOCATION_MODE: "system_proportional",
-  });
+  const config = loadBinanceExecutionConfig(
+    {},
+    {
+      ...process.env,
+      BINANCE_MODE: "live",
+      BINANCE_API_KEY: "key",
+      BINANCE_API_SECRET: "secret",
+      BINANCE_ALLOWED_SYMBOLS: "*",
+      BINANCE_LIVE_TRADING_ENABLED: "true",
+      BINANCE_CONFIRM_LIVE_TRADING: "true",
+      BINANCE_RISK_GUARD_LIVE_TRADING_APPROVED: "true",
+      BINANCE_MAX_NOTIONAL_PER_ORDER: "system",
+      BINANCE_MAX_DAILY_NOTIONAL: "system",
+      BINANCE_MAX_OPEN_ORDERS: "system",
+      BINANCE_ALLOCATION_MODE: "system_proportional",
+    },
+  );
 
   assert.equal(config.validationErrors.length, 0);
   assert.equal(config.maxNotionalPerOrder, Number.POSITIVE_INFINITY);
@@ -142,13 +193,16 @@ test("config supports system-managed execution caps", () => {
 });
 
 test("all-symbol mode delegates symbol filtering to exchange info", async () => {
-  const config = loadBinanceExecutionConfig({}, {
-    ...process.env,
-    BINANCE_MODE: "testnet",
-    BINANCE_API_KEY: "key",
-    BINANCE_API_SECRET: "secret",
-    BINANCE_ALLOWED_SYMBOLS: "*",
-  });
+  const config = loadBinanceExecutionConfig(
+    {},
+    {
+      ...process.env,
+      BINANCE_MODE: "testnet",
+      BINANCE_API_KEY: "key",
+      BINANCE_API_SECRET: "secret",
+      BINANCE_ALLOWED_SYMBOLS: "*",
+    },
+  );
   const module = createBinanceExecutionModule({
     mode: "dry_run",
     stateFile: stateFile("all-symbols"),
@@ -159,12 +213,14 @@ test("all-symbol mode delegates symbol filtering to exchange info", async () => 
     minConfidence: 0.5,
     minTrust: 0.5,
   });
-  const result = await module.executeDecision(decision({
-    id: "doge-all-symbols",
-    symbol: "DOGEUSDT",
-    appSizePct: 0.5,
-    price: 0.25,
-  }));
+  const result = await module.executeDecision(
+    decision({
+      id: "doge-all-symbols",
+      symbol: "DOGEUSDT",
+      appSizePct: 0.5,
+      price: 0.25,
+    }),
+  );
 
   assert.deepEqual(config.allowedSymbols, ["*"]);
   assert.equal(allSymbolsAllowed(config.allowedSymbols), true);
@@ -214,10 +270,16 @@ test("sizing adapter preserves normalized exposure semantics", () => {
   });
 
   assert.equal(single[0].notional, 10);
-  assert.deepEqual(multi.map((allocation) => allocation.notional), [10, 5, 5]);
+  assert.deepEqual(
+    multi.map((allocation) => allocation.notional),
+    [10, 5, 5],
+  );
   assert.equal(tiny[0].notional, 2);
   assert.equal(tiny[0].reasons.includes("below_min_notional"), true);
-  assert.deepEqual(system.map((allocation) => allocation.notional), [0, 10, 10]);
+  assert.deepEqual(
+    system.map((allocation) => allocation.notional),
+    [0, 10, 10],
+  );
   assert.equal(system[0].rejected, false);
 });
 
@@ -225,46 +287,61 @@ test("exchange filter normalization rejects invalid orders before routing", () =
   assert.equal(normalizeQuantity(0.123456, symbolInfo), 0.123);
   assert.equal(normalizePrice(100.019, symbolInfo), 100.01);
 
-  const valid = validateOrderAgainstExchangeFilters({
-    decisionId: "d1",
-    clientOrderId: "c1",
-    symbol: "BTCUSDT",
-    side: "BUY",
-    type: "LIMIT_MAKER",
-    quantity: 0.123456,
-    price: 100.019,
-    notional: 12.3,
-  }, symbolInfo);
-  const invalid = validateOrderAgainstExchangeFilters({
-    decisionId: "d2",
-    clientOrderId: "c2",
-    symbol: "BTCUSDT",
-    side: "BUY",
-    type: "LIMIT_MAKER",
-    quantity: 0.0005,
-    price: 100,
-    notional: 0.05,
-  }, symbolInfo, { openOrderCount: 2, currentPositionQty: 10 });
-  const invalidPosition = validateOrderAgainstExchangeFilters({
-    decisionId: "d3",
-    clientOrderId: "c3",
-    symbol: "BTCUSDT",
-    side: "BUY",
-    type: "LIMIT_MAKER",
-    quantity: 0.6,
-    price: 100,
-    notional: 60,
-  }, symbolInfo, { currentPositionQty: 9.5 });
-  const invalidSell = validateOrderAgainstExchangeFilters({
-    decisionId: "d4",
-    clientOrderId: "c4",
-    symbol: "BTCUSDT",
-    side: "SELL",
-    type: "LIMIT_MAKER",
-    quantity: 2,
-    price: 100,
-    notional: 200,
-  }, symbolInfo, { currentPositionQty: 1 });
+  const valid = validateOrderAgainstExchangeFilters(
+    {
+      decisionId: "d1",
+      clientOrderId: "c1",
+      symbol: "BTCUSDT",
+      side: "BUY",
+      type: "LIMIT_MAKER",
+      quantity: 0.123456,
+      price: 100.019,
+      notional: 12.3,
+    },
+    symbolInfo,
+  );
+  const invalid = validateOrderAgainstExchangeFilters(
+    {
+      decisionId: "d2",
+      clientOrderId: "c2",
+      symbol: "BTCUSDT",
+      side: "BUY",
+      type: "LIMIT_MAKER",
+      quantity: 0.0005,
+      price: 100,
+      notional: 0.05,
+    },
+    symbolInfo,
+    { openOrderCount: 2, currentPositionQty: 10 },
+  );
+  const invalidPosition = validateOrderAgainstExchangeFilters(
+    {
+      decisionId: "d3",
+      clientOrderId: "c3",
+      symbol: "BTCUSDT",
+      side: "BUY",
+      type: "LIMIT_MAKER",
+      quantity: 0.6,
+      price: 100,
+      notional: 60,
+    },
+    symbolInfo,
+    { currentPositionQty: 9.5 },
+  );
+  const invalidSell = validateOrderAgainstExchangeFilters(
+    {
+      decisionId: "d4",
+      clientOrderId: "c4",
+      symbol: "BTCUSDT",
+      side: "SELL",
+      type: "LIMIT_MAKER",
+      quantity: 2,
+      price: 100,
+      notional: 200,
+    },
+    symbolInfo,
+    { currentPositionQty: 1 },
+  );
 
   assert.equal(valid.ok, true);
   assert.equal(invalid.ok, false);
@@ -308,18 +385,28 @@ test("dry_run execution covers BUY, HOLD, stale, duplicate, kill switch, and min
     staleSyncMs: 60_000,
   });
 
-  const buy = await module.executeDecision(decision({ id: "buy-1", appSizePct: 0.5, price: 100 }));
-  const hold = await module.executeDecision(decision({ id: "hold-1", action: "HOLD", appSizePct: 1, price: 100 }));
-  const duplicate = await module.executeDecision(decision({ id: "buy-1", appSizePct: 0.5, price: 100 }));
-  const stale = await module.executeDecision(decision({
-    id: "stale-1",
-    appSizePct: 0.5,
-    price: 100,
-    timestamp: new Date(Date.now() - 600_000).toISOString(),
-  }));
+  const buy = await module.executeDecision(
+    decision({ id: "buy-1", appSizePct: 0.5, price: 100 }),
+  );
+  const hold = await module.executeDecision(
+    decision({ id: "hold-1", action: "HOLD", appSizePct: 1, price: 100 }),
+  );
+  const duplicate = await module.executeDecision(
+    decision({ id: "buy-1", appSizePct: 0.5, price: 100 }),
+  );
+  const stale = await module.executeDecision(
+    decision({
+      id: "stale-1",
+      appSizePct: 0.5,
+      price: 100,
+      timestamp: new Date(Date.now() - 600_000).toISOString(),
+    }),
+  );
 
   module.enableKillSwitch("test");
-  const killed = await module.executeDecision(decision({ id: "killed-1", appSizePct: 0.5, price: 100 }));
+  const killed = await module.executeDecision(
+    decision({ id: "killed-1", appSizePct: 0.5, price: 100 }),
+  );
   module.disableKillSwitch("test-complete");
 
   const tiny = await createBinanceExecutionModule({
@@ -355,9 +442,13 @@ test("dry_run EXIT uses actual reconciled position and cancel releases reservati
     minTrust: 0.5,
   });
 
-  const buy = await module.executeDecision(decision({ id: "exit-buy", appSizePct: 1, price: 100 }));
+  const buy = await module.executeDecision(
+    decision({ id: "exit-buy", appSizePct: 1, price: 100 }),
+  );
   await module.syncAccountState();
-  const exit = await module.executeDecision(decision({ id: "exit-sell", action: "EXIT", appSizePct: 1, price: 100 }));
+  const exit = await module.executeDecision(
+    decision({ id: "exit-sell", action: "EXIT", appSizePct: 1, price: 100 }),
+  );
   const cancelled = await module.cancelOrder(buy.clientOrderId ?? "");
 
   assert.equal(buy.status, "filled");
@@ -378,15 +469,19 @@ test("dry_run EXIT can be capped to a requested filled buy quantity", async () =
     minTrust: 0.5,
   });
 
-  const buy = await module.executeDecision(decision({ id: "exit-quantity-buy", appSizePct: 1, price: 100 }));
+  const buy = await module.executeDecision(
+    decision({ id: "exit-quantity-buy", appSizePct: 1, price: 100 }),
+  );
   await module.syncAccountState();
-  const exit = await module.executeDecision(decision({
-    id: "exit-quantity-sell",
-    action: "EXIT",
-    appSizePct: 1,
-    price: 100,
-    exitQuantity: 0.1,
-  }));
+  const exit = await module.executeDecision(
+    decision({
+      id: "exit-quantity-sell",
+      action: "EXIT",
+      appSizePct: 1,
+      price: 100,
+      exitQuantity: 0.1,
+    }),
+  );
 
   assert.equal(buy.status, "filled");
   assert.equal(exit.status, "filled");
@@ -449,7 +544,8 @@ test("rate limiter retries 429s and opens kill path on 418 bans", async () => {
   });
   const result = await limiter.schedule(async () => {
     attempts += 1;
-    if (attempts === 1) throw new BinanceRateLimitError("slow down", { retryAfterMs: 0 });
+    if (attempts === 1)
+      throw new BinanceRateLimitError("slow down", { retryAfterMs: 0 });
     return "ok";
   });
 
@@ -462,9 +558,10 @@ test("rate limiter retries 429s and opens kill path on 418 bans", async () => {
   });
 
   await assert.rejects(
-    () => banLimiter.schedule(async () => {
-      throw new BinanceRateLimitError("banned", { banned: true });
-    }),
+    () =>
+      banLimiter.schedule(async () => {
+        throw new BinanceRateLimitError("banned", { banned: true });
+      }),
     /banned/,
   );
 
@@ -492,7 +589,8 @@ test("testnet API ban activates kill switch and fails closed", async () => {
     apiSecret: "secret",
     stateFile: stateFile("ban"),
     allowedSymbols: ["BTCUSDT"],
-    fetch: async () => new Response(JSON.stringify({ msg: "ip banned" }), { status: 418 }),
+    fetch: async () =>
+      new Response(JSON.stringify({ msg: "ip banned" }), { status: 418 }),
   });
 
   await module.syncAccountState();

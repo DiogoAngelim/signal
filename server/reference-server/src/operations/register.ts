@@ -1,8 +1,8 @@
-import type { SignalRuntime, SignalSchema } from "@signal/runtime";
+import type { SignalRuntime, SignalSchema } from "@signal/sdk-node";
 import {
+  type HighRiskPaymentStore,
   createHighRiskPaymentStore,
   registerHighRiskPaymentFlow,
-  type HighRiskPaymentStore,
 } from "./high-risk-payment";
 
 type Note = {
@@ -92,25 +92,25 @@ function optionalString(value: unknown): string | undefined {
 
 const noteGetInputSchema = schema<NoteGetInput>((value) => {
   if (!isRecord(value)) throw new Error("note.get.v1 input must be an object");
-  return { noteId: requireString(value["noteId"], "noteId") };
+  return { noteId: requireString(value.noteId, "noteId") };
 });
 
 const postGetInputSchema = schema<PostGetInput>((value) => {
   if (!isRecord(value)) throw new Error("post.get.v1 input must be an object");
-  return { postId: requireString(value["postId"], "postId") };
+  return { postId: requireString(value.postId, "postId") };
 });
 
 const postPublishInputSchema = schema<PostPublishInput>((value) => {
   if (!isRecord(value))
     throw new Error("post.publish.v1 input must be an object");
   return {
-    ...(optionalString(value["postId"])
-      ? { postId: optionalString(value["postId"]) }
+    ...(optionalString(value.postId)
+      ? { postId: optionalString(value.postId) }
       : {}),
-    title: requireString(value["title"], "title"),
-    body: optionalString(value["body"]) ?? "",
-    ...(optionalString(value["publishedAt"])
-      ? { publishedAt: optionalString(value["publishedAt"]) }
+    title: requireString(value.title, "title"),
+    body: optionalString(value.body) ?? "",
+    ...(optionalString(value.publishedAt)
+      ? { publishedAt: optionalString(value.publishedAt) }
       : {}),
   };
 });
@@ -119,10 +119,10 @@ const postEventSchema = schema<Post>((value) => {
   if (!isRecord(value))
     throw new Error("post.published.v1 payload must be an object");
   return {
-    postId: requireString(value["postId"], "postId"),
-    title: requireString(value["title"], "title"),
-    body: typeof value["body"] === "string" ? value["body"] : "",
-    publishedAt: requireString(value["publishedAt"], "publishedAt"),
+    postId: requireString(value.postId, "postId"),
+    title: requireString(value.title, "title"),
+    body: typeof value.body === "string" ? value.body : "",
+    publishedAt: requireString(value.publishedAt, "publishedAt"),
   };
 });
 

@@ -3,11 +3,11 @@ import {
   DEFAULT_GUIDED_STEP_ID,
   GUIDED_STEPS,
   GUIDED_STEP_STATUS_LABELS,
+  type GuidedStepId,
+  type GuidedStepStatus,
   createGuidedStepStatuses,
   getGuidedStepById,
   getGuidedStepNumber,
-  type GuidedStepId,
-  type GuidedStepStatus,
 } from "@/lib/guided-workflow";
 import {
   Activity,
@@ -32,16 +32,19 @@ import {
 } from "lucide-react";
 import { Component, useMemo, useState } from "react";
 import {
-  FocusCard,
   ConfidenceRange,
+  FocusCard,
   GoalCard,
+  type GuideFact,
   GuideLayout,
+  type GuideTone,
   MarketContextCard,
   OptionCard,
   PlanReviewCard,
   ProgressCard,
   RealityCheckCard,
   RecommendationCard,
+  type ResourcePriorityOption,
   StepRail,
   UnknownsCard,
   UserControlCard,
@@ -49,9 +52,6 @@ import {
   defaultGuideSteps,
   processProgress,
   recommendedNextStep,
-  type GuideFact,
-  type ResourcePriorityOption,
-  type GuideTone,
 } from "./MarketDecisionGuide";
 
 export type DecisionTone = "good" | "warn" | "bad" | "neutral";
@@ -339,7 +339,9 @@ function commitmentPlan(input: {
     allocationPct > 0 &&
     input.exposureText !== "No new allocation";
   const committedAmount = tradable
-    ? contribution * (allocationPct / 100) * goalCommitmentFactor(input.goal, input.kind)
+    ? contribution *
+      (allocationPct / 100) *
+      goalCommitmentFactor(input.goal, input.kind)
     : 0;
 
   return {
@@ -400,7 +402,11 @@ function cleanSentence(value: string) {
 function displayExposure(value: string) {
   const normalized = String(value ?? "").trim();
   if (!normalized) return "No new allocation";
-  if (/^(wait|none|no exposure|no new exposure|no allocation|no new allocation|0%|0\.0%)$/i.test(normalized)) {
+  if (
+    /^(wait|none|no exposure|no new exposure|no allocation|no new allocation|0%|0\.0%)$/i.test(
+      normalized,
+    )
+  ) {
     return "No new allocation";
   }
   return normalized;
@@ -413,14 +419,18 @@ function stewardshipActionLabel(
 ) {
   const normalizedAction = String(action ?? "").toLowerCase();
   const normalizedExposure = String(exposureText ?? "");
-  const noExposure = /no new exposure|no exposure|no new allocation|no allocation|0%|flat|none/i.test(
-    normalizedExposure,
-  );
+  const noExposure =
+    /no new exposure|no exposure|no new allocation|no allocation|0%|flat|none/i.test(
+      normalizedExposure,
+    );
 
   if (riskPct != null && Number.isFinite(riskPct) && riskPct >= 72) {
     return "Protect";
   }
-  if (noExposure || /wait|hold|watch|review|track|observe/.test(normalizedAction)) {
+  if (
+    noExposure ||
+    /wait|hold|watch|review|track|observe/.test(normalizedAction)
+  ) {
     return "Observe";
   }
   if (/sell|exit|reduce|avoid/.test(normalizedAction)) {
@@ -552,15 +562,18 @@ function metricGuidance(metric: DecisionRawMetric) {
         return "Current conditions are improving, but confirmation is incomplete.";
       return "Current conditions are weak. Protect capital.";
     case "Opportunity Density":
-      if (number == null) return "The number of resilience options is still loading.";
+      if (number == null)
+        return "The number of resilience options is still loading.";
       if (number >= 65)
         return "Enough options are appearing to improve resilience without forcing urgency.";
       if (number >= 35) return "Resilience options are limited. Be selective.";
       return "Few options strengthen the resource enough. Wait.";
     case "Risk Pressure":
       if (number == null) return "Current conditions are still loading.";
-      if (number >= 70) return "Threat pressure is elevated. Keep allocation defensive.";
-      if (number >= 45) return "Threat pressure is manageable only with disciplined size.";
+      if (number >= 70)
+        return "Threat pressure is elevated. Keep allocation defensive.";
+      if (number >= 45)
+        return "Threat pressure is manageable only with disciplined size.";
       return "Threat pressure looks contained for the suggested action.";
     case "Readiness":
       if (number == null) return "The decision is still forming.";
@@ -808,7 +821,9 @@ function MarketChoiceGrid({
       data-testid="market-choice-grid"
       className={cx(
         "grid min-w-0 gap-3",
-        compact ? "sm:grid-cols-2 xl:grid-cols-3" : "sm:grid-cols-2 lg:grid-cols-3",
+        compact
+          ? "sm:grid-cols-2 xl:grid-cols-3"
+          : "sm:grid-cols-2 lg:grid-cols-3",
       )}
     >
       {MARKET_ENTRY_OPTIONS.map((entry) => {
@@ -1140,7 +1155,8 @@ function BlockingStateScreen({
                         Capital allocation venue
                       </div>
                       <h2 className="break-words text-xl font-semibold leading-tight text-zinc-950">
-                        Where should Signal translate stewardship into an investment decision?
+                        Where should Signal translate stewardship into an
+                        investment decision?
                       </h2>
                     </div>
                     <MarketChoiceGrid
@@ -1174,7 +1190,7 @@ function BlockingStateScreen({
               statuses={stepStatuses}
             />
           }
-          />
+        />
       </main>
     );
   }
@@ -1320,7 +1336,11 @@ function CommitmentCard({
     opportunity,
   });
   const resultTone: DecisionTone =
-    plan.committedAmount > 0 ? "good" : plan.contribution > 0 ? "warn" : "neutral";
+    plan.committedAmount > 0
+      ? "good"
+      : plan.contribution > 0
+        ? "warn"
+        : "neutral";
 
   return (
     <section
@@ -1396,13 +1416,18 @@ function CommitmentCard({
 
       <div className="grid gap-2 text-sm leading-6 text-zinc-600 sm:grid-cols-3">
         <span className="min-w-0 break-words">
-          Stewardship focus: <strong className="text-zinc-900">{investorCopy(goal)}</strong>
+          Stewardship focus:{" "}
+          <strong className="text-zinc-900">{investorCopy(goal)}</strong>
         </span>
         <span className="min-w-0 break-words">
-          Resilience guardrail: <strong className="text-zinc-900">{exposureText}</strong>
+          Resilience guardrail:{" "}
+          <strong className="text-zinc-900">{exposureText}</strong>
         </span>
         <span className="min-w-0 break-words">
-          Instrument: <strong className="text-zinc-900">{opportunity?.ticker ?? "Pending"}</strong>
+          Instrument:{" "}
+          <strong className="text-zinc-900">
+            {opportunity?.ticker ?? "Pending"}
+          </strong>
         </span>
       </div>
     </section>
@@ -1577,7 +1602,11 @@ function learningList(values: unknown, fallback: string, limit = 4) {
       .map((item) =>
         typeof item === "string"
           ? item
-          : (item?.description ?? item?.summary ?? item?.lesson ?? item?.reason ?? item?.label),
+          : (item?.description ??
+            item?.summary ??
+            item?.lesson ??
+            item?.reason ??
+            item?.label),
       )
       .map((item) => investorCopy(String(item ?? "").trim()))
       .filter(Boolean);
@@ -1638,8 +1667,8 @@ function buildLearningDraft(input: {
   return [
     "The most useful stewardship lessons usually come from repetition, not prediction.",
     `Across ${input.evidenceCount} reviewed decisions, ${statement}`,
-    `The important discovery is not that every similar setup should be acted on. It is that an allocation plan becomes more trustworthy when the same lesson survives multiple outcome reviews.`,
-    `That matters because a persuasive instrument can feel clear before the evidence is durable. Keeping participation gradual gives the plan time to learn without treating early conviction as certainty.`,
+    "The important discovery is not that every similar setup should be acted on. It is that an allocation plan becomes more trustworthy when the same lesson survives multiple outcome reviews.",
+    "That matters because a persuasive instrument can feel clear before the evidence is durable. Keeping participation gradual gives the plan time to learn without treating early conviction as certainty.",
     `In the current decision, that learning keeps the next step grounded in ${lowerFirst(recommendation)} and ${lowerFirst(exposure)} instead of pushing for a larger commitment before the evidence repeats.`,
     `Future decisions should use this pattern as a quiet governor: ${impact || why || "participation can expand when reliability keeps improving, and contract when the reviewed evidence stops repeating."}`,
     "This is not a prediction or a portfolio optimization alert. It is a reminder that repeated lessons deserve more trust than impressive one-off calls.",
@@ -1883,7 +1912,13 @@ function WhatWeLearnedCard({ insight }: { insight: LearningInsightSummary }) {
         <FactTile
           label="Draft status"
           value={statusLabel}
-          tone={status === "approved" ? "good" : status === "discarded" ? "bad" : "neutral"}
+          tone={
+            status === "approved"
+              ? "good"
+              : status === "discarded"
+                ? "bad"
+                : "neutral"
+          }
         />
       </div>
 
@@ -1925,7 +1960,10 @@ function WhatWeLearnedCard({ insight }: { insight: LearningInsightSummary }) {
         >
           {isEditing ? "Save Edit" : "Edit"}
         </LearningDraftButton>
-        <LearningDraftButton disabled={!insight.hasDraft} onClick={regenerateDraft}>
+        <LearningDraftButton
+          disabled={!insight.hasDraft}
+          onClick={regenerateDraft}
+        >
           Regenerate
         </LearningDraftButton>
         <LearningDraftButton
@@ -1979,19 +2017,24 @@ function InvestorLearningPanel({ learning }: { learning?: any }) {
   );
   const lessons = learningList(
     learning?.learningRecords,
-    emptyStates.find((item) => /outcome learning|previous decisions/i.test(item)) ??
-      "No previous decisions have been reviewed yet.",
+    emptyStates.find((item) =>
+      /outcome learning|previous decisions/i.test(item),
+    ) ?? "No previous decisions have been reviewed yet.",
     4,
   );
   const horizonLines = Array.isArray(learning?.horizons)
-    ? learning.horizons.map((view: any) =>
-        `${learningText(view.horizon)}: ${learningText(view.view)}. ${learningText(view.action)}`,
+    ? learning.horizons.map(
+        (view: any) =>
+          `${learningText(view.horizon)}: ${learningText(view.view)}. ${learningText(view.action)}`,
       )
     : ["Horizon views are still forming."];
   const similarLines = similarRegimes.length
-    ? similarRegimes.slice(0, 3).map((item: any) =>
-        `${Math.round(Number(item.similarity ?? 0) * 100)}% similar: ${learningText(item.whatHappened)}`,
-      )
+    ? similarRegimes
+        .slice(0, 3)
+        .map(
+          (item: any) =>
+            `${Math.round(Number(item.similarity ?? 0) * 100)}% similar: ${learningText(item.whatHappened)}`,
+        )
     : [
         emptyStates.find((item) => /similar regimes/i.test(item)) ??
           "Similar regimes will appear after more snapshots are collected.",
@@ -2006,7 +2049,10 @@ function InvestorLearningPanel({ learning }: { learning?: any }) {
   return (
     <DisclosurePanel
       title="Stewardship Review"
-      summary={learningText(narrative.action, "Learning output is still forming.")}
+      summary={learningText(
+        narrative.action,
+        "Learning output is still forming.",
+      )}
       testId="investor-learning-panel"
     >
       <div className="grid min-w-0 gap-3">
@@ -2015,14 +2061,20 @@ function InvestorLearningPanel({ learning }: { learning?: any }) {
             {learningText(thesis.title, "Current thesis is still forming.")}
           </p>
           <p className="break-words text-sm leading-6 text-zinc-700">
-            {learningText(thesis.description, "Signal has not formed a durable thesis yet.")}
+            {learningText(
+              thesis.description,
+              "Signal has not formed a durable thesis yet.",
+            )}
           </p>
         </LearningSection>
 
         <LearningSection title="Supporting Evidence">
           <div className="grid gap-1">
             {supports.map((item) => (
-              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+              <p
+                key={item}
+                className="break-words text-sm leading-6 text-zinc-700"
+              >
                 {item}
               </p>
             ))}
@@ -2032,7 +2084,10 @@ function InvestorLearningPanel({ learning }: { learning?: any }) {
         <LearningSection title="Contradicting Evidence">
           <div className="grid gap-1">
             {contradicts.map((item) => (
-              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+              <p
+                key={item}
+                className="break-words text-sm leading-6 text-zinc-700"
+              >
                 {item}
               </p>
             ))}
@@ -2042,7 +2097,10 @@ function InvestorLearningPanel({ learning }: { learning?: any }) {
         <LearningSection title="Similar Regimes">
           <div className="grid gap-1">
             {similarLines.map((item) => (
-              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+              <p
+                key={item}
+                className="break-words text-sm leading-6 text-zinc-700"
+              >
                 {item}
               </p>
             ))}
@@ -2051,18 +2109,33 @@ function InvestorLearningPanel({ learning }: { learning?: any }) {
 
         <LearningSection title="What Changed">
           <p className="break-words text-sm leading-6 text-zinc-700">
-            {learningText(narrative.whatChanged, "No reviewed change has been detected yet.")}
+            {learningText(
+              narrative.whatChanged,
+              "No reviewed change has been detected yet.",
+            )}
           </p>
         </LearningSection>
 
         <LearningSection title="Conviction">
           <div className="grid gap-2 sm:grid-cols-3">
-            <FactTile label="Confidence" value={`${Math.round(Number(conviction.confidence ?? 0))}%`} />
-            <FactTile label="Reliability" value={`${Math.round(Number(conviction.trust ?? 0))}%`} />
-            <FactTile label="Conviction" value={`${Math.round(Number(conviction.conviction ?? 0))}%`} />
+            <FactTile
+              label="Confidence"
+              value={`${Math.round(Number(conviction.confidence ?? 0))}%`}
+            />
+            <FactTile
+              label="Reliability"
+              value={`${Math.round(Number(conviction.trust ?? 0))}%`}
+            />
+            <FactTile
+              label="Conviction"
+              value={`${Math.round(Number(conviction.conviction ?? 0))}%`}
+            />
           </div>
           <p className="break-words text-sm leading-6 text-zinc-700">
-            {learningText(conviction.explanation, "Conviction is still being separated from readiness.")}
+            {learningText(
+              conviction.explanation,
+              "Conviction is still being separated from readiness.",
+            )}
           </p>
         </LearningSection>
 
@@ -2078,7 +2151,10 @@ function InvestorLearningPanel({ learning }: { learning?: any }) {
         <LearningSection title="Mind Change Triggers">
           <div className="grid gap-1">
             {triggers.map((item) => (
-              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+              <p
+                key={item}
+                className="break-words text-sm leading-6 text-zinc-700"
+              >
                 {item}
               </p>
             ))}
@@ -2087,17 +2163,25 @@ function InvestorLearningPanel({ learning }: { learning?: any }) {
 
         <LearningSection title="Optionality Review">
           <p className="break-words text-sm leading-6 text-zinc-700">
-            {learningText(ranking.explanation, "No instrument is ready enough to rank as best right now.")}
+            {learningText(
+              ranking.explanation,
+              "No instrument is ready enough to rank as best right now.",
+            )}
           </p>
           <p className="break-words text-xs leading-5 text-zinc-500">
-            Best: {learningText(ranking.bestOpportunity?.label, "None")} | Other: {otherOpportunities.join(", ") || "None"} | Not ready: {notReady.join(", ") || "None"}
+            Best: {learningText(ranking.bestOpportunity?.label, "None")} |
+            Other: {otherOpportunities.join(", ") || "None"} | Not ready:{" "}
+            {notReady.join(", ") || "None"}
           </p>
         </LearningSection>
 
         <LearningSection title="Time Horizon Views">
           <div className="grid gap-1">
             {horizonLines.map((item) => (
-              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+              <p
+                key={item}
+                className="break-words text-sm leading-6 text-zinc-700"
+              >
                 {item}
               </p>
             ))}
@@ -2106,19 +2190,30 @@ function InvestorLearningPanel({ learning }: { learning?: any }) {
 
         <LearningSection title="Capital Plan Context">
           <p className="break-words text-sm leading-6 text-zinc-700">
-            {learningText(portfolio.summary, "Capital plan context is unavailable.")}
+            {learningText(
+              portfolio.summary,
+              "Capital plan context is unavailable.",
+            )}
           </p>
-          {learningList(portfolio.warnings, "", 3).filter(Boolean).map((item) => (
-            <p key={item} className="break-words text-xs leading-5 text-zinc-500">
-              {item}
-            </p>
-          ))}
+          {learningList(portfolio.warnings, "", 3)
+            .filter(Boolean)
+            .map((item) => (
+              <p
+                key={item}
+                className="break-words text-xs leading-5 text-zinc-500"
+              >
+                {item}
+              </p>
+            ))}
         </LearningSection>
 
         <LearningSection title="Reflection / Lessons">
           <div className="grid gap-1">
             {lessons.map((item) => (
-              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
+              <p
+                key={item}
+                className="break-words text-sm leading-6 text-zinc-700"
+              >
                 {item}
               </p>
             ))}
@@ -2132,11 +2227,17 @@ function InvestorLearningPanel({ learning }: { learning?: any }) {
               narrative.whyItMatters,
               narrative.uncertainty,
               narrative.mindChange,
-            ].map((item) => learningText(item, "")).filter(Boolean).map((item) => (
-              <p key={item} className="break-words text-sm leading-6 text-zinc-700">
-                {item}
-              </p>
-            ))}
+            ]
+              .map((item) => learningText(item, ""))
+              .filter(Boolean)
+              .map((item) => (
+                <p
+                  key={item}
+                  className="break-words text-sm leading-6 text-zinc-700"
+                >
+                  {item}
+                </p>
+              ))}
           </div>
         </LearningSection>
       </div>
@@ -2522,9 +2623,17 @@ export default function DecisionOperatingSystem({
         ),
         nextStep: "Review threats before changing allocation.",
         facts: [
-          { label: "Resource", value: primaryResource.resource, tone: selectedTone },
+          {
+            label: "Resource",
+            value: primaryResource.resource,
+            tone: selectedTone,
+          },
           { label: "Guidance", value: safeRecommendation, tone: readinessTone },
-          { label: "Resource health", value: marketHealthWord, tone: readinessTone },
+          {
+            label: "Resource health",
+            value: marketHealthWord,
+            tone: readinessTone,
+          },
           { label: "Threat", value: resourceThreats[0] ?? missingEvidence },
         ],
         story: {
@@ -2577,7 +2686,11 @@ export default function DecisionOperatingSystem({
         ),
         nextStep: "Check whether a specific instrument improves resilience.",
         facts: [
-          { label: "Resource health", value: marketHealthWord, tone: readinessTone },
+          {
+            label: "Resource health",
+            value: marketHealthWord,
+            tone: readinessTone,
+          },
           { label: "Status", value: marketStatus },
           {
             label: "Threat pressure",
@@ -2724,7 +2837,13 @@ export default function DecisionOperatingSystem({
             : `${trustWord} reliability supports the stewardship guidance.`,
         answer: `${passCount} checks strengthen the decision, ${cautionCount} need care, and ${failCount} weaken it.`,
         why: compactList(
-          [resourceStrengtheners[0], topSupport[0], topRisk[0], missingEvidence, readinessBlocker],
+          [
+            resourceStrengtheners[0],
+            topSupport[0],
+            topRisk[0],
+            missingEvidence,
+            readinessBlocker,
+          ],
           "Reliability evidence is still forming.",
         ),
         evidence: evidenceLadder.map(
@@ -2875,7 +2994,11 @@ export default function DecisionOperatingSystem({
         facts: [
           { label: "Guidance", value: safeRecommendation, tone: readinessTone },
           { label: "Instrument", value: actionPlan.asset },
-          { label: "Allocation", value: actionExposureText, tone: readinessTone },
+          {
+            label: "Allocation",
+            value: actionExposureText,
+            tone: readinessTone,
+          },
           { label: "Stop reviewing if", value: actionPlan.invalidation },
         ],
         story: {
@@ -3028,21 +3151,21 @@ export default function DecisionOperatingSystem({
       "Confidence",
       "Coherence",
       "Consensus",
-            "Trust",
-            "Conviction",
-            "Risk Pressure",
-            "Market Health",
-            "Simulation",
-            "Wisdom",
-            "Action Scale",
-            "Outcome Accuracy",
-            "Readiness",
-            "Decision Readiness",
-            "Starter Size",
-            "Portfolio Cap",
-            "Portfolio Contribution",
-            "Similar Regimes",
-            "Survival",
+      "Trust",
+      "Conviction",
+      "Risk Pressure",
+      "Market Health",
+      "Simulation",
+      "Wisdom",
+      "Action Scale",
+      "Outcome Accuracy",
+      "Readiness",
+      "Decision Readiness",
+      "Starter Size",
+      "Portfolio Cap",
+      "Portfolio Contribution",
+      "Similar Regimes",
+      "Survival",
       "Calibration",
       "History Depth",
       "Regime Coverage",
@@ -3103,7 +3226,12 @@ export default function DecisionOperatingSystem({
     5,
   );
   const optionSupports = compactList(
-    [resourceStrengtheners[0], selectedOpportunity?.support[0], topSupport[0], readinessImprover],
+    [
+      resourceStrengtheners[0],
+      selectedOpportunity?.support[0],
+      topSupport[0],
+      readinessImprover,
+    ],
     "Observe until stronger confirmation survives review.",
     4,
   );
@@ -3165,7 +3293,9 @@ export default function DecisionOperatingSystem({
   const guideSteps = defaultGuideSteps({
     goal: resourcePrioritySummary(selectedResources),
     reality: `${marketHealthWord} resource health with ${riskPressureWord.toLowerCase()} threat pressure.`,
-    focus: optionSupports[0] ?? "Observe until stronger confirmation survives review.",
+    focus:
+      optionSupports[0] ??
+      "Observe until stronger confirmation survives review.",
     options:
       selectedOpportunity?.drivers[0] ??
       "Signal is preparing several capital allocation paths.",
@@ -3206,7 +3336,9 @@ export default function DecisionOperatingSystem({
                 className="h-9 w-full min-w-0 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-950 outline-none sm:w-[190px]"
               >
                 {selectedMarket &&
-                !marketOptions.some((market) => market.value === selectedMarket) ? (
+                !marketOptions.some(
+                  (market) => market.value === selectedMarket,
+                ) ? (
                   <option value={selectedMarket}>{selectedMarketName}</option>
                 ) : null}
                 {marketOptions.map((market) => (
@@ -3450,44 +3582,45 @@ export default function DecisionOperatingSystem({
                     testId="evidence-summary-panel"
                   >
                     <div className="grid gap-2">
-                      {(evidenceLadder.length ? evidenceLadder : evidencePreview).map(
-                        (stage) => (
-                          <div
-                            key={stage.id}
-                            className="grid min-w-0 grid-cols-[24px_minmax(0,1fr)_auto] items-start gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2 text-sm leading-5 text-zinc-700"
+                      {(evidenceLadder.length
+                        ? evidenceLadder
+                        : evidencePreview
+                      ).map((stage) => (
+                        <div
+                          key={stage.id}
+                          className="grid min-w-0 grid-cols-[24px_minmax(0,1fr)_auto] items-start gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2 text-sm leading-5 text-zinc-700"
+                        >
+                          <span
+                            className={cx(
+                              "grid h-6 w-6 place-items-center rounded-md",
+                              statusTone(stage.status) === "good" &&
+                                "bg-emerald-50 text-emerald-700",
+                              statusTone(stage.status) === "warn" &&
+                                "bg-amber-50 text-amber-700",
+                              statusTone(stage.status) === "bad" &&
+                                "bg-red-50 text-red-700",
+                            )}
                           >
-                            <span
-                              className={cx(
-                                "grid h-6 w-6 place-items-center rounded-md",
-                                statusTone(stage.status) === "good" &&
-                                  "bg-emerald-50 text-emerald-700",
-                                statusTone(stage.status) === "warn" &&
-                                  "bg-amber-50 text-amber-700",
-                                statusTone(stage.status) === "bad" &&
-                                  "bg-red-50 text-red-700",
-                              )}
-                            >
-                              {statusIcon(stage.status)}
+                            {statusIcon(stage.status)}
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block break-words font-semibold text-zinc-950">
+                              {friendlyEvidenceLabel(stage.label)}
                             </span>
-                            <span className="min-w-0">
-                              <span className="block break-words font-semibold text-zinc-950">
-                                {friendlyEvidenceLabel(stage.label)}
-                              </span>
-                              <span className="block break-words text-zinc-600">
-                                {investorCopy(stage.explanation)}
-                              </span>
+                            <span className="block break-words text-zinc-600">
+                              {investorCopy(stage.explanation)}
                             </span>
-                            <span
-                              className={cx(
-                                "rounded-md border px-1.5 py-0.5 text-[11px] font-semibold",
-                                toneSurface(statusTone(stage.status)),
-                              )}
-                            >
-                              {statusLabel(stage.status)}
-                            </span>
-                          </div>
-                        ),
-                      )}
+                          </span>
+                          <span
+                            className={cx(
+                              "rounded-md border px-1.5 py-0.5 text-[11px] font-semibold",
+                              toneSurface(statusTone(stage.status)),
+                            )}
+                          >
+                            {statusLabel(stage.status)}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </DisclosurePanel>
 

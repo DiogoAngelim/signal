@@ -56,10 +56,10 @@ export type PortfolioRiskConfig = {
 };
 
 export const DEFAULT_PORTFOLIO_RISK_CONFIG: PortfolioRiskConfig = {
-  maxExposurePerAsset: 0.20,
+  maxExposurePerAsset: 0.2,
   maxTotalExposure: 0.65,
-  minConfidence: 0.30,
-  minStrength: 0.20,
+  minConfidence: 0.3,
+  minStrength: 0.2,
   cooldownMs: 60_000,
   baseSizeFraction: 0.05,
 };

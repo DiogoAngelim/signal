@@ -1,9 +1,15 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { createAwareApiService, handleAwareApiRequest } from "../src/api/index.js";
+import {
+  createAwareApiService,
+  handleAwareApiRequest,
+} from "../src/api/index.js";
 
 const service = createAwareApiService();
 
-export async function handleAwareNodeRequest(req: IncomingMessage, res: ServerResponse) {
+export async function handleAwareNodeRequest(
+  req: IncomingMessage,
+  res: ServerResponse,
+) {
   try {
     const request = await toRequest(req);
     const response = await handleAwareApiRequest(request, service);
@@ -11,19 +17,25 @@ export async function handleAwareNodeRequest(req: IncomingMessage, res: ServerRe
   } catch (error) {
     res.statusCode = 500;
     res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.end(JSON.stringify({
-      ok: false,
-      error: {
-        code: "REQUEST_FAILED",
-        message: error instanceof Error ? error.message : "Aware API request failed."
-      }
-    }));
+    res.end(
+      JSON.stringify({
+        ok: false,
+        error: {
+          code: "REQUEST_FAILED",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Aware API request failed.",
+        },
+      }),
+    );
   }
 }
 
 async function toRequest(req: IncomingMessage): Promise<Request> {
   const host = req.headers.host ?? "aware.local";
-  const protocol = host.includes("localhost") || host.startsWith("127.") ? "http" : "https";
+  const protocol =
+    host.includes("localhost") || host.startsWith("127.") ? "http" : "https";
   const headers = new Headers();
   for (const [key, value] of Object.entries(req.headers)) {
     if (Array.isArray(value)) {
@@ -32,11 +44,14 @@ async function toRequest(req: IncomingMessage): Promise<Request> {
       headers.set(key, value);
     }
   }
-  const body = req.method === "GET" || req.method === "HEAD" ? undefined : (await readBody(req)).toString();
+  const body =
+    req.method === "GET" || req.method === "HEAD"
+      ? undefined
+      : (await readBody(req)).toString();
   return new Request(`${protocol}://${host}${req.url ?? "/"}`, {
     method: req.method,
     headers,
-    body
+    body,
   });
 }
 
@@ -49,7 +64,10 @@ function readBody(req: IncomingMessage): Promise<Buffer> {
   });
 }
 
-async function writeResponse(res: ServerResponse, response: Response): Promise<void> {
+async function writeResponse(
+  res: ServerResponse,
+  response: Response,
+): Promise<void> {
   res.statusCode = response.status;
   response.headers.forEach((value, key) => {
     res.setHeader(key, value);

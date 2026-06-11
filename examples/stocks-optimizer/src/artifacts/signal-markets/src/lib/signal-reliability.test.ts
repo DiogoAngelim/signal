@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   ReliabilityEngine,
-  confidenceCapForReliability,
-  evaluateReliability,
   type ReliabilityEvaluation,
   type ReliabilityRecord,
+  confidenceCapForReliability,
+  evaluateReliability,
 } from "../../../signal-framework";
 
 const now = Date.parse("2026-05-28T12:00:00.000Z");
@@ -26,7 +26,9 @@ function record(overrides: Partial<ReliabilityRecord> = {}): ReliabilityRecord {
   };
 }
 
-function baseEvaluation(overrides: Partial<ReliabilityEvaluation> = {}): ReliabilityEvaluation {
+function baseEvaluation(
+  overrides: Partial<ReliabilityEvaluation> = {},
+): ReliabilityEvaluation {
   return {
     now,
     maxAgeMs: 60_000,
@@ -66,7 +68,10 @@ describe("generic signal reliability engine", () => {
         records: [
           record({ id: "stale-number", timestamp: now - 120_000 }),
           record({ id: "stale-date", timestamp: new Date(now - 120_000) }),
-          record({ id: "fresh-string", timestamp: new Date(now - 2_000).toISOString() }),
+          record({
+            id: "fresh-string",
+            timestamp: new Date(now - 2_000).toISOString(),
+          }),
           record({ id: "invalid-time", timestamp: "not-a-date" }),
         ],
         minSampleSize: 4,
@@ -84,7 +89,10 @@ describe("generic signal reliability engine", () => {
   it("marks fully stale datasets as stale", () => {
     const result = evaluateReliability(
       baseEvaluation({
-        records: [record({ id: "a", timestamp: now - 120_000 }), record({ id: "b", timestamp: now - 90_000 })],
+        records: [
+          record({ id: "a", timestamp: now - 120_000 }),
+          record({ id: "b", timestamp: now - 90_000 }),
+        ],
         minSampleSize: 2,
         expectedCount: 2,
       }),
@@ -99,9 +107,36 @@ describe("generic signal reliability engine", () => {
       baseEvaluation({
         records: [
           record({ id: "missing", fields: { label: "missing value" } }),
-          record({ id: "invalid-type", fields: { value: "42", label: "bad", active: true, payload: {}, samples: [] } }),
-          record({ id: "too-small", fields: { value: 0, label: "low", active: true, payload: {}, samples: [] } }),
-          record({ id: "too-large", fields: { value: 101, label: "high", active: true, payload: {}, samples: [] } }),
+          record({
+            id: "invalid-type",
+            fields: {
+              value: "42",
+              label: "bad",
+              active: true,
+              payload: {},
+              samples: [],
+            },
+          }),
+          record({
+            id: "too-small",
+            fields: {
+              value: 0,
+              label: "low",
+              active: true,
+              payload: {},
+              samples: [],
+            },
+          }),
+          record({
+            id: "too-large",
+            fields: {
+              value: 101,
+              label: "high",
+              active: true,
+              payload: {},
+              samples: [],
+            },
+          }),
         ],
         minSampleSize: 4,
         expectedCount: 4,
@@ -111,7 +146,11 @@ describe("generic signal reliability engine", () => {
     expect(result.status).toBe("invalid");
     expect(result.metadata.rejectedCount).toBe(4);
     expect(result.diagnostics.map((item) => item.code)).toEqual(
-      expect.arrayContaining(["FIELD_MISSING", "FIELD_INVALID", "FIELD_OUT_OF_RANGE"]),
+      expect.arrayContaining([
+        "FIELD_MISSING",
+        "FIELD_INVALID",
+        "FIELD_OUT_OF_RANGE",
+      ]),
     );
   });
 
@@ -120,7 +159,11 @@ describe("generic signal reliability engine", () => {
       now,
       maxAgeMs: 60_000,
       records: [
-        record({ id: "min-only", timestamp: null, fields: { value: -1, ceiling: 5 } }),
+        record({
+          id: "min-only",
+          timestamp: null,
+          fields: { value: -1, ceiling: 5 },
+        }),
         record({ id: "max-only", fields: { value: 5, ceiling: 11 } }),
       ],
       fieldRules: [
@@ -157,9 +200,36 @@ describe("generic signal reliability engine", () => {
     const result = evaluateReliability(
       baseEvaluation({
         records: [
-          record({ id: "normal-a", fields: { value: 10, label: "a", active: true, payload: {}, samples: [] } }),
-          record({ id: "normal-b", fields: { value: 10, label: "b", active: true, payload: {}, samples: [] } }),
-          record({ id: "extreme", fields: { value: 100, label: "c", active: true, payload: {}, samples: [] } }),
+          record({
+            id: "normal-a",
+            fields: {
+              value: 10,
+              label: "a",
+              active: true,
+              payload: {},
+              samples: [],
+            },
+          }),
+          record({
+            id: "normal-b",
+            fields: {
+              value: 10,
+              label: "b",
+              active: true,
+              payload: {},
+              samples: [],
+            },
+          }),
+          record({
+            id: "extreme",
+            fields: {
+              value: 100,
+              label: "c",
+              active: true,
+              payload: {},
+              samples: [],
+            },
+          }),
         ],
         minSampleSize: 3,
         expectedCount: 3,
@@ -172,7 +242,9 @@ describe("generic signal reliability engine", () => {
 
     expect(result.metadata.rejectedCount).toBe(0);
     expect(result.components.outlierSafety).toBeLessThan(60);
-    expect(result.diagnostics.filter((item) => item.code === "FIELD_OUTLIER")).toHaveLength(2);
+    expect(
+      result.diagnostics.filter((item) => item.code === "FIELD_OUTLIER"),
+    ).toHaveLength(2);
   });
 
   it("degrades source quality from record, source map, and defaults", () => {
@@ -192,23 +264,34 @@ describe("generic signal reliability engine", () => {
 
     expect(result.status).toBe("degraded");
     expect(result.components.sourceQuality).toBe(40);
-    expect(result.diagnostics.map((item) => item.code)).toContain("SOURCE_QUALITY_DEGRADED");
+    expect(result.diagnostics.map((item) => item.code)).toContain(
+      "SOURCE_QUALITY_DEGRADED",
+    );
   });
 
   it("handles empty and malformed datasets", () => {
     const empty = evaluateReliability(baseEvaluation({ records: [] }));
-    const malformed = evaluateReliability({ records: null as unknown as ReliabilityRecord[], now });
+    const malformed = evaluateReliability({
+      records: null as unknown as ReliabilityRecord[],
+      now,
+    });
 
     expect(empty.status).toBe("invalid");
     expect(empty.diagnostics.map((item) => item.code)).toContain("INPUT_EMPTY");
     expect(malformed.status).toBe("invalid");
-    expect(malformed.diagnostics.map((item) => item.code)).toEqual(["INPUT_MALFORMED", "INPUT_EMPTY"]);
+    expect(malformed.diagnostics.map((item) => item.code)).toEqual([
+      "INPUT_MALFORMED",
+      "INPUT_EMPTY",
+    ]);
   });
 
   it("supports partial datasets and custom zero weights", () => {
     const partial = evaluateReliability(
       baseEvaluation({
-        records: [record({ id: "fresh" }), record({ id: "old", timestamp: now - 120_000 })],
+        records: [
+          record({ id: "fresh" }),
+          record({ id: "old", timestamp: now - 120_000 }),
+        ],
         minSampleSize: 1,
         expectedCount: 4,
         weights: {
@@ -242,8 +325,15 @@ describe("generic signal reliability engine", () => {
       maxAgeMs: 60_000,
       records: [
         { id: "", timestamp: Number.NaN, fields: { free: "ok", solo: 1 } },
-        { timestamp: now, fields: { free: "ok" } } as unknown as ReliabilityRecord,
-        { id: "bad-date", timestamp: new Date("bad-date"), fields: { free: "ok" } },
+        {
+          timestamp: now,
+          fields: { free: "ok" },
+        } as unknown as ReliabilityRecord,
+        {
+          id: "bad-date",
+          timestamp: new Date("bad-date"),
+          fields: { free: "ok" },
+        },
       ],
       fieldRules: [{ field: "free", required: true }],
       outlierRules: [
@@ -257,7 +347,10 @@ describe("generic signal reliability engine", () => {
     });
     const criticalSource = evaluateReliability({
       now,
-      records: [record({ id: "bad-source-a", quality: 20 }), record({ id: "bad-source-b", quality: 30 })],
+      records: [
+        record({ id: "bad-source-a", quality: 20 }),
+        record({ id: "bad-source-b", quality: 30 }),
+      ],
       minSampleSize: 2,
     });
     const weightedSampleSize = evaluateReliability({
@@ -287,9 +380,15 @@ describe("generic signal reliability engine", () => {
       },
     });
 
-    expect(fallback.diagnostics.map((item) => item.code)).toContain("TIMESTAMP_INVALID");
+    expect(fallback.diagnostics.map((item) => item.code)).toContain(
+      "TIMESTAMP_INVALID",
+    );
     expect(noRules.status).toBe("healthy");
-    expect(criticalSource.diagnostics.find((item) => item.code === "SOURCE_QUALITY_DEGRADED")?.severity).toBe("critical");
+    expect(
+      criticalSource.diagnostics.find(
+        (item) => item.code === "SOURCE_QUALITY_DEGRADED",
+      )?.severity,
+    ).toBe("critical");
     expect(weightedSampleSize.status).toBe("degraded");
     expect(weightedSampleSize.score).toBe(50);
     expect(scoreOnlyDegraded.status).toBe("degraded");

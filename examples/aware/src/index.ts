@@ -1,24 +1,28 @@
 export {
   createAwareApiService,
-  handleAwareApiRequest
+  handleAwareApiRequest,
 } from "./api.js";
 export {
   collectSafetyObservations,
   createDefaultAwareAdapters,
   createFixtureAwareAdapters,
-  createRegionService
+  createRegionService,
 } from "./adapters.js";
 export {
   attentionLabels,
   attentionLevels,
-  safetyActions
+  safetyActions,
 } from "./contracts.js";
-export { AWARE_FIXTURE_IDS, awareFixtureCatalog, fixtureRegions } from "./fixtures.js";
+export {
+  AWARE_FIXTURE_IDS,
+  awareFixtureCatalog,
+  fixtureRegions,
+} from "./fixtures.js";
 export {
   AWARE_OPERATION_NAMES,
   createAwareSignalApp,
   createBriefingFromObservations,
-  listAwareOperationContracts
+  listAwareOperationContracts,
 } from "./signal.js";
 export type {
   AdapterCollectionResult,
@@ -30,5 +34,5 @@ export type {
   Region,
   SafetyAction,
   SafetyObservation,
-  SafetyRisk
+  SafetyRisk,
 } from "./contracts.js";

@@ -1,4 +1,3 @@
-
 import { clamp, numeric } from "../math/statistics";
 
 export type ReadinessRemediationCategory =
@@ -18,8 +17,16 @@ export type ReadinessRemediationCategory =
   | "agency"
   | "other";
 
-export type ReadinessRemediationSeverity = "low" | "medium" | "high" | "critical";
-export type ReadinessRemediationStatus = "ready" | "watch" | "review" | "blocked";
+export type ReadinessRemediationSeverity =
+  | "low"
+  | "medium"
+  | "high"
+  | "critical";
+export type ReadinessRemediationStatus =
+  | "ready"
+  | "watch"
+  | "review"
+  | "blocked";
 
 export type ReadinessRemediationGate = {
   id: string;
@@ -130,20 +137,26 @@ type Candidate = {
   trustPrimary: boolean;
 };
 
-const CATEGORY_DEFAULTS: Record<ReadinessRemediationCategory, {
-  title: string;
-  baseLift: number;
-  effort: ReadinessRemediationStep["effort"];
-  targetScore: number;
-  evidenceRequired: string[];
-  unlocks: string[];
-}> = {
+const CATEGORY_DEFAULTS: Record<
+  ReadinessRemediationCategory,
+  {
+    title: string;
+    baseLift: number;
+    effort: ReadinessRemediationStep["effort"];
+    targetScore: number;
+    evidenceRequired: string[];
+    unlocks: string[];
+  }
+> = {
   calibration: {
     title: "Stabilize calibration outcomes",
     baseLift: 18,
     effort: "medium",
     targetScore: 75,
-    evidenceRequired: ["Closed outcomes from similar states", "Calibration warnings trend"],
+    evidenceRequired: [
+      "Closed outcomes from similar states",
+      "Calibration warnings trend",
+    ],
     unlocks: ["Review gate can relax once calibrated outcomes are stable."],
   },
   robustness: {
@@ -151,15 +164,25 @@ const CATEGORY_DEFAULTS: Record<ReadinessRemediationCategory, {
     baseLift: 20,
     effort: "high",
     targetScore: 70,
-    evidenceRequired: ["Overfit risk", "Deployment readiness", "Independent validation windows"],
-    unlocks: ["Trust Governor can move beyond exits-only when robustness risk clears."],
+    evidenceRequired: [
+      "Overfit risk",
+      "Deployment readiness",
+      "Independent validation windows",
+    ],
+    unlocks: [
+      "Trust Governor can move beyond exits-only when robustness risk clears.",
+    ],
   },
   benchmark: {
     title: "Rebuild benchmark edge",
     baseLift: 16,
     effort: "high",
     targetScore: 70,
-    evidenceRequired: ["Strategy return after costs", "Best baseline return", "Benchmark margin"],
+    evidenceRequired: [
+      "Strategy return after costs",
+      "Best baseline return",
+      "Benchmark margin",
+    ],
     unlocks: ["Readiness can pass benchmark comparison."],
   },
   walk_forward: {
@@ -167,7 +190,11 @@ const CATEGORY_DEFAULTS: Record<ReadinessRemediationCategory, {
     baseLift: 14,
     effort: "medium",
     targetScore: 70,
-    evidenceRequired: ["Chronological test windows", "Weakest period", "Best-period contribution"],
+    evidenceRequired: [
+      "Chronological test windows",
+      "Weakest period",
+      "Best-period contribution",
+    ],
     unlocks: ["Readiness can trust performance outside one period."],
   },
   strategy_edge: {
@@ -175,7 +202,11 @@ const CATEGORY_DEFAULTS: Record<ReadinessRemediationCategory, {
     baseLift: 13,
     effort: "medium",
     targetScore: 70,
-    evidenceRequired: ["Risk-adjusted return", "Positive returns", "Trade sample"],
+    evidenceRequired: [
+      "Risk-adjusted return",
+      "Positive returns",
+      "Trade sample",
+    ],
     unlocks: ["Model confidence cap can rise when edge clears threshold."],
   },
   parameter_stability: {
@@ -183,7 +214,11 @@ const CATEGORY_DEFAULTS: Record<ReadinessRemediationCategory, {
     baseLift: 12,
     effort: "medium",
     targetScore: 70,
-    evidenceRequired: ["Nearby parameter variants", "Variant pass rate", "Benchmark survival rate"],
+    evidenceRequired: [
+      "Nearby parameter variants",
+      "Variant pass rate",
+      "Benchmark survival rate",
+    ],
     unlocks: ["Readiness can trust the selected configuration."],
   },
   concentration: {
@@ -191,15 +226,25 @@ const CATEGORY_DEFAULTS: Record<ReadinessRemediationCategory, {
     baseLift: 11,
     effort: "medium",
     targetScore: 70,
-    evidenceRequired: ["Top-trade contribution", "Top-period contribution", "Median outcome"],
-    unlocks: ["Readiness can trust that returns are not dominated by outliers."],
+    evidenceRequired: [
+      "Top-trade contribution",
+      "Top-period contribution",
+      "Median outcome",
+    ],
+    unlocks: [
+      "Readiness can trust that returns are not dominated by outliers.",
+    ],
   },
   data_reliability: {
     title: "Restore data reliability",
     baseLift: 22,
     effort: "low",
     targetScore: 90,
-    evidenceRequired: ["Fresh synchronized data", "Coverage audit", "Rejected record count"],
+    evidenceRequired: [
+      "Fresh synchronized data",
+      "Coverage audit",
+      "Rejected record count",
+    ],
     unlocks: ["Any trust decision can use the current data snapshot."],
   },
   live_signal: {
@@ -207,7 +252,11 @@ const CATEGORY_DEFAULTS: Record<ReadinessRemediationCategory, {
     baseLift: 10,
     effort: "medium",
     targetScore: 70,
-    evidenceRequired: ["Forward shadow observations", "Live signal match", "Average forward return"],
+    evidenceRequired: [
+      "Forward shadow observations",
+      "Live signal match",
+      "Average forward return",
+    ],
     unlocks: ["Readiness can advance from shadow evidence to live review."],
   },
   risk_control: {
@@ -223,7 +272,11 @@ const CATEGORY_DEFAULTS: Record<ReadinessRemediationCategory, {
     baseLift: 9,
     effort: "low",
     targetScore: 60,
-    evidenceRequired: ["Trusted max exposure", "Sizing constraints", "Available capacity"],
+    evidenceRequired: [
+      "Trusted max exposure",
+      "Sizing constraints",
+      "Available capacity",
+    ],
     unlocks: ["Sizing can consider non-zero review allocations."],
   },
   belief: {
@@ -231,7 +284,11 @@ const CATEGORY_DEFAULTS: Record<ReadinessRemediationCategory, {
     baseLift: 8,
     effort: "medium",
     targetScore: 70,
-    evidenceRequired: ["Supporting evidence", "Contradictory evidence", "Evidence agreement"],
+    evidenceRequired: [
+      "Supporting evidence",
+      "Contradictory evidence",
+      "Evidence agreement",
+    ],
     unlocks: ["Belief can move from weak or uncertain toward justified."],
   },
   judgement: {
@@ -239,7 +296,11 @@ const CATEGORY_DEFAULTS: Record<ReadinessRemediationCategory, {
     baseLift: 8,
     effort: "medium",
     targetScore: 70,
-    evidenceRequired: ["Similar historical samples", "Outcome stability", "Overfit risk"],
+    evidenceRequired: [
+      "Similar historical samples",
+      "Outcome stability",
+      "Overfit risk",
+    ],
     unlocks: ["Judgement can support rather than review-gate the decision."],
   },
   agency: {
@@ -247,7 +308,11 @@ const CATEGORY_DEFAULTS: Record<ReadinessRemediationCategory, {
     baseLift: 7,
     effort: "low",
     targetScore: 70,
-    evidenceRequired: ["Policy traces", "Blocked action reasons", "Approval state"],
+    evidenceRequired: [
+      "Policy traces",
+      "Blocked action reasons",
+      "Approval state",
+    ],
     unlocks: ["Agency can approve commitment decisions."],
   },
   other: {
@@ -267,9 +332,13 @@ const SEVERITY_WEIGHT: Record<ReadinessRemediationSeverity, number> = {
   critical: 14,
 };
 
-export function planReadinessRemediation(input: ReadinessRemediationInput = {}): ReadinessRemediationPlan {
+export function planReadinessRemediation(
+  input: ReadinessRemediationInput = {},
+): ReadinessRemediationPlan {
   const gates = Array.isArray(input.gates) ? input.gates : [];
-  const flags = Array.isArray(input.failureFlags) ? input.failureFlags.filter(Boolean) : [];
+  const flags = Array.isArray(input.failureFlags)
+    ? input.failureFlags.filter(Boolean)
+    : [];
   const candidates = [
     ...gates.flatMap(gateCandidate),
     ...flags.map(flagCandidate),
@@ -283,11 +352,24 @@ export function planReadinessRemediation(input: ReadinessRemediationInput = {}):
     .sort(compareSteps)
     .map((step, index) => ({ ...step, priority: index + 1 }));
   const failedGateCount = gates.filter((gate) => gate.passed === false).length;
-  const totalExpectedTrustLift = round(clamp(steps.slice(0, 4).reduce((sum, step) => sum + step.expectedTrustLift, 0)));
-  const executionGate = executionGateFor(steps, input.trust?.participationMode, input.context?.allowsNewExposure);
+  const totalExpectedTrustLift = round(
+    clamp(
+      steps.slice(0, 4).reduce((sum, step) => sum + step.expectedTrustLift, 0),
+    ),
+  );
+  const executionGate = executionGateFor(
+    steps,
+    input.trust?.participationMode,
+    input.context?.allowsNewExposure,
+  );
   const status = statusFor(steps, executionGate);
   const blockers = steps
-    .filter((step) => step.status === "blocked" || step.severity === "high" || step.severity === "critical")
+    .filter(
+      (step) =>
+        step.status === "blocked" ||
+        step.severity === "high" ||
+        step.severity === "critical",
+    )
     .map((step) => step.reason)
     .slice(0, 6);
   const topAction = steps[0]?.title ?? "No remediation required";
@@ -300,7 +382,9 @@ export function planReadinessRemediation(input: ReadinessRemediationInput = {}):
     topAction,
     totalExpectedTrustLift,
     executionGate,
-    ...(input.context?.targetStage ? { targetStage: String(input.context.targetStage) } : {}),
+    ...(input.context?.targetStage
+      ? { targetStage: String(input.context.targetStage) }
+      : {}),
     steps,
     blockers,
     audit: {
@@ -319,33 +403,45 @@ export function planReadinessRemediation(input: ReadinessRemediationInput = {}):
 export const planReadinessRemediationSteps = planReadinessRemediation;
 
 function gateCandidate(gate: ReadinessRemediationGate): Candidate[] {
-  const passed = gate.passed === true || normalizedSeverity(gate.severity) === "low" && numeric(gate.score, 100) >= numeric(gate.targetScore, 70);
+  const passed =
+    gate.passed === true ||
+    (normalizedSeverity(gate.severity) === "low" &&
+      numeric(gate.score, 100) >= numeric(gate.targetScore, 70));
   if (passed) return [];
 
-  const category = gate.category ?? categoryFromText(`${gate.id} ${gate.label ?? ""}`);
+  const category =
+    gate.category ?? categoryFromText(`${gate.id} ${gate.label ?? ""}`);
   const defaults = CATEGORY_DEFAULTS[category];
   const currentScore = finiteOrNull(gate.score);
   const targetScore = numeric(gate.targetScore, defaults.targetScore);
 
-  return [{
-    id: `gate:${gate.id}`,
-    category,
-    title: defaults.title,
-    severity: gate.severity ?? severityFromScore(currentScore, targetScore),
-    reason: gate.reason || `${gate.label ?? gate.id} has not cleared the readiness threshold.`,
-    currentScore,
-    targetScore,
-    evidenceRequired: gate.evidenceRequired ?? defaults.evidenceRequired,
-    unlocks: gate.unlockCriteria ?? defaults.unlocks,
-    sourceId: gate.id,
-    trustPrimary: false,
-  }];
+  return [
+    {
+      id: `gate:${gate.id}`,
+      category,
+      title: defaults.title,
+      severity: gate.severity ?? severityFromScore(currentScore, targetScore),
+      reason:
+        gate.reason ||
+        `${gate.label ?? gate.id} has not cleared the readiness threshold.`,
+      currentScore,
+      targetScore,
+      evidenceRequired: gate.evidenceRequired ?? defaults.evidenceRequired,
+      unlocks: gate.unlockCriteria ?? defaults.unlocks,
+      sourceId: gate.id,
+      trustPrimary: false,
+    },
+  ];
 }
 
 function flagCandidate(flag: string): Candidate {
   const category = categoryFromText(flag);
   const defaults = CATEGORY_DEFAULTS[category];
-  const severity = /DATA|EXECUTION_BLOCKED|BLOCK|ROBUSTNESS|BENCHMARK/.test(normalizedCode(flag)) ? "high" : "medium";
+  const severity = /DATA|EXECUTION_BLOCKED|BLOCK|ROBUSTNESS|BENCHMARK/.test(
+    normalizedCode(flag),
+  )
+    ? "high"
+    : "medium";
 
   return {
     id: `flag:${normalizedCode(flag)}`,
@@ -362,14 +458,18 @@ function flagCandidate(flag: string): Candidate {
   };
 }
 
-function trustCandidates(trust: ReadinessRemediationInput["trust"]): Candidate[] {
+function trustCandidates(
+  trust: ReadinessRemediationInput["trust"],
+): Candidate[] {
   if (!trust) return [];
 
   const primary = String(trust.primaryBlocker ?? "");
   const blockers = Array.isArray(trust.blockers) ? trust.blockers : [];
 
   return blockers.map((item, index) => {
-    const category = categoryFromText(`${item.id ?? ""} ${item.label ?? ""} ${item.reason ?? ""}`);
+    const category = categoryFromText(
+      `${item.id ?? ""} ${item.label ?? ""} ${item.reason ?? ""}`,
+    );
     const defaults = CATEGORY_DEFAULTS[category];
     const id = String(item.id ?? `trust-${index}`);
 
@@ -378,18 +478,24 @@ function trustCandidates(trust: ReadinessRemediationInput["trust"]): Candidate[]
       category,
       title: defaults.title,
       severity: normalizedSeverity(item.severity),
-      reason: item.reason || item.label || "Trust Governor blocks increased participation.",
+      reason:
+        item.reason ||
+        item.label ||
+        "Trust Governor blocks increased participation.",
       currentScore: finiteOrNull(trust.trustScore),
       targetScore: defaults.targetScore,
       evidenceRequired: defaults.evidenceRequired,
       unlocks: item.unlockCriteria ?? trust.unlockCriteria ?? defaults.unlocks,
       sourceId: id,
-      trustPrimary: id === primary || normalizedCode(id) === normalizedCode(primary),
+      trustPrimary:
+        id === primary || normalizedCode(id) === normalizedCode(primary),
     };
   });
 }
 
-function calibrationCandidates(calibration: ReadinessRemediationInput["calibration"]): Candidate[] {
+function calibrationCandidates(
+  calibration: ReadinessRemediationInput["calibration"],
+): Candidate[] {
   if (!calibration) return [];
 
   const status = normalizedCode(calibration.status ?? "");
@@ -398,13 +504,19 @@ function calibrationCandidates(calibration: ReadinessRemediationInput["calibrati
     status.includes("UNSTABLE") ||
     status.includes("POOR") ||
     status.includes("INSUFFICIENT") ||
-    warnings.some((warning) => warning.includes("UNSTABLE") || warning.includes("OVERCONFIDENCE") || warning.includes("POOR"));
+    warnings.some(
+      (warning) =>
+        warning.includes("UNSTABLE") ||
+        warning.includes("OVERCONFIDENCE") ||
+        warning.includes("POOR"),
+    );
 
   if (!needsReview) return [];
 
   const raw = finiteOrNull(calibration.rawConfidence);
   const calibrated = finiteOrNull(calibration.calibratedConfidence);
-  const gap = raw != null && calibrated != null ? Math.max(0, raw - calibrated) : 0;
+  const gap =
+    raw != null && calibrated != null ? Math.max(0, raw - calibrated) : 0;
   const severity: ReadinessRemediationSeverity = status.includes("INSUFFICIENT")
     ? "medium"
     : gap >= 20 || status.includes("UNSTABLE")
@@ -412,56 +524,77 @@ function calibrationCandidates(calibration: ReadinessRemediationInput["calibrati
       : "medium";
   const defaults = CATEGORY_DEFAULTS.calibration;
 
-  return [{
-    id: `calibration:${status || "warnings"}`,
-    category: "calibration",
-    title: defaults.title,
-    severity,
-    reason: status.includes("UNSTABLE")
-      ? "Calibration has samples, but outcomes are unstable."
-      : status.includes("INSUFFICIENT")
-        ? "Calibration history is not deep enough yet."
-        : "Calibration quality does not support higher trust yet.",
-    currentScore: finiteOrNull(calibration.trustworthiness ?? calibrated),
-    targetScore: defaults.targetScore,
-    evidenceRequired: defaults.evidenceRequired,
-    unlocks: defaults.unlocks,
-    sourceId: status || "calibration",
-    trustPrimary: false,
-  }];
+  return [
+    {
+      id: `calibration:${status || "warnings"}`,
+      category: "calibration",
+      title: defaults.title,
+      severity,
+      reason: status.includes("UNSTABLE")
+        ? "Calibration has samples, but outcomes are unstable."
+        : status.includes("INSUFFICIENT")
+          ? "Calibration history is not deep enough yet."
+          : "Calibration quality does not support higher trust yet.",
+      currentScore: finiteOrNull(calibration.trustworthiness ?? calibrated),
+      targetScore: defaults.targetScore,
+      evidenceRequired: defaults.evidenceRequired,
+      unlocks: defaults.unlocks,
+      sourceId: status || "calibration",
+      trustPrimary: false,
+    },
+  ];
 }
 
-function robustnessCandidates(robustness: ReadinessRemediationInput["robustness"]): Candidate[] {
+function robustnessCandidates(
+  robustness: ReadinessRemediationInput["robustness"],
+): Candidate[] {
   if (!robustness) return [];
 
-  const overfitRisk = finiteOrNull(robustness.overfitRisk ?? robustness.overfitRiskPct);
-  const deploymentReadiness = finiteOrNull(robustness.deploymentReadiness ?? robustness.deploymentReadinessScore);
+  const overfitRisk = finiteOrNull(
+    robustness.overfitRisk ?? robustness.overfitRiskPct,
+  );
+  const deploymentReadiness = finiteOrNull(
+    robustness.deploymentReadiness ?? robustness.deploymentReadinessScore,
+  );
   const safetyGate = normalizedCode(robustness.safetyGate ?? "");
   const blocked = safetyGate.includes("BLOCK");
-  const risky = blocked || (overfitRisk != null && overfitRisk > 30) || (deploymentReadiness != null && deploymentReadiness < 60);
+  const risky =
+    blocked ||
+    (overfitRisk != null && overfitRisk > 30) ||
+    (deploymentReadiness != null && deploymentReadiness < 60);
 
   if (!risky) return [];
 
   const defaults = CATEGORY_DEFAULTS.robustness;
 
-  return [{
-    id: "robustness:overfit",
-    category: "robustness",
-    title: defaults.title,
-    severity: blocked || (overfitRisk != null && overfitRisk > 60) ? "critical" : "high",
-    reason: blocked
-      ? "Robustness safety gate blocks execution."
-      : "Robustness overfit risk is above the execution threshold.",
-    currentScore: overfitRisk == null ? finiteOrNull(robustness.robustnessScore) : clamp(100 - overfitRisk),
-    targetScore: defaults.targetScore,
-    evidenceRequired: defaults.evidenceRequired,
-    unlocks: defaults.unlocks,
-    sourceId: "robustness",
-    trustPrimary: false,
-  }];
+  return [
+    {
+      id: "robustness:overfit",
+      category: "robustness",
+      title: defaults.title,
+      severity:
+        blocked || (overfitRisk != null && overfitRisk > 60)
+          ? "critical"
+          : "high",
+      reason: blocked
+        ? "Robustness safety gate blocks execution."
+        : "Robustness overfit risk is above the execution threshold.",
+      currentScore:
+        overfitRisk == null
+          ? finiteOrNull(robustness.robustnessScore)
+          : clamp(100 - overfitRisk),
+      targetScore: defaults.targetScore,
+      evidenceRequired: defaults.evidenceRequired,
+      unlocks: defaults.unlocks,
+      sourceId: "robustness",
+      trustPrimary: false,
+    },
+  ];
 }
 
-function contextCandidates(context: ReadinessRemediationInput["context"]): Candidate[] {
+function contextCandidates(
+  context: ReadinessRemediationInput["context"],
+): Candidate[] {
   if (!context) return [];
 
   const maxConfidence = finiteOrNull(context.maxConfidence);
@@ -469,26 +602,35 @@ function contextCandidates(context: ReadinessRemediationInput["context"]): Candi
   const confidenceBlocked = maxConfidence != null && maxConfidence < 50;
   const readinessBlocked = readinessScore != null && readinessScore < 50;
 
-  if (!confidenceBlocked && !readinessBlocked && context.allowsNewExposure !== false) return [];
+  if (
+    !confidenceBlocked &&
+    !readinessBlocked &&
+    context.allowsNewExposure !== false
+  )
+    return [];
 
-  const category: ReadinessRemediationCategory = context.allowsNewExposure === false ? "capacity" : "strategy_edge";
+  const category: ReadinessRemediationCategory =
+    context.allowsNewExposure === false ? "capacity" : "strategy_edge";
   const defaults = CATEGORY_DEFAULTS[category];
 
-  return [{
-    id: `context:${category}`,
-    category,
-    title: defaults.title,
-    severity: confidenceBlocked || readinessBlocked ? "medium" : "high",
-    reason: context.allowsNewExposure === false
-      ? "The current state does not allow new exposure."
-      : "Readiness or confidence is below the review threshold.",
-    currentScore: readinessScore ?? maxConfidence,
-    targetScore: defaults.targetScore,
-    evidenceRequired: defaults.evidenceRequired,
-    unlocks: defaults.unlocks,
-    sourceId: category,
-    trustPrimary: false,
-  }];
+  return [
+    {
+      id: `context:${category}`,
+      category,
+      title: defaults.title,
+      severity: confidenceBlocked || readinessBlocked ? "medium" : "high",
+      reason:
+        context.allowsNewExposure === false
+          ? "The current state does not allow new exposure."
+          : "Readiness or confidence is below the review threshold.",
+      currentScore: readinessScore ?? maxConfidence,
+      targetScore: defaults.targetScore,
+      evidenceRequired: defaults.evidenceRequired,
+      unlocks: defaults.unlocks,
+      sourceId: category,
+      trustPrimary: false,
+    },
+  ];
 }
 
 function mergeCandidates(candidates: Candidate[]): Candidate[] {
@@ -505,10 +647,20 @@ function mergeCandidates(candidates: Candidate[]): Candidate[] {
     merged.set(candidate.category, {
       ...existing,
       severity: strongerSeverity(existing.severity, candidate.severity),
-      reason: existing.trustPrimary ? existing.reason : candidate.trustPrimary ? candidate.reason : existing.reason,
-      currentScore: lowerNullable(existing.currentScore, candidate.currentScore),
+      reason: existing.trustPrimary
+        ? existing.reason
+        : candidate.trustPrimary
+          ? candidate.reason
+          : existing.reason,
+      currentScore: lowerNullable(
+        existing.currentScore,
+        candidate.currentScore,
+      ),
       targetScore: Math.max(existing.targetScore, candidate.targetScore),
-      evidenceRequired: unique([...existing.evidenceRequired, ...candidate.evidenceRequired]),
+      evidenceRequired: unique([
+        ...existing.evidenceRequired,
+        ...candidate.evidenceRequired,
+      ]),
       unlocks: unique([...existing.unlocks, ...candidate.unlocks]),
       sourceId: unique([existing.sourceId, candidate.sourceId]).join(","),
       trustPrimary: existing.trustPrimary || candidate.trustPrimary,
@@ -520,8 +672,20 @@ function mergeCandidates(candidates: Candidate[]): Candidate[] {
 
 function candidateToStep(candidate: Candidate): ReadinessRemediationStep {
   const defaults = CATEGORY_DEFAULTS[candidate.category];
-  const deficit = candidate.currentScore == null ? 20 : Math.max(0, candidate.targetScore - candidate.currentScore);
-  const expectedTrustLift = round(clamp(defaults.baseLift + SEVERITY_WEIGHT[candidate.severity] + deficit / 5 + (candidate.trustPrimary ? 6 : 0), 1, 35));
+  const deficit =
+    candidate.currentScore == null
+      ? 20
+      : Math.max(0, candidate.targetScore - candidate.currentScore);
+  const expectedTrustLift = round(
+    clamp(
+      defaults.baseLift +
+        SEVERITY_WEIGHT[candidate.severity] +
+        deficit / 5 +
+        (candidate.trustPrimary ? 6 : 0),
+      1,
+      35,
+    ),
+  );
 
   return {
     id: `remediate:${candidate.category}`,
@@ -529,11 +693,12 @@ function candidateToStep(candidate: Candidate): ReadinessRemediationStep {
     title: candidate.title,
     priority: 0,
     severity: candidate.severity,
-    status: candidate.severity === "critical" || candidate.severity === "high"
-      ? "blocked"
-      : candidate.severity === "medium"
-        ? "review"
-        : "watch",
+    status:
+      candidate.severity === "critical" || candidate.severity === "high"
+        ? "blocked"
+        : candidate.severity === "medium"
+          ? "review"
+          : "watch",
     expectedTrustLift,
     effort: defaults.effort,
     reason: candidate.reason,
@@ -548,14 +713,18 @@ function candidateToStep(candidate: Candidate): ReadinessRemediationStep {
   };
 }
 
-function compareSteps(left: ReadinessRemediationStep, right: ReadinessRemediationStep) {
+function compareSteps(
+  left: ReadinessRemediationStep,
+  right: ReadinessRemediationStep,
+) {
   const statusDelta = statusRank(right.status) - statusRank(left.status);
   if (statusDelta !== 0) return statusDelta;
 
   const liftDelta = right.expectedTrustLift - left.expectedTrustLift;
   if (liftDelta !== 0) return liftDelta;
 
-  const severityDelta = SEVERITY_WEIGHT[right.severity] - SEVERITY_WEIGHT[left.severity];
+  const severityDelta =
+    SEVERITY_WEIGHT[right.severity] - SEVERITY_WEIGHT[left.severity];
   if (severityDelta !== 0) return severityDelta;
 
   return categoryRank(left.category) - categoryRank(right.category);
@@ -567,23 +736,38 @@ function executionGateFor(
   allowsNewExposure: boolean | undefined,
 ): ReadinessRemediationPlan["executionGate"] {
   const mode = normalizedCode(participationMode ?? "");
-  if (allowsNewExposure === false || mode.includes("BLOCKED") || steps.some((step) => step.severity === "critical")) {
+  if (
+    allowsNewExposure === false ||
+    mode.includes("BLOCKED") ||
+    steps.some((step) => step.severity === "critical")
+  ) {
     return "blocked";
   }
-  if (mode.includes("EXITS_ONLY") || mode.includes("PAPER") || steps.some((step) => step.status === "blocked")) {
+  if (
+    mode.includes("EXITS_ONLY") ||
+    mode.includes("PAPER") ||
+    steps.some((step) => step.status === "blocked")
+  ) {
     return "review";
   }
   return "open";
 }
 
-function statusFor(steps: ReadinessRemediationStep[], gate: ReadinessRemediationPlan["executionGate"]): ReadinessRemediationStatus {
+function statusFor(
+  steps: ReadinessRemediationStep[],
+  gate: ReadinessRemediationPlan["executionGate"],
+): ReadinessRemediationStatus {
   if (!steps.length) return "ready";
   if (gate === "blocked") return "blocked";
   if (gate === "review") return "review";
   return "watch";
 }
 
-function summaryFor(status: ReadinessRemediationStatus, steps: ReadinessRemediationStep[], lift: number) {
+function summaryFor(
+  status: ReadinessRemediationStatus,
+  steps: ReadinessRemediationStep[],
+  lift: number,
+) {
   if (status === "ready") return "No readiness remediation is required.";
   const first = steps[0];
   return `${first.title} is the highest-impact remediation step, with an estimated trust lift of ${lift.toFixed(1)} points across the top priorities.`;
@@ -591,34 +775,73 @@ function summaryFor(status: ReadinessRemediationStatus, steps: ReadinessRemediat
 
 function reasonForFlag(flag: string, fallbackTitle: string) {
   const code = normalizedCode(flag);
-  if (code.includes("LOW_SHARPE")) return "Risk-adjusted return is below the readiness threshold.";
-  if (code.includes("BENCHMARK")) return "The objective does not clear the benchmark margin.";
-  if (code.includes("WALK_FORWARD")) return "Walk-forward outcomes are not stable enough.";
-  if (code.includes("PARAMETER")) return "Nearby variants do not preserve the edge.";
-  if (code.includes("OUTLIER") || code.includes("CONCENTRATION") || code.includes("TOP_WINNER")) return "Returns depend too heavily on concentrated winners or periods.";
-  if (code.includes("ROBUSTNESS")) return "Robustness risk blocks higher trust.";
-  if (code.includes("CALIBRATION")) return "Calibration does not support higher trust yet.";
-  if (code.includes("DATA") || code.includes("SYNTHETIC")) return "Data quality is not reliable enough for promotion.";
-  if (code.includes("LIVE_SIGNAL") || code.includes("FORWARD_SHADOW")) return "Live or forward evidence is not sufficient yet.";
-  if (code.includes("DRAWDOWN") || code.includes("RISK")) return "Risk control is below threshold.";
+  if (code.includes("LOW_SHARPE"))
+    return "Risk-adjusted return is below the readiness threshold.";
+  if (code.includes("BENCHMARK"))
+    return "The objective does not clear the benchmark margin.";
+  if (code.includes("WALK_FORWARD"))
+    return "Walk-forward outcomes are not stable enough.";
+  if (code.includes("PARAMETER"))
+    return "Nearby variants do not preserve the edge.";
+  if (
+    code.includes("OUTLIER") ||
+    code.includes("CONCENTRATION") ||
+    code.includes("TOP_WINNER")
+  )
+    return "Returns depend too heavily on concentrated winners or periods.";
+  if (code.includes("ROBUSTNESS"))
+    return "Robustness risk blocks higher trust.";
+  if (code.includes("CALIBRATION"))
+    return "Calibration does not support higher trust yet.";
+  if (code.includes("DATA") || code.includes("SYNTHETIC"))
+    return "Data quality is not reliable enough for promotion.";
+  if (code.includes("LIVE_SIGNAL") || code.includes("FORWARD_SHADOW"))
+    return "Live or forward evidence is not sufficient yet.";
+  if (code.includes("DRAWDOWN") || code.includes("RISK"))
+    return "Risk control is below threshold.";
   return `${fallbackTitle} is required before readiness can improve.`;
 }
 
 function categoryFromText(value: string): ReadinessRemediationCategory {
   const code = normalizedCode(value);
   if (code.includes("CALIBRATION")) return "calibration";
-  if (code.includes("ROBUSTNESS") || code.includes("OVERFIT")) return "robustness";
+  if (code.includes("ROBUSTNESS") || code.includes("OVERFIT"))
+    return "robustness";
   if (code.includes("BENCHMARK")) return "benchmark";
-  if (code.includes("WALK_FORWARD") || code.includes("PERIOD")) return "walk_forward";
-  if (code.includes("SHARPE") || code.includes("STRATEGY_EDGE") || code.includes("RISK_ADJUSTED")) return "strategy_edge";
-  if (code.includes("PARAMETER") || code.includes("VARIANT")) return "parameter_stability";
-  if (code.includes("OUTLIER") || code.includes("CONCENTRATION") || code.includes("TOP_WINNER")) return "concentration";
-  if (code.includes("DATA") || code.includes("SYNTHETIC") || code.includes("STALE")) return "data_reliability";
-  if (code.includes("LIVE_SIGNAL") || code.includes("FORWARD_SHADOW") || code.includes("SIGNAL_MATCH")) return "live_signal";
-  if (code.includes("DRAWDOWN") || code.includes("RISK_CONTROL")) return "risk_control";
+  if (code.includes("WALK_FORWARD") || code.includes("PERIOD"))
+    return "walk_forward";
+  if (
+    code.includes("SHARPE") ||
+    code.includes("STRATEGY_EDGE") ||
+    code.includes("RISK_ADJUSTED")
+  )
+    return "strategy_edge";
+  if (code.includes("PARAMETER") || code.includes("VARIANT"))
+    return "parameter_stability";
+  if (
+    code.includes("OUTLIER") ||
+    code.includes("CONCENTRATION") ||
+    code.includes("TOP_WINNER")
+  )
+    return "concentration";
+  if (
+    code.includes("DATA") ||
+    code.includes("SYNTHETIC") ||
+    code.includes("STALE")
+  )
+    return "data_reliability";
+  if (
+    code.includes("LIVE_SIGNAL") ||
+    code.includes("FORWARD_SHADOW") ||
+    code.includes("SIGNAL_MATCH")
+  )
+    return "live_signal";
+  if (code.includes("DRAWDOWN") || code.includes("RISK_CONTROL"))
+    return "risk_control";
   if (code.includes("CAPACITY") || code.includes("EXPOSURE")) return "capacity";
   if (code.includes("BELIEF")) return "belief";
-  if (code.includes("JUDGEMENT") || code.includes("JUDGMENT")) return "judgement";
+  if (code.includes("JUDGEMENT") || code.includes("JUDGMENT"))
+    return "judgement";
   if (code.includes("AGENCY")) return "agency";
   return "other";
 }
@@ -631,7 +854,10 @@ function normalizedSeverity(value: unknown): ReadinessRemediationSeverity {
   return "medium";
 }
 
-function severityFromScore(score: number | null, target: number): ReadinessRemediationSeverity {
+function severityFromScore(
+  score: number | null,
+  target: number,
+): ReadinessRemediationSeverity {
   if (score == null) return "medium";
   const deficit = target - score;
   if (deficit >= 45) return "critical";
@@ -640,7 +866,10 @@ function severityFromScore(score: number | null, target: number): ReadinessRemed
   return "low";
 }
 
-function strongerSeverity(left: ReadinessRemediationSeverity, right: ReadinessRemediationSeverity) {
+function strongerSeverity(
+  left: ReadinessRemediationSeverity,
+  right: ReadinessRemediationSeverity,
+) {
   return SEVERITY_WEIGHT[right] > SEVERITY_WEIGHT[left] ? right : left;
 }
 
@@ -675,6 +904,5 @@ function finiteOrNull(value: unknown) {
 function unique(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)));
 }
-
 
 const round = (value: number) => Number(value.toFixed(2));

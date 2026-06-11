@@ -3,7 +3,7 @@
  * Provides typed read/write access to pipeline state with change notification.
  */
 
-import { EventBus } from "./EventBus";
+import type { EventBus } from "./EventBus";
 
 export type StateChange = {
   readonly key: string;
@@ -35,7 +35,11 @@ export class StateStore {
       timestamp: Date.now(),
     };
 
-    this.eventBus.emit("state:changed", { key, oldValue, newValue: value }, "StateStore");
+    this.eventBus.emit(
+      "state:changed",
+      { key, oldValue, newValue: value },
+      "StateStore",
+    );
   }
 
   delete(key: string): boolean {

@@ -1,8 +1,8 @@
-import { sizeFinancialExposure } from "./lib/financial-sizing";
 import {
   enrichStrategySignals,
   summarizeStrategyDecisionIntelligence,
 } from "./lib/decision-intelligence";
+import { sizeFinancialExposure } from "./lib/financial-sizing";
 
 type StrategyPoint = {
   date: string;
@@ -42,13 +42,22 @@ function clamp(value: number, min = 0, max = 100) {
 }
 
 function ticker(item: MarketItem) {
-  return String(item.symbol ?? item.ticker ?? item.name ?? "").trim().toUpperCase();
+  return String(item.symbol ?? item.ticker ?? item.name ?? "")
+    .trim()
+    .toUpperCase();
 }
 
 function priceOf(item: MarketItem) {
   return Math.max(
     0.01,
-    num(item.price ?? item.last ?? item.close ?? item.regularMarketPrice ?? item.value, 1),
+    num(
+      item.price ??
+        item.last ??
+        item.close ??
+        item.regularMarketPrice ??
+        item.value,
+      1,
+    ),
   );
 }
 
@@ -60,11 +69,10 @@ function changePctOf(item: MarketItem, index: number) {
     item.regularMarketChangePercent ??
     item.change;
 
-  const parsed = num(raw, NaN);
+  const parsed = num(raw, Number.NaN);
 
   if (Number.isFinite(parsed)) return parsed;
 
-  
   return Math.sin(index * 0.73) * 1.8 + Math.cos(index * 0.37) * 0.9;
 }
 
@@ -106,8 +114,8 @@ function generateSyntheticBars(item: MarketItem, index: number, days = 360) {
     });
   }
 
-  
-  const scale = currentPrice / Math.max(0.01, bars[bars.length - 1]?.close ?? currentPrice);
+  const scale =
+    currentPrice / Math.max(0.01, bars[bars.length - 1]?.close ?? currentPrice);
 
   return bars.map((bar) => ({
     date: bar.date,
@@ -116,7 +124,9 @@ function generateSyntheticBars(item: MarketItem, index: number, days = 360) {
 }
 
 function mean(values: number[]) {
-  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+  return values.length
+    ? values.reduce((sum, value) => sum + value, 0) / values.length
+    : 0;
 }
 
 function stdev(values: number[]) {
@@ -146,7 +156,9 @@ function returns(values: number[]) {
 }
 
 function pct(previous: number, current: number) {
-  return previous > 0 && current > 0 ? ((current - previous) / previous) * 100 : 0;
+  return previous > 0 && current > 0
+    ? ((current - previous) / previous) * 100
+    : 0;
 }
 
 function signalForBars(
@@ -155,17 +167,23 @@ function signalForBars(
   index: number,
   config: any,
 ) {
-  if (index < Math.max(config.slow, config.momentum, config.riskLookback) + 1) return null;
+  if (index < Math.max(config.slow, config.momentum, config.riskLookback) + 1)
+    return null;
 
   const closes = bars.map((bar) => bar.close);
   const close = closes[index];
   const fast = sma(closes, index, config.fast);
   const slow = sma(closes, index, config.slow);
   const momentum = pct(closes[index - config.momentum], close);
-  const vol = stdev(returns(closes.slice(index - config.riskLookback, index + 1))) * Math.sqrt(252) * 100;
+  const vol =
+    stdev(returns(closes.slice(index - config.riskLookback, index + 1))) *
+    Math.sqrt(252) *
+    100;
   const trend = slow > 0 ? ((fast - slow) / slow) * 100 : 0;
 
-  const setupQuality = clamp(50 + trend * 12 + momentum * 1.8 - Math.max(0, vol - 35) * 0.22);
+  const setupQuality = clamp(
+    50 + trend * 12 + momentum * 1.8 - Math.max(0, vol - 35) * 0.22,
+  );
   const riskPressure = clamp(vol * 0.9 + Math.max(0, -momentum) * 2.5);
 
   const buy =
@@ -183,7 +201,11 @@ function signalForBars(
 
   const rawSuggestedExposure =
     signalAction === "Buy"
-      ? clamp((setupQuality - riskPressure * 0.35) / 14, 0, config.maxPositionPct)
+      ? clamp(
+          (setupQuality - riskPressure * 0.35) / 14,
+          0,
+          config.maxPositionPct,
+        )
       : 0;
   const sizingConstraints = [
     {
@@ -258,7 +280,9 @@ function signalForBars(
           Math.max(0, momentum) * 8 +
           Math.max(0, trend) * 3,
       ),
-      expectedCost: clamp(Math.abs(momentum) * 4 + Math.max(0, vol - 35) * 0.35),
+      expectedCost: clamp(
+        Math.abs(momentum) * 4 + Math.max(0, vol - 35) * 0.35,
+      ),
       expectedRisk: riskPressure,
       uncertainty: 100 - setupQuality,
       confidence: setupQuality,
@@ -281,7 +305,8 @@ function signalForBars(
       context: { momentum, trend, volatilityPct: vol },
     },
   });
-  const suggestedExposure = signalAction === "Buy" ? financialSizing.suggestedExposurePct : 0;
+  const suggestedExposure =
+    signalAction === "Buy" ? financialSizing.suggestedExposurePct : 0;
 
   const regime =
     riskPressure > 72
@@ -383,7 +408,9 @@ function simulate(
     let deployedPct = 0;
 
     for (const signal of signals
-      .filter((item) => item.signalAction === "Buy" && item.suggestedExposure > 0)
+      .filter(
+        (item) => item.signalAction === "Buy" && item.suggestedExposure > 0,
+      )
       .sort((a, b) => b.setupQuality - a.setupQuality)) {
       if (deployedPct >= config.totalExposureCap) break;
 
@@ -406,7 +433,8 @@ function simulate(
     for (const [symbol, position] of Array.from(active.entries())) {
       if (!targets.has(symbol)) {
         const bars = grouped.get(symbol) ?? [];
-        const exit = bars.find((bar) => bar.date === date)?.close ?? position.entryPrice;
+        const exit =
+          bars.find((bar) => bar.date === date)?.close ?? position.entryPrice;
         const gross = pct(position.entryPrice, exit);
         const cost = (config.spreadBps + config.slippageBps) / 100;
 
@@ -455,8 +483,8 @@ function simulate(
 
     equity = Math.max(0, equity * (1 + dailyReturn));
 
-    const dailyReturnPct = lastEquity > 0 ? ((equity / lastEquity) - 1) * 100 : 0;
-    const returnPct = ((equity / initialEquity) - 1) * 100;
+    const dailyReturnPct = lastEquity > 0 ? (equity / lastEquity - 1) * 100 : 0;
+    const returnPct = (equity / initialEquity - 1) * 100;
 
     lastEquity = equity;
 
@@ -487,7 +515,10 @@ function simulate(
 
   for (const point of curve) {
     peak = Math.max(peak, point.equity);
-    maxDrawdownPct = Math.max(maxDrawdownPct, peak > 0 ? ((peak - point.equity) / peak) * 100 : 0);
+    maxDrawdownPct = Math.max(
+      maxDrawdownPct,
+      peak > 0 ? ((peak - point.equity) / peak) * 100 : 0,
+    );
   }
 
   const tradeReturns = trades.map((trade) => trade.returnPct);
@@ -497,8 +528,11 @@ function simulate(
   const grossProfit = wins.reduce((sum, value) => sum + value, 0);
   const grossLoss = Math.abs(losses.reduce((sum, value) => sum + value, 0));
 
-  const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? 999 : null;
-  const winRatePct = tradeReturns.length ? (wins.length / tradeReturns.length) * 100 : null;
+  const profitFactor =
+    grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? 999 : null;
+  const winRatePct = tradeReturns.length
+    ? (wins.length / tradeReturns.length) * 100
+    : null;
   const totalReturnPct = curve.length ? curve[curve.length - 1].returnPct : 0;
 
   const survivalScore = clamp(
@@ -539,8 +573,14 @@ export function runLocalWalkForwardStrategy(input: {
   maxBars?: number;
 }) {
   const market = input.market;
-  const symbolLimit = Math.max(5, Math.min(Number(input.symbolLimit ?? 40), 120));
-  const configLimit = Math.max(4, Math.min(Number(input.configLimit ?? 24), 80));
+  const symbolLimit = Math.max(
+    5,
+    Math.min(Number(input.symbolLimit ?? 40), 120),
+  );
+  const configLimit = Math.max(
+    4,
+    Math.min(Number(input.configLimit ?? 24), 80),
+  );
   const maxBars = Math.max(120, Math.min(Number(input.maxBars ?? 360), 720));
 
   const items = input.items.slice(0, symbolLimit);
@@ -552,16 +592,25 @@ export function runLocalWalkForwardStrategy(input: {
   });
 
   const dates = Array.from(
-    new Set(Array.from(grouped.values()).flatMap((bars) => bars.map((bar) => bar.date))),
+    new Set(
+      Array.from(grouped.values()).flatMap((bars) =>
+        bars.map((bar) => bar.date),
+      ),
+    ),
   ).sort();
 
-  const results = configGrid(configLimit).map((config) => simulate(grouped, dates, config));
+  const results = configGrid(configLimit).map((config) =>
+    simulate(grouped, dates, config),
+  );
 
   results.sort((a, b) => {
     const survivalDelta = b.summary.survivalScore - a.summary.survivalScore;
     if (survivalDelta !== 0) return survivalDelta;
 
-    return (b.summary.annualizedSharpe ?? -999) - (a.summary.annualizedSharpe ?? -999);
+    return (
+      (b.summary.annualizedSharpe ?? -999) -
+      (a.summary.annualizedSharpe ?? -999)
+    );
   });
 
   const best = results[0];
@@ -570,7 +619,9 @@ export function runLocalWalkForwardStrategy(input: {
   const signals = Array.from(grouped.entries())
     .map(([symbol, bars]) => {
       const index = bars.findIndex((bar) => bar.date === latestDate);
-      return index >= 0 ? signalForBars(symbol, bars, index, best.config) : null;
+      return index >= 0
+        ? signalForBars(symbol, bars, index, best.config)
+        : null;
     })
     .filter(Boolean)
     .sort((a: any, b: any) => b.setupQuality - a.setupQuality);
@@ -594,7 +645,8 @@ export function runLocalWalkForwardStrategy(input: {
       survivalScore: best.summary.survivalScore,
     },
     signals: decisionSignals,
-    decisionIntelligence: summarizeStrategyDecisionIntelligence(decisionSignals),
+    decisionIntelligence:
+      summarizeStrategyDecisionIntelligence(decisionSignals),
     summary: {
       market,
       ...best.summary,

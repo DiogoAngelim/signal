@@ -4,11 +4,15 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { handleLiquidityManagerApiRequest } from "../src/api/handler.js";
 import {
+  createUnofficialNubankSessionAdapter,
+  normalizeNubankFeed,
+  resolveNubankFactory,
+} from "../src/api/nubank-adapter.js";
+import {
   createNubankApiSessionAdapter,
   normalizeNubankApiAccountTransactions,
-  normalizeNubankApiCardTransactions
+  normalizeNubankApiCardTransactions,
 } from "../src/api/nubank-api-adapter.js";
-import { createUnofficialNubankSessionAdapter, normalizeNubankFeed, resolveNubankFactory } from "../src/api/nubank-adapter.js";
 
 const NOW = new Date("2026-06-03T12:00:00.000Z");
 
@@ -21,20 +25,24 @@ describe("Liquidity Manager local API", () => {
       statementPath,
       `Data,Valor,Identificador,Descrição
 01/04/2026,100.00,nu-1,Transferência recebida pelo Pix
-01/04/2026,-20.00,nu-2,Compra no débito`
+01/04/2026,-20.00,nu-2,Compra no débito`,
     );
     writeFileSync(
       manifestPath,
       JSON.stringify({
         currentBalance: 3906.91,
         balanceSource: "Unit-test override",
-        interval: { firstMonth: "2026-04", lastMonth: "2026-04", monthCount: 1 },
+        interval: {
+          firstMonth: "2026-04",
+          lastMonth: "2026-04",
+          monthCount: 1,
+        },
         missingMonths: [],
         sourceFileCount: 1,
         uniqueFileCount: 1,
         removedDuplicateFileCount: 0,
-        transactionRows: 2
-      })
+        transactionRows: 2,
+      }),
     );
 
     const response = await handleLiquidityManagerApiRequest(
@@ -42,8 +50,8 @@ describe("Liquidity Manager local API", () => {
       {
         localStatementPath: statementPath,
         localStatementManifestPath: manifestPath,
-        now: () => NOW
-      }
+        now: () => NOW,
+      },
     );
     const result = await response.json();
 
@@ -65,8 +73,8 @@ describe("Liquidity Manager local API", () => {
           userId: "u1",
           cpf: "123.456.789-09",
           password: "never-return-this",
-          authCode: "qr-id-never-return-this"
-        })
+          authCode: "qr-id-never-return-this",
+        }),
       }),
       {
         now: () => NOW,
@@ -82,13 +90,13 @@ describe("Liquidity Manager local API", () => {
                   source: "nubank",
                   amount: 7200,
                   description: "Salary deposit",
-                  date: new Date("2026-05-25T12:00:00.000Z")
-                }
-              ]
+                  date: new Date("2026-05-25T12:00:00.000Z"),
+                },
+              ],
             };
-          }
-        }
-      }
+          },
+        },
+      },
     );
 
     const text = await response.text();
@@ -116,10 +124,10 @@ describe("Liquidity Manager local API", () => {
       new Request("http://127.0.0.1/api/nubank/connect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cpf: "", password: "" })
-      })
+        body: JSON.stringify({ cpf: "", password: "" }),
+      }),
     );
-    const result = await response.json() as { ok: boolean; message: string };
+    const result = (await response.json()) as { ok: boolean; message: string };
 
     expect(response.status).toBe(400);
     expect(result.ok).toBe(false);
@@ -127,14 +135,26 @@ describe("Liquidity Manager local API", () => {
   });
 
   it("authenticates with the GitHub nubank-api QR flow and normalizes account and card records", async () => {
-    const authCalls: Array<{ cpf: string; password: string; authCode: string }> = [];
+    const authCalls: Array<{
+      cpf: string;
+      password: string;
+      authCode: string;
+    }> = [];
     const adapter = createNubankApiSessionAdapter({
       createClient: () => ({
-        authState: { accessToken: "secret-auth-state", privateUrls: {}, publicUrls: {} },
+        authState: {
+          accessToken: "secret-auth-state",
+          privateUrls: {},
+          publicUrls: {},
+        },
         auth: {
-          authenticateWithQrCode: async (cpf: string, password: string, authCode: string) => {
+          authenticateWithQrCode: async (
+            cpf: string,
+            password: string,
+            authCode: string,
+          ) => {
             authCalls.push({ cpf, password, authCode });
-          }
+          },
         },
         account: {
           getBalance: async () => 123456,
@@ -145,17 +165,17 @@ describe("Liquidity Manager local API", () => {
                 __typename: "PixTransferOutEvent",
                 title: "Pix sent",
                 detail: "R$ 35,00",
-                postDate: "2026-05-10"
+                postDate: "2026-05-10",
               },
               {
                 id: "account-2",
                 __typename: "TransferInEvent",
                 title: "Transfer received",
                 detail: "R$ 150,00",
-                postDate: "2026-05-11"
-              }
-            ]
-          })
+                postDate: "2026-05-11",
+              },
+            ],
+          }),
         },
         card: {
           getTransactions: async () => [
@@ -164,8 +184,8 @@ describe("Liquidity Manager local API", () => {
               category: "transaction",
               title: "Market",
               amount: 3210,
-              time: "2026-05-12T12:00:00.000Z"
-            }
+              time: "2026-05-12T12:00:00.000Z",
+            },
           ],
           getPayments: async () => [
             {
@@ -173,36 +193,44 @@ describe("Liquidity Manager local API", () => {
               category: "payment",
               title: "Card payment",
               amount: 200000,
-              time: "2026-05-13T12:00:00.000Z"
-            }
-          ]
-        }
-      })
+              time: "2026-05-13T12:00:00.000Z",
+            },
+          ],
+        },
+      }),
     });
 
     const session = await adapter.createSession({
       cpf: "123.456.789-09",
       password: "temporary",
-      authCode: "qr-auth-id"
+      authCode: "qr-auth-id",
     });
 
-    expect(authCalls).toEqual([{ cpf: "12345678909", password: "temporary", authCode: "qr-auth-id" }]);
+    expect(authCalls).toEqual([
+      { cpf: "12345678909", password: "temporary", authCode: "qr-auth-id" },
+    ]);
     expect(session.balances?.[0]?.availableAmount).toBe(1234.56);
-    expect(session.transactions?.map((transaction) => transaction.amount)).toEqual([-35, 150, -32.1, 2000]);
-    expect(JSON.stringify(session.transactions)).not.toContain("secret-auth-state");
+    expect(
+      session.transactions?.map((transaction) => transaction.amount),
+    ).toEqual([-35, 150, -32.1, 2000]);
+    expect(JSON.stringify(session.transactions)).not.toContain(
+      "secret-auth-state",
+    );
   });
 
   it("requires QR id or saved auth state for the GitHub nubank-api adapter", async () => {
     const adapter = createNubankApiSessionAdapter({
       createClient: () => ({
         auth: {
-          authenticateWithQrCode: async () => undefined
-        }
-      })
+          authenticateWithQrCode: async () => undefined,
+        },
+      }),
     });
 
-    await expect(adapter.createSession({ cpf: "12345678909", password: "temporary" })).rejects.toMatchObject({
-      publicMessage: expect.stringContaining("QR authorization")
+    await expect(
+      adapter.createSession({ cpf: "12345678909", password: "temporary" }),
+    ).rejects.toMatchObject({
+      publicMessage: expect.stringContaining("QR authorization"),
     });
   });
 
@@ -214,8 +242,8 @@ describe("Liquidity Manager local API", () => {
         body: JSON.stringify({
           userId: "u1",
           cpf: "12345678909",
-          password: "temporary"
-        })
+          password: "temporary",
+        }),
       }),
       {
         nubankAdapter: createUnofficialNubankSessionAdapter({
@@ -223,19 +251,24 @@ describe("Liquidity Manager local API", () => {
             getLoginToken: async () => {
               throw new Error("raw upstream detail");
             },
-            getWholeFeed: async () => []
-          })
-        })
-      }
+            getWholeFeed: async () => [],
+          }),
+        }),
+      },
     );
 
     const response = await handleLiquidityManagerApiRequest(
-      new Request("http://127.0.0.1/api/nubank/last-attempt")
+      new Request("http://127.0.0.1/api/nubank/last-attempt"),
     );
     const text = await response.text();
     const result = JSON.parse(text) as {
       ok: boolean;
-      attempt: { status: string; statusCode: number; message: string; updatedAt: string };
+      attempt: {
+        status: string;
+        statusCode: number;
+        message: string;
+        updatedAt: string;
+      };
     };
 
     expect(response.status).toBe(200);
@@ -257,8 +290,8 @@ describe("Liquidity Manager local API", () => {
         body: JSON.stringify({
           userId: "u1",
           cpf: "12345678909",
-          password: "temporary"
-        })
+          password: "temporary",
+        }),
       }),
       {
         nubankAdapter: createUnofficialNubankSessionAdapter({
@@ -266,10 +299,10 @@ describe("Liquidity Manager local API", () => {
             getLoginToken: async () => {
               throw new Error("raw auth provider detail");
             },
-            getWholeFeed: async () => []
-          })
-        })
-      }
+            getWholeFeed: async () => [],
+          }),
+        }),
+      },
     );
     const text = await response.text();
     const result = JSON.parse(text) as { ok: boolean; message: string };
@@ -291,20 +324,20 @@ describe("Liquidity Manager local API", () => {
         body: JSON.stringify({
           userId: "u1",
           cpf: "123.456.789-09",
-          password: "temporary"
-        })
+          password: "temporary",
+        }),
       }),
       {
         nubankAdapter: createUnofficialNubankSessionAdapter({
           createClient: () => ({
             getLoginToken: async ({ login }: { login: string }) => ({
               access_token: "token",
-              login
+              login,
             }),
-            getWholeFeed: async () => []
-          })
-        })
-      }
+            getWholeFeed: async () => [],
+          }),
+        }),
+      },
     );
     const text = await response.text();
     const result = JSON.parse(text) as { ok: boolean; message: string };
@@ -324,15 +357,15 @@ describe("Liquidity Manager local API", () => {
         title: "Coffee",
         category: "transaction",
         amount: 1890,
-        time: "2026-05-12T12:00:00.000Z"
+        time: "2026-05-12T12:00:00.000Z",
       },
       {
         id: "feed-2",
         description: "Payment received",
         category: "payment",
         amount: 500000,
-        date: "2026-05-25T12:00:00.000Z"
-      }
+        date: "2026-05-25T12:00:00.000Z",
+      },
     ]);
 
     expect(transactions).toHaveLength(2);
@@ -341,25 +374,29 @@ describe("Liquidity Manager local API", () => {
   });
 
   it("normalizes nubank-api account and card transaction shapes", () => {
-    expect(normalizeNubankApiAccountTransactions([
-      {
-        id: "account-1",
-        __typename: "BillPaymentEvent",
-        title: "Bill",
-        detail: "R$ 82,40",
-        postDate: "2026-05-14"
-      }
-    ])[0]?.amount).toBe(-82.4);
+    expect(
+      normalizeNubankApiAccountTransactions([
+        {
+          id: "account-1",
+          __typename: "BillPaymentEvent",
+          title: "Bill",
+          detail: "R$ 82,40",
+          postDate: "2026-05-14",
+        },
+      ])[0]?.amount,
+    ).toBe(-82.4);
 
-    expect(normalizeNubankApiCardTransactions([
-      {
-        id: "payment-1",
-        category: "payment",
-        title: "Payment",
-        amount: 500000,
-        time: "2026-05-15T12:00:00.000Z"
-      }
-    ])[0]?.amount).toBe(5000);
+    expect(
+      normalizeNubankApiCardTransactions([
+        {
+          id: "payment-1",
+          category: "payment",
+          title: "Payment",
+          amount: 500000,
+          time: "2026-05-15T12:00:00.000Z",
+        },
+      ])[0]?.amount,
+    ).toBe(5000);
   });
 
   it("unwraps the old CommonJS Nubank package default export", () => {

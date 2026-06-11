@@ -8,9 +8,17 @@
     "strategy": "constraint_first",
     "policy": "balanced",
     "resource": { "available": 1000 },
-    "decisions": [{ "id": "go", "confidence": 0.82, "trust": 0.8, "risk": 0.25 }],
+    "decisions": [
+      { "id": "go", "confidence": 0.82, "trust": 0.8, "risk": 0.25 }
+    ],
     "constraints": [
-      { "id": "soft-review", "type": "soft", "severity": "medium", "passed": false, "reason": "Review is stale." },
+      {
+        "id": "soft-review",
+        "type": "soft",
+        "severity": "medium",
+        "passed": false,
+        "reason": "Review is stale."
+      },
       { "id": "global-small", "maxCommitmentRatio": 0.1 }
     ],
     "now": "2026-06-01T00:00:00Z"
@@ -23,7 +31,13 @@
     "limitedBy": ["soft-review", "constraint_cap"],
     "cappedBy": ["constraint.global_cap"],
     "recommendations": [
-      { "targetId": "go", "amount": 100, "normalizedCommitment": 0.1, "weight": 1, "mode": "limited" }
+      {
+        "targetId": "go",
+        "amount": 100,
+        "normalizedCommitment": 0.1,
+        "weight": 1,
+        "mode": "limited"
+      }
     ]
   }
 }

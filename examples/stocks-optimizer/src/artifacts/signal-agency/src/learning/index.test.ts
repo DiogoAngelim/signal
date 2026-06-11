@@ -12,14 +12,28 @@ function trace(input: {
   return {
     traceId: `${input.kind ?? "prepare_response"}-${input.confidence ?? 0.8}-${success}`,
     timestamp: "2026-01-01T00:00:00.000Z",
-    decision: { kind: input.kind ?? "prepare_response", confidence: input.confidence ?? 0.8 },
+    decision: {
+      kind: input.kind ?? "prepare_response",
+      confidence: input.confidence ?? 0.8,
+    },
     policy: {
       allowed: input.allowed ?? true,
       requiresApproval: false,
-      reason: input.allowed === false ? "Policy blocked action: test." : "Policy allowed action.",
+      reason:
+        input.allowed === false
+          ? "Policy blocked action: test."
+          : "Policy allowed action.",
       violations: input.allowed === false ? ["test"] : [],
     },
-    outcome: { success, outcomeLabel: success === true ? "positive" : success === false ? "negative" : "unknown" },
+    outcome: {
+      success,
+      outcomeLabel:
+        success === true
+          ? "positive"
+          : success === false
+            ? "negative"
+            : "unknown",
+    },
     selfDiagnosis: {
       trust: 0.5,
       dataReliability: 0.5,
@@ -40,12 +54,15 @@ const overconfident: CalibrationResult = {
 
 describe("learning", () => {
   it("identifies poor high-confidence, blocked, successful, and missing-outcome patterns", () => {
-    const result = learnFromTraces([
-      trace({ confidence: 0.9, success: false }),
-      trace({ success: true, kind: "prepare_response" }),
-      trace({ success: true, kind: "prepare_response" }),
-      trace({ allowed: false, success: null }),
-    ], overconfident);
+    const result = learnFromTraces(
+      [
+        trace({ confidence: 0.9, success: false }),
+        trace({ success: true, kind: "prepare_response" }),
+        trace({ success: true, kind: "prepare_response" }),
+        trace({ allowed: false, success: null }),
+      ],
+      overconfident,
+    );
 
     expect(result.learnedPatterns).toEqual([
       "1 high-confidence decision(s) had poor outcomes.",
@@ -62,17 +79,19 @@ describe("learning", () => {
   });
 
   it("adjusts confidence upward for underconfidence and supports custom thresholds", () => {
-    const result = learnFromTraces([
-      trace({ success: true, kind: "collect_context", confidence: 0.7 }),
-    ], {
-      calibratedConfidence: 0.7,
-      calibrationError: -0.2,
-      reliability: "underconfident",
-      sampleSize: 3,
-    }, {
-      highConfidenceThreshold: 0.95,
-      similarSuccessThreshold: 1,
-    });
+    const result = learnFromTraces(
+      [trace({ success: true, kind: "collect_context", confidence: 0.7 })],
+      {
+        calibratedConfidence: 0.7,
+        calibrationError: -0.2,
+        reliability: "underconfident",
+        sampleSize: 3,
+      },
+      {
+        highConfidenceThreshold: 0.95,
+        similarSuccessThreshold: 1,
+      },
+    );
 
     expect(result.learnedPatterns).toEqual([
       'Decision kind "collect_context" has repeated successful outcomes.',
@@ -82,7 +101,9 @@ describe("learning", () => {
   });
 
   it("returns an empty result when no reusable pattern is present", () => {
-    expect(learnFromTraces([trace({ confidence: 0.4, success: true })])).toEqual({
+    expect(
+      learnFromTraces([trace({ confidence: 0.4, success: true })]),
+    ).toEqual({
       learnedPatterns: [],
       confidenceAdjustment: 0,
       policySuggestions: [],

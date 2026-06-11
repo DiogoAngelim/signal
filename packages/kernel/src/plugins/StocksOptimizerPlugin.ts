@@ -9,15 +9,21 @@
  * wrapped through the adapter base classes.
  */
 
-import type { SignalPlugin, PluginContext } from "../plugin/SignalPlugin";
-import type { SignalGeneratorInput, SignalGeneratorOutput } from "../interfaces/SignalGenerator";
-import type { AnalyzerInput, AnalyzerOutput } from "../interfaces/Analyzer";
-import type { ScorerInput, ScorerOutput } from "../interfaces/Scorer";
-import type { AggregatorInput, AggregatorOutput } from "../interfaces/Aggregator";
-import { BaseSignalGenerator } from "../adapters/BaseSignalGenerator";
+import { BaseAggregator } from "../adapters/BaseAggregator";
 import { BaseAnalyzer } from "../adapters/BaseAnalyzer";
 import { BaseScorer } from "../adapters/BaseScorer";
-import { BaseAggregator } from "../adapters/BaseAggregator";
+import { BaseSignalGenerator } from "../adapters/BaseSignalGenerator";
+import type {
+  AggregatorInput,
+  AggregatorOutput,
+} from "../interfaces/Aggregator";
+import type { AnalyzerInput, AnalyzerOutput } from "../interfaces/Analyzer";
+import type { ScorerInput, ScorerOutput } from "../interfaces/Scorer";
+import type {
+  SignalGeneratorInput,
+  SignalGeneratorOutput,
+} from "../interfaces/SignalGenerator";
+import type { PluginContext, SignalPlugin } from "../plugin/SignalPlugin";
 
 // ─── Stocks Generator ──────────────────────────────────────────
 // Wraps the signal-framework's perception/synchronization stages
@@ -27,17 +33,23 @@ export class StocksGenerator extends BaseSignalGenerator {
   readonly id = "stocks-generator";
   readonly version = 1;
 
-  private _generateFn?: (input: SignalGeneratorInput) => Promise<SignalGeneratorOutput>;
+  private _generateFn?: (
+    input: SignalGeneratorInput,
+  ) => Promise<SignalGeneratorOutput>;
 
   /**
    * Set the underlying generate function from the signal-framework.
    * This is called during plugin registration to wire the existing module.
    */
-  setGenerateFn(fn: (input: SignalGeneratorInput) => Promise<SignalGeneratorOutput>): void {
+  setGenerateFn(
+    fn: (input: SignalGeneratorInput) => Promise<SignalGeneratorOutput>,
+  ): void {
     this._generateFn = fn;
   }
 
-  protected async doGenerate(input: SignalGeneratorInput): Promise<SignalGeneratorOutput> {
+  protected async doGenerate(
+    input: SignalGeneratorInput,
+  ): Promise<SignalGeneratorOutput> {
     if (!this._generateFn) {
       // Default: pass-through features from input
       return { ...input };
@@ -86,7 +98,11 @@ export class StocksScorer extends BaseScorer {
   protected async doScore(input: ScorerInput): Promise<ScorerOutput> {
     if (!this._scoreFn) {
       // Default: neutral scoring
-      return { score: 0.5, confidence: 0.5, rationale: { source: "stocks-scorer-default" } };
+      return {
+        score: 0.5,
+        confidence: 0.5,
+        rationale: { source: "stocks-scorer-default" },
+      };
     }
     return this._scoreFn(input);
   }
@@ -102,14 +118,22 @@ export class StocksAggregator extends BaseAggregator {
 
   private _aggregateFn?: (input: AggregatorInput) => Promise<AggregatorOutput>;
 
-  setAggregateFn(fn: (input: AggregatorInput) => Promise<AggregatorOutput>): void {
+  setAggregateFn(
+    fn: (input: AggregatorInput) => Promise<AggregatorOutput>,
+  ): void {
     this._aggregateFn = fn;
   }
 
-  protected async doAggregate(input: AggregatorInput): Promise<AggregatorOutput> {
+  protected async doAggregate(
+    input: AggregatorInput,
+  ): Promise<AggregatorOutput> {
     if (!this._aggregateFn) {
       // Default: pass-through aggregation
-      return { decision: "hold", weight: 0.5, metadata: { source: "stocks-aggregator-default" } };
+      return {
+        decision: "hold",
+        weight: 0.5,
+        metadata: { source: "stocks-aggregator-default" },
+      };
     }
     return this._aggregateFn(input);
   }
@@ -121,9 +145,15 @@ export class StocksOptimizerPlugin implements SignalPlugin {
   readonly id = "stocks-optimizer";
   readonly name = "Stocks Optimizer";
   readonly version = 1;
-  readonly description = "Stocks market signal analysis plugin — wraps the signal-framework pipeline stages";
+  readonly description =
+    "Stocks market signal analysis plugin — wraps the signal-framework pipeline stages";
   readonly domain = "stocks";
-  readonly capabilities = ["generate", "analyze", "score", "aggregate"] as const;
+  readonly capabilities = [
+    "generate",
+    "analyze",
+    "score",
+    "aggregate",
+  ] as const;
 
   private readonly _generator: StocksGenerator;
   private readonly _analyzer: StocksAnalyzer;
@@ -174,7 +204,10 @@ export type StocksFrameworkFns = {
   aggregate?: (input: AggregatorInput) => Promise<AggregatorOutput>;
 };
 
-export function wireStocksFramework(plugin: StocksOptimizerPlugin, fns: StocksFrameworkFns): void {
+export function wireStocksFramework(
+  plugin: StocksOptimizerPlugin,
+  fns: StocksFrameworkFns,
+): void {
   if (fns.generate) plugin.getGenerator().setGenerateFn(fns.generate);
   if (fns.analyze) plugin.getAnalyzer().setAnalyzeFn(fns.analyze);
   if (fns.score) plugin.getScorer().setScoreFn(fns.score);

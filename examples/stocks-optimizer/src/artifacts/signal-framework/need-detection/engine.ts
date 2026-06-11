@@ -1,4 +1,3 @@
-
 import { clamp, mean, numeric } from "../math/statistics";
 import type {
   DetectedNeed,
@@ -40,92 +39,163 @@ const RECOMMENDATIONS: Record<NeedCategory, string[]> = {
   ],
 };
 
-
-
-
-
-
-
-
-
-export function detectNeeds(input: NeedDetectionInput, options: NeedDetectionOptions = {}): DetectedNeed[] {
+export function detectNeeds(
+  input: NeedDetectionInput,
+  options: NeedDetectionOptions = {},
+): DetectedNeed[] {
   const settings = { ...DEFAULT_OPTIONS, ...options };
   const perceptionScore = score(input.perception?.compositeScore, 50);
   const perceptionConfidence = score(input.perception?.confidence, 50);
   const agreement = score(input.perception?.agreement, 50);
-  const uncertainty = score(input.diagnostics?.uncertainty, 100 - perceptionConfidence);
+  const uncertainty = score(
+    input.diagnostics?.uncertainty,
+    100 - perceptionConfidence,
+  );
   const trust = score(input.diagnostics?.trust, perceptionConfidence);
   const synchronization = score(input.synchronization?.score, 50);
-  const readiness = score(input.executionReadiness?.readinessScore, perceptionScore);
-  const executionSuitability = score(input.executionReadiness?.executionSuitability, readiness);
-  const riskSuggestion = score(input.executionReadiness?.riskAdjustedExposureSuggestion, executionSuitability);
-  const contradictionDensity = score(input.diagnostics?.contradictionDensity, 0);
-  
+  const readiness = score(
+    input.executionReadiness?.readinessScore,
+    perceptionScore,
+  );
+  const executionSuitability = score(
+    input.executionReadiness?.executionSuitability,
+    readiness,
+  );
+  const riskSuggestion = score(
+    input.executionReadiness?.riskAdjustedExposureSuggestion,
+    executionSuitability,
+  );
+  const contradictionDensity = score(
+    input.diagnostics?.contradictionDensity,
+    0,
+  );
+
   const contradictionCount = input.diagnostics?.contradictions?.length ?? 0;
   const rankingCount = input.rankings?.length ?? 0;
-  const emergingCount = input.rankings?.filter((ranking) => ranking.emerging).length ?? 0;
+  const emergingCount =
+    input.rankings?.filter((ranking) => ranking.emerging).length ?? 0;
   const candidateCount = input.opportunities?.length ?? 0;
-  const explicitDensity = input.opportunityDensity == null ? undefined : score(input.opportunityDensity, 0);
-  const opportunityDensity = explicitDensity ?? clamp(candidateCount * 8 + emergingCount * 5 + Math.min(rankingCount, 8) * 2);
-  const health = mean([perceptionScore, perceptionConfidence, agreement, trust, synchronization]);
+  const explicitDensity =
+    input.opportunityDensity == null
+      ? undefined
+      : score(input.opportunityDensity, 0);
+  const opportunityDensity =
+    explicitDensity ??
+    clamp(
+      candidateCount * 8 + emergingCount * 5 + Math.min(rankingCount, 8) * 2,
+    );
+  const health = mean([
+    perceptionScore,
+    perceptionConfidence,
+    agreement,
+    trust,
+    synchronization,
+  ]);
   const needs: DetectedNeed[] = [];
 
-  pushNeed(needs, {
-    category: "discover-opportunities",
-    severity: clamp(settings.targetOpportunityDensity - opportunityDensity + Math.max(0, health - 50) * 0.5),
-    confidence: mean([perceptionConfidence, trust, synchronization]),
-    explanation:
-      "The objective has acceptable operating conditions, but the candidate surface is not dense enough to deploy capital confidently.",
-  }, settings);
+  pushNeed(
+    needs,
+    {
+      category: "discover-opportunities",
+      severity: clamp(
+        settings.targetOpportunityDensity -
+          opportunityDensity +
+          Math.max(0, health - 50) * 0.5,
+      ),
+      confidence: mean([perceptionConfidence, trust, synchronization]),
+      explanation:
+        "The objective has acceptable operating conditions, but the candidate surface is not dense enough to deploy capital confidently.",
+    },
+    settings,
+  );
 
-  pushNeed(needs, {
-    category: "gather-evidence",
-    severity: clamp(uncertainty * 0.72 + Math.max(0, 55 - perceptionConfidence) * 0.34 + Math.max(0, 55 - synchronization) * 0.28),
-    confidence: mean([100 - uncertainty, synchronization, trust]),
-    explanation:
-      "The system lacks enough reliable evidence to convert observations into a higher-conviction action.",
-  }, settings);
+  pushNeed(
+    needs,
+    {
+      category: "gather-evidence",
+      severity: clamp(
+        uncertainty * 0.72 +
+          Math.max(0, 55 - perceptionConfidence) * 0.34 +
+          Math.max(0, 55 - synchronization) * 0.28,
+      ),
+      confidence: mean([100 - uncertainty, synchronization, trust]),
+      explanation:
+        "The system lacks enough reliable evidence to convert observations into a higher-conviction action.",
+    },
+    settings,
+  );
 
-  pushNeed(needs, {
-    category: "reduce-exposure",
-    severity: clamp(Math.max(0, 45 - riskSuggestion) * 1.55 + Math.max(0, 45 - layerScore(input, "survival")) * 0.72),
-    confidence: mean([perceptionConfidence, trust, 100 - uncertainty]),
-    explanation:
-      "Risk-adjusted participation capacity is below the level required for additional exposure.",
-  }, settings);
+  pushNeed(
+    needs,
+    {
+      category: "reduce-exposure",
+      severity: clamp(
+        Math.max(0, 45 - riskSuggestion) * 1.55 +
+          Math.max(0, 45 - layerScore(input, "survival")) * 0.72,
+      ),
+      confidence: mean([perceptionConfidence, trust, 100 - uncertainty]),
+      explanation:
+        "Risk-adjusted participation capacity is below the level required for additional exposure.",
+    },
+    settings,
+  );
 
-  pushNeed(needs, {
-    category: "increase-participation",
-    severity: clamp(
-      (health - settings.targetParticipation) * 1.05 +
-        Math.max(0, readiness - 55) * 0.5 +
-        Math.max(0, opportunityDensity - 10) * 0.42,
-    ),
-    confidence: mean([perceptionConfidence, agreement, trust, synchronization]),
-    explanation:
-      "Alignment, confidence, and operating reliability are strong enough to support graduated participation.",
-  }, settings);
+  pushNeed(
+    needs,
+    {
+      category: "increase-participation",
+      severity: clamp(
+        (health - settings.targetParticipation) * 1.05 +
+          Math.max(0, readiness - 55) * 0.5 +
+          Math.max(0, opportunityDensity - 10) * 0.42,
+      ),
+      confidence: mean([
+        perceptionConfidence,
+        agreement,
+        trust,
+        synchronization,
+      ]),
+      explanation:
+        "Alignment, confidence, and operating reliability are strong enough to support graduated participation.",
+    },
+    settings,
+  );
 
-  pushNeed(needs, {
-    category: "wait",
-    severity: clamp(contradictionDensity * 1.25 + contradictionCount * 8 + Math.max(0, 50 - agreement) * 0.8),
-    confidence: mean([perceptionConfidence, trust, clamp(100 - agreement)]),
-    explanation:
-      "Conflicting observations are strong enough that action should wait for clearer alignment.",
-  }, settings);
+  pushNeed(
+    needs,
+    {
+      category: "wait",
+      severity: clamp(
+        contradictionDensity * 1.25 +
+          contradictionCount * 8 +
+          Math.max(0, 50 - agreement) * 0.8,
+      ),
+      confidence: mean([perceptionConfidence, trust, clamp(100 - agreement)]),
+      explanation:
+        "Conflicting observations are strong enough that action should wait for clearer alignment.",
+    },
+    settings,
+  );
 
   if (!needs.length) {
-    pushNeed(needs, {
-      category: "maintain",
-      severity: settings.minSeverity,
-      confidence: mean([perceptionConfidence, trust, synchronization]),
-      explanation: "No blocker is materially preventing the current objective.",
-    }, { ...settings, minSeverity: 0 });
+    pushNeed(
+      needs,
+      {
+        category: "maintain",
+        severity: settings.minSeverity,
+        confidence: mean([perceptionConfidence, trust, synchronization]),
+        explanation:
+          "No blocker is materially preventing the current objective.",
+      },
+      { ...settings, minSeverity: 0 },
+    );
   }
 
   return needs.sort((left, right) => {
     const severityDelta = right.severity - left.severity;
-    return severityDelta === 0 ? left.needId.localeCompare(right.needId) : severityDelta;
+    return severityDelta === 0
+      ? left.needId.localeCompare(right.needId)
+      : severityDelta;
   });
 }
 
@@ -148,7 +218,9 @@ function pushNeed(
 }
 
 function layerScore(input: NeedDetectionInput, key: string) {
-  const layers = input.perception?.layers as Record<string, { score?: number }> | undefined;
+  const layers = input.perception?.layers as
+    | Record<string, { score?: number }>
+    | undefined;
   return score(layers?.[key]?.score, 50);
 }
 
@@ -156,8 +228,6 @@ function score(value: unknown, fallback: number) {
   return clamp(numeric(value, fallback));
 }
 
-
 function round(value: number) {
   return Number(value.toFixed(2));
 }
-

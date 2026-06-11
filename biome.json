@@ -10,7 +10,8 @@
       "**/.next/**",
       "**/out/**",
       "**/dist/**",
-      "**/coverage/**"
+      "**/coverage/**",
+      "examples/**"
     ]
   },
   "formatter": {

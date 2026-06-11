@@ -1,22 +1,26 @@
 import { performance } from "node:perf_hooks";
 import { z } from "zod";
+import { logger } from "../lib/logger.js";
+import { ApiProblem } from "../observability/signal-http.js";
+import {
+  incrementSignalCounter,
+  observeSignalLatency,
+  snapshotSignalMetrics,
+} from "../observability/signal-metrics.js";
 import {
   EmitSignalRequestSchema,
-  SignalEnvelopeSchema,
   type SignalEnvelope,
+  SignalEnvelopeSchema,
   type SignalFilters,
 } from "../schemas/signal-api.js";
 import {
-  getSignalStore,
   type SignalRecord,
   type SignalStorageAdapter,
   type SignalTrustMetadata,
+  getSignalStore,
 } from "../storage/signal-store.js";
 import { SignalStreamHub } from "../streams/signal-stream.js";
 import { SignalWebhookDispatcher } from "../webhooks/signal-webhooks.js";
-import { ApiProblem } from "../observability/signal-http.js";
-import { incrementSignalCounter, observeSignalLatency, snapshotSignalMetrics } from "../observability/signal-metrics.js";
-import { logger } from "../lib/logger.js";
 
 export type SignalEmitContext = {
   requestId: string;
@@ -37,11 +41,16 @@ export class SignalDistributionService {
     private readonly webhookDispatcher: SignalWebhookDispatcher,
   ) {}
 
-  async emit(rawRequest: unknown, context: SignalEmitContext): Promise<SignalEmitResult> {
+  async emit(
+    rawRequest: unknown,
+    context: SignalEmitContext,
+  ): Promise<SignalEmitResult> {
     const startedAt = performance.now();
     const rawSignal = EmitSignalRequestSchema.parse(rawRequest);
     const signal = parseSignal(rawSignal);
-    const existing = await this.store.findByIdempotencyKey(signal.idempotencyKey);
+    const existing = await this.store.findByIdempotencyKey(
+      signal.idempotencyKey,
+    );
 
     if (existing) {
       await this.store.appendAudit({
@@ -97,12 +106,17 @@ export class SignalDistributionService {
       },
     });
 
-    
     await this.streamHub.publish(nextRecord);
     void this.webhookDispatcher.enqueueSignal(nextRecord).catch((error) => {
-      logger.warn({ err: error, signalId: signal.id }, "Failed to enqueue signal webhooks");
+      logger.warn(
+        { err: error, signalId: signal.id },
+        "Failed to enqueue signal webhooks",
+      );
     });
-    incrementSignalCounter("signal.emit.accepted", { kind: signal.kind, status: signal.status });
+    incrementSignalCounter("signal.emit.accepted", {
+      kind: signal.kind,
+      status: signal.status,
+    });
     observeSignalLatency("signal.emit", duration(startedAt));
 
     return {
@@ -198,30 +212,60 @@ export class SignalDistributionService {
       },
       paths: {
         "/api/v1/signals": {
-          get: { security: [{ signalApiKey: ["signals:read"] }], responses: { "200": { description: "List signals" } } },
+          get: {
+            security: [{ signalApiKey: ["signals:read"] }],
+            responses: { "200": { description: "List signals" } },
+          },
         },
         "/api/v1/signals/latest": {
-          get: { security: [{ signalApiKey: ["signals:read"] }], responses: { "200": { description: "Latest signal" } } },
+          get: {
+            security: [{ signalApiKey: ["signals:read"] }],
+            responses: { "200": { description: "Latest signal" } },
+          },
         },
         "/api/v1/signals/{id}": {
-          get: { security: [{ signalApiKey: ["signals:read"] }], responses: { "200": { description: "Signal by id" } } },
+          get: {
+            security: [{ signalApiKey: ["signals:read"] }],
+            responses: { "200": { description: "Signal by id" } },
+          },
         },
         "/api/v1/signals/emit": {
-          post: { security: [{ signalApiKey: ["signals:emit"] }], responses: { "202": { description: "Signal accepted" } } },
+          post: {
+            security: [{ signalApiKey: ["signals:emit"] }],
+            responses: { "202": { description: "Signal accepted" } },
+          },
         },
         "/api/v1/signals/stream": {
-          get: { security: [{ signalApiKey: ["signals:stream"] }], responses: { "200": { description: "SSE stream" } } },
+          get: {
+            security: [{ signalApiKey: ["signals:stream"] }],
+            responses: { "200": { description: "SSE stream" } },
+          },
         },
         "/api/v1/webhooks": {
-          get: { security: [{ signalApiKey: ["webhooks:read"] }], responses: { "200": { description: "List webhooks" } } },
-          post: { security: [{ signalApiKey: ["webhooks:write"] }], responses: { "201": { description: "Create webhook" } } },
+          get: {
+            security: [{ signalApiKey: ["webhooks:read"] }],
+            responses: { "200": { description: "List webhooks" } },
+          },
+          post: {
+            security: [{ signalApiKey: ["webhooks:write"] }],
+            responses: { "201": { description: "Create webhook" } },
+          },
         },
         "/api/v1/audit/signals": {
-          get: { security: [{ signalApiKey: ["audit:read"] }], responses: { "200": { description: "Signal audit trail" } } },
+          get: {
+            security: [{ signalApiKey: ["audit:read"] }],
+            responses: { "200": { description: "Signal audit trail" } },
+          },
         },
         "/api/v1/admin/api-keys": {
-          get: { security: [{ signalApiKey: ["admin:keys"] }], responses: { "200": { description: "List API keys" } } },
-          post: { security: [{ signalApiKey: ["admin:keys"] }], responses: { "201": { description: "Create API key" } } },
+          get: {
+            security: [{ signalApiKey: ["admin:keys"] }],
+            responses: { "200": { description: "List API keys" } },
+          },
+          post: {
+            security: [{ signalApiKey: ["admin:keys"] }],
+            responses: { "201": { description: "Create API key" } },
+          },
         },
       },
       components: {
@@ -268,28 +312,46 @@ export function resetSignalServicesForTests() {
   );
 }
 
-export function buildSignalTrustMetadata(signal: SignalEnvelope): SignalTrustMetadata {
+export function buildSignalTrustMetadata(
+  signal: SignalEnvelope,
+): SignalTrustMetadata {
   const now = Date.now();
   const signalTimestamp = Date.parse(signal.timestamp);
-  const timestampFreshnessMs = Number.isFinite(signalTimestamp) ? Math.max(0, now - signalTimestamp) : Number.POSITIVE_INFINITY;
-  const dataFreshnessMs = Number(signal.metrics.dataFreshnessMs ?? signal.metrics.quoteAgeMs ?? signal.metrics.sourceAgeMs);
-  const dataFreshness =
-    Number.isFinite(dataFreshnessMs)
-      ? dataFreshnessMs <= 120_000 ? "fresh" : "stale"
-      : "unknown";
-  const calibratedConfidence = clamp(
-    Number(signal.metrics.calibratedConfidence ?? ((signal.confidence * 0.65) + (signal.trust * 0.35))),
+  const timestampFreshnessMs = Number.isFinite(signalTimestamp)
+    ? Math.max(0, now - signalTimestamp)
+    : Number.POSITIVE_INFINITY;
+  const dataFreshnessMs = Number(
+    signal.metrics.dataFreshnessMs ??
+      signal.metrics.quoteAgeMs ??
+      signal.metrics.sourceAgeMs,
   );
-  const riskState = signal.kind === "risk_off" || signal.risk >= 80
-    ? "risk_off"
-    : signal.risk >= 55
-      ? "elevated"
-      : "normal";
-  const actionability = signal.status === "rejected" || signal.status === "expired" || riskState === "risk_off"
-    ? "blocked"
-    : signal.status === "confirmed" && signal.trust >= 60 && signal.confidence >= 50
-      ? "actionable"
-      : "informational";
+  const dataFreshness = Number.isFinite(dataFreshnessMs)
+    ? dataFreshnessMs <= 120_000
+      ? "fresh"
+      : "stale"
+    : "unknown";
+  const calibratedConfidence = clamp(
+    Number(
+      signal.metrics.calibratedConfidence ??
+        signal.confidence * 0.65 + signal.trust * 0.35,
+    ),
+  );
+  const riskState =
+    signal.kind === "risk_off" || signal.risk >= 80
+      ? "risk_off"
+      : signal.risk >= 55
+        ? "elevated"
+        : "normal";
+  const actionability =
+    signal.status === "rejected" ||
+    signal.status === "expired" ||
+    riskState === "risk_off"
+      ? "blocked"
+      : signal.status === "confirmed" &&
+          signal.trust >= 60 &&
+          signal.confidence >= 50
+        ? "actionable"
+        : "informational";
 
   return {
     rawConfidence: signal.confidence,
@@ -298,7 +360,9 @@ export function buildSignalTrustMetadata(signal: SignalEnvelope): SignalTrustMet
     riskState,
     exposureCap: signal.maxExposure,
     reason: signal.reason,
-    ...(signal.status === "rejected" ? { rejectionReason: signal.explanation } : {}),
+    ...(signal.status === "rejected"
+      ? { rejectionReason: signal.explanation }
+      : {}),
     moduleContributionSummary: summarizeModules(signal),
     timestampFreshnessMs,
     dataFreshness,
@@ -325,10 +389,14 @@ function parseSignal(rawSignal: unknown): SignalEnvelope {
   }
 }
 
-function summarizeModules(signal: SignalEnvelope): SignalTrustMetadata["moduleContributionSummary"] {
+function summarizeModules(
+  signal: SignalEnvelope,
+): SignalTrustMetadata["moduleContributionSummary"] {
   const output: SignalTrustMetadata["moduleContributionSummary"] = {};
 
-  for (const key of Object.keys(signal.modules) as Array<keyof SignalEnvelope["modules"]>) {
+  for (const key of Object.keys(signal.modules) as Array<
+    keyof SignalEnvelope["modules"]
+  >) {
     const value = signal.modules[key];
     const score = extractModuleScore(value);
     output[key] = {
@@ -342,7 +410,8 @@ function summarizeModules(signal: SignalEnvelope): SignalTrustMetadata["moduleCo
 
 function extractModuleScore(value: unknown): number | undefined {
   if (!value || typeof value !== "object") return undefined;
-  const candidate = (value as Record<string, unknown>).score ??
+  const candidate =
+    (value as Record<string, unknown>).score ??
     (value as Record<string, unknown>).confidence ??
     (value as Record<string, unknown>).trust;
   const parsed = Number(candidate);

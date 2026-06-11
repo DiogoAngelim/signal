@@ -1,15 +1,15 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   BUILT_IN_COMMITMENT_POLICIES,
+  type CommitmentEvaluateInput,
   commitmentEvaluateInputSchema,
   commitmentEvaluateResultSchema,
   evaluateCommitment,
   listCommitmentOperations,
   registerCommitmentOperations,
   resolveCommitmentPolicy,
-  type CommitmentEvaluateInput,
 } from ".";
 
 type Fixture = {
@@ -42,7 +42,12 @@ function loadFixtures(): Fixture[] {
   return readdirSync(fixturesDir)
     .filter((file) => file.endsWith(".json"))
     .sort()
-    .map((file) => JSON.parse(readFileSync(path.join(fixturesDir, file), "utf8")) as Fixture);
+    .map(
+      (file) =>
+        JSON.parse(
+          readFileSync(path.join(fixturesDir, file), "utf8"),
+        ) as Fixture,
+    );
 }
 
 describe("evaluateCommitment fixtures", () => {
@@ -54,17 +59,25 @@ describe("evaluateCommitment fixtures", () => {
       expect(result.operation).toBe("commitment.evaluate.v1");
       expect(result.status).toBe(fixture.expectations.status);
       expect(result.strategy).toBe(fixture.expectations.strategy);
-      expect(result.totalRecommended).toBe(fixture.expectations.totalRecommended);
-      expect(result.normalizedCommitment).toBe(fixture.expectations.normalizedCommitment);
+      expect(result.totalRecommended).toBe(
+        fixture.expectations.totalRecommended,
+      );
+      expect(result.normalizedCommitment).toBe(
+        fixture.expectations.normalizedCommitment,
+      );
       expect(result.limitedBy).toEqual(fixture.expectations.limitedBy);
       expect(result.audit.cappedBy).toEqual(fixture.expectations.cappedBy);
-      expect(result.recommendations.map(({ targetId, amount, normalizedCommitment, weight, mode }) => ({
-        targetId,
-        amount,
-        normalizedCommitment,
-        weight,
-        mode,
-      }))).toEqual(fixture.expectations.recommendations);
+      expect(
+        result.recommendations.map(
+          ({ targetId, amount, normalizedCommitment, weight, mode }) => ({
+            targetId,
+            amount,
+            normalizedCommitment,
+            weight,
+            mode,
+          }),
+        ),
+      ).toEqual(fixture.expectations.recommendations);
       if (fixture.expectations.createdAt) {
         expect(result.audit.createdAt).toBe(fixture.expectations.createdAt);
       }
@@ -118,7 +131,9 @@ describe("commitment policies", () => {
 
     expect(result.status).toBe("recommended");
     expect(result.audit.resourceBasis).toBe(1);
-    expect(result.audit.assumptions).toContain("No resource was supplied; using normalized resource basis 1.");
+    expect(result.audit.assumptions).toContain(
+      "No resource was supplied; using normalized resource basis 1.",
+    );
   });
 
   it("handles resource maximums, minimums, and non-blocking hard constraints", () => {
@@ -134,18 +149,29 @@ describe("commitment policies", () => {
     });
     const reduced = evaluateCommitment({
       decision: { id: "reduced", confidence: 0.9, trust: 0.9, risk: 0.2 },
-      constraints: [{ id: "hard-review", type: "hard", severity: "medium", passed: false }],
+      constraints: [
+        { id: "hard-review", type: "hard", severity: "medium", passed: false },
+      ],
       policy: "balanced",
     });
 
     expect(capped.audit.cappedBy).toContain("resource.maximum");
     expect(raised.audit.cappedBy).toContain("resource.minimum");
-    expect(reduced.audit.reductions[0]).toMatchObject({ id: "hard-review", factor: 0.5 });
+    expect(reduced.audit.reductions[0]).toMatchObject({
+      id: "hard-review",
+      factor: 0.5,
+    });
   });
 
   it("can produce maximum mode under a permissive custom policy", () => {
     const result = evaluateCommitment({
-      decision: { id: "max-mode", confidence: 1, trust: 1, risk: 0, expectedUtility: 1 },
+      decision: {
+        id: "max-mode",
+        confidence: 1,
+        trust: 1,
+        risk: 0,
+        expectedUtility: 1,
+      },
       resource: { available: 100 },
       policy: {
         name: "custom",
@@ -164,13 +190,33 @@ describe("commitment policies", () => {
 
 describe("commitment strategies", () => {
   const decisions = [
-    { id: "a", confidence: 0.8, trust: 0.8, risk: 0.2, outcomeSeries: [0.02, 0.018, 0.021, 0.019] },
-    { id: "b", confidence: 0.75, trust: 0.78, risk: 0.3, outcomeSeries: [0.01, 0.012, 0.009, 0.011] },
+    {
+      id: "a",
+      confidence: 0.8,
+      trust: 0.8,
+      risk: 0.2,
+      outcomeSeries: [0.02, 0.018, 0.021, 0.019],
+    },
+    {
+      id: "b",
+      confidence: 0.75,
+      trust: 0.78,
+      risk: 0.3,
+      outcomeSeries: [0.01, 0.012, 0.009, 0.011],
+    },
   ];
 
   it("supports confidence, equal, and constraint-first strategy paths", () => {
-    const equal = evaluateCommitment({ decisions, strategy: "equal_weight", policy: "balanced" });
-    const confidence = evaluateCommitment({ decisions, strategy: "confidence_weighted", policy: "balanced" });
+    const equal = evaluateCommitment({
+      decisions,
+      strategy: "equal_weight",
+      policy: "balanced",
+    });
+    const confidence = evaluateCommitment({
+      decisions,
+      strategy: "confidence_weighted",
+      policy: "balanced",
+    });
     const constrained = evaluateCommitment({
       decisions,
       strategy: "constraint_first",
@@ -180,7 +226,9 @@ describe("commitment strategies", () => {
     });
 
     expect(equal.recommendations[0]?.weight).toBeCloseTo(0.5, 4);
-    expect(confidence.recommendations[0]?.weight).toBeGreaterThan(confidence.recommendations[1]?.weight ?? 0);
+    expect(confidence.recommendations[0]?.weight).toBeGreaterThan(
+      confidence.recommendations[1]?.weight ?? 0,
+    );
     expect(constrained.recommendations[0]?.weight).toBeLessThan(0.1);
   });
 
@@ -188,7 +236,10 @@ describe("commitment strategies", () => {
     const input = {
       decisions,
       strategy: "sharpe_like" as const,
-      policy: { name: "custom" as const, sharpeLike: { rounds: 24, refinementPasses: 1, refinementPoolSize: 8 } },
+      policy: {
+        name: "custom" as const,
+        sharpeLike: { rounds: 24, refinementPasses: 1, refinementPoolSize: 8 },
+      },
       seed: "repeatable",
     };
 
@@ -200,7 +251,12 @@ describe("commitment strategies", () => {
   });
 
   it("covers sharpe-like objective variants and generated seeds", () => {
-    const objectives = ["downside_adjusted", "drawdown_adjusted", "return", "reward_to_variability"] as const;
+    const objectives = [
+      "downside_adjusted",
+      "drawdown_adjusted",
+      "return",
+      "reward_to_variability",
+    ] as const;
 
     for (const objective of objectives) {
       const result = evaluateCommitment({
@@ -208,7 +264,12 @@ describe("commitment strategies", () => {
         strategy: "sharpe_like",
         policy: {
           name: "custom",
-          sharpeLike: { objective, rounds: 8, refinementPasses: 0, refinementPoolSize: 1 },
+          sharpeLike: {
+            objective,
+            rounds: 8,
+            refinementPasses: 0,
+            refinementPoolSize: 1,
+          },
         },
       });
 
@@ -224,13 +285,23 @@ describe("commitment strategies", () => {
         { id: "blocked-target", confidence: 0.9, trust: 0.9, risk: 0.1 },
         { id: "allowed-target", confidence: 0.9, trust: 0.9, risk: 0.1 },
       ],
-      constraints: [{ id: "target-rule", targetId: "blocked-target", type: "hard", severity: "high", passed: false }],
+      constraints: [
+        {
+          id: "target-rule",
+          targetId: "blocked-target",
+          type: "hard",
+          severity: "high",
+          passed: false,
+        },
+      ],
       policy: "balanced",
     });
 
     expect(result.status).toBe("recommended");
     expect(result.audit.eligibleTargets).toEqual(["allowed-target"]);
-    expect(result.recommendations.map((item) => item.targetId)).toEqual(["allowed-target"]);
+    expect(result.recommendations.map((item) => item.targetId)).toEqual([
+      "allowed-target",
+    ]);
   });
 });
 
@@ -252,7 +323,9 @@ describe("commitment protocol operation", () => {
     const input = commitmentEvaluateInputSchema.parse({
       decision: { id: "schema", confidence: 1, trust: 1, risk: 0 },
     });
-    const result = commitmentEvaluateResultSchema.parse(evaluateCommitment(input));
+    const result = commitmentEvaluateResultSchema.parse(
+      evaluateCommitment(input),
+    );
 
     expect(result.status).toBe("recommended");
     expect(() => commitmentEvaluateInputSchema.parse(null)).toThrow();

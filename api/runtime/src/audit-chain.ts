@@ -20,9 +20,7 @@ export interface AuditChainEntry {
   readonly hash: string;
 }
 
-export function computeEntryHash(
-  entry: Omit<AuditChainEntry, "hash">,
-): string {
+export function computeEntryHash(entry: Omit<AuditChainEntry, "hash">): string {
   const content = stableStringify({
     sequence: entry.sequence,
     timestamp: entry.timestamp,
@@ -73,8 +71,9 @@ export function verifyChain(entries: AuditChainEntry[]): boolean {
   if (entries.length === 0) return true;
 
   for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i]!;
-    const expectedPreviousHash = i === 0 ? GENESIS_HASH : entries[i - 1]!.hash;
+    const entry = entries[i];
+    if (!entry) continue;
+    const expectedPreviousHash = i === 0 ? GENESIS_HASH : entries[i - 1]?.hash;
 
     if (entry.previousHash !== expectedPreviousHash) return false;
 

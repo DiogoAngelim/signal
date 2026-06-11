@@ -1,11 +1,11 @@
 import {
-  confidenceCapForReliability,
-  evaluateReliability,
   type MetricInput,
   type ReliabilityDiagnostic,
   type ReliabilityRecord,
   type ReliabilityResult,
   type ReliabilityStatus,
+  confidenceCapForReliability,
+  evaluateReliability,
 } from "../../../signal-framework";
 
 export type MarketReliabilitySource = {
@@ -105,9 +105,18 @@ export function evaluateMarketReliability(
   const resolved = { ...DEFAULT_POLICY, ...policy };
   const now = source.now ?? Date.now();
   const stocks = Array.isArray(source.stocks) ? source.stocks : [];
-  const expectedAssets = Math.max(1, source.expectedAssetCount ?? stocks.length);
-  const minimumValidAssets = Math.max(1, Math.ceil(expectedAssets * resolved.minTickerCoverageRatio));
-  const freshnessWindow = source.marketStatus === "Closed" ? resolved.closedFreshnessMs : resolved.openFreshnessMs;
+  const expectedAssets = Math.max(
+    1,
+    source.expectedAssetCount ?? stocks.length,
+  );
+  const minimumValidAssets = Math.max(
+    1,
+    Math.ceil(expectedAssets * resolved.minTickerCoverageRatio),
+  );
+  const freshnessWindow =
+    source.marketStatus === "Closed"
+      ? resolved.closedFreshnessMs
+      : resolved.openFreshnessMs;
   const marketDiagnostics: ReliabilityDiagnostic[] = [];
   const stats = collectMarketStats(stocks, source, resolved, now);
   const partialFailureRatio = stats.partialApiFailures / expectedAssets;
@@ -137,17 +146,22 @@ export function evaluateMarketReliability(
     marketDiagnostics.push({
       code: "TICKER_COVERAGE_LOW",
       severity: "critical",
-      message: "Ticker universe coverage is below the market policy requirement.",
+      message:
+        "Ticker universe coverage is below the market policy requirement.",
       observed: stats.validAssets,
       expected: minimumValidAssets,
     });
   }
 
-  if (stats.validAssets > 0 && source.breadth < resolved.minBreadthParticipation) {
+  if (
+    stats.validAssets > 0 &&
+    source.breadth < resolved.minBreadthParticipation
+  ) {
     marketDiagnostics.push({
       code: "BREADTH_PARTICIPATION_LOW",
       severity: "info",
-      message: "Market breadth participation is low; this is a market-condition signal, not a data integrity failure.",
+      message:
+        "Market breadth participation is low; this is a market-condition signal, not a data integrity failure.",
       observed: source.breadth,
       expected: `>= ${resolved.minBreadthParticipation}`,
     });
@@ -158,16 +172,34 @@ export function evaluateMarketReliability(
     "MISSING_VOLUME",
     stats.missingVolume,
     "Volume is unavailable for part of the market dataset.",
-    diagnosticSeverity(stats.missingVolume, Math.max(1, stats.validAssets), resolved.requireVolume ? 0 : 0.05),
+    diagnosticSeverity(
+      stats.missingVolume,
+      Math.max(1, stats.validAssets),
+      resolved.requireVolume ? 0 : 0.05,
+    ),
   );
-  addCountDiagnostic(marketDiagnostics, "MISSING_OHLCV", stats.missingOhlcv, "One or more candle records are missing market-specific fields.");
-  addCountDiagnostic(marketDiagnostics, "DUPLICATED_CANDLES", stats.duplicateCandles, "Duplicated candle timestamps were detected.");
+  addCountDiagnostic(
+    marketDiagnostics,
+    "MISSING_OHLCV",
+    stats.missingOhlcv,
+    "One or more candle records are missing market-specific fields.",
+  );
+  addCountDiagnostic(
+    marketDiagnostics,
+    "DUPLICATED_CANDLES",
+    stats.duplicateCandles,
+    "Duplicated candle timestamps were detected.",
+  );
   addCountDiagnostic(
     marketDiagnostics,
     "LOW_SYNCHRONIZED_CANDLE_COUNT",
     stats.lowSynchronizedSamples,
     "Some assets do not have enough synchronized samples.",
-    diagnosticSeverity(stats.lowSynchronizedSamples, Math.max(1, stats.validAssets), 0.05),
+    diagnosticSeverity(
+      stats.lowSynchronizedSamples,
+      Math.max(1, stats.validAssets),
+      0.05,
+    ),
   );
   addCountDiagnostic(
     marketDiagnostics,
@@ -181,7 +213,8 @@ export function evaluateMarketReliability(
     marketDiagnostics.push({
       code: "EXCHANGE_DESYNCHRONIZED",
       severity: "critical",
-      message: "Exchange synchronization has failed or is explicitly marked out of sync.",
+      message:
+        "Exchange synchronization has failed or is explicitly marked out of sync.",
       observed: false,
       expected: true,
     });
@@ -201,7 +234,8 @@ export function evaluateMarketReliability(
     marketDiagnostics.push({
       code: "SYNTHETIC_DATA_DETECTED",
       severity: "critical",
-      message: "Synthetic, demo, or mock data was detected in the market dataset.",
+      message:
+        "Synthetic, demo, or mock data was detected in the market dataset.",
       observed: true,
       expected: false,
     });
@@ -216,29 +250,57 @@ export function evaluateMarketReliability(
     sourceQuality: SOURCE_QUALITY,
     defaultSourceQuality: 72,
     fieldRules: [
-      { field: "price", required: false, type: "number", min: priceBounds.min, allowNull: true },
-      { field: "volume", required: resolved.requireVolume, type: "number", min: 0, allowNull: !resolved.requireVolume },
+      {
+        field: "price",
+        required: false,
+        type: "number",
+        min: priceBounds.min,
+        allowNull: true,
+      },
+      {
+        field: "volume",
+        required: resolved.requireVolume,
+        type: "number",
+        min: 0,
+        allowNull: !resolved.requireVolume,
+      },
     ],
-    outlierRules: [{ field: "price", min: priceBounds.min, max: priceBounds.max }],
+    outlierRules: [
+      { field: "price", min: priceBounds.min, max: priceBounds.max },
+    ],
   });
   const score = clamp(
     generic.score -
       (source.staleData ? 18 : 0) -
-      (stats.validAssets <= 0 ? 44 : stats.validAssets < minimumValidAssets ? 24 : 0) -
+      (stats.validAssets <= 0
+        ? 44
+        : stats.validAssets < minimumValidAssets
+          ? 24
+          : 0) -
       Math.min(18, partialFailureRatio * 40) -
       (source.exchangeSynchronized === false ? 20 : 0) -
       (stats.fallbackMode ? 8 : 0) -
       (stats.syntheticDataDetected ? 35 : 0),
   );
   const status = marketReliabilityStatus(score, generic.status, {
-    stale: source.staleData || stats.staleRecords >= Math.max(1, stats.records.length),
+    stale:
+      source.staleData ||
+      stats.staleRecords >= Math.max(1, stats.records.length),
     validAssets: stats.validAssets,
     minimumValidAssets,
     recordCount: stats.records.length,
     marketStatus: source.marketStatus,
   });
   const diagnostics = [...generic.diagnostics, ...marketDiagnostics];
-  const market = buildMarketMetadata(source, stats, status, diagnostics, score, now, minimumValidAssets);
+  const market = buildMarketMetadata(
+    source,
+    stats,
+    status,
+    diagnostics,
+    score,
+    now,
+    minimumValidAssets,
+  );
 
   return {
     ...generic,
@@ -255,7 +317,10 @@ export function applyReliabilityToMetricInputs(
   reliability: MarketReliabilityResult,
 ): MetricInput[] {
   return metrics.map((metric) => {
-    const cappedConfidence = Math.min(metric.confidence ?? 100, reliability.confidenceCap);
+    const cappedConfidence = Math.min(
+      metric.confidence ?? 100,
+      reliability.confidenceCap,
+    );
     const reliabilityDetail = `Data reliability ${Math.round(reliability.score)}/100 (${reliability.status}); confidence cap ${reliability.confidenceCap}%.`;
     const isSelfAwarenessMetric =
       metric.key === "dataReliability" ||
@@ -264,28 +329,40 @@ export function applyReliabilityToMetricInputs(
 
     return {
       ...metric,
-      value: isSelfAwarenessMetric ? Math.min(metric.value, reliability.score) : metric.value,
+      value: isSelfAwarenessMetric
+        ? Math.min(metric.value, reliability.score)
+        : metric.value,
       raw:
         metric.key === "dataReliability" && reliability.status !== "healthy"
           ? reliability.market.explanation
           : metric.raw,
       confidence: cappedConfidence,
-      detail: metric.detail ? `${metric.detail} ${reliabilityDetail}` : reliabilityDetail,
+      detail: metric.detail
+        ? `${metric.detail} ${reliabilityDetail}`
+        : reliabilityDetail,
     };
   });
 }
 
-export function capReliabilityConfidence(value: number | null | undefined, reliability: MarketReliabilityResult) {
+export function capReliabilityConfidence(
+  value: number | null | undefined,
+  reliability: MarketReliabilityResult,
+) {
   if (value == null || !Number.isFinite(value)) return value;
   return Math.min(value, reliability.confidenceCap);
 }
 
-export function capReliabilityExposure(value: number, reliability: MarketReliabilityResult) {
+export function capReliabilityExposure(
+  value: number,
+  reliability: MarketReliabilityResult,
+) {
   const exposure = Number.isFinite(value) ? value : 0;
   return clamp(exposure * (reliability.confidenceCap / 100), 0, exposure);
 }
 
-export function shouldUseDefensiveReliabilityPosture(reliability: MarketReliabilityResult) {
+export function shouldUseDefensiveReliabilityPosture(
+  reliability: MarketReliabilityResult,
+) {
   return reliability.market.defensiveMode;
 }
 
@@ -309,18 +386,37 @@ function collectMarketStats(
     const id = instrumentId(stock, index);
     const sourceName = sourceLabel(stock);
     const price = marketPrice(stock);
-    const volume = firstFiniteNumber([stock.volume, stock.regularMarketVolume, stock.quoteVolume]);
+    const volume = firstFiniteNumber([
+      stock.volume,
+      stock.regularMarketVolume,
+      stock.quoteVolume,
+    ]);
     const history = Array.isArray(stock.history) ? stock.history : [];
     const timestamp = recordTimestamp(stock, source.lastSuccessfulSync, now);
-    const explicitSampleCount = firstFiniteNumber([stock.sampleCount, stock.samples, stock.historyCount, stock.barCount]);
-    const sampleCount = Math.max(history.length, explicitSampleCount ?? 0, price != null ? 1 : 0);
+    const explicitSampleCount = firstFiniteNumber([
+      stock.sampleCount,
+      stock.samples,
+      stock.historyCount,
+      stock.barCount,
+    ]);
+    const sampleCount = Math.max(
+      history.length,
+      explicitSampleCount ?? 0,
+      price != null ? 1 : 0,
+    );
 
     const hasEvidence = hasMarketEvidence(stock);
 
     if (hasEvidence) validAssets += 1;
     if (hasEvidence && volume == null) missingVolume += 1;
-    if (hasEvidence && sampleCount < policy.minSynchronizedSamples) lowSynchronizedSamples += 1;
-    if (timestamp != null && now - timestamp > policy.openFreshnessMs && source.marketStatus === "Open") staleRecords += 1;
+    if (hasEvidence && sampleCount < policy.minSynchronizedSamples)
+      lowSynchronizedSamples += 1;
+    if (
+      timestamp != null &&
+      now - timestamp > policy.openFreshnessMs &&
+      source.marketStatus === "Open"
+    )
+      staleRecords += 1;
     if (hasPartialFailure(stock)) partialApiFailures += 1;
     if (hasFallbackSource(stock)) fallbackMode = true;
     if (isSyntheticSource(stock)) syntheticDataDetected = true;
@@ -365,20 +461,30 @@ function buildMarketMetadata(
   now: number,
   minimumValidAssets: number,
 ): MarketReliabilityMetadata {
-  const criticalOrWarning = diagnostics.filter((diagnostic) => diagnostic.severity !== "info");
+  const criticalOrWarning = diagnostics.filter(
+    (diagnostic) => diagnostic.severity !== "info",
+  );
   const primaryIssues = Array.from(
     new Set(criticalOrWarning.map((diagnostic) => issueLabel(diagnostic.code))),
   ).slice(0, 5);
   const resolvedPrimaryIssues = primaryIssues.length
     ? primaryIssues
-    : [source.marketStatus === "Closed" ? "Venue closed" : "No dominant reliability issues"];
-  const synchronizationStatus = source.staleData || status === "stale"
-    ? "stale"
-    : source.exchangeSynchronized === false
-      ? "not_synced"
-      : stats.validAssets < minimumValidAssets || stats.validAssets / Math.max(1, source.expectedAssetCount ?? stats.records.length) < 0.95
-        ? "partial"
-        : "synced";
+    : [
+        source.marketStatus === "Closed"
+          ? "Venue closed"
+          : "No dominant reliability issues",
+      ];
+  const synchronizationStatus =
+    source.staleData || status === "stale"
+      ? "stale"
+      : source.exchangeSynchronized === false
+        ? "not_synced"
+        : stats.validAssets < minimumValidAssets ||
+            stats.validAssets /
+              Math.max(1, source.expectedAssetCount ?? stats.records.length) <
+              0.95
+          ? "partial"
+          : "synced";
   const defensiveMode =
     status === "invalid" ||
     status === "insufficient" ||
@@ -391,9 +497,14 @@ function buildMarketMetadata(
     venueStatus: source.marketStatus === "Open" ? "open" : "closed",
     synchronizationStatus,
     validAssets: stats.validAssets,
-    rejectedAssets: Math.max(0, (source.expectedAssetCount ?? stats.records.length) - stats.validAssets),
+    rejectedAssets: Math.max(
+      0,
+      (source.expectedAssetCount ?? stats.records.length) - stats.validAssets,
+    ),
     staleRecords: stats.staleRecords,
-    missingFields: diagnostics.filter((diagnostic) => diagnostic.code === "FIELD_MISSING").length,
+    missingFields: diagnostics.filter(
+      (diagnostic) => diagnostic.code === "FIELD_MISSING",
+    ).length,
     staleCandles: stats.staleRecords,
     missingVolume: stats.missingVolume,
     missingOhlcv: stats.missingOhlcv,
@@ -402,10 +513,17 @@ function buildMarketMetadata(
     partialApiFailures: stats.partialApiFailures,
     fallbackMode: stats.fallbackMode,
     syntheticDataDetected: stats.syntheticDataDetected,
-    lastSuccessfulSync: source.lastSuccessfulSync ? new Date(source.lastSuccessfulSync).toISOString() : null,
+    lastSuccessfulSync: source.lastSuccessfulSync
+      ? new Date(source.lastSuccessfulSync).toISOString()
+      : null,
     defensiveMode,
     primaryIssues: resolvedPrimaryIssues,
-    explanation: reliabilityExplanation(status, resolvedPrimaryIssues, source.marketStatus, now),
+    explanation: reliabilityExplanation(
+      status,
+      resolvedPrimaryIssues,
+      source.marketStatus,
+      now,
+    ),
   };
 }
 
@@ -414,7 +532,9 @@ function addCountDiagnostic(
   code: string,
   count: number,
   message: string,
-  severity: ReliabilityDiagnostic["severity"] = code === "DUPLICATED_CANDLES" ? "critical" : "warning",
+  severity: ReliabilityDiagnostic["severity"] = code === "DUPLICATED_CANDLES"
+    ? "critical"
+    : "warning",
 ) {
   if (count <= 0) return;
   diagnostics.push({
@@ -426,7 +546,11 @@ function addCountDiagnostic(
   });
 }
 
-function diagnosticSeverity(count: number, total: number, warningRatio: number): ReliabilityDiagnostic["severity"] {
+function diagnosticSeverity(
+  count: number,
+  total: number,
+  warningRatio: number,
+): ReliabilityDiagnostic["severity"] {
   if (count / Math.max(1, total) >= warningRatio) return "warning";
   return "info";
 }
@@ -443,11 +567,18 @@ function marketReliabilityStatus(
   },
 ): ReliabilityStatus {
   if (state.validAssets <= 0) {
-    return state.marketStatus === "Closed" && state.recordCount > 0 ? "insufficient" : "invalid";
+    return state.marketStatus === "Closed" && state.recordCount > 0
+      ? "insufficient"
+      : "invalid";
   }
   if (genericStatus === "invalid") return "invalid";
   if (state.stale || genericStatus === "stale") return "stale";
-  if (state.validAssets < state.minimumValidAssets || score < 40 || genericStatus === "insufficient") return "insufficient";
+  if (
+    state.validAssets < state.minimumValidAssets ||
+    score < 40 ||
+    genericStatus === "insufficient"
+  )
+    return "insufficient";
   if (score < 80 || genericStatus === "degraded") return "degraded";
   return "healthy";
 }
@@ -477,11 +608,21 @@ function hasSynchronizedHistory(stock: Record<string, any>) {
 }
 
 function instrumentId(stock: Record<string, any>, index: number) {
-  return String(stock.ticker ?? stock.symbol ?? stock.name ?? `asset-${index}`).trim() || `asset-${index}`;
+  return (
+    String(
+      stock.ticker ?? stock.symbol ?? stock.name ?? `asset-${index}`,
+    ).trim() || `asset-${index}`
+  );
 }
 
 function sourceLabel(stock: Record<string, any>) {
-  const source = String(stock.source ?? stock.quoteSource ?? stock.quoteStatus ?? stock.sourceFile ?? "available").toLowerCase();
+  const source = String(
+    stock.source ??
+      stock.quoteSource ??
+      stock.quoteStatus ??
+      stock.sourceFile ??
+      "available",
+  ).toLowerCase();
   if (/synthetic|demo|mock/.test(source)) return "synthetic";
   if (/fallback/.test(source)) return "fallback";
   if (/failed|unavailable|blocked/.test(source)) return "failed";
@@ -492,12 +633,26 @@ function sourceLabel(stock: Record<string, any>) {
 }
 
 function qualityFromStock(stock: Record<string, any>) {
-  const explicit = firstFiniteNumber([stock.sourceQuality, stock.reliability, stock.dataQuality]);
+  const explicit = firstFiniteNumber([
+    stock.sourceQuality,
+    stock.reliability,
+    stock.dataQuality,
+  ]);
   return explicit ?? undefined;
 }
 
-function recordTimestamp(stock: Record<string, any>, lastSuccessfulSync: number | null | undefined, now: number) {
-  const candidates = [stock.updatedAt, stock.syncedAt, stock.timestamp, stock.lastSyncedAt, lastSuccessfulSync];
+function recordTimestamp(
+  stock: Record<string, any>,
+  lastSuccessfulSync: number | null | undefined,
+  now: number,
+) {
+  const candidates = [
+    stock.updatedAt,
+    stock.syncedAt,
+    stock.timestamp,
+    stock.lastSyncedAt,
+    lastSuccessfulSync,
+  ];
   for (const candidate of candidates) {
     const parsed = parseTime(candidate);
     if (parsed != null) return parsed;
@@ -519,8 +674,12 @@ function inspectCandleHistory(history: unknown[]) {
       seen.add(timestamp);
     }
 
-    const hasAnyOhlcvField = ["open", "high", "low", "close", "volume"].some((field) => row[field] != null);
-    const hasAllPriceFields = ["open", "high", "low", "close"].every((field) => finiteNumber(row[field]) != null);
+    const hasAnyOhlcvField = ["open", "high", "low", "close", "volume"].some(
+      (field) => row[field] != null,
+    );
+    const hasAllPriceFields = ["open", "high", "low", "close"].every(
+      (field) => finiteNumber(row[field]) != null,
+    );
     if (hasAnyOhlcvField && !hasAllPriceFields) missingOhlcv += 1;
   }
 
@@ -528,16 +687,22 @@ function inspectCandleHistory(history: unknown[]) {
 }
 
 function hasPartialFailure(stock: Record<string, any>) {
-  return /failed|unavailable|blocked|timeout/i.test(String(stock.source ?? stock.quoteStatus ?? stock.quoteStatusReason ?? ""));
+  return /failed|unavailable|blocked|timeout/i.test(
+    String(stock.source ?? stock.quoteStatus ?? stock.quoteStatusReason ?? ""),
+  );
 }
 
 function hasFallbackSource(stock: Record<string, any>) {
-  return /fallback/i.test(String(stock.source ?? stock.quoteSource ?? stock.quoteStatusReason ?? ""));
+  return /fallback/i.test(
+    String(stock.source ?? stock.quoteSource ?? stock.quoteStatusReason ?? ""),
+  );
 }
 
 function isSyntheticSource(stock: Record<string, any>) {
   return /synthetic|demo|mock/i.test(
-    String(`${stock.source ?? ""} ${stock.sourceFile ?? ""} ${stock.name ?? ""} ${stock.description ?? ""}`),
+    String(
+      `${stock.source ?? ""} ${stock.sourceFile ?? ""} ${stock.name ?? ""} ${stock.description ?? ""}`,
+    ),
   );
 }
 
@@ -592,9 +757,12 @@ function reliabilityExplanation(
       ? "Market data is synchronized; the venue is closed so live updates are paused."
       : "Market data is synchronized and usable.";
   }
-  if (status === "stale") return "Waiting for fresh market synchronization before increasing conviction.";
-  if (status === "insufficient") return "Insufficient data; waiting for broader synchronized market coverage.";
-  if (status === "invalid") return "Market data is invalid or unavailable; confidence is capped defensively.";
+  if (status === "stale")
+    return "Waiting for fresh market synchronization before increasing conviction.";
+  if (status === "insufficient")
+    return "Insufficient data; waiting for broader synchronized market coverage.";
+  if (status === "invalid")
+    return "Market data is invalid or unavailable; confidence is capped defensively.";
   return `Market data is usable but degraded by ${primaryIssues[0].toLowerCase()}.`;
 }
 
@@ -614,7 +782,12 @@ function firstFiniteNumber(values: unknown[]) {
 }
 
 function marketPrice(stock: Record<string, any>) {
-  return firstFiniteNumber([stock.price, stock.last, stock.close, stock.regularMarketPrice]);
+  return firstFiniteNumber([
+    stock.price,
+    stock.last,
+    stock.close,
+    stock.regularMarketPrice,
+  ]);
 }
 
 function parseTime(value: unknown) {

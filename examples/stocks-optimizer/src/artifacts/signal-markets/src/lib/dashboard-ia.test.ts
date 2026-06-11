@@ -25,8 +25,12 @@ function richState() {
     mainWarnings: ["Survival memory remains scarred."],
     reasons: ["Survival scar restricts normal sizing."],
     missingEvidence: ["Reduced-size survival review"],
-    unlockConditions: ["Raise survival confidence to at least 70/100 for normal sizing."],
-    invalidationConditions: ["Invalidate if similar-state survival cost rises."],
+    unlockConditions: [
+      "Raise survival confidence to at least 70/100 for normal sizing.",
+    ],
+    invalidationConditions: [
+      "Invalidate if similar-state survival cost rises.",
+    ],
   };
 
   return {
@@ -64,7 +68,9 @@ function richState() {
       verdict: "recognized",
       reason: "Recognized recurring positive state.",
       missingEvidence: [],
-      invalidationConditions: ["Recognition invalidates if recurrence falls below 70/100."],
+      invalidationConditions: [
+        "Recognition invalidates if recurrence falls below 70/100.",
+      ],
     },
     belief: {
       verdict: "justified",
@@ -112,7 +118,9 @@ function richState() {
         "Raise agency trust to at least 70/100.",
         "Close reduced-size outcomes with acceptable drawdown.",
       ],
-      invalidationConditions: ["Invalidate if Trust or Judgement falls below the commitment threshold."],
+      invalidationConditions: [
+        "Invalidate if Trust or Judgement falls below the commitment threshold.",
+      ],
       explanation: "Resolve waits because Agency trust remains unresolved.",
       traces: [],
     },
@@ -128,7 +136,9 @@ function richState() {
       shouldEscalateHumanReview: false,
       blockers: ["Recovery incomplete until clean outcomes close."],
       reasons: [],
-      unlockConditions: ["Close reduced-size outcomes for the stable positive state archetype."],
+      unlockConditions: [
+        "Close reduced-size outcomes for the stable positive state archetype.",
+      ],
       invalidationConditions: ["Invalidate recovery if drawdown regresses."],
     },
     trustGovernor: {
@@ -137,13 +147,15 @@ function richState() {
       maxExposure: 2,
       allowsNewExposure: true,
       confidenceCap: 55,
-      blockers: [{
-        id: "trust",
-        label: "Trust below threshold",
-        severity: "warn",
-        reason: "Trust score has not cleared the restoration threshold.",
-        unlockCriteria: ["Raise trust score to at least 70/100."],
-      }],
+      blockers: [
+        {
+          id: "trust",
+          label: "Trust below threshold",
+          severity: "warn",
+          reason: "Trust score has not cleared the restoration threshold.",
+          unlockCriteria: ["Raise trust score to at least 70/100."],
+        },
+      ],
       unlockCriteria: ["Raise trust score to at least 70/100."],
       reasons: ["Survival reduced size."],
     },
@@ -151,7 +163,8 @@ function richState() {
       sizingMode: "micro",
       sizingDecision: "limited",
       suggestedMaximumExposurePct: 2,
-      limitedReason: "Reduced size because survival scar and trust below threshold.",
+      limitedReason:
+        "Reduced size because survival scar and trust below threshold.",
       sizingReasons: ["Reduced size because survival scar."],
       sizingRationale: ["Trust below threshold."],
     },
@@ -200,14 +213,22 @@ describe("dashboard executive information architecture", () => {
     const state = richState();
     const ia = buildExecutiveDashboardIA(state);
 
-    expect(ia.executiveReasoning.narrative).toContain("historically recurring positive state");
-    expect(ia.executiveReasoning.narrative).toContain("governance recommends micro participation");
+    expect(ia.executiveReasoning.narrative).toContain(
+      "historically recurring positive state",
+    );
+    expect(ia.executiveReasoning.narrative).toContain(
+      "governance recommends micro participation",
+    );
     expect(ia.executiveReasoning.finalDecision).toBe("Wait");
     expect(ia.executiveReasoning.recommendedParticipationMode).toBe("Micro");
     expect(ia.executiveReasoning.maxExposure).toBe("2%");
-    expect(ia.executiveReasoning.mainReasonForRestriction?.code).toBe("survival_scar");
+    expect(ia.executiveReasoning.mainReasonForRestriction?.code).toBe(
+      "survival_scar",
+    );
     expect(ia.traceability.originalState).toBe(state.sourceState);
-    expect(ia.traceability.preservedModules.survivalMemory).toBe(state.survivalMemory);
+    expect(ia.traceability.preservedModules.survivalMemory).toBe(
+      state.survivalMemory,
+    );
   });
 
   it("selects the compact Evidence Summary from buried diagnostics", () => {
@@ -237,7 +258,10 @@ describe("dashboard executive information architecture", () => {
     expect(codes).toContain("trust_below_threshold");
     expect(codes).toContain("reduced_size");
     expect(codes).toContain("recovery_incomplete");
-    expect(reasons.find((reason) => reason.code === "survival_scar")?.affectedModules).toContain("Survival Memory");
+    expect(
+      reasons.find((reason) => reason.code === "survival_scar")
+        ?.affectedModules,
+    ).toContain("Survival Memory");
     expect(new Set(codes).size).toBe(codes.length);
   });
 
@@ -255,9 +279,15 @@ describe("dashboard executive information architecture", () => {
       "Survival",
       "Discovery Intelligence",
     ]);
-    expect(pipeline.find((step) => step.stage === "Recognition")?.outcome).toBe("passed");
-    expect(pipeline.find((step) => step.stage === "Agency")?.outcome).toBe("escalated");
-    expect(pipeline.find((step) => step.stage === "Resolve")?.outcome).toBe("limited");
+    expect(pipeline.find((step) => step.stage === "Recognition")?.outcome).toBe(
+      "passed",
+    );
+    expect(pipeline.find((step) => step.stage === "Agency")?.outcome).toBe(
+      "escalated",
+    );
+    expect(pipeline.find((step) => step.stage === "Resolve")?.outcome).toBe(
+      "limited",
+    );
   });
 
   it("explains why full size is unavailable in priority order", () => {
@@ -276,9 +306,15 @@ describe("dashboard executive information architecture", () => {
   it("extracts unlock and invalidation conditions for decision changes", () => {
     const extracted = extractUnlockInvalidationConditions(richState());
 
-    expect(extracted.unlockConditions).toContain("Raise trust score to at least 70/100.");
-    expect(extracted.unlockConditions).toContain("Raise agency trust to at least 70/100.");
-    expect(extracted.invalidationConditions).toContain("Invalidate if Trust or Judgement falls below the commitment threshold.");
+    expect(extracted.unlockConditions).toContain(
+      "Raise trust score to at least 70/100.",
+    );
+    expect(extracted.unlockConditions).toContain(
+      "Raise agency trust to at least 70/100.",
+    );
+    expect(extracted.invalidationConditions).toContain(
+      "Invalidate if Trust or Judgement falls below the commitment threshold.",
+    );
     expect(extracted.primaryUnlockCondition).toContain("70/100");
     expect(extracted.primaryInvalidationCondition).toContain("survival cost");
   });
@@ -295,8 +331,16 @@ describe("dashboard executive information architecture", () => {
       "Wisdom",
       "Discovery Intelligence",
     ]);
-    expect(groups.find((group) => group.concept === "Trust")?.metrics.map((metric) => metric.label)).toContain("Agency trust");
-    expect(groups.find((group) => group.concept === "Confidence")?.metrics.map((metric) => metric.label)).toContain("Calibrated confidence");
+    expect(
+      groups
+        .find((group) => group.concept === "Trust")
+        ?.metrics.map((metric) => metric.label),
+    ).toContain("Agency trust");
+    expect(
+      groups
+        .find((group) => group.concept === "Confidence")
+        ?.metrics.map((metric) => metric.label),
+    ).toContain("Calibrated confidence");
   });
 
   it("keeps backwards compatibility with current app state shape", () => {
@@ -316,7 +360,9 @@ describe("dashboard executive information architecture", () => {
         readinessScore: 70,
       },
     });
-    const byId = Object.fromEntries(ia.evidenceSummary.map((item) => [item.id, item.value]));
+    const byId = Object.fromEntries(
+      ia.evidenceSummary.map((item) => [item.id, item.value]),
+    );
 
     expect(byId["sharpe-ratio"]).toBe("1.04");
     expect(byId["profit-factor"]).toBe("1.20");
@@ -346,20 +392,22 @@ describe("dashboard executive information architecture", () => {
         audit: {},
       },
       counterfactual: {
-        scenarios: [{
-          id: "counterfactual:normal_size",
-          kind: "normal_size",
-          label: "Normal-size decision",
-          decision: "buy",
-          expectedOutcomeScore: 72,
-          expectedReturn: 8,
-          riskScore: 44,
-          regretScore: 22,
-          restrictionImpactScore: 48,
-          confidence: 74,
-          summary: "Normal size may have worked.",
-          assumptions: [],
-        }],
+        scenarios: [
+          {
+            id: "counterfactual:normal_size",
+            kind: "normal_size",
+            label: "Normal-size decision",
+            decision: "buy",
+            expectedOutcomeScore: 72,
+            expectedReturn: 8,
+            riskScore: 44,
+            regretScore: 22,
+            restrictionImpactScore: 48,
+            confidence: 74,
+            summary: "Normal size may have worked.",
+            assumptions: [],
+          },
+        ],
         avoidedLossScore: 38,
         missedUpsideScore: 62,
         restrictionValueScore: 41,
@@ -382,7 +430,9 @@ describe("dashboard executive information architecture", () => {
         confirmationLatency: 4,
         status: "developing",
         blockers: ["Discovery maturity is still immature."],
-        unlockConditions: ["Raise discovery maturity with more confirmed outcome samples."],
+        unlockConditions: [
+          "Raise discovery maturity with more confirmed outcome samples.",
+        ],
         explanation: "Discovery is developing.",
         audit: {},
       },
@@ -436,12 +486,14 @@ describe("dashboard executive information architecture", () => {
           decisionQualityTrend: 5,
           governanceTrend: 2,
         },
-        recommendations: [{
-          id: "institutionalize",
-          category: "institutionalization",
-          priority: "medium",
-          message: "Convert trusted discoveries into policies.",
-        }],
+        recommendations: [
+          {
+            id: "institutionalize",
+            category: "institutionalization",
+            priority: "medium",
+            message: "Convert trusted discoveries into policies.",
+          },
+        ],
       },
     });
 
@@ -451,7 +503,9 @@ describe("dashboard executive information architecture", () => {
     expect(ia.discoveryIntelligence?.score).toBe(67);
     expect(ia.decisionStates.trust.status).toBe("provisional");
     expect(ia.decisionStates.permission.level).toBe("review_required");
-    expect(ia.traceability.preservedModules.executionQuality).toBe(ia.executionQuality);
+    expect(ia.traceability.preservedModules.executionQuality).toBe(
+      ia.executionQuality,
+    );
   });
 
   it("evolves governance into a single command with arbitration and accountability", () => {
@@ -514,12 +568,25 @@ describe("dashboard executive information architecture", () => {
     expect(evolution.command.action).toBe("review");
     expect(evolution.command.allowedExposureState).toBe("micro");
     expect(evolution.command.reason).toContain("governance review");
-    expect(evolution.arbitration.conflicts.map((conflict) => conflict.id)).toContain("executive-wisdom-conflict");
-    expect(evolution.arbitration.conflicts.map((conflict) => conflict.id)).toContain("survival-threshold-status-conflict");
-    expect(evolution.exposureStates.find((item) => item.status === "active")?.state).toBe("micro");
-    expect(evolution.confidenceLedger.find((item) => item.kind === "survival")?.status).toBe("scarred");
-    expect(evolution.restrictionBets[0]?.evidenceRequired).toContain("max adverse excursion");
-    expect(evolution.accountabilityLoop.map((step) => step.id)).toContain("policy-adjustment");
+    expect(
+      evolution.arbitration.conflicts.map((conflict) => conflict.id),
+    ).toContain("executive-wisdom-conflict");
+    expect(
+      evolution.arbitration.conflicts.map((conflict) => conflict.id),
+    ).toContain("survival-threshold-status-conflict");
+    expect(
+      evolution.exposureStates.find((item) => item.status === "active")?.state,
+    ).toBe("micro");
+    expect(
+      evolution.confidenceLedger.find((item) => item.kind === "survival")
+        ?.status,
+    ).toBe("scarred");
+    expect(evolution.restrictionBets[0]?.evidenceRequired).toContain(
+      "max adverse excursion",
+    );
+    expect(evolution.accountabilityLoop.map((step) => step.id)).toContain(
+      "policy-adjustment",
+    );
   });
 
   it("handles empty, missing, and partial diagnostic states", () => {
@@ -527,12 +594,18 @@ describe("dashboard executive information architecture", () => {
 
     expect(empty.executiveReasoning.finalDecision).toBe("Pending");
     expect(empty.evidenceSummary).toHaveLength(18);
-    expect(empty.evidenceSummary.every((item) => item.value === "Pending")).toBe(true);
+    expect(
+      empty.evidenceSummary.every((item) => item.value === "Pending"),
+    ).toBe(true);
     expect(empty.decisionPipeline).toHaveLength(9);
     expect(empty.terminologyGroups).toHaveLength(7);
 
-    const partial = buildExecutiveDashboardIA({ trustGovernor: { participationMode: "limited", maxExposure: 5 } });
-    expect(partial.executiveReasoning.recommendedParticipationMode).toBe("Limited");
+    const partial = buildExecutiveDashboardIA({
+      trustGovernor: { participationMode: "limited", maxExposure: 5 },
+    });
+    expect(partial.executiveReasoning.recommendedParticipationMode).toBe(
+      "Limited",
+    );
     expect(partial.whyNotFullSize.active).toBe(true);
   });
 });

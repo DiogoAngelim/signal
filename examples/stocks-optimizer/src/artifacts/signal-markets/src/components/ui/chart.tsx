@@ -1,11 +1,7 @@
-
-
-
 import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 
 import { cn } from "@/lib/utils";
-
 
 const THEMES = { light: "", dark: ".dark" } as const;
 
@@ -320,7 +316,6 @@ const ChartLegendContent = React.forwardRef<
   },
 );
 ChartLegendContent.displayName = "ChartLegend";
-
 
 function getPayloadConfigFromPayload(
   config: ChartConfig,

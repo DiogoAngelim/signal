@@ -1,5 +1,5 @@
+import type { SignalExecutionResult } from "@signal/sdk-node";
 import { describe, expect, it } from "vitest";
-import type { SignalExecutionResult } from "@signal/runtime";
 import { createReferenceRuntime } from "../src/lib";
 import type { PaymentCaptureInput } from "../src/operations/high-risk-payment";
 import {
@@ -233,7 +233,7 @@ describe("high-risk payment reference flow", () => {
 
   it("fails fast when the durable Postgres proof has no database url", async () => {
     const previousDatabaseUrl = process.env.DATABASE_URL;
-    delete process.env.DATABASE_URL;
+    process.env.DATABASE_URL = undefined;
 
     try {
       await expect(runReferencePostgresProof()).rejects.toThrow(
@@ -241,7 +241,7 @@ describe("high-risk payment reference flow", () => {
       );
     } finally {
       if (previousDatabaseUrl === undefined) {
-        delete process.env.DATABASE_URL;
+        process.env.DATABASE_URL = undefined;
       } else {
         process.env.DATABASE_URL = previousDatabaseUrl;
       }

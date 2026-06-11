@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { type IRouter, Router } from "express";
 import { createSignalApiRouter } from "../api/signal-routes.js";
 import binanceExecutionRouter from "./binance-execution";
 import healthRouter from "./health";

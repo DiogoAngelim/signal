@@ -26,7 +26,11 @@ export class KillSwitch {
     return this.snapshot();
   }
 
-  hydrate(value?: { active?: boolean; reason?: string | null; updatedAt?: string | null }) {
+  hydrate(value?: {
+    active?: boolean;
+    reason?: string | null;
+    updatedAt?: string | null;
+  }) {
     this.active = value?.active === true;
     this.reason = value?.reason ?? null;
     this.updatedAt = value?.updatedAt ?? null;

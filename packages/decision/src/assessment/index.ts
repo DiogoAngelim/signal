@@ -10,9 +10,9 @@ import type {
   DecisionEvidenceQualityAssessment,
   DecisionGovernanceAssessment,
   DecisionJournal,
-  DecisionJournalTraceability,
   DecisionJournalTraceRef,
   DecisionJournalTraceRefType,
+  DecisionJournalTraceability,
   DecisionLearning,
   DecisionLearningOutcome,
   DecisionLearningPattern,
@@ -26,30 +26,75 @@ import type {
   DecisionThreat,
   DecisionThreatInput,
 } from "../types";
-import { asScore, average, clamp, nowIso, stableId, uniqueStrings } from "../utils";
+import {
+  asScore,
+  average,
+  clamp,
+  nowIso,
+  stableId,
+  uniqueStrings,
+} from "../utils";
 
 type EvidenceReferenceTraceability = DecisionJournalTraceability & {
   traceRefs: DecisionJournalTraceRef[];
 };
 
-export function assessDecisionEvidence(input: DecisionAssessmentInput = {}): DecisionAssessment {
+export function assessDecisionEvidence(
+  input: DecisionAssessmentInput = {},
+): DecisionAssessment {
   const createdAt = input.createdAt ?? nowIso();
   const evidence = normalizeEvidence(input.evidence ?? []);
   const known = normalizeFacts(input.known ?? [], "known", "known");
   const unknowns = normalizeFacts(input.unknowns ?? [], "unknown", "unknown");
-  const assumptions = normalizeFacts(input.assumptions ?? [], "assumed", "assumption");
-  const contradicted = normalizeFacts(input.contradicted ?? [], "contradicted", "contradiction");
+  const assumptions = normalizeFacts(
+    input.assumptions ?? [],
+    "assumed",
+    "assumption",
+  );
+  const contradicted = normalizeFacts(
+    input.contradicted ?? [],
+    "contradicted",
+    "contradiction",
+  );
   const threats = normalizeThreats(input.threats ?? []);
   const referenceTraceability = assessEvidenceReferenceTraceability(
     evidence,
     { known, unknowns, assumptions, contradicted },
     threats,
   );
-  const evidenceQuality = assessEvidenceQuality(evidence, contradicted, referenceTraceability);
-  const confidence = assessConfidence(input.desiredConfidence, evidenceQuality, assumptions, unknowns);
-  const nextBestEvidence = chooseNextBestEvidence(input.nextBestEvidence, evidenceQuality, assumptions, unknowns, contradicted);
-  const governance = assessGovernance(evidenceQuality, confidence, assumptions, unknowns, contradicted, nextBestEvidence);
-  const stewardship = assessStewardshipFromAssessment(input, threats, evidenceQuality, confidence, governance);
+  const evidenceQuality = assessEvidenceQuality(
+    evidence,
+    contradicted,
+    referenceTraceability,
+  );
+  const confidence = assessConfidence(
+    input.desiredConfidence,
+    evidenceQuality,
+    assumptions,
+    unknowns,
+  );
+  const nextBestEvidence = chooseNextBestEvidence(
+    input.nextBestEvidence,
+    evidenceQuality,
+    assumptions,
+    unknowns,
+    contradicted,
+  );
+  const governance = assessGovernance(
+    evidenceQuality,
+    confidence,
+    assumptions,
+    unknowns,
+    contradicted,
+    nextBestEvidence,
+  );
+  const stewardship = assessStewardshipFromAssessment(
+    input,
+    threats,
+    evidenceQuality,
+    confidence,
+    governance,
+  );
   const journal = createDecisionJournal({
     decisionId: input.decisionId ?? "decision:unassigned",
     createdAt,
@@ -101,16 +146,18 @@ export function createDecisionJournal(input: {
   const contradictionEvidence = input.evidence
     .filter((item) => item.direction === "contradicting")
     .map((item) => item.label);
-  const traceability = input.traceability ?? assessEvidenceReferenceTraceability(
-    input.evidence,
-    {
-      known: input.known ?? [],
-      unknowns: input.unknowns,
-      assumptions: input.assumptions,
-      contradicted: input.contradicted,
-    },
-    input.threats ?? [],
-  );
+  const traceability =
+    input.traceability ??
+    assessEvidenceReferenceTraceability(
+      input.evidence,
+      {
+        known: input.known ?? [],
+        unknowns: input.unknowns,
+        assumptions: input.assumptions,
+        contradicted: input.contradicted,
+      },
+      input.threats ?? [],
+    );
 
   return {
     decisionId: input.decisionId,
@@ -122,25 +169,41 @@ export function createDecisionJournal(input: {
       ...contradictionEvidence,
     ]),
     unknownsPresent: input.unknowns.map((item) => item.label),
-    reasoningSummary: input.reasoningSummary?.trim() || "Decision context captured before the outcome was known.",
+    reasoningSummary:
+      input.reasoningSummary?.trim() ||
+      "Decision context captured before the outcome was known.",
     traceRefs: traceability.traceRefs,
     traceability: journalTraceability(traceability),
   };
 }
 
-export function reviewDecisionOutcome(input: DecisionOutcomeReviewInput): DecisionOutcomeReview {
+export function reviewDecisionOutcome(
+  input: DecisionOutcomeReviewInput,
+): DecisionOutcomeReview {
   const assumptions = input.assumptions ?? [];
   const evidence = input.evidence ?? [];
-  const assumptionFailures = assumptions.filter((item) => item.status === "failed");
-  const assumptionSurvivals = assumptions.filter((item) => item.status === "survived");
-  const evidenceThatMattered = evidence.filter((item) => item.role === "mattered");
-  const evidenceThatMisled = evidence.filter((item) => item.role === "misleading");
+  const assumptionFailures = assumptions.filter(
+    (item) => item.status === "failed",
+  );
+  const assumptionSurvivals = assumptions.filter(
+    (item) => item.status === "survived",
+  );
+  const evidenceThatMattered = evidence.filter(
+    (item) => item.role === "mattered",
+  );
+  const evidenceThatMisled = evidence.filter(
+    (item) => item.role === "misleading",
+  );
   const learning = generateDecisionLearning(input);
   const lessons = uniqueStrings([
     ...(input.lessons ?? []),
     learning.whatShouldChange,
-    ...assumptionFailures.map((item) => `Review assumption next time: ${item.label}.`),
-    ...evidenceThatMisled.map((item) => `Treat this evidence more cautiously next time: ${item.label}.`),
+    ...assumptionFailures.map(
+      (item) => `Review assumption next time: ${item.label}.`,
+    ),
+    ...evidenceThatMisled.map(
+      (item) => `Treat this evidence more cautiously next time: ${item.label}.`,
+    ),
   ]);
 
   return {
@@ -148,7 +211,9 @@ export function reviewDecisionOutcome(input: DecisionOutcomeReviewInput): Decisi
     decisionId: input.decisionId,
     reviewedAt: input.reviewedAt ?? nowIso(),
     whatHappened: input.whatHappened,
-    why: input.why?.trim() || "The outcome review did not identify a single cause yet.",
+    why:
+      input.why?.trim() ||
+      "The outcome review did not identify a single cause yet.",
     surprises: uniqueStrings(input.surprises ?? []),
     assumptionFailures,
     assumptionSurvivals,
@@ -159,16 +224,23 @@ export function reviewDecisionOutcome(input: DecisionOutcomeReviewInput): Decisi
   };
 }
 
-export function generateDecisionLearning(input: DecisionOutcomeReviewInput): DecisionLearning {
+export function generateDecisionLearning(
+  input: DecisionOutcomeReviewInput,
+): DecisionLearning {
   const assumptions = input.assumptions ?? [];
   const evidence = input.evidence ?? [];
   const failed = assumptions.some((item) => item.status === "failed");
   const survived = assumptions.some((item) => item.status === "survived");
   const misleading = evidence.some((item) => item.role === "misleading");
   const mattered = evidence.some((item) => item.role === "mattered");
-  const outcome: DecisionLearningOutcome = failed || misleading
-    ? survived || mattered ? "mixed" : "contradicted"
-    : survived || mattered ? "confirmed" : "unknown";
+  const outcome: DecisionLearningOutcome =
+    failed || misleading
+      ? survived || mattered
+        ? "mixed"
+        : "contradicted"
+      : survived || mattered
+        ? "confirmed"
+        : "unknown";
 
   return {
     learningId: stableId("learning", input.reviewId ?? input.decisionId),
@@ -180,7 +252,9 @@ export function generateDecisionLearning(input: DecisionOutcomeReviewInput): Dec
   };
 }
 
-export function deriveLearningPatterns(learnings: readonly DecisionLearning[]): DecisionLearningPattern[] {
+export function deriveLearningPatterns(
+  learnings: readonly DecisionLearning[],
+): DecisionLearningPattern[] {
   const groups = new Map<string, DecisionLearning[]>();
   for (const learning of learnings) {
     const key = learning.whatShouldChange.trim().toLowerCase();
@@ -192,10 +266,15 @@ export function deriveLearningPatterns(learnings: readonly DecisionLearning[]): 
 
   return [...groups.entries()]
     .map(([key, group]) => {
-      const confirmations = group.filter((item) => item.outcome === "confirmed").length;
-      const contradictions = group.filter((item) => item.outcome === "contradicted" || item.outcome === "mixed").length;
+      const confirmations = group.filter(
+        (item) => item.outcome === "confirmed",
+      ).length;
+      const contradictions = group.filter(
+        (item) => item.outcome === "contradicted" || item.outcome === "mixed",
+      ).length;
       const denominator = confirmations + contradictions;
-      const survivalRate = denominator === 0 ? 0 : Math.round((confirmations / denominator) * 100);
+      const survivalRate =
+        denominator === 0 ? 0 : Math.round((confirmations / denominator) * 100);
       const lesson = group[0]?.whatShouldChange ?? key;
 
       return {
@@ -205,13 +284,18 @@ export function deriveLearningPatterns(learnings: readonly DecisionLearning[]): 
         confirmations,
         contradictions,
         survivalRate,
-        explanation: "Repeated lessons improve process quality; they do not increase decision confidence by themselves.",
+        explanation:
+          "Repeated lessons improve process quality; they do not increase decision confidence by themselves.",
       };
     })
-    .sort((a, b) => b.frequency - a.frequency || a.lesson.localeCompare(b.lesson));
+    .sort(
+      (a, b) => b.frequency - a.frequency || a.lesson.localeCompare(b.lesson),
+    );
 }
 
-function normalizeEvidence(values: readonly DecisionEvidenceInput[]): DecisionEvidence[] {
+function normalizeEvidence(
+  values: readonly DecisionEvidenceInput[],
+): DecisionEvidence[] {
   return values.map((value, index) => {
     const quality = asScore(value.quality, 50);
     const reliability = asScore(value.reliability, quality);
@@ -235,7 +319,9 @@ function normalizeEvidence(values: readonly DecisionEvidenceInput[]): DecisionEv
       traceability,
       strength: asScore(value.strength, quality),
       ...(value.source === undefined ? {} : { source: value.source }),
-      ...(value.observedAt === undefined ? {} : { observedAt: value.observedAt }),
+      ...(value.observedAt === undefined
+        ? {}
+        : { observedAt: value.observedAt }),
       supports: [...(value.supports ?? [])],
       contradicts: [...(value.contradicts ?? [])],
       ...(value.metadata === undefined ? {} : { metadata: value.metadata }),
@@ -265,7 +351,9 @@ function normalizeFacts(
       summary: value.summary ?? value.label,
       status,
       evidenceIds: [...(value.evidenceIds ?? [])],
-      ...(value.reviewAfter === undefined ? {} : { reviewAfter: value.reviewAfter }),
+      ...(value.reviewAfter === undefined
+        ? {}
+        : { reviewAfter: value.reviewAfter }),
       ...(value.metadata === undefined ? {} : { metadata: value.metadata }),
     };
   });
@@ -283,18 +371,29 @@ function assessEvidenceQuality(
   const calibration = averageEvidence(evidence, "calibration");
   const evidenceTraceabilityScore = averageEvidence(evidence, "traceability");
   const rawQuality = averageEvidence(evidence, "quality");
-  const contradictionPressure = assessContradictionPressure(evidence, contradicted);
+  const contradictionPressure = assessContradictionPressure(
+    evidence,
+    contradicted,
+  );
   const referenceCoverage = traceability.evidenceReferenceCoverage;
-  const quality = Math.round(clamp(average([
-    rawQuality,
-    reliability,
-    freshness,
-    independence,
-    replication,
-    calibration,
-    evidenceTraceabilityScore,
-    referenceCoverage,
-  ], 0) - contradictionPressure * 0.12));
+  const quality = Math.round(
+    clamp(
+      average(
+        [
+          rawQuality,
+          reliability,
+          freshness,
+          independence,
+          replication,
+          calibration,
+          evidenceTraceabilityScore,
+          referenceCoverage,
+        ],
+        0,
+      ) -
+        contradictionPressure * 0.12,
+    ),
+  );
   const explanation = [
     evidence.length
       ? `${evidence.length} evidence item(s) were assessed.`
@@ -327,18 +426,34 @@ function assessConfidence(
   assumptions: readonly AssessmentFact[],
   unknowns: readonly AssessmentFact[],
 ): DecisionConfidenceDiscipline {
-  const requested = Math.round(asScore(desiredConfidence, evidenceQuality.quality));
+  const requested = Math.round(
+    asScore(desiredConfidence, evidenceQuality.quality),
+  );
   const evidenceQualityCap = evidenceQuality.quality;
-  const contradictionCap = Math.round(clamp(100 - evidenceQuality.contradictionPressure * 0.65));
-  const assumptionCap = Math.round(clamp(100 - assumptionExposure(assumptions) * 0.5));
-  const unknownCoverageCap = Math.round(clamp(100 - unknownExposure(unknowns) * 0.45));
-  const cap = Math.min(evidenceQualityCap, contradictionCap, assumptionCap, unknownCoverageCap);
+  const contradictionCap = Math.round(
+    clamp(100 - evidenceQuality.contradictionPressure * 0.65),
+  );
+  const assumptionCap = Math.round(
+    clamp(100 - assumptionExposure(assumptions) * 0.5),
+  );
+  const unknownCoverageCap = Math.round(
+    clamp(100 - unknownExposure(unknowns) * 0.45),
+  );
+  const cap = Math.min(
+    evidenceQualityCap,
+    contradictionCap,
+    assumptionCap,
+    unknownCoverageCap,
+  );
   const capped = Math.min(requested, cap);
   const explanation = [
     `Requested confidence was ${requested}/100.`,
     `Evidence quality caps confidence at ${evidenceQualityCap}/100.`,
   ];
-  if (capped < requested) explanation.push(`Visible uncertainty lowered confidence to ${capped}/100.`);
+  if (capped < requested)
+    explanation.push(
+      `Visible uncertainty lowered confidence to ${capped}/100.`,
+    );
 
   return {
     requested,
@@ -359,15 +474,22 @@ function chooseNextBestEvidence(
   unknowns: readonly AssessmentFact[],
   contradicted: readonly AssessmentFact[],
 ): DecisionNextBestEvidence {
-  const inferred = inferNextBestEvidence(evidenceQuality, assumptions, unknowns, contradicted);
+  const inferred = inferNextBestEvidence(
+    evidenceQuality,
+    assumptions,
+    unknowns,
+    contradicted,
+  );
   return {
     question: requested?.question ?? inferred.question,
     whyItMatters: requested?.whyItMatters ?? inferred.whyItMatters,
     expectedImpact: requested?.expectedImpact ?? inferred.expectedImpact,
-    expectedUncertaintyReduction: Math.round(asScore(
-      requested?.expectedUncertaintyReduction,
-      inferred.expectedUncertaintyReduction,
-    )),
+    expectedUncertaintyReduction: Math.round(
+      asScore(
+        requested?.expectedUncertaintyReduction,
+        inferred.expectedUncertaintyReduction,
+      ),
+    ),
   };
 }
 
@@ -380,39 +502,64 @@ function assessGovernance(
   nextBestEvidence: DecisionNextBestEvidence,
 ): DecisionGovernanceAssessment {
   const assumptionVisibility = assumptions.length
-    ? average(assumptions.map((item) => item.summary ? 85 : 65), 70)
+    ? average(
+        assumptions.map((item) => (item.summary ? 85 : 65)),
+        70,
+      )
     : 55;
-  const contradictionVisibility = evidenceQuality.contradictionPressure > 0
-    ? contradicted.length > 0 ? 100 : 70
-    : 100;
+  const contradictionVisibility =
+    evidenceQuality.contradictionPressure > 0
+      ? contradicted.length > 0
+        ? 100
+        : 70
+      : 100;
   const unknownVisibility = unknowns.length ? 90 : 60;
-  const auditability = average([evidenceQuality.traceability, evidenceQuality.coverage]);
-  const explainability = average([assumptionVisibility, contradictionVisibility, unknownVisibility, evidenceQuality.coverage]);
+  const auditability = average([
+    evidenceQuality.traceability,
+    evidenceQuality.coverage,
+  ]);
+  const explainability = average([
+    assumptionVisibility,
+    contradictionVisibility,
+    unknownVisibility,
+    evidenceQuality.coverage,
+  ]);
   const challengeability = average([
     contradictionVisibility,
     unknownVisibility,
     nextBestEvidence.question ? 95 : 50,
   ]);
-  const score = Math.round(average([
-    auditability,
-    explainability,
-    challengeability,
-    evidenceQuality.traceability,
-    evidenceQuality.coverage,
-    contradictionVisibility,
-    assumptionVisibility,
-  ]));
+  const score = Math.round(
+    average([
+      auditability,
+      explainability,
+      challengeability,
+      evidenceQuality.traceability,
+      evidenceQuality.coverage,
+      contradictionVisibility,
+      assumptionVisibility,
+    ]),
+  );
   const warnings: string[] = [];
   const blockers: string[] = [];
 
-  if (!assumptions.length) warnings.push("No assumptions were declared; verify this is intentional.");
-  if (!unknowns.length) warnings.push("No unknowns were declared; hidden uncertainty may remain.");
-  if (evidenceQuality.contradictionPressure >= 45) warnings.push("Contradiction pressure is high enough to require challenge.");
+  if (!assumptions.length)
+    warnings.push("No assumptions were declared; verify this is intentional.");
+  if (!unknowns.length)
+    warnings.push("No unknowns were declared; hidden uncertainty may remain.");
+  if (evidenceQuality.contradictionPressure >= 45)
+    warnings.push(
+      "Contradiction pressure is high enough to require challenge.",
+    );
   if (evidenceQuality.missingEvidenceReferences?.length) {
-    warnings.push(`Missing evidence references: ${evidenceQuality.missingEvidenceReferences.join(", ")}.`);
+    warnings.push(
+      `Missing evidence references: ${evidenceQuality.missingEvidenceReferences.join(", ")}.`,
+    );
   }
-  if (evidenceQuality.quality <= 20) blockers.push("Evidence quality is too weak to support confident action.");
-  if (confidence.cap <= 25) blockers.push("Confidence is capped too low for a strong decision.");
+  if (evidenceQuality.quality <= 20)
+    blockers.push("Evidence quality is too weak to support confident action.");
+  if (confidence.cap <= 25)
+    blockers.push("Confidence is capped too low for a strong decision.");
 
   return {
     score,
@@ -440,7 +587,12 @@ function assessStewardshipFromAssessment(
   confidence: DecisionConfidenceDiscipline,
   governance: DecisionGovernanceAssessment,
 ): DecisionStewardshipAssessment {
-  const threatPressure = Math.round(average(threats.map((item) => (item.severity * item.likelihood) / 100), 0));
+  const threatPressure = Math.round(
+    average(
+      threats.map((item) => (item.severity * item.likelihood) / 100),
+      0,
+    ),
+  );
   const importance = Math.round(asScore(input.importance, 50));
   const optionality = Math.round(asScore(input.optionality, 50));
   const resilience = Math.round(asScore(input.resilience, 50));
@@ -482,16 +634,20 @@ function inferNextBestEvidence(
   if (evidenceQuality.quality <= 20) {
     return {
       question: "What direct, traceable evidence supports this decision?",
-      whyItMatters: "The current assessment cannot distinguish evidence from assertion.",
+      whyItMatters:
+        "The current assessment cannot distinguish evidence from assertion.",
       expectedImpact: "Establishes a minimum audit trail before action.",
       expectedUncertaintyReduction: 45,
     };
   }
   if (contradicted.length || evidenceQuality.contradictionPressure >= 45) {
     return {
-      question: "Which contradictory evidence would change the decision if true?",
-      whyItMatters: "Contradictions are the fastest way to expose a brittle decision.",
-      expectedImpact: "Clarifies whether to wait, reduce, or proceed reversibly.",
+      question:
+        "Which contradictory evidence would change the decision if true?",
+      whyItMatters:
+        "Contradictions are the fastest way to expose a brittle decision.",
+      expectedImpact:
+        "Clarifies whether to wait, reduce, or proceed reversibly.",
       expectedUncertaintyReduction: 35,
     };
   }
@@ -499,8 +655,10 @@ function inferNextBestEvidence(
   if (assumption) {
     return {
       question: `How can we test this assumption: ${assumption.label}?`,
-      whyItMatters: "Untested assumptions can make confidence look stronger than evidence allows.",
-      expectedImpact: "Turns an assumption into known, contradicted, or still-unknown evidence.",
+      whyItMatters:
+        "Untested assumptions can make confidence look stronger than evidence allows.",
+      expectedImpact:
+        "Turns an assumption into known, contradicted, or still-unknown evidence.",
       expectedUncertaintyReduction: 30,
     };
   }
@@ -509,19 +667,24 @@ function inferNextBestEvidence(
     return {
       question: `What would resolve this unknown: ${unknown.label}?`,
       whyItMatters: "Visible unknowns define the current uncertainty boundary.",
-      expectedImpact: "Improves the next decision without pretending certainty now.",
+      expectedImpact:
+        "Improves the next decision without pretending certainty now.",
       expectedUncertaintyReduction: 25,
     };
   }
   return {
     question: "What outcome signal should be reviewed after the decision?",
-    whyItMatters: "Decision quality improves when outcomes are compared with the original reasoning.",
-    expectedImpact: "Creates a simple learning loop for the next similar decision.",
+    whyItMatters:
+      "Decision quality improves when outcomes are compared with the original reasoning.",
+    expectedImpact:
+      "Creates a simple learning loop for the next similar decision.",
     expectedUncertaintyReduction: 20,
   };
 }
 
-function normalizeThreats(values: readonly DecisionThreatInput[]): DecisionThreat[] {
+function normalizeThreats(
+  values: readonly DecisionThreatInput[],
+): DecisionThreat[] {
   return values.map((value, index) => {
     if (typeof value === "string") {
       return {
@@ -544,9 +707,18 @@ function normalizeThreats(values: readonly DecisionThreatInput[]): DecisionThrea
   });
 }
 
-function assessReversibility(input: DecisionReversibilityInput | undefined): DecisionReversibilityAssessment {
+function assessReversibility(
+  input: DecisionReversibilityInput | undefined,
+): DecisionReversibilityAssessment {
   if (input === undefined) {
-    return { level: "unknown", score: 35, canUndo: false, cost: 65, speed: 35, notes: [] };
+    return {
+      level: "unknown",
+      score: 35,
+      canUndo: false,
+      cost: 65,
+      speed: 35,
+      notes: [],
+    };
   }
   if (typeof input === "number") {
     const score = Math.round(asScore(input));
@@ -560,7 +732,14 @@ function assessReversibility(input: DecisionReversibilityInput | undefined): Dec
     };
   }
   if (typeof input === "string") {
-    const score = input === "high" ? 90 : input === "medium" ? 65 : input === "low" ? 35 : 25;
+    const score =
+      input === "high"
+        ? 90
+        : input === "medium"
+          ? 65
+          : input === "low"
+            ? 35
+            : 25;
     return {
       level: input,
       score,
@@ -573,11 +752,12 @@ function assessReversibility(input: DecisionReversibilityInput | undefined): Dec
 
   const cost = asScore(input.cost, input.canUndo === false ? 80 : 50);
   const speed = asScore(input.speed, input.canUndo === false ? 25 : 60);
-  const score = Math.round(asScore(input.score, average([
-    input.canUndo === false ? 25 : 75,
-    100 - cost,
-    speed,
-  ])));
+  const score = Math.round(
+    asScore(
+      input.score,
+      average([input.canUndo === false ? 25 : 75, 100 - cost, speed]),
+    ),
+  );
 
   return {
     level: reversibilityLevel(score),
@@ -599,11 +779,24 @@ function stewardshipRecommendation(input: {
   resilience: number;
   reversibility: DecisionReversibilityAssessment;
 }): DecisionStewardshipAssessment["recommendation"] {
-  if (input.governance.blockers.length || input.confidence.cap < 30) return "wait";
-  if (input.importance >= 75 && input.threatPressure >= 70 && input.resilience < 45) return "avoid";
-  if (input.evidenceQuality.quality < 55 && input.reversibility.score >= 60) return "proceed-reversibly";
-  if (input.evidenceQuality.quality < 55 || input.threatPressure >= 65 || input.reversibility.score < 40) return "reduce";
-  if (input.optionality < 35 && input.importance >= 70) return "proceed-reversibly";
+  if (input.governance.blockers.length || input.confidence.cap < 30)
+    return "wait";
+  if (
+    input.importance >= 75 &&
+    input.threatPressure >= 70 &&
+    input.resilience < 45
+  )
+    return "avoid";
+  if (input.evidenceQuality.quality < 55 && input.reversibility.score >= 60)
+    return "proceed-reversibly";
+  if (
+    input.evidenceQuality.quality < 55 ||
+    input.threatPressure >= 65 ||
+    input.reversibility.score < 40
+  )
+    return "reduce";
+  if (input.optionality < 35 && input.importance >= 70)
+    return "proceed-reversibly";
   return "proceed";
 }
 
@@ -614,20 +807,41 @@ function reversibilityLevel(score: number): DecisionReversibility {
   return "unknown";
 }
 
-function averageEvidence(evidence: readonly DecisionEvidence[], key: keyof Pick<
-  DecisionEvidence,
-  "quality" | "reliability" | "freshness" | "independence" | "replication" | "calibration" | "traceability"
->): number {
-  return evidence.length ? average(evidence.map((item) => item[key]), 0) : 0;
+function averageEvidence(
+  evidence: readonly DecisionEvidence[],
+  key: keyof Pick<
+    DecisionEvidence,
+    | "quality"
+    | "reliability"
+    | "freshness"
+    | "independence"
+    | "replication"
+    | "calibration"
+    | "traceability"
+  >,
+): number {
+  return evidence.length
+    ? average(
+        evidence.map((item) => item[key]),
+        0,
+      )
+    : 0;
 }
 
 function assessContradictionPressure(
   evidence: readonly DecisionEvidence[],
   contradicted: readonly AssessmentFact[],
 ): number {
-  const contradictoryEvidence = evidence.filter((item) => item.direction === "contradicting");
+  const contradictoryEvidence = evidence.filter(
+    (item) => item.direction === "contradicting",
+  );
   const evidencePressure = contradictoryEvidence.length
-    ? average(contradictoryEvidence.map((item) => average([item.strength, item.quality], 0)), 0)
+    ? average(
+        contradictoryEvidence.map((item) =>
+          average([item.strength, item.quality], 0),
+        ),
+        0,
+      )
     : 0;
   return clamp(evidencePressure + contradicted.length * 12);
 }
@@ -643,29 +857,46 @@ function assessEvidenceReferenceTraceability(
   threats: readonly DecisionThreat[],
 ): EvidenceReferenceTraceability {
   const evidenceIds = new Set(evidence.map((item) => item.evidenceId));
-  const evidenceTraces = evidence.map((item): DecisionJournalTraceRef => ({
-    refId: item.evidenceId,
-    refType: "evidence",
-    label: item.label,
-    evidenceIds: [item.evidenceId],
-    linkedEvidenceIds: [item.evidenceId],
-    missingEvidenceIds: [],
-  }));
+  const evidenceTraces = evidence.map(
+    (item): DecisionJournalTraceRef => ({
+      refId: item.evidenceId,
+      refType: "evidence",
+      label: item.label,
+      evidenceIds: [item.evidenceId],
+      linkedEvidenceIds: [item.evidenceId],
+      missingEvidenceIds: [],
+    }),
+  );
   const referenceTraces: DecisionJournalTraceRef[] = [
     ...facts.known.map((fact) => factTrace(fact, "known", evidenceIds)),
     ...facts.unknowns.map((fact) => factTrace(fact, "unknown", evidenceIds)),
-    ...facts.assumptions.map((fact) => factTrace(fact, "assumption", evidenceIds)),
-    ...facts.contradicted.map((fact) => factTrace(fact, "contradiction", evidenceIds)),
+    ...facts.assumptions.map((fact) =>
+      factTrace(fact, "assumption", evidenceIds),
+    ),
+    ...facts.contradicted.map((fact) =>
+      factTrace(fact, "contradiction", evidenceIds),
+    ),
     ...threats.map((threat) => threatTrace(threat, evidenceIds)),
   ];
-  const missingEvidenceReferences = uniqueStrings(referenceTraces.flatMap((trace) => trace.missingEvidenceIds));
-  const uncoveredReferences = referenceTraces.filter((trace) => trace.linkedEvidenceIds.length === 0);
+  const missingEvidenceReferences = uniqueStrings(
+    referenceTraces.flatMap((trace) => trace.missingEvidenceIds),
+  );
+  const uncoveredReferences = referenceTraces.filter(
+    (trace) => trace.linkedEvidenceIds.length === 0,
+  );
   const evidenceReferenceCoverage = !evidence.length
     ? 0
     : referenceTraces.length
-      ? Math.round(clamp(((referenceTraces.length - uncoveredReferences.length) / referenceTraces.length) * 100))
+      ? Math.round(
+          clamp(
+            ((referenceTraces.length - uncoveredReferences.length) /
+              referenceTraces.length) *
+              100,
+          ),
+        )
       : 60;
-  const complete = missingEvidenceReferences.length === 0 && uncoveredReferences.length === 0;
+  const complete =
+    missingEvidenceReferences.length === 0 && uncoveredReferences.length === 0;
 
   return {
     traceRefs: [...evidenceTraces, ...referenceTraces],
@@ -698,7 +929,10 @@ function factTrace(
   });
 }
 
-function threatTrace(threat: DecisionThreat, evidenceIds: ReadonlySet<string>): DecisionJournalTraceRef {
+function threatTrace(
+  threat: DecisionThreat,
+  evidenceIds: ReadonlySet<string>,
+): DecisionJournalTraceRef {
   return referenceTrace({
     refId: threat.threatId,
     refType: "threat",
@@ -721,12 +955,18 @@ function referenceTrace(input: {
     refType: input.refType,
     label: input.label,
     evidenceIds: referencedEvidenceIds,
-    linkedEvidenceIds: referencedEvidenceIds.filter((evidenceId) => input.evidenceIds.has(evidenceId)),
-    missingEvidenceIds: referencedEvidenceIds.filter((evidenceId) => !input.evidenceIds.has(evidenceId)),
+    linkedEvidenceIds: referencedEvidenceIds.filter((evidenceId) =>
+      input.evidenceIds.has(evidenceId),
+    ),
+    missingEvidenceIds: referencedEvidenceIds.filter(
+      (evidenceId) => !input.evidenceIds.has(evidenceId),
+    ),
   };
 }
 
-function journalTraceability(traceability: EvidenceReferenceTraceability): DecisionJournalTraceability {
+function journalTraceability(
+  traceability: EvidenceReferenceTraceability,
+): DecisionJournalTraceability {
   return {
     complete: traceability.complete,
     evidenceReferenceCoverage: traceability.evidenceReferenceCoverage,
@@ -737,20 +977,29 @@ function journalTraceability(traceability: EvidenceReferenceTraceability): Decis
 
 function assumptionExposure(assumptions: readonly AssessmentFact[]): number {
   if (!assumptions.length) return 20;
-  const withoutEvidence = assumptions.filter((item) => item.evidenceIds.length === 0).length;
+  const withoutEvidence = assumptions.filter(
+    (item) => item.evidenceIds.length === 0,
+  ).length;
   const withoutReview = assumptions.filter((item) => !item.reviewAfter).length;
-  return clamp(assumptions.length * 12 + withoutEvidence * 8 + withoutReview * 5);
+  return clamp(
+    assumptions.length * 12 + withoutEvidence * 8 + withoutReview * 5,
+  );
 }
 
 function unknownExposure(unknowns: readonly AssessmentFact[]): number {
   if (!unknowns.length) return 25;
-  const withoutEvidence = unknowns.filter((item) => item.evidenceIds.length === 0).length;
+  const withoutEvidence = unknowns.filter(
+    (item) => item.evidenceIds.length === 0,
+  ).length;
   return clamp(unknowns.length * 10 + withoutEvidence * 6);
 }
 
 function defaultChange(outcome: DecisionLearningOutcome): string {
-  if (outcome === "confirmed") return "Keep the reasoning, but continue reviewing outcomes.";
-  if (outcome === "contradicted") return "Change the decision rule before repeating this decision.";
-  if (outcome === "mixed") return "Separate what worked from what failed before increasing confidence.";
+  if (outcome === "confirmed")
+    return "Keep the reasoning, but continue reviewing outcomes.";
+  if (outcome === "contradicted")
+    return "Change the decision rule before repeating this decision.";
+  if (outcome === "mixed")
+    return "Separate what worked from what failed before increasing confidence.";
   return "Capture more outcome evidence before changing the process.";
 }

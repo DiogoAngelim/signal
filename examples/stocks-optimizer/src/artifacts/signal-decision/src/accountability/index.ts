@@ -1,3 +1,4 @@
+import { compareReplay } from "../decision-record";
 import type {
   AccountabilityReport,
   CoherenceAssessment,
@@ -5,7 +6,6 @@ import type {
   OutcomeEvaluation,
   SignalDecisionRecord,
 } from "../types";
-import { compareReplay } from "../decision-record";
 
 export function createAccountabilityReport(input: {
   record: SignalDecisionRecord;
@@ -14,36 +14,58 @@ export function createAccountabilityReport(input: {
   decisionSummary?: string;
 }): AccountabilityReport {
   const replay = input.currentCoherence
-    ? compareReplay(input.record.decisionId, input.record.coherence, input.currentCoherence)
+    ? compareReplay(
+        input.record.decisionId,
+        input.record.coherence,
+        input.currentCoherence,
+      )
     : defaultReplay(input.record);
   const supportingEvidence = [
     ...(input.record.assessment?.evidence
       .filter((item) => item.direction === "supporting")
       .map((item) => item.summary) ?? []),
-    ...input.record.coherence.explanation.filter((line) => !/contradict|block|pause/i.test(line)),
-    ...(input.record.wisdom?.decision === "proceed" ? input.record.wisdom.reason : []),
+    ...input.record.coherence.explanation.filter(
+      (line) => !/contradict|block|pause/i.test(line),
+    ),
+    ...(input.record.wisdom?.decision === "proceed"
+      ? input.record.wisdom.reason
+      : []),
   ];
   const conflictingEvidence = [
     ...(input.record.assessment?.evidence
       .filter((item) => item.direction === "contradicting")
       .map((item) => item.summary) ?? []),
-    ...(input.record.assessment?.contradicted.map((item) => item.summary) ?? []),
-    ...input.record.coherence.contradictions.map((conflict) => conflict.description),
-    ...(input.record.wisdom?.decision === "avoid" ? input.record.wisdom.reason : []),
+    ...(input.record.assessment?.contradicted.map((item) => item.summary) ??
+      []),
+    ...input.record.coherence.contradictions.map(
+      (conflict) => conflict.description,
+    ),
+    ...(input.record.wisdom?.decision === "avoid"
+      ? input.record.wisdom.reason
+      : []),
   ];
 
   return {
     decisionId: input.record.decisionId,
     decisionSummary: input.decisionSummary ?? input.record.humanSummary,
-    actionTaken: Boolean(input.record.action) && input.record.coherence.actionAllowed,
+    actionTaken:
+      Boolean(input.record.action) && input.record.coherence.actionAllowed,
     modulesInvolved: modulesInvolved(input.record),
     supportingEvidence,
     conflictingEvidence,
-    contradictionsDetected: input.record.coherence.contradictions.map((conflict) => conflict.conflictId),
+    contradictionsDetected: input.record.coherence.contradictions.map(
+      (conflict) => conflict.conflictId,
+    ),
     confidenceAtDecision: input.record.coherence.score,
-    confidenceToday: input.currentCoherence?.score ?? input.record.coherence.score,
-    ...(input.outcome === undefined ? {} : { outcomeSummary: `${input.outcome.category} at ${input.outcome.successScore}/100.` }),
-    lessonsLearned: input.outcome?.lessons ?? input.record.outcome?.lessons ?? [],
+    confidenceToday:
+      input.currentCoherence?.score ?? input.record.coherence.score,
+    ...(input.outcome === undefined
+      ? {}
+      : {
+          outcomeSummary: `${input.outcome.category} at ${input.outcome.successScore}/100.`,
+        }),
+    lessonsLearned:
+      input.outcome?.lessons ?? input.record.outcome?.lessons ?? [],
     replayResult: replay.replayResult,
     humanExplanation: accountabilityExplanation(replay, input.record),
   };
@@ -53,7 +75,11 @@ export function replayDecision(input: {
   record: SignalDecisionRecord;
   currentCoherence: CoherenceAssessment;
 }): DecisionReplayComparison {
-  return compareReplay(input.record.decisionId, input.record.coherence, input.currentCoherence);
+  return compareReplay(
+    input.record.decisionId,
+    input.record.coherence,
+    input.currentCoherence,
+  );
 }
 
 function modulesInvolved(record: SignalDecisionRecord): string[] {
@@ -80,11 +106,15 @@ function defaultReplay(record: SignalDecisionRecord): DecisionReplayComparison {
     currentScale: record.coherence.actionScale,
     replayResult: "same-decision",
     differences: [],
-    explanation: "Replay used the original data because no newer coherence assessment was supplied.",
+    explanation:
+      "Replay used the original data because no newer coherence assessment was supplied.",
   };
 }
 
-function accountabilityExplanation(replay: DecisionReplayComparison, record: SignalDecisionRecord): string {
+function accountabilityExplanation(
+  replay: DecisionReplayComparison,
+  record: SignalDecisionRecord,
+): string {
   if (replay.replayResult === "changed-decision") {
     return `With current knowledge, Signal would change the decision. ${replay.explanation}`;
   }

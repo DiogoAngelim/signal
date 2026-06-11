@@ -4,15 +4,15 @@
  * SignalPackage trace data to reproduce and validate outcomes.
  */
 
-import type { SignalPackage, SignalPackageId } from "../model/SignalPackage";
-import { EventBus } from "../infrastructure/EventBus";
-import { SignalStore } from "../infrastructure/SignalStore";
-import { DecisionStore } from "../infrastructure/DecisionStore";
-import type { SignalGenerator } from "../interfaces/SignalGenerator";
+import type { DecisionStore } from "../infrastructure/DecisionStore";
+import type { EventBus } from "../infrastructure/EventBus";
+import type { SignalStore } from "../infrastructure/SignalStore";
+import type { Aggregator } from "../interfaces/Aggregator";
 import type { Analyzer } from "../interfaces/Analyzer";
 import type { Scorer } from "../interfaces/Scorer";
-import type { Aggregator } from "../interfaces/Aggregator";
-import { PipelineRunner } from "./PipelineRunner";
+import type { SignalGenerator } from "../interfaces/SignalGenerator";
+import type { SignalPackage, SignalPackageId } from "../model/SignalPackage";
+import type { PipelineRunner } from "./PipelineRunner";
 
 export type ReplayResult = {
   readonly originalPackageId: SignalPackageId;
@@ -49,12 +49,15 @@ export class ReplayEngine {
 
     const original = await this.signalStore.get(originalPackageId);
     if (!original) {
-      throw new Error(`SignalPackage not found for replay: ${originalPackageId}`);
+      throw new Error(
+        `SignalPackage not found for replay: ${originalPackageId}`,
+      );
     }
 
     // Re-execute the pipeline with the same input
     const meta = { ...original.meta, createdAt: Date.now() };
-    const replayedPackageId = `replay:${originalPackageId}:${Date.now()}` as SignalPackageId;
+    const replayedPackageId =
+      `replay:${originalPackageId}:${Date.now()}` as SignalPackageId;
 
     const replayed = await this.pipelineRunner.run(
       replayedPackageId,
@@ -78,12 +81,16 @@ export class ReplayEngine {
       replayedAt: Date.now(),
     };
 
-    this.eventBus.emit("replay:completed", {
-      originalPackageId,
-      replayedPackageId,
-      match,
-      mismatchCount: mismatches.length,
-    }, "ReplayEngine");
+    this.eventBus.emit(
+      "replay:completed",
+      {
+        originalPackageId,
+        replayedPackageId,
+        match,
+        mismatchCount: mismatches.length,
+      },
+      "ReplayEngine",
+    );
 
     return result;
   }
@@ -101,36 +108,69 @@ export class ReplayEngine {
     for (const packageId of packageIds) {
       const input = inputs.get(packageId);
       if (!input) {
-        this.eventBus.emit("replay:skipped", { packageId, reason: "no input" }, "ReplayEngine");
+        this.eventBus.emit(
+          "replay:skipped",
+          { packageId, reason: "no input" },
+          "ReplayEngine",
+        );
         continue;
       }
 
-      const result = await this.replay(packageId, input, generator, analyzer, scorer, aggregator);
+      const result = await this.replay(
+        packageId,
+        input,
+        generator,
+        analyzer,
+        scorer,
+        aggregator,
+      );
       results.push(result);
     }
 
     const allMatch = results.every((r) => r.match);
-    this.eventBus.emit("replay:range-completed", {
-      total: results.length,
-      matched: results.filter((r) => r.match).length,
-      mismatched: results.filter((r) => !r.match).length,
-      allMatch,
-    }, "ReplayEngine");
+    this.eventBus.emit(
+      "replay:range-completed",
+      {
+        total: results.length,
+        matched: results.filter((r) => r.match).length,
+        mismatched: results.filter((r) => !r.match).length,
+        allMatch,
+      },
+      "ReplayEngine",
+    );
 
     return results;
   }
 
-  private comparePackages(original: SignalPackage, replayed: SignalPackage): ReplayMismatch[] {
+  private comparePackages(
+    original: SignalPackage,
+    replayed: SignalPackage,
+  ): ReplayMismatch[] {
     const mismatches: ReplayMismatch[] = [];
 
     // Compare features
-    this.deepCompare("features", original.features, replayed.features, mismatches);
+    this.deepCompare(
+      "features",
+      original.features,
+      replayed.features,
+      mismatches,
+    );
 
     // Compare analysis
-    this.deepCompare("analysis", original.analysis, replayed.analysis, mismatches);
+    this.deepCompare(
+      "analysis",
+      original.analysis,
+      replayed.analysis,
+      mismatches,
+    );
 
     // Compare decision
-    this.deepCompare("decision", original.decision, replayed.decision, mismatches);
+    this.deepCompare(
+      "decision",
+      original.decision,
+      replayed.decision,
+      mismatches,
+    );
 
     // Compare result
     this.deepCompare("result", original.result, replayed.result, mismatches);
@@ -138,7 +178,13 @@ export class ReplayEngine {
     return mismatches;
   }
 
-  private deepCompare(stage: string, original: unknown, replayed: unknown, mismatches: ReplayMismatch[], prefix = ""): void {
+  private deepCompare(
+    stage: string,
+    original: unknown,
+    replayed: unknown,
+    mismatches: ReplayMismatch[],
+    prefix = "",
+  ): void {
     const field = prefix || stage;
 
     if (typeof original !== typeof replayed) {
@@ -156,10 +202,19 @@ export class ReplayEngine {
     if (typeof original === "object" && typeof replayed === "object") {
       const origObj = original as Record<string, unknown>;
       const repObj = replayed as Record<string, unknown>;
-      const allKeys = new Set([...Object.keys(origObj), ...Object.keys(repObj)]);
+      const allKeys = new Set([
+        ...Object.keys(origObj),
+        ...Object.keys(repObj),
+      ]);
 
       for (const key of allKeys) {
-        this.deepCompare(stage, origObj[key], repObj[key], mismatches, prefix ? `${prefix}.${key}` : key);
+        this.deepCompare(
+          stage,
+          origObj[key],
+          repObj[key],
+          mismatches,
+          prefix ? `${prefix}.${key}` : key,
+        );
       }
       return;
     }

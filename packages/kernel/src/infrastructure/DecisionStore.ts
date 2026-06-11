@@ -3,7 +3,7 @@
  * Tracks the decision history for audit, replay, and governance.
  */
 
-import { EventBus } from "./EventBus";
+import type { EventBus } from "./EventBus";
 
 export type DecisionRecord = {
   readonly id: string;
@@ -29,9 +29,13 @@ export class DecisionStore {
     if (!this.packageIndex.has(decision.packageId)) {
       this.packageIndex.set(decision.packageId, new Set());
     }
-    this.packageIndex.get(decision.packageId)!.add(decision.id);
+    this.packageIndex.get(decision.packageId)?.add(decision.id);
 
-    this.eventBus.emit("decision:stored", { decisionId: decision.id, packageId: decision.packageId }, "DecisionStore");
+    this.eventBus.emit(
+      "decision:stored",
+      { decisionId: decision.id, packageId: decision.packageId },
+      "DecisionStore",
+    );
   }
 
   async get(id: string): Promise<DecisionRecord | undefined> {
@@ -61,7 +65,9 @@ export class DecisionStore {
   }
 
   async all(): Promise<DecisionRecord[]> {
-    return Array.from(this.decisions.values()).sort((a, b) => a.timestamp - b.timestamp);
+    return Array.from(this.decisions.values()).sort(
+      (a, b) => a.timestamp - b.timestamp,
+    );
   }
 
   async count(): Promise<number> {

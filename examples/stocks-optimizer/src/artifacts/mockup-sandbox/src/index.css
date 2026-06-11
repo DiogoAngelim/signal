@@ -42,7 +42,6 @@
   --color-sidebar-ring: hsl(var(--sidebar-ring));
 }
 
-
 :root {
   --button-outline: rgba(0, 0, 0, 0.1);
   --badge-outline: rgba(0, 0, 0, 0.05);
@@ -90,7 +89,6 @@
   --radius: .5rem;
   --spacing: 0.25rem;
 }
-
 
 .dark {
   --button-outline: rgba(255, 255, 255, 0.1);
@@ -144,12 +142,10 @@
 }
 
 @layer utilities {
-  
   input[type="search"]::-webkit-search-cancel-button {
     @apply hidden;
   }
 
-  
   [contenteditable][data-placeholder]:empty::before {
     content: attr(data-placeholder);
     color: hsl(var(--muted-foreground));

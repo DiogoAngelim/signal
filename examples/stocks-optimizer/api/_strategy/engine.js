@@ -10,7 +10,9 @@ function clamp(value, min = 0, max = 100) {
 }
 
 function mean(values) {
-  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+  return values.length
+    ? values.reduce((sum, value) => sum + value, 0) / values.length
+    : 0;
 }
 
 function stdev(values) {
@@ -40,15 +42,35 @@ function computeIndicators(bars, index, config = {}) {
   const close = numeric(current?.close);
   const previousClose = numeric(previous?.close, close);
 
-  const fastLookback = Math.max(5, Math.min(60, Number(config.fastLookback || 20)));
-  const slowLookback = Math.max(fastLookback + 5, Math.min(180, Number(config.slowLookback || 60)));
-  const longLookback = Math.max(slowLookback + 10, Math.min(260, Number(config.longLookback || 120)));
-  const momentumLookback = Math.max(5, Math.min(40, Number(config.momentumLookback || 20)));
+  const fastLookback = Math.max(
+    5,
+    Math.min(60, Number(config.fastLookback || 20)),
+  );
+  const slowLookback = Math.max(
+    fastLookback + 5,
+    Math.min(180, Number(config.slowLookback || 60)),
+  );
+  const longLookback = Math.max(
+    slowLookback + 10,
+    Math.min(260, Number(config.longLookback || 120)),
+  );
+  const momentumLookback = Math.max(
+    5,
+    Math.min(40, Number(config.momentumLookback || 20)),
+  );
 
-  const window20 = rollingWindow(bars, index, momentumLookback).map((bar) => numeric(bar.close)).filter((v) => v > 0);
-  const window50 = rollingWindow(bars, index, fastLookback).map((bar) => numeric(bar.close)).filter((v) => v > 0);
-  const window60 = rollingWindow(bars, index, slowLookback).map((bar) => numeric(bar.close)).filter((v) => v > 0);
-  const window120 = rollingWindow(bars, index, longLookback).map((bar) => numeric(bar.close)).filter((v) => v > 0);
+  const window20 = rollingWindow(bars, index, momentumLookback)
+    .map((bar) => numeric(bar.close))
+    .filter((v) => v > 0);
+  const window50 = rollingWindow(bars, index, fastLookback)
+    .map((bar) => numeric(bar.close))
+    .filter((v) => v > 0);
+  const window60 = rollingWindow(bars, index, slowLookback)
+    .map((bar) => numeric(bar.close))
+    .filter((v) => v > 0);
+  const window120 = rollingWindow(bars, index, longLookback)
+    .map((bar) => numeric(bar.close))
+    .filter((v) => v > 0);
 
   const returns20 = [];
 
@@ -61,7 +83,8 @@ function computeIndicators(bars, index, config = {}) {
   const avg60 = mean(window60);
   const avg120 = mean(window120);
 
-  const recentReturn = previousClose > 0 && close > 0 ? (close / previousClose - 1) * 100 : 0;
+  const recentReturn =
+    previousClose > 0 && close > 0 ? (close / previousClose - 1) * 100 : 0;
   const avgReturn20 = mean(returns20);
   const volatility20 = stdev(returns20);
   const positiveBreadth20 = returns20.length
@@ -70,7 +93,7 @@ function computeIndicators(bars, index, config = {}) {
 
   const trendSlope20 =
     window20.length >= 2 && window20[0] > 0
-      ? ((window20[window20.length - 1] / window20[0]) - 1) * 100
+      ? (window20[window20.length - 1] / window20[0] - 1) * 100
       : 0;
 
   return {
@@ -89,7 +112,9 @@ function computeIndicators(bars, index, config = {}) {
     slowLookback,
     longLookback,
     momentumLookback,
-    hasEnoughBars: window20.length >= Math.min(10, momentumLookback) && window60.length >= Math.min(20, slowLookback),
+    hasEnoughBars:
+      window20.length >= Math.min(10, momentumLookback) &&
+      window60.length >= Math.min(20, slowLookback),
   };
 }
 
@@ -116,7 +141,9 @@ function classifyRegimeForMarket(symbolSignals) {
   );
 
   const breadth = covered.length
-    ? (covered.filter((signal) => signal.suggestedExposure > 0).length / covered.length) * 100
+    ? (covered.filter((signal) => signal.suggestedExposure > 0).length /
+        covered.length) *
+      100
     : 0;
 
   const confidence = clamp(avgQuality * 0.75 + (100 - avgRisk) * 0.25);
@@ -176,8 +203,12 @@ function runSymbolIntelligence({ market, symbol, bars, index, config = {} }) {
     100,
   );
 
-  const setupQuality = clamp(signalConfidence * 0.45 + trendQuality * 0.45 + (100 - riskPressure) * 0.1);
-  const timingQuality = clamp((setupQuality + trendQuality + indicators.positiveBreadth20) / 3);
+  const setupQuality = clamp(
+    signalConfidence * 0.45 + trendQuality * 0.45 + (100 - riskPressure) * 0.1,
+  );
+  const timingQuality = clamp(
+    (setupQuality + trendQuality + indicators.positiveBreadth20) / 3,
+  );
   const expectedMove = indicators.avgReturn20 || indicators.recentReturn || 0;
 
   let signalAction = "Hold";
@@ -201,12 +232,18 @@ function runSymbolIntelligence({ market, symbol, bars, index, config = {} }) {
   ) {
     signalAction = "Buy";
     allocationAction = "Buy";
-    suggestedExposure = clamp((setupQuality - riskPressure * 0.35) / exposureDivisor, 0.5, maxExposure);
+    suggestedExposure = clamp(
+      (setupQuality - riskPressure * 0.35) / exposureDivisor,
+      0.5,
+      maxExposure,
+    );
   }
 
   if (
     riskPressure >= 76 ||
-    (hasEvidence && close < indicators.avg60 && indicators.recentReturn < -1.5) ||
+    (hasEvidence &&
+      close < indicators.avg60 &&
+      indicators.recentReturn < -1.5) ||
     setupQuality < 38
   ) {
     signalAction = "Sell";
@@ -251,7 +288,10 @@ function applyRegimeToSignals(symbolSignals, regimeState) {
 
     if (regimeState.regime === "Defensive Environment") {
       const defensiveBuyQuality = numeric(next.config?.defensiveBuyQuality, 74);
-      if (next.allocationAction === "Buy" && next.setupQuality < defensiveBuyQuality) {
+      if (
+        next.allocationAction === "Buy" &&
+        next.setupQuality < defensiveBuyQuality
+      ) {
         next.allocationAction = "Hold";
         next.signalAction = "Hold";
         next.suggestedExposure = 0;
@@ -262,7 +302,12 @@ function applyRegimeToSignals(symbolSignals, regimeState) {
   });
 }
 
-function runStrategyForMarketAtIndex({ market, barsBySymbol, indexBySymbol, config = {} }) {
+function runStrategyForMarketAtIndex({
+  market,
+  barsBySymbol,
+  indexBySymbol,
+  config = {},
+}) {
   const rawSignals = [];
 
   for (const [symbol, bars] of barsBySymbol.entries()) {
@@ -317,12 +362,18 @@ function computeMetrics(curve) {
 
   const avgReturn = mean(returns);
   const volatility = stdev(returns);
-  const annualizedSharpe = volatility > 0 ? (avgReturn / volatility) * Math.sqrt(252) : null;
+  const annualizedSharpe =
+    volatility > 0 ? (avgReturn / volatility) * Math.sqrt(252) : null;
 
-  const grossProfit = returns.filter((value) => value > 0).reduce((sum, value) => sum + value, 0);
-  const grossLoss = Math.abs(returns.filter((value) => value < 0).reduce((sum, value) => sum + value, 0));
+  const grossProfit = returns
+    .filter((value) => value > 0)
+    .reduce((sum, value) => sum + value, 0);
+  const grossLoss = Math.abs(
+    returns.filter((value) => value < 0).reduce((sum, value) => sum + value, 0),
+  );
 
-  const profitFactor = grossLoss === 0 ? (grossProfit > 0 ? 999 : null) : grossProfit / grossLoss;
+  const profitFactor =
+    grossLoss === 0 ? (grossProfit > 0 ? 999 : null) : grossProfit / grossLoss;
 
   const winRatePct = returns.length
     ? (returns.filter((value) => value > 0).length / returns.length) * 100
@@ -335,7 +386,10 @@ function computeMetrics(curve) {
     peak = Math.max(peak, point.equity);
 
     if (peak > 0) {
-      maxDrawdownPct = Math.max(maxDrawdownPct, ((peak - point.equity) / peak) * 100);
+      maxDrawdownPct = Math.max(
+        maxDrawdownPct,
+        ((peak - point.equity) / peak) * 100,
+      );
     }
   }
 
@@ -417,10 +471,16 @@ function buildBacktestFromSharedEngine({ market, barsBySymbol, config = {} }) {
     );
 
     const buys = result.signals.filter((signal) => {
-      return signal.allocationAction === "Buy" && numeric(signal.suggestedExposure) > 0;
+      return (
+        signal.allocationAction === "Buy" &&
+        numeric(signal.suggestedExposure) > 0
+      );
     });
 
-    const totalExposure = buys.reduce((sum, signal) => sum + numeric(signal.suggestedExposure), 0);
+    const totalExposure = buys.reduce(
+      (sum, signal) => sum + numeric(signal.suggestedExposure),
+      0,
+    );
     const deployedFraction = Math.min(1, Math.max(0, totalExposure / 100));
     const cashFraction = 1 - deployedFraction;
 
@@ -430,7 +490,9 @@ function buildBacktestFromSharedEngine({ market, barsBySymbol, config = {} }) {
       for (const buy of buys) {
         const bars = barsBySymbol.get(buy.symbol) || [];
         const today = bars.find((bar) => (bar.timestamp || bar.date) === date);
-        const tomorrow = bars.find((bar) => (bar.timestamp || bar.date) === nextDate);
+        const tomorrow = bars.find(
+          (bar) => (bar.timestamp || bar.date) === nextDate,
+        );
 
         if (!today || !tomorrow) continue;
 
@@ -461,7 +523,6 @@ function buildBacktestFromSharedEngine({ market, barsBySymbol, config = {} }) {
     metrics: computeMetrics(curve),
   };
 }
-
 
 function generateConservativeConfigs() {
   const configs = [];
@@ -528,7 +589,8 @@ function splitCurveByRatio(curve, trainRatio = 0.7) {
 }
 
 function scoreBacktestMetrics(metrics, curve, signalCount = 0) {
-  if (!metrics || metrics.totalReturnPct == null || !curve.length) return -Infinity;
+  if (!metrics || metrics.totalReturnPct == null || !curve.length)
+    return Number.NEGATIVE_INFINITY;
 
   const sharpe = numeric(metrics.annualizedSharpe);
   const totalReturn = numeric(metrics.totalReturnPct);
@@ -554,7 +616,12 @@ function scoreBacktestMetrics(metrics, curve, signalCount = 0) {
   );
 }
 
-function evaluateConfigOnBars({ market, barsBySymbol, config, trainRatio = 0.7 }) {
+function evaluateConfigOnBars({
+  market,
+  barsBySymbol,
+  config,
+  trainRatio = 0.7,
+}) {
   const full = buildBacktestFromSharedEngine({
     market,
     barsBySymbol,
@@ -565,9 +632,15 @@ function evaluateConfigOnBars({ market, barsBySymbol, config, trainRatio = 0.7 }
   const trainMetrics = computeMetrics(split.train);
   const testMetrics = computeMetrics(split.test);
 
-  const signalCount = full.signals.filter((signal) => signal.allocationAction === "Buy").length;
+  const signalCount = full.signals.filter(
+    (signal) => signal.allocationAction === "Buy",
+  ).length;
 
-  const trainScore = scoreBacktestMetrics(trainMetrics, split.train, signalCount);
+  const trainScore = scoreBacktestMetrics(
+    trainMetrics,
+    split.train,
+    signalCount,
+  );
   const testScore = scoreBacktestMetrics(testMetrics, split.test, signalCount);
 
   const degradationPenalty =
@@ -591,7 +664,12 @@ function evaluateConfigOnBars({ market, barsBySymbol, config, trainRatio = 0.7 }
   };
 }
 
-function optimizeConfigsOnBars({ market, barsBySymbol, configs = generateConservativeConfigs(), limit = 40 }) {
+function optimizeConfigsOnBars({
+  market,
+  barsBySymbol,
+  configs = generateConservativeConfigs(),
+  limit = 40,
+}) {
   const candidates = configs.slice(0, Math.max(1, limit));
   const results = [];
 
@@ -612,8 +690,6 @@ function optimizeConfigsOnBars({ market, barsBySymbol, configs = generateConserv
   return results;
 }
 
-
-
 function returnsForBars(bars, lookback = 60) {
   const usable = bars.slice(Math.max(0, bars.length - lookback - 1));
   const returns = [];
@@ -633,7 +709,7 @@ function returnsForBars(bars, lookback = 60) {
 function buildReturnMatrix({ signals, barsBySymbol, lookback = 60 }) {
   const symbols = signals.map((signal) => signal.symbol);
   const bySymbolReturns = new Map();
-  let minLength = Infinity;
+  let minLength = Number.POSITIVE_INFINITY;
 
   for (const symbol of symbols) {
     const returns = returnsForBars(barsBySymbol.get(symbol) || [], lookback);
@@ -644,11 +720,15 @@ function buildReturnMatrix({ signals, barsBySymbol, lookback = 60 }) {
     }
   }
 
-  const filteredSymbols = symbols.filter((symbol) => bySymbolReturns.has(symbol));
+  const filteredSymbols = symbols.filter((symbol) =>
+    bySymbolReturns.has(symbol),
+  );
 
   return {
     symbols: filteredSymbols,
-    matrix: filteredSymbols.map((symbol) => bySymbolReturns.get(symbol).slice(-minLength)),
+    matrix: filteredSymbols.map((symbol) =>
+      bySymbolReturns.get(symbol).slice(-minLength),
+    ),
   };
 }
 
@@ -663,7 +743,9 @@ function covariance(a, b) {
 
 function buildShrinkageCovariance(matrix, shrinkage = 0.35) {
   const n = matrix.length;
-  const cov = Array.from({ length: n }, () => Array.from({ length: n }, () => 0));
+  const cov = Array.from({ length: n }, () =>
+    Array.from({ length: n }, () => 0),
+  );
 
   for (let i = 0; i < n; i += 1) {
     for (let j = 0; j < n; j += 1) {
@@ -697,13 +779,11 @@ function normalizeWeights(weights, maxTotalWeight) {
   return weights.map((value) => Math.max(0, value) * scale);
 }
 
-function optimizeMptAllocation({
-  signals,
-  barsBySymbol,
-  config = {},
-}) {
+function optimizeMptAllocation({ signals, barsBySymbol, config = {} }) {
   const buySignals = signals.filter((signal) => {
-    return signal.allocationAction === "Buy" && numeric(signal.suggestedExposure) > 0;
+    return (
+      signal.allocationAction === "Buy" && numeric(signal.suggestedExposure) > 0
+    );
   });
 
   if (!buySignals.length) {
@@ -716,10 +796,17 @@ function optimizeMptAllocation({
   }
 
   const maxTotalExposure = numeric(config.maxTotalExposure, 65) / 100;
-  const maxPositionWeight = numeric(config.maxPositionWeight, numeric(config.maxExposure, 5.5)) / 100;
+  const maxPositionWeight =
+    numeric(config.maxPositionWeight, numeric(config.maxExposure, 5.5)) / 100;
   const riskAversion = numeric(config.riskAversion, 8);
-  const covarianceLookback = Math.max(20, Math.min(180, Number(config.covarianceLookback || 60)));
-  const covarianceShrinkage = Math.max(0, Math.min(0.95, Number(config.covarianceShrinkage ?? 0.35)));
+  const covarianceLookback = Math.max(
+    20,
+    Math.min(180, Number(config.covarianceLookback || 60)),
+  );
+  const covarianceShrinkage = Math.max(
+    0,
+    Math.min(0.95, Number(config.covarianceShrinkage ?? 0.35)),
+  );
 
   const { symbols, matrix } = buildReturnMatrix({
     signals: buySignals,
@@ -731,12 +818,16 @@ function optimizeMptAllocation({
     return signals;
   }
 
-  const signalBySymbol = new Map(buySignals.map((signal) => [signal.symbol, signal]));
+  const signalBySymbol = new Map(
+    buySignals.map((signal) => [signal.symbol, signal]),
+  );
   const cov = buildShrinkageCovariance(matrix, covarianceShrinkage);
 
   const expectedReturns = symbols.map((symbol) => {
     const signal = signalBySymbol.get(symbol);
-    const historicalMean = mean(returnsForBars(barsBySymbol.get(symbol) || [], covarianceLookback));
+    const historicalMean = mean(
+      returnsForBars(barsBySymbol.get(symbol) || [], covarianceLookback),
+    );
     const signalExpected = numeric(signal?.expectedMove) / 100;
 
     return historicalMean * 0.35 + signalExpected * 0.65;
@@ -759,7 +850,6 @@ function optimizeMptAllocation({
   weights = weights.map((weight) => Math.min(weight, maxPositionWeight));
   weights = normalizeWeights(weights, maxTotalExposure);
 
-  
   for (let iteration = 0; iteration < 30; iteration += 1) {
     const currentVariance = portfolioVariance(weights, cov);
 
@@ -773,13 +863,16 @@ function optimizeMptAllocation({
       ];
 
       let bestWeight = original;
-      let bestObjective = -Infinity;
+      let bestObjective = Number.NEGATIVE_INFINITY;
 
       for (const candidate of candidates) {
         const trial = [...weights];
         trial[i] = candidate;
         const normalized = normalizeWeights(trial, maxTotalExposure);
-        const expected = normalized.reduce((sum, weight, index) => sum + weight * expectedReturns[index], 0);
+        const expected = normalized.reduce(
+          (sum, weight, index) => sum + weight * expectedReturns[index],
+          0,
+        );
         const variance = portfolioVariance(normalized, cov);
         const objective = expected - riskAversion * variance;
 
@@ -802,7 +895,9 @@ function optimizeMptAllocation({
     if (Math.abs(nextVariance - currentVariance) < 1e-10) break;
   }
 
-  const weightBySymbol = new Map(symbols.map((symbol, index) => [symbol, weights[index]]));
+  const weightBySymbol = new Map(
+    symbols.map((symbol, index) => [symbol, weights[index]]),
+  );
 
   return signals.map((signal) => {
     if (signal.allocationAction !== "Buy") {
@@ -824,7 +919,6 @@ function optimizeMptAllocation({
     };
   });
 }
-
 
 module.exports = {
   STARTING_EQUITY,

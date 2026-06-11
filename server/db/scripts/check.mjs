@@ -3,7 +3,9 @@ import pg from "pg";
 const { Pool } = pg;
 
 if (!process.env.DATABASE_URL) {
-  console.error("DATABASE_URL is required to check Signal decision-memory tables.");
+  console.error(
+    "DATABASE_URL is required to check Signal decision-memory tables.",
+  );
   process.exit(1);
 }
 
@@ -20,7 +22,9 @@ const expectedTables = [
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: shouldUseSsl(process.env.DATABASE_URL) ? { rejectUnauthorized: false } : undefined,
+  ssl: shouldUseSsl(process.env.DATABASE_URL)
+    ? { rejectUnauthorized: false }
+    : undefined,
   max: 1,
   allowExitOnIdle: true,
 });
@@ -39,7 +43,9 @@ try {
   const found = new Set(result.rows.map((row) => row.table_name));
   const missing = expectedTables.filter((table) => !found.has(table));
   if (missing.length) {
-    console.error(`Missing Signal decision-memory tables: ${missing.join(", ")}`);
+    console.error(
+      `Missing Signal decision-memory tables: ${missing.join(", ")}`,
+    );
     process.exitCode = 1;
   } else {
     console.log("All Signal decision-memory tables exist.");
@@ -49,5 +55,8 @@ try {
 }
 
 function shouldUseSsl(connectionString) {
-  return /sslmode=require/i.test(connectionString) || /\.neon\.tech\//i.test(connectionString);
+  return (
+    /sslmode=require/i.test(connectionString) ||
+    /\.neon\.tech\//i.test(connectionString)
+  );
 }

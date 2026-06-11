@@ -1,6 +1,14 @@
 import type { SignalDecisionRecord } from "@signal/decision";
-import { DEFAULT_RETENTION_POLICY, MemoryLifecycle, normalizeRetentionPolicy } from "./retention";
-import { anonymizeExpiredRecord, compactDecisionRecord, summarizeDecisionRecords } from "./summary";
+import {
+  DEFAULT_RETENTION_POLICY,
+  MemoryLifecycle,
+  normalizeRetentionPolicy,
+} from "./retention";
+import {
+  anonymizeExpiredRecord,
+  compactDecisionRecord,
+  summarizeDecisionRecords,
+} from "./summary";
 import type {
   CompactionJobInput,
   CompactionJobResult,
@@ -17,7 +25,9 @@ export class CompactionJob {
     policy?: RetentionPolicy;
   }) {
     this.store = input.store;
-    this.lifecycle = new MemoryLifecycle(normalizeRetentionPolicy(input.policy ?? DEFAULT_RETENTION_POLICY));
+    this.lifecycle = new MemoryLifecycle(
+      normalizeRetentionPolicy(input.policy ?? DEFAULT_RETENTION_POLICY),
+    );
   }
 
   async run(input: CompactionJobInput = {}): Promise<CompactionJobResult> {
@@ -55,7 +65,10 @@ export class CompactionJob {
         if (tier === "hot") {
           result.retained += 1;
           if (record.retentionTier !== "hot") {
-            await this.store.saveDecisionRecord({ ...record, retentionTier: "hot" });
+            await this.store.saveDecisionRecord({
+              ...record,
+              retentionTier: "hot",
+            });
           }
           continue;
         }
@@ -84,7 +97,9 @@ export class CompactionJob {
           now,
         });
         await this.store.saveSummary(summary);
-        await this.store.saveDecisionRecord(compactDecisionRecord(record, tier, summary.summaryId));
+        await this.store.saveDecisionRecord(
+          compactDecisionRecord(record, tier, summary.summaryId),
+        );
         result.compacted += 1;
         result.summarized += 1;
       }
@@ -92,13 +107,17 @@ export class CompactionJob {
       if (summaryCandidates.length > 1) {
         const grouped = groupBySource(summaryCandidates);
         for (const [source, sourceRecords] of grouped) {
-          await this.store.saveSummary(summarizeDecisionRecords({
-            records: sourceRecords,
-            outcomes: sourceRecords.flatMap((record) => record.outcome ? [record.outcome] : []),
-            source,
-            retentionTier: "warm",
-            now,
-          }));
+          await this.store.saveSummary(
+            summarizeDecisionRecords({
+              records: sourceRecords,
+              outcomes: sourceRecords.flatMap((record) =>
+                record.outcome ? [record.outcome] : [],
+              ),
+              source,
+              retentionTier: "warm",
+              now,
+            }),
+          );
           result.summarized += 1;
         }
       }
@@ -121,7 +140,9 @@ export class CompactionJob {
   }
 }
 
-function groupBySource(records: readonly SignalDecisionRecord[]): Map<string, SignalDecisionRecord[]> {
+function groupBySource(
+  records: readonly SignalDecisionRecord[],
+): Map<string, SignalDecisionRecord[]> {
   const grouped = new Map<string, SignalDecisionRecord[]>();
   for (const record of records) {
     const source = record.source || "signal";

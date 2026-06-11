@@ -11,15 +11,15 @@ function readFixture(name: string) {
   return JSON.parse(
     readFileSync(
       join(__dirname, "../../../spec/contracts/fixtures/protocol", name),
-      "utf8"
-    )
+      "utf8",
+    ),
   );
 }
 
 describe("conformance fixtures", () => {
   it("validates the reference envelope fixture", () => {
     expect(
-      signalEnvelopeSchema.parse(readFixture("envelope.query.v1.json"))
+      signalEnvelopeSchema.parse(readFixture("envelope.query.v1.json")),
     ).toMatchObject({
       name: "note.get.v1",
     });
@@ -27,7 +27,7 @@ describe("conformance fixtures", () => {
 
   it("validates the replayed result fixture", () => {
     expect(
-      signalResultSchema.parse(readFixture("result.replayed.v1.json"))
+      signalResultSchema.parse(readFixture("result.replayed.v1.json")),
     ).toMatchObject({
       ok: true,
       meta: {
@@ -39,8 +39,8 @@ describe("conformance fixtures", () => {
   it("validates the capability fixture", () => {
     expect(
       signalCapabilitiesSchema.parse(
-        readFixture("capabilities.reference.v1.json")
-      )
+        readFixture("capabilities.reference.v1.json"),
+      ),
     ).toMatchObject({
       features: {
         deadlines: true,

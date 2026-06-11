@@ -6,9 +6,14 @@
  * Reports mismatches.
  */
 
-import type { PhaseState, SignalState, ReplayResult, ReplayMismatch } from "../state/types.js";
-import { recomputePhaseHash, computePhaseHash } from "../core/hashChain.js";
 import { GENESIS_HASH } from "../core/constants.js";
+import { computePhaseHash, recomputePhaseHash } from "../core/hashChain.js";
+import type {
+  PhaseState,
+  ReplayMismatch,
+  ReplayResult,
+  SignalState,
+} from "../state/types.js";
 
 /**
  * Replay phases from `from` to `to` (inclusive).
@@ -20,7 +25,7 @@ import { GENESIS_HASH } from "../core/constants.js";
  */
 export function replayPhases(
   state: SignalState,
-  from: number = 0,
+  from = 0,
   to: number = state.phases.length - 1,
 ): ReplayResult {
   const mismatches: ReplayMismatch[] = [];
@@ -35,7 +40,8 @@ export function replayPhases(
   }
 
   for (let i = start; i <= end; i++) {
-    const phase = phases[i]!;
+    const phase = phases[i];
+    if (!phase) continue;
 
     // Recompute the phase hash from its stored data
     const recomputedHash = recomputePhaseHash(phase);
@@ -81,7 +87,8 @@ export function replayWithChainValidation(state: SignalState): ReplayResult {
   let expectedPreviousHash: string = GENESIS_HASH;
 
   for (let i = 0; i < phases.length; i++) {
-    const phase = phases[i]!;
+    const phase = phases[i];
+    if (!phase) continue;
 
     // Check chain linkage
     if (phase.previousHash !== expectedPreviousHash) {
@@ -121,10 +128,7 @@ export function formatReplayResult(result: ReplayResult): string {
     return "REPLAY: All phases verified — no mismatches detected.";
   }
 
-  const lines: string[] = [
-    "REPLAY: Mismatches detected!",
-    "",
-  ];
+  const lines: string[] = ["REPLAY: Mismatches detected!", ""];
 
   for (const m of result.mismatches) {
     lines.push(`  Phase ${m.phase}:`);

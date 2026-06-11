@@ -17,9 +17,14 @@ export function normalizeMetric(
   const average = mean(nextHistory);
   const sigma = stdev(nextHistory);
   const zScore = sigma > 0 ? (score - average) / sigma : 0;
-  const percentileScore = nextHistory.length > 1 ? percentileRank(nextHistory, score) : clamp(score);
+  const percentileScore =
+    nextHistory.length > 1 ? percentileRank(nextHistory, score) : clamp(score);
   const zScoreNormalized = clamp(50 + zScore * 14);
-  const volatilityAdjustedScore = clamp(score - sigma * 0.16 * regimeVolatilityScale + Math.abs(score - average) * 0.08);
+  const volatilityAdjustedScore = clamp(
+    score -
+      sigma * 0.16 * regimeVolatilityScale +
+      Math.abs(score - average) * 0.08,
+  );
   const boundedScore = clamp(
     score * 0.46 +
       percentileScore * 0.24 +

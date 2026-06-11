@@ -181,11 +181,20 @@ export interface AlgaiStudentDataSource {
   getAuthenticatedUser(): Promise<AuthenticatedUser | null>;
   getParentDashboardAccess(): Promise<ParentDashboardAccessPayload | null>;
   getStudentAccessForEmail(email: string): Promise<StudentAccessRecord | null>;
-  getStudentAccessRecordsForEmail(email: string): Promise<StudentAccessRecord[]>;
-  getStudentAccessRecord(studentId: string): Promise<StudentAccessRecord | null>;
+  getStudentAccessRecordsForEmail(
+    email: string,
+  ): Promise<StudentAccessRecord[]>;
+  getStudentAccessRecord(
+    studentId: string,
+  ): Promise<StudentAccessRecord | null>;
   getLearningSummary(studentId: string): Promise<StudentLearningSummary | null>;
-  isTeacherAuthorizedForStudent(teacherEmail: string, studentId: string): Promise<boolean>;
-  updateParentEmailsForStudent(input: ParentAccessUpdateInput): Promise<ParentAccessUpdateResult>;
+  isTeacherAuthorizedForStudent(
+    teacherEmail: string,
+    studentId: string,
+  ): Promise<boolean>;
+  updateParentEmailsForStudent(
+    input: ParentAccessUpdateInput,
+  ): Promise<ParentAccessUpdateResult>;
 }
 
 export interface DemoAlgaiStudentDataSource extends AlgaiStudentDataSource {

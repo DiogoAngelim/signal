@@ -16,7 +16,12 @@ export type SignalPackageMeta = {
  * SignalPackage is the immutable envelope that carries data through
  * the kernel pipeline: transform → analyze → decide → execute.
  */
-export type SignalPackage<TFeatures = unknown, TAnalysis = unknown, TDecision = unknown, TResult = unknown> = {
+export type SignalPackage<
+  TFeatures = unknown,
+  TAnalysis = unknown,
+  TDecision = unknown,
+  TResult = unknown,
+> = {
   readonly id: SignalPackageId;
   readonly meta: SignalPackageMeta;
   readonly features: TFeatures;
@@ -38,7 +43,12 @@ export type SignalPackageTraceEntry = {
  * Builder for constructing SignalPackage instances incrementally.
  * Ensures immutability of the final package.
  */
-export class SignalPackageBuilder<TFeatures = unknown, TAnalysis = unknown, TDecision = unknown, TResult = unknown> {
+export class SignalPackageBuilder<
+  TFeatures = unknown,
+  TAnalysis = unknown,
+  TDecision = unknown,
+  TResult = unknown,
+> {
   private _features: TFeatures = null as unknown as TFeatures;
   private _analysis: TAnalysis = null as unknown as TAnalysis;
   private _decision: TDecision = null as unknown as TDecision;
@@ -83,12 +93,19 @@ export class SignalPackageBuilder<TFeatures = unknown, TAnalysis = unknown, TDec
       analysis: this._analysis,
       decision: this._decision,
       result: this._result,
-      trace: Object.freeze([...this._trace.map((t) => Object.freeze({ ...t }))]),
+      trace: Object.freeze([
+        ...this._trace.map((t) => Object.freeze({ ...t })),
+      ]),
     });
   }
 }
 
-export function createSignalPackage<TFeatures = unknown, TAnalysis = unknown, TDecision = unknown, TResult = unknown>(
+export function createSignalPackage<
+  TFeatures = unknown,
+  TAnalysis = unknown,
+  TDecision = unknown,
+  TResult = unknown,
+>(
   id: SignalPackageId,
   meta: SignalPackageMeta,
 ): SignalPackageBuilder<TFeatures, TAnalysis, TDecision, TResult> {

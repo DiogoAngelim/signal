@@ -11,14 +11,17 @@ import {
   SlidersHorizontal,
   Trash2,
   Upload,
-  WalletCards
+  WalletCards,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
-import { calculateCashflowProfile } from "../cashflow.js";
 import {
-  ManualUploadConnector,
-  SampleDataConnector
-} from "../connectors.js";
+  type ChangeEvent,
+  type FormEvent,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { calculateCashflowProfile } from "../cashflow.js";
+import { ManualUploadConnector, SampleDataConnector } from "../connectors.js";
 import { formatBrl, formatPercent } from "../format.js";
 import type {
   BalanceSnapshot,
@@ -28,7 +31,7 @@ import type {
   PurchaseDecisionOutput,
   PurchaseNecessity,
   PurchaseVerdict,
-  RawTransaction
+  RawTransaction,
 } from "../models.js";
 import { normalizeRawTransactions } from "../normalize.js";
 import { createPurchaseDecision } from "../purchase-decision.js";
@@ -37,7 +40,13 @@ import { createSampleFinancialDataset } from "../sample-data.js";
 const APP_NOW = new Date("2026-06-03T12:00:00.000Z");
 const USER_ID = "demo-user";
 
-type Tab = "validate" | "connect" | "profile" | "history" | "upload" | "settings";
+type Tab =
+  | "validate"
+  | "connect"
+  | "profile"
+  | "history"
+  | "upload"
+  | "settings";
 
 type FinancialState = {
   connection?: BankConnection;
@@ -75,22 +84,28 @@ const SAMPLE_UPLOAD = `date,description,amount,category,balance
 
 export function App() {
   const [tab, setTab] = useState<Tab>("validate");
-  const [financialState, setFinancialState] = useState<FinancialState>(() => createInitialFinancialState());
+  const [financialState, setFinancialState] = useState<FinancialState>(() =>
+    createInitialFinancialState(),
+  );
   const [form, setForm] = useState<PurchaseForm>({
     amount: "520",
     category: "Work equipment",
     paymentMethod: "cash",
     installments: "6",
-    necessity: "optional"
+    necessity: "optional",
   });
-  const [decision, setDecision] = useState<PurchaseDecisionOutput | undefined>();
+  const [decision, setDecision] = useState<
+    PurchaseDecisionOutput | undefined
+  >();
   const [history, setHistory] = useState<PurchaseDecision[]>([]);
   const [manualCsv, setManualCsv] = useState(SAMPLE_UPLOAD);
 
   useEffect(() => {
     let cancelled = false;
 
-    void fetch(`/api/local-nubank-statement?userId=${encodeURIComponent(USER_ID)}`)
+    void fetch(
+      `/api/local-nubank-statement?userId=${encodeURIComponent(USER_ID)}`,
+    )
       .then(async (response) => {
         if (!response.ok) return undefined;
         return response.json() as Promise<LocalNubankStatementApiResult>;
@@ -112,7 +127,7 @@ export function App() {
     return normalizeRawTransactions({
       rawTransactions: financialState.rawTransactions,
       userId: USER_ID,
-      connectionId: financialState.connection.id
+      connectionId: financialState.connection.id,
     });
   }, [financialState.connection, financialState.rawTransactions]);
 
@@ -121,7 +136,7 @@ export function App() {
       userId: USER_ID,
       transactions: normalizedTransactions,
       balances: financialState.balances,
-      now: APP_NOW
+      now: APP_NOW,
     });
   }, [financialState.balances, normalizedTransactions]);
 
@@ -135,11 +150,11 @@ export function App() {
         category: form.category || undefined,
         paymentMethod: form.paymentMethod,
         installments: Number(form.installments) || undefined,
-        necessity: form.necessity
+        necessity: form.necessity,
       },
       profile,
       transactions: normalizedTransactions,
-      now: APP_NOW
+      now: APP_NOW,
     });
     setDecision(nextDecision);
     setHistory((current) => [
@@ -152,9 +167,9 @@ export function App() {
         paymentMethod: form.paymentMethod,
         installments: Number(form.installments) || undefined,
         necessity: form.necessity,
-        createdAt: new Date()
+        createdAt: new Date(),
       },
-      ...current
+      ...current,
     ]);
   }
 
@@ -165,8 +180,10 @@ export function App() {
       setFinancialState({
         connection: result.connection,
         balances: await connector.fetchBalances(result.connection.id),
-        rawTransactions: await connector.fetchTransactions(result.connection.id),
-        message: result.message
+        rawTransactions: await connector.fetchTransactions(
+          result.connection.id,
+        ),
+        message: result.message,
       });
       setTab("validate");
       setDecision(undefined);
@@ -178,7 +195,7 @@ export function App() {
     const result = await connector.connect({
       userId: USER_ID,
       csv: manualCsv,
-      currentBalance: profile.currentBalance
+      currentBalance: profile.currentBalance,
     });
     if (!result.ok) {
       setFinancialState((current) => ({ ...current, message: result.message }));
@@ -188,7 +205,7 @@ export function App() {
       connection: result.connection,
       balances: await connector.fetchBalances(result.connection.id),
       rawTransactions: await connector.fetchTransactions(result.connection.id),
-      message: result.message
+      message: result.message,
     });
     setTab("validate");
     setDecision(undefined);
@@ -201,14 +218,33 @@ export function App() {
   }
 
   function disconnectData() {
-    if (!window.confirm("Disconnect the active financial data source? Imported records will be cleared from this session.")) return;
-    setFinancialState({ balances: [], rawTransactions: [], message: "Financial data disconnected." });
+    if (
+      !window.confirm(
+        "Disconnect the active financial data source? Imported records will be cleared from this session.",
+      )
+    )
+      return;
+    setFinancialState({
+      balances: [],
+      rawTransactions: [],
+      message: "Financial data disconnected.",
+    });
     setDecision(undefined);
   }
 
   function deleteImportedData() {
-    if (!window.confirm("Delete imported financial records from this session? This cannot be undone in the current session.")) return;
-    setFinancialState((current) => ({ ...current, balances: [], rawTransactions: [], message: "Imported financial records deleted." }));
+    if (
+      !window.confirm(
+        "Delete imported financial records from this session? This cannot be undone in the current session.",
+      )
+    )
+      return;
+    setFinancialState((current) => ({
+      ...current,
+      balances: [],
+      rawTransactions: [],
+      message: "Imported financial records deleted.",
+    }));
     setDecision(undefined);
   }
 
@@ -216,24 +252,65 @@ export function App() {
     <main className="liquidity-app">
       <header className="app-topbar">
         <div className="brand-lockup">
-          <div className="brand-icon" aria-hidden="true"><WalletCards size={22} /></div>
+          <div className="brand-icon" aria-hidden="true">
+            <WalletCards size={22} />
+          </div>
           <div>
             <p>Liquidity Manager</p>
             <span>{connectionLabel(financialState.connection)}</span>
           </div>
         </div>
         <nav className="tab-nav" aria-label="Liquidity Manager sections">
-          <TabButton tab="validate" current={tab} onSelect={setTab} icon={<CircleDollarSign size={17} />} label="Validate" />
-          <TabButton tab="connect" current={tab} onSelect={setTab} icon={<PlugZap size={17} />} label="Connect" />
-          <TabButton tab="profile" current={tab} onSelect={setTab} icon={<SlidersHorizontal size={17} />} label="Profile" />
-          <TabButton tab="history" current={tab} onSelect={setTab} icon={<History size={17} />} label="History" />
-          <TabButton tab="upload" current={tab} onSelect={setTab} icon={<FileUp size={17} />} label="Upload" />
-          <TabButton tab="settings" current={tab} onSelect={setTab} icon={<ShieldCheck size={17} />} label="Settings" />
+          <TabButton
+            tab="validate"
+            current={tab}
+            onSelect={setTab}
+            icon={<CircleDollarSign size={17} />}
+            label="Validate"
+          />
+          <TabButton
+            tab="connect"
+            current={tab}
+            onSelect={setTab}
+            icon={<PlugZap size={17} />}
+            label="Connect"
+          />
+          <TabButton
+            tab="profile"
+            current={tab}
+            onSelect={setTab}
+            icon={<SlidersHorizontal size={17} />}
+            label="Profile"
+          />
+          <TabButton
+            tab="history"
+            current={tab}
+            onSelect={setTab}
+            icon={<History size={17} />}
+            label="History"
+          />
+          <TabButton
+            tab="upload"
+            current={tab}
+            onSelect={setTab}
+            icon={<FileUp size={17} />}
+            label="Upload"
+          />
+          <TabButton
+            tab="settings"
+            current={tab}
+            onSelect={setTab}
+            icon={<ShieldCheck size={17} />}
+            label="Settings"
+          />
         </nav>
       </header>
 
       {financialState.message ? (
-        <p className="system-message"><ShieldCheck size={17} aria-hidden="true" />{financialState.message}</p>
+        <p className="system-message">
+          <ShieldCheck size={17} aria-hidden="true" />
+          {financialState.message}
+        </p>
       ) : null}
 
       {tab === "validate" ? (
@@ -242,7 +319,9 @@ export function App() {
           profile={profile}
           transactionCount={normalizedTransactions.length}
           decision={decision}
-          disabled={!financialState.connection || normalizedTransactions.length === 0}
+          disabled={
+            !financialState.connection || normalizedTransactions.length === 0
+          }
           onChange={setForm}
           onSubmit={validatePurchase}
           onLoadSample={() => void loadSampleData()}
@@ -250,9 +329,7 @@ export function App() {
       ) : null}
 
       {tab === "connect" ? (
-        <ConnectScreen
-          onUpload={() => setTab("upload")}
-        />
+        <ConnectScreen onUpload={() => setTab("upload")} />
       ) : null}
 
       {tab === "profile" ? <CashflowProfileView profile={profile} /> : null}
@@ -285,7 +362,7 @@ export function PurchaseValidator({
   disabled,
   onChange,
   onSubmit,
-  onLoadSample
+  onLoadSample,
 }: {
   form: PurchaseForm;
   profile: ReturnType<typeof calculateCashflowProfile>;
@@ -302,14 +379,18 @@ export function PurchaseValidator({
         <div>
           <p className="eyebrow">Purchase validation</p>
           <h1 id="purchase-question">Is this purchase justifiable?</h1>
-          <p className="subtitle">Validate a purchase against your real cashflow before committing.</p>
+          <p className="subtitle">
+            Validate a purchase against your real cashflow before committing.
+          </p>
         </div>
 
         <label className="field">
           <span>Amount</span>
           <input
             value={form.amount}
-            onChange={(event) => onChange({ ...form, amount: event.target.value })}
+            onChange={(event) =>
+              onChange({ ...form, amount: event.target.value })
+            }
             inputMode="decimal"
             type="number"
             min="1"
@@ -322,7 +403,9 @@ export function PurchaseValidator({
           <span>Category</span>
           <input
             value={form.category}
-            onChange={(event) => onChange({ ...form, category: event.target.value })}
+            onChange={(event) =>
+              onChange({ ...form, category: event.target.value })
+            }
             placeholder="Optional"
             aria-label="Purchase category"
           />
@@ -330,12 +413,18 @@ export function PurchaseValidator({
 
         <div className="field">
           <span>Payment method</span>
-          <div className="segmented-control" role="group" aria-label="Payment method">
+          <div
+            className="segmented-control"
+            role="group"
+            aria-label="Payment method"
+          >
             {(["cash", "credit", "installments"] as const).map((method) => (
               <button
                 key={method}
                 type="button"
-                className={form.paymentMethod === method ? "selected" : undefined}
+                className={
+                  form.paymentMethod === method ? "selected" : undefined
+                }
                 onClick={() => onChange({ ...form, paymentMethod: method })}
               >
                 {methodLabel(method)}
@@ -349,7 +438,9 @@ export function PurchaseValidator({
             <span>Installments</span>
             <input
               value={form.installments}
-              onChange={(event) => onChange({ ...form, installments: event.target.value })}
+              onChange={(event) =>
+                onChange({ ...form, installments: event.target.value })
+              }
               type="number"
               min="2"
               max="24"
@@ -363,7 +454,12 @@ export function PurchaseValidator({
           <span>Necessity</span>
           <select
             value={form.necessity}
-            onChange={(event) => onChange({ ...form, necessity: event.target.value as PurchaseNecessity })}
+            onChange={(event) =>
+              onChange({
+                ...form,
+                necessity: event.target.value as PurchaseNecessity,
+              })
+            }
             aria-label="Purchase necessity"
           >
             <option value="optional">Optional</option>
@@ -373,12 +469,20 @@ export function PurchaseValidator({
         </label>
 
         <div className="form-actions">
-          <button className="primary-button" type="submit" disabled={disabled || Number(form.amount) <= 0}>
+          <button
+            className="primary-button"
+            type="submit"
+            disabled={disabled || Number(form.amount) <= 0}
+          >
             <CheckCircle2 size={18} aria-hidden="true" />
             Validate purchase
           </button>
           {disabled ? (
-            <button className="secondary-button" type="button" onClick={onLoadSample}>
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={onLoadSample}
+            >
               <RefreshCw size={17} aria-hidden="true" />
               Try sample data
             </button>
@@ -411,15 +515,38 @@ function DecisionResult({ decision }: { decision: PurchaseDecisionOutput }) {
       </div>
 
       <div className="metrics-comparison" aria-label="Before and after metrics">
-        <MetricPair label="Current balance" before={formatBrl(decision.before.currentBalance)} after={formatBrl(decision.after.currentBalance)} />
-        <MetricPair label="Runway" before={`${decision.before.runwayWeeks} weeks`} after={`${decision.after.runwayWeeks} weeks`} />
-        <MetricPair label="30-day risk" before={formatPercent(decision.before.shortfallRisk30d)} after={formatPercent(decision.after.shortfallRisk30d)} />
-        <MetricPair label="60-day risk" before={formatPercent(decision.before.shortfallRisk60d)} after={formatPercent(decision.after.shortfallRisk60d)} />
-        <MetricPair label="90-day risk" before={formatPercent(decision.before.shortfallRisk90d)} after={formatPercent(decision.after.shortfallRisk90d)} />
+        <MetricPair
+          label="Current balance"
+          before={formatBrl(decision.before.currentBalance)}
+          after={formatBrl(decision.after.currentBalance)}
+        />
+        <MetricPair
+          label="Runway"
+          before={`${decision.before.runwayWeeks} weeks`}
+          after={`${decision.after.runwayWeeks} weeks`}
+        />
+        <MetricPair
+          label="30-day risk"
+          before={formatPercent(decision.before.shortfallRisk30d)}
+          after={formatPercent(decision.after.shortfallRisk30d)}
+        />
+        <MetricPair
+          label="60-day risk"
+          before={formatPercent(decision.before.shortfallRisk60d)}
+          after={formatPercent(decision.after.shortfallRisk60d)}
+        />
+        <MetricPair
+          label="90-day risk"
+          before={formatPercent(decision.before.shortfallRisk90d)}
+          after={formatPercent(decision.after.shortfallRisk90d)}
+        />
       </div>
 
       {decision.saferAlternative ? (
-        <p className="safer-alternative"><ShieldCheck size={17} aria-hidden="true" />{decision.saferAlternative}</p>
+        <p className="safer-alternative">
+          <ShieldCheck size={17} aria-hidden="true" />
+          {decision.saferAlternative}
+        </p>
       ) : null}
     </div>
   );
@@ -430,12 +557,20 @@ function EmptyDecision() {
     <div className="empty-decision">
       <CircleDollarSign size={28} aria-hidden="true" />
       <p>No decision yet.</p>
-      <span>Enter a purchase and validate it against the active cashflow profile.</span>
+      <span>
+        Enter a purchase and validate it against the active cashflow profile.
+      </span>
     </div>
   );
 }
 
-function CashflowVisual({ profile, transactionCount }: { profile: ReturnType<typeof calculateCashflowProfile>; transactionCount: number }) {
+function CashflowVisual({
+  profile,
+  transactionCount,
+}: {
+  profile: ReturnType<typeof calculateCashflowProfile>;
+  transactionCount: number;
+}) {
   const runwayWidth = `${Math.min(100, (profile.runwayWeeks / 20) * 100)}%`;
   const riskWidth = `${Math.min(100, profile.shortfallRisk90d * 100)}%`;
 
@@ -445,12 +580,16 @@ function CashflowVisual({ profile, transactionCount }: { profile: ReturnType<typ
         <span>Balance</span>
         <strong>{formatBrl(profile.currentBalance)}</strong>
       </div>
-      <div className="visual-track"><span style={{ width: runwayWidth }} /></div>
+      <div className="visual-track">
+        <span style={{ width: runwayWidth }} />
+      </div>
       <div className="visual-row">
         <span>Runway</span>
         <strong>{profile.runwayWeeks} weeks</strong>
       </div>
-      <div className="visual-track risk"><span style={{ width: riskWidth }} /></div>
+      <div className="visual-track risk">
+        <span style={{ width: riskWidth }} />
+      </div>
       <div className="visual-row">
         <span>90-day risk</span>
         <strong>{formatPercent(profile.shortfallRisk90d)}</strong>
@@ -464,7 +603,7 @@ function CashflowVisual({ profile, transactionCount }: { profile: ReturnType<typ
 }
 
 export function ConnectScreen({
-  onUpload
+  onUpload,
 }: {
   onUpload(): void;
 }) {
@@ -488,7 +627,9 @@ export function ConnectScreen({
   );
 }
 
-function CashflowProfileView({ profile }: { profile: ReturnType<typeof calculateCashflowProfile> }) {
+function CashflowProfileView({
+  profile,
+}: { profile: ReturnType<typeof calculateCashflowProfile> }) {
   return (
     <section className="screen-grid" aria-labelledby="profile-title">
       <div className="screen-heading">
@@ -496,15 +637,42 @@ function CashflowProfileView({ profile }: { profile: ReturnType<typeof calculate
         <h1 id="profile-title">Cashflow profile</h1>
       </div>
       <div className="profile-grid">
-        <MetricTile label="Current balance" value={formatBrl(profile.currentBalance)} />
-        <MetricTile label="Average monthly income" value={formatBrl(profile.averageMonthlyIncome)} />
-        <MetricTile label="Average monthly expenses" value={formatBrl(profile.averageMonthlyExpenses)} />
-        <MetricTile label="Fixed monthly expenses" value={formatBrl(profile.fixedMonthlyExpenses)} />
-        <MetricTile label="Discretionary monthly expenses" value={formatBrl(profile.discretionaryMonthlyExpenses)} />
-        <MetricTile label="Income volatility" value={formatPercent(profile.incomeVolatility)} />
-        <MetricTile label="Expense volatility" value={formatPercent(profile.expenseVolatility)} />
-        <MetricTile label="Data coverage" value={`${profile.dataCoverageDays} days`} />
-        <MetricTile label="Transaction count" value={`${profile.transactionCount}`} />
+        <MetricTile
+          label="Current balance"
+          value={formatBrl(profile.currentBalance)}
+        />
+        <MetricTile
+          label="Average monthly income"
+          value={formatBrl(profile.averageMonthlyIncome)}
+        />
+        <MetricTile
+          label="Average monthly expenses"
+          value={formatBrl(profile.averageMonthlyExpenses)}
+        />
+        <MetricTile
+          label="Fixed monthly expenses"
+          value={formatBrl(profile.fixedMonthlyExpenses)}
+        />
+        <MetricTile
+          label="Discretionary monthly expenses"
+          value={formatBrl(profile.discretionaryMonthlyExpenses)}
+        />
+        <MetricTile
+          label="Income volatility"
+          value={formatPercent(profile.incomeVolatility)}
+        />
+        <MetricTile
+          label="Expense volatility"
+          value={formatPercent(profile.expenseVolatility)}
+        />
+        <MetricTile
+          label="Data coverage"
+          value={`${profile.dataCoverageDays} days`}
+        />
+        <MetricTile
+          label="Transaction count"
+          value={`${profile.transactionCount}`}
+        />
       </div>
     </section>
   );
@@ -520,12 +688,21 @@ function DecisionHistory({ decisions }: { decisions: PurchaseDecision[] }) {
       {decisions.length ? (
         <div className="history-list">
           {decisions.map((decision) => (
-            <article className={`history-item verdict-${decision.verdict}`} key={decision.id}>
+            <article
+              className={`history-item verdict-${decision.verdict}`}
+              key={decision.id}
+            >
               <div>
                 <strong>{formatBrl(decision.amount)}</strong>
-                <span>{decision.category || "Uncategorized"} · {methodLabel(decision.paymentMethod)}</span>
+                <span>
+                  {decision.category || "Uncategorized"} ·{" "}
+                  {methodLabel(decision.paymentMethod)}
+                </span>
               </div>
-              <p>{verdictLabel(decision.verdict)} · score {decision.score} · confidence {decision.confidence}</p>
+              <p>
+                {verdictLabel(decision.verdict)} · score {decision.score} ·
+                confidence {decision.confidence}
+              </p>
             </article>
           ))}
         </div>
@@ -540,7 +717,7 @@ function ManualUploadView({
   csv,
   onCsvChange,
   onFileChange,
-  onImport
+  onImport,
 }: {
   csv: string;
   onCsvChange(value: string): void;
@@ -566,7 +743,12 @@ function ManualUploadView({
       </div>
       <label className="field text-area-field">
         <span>CSV content</span>
-        <textarea value={csv} onChange={(event) => onCsvChange(event.target.value)} rows={10} spellCheck={false} />
+        <textarea
+          value={csv}
+          onChange={(event) => onCsvChange(event.target.value)}
+          rows={10}
+          spellCheck={false}
+        />
       </label>
     </section>
   );
@@ -576,7 +758,7 @@ function SettingsView({
   connection,
   rawRecordCount,
   onDisconnect,
-  onDeleteData
+  onDeleteData,
 }: {
   connection?: BankConnection;
   rawRecordCount: number;
@@ -590,11 +772,18 @@ function SettingsView({
         <h1 id="settings-title">Disconnect / delete data</h1>
       </div>
       <div className="settings-grid">
-        <MetricTile label="Active provider" value={connection ? providerLabel(connection.provider) : "None"} />
+        <MetricTile
+          label="Active provider"
+          value={connection ? providerLabel(connection.provider) : "None"}
+        />
         <MetricTile label="Imported records" value={`${rawRecordCount}`} />
       </div>
       <div className="danger-actions">
-        <button className="secondary-button" type="button" onClick={onDisconnect}>
+        <button
+          className="secondary-button"
+          type="button"
+          onClick={onDisconnect}
+        >
           <PlugZap size={17} aria-hidden="true" />
           Disconnect
         </button>
@@ -614,12 +803,18 @@ function ScoreMeter({ label, value }: { label: string; value: number }) {
         <span>{label}</span>
         <strong>{value}</strong>
       </div>
-      <div className="meter-track"><span style={{ width: `${value}%` }} /></div>
+      <div className="meter-track">
+        <span style={{ width: `${value}%` }} />
+      </div>
     </div>
   );
 }
 
-function MetricPair({ label, before, after }: { label: string; before: string; after: string }) {
+function MetricPair({
+  label,
+  before,
+  after,
+}: { label: string; before: string; after: string }) {
   return (
     <div className="metric-pair">
       <span>{label}</span>
@@ -643,7 +838,7 @@ function TabButton({
   current,
   icon,
   label,
-  onSelect
+  onSelect,
 }: {
   tab: Tab;
   current: Tab;
@@ -652,7 +847,12 @@ function TabButton({
   onSelect(tab: Tab): void;
 }) {
   return (
-    <button type="button" className={current === tab ? "selected" : undefined} onClick={() => onSelect(tab)} aria-current={current === tab ? "page" : undefined}>
+    <button
+      type="button"
+      className={current === tab ? "selected" : undefined}
+      onClick={() => onSelect(tab)}
+      aria-current={current === tab ? "page" : undefined}
+    >
       {icon}
       <span>{label}</span>
     </button>
@@ -660,7 +860,8 @@ function TabButton({
 }
 
 function VerdictIcon({ verdict }: { verdict: PurchaseVerdict }) {
-  if (verdict === "approved" || verdict === "acceptable") return <CheckCircle2 size={28} aria-hidden="true" />;
+  if (verdict === "approved" || verdict === "acceptable")
+    return <CheckCircle2 size={28} aria-hidden="true" />;
   return <AlertTriangle size={28} aria-hidden="true" />;
 }
 
@@ -672,14 +873,18 @@ function createInitialFinancialState(): FinancialState {
     mode: "sample_data",
     status: "connected",
     lastSyncedAt: APP_NOW,
-    createdAt: APP_NOW
+    createdAt: APP_NOW,
   };
-  const dataset = createSampleFinancialDataset({ userId: USER_ID, connectionId: connection.id, now: APP_NOW });
+  const dataset = createSampleFinancialDataset({
+    userId: USER_ID,
+    connectionId: connection.id,
+    now: APP_NOW,
+  });
   return {
     connection,
     balances: dataset.balances,
     rawTransactions: dataset.transactions,
-    message: "Sample cashflow data is ready."
+    message: "Sample cashflow data is ready.",
   };
 }
 
@@ -693,17 +898,19 @@ function hydrateFinancialState(input: {
     connection: {
       ...input.connection,
       createdAt: new Date(input.connection.createdAt),
-      lastSyncedAt: input.connection.lastSyncedAt ? new Date(input.connection.lastSyncedAt) : undefined
+      lastSyncedAt: input.connection.lastSyncedAt
+        ? new Date(input.connection.lastSyncedAt)
+        : undefined,
     },
     balances: input.balances.map((balance) => ({
       ...balance,
-      capturedAt: new Date(balance.capturedAt)
+      capturedAt: new Date(balance.capturedAt),
     })),
     rawTransactions: input.rawTransactions.map((transaction) => ({
       ...transaction,
-      date: new Date(transaction.date)
+      date: new Date(transaction.date),
     })),
-    message: input.message
+    message: input.message,
   };
 }
 
@@ -732,7 +939,7 @@ function verdictLabel(verdict: PurchaseVerdict): string {
     delay: "Delay",
     reduce_amount: "Reduce amount",
     risky: "Risky",
-    not_justifiable: "Not justifiable"
+    not_justifiable: "Not justifiable",
   };
   return labels[verdict];
 }

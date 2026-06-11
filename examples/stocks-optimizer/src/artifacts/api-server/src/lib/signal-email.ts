@@ -69,13 +69,19 @@ function parseBoolean(value: string | undefined, fallback: boolean): boolean {
   return fallback;
 }
 
-function parsePositiveNumber(value: string | undefined, fallback: number): number {
+function parsePositiveNumber(
+  value: string | undefined,
+  fallback: number,
+): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
 function signalEmailEnabled(): boolean {
-  return parseBoolean(readEnv("SIGNAL_EMAIL_ENABLED"), process.env.NODE_ENV !== "test");
+  return parseBoolean(
+    readEnv("SIGNAL_EMAIL_ENABLED"),
+    process.env.NODE_ENV !== "test",
+  );
 }
 
 function signalEmailRecipients(): string {
@@ -170,8 +176,7 @@ function actionTheme(action: string) {
       border: "#fecdd3",
       label: "Risk-off signal",
       soft: "#7f1d1d",
-      text:
-        "The model is flagging elevated downside or deterioration. Treat this as a prompt to review exposure, stops, and whether the position still earns its risk.",
+      text: "The model is flagging elevated downside or deterioration. Treat this as a prompt to review exposure, stops, and whether the position still earns its risk.",
     };
   }
 
@@ -181,8 +186,7 @@ function actionTheme(action: string) {
     border: "#a7f3d0",
     label: "Constructive signal",
     soft: "#064e3b",
-    text:
-      "The model is seeing enough strength in the setup to warrant a closer entry or allocation review. Confirm liquidity, sizing, and portfolio fit before acting.",
+    text: "The model is seeing enough strength in the setup to warrant a closer entry or allocation review. Confirm liquidity, sizing, and portfolio fit before acting.",
   };
 }
 
@@ -238,7 +242,8 @@ function buildSignalEmailHtml(event: SignalEmailEvent): string {
     quote.signalConfidence === undefined
       ? "n/a"
       : `${formatNumber(quote.signalConfidence, 0)}%`;
-  const emittedAt = quote.signalEmittedAt ?? event.emittedAt ?? new Date().toISOString();
+  const emittedAt =
+    quote.signalEmittedAt ?? event.emittedAt ?? new Date().toISOString();
   const formattedTime = formatTimestamp(emittedAt);
   const interpretation = buildSignalInterpretation(quote);
 
@@ -336,7 +341,8 @@ function buildSignalEmail(
     quote.signalConfidence === undefined
       ? "n/a"
       : `${formatNumber(quote.signalConfidence, 0)}%`;
-  const emittedAt = quote.signalEmittedAt ?? event.emittedAt ?? new Date().toISOString();
+  const emittedAt =
+    quote.signalEmittedAt ?? event.emittedAt ?? new Date().toISOString();
   const subject = `[${action}] ${quote.symbol} signal ${confidence}`;
   const interpretation = buildSignalInterpretation(quote);
 
@@ -403,7 +409,9 @@ function renderSendmailMessage(message: TransportMessage): string {
 async function sendWithResend(message: TransportMessage): Promise<void> {
   const apiKey = readEnv("RESEND_API_KEY");
   if (!apiKey) {
-    throw new Error("RESEND_API_KEY is required for SIGNAL_EMAIL_PROVIDER=resend");
+    throw new Error(
+      "RESEND_API_KEY is required for SIGNAL_EMAIL_PROVIDER=resend",
+    );
   }
 
   const controller = new AbortController();
@@ -420,7 +428,10 @@ async function sendWithResend(message: TransportMessage): Promise<void> {
         reply_to: message.replyTo,
         subject: message.subject,
         text: message.text,
-        to: message.to.split(",").map((item) => item.trim()).filter(Boolean),
+        to: message.to
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
       }),
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -432,7 +443,9 @@ async function sendWithResend(message: TransportMessage): Promise<void> {
 
     if (!response.ok) {
       const body = await response.text().catch(() => "");
-      throw new Error(`Resend email failed with ${response.status}: ${body.slice(0, 250)}`);
+      throw new Error(
+        `Resend email failed with ${response.status}: ${body.slice(0, 250)}`,
+      );
     }
   } finally {
     clearTimeout(timeout);
@@ -441,7 +454,10 @@ async function sendWithResend(message: TransportMessage): Promise<void> {
 
 async function sendWithSendmail(message: TransportMessage): Promise<void> {
   const sendmailPath = readEnv("SENDMAIL_PATH") ?? "/usr/sbin/sendmail";
-  const timeoutMs = parsePositiveNumber(readEnv("SIGNAL_EMAIL_TIMEOUT_MS"), 10_000);
+  const timeoutMs = parsePositiveNumber(
+    readEnv("SIGNAL_EMAIL_TIMEOUT_MS"),
+    10_000,
+  );
   const rawMessage = renderSendmailMessage(message);
 
   await new Promise<void>((resolve, reject) => {
@@ -488,7 +504,10 @@ async function sendWithSmtp(message: TransportMessage): Promise<void> {
   const secure = parseBoolean(readEnv("SMTP_SECURE"), false);
   const user = readEnv("SMTP_USER");
   const pass = readEnv("SMTP_PASS");
-  const timeoutMs = parsePositiveNumber(readEnv("SIGNAL_EMAIL_TIMEOUT_MS"), 10_000);
+  const timeoutMs = parsePositiveNumber(
+    readEnv("SIGNAL_EMAIL_TIMEOUT_MS"),
+    10_000,
+  );
   const transport = (await loadNodemailer()).createTransport({
     auth: user && pass ? { pass, user } : undefined,
     connectionTimeout: timeoutMs,
@@ -572,7 +591,8 @@ async function sendSignalNotificationEmail(
       symbol: event.quote.symbol,
     };
   } catch (error) {
-    const messageText = error instanceof Error ? error.message : "Email send failed";
+    const messageText =
+      error instanceof Error ? error.message : "Email send failed";
     console.error("Signal email notification failed", {
       error: messageText,
       provider,
@@ -593,7 +613,9 @@ async function sendSignalNotificationEmail(
 export async function sendSignalNotificationEmails(
   events: SignalEmailEvent[],
 ): Promise<SignalEmailDeliveryResult[]> {
-  const actionableEvents = events.filter((event) => isBuySellSignal(event.quote));
+  const actionableEvents = events.filter((event) =>
+    isBuySellSignal(event.quote),
+  );
   if (!actionableEvents.length) return [];
 
   const results = await Promise.all(

@@ -1,4 +1,8 @@
-import type { PolicyConfig, PolicyEvaluationInput, PolicyResult } from "../types";
+import type {
+  PolicyConfig,
+  PolicyEvaluationInput,
+  PolicyResult,
+} from "../types";
 
 const DEFAULT_MINIMUM_CONFIDENCE = 0;
 
@@ -9,21 +13,32 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyResult {
     config.minimumConfidence ?? DEFAULT_MINIMUM_CONFIDENCE,
     "minimumConfidence",
   );
-  const confidence = unitValue(input.decision.confidence, "decision.confidence");
+  const confidence = unitValue(
+    input.decision.confidence,
+    "decision.confidence",
+  );
   const maximumSize = optionalNonNegative(config.maximumSize, "maximumSize");
-  const requestedSize = input.sizing === undefined
-    ? undefined
-    : nonNegative(input.sizing.size, "sizing.size");
+  const requestedSize =
+    input.sizing === undefined
+      ? undefined
+      : nonNegative(input.sizing.size, "sizing.size");
   const configuredBlockReasons = config.blockReasons ?? [];
   const inputBlockReasons = input.blockReasons ?? [];
-  const allBlockReasons = [...configuredBlockReasons, ...inputBlockReasons].filter((reason) => reason.length > 0);
+  const allBlockReasons = [
+    ...configuredBlockReasons,
+    ...inputBlockReasons,
+  ].filter((reason) => reason.length > 0);
   const requiresApproval = config.humanApprovalRequired === true;
 
   if (confidence < minimumConfidence) {
     violations.push("confidence_below_minimum");
   }
 
-  if (maximumSize !== undefined && requestedSize !== undefined && requestedSize > maximumSize) {
+  if (
+    maximumSize !== undefined &&
+    requestedSize !== undefined &&
+    requestedSize > maximumSize
+  ) {
     violations.push("size_above_maximum");
   }
 
@@ -35,9 +50,12 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyResult {
     violations.push("human_approval_required");
   }
 
-  const recommendedSize = maximumSize !== undefined && requestedSize !== undefined && requestedSize > maximumSize
-    ? maximumSize
-    : undefined;
+  const recommendedSize =
+    maximumSize !== undefined &&
+    requestedSize !== undefined &&
+    requestedSize > maximumSize
+      ? maximumSize
+      : undefined;
   const allowed = violations.length === 0;
 
   return {

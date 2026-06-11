@@ -3,7 +3,9 @@ const { syncMarketQuotes } = require("../_quote-sync.js");
 const crypto = require("node:crypto");
 
 function marketKey(value) {
-  return String(value || "").trim().toUpperCase();
+  return String(value || "")
+    .trim()
+    .toUpperCase();
 }
 
 function parseBody(req) {
@@ -13,7 +15,9 @@ function parseBody(req) {
 }
 
 function symbolKey(value) {
-  return String(value || "").trim().toUpperCase();
+  return String(value || "")
+    .trim()
+    .toUpperCase();
 }
 
 function quoteSymbolKey(quote) {
@@ -27,13 +31,17 @@ function quoteHasLivePrice(quote) {
 
 function coversRequestedSymbols(payload, symbols) {
   if (!symbols.length) return true;
-  const available = new Set((payload?.quotes || []).map(quoteSymbolKey).filter(Boolean));
+  const available = new Set(
+    (payload?.quotes || []).map(quoteSymbolKey).filter(Boolean),
+  );
   return symbols.every((symbol) => available.has(symbolKey(symbol)));
 }
 
 function hasMissingRequestedQuote(payload, symbols) {
   if (!symbols.length) return false;
-  const bySymbol = new Map((payload?.quotes || []).map((quote) => [quoteSymbolKey(quote), quote]));
+  const bySymbol = new Map(
+    (payload?.quotes || []).map((quote) => [quoteSymbolKey(quote), quote]),
+  );
   return symbols.some((symbol) => {
     const quote = bySymbol.get(symbolKey(symbol));
     return !quote || !quoteHasLivePrice(quote);
@@ -44,8 +52,12 @@ function quotesForSymbols(payload, symbols) {
   const quotes = payload?.quotes || [];
   if (!symbols.length) return quotes;
 
-  const bySymbol = new Map(quotes.map((quote) => [quoteSymbolKey(quote), quote]));
-  return symbols.map((symbol) => bySymbol.get(symbolKey(symbol))).filter(Boolean);
+  const bySymbol = new Map(
+    quotes.map((quote) => [quoteSymbolKey(quote), quote]),
+  );
+  return symbols
+    .map((symbol) => bySymbol.get(symbolKey(symbol)))
+    .filter(Boolean);
 }
 
 function symbolsFingerprint(symbols) {
@@ -63,10 +75,10 @@ module.exports = async function handler(req, res) {
 
     const market = marketKey(
       body.market ||
-      body.exchange ||
-      url.searchParams.get("market") ||
-      url.searchParams.get("exchange") ||
-      ""
+        body.exchange ||
+        url.searchParams.get("market") ||
+        url.searchParams.get("exchange") ||
+        "",
     );
 
     const symbols = Array.isArray(body.symbols)
@@ -80,14 +92,27 @@ module.exports = async function handler(req, res) {
 
     let payload = await getCache(`quotes:${market}`);
     const coversRequest = coversRequestedSymbols(payload, symbols);
-    const retryMissing = Number(body.retryCount ?? 0) > 0 || body.bypass === true;
+    const retryMissing =
+      Number(body.retryCount ?? 0) > 0 || body.bypass === true;
     const hasMissingQuote = hasMissingRequestedQuote(payload, symbols);
-    const isFresh = payload && Date.now() - payload.syncedAt < 10_000 && coversRequest && !(retryMissing && hasMissingQuote);
+    const isFresh =
+      payload &&
+      Date.now() - payload.syncedAt < 10_000 &&
+      coversRequest &&
+      !(retryMissing && hasMissingQuote);
 
     if ((!isFresh || !payload) && symbols.length > 0) {
-      const lock = await acquireLock(`lock:quotes:${market}:${symbolsFingerprint(symbols)}:v3`, 15);
+      const lock = await acquireLock(
+        `lock:quotes:${market}:${symbolsFingerprint(symbols)}:v3`,
+        15,
+      );
 
-      if (lock.acquired || !payload || !coversRequest || (retryMissing && hasMissingQuote)) {
+      if (
+        lock.acquired ||
+        !payload ||
+        !coversRequest ||
+        (retryMissing && hasMissingQuote)
+      ) {
         payload = await syncMarketQuotes({ market, symbols });
       }
     }
@@ -101,13 +126,13 @@ module.exports = async function handler(req, res) {
       items: quotes,
       syncedAt: payload?.syncedAt || null,
       stale: !payload || Date.now() - payload.syncedAt > 15_000,
-      count: quotes.length
+      count: quotes.length,
     });
   } catch (error) {
     res.status(500).json({
       error: "QUOTES_READ_FAILED",
       message: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
   }
 };

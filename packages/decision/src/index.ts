@@ -7,8 +7,17 @@ export {
 } from "./assessment";
 export { createAccountabilityReport, replayDecision } from "./accountability";
 export { assessCoherence, detectCoherenceConflicts } from "./coherence";
-export { attachAccountability, compareReplay, createDecisionRecord, createInMemoryDecisionRecordStore } from "./decision-record";
-export { accountabilityHumanSummary, buildHumanDecisionGuide, createHumanDecisionSummary } from "./human-language";
+export {
+  attachAccountability,
+  compareReplay,
+  createDecisionRecord,
+  createInMemoryDecisionRecordStore,
+} from "./decision-record";
+export {
+  accountabilityHumanSummary,
+  buildHumanDecisionGuide,
+  createHumanDecisionSummary,
+} from "./human-language";
 export type { HumanDecisionGuideStep } from "./human-language";
 export {
   assessSignalLessonSurvival,
@@ -22,10 +31,23 @@ export {
   traceSignalLineage,
 } from "./learning-judgment";
 export { applyOutcomeFeedback, evaluateOutcome } from "./outcomes";
-export { DECISION_OPERATION_DEFINITIONS, listDecisionOperations, registerDecisionOperations } from "./operations";
+export {
+  DECISION_OPERATION_DEFINITIONS,
+  listDecisionOperations,
+  registerDecisionOperations,
+} from "./operations";
 export { evaluateDecision } from "./pipeline";
-export { bestPurposeScenario, generatePredictionScenarios, mostDangerousScenario, mostLikelyScenario } from "./prediction";
-export { compactRealityPayload, createRealitySnapshot, createRealitySnapshotForDecision } from "./reality";
+export {
+  bestPurposeScenario,
+  generatePredictionScenarios,
+  mostDangerousScenario,
+  mostLikelyScenario,
+} from "./prediction";
+export {
+  compactRealityPayload,
+  createRealitySnapshot,
+  createRealitySnapshotForDecision,
+} from "./reality";
 export { simulateDecisionPaths } from "./simulation";
 export {
   assessStewardship,

@@ -59,18 +59,34 @@ export function normalizeRegimeType(value: unknown): RegimeType {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "_");
 
-  if (text === "bull" || text === "bullish" || text === "trending" || text === "expansion") return "bull";
-  if (text === "bear" || text === "bearish" || text === "downtrend") return "bear";
-  if (text === "crash" || text === "panic" || text === "capitulation") return "crash";
+  if (
+    text === "bull" ||
+    text === "bullish" ||
+    text === "trending" ||
+    text === "expansion"
+  )
+    return "bull";
+  if (text === "bear" || text === "bearish" || text === "downtrend")
+    return "bear";
+  if (text === "crash" || text === "panic" || text === "capitulation")
+    return "crash";
   if (text === "recovery" || text === "rebound") return "recovery";
-  if (text === "volatility_transition" || text === "vol_transition" || text === "transition") return "volatility_transition";
+  if (
+    text === "volatility_transition" ||
+    text === "vol_transition" ||
+    text === "transition"
+  )
+    return "volatility_transition";
   if (text === "low_volatility" || text === "low_vol") return "low_volatility";
-  if (text === "high_volatility" || text === "high_vol" || text === "volatile") return "high_volatility";
+  if (text === "high_volatility" || text === "high_vol" || text === "volatile")
+    return "high_volatility";
   if (text === "sideways" || text === "range") return "sideways";
   return "unknown";
 }
 
-export function buildHistoricalDataset(input: HistoricalDatasetInput): HistoricalDataset {
+export function buildHistoricalDataset(
+  input: HistoricalDatasetInput,
+): HistoricalDataset {
   const bars = normalizeCandles(input.bars);
   const audit = {
     ...auditCandles(bars),
@@ -87,7 +103,9 @@ export function buildHistoricalDataset(input: HistoricalDatasetInput): Historica
     ...(input.coverage ?? {}),
   };
   const classifiedBars = classifyBars(bars);
-  const regimes = input.regimes?.length ? input.regimes : buildRegimeSegments(classifiedBars);
+  const regimes = input.regimes?.length
+    ? input.regimes
+    : buildRegimeSegments(classifiedBars);
   const regimeStats = cachedRegimeStats({
     bars: classifiedBars,
     regimes,
@@ -109,39 +127,82 @@ export function buildHistoricalDataset(input: HistoricalDatasetInput): Historica
   };
 }
 
-export function summarizeHistoricalDatasets(datasets: HistoricalDataset[]): MarketHistoryDiagnostics {
+export function summarizeHistoricalDatasets(
+  datasets: HistoricalDataset[],
+): MarketHistoryDiagnostics {
   const usable = datasets.filter((dataset) => dataset.bars.length > 0);
   const regimeCounts: Partial<Record<RegimeType, number>> = {};
   let totalBars = 0;
 
   for (const dataset of usable) {
     totalBars += dataset.bars.length;
-    for (const [regime, count] of Object.entries(dataset.regimeStats.regimeCounts)) {
-      regimeCounts[regime as RegimeType] = (regimeCounts[regime as RegimeType] ?? 0) + Number(count ?? 0);
+    for (const [regime, count] of Object.entries(
+      dataset.regimeStats.regimeCounts,
+    )) {
+      regimeCounts[regime as RegimeType] =
+        (regimeCounts[regime as RegimeType] ?? 0) + Number(count ?? 0);
     }
   }
 
-  const historyCoverageYears = roundOne(mean(usable.map((dataset) => dataset.coverage.availableYears)));
-  const coveragePct = roundScore(mean(usable.map((dataset) => dataset.coverage.coveragePct)));
-  const historyDepthScore = roundScore(mean(usable.map((dataset) => dataset.regimeStats.historyDepthScore)));
-  const regimeCoverageScore = roundScore(Math.max(
-    regimeCoverageScoreForCounts(regimeCounts, totalBars, historyCoverageYears),
-    mean(usable.map((dataset) => dataset.regimeStats.regimeCoverageScore)) * 0.85,
-  ));
-  const regimeDiversityScore = roundScore(regimeDiversityScoreForCounts(regimeCounts));
-  const sampleDiversityScore = roundScore(mean([
-    mean(usable.map((dataset) => dataset.regimeStats.sampleDiversityScore)),
-    clamp((usable.length / 24) * 100),
-    clamp((totalBars / Math.max(1, usable.length * TARGET_HISTORY_YEARS * 180)) * 100),
-  ]));
-  const temporalConcentrationScore = roundScore(mean(usable.map((dataset) => dataset.regimeStats.temporalConcentrationScore)));
-  const auditQualityScore = roundScore(mean(usable.map((dataset) => dataset.audit.qualityScore)));
-  const coverageStatus = coverageStatusForScore(coveragePct, historyCoverageYears, historyDepthScore, usable.length);
-  const keyRegimesCovered = KEY_REGIMES.filter((regime) => (regimeCounts[regime] ?? 0) > 0);
-  const currentRegime = mostCommon(
-    usable.map((dataset) => dataset.regimeStats.currentRegime).filter((regime) => regime !== "unknown"),
-  ) ?? "unknown";
-  const auditWarnings = unique(usable.flatMap((dataset) => dataset.audit.warnings)).slice(0, 8);
+  const historyCoverageYears = roundOne(
+    mean(usable.map((dataset) => dataset.coverage.availableYears)),
+  );
+  const coveragePct = roundScore(
+    mean(usable.map((dataset) => dataset.coverage.coveragePct)),
+  );
+  const historyDepthScore = roundScore(
+    mean(usable.map((dataset) => dataset.regimeStats.historyDepthScore)),
+  );
+  const regimeCoverageScore = roundScore(
+    Math.max(
+      regimeCoverageScoreForCounts(
+        regimeCounts,
+        totalBars,
+        historyCoverageYears,
+      ),
+      mean(usable.map((dataset) => dataset.regimeStats.regimeCoverageScore)) *
+        0.85,
+    ),
+  );
+  const regimeDiversityScore = roundScore(
+    regimeDiversityScoreForCounts(regimeCounts),
+  );
+  const sampleDiversityScore = roundScore(
+    mean([
+      mean(usable.map((dataset) => dataset.regimeStats.sampleDiversityScore)),
+      clamp((usable.length / 24) * 100),
+      clamp(
+        (totalBars / Math.max(1, usable.length * TARGET_HISTORY_YEARS * 180)) *
+          100,
+      ),
+    ]),
+  );
+  const temporalConcentrationScore = roundScore(
+    mean(
+      usable.map((dataset) => dataset.regimeStats.temporalConcentrationScore),
+    ),
+  );
+  const auditQualityScore = roundScore(
+    mean(usable.map((dataset) => dataset.audit.qualityScore)),
+  );
+  const coverageStatus = coverageStatusForScore(
+    coveragePct,
+    historyCoverageYears,
+    historyDepthScore,
+    usable.length,
+  );
+  const keyRegimesCovered = KEY_REGIMES.filter(
+    (regime) => (regimeCounts[regime] ?? 0) > 0,
+  );
+  const currentRegime =
+    mostCommon(
+      usable
+        .map((dataset) => dataset.regimeStats.currentRegime)
+        .filter((regime) => regime !== "unknown"),
+    ) ?? "unknown";
+  const auditWarnings = unique(
+    usable.flatMap((dataset) => dataset.audit.warnings),
+  ).slice(0, 8);
 
   return {
     symbolCount: usable.length,
@@ -160,7 +221,8 @@ export function summarizeHistoricalDatasets(datasets: HistoricalDataset[]): Mark
     totalBars,
     auditQualityScore,
     auditWarnings,
-    explanation: "Extended history improves regime awareness and calibration. Recent outcomes still govern sizing restoration.",
+    explanation:
+      "Extended history improves regime awareness and calibration. Recent outcomes still govern sizing restoration.",
   };
 }
 
@@ -189,7 +251,9 @@ function normalizeCandles(bars: HistoricalCandle[]) {
     });
   }
 
-  return [...byDate.values()].sort((left, right) => left.date.localeCompare(right.date));
+  return [...byDate.values()].sort((left, right) =>
+    left.date.localeCompare(right.date),
+  );
 }
 
 function auditCandles(bars: HistoricalCandle[]): CandleAudit {
@@ -202,7 +266,10 @@ function auditCandles(bars: HistoricalCandle[]): CandleAudit {
 
   for (let index = 0; index < bars.length; index += 1) {
     const bar = bars[index];
-    if (bar.high < Math.max(bar.open, bar.close) || bar.low > Math.min(bar.open, bar.close)) {
+    if (
+      bar.high < Math.max(bar.open, bar.close) ||
+      bar.low > Math.min(bar.open, bar.close)
+    ) {
       invalidOhlcCount += 1;
     }
     if (bar.volume == null || !Number.isFinite(Number(bar.volume))) {
@@ -218,12 +285,25 @@ function auditCandles(bars: HistoricalCandle[]): CandleAudit {
   }
 
   const latestDate = bars.at(-1)?.date;
-  const staleDays = latestDate ? Math.max(0, Math.floor((Date.now() - Date.parse(`${latestDate}T00:00:00.000Z`)) / 86_400_000)) : 999;
+  const staleDays = latestDate
+    ? Math.max(
+        0,
+        Math.floor(
+          (Date.now() - Date.parse(`${latestDate}T00:00:00.000Z`)) / 86_400_000,
+        ),
+      )
+    : 999;
   const stale = staleDays > 10;
   const warnings = [
-    duplicateCount > 0 ? `${duplicateCount} duplicate candle date(s) were removed.` : "",
-    invalidOhlcCount > 0 ? `${invalidOhlcCount} candle(s) had invalid OHLC ranges.` : "",
-    gapCount > 0 ? `${gapCount} history gap(s), longest ${longestGapDays} days.` : "",
+    duplicateCount > 0
+      ? `${duplicateCount} duplicate candle date(s) were removed.`
+      : "",
+    invalidOhlcCount > 0
+      ? `${invalidOhlcCount} candle(s) had invalid OHLC ranges.`
+      : "",
+    gapCount > 0
+      ? `${gapCount} history gap(s), longest ${longestGapDays} days.`
+      : "",
     stale ? `Latest candle is ${staleDays} days old.` : "",
   ].filter(Boolean);
   const qualityScore = roundScore(
@@ -258,16 +338,33 @@ function coverageForBars(input: {
 }): HistoryCoverage {
   const firstDate = input.bars[0]?.date ?? null;
   const lastDate = input.bars.at(-1)?.date ?? null;
-  const requestedYears = Math.max(1, input.requestedYears || TARGET_HISTORY_YEARS);
-  const requestedBars = Math.max(1, input.requestedBars || requestedYears * TRADING_DAYS_PER_YEAR);
-  const expectedBars = Math.min(requestedBars, Math.round(requestedYears * TRADING_DAYS_PER_YEAR));
-  const availableYears = firstDate && lastDate
-    ? Math.max(0, daysBetween(firstDate, lastDate) / 365.25)
-    : 0;
+  const requestedYears = Math.max(
+    1,
+    input.requestedYears || TARGET_HISTORY_YEARS,
+  );
+  const requestedBars = Math.max(
+    1,
+    input.requestedBars || requestedYears * TRADING_DAYS_PER_YEAR,
+  );
+  const expectedBars = Math.min(
+    requestedBars,
+    Math.round(requestedYears * TRADING_DAYS_PER_YEAR),
+  );
+  const availableYears =
+    firstDate && lastDate
+      ? Math.max(0, daysBetween(firstDate, lastDate) / 365.25)
+      : 0;
   const barCoverage = input.bars.length / Math.max(1, expectedBars);
   const yearCoverage = availableYears / requestedYears;
-  const coveragePct = roundScore(Math.min(1, barCoverage, yearCoverage || barCoverage) * 100);
-  const status = coverageStatusForScore(coveragePct, availableYears, historyDepthScoreFor(availableYears, requestedYears, coveragePct, 100), input.bars.length);
+  const coveragePct = roundScore(
+    Math.min(1, barCoverage, yearCoverage || barCoverage) * 100,
+  );
+  const status = coverageStatusForScore(
+    coveragePct,
+    availableYears,
+    historyDepthScoreFor(availableYears, requestedYears, coveragePct, 100),
+    input.bars.length,
+  );
 
   return {
     requestedYears,
@@ -291,7 +388,8 @@ function classifyBars(bars: HistoricalCandle[]) {
     return {
       ...bar,
       regime: inferred,
-      regimeConfidence: bar.regimeConfidence ?? regimeConfidenceFor(inferred, bars, index),
+      regimeConfidence:
+        bar.regimeConfidence ?? regimeConfidenceFor(inferred, bars, index),
     };
   });
 }
@@ -299,23 +397,42 @@ function classifyBars(bars: HistoricalCandle[]) {
 function inferRegime(bars: HistoricalCandle[], index: number): RegimeType {
   const close = bars[index].close;
   const previous = bars[index - 1]?.close;
-  const dayReturn = previous && previous > 0 ? ((close / previous) - 1) * 100 : 0;
+  const dayReturn = previous && previous > 0 ? (close / previous - 1) * 100 : 0;
   const lookback20 = pctMove(bars[Math.max(0, index - 20)]?.close, close);
   const lookback60 = pctMove(bars[Math.max(0, index - 60)]?.close, close);
-  const volatility20 = stdev(returns(bars.slice(Math.max(0, index - 20), index + 1))) * 100;
-  const volatility60 = stdev(returns(bars.slice(Math.max(0, index - 60), index + 1))) * 100;
-  const recentPeak = Math.max(...bars.slice(Math.max(0, index - 90), index + 1).map((bar) => bar.close));
-  const drawdown = recentPeak > 0 ? ((close / recentPeak) - 1) * 100 : 0;
-  const priorDrawdown = index > 15
-    ? Math.min(...bars.slice(Math.max(0, index - 90), Math.max(0, index - 15)).map((bar) => {
-        const peak = Math.max(...bars.slice(Math.max(0, index - 90), index + 1).map((item) => item.close));
-        return peak > 0 ? ((bar.close / peak) - 1) * 100 : 0;
-      }))
-    : 0;
+  const volatility20 =
+    stdev(returns(bars.slice(Math.max(0, index - 20), index + 1))) * 100;
+  const volatility60 =
+    stdev(returns(bars.slice(Math.max(0, index - 60), index + 1))) * 100;
+  const recentPeak = Math.max(
+    ...bars.slice(Math.max(0, index - 90), index + 1).map((bar) => bar.close),
+  );
+  const drawdown = recentPeak > 0 ? (close / recentPeak - 1) * 100 : 0;
+  const priorDrawdown =
+    index > 15
+      ? Math.min(
+          ...bars
+            .slice(Math.max(0, index - 90), Math.max(0, index - 15))
+            .map((bar) => {
+              const peak = Math.max(
+                ...bars
+                  .slice(Math.max(0, index - 90), index + 1)
+                  .map((item) => item.close),
+              );
+              return peak > 0 ? (bar.close / peak - 1) * 100 : 0;
+            }),
+        )
+      : 0;
 
-  if (dayReturn <= -8 || drawdown <= -28 || (lookback20 <= -18 && volatility20 >= 3.8)) return "crash";
+  if (
+    dayReturn <= -8 ||
+    drawdown <= -28 ||
+    (lookback20 <= -18 && volatility20 >= 3.8)
+  )
+    return "crash";
   if (priorDrawdown <= -18 && lookback20 >= 8) return "recovery";
-  if (Math.abs(volatility20 - volatility60) >= 1.8 && index > 60) return "volatility_transition";
+  if (Math.abs(volatility20 - volatility60) >= 1.8 && index > 60)
+    return "volatility_transition";
   if (lookback60 >= 8 && drawdown > -12) return "bull";
   if (lookback60 <= -8 || drawdown <= -16) return "bear";
   if (volatility20 >= 3) return "high_volatility";
@@ -323,11 +440,17 @@ function inferRegime(bars: HistoricalCandle[], index: number): RegimeType {
   return "sideways";
 }
 
-function regimeConfidenceFor(regime: RegimeType, bars: HistoricalCandle[], index: number) {
+function regimeConfidenceFor(
+  regime: RegimeType,
+  bars: HistoricalCandle[],
+  index: number,
+) {
   if (regime === "unknown") return 0;
-  const volatility = stdev(returns(bars.slice(Math.max(0, index - 20), index + 1))) * 100;
+  const volatility =
+    stdev(returns(bars.slice(Math.max(0, index - 20), index + 1))) * 100;
   const sampleScore = clamp((Math.min(index + 1, 60) / 60) * 100);
-  const volatilityPenalty = regime === "bull" || regime === "bear" ? Math.min(18, volatility * 2) : 0;
+  const volatilityPenalty =
+    regime === "bull" || regime === "bear" ? Math.min(18, volatility * 2) : 0;
   return roundScore(sampleScore * 0.7 + 30 - volatilityPenalty);
 }
 
@@ -354,7 +477,9 @@ function buildRegimeSegments(bars: HistoricalCandle[]): RegimeSegment[] {
     start = index;
   }
 
-  return segments.filter((segment) => segment.samples > 0 && segment.startDate && segment.endDate);
+  return segments.filter(
+    (segment) => segment.samples > 0 && segment.startDate && segment.endDate,
+  );
 }
 
 function cachedRegimeStats(input: {
@@ -369,7 +494,9 @@ function cachedRegimeStats(input: {
     input.bars.length,
     input.coverage.requestedYears,
     input.audit.qualityScore,
-    input.regimes.map((segment) => `${segment.regime}:${segment.samples}`).join(","),
+    input.regimes
+      .map((segment) => `${segment.regime}:${segment.samples}`)
+      .join(","),
   ].join("|");
   const cached = REGIME_STATS_CACHE.get(signature);
   if (cached) return cached;
@@ -380,7 +507,10 @@ function cachedRegimeStats(input: {
     regimeCounts[regime] = (regimeCounts[regime] ?? 0) + 1;
   }
   const regimeSharePct = Object.fromEntries(
-    Object.entries(regimeCounts).map(([regime, count]) => [regime, roundScore((Number(count) / Math.max(1, input.bars.length)) * 100)]),
+    Object.entries(regimeCounts).map(([regime, count]) => [
+      regime,
+      roundScore((Number(count) / Math.max(1, input.bars.length)) * 100),
+    ]),
   ) as Partial<Record<RegimeType, number>>;
   const currentRegime = input.bars.at(-1)?.regime ?? "unknown";
   const availableYears = input.coverage.availableYears;
@@ -393,11 +523,21 @@ function cachedRegimeStats(input: {
   const result: RegimeStatistics = {
     regimeCounts,
     regimeSharePct,
-    keyRegimesCovered: KEY_REGIMES.filter((regime) => (regimeCounts[regime] ?? 0) > 0),
+    keyRegimesCovered: KEY_REGIMES.filter(
+      (regime) => (regimeCounts[regime] ?? 0) > 0,
+    ),
     historyDepthScore,
-    regimeCoverageScore: regimeCoverageScoreForCounts(regimeCounts, input.bars.length, availableYears),
+    regimeCoverageScore: regimeCoverageScoreForCounts(
+      regimeCounts,
+      input.bars.length,
+      availableYears,
+    ),
     regimeDiversityScore: regimeDiversityScoreForCounts(regimeCounts),
-    sampleDiversityScore: sampleDiversityScoreFor(input.bars, regimeCounts, availableYears),
+    sampleDiversityScore: sampleDiversityScoreFor(
+      input.bars,
+      regimeCounts,
+      availableYears,
+    ),
     temporalConcentrationScore: temporalConcentrationScoreFor(input.bars),
     currentRegime,
   };
@@ -406,9 +546,17 @@ function cachedRegimeStats(input: {
   return result;
 }
 
-function historyDepthScoreFor(availableYears: number, requestedYears: number, coveragePct: number, auditQualityScore: number) {
+function historyDepthScoreFor(
+  availableYears: number,
+  requestedYears: number,
+  coveragePct: number,
+  auditQualityScore: number,
+) {
   return roundScore(
-    clamp((availableYears / Math.max(1, requestedYears || TARGET_HISTORY_YEARS)) * 72) +
+    clamp(
+      (availableYears / Math.max(1, requestedYears || TARGET_HISTORY_YEARS)) *
+        72,
+    ) +
       clamp(coveragePct) * 0.2 +
       clamp(auditQualityScore) * 0.08,
   );
@@ -419,14 +567,27 @@ function regimeCoverageScoreForCounts(
   totalBars: number,
   availableYears: number,
 ) {
-  const keyCoverage = KEY_REGIMES.filter((regime) => (regimeCounts[regime] ?? 0) > 0).length / KEY_REGIMES.length;
-  const keySamples = KEY_REGIMES.reduce((sum, regime) => sum + (regimeCounts[regime] ?? 0), 0);
+  const keyCoverage =
+    KEY_REGIMES.filter((regime) => (regimeCounts[regime] ?? 0) > 0).length /
+    KEY_REGIMES.length;
+  const keySamples = KEY_REGIMES.reduce(
+    (sum, regime) => sum + (regimeCounts[regime] ?? 0),
+    0,
+  );
   const sampleShare = totalBars > 0 ? keySamples / totalBars : 0;
-  return roundScore(keyCoverage * 72 + Math.min(1, sampleShare / 0.55) * 14 + Math.min(1, availableYears / TARGET_HISTORY_YEARS) * 14);
+  return roundScore(
+    keyCoverage * 72 +
+      Math.min(1, sampleShare / 0.55) * 14 +
+      Math.min(1, availableYears / TARGET_HISTORY_YEARS) * 14,
+  );
 }
 
-function regimeDiversityScoreForCounts(regimeCounts: Partial<Record<RegimeType, number>>) {
-  const counts = Object.values(regimeCounts).map(Number).filter((value) => value > 0);
+function regimeDiversityScoreForCounts(
+  regimeCounts: Partial<Record<RegimeType, number>>,
+) {
+  const counts = Object.values(regimeCounts)
+    .map(Number)
+    .filter((value) => value > 0);
   const total = counts.reduce((sum, value) => sum + value, 0);
   if (!total || counts.length <= 1) return counts.length ? 20 : 0;
   const entropy = -counts.reduce((sum, count) => {
@@ -441,12 +602,14 @@ function sampleDiversityScoreFor(
   regimeCounts: Partial<Record<RegimeType, number>>,
   availableYears: number,
 ) {
-  return roundScore(mean([
-    clamp((bars.length / (TARGET_HISTORY_YEARS * 180)) * 100),
-    regimeDiversityScoreForCounts(regimeCounts),
-    clamp((availableYears / TARGET_HISTORY_YEARS) * 100),
-    temporalConcentrationScoreFor(bars),
-  ]));
+  return roundScore(
+    mean([
+      clamp((bars.length / (TARGET_HISTORY_YEARS * 180)) * 100),
+      regimeDiversityScoreForCounts(regimeCounts),
+      clamp((availableYears / TARGET_HISTORY_YEARS) * 100),
+      temporalConcentrationScoreFor(bars),
+    ]),
+  );
 }
 
 function temporalConcentrationScoreFor(bars: HistoricalCandle[]) {
@@ -467,13 +630,17 @@ function coverageStatusForScore(
   returnedBars: number,
 ): HistoryCoverage["status"] {
   if (returnedBars <= 0) return "unavailable";
-  if (availableYears >= 14 && coveragePct >= 85 && historyDepthScore >= 88) return "full";
-  if (availableYears >= 4 && coveragePct >= 35 && historyDepthScore >= 45) return "partial";
+  if (availableYears >= 14 && coveragePct >= 85 && historyDepthScore >= 88)
+    return "full";
+  if (availableYears >= 4 && coveragePct >= 35 && historyDepthScore >= 45)
+    return "partial";
   return "thin";
 }
 
 function pctMove(previous: number | undefined, current: number | undefined) {
-  return previous && current && previous > 0 ? ((current / previous) - 1) * 100 : 0;
+  return previous && current && previous > 0
+    ? (current / previous - 1) * 100
+    : 0;
 }
 
 function returns(bars: HistoricalCandle[]) {
@@ -495,14 +662,18 @@ function stdev(values: number[]) {
 
 function mean(values: number[]) {
   const clean = values.filter(Number.isFinite);
-  return clean.length ? clean.reduce((sum, value) => sum + value, 0) / clean.length : 0;
+  return clean.length
+    ? clean.reduce((sum, value) => sum + value, 0) / clean.length
+    : 0;
 }
 
 function dateKey(value: unknown) {
   const text = String(value ?? "").trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
   const parsed = Date.parse(text);
-  return Number.isFinite(parsed) ? new Date(parsed).toISOString().slice(0, 10) : "";
+  return Number.isFinite(parsed)
+    ? new Date(parsed).toISOString().slice(0, 10)
+    : "";
 }
 
 function daysBetween(start: string, end: string) {
@@ -541,5 +712,9 @@ function unique(values: string[]) {
 function mostCommon<T extends string>(values: T[]) {
   const counts = new Map<T, number>();
   for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
-  return [...counts.entries()].sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))[0]?.[0] ?? null;
+  return (
+    [...counts.entries()].sort(
+      (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
+    )[0]?.[0] ?? null
+  );
 }

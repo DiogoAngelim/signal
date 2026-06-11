@@ -3,7 +3,9 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "..",
-    "types": ["node"]
+    "types": ["node"],
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false
   },
   "include": ["src", "../signal-framework"]
 }

@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import type {
+  CommandCenterBoss,
+  CommandCenterMission,
+  CommandCenterProgressMetric,
+  CommandCenterSkillState,
+  CommandCenterTone,
+  CommandCenterViewModel,
+} from "@/lib/command-center";
 import {
   Activity,
   AlertTriangle,
@@ -17,14 +24,7 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react";
-import type {
-  CommandCenterBoss,
-  CommandCenterMission,
-  CommandCenterProgressMetric,
-  CommandCenterSkillState,
-  CommandCenterTone,
-  CommandCenterViewModel,
-} from "@/lib/command-center";
+import { useEffect, useRef, useState } from "react";
 
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -36,16 +36,21 @@ function boundedPct(value: number | null | undefined) {
 }
 
 function toneClasses(tone: CommandCenterTone) {
-  if (tone === "good") return "border-emerald-300/25 bg-emerald-400/10 text-emerald-100";
-  if (tone === "warn") return "border-[#FDD000]/30 bg-[#FDD000]/12 text-[#FDD000]";
+  if (tone === "good")
+    return "border-emerald-300/25 bg-emerald-400/10 text-emerald-100";
+  if (tone === "warn")
+    return "border-[#FDD000]/30 bg-[#FDD000]/12 text-[#FDD000]";
   if (tone === "bad") return "border-red-300/25 bg-red-500/10 text-red-100";
   return "border-white/10 bg-white/[0.045] text-zinc-300";
 }
 
 function skillTone(state: CommandCenterSkillState) {
-  if (state === "Mastered") return "border-emerald-300/30 bg-emerald-400/10 text-emerald-100";
-  if (state === "Mature") return "border-cyan-300/25 bg-cyan-400/10 text-cyan-100";
-  if (state === "Growing") return "border-[#FDD000]/30 bg-[#FDD000]/12 text-[#FDD000]";
+  if (state === "Mastered")
+    return "border-emerald-300/30 bg-emerald-400/10 text-emerald-100";
+  if (state === "Mature")
+    return "border-cyan-300/25 bg-cyan-400/10 text-cyan-100";
+  if (state === "Growing")
+    return "border-[#FDD000]/30 bg-[#FDD000]/12 text-[#FDD000]";
   return "border-white/10 bg-white/[0.035] text-zinc-500";
 }
 
@@ -173,7 +178,10 @@ function BossRow({ boss }: { boss: CommandCenterBoss }) {
         <Pill tone={tone}>{boss.threatLevel}</Pill>
       </div>
       <div className="mt-3">
-        <ProgressRail value={boss.progressPct} tone={tone === "bad" ? "warn" : "good"} />
+        <ProgressRail
+          value={boss.progressPct}
+          tone={tone === "bad" ? "warn" : "good"}
+        />
       </div>
       <div className="mt-2 text-xs leading-5 text-zinc-400">
         Defeat condition: {boss.defeatCondition}
@@ -184,7 +192,9 @@ function BossRow({ boss }: { boss: CommandCenterBoss }) {
 
 function useProgressGains(metrics: CommandCenterProgressMetric[]) {
   const previousRef = useRef<Record<string, number> | null>(null);
-  const [gains, setGains] = useState<Array<{ id: string; label: string; gain: number }>>([]);
+  const [gains, setGains] = useState<
+    Array<{ id: string; label: string; gain: number }>
+  >([]);
 
   useEffect(() => {
     const previous = previousRef.current;
@@ -228,12 +238,22 @@ function useLegacyNotifications(model: CommandCenterViewModel) {
     campaigns: Set<string>;
     rank: string;
   } | null>(null);
-  const [notifications, setNotifications] = useState<Array<{ id: string; label: string; detail: string }>>([]);
+  const [notifications, setNotifications] = useState<
+    Array<{ id: string; label: string; detail: string }>
+  >([]);
 
   useEffect(() => {
     const current = {
-      achievements: new Set(model.achievements.filter((achievement) => achievement.unlocked).map((achievement) => achievement.id)),
-      campaigns: new Set(model.campaignHistory.filter((campaign) => campaign.status === "Completed").map((campaign) => campaign.id)),
+      achievements: new Set(
+        model.achievements
+          .filter((achievement) => achievement.unlocked)
+          .map((achievement) => achievement.id),
+      ),
+      campaigns: new Set(
+        model.campaignHistory
+          .filter((campaign) => campaign.status === "Completed")
+          .map((campaign) => campaign.id),
+      ),
       rank: model.reputation.rank,
     };
     const previous = previousRef.current;
@@ -241,25 +261,35 @@ function useLegacyNotifications(model: CommandCenterViewModel) {
     if (previous) {
       const nextNotifications = [
         ...model.achievements
-          .filter((achievement) => achievement.unlocked && !previous.achievements.has(achievement.id))
+          .filter(
+            (achievement) =>
+              achievement.unlocked &&
+              !previous.achievements.has(achievement.id),
+          )
           .map((achievement) => ({
             id: `achievement:${achievement.id}`,
             label: "Achievement Unlocked",
             detail: `${achievement.label} · ${achievement.rarity}`,
           })),
         ...model.campaignHistory
-          .filter((campaign) => campaign.status === "Completed" && !previous.campaigns.has(campaign.id))
+          .filter(
+            (campaign) =>
+              campaign.status === "Completed" &&
+              !previous.campaigns.has(campaign.id),
+          )
           .map((campaign) => ({
             id: `campaign:${campaign.id}`,
             label: "Campaign Complete",
             detail: `${campaign.name} · Reward unlocked`,
           })),
         ...(previous.rank !== model.reputation.rank
-          ? [{
-              id: `rank:${model.reputation.rank}`,
-              label: "Rank Up",
-              detail: `${previous.rank} -> ${model.reputation.rank}`,
-            }]
+          ? [
+              {
+                id: `rank:${model.reputation.rank}`,
+                label: "Rank Up",
+                detail: `${previous.rank} -> ${model.reputation.rank}`,
+              },
+            ]
           : []),
       ];
 
@@ -315,9 +345,14 @@ export function CommandCenter({ model }: { model: CommandCenterViewModel }) {
               <div className="mt-3 text-3xl font-semibold text-white">
                 Level {model.level.level}
               </div>
-              <div className="mt-1 text-sm text-zinc-300">{model.level.title}</div>
+              <div className="mt-1 text-sm text-zinc-300">
+                {model.level.title}
+              </div>
               <div className="mt-4">
-                <ProgressRail value={model.level.progressToNextPct} tone="warn" />
+                <ProgressRail
+                  value={model.level.progressToNextPct}
+                  tone="warn"
+                />
               </div>
               <div className="mt-2 text-xs text-zinc-500">
                 Next Rank: {model.level.nextTitle ?? "Maximum rank"}
@@ -336,7 +371,10 @@ export function CommandCenter({ model }: { model: CommandCenterViewModel }) {
                 {model.xp.nextRank ?? "All ranks unlocked"}
               </div>
               <div className="mt-4">
-                <ProgressRail value={model.xp.progressToNextPct} tone="neutral" />
+                <ProgressRail
+                  value={model.xp.progressToNextPct}
+                  tone="neutral"
+                />
               </div>
               <div className="mt-2 text-xs text-zinc-500">
                 {model.xp.nextRankXp == null
@@ -405,7 +443,10 @@ export function CommandCenter({ model }: { model: CommandCenterViewModel }) {
                     <Pill tone={region.tone}>{region.completionPct}%</Pill>
                   </div>
                   <div className="mt-3">
-                    <ProgressRail value={region.completionPct} tone={region.tone} />
+                    <ProgressRail
+                      value={region.completionPct}
+                      tone={region.tone}
+                    />
                   </div>
                 </div>
               ))}
@@ -427,7 +468,9 @@ export function CommandCenter({ model }: { model: CommandCenterViewModel }) {
                     Current Chapter: {model.campaign.currentChapter}
                   </div>
                 </div>
-                <Pill tone={model.campaign.progressPct >= 100 ? "good" : "warn"}>
+                <Pill
+                  tone={model.campaign.progressPct >= 100 ? "good" : "warn"}
+                >
                   {Math.round(model.campaign.progressPct)}%
                 </Pill>
               </div>
@@ -488,7 +531,8 @@ export function CommandCenter({ model }: { model: CommandCenterViewModel }) {
                 </div>
               ) : (
                 <div className="rounded-lg border border-emerald-300/20 bg-emerald-400/10 px-4 py-4 text-sm text-emerald-100">
-                  No active boss encounter. Restrictions are currently in monitoring mode.
+                  No active boss encounter. Restrictions are currently in
+                  monitoring mode.
                 </div>
               )}
             </Panel>
@@ -535,7 +579,15 @@ export function CommandCenter({ model }: { model: CommandCenterViewModel }) {
                     {model.reputation.rank}
                   </div>
                 </div>
-                <Pill tone={model.reputation.score >= 80 ? "good" : model.reputation.score >= 60 ? "warn" : "neutral"}>
+                <Pill
+                  tone={
+                    model.reputation.score >= 80
+                      ? "good"
+                      : model.reputation.score >= 60
+                        ? "warn"
+                        : "neutral"
+                  }
+                >
                   {Math.round(model.reputation.score)}
                 </Pill>
               </div>
@@ -592,7 +644,9 @@ export function CommandCenter({ model }: { model: CommandCenterViewModel }) {
                 <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
                   Next Objective
                 </div>
-                <p className="mt-1 text-zinc-300">{model.advisor.nextObjective}</p>
+                <p className="mt-1 text-zinc-300">
+                  {model.advisor.nextObjective}
+                </p>
               </div>
               <Pill tone="warn">{model.advisor.campaignStatus}</Pill>
             </div>
@@ -716,7 +770,9 @@ export function CommandCenter({ model }: { model: CommandCenterViewModel }) {
                       </div>
                     </div>
                     <Pill tone={achievement.unlocked ? "good" : "neutral"}>
-                      {achievement.unlocked ? "Unlocked" : `${Math.round(achievement.progressPct)}%`}
+                      {achievement.unlocked
+                        ? "Unlocked"
+                        : `${Math.round(achievement.progressPct)}%`}
                     </Pill>
                   </div>
                 </div>
@@ -782,7 +838,9 @@ export function CommandCenter({ model }: { model: CommandCenterViewModel }) {
                         Started {formatShortDate(campaign.startedAt)}
                       </div>
                     </div>
-                    <Pill tone={campaign.status === "Completed" ? "good" : "warn"}>
+                    <Pill
+                      tone={campaign.status === "Completed" ? "good" : "warn"}
+                    >
                       {campaign.status}
                     </Pill>
                   </div>
@@ -807,7 +865,8 @@ export function CommandCenter({ model }: { model: CommandCenterViewModel }) {
                       {milestone.name}
                     </div>
                     <div className="mt-0.5 text-xs text-zinc-500">
-                      {milestone.source} · {Math.round(milestone.value)} · {formatShortDate(milestone.reachedAt)}
+                      {milestone.source} · {Math.round(milestone.value)} ·{" "}
+                      {formatShortDate(milestone.reachedAt)}
                     </div>
                   </div>
                 ))}

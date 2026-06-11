@@ -1,7 +1,9 @@
 const { setCache } = require("./_quote-cache.js");
 
 function marketKey(value) {
-  return String(value || "").trim().toUpperCase();
+  return String(value || "")
+    .trim()
+    .toUpperCase();
 }
 
 function normalizeSymbol(value) {
@@ -18,13 +20,13 @@ const TRADINGVIEW_EXCHANGE_BY_MARKET = {
   BINANCE: "BINANCE",
   LSE: "LSE",
   NASDAQ: "NASDAQ",
-  NYSE: "NYSE"
+  NYSE: "NYSE",
 };
 
 const TRADINGVIEW_EXCHANGE_BY_SUFFIX = {
   AD: "ADX",
   AE: "DFM",
-  SA: "BMFBOVESPA"
+  SA: "BMFBOVESPA",
 };
 
 const TRADINGVIEW_SCANNER_BY_MARKET = {
@@ -37,7 +39,7 @@ const TRADINGVIEW_SCANNER_BY_MARKET = {
   DXB: "uae",
   LSE: "uk",
   NASDAQ: "america",
-  NYSE: "america"
+  NYSE: "america",
 };
 
 const TRADINGVIEW_SCANNER_COLUMNS = [
@@ -49,7 +51,7 @@ const TRADINGVIEW_SCANNER_COLUMNS = [
   "volume",
   "open",
   "high",
-  "low"
+  "low",
 ];
 
 function unique(values) {
@@ -63,7 +65,10 @@ function stripKnownSuffix(symbol) {
 function tradingViewExchangeFor(market, symbol) {
   const raw = normalizeSymbol(symbol);
   const suffix = raw.match(/\.([A-Z]{1,5})$/i)?.[1]?.toUpperCase();
-  return (suffix ? TRADINGVIEW_EXCHANGE_BY_SUFFIX[suffix] : null) || TRADINGVIEW_EXCHANGE_BY_MARKET[marketKey(market)];
+  return (
+    (suffix ? TRADINGVIEW_EXCHANGE_BY_SUFFIX[suffix] : null) ||
+    TRADINGVIEW_EXCHANGE_BY_MARKET[marketKey(market)]
+  );
 }
 
 function tradingViewSymbolCandidates(market, symbol) {
@@ -77,14 +82,11 @@ function tradingViewSymbolCandidates(market, symbol) {
   if (exchange) {
     return unique([
       `${exchange}:${base}`,
-      base !== raw ? `${exchange}:${raw}` : ""
+      base !== raw ? `${exchange}:${raw}` : "",
     ]);
   }
 
-  return unique([
-    raw,
-    base !== raw ? base : ""
-  ]);
+  return unique([raw, base !== raw ? base : ""]);
 }
 
 function normalizeBinanceSymbol(value) {
@@ -97,7 +99,10 @@ function normalizeBinanceSymbol(value) {
 }
 
 function parseTradingViewCsv(csv) {
-  const normalized = String(csv || "").trim().replaceAll("\r\n", "\n").replaceAll("\r", "\n");
+  const normalized = String(csv || "")
+    .trim()
+    .replaceAll("\r\n", "\n")
+    .replaceAll("\r", "\n");
   const lines = normalized.split("\n").filter(Boolean);
 
   if (lines.length < 2) return [];
@@ -139,7 +144,10 @@ async function mapWithConcurrency(values, limit, mapper) {
     }
   }
 
-  const workers = Array.from({ length: Math.min(limit, values.length) }, worker);
+  const workers = Array.from(
+    { length: Math.min(limit, values.length) },
+    worker,
+  );
   await Promise.all(workers);
   return results;
 }
@@ -147,8 +155,8 @@ async function mapWithConcurrency(values, limit, mapper) {
 async function fetchJson(url) {
   const response = await fetch(url, {
     headers: {
-      "User-Agent": "Mozilla/5.0 stocks-optimizer"
-    }
+      "User-Agent": "Mozilla/5.0 stocks-optimizer",
+    },
   });
 
   if (!response.ok) {
@@ -189,7 +197,7 @@ function quoteFromBinanceRow(symbol, row, source) {
     previousClose: numberOrNull(row?.prevClosePrice),
     currency: binanceSymbol.endsWith("USDT") ? "USDT" : null,
     updatedAt: new Date().toISOString(),
-    source
+    source,
   };
 }
 
@@ -207,7 +215,7 @@ function unavailableQuote(symbol, market, source) {
     percentChange: null,
     volume: null,
     updatedAt: new Date().toISOString(),
-    source
+    source,
   };
 }
 
@@ -230,7 +238,7 @@ async function fetchBinanceEndpointQuotes(symbols, url, source) {
     if (!row) {
       return {
         ...unavailableQuote(symbol, "BINANCE", `${source}-missing`),
-        binanceSymbol
+        binanceSymbol,
       };
     }
 
@@ -268,7 +276,7 @@ function quoteFromScannerRow(symbol, market, ticker, row) {
     history,
     sampleCount: history.length,
     updatedAt: new Date().toISOString(),
-    source: "tradingview-scanner"
+    source: "tradingview-scanner",
   };
 }
 
@@ -289,28 +297,40 @@ async function fetchTradingViewScannerQuotes(market, symbols) {
 
   if (!requests.length) return [];
 
-  const response = await fetch(`https://scanner.tradingview.com/${scannerMarket}/scan`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "User-Agent": "Mozilla/5.0 stocks-optimizer"
-    },
-    body: JSON.stringify({
-      symbols: {
-        tickers: requests.map((request) => request.ticker),
-        query: { types: [] }
+  const response = await fetch(
+    `https://scanner.tradingview.com/${scannerMarket}/scan`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 stocks-optimizer",
       },
-      columns: TRADINGVIEW_SCANNER_COLUMNS
-    })
-  });
+      body: JSON.stringify({
+        symbols: {
+          tickers: requests.map((request) => request.ticker),
+          query: { types: [] },
+        },
+        columns: TRADINGVIEW_SCANNER_COLUMNS,
+      }),
+    },
+  );
 
   if (!response.ok) return [];
 
   const payload = await response.json();
-  const byTicker = new Map((payload?.data || []).map((row) => [String(row.s), row]));
+  const byTicker = new Map(
+    (payload?.data || []).map((row) => [String(row.s), row]),
+  );
 
   return requests
-    .map((request) => quoteFromScannerRow(request.symbol, normalizedMarket, request.ticker, byTicker.get(request.ticker)))
+    .map((request) =>
+      quoteFromScannerRow(
+        request.symbol,
+        normalizedMarket,
+        request.ticker,
+        byTicker.get(request.ticker),
+      ),
+    )
     .filter(Boolean);
 }
 
@@ -334,8 +354,8 @@ async function fetchTradingViewQuotes(market, symbols, reason = null) {
       for (let attempt = 0; attempt < 2; attempt += 1) {
         const response = await fetch(url.toString(), {
           headers: {
-            "User-Agent": "Mozilla/5.0 stocks-optimizer"
-          }
+            "User-Agent": "Mozilla/5.0 stocks-optimizer",
+          },
         });
 
         if (!response.ok) {
@@ -362,9 +382,7 @@ async function fetchTradingViewQuotes(market, symbols, reason = null) {
 
       const previousClose = numberOrNull(previousRow.Close);
       const change =
-        close !== null && previousClose !== null
-          ? close - previousClose
-          : null;
+        close !== null && previousClose !== null ? close - previousClose : null;
       const changePercent =
         close !== null && previousClose !== null && previousClose !== 0
           ? ((close - previousClose) / previousClose) * 100
@@ -393,7 +411,7 @@ async function fetchTradingViewQuotes(market, symbols, reason = null) {
         history,
         sampleCount: history.length,
         updatedAt: new Date().toISOString(),
-        source: "tradingview-data"
+        source: "tradingview-data",
       };
     }
 
@@ -414,17 +432,29 @@ async function fetchTradingViewQuotes(market, symbols, reason = null) {
       previousClose: null,
       volume: null,
       updatedAt: new Date().toISOString(),
-      source: `tradingview-unavailable:${lastFailure || "no-candidates"}${reason ? `:${reason}` : ""}`
+      source: `tradingview-unavailable:${lastFailure || "no-candidates"}${reason ? `:${reason}` : ""}`,
     };
   }
 
   const scannerQuotes = await fetchTradingViewScannerQuotes(market, symbols);
-  const scannerBySymbol = new Map(scannerQuotes.map((quote) => [quote.symbol, quote]));
-  const missingSymbols = symbols.filter((symbol) => !scannerBySymbol.has(symbol));
-  const fallbackQuotes = await mapWithConcurrency(missingSymbols, Math.max(1, Math.min(12, concurrency)), fetchOne);
-  const fallbackBySymbol = new Map(fallbackQuotes.map((quote) => [quote.symbol, quote]));
+  const scannerBySymbol = new Map(
+    scannerQuotes.map((quote) => [quote.symbol, quote]),
+  );
+  const missingSymbols = symbols.filter(
+    (symbol) => !scannerBySymbol.has(symbol),
+  );
+  const fallbackQuotes = await mapWithConcurrency(
+    missingSymbols,
+    Math.max(1, Math.min(12, concurrency)),
+    fetchOne,
+  );
+  const fallbackBySymbol = new Map(
+    fallbackQuotes.map((quote) => [quote.symbol, quote]),
+  );
 
-  return symbols.map((symbol) => scannerBySymbol.get(symbol) || fallbackBySymbol.get(symbol));
+  return symbols.map(
+    (symbol) => scannerBySymbol.get(symbol) || fallbackBySymbol.get(symbol),
+  );
 }
 
 async function fetchBinanceQuotes(symbols) {
@@ -440,24 +470,27 @@ async function fetchBinanceQuotes(symbols) {
     return await fetchBinanceEndpointQuotes(symbols, spotUrl, "binance-spot");
   } catch (spotError) {
     try {
-      return await fetchBinanceEndpointQuotes(symbols, futuresUrl, "binance-futures");
+      return await fetchBinanceEndpointQuotes(
+        symbols,
+        futuresUrl,
+        "binance-futures",
+      );
     } catch (futuresError) {
-      const blockedStatus = spotError.status === 451 || futuresError.status === 451
-        ? 451
-        : null;
+      const blockedStatus =
+        spotError.status === 451 || futuresError.status === 451 ? 451 : null;
 
       if (blockedStatus) {
         return fetchTradingViewQuotes(
           "BINANCE",
           symbols,
-          `binance-blocked:${blockedStatus}`
+          `binance-blocked:${blockedStatus}`,
         );
       }
 
       return fetchTradingViewQuotes(
         "BINANCE",
         symbols,
-        `binance-unavailable:${spotError.status || futuresError.status || "unknown"}`
+        `binance-unavailable:${spotError.status || futuresError.status || "unknown"}`,
       );
     }
   }
@@ -466,7 +499,7 @@ async function fetchBinanceQuotes(symbols) {
 async function syncMarketQuotes({ market, symbols }) {
   const normalizedMarket = marketKey(market);
   const uniqueSymbols = Array.from(
-    new Set(symbols.map(normalizeSymbol).filter(Boolean))
+    new Set(symbols.map(normalizeSymbol).filter(Boolean)),
   ).slice(0, 500);
 
   const quotes =
@@ -479,7 +512,7 @@ async function syncMarketQuotes({ market, symbols }) {
     quotes,
     data: quotes,
     items: quotes,
-    syncedAt: Date.now()
+    syncedAt: Date.now(),
   };
 
   await setCache(`quotes:${normalizedMarket}`, payload, 30);
@@ -488,5 +521,5 @@ async function syncMarketQuotes({ market, symbols }) {
 }
 
 module.exports = {
-  syncMarketQuotes
+  syncMarketQuotes,
 };

@@ -23,7 +23,7 @@ export class SignalRegistry {
   }
 
   registerQuery<TInput, TResult>(
-    definition: SignalQueryDefinition<TInput, TResult>
+    definition: SignalQueryDefinition<TInput, TResult>,
   ): SignalQueryDefinition<TInput, TResult> {
     this.ensureMutable();
     this.assertName(definition.name);
@@ -32,7 +32,7 @@ export class SignalRegistry {
   }
 
   registerMutation<TInput, TResult>(
-    definition: SignalMutationDefinition<TInput, TResult>
+    definition: SignalMutationDefinition<TInput, TResult>,
   ): SignalMutationDefinition<TInput, TResult> {
     this.ensureMutable();
     this.assertName(definition.name);
@@ -41,7 +41,7 @@ export class SignalRegistry {
   }
 
   registerEvent<TInput, TResult>(
-    definition: SignalEventDefinition<TInput, TResult>
+    definition: SignalEventDefinition<TInput, TResult>,
   ): SignalEventDefinition<TInput, TResult> {
     this.ensureMutable();
     this.assertName(definition.name);
@@ -52,7 +52,10 @@ export class SignalRegistry {
   getQuery(name: string): SignalQueryDefinition {
     const definition = this.queries.get(name);
     if (!definition) {
-      throw createProtocolError("UNSUPPORTED_OPERATION", `Unknown query: ${name}`);
+      throw createProtocolError(
+        "UNSUPPORTED_OPERATION",
+        `Unknown query: ${name}`,
+      );
     }
     return definition;
   }
@@ -60,7 +63,10 @@ export class SignalRegistry {
   getMutation(name: string): SignalMutationDefinition {
     const definition = this.mutations.get(name);
     if (!definition) {
-      throw createProtocolError("UNSUPPORTED_OPERATION", `Unknown mutation: ${name}`);
+      throw createProtocolError(
+        "UNSUPPORTED_OPERATION",
+        `Unknown mutation: ${name}`,
+      );
     }
     return definition;
   }
@@ -68,7 +74,10 @@ export class SignalRegistry {
   getEvent(name: string): SignalEventDefinition {
     const definition = this.events.get(name);
     if (!definition) {
-      throw createProtocolError("UNSUPPORTED_OPERATION", `Unknown event: ${name}`);
+      throw createProtocolError(
+        "UNSUPPORTED_OPERATION",
+        `Unknown event: ${name}`,
+      );
     }
     return definition;
   }

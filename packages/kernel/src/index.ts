@@ -17,28 +17,28 @@ export {
 } from "./model/SignalPackage";
 
 // ─── Interfaces ────────────────────────────────────────────────
-export {
-  type SignalGenerator,
-  type SignalGeneratorInput,
-  type SignalGeneratorOutput,
+export type {
+  SignalGenerator,
+  SignalGeneratorInput,
+  SignalGeneratorOutput,
 } from "./interfaces/SignalGenerator";
 
-export {
-  type Analyzer,
-  type AnalyzerInput,
-  type AnalyzerOutput,
+export type {
+  Analyzer,
+  AnalyzerInput,
+  AnalyzerOutput,
 } from "./interfaces/Analyzer";
 
-export {
-  type Scorer,
-  type ScorerInput,
-  type ScorerOutput,
+export type {
+  Scorer,
+  ScorerInput,
+  ScorerOutput,
 } from "./interfaces/Scorer";
 
-export {
-  type Aggregator,
-  type AggregatorInput,
-  type AggregatorOutput,
+export type {
+  Aggregator,
+  AggregatorInput,
+  AggregatorOutput,
 } from "./interfaces/Aggregator";
 
 // ─── Infrastructure ───────────────────────────────────────────
@@ -53,9 +53,7 @@ export {
   type StateChange,
 } from "./infrastructure/StateStore";
 
-export {
-  SignalStore,
-} from "./infrastructure/SignalStore";
+export { SignalStore } from "./infrastructure/SignalStore";
 
 export {
   DecisionStore,
@@ -68,9 +66,7 @@ export {
   type OrchestratorConfig,
 } from "./orchestrator/SignalOrchestrator";
 
-export {
-  PipelineRunner,
-} from "./orchestrator/PipelineRunner";
+export { PipelineRunner } from "./orchestrator/PipelineRunner";
 
 export {
   ExecutionController,

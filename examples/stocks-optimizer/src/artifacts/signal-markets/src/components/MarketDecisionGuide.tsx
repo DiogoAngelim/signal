@@ -1,4 +1,3 @@
-import type { KeyboardEvent, ReactNode } from "react";
 import {
   GUIDED_STEPS,
   GUIDED_STEP_STATUS_LABELS,
@@ -14,6 +13,7 @@ import {
   SlidersHorizontal,
   Target,
 } from "lucide-react";
+import type { KeyboardEvent, ReactNode } from "react";
 
 export type GuideTone = "good" | "warn" | "bad" | "neutral";
 
@@ -74,7 +74,8 @@ function boundedPct(value: number) {
 }
 
 function toneAccent(tone: GuideTone = "neutral") {
-  if (tone === "good") return "border-emerald-200 bg-emerald-50 text-emerald-950";
+  if (tone === "good")
+    return "border-emerald-200 bg-emerald-50 text-emerald-950";
   if (tone === "warn") return "border-amber-200 bg-amber-50 text-amber-950";
   if (tone === "bad") return "border-rose-200 bg-rose-50 text-rose-950";
   return "border-zinc-200 bg-white text-zinc-900";
@@ -155,9 +156,7 @@ export function GuideLayout({
       </aside>
       <div className="grid min-w-0 content-start gap-3">{primary}</div>
       <aside className="grid min-w-0 content-start gap-3">{secondary}</aside>
-      {details ? (
-        <div className="min-w-0 xl:col-span-3">{details}</div>
-      ) : null}
+      {details ? <div className="min-w-0 xl:col-span-3">{details}</div> : null}
     </section>
   );
 }
@@ -459,7 +458,11 @@ export function OptionCard({
   worksAgainst: string[];
 }) {
   return (
-    <CardShell title="Stewardship Options" eyebrow="Strengths and threats" testId="option-card">
+    <CardShell
+      title="Stewardship Options"
+      eyebrow="Strengths and threats"
+      testId="option-card"
+    >
       <div className="grid min-w-0 gap-3 sm:grid-cols-2">
         <div>
           <div className="text-xs font-semibold uppercase tracking-normal text-emerald-700">
@@ -467,7 +470,10 @@ export function OptionCard({
           </div>
           <ul className="mt-2 grid gap-2">
             {supports.map((item) => (
-              <li key={item} className="break-words text-sm leading-6 text-zinc-700">
+              <li
+                key={item}
+                className="break-words text-sm leading-6 text-zinc-700"
+              >
                 {item}
               </li>
             ))}
@@ -479,7 +485,10 @@ export function OptionCard({
           </div>
           <ul className="mt-2 grid gap-2">
             {worksAgainst.map((item) => (
-              <li key={item} className="break-words text-sm leading-6 text-zinc-700">
+              <li
+                key={item}
+                className="break-words text-sm leading-6 text-zinc-700"
+              >
                 {item}
               </li>
             ))}
@@ -591,7 +600,11 @@ export function UnknownsCard({ unknowns }: { unknowns: string[] }) {
 
 export function ProgressCard({ items }: { items: ProgressSignal[] }) {
   return (
-    <CardShell title="Stewardship Progress" eyebrow="Process" testId="progress-card">
+    <CardShell
+      title="Stewardship Progress"
+      eyebrow="Process"
+      testId="progress-card"
+    >
       <div className="grid gap-3">
         <p className="text-sm leading-6 text-zinc-600">
           Today the system rewards discipline, optionality, and decisions that
@@ -629,7 +642,11 @@ export function ProgressCard({ items }: { items: ProgressSignal[] }) {
 
 export function PlanReviewCard({ checkpoints }: { checkpoints: string[] }) {
   return (
-    <CardShell title="Review Plan" eyebrow="Stewardship checks" testId="plan-review-card">
+    <CardShell
+      title="Review Plan"
+      eyebrow="Stewardship checks"
+      testId="plan-review-card"
+    >
       <ol className="grid gap-2">
         {checkpoints.map((checkpoint, index) => (
           <li
@@ -653,7 +670,11 @@ export function UserControlCard({
   statement?: string;
 }) {
   return (
-    <CardShell title="You Remain In Control" eyebrow="Control" testId="user-control-card">
+    <CardShell
+      title="You Remain In Control"
+      eyebrow="Control"
+      testId="user-control-card"
+    >
       <div className="grid grid-cols-[34px_minmax(0,1fr)] gap-3">
         <span className="grid h-9 w-9 place-items-center rounded-md border border-zinc-200 bg-zinc-50 text-zinc-700">
           <ShieldCheck className="h-4 w-4" />
@@ -668,7 +689,12 @@ export function UserControlCard({
 
 function FactPill({ fact }: { fact: GuideFact }) {
   return (
-    <div className={cx("min-w-0 rounded-md border px-3 py-2", toneAccent(fact.tone))}>
+    <div
+      className={cx(
+        "min-w-0 rounded-md border px-3 py-2",
+        toneAccent(fact.tone),
+      )}
+    >
       <div className="break-words text-xs font-medium opacity-70">
         {fact.label}
       </div>
@@ -739,7 +765,8 @@ export function createConfidenceRange(input: {
     low,
     high,
     label: `${low}%-${high}%`,
-    explanation: "We do not know enough to be certain. Treat stewardship evidence as a range, not a promise.",
+    explanation:
+      "We do not know enough to be certain. Treat stewardship evidence as a range, not a promise.",
   };
 }
 
@@ -751,9 +778,10 @@ export function recommendedNextStep(input: {
   missingEvidence: string;
 }) {
   const action = input.action.toLowerCase();
-  const noExposure = /no new exposure|no exposure|no new allocation|no allocation|0%|flat|none/i.test(
-    input.exposureText,
-  );
+  const noExposure =
+    /no new exposure|no exposure|no new allocation|no allocation|0%|flat|none/i.test(
+      input.exposureText,
+    );
 
   if (input.failCount > 0 || (input.risk != null && input.risk >= 72)) {
     return "Protect";
@@ -823,18 +851,18 @@ export function processProgress(input: {
     {
       label: "Decision quality",
       value: decisionQuality,
-      detail: "The next step is clear without pretending to predict the future.",
+      detail:
+        "The next step is clear without pretending to predict the future.",
       tone: decisionQuality >= 70 ? "good" : "warn",
     },
   ];
 }
 
-export function uniqueGuideList(values: Array<string | null | undefined>, limit = 5) {
+export function uniqueGuideList(
+  values: Array<string | null | undefined>,
+  limit = 5,
+) {
   return Array.from(
-    new Set(
-      values
-        .map((value) => String(value ?? "").trim())
-        .filter(Boolean),
-    ),
+    new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean)),
   ).slice(0, limit);
 }

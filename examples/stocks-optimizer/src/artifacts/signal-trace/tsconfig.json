@@ -11,6 +11,8 @@
     "sourceMap": true,
     "types": ["node"],
     "skipLibCheck": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false,
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src"],

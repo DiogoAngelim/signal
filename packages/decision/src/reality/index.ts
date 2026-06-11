@@ -1,7 +1,9 @@
 import type { RealitySnapshot, RealitySnapshotInput } from "../types";
 import { asScore, nowIso } from "../utils";
 
-export function createRealitySnapshot(input: RealitySnapshotInput): RealitySnapshot {
+export function createRealitySnapshot(
+  input: RealitySnapshotInput,
+): RealitySnapshot {
   const source = normalizeSource(input.source);
   const createdAt = input.createdAt ?? nowIso();
   const snapshotId = input.snapshotId ?? `reality:${source}:${createdAt}`;
@@ -29,7 +31,10 @@ export function createRealitySnapshotForDecision(input: {
   if (input.realitySnapshot) {
     return createRealitySnapshot({
       ...input.realitySnapshot,
-      snapshotId: input.realitySnapshot.snapshotId ?? input.realitySnapshotId ?? `reality:${input.decisionId}`,
+      snapshotId:
+        input.realitySnapshot.snapshotId ??
+        input.realitySnapshotId ??
+        `reality:${input.decisionId}`,
       source: input.realitySnapshot.source ?? input.source ?? "signal",
       createdAt: input.realitySnapshot.createdAt ?? input.createdAt,
       payload: input.realitySnapshot.payload ?? input.observation,
@@ -48,7 +53,10 @@ export function createRealitySnapshotForDecision(input: {
   });
 }
 
-export function compactRealityPayload(payload: unknown, keys: readonly string[]): Record<string, unknown> {
+export function compactRealityPayload(
+  payload: unknown,
+  keys: readonly string[],
+): Record<string, unknown> {
   if (!isRecord(payload)) return { value: payload };
   const compacted: Record<string, unknown> = {};
   for (const key of keys) {

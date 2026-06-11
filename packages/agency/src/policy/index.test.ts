@@ -9,16 +9,18 @@ const decision: AgencyDecision = {
 
 describe("policy", () => {
   it("allows a decision that satisfies confidence, size, and approval rules", () => {
-    expect(evaluatePolicy({
-      decision,
-      sizing: { size: 4 },
-      config: {
-        minimumConfidence: 0.5,
-        maximumSize: 10,
-        humanApprovalRequired: true,
-      },
-      approvalGranted: true,
-    })).toEqual({
+    expect(
+      evaluatePolicy({
+        decision,
+        sizing: { size: 4 },
+        config: {
+          minimumConfidence: 0.5,
+          maximumSize: 10,
+          humanApprovalRequired: true,
+        },
+        approvalGranted: true,
+      }),
+    ).toEqual({
       allowed: true,
       maxSize: 10,
       requiresApproval: true,
@@ -35,7 +37,9 @@ describe("policy", () => {
 
     expect(result.allowed).toBe(false);
     expect(result.violations).toEqual(["confidence_below_minimum"]);
-    expect(result.reason).toBe("Policy blocked action: confidence_below_minimum.");
+    expect(result.reason).toBe(
+      "Policy blocked action: confidence_below_minimum.",
+    );
   });
 
   it("blocks oversize requests and recommends the configured maximum", () => {
@@ -59,7 +63,10 @@ describe("policy", () => {
     });
 
     expect(result.allowed).toBe(false);
-    expect(result.violations).toEqual(["blocked:external_pause", "blocked:conflicting_evidence"]);
+    expect(result.violations).toEqual([
+      "blocked:external_pause",
+      "blocked:conflicting_evidence",
+    ]);
   });
 
   it("blocks when human approval is required but not granted", () => {
@@ -81,15 +88,15 @@ describe("policy", () => {
   });
 
   it("rejects invalid confidence and size values", () => {
-    expect(() => evaluatePolicy({ decision: { ...decision, confidence: 1.2 } })).toThrow(
-      "decision.confidence must be a number between 0 and 1.",
-    );
-    expect(() => evaluatePolicy({ decision, config: { minimumConfidence: -0.1 } })).toThrow(
-      "minimumConfidence must be a number between 0 and 1.",
-    );
-    expect(() => evaluatePolicy({ decision, config: { maximumSize: -1 } })).toThrow(
-      "maximumSize must be a non-negative number.",
-    );
+    expect(() =>
+      evaluatePolicy({ decision: { ...decision, confidence: 1.2 } }),
+    ).toThrow("decision.confidence must be a number between 0 and 1.");
+    expect(() =>
+      evaluatePolicy({ decision, config: { minimumConfidence: -0.1 } }),
+    ).toThrow("minimumConfidence must be a number between 0 and 1.");
+    expect(() =>
+      evaluatePolicy({ decision, config: { maximumSize: -1 } }),
+    ).toThrow("maximumSize must be a non-negative number.");
     expect(() => evaluatePolicy({ decision, sizing: { size: -1 } })).toThrow(
       "sizing.size must be a non-negative number.",
     );

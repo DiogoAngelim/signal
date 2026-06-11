@@ -4,21 +4,29 @@
  * The Kernel owns orchestration; plugins cannot control execution.
  */
 
-import type { SignalPackage, SignalPackageId, SignalPackageMeta } from "../model/SignalPackage";
-import { createSignalPackage } from "../model/SignalPackage";
-import type { SignalGenerator } from "../interfaces/SignalGenerator";
+import { BoundaryGuard } from "../boundary/BoundaryGuard";
+import { DecisionStore } from "../infrastructure/DecisionStore";
+import { EventBus } from "../infrastructure/EventBus";
+import { SignalStore } from "../infrastructure/SignalStore";
+import { StateStore } from "../infrastructure/StateStore";
+import type { Aggregator } from "../interfaces/Aggregator";
 import type { Analyzer } from "../interfaces/Analyzer";
 import type { Scorer } from "../interfaces/Scorer";
-import type { Aggregator } from "../interfaces/Aggregator";
-import type { SignalPlugin, PluginContext, PluginDescriptor } from "../plugin/SignalPlugin";
+import type { SignalGenerator } from "../interfaces/SignalGenerator";
+import type {
+  SignalPackage,
+  SignalPackageId,
+  SignalPackageMeta,
+} from "../model/SignalPackage";
+import { createSignalPackage } from "../model/SignalPackage";
+import type {
+  PluginContext,
+  PluginDescriptor,
+  SignalPlugin,
+} from "../plugin/SignalPlugin";
 import { describePlugin } from "../plugin/SignalPlugin";
-import { BoundaryGuard } from "../boundary/BoundaryGuard";
-import { EventBus } from "../infrastructure/EventBus";
-import { StateStore } from "../infrastructure/StateStore";
-import { SignalStore } from "../infrastructure/SignalStore";
-import { DecisionStore } from "../infrastructure/DecisionStore";
-import { PipelineRunner } from "./PipelineRunner";
 import { ExecutionController } from "./ExecutionController";
+import { PipelineRunner } from "./PipelineRunner";
 
 export type OrchestratorConfig = {
   readonly domain: string;
@@ -47,28 +55,51 @@ export class SignalOrchestrator {
     this.stateStore = new StateStore(this.eventBus);
     this.signalStore = new SignalStore(this.eventBus);
     this.decisionStore = new DecisionStore(this.eventBus);
-    this.executionController = new ExecutionController(this.eventBus, config.maxConcurrentPipelines);
-    this.pipelineRunner = new PipelineRunner(this.eventBus, this.signalStore, this.decisionStore);
+    this.executionController = new ExecutionController(
+      this.eventBus,
+      config.maxConcurrentPipelines,
+    );
+    this.pipelineRunner = new PipelineRunner(
+      this.eventBus,
+      this.signalStore,
+      this.decisionStore,
+    );
   }
 
   registerGenerator(generator: SignalGenerator): void {
     this.generators.set(generator.id, generator);
-    this.eventBus.emit("orchestrator:generator-registered", { id: generator.id, version: generator.version }, "SignalOrchestrator");
+    this.eventBus.emit(
+      "orchestrator:generator-registered",
+      { id: generator.id, version: generator.version },
+      "SignalOrchestrator",
+    );
   }
 
   registerAnalyzer(analyzer: Analyzer): void {
     this.analyzers.set(analyzer.id, analyzer);
-    this.eventBus.emit("orchestrator:analyzer-registered", { id: analyzer.id, version: analyzer.version }, "SignalOrchestrator");
+    this.eventBus.emit(
+      "orchestrator:analyzer-registered",
+      { id: analyzer.id, version: analyzer.version },
+      "SignalOrchestrator",
+    );
   }
 
   registerScorer(scorer: Scorer): void {
     this.scorers.set(scorer.id, scorer);
-    this.eventBus.emit("orchestrator:scorer-registered", { id: scorer.id, version: scorer.version }, "SignalOrchestrator");
+    this.eventBus.emit(
+      "orchestrator:scorer-registered",
+      { id: scorer.id, version: scorer.version },
+      "SignalOrchestrator",
+    );
   }
 
   registerAggregator(aggregator: Aggregator): void {
     this.aggregators.set(aggregator.id, aggregator);
-    this.eventBus.emit("orchestrator:aggregator-registered", { id: aggregator.id, version: aggregator.version }, "SignalOrchestrator");
+    this.eventBus.emit(
+      "orchestrator:aggregator-registered",
+      { id: aggregator.id, version: aggregator.version },
+      "SignalOrchestrator",
+    );
   }
 
   getGenerator(id: string): SignalGenerator | undefined {
@@ -87,7 +118,13 @@ export class SignalOrchestrator {
     return this.aggregators.get(id);
   }
 
-  async execute(input: Record<string, unknown>, generatorId: string, analyzerId: string, scorerId: string, aggregatorId: string): Promise<SignalPackage> {
+  async execute(
+    input: Record<string, unknown>,
+    generatorId: string,
+    analyzerId: string,
+    scorerId: string,
+    aggregatorId: string,
+  ): Promise<SignalPackage> {
     const generator = this.generators.get(generatorId);
     if (!generator) throw new Error(`Generator not found: ${generatorId}`);
 
@@ -110,7 +147,8 @@ export class SignalOrchestrator {
         source: generatorId,
       };
 
-      const packageId = `${this.config.domain}:${Date.now()}:${Math.random().toString(36).slice(2, 9)}` as SignalPackageId;
+      const packageId =
+        `${this.config.domain}:${Date.now()}:${Math.random().toString(36).slice(2, 9)}` as SignalPackageId;
 
       return await this.pipelineRunner.run(
         packageId,
@@ -155,7 +193,9 @@ export class SignalOrchestrator {
     // Boundary enforcement: validate plugin before registration
     if (!this.boundaryGuard.validatePlugin(plugin)) {
       const violations = this.boundaryGuard.getViolationsFor(plugin.id);
-      throw new Error(`Plugin ${plugin.id} failed boundary validation: ${violations.map((v) => v.message).join("; ")}`);
+      throw new Error(
+        `Plugin ${plugin.id} failed boundary validation: ${violations.map((v) => v.message).join("; ")}`,
+      );
     }
 
     const descriptor = describePlugin(plugin);
@@ -208,7 +248,11 @@ export class SignalOrchestrator {
 
     this.plugins.set(plugin.id, plugin);
     this.boundaryGuard.markRegistered(plugin.id, plugin.capabilities);
-    this.eventBus.emit("orchestrator:plugin-registered", { id: plugin.id, capabilities: plugin.capabilities }, "SignalOrchestrator");
+    this.eventBus.emit(
+      "orchestrator:plugin-registered",
+      { id: plugin.id, capabilities: plugin.capabilities },
+      "SignalOrchestrator",
+    );
   }
 
   /**
@@ -250,7 +294,11 @@ export class SignalOrchestrator {
 
     this.plugins.delete(pluginId);
     this.boundaryGuard.markUnregistered(pluginId);
-    this.eventBus.emit("orchestrator:plugin-disposed", { id: pluginId }, "SignalOrchestrator");
+    this.eventBus.emit(
+      "orchestrator:plugin-disposed",
+      { id: pluginId },
+      "SignalOrchestrator",
+    );
   }
 
   getPlugin(id: string): SignalPlugin | undefined {

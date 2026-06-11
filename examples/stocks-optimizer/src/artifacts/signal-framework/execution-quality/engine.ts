@@ -1,6 +1,11 @@
 import { clamp, mean } from "../math/statistics";
 
-export type ExecutionQualityStatus = "blocked" | "poor" | "acceptable" | "good" | "excellent";
+export type ExecutionQualityStatus =
+  | "blocked"
+  | "poor"
+  | "acceptable"
+  | "good"
+  | "excellent";
 
 export type RecommendedExecutionMode =
   | "do_not_execute"
@@ -62,20 +67,9 @@ const WEIGHTS = {
   staleDataSafety: 0.04,
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-export function evaluateExecutionQuality(input: ExecutionQualityInput = {}): ExecutionQualityResult {
+export function evaluateExecutionQuality(
+  input: ExecutionQualityInput = {},
+): ExecutionQualityResult {
   const entryQuality = score(input.entryQuality, 50);
   const exitQuality = score(input.exitQuality, 55);
   const liquidityQuality = score(input.liquidityQuality, 50);
@@ -84,7 +78,10 @@ export function evaluateExecutionQuality(input: ExecutionQualityInput = {}): Exe
   const timingUrgency = score(input.timingUrgency, 35);
   const scalingQuality = score(input.scalingQuality, 50);
   const invalidationClarity = score(input.invalidationClarity, 45);
-  const executionReadiness = score(input.executionReadiness, mean([entryQuality, exitQuality, liquidityQuality]));
+  const executionReadiness = score(
+    input.executionReadiness,
+    mean([entryQuality, exitQuality, liquidityQuality]),
+  );
   const marketImpactRisk = score(input.marketImpactRisk, 25);
   const staleDataRisk = score(input.staleDataRisk, 25);
   const blockers = blockersFor(input, {
@@ -103,19 +100,21 @@ export function evaluateExecutionQuality(input: ExecutionQualityInput = {}): Exe
     staleDataRisk,
   });
   const timingFit = timingFitFor(timingUrgency, volatilityRisk, staleDataRisk);
-  const scoreValue = roundScore(weightedScore({
-    entryQuality,
-    exitQuality,
-    liquidityQuality,
-    slippageSafety: 100 - slippageRisk,
-    volatilitySafety: 100 - volatilityRisk,
-    timingFit,
-    scalingQuality,
-    invalidationClarity,
-    executionReadiness,
-    marketImpactSafety: 100 - marketImpactRisk,
-    staleDataSafety: 100 - staleDataRisk,
-  }));
+  const scoreValue = roundScore(
+    weightedScore({
+      entryQuality,
+      exitQuality,
+      liquidityQuality,
+      slippageSafety: 100 - slippageRisk,
+      volatilitySafety: 100 - volatilityRisk,
+      timingFit,
+      scalingQuality,
+      invalidationClarity,
+      executionReadiness,
+      marketImpactSafety: 100 - marketImpactRisk,
+      staleDataSafety: 100 - staleDataRisk,
+    }),
+  );
   const status = statusFor(scoreValue, blockers);
   const recommendedExecutionMode = modeFor(status, {
     timingUrgency,
@@ -138,7 +137,12 @@ export function evaluateExecutionQuality(input: ExecutionQualityInput = {}): Exe
     blockers,
     warnings,
     recommendedExecutionMode,
-    explanation: explanationFor(status, recommendedExecutionMode, blockers, warnings),
+    explanation: explanationFor(
+      status,
+      recommendedExecutionMode,
+      blockers,
+      warnings,
+    ),
     audit: {
       weights: WEIGHTS,
       timingFit,
@@ -168,10 +172,18 @@ function blockersFor(
 ) {
   return unique([
     ...(input.blockers ?? []),
-    values.liquidityQuality < 20 ? "Liquidity is too weak for clean execution." : "",
-    values.slippageRisk > (input.maxSlippageRisk ?? 85) ? "Slippage risk exceeds execution policy." : "",
-    values.staleDataRisk > (input.maxStaleDataRisk ?? 85) ? "Execution data is too stale." : "",
-    values.invalidationClarity < 20 ? "Stop or invalidation condition is unclear." : "",
+    values.liquidityQuality < 20
+      ? "Liquidity is too weak for clean execution."
+      : "",
+    values.slippageRisk > (input.maxSlippageRisk ?? 85)
+      ? "Slippage risk exceeds execution policy."
+      : "",
+    values.staleDataRisk > (input.maxStaleDataRisk ?? 85)
+      ? "Execution data is too stale."
+      : "",
+    values.invalidationClarity < 20
+      ? "Stop or invalidation condition is unclear."
+      : "",
   ]);
 }
 
@@ -189,22 +201,39 @@ function warningsFor(
 ) {
   return unique([
     ...(input.warnings ?? []),
-    values.entryQuality < 45 ? "Entry quality is below the clean-execution band." : "",
-    values.exitQuality < 45 ? "Exit quality is below the clean-execution band." : "",
-    values.liquidityQuality < 45 ? "Liquidity is thin; use smaller or more patient execution." : "",
+    values.entryQuality < 45
+      ? "Entry quality is below the clean-execution band."
+      : "",
+    values.exitQuality < 45
+      ? "Exit quality is below the clean-execution band."
+      : "",
+    values.liquidityQuality < 45
+      ? "Liquidity is thin; use smaller or more patient execution."
+      : "",
     values.slippageRisk > 55 ? "Spread or slippage risk is elevated." : "",
     values.volatilityRisk > 65 ? "Volatility timing is noisy." : "",
-    values.scalingQuality < 45 ? "Scaling plan is not strong enough for normal size." : "",
-    values.staleDataRisk > 55 ? "Execution data freshness should be checked before acting." : "",
+    values.scalingQuality < 45
+      ? "Scaling plan is not strong enough for normal size."
+      : "",
+    values.staleDataRisk > 55
+      ? "Execution data freshness should be checked before acting."
+      : "",
   ]);
 }
 
-function timingFitFor(timingUrgency: number, volatilityRisk: number, staleDataRisk: number) {
+function timingFitFor(
+  timingUrgency: number,
+  volatilityRisk: number,
+  staleDataRisk: number,
+) {
   const urgencyValue = timingUrgency >= 70 ? 80 : timingUrgency >= 40 ? 65 : 55;
   return clamp(urgencyValue - volatilityRisk * 0.25 - staleDataRisk * 0.2);
 }
 
-function statusFor(scoreValue: number, blockers: string[]): ExecutionQualityStatus {
+function statusFor(
+  scoreValue: number,
+  blockers: string[],
+): ExecutionQualityStatus {
   if (blockers.length) return "blocked";
   if (scoreValue < 45) return "poor";
   if (scoreValue < 65) return "acceptable";
@@ -224,7 +253,8 @@ function modeFor(
   if (status === "blocked") return "do_not_execute";
   if (status === "poor") return "wait";
   if (values.slippageRisk > 50) return "limit_only";
-  if (values.liquidityQuality < 55 || values.scalingQuality < 55) return "small_probe";
+  if (values.liquidityQuality < 55 || values.scalingQuality < 55)
+    return "small_probe";
   if (status === "acceptable" || values.timingUrgency < 70) return "scale_in";
   return "normal";
 }
@@ -245,7 +275,10 @@ function explanationFor(
 }
 
 function weightedScore(values: Record<keyof typeof WEIGHTS, number>) {
-  return Object.entries(WEIGHTS).reduce((sum, [key, weight]) => sum + values[key as keyof typeof WEIGHTS] * weight, 0);
+  return Object.entries(WEIGHTS).reduce(
+    (sum, [key, weight]) => sum + values[key as keyof typeof WEIGHTS] * weight,
+    0,
+  );
 }
 
 function score(value: unknown, fallback: number) {

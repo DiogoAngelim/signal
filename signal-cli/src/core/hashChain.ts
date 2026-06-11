@@ -10,9 +10,13 @@
 
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
-import { join, relative, extname } from "node:path";
+import { extname, join, relative } from "node:path";
 import type { ExecutionTrace, PhaseState } from "../state/types.js";
-import { GENESIS_HASH, IGNORED_PATTERNS, IGNORED_EXTENSIONS } from "./constants.js";
+import {
+  GENESIS_HASH,
+  IGNORED_EXTENSIONS,
+  IGNORED_PATTERNS,
+} from "./constants.js";
 
 // ─── Strict JSON Serialization (v17 #1) ─────────────────────────────────────
 
@@ -23,10 +27,7 @@ import { GENESIS_HASH, IGNORED_PATTERNS, IGNORED_EXTENSIONS } from "./constants.
  * - arrays preserve order
  * - no prototype properties included
  */
-export function sortedKeysReplacer(
-  key: string,
-  value: unknown,
-): unknown {
+export function sortedKeysReplacer(key: string, value: unknown): unknown {
   if (value === undefined) {
     return undefined; // will be removed by JSON.stringify
   }
@@ -137,13 +138,14 @@ export function collectFilePaths(dir: string, baseDir: string = dir): string[] {
     }
 
     const fullPath = join(dir, entry);
-    let stat;
+    let stat: ReturnType<typeof statSync> | null = null;
     try {
       stat = statSync(fullPath);
     } catch {
       continue;
     }
 
+    if (!stat) continue;
     if (stat.isDirectory()) {
       const subPaths = collectFilePaths(fullPath, baseDir);
       results.push(...subPaths);
@@ -252,7 +254,7 @@ export function getPreviousHash(phases: readonly PhaseState[]): string {
   if (phases.length === 0) {
     return GENESIS_HASH;
   }
-  return phases[phases.length - 1]!.hash;
+  return phases[phases.length - 1]?.hash;
 }
 
 /**

@@ -130,19 +130,28 @@ const PROFILE_OVERRIDES: Record<
   },
 };
 
-export function backtestProfileForMarket(marketInput: string): MarketBacktestProfile {
-  const market = String(marketInput || "ADX").trim().toUpperCase();
+export function backtestProfileForMarket(
+  marketInput: string,
+): MarketBacktestProfile {
+  const market = String(marketInput || "ADX")
+    .trim()
+    .toUpperCase();
 
   if (/BINANCE|CRYPTO/.test(market)) return "CRYPTO_LIQUID";
   if (/B3|BMFBOVESPA|BRASIL|BRAZIL/.test(market)) return "BRAZIL_B3";
   if (/ADX|DFM|DUBAI|ABU DHABI|UAE|AE\b/.test(market)) return "GULF_LARGE_CAP";
-  if (/NASDAQ|NYSE|AMEX|ARCA|BATS|IEX|US\b|USA/.test(market)) return "US_LARGE_CAP";
+  if (/NASDAQ|NYSE|AMEX|ARCA|BATS|IEX|US\b|USA/.test(market))
+    return "US_LARGE_CAP";
 
   return "GLOBAL_LIQUID";
 }
 
-export function backtestConfigForMarket(marketInput: string): MarketBacktestConfig {
-  const market = String(marketInput || "ADX").trim().toUpperCase();
+export function backtestConfigForMarket(
+  marketInput: string,
+): MarketBacktestConfig {
+  const market = String(marketInput || "ADX")
+    .trim()
+    .toUpperCase();
   const profile = backtestProfileForMarket(market);
   const resolved = { ...BASE_PROFILE, ...(PROFILE_OVERRIDES[profile] ?? {}) };
 

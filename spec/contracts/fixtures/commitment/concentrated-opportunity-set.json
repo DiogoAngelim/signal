@@ -9,9 +9,27 @@
     "policy": "balanced",
     "resource": { "available": 1000 },
     "decisions": [
-      { "id": "leader", "confidence": 0.92, "trust": 0.9, "risk": 0.25, "outcomeSeries": [0.03, 0.028, 0.031, 0.027, 0.032, 0.029] },
-      { "id": "support-1", "confidence": 0.7, "trust": 0.72, "risk": 0.35, "outcomeSeries": [0.008, 0.006, 0.009, 0.007, 0.008, 0.006] },
-      { "id": "support-2", "confidence": 0.68, "trust": 0.7, "risk": 0.4, "outcomeSeries": [0.007, 0.005, 0.006, 0.007, 0.005, 0.006] }
+      {
+        "id": "leader",
+        "confidence": 0.92,
+        "trust": 0.9,
+        "risk": 0.25,
+        "outcomeSeries": [0.03, 0.028, 0.031, 0.027, 0.032, 0.029]
+      },
+      {
+        "id": "support-1",
+        "confidence": 0.7,
+        "trust": 0.72,
+        "risk": 0.35,
+        "outcomeSeries": [0.008, 0.006, 0.009, 0.007, 0.008, 0.006]
+      },
+      {
+        "id": "support-2",
+        "confidence": 0.68,
+        "trust": 0.7,
+        "risk": 0.4,
+        "outcomeSeries": [0.007, 0.005, 0.006, 0.007, 0.005, 0.006]
+      }
     ],
     "seed": "concentrated",
     "now": "2026-06-01T00:00:00Z"
@@ -24,9 +42,27 @@
     "limitedBy": [],
     "cappedBy": [],
     "recommendations": [
-      { "targetId": "leader", "amount": 444.1764, "normalizedCommitment": 0.444176, "weight": 1, "mode": "normal" },
-      { "targetId": "support-1", "amount": 0, "normalizedCommitment": 0, "weight": 0, "mode": "none" },
-      { "targetId": "support-2", "amount": 0, "normalizedCommitment": 0, "weight": 0, "mode": "none" }
+      {
+        "targetId": "leader",
+        "amount": 444.1764,
+        "normalizedCommitment": 0.444176,
+        "weight": 1,
+        "mode": "normal"
+      },
+      {
+        "targetId": "support-1",
+        "amount": 0,
+        "normalizedCommitment": 0,
+        "weight": 0,
+        "mode": "none"
+      },
+      {
+        "targetId": "support-2",
+        "amount": 0,
+        "normalizedCommitment": 0,
+        "weight": 0,
+        "mode": "none"
+      }
     ]
   }
 }

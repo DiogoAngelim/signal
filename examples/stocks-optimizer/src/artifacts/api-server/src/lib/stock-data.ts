@@ -1,23 +1,27 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import Papa from "papaparse";
+import { logger } from "./logger";
 import {
+  type SignalLifecycleDecision,
+  applyLifecycleToSignal,
+  governSignalDecision,
+} from "./signal-lifecycle-governance";
+import {
+  type SignalTrainingState,
   calibrateSignalDecision,
   getAdaptiveThresholds,
   getSignalTrainingState,
   recordSignalSnapshot,
-  type SignalTrainingState,
 } from "./signal-training";
-import {
-  applyLifecycleToSignal,
-  governSignalDecision,
-  type SignalLifecycleDecision,
-} from "./signal-lifecycle-governance";
-import { logger } from "./logger";
 
 function shouldUseBinanceFallbackProvider(market: unknown, symbol: unknown) {
-  const marketValue = String(market ?? "").trim().toUpperCase();
-  const symbolValue = String(symbol ?? "").trim().toUpperCase();
+  const marketValue = String(market ?? "")
+    .trim()
+    .toUpperCase();
+  const symbolValue = String(symbol ?? "")
+    .trim()
+    .toUpperCase();
 
   if (process.env.ENABLE_BINANCE_FALLBACK !== "true") {
     return false;
@@ -30,11 +34,13 @@ function shouldUseBinanceFallbackProvider(market: unknown, symbol: unknown) {
   );
 }
 
-
-
 function isBinanceMarketContext(market: unknown, symbol: unknown) {
-  const marketValue = String(market ?? "").trim().toUpperCase();
-  const symbolValue = String(symbol ?? "").trim().toUpperCase();
+  const marketValue = String(market ?? "")
+    .trim()
+    .toUpperCase();
+  const symbolValue = String(symbol ?? "")
+    .trim()
+    .toUpperCase();
 
   return (
     marketValue.includes("BINANCE") ||
@@ -42,12 +48,14 @@ function isBinanceMarketContext(market: unknown, symbol: unknown) {
     symbolValue.startsWith("BINANCE:")
   );
 }
-
-
 
 function shouldUseBinanceProvider(market: unknown, symbol: unknown) {
-  const marketValue = String(market ?? "").trim().toUpperCase();
-  const symbolValue = String(symbol ?? "").trim().toUpperCase();
+  const marketValue = String(market ?? "")
+    .trim()
+    .toUpperCase();
+  const symbolValue = String(symbol ?? "")
+    .trim()
+    .toUpperCase();
 
   return (
     marketValue.includes("BINANCE") ||
@@ -55,8 +63,6 @@ function shouldUseBinanceProvider(market: unknown, symbol: unknown) {
     symbolValue.startsWith("BINANCE:")
   );
 }
-
-
 
 function normalizeBinanceSnapshotSymbol(symbol: string) {
   const raw = String(symbol ?? "")
@@ -68,17 +74,19 @@ function normalizeBinanceSnapshotSymbol(symbol: string) {
 
   if (!raw) return raw;
 
-  
-  if (raw.endsWith("USDT") || raw.endsWith("USDC") || raw.endsWith("BUSD") || raw.endsWith("FDUSD")) {
+  if (
+    raw.endsWith("USDT") ||
+    raw.endsWith("USDC") ||
+    raw.endsWith("BUSD") ||
+    raw.endsWith("FDUSD")
+  ) {
     return raw;
   }
 
-  
   if (raw.endsWith("USD")) {
     return `${raw.slice(0, -3)}USDT`;
   }
 
-  
   if (!/(USDT|USDC|BUSD|FDUSD|BTC|ETH)$/.test(raw)) {
     return `${raw}USDT`;
   }
@@ -86,13 +94,16 @@ function normalizeBinanceSnapshotSymbol(symbol: string) {
   return raw;
 }
 
-
-
-const PROVIDER_SYMBOL_RESOLUTION_CACHE = new Map<string, { symbol: string | null; expiresAt: number }>();
+const PROVIDER_SYMBOL_RESOLUTION_CACHE = new Map<
+  string,
+  { symbol: string | null; expiresAt: number }
+>();
 const PROVIDER_SYMBOL_RESOLUTION_TTL_MS = 6 * 60 * 60 * 1000;
 
 function providerResolutionKey(symbol: string) {
-  return String(symbol ?? "").trim().toUpperCase();
+  return String(symbol ?? "")
+    .trim()
+    .toUpperCase();
 }
 
 function getCachedProviderSymbol(symbol: string) {
@@ -119,7 +130,7 @@ function setCachedProviderSymbol(symbol: string, resolved: string | null) {
 function candidateProviderSymbols(rawSymbol: string) {
   const raw = String(rawSymbol ?? "").trim();
   const prefix = raw.includes(":") ? raw.split(":")[0] : "";
-  const base = raw.includes(":") ? raw.split(":").at(-1) ?? raw : raw;
+  const base = raw.includes(":") ? (raw.split(":").at(-1) ?? raw) : raw;
 
   const stripped = base
     .replace(/\.OL$/i, "")
@@ -150,7 +161,10 @@ function candidateProviderSymbols(rawSymbol: string) {
   } else if (/DFM|DUBAI/i.test(prefix) || /\.AE$/i.test(base)) {
     candidates.add(`${stripped}.AE`);
     candidates.add(`DFM:${stripped}`);
-  } else if (/B3|BMFBOVESPA|SAO PAULO|SÃO PAULO/i.test(prefix) || /\.SA$/i.test(base)) {
+  } else if (
+    /B3|BMFBOVESPA|SAO PAULO|SÃO PAULO/i.test(prefix) ||
+    /\.SA$/i.test(base)
+  ) {
     candidates.add(`${stripped}.SA`);
     candidates.add(`BMFBOVESPA:${stripped}`);
   } else if (/BRUSSELS/i.test(prefix) || /\.BR$/i.test(base)) {
@@ -178,10 +192,15 @@ function candidateProviderSymbols(rawSymbol: string) {
   return Array.from(candidates).filter(Boolean);
 }
 
-async function yahooChartRowsForProviderSymbol(symbol: string, options: TradingViewRowsOptions): Promise<TradingViewRow[]> {
+async function yahooChartRowsForProviderSymbol(
+  symbol: string,
+  options: TradingViewRowsOptions,
+): Promise<TradingViewRow[]> {
   if (!hasTimeRemaining(options, 3_500)) return [];
 
-  const encoded = encodeURIComponent(symbol.includes(":") ? symbol.split(":").at(-1) ?? symbol : symbol);
+  const encoded = encodeURIComponent(
+    symbol.includes(":") ? (symbol.split(":").at(-1) ?? symbol) : symbol,
+  );
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encoded}?range=6mo&interval=1d&includePrePost=false&events=div%2Csplits`;
 
   const controller = new AbortController();
@@ -217,7 +236,9 @@ async function yahooChartRowsForProviderSymbol(symbol: string, options: TradingV
       const adjClose = Number(adjusted?.[index]);
 
       rows.push({
-        date: new Date(Number(timestamps[index]) * 1000).toISOString().slice(0, 10),
+        date: new Date(Number(timestamps[index]) * 1000)
+          .toISOString()
+          .slice(0, 10),
         price: close,
         open: Number.isFinite(open) ? open : close,
         high: Number.isFinite(high) ? high : close,
@@ -236,7 +257,10 @@ async function yahooChartRowsForProviderSymbol(symbol: string, options: TradingV
   }
 }
 
-async function resolveProviderRows(rawSymbol: string, options: TradingViewRowsOptions) {
+async function resolveProviderRows(
+  rawSymbol: string,
+  options: TradingViewRowsOptions,
+) {
   const cached = getCachedProviderSymbol(rawSymbol);
 
   if (cached === null) return { symbol: null, rows: [] };
@@ -259,41 +283,39 @@ async function resolveProviderRows(rawSymbol: string, options: TradingViewRowsOp
   return { symbol: null, rows: [] };
 }
 
-
-
 function normalizeYahooCsvSymbol(symbol: string) {
   const raw = String(symbol ?? "").trim();
   const upper = raw.toUpperCase();
 
-  const withoutPrefix = raw.includes(":") ? raw.split(":").at(-1) ?? raw : raw;
+  const withoutPrefix = raw.includes(":")
+    ? (raw.split(":").at(-1) ?? raw)
+    : raw;
 
   if (/^EURONEXT BRUSSELS:/i.test(raw)) {
-    return withoutPrefix.replace(/\.BR$/i, "") + ".BR";
+    return `${withoutPrefix.replace(/\.BR$/i, "")}.BR`;
   }
 
   if (/^EURONEXT AMSTERDAM:/i.test(raw)) {
-    return withoutPrefix.replace(/\.AS$/i, "") + ".AS";
+    return `${withoutPrefix.replace(/\.AS$/i, "")}.AS`;
   }
 
   if (/^EURONEXT PARIS:/i.test(raw)) {
-    return withoutPrefix.replace(/\.PA$/i, "") + ".PA";
+    return `${withoutPrefix.replace(/\.PA$/i, "")}.PA`;
   }
 
   if (/^EURONEXT LISBON:/i.test(raw)) {
-    return withoutPrefix.replace(/\.LS$/i, "") + ".LS";
+    return `${withoutPrefix.replace(/\.LS$/i, "")}.LS`;
   }
 
   if (/^EURONEXT DUBLIN:/i.test(raw)) {
-    return withoutPrefix.replace(/\.IR$/i, "") + ".IR";
+    return `${withoutPrefix.replace(/\.IR$/i, "")}.IR`;
   }
 
   if (/^EURONEXT OSLO:/i.test(raw)) {
-    return withoutPrefix.replace(/\.OL$/i, "") + ".OL";
+    return `${withoutPrefix.replace(/\.OL$/i, "")}.OL`;
   }
 
   if (/^EURONEXT:/i.test(raw)) {
-    
-    
     return withoutPrefix;
   }
 
@@ -303,8 +325,6 @@ function normalizeYahooCsvSymbol(symbol: string) {
 
   return withoutPrefix;
 }
-
-
 
 function parseTradingViewCsvBarQuote(symbol: string, text: string) {
   const lines = String(text ?? "")
@@ -328,7 +348,8 @@ function parseTradingViewCsvBarQuote(symbol: string, text: string) {
   if (dateIndex < 0 || closeIndex < 0) return null;
 
   function n(value: string | undefined) {
-    if (value == null || value === "" || value.toLowerCase() === "null") return null;
+    if (value == null || value === "" || value.toLowerCase() === "null")
+      return null;
     const parsed = Number(value.replace(/,/g, ""));
     return Number.isFinite(parsed) ? parsed : null;
   }
@@ -379,8 +400,6 @@ function parseTradingViewCsvBarQuote(symbol: string, text: string) {
   };
 }
 
-
-
 type ParsedTradingViewBar = {
   date: string;
   open: number;
@@ -413,7 +432,8 @@ function parseTradingViewCsvBars(text: string): ParsedTradingViewBar[] {
   if (dateIndex < 0 || closeIndex < 0) return [];
 
   const parseNumber = (value: string | undefined) => {
-    if (value == null || value === "" || value.toLowerCase() === "null") return null;
+    if (value == null || value === "" || value.toLowerCase() === "null")
+      return null;
     const parsed = Number(String(value).replace(/,/g, ""));
     return Number.isFinite(parsed) ? parsed : null;
   };
@@ -429,7 +449,8 @@ function parseTradingViewCsvBars(text: string): ParsedTradingViewBar[] {
     const open = parseNumber(cols[openIndex]) ?? close;
     const high = parseNumber(cols[highIndex]) ?? close;
     const low = parseNumber(cols[lowIndex]) ?? close;
-    const adjustedClose = adjCloseIndex >= 0 ? parseNumber(cols[adjCloseIndex]) : null;
+    const adjustedClose =
+      adjCloseIndex >= 0 ? parseNumber(cols[adjCloseIndex]) : null;
     const volume = volumeIndex >= 0 ? parseNumber(cols[volumeIndex]) : null;
 
     bars.push({
@@ -476,13 +497,14 @@ function latestTradingViewBarAsQuote(symbol: string, text: string) {
   };
 }
 
-
-
 function normalizeTradingViewSymbol(symbol: string) {
   const value = String(symbol ?? "").trim();
 
   return value
-    .replace(/^EURONEXT\s+(BRUSSELS|AMSTERDAM|PARIS|LISBON|DUBLIN|OSLO):/i, "EURONEXT:")
+    .replace(
+      /^EURONEXT\s+(BRUSSELS|AMSTERDAM|PARIS|LISBON|DUBLIN|OSLO):/i,
+      "EURONEXT:",
+    )
     .replace(/\.BR$/i, "")
     .replace(/\.AS$/i, "")
     .replace(/\.PA$/i, "")
@@ -491,10 +513,10 @@ function normalizeTradingViewSymbol(symbol: string) {
     .replace(/\.OL$/i, "");
 }
 
-
-
 function shouldSkipLocalQuoteSymbol(symbol: string) {
-  const value = String(symbol ?? "").trim().toUpperCase();
+  const value = String(symbol ?? "")
+    .trim()
+    .toUpperCase();
 
   return (
     !value ||
@@ -504,8 +526,6 @@ function shouldSkipLocalQuoteSymbol(symbol: string) {
     value.includes("DUMMY")
   );
 }
-
-
 
 const UNAVAILABLE_QUOTE_SYMBOLS = new Map<string, number>();
 const UNAVAILABLE_QUOTE_TTL_MS = 30 * 60 * 1000;
@@ -525,8 +545,6 @@ function isUnavailableQuoteSymbol(key: string) {
 function markUnavailableQuoteSymbol(key: string) {
   UNAVAILABLE_QUOTE_SYMBOLS.set(key, Date.now() + UNAVAILABLE_QUOTE_TTL_MS);
 }
-
-
 
 export interface StockListItem {
   symbol: string;
@@ -630,7 +648,14 @@ const currentDirname = process.cwd();
 
 const PUBLIC_DIR_CANDIDATES = [
   path.resolve(process.cwd(), "src", "artifacts", "signal-markets", "public"),
-  path.resolve(process.cwd(), "src", "artifacts", "signal-markets", "dist", "public"),
+  path.resolve(
+    process.cwd(),
+    "src",
+    "artifacts",
+    "signal-markets",
+    "dist",
+    "public",
+  ),
   path.resolve(process.cwd(), "..", "signal-markets", "public"),
   path.resolve(process.cwd(), "..", "signal-markets", "dist", "public"),
   path.resolve(process.cwd(), "stocks-public"),
@@ -691,7 +716,13 @@ const PUBLIC_DIR_CANDIDATES = [
     "stocks-optimizer",
     "public",
   ),
-  path.resolve(currentDirname, "../../../..", "lib", "stocks-optimizer", "public"),
+  path.resolve(
+    currentDirname,
+    "../../../..",
+    "lib",
+    "stocks-optimizer",
+    "public",
+  ),
 ];
 
 const DEFAULT_PUBLIC_DIR =
@@ -842,7 +873,6 @@ let tradingViewQueue: Promise<void> = Promise.resolve();
 let tradingViewBackoffUntil = 0;
 let consecutiveTradingViewFailures = 0;
 
-
 function normalizeBinanceApiSymbol(symbol: string) {
   return symbol
     .replace(/^BINANCE:/, "")
@@ -896,9 +926,15 @@ function stabilizedRatio(returns: number[], downsideOnly = false): number {
   if (returns.length < 2) return 0;
   const downside = returns.filter((value) => value < 0);
   const volatility = downsideOnly
-    ? Math.sqrt(mean((downside.length ? downside : [0]).map((value) => value ** 2)))
+    ? Math.sqrt(
+        mean((downside.length ? downside : [0]).map((value) => value ** 2)),
+      )
     : standardDeviation(returns);
-  const sampleWeight = clampMetric(returns.length / (returns.length + 20), 0, 1);
+  const sampleWeight = clampMetric(
+    returns.length / (returns.length + 20),
+    0,
+    1,
+  );
   const annualization = Math.sqrt(Math.min(Math.max(returns.length, 1), 30));
   const raw = (mean(returns) / Math.max(volatility, 0.006)) * annualization;
   return Number(Math.max(-4, Math.min(4, raw * sampleWeight)).toFixed(2));
@@ -930,11 +966,18 @@ function deriveRegime(quote: StockQuote): AdaptiveRegime {
       ? ((quote.high52 - quote.low52) / Math.max(quote.price, 0.0001)) * 100
       : 0;
 
-  if (absChange >= 8 || (quote.status === "Watch" && change < -3)) return "PANIC";
+  if (absChange >= 8 || (quote.status === "Watch" && change < -3))
+    return "PANIC";
   if (quote.status === "Watch" || volatility >= 2.5) return "HIGH_VOL";
-  if (quote.signalAction === "Buy" && quote.status === "Rising" && absChange >= 1.2) return "BREAKOUT";
+  if (
+    quote.signalAction === "Buy" &&
+    quote.status === "Rising" &&
+    absChange >= 1.2
+  )
+    return "BREAKOUT";
   if (quote.signalAction === "Buy" && change > 0) return "TRENDING";
-  if (quote.signalAction === "Sell" || quote.status === "Dip") return "MEAN_REVERTING";
+  if (quote.signalAction === "Sell" || quote.status === "Dip")
+    return "MEAN_REVERTING";
   if (volatility <= 0.35 && range <= 12) return "COMPRESSION";
   return "LOW_VOL";
 }
@@ -948,7 +991,8 @@ function deriveTrainingMarketCondition(quote: StockQuote): AdaptiveRegime {
       ? ((quote.high52 - quote.low52) / Math.max(quote.price, 0.0001)) * 100
       : 0;
 
-  if (absChange >= 8 || (quote.status === "Watch" && change < -3)) return "PANIC";
+  if (absChange >= 8 || (quote.status === "Watch" && change < -3))
+    return "PANIC";
   if (quote.status === "Watch" || volatility >= 2.5) return "HIGH_VOL";
   if (quote.status === "Rising" && change > 0) {
     return absChange >= 1.2 ? "BREAKOUT" : "TRENDING";
@@ -983,7 +1027,8 @@ function enrichAdaptiveQuote(quote: StockQuote): StockQuote {
   const absChange = Math.abs(change);
   const signalAction = quote.signalAction ?? "Hold";
   const confidence = clampMetric(
-    quote.signalConfidence ?? (signalAction === "Hold" ? 46 : 58 + absChange * 8),
+    quote.signalConfidence ??
+      (signalAction === "Hold" ? 46 : 58 + absChange * 8),
   );
   const volatilityPct = volatility * 100;
   const volatilityShift = clampMetric(volatilityPct * 10 + absChange * 3);
@@ -994,29 +1039,44 @@ function enrichAdaptiveQuote(quote: StockQuote): StockQuote {
     100 - driftScore * 0.72 - (signalAction === "Hold" ? 8 : 0),
   );
   const uncertainty = clampMetric(100 - confidence * 0.68 + driftScore * 0.38);
-  const agreement = clampMetric(confidence * 0.62 + stabilityScore * 0.32 - uncertainty * 0.12);
+  const agreement = clampMetric(
+    confidence * 0.62 + stabilityScore * 0.32 - uncertainty * 0.12,
+  );
   const consensus = clampMetric(agreement * 0.72 + stabilityScore * 0.2);
-  const direction = signalAction === "Sell" ? -1 : signalAction === "Buy" ? 1 : change >= 0 ? 1 : -1;
+  const direction =
+    signalAction === "Sell"
+      ? -1
+      : signalAction === "Buy"
+        ? 1
+        : change >= 0
+          ? 1
+          : -1;
   const trendComponentPct =
-    Math.abs(averageReturn) * 100 * Math.sqrt(Math.min(Math.max(returns.length, 1), 10));
+    Math.abs(averageReturn) *
+    100 *
+    Math.sqrt(Math.min(Math.max(returns.length, 1), 10));
   const volatilityForecastPct =
     volatilityPct * Math.sqrt(Math.min(Math.max(returns.length, 1), 5));
   const moveMagnitudePct = clampNumber(
-    (Math.max(absChange * 0.45, trendComponentPct) + volatilityForecastPct * 0.6) *
+    (Math.max(absChange * 0.45, trendComponentPct) +
+      volatilityForecastPct * 0.6) *
       (0.55 + confidence / 160),
     0.05,
     18,
   );
-  const expectedMovePct = Number(
-    (direction * moveMagnitudePct).toFixed(2),
-  );
+  const expectedMovePct = Number((direction * moveMagnitudePct).toFixed(2));
   const winReturns = returns.filter((value) => value > 0);
   const lossReturns = returns.filter((value) => value < 0);
   const grossWins = winReturns.reduce((sum, value) => sum + value, 0);
-  const grossLosses = Math.abs(lossReturns.reduce((sum, value) => sum + value, 0));
-  const profitFactor = grossLosses > 0 ? grossWins / grossLosses : winReturns.length ? 4 : 1;
+  const grossLosses = Math.abs(
+    lossReturns.reduce((sum, value) => sum + value, 0),
+  );
+  const profitFactor =
+    grossLosses > 0 ? grossWins / grossLosses : winReturns.length ? 4 : 1;
   const maxDrawdown = maxDrawdownFromReturns(returns) * 100;
-  const entropy = clampMetric(signalAction === "Hold" ? 62 - confidence * 0.2 : 44 + uncertainty * 0.38);
+  const entropy = clampMetric(
+    signalAction === "Hold" ? 62 - confidence * 0.2 : 44 + uncertainty * 0.38,
+  );
   const predictionResidual = clampMetric(
     Math.abs((quote.signalReturnPercent ?? change) - expectedMovePct) * 5 +
       Math.max(0, volatilityShift - 60) * 0.15,
@@ -1036,7 +1096,12 @@ function enrichAdaptiveQuote(quote: StockQuote): StockQuote {
     liveMetrics: {
       rollingSharpe: stabilizedRatio(returns),
       rollingSortino: stabilizedRatio(returns, true),
-      hitRate: Number((returns.length ? (winReturns.length / returns.length) * 100 : confidence * 0.55).toFixed(1)),
+      hitRate: Number(
+        (returns.length
+          ? (winReturns.length / returns.length) * 100
+          : confidence * 0.55
+        ).toFixed(1),
+      ),
       expectancy: Number((averageReturn * 100).toFixed(2)),
       profitFactor: Number(Math.min(9.99, profitFactor).toFixed(2)),
       maxDrawdown: Number(maxDrawdown.toFixed(2)),
@@ -1233,7 +1298,10 @@ export async function fetchQuotes(
       } else if (lastError) {
         logger.debug({ symbol, err: lastError }, "Failed to fetch quote");
       } else {
-        logger.debug({ exchange: normalized, symbol }, "No live quote rows returned");
+        logger.debug(
+          { exchange: normalized, symbol },
+          "No live quote rows returned",
+        );
       }
     },
     { shouldContinue: () => hasTimeRemaining(options, 4_000) },
@@ -1279,7 +1347,10 @@ export async function fetchMarketQuotes(
       } else if (lastError) {
         logger.debug({ symbol, err: lastError }, "Failed to fetch quote");
       } else {
-        logger.debug({ market: normalized, symbol }, "No live quote rows returned");
+        logger.debug(
+          { market: normalized, symbol },
+          "No live quote rows returned",
+        );
       }
     },
     { shouldContinue: () => hasTimeRemaining(options, 4_000) },
@@ -1404,7 +1475,10 @@ async function fetchQuote(
   }
 
   if (isBinanceScope(exchange, market) && !process.env.VERCEL) {
-    const binanceQuote = shouldUseBinanceFallbackProvider(typeof market !== "undefined" ? market : undefined, typeof symbol !== "undefined" ? symbol : undefined)
+    const binanceQuote = shouldUseBinanceFallbackProvider(
+      typeof market !== "undefined" ? market : undefined,
+      typeof symbol !== "undefined" ? symbol : undefined,
+    )
       ? await fetchBinanceQuote(symbol)
       : null;
     if (binanceQuote) {
@@ -1423,7 +1497,11 @@ async function fetchQuote(
   });
   if (!rows.length) {
     logger.debug(
-      { market, symbol, candidates: buildTradingViewCandidates(symbol, market) },
+      {
+        market,
+        symbol,
+        candidates: buildTradingViewCandidates(symbol, market),
+      },
       "TradingView returned no rows for quote",
     );
     return cached?.quote ?? null;
@@ -1483,7 +1561,8 @@ async function getSignalForQuote(
   const scopedMarket = trainingMarketScope(market, quote);
   const cacheKey = `${scopedMarket}:${quote.symbol}`;
   const cached = signalCache.get(cacheKey);
-  const useCache = !options?.bypassSignalCache && cached && cached.expiresAt > Date.now();
+  const useCache =
+    !options?.bypassSignalCache && cached && cached.expiresAt > Date.now();
 
   // Full cache hit: return snapshot directly, skipping all DB I/O
   if (useCache && cached.snapshot) {
@@ -1508,24 +1587,26 @@ async function getSignalForQuote(
 
   const currentPrice =
     Number.isFinite(quote.price) && quote.price > 0 ? quote.price : 0;
-  const governed = options?.recordSignalSnapshots === false
-    ? { signal, lifecycle: null }
-    : await governSignalForQuote({
-      market: scopedMarket,
-      symbol: quote.symbol,
-      currentPrice,
-      signal,
-      previousState: trainingState,
-    });
-  const snapshot = options?.recordSignalSnapshots === false
-    ? buildSignalSnapshot(quote, signal)
-    : await recordSignalSnapshot({
-      market: scopedMarket,
-      symbol: quote.symbol,
-      currentPrice,
-      signal: governed.signal,
-      previousState: trainingState,
-    });
+  const governed =
+    options?.recordSignalSnapshots === false
+      ? { signal, lifecycle: null }
+      : await governSignalForQuote({
+          market: scopedMarket,
+          symbol: quote.symbol,
+          currentPrice,
+          signal,
+          previousState: trainingState,
+        });
+  const snapshot =
+    options?.recordSignalSnapshots === false
+      ? buildSignalSnapshot(quote, signal)
+      : await recordSignalSnapshot({
+          market: scopedMarket,
+          symbol: quote.symbol,
+          currentPrice,
+          signal: governed.signal,
+          previousState: trainingState,
+        });
   const governedSnapshot = governed.lifecycle
     ? attachLifecycleToSnapshot(snapshot, governed.lifecycle)
     : snapshot;
@@ -1551,7 +1632,10 @@ async function governSignalForQuote(input: {
   currentPrice: number;
   signal: SignalDecision;
   previousState: SignalTrainingState;
-}): Promise<{ signal: SignalDecision; lifecycle: SignalLifecycleDecision | null }> {
+}): Promise<{
+  signal: SignalDecision;
+  lifecycle: SignalLifecycleDecision | null;
+}> {
   const lifecycle = await governSignalDecision(input);
   return {
     signal: applyLifecycleToSignal(input.signal, lifecycle),
@@ -1598,7 +1682,10 @@ function buildSignalSnapshot(
 }
 
 function buildEphemeralSignalSnapshot(quote: StockQuote): SignalSnapshot {
-  const signal = deriveHeuristicSignal(quote, defaultSignalTrainingState(quote.symbol));
+  const signal = deriveHeuristicSignal(
+    quote,
+    defaultSignalTrainingState(quote.symbol),
+  );
   return buildSignalSnapshot(quote, signal);
 }
 
@@ -1663,17 +1750,20 @@ function deriveHeuristicSignal(
     signalAction === "Hold"
       ? clampNumber(1 - absChange / neutralBand, 0, 1)
       : clampNumber(
-        absChange /
-          Math.max(
-            0.2,
-            signalAction === "Buy" ? Math.abs(buyThreshold) : Math.abs(sellThreshold),
-          ),
-        0,
-        3,
-      );
-  const signalConfidence = signalAction === "Hold"
-    ? clampNumber(44 + signalStrength * 22, 20, 86)
-    : clampNumber(48 + signalStrength * 18, 25, 95);
+          absChange /
+            Math.max(
+              0.2,
+              signalAction === "Buy"
+                ? Math.abs(buyThreshold)
+                : Math.abs(sellThreshold),
+            ),
+          0,
+          3,
+        );
+  const signalConfidence =
+    signalAction === "Hold"
+      ? clampNumber(44 + signalStrength * 22, 20, 86)
+      : clampNumber(48 + signalStrength * 18, 25, 95);
 
   return {
     signalAction,
@@ -1769,10 +1859,12 @@ function normalizeBinanceSymbol(
   const rawSymbol = symbol.trim().toUpperCase();
   if (!rawSymbol) return null;
   const withoutExchange = rawSymbol.includes(":")
-    ? rawSymbol.split(":").pop() ?? rawSymbol
+    ? (rawSymbol.split(":").pop() ?? rawSymbol)
     : rawSymbol;
   const kind = withoutExchange.endsWith(".P") ? "futures" : "spot";
-  const apiSymbol = withoutExchange.replace(/\.P$/, "").replace(/[^A-Z0-9]/g, "");
+  const apiSymbol = withoutExchange
+    .replace(/\.P$/, "")
+    .replace(/[^A-Z0-9]/g, "");
   return apiSymbol ? { apiSymbol, kind } : null;
 }
 
@@ -1798,7 +1890,10 @@ async function getBinanceTickerCache(): Promise<BinanceTickerCache> {
   }
 
   binanceTickerCachePromise = Promise.all([
-    fetchBinanceTickerRows(`${BINANCE_SPOT_BASE_URL}/api/v3/ticker/24hr`, "spot"),
+    fetchBinanceTickerRows(
+      `${BINANCE_SPOT_BASE_URL}/api/v3/ticker/24hr`,
+      "spot",
+    ),
     fetchBinanceTickerRows(
       `${BINANCE_FUTURES_BASE_URL}/fapi/v1/ticker/24hr`,
       "futures",
@@ -1862,7 +1957,10 @@ async function fetchBinanceTickerRows(
         symbol: item.symbol.toUpperCase(),
       }));
   } catch (error) {
-    logger.warn({ marketType, err: error }, "Binance ticker snapshot request errored");
+    logger.warn(
+      { marketType, err: error },
+      "Binance ticker snapshot request errored",
+    );
     return [];
   } finally {
     clearTimeout(timeout);
@@ -2093,30 +2191,32 @@ async function fetchTradingViewRowsForSymbol(
   const pending = tradingViewRowsInFlight.get(cacheKey);
   if (pending) return pending;
 
-  const request = fetchTradingViewRowsForSymbolUncached(tvSymbol, options, cacheKey)
-    .finally(() => {
-      tradingViewRowsInFlight.delete(cacheKey);
-    });
+  const request = fetchTradingViewRowsForSymbolUncached(
+    tvSymbol,
+    options,
+    cacheKey,
+  ).finally(() => {
+    tradingViewRowsInFlight.delete(cacheKey);
+  });
   tradingViewRowsInFlight.set(cacheKey, request);
   return request;
 }
-
 
 function scannerBaseTickerResolved(symbol: string) {
   return String(symbol ?? "")
     .trim()
     .split(":")
-    .at(-1)!
-    .replace(/\.(BR|AS|PA|LS|IR|OL|L|MI|DE|F|SW|MC|SA|AD|AE)$/i, "");
+    .at(-1)
+    ?.replace(/\.(BR|AS|PA|LS|IR|OL|L|MI|DE|F|SW|MC|SA|AD|AE)$/i, "");
 }
 
 function scannerMarketResolved(options: any) {
   return String(
     options?.market ??
-    options?.marketName ??
-    options?.exchange ??
-    options?.venue ??
-    "",
+      options?.marketName ??
+      options?.exchange ??
+      options?.venue ??
+      "",
   ).toUpperCase();
 }
 
@@ -2128,7 +2228,12 @@ function scannerCandidatesResolved(rawSymbol: string, options?: any) {
 
   if (raw.includes(":")) candidates.add(raw);
 
-  if (market === "ADX" || market.includes("ABU DHABI") || /^ADX:/i.test(raw) || /\.AD$/i.test(raw)) {
+  if (
+    market === "ADX" ||
+    market.includes("ABU DHABI") ||
+    /^ADX:/i.test(raw) ||
+    /\.AD$/i.test(raw)
+  ) {
     candidates.add(`ADX:${base}`);
     return Array.from(candidates);
   }
@@ -2159,7 +2264,11 @@ function scannerCandidatesResolved(rawSymbol: string, options?: any) {
     return Array.from(candidates);
   }
 
-  if (market.includes("OSLO") || /^EURONEXT OSLO:/i.test(raw) || /\.OL$/i.test(raw)) {
+  if (
+    market.includes("OSLO") ||
+    /^EURONEXT OSLO:/i.test(raw) ||
+    /\.OL$/i.test(raw)
+  ) {
     candidates.add(`OSL:${base}`);
     candidates.add(`OSE:${base}`);
     candidates.add(`EURONEXT:${base}`);
@@ -2179,7 +2288,11 @@ function scannerCandidatesResolved(rawSymbol: string, options?: any) {
     return Array.from(candidates);
   }
 
-  if (market.includes("LSE") || market.includes("LONDON") || /\.L$/i.test(raw)) {
+  if (
+    market.includes("LSE") ||
+    market.includes("LONDON") ||
+    /\.L$/i.test(raw)
+  ) {
     candidates.add(`LSE:${base}`);
     return Array.from(candidates);
   }
@@ -2207,30 +2320,33 @@ async function fetchTradingViewScannerRowsResolved(
   const timeout = setTimeout(() => controller.abort(), TRADINGVIEW_TIMEOUT_MS);
 
   try {
-    const response = await fetch("https://scanner.tradingview.com/global/scan", {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0",
-      },
-      body: JSON.stringify({
-        symbols: {
-          tickers: candidates,
-          query: { types: [] },
+    const response = await fetch(
+      "https://scanner.tradingview.com/global/scan",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+          "User-Agent": "Mozilla/5.0",
         },
-        columns: [
-          "close",
-          "open",
-          "high",
-          "low",
-          "volume",
-          "change",
-          "change_abs",
-        ],
-      }),
-      signal: controller.signal,
-    });
+        body: JSON.stringify({
+          symbols: {
+            tickers: candidates,
+            query: { types: [] },
+          },
+          columns: [
+            "close",
+            "open",
+            "high",
+            "low",
+            "volume",
+            "change",
+            "change_abs",
+          ],
+        }),
+        signal: controller.signal,
+      },
+    );
 
     if (!response.ok) return [];
 
@@ -2268,7 +2384,9 @@ async function fetchTradingViewScannerRowsResolved(
         change: Number.isFinite(changeAbs) ? changeAbs : 0,
         changePercent: Number.isFinite(changePercent) ? changePercent : 0,
         regularMarketChange: Number.isFinite(changeAbs) ? changeAbs : 0,
-        regularMarketChangePercent: Number.isFinite(changePercent) ? changePercent : 0,
+        regularMarketChangePercent: Number.isFinite(changePercent)
+          ? changePercent
+          : 0,
       } as TradingViewRow,
     ];
   } catch (error) {
@@ -2282,7 +2400,6 @@ async function fetchTradingViewScannerRowsResolved(
   }
 }
 
-
 async function fetchTradingViewRowsForSymbolUncached(
   tvSymbol: string,
   options: TradingViewRowsOptions,
@@ -2291,7 +2408,10 @@ async function fetchTradingViewRowsForSymbolUncached(
   if (!hasTimeRemaining(options, 4_000)) return [];
 
   const csvSymbol = normalizeYahooCsvSymbol(tvSymbol);
-  const scannerRows = await fetchTradingViewScannerRowsResolved(tvSymbol, options);
+  const scannerRows = await fetchTradingViewScannerRowsResolved(
+    tvSymbol,
+    options,
+  );
   if (scannerRows.length) {
     cacheTradingViewRows(cacheKey, scannerRows, QUOTE_CACHE_TTL_MS);
     return scannerRows;
@@ -2309,7 +2429,9 @@ async function fetchTradingViewRowsForSymbolUncached(
       signal: controller.signal,
     });
     if (!response.ok) {
-      const retryAfterMs = retryAfterHeaderMs(response.headers.get("retry-after"));
+      const retryAfterMs = retryAfterHeaderMs(
+        response.headers.get("retry-after"),
+      );
       registerTradingViewFailure(retryAfterMs);
       cacheTradingViewRows(
         cacheKey,
@@ -2319,7 +2441,12 @@ async function fetchTradingViewRowsForSymbolUncached(
           : Math.min(TRADINGVIEW_MISS_CACHE_TTL_MS, retryAfterMs ?? 60_000),
       );
       logger.warn(
-        { symbol: csvSymbol, originalSymbol: tvSymbol, status: response.status, statusText: response.statusText },
+        {
+          symbol: csvSymbol,
+          originalSymbol: tvSymbol,
+          status: response.status,
+          statusText: response.statusText,
+        },
         "TradingView quote request failed",
       );
       return [];
@@ -2329,7 +2456,12 @@ async function fetchTradingViewRowsForSymbolUncached(
     const rows = parseCsvRows(csv);
     if (!rows.length) {
       logger.warn(
-        { symbol: csvSymbol, originalSymbol: tvSymbol, bytes: csv.length, preview: csv.slice(0, 120) },
+        {
+          symbol: csvSymbol,
+          originalSymbol: tvSymbol,
+          bytes: csv.length,
+          preview: csv.slice(0, 120),
+        },
         "TradingView quote response contained no parseable rows",
       );
     }
@@ -2347,7 +2479,10 @@ async function fetchTradingViewRowsForSymbolUncached(
       [],
       Math.min(TRADINGVIEW_MISS_CACHE_TTL_MS, 30_000),
     );
-    logger.warn({ symbol: normalizeTradingViewSymbol(tvSymbol), err: error }, "TradingView quote request errored");
+    logger.warn(
+      { symbol: normalizeTradingViewSymbol(tvSymbol), err: error },
+      "TradingView quote request errored",
+    );
     return [];
   } finally {
     clearTimeout(timeout);
@@ -2401,16 +2536,20 @@ function prioritizeTradingViewCandidates(
   return Array.from(new Set(ordered)).slice(0, limit);
 }
 
-function cacheResolvedTradingViewSymbol(resolutionKey: string, tvSymbol: string) {
+function cacheResolvedTradingViewSymbol(
+  resolutionKey: string,
+  tvSymbol: string,
+) {
   tradingViewResolvedSymbolCache.set(resolutionKey, {
     expiresAt: Date.now() + TRADINGVIEW_RESOLVED_SYMBOL_CACHE_TTL_MS,
     tvSymbol,
   });
 }
 
-async function scheduleTradingViewRequest(
-  options?: { deadlineAt?: number; minRemainingMs?: number },
-): Promise<boolean> {
+async function scheduleTradingViewRequest(options?: {
+  deadlineAt?: number;
+  minRemainingMs?: number;
+}): Promise<boolean> {
   if (
     !Number.isFinite(TRADINGVIEW_REQUESTS_PER_MINUTE) ||
     TRADINGVIEW_REQUESTS_PER_MINUTE <= 0
@@ -2433,50 +2572,56 @@ async function scheduleTradingViewRequest(
   const minGapMs = Math.ceil(60_000 / limit);
   const windowMs = 60 * 1000;
 
-  const scheduled = tradingViewQueue.catch(() => undefined).then(async () => {
-    let now = Date.now();
-    if (tradingViewBackoffUntil > now) {
-      const waitMs = tradingViewBackoffUntil - now;
-      if (!hasTimeAfterWait(waitMs, options, 1_500)) return false;
-      await sleep(waitMs);
-      now = Date.now();
-    }
+  const scheduled = tradingViewQueue
+    .catch(() => undefined)
+    .then(async () => {
+      let now = Date.now();
+      if (tradingViewBackoffUntil > now) {
+        const waitMs = tradingViewBackoffUntil - now;
+        if (!hasTimeAfterWait(waitMs, options, 1_500)) return false;
+        await sleep(waitMs);
+        now = Date.now();
+      }
 
-    while (
-      tradingViewRequestTimestamps.length &&
-      now - tradingViewRequestTimestamps[0] >= windowMs
-    ) {
-      tradingViewRequestTimestamps.shift();
-    }
-
-    if (tradingViewRequestTimestamps.length >= limit) {
-      const waitMs = windowMs - (now - tradingViewRequestTimestamps[0]) + 10;
-      if (!hasTimeAfterWait(waitMs, options, 1_500)) return false;
-      await sleep(Math.max(0, waitMs));
-      now = Date.now();
       while (
         tradingViewRequestTimestamps.length &&
         now - tradingViewRequestTimestamps[0] >= windowMs
       ) {
         tradingViewRequestTimestamps.shift();
       }
-    }
 
-    const lastRequestAt =
-      tradingViewRequestTimestamps[tradingViewRequestTimestamps.length - 1] ?? 0;
-    if (
-      tradingViewRequestTimestamps.length >= burstSize &&
-      now - lastRequestAt < minGapMs
-    ) {
-      const waitMs = minGapMs - (now - lastRequestAt);
-      if (!hasTimeAfterWait(waitMs, options, 1_500)) return false;
-      await sleep(waitMs);
-    }
+      if (tradingViewRequestTimestamps.length >= limit) {
+        const waitMs = windowMs - (now - tradingViewRequestTimestamps[0]) + 10;
+        if (!hasTimeAfterWait(waitMs, options, 1_500)) return false;
+        await sleep(Math.max(0, waitMs));
+        now = Date.now();
+        while (
+          tradingViewRequestTimestamps.length &&
+          now - tradingViewRequestTimestamps[0] >= windowMs
+        ) {
+          tradingViewRequestTimestamps.shift();
+        }
+      }
 
-    tradingViewRequestTimestamps.push(Date.now());
-    return true;
-  });
-  tradingViewQueue = scheduled.then(() => undefined, () => undefined);
+      const lastRequestAt =
+        tradingViewRequestTimestamps[tradingViewRequestTimestamps.length - 1] ??
+        0;
+      if (
+        tradingViewRequestTimestamps.length >= burstSize &&
+        now - lastRequestAt < minGapMs
+      ) {
+        const waitMs = minGapMs - (now - lastRequestAt);
+        if (!hasTimeAfterWait(waitMs, options, 1_500)) return false;
+        await sleep(waitMs);
+      }
+
+      tradingViewRequestTimestamps.push(Date.now());
+      return true;
+    });
+  tradingViewQueue = scheduled.then(
+    () => undefined,
+    () => undefined,
+  );
 
   return scheduled;
 }
@@ -2500,10 +2645,14 @@ function registerTradingViewFailure(retryAfterMs?: number | null) {
   consecutiveTradingViewFailures += 1;
   const exponentialBackoffMs = Math.min(
     TRADINGVIEW_BACKOFF_MAX_MS,
-    TRADINGVIEW_BACKOFF_BASE_MS * 2 ** Math.min(consecutiveTradingViewFailures - 1, 5),
+    TRADINGVIEW_BACKOFF_BASE_MS *
+      2 ** Math.min(consecutiveTradingViewFailures - 1, 5),
   );
   const backoffMs = Math.max(retryAfterMs ?? 0, exponentialBackoffMs);
-  tradingViewBackoffUntil = Math.max(tradingViewBackoffUntil, Date.now() + backoffMs);
+  tradingViewBackoffUntil = Math.max(
+    tradingViewBackoffUntil,
+    Date.now() + backoffMs,
+  );
 }
 
 function retryAfterHeaderMs(value: string | null): number | null {
@@ -2513,7 +2662,9 @@ function retryAfterHeaderMs(value: string | null): number | null {
     return seconds * 1000;
   }
   const timestamp = Date.parse(value);
-  return Number.isFinite(timestamp) ? Math.max(0, timestamp - Date.now()) : null;
+  return Number.isFinite(timestamp)
+    ? Math.max(0, timestamp - Date.now())
+    : null;
 }
 
 function sleep(ms: number) {
@@ -2547,7 +2698,10 @@ function buildTradingViewUrl(
     Number.isFinite(options.lookbackYears) &&
     Number(options.lookbackYears) > 0
   ) {
-    params.set("lookbackYears", String(Math.floor(Number(options.lookbackYears))));
+    params.set(
+      "lookbackYears",
+      String(Math.floor(Number(options.lookbackYears))),
+    );
   }
 
   const query = params.toString();
@@ -2652,8 +2806,7 @@ function estimateSpread(
     if (returns.length >= 2) {
       const mean = returns.reduce((s, v) => s + v, 0) / returns.length;
       const variance =
-        returns.reduce((s, v) => s + (v - mean) ** 2, 0) /
-        (returns.length - 1);
+        returns.reduce((s, v) => s + (v - mean) ** 2, 0) / (returns.length - 1);
       volatility = Math.sqrt(variance); // daily std dev (log returns)
     }
   }

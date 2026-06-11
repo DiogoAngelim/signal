@@ -18,7 +18,9 @@ export type SignalEnvironmentReport = {
 export function validateSignalEnvironment(): SignalEnvironmentReport {
   const environment = process.env.NODE_ENV ?? "development";
   const production = environment === "production";
-  const storageDriver = process.env.SIGNAL_STORAGE_DRIVER ?? (process.env.DATABASE_URL ? "postgres" : "memory");
+  const storageDriver =
+    process.env.SIGNAL_STORAGE_DRIVER ??
+    (process.env.DATABASE_URL ? "postgres" : "memory");
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -31,31 +33,47 @@ export function validateSignalEnvironment(): SignalEnvironmentReport {
   }
 
   if (production && !process.env.SIGNAL_SECRET_ENCRYPTION_KEY) {
-    errors.push("Production requires SIGNAL_SECRET_ENCRYPTION_KEY for API and webhook secret encryption.");
+    errors.push(
+      "Production requires SIGNAL_SECRET_ENCRYPTION_KEY for API and webhook secret encryption.",
+    );
   }
 
   if (production && process.env.SIGNAL_API_ALLOW_DEV_KEY !== "false") {
     errors.push("Production must set SIGNAL_API_ALLOW_DEV_KEY=false.");
   }
 
-  if (production && process.env.SIGNAL_WEBHOOK_ALLOW_PRIVATE_TARGETS === "true") {
+  if (
+    production &&
+    process.env.SIGNAL_WEBHOOK_ALLOW_PRIVATE_TARGETS === "true"
+  ) {
     errors.push("Production cannot allow private webhook targets.");
   }
 
   if (production && process.env.SIGNAL_API_KEYS) {
-    errors.push("Production cannot use plaintext SIGNAL_API_KEYS; use persisted API keys or SIGNAL_BOOTSTRAP_ADMIN_KEY_HASH.");
+    errors.push(
+      "Production cannot use plaintext SIGNAL_API_KEYS; use persisted API keys or SIGNAL_BOOTSTRAP_ADMIN_KEY_HASH.",
+    );
   }
 
-  if (process.env.SIGNAL_REQUIRE_EMIT_SIGNATURE === "true" && !process.env.SIGNAL_INGESTION_SIGNING_SECRET) {
-    errors.push("SIGNAL_REQUIRE_EMIT_SIGNATURE=true requires SIGNAL_INGESTION_SIGNING_SECRET.");
+  if (
+    process.env.SIGNAL_REQUIRE_EMIT_SIGNATURE === "true" &&
+    !process.env.SIGNAL_INGESTION_SIGNING_SECRET
+  ) {
+    errors.push(
+      "SIGNAL_REQUIRE_EMIT_SIGNATURE=true requires SIGNAL_INGESTION_SIGNING_SECRET.",
+    );
   }
 
   if (!process.env.SIGNAL_API_CORS_ORIGINS && production) {
-    warnings.push("Production should set SIGNAL_API_CORS_ORIGINS to explicit consumer origins.");
+    warnings.push(
+      "Production should set SIGNAL_API_CORS_ORIGINS to explicit consumer origins.",
+    );
   }
 
   if (!process.env.SIGNAL_BACKUP_POLICY_URL && production) {
-    warnings.push("Production backup/restore runbook should be linked with SIGNAL_BACKUP_POLICY_URL.");
+    warnings.push(
+      "Production backup/restore runbook should be linked with SIGNAL_BACKUP_POLICY_URL.",
+    );
   }
 
   return {
@@ -66,10 +84,22 @@ export function validateSignalEnvironment(): SignalEnvironmentReport {
     warnings,
     settings: {
       queueMaxDepth: positiveInt(process.env.SIGNAL_QUEUE_MAX_DEPTH, 10_000),
-      streamMaxClients: positiveInt(process.env.SIGNAL_STREAM_MAX_CLIENTS, 1_000),
-      webhookTimeoutMs: positiveInt(process.env.SIGNAL_WEBHOOK_TIMEOUT_MS, 5_000),
-      webhookResponseMaxBytes: positiveInt(process.env.SIGNAL_WEBHOOK_RESPONSE_MAX_BYTES, 64 * 1024),
-      webhookRedirectLimit: positiveInt(process.env.SIGNAL_WEBHOOK_REDIRECT_LIMIT, 3),
+      streamMaxClients: positiveInt(
+        process.env.SIGNAL_STREAM_MAX_CLIENTS,
+        1_000,
+      ),
+      webhookTimeoutMs: positiveInt(
+        process.env.SIGNAL_WEBHOOK_TIMEOUT_MS,
+        5_000,
+      ),
+      webhookResponseMaxBytes: positiveInt(
+        process.env.SIGNAL_WEBHOOK_RESPONSE_MAX_BYTES,
+        64 * 1024,
+      ),
+      webhookRedirectLimit: positiveInt(
+        process.env.SIGNAL_WEBHOOK_REDIRECT_LIMIT,
+        3,
+      ),
     },
   };
 }

@@ -1,6 +1,16 @@
-export type ThesisStatus = "emerging" | "strengthening" | "stable" | "weakening" | "invalidated";
+export type ThesisStatus =
+  | "emerging"
+  | "strengthening"
+  | "stable"
+  | "weakening"
+  | "invalidated";
 export type EvidenceDirection = "supporting" | "contradicting" | "missing";
-export type DecisionOutcomeJudgment = "correct" | "wrong" | "early" | "late" | "inconclusive";
+export type DecisionOutcomeJudgment =
+  | "correct"
+  | "wrong"
+  | "early"
+  | "late"
+  | "inconclusive";
 export type Horizon = "short-term" | "medium-term" | "long-term";
 
 export type Evidence = {
@@ -144,7 +154,11 @@ export type CalibrationRecord = {
   calibrationScore: number;
   overconfidenceSignal: boolean;
   underconfidenceSignal: boolean;
-  reliabilityTrend: "aligned" | "overconfident" | "underconfident" | "insufficient-data";
+  reliabilityTrend:
+    | "aligned"
+    | "overconfident"
+    | "underconfident"
+    | "insufficient-data";
   sampleSize: number;
   explanation: string;
   metadata?: Record<string, unknown>;
@@ -256,7 +270,13 @@ export type ConvictionProfile = {
 export type ReadinessProfile = {
   readiness: number;
   actionJustified: boolean;
-  actionLanguage: "avoid" | "observe" | "watch" | "prepare" | "act-small" | "act";
+  actionLanguage:
+    | "avoid"
+    | "observe"
+    | "watch"
+    | "prepare"
+    | "act-small"
+    | "act";
   exposure: number;
   explanation: string;
 };
@@ -397,12 +417,18 @@ export function validateThesis(thesis: Thesis): ValidationResult {
     thesis.description ? "" : "description is required",
     isThesisStatus(thesis.status) ? "" : "status is invalid",
     scoreIsValid(thesis.confidence) ? "" : "confidence must be 0..100",
-    Array.isArray(thesis.supportingEvidence) ? "" : "supportingEvidence must be an array",
-    Array.isArray(thesis.contradictingEvidence) ? "" : "contradictingEvidence must be an array",
+    Array.isArray(thesis.supportingEvidence)
+      ? ""
+      : "supportingEvidence must be an array",
+    Array.isArray(thesis.contradictingEvidence)
+      ? ""
+      : "contradictingEvidence must be an array",
   ]);
 }
 
-export function validateRegimeSnapshot(snapshot: RegimeSnapshot): ValidationResult {
+export function validateRegimeSnapshot(
+  snapshot: RegimeSnapshot,
+): ValidationResult {
   return validationResult([
     snapshot.regimeSnapshotId ? "" : "regimeSnapshotId is required",
     snapshot.marketCategory ? "" : "marketCategory is required",
@@ -412,11 +438,15 @@ export function validateRegimeSnapshot(snapshot: RegimeSnapshot): ValidationResu
     scoreIsValid(snapshot.trust) ? "" : "trust must be 0..100",
     scoreIsValid(snapshot.confidence) ? "" : "confidence must be 0..100",
     scoreIsValid(snapshot.readiness) ? "" : "readiness must be 0..100",
-    scoreIsValid(snapshot.opportunityDensity) ? "" : "opportunityDensity must be 0..100",
+    scoreIsValid(snapshot.opportunityDensity)
+      ? ""
+      : "opportunityDensity must be 0..100",
   ]);
 }
 
-export function validateDecisionRecord(record: DecisionRecord): ValidationResult {
+export function validateDecisionRecord(
+  record: DecisionRecord,
+): ValidationResult {
   return validationResult([
     record.decisionId ? "" : "decisionId is required",
     record.source ? "" : "source is required",
@@ -429,7 +459,9 @@ export function validateDecisionRecord(record: DecisionRecord): ValidationResult
   ]);
 }
 
-export function createInvestorLearningAssessment(input: InvestorLearningInput): InvestorLearningAssessment {
+export function createInvestorLearningAssessment(
+  input: InvestorLearningInput,
+): InvestorLearningAssessment {
   const createdAt = input.createdAt ?? new Date().toISOString();
   const source = input.source ?? "signal";
   const marketCategory = clean(input.marketCategory, "stocks");
@@ -459,21 +491,24 @@ export function createInvestorLearningAssessment(input: InvestorLearningInput): 
     decisionId: input.decisionId,
   }) as DisconfirmingEvidence[];
   const missing = uniqueStrings(input.missingEvidence ?? []);
-  const invalidationConditions = uniqueStrings(input.invalidationConditions ?? []);
+  const invalidationConditions = uniqueStrings(
+    input.invalidationConditions ?? [],
+  );
   const thesis = updateThesisStatus(
-    input.existingThesis ?? createThesis({
-      source,
-      createdAt,
-      marketCategory,
-      venue,
-      symbol: input.symbol,
-      recommendation,
-      confidence,
-      supportingEvidence: support,
-      contradictingEvidence: contradicting,
-      missingEvidence: missing,
-      invalidationConditions,
-    }),
+    input.existingThesis ??
+      createThesis({
+        source,
+        createdAt,
+        marketCategory,
+        venue,
+        symbol: input.symbol,
+        recommendation,
+        confidence,
+        supportingEvidence: support,
+        contradictingEvidence: contradicting,
+        missingEvidence: missing,
+        invalidationConditions,
+      }),
     {
       updatedAt: createdAt,
       confidence,
@@ -525,25 +560,34 @@ export function createInvestorLearningAssessment(input: InvestorLearningInput): 
   });
   const alternatives = input.alternatives?.length
     ? input.alternatives
-    : [{
-        id: input.symbol ?? input.decisionId,
-        label: input.symbol ?? recommendation,
-        readiness: readinessValue,
-        quality: confidence,
-        trust,
-        risk: clampScore(input.riskPressure, 50),
-        exposure,
-        reasons: support.map((item) => item.description),
-        risks: contradicting.map((item) => item.description),
-      }];
+    : [
+        {
+          id: input.symbol ?? input.decisionId,
+          label: input.symbol ?? recommendation,
+          readiness: readinessValue,
+          quality: confidence,
+          trust,
+          risk: clampScore(input.riskPressure, 50),
+          exposure,
+          reasons: support.map((item) => item.description),
+          risks: contradicting.map((item) => item.description),
+        },
+      ];
   const opportunityRanking = rankOpportunities(alternatives);
   const portfolioContext = input.portfolioContext
     ? evaluatePortfolioContext({
         ...input.portfolioContext,
-        riskContribution: input.portfolioContext.riskContribution ?? clampScore(input.riskPressure, 50),
+        riskContribution:
+          input.portfolioContext.riskContribution ??
+          clampScore(input.riskPressure, 50),
         expectedRiskAdjustedContribution:
           input.portfolioContext.expectedRiskAdjustedContribution ??
-          clampScore(confidence - clampScore(input.riskPressure, 50) * 0.35 + exposure * 2, 0),
+          clampScore(
+            confidence -
+              clampScore(input.riskPressure, 50) * 0.35 +
+              exposure * 2,
+            0,
+          ),
       })
     : evaluatePortfolioContext();
   const horizons = buildTimeHorizonViews({
@@ -574,11 +618,13 @@ export function createInvestorLearningAssessment(input: InvestorLearningInput): 
       })
     : null;
   const learningRecords = review
-    ? [createLearningRecordFromReview(review, {
-        source,
-        thesisId: thesis.thesisId,
-        regimeSnapshotId: regimeSnapshot.regimeSnapshotId,
-      })]
+    ? [
+        createLearningRecordFromReview(review, {
+          source,
+          thesisId: thesis.thesisId,
+          regimeSnapshotId: regimeSnapshot.regimeSnapshotId,
+        }),
+      ]
     : [];
   const decisionRecord = {
     decisionId: input.decisionId,
@@ -672,11 +718,17 @@ export function createThesis(input: {
   invalidationConditions?: string[];
 }): Thesis {
   const createdAt = input.createdAt ?? new Date().toISOString();
-  const subject = input.symbol ?? input.venue ?? input.marketCategory ?? "market";
+  const subject =
+    input.symbol ?? input.venue ?? input.marketCategory ?? "market";
   const recommendation = clean(input.recommendation, "Observe");
   const title = `${subject} ${recommendation} thesis`;
   return {
-    thesisId: idFor("thesis", input.source ?? "signal", subject, recommendation),
+    thesisId: idFor(
+      "thesis",
+      input.source ?? "signal",
+      subject,
+      recommendation,
+    ),
     source: input.source ?? "signal",
     title,
     description: `${subject} is being evaluated for ${recommendation.toLowerCase()} because current evidence may justify the suggested risk.`,
@@ -719,9 +771,17 @@ export function updateThesisStatus(
     ...(patch.invalidationConditions ?? []),
   ]);
   const confidence = clampScore(patch.confidence, thesis.confidence);
-  const supportStrength = average(supportingEvidence.map((item) => item.strength), 0);
-  const contradictionPressure = average(contradictingEvidence.map((item) => item.strength), 0);
-  const invalidated = contradictingEvidence.some((item) => item.invalidates || item.strength >= 90);
+  const supportStrength = average(
+    supportingEvidence.map((item) => item.strength),
+    0,
+  );
+  const contradictionPressure = average(
+    contradictingEvidence.map((item) => item.strength),
+    0,
+  );
+  const invalidated = contradictingEvidence.some(
+    (item) => item.invalidates || item.strength >= 90,
+  );
   const status: ThesisStatus = invalidated
     ? "invalidated"
     : contradictionPressure >= supportStrength + 15
@@ -780,21 +840,39 @@ export function buildRegimeSnapshot(input: {
     : undefined;
 
   return {
-    regimeSnapshotId: idFor("regime", input.source ?? "signal", decisionId, timestamp),
+    regimeSnapshotId: idFor(
+      "regime",
+      input.source ?? "signal",
+      decisionId,
+      timestamp,
+    ),
     source: input.source ?? "signal",
     marketCategory,
     venue,
     timestamp,
     marketHealth: clampScore(input.marketHealth, 100 - riskPressure),
-    riskState: clean(input.riskState, riskPressure >= 70 ? "elevated" : riskPressure >= 45 ? "mixed" : "contained"),
+    riskState: clean(
+      input.riskState,
+      riskPressure >= 70
+        ? "elevated"
+        : riskPressure >= 45
+          ? "mixed"
+          : "contained",
+    ),
     trust: clampScore(input.trust, 50),
     confidence: clampScore(input.confidence, 50),
     readiness: clampScore(input.readiness, 35),
     exposureGuidance: clampScore(input.exposure, 0),
     opportunityDensity: clampScore(input.opportunityDensity, 0),
-    ...(input.volatility == null ? {} : { volatility: clampScore(input.volatility, 50) }),
-    ...(input.breadth == null ? {} : { breadth: clampScore(input.breadth, 50) }),
-    ...(input.participation == null ? {} : { participation: clampScore(input.participation, 50) }),
+    ...(input.volatility == null
+      ? {}
+      : { volatility: clampScore(input.volatility, 50) }),
+    ...(input.breadth == null
+      ? {}
+      : { breadth: clampScore(input.breadth, 50) }),
+    ...(input.participation == null
+      ? {}
+      : { participation: clampScore(input.participation, 50) }),
     finalRecommendation: clean(input.finalRecommendation, "Observe"),
     ...(outcome ? { eventualOutcome: outcome } : {}),
     ...(input.metadata ? { metadata: input.metadata } : {}),
@@ -809,18 +887,25 @@ export function findSimilarRegimes(
   const threshold = options.threshold ?? 0.55;
   const limit = options.limit ?? 5;
   return history
-    .filter((snapshot) => snapshot.regimeSnapshotId !== current.regimeSnapshotId)
+    .filter(
+      (snapshot) => snapshot.regimeSnapshotId !== current.regimeSnapshotId,
+    )
     .map((snapshot) => ({
       snapshot,
       similarity: regimeSimilarity(current, snapshot),
-      whatHappened: snapshot.eventualOutcome?.summary ?? "Outcome learning starts after decisions are reviewed.",
+      whatHappened:
+        snapshot.eventualOutcome?.summary ??
+        "Outcome learning starts after decisions are reviewed.",
     }))
     .filter((item) => item.similarity >= threshold)
     .sort((a, b) => b.similarity - a.similarity)
     .slice(0, limit);
 }
 
-export function regimeSimilarity(left: RegimeSnapshot, right: RegimeSnapshot): number {
+export function regimeSimilarity(
+  left: RegimeSnapshot,
+  right: RegimeSnapshot,
+): number {
   const numericPairs: Array<[number | undefined, number | undefined]> = [
     [left.marketHealth, right.marketHealth],
     [left.trust, right.trust],
@@ -833,13 +918,24 @@ export function regimeSimilarity(left: RegimeSnapshot, right: RegimeSnapshot): n
     [left.participation, right.participation],
   ];
   const scores = numericPairs
-    .filter((pair): pair is [number, number] => pair[0] != null && pair[1] != null)
+    .filter(
+      (pair): pair is [number, number] => pair[0] != null && pair[1] != null,
+    )
     .map(([a, b]) => 1 - Math.min(Math.abs(a - b), 100) / 100);
   const numericScore = average(scores, 0.5);
   const categoryScore = left.marketCategory === right.marketCategory ? 1 : 0.55;
   const venueScore = left.venue === right.venue ? 1 : 0.7;
-  const riskScore = normalizedWords(left.riskState) === normalizedWords(right.riskState) ? 1 : 0.72;
-  return round((numericScore * 0.68 + categoryScore * 0.12 + venueScore * 0.1 + riskScore * 0.1), 3);
+  const riskScore =
+    normalizedWords(left.riskState) === normalizedWords(right.riskState)
+      ? 1
+      : 0.72;
+  return round(
+    numericScore * 0.68 +
+      categoryScore * 0.12 +
+      venueScore * 0.1 +
+      riskScore * 0.1,
+    3,
+  );
 }
 
 export function createDecisionReview(input: {
@@ -858,7 +954,11 @@ export function createDecisionReview(input: {
   const classification = input.outcome.classification;
   const adjustment = adjustmentFor(classification);
   return {
-    reviewId: idFor("review", input.decision.decisionId, input.outcome.outcomeId),
+    reviewId: idFor(
+      "review",
+      input.decision.decisionId,
+      input.outcome.outcomeId,
+    ),
     decisionId: input.decision.decisionId,
     source: input.decision.source ?? input.outcome.source,
     reviewedAt,
@@ -878,7 +978,11 @@ export function createDecisionReview(input: {
 
 export function createLearningRecordFromReview(
   review: DecisionReview,
-  context: { source?: string; thesisId?: string; regimeSnapshotId?: string } = {},
+  context: {
+    source?: string;
+    thesisId?: string;
+    regimeSnapshotId?: string;
+  } = {},
 ): LearningRecord {
   return {
     learningId: idFor("learning", review.reviewId),
@@ -886,7 +990,9 @@ export function createLearningRecordFromReview(
     createdAt: review.reviewedAt,
     decisionId: review.decisionId,
     ...(context.thesisId ? { thesisId: context.thesisId } : {}),
-    ...(context.regimeSnapshotId ? { regimeSnapshotId: context.regimeSnapshotId } : {}),
+    ...(context.regimeSnapshotId
+      ? { regimeSnapshotId: context.regimeSnapshotId }
+      : {}),
     lesson: review.lesson,
     changes: [
       review.confidenceAdjustment === 0
@@ -908,26 +1014,38 @@ export function buildCalibrationRecord(input: {
   reviewedOutcomes?: readonly DecisionReview[];
   createdAt?: string;
 }): CalibrationRecord {
-  const createdAt = input.createdAt ?? input.outcome?.recordedAt ?? new Date().toISOString();
+  const createdAt =
+    input.createdAt ?? input.outcome?.recordedAt ?? new Date().toISOString();
   const actualOutcomeScore = input.outcome ? scoreOutcome(input.outcome) : null;
-  const calibrationError = actualOutcomeScore == null
-    ? 0
-    : round(input.decisionRecord.confidence - actualOutcomeScore, 2);
-  const sampleSize = (input.reviewedOutcomes?.length ?? 0) + (input.outcome ? 1 : 0);
-  const reviewBias = average(input.reviewedOutcomes?.map((review) => review.confidenceAdjustment) ?? [], 0);
-  const reliabilityTrend = actualOutcomeScore == null && sampleSize === 0
-    ? "insufficient-data"
-    : calibrationError > 12 || reviewBias < -1
-      ? "overconfident"
-      : calibrationError < -12 || reviewBias > 1
-        ? "underconfident"
-        : "aligned";
-  const calibrationScore = actualOutcomeScore == null
-    ? 0
-    : clampScore(100 - Math.abs(calibrationError), 0);
+  const calibrationError =
+    actualOutcomeScore == null
+      ? 0
+      : round(input.decisionRecord.confidence - actualOutcomeScore, 2);
+  const sampleSize =
+    (input.reviewedOutcomes?.length ?? 0) + (input.outcome ? 1 : 0);
+  const reviewBias = average(
+    input.reviewedOutcomes?.map((review) => review.confidenceAdjustment) ?? [],
+    0,
+  );
+  const reliabilityTrend =
+    actualOutcomeScore == null && sampleSize === 0
+      ? "insufficient-data"
+      : calibrationError > 12 || reviewBias < -1
+        ? "overconfident"
+        : calibrationError < -12 || reviewBias > 1
+          ? "underconfident"
+          : "aligned";
+  const calibrationScore =
+    actualOutcomeScore == null
+      ? 0
+      : clampScore(100 - Math.abs(calibrationError), 0);
 
   return {
-    calibrationRecordId: idFor("calibration-record", input.decisionRecord.decisionId, createdAt),
+    calibrationRecordId: idFor(
+      "calibration-record",
+      input.decisionRecord.decisionId,
+      createdAt,
+    ),
     source: input.decisionRecord.source,
     createdAt,
     decisionId: input.decisionRecord.decisionId,
@@ -939,9 +1057,10 @@ export function buildCalibrationRecord(input: {
     underconfidenceSignal: reliabilityTrend === "underconfident",
     reliabilityTrend,
     sampleSize,
-    explanation: actualOutcomeScore == null
-      ? "Calibration will improve after more outcomes are reviewed."
-      : `Predicted confidence differed from the reviewed outcome by ${Math.abs(calibrationError)} points.`,
+    explanation:
+      actualOutcomeScore == null
+        ? "Calibration will improve after more outcomes are reviewed."
+        : `Predicted confidence differed from the reviewed outcome by ${Math.abs(calibrationError)} points.`,
   };
 }
 
@@ -950,10 +1069,19 @@ export function buildProcessQualityRecord(input: {
   outcome?: DecisionOutcome;
   createdAt?: string;
 }): ProcessQualityRecord {
-  const createdAt = input.createdAt ?? input.outcome?.recordedAt ?? new Date().toISOString();
-  const supportStrength = average(input.decisionRecord.supportingEvidence.map((item) => item.strength), input.decisionRecord.confidence);
-  const contradictionPressure = average(input.decisionRecord.contradictingEvidence.map((item) => item.strength), 0);
-  const evidenceQualityScore = clampScore(supportStrength - contradictionPressure * 0.25);
+  const createdAt =
+    input.createdAt ?? input.outcome?.recordedAt ?? new Date().toISOString();
+  const supportStrength = average(
+    input.decisionRecord.supportingEvidence.map((item) => item.strength),
+    input.decisionRecord.confidence,
+  );
+  const contradictionPressure = average(
+    input.decisionRecord.contradictingEvidence.map((item) => item.strength),
+    0,
+  );
+  const evidenceQualityScore = clampScore(
+    supportStrength - contradictionPressure * 0.25,
+  );
   const disconfirmationScore = clampScore(
     (input.decisionRecord.contradictingEvidence.length > 0 ? 45 : 20) +
       Math.min(input.decisionRecord.invalidationConditions.length, 3) * 15 +
@@ -961,16 +1089,23 @@ export function buildProcessQualityRecord(input: {
     50,
   );
   const uncertaintyScore = clampScore(
-    100 - Math.max(0, input.decisionRecord.confidence - 78) - input.decisionRecord.missingEvidence.length * 8,
+    100 -
+      Math.max(0, input.decisionRecord.confidence - 78) -
+      input.decisionRecord.missingEvidence.length * 8,
     70,
   );
-  const readinessScore = input.decisionRecord.exposure > 0
-    ? clampScore(input.decisionRecord.readiness)
-    : clampScore(100 - Math.max(0, 45 - input.decisionRecord.readiness));
+  const readinessScore =
+    input.decisionRecord.exposure > 0
+      ? clampScore(input.decisionRecord.readiness)
+      : clampScore(100 - Math.max(0, 45 - input.decisionRecord.readiness));
   const sizingScore = clampScore(
-    input.decisionRecord.exposure <= exposureCapFor(input.decisionRecord.readiness)
+    input.decisionRecord.exposure <=
+      exposureCapFor(input.decisionRecord.readiness)
       ? 90 - contradictionPressure * 0.2
-      : 45 - (input.decisionRecord.exposure - exposureCapFor(input.decisionRecord.readiness)) * 4,
+      : 45 -
+          (input.decisionRecord.exposure -
+            exposureCapFor(input.decisionRecord.readiness)) *
+            4,
     65,
   );
   const processQualityScore = clampScore(
@@ -980,11 +1115,20 @@ export function buildProcessQualityRecord(input: {
       sizingScore * 0.2 +
       readinessScore * 0.15,
   );
-  const outcomeQualityScore = input.outcome ? scoreOutcome(input.outcome) : null;
-  const classification = classifyProcessQuality(processQualityScore, outcomeQualityScore);
+  const outcomeQualityScore = input.outcome
+    ? scoreOutcome(input.outcome)
+    : null;
+  const classification = classifyProcessQuality(
+    processQualityScore,
+    outcomeQualityScore,
+  );
 
   return {
-    processQualityId: idFor("process-quality", input.decisionRecord.decisionId, createdAt),
+    processQualityId: idFor(
+      "process-quality",
+      input.decisionRecord.decisionId,
+      createdAt,
+    ),
     source: input.decisionRecord.source,
     createdAt,
     decisionId: input.decisionRecord.decisionId,
@@ -1011,9 +1155,15 @@ export function evaluateBeliefFreshness(
   ];
   const latestEvidenceAt = latestValidDate(observedDates);
   const asOfDate = typeof asOf === "string" ? new Date(asOf) : asOf;
-  const hasEvidence = thesis.supportingEvidence.length + thesis.contradictingEvidence.length > 0;
+  const hasEvidence =
+    thesis.supportingEvidence.length + thesis.contradictingEvidence.length > 0;
   const ageDays = latestEvidenceAt
-    ? Math.max(0, Math.floor((asOfDate.getTime() - latestEvidenceAt.getTime()) / 86_400_000))
+    ? Math.max(
+        0,
+        Math.floor(
+          (asOfDate.getTime() - latestEvidenceAt.getTime()) / 86_400_000,
+        ),
+      )
     : Number.POSITIVE_INFINITY;
   const status: BeliefFreshnessProfile["status"] = !hasEvidence
     ? "unsupported"
@@ -1022,15 +1172,20 @@ export function evaluateBeliefFreshness(
       : ageDays <= 30
         ? "aging"
         : "stale";
-  const decayApplied = status === "fresh"
-    ? 0
-    : status === "aging"
-      ? Math.min(10, ageDays * 0.25)
-      : status === "stale"
-        ? Math.min(35, 8 + ageDays * 0.35)
-        : 20;
-  const confidenceAfterDecay = clampScore(thesis.confidence - decayApplied, thesis.confidence);
-  const freshness = status === "unsupported" ? 0 : clampScore(100 - decayApplied * 2);
+  const decayApplied =
+    status === "fresh"
+      ? 0
+      : status === "aging"
+        ? Math.min(10, ageDays * 0.25)
+        : status === "stale"
+          ? Math.min(35, 8 + ageDays * 0.35)
+          : 20;
+  const confidenceAfterDecay = clampScore(
+    thesis.confidence - decayApplied,
+    thesis.confidence,
+  );
+  const freshness =
+    status === "unsupported" ? 0 : clampScore(100 - decayApplied * 2);
 
   return {
     freshness,
@@ -1038,11 +1193,12 @@ export function evaluateBeliefFreshness(
     status,
     confidenceAfterDecay,
     decayApplied: round(decayApplied, 2),
-    explanation: status === "fresh"
-      ? "This thesis has fresh evidence."
-      : status === "unsupported"
-        ? "This thesis has not received fresh evidence yet."
-        : `Evidence is ${ageDays} day(s) old, so conviction should decay unless refreshed.`,
+    explanation:
+      status === "fresh"
+        ? "This thesis has fresh evidence."
+        : status === "unsupported"
+          ? "This thesis has not received fresh evidence yet."
+          : `Evidence is ${ageDays} day(s) old, so conviction should decay unless refreshed.`,
   };
 }
 
@@ -1054,9 +1210,10 @@ export function applyBeliefDecay(
   return {
     ...thesis,
     confidence: freshness.confidenceAfterDecay,
-    status: freshness.status === "stale" && thesis.status !== "invalidated"
-      ? "weakening"
-      : thesis.status,
+    status:
+      freshness.status === "stale" && thesis.status !== "invalidated"
+        ? "weakening"
+        : thesis.status,
     metadata: {
       ...thesis.metadata,
       beliefFreshness: freshness,
@@ -1082,9 +1239,20 @@ export function buildConvictionProfile(input: {
 }): ConvictionProfile {
   const confidence = clampScore(input.confidence, 50);
   const trust = clampScore(input.trust, 50);
-  const supportStrength = average((input.supportingEvidence ?? []).map((item) => item.strength), confidence);
-  const contradictionPressure = average((input.contradictingEvidence ?? []).map((item) => item.strength), 0);
-  const conviction = clampScore(confidence * 0.38 + trust * 0.28 + supportStrength * 0.28 - contradictionPressure * 0.18);
+  const supportStrength = average(
+    (input.supportingEvidence ?? []).map((item) => item.strength),
+    confidence,
+  );
+  const contradictionPressure = average(
+    (input.contradictingEvidence ?? []).map((item) => item.strength),
+    0,
+  );
+  const conviction = clampScore(
+    confidence * 0.38 +
+      trust * 0.28 +
+      supportStrength * 0.28 -
+      contradictionPressure * 0.18,
+  );
   return {
     confidence,
     trust,
@@ -1107,7 +1275,8 @@ export function buildReadinessProfile(input: {
   const confidence = clampScore(input.confidence, 50);
   const trust = clampScore(input.trust, 50);
   const contradictionCount = input.contradictionCount ?? 0;
-  const actionJustified = readiness >= 68 && exposure > 0 && trust >= 55 && contradictionCount === 0;
+  const actionJustified =
+    readiness >= 68 && exposure > 0 && trust >= 55 && contradictionCount === 0;
   const actionLanguage: ReadinessProfile["actionLanguage"] =
     readiness < 25 || contradictionCount >= 3
       ? "avoid"
@@ -1134,13 +1303,18 @@ export function buildMindChangeTriggers(input: {
   current: RegimeSnapshot;
   similarRegimes?: SimilarRegime[];
 }): MindChangeTrigger[] {
-  const failedSimilar = (input.similarRegimes ?? []).some((item) =>
-    item.snapshot.eventualOutcome?.classification === "wrong" ||
-    item.snapshot.eventualOutcome?.classification === "late",
+  const failedSimilar = (input.similarRegimes ?? []).some(
+    (item) =>
+      item.snapshot.eventualOutcome?.classification === "wrong" ||
+      item.snapshot.eventualOutcome?.classification === "late",
   );
   return uniqueTriggers([
     {
-      triggerId: idFor("trigger", input.current.regimeSnapshotId, "participation"),
+      triggerId: idFor(
+        "trigger",
+        input.current.regimeSnapshotId,
+        "participation",
+      ),
       label: "Participation deteriorates",
       metric: "participation",
       direction: "falls_below",
@@ -1166,7 +1340,8 @@ export function buildMindChangeTriggers(input: {
       direction: "falls_below",
       threshold: 50,
       currentValue: input.current.trust,
-      reason: "Trust below 50 means historical reliability no longer supports action.",
+      reason:
+        "Trust below 50 means historical reliability no longer supports action.",
       severity: "review",
     },
     ...input.thesis.invalidationConditions.map((condition) => ({
@@ -1178,7 +1353,11 @@ export function buildMindChangeTriggers(input: {
     })),
     failedSimilar
       ? {
-          triggerId: idFor("trigger", input.current.regimeSnapshotId, "similar-regime-failure"),
+          triggerId: idFor(
+            "trigger",
+            input.current.regimeSnapshotId,
+            "similar-regime-failure",
+          ),
           label: "Similar regimes begin failing",
           direction: "changes" as const,
           reason: "Past similar states include wrong or late outcomes.",
@@ -1188,7 +1367,9 @@ export function buildMindChangeTriggers(input: {
   ]);
 }
 
-export function rankOpportunities(input: readonly OpportunityRankingInput[]): OpportunityRankingResult {
+export function rankOpportunities(
+  input: readonly OpportunityRankingInput[],
+): OpportunityRankingResult {
   const ranked = input
     .map((item, index) => {
       const risk = clampScore(item.risk, 50);
@@ -1220,7 +1401,9 @@ export function rankOpportunities(input: readonly OpportunityRankingInput[]): Op
     .map((item, index) => ({ ...item, rank: index + 1 }));
   const ready = ranked.filter((item) => item.bucket !== "not-ready");
   const best = ready[0] ? { ...ready[0], bucket: "best" as const } : null;
-  const other = ready.slice(best ? 1 : 0).map((item) => ({ ...item, bucket: "other" as const }));
+  const other = ready
+    .slice(best ? 1 : 0)
+    .map((item) => ({ ...item, bucket: "other" as const }));
   const notReady = ranked.filter((item) => item.bucket === "not-ready");
   return {
     bestOpportunity: best,
@@ -1254,12 +1437,16 @@ export function buildTimeHorizonViews(input: {
       score: readiness * 0.45 + confidence * 0.25 + (100 - risk) * 0.3,
       confidence,
       thesis: input.thesis.title,
-      action: readiness >= 68 ? recommendation : "Wait for cleaner short-term confirmation",
+      action:
+        readiness >= 68
+          ? recommendation
+          : "Wait for cleaner short-term confirmation",
       risks: input.thesis.contradictingEvidence.map((item) => item.description),
     }),
     horizonView({
       horizon: "medium-term",
-      score: confidence * 0.32 + trust * 0.32 + density * 0.18 + (100 - risk) * 0.18,
+      score:
+        confidence * 0.32 + trust * 0.32 + density * 0.18 + (100 - risk) * 0.18,
       confidence: (confidence + trust) / 2,
       thesis: input.thesis.title,
       action: trust >= 60 ? recommendation : "Track until reliability improves",
@@ -1267,16 +1454,20 @@ export function buildTimeHorizonViews(input: {
     }),
     horizonView({
       horizon: "long-term",
-      score: trust * 0.42 + confidence * 0.2 + (100 - risk) * 0.24 + density * 0.14,
+      score:
+        trust * 0.42 + confidence * 0.2 + (100 - risk) * 0.24 + density * 0.14,
       confidence: trust,
       thesis: input.thesis.title,
-      action: risk >= 70 ? "Stay cautious until risk normalizes" : recommendation,
+      action:
+        risk >= 70 ? "Stay cautious until risk normalizes" : recommendation,
       risks: input.thesis.invalidationConditions,
     }),
   ];
 }
 
-export function evaluatePortfolioContext(input: Partial<PortfolioContext> = {}): PortfolioContext {
+export function evaluatePortfolioContext(
+  input: Partial<PortfolioContext> = {},
+): PortfolioContext {
   if (input.hasData === false || Object.keys(input).length === 0) {
     return {
       hasData: false,
@@ -1285,8 +1476,11 @@ export function evaluatePortfolioContext(input: Partial<PortfolioContext> = {}):
       exposureOverlap: 0,
       riskContribution: 0,
       expectedRiskAdjustedContribution: 0,
-      summary: "Portfolio context is unavailable; Signal is evaluating the opportunity on standalone evidence only.",
-      warnings: ["Portfolio improvement checks will appear after portfolio data is connected."],
+      summary:
+        "Portfolio context is unavailable; Signal is evaluating the opportunity on standalone evidence only.",
+      warnings: [
+        "Portfolio improvement checks will appear after portfolio data is connected.",
+      ],
     };
   }
 
@@ -1294,11 +1488,16 @@ export function evaluatePortfolioContext(input: Partial<PortfolioContext> = {}):
   const diversificationBenefit = clampScore(input.diversificationBenefit, 50);
   const exposureOverlap = clampScore(input.exposureOverlap, 0);
   const riskContribution = clampScore(input.riskContribution, 50);
-  const expectedRiskAdjustedContribution = clampScore(input.expectedRiskAdjustedContribution, 50);
+  const expectedRiskAdjustedContribution = clampScore(
+    input.expectedRiskAdjustedContribution,
+    50,
+  );
   const warnings = uniqueStrings([
     ...(input.warnings ?? []),
     concentrationRisk >= 70 ? "Concentration risk is elevated." : "",
-    exposureOverlap >= 70 ? "Exposure overlaps heavily with existing positions." : "",
+    exposureOverlap >= 70
+      ? "Exposure overlaps heavily with existing positions."
+      : "",
   ]);
 
   return {
@@ -1308,7 +1507,9 @@ export function evaluatePortfolioContext(input: Partial<PortfolioContext> = {}):
     exposureOverlap,
     riskContribution,
     expectedRiskAdjustedContribution,
-    summary: input.summary ?? `Expected risk-adjusted contribution is ${Math.round(expectedRiskAdjustedContribution)}/100.`,
+    summary:
+      input.summary ??
+      `Expected risk-adjusted contribution is ${Math.round(expectedRiskAdjustedContribution)}/100.`,
     warnings,
     ...(input.metadata ? { metadata: input.metadata } : {}),
   };
@@ -1333,11 +1534,14 @@ export function generateInvestorNarrative(input: {
     whatChanged: similar
       ? `This resembles ${similar.snapshot.venue} on ${similar.snapshot.timestamp.slice(0, 10)} with ${Math.round(similar.similarity * 100)}% similarity.`
       : "Similar regimes will appear after more snapshots are collected.",
-    uncertainty: input.thesis.contradictingEvidence[0]?.description ??
+    uncertainty:
+      input.thesis.contradictingEvidence[0]?.description ??
       input.thesis.missingEvidence[0] ??
       "No contradicting evidence has been found yet.",
     action: `${input.recommendation}; readiness says ${input.readiness.actionLanguage.replace("-", " ")}.`,
-    mindChange: trigger?.reason ?? "What would change the view will become clearer as more evidence is collected.",
+    mindChange:
+      trigger?.reason ??
+      "What would change the view will become clearer as more evidence is collected.",
   };
 }
 
@@ -1361,13 +1565,18 @@ export class RegimeMemoryEngine {
     return [...this.snapshots];
   }
 
-  findSimilar(current: RegimeSnapshot, options?: { limit?: number; threshold?: number }): SimilarRegime[] {
+  findSimilar(
+    current: RegimeSnapshot,
+    options?: { limit?: number; threshold?: number },
+  ): SimilarRegime[] {
     return findSimilarRegimes(current, this.snapshots, options);
   }
 }
 
 export class ReflectionEngine {
-  reviewDecision(input: Parameters<typeof createDecisionReview>[0]): DecisionReview {
+  reviewDecision(
+    input: Parameters<typeof createDecisionReview>[0],
+  ): DecisionReview {
     return createDecisionReview(input);
   }
 
@@ -1380,13 +1589,17 @@ export class ReflectionEngine {
 }
 
 export class ProcessQualityEngine {
-  evaluate(input: Parameters<typeof buildProcessQualityRecord>[0]): ProcessQualityRecord {
+  evaluate(
+    input: Parameters<typeof buildProcessQualityRecord>[0],
+  ): ProcessQualityRecord {
     return buildProcessQualityRecord(input);
   }
 }
 
 export class CalibrationEngine {
-  evaluate(input: Parameters<typeof buildCalibrationRecord>[0]): CalibrationRecord {
+  evaluate(
+    input: Parameters<typeof buildCalibrationRecord>[0],
+  ): CalibrationRecord {
     return buildCalibrationRecord(input);
   }
 }
@@ -1406,7 +1619,10 @@ export class ThesisEngine {
     return createThesis(input);
   }
 
-  update(thesis: Thesis, patch: Parameters<typeof updateThesisStatus>[1]): Thesis {
+  update(
+    thesis: Thesis,
+    patch: Parameters<typeof updateThesisStatus>[1],
+  ): Thesis {
     return updateThesisStatus(thesis, patch);
   }
 }
@@ -1418,19 +1634,25 @@ export class DisconfirmationEngine {
 }
 
 export class MindChangeEngine {
-  buildTriggers(input: Parameters<typeof buildMindChangeTriggers>[0]): MindChangeTrigger[] {
+  buildTriggers(
+    input: Parameters<typeof buildMindChangeTriggers>[0],
+  ): MindChangeTrigger[] {
     return buildMindChangeTriggers(input);
   }
 }
 
 export class ConvictionEngine {
-  buildProfile(input: Parameters<typeof buildConvictionProfile>[0]): ConvictionProfile {
+  buildProfile(
+    input: Parameters<typeof buildConvictionProfile>[0],
+  ): ConvictionProfile {
     return buildConvictionProfile(input);
   }
 }
 
 export class ReadinessEngine {
-  buildProfile(input: Parameters<typeof buildReadinessProfile>[0]): ReadinessProfile {
+  buildProfile(
+    input: Parameters<typeof buildReadinessProfile>[0],
+  ): ReadinessProfile {
     return buildReadinessProfile(input);
   }
 }
@@ -1442,13 +1664,17 @@ export class OpportunityCostEngine {
 }
 
 export class TimeHorizonEngine {
-  buildViews(input: Parameters<typeof buildTimeHorizonViews>[0]): TimeHorizonView[] {
+  buildViews(
+    input: Parameters<typeof buildTimeHorizonViews>[0],
+  ): TimeHorizonView[] {
     return buildTimeHorizonViews(input);
   }
 }
 
 export class NarrativeEngine {
-  generate(input: Parameters<typeof generateInvestorNarrative>[0]): InvestorNarrative {
+  generate(
+    input: Parameters<typeof generateInvestorNarrative>[0],
+  ): InvestorNarrative {
     return generateInvestorNarrative(input);
   }
 }
@@ -1460,10 +1686,18 @@ function learningEmptyStates(input: {
   outcome?: DecisionOutcome;
 }) {
   return uniqueStrings([
-    input.reviewedOutcomes?.length ? "" : "No previous decisions have been reviewed yet.",
-    input.similarRegimes.length ? "" : "Similar regimes will appear after more snapshots are collected.",
-    input.contradicting.length ? "" : "No contradicting evidence has been found yet.",
-    input.outcome ? "" : "Outcome learning starts after decisions are reviewed.",
+    input.reviewedOutcomes?.length
+      ? ""
+      : "No previous decisions have been reviewed yet.",
+    input.similarRegimes.length
+      ? ""
+      : "Similar regimes will appear after more snapshots are collected.",
+    input.contradicting.length
+      ? ""
+      : "No contradicting evidence has been found yet.",
+    input.outcome
+      ? ""
+      : "Outcome learning starts after decisions are reviewed.",
   ]);
 }
 
@@ -1489,8 +1723,11 @@ function evidenceFromStrings(input: {
     source: input.source,
     ...(input.decisionId ? { decisionId: input.decisionId } : {}),
     ...(input.thesisId ? { thesisId: input.thesisId } : {}),
-    ...(input.regimeSnapshotId ? { regimeSnapshotId: input.regimeSnapshotId } : {}),
-    ...(input.direction === "contradicting" && /invalidate|block|collapse|falls?|deteriorates?|weakens?/i.test(description)
+    ...(input.regimeSnapshotId
+      ? { regimeSnapshotId: input.regimeSnapshotId }
+      : {}),
+    ...(input.direction === "contradicting" &&
+    /invalidate|block|collapse|falls?|deteriorates?|weakens?/i.test(description)
       ? { invalidates: true }
       : {}),
   }));
@@ -1506,7 +1743,13 @@ function horizonView(input: {
 }): TimeHorizonView {
   const score = clampScore(input.score, 50);
   const view: TimeHorizonView["view"] =
-    score >= 68 ? "constructive" : score >= 50 ? "neutral" : score >= 35 ? "cautious" : "avoid";
+    score >= 68
+      ? "constructive"
+      : score >= 50
+        ? "neutral"
+        : score >= 35
+          ? "cautious"
+          : "avoid";
   return {
     horizon: input.horizon,
     view,
@@ -1524,7 +1767,8 @@ function scoreOutcome(outcome: DecisionOutcome): number {
 
   if (outcome.classification === "correct") return 100;
   if (outcome.classification === "wrong") return 0;
-  if (outcome.classification === "early" || outcome.classification === "late") return 55;
+  if (outcome.classification === "early" || outcome.classification === "late")
+    return 55;
   return 50;
 }
 
@@ -1543,13 +1787,16 @@ function classifyProcessQuality(
     return processQualityScore >= 65 ? "sound_process" : "inconclusive";
   }
 
-  if (processQualityScore >= 65 && outcomeQualityScore < 45) return "unlucky_loss";
+  if (processQualityScore >= 65 && outcomeQualityScore < 45)
+    return "unlucky_loss";
   if (processQualityScore < 65 && outcomeQualityScore >= 65) return "lucky_win";
   if (processQualityScore >= 65) return "sound_process";
   return "weak_process";
 }
 
-function processLearningNote(classification: ProcessQualityRecord["classification"]): string {
+function processLearningNote(
+  classification: ProcessQualityRecord["classification"],
+): string {
   if (classification === "unlucky_loss") {
     return "The process was sound even though the outcome was poor; avoid learning the wrong lesson from an unlucky loss.";
   }
@@ -1583,7 +1830,13 @@ function validationResult(errors: string[]): ValidationResult {
 }
 
 function isThesisStatus(value: string): value is ThesisStatus {
-  return ["emerging", "strengthening", "stable", "weakening", "invalidated"].includes(value);
+  return [
+    "emerging",
+    "strengthening",
+    "stable",
+    "weakening",
+    "invalidated",
+  ].includes(value);
 }
 
 function scoreIsValid(value: number): boolean {
@@ -1613,11 +1866,16 @@ function clean(value: unknown, fallback: string): string {
 }
 
 function normalizedWords(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function uniqueStrings(values: readonly unknown[]): string[] {
-  return Array.from(new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean)));
+  return Array.from(
+    new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean)),
+  );
 }
 
 function uniqueEvidence<T extends Evidence>(values: readonly T[]): T[] {
@@ -1632,7 +1890,9 @@ function uniqueEvidence<T extends Evidence>(values: readonly T[]): T[] {
   return result;
 }
 
-function uniqueTriggers(values: Array<MindChangeTrigger | null>): MindChangeTrigger[] {
+function uniqueTriggers(
+  values: Array<MindChangeTrigger | null>,
+): MindChangeTrigger[] {
   const seen = new Set<string>();
   const result: MindChangeTrigger[] = [];
   for (const value of values) {
@@ -1661,9 +1921,13 @@ function adjustmentFor(classification: DecisionOutcomeJudgment): number {
 }
 
 function lessonFor(classification: DecisionOutcomeJudgment): string {
-  if (classification === "correct") return "The decision logic was supported by the reviewed outcome.";
-  if (classification === "wrong") return "Reduce trust in this setup until disconfirming evidence is better handled.";
-  if (classification === "early") return "The thesis may have been right, but readiness was too early.";
-  if (classification === "late") return "The thesis may have been right, but the action arrived too late.";
+  if (classification === "correct")
+    return "The decision logic was supported by the reviewed outcome.";
+  if (classification === "wrong")
+    return "Reduce trust in this setup until disconfirming evidence is better handled.";
+  if (classification === "early")
+    return "The thesis may have been right, but readiness was too early.";
+  if (classification === "late")
+    return "The thesis may have been right, but the action arrived too late.";
   return "The outcome is inconclusive; keep collecting reviewed decisions.";
 }

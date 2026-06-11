@@ -62,7 +62,11 @@ describe("Signal Trust Governor", () => {
     assert.ok(result.blockedActions.includes("new_exposure"));
     assert.equal(result.primaryBlocker, "calibration_unstable_outcomes");
     assert.match(result.unlockCriteria.join(" "), /outcome stability/i);
-    assert.ok(result.contradictions.includes("Judgement finds similar history usable, but calibration still requires review."));
+    assert.ok(
+      result.contradictions.includes(
+        "Judgement finds similar history usable, but calibration still requires review.",
+      ),
+    );
   });
 
   it("allows normal participation when trust inputs agree and capacity exists", () => {
@@ -117,7 +121,11 @@ describe("Signal Trust Governor", () => {
       calibratedConfidence: 78,
       maxExposure: 5,
       reliability: { score: 20, status: "invalid", confidenceCap: 20 },
-      calibration: { warnings: [], calibratedConfidence: 78, trustworthiness: 80 },
+      calibration: {
+        warnings: [],
+        calibratedConfidence: 78,
+        trustworthiness: 80,
+      },
     });
 
     assert.equal(result.participationMode, "blocked");
@@ -155,8 +163,16 @@ describe("Signal Trust Governor", () => {
     assert.equal(result.participationMode, "exits_only");
     assert.equal(result.primaryBlocker, "robustness_overfit_risk");
     assert.match(result.unlockCriteria.join(" "), /overfit risk/i);
-    assert.equal(result.blockers.some((blocker) => blocker.id === "strategy_readiness_blocked"), false);
-    assert.equal(result.blockers.some((blocker) => blocker.id === "capacity_unavailable"), false);
+    assert.equal(
+      result.blockers.some(
+        (blocker) => blocker.id === "strategy_readiness_blocked",
+      ),
+      false,
+    );
+    assert.equal(
+      result.blockers.some((blocker) => blocker.id === "capacity_unavailable"),
+      false,
+    );
   });
 
   it("uses concentration unlock criteria for the exact failed concentration dimensions", () => {
@@ -188,14 +204,33 @@ describe("Signal Trust Governor", () => {
       },
     });
 
-    const concentration = result.blockers.find((blocker) => blocker.id === "concentration_dependency");
+    const concentration = result.blockers.find(
+      (blocker) => blocker.id === "concentration_dependency",
+    );
 
     assert.equal(result.primaryBlocker, "concentration_dependency");
-    assert.equal(concentration?.reason, "Results depend too much on one validation period.");
-    assert.ok(result.unlockCriteria.includes("Reduce period concentration across independent test windows."));
-    assert.ok(result.unlockCriteria.includes("Confirm median trade return stays positive."));
-    assert.equal(result.unlockCriteria.includes("Reduce top-winner concentration."), false);
-    assert.equal(result.blockers.some((blocker) => blocker.id === "capacity_unavailable"), false);
+    assert.equal(
+      concentration?.reason,
+      "Results depend too much on one validation period.",
+    );
+    assert.ok(
+      result.unlockCriteria.includes(
+        "Reduce period concentration across independent test windows.",
+      ),
+    );
+    assert.ok(
+      result.unlockCriteria.includes(
+        "Confirm median trade return stays positive.",
+      ),
+    );
+    assert.equal(
+      result.unlockCriteria.includes("Reduce top-winner concentration."),
+      false,
+    );
+    assert.equal(
+      result.blockers.some((blocker) => blocker.id === "capacity_unavailable"),
+      false,
+    );
   });
 
   it("uses paper mode when trust is low but no hard blocker is present", () => {
@@ -203,7 +238,11 @@ describe("Signal Trust Governor", () => {
       rawConfidence: 49,
       calibratedConfidence: 48,
       maxExposure: 4,
-      calibration: { warnings: [], calibratedConfidence: 48, trustworthiness: 52 },
+      calibration: {
+        warnings: [],
+        calibratedConfidence: 48,
+        trustworthiness: 52,
+      },
       reliability: { score: 80, status: "healthy", confidenceCap: 80 },
       strategy: { readinessScore: 55, maxConfidence: 50, maxPositionPct: 4 },
     });
@@ -221,7 +260,12 @@ describe("Signal Trust Governor", () => {
       maxExposure: 8,
       requestedExposure: 5,
       opensNewExposure: true,
-      calibration: { warnings: [], calibratedConfidence: 84, trustworthiness: 86, status: "trusted" },
+      calibration: {
+        warnings: [],
+        calibratedConfidence: 84,
+        trustworthiness: 86,
+        status: "trusted",
+      },
       reliability: { score: 96, status: "healthy", confidenceCap: 96 },
       strategy: { readinessScore: 88, maxConfidence: 84, maxPositionPct: 8 },
       survivalMemory: {
@@ -246,7 +290,9 @@ describe("Signal Trust Governor", () => {
     assert.equal(result.confidenceCap, 28);
     assert.equal(result.audit.rawMaxExposure, 0);
     assert.equal(result.audit.survivalRecovery?.recommendation, "wait");
-    assert.ok(result.unlockCriteria.includes("Clear near-ruin survival matches."));
+    assert.ok(
+      result.unlockCriteria.includes("Clear near-ruin survival matches."),
+    );
   });
 
   it("allows reduced-size recovery exposure when survival memory has scars but no wait recommendation", () => {
@@ -256,9 +302,19 @@ describe("Signal Trust Governor", () => {
       maxExposure: 10,
       requestedExposure: 6,
       opensNewExposure: true,
-      calibration: { warnings: [], calibratedConfidence: 84, trustworthiness: 86, status: "trusted" },
+      calibration: {
+        warnings: [],
+        calibratedConfidence: 84,
+        trustworthiness: 86,
+        status: "trusted",
+      },
       reliability: { score: 96, status: "healthy", confidenceCap: 96 },
-      strategy: { stage: "Limited live", readinessScore: 86, maxConfidence: 84, maxPositionPct: 10 },
+      strategy: {
+        stage: "Limited live",
+        readinessScore: 86,
+        maxConfidence: 84,
+        maxPositionPct: 10,
+      },
       survivalMemory: {
         status: "scarred",
         recommendation: "act_with_reduced_size",
@@ -288,9 +344,19 @@ describe("Signal Trust Governor", () => {
       maxExposure: 3.37,
       requestedExposure: 3.37,
       opensNewExposure: true,
-      calibration: { warnings: [], calibratedConfidence: 73, trustworthiness: 81, status: "trusted" },
+      calibration: {
+        warnings: [],
+        calibratedConfidence: 73,
+        trustworthiness: 81,
+        status: "trusted",
+      },
       reliability: { score: 100, status: "healthy", confidenceCap: 100 },
-      strategy: { stage: "Paper trade", readinessScore: 86, maxConfidence: 73, maxPositionPct: 3.37 },
+      strategy: {
+        stage: "Paper trade",
+        readinessScore: 86,
+        maxConfidence: 73,
+        maxPositionPct: 3.37,
+      },
       survivalMemory: {
         status: "scarred",
         recommendation: "act_with_reduced_size",

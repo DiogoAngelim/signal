@@ -19,7 +19,13 @@
     "limitedBy": ["policy_gate", "confidence_threshold"],
     "cappedBy": [],
     "recommendations": [
-      { "targetId": "thin", "amount": 0, "normalizedCommitment": 0, "weight": 0, "mode": "none" }
+      {
+        "targetId": "thin",
+        "amount": 0,
+        "normalizedCommitment": 0,
+        "weight": 0,
+        "mode": "none"
+      }
     ]
   }
 }

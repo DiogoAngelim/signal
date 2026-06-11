@@ -9,12 +9,12 @@
  * 5. Compute deterministic score (100 if valid, else 0)
  */
 
-import { readState, stateExists } from "../state/stateStore.js";
-import { verifyState } from "../verifier/verifier.js";
-import { replayPhases } from "../replay/replayEngine.js";
-import { writeProof, PROOF_TYPES } from "../proofs/proofWriter.js";
 import { recomputePhaseHash } from "../core/hashChain.js";
+import { PROOF_TYPES, writeProof } from "../proofs/proofWriter.js";
+import { replayPhases } from "../replay/replayEngine.js";
+import { readState, stateExists } from "../state/stateStore.js";
 import type { SignalError } from "../state/types.js";
+import { verifyState } from "../verifier/verifier.js";
 
 /**
  * Execute the `signal audit` command.
@@ -22,7 +22,9 @@ import type { SignalError } from "../state/types.js";
  */
 export function executeAudit(root: string = process.cwd()): boolean {
   if (!stateExists(root)) {
-    console.error("SIGNAL: No .signal/state.json found. Run `signal init` first.");
+    console.error(
+      "SIGNAL: No .signal/state.json found. Run `signal init` first.",
+    );
     writeProof(
       PROOF_TYPES.AUDIT_PROOF,
       "FAIL",
@@ -85,7 +87,9 @@ export function executeAudit(root: string = process.cwd()): boolean {
   } else {
     console.log("  ✗ Replay integrity: INVALID");
     for (const m of replayResult.mismatches) {
-      console.log(`    Phase ${m.phase}: stored=${m.storedHash}, recomputed=${m.recomputedHash}`);
+      console.log(
+        `    Phase ${m.phase}: stored=${m.storedHash}, recomputed=${m.recomputedHash}`,
+      );
     }
   }
 
@@ -118,22 +122,24 @@ export function executeAudit(root: string = process.cwd()): boolean {
   // Invariant 1: state[i].previousHash === state[i-1].hash
   let chainInvariant = true;
   for (let i = 0; i < state.phases.length; i++) {
-    const phase = state.phases[i]!;
-    const expectedPrev = i === 0
-      ? "0000000000000000000000000000000000000000000000000000000000000000"
-      : state.phases[i - 1]!.hash;
+    const phase = state.phases[i];
+    if (!phase) continue;
+    const expectedPrev =
+      i === 0
+        ? "0000000000000000000000000000000000000000000000000000000000000000"
+        : state.phases[i - 1]?.hash;
     if (phase.previousHash !== expectedPrev) {
       chainInvariant = false;
       break;
     }
   }
-  invariants["chainLinkage"] = chainInvariant;
+  invariants.chainLinkage = chainInvariant;
 
   // Invariant 2: all hashes recomputed must match stored values
-  invariants["hashRecomputation"] = chainValid;
+  invariants.hashRecomputation = chainValid;
 
   // Invariant 3: replay produces identical results
-  invariants["replayConsistency"] = replayValid;
+  invariants.replayConsistency = replayValid;
 
   const allInvariantsHold = Object.values(invariants).every(Boolean);
   const deterministicScore = allInvariantsHold ? 100 : 0;

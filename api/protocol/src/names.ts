@@ -10,7 +10,7 @@ export const signalNameSchema = z
   .min(1)
   .regex(
     signalNamePattern,
-    "Signal names must use <domain>.<action>.<version> with lowercase dot-separated segments"
+    "Signal names must use <domain>.<action>.<version> with lowercase dot-separated segments",
   );
 
 export interface SignalNameParts {
@@ -31,7 +31,10 @@ export function parseSignalName(value: string): SignalNameParts {
     throw new Error(`Invalid Signal name: ${value}`);
   }
 
-  const groups = match.groups as Record<"domain" | "action" | "version", string>;
+  const groups = match.groups as Record<
+    "domain" | "action" | "version",
+    string
+  >;
 
   return {
     domain: groups.domain,
@@ -43,7 +46,7 @@ export function parseSignalName(value: string): SignalNameParts {
 export function createSignalName(
   domain: string,
   action: string,
-  version = "v1"
+  version = "v1",
 ): string {
   return `${domain}.${action}.${version}`;
 }

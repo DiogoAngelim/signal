@@ -67,7 +67,11 @@ export class ExecutionStateStore {
   }
 
   getDecisionByClientOrderId(clientOrderId: string) {
-    return this.records().decisions.find((decision) => decision.clientOrderId === clientOrderId) ?? null;
+    return (
+      this.records().decisions.find(
+        (decision) => decision.clientOrderId === clientOrderId,
+      ) ?? null
+    );
   }
 
   saveOrder(record: ExecutionOrderRecord) {
@@ -89,9 +93,13 @@ export class ExecutionStateStore {
   }
 
   findOrder(orderId: string) {
-    return this.orders.get(orderId) ??
-      Array.from(this.orders.values()).find((order) => order.clientOrderId === orderId) ??
-      null;
+    return (
+      this.orders.get(orderId) ??
+      Array.from(this.orders.values()).find(
+        (order) => order.clientOrderId === orderId,
+      ) ??
+      null
+    );
   }
 
   saveReservation(reservation: Reservation) {
@@ -115,7 +123,10 @@ export class ExecutionStateStore {
   releaseReservationsForDecision(decisionId: string) {
     const released: Reservation[] = [];
     for (const reservation of this.reservations.values()) {
-      if (reservation.decisionId === decisionId && reservation.status === "reserved") {
+      if (
+        reservation.decisionId === decisionId &&
+        reservation.status === "reserved"
+      ) {
         released.push(this.releaseReservation(reservation.id) as Reservation);
       }
     }
@@ -123,7 +134,9 @@ export class ExecutionStateStore {
   }
 
   activeReservations() {
-    return Array.from(this.reservations.values()).filter((reservation) => reservation.status === "reserved");
+    return Array.from(this.reservations.values()).filter(
+      (reservation) => reservation.status === "reserved",
+    );
   }
 
   saveSnapshot(snapshot: PositionSnapshot) {
@@ -174,7 +187,11 @@ export class ExecutionStateStore {
     };
   }
 
-  snapshot(mode: ExecutionMode, circuitBreaker: ExecutionStateSnapshot["circuitBreaker"], metrics: Record<string, number>): ExecutionStateSnapshot {
+  snapshot(
+    mode: ExecutionMode,
+    circuitBreaker: ExecutionStateSnapshot["circuitBreaker"],
+    metrics: Record<string, number>,
+  ): ExecutionStateSnapshot {
     return {
       mode,
       decisions: Array.from(this.decisions.values()),
@@ -191,10 +208,14 @@ export class ExecutionStateStore {
   private load() {
     try {
       if (!fs.existsSync(this.filePath)) return;
-      const parsed = JSON.parse(fs.readFileSync(this.filePath, "utf8")) as Partial<PersistedState>;
-      for (const decision of parsed.decisions ?? []) this.decisions.set(decision.decisionId, decision);
+      const parsed = JSON.parse(
+        fs.readFileSync(this.filePath, "utf8"),
+      ) as Partial<PersistedState>;
+      for (const decision of parsed.decisions ?? [])
+        this.decisions.set(decision.decisionId, decision);
       for (const order of parsed.orders ?? []) this.orders.set(order.id, order);
-      for (const reservation of parsed.reservations ?? []) this.reservations.set(reservation.id, reservation);
+      for (const reservation of parsed.reservations ?? [])
+        this.reservations.set(reservation.id, reservation);
       this.snapshots = Array.isArray(parsed.snapshots) ? parsed.snapshots : [];
       this.account = parsed.account ?? { ...EMPTY_ACCOUNT };
       this.killSwitch = parsed.killSwitch ?? this.killSwitch;

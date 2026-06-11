@@ -1,6 +1,10 @@
 import { clamp, mean, numeric, stdev } from "../math/statistics";
 import type { MeaningResult } from "../meaning/engine";
-import type { PruningCandidateAssessment, PruningRecommendedAction, PruningResult } from "../pruning/engine";
+import type {
+  PruningCandidateAssessment,
+  PruningRecommendedAction,
+  PruningResult,
+} from "../pruning/engine";
 
 export type WisdomDecisionStatus =
   | "approved"
@@ -49,7 +53,14 @@ export type WisdomAlternativeScenario = {
   id?: string;
   label?: string;
   action?: string;
-  kind?: "actual" | "do-nothing" | "wait" | "scale" | "reject" | "alternative" | string;
+  kind?:
+    | "actual"
+    | "do-nothing"
+    | "wait"
+    | "scale"
+    | "reject"
+    | "alternative"
+    | string;
   expectedReward?: number;
   expectedCost?: number;
   expectedRisk?: number;
@@ -84,7 +95,9 @@ export class DecisionOutcomeMemory {
   private records: DecisionOutcomeRecord[];
 
   constructor(records: DecisionOutcomeRecord[] = []) {
-    this.records = records.map((record, index) => normalizeRecord(record, index));
+    this.records = records.map((record, index) =>
+      normalizeRecord(record, index),
+    );
   }
 
   record(record: DecisionOutcomeRecord): DecisionOutcomeRecord {
@@ -102,7 +115,9 @@ export class DecisionOutcomeMemory {
   }
 
   load(records: DecisionOutcomeRecord[]): DecisionOutcomeRecord[] {
-    this.records = records.map((record, index) => normalizeRecord(record, index));
+    this.records = records.map((record, index) =>
+      normalizeRecord(record, index),
+    );
     return this.all();
   }
 
@@ -133,11 +148,19 @@ export type WisdomCounterfactualResult = {
   worstAlternative: WisdomReviewedScenario | null;
   reviewedAlternatives: WisdomReviewedScenario[];
   contributors: Record<
-    "decisionQuality" | "avoidedLoss" | "missedUpside" | "restrictionValue" | "counterfactualConfidence",
+    | "decisionQuality"
+    | "avoidedLoss"
+    | "missedUpside"
+    | "restrictionValue"
+    | "counterfactualConfidence",
     WisdomContributor[]
   >;
   scores: Record<
-    "decisionQuality" | "avoidedLoss" | "missedUpside" | "restrictionValue" | "counterfactualConfidence",
+    | "decisionQuality"
+    | "avoidedLoss"
+    | "missedUpside"
+    | "restrictionValue"
+    | "counterfactualConfidence",
     WisdomScoreAudit
   >;
   explanation: string;
@@ -182,11 +205,21 @@ export type OpportunityEconomicsResult = {
   opportunityCost: number;
   bestOption: "action" | "wait" | "reject" | "scale";
   contributors: Record<
-    "actionValue" | "waitValue" | "rejectValue" | "scaleValue" | "urgencyCost" | "opportunityCost",
+    | "actionValue"
+    | "waitValue"
+    | "rejectValue"
+    | "scaleValue"
+    | "urgencyCost"
+    | "opportunityCost",
     WisdomContributor[]
   >;
   scores: Record<
-    "actionValue" | "waitValue" | "rejectValue" | "scaleValue" | "urgencyCost" | "opportunityCost",
+    | "actionValue"
+    | "waitValue"
+    | "rejectValue"
+    | "scaleValue"
+    | "urgencyCost"
+    | "opportunityCost",
     WisdomScoreAudit
   >;
   explanation: string;
@@ -219,14 +252,24 @@ export type DiscoveryMaturityResult = {
   recurrenceRate: number;
   noveltyPersistence: number;
   conversionRate: number;
-  trustedDiscoveries: Array<{ id: string; stage: DiscoveryLifecycleStage; maturityScore: number }>;
+  trustedDiscoveries: Array<{
+    id: string;
+    stage: DiscoveryLifecycleStage;
+    maturityScore: number;
+  }>;
   lifecycle: Array<{ stage: DiscoveryLifecycleStage; count: number }>;
   contributors: Record<
-    "maturityScore" | "recurrenceRate" | "noveltyPersistence" | "conversionRate",
+    | "maturityScore"
+    | "recurrenceRate"
+    | "noveltyPersistence"
+    | "conversionRate",
     WisdomContributor[]
   >;
   scores: Record<
-    "maturityScore" | "recurrenceRate" | "noveltyPersistence" | "conversionRate",
+    | "maturityScore"
+    | "recurrenceRate"
+    | "noveltyPersistence"
+    | "conversionRate",
     WisdomScoreAudit
   >;
   explanation: string;
@@ -240,7 +283,13 @@ export type AgencyEffectivenessInput = {
 
 export type AgencyEffectivenessEvent = {
   id?: string;
-  action?: "approved" | "rejected" | "intervened" | "overridden" | "blocked" | string;
+  action?:
+    | "approved"
+    | "rejected"
+    | "intervened"
+    | "overridden"
+    | "blocked"
+    | string;
   proposedAction?: string;
   realizedResult?: WisdomOutcomeResult;
   baselineResult?: WisdomOutcomeResult;
@@ -256,11 +305,19 @@ export type AgencyEffectivenessResult = {
   rejectionQuality: number;
   governanceEffectiveness: number;
   contributors: Record<
-    "agencyAccuracy" | "interventionValue" | "approvalQuality" | "rejectionQuality" | "governanceEffectiveness",
+    | "agencyAccuracy"
+    | "interventionValue"
+    | "approvalQuality"
+    | "rejectionQuality"
+    | "governanceEffectiveness",
     WisdomContributor[]
   >;
   scores: Record<
-    "agencyAccuracy" | "interventionValue" | "approvalQuality" | "rejectionQuality" | "governanceEffectiveness",
+    | "agencyAccuracy"
+    | "interventionValue"
+    | "approvalQuality"
+    | "rejectionQuality"
+    | "governanceEffectiveness",
     WisdomScoreAudit
   >;
   explanation: string;
@@ -275,7 +332,9 @@ export type PortfolioIntelligenceInput = {
     usedCapital?: number;
     maxAllocationPerOpportunity?: number;
   };
-  correlationStructure?: WisdomCorrelation[] | Record<string, Record<string, number>>;
+  correlationStructure?:
+    | WisdomCorrelation[]
+    | Record<string, Record<string, number>>;
   riskProfile?: {
     riskTolerance?: number;
     concentrationLimit?: number;
@@ -363,8 +422,14 @@ export type DecisionQualityResult = {
   discoveryMaturity: DiscoveryMaturityResult;
   agencyEffectiveness: AgencyEffectivenessResult;
   portfolioIntelligence: PortfolioIntelligenceResult;
-  contributors: Record<"decisionQuality" | "wisdomScore" | "learningConfidence", WisdomContributor[]>;
-  scores: Record<"decisionQuality" | "wisdomScore" | "learningConfidence", WisdomScoreAudit>;
+  contributors: Record<
+    "decisionQuality" | "wisdomScore" | "learningConfidence",
+    WisdomContributor[]
+  >;
+  scores: Record<
+    "decisionQuality" | "wisdomScore" | "learningConfidence",
+    WisdomScoreAudit
+  >;
   sourceModules: string[];
   justifiedConfidence: number;
   falseConfidenceRisk: number;
@@ -411,7 +476,13 @@ export type WisdomSummary = {
   };
   opportunityEconomics: Pick<
     OpportunityEconomicsResult,
-    "actionValue" | "waitValue" | "rejectValue" | "scaleValue" | "urgencyCost" | "opportunityCost" | "bestOption"
+    | "actionValue"
+    | "waitValue"
+    | "rejectValue"
+    | "scaleValue"
+    | "urgencyCost"
+    | "opportunityCost"
+    | "bestOption"
   >;
   discoveryMaturity: {
     maturityScore: number;
@@ -423,7 +494,11 @@ export type WisdomSummary = {
   };
   agencyEffectiveness: Pick<
     AgencyEffectivenessResult,
-    "agencyAccuracy" | "interventionValue" | "approvalQuality" | "rejectionQuality" | "governanceEffectiveness"
+    | "agencyAccuracy"
+    | "interventionValue"
+    | "approvalQuality"
+    | "rejectionQuality"
+    | "governanceEffectiveness"
   >;
   portfolioIntelligence: Pick<
     PortfolioIntelligenceResult,
@@ -447,12 +522,24 @@ export type WisdomSummaryInput = Partial<DecisionQualityInput> & {
 
 export type WisdomEngine = {
   memory: DecisionOutcomeMemory;
-  evaluateDecisionQuality: (input?: DecisionQualityInput) => DecisionQualityResult;
-  evaluateCounterfactuals: (input?: WisdomCounterfactualInput) => WisdomCounterfactualResult;
-  evaluateOpportunityEconomics: (input?: OpportunityEconomicsInput) => OpportunityEconomicsResult;
-  evaluateDiscoveryMaturity: (input?: DiscoveryMaturityInput) => DiscoveryMaturityResult;
-  evaluateAgencyEffectiveness: (input?: AgencyEffectivenessInput) => AgencyEffectivenessResult;
-  evaluatePortfolioIntelligence: (input?: PortfolioIntelligenceInput) => PortfolioIntelligenceResult;
+  evaluateDecisionQuality: (
+    input?: DecisionQualityInput,
+  ) => DecisionQualityResult;
+  evaluateCounterfactuals: (
+    input?: WisdomCounterfactualInput,
+  ) => WisdomCounterfactualResult;
+  evaluateOpportunityEconomics: (
+    input?: OpportunityEconomicsInput,
+  ) => OpportunityEconomicsResult;
+  evaluateDiscoveryMaturity: (
+    input?: DiscoveryMaturityInput,
+  ) => DiscoveryMaturityResult;
+  evaluateAgencyEffectiveness: (
+    input?: AgencyEffectivenessInput,
+  ) => AgencyEffectivenessResult;
+  evaluatePortfolioIntelligence: (
+    input?: PortfolioIntelligenceInput,
+  ) => PortfolioIntelligenceResult;
   recordOutcome: (record: DecisionOutcomeRecord) => RecordOutcomeResult;
   buildWisdomSummary: (input?: WisdomSummaryInput) => WisdomSummary;
 };
@@ -464,56 +551,100 @@ export type RecordOutcomeResult = {
   memorySize: number;
 };
 
-export function createDecisionOutcomeMemory(records: DecisionOutcomeRecord[] = []) {
+export function createDecisionOutcomeMemory(
+  records: DecisionOutcomeRecord[] = [],
+) {
   return new DecisionOutcomeMemory(records);
 }
 
-export function createWisdom(input: { memory?: DecisionOutcomeMemory | DecisionOutcomeRecord[] } = {}): WisdomEngine {
+export function createWisdom(
+  input: { memory?: DecisionOutcomeMemory | DecisionOutcomeRecord[] } = {},
+): WisdomEngine {
   const memory = Array.isArray(input.memory)
     ? createDecisionOutcomeMemory(input.memory)
-    : input.memory ?? createDecisionOutcomeMemory();
+    : (input.memory ?? createDecisionOutcomeMemory());
 
   return {
     memory,
     evaluateDecisionQuality: (qualityInput = {}) =>
-      evaluateDecisionQuality({ ...qualityInput, history: qualityInput.history ?? memory.all() }),
+      evaluateDecisionQuality({
+        ...qualityInput,
+        history: qualityInput.history ?? memory.all(),
+      }),
     evaluateCounterfactuals: (counterfactualInput = {}) =>
-      evaluateCounterfactuals({ ...counterfactualInput, history: counterfactualInput.history ?? memory.all() }),
+      evaluateCounterfactuals({
+        ...counterfactualInput,
+        history: counterfactualInput.history ?? memory.all(),
+      }),
     evaluateOpportunityEconomics,
     evaluateDiscoveryMaturity,
     evaluateAgencyEffectiveness: (agencyInput = {}) =>
-      evaluateAgencyEffectiveness({ ...agencyInput, history: agencyInput.history ?? memory.all() }),
+      evaluateAgencyEffectiveness({
+        ...agencyInput,
+        history: agencyInput.history ?? memory.all(),
+      }),
     evaluatePortfolioIntelligence,
-    recordOutcome: (record: DecisionOutcomeRecord) => recordOutcome({ memory, record }),
+    recordOutcome: (record: DecisionOutcomeRecord) =>
+      recordOutcome({ memory, record }),
     buildWisdomSummary: (summaryInput = {}) =>
-      buildWisdomSummary({ ...summaryInput, records: summaryInput.records ?? memory.all() }),
+      buildWisdomSummary({
+        ...summaryInput,
+        records: summaryInput.records ?? memory.all(),
+      }),
   };
 }
 
-export function evaluateCounterfactuals(input: WisdomCounterfactualInput = {}): WisdomCounterfactualResult {
+export function evaluateCounterfactuals(
+  input: WisdomCounterfactualInput = {},
+): WisdomCounterfactualResult {
   const record = input.decision ?? recordFromCounterfactualInput(input);
   const actualOutcome = reviewActualScenario(record, input);
-  const reviewedAlternatives = (record.alternatives ?? []).map((alternative, index) =>
-    reviewAlternativeScenario(alternative, index),
+  const reviewedAlternatives = (record.alternatives ?? []).map(
+    (alternative, index) => reviewAlternativeScenario(alternative, index),
   );
   const allScenarios = [actualOutcome, ...reviewedAlternatives];
-  const bestAlternative = reviewedAlternatives.length ? maxBy(reviewedAlternatives, (scenario) => scenario.utility) : null;
-  const worstAlternative = reviewedAlternatives.length ? minBy(reviewedAlternatives, (scenario) => scenario.utility) : null;
-  const bestUtility = maxBy(allScenarios, (scenario) => scenario.utility).utility;
-  const worstUtility = minBy(allScenarios, (scenario) => scenario.utility).utility;
+  const bestAlternative = reviewedAlternatives.length
+    ? maxBy(reviewedAlternatives, (scenario) => scenario.utility)
+    : null;
+  const worstAlternative = reviewedAlternatives.length
+    ? minBy(reviewedAlternatives, (scenario) => scenario.utility)
+    : null;
+  const bestUtility = maxBy(
+    allScenarios,
+    (scenario) => scenario.utility,
+  ).utility;
+  const worstUtility = minBy(
+    allScenarios,
+    (scenario) => scenario.utility,
+  ).utility;
   const spread = Math.max(0.0001, bestUtility - worstUtility);
-  const valueScale = input.valueScale ?? scaleFor(allScenarios.map((scenario) => scenario.utility));
-  const alternativeBestUtility = bestAlternative?.utility ?? actualOutcome.utility;
+  const valueScale =
+    input.valueScale ??
+    scaleFor(allScenarios.map((scenario) => scenario.utility));
+  const alternativeBestUtility =
+    bestAlternative?.utility ?? actualOutcome.utility;
   const alternativeWorstAdverse = reviewedAlternatives.length
-    ? Math.max(...reviewedAlternatives.map((scenario) => scenario.adverseImpact))
+    ? Math.max(
+        ...reviewedAlternatives.map((scenario) => scenario.adverseImpact),
+      )
     : actualOutcome.adverseImpact;
-  const missedUpsideRaw = Math.max(0, alternativeBestUtility - actualOutcome.utility);
-  const avoidedLossRaw = Math.max(0, alternativeWorstAdverse - actualOutcome.adverseImpact);
-  const decisionQuality = roundScore(((actualOutcome.utility - worstUtility) / spread) * 100);
+  const missedUpsideRaw = Math.max(
+    0,
+    alternativeBestUtility - actualOutcome.utility,
+  );
+  const avoidedLossRaw = Math.max(
+    0,
+    alternativeWorstAdverse - actualOutcome.adverseImpact,
+  );
+  const decisionQuality = roundScore(
+    ((actualOutcome.utility - worstUtility) / spread) * 100,
+  );
   const missedUpside = roundScore((missedUpsideRaw / valueScale) * 100);
   const avoidedLoss = roundScore((avoidedLossRaw / valueScale) * 100);
   const restricted = isRestricted(record.status);
-  const restrictionValue = roundScore(50 + (avoidedLoss - missedUpside) * (restricted ? 0.5 : 0.25));
+  const restrictionValue = roundScore(
+    50 + (avoidedLoss - missedUpside) * (restricted ? 0.5 : 0.25),
+  );
   const counterfactualConfidence = counterfactualConfidenceFor({
     alternatives: reviewedAlternatives,
     history: input.history ?? [],
@@ -524,43 +655,124 @@ export function evaluateCounterfactuals(input: WisdomCounterfactualInput = {}): 
       decisionQuality,
       "decisionQuality = actual utility rank between worst and best observed or counterfactual scenario",
       [
-        contributor("actual-utility", "Actual utility", actualOutcome.utility, 0.55, "Realized or expected utility of the chosen action."),
-        contributor("best-utility", "Best scenario utility", bestUtility, 0.25, "Highest utility among actual and alternatives."),
-        contributor("worst-utility", "Worst scenario utility", worstUtility, 0.2, "Lowest utility among actual and alternatives."),
+        contributor(
+          "actual-utility",
+          "Actual utility",
+          actualOutcome.utility,
+          0.55,
+          "Realized or expected utility of the chosen action.",
+        ),
+        contributor(
+          "best-utility",
+          "Best scenario utility",
+          bestUtility,
+          0.25,
+          "Highest utility among actual and alternatives.",
+        ),
+        contributor(
+          "worst-utility",
+          "Worst scenario utility",
+          worstUtility,
+          0.2,
+          "Lowest utility among actual and alternatives.",
+        ),
       ],
     ),
     avoidedLoss: audit(
       avoidedLoss,
       "avoidedLoss = normalized adverse impact avoided versus the worst alternative",
       [
-        contributor("alternative-adverse-impact", "Worst alternative adverse impact", alternativeWorstAdverse, 0.6, "Largest adverse impact among alternatives."),
-        contributor("actual-adverse-impact", "Actual adverse impact", actualOutcome.adverseImpact, 0.4, "Adverse impact of the selected action."),
+        contributor(
+          "alternative-adverse-impact",
+          "Worst alternative adverse impact",
+          alternativeWorstAdverse,
+          0.6,
+          "Largest adverse impact among alternatives.",
+        ),
+        contributor(
+          "actual-adverse-impact",
+          "Actual adverse impact",
+          actualOutcome.adverseImpact,
+          0.4,
+          "Adverse impact of the selected action.",
+        ),
       ],
     ),
     missedUpside: audit(
       missedUpside,
       "missedUpside = normalized gap between best alternative utility and actual utility",
       [
-        contributor("best-alternative", "Best alternative utility", alternativeBestUtility, 0.65, "Best utility available in non-selected scenarios."),
-        contributor("actual-utility", "Actual utility", actualOutcome.utility, 0.35, "Utility of the selected action."),
+        contributor(
+          "best-alternative",
+          "Best alternative utility",
+          alternativeBestUtility,
+          0.65,
+          "Best utility available in non-selected scenarios.",
+        ),
+        contributor(
+          "actual-utility",
+          "Actual utility",
+          actualOutcome.utility,
+          0.35,
+          "Utility of the selected action.",
+        ),
       ],
     ),
     restrictionValue: audit(
       restrictionValue,
       "restrictionValue = 50 + avoided loss minus missed upside, weighted by whether a restriction was active",
       [
-        contributor("avoided-loss", "Avoided loss", avoidedLoss, 0.5, "Protection created by the restriction."),
-        contributor("missed-upside", "Missed upside", missedUpside, -0.5, "Opportunity sacrificed by the restriction."),
-        contributor("restriction-active", "Restriction active", restricted ? 100 : 0, 0.15, "Whether the decision was blocked, delayed, reduced, or rejected."),
+        contributor(
+          "avoided-loss",
+          "Avoided loss",
+          avoidedLoss,
+          0.5,
+          "Protection created by the restriction.",
+        ),
+        contributor(
+          "missed-upside",
+          "Missed upside",
+          missedUpside,
+          -0.5,
+          "Opportunity sacrificed by the restriction.",
+        ),
+        contributor(
+          "restriction-active",
+          "Restriction active",
+          restricted ? 100 : 0,
+          0.15,
+          "Whether the decision was blocked, delayed, reduced, or rejected.",
+        ),
       ],
     ),
     counterfactualConfidence: audit(
       counterfactualConfidence,
       "counterfactualConfidence = outcome coverage plus memory depth minus scenario dispersion",
       [
-        contributor("coverage", "Alternative outcome coverage", coverageFor(reviewedAlternatives), 0.45, "Share of alternatives with realized or counterfactual outcomes."),
-        contributor("memory-depth", "Memory depth", Math.min(100, (input.history ?? []).length * 5), 0.35, "Prior outcome records available for learning."),
-        contributor("consistency", "Scenario consistency", Math.max(0, 100 - stdev(allScenarios.map((scenario) => scenario.utility)) * 8), 0.2, "Lower utility dispersion increases confidence."),
+        contributor(
+          "coverage",
+          "Alternative outcome coverage",
+          coverageFor(reviewedAlternatives),
+          0.45,
+          "Share of alternatives with realized or counterfactual outcomes.",
+        ),
+        contributor(
+          "memory-depth",
+          "Memory depth",
+          Math.min(100, (input.history ?? []).length * 5),
+          0.35,
+          "Prior outcome records available for learning.",
+        ),
+        contributor(
+          "consistency",
+          "Scenario consistency",
+          Math.max(
+            0,
+            100 - stdev(allScenarios.map((scenario) => scenario.utility)) * 8,
+          ),
+          0.2,
+          "Lower utility dispersion increases confidence.",
+        ),
       ],
     ),
   };
@@ -577,12 +789,19 @@ export function evaluateCounterfactuals(input: WisdomCounterfactualInput = {}): 
     reviewedAlternatives,
     contributors: contributorsFrom(scores),
     scores,
-    explanation: counterfactualExplanation(decisionQuality, avoidedLoss, missedUpside, restrictionValue),
+    explanation: counterfactualExplanation(
+      decisionQuality,
+      avoidedLoss,
+      missedUpside,
+      restrictionValue,
+    ),
     formulas: Object.values(scores).map((score) => score.formula),
   };
 }
 
-export function evaluateOpportunityEconomics(input: OpportunityEconomicsInput = {}): OpportunityEconomicsResult {
+export function evaluateOpportunityEconomics(
+  input: OpportunityEconomicsInput = {},
+): OpportunityEconomicsResult {
   const riskPenalty = numeric(input.riskPenalty, 1);
   const options = {
     action: economicValue("action", input.action, riskPenalty),
@@ -590,11 +809,21 @@ export function evaluateOpportunityEconomics(input: OpportunityEconomicsInput = 
     reject: economicValue("reject", input.reject, riskPenalty),
     scale: economicValue("scale", input.scale, riskPenalty),
   };
-  const ordered = Object.entries(options) as Array<[OpportunityEconomicsResult["bestOption"], ReturnType<typeof economicValue>]>;
-  const bestOption = ordered.sort((left, right) => right[1].utility - left[1].utility)[0][0];
+  const ordered = Object.entries(options) as Array<
+    [OpportunityEconomicsResult["bestOption"], ReturnType<typeof economicValue>]
+  >;
+  const bestOption = ordered.sort(
+    (left, right) => right[1].utility - left[1].utility,
+  )[0][0];
   const selected = selectedEconomicsKey(input.selected);
-  const urgencyCost = Math.max(0, options.action.utility - options.wait.utility);
-  const opportunityCost = Math.max(0, options[bestOption].utility - options[selected].utility);
+  const urgencyCost = Math.max(
+    0,
+    options.action.utility - options.wait.utility,
+  );
+  const opportunityCost = Math.max(
+    0,
+    options[bestOption].utility - options[selected].utility,
+  );
   const scores = {
     actionValue: optionAudit(options.action),
     waitValue: optionAudit(options.wait),
@@ -604,16 +833,40 @@ export function evaluateOpportunityEconomics(input: OpportunityEconomicsInput = 
       roundNumber(urgencyCost),
       "urgencyCost = max(0, action value - wait value)",
       [
-        contributor("action-value", "Action value", options.action.utility, 0.5, "Expected utility of acting now."),
-        contributor("wait-value", "Wait value", options.wait.utility, -0.5, "Expected utility of waiting."),
+        contributor(
+          "action-value",
+          "Action value",
+          options.action.utility,
+          0.5,
+          "Expected utility of acting now.",
+        ),
+        contributor(
+          "wait-value",
+          "Wait value",
+          options.wait.utility,
+          -0.5,
+          "Expected utility of waiting.",
+        ),
       ],
     ),
     opportunityCost: audit(
       roundNumber(opportunityCost),
       "opportunityCost = max(0, best option value - selected option value)",
       [
-        contributor("best-option", "Best option value", options[bestOption].utility, 0.6, `Best option is ${bestOption}.`),
-        contributor("selected-option", "Selected option value", options[selected].utility, -0.4, `Selected option is ${selected}.`),
+        contributor(
+          "best-option",
+          "Best option value",
+          options[bestOption].utility,
+          0.6,
+          `Best option is ${bestOption}.`,
+        ),
+        contributor(
+          "selected-option",
+          "Selected option value",
+          options[selected].utility,
+          -0.4,
+          `Selected option is ${selected}.`,
+        ),
       ],
     ),
   };
@@ -633,52 +886,123 @@ export function evaluateOpportunityEconomics(input: OpportunityEconomicsInput = 
   };
 }
 
-export function evaluateDiscoveryMaturity(input: DiscoveryMaturityInput = {}): DiscoveryMaturityResult {
+export function evaluateDiscoveryMaturity(
+  input: DiscoveryMaturityInput = {},
+): DiscoveryMaturityResult {
   const discoveries = input.discoveries ?? [];
   const now = deterministicNow(discoveries, input.now);
-  const reviewed = discoveries.map((discovery, index) => reviewDiscovery(discovery, index, now));
+  const reviewed = discoveries.map((discovery, index) =>
+    reviewDiscovery(discovery, index, now),
+  );
   const recurrenceRate = pct(
     reviewed.reduce((sum, item) => sum + item.recurrences, 0),
     reviewed.reduce((sum, item) => sum + Math.max(1, item.observations), 0),
     0,
   );
-  const noveltyPersistence = roundScore(mean(reviewed.map((item) => item.noveltyPersistence)));
+  const noveltyPersistence = roundScore(
+    mean(reviewed.map((item) => item.noveltyPersistence)),
+  );
   const conversionRate = pct(
     reviewed.reduce((sum, item) => sum + item.successes, 0),
     reviewed.reduce((sum, item) => sum + item.conversions, 0),
     0,
   );
-  const maturityScore = roundScore(mean(reviewed.map((item) => item.maturityScore)));
+  const maturityScore = roundScore(
+    mean(reviewed.map((item) => item.maturityScore)),
+  );
   const trustedDiscoveries = reviewed
-    .filter((item) => item.stage === "Trusted" || item.stage === "Institutional" || item.maturityScore >= 75)
-    .map((item) => ({ id: item.id, stage: item.stage, maturityScore: item.maturityScore }));
+    .filter(
+      (item) =>
+        item.stage === "Trusted" ||
+        item.stage === "Institutional" ||
+        item.maturityScore >= 75,
+    )
+    .map((item) => ({
+      id: item.id,
+      stage: item.stage,
+      maturityScore: item.maturityScore,
+    }));
   const lifecycle = lifecycleCounts(reviewed.map((item) => item.stage));
   const scores = {
     maturityScore: audit(
       maturityScore,
       "maturityScore = average lifecycle maturity from age, confirmation, recurrence, novelty persistence, and conversion",
       [
-        contributor("age", "Discovery age", mean(reviewed.map((item) => item.ageScore)), 0.18, "Older discoveries have had more time to prove or decay."),
-        contributor("confirmation", "Confirmations", mean(reviewed.map((item) => item.confirmationScore)), 0.26, "Evidence-backed confirmations replace raw confidence."),
-        contributor("recurrence", "Recurrence", recurrenceRate, 0.22, "Recurring discoveries are more mature than isolated discoveries."),
-        contributor("conversion", "Conversion", conversionRate, 0.22, "Confirmed discoveries must convert into useful outcomes."),
-        contributor("novelty", "Novelty persistence", noveltyPersistence, 0.12, "Novelty should persist without being merely fresh."),
+        contributor(
+          "age",
+          "Discovery age",
+          mean(reviewed.map((item) => item.ageScore)),
+          0.18,
+          "Older discoveries have had more time to prove or decay.",
+        ),
+        contributor(
+          "confirmation",
+          "Confirmations",
+          mean(reviewed.map((item) => item.confirmationScore)),
+          0.26,
+          "Evidence-backed confirmations replace raw confidence.",
+        ),
+        contributor(
+          "recurrence",
+          "Recurrence",
+          recurrenceRate,
+          0.22,
+          "Recurring discoveries are more mature than isolated discoveries.",
+        ),
+        contributor(
+          "conversion",
+          "Conversion",
+          conversionRate,
+          0.22,
+          "Confirmed discoveries must convert into useful outcomes.",
+        ),
+        contributor(
+          "novelty",
+          "Novelty persistence",
+          noveltyPersistence,
+          0.12,
+          "Novelty should persist without being merely fresh.",
+        ),
       ],
     ),
     recurrenceRate: audit(
       recurrenceRate,
       "recurrenceRate = recurrence count divided by observation count",
-      [contributor("recurrence-rate", "Recurrence rate", recurrenceRate, 1, "How often detections recur across observations.")],
+      [
+        contributor(
+          "recurrence-rate",
+          "Recurrence rate",
+          recurrenceRate,
+          1,
+          "How often detections recur across observations.",
+        ),
+      ],
     ),
     noveltyPersistence: audit(
       noveltyPersistence,
       "noveltyPersistence = novelty after deterministic age decay",
-      [contributor("novelty-persistence", "Novelty persistence", noveltyPersistence, 1, "Novel discoveries retain value only if novelty persists.")],
+      [
+        contributor(
+          "novelty-persistence",
+          "Novelty persistence",
+          noveltyPersistence,
+          1,
+          "Novel discoveries retain value only if novelty persists.",
+        ),
+      ],
     ),
     conversionRate: audit(
       conversionRate,
       "conversionRate = successful conversions divided by conversion opportunities",
-      [contributor("conversion-rate", "Conversion rate", conversionRate, 1, "How often discoveries become useful decisions.")],
+      [
+        contributor(
+          "conversion-rate",
+          "Conversion rate",
+          conversionRate,
+          1,
+          "How often discoveries become useful decisions.",
+        ),
+      ],
     ),
   };
 
@@ -698,54 +1022,139 @@ export function evaluateDiscoveryMaturity(input: DiscoveryMaturityInput = {}): D
   };
 }
 
-export function evaluateAgencyEffectiveness(input: AgencyEffectivenessInput = {}): AgencyEffectivenessResult {
+export function evaluateAgencyEffectiveness(
+  input: AgencyEffectivenessInput = {},
+): AgencyEffectivenessResult {
   const events = input.events ?? agencyEventsFromHistory(input.history ?? []);
-  const approvals = events.filter((event) => normalized(event.action) === "approved");
-  const rejections = events.filter((event) => ["rejected", "blocked"].includes(normalized(event.action)));
-  const interventions = events.filter((event) => ["intervened", "overridden"].includes(normalized(event.action)) || event.override === true);
-  const approvalQuality = qualityScore(approvals.map((event) => outcomeUtility(event.realizedResult)));
-  const rejectionQuality = qualityScore(rejections.map((event) => rejectionDelta(event)));
-  const interventionValue = qualityScore(interventions.map((event) => interventionDelta(event)));
-  const accuracySamples = events.map((event) => agencyCorrectness(event)).filter(Number.isFinite);
+  const approvals = events.filter(
+    (event) => normalized(event.action) === "approved",
+  );
+  const rejections = events.filter((event) =>
+    ["rejected", "blocked"].includes(normalized(event.action)),
+  );
+  const interventions = events.filter(
+    (event) =>
+      ["intervened", "overridden"].includes(normalized(event.action)) ||
+      event.override === true,
+  );
+  const approvalQuality = qualityScore(
+    approvals.map((event) => outcomeUtility(event.realizedResult)),
+  );
+  const rejectionQuality = qualityScore(
+    rejections.map((event) => rejectionDelta(event)),
+  );
+  const interventionValue = qualityScore(
+    interventions.map((event) => interventionDelta(event)),
+  );
+  const accuracySamples = events
+    .map((event) => agencyCorrectness(event))
+    .filter(Number.isFinite);
   const agencyAccuracy = roundScore(mean(accuracySamples));
-  const frictionPenalty = roundScore(mean(events.map((event) => Math.max(0, numeric(event.frictionCost, 0)))) * 5);
-  const governanceEffectiveness = roundScore(mean([
-    agencyAccuracy,
-    interventionValue,
-    approvalQuality,
-    rejectionQuality,
-    Math.max(0, 100 - frictionPenalty),
-  ]));
+  const frictionPenalty = roundScore(
+    mean(events.map((event) => Math.max(0, numeric(event.frictionCost, 0)))) *
+      5,
+  );
+  const governanceEffectiveness = roundScore(
+    mean([
+      agencyAccuracy,
+      interventionValue,
+      approvalQuality,
+      rejectionQuality,
+      Math.max(0, 100 - frictionPenalty),
+    ]),
+  );
   const scores = {
     agencyAccuracy: audit(
       agencyAccuracy,
       "agencyAccuracy = share of Agency decisions whose eventual utility direction was correct",
-      [contributor("accuracy", "Decision accuracy", agencyAccuracy, 1, "Approvals should be useful; rejections and blocks should avoid worse outcomes.")],
+      [
+        contributor(
+          "accuracy",
+          "Decision accuracy",
+          agencyAccuracy,
+          1,
+          "Approvals should be useful; rejections and blocks should avoid worse outcomes.",
+        ),
+      ],
     ),
     interventionValue: audit(
       interventionValue,
       "interventionValue = normalized improvement of intervention outcomes over baseline outcomes",
-      [contributor("intervention-value", "Intervention value", interventionValue, 1, "Whether Agency interventions improved outcomes rather than only adding friction.")],
+      [
+        contributor(
+          "intervention-value",
+          "Intervention value",
+          interventionValue,
+          1,
+          "Whether Agency interventions improved outcomes rather than only adding friction.",
+        ),
+      ],
     ),
     approvalQuality: audit(
       approvalQuality,
       "approvalQuality = normalized utility of approved decisions",
-      [contributor("approval-quality", "Approval quality", approvalQuality, 1, "Quality of Agency approvals with realized outcomes.")],
+      [
+        contributor(
+          "approval-quality",
+          "Approval quality",
+          approvalQuality,
+          1,
+          "Quality of Agency approvals with realized outcomes.",
+        ),
+      ],
     ),
     rejectionQuality: audit(
       rejectionQuality,
       "rejectionQuality = normalized avoided utility loss from rejected or blocked decisions",
-      [contributor("rejection-quality", "Rejection quality", rejectionQuality, 1, "Quality of Agency rejections and blocks.")],
+      [
+        contributor(
+          "rejection-quality",
+          "Rejection quality",
+          rejectionQuality,
+          1,
+          "Quality of Agency rejections and blocks.",
+        ),
+      ],
     ),
     governanceEffectiveness: audit(
       governanceEffectiveness,
       "governanceEffectiveness = mean accuracy, intervention value, approval quality, rejection quality, and low friction",
       [
-        contributor("accuracy", "Agency accuracy", agencyAccuracy, 0.25, "Outcome-direction correctness."),
-        contributor("intervention", "Intervention value", interventionValue, 0.25, "Value added by interventions."),
-        contributor("approval", "Approval quality", approvalQuality, 0.2, "Quality of approvals."),
-        contributor("rejection", "Rejection quality", rejectionQuality, 0.2, "Quality of rejections."),
-        contributor("friction", "Friction control", Math.max(0, 100 - frictionPenalty), 0.1, "Governance should not create unnecessary cost."),
+        contributor(
+          "accuracy",
+          "Agency accuracy",
+          agencyAccuracy,
+          0.25,
+          "Outcome-direction correctness.",
+        ),
+        contributor(
+          "intervention",
+          "Intervention value",
+          interventionValue,
+          0.25,
+          "Value added by interventions.",
+        ),
+        contributor(
+          "approval",
+          "Approval quality",
+          approvalQuality,
+          0.2,
+          "Quality of approvals.",
+        ),
+        contributor(
+          "rejection",
+          "Rejection quality",
+          rejectionQuality,
+          0.2,
+          "Quality of rejections.",
+        ),
+        contributor(
+          "friction",
+          "Friction control",
+          Math.max(0, 100 - frictionPenalty),
+          0.1,
+          "Governance should not create unnecessary cost.",
+        ),
       ],
     ),
   };
@@ -758,72 +1167,174 @@ export function evaluateAgencyEffectiveness(input: AgencyEffectivenessInput = {}
     governanceEffectiveness,
     contributors: contributorsFrom(scores),
     scores,
-    explanation: governanceEffectiveness >= 60
-      ? "Agency is adding measurable decision value."
-      : "Agency is not yet proving enough value over its friction cost.",
+    explanation:
+      governanceEffectiveness >= 60
+        ? "Agency is adding measurable decision value."
+        : "Agency is not yet proving enough value over its friction cost.",
     formulas: Object.values(scores).map((score) => score.formula),
   };
 }
 
-export function evaluatePortfolioIntelligence(input: PortfolioIntelligenceInput = {}): PortfolioIntelligenceResult {
+export function evaluatePortfolioIntelligence(
+  input: PortfolioIntelligenceInput = {},
+): PortfolioIntelligenceResult {
   const opportunities = input.opportunities ?? [];
   const allocations = allocationsFor(input.currentAllocations, opportunities);
-  const totalCapital = totalCapitalFor(input.capitalConstraints, allocations, opportunities);
-  const weights = allocations.map((allocation) => totalCapital > 0 ? allocation.amount / totalCapital : 0);
+  const totalCapital = totalCapitalFor(
+    input.capitalConstraints,
+    allocations,
+    opportunities,
+  );
+  const weights = allocations.map((allocation) =>
+    totalCapital > 0 ? allocation.amount / totalCapital : 0,
+  );
   const hhi = weights.reduce((sum, weight) => sum + weight ** 2, 0);
   const concentrationRisk = roundScore(hhi * 100);
   const averageCorrelation = averageCorrelationFor(input.correlationStructure);
   const groupBalance = groupBalanceFor(opportunities, allocations);
-  const diversificationQuality = roundScore(100 - concentrationRisk * 0.55 - averageCorrelation * 35 + groupBalance * 0.25);
-  const capitalEfficiency = roundScore(50 + averageAllocatedUtility(opportunities, allocations) * 10);
-  const opportunityCoverage = coverageScoreFor(opportunities, allocations, input.riskProfile?.minimumCoverage);
+  const diversificationQuality = roundScore(
+    100 -
+      concentrationRisk * 0.55 -
+      averageCorrelation * 35 +
+      groupBalance * 0.25,
+  );
+  const capitalEfficiency = roundScore(
+    50 + averageAllocatedUtility(opportunities, allocations) * 10,
+  );
+  const opportunityCoverage = coverageScoreFor(
+    opportunities,
+    allocations,
+    input.riskProfile?.minimumCoverage,
+  );
   const portfolioConvexity = convexityScoreFor(opportunities, allocations);
-  const allocationQuality = roundScore(mean([
-    Math.max(0, 100 - concentrationRisk),
-    diversificationQuality,
-    capitalEfficiency,
-    opportunityCoverage,
-    portfolioConvexity,
-  ]));
+  const allocationQuality = roundScore(
+    mean([
+      Math.max(0, 100 - concentrationRisk),
+      diversificationQuality,
+      capitalEfficiency,
+      opportunityCoverage,
+      portfolioConvexity,
+    ]),
+  );
   const scores = {
     concentrationRisk: audit(
       concentrationRisk,
       "concentrationRisk = Herfindahl allocation concentration",
-      [contributor("hhi", "Allocation concentration", concentrationRisk, 1, "Higher concentration means less diversified capital use.")],
+      [
+        contributor(
+          "hhi",
+          "Allocation concentration",
+          concentrationRisk,
+          1,
+          "Higher concentration means less diversified capital use.",
+        ),
+      ],
     ),
     diversificationQuality: audit(
       diversificationQuality,
       "diversificationQuality = concentration control plus group balance minus correlation pressure",
       [
-        contributor("concentration", "Concentration control", Math.max(0, 100 - concentrationRisk), 0.45, "Lower concentration improves diversification."),
-        contributor("correlation", "Correlation control", Math.max(0, 100 - averageCorrelation * 100), 0.35, "Lower correlation improves diversification."),
-        contributor("group-balance", "Group balance", groupBalance, 0.2, "Capital spread across opportunity groups."),
+        contributor(
+          "concentration",
+          "Concentration control",
+          Math.max(0, 100 - concentrationRisk),
+          0.45,
+          "Lower concentration improves diversification.",
+        ),
+        contributor(
+          "correlation",
+          "Correlation control",
+          Math.max(0, 100 - averageCorrelation * 100),
+          0.35,
+          "Lower correlation improves diversification.",
+        ),
+        contributor(
+          "group-balance",
+          "Group balance",
+          groupBalance,
+          0.2,
+          "Capital spread across opportunity groups.",
+        ),
       ],
     ),
     capitalEfficiency: audit(
       capitalEfficiency,
       "capitalEfficiency = normalized expected utility per allocated capital",
-      [contributor("capital-efficiency", "Capital efficiency", capitalEfficiency, 1, "Expected value after risk per unit of allocated capital.")],
+      [
+        contributor(
+          "capital-efficiency",
+          "Capital efficiency",
+          capitalEfficiency,
+          1,
+          "Expected value after risk per unit of allocated capital.",
+        ),
+      ],
     ),
     opportunityCoverage: audit(
       opportunityCoverage,
       "opportunityCoverage = positive opportunities receiving capital divided by positive opportunities available",
-      [contributor("coverage", "Opportunity coverage", opportunityCoverage, 1, "How much of the available opportunity set is represented by allocations.")],
+      [
+        contributor(
+          "coverage",
+          "Opportunity coverage",
+          opportunityCoverage,
+          1,
+          "How much of the available opportunity set is represented by allocations.",
+        ),
+      ],
     ),
     portfolioConvexity: audit(
       portfolioConvexity,
       "portfolioConvexity = weighted upside versus downside asymmetry",
-      [contributor("convexity", "Portfolio convexity", portfolioConvexity, 1, "Allocations should preserve asymmetric upside relative to downside.")],
+      [
+        contributor(
+          "convexity",
+          "Portfolio convexity",
+          portfolioConvexity,
+          1,
+          "Allocations should preserve asymmetric upside relative to downside.",
+        ),
+      ],
     ),
     allocationQuality: audit(
       allocationQuality,
       "allocationQuality = blend of concentration control, diversification, capital efficiency, coverage, and convexity",
       [
-        contributor("concentration-control", "Concentration control", Math.max(0, 100 - concentrationRisk), 0.2, "Avoid over-allocating to one opportunity."),
-        contributor("diversification", "Diversification quality", diversificationQuality, 0.2, "Quality of cross-opportunity distribution."),
-        contributor("capital-efficiency", "Capital efficiency", capitalEfficiency, 0.25, "Expected value per capital unit."),
-        contributor("coverage", "Opportunity coverage", opportunityCoverage, 0.2, "Participation across useful opportunities."),
-        contributor("convexity", "Portfolio convexity", portfolioConvexity, 0.15, "Asymmetric outcome profile."),
+        contributor(
+          "concentration-control",
+          "Concentration control",
+          Math.max(0, 100 - concentrationRisk),
+          0.2,
+          "Avoid over-allocating to one opportunity.",
+        ),
+        contributor(
+          "diversification",
+          "Diversification quality",
+          diversificationQuality,
+          0.2,
+          "Quality of cross-opportunity distribution.",
+        ),
+        contributor(
+          "capital-efficiency",
+          "Capital efficiency",
+          capitalEfficiency,
+          0.25,
+          "Expected value per capital unit.",
+        ),
+        contributor(
+          "coverage",
+          "Opportunity coverage",
+          opportunityCoverage,
+          0.2,
+          "Participation across useful opportunities.",
+        ),
+        contributor(
+          "convexity",
+          "Portfolio convexity",
+          portfolioConvexity,
+          0.15,
+          "Asymmetric outcome profile.",
+        ),
       ],
     ),
   };
@@ -837,101 +1348,262 @@ export function evaluatePortfolioIntelligence(input: PortfolioIntelligenceInput 
     allocationQuality,
     contributors: contributorsFrom(scores),
     scores,
-    explanation: allocationQuality >= 60
-      ? "Portfolio allocation is using capital efficiently relative to risk, coverage, and diversification."
-      : "Portfolio allocation needs better coverage, diversification, or expected utility per capital unit.",
+    explanation:
+      allocationQuality >= 60
+        ? "Portfolio allocation is using capital efficiently relative to risk, coverage, and diversification."
+        : "Portfolio allocation needs better coverage, diversification, or expected utility per capital unit.",
     formulas: Object.values(scores).map((score) => score.formula),
   };
 }
 
-export function evaluateDecisionQuality(input: DecisionQualityInput = {}): DecisionQualityResult {
+export function evaluateDecisionQuality(
+  input: DecisionQualityInput = {},
+): DecisionQualityResult {
   const history = input.history ?? [];
-  const counterfactuals = input.counterfactuals ?? evaluateCounterfactuals({ decision: input.decision ?? null, history });
-  const opportunityEconomics = input.opportunityEconomics ?? evaluateOpportunityEconomics();
-  const discoveryMaturity = input.discoveryMaturity ?? evaluateDiscoveryMaturity({
-    discoveries: discoveryRecordsFrom(input.discovery),
-  });
-  const agencyEffectiveness = input.agencyEffectiveness ?? evaluateAgencyEffectiveness({ history });
-  const portfolioIntelligence = input.portfolioIntelligence ?? evaluatePortfolioIntelligence();
-  const reflectionScore = scoreFromUnknown(input.reflection, ["reflectionScore", "score"], 50);
-  const survivalScore = scoreFromUnknown(input.survivalMemory, ["survivalConfidence", "score"], 50);
+  const counterfactuals =
+    input.counterfactuals ??
+    evaluateCounterfactuals({ decision: input.decision ?? null, history });
+  const opportunityEconomics =
+    input.opportunityEconomics ?? evaluateOpportunityEconomics();
+  const discoveryMaturity =
+    input.discoveryMaturity ??
+    evaluateDiscoveryMaturity({
+      discoveries: discoveryRecordsFrom(input.discovery),
+    });
+  const agencyEffectiveness =
+    input.agencyEffectiveness ?? evaluateAgencyEffectiveness({ history });
+  const portfolioIntelligence =
+    input.portfolioIntelligence ?? evaluatePortfolioIntelligence();
+  const reflectionScore = scoreFromUnknown(
+    input.reflection,
+    ["reflectionScore", "score"],
+    50,
+  );
+  const survivalScore = scoreFromUnknown(
+    input.survivalMemory,
+    ["survivalConfidence", "score"],
+    50,
+  );
   const pruning = pruningAdjustmentFor(input.pruning);
   const meaning = meaningAdjustmentFor(input.meaning);
   const economicsScore = economicsScoreFor(opportunityEconomics);
-  const decisionQuality = roundScore(mean([
-    counterfactuals.decisionQuality,
-    economicsScore,
-    discoveryMaturity.maturityScore,
-    agencyEffectiveness.governanceEffectiveness,
-    portfolioIntelligence.allocationQuality,
-    reflectionScore,
-    survivalScore,
-  ]) + pruning.robustnessAdjustment * 0.12 - pruning.falseConfidenceRisk * 0.08 - meaning.decisionPenalty);
-  const learningConfidence = roundScore(mean([
-    counterfactuals.counterfactualConfidence,
-    Math.min(100, history.length * 5),
-    discoveryMaturity.maturityScore,
-    agencyEffectiveness.agencyAccuracy,
-  ]) + pruning.confidenceAdjustment + meaning.confidenceAdjustment);
-  const wisdomScore = roundScore(mean([
-    decisionQuality,
-    learningConfidence,
-    counterfactuals.restrictionValue,
-    Math.max(0, 100 - opportunityEconomics.opportunityCost),
-  ]));
-  const justifiedConfidence = roundScore(learningConfidence - pruning.falseConfidenceRisk * 0.32 + pruning.evidenceConfidence * 0.12);
-  const falseConfidenceRisk = roundScore(Math.max(pruning.falseConfidenceRisk, meaning.falseConfidenceRisk));
-  const robustnessScore = roundScore(mean([
-    portfolioIntelligence.diversificationQuality,
-    100 - falseConfidenceRisk,
-    pruning.evidenceConfidence,
-    100 - meaning.falseConfidenceRisk,
-  ]));
-  const antifragilityScore = roundScore(mean([
-    survivalScore,
-    counterfactuals.restrictionValue,
-    pruning.survivalContribution,
-    pruning.ignoranceEffectivenessScore,
-    meaning.safetyPriority,
-  ]));
-  const survivalAdjustment = roundScore(50 + (pruning.survivalContribution - pruning.pruningScore) * 0.35 - meaning.falseConfidenceRisk * 0.18);
-  const recommendedAction = wisdomRecommendedAction(opportunityEconomics.bestOption, pruning, meaning);
+  const decisionQuality = roundScore(
+    mean([
+      counterfactuals.decisionQuality,
+      economicsScore,
+      discoveryMaturity.maturityScore,
+      agencyEffectiveness.governanceEffectiveness,
+      portfolioIntelligence.allocationQuality,
+      reflectionScore,
+      survivalScore,
+    ]) +
+      pruning.robustnessAdjustment * 0.12 -
+      pruning.falseConfidenceRisk * 0.08 -
+      meaning.decisionPenalty,
+  );
+  const learningConfidence = roundScore(
+    mean([
+      counterfactuals.counterfactualConfidence,
+      Math.min(100, history.length * 5),
+      discoveryMaturity.maturityScore,
+      agencyEffectiveness.agencyAccuracy,
+    ]) +
+      pruning.confidenceAdjustment +
+      meaning.confidenceAdjustment,
+  );
+  const wisdomScore = roundScore(
+    mean([
+      decisionQuality,
+      learningConfidence,
+      counterfactuals.restrictionValue,
+      Math.max(0, 100 - opportunityEconomics.opportunityCost),
+    ]),
+  );
+  const justifiedConfidence = roundScore(
+    learningConfidence -
+      pruning.falseConfidenceRisk * 0.32 +
+      pruning.evidenceConfidence * 0.12,
+  );
+  const falseConfidenceRisk = roundScore(
+    Math.max(pruning.falseConfidenceRisk, meaning.falseConfidenceRisk),
+  );
+  const robustnessScore = roundScore(
+    mean([
+      portfolioIntelligence.diversificationQuality,
+      100 - falseConfidenceRisk,
+      pruning.evidenceConfidence,
+      100 - meaning.falseConfidenceRisk,
+    ]),
+  );
+  const antifragilityScore = roundScore(
+    mean([
+      survivalScore,
+      counterfactuals.restrictionValue,
+      pruning.survivalContribution,
+      pruning.ignoranceEffectivenessScore,
+      meaning.safetyPriority,
+    ]),
+  );
+  const survivalAdjustment = roundScore(
+    50 +
+      (pruning.survivalContribution - pruning.pruningScore) * 0.35 -
+      meaning.falseConfidenceRisk * 0.18,
+  );
+  const recommendedAction = wisdomRecommendedAction(
+    opportunityEconomics.bestOption,
+    pruning,
+    meaning,
+  );
   const scores = {
     decisionQuality: audit(
       decisionQuality,
       "decisionQuality = mean counterfactual quality, economics, discovery maturity, agency effectiveness, portfolio quality, reflection, and survival evidence",
       [
-        contributor("counterfactuals", "Counterfactual decision quality", counterfactuals.decisionQuality, 0.2, "How the actual outcome compares with alternatives."),
-        contributor("economics", "Opportunity economics", economicsScore, 0.16, "Whether acting, waiting, rejecting, or scaling had the best expected utility."),
-        contributor("discovery", "Discovery maturity", discoveryMaturity.maturityScore, 0.14, "Evidence-backed maturity of the opportunity source."),
-        contributor("agency", "Agency effectiveness", agencyEffectiveness.governanceEffectiveness, 0.14, "Whether governance improved outcomes."),
-        contributor("portfolio", "Portfolio intelligence", portfolioIntelligence.allocationQuality, 0.14, "Portfolio-level capital allocation quality."),
-        contributor("reflection", "Reflection", reflectionScore, 0.11, "Reflection quality supplied by the caller."),
-        contributor("survival", "Survival memory", survivalScore, 0.11, "Long-term survival evidence supplied by the caller."),
-        contributor("pruning", "Pruning restraint", 100 - pruning.falseConfidenceRisk, 0.08, "Whether noisy, stale, redundant, or overfit evidence has been restrained."),
-        contributor("meaning", "Meaning alignment", 100 - meaning.falseConfidenceRisk, 0.08, "Whether the desire has been transformed into a safe positive goal."),
+        contributor(
+          "counterfactuals",
+          "Counterfactual decision quality",
+          counterfactuals.decisionQuality,
+          0.2,
+          "How the actual outcome compares with alternatives.",
+        ),
+        contributor(
+          "economics",
+          "Opportunity economics",
+          economicsScore,
+          0.16,
+          "Whether acting, waiting, rejecting, or scaling had the best expected utility.",
+        ),
+        contributor(
+          "discovery",
+          "Discovery maturity",
+          discoveryMaturity.maturityScore,
+          0.14,
+          "Evidence-backed maturity of the opportunity source.",
+        ),
+        contributor(
+          "agency",
+          "Agency effectiveness",
+          agencyEffectiveness.governanceEffectiveness,
+          0.14,
+          "Whether governance improved outcomes.",
+        ),
+        contributor(
+          "portfolio",
+          "Portfolio intelligence",
+          portfolioIntelligence.allocationQuality,
+          0.14,
+          "Portfolio-level capital allocation quality.",
+        ),
+        contributor(
+          "reflection",
+          "Reflection",
+          reflectionScore,
+          0.11,
+          "Reflection quality supplied by the caller.",
+        ),
+        contributor(
+          "survival",
+          "Survival memory",
+          survivalScore,
+          0.11,
+          "Long-term survival evidence supplied by the caller.",
+        ),
+        contributor(
+          "pruning",
+          "Pruning restraint",
+          100 - pruning.falseConfidenceRisk,
+          0.08,
+          "Whether noisy, stale, redundant, or overfit evidence has been restrained.",
+        ),
+        contributor(
+          "meaning",
+          "Meaning alignment",
+          100 - meaning.falseConfidenceRisk,
+          0.08,
+          "Whether the desire has been transformed into a safe positive goal.",
+        ),
       ],
     ),
     wisdomScore: audit(
       wisdomScore,
       "wisdomScore = mean decision quality, learning confidence, restriction value, and low opportunity cost",
       [
-        contributor("decision-quality", "Decision quality", decisionQuality, 0.35, "Composite quality of this decision."),
-        contributor("learning-confidence", "Learning confidence", learningConfidence, 0.25, "Confidence that outcome history is sufficient."),
-        contributor("restriction-value", "Restriction value", counterfactuals.restrictionValue, 0.2, "Whether restrictions are creating value."),
-        contributor("opportunity-cost-control", "Opportunity cost control", Math.max(0, 100 - opportunityEconomics.opportunityCost), 0.2, "Whether caution is not too costly."),
+        contributor(
+          "decision-quality",
+          "Decision quality",
+          decisionQuality,
+          0.35,
+          "Composite quality of this decision.",
+        ),
+        contributor(
+          "learning-confidence",
+          "Learning confidence",
+          learningConfidence,
+          0.25,
+          "Confidence that outcome history is sufficient.",
+        ),
+        contributor(
+          "restriction-value",
+          "Restriction value",
+          counterfactuals.restrictionValue,
+          0.2,
+          "Whether restrictions are creating value.",
+        ),
+        contributor(
+          "opportunity-cost-control",
+          "Opportunity cost control",
+          Math.max(0, 100 - opportunityEconomics.opportunityCost),
+          0.2,
+          "Whether caution is not too costly.",
+        ),
       ],
     ),
     learningConfidence: audit(
       learningConfidence,
       "learningConfidence = counterfactual confidence, memory depth, discovery maturity, and agency accuracy",
       [
-        contributor("counterfactual-confidence", "Counterfactual confidence", counterfactuals.counterfactualConfidence, 0.35, "Quality of alternative outcome evidence."),
-        contributor("memory-depth", "Memory depth", Math.min(100, history.length * 5), 0.25, "Persisted outcome records."),
-        contributor("discovery-maturity", "Discovery maturity", discoveryMaturity.maturityScore, 0.2, "Mature discovery histories increase confidence."),
-        contributor("agency-accuracy", "Agency accuracy", agencyEffectiveness.agencyAccuracy, 0.2, "Agency outcome correctness."),
-        contributor("pruning-evidence", "Pruning evidence", pruning.evidenceConfidence, 0.1, "Pruning cannot increase confidence when evidence is weak."),
-        contributor("meaning-confidence", "Meaning confidence", meaning.needConfidence * 100, 0.1, "Low need confidence lowers learning confidence."),
+        contributor(
+          "counterfactual-confidence",
+          "Counterfactual confidence",
+          counterfactuals.counterfactualConfidence,
+          0.35,
+          "Quality of alternative outcome evidence.",
+        ),
+        contributor(
+          "memory-depth",
+          "Memory depth",
+          Math.min(100, history.length * 5),
+          0.25,
+          "Persisted outcome records.",
+        ),
+        contributor(
+          "discovery-maturity",
+          "Discovery maturity",
+          discoveryMaturity.maturityScore,
+          0.2,
+          "Mature discovery histories increase confidence.",
+        ),
+        contributor(
+          "agency-accuracy",
+          "Agency accuracy",
+          agencyEffectiveness.agencyAccuracy,
+          0.2,
+          "Agency outcome correctness.",
+        ),
+        contributor(
+          "pruning-evidence",
+          "Pruning evidence",
+          pruning.evidenceConfidence,
+          0.1,
+          "Pruning cannot increase confidence when evidence is weak.",
+        ),
+        contributor(
+          "meaning-confidence",
+          "Meaning confidence",
+          meaning.needConfidence * 100,
+          0.1,
+          "Low need confidence lowers learning confidence.",
+        ),
       ],
     ),
   };
@@ -977,14 +1649,26 @@ export function evaluateDecisionQuality(input: DecisionQualityInput = {}): Decis
 }
 
 export function recordOutcome(
-  input: DecisionOutcomeRecord | { memory?: DecisionOutcomeMemory; record: DecisionOutcomeRecord },
+  input:
+    | DecisionOutcomeRecord
+    | { memory?: DecisionOutcomeMemory; record: DecisionOutcomeRecord },
 ): RecordOutcomeResult {
-  const memory = "record" in input ? input.memory ?? createDecisionOutcomeMemory() : createDecisionOutcomeMemory();
+  const memory =
+    "record" in input
+      ? (input.memory ?? createDecisionOutcomeMemory())
+      : createDecisionOutcomeMemory();
   const record = "record" in input ? input.record : input;
   const stored = memory.record(record);
   const history = memory.all();
-  const counterfactuals = evaluateCounterfactuals({ decision: stored, history });
-  const decisionQuality = evaluateDecisionQuality({ decision: stored, history, counterfactuals });
+  const counterfactuals = evaluateCounterfactuals({
+    decision: stored,
+    history,
+  });
+  const decisionQuality = evaluateDecisionQuality({
+    decision: stored,
+    history,
+    counterfactuals,
+  });
 
   return {
     record: stored,
@@ -994,13 +1678,28 @@ export function recordOutcome(
   };
 }
 
-export function buildWisdomSummary(input: WisdomSummaryInput = {}): WisdomSummary {
+export function buildWisdomSummary(
+  input: WisdomSummaryInput = {},
+): WisdomSummary {
   const records = input.records ?? input.history ?? [];
-  const counterfactuals = input.counterfactuals ?? aggregateCounterfactuals(records);
-  const opportunityEconomics = input.opportunityEconomics ?? evaluateOpportunityEconomics();
-  const discoveryMaturity = input.discoveryMaturity ?? evaluateDiscoveryMaturity({ discoveries: input.discoveries ?? discoveryRecordsFrom(input.discovery) });
-  const agencyEffectiveness = input.agencyEffectiveness ?? evaluateAgencyEffectiveness({ events: input.agencyEvents, history: records });
-  const portfolioIntelligence = input.portfolioIntelligence ?? evaluatePortfolioIntelligence(input.portfolio);
+  const counterfactuals =
+    input.counterfactuals ?? aggregateCounterfactuals(records);
+  const opportunityEconomics =
+    input.opportunityEconomics ?? evaluateOpportunityEconomics();
+  const discoveryMaturity =
+    input.discoveryMaturity ??
+    evaluateDiscoveryMaturity({
+      discoveries: input.discoveries ?? discoveryRecordsFrom(input.discovery),
+    });
+  const agencyEffectiveness =
+    input.agencyEffectiveness ??
+    evaluateAgencyEffectiveness({
+      events: input.agencyEvents,
+      history: records,
+    });
+  const portfolioIntelligence =
+    input.portfolioIntelligence ??
+    evaluatePortfolioIntelligence(input.portfolio);
   const decisionQuality = evaluateDecisionQuality({
     ...input,
     history: records,
@@ -1010,10 +1709,18 @@ export function buildWisdomSummary(input: WisdomSummaryInput = {}): WisdomSummar
     agencyEffectiveness,
     portfolioIntelligence,
   });
-  const delayed = records.filter((record) => normalized(record.status) === "delayed");
-  const delayedCounterfactuals = delayed.map((record) => evaluateCounterfactuals({ decision: record, history: records }));
-  const delayedMissedUpside = sum(delayedCounterfactuals.map((item) => item.missedUpside));
-  const delayedAvoidedLoss = sum(delayedCounterfactuals.map((item) => item.avoidedLoss));
+  const delayed = records.filter(
+    (record) => normalized(record.status) === "delayed",
+  );
+  const delayedCounterfactuals = delayed.map((record) =>
+    evaluateCounterfactuals({ decision: record, history: records }),
+  );
+  const delayedMissedUpside = sum(
+    delayedCounterfactuals.map((item) => item.missedUpside),
+  );
+  const delayedAvoidedLoss = sum(
+    delayedCounterfactuals.map((item) => item.avoidedLoss),
+  );
   const summary = [
     `Restrictions saved ${roundNumber(counterfactuals.avoidedLoss)} outcome-risk points while sacrificing ${roundNumber(counterfactuals.missedUpside)} opportunity points.`,
     `Delayed decisions sacrificed ${roundNumber(delayedMissedUpside)} opportunity points while reducing adverse impact by ${roundNumber(delayedAvoidedLoss)} points.`,
@@ -1066,35 +1773,57 @@ export function buildWisdomSummary(input: WisdomSummaryInput = {}): WisdomSummar
   };
 }
 
-function normalizeRecord(record: DecisionOutcomeRecord, index: number): DecisionOutcomeRecord {
+function normalizeRecord(
+  record: DecisionOutcomeRecord,
+  index: number,
+): DecisionOutcomeRecord {
   return {
     ...copy(record),
     id: record.id?.trim() || `decision-outcome-${index + 1}`,
     action: record.action?.trim() || "unknown-action",
     status: record.status ?? "observed",
-    alternatives: (record.alternatives ?? []).map((alternative, alternativeIndex) => ({
-      ...alternative,
-      id: alternative.id?.trim() || `alternative-${alternativeIndex + 1}`,
-      label: alternative.label?.trim() || labelForAlternative(alternative, alternativeIndex),
-      action: alternative.action?.trim() || alternative.kind || "alternative",
-    })),
+    alternatives: (record.alternatives ?? []).map(
+      (alternative, alternativeIndex) => ({
+        ...alternative,
+        id: alternative.id?.trim() || `alternative-${alternativeIndex + 1}`,
+        label:
+          alternative.label?.trim() ||
+          labelForAlternative(alternative, alternativeIndex),
+        action: alternative.action?.trim() || alternative.kind || "alternative",
+      }),
+    ),
   };
 }
 
-function recordFromCounterfactualInput(input: WisdomCounterfactualInput): DecisionOutcomeRecord {
+function recordFromCounterfactualInput(
+  input: WisdomCounterfactualInput,
+): DecisionOutcomeRecord {
   const actual = input.actual;
-  const outcome = isAlternative(actual) ? actual.realizedResult ?? actual.counterfactualResult : actual;
-  return normalizeRecord({
-    action: input.action ?? (isAlternative(actual) ? actual.action : undefined),
-    status: input.status ?? "observed",
-    realizedResult: outcome ?? undefined,
-    alternatives: input.alternatives ?? [],
-  }, 0);
+  const outcome = isAlternative(actual)
+    ? (actual.realizedResult ?? actual.counterfactualResult)
+    : actual;
+  return normalizeRecord(
+    {
+      action:
+        input.action ?? (isAlternative(actual) ? actual.action : undefined),
+      status: input.status ?? "observed",
+      realizedResult: outcome ?? undefined,
+      alternatives: input.alternatives ?? [],
+    },
+    0,
+  );
 }
 
-function reviewActualScenario(record: DecisionOutcomeRecord, input: WisdomCounterfactualInput): WisdomReviewedScenario {
+function reviewActualScenario(
+  record: DecisionOutcomeRecord,
+  input: WisdomCounterfactualInput,
+): WisdomReviewedScenario {
   const actualAlternative = isAlternative(input.actual) ? input.actual : null;
-  const result = record.realizedResult ?? record.futureOutcome ?? actualAlternative?.realizedResult ?? actualAlternative?.counterfactualResult;
+  const result =
+    record.realizedResult ??
+    record.futureOutcome ??
+    actualAlternative?.realizedResult ??
+    actualAlternative?.counterfactualResult;
   const fallback = actualAlternative ? expectedUtility(actualAlternative) : 0;
   const utility = outcomeUtility(result, fallback);
 
@@ -1107,11 +1836,17 @@ function reviewActualScenario(record: DecisionOutcomeRecord, input: WisdomCounte
     reward: rewardFor(result, fallback),
     cost: costFor(result),
     adverseImpact: adverseImpactFor(result, utility),
-    confidence: score(result?.confidence, actualAlternative?.expectedConfidence ?? 50),
+    confidence: score(
+      result?.confidence,
+      actualAlternative?.expectedConfidence ?? 50,
+    ),
   };
 }
 
-function reviewAlternativeScenario(alternative: WisdomAlternativeScenario, index: number): WisdomReviewedScenario {
+function reviewAlternativeScenario(
+  alternative: WisdomAlternativeScenario,
+  index: number,
+): WisdomReviewedScenario {
   const result = alternative.realizedResult ?? alternative.counterfactualResult;
   const fallback = expectedUtility(alternative);
   const utility = outcomeUtility(result, fallback);
@@ -1122,15 +1857,28 @@ function reviewAlternativeScenario(alternative: WisdomAlternativeScenario, index
     action: alternative.action ?? alternative.kind ?? "alternative",
     kind: alternative.kind ?? "alternative",
     utility,
-    reward: rewardFor(result, numeric(alternative.expectedReward ?? alternative.expectedValue, fallback)),
+    reward: rewardFor(
+      result,
+      numeric(
+        alternative.expectedReward ?? alternative.expectedValue,
+        fallback,
+      ),
+    ),
     cost: costFor(result, numeric(alternative.expectedCost, 0)),
-    adverseImpact: adverseImpactFor(result, utility, numeric(alternative.expectedRisk, Math.max(0, -fallback))),
+    adverseImpact: adverseImpactFor(
+      result,
+      utility,
+      numeric(alternative.expectedRisk, Math.max(0, -fallback)),
+    ),
     confidence: score(result?.confidence, alternative.expectedConfidence ?? 50),
   };
 }
 
 function expectedUtility(alternative: WisdomAlternativeScenario) {
-  const reward = numeric(alternative.expectedReward ?? alternative.expectedValue, 0);
+  const reward = numeric(
+    alternative.expectedReward ?? alternative.expectedValue,
+    0,
+  );
   const cost = numeric(alternative.expectedCost, 0);
   const risk = numeric(alternative.expectedRisk, 0);
   const scale = numeric(alternative.scale, 1);
@@ -1158,9 +1906,21 @@ function costFor(result: WisdomOutcomeResult | undefined, fallback = 0) {
   return roundNumber(numeric(result.cost, fallback));
 }
 
-function adverseImpactFor(result: WisdomOutcomeResult | undefined, utility: number, fallback = 0) {
+function adverseImpactFor(
+  result: WisdomOutcomeResult | undefined,
+  utility: number,
+  fallback = 0,
+) {
   if (!result) return roundNumber(Math.max(fallback, -utility, 0));
-  return roundNumber(Math.max(0, numeric(result.adverseImpact ?? result.risk, Math.max(fallback, -utility, 0))));
+  return roundNumber(
+    Math.max(
+      0,
+      numeric(
+        result.adverseImpact ?? result.risk,
+        Math.max(fallback, -utility, 0),
+      ),
+    ),
+  );
 }
 
 function counterfactualConfidenceFor(input: {
@@ -1170,13 +1930,25 @@ function counterfactualConfidenceFor(input: {
 }) {
   const coverage = coverageFor(input.alternatives);
   const memoryDepth = Math.min(100, input.history.length * 5);
-  const consistency = Math.max(0, 100 - stdev([input.actualOutcome, ...input.alternatives].map((scenario) => scenario.utility)) * 8);
+  const consistency = Math.max(
+    0,
+    100 -
+      stdev(
+        [input.actualOutcome, ...input.alternatives].map(
+          (scenario) => scenario.utility,
+        ),
+      ) *
+        8,
+  );
   return roundScore(coverage * 0.45 + memoryDepth * 0.35 + consistency * 0.2);
 }
 
 function coverageFor(alternatives: WisdomReviewedScenario[]) {
   if (!alternatives.length) return 0;
-  const covered = alternatives.filter((alternative) => alternative.confidence > 0 && Number.isFinite(alternative.utility)).length;
+  const covered = alternatives.filter(
+    (alternative) =>
+      alternative.confidence > 0 && Number.isFinite(alternative.utility),
+  ).length;
   return roundScore((covered / alternatives.length) * 100);
 }
 
@@ -1191,7 +1963,14 @@ function economicValue(
   const confidence = score(option?.confidence, option ? 100 : 0) / 100;
   const utility = roundNumber(reward * confidence - cost - risk * riskPenalty);
 
-  return { key, reward, cost, risk, confidence: roundScore(confidence * 100), utility };
+  return {
+    key,
+    reward,
+    cost,
+    risk,
+    confidence: roundScore(confidence * 100),
+    utility,
+  };
 }
 
 function optionAudit(option: ReturnType<typeof economicValue>) {
@@ -1199,42 +1978,106 @@ function optionAudit(option: ReturnType<typeof economicValue>) {
     option.utility,
     `${option.key}Value = expected reward * confidence - expected cost - expected risk * risk penalty`,
     [
-      contributor(`${option.key}-reward`, "Expected reward", option.reward, 0.45, "Reward expected from this option."),
-      contributor(`${option.key}-confidence`, "Confidence", option.confidence, 0.2, "Confidence applied to expected reward."),
-      contributor(`${option.key}-cost`, "Expected cost", option.cost, -0.2, "Direct cost expected from this option."),
-      contributor(`${option.key}-risk`, "Expected risk", option.risk, -0.15, "Adverse impact expected from this option."),
+      contributor(
+        `${option.key}-reward`,
+        "Expected reward",
+        option.reward,
+        0.45,
+        "Reward expected from this option.",
+      ),
+      contributor(
+        `${option.key}-confidence`,
+        "Confidence",
+        option.confidence,
+        0.2,
+        "Confidence applied to expected reward.",
+      ),
+      contributor(
+        `${option.key}-cost`,
+        "Expected cost",
+        option.cost,
+        -0.2,
+        "Direct cost expected from this option.",
+      ),
+      contributor(
+        `${option.key}-risk`,
+        "Expected risk",
+        option.risk,
+        -0.15,
+        "Adverse impact expected from this option.",
+      ),
     ],
   );
 }
 
-function selectedEconomicsKey(value: unknown): OpportunityEconomicsResult["bestOption"] {
+function selectedEconomicsKey(
+  value: unknown,
+): OpportunityEconomicsResult["bestOption"] {
   const normalizedValue = normalized(value);
-  if (normalizedValue === "wait" || normalizedValue === "reject" || normalizedValue === "scale") return normalizedValue;
+  if (
+    normalizedValue === "wait" ||
+    normalizedValue === "reject" ||
+    normalizedValue === "scale"
+  )
+    return normalizedValue;
   return "action";
 }
 
-function reviewDiscovery(discovery: WisdomDiscoveryRecord, index: number, now: number) {
+function reviewDiscovery(
+  discovery: WisdomDiscoveryRecord,
+  index: number,
+  now: number,
+) {
   const detected = toTime(discovery.detectedAt) ?? now;
   const ageDays = Math.max(0, (now - detected) / 86_400_000);
-  const confirmations = Math.max(0, Math.round(numeric(discovery.confirmationCount, discovery.confirmedAt ? 1 : 0)));
-  const observations = Math.max(1, Math.round(numeric(discovery.observationCount ?? discovery.opportunityCount, 1)));
-  const recurrences = Math.max(0, Math.round(numeric(discovery.recurrenceCount, 0)));
-  const conversions = Math.max(0, Math.round(numeric(discovery.conversionCount, observations)));
+  const confirmations = Math.max(
+    0,
+    Math.round(
+      numeric(discovery.confirmationCount, discovery.confirmedAt ? 1 : 0),
+    ),
+  );
+  const observations = Math.max(
+    1,
+    Math.round(
+      numeric(discovery.observationCount ?? discovery.opportunityCount, 1),
+    ),
+  );
+  const recurrences = Math.max(
+    0,
+    Math.round(numeric(discovery.recurrenceCount, 0)),
+  );
+  const conversions = Math.max(
+    0,
+    Math.round(numeric(discovery.conversionCount, observations)),
+  );
   const successes = Math.max(0, Math.round(numeric(discovery.successCount, 0)));
   const ageScore = clamp(ageDays * 2.5);
   const confirmationScore = clamp(confirmations * 16);
   const recurrenceScore = pct(recurrences, observations, 0);
   const conversionScore = pct(successes, conversions, 0);
-  const noveltyPersistence = roundScore(Math.max(0, score(discovery.novelty, 50) - ageDays * 0.8 + recurrenceScore * 0.25));
+  const noveltyPersistence = roundScore(
+    Math.max(
+      0,
+      score(discovery.novelty, 50) - ageDays * 0.8 + recurrenceScore * 0.25,
+    ),
+  );
   const suppliedMaturity = optionalScore(discovery.maturityScore);
-  const maturityScore = roundScore(suppliedMaturity ?? mean([
-    ageScore * 0.18,
-    confirmationScore * 0.26,
-    recurrenceScore * 0.22,
-    conversionScore * 0.22,
-    noveltyPersistence * 0.12,
-  ]) * 5);
-  const stage = lifecycleStageFor(discovery.status, maturityScore, confirmations, recurrences);
+  const maturityScore = roundScore(
+    suppliedMaturity ??
+      mean([
+        ageScore * 0.18,
+        confirmationScore * 0.26,
+        recurrenceScore * 0.22,
+        conversionScore * 0.22,
+        noveltyPersistence * 0.12,
+      ]) * 5,
+  );
+  const stage = lifecycleStageFor(
+    discovery.status,
+    maturityScore,
+    confirmations,
+    recurrences,
+  );
 
   return {
     id: discovery.id ?? `discovery-${index + 1}`,
@@ -1258,7 +2101,9 @@ function lifecycleStageFor(
   recurrences: number,
 ): DiscoveryLifecycleStage {
   const normalizedStatus = normalized(status);
-  const direct = DISCOVERY_STAGES.find((stage) => normalized(stage) === normalizedStatus);
+  const direct = DISCOVERY_STAGES.find(
+    (stage) => normalized(stage) === normalizedStatus,
+  );
   if (direct) return direct;
   if (maturityScore >= 90 && recurrences >= 10) return "Institutional";
   if (maturityScore >= 75 && confirmations >= 4) return "Trusted";
@@ -1275,13 +2120,20 @@ function lifecycleCounts(stages: DiscoveryLifecycleStage[]) {
   }));
 }
 
-function agencyEventsFromHistory(history: DecisionOutcomeRecord[]): AgencyEffectivenessEvent[] {
+function agencyEventsFromHistory(
+  history: DecisionOutcomeRecord[],
+): AgencyEffectivenessEvent[] {
   return history.map((record, index) => ({
     id: record.id ?? `agency-event-${index + 1}`,
     action: agencyActionFromStatus(record.status),
     realizedResult: record.realizedResult ?? record.futureOutcome,
-    counterfactualResult: record.counterfactualResult ?? bestCounterfactualResult(record.alternatives),
-    frictionCost: numeric((record.context?.frictionCost as number | undefined) ?? 0, 0),
+    counterfactualResult:
+      record.counterfactualResult ??
+      bestCounterfactualResult(record.alternatives),
+    frictionCost: numeric(
+      (record.context?.frictionCost as number | undefined) ?? 0,
+      0,
+    ),
   }));
 }
 
@@ -1294,9 +2146,15 @@ function agencyActionFromStatus(status: unknown) {
   return "approved";
 }
 
-function bestCounterfactualResult(alternatives: WisdomAlternativeScenario[] | undefined) {
-  const reviewed = (alternatives ?? []).map((alternative, index) => reviewAlternativeScenario(alternative, index));
-  return reviewed.length ? { value: maxBy(reviewed, (scenario) => scenario.utility).utility } : undefined;
+function bestCounterfactualResult(
+  alternatives: WisdomAlternativeScenario[] | undefined,
+) {
+  const reviewed = (alternatives ?? []).map((alternative, index) =>
+    reviewAlternativeScenario(alternative, index),
+  );
+  return reviewed.length
+    ? { value: maxBy(reviewed, (scenario) => scenario.utility).utility }
+    : undefined;
 }
 
 function rejectionDelta(event: AgencyEffectivenessEvent) {
@@ -1307,15 +2165,25 @@ function rejectionDelta(event: AgencyEffectivenessEvent) {
 
 function interventionDelta(event: AgencyEffectivenessEvent) {
   const actual = outcomeUtility(event.realizedResult, 0);
-  const baseline = outcomeUtility(event.baselineResult ?? event.counterfactualResult, 0);
+  const baseline = outcomeUtility(
+    event.baselineResult ?? event.counterfactualResult,
+    0,
+  );
   return actual - baseline;
 }
 
 function agencyCorrectness(event: AgencyEffectivenessEvent) {
   const action = normalized(event.action);
-  if (action === "approved") return outcomeUtility(event.realizedResult, 0) >= 0 ? 100 : 0;
-  if (action === "rejected" || action === "blocked") return rejectionDelta(event) >= 0 ? 100 : 0;
-  if (action === "intervened" || action === "overridden" || event.override === true) return interventionDelta(event) >= 0 ? 100 : 0;
+  if (action === "approved")
+    return outcomeUtility(event.realizedResult, 0) >= 0 ? 100 : 0;
+  if (action === "rejected" || action === "blocked")
+    return rejectionDelta(event) >= 0 ? 100 : 0;
+  if (
+    action === "intervened" ||
+    action === "overridden" ||
+    event.override === true
+  )
+    return interventionDelta(event) >= 0 ? 100 : 0;
   return 50;
 }
 
@@ -1328,11 +2196,21 @@ function allocationsFor(
   allocations: PortfolioIntelligenceInput["currentAllocations"],
   opportunities: WisdomPortfolioOpportunity[],
 ): WisdomAllocation[] {
-  if (Array.isArray(allocations)) return allocations.map((allocation) => ({ id: allocation.id, amount: Math.max(0, numeric(allocation.amount, 0)) }));
+  if (Array.isArray(allocations))
+    return allocations.map((allocation) => ({
+      id: allocation.id,
+      amount: Math.max(0, numeric(allocation.amount, 0)),
+    }));
   if (allocations && typeof allocations === "object") {
-    return Object.entries(allocations).map(([id, amount]) => ({ id, amount: Math.max(0, numeric(amount, 0)) }));
+    return Object.entries(allocations).map(([id, amount]) => ({
+      id,
+      amount: Math.max(0, numeric(amount, 0)),
+    }));
   }
-  return opportunities.map((opportunity) => ({ id: opportunity.id, amount: Math.max(0, numeric(opportunity.allocation, 0)) }));
+  return opportunities.map((opportunity) => ({
+    id: opportunity.id,
+    amount: Math.max(0, numeric(opportunity.allocation, 0)),
+  }));
 }
 
 function totalCapitalFor(
@@ -1349,19 +2227,31 @@ function totalCapitalFor(
   );
 }
 
-function averageCorrelationFor(correlation: PortfolioIntelligenceInput["correlationStructure"]) {
+function averageCorrelationFor(
+  correlation: PortfolioIntelligenceInput["correlationStructure"],
+) {
   if (!correlation) return 0;
-  if (Array.isArray(correlation)) return mean(correlation.map((item) => Math.abs(numeric(item.correlation, 0))));
+  if (Array.isArray(correlation))
+    return mean(
+      correlation.map((item) => Math.abs(numeric(item.correlation, 0))),
+    );
   const values: number[] = [];
   for (const row of Object.values(correlation)) {
-    values.push(...Object.values(row).map((value) => Math.abs(numeric(value, 0))));
+    values.push(
+      ...Object.values(row).map((value) => Math.abs(numeric(value, 0))),
+    );
   }
   return mean(values);
 }
 
-function groupBalanceFor(opportunities: WisdomPortfolioOpportunity[], allocations: WisdomAllocation[]) {
+function groupBalanceFor(
+  opportunities: WisdomPortfolioOpportunity[],
+  allocations: WisdomAllocation[],
+) {
   if (!opportunities.length || !allocations.length) return 0;
-  const byId = new Map(opportunities.map((opportunity) => [opportunity.id, opportunity]));
+  const byId = new Map(
+    opportunities.map((opportunity) => [opportunity.id, opportunity]),
+  );
   const groupTotals = new Map<string, number>();
   for (const allocation of allocations) {
     const group = byId.get(allocation.id)?.group ?? "ungrouped";
@@ -1374,16 +2264,26 @@ function groupBalanceFor(opportunities: WisdomPortfolioOpportunity[], allocation
   return roundScore((1 - hhi) * 100);
 }
 
-function averageAllocatedUtility(opportunities: WisdomPortfolioOpportunity[], allocations: WisdomAllocation[]) {
+function averageAllocatedUtility(
+  opportunities: WisdomPortfolioOpportunity[],
+  allocations: WisdomAllocation[],
+) {
   if (!opportunities.length || !allocations.length) return 0;
-  const byId = new Map(opportunities.map((opportunity) => [opportunity.id, opportunity]));
+  const byId = new Map(
+    opportunities.map((opportunity) => [opportunity.id, opportunity]),
+  );
   const weighted = allocations.map((allocation) => {
     const opportunity = byId.get(allocation.id);
     if (!opportunity) return 0;
-    const utility = numeric(opportunity.expectedValue ?? opportunity.expectedReward, 0) - numeric(opportunity.expectedRisk, 0);
+    const utility =
+      numeric(opportunity.expectedValue ?? opportunity.expectedReward, 0) -
+      numeric(opportunity.expectedRisk, 0);
     return utility * allocation.amount;
   });
-  return sum(weighted) / Math.max(1, sum(allocations.map((allocation) => allocation.amount)));
+  return (
+    sum(weighted) /
+    Math.max(1, sum(allocations.map((allocation) => allocation.amount)))
+  );
 }
 
 function coverageScoreFor(
@@ -1391,43 +2291,82 @@ function coverageScoreFor(
   allocations: WisdomAllocation[],
   minimumCoverage = 0,
 ) {
-  const positive = opportunities.filter((opportunity) =>
-    numeric(opportunity.expectedValue ?? opportunity.expectedReward, 0) - numeric(opportunity.expectedRisk, 0) > 0,
+  const positive = opportunities.filter(
+    (opportunity) =>
+      numeric(opportunity.expectedValue ?? opportunity.expectedReward, 0) -
+        numeric(opportunity.expectedRisk, 0) >
+      0,
   );
   if (!positive.length) return 100;
-  const allocated = new Set(allocations.filter((allocation) => allocation.amount > 0).map((allocation) => allocation.id));
-  const coverage = (positive.filter((opportunity) => allocated.has(opportunity.id)).length / positive.length) * 100;
+  const allocated = new Set(
+    allocations
+      .filter((allocation) => allocation.amount > 0)
+      .map((allocation) => allocation.id),
+  );
+  const coverage =
+    (positive.filter((opportunity) => allocated.has(opportunity.id)).length /
+      positive.length) *
+    100;
   return roundScore(Math.max(coverage, Math.min(coverage, minimumCoverage)));
 }
 
-function convexityScoreFor(opportunities: WisdomPortfolioOpportunity[], allocations: WisdomAllocation[]) {
+function convexityScoreFor(
+  opportunities: WisdomPortfolioOpportunity[],
+  allocations: WisdomAllocation[],
+) {
   if (!opportunities.length || !allocations.length) return 50;
-  const byId = new Map(opportunities.map((opportunity) => [opportunity.id, opportunity]));
-  const total = Math.max(1, sum(allocations.map((allocation) => allocation.amount)));
-  const scoreValue = sum(allocations.map((allocation) => {
-    const opportunity = byId.get(allocation.id);
-    if (!opportunity) return 0;
-    const upside = numeric(opportunity.upside ?? opportunity.expectedReward ?? opportunity.expectedValue, 0);
-    const downside = Math.max(0.0001, numeric(opportunity.downside ?? opportunity.expectedRisk, 1));
-    return clamp(50 + ((upside - downside) / Math.max(upside, downside, 1)) * 50) * (allocation.amount / total);
-  }));
+  const byId = new Map(
+    opportunities.map((opportunity) => [opportunity.id, opportunity]),
+  );
+  const total = Math.max(
+    1,
+    sum(allocations.map((allocation) => allocation.amount)),
+  );
+  const scoreValue = sum(
+    allocations.map((allocation) => {
+      const opportunity = byId.get(allocation.id);
+      if (!opportunity) return 0;
+      const upside = numeric(
+        opportunity.upside ??
+          opportunity.expectedReward ??
+          opportunity.expectedValue,
+        0,
+      );
+      const downside = Math.max(
+        0.0001,
+        numeric(opportunity.downside ?? opportunity.expectedRisk, 1),
+      );
+      return (
+        clamp(50 + ((upside - downside) / Math.max(upside, downside, 1)) * 50) *
+        (allocation.amount / total)
+      );
+    }),
+  );
   return roundScore(scoreValue);
 }
 
 function discoveryRecordsFrom(value: unknown): WisdomDiscoveryRecord[] {
   if (Array.isArray(value)) return value as WisdomDiscoveryRecord[];
-  if (value && typeof value === "object") return [value as WisdomDiscoveryRecord];
+  if (value && typeof value === "object")
+    return [value as WisdomDiscoveryRecord];
   return [];
 }
 
 function economicsScoreFor(economics: OpportunityEconomicsResult) {
   const selectedValue = economics.actionValue;
-  const bestValue = Math.max(economics.actionValue, economics.waitValue, economics.rejectValue, economics.scaleValue);
+  const bestValue = Math.max(
+    economics.actionValue,
+    economics.waitValue,
+    economics.rejectValue,
+    economics.scaleValue,
+  );
   if (bestValue === 0 && selectedValue === 0) return 50;
   return roundScore(100 - Math.max(0, bestValue - selectedValue));
 }
 
-function pruningAdjustmentFor(input: DecisionQualityInput["pruning"]): WisdomPruningAdjustment {
+function pruningAdjustmentFor(
+  input: DecisionQualityInput["pruning"],
+): WisdomPruningAdjustment {
   if (!input) {
     return {
       pruningScore: 0,
@@ -1448,17 +2387,47 @@ function pruningAdjustmentFor(input: DecisionQualityInput["pruning"]): WisdomPru
       : [input];
   const fallbackSource = Array.isArray(input) ? {} : input;
   const recommendedAction = strongestPruningAction(
-    candidates.map((candidate) => candidate.recommendedAction).filter(Boolean) as PruningRecommendedAction[],
+    candidates
+      .map((candidate) => candidate.recommendedAction)
+      .filter(Boolean) as PruningRecommendedAction[],
   );
   const pruningScore = scoreMean(candidates, "pruningScore", fallbackSource);
-  const ignoranceEffectivenessScore = scoreMean(candidates, "ignoranceEffectivenessScore", fallbackSource, 50);
-  const evidenceConfidence = scoreMean(candidates, "evidenceConfidence", fallbackSource, 50);
-  const overfitPenalty = scoreMean(candidates, "overfitPenalty", fallbackSource);
+  const ignoranceEffectivenessScore = scoreMean(
+    candidates,
+    "ignoranceEffectivenessScore",
+    fallbackSource,
+    50,
+  );
+  const evidenceConfidence = scoreMean(
+    candidates,
+    "evidenceConfidence",
+    fallbackSource,
+    50,
+  );
+  const overfitPenalty = scoreMean(
+    candidates,
+    "overfitPenalty",
+    fallbackSource,
+  );
   const noisePenalty = scoreMean(candidates, "noisePenalty", fallbackSource);
-  const clarityPenalty = scoreMean(candidates, "clarityPenalty", fallbackSource);
-  const survivalContribution = Math.max(...candidates.map((candidate) => score(candidate.survivalContribution, 50)), score(fallbackSource.survivalContribution, 50));
+  const clarityPenalty = scoreMean(
+    candidates,
+    "clarityPenalty",
+    fallbackSource,
+  );
+  const survivalContribution = Math.max(
+    ...candidates.map((candidate) => score(candidate.survivalContribution, 50)),
+    score(fallbackSource.survivalContribution, 50),
+  );
   const weakEvidence = clamp(100 - evidenceConfidence);
-  const actionRisk = recommendedAction === "ignore" ? 18 : recommendedAction === "quarantine" ? 24 : recommendedAction === "review" ? 10 : 0;
+  const actionRisk =
+    recommendedAction === "ignore"
+      ? 18
+      : recommendedAction === "quarantine"
+        ? 24
+        : recommendedAction === "review"
+          ? 10
+          : 0;
   const falseConfidenceRisk = roundScore(
     pruningScore * 0.26 +
       overfitPenalty * 0.24 +
@@ -1468,12 +2437,21 @@ function pruningAdjustmentFor(input: DecisionQualityInput["pruning"]): WisdomPru
       actionRisk -
       survivalContribution * 0.06,
   );
-  const robustnessAdjustment = roundScore(
-    ignoranceEffectivenessScore * 0.18 + evidenceConfidence * 0.14 - overfitPenalty * 0.22 - noisePenalty * 0.1 - pruningScore * 0.08,
-  ) - 20;
-  const confidenceAdjustment = -roundScore(falseConfidenceRisk * 0.2 + weakEvidence * 0.08);
+  const robustnessAdjustment =
+    roundScore(
+      ignoranceEffectivenessScore * 0.18 +
+        evidenceConfidence * 0.14 -
+        overfitPenalty * 0.22 -
+        noisePenalty * 0.1 -
+        pruningScore * 0.08,
+    ) - 20;
+  const confidenceAdjustment = -roundScore(
+    falseConfidenceRisk * 0.2 + weakEvidence * 0.08,
+  );
   const warnings = unique(
-    candidates.flatMap((candidate) => Array.isArray(candidate.warnings) ? candidate.warnings : []),
+    candidates.flatMap((candidate) =>
+      Array.isArray(candidate.warnings) ? candidate.warnings : [],
+    ),
   );
 
   return {
@@ -1489,7 +2467,9 @@ function pruningAdjustmentFor(input: DecisionQualityInput["pruning"]): WisdomPru
   };
 }
 
-function meaningAdjustmentFor(input: DecisionQualityInput["meaning"]): WisdomMeaningAdjustment {
+function meaningAdjustmentFor(
+  input: DecisionQualityInput["meaning"],
+): WisdomMeaningAdjustment {
   if (!input || typeof input !== "object") {
     return {
       gravityScore: 0,
@@ -1502,24 +2482,44 @@ function meaningAdjustmentFor(input: DecisionQualityInput["meaning"]): WisdomMea
       warnings: [],
     };
   }
-  const gravityScore = clamp(numeric(input.gravityScore, input.purposeInputs?.gravityScore ?? 0), -10, 10);
-  const needConfidence = clamp(numeric(input.needConfidence, input.purposeInputs?.needConfidence ?? 0.5), 0, 1);
-  const literalDesireUnsafe = Boolean(input.purposeInputs?.literalDesireUnsafe ?? gravityScore <= -5);
-  const safetyPriority = clamp(numeric(input.purposeInputs?.safetyPriority, 55 + Math.max(0, -gravityScore) * 5));
+  const gravityScore = clamp(
+    numeric(input.gravityScore, input.purposeInputs?.gravityScore ?? 0),
+    -10,
+    10,
+  );
+  const needConfidence = clamp(
+    numeric(input.needConfidence, input.purposeInputs?.needConfidence ?? 0.5),
+    0,
+    1,
+  );
+  const literalDesireUnsafe = Boolean(
+    input.purposeInputs?.literalDesireUnsafe ?? gravityScore <= -5,
+  );
+  const safetyPriority = clamp(
+    numeric(
+      input.purposeInputs?.safetyPriority,
+      55 + Math.max(0, -gravityScore) * 5,
+    ),
+  );
   const falseConfidenceRisk = roundScore(
     Math.max(0, -gravityScore) * 7 +
       Math.max(0, 0.55 - needConfidence) * 65 +
       (literalDesireUnsafe ? 12 : 0),
   );
-  const confidenceAdjustment = -roundScore(falseConfidenceRisk * 0.22 + Math.max(0, 0.65 - needConfidence) * 20);
-  const decisionPenalty = roundScore(falseConfidenceRisk * 0.08 + (literalDesireUnsafe ? 4 : 0));
-  const recommendedAction = gravityScore <= -9
-    ? "block"
-    : gravityScore <= -7 || needConfidence < 0.45
-      ? "review"
-      : gravityScore <= -5
-        ? "scale"
-        : "allow";
+  const confidenceAdjustment = -roundScore(
+    falseConfidenceRisk * 0.22 + Math.max(0, 0.65 - needConfidence) * 20,
+  );
+  const decisionPenalty = roundScore(
+    falseConfidenceRisk * 0.08 + (literalDesireUnsafe ? 4 : 0),
+  );
+  const recommendedAction =
+    gravityScore <= -9
+      ? "block"
+      : gravityScore <= -7 || needConfidence < 0.45
+        ? "review"
+        : gravityScore <= -5
+          ? "scale"
+          : "allow";
 
   return {
     gravityScore,
@@ -1531,8 +2531,14 @@ function meaningAdjustmentFor(input: DecisionQualityInput["meaning"]): WisdomMea
     recommendedAction,
     warnings: [
       ...safeStrings(input.riskWarnings),
-      ...(literalDesireUnsafe ? ["Meaning transformed an unsafe literal desire; Wisdom must not optimize the literal request."] : []),
-      ...(needConfidence < 0.45 ? ["Meaning confidence is low; Wisdom should escalate review."] : []),
+      ...(literalDesireUnsafe
+        ? [
+            "Meaning transformed an unsafe literal desire; Wisdom must not optimize the literal request.",
+          ]
+        : []),
+      ...(needConfidence < 0.45
+        ? ["Meaning confidence is low; Wisdom should escalate review."]
+        : []),
     ],
   };
 }
@@ -1544,18 +2550,24 @@ function wisdomRecommendedAction(
 ) {
   if (meaning.recommendedAction === "block") return "review";
   if (meaning.recommendedAction === "review") return "review";
-  if (meaning.recommendedAction === "scale") return bestOption === "action" ? "scale" : bestOption;
+  if (meaning.recommendedAction === "scale")
+    return bestOption === "action" ? "scale" : bestOption;
   if (pruning.recommendedAction === "quarantine") return "review";
   if (pruning.recommendedAction === "ignore") return "review";
   if (pruning.recommendedAction === "review") return "review";
-  if (pruning.recommendedAction === "reduce") return bestOption === "action" ? "scale" : bestOption;
+  if (pruning.recommendedAction === "reduce")
+    return bestOption === "action" ? "scale" : bestOption;
   if (pruning.evidenceConfidence < 40) return "review";
   return bestOption;
 }
 
 function strongestPruningAction(actions: PruningRecommendedAction[]) {
   if (!actions.length) return "keep";
-  return actions.sort((left, right) => pruningActionRank(right) - pruningActionRank(left))[0] ?? "keep";
+  return (
+    actions.sort(
+      (left, right) => pruningActionRank(right) - pruningActionRank(left),
+    )[0] ?? "keep"
+  );
 }
 
 function pruningActionRank(action: PruningRecommendedAction) {
@@ -1573,9 +2585,14 @@ function scoreMean(
   fallbackSource: Partial<PruningResult> | Partial<PruningCandidateAssessment>,
   fallback = 0,
 ) {
-  const direct = score((fallbackSource as Record<string, unknown>)[key as string], fallback);
+  const direct = score(
+    (fallbackSource as Record<string, unknown>)[key as string],
+    fallback,
+  );
   const values = candidates
-    .map((candidate) => optionalScore((candidate as Record<string, unknown>)[key as string]))
+    .map((candidate) =>
+      optionalScore((candidate as Record<string, unknown>)[key as string]),
+    )
     .filter((value): value is number => value != null);
   return values.length ? roundScore(mean(values)) : direct;
 }
@@ -1591,20 +2608,30 @@ function sourceModulesFor(input: DecisionQualityInput) {
     discoveryMaturity: input.discoveryMaturity,
     agencyEffectiveness: input.agencyEffectiveness,
     portfolioIntelligence: input.portfolioIntelligence,
-  }).filter(([, value]) => value != null).map(([key]) => key);
+  })
+    .filter(([, value]) => value != null)
+    .map(([key]) => key);
 }
 
 function aggregateCounterfactuals(records: DecisionOutcomeRecord[]) {
   if (!records.length) return evaluateCounterfactuals();
-  const reviewed = records.map((record) => evaluateCounterfactuals({ decision: record, history: records }));
+  const reviewed = records.map((record) =>
+    evaluateCounterfactuals({ decision: record, history: records }),
+  );
   const base = reviewed[0];
   return {
     ...base,
-    decisionQuality: roundScore(mean(reviewed.map((item) => item.decisionQuality))),
+    decisionQuality: roundScore(
+      mean(reviewed.map((item) => item.decisionQuality)),
+    ),
     avoidedLoss: roundScore(sum(reviewed.map((item) => item.avoidedLoss))),
     missedUpside: roundScore(sum(reviewed.map((item) => item.missedUpside))),
-    restrictionValue: roundScore(mean(reviewed.map((item) => item.restrictionValue))),
-    counterfactualConfidence: roundScore(mean(reviewed.map((item) => item.counterfactualConfidence))),
+    restrictionValue: roundScore(
+      mean(reviewed.map((item) => item.restrictionValue)),
+    ),
+    counterfactualConfidence: roundScore(
+      mean(reviewed.map((item) => item.counterfactualConfidence)),
+    ),
     explanation: `Aggregated ${records.length} wisdom outcome records.`,
   };
 }
@@ -1619,23 +2646,40 @@ function scoreFromUnknown(value: unknown, keys: string[], fallback: number) {
   return fallback;
 }
 
-function deterministicNow(discoveries: WisdomDiscoveryRecord[], now: DiscoveryMaturityInput["now"]) {
+function deterministicNow(
+  discoveries: WisdomDiscoveryRecord[],
+  now: DiscoveryMaturityInput["now"],
+) {
   const explicit = toTime(now);
   if (explicit != null) return explicit;
-  const times = discoveries.flatMap((discovery) => [
-    toTime(discovery.detectedAt),
-    toTime(discovery.observedAt),
-    toTime(discovery.confirmedAt),
-  ]).filter((value): value is number => value != null);
+  const times = discoveries
+    .flatMap((discovery) => [
+      toTime(discovery.detectedAt),
+      toTime(discovery.observedAt),
+      toTime(discovery.confirmedAt),
+    ])
+    .filter((value): value is number => value != null);
   return times.length ? Math.max(...times) : 0;
 }
 
 function isRestricted(status: unknown) {
-  return ["blocked", "delayed", "reduced-size", "reduced size", "rejected"].includes(normalized(status));
+  return [
+    "blocked",
+    "delayed",
+    "reduced-size",
+    "reduced size",
+    "rejected",
+  ].includes(normalized(status));
 }
 
 function isAlternative(value: unknown): value is WisdomAlternativeScenario {
-  return Boolean(value && typeof value === "object" && ("expectedReward" in value || "expectedValue" in value || "kind" in value));
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      ("expectedReward" in value ||
+        "expectedValue" in value ||
+        "kind" in value),
+  );
 }
 
 function counterfactualExplanation(
@@ -1644,12 +2688,18 @@ function counterfactualExplanation(
   missedUpside: number,
   restrictionValue: number,
 ) {
-  if (restrictionValue >= 65) return `Restrictions appear valuable: avoided loss ${avoidedLoss}/100 exceeds missed upside ${missedUpside}/100.`;
-  if (missedUpside > avoidedLoss) return `Caution is costly: missed upside ${missedUpside}/100 exceeds avoided loss ${avoidedLoss}/100.`;
+  if (restrictionValue >= 65)
+    return `Restrictions appear valuable: avoided loss ${avoidedLoss}/100 exceeds missed upside ${missedUpside}/100.`;
+  if (missedUpside > avoidedLoss)
+    return `Caution is costly: missed upside ${missedUpside}/100 exceeds avoided loss ${avoidedLoss}/100.`;
   return `Decision quality is ${decisionQuality}/100 with balanced restriction value.`;
 }
 
-function audit(value: number, formula: string, contributors: WisdomContributor[]): WisdomScoreAudit {
+function audit(
+  value: number,
+  formula: string,
+  contributors: WisdomContributor[],
+): WisdomScoreAudit {
   return {
     value: roundNumber(value),
     contributors: contributors.map((item) => ({
@@ -1678,15 +2728,21 @@ function contributor(
   };
 }
 
-function contributorsFrom<T extends Record<string, WisdomScoreAudit>>(scores: T) {
+function contributorsFrom<T extends Record<string, WisdomScoreAudit>>(
+  scores: T,
+) {
   return Object.fromEntries(
     Object.entries(scores).map(([key, score]) => [key, score.contributors]),
   ) as { [K in keyof T]: WisdomContributor[] };
 }
 
-function labelForAlternative(alternative: WisdomAlternativeScenario, index: number) {
+function labelForAlternative(
+  alternative: WisdomAlternativeScenario,
+  index: number,
+) {
   if (alternative.kind === "do-nothing") return "Do nothing";
-  if (alternative.kind === "wait") return alternative.delayHours ? `Wait ${alternative.delayHours}h` : "Wait";
+  if (alternative.kind === "wait")
+    return alternative.delayHours ? `Wait ${alternative.delayHours}h` : "Wait";
   if (alternative.kind === "scale") return "Scale action";
   if (alternative.kind === "reject") return "Reject";
   return `Alternative ${index + 1}`;
@@ -1698,15 +2754,21 @@ function scaleFor(values: number[]) {
 }
 
 function maxBy<T>(values: T[], selector: (value: T) => number): T {
-  return values.reduce((best, candidate) => selector(candidate) > selector(best) ? candidate : best);
+  return values.reduce((best, candidate) =>
+    selector(candidate) > selector(best) ? candidate : best,
+  );
 }
 
 function minBy<T>(values: T[], selector: (value: T) => number): T {
-  return values.reduce((best, candidate) => selector(candidate) < selector(best) ? candidate : best);
+  return values.reduce((best, candidate) =>
+    selector(candidate) < selector(best) ? candidate : best,
+  );
 }
 
 function pct(numerator: number, denominator: number, fallback: number) {
-  return denominator > 0 ? roundScore((numerator / denominator) * 100) : roundScore(fallback);
+  return denominator > 0
+    ? roundScore((numerator / denominator) * 100)
+    : roundScore(fallback);
 }
 
 function score(value: unknown, fallback: number) {
@@ -1729,7 +2791,9 @@ function roundNumber(value: number) {
 }
 
 function sum(values: number[]) {
-  return values.filter(Number.isFinite).reduce((total, value) => total + value, 0);
+  return values
+    .filter(Number.isFinite)
+    .reduce((total, value) => total + value, 0);
 }
 
 function unique(values: string[]) {
@@ -1738,17 +2802,28 @@ function unique(values: string[]) {
 
 function safeStrings(value: unknown) {
   return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+    ? value.filter(
+        (item): item is string =>
+          typeof item === "string" && item.trim().length > 0,
+      )
     : [];
 }
 
 function normalized(value: unknown) {
-  return String(value ?? "").trim().toLowerCase().replace(/_/g, " ");
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/_/g, " ");
 }
 
 function toTime(value: unknown) {
   if (value == null || value === "") return null;
-  const time = value instanceof Date ? value.getTime() : typeof value === "number" ? value : new Date(String(value)).getTime();
+  const time =
+    value instanceof Date
+      ? value.getTime()
+      : typeof value === "number"
+        ? value
+        : new Date(String(value)).getTime();
   return Number.isFinite(time) ? time : null;
 }
 

@@ -10,14 +10,20 @@ export type AwareBrowserClient = {
   sendFeedback(input: FeedbackInput): Promise<void>;
 };
 
-export function createAwareBrowserClient(basePath = "/api"): AwareBrowserClient {
+export function createAwareBrowserClient(
+  basePath = "/api",
+): AwareBrowserClient {
   return {
     async searchRegions(query) {
-      const response = await requestJson<{ regions: Region[] }>(`${basePath}/regions/search?q=${encodeURIComponent(query)}`);
+      const response = await requestJson<{ regions: Region[] }>(
+        `${basePath}/regions/search?q=${encodeURIComponent(query)}`,
+      );
       return response.regions;
     },
     async getBriefing(regionId) {
-      const response = await requestJson<{ briefing: Briefing }>(`${basePath}/regions/${encodeURIComponent(regionId)}/briefing`);
+      const response = await requestJson<{ briefing: Briefing }>(
+        `${basePath}/regions/${encodeURIComponent(regionId)}/briefing`,
+      );
       return response.briefing;
     },
     async sendFeedback(input) {
@@ -25,11 +31,13 @@ export function createAwareBrowserClient(basePath = "/api"): AwareBrowserClient 
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(input.idempotencyKey ? { "Idempotency-Key": input.idempotencyKey } : {})
+          ...(input.idempotencyKey
+            ? { "Idempotency-Key": input.idempotencyKey }
+            : {}),
         },
-        body: JSON.stringify(input)
+        body: JSON.stringify(input),
       });
-    }
+    },
   };
 }
 

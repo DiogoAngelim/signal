@@ -1,28 +1,33 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  evaluateBelief as exportedEvaluateBelief,
+  evaluateEvidence as exportedEvaluateEvidence,
+} from "../index";
+import {
   calculateBeliefFragility,
   calculateEvidenceAgreement,
   createBeliefReason,
   evaluateBelief,
   evaluateEvidence,
 } from "./engine";
-import {
-  evaluateBelief as exportedEvaluateBelief,
-  evaluateEvidence as exportedEvaluateEvidence,
-} from "../index";
 
 function expect<T>(actual: T) {
   return {
     toBe: (expected: unknown) => assert.equal(actual, expected),
     toEqual: (expected: unknown) => assert.deepEqual(actual, expected),
-    toContain: (expected: unknown) => assert.ok((actual as any).includes(expected)),
-    toHaveLength: (expected: number) => assert.equal((actual as any).length, expected),
-    toMatchObject: (expected: unknown) => assert.partialDeepStrictEqual(actual, expected),
+    toContain: (expected: unknown) =>
+      assert.ok((actual as any).includes(expected)),
+    toHaveLength: (expected: number) =>
+      assert.equal((actual as any).length, expected),
+    toMatchObject: (expected: unknown) =>
+      assert.partialDeepStrictEqual(actual, expected),
     toBeGreaterThan: (expected: number) => assert.ok(Number(actual) > expected),
-    toBeGreaterThanOrEqual: (expected: number) => assert.ok(Number(actual) >= expected),
+    toBeGreaterThanOrEqual: (expected: number) =>
+      assert.ok(Number(actual) >= expected),
     toBeLessThan: (expected: number) => assert.ok(Number(actual) < expected),
-    toBeLessThanOrEqual: (expected: number) => assert.ok(Number(actual) <= expected),
+    toBeLessThanOrEqual: (expected: number) =>
+      assert.ok(Number(actual) <= expected),
     not: {
       toBe: (expected: unknown) => assert.notEqual(actual, expected),
     },
@@ -122,7 +127,9 @@ describe("Signal Belief", () => {
     });
 
     expect(result.verdict).toBe("contradicted");
-    expect(result.contradictionStrength).toBeGreaterThan(result.supportStrength);
+    expect(result.contradictionStrength).toBeGreaterThan(
+      result.supportStrength,
+    );
     expect(result.blockers).toContain(
       "Contradictory evidence is stronger than supporting evidence.",
     );
@@ -190,7 +197,9 @@ describe("Signal Belief", () => {
     });
 
     expect(result.verdict).not.toBe("justified");
-    expect(result.warnings.some((warning) => warning.includes("exceeds tolerance"))).toBe(true);
+    expect(
+      result.warnings.some((warning) => warning.includes("exceeds tolerance")),
+    ).toBe(true);
   });
 
   it("mixed evidence lowers agreement and increases fragility", () => {
@@ -213,7 +222,9 @@ describe("Signal Belief", () => {
 
     expect(mixed.evidenceAgreement).toBeLessThan(supportOnly.evidenceAgreement);
     expect(mixed.fragility).toBeGreaterThan(supportOnly.fragility);
-    expect(mixed.warnings).toContain("Supporting and contradictory evidence are close.");
+    expect(mixed.warnings).toContain(
+      "Supporting and contradictory evidence are close.",
+    );
   });
 
   it("neutral evidence contributes coverage without directional confidence", () => {
@@ -257,7 +268,11 @@ describe("Signal Belief", () => {
     expect(uncertain.trustworthiness).toBeLessThan(certain.trustworthiness);
     expect(uncertain.fragility).toBeGreaterThan(certain.fragility);
     expect(uncertain.verdict).not.toBe("justified");
-    expect(uncertain.warnings.some((warning) => warning.includes("Uncertainty is high"))).toBe(true);
+    expect(
+      uncertain.warnings.some((warning) =>
+        warning.includes("Uncertainty is high"),
+      ),
+    ).toBe(true);
   });
 
   it("low evidence count reduces coverage and prevents a justified verdict", () => {
@@ -269,7 +284,9 @@ describe("Signal Belief", () => {
 
     expect(result.evidenceCoverage).toBeLessThan(60);
     expect(result.verdict).not.toBe("justified");
-    expect(result.warnings[0]).toContain("Evidence count 1 is below minimum 4.");
+    expect(result.warnings[0]).toContain(
+      "Evidence count 1 is below minimum 4.",
+    );
   });
 
   it("low evidence confidence reduces trust and is surfaced as a warning", () => {
@@ -283,7 +300,11 @@ describe("Signal Belief", () => {
     });
 
     expect(result.trustworthiness).toBeLessThan(80);
-    expect(result.warnings.some((warning) => warning.includes("Average evidence confidence is low"))).toBe(true);
+    expect(
+      result.warnings.some((warning) =>
+        warning.includes("Average evidence confidence is low"),
+      ),
+    ).toBe(true);
   });
 
   it("one dominant source increases fragility", () => {
@@ -305,7 +326,11 @@ describe("Signal Belief", () => {
     });
 
     expect(dominated.fragility).toBeGreaterThan(independent.fragility);
-    expect(dominated.warnings.some((warning) => warning.includes("One evidence source dominates"))).toBe(true);
+    expect(
+      dominated.warnings.some((warning) =>
+        warning.includes("One evidence source dominates"),
+      ),
+    ).toBe(true);
   });
 
   it("prior confidence influences final confidence without overriding evidence", () => {
@@ -390,29 +415,39 @@ describe("Signal Belief", () => {
       name: "exported",
       direction: "support",
     });
-    expect(exportedEvaluateBelief({
-      claim: "Exported belief works.",
-      evidence: [
-        support("support a", 90, 90, "a"),
-        support("support b", 90, 90, "b"),
-        support("support c", 90, 90, "c"),
-      ],
-    }).verdict).toBe("justified");
+    expect(
+      exportedEvaluateBelief({
+        claim: "Exported belief works.",
+        evidence: [
+          support("support a", 90, 90, "a"),
+          support("support b", 90, 90, "b"),
+          support("support c", 90, 90, "c"),
+        ],
+      }).verdict,
+    ).toBe("justified");
   });
 
   it("calculates agreement and fragility for direct helper calls", () => {
     const supportResult = evaluateEvidence(support("support", 80, 90));
-    const contradictionResult = evaluateEvidence(contradict("contradiction", 80, 90));
+    const contradictionResult = evaluateEvidence(
+      contradict("contradiction", 80, 90),
+    );
     const neutralResult = evaluateEvidence(neutral("neutral", 80, 90));
 
     expect(calculateEvidenceAgreement([])).toBe(0);
     expect(calculateEvidenceAgreement(undefined as any)).toBe(0);
     expect(calculateEvidenceAgreement([neutralResult])).toBe(50);
     expect(calculateEvidenceAgreement([supportResult])).toBe(100);
-    expect(calculateEvidenceAgreement([supportResult, contradictionResult])).toBe(50);
+    expect(
+      calculateEvidenceAgreement([supportResult, contradictionResult]),
+    ).toBe(50);
 
     const fragile = calculateBeliefFragility(
-      { claim: "Fragile.", uncertainty: 80, evidence: [support("support", 20, 10)] },
+      {
+        claim: "Fragile.",
+        uncertainty: 80,
+        evidence: [support("support", 20, 10)],
+      },
       [evaluateEvidence(support("support", 20, 10))],
     );
     const fallbackFragile = calculateBeliefFragility(

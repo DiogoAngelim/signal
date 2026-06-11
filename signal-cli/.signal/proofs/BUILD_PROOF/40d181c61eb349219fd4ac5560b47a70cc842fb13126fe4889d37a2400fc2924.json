@@ -1,1 +1,17 @@
-{"details":{"buildOutputHash":"013ebf606855b8b7421d26fa7b660f1a90db4ad870e45be68510bf6b2d03ab10","buildPassed":true,"outputDir":"dist","phaseNumber":1,"postVerify":true,"preVerify":true},"hashes":["013ebf606855b8b7421d26fa7b660f1a90db4ad870e45be68510bf6b2d03ab10"],"result":"PASS","timestamp":"NOT_ALLOWED_IN_HASH_LOGIC","type":"BUILD_PROOF","valid":true}
+{
+  "details": {
+    "buildOutputHash": "013ebf606855b8b7421d26fa7b660f1a90db4ad870e45be68510bf6b2d03ab10",
+    "buildPassed": true,
+    "outputDir": "dist",
+    "phaseNumber": 1,
+    "postVerify": true,
+    "preVerify": true
+  },
+  "hashes": [
+    "013ebf606855b8b7421d26fa7b660f1a90db4ad870e45be68510bf6b2d03ab10"
+  ],
+  "result": "PASS",
+  "timestamp": "NOT_ALLOWED_IN_HASH_LOGIC",
+  "type": "BUILD_PROOF",
+  "valid": true
+}

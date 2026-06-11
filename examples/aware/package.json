@@ -17,9 +17,8 @@
     "clean": "rm -rf dist coverage"
   },
   "dependencies": {
-    "@signal/decision": "workspace:*",
     "@signal/decision-memory": "workspace:*",
-    "@signal/runtime": "workspace:*",
+    "@signal/sdk-node": "workspace:*",
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

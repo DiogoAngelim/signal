@@ -4,7 +4,9 @@ declare module "nodemailer" {
     sendMail(message: Record<string, unknown>): Promise<unknown>;
   }
 
-  export function createTransport(options: Record<string, unknown>): Transporter;
+  export function createTransport(
+    options: Record<string, unknown>,
+  ): Transporter;
 
   const nodemailer: {
     createTransport: typeof createTransport;

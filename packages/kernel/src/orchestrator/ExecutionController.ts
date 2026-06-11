@@ -4,7 +4,7 @@
  * Plugins cannot bypass this — they are invoked only through the orchestrator.
  */
 
-import { EventBus } from "../infrastructure/EventBus";
+import type { EventBus } from "../infrastructure/EventBus";
 
 export type ExecutionState = "idle" | "running" | "paused" | "stopped";
 
@@ -50,7 +50,11 @@ export class ExecutionController {
 
     this.activeCount++;
     this._state = "running";
-    this.eventBus.emit("execution:acquired", { activeCount: this.activeCount }, "ExecutionController");
+    this.eventBus.emit(
+      "execution:acquired",
+      { activeCount: this.activeCount },
+      "ExecutionController",
+    );
   }
 
   release(): void {
@@ -62,7 +66,11 @@ export class ExecutionController {
       this._state = "idle";
     }
 
-    this.eventBus.emit("execution:released", { activeCount: this.activeCount }, "ExecutionController");
+    this.eventBus.emit(
+      "execution:released",
+      { activeCount: this.activeCount },
+      "ExecutionController",
+    );
 
     if (this.waitQueue.length > 0 && this.activeCount < this.maxConcurrent) {
       const next = this.waitQueue.shift();
@@ -73,14 +81,22 @@ export class ExecutionController {
   pause(): void {
     if (this._state === "running" || this._state === "idle") {
       this._state = "paused";
-      this.eventBus.emit("execution:paused", { activeCount: this.activeCount }, "ExecutionController");
+      this.eventBus.emit(
+        "execution:paused",
+        { activeCount: this.activeCount },
+        "ExecutionController",
+      );
     }
   }
 
   resume(): void {
     if (this._state === "paused") {
       this._state = this.activeCount > 0 ? "running" : "idle";
-      this.eventBus.emit("execution:resumed", { activeCount: this.activeCount }, "ExecutionController");
+      this.eventBus.emit(
+        "execution:resumed",
+        { activeCount: this.activeCount },
+        "ExecutionController",
+      );
     }
   }
 

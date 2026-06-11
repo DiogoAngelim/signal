@@ -18,7 +18,7 @@ module.exports = function handler(_req, res) {
           name: market,
           market,
           symbolsCount: 0,
-          sourceFiles: []
+          sourceFiles: [],
         });
       }
 
@@ -33,18 +33,18 @@ module.exports = function handler(_req, res) {
     const data = Array.from(markets.values())
       .map((entry) => ({
         ...entry,
-        sourceFiles: entry.sourceFiles.sort()
+        sourceFiles: entry.sourceFiles.sort(),
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
 
     res.status(200).json({
       data,
-      total: data.length
+      total: data.length,
     });
   } catch (error) {
     res.status(500).json({
       error: "MARKETS_LOAD_FAILED",
-      message: error.message
+      message: error.message,
     });
   }
 };

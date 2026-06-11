@@ -1,4 +1,4 @@
-const crypto = require("crypto");
+const crypto = require("node:crypto");
 const { query } = require("./_lib/db.js");
 const { getCache, setCache, acquireLock } = require("./_quote-cache.js");
 const {
@@ -9,8 +9,6 @@ const {
   generateConservativeConfigs,
   optimizeConfigsOnBars,
 } = require("./_strategy/engine.js");
-
-
 
 const STRATEGY_ENGINE_VERSION = "2026.05.25-v1";
 const CONFIG_SCHEMA_VERSION = "1";
@@ -70,7 +68,9 @@ function requestAction(req) {
 function bearerToken(req) {
   const header = req.headers?.authorization || req.headers?.Authorization || "";
   const value = Array.isArray(header) ? header[0] : header;
-  return String(value).replace(/^Bearer\s+/i, "").trim();
+  return String(value)
+    .replace(/^Bearer\s+/i, "")
+    .trim();
 }
 
 function isCronAuthorized(req) {
@@ -108,7 +108,13 @@ function jsonSafe(value) {
   }
 }
 
-async function createStrategyJob({ market, jobType, status = "queued", params = {}, createdBy = "system" }) {
+async function createStrategyJob({
+  market,
+  jobType,
+  status = "queued",
+  params = {},
+  createdBy = "system",
+}) {
   const result = await query(
     `
     INSERT INTO strategy_jobs (
@@ -217,8 +223,14 @@ async function getStrategyControls(market) {
     disableAutoPromotion: Boolean(row?.disable_auto_promotion),
     forceCashMode: Boolean(row?.force_cash_mode),
     pauseMarket: Boolean(row?.pause_market),
-    maxLiveDrawdownPct: row?.max_live_drawdown_pct == null ? 8 : Number(row.max_live_drawdown_pct),
-    staleSignalMinutes: row?.stale_signal_minutes == null ? 180 : Number(row.stale_signal_minutes),
+    maxLiveDrawdownPct:
+      row?.max_live_drawdown_pct == null
+        ? 8
+        : Number(row.max_live_drawdown_pct),
+    staleSignalMinutes:
+      row?.stale_signal_minutes == null
+        ? 180
+        : Number(row.stale_signal_minutes),
     payload: row?.payload ?? {},
   };
 }
@@ -282,8 +294,6 @@ async function latestBarFreshness(market) {
   }
 }
 
-
-
 const ADMIN_READ_ACTIONS = new Set([
   "audit-log",
   "job-status",
@@ -314,14 +324,18 @@ function requireReadAccess(req, res) {
   res.status(401).json({
     error: "UNAUTHORIZED_READ_ROUTE",
     action,
-    message: "This route exposes internal strategy data and requires authorization.",
+    message:
+      "This route exposes internal strategy data and requires authorization.",
   });
 
   return false;
 }
 
 function hashIdempotencyKey(value) {
-  return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
+  return crypto
+    .createHash("sha256")
+    .update(JSON.stringify(value))
+    .digest("hex");
 }
 
 function explicitIdempotencyKey(req, fallbackPayload) {
@@ -339,7 +353,9 @@ function explicitIdempotencyKey(req, fallbackPayload) {
 }
 
 function normalizeSymbol(value) {
-  return String(value || "").trim().toUpperCase();
+  return String(value || "")
+    .trim()
+    .toUpperCase();
 }
 
 function parseSymbolList(value) {
@@ -358,8 +374,12 @@ function parseSymbolList(value) {
 
 function applySymbolControls(symbols, controls) {
   const payload = controls?.payload || {};
-  const whitelist = parseSymbolList(payload.whitelistedSymbols || payload.symbolWhitelist);
-  const blacklist = parseSymbolList(payload.blacklistedSymbols || payload.symbolBlacklist);
+  const whitelist = parseSymbolList(
+    payload.whitelistedSymbols || payload.symbolWhitelist,
+  );
+  const blacklist = parseSymbolList(
+    payload.blacklistedSymbols || payload.symbolBlacklist,
+  );
   const maxSymbols = Number(payload.maxSymbols || 0);
 
   let next = symbols.map(normalizeSymbol).filter(Boolean);
@@ -419,8 +439,6 @@ function sanitizePublicConfig(config) {
   };
 }
 
-
-
 const HEAVY_JOB_TYPES = new Set([
   "history-sync",
   "backtest-market",
@@ -439,7 +457,9 @@ const HEAVY_ACTION_TO_JOB_TYPE = {
 };
 
 function workerId() {
-  return process.env.WORKER_ID || process.env.VERCEL_REGION || `api-${process.pid}`;
+  return (
+    process.env.WORKER_ID || process.env.VERCEL_REGION || `api-${process.pid}`
+  );
 }
 
 function retryDelaySeconds(attempts) {
@@ -508,7 +528,8 @@ async function enforceHeavyJobRateLimit({
   const recent = rows[0];
 
   if (recent?.updated_at) {
-    const elapsedSeconds = (Date.now() - new Date(recent.updated_at).getTime()) / 1000;
+    const elapsedSeconds =
+      (Date.now() - new Date(recent.updated_at).getTime()) / 1000;
 
     if (elapsedSeconds < cooldownSeconds) {
       return {
@@ -612,9 +633,10 @@ async function releaseJobLease(jobId) {
   );
 }
 
-
 function marketKey(value) {
-  return String(value || "").trim().toUpperCase();
+  return String(value || "")
+    .trim()
+    .toUpperCase();
 }
 
 function routeName(req) {
@@ -871,7 +893,11 @@ async function handleMigrate(req, res) {
   });
 }
 
-async function loadBarsBySymbol({ market, limitSymbols = 50, controls = null }) {
+async function loadBarsBySymbol({
+  market,
+  limitSymbols = 50,
+  controls = null,
+}) {
   const effectiveControls = controls || (await getStrategyControls(market));
 
   const { rows: symbols } = await query(
@@ -889,7 +915,10 @@ async function loadBarsBySymbol({ market, limitSymbols = 50, controls = null }) 
   );
 
   const rawSymbolList = symbols.map((row) => row.symbol);
-  const symbolList = applySymbolControls(rawSymbolList, effectiveControls).slice(0, limitSymbols);
+  const symbolList = applySymbolControls(
+    rawSymbolList,
+    effectiveControls,
+  ).slice(0, limitSymbols);
 
   if (!symbolList.length) return new Map();
 
@@ -928,7 +957,6 @@ async function loadBarsBySymbol({ market, limitSymbols = 50, controls = null }) 
 
   return bySymbol;
 }
-
 
 async function saveLiveSignals(market, result) {
   for (const signal of result.signals) {
@@ -990,7 +1018,6 @@ async function saveLiveSignals(market, result) {
     );
   }
 }
-
 
 async function loadPromotedConfig(market) {
   const { rows } = await query(
@@ -1072,7 +1099,15 @@ async function saveConfigResult(market, evaluation, status = "candidate") {
 }
 
 async function promoteConfig(market, configId, status = "paper_promoted") {
-  if (!["paper_promoted", "live_promoted", "promoted", "candidate", "retired"].includes(status)) {
+  if (
+    ![
+      "paper_promoted",
+      "live_promoted",
+      "promoted",
+      "candidate",
+      "retired",
+    ].includes(status)
+  ) {
     status = "paper_promoted";
   }
 
@@ -1128,12 +1163,17 @@ async function promoteConfig(market, configId, status = "paper_promoted") {
   });
 }
 
-
 async function handleLiveMarket(req, res) {
   const body = req.method === "POST" ? getBody(req) : {};
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const market = marketKey(body.market || url.searchParams.get("market"));
-  const limitSymbols = Math.min(200, Math.max(2, Number(body.limitSymbols || url.searchParams.get("limitSymbols") || 80)));
+  const limitSymbols = Math.min(
+    200,
+    Math.max(
+      2,
+      Number(body.limitSymbols || url.searchParams.get("limitSymbols") || 80),
+    ),
+  );
 
   if (!market) {
     res.status(400).json({ error: "MARKET_REQUIRED" });
@@ -1142,7 +1182,11 @@ async function handleLiveMarket(req, res) {
 
   const controls = await getStrategyControls(market);
 
-  if (controls.pauseMarket || controls.disableLiveSignals || controls.forceCashMode) {
+  if (
+    controls.pauseMarket ||
+    controls.disableLiveSignals ||
+    controls.forceCashMode
+  ) {
     await auditStrategyEvent({
       market,
       eventType: "LIVE_SIGNALS_BLOCKED",
@@ -1205,7 +1249,9 @@ async function handleLiveMarket(req, res) {
 
   if (!lock.acquired) {
     const cached = await getCache(`strategy:live:${market}`);
-    res.status(202).json(cached || { ok: true, market, status: "already_running" });
+    res
+      .status(202)
+      .json(cached || { ok: true, market, status: "already_running" });
     return;
   }
 
@@ -1415,14 +1461,20 @@ async function handleBacktestMarket(req, res) {
     : await loadPromotedConfig(market);
 
   const configId = requestedConfigId || promoted.configId || "default";
-  const limitSymbols = Math.min(200, Math.max(2, Number(body.limitSymbols || 30)));
+  const limitSymbols = Math.min(
+    200,
+    Math.max(2, Number(body.limitSymbols || 30)),
+  );
 
   if (!market) {
     res.status(400).json({ error: "MARKET_REQUIRED" });
     return;
   }
 
-  const lock = await acquireLock(`lock:strategy-backtest-market:${market}:${configId}`, 180);
+  const lock = await acquireLock(
+    `lock:strategy-backtest-market:${market}:${configId}`,
+    180,
+  );
 
   if (!lock.acquired) {
     res.status(202).json({
@@ -1494,7 +1546,9 @@ async function handleBacktestMarket(req, res) {
 
   await updateStrategyJob(jobId, {
     status: endSegment >= plannedSegments.length ? "completed" : "partial",
-    progress: Math.round((endSegment / Math.max(1, plannedSegments.length)) * 100),
+    progress: Math.round(
+      (endSegment / Math.max(1, plannedSegments.length)) * 100,
+    ),
     cursorValue: String(endSegment),
     completedAt: new Date().toISOString(),
     summary: {
@@ -1568,7 +1622,9 @@ async function handleSignals(req, res) {
     source: row.source,
   }));
 
-  const publicSignals = isAdminAuthorized(req) ? signals : signals.map(sanitizePublicSignal);
+  const publicSignals = isAdminAuthorized(req)
+    ? signals
+    : signals.map(sanitizePublicSignal);
 
   res.status(200).json({
     ok: true,
@@ -1579,8 +1635,6 @@ async function handleSignals(req, res) {
     cached: false,
   });
 }
-
-
 
 function isForwardValidationEligible(metrics) {
   const observations = Number(metrics.observations || 0);
@@ -1630,7 +1684,11 @@ function isForwardValidationEligible(metrics) {
   };
 }
 
-async function evaluateForwardValidation({ market, configId, autoPromote = true }) {
+async function evaluateForwardValidation({
+  market,
+  configId,
+  autoPromote = true,
+}) {
   const { rows } = await query(
     `
     SELECT
@@ -1656,7 +1714,8 @@ async function evaluateForwardValidation({ market, configId, autoPromote = true 
     firstSeenAt && lastSeenAt
       ? Math.max(
           0,
-          (new Date(lastSeenAt).getTime() - new Date(firstSeenAt).getTime()) / 86_400_000,
+          (new Date(lastSeenAt).getTime() - new Date(firstSeenAt).getTime()) /
+            86_400_000,
         )
       : 0;
 
@@ -1666,9 +1725,12 @@ async function evaluateForwardValidation({ market, configId, autoPromote = true 
     firstSeenAt,
     lastSeenAt,
     daysObserved,
-    avgSetupQuality: row.avg_setup_quality == null ? null : Number(row.avg_setup_quality),
-    avgRiskPressure: row.avg_risk_pressure == null ? null : Number(row.avg_risk_pressure),
-    avgExpectedMove: row.avg_expected_move == null ? null : Number(row.avg_expected_move),
+    avgSetupQuality:
+      row.avg_setup_quality == null ? null : Number(row.avg_setup_quality),
+    avgRiskPressure:
+      row.avg_risk_pressure == null ? null : Number(row.avg_risk_pressure),
+    avgExpectedMove:
+      row.avg_expected_move == null ? null : Number(row.avg_expected_move),
   };
 
   const decision = isForwardValidationEligible(metrics);
@@ -1728,7 +1790,12 @@ async function evaluateForwardValidation({ market, configId, autoPromote = true 
 
   const controls = await getStrategyControls(market);
 
-  if (decision.eligible && autoPromote && !controls.disableAutoPromotion && !controls.pauseMarket) {
+  if (
+    decision.eligible &&
+    autoPromote &&
+    !controls.disableAutoPromotion &&
+    !controls.pauseMarket
+  ) {
     await promoteConfig(market, configId, "live_promoted");
 
     await auditStrategyEvent({
@@ -1766,14 +1833,15 @@ async function evaluateForwardValidation({ market, configId, autoPromote = true 
   };
 }
 
-
-
 async function handleForwardValidate(req, res) {
   const body = req.method === "POST" ? getBody(req) : {};
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
 
   const market = marketKey(body.market || url.searchParams.get("market"));
-  const autoPromote = String(body.autoPromote ?? url.searchParams.get("autoPromote") ?? "true") !== "false";
+  const autoPromote =
+    String(
+      body.autoPromote ?? url.searchParams.get("autoPromote") ?? "true",
+    ) !== "false";
 
   if (!market) {
     res.status(400).json({ error: "MARKET_REQUIRED" });
@@ -1802,8 +1870,6 @@ async function handleForwardValidate(req, res) {
     ...result,
   });
 }
-
-
 
 async function handleSetControl(req, res) {
   if (req.method !== "POST") {
@@ -1920,8 +1986,6 @@ async function handleForceCash(req, res) {
   });
 }
 
-
-
 async function handleCreateJob(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
@@ -1974,8 +2038,6 @@ async function handleCreateJob(req, res) {
   });
 }
 
-
-
 async function handleClaimNextJob(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
@@ -1985,7 +2047,10 @@ async function handleClaimNextJob(req, res) {
   const body = getBody(req);
   const jobType = body.jobType ? String(body.jobType) : null;
   const market = body.market ? marketKey(body.market) : null;
-  const leaseSeconds = Math.min(1800, Math.max(30, Number(body.leaseSeconds || 300)));
+  const leaseSeconds = Math.min(
+    1800,
+    Math.max(30, Number(body.leaseSeconds || 300)),
+  );
   const lockedBy = workerId();
 
   const params = [];
@@ -2040,7 +2105,6 @@ async function handleClaimNextJob(req, res) {
   });
 }
 
-
 async function handleRunJob(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
@@ -2055,7 +2119,9 @@ async function handleRunJob(req, res) {
     return;
   }
 
-  const { rows } = await query(`SELECT * FROM strategy_jobs WHERE id = $1`, [jobId]);
+  const { rows } = await query("SELECT * FROM strategy_jobs WHERE id = $1", [
+    jobId,
+  ]);
   const job = rows[0];
 
   if (!job) {
@@ -2093,7 +2159,8 @@ async function handleRunJob(req, res) {
   }
 
   const params = job.params || {};
-  const nextSegment = job.cursor_value == null ? undefined : Number(job.cursor_value);
+  const nextSegment =
+    job.cursor_value == null ? undefined : Number(job.cursor_value);
 
   const fakeReq = {
     ...req,
@@ -2103,7 +2170,9 @@ async function handleRunJob(req, res) {
       market: job.market,
       resume: true,
       reset: false,
-      startSegment: Number.isFinite(nextSegment) ? nextSegment : params.startSegment,
+      startSegment: Number.isFinite(nextSegment)
+        ? nextSegment
+        : params.startSegment,
     },
     headers: req.headers,
     url: "/api/strategy?action=walk-forward-market",
@@ -2141,14 +2210,15 @@ async function handleCancelJob(req, res) {
   });
 }
 
-
 async function handleJobStatus(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const id = url.searchParams.get("jobId");
   const market = url.searchParams.get("market");
 
   if (id) {
-    const { rows } = await query(`SELECT * FROM strategy_jobs WHERE id = $1`, [id]);
+    const { rows } = await query("SELECT * FROM strategy_jobs WHERE id = $1", [
+      id,
+    ]);
     res.status(200).json({ ok: true, job: rows[0] || null });
     return;
   }
@@ -2183,7 +2253,10 @@ async function handleJobStatus(req, res) {
 async function handleAuditLog(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const market = marketKey(url.searchParams.get("market") || "");
-  const limit = Math.min(200, Math.max(1, Number(url.searchParams.get("limit") || 50)));
+  const limit = Math.min(
+    200,
+    Math.max(1, Number(url.searchParams.get("limit") || 50)),
+  );
 
   const params = [];
   let filter = "";
@@ -2212,8 +2285,6 @@ async function handleAuditLog(req, res) {
     events: rows,
   });
 }
-
-
 
 async function handleRetireConfig(req, res) {
   if (req.method !== "POST") {
@@ -2258,8 +2329,6 @@ async function handleRetireConfig(req, res) {
   });
 }
 
-
-
 async function handleDataQuality(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const market = marketKey(url.searchParams.get("market"));
@@ -2272,7 +2341,9 @@ async function handleDataQuality(req, res) {
   const quality = await evaluateDataQuality(market, {
     minSymbols: Number(url.searchParams.get("minSymbols") || 5),
     minBarsPerSymbol: Number(url.searchParams.get("minBarsPerSymbol") || 120),
-    maxLatestBarAgeDays: Number(url.searchParams.get("maxLatestBarAgeDays") || 7),
+    maxLatestBarAgeDays: Number(
+      url.searchParams.get("maxLatestBarAgeDays") || 7,
+    ),
     maxExtremeJumpPct: Number(url.searchParams.get("maxExtremeJumpPct") || 80),
   });
 
@@ -2282,11 +2353,13 @@ async function handleDataQuality(req, res) {
   });
 }
 
-
 async function handleBestConfigs(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const market = marketKey(url.searchParams.get("market"));
-  const limit = Math.min(20, Math.max(1, Number(url.searchParams.get("limit") || 10)));
+  const limit = Math.min(
+    20,
+    Math.max(1, Number(url.searchParams.get("limit") || 10)),
+  );
 
   if (!market) {
     res.status(400).json({ error: "MARKET_REQUIRED" });
@@ -2343,15 +2416,19 @@ async function handleBestConfigs(req, res) {
     promotedAt: row.promoted_at,
     updatedAt: row.updated_at,
     forward: {
-      observations: row.forward_observations == null ? 0 : Number(row.forward_observations),
-      buySignals: row.forward_buy_signals == null ? 0 : Number(row.forward_buy_signals),
+      observations:
+        row.forward_observations == null ? 0 : Number(row.forward_observations),
+      buySignals:
+        row.forward_buy_signals == null ? 0 : Number(row.forward_buy_signals),
       promotionEligible: row.forward_promotion_eligible,
       promotionReason: row.forward_promotion_reason,
       promotedToLiveAt: row.promoted_to_live_at,
     },
   }));
 
-  const responseConfigs = isAdminAuthorized(req) ? configs : configs.map(sanitizePublicConfig);
+  const responseConfigs = isAdminAuthorized(req)
+    ? configs
+    : configs.map(sanitizePublicConfig);
 
   res.status(200).json({
     ok: true,
@@ -2360,15 +2437,18 @@ async function handleBestConfigs(req, res) {
   });
 }
 
-
-
-
-
 async function handleWalkForwardTrades(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const market = marketKey(url.searchParams.get("market"));
-  const runId = String(url.searchParams.get("configId") || url.searchParams.get("runId") || "rolling");
-  const limit = Math.min(5000, Math.max(1, Number(url.searchParams.get("limit") || 500)));
+  const runId = String(
+    url.searchParams.get("configId") ||
+      url.searchParams.get("runId") ||
+      "rolling",
+  );
+  const limit = Math.min(
+    5000,
+    Math.max(1, Number(url.searchParams.get("limit") || 500)),
+  );
 
   if (!market) {
     res.status(400).json({ error: "MARKET_REQUIRED" });
@@ -2430,13 +2510,19 @@ async function handleWalkForwardTrades(req, res) {
   });
 }
 
-
 async function handleWalkForwardSignals(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const market = marketKey(url.searchParams.get("market"));
-  const runId = String(url.searchParams.get("configId") || url.searchParams.get("runId") || "rolling");
+  const runId = String(
+    url.searchParams.get("configId") ||
+      url.searchParams.get("runId") ||
+      "rolling",
+  );
   const action = url.searchParams.get("allocationAction");
-  const limit = Math.min(5000, Math.max(1, Number(url.searchParams.get("limit") || 500)));
+  const limit = Math.min(
+    5000,
+    Math.max(1, Number(url.searchParams.get("limit") || 500)),
+  );
 
   if (!market) {
     res.status(400).json({ error: "MARKET_REQUIRED" });
@@ -2515,7 +2601,6 @@ async function handleWalkForwardSignals(req, res) {
   });
 }
 
-
 async function handleWalkForwardSummary(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const market = marketKey(url.searchParams.get("market"));
@@ -2526,7 +2611,9 @@ async function handleWalkForwardSummary(req, res) {
     return;
   }
 
-  const cached = await getCache(`strategy:walkforward:summary:${market}:${configId}`);
+  const cached = await getCache(
+    `strategy:walkforward:summary:${market}:${configId}`,
+  );
 
   if (cached) {
     res.status(200).json({ ...cached, cached: true });
@@ -2558,12 +2645,21 @@ async function handleWalkForwardSummary(req, res) {
           maxDrawdownPct: Number(row.max_drawdown_pct),
           equity: Number(row.equity),
           segments: Number(row.segments),
-          benchmarkReturnPct: row.benchmark_return_pct == null ? null : Number(row.benchmark_return_pct),
-          benchmarkSharpe: row.benchmark_sharpe == null ? null : Number(row.benchmark_sharpe),
-          excessReturnPct: row.excess_return_pct == null ? null : Number(row.excess_return_pct),
-          excessSharpe: row.excess_sharpe == null ? null : Number(row.excess_sharpe),
+          benchmarkReturnPct:
+            row.benchmark_return_pct == null
+              ? null
+              : Number(row.benchmark_return_pct),
+          benchmarkSharpe:
+            row.benchmark_sharpe == null ? null : Number(row.benchmark_sharpe),
+          excessReturnPct:
+            row.excess_return_pct == null
+              ? null
+              : Number(row.excess_return_pct),
+          excessSharpe:
+            row.excess_sharpe == null ? null : Number(row.excess_sharpe),
           cashReturnPct: 0,
-          excessReturnVsCashPct: row.total_return_pct == null ? null : Number(row.total_return_pct),
+          excessReturnVsCashPct:
+            row.total_return_pct == null ? null : Number(row.total_return_pct),
           promotionEligible: row.promotion_eligible,
           promotionReason: row.promotion_reason,
           updatedAt: row.updated_at,
@@ -2604,7 +2700,9 @@ async function handleWalkForwardHistory(req, res) {
     return;
   }
 
-  const cached = await getCache(`strategy:walkforward:history:${market}:${configId}`);
+  const cached = await getCache(
+    `strategy:walkforward:history:${market}:${configId}`,
+  );
 
   if (cached?.data?.length) {
     res.status(200).json({ ...cached, cached: true });
@@ -2654,7 +2752,6 @@ async function handleWalkForwardHistory(req, res) {
   });
 }
 
-
 async function handleBacktestSummary(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const market = marketKey(url.searchParams.get("market"));
@@ -2665,7 +2762,9 @@ async function handleBacktestSummary(req, res) {
     return;
   }
 
-  const cached = await getCache(`strategy:backtest:summary:${market}:${configId}`);
+  const cached = await getCache(
+    `strategy:backtest:summary:${market}:${configId}`,
+  );
 
   if (cached) {
     res.status(200).json({ ...cached, cached: true });
@@ -2725,7 +2824,9 @@ async function handleBacktestHistory(req, res) {
     return;
   }
 
-  const cached = await getCache(`strategy:backtest:history:${market}:${configId}`);
+  const cached = await getCache(
+    `strategy:backtest:history:${market}:${configId}`,
+  );
 
   if (cached?.data?.length) {
     res.status(200).json({ ...cached, cached: true });
@@ -2763,8 +2864,6 @@ async function handleBacktestHistory(req, res) {
     source: "shared-strategy-engine",
   });
 }
-
-
 
 function collectAllDates(barsBySymbol) {
   return Array.from(
@@ -2817,8 +2916,16 @@ function filterBarsThroughDate(barsBySymbol, endDate, minBars = 80) {
   return next;
 }
 
-function rebaseCurveSegment({ segmentCurve, testStart, startingEquity, segmentIndex, selectedConfigId }) {
-  const usable = segmentCurve.filter((point) => normalizeDate(point.date) >= testStart);
+function rebaseCurveSegment({
+  segmentCurve,
+  testStart,
+  startingEquity,
+  segmentIndex,
+  selectedConfigId,
+}) {
+  const usable = segmentCurve.filter(
+    (point) => normalizeDate(point.date) >= testStart,
+  );
 
   if (usable.length < 2) return [];
 
@@ -2839,7 +2946,6 @@ function rebaseCurveSegment({ segmentCurve, testStart, startingEquity, segmentIn
     };
   });
 }
-
 
 function buildEqualWeightBenchmarkCurve({
   barsBySymbol,
@@ -2871,7 +2977,7 @@ function buildEqualWeightBenchmarkCurve({
     },
   ];
 
-  const perSymbolWeight = (totalExposureCap / 100) / eligibleSymbols.length;
+  const perSymbolWeight = totalExposureCap / 100 / eligibleSymbols.length;
   const cashFraction = 1 - totalExposureCap / 100;
 
   for (let i = 0; i < dates.length - 1; i += 1) {
@@ -2929,7 +3035,9 @@ function summarizeBenchmarkComparison(strategyMetrics, benchmarkMetrics) {
   const benchmarkSharpe = Number(benchmarkMetrics?.annualizedSharpe);
 
   return {
-    benchmarkReturnPct: Number.isFinite(benchmarkReturn) ? benchmarkReturn : null,
+    benchmarkReturnPct: Number.isFinite(benchmarkReturn)
+      ? benchmarkReturn
+      : null,
     benchmarkSharpe: Number.isFinite(benchmarkSharpe) ? benchmarkSharpe : null,
     excessReturnPct:
       Number.isFinite(strategyReturn) && Number.isFinite(benchmarkReturn)
@@ -2955,7 +3063,11 @@ function isWalkForwardPromotionEligible({
   const profitFactor = Number(candidateMetrics?.profitFactor);
   const winRate = Number(candidateMetrics?.winRatePct);
 
-  if (!Number.isFinite(sharpe) || !Number.isFinite(maxDrawdown) || !Number.isFinite(totalReturn)) {
+  if (
+    !Number.isFinite(sharpe) ||
+    !Number.isFinite(maxDrawdown) ||
+    !Number.isFinite(totalReturn)
+  ) {
     return {
       eligible: false,
       reason: "INVALID_METRICS",
@@ -3043,7 +3155,11 @@ function isWalkForwardPromotionEligible({
       };
     }
 
-    if (Number.isFinite(currentProfitFactor) && Number.isFinite(profitFactor) && profitFactor < currentProfitFactor) {
+    if (
+      Number.isFinite(currentProfitFactor) &&
+      Number.isFinite(profitFactor) &&
+      profitFactor < currentProfitFactor
+    ) {
       return {
         eligible: false,
         reason: "WORSE_PROFIT_FACTOR_THAN_CURRENT",
@@ -3088,16 +3204,21 @@ async function loadCurrentPromotedWalkForwardMetrics(market) {
 
   return {
     configId: promoted.configId,
-    totalReturnPct: row.total_return_pct == null ? null : Number(row.total_return_pct),
-    annualizedSharpe: row.annualized_sharpe == null ? null : Number(row.annualized_sharpe),
-    averageDurationDays: row.average_duration_days == null ? null : Number(row.average_duration_days),
+    totalReturnPct:
+      row.total_return_pct == null ? null : Number(row.total_return_pct),
+    annualizedSharpe:
+      row.annualized_sharpe == null ? null : Number(row.annualized_sharpe),
+    averageDurationDays:
+      row.average_duration_days == null
+        ? null
+        : Number(row.average_duration_days),
     profitFactor: row.profit_factor == null ? null : Number(row.profit_factor),
     winRatePct: row.win_rate_pct == null ? null : Number(row.win_rate_pct),
-    maxDrawdownPct: row.max_drawdown_pct == null ? null : Number(row.max_drawdown_pct),
+    maxDrawdownPct:
+      row.max_drawdown_pct == null ? null : Number(row.max_drawdown_pct),
     equity: row.equity == null ? null : Number(row.equity),
   };
 }
-
 
 function computeCurveMetrics(curve) {
   return computeMetrics(
@@ -3109,7 +3230,6 @@ function computeCurveMetrics(curve) {
     })),
   );
 }
-
 
 function generateForwardSignalsForWindow({
   market,
@@ -3165,7 +3285,9 @@ function generateForwardSignalsForWindow({
 
 function closeForSymbolAtDate(barsBySymbol, symbol, date) {
   const bars = barsBySymbol.get(symbol) || [];
-  const point = bars.find((bar) => normalizeDate(bar.timestamp || bar.date) === date);
+  const point = bars.find(
+    (bar) => normalizeDate(bar.timestamp || bar.date) === date,
+  );
   return point ? Number(point.close) : null;
 }
 
@@ -3177,7 +3299,9 @@ function buildCurveFromForwardSignals({
   segmentIndex,
   selectedConfigId,
 }) {
-  const dates = Array.from(new Set(signals.map((signal) => normalizeDate(signal.timestamp)))).sort();
+  const dates = Array.from(
+    new Set(signals.map((signal) => normalizeDate(signal.timestamp))),
+  ).sort();
 
   if (dates.length < 2) return [];
 
@@ -3192,7 +3316,9 @@ function buildCurveFromForwardSignals({
       positionsCount: 0,
       segmentIndex,
       selectedConfigId,
-      regime: signals.find((signal) => normalizeDate(signal.timestamp) === dates[0])?.regime || null,
+      regime:
+        signals.find((signal) => normalizeDate(signal.timestamp) === dates[0])
+          ?.regime || null,
     },
   ];
 
@@ -3200,12 +3326,20 @@ function buildCurveFromForwardSignals({
     const date = dates[i];
     const nextDate = dates[i + 1];
 
-    const dailySignals = signals.filter((signal) => normalizeDate(signal.timestamp) === date);
+    const dailySignals = signals.filter(
+      (signal) => normalizeDate(signal.timestamp) === date,
+    );
     const buys = dailySignals.filter((signal) => {
-      return signal.allocationAction === "Buy" && Number(signal.suggestedExposure) > 0;
+      return (
+        signal.allocationAction === "Buy" &&
+        Number(signal.suggestedExposure) > 0
+      );
     });
 
-    const totalExposure = buys.reduce((sum, signal) => sum + Number(signal.suggestedExposure || 0), 0);
+    const totalExposure = buys.reduce(
+      (sum, signal) => sum + Number(signal.suggestedExposure || 0),
+      0,
+    );
     const deployedFraction = Math.min(1, Math.max(0, totalExposure / 100));
     const cashFraction = 1 - deployedFraction;
 
@@ -3214,7 +3348,11 @@ function buildCurveFromForwardSignals({
     if (buys.length && totalExposure > 0) {
       for (const buy of buys) {
         const todayClose = closeForSymbolAtDate(barsBySymbol, buy.symbol, date);
-        const nextClose = closeForSymbolAtDate(barsBySymbol, buy.symbol, nextDate);
+        const nextClose = closeForSymbolAtDate(
+          barsBySymbol,
+          buy.symbol,
+          nextDate,
+        );
 
         if (!todayClose || !nextClose) continue;
 
@@ -3243,11 +3381,12 @@ function buildCurveFromForwardSignals({
   return curve;
 }
 
-
-
 function barForSymbolAtDate(barsBySymbol, symbol, date) {
   const bars = barsBySymbol.get(symbol) || [];
-  return bars.find((bar) => normalizeDate(bar.timestamp || bar.date) === date) || null;
+  return (
+    bars.find((bar) => normalizeDate(bar.timestamp || bar.date) === date) ||
+    null
+  );
 }
 
 function executionPriceForSymbolAtDate(barsBySymbol, symbol, date) {
@@ -3297,7 +3436,9 @@ function historicalReturnsUntilDate(barsBySymbol, symbol, date, lookback = 60) {
 
 function covarianceMatrix(returnSeries) {
   const symbols = Object.keys(returnSeries);
-  const length = Math.min(...symbols.map((symbol) => returnSeries[symbol].length));
+  const length = Math.min(
+    ...symbols.map((symbol) => returnSeries[symbol].length),
+  );
 
   if (!symbols.length || !Number.isFinite(length) || length < 5) {
     return {
@@ -3308,7 +3449,9 @@ function covarianceMatrix(returnSeries) {
   }
 
   const aligned = symbols.map((symbol) => returnSeries[symbol].slice(-length));
-  const means = aligned.map((series) => series.reduce((sum, value) => sum + value, 0) / series.length);
+  const means = aligned.map(
+    (series) => series.reduce((sum, value) => sum + value, 0) / series.length,
+  );
 
   const cov = aligned.map((a, i) =>
     aligned.map((b, j) => {
@@ -3339,9 +3482,11 @@ function shrinkCovariance(cov, shrinkage = 0.35) {
 }
 
 function projectWeights(weights, caps, totalCap) {
-  let next = weights.map((value, index) => Math.min(Math.max(0, value), caps[index]));
+  let next = weights.map((value, index) =>
+    Math.min(Math.max(0, value), caps[index]),
+  );
 
-  let sum = next.reduce((acc, value) => acc + value, 0);
+  const sum = next.reduce((acc, value) => acc + value, 0);
 
   if (sum > totalCap && sum > 0) {
     const scale = totalCap / sum;
@@ -3362,7 +3507,11 @@ function allocateMptWeights({
   shrinkage = 0.35,
 }) {
   const candidates = signals
-    .filter((signal) => signal.allocationAction === "Buy" && Number(signal.suggestedExposure) > 0)
+    .filter(
+      (signal) =>
+        signal.allocationAction === "Buy" &&
+        Number(signal.suggestedExposure) > 0,
+    )
     .slice(0, 40);
 
   if (!candidates.length) return new Map();
@@ -3372,7 +3521,12 @@ function allocateMptWeights({
 
   for (const signal of candidates) {
     const symbol = signal.symbol;
-    const returns = historicalReturnsUntilDate(barsBySymbol, symbol, date, lookback);
+    const returns = historicalReturnsUntilDate(
+      barsBySymbol,
+      symbol,
+      date,
+      lookback,
+    );
 
     if (returns.length >= 10) {
       returnSeries[symbol] = returns;
@@ -3396,10 +3550,15 @@ function allocateMptWeights({
 
   const caps = symbols.map((symbol) => {
     const signal = candidateBySymbol.get(symbol);
-    return Math.min(maxPositionPct, Math.max(0, Number(signal?.suggestedExposure || 0)));
+    return Math.min(
+      maxPositionPct,
+      Math.max(0, Number(signal?.suggestedExposure || 0)),
+    );
   });
 
-  let weights = caps.map((cap) => Math.min(cap, totalExposureCap / symbols.length));
+  let weights = caps.map((cap) =>
+    Math.min(cap, totalExposureCap / symbols.length),
+  );
 
   const learningRate = 6;
 
@@ -3445,7 +3604,12 @@ function portfolioEquityFromState({ cash, positions, barsBySymbol, date }) {
   return equity;
 }
 
-function portfolioExposurePctFromState({ equity, positions, barsBySymbol, date }) {
+function portfolioExposurePctFromState({
+  equity,
+  positions,
+  barsBySymbol,
+  date,
+}) {
   if (!equity || equity <= 0) return 0;
 
   let exposure = 0;
@@ -3461,7 +3625,6 @@ function portfolioExposurePctFromState({ equity, positions, barsBySymbol, date }
   return exposure * 100;
 }
 
-
 function buildStatefulLongOnlyCurveFromSignals({
   barsBySymbol,
   signals,
@@ -3473,7 +3636,9 @@ function buildStatefulLongOnlyCurveFromSignals({
 }) {
   const halfSpreadRate = Math.max(0, Number(spreadBps || 0)) / 20_000;
 
-  const dates = Array.from(new Set(signals.map((signal) => normalizeDate(signal.timestamp)))).sort();
+  const dates = Array.from(
+    new Set(signals.map((signal) => normalizeDate(signal.timestamp))),
+  ).sort();
 
   if (dates.length < 2) {
     return {
@@ -3496,7 +3661,9 @@ function buildStatefulLongOnlyCurveFromSignals({
       positionsCount: 0,
       segmentIndex,
       selectedConfigId,
-      regime: signals.find((signal) => normalizeDate(signal.timestamp) === dates[0])?.regime || null,
+      regime:
+        signals.find((signal) => normalizeDate(signal.timestamp) === dates[0])
+          ?.regime || null,
     },
   ];
 
@@ -3504,12 +3671,18 @@ function buildStatefulLongOnlyCurveFromSignals({
     const date = dates[i];
     const nextDate = dates[i + 1];
 
-    const dailySignals = signals.filter((signal) => normalizeDate(signal.timestamp) === date);
+    const dailySignals = signals.filter(
+      (signal) => normalizeDate(signal.timestamp) === date,
+    );
 
     for (const signal of dailySignals) {
-      const action = String(signal.allocationAction || signal.signalAction || "Hold");
+      const action = String(
+        signal.allocationAction || signal.signalAction || "Hold",
+      );
       const symbol = signal.symbol;
-      const midPrice = closeForSymbolAtDate(barsBySymbol, symbol, date) || Number(signal.price);
+      const midPrice =
+        closeForSymbolAtDate(barsBySymbol, symbol, date) ||
+        Number(signal.price);
 
       if (!symbol || !Number.isFinite(midPrice) || midPrice <= 0) continue;
 
@@ -3529,7 +3702,10 @@ function buildStatefulLongOnlyCurveFromSignals({
             exposure,
             lastSignalDate: date,
             lastSignalPrice: midPrice,
-            maxPrice: Math.max(existing.maxPrice || existing.entryPrice, midPrice),
+            maxPrice: Math.max(
+              existing.maxPrice || existing.entryPrice,
+              midPrice,
+            ),
           });
         } else {
           positions.set(symbol, {
@@ -3550,7 +3726,10 @@ function buildStatefulLongOnlyCurveFromSignals({
       if (action === "Sell") {
         if (!existing) continue;
 
-        const pnlPct = existing.entryPrice > 0 ? ((sellPrice / existing.entryPrice) - 1) * 100 : 0;
+        const pnlPct =
+          existing.entryPrice > 0
+            ? (sellPrice / existing.entryPrice - 1) * 100
+            : 0;
 
         trades.push({
           symbol,
@@ -3612,12 +3791,17 @@ function buildStatefulLongOnlyCurveFromSignals({
   const finalDate = dates[dates.length - 1];
 
   for (const [symbol, position] of positions.entries()) {
-    const finalMidPrice = closeForSymbolAtDate(barsBySymbol, symbol, finalDate) || position.lastSignalPrice;
-    const exitPrice = finalMidPrice ? finalMidPrice * (1 - halfSpreadRate) : null;
+    const finalMidPrice =
+      closeForSymbolAtDate(barsBySymbol, symbol, finalDate) ||
+      position.lastSignalPrice;
+    const exitPrice = finalMidPrice
+      ? finalMidPrice * (1 - halfSpreadRate)
+      : null;
 
     if (!exitPrice || !Number.isFinite(exitPrice) || exitPrice <= 0) continue;
 
-    const pnlPct = position.entryPrice > 0 ? ((exitPrice / position.entryPrice) - 1) * 100 : 0;
+    const pnlPct =
+      position.entryPrice > 0 ? (exitPrice / position.entryPrice - 1) * 100 : 0;
 
     trades.push({
       symbol,
@@ -3679,7 +3863,6 @@ async function saveWalkForwardTrades({ market, runId, trades }) {
     );
   }
 }
-
 
 async function saveWalkForwardSignals({ market, runId, signals }) {
   for (const signal of signals) {
@@ -3743,7 +3926,6 @@ async function saveWalkForwardSignals({ market, runId, signals }) {
   }
 }
 
-
 async function saveWalkForwardResult({
   market,
   configId,
@@ -3754,22 +3936,22 @@ async function saveWalkForwardResult({
   promotionDecision = {},
 }) {
   await query(
-    `DELETE FROM strategy_walkforward_equity_curve WHERE market = $1 AND config_id = $2`,
+    "DELETE FROM strategy_walkforward_equity_curve WHERE market = $1 AND config_id = $2",
     [market, configId],
   );
 
   await query(
-    `DELETE FROM strategy_walkforward_segments WHERE market = $1 AND config_id = $2`,
+    "DELETE FROM strategy_walkforward_segments WHERE market = $1 AND config_id = $2",
     [market, configId],
   );
 
   await query(
-    `DELETE FROM strategy_walkforward_signals WHERE market = $1 AND run_id = $2`,
+    "DELETE FROM strategy_walkforward_signals WHERE market = $1 AND run_id = $2",
     [market, configId],
   );
 
   await query(
-    `DELETE FROM strategy_walkforward_trades WHERE market = $1 AND run_id = $2`,
+    "DELETE FROM strategy_walkforward_trades WHERE market = $1 AND run_id = $2",
     [market, configId],
   );
 
@@ -3939,7 +4121,6 @@ async function saveWalkForwardResult({
   );
 }
 
-
 async function handleOptimizeMarket(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
@@ -3948,8 +4129,14 @@ async function handleOptimizeMarket(req, res) {
 
   const body = getBody(req);
   const market = marketKey(body.market);
-  const symbolLimit = Math.min(120, Math.max(5, Number(body.symbolLimit || 30)));
-  const configLimit = Math.min(120, Math.max(5, Number(body.configLimit || 40)));
+  const symbolLimit = Math.min(
+    120,
+    Math.max(5, Number(body.symbolLimit || 30)),
+  );
+  const configLimit = Math.min(
+    120,
+    Math.max(5, Number(body.configLimit || 40)),
+  );
   const autoPromote = body.autoPromote !== false;
 
   if (!market) {
@@ -3957,7 +4144,10 @@ async function handleOptimizeMarket(req, res) {
     return;
   }
 
-  const lock = await acquireLock(`lock:strategy-optimize-market:${market}`, 240);
+  const lock = await acquireLock(
+    `lock:strategy-optimize-market:${market}`,
+    240,
+  );
 
   if (!lock.acquired) {
     res.status(202).json({
@@ -4129,7 +4319,7 @@ async function handleOptimizeMarket(req, res) {
       market,
       runId,
       tested: results.length,
-      promoted: autoPromote ? best?.config?.id ?? null : null,
+      promoted: autoPromote ? (best?.config?.id ?? null) : null,
       best: best
         ? {
             config: best.config,
@@ -4167,10 +4357,6 @@ async function handleOptimizeMarket(req, res) {
   }
 }
 
-
-
-
-
 function makeWalkForwardSegments(dates, { trainDays, testDays, stepDays }) {
   const segments = [];
 
@@ -4185,9 +4371,13 @@ function makeWalkForwardSegments(dates, { trainDays, testDays, stepDays }) {
       segmentIndex,
       trainStartIndex,
       trainStart: dates[trainStartIndex],
-      trainEnd: dates[Math.min(dates.length - 1, trainStartIndex + trainDays - 1)],
+      trainEnd:
+        dates[Math.min(dates.length - 1, trainStartIndex + trainDays - 1)],
       testStart: dates[Math.min(dates.length - 1, trainStartIndex + trainDays)],
-      testEnd: dates[Math.min(dates.length - 1, trainStartIndex + trainDays + testDays - 1)],
+      testEnd:
+        dates[
+          Math.min(dates.length - 1, trainStartIndex + trainDays + testDays - 1)
+        ],
     });
   }
 
@@ -4342,8 +4532,6 @@ async function finalizeWalkForwardMetrics({
   });
 }
 
-
-
 async function evaluateDataQuality(market, options = {}) {
   const minSymbols = Number(options.minSymbols ?? 5);
   const minBarsPerSymbol = Number(options.minBarsPerSymbol ?? 120);
@@ -4369,7 +4557,9 @@ async function evaluateDataQuality(market, options = {}) {
   );
 
   const summary = summaryResult.rows[0] || {};
-  const latestBarDate = summary.latest_bar_date ? new Date(summary.latest_bar_date) : null;
+  const latestBarDate = summary.latest_bar_date
+    ? new Date(summary.latest_bar_date)
+    : null;
   const latestBarAgeDays = latestBarDate
     ? Math.max(0, (Date.now() - latestBarDate.getTime()) / 86_400_000)
     : null;
@@ -4388,7 +4578,9 @@ async function evaluateDataQuality(market, options = {}) {
   );
 
   const symbolRows = barsResult.rows || [];
-  const tradableSymbols = symbolRows.filter((row) => Number(row.bars) >= minBarsPerSymbol).length;
+  const tradableSymbols = symbolRows.filter(
+    (row) => Number(row.bars) >= minBarsPerSymbol,
+  ).length;
 
   const duplicatesResult = await query(
     `
@@ -4476,7 +4668,9 @@ async function evaluateDataQuality(market, options = {}) {
       symbols: Number(summary.symbols || 0),
       tradableSymbols,
       rows: Number(summary.rows || 0),
-      latestBarDate: latestBarDate ? latestBarDate.toISOString().slice(0, 10) : null,
+      latestBarDate: latestBarDate
+        ? latestBarDate.toISOString().slice(0, 10)
+        : null,
       latestBarAgeDays,
       zeroPriceRows,
       duplicateRows,
@@ -4510,7 +4704,6 @@ async function requireDataQualityPass(market, res, options = {}) {
   return quality;
 }
 
-
 async function handleWalkForwardMarket(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
@@ -4520,27 +4713,91 @@ async function handleWalkForwardMarket(req, res) {
   const body = getBody(req);
   const market = marketKey(body.market);
   const configId = String(body.configId || "rolling");
-  const symbolLimit = Math.min(200, Math.max(5, Number(body.symbolLimit || 40)));
-  const configLimit = Math.min(120, Math.max(5, Number(body.configLimit || 40)));
+  const symbolLimit = Math.min(
+    200,
+    Math.max(5, Number(body.symbolLimit || 40)),
+  );
+  const configLimit = Math.min(
+    120,
+    Math.max(5, Number(body.configLimit || 40)),
+  );
   const trainDays = Math.min(900, Math.max(120, Number(body.trainDays || 365)));
   const testDays = Math.min(180, Math.max(20, Number(body.testDays || 63)));
-  const stepDays = Math.min(180, Math.max(20, Number(body.stepDays || testDays)));
-  const warmupDays = Math.min(260, Math.max(60, Number(body.warmupDays || 120)));
+  const stepDays = Math.min(
+    180,
+    Math.max(20, Number(body.stepDays || testDays)),
+  );
+  const warmupDays = Math.min(
+    260,
+    Math.max(60, Number(body.warmupDays || 120)),
+  );
   const resume = body.resume !== false;
   const reset = body.reset === true;
-  const maxSegmentsPerRun = Math.min(12, Math.max(1, Number(body.maxSegmentsPerRun || 3)));
-  const requestedStartSegment = body.startSegment == null ? null : Math.max(0, Number(body.startSegment));
+  const maxSegmentsPerRun = Math.min(
+    12,
+    Math.max(1, Number(body.maxSegmentsPerRun || 3)),
+  );
+  const requestedStartSegment =
+    body.startSegment == null ? null : Math.max(0, Number(body.startSegment));
 
   const executionPreset = executionPresetForMarket(market);
 
-  const spreadBps = pickExecutionNumber(body, "spreadBps", executionPreset, 0, 100);
-  const slippageBps = pickExecutionNumber(body, "slippageBps", executionPreset, 0, 100);
-  const rebalanceThresholdBps = pickExecutionNumber(body, "rebalanceThresholdBps", executionPreset, 0, 500);
-  const totalExposureCap = pickExecutionNumber(body, "totalExposureCap", executionPreset, 0, 100);
-  const maxPositionPct = pickExecutionNumber(body, "maxPositionPct", executionPreset, 0.5, 25);
-  const mptLookback = pickExecutionNumber(body, "mptLookback", executionPreset, 20, 180);
-  const riskAversion = pickExecutionNumber(body, "riskAversion", executionPreset, 0.1, 50);
-  const shrinkage = pickExecutionNumber(body, "shrinkage", executionPreset, 0, 1);
+  const spreadBps = pickExecutionNumber(
+    body,
+    "spreadBps",
+    executionPreset,
+    0,
+    100,
+  );
+  const slippageBps = pickExecutionNumber(
+    body,
+    "slippageBps",
+    executionPreset,
+    0,
+    100,
+  );
+  const rebalanceThresholdBps = pickExecutionNumber(
+    body,
+    "rebalanceThresholdBps",
+    executionPreset,
+    0,
+    500,
+  );
+  const totalExposureCap = pickExecutionNumber(
+    body,
+    "totalExposureCap",
+    executionPreset,
+    0,
+    100,
+  );
+  const maxPositionPct = pickExecutionNumber(
+    body,
+    "maxPositionPct",
+    executionPreset,
+    0.5,
+    25,
+  );
+  const mptLookback = pickExecutionNumber(
+    body,
+    "mptLookback",
+    executionPreset,
+    20,
+    180,
+  );
+  const riskAversion = pickExecutionNumber(
+    body,
+    "riskAversion",
+    executionPreset,
+    0.1,
+    50,
+  );
+  const shrinkage = pickExecutionNumber(
+    body,
+    "shrinkage",
+    executionPreset,
+    0,
+    1,
+  );
 
   if (!market) {
     res.status(400).json({ error: "MARKET_REQUIRED" });
@@ -4605,7 +4862,10 @@ async function handleWalkForwardMarket(req, res) {
     progress: 0,
   });
 
-  const lock = await acquireLock(`lock:strategy-walk-forward:${market}:${configId}`, 300);
+  const lock = await acquireLock(
+    `lock:strategy-walk-forward:${market}:${configId}`,
+    300,
+  );
 
   if (!lock.acquired) {
     await updateStrategyJob(jobId, {
@@ -4657,26 +4917,50 @@ async function handleWalkForwardMarket(req, res) {
   }
 
   const configs = generateConservativeConfigs();
-  const plannedSegments = makeWalkForwardSegments(dates, { trainDays, testDays, stepDays });
+  const plannedSegments = makeWalkForwardSegments(dates, {
+    trainDays,
+    testDays,
+    stepDays,
+  });
 
   if (reset) {
-    await query(`DELETE FROM strategy_walkforward_equity_curve WHERE market = $1 AND config_id = $2`, [market, configId]);
-    await query(`DELETE FROM strategy_walkforward_segments WHERE market = $1 AND config_id = $2`, [market, configId]);
-    await query(`DELETE FROM strategy_walkforward_signals WHERE market = $1 AND run_id = $2`, [market, configId]);
-    await query(`DELETE FROM strategy_walkforward_trades WHERE market = $1 AND run_id = $2`, [market, configId]);
+    await query(
+      "DELETE FROM strategy_walkforward_equity_curve WHERE market = $1 AND config_id = $2",
+      [market, configId],
+    );
+    await query(
+      "DELETE FROM strategy_walkforward_segments WHERE market = $1 AND config_id = $2",
+      [market, configId],
+    );
+    await query(
+      "DELETE FROM strategy_walkforward_signals WHERE market = $1 AND run_id = $2",
+      [market, configId],
+    );
+    await query(
+      "DELETE FROM strategy_walkforward_trades WHERE market = $1 AND run_id = $2",
+      [market, configId],
+    );
   }
 
-  const existingState = resume && !reset
-    ? await loadExistingWalkForwardState({ market, configId })
-    : { curve: [], currentEquity: 1000, nextSegmentIndex: 0 };
+  const existingState =
+    resume && !reset
+      ? await loadExistingWalkForwardState({ market, configId })
+      : { curve: [], currentEquity: 1000, nextSegmentIndex: 0 };
 
   const curve = [...existingState.curve];
   const segments = [];
   let currentEquity = existingState.currentEquity;
   const startSegment = requestedStartSegment ?? existingState.nextSegmentIndex;
-  const endSegment = Math.min(plannedSegments.length, startSegment + maxSegmentsPerRun);
+  const endSegment = Math.min(
+    plannedSegments.length,
+    startSegment + maxSegmentsPerRun,
+  );
 
-  for (let plannedIndex = startSegment; plannedIndex < endSegment; plannedIndex += 1) {
+  for (
+    let plannedIndex = startSegment;
+    plannedIndex < endSegment;
+    plannedIndex += 1
+  ) {
     const planned = plannedSegments[plannedIndex];
     const segmentIndex = planned.segmentIndex;
     const trainStart = planned.trainStart;
@@ -4695,7 +4979,8 @@ async function handleWalkForwardMarket(req, res) {
       limit: configLimit,
     });
 
-    const best = evaluations.find((item) => isPromotionEligible(item)) || evaluations[0];
+    const best =
+      evaluations.find((item) => isPromotionEligible(item)) || evaluations[0];
 
     if (!best) continue;
 
@@ -4748,7 +5033,9 @@ async function handleWalkForwardMarket(req, res) {
     });
 
     const pointsToAdd = curve.length
-      ? segmentCurve.filter((point) => point.date > curve[curve.length - 1].date)
+      ? segmentCurve.filter(
+          (point) => point.date > curve[curve.length - 1].date,
+        )
       : segmentCurve;
 
     await appendWalkForwardCurvePoints({
@@ -4781,7 +5068,9 @@ async function handleWalkForwardMarket(req, res) {
     segments.push(segment);
 
     await updateStrategyJob(jobId, {
-      progress: Math.round(((plannedIndex + 1) / Math.max(1, plannedSegments.length)) * 100),
+      progress: Math.round(
+        ((plannedIndex + 1) / Math.max(1, plannedSegments.length)) * 100,
+      ),
       cursorValue: String(plannedIndex + 1),
       summary: {
         processedSegments: plannedIndex + 1,
@@ -4794,7 +5083,9 @@ async function handleWalkForwardMarket(req, res) {
   if (curve.length < 2) {
     await updateStrategyJob(jobId, {
       status: "completed",
-      progress: Math.round((endSegment / Math.max(1, plannedSegments.length)) * 100),
+      progress: Math.round(
+        (endSegment / Math.max(1, plannedSegments.length)) * 100,
+      ),
       completedAt: new Date().toISOString(),
       cursorValue: String(endSegment),
       summary: {
@@ -4827,8 +5118,12 @@ async function handleWalkForwardMarket(req, res) {
     maxSymbols: symbolLimit,
   });
   const benchmarkMetrics = computeCurveMetrics(benchmarkCurve);
-  const benchmarkComparison = summarizeBenchmarkComparison(metrics, benchmarkMetrics);
-  const currentPromotedMetrics = await loadCurrentPromotedWalkForwardMetrics(market);
+  const benchmarkComparison = summarizeBenchmarkComparison(
+    metrics,
+    benchmarkMetrics,
+  );
+  const currentPromotedMetrics =
+    await loadCurrentPromotedWalkForwardMetrics(market);
   const tradeCount = segments.reduce((sum, segment) => {
     return sum + Number(segment.metrics?.trades ?? 0);
   }, 0);
@@ -4856,7 +5151,12 @@ async function handleWalkForwardMarket(req, res) {
     const selectedConfigId = lastSegment?.selectedConfig?.id;
 
     if (selectedConfigId) {
-      await promoteConfig(market, selectedConfigId, "paper_promoted", "paper_promoted");
+      await promoteConfig(
+        market,
+        selectedConfigId,
+        "paper_promoted",
+        "paper_promoted",
+      );
     }
   }
 
@@ -4920,9 +5220,6 @@ async function handleWalkForwardMarket(req, res) {
   });
 }
 
-
-
-
 async function handleCronForwardValidate(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const secret = url.searchParams.get("secret");
@@ -4932,8 +5229,13 @@ async function handleCronForwardValidate(req, res) {
     return;
   }
 
-  const requestedMarkets = String(url.searchParams.get("markets") || "ALL").trim();
-  const marketLimit = Math.min(12, Math.max(1, Number(url.searchParams.get("marketLimit") || 4)));
+  const requestedMarkets = String(
+    url.searchParams.get("markets") || "ALL",
+  ).trim();
+  const marketLimit = Math.min(
+    12,
+    Math.max(1, Number(url.searchParams.get("marketLimit") || 4)),
+  );
 
   let markets = [];
 
@@ -4951,7 +5253,11 @@ async function handleCronForwardValidate(req, res) {
 
     markets = rows.map((row) => marketKey(row.market));
   } else {
-    markets = requestedMarkets.split(",").map(marketKey).filter(Boolean).slice(0, marketLimit);
+    markets = requestedMarkets
+      .split(",")
+      .map(marketKey)
+      .filter(Boolean)
+      .slice(0, marketLimit);
   }
 
   const results = [];
@@ -4995,7 +5301,6 @@ async function handleCronForwardValidate(req, res) {
   });
 }
 
-
 async function handleCronWalkForward(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const secret = url.searchParams.get("secret");
@@ -5005,13 +5310,33 @@ async function handleCronWalkForward(req, res) {
     return;
   }
 
-  const requestedMarkets = String(url.searchParams.get("markets") || "ALL").trim();
-  const marketLimit = Math.min(4, Math.max(1, Number(url.searchParams.get("marketLimit") || 2)));
-  const symbolLimit = Math.min(80, Math.max(5, Number(url.searchParams.get("symbolLimit") || 30)));
-  const configLimit = Math.min(80, Math.max(5, Number(url.searchParams.get("configLimit") || 40)));
-  const trainDays = Math.min(900, Math.max(120, Number(url.searchParams.get("trainDays") || 365)));
-  const testDays = Math.min(180, Math.max(20, Number(url.searchParams.get("testDays") || 63)));
-  const stepDays = Math.min(180, Math.max(20, Number(url.searchParams.get("stepDays") || testDays)));
+  const requestedMarkets = String(
+    url.searchParams.get("markets") || "ALL",
+  ).trim();
+  const marketLimit = Math.min(
+    4,
+    Math.max(1, Number(url.searchParams.get("marketLimit") || 2)),
+  );
+  const symbolLimit = Math.min(
+    80,
+    Math.max(5, Number(url.searchParams.get("symbolLimit") || 30)),
+  );
+  const configLimit = Math.min(
+    80,
+    Math.max(5, Number(url.searchParams.get("configLimit") || 40)),
+  );
+  const trainDays = Math.min(
+    900,
+    Math.max(120, Number(url.searchParams.get("trainDays") || 365)),
+  );
+  const testDays = Math.min(
+    180,
+    Math.max(20, Number(url.searchParams.get("testDays") || 63)),
+  );
+  const stepDays = Math.min(
+    180,
+    Math.max(20, Number(url.searchParams.get("stepDays") || testDays)),
+  );
   const executionOverrides = {
     spreadBps: url.searchParams.get("spreadBps"),
     slippageBps: url.searchParams.get("slippageBps"),
@@ -5040,7 +5365,11 @@ async function handleCronWalkForward(req, res) {
 
     markets = rows.map((row) => marketKey(row.market));
   } else {
-    markets = requestedMarkets.split(",").map(marketKey).filter(Boolean).slice(0, marketLimit);
+    markets = requestedMarkets
+      .split(",")
+      .map(marketKey)
+      .filter(Boolean)
+      .slice(0, marketLimit);
   }
 
   const results = [];
@@ -5057,14 +5386,32 @@ async function handleCronWalkForward(req, res) {
           trainDays,
           testDays,
           stepDays,
-          ...(executionOverrides.spreadBps != null ? { spreadBps: executionOverrides.spreadBps } : {}),
-          ...(executionOverrides.slippageBps != null ? { slippageBps: executionOverrides.slippageBps } : {}),
-          ...(executionOverrides.rebalanceThresholdBps != null ? { rebalanceThresholdBps: executionOverrides.rebalanceThresholdBps } : {}),
-          ...(executionOverrides.totalExposureCap != null ? { totalExposureCap: executionOverrides.totalExposureCap } : {}),
-          ...(executionOverrides.maxPositionPct != null ? { maxPositionPct: executionOverrides.maxPositionPct } : {}),
-          ...(executionOverrides.mptLookback != null ? { mptLookback: executionOverrides.mptLookback } : {}),
-          ...(executionOverrides.riskAversion != null ? { riskAversion: executionOverrides.riskAversion } : {}),
-          ...(executionOverrides.shrinkage != null ? { shrinkage: executionOverrides.shrinkage } : {}),
+          ...(executionOverrides.spreadBps != null
+            ? { spreadBps: executionOverrides.spreadBps }
+            : {}),
+          ...(executionOverrides.slippageBps != null
+            ? { slippageBps: executionOverrides.slippageBps }
+            : {}),
+          ...(executionOverrides.rebalanceThresholdBps != null
+            ? {
+                rebalanceThresholdBps: executionOverrides.rebalanceThresholdBps,
+              }
+            : {}),
+          ...(executionOverrides.totalExposureCap != null
+            ? { totalExposureCap: executionOverrides.totalExposureCap }
+            : {}),
+          ...(executionOverrides.maxPositionPct != null
+            ? { maxPositionPct: executionOverrides.maxPositionPct }
+            : {}),
+          ...(executionOverrides.mptLookback != null
+            ? { mptLookback: executionOverrides.mptLookback }
+            : {}),
+          ...(executionOverrides.riskAversion != null
+            ? { riskAversion: executionOverrides.riskAversion }
+            : {}),
+          ...(executionOverrides.shrinkage != null
+            ? { shrinkage: executionOverrides.shrinkage }
+            : {}),
         },
       };
 
@@ -5100,7 +5447,6 @@ async function handleCronWalkForward(req, res) {
   });
 }
 
-
 async function handleCronOptimize(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const secret = url.searchParams.get("secret");
@@ -5110,10 +5456,21 @@ async function handleCronOptimize(req, res) {
     return;
   }
 
-  const requestedMarkets = String(url.searchParams.get("markets") || "ALL").trim();
-  const marketLimit = Math.min(6, Math.max(1, Number(url.searchParams.get("marketLimit") || 2)));
-  const symbolLimit = Math.min(60, Math.max(5, Number(url.searchParams.get("symbolLimit") || 12)));
-  const configLimit = Math.min(80, Math.max(5, Number(url.searchParams.get("configLimit") || 30)));
+  const requestedMarkets = String(
+    url.searchParams.get("markets") || "ALL",
+  ).trim();
+  const marketLimit = Math.min(
+    6,
+    Math.max(1, Number(url.searchParams.get("marketLimit") || 2)),
+  );
+  const symbolLimit = Math.min(
+    60,
+    Math.max(5, Number(url.searchParams.get("symbolLimit") || 12)),
+  );
+  const configLimit = Math.min(
+    80,
+    Math.max(5, Number(url.searchParams.get("configLimit") || 30)),
+  );
 
   let markets = [];
 
@@ -5132,7 +5489,11 @@ async function handleCronOptimize(req, res) {
 
     markets = rows.map((row) => marketKey(row.market));
   } else {
-    markets = requestedMarkets.split(",").map(marketKey).filter(Boolean).slice(0, marketLimit);
+    markets = requestedMarkets
+      .split(",")
+      .map(marketKey)
+      .filter(Boolean)
+      .slice(0, marketLimit);
   }
 
   const results = [];
@@ -5198,7 +5559,6 @@ async function handleCronOptimize(req, res) {
   });
 }
 
-
 async function handleCronBacktest(req, res) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
   const secret = url.searchParams.get("secret");
@@ -5208,9 +5568,17 @@ async function handleCronBacktest(req, res) {
     return;
   }
 
-  const requestedMarkets = String(url.searchParams.get("markets") || "ALL").trim();
-  const marketLimit = Math.min(12, Math.max(1, Number(url.searchParams.get("marketLimit") || 4)));
-  const limitSymbols = Math.min(80, Math.max(2, Number(url.searchParams.get("limitSymbols") || 12)));
+  const requestedMarkets = String(
+    url.searchParams.get("markets") || "ALL",
+  ).trim();
+  const marketLimit = Math.min(
+    12,
+    Math.max(1, Number(url.searchParams.get("marketLimit") || 4)),
+  );
+  const limitSymbols = Math.min(
+    80,
+    Math.max(2, Number(url.searchParams.get("limitSymbols") || 12)),
+  );
 
   let markets = [];
 
@@ -5229,7 +5597,11 @@ async function handleCronBacktest(req, res) {
 
     markets = rows.map((row) => marketKey(row.market));
   } else {
-    markets = requestedMarkets.split(",").map(marketKey).filter(Boolean).slice(0, marketLimit);
+    markets = requestedMarkets
+      .split(",")
+      .map(marketKey)
+      .filter(Boolean)
+      .slice(0, marketLimit);
   }
 
   const results = [];
@@ -5237,7 +5609,11 @@ async function handleCronBacktest(req, res) {
   for (const market of markets) {
     try {
       const barsBySymbol = await loadBarsBySymbol({ market, limitSymbols });
-      const result = buildBacktestFromSharedEngine({ market, barsBySymbol, config: {} });
+      const result = buildBacktestFromSharedEngine({
+        market,
+        barsBySymbol,
+        config: {},
+      });
 
       if (result.curve.length >= 2) {
         await saveBacktest(market, "default", result);
@@ -5275,13 +5651,21 @@ module.exports = async function handler(req, res) {
     const mappedJobType = HEAVY_ACTION_TO_JOB_TYPE[route];
     if (mappedJobType && req.method === "POST") {
       const body = getBody(req);
-      const market = marketKey(body.market || new URL(req.url, "https://stocks-optimizer.vercel.app").searchParams.get("market"));
+      const market = marketKey(
+        body.market ||
+          new URL(
+            req.url,
+            "https://stocks-optimizer.vercel.app",
+          ).searchParams.get("market"),
+      );
 
       if (market) {
         const rate = await enforceHeavyJobRateLimit({
           market,
           jobType: mappedJobType,
-          cooldownSeconds: Number(process.env.STRATEGY_HEAVY_JOB_COOLDOWN_SECONDS || 60),
+          cooldownSeconds: Number(
+            process.env.STRATEGY_HEAVY_JOB_COOLDOWN_SECONDS || 60,
+          ),
           allowResume: true,
         });
 

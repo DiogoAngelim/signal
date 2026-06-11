@@ -1,5 +1,3 @@
-import type { SignalCapabilities, SignalEnvelope } from "@signal/protocol";
-import { ZodError } from "zod";
 import type {
   DecisionPort,
   EventPort,
@@ -7,6 +5,8 @@ import type {
   RuntimeMode,
   StoragePort,
 } from "@signal/ports";
+import type { SignalCapabilities, SignalEnvelope } from "@signal/protocol";
+import { ZodError } from "zod";
 import { buildCapabilities } from "./capabilities";
 import {
   createInProcessDispatcher,

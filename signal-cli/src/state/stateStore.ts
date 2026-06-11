@@ -6,31 +6,31 @@
  */
 
 import {
+  copyFileSync,
   existsSync,
   mkdirSync,
   readFileSync,
-  writeFileSync,
   readdirSync,
-  copyFileSync,
   statSync,
+  writeFileSync,
 } from "node:fs";
 import { join, resolve } from "node:path";
-import type {
-  SignalState,
-  PhaseState,
-  SignalHashes,
-  HashLogEntry,
-} from "./types.js";
 import {
-  getSignalDir,
-  getStatePath,
+  GENESIS_HASH,
+  STATE_VERSION,
   getHashesPath,
   getLogsPath,
+  getSignalDir,
   getSnapshotsDir,
-  STATE_VERSION,
-  GENESIS_HASH,
+  getStatePath,
 } from "../core/constants.js";
 import { deterministicStringify } from "../core/hashChain.js";
+import type {
+  HashLogEntry,
+  PhaseState,
+  SignalHashes,
+  SignalState,
+} from "./types.js";
 
 // ─── Directory Initialization ───────────────────────────────────────────────
 
@@ -53,21 +53,29 @@ export function initSignalDir(root: string = process.cwd()): void {
       version: STATE_VERSION,
       phases: [],
     };
-    writeFileSync(statePath, deterministicStringify(initialState) + "\n", "utf8");
+    writeFileSync(
+      statePath,
+      `${deterministicStringify(initialState)}\n`,
+      "utf8",
+    );
   }
 
   // Initialize hashes.json if it doesn't exist
   const hashesPath = getHashesPath(root);
   if (!existsSync(hashesPath)) {
     const initialHashes: SignalHashes = { entries: {} };
-    writeFileSync(hashesPath, deterministicStringify(initialHashes) + "\n", "utf8");
+    writeFileSync(
+      hashesPath,
+      `${deterministicStringify(initialHashes)}\n`,
+      "utf8",
+    );
   }
 
   // Initialize logs.json if it doesn't exist
   const logsPath = getLogsPath(root);
   if (!existsSync(logsPath)) {
     const initialLogs: HashLogEntry[] = [];
-    writeFileSync(logsPath, deterministicStringify(initialLogs) + "\n", "utf8");
+    writeFileSync(logsPath, `${deterministicStringify(initialLogs)}\n`, "utf8");
   }
 }
 
@@ -84,14 +92,20 @@ export function readState(root: string = process.cwd()): SignalState {
   return JSON.parse(raw) as SignalState;
 }
 
-export function writeState(state: SignalState, root: string = process.cwd()): void {
+export function writeState(
+  state: SignalState,
+  root: string = process.cwd(),
+): void {
   const statePath = getStatePath(root);
-  writeFileSync(statePath, deterministicStringify(state) + "\n", "utf8");
+  writeFileSync(statePath, `${deterministicStringify(state)}\n`, "utf8");
 }
 
 // ─── Phase Management ──────────────────────────────────────────────────────
 
-export function addPhase(phase: PhaseState, root: string = process.cwd()): void {
+export function addPhase(
+  phase: PhaseState,
+  root: string = process.cwd(),
+): void {
   const state = readState(root);
   const phases = [...state.phases, phase];
   writeState({ ...state, phases }, root);
@@ -120,9 +134,12 @@ export function readHashes(root: string = process.cwd()): SignalHashes {
   return JSON.parse(raw) as SignalHashes;
 }
 
-export function writeHashes(hashes: SignalHashes, root: string = process.cwd()): void {
+export function writeHashes(
+  hashes: SignalHashes,
+  root: string = process.cwd(),
+): void {
   const hashesPath = getHashesPath(root);
-  writeFileSync(hashesPath, deterministicStringify(hashes) + "\n", "utf8");
+  writeFileSync(hashesPath, `${deterministicStringify(hashes)}\n`, "utf8");
 }
 
 export function addHashEntry(
@@ -153,7 +170,7 @@ export function addLogEntry(
   const logs = readLogs(root);
   logs.push(entry);
   const logsPath = getLogsPath(root);
-  writeFileSync(logsPath, deterministicStringify(logs) + "\n", "utf8");
+  writeFileSync(logsPath, `${deterministicStringify(logs)}\n`, "utf8");
 }
 
 // ─── Snapshots ─────────────────────────────────────────────────────────────
@@ -191,7 +208,9 @@ export function stateExists(root: string = process.cwd()): boolean {
   return existsSync(getStatePath(root));
 }
 
-export function getLastPhase(root: string = process.cwd()): PhaseState | undefined {
+export function getLastPhase(
+  root: string = process.cwd(),
+): PhaseState | undefined {
   const phases = getPhases(root);
   if (phases.length === 0) return undefined;
   return phases[phases.length - 1];

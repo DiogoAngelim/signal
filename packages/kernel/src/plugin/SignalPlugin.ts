@@ -7,10 +7,10 @@
  * SignalPackage is the only shared data contract between kernel and plugins.
  */
 
-import type { SignalGenerator } from "../interfaces/SignalGenerator";
+import type { Aggregator } from "../interfaces/Aggregator";
 import type { Analyzer } from "../interfaces/Analyzer";
 import type { Scorer } from "../interfaces/Scorer";
-import type { Aggregator } from "../interfaces/Aggregator";
+import type { SignalGenerator } from "../interfaces/SignalGenerator";
 
 export type PluginCapability = "generate" | "analyze" | "score" | "aggregate";
 

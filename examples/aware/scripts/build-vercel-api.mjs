@@ -1,13 +1,19 @@
-import { build } from "esbuild";
-import { rm, mkdir } from "node:fs/promises";
+import { mkdir, rm } from "node:fs/promises";
 import { dirname } from "node:path";
+import { build } from "esbuild";
 
 const routes = [
   ["api-src/regions/search.ts", "api/regions/search.js"],
-  ["api-src/regions/[regionId]/briefing.ts", "api/regions/[regionId]/briefing.js"],
+  [
+    "api-src/regions/[regionId]/briefing.ts",
+    "api/regions/[regionId]/briefing.js",
+  ],
   ["api-src/briefings/[briefingId].ts", "api/briefings/[briefingId].js"],
-  ["api-src/briefings/[briefingId]/sources.ts", "api/briefings/[briefingId]/sources.js"],
-  ["api-src/feedback.ts", "api/feedback.js"]
+  [
+    "api-src/briefings/[briefingId]/sources.ts",
+    "api/briefings/[briefingId]/sources.js",
+  ],
+  ["api-src/feedback.ts", "api/feedback.js"],
 ];
 
 await rm("api", { recursive: true, force: true });
@@ -26,8 +32,8 @@ for (const [entry, outfile] of routes) {
     legalComments: "none",
     logLevel: "silent",
     banner: {
-      js: "import { createRequire as __awareCreateRequire } from 'node:module'; const require = __awareCreateRequire(import.meta.url);"
-    }
+      js: "import { createRequire as __awareCreateRequire } from 'node:module'; const require = __awareCreateRequire(import.meta.url);",
+    },
   });
 }
 

@@ -1,5 +1,10 @@
 import { clamp, mean } from "../math/statistics";
-import type { DiagnosticsState, ExecutionReadinessState, RegimeState, SynchronizationState } from "../types";
+import type {
+  DiagnosticsState,
+  ExecutionReadinessState,
+  RegimeState,
+  SynchronizationState,
+} from "../types";
 
 export function evaluateExecutionReadiness(args: {
   perceptionScore: number;
@@ -9,7 +14,10 @@ export function evaluateExecutionReadiness(args: {
   synchronization: SynchronizationState;
   diagnostics: DiagnosticsState;
 }): ExecutionReadinessState {
-  const contradictionPenalty = args.diagnostics.contradictions.reduce((sum, item) => sum + item.readinessImpact, 0);
+  const contradictionPenalty = args.diagnostics.contradictions.reduce(
+    (sum, item) => sum + item.readinessImpact,
+    0,
+  );
   const readinessScore = clamp(
     mean([
       args.perceptionScore,
@@ -18,15 +26,26 @@ export function evaluateExecutionReadiness(args: {
       args.regime.confidence * args.regime.modifiers.confidenceScale,
       args.synchronization.score,
       args.diagnostics.trust,
-    ]) - contradictionPenalty * 0.18,
+    ]) -
+      contradictionPenalty * 0.18,
   );
-  const executionSuitability = clamp(readinessScore - args.synchronization.reliabilityPenalty * 0.24);
+  const executionSuitability = clamp(
+    readinessScore - args.synchronization.reliabilityPenalty * 0.24,
+  );
   const exposureCap = args.regime.modifiers.exposureCap;
-  const riskAdjustedExposureSuggestion = clamp((executionSuitability / 100) * exposureCap);
-  const confidenceAdjustedSizing = clamp(riskAdjustedExposureSuggestion * (args.diagnostics.trust / 100));
+  const riskAdjustedExposureSuggestion = clamp(
+    (executionSuitability / 100) * exposureCap,
+  );
+  const confidenceAdjustedSizing = clamp(
+    riskAdjustedExposureSuggestion * (args.diagnostics.trust / 100),
+  );
 
   return {
-    state: classify(readinessScore, args.diagnostics.trust, args.synchronization.score),
+    state: classify(
+      readinessScore,
+      args.diagnostics.trust,
+      args.synchronization.score,
+    ),
     readinessScore,
     executionSuitability,
     riskAdjustedExposureSuggestion,
@@ -39,7 +58,11 @@ export function evaluateExecutionReadiness(args: {
   };
 }
 
-function classify(score: number, trust: number, sync: number): ExecutionReadinessState["state"] {
+function classify(
+  score: number,
+  trust: number,
+  sync: number,
+): ExecutionReadinessState["state"] {
   if (score < 25 || trust < 30 || sync < 28) return "Breaking";
   if (score < 38) return "Dormant";
   if (score < 50) return "Emerging";

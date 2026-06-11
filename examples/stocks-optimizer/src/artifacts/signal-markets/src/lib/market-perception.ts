@@ -1,5 +1,17 @@
 import {
+  type CalibrationInput,
+  type MetricContribution as FrameworkMetricContribution,
+  type MetricState as FrameworkMetricState,
+  type MetricInput as MarketMetricInput,
+  type StocksOptimizerMetricSource as MarketPerceptionMetricSource,
+  type NormalizationState as MetricNormalization,
+  type MetricPolarity,
+  type SignalContext,
   SignalFrameworkEngine,
+  type SignalSnapshot,
+  type StocksMeaningViewModel,
+  type StocksPruningViewModel,
+  type StocksPurposeViewModel,
   buildStocksLeadershipObservations,
   buildStocksMeaningViewModel,
   buildStocksOptimizerMetrics,
@@ -9,27 +21,20 @@ import {
   buildStocksPurposeViewModel,
   buildStocksSynchronization,
   createStocksMetricRegistry,
-  type MetricContribution as FrameworkMetricContribution,
-  type MetricInput as MarketMetricInput,
-  type MetricPolarity,
-  type MetricState as FrameworkMetricState,
-  type NormalizationState as MetricNormalization,
   resolveSemanticState,
-  type CalibrationInput,
-  type SignalContext,
-  type SignalSnapshot,
-  type StocksOptimizerMetricSource as MarketPerceptionMetricSource,
-  type StocksMeaningViewModel,
-  type StocksPruningViewModel,
-  type StocksPurposeViewModel,
 } from "../../../signal-framework";
 import {
+  type MarketReliabilityResult,
   applyReliabilityToMetricInputs,
   evaluateMarketReliability,
-  type MarketReliabilityResult,
 } from "./market-reliability";
 
-export type { MarketMetricInput, MetricNormalization, MetricPolarity, MarketPerceptionMetricSource };
+export type {
+  MarketMetricInput,
+  MetricNormalization,
+  MetricPolarity,
+  MarketPerceptionMetricSource,
+};
 
 export type MarketLayerKey =
   | "red"
@@ -164,64 +169,153 @@ const LAYER_ORDER: MarketLayerKey[] = [
   "white",
 ];
 
-export const MARKET_LAYER_DEFINITIONS: Record<MarketLayerKey, LayerDefinition> = {
-  red: {
-    label: "Survival",
-    meaning: "Liquidity stress, tail pressure, volatility expansion, and structural instability.",
-    color: "#ff3b30",
-    classifications: ["Stable geometry", "Pressure building", "Structural stress", "Critical instability"],
-    visualSignals: ["Smooth pressure ring", "Compressed ring", "Fractured turbulence", "Violent fragmentation"],
-  },
-  orange: {
-    label: "Emotion",
-    meaning: "Crowd acceleration, panic/euphoria, narrative concentration, and emotional turbulence.",
-    color: "#ff8a00",
-    classifications: ["Calm flow", "Warming crowd", "Overheated emotion", "Explosive psychology"],
-    visualSignals: ["Warm breathing", "Fluid acceleration", "Heatwave bursts", "Chaotic flow"],
-  },
-  yellow: {
-    label: "Conviction",
-    meaning: "Signal consensus, directional authority, stability, and execution confidence.",
-    color: "#ffd84d",
-    classifications: ["Scattered signal", "Forming bias", "Coherent projection", "Focused authority"],
-    visualSignals: ["Diffuse rays", "Aligning vectors", "Luminous beams", "Focused streams"],
-  },
-  green: {
-    label: "Harmony",
-    meaning: "Breadth, synchronization, structural balance, and portfolio symmetry.",
-    color: "#24d17e",
-    classifications: ["Fragmented field", "Partial alignment", "Synchronized market", "Balanced ecosystem"],
-    visualSignals: ["Warped asymmetry", "Partial orbit", "Harmonic waves", "Orbital synchronization"],
-  },
-  blue: {
-    label: "Information",
-    meaning: "Information transfer, event absorption, quote reliability, and signal confirmation.",
-    color: "#37a5ff",
-    classifications: ["Signal gaps", "Uneven transfer", "Coherent propagation", "Efficient absorption"],
-    visualSignals: ["Broken interference", "Mixed ripples", "Clear wave field", "Clean propagation"],
-  },
-  indigo: {
-    label: "Intuition",
-    meaning: "Anomaly emergence, latent structure, and transition probability.",
-    color: "#6755ff",
-    classifications: ["Dormant topology", "Hidden activity", "Transition forming", "Regime emergence"],
-    visualSignals: ["Dim topology", "Node activation", "Structural morphing", "Topology transformation"],
-  },
-  violet: {
-    label: "Macro Context",
-    meaning: "Macro pressure, capital rotation, long-cycle environment, and regime gravity.",
-    color: "#b65cff",
-    classifications: ["Clear atmosphere", "Macro drift", "Environmental pressure", "Dense gravity"],
-    visualSignals: ["Smooth ambient field", "Orbital drift", "Warped density", "Gravitational distortion"],
-  },
-  white: {
-    label: "System Self-Awareness",
-    meaning: "Data reliability, calibrated confidence, uncertainty, memory depth, decision consistency, and residual overfit risk.",
-    color: "#f8fafc",
-    classifications: ["Uncalibrated", "Review-gated", "Self-aware", "Autonomous-ready"],
-    visualSignals: ["Unstable nucleus", "Soft flicker", "Stable pulse", "Radiant center"],
-  },
-};
+export const MARKET_LAYER_DEFINITIONS: Record<MarketLayerKey, LayerDefinition> =
+  {
+    red: {
+      label: "Survival",
+      meaning:
+        "Liquidity stress, tail pressure, volatility expansion, and structural instability.",
+      color: "#ff3b30",
+      classifications: [
+        "Stable geometry",
+        "Pressure building",
+        "Structural stress",
+        "Critical instability",
+      ],
+      visualSignals: [
+        "Smooth pressure ring",
+        "Compressed ring",
+        "Fractured turbulence",
+        "Violent fragmentation",
+      ],
+    },
+    orange: {
+      label: "Emotion",
+      meaning:
+        "Crowd acceleration, panic/euphoria, narrative concentration, and emotional turbulence.",
+      color: "#ff8a00",
+      classifications: [
+        "Calm flow",
+        "Warming crowd",
+        "Overheated emotion",
+        "Explosive psychology",
+      ],
+      visualSignals: [
+        "Warm breathing",
+        "Fluid acceleration",
+        "Heatwave bursts",
+        "Chaotic flow",
+      ],
+    },
+    yellow: {
+      label: "Conviction",
+      meaning:
+        "Signal consensus, directional authority, stability, and execution confidence.",
+      color: "#ffd84d",
+      classifications: [
+        "Scattered signal",
+        "Forming bias",
+        "Coherent projection",
+        "Focused authority",
+      ],
+      visualSignals: [
+        "Diffuse rays",
+        "Aligning vectors",
+        "Luminous beams",
+        "Focused streams",
+      ],
+    },
+    green: {
+      label: "Harmony",
+      meaning:
+        "Breadth, synchronization, structural balance, and portfolio symmetry.",
+      color: "#24d17e",
+      classifications: [
+        "Fragmented field",
+        "Partial alignment",
+        "Synchronized market",
+        "Balanced ecosystem",
+      ],
+      visualSignals: [
+        "Warped asymmetry",
+        "Partial orbit",
+        "Harmonic waves",
+        "Orbital synchronization",
+      ],
+    },
+    blue: {
+      label: "Information",
+      meaning:
+        "Information transfer, event absorption, quote reliability, and signal confirmation.",
+      color: "#37a5ff",
+      classifications: [
+        "Signal gaps",
+        "Uneven transfer",
+        "Coherent propagation",
+        "Efficient absorption",
+      ],
+      visualSignals: [
+        "Broken interference",
+        "Mixed ripples",
+        "Clear wave field",
+        "Clean propagation",
+      ],
+    },
+    indigo: {
+      label: "Intuition",
+      meaning:
+        "Anomaly emergence, latent structure, and transition probability.",
+      color: "#6755ff",
+      classifications: [
+        "Dormant topology",
+        "Hidden activity",
+        "Transition forming",
+        "Regime emergence",
+      ],
+      visualSignals: [
+        "Dim topology",
+        "Node activation",
+        "Structural morphing",
+        "Topology transformation",
+      ],
+    },
+    violet: {
+      label: "Macro Context",
+      meaning:
+        "Macro pressure, capital rotation, long-cycle environment, and regime gravity.",
+      color: "#b65cff",
+      classifications: [
+        "Clear atmosphere",
+        "Macro drift",
+        "Environmental pressure",
+        "Dense gravity",
+      ],
+      visualSignals: [
+        "Smooth ambient field",
+        "Orbital drift",
+        "Warped density",
+        "Gravitational distortion",
+      ],
+    },
+    white: {
+      label: "System Self-Awareness",
+      meaning:
+        "Data reliability, calibrated confidence, uncertainty, memory depth, decision consistency, and residual overfit risk.",
+      color: "#f8fafc",
+      classifications: [
+        "Uncalibrated",
+        "Review-gated",
+        "Self-aware",
+        "Autonomous-ready",
+      ],
+      visualSignals: [
+        "Unstable nucleus",
+        "Soft flicker",
+        "Stable pulse",
+        "Radiant center",
+      ],
+    },
+  };
 
 export class MetricRegistry {
   private readonly frameworkRegistry = createStocksMetricRegistry();
@@ -241,18 +335,25 @@ export function createDefaultMetricRegistry() {
   return new MetricRegistry();
 }
 
-export function buildMarketPerceptionMetrics(input: MarketPerceptionMetricSource): MarketMetricInput[] {
+export function buildMarketPerceptionMetrics(
+  input: MarketPerceptionMetricSource,
+): MarketMetricInput[] {
   return buildStocksOptimizerMetrics(input);
 }
 
 export class MarketStateEngine {
-  private readonly engine = new SignalFrameworkEngine(createStocksMetricRegistry());
+  private readonly engine = new SignalFrameworkEngine(
+    createStocksMetricRegistry(),
+  );
   private readonly history: MarketStateTransition[] = [];
   private lastSource: MarketPerceptionMetricSource | null = null;
 
   constructor(
     _registry = createDefaultMetricRegistry(),
-    private readonly options: { maxSnapshotHistory?: number; storageKey?: string } = {},
+    private readonly options: {
+      maxSnapshotHistory?: number;
+      storageKey?: string;
+    } = {},
   ) {}
 
   setSource(input: MarketPerceptionMetricSource) {
@@ -261,11 +362,17 @@ export class MarketStateEngine {
 
   async ingest(
     inputs: MarketMetricInput[],
-    context: { market: string; timeframe?: string; timestamp?: number } = { market: "Unknown" },
+    context: { market: string; timeframe?: string; timestamp?: number } = {
+      market: "Unknown",
+    },
   ): Promise<MarketStateSnapshot> {
     const timestamp = context.timestamp ?? Date.now();
     const reliability = this.lastSource
-      ? evaluateMarketReliability({ ...this.lastSource, market: context.market, now: timestamp })
+      ? evaluateMarketReliability({
+          ...this.lastSource,
+          market: context.market,
+          now: timestamp,
+        })
       : undefined;
     const calibration = this.lastSource
       ? buildCalibrationContext(this.lastSource, timestamp)
@@ -277,7 +384,9 @@ export class MarketStateEngine {
       timestamp,
       domain: "stocks-optimizer",
       metrics: reliabilityAdjustedInputs,
-      synchronization: this.lastSource ? buildStocksSynchronization(this.lastSource) : undefined,
+      synchronization: this.lastSource
+        ? buildStocksSynchronization(this.lastSource)
+        : undefined,
       calibration,
       meaning: this.lastSource?.meaningText
         ? {
@@ -292,9 +401,15 @@ export class MarketStateEngine {
             },
           }
         : undefined,
-      pruning: this.lastSource ? buildStocksPruningInput(this.lastSource, { now: timestamp }) : undefined,
-      purpose: this.lastSource ? buildStocksPurposeInput(this.lastSource, { now: timestamp }) : undefined,
-      observations: this.lastSource ? buildStocksLeadershipObservations(this.lastSource.stocks, timestamp) : [],
+      pruning: this.lastSource
+        ? buildStocksPruningInput(this.lastSource, { now: timestamp })
+        : undefined,
+      purpose: this.lastSource
+        ? buildStocksPurposeInput(this.lastSource, { now: timestamp })
+        : undefined,
+      observations: this.lastSource
+        ? buildStocksLeadershipObservations(this.lastSource.stocks, timestamp)
+        : [],
       metadata: {
         market: context.market,
         timeframe: context.timeframe ?? "live",
@@ -302,9 +417,21 @@ export class MarketStateEngine {
         reliability,
       },
     });
-    const snapshot = adaptSnapshot(frameworkSnapshot, context.market, context.timeframe ?? "live", this.history, reliability);
+    const snapshot = adaptSnapshot(
+      frameworkSnapshot,
+      context.market,
+      context.timeframe ?? "live",
+      this.history,
+      reliability,
+    );
     this.history.push(compactTransition(snapshot));
-    this.history.splice(0, Math.max(0, this.history.length - (this.options.maxSnapshotHistory ?? 80)));
+    this.history.splice(
+      0,
+      Math.max(
+        0,
+        this.history.length - (this.options.maxSnapshotHistory ?? 80),
+      ),
+    );
     snapshot.history = this.history.slice();
     return snapshot;
   }
@@ -323,11 +450,19 @@ function adaptSnapshot(
 ): MarketStateSnapshot {
   const layers = {} as Record<MarketLayerKey, MarketLayerState>;
 
-  for (const [frameworkKey, layer] of Object.entries(snapshot.perception.layers)) {
-    const marketKey = FRAMEWORK_TO_MARKET_LAYER[frameworkKey as keyof typeof FRAMEWORK_TO_MARKET_LAYER];
+  for (const [frameworkKey, layer] of Object.entries(
+    snapshot.perception.layers,
+  )) {
+    const marketKey =
+      FRAMEWORK_TO_MARKET_LAYER[
+        frameworkKey as keyof typeof FRAMEWORK_TO_MARKET_LAYER
+      ];
     const definition = MARKET_LAYER_DEFINITIONS[marketKey];
-    const visualIndex = layer.score >= 75 ? 3 : layer.score >= 50 ? 2 : layer.score >= 25 ? 1 : 0;
-    const confidence = reliability ? Math.min(layer.confidence, reliability.confidenceCap) : layer.confidence;
+    const visualIndex =
+      layer.score >= 75 ? 3 : layer.score >= 50 ? 2 : layer.score >= 25 ? 1 : 0;
+    const confidence = reliability
+      ? Math.min(layer.confidence, reliability.confidenceCap)
+      : layer.confidence;
     layers[marketKey] = {
       key: marketKey,
       label: definition.label,
@@ -336,14 +471,22 @@ function adaptSnapshot(
       score: layer.score,
       confidence,
       momentum: layer.momentum,
-      classification: semanticLayerClassification(marketKey, layer.score, confidence, layer.momentum),
+      classification: semanticLayerClassification(
+        marketKey,
+        layer.score,
+        confidence,
+        layer.momentum,
+      ),
       visualSignal: definition.visualSignals[visualIndex],
       contributors: layer.contributors,
     };
   }
 
   const timeframes = Object.fromEntries(
-    Object.entries(snapshot.perception.timeframes).map(([key, state]) => [key, state]),
+    Object.entries(snapshot.perception.timeframes).map(([key, state]) => [
+      key,
+      state,
+    ]),
   ) as Record<MarketTimeframeKey, MarketTimeframeState>;
 
   return {
@@ -352,7 +495,9 @@ function adaptSnapshot(
     market,
     regime: snapshot.regime.name,
     compositeScore: snapshot.perception.compositeScore,
-    confidence: reliability ? Math.min(snapshot.confidence, reliability.confidenceCap) : snapshot.confidence,
+    confidence: reliability
+      ? Math.min(snapshot.confidence, reliability.confidenceCap)
+      : snapshot.confidence,
     agreement: snapshot.perception.agreement,
     dominantLayer: FRAMEWORK_TO_MARKET_LAYER[snapshot.perception.dominantLayer],
     layers,
@@ -398,14 +543,18 @@ function buildCalibrationContext(
     timestamp: new Date(timestamp).toISOString(),
     prediction: {
       expectedOutcome: "trusted-understanding",
-      calibratedConfidence: finiteNumber(source.calibrationCalibratedConfidence),
+      calibratedConfidence: finiteNumber(
+        source.calibrationCalibratedConfidence,
+      ),
     },
     confidence: clampPct(confidence),
     metadata: {
       source: "market-perception-calibration",
       status: source.calibrationStatus ?? "unknown",
       trustworthiness: finiteNumber(source.calibrationTrustworthiness),
-      warnings: Array.isArray(source.calibrationWarnings) ? source.calibrationWarnings : [],
+      warnings: Array.isArray(source.calibrationWarnings)
+        ? source.calibrationWarnings
+        : [],
     },
     history: buildCalibrationHistory(source, timestamp),
   };
@@ -415,19 +564,26 @@ function buildCalibrationHistory(
   source: MarketPerceptionMetricSource,
   timestamp: number,
 ): CalibrationInput[] {
-  const sampleSize = Math.min(160, Math.max(0, Math.round(finiteNumber(source.calibrationSampleSize) ?? 0)));
+  const sampleSize = Math.min(
+    160,
+    Math.max(0, Math.round(finiteNumber(source.calibrationSampleSize) ?? 0)),
+  );
   const historicalAccuracy = finiteNumber(source.calibrationHistoricalAccuracy);
   if (sampleSize <= 0 || historicalAccuracy == null) return [];
 
   const calibrationError = finiteNumber(source.calibrationError) ?? 0;
   const averageConfidence = clampPct(historicalAccuracy + calibrationError);
-  const successCount = Math.round(sampleSize * (clampPct(historicalAccuracy) / 100));
+  const successCount = Math.round(
+    sampleSize * (clampPct(historicalAccuracy) / 100),
+  );
 
   return Array.from({ length: sampleSize }, (_, index) => {
     const success = index < successCount;
     return {
       id: `market-calibration-history-${timestamp}-${index}`,
-      timestamp: new Date(timestamp - (sampleSize - index) * 60_000).toISOString(),
+      timestamp: new Date(
+        timestamp - (sampleSize - index) * 60_000,
+      ).toISOString(),
       prediction: { expectedOutcome: "success" },
       confidence: averageConfidence,
       outcome: { label: success ? "success" : "failure", correct: success },
@@ -455,7 +611,9 @@ function semanticLayerClassification(
 
   const strength = pct(score);
   const trust = pct(confidence);
-  const motion = clamp01(0.5 + (Number.isFinite(momentum) ? momentum : 0) / 100);
+  const motion = clamp01(
+    0.5 + (Number.isFinite(momentum) ? momentum : 0) / 100,
+  );
 
   const dimensionsByLayer: Record<MarketLayerKey, Record<string, number>> = {
     red: {
@@ -536,7 +694,9 @@ function semanticLayerClassification(
   ).word;
 }
 
-function adaptMetrics(metrics: SignalSnapshot["metrics"]): Record<string, MetricState> {
+function adaptMetrics(
+  metrics: SignalSnapshot["metrics"],
+): Record<string, MetricState> {
   return Object.fromEntries(
     Object.entries(metrics).map(([key, metric]) => [
       key,
@@ -568,7 +728,9 @@ function finiteNumber(value: unknown) {
   return Number.isFinite(number) ? number : undefined;
 }
 
-function compactTransition(snapshot: MarketStateSnapshot): MarketStateTransition {
+function compactTransition(
+  snapshot: MarketStateSnapshot,
+): MarketStateTransition {
   return {
     timestamp: snapshot.timestamp,
     regime: snapshot.regime,

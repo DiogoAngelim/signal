@@ -111,14 +111,19 @@ export class SignalPipelineAuditTrail {
   private readonly maxEvents: number;
   private readonly logger: AuditLogger;
 
-  constructor(options: {
-    enabled?: boolean;
-    debug?: boolean;
-    persistent?: boolean;
-    maxEvents?: number;
-    logger?: AuditLogger;
-  } = {}) {
-    this.enabled = options.enabled === true || options.debug === true || options.persistent === true;
+  constructor(
+    options: {
+      enabled?: boolean;
+      debug?: boolean;
+      persistent?: boolean;
+      maxEvents?: number;
+      logger?: AuditLogger;
+    } = {},
+  ) {
+    this.enabled =
+      options.enabled === true ||
+      options.debug === true ||
+      options.persistent === true;
     this.debugMode = options.debug === true;
     this.persistent = options.persistent === true || this.debugMode;
     this.maxEvents = Math.max(0, Math.floor(options.maxEvents ?? 5_000));
@@ -136,13 +141,19 @@ export class SignalPipelineAuditTrail {
     }
 
     if (this.debugMode) {
-      this.logger.debug(JSON.stringify({ type: "signal.pipeline.audit", ...normalized }));
+      this.logger.debug(
+        JSON.stringify({ type: "signal.pipeline.audit", ...normalized }),
+      );
     }
 
     return normalized;
   }
 
-  stage(input: Omit<PipelineAuditEvent, "timestamp"> & { timestamp?: number | string }): PipelineAuditEvent | null {
+  stage(
+    input: Omit<PipelineAuditEvent, "timestamp"> & {
+      timestamp?: number | string;
+    },
+  ): PipelineAuditEvent | null {
     return this.emit({
       ...input,
       timestamp: input.timestamp ?? Date.now(),
@@ -155,7 +166,9 @@ export class SignalPipelineAuditTrail {
 
   byAsset(asset: string): PipelineAuditEvent[] {
     const normalized = normalizeAsset(asset);
-    return this.memory.filter((event) => normalizeAsset(event.asset) === normalized);
+    return this.memory.filter(
+      (event) => normalizeAsset(event.asset) === normalized,
+    );
   }
 
   clear() {
@@ -164,16 +177,22 @@ export class SignalPipelineAuditTrail {
 }
 
 export class SuppressionCascadeInspector {
-  inspect(events: PipelineAuditEvent[], assets?: string[]): SuppressionCascadeDiagnostic {
+  inspect(
+    events: PipelineAuditEvent[],
+    assets?: string[],
+  ): SuppressionCascadeDiagnostic {
     const analytics = buildStageSurvivalAnalytics(events, assets);
     const eliminatingStage =
-      analytics.stages.find((stage) => stage.reached > 0 && stage.passed === 0)?.stage ?? null;
+      analytics.stages.find((stage) => stage.reached > 0 && stage.passed === 0)
+        ?.stage ?? null;
 
     const eliminatedBySingleLayer = Boolean(eliminatingStage);
     const warnings = [...analytics.warnings];
 
     if (eliminatedBySingleLayer && eliminatingStage) {
-      warnings.push(`Single-layer suppression detected at ${eliminatingStage}.`);
+      warnings.push(
+        `Single-layer suppression detected at ${eliminatingStage}.`,
+      );
     }
 
     return {
@@ -226,7 +245,9 @@ export class RecursiveGateDetector {
     return {
       hasCycle: cycles.length > 0,
       cycles,
-      warnings: cycles.map((cycle) => `Recursive gate cycle detected: ${cycle.join(" -> ")}.`),
+      warnings: cycles.map(
+        (cycle) => `Recursive gate cycle detected: ${cycle.join(" -> ")}.`,
+      ),
     };
   }
 }
@@ -237,11 +258,17 @@ export class DeadlockAnalyzer {
     assets?: string[];
     dependencies?: GateDependencyGraph;
   }): DeadlockDiagnostic {
-    const suppression = new SuppressionCascadeInspector().inspect(input.events, input.assets);
-    const recursive = new RecursiveGateDetector().detect(input.dependencies ?? {});
+    const suppression = new SuppressionCascadeInspector().inspect(
+      input.events,
+      input.assets,
+    );
+    const recursive = new RecursiveGateDetector().detect(
+      input.dependencies ?? {},
+    );
     const bottleneck = suppression.analytics.bottleneck?.stage ?? null;
     const warnings = [...suppression.warnings, ...recursive.warnings];
-    const deadlocked = recursive.hasCycle || suppression.eliminatedBySingleLayer;
+    const deadlocked =
+      recursive.hasCycle || suppression.eliminatedBySingleLayer;
 
     const suggestedResolution = [
       recursive.hasCycle
@@ -267,23 +294,44 @@ export class DeadlockAnalyzer {
 
 export class ScoreNormalizationDiagnostics {
   analyze(samples: ScoreDiagnosticSample[]): ScoreNormalizationDiagnostic {
-    const finiteFinals = finiteValues(samples.map((sample) => sample.finalConfidenceScore));
+    const finiteFinals = finiteValues(
+      samples.map((sample) => sample.finalConfidenceScore),
+    );
     const finiteRaw = finiteValues(samples.map((sample) => sample.rawScore));
-    const finiteNormalized = finiteValues(samples.map((sample) => sample.normalizedScore));
-    const finitePostFilter = finiteValues(samples.map((sample) => sample.postFilterScore));
+    const finiteNormalized = finiteValues(
+      samples.map((sample) => sample.normalizedScore),
+    );
+    const finitePostFilter = finiteValues(
+      samples.map((sample) => sample.postFilterScore),
+    );
     const midpointCount = samples.filter((sample) => {
       const score = finiteOrNull(sample.finalConfidenceScore);
       return score != null && score >= 49 && score <= 53;
     }).length;
     const fallbackCount = samples.filter((sample) => {
-      const reason = String(sample.reason ?? sample.metadata?.reason ?? "").toLowerCase();
+      const reason = String(
+        sample.reason ?? sample.metadata?.reason ?? "",
+      ).toLowerCase();
       const score = finiteOrNull(sample.finalConfidenceScore);
-      return reason.includes("fallback") || reason.includes("nan") || (score != null && score >= 50 && score <= 52);
+      return (
+        reason.includes("fallback") ||
+        reason.includes("nan") ||
+        (score != null && score >= 50 && score <= 52)
+      );
     }).length;
     const nanFallbackCount = samples.filter((sample) => {
-      const reason = String(sample.reason ?? sample.metadata?.reason ?? "").toLowerCase();
-      return reason.includes("nan") || [sample.rawScore, sample.normalizedScore, sample.postFilterScore, sample.finalConfidenceScore]
-        .some((value) => value == null || !Number.isFinite(Number(value)));
+      const reason = String(
+        sample.reason ?? sample.metadata?.reason ?? "",
+      ).toLowerCase();
+      return (
+        reason.includes("nan") ||
+        [
+          sample.rawScore,
+          sample.normalizedScore,
+          sample.postFilterScore,
+          sample.finalConfidenceScore,
+        ].some((value) => value == null || !Number.isFinite(Number(value)))
+      );
     }).length;
     const clampedCount = samples.filter((sample) => {
       const score = finiteOrNull(sample.finalConfidenceScore);
@@ -307,31 +355,50 @@ export class ScoreNormalizationDiagnostics {
     const warnings: string[] = [];
 
     if (midpointCollapsePct >= 75) {
-      warnings.push(`${Math.round(midpointCollapsePct)}% of assets collapsed into the 49-53 confidence range.`);
+      warnings.push(
+        `${Math.round(midpointCollapsePct)}% of assets collapsed into the 49-53 confidence range.`,
+      );
     }
 
     if (fallbackCollapsePct >= 50) {
-      warnings.push(`${Math.round(fallbackCollapsePct)}% of assets appear to use fallback confidence values.`);
+      warnings.push(
+        `${Math.round(fallbackCollapsePct)}% of assets appear to use fallback confidence values.`,
+      );
     }
 
     if (nanFallbackPct >= 10) {
-      warnings.push(`${Math.round(nanFallbackPct)}% of score samples contain NaN/null fallback evidence.`);
+      warnings.push(
+        `${Math.round(nanFallbackPct)}% of score samples contain NaN/null fallback evidence.`,
+      );
     }
 
-    if (rawRange != null && rawRange > 10 && normalizedRange != null && normalizedRange < 2) {
-      warnings.push("Raw score dispersion exists, but normalization compresses scores into a very narrow band.");
+    if (
+      rawRange != null &&
+      rawRange > 10 &&
+      normalizedRange != null &&
+      normalizedRange < 2
+    ) {
+      warnings.push(
+        "Raw score dispersion exists, but normalization compresses scores into a very narrow band.",
+      );
     }
 
     if (finalRange != null && finalRange < 3 && finiteFinals.length >= 5) {
-      warnings.push("Final confidence scores have low dispersion; check denominator floors and midpoint defaults.");
+      warnings.push(
+        "Final confidence scores have low dispersion; check denominator floors and midpoint defaults.",
+      );
     }
 
     if (clampedPct >= 25) {
-      warnings.push(`${Math.round(clampedPct)}% of final confidence values are hard-clamped near 0 or 100.`);
+      warnings.push(
+        `${Math.round(clampedPct)}% of final confidence values are hard-clamped near 0 or 100.`,
+      );
     }
 
     if (saturationPct >= 25) {
-      warnings.push(`${Math.round(saturationPct)}% of normalized scores are saturated near bounds.`);
+      warnings.push(
+        `${Math.round(saturationPct)}% of normalized scores are saturated near bounds.`,
+      );
     }
 
     return {
@@ -357,18 +424,26 @@ export function buildStageSurvivalAnalytics(
   assets?: string[],
 ): StageSurvivalAnalytics {
   const normalizedEvents = events.map(normalizeAuditEvent);
-  const explicitAssets = new Set((assets ?? []).map(normalizeAsset).filter(Boolean));
+  const explicitAssets = new Set(
+    (assets ?? []).map(normalizeAsset).filter(Boolean),
+  );
   const allAssets = new Set([
     ...explicitAssets,
-    ...normalizedEvents.map((event) => normalizeAsset(event.asset)).filter(Boolean),
+    ...normalizedEvents
+      .map((event) => normalizeAsset(event.asset))
+      .filter(Boolean),
   ]);
   const universeSize = allAssets.size;
   const stages: StageSurvivalRow[] = [];
   let cumulative = universeSize;
 
   for (const stage of SIGNAL_PIPELINE_STAGES) {
-    const stageEvents = normalizedEvents.filter((event) => event.stage === stage);
-    const reachedAssets = new Set(stageEvents.map((event) => normalizeAsset(event.asset)).filter(Boolean));
+    const stageEvents = normalizedEvents.filter(
+      (event) => event.stage === stage,
+    );
+    const reachedAssets = new Set(
+      stageEvents.map((event) => normalizeAsset(event.asset)).filter(Boolean),
+    );
     const passedAssets = new Set(
       stageEvents
         .filter((event) => event.passed)
@@ -379,7 +454,10 @@ export function buildStageSurvivalAnalytics(
     const reached = stageEvents.length ? reachedAssets.size : cumulative;
     const passed = stageEvents.length ? passedAssets.size : reached;
     const rejected = Math.max(0, reached - passed);
-    const reasons = summarizeReasons(rejectedEvents, Math.max(1, rejectedEvents.length));
+    const reasons = summarizeReasons(
+      rejectedEvents,
+      Math.max(1, rejectedEvents.length),
+    );
     const row: StageSurvivalRow = {
       stage,
       reached,
@@ -400,16 +478,23 @@ export function buildStageSurvivalAnalytics(
   const bottleneck =
     stages
       .filter((stage) => stage.reached > 0 && stage.rejected > 0)
-      .sort((a, b) => b.attritionPct - a.attritionPct || b.rejected - a.rejected)[0] ?? null;
-  const dominantRejectionStage = bottleneck && bottleneck.rejected > 0 ? bottleneck.stage : null;
+      .sort(
+        (a, b) => b.attritionPct - a.attritionPct || b.rejected - a.rejected,
+      )[0] ?? null;
+  const dominantRejectionStage =
+    bottleneck && bottleneck.rejected > 0 ? bottleneck.stage : null;
   const warnings: string[] = [];
 
   if (bottleneck && bottleneck.reached > 0 && bottleneck.passed === 0) {
-    warnings.push(`${bottleneck.stage} eliminated every candidate that reached it.`);
+    warnings.push(
+      `${bottleneck.stage} eliminated every candidate that reached it.`,
+    );
   }
 
   if (bottleneck && bottleneck.attritionPct >= 80 && bottleneck.rejected > 0) {
-    warnings.push(`${bottleneck.stage} rejected ${Math.round(bottleneck.attritionPct)}% of reached candidates.`);
+    warnings.push(
+      `${bottleneck.stage} rejected ${Math.round(bottleneck.attritionPct)}% of reached candidates.`,
+    );
   }
 
   return {
@@ -447,7 +532,9 @@ function summarizeReasons(events: PipelineAuditEvent[], denominator: number) {
 }
 
 function normalizeAsset(value: unknown) {
-  return String(value ?? "").trim().toUpperCase();
+  return String(value ?? "")
+    .trim()
+    .toUpperCase();
 }
 
 function finiteValues(values: Array<number | null | undefined>) {

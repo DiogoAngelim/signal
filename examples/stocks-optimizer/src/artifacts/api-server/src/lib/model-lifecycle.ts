@@ -68,7 +68,10 @@ export interface PromotionGateResult {
 
 export interface RetirementRuleResult {
   should_retire: boolean;
-  target_state: Extract<ModelLifecycleState, "WATCHLIST" | "REDUCED" | "RETIRED">;
+  target_state: Extract<
+    ModelLifecycleState,
+    "WATCHLIST" | "REDUCED" | "RETIRED"
+  >;
   failures: MetricGateFailure[];
 }
 
@@ -109,7 +112,10 @@ export interface RetirementRules {
   min_result_without_top_3: number;
   max_slippage_sensitivity: number;
   max_live_vs_backtest_decay: number;
-  target_state: Extract<ModelLifecycleState, "WATCHLIST" | "REDUCED" | "RETIRED">;
+  target_state: Extract<
+    ModelLifecycleState,
+    "WATCHLIST" | "REDUCED" | "RETIRED"
+  >;
 }
 
 export interface ModelLifecycleConfig {
@@ -162,48 +168,46 @@ const PROMOTION_TARGET_STATES = new Set<ModelLifecycleState>([
   "PRODUCTION",
 ]);
 
-
-export const DEFAULT_MODEL_LIFECYCLE_CONFIG: ModelLifecycleConfig =
-  deepFreeze({
-    state_machine: {
-      RESEARCH: ["CANDIDATE", "RETIRED"],
-      CANDIDATE: ["SHADOW", "WATCHLIST", "RETIRED"],
-      SHADOW: ["SMALL_LIVE", "WATCHLIST", "RETIRED"],
-      SMALL_LIVE: ["PRODUCTION", "WATCHLIST", "REDUCED", "RETIRED"],
-      PRODUCTION: ["WATCHLIST", "REDUCED", "RETIRED"],
-      WATCHLIST: ["SHADOW", "REDUCED", "RETIRED"],
-      REDUCED: ["PRODUCTION", "WATCHLIST", "RETIRED"],
-      RETIRED: [],
-    },
-    promotion_rules: {
-      min_expectancy_r: 0,
-      min_rolling_expectancy_r: 0,
-      min_profit_factor_after_costs: 1.1,
-      max_drawdown: 8,
-      min_average_winner_r: 0,
-      max_average_loser_r: 2,
-      max_top_1_profit_dependency: 0.35,
-      max_top_3_profit_dependency: 0.6,
-      min_result_without_top_1: 0,
-      min_result_without_top_3: 0,
-      max_slippage_sensitivity: 0.2,
-      max_live_vs_backtest_decay: 0.35,
-      min_tested_variants: 1,
-    },
-    retirement_rules: {
-      min_expectancy_r: 0,
-      min_rolling_expectancy_r: 0,
-      min_profit_factor_after_costs: 1,
-      max_drawdown: 12,
-      max_top_1_profit_dependency: 0.55,
-      max_top_3_profit_dependency: 0.8,
-      min_result_without_top_1: -1,
-      min_result_without_top_3: -2,
-      max_slippage_sensitivity: 0.35,
-      max_live_vs_backtest_decay: 0.5,
-      target_state: "RETIRED",
-    },
-  });
+export const DEFAULT_MODEL_LIFECYCLE_CONFIG: ModelLifecycleConfig = deepFreeze({
+  state_machine: {
+    RESEARCH: ["CANDIDATE", "RETIRED"],
+    CANDIDATE: ["SHADOW", "WATCHLIST", "RETIRED"],
+    SHADOW: ["SMALL_LIVE", "WATCHLIST", "RETIRED"],
+    SMALL_LIVE: ["PRODUCTION", "WATCHLIST", "REDUCED", "RETIRED"],
+    PRODUCTION: ["WATCHLIST", "REDUCED", "RETIRED"],
+    WATCHLIST: ["SHADOW", "REDUCED", "RETIRED"],
+    REDUCED: ["PRODUCTION", "WATCHLIST", "RETIRED"],
+    RETIRED: [],
+  },
+  promotion_rules: {
+    min_expectancy_r: 0,
+    min_rolling_expectancy_r: 0,
+    min_profit_factor_after_costs: 1.1,
+    max_drawdown: 8,
+    min_average_winner_r: 0,
+    max_average_loser_r: 2,
+    max_top_1_profit_dependency: 0.35,
+    max_top_3_profit_dependency: 0.6,
+    min_result_without_top_1: 0,
+    min_result_without_top_3: 0,
+    max_slippage_sensitivity: 0.2,
+    max_live_vs_backtest_decay: 0.35,
+    min_tested_variants: 1,
+  },
+  retirement_rules: {
+    min_expectancy_r: 0,
+    min_rolling_expectancy_r: 0,
+    min_profit_factor_after_costs: 1,
+    max_drawdown: 12,
+    max_top_1_profit_dependency: 0.55,
+    max_top_3_profit_dependency: 0.8,
+    min_result_without_top_1: -1,
+    min_result_without_top_3: -2,
+    max_slippage_sensitivity: 0.35,
+    max_live_vs_backtest_decay: 0.5,
+    target_state: "RETIRED",
+  },
+});
 
 export class InMemoryModelLifecycleStore implements ModelLifecycleStore {
   private records = new Map<string, ModelLifecycleRecord>();
@@ -247,10 +251,8 @@ export class ModelLifecycleRegistry {
   private auditCounter = 0;
 
   constructor(
-    private readonly config: ModelLifecycleConfig =
-      DEFAULT_MODEL_LIFECYCLE_CONFIG,
-    private readonly store: ModelLifecycleStore =
-      new InMemoryModelLifecycleStore(),
+    private readonly config: ModelLifecycleConfig = DEFAULT_MODEL_LIFECYCLE_CONFIG,
+    private readonly store: ModelLifecycleStore = new InMemoryModelLifecycleStore(),
     private readonly clock: () => Date = () => new Date(),
   ) {}
 
@@ -274,7 +276,7 @@ export class ModelLifecycleRegistry {
       updated_at: now,
     });
     this.store.register(record);
-    
+
     return record;
   }
 
@@ -294,7 +296,11 @@ export class ModelLifecycleRegistry {
     metrics: EvaluationMetrics,
     metadata: Pick<ModelMetadata, "number_of_tested_variants">,
   ): PromotionGateResult {
-    return evaluatePromotionGates(metrics, metadata, this.config.promotion_rules);
+    return evaluatePromotionGates(
+      metrics,
+      metadata,
+      this.config.promotion_rules,
+    );
   }
 
   evaluateRetirementRules(metrics: EvaluationMetrics): RetirementRuleResult {
@@ -315,7 +321,9 @@ export class ModelLifecycleRegistry {
     if (record.lifecycle_state === input.new_state) {
       throw new Error(`Model ${record.model_id} is already ${input.new_state}`);
     }
-    if (!isAllowedTransition(record.lifecycle_state, input.new_state, this.config)) {
+    if (
+      !isAllowedTransition(record.lifecycle_state, input.new_state, this.config)
+    ) {
       throw new Error(
         `Transition ${record.lifecycle_state} -> ${input.new_state} is not allowed`,
       );
@@ -328,7 +336,12 @@ export class ModelLifecycleRegistry {
       }
     }
 
-    return this.commitTransition(record, input.new_state, input.metrics_snapshot, input.reason);
+    return this.commitTransition(
+      record,
+      input.new_state,
+      input.metrics_snapshot,
+      input.reason,
+    );
   }
 
   promoteToProduction(input: {
@@ -337,23 +350,30 @@ export class ModelLifecycleRegistry {
     reason: string;
   }): ModelLifecycleRecord {
     const candidate = this.requireModel(input.candidate_model_id);
-    const gates = this.evaluatePromotionGates(input.metrics_snapshot, candidate);
+    const gates = this.evaluatePromotionGates(
+      input.metrics_snapshot,
+      candidate,
+    );
     if (!gates.passed) {
-      throw new Error(formatGateFailure("Production promotion blocked", gates.failures));
+      throw new Error(
+        formatGateFailure("Production promotion blocked", gates.failures),
+      );
     }
-    if (!isAllowedTransition(candidate.lifecycle_state, "PRODUCTION", this.config)) {
+    if (
+      !isAllowedTransition(candidate.lifecycle_state, "PRODUCTION", this.config)
+    ) {
       throw new Error(
         `Transition ${candidate.lifecycle_state} -> PRODUCTION is not allowed`,
       );
     }
 
-    const existingProduction = this
-      .store
+    const existingProduction = this.store
       .list()
-      .find((model) =>
-        model.model_id !== candidate.model_id &&
-        model.regime_scope === candidate.regime_scope &&
-        model.lifecycle_state === "PRODUCTION"
+      .find(
+        (model) =>
+          model.model_id !== candidate.model_id &&
+          model.regime_scope === candidate.regime_scope &&
+          model.lifecycle_state === "PRODUCTION",
       );
 
     if (existingProduction) {
@@ -383,7 +403,13 @@ export class ModelLifecycleRegistry {
     if (!result.should_retire) {
       return null;
     }
-    if (!isAllowedTransition(record.lifecycle_state, result.target_state, this.config)) {
+    if (
+      !isAllowedTransition(
+        record.lifecycle_state,
+        result.target_state,
+        this.config,
+      )
+    ) {
       throw new Error(
         `Transition ${record.lifecycle_state} -> ${result.target_state} is not allowed`,
       );
@@ -416,7 +442,9 @@ export class ModelLifecycleRegistry {
     payload: TInput;
     production_decide: (payload: TInput) => Promise<TDecision> | TDecision;
     shadow_decide: (payload: TInput) => Promise<TDecision> | TDecision;
-    record?: (result: ShadowModeResult<TInput, TDecision>) => Promise<void> | void;
+    record?: (
+      result: ShadowModeResult<TInput, TDecision>,
+    ) => Promise<void> | void;
   }): Promise<ShadowModeResult<TInput, TDecision>> {
     this.assertCanOpenNewTrades(input.production_model_id);
     const shadow = this.requireModel(input.shadow_model_id);
@@ -493,7 +521,6 @@ export function loadModelLifecycleConfig(
     return DEFAULT_MODEL_LIFECYCLE_CONFIG;
   }
 
-  
   const parsed = parseYaml(fs.readFileSync(configPath, "utf8")) as {
     model_lifecycle?: Partial<ModelLifecycleConfig>;
   } | null;
@@ -508,19 +535,97 @@ export function evaluatePromotionGates(
   const failures: MetricGateFailure[] = [];
   const minExpectancy = Math.max(0, rules.min_expectancy_r);
 
-  minGate(failures, "positive_out_of_sample_expectancy", "expectancy_r", metrics.expectancy_r, minExpectancy);
-  minGate(failures, "rolling_expectancy", "rolling_expectancy_r", metrics.rolling_expectancy_r, rules.min_rolling_expectancy_r);
-  minGate(failures, "profit_factor_after_costs", "profit_factor_after_costs", metrics.profit_factor_after_costs, rules.min_profit_factor_after_costs);
-  maxGate(failures, "max_drawdown", "max_drawdown", metrics.max_drawdown, rules.max_drawdown);
-  minGate(failures, "average_winner_r", "average_winner_r", metrics.average_winner_r, rules.min_average_winner_r);
-  maxGate(failures, "average_loser_r", "average_loser_r", Math.abs(metrics.average_loser_r), rules.max_average_loser_r);
-  maxGate(failures, "top_1_profit_dependency", "top_1_profit_dependency", metrics.top_1_profit_dependency, rules.max_top_1_profit_dependency);
-  maxGate(failures, "top_3_profit_dependency", "top_3_profit_dependency", metrics.top_3_profit_dependency, rules.max_top_3_profit_dependency);
-  minGate(failures, "result_without_top_1", "result_without_top_1", metrics.result_without_top_1, rules.min_result_without_top_1);
-  minGate(failures, "result_without_top_3", "result_without_top_3", metrics.result_without_top_3, rules.min_result_without_top_3);
-  maxGate(failures, "slippage_sensitivity", "slippage_sensitivity", metrics.slippage_sensitivity, rules.max_slippage_sensitivity);
-  maxGate(failures, "live_vs_backtest_decay", "live_vs_backtest_decay", metrics.live_vs_backtest_decay, rules.max_live_vs_backtest_decay);
-  minGate(failures, "tested_variants", "number_of_tested_variants", metadata.number_of_tested_variants, rules.min_tested_variants);
+  minGate(
+    failures,
+    "positive_out_of_sample_expectancy",
+    "expectancy_r",
+    metrics.expectancy_r,
+    minExpectancy,
+  );
+  minGate(
+    failures,
+    "rolling_expectancy",
+    "rolling_expectancy_r",
+    metrics.rolling_expectancy_r,
+    rules.min_rolling_expectancy_r,
+  );
+  minGate(
+    failures,
+    "profit_factor_after_costs",
+    "profit_factor_after_costs",
+    metrics.profit_factor_after_costs,
+    rules.min_profit_factor_after_costs,
+  );
+  maxGate(
+    failures,
+    "max_drawdown",
+    "max_drawdown",
+    metrics.max_drawdown,
+    rules.max_drawdown,
+  );
+  minGate(
+    failures,
+    "average_winner_r",
+    "average_winner_r",
+    metrics.average_winner_r,
+    rules.min_average_winner_r,
+  );
+  maxGate(
+    failures,
+    "average_loser_r",
+    "average_loser_r",
+    Math.abs(metrics.average_loser_r),
+    rules.max_average_loser_r,
+  );
+  maxGate(
+    failures,
+    "top_1_profit_dependency",
+    "top_1_profit_dependency",
+    metrics.top_1_profit_dependency,
+    rules.max_top_1_profit_dependency,
+  );
+  maxGate(
+    failures,
+    "top_3_profit_dependency",
+    "top_3_profit_dependency",
+    metrics.top_3_profit_dependency,
+    rules.max_top_3_profit_dependency,
+  );
+  minGate(
+    failures,
+    "result_without_top_1",
+    "result_without_top_1",
+    metrics.result_without_top_1,
+    rules.min_result_without_top_1,
+  );
+  minGate(
+    failures,
+    "result_without_top_3",
+    "result_without_top_3",
+    metrics.result_without_top_3,
+    rules.min_result_without_top_3,
+  );
+  maxGate(
+    failures,
+    "slippage_sensitivity",
+    "slippage_sensitivity",
+    metrics.slippage_sensitivity,
+    rules.max_slippage_sensitivity,
+  );
+  maxGate(
+    failures,
+    "live_vs_backtest_decay",
+    "live_vs_backtest_decay",
+    metrics.live_vs_backtest_decay,
+    rules.max_live_vs_backtest_decay,
+  );
+  minGate(
+    failures,
+    "tested_variants",
+    "number_of_tested_variants",
+    metadata.number_of_tested_variants,
+    rules.min_tested_variants,
+  );
 
   return {
     passed: failures.length === 0,
@@ -534,16 +639,66 @@ export function evaluateRetirementRules(
 ): RetirementRuleResult {
   const failures: MetricGateFailure[] = [];
 
-  retirementMinTrigger(failures, "expectancy_r", metrics.expectancy_r, rules.min_expectancy_r);
-  retirementMinTrigger(failures, "rolling_expectancy_r", metrics.rolling_expectancy_r, rules.min_rolling_expectancy_r);
-  retirementMinTrigger(failures, "profit_factor_after_costs", metrics.profit_factor_after_costs, rules.min_profit_factor_after_costs);
-  retirementMaxTrigger(failures, "max_drawdown", metrics.max_drawdown, rules.max_drawdown);
-  retirementMaxTrigger(failures, "top_1_profit_dependency", metrics.top_1_profit_dependency, rules.max_top_1_profit_dependency);
-  retirementMaxTrigger(failures, "top_3_profit_dependency", metrics.top_3_profit_dependency, rules.max_top_3_profit_dependency);
-  retirementMinTrigger(failures, "result_without_top_1", metrics.result_without_top_1, rules.min_result_without_top_1);
-  retirementMinTrigger(failures, "result_without_top_3", metrics.result_without_top_3, rules.min_result_without_top_3);
-  retirementMaxTrigger(failures, "slippage_sensitivity", metrics.slippage_sensitivity, rules.max_slippage_sensitivity);
-  retirementMaxTrigger(failures, "live_vs_backtest_decay", metrics.live_vs_backtest_decay, rules.max_live_vs_backtest_decay);
+  retirementMinTrigger(
+    failures,
+    "expectancy_r",
+    metrics.expectancy_r,
+    rules.min_expectancy_r,
+  );
+  retirementMinTrigger(
+    failures,
+    "rolling_expectancy_r",
+    metrics.rolling_expectancy_r,
+    rules.min_rolling_expectancy_r,
+  );
+  retirementMinTrigger(
+    failures,
+    "profit_factor_after_costs",
+    metrics.profit_factor_after_costs,
+    rules.min_profit_factor_after_costs,
+  );
+  retirementMaxTrigger(
+    failures,
+    "max_drawdown",
+    metrics.max_drawdown,
+    rules.max_drawdown,
+  );
+  retirementMaxTrigger(
+    failures,
+    "top_1_profit_dependency",
+    metrics.top_1_profit_dependency,
+    rules.max_top_1_profit_dependency,
+  );
+  retirementMaxTrigger(
+    failures,
+    "top_3_profit_dependency",
+    metrics.top_3_profit_dependency,
+    rules.max_top_3_profit_dependency,
+  );
+  retirementMinTrigger(
+    failures,
+    "result_without_top_1",
+    metrics.result_without_top_1,
+    rules.min_result_without_top_1,
+  );
+  retirementMinTrigger(
+    failures,
+    "result_without_top_3",
+    metrics.result_without_top_3,
+    rules.min_result_without_top_3,
+  );
+  retirementMaxTrigger(
+    failures,
+    "slippage_sensitivity",
+    metrics.slippage_sensitivity,
+    rules.max_slippage_sensitivity,
+  );
+  retirementMaxTrigger(
+    failures,
+    "live_vs_backtest_decay",
+    metrics.live_vs_backtest_decay,
+    rules.max_live_vs_backtest_decay,
+  );
 
   return {
     should_retire: failures.length > 0,
@@ -587,7 +742,10 @@ export function calculateEvaluationMetrics(
     slippage_sensitivity: round(Math.max(0, expectancy - slippageExpectancy)),
     live_vs_backtest_decay: round(
       backtestExpectancy > 0
-        ? Math.max(0, (backtestExpectancy - liveExpectancy) / backtestExpectancy)
+        ? Math.max(
+            0,
+            (backtestExpectancy - liveExpectancy) / backtestExpectancy,
+          )
         : 0,
     ),
   };
@@ -629,7 +787,9 @@ export function isAllowedTransition(
   return config.state_machine[oldState]?.includes(newState) ?? false;
 }
 
-function normalizeConfig(input: Partial<ModelLifecycleConfig>): ModelLifecycleConfig {
+function normalizeConfig(
+  input: Partial<ModelLifecycleConfig>,
+): ModelLifecycleConfig {
   return deepFreeze({
     state_machine: normalizeStateMachine(input.state_machine),
     promotion_rules: {
@@ -644,7 +804,9 @@ function normalizeConfig(input: Partial<ModelLifecycleConfig>): ModelLifecycleCo
 }
 
 function normalizeStateMachine(
-  input: Partial<Record<ModelLifecycleState, ModelLifecycleState[]>> | undefined,
+  input:
+    | Partial<Record<ModelLifecycleState, ModelLifecycleState[]>>
+    | undefined,
 ): Record<ModelLifecycleState, ModelLifecycleState[]> {
   const merged = {
     ...DEFAULT_MODEL_LIFECYCLE_CONFIG.state_machine,
@@ -738,7 +900,10 @@ function retirementMaxTrigger(
   }
 }
 
-function formatGateFailure(prefix: string, failures: MetricGateFailure[]): string {
+function formatGateFailure(
+  prefix: string,
+  failures: MetricGateFailure[],
+): string {
   return `${prefix}: ${failures.map((failure) => failure.message).join("; ")}`;
 }
 

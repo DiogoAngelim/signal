@@ -107,21 +107,26 @@ describe("agency pipeline", () => {
   });
 
   it("works without an action and with an unknown outcome", () => {
-    const trace = runAgencyCycle({
-      decision: {
-        kind: "collect_context",
-        confidence: 0.6,
+    const trace = runAgencyCycle(
+      {
+        decision: {
+          kind: "collect_context",
+          confidence: 0.6,
+        },
       },
-    }, {
-      clock: () => new Date("2026-01-01T00:00:00.000Z"),
-    });
+      {
+        clock: () => new Date("2026-01-01T00:00:00.000Z"),
+      },
+    );
 
     expect(trace.action).toBeUndefined();
     expect(trace.outcome).toEqual({
       success: null,
       outcomeLabel: "unknown",
     });
-    expect(trace.learning?.learnedPatterns).toEqual(["1 trace(s) are missing outcome data."]);
+    expect(trace.learning?.learnedPatterns).toEqual([
+      "1 trace(s) are missing outcome data.",
+    ]);
     expect(trace.selfDiagnosis.recommendation).toBe("requires_human_review");
   });
 

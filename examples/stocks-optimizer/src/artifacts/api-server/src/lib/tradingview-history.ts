@@ -1,8 +1,17 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import type { CandleAudit, HistoricalDataset, HistoryCoverage, RegimeSegment, RegimeType } from "../../../signal-framework/history/types";
-import { buildHistoricalDataset, normalizeRegimeType } from "./historical-dataset";
+import type {
+  CandleAudit,
+  HistoricalDataset,
+  HistoryCoverage,
+  RegimeSegment,
+  RegimeType,
+} from "../../../signal-framework/history/types";
+import {
+  buildHistoricalDataset,
+  normalizeRegimeType,
+} from "./historical-dataset";
 import { logger } from "./logger";
 
 export type TradingViewHistoricalBar = {
@@ -38,20 +47,32 @@ type Candidate = {
 
 const DEFAULT_BARS = 3_780;
 const DEFAULT_LOOKBACK_YEARS = 15;
-const DEFAULT_TIMEOUT_MS = Number(process.env.TRADINGVIEW_HISTORY_TIMEOUT_MS ?? 20_000);
-const HISTORY_CACHE_TTL_MS = Number(process.env.TRADINGVIEW_HISTORY_CACHE_TTL_MS ?? 10 * 60_000);
+const DEFAULT_TIMEOUT_MS = Number(
+  process.env.TRADINGVIEW_HISTORY_TIMEOUT_MS ?? 20_000,
+);
+const HISTORY_CACHE_TTL_MS = Number(
+  process.env.TRADINGVIEW_HISTORY_CACHE_TTL_MS ?? 10 * 60_000,
+);
 const BINANCE_KLINE_LIMIT = 1_000;
-const HISTORY_CACHE = new Map<string, { expiresAt: number; dataset: HistoricalDataset }>();
+const HISTORY_CACHE = new Map<
+  string,
+  { expiresAt: number; dataset: HistoricalDataset }
+>();
 
 let chartDataModulePromise: Promise<any | null> | null = null;
 
 function normalizeKey(value: unknown) {
-  return String(value ?? "").trim().toUpperCase();
+  return String(value ?? "")
+    .trim()
+    .toUpperCase();
 }
 
 function stripKnownSuffix(symbol: string) {
   return symbol
-    .replace(/\.(BR|AS|PA|LS|IR|OL|L|MI|DE|F|SW|MC|SA|AD|AE|DU|TO|V|AX|HK|SS|SZ)$/i, "")
+    .replace(
+      /\.(BR|AS|PA|LS|IR|OL|L|MI|DE|F|SW|MC|SA|AD|AE|DU|TO|V|AX|HK|SS|SZ)$/i,
+      "",
+    )
     .replace(/\.P$/i, "");
 }
 
@@ -92,20 +113,34 @@ function exchangeAliases(marketInput: unknown, symbolInput: unknown): string[] {
     OSE: ["OSE", "OSL", "EURONEXT"],
   };
 
-  const suffixAliases =
-    /\.SA$/i.test(symbol) ? ["BMFBOVESPA"] :
-    /\.AD$/i.test(symbol) ? ["ADX"] :
-    /\.AE$|\.DU$/i.test(symbol) ? ["DFM", "DUBAI"] :
-    /\.OL$/i.test(symbol) ? ["OSL", "OSE", "EURONEXT"] :
-    /\.(BR|AS|PA|LS|IR)$/i.test(symbol) ? ["EURONEXT"] :
-    /\.L$/i.test(symbol) ? ["LSE"] :
-    /\.TO$/i.test(symbol) ? ["TSX"] :
-    [];
+  const suffixAliases = /\.SA$/i.test(symbol)
+    ? ["BMFBOVESPA"]
+    : /\.AD$/i.test(symbol)
+      ? ["ADX"]
+      : /\.AE$|\.DU$/i.test(symbol)
+        ? ["DFM", "DUBAI"]
+        : /\.OL$/i.test(symbol)
+          ? ["OSL", "OSE", "EURONEXT"]
+          : /\.(BR|AS|PA|LS|IR)$/i.test(symbol)
+            ? ["EURONEXT"]
+            : /\.L$/i.test(symbol)
+              ? ["LSE"]
+              : /\.TO$/i.test(symbol)
+                ? ["TSX"]
+                : [];
 
-  return Array.from(new Set([...(aliases[market] ?? (market ? [market] : [])), ...suffixAliases]));
+  return Array.from(
+    new Set([
+      ...(aliases[market] ?? (market ? [market] : [])),
+      ...suffixAliases,
+    ]),
+  );
 }
 
-function buildCandidates(symbolInput: string, marketInput?: string): Candidate[] {
+function buildCandidates(
+  symbolInput: string,
+  marketInput?: string,
+): Candidate[] {
   const raw = String(symbolInput ?? "").trim();
   if (!raw) return [];
 
@@ -145,12 +180,15 @@ function buildCandidates(symbolInput: string, marketInput?: string): Candidate[]
   }
 
   return Array.from(
-    new Map(candidates.map((candidate) => [candidate.providerSymbol, candidate])).values(),
+    new Map(
+      candidates.map((candidate) => [candidate.providerSymbol, candidate]),
+    ).values(),
   );
 }
 
 function modulePathCandidates() {
-  const configured = process.env.TRADINGVIEW_DATA_MODULE_DIR || process.env.TRADINGVIEW_DATA_DIR;
+  const configured =
+    process.env.TRADINGVIEW_DATA_MODULE_DIR || process.env.TRADINGVIEW_DATA_DIR;
   return [
     configured,
     path.resolve(process.cwd(), "tradingview-data"),
@@ -176,7 +214,10 @@ async function loadLocalChartDataModule() {
           return mod;
         }
       } catch (error) {
-        logger.warn({ file, err: error }, "Could not load local tradingview-data module");
+        logger.warn(
+          { file, err: error },
+          "Could not load local tradingview-data module",
+        );
       }
     }
 
@@ -186,7 +227,10 @@ async function loadLocalChartDataModule() {
   return chartDataModulePromise;
 }
 
-function normalizeBar(raw: any, metadata: Record<string, any>): TradingViewHistoricalBar | null {
+function normalizeBar(
+  raw: any,
+  metadata: Record<string, any>,
+): TradingViewHistoricalBar | null {
   const close = Number(raw?.close ?? raw?.price ?? raw?.["Adj Close"]);
   if (!Number.isFinite(close) || close <= 0) return null;
 
@@ -194,7 +238,9 @@ function normalizeBar(raw: any, metadata: Record<string, any>): TradingViewHisto
   const high = Number(raw?.high ?? raw?.High);
   const low = Number(raw?.low ?? raw?.Low);
   const volume = Number(raw?.volume ?? raw?.Volume);
-  const timestamp = String(raw?.timestamp ?? raw?.time ?? raw?.Date ?? raw?.date ?? "");
+  const timestamp = String(
+    raw?.timestamp ?? raw?.time ?? raw?.Date ?? raw?.date ?? "",
+  );
   const date = /^\d{4}-\d{2}-\d{2}$/.test(timestamp)
     ? timestamp
     : Number.isFinite(Date.parse(timestamp))
@@ -216,11 +262,19 @@ function normalizeBar(raw: any, metadata: Record<string, any>): TradingViewHisto
     source: metadata.source ?? "tradingview-data",
     sourceStatus: metadata.sourceStatus ?? "delayed",
     dataQuality: metadata.dataQuality ?? "real",
-    ...(raw?.regime ?? raw?.regimeType ?? metadata.regime
-      ? { regime: normalizeRegimeType(raw?.regime ?? raw?.regimeType ?? metadata.regime) }
+    ...((raw?.regime ?? raw?.regimeType ?? metadata.regime)
+      ? {
+          regime: normalizeRegimeType(
+            raw?.regime ?? raw?.regimeType ?? metadata.regime,
+          ),
+        }
       : {}),
     ...(Number.isFinite(Number(raw?.regimeConfidence ?? raw?.regime_confidence))
-      ? { regimeConfidence: Number(raw?.regimeConfidence ?? raw?.regime_confidence) }
+      ? {
+          regimeConfidence: Number(
+            raw?.regimeConfidence ?? raw?.regime_confidence,
+          ),
+        }
       : {}),
     providerSymbol: metadata.providerSymbol,
     exchange: metadata.exchange,
@@ -252,7 +306,10 @@ function datasetFromRows(
 ) {
   const bars = normalizeBars(rows, {
     source: "tradingview-data",
-    sourceStatus: metadata.sourceStatus === "unavailable" ? "unavailable" : (metadata.sourceStatus ?? "delayed"),
+    sourceStatus:
+      metadata.sourceStatus === "unavailable"
+        ? "unavailable"
+        : (metadata.sourceStatus ?? "delayed"),
     dataQuality: metadata.dataQuality === "degraded" ? "degraded" : "real",
     providerSymbol: metadata.providerSymbol ?? candidate.providerSymbol,
     exchange: metadata.exchange ?? candidate.exchange,
@@ -295,7 +352,10 @@ function binanceKlinesBaseUrl() {
   );
 }
 
-function binanceKlineToBar(symbol: string, row: unknown[]): TradingViewHistoricalBar | null {
+function binanceKlineToBar(
+  symbol: string,
+  row: unknown[],
+): TradingViewHistoricalBar | null {
   const openTime = Number(row[0]);
   const open = Number(row[1]);
   const high = Number(row[2]);
@@ -363,10 +423,13 @@ async function fetchBinanceKlinesPage(input: {
 
     const payload = await response.json();
     return Array.isArray(payload) && payload.every((row) => Array.isArray(row))
-      ? payload as unknown[][]
+      ? (payload as unknown[][])
       : null;
   } catch (error) {
-    logger.debug({ symbol: input.symbol, err: error }, "Binance kline history request failed");
+    logger.debug(
+      { symbol: input.symbol, err: error },
+      "Binance kline history request failed",
+    );
     return null;
   } finally {
     clearTimeout(timeout);
@@ -378,7 +441,10 @@ async function fetchViaBinanceKlines(
   symbolInput: string,
   options: Required<TradingViewHistoryOptions>,
 ) {
-  if (!isBinanceMarket(market) || process.env.BINANCE_HISTORY_DISABLED === "true") {
+  if (
+    !isBinanceMarket(market) ||
+    process.env.BINANCE_HISTORY_DISABLED === "true"
+  ) {
     return null;
   }
 
@@ -389,7 +455,10 @@ async function fetchViaBinanceKlines(
   const startTime = Date.now() - requestedYearsMs;
   let endTime = Date.now();
   const rows: unknown[][] = [];
-  const maxPages = Math.max(1, Math.ceil(options.bars / BINANCE_KLINE_LIMIT) + 2);
+  const maxPages = Math.max(
+    1,
+    Math.ceil(options.bars / BINANCE_KLINE_LIMIT) + 2,
+  );
 
   for (let page = 0; page < maxPages && rows.length < options.bars; page += 1) {
     const pageRows = await fetchBinanceKlinesPage({
@@ -410,7 +479,10 @@ async function fetchViaBinanceKlines(
   const bars = rows
     .map((row) => binanceKlineToBar(symbol, row))
     .filter((bar): bar is TradingViewHistoricalBar => Boolean(bar))
-    .filter((bar) => Date.parse(bar.timestamp ?? `${bar.date}T00:00:00.000Z`) >= startTime)
+    .filter(
+      (bar) =>
+        Date.parse(bar.timestamp ?? `${bar.date}T00:00:00.000Z`) >= startTime,
+    )
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(-options.bars);
 
@@ -436,29 +508,33 @@ async function fetchViaBinanceKlines(
   });
 }
 
-async function fetchViaLocalModule(candidate: Candidate, options: Required<TradingViewHistoryOptions>) {
+async function fetchViaLocalModule(
+  candidate: Candidate,
+  options: Required<TradingViewHistoryOptions>,
+) {
   const mod = await loadLocalChartDataModule();
   if (!mod) return null;
 
-  const result = typeof mod.fetchHistoricalDataset === "function"
-    ? await mod.fetchHistoricalDataset({
-        symbol: candidate.symbol,
-        exchange: candidate.exchange,
-        market: candidate.exchange === "BINANCE" ? "crypto" : "stock",
-        interval: "1D",
-        bars: options.bars,
-        lookbackYears: options.lookbackYears,
-        timeoutMs: options.timeoutMs,
-      })
-    : await mod.fetchTradingViewCandlesForSymbol({
-        symbol: candidate.symbol,
-        exchange: candidate.exchange,
-        market: candidate.exchange === "BINANCE" ? "crypto" : "stock",
-        interval: "1D",
-        bars: options.bars,
-        lookbackYears: options.lookbackYears,
-        timeoutMs: options.timeoutMs,
-      });
+  const result =
+    typeof mod.fetchHistoricalDataset === "function"
+      ? await mod.fetchHistoricalDataset({
+          symbol: candidate.symbol,
+          exchange: candidate.exchange,
+          market: candidate.exchange === "BINANCE" ? "crypto" : "stock",
+          interval: "1D",
+          bars: options.bars,
+          lookbackYears: options.lookbackYears,
+          timeoutMs: options.timeoutMs,
+        })
+      : await mod.fetchTradingViewCandlesForSymbol({
+          symbol: candidate.symbol,
+          exchange: candidate.exchange,
+          market: candidate.exchange === "BINANCE" ? "crypto" : "stock",
+          interval: "1D",
+          bars: options.bars,
+          lookbackYears: options.lookbackYears,
+          timeoutMs: options.timeoutMs,
+        });
 
   const dataset = result?.dataset ?? result?.historicalDataset ?? result;
   const rows = Array.isArray(dataset?.bars)
@@ -466,17 +542,27 @@ async function fetchViaLocalModule(candidate: Candidate, options: Required<Tradi
     : Array.isArray(result?.bars)
       ? result.bars
       : [];
-  return datasetFromRows(candidate, options, rows, {
-    market: candidate.exchange,
-    sourceStatus: dataset?.sourceStatus ?? result?.sourceStatus,
-    dataQuality: dataset?.dataQuality ?? result?.dataQuality,
-    providerSymbol: dataset?.symbol ?? dataset?.providerSymbol ?? result?.symbol ?? candidate.providerSymbol,
-    exchange: dataset?.exchange ?? result?.exchange ?? candidate.exchange,
-  }, {
-    coverage: dataset?.coverage,
-    audit: dataset?.audit,
-    regimes: Array.isArray(dataset?.regimes) ? dataset.regimes : null,
-  });
+  return datasetFromRows(
+    candidate,
+    options,
+    rows,
+    {
+      market: candidate.exchange,
+      sourceStatus: dataset?.sourceStatus ?? result?.sourceStatus,
+      dataQuality: dataset?.dataQuality ?? result?.dataQuality,
+      providerSymbol:
+        dataset?.symbol ??
+        dataset?.providerSymbol ??
+        result?.symbol ??
+        candidate.providerSymbol,
+      exchange: dataset?.exchange ?? result?.exchange ?? candidate.exchange,
+    },
+    {
+      coverage: dataset?.coverage,
+      audit: dataset?.audit,
+      regimes: Array.isArray(dataset?.regimes) ? dataset.regimes : null,
+    },
+  );
 }
 
 function tradingViewRemoteBaseUrl() {
@@ -486,7 +572,10 @@ function tradingViewRemoteBaseUrl() {
   );
 }
 
-async function fetchViaRemote(candidate: Candidate, options: Required<TradingViewHistoryOptions>) {
+async function fetchViaRemote(
+  candidate: Candidate,
+  options: Required<TradingViewHistoryOptions>,
+) {
   const url = new URL(tradingViewRemoteBaseUrl());
   url.searchParams.set("symbol", candidate.symbol);
   if (candidate.exchange) url.searchParams.set("exchange", candidate.exchange);
@@ -516,21 +605,32 @@ async function fetchViaRemote(candidate: Candidate, options: Required<TradingVie
       const rows = Array.isArray(dataset?.bars)
         ? dataset.bars
         : Array.isArray(payload?.bars)
-        ? payload.bars
-        : Array.isArray(payload?.data)
-          ? payload.data
-          : [];
-      return datasetFromRows(candidate, options, rows, {
-        market: candidate.exchange,
-        sourceStatus: dataset?.sourceStatus ?? payload?.sourceStatus,
-        dataQuality: dataset?.dataQuality ?? payload?.dataQuality,
-        providerSymbol: dataset?.symbol ?? dataset?.providerSymbol ?? payload?.symbol ?? candidate.providerSymbol,
-        exchange: dataset?.exchange ?? payload?.exchange ?? candidate.exchange,
-      }, {
-        coverage: dataset?.coverage,
-        audit: dataset?.audit,
-        regimes: Array.isArray(dataset?.regimes) ? dataset.regimes : null,
-      });
+          ? payload.bars
+          : Array.isArray(payload?.data)
+            ? payload.data
+            : [];
+      return datasetFromRows(
+        candidate,
+        options,
+        rows,
+        {
+          market: candidate.exchange,
+          sourceStatus: dataset?.sourceStatus ?? payload?.sourceStatus,
+          dataQuality: dataset?.dataQuality ?? payload?.dataQuality,
+          providerSymbol:
+            dataset?.symbol ??
+            dataset?.providerSymbol ??
+            payload?.symbol ??
+            candidate.providerSymbol,
+          exchange:
+            dataset?.exchange ?? payload?.exchange ?? candidate.exchange,
+        },
+        {
+          coverage: dataset?.coverage,
+          audit: dataset?.audit,
+          regimes: Array.isArray(dataset?.regimes) ? dataset.regimes : null,
+        },
+      );
     }
 
     const text = await response.text();
@@ -538,7 +638,9 @@ async function fetchViaRemote(candidate: Candidate, options: Required<TradingVie
     const headers = headerLine?.split(",").map((header) => header.trim()) ?? [];
     const rows = lines.map((line) => {
       const cols = line.split(",");
-      return Object.fromEntries(headers.map((header, index) => [header, cols[index]]));
+      return Object.fromEntries(
+        headers.map((header, index) => [header, cols[index]]),
+      );
     });
 
     return datasetFromRows(candidate, options, rows, {
@@ -549,14 +651,21 @@ async function fetchViaRemote(candidate: Candidate, options: Required<TradingVie
       exchange: candidate.exchange,
     });
   } catch (error) {
-    logger.debug({ candidate, err: error }, "TradingView remote history request failed");
+    logger.debug(
+      { candidate, err: error },
+      "TradingView remote history request failed",
+    );
     return null;
   } finally {
     clearTimeout(timeout);
   }
 }
 
-function cacheKey(market: string, symbol: string, options: Required<TradingViewHistoryOptions>) {
+function cacheKey(
+  market: string,
+  symbol: string,
+  options: Required<TradingViewHistoryOptions>,
+) {
   return `${normalizeKey(market)}:${normalizeKey(symbol)}:${options.bars}:${options.lookbackYears}`;
 }
 
@@ -565,7 +674,11 @@ export async function loadTradingViewHistoricalBars(
   symbol: string,
   options: TradingViewHistoryOptions = {},
 ): Promise<TradingViewHistoricalBar[]> {
-  const dataset = await loadTradingViewHistoricalDataset(market, symbol, options);
+  const dataset = await loadTradingViewHistoricalDataset(
+    market,
+    symbol,
+    options,
+  );
   return dataset.bars as TradingViewHistoricalBar[];
 }
 
@@ -576,7 +689,10 @@ export async function loadTradingViewHistoricalDataset(
 ): Promise<HistoricalDataset> {
   const resolvedOptions = {
     bars: Math.max(2, Number(options.bars ?? DEFAULT_BARS)),
-    lookbackYears: Math.max(1, Number(options.lookbackYears ?? DEFAULT_LOOKBACK_YEARS)),
+    lookbackYears: Math.max(
+      1,
+      Number(options.lookbackYears ?? DEFAULT_LOOKBACK_YEARS),
+    ),
     minBars: Math.max(1, Number(options.minBars ?? 60)),
     timeoutMs: Math.max(1_000, Number(options.timeoutMs ?? DEFAULT_TIMEOUT_MS)),
   };
@@ -587,22 +703,35 @@ export async function loadTradingViewHistoricalDataset(
     return cached.dataset;
   }
 
-  const binanceDataset = await fetchViaBinanceKlines(market, symbol, resolvedOptions);
+  const binanceDataset = await fetchViaBinanceKlines(
+    market,
+    symbol,
+    resolvedOptions,
+  );
   if (binanceDataset && binanceDataset.bars.length >= resolvedOptions.minBars) {
-    HISTORY_CACHE.set(key, { expiresAt: Date.now() + HISTORY_CACHE_TTL_MS, dataset: binanceDataset });
+    HISTORY_CACHE.set(key, {
+      expiresAt: Date.now() + HISTORY_CACHE_TTL_MS,
+      dataset: binanceDataset,
+    });
     return binanceDataset;
   }
 
   for (const candidate of buildCandidates(symbol, market)) {
     const localDataset = await fetchViaLocalModule(candidate, resolvedOptions);
     if (localDataset && localDataset.bars.length >= resolvedOptions.minBars) {
-      HISTORY_CACHE.set(key, { expiresAt: Date.now() + HISTORY_CACHE_TTL_MS, dataset: localDataset });
+      HISTORY_CACHE.set(key, {
+        expiresAt: Date.now() + HISTORY_CACHE_TTL_MS,
+        dataset: localDataset,
+      });
       return localDataset;
     }
 
     const remoteDataset = await fetchViaRemote(candidate, resolvedOptions);
     if (remoteDataset && remoteDataset.bars.length >= resolvedOptions.minBars) {
-      HISTORY_CACHE.set(key, { expiresAt: Date.now() + HISTORY_CACHE_TTL_MS, dataset: remoteDataset });
+      HISTORY_CACHE.set(key, {
+        expiresAt: Date.now() + HISTORY_CACHE_TTL_MS,
+        dataset: remoteDataset,
+      });
       return remoteDataset;
     }
   }
@@ -614,6 +743,9 @@ export async function loadTradingViewHistoricalDataset(
     requestedYears: resolvedOptions.lookbackYears,
     requestedBars: resolvedOptions.bars,
   });
-  HISTORY_CACHE.set(key, { expiresAt: Date.now() + Math.min(HISTORY_CACHE_TTL_MS, 60_000), dataset: emptyDataset });
+  HISTORY_CACHE.set(key, {
+    expiresAt: Date.now() + Math.min(HISTORY_CACHE_TTL_MS, 60_000),
+    dataset: emptyDataset,
+  });
   return emptyDataset;
 }

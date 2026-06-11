@@ -26,8 +26,14 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { canonicalize } from "./canonicalize.js";
 import { hashSync } from "./hash.js";
-import { traceExecution, createEngineSteps, type TraceResult, type StepDef, type EngineFn } from "./trace.js";
-import { replayAndValidate, type ReplayResult } from "./replay.js";
+import { type ReplayResult, replayAndValidate } from "./replay.js";
+import {
+  type EngineFn,
+  type StepDef,
+  type TraceResult,
+  createEngineSteps,
+  traceExecution,
+} from "./trace.js";
 
 const TRACE_DIR = ".signal/trace";
 
@@ -154,7 +160,11 @@ export function audit(input: unknown, config: TraceConfig): AuditResult {
       inputHash,
       outputHash,
       fingerprint,
-      artifacts: { runJson: runJsonPath, fingerprintJson: fingerprintJsonPath, replayJson: replayJsonPath },
+      artifacts: {
+        runJson: runJsonPath,
+        fingerprintJson: fingerprintJsonPath,
+        replayJson: replayJsonPath,
+      },
       error: replayResult.error ?? "Replay verification failed — hard stop",
     };
   }
@@ -166,7 +176,11 @@ export function audit(input: unknown, config: TraceConfig): AuditResult {
     inputHash,
     outputHash,
     fingerprint,
-    artifacts: { runJson: runJsonPath, fingerprintJson: fingerprintJsonPath, replayJson: replayJsonPath },
+    artifacts: {
+      runJson: runJsonPath,
+      fingerprintJson: fingerprintJsonPath,
+      replayJson: replayJsonPath,
+    },
   };
 }
 

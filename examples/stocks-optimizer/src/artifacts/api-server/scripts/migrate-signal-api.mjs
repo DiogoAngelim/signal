@@ -31,7 +31,9 @@ try {
 
     if (existing.rowCount) {
       if (existing.rows[0].checksum !== migration.checksum) {
-        throw new Error(`Migration checksum drift detected for ${migration.version}.`);
+        throw new Error(
+          `Migration checksum drift detected for ${migration.version}.`,
+        );
       }
       continue;
     }
@@ -62,12 +64,14 @@ async function loadMigrations() {
     .filter((file) => /^\d+_.+\.sql$/.test(file))
     .sort();
 
-  return Promise.all(files.map(async (file) => {
-    const sql = await fs.readFile(path.join(migrationsDir, file), "utf8");
-    return {
-      version: file.replace(/\.sql$/, ""),
-      sql,
-      checksum: crypto.createHash("sha256").update(sql).digest("hex"),
-    };
-  }));
+  return Promise.all(
+    files.map(async (file) => {
+      const sql = await fs.readFile(path.join(migrationsDir, file), "utf8");
+      return {
+        version: file.replace(/\.sql$/, ""),
+        sql,
+        checksum: crypto.createHash("sha256").update(sql).digest("hex"),
+      };
+    }),
+  );
 }

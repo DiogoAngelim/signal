@@ -1,6 +1,6 @@
-import type { FastifyInstance } from "fastify";
 import type { SignalCapabilities } from "@signal/protocol";
-import { createReferenceServer, createReferenceRuntime } from "./lib/runtime";
+import type { FastifyInstance } from "fastify";
+import { createReferenceRuntime, createReferenceServer } from "./lib/runtime";
 import { registerHealthRoute } from "./routes/health";
 import { registerObservedEventsRoute } from "./routes/observed-events";
 
@@ -14,7 +14,7 @@ export async function startReferenceServer(): Promise<{
   registerHealthRoute(app);
   registerObservedEventsRoute(app, subscribers);
 
-  const port = Number(process.env["SIGNAL_HTTP_PORT"] ?? 3001);
+  const port = Number(process.env.SIGNAL_HTTP_PORT ?? 3001);
 
   await app.listen({ port, host: "127.0.0.1" });
 
@@ -38,18 +38,18 @@ async function main() {
         capabilities: {
           queries: capabilities.queries.map((entry) => entry.name),
           mutations: capabilities.mutations.map((entry) => entry.name),
-          publishedEvents: capabilities.publishedEvents.map((entry) => entry.name),
+          publishedEvents: capabilities.publishedEvents.map(
+            (entry) => entry.name,
+          ),
         },
       },
       null,
-      2
-    )
+      2,
+    ),
   );
 }
-
 
 main().catch((error) => {
   console.error(error);
   process.exit(1);
 });
-

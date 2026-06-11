@@ -1,12 +1,12 @@
 import {
-  evaluateJudgement,
   type JudgementOutcome,
   type JudgementResult,
   type JudgementTrace,
+  evaluateJudgement,
 } from "../../../signal-framework/judgement/engine";
 import {
-  buildStockSurvivalMemory,
   type StockSurvivalMemoryDiagnostic,
+  buildStockSurvivalMemory,
 } from "./survival-memory-adapter";
 
 export type StockJudgementReadiness = {
@@ -102,23 +102,27 @@ export type StockJudgementExposureGate = {
   reasons: string[];
 };
 
-export function evaluateStockJudgement(input: StockJudgementInput): StockJudgementResult {
-  const survivalMemory = input.survivalMemory ?? buildStockSurvivalMemory({
-    market: input.market,
-    symbol: input.symbol,
-    rawAction: input.rawAction,
-    setupQuality: input.setupQuality,
-    riskPressure: input.riskPressure,
-    volatilityPct: input.volatilityPct,
-    liquidityScore: input.liquidityScore,
-    expectedEdgePct: input.expectedEdgePct,
-    rawSuggestedExposurePct: input.rawSuggestedExposurePct,
-    maxPositionPct: input.readiness.maxPositionPct,
-    readiness: input.readiness,
-    trades: input.previousTrades,
-    strategyHistory: input.strategyHistory,
-    requireExplicitSurvivalFields: true,
-  });
+export function evaluateStockJudgement(
+  input: StockJudgementInput,
+): StockJudgementResult {
+  const survivalMemory =
+    input.survivalMemory ??
+    buildStockSurvivalMemory({
+      market: input.market,
+      symbol: input.symbol,
+      rawAction: input.rawAction,
+      setupQuality: input.setupQuality,
+      riskPressure: input.riskPressure,
+      volatilityPct: input.volatilityPct,
+      liquidityScore: input.liquidityScore,
+      expectedEdgePct: input.expectedEdgePct,
+      rawSuggestedExposurePct: input.rawSuggestedExposurePct,
+      maxPositionPct: input.readiness.maxPositionPct,
+      readiness: input.readiness,
+      trades: input.previousTrades,
+      strategyHistory: input.strategyHistory,
+      requireExplicitSurvivalFields: true,
+    });
   const judgement = evaluateJudgement({
     currentState: currentStateFor(input),
     proposedDecision: {
@@ -166,7 +170,10 @@ export function evaluateStockJudgement(input: StockJudgementInput): StockJudgeme
   );
 }
 
-export function judgementExposureGate(judgement: JudgementResult | null | undefined, exposurePct: number): StockJudgementExposureGate {
+export function judgementExposureGate(
+  judgement: JudgementResult | null | undefined,
+  exposurePct: number,
+): StockJudgementExposureGate {
   if (!judgement) {
     return {
       allowsNewExposure: true,
@@ -181,9 +188,10 @@ export function judgementExposureGate(judgement: JudgementResult | null | undefi
   const blocksNewExposure = judgement.status === "blocked";
   const requiresReview = judgement.status === "review_required";
   const allowsNewExposure = !blocksNewExposure && !requiresReview;
-  const confidenceRatio = judgement.rawConfidence > 0
-    ? clamp(judgement.adjustedConfidence / judgement.rawConfidence, 0, 1)
-    : 0;
+  const confidenceRatio =
+    judgement.rawConfidence > 0
+      ? clamp(judgement.adjustedConfidence / judgement.rawConfidence, 0, 1)
+      : 0;
   const exposureMultiplier = allowsNewExposure
     ? judgement.status === "trusted"
       ? confidenceRatio
@@ -201,12 +209,19 @@ export function judgementExposureGate(judgement: JudgementResult | null | undefi
   };
 }
 
-export function judgementTrustForAgency(readinessTrust: number, judgement: JudgementResult | null | undefined) {
+export function judgementTrustForAgency(
+  readinessTrust: number,
+  judgement: JudgementResult | null | undefined,
+) {
   const baseTrust = clamp(readinessTrust);
   if (!judgement) return baseTrust;
-  if (judgement.status === "trusted") return roundPct(Math.max(baseTrust, judgement.trust));
-  if (judgement.status === "cautious") return roundPct(Math.min(baseTrust, judgement.trust));
-  return roundPct(Math.min(baseTrust, judgement.trust, judgement.adjustedConfidence));
+  if (judgement.status === "trusted")
+    return roundPct(Math.max(baseTrust, judgement.trust));
+  if (judgement.status === "cautious")
+    return roundPct(Math.min(baseTrust, judgement.trust));
+  return roundPct(
+    Math.min(baseTrust, judgement.trust, judgement.adjustedConfidence),
+  );
 }
 
 export function judgementReasons(judgement: JudgementResult) {
@@ -221,20 +236,45 @@ function applySurvivalMemoryToJudgement(
   survivalMemory: StockSurvivalMemoryDiagnostic,
   opensNewExposure: boolean,
 ): StockJudgementResult {
-  if (!opensNewExposure || survivalMemory.recordCount === 0 || survivalMemory.scarCount === 0) {
+  if (
+    !opensNewExposure ||
+    survivalMemory.recordCount === 0 ||
+    survivalMemory.scarCount === 0
+  ) {
     return { ...judgement, survivalMemory };
   }
 
   const penalty = clamp(survivalMemory.confidencePenalty, 0, 45);
   const adjustedConfidence = clamp(
-    Math.min(judgement.adjustedConfidence - penalty, survivalMemory.survivalConfidence),
+    Math.min(
+      judgement.adjustedConfidence - penalty,
+      survivalMemory.survivalConfidence,
+    ),
   );
-  const trust = clamp(Math.min(judgement.trust - penalty * 0.6, survivalMemory.survivalConfidence));
-  const reliability = clamp(Math.min(judgement.reliability, 100 - survivalMemory.averageSurvivalCost * 0.7));
-  const outcomeStability = clamp(Math.min(judgement.outcomeStability, 100 - survivalMemory.averageSurvivalCost * 0.8));
-  const overfitRisk = clamp(Math.max(judgement.overfitRisk, survivalMemory.averageSurvivalCost));
+  const trust = clamp(
+    Math.min(
+      judgement.trust - penalty * 0.6,
+      survivalMemory.survivalConfidence,
+    ),
+  );
+  const reliability = clamp(
+    Math.min(
+      judgement.reliability,
+      100 - survivalMemory.averageSurvivalCost * 0.7,
+    ),
+  );
+  const outcomeStability = clamp(
+    Math.min(
+      judgement.outcomeStability,
+      100 - survivalMemory.averageSurvivalCost * 0.8,
+    ),
+  );
+  const overfitRisk = clamp(
+    Math.max(judgement.overfitRisk, survivalMemory.averageSurvivalCost),
+  );
   const status: JudgementResult["status"] =
-    survivalMemory.recommendation === "wait" && survivalMemory.exposureMultiplier === 0
+    survivalMemory.recommendation === "wait" &&
+    survivalMemory.exposureMultiplier === 0
       ? "blocked"
       : survivalMemory.recommendation === "wait"
         ? "review_required"
@@ -280,9 +320,14 @@ function currentStateFor(input: StockJudgementInput) {
     volatilityPct: input.volatilityPct,
     liquidityScore: input.liquidityScore ?? 70,
     readinessStage: input.readiness.stage ?? "Unknown",
-    readinessScore: input.readiness.readinessScore ?? input.readiness.calibratedConfidence ?? input.calibratedConfidence,
-    benchmarkExcessPct: input.readiness.benchmarks?.excessReturnAfterCostsPct ?? 0,
-    liveSignalScore: input.readiness.components?.liveSignalConsistency?.score ?? 0,
+    readinessScore:
+      input.readiness.readinessScore ??
+      input.readiness.calibratedConfidence ??
+      input.calibratedConfidence,
+    benchmarkExcessPct:
+      input.readiness.benchmarks?.excessReturnAfterCostsPct ?? 0,
+    liveSignalScore:
+      input.readiness.components?.liveSignalConsistency?.score ?? 0,
     parameterPassRate: input.readiness.parameterStability?.passRate ?? 0,
     sizingDecision: input.sizingResult?.decision ?? "unknown",
     sizingMode: input.sizingResult?.mode ?? "none",
@@ -292,8 +337,16 @@ function currentStateFor(input: StockJudgementInput) {
 function tradeOutcomes(input: StockJudgementInput): JudgementOutcome[] {
   return safeArray(input.previousTrades).map((trade, index) => {
     const record = objectOrEmpty(trade);
-    const returnPct = firstNumber(record.returnPct, record.return_pct, record.profitPct, record.pnlPct, 0) as number;
-    const symbol = String(record.symbol ?? record.ticker ?? input.symbol ?? `trade-${index}`).toUpperCase();
+    const returnPct = firstNumber(
+      record.returnPct,
+      record.return_pct,
+      record.profitPct,
+      record.pnlPct,
+      0,
+    ) as number;
+    const symbol = String(
+      record.symbol ?? record.ticker ?? input.symbol ?? `trade-${index}`,
+    ).toUpperCase();
 
     return {
       id: String(record.id ?? `${symbol}-${index}`),
@@ -305,23 +358,38 @@ function tradeOutcomes(input: StockJudgementInput): JudgementOutcome[] {
         riskPressure: firstNumber(record.riskPressure, input.riskPressure),
         volatilityPct: firstNumber(record.volatilityPct, input.volatilityPct),
         readinessStage: input.readiness.stage ?? "Unknown",
-        benchmarkExcessPct: input.readiness.benchmarks?.excessReturnAfterCostsPct ?? 0,
+        benchmarkExcessPct:
+          input.readiness.benchmarks?.excessReturnAfterCostsPct ?? 0,
       },
       decision: {
         type: "stock-signal",
         action: record.signalAction ?? record.action ?? "Buy",
-        expectedEdgePct: firstNumber(record.expectedEdgePct, returnPct, input.expectedEdgePct),
+        expectedEdgePct: firstNumber(
+          record.expectedEdgePct,
+          returnPct,
+          input.expectedEdgePct,
+        ),
       },
       action: {
         kind: "open_exposure",
-        requestedExposurePct: firstNumber(record.entryExposure, record.exposurePct, input.rawSuggestedExposurePct),
+        requestedExposurePct: firstNumber(
+          record.entryExposure,
+          record.exposurePct,
+          input.rawSuggestedExposurePct,
+        ),
       },
       outcome: {
         returnPct,
         success: returnPct > 0 ? true : returnPct < 0 ? false : null,
-        label: returnPct > 0 ? "success" : returnPct < 0 ? "failure" : "neutral",
+        label:
+          returnPct > 0 ? "success" : returnPct < 0 ? "failure" : "neutral",
       },
-      confidence: firstNumber(record.confidence, record.signalConfidence, record.rawConfidence, input.rawConfidence),
+      confidence: firstNumber(
+        record.confidence,
+        record.signalConfidence,
+        record.rawConfidence,
+        input.rawConfidence,
+      ),
       metadata: {
         source: "previous-trade",
         survivalCost: firstNumber(record.survivalCost),
@@ -333,41 +401,50 @@ function tradeOutcomes(input: StockJudgementInput): JudgementOutcome[] {
   });
 }
 
-function strategyHistoryOutcomes(input: StockJudgementInput): JudgementOutcome[] {
+function strategyHistoryOutcomes(
+  input: StockJudgementInput,
+): JudgementOutcome[] {
   return safeArray(input.strategyHistory).flatMap((entry, index) => {
     const record = objectOrEmpty(entry);
-    const returnPct = firstNumber(record.returnPct, record.return_pct, record.portfolioReturnPct, record.changePct);
+    const returnPct = firstNumber(
+      record.returnPct,
+      record.return_pct,
+      record.portfolioReturnPct,
+      record.changePct,
+    );
     if (returnPct == null) return [];
 
-    return [{
-      id: String(record.id ?? record.date ?? `history-${index}`),
-      state: {
-        market: input.market,
-        rawAction: input.rawAction,
-        readinessStage: input.readiness.stage ?? "Unknown",
-        setupQuality: input.setupQuality,
-        riskPressure: input.riskPressure,
-        volatilityPct: input.volatilityPct,
-      },
-      decision: {
-        type: "strategy-history",
+    return [
+      {
+        id: String(record.id ?? record.date ?? `history-${index}`),
+        state: {
+          market: input.market,
+          rawAction: input.rawAction,
+          readinessStage: input.readiness.stage ?? "Unknown",
+          setupQuality: input.setupQuality,
+          riskPressure: input.riskPressure,
+          volatilityPct: input.volatilityPct,
+        },
+        decision: {
+          type: "strategy-history",
+          confidence: firstNumber(record.confidence, input.rawConfidence),
+        },
+        action: {
+          kind: actionKindFor(input.rawAction),
+          requestedExposurePct: input.rawSuggestedExposurePct,
+        },
+        outcome: {
+          returnPct,
+          success: returnPct > 0 ? true : returnPct < 0 ? false : null,
+        },
         confidence: firstNumber(record.confidence, input.rawConfidence),
+        metadata: {
+          source: "strategy-history",
+          survivalCost: firstNumber(record.survivalCost),
+          outcomeClass: record.outcomeClass,
+        },
       },
-      action: {
-        kind: actionKindFor(input.rawAction),
-        requestedExposurePct: input.rawSuggestedExposurePct,
-      },
-      outcome: {
-        returnPct,
-        success: returnPct > 0 ? true : returnPct < 0 ? false : null,
-      },
-      confidence: firstNumber(record.confidence, input.rawConfidence),
-      metadata: {
-        source: "strategy-history",
-        survivalCost: firstNumber(record.survivalCost),
-        outcomeClass: record.outcomeClass,
-      },
-    }];
+    ];
   });
 }
 
@@ -375,89 +452,117 @@ function forwardShadowTraces(input: StockJudgementInput): JudgementTrace[] {
   const shadow = input.forwardShadow;
   if (!shadow) return [];
 
-  const evaluated = firstNumber(shadow.evaluatedSignalCount, shadow.evaluatedSignals, 0) as number;
+  const evaluated = firstNumber(
+    shadow.evaluatedSignalCount,
+    shadow.evaluatedSignals,
+    0,
+  ) as number;
   if (evaluated <= 0) return [];
 
-  const averageReturnPct = firstNumber(shadow.averageReturnPct, shadow.meanReturnPct, 0) as number;
-  return [{
-    state: {
-      market: input.market,
-      rawAction: input.rawAction,
-      readinessStage: input.readiness.stage ?? "Unknown",
-      setupQuality: input.setupQuality,
-      riskPressure: input.riskPressure,
-    },
-    decision: {
-      type: "forward-shadow",
-      confidence: input.calibratedConfidence,
-    },
-    action: {
-      kind: actionKindFor(input.rawAction),
-    },
-    outcome: {
-      returnPct: averageReturnPct,
-      success: averageReturnPct > 0 ? true : averageReturnPct < 0 ? false : null,
-    },
-    confidence: input.calibratedConfidence,
-    metadata: { source: "forward-shadow", sampleSize: evaluated },
-  }];
-}
-
-function opportunityTraces(input: StockJudgementInput): JudgementTrace[] {
-  return safeArray(input.opportunityCandidates).slice(0, 5).map((candidate, index) => {
-    const record = objectOrEmpty(candidate);
-    const score = firstNumber(record.candidateScore, record.score, 0) as number;
-    return {
-      id: String(record.symbol ?? record.id ?? `candidate-${index}`),
+  const averageReturnPct = firstNumber(
+    shadow.averageReturnPct,
+    shadow.meanReturnPct,
+    0,
+  ) as number;
+  return [
+    {
       state: {
         market: input.market,
-        symbol: record.symbol ?? input.symbol,
         rawAction: input.rawAction,
-        setupQuality: firstNumber(record.candidateScore, input.setupQuality),
+        readinessStage: input.readiness.stage ?? "Unknown",
+        setupQuality: input.setupQuality,
         riskPressure: input.riskPressure,
       },
       decision: {
-        type: "opportunity-candidate",
-        confidence: score,
+        type: "forward-shadow",
+        confidence: input.calibratedConfidence,
       },
       action: {
         kind: actionKindFor(input.rawAction),
       },
       outcome: {
-        returnPct: firstNumber(record.expectedOutcome, record.expectedMove, input.expectedEdgePct),
-        success: score >= 60,
+        returnPct: averageReturnPct,
+        success:
+          averageReturnPct > 0 ? true : averageReturnPct < 0 ? false : null,
       },
-      confidence: score,
-      metadata: { source: "opportunity-candidate" },
-    };
-  });
+      confidence: input.calibratedConfidence,
+      metadata: { source: "forward-shadow", sampleSize: evaluated },
+    },
+  ];
+}
+
+function opportunityTraces(input: StockJudgementInput): JudgementTrace[] {
+  return safeArray(input.opportunityCandidates)
+    .slice(0, 5)
+    .map((candidate, index) => {
+      const record = objectOrEmpty(candidate);
+      const score = firstNumber(
+        record.candidateScore,
+        record.score,
+        0,
+      ) as number;
+      return {
+        id: String(record.symbol ?? record.id ?? `candidate-${index}`),
+        state: {
+          market: input.market,
+          symbol: record.symbol ?? input.symbol,
+          rawAction: input.rawAction,
+          setupQuality: firstNumber(record.candidateScore, input.setupQuality),
+          riskPressure: input.riskPressure,
+        },
+        decision: {
+          type: "opportunity-candidate",
+          confidence: score,
+        },
+        action: {
+          kind: actionKindFor(input.rawAction),
+        },
+        outcome: {
+          returnPct: firstNumber(
+            record.expectedOutcome,
+            record.expectedMove,
+            input.expectedEdgePct,
+          ),
+          success: score >= 60,
+        },
+        confidence: score,
+        metadata: { source: "opportunity-candidate" },
+      };
+    });
 }
 
 function agencyTraces(input: StockJudgementInput): JudgementTrace[] {
   const agency = input.agencyResult;
   if (!agency) return [];
 
-  return [{
-    state: {
-      market: input.market,
-      symbol: input.symbol,
-      rawAction: input.rawAction,
-      setupQuality: input.setupQuality,
-      riskPressure: input.riskPressure,
-    },
-    decision: {
-      type: "agency-audit",
+  return [
+    {
+      state: {
+        market: input.market,
+        symbol: input.symbol,
+        rawAction: input.rawAction,
+        setupQuality: input.setupQuality,
+        riskPressure: input.riskPressure,
+      },
+      decision: {
+        type: "agency-audit",
+        confidence: input.calibratedConfidence,
+      },
+      action: {
+        kind: actionKindFor(input.rawAction),
+      },
+      outcome: {
+        label:
+          agency.allowed === true
+            ? "success"
+            : agency.requiresApproval === true
+              ? "partial"
+              : "failure",
+      },
       confidence: input.calibratedConfidence,
+      metadata: { source: "agency-audit" },
     },
-    action: {
-      kind: actionKindFor(input.rawAction),
-    },
-    outcome: {
-      label: agency.allowed === true ? "success" : agency.requiresApproval === true ? "partial" : "failure",
-    },
-    confidence: input.calibratedConfidence,
-    metadata: { source: "agency-audit" },
-  }];
+  ];
 }
 
 function overfitRiskFor(readiness: StockJudgementReadiness) {
@@ -469,16 +574,25 @@ function overfitRiskFor(readiness: StockJudgementReadiness) {
   );
   const concentration = readiness.concentration?.outlierDependent
     ? Math.max(
-        firstNumber(readiness.concentration.top1TradeContributionPct, 0) as number,
-        firstNumber(readiness.concentration.top5TradeContributionPct, 0) as number,
+        firstNumber(
+          readiness.concentration.top1TradeContributionPct,
+          0,
+        ) as number,
+        firstNumber(
+          readiness.concentration.top5TradeContributionPct,
+          0,
+        ) as number,
       )
     : 0;
   const walkForwardRisk = readiness.walkForward?.stable === false ? 70 : 0;
-  const parameterRisk = readiness.parameterStability?.stable === false
-    ? 100 - (firstNumber(readiness.parameterStability.passRate, 0) as number)
-    : 0;
+  const parameterRisk =
+    readiness.parameterStability?.stable === false
+      ? 100 - (firstNumber(readiness.parameterStability.passRate, 0) as number)
+      : 0;
 
-  return clamp(Math.max(explicit ?? 0, concentration, walkForwardRisk, parameterRisk));
+  return clamp(
+    Math.max(explicit ?? 0, concentration, walkForwardRisk, parameterRisk),
+  );
 }
 
 function actionKindFor(action: string) {
@@ -493,7 +607,7 @@ function safeArray(value: unknown) {
 
 function objectOrEmpty(value: unknown) {
   return value && typeof value === "object" && !Array.isArray(value)
-    ? value as Record<string, unknown>
+    ? (value as Record<string, unknown>)
     : {};
 }
 

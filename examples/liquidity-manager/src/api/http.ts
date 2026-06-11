@@ -10,11 +10,14 @@ export async function toRequest(req: IncomingMessage): Promise<Request> {
       headers.set(key, value);
     }
   }
-  const body = req.method === "GET" || req.method === "HEAD" ? undefined : (await readBody(req)).toString();
+  const body =
+    req.method === "GET" || req.method === "HEAD"
+      ? undefined
+      : (await readBody(req)).toString();
   return new Request(`${origin}${req.url ?? "/"}`, {
     method: req.method,
     headers,
-    body
+    body,
   });
 }
 
@@ -24,11 +27,14 @@ export function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
   headers.set("Cache-Control", "no-store");
   return new Response(JSON.stringify(body), {
     ...init,
-    headers
+    headers,
   });
 }
 
-export async function writeResponse(res: ServerResponse, response: Response): Promise<void> {
+export async function writeResponse(
+  res: ServerResponse,
+  response: Response,
+): Promise<void> {
   res.statusCode = response.status;
   response.headers.forEach((value, key) => {
     res.setHeader(key, value);

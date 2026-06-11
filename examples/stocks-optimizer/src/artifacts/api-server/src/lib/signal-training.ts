@@ -119,8 +119,8 @@ function mapRowToState(
     symbol: String(row.symbol ?? fallback.symbol),
     lastSignalAction:
       row.last_signal_action === "Buy" ||
-        row.last_signal_action === "Sell" ||
-        row.last_signal_action === "Hold"
+      row.last_signal_action === "Sell" ||
+      row.last_signal_action === "Hold"
         ? row.last_signal_action
         : fallback.lastSignalAction,
     lastSignalConfidence: Math.round(
@@ -338,11 +338,10 @@ function recomputeAdaptiveState(
     sampleCredibility(state.holdObservations);
   const overallBias =
     totalCredibility > 0
-      ? (
-          (buyRate - 0.5) * buyCredibility +
+      ? ((buyRate - 0.5) * buyCredibility +
           (sellRate - 0.5) * sellCredibility +
-          (holdRate - 0.5) * sampleCredibility(state.holdObservations)
-        ) / totalCredibility
+          (holdRate - 0.5) * sampleCredibility(state.holdObservations)) /
+        totalCredibility
       : 0;
   state.confidenceBias = Number(clamp(overallBias * 28, -12, 12).toFixed(4));
 
@@ -484,10 +483,10 @@ export async function getSignalTrainingState(
 
     state = result.rows[0]
       ? mapRowToState(
-        result.rows[0] as Record<string, unknown>,
-        normalizedMarket,
-        normalizedSymbol,
-      )
+          result.rows[0] as Record<string, unknown>,
+          normalizedMarket,
+          normalizedSymbol,
+        )
       : createDefaultState(normalizedMarket, normalizedSymbol);
   } catch (error) {
     logTrainingPersistenceWarning(
@@ -588,8 +587,8 @@ export async function recordSignalSnapshot(input: {
   const signalReturnPercent =
     state.lastSignalEntryPrice > 0
       ? ((currentPrice - state.lastSignalEntryPrice) /
-        state.lastSignalEntryPrice) *
-      100
+          state.lastSignalEntryPrice) *
+        100
       : 0;
 
   return {

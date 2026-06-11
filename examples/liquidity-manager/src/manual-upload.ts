@@ -19,20 +19,33 @@ export type ManualUploadParseResult =
 
 const HEADER_ALIASES = {
   date: ["date", "data", "transaction_date", "posted_date", "dt"],
-  description: ["description", "descricao", "descrição", "memo", "merchant", "name", "title"],
+  description: [
+    "description",
+    "descricao",
+    "descrição",
+    "memo",
+    "merchant",
+    "name",
+    "title",
+  ],
   amount: ["amount", "valor", "value", "transaction_amount", "quantia"],
   category: ["category", "categoria", "type_category"],
   type: ["type", "tipo", "direction", "debit_credit"],
-  balance: ["balance", "saldo", "running_balance"]
+  balance: ["balance", "saldo", "running_balance"],
 } as const;
 
 export function parseManualCsv(csv: string): ManualUploadParseResult {
-  const rows = parseCsvRows(csv).filter((row) => row.some((cell) => cell.trim()));
+  const rows = parseCsvRows(csv).filter((row) =>
+    row.some((cell) => cell.trim()),
+  );
   if (rows.length < 2) {
-    return { ok: false, errors: ["CSV must include a header row and at least one transaction."] };
+    return {
+      ok: false,
+      errors: ["CSV must include a header row and at least one transaction."],
+    };
   }
 
-  const headers = rows[0]!.map(normalizeHeader);
+  const headers = rows[0]?.map(normalizeHeader);
   const dateIndex = findHeader(headers, HEADER_ALIASES.date);
   const descriptionIndex = findHeader(headers, HEADER_ALIASES.description);
   const amountIndex = findHeader(headers, HEADER_ALIASES.amount);
@@ -69,7 +82,8 @@ export function parseManualCsv(csv: string): ManualUploadParseResult {
 
     const type = typeIndex >= 0 ? row[typeIndex]?.toLowerCase() : "";
     const amount = normalizeSignedAmount(parsedAmount, type);
-    const balance = balanceIndex >= 0 ? parseMoney(row[balanceIndex]) : Number.NaN;
+    const balance =
+      balanceIndex >= 0 ? parseMoney(row[balanceIndex]) : Number.NaN;
     if (Number.isFinite(balance)) currentBalance = balance;
 
     transactions.push({
@@ -79,9 +93,12 @@ export function parseManualCsv(csv: string): ManualUploadParseResult {
       description,
       date,
       metadata: {
-        category: categoryIndex >= 0 ? row[categoryIndex]?.trim() || undefined : undefined,
-        importedRow: index + 2
-      }
+        category:
+          categoryIndex >= 0
+            ? row[categoryIndex]?.trim() || undefined
+            : undefined,
+        importedRow: index + 2,
+      },
     });
   });
 
@@ -99,13 +116,13 @@ function parseCsvRows(csv: string): string[][] {
     const char = csv[index]!;
     const next = csv[index + 1];
 
-    if (char === "\"" && quoted && next === "\"") {
-      cell += "\"";
+    if (char === '"' && quoted && next === '"') {
+      cell += '"';
       index += 1;
       continue;
     }
 
-    if (char === "\"") {
+    if (char === '"') {
       quoted = !quoted;
       continue;
     }
@@ -152,7 +169,9 @@ function parseDate(value: string | undefined): Date | undefined {
   if (!value) return undefined;
   const trimmed = value.trim();
   const brMatch = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(trimmed);
-  const normalized = brMatch ? `${brMatch[3]}-${brMatch[2]!.padStart(2, "0")}-${brMatch[1]!.padStart(2, "0")}` : trimmed;
+  const normalized = brMatch
+    ? `${brMatch[3]}-${brMatch[2]?.padStart(2, "0")}-${brMatch[1]?.padStart(2, "0")}`
+    : trimmed;
   const date = new Date(`${normalized}T12:00:00.000Z`);
   return Number.isNaN(date.getTime()) ? undefined : date;
 }
@@ -170,9 +189,22 @@ function parseMoney(value: string | undefined): number {
   return Number(normalized);
 }
 
-function normalizeSignedAmount(amount: number, type: string | undefined): number {
+function normalizeSignedAmount(
+  amount: number,
+  type: string | undefined,
+): number {
   const typeValue = type?.toLowerCase() ?? "";
-  if (["debit", "debito", "débito", "outflow", "expense", "withdrawal"].includes(typeValue)) return -Math.abs(amount);
-  if (["credit", "credito", "crédito", "inflow", "income", "deposit"].includes(typeValue)) return Math.abs(amount);
+  if (
+    ["debit", "debito", "débito", "outflow", "expense", "withdrawal"].includes(
+      typeValue,
+    )
+  )
+    return -Math.abs(amount);
+  if (
+    ["credit", "credito", "crédito", "inflow", "income", "deposit"].includes(
+      typeValue,
+    )
+  )
+    return Math.abs(amount);
   return amount;
 }

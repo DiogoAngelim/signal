@@ -1,26 +1,16 @@
-
-
-
-
-
-
-
 import { SignalConflictError, SignalVersionMismatchError } from "../errors";
 import type { DocumentId, SignalDB } from "../types";
 
 interface Document {
   _id: DocumentId;
-  [key: string]: any;
+  _version: number;
+  _createdAt: number;
+  _updatedAt?: number;
+  [key: string]: unknown;
 }
-
-
-
 
 export class MemoryAdapter implements SignalDB {
   private collections = new Map<string, Map<DocumentId, Document>>();
-
-  
-
 
   initCollection(name: string): void {
     if (!this.collections.has(name)) {
@@ -28,19 +18,22 @@ export class MemoryAdapter implements SignalDB {
     }
   }
 
-  
-
+  private getCollection(name: string): Map<DocumentId, Document> {
+    this.initCollection(name);
+    const collection = this.collections.get(name);
+    if (!collection) {
+      throw new Error(`Collection ${name} not found after initialization`);
+    }
+    return collection;
+  }
 
   async isConnected(): Promise<boolean> {
     return true;
   }
 
-  
-
-
+  // biome-ignore lint/suspicious/noExplicitAny: interface SignalDB uses any
   async find<T = any>(collection: string, query: any): Promise<T[]> {
-    this.initCollection(collection);
-    const docs = this.collections.get(collection)!;
+    const docs = this.getCollection(collection);
     const results: T[] = [];
 
     for (const doc of docs.values()) {
@@ -52,29 +45,31 @@ export class MemoryAdapter implements SignalDB {
     return results;
   }
 
-  
-
-
+  // biome-ignore lint/suspicious/noExplicitAny: interface SignalDB uses any
   async findOne<T = any>(collection: string, query: any): Promise<T | null> {
     const results = await this.find<T>(collection, query);
     return results[0] ?? null;
   }
 
-  
-
-
-  async findById<T = any>(collection: string, id: DocumentId): Promise<T | null> {
+  // biome-ignore lint/suspicious/noExplicitAny: interface SignalDB uses any
+  async findById<T = any>(
+    collection: string,
+    id: DocumentId,
+  ): Promise<T | null> {
     return this.findOne<T>(collection, { _id: id });
   }
 
-  
+  // biome-ignore lint/suspicious/noExplicitAny: interface SignalDB uses any
+  async insert<T = any>(
+    collection: string,
+    doc: Partial<T>,
+  ): Promise<DocumentId> {
+    const docs = this.getCollection(collection);
 
-
-  async insert<T = any>(collection: string, doc: Partial<T>): Promise<DocumentId> {
-    this.initCollection(collection);
-    const docs = this.collections.get(collection)!;
-
-    const id = ((doc as any)?._id as DocumentId) || this.generateId();
+    const existingId = (doc as Partial<Document>)?._id as
+      | DocumentId
+      | undefined;
+    const id = existingId || this.generateId();
     if (docs.has(id)) {
       throw new SignalConflictError(`Document already exists: ${id}`);
     }
@@ -89,29 +84,29 @@ export class MemoryAdapter implements SignalDB {
     return id;
   }
 
-  
-
-
+  // biome-ignore lint/suspicious/noExplicitAny: interface SignalDB uses any
   async update<T = any>(
     collection: string,
     id: DocumentId,
     update: Partial<T>,
-    options?: { expectedVersion?: number }
+    options?: { expectedVersion?: number },
   ): Promise<void> {
-    this.initCollection(collection);
-    const docs = this.collections.get(collection)!;
+    const docs = this.getCollection(collection);
     const doc = docs.get(id);
 
     if (!doc) {
       throw new SignalConflictError(`Document not found: ${collection}.${id}`);
     }
 
-    const currentVersion = (doc as any)._version ?? 0;
-    if (options?.expectedVersion != null && currentVersion !== options.expectedVersion) {
+    const currentVersion = doc._version;
+    if (
+      options?.expectedVersion != null &&
+      currentVersion !== options.expectedVersion
+    ) {
       throw new SignalVersionMismatchError(
         `Version mismatch for ${collection}.${id}`,
         options.expectedVersion,
-        currentVersion
+        currentVersion,
       );
     }
 
@@ -121,80 +116,52 @@ export class MemoryAdapter implements SignalDB {
     });
   }
 
-  
-
-
   async remove(collection: string, id: DocumentId): Promise<void> {
-    this.initCollection(collection);
-    const docs = this.collections.get(collection)!;
+    const docs = this.getCollection(collection);
     docs.delete(id);
   }
-
-  
-
 
   async delete(collection: string, id: DocumentId): Promise<void> {
     await this.remove(collection, id);
   }
 
-  
-
-
+  // biome-ignore lint/suspicious/noExplicitAny: interface SignalDB uses any
   async count(collection: string, query: any): Promise<number> {
     const results = await this.find(collection, query);
     return results.length;
   }
 
-  
-
-
   async disconnect(): Promise<void> {
     // no-op
   }
-
-  
-
 
   clear(): void {
     this.collections.clear();
   }
 
-  
-
-
   getCollections(): string[] {
     return Array.from(this.collections.keys());
   }
 
-  
-
-
+  // biome-ignore lint/suspicious/noExplicitAny: interface SignalDB uses any
   getAllDocuments<T = any>(collection: string): T[] {
-    this.initCollection(collection);
-    const docs = this.collections.get(collection)!;
+    const docs = this.getCollection(collection);
     return Array.from(docs.values()) as T[];
   }
 
-  
-
-
   async exists(collection: string, id: DocumentId): Promise<boolean> {
-    this.initCollection(collection);
-    const docs = this.collections.get(collection)!;
+    const docs = this.getCollection(collection);
     return docs.has(id);
   }
 
-  
-
-
-  private matchesQuery(doc: Document, query: Record<string, any>): boolean {
+  private matchesQuery(doc: Document, query: Record<string, unknown>): boolean {
     for (const [key, value] of Object.entries(query)) {
       if (value === null) {
         if (doc[key] !== null && doc[key] !== undefined) {
           return false;
         }
       } else if (Array.isArray(value)) {
-        if (!value.includes(doc[key])) {
+        if (!value.includes(doc[key] as string | number)) {
           return false;
         }
       } else {
@@ -205,9 +172,6 @@ export class MemoryAdapter implements SignalDB {
     }
     return true;
   }
-
-  
-
 
   private generateId(): DocumentId {
     return `doc_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;

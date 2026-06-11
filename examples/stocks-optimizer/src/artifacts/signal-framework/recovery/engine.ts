@@ -1,4 +1,3 @@
-
 import { clamp } from "../math/statistics";
 
 export type RecoveryStatus = "locked" | "recovering" | "restored" | "regressed";
@@ -135,7 +134,10 @@ export const DEFAULT_RECOVERY_THRESHOLDS: RecoveryThresholds = {
 };
 
 export function evaluateRecovery(input: RecoveryInput = {}): RecoveryResult {
-  const thresholds = { ...DEFAULT_RECOVERY_THRESHOLDS, ...(input.thresholds ?? {}) };
+  const thresholds = {
+    ...DEFAULT_RECOVERY_THRESHOLDS,
+    ...(input.thresholds ?? {}),
+  };
   const survivalConfidence = score(input.survivalConfidence, 0);
   const scarPressure = countPressure(input.scarCount, 100);
   const nearRuinPressure = countPressure(input.nearRuinCount, 50);
@@ -150,23 +152,53 @@ export function evaluateRecovery(input: RecoveryInput = {}): RecoveryResult {
   const beliefFragility = score(input.beliefFragility, 50);
   const evidenceAgreement = score(input.evidenceAgreement, 50);
   const dataReliability = score(input.dataReliability, 0);
-  const blockedAgencyActionCount = Math.max(0, Math.round(number(input.blockedAgencyActionCount, 0)));
+  const blockedAgencyActionCount = Math.max(
+    0,
+    Math.round(number(input.blockedAgencyActionCount, 0)),
+  );
   const discoveryConfidence = score(input.discoveryConfidence, 0);
   const discoveryMaturity = score(input.discoveryMaturity, 0);
   const novelty = score(input.novelty, 50);
-  const currentMaxExposure = percent(input.currentMaxExposure, percent(input.recoveryExposureCap, 0));
+  const currentMaxExposure = percent(
+    input.currentMaxExposure,
+    percent(input.recoveryExposureCap, 0),
+  );
   const targetNormalExposure = Math.max(
     0,
-    percent(input.targetNormalExposure, Math.max(currentMaxExposure, percent(input.recoveryExposureCap, currentMaxExposure))),
+    percent(
+      input.targetNormalExposure,
+      Math.max(
+        currentMaxExposure,
+        percent(input.recoveryExposureCap, currentMaxExposure),
+      ),
+    ),
   );
-  const currentCapacityRatio = targetNormalExposure > 0 ? clamp(currentMaxExposure / targetNormalExposure * 100) : 0;
-  const sampleCount = Math.max(0, Math.round(number(input.similarSampleCount, 0)));
-  const positiveOutcomes = Math.max(0, Math.round(number(input.positiveSimilarOutcomes, 0)));
-  const negativeOutcomes = Math.max(0, Math.round(number(input.negativeSimilarOutcomes, 0)));
-  const neutralOutcomes = Math.max(0, Math.round(number(input.neutralSimilarOutcomes, 0)));
+  const currentCapacityRatio =
+    targetNormalExposure > 0
+      ? clamp((currentMaxExposure / targetNormalExposure) * 100)
+      : 0;
+  const sampleCount = Math.max(
+    0,
+    Math.round(number(input.similarSampleCount, 0)),
+  );
+  const positiveOutcomes = Math.max(
+    0,
+    Math.round(number(input.positiveSimilarOutcomes, 0)),
+  );
+  const negativeOutcomes = Math.max(
+    0,
+    Math.round(number(input.negativeSimilarOutcomes, 0)),
+  );
+  const neutralOutcomes = Math.max(
+    0,
+    Math.round(number(input.neutralSimilarOutcomes, 0)),
+  );
   const outcomeCount = positiveOutcomes + negativeOutcomes + neutralOutcomes;
-  const positiveOutcomeRatio = outcomeCount > 0 ? positiveOutcomes / outcomeCount : 0;
-  const sampleConfidence = clamp(sampleCount / Math.max(1, thresholds.minSimilarSamplesForRestore) * 100);
+  const positiveOutcomeRatio =
+    outcomeCount > 0 ? positiveOutcomes / outcomeCount : 0;
+  const sampleConfidence = clamp(
+    (sampleCount / Math.max(1, thresholds.minSimilarSamplesForRestore)) * 100,
+  );
   const evidenceLift = round(
     Math.max(0, judgementReliability - 60) * 0.16 +
       Math.max(0, outcomeStability - 60) * 0.16 +
@@ -230,7 +262,8 @@ export function evaluateRecovery(input: RecoveryInput = {}): RecoveryResult {
     discoveryConfidence,
     discoveryMaturity,
   });
-  const shouldEscalateHumanReview = thresholds.agencyReviewBlocksRestore && blockedAgencyActionCount > 0;
+  const shouldEscalateHumanReview =
+    thresholds.agencyReviewBlocksRestore && blockedAgencyActionCount > 0;
   const status = statusFor({
     thresholds,
     survivalConfidence,
@@ -289,7 +322,14 @@ export function evaluateRecovery(input: RecoveryInput = {}): RecoveryResult {
     recommendedExposureCap,
     canRestoreSizing,
     shouldEscalateHumanReview,
-    reasons: reasonsFor(status, mode, recoveryScore, confidenceCapLift, recommendedExposureCap, shouldEscalateHumanReview),
+    reasons: reasonsFor(
+      status,
+      mode,
+      recoveryScore,
+      confidenceCapLift,
+      recommendedExposureCap,
+      shouldEscalateHumanReview,
+    ),
     blockers,
     unlockConditions: unlockConditionsFor(blockers, thresholds),
     invalidationConditions: invalidationConditionsFor(status),
@@ -347,10 +387,15 @@ function statusFor(input: {
   canRestoreEvidence: boolean;
   shouldEscalateHumanReview: boolean;
 }): RecoveryStatus {
-  if (input.dataReliability < input.thresholds.minDataReliability) return "locked";
-  if (input.overfitRisk >= input.thresholds.regressedOverfitRisk) return "regressed";
+  if (input.dataReliability < input.thresholds.minDataReliability)
+    return "locked";
+  if (input.overfitRisk >= input.thresholds.regressedOverfitRisk)
+    return "regressed";
   if (input.overfitRisk > input.thresholds.maxOverfitRisk) return "locked";
-  if (input.survivalConfidence < input.thresholds.minSurvivalConfidenceForRecovery) return "locked";
+  if (
+    input.survivalConfidence < input.thresholds.minSurvivalConfidenceForRecovery
+  )
+    return "locked";
   if (
     input.canRestoreEvidence &&
     input.recoveryScore >= input.thresholds.minRecoveryScoreForRestore &&
@@ -358,7 +403,8 @@ function statusFor(input: {
   ) {
     return "restored";
   }
-  if (input.recoveryScore >= input.thresholds.minRecoveryScoreForRecovery) return "recovering";
+  if (input.recoveryScore >= input.thresholds.minRecoveryScoreForRecovery)
+    return "recovering";
   return "locked";
 }
 
@@ -377,24 +423,36 @@ function restoreEvidencePasses(input: {
   discoveryMaturity: number;
 }) {
   return (
-    input.survivalConfidence >= input.thresholds.minSurvivalConfidenceForRestore &&
+    input.survivalConfidence >=
+      input.thresholds.minSurvivalConfidenceForRestore &&
     input.trustScore >= input.thresholds.minTrustScoreForRestore &&
-    input.calibratedConfidence >= input.thresholds.minCalibratedConfidenceForRestore &&
+    input.calibratedConfidence >=
+      input.thresholds.minCalibratedConfidenceForRestore &&
     input.beliefFragility <= input.thresholds.maxBeliefFragilityForRestore &&
-    input.evidenceAgreement >= input.thresholds.minEvidenceAgreementForRestore &&
-    input.judgementReliability >= input.thresholds.minJudgementReliabilityForRestore &&
+    input.evidenceAgreement >=
+      input.thresholds.minEvidenceAgreementForRestore &&
+    input.judgementReliability >=
+      input.thresholds.minJudgementReliabilityForRestore &&
     input.outcomeStability >= input.thresholds.minOutcomeStabilityForRestore &&
     input.sampleCount >= input.thresholds.minSimilarSamplesForRestore &&
-    input.positiveOutcomeRatio >= input.thresholds.minPositiveOutcomeRatioForRestore &&
-    input.discoveryConfidence >= input.thresholds.minDiscoveryConfidenceForRestore &&
+    input.positiveOutcomeRatio >=
+      input.thresholds.minPositiveOutcomeRatioForRestore &&
+    input.discoveryConfidence >=
+      input.thresholds.minDiscoveryConfidenceForRestore &&
     input.discoveryMaturity >= input.thresholds.minDiscoveryMaturityForRestore
   );
 }
 
-function modeFor(status: RecoveryStatus, recoveryScore: number, thresholds: RecoveryThresholds): RecoveryMode {
+function modeFor(
+  status: RecoveryStatus,
+  recoveryScore: number,
+  thresholds: RecoveryThresholds,
+): RecoveryMode {
   if (status === "restored") return "normal";
   if (status === "recovering") {
-    return recoveryScore >= thresholds.minRecoveryScoreForGraduated ? "graduated" : "reduced-size";
+    return recoveryScore >= thresholds.minRecoveryScoreForGraduated
+      ? "graduated"
+      : "reduced-size";
   }
   return "observe";
 }
@@ -411,10 +469,15 @@ function trustedCapacityFor(input: {
   if (input.status !== "recovering") return 0;
 
   const modeCap = input.mode === "graduated" ? 70 : 40;
-  const survivalCap = input.survivalConfidence >= input.thresholds.minSurvivalConfidenceForRestore
-    ? 85
-    : clamp(input.survivalConfidence - 30, 0, 65);
-  const evidenceCapacity = (input.recoveryScore - input.thresholds.minRecoveryScoreForRecovery) * 1.25 + input.currentCapacityRatio * 0.25 + 25;
+  const survivalCap =
+    input.survivalConfidence >= input.thresholds.minSurvivalConfidenceForRestore
+      ? 85
+      : clamp(input.survivalConfidence - 30, 0, 65);
+  const evidenceCapacity =
+    (input.recoveryScore - input.thresholds.minRecoveryScoreForRecovery) *
+      1.25 +
+    input.currentCapacityRatio * 0.25 +
+    25;
 
   return round(clamp(Math.min(evidenceCapacity, modeCap, survivalCap)));
 }
@@ -427,8 +490,14 @@ function recommendedExposureCapFor(input: {
 }) {
   if (input.status === "locked" || input.status === "regressed") return 0;
   if (input.status === "restored") return round(input.targetNormalExposure);
-  const capacityCap = input.targetNormalExposure * input.trustedCapacity / 100;
-  return round(Math.min(input.targetNormalExposure, Math.max(input.currentMaxExposure, capacityCap)));
+  const capacityCap =
+    (input.targetNormalExposure * input.trustedCapacity) / 100;
+  return round(
+    Math.min(
+      input.targetNormalExposure,
+      Math.max(input.currentMaxExposure, capacityCap),
+    ),
+  );
 }
 
 function confidenceCapLiftFor(input: {
@@ -440,9 +509,13 @@ function confidenceCapLiftFor(input: {
   thresholds: RecoveryThresholds;
 }) {
   if (input.status === "locked" || input.status === "regressed") return 0;
-  const scoreLift = Math.max(0, input.recoveryScore - input.confidenceCap) * 0.45;
-  const capacityLift = Math.max(0, input.trustedCapacity - input.currentCapacityRatio) * 0.08;
-  return round(clamp(scoreLift + capacityLift, 0, input.thresholds.maxConfidenceCapLift));
+  const scoreLift =
+    Math.max(0, input.recoveryScore - input.confidenceCap) * 0.45;
+  const capacityLift =
+    Math.max(0, input.trustedCapacity - input.currentCapacityRatio) * 0.08;
+  return round(
+    clamp(scoreLift + capacityLift, 0, input.thresholds.maxConfidenceCapLift),
+  );
 }
 
 function blockersFor(input: {
@@ -464,36 +537,111 @@ function blockersFor(input: {
   discoveryMaturity: number;
 }) {
   const blockers: string[] = [];
-  if (input.dataReliability < input.thresholds.minDataReliability) blockers.push("Data reliability is below the recovery threshold.");
-  if (input.overfitRisk > input.thresholds.maxOverfitRisk) blockers.push("Overfit risk is above the recovery threshold.");
-  if (input.survivalConfidence < input.thresholds.minSurvivalConfidenceForRecovery) blockers.push("Survival confidence is too low to start recovery.");
-  if (input.survivalConfidence < input.thresholds.minSurvivalConfidenceForRestore) blockers.push("Survival confidence has not cleared the normal-sizing threshold.");
-  if (input.trustScore < input.thresholds.minTrustScoreForRestore) blockers.push("Trust score has not cleared the restoration threshold.");
-  if (input.calibratedConfidence < input.thresholds.minCalibratedConfidenceForRestore) blockers.push("Calibrated confidence has not cleared the restoration threshold.");
-  if (input.blockedAgencyActionCount > 0 && input.thresholds.agencyReviewBlocksRestore) blockers.push("Blocked agency actions require human review before restoration.");
-  if (input.beliefFragility > input.thresholds.maxBeliefFragilityForRestore) blockers.push("Belief fragility is too high for normal sizing.");
-  if (input.evidenceAgreement < input.thresholds.minEvidenceAgreementForRestore) blockers.push("Evidence agreement is not strong enough for restoration.");
-  if (input.judgementReliability < input.thresholds.minJudgementReliabilityForRestore) blockers.push("Judgement reliability is below restoration threshold.");
-  if (input.outcomeStability < input.thresholds.minOutcomeStabilityForRestore) blockers.push("Outcome stability is below restoration threshold.");
-  if (input.sampleCount < input.thresholds.minSimilarSamplesForRestore) blockers.push("Similar outcome sample count is too small for restoration.");
-  if (input.positiveOutcomeRatio < input.thresholds.minPositiveOutcomeRatioForRestore) blockers.push("Positive similar-outcome ratio is below restoration threshold.");
-  if (input.discoveryConfidence < input.thresholds.minDiscoveryConfidenceForRestore) blockers.push("Discovery confidence has not matured enough for normal sizing.");
-  if (input.discoveryMaturity < input.thresholds.minDiscoveryMaturityForRestore) blockers.push("Discovery maturity has not cleared the restoration threshold.");
-  if (input.recoveryScore < input.thresholds.minRecoveryScoreForRecovery && !blockers.length) blockers.push("Recovery score is still below the recovery threshold.");
+  if (input.dataReliability < input.thresholds.minDataReliability)
+    blockers.push("Data reliability is below the recovery threshold.");
+  if (input.overfitRisk > input.thresholds.maxOverfitRisk)
+    blockers.push("Overfit risk is above the recovery threshold.");
+  if (
+    input.survivalConfidence < input.thresholds.minSurvivalConfidenceForRecovery
+  )
+    blockers.push("Survival confidence is too low to start recovery.");
+  if (
+    input.survivalConfidence < input.thresholds.minSurvivalConfidenceForRestore
+  )
+    blockers.push(
+      "Survival confidence has not cleared the normal-sizing threshold.",
+    );
+  if (input.trustScore < input.thresholds.minTrustScoreForRestore)
+    blockers.push("Trust score has not cleared the restoration threshold.");
+  if (
+    input.calibratedConfidence <
+    input.thresholds.minCalibratedConfidenceForRestore
+  )
+    blockers.push(
+      "Calibrated confidence has not cleared the restoration threshold.",
+    );
+  if (
+    input.blockedAgencyActionCount > 0 &&
+    input.thresholds.agencyReviewBlocksRestore
+  )
+    blockers.push(
+      "Blocked agency actions require human review before restoration.",
+    );
+  if (input.beliefFragility > input.thresholds.maxBeliefFragilityForRestore)
+    blockers.push("Belief fragility is too high for normal sizing.");
+  if (input.evidenceAgreement < input.thresholds.minEvidenceAgreementForRestore)
+    blockers.push("Evidence agreement is not strong enough for restoration.");
+  if (
+    input.judgementReliability <
+    input.thresholds.minJudgementReliabilityForRestore
+  )
+    blockers.push("Judgement reliability is below restoration threshold.");
+  if (input.outcomeStability < input.thresholds.minOutcomeStabilityForRestore)
+    blockers.push("Outcome stability is below restoration threshold.");
+  if (input.sampleCount < input.thresholds.minSimilarSamplesForRestore)
+    blockers.push("Similar outcome sample count is too small for restoration.");
+  if (
+    input.positiveOutcomeRatio <
+    input.thresholds.minPositiveOutcomeRatioForRestore
+  )
+    blockers.push(
+      "Positive similar-outcome ratio is below restoration threshold.",
+    );
+  if (
+    input.discoveryConfidence <
+    input.thresholds.minDiscoveryConfidenceForRestore
+  )
+    blockers.push(
+      "Discovery confidence has not matured enough for normal sizing.",
+    );
+  if (input.discoveryMaturity < input.thresholds.minDiscoveryMaturityForRestore)
+    blockers.push(
+      "Discovery maturity has not cleared the restoration threshold.",
+    );
+  if (
+    input.recoveryScore < input.thresholds.minRecoveryScoreForRecovery &&
+    !blockers.length
+  )
+    blockers.push("Recovery score is still below the recovery threshold.");
   return unique(blockers);
 }
 
-function unlockConditionsFor(blockers: string[], thresholds: RecoveryThresholds) {
+function unlockConditionsFor(
+  blockers: string[],
+  thresholds: RecoveryThresholds,
+) {
   if (!blockers.length) return [];
   const unlocks: string[] = [];
-  if (blockers.some((item) => item.includes("Data reliability"))) unlocks.push(`Restore data reliability to at least ${thresholds.minDataReliability}/100.`);
-  if (blockers.some((item) => item.includes("Overfit"))) unlocks.push(`Reduce overfit risk to ${thresholds.maxOverfitRisk}/100 or lower.`);
-  if (blockers.some((item) => item.includes("Survival confidence"))) unlocks.push(`Raise survival confidence to at least ${thresholds.minSurvivalConfidenceForRestore}/100 for normal sizing.`);
-  if (blockers.some((item) => item.includes("Trust score"))) unlocks.push(`Raise trust score to at least ${thresholds.minTrustScoreForRestore}/100.`);
-  if (blockers.some((item) => item.includes("Calibrated confidence"))) unlocks.push(`Raise calibrated confidence to at least ${thresholds.minCalibratedConfidenceForRestore}/100.`);
-  if (blockers.some((item) => item.includes("agency"))) unlocks.push("Clear blocked agency actions or complete human review.");
-  if (blockers.some((item) => item.includes("Discovery"))) unlocks.push("Let discovery confidence and maturity improve before restoring normal sizing.");
-  if (!unlocks.length) unlocks.push("Keep collecting stable positive outcomes until recovery score improves.");
+  if (blockers.some((item) => item.includes("Data reliability")))
+    unlocks.push(
+      `Restore data reliability to at least ${thresholds.minDataReliability}/100.`,
+    );
+  if (blockers.some((item) => item.includes("Overfit")))
+    unlocks.push(
+      `Reduce overfit risk to ${thresholds.maxOverfitRisk}/100 or lower.`,
+    );
+  if (blockers.some((item) => item.includes("Survival confidence")))
+    unlocks.push(
+      `Raise survival confidence to at least ${thresholds.minSurvivalConfidenceForRestore}/100 for normal sizing.`,
+    );
+  if (blockers.some((item) => item.includes("Trust score")))
+    unlocks.push(
+      `Raise trust score to at least ${thresholds.minTrustScoreForRestore}/100.`,
+    );
+  if (blockers.some((item) => item.includes("Calibrated confidence")))
+    unlocks.push(
+      `Raise calibrated confidence to at least ${thresholds.minCalibratedConfidenceForRestore}/100.`,
+    );
+  if (blockers.some((item) => item.includes("agency")))
+    unlocks.push("Clear blocked agency actions or complete human review.");
+  if (blockers.some((item) => item.includes("Discovery")))
+    unlocks.push(
+      "Let discovery confidence and maturity improve before restoring normal sizing.",
+    );
+  if (!unlocks.length)
+    unlocks.push(
+      "Keep collecting stable positive outcomes until recovery score improves.",
+    );
   return unique(unlocks);
 }
 
@@ -503,7 +651,11 @@ function invalidationConditionsFor(status: RecoveryStatus) {
     "Invalidate recovery if data reliability falls below the configured threshold.",
     "Invalidate recovery if similar states repeat near-ruin survival costs.",
   ];
-  if (status === "restored") return [...base, "Invalidate restoration if blocked agency actions reappear."];
+  if (status === "restored")
+    return [
+      ...base,
+      "Invalidate restoration if blocked agency actions reappear.",
+    ];
   if (status === "recovering") return base;
   return ["Do not restore sizing while recovery remains locked or regressed."];
 }
@@ -521,16 +673,24 @@ function reasonsFor(
   ];
 
   if (status === "recovering") {
-    reasons.push(`Recovered evidence supports a gradual exposure cap near ${recommendedExposureCap.toFixed(2)}%.`);
+    reasons.push(
+      `Recovered evidence supports a gradual exposure cap near ${recommendedExposureCap.toFixed(2)}%.`,
+    );
   }
   if (status === "restored") {
-    reasons.push("Recovery evidence supports normal sizing subject to downstream gates.");
+    reasons.push(
+      "Recovery evidence supports normal sizing subject to downstream gates.",
+    );
   }
   if (confidenceCapLift > 0) {
-    reasons.push(`Recovery can lift the trusted confidence cap by ${confidenceCapLift.toFixed(1)} points before downstream gates.`);
+    reasons.push(
+      `Recovery can lift the trusted confidence cap by ${confidenceCapLift.toFixed(1)} points before downstream gates.`,
+    );
   }
   if (shouldEscalateHumanReview) {
-    reasons.push("Blocked agency actions remain; human review is required before restoration.");
+    reasons.push(
+      "Blocked agency actions remain; human review is required before restoration.",
+    );
   }
 
   return reasons;
@@ -539,7 +699,7 @@ function reasonsFor(
 function countPressure(value: unknown, scale: number) {
   const count = Math.max(0, number(value, 0));
   if (count === 0) return 0;
-  return clamp(Math.log1p(count) / Math.log1p(scale) * 100);
+  return clamp((Math.log1p(count) / Math.log1p(scale)) * 100);
 }
 
 function score(value: unknown, fallback: number) {
@@ -563,7 +723,6 @@ function round(value: number) {
 function roundRatio(value: number) {
   return Number(value.toFixed(4));
 }
-
 
 function unique(values: string[]) {
   return Array.from(new Set(values));

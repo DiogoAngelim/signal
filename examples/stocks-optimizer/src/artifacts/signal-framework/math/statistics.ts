@@ -9,7 +9,9 @@ export function numeric(value: unknown, fallback = 0) {
 
 export function mean(values: number[]) {
   const usable = values.filter(Number.isFinite);
-  return usable.length ? usable.reduce((sum, value) => sum + value, 0) / usable.length : 0;
+  return usable.length
+    ? usable.reduce((sum, value) => sum + value, 0) / usable.length
+    : 0;
 }
 
 export function stdev(values: number[]) {
@@ -22,13 +24,22 @@ export function stdev(values: number[]) {
 export function percentileRank(values: number[], value: number) {
   const usable = values.filter(Number.isFinite);
   if (!usable.length) return clamp(value);
-  return clamp((usable.filter((item) => item <= value).length / usable.length) * 100);
+  return clamp(
+    (usable.filter((item) => item <= value).length / usable.length) * 100,
+  );
 }
 
-export function signRatio(values: number[], direction: "positive" | "negative") {
+export function signRatio(
+  values: number[],
+  direction: "positive" | "negative",
+) {
   const usable = values.filter(Number.isFinite);
   if (!usable.length) return 0;
-  return usable.filter((value) => (direction === "positive" ? value >= 0 : value < 0)).length / usable.length;
+  return (
+    usable.filter((value) =>
+      direction === "positive" ? value >= 0 : value < 0,
+    ).length / usable.length
+  );
 }
 
 export function immutable<T>(value: T): Readonly<T> {

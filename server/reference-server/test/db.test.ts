@@ -10,7 +10,7 @@ import { createReferenceIdempotencyStore } from "../src/db";
 import { referenceServerSchema } from "../src/db/schema";
 
 beforeEach(() => {
-  delete process.env.DATABASE_URL;
+  process.env.DATABASE_URL = undefined;
   postgresMock.createPostgresIdempotencyStore.mockClear();
 });
 

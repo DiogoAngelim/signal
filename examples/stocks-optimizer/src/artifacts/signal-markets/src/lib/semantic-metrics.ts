@@ -1,6 +1,6 @@
 import {
-  resolveSemanticState,
   type SemanticStateResult,
+  resolveSemanticState,
 } from "../../../signal-framework";
 
 export type SemanticMetricView = {
@@ -32,14 +32,19 @@ export type DashboardSemanticMetrics = {
   durability: SemanticMetricView;
 };
 
-export function buildDashboardSemanticMetrics(input: DashboardSemanticMetricsInput): DashboardSemanticMetrics {
+export function buildDashboardSemanticMetrics(
+  input: DashboardSemanticMetricsInput,
+): DashboardSemanticMetrics {
   const marketHealth = pct(input.marketHealthPct);
   const opportunityDensity = pct(input.opportunityDensityPct);
   const confidence = pct(input.confidencePct);
   const risk = pct(input.riskPct, 1);
   const riskControl = 1 - risk;
   const trendQuality = pct(input.avgQualityPct);
-  const exposureShare = exposureRatio(input.suggestedMaximumExposurePct, input.strategyCapPct);
+  const exposureShare = exposureRatio(
+    input.suggestedMaximumExposurePct,
+    input.strategyCapPct,
+  );
 
   return {
     marketHealth: semanticMetric(
@@ -66,7 +71,12 @@ export function buildDashboardSemanticMetrics(input: DashboardSemanticMetricsInp
       { participation: 2, synchronization: 1.2, uncertainty: 0.8 },
     ),
     sizing: semanticMetric(
-      sizingDimensions(input.sizingMode, exposureShare, confidence, riskControl),
+      sizingDimensions(
+        input.sizingMode,
+        exposureShare,
+        confidence,
+        riskControl,
+      ),
       { participation: 1.5, confidence: 1, stability: 1, stress: 0.8 },
       ["Limited", "Controlled", "Aggressive"],
     ),
@@ -116,14 +126,16 @@ function semanticMetric(
   weights: Record<string, number>,
   priority: string[] = [],
 ): SemanticMetricView {
-  return toSemanticMetricView(resolveSemanticState(
-    { dimensions },
-    {
-      weights,
-      priority,
-      secondaryLimit: 2,
-    },
-  ));
+  return toSemanticMetricView(
+    resolveSemanticState(
+      { dimensions },
+      {
+        weights,
+        priority,
+        secondaryLimit: 2,
+      },
+    ),
+  );
 }
 
 function toSemanticMetricView(result: SemanticStateResult): SemanticMetricView {
@@ -143,7 +155,13 @@ function sizingDimensions(
   riskControl: number,
 ) {
   if (!sizingMode || sizingMode === "none" || exposureShare <= 0.01) {
-    return { participation: 0.24, confidence: 0.42, direction: 0.44, stability: riskControl, stress: 1 - riskControl };
+    return {
+      participation: 0.24,
+      confidence: 0.42,
+      direction: 0.44,
+      stability: riskControl,
+      stress: 1 - riskControl,
+    };
   }
 
   const urgencyByMode: Record<string, number> = {
@@ -165,9 +183,19 @@ function sizingDimensions(
   };
 }
 
-function exposureDimensions(exposureShare: number, confidence: number, riskControl: number) {
+function exposureDimensions(
+  exposureShare: number,
+  confidence: number,
+  riskControl: number,
+) {
   if (exposureShare <= 0.01) {
-    return { participation: 0.24, confidence: 0.42, direction: 0.44, stability: riskControl, urgency: 0.16 };
+    return {
+      participation: 0.24,
+      confidence: 0.42,
+      direction: 0.44,
+      stability: riskControl,
+      urgency: 0.16,
+    };
   }
 
   return {
@@ -182,7 +210,8 @@ function exposureDimensions(exposureShare: number, confidence: number, riskContr
 }
 
 function exposureRatio(exposurePct: number, capPct: number) {
-  if (!Number.isFinite(exposurePct) || !Number.isFinite(capPct) || capPct <= 0) return 0;
+  if (!Number.isFinite(exposurePct) || !Number.isFinite(capPct) || capPct <= 0)
+    return 0;
   return clamp01(exposurePct / capPct);
 }
 

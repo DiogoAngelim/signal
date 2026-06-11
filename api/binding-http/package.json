@@ -23,6 +23,7 @@
   "dependencies": {
     "@signal/protocol": "workspace:*",
     "@signal/runtime": "workspace:*",
+    "@signal/sdk-node": "workspace:*",
     "fastify": "^5.2.1"
   },
   "devDependencies": {

@@ -50,6 +50,6 @@ describe("reference app bootstrap", () => {
       publishedEvents: [],
     });
 
-    delete process.env.SIGNAL_HTTP_PORT;
+    process.env.SIGNAL_HTTP_PORT = undefined;
   });
 });

@@ -5,7 +5,7 @@ import {
   isParentForStudent,
   normalizeParentEmails,
   resolveAlgaiAccess,
-  updateParentAccessForStudent
+  updateParentAccessForStudent,
 } from "./algaiParentAccess";
 
 describe("AlgAI parent access validation", () => {
@@ -15,8 +15,8 @@ describe("AlgAI parent access validation", () => {
         " Parent.Rivera@Example.com ",
         "parent.rivera@example.com",
         "bad email",
-        "Caregiver.Rivera@Example.com"
-      ])
+        "Caregiver.Rivera@Example.com",
+      ]),
     ).toEqual(["parent.rivera@example.com", "caregiver.rivera@example.com"]);
   });
 
@@ -24,44 +24,58 @@ describe("AlgAI parent access validation", () => {
     const source = createMockAlgaiDataSource();
 
     await expect(
-      isParentForStudent("parent.rivera@example.com", "student-mia-rivera", source)
+      isParentForStudent(
+        "parent.rivera@example.com",
+        "student-mia-rivera",
+        source,
+      ),
     ).resolves.toBe(true);
 
-    const resolution = await resolveAlgaiAccess("parent.rivera@example.com", source);
+    const resolution = await resolveAlgaiAccess(
+      "parent.rivera@example.com",
+      source,
+    );
 
     expect(resolution.kind).toBe("parent");
     if (resolution.kind === "parent") {
       expect(resolution.dashboards[0]?.student.childName).toBe("Mia Rivera");
-      expect(resolution.dashboards[0]?.dashboardPermissions.validatedParentEmail).toBe(
-        "parent.rivera@example.com"
-      );
+      expect(
+        resolution.dashboards[0]?.dashboardPermissions.validatedParentEmail,
+      ).toBe("parent.rivera@example.com");
     }
   });
 
   it("returns every registered student connected to one parent email", async () => {
     const source = createMockAlgaiDataSource();
-    const resolution = await resolveAlgaiAccess("parent.rivera@example.com", source);
+    const resolution = await resolveAlgaiAccess(
+      "parent.rivera@example.com",
+      source,
+    );
 
     expect(resolution.kind).toBe("parent");
     if (resolution.kind === "parent") {
-      expect(resolution.dashboards.map((dashboard) => dashboard.student.childName)).toEqual([
-        "Mia Rivera",
-        "Noah Patel"
-      ]);
+      expect(
+        resolution.dashboards.map((dashboard) => dashboard.student.childName),
+      ).toEqual(["Mia Rivera", "Noah Patel"]);
     }
   });
 
   it("routes a student email away from the parent dashboard", async () => {
     const source = createMockAlgaiDataSource();
 
-    await expect(isChildEmail("mia.rivera@student.algai.test", source)).resolves.toBe(true);
+    await expect(
+      isChildEmail("mia.rivera@student.algai.test", source),
+    ).resolves.toBe(true);
 
-    const resolution = await resolveAlgaiAccess("mia.rivera@student.algai.test", source);
+    const resolution = await resolveAlgaiAccess(
+      "mia.rivera@student.algai.test",
+      source,
+    );
 
     expect(resolution).toMatchObject({
       kind: "child",
       studentId: "student-mia-rivera",
-      childAccessPath: "/child"
+      childAccessPath: "/child",
     });
   });
 
@@ -80,16 +94,16 @@ describe("AlgAI parent access validation", () => {
       {
         teacherEmail: "Ana.Martins@AlgAI.School",
         studentId: "student-mia-rivera",
-        parentEmails: ["New.Parent@Example.com", "new.parent@example.com"]
+        parentEmails: ["New.Parent@Example.com", "new.parent@example.com"],
       },
-      source
+      source,
     );
 
     expect(result.parentEmails).toEqual(["new.parent@example.com"]);
     await expect(
-      getStudentAccessForEmail("new.parent@example.com", source)
+      getStudentAccessForEmail("new.parent@example.com", source),
     ).resolves.toMatchObject({
-      studentId: "student-mia-rivera"
+      studentId: "student-mia-rivera",
     });
   });
 
@@ -101,10 +115,10 @@ describe("AlgAI parent access validation", () => {
         {
           teacherEmail: "other.teacher@algai.school",
           studentId: "student-mia-rivera",
-          parentEmails: ["new.parent@example.com"]
+          parentEmails: ["new.parent@example.com"],
         },
-        source
-      )
+        source,
+      ),
     ).rejects.toThrow(/not authorized/u);
   });
 });

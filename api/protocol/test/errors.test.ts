@@ -1,14 +1,14 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  signalErrorCodes,
-  signalErrorCategories,
-  getSignalErrorDefaults,
-  createSignalError,
-  createProtocolError,
-  signalErrorHttpStatus,
-  SignalErrorCode,
   SignalErrorCategory,
-  SignalErrorEnvelope,
+  type SignalErrorCode,
+  type SignalErrorEnvelope,
+  createProtocolError,
+  createSignalError,
+  getSignalErrorDefaults,
+  signalErrorCategories,
+  signalErrorCodes,
+  signalErrorHttpStatus,
 } from "../src/errors";
 
 describe("errors module full coverage", () => {
@@ -28,7 +28,7 @@ describe("errors module full coverage", () => {
       expect(err.code).toBe(code);
       expect(signalErrorCategories).toContain(err.category);
       expect(typeof err.message).toBe("string");
-      
+
       const custom = createSignalError(code, "custom", {
         category: signalErrorCategories[0],
         retryable: true,
@@ -46,7 +46,7 @@ describe("errors module full coverage", () => {
       expect(err.code).toBe(code);
       expect(signalErrorCategories).toContain(err.category);
       expect(typeof err.message).toBe("string");
-      
+
       const custom = createProtocolError(code, "custom", {
         category: signalErrorCategories[0],
         retryable: true,
@@ -82,10 +82,13 @@ describe("errors module full coverage", () => {
       };
       expect(signalErrorHttpStatus(env)).toBe(codeToStatus[code]);
     }
-    
-    
-    expect(signalErrorHttpStatus({ code: "UNKNOWN", category: "capability" })).toBe(404);
-    
-    expect(signalErrorHttpStatus({ code: "UNKNOWN", category: "runtime" })).toBe(500);
+
+    expect(
+      signalErrorHttpStatus({ code: "UNKNOWN", category: "capability" }),
+    ).toBe(404);
+
+    expect(
+      signalErrorHttpStatus({ code: "UNKNOWN", category: "runtime" }),
+    ).toBe(500);
   });
 });

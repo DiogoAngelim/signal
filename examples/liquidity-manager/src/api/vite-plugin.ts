@@ -6,7 +6,13 @@ type ViteLikePlugin = {
   name: string;
   configureServer(server: {
     middlewares: {
-      use(handler: (req: IncomingMessage, res: ServerResponse, next: () => void) => void | Promise<void>): void;
+      use(
+        handler: (
+          req: IncomingMessage,
+          res: ServerResponse,
+          next: () => void,
+        ) => void | Promise<void>,
+      ): void;
     };
   }): void;
 };
@@ -29,12 +35,14 @@ export function liquidityManagerApiPlugin(): ViteLikePlugin {
           res.statusCode = 500;
           res.setHeader("Content-Type", "application/json; charset=utf-8");
           res.setHeader("Cache-Control", "no-store");
-          res.end(JSON.stringify({
-            ok: false,
-            message: "The local API could not complete the request."
-          }));
+          res.end(
+            JSON.stringify({
+              ok: false,
+              message: "The local API could not complete the request.",
+            }),
+          );
         }
       });
-    }
+    },
   };
 }

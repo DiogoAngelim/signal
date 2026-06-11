@@ -65,7 +65,10 @@ test("stock Recognition adapter attaches generic diagnostics without changing si
   assert.equal(result.signals[0]?.allocationAction, "Blocked");
   assert.equal(result.signals[0]?.recognition.verdict, "recognized");
   assert.equal(result.recognitionDiagnostics.verdictCounts.recognized, 1);
-  assert.equal(result.recognitionDiagnostics.primary?.metadata.module, "recognition");
+  assert.equal(
+    result.recognitionDiagnostics.primary?.metadata.module,
+    "recognition",
+  );
 });
 
 test("stock Recognition adapter keeps insufficient evidence explicit when history is missing", () => {
@@ -75,13 +78,24 @@ test("stock Recognition adapter keeps insufficient evidence explicit when histor
     trades: [],
     opportunityDiscovery: {
       candidates: [{ symbol: "AAA", candidateScore: 82 }],
-      discovery: { confidence: 28, novelty: 85, memory: { similarOutcomes: 0 } },
+      discovery: {
+        confidence: 28,
+        novelty: 85,
+        memory: { similarOutcomes: 0 },
+      },
     },
   });
 
   assert.equal(result.signals[0]?.recognition.verdict, "insufficient_evidence");
-  assert.ok(result.signals[0]?.recognition.missingEvidence.includes("historical state samples"));
-  assert.equal(result.recognitionDiagnostics.verdictCounts.insufficient_evidence, 1);
+  assert.ok(
+    result.signals[0]?.recognition.missingEvidence.includes(
+      "historical state samples",
+    ),
+  );
+  assert.equal(
+    result.recognitionDiagnostics.verdictCounts.insufficient_evidence,
+    1,
+  );
 });
 
 test("stock Recognition uses long-history regime coverage for historical similarity confidence", () => {
@@ -91,7 +105,11 @@ test("stock Recognition uses long-history regime coverage for historical similar
     trades: [],
     opportunityDiscovery: {
       candidates: [{ symbol: "AAA", candidateScore: 82 }],
-      discovery: { confidence: 28, novelty: 85, memory: { similarOutcomes: 0 } },
+      discovery: {
+        confidence: 28,
+        novelty: 85,
+        memory: { similarOutcomes: 0 },
+      },
     },
   });
   const extended = applyStockRecognitionDiagnostics({
@@ -107,20 +125,39 @@ test("stock Recognition uses long-history regime coverage for historical similar
         sampleDiversityScore: 89,
         coverageStatus: "full",
         currentRegime: "recovery",
-        keyRegimesCovered: ["bull", "bear", "crash", "recovery", "volatility_transition"],
-        regimeCounts: { bull: 1000, bear: 700, crash: 100, recovery: 400, volatility_transition: 250 },
+        keyRegimesCovered: [
+          "bull",
+          "bear",
+          "crash",
+          "recovery",
+          "volatility_transition",
+        ],
+        regimeCounts: {
+          bull: 1000,
+          bear: 700,
+          crash: 100,
+          recovery: 400,
+          volatility_transition: 250,
+        },
       },
     },
     opportunityDiscovery: {
       candidates: [{ symbol: "AAA", candidateScore: 82 }],
-      discovery: { confidence: 28, novelty: 85, memory: { similarOutcomes: 0 } },
+      discovery: {
+        confidence: 28,
+        novelty: 85,
+        memory: { similarOutcomes: 0 },
+      },
     },
   });
   const baseRecognition = base.signals[0]?.recognition;
   const extendedRecognition = extended.signals[0]?.recognition;
 
   assert.ok((extendedRecognition?.historicalSimilarityConfidence ?? 0) >= 85);
-  assert.ok((extendedRecognition?.recurrenceConfidence ?? 0) > (baseRecognition?.recurrenceConfidence ?? 0));
+  assert.ok(
+    (extendedRecognition?.recurrenceConfidence ?? 0) >
+      (baseRecognition?.recurrenceConfidence ?? 0),
+  );
   assert.equal(
     extended.recognitionDiagnostics.signals[0]?.historicalSimilarityConfidence,
     extendedRecognition?.historicalSimilarityConfidence,
@@ -146,7 +183,11 @@ test("stock Recognition derives history samples from regime counts when labels a
     },
     opportunityDiscovery: {
       candidates: [{ symbol: "AAA", candidateScore: 76 }],
-      discovery: { confidence: 34, novelty: 80, memory: { similarOutcomes: 0 } },
+      discovery: {
+        confidence: 34,
+        novelty: 80,
+        memory: { similarOutcomes: 0 },
+      },
     },
   });
   const recognition = result.signals[0]?.recognition;
@@ -176,11 +217,17 @@ test("stock Recognition handles count-free history diagnostics as neutral eviden
     },
     opportunityDiscovery: {
       candidates: [{ symbol: "AAA", candidateScore: 70 }],
-      discovery: { confidence: 32, novelty: 78, memory: { similarOutcomes: 0 } },
+      discovery: {
+        confidence: 32,
+        novelty: 78,
+        memory: { similarOutcomes: 0 },
+      },
     },
   });
 
-  assert.ok((result.signals[0]?.recognition.historicalSimilarityConfidence ?? 0) > 0);
+  assert.ok(
+    (result.signals[0]?.recognition.historicalSimilarityConfidence ?? 0) > 0,
+  );
   assert.ok(result.signals[0]?.recognition.archetype.length);
 });
 
@@ -238,11 +285,17 @@ test("stock Recognition defaults sparse history diagnostic scores", () => {
     },
     opportunityDiscovery: {
       candidates: [{ symbol: "AAA", candidateScore: 70 }],
-      discovery: { confidence: 32, novelty: 78, memory: { similarOutcomes: 0 } },
+      discovery: {
+        confidence: 32,
+        novelty: 78,
+        memory: { similarOutcomes: 0 },
+      },
     },
   });
 
-  assert.ok((result.signals[0]?.recognition.historicalSimilarityConfidence ?? 0) >= 0);
+  assert.ok(
+    (result.signals[0]?.recognition.historicalSimilarityConfidence ?? 0) >= 0,
+  );
   assert.ok(result.signals[0]?.recognition.archetype.length);
 });
 
@@ -266,33 +319,39 @@ test("stock Recognition reads history diagnostics from robustness diagnostics fa
     },
   });
 
-  assert.ok((result.signals[0]?.recognition.historicalSimilarityConfidence ?? 0) >= 0);
+  assert.ok(
+    (result.signals[0]?.recognition.historicalSimilarityConfidence ?? 0) >= 0,
+  );
 });
 
 test("stock Recognition accepts strong aggregate Judgement as a guarded archetype", () => {
   const result = applyStockRecognitionDiagnostics({
     market: "BINANCE",
-    signals: [signal({
-      symbol: "SOLUSDT",
-      ticker: "SOLUSDT",
-      setupQuality: 100,
-      riskPressure: 7,
-      calibratedConfidence: 52,
-      judgement: {
-        similarSampleSize: 1049,
-        reliability: 80,
-        outcomeStability: 77,
-        overfitRisk: 29,
-        evidence: {
-          similarStates: 1049,
-          positiveOutcomes: 999,
-          negativeOutcomes: 50,
-          neutralOutcomes: 0,
+    signals: [
+      signal({
+        symbol: "SOLUSDT",
+        ticker: "SOLUSDT",
+        setupQuality: 100,
+        riskPressure: 7,
+        calibratedConfidence: 52,
+        judgement: {
+          similarSampleSize: 1049,
+          reliability: 80,
+          outcomeStability: 77,
+          overfitRisk: 29,
+          evidence: {
+            similarStates: 1049,
+            positiveOutcomes: 999,
+            negativeOutcomes: 50,
+            neutralOutcomes: 0,
+          },
         },
-      },
-    })],
+      }),
+    ],
     trades: [],
-    summary: { strategyReadiness: { components: { dataReliability: { score: 100 } } } },
+    summary: {
+      strategyReadiness: { components: { dataReliability: { score: 100 } } },
+    },
     opportunityDiscovery: {
       density: { density: 46, quality: 56 },
       candidates: [{ symbol: "SOLUSDT", candidateScore: 100 }],
@@ -319,29 +378,40 @@ test("stock Recognition accepts strong aggregate Judgement as a guarded archetyp
 test("stock Recognition rejects weak aggregate Judgement linkage", () => {
   const result = applyStockRecognitionDiagnostics({
     market: "BINANCE",
-    signals: [signal({
-      judgement: {
-        similarSampleSize: 1049,
-        reliability: 52,
-        outcomeStability: 77,
-        evidence: {
-          similarStates: 1049,
-          positiveOutcomes: 999,
-          negativeOutcomes: 50,
-          neutralOutcomes: 0,
+    signals: [
+      signal({
+        judgement: {
+          similarSampleSize: 1049,
+          reliability: 52,
+          outcomeStability: 77,
+          evidence: {
+            similarStates: 1049,
+            positiveOutcomes: 999,
+            negativeOutcomes: 50,
+            neutralOutcomes: 0,
+          },
         },
-      },
-    })],
+      }),
+    ],
     trades: [],
-    summary: { strategyReadiness: { components: { dataReliability: { score: 100 } } } },
+    summary: {
+      strategyReadiness: { components: { dataReliability: { score: 100 } } },
+    },
     opportunityDiscovery: {
       candidates: [{ symbol: "AAA", candidateScore: 82 }],
-      discovery: { confidence: 30, novelty: 90, memory: { similarOutcomes: 0 } },
+      discovery: {
+        confidence: 30,
+        novelty: 90,
+        memory: { similarOutcomes: 0 },
+      },
     },
   });
 
   assert.notEqual(result.signals[0]?.recognition.verdict, "recognized");
-  assert.equal(result.signals[0]?.recognition.judgementSimilarityJustified, false);
+  assert.equal(
+    result.signals[0]?.recognition.judgementSimilarityJustified,
+    false,
+  );
 });
 
 test("stock Recognition labels guarded aggregate Judgement archetypes by outcome mix", () => {
@@ -361,7 +431,11 @@ test("stock Recognition labels guarded aggregate Judgement archetypes by outcome
     }),
     trades: [],
     opportunityDiscovery: {
-      discovery: { confidence: 32, novelty: 88, memory: { similarOutcomes: 0 } },
+      discovery: {
+        confidence: 32,
+        novelty: 88,
+        memory: { similarOutcomes: 0 },
+      },
     },
   });
   const mixed = buildStockRecognitionInput({
@@ -381,7 +455,11 @@ test("stock Recognition labels guarded aggregate Judgement archetypes by outcome
     trades: [],
     summary: { dataReliability: { score: 95 } },
     opportunityDiscovery: {
-      discovery: { confidence: 32, novelty: 88, memory: { similarOutcomes: 0 } },
+      discovery: {
+        confidence: 32,
+        novelty: 88,
+        memory: { similarOutcomes: 0 },
+      },
     },
   });
 
@@ -409,7 +487,11 @@ test("stock Recognition rejects aggregate Judgement when market data reliability
     trades: [],
     summary: { dataReliability: { score: 60 } },
     opportunityDiscovery: {
-      discovery: { confidence: 30, novelty: 90, memory: { similarOutcomes: 0 } },
+      discovery: {
+        confidence: 30,
+        novelty: 90,
+        memory: { similarOutcomes: 0 },
+      },
     },
   });
 
@@ -420,7 +502,9 @@ test("stock Recognition input remains state-oriented and can use raw action inte
   const input = buildStockRecognitionInput({
     signal: signal(),
     trades: trades(3),
-    summary: { strategyReadiness: { components: { dataReliability: { score: 92 } } } },
+    summary: {
+      strategyReadiness: { components: { dataReliability: { score: 92 } } },
+    },
     opportunityDiscovery: {
       density: { density: 66, quality: 81 },
       discovery: { confidence: 40, novelty: 80 },
@@ -474,7 +558,10 @@ test("stock Recognition adapter covers fallback sources without changing decisio
   assert.equal(empty.recognitionDiagnostics.primary, null);
   assert.equal(result.recognitionDiagnostics.signals[0]?.symbol, "BBB");
   assert.equal(result.recognitionDiagnostics.signals[1]?.symbol, "");
-  assert.deepEqual(result.signals.map((item) => item.signalAction), ["Buy", "Buy"]);
+  assert.deepEqual(
+    result.signals.map((item) => item.signalAction),
+    ["Buy", "Buy"],
+  );
 });
 
 test("stock Recognition input normalizes action, outcome, and archetype fallbacks", () => {
@@ -502,7 +589,10 @@ test("stock Recognition input normalizes action, outcome, and archetype fallback
       { score: 0 },
       {},
     ],
-    summary: { dataReliability: { score: 88 }, recovery: { status: "recovering" } },
+    summary: {
+      dataReliability: { score: 88 },
+      recovery: { status: "recovering" },
+    },
   });
   const signalDiscoveryInput = buildStockRecognitionInput({
     signal: signal({
@@ -526,10 +616,7 @@ test("stock Recognition input normalizes action, outcome, and archetype fallback
   const negativeArchetypeInput = buildStockRecognitionInput({
     signal: signal(),
     candidate: { candidateScore: 50 },
-    trades: [
-      { returnPct: -1 },
-      { profitPct: -2 },
-    ],
+    trades: [{ returnPct: -1 }, { profitPct: -2 }],
   });
   const compactRecoveryInput = buildStockRecognitionInput({
     signal: signal({
@@ -557,20 +644,35 @@ test("stock Recognition input normalizes action, outcome, and archetype fallback
   assert.equal(fallbackInput.currentState?.signalConfidence, 75);
   assert.equal(fallbackInput.perception?.dataReliability, 88);
   assert.deepEqual(fallbackInput.recovery, { status: "recovering" });
-  assert.deepEqual(fallbackInput.outcomeSamples?.map((item) => item.success), [true, false, null, null]);
-  assert.deepEqual(fallbackInput.outcomeSamples?.map((item) => item.archetype), [
-    "stable_positive_state",
-    "stable_negative_state",
-    "mixed_recurring_state",
-    "mixed_recurring_state",
-  ]);
+  assert.deepEqual(
+    fallbackInput.outcomeSamples?.map((item) => item.success),
+    [true, false, null, null],
+  );
+  assert.deepEqual(
+    fallbackInput.outcomeSamples?.map((item) => item.archetype),
+    [
+      "stable_positive_state",
+      "stable_negative_state",
+      "mixed_recurring_state",
+      "mixed_recurring_state",
+    ],
+  );
   assert.deepEqual(fallbackInput.archetypes, []);
   assert.equal(allocationInput.currentState?.actionIntent, "Sell");
-  assert.equal(allocationInput.outcomeSamples?.[0]?.state?.actionIntent, "Sell");
+  assert.equal(
+    allocationInput.outcomeSamples?.[0]?.state?.actionIntent,
+    "Sell",
+  );
   assert.equal(emptyRawActionInput.currentState?.actionIntent, "");
-  assert.equal(emptyRawActionInput.outcomeSamples?.[0]?.state?.actionIntent, "Buy");
+  assert.equal(
+    emptyRawActionInput.outcomeSamples?.[0]?.state?.actionIntent,
+    "Buy",
+  );
   assert.equal(holdInput.currentState?.actionIntent, "Hold");
-  assert.equal(negativeArchetypeInput.archetypes?.[0]?.label, "stable_negative_state");
+  assert.equal(
+    negativeArchetypeInput.archetypes?.[0]?.label,
+    "stable_negative_state",
+  );
   assert.equal(negativeArchetypeInput.archetypes?.[0]?.confidence, 50);
   assert.deepEqual(compactRecoveryInput.recovery, {
     status: "recovering",

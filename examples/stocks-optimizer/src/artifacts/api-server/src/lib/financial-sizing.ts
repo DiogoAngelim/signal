@@ -6,12 +6,12 @@ import type {
   SizingResult,
 } from "../../../signal-framework/sizing/engine";
 import {
-  createViabilityReason,
-  evaluateViability,
   type ViabilityConstraintInput,
   type ViabilityInput,
   type ViabilityResult,
   type ViabilityVerdict,
+  createViabilityReason,
+  evaluateViability,
 } from "../../../signal-framework/viability/engine";
 import type { StockSurvivalMemoryDiagnostic } from "./survival-memory-adapter";
 
@@ -66,35 +66,64 @@ export type FinancialExposureSizingResult = {
   viabilityMarginOfSafety?: number;
 };
 
-export function financialExposureBandForSizingMode(mode: SizingMode, strategyCapPct: number): FinancialExposureBand {
+export function financialExposureBandForSizingMode(
+  mode: SizingMode,
+  strategyCapPct: number,
+): FinancialExposureBand {
   const cap = clamp(strategyCapPct);
   if (mode === "none") return { minPct: 0, maxPct: 0, label: "0%" };
-  if (mode === "micro") return { minPct: 0, maxPct: Math.min(5, cap), label: "0-5%" };
-  if (mode === "small") return { minPct: Math.min(5, cap), maxPct: Math.min(15, cap), label: "5-15%" };
-  if (mode === "normal") return { minPct: Math.min(15, cap), maxPct: Math.min(40, cap), label: "15-40%" };
-  if (mode === "large") return { minPct: Math.min(40, cap), maxPct: Math.min(70, cap), label: "40-70%" };
+  if (mode === "micro")
+    return { minPct: 0, maxPct: Math.min(5, cap), label: "0-5%" };
+  if (mode === "small")
+    return {
+      minPct: Math.min(5, cap),
+      maxPct: Math.min(15, cap),
+      label: "5-15%",
+    };
+  if (mode === "normal")
+    return {
+      minPct: Math.min(15, cap),
+      maxPct: Math.min(40, cap),
+      label: "15-40%",
+    };
+  if (mode === "large")
+    return {
+      minPct: Math.min(40, cap),
+      maxPct: Math.min(70, cap),
+      label: "40-70%",
+    };
   return { minPct: Math.min(70, cap), maxPct: cap, label: "strategy cap" };
 }
 
-export function sizeFinancialExposure(input: FinancialExposureSizingInput): FinancialExposureSizingResult {
+export function sizeFinancialExposure(
+  input: FinancialExposureSizingInput,
+): FinancialExposureSizingResult {
   const configuredMaxExposurePct = clamp(input.maxExposurePct);
   const survivalMultiplier = input.survivalMemory?.exposureMultiplier ?? 1;
-  const maxExposurePct = round(Math.min(
-    configuredMaxExposurePct,
-    configuredMaxExposurePct * survivalMultiplier,
-    input.survivalMemory?.maxExposurePct ?? configuredMaxExposurePct,
-  ));
-  const requestedExposurePct = clamp(input.requestedExposurePct, 0, maxExposurePct);
-  const availableExposurePct = input.availableExposurePct == null
-    ? maxExposurePct
-    : clamp(input.availableExposurePct, 0, maxExposurePct);
+  const maxExposurePct = round(
+    Math.min(
+      configuredMaxExposurePct,
+      configuredMaxExposurePct * survivalMultiplier,
+      input.survivalMemory?.maxExposurePct ?? configuredMaxExposurePct,
+    ),
+  );
+  const requestedExposurePct = clamp(
+    input.requestedExposurePct,
+    0,
+    maxExposurePct,
+  );
+  const availableExposurePct =
+    input.availableExposurePct == null
+      ? maxExposurePct
+      : clamp(input.availableExposurePct, 0, maxExposurePct);
   const sizingResult = sizeAdaptiveOpportunity({
     targetRef: input.targetRef,
     actionRef: input.actionRef,
     decisionRef: input.decisionRef,
     opportunityQuality: input.confidence,
     signalConfidence: input.confidence,
-    marketParticipation: maxExposurePct > 0 ? (requestedExposurePct / maxExposurePct) * 100 : 0,
+    marketParticipation:
+      maxExposurePct > 0 ? (requestedExposurePct / maxExposurePct) * 100 : 0,
     riskControl: 100 - input.riskPressure,
     perceptionAlignment: input.confidence,
     systemTrust: 70,
@@ -126,13 +155,19 @@ export function sizeFinancialExposure(input: FinancialExposureSizingInput): Fina
         context: input.viability.context,
       })
     : undefined;
-  const viabilityReason = viabilityResult ? createViabilityReason(viabilityResult) : undefined;
+  const viabilityReason = viabilityResult
+    ? createViabilityReason(viabilityResult)
+    : undefined;
   const viabilityAllowsExposure =
     !viabilityResult ||
     viabilityResult.verdict === "viable" ||
     viabilityResult.verdict === "marginal";
   const sizingReasons = unique([
-    ...survivalSizingReasons(input.survivalMemory, configuredMaxExposurePct, maxExposurePct),
+    ...survivalSizingReasons(
+      input.survivalMemory,
+      configuredMaxExposurePct,
+      maxExposurePct,
+    ),
     ...sizingResult.reasons,
     ...(viabilityReason ? [viabilityReason] : []),
     ...(viabilityResult?.warnings ?? []),
@@ -141,15 +176,28 @@ export function sizeFinancialExposure(input: FinancialExposureSizingInput): Fina
     ? { ...sizingResult, reasons: sizingReasons }
     : {
         ...sizingResult,
-        decision: sizingResult.decision === "blocked" || viabilityResult?.verdict === "blocked" ? "blocked" : "deferred",
+        decision:
+          sizingResult.decision === "blocked" ||
+          viabilityResult?.verdict === "blocked"
+            ? "blocked"
+            : "deferred",
         mode: "none",
         size: 0,
         normalizedSize: 0,
         reasons: sizingReasons,
       };
-  const exposureBand = financialExposureBandForSizingMode(effectiveSizingResult.mode, maxExposurePct);
+  const exposureBand = financialExposureBandForSizingMode(
+    effectiveSizingResult.mode,
+    maxExposurePct,
+  );
   const suggestedExposurePct = viabilityAllowsExposure
-    ? round(Math.min(effectiveSizingResult.size, exposureBand.maxPct, maxExposurePct))
+    ? round(
+        Math.min(
+          effectiveSizingResult.size,
+          exposureBand.maxPct,
+          maxExposurePct,
+        ),
+      )
     : 0;
 
   return {
@@ -170,17 +218,27 @@ export function sizeFinancialExposure(input: FinancialExposureSizingInput): Fina
   };
 }
 
-function survivalSizingConstraints(survivalMemory?: StockSurvivalMemoryDiagnostic | null): SizingConstraint[] {
-  if (!survivalMemory || survivalMemory.recordCount === 0 || survivalMemory.scarCount === 0) return [];
+function survivalSizingConstraints(
+  survivalMemory?: StockSurvivalMemoryDiagnostic | null,
+): SizingConstraint[] {
+  if (
+    !survivalMemory ||
+    survivalMemory.recordCount === 0 ||
+    survivalMemory.scarCount === 0
+  )
+    return [];
 
-  return [{
-    id: "survival-memory",
-    label: "Survival memory",
-    type: survivalMemory.recommendation === "wait" ? "hard" : "soft",
-    passed: survivalMemory.recommendation !== "wait",
-    severity: survivalMemory.recommendation === "wait" ? "high" : "medium",
-    reason: survivalMemory.reasons[0] ?? "Similar states carried survival scars.",
-  }];
+  return [
+    {
+      id: "survival-memory",
+      label: "Survival memory",
+      type: survivalMemory.recommendation === "wait" ? "hard" : "soft",
+      passed: survivalMemory.recommendation !== "wait",
+      severity: survivalMemory.recommendation === "wait" ? "high" : "medium",
+      reason:
+        survivalMemory.reasons[0] ?? "Similar states carried survival scars.",
+    },
+  ];
 }
 
 function survivalSizingReasons(
@@ -188,7 +246,12 @@ function survivalSizingReasons(
   configuredMaxExposurePct: number,
   maxExposurePct: number,
 ) {
-  if (!survivalMemory || survivalMemory.recordCount === 0 || survivalMemory.scarCount === 0) return [];
+  if (
+    !survivalMemory ||
+    survivalMemory.recordCount === 0 ||
+    survivalMemory.scarCount === 0
+  )
+    return [];
 
   const reasons = [
     `Survival memory capped max exposure from ${formatPct(configuredMaxExposurePct)} to ${formatPct(maxExposurePct)}.`,
@@ -196,7 +259,9 @@ function survivalSizingReasons(
   ];
 
   if (survivalMemory.recommendation === "wait") {
-    reasons.push("Survival memory requires waiting before normal opportunity sizing can expand exposure.");
+    reasons.push(
+      "Survival memory requires waiting before normal opportunity sizing can expand exposure.",
+    );
   }
 
   return reasons;

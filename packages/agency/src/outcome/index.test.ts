@@ -21,21 +21,27 @@ describe("outcome", () => {
   });
 
   it("infers labels from reward and loss values", () => {
-    expect(resolveOutcome({ reward: 5, loss: 2 }).outcomeLabel).toBe("positive");
+    expect(resolveOutcome({ reward: 5, loss: 2 }).outcomeLabel).toBe(
+      "positive",
+    );
     expect(resolveOutcome({ loss: 2 }).outcomeLabel).toBe("negative");
-    expect(resolveOutcome({ reward: 1, loss: 4 }).outcomeLabel).toBe("negative");
+    expect(resolveOutcome({ reward: 1, loss: 4 }).outcomeLabel).toBe(
+      "negative",
+    );
     expect(resolveOutcome({ reward: 3, loss: 3 }).outcomeLabel).toBe("neutral");
     expect(resolveOutcome({ reward: 0 }).outcomeLabel).toBe("neutral");
   });
 
   it("preserves explicit labels and measurable fields", () => {
-    expect(resolveOutcome({
-      success: null,
-      reward: 1,
-      loss: 0,
-      durationMs: 20,
-      outcomeLabel: "neutral",
-    })).toEqual({
+    expect(
+      resolveOutcome({
+        success: null,
+        reward: 1,
+        loss: 0,
+        durationMs: 20,
+        outcomeLabel: "neutral",
+      }),
+    ).toEqual({
       success: null,
       reward: 1,
       loss: 0,
@@ -45,8 +51,14 @@ describe("outcome", () => {
   });
 
   it("rejects negative measurable fields", () => {
-    expect(() => resolveOutcome({ reward: -1 })).toThrow("reward must be a non-negative number.");
-    expect(() => resolveOutcome({ loss: -1 })).toThrow("loss must be a non-negative number.");
-    expect(() => resolveOutcome({ durationMs: -1 })).toThrow("durationMs must be a non-negative number.");
+    expect(() => resolveOutcome({ reward: -1 })).toThrow(
+      "reward must be a non-negative number.",
+    );
+    expect(() => resolveOutcome({ loss: -1 })).toThrow(
+      "loss must be a non-negative number.",
+    );
+    expect(() => resolveOutcome({ durationMs: -1 })).toThrow(
+      "durationMs must be a non-negative number.",
+    );
   });
 });

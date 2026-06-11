@@ -4,10 +4,10 @@ import path from "node:path";
 import cors from "cors";
 import express, { type Request, type Response } from "express";
 import {
-  createBinanceExecutionModule,
   type BinanceExecutionDecision,
   type ExecutionOrderRecord,
   type ExecutionResult,
+  createBinanceExecutionModule,
 } from "../../api-server/src/modules/binance-execution/index.js";
 
 type RunOptions = {
@@ -93,7 +93,9 @@ type TakeProfitCheckResult = {
 function parseBoolean(value: unknown, fallback = false) {
   if (value == null || value === "") return fallback;
   if (typeof value === "boolean") return value;
-  return ["1", "true", "yes", "on"].includes(String(value).trim().toLowerCase());
+  return ["1", "true", "yes", "on"].includes(
+    String(value).trim().toLowerCase(),
+  );
 }
 
 function parseNumber(value: unknown, fallback: number) {
@@ -118,20 +120,28 @@ function takeProfitFeeBps() {
 }
 
 function takeProfitBufferBps() {
-  return Math.max(0, parseNumber(process.env.BINANCE_TAKE_PROFIT_BUFFER_BPS, 5));
+  return Math.max(
+    0,
+    parseNumber(process.env.BINANCE_TAKE_PROFIT_BUFFER_BPS, 5),
+  );
 }
 
 function takeProfitOrderType(): TakeProfitOrderType {
-  const value = envString("BINANCE_TAKE_PROFIT_ORDER_TYPE", "LIMIT").toUpperCase();
+  const value = envString(
+    "BINANCE_TAKE_PROFIT_ORDER_TYPE",
+    "LIMIT",
+  ).toUpperCase();
   return value === "LIMIT_MAKER" ? "LIMIT_MAKER" : "LIMIT";
 }
 
 function binanceBaseUrl() {
   const mode = binanceMode();
-  const fallback = mode === "testnet"
-    ? "https://testnet.binance.vision"
-    : "https://api.binance.com";
-  const envName = mode === "testnet" ? "BINANCE_TESTNET_BASE_URL" : "BINANCE_BASE_URL";
+  const fallback =
+    mode === "testnet"
+      ? "https://testnet.binance.vision"
+      : "https://api.binance.com";
+  const envName =
+    mode === "testnet" ? "BINANCE_TESTNET_BASE_URL" : "BINANCE_BASE_URL";
   return envString(envName, fallback).replace(/\/+$/, "");
 }
 
@@ -149,15 +159,19 @@ function bearerToken(req: Request) {
 }
 
 function adminSecret() {
-  return envString("BINANCE_WORKER_ADMIN_SECRET") ||
+  return (
+    envString("BINANCE_WORKER_ADMIN_SECRET") ||
     envString("BINANCE_EXECUTION_ADMIN_SECRET") ||
-    envString("ADMIN_SECRET");
+    envString("ADMIN_SECRET")
+  );
 }
 
 function hasAdminAccess(req: Request) {
   const secret = adminSecret();
   if (!secret) return false;
-  const headerToken = String(req.headers["x-binance-execution-secret"] ?? "").trim();
+  const headerToken = String(
+    req.headers["x-binance-execution-secret"] ?? "",
+  ).trim();
   return safeEqual(bearerToken(req), secret) || safeEqual(headerToken, secret);
 }
 
@@ -165,7 +179,8 @@ function requireAdmin(req: Request, res: Response) {
   if (hasAdminAccess(req)) return true;
   res.status(401).json({
     error: "Unauthorized",
-    message: "Binance execution worker requires BINANCE_WORKER_ADMIN_SECRET, BINANCE_EXECUTION_ADMIN_SECRET, or ADMIN_SECRET.",
+    message:
+      "Binance execution worker requires BINANCE_WORKER_ADMIN_SECRET, BINANCE_EXECUTION_ADMIN_SECRET, or ADMIN_SECRET.",
   });
   return false;
 }
@@ -175,44 +190,79 @@ function requestOptions(req: Request): RunOptions {
   const query = req.query as Record<string, unknown>;
   return {
     force: body.force === true || query.force === "true",
-    limit: parseNumber(body.limit ?? query.limit ?? process.env.BINANCE_WORKER_LIMIT, 20),
-    market: envString("BINANCE_WORKER_MARKET", "BINANCE") ||
-      String(body.market ?? query.market ?? "BINANCE").trim().toUpperCase(),
-    runtimeMode: String(body.runtimeMode ?? query.runtimeMode ?? process.env.BINANCE_WORKER_RUNTIME_MODE ?? ""),
-    strategyId: String(body.strategyId ?? query.strategyId ?? process.env.BINANCE_WORKER_STRATEGY_ID ?? "stocks-optimizer").trim(),
+    limit: parseNumber(
+      body.limit ?? query.limit ?? process.env.BINANCE_WORKER_LIMIT,
+      20,
+    ),
+    market:
+      envString("BINANCE_WORKER_MARKET", "BINANCE") ||
+      String(body.market ?? query.market ?? "BINANCE")
+        .trim()
+        .toUpperCase(),
+    runtimeMode: String(
+      body.runtimeMode ??
+        query.runtimeMode ??
+        process.env.BINANCE_WORKER_RUNTIME_MODE ??
+        "",
+    ),
+    strategyId: String(
+      body.strategyId ??
+        query.strategyId ??
+        process.env.BINANCE_WORKER_STRATEGY_ID ??
+        "stocks-optimizer",
+    ).trim(),
   };
 }
 
 function optimizerBaseUrl() {
-  return envString("STOCKS_OPTIMIZER_BASE_URL", "https://stocks-optimizer.vercel.app").replace(/\/+$/, "");
+  return envString(
+    "STOCKS_OPTIMIZER_BASE_URL",
+    "https://stocks-optimizer.vercel.app",
+  ).replace(/\/+$/, "");
 }
 
 function optimizerSecret() {
-  return envString("STOCKS_OPTIMIZER_EXECUTION_SECRET") ||
+  return (
+    envString("STOCKS_OPTIMIZER_EXECUTION_SECRET") ||
     envString("BINANCE_EXECUTION_ADMIN_SECRET") ||
-    envString("ADMIN_SECRET");
+    envString("ADMIN_SECRET")
+  );
 }
 
 function ignoreBaselineFile() {
-  return envString("BINANCE_WORKER_IGNORE_BASELINE_FILE") ||
-    path.resolve(process.cwd(), ".local-cache/binance-execution/ignored-current-signals.json");
+  return (
+    envString("BINANCE_WORKER_IGNORE_BASELINE_FILE") ||
+    path.resolve(
+      process.cwd(),
+      ".local-cache/binance-execution/ignored-current-signals.json",
+    )
+  );
 }
 
 function clearedSignalsFile() {
-  return envString("BINANCE_WORKER_CLEARED_SIGNALS_FILE") ||
-    path.resolve(process.cwd(), ".local-cache/binance-execution/cleared-signals.json");
+  return (
+    envString("BINANCE_WORKER_CLEARED_SIGNALS_FILE") ||
+    path.resolve(
+      process.cwd(),
+      ".local-cache/binance-execution/cleared-signals.json",
+    )
+  );
 }
 
 function readIgnoredBaseline(): IgnoredSignalBaseline | null {
   try {
     const file = ignoreBaselineFile();
     if (!fs.existsSync(file)) return null;
-    const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as Partial<IgnoredSignalBaseline>;
+    const parsed = JSON.parse(
+      fs.readFileSync(file, "utf8"),
+    ) as Partial<IgnoredSignalBaseline>;
     if (!Array.isArray(parsed.fingerprints)) return null;
     return {
       createdAt: String(parsed.createdAt ?? new Date(0).toISOString()),
       fingerprints: parsed.fingerprints.map(String),
-      decisions: Array.isArray(parsed.decisions) ? parsed.decisions as IgnoredSignalBaseline["decisions"] : [],
+      decisions: Array.isArray(parsed.decisions)
+        ? (parsed.decisions as IgnoredSignalBaseline["decisions"])
+        : [],
     };
   } catch {
     return null;
@@ -242,7 +292,7 @@ function isClearedSignalRecord(value: unknown): value is ClearedSignalRecord {
       Number.isFinite(Number(record.entryPrice)) &&
       Number.isFinite(Number(record.currentPrice)) &&
       Number.isFinite(Number(record.targetPrice)) &&
-      Number.isFinite(Number(record.expectedMovePct))
+      Number.isFinite(Number(record.expectedMovePct)),
   );
 }
 
@@ -250,14 +300,20 @@ function readClearedSignalStore(): ClearedSignalStore {
   try {
     const file = clearedSignalsFile();
     if (!fs.existsSync(file)) return emptyClearedSignalStore();
-    const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as Partial<ClearedSignalStore>;
+    const parsed = JSON.parse(
+      fs.readFileSync(file, "utf8"),
+    ) as Partial<ClearedSignalStore>;
     const signals = Array.isArray(parsed.signals)
       ? parsed.signals.filter(isClearedSignalRecord)
       : [];
-    const fingerprints = Array.from(new Set([
-      ...(Array.isArray(parsed.fingerprints) ? parsed.fingerprints.map(String) : []),
-      ...signals.map((signal) => signal.fingerprint),
-    ]));
+    const fingerprints = Array.from(
+      new Set([
+        ...(Array.isArray(parsed.fingerprints)
+          ? parsed.fingerprints.map(String)
+          : []),
+        ...signals.map((signal) => signal.fingerprint),
+      ]),
+    );
     return {
       updatedAt: String(parsed.updatedAt ?? new Date(0).toISOString()),
       fingerprints,
@@ -307,17 +363,13 @@ function writeClearedSignalStore(signals: ClearedSignalRecord[]) {
 function clearIgnoredBaseline() {
   try {
     fs.rmSync(ignoreBaselineFile(), { force: true });
-  } catch {
-    
-  }
+  } catch {}
 }
 
 function clearClearedSignals() {
   try {
     fs.rmSync(clearedSignalsFile(), { force: true });
-  } catch {
-    
-  }
+  } catch {}
 }
 
 function decisionFingerprint(decision: BinanceExecutionDecision) {
@@ -360,7 +412,9 @@ function clearReachedSignal(input: {
   };
   const current = readClearedSignalStore();
   return writeClearedSignalStore([
-    ...current.signals.filter((existing) => existing.fingerprint !== fingerprint),
+    ...current.signals.filter(
+      (existing) => existing.fingerprint !== fingerprint,
+    ),
     signal,
   ]);
 }
@@ -424,16 +478,22 @@ function decisionUrl(options: RunOptions) {
   const url = new URL("/api/binance-execution/decisions", optimizerBaseUrl());
   url.searchParams.set("market", options.market ?? "BINANCE");
   url.searchParams.set("strategyId", options.strategyId ?? "stocks-optimizer");
-  url.searchParams.set("limit", String(Math.max(1, Math.min(options.limit ?? 20, 100))));
+  url.searchParams.set(
+    "limit",
+    String(Math.max(1, Math.min(options.limit ?? 20, 100))),
+  );
   if (options.force) url.searchParams.set("force", "true");
-  if (options.runtimeMode) url.searchParams.set("runtimeMode", options.runtimeMode);
+  if (options.runtimeMode)
+    url.searchParams.set("runtimeMode", options.runtimeMode);
   return url;
 }
 
 async function fetchDecisionPayload(options: RunOptions) {
   const secret = optimizerSecret();
   if (!secret) {
-    throw new Error("STOCKS_OPTIMIZER_EXECUTION_SECRET or BINANCE_EXECUTION_ADMIN_SECRET is required to fetch decisions");
+    throw new Error(
+      "STOCKS_OPTIMIZER_EXECUTION_SECRET or BINANCE_EXECUTION_ADMIN_SECRET is required to fetch decisions",
+    );
   }
 
   const response = await fetch(decisionUrl(options), {
@@ -444,9 +504,11 @@ async function fetchDecisionPayload(options: RunOptions) {
   });
 
   const text = await response.text();
-  const payload = text ? JSON.parse(text) as DecisionPayload : {};
+  const payload = text ? (JSON.parse(text) as DecisionPayload) : {};
   if (!response.ok) {
-    throw new Error(`decision fetch failed: ${response.status} ${JSON.stringify(payload)}`);
+    throw new Error(
+      `decision fetch failed: ${response.status} ${JSON.stringify(payload)}`,
+    );
   }
 
   return {
@@ -459,8 +521,14 @@ function takeProfitDecisionId(order: ExecutionOrderRecord) {
   return `tp:${order.clientOrderId}`;
 }
 
-function decisionForOrder(order: ExecutionOrderRecord, decisions: Array<{ decisionId: string; decision: BinanceExecutionDecision }>) {
-  return decisions.find((record) => record.decisionId === order.decisionId)?.decision ?? null;
+function decisionForOrder(
+  order: ExecutionOrderRecord,
+  decisions: Array<{ decisionId: string; decision: BinanceExecutionDecision }>,
+) {
+  return (
+    decisions.find((record) => record.decisionId === order.decisionId)
+      ?.decision ?? null
+  );
 }
 
 function expectedMovePctFor(decision: BinanceExecutionDecision | null) {
@@ -468,7 +536,10 @@ function expectedMovePctFor(decision: BinanceExecutionDecision | null) {
   return Number.isFinite(value) && value > 0 ? value : null;
 }
 
-function entryPriceFor(order: ExecutionOrderRecord, decision: BinanceExecutionDecision | null) {
+function entryPriceFor(
+  order: ExecutionOrderRecord,
+  decision: BinanceExecutionDecision | null,
+) {
   const candidates = [
     order.price,
     decision?.price,
@@ -484,20 +555,29 @@ function entryPriceFor(order: ExecutionOrderRecord, decision: BinanceExecutionDe
 function takeProfitTargetPrice(entryPrice: number, expectedMovePct: number) {
   const expectedMoveFraction = expectedMovePct / 100;
   const costFraction = (takeProfitFeeBps() + takeProfitBufferBps()) / 10_000;
-  return Number((entryPrice * (1 + expectedMoveFraction) * (1 + costFraction)).toFixed(12));
+  return Number(
+    (entryPrice * (1 + expectedMoveFraction) * (1 + costFraction)).toFixed(12),
+  );
 }
 
 function existingTakeProfitCreated(
   order: ExecutionOrderRecord,
-  state: { decisions: Array<{ decisionId: string }>; orders: ExecutionOrderRecord[] },
+  state: {
+    decisions: Array<{ decisionId: string }>;
+    orders: ExecutionOrderRecord[];
+  },
 ) {
   const decisionId = takeProfitDecisionId(order);
-  return state.decisions.some((decision) => decision.decisionId === decisionId) ||
-    state.orders.some((existing) => existing.decisionId === decisionId);
+  return (
+    state.decisions.some((decision) => decision.decisionId === decisionId) ||
+    state.orders.some((existing) => existing.decisionId === decisionId)
+  );
 }
 
 async function tickerPrice(symbol: string, fallback: number) {
-  const symbolOverride = envString(`BINANCE_TAKE_PROFIT_PRICE_${symbol.toUpperCase()}`);
+  const symbolOverride = envString(
+    `BINANCE_TAKE_PROFIT_PRICE_${symbol.toUpperCase()}`,
+  );
   const dryRunOverride = envString("BINANCE_TAKE_PROFIT_DRY_RUN_PRICE");
   const override = symbolOverride || dryRunOverride;
   const overridePrice = Number(override);
@@ -506,7 +586,10 @@ async function tickerPrice(symbol: string, fallback: number) {
 
   const url = new URL("/api/v3/ticker/price", binanceBaseUrl());
   url.searchParams.set("symbol", symbol);
-  const timeoutMs = Math.max(1_000, parseNumber(process.env.BINANCE_REQUEST_TIMEOUT_MS, 10_000));
+  const timeoutMs = Math.max(
+    1_000,
+    parseNumber(process.env.BINANCE_REQUEST_TIMEOUT_MS, 10_000),
+  );
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -516,15 +599,19 @@ async function tickerPrice(symbol: string, fallback: number) {
     });
     if (response.status === 418) {
       executionModule.enableKillSwitch("binance_418:take_profit_ticker");
-      throw new Error("Binance IP ban protection activated during take-profit ticker check");
+      throw new Error(
+        "Binance IP ban protection activated during take-profit ticker check",
+      );
     }
-    const payload = await response.json() as { price?: string };
+    const payload = (await response.json()) as { price?: string };
     if (!response.ok) {
       throw new Error(`take-profit ticker failed: ${response.status}`);
     }
     const price = Number(payload.price);
     if (!Number.isFinite(price) || price <= 0) {
-      throw new Error(`take-profit ticker returned invalid price for ${symbol}`);
+      throw new Error(
+        `take-profit ticker returned invalid price for ${symbol}`,
+      );
     }
     return price;
   } finally {
@@ -532,7 +619,9 @@ async function tickerPrice(symbol: string, fallback: number) {
   }
 }
 
-async function checkTakeProfitOrders(trigger = "manual"): Promise<TakeProfitCheckResult> {
+async function checkTakeProfitOrders(
+  trigger = "manual",
+): Promise<TakeProfitCheckResult> {
   const checkedAt = new Date().toISOString();
   if (!takeProfitEnabled()) {
     return {
@@ -547,10 +636,12 @@ async function checkTakeProfitOrders(trigger = "manual"): Promise<TakeProfitChec
 
   await executionModule.syncAccountState();
   const state = executionModule.getExecutionState();
-  const buyOrders = state.orders.filter((order) =>
-    order.side === "BUY" &&
-    order.status.toUpperCase() === "FILLED" &&
-    !order.decisionId.startsWith("tp:"));
+  const buyOrders = state.orders.filter(
+    (order) =>
+      order.side === "BUY" &&
+      order.status.toUpperCase() === "FILLED" &&
+      !order.decisionId.startsWith("tp:"),
+  );
   const candidates: TakeProfitCandidate[] = [];
 
   for (const order of buyOrders) {
@@ -562,19 +653,32 @@ async function checkTakeProfitOrders(trigger = "manual"): Promise<TakeProfitChec
     };
 
     if (existingTakeProfitCreated(order, state)) {
-      candidates.push({ ...baseCandidate, status: "skipped", reason: "take_profit_already_created" });
+      candidates.push({
+        ...baseCandidate,
+        status: "skipped",
+        reason: "take_profit_already_created",
+      });
       continue;
     }
 
     const expectedMovePct = expectedMovePctFor(decision);
     if (expectedMovePct == null) {
-      candidates.push({ ...baseCandidate, status: "skipped", reason: "missing_expected_move" });
+      candidates.push({
+        ...baseCandidate,
+        status: "skipped",
+        reason: "missing_expected_move",
+      });
       continue;
     }
 
     const entryPrice = entryPriceFor(order, decision);
     if (entryPrice == null) {
-      candidates.push({ ...baseCandidate, status: "skipped", reason: "missing_entry_price", expectedMovePct });
+      candidates.push({
+        ...baseCandidate,
+        status: "skipped",
+        reason: "missing_entry_price",
+        expectedMovePct,
+      });
       continue;
     }
 
@@ -617,7 +721,10 @@ async function checkTakeProfitOrders(trigger = "manual"): Promise<TakeProfitChec
 
       candidates.push({
         ...baseCandidate,
-        status: result.status === "failed" || result.status === "rejected" ? "failed" : "triggered",
+        status:
+          result.status === "failed" || result.status === "rejected"
+            ? "failed"
+            : "triggered",
         reason: result.reasons[0],
         entryPrice,
         currentPrice,
@@ -626,7 +733,11 @@ async function checkTakeProfitOrders(trigger = "manual"): Promise<TakeProfitChec
         result,
       });
 
-      if (result.status !== "failed" && result.status !== "rejected" && decision) {
+      if (
+        result.status !== "failed" &&
+        result.status !== "rejected" &&
+        decision
+      ) {
         clearReachedSignal({
           order,
           decision,
@@ -668,20 +779,29 @@ function mergeTakeProfitResults(
     enabled: first.enabled || second.enabled,
     trigger: first.trigger,
     checkedAt: second.checkedAt,
-    inspectedOrderCount: Math.max(first.inspectedOrderCount, second.inspectedOrderCount),
+    inspectedOrderCount: Math.max(
+      first.inspectedOrderCount,
+      second.inspectedOrderCount,
+    ),
     candidates: [...first.candidates, ...second.candidates],
   };
 }
 
 const app = express();
 const executionModule = createBinanceExecutionModule();
-const autoExecute = parseBoolean(process.env.BINANCE_WORKER_AUTO_EXECUTE, false);
+const autoExecute = parseBoolean(
+  process.env.BINANCE_WORKER_AUTO_EXECUTE,
+  false,
+);
 const requireIgnoredBaseline = parseBoolean(
   process.env.BINANCE_WORKER_REQUIRE_IGNORE_BASELINE ??
     process.env.BINANCE_WORKER_IGNORE_BASELINE_REQUIRED,
   false,
 );
-const intervalMs = Math.max(10_000, parseNumber(process.env.BINANCE_WORKER_INTERVAL_MS, 60_000));
+const intervalMs = Math.max(
+  10_000,
+  parseNumber(process.env.BINANCE_WORKER_INTERVAL_MS, 60_000),
+);
 let runInFlight = false;
 let lastRun: unknown = null;
 let lastRunAt: string | null = null;
@@ -702,7 +822,9 @@ async function runOnce(options: RunOptions = {}) {
   runInFlight = true;
   try {
     const decisionPayload = await fetchDecisionPayload(options);
-    const preExecutionTakeProfit = await checkTakeProfitOrders(options.trigger ?? "manual");
+    const preExecutionTakeProfit = await checkTakeProfitOrders(
+      options.trigger ?? "manual",
+    );
     const decisions = decisionPayload.decisions ?? [];
     const filtered = filterIgnoredDecisions(decisions);
     if (requireIgnoredBaseline && !filtered.baseline) {
@@ -731,8 +853,14 @@ async function runOnce(options: RunOptions = {}) {
     const postExecutionTakeProfit = filtered.accepted.length
       ? await checkTakeProfitOrders(options.trigger ?? "manual")
       : null;
-    const takeProfit = mergeTakeProfitResults(preExecutionTakeProfit, postExecutionTakeProfit);
-    const ok = results.every((result) => result.status !== "failed" && result.status !== "rejected") && takeProfit.ok;
+    const takeProfit = mergeTakeProfitResults(
+      preExecutionTakeProfit,
+      postExecutionTakeProfit,
+    );
+    const ok =
+      results.every(
+        (result) => result.status !== "failed" && result.status !== "rejected",
+      ) && takeProfit.ok;
     lastRunAt = new Date().toISOString();
     const cleared = readClearedSignalStore();
     lastRun = {
@@ -871,7 +999,9 @@ app.post("/execute", async (req, res) => {
 
   const results = await executionModule.executeDecisions(decisions);
   res.json({
-    ok: results.every((result) => result.status !== "failed" && result.status !== "rejected"),
+    ok: results.every(
+      (result) => result.status !== "failed" && result.status !== "rejected",
+    ),
     results,
   });
 });
@@ -888,11 +1018,16 @@ app.post("/run-once", async (req, res) => {
 
 app.post("/kill-switch", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  const action = String(req.body?.action ?? req.query.action ?? "enable").trim().toLowerCase();
-  const reason = String(req.body?.reason ?? req.query.reason ?? "operator_request");
-  const killSwitch = action === "disable"
-    ? executionModule.disableKillSwitch(reason)
-    : executionModule.enableKillSwitch(reason);
+  const action = String(req.body?.action ?? req.query.action ?? "enable")
+    .trim()
+    .toLowerCase();
+  const reason = String(
+    req.body?.reason ?? req.query.reason ?? "operator_request",
+  );
+  const killSwitch =
+    action === "disable"
+      ? executionModule.disableKillSwitch(reason)
+      : executionModule.enableKillSwitch(reason);
   res.json({ ok: true, killSwitch });
 });
 
@@ -903,28 +1038,36 @@ app.delete("/orders/:orderId", async (req, res) => {
 
 app.delete("/orders", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  const symbol = req.query.symbol ? String(req.query.symbol).trim().toUpperCase() : undefined;
+  const symbol = req.query.symbol
+    ? String(req.query.symbol).trim().toUpperCase()
+    : undefined;
   res.json({ cancelled: await executionModule.cancelAll(symbol) });
 });
 
 function scheduleNextRun(delayMs = intervalMs) {
-  setTimeout(async () => {
-    try {
-      await runOnce({
-        limit: parseNumber(process.env.BINANCE_WORKER_LIMIT, 20),
-        market: envString("BINANCE_WORKER_MARKET", "BINANCE"),
-        runtimeMode: envString("BINANCE_WORKER_RUNTIME_MODE"),
-        strategyId: envString("BINANCE_WORKER_STRATEGY_ID", "stocks-optimizer"),
-        trigger: "interval",
-      });
-    } catch (error) {
-      console.warn("binance worker auto-run failed", {
-        error: error instanceof Error ? error.message : String(error),
-      });
-    } finally {
-      scheduleNextRun();
-    }
-  }, Math.max(0, delayMs)).unref();
+  setTimeout(
+    async () => {
+      try {
+        await runOnce({
+          limit: parseNumber(process.env.BINANCE_WORKER_LIMIT, 20),
+          market: envString("BINANCE_WORKER_MARKET", "BINANCE"),
+          runtimeMode: envString("BINANCE_WORKER_RUNTIME_MODE"),
+          strategyId: envString(
+            "BINANCE_WORKER_STRATEGY_ID",
+            "stocks-optimizer",
+          ),
+          trigger: "interval",
+        });
+      } catch (error) {
+        console.warn("binance worker auto-run failed", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      } finally {
+        scheduleNextRun();
+      }
+    },
+    Math.max(0, delayMs),
+  ).unref();
 }
 
 if (autoExecute) {

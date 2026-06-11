@@ -149,7 +149,9 @@ export function evaluateEvidence(input: EvidenceInput): EvidenceResult {
   const confidence = score(input.confidence, DEFAULT_EVIDENCE_CONFIDENCE);
   const weight = score(input.weight, DEFAULT_EVIDENCE_WEIGHT);
   const weightedStrength = roundScore(strength * (confidence / 100) * weight);
-  const reason = String(input.reason ?? "").trim() || defaultEvidenceReason(name, direction, strength);
+  const reason =
+    String(input.reason ?? "").trim() ||
+    defaultEvidenceReason(name, direction, strength);
 
   return {
     name,
@@ -174,14 +176,17 @@ export function calculateEvidenceAgreement(results: EvidenceResult[]): number {
 
   if (directionalTotal <= 0) return 50;
 
-  return roundScore((Math.max(support, contradiction) / directionalTotal) * 100);
+  return roundScore(
+    (Math.max(support, contradiction) / directionalTotal) * 100,
+  );
 }
 
 export function calculateBeliefFragility(
   input: BeliefInput,
   evidence: EvidenceResult[],
 ): number {
-  return calculateBeliefMetrics(input, Array.isArray(evidence) ? evidence : []).fragility;
+  return calculateBeliefMetrics(input, Array.isArray(evidence) ? evidence : [])
+    .fragility;
 }
 
 export function createBeliefReason(result: BeliefResult): string {
@@ -195,24 +200,41 @@ export function createBeliefReason(result: BeliefResult): string {
   const evidencePhrase = [
     support ? `top support: ${support}` : "",
     contradiction ? `top contradiction: ${contradiction}` : "",
-  ].filter(Boolean).join("; ");
+  ]
+    .filter(Boolean)
+    .join("; ");
 
   return [
     `Belief is ${result.verdict} for "${result.claim}"`,
     `with confidence ${formatScore(result.confidence)}, trustworthiness ${formatScore(result.trustworthiness)}, and fragility ${formatScore(result.fragility)}.`,
-    evidencePhrase ? `Evidence ${evidencePhrase}.` : "No directional evidence is available.",
+    evidencePhrase
+      ? `Evidence ${evidencePhrase}.`
+      : "No directional evidence is available.",
     suffix.trim(),
-  ].filter(Boolean).join(" ");
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
-function calculateBeliefMetrics(input: BeliefInput, evidence: EvidenceResult[]): BeliefMetrics {
-  const priorConfidence = score(input.priorConfidence, DEFAULT_PRIOR_CONFIDENCE);
+function calculateBeliefMetrics(
+  input: BeliefInput,
+  evidence: EvidenceResult[],
+): BeliefMetrics {
+  const priorConfidence = score(
+    input.priorConfidence,
+    DEFAULT_PRIOR_CONFIDENCE,
+  );
   const uncertainty = score(input.uncertainty, DEFAULT_UNCERTAINTY);
   const minimumEvidenceCount = Math.max(
     1,
-    Math.round(score(input.minimumEvidenceCount, DEFAULT_MINIMUM_EVIDENCE_COUNT)),
+    Math.round(
+      score(input.minimumEvidenceCount, DEFAULT_MINIMUM_EVIDENCE_COUNT),
+    ),
   );
-  const minimumCoverage = score(input.minimumCoverage, DEFAULT_MINIMUM_COVERAGE);
+  const minimumCoverage = score(
+    input.minimumCoverage,
+    DEFAULT_MINIMUM_COVERAGE,
+  );
   const contradictionTolerance = score(
     input.contradictionTolerance,
     DEFAULT_CONTRADICTION_TOLERANCE,
@@ -221,7 +243,9 @@ function calculateBeliefMetrics(input: BeliefInput, evidence: EvidenceResult[]):
   const contradictionStrength = directionalStrength(evidence, "contradict");
   const neutralStrength = directionalStrength(evidence, "neutral");
   const evidenceAgreement = calculateEvidenceAgreement(evidence);
-  const averageEvidenceConfidence = roundScore(mean(evidence.map((item) => item.confidence)));
+  const averageEvidenceConfidence = roundScore(
+    mean(evidence.map((item) => item.confidence)),
+  );
   const evidenceStrength = roundScore(
     Math.max(supportStrength, contradictionStrength, neutralStrength),
   );
@@ -280,7 +304,10 @@ function calculateBeliefMetrics(input: BeliefInput, evidence: EvidenceResult[]):
   };
 }
 
-function resolveVerdict(metrics: BeliefMetrics, evidence: EvidenceResult[]): BeliefVerdict {
+function resolveVerdict(
+  metrics: BeliefMetrics,
+  evidence: EvidenceResult[],
+): BeliefVerdict {
   if (!evidence.length) return "uncertain";
 
   if (
@@ -320,14 +347,19 @@ function collectWarnings(metrics: BeliefMetrics, evidence: EvidenceResult[]) {
     );
   }
 
-  if (evidence.length > 0 && metrics.evidenceCoverage < metrics.minimumCoverage) {
+  if (
+    evidence.length > 0 &&
+    metrics.evidenceCoverage < metrics.minimumCoverage
+  ) {
     warnings.push(
       `Evidence coverage ${formatScore(metrics.evidenceCoverage)} is below minimum ${formatScore(metrics.minimumCoverage)}.`,
     );
   }
 
   if (metrics.uncertainty >= 60) {
-    warnings.push(`Uncertainty is high at ${formatScore(metrics.uncertainty)}.`);
+    warnings.push(
+      `Uncertainty is high at ${formatScore(metrics.uncertainty)}.`,
+    );
   }
 
   if (evidence.length > 0 && metrics.averageEvidenceConfidence < 50) {
@@ -337,7 +369,9 @@ function collectWarnings(metrics: BeliefMetrics, evidence: EvidenceResult[]) {
   }
 
   if (metrics.sourceDominance >= 70) {
-    warnings.push(`One evidence source dominates ${formatScore(metrics.sourceDominance)} of source weight.`);
+    warnings.push(
+      `One evidence source dominates ${formatScore(metrics.sourceDominance)} of source weight.`,
+    );
   }
 
   if (
@@ -374,7 +408,9 @@ function collectBlockers(
     verdict === "contradicted" &&
     metrics.contradictionStrength > metrics.supportStrength
   ) {
-    blockers.push("Contradictory evidence is stronger than supporting evidence.");
+    blockers.push(
+      "Contradictory evidence is stronger than supporting evidence.",
+    );
   }
 
   if (metrics.contradictionStrength >= 60) {
@@ -382,14 +418,21 @@ function collectBlockers(
   }
 
   if (evidence.length > 0 && metrics.confidence < 55) {
-    blockers.push(`Confidence ${formatScore(metrics.confidence)} is below weak-belief threshold.`);
+    blockers.push(
+      `Confidence ${formatScore(metrics.confidence)} is below weak-belief threshold.`,
+    );
   }
 
   if (evidence.length > 0 && metrics.trustworthiness < 50) {
-    blockers.push(`Trustworthiness ${formatScore(metrics.trustworthiness)} is below minimum.`);
+    blockers.push(
+      `Trustworthiness ${formatScore(metrics.trustworthiness)} is below minimum.`,
+    );
   }
 
-  if (evidence.length > 0 && metrics.evidenceCoverage < metrics.minimumCoverage) {
+  if (
+    evidence.length > 0 &&
+    metrics.evidenceCoverage < metrics.minimumCoverage
+  ) {
     blockers.push("Evidence coverage is insufficient.");
   }
 
@@ -400,19 +443,29 @@ function collectBlockers(
   return unique(blockers);
 }
 
-function evidenceByDirection(evidence: EvidenceResult[], direction: EvidenceDirection) {
+function evidenceByDirection(
+  evidence: EvidenceResult[],
+  direction: EvidenceDirection,
+) {
   return evidence
     .filter((item) => item.direction === direction)
-    .sort((a, b) => b.weightedStrength - a.weightedStrength || a.name.localeCompare(b.name));
+    .sort(
+      (a, b) =>
+        b.weightedStrength - a.weightedStrength || a.name.localeCompare(b.name),
+    );
 }
 
-function directionalStrength(evidence: EvidenceResult[], direction: EvidenceDirection) {
+function directionalStrength(
+  evidence: EvidenceResult[],
+  direction: EvidenceDirection,
+) {
   const directional = evidence.filter((item) => item.direction === direction);
   const totalWeight = directional.reduce((sum, item) => sum + item.weight, 0);
   if (totalWeight <= 0) return 0;
 
   return roundScore(
-    directional.reduce((sum, item) => sum + item.weightedStrength, 0) / totalWeight,
+    directional.reduce((sum, item) => sum + item.weightedStrength, 0) /
+      totalWeight,
   );
 }
 
@@ -434,7 +487,10 @@ function sourceDominanceScore(evidence: EvidenceResult[]) {
   for (const item of evidence) {
     const sourceKey = String(item.source ?? `evidence:${item.name}`);
     const sourceWeight = item.weight * (item.confidence / 100);
-    sourceWeights.set(sourceKey, (sourceWeights.get(sourceKey) ?? 0) + sourceWeight);
+    sourceWeights.set(
+      sourceKey,
+      (sourceWeights.get(sourceKey) ?? 0) + sourceWeight,
+    );
     totalWeight += sourceWeight;
   }
 
@@ -469,7 +525,11 @@ function topEvidenceName(evidence: EvidenceResult[]) {
   return top ? `${top.name} (${formatScore(top.weightedStrength)})` : "";
 }
 
-function defaultEvidenceReason(name: string, direction: EvidenceDirection, strength: number) {
+function defaultEvidenceReason(
+  name: string,
+  direction: EvidenceDirection,
+  strength: number,
+) {
   return `${name} provides ${direction} evidence with strength ${formatScore(strength)}.`;
 }
 
@@ -478,7 +538,11 @@ function safeEvidence(evidence: EvidenceInput[] | undefined) {
 }
 
 function normalizeDirection(direction: EvidenceDirection): EvidenceDirection {
-  if (direction === "support" || direction === "contradict" || direction === "neutral") {
+  if (
+    direction === "support" ||
+    direction === "contradict" ||
+    direction === "neutral"
+  ) {
     return direction;
   }
 

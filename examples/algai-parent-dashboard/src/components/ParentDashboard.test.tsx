@@ -1,5 +1,5 @@
-import { renderToString } from "react-dom/server";
 import { demoLearningSummaries } from "@/api/mockData";
+import { renderToString } from "react-dom/server";
 import { LearningReview, ParentDashboard } from "./ParentDashboard";
 
 describe("ParentDashboard", () => {
@@ -11,14 +11,16 @@ describe("ParentDashboard", () => {
           id: "google-parent.rivera@example.com",
           email: "parent.rivera@example.com",
           name: "Parent Rivera",
-          provider: "google"
+          provider: "google",
         }}
         onSignOut={() => undefined}
-      />
+      />,
     );
 
     expect(html).toContain("Mia Rivera");
-    expect(html).toContain("Read together for 15 minutes three times this week.");
+    expect(html).toContain(
+      "Read together for 15 minutes three times this week.",
+    );
     expect(html).toContain("Parent access validated");
     for (const restrictedWord of ["b" + "uy", "s" + "ell", "port" + "folio"]) {
       expect(html).not.toContain(restrictedWord);
@@ -26,7 +28,9 @@ describe("ParentDashboard", () => {
   });
 
   it("renders evidence-centered decision quality for learning review", () => {
-    const html = renderToString(<LearningReview dashboard={demoLearningSummaries[0]!} />);
+    const html = renderToString(
+      <LearningReview dashboard={demoLearningSummaries[0]!} />,
+    );
 
     expect(html).toContain("What AlgAI knows and still needs to check");
     expect(html).toContain("Contradictory indicators");
@@ -42,10 +46,10 @@ describe("ParentDashboard", () => {
           id: "google-parent.rivera@example.com",
           email: "parent.rivera@example.com",
           name: "Parent Rivera",
-          provider: "google"
+          provider: "google",
         }}
         onSignOut={() => undefined}
-      />
+      />,
     );
 
     expect(html).toContain("associated students");

@@ -1,6 +1,12 @@
-import type { AgencyCausalChain, AgencyMemoryStore, AgencyTrace } from "../types";
+import type {
+  AgencyCausalChain,
+  AgencyMemoryStore,
+  AgencyTrace,
+} from "../types";
 
-export function createInMemoryAgencyMemory(initialTraces: readonly AgencyTrace[] = []): AgencyMemoryStore {
+export function createInMemoryAgencyMemory(
+  initialTraces: readonly AgencyTrace[] = [],
+): AgencyMemoryStore {
   const traces = [...initialTraces];
 
   return {

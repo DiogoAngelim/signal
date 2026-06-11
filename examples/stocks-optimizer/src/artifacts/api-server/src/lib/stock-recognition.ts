@@ -1,8 +1,8 @@
 import {
-  recognizeState,
   type RecognitionInput,
   type RecognitionResult,
   type RecognitionVerdict,
+  recognizeState,
 } from "../../../signal-framework/recognition/engine";
 
 export type StockRecognitionSignal = {
@@ -43,12 +43,16 @@ export type StockRecognitionDiagnostics = {
   }>;
 };
 
-export type StockRecognitionApplicationResult<T extends StockRecognitionSignal> = {
+export type StockRecognitionApplicationResult<
+  T extends StockRecognitionSignal,
+> = {
   signals: Array<T & { recognition: RecognitionResult }>;
   recognitionDiagnostics: StockRecognitionDiagnostics;
 };
 
-export function applyStockRecognitionDiagnostics<T extends StockRecognitionSignal>(input: {
+export function applyStockRecognitionDiagnostics<
+  T extends StockRecognitionSignal,
+>(input: {
   market: string;
   signals: T[];
   trades?: unknown[];
@@ -56,16 +60,21 @@ export function applyStockRecognitionDiagnostics<T extends StockRecognitionSigna
   opportunityDiscovery?: any;
 }): StockRecognitionApplicationResult<T> {
   const candidates = new Map(
-    array(input.opportunityDiscovery?.candidates).map((candidate: any) => [symbolOf(candidate), candidate]),
+    array(input.opportunityDiscovery?.candidates).map((candidate: any) => [
+      symbolOf(candidate),
+      candidate,
+    ]),
   );
   const signals = input.signals.map((signal) => {
-    const recognition = recognizeState(buildStockRecognitionInput({
-      signal,
-      candidate: candidates.get(symbolOf(signal)),
-      trades: input.trades,
-      summary: input.summary,
-      opportunityDiscovery: input.opportunityDiscovery,
-    }));
+    const recognition = recognizeState(
+      buildStockRecognitionInput({
+        signal,
+        candidate: candidates.get(symbolOf(signal)),
+        trades: input.trades,
+        summary: input.summary,
+        opportunityDiscovery: input.opportunityDiscovery,
+      }),
+    );
 
     return {
       ...signal,
@@ -88,27 +97,50 @@ export function buildStockRecognitionInput(input: {
 }): RecognitionInput {
   const signal = input.signal;
   const candidate = input.candidate ?? signal.opportunityDiscovery ?? {};
-  const genericDiscovery = candidate.discovery ?? signal.opportunityDiscovery?.discovery ?? input.opportunityDiscovery?.discovery ?? null;
+  const genericDiscovery =
+    candidate.discovery ??
+    signal.opportunityDiscovery?.discovery ??
+    input.opportunityDiscovery?.discovery ??
+    null;
   const judgement = signal.judgement ?? null;
-  const survivalMemory = signal.survivalMemory ?? judgement?.survivalMemory ?? null;
+  const survivalMemory =
+    signal.survivalMemory ?? judgement?.survivalMemory ?? null;
   const historyDiagnostics = historyDiagnosticsFromSummary(input.summary);
   const rawAction = actionIntentFor(signal);
   const currentState = {
     actionIntent: rawAction,
     setupQuality: finiteNumber(signal.setupQuality),
     riskPressure: finiteNumber(signal.riskPressure),
-    signalConfidence: finiteNumber(signal.calibratedConfidence ?? signal.signalConfidence ?? signal.rawConfidence),
-    regimeType: historyDiagnostics?.currentRegime ?? signal.diagnostic?.regime ?? (signal as any).regime,
+    signalConfidence: finiteNumber(
+      signal.calibratedConfidence ??
+        signal.signalConfidence ??
+        signal.rawConfidence,
+    ),
+    regimeType:
+      historyDiagnostics?.currentRegime ??
+      signal.diagnostic?.regime ??
+      (signal as any).regime,
   };
   const perception = {
-    opportunityDensity: finiteNumber(input.opportunityDiscovery?.density?.density),
-    opportunityQuality: finiteNumber(candidate.candidateScore ?? input.opportunityDiscovery?.density?.quality),
+    opportunityDensity: finiteNumber(
+      input.opportunityDiscovery?.density?.density,
+    ),
+    opportunityQuality: finiteNumber(
+      candidate.candidateScore ?? input.opportunityDiscovery?.density?.quality,
+    ),
     readinessScore: finiteNumber(input.summary?.readinessScore),
-    dataReliability: finiteNumber(input.summary?.strategyReadiness?.components?.dataReliability?.score ?? input.summary?.dataReliability?.score),
+    dataReliability: finiteNumber(
+      input.summary?.strategyReadiness?.components?.dataReliability?.score ??
+        input.summary?.dataReliability?.score,
+    ),
     historyDepthScore: finiteNumber(historyDiagnostics?.historyDepthScore),
     regimeCoverageScore: finiteNumber(historyDiagnostics?.regimeCoverageScore),
-    regimeDiversityScore: finiteNumber(historyDiagnostics?.regimeDiversityScore),
-    sampleDiversityScore: finiteNumber(historyDiagnostics?.sampleDiversityScore),
+    regimeDiversityScore: finiteNumber(
+      historyDiagnostics?.regimeDiversityScore,
+    ),
+    sampleDiversityScore: finiteNumber(
+      historyDiagnostics?.sampleDiversityScore,
+    ),
   };
 
   return {
@@ -118,11 +150,17 @@ export function buildStockRecognitionInput(input: {
     discovery: genericDiscovery,
     judgement,
     survivalMemory,
-    recovery: compactRecoveryContext(signal.recovery ?? input.summary?.recovery ?? null),
+    recovery: compactRecoveryContext(
+      signal.recovery ?? input.summary?.recovery ?? null,
+    ),
     historicalStates: historyStateSamples(historyDiagnostics, rawAction),
     outcomeSamples: tradeOutcomeSamples(input.trades, rawAction),
     archetypes: [
-      ...archetypesFromHistoryDiagnostics(historyDiagnostics, currentState, perception),
+      ...archetypesFromHistoryDiagnostics(
+        historyDiagnostics,
+        currentState,
+        perception,
+      ),
       ...archetypesFromCandidate(candidate, input.trades),
       ...archetypesFromJudgement({
         currentState,
@@ -142,12 +180,17 @@ function historyDiagnosticsFromSummary(summary?: Record<string, any>) {
     summary?.robustnessDiagnostics?.historyDiagnostics ??
     null;
 
-  return diagnostics && typeof diagnostics === "object" && !Array.isArray(diagnostics)
-    ? diagnostics as NonNullable<RecognitionInput["historyDiagnostics"]>
+  return diagnostics &&
+    typeof diagnostics === "object" &&
+    !Array.isArray(diagnostics)
+    ? (diagnostics as NonNullable<RecognitionInput["historyDiagnostics"]>)
     : null;
 }
 
-function historyStateSamples(historyDiagnostics: RecognitionInput["historyDiagnostics"], actionIntent: string) {
+function historyStateSamples(
+  historyDiagnostics: RecognitionInput["historyDiagnostics"],
+  actionIntent: string,
+) {
   if (!historyDiagnostics) return [];
   const regimes = historyDiagnostics.keyRegimesCovered?.length
     ? historyDiagnostics.keyRegimesCovered
@@ -182,51 +225,97 @@ function archetypesFromHistoryDiagnostics(
   const regimes = historyDiagnostics.keyRegimesCovered?.length
     ? historyDiagnostics.keyRegimesCovered
     : Object.keys(historyDiagnostics.regimeCounts ?? {});
-  const sampleSize = regimes.reduce((sum, regime) => sum + Math.max(0, Math.round(finiteNumber(historyDiagnostics.regimeCounts?.[regime]) ?? 1)), 0);
+  const sampleSize = regimes.reduce(
+    (sum, regime) =>
+      sum +
+      Math.max(
+        0,
+        Math.round(
+          finiteNumber(historyDiagnostics.regimeCounts?.[regime]) ?? 1,
+        ),
+      ),
+    0,
+  );
   if (!regimes.length || sampleSize <= 0) return [];
 
-  return [{
-    id: "long-history-regime-archetype",
-    label: `${historyDiagnostics.currentRegime ?? "multi"}_regime_state`,
-    state: currentState,
-    perception,
-    confidence: Math.min(95, Math.max(50, finiteNumber(historyDiagnostics.regimeCoverageScore) ?? 50)),
-    sampleSize,
-    positiveOutcomes: 0,
-    negativeOutcomes: 0,
-    neutralOutcomes: sampleSize,
-    outcomeStability: Math.min(95, Math.max(40, finiteNumber(historyDiagnostics.sampleDiversityScore) ?? 50)),
-    metadata: {
-      source: "long-history",
-      regimes,
+  return [
+    {
+      id: "long-history-regime-archetype",
+      label: `${historyDiagnostics.currentRegime ?? "multi"}_regime_state`,
+      state: currentState,
+      perception,
+      confidence: Math.min(
+        95,
+        Math.max(
+          50,
+          finiteNumber(historyDiagnostics.regimeCoverageScore) ?? 50,
+        ),
+      ),
+      sampleSize,
+      positiveOutcomes: 0,
+      negativeOutcomes: 0,
+      neutralOutcomes: sampleSize,
+      outcomeStability: Math.min(
+        95,
+        Math.max(
+          40,
+          finiteNumber(historyDiagnostics.sampleDiversityScore) ?? 50,
+        ),
+      ),
+      metadata: {
+        source: "long-history",
+        regimes,
+      },
     },
-  }];
+  ];
 }
 
-function tradeOutcomeSamples(trades: unknown[] | undefined, actionIntent: string) {
+function tradeOutcomeSamples(
+  trades: unknown[] | undefined,
+  actionIntent: string,
+) {
   return array(trades).map((trade: any, index) => {
-    const realized = finiteNumber(trade?.returnPct ?? trade?.profitPct ?? trade?.value ?? trade?.score) ?? 0;
+    const realized =
+      finiteNumber(
+        trade?.returnPct ?? trade?.profitPct ?? trade?.value ?? trade?.score,
+      ) ?? 0;
 
     return {
       id: String(trade?.id ?? trade?.tradeId ?? `trade:${index + 1}`),
       state: {
-        actionIntent: String(trade?.rawAction ?? trade?.action ?? (actionIntent || "Buy")),
+        actionIntent: String(
+          trade?.rawAction ?? trade?.action ?? (actionIntent || "Buy"),
+        ),
         setupQuality: finiteNumber(trade?.setupQuality),
         riskPressure: finiteNumber(trade?.riskPressure),
-        signalConfidence: finiteNumber(trade?.confidence ?? trade?.signalConfidence),
+        signalConfidence: finiteNumber(
+          trade?.confidence ?? trade?.signalConfidence,
+        ),
       },
       value: realized,
       success: realized > 0 ? true : realized < 0 ? false : null,
-      archetype: realized > 0 ? "stable_positive_state" : realized < 0 ? "stable_negative_state" : "mixed_recurring_state",
+      archetype:
+        realized > 0
+          ? "stable_positive_state"
+          : realized < 0
+            ? "stable_negative_state"
+            : "mixed_recurring_state",
       confidence: finiteNumber(trade?.confidence ?? trade?.signalConfidence),
     };
   });
 }
 
-function archetypesFromCandidate(candidate: any, trades: unknown[] | undefined) {
+function archetypesFromCandidate(
+  candidate: any,
+  trades: unknown[] | undefined,
+) {
   const closed = array(trades);
   const outcomes = closed
-    .map((trade: any) => finiteNumber(trade?.returnPct ?? trade?.profitPct ?? trade?.value ?? trade?.score))
+    .map((trade: any) =>
+      finiteNumber(
+        trade?.returnPct ?? trade?.profitPct ?? trade?.value ?? trade?.score,
+      ),
+    )
     .filter((value): value is number => value != null);
   if (!outcomes.length) return [];
 
@@ -236,23 +325,37 @@ function archetypesFromCandidate(candidate: any, trades: unknown[] | undefined) 
   const setupQuality = finiteNumber(candidate?.candidateScore);
   if (setupQuality == null) return [];
 
-  return [{
-    id: "candidate-outcome-archetype",
-    label: positiveOutcomes >= negativeOutcomes ? "stable_positive_state" : "stable_negative_state",
-    state: {
-      setupQuality,
+  return [
+    {
+      id: "candidate-outcome-archetype",
+      label:
+        positiveOutcomes >= negativeOutcomes
+          ? "stable_positive_state"
+          : "stable_negative_state",
+      state: {
+        setupQuality,
+      },
+      confidence: Math.min(
+        95,
+        Math.max(50, (positiveOutcomes / Math.max(1, outcomes.length)) * 100),
+      ),
+      sampleSize: outcomes.length,
+      positiveOutcomes,
+      negativeOutcomes,
+      neutralOutcomes,
+      outcomeStability: Math.max(
+        0,
+        (Math.max(positiveOutcomes, negativeOutcomes, neutralOutcomes) /
+          outcomes.length) *
+          100,
+      ),
     },
-    confidence: Math.min(95, Math.max(50, (positiveOutcomes / Math.max(1, outcomes.length)) * 100)),
-    sampleSize: outcomes.length,
-    positiveOutcomes,
-    negativeOutcomes,
-    neutralOutcomes,
-    outcomeStability: Math.max(0, (Math.max(positiveOutcomes, negativeOutcomes, neutralOutcomes) / outcomes.length) * 100),
-  }];
+  ];
 }
 
 function compactRecoveryContext(recovery: any) {
-  if (!recovery || typeof recovery !== "object" || Array.isArray(recovery)) return null;
+  if (!recovery || typeof recovery !== "object" || Array.isArray(recovery))
+    return null;
 
   const context: Record<string, string | number> = {};
   const status = stringValue(recovery.status);
@@ -266,7 +369,8 @@ function compactRecoveryContext(recovery: any) {
   if (mode) context.mode = mode;
   if (recoveryScore != null) context.recoveryScore = recoveryScore;
   if (trustedCapacity != null) context.trustedCapacity = trustedCapacity;
-  if (recommendedExposureCap != null) context.recommendedExposureCap = recommendedExposureCap;
+  if (recommendedExposureCap != null)
+    context.recommendedExposureCap = recommendedExposureCap;
   if (confidenceCapLift != null) context.confidenceCapLift = confidenceCapLift;
 
   return Object.keys(context).length ? context : null;
@@ -284,14 +388,31 @@ function archetypesFromJudgement(input: {
     Math.round(finiteNumber(judgement?.similarSampleSize) ?? 0),
     Math.round(finiteNumber(evidence.similarStates) ?? 0),
   );
-  const positiveOutcomes = Math.max(0, Math.round(finiteNumber(evidence.positiveOutcomes) ?? 0));
-  const negativeOutcomes = Math.max(0, Math.round(finiteNumber(evidence.negativeOutcomes) ?? 0));
-  const neutralOutcomes = Math.max(0, Math.round(finiteNumber(evidence.neutralOutcomes) ?? 0));
+  const positiveOutcomes = Math.max(
+    0,
+    Math.round(finiteNumber(evidence.positiveOutcomes) ?? 0),
+  );
+  const negativeOutcomes = Math.max(
+    0,
+    Math.round(finiteNumber(evidence.negativeOutcomes) ?? 0),
+  );
+  const neutralOutcomes = Math.max(
+    0,
+    Math.round(finiteNumber(evidence.neutralOutcomes) ?? 0),
+  );
   const outcomeCount = positiveOutcomes + negativeOutcomes + neutralOutcomes;
   const reliability = finiteNumber(judgement?.reliability) ?? 0;
-  const outcomeStability = finiteNumber(judgement?.outcomeStability) ?? finiteNumber(evidence.consistency) ?? 0;
-  const dataReliability = finiteNumber(input.summary?.strategyReadiness?.components?.dataReliability?.score ?? input.summary?.dataReliability?.score);
-  const stateFeatureCount = Object.values(input.currentState).filter((value) => value != null && value !== "").length;
+  const outcomeStability =
+    finiteNumber(judgement?.outcomeStability) ??
+    finiteNumber(evidence.consistency) ??
+    0;
+  const dataReliability = finiteNumber(
+    input.summary?.strategyReadiness?.components?.dataReliability?.score ??
+      input.summary?.dataReliability?.score,
+  );
+  const stateFeatureCount = Object.values(input.currentState).filter(
+    (value) => value != null && value !== "",
+  ).length;
   const hasStrongLinkage =
     similarStates >= 12 &&
     outcomeCount >= 5 &&
@@ -302,38 +423,49 @@ function archetypesFromJudgement(input: {
 
   if (!hasStrongLinkage) return [];
 
-  const dominantOutcomes = Math.max(positiveOutcomes, negativeOutcomes, neutralOutcomes);
-  const dominantRatio = dominantOutcomes / outcomeCount;
-  const label = dominantRatio >= 0.7 && positiveOutcomes === dominantOutcomes
-    ? "stable_positive_state"
-    : dominantRatio >= 0.7 && negativeOutcomes === dominantOutcomes
-      ? "stable_negative_state"
-      : "mixed_recurring_state";
-  const sampleConfidence = Math.min(100, (similarStates / 16) * 100);
-  const confidence = Math.min(95, Math.max(60, (
-    reliability * 0.35 +
-    outcomeStability * 0.35 +
-    sampleConfidence * 0.2 +
-    (dataReliability ?? reliability) * 0.1
-  )));
-
-  return [{
-    id: "judgement-outcome-archetype",
-    label,
-    state: input.currentState,
-    perception: input.perception,
-    confidence,
-    sampleSize: similarStates,
+  const dominantOutcomes = Math.max(
     positiveOutcomes,
     negativeOutcomes,
     neutralOutcomes,
-    outcomeStability,
-    metadata: {
-      source: "judgement",
-      reliability,
-      similarStates,
+  );
+  const dominantRatio = dominantOutcomes / outcomeCount;
+  const label =
+    dominantRatio >= 0.7 && positiveOutcomes === dominantOutcomes
+      ? "stable_positive_state"
+      : dominantRatio >= 0.7 && negativeOutcomes === dominantOutcomes
+        ? "stable_negative_state"
+        : "mixed_recurring_state";
+  const sampleConfidence = Math.min(100, (similarStates / 16) * 100);
+  const confidence = Math.min(
+    95,
+    Math.max(
+      60,
+      reliability * 0.35 +
+        outcomeStability * 0.35 +
+        sampleConfidence * 0.2 +
+        (dataReliability ?? reliability) * 0.1,
+    ),
+  );
+
+  return [
+    {
+      id: "judgement-outcome-archetype",
+      label,
+      state: input.currentState,
+      perception: input.perception,
+      confidence,
+      sampleSize: similarStates,
+      positiveOutcomes,
+      negativeOutcomes,
+      neutralOutcomes,
+      outcomeStability,
+      metadata: {
+        source: "judgement",
+        reliability,
+        similarStates,
+      },
     },
-  }];
+  ];
 }
 
 function summarizeRecognitionDiagnostics(
@@ -351,10 +483,13 @@ function summarizeRecognitionDiagnostics(
     verdictCounts[signal.recognition.verdict] += 1;
   }
 
-  const primary = [...signals].sort((left, right) =>
-    right.recognition.recognitionScore - left.recognition.recognitionScore ||
-    symbolOf(left).localeCompare(symbolOf(right)),
-  )[0]?.recognition ?? null;
+  const primary =
+    [...signals].sort(
+      (left, right) =>
+        right.recognition.recognitionScore -
+          left.recognition.recognitionScore ||
+        symbolOf(left).localeCompare(symbolOf(right)),
+    )[0]?.recognition ?? null;
 
   return {
     module: "stocks.recognition-adapter",
@@ -365,7 +500,8 @@ function summarizeRecognitionDiagnostics(
       verdict: signal.recognition.verdict,
       recognitionScore: signal.recognition.recognitionScore,
       recurrenceConfidence: signal.recognition.recurrenceConfidence,
-      historicalSimilarityConfidence: signal.recognition.historicalSimilarityConfidence,
+      historicalSimilarityConfidence:
+        signal.recognition.historicalSimilarityConfidence,
       noveltyScore: signal.recognition.noveltyScore,
       archetype: signal.recognition.archetype,
       matchedSamples: signal.recognition.matchedSamples,
@@ -374,11 +510,18 @@ function summarizeRecognitionDiagnostics(
 }
 
 function actionIntentFor(signal: StockRecognitionSignal) {
-  return String(signal.diagnostic?.rawAction ?? signal.signalAction ?? signal.allocationAction ?? "Hold");
+  return String(
+    signal.diagnostic?.rawAction ??
+      signal.signalAction ??
+      signal.allocationAction ??
+      "Hold",
+  );
 }
 
 function symbolOf(value: any) {
-  return String(value?.symbol ?? value?.ticker ?? "").trim().toUpperCase();
+  return String(value?.symbol ?? value?.ticker ?? "")
+    .trim()
+    .toUpperCase();
 }
 
 function finiteNumber(value: unknown) {

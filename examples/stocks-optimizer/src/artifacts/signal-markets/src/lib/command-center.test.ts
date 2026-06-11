@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  type CommandCenterInput,
   buildCommandCenterViewModel,
   deriveAchievements,
   deriveBosses,
@@ -10,7 +11,6 @@ import {
   deriveOperatorXp,
   deriveSkillTree,
   deriveWorldMap,
-  type CommandCenterInput,
 } from "./command-center";
 
 const restorationProgress = {
@@ -94,8 +94,12 @@ describe("command center derivation", () => {
     expect(level.title).toBe("Portfolio Commander");
     expect(level.nextTitle).toBe("Institutional Operator");
     expect(xp.current).toBeGreaterThan(450);
-    expect(xp.sources.find((source) => source.label === "History Depth")?.xp).toBe(55);
-    expect(xp.sources.find((source) => source.label === "Calibration")?.xp).toBe(85);
+    expect(
+      xp.sources.find((source) => source.label === "History Depth")?.xp,
+    ).toBe(55);
+    expect(
+      xp.sources.find((source) => source.label === "Calibration")?.xp,
+    ).toBe(85);
   });
 
   it("derives campaign progression, missions, bosses, and unlock cards", () => {
@@ -151,19 +155,30 @@ describe("command center derivation", () => {
       } as any,
     });
 
-    expect(skills.find((skill) => skill.label === "Trust")?.state).toBe("Mature");
-    expect(skills.find((skill) => skill.label === "Recognition")?.state).toBe("Mature");
+    expect(skills.find((skill) => skill.label === "Trust")?.state).toBe(
+      "Mature",
+    );
+    expect(skills.find((skill) => skill.label === "Recognition")?.state).toBe(
+      "Mature",
+    );
     expect(regions.map((region) => region.label)).toContain("Recovery Region");
     expect(
-      achievements.find((achievement) => achievement.id === "first-clean-outcome")
-        ?.unlocked,
+      achievements.find(
+        (achievement) => achievement.id === "first-clean-outcome",
+      )?.unlocked,
     ).toBe(true);
     expect(identity.className).toBe("Probe Operator");
     expect(model.prestige.tier).toBe("Prestige III");
     expect(model.operatorClass).toBe("Institutional Operator");
     expect(model.reputation.rank).toBe("Institutional");
-    expect(model.badges.map((badge) => badge.id)).toContain("institutional-operator");
-    expect(model.campaignHistory.map((campaign) => campaign.name)).toContain("Restore Trading Authorization");
-    expect(model.unlockHistory.map((unlock) => unlock.id)).toContain("prestige-eligibility");
+    expect(model.badges.map((badge) => badge.id)).toContain(
+      "institutional-operator",
+    );
+    expect(model.campaignHistory.map((campaign) => campaign.name)).toContain(
+      "Restore Trading Authorization",
+    );
+    expect(model.unlockHistory.map((unlock) => unlock.id)).toContain(
+      "prestige-eligibility",
+    );
   });
 });

@@ -41,10 +41,21 @@ function redactValue(value: unknown, seen: WeakSet<object>): unknown {
   return output;
 }
 
-function write(level: "info" | "warn" | "error" | "debug", payload: unknown, message?: string) {
+function write(
+  level: "info" | "warn" | "error" | "debug",
+  payload: unknown,
+  message?: string,
+) {
   const clean = redactSecrets(payload);
   if (level === "debug" && process.env.LOG_LEVEL !== "debug") return;
-  const fn = level === "error" ? console.error : level === "warn" ? console.warn : level === "debug" ? console.debug : console.log;
+  const fn =
+    level === "error"
+      ? console.error
+      : level === "warn"
+        ? console.warn
+        : level === "debug"
+          ? console.debug
+          : console.log;
   if (message) fn(message, clean);
   else fn(clean);
 }

@@ -1,5 +1,5 @@
-import { runSignalQueueWorker } from "../queues/signal-queue.js";
 import { logger } from "../lib/logger.js";
+import { runSignalQueueWorker } from "../queues/signal-queue.js";
 
 const controller = new AbortController();
 

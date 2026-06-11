@@ -46,13 +46,18 @@ export interface SignalLogger {
   error(entry: Omit<SignalLogEntry, "level" | "timestamp">): void;
 }
 
-export function createConsoleLogger(minLevel: SignalLogLevel = "info"): SignalLogger {
+export function createConsoleLogger(
+  minLevel: SignalLogLevel = "info",
+): SignalLogger {
   const shouldLog = (level: SignalLogLevel): boolean => {
     const levels: SignalLogLevel[] = ["debug", "info", "warn", "error"];
     return levels.indexOf(level) >= levels.indexOf(minLevel);
   };
 
-  const log = (level: SignalLogLevel, entry: Omit<SignalLogEntry, "level" | "timestamp">): void => {
+  const log = (
+    level: SignalLogLevel,
+    entry: Omit<SignalLogEntry, "level" | "timestamp">,
+  ): void => {
     if (!shouldLog(level)) return;
     const full: SignalLogEntry = {
       ...entry,
@@ -61,9 +66,15 @@ export function createConsoleLogger(minLevel: SignalLogLevel = "info"): SignalLo
     } as SignalLogEntry;
     const output = JSON.stringify(full);
     switch (level) {
-      case "error": console.error(output); break;
-      case "warn": console.warn(output); break;
-      default: console.log(output); break;
+      case "error":
+        console.error(output);
+        break;
+      case "warn":
+        console.warn(output);
+        break;
+      default:
+        console.log(output);
+        break;
     }
   };
 
@@ -76,22 +87,50 @@ export function createConsoleLogger(minLevel: SignalLogLevel = "info"): SignalLo
 }
 
 export interface SignalMetricsRecorder {
-  increment(name: string, value?: number, labels?: Record<string, string>): void;
+  increment(
+    name: string,
+    value?: number,
+    labels?: Record<string, string>,
+  ): void;
   gauge(name: string, value: number, labels?: Record<string, string>): void;
-  timing(name: string, durationMs: number, labels?: Record<string, string>): void;
+  timing(
+    name: string,
+    durationMs: number,
+    labels?: Record<string, string>,
+  ): void;
 }
 
-export function createInMemoryMetricsRecorder(): SignalMetricsRecorder & { snapshot(): SignalMetric[]} {
+export function createInMemoryMetricsRecorder(): SignalMetricsRecorder & {
+  snapshot(): SignalMetric[];
+} {
   const metrics: SignalMetric[] = [];
   return {
     increment(name, value = 1, labels = {}) {
-      metrics.push({ name, value, unit: "count", labels, timestamp: new Date().toISOString() });
+      metrics.push({
+        name,
+        value,
+        unit: "count",
+        labels,
+        timestamp: new Date().toISOString(),
+      });
     },
     gauge(name, value, labels = {}) {
-      metrics.push({ name, value, unit: "gauge", labels, timestamp: new Date().toISOString() });
+      metrics.push({
+        name,
+        value,
+        unit: "gauge",
+        labels,
+        timestamp: new Date().toISOString(),
+      });
     },
     timing(name, durationMs, labels = {}) {
-      metrics.push({ name, value: durationMs, unit: "ms", labels, timestamp: new Date().toISOString() });
+      metrics.push({
+        name,
+        value: durationMs,
+        unit: "ms",
+        labels,
+        timestamp: new Date().toISOString(),
+      });
     },
     snapshot() {
       return [...metrics];

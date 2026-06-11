@@ -44,7 +44,7 @@ export function executeInstallHooks(root: string = process.cwd()): boolean {
   }
 
   // Get or create scripts section
-  const scripts = (packageJson["scripts"] ?? {}) as Record<string, string>;
+  const scripts = (packageJson.scripts ?? {}) as Record<string, string>;
   let modified = false;
 
   for (const [key, value] of Object.entries(SIGNAL_SCRIPTS)) {
@@ -63,10 +63,10 @@ export function executeInstallHooks(root: string = process.cwd()): boolean {
   }
 
   if (modified) {
-    packageJson["scripts"] = scripts;
+    packageJson.scripts = scripts;
     writeFileSync(
       packageJsonPath,
-      JSON.stringify(packageJson, null, 2) + "\n",
+      `${JSON.stringify(packageJson, null, 2)}\n`,
       "utf8",
     );
     console.log("");

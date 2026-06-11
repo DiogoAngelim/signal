@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { ok, fail, signalResultSchema } from "../src/result";
+import { describe, expect, it } from "vitest";
 import { createSignalError, signalErrorSchema } from "../src/errors";
+import { fail, ok, signalResultSchema } from "../src/result";
 
 describe("result.ts uncovered branch", () => {
   it("ok() sets default outcome to 'completed' if not provided", () => {
@@ -12,7 +12,10 @@ describe("result.ts uncovered branch", () => {
   });
 
   it("ok() preserves explicit outcome if provided", () => {
-    const result = ok({ foo: 2 }, { outcome: "replayed", context: { messageId: "id2" } });
+    const result = ok(
+      { foo: 2 },
+      { outcome: "replayed", context: { messageId: "id2" } },
+    );
     expect(result.meta?.outcome).toBe("replayed");
     expect(result.meta?.context?.messageId).toBe("id2");
   });

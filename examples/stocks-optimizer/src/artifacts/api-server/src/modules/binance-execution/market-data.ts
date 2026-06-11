@@ -1,10 +1,6 @@
 import type { BinanceOpenOrder, BinanceTrade } from "./types";
 
-export type DryRunSimulation =
-  | "fill"
-  | "partial_fill"
-  | "reject"
-  | "cancel";
+export type DryRunSimulation = "fill" | "partial_fill" | "reject" | "cancel";
 
 export class DryRunSimulator {
   private sequence = 1;
@@ -19,7 +15,9 @@ export class DryRunSimulator {
 
   referencePrice(symbol: string, fallback = 1) {
     const value = this.options.priceBySymbol?.[symbol.toUpperCase()];
-    return Number.isFinite(value) && Number(value) > 0 ? Number(value) : fallback;
+    return Number.isFinite(value) && Number(value) > 0
+      ? Number(value)
+      : fallback;
   }
 
   placeOrder(order: {
@@ -31,8 +29,20 @@ export class DryRunSimulator {
     type: string;
   }): BinanceOpenOrder {
     const mode = this.options.simulation ?? "fill";
-    const executedQty = mode === "partial_fill" ? order.quantity / 2 : mode === "reject" ? 0 : order.quantity;
-    const status = mode === "partial_fill" ? "PARTIALLY_FILLED" : mode === "reject" ? "REJECTED" : mode === "cancel" ? "CANCELED" : "FILLED";
+    const executedQty =
+      mode === "partial_fill"
+        ? order.quantity / 2
+        : mode === "reject"
+          ? 0
+          : order.quantity;
+    const status =
+      mode === "partial_fill"
+        ? "PARTIALLY_FILLED"
+        : mode === "reject"
+          ? "REJECTED"
+          : mode === "cancel"
+            ? "CANCELED"
+            : "FILLED";
     const now = this.options.now?.() ?? new Date();
 
     return {

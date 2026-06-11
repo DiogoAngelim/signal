@@ -1,17 +1,17 @@
-import { motion } from "framer-motion";
 import { Navbar } from "@/components/navbar";
-import { Link } from "wouter";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
   BarChart3,
-  ShieldCheck,
-  Zap,
-  LineChart,
   Eye,
   LayoutTemplate,
-  Wallet,
+  LineChart,
+  ShieldCheck,
   TrendingUp,
+  Wallet,
+  Zap,
 } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Landing() {
   return (
@@ -29,7 +29,7 @@ export default function Landing() {
               className="mx-auto max-w-4xl"
             >
               <div className="mb-6 inline-flex items-center rounded-md border border-[#FDD000]/30 bg-[#FDD000]/10 px-3 py-1 text-sm font-medium text-[#FDD000]">
-                <span className="mr-2 flex h-2 w-2 rounded-full bg-[#FDD000]"></span>
+                <span className="mr-2 flex h-2 w-2 rounded-full bg-[#FDD000]" />
                 Live market signals with simple confidence scores
               </div>
               <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl leading-[1.1]">
@@ -90,9 +90,7 @@ export default function Landing() {
                     </div>
                   </div>
                   <div className="w-full sm:w-auto text-left sm:text-right">
-                    <p className="mb-1 text-sm text-zinc-400">
-                      Data status
-                    </p>
+                    <p className="mb-1 text-sm text-zinc-400">Data status</p>
                     <span className="inline-flex items-center rounded-md border border-[#FDD000]/30 bg-[#FDD000]/10 px-2.5 py-0.5 text-xs font-medium text-[#FDD000]">
                       Signals active
                     </span>
@@ -104,7 +102,7 @@ export default function Landing() {
                       key={i}
                       className="h-32 rounded-lg border border-white/10 bg-white/[0.06] animate-pulse"
                       style={{ animationDelay: `${i * 0.15}s` }}
-                    ></div>
+                    />
                   ))}
                 </div>
               </div>
@@ -251,9 +249,7 @@ export default function Landing() {
                 <ul className="space-y-4 text-zinc-400">
                   <li className="flex gap-3">
                     <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FDD000]" />
-                    <span>
-                      Signal direction with a confidence score.
-                    </span>
+                    <span>Signal direction with a confidence score.</span>
                   </li>
                   <li className="flex gap-3">
                     <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FDD000]" />

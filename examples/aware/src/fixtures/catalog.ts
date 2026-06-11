@@ -1,4 +1,8 @@
-import type { AwareFixtureScenario, FixtureScenarioId, Region } from "../contracts.js";
+import type {
+  AwareFixtureScenario,
+  FixtureScenarioId,
+  Region,
+} from "../contracts.js";
 
 export const AWARE_FIXTURE_IDS = [
   "normal-day",
@@ -8,7 +12,7 @@ export const AWARE_FIXTURE_IDS = [
   "poor-air-quality-day",
   "mosquito-activity-warning",
   "multiple-simultaneous-risks",
-  "source-unavailable"
+  "source-unavailable",
 ] as const satisfies readonly FixtureScenarioId[];
 
 export const fixtureRegions: Region[] = [
@@ -21,7 +25,7 @@ export const fixtureRegions: Region[] = [
     longitude: -80.1918,
     timezone: "America/New_York",
     searchTerms: ["miami", "miami-dade", "florida", "south florida"],
-    defaultFixtureId: "multiple-simultaneous-risks"
+    defaultFixtureId: "multiple-simultaneous-risks",
   },
   {
     id: "phoenix-az",
@@ -32,7 +36,7 @@ export const fixtureRegions: Region[] = [
     longitude: -112.074,
     timezone: "America/Phoenix",
     searchTerms: ["phoenix", "maricopa", "arizona", "valley"],
-    defaultFixtureId: "heat-warning-day"
+    defaultFixtureId: "heat-warning-day",
   },
   {
     id: "seattle-wa",
@@ -43,7 +47,7 @@ export const fixtureRegions: Region[] = [
     longitude: -122.3321,
     timezone: "America/Los_Angeles",
     searchTerms: ["seattle", "king county", "washington", "puget sound"],
-    defaultFixtureId: "normal-day"
+    defaultFixtureId: "normal-day",
   },
   {
     id: "houston-tx",
@@ -54,7 +58,7 @@ export const fixtureRegions: Region[] = [
     longitude: -95.3698,
     timezone: "America/Chicago",
     searchTerms: ["houston", "harris county", "texas", "gulf coast"],
-    defaultFixtureId: "heavy-rain-flood-risk-day"
+    defaultFixtureId: "heavy-rain-flood-risk-day",
   },
   {
     id: "new-york-ny",
@@ -65,7 +69,7 @@ export const fixtureRegions: Region[] = [
     longitude: -74.006,
     timezone: "America/New_York",
     searchTerms: ["new york", "nyc", "manhattan", "brooklyn", "queens"],
-    defaultFixtureId: "poor-air-quality-day"
+    defaultFixtureId: "poor-air-quality-day",
   },
   {
     id: "san-juan-pr",
@@ -76,11 +80,14 @@ export const fixtureRegions: Region[] = [
     longitude: -66.1057,
     timezone: "America/Puerto_Rico",
     searchTerms: ["san juan", "puerto rico", "pr"],
-    defaultFixtureId: "mosquito-activity-warning"
-  }
+    defaultFixtureId: "mosquito-activity-warning",
+  },
 ];
 
-export const awareFixtureCatalog: Record<FixtureScenarioId, AwareFixtureScenario> = {
+export const awareFixtureCatalog: Record<
+  FixtureScenarioId,
+  AwareFixtureScenario
+> = {
   "normal-day": {
     id: "normal-day",
     label: "Normal day",
@@ -92,28 +99,28 @@ export const awareFixtureCatalog: Record<FixtureScenarioId, AwareFixtureScenario
       uvSeverity: 0,
       maxTemperatureC: 21,
       precipitationMm: 1,
-      uvIndex: 4
+      uvIndex: 4,
     },
     airQuality: {
       severity: 0,
       usAqi: 38,
-      pm25: 7
+      pm25: 7,
     },
     pollen: {
       severity: 0,
       index: 2,
-      dominant: "grass"
+      dominant: "grass",
     },
     officialAlerts: {
       severity: 0,
       headline: "No active official weather alerts found in the fixture.",
-      urgency: "none"
+      urgency: "none",
     },
     mosquito: {
       severity: 0,
       activityIndex: 2,
-      rationale: "Cooler temperatures and little standing-water signal."
-    }
+      rationale: "Cooler temperatures and little standing-water signal.",
+    },
   },
   "strong-uv-day": {
     id: "strong-uv-day",
@@ -126,28 +133,28 @@ export const awareFixtureCatalog: Record<FixtureScenarioId, AwareFixtureScenario
       uvSeverity: 2,
       maxTemperatureC: 31,
       precipitationMm: 3,
-      uvIndex: 10
+      uvIndex: 10,
     },
     airQuality: {
       severity: 0,
       usAqi: 44,
-      pm25: 8
+      pm25: 8,
     },
     pollen: {
       severity: 1,
       index: 4,
-      dominant: "grass"
+      dominant: "grass",
     },
     officialAlerts: {
       severity: 0,
       headline: "No active official weather alerts found in the fixture.",
-      urgency: "none"
+      urgency: "none",
     },
     mosquito: {
       severity: 1,
       activityIndex: 4,
-      rationale: "Warm, humid conditions can support mosquito activity."
-    }
+      rationale: "Warm, humid conditions can support mosquito activity.",
+    },
   },
   "heat-warning-day": {
     id: "heat-warning-day",
@@ -160,28 +167,28 @@ export const awareFixtureCatalog: Record<FixtureScenarioId, AwareFixtureScenario
       uvSeverity: 2,
       maxTemperatureC: 43,
       precipitationMm: 0,
-      uvIndex: 9
+      uvIndex: 9,
     },
     airQuality: {
       severity: 1,
       usAqi: 83,
-      pm25: 15
+      pm25: 15,
     },
     pollen: {
       severity: 0,
       index: 2,
-      dominant: "olive"
+      dominant: "olive",
     },
     officialAlerts: {
       severity: 2,
       headline: "Heat advisory in effect for the afternoon.",
-      urgency: "moderate"
+      urgency: "moderate",
     },
     mosquito: {
       severity: 0,
       activityIndex: 1,
-      rationale: "Very dry conditions reduce the placeholder activity signal."
-    }
+      rationale: "Very dry conditions reduce the placeholder activity signal.",
+    },
   },
   "heavy-rain-flood-risk-day": {
     id: "heavy-rain-flood-risk-day",
@@ -194,28 +201,28 @@ export const awareFixtureCatalog: Record<FixtureScenarioId, AwareFixtureScenario
       uvSeverity: 0,
       maxTemperatureC: 27,
       precipitationMm: 82,
-      uvIndex: 3
+      uvIndex: 3,
     },
     airQuality: {
       severity: 0,
       usAqi: 42,
-      pm25: 7
+      pm25: 7,
     },
     pollen: {
       severity: 1,
       index: 4,
-      dominant: "grass"
+      dominant: "grass",
     },
     officialAlerts: {
       severity: 3,
       headline: "Flash flood warning for parts of the region.",
-      urgency: "severe"
+      urgency: "severe",
     },
     mosquito: {
       severity: 2,
       activityIndex: 6,
-      rationale: "Recent heavy rain can leave standing water."
-    }
+      rationale: "Recent heavy rain can leave standing water.",
+    },
   },
   "poor-air-quality-day": {
     id: "poor-air-quality-day",
@@ -228,28 +235,28 @@ export const awareFixtureCatalog: Record<FixtureScenarioId, AwareFixtureScenario
       uvSeverity: 1,
       maxTemperatureC: 24,
       precipitationMm: 0,
-      uvIndex: 6
+      uvIndex: 6,
     },
     airQuality: {
       severity: 3,
       usAqi: 178,
-      pm25: 58
+      pm25: 58,
     },
     pollen: {
       severity: 1,
       index: 5,
-      dominant: "grass"
+      dominant: "grass",
     },
     officialAlerts: {
       severity: 0,
       headline: "No active official weather alerts found in the fixture.",
-      urgency: "none"
+      urgency: "none",
     },
     mosquito: {
       severity: 0,
       activityIndex: 2,
-      rationale: "The placeholder signal is low for this fixture."
-    }
+      rationale: "The placeholder signal is low for this fixture.",
+    },
   },
   "mosquito-activity-warning": {
     id: "mosquito-activity-warning",
@@ -262,28 +269,29 @@ export const awareFixtureCatalog: Record<FixtureScenarioId, AwareFixtureScenario
       uvSeverity: 1,
       maxTemperatureC: 30,
       precipitationMm: 14,
-      uvIndex: 7
+      uvIndex: 7,
     },
     airQuality: {
       severity: 0,
       usAqi: 36,
-      pm25: 6
+      pm25: 6,
     },
     pollen: {
       severity: 0,
       index: 2,
-      dominant: "grass"
+      dominant: "grass",
     },
     officialAlerts: {
       severity: 0,
       headline: "No active official weather alerts found in the fixture.",
-      urgency: "none"
+      urgency: "none",
     },
     mosquito: {
       severity: 2,
       activityIndex: 7,
-      rationale: "Warm temperatures and recent rain support a cautious placeholder signal."
-    }
+      rationale:
+        "Warm temperatures and recent rain support a cautious placeholder signal.",
+    },
   },
   "multiple-simultaneous-risks": {
     id: "multiple-simultaneous-risks",
@@ -296,28 +304,29 @@ export const awareFixtureCatalog: Record<FixtureScenarioId, AwareFixtureScenario
       uvSeverity: 2,
       maxTemperatureC: 34,
       precipitationMm: 36,
-      uvIndex: 10
+      uvIndex: 10,
     },
     airQuality: {
       severity: 1,
       usAqi: 86,
-      pm25: 16
+      pm25: 16,
     },
     pollen: {
       severity: 2,
       index: 7,
-      dominant: "grass"
+      dominant: "grass",
     },
     officialAlerts: {
       severity: 2,
       headline: "Strong thunderstorms may affect travel later today.",
-      urgency: "moderate"
+      urgency: "moderate",
     },
     mosquito: {
       severity: 2,
       activityIndex: 7,
-      rationale: "Warm, wet conditions can increase exposure around standing water."
-    }
+      rationale:
+        "Warm, wet conditions can increase exposure around standing water.",
+    },
   },
   "source-unavailable": {
     id: "source-unavailable",
@@ -330,32 +339,35 @@ export const awareFixtureCatalog: Record<FixtureScenarioId, AwareFixtureScenario
       uvSeverity: 1,
       maxTemperatureC: 30,
       precipitationMm: 2,
-      uvIndex: 7
+      uvIndex: 7,
     },
     airQuality: {
       severity: 0,
       usAqi: 44,
-      pm25: 8
+      pm25: 8,
     },
     pollen: {
       severity: 0,
       index: 2,
-      dominant: "grass"
+      dominant: "grass",
     },
     officialAlerts: {
       severity: 0,
       headline: "Official alert source was unavailable in this fixture.",
-      urgency: "none"
+      urgency: "none",
     },
     mosquito: {
       severity: 1,
       activityIndex: 4,
-      rationale: "Warm conditions support a low placeholder signal."
+      rationale: "Warm conditions support a low placeholder signal.",
     },
-    unavailableSources: ["official_alert", "air_quality"]
-  }
+    unavailableSources: ["official_alert", "air_quality"],
+  },
 };
 
-export function fixtureForRegion(region: Region, override?: FixtureScenarioId): AwareFixtureScenario {
+export function fixtureForRegion(
+  region: Region,
+  override?: FixtureScenarioId,
+): AwareFixtureScenario {
   return awareFixtureCatalog[override ?? region.defaultFixtureId];
 }

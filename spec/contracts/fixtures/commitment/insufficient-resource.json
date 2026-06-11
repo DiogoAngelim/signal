@@ -18,7 +18,13 @@
     "limitedBy": ["resource_available"],
     "cappedBy": [],
     "recommendations": [
-      { "targetId": "ready", "amount": 0, "normalizedCommitment": 0, "weight": 0, "mode": "none" }
+      {
+        "targetId": "ready",
+        "amount": 0,
+        "normalizedCommitment": 0,
+        "weight": 0,
+        "mode": "none"
+      }
     ]
   }
 }

@@ -6,7 +6,7 @@ import type {
   ObservationCategory,
   Region,
   SafetyObservation,
-  SourceReliability
+  SourceReliability,
 } from "../contracts.js";
 import { fixtureForRegion } from "../fixtures.js";
 
@@ -35,12 +35,14 @@ export type SafetyDataAdapter = {
   collect(region: Region): Promise<AdapterRunResult>;
 };
 
-export function normalizeAdapterOptions(options: AdapterOptions = {}): AdapterContext {
+export function normalizeAdapterOptions(
+  options: AdapterOptions = {},
+): AdapterContext {
   return {
     mode: options.mode ?? "live-first",
     fixtureId: options.fixtureId,
     fetcher: options.fetcher ?? globalThis.fetch,
-    now: options.now ?? (() => new Date())
+    now: options.now ?? (() => new Date()),
   };
 }
 
@@ -56,7 +58,10 @@ export function attentionFromSeverity(severity: number): AttentionLevel {
   return "normal";
 }
 
-export function freshnessFromUpdatedAt(updatedAt: string, now: Date): FreshnessStatus {
+export function freshnessFromUpdatedAt(
+  updatedAt: string,
+  now: Date,
+): FreshnessStatus {
   const ageMs = Math.max(0, now.getTime() - new Date(updatedAt).getTime());
   if (!Number.isFinite(ageMs)) return "missing";
   if (ageMs <= 45 * 60 * 1000) return "fresh";
@@ -64,17 +69,20 @@ export function freshnessFromUpdatedAt(updatedAt: string, now: Date): FreshnessS
   return "stale";
 }
 
-export function createSource(input: {
-  id: string;
-  name: string;
-  url?: string;
-  provider: EvidenceSource["provider"];
-  updatedAt: string;
-  reliability: SourceReliability;
-  freshness?: FreshnessStatus;
-  status?: EvidenceSource["status"];
-  note: string;
-}, now: Date): EvidenceSource {
+export function createSource(
+  input: {
+    id: string;
+    name: string;
+    url?: string;
+    provider: EvidenceSource["provider"];
+    updatedAt: string;
+    reliability: SourceReliability;
+    freshness?: FreshnessStatus;
+    status?: EvidenceSource["status"];
+    note: string;
+  },
+  now: Date,
+): EvidenceSource {
   return {
     id: input.id,
     name: input.name,
@@ -84,7 +92,7 @@ export function createSource(input: {
     reliability: input.reliability,
     freshness: input.freshness ?? freshnessFromUpdatedAt(input.updatedAt, now),
     status: input.status ?? "available",
-    note: input.note
+    note: input.note,
   };
 }
 
@@ -115,30 +123,36 @@ export function createObservation(input: {
     plainLanguage: input.plainLanguage,
     missing: input.missing ?? false,
     degraded: input.degraded ?? input.source.status !== "available",
-    details: input.details
+    details: input.details,
   };
 }
 
-export function createUnavailableObservation(input: {
-  region: Region;
-  sourceId: string;
-  sourceName: string;
-  category: ObservationCategory;
-  updatedAt: string;
-  note: string;
-  url?: string;
-}, now: Date): AdapterRunResult {
-  const source = createSource({
-    id: input.sourceId,
-    name: input.sourceName,
-    url: input.url,
-    provider: "fixture",
-    updatedAt: input.updatedAt,
-    reliability: "limited",
-    freshness: "missing",
-    status: "unavailable",
-    note: input.note
-  }, now);
+export function createUnavailableObservation(
+  input: {
+    region: Region;
+    sourceId: string;
+    sourceName: string;
+    category: ObservationCategory;
+    updatedAt: string;
+    note: string;
+    url?: string;
+  },
+  now: Date,
+): AdapterRunResult {
+  const source = createSource(
+    {
+      id: input.sourceId,
+      name: input.sourceName,
+      url: input.url,
+      provider: "fixture",
+      updatedAt: input.updatedAt,
+      reliability: "limited",
+      freshness: "missing",
+      status: "unavailable",
+      note: input.note,
+    },
+    now,
+  );
   return {
     sources: [source],
     observations: [
@@ -150,28 +164,34 @@ export function createUnavailableObservation(input: {
         observedAt: input.updatedAt,
         severity: 1,
         source,
-        plainLanguage: "A source that usually helps this briefing is unavailable right now.",
+        plainLanguage:
+          "A source that usually helps this briefing is unavailable right now.",
         missing: true,
         degraded: true,
         details: {
           unavailableCategory: input.category,
-          fallback: true
-        }
-      })
-    ]
+          fallback: true,
+        },
+      }),
+    ],
   };
 }
 
-export function maxSeverity(...values: Array<0 | 1 | 2 | 3 | 4>): 0 | 1 | 2 | 3 | 4 {
+export function maxSeverity(
+  ...values: Array<0 | 1 | 2 | 3 | 4>
+): 0 | 1 | 2 | 3 | 4 {
   return Math.max(...values) as 0 | 1 | 2 | 3 | 4;
 }
 
-export function severityFromThresholds(value: number, thresholds: {
-  notice: number;
-  warning: number;
-  urgency: number;
-  emergency?: number;
-}): 0 | 1 | 2 | 3 | 4 {
+export function severityFromThresholds(
+  value: number,
+  thresholds: {
+    notice: number;
+    warning: number;
+    urgency: number;
+    emergency?: number;
+  },
+): 0 | 1 | 2 | 3 | 4 {
   if (thresholds.emergency != null && value >= thresholds.emergency) return 4;
   if (value >= thresholds.urgency) return 3;
   if (value >= thresholds.warning) return 2;

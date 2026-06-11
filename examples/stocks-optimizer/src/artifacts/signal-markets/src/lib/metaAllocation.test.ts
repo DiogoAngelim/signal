@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  type DiagnosticInputs,
+  RollingCalibrationTracker,
   buildCalibrationState,
   classifyMarketRegime,
   decideMetaAllocation,
   forecastSignalSurvival,
   getCalibrationState,
-  RollingCalibrationTracker,
   updateCalibration,
-  type DiagnosticInputs,
 } from "./metaAllocation";
 
 const baseDiagnostics: DiagnosticInputs = {
@@ -39,8 +39,16 @@ function decisionFor(diagnostics: DiagnosticInputs) {
     { predictedProbability: 0.54, realizedOutcomeQuality: 0.57 },
   ]);
   const regime = classifyMarketRegime(diagnostics);
-  const survival = forecastSignalSurvival({ diagnostics, signalAgeMinutes: 18 });
-  return decideMetaAllocation({ diagnostics, calibrationState, regime, survival });
+  const survival = forecastSignalSurvival({
+    diagnostics,
+    signalAgeMinutes: 18,
+  });
+  return decideMetaAllocation({
+    diagnostics,
+    calibrationState,
+    regime,
+    survival,
+  });
 }
 
 describe("meta allocation governors", () => {
@@ -69,8 +77,21 @@ describe("meta allocation governors", () => {
     const regime = classifyMarketRegime(baseDiagnostics);
     const survival = forecastSignalSurvival({ diagnostics: baseDiagnostics });
 
-    expect(decideMetaAllocation({ diagnostics: baseDiagnostics, calibrationState: weakCalibration, regime, survival }).confidenceDiscount)
-      .toBeLessThan(decideMetaAllocation({ diagnostics: baseDiagnostics, calibrationState: goodCalibration, regime, survival }).confidenceDiscount);
+    expect(
+      decideMetaAllocation({
+        diagnostics: baseDiagnostics,
+        calibrationState: weakCalibration,
+        regime,
+        survival,
+      }).confidenceDiscount,
+    ).toBeLessThan(
+      decideMetaAllocation({
+        diagnostics: baseDiagnostics,
+        calibrationState: goodCalibration,
+        regime,
+        survival,
+      }).confidenceDiscount,
+    );
   });
 
   it("reduces exposure under high entropy", () => {
@@ -81,10 +102,20 @@ describe("meta allocation governors", () => {
   });
 
   it("extends holding duration when regime stability is high", () => {
-    const unstable = decisionFor({ ...baseDiagnostics, regimeStability: 30, drift: 62 });
-    const stable = decisionFor({ ...baseDiagnostics, regimeStability: 84, drift: 26 });
+    const unstable = decisionFor({
+      ...baseDiagnostics,
+      regimeStability: 30,
+      drift: 62,
+    });
+    const stable = decisionFor({
+      ...baseDiagnostics,
+      regimeStability: 84,
+      drift: 26,
+    });
 
-    expect(stable.holdingPeriodMultiplier).toBeGreaterThan(unstable.holdingPeriodMultiplier);
+    expect(stable.holdingPeriodMultiplier).toBeGreaterThan(
+      unstable.holdingPeriodMultiplier,
+    );
   });
 
   it("shortens holding horizon when survival is low", () => {
@@ -116,7 +147,9 @@ describe("meta allocation governors", () => {
     });
 
     expect(moderate.breakdownRisk).toBe("moderate");
-    expect(fragile.recommendedHoldingMinutes).toBeLessThan(durable.recommendedHoldingMinutes);
+    expect(fragile.recommendedHoldingMinutes).toBeLessThan(
+      durable.recommendedHoldingMinutes,
+    );
   });
 
   it("uses conservative defaults when diagnostics are missing", () => {
@@ -142,7 +175,9 @@ describe("meta allocation governors", () => {
       survivalProbability: 30,
     });
 
-    expect(gamedProxy.exposureMultiplier).toBeLessThan(clean.exposureMultiplier);
+    expect(gamedProxy.exposureMultiplier).toBeLessThan(
+      clean.exposureMultiplier,
+    );
   });
 
   it("normalizes every realized outcome shape in rolling calibration", () => {
@@ -155,7 +190,12 @@ describe("meta allocation governors", () => {
 
     expect(state.sampleSize).toBe(2);
     expect(fallbackOutcomeState.sampleSize).toBe(2);
-    expect(fallbackOutcomeState.bucketAccuracy.reduce((sum, bucket) => sum + bucket.count, 0)).toBe(2);
+    expect(
+      fallbackOutcomeState.bucketAccuracy.reduce(
+        (sum, bucket) => sum + bucket.count,
+        0,
+      ),
+    ).toBe(2);
     expect(fallbackOutcomeState.bucketAccuracy[2].count).toBe(2);
   });
 
@@ -179,13 +219,21 @@ describe("meta allocation governors", () => {
   });
 
   it("classifies low signal and high volatility regimes", () => {
-    expect(classifyMarketRegime({ breadth: 20, entropy: 80 }).regime).toBe("low_signal");
-    expect(classifyMarketRegime({ volatilityPressure: 80, residualInstability: 40 }).regime).toBe("high_volatility");
+    expect(classifyMarketRegime({ breadth: 20, entropy: 80 }).regime).toBe(
+      "low_signal",
+    );
+    expect(
+      classifyMarketRegime({ volatilityPressure: 80, residualInstability: 40 })
+        .regime,
+    ).toBe("high_volatility");
   });
 
   it("tracks calibration through the module-level tracker", () => {
     const before = getCalibrationState().sampleSize;
-    const state = updateCalibration({ predictedProbability: 0.6 }, { success: false });
+    const state = updateCalibration(
+      { predictedProbability: 0.6 },
+      { success: false },
+    );
 
     expect(state.sampleSize).toBe(before + 1);
     expect(getCalibrationState().sampleSize).toBe(before + 1);
@@ -211,7 +259,11 @@ describe("meta allocation governors", () => {
 
     expect(decision.exposureMultiplier).toBeLessThan(0.4);
     expect(decision.allocationCap).toBeGreaterThanOrEqual(0.8);
-    expect(decision.reasons).toContain("Missing diagnostics trigger conservative defaults.");
-    expect(decideMetaAllocation({ diagnostics: baseDiagnostics }).regimeRisk).toBe("low");
+    expect(decision.reasons).toContain(
+      "Missing diagnostics trigger conservative defaults.",
+    );
+    expect(
+      decideMetaAllocation({ diagnostics: baseDiagnostics }).regimeRisk,
+    ).toBe("low");
   });
 });

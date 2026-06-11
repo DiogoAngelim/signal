@@ -42,8 +42,15 @@ export class RateLimiter {
         }
 
         if (attempt >= maxRetries || !isRetryable(error)) throw error;
-        this.options.metrics?.increment(error instanceof BinanceRateLimitError ? "rate_limit_events" : "api_failures");
-        const retryAfterMs = error instanceof BinanceRateLimitError ? error.retryAfterMs : undefined;
+        this.options.metrics?.increment(
+          error instanceof BinanceRateLimitError
+            ? "rate_limit_events"
+            : "api_failures",
+        );
+        const retryAfterMs =
+          error instanceof BinanceRateLimitError
+            ? error.retryAfterMs
+            : undefined;
         await this.delay(retryAfterMs ?? this.backoff(attempt));
         attempt += 1;
       }
@@ -54,7 +61,9 @@ export class RateLimiter {
     const limit = this.options.maxRequestsPerMinute ?? 1_100;
     const now = this.now();
     const windowMs = 60_000;
-    this.requestTimestamps = this.requestTimestamps.filter((timestamp) => now - timestamp < windowMs);
+    this.requestTimestamps = this.requestTimestamps.filter(
+      (timestamp) => now - timestamp < windowMs,
+    );
 
     if (this.requestTimestamps.length >= limit) {
       const waitMs = windowMs - (now - this.requestTimestamps[0]);
@@ -76,7 +85,9 @@ export class RateLimiter {
   }
 
   private delay(ms: number) {
-    return this.options.sleep ? this.options.sleep(Math.max(0, ms)) : new Promise((resolve) => setTimeout(resolve, Math.max(0, ms)));
+    return this.options.sleep
+      ? this.options.sleep(Math.max(0, ms))
+      : new Promise((resolve) => setTimeout(resolve, Math.max(0, ms)));
   }
 }
 

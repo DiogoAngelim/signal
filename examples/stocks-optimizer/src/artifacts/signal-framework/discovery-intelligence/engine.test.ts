@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  type DecisionRecord,
+  type DiscoveryRecord,
+  type RestrictionRecord,
   evaluateDiscoveryIntelligence,
   evaluateDiscoveryMaturity,
   evaluateGovernanceEffectiveness,
   evaluateInstitutionalKnowledge,
   evaluateMetaLearning,
   evaluateOpportunityEconomics,
-  type DecisionRecord,
-  type DiscoveryRecord,
-  type RestrictionRecord,
 } from "./engine";
 
 describe("discovery intelligence", () => {
@@ -22,7 +22,13 @@ describe("discovery intelligence", () => {
       { id: "d5", stage: "REPEATABLE", previousStage: "CONFIRMED" },
       { id: "d6", stage: "TRUSTED", previousStage: "REPEATABLE" },
       { id: "d7", stage: "INSTITUTIONAL", previousStage: "TRUSTED" },
-      { id: "d8", stage: "OBSERVED", previousStage: "OBSERVED", abandoned: true, value: -1 },
+      {
+        id: "d8",
+        stage: "OBSERVED",
+        previousStage: "OBSERVED",
+        abandoned: true,
+        value: -1,
+      },
     ]);
 
     assert.equal(maturity.discoveryCount, 8);
@@ -35,10 +41,22 @@ describe("discovery intelligence", () => {
 
   it("calculates opportunity cost across act, wait, reject, and restrict", () => {
     const decisions: DecisionRecord[] = [
-      { id: "a", action: "ACT", alternatives: { ACT: 12, WAIT: 4, REJECT: 0, RESTRICT: 6 } },
-      { id: "b", action: "RESTRICT", alternatives: { ACT: 20, WAIT: 8, REJECT: 0, RESTRICT: 10 } },
+      {
+        id: "a",
+        action: "ACT",
+        alternatives: { ACT: 12, WAIT: 4, REJECT: 0, RESTRICT: 6 },
+      },
+      {
+        id: "b",
+        action: "RESTRICT",
+        alternatives: { ACT: 20, WAIT: 8, REJECT: 0, RESTRICT: 10 },
+      },
       { id: "c", action: "WAIT", expectedValue: 10 },
-      { id: "d", action: "REJECT", alternatives: { ACT: -8, WAIT: -2, REJECT: 0, RESTRICT: -1 } },
+      {
+        id: "d",
+        action: "REJECT",
+        alternatives: { ACT: -8, WAIT: -2, REJECT: 0, RESTRICT: -1 },
+      },
     ];
     const economics = evaluateOpportunityEconomics(decisions, [
       { id: "oa", decisionId: "a", value: 15 },
@@ -57,19 +75,34 @@ describe("discovery intelligence", () => {
 
   it("scores governance restrictions as avoided loss minus missed upside", () => {
     const decisions: DecisionRecord[] = [
-      { id: "good", action: "RESTRICT", alternatives: { ACT: -10, WAIT: -2, REJECT: 0, RESTRICT: 4 } },
-      { id: "bad", action: "WAIT", alternatives: { ACT: 14, WAIT: 2, REJECT: 0, RESTRICT: 8 } },
+      {
+        id: "good",
+        action: "RESTRICT",
+        alternatives: { ACT: -10, WAIT: -2, REJECT: 0, RESTRICT: 4 },
+      },
+      {
+        id: "bad",
+        action: "WAIT",
+        alternatives: { ACT: 14, WAIT: 2, REJECT: 0, RESTRICT: 8 },
+      },
     ];
     const restrictions: RestrictionRecord[] = [
       { id: "r1", type: "survival scar", decisionId: "good" },
       { id: "r2", type: "trust gate", decisionId: "bad" },
     ];
-    const governance = evaluateGovernanceEffectiveness(restrictions, decisions, [
-      { id: "og", decisionId: "good", value: 4 },
-      { id: "ob", decisionId: "bad", value: 2 },
-    ]);
+    const governance = evaluateGovernanceEffectiveness(
+      restrictions,
+      decisions,
+      [
+        { id: "og", decisionId: "good", value: 4 },
+        { id: "ob", decisionId: "bad", value: 2 },
+      ],
+    );
 
-    assert.deepEqual(governance.restrictions.map((item) => item.effectiveness), [14, -12]);
+    assert.deepEqual(
+      governance.restrictions.map((item) => item.effectiveness),
+      [14, -12],
+    );
     assert.equal(governance.helpfulRestrictions, 1);
     assert.equal(governance.harmfulRestrictions, 1);
   });
@@ -127,14 +160,26 @@ describe("discovery intelligence", () => {
   it("uses long-history regime coverage as a capped intelligence signal", () => {
     const weak = evaluateDiscoveryIntelligence({
       discoveries: [{ id: "d1", stage: "OBSERVED" }],
-      decisions: [{ id: "wait", action: "WAIT", alternatives: { ACT: 10, WAIT: 4, REJECT: 0, RESTRICT: 6 } }],
+      decisions: [
+        {
+          id: "wait",
+          action: "WAIT",
+          alternatives: { ACT: 10, WAIT: 4, REJECT: 0, RESTRICT: 6 },
+        },
+      ],
       outcomes: [{ id: "wait:outcome", decisionId: "wait", value: 4 }],
       restrictions: [],
       traces: [{ id: "regime", metric: "regime coverage", value: 35 }],
     });
     const broad = evaluateDiscoveryIntelligence({
       discoveries: [{ id: "d1", stage: "OBSERVED" }],
-      decisions: [{ id: "wait", action: "WAIT", alternatives: { ACT: 10, WAIT: 4, REJECT: 0, RESTRICT: 6 } }],
+      decisions: [
+        {
+          id: "wait",
+          action: "WAIT",
+          alternatives: { ACT: 10, WAIT: 4, REJECT: 0, RESTRICT: 6 },
+        },
+      ],
       outcomes: [{ id: "wait:outcome", decisionId: "wait", value: 4 }],
       restrictions: [],
       traces: [],
@@ -147,7 +192,9 @@ describe("discovery intelligence", () => {
     assert.equal(weak.regimeCoverageScore, 35);
     assert.equal(broad.regimeCoverageScore, 92);
     assert.ok(broad.score > weak.score);
-    assert.ok(weak.recommendations.some((item) => item.id === "expand-regime-coverage"));
+    assert.ok(
+      weak.recommendations.some((item) => item.id === "expand-regime-coverage"),
+    );
   });
 
   it("keeps property-style invariants over generated generic records", () => {
@@ -172,7 +219,10 @@ describe("discovery intelligence", () => {
       assert.equal(countedStages, discoveries.length);
       assert.ok(result.score >= 0 && result.score <= 100);
       for (const restriction of result.governance.restrictions) {
-        assert.equal(restriction.effectiveness, restriction.avoidedLoss - restriction.missedUpside);
+        assert.equal(
+          restriction.effectiveness,
+          restriction.avoidedLoss - restriction.missedUpside,
+        );
       }
     }
   });
@@ -180,15 +230,36 @@ describe("discovery intelligence", () => {
   it("emits framework-level recommendations and empty-state guidance", () => {
     const result = evaluateDiscoveryIntelligence({
       discoveries: [
-        { id: "false", stage: "observed", abandoned: true, falseDiscovery: true, value: -3 },
-        { id: "trusted", stage: "TRUSTED", previousStage: "REPEATABLE", institutionalStage: "knowledge" },
+        {
+          id: "false",
+          stage: "observed",
+          abandoned: true,
+          falseDiscovery: true,
+          value: -3,
+        },
+        {
+          id: "trusted",
+          stage: "TRUSTED",
+          previousStage: "REPEATABLE",
+          institutionalStage: "knowledge",
+        },
       ],
       decisions: [
-        { id: "missed", action: "WAIT", alternatives: { ACT: 20, WAIT: 3, REJECT: 0, RESTRICT: 8 } },
+        {
+          id: "missed",
+          action: "WAIT",
+          alternatives: { ACT: 20, WAIT: 3, REJECT: 0, RESTRICT: 8 },
+        },
       ],
       outcomes: [{ id: "outcome", decisionId: "missed", value: 3 }],
       restrictions: [
-        { id: "gate", decisionId: "missed", type: "opportunity density gate", avoidedLoss: 0, missedUpside: 17 },
+        {
+          id: "gate",
+          decisionId: "missed",
+          type: "opportunity density gate",
+          avoidedLoss: 0,
+          missedUpside: 17,
+        },
       ],
       traces: [
         { id: "m1", metric: "trust", value: 80, timestamp: 1 },
@@ -213,7 +284,15 @@ describe("discovery intelligence", () => {
 });
 
 function generatedDiscoveries(seed: number): DiscoveryRecord[] {
-  const stages = ["EMERGING", "DETECTED", "OBSERVED", "CONFIRMED", "REPEATABLE", "TRUSTED", "INSTITUTIONAL"];
+  const stages = [
+    "EMERGING",
+    "DETECTED",
+    "OBSERVED",
+    "CONFIRMED",
+    "REPEATABLE",
+    "TRUSTED",
+    "INSTITUTIONAL",
+  ];
   return stages.map((stage, index) => ({
     id: `${seed}:d:${index}`,
     stage,
@@ -222,7 +301,14 @@ function generatedDiscoveries(seed: number): DiscoveryRecord[] {
     value: ((seed + index) % 5) - 2,
     abandoned: (seed + index) % 11 === 0,
     falseDiscovery: (seed + index) % 17 === 0,
-    institutionalStage: index >= 6 ? "institutional" : index >= 5 ? "policy" : index >= 4 ? "knowledge" : "discovery",
+    institutionalStage:
+      index >= 6
+        ? "institutional"
+        : index >= 5
+          ? "policy"
+          : index >= 4
+            ? "knowledge"
+            : "discovery",
   }));
 }
 
@@ -256,15 +342,23 @@ function generatedOutcomes(seed: number) {
 }
 
 function generatedRestrictions(seed: number): RestrictionRecord[] {
-  return generatedDecisions(seed).slice(0, 2).map((decision, index) => ({
-    id: `${decision.id}:restriction`,
-    type: index === 0 ? "survival scar" : "readiness gate",
-    decisionId: decision.id,
-  }));
+  return generatedDecisions(seed)
+    .slice(0, 2)
+    .map((decision, index) => ({
+      id: `${decision.id}:restriction`,
+      type: index === 0 ? "survival scar" : "readiness gate",
+      decisionId: decision.id,
+    }));
 }
 
 function generatedTraces(seed: number) {
-  const metrics = ["calibration", "trust", "survival", "decision quality", "governance"];
+  const metrics = [
+    "calibration",
+    "trust",
+    "survival",
+    "decision quality",
+    "governance",
+  ];
   return metrics.flatMap((metric, index) => [
     {
       id: `${seed}:${metric}:early`,

@@ -7,12 +7,30 @@ export function assessWisdom(input: WisdomInput = {}): WisdomAssessment {
   const irreversibleRisk = asScore(input.irreversibleRisk, downsideRisk);
   const survivalPriority = asScore(input.survivalPriority, 80);
   const longTermAlignment = asScore(input.longTermAlignment, expectedReward);
-  const shortTermTemptation = asScore(input.shortTermTemptation, expectedReward);
+  const shortTermTemptation = asScore(
+    input.shortTermTemptation,
+    expectedReward,
+  );
   const uncertainty = asScore(input.uncertainty, 100 - expectedReward);
   const confidence = asScore(input.confidence, expectedReward);
-  const survivalDrag = Math.max(downsideRisk, irreversibleRisk) * (survivalPriority / 100);
-  const score = clamp(longTermAlignment * 0.35 + confidence * 0.2 + expectedReward * 0.2 + (100 - survivalDrag) * 0.25 - uncertainty * 0.12);
-  const decision = wisdomDecision({ score, downsideRisk, irreversibleRisk, survivalPriority, confidence, shortTermTemptation, longTermAlignment });
+  const survivalDrag =
+    Math.max(downsideRisk, irreversibleRisk) * (survivalPriority / 100);
+  const score = clamp(
+    longTermAlignment * 0.35 +
+      confidence * 0.2 +
+      expectedReward * 0.2 +
+      (100 - survivalDrag) * 0.25 -
+      uncertainty * 0.12,
+  );
+  const decision = wisdomDecision({
+    score,
+    downsideRisk,
+    irreversibleRisk,
+    survivalPriority,
+    confidence,
+    shortTermTemptation,
+    longTermAlignment,
+  });
 
   return {
     score: Math.round(score),
@@ -65,12 +83,27 @@ function wisdomReasons(
   },
 ): string[] {
   const reasons = ["Long-term survival outranks short-term opportunity."];
-  if (input.irreversibleRisk >= 72) reasons.push("Irreversible risk is high, so confidence must be exceptional before acting.");
-  if (input.downsideRisk >= 70) reasons.push("The downside could dominate the upside.");
-  if (input.shortTermTemptation > input.longTermAlignment) reasons.push("Short-term temptation is stronger than long-term alignment.");
-  if (decision === "proceed") reasons.push("Reward, alignment, and survivability are strong enough to proceed.");
-  if (decision === "proceed-small") reasons.push("The idea may be useful, but the safer expression is smaller.");
-  if (decision === "wait") reasons.push("Waiting preserves optionality while uncertainty clears.");
-  if (decision === "avoid") reasons.push("Avoiding action protects the system from a non-survivable path.");
+  if (input.irreversibleRisk >= 72)
+    reasons.push(
+      "Irreversible risk is high, so confidence must be exceptional before acting.",
+    );
+  if (input.downsideRisk >= 70)
+    reasons.push("The downside could dominate the upside.");
+  if (input.shortTermTemptation > input.longTermAlignment)
+    reasons.push("Short-term temptation is stronger than long-term alignment.");
+  if (decision === "proceed")
+    reasons.push(
+      "Reward, alignment, and survivability are strong enough to proceed.",
+    );
+  if (decision === "proceed-small")
+    reasons.push(
+      "The idea may be useful, but the safer expression is smaller.",
+    );
+  if (decision === "wait")
+    reasons.push("Waiting preserves optionality while uncertainty clears.");
+  if (decision === "avoid")
+    reasons.push(
+      "Avoiding action protects the system from a non-survivable path.",
+    );
   return reasons;
 }

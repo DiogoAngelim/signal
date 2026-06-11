@@ -1,7 +1,12 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { calculateCashflowProfile, createPurchaseDecision, createSampleFinancialDataset, normalizeRawTransactions } from "../src/index.js";
 import { App, ConnectScreen, PurchaseValidator } from "../src/frontend/App.js";
+import {
+  calculateCashflowProfile,
+  createPurchaseDecision,
+  createSampleFinancialDataset,
+  normalizeRawTransactions,
+} from "../src/index.js";
 
 const NOW = new Date("2026-06-03T12:00:00.000Z");
 
@@ -19,9 +24,7 @@ describe("Liquidity Manager UI", () => {
 
   it("keeps Connect focused on statement upload only", () => {
     const html = renderToStaticMarkup(
-      <ConnectScreen
-        onUpload={() => undefined}
-      />
+      <ConnectScreen onUpload={() => undefined} />,
     );
 
     expect(html).toContain("Upload statement");
@@ -34,19 +37,43 @@ describe("Liquidity Manager UI", () => {
   });
 
   it("renders verdict, score, confidence, before/after metrics, and safer alternatives", () => {
-    const dataset = createSampleFinancialDataset({ userId: "u1", connectionId: "sample-1", now: NOW });
-    const normalized = normalizeRawTransactions({ rawTransactions: dataset.transactions, userId: "u1", connectionId: "sample-1" });
-    const profile = calculateCashflowProfile({ userId: "u1", transactions: normalized, balances: dataset.balances, now: NOW });
+    const dataset = createSampleFinancialDataset({
+      userId: "u1",
+      connectionId: "sample-1",
+      now: NOW,
+    });
+    const normalized = normalizeRawTransactions({
+      rawTransactions: dataset.transactions,
+      userId: "u1",
+      connectionId: "sample-1",
+    });
+    const profile = calculateCashflowProfile({
+      userId: "u1",
+      transactions: normalized,
+      balances: dataset.balances,
+      now: NOW,
+    });
     const decision = createPurchaseDecision({
-      input: { userId: "u1", amount: 14000, paymentMethod: "cash", necessity: "optional" },
+      input: {
+        userId: "u1",
+        amount: 14000,
+        paymentMethod: "cash",
+        necessity: "optional",
+      },
       profile,
       transactions: normalized,
-      now: NOW
+      now: NOW,
     });
 
     const html = renderToStaticMarkup(
       <PurchaseValidator
-        form={{ amount: "14000", category: "Travel", paymentMethod: "cash", installments: "6", necessity: "optional" }}
+        form={{
+          amount: "14000",
+          category: "Travel",
+          paymentMethod: "cash",
+          installments: "6",
+          necessity: "optional",
+        }}
         profile={profile}
         transactionCount={normalized.length}
         decision={decision}
@@ -54,7 +81,7 @@ describe("Liquidity Manager UI", () => {
         onChange={() => undefined}
         onSubmit={() => undefined}
         onLoadSample={() => undefined}
-      />
+      />,
     );
 
     expect(html).toContain("Score");

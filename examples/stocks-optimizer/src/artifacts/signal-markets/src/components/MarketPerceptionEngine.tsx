@@ -1,6 +1,3 @@
-import { useEffect, useMemo, useRef } from "react";
-import { Activity, Gauge, Layers, Radio, ShieldCheck } from "lucide-react";
-import { motion } from "framer-motion";
 import ReliabilityAuditPanel from "@/components/ReliabilityAuditPanel";
 import {
   MARKET_LAYER_DEFINITIONS,
@@ -8,6 +5,9 @@ import {
   type MarketStateSnapshot,
   type MarketTimeframeKey,
 } from "@/lib/market-perception";
+import { motion } from "framer-motion";
+import { Activity, Gauge, Layers, Radio, ShieldCheck } from "lucide-react";
+import { useEffect, useMemo, useRef } from "react";
 
 type MarketPerceptionEngineProps = {
   snapshot: MarketStateSnapshot | null;
@@ -1225,7 +1225,7 @@ function ModuleSignalGlyph({
             boxShadow: `0 0 18px ${colorWithAlpha(color, 0.62)}`,
           }}
         />
-        </div>
+      </div>
     </div>
   );
 }
@@ -1244,7 +1244,7 @@ function PerceptionModulesPanel({
       <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
         <Layers className="h-4 w-4 text-[#FDD000]" />
         Perception modules
-        </div>
+      </div>
       <div className="grid gap-3">
         {modules.map((module) => (
           <div

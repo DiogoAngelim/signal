@@ -19,7 +19,14 @@ describe("stocks optimizer sizing integration", () => {
       requestedCapacity: 10,
       availableCapacity: 20,
       maxCapacity: 20,
-      constraints: [{ id: "opportunity-density", type: "hard", passed: true, severity: "high" }],
+      constraints: [
+        {
+          id: "opportunity-density",
+          type: "hard",
+          passed: true,
+          severity: "high",
+        },
+      ],
     });
 
     expect(result.decision).toBe("allowed");
@@ -70,7 +77,11 @@ describe("stocks optimizer sizing integration", () => {
     expect(view.operatorState.status).toBe("locked");
     expect(view.operatorState.sizingModeLabel).toBe("Sizing locked");
     expect(view.operatorState.portfolioCapLabel).toBe("No exposure");
-    expect(view.sizingReasons.some((reason) => reason.includes("Opportunity density"))).toBe(true);
+    expect(
+      view.sizingReasons.some((reason) =>
+        reason.includes("Opportunity density"),
+      ),
+    ).toBe(true);
   });
 
   it("prioritizes strategy readiness when exposure is blocked by promotion gates", () => {
@@ -88,7 +99,9 @@ describe("stocks optimizer sizing integration", () => {
     });
 
     expect(view.suggestedMaximumExposurePct).toBe(0);
-    expect(view.limitedReason).toBe("Strategy readiness gates block new exposure.");
+    expect(view.limitedReason).toBe(
+      "Strategy readiness gates block new exposure.",
+    );
     expect(view.operatorState.status).toBe("locked");
     expect(view.operatorState.portfolioCapLabel).toBe("No exposure");
   });
@@ -106,12 +119,19 @@ describe("stocks optimizer sizing integration", () => {
       hasProvidedSignals: true,
       strategyBlocked: true,
       strategyBlockedLabel: "Calibration",
-      strategyBlockedReason: "Calibration gates block new exposure until outcomes stabilize.",
+      strategyBlockedReason:
+        "Calibration gates block new exposure until outcomes stabilize.",
     });
 
     expect(view.suggestedMaximumExposurePct).toBe(0);
-    expect(view.limitedReason).toBe("Calibration gates block new exposure until outcomes stabilize.");
-    expect(view.sizingConstraints.some((constraint) => constraint.label === "Calibration")).toBe(true);
+    expect(view.limitedReason).toBe(
+      "Calibration gates block new exposure until outcomes stabilize.",
+    );
+    expect(
+      view.sizingConstraints.some(
+        (constraint) => constraint.label === "Calibration",
+      ),
+    ).toBe(true);
   });
 
   it("keeps raw none sizing structural while exposing operator-safe labels", () => {
@@ -127,7 +147,8 @@ describe("stocks optimizer sizing integration", () => {
       hasProvidedSignals: true,
       strategyBlocked: true,
       strategyBlockedLabel: "Survival memory scar",
-      strategyBlockedReason: "Survival Memory requires proof before sizing can reopen.",
+      strategyBlockedReason:
+        "Survival Memory requires proof before sizing can reopen.",
     });
 
     expect(view.sizingMode).toBe("none");
@@ -156,7 +177,14 @@ describe("stocks optimizer sizing integration", () => {
 
     expect(view.sizingDecision).toBe("allowed");
     expect(view.suggestedExposurePct).toBeGreaterThan(0);
-    expect(assetSizingLabel({ allocationAction: "Buy", suggestedExposure: view.suggestedExposurePct, setupQuality: 84, sizingMode: view.sizingMode })).toBe("Mature");
+    expect(
+      assetSizingLabel({
+        allocationAction: "Buy",
+        suggestedExposure: view.suggestedExposurePct,
+        setupQuality: 84,
+        sizingMode: view.sizingMode,
+      }),
+    ).toBe("Mature");
   });
 
   it("derives requested exposure for explicit buy ideas with zero upstream exposure", () => {
@@ -217,7 +245,9 @@ describe("stocks optimizer sizing integration", () => {
     });
 
     expect(view.suggestedMaximumExposurePct).toBe(2);
-    expect(view.limitedReason).toBe("Portfolio exposure is capped by requested capacity at 2.0%.");
+    expect(view.limitedReason).toBe(
+      "Portfolio exposure is capped by requested capacity at 2.0%.",
+    );
   });
 
   it("financial exposure mapping stays outside the Signal Sizing result", () => {
@@ -228,7 +258,10 @@ describe("stocks optimizer sizing integration", () => {
       requestedCapacity: 100,
       availableCapacity: 100,
     });
-    const financialBand = financialExposureBandForSizingMode(signalSizing.mode, 65);
+    const financialBand = financialExposureBandForSizingMode(
+      signalSizing.mode,
+      65,
+    );
 
     expect("suggestedExposurePct" in (signalSizing as any)).toBe(false);
     expect(financialBand.maxPct).toBeLessThanOrEqual(65);

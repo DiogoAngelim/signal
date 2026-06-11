@@ -9,7 +9,11 @@ type CounterRecord = {
 const counters = new Map<string, CounterRecord>();
 const latencies = new Map<string, number[]>();
 
-export function incrementSignalCounter(name: string, tags: MetricTags = {}, value = 1) {
+export function incrementSignalCounter(
+  name: string,
+  tags: MetricTags = {},
+  value = 1,
+) {
   const key = metricKey(name, tags);
   const existing = counters.get(key);
   counters.set(key, {
@@ -28,7 +32,10 @@ export function observeSignalLatency(name: string, valueMs: number) {
 }
 
 export function snapshotSignalMetrics() {
-  const latency: Record<string, { count: number; p50: number; p95: number; p99: number; max: number }> = {};
+  const latency: Record<
+    string,
+    { count: number; p50: number; p95: number; p99: number; max: number }
+  > = {};
   for (const [name, values] of latencies.entries()) {
     latency[name] = percentileSummary(values);
   }
@@ -71,7 +78,8 @@ function metricKey(name: string, tags: MetricTags) {
 function sanitizeTags(tags: MetricTags) {
   const output: MetricTags = {};
   for (const [key, value] of Object.entries(tags)) {
-    if (/secret|token|key|authorization|signature|password/i.test(key)) continue;
+    if (/secret|token|key|authorization|signature|password/i.test(key))
+      continue;
     if (value == null) continue;
     output[key] = value;
   }
@@ -91,6 +99,9 @@ function percentileSummary(values: number[]) {
 }
 
 function percentile(sorted: number[], quantile: number) {
-  const index = Math.min(sorted.length - 1, Math.max(0, Math.ceil(sorted.length * quantile) - 1));
+  const index = Math.min(
+    sorted.length - 1,
+    Math.max(0, Math.ceil(sorted.length * quantile) - 1),
+  );
   return Math.round(sorted[index] * 100) / 100;
 }

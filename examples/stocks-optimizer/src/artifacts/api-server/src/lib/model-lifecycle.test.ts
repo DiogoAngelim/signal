@@ -5,17 +5,17 @@ import path from "node:path";
 import test from "node:test";
 import {
   DEFAULT_MODEL_LIFECYCLE_CONFIG,
+  type EvaluationMetrics,
   InMemoryModelLifecycleStore,
+  type ModelLifecycleConfig,
   ModelLifecycleRegistry,
+  type ModelMetadata,
   calculateEvaluationMetrics,
   calculateOutlierDependenceMetrics,
   evaluatePromotionGates,
   evaluateRetirementRules,
   isAllowedTransition,
   loadModelLifecycleConfig,
-  type EvaluationMetrics,
-  type ModelLifecycleConfig,
-  type ModelMetadata,
 } from "./model-lifecycle";
 
 const passingMetrics: EvaluationMetrics = {
@@ -53,7 +53,9 @@ function metadata(
   };
 }
 
-function registry(config: ModelLifecycleConfig = DEFAULT_MODEL_LIFECYCLE_CONFIG) {
+function registry(
+  config: ModelLifecycleConfig = DEFAULT_MODEL_LIFECYCLE_CONFIG,
+) {
   return new ModelLifecycleRegistry(
     config,
     new InMemoryModelLifecycleStore(),
@@ -92,16 +94,27 @@ test("default registry constructor wires defaults", () => {
 
   assert.equal(record.lifecycle_state, "SMALL_LIVE");
   assert.equal(subject.canOpenNewTrades("default-v1"), true);
-  assert.equal(subject.evaluatePromotionGates(passingMetrics, record).passed, true);
-  assert.equal(subject.evaluateRetirementRules(passingMetrics).should_retire, false);
+  assert.equal(
+    subject.evaluatePromotionGates(passingMetrics, record).passed,
+    true,
+  );
+  assert.equal(
+    subject.evaluateRetirementRules(passingMetrics).should_retire,
+    false,
+  );
 });
 
 test("promotion gates block negative out-of-sample expectancy", () => {
   const metrics = { ...passingMetrics, expectancy_r: -0.01 };
-  const result = evaluatePromotionGates(metrics, { number_of_tested_variants: 12 });
+  const result = evaluatePromotionGates(metrics, {
+    number_of_tested_variants: 12,
+  });
 
   assert.equal(result.passed, false);
-  assert.equal(result.failures.some((failure) => failure.metric === "expectancy_r"), true);
+  assert.equal(
+    result.failures.some((failure) => failure.metric === "expectancy_r"),
+    true,
+  );
 });
 
 test("promotion gates block top winner collapse", () => {
@@ -112,11 +125,23 @@ test("promotion gates block top winner collapse", () => {
     result_without_top_1: -0.4,
     result_without_top_3: -1.2,
   };
-  const result = evaluatePromotionGates(metrics, { number_of_tested_variants: 12 });
+  const result = evaluatePromotionGates(metrics, {
+    number_of_tested_variants: 12,
+  });
 
   assert.equal(result.passed, false);
-  assert.equal(result.failures.some((failure) => failure.metric === "result_without_top_1"), true);
-  assert.equal(result.failures.some((failure) => failure.metric === "result_without_top_3"), true);
+  assert.equal(
+    result.failures.some(
+      (failure) => failure.metric === "result_without_top_1",
+    ),
+    true,
+  );
+  assert.equal(
+    result.failures.some(
+      (failure) => failure.metric === "result_without_top_3",
+    ),
+    true,
+  );
 });
 
 test("retirement rules trigger on live decay and drawdown breaches", () => {
@@ -130,9 +155,22 @@ test("retirement rules trigger on live decay and drawdown breaches", () => {
 
   assert.equal(result.should_retire, true);
   assert.equal(result.target_state, "RETIRED");
-  assert.equal(result.failures.some((failure) => failure.metric === "max_drawdown"), true);
-  assert.equal(result.failures.some((failure) => failure.metric === "slippage_sensitivity"), true);
-  assert.equal(result.failures.some((failure) => failure.metric === "live_vs_backtest_decay"), true);
+  assert.equal(
+    result.failures.some((failure) => failure.metric === "max_drawdown"),
+    true,
+  );
+  assert.equal(
+    result.failures.some(
+      (failure) => failure.metric === "slippage_sensitivity",
+    ),
+    true,
+  );
+  assert.equal(
+    result.failures.some(
+      (failure) => failure.metric === "live_vs_backtest_decay",
+    ),
+    true,
+  );
 });
 
 test("retired models cannot open new trades or transition again", () => {
@@ -146,7 +184,10 @@ test("retired models cannot open new trades or transition again", () => {
   });
 
   assert.equal(subject.canOpenNewTrades("prod-v1"), false);
-  assert.throws(() => subject.assertCanOpenNewTrades("prod-v1"), /cannot open new trades/);
+  assert.throws(
+    () => subject.assertCanOpenNewTrades("prod-v1"),
+    /cannot open new trades/,
+  );
   assert.throws(
     () =>
       subject.transitionModel({
@@ -162,7 +203,9 @@ test("retired models cannot open new trades or transition again", () => {
 test("production remains unchanged when candidate fails gates", () => {
   const subject = registry();
   subject.registerModel(metadata("prod-v1", "PRODUCTION"));
-  subject.registerModel(metadata("candidate-v2", "SMALL_LIVE", { parent_model_id: "prod-v1" }));
+  subject.registerModel(
+    metadata("candidate-v2", "SMALL_LIVE", { parent_model_id: "prod-v1" }),
+  );
 
   assert.throws(
     () =>
@@ -182,7 +225,9 @@ test("production remains unchanged when candidate fails gates", () => {
 test("production switches only after candidate passes all gates", () => {
   const subject = registry();
   subject.registerModel(metadata("prod-v1", "PRODUCTION"));
-  subject.registerModel(metadata("candidate-v2", "SMALL_LIVE", { parent_model_id: "prod-v1" }));
+  subject.registerModel(
+    metadata("candidate-v2", "SMALL_LIVE", { parent_model_id: "prod-v1" }),
+  );
 
   subject.promoteToProduction({
     candidate_model_id: "candidate-v2",
@@ -230,11 +275,16 @@ test("outlier dependence metrics remove top one and top three winners", () => {
 
 test("store rejects duplicate and unknown records while returning immutable copies", () => {
   const store = new InMemoryModelLifecycleStore();
-  const record = registry().registerModel(metadata("candidate-v1", "CANDIDATE"));
+  const record = registry().registerModel(
+    metadata("candidate-v1", "CANDIDATE"),
+  );
 
   store.register(record);
   assert.throws(() => store.register(record), /already registered/);
-  assert.throws(() => store.replace({ ...record, model_id: "missing" }), /not registered/);
+  assert.throws(
+    () => store.replace({ ...record, model_id: "missing" }),
+    /not registered/,
+  );
   assert.equal(store.get("missing"), null);
   assert.equal(store.list().length, 1);
   assert.throws(() => {
@@ -245,11 +295,30 @@ test("store rejects duplicate and unknown records while returning immutable copi
 test("registration validates required identifiers and normalizes null parent", () => {
   const subject = registry();
 
-  assert.throws(() => subject.registerModel(metadata("", "RESEARCH")), /model_id is required/);
-  assert.throws(() => subject.registerModel(metadata("bad-feature", "RESEARCH", { feature_hash: " " })), /feature_hash is required/);
-  assert.throws(() => subject.registerModel(metadata("bad-params", "RESEARCH", { parameter_hash: " " })), /parameter_hash is required/);
+  assert.throws(
+    () => subject.registerModel(metadata("", "RESEARCH")),
+    /model_id is required/,
+  );
+  assert.throws(
+    () =>
+      subject.registerModel(
+        metadata("bad-feature", "RESEARCH", { feature_hash: " " }),
+      ),
+    /feature_hash is required/,
+  );
+  assert.throws(
+    () =>
+      subject.registerModel(
+        metadata("bad-params", "RESEARCH", { parameter_hash: " " }),
+      ),
+    /parameter_hash is required/,
+  );
 
-  const record = subject.registerModel(metadata("research-v2", "RESEARCH", { parent_model_id: undefined as unknown as null }));
+  const record = subject.registerModel(
+    metadata("research-v2", "RESEARCH", {
+      parent_model_id: undefined as unknown as null,
+    }),
+  );
   assert.equal(record.parent_model_id, null);
   assert.equal(record.registered_at, "2026-05-21T12:00:00.000Z");
   assert.equal(subject.listModels().length, 1);
@@ -257,9 +326,14 @@ test("registration validates required identifiers and normalizes null parent", (
 
 test("transition validates unknown, duplicate, promotion gate, and missing-model paths", () => {
   const subject = registry();
-  subject.registerModel(metadata("candidate-v1", "CANDIDATE", { number_of_tested_variants: 0 }));
+  subject.registerModel(
+    metadata("candidate-v1", "CANDIDATE", { number_of_tested_variants: 0 }),
+  );
 
-  assert.throws(() => isAllowedTransition("BOGUS" as never, "RETIRED"), /Unknown model lifecycle state/);
+  assert.throws(
+    () => isAllowedTransition("BOGUS" as never, "RETIRED"),
+    /Unknown model lifecycle state/,
+  );
   assert.throws(
     () =>
       subject.transitionModel({
@@ -327,11 +401,18 @@ test("retirement rules return null when metrics remain healthy and throw on ille
   production.registerModel(metadata("prod-retire", "PRODUCTION"));
   const retired = production.applyRetirementRules({
     model_id: "prod-retire",
-    metrics_snapshot: { ...passingMetrics, expectancy_r: -0.2, rolling_expectancy_r: -0.1 },
+    metrics_snapshot: {
+      ...passingMetrics,
+      expectancy_r: -0.2,
+      rolling_expectancy_r: -0.1,
+    },
     reason: "live rules",
   });
   assert.equal(retired?.lifecycle_state, "RETIRED");
-  assert.match(production.getAuditLog("prod-retire")[0].reason, /expectancy_r -0.2 fell below/);
+  assert.match(
+    production.getAuditLog("prod-retire")[0].reason,
+    /expectancy_r -0.2 fell below/,
+  );
 });
 
 test("shadow mode requires live production and shadow-state candidate", async () => {
@@ -421,8 +502,16 @@ test("evaluation metrics cover empty, losing, winning, and slippage inputs", () 
   assert.equal(metrics.rolling_expectancy_r, 0.9);
   assert.equal(metrics.slippage_sensitivity, 0.4);
   assert.equal(metrics.live_vs_backtest_decay, 0.5);
-  assert.equal(calculateEvaluationMetrics({ trade_results_r: [1, 2] }).profit_factor_after_costs, 99);
-  assert.equal(calculateEvaluationMetrics({ trade_results_r: [Number.POSITIVE_INFINITY] }).expectancy_r, 0);
+  assert.equal(
+    calculateEvaluationMetrics({ trade_results_r: [1, 2] })
+      .profit_factor_after_costs,
+    99,
+  );
+  assert.equal(
+    calculateEvaluationMetrics({ trade_results_r: [Number.POSITIVE_INFINITY] })
+      .expectancy_r,
+    0,
+  );
   assert.equal(
     calculateEvaluationMetrics({
       trade_results_r: [1],
@@ -434,7 +523,12 @@ test("evaluation metrics cover empty, losing, winning, and slippage inputs", () 
 });
 
 test("config loader falls back to defaults and normalizes yaml overrides", () => {
-  assert.equal(loadModelLifecycleConfig(path.join(os.tmpdir(), "missing-model-lifecycle.yaml")), DEFAULT_MODEL_LIFECYCLE_CONFIG);
+  assert.equal(
+    loadModelLifecycleConfig(
+      path.join(os.tmpdir(), "missing-model-lifecycle.yaml"),
+    ),
+    DEFAULT_MODEL_LIFECYCLE_CONFIG,
+  );
 
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "model-lifecycle-"));
   const file = path.join(dir, "config.yaml");
@@ -459,35 +553,59 @@ test("config loader falls back to defaults and normalizes yaml overrides", () =>
   assert.equal(isAllowedTransition("RESEARCH", "RETIRED", config), true);
 
   const badFile = path.join(dir, "bad.yaml");
-  fs.writeFileSync(badFile, "model_lifecycle:\n  state_machine:\n    RESEARCH: [NOPE]\n");
-  assert.throws(() => loadModelLifecycleConfig(badFile), /Unknown model lifecycle state/);
+  fs.writeFileSync(
+    badFile,
+    "model_lifecycle:\n  state_machine:\n    RESEARCH: [NOPE]\n",
+  );
+  assert.throws(
+    () => loadModelLifecycleConfig(badFile),
+    /Unknown model lifecycle state/,
+  );
 
   const emptyConfigFile = path.join(dir, "empty.yaml");
   fs.writeFileSync(emptyConfigFile, "{}\n");
-  assert.equal(loadModelLifecycleConfig(emptyConfigFile).promotion_rules.min_tested_variants, 1);
+  assert.equal(
+    loadModelLifecycleConfig(emptyConfigFile).promotion_rules
+      .min_tested_variants,
+    1,
+  );
 
   const partialConfigFile = path.join(dir, "partial.yaml");
-  fs.writeFileSync(partialConfigFile, "model_lifecycle:\n  state_machine:\n    WATCHLIST: []\n");
+  fs.writeFileSync(
+    partialConfigFile,
+    "model_lifecycle:\n  state_machine:\n    WATCHLIST: []\n",
+  );
   const partial = loadModelLifecycleConfig(partialConfigFile);
   assert.equal(partial.promotion_rules.min_tested_variants, 1);
   assert.equal(partial.retirement_rules.target_state, "RETIRED");
   assert.equal(isAllowedTransition("WATCHLIST", "SHADOW", partial), false);
 
   const nullStateFile = path.join(dir, "null-state.yaml");
-  fs.writeFileSync(nullStateFile, "model_lifecycle:\n  state_machine:\n    WATCHLIST:\n");
-  assert.deepEqual(loadModelLifecycleConfig(nullStateFile).state_machine.WATCHLIST, []);
+  fs.writeFileSync(
+    nullStateFile,
+    "model_lifecycle:\n  state_machine:\n    WATCHLIST:\n",
+  );
+  assert.deepEqual(
+    loadModelLifecycleConfig(nullStateFile).state_machine.WATCHLIST,
+    [],
+  );
 
   const previous = process.env.MODEL_LIFECYCLE_CONFIG;
   process.env.MODEL_LIFECYCLE_CONFIG = file;
-  assert.equal(loadModelLifecycleConfig().promotion_rules.min_tested_variants, 3);
+  assert.equal(
+    loadModelLifecycleConfig().promotion_rules.min_tested_variants,
+    3,
+  );
   if (previous == null) {
-    delete process.env.MODEL_LIFECYCLE_CONFIG;
+    process.env.MODEL_LIFECYCLE_CONFIG = undefined;
   } else {
     process.env.MODEL_LIFECYCLE_CONFIG = previous;
   }
 
   const cwd = process.cwd();
-  const defaultDir = fs.mkdtempSync(path.join(os.tmpdir(), "model-lifecycle-default-"));
+  const defaultDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "model-lifecycle-default-"),
+  );
   process.chdir(defaultDir);
   try {
     assert.equal(loadModelLifecycleConfig(), DEFAULT_MODEL_LIFECYCLE_CONFIG);

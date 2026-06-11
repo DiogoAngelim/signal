@@ -11,9 +11,9 @@ const FLOAT_PRECISION = 10;
 function normalizeFloat(value: number): number {
   if (!Number.isFinite(value)) {
     if (Number.isNaN(value)) throw new Error("Cannot canonicalize NaN");
-    return value > 0 ? Infinity : -Infinity;
+    return value > 0 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
   }
-  return parseFloat(value.toFixed(FLOAT_PRECISION));
+  return Number.parseFloat(value.toFixed(FLOAT_PRECISION));
 }
 
 function canonicalizeValue(value: unknown): unknown {

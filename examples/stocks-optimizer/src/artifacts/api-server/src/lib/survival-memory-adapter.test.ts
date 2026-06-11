@@ -28,22 +28,24 @@ test("stock survival memory turns trade outcomes into reusable survival records"
     rawSuggestedExposurePct: 8,
     maxPositionPct: 10,
     readiness,
-    trades: [{
-      id: "trade-1",
-      symbol: "AAA",
-      exitDate: "2026-01-05",
-      returnPct: 8,
-      entryExposure: 8,
-      setupQuality: 82,
-      riskPressure: 74,
-      volatilityPct: 7,
-      liquidityScore: 25,
-      maxDrawdownPct: 32,
-      maxAdverseExcursion: 36,
-      recoveryTimeBars: 55,
-      tailRisk: 86,
-      liquidityStress: 83,
-    }],
+    trades: [
+      {
+        id: "trade-1",
+        symbol: "AAA",
+        exitDate: "2026-01-05",
+        returnPct: 8,
+        entryExposure: 8,
+        setupQuality: 82,
+        riskPressure: 74,
+        volatilityPct: 7,
+        liquidityScore: 25,
+        maxDrawdownPct: 32,
+        maxAdverseExcursion: 36,
+        recoveryTimeBars: 55,
+        tailRisk: 86,
+        liquidityStress: 83,
+      },
+    ],
   });
 
   assert.equal(memory.module, "stocks.survival-memory");
@@ -53,18 +55,22 @@ test("stock survival memory turns trade outcomes into reusable survival records"
   assert.equal(memory.recommendation, "act_with_reduced_size");
   assert.ok(memory.maxExposurePct < 8);
   assert.ok(memory.maxExposurePct > 0);
-  assert.ok(memory.mainWarnings.some((warning) => warning.includes("profitable")));
+  assert.ok(
+    memory.mainWarnings.some((warning) => warning.includes("profitable")),
+  );
 });
 
 test("survival enrichment extends stored trade outcomes without mutating the source records", () => {
-  const trades = [{
-    symbol: "BBB",
-    entryDate: "2026-01-01",
-    exitDate: "2026-01-06",
-    returnPct: -2,
-    entryExposure: 5,
-    riskPressure: 45,
-  }];
+  const trades = [
+    {
+      symbol: "BBB",
+      entryDate: "2026-01-01",
+      exitDate: "2026-01-06",
+      returnPct: -2,
+      entryExposure: 5,
+      riskPressure: 45,
+    },
+  ];
   const enriched = enrichTradesWithSurvivalMemory(trades, {
     market: "NYSE",
     rawAction: "Buy",
@@ -154,20 +160,25 @@ test("explicit survival filtering and fallback branches stay deterministic", () 
       { date: "2026-01-02", return_pct: "", maxDrawdownPct: 2 },
     ],
   });
-  const enriched = enrichTradesWithSurvivalMemory([{
-    ticker: "CALM",
-    returnPct: 1,
-    entryExposure: 1,
-    setupQuality: 70,
-    riskPressure: 5,
-    maxDrawdownPct: 1,
-    maxAdverseExcursionPct: 1,
-    recoveryTimeBars: null,
-  }], {
-    market: "NYSE",
-    rawAction: "Hold",
-    readiness: null,
-  });
+  const enriched = enrichTradesWithSurvivalMemory(
+    [
+      {
+        ticker: "CALM",
+        returnPct: 1,
+        entryExposure: 1,
+        setupQuality: 70,
+        riskPressure: 5,
+        maxDrawdownPct: 1,
+        maxAdverseExcursionPct: 1,
+        recoveryTimeBars: null,
+      },
+    ],
+    {
+      market: "NYSE",
+      rawAction: "Hold",
+      readiness: null,
+    },
+  );
   const fallback = buildStockSurvivalMemory({
     market: "LSE",
     setupQuality: undefined,

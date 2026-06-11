@@ -17,7 +17,9 @@ import type {
   SharpeLikeConfig,
 } from "./types";
 
-type NormalizedConstraint = Required<Pick<CommitmentConstraint, "id" | "type" | "severity" | "passed">> &
+type NormalizedConstraint = Required<
+  Pick<CommitmentConstraint, "id" | "type" | "severity" | "passed">
+> &
   Omit<CommitmentConstraint, "id" | "type" | "severity" | "passed">;
 
 type ScoredDecision = {
@@ -53,7 +55,9 @@ type Allocation = {
 
 const DEFAULT_CREATED_AT = "1970-01-01T00:00:00.000Z";
 
-export function evaluateCommitment(input: CommitmentEvaluateInput = {}): CommitmentResult {
+export function evaluateCommitment(
+  input: CommitmentEvaluateInput = {},
+): CommitmentResult {
   const policy = resolveCommitmentPolicy(input.policy);
   const createdAt = normalizeDate(input.now);
   const decisions = normalizeDecisions(input);
@@ -89,7 +93,9 @@ export function evaluateCommitment(input: CommitmentEvaluateInput = {}): Commitm
     });
   }
 
-  const globalBlocks = blockingConstraints(constraints).filter((constraint) => !constraint.targetId);
+  const globalBlocks = blockingConstraints(constraints).filter(
+    (constraint) => !constraint.targetId,
+  );
   if (globalBlocks.length > 0) {
     for (const constraint of globalBlocks) {
       blockedBy.push(constraint.id);
@@ -120,7 +126,12 @@ export function evaluateCommitment(input: CommitmentEvaluateInput = {}): Commitm
   }
 
   const scored = decisions.map((decision) =>
-    scoreDecision(decision, input, policy, constraints.filter((constraint) => constraint.targetId === decision.id)),
+    scoreDecision(
+      decision,
+      input,
+      policy,
+      constraints.filter((constraint) => constraint.targetId === decision.id),
+    ),
   );
 
   const eligible = scored.filter((entry) => {
@@ -144,7 +155,9 @@ export function evaluateCommitment(input: CommitmentEvaluateInput = {}): Commitm
 
     if (entry.score.trust < policy.minTrust) {
       entry.limitedBy.push("trust_threshold");
-      entry.reasons.push(`Trust ${formatPercent(entry.score.trust)} is below policy minimum ${formatPercent(policy.minTrust)}.`);
+      entry.reasons.push(
+        `Trust ${formatPercent(entry.score.trust)} is below policy minimum ${formatPercent(policy.minTrust)}.`,
+      );
       return false;
     }
 
@@ -165,8 +178,14 @@ export function evaluateCommitment(input: CommitmentEvaluateInput = {}): Commitm
       totalRecommended: 0,
       normalizedCommitment: 0,
       recommendations: scored.map((entry) => zeroRecommendation(entry)),
-      reasons: unique([...reasons, ...scored.flatMap((entry) => entry.reasons)]),
-      limitedBy: unique(["policy_gate", ...scored.flatMap((entry) => entry.limitedBy)]),
+      reasons: unique([
+        ...reasons,
+        ...scored.flatMap((entry) => entry.reasons),
+      ]),
+      limitedBy: unique([
+        "policy_gate",
+        ...scored.flatMap((entry) => entry.limitedBy),
+      ]),
       blockedBy,
       cappedBy,
       reductions,
@@ -189,7 +208,10 @@ export function evaluateCommitment(input: CommitmentEvaluateInput = {}): Commitm
       totalRecommended: 0,
       normalizedCommitment: 0,
       recommendations: eligible.map((entry) => zeroRecommendation(entry)),
-      reasons: unique([...reasons, ...eligible.flatMap((entry) => entry.reasons)]),
+      reasons: unique([
+        ...reasons,
+        ...eligible.flatMap((entry) => entry.reasons),
+      ]),
       limitedBy: ["resource_available"],
       blockedBy,
       cappedBy,
@@ -201,7 +223,12 @@ export function evaluateCommitment(input: CommitmentEvaluateInput = {}): Commitm
     });
   }
 
-  const strategyPlan = resolveStrategyPlan(input.strategy ?? "risk_adjusted", eligible, policy, input.seed);
+  const strategyPlan = resolveStrategyPlan(
+    input.strategy ?? "risk_adjusted",
+    eligible,
+    policy,
+    input.seed,
+  );
   reasons.push(...strategyPlan.reasons);
   limitedBy.push(...strategyPlan.limitedBy);
 
@@ -209,25 +236,46 @@ export function evaluateCommitment(input: CommitmentEvaluateInput = {}): Commitm
     eligible.map((entry) => entry.score.quality),
     strategyPlan.weights,
   );
-  const requestedCap = smallestDefined(resource.requested, resource.maximum, resource.basis);
+  const requestedCap = smallestDefined(
+    resource.requested,
+    resource.maximum,
+    resource.basis,
+  );
   let preConstraintCommitment = round(
-    resource.basis * clampUnit(aggregateQuality * policy.maxCommitmentRatio * policy.commitmentMultiplier),
+    resource.basis *
+      clampUnit(
+        aggregateQuality *
+          policy.maxCommitmentRatio *
+          policy.commitmentMultiplier,
+      ),
   );
 
   if (requestedCap < preConstraintCommitment) {
     preConstraintCommitment = requestedCap;
-    cappedBy.push(resource.requested != null ? "resource.requested" : resource.maximum != null ? "resource.maximum" : "resource.available");
-    reasons.push(`Capped by available/requested resource at ${formatNumber(requestedCap)}.`);
+    cappedBy.push(
+      resource.requested != null
+        ? "resource.requested"
+        : resource.maximum != null
+          ? "resource.maximum"
+          : "resource.available",
+    );
+    reasons.push(
+      `Capped by available/requested resource at ${formatNumber(requestedCap)}.`,
+    );
   }
 
-  for (const constraint of nonBlockingFailures(constraints).filter((entry) => !entry.targetId)) {
+  for (const constraint of nonBlockingFailures(constraints).filter(
+    (entry) => !entry.targetId,
+  )) {
     const factor = reductionFactor(constraint, policy);
     preConstraintCommitment = round(preConstraintCommitment * factor);
     limitedBy.push(constraint.id);
     reductions.push({
       id: constraint.id,
       factor,
-      reason: constraint.reason ?? `${constraintName(constraint)} reduced commitment.`,
+      reason:
+        constraint.reason ??
+        `${constraintName(constraint)} reduced commitment.`,
     });
     reasons.push(`${constraintName(constraint)} reduced commitment by policy.`);
   }
@@ -240,37 +288,67 @@ export function evaluateCommitment(input: CommitmentEvaluateInput = {}): Commitm
     reasons.push(`Capped by global constraint at ${formatNumber(globalCap)}.`);
   }
 
-  if (resource.minimum != null && preConstraintCommitment > 0 && preConstraintCommitment < resource.minimum) {
+  if (
+    resource.minimum != null &&
+    preConstraintCommitment > 0 &&
+    preConstraintCommitment < resource.minimum
+  ) {
     if (resource.minimum <= requestedCap) {
       preConstraintCommitment = resource.minimum;
       cappedBy.push("resource.minimum");
-      reasons.push(`Raised to minimum commitment ${formatNumber(resource.minimum)}.`);
+      reasons.push(
+        `Raised to minimum commitment ${formatNumber(resource.minimum)}.`,
+      );
     } else {
-      reasons.push(`Minimum commitment ${formatNumber(resource.minimum)} could not be met.`);
+      reasons.push(
+        `Minimum commitment ${formatNumber(resource.minimum)} could not be met.`,
+      );
       limitedBy.push("resource.minimum");
     }
   }
 
   if (preConstraintCommitment <= 0) {
-    reasons.push("Commitment reduced to zero by policy, constraints, or resources.");
+    reasons.push(
+      "Commitment reduced to zero by policy, constraints, or resources.",
+    );
   }
 
-  const targetCaps = eligible.map((entry) => targetCap(entry, policy, resource.basis));
-  const allocation = allocateByWeights(preConstraintCommitment, strategyPlan.weights, targetCaps);
+  const targetCaps = eligible.map((entry) =>
+    targetCap(entry, policy, resource.basis),
+  );
+  const allocation = allocateByWeights(
+    preConstraintCommitment,
+    strategyPlan.weights,
+    targetCaps,
+  );
   cappedBy.push(...allocation.cappedBy);
   if (allocation.unallocated > 0) {
     limitedBy.push("target_caps");
-    reasons.push(`${formatNumber(allocation.unallocated)} could not be allocated within target caps.`);
+    reasons.push(
+      `${formatNumber(allocation.unallocated)} could not be allocated within target caps.`,
+    );
   }
 
   const recommendations = eligible.map((entry, index) =>
-    recommendationFor(entry, allocation.amounts[index] ?? 0, resource.basis, preConstraintCommitment, strategyPlan.weights[index] ?? 0),
+    recommendationFor(
+      entry,
+      allocation.amounts[index] ?? 0,
+      resource.basis,
+      preConstraintCommitment,
+      strategyPlan.weights[index] ?? 0,
+    ),
   );
 
-  const totalRecommended = round(recommendations.reduce((sum, item) => sum + item.amount, 0));
-  const normalizedCommitment = resource.basis > 0 ? round(totalRecommended / resource.basis) : 0;
+  const totalRecommended = round(
+    recommendations.reduce((sum, item) => sum + item.amount, 0),
+  );
+  const normalizedCommitment =
+    resource.basis > 0 ? round(totalRecommended / resource.basis) : 0;
 
-  if (normalizedCommitment > 0 && normalizedCommitment < policy.minimumViableCommitmentRatio) {
+  if (
+    normalizedCommitment > 0 &&
+    normalizedCommitment < policy.minimumViableCommitmentRatio
+  ) {
     limitedBy.push("minimum_viable_commitment");
     reasons.push(
       `Recommended commitment ${formatPercent(normalizedCommitment)} is below policy minimum viable commitment ${formatPercent(
@@ -280,7 +358,10 @@ export function evaluateCommitment(input: CommitmentEvaluateInput = {}): Commitm
   }
 
   const status: CommitmentStatus =
-    normalizedCommitment <= 0 || normalizedCommitment < policy.minimumViableCommitmentRatio ? "deferred" : "recommended";
+    normalizedCommitment <= 0 ||
+    normalizedCommitment < policy.minimumViableCommitmentRatio
+      ? "deferred"
+      : "recommended";
 
   return buildResult({
     status,
@@ -291,9 +372,23 @@ export function evaluateCommitment(input: CommitmentEvaluateInput = {}): Commitm
     resource,
     totalRecommended: status === "recommended" ? totalRecommended : 0,
     normalizedCommitment: status === "recommended" ? normalizedCommitment : 0,
-    recommendations: status === "recommended" ? recommendations : recommendations.map((entry) => ({ ...entry, amount: 0, normalizedCommitment: 0, mode: "none" })),
-    reasons: unique([...reasons, ...eligible.flatMap((entry) => entry.reasons)]),
-    limitedBy: unique([...limitedBy, ...eligible.flatMap((entry) => entry.limitedBy)]),
+    recommendations:
+      status === "recommended"
+        ? recommendations
+        : recommendations.map((entry) => ({
+            ...entry,
+            amount: 0,
+            normalizedCommitment: 0,
+            mode: "none",
+          })),
+    reasons: unique([
+      ...reasons,
+      ...eligible.flatMap((entry) => entry.reasons),
+    ]),
+    limitedBy: unique([
+      ...limitedBy,
+      ...eligible.flatMap((entry) => entry.limitedBy),
+    ]),
     blockedBy,
     cappedBy,
     reductions,
@@ -304,7 +399,9 @@ export function evaluateCommitment(input: CommitmentEvaluateInput = {}): Commitm
   });
 }
 
-function normalizeDecisions(input: CommitmentEvaluateInput): CommitmentDecision[] {
+function normalizeDecisions(
+  input: CommitmentEvaluateInput,
+): CommitmentDecision[] {
   const values = [
     ...(input.decision ? [input.decision] : []),
     ...(Array.isArray(input.decisions) ? input.decisions : []),
@@ -331,7 +428,9 @@ function normalizeResource(resource?: CommitmentResource): ResourceState {
 
   let basis = available ?? requested ?? maximum ?? 1;
   if (available == null && requested == null && maximum == null) {
-    assumptions.push("No resource was supplied; using normalized resource basis 1.");
+    assumptions.push(
+      "No resource was supplied; using normalized resource basis 1.",
+    );
   }
   if (!Number.isFinite(basis) || basis < 0) basis = 0;
 
@@ -344,7 +443,9 @@ function normalizeResource(resource?: CommitmentResource): ResourceState {
   };
 }
 
-function normalizeConstraints(constraints?: CommitmentConstraint[]): NormalizedConstraint[] {
+function normalizeConstraints(
+  constraints?: CommitmentConstraint[],
+): NormalizedConstraint[] {
   if (!Array.isArray(constraints)) return [];
   return constraints.map((constraint, index) => ({
     ...constraint,
@@ -363,8 +464,18 @@ function scoreDecision(
 ): ScoredDecision {
   const reasons: string[] = [];
   const limitedBy: string[] = [];
-  const confidence = normalizeScore(decision.confidence, 0, "confidence", reasons);
-  const userTrust = normalizeScore(decision.userTrust ?? decision.trust ?? input.trust?.userTrust, confidence, "user trust", reasons);
+  const confidence = normalizeScore(
+    decision.confidence,
+    0,
+    "confidence",
+    reasons,
+  );
+  const userTrust = normalizeScore(
+    decision.userTrust ?? decision.trust ?? input.trust?.userTrust,
+    confidence,
+    "user trust",
+    reasons,
+  );
   const systemConfidence = normalizeScore(
     decision.systemConfidence ?? input.trust?.systemConfidence,
     confidence,
@@ -377,13 +488,24 @@ function scoreDecision(
     "historical reliability",
     reasons,
   );
-  const trust = round((userTrust + systemConfidence + historicalReliability) / 3);
+  const trust = round(
+    (userTrust + systemConfidence + historicalReliability) / 3,
+  );
   const risk = normalizeScore(decision.risk, 0.5, "risk", reasons);
-  const expectedUtility = normalizeScore(decision.expectedUtility, 0.5, "expected utility", reasons);
+  const expectedUtility = normalizeScore(
+    decision.expectedUtility,
+    0.5,
+    "expected utility",
+    reasons,
+  );
   const riskAdjustment = clampUnit(1 - risk * (1 - policy.riskTolerance));
   const utilityAdjustment = 0.75 + expectedUtility * 0.5;
-  let quality = clampUnit(confidence * trust * riskAdjustment * utilityAdjustment);
-  const constraints = normalizeConstraints(decision.constraints).concat(inheritedConstraints);
+  let quality = clampUnit(
+    confidence * trust * riskAdjustment * utilityAdjustment,
+  );
+  const constraints = normalizeConstraints(decision.constraints).concat(
+    inheritedConstraints,
+  );
 
   for (const constraint of nonBlockingFailures(constraints)) {
     const factor = reductionFactor(constraint, policy);
@@ -392,8 +514,12 @@ function scoreDecision(
     reasons.push(`${constraintName(constraint)} reduced target quality.`);
   }
 
-  if (confidence >= policy.minConfidence) reasons.push(`Confidence ${formatPercent(confidence)} clears policy minimum.`);
-  if (trust >= policy.minTrust) reasons.push(`Trust ${formatPercent(trust)} clears policy minimum.`);
+  if (confidence >= policy.minConfidence)
+    reasons.push(
+      `Confidence ${formatPercent(confidence)} clears policy minimum.`,
+    );
+  if (trust >= policy.minTrust)
+    reasons.push(`Trust ${formatPercent(trust)} clears policy minimum.`);
 
   return {
     decision,
@@ -425,7 +551,9 @@ function resolveStrategyPlan(
       strategy: requested,
       weights: [1],
       scores: { [entries[0]?.decision.id ?? "target"]: 1 },
-      reasons: ["Single eligible decision receives all allocatable commitment."],
+      reasons: [
+        "Single eligible decision receives all allocatable commitment.",
+      ],
       limitedBy: [],
     };
   }
@@ -434,7 +562,12 @@ function resolveStrategyPlan(
     const optimized = sharpeLikeWeights(entries, policy, seed);
     if (optimized) return optimized;
 
-    const fallback = resolveStrategyPlan(policy.fallbackStrategy, entries, policy, seed);
+    const fallback = resolveStrategyPlan(
+      policy.fallbackStrategy,
+      entries,
+      policy,
+      seed,
+    );
     return {
       ...fallback,
       reasons: [
@@ -447,8 +580,10 @@ function resolveStrategyPlan(
 
   const rawScores = entries.map((entry) => {
     if (requested === "equal_weight") return 1;
-    if (requested === "confidence_weighted") return entry.score.confidence * entry.score.trust;
-    if (requested === "constraint_first") return constraintFirstScore(entry, policy);
+    if (requested === "confidence_weighted")
+      return entry.score.confidence * entry.score.trust;
+    if (requested === "constraint_first")
+      return constraintFirstScore(entry, policy);
     return entry.score.quality;
   });
 
@@ -456,14 +591,25 @@ function resolveStrategyPlan(
   return {
     strategy: requested,
     weights,
-    scores: Object.fromEntries(entries.map((entry, index) => [entry.decision.id, round(rawScores[index] ?? 0)])),
+    scores: Object.fromEntries(
+      entries.map((entry, index) => [
+        entry.decision.id,
+        round(rawScores[index] ?? 0),
+      ]),
+    ),
     reasons: [`Strategy ${requested} produced deterministic target weights.`],
     limitedBy: [],
   };
 }
 
-function sharpeLikeWeights(entries: ScoredDecision[], policy: CommitmentPolicy, seed?: string): StrategyPlan | null {
-  const minLength = Math.min(...entries.map((entry) => entry.decision.outcomeSeries?.length ?? 0));
+function sharpeLikeWeights(
+  entries: ScoredDecision[],
+  policy: CommitmentPolicy,
+  seed?: string,
+): StrategyPlan | null {
+  const minLength = Math.min(
+    ...entries.map((entry) => entry.decision.outcomeSeries?.length ?? 0),
+  );
   if (!Number.isFinite(minLength) || minLength < 2) return null;
 
   const matrix = entries.map((entry) =>
@@ -474,23 +620,47 @@ function sharpeLikeWeights(entries: ScoredDecision[], policy: CommitmentPolicy, 
   const config = policy.sharpeLike;
   const weights = optimizeOutcomeMatrix(matrix, {
     ...config,
-    seed: seed ?? config.seed ?? stableHash(JSON.stringify({ matrix, policy: policy.name, version: policy.version })),
+    seed:
+      seed ??
+      config.seed ??
+      stableHash(
+        JSON.stringify({
+          matrix,
+          policy: policy.name,
+          version: policy.version,
+        }),
+      ),
   });
   const scoreValues = entries.map((entry, index) => {
-    const single = matrix.map((series, seriesIndex) => series.map((value) => (seriesIndex === index ? value : 0)));
-    return scoreOutcomeMetrics(summarizeOutcomeMetrics(unitWeight(entries.length, index), single), config);
+    const single = matrix.map((series, seriesIndex) =>
+      series.map((value) => (seriesIndex === index ? value : 0)),
+    );
+    return scoreOutcomeMetrics(
+      summarizeOutcomeMetrics(unitWeight(entries.length, index), single),
+      config,
+    );
   });
 
   return {
     strategy: "sharpe_like",
     weights,
-    scores: Object.fromEntries(entries.map((entry, index) => [entry.decision.id, round(scoreValues[index] ?? 0)])),
-    reasons: ["Sharpe-like strategy optimized reward relative to variability using deterministic seeded search."],
+    scores: Object.fromEntries(
+      entries.map((entry, index) => [
+        entry.decision.id,
+        round(scoreValues[index] ?? 0),
+      ]),
+    ),
+    reasons: [
+      "Sharpe-like strategy optimized reward relative to variability using deterministic seeded search.",
+    ],
     limitedBy: [],
   };
 }
 
-function optimizeOutcomeMatrix(outcomeMatrix: number[][], config: Required<Omit<SharpeLikeConfig, "seed">> & { seed?: string }): number[] {
+function optimizeOutcomeMatrix(
+  outcomeMatrix: number[][],
+  config: Required<Omit<SharpeLikeConfig, "seed">> & { seed?: string },
+): number[] {
   if (outcomeMatrix.length === 0) return [];
   if (outcomeMatrix.length === 1) return [1];
 
@@ -499,13 +669,20 @@ function optimizeOutcomeMatrix(outcomeMatrix: number[][], config: Required<Omit<
   let best = normalizeWeights(Array.from({ length: count }, () => 1));
   let bestMetrics = summarizeOutcomeMetrics(best, outcomeMatrix);
   let bestScore = scoreOutcomeMetrics(bestMetrics, config);
-  const rounds = config.rounds == null ? Math.max(1000, count * 700) : Math.max(1, Math.floor(config.rounds));
+  const rounds =
+    config.rounds == null
+      ? Math.max(1000, count * 700)
+      : Math.max(1, Math.floor(config.rounds));
 
   for (let index = 0; index < rounds; index += 1) {
     const candidate = randomWeights(count, rng);
     const metrics = summarizeOutcomeMetrics(candidate, outcomeMatrix);
     const score = scoreOutcomeMetrics(metrics, config);
-    if (score > bestScore + 1e-12 || (Math.abs(score - bestScore) <= 1e-12 && preferredMetrics(metrics, bestMetrics))) {
+    if (
+      score > bestScore + 1e-12 ||
+      (Math.abs(score - bestScore) <= 1e-12 &&
+        preferredMetrics(metrics, bestMetrics))
+    ) {
       best = candidate;
       bestMetrics = metrics;
       bestScore = score;
@@ -518,10 +695,16 @@ function optimizeOutcomeMatrix(outcomeMatrix: number[][], config: Required<Omit<
   for (let pass = 0; pass < passes; pass += 1) {
     const scale = baseScale / Math.max(1, pass + 1);
     for (let index = 0; index < poolSize; index += 1) {
-      const candidate = normalizeWeights(best.map((weight) => Math.max(0, weight + (rng() - 0.5) * scale)));
+      const candidate = normalizeWeights(
+        best.map((weight) => Math.max(0, weight + (rng() - 0.5) * scale)),
+      );
       const metrics = summarizeOutcomeMetrics(candidate, outcomeMatrix);
       const score = scoreOutcomeMetrics(metrics, config);
-      if (score > bestScore + 1e-12 || (Math.abs(score - bestScore) <= 1e-12 && preferredMetrics(metrics, bestMetrics))) {
+      if (
+        score > bestScore + 1e-12 ||
+        (Math.abs(score - bestScore) <= 1e-12 &&
+          preferredMetrics(metrics, bestMetrics))
+      ) {
         best = candidate;
         bestMetrics = metrics;
         bestScore = score;
@@ -537,11 +720,16 @@ function summarizeOutcomeMetrics(weights: number[], outcomeMatrix: number[][]) {
   if (series.length < 2) return null;
 
   const meanValue = mean(series);
-  const variance = series.reduce((sum, value) => sum + (value - meanValue) ** 2, 0) / Math.max(1, series.length - 1);
+  const variance =
+    series.reduce((sum, value) => sum + (value - meanValue) ** 2, 0) /
+    Math.max(1, series.length - 1);
   const variability = Math.sqrt(Math.max(variance, 1e-10)) * Math.sqrt(252);
   const annualizedReturn = meanValue * 252;
-  const downsideVariance = series.reduce((sum, value) => sum + Math.min(0, value) ** 2, 0) / series.length;
-  const downsideDeviation = Math.sqrt(Math.max(downsideVariance, 1e-10)) * Math.sqrt(252);
+  const downsideVariance =
+    series.reduce((sum, value) => sum + Math.min(0, value) ** 2, 0) /
+    series.length;
+  const downsideDeviation =
+    Math.sqrt(Math.max(downsideVariance, 1e-10)) * Math.sqrt(252);
 
   let value = 1;
   let peak = 1;
@@ -567,7 +755,10 @@ function summarizeOutcomeMetrics(weights: number[], outcomeMatrix: number[][]) {
   };
 }
 
-function scoreOutcomeMetrics(metrics: ReturnType<typeof summarizeOutcomeMetrics>, config: Required<Omit<SharpeLikeConfig, "seed">>): number {
+function scoreOutcomeMetrics(
+  metrics: ReturnType<typeof summarizeOutcomeMetrics>,
+  config: Required<Omit<SharpeLikeConfig, "seed">>,
+): number {
   if (!metrics) return Number.NEGATIVE_INFINITY;
   if (config.objective === "downside_adjusted") return metrics.downsideAdjusted;
   if (config.objective === "drawdown_adjusted") return metrics.drawdownAdjusted;
@@ -585,7 +776,10 @@ function scoreOutcomeMetrics(metrics: ReturnType<typeof summarizeOutcomeMetrics>
   return metrics.rewardToVariability;
 }
 
-function portfolioSeries(weights: number[], outcomeMatrix: number[][]): number[] {
+function portfolioSeries(
+  weights: number[],
+  outcomeMatrix: number[][],
+): number[] {
   const periods = outcomeMatrix[0]?.length ?? 0;
   const series: number[] = [];
   for (let period = 0; period < periods; period += 1) {
@@ -598,10 +792,15 @@ function portfolioSeries(weights: number[], outcomeMatrix: number[][]): number[]
   return series;
 }
 
-function preferredMetrics(candidate: ReturnType<typeof summarizeOutcomeMetrics>, current: ReturnType<typeof summarizeOutcomeMetrics>): boolean {
+function preferredMetrics(
+  candidate: ReturnType<typeof summarizeOutcomeMetrics>,
+  current: ReturnType<typeof summarizeOutcomeMetrics>,
+): boolean {
   if (!candidate) return false;
   if (!current) return true;
-  if (Math.abs(candidate.rewardToVariability - current.rewardToVariability) > 1e-6) {
+  if (
+    Math.abs(candidate.rewardToVariability - current.rewardToVariability) > 1e-6
+  ) {
     return candidate.rewardToVariability > current.rewardToVariability;
   }
   if (Math.abs(candidate.cumulativeReturn - current.cumulativeReturn) > 1e-6) {
@@ -613,7 +812,11 @@ function preferredMetrics(candidate: ReturnType<typeof summarizeOutcomeMetrics>,
   return candidate.variability < current.variability;
 }
 
-function targetCap(entry: ScoredDecision, policy: CommitmentPolicy, basis: number): number {
+function targetCap(
+  entry: ScoredDecision,
+  policy: CommitmentPolicy,
+  basis: number,
+): number {
   const caps = [basis * policy.maxSingleTargetRatio];
   const maxCommitment = nonNegativeNumber(entry.decision.maxCommitment);
   if (maxCommitment != null) caps.push(maxCommitment);
@@ -624,7 +827,10 @@ function targetCap(entry: ScoredDecision, policy: CommitmentPolicy, basis: numbe
   return Math.min(...caps);
 }
 
-function globalConstraintCap(constraints: NormalizedConstraint[], basis: number): number | undefined {
+function globalConstraintCap(
+  constraints: NormalizedConstraint[],
+  basis: number,
+): number | undefined {
   const caps = constraints
     .filter((constraint) => !constraint.targetId)
     .map((constraint) => constraintCap(constraint, basis))
@@ -632,14 +838,22 @@ function globalConstraintCap(constraints: NormalizedConstraint[], basis: number)
   return caps.length ? Math.min(...caps) : undefined;
 }
 
-function constraintCap(constraint: CommitmentConstraint, basis: number): number | undefined {
+function constraintCap(
+  constraint: CommitmentConstraint,
+  basis: number,
+): number | undefined {
   const absolute = nonNegativeNumber(constraint.maxCommitment);
   const ratio = nonNegativeNumber(constraint.maxCommitmentRatio);
-  const ratioCap = ratio == null ? undefined : basis * normalizeRatioValue(ratio);
+  const ratioCap =
+    ratio == null ? undefined : basis * normalizeRatioValue(ratio);
   return smallestDefined(absolute, ratioCap);
 }
 
-function allocateByWeights(totalBudget: number, weights: number[], caps: number[]): Allocation {
+function allocateByWeights(
+  totalBudget: number,
+  weights: number[],
+  caps: number[],
+): Allocation {
   const amounts = weights.map(() => 0);
   const active = new Set(weights.map((_, index) => index));
   const cappedBy: string[] = [];
@@ -647,12 +861,18 @@ function allocateByWeights(totalBudget: number, weights: number[], caps: number[
 
   while (active.size > 0 && remaining > 1e-9) {
     const activeIndexes = [...active];
-    const totalWeight = activeIndexes.reduce((sum, index) => sum + Math.max(0, weights[index] ?? 0), 0);
+    const totalWeight = activeIndexes.reduce(
+      (sum, index) => sum + Math.max(0, weights[index] ?? 0),
+      0,
+    );
     const equalWeight = totalWeight <= 0 ? 1 / activeIndexes.length : 0;
     let cappedThisPass = false;
 
     for (const index of activeIndexes) {
-      const share = totalWeight > 0 ? Math.max(0, weights[index] ?? 0) / totalWeight : equalWeight;
+      const share =
+        totalWeight > 0
+          ? Math.max(0, weights[index] ?? 0) / totalWeight
+          : equalWeight;
       const desired = remaining * share;
       const cap = caps[index] ?? Number.POSITIVE_INFINITY;
       const capRoom = Math.max(0, cap - (amounts[index] ?? 0));
@@ -667,7 +887,10 @@ function allocateByWeights(totalBudget: number, weights: number[], caps: number[
 
     if (!cappedThisPass) {
       for (const index of activeIndexes) {
-        const share = totalWeight > 0 ? Math.max(0, weights[index] ?? 0) / totalWeight : equalWeight;
+        const share =
+          totalWeight > 0
+            ? Math.max(0, weights[index] ?? 0) / totalWeight
+            : equalWeight;
         amounts[index] = round((amounts[index] ?? 0) + remaining * share);
       }
       remaining = 0;
@@ -716,7 +939,10 @@ function zeroRecommendation(entry: ScoredDecision): CommitmentRecommendation {
     weight: 0,
     mode: "none",
     score: entry.score,
-    reasons: unique([...entry.reasons, "No commitment allocated to this target."]),
+    reasons: unique([
+      ...entry.reasons,
+      "No commitment allocated to this target.",
+    ]),
     limitedBy: unique(entry.limitedBy),
   };
 }
@@ -757,14 +983,22 @@ function buildResult(args: {
     recommendations: args.recommendations,
     reasons: unique(args.reasons),
     limitedBy: unique(args.limitedBy),
-    invalidation: buildInvalidation(args.policy, args.recommendations, args.limitedBy),
+    invalidation: buildInvalidation(
+      args.policy,
+      args.recommendations,
+      args.limitedBy,
+    ),
     monitoringPlan: buildMonitoringPlan(args.policy, args.recommendations),
     audit: {
       deterministic: true,
       createdAt: args.createdAt,
       resourceBasis: round(args.resource.basis),
-      ...(args.resource.requested != null ? { requestedCommitment: args.resource.requested } : {}),
-      ...(args.resource.maximum != null ? { maxCommitment: args.resource.maximum } : {}),
+      ...(args.resource.requested != null
+        ? { requestedCommitment: args.resource.requested }
+        : {}),
+      ...(args.resource.maximum != null
+        ? { maxCommitment: args.resource.maximum }
+        : {}),
       preConstraintCommitment: round(args.preConstraintCommitment),
       unallocatedCommitment: round(args.unallocatedCommitment),
       eligibleTargets: args.eligibleTargets,
@@ -819,7 +1053,8 @@ function buildInvalidation(
   return {
     triggers,
     confidenceDeterioration: recommendations.map(
-      (entry) => `${entry.targetId}: invalidate if confidence drops below ${formatPercent(Math.max(policy.minConfidence, entry.score.confidence - policy.invalidationTolerance))}.`,
+      (entry) =>
+        `${entry.targetId}: invalidate if confidence drops below ${formatPercent(Math.max(policy.minConfidence, entry.score.confidence - policy.invalidationTolerance))}.`,
     ),
     evidenceDeterioration: [
       "Invalidate if supporting evidence no longer matches the decision state.",
@@ -829,29 +1064,46 @@ function buildInvalidation(
       `Invalidate if policy ${policy.name}@${policy.version} changes or any hard constraint fails.`,
       ...limitedBy.map((entry) => `Review existing limiter: ${entry}.`),
     ],
-    resourceViolations: ["Invalidate if available, requested, or maximum resource no longer supports the committed amount."],
+    resourceViolations: [
+      "Invalidate if available, requested, or maximum resource no longer supports the committed amount.",
+    ],
   };
 }
 
-function buildMonitoringPlan(policy: CommitmentPolicy, recommendations: CommitmentRecommendation[]): CommitmentMonitoringPlan {
+function buildMonitoringPlan(
+  policy: CommitmentPolicy,
+  recommendations: CommitmentRecommendation[],
+): CommitmentMonitoringPlan {
   return {
     metrics: recommendations.flatMap((entry) => [
       {
         id: "confidence",
         targetId: entry.targetId,
-        threshold: round(Math.max(policy.minConfidence, entry.score.confidence - policy.invalidationTolerance)),
+        threshold: round(
+          Math.max(
+            policy.minConfidence,
+            entry.score.confidence - policy.invalidationTolerance,
+          ),
+        ),
         direction: "below" as const,
       },
       {
         id: "trust",
         targetId: entry.targetId,
-        threshold: round(Math.max(policy.minTrust, entry.score.trust - policy.invalidationTolerance)),
+        threshold: round(
+          Math.max(
+            policy.minTrust,
+            entry.score.trust - policy.invalidationTolerance,
+          ),
+        ),
         direction: "below" as const,
       },
       {
         id: "risk",
         targetId: entry.targetId,
-        threshold: round(clampUnit(entry.score.risk + policy.invalidationTolerance)),
+        threshold: round(
+          clampUnit(entry.score.risk + policy.invalidationTolerance),
+        ),
         direction: "above" as const,
       },
     ]),
@@ -861,7 +1113,11 @@ function buildMonitoringPlan(policy: CommitmentPolicy, recommendations: Commitme
       "constraint.failed",
       "resource.available.changed",
     ],
-    events: ["commitment.review_due", "commitment.invalidated", "commitment.resource_limited"],
+    events: [
+      "commitment.review_due",
+      "commitment.invalidated",
+      "commitment.resource_limited",
+    ],
     futureChecks: [
       `Re-evaluate when confidence, trust, risk, or resource changes by ${formatPercent(policy.invalidationTolerance)}.`,
       `Use monitoring sensitivity ${formatPercent(policy.monitoringSensitivity)} when prioritizing alerts.`,
@@ -869,7 +1125,9 @@ function buildMonitoringPlan(policy: CommitmentPolicy, recommendations: Commitme
   };
 }
 
-function blockingConstraints(constraints: NormalizedConstraint[]): NormalizedConstraint[] {
+function blockingConstraints(
+  constraints: NormalizedConstraint[],
+): NormalizedConstraint[] {
   return constraints.filter(
     (constraint) =>
       constraint.type === "hard" &&
@@ -878,33 +1136,54 @@ function blockingConstraints(constraints: NormalizedConstraint[]): NormalizedCon
   );
 }
 
-function nonBlockingFailures(constraints: NormalizedConstraint[]): NormalizedConstraint[] {
-  return constraints.filter((constraint) => !constraint.passed && !blockingConstraints([constraint]).length);
+function nonBlockingFailures(
+  constraints: NormalizedConstraint[],
+): NormalizedConstraint[] {
+  return constraints.filter(
+    (constraint) =>
+      !constraint.passed && !blockingConstraints([constraint]).length,
+  );
 }
 
-function reductionFactor(constraint: NormalizedConstraint, policy: CommitmentPolicy): number {
-  if (constraint.reductionFactor != null) return clampUnit(Number(constraint.reductionFactor));
+function reductionFactor(
+  constraint: NormalizedConstraint,
+  policy: CommitmentPolicy,
+): number {
+  if (constraint.reductionFactor != null)
+    return clampUnit(Number(constraint.reductionFactor));
   return constraint.type === "hard"
     ? policy.hardConstraintReduction[constraint.severity]
     : policy.softConstraintReduction[constraint.severity];
 }
 
-function constraintFirstScore(entry: ScoredDecision, policy: CommitmentPolicy): number {
+function constraintFirstScore(
+  entry: ScoredDecision,
+  policy: CommitmentPolicy,
+): number {
   const cap = targetCap(entry, policy, 1);
   const failed = nonBlockingFailures(entry.constraints).length;
   return entry.score.quality * (failed > 0 ? 0.6 : 1) * clampUnit(cap);
 }
 
-function normalizeScore(value: unknown, fallback: number, label: string, reasons: string[]): number {
+function normalizeScore(
+  value: unknown,
+  fallback: number,
+  label: string,
+  reasons: string[],
+): number {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) {
-    if (value == null) reasons.push(`${label} missing; using ${formatPercent(fallback)}.`);
+    if (value == null)
+      reasons.push(`${label} missing; using ${formatPercent(fallback)}.`);
     else reasons.push(`${label} invalid; using ${formatPercent(fallback)}.`);
     return clampUnit(fallback);
   }
   const scaled = normalizeRatioValue(numeric);
   const clamped = clampUnit(scaled);
-  if (clamped !== scaled) reasons.push(`${label} outside 0-100%; clamped to ${formatPercent(clamped)}.`);
+  if (clamped !== scaled)
+    reasons.push(
+      `${label} outside 0-100%; clamped to ${formatPercent(clamped)}.`,
+    );
   return round(clamped);
 }
 
@@ -912,35 +1191,61 @@ function normalizeRatioValue(value: number): number {
   return Math.abs(value) > 1 ? value / 100 : value;
 }
 
-function normalizeSeverity(value: CommitmentConstraintSeverity | undefined): CommitmentConstraintSeverity {
-  if (value === "low" || value === "medium" || value === "high" || value === "critical") return value;
+function normalizeSeverity(
+  value: CommitmentConstraintSeverity | undefined,
+): CommitmentConstraintSeverity {
+  if (
+    value === "low" ||
+    value === "medium" ||
+    value === "high" ||
+    value === "critical"
+  )
+    return value;
   return "medium";
 }
 
 function normalizeWeights(values: number[]): number[] {
-  const positive = values.map((value) => (Number.isFinite(value) ? Math.max(0, value) : 0));
+  const positive = values.map((value) =>
+    Number.isFinite(value) ? Math.max(0, value) : 0,
+  );
   const sum = positive.reduce((total, value) => total + value, 0);
-  if (sum <= 0) return positive.map(() => (positive.length ? round(1 / positive.length) : 0));
+  if (sum <= 0)
+    return positive.map(() =>
+      positive.length ? round(1 / positive.length) : 0,
+    );
   return positive.map((value) => round(value / sum));
 }
 
 function randomWeights(count: number, rng: () => number): number[] {
-  const values = Array.from({ length: count }, () => Math.max(1e-6, -Math.log(Math.max(1e-12, rng()))));
+  const values = Array.from({ length: count }, () =>
+    Math.max(1e-6, -Math.log(Math.max(1e-12, rng()))),
+  );
   return normalizeWeights(values);
 }
 
 function unitWeight(count: number, activeIndex: number): number[] {
-  return Array.from({ length: count }, (_, index) => (index === activeIndex ? 1 : 0));
+  return Array.from({ length: count }, (_, index) =>
+    index === activeIndex ? 1 : 0,
+  );
 }
 
 function weightedAverage(values: number[], weights: number[]): number {
   if (values.length === 0) return 0;
-  const normalized = normalizeWeights(weights.length === values.length ? weights : values.map(() => 1));
-  return round(values.reduce((sum, value, index) => sum + value * (normalized[index] ?? 0), 0));
+  const normalized = normalizeWeights(
+    weights.length === values.length ? weights : values.map(() => 1),
+  );
+  return round(
+    values.reduce(
+      (sum, value, index) => sum + value * (normalized[index] ?? 0),
+      0,
+    ),
+  );
 }
 
 function mean(values: number[]): number {
-  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+  return values.length
+    ? values.reduce((sum, value) => sum + value, 0) / values.length
+    : 0;
 }
 
 function nonNegativeNumber(value: unknown): number | undefined {
@@ -968,11 +1273,15 @@ function modeFor(normalizedCommitment: number): CommitmentMode {
 function normalizeDate(value: unknown): string {
   if (typeof value !== "string" || !value.trim()) return DEFAULT_CREATED_AT;
   const time = Date.parse(value);
-  return Number.isFinite(time) ? new Date(time).toISOString() : DEFAULT_CREATED_AT;
+  return Number.isFinite(time)
+    ? new Date(time).toISOString()
+    : DEFAULT_CREATED_AT;
 }
 
 function constraintName(constraint: CommitmentConstraint): string {
-  return constraint.label ? `${constraint.label} (${constraint.id})` : constraint.id;
+  return constraint.label
+    ? `${constraint.label} (${constraint.id})`
+    : constraint.id;
 }
 
 function clampUnit(value: number): number {
@@ -990,7 +1299,9 @@ function formatPercent(value: number): string {
 }
 
 function formatNumber(value: number): string {
-  return Number.isInteger(value) ? String(value) : value.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
+  return Number.isInteger(value)
+    ? String(value)
+    : value.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
 }
 
 function unique<T>(values: T[]): T[] {

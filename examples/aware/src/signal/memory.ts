@@ -1,13 +1,18 @@
 import {
+  type CoherenceAssessment,
   createDecisionRecord,
-  type CoherenceAssessment
-} from "@signal/decision";
+} from "@signal/sdk-node";
 import {
-  createInMemoryDecisionMemoryStore,
   type DecisionMemoryStore,
-  type DecisionReview
-} from "@signal/decision-memory";
-import type { Briefing, BriefingReviewInput, BriefingReviewResult, SafetyObservation } from "../contracts.js";
+  type DecisionReview,
+  createInMemoryDecisionMemoryStore,
+} from "@signal/sdk-node";
+import type {
+  Briefing,
+  BriefingReviewInput,
+  BriefingReviewResult,
+  SafetyObservation,
+} from "../contracts.js";
 
 export const AWARE_MEMORY_APP_ID = "aware";
 export const AWARE_MEMORY_DOMAIN = "public-safety-guidance";
@@ -21,7 +26,9 @@ export type AwareDecisionMemory = {
   recordReview(input: BriefingReviewInput): Promise<BriefingReviewResult>;
 };
 
-export function createAwareDecisionMemory(store: DecisionMemoryStore = createInMemoryDecisionMemoryStore()): AwareDecisionMemory {
+export function createAwareDecisionMemory(
+  store: DecisionMemoryStore = createInMemoryDecisionMemoryStore(),
+): AwareDecisionMemory {
   return {
     store,
     async recordBriefing(input) {
@@ -43,17 +50,17 @@ export function createAwareDecisionMemory(store: DecisionMemoryStore = createInM
             signal: observation.signal,
             severity: observation.severity,
             sourceId: observation.source.id,
-            degraded: observation.degraded
-          }))
+            degraded: observation.degraded,
+          })),
         },
         coherence: coherenceFromBriefing(input.briefing),
         action: input.briefing.items.map((item) => ({
           itemId: item.id,
           primaryAction: item.primaryAction,
-          attentionLevel: item.attentionLevel
+          attentionLevel: item.attentionLevel,
         })),
         humanSummary: input.briefing.summary,
-        retentionTier: "hot"
+        retentionTier: "hot",
       });
       await store.saveDecisionRecord(record);
       return decisionId;
@@ -72,14 +79,17 @@ export function createAwareDecisionMemory(store: DecisionMemoryStore = createInM
         reviewedAt: now,
         classification: input.classification ?? "inconclusive",
         whatWasRecommended: `Review for briefing ${input.briefingId}.`,
-        whyRecommended: "Aware generated a regional public-safety briefing from normalized evidence.",
+        whyRecommended:
+          "Aware generated a regional public-safety briefing from normalized evidence.",
         whatHappened: input.whatHappened ?? "No outcome was supplied.",
-        lesson: input.lesson ?? "Keep the lesson provisional until more reviewed outcomes arrive.",
+        lesson:
+          input.lesson ??
+          "Keep the lesson provisional until more reviewed outcomes arrive.",
         confidenceAdjustment: 0,
         trustAdjustment: 0,
         metadata: {
-          scope: "examples/aware"
-        }
+          scope: "examples/aware",
+        },
       };
       await store.saveDecisionReview(review);
       return {
@@ -87,9 +97,9 @@ export function createAwareDecisionMemory(store: DecisionMemoryStore = createInM
         briefingId: input.briefingId,
         recordedAt: review.reviewedAt,
         status: "recorded",
-        memoryRecordId: review.decisionId
+        memoryRecordId: review.decisionId,
       };
-    }
+    },
   };
 }
 
@@ -98,19 +108,38 @@ export function memoryDecisionId(briefingId: string): string {
 }
 
 function coherenceFromBriefing(briefing: Briefing): CoherenceAssessment {
-  const rank = { normal: 92, notice: 78, warning: 66, urgency: 54, emergency: 48 }[briefing.attentionLevel];
-  const actionScale = { normal: 0.1, notice: 0.25, warning: 0.5, urgency: 0.75, emergency: 0.9 }[briefing.attentionLevel];
+  const rank = {
+    normal: 92,
+    notice: 78,
+    warning: 66,
+    urgency: 54,
+    emergency: 48,
+  }[briefing.attentionLevel];
+  const actionScale = {
+    normal: 0.1,
+    notice: 0.25,
+    warning: 0.5,
+    urgency: 0.75,
+    emergency: 0.9,
+  }[briefing.attentionLevel];
   return {
     score: rank,
-    status: briefing.degraded ? "tension" : briefing.attentionLevel === "emergency" ? "unstable" : "stable",
+    status: briefing.degraded
+      ? "tension"
+      : briefing.attentionLevel === "emergency"
+        ? "unstable"
+        : "stable",
     contradictions: briefing.degraded
-      ? [{
-          conflictId: `${briefing.id}:degraded`,
-          modules: ["discovery", "judgment"],
-          severity: "medium",
-          description: "Some evidence sources were unavailable.",
-          recommendation: "Keep guidance cautious and show source limitations."
-        }]
+      ? [
+          {
+            conflictId: `${briefing.id}:degraded`,
+            modules: ["discovery", "judgment"],
+            severity: "medium",
+            description: "Some evidence sources were unavailable.",
+            recommendation:
+              "Keep guidance cautious and show source limitations.",
+          },
+        ]
       : [],
     consensusLevel: briefing.degraded ? 68 : 82,
     actionAllowed: true,
@@ -120,8 +149,8 @@ function coherenceFromBriefing(briefing: Briefing): CoherenceAssessment {
     confidenceAdjustment: briefing.degraded ? -8 : 0,
     explanation: [
       "Decision memory records the briefing as a public-safety guidance decision.",
-      "The record keeps evidence, trust, constraints, commitment, and action traceable for this example."
-    ]
+      "The record keeps evidence, trust, constraints, commitment, and action traceable for this example.",
+    ],
   };
 }
 

@@ -133,12 +133,17 @@ const TRUST_RANK: Record<ModelLifecycleState, number> = {
 let schemaReady: Promise<void> | null = null;
 let warningLogged = false;
 
-export async function listPortfolioDecisionMemory(input: {
-  market?: string;
-  limit?: number;
-} = {}): Promise<PortfolioDecisionMemoryEntry[]> {
+export async function listPortfolioDecisionMemory(
+  input: {
+    market?: string;
+    limit?: number;
+  } = {},
+): Promise<PortfolioDecisionMemoryEntry[]> {
   await ensureDecisionMemorySchema();
-  const limit = Math.min(Math.max(Number(input.limit ?? DEFAULT_LIMIT), 1), 200);
+  const limit = Math.min(
+    Math.max(Number(input.limit ?? DEFAULT_LIMIT), 1),
+    200,
+  );
   const market = normalizeMarket(input.market ?? "");
   const params: Array<string | number> = [];
   const where = market ? "WHERE market = $1" : "";
@@ -159,12 +164,17 @@ export async function listPortfolioDecisionMemory(input: {
   return result.rows.map(rowToEntry);
 }
 
-export async function listPortfolioDecisionAudit(input: {
-  market?: string;
-  limit?: number;
-} = {}): Promise<PortfolioDecisionAuditEntry[]> {
+export async function listPortfolioDecisionAudit(
+  input: {
+    market?: string;
+    limit?: number;
+  } = {},
+): Promise<PortfolioDecisionAuditEntry[]> {
   await ensureDecisionMemorySchema();
-  const limit = Math.min(Math.max(Number(input.limit ?? DEFAULT_LIMIT), 1), 200);
+  const limit = Math.min(
+    Math.max(Number(input.limit ?? DEFAULT_LIMIT), 1),
+    200,
+  );
   const market = normalizeMarket(input.market ?? "");
   const params: Array<string | number> = [];
   const where = market ? "WHERE market = $1" : "";
@@ -192,15 +202,22 @@ export async function listPortfolioDecisionAudit(input: {
   }));
 }
 
-export async function listPortfolioDecisionOutcomes(input: {
-  market?: string;
-  limit?: number;
-} = {}): Promise<PortfolioDecisionOutcome[]> {
+export async function listPortfolioDecisionOutcomes(
+  input: {
+    market?: string;
+    limit?: number;
+  } = {},
+): Promise<PortfolioDecisionOutcome[]> {
   await ensureDecisionMemorySchema();
-  const limit = Math.min(Math.max(Number(input.limit ?? DEFAULT_LIMIT), 1), 200);
+  const limit = Math.min(
+    Math.max(Number(input.limit ?? DEFAULT_LIMIT), 1),
+    200,
+  );
   const market = normalizeMarket(input.market ?? "");
   const params: Array<string | number> = [];
-  const marketJoin = market ? `JOIN ${DECISION_TABLE} d ON d.decision_id = o.decision_id` : "";
+  const marketJoin = market
+    ? `JOIN ${DECISION_TABLE} d ON d.decision_id = o.decision_id`
+    : "";
   const where = market ? "WHERE d.market = $1" : "";
   if (market) params.push(market);
   params.push(limit);
@@ -290,12 +307,18 @@ export async function recordPortfolioDecisionMemory(
       decisionId: result.rows[0].decision_id,
       market: result.rows[0].market,
       eventType: "recorded",
-      snapshot: rowToEntry(result.rows[0]) as unknown as Record<string, unknown>,
+      snapshot: rowToEntry(result.rows[0]) as unknown as Record<
+        string,
+        unknown
+      >,
     });
     return rowToEntry(result.rows[0]);
   }
 
-  const existing = await loadDecisionBySignature(normalized.market, normalized.signature);
+  const existing = await loadDecisionBySignature(
+    normalized.market,
+    normalized.signature,
+  );
   return existing ?? normalized;
 }
 
@@ -378,7 +401,10 @@ export async function reviewPortfolioDecisionOutcomes(input: {
   }
 
   return {
-    entries: await listPortfolioDecisionMemory({ market, limit: DEFAULT_LIMIT }),
+    entries: await listPortfolioDecisionMemory({
+      market,
+      limit: DEFAULT_LIMIT,
+    }),
     outcomes: created,
   };
 }
@@ -504,7 +530,9 @@ async function recordAudit(input: {
   );
 }
 
-function normalizeEntry(entry: PortfolioDecisionMemoryEntry): PortfolioDecisionMemoryEntry {
+function normalizeEntry(
+  entry: PortfolioDecisionMemoryEntry,
+): PortfolioDecisionMemoryEntry {
   const market = normalizeMarket(entry.market);
   const recordedAt = finiteOr(entry.recordedAt, Date.now());
   return {
@@ -519,24 +547,36 @@ function normalizeEntry(entry: PortfolioDecisionMemoryEntry): PortfolioDecisionM
     targetAllocationPct: finiteOr(entry.targetAllocationPct, 0),
     targetCapital: finiteOr(entry.targetCapital, 0),
     confidenceFilter: normalizeRiskMode(entry.confidenceFilter),
-    confidenceFilterLabel: String(entry.confidenceFilterLabel || "Conservative"),
+    confidenceFilterLabel: String(
+      entry.confidenceFilterLabel || "Conservative",
+    ),
     lifecycleState: normalizeLifecycleState(entry.lifecycleState),
-    lifecycleLabel: String(entry.lifecycleLabel || entry.lifecycleState || "Needs More Proof"),
+    lifecycleLabel: String(
+      entry.lifecycleLabel || entry.lifecycleState || "Needs More Proof",
+    ),
     topTickers: Array.isArray(entry.topTickers)
-      ? entry.topTickers.slice(0, 12).map((ticker) => ({
-        ticker: String(ticker.ticker ?? "").trim().toUpperCase(),
-        action: String(ticker.action ?? "Hold"),
-        allocationPct: finiteOr(ticker.allocationPct, 0),
-        targetCapital: finiteOr(ticker.targetCapital, 0),
-        quality: finiteOr(ticker.quality, 0),
-        risk: finiteOr(ticker.risk, 0),
-      })).filter((ticker) => ticker.ticker)
+      ? entry.topTickers
+          .slice(0, 12)
+          .map((ticker) => ({
+            ticker: String(ticker.ticker ?? "")
+              .trim()
+              .toUpperCase(),
+            action: String(ticker.action ?? "Hold"),
+            allocationPct: finiteOr(ticker.allocationPct, 0),
+            targetCapital: finiteOr(ticker.targetCapital, 0),
+            quality: finiteOr(ticker.quality, 0),
+            risk: finiteOr(ticker.risk, 0),
+          }))
+          .filter((ticker) => ticker.ticker)
       : [],
     startPortfolioValue: finiteOr(entry.startPortfolioValue, 0),
     startTotalReturn: finiteOr(entry.startTotalReturn, 0),
     startSharpe: nullableNumber(entry.startSharpe),
     startProfitFactor: nullableNumber(entry.startProfitFactor),
-    startClosedTrades: Math.max(0, Math.round(finiteOr(entry.startClosedTrades, 0))),
+    startClosedTrades: Math.max(
+      0,
+      Math.round(finiteOr(entry.startClosedTrades, 0)),
+    ),
     startDrawdown: finiteOr(entry.startDrawdown, 0),
     dataQualityPct: finiteOr(entry.dataQualityPct, 0),
   };
@@ -552,10 +592,17 @@ function classifyOutcome(
     lifecycleState: ModelLifecycleState;
   },
 ) {
-  const returnChange = (finiteOr(current.currentTotalReturn, 0) - entry.startTotalReturn) * 100;
+  const returnChange =
+    (finiteOr(current.currentTotalReturn, 0) - entry.startTotalReturn) * 100;
   const sharpeChange = (current.currentSharpe ?? 0) - (entry.startSharpe ?? 0);
-  const closedTradeChange = Math.max(0, Math.round(finiteOr(current.currentClosedTrades, 0) - entry.startClosedTrades));
-  const drawdownChange = finiteOr(current.currentDrawdown, 0) - entry.startDrawdown;
+  const closedTradeChange = Math.max(
+    0,
+    Math.round(
+      finiteOr(current.currentClosedTrades, 0) - entry.startClosedTrades,
+    ),
+  );
+  const drawdownChange =
+    finiteOr(current.currentDrawdown, 0) - entry.startDrawdown;
   const trustDelta =
     (TRUST_RANK[normalizeLifecycleState(current.lifecycleState)] ?? 1) -
     (TRUST_RANK[normalizeLifecycleState(entry.lifecycleState)] ?? 1);
@@ -628,11 +675,16 @@ function rowToOutcome(row: OutcomeRow): PortfolioDecisionOutcome {
 }
 
 function normalizeMarket(value: string) {
-  return String(value ?? "").trim().toUpperCase();
+  return String(value ?? "")
+    .trim()
+    .toUpperCase();
 }
 
 function normalizeTone(value: unknown): DecisionTone {
-  return value === "good" || value === "warn" || value === "bad" || value === "info"
+  return value === "good" ||
+    value === "warn" ||
+    value === "bad" ||
+    value === "info"
     ? value
     : "info";
 }

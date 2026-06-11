@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [liquidityManagerApiPlugin(), react()],
   build: {
     outDir: "dist/web",
-    sourcemap: true
+    sourcemap: true,
   },
   test: {
     environment: "node",
@@ -14,8 +14,13 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts", "src/**/*.tsx"],
-      exclude: ["src/frontend/main.tsx", "dist/**", "test/**", "vite.config.ts"],
-      reporter: ["text", "lcov"]
-    }
-  }
+      exclude: [
+        "src/frontend/main.tsx",
+        "dist/**",
+        "test/**",
+        "vite.config.ts",
+      ],
+      reporter: ["text", "lcov"],
+    },
+  },
 });

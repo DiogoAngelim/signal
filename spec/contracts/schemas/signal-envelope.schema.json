@@ -3,24 +3,13 @@
   "$id": "https://signal.dev/schemas/signal-envelope.schema.json",
   "title": "Signal Envelope",
   "type": "object",
-  "required": [
-    "protocol",
-    "kind",
-    "name",
-    "messageId",
-    "timestamp",
-    "payload"
-  ],
+  "required": ["protocol", "kind", "name", "messageId", "timestamp", "payload"],
   "properties": {
     "protocol": {
       "const": "signal.v1"
     },
     "kind": {
-      "enum": [
-        "query",
-        "mutation",
-        "event"
-      ]
+      "enum": ["query", "mutation", "event"]
     },
     "name": {
       "type": "string",

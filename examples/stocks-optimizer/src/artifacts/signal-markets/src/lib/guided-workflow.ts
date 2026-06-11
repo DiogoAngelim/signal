@@ -36,12 +36,14 @@ export const GUIDED_STEPS: GuidedStep[] = [
   {
     id: "understand-reasoning",
     title: "Stewardship Review",
-    description: "Review what changed, what survived, and what still needs proof.",
+    description:
+      "Review what changed, what survived, and what still needs proof.",
   },
   {
     id: "decide-what-to-do",
     title: "Decide How To Protect",
-    description: "Choose the next step that strengthens long-term resource health.",
+    description:
+      "Choose the next step that strengthens long-term resource health.",
   },
 ];
 
@@ -66,9 +68,7 @@ export function getGuidedStepNumber(stepId: GuidedStepId) {
 }
 
 export function getGuidedStepById(stepId: GuidedStepId) {
-  return (
-    GUIDED_STEPS.find((step) => step.id === stepId) ?? GUIDED_STEPS[0]
-  );
+  return GUIDED_STEPS.find((step) => step.id === stepId) ?? GUIDED_STEPS[0];
 }
 
 export function createGuidedStepStatuses(input: {

@@ -1,1 +1,14 @@
-{"details":{"actual":"906cf98f5a90205277a8750f4ecb2d52f1cee953357b75060ac6d8f17beb9265","errorCode":"INVALID_HASH","expected":"a0196a71df3d8a3461e947f9a80c42ce48d55927b67ff8e93c944e466692d4ba","message":"Phase hash does not match recomputation","phase":1},"hashes":[],"result":"FAIL","timestamp":"NOT_ALLOWED_IN_HASH_LOGIC","type":"FAILURE_PROOF","valid":false}
+{
+  "details": {
+    "actual": "906cf98f5a90205277a8750f4ecb2d52f1cee953357b75060ac6d8f17beb9265",
+    "errorCode": "INVALID_HASH",
+    "expected": "a0196a71df3d8a3461e947f9a80c42ce48d55927b67ff8e93c944e466692d4ba",
+    "message": "Phase hash does not match recomputation",
+    "phase": 1
+  },
+  "hashes": [],
+  "result": "FAIL",
+  "timestamp": "NOT_ALLOWED_IN_HASH_LOGIC",
+  "type": "FAILURE_PROOF",
+  "valid": false
+}

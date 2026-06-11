@@ -1,14 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  financialExposureBandForSizingMode,
+  sizeFinancialExposure,
+} from "./financial-sizing";
+import { buildRestorationProgress } from "./restoration-progress";
+import {
   StrategyReadinessEvaluator,
+  type StrategyReadinessResult,
   applyStrategyReadinessToSummary,
   classifyStrategySignal,
   strategyReadinessStageRank,
-  type StrategyReadinessResult,
 } from "./strategy-readiness";
-import { financialExposureBandForSizingMode, sizeFinancialExposure } from "./financial-sizing";
-import { buildRestorationProgress } from "./restoration-progress";
 
 const evaluator = new StrategyReadinessEvaluator();
 
@@ -58,9 +61,22 @@ const longHistoryDiagnostics = {
   temporalConcentrationScore: 10,
   coverageStatus: "full" as const,
   currentRegime: "recovery",
-  keyRegimesCovered: ["bull", "bear", "crash", "recovery", "volatility_transition"],
-  regimeCounts: { bull: 1000, bear: 700, crash: 100, recovery: 400, volatility_transition: 250 },
-  explanation: "Extended history improves regime awareness and calibration. Recent outcomes still govern sizing restoration.",
+  keyRegimesCovered: [
+    "bull",
+    "bear",
+    "crash",
+    "recovery",
+    "volatility_transition",
+  ],
+  regimeCounts: {
+    bull: 1000,
+    bear: 700,
+    crash: 100,
+    recovery: 400,
+    volatility_transition: 250,
+  },
+  explanation:
+    "Extended history improves regime awareness and calibration. Recent outcomes still govern sizing restoration.",
 };
 
 function trades(count = 40, returnPct = 1.2) {
@@ -113,7 +129,8 @@ function passingInput(overrides: any = {}) {
     market: "NASDAQ",
     summary: { ...summary, ...(overrides.summary ?? {}) },
     trades: overrides.trades ?? trades(),
-    walkForwardSegments: overrides.walkForwardSegments ?? summary.walkForwardSegments,
+    walkForwardSegments:
+      overrides.walkForwardSegments ?? summary.walkForwardSegments,
     parameterRobustness: overrides.parameterRobustness ?? parameterRobustness,
     dataQualityReport: overrides.dataQualityReport ?? dataQualityReport,
     forwardShadow: overrides.forwardShadow ?? forwardShadow,
@@ -146,15 +163,22 @@ function survivalMemory(overrides: Record<string, unknown> = {}) {
     mainWarnings: ["Similar states include near-ruin survival patterns."],
     reasons: ["Wait because similar states had unacceptable survival cost."],
     missingEvidence: ["Survival memory clearance"],
-    unlockConditions: ["Wait until similar states show survival cost below 35/100 and no near-ruin match."],
-    invalidationConditions: ["Invalidate if liquidity or tail pressure remains elevated in the current state."],
+    unlockConditions: [
+      "Wait until similar states show survival cost below 35/100 and no near-ruin match.",
+    ],
+    invalidationConditions: [
+      "Invalidate if liquidity or tail pressure remains elevated in the current state.",
+    ],
     fragileMatches: [],
     records: [],
     ...overrides,
   } as any;
 }
 
-function cleanReducedSizeRecord(id: string, overrides: Record<string, unknown> = {}) {
+function cleanReducedSizeRecord(
+  id: string,
+  overrides: Record<string, unknown> = {},
+) {
   return {
     id,
     timestamp: "2026-05-28T00:00:00.000Z",
@@ -179,7 +203,9 @@ function cleanReducedSizeRecord(id: string, overrides: Record<string, unknown> =
 }
 
 function cleanReducedSizeRecords(count = 3) {
-  return Array.from({ length: count }, (_, index) => cleanReducedSizeRecord(`clean-${index + 1}`));
+  return Array.from({ length: count }, (_, index) =>
+    cleanReducedSizeRecord(`clean-${index + 1}`),
+  );
 }
 
 function hasFlag(result: StrategyReadinessResult, flag: string) {
@@ -258,7 +284,9 @@ test("nearby parameter fragility blocks the selected configuration", () => {
       stable: false,
       passRate: 37.5,
       benchmarkSurvivalRate: 50,
-      variants: [{ configId: "lookback-80", excessReturnPct: -2, passed: false }],
+      variants: [
+        { configId: "lookback-80", excessReturnPct: -2, passed: false },
+      ],
     },
   });
 
@@ -316,7 +344,12 @@ test("non-positive median trade return blocks concentration clearance", () => {
 
   assert.equal(result.concentration.medianTradeReturnPositive, false);
   assert.equal(result.components.concentrationControl.passed, false);
-  assert.equal(result.components.concentrationControl.reasons.includes("Median trade return is not positive."), true);
+  assert.equal(
+    result.components.concentrationControl.reasons.includes(
+      "Median trade return is not positive.",
+    ),
+    true,
+  );
   assert.equal(hasFlag(result, "OUTLIER_DEPENDENCY"), true);
   assert.equal(hasFlag(result, "MEDIAN_TRADE_RETURN_NOT_POSITIVE"), true);
   assert.equal(hasFlag(result, "OVERFIT_TOP_WINNER_DEPENDENCY"), false);
@@ -349,7 +382,11 @@ test("zero max-position readiness cannot produce buy ideas", () => {
   assert.equal(decision.signalConfidence, blocked.maxConfidence);
   assert.equal(decision.sizingResult.decision, "blocked");
   assert.equal(decision.sizingMode, "none");
-  assert.ok(decision.sizingReasons.some((reason) => reason.includes("Strategy readiness")));
+  assert.ok(
+    decision.sizingReasons.some((reason) =>
+      reason.includes("Strategy readiness"),
+    ),
+  );
 });
 
 test("buy requires positive edge, passed readiness, passed risk checks, and non-zero sizing", () => {
@@ -396,8 +433,18 @@ test("buy requires positive edge, passed readiness, passed risk checks, and non-
   assert.equal(buy.trustGovernor?.allowsNewExposure, true);
   assert.equal(buy.suggestedExposure > 0, true);
   assert.equal(buy.sizingResult.decision, "allowed");
-  assert.ok(buy.sizingConstraints.some((constraint) => constraint.id === "belief-justification" && constraint.passed));
-  assert.ok(buy.viabilityResult?.constraints.some((constraint) => constraint.id === "belief-justification" && constraint.passed));
+  assert.ok(
+    buy.sizingConstraints.some(
+      (constraint) =>
+        constraint.id === "belief-justification" && constraint.passed,
+    ),
+  );
+  assert.ok(
+    buy.viabilityResult?.constraints.some(
+      (constraint) =>
+        constraint.id === "belief-justification" && constraint.passed,
+    ),
+  );
   assert.notEqual(buy.sizingMode, "none");
   assert.ok(buy.sizingReasons.includes("All sizing constraints passed."));
   assert.equal(noEdge.signalAction, "Sell");
@@ -407,7 +454,9 @@ test("buy requires positive edge, passed readiness, passed risk checks, and non-
   assert.equal(highRisk.allocationAction, "Watch");
   assert.equal(highRisk.suggestedExposure, 0);
   assert.equal(highRisk.sizingResult.decision, "blocked");
-  assert.ok(highRisk.sizingReasons.some((reason) => reason.includes("Risk gate")));
+  assert.ok(
+    highRisk.sizingReasons.some((reason) => reason.includes("Risk gate")),
+  );
 });
 
 test("survival memory caps sizing before opportunity sizing expands exposure", () => {
@@ -438,9 +487,13 @@ test("survival memory caps sizing before opportunity sizing expands exposure", (
   });
 
   assert.ok(capped.survivalMemory);
-  assert.ok(capped.survivalMemory!.scarCount > 0);
+  assert.ok(capped.survivalMemory?.scarCount > 0);
   assert.ok(capped.maxPositionPct < ready.maxPositionPct);
-  assert.ok(capped.sizingReasons.some((reason) => reason.includes("Survival memory capped max exposure")));
+  assert.ok(
+    capped.sizingReasons.some((reason) =>
+      reason.includes("Survival memory capped max exposure"),
+    ),
+  );
 });
 
 test("survival memory can block buys and still allow risk exits", () => {
@@ -472,24 +525,45 @@ test("survival memory can block buys and still allow risk exits", () => {
   });
 
   assert.equal(blockedBuy.allocationAction, "Blocked");
-  assert.equal(blockedBuy.rejectionReason, "Survival memory blocks new exposure");
+  assert.equal(
+    blockedBuy.rejectionReason,
+    "Survival memory blocks new exposure",
+  );
   assert.equal(blockedBuy.judgement?.status, "blocked");
-  assert.equal(blockedBuy.trustGovernor?.primaryBlocker, "survival_memory_wait");
-  assert.equal(blockedBuy.trustGovernor?.audit.survivalRecovery?.trustedMaxExposure, 0);
+  assert.equal(
+    blockedBuy.trustGovernor?.primaryBlocker,
+    "survival_memory_wait",
+  );
+  assert.equal(
+    blockedBuy.trustGovernor?.audit.survivalRecovery?.trustedMaxExposure,
+    0,
+  );
   assert.equal(riskExit.signalAction, "Sell");
-  assert.ok(riskExit.sizingReasons.includes("Risk-reducing exits remain allowed while Survival Memory blocks new exposure."));
+  assert.ok(
+    riskExit.sizingReasons.includes(
+      "Risk-reducing exits remain allowed while Survival Memory blocks new exposure.",
+    ),
+  );
 });
 
 test("long-history may improve trust and calibration but cannot clear Survival Memory or restore sizing", () => {
   const baseline = evaluate();
-  const withHistory = evaluator.evaluate(passingInput({
-    summary: { historyDiagnostics: longHistoryDiagnostics },
-    dataQualityReport: { ...dataQualityReport, historyDiagnostics: longHistoryDiagnostics },
-  }));
+  const withHistory = evaluator.evaluate(
+    passingInput({
+      summary: { historyDiagnostics: longHistoryDiagnostics },
+      dataQualityReport: {
+        ...dataQualityReport,
+        historyDiagnostics: longHistoryDiagnostics,
+      },
+    }),
+  );
   const lockedReadiness = evaluator.evaluate({
     ...passingInput({
       summary: { historyDiagnostics: longHistoryDiagnostics },
-      dataQualityReport: { ...dataQualityReport, historyDiagnostics: longHistoryDiagnostics },
+      dataQualityReport: {
+        ...dataQualityReport,
+        historyDiagnostics: longHistoryDiagnostics,
+      },
     }),
     survivalMemory: survivalMemory(),
   });
@@ -516,7 +590,10 @@ test("long-history may improve trust and calibration but cannot clear Survival M
   assert.equal(lockedReadiness.recovery.canRestoreSizing, false);
   assert.equal(lockedDecision.allocationAction, "Blocked");
   assert.equal(lockedDecision.suggestedExposure, 0);
-  assert.equal(lockedDecision.trustGovernor?.primaryBlocker, "survival_memory_wait");
+  assert.equal(
+    lockedDecision.trustGovernor?.primaryBlocker,
+    "survival_memory_wait",
+  );
   assert.equal(lockedDecision.recovery?.canRestoreSizing, false);
 });
 
@@ -529,10 +606,15 @@ test("low long-history scores do not grant calibration credit", () => {
     sampleDiversityScore: 70,
     coverageStatus: "partial" as const,
   };
-  const result = evaluator.evaluate(passingInput({
-    summary: { historyDiagnostics: lowHistory },
-    dataQualityReport: { ...dataQualityReport, historyDiagnostics: lowHistory },
-  }));
+  const result = evaluator.evaluate(
+    passingInput({
+      summary: { historyDiagnostics: lowHistory },
+      dataQualityReport: {
+        ...dataQualityReport,
+        historyDiagnostics: lowHistory,
+      },
+    }),
+  );
 
   assert.equal((result as any).extendedHistoryCredit, undefined);
 });
@@ -604,7 +686,10 @@ test("recovery diagnostics keep scarred dashboard-like states recovering and rev
       exposureMultiplier: 0.27,
       maxExposurePct: 1.5,
     }),
-    previousTrades: judgementTrades([...Array(999).fill(6), ...Array(50).fill(-2)]),
+    previousTrades: judgementTrades([
+      ...Array(999).fill(6),
+      ...Array(50).fill(-2),
+    ]),
     opportunityCandidates: [
       {
         symbol: "SOLUSDT",
@@ -612,7 +697,9 @@ test("recovery diagnostics keep scarred dashboard-like states recovering and rev
         opportunityDiscovery: { confidence: 36, maturity: 39, novelty: 93 },
       },
     ],
-    agencyResult: { violations: ["blocked participation", "reduce participation"] },
+    agencyResult: {
+      violations: ["blocked participation", "reduce participation"],
+    },
   });
 
   assert.equal(decision.recovery?.module, "signal.recovery");
@@ -621,16 +708,33 @@ test("recovery diagnostics keep scarred dashboard-like states recovering and rev
   assert.equal(decision.recovery?.canRestoreSizing, false);
   assert.equal(decision.recovery?.shouldEscalateHumanReview, true);
   assert.ok(decision.recovery?.recommendedExposureCap > 0);
-  assert.equal(decision.restorationProgress?.module, "stocks.restoration-progress");
+  assert.equal(
+    decision.restorationProgress?.module,
+    "stocks.restoration-progress",
+  );
   assert.equal(decision.restorationProgress?.status, "collecting_evidence");
   assert.equal(decision.restorationProgress?.restorationState, "scarred");
-  assert.equal(decision.restorationProgress?.ledger.title, "Survival Memory Restoration Ledger");
+  assert.equal(
+    decision.restorationProgress?.ledger.title,
+    "Survival Memory Restoration Ledger",
+  );
   assert.equal(decision.restorationProgress?.ledger.requiredCleanOutcomes, 3);
   assert.equal(decision.restorationProgress?.targetNormalExposurePct, 7.25);
   assert.equal(decision.restorationProgress?.canRestoreSizing, false);
-  assert.equal(decision.restorationProgress?.outcomeProof.cleanReducedSizeOutcomeCount, 0);
-  assert.ok(decision.restorationProgress?.gates.some((gate) => gate.id === "clean-reduced-size-outcomes" && !gate.passed));
-  assert.ok(decision.sizingReasons.some((reason) => reason.includes("Recovery is recovering")));
+  assert.equal(
+    decision.restorationProgress?.outcomeProof.cleanReducedSizeOutcomeCount,
+    0,
+  );
+  assert.ok(
+    decision.restorationProgress?.gates.some(
+      (gate) => gate.id === "clean-reduced-size-outcomes" && !gate.passed,
+    ),
+  );
+  assert.ok(
+    decision.sizingReasons.some((reason) =>
+      reason.includes("Recovery is recovering"),
+    ),
+  );
 });
 
 test("recovery target exposure falls back when readiness recovery audit is unavailable", () => {
@@ -695,7 +799,10 @@ test("judgement and survival caps do not masquerade as poor calibration blocks",
         "Cap exposure to 65% of the normal limit before opportunity sizing expands it.",
       ],
     }),
-    previousTrades: judgementTrades([...Array(120).fill(6), ...Array(8).fill(-1)]),
+    previousTrades: judgementTrades([
+      ...Array(120).fill(6),
+      ...Array(8).fill(-1),
+    ]),
     opportunityCandidates: [
       {
         symbol: "SOLUSDT",
@@ -708,13 +815,24 @@ test("judgement and survival caps do not masquerade as poor calibration blocks",
 
   assert.equal(decision.judgement?.status, "cautious");
   assert.equal(decision.trustGovernor?.allowsNewExposure, true);
-  assert.equal(decision.trustGovernor?.blockers.some((blocker) => blocker.id === "raw_calibrated_confidence_gap"), false);
+  assert.equal(
+    decision.trustGovernor?.blockers.some(
+      (blocker) => blocker.id === "raw_calibrated_confidence_gap",
+    ),
+    false,
+  );
   assert.equal(decision.trustGovernor?.primaryBlocker, "survival_reduced_size");
   assert.equal(decision.signalAction, "Buy");
   assert.equal(decision.allocationAction, "Buy");
   assert.ok(decision.suggestedExposure > 0);
-  assert.ok(decision.suggestedExposure <= (decision.recovery?.recommendedExposureCap ?? 0));
-  assert.ok(decision.sizingResult.size <= (decision.recovery?.recommendedExposureCap ?? 0));
+  assert.ok(
+    decision.suggestedExposure <=
+      (decision.recovery?.recommendedExposureCap ?? 0),
+  );
+  assert.ok(
+    decision.sizingResult.size <=
+      (decision.recovery?.recommendedExposureCap ?? 0),
+  );
 });
 
 test("recovery can restore normal mode after survival, trust, calibration, agency, and discovery clear", () => {
@@ -753,7 +871,10 @@ test("recovery can restore normal mode after survival, trust, calibration, agenc
       reasons: ["Recovery evidence is improving."],
       records: cleanReducedSizeRecords(),
     }),
-    previousTrades: judgementTrades([...Array(120).fill(6), ...Array(8).fill(-1)]),
+    previousTrades: judgementTrades([
+      ...Array(120).fill(6),
+      ...Array(8).fill(-1),
+    ]),
     opportunityCandidates: [
       {
         symbol: "SOLUSDT",
@@ -772,7 +893,10 @@ test("recovery can restore normal mode after survival, trust, calibration, agenc
   assert.equal(decision.restorationProgress?.status, "restored");
   assert.equal(decision.restorationProgress?.restorationState, "clear");
   assert.equal(decision.restorationProgress?.progressPct, 100);
-  assert.equal(decision.restorationProgress?.gates.every((gate) => gate.passed), true);
+  assert.equal(
+    decision.restorationProgress?.gates.every((gate) => gate.passed),
+    true,
+  );
 });
 
 test("restoration blocks normal sizing until clean reduced-size outcomes clear", () => {
@@ -810,7 +934,10 @@ test("restoration blocks normal sizing until clean reduced-size outcomes clear",
       mainWarnings: ["Controlled survival scars are improving."],
       reasons: ["Recovery evidence is improving."],
     }),
-    previousTrades: judgementTrades([...Array(120).fill(6), ...Array(8).fill(-1)]),
+    previousTrades: judgementTrades([
+      ...Array(120).fill(6),
+      ...Array(8).fill(-1),
+    ]),
     opportunityCandidates: [
       {
         symbol: "SOLUSDT",
@@ -825,8 +952,18 @@ test("restoration blocks normal sizing until clean reduced-size outcomes clear",
   assert.equal(decision.restorationProgress?.canRestoreSizing, false);
   assert.equal(decision.restorationProgress?.status, "collecting_evidence");
   assert.equal(decision.restorationProgress?.restorationState, "watch");
-  assert.equal(decision.restorationProgress?.gates.find((gate) => gate.id === "clean-reduced-size-outcomes")?.passed, false);
-  assert.equal(decision.restorationProgress?.gates.find((gate) => gate.id === "survival-status")?.passed, false);
+  assert.equal(
+    decision.restorationProgress?.gates.find(
+      (gate) => gate.id === "clean-reduced-size-outcomes",
+    )?.passed,
+    false,
+  );
+  assert.equal(
+    decision.restorationProgress?.gates.find(
+      (gate) => gate.id === "survival-status",
+    )?.passed,
+    false,
+  );
 });
 
 test("restoration ledger tracks clean reduced-size streaks and survival boundaries", () => {
@@ -880,8 +1017,15 @@ test("restoration ledger tracks clean reduced-size streaks and survival boundari
   assert.equal(progress.outcomeProof.remainingCleanReducedSizeOutcomes, 1);
   assert.equal(progress.outcomeProof.activeProofBoundaryBreakCount, 0);
   assert.equal(progress.ledger.entries.length, 4);
-  assert.ok(progress.ledger.entries.find((entry) => entry.id === "mae-break")?.boundaryBreaches.includes("MAE"));
-  assert.equal(progress.ledger.exactUnlockCondition, "Close 1 more clean reduced-size outcome without breaching survival boundaries.");
+  assert.ok(
+    progress.ledger.entries
+      .find((entry) => entry.id === "mae-break")
+      ?.boundaryBreaches.includes("MAE"),
+  );
+  assert.equal(
+    progress.ledger.exactUnlockCondition,
+    "Close 1 more clean reduced-size outcome without breaching survival boundaries.",
+  );
   assert.equal(progress.actionPlan.remainingCleanOutcomes, 1);
   assert.match(progress.actionPlan.exposureInstruction, /Keep exposure capped/);
 });
@@ -935,12 +1079,27 @@ test("restoration proof lane can advance after an older boundary break is follow
   assert.equal(progress.outcomeProof.activeProofBoundaryBreakCount, 0);
   assert.equal(progress.outcomeProof.cleanReducedSizeOutcomeCount, 3);
   assert.equal(progress.outcomeProof.remainingCleanReducedSizeOutcomes, 0);
-  assert.equal(progress.gates.find((gate) => gate.id === "clean-reduced-size-outcomes")?.passed, true);
-  assert.equal(progress.gates.find((gate) => gate.id === "survival-status")?.passed, true);
+  assert.equal(
+    progress.gates.find((gate) => gate.id === "clean-reduced-size-outcomes")
+      ?.passed,
+    true,
+  );
+  assert.equal(
+    progress.gates.find((gate) => gate.id === "survival-status")?.passed,
+    true,
+  );
   assert.equal(progress.restorationState, "clear");
   assert.equal(progress.actionPlan.status, "ready_for_review");
-  assert.equal(progress.ledger.exactUnlockCondition, "Survival Memory restoration ledger is clear; normal sizing can proceed through downstream controls.");
-  assert.equal(progress.actionPlan.steps.find((step) => step.id === "clear-survival-memory")?.status, "done");
+  assert.equal(
+    progress.ledger.exactUnlockCondition,
+    "Survival Memory restoration ledger is clear; normal sizing can proceed through downstream controls.",
+  );
+  assert.equal(
+    progress.actionPlan.steps.find(
+      (step) => step.id === "clear-survival-memory",
+    )?.status,
+    "done",
+  );
 });
 
 test("restoration plan blocks clean proof while survival confidence and proof lane capacity are missing", () => {
@@ -954,13 +1113,21 @@ test("restoration plan blocks clean proof while survival confidence and proof la
     currentExposureCapPct: 0,
     targetNormalExposurePct: 0,
   });
-  const cleanProofStep = progress.actionPlan.steps.find((step) => step.id === "collect-clean-outcomes");
+  const cleanProofStep = progress.actionPlan.steps.find(
+    (step) => step.id === "collect-clean-outcomes",
+  );
 
-  assert.match(progress.actionPlan.activeInstruction, /Raise survival confidence from 66\/100/);
+  assert.match(
+    progress.actionPlan.activeInstruction,
+    /Raise survival confidence from 66\/100/,
+  );
   assert.match(progress.actionPlan.exposureInstruction, /Stay exits-only/);
   assert.equal(progress.actionPlan.steps[0]?.id, "raise-survival-confidence");
   assert.equal(cleanProofStep?.status, "blocked");
-  assert.match(cleanProofStep?.detail ?? "", /survival confidence reaches 70\/100/);
+  assert.match(
+    cleanProofStep?.detail ?? "",
+    /survival confidence reaches 70\/100/,
+  );
 });
 
 test("restoration plan asks to reopen the proof lane before counting clean outcomes at zero cap", () => {
@@ -974,9 +1141,14 @@ test("restoration plan asks to reopen the proof lane before counting clean outco
     currentExposureCapPct: 0,
     targetNormalExposurePct: 0,
   });
-  const cleanProofStep = progress.actionPlan.steps.find((step) => step.id === "collect-clean-outcomes");
+  const cleanProofStep = progress.actionPlan.steps.find(
+    (step) => step.id === "collect-clean-outcomes",
+  );
 
-  assert.match(progress.actionPlan.activeInstruction, /Reopen reduced-size proof lane capacity/);
+  assert.match(
+    progress.actionPlan.activeInstruction,
+    /Reopen reduced-size proof lane capacity/,
+  );
   assert.equal(progress.actionPlan.steps[0]?.id, "reopen-proof-lane");
   assert.equal(cleanProofStep?.status, "blocked");
   assert.match(cleanProofStep?.detail ?? "", /current cap is 0%/);
@@ -1008,7 +1180,11 @@ test("recovery handles empty opportunity arrays and agency summary blocker count
   });
 
   assert.equal(decision.recovery?.shouldEscalateHumanReview, true);
-  assert.ok(decision.recovery?.blockers.includes("Blocked agency actions require human review before restoration."));
+  assert.ok(
+    decision.recovery?.blockers.includes(
+      "Blocked agency actions require human review before restoration.",
+    ),
+  );
 });
 
 test("trust governor can cap allowed buy sizing without blocking exposure", () => {
@@ -1030,7 +1206,11 @@ test("trust governor can cap allowed buy sizing without blocking exposure", () =
   assert.equal(capped.trustGovernor.participationMode, "micro");
   assert.equal(capped.sizingResult.size, capped.trustGovernor.maxExposure);
   assert.equal(capped.sizingResult.size < ready.maxPositionPct, true);
-  assert.ok(capped.sizingReasons.some((reason) => reason.includes("Trusted maximum exposure")));
+  assert.ok(
+    capped.sizingReasons.some((reason) =>
+      reason.includes("Trusted maximum exposure"),
+    ),
+  );
 });
 
 test("belief gates route weak, uncertain, and contradicted candidates before buy actions", () => {
@@ -1063,8 +1243,16 @@ test("belief gates route weak, uncertain, and contradicted candidates before buy
     benchmarks: { ...ready.benchmarks, excessReturnAfterCostsPct: -12 },
     components: {
       ...ready.components,
-      dataReliability: { ...ready.components.dataReliability, score: 25, passed: false },
-      riskControl: { ...ready.components.riskControl, score: 25, passed: false },
+      dataReliability: {
+        ...ready.components.dataReliability,
+        score: 25,
+        passed: false,
+      },
+      riskControl: {
+        ...ready.components.riskControl,
+        score: 25,
+        passed: false,
+      },
     },
   };
   const contradicted = classifyStrategySignal({
@@ -1083,17 +1271,33 @@ test("belief gates route weak, uncertain, and contradicted candidates before buy
   assert.equal(weak.allocationAction, "Watch");
   assert.equal(weak.rejectionReason, "Belief requires review");
   assert.equal(weak.suggestedExposure, 0);
-  assert.equal(weak.sizingConstraints.some((constraint) => constraint.id === "belief-justification" && !constraint.passed), true);
+  assert.equal(
+    weak.sizingConstraints.some(
+      (constraint) =>
+        constraint.id === "belief-justification" && !constraint.passed,
+    ),
+    true,
+  );
 
   assert.equal(uncertain.belief.verdict, "uncertain");
   assert.equal(uncertain.allocationAction, "Blocked");
-  assert.equal(uncertain.rejectionReason, "Belief uncertain blocks new exposure");
+  assert.equal(
+    uncertain.rejectionReason,
+    "Belief uncertain blocks new exposure",
+  );
   assert.equal(uncertain.sizingResult.decision, "blocked");
 
   assert.equal(contradicted.belief.verdict, "contradicted");
   assert.equal(contradicted.allocationAction, "Blocked");
-  assert.equal(contradicted.rejectionReason, "Belief contradicted blocks new exposure");
-  assert.ok(contradicted.sizingReasons.some((reason) => reason.includes("Belief contradicted")));
+  assert.equal(
+    contradicted.rejectionReason,
+    "Belief contradicted blocks new exposure",
+  );
+  assert.ok(
+    contradicted.sizingReasons.some((reason) =>
+      reason.includes("Belief contradicted"),
+    ),
+  );
 });
 
 test("financial exposure mapping stays outside generic Signal sizing", () => {
@@ -1105,7 +1309,14 @@ test("financial exposure mapping stays outside generic Signal sizing", () => {
     requestedExposurePct: 12,
     availableExposurePct: 20,
     maxExposurePct: 20,
-    constraints: [{ id: "opportunity-density", type: "hard", passed: true, severity: "high" }],
+    constraints: [
+      {
+        id: "opportunity-density",
+        type: "hard",
+        passed: true,
+        severity: "high",
+      },
+    ],
   });
   const band = financialExposureBandForSizingMode(sizing.sizingMode, 20);
 
@@ -1147,7 +1358,11 @@ test("calibration reduces high raw confidence when outcomes are poor", () => {
   assert.ok(result.calibratedConfidence < result.rawConfidence);
   assert.ok(result.maxConfidence <= result.calibratedConfidence);
   assert.ok(result.calibration.warnings.includes("overconfidence"));
-  assert.ok(result.components.modelConfidence.reasons.some((reason) => reason.includes("historical calibration")));
+  assert.ok(
+    result.components.modelConfidence.reasons.some((reason) =>
+      reason.includes("historical calibration"),
+    ),
+  );
 
   const decision = classifyStrategySignal({
     readiness: result,
@@ -1163,7 +1378,11 @@ test("calibration reduces high raw confidence when outcomes are poor", () => {
 
   assert.equal(decision.allocationAction, "Blocked");
   assert.equal(decision.rejectionReason, "Calibration requires review");
-  assert.ok(decision.sizingReasons.some((reason) => reason.includes("historical calibration")));
+  assert.ok(
+    decision.sizingReasons.some((reason) =>
+      reason.includes("historical calibration"),
+    ),
+  );
 });
 
 test("calibration uses trade-level setup confidence instead of inflating every historical trade", () => {
@@ -1209,7 +1428,10 @@ test("calibration uses trade-level setup confidence instead of inflating every h
     })),
   });
 
-  assert.equal(setupOnly.calibration.warnings.includes("overconfidence"), false);
+  assert.equal(
+    setupOnly.calibration.warnings.includes("overconfidence"),
+    false,
+  );
   assert.equal(riskOnly.calibration.warnings.includes("overconfidence"), false);
 });
 
@@ -1219,7 +1441,10 @@ test("insufficient calibration history warns without blindly collapsing readines
   assert.equal(result.calibration.status, "insufficient-history");
   assert.ok(result.calibration.warnings.includes("insufficient history"));
   assert.ok(result.maxConfidence > 0);
-  assert.equal(result.calibration.explanation, "Calibration history is still insufficient.");
+  assert.equal(
+    result.calibration.explanation,
+    "Calibration history is still insufficient.",
+  );
 
   const decision = classifyStrategySignal({
     readiness: result,
@@ -1235,7 +1460,11 @@ test("insufficient calibration history warns without blindly collapsing readines
 
   assert.equal(decision.allocationAction, "Blocked");
   assert.equal(decision.rejectionReason, "Calibration requires review");
-  assert.ok(decision.sizingReasons.some((reason) => reason.includes("Calibration history is still insufficient")));
+  assert.ok(
+    decision.sizingReasons.some((reason) =>
+      reason.includes("Calibration history is still insufficient"),
+    ),
+  );
 });
 
 test("unstable calibration outcomes require review even with enough samples", () => {
@@ -1257,7 +1486,10 @@ test("unstable calibration outcomes require review even with enough samples", ()
   assert.match(result.calibration.explanation, /outcomes are unstable/);
   assert.equal(result.trustGovernor.participationMode, "exits_only");
   assert.equal(result.trustGovernor.maxExposure, 0);
-  assert.equal(result.trustGovernor.primaryBlocker, "calibration_unstable_outcomes");
+  assert.equal(
+    result.trustGovernor.primaryBlocker,
+    "calibration_unstable_outcomes",
+  );
 
   const decision = classifyStrategySignal({
     readiness: result,
@@ -1274,7 +1506,11 @@ test("unstable calibration outcomes require review even with enough samples", ()
   assert.equal(decision.allocationAction, "Blocked");
   assert.equal(decision.rejectionReason, "Calibration requires review");
   assert.equal(decision.trustGovernor?.participationMode, "exits_only");
-  assert.ok(decision.sizingReasons.some((reason) => reason.includes("Calibration outcomes are unstable")));
+  assert.ok(
+    decision.sizingReasons.some((reason) =>
+      reason.includes("Calibration outcomes are unstable"),
+    ),
+  );
 
   const sellDecision = classifyStrategySignal({
     readiness: result,
@@ -1290,8 +1526,17 @@ test("unstable calibration outcomes require review even with enough samples", ()
 
   assert.equal(sellDecision.allocationAction, "Sell");
   assert.equal(sellDecision.signalStatus, "risk-exit");
-  assert.ok(sellDecision.sizingReasons[0]?.includes("Risk-reducing exits remain allowed"));
-  assert.equal(sellDecision.sizingReasons.some((reason) => reason.includes("opening new exposure")), false);
+  assert.ok(
+    sellDecision.sizingReasons[0]?.includes(
+      "Risk-reducing exits remain allowed",
+    ),
+  );
+  assert.equal(
+    sellDecision.sizingReasons.some((reason) =>
+      reason.includes("opening new exposure"),
+    ),
+    false,
+  );
 });
 
 test("profitable mixed trade history can clear calibration review without becoming full production", () => {
@@ -1317,7 +1562,10 @@ test("profitable mixed trade history can clear calibration review without becomi
   });
 
   assert.equal(result.calibration.status, "trusted");
-  assert.equal(result.calibration.warnings.includes("unstable outcomes"), false);
+  assert.equal(
+    result.calibration.warnings.includes("unstable outcomes"),
+    false,
+  );
   assert.equal(result.calibration.warnings.includes("overconfidence"), false);
   assert.equal(result.stage, "Limited live");
   assert.equal(result.trustGovernor.participationMode, "limited");
@@ -1342,7 +1590,12 @@ test("opportunity density zero blocks exposure even when confidence is strong", 
 
   assert.equal(decision.suggestedExposure, 0);
   assert.equal(decision.sizingResult.decision, "blocked");
-  assert.ok(decision.sizingConstraints.some((constraint) => constraint.id === "opportunity-density" && constraint.passed === false));
+  assert.ok(
+    decision.sizingConstraints.some(
+      (constraint) =>
+        constraint.id === "opportunity-density" && constraint.passed === false,
+    ),
+  );
 });
 
 test("strategy readiness blocks and reduces actionable confidence", () => {
@@ -1379,7 +1632,12 @@ test("calibration history handles trade metadata and missing readiness calibrati
   const result = evaluate({
     trades: [
       { id: "ZERO", exitDate: "2026-01-03", returnPct: 0, confidence: 42 },
-      { symbol: "NEG", entryDate: "2026-01-02", returnPct: -2, signalConfidence: 74 },
+      {
+        symbol: "NEG",
+        entryDate: "2026-01-02",
+        returnPct: -2,
+        signalConfidence: 74,
+      },
       { returnPct: 1.5 },
     ],
   });
@@ -1397,7 +1655,10 @@ test("calibration history handles trade metadata and missing readiness calibrati
 
   assert.ok(result.calibration.sampleSize >= 11);
   assert.ok(result.calibration.warnings.length > 0);
-  assert.equal(decision.calibratedConfidence, Math.min(82, result.maxConfidence));
+  assert.equal(
+    decision.calibratedConfidence,
+    Math.min(82, result.maxConfidence),
+  );
 
   const ready = evaluate();
   const noCalibrationReadiness = { ...ready, calibration: undefined as any };
@@ -1446,7 +1707,10 @@ test("calibration treats zero-magnitude and returnless trades conservatively", (
   });
 
   assert.equal(zeroMagnitude.calibration.sampleSize >= 12, true);
-  assert.equal(Number.isFinite(zeroMagnitude.calibration.historicalAccuracy), true);
+  assert.equal(
+    Number.isFinite(zeroMagnitude.calibration.historicalAccuracy),
+    true,
+  );
   assert.equal(returnless.calibration.sampleSize > 0, true);
   assert.ok(returnless.calibration.warnings.length > 0);
 });
@@ -1502,9 +1766,15 @@ test("robustness diagnostics cap confidence and can block execution", () => {
   assert.equal(blocked.maxConfidence <= 35, true);
   const blockedSummary = applyStrategyReadinessToSummary({}, blocked);
   assert.equal(blockedSummary.robustnessPassed, false);
-  assert.equal(blocked.readinessRemediation.module, "signal.readiness-remediation-planner");
+  assert.equal(
+    blocked.readinessRemediation.module,
+    "signal.readiness-remediation-planner",
+  );
   assert.equal(blocked.readinessRemediation.steps[0]?.category, "robustness");
-  assert.equal(blockedSummary.remediationTopAction, blocked.readinessRemediation.topAction);
+  assert.equal(
+    blockedSummary.remediationTopAction,
+    blocked.readinessRemediation.topAction,
+  );
 
   const external = evaluator.evaluate({
     ...passingInput(),
@@ -1520,7 +1790,10 @@ test("robustness diagnostics cap confidence and can block execution", () => {
 
 test("production eligible only when all required gates pass", () => {
   const result = evaluate();
-  const summary = applyStrategyReadinessToSummary(passingInput().summary, result);
+  const summary = applyStrategyReadinessToSummary(
+    passingInput().summary,
+    result,
+  );
 
   assert.equal(result.recovery.module, "signal.recovery");
   for (const key of [
@@ -1542,16 +1815,43 @@ test("production eligible only when all required gates pass", () => {
   assert.equal(summary.recoveryStatus, result.recovery.status);
   assert.equal(summary.recoveryMode, result.recovery.mode);
   assert.equal(summary.recoveryScore, result.recovery.recoveryScore);
-  assert.equal(summary.recoveryTrustedCapacity, result.recovery.trustedCapacity);
-  assert.equal(summary.recoveryConfidenceCapLift, result.recovery.confidenceCapLift);
-  assert.equal(summary.recoveryRecommendedExposureCap, result.recovery.recommendedExposureCap);
-  assert.equal(summary.recoveryCanRestoreSizing, result.recovery.canRestoreSizing);
-  assert.equal(summary.recoveryHumanReviewRequired, result.recovery.shouldEscalateHumanReview);
-  assert.equal(result.restorationProgress.module, "stocks.restoration-progress");
-  assert.equal(result.restorationProgress.ledger.title, "Survival Memory Restoration Ledger");
+  assert.equal(
+    summary.recoveryTrustedCapacity,
+    result.recovery.trustedCapacity,
+  );
+  assert.equal(
+    summary.recoveryConfidenceCapLift,
+    result.recovery.confidenceCapLift,
+  );
+  assert.equal(
+    summary.recoveryRecommendedExposureCap,
+    result.recovery.recommendedExposureCap,
+  );
+  assert.equal(
+    summary.recoveryCanRestoreSizing,
+    result.recovery.canRestoreSizing,
+  );
+  assert.equal(
+    summary.recoveryHumanReviewRequired,
+    result.recovery.shouldEscalateHumanReview,
+  );
+  assert.equal(
+    result.restorationProgress.module,
+    "stocks.restoration-progress",
+  );
+  assert.equal(
+    result.restorationProgress.ledger.title,
+    "Survival Memory Restoration Ledger",
+  );
   assert.equal(summary.restorationProgress, result.restorationProgress);
-  assert.equal(summary.restorationProgressStatus, result.restorationProgress.status);
-  assert.equal(summary.restorationProgressPct, result.restorationProgress.progressPct);
+  assert.equal(
+    summary.restorationProgressStatus,
+    result.restorationProgress.status,
+  );
+  assert.equal(
+    summary.restorationProgressPct,
+    result.restorationProgress.progressPct,
+  );
   assert.equal(result.stage, "Production eligible");
   assert.equal(result.productionEligible, true);
   assert.equal(result.blocked, false);
@@ -1618,7 +1918,10 @@ test("moderate confidence reaches limited live but not production", () => {
       survivalScore: 72,
     },
   });
-  const summary = applyStrategyReadinessToSummary(passingInput().summary, result);
+  const summary = applyStrategyReadinessToSummary(
+    passingInput().summary,
+    result,
+  );
 
   assert.equal(result.stage, "Limited live");
   assert.equal(result.maxConfidence, 72);
@@ -1764,7 +2067,10 @@ test("evaluator falls back to summary-owned inputs and conservative defaults", (
 test("summary application handles empty summaries and missing confidence fields", () => {
   const ready = evaluate();
   const emptySummary = applyStrategyReadinessToSummary(null, ready);
-  const survivalOnlySummary = applyStrategyReadinessToSummary({ survivalScore: 81 }, ready);
+  const survivalOnlySummary = applyStrategyReadinessToSummary(
+    { survivalScore: 81 },
+    ready,
+  );
 
   assert.equal(emptySummary.productionReadinessStatus, "Production eligible");
   assert.equal(emptySummary.survivalScore, 0);
@@ -1776,10 +2082,13 @@ test("summary application handles empty summaries and missing confidence fields"
 test("summary application remains defensive when Survival Memory is absent", () => {
   const ready = evaluate();
   const withoutSurvivalMemory = { ...ready, survivalMemory: undefined } as any;
-  const summary = applyStrategyReadinessToSummary({
-    survivalScore: 72,
-    promotionConfidence: 74,
-  }, withoutSurvivalMemory);
+  const summary = applyStrategyReadinessToSummary(
+    {
+      survivalScore: 72,
+      promotionConfidence: 74,
+    },
+    withoutSurvivalMemory,
+  );
 
   assert.equal(summary.survivalMemory, undefined);
   assert.equal(summary.survivalScarCount, 0);
@@ -1865,7 +2174,11 @@ test("judgement integrates after sizing and before agency-facing decisions", () 
   assert.equal(decision.allocationAction, "Buy");
   assert.equal(decision.judgement?.status, "trusted");
   assert.ok(decision.judgement.reasons.length > 0);
-  assert.ok(decision.sizingReasons.some((reason) => reason.includes("Judgement compared")));
+  assert.ok(
+    decision.sizingReasons.some((reason) =>
+      reason.includes("Judgement compared"),
+    ),
+  );
 });
 
 test("judgement fallback preserves current logic when no evidence is available", () => {
@@ -1936,7 +2249,10 @@ test("cautious judgement reduces exposure but can still allow a buy", () => {
     volatilityPct: 3,
     liquidityScore: 95,
     signalConfidence: 91,
-    previousTrades: judgementTrades([...Array(8).fill(5), ...Array(4).fill(-2)]),
+    previousTrades: judgementTrades([
+      ...Array(8).fill(5),
+      ...Array(4).fill(-2),
+    ]),
   });
 
   assert.equal(cautious.judgement?.status, "cautious");
@@ -1957,7 +2273,9 @@ test("unstable judgement outcomes produce a review gate while risk exits remain 
     volatilityPct: 3,
     liquidityScore: 95,
     signalConfidence: 91,
-    previousTrades: judgementTrades(Array.from({ length: 16 }, (_, index) => index % 2 === 0 ? 100 : -100)),
+    previousTrades: judgementTrades(
+      Array.from({ length: 16 }, (_, index) => (index % 2 === 0 ? 100 : -100)),
+    ),
   });
   const sell = classifyStrategySignal({
     readiness: ready,
@@ -1969,7 +2287,9 @@ test("unstable judgement outcomes produce a review gate while risk exits remain 
     volatilityPct: 3,
     liquidityScore: 90,
     signalConfidence: 60,
-    previousTrades: judgementTrades(Array.from({ length: 16 }, (_, index) => index % 2 === 0 ? 100 : -100)),
+    previousTrades: judgementTrades(
+      Array.from({ length: 16 }, (_, index) => (index % 2 === 0 ? 100 : -100)),
+    ),
   });
 
   assert.equal(review.judgement?.status, "review_required");
@@ -1979,7 +2299,11 @@ test("unstable judgement outcomes produce a review gate while risk exits remain 
   assert.equal(sell.allocationAction, "Sell");
   assert.equal(sell.signalStatus, "risk-exit");
   assert.equal(sell.suggestedExposure, 0);
-  assert.ok(sell.sizingReasons.some((reason) => reason.includes("Risk-reducing exits remain allowed while Judgement")));
+  assert.ok(
+    sell.sizingReasons.some((reason) =>
+      reason.includes("Risk-reducing exits remain allowed while Judgement"),
+    ),
+  );
 });
 
 test("stable judgement can improve agency trust when readiness trust is conservative", () => {
@@ -2020,9 +2344,15 @@ test("strong judgement evidence preserves full sizing when confidence lift is ju
   });
 
   assert.equal(decision.judgement?.status, "trusted");
-  assert.ok(decision.judgement.adjustedConfidence >= decision.judgement.rawConfidence);
+  assert.ok(
+    decision.judgement.adjustedConfidence >= decision.judgement.rawConfidence,
+  );
   assert.equal(decision.sizingResult.mode, decision.sizingMode);
-  assert.ok(decision.sizingResult.reasons.some((reason) => reason.includes("Status is trusted")));
+  assert.ok(
+    decision.sizingResult.reasons.some((reason) =>
+      reason.includes("Status is trusted"),
+    ),
+  );
 });
 
 test("judgement evidence can come from history, shadow, opportunities, or agency traces", () => {
@@ -2040,7 +2370,10 @@ test("judgement evidence can come from history, shadow, opportunities, or agency
   };
   const fromHistory = classifyStrategySignal({
     ...common,
-    strategyHistory: Array.from({ length: 6 }, (_, index) => ({ date: `2026-01-${index + 1}`, returnPct: 2 })),
+    strategyHistory: Array.from({ length: 6 }, (_, index) => ({
+      date: `2026-01-${index + 1}`,
+      returnPct: 2,
+    })),
   });
   const fromShadow = classifyStrategySignal({
     ...common,
@@ -2048,7 +2381,11 @@ test("judgement evidence can come from history, shadow, opportunities, or agency
   });
   const fromOpportunity = classifyStrategySignal({
     ...common,
-    opportunityCandidates: Array.from({ length: 6 }, (_, index) => ({ symbol: `O${index}`, candidateScore: 70, expectedMove: 2 })),
+    opportunityCandidates: Array.from({ length: 6 }, (_, index) => ({
+      symbol: `O${index}`,
+      candidateScore: 70,
+      expectedMove: 2,
+    })),
   });
   const fromAgency = classifyStrategySignal({
     ...common,

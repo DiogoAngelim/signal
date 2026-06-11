@@ -16,14 +16,12 @@ function storageKey(key: string) {
 export function isValidHistoricalValidationPayload(payload: any): boolean {
   if (!payload) return false;
 
-  const root = payload?.data && !Array.isArray(payload.data) ? payload.data : payload;
+  const root =
+    payload?.data && !Array.isArray(payload.data) ? payload.data : payload;
   const summary = root?.summary ?? root?.snapshot ?? root;
 
   const tradeCount = Number(
-    summary?.tradeCount ??
-      root?.tradeCount ??
-      root?.snapshot?.tradeCount ??
-      0,
+    summary?.tradeCount ?? root?.tradeCount ?? root?.snapshot?.tradeCount ?? 0,
   );
 
   const survivalScore = Number(
@@ -33,16 +31,9 @@ export function isValidHistoricalValidationPayload(payload: any): boolean {
       0,
   );
 
-  const history =
-    root?.history ??
-    root?.data ??
-    summary?.history ??
-    [];
+  const history = root?.history ?? root?.data ?? summary?.history ?? [];
 
-  const trades =
-    root?.trades ??
-    summary?.trades ??
-    [];
+  const trades = root?.trades ?? summary?.trades ?? [];
 
   const hasHistory = Array.isArray(history) && history.length > 0;
   const hasTrades = Array.isArray(trades) && trades.length > 0;
@@ -91,18 +82,17 @@ export function recoverBacktestPayload<T>(key: string, payload: T): T {
 
 export function shouldProtectBacktestUrl(url: string): boolean {
   return (
-    url.includes("/api/portfolio") ||
-    url.includes("/portfolio") ||
-    url.includes("/api/strategy") ||
-    url.includes("/strategy")
-  ) && (
-    url.includes("summary") ||
-    url.includes("history") ||
-    url.includes("trades") ||
-    url.includes("snapshot") ||
-    url.includes("walk-forward") ||
-    url.includes("live-market") ||
-    url.includes("refresh-market")
+    (url.includes("/api/portfolio") ||
+      url.includes("/portfolio") ||
+      url.includes("/api/strategy") ||
+      url.includes("/strategy")) &&
+    (url.includes("summary") ||
+      url.includes("history") ||
+      url.includes("trades") ||
+      url.includes("snapshot") ||
+      url.includes("walk-forward") ||
+      url.includes("live-market") ||
+      url.includes("refresh-market"))
   );
 }
 

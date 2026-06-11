@@ -1,4 +1,8 @@
-import type { StewardshipEvidence, StewardshipLesson, StewardshipMemoryInput } from "./types";
+import type {
+  StewardshipEvidence,
+  StewardshipLesson,
+  StewardshipMemoryInput,
+} from "./types";
 
 export function consumeStewardshipMemory(memory?: StewardshipMemoryInput): {
   evidence: StewardshipEvidence[];

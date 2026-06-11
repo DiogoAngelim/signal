@@ -1,4 +1,9 @@
-export type ReliabilityStatus = "healthy" | "degraded" | "insufficient" | "stale" | "invalid";
+export type ReliabilityStatus =
+  | "healthy"
+  | "degraded"
+  | "insufficient"
+  | "stale"
+  | "invalid";
 
 export type ReliabilityDiagnostic = {
   code: string;
@@ -33,7 +38,12 @@ export type ReliabilityResult = {
   };
 };
 
-export type ReliabilityFieldType = "number" | "string" | "boolean" | "object" | "array";
+export type ReliabilityFieldType =
+  | "number"
+  | "string"
+  | "boolean"
+  | "object"
+  | "array";
 
 export type ReliabilityFieldRule = {
   field: string;
@@ -121,14 +131,24 @@ export class ReliabilityEngine {
     const states = records.map((record, index) =>
       this.evaluateRecord(record, index, input, now, seenIds, diagnostics),
     );
-    const outlierCount = this.evaluateOutliers(records, input.outlierRules ?? [], diagnostics);
+    const outlierCount = this.evaluateOutliers(
+      records,
+      input.outlierRules ?? [],
+      diagnostics,
+    );
     const rejectedCount = states.filter((state) => state.rejected).length;
     const validCount = records.length - rejectedCount;
     const staleCount = states.filter((state) => state.stale).length;
-    const invalidTimestampCount = states.filter((state) => state.invalidTimestamp).length;
-    const duplicateCount = diagnostics.filter((diagnostic) => diagnostic.code === "RECORD_DUPLICATE").length;
+    const invalidTimestampCount = states.filter(
+      (state) => state.invalidTimestamp,
+    ).length;
+    const duplicateCount = diagnostics.filter(
+      (diagnostic) => diagnostic.code === "RECORD_DUPLICATE",
+    ).length;
     const missingOrInvalidFieldCount = diagnostics.filter(
-      (diagnostic) => diagnostic.code === "FIELD_MISSING" || diagnostic.code === "FIELD_INVALID",
+      (diagnostic) =>
+        diagnostic.code === "FIELD_MISSING" ||
+        diagnostic.code === "FIELD_INVALID",
     ).length;
 
     if (validCount < (input.minSampleSize ?? 1)) {
@@ -153,11 +173,30 @@ export class ReliabilityEngine {
     }
 
     const components: ReliabilityComponents = {
-      freshness: clamp(100 - ratio(staleCount, records.length) * 100 - ratio(invalidTimestampCount, records.length) * 30),
-      completeness: clamp(100 - ratio(missingOrInvalidFieldCount, records.length * Math.max(1, input.fieldRules?.length ?? 1)) * 100),
-      sampleSize: sampleSizeScore(validCount, input.minSampleSize, input.expectedCount),
+      freshness: clamp(
+        100 -
+          ratio(staleCount, records.length) * 100 -
+          ratio(invalidTimestampCount, records.length) * 30,
+      ),
+      completeness: clamp(
+        100 -
+          ratio(
+            missingOrInvalidFieldCount,
+            records.length * Math.max(1, input.fieldRules?.length ?? 1),
+          ) *
+            100,
+      ),
+      sampleSize: sampleSizeScore(
+        validCount,
+        input.minSampleSize,
+        input.expectedCount,
+      ),
       sourceQuality,
-      consistency: clamp(100 - ratio(duplicateCount, records.length) * 55 - ratio(rejectedCount, records.length) * 35),
+      consistency: clamp(
+        100 -
+          ratio(duplicateCount, records.length) * 55 -
+          ratio(rejectedCount, records.length) * 35,
+      ),
       outlierSafety: clamp(100 - ratio(outlierCount, records.length) * 70),
     };
     const score = weightedScore(components, input.weights);
@@ -168,7 +207,16 @@ export class ReliabilityEngine {
       minSampleSize: input.minSampleSize ?? 1,
     });
 
-    return this.result(score, status, diagnostics, now, records.length, validCount, rejectedCount, components);
+    return this.result(
+      score,
+      status,
+      diagnostics,
+      now,
+      records.length,
+      validCount,
+      rejectedCount,
+      components,
+    );
   }
 
   private evaluateRecord(
@@ -261,7 +309,11 @@ export class ReliabilityEngine {
         continue;
       }
 
-      if (typeof value === "number" && ((rule.min != null && value < rule.min) || (rule.max != null && value > rule.max))) {
+      if (
+        typeof value === "number" &&
+        ((rule.min != null && value < rule.min) ||
+          (rule.max != null && value > rule.max))
+      ) {
         state.rejected = true;
         diagnostics.push({
           code: "FIELD_OUT_OF_RANGE",
@@ -296,8 +348,13 @@ export class ReliabilityEngine {
         const value = numberValue(record.fields?.[rule.field]);
         if (value == null) return;
 
-        const fixedLimitOutlier = (rule.min != null && value < rule.min) || (rule.max != null && value > rule.max);
-        const zScoreOutlier = rule.zScoreLimit != null && deviation > 0 && Math.abs((value - average) / deviation) > rule.zScoreLimit;
+        const fixedLimitOutlier =
+          (rule.min != null && value < rule.min) ||
+          (rule.max != null && value > rule.max);
+        const zScoreOutlier =
+          rule.zScoreLimit != null &&
+          deviation > 0 &&
+          Math.abs((value - average) / deviation) > rule.zScoreLimit;
 
         if (fixedLimitOutlier || zScoreOutlier) {
           outlierCount += 1;
@@ -308,7 +365,9 @@ export class ReliabilityEngine {
             field: rule.field,
             source: record.source,
             observed: value,
-            expected: fixedLimitOutlier ? rangeText(rule.min, rule.max) : `z-score <= ${rule.zScoreLimit}`,
+            expected: fixedLimitOutlier
+              ? rangeText(rule.min, rule.max)
+              : `z-score <= ${rule.zScoreLimit}`,
           });
         }
       });
@@ -343,7 +402,9 @@ export class ReliabilityEngine {
   }
 }
 
-export function evaluateReliability(input: ReliabilityEvaluation): ReliabilityResult {
+export function evaluateReliability(
+  input: ReliabilityEvaluation,
+): ReliabilityResult {
   return new ReliabilityEngine().evaluate(input);
 }
 
@@ -359,26 +420,38 @@ export function confidenceCapForReliability(score: number) {
 function reliabilityStatus(
   score: number,
   components: ReliabilityComponents,
-  state: { validCount: number; staleCount: number; total: number; minSampleSize: number },
+  state: {
+    validCount: number;
+    staleCount: number;
+    total: number;
+    minSampleSize: number;
+  },
 ): ReliabilityStatus {
   if (state.validCount <= 0) return "invalid";
-  if (state.staleCount === state.total || (state.staleCount > 0 && score < 55)) return "stale";
-  if (state.validCount < state.minSampleSize || score < 40) return "insufficient";
+  if (state.staleCount === state.total || (state.staleCount > 0 && score < 55))
+    return "stale";
+  if (state.validCount < state.minSampleSize || score < 40)
+    return "insufficient";
   if (Math.min(...Object.values(components)) < 60) return "degraded";
   if (score < 80) return "degraded";
   return "healthy";
 }
 
-function fieldMatchesType(value: unknown, type: ReliabilityFieldType | undefined) {
+function fieldMatchesType(
+  value: unknown,
+  type: ReliabilityFieldType | undefined,
+) {
   if (!type) return true;
   if (type === "array") return Array.isArray(value);
-  if (type === "object") return typeof value === "object" && value !== null && !Array.isArray(value);
+  if (type === "object")
+    return typeof value === "object" && value !== null && !Array.isArray(value);
   return typeof value === type && (type !== "number" || Number.isFinite(value));
 }
 
 function sourceScore(record: ReliabilityRecord, input: ReliabilityEvaluation) {
   if (typeof record.quality === "number") return clamp(record.quality);
-  if (record.source && input.sourceQuality?.[record.source] != null) return clamp(input.sourceQuality[record.source]);
+  if (record.source && input.sourceQuality?.[record.source] != null)
+    return clamp(input.sourceQuality[record.source]);
   return clamp(input.defaultSourceQuality ?? 100);
 }
 
@@ -399,18 +472,33 @@ function numberValue(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-function sampleSizeScore(validCount: number, minSampleSize = 1, expectedCount?: number) {
+function sampleSizeScore(
+  validCount: number,
+  minSampleSize = 1,
+  expectedCount?: number,
+) {
   const denominator = Math.max(1, expectedCount ?? minSampleSize);
   const base = clamp((validCount / denominator) * 100);
   if (validCount >= minSampleSize) return base;
   return Math.min(base, clamp((validCount / Math.max(1, minSampleSize)) * 60));
 }
 
-function weightedScore(components: ReliabilityComponents, weights: Partial<ReliabilityWeights> | undefined) {
+function weightedScore(
+  components: ReliabilityComponents,
+  weights: Partial<ReliabilityWeights> | undefined,
+) {
   const merged = { ...DEFAULT_WEIGHTS, ...weights };
-  const entries = Object.entries(merged) as Array<[keyof ReliabilityComponents, number]>;
-  const total = entries.reduce((sum, [, weight]) => sum + Math.max(0, weight), 0) || 1;
-  return clamp(entries.reduce((sum, [key, weight]) => sum + components[key] * Math.max(0, weight), 0) / total);
+  const entries = Object.entries(merged) as Array<
+    [keyof ReliabilityComponents, number]
+  >;
+  const total =
+    entries.reduce((sum, [, weight]) => sum + Math.max(0, weight), 0) || 1;
+  return clamp(
+    entries.reduce(
+      (sum, [key, weight]) => sum + components[key] * Math.max(0, weight),
+      0,
+    ) / total,
+  );
 }
 
 function ratio(count: number, total: number) {
@@ -418,7 +506,9 @@ function ratio(count: number, total: number) {
 }
 
 function mean(values: number[]) {
-  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+  return values.length
+    ? values.reduce((sum, value) => sum + value, 0) / values.length
+    : 0;
 }
 
 function standardDeviation(values: number[], average: number) {
@@ -434,7 +524,9 @@ function round(value: number) {
   return Number(clamp(value).toFixed(2));
 }
 
-function roundComponents(components: ReliabilityComponents): ReliabilityComponents {
+function roundComponents(
+  components: ReliabilityComponents,
+): ReliabilityComponents {
   return {
     freshness: round(components.freshness),
     completeness: round(components.completeness),

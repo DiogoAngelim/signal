@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { NubankApi, type AccountTransaction } from "nubank-api";
+import { type AccountTransaction, NubankApi } from "nubank-api";
 import type { NubankSessionAdapter } from "../connectors.js";
 import type { RawTransaction } from "../models.js";
 import { NubankConnectionError } from "./nubank-adapter.js";
@@ -21,7 +21,11 @@ type NubankApiClientOptions = {
 type NubankApiLike = {
   authState?: unknown;
   auth?: {
-    authenticateWithQrCode?: (cpf: string, password: string, qrCodeId: string) => Promise<void>;
+    authenticateWithQrCode?: (
+      cpf: string,
+      password: string,
+      qrCodeId: string,
+    ) => Promise<void>;
   };
   account?: {
     getBalance?: () => Promise<unknown>;
@@ -46,7 +50,8 @@ type NubankApiAdapterOptions = {
   maxAccountPages?: number;
 };
 
-const DEFAULT_CLIENT_NAME = "github:DiogoAngelim/signal/examples/liquidity-manager";
+const DEFAULT_CLIENT_NAME =
+  "github:DiogoAngelim/signal/examples/liquidity-manager";
 const DEFAULT_MAX_ACCOUNT_PAGES = 4;
 
 const ACCOUNT_OUTFLOW_TYPES = new Set([
@@ -57,7 +62,7 @@ const ACCOUNT_OUTFLOW_TYPES = new Set([
   "DebitWithdrawalFeeEvent",
   "PixTransferOutEvent",
   "PixTransferScheduledEvent",
-  "TransferOutEvent"
+  "TransferOutEvent",
 ]);
 
 const ACCOUNT_INFLOW_TYPES = new Set([
@@ -65,7 +70,7 @@ const ACCOUNT_INFLOW_TYPES = new Set([
   "PixTransferInEvent",
   "PixTransferOutReversalEvent",
   "TransferInEvent",
-  "TransferOutReversalEvent"
+  "TransferOutReversalEvent",
 ]);
 
 export function createNubankApiSessionAdapter({
@@ -74,52 +79,60 @@ export function createNubankApiSessionAdapter({
   clientName = DEFAULT_CLIENT_NAME,
   createClient = (params) => new NubankApi(params) as NubankApiLike,
   env = process.env,
-  maxAccountPages = DEFAULT_MAX_ACCOUNT_PAGES
+  maxAccountPages = DEFAULT_MAX_ACCOUNT_PAGES,
 }: NubankApiAdapterOptions = {}): NubankSessionAdapter {
   return {
     async createSession({ cpf, password, authCode }) {
-      const storedAuthState = parseStoredAuthState(authState ?? env["NUBANK_API_AUTH_STATE"]);
+      const storedAuthState = parseStoredAuthState(
+        authState ?? env.NUBANK_API_AUTH_STATE,
+      );
       const storedCert = cert ?? readConfiguredCertificate(env);
       const api = createClient({
         ...storedAuthState,
         clientName,
         cert: storedCert,
-        env: "node"
+        env: "node",
       });
 
       if (!storedAuthState) {
         await authenticateWithQrCode(api, cpf, password, authCode);
       }
 
-      const [balance, accountFeed, cardTransactions, cardPayments] = await Promise.all([
-        readAccountBalance(api),
-        readAccountFeed(api, maxAccountPages),
-        readCardTransactions(api),
-        readCardPayments(api)
-      ]);
+      const [balance, accountFeed, cardTransactions, cardPayments] =
+        await Promise.all([
+          readAccountBalance(api),
+          readAccountFeed(api, maxAccountPages),
+          readCardTransactions(api),
+          readCardPayments(api),
+        ]);
 
       const transactions = [
         ...normalizeNubankApiAccountTransactions(accountFeed),
-        ...normalizeNubankApiCardTransactions(cardTransactions, "card-transaction"),
-        ...normalizeNubankApiCardTransactions(cardPayments, "card-payment")
+        ...normalizeNubankApiCardTransactions(
+          cardTransactions,
+          "card-transaction",
+        ),
+        ...normalizeNubankApiCardTransactions(cardPayments, "card-payment"),
       ];
 
       if (transactions.length === 0 && balance == null) {
         throw new NubankConnectionError(
-          "Nubank authenticated, but this unofficial adapter did not return readable balance or transactions."
+          "Nubank authenticated, but this unofficial adapter did not return readable balance or transactions.",
         );
       }
 
       return {
         sessionData: api.authState ?? storedAuthState ?? {},
         balances: balance == null ? [] : [{ availableAmount: balance }],
-        transactions
+        transactions,
       };
-    }
+    },
   };
 }
 
-export function normalizeNubankApiAccountTransactions(feed: unknown): RawTransaction[] {
+export function normalizeNubankApiAccountTransactions(
+  feed: unknown,
+): RawTransaction[] {
   const items = Array.isArray(feed) ? feed : [];
   return items.flatMap((item, index) => {
     const transaction = normalizeNubankApiAccountTransaction(item, index);
@@ -127,10 +140,17 @@ export function normalizeNubankApiAccountTransactions(feed: unknown): RawTransac
   });
 }
 
-export function normalizeNubankApiCardTransactions(feed: unknown, importedFrom = "card-transaction"): RawTransaction[] {
+export function normalizeNubankApiCardTransactions(
+  feed: unknown,
+  importedFrom = "card-transaction",
+): RawTransaction[] {
   const items = Array.isArray(feed) ? feed : [];
   return items.flatMap((item, index) => {
-    const transaction = normalizeNubankApiCardTransaction(item, index, importedFrom);
+    const transaction = normalizeNubankApiCardTransaction(
+      item,
+      index,
+      importedFrom,
+    );
     return transaction ? [transaction] : [];
   });
 }
@@ -139,38 +159,52 @@ async function authenticateWithQrCode(
   api: NubankApiLike,
   cpf: string,
   password: string | undefined,
-  authCode: string | undefined
+  authCode: string | undefined,
 ): Promise<void> {
   if (!password || !authCode?.trim()) {
     throw new NubankConnectionError(
-      "Nubank QR authorization requires CPF, password, and a generated QR id, or a saved NUBANK_API_AUTH_STATE."
+      "Nubank QR authorization requires CPF, password, and a generated QR id, or a saved NUBANK_API_AUTH_STATE.",
     );
   }
   if (typeof api.auth?.authenticateWithQrCode !== "function") {
-    throw new NubankConnectionError("The nubank-api client does not expose QR authentication.");
+    throw new NubankConnectionError(
+      "The nubank-api client does not expose QR authentication.",
+    );
   }
 
   try {
-    await api.auth.authenticateWithQrCode(cpf.replace(/\D/g, ""), password, authCode.trim());
+    await api.auth.authenticateWithQrCode(
+      cpf.replace(/\D/g, ""),
+      password,
+      authCode.trim(),
+    );
   } catch {
     throw new NubankConnectionError(
-      "Nubank QR authorization failed. Scan the generated QR id in the Nubank app, then try again."
+      "Nubank QR authorization failed. Scan the generated QR id in the Nubank app, then try again.",
     );
   }
 }
 
-async function readAccountBalance(api: NubankApiLike): Promise<number | undefined> {
+async function readAccountBalance(
+  api: NubankApiLike,
+): Promise<number | undefined> {
   if (typeof api.account?.getBalance !== "function") return undefined;
   try {
     const balance = await api.account.getBalance();
-    const amount = typeof balance === "number" ? balance : extractFirstNumber(balance, ["amount", "balance", "availableAmount"]);
+    const amount =
+      typeof balance === "number"
+        ? balance
+        : extractFirstNumber(balance, ["amount", "balance", "availableAmount"]);
     return amount == null ? undefined : normalizeCurrencyAmount(amount);
   } catch {
     return undefined;
   }
 }
 
-async function readAccountFeed(api: NubankApiLike, maxPages: number): Promise<unknown[]> {
+async function readAccountFeed(
+  api: NubankApiLike,
+  maxPages: number,
+): Promise<unknown[]> {
   try {
     if (typeof api.account?.getFeedPaginated === "function") {
       const items: unknown[] = [];
@@ -214,7 +248,11 @@ async function readCardTransactions(api: NubankApiLike): Promise<unknown[]> {
     }
     if (typeof api.card?.getFeed === "function") {
       const feed = await api.card.getFeed();
-      return Array.isArray(feed) ? feed.filter((item) => readString(item, ["category"]) === "transaction") : [];
+      return Array.isArray(feed)
+        ? feed.filter(
+            (item) => readString(item, ["category"]) === "transaction",
+          )
+        : [];
     }
   } catch {
     return [];
@@ -230,7 +268,9 @@ async function readCardPayments(api: NubankApiLike): Promise<unknown[]> {
     }
     if (typeof api.card?.getFeed === "function") {
       const feed = await api.card.getFeed();
-      return Array.isArray(feed) ? feed.filter((item) => readString(item, ["category"]) === "payment") : [];
+      return Array.isArray(feed)
+        ? feed.filter((item) => readString(item, ["category"]) === "payment")
+        : [];
     }
   } catch {
     return [];
@@ -238,19 +278,24 @@ async function readCardPayments(api: NubankApiLike): Promise<unknown[]> {
   return [];
 }
 
-function normalizeNubankApiAccountTransaction(item: unknown, index: number): RawTransaction | undefined {
+function normalizeNubankApiAccountTransaction(
+  item: unknown,
+  index: number,
+): RawTransaction | undefined {
   if (!isRecord(item)) return undefined;
   const date = readDate(item, ["postDate", "date", "time"]);
   if (!date) return undefined;
   const amount = readAccountAmount(item);
   if (amount == null || amount === 0) return undefined;
-  const id = readString(item, ["id"]) ?? `nubank-account-${index + 1}-${date.toISOString().slice(0, 10)}`;
+  const id =
+    readString(item, ["id"]) ??
+    `nubank-account-${index + 1}-${date.toISOString().slice(0, 10)}`;
   const typename = readString(item, ["__typename"]);
   const description = joinDescription(
     readString(item, ["title"]),
     readString(item, ["detail"]),
     readString(item, ["destinationAccount.name"]),
-    readString(item, ["originAccount.name"])
+    readString(item, ["originAccount.name"]),
   );
 
   return {
@@ -261,22 +306,38 @@ function normalizeNubankApiAccountTransaction(item: unknown, index: number): Raw
     date,
     metadata: {
       category: typename,
-      importedFrom: "nubank-api-account-feed"
-    }
+      importedFrom: "nubank-api-account-feed",
+    },
   };
 }
 
-function normalizeNubankApiCardTransaction(item: unknown, index: number, importedFrom: string): RawTransaction | undefined {
+function normalizeNubankApiCardTransaction(
+  item: unknown,
+  index: number,
+  importedFrom: string,
+): RawTransaction | undefined {
   if (!isRecord(item)) return undefined;
   const date = readDate(item, ["time", "date", "postDate"]);
   if (!date) return undefined;
-  const rawAmount = extractFirstNumber(item, ["amount", "value", "details.amount"]);
+  const rawAmount = extractFirstNumber(item, [
+    "amount",
+    "value",
+    "details.amount",
+  ]);
   if (rawAmount == null || rawAmount === 0) return undefined;
 
   const category = readString(item, ["category"]) ?? importedFrom;
-  const amount = inferCardAmountSign(normalizeCurrencyAmount(rawAmount), category);
-  const id = readString(item, ["id", "href"]) ?? `nubank-card-${index + 1}-${date.toISOString().slice(0, 10)}`;
-  const description = joinDescription(readString(item, ["title"]), readString(item, ["description"]));
+  const amount = inferCardAmountSign(
+    normalizeCurrencyAmount(rawAmount),
+    category,
+  );
+  const id =
+    readString(item, ["id", "href"]) ??
+    `nubank-card-${index + 1}-${date.toISOString().slice(0, 10)}`;
+  const description = joinDescription(
+    readString(item, ["title"]),
+    readString(item, ["description"]),
+  );
 
   return {
     id,
@@ -286,13 +347,20 @@ function normalizeNubankApiCardTransaction(item: unknown, index: number, importe
     date,
     metadata: {
       category,
-      importedFrom: `nubank-api-${importedFrom}`
-    }
+      importedFrom: `nubank-api-${importedFrom}`,
+    },
   };
 }
 
-function readAccountAmount(item: AccountTransaction | Record<string, unknown>): number | undefined {
-  const explicitAmount = extractFirstNumber(item, ["amount", "value", "detail", "footer"]);
+function readAccountAmount(
+  item: AccountTransaction | Record<string, unknown>,
+): number | undefined {
+  const explicitAmount = extractFirstNumber(item, [
+    "amount",
+    "value",
+    "detail",
+    "footer",
+  ]);
   if (explicitAmount == null) return undefined;
   const amount = normalizeCurrencyAmount(explicitAmount);
   const typename = readString(item, ["__typename"]) ?? "";
@@ -303,32 +371,38 @@ function readAccountAmount(item: AccountTransaction | Record<string, unknown>): 
 
 function inferCardAmountSign(amount: number, category: string): number {
   if (amount < 0) return amount;
-  return category.toLowerCase() === "payment" ? Math.abs(amount) : -Math.abs(amount);
+  return category.toLowerCase() === "payment"
+    ? Math.abs(amount)
+    : -Math.abs(amount);
 }
 
-function parseStoredAuthState(value: unknown): NubankApiClientOptions | undefined {
+function parseStoredAuthState(
+  value: unknown,
+): NubankApiClientOptions | undefined {
   if (value == null || value === "") return undefined;
   const parsed = typeof value === "string" ? parseJson(value) : value;
   if (!isRecord(parsed)) {
-    throw new NubankConnectionError("NUBANK_API_AUTH_STATE is not valid JSON auth state.");
+    throw new NubankConnectionError(
+      "NUBANK_API_AUTH_STATE is not valid JSON auth state.",
+    );
   }
 
   return {
     accessToken: readString(parsed, ["accessToken"]),
     refreshToken: readString(parsed, ["refreshToken"]),
     refreshBefore: readString(parsed, ["refreshBefore"]),
-    privateUrls: readRoutes(parsed["privateUrls"]),
-    publicUrls: readPublicUrls(parsed["publicUrls"])
+    privateUrls: readRoutes(parsed.privateUrls),
+    publicUrls: readPublicUrls(parsed.publicUrls),
   };
 }
 
 function readConfiguredCertificate(env: NodeJS.ProcessEnv): Buffer | undefined {
-  const certBase64 = env["NUBANK_API_CERT_BASE64"]?.trim();
+  const certBase64 = env.NUBANK_API_CERT_BASE64?.trim();
   if (certBase64) {
     return Buffer.from(certBase64, "base64");
   }
 
-  const certPath = env["NUBANK_API_CERT_PATH"]?.trim();
+  const certPath = env.NUBANK_API_CERT_PATH?.trim();
   if (!certPath) return undefined;
 
   try {
@@ -342,7 +416,9 @@ function parseJson(value: string): unknown {
   try {
     return JSON.parse(value);
   } catch {
-    throw new NubankConnectionError("NUBANK_API_AUTH_STATE is not valid JSON auth state.");
+    throw new NubankConnectionError(
+      "NUBANK_API_AUTH_STATE is not valid JSON auth state.",
+    );
   }
 }
 
@@ -383,11 +459,15 @@ function joinDescription(...parts: Array<string | undefined>): string {
 
 function normalizeCurrencyAmount(amount: number): number {
   const absolute = Math.abs(amount);
-  const value = Number.isInteger(amount) && absolute >= 1_000 ? amount / 100 : amount;
+  const value =
+    Number.isInteger(amount) && absolute >= 1_000 ? amount / 100 : amount;
   return Math.round(value * 100) / 100;
 }
 
-function extractFirstNumber(value: unknown, paths: string[]): number | undefined {
+function extractFirstNumber(
+  value: unknown,
+  paths: string[],
+): number | undefined {
   for (const path of paths) {
     const found = readPath(value, path);
     if (typeof found === "number" && Number.isFinite(found)) return found;
@@ -402,7 +482,9 @@ function extractFirstNumber(value: unknown, paths: string[]): number | undefined
 function parseCurrencyString(value: string): number | undefined {
   const match = value.match(/-?\d[\d.,]*/);
   if (!match) return undefined;
-  const normalized = match[0].replace(/\.(?=\d{3}(?:\D|$))/g, "").replace(",", ".");
+  const normalized = match[0]
+    .replace(/\.(?=\d{3}(?:\D|$))/g, "")
+    .replace(",", ".");
   const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : undefined;
 }

@@ -100,7 +100,7 @@ export type SignalEnvelopeInput<TPayload = unknown> = Omit<
 };
 
 export function createSignalEnvelope<TPayload>(
-  input: SignalEnvelopeInput<TPayload>
+  input: SignalEnvelopeInput<TPayload>,
 ): SignalEnvelope<TPayload> {
   return signalEnvelopeSchema.parse({
     protocol: signalProtocolVersion,
@@ -111,7 +111,7 @@ export function createSignalEnvelope<TPayload>(
 }
 
 export function validateSignalEnvelope<TPayload = unknown>(
-  input: unknown
+  input: unknown,
 ): SignalEnvelope<TPayload> {
   return signalEnvelopeSchema.parse(input) as SignalEnvelope<TPayload>;
 }

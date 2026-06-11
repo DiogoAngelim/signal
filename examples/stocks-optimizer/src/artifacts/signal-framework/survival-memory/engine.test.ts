@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  type SurvivalMemoryRecord,
   buildSurvivalMemoryRecord,
   calculateSurvivalCost,
   classifySurvivalOutcome,
   evaluateSurvivalMemory,
   fingerprintSurvivalState,
   scarWeightForOutcome,
-  type SurvivalMemoryRecord,
 } from "./engine";
 
 test("survival cost uses adverse excursion, drawdown, recovery, and stress inputs", () => {
@@ -26,54 +26,69 @@ test("survival cost uses adverse excursion, drawdown, recovery, and stress input
 });
 
 test("survival outcome classification separates comfortable, stressed, barely survived, and failed states", () => {
-  assert.equal(classifySurvivalOutcome({
-    realizedReturn: 2,
-    maxDrawdown: 2,
-    maxAdverseExcursion: 3,
-    recoveryTimeBars: 2,
-    volatilityExpansion: 8,
-    tailRisk: 4,
-    liquidityStress: 3,
-    structuralDanger: 5,
-    novelty: 12,
-  }), "comfortable_survival");
+  assert.equal(
+    classifySurvivalOutcome({
+      realizedReturn: 2,
+      maxDrawdown: 2,
+      maxAdverseExcursion: 3,
+      recoveryTimeBars: 2,
+      volatilityExpansion: 8,
+      tailRisk: 4,
+      liquidityStress: 3,
+      structuralDanger: 5,
+      novelty: 12,
+    }),
+    "comfortable_survival",
+  );
 
-  assert.equal(classifySurvivalOutcome({
-    realizedReturn: 0.5,
-    maxDrawdown: 12,
-    maxAdverseExcursion: 13,
-    recoveryTimeBars: 12,
-    volatilityExpansion: 42,
-    tailRisk: 24,
-    liquidityStress: 18,
-    structuralDanger: 15,
-    novelty: 20,
-  }), "stressed_survival");
+  assert.equal(
+    classifySurvivalOutcome({
+      realizedReturn: 0.5,
+      maxDrawdown: 12,
+      maxAdverseExcursion: 13,
+      recoveryTimeBars: 12,
+      volatilityExpansion: 42,
+      tailRisk: 24,
+      liquidityStress: 18,
+      structuralDanger: 15,
+      novelty: 20,
+    }),
+    "stressed_survival",
+  );
 
-  assert.equal(classifySurvivalOutcome({
-    realizedReturn: 8,
-    maxDrawdown: 32,
-    maxAdverseExcursion: 36,
-    recoveryTimeBars: 50,
-    volatilityExpansion: 75,
-    tailRisk: 82,
-    liquidityStress: 84,
-    structuralDanger: 65,
-    novelty: 45,
-  }), "barely_survived");
+  assert.equal(
+    classifySurvivalOutcome({
+      realizedReturn: 8,
+      maxDrawdown: 32,
+      maxAdverseExcursion: 36,
+      recoveryTimeBars: 50,
+      volatilityExpansion: 75,
+      tailRisk: 82,
+      liquidityStress: 84,
+      structuralDanger: 65,
+      novelty: 45,
+    }),
+    "barely_survived",
+  );
 
-  assert.equal(classifySurvivalOutcome({
-    realizedReturn: -1,
-    maxDrawdown: 6,
-    maxAdverseExcursion: 8,
-  }), "stressed_survival");
+  assert.equal(
+    classifySurvivalOutcome({
+      realizedReturn: -1,
+      maxDrawdown: 6,
+      maxAdverseExcursion: 8,
+    }),
+    "stressed_survival",
+  );
 
-  assert.equal(classifySurvivalOutcome({
-    realizedReturn: -3,
-    maxDrawdown: 28,
-    maxAdverseExcursion: 32,
-    tailRisk: 76,
-  }), "failed_survival");
+  assert.equal(
+    classifySurvivalOutcome({
+      realizedReturn: -3,
+      maxDrawdown: 28,
+      maxAdverseExcursion: 32,
+      tailRisk: 76,
+    }),
+    "failed_survival",
+  );
 });
 
 test("profitable but dangerous outcomes become survival scars", () => {
@@ -83,7 +98,12 @@ test("profitable but dangerous outcomes become survival scars", () => {
     asset: "AAA",
     venue: "NASDAQ",
     regime: "trend",
-    state: { venue: "NASDAQ", regime: "trend", action: "buy", riskPressure: 72 },
+    state: {
+      venue: "NASDAQ",
+      regime: "trend",
+      action: "buy",
+      riskPressure: 72,
+    },
     action: "buy",
     maxExposure: 8,
     realizedReturn: 8,
@@ -101,14 +121,24 @@ test("profitable but dangerous outcomes become survival scars", () => {
   assert.equal(record.outcomeClass, "barely_survived");
   assert.ok(record.survivalCost >= 60);
   assert.ok(record.scarWeight >= 0.55);
-  assert.ok(record.notes?.includes("Profitable outcome carried unacceptable survival cost."));
+  assert.ok(
+    record.notes?.includes(
+      "Profitable outcome carried unacceptable survival cost.",
+    ),
+  );
 });
 
 test("survival memory penalizes current states similar to fragile history", () => {
   const fragile = buildSurvivalMemoryRecord({
     id: "fragile",
     timestamp: "2026-01-03",
-    state: { venue: "NASDAQ", regime: "trend", action: "buy", riskPressure: 74, volatilityExpansion: 80 },
+    state: {
+      venue: "NASDAQ",
+      regime: "trend",
+      action: "buy",
+      riskPressure: 74,
+      volatilityExpansion: 80,
+    },
     action: "buy",
     realizedReturn: 5,
     maxExposure: 6,
@@ -125,7 +155,13 @@ test("survival memory penalizes current states similar to fragile history", () =
   const comfortable = buildSurvivalMemoryRecord({
     id: "comfortable",
     timestamp: "2026-01-04",
-    state: { venue: "NASDAQ", regime: "trend", action: "buy", riskPressure: 18, volatilityExpansion: 10 },
+    state: {
+      venue: "NASDAQ",
+      regime: "trend",
+      action: "buy",
+      riskPressure: 18,
+      volatilityExpansion: 10,
+    },
     action: "buy",
     realizedReturn: 3,
     maxExposure: 3,
@@ -141,7 +177,13 @@ test("survival memory penalizes current states similar to fragile history", () =
   });
   const analysis = evaluateSurvivalMemory({
     records: [comfortable, fragile],
-    currentState: { venue: "NASDAQ", regime: "trend", action: "buy", riskPressure: 76, volatilityExpansion: 84 },
+    currentState: {
+      venue: "NASDAQ",
+      regime: "trend",
+      action: "buy",
+      riskPressure: 76,
+      volatilityExpansion: 84,
+    },
     similarityThreshold: 0.3,
   });
 
@@ -151,73 +193,91 @@ test("survival memory penalizes current states similar to fragile history", () =
   assert.equal(analysis.nearRuinCount, 1);
   assert.equal(analysis.exposureMultiplier, 0.2);
   assert.ok(analysis.confidencePenalty > 40);
-  assert.ok(analysis.mainWarnings.includes("Current state resembles fragile historical states."));
+  assert.ok(
+    analysis.mainWarnings.includes(
+      "Current state resembles fragile historical states.",
+    ),
+  );
   assert.ok(analysis.missingEvidence.includes("Survival memory clearance"));
 });
 
 test("survival memory does not collapse confidence or capacity from raw scar counts when average survival cost is controlled", () => {
-  const current = fingerprintSurvivalState({ venue: "BINANCE", action: "buy", riskPressure: 57, volatilityExpansion: 38 });
-  const moderateNearRuin: SurvivalMemoryRecord[] = Array.from({ length: 54 }, (_, index) => ({
-    id: `moderate-near-${index}`,
-    timestamp: "2026-01-01T00:00:00.000Z",
-    stateFingerprint: current,
+  const current = fingerprintSurvivalState({
+    venue: "BINANCE",
     action: "buy",
-    maxExposure: 8,
-    realizedReturn: 4,
-    maxDrawdown: 31,
-    maxAdverseExcursion: 46,
-    recoveryTimeBars: 5,
-    volatilityExpansion: 22,
-    tailRisk: 44,
-    liquidityStress: 18,
-    structuralDanger: 22,
-    novelty: 16,
-    opportunityDensity: 64,
-    outcomeClass: "barely_survived",
-    survivalCost: 29,
-    scarWeight: 0.55,
-    notes: ["Profitable outcome carried unacceptable survival cost."],
-  }));
-  const stressedScars: SurvivalMemoryRecord[] = Array.from({ length: 35 }, (_, index) => ({
-    id: `stressed-${index}`,
-    timestamp: "2026-01-01T00:00:00.000Z",
-    stateFingerprint: current,
-    action: "buy",
-    maxExposure: 5,
-    realizedReturn: 2,
-    maxDrawdown: 12,
-    maxAdverseExcursion: 14,
-    recoveryTimeBars: 3,
-    volatilityExpansion: 16,
-    tailRisk: 24,
-    liquidityStress: 12,
-    structuralDanger: 18,
-    novelty: 12,
-    opportunityDensity: 48,
-    outcomeClass: "stressed_survival",
-    survivalCost: 27,
-    scarWeight: 0.2,
-  }));
-  const comfortable: SurvivalMemoryRecord[] = Array.from({ length: 9 }, (_, index) => ({
-    id: `comfortable-${index}`,
-    timestamp: "2026-01-01T00:00:00.000Z",
-    stateFingerprint: current,
-    action: "buy",
-    maxExposure: 2,
-    realizedReturn: 1,
-    maxDrawdown: 2,
-    maxAdverseExcursion: 3,
-    recoveryTimeBars: 1,
-    volatilityExpansion: 4,
-    tailRisk: 3,
-    liquidityStress: 2,
-    structuralDanger: 4,
-    novelty: 6,
-    opportunityDensity: 28,
-    outcomeClass: "comfortable_survival",
-    survivalCost: 5,
-    scarWeight: 0,
-  }));
+    riskPressure: 57,
+    volatilityExpansion: 38,
+  });
+  const moderateNearRuin: SurvivalMemoryRecord[] = Array.from(
+    { length: 54 },
+    (_, index) => ({
+      id: `moderate-near-${index}`,
+      timestamp: "2026-01-01T00:00:00.000Z",
+      stateFingerprint: current,
+      action: "buy",
+      maxExposure: 8,
+      realizedReturn: 4,
+      maxDrawdown: 31,
+      maxAdverseExcursion: 46,
+      recoveryTimeBars: 5,
+      volatilityExpansion: 22,
+      tailRisk: 44,
+      liquidityStress: 18,
+      structuralDanger: 22,
+      novelty: 16,
+      opportunityDensity: 64,
+      outcomeClass: "barely_survived",
+      survivalCost: 29,
+      scarWeight: 0.55,
+      notes: ["Profitable outcome carried unacceptable survival cost."],
+    }),
+  );
+  const stressedScars: SurvivalMemoryRecord[] = Array.from(
+    { length: 35 },
+    (_, index) => ({
+      id: `stressed-${index}`,
+      timestamp: "2026-01-01T00:00:00.000Z",
+      stateFingerprint: current,
+      action: "buy",
+      maxExposure: 5,
+      realizedReturn: 2,
+      maxDrawdown: 12,
+      maxAdverseExcursion: 14,
+      recoveryTimeBars: 3,
+      volatilityExpansion: 16,
+      tailRisk: 24,
+      liquidityStress: 12,
+      structuralDanger: 18,
+      novelty: 12,
+      opportunityDensity: 48,
+      outcomeClass: "stressed_survival",
+      survivalCost: 27,
+      scarWeight: 0.2,
+    }),
+  );
+  const comfortable: SurvivalMemoryRecord[] = Array.from(
+    { length: 9 },
+    (_, index) => ({
+      id: `comfortable-${index}`,
+      timestamp: "2026-01-01T00:00:00.000Z",
+      stateFingerprint: current,
+      action: "buy",
+      maxExposure: 2,
+      realizedReturn: 1,
+      maxDrawdown: 2,
+      maxAdverseExcursion: 3,
+      recoveryTimeBars: 1,
+      volatilityExpansion: 4,
+      tailRisk: 3,
+      liquidityStress: 2,
+      structuralDanger: 4,
+      novelty: 6,
+      opportunityDensity: 28,
+      outcomeClass: "comfortable_survival",
+      survivalCost: 5,
+      scarWeight: 0,
+    }),
+  );
   const analysis = evaluateSurvivalMemory({
     records: [...moderateNearRuin, ...stressedScars, ...comfortable],
     stateFingerprint: current,
@@ -232,51 +292,64 @@ test("survival memory does not collapse confidence or capacity from raw scar cou
   assert.equal(analysis.exposureMultiplier, 0.65);
   assert.ok(analysis.survivalConfidence > 60);
   assert.ok(analysis.confidencePenalty < 25);
-  assert.equal(analysis.missingEvidence.includes("Survival memory clearance"), false);
+  assert.equal(
+    analysis.missingEvidence.includes("Survival memory clearance"),
+    false,
+  );
 });
 
 test("survival memory maximizes controlled recovery confidence without clearing reduced-size status", () => {
-  const current = fingerprintSurvivalState({ venue: "BINANCE", action: "buy", regime: "low-vol-grind" });
-  const recoveredNearRuin: SurvivalMemoryRecord[] = Array.from({ length: 21 }, (_, index) => ({
-    id: `recovered-near-${index}`,
-    timestamp: "2026-05-29T00:00:00.000Z",
-    stateFingerprint: current,
+  const current = fingerprintSurvivalState({
+    venue: "BINANCE",
     action: "buy",
-    maxExposure: 4,
-    realizedReturn: 3,
-    maxDrawdown: 31,
-    maxAdverseExcursion: 46,
-    recoveryTimeBars: 6,
-    volatilityExpansion: 22,
-    tailRisk: 44,
-    liquidityStress: 18,
-    structuralDanger: 22,
-    novelty: 16,
-    opportunityDensity: 37,
-    outcomeClass: "barely_survived",
-    survivalCost: 29,
-    scarWeight: 0.55,
-  }));
-  const controlledScars: SurvivalMemoryRecord[] = Array.from({ length: 26 }, (_, index) => ({
-    id: `controlled-scar-${index}`,
-    timestamp: "2026-05-29T00:00:00.000Z",
-    stateFingerprint: current,
-    action: "buy",
-    maxExposure: 3,
-    realizedReturn: 2,
-    maxDrawdown: 12,
-    maxAdverseExcursion: 14,
-    recoveryTimeBars: 6,
-    volatilityExpansion: 16,
-    tailRisk: 24,
-    liquidityStress: 12,
-    structuralDanger: 18,
-    novelty: 12,
-    opportunityDensity: 37,
-    outcomeClass: "stressed_survival",
-    survivalCost: 27,
-    scarWeight: 0.2,
-  }));
+    regime: "low-vol-grind",
+  });
+  const recoveredNearRuin: SurvivalMemoryRecord[] = Array.from(
+    { length: 21 },
+    (_, index) => ({
+      id: `recovered-near-${index}`,
+      timestamp: "2026-05-29T00:00:00.000Z",
+      stateFingerprint: current,
+      action: "buy",
+      maxExposure: 4,
+      realizedReturn: 3,
+      maxDrawdown: 31,
+      maxAdverseExcursion: 46,
+      recoveryTimeBars: 6,
+      volatilityExpansion: 22,
+      tailRisk: 44,
+      liquidityStress: 18,
+      structuralDanger: 22,
+      novelty: 16,
+      opportunityDensity: 37,
+      outcomeClass: "barely_survived",
+      survivalCost: 29,
+      scarWeight: 0.55,
+    }),
+  );
+  const controlledScars: SurvivalMemoryRecord[] = Array.from(
+    { length: 26 },
+    (_, index) => ({
+      id: `controlled-scar-${index}`,
+      timestamp: "2026-05-29T00:00:00.000Z",
+      stateFingerprint: current,
+      action: "buy",
+      maxExposure: 3,
+      realizedReturn: 2,
+      maxDrawdown: 12,
+      maxAdverseExcursion: 14,
+      recoveryTimeBars: 6,
+      volatilityExpansion: 16,
+      tailRisk: 24,
+      liquidityStress: 12,
+      structuralDanger: 18,
+      novelty: 12,
+      opportunityDensity: 37,
+      outcomeClass: "stressed_survival",
+      survivalCost: 27,
+      scarWeight: 0.2,
+    }),
+  );
   const analysis = evaluateSurvivalMemory({
     records: [...recoveredNearRuin, ...controlledScars],
     stateFingerprint: current,
@@ -293,7 +366,11 @@ test("survival memory maximizes controlled recovery confidence without clearing 
 });
 
 test("survival memory does not hard-gate on an isolated severe outlier when aggregate recovery is controlled", () => {
-  const current = fingerprintSurvivalState({ venue: "BINANCE", action: "buy", regime: "rotation" });
+  const current = fingerprintSurvivalState({
+    venue: "BINANCE",
+    action: "buy",
+    regime: "rotation",
+  });
   const severeOutlier: SurvivalMemoryRecord = {
     id: "severe-outlier",
     timestamp: "2026-01-01T00:00:00.000Z",
@@ -314,26 +391,29 @@ test("survival memory does not hard-gate on an isolated severe outlier when aggr
     survivalCost: 78,
     scarWeight: 0.8,
   };
-  const comfortable: SurvivalMemoryRecord[] = Array.from({ length: 19 }, (_, index) => ({
-    id: `comfortable-recovery-${index}`,
-    timestamp: "2026-01-01T00:00:00.000Z",
-    stateFingerprint: current,
-    action: "buy",
-    maxExposure: 2,
-    realizedReturn: 1,
-    maxDrawdown: 2,
-    maxAdverseExcursion: 3,
-    recoveryTimeBars: 1,
-    volatilityExpansion: 4,
-    tailRisk: 3,
-    liquidityStress: 2,
-    structuralDanger: 4,
-    novelty: 6,
-    opportunityDensity: 28,
-    outcomeClass: "comfortable_survival",
-    survivalCost: 5,
-    scarWeight: 0,
-  }));
+  const comfortable: SurvivalMemoryRecord[] = Array.from(
+    { length: 19 },
+    (_, index) => ({
+      id: `comfortable-recovery-${index}`,
+      timestamp: "2026-01-01T00:00:00.000Z",
+      stateFingerprint: current,
+      action: "buy",
+      maxExposure: 2,
+      realizedReturn: 1,
+      maxDrawdown: 2,
+      maxAdverseExcursion: 3,
+      recoveryTimeBars: 1,
+      volatilityExpansion: 4,
+      tailRisk: 3,
+      liquidityStress: 2,
+      structuralDanger: 4,
+      novelty: 6,
+      opportunityDensity: 28,
+      outcomeClass: "comfortable_survival",
+      survivalCost: 5,
+      scarWeight: 0,
+    }),
+  );
   const analysis = evaluateSurvivalMemory({
     records: [severeOutlier, ...comfortable],
     stateFingerprint: current,
@@ -345,11 +425,19 @@ test("survival memory does not hard-gate on an isolated severe outlier when aggr
   assert.equal(analysis.recommendation, "act_with_reduced_size");
   assert.equal(analysis.exposureMultiplier, 1);
   assert.ok(analysis.survivalConfidence > 70);
-  assert.equal(analysis.missingEvidence.includes("Survival memory clearance"), false);
+  assert.equal(
+    analysis.missingEvidence.includes("Survival memory clearance"),
+    false,
+  );
 });
 
 test("survival memory remains clear when matching history survived comfortably", () => {
-  const state = { venue: "NYSE", regime: "low-vol", action: "buy", riskPressure: 15 };
+  const state = {
+    venue: "NYSE",
+    regime: "low-vol",
+    action: "buy",
+    riskPressure: 15,
+  };
   const record = buildSurvivalMemoryRecord({
     id: "calm",
     state,
@@ -384,7 +472,10 @@ test("empty survival memory is explicit and deterministic", () => {
   assert.equal(analysis.status, "empty");
   assert.equal(analysis.recordCount, 0);
   assert.equal(analysis.survivalConfidence, 100);
-  assert.equal(analysis.reasons[0], "No survival memory records are available yet.");
+  assert.equal(
+    analysis.reasons[0],
+    "No survival memory records are available yet.",
+  );
 });
 
 test("prebuilt fingerprints and alternate actions are normalized", () => {
@@ -458,16 +549,18 @@ test("survival scoring handles non-finite defensive inputs", () => {
   });
   const highAverageCost = evaluateSurvivalMemory({
     stateFingerprint: "current:state",
-    records: [{
-      ...unknown,
-      id: "high-cost",
-      stateFingerprint: "different:state",
-      outcomeClass: "stressed_survival",
-      survivalCost: 72,
-      scarWeight: 0.2,
-      maxDrawdown: 12,
-      maxAdverseExcursion: 14,
-    }],
+    records: [
+      {
+        ...unknown,
+        id: "high-cost",
+        stateFingerprint: "different:state",
+        outcomeClass: "stressed_survival",
+        survivalCost: 72,
+        scarWeight: 0.2,
+        maxDrawdown: 12,
+        maxAdverseExcursion: 14,
+      },
+    ],
   });
   const severeCluster = evaluateSurvivalMemory({
     stateFingerprint: "cluster:fragile",

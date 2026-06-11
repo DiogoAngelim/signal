@@ -26,12 +26,18 @@ describe("evaluateStewardshipGovernance", () => {
       threats: baseThreats,
       protections: [],
       uncertainties: [],
-      context: { accountabilityOwner: "reviewer", policyCompliance: "compliant", reversibility: "high" },
+      context: {
+        accountabilityOwner: "reviewer",
+        policyCompliance: "compliant",
+        reversibility: "high",
+      },
     });
 
     expect(governance.evidenceQuality).toBe("weak");
     expect(governance.status).toBe("weak");
-    expect(governance.warnings).toContain("Evidence quality is not yet durable enough for a larger step.");
+    expect(governance.warnings).toContain(
+      "Evidence quality is not yet durable enough for a larger step.",
+    );
   });
 
   it("keeps strong evidence cautious when review depth is still limited", () => {
@@ -45,11 +51,30 @@ describe("evaluateStewardshipGovernance", () => {
           durability: "strong",
         },
       ],
-      lessons: [{ id: "lesson:1", label: "Lesson", summary: "Lesson held.", outcome: "confirmed", repetition: 3 }],
+      lessons: [
+        {
+          id: "lesson:1",
+          label: "Lesson",
+          summary: "Lesson held.",
+          outcome: "confirmed",
+          repetition: 3,
+        },
+      ],
       threats: baseThreats,
       protections: [],
-      uncertainties: [{ id: "uncertainty:1", label: "Open condition", severity: "high", visibility: "explicit" }],
-      context: { accountabilityOwner: "reviewer", policyCompliance: "compliant", reversibility: "high" },
+      uncertainties: [
+        {
+          id: "uncertainty:1",
+          label: "Open condition",
+          severity: "high",
+          visibility: "explicit",
+        },
+      ],
+      context: {
+        accountabilityOwner: "reviewer",
+        policyCompliance: "compliant",
+        reversibility: "high",
+      },
     });
 
     expect(governance.evidenceQuality).toBe("strong");
@@ -67,25 +92,59 @@ describe("evaluateStewardshipGovernance", () => {
       context: { policyCompliance: "violated" },
     });
     const irreversible = evaluateStewardshipGovernance({
-      evidence: [{ id: "evidence:1", label: "Review", summary: "Review exists.", quality: "limited", durability: "limited" }],
+      evidence: [
+        {
+          id: "evidence:1",
+          label: "Review",
+          summary: "Review exists.",
+          quality: "limited",
+          durability: "limited",
+        },
+      ],
       lessons: [],
-      threats: [{ id: "threat:critical", label: "Critical downside", severity: "critical", mitigated: false }],
+      threats: [
+        {
+          id: "threat:critical",
+          label: "Critical downside",
+          severity: "critical",
+          mitigated: false,
+        },
+      ],
       protections: [],
       uncertainties: [],
       context: { policyCompliance: "compliant", reversibility: "low" },
     });
 
     expect(policyViolation.status).toBe("blocked");
-    expect(policyViolation.blockers).toContain("Policy compliance is violated.");
+    expect(policyViolation.blockers).toContain(
+      "Policy compliance is violated.",
+    );
     expect(irreversible.status).toBe("blocked");
-    expect(irreversible.blockers).toContain("A critical threat is paired with low reversibility.");
+    expect(irreversible.blockers).toContain(
+      "A critical threat is paired with low reversibility.",
+    );
   });
 
   it("surfaces concentration risk and missing accountability", () => {
     const governance = evaluateStewardshipGovernance({
-      evidence: [{ id: "evidence:1", label: "Review", summary: "Review exists.", quality: "adequate", durability: "adequate" }],
+      evidence: [
+        {
+          id: "evidence:1",
+          label: "Review",
+          summary: "Review exists.",
+          quality: "adequate",
+          durability: "adequate",
+        },
+      ],
       lessons: [],
-      threats: [{ id: "threat:critical", label: "Critical downside", severity: "critical", mitigated: false }],
+      threats: [
+        {
+          id: "threat:critical",
+          label: "Critical downside",
+          severity: "critical",
+          mitigated: false,
+        },
+      ],
       protections: [],
       uncertainties: [],
       context: {
@@ -98,7 +157,11 @@ describe("evaluateStewardshipGovernance", () => {
 
     expect(governance.status).toBe("blocked");
     expect(governance.concentrationRisk).toBe("critical");
-    expect(governance.missingInformation).toContain("No owner has accepted follow-up.");
-    expect(governance.blockers).toContain("Critical risk has no clear accountability.");
+    expect(governance.missingInformation).toContain(
+      "No owner has accepted follow-up.",
+    );
+    expect(governance.blockers).toContain(
+      "Critical risk has no clear accountability.",
+    );
   });
 });

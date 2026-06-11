@@ -1,1 +1,8 @@
-{"details":{"reason":"No state file found"},"hashes":[],"result":"FAIL","timestamp":"NOT_ALLOWED_IN_HASH_LOGIC","type":"PHASE_CHAIN_PROOF","valid":false}
+{
+  "details": { "reason": "No state file found" },
+  "hashes": [],
+  "result": "FAIL",
+  "timestamp": "NOT_ALLOWED_IN_HASH_LOGIC",
+  "type": "PHASE_CHAIN_PROOF",
+  "valid": false
+}

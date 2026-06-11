@@ -187,16 +187,24 @@ export type CompactionJobResult = {
 };
 
 export type DecisionRecordStore = {
-  saveDecisionRecord(record: SignalDecisionRecord): Promise<SignalDecisionRecord>;
-  getDecisionRecord(decisionId: string): Promise<SignalDecisionRecord | undefined>;
-  listDecisionRecords(filter?: DecisionRecordFilter): Promise<SignalDecisionRecord[]>;
+  saveDecisionRecord(
+    record: SignalDecisionRecord,
+  ): Promise<SignalDecisionRecord>;
+  getDecisionRecord(
+    decisionId: string,
+  ): Promise<SignalDecisionRecord | undefined>;
+  listDecisionRecords(
+    filter?: DecisionRecordFilter,
+  ): Promise<SignalDecisionRecord[]>;
   deleteDecisionRecord?(decisionId: string): Promise<void>;
 };
 
 export type RealityStore = {
   saveRealitySnapshot(snapshot: RealitySnapshot): Promise<RealitySnapshot>;
   getRealitySnapshot(snapshotId: string): Promise<RealitySnapshot | undefined>;
-  listRealitySnapshots(filter?: RealitySnapshotFilter): Promise<RealitySnapshot[]>;
+  listRealitySnapshots(
+    filter?: RealitySnapshotFilter,
+  ): Promise<RealitySnapshot[]>;
 };
 
 export type OutcomeStore = {
@@ -210,20 +218,32 @@ export type ReplayStore = {
 };
 
 export type CalibrationStore = {
-  recordCalibration(entry: CalibrationHistoryEntry): Promise<CalibrationHistoryEntry>;
+  recordCalibration(
+    entry: CalibrationHistoryEntry,
+  ): Promise<CalibrationHistoryEntry>;
   recordTrust(entry: TrustHistoryEntry): Promise<TrustHistoryEntry>;
-  listCalibrationHistory(decisionId?: string): Promise<CalibrationHistoryEntry[]>;
+  listCalibrationHistory(
+    decisionId?: string,
+  ): Promise<CalibrationHistoryEntry[]>;
   listTrustHistory(decisionId?: string): Promise<TrustHistoryEntry[]>;
 };
 
 export type SummaryStore = {
   saveSummary(summary: MemorySummary): Promise<MemorySummary>;
-  listSummaries(filter?: { appId?: string; domain?: string; source?: string; limit?: number }): Promise<MemorySummary[]>;
+  listSummaries(filter?: {
+    appId?: string;
+    domain?: string;
+    source?: string;
+    limit?: number;
+  }): Promise<MemorySummary[]>;
 };
 
 export type RetentionJobStore = {
   saveRetentionJob(job: RetentionJobRecord): Promise<RetentionJobRecord>;
-  updateRetentionJob(jobId: string, patch: Partial<RetentionJobRecord>): Promise<RetentionJobRecord | undefined>;
+  updateRetentionJob(
+    jobId: string,
+    patch: Partial<RetentionJobRecord>,
+  ): Promise<RetentionJobRecord | undefined>;
 };
 
 export type LearningStore = {
@@ -233,16 +253,24 @@ export type LearningStore = {
   getThesis(thesisId: string): Promise<Thesis | undefined>;
   listTheses(filter?: LearningRecordFilter): Promise<Thesis[]>;
   saveRegimeSnapshot(snapshot: RegimeSnapshot): Promise<RegimeSnapshot>;
-  getRegimeSnapshot(regimeSnapshotId: string): Promise<RegimeSnapshot | undefined>;
+  getRegimeSnapshot(
+    regimeSnapshotId: string,
+  ): Promise<RegimeSnapshot | undefined>;
   listRegimeSnapshots(filter?: LearningRecordFilter): Promise<RegimeSnapshot[]>;
   saveDecisionReview(review: DecisionReview): Promise<DecisionReview>;
   listDecisionReviews(filter?: LearningRecordFilter): Promise<DecisionReview[]>;
   saveLearningRecord(record: LearningRecord): Promise<LearningRecord>;
   listLearningRecords(filter?: LearningRecordFilter): Promise<LearningRecord[]>;
   saveCalibrationRecord(record: CalibrationRecord): Promise<CalibrationRecord>;
-  listCalibrationRecords(filter?: LearningRecordFilter): Promise<CalibrationRecord[]>;
-  saveProcessQualityRecord(record: ProcessQualityRecord): Promise<ProcessQualityRecord>;
-  listProcessQualityRecords(filter?: LearningRecordFilter): Promise<ProcessQualityRecord[]>;
+  listCalibrationRecords(
+    filter?: LearningRecordFilter,
+  ): Promise<CalibrationRecord[]>;
+  saveProcessQualityRecord(
+    record: ProcessQualityRecord,
+  ): Promise<ProcessQualityRecord>;
+  listProcessQualityRecords(
+    filter?: LearningRecordFilter,
+  ): Promise<ProcessQualityRecord[]>;
 };
 
 export type DecisionMemoryStore = RealityStore &

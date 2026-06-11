@@ -3,7 +3,7 @@ import {
   calculateCashflowProfile,
   createPurchaseDecision,
   createSampleFinancialDataset,
-  normalizeRawTransactions
+  normalizeRawTransactions,
 } from "../src/index.js";
 import type { RawTransaction } from "../src/models.js";
 
@@ -14,7 +14,9 @@ describe("cashflow profile", () => {
     const { profile } = sampleProfile();
 
     expect(profile.currentBalance).toBe(23000);
-    expect(profile.averageMonthlyIncome).toBeGreaterThan(profile.averageMonthlyExpenses);
+    expect(profile.averageMonthlyIncome).toBeGreaterThan(
+      profile.averageMonthlyExpenses,
+    );
     expect(profile.fixedMonthlyExpenses).toBeGreaterThan(3000);
     expect(profile.runwayWeeks).toBeGreaterThan(16);
     expect(profile.dataCoverageDays).toBeGreaterThanOrEqual(180);
@@ -23,37 +25,103 @@ describe("cashflow profile", () => {
 
   it("classifies inflows, outflows, income, and recurring expenses from normalized history", () => {
     const { normalized, profile } = sampleProfile();
-    const salary = normalized.find((transaction) => transaction.description === "Salary deposit");
-    const rent = normalized.find((transaction) => transaction.description === "Apartment rent");
+    const salary = normalized.find(
+      (transaction) => transaction.description === "Salary deposit",
+    );
+    const rent = normalized.find(
+      (transaction) => transaction.description === "Apartment rent",
+    );
 
     expect(salary?.direction).toBe("inflow");
     expect(salary?.type).toBe("income");
     expect(rent?.direction).toBe("outflow");
     expect(rent?.type).toBe("expense");
-    expect(profile.fixedMonthlyExpenses).toBeGreaterThan(profile.discretionaryMonthlyExpenses);
+    expect(profile.fixedMonthlyExpenses).toBeGreaterThan(
+      profile.discretionaryMonthlyExpenses,
+    );
   });
 
   it("feeds manual-upload shaped data into the same purchase engine", () => {
     const rawTransactions: RawTransaction[] = [
-      raw("salary-1", "manual_upload", 6000, "Salary deposit", "2026-04-25", "Income"),
-      raw("salary-2", "manual_upload", 6000, "Salary deposit", "2026-05-25", "Income"),
-      raw("rent-1", "manual_upload", -2100, "Apartment rent", "2026-04-03", "Housing"),
-      raw("rent-2", "manual_upload", -2100, "Apartment rent", "2026-05-03", "Housing"),
-      raw("groceries-1", "manual_upload", -450, "Grocery market", "2026-05-10", "Groceries"),
-      raw("groceries-2", "manual_upload", -430, "Grocery market", "2026-05-17", "Groceries")
+      raw(
+        "salary-1",
+        "manual_upload",
+        6000,
+        "Salary deposit",
+        "2026-04-25",
+        "Income",
+      ),
+      raw(
+        "salary-2",
+        "manual_upload",
+        6000,
+        "Salary deposit",
+        "2026-05-25",
+        "Income",
+      ),
+      raw(
+        "rent-1",
+        "manual_upload",
+        -2100,
+        "Apartment rent",
+        "2026-04-03",
+        "Housing",
+      ),
+      raw(
+        "rent-2",
+        "manual_upload",
+        -2100,
+        "Apartment rent",
+        "2026-05-03",
+        "Housing",
+      ),
+      raw(
+        "groceries-1",
+        "manual_upload",
+        -450,
+        "Grocery market",
+        "2026-05-10",
+        "Groceries",
+      ),
+      raw(
+        "groceries-2",
+        "manual_upload",
+        -430,
+        "Grocery market",
+        "2026-05-17",
+        "Groceries",
+      ),
     ];
-    const normalized = normalizeRawTransactions({ rawTransactions, userId: "u1", connectionId: "manual-1" });
+    const normalized = normalizeRawTransactions({
+      rawTransactions,
+      userId: "u1",
+      connectionId: "manual-1",
+    });
     const profile = calculateCashflowProfile({
       userId: "u1",
       transactions: normalized,
-      balances: [{ id: "b1", userId: "u1", connectionId: "manual-1", availableAmount: 14000, currency: "BRL", capturedAt: NOW }],
-      now: NOW
+      balances: [
+        {
+          id: "b1",
+          userId: "u1",
+          connectionId: "manual-1",
+          availableAmount: 14000,
+          currency: "BRL",
+          capturedAt: NOW,
+        },
+      ],
+      now: NOW,
     });
     const decision = createPurchaseDecision({
-      input: { userId: "u1", amount: 500, paymentMethod: "cash", necessity: "optional" },
+      input: {
+        userId: "u1",
+        amount: 500,
+        paymentMethod: "cash",
+        necessity: "optional",
+      },
       profile,
       transactions: normalized,
-      now: NOW
+      now: NOW,
     });
 
     expect(decision.score).toBeGreaterThan(60);
@@ -68,20 +136,38 @@ describe("cashflow profile", () => {
       raw("nu-4", "nubank", -2200, "Apartment rent", "2026-03-03", "Housing"),
       raw("nu-5", "nubank", -2200, "Apartment rent", "2026-04-03", "Housing"),
       raw("nu-6", "nubank", -2200, "Apartment rent", "2026-05-03", "Housing"),
-      raw("nu-7", "nubank", -380, "Grocery market", "2026-05-09", "Groceries")
+      raw("nu-7", "nubank", -380, "Grocery market", "2026-05-09", "Groceries"),
     ];
-    const normalized = normalizeRawTransactions({ rawTransactions, userId: "u1", connectionId: "nu-1" });
+    const normalized = normalizeRawTransactions({
+      rawTransactions,
+      userId: "u1",
+      connectionId: "nu-1",
+    });
     const profile = calculateCashflowProfile({
       userId: "u1",
       transactions: normalized,
-      balances: [{ id: "b1", userId: "u1", connectionId: "nu-1", availableAmount: 12500, currency: "BRL", capturedAt: NOW }],
-      now: NOW
+      balances: [
+        {
+          id: "b1",
+          userId: "u1",
+          connectionId: "nu-1",
+          availableAmount: 12500,
+          currency: "BRL",
+          capturedAt: NOW,
+        },
+      ],
+      now: NOW,
     });
     const decision = createPurchaseDecision({
-      input: { userId: "u1", amount: 800, paymentMethod: "cash", necessity: "necessary" },
+      input: {
+        userId: "u1",
+        amount: 800,
+        paymentMethod: "cash",
+        necessity: "necessary",
+      },
       profile,
       transactions: normalized,
-      now: NOW
+      now: NOW,
     });
 
     expect(decision.verdict).not.toBe("not_justifiable");
@@ -90,35 +176,68 @@ describe("cashflow profile", () => {
 
   it("excludes internal Nubank investment movements from monthly expenses", () => {
     const rawTransactions: RawTransaction[] = [
-      raw("income", "nubank", 5000, "Transferência recebida pelo Pix", "2026-05-25", "Income"),
+      raw(
+        "income",
+        "nubank",
+        5000,
+        "Transferência recebida pelo Pix",
+        "2026-05-25",
+        "Income",
+      ),
       raw("rdb", "nubank", -4800, "Aplicação RDB", "2026-05-25", "Transfer"),
-      raw("grocery", "nubank", -200, "Compra no débito", "2026-05-26", "Groceries")
+      raw(
+        "grocery",
+        "nubank",
+        -200,
+        "Compra no débito",
+        "2026-05-26",
+        "Groceries",
+      ),
     ];
-    const normalized = normalizeRawTransactions({ rawTransactions, userId: "u1", connectionId: "nu-1" });
+    const normalized = normalizeRawTransactions({
+      rawTransactions,
+      userId: "u1",
+      connectionId: "nu-1",
+    });
     const profile = calculateCashflowProfile({
       userId: "u1",
       transactions: normalized,
-      balances: [{ id: "b1", userId: "u1", connectionId: "nu-1", availableAmount: 5000, currency: "BRL", capturedAt: NOW }],
-      now: NOW
+      balances: [
+        {
+          id: "b1",
+          userId: "u1",
+          connectionId: "nu-1",
+          availableAmount: 5000,
+          currency: "BRL",
+          capturedAt: NOW,
+        },
+      ],
+      now: NOW,
     });
 
-    expect(normalized.find((transaction) => transaction.id === "rdb")?.type).toBe("transfer");
+    expect(
+      normalized.find((transaction) => transaction.id === "rdb")?.type,
+    ).toBe("transfer");
     expect(profile.averageMonthlyExpenses).toBeLessThan(300);
   });
 });
 
 function sampleProfile() {
-  const dataset = createSampleFinancialDataset({ userId: "u1", connectionId: "sample-1", now: NOW });
+  const dataset = createSampleFinancialDataset({
+    userId: "u1",
+    connectionId: "sample-1",
+    now: NOW,
+  });
   const normalized = normalizeRawTransactions({
     rawTransactions: dataset.transactions,
     userId: "u1",
-    connectionId: "sample-1"
+    connectionId: "sample-1",
   });
   const profile = calculateCashflowProfile({
     userId: "u1",
     transactions: normalized,
     balances: dataset.balances,
-    now: NOW
+    now: NOW,
   });
   return { dataset, normalized, profile };
 }
@@ -129,7 +248,7 @@ function raw(
   amount: number,
   description: string,
   date: string,
-  category: string
+  category: string,
 ): RawTransaction {
   return {
     id,
@@ -137,6 +256,6 @@ function raw(
     amount,
     description,
     date: new Date(`${date}T12:00:00.000Z`),
-    metadata: { category }
+    metadata: { category },
   };
 }

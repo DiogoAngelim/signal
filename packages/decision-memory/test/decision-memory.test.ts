@@ -1,23 +1,29 @@
+import {
+  assessCoherence,
+  createDecisionRecord,
+  createRealitySnapshot,
+  evaluateOutcome,
+} from "@signal/decision";
 import { describe, expect, it } from "vitest";
-import { assessCoherence, createDecisionRecord, createRealitySnapshot, evaluateOutcome } from "@signal/decision";
 import {
   BeliefDecayEngine,
   CalibrationEngine,
   CompactionJob,
-  ProcessQualityEngine,
-  RegimeMemoryEngine,
-  ThesisEngine,
   MemoryLifecycle,
   NeonPostgresAdapter,
+  ProcessQualityEngine,
+  RegimeMemoryEngine,
+  type RegimeSnapshot,
   SIGNAL_DECISION_MEMORY_MIGRATION_SQL,
+  ThesisEngine,
   applyBeliefDecay,
   buildCalibrationRecord,
   buildMindChangeTriggers,
   buildProcessQualityRecord,
-  createDecisionMemoryOperations,
   createDecisionMemoryContractAdapter,
-  createInvestorLearningAssessment,
+  createDecisionMemoryOperations,
   createInMemoryDecisionMemoryStore,
+  createInvestorLearningAssessment,
   createLearningRecordFromReview,
   decisionMemoryConfigFromEnv,
   findSimilarRegimes,
@@ -30,7 +36,6 @@ import {
   validateDecisionRecord,
   validateRegimeSnapshot,
   validateThesis,
-  type RegimeSnapshot,
 } from "../src";
 
 describe("@signal/decision-memory", () => {
@@ -48,16 +53,33 @@ describe("@signal/decision-memory", () => {
     expect(config.enabled).toBe(true);
     expect(config.provider).toBe("postgres");
     expect(config.source).toBe("stocks-optimizer");
-    expect(config.retentionPolicy).toMatchObject({ hotDays: 10, warmDays: 90, coldDays: 180 });
+    expect(config.retentionPolicy).toMatchObject({
+      hotDays: 10,
+      warmDays: 90,
+      coldDays: 180,
+    });
   });
 
   it("classifies hot, warm, cold, and expired retention tiers", () => {
     const now = new Date("2026-05-31T00:00:00.000Z");
-    expect(retentionTierForCreatedAt("2026-05-20T00:00:00.000Z", undefined, now)).toBe("hot");
-    expect(retentionTierForCreatedAt("2026-03-01T00:00:00.000Z", undefined, now)).toBe("warm");
-    expect(retentionTierForCreatedAt("2025-08-01T00:00:00.000Z", undefined, now)).toBe("cold");
-    expect(retentionTierForCreatedAt("2025-01-01T00:00:00.000Z", undefined, now)).toBe("expired");
-    expect(new MemoryLifecycle().shouldCompact(record("warm", "2026-01-01T00:00:00.000Z"), now)).toBe(true);
+    expect(
+      retentionTierForCreatedAt("2026-05-20T00:00:00.000Z", undefined, now),
+    ).toBe("hot");
+    expect(
+      retentionTierForCreatedAt("2026-03-01T00:00:00.000Z", undefined, now),
+    ).toBe("warm");
+    expect(
+      retentionTierForCreatedAt("2025-08-01T00:00:00.000Z", undefined, now),
+    ).toBe("cold");
+    expect(
+      retentionTierForCreatedAt("2025-01-01T00:00:00.000Z", undefined, now),
+    ).toBe("expired");
+    expect(
+      new MemoryLifecycle().shouldCompact(
+        record("warm", "2026-01-01T00:00:00.000Z"),
+        now,
+      ),
+    ).toBe(true);
   });
 
   it("stores decisions, outcomes, replay snapshots, calibration, trust, and summaries in memory", async () => {
@@ -103,15 +125,26 @@ describe("@signal/decision-memory", () => {
       impact: outcome.trustImpact,
       trust: { trust: 80 },
     });
-    const summary = summarizeDecisionRecords({ records: [saved], outcomes: [outcome] });
+    const summary = summarizeDecisionRecords({
+      records: [saved],
+      outcomes: [outcome],
+    });
     await store.saveSummary(summary);
 
-    expect(await store.getDecisionRecord(saved.decisionId)).toMatchObject({ decisionId: saved.decisionId });
-    expect(await store.getRealitySnapshot("reality:decision:1")).toMatchObject({ source: "stocks-optimizer" });
-    expect(await store.listRealitySnapshots({ source: "stocks-optimizer" })).not.toHaveLength(0);
+    expect(await store.getDecisionRecord(saved.decisionId)).toMatchObject({
+      decisionId: saved.decisionId,
+    });
+    expect(await store.getRealitySnapshot("reality:decision:1")).toMatchObject({
+      source: "stocks-optimizer",
+    });
+    expect(
+      await store.listRealitySnapshots({ source: "stocks-optimizer" }),
+    ).not.toHaveLength(0);
     expect(await store.listOutcomes(saved.decisionId)).toHaveLength(1);
     expect(await store.listReplaySnapshots(saved.decisionId)).toHaveLength(1);
-    expect(await store.listCalibrationHistory(saved.decisionId)).toHaveLength(1);
+    expect(await store.listCalibrationHistory(saved.decisionId)).toHaveLength(
+      1,
+    );
     expect(await store.listTrustHistory(saved.decisionId)).toHaveLength(1);
     expect(await store.listSummaries({ source: saved.source })).toHaveLength(1);
   });
@@ -126,10 +159,12 @@ describe("@signal/decision-memory", () => {
       timestamp: "2026-06-01T12:00:00.000Z",
     };
 
-    await expect(memory.recordDecision({
-      scope: undefined as never,
-      modules: { discovery: 80 },
-    })).rejects.toThrow(/scope/i);
+    await expect(
+      memory.recordDecision({
+        scope: undefined as never,
+        modules: { discovery: 80 },
+      }),
+    ).rejects.toThrow(/scope/i);
 
     const decision = await memory.recordDecision({
       scope,
@@ -148,20 +183,25 @@ describe("@signal/decision-memory", () => {
       scope: { ...scope, timestamp: "2026-06-03T12:00:00.000Z" },
       classification: "correct",
       whatWasRecommended: "Buy small",
-      whyRecommended: "Evidence and survival memory supported limited exposure.",
+      whyRecommended:
+        "Evidence and survival memory supported limited exposure.",
       whatHappened: "The position worked without breaching survival limits.",
-      lesson: "Keep reduced-size entries when recovery evidence is still maturing.",
+      lesson:
+        "Keep reduced-size entries when recovery evidence is still maturing.",
     });
     const lesson = await memory.recordLesson({
       scope: { ...scope, timestamp: "2026-06-04T12:00:00.000Z" },
-      lesson: "Reduced-size exposure can preserve optionality in recovering regimes.",
+      lesson:
+        "Reduced-size exposure can preserve optionality in recovering regimes.",
       changes: ["Keep survival memory above sizing pressure."],
     });
 
-    await expect(memory.recordDecision({
-      scope,
-      modules: { discovery: 82 },
-    })).rejects.toThrow(/append-only/i);
+    await expect(
+      memory.recordDecision({
+        scope,
+        modules: { discovery: 82 },
+      }),
+    ).rejects.toThrow(/append-only/i);
 
     const timeline = await memory.timeline({ scope });
     const calibration = await memory.queryCalibration({ scope });
@@ -171,7 +211,12 @@ describe("@signal/decision-memory", () => {
     expect(outcome.originalDecisionId).toBe(scope.decisionId);
     expect(review.decisionId).toBe(decision.decisionId);
     expect(lesson.decisionId).toBe(decision.decisionId);
-    expect(timeline.entries.map((entry) => entry.kind)).toEqual(["Decision", "Outcome", "Review", "Lesson"]);
+    expect(timeline.entries.map((entry) => entry.kind)).toEqual([
+      "Decision",
+      "Outcome",
+      "Review",
+      "Lesson",
+    ]);
     expect(timeline.orphanLessons).toHaveLength(0);
     expect(calibration.historicalCalibration.sampleSize).toBe(1);
     expect(calibration.confidenceAccuracy).toBeGreaterThan(0);
@@ -216,13 +261,25 @@ describe("@signal/decision-memory", () => {
 
     const stocksTimeline = await memory.timeline({ scope: stocksScope });
     const emergencyTimeline = await memory.timeline({ scope: emergencyScope });
-    const stocksStats = await memory.stats({ scope: { appId: "stocks-optimizer", domain: "capital-allocation" } });
-    const emergencyStats = await memory.stats({ scope: { appId: "emergency-awareness", domain: "climate-risk" } });
+    const stocksStats = await memory.stats({
+      scope: { appId: "stocks-optimizer", domain: "capital-allocation" },
+    });
+    const emergencyStats = await memory.stats({
+      scope: { appId: "emergency-awareness", domain: "climate-risk" },
+    });
 
-    expect(stocksTimeline.lessons.map((item) => item.lesson).join(" ")).toContain("Stocks Optimizer");
-    expect(stocksTimeline.lessons.map((item) => item.lesson).join(" ")).not.toContain("Emergency Awareness");
-    expect(emergencyTimeline.lessons.map((item) => item.lesson).join(" ")).toContain("Emergency Awareness");
-    expect(emergencyTimeline.lessons.map((item) => item.lesson).join(" ")).not.toContain("Stocks Optimizer");
+    expect(
+      stocksTimeline.lessons.map((item) => item.lesson).join(" "),
+    ).toContain("Stocks Optimizer");
+    expect(
+      stocksTimeline.lessons.map((item) => item.lesson).join(" "),
+    ).not.toContain("Emergency Awareness");
+    expect(
+      emergencyTimeline.lessons.map((item) => item.lesson).join(" "),
+    ).toContain("Emergency Awareness");
+    expect(
+      emergencyTimeline.lessons.map((item) => item.lesson).join(" "),
+    ).not.toContain("Stocks Optimizer");
     expect(stocksStats).toMatchObject({ decisions: 1, lessons: 1 });
     expect(emergencyStats).toMatchObject({ decisions: 1, lessons: 1 });
   });
@@ -293,35 +350,75 @@ describe("@signal/decision-memory", () => {
       volatility: 38,
       breadth: 67,
       participation: 71,
-      supportingEvidence: ["Trend, timing, and coherence support a small entry."],
-      contradictingEvidence: ["Volatility expansion would invalidate full sizing."],
+      supportingEvidence: [
+        "Trend, timing, and coherence support a small entry.",
+      ],
+      contradictingEvidence: [
+        "Volatility expansion would invalidate full sizing.",
+      ],
       missingEvidence: ["More reviewed outcomes for this regime."],
       invalidationConditions: ["Invalidate if participation deteriorates."],
     });
 
-    expect(validateThesis(assessment.thesis)).toEqual({ valid: true, errors: [] });
-    expect(validateRegimeSnapshot(assessment.regimeSnapshot)).toEqual({ valid: true, errors: [] });
-    expect(validateDecisionRecord(assessment.decisionRecord)).toEqual({ valid: true, errors: [] });
+    expect(validateThesis(assessment.thesis)).toEqual({
+      valid: true,
+      errors: [],
+    });
+    expect(validateRegimeSnapshot(assessment.regimeSnapshot)).toEqual({
+      valid: true,
+      errors: [],
+    });
+    expect(validateDecisionRecord(assessment.decisionRecord)).toEqual({
+      valid: true,
+      errors: [],
+    });
     expect(assessment.calibration.reliabilityTrend).toBe("insufficient-data");
     expect(assessment.processQuality.processQualityScore).toBeGreaterThan(0);
     expect(assessment.beliefFreshness.status).toBe("fresh");
-    expect(assessment.disconfirmation.question).toBe("What could make this wrong?");
-    await store.saveEvidence(assessment.evidence.supporting[0]!);
+    expect(assessment.disconfirmation.question).toBe(
+      "What could make this wrong?",
+    );
+    const supportingEvidence = assessment.evidence.supporting[0];
+    if (!supportingEvidence) throw new Error("Expected supporting evidence");
+    await store.saveEvidence(supportingEvidence);
     await store.saveThesis(assessment.thesis);
     await store.saveRegimeSnapshot(assessment.regimeSnapshot);
     await store.saveCalibrationRecord(assessment.calibration);
     await store.saveProcessQualityRecord(assessment.processQuality);
-    for (const learning of assessment.learningRecords) await store.saveLearningRecord(learning);
+    for (const learning of assessment.learningRecords)
+      await store.saveLearningRecord(learning);
 
-    expect(await store.listEvidence({ source: "stocks-optimizer" })).toHaveLength(1);
-    expect(await store.getThesis(assessment.thesis.thesisId)).toMatchObject({ title: assessment.thesis.title });
-    expect(await store.getRegimeSnapshot(assessment.regimeSnapshot.regimeSnapshotId)).toMatchObject({ venue: "BINANCE" });
-    expect(await store.listCalibrationRecords({ decisionId: assessment.decisionRecord.decisionId })).toHaveLength(1);
-    expect(await store.listProcessQualityRecords({ decisionId: assessment.decisionRecord.decisionId })).toHaveLength(1);
-    expect(await store.listTheses({ source: "stocks-optimizer" })).toHaveLength(1);
-    expect(await store.listRegimeSnapshots({ venue: "BINANCE" })).toHaveLength(1);
-    expect(await store.listLearningRecords({ source: "stocks-optimizer" })).toHaveLength(0);
-    expect(assessment.emptyStates).toContain("Outcome learning starts after decisions are reviewed.");
+    expect(
+      await store.listEvidence({ source: "stocks-optimizer" }),
+    ).toHaveLength(1);
+    expect(await store.getThesis(assessment.thesis.thesisId)).toMatchObject({
+      title: assessment.thesis.title,
+    });
+    expect(
+      await store.getRegimeSnapshot(assessment.regimeSnapshot.regimeSnapshotId),
+    ).toMatchObject({ venue: "BINANCE" });
+    expect(
+      await store.listCalibrationRecords({
+        decisionId: assessment.decisionRecord.decisionId,
+      }),
+    ).toHaveLength(1);
+    expect(
+      await store.listProcessQualityRecords({
+        decisionId: assessment.decisionRecord.decisionId,
+      }),
+    ).toHaveLength(1);
+    expect(await store.listTheses({ source: "stocks-optimizer" })).toHaveLength(
+      1,
+    );
+    expect(await store.listRegimeSnapshots({ venue: "BINANCE" })).toHaveLength(
+      1,
+    );
+    expect(
+      await store.listLearningRecords({ source: "stocks-optimizer" }),
+    ).toHaveLength(0);
+    expect(assessment.emptyStates).toContain(
+      "Outcome learning starts after decisions are reviewed.",
+    );
   });
 
   it("matches similar regimes, separates conviction from readiness, and creates reflection lessons", async () => {
@@ -332,7 +429,9 @@ describe("@signal/decision-memory", () => {
     });
     const distant = regime("distant", 28, 35, 20, "Avoid");
 
-    const matches = findSimilarRegimes(current, [similar, distant], { threshold: 0.75 });
+    const matches = findSimilarRegimes(current, [similar, distant], {
+      threshold: 0.75,
+    });
     expect(matches).toHaveLength(1);
     expect(matches[0]?.whatHappened).toContain("Small entries worked");
 
@@ -356,12 +455,14 @@ describe("@signal/decision-memory", () => {
         source: "stocks-optimizer",
         recordedAt: "2026-06-01T00:00:00.000Z",
         classification: "early",
-        summary: "The thesis worked later, but readiness was not present at decision time.",
+        summary:
+          "The thesis worked later, but readiness was not present at decision time.",
         lessons: ["Confidence was high, but readiness was too early."],
       },
     });
     expect(assessment.review).not.toBeNull();
-    const review = assessment.review!;
+    const review = assessment.review;
+    if (!review) throw new Error("Expected review");
     const calibration = buildCalibrationRecord({
       decisionRecord: assessment.decisionRecord,
       outcome: {
@@ -396,7 +497,9 @@ describe("@signal/decision-memory", () => {
     expect(review.classification).toBe("early");
     expect(calibration.overconfidenceSignal).toBe(true);
     expect(process.learningNote).toMatch(/process|outcome/i);
-    expect(createLearningRecordFromReview(review).lesson).toContain("readiness");
+    expect(createLearningRecordFromReview(review).lesson).toContain(
+      "readiness",
+    );
   });
 
   it("tracks thesis state transitions, disconfirmation, mind changes, opportunity ranking, horizons, and portfolio fallbacks", () => {
@@ -417,21 +520,39 @@ describe("@signal/decision-memory", () => {
       contradictingEvidence: ["Invalidate if breadth weakens."],
       invalidationConditions: ["Similar regimes begin failing."],
       alternatives: [
-        { id: "MSFT", label: "MSFT", readiness: 76, quality: 82, trust: 74, risk: 30, exposure: 2 },
-        { id: "TSLA", label: "TSLA", readiness: 38, quality: 80, trust: 50, risk: 82, exposure: 0 },
+        {
+          id: "MSFT",
+          label: "MSFT",
+          readiness: 76,
+          quality: 82,
+          trust: 74,
+          risk: 30,
+          exposure: 2,
+        },
+        {
+          id: "TSLA",
+          label: "TSLA",
+          readiness: 38,
+          quality: 80,
+          trust: 50,
+          risk: 82,
+          exposure: 0,
+        },
       ],
     });
     const updated = updateThesisStatus(assessment.thesis, {
-      contradictingEvidence: [{
-        evidenceId: "evidence:invalidating",
-        observedAt: "2026-05-31T00:00:00.000Z",
-        label: "Invalidation",
-        description: "Breadth collapse invalidates the thesis.",
-        direction: "contradicting",
-        strength: 94,
-        confidence: 90,
-        invalidates: true,
-      }],
+      contradictingEvidence: [
+        {
+          evidenceId: "evidence:invalidating",
+          observedAt: "2026-05-31T00:00:00.000Z",
+          label: "Invalidation",
+          description: "Breadth collapse invalidates the thesis.",
+          direction: "contradicting",
+          strength: 94,
+          confidence: 90,
+          invalidates: true,
+        },
+      ],
     });
     const triggers = buildMindChangeTriggers({
       thesis: assessment.thesis,
@@ -439,16 +560,42 @@ describe("@signal/decision-memory", () => {
       similarRegimes: [],
     });
     const ranking = rankOpportunities([
-      { id: "A", label: "A", readiness: 80, quality: 75, trust: 75, risk: 25, exposure: 2 },
-      { id: "B", label: "B", readiness: 35, quality: 70, trust: 70, risk: 40, exposure: 0 },
+      {
+        id: "A",
+        label: "A",
+        readiness: 80,
+        quality: 75,
+        trust: 75,
+        risk: 25,
+        exposure: 2,
+      },
+      {
+        id: "B",
+        label: "B",
+        readiness: 35,
+        quality: 70,
+        trust: 70,
+        risk: 40,
+        exposure: 0,
+      },
     ]);
 
     expect(updated.status).toBe("invalidated");
-    expect(triggers.some((trigger) => trigger.label === "Similar regimes begin failing.")).toBe(true);
+    expect(
+      triggers.some(
+        (trigger) => trigger.label === "Similar regimes begin failing.",
+      ),
+    ).toBe(true);
     expect(ranking.bestOpportunity?.label).toBe("A");
     expect(ranking.notReadyYet.map((item) => item.label)).toContain("B");
-    expect(assessment.horizons.map((view) => view.horizon)).toEqual(["short-term", "medium-term", "long-term"]);
-    expect(assessment.portfolioContext.summary).toContain("Portfolio context is unavailable");
+    expect(assessment.horizons.map((view) => view.horizon)).toEqual([
+      "short-term",
+      "medium-term",
+      "long-term",
+    ]);
+    expect(assessment.portfolioContext.summary).toContain(
+      "Portfolio context is unavailable",
+    );
     expect(assessment.narrative.action).toContain("readiness");
   });
 
@@ -460,18 +607,22 @@ describe("@signal/decision-memory", () => {
       symbol: "AAPL",
       recommendation: "Watch",
       confidence: 80,
-      supportingEvidence: [{
-        evidenceId: "evidence:old",
-        observedAt: "2026-01-01T00:00:00.000Z",
-        label: "Old evidence",
-        description: "Old evidence supported the thesis.",
-        direction: "supporting",
-        strength: 80,
-        confidence: 80,
-      }],
+      supportingEvidence: [
+        {
+          evidenceId: "evidence:old",
+          observedAt: "2026-01-01T00:00:00.000Z",
+          label: "Old evidence",
+          description: "Old evidence supported the thesis.",
+          direction: "supporting",
+          strength: 80,
+          confidence: 80,
+        },
+      ],
     });
     const decayed = applyBeliefDecay(thesis, "2026-03-15T00:00:00.000Z");
-    const memory = new RegimeMemoryEngine([regime("similar", 72, 74, 70, "Watch")]);
+    const memory = new RegimeMemoryEngine([
+      regime("similar", 72, 74, 70, "Watch"),
+    ]);
     const current = regime("current-engine", 73, 73, 69, "Watch");
     const process = new ProcessQualityEngine().evaluate({
       decisionRecord: createInvestorLearningAssessment({
@@ -498,7 +649,10 @@ describe("@signal/decision-memory", () => {
       }).decisionRecord,
     });
 
-    expect(new BeliefDecayEngine().evaluate(thesis, "2026-03-15T00:00:00.000Z").status).toBe("stale");
+    expect(
+      new BeliefDecayEngine().evaluate(thesis, "2026-03-15T00:00:00.000Z")
+        .status,
+    ).toBe("stale");
     expect(decayed.confidence).toBeLessThan(thesis.confidence);
     expect(memory.findSimilar(current, { threshold: 0.7 })).toHaveLength(1);
     expect(process.processQualityScore).toBeGreaterThan(0);
@@ -507,8 +661,12 @@ describe("@signal/decision-memory", () => {
 
   it("compacts old records into lessons and removes expired raw inputs", async () => {
     const store = createInMemoryDecisionMemoryStore();
-    await store.saveDecisionRecord(record("warm-decision", "2026-01-01T00:00:00.000Z"));
-    await store.saveDecisionRecord(record("expired-decision", "2025-01-01T00:00:00.000Z"));
+    await store.saveDecisionRecord(
+      record("warm-decision", "2026-01-01T00:00:00.000Z"),
+    );
+    await store.saveDecisionRecord(
+      record("expired-decision", "2025-01-01T00:00:00.000Z"),
+    );
 
     const result = await new CompactionJob({ store }).run({
       now: new Date("2026-05-31T00:00:00.000Z"),
@@ -517,18 +675,30 @@ describe("@signal/decision-memory", () => {
     expect(result.compacted).toBe(1);
     expect(result.expired).toBe(1);
     expect(await store.getDecisionRecord("expired-decision")).toBeUndefined();
-    expect((await store.getDecisionRecord("warm-decision"))?.observation).toMatchObject({ compacted: true });
+    expect(
+      (await store.getDecisionRecord("warm-decision"))?.observation,
+    ).toMatchObject({ compacted: true });
     expect(await store.listSummaries()).not.toHaveLength(0);
   });
 
   it("exposes versioned operations and executable handlers", async () => {
     const store = createInMemoryDecisionMemoryStore();
     const operations = createDecisionMemoryOperations(store);
-    const realityOperation = operations.find((operation) => operation.name === "reality.snapshot.record.v1");
-    const recordOperation = operations.find((operation) => operation.name === "decision.record.v1");
-    const outcomeOperation = operations.find((operation) => operation.name === "outcome.record.v1");
-    const timelineOperation = operations.find((operation) => operation.name === "memory.timeline.v1");
-    const summaryOperation = operations.find((operation) => operation.name === "decision.memory.summary.v1");
+    const realityOperation = operations.find(
+      (operation) => operation.name === "reality.snapshot.record.v1",
+    );
+    const recordOperation = operations.find(
+      (operation) => operation.name === "decision.record.v1",
+    );
+    const outcomeOperation = operations.find(
+      (operation) => operation.name === "outcome.record.v1",
+    );
+    const timelineOperation = operations.find(
+      (operation) => operation.name === "memory.timeline.v1",
+    );
+    const summaryOperation = operations.find(
+      (operation) => operation.name === "decision.memory.summary.v1",
+    );
     const scope = {
       appId: "stocks-optimizer",
       domain: "capital-allocation",
@@ -536,10 +706,18 @@ describe("@signal/decision-memory", () => {
       timestamp: "2026-06-01T00:00:00.000Z",
     };
 
-    expect(listDecisionMemoryOperations().map((operation) => operation.name)).toContain("decision.memory.compact.v1");
-    expect(listDecisionMemoryOperations().map((operation) => operation.name)).toContain("reality.snapshot.record.v1");
-    expect(listDecisionMemoryOperations().map((operation) => operation.name)).toContain("outcome.record.v1");
-    expect(listDecisionMemoryOperations().map((operation) => operation.name)).toContain("memory.timeline.v1");
+    expect(
+      listDecisionMemoryOperations().map((operation) => operation.name),
+    ).toContain("decision.memory.compact.v1");
+    expect(
+      listDecisionMemoryOperations().map((operation) => operation.name),
+    ).toContain("reality.snapshot.record.v1");
+    expect(
+      listDecisionMemoryOperations().map((operation) => operation.name),
+    ).toContain("outcome.record.v1");
+    expect(
+      listDecisionMemoryOperations().map((operation) => operation.name),
+    ).toContain("memory.timeline.v1");
     await realityOperation?.handler({
       scope,
       snapshotId: "reality:operation:1",
@@ -562,7 +740,9 @@ describe("@signal/decision-memory", () => {
     const summary = await summaryOperation?.handler({ scope, generate: true });
     expect(summary).toMatchObject({ count: 1 });
     expect(timeline).toMatchObject({ entries: expect.any(Array) });
-    expect(await store.getRealitySnapshot("reality:operation:1")).toMatchObject({ source: "stocks-optimizer" });
+    expect(await store.getRealitySnapshot("reality:operation:1")).toMatchObject(
+      { source: "stocks-optimizer" },
+    );
   });
 
   it("ships idempotent Postgres migrations for all shared memory tables", () => {
@@ -583,9 +763,13 @@ describe("@signal/decision-memory", () => {
       "signal_memory_summaries",
       "signal_retention_jobs",
     ]) {
-      expect(SIGNAL_DECISION_MEMORY_MIGRATION_SQL).toContain(`CREATE TABLE IF NOT EXISTS ${table}`);
+      expect(SIGNAL_DECISION_MEMORY_MIGRATION_SQL).toContain(
+        `CREATE TABLE IF NOT EXISTS ${table}`,
+      );
     }
-    expect(SIGNAL_DECISION_MEMORY_MIGRATION_SQL).toContain("CREATE INDEX IF NOT EXISTS");
+    expect(SIGNAL_DECISION_MEMORY_MIGRATION_SQL).toContain(
+      "CREATE INDEX IF NOT EXISTS",
+    );
   });
 
   it("maps Neon/Postgres persistence calls through SQL rows without a live database", async () => {
@@ -637,7 +821,10 @@ describe("@signal/decision-memory", () => {
       retentionTier: "hot" as const,
       snapshot: { replay: true },
     };
-    const summary = summarizeDecisionRecords({ records: [decision], outcomes: [outcome] });
+    const summary = summarizeDecisionRecords({
+      records: [decision],
+      outcomes: [outcome],
+    });
     const retentionJob = {
       jobId: "retention:postgres",
       jobType: "compact" as const,
@@ -668,55 +855,103 @@ describe("@signal/decision-memory", () => {
       trust: { trust: 75 },
     });
     await adapter.saveSummary(summary);
-    await adapter.saveEvidence(assessment.evidence.supporting[0]!);
+    const supporting = assessment.evidence.supporting[0];
+    if (!supporting) throw new Error("Expected supporting evidence");
+    await adapter.saveEvidence(supporting);
     await adapter.saveThesis(assessment.thesis);
     await adapter.saveRegimeSnapshot(assessment.regimeSnapshot);
-    await adapter.saveDecisionReview(assessment.review!);
-    await adapter.saveLearningRecord(assessment.learningRecords[0]!);
+    if (!assessment.review) throw new Error("Expected review");
+    await adapter.saveDecisionReview(assessment.review);
+    const learningRecord = assessment.learningRecords[0];
+    if (!learningRecord) throw new Error("Expected learning record");
+    await adapter.saveLearningRecord(learningRecord);
     await adapter.saveCalibrationRecord(assessment.calibration);
     await adapter.saveProcessQualityRecord(assessment.processQuality);
     await adapter.saveRetentionJob(retentionJob);
 
-    expect(await adapter.getRealitySnapshot(realitySnapshot.snapshotId)).toMatchObject({
+    expect(
+      await adapter.getRealitySnapshot(realitySnapshot.snapshotId),
+    ).toMatchObject({
       source: "signal-test",
     });
-    expect(await adapter.listRealitySnapshots({ source: "signal-test", limit: 2 })).toHaveLength(1);
+    expect(
+      await adapter.listRealitySnapshots({ source: "signal-test", limit: 2 }),
+    ).toHaveLength(1);
     expect(await adapter.getDecisionRecord(decision.decisionId)).toMatchObject({
       decisionId: decision.decisionId,
       realitySnapshot: expect.objectContaining({ source: "signal-test" }),
     });
-    expect(await adapter.listDecisionRecords({ source: "signal-test", retentionTier: "hot" })).toHaveLength(1);
+    expect(
+      await adapter.listDecisionRecords({
+        source: "signal-test",
+        retentionTier: "hot",
+      }),
+    ).toHaveLength(1);
     expect(await adapter.listOutcomes(decision.decisionId)).toHaveLength(1);
-    expect(await adapter.listReplaySnapshots(decision.decisionId)).toEqual([replay]);
-    expect(await adapter.listCalibrationHistory(decision.decisionId)).toHaveLength(1);
+    expect(await adapter.listReplaySnapshots(decision.decisionId)).toEqual([
+      replay,
+    ]);
+    expect(
+      await adapter.listCalibrationHistory(decision.decisionId),
+    ).toHaveLength(1);
     expect(await adapter.listTrustHistory(decision.decisionId)).toHaveLength(1);
-    expect(await adapter.listSummaries({ source: "signal-test", limit: 1 })).toHaveLength(1);
-    expect(await adapter.listEvidence({ source: "signal-test" })).toHaveLength(1);
+    expect(
+      await adapter.listSummaries({ source: "signal-test", limit: 1 }),
+    ).toHaveLength(1);
+    expect(await adapter.listEvidence({ source: "signal-test" })).toHaveLength(
+      1,
+    );
     expect(await adapter.getThesis(assessment.thesis.thesisId)).toMatchObject({
       thesisId: assessment.thesis.thesisId,
     });
     expect(await adapter.listTheses({ source: "signal-test" })).toHaveLength(1);
-    expect(await adapter.getRegimeSnapshot(assessment.regimeSnapshot.regimeSnapshotId)).toMatchObject({
+    expect(
+      await adapter.getRegimeSnapshot(
+        assessment.regimeSnapshot.regimeSnapshotId,
+      ),
+    ).toMatchObject({
       venue: "US",
     });
     expect(await adapter.listRegimeSnapshots({ venue: "US" })).toHaveLength(1);
-    expect(await adapter.listDecisionReviews({ decisionId: decision.decisionId })).toHaveLength(1);
-    expect(await adapter.listLearningRecords({ decisionId: decision.decisionId })).toHaveLength(1);
-    expect(await adapter.listCalibrationRecords({ decisionId: decision.decisionId })).toHaveLength(1);
-    expect(await adapter.listProcessQualityRecords({ decisionId: decision.decisionId })).toHaveLength(1);
-    expect(await adapter.updateRetentionJob("retention:postgres", {
-      status: "completed",
-      completedAt: "2026-06-01T00:01:00.000Z",
-      result: { compacted: 1 },
-    })).toMatchObject({ status: "completed", result: { compacted: 1 } });
-    expect(await adapter.updateRetentionJob("retention:missing", { status: "failed" })).toBeUndefined();
+    expect(
+      await adapter.listDecisionReviews({ decisionId: decision.decisionId }),
+    ).toHaveLength(1);
+    expect(
+      await adapter.listLearningRecords({ decisionId: decision.decisionId }),
+    ).toHaveLength(1);
+    expect(
+      await adapter.listCalibrationRecords({ decisionId: decision.decisionId }),
+    ).toHaveLength(1);
+    expect(
+      await adapter.listProcessQualityRecords({
+        decisionId: decision.decisionId,
+      }),
+    ).toHaveLength(1);
+    expect(
+      await adapter.updateRetentionJob("retention:postgres", {
+        status: "completed",
+        completedAt: "2026-06-01T00:01:00.000Z",
+        result: { compacted: 1 },
+      }),
+    ).toMatchObject({ status: "completed", result: { compacted: 1 } });
+    expect(
+      await adapter.updateRetentionJob("retention:missing", {
+        status: "failed",
+      }),
+    ).toBeUndefined();
 
     await adapter.deleteDecisionRecord(decision.decisionId);
     await adapter.close();
 
     expect(pool.closed).toBe(true);
-    expect(pool.calls.some((call) => call.sql.includes("signal_decision_records"))).toBe(true);
-    expect(pool.calls.some((call) => call.sql === SIGNAL_DECISION_MEMORY_MIGRATION_SQL)).toBe(true);
+    expect(
+      pool.calls.some((call) => call.sql.includes("signal_decision_records")),
+    ).toBe(true);
+    expect(
+      pool.calls.some(
+        (call) => call.sql === SIGNAL_DECISION_MEMORY_MIGRATION_SQL,
+      ),
+    ).toBe(true);
   });
 });
 
@@ -771,7 +1006,9 @@ class FakePool {
       return { rows: [{ process: processQualityRow() }] };
     }
     if (sql.includes("signal_retention_jobs") && sql.includes("SELECT")) {
-      return params[0] === "retention:missing" ? { rows: [] } : { rows: [retentionJobRow()] };
+      return params[0] === "retention:missing"
+        ? { rows: [] }
+        : { rows: [retentionJobRow()] };
     }
     return { rows: [] };
   }
@@ -993,7 +1230,10 @@ function record(decisionId: string, createdAt = "2026-05-31T00:00:00.000Z") {
     decisionId,
     createdAt,
     source: "stocks-optimizer",
-    observation: { raw: "payload", duplicatedMarketSnapshot: Array.from({ length: 10 }, (_, index) => index) },
+    observation: {
+      raw: "payload",
+      duplicatedMarketSnapshot: Array.from({ length: 10 }, (_, index) => index),
+    },
     coherence: assessCoherence({
       discovery: 80,
       judgment: 76,

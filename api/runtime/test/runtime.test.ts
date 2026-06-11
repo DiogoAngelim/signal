@@ -1023,7 +1023,10 @@ describe("runtime", () => {
       kind: "mutation",
       name: "layer.save.v1",
       payload: {},
-      context: { idempotencyKey: "save-layer-invalid", meta: "bad-meta" } as never,
+      context: {
+        idempotencyKey: "save-layer-invalid",
+        meta: "bad-meta",
+      } as never,
     });
     const event = await runtime.execute({
       kind: "event",
@@ -1064,9 +1067,9 @@ describe("runtime", () => {
       data: { id: "one", saved: true },
     });
     expect(invalidMutation.ok).toBe(false);
-    expect(
-      invalidMutation.ok === false && invalidMutation.error.code,
-    ).toBe("VALIDATION_ERROR");
+    expect(invalidMutation.ok === false && invalidMutation.error.code).toBe(
+      "VALIDATION_ERROR",
+    );
     expect(event.ok && event.data).toMatchObject({
       kind: "event",
       name: "layer.changed.v1",
@@ -1077,9 +1080,9 @@ describe("runtime", () => {
     expect(invalid.ok).toBe(false);
     expect(invalid.ok === false && invalid.error.code).toBe("VALIDATION_ERROR");
     expect(invalidEvent.ok).toBe(false);
-    expect(
-      invalidEvent.ok === false && invalidEvent.error.code,
-    ).toBe("VALIDATION_ERROR");
+    expect(invalidEvent.ok === false && invalidEvent.error.code).toBe(
+      "VALIDATION_ERROR",
+    );
     expect(missingEvent.ok).toBe(false);
     expect(missingEvent.ok === false && missingEvent.error.code).toBe(
       "UNSUPPORTED_OPERATION",

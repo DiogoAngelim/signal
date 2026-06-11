@@ -3,7 +3,10 @@ import type {
   AgencyResult,
   DecisionResult,
 } from "../agency/engine";
-import type { CalibrationInput, CalibrationResult } from "../calibration/engine";
+import type {
+  CalibrationInput,
+  CalibrationResult,
+} from "../calibration/engine";
 import type {
   DiscoveryIntelligenceInput,
   DiscoveryIntelligenceResult,
@@ -14,7 +17,10 @@ import type { LegacyInput, LegacyOutput } from "../legacy/engine";
 import type { MeaningInput, MeaningResult } from "../meaning/engine";
 import type { PruningInput, PruningResult } from "../pruning/engine";
 import type { PurposeInput, PurposeResult } from "../purpose/engine";
-import type { RecognitionInput, RecognitionResult } from "../recognition/engine";
+import type {
+  RecognitionInput,
+  RecognitionResult,
+} from "../recognition/engine";
 import type { ReflectionInput, ReflectionResult } from "../reflection/engine";
 import type { ViabilityInput, ViabilityResult } from "../viability/engine";
 
@@ -466,7 +472,8 @@ export type SignalContext = {
   recognition?: Partial<RecognitionInput>;
   pruning?: Partial<PruningInput>;
   meaning?: MeaningInput;
-  purpose?: Partial<Omit<PurposeInput, "ambition">> & Pick<PurposeInput, "ambition">;
+  purpose?: Partial<Omit<PurposeInput, "ambition">> &
+    Pick<PurposeInput, "ambition">;
   decision?: DecisionResult | null;
   agency?: AgencyInput;
   viability?: Partial<ViabilityInput>;

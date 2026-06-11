@@ -6,15 +6,33 @@ export type StewardshipStrength = "weak" | "limited" | "adequate" | "strong";
 
 export type StewardshipVisibility = "hidden" | "partial" | "explicit";
 
-export type StewardshipEvidenceQuality = "absent" | "weak" | "limited" | "adequate" | "strong";
+export type StewardshipEvidenceQuality =
+  | "absent"
+  | "weak"
+  | "limited"
+  | "adequate"
+  | "strong";
 
-export type StewardshipGovernanceStatus = "blocked" | "weak" | "caution" | "acceptable";
+export type StewardshipGovernanceStatus =
+  | "blocked"
+  | "weak"
+  | "caution"
+  | "acceptable";
 
-export type StewardshipPolicyCompliance = "compliant" | "needs_review" | "violated" | "unknown";
+export type StewardshipPolicyCompliance =
+  | "compliant"
+  | "needs_review"
+  | "violated"
+  | "unknown";
 
 export type StewardshipReversibility = "unknown" | "low" | "medium" | "high";
 
-export type StewardshipConcentrationRisk = "unknown" | "low" | "medium" | "high" | "critical";
+export type StewardshipConcentrationRisk =
+  | "unknown"
+  | "low"
+  | "medium"
+  | "high"
+  | "critical";
 
 export type StewardshipRecommendationAction =
   | "observe"
@@ -90,7 +108,12 @@ export type StewardshipEvidence = {
   contradicts?: string[];
 };
 
-export type StewardshipLessonOutcome = "confirmed" | "contradicted" | "mixed" | "unknown" | "too_early";
+export type StewardshipLessonOutcome =
+  | "confirmed"
+  | "contradicted"
+  | "mixed"
+  | "unknown"
+  | "too_early";
 
 export type StewardshipLesson = {
   id: string;

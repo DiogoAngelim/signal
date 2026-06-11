@@ -14,16 +14,23 @@ import type {
   SignalRelationshipExplanation,
   SignalRelationshipLookup,
   SignalRelationshipMemory,
+  SignalReviewRef,
   SignalReviewedHistory,
   SignalReviewedSituation,
-  SignalReviewRef,
   SignalSimilarityMatch,
   SignalState,
   SignalStrategy,
   SignalThreat,
   SignalTradeoff,
 } from "./types";
-import { asScore, average, clamp, nowIso, stableId, uniqueStrings } from "./utils";
+import {
+  asScore,
+  average,
+  clamp,
+  nowIso,
+  stableId,
+  uniqueStrings,
+} from "./utils";
 
 export const SIGNAL_UNIVERSAL_LIFECYCLE = [
   "Objective",
@@ -72,18 +79,34 @@ export function lookupSignalRelationships(
   query: SignalRelationshipLookup = {},
 ): SignalRelationship[] {
   return relationships.filter((relationship) => {
-    if (query.sourceId !== undefined && relationship.sourceId !== query.sourceId) return false;
-    if (query.targetId !== undefined && relationship.targetId !== query.targetId) return false;
-    if (query.relationType !== undefined && relationship.relationType !== query.relationType) return false;
     if (
-      query.entityId !== undefined
-      && relationship.sourceId !== query.entityId
-      && relationship.targetId !== query.entityId
-    ) return false;
+      query.sourceId !== undefined &&
+      relationship.sourceId !== query.sourceId
+    )
+      return false;
     if (
-      query.reviewId !== undefined
-      && !relationship.reviewRefs.some((review) => review.reviewId === query.reviewId)
-    ) return false;
+      query.targetId !== undefined &&
+      relationship.targetId !== query.targetId
+    )
+      return false;
+    if (
+      query.relationType !== undefined &&
+      relationship.relationType !== query.relationType
+    )
+      return false;
+    if (
+      query.entityId !== undefined &&
+      relationship.sourceId !== query.entityId &&
+      relationship.targetId !== query.entityId
+    )
+      return false;
+    if (
+      query.reviewId !== undefined &&
+      !relationship.reviewRefs.some(
+        (review) => review.reviewId === query.reviewId,
+      )
+    )
+      return false;
     return true;
   });
 }
@@ -92,16 +115,18 @@ export function explainSignalRelationships(
   relationships: readonly SignalRelationship[],
   query: SignalRelationshipLookup = {},
 ): SignalRelationshipExplanation[] {
-  return lookupSignalRelationships(relationships, query).map((relationship) => ({
-    relationshipId: relationship.id,
-    sourceId: relationship.sourceId,
-    targetId: relationship.targetId,
-    relationType: relationship.relationType,
-    explanation: relationship.explanation.join(" "),
-    reviewRefs: [...relationship.reviewRefs],
-    strength: relationship.strength,
-    confidence: relationship.confidence,
-  }));
+  return lookupSignalRelationships(relationships, query).map(
+    (relationship) => ({
+      relationshipId: relationship.id,
+      sourceId: relationship.sourceId,
+      targetId: relationship.targetId,
+      relationType: relationship.relationType,
+      explanation: relationship.explanation.join(" "),
+      reviewRefs: [...relationship.reviewRefs],
+      strength: relationship.strength,
+      confidence: relationship.confidence,
+    }),
+  );
 }
 
 export function traceSignalLineage(
@@ -110,25 +135,39 @@ export function traceSignalLineage(
 ): SignalLineage {
   const explanations = explainSignalRelationships(relationships, { entityId });
   const related = lookupSignalRelationships(relationships, { entityId });
-  const reviewRefs = uniqueReviewRefs(related.flatMap((relationship) => relationship.reviewRefs));
-  const lessonRefs = uniqueStrings(related.flatMap((relationship) => {
-    const refs: string[] = [];
-    if (relationship.sourceType === "Lesson") refs.push(relationship.sourceId);
-    if (relationship.targetType === "Lesson") refs.push(relationship.targetId);
-    return refs;
-  }));
-  const judgmentRefs = uniqueStrings(related.flatMap((relationship) => {
-    const refs: string[] = [];
-    if (relationship.sourceType === "Judgment") refs.push(relationship.sourceId);
-    if (relationship.targetType === "Judgment") refs.push(relationship.targetId);
-    return refs;
-  }));
-  const similarityRefs = uniqueStrings(related.flatMap((relationship) => {
-    const refs: string[] = [];
-    if (relationship.sourceType === "Similarity") refs.push(relationship.sourceId);
-    if (relationship.targetType === "Similarity") refs.push(relationship.targetId);
-    return refs;
-  }));
+  const reviewRefs = uniqueReviewRefs(
+    related.flatMap((relationship) => relationship.reviewRefs),
+  );
+  const lessonRefs = uniqueStrings(
+    related.flatMap((relationship) => {
+      const refs: string[] = [];
+      if (relationship.sourceType === "Lesson")
+        refs.push(relationship.sourceId);
+      if (relationship.targetType === "Lesson")
+        refs.push(relationship.targetId);
+      return refs;
+    }),
+  );
+  const judgmentRefs = uniqueStrings(
+    related.flatMap((relationship) => {
+      const refs: string[] = [];
+      if (relationship.sourceType === "Judgment")
+        refs.push(relationship.sourceId);
+      if (relationship.targetType === "Judgment")
+        refs.push(relationship.targetId);
+      return refs;
+    }),
+  );
+  const similarityRefs = uniqueStrings(
+    related.flatMap((relationship) => {
+      const refs: string[] = [];
+      if (relationship.sourceType === "Similarity")
+        refs.push(relationship.sourceId);
+      if (relationship.targetType === "Similarity")
+        refs.push(relationship.targetId);
+      return refs;
+    }),
+  );
 
   return {
     entityId,
@@ -138,7 +177,10 @@ export function traceSignalLineage(
     judgmentRefs,
     similarityRefs,
     explanation: explanations.length
-      ? explanations.map((item) => `${item.sourceId} ${item.relationType} ${item.targetId}: ${item.explanation}`)
+      ? explanations.map(
+          (item) =>
+            `${item.sourceId} ${item.relationType} ${item.targetId}: ${item.explanation}`,
+        )
       : [`No reviewed relationship lineage is recorded for ${entityId}.`],
   };
 }
@@ -152,21 +194,24 @@ export function assessSignalLessonSurvival(
       const survivalCount = Math.max(0, Math.round(lesson.survivalCount));
       const failureCount = Math.max(0, Math.round(lesson.failureCount));
       const denominator = survivalCount + failureCount;
-      const survivalRate = denominator === 0 ? 0 : Math.round((survivalCount / denominator) * 100);
+      const survivalRate =
+        denominator === 0 ? 0 : Math.round((survivalCount / denominator) * 100);
       const reviewedWeight = Math.min(20, reviewCount * 4);
       const repeatedWeight = Math.min(20, survivalCount * 5);
       const applicabilityWeight = Math.min(10, lesson.applicability.length * 2);
       const coverageWeight = Math.min(10, lesson.domainCoverage.length * 2);
       const failurePenalty = Math.min(25, failureCount * 6);
-      const preferenceScore = Math.round(clamp(
-        asScore(lesson.confidence, 50) * 0.35
-        + survivalRate * 0.25
-        + reviewedWeight
-        + repeatedWeight
-        + applicabilityWeight
-        + coverageWeight
-        - failurePenalty,
-      ));
+      const preferenceScore = Math.round(
+        clamp(
+          asScore(lesson.confidence, 50) * 0.35 +
+            survivalRate * 0.25 +
+            reviewedWeight +
+            repeatedWeight +
+            applicabilityWeight +
+            coverageWeight -
+            failurePenalty,
+        ),
+      );
 
       return {
         lessonId: lesson.id,
@@ -181,7 +226,11 @@ export function assessSignalLessonSurvival(
         explanation: `Lesson ${lesson.id} is preferred at ${preferenceScore}/100 because it has ${reviewCount} reviews, ${survivalCount} survivals, and ${failureCount} failures.`,
       };
     })
-    .sort((a, b) => b.preferenceScore - a.preferenceScore || a.lessonId.localeCompare(b.lessonId));
+    .sort(
+      (a, b) =>
+        b.preferenceScore - a.preferenceScore ||
+        a.lessonId.localeCompare(b.lessonId),
+    );
 }
 
 export function findSignalSimilarityMatches(input: {
@@ -194,22 +243,35 @@ export function findSignalSimilarityMatches(input: {
 }): SignalSimilarityMatch[] {
   const tags = normalizeTags(input.currentTags ?? []);
   const lessonSurvival = assessSignalLessonSurvival(input.lessons ?? []);
-  const lessonById = new Map(lessonSurvival.map((lesson) => [lesson.lessonId, lesson]));
+  const lessonById = new Map(
+    lessonSurvival.map((lesson) => [lesson.lessonId, lesson]),
+  );
   const now = input.now ?? nowIso();
 
   return (input.reviewedSituations ?? [])
     .map((situation) => {
       const situationTags = normalizeTags(situation.tags);
       const sharedTags = tags.filter((tag) => situationTags.includes(tag));
-      const tagScore = tags.length === 0
-        ? 0
-        : Math.round((sharedTags.length / Math.max(tags.length, situationTags.length, 1)) * 100);
-      const relationshipScore = relationshipSimilarityScore(input.relationships ?? [], situation.relationshipRefs ?? []);
+      const tagScore =
+        tags.length === 0
+          ? 0
+          : Math.round(
+              (sharedTags.length /
+                Math.max(tags.length, situationTags.length, 1)) *
+                100,
+            );
+      const relationshipScore = relationshipSimilarityScore(
+        input.relationships ?? [],
+        situation.relationshipRefs ?? [],
+      );
       const score = Math.round(clamp(tagScore * 0.8 + relationshipScore * 0.2));
       const lessons = uniqueStrings(situation.lessonRefs ?? [])
         .map((lessonId) => lessonById.get(lessonId))
-        .filter((lesson): lesson is SignalLessonSurvival => lesson !== undefined);
-      const reviewRefs = situation.reviewRef === undefined ? [] : [situation.reviewRef];
+        .filter(
+          (lesson): lesson is SignalLessonSurvival => lesson !== undefined,
+        );
+      const reviewRefs =
+        situation.reviewRef === undefined ? [] : [situation.reviewRef];
 
       return {
         id: stableId("similarity", situation.id),
@@ -218,11 +280,17 @@ export function findSignalSimilarityMatches(input: {
         sourceId: input.objectiveId,
         targetId: situation.id,
         score,
-        basis: sharedTags.length ? sharedTags : ["reviewed situation available"],
+        basis: sharedTags.length
+          ? sharedTags
+          : ["reviewed situation available"],
         lessonRefs: lessons.map((lesson) => lesson.lessonId),
         traceRefs: [
           { refId: input.objectiveId, refType: "Objective", role: "current" },
-          { refId: situation.id, refType: "ReviewedHistory", role: "historical" },
+          {
+            refId: situation.id,
+            refType: "ReviewedHistory",
+            role: "historical",
+          },
         ],
         reviewRefs,
         explanation: [
@@ -255,7 +323,9 @@ export function buildSignalReviewedHistory(input: {
     ...(input.relationships ?? []).map((relationship) => relationship.id),
   ]);
   const reviewRefs = uniqueReviewRefs([
-    ...situations.flatMap((situation) => situation.reviewRef === undefined ? [] : [situation.reviewRef]),
+    ...situations.flatMap((situation) =>
+      situation.reviewRef === undefined ? [] : [situation.reviewRef],
+    ),
     ...(input.reviews ?? []),
   ]);
 
@@ -273,15 +343,25 @@ export function buildSignalReviewedHistory(input: {
     explanation: [
       `Reviewed history contains ${situations.length} situations, ${reviewRefs.length} reviews, and ${relationshipRefs.length} relationships.`,
     ],
-    decisionRefs: uniqueStrings(situations.flatMap((situation) => situation.decisionRef ?? [])),
-    outcomeRefs: uniqueStrings(situations.flatMap((situation) => situation.outcomeRef ?? [])),
-    assumptionRefs: uniqueStrings(situations.flatMap((situation) => situation.assumptionRefs ?? [])),
-    lessonRefs: uniqueStrings(situations.flatMap((situation) => situation.lessonRefs ?? [])),
+    decisionRefs: uniqueStrings(
+      situations.flatMap((situation) => situation.decisionRef ?? []),
+    ),
+    outcomeRefs: uniqueStrings(
+      situations.flatMap((situation) => situation.outcomeRef ?? []),
+    ),
+    assumptionRefs: uniqueStrings(
+      situations.flatMap((situation) => situation.assumptionRefs ?? []),
+    ),
+    lessonRefs: uniqueStrings(
+      situations.flatMap((situation) => situation.lessonRefs ?? []),
+    ),
     relationshipRefs,
   };
 }
 
-export function evaluateLearningJudgment(input: SignalLearningRuntimeInput): SignalLearningRuntimeResult {
+export function evaluateLearningJudgment(
+  input: SignalLearningRuntimeInput,
+): SignalLearningRuntimeResult {
   const now = input.now ?? nowIso();
   const relationships = input.relationships ?? [];
   const relationshipMemory = createSignalRelationshipMemory(relationships);
@@ -297,11 +377,16 @@ export function evaluateLearningJudgment(input: SignalLearningRuntimeInput): Sig
   });
   const reviewedHistory = buildSignalReviewedHistory({
     situations: input.reviewedSituations,
-    reviews: input.priorReviews?.map((review) => ({ reviewId: review.id, reviewedAt: review.createdAt })),
+    reviews: input.priorReviews?.map((review) => ({
+      reviewId: review.id,
+      reviewedAt: review.createdAt,
+    })),
     relationships,
     now,
   });
-  const evaluation = input.evaluation ?? buildEvaluation(input, state, lessonSurvival, similarityMatches, now);
+  const evaluation =
+    input.evaluation ??
+    buildEvaluation(input, state, lessonSurvival, similarityMatches, now);
   const constraints = [...(input.constraints ?? [])];
   const threats = [...(input.threats ?? [])];
   const assumptions = [...(input.assumptions ?? [])];
@@ -350,8 +435,16 @@ export function evaluateLearningJudgment(input: SignalLearningRuntimeInput): Sig
   };
 }
 
-function buildState(input: SignalLearningRuntimeInput, now: string): SignalState {
-  const evidenceQuality = average((input.evidence ?? []).map((item) => asScore(item.confidence, item.strength)), 50);
+function buildState(
+  input: SignalLearningRuntimeInput,
+  now: string,
+): SignalState {
+  const evidenceQuality = average(
+    (input.evidence ?? []).map((item) =>
+      asScore(item.confidence, item.strength),
+    ),
+    50,
+  );
 
   return {
     id: stableId("state", input.objective.id),
@@ -370,7 +463,9 @@ function buildState(input: SignalLearningRuntimeInput, now: string): SignalState
       })),
     ],
     reviewRefs: [],
-    explanation: ["State was assembled from the current objective, positions, and evidence before any new outcome exists."],
+    explanation: [
+      "State was assembled from the current objective, positions, and evidence before any new outcome exists.",
+    ],
   };
 }
 
@@ -381,10 +476,20 @@ function buildEvaluation(
   similarityMatches: readonly SignalSimilarityMatch[],
   now: string,
 ): SignalEvaluation {
-  const lessonScore = average(lessonSurvival.slice(0, 3).map((lesson) => lesson.preferenceScore), 50);
-  const similarityScore = average(similarityMatches.slice(0, 3).map((match) => match.score), 50);
-  const score = Math.round(clamp(average([state.quality, lessonScore, similarityScore])));
-  const confidence = Math.round(clamp(average([state.quality, lessonScore]) - state.uncertainty * 0.15));
+  const lessonScore = average(
+    lessonSurvival.slice(0, 3).map((lesson) => lesson.preferenceScore),
+    50,
+  );
+  const similarityScore = average(
+    similarityMatches.slice(0, 3).map((match) => match.score),
+    50,
+  );
+  const score = Math.round(
+    clamp(average([state.quality, lessonScore, similarityScore])),
+  );
+  const confidence = Math.round(
+    clamp(average([state.quality, lessonScore]) - state.uncertainty * 0.15),
+  );
 
   return {
     id: stableId("evaluation", input.objective.id),
@@ -422,24 +527,59 @@ function buildJudgment(input: {
   relationships: readonly SignalRelationship[];
   now: string;
 }): SignalJudgment {
-  const bindingConstraint = input.constraints.some((constraint) => constraint.binding && constraint.severity >= 70);
-  const threatPressure = average(input.threats.map((threat) => asScore(threat.severity) * asScore(threat.likelihood) / 100), 0);
-  const failedAssumptionPressure = input.assumptions.filter((assumption) => assumption.status === "failed").length * 12;
-  const lessonSupport = average(input.lessonSurvival.slice(0, 3).map((lesson) => lesson.preferenceScore), 50);
-  const similaritySupport = average(input.similarityMatches.slice(0, 3).map((match) => match.score), 50);
-  const relationshipSupport = average(
-    input.relationships
-      .filter((relationship) => relationship.targetType === "Judgment" || relationship.relationType === "applies_to")
-      .map((relationship) => asScore(relationship.confidence, relationship.strength)),
+  const bindingConstraint = input.constraints.some(
+    (constraint) => constraint.binding && constraint.severity >= 70,
+  );
+  const threatPressure = average(
+    input.threats.map(
+      (threat) => (asScore(threat.severity) * asScore(threat.likelihood)) / 100,
+    ),
+    0,
+  );
+  const failedAssumptionPressure =
+    input.assumptions.filter((assumption) => assumption.status === "failed")
+      .length * 12;
+  const lessonSupport = average(
+    input.lessonSurvival.slice(0, 3).map((lesson) => lesson.preferenceScore),
     50,
   );
-  const confidence = Math.round(clamp(
-    average([input.evaluation.confidence, lessonSupport, similaritySupport, relationshipSupport])
-    - threatPressure * 0.2
-    - failedAssumptionPressure,
-  ));
-  const uncertainty = Math.round(clamp(100 - confidence + threatPressure * 0.2));
-  const posture = choosePosture(bindingConstraint, confidence, uncertainty, threatPressure);
+  const similaritySupport = average(
+    input.similarityMatches.slice(0, 3).map((match) => match.score),
+    50,
+  );
+  const relationshipSupport = average(
+    input.relationships
+      .filter(
+        (relationship) =>
+          relationship.targetType === "Judgment" ||
+          relationship.relationType === "applies_to",
+      )
+      .map((relationship) =>
+        asScore(relationship.confidence, relationship.strength),
+      ),
+    50,
+  );
+  const confidence = Math.round(
+    clamp(
+      average([
+        input.evaluation.confidence,
+        lessonSupport,
+        similaritySupport,
+        relationshipSupport,
+      ]) -
+        threatPressure * 0.2 -
+        failedAssumptionPressure,
+    ),
+  );
+  const uncertainty = Math.round(
+    clamp(100 - confidence + threatPressure * 0.2),
+  );
+  const posture = choosePosture(
+    bindingConstraint,
+    confidence,
+    uncertainty,
+    threatPressure,
+  );
 
   return {
     id: stableId("judgment", input.input.objective.id),
@@ -456,16 +596,28 @@ function buildJudgment(input: {
     threatRefs: input.threats.map((threat) => threat.id),
     assumptionRefs: input.assumptions.map((assumption) => assumption.id),
     reviewedHistoryRefs: [input.reviewedHistory.id],
-    lessonRefs: input.lessonSurvival.slice(0, 5).map((lesson) => lesson.lessonId),
-    relationshipRefs: input.relationships.map((relationship) => relationship.id),
+    lessonRefs: input.lessonSurvival
+      .slice(0, 5)
+      .map((lesson) => lesson.lessonId),
+    relationshipRefs: input.relationships.map(
+      (relationship) => relationship.id,
+    ),
     confidence,
     uncertainty,
     posture,
     futureOutcomeRequired: false,
     traceRefs: [
       { refId: input.state.id, refType: "State", role: "current-state" },
-      { refId: input.evaluation.id, refType: "Evaluation", role: "current-evaluation" },
-      { refId: input.reviewedHistory.id, refType: "ReviewedHistory", role: "reviewed-history" },
+      {
+        refId: input.evaluation.id,
+        refType: "Evaluation",
+        role: "current-evaluation",
+      },
+      {
+        refId: input.reviewedHistory.id,
+        refType: "ReviewedHistory",
+        role: "reviewed-history",
+      },
       ...input.lessonSurvival.slice(0, 3).map((lesson) => ({
         refId: lesson.lessonId,
         refType: "Lesson" as const,
@@ -488,8 +640,11 @@ function buildTradeoffs(
   now: string,
 ): SignalTradeoff[] {
   const highestThreat = [...threats].sort((a, b) => b.severity - a.severity)[0];
-  const bindingConstraint = constraints.find((constraint) => constraint.binding);
-  const reversibility: DecisionReversibility = judgment.posture === "proceed" ? "medium" : "high";
+  const bindingConstraint = constraints.find(
+    (constraint) => constraint.binding,
+  );
+  const reversibility: DecisionReversibility =
+    judgment.posture === "proceed" ? "medium" : "high";
 
   return [
     {
@@ -499,11 +654,16 @@ function buildTradeoffs(
       createdAt: now,
       optionIds: [judgment.id],
       benefit: "Uses reviewed learning while preserving a clear review trail.",
-      cost: highestThreat?.label ?? bindingConstraint?.label ?? "Some uncertainty remains unresolved.",
+      cost:
+        highestThreat?.label ??
+        bindingConstraint?.label ??
+        "Some uncertainty remains unresolved.",
       reversibility,
       traceRefs: [{ refId: judgment.id, refType: "Judgment", role: "basis" }],
       reviewRefs: [...judgment.reviewRefs],
-      explanation: ["The tradeoff keeps the current decision reviewable instead of treating the rationale as settled."],
+      explanation: [
+        "The tradeoff keeps the current decision reviewable instead of treating the rationale as settled.",
+      ],
     },
   ];
 }
@@ -513,7 +673,9 @@ function buildStrategies(
   tradeoffs: readonly SignalTradeoff[],
   now: string,
 ): SignalStrategy[] {
-  const quality = Math.round(clamp(judgment.confidence - judgment.uncertainty * 0.2));
+  const quality = Math.round(
+    clamp(judgment.confidence - judgment.uncertainty * 0.2),
+  );
 
   return [
     {
@@ -525,7 +687,9 @@ function buildStrategies(
       tradeoffIds: tradeoffs.map((tradeoff) => tradeoff.id),
       quality,
       reversible: judgment.posture !== "proceed",
-      traceRefs: [{ refId: judgment.id, refType: "Judgment", role: "strategy-source" }],
+      traceRefs: [
+        { refId: judgment.id, refType: "Judgment", role: "strategy-source" },
+      ],
       reviewRefs: [...judgment.reviewRefs],
       explanation: [
         "Strategy quality is evaluated separately from execution quality; no execution quality is assumed before action.",
@@ -540,7 +704,8 @@ function choosePosture(
   uncertainty: number,
   threatPressure: number,
 ): SignalJudgment["posture"] {
-  if (bindingConstraint || threatPressure >= 80 || confidence < 25) return "avoid";
+  if (bindingConstraint || threatPressure >= 80 || confidence < 25)
+    return "avoid";
   if (confidence < 45 || uncertainty >= 75) return "wait";
   if (threatPressure >= 60 || uncertainty >= 55) return "reduce";
   if (uncertainty >= 35) return "proceed-reversibly";
@@ -565,12 +730,20 @@ function relationshipSimilarityScore(
 ): number {
   if (!relationshipRefs.length) return 0;
   const refs = new Set(relationshipRefs);
-  const matched = relationships.filter((relationship) => refs.has(relationship.id));
+  const matched = relationships.filter((relationship) =>
+    refs.has(relationship.id),
+  );
   if (!matched.length) return 0;
-  return Math.round(average(matched.map((relationship) => average([
-    asScore(relationship.strength),
-    asScore(relationship.confidence),
-  ]))));
+  return Math.round(
+    average(
+      matched.map((relationship) =>
+        average([
+          asScore(relationship.strength),
+          asScore(relationship.confidence),
+        ]),
+      ),
+    ),
+  );
 }
 
 function uniqueReviewRefs(refs: readonly SignalReviewRef[]): SignalReviewRef[] {

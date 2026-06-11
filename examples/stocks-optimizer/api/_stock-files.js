@@ -7,7 +7,7 @@ function findPublicDir() {
     path.join(process.cwd(), "src/artifacts/signal-markets/public"),
     path.join(process.cwd(), "src/artifacts/signal-markets/dist/public"),
     path.join(process.cwd(), "src/public"),
-    path.join(process.cwd(), "public")
+    path.join(process.cwd(), "public"),
   ].filter(Boolean);
 
   for (const candidate of candidates) {
@@ -19,12 +19,16 @@ function findPublicDir() {
 
     const hasStockLists = fs
       .readdirSync(absolute)
-      .some((file) => file.startsWith("stocks_list_") && file.endsWith(".json"));
+      .some(
+        (file) => file.startsWith("stocks_list_") && file.endsWith(".json"),
+      );
 
     if (hasStockLists) return absolute;
   }
 
-  throw new Error(`No stocks_list_*.json found. Checked: ${candidates.join(", ")}`);
+  throw new Error(
+    `No stocks_list_*.json found. Checked: ${candidates.join(", ")}`,
+  );
 }
 
 function readList(filePath) {
@@ -40,7 +44,9 @@ function readList(filePath) {
 }
 
 function marketKey(value) {
-  return String(value || "").trim().toUpperCase();
+  return String(value || "")
+    .trim()
+    .toUpperCase();
 }
 
 function getMarket(item) {
@@ -50,12 +56,12 @@ function getMarket(item) {
 function normalizeItem(item, sourceFile) {
   const symbol = String(
     item?.symbol ||
-    item?.ticker ||
-    item?.code ||
-    item?.tvSymbol ||
-    item?.tradingViewSymbol ||
-    item?.s ||
-    ""
+      item?.ticker ||
+      item?.code ||
+      item?.tvSymbol ||
+      item?.tradingViewSymbol ||
+      item?.s ||
+      "",
   ).trim();
 
   const market = getMarket(item);
@@ -77,7 +83,7 @@ function normalizeItem(item, sourceFile) {
     change: item?.change ?? null,
     changePercent: item?.changePercent ?? item?.change_percent ?? null,
     volume: item?.volume ?? null,
-    currency: item?.currency ?? null
+    currency: item?.currency ?? null,
   };
 }
 
@@ -115,5 +121,5 @@ module.exports = {
   getMarket,
   normalizeItem,
   getStockFiles,
-  readAllStocks
+  readAllStocks,
 };

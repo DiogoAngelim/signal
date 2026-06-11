@@ -1,11 +1,16 @@
 import crypto from "node:crypto";
 
-export function canonicalQuery(params: Record<string, string | number | boolean | undefined | null>) {
+export function canonicalQuery(
+  params: Record<string, string | number | boolean | undefined | null>,
+) {
   return Object.entries(params)
     .filter(([, value]) => value != null)
     .map(([key, value]) => [key, String(value)] as const)
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+    )
     .join("&");
 }
 
@@ -34,7 +39,13 @@ export function createClientOrderId(input: {
     input.symbol,
     input.action,
   ].join(":");
-  const hash = crypto.createHash("sha256").update(seed).digest("hex").slice(0, 22);
-  const readable = `${input.symbol}_${input.action}`.replace(/[^A-Z0-9_]/gi, "").slice(0, 12);
+  const hash = crypto
+    .createHash("sha256")
+    .update(seed)
+    .digest("hex")
+    .slice(0, 22);
+  const readable = `${input.symbol}_${input.action}`
+    .replace(/[^A-Z0-9_]/gi, "")
+    .slice(0, 12);
   return `so_${readable}_${hash}`.slice(0, 36);
 }

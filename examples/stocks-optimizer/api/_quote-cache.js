@@ -2,8 +2,7 @@ const memory = new Map();
 
 function hasRedis() {
   return Boolean(
-    process.env.UPSTASH_REDIS_REST_URL &&
-    process.env.UPSTASH_REDIS_REST_TOKEN
+    process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN,
   );
 }
 
@@ -12,9 +11,9 @@ async function redisRequest(command) {
     method: "POST",
     headers: {
       Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(command)
+    body: JSON.stringify(command),
   });
 
   if (!response.ok) {
@@ -43,7 +42,7 @@ async function setCache(key, value, ttlSeconds = 30) {
   if (!hasRedis()) {
     memory.set(key, {
       value,
-      expiresAt: Date.now() + ttlSeconds * 1000
+      expiresAt: Date.now() + ttlSeconds * 1000,
     });
     return;
   }
@@ -60,7 +59,7 @@ async function acquireLock(key, ttlSeconds = 10) {
 
     memory.set(key, {
       value: "1",
-      expiresAt: Date.now() + ttlSeconds * 1000
+      expiresAt: Date.now() + ttlSeconds * 1000,
     });
 
     return { acquired: true };
@@ -73,5 +72,5 @@ async function acquireLock(key, ttlSeconds = 10) {
 module.exports = {
   getCache,
   setCache,
-  acquireLock
+  acquireLock,
 };

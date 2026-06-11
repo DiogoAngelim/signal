@@ -17,25 +17,51 @@ import {
 
 type RuleContext = Partial<Record<DecisionModuleName, NormalizedModuleState>>;
 
-export function assessCoherence(input: DecisionModuleInputs): CoherenceAssessment {
+export function assessCoherence(
+  input: DecisionModuleInputs,
+): CoherenceAssessment {
   const modules = normalizeModuleInputs(input);
   const moduleValues = Object.values(modules);
   const scores = moduleValues.map((module) => module.score);
   const baseScore = average(scores);
   const dispersion = standardDeviation(scores);
   const conflicts = detectCoherenceConflicts(modules);
-  const penalty = conflicts.reduce((sum, conflict) => sum + severityWeight(conflict.severity), 0);
+  const penalty = conflicts.reduce(
+    (sum, conflict) => sum + severityWeight(conflict.severity),
+    0,
+  );
   const reflectionJudgmentBonus = reflectiveJudgmentBonus(modules);
   const consensusLevel = clamp(100 - dispersion * 1.45 - conflicts.length * 4);
-  const score = clamp(baseScore * 0.62 + consensusLevel * 0.38 - penalty + reflectionJudgmentBonus);
-  const hasCritical = conflicts.some((conflict) => conflict.severity === "critical");
-  const actionAllowed = !hasCritical && score >= 40 && moduleValues.every((module) => module.allowed || module.score >= 35);
+  const score = clamp(
+    baseScore * 0.62 +
+      consensusLevel * 0.38 -
+      penalty +
+      reflectionJudgmentBonus,
+  );
+  const hasCritical = conflicts.some(
+    (conflict) => conflict.severity === "critical",
+  );
+  const actionAllowed =
+    !hasCritical &&
+    score >= 40 &&
+    moduleValues.every((module) => module.allowed || module.score >= 35);
   const actionScale = actionAllowed ? actionScaleFor(score, conflicts) : 0;
   const status = coherenceStatusFor(score, conflicts, actionAllowed);
-  const conflictPenalty = conflicts.reduce((sum, conflict) => sum + severityWeight(conflict.severity) / 4, 0);
-  const trustAdjustment = clamp(reflectionJudgmentBonus - conflictPenalty, -30, 20);
+  const conflictPenalty = conflicts.reduce(
+    (sum, conflict) => sum + severityWeight(conflict.severity) / 4,
+    0,
+  );
+  const trustAdjustment = clamp(
+    reflectionJudgmentBonus - conflictPenalty,
+    -30,
+    20,
+  );
   const agencyAdjustment = clamp((actionScale - 1) * 100, -100, 25);
-  const confidenceAdjustment = clamp(calibrationConfidenceAdjustment(modules) - conflictPenalty, -40, 20);
+  const confidenceAdjustment = clamp(
+    calibrationConfidenceAdjustment(modules) - conflictPenalty,
+    -40,
+    20,
+  );
 
   return {
     score: Math.round(score),
@@ -47,11 +73,19 @@ export function assessCoherence(input: DecisionModuleInputs): CoherenceAssessmen
     trustAdjustment: Math.round(trustAdjustment),
     agencyAdjustment: Math.round(agencyAdjustment),
     confidenceAdjustment: Math.round(confidenceAdjustment),
-    explanation: coherenceExplanation(score, status, conflicts, actionScale, reflectionJudgmentBonus),
+    explanation: coherenceExplanation(
+      score,
+      status,
+      conflicts,
+      actionScale,
+      reflectionJudgmentBonus,
+    ),
   };
 }
 
-export function detectCoherenceConflicts(modules: RuleContext): CoherenceConflict[] {
+export function detectCoherenceConflicts(
+  modules: RuleContext,
+): CoherenceConflict[] {
   const conflicts: CoherenceConflict[] = [];
   addIf(conflicts, highDiscoveryLowTrust(modules));
   addIf(conflicts, highAgencyWeakPurpose(modules));
@@ -64,7 +98,11 @@ export function detectCoherenceConflicts(modules: RuleContext): CoherenceConflic
 }
 
 function highDiscoveryLowTrust(modules: RuleContext): CoherenceConflict | null {
-  if (moduleScore(modules, "discovery") < 75 || moduleScore(modules, "trust") > 45) return null;
+  if (
+    moduleScore(modules, "discovery") < 75 ||
+    moduleScore(modules, "trust") > 45
+  )
+    return null;
   return conflict(
     "high-discovery-low-trust",
     ["discovery", "trust"],
@@ -75,7 +113,11 @@ function highDiscoveryLowTrust(modules: RuleContext): CoherenceConflict | null {
 }
 
 function highAgencyWeakPurpose(modules: RuleContext): CoherenceConflict | null {
-  if (moduleScore(modules, "agency") < 75 || moduleScore(modules, "purpose") > 45) return null;
+  if (
+    moduleScore(modules, "agency") < 75 ||
+    moduleScore(modules, "purpose") > 45
+  )
+    return null;
   return conflict(
     "high-agency-weak-purpose",
     ["agency", "purpose"],
@@ -85,8 +127,13 @@ function highAgencyWeakPurpose(modules: RuleContext): CoherenceConflict | null {
   );
 }
 
-function highConfidenceLowCalibration(modules: RuleContext): CoherenceConflict | null {
-  const confidence = Math.max(moduleScore(modules, "judgment"), moduleScore(modules, "trust"));
+function highConfidenceLowCalibration(
+  modules: RuleContext,
+): CoherenceConflict | null {
+  const confidence = Math.max(
+    moduleScore(modules, "judgment"),
+    moduleScore(modules, "trust"),
+  );
   if (confidence < 75 || moduleScore(modules, "calibration") > 55) return null;
   return conflict(
     "high-confidence-low-calibration",
@@ -98,7 +145,11 @@ function highConfidenceLowCalibration(modules: RuleContext): CoherenceConflict |
 }
 
 function lowRecoveryHighAgency(modules: RuleContext): CoherenceConflict | null {
-  if (moduleScore(modules, "recovery") > 40 || moduleScore(modules, "agency") < 65) return null;
+  if (
+    moduleScore(modules, "recovery") > 40 ||
+    moduleScore(modules, "agency") < 65
+  )
+    return null;
   return conflict(
     "low-recovery-high-agency",
     ["recovery", "agency"],
@@ -109,7 +160,8 @@ function lowRecoveryHighAgency(modules: RuleContext): CoherenceConflict | null {
 }
 
 function weakNeedStrongAgency(modules: RuleContext): CoherenceConflict | null {
-  if (moduleScore(modules, "need") > 45 || moduleScore(modules, "agency") < 70) return null;
+  if (moduleScore(modules, "need") > 45 || moduleScore(modules, "agency") < 70)
+    return null;
   return conflict(
     "weak-need-strong-agency",
     ["need", "agency"],
@@ -119,8 +171,14 @@ function weakNeedStrongAgency(modules: RuleContext): CoherenceConflict | null {
   );
 }
 
-function weakIdentityStrongAgency(modules: RuleContext): CoherenceConflict | null {
-  if (moduleScore(modules, "identity") > 45 || moduleScore(modules, "agency") < 70) return null;
+function weakIdentityStrongAgency(
+  modules: RuleContext,
+): CoherenceConflict | null {
+  if (
+    moduleScore(modules, "identity") > 45 ||
+    moduleScore(modules, "agency") < 70
+  )
+    return null;
   return conflict(
     "weak-identity-strong-agency",
     ["identity", "agency"],
@@ -130,8 +188,14 @@ function weakIdentityStrongAgency(modules: RuleContext): CoherenceConflict | nul
   );
 }
 
-function lowAwarenessHighJudgment(modules: RuleContext): CoherenceConflict | null {
-  if (moduleScore(modules, "awareness") > 45 || moduleScore(modules, "judgment") < 70) return null;
+function lowAwarenessHighJudgment(
+  modules: RuleContext,
+): CoherenceConflict | null {
+  if (
+    moduleScore(modules, "awareness") > 45 ||
+    moduleScore(modules, "judgment") < 70
+  )
+    return null;
   return conflict(
     "low-awareness-high-judgment",
     ["awareness", "judgment"],
@@ -142,7 +206,10 @@ function lowAwarenessHighJudgment(modules: RuleContext): CoherenceConflict | nul
 }
 
 function reflectiveJudgmentBonus(modules: RuleContext): number {
-  return moduleScore(modules, "reflection") >= 70 && moduleScore(modules, "judgment") >= 70 ? 8 : 0;
+  return moduleScore(modules, "reflection") >= 70 &&
+    moduleScore(modules, "judgment") >= 70
+    ? 8
+    : 0;
 }
 
 function calibrationConfidenceAdjustment(modules: RuleContext): number {
@@ -154,7 +221,9 @@ function calibrationConfidenceAdjustment(modules: RuleContext): number {
 }
 
 function actionScaleFor(score: number, conflicts: CoherenceConflict[]): number {
-  const critical = conflicts.some((conflict) => conflict.severity === "critical");
+  const critical = conflicts.some(
+    (conflict) => conflict.severity === "critical",
+  );
   if (critical || score < 40) return 0;
   if (score < 60) return 0.15;
   if (score < 75) return 0.45;
@@ -162,9 +231,19 @@ function actionScaleFor(score: number, conflicts: CoherenceConflict[]): number {
   return 1;
 }
 
-function coherenceStatusFor(score: number, conflicts: CoherenceConflict[], actionAllowed: boolean): CoherenceStatus {
+function coherenceStatusFor(
+  score: number,
+  conflicts: CoherenceConflict[],
+  actionAllowed: boolean,
+): CoherenceStatus {
   if (!actionAllowed) return "blocked";
-  if (conflicts.some((conflict) => conflict.severity === "critical" || conflict.severity === "high")) return "contradictory";
+  if (
+    conflicts.some(
+      (conflict) =>
+        conflict.severity === "critical" || conflict.severity === "high",
+    )
+  )
+    return "contradictory";
   if (score < 40) return "unstable";
   if (score < 60) return "tension";
   if (score < 75) return "stable";
@@ -186,7 +265,8 @@ function coherenceExplanation(
         ? `Action can continue only at ${Math.round(actionScale * 100)}% scale.`
         : "Action can proceed at normal scale.",
   ];
-  if (bonus > 0) lines.push("Reflection and judgment agree, which modestly improves trust.");
+  if (bonus > 0)
+    lines.push("Reflection and judgment agree, which modestly improves trust.");
   for (const conflict of conflicts) {
     lines.push(conflict.description);
   }
@@ -203,6 +283,9 @@ function conflict(
   return { conflictId, modules, severity, description, recommendation };
 }
 
-function addIf(conflicts: CoherenceConflict[], conflictValue: CoherenceConflict | null): void {
+function addIf(
+  conflicts: CoherenceConflict[],
+  conflictValue: CoherenceConflict | null,
+): void {
   if (conflictValue) conflicts.push(conflictValue);
 }

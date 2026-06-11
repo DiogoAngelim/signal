@@ -1,11 +1,17 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  assessDecisionEvidence as assessDecisionEvidenceFromCore,
+  evaluateDecision as evaluateDecisionFromCore,
+  reviewDecisionOutcome as reviewDecisionOutcomeFromCore,
+} from "./core";
+import {
+  SIGNAL_UNIVERSAL_LIFECYCLE,
   applyOutcomeFeedback,
+  assessCoherence,
   assessDecisionEvidence,
   assessSignalLessonSurvival,
-  assessCoherence,
   assessWisdom,
   buildHumanDecisionGuide,
   createAccountabilityReport,
@@ -18,18 +24,12 @@ import {
   evaluateLearningJudgment,
   evaluateOutcome,
   generatePredictionScenarios,
-  reviewDecisionOutcome,
   listDecisionOperations,
   registerDecisionOperations,
   replayDecision,
+  reviewDecisionOutcome,
   simulateDecisionPaths,
-  SIGNAL_UNIVERSAL_LIFECYCLE,
 } from "./index";
-import {
-  assessDecisionEvidence as assessDecisionEvidenceFromCore,
-  evaluateDecision as evaluateDecisionFromCore,
-  reviewDecisionOutcome as reviewDecisionOutcomeFromCore,
-} from "./core";
 
 describe("@signal/decision", () => {
   it("detects coherence contradictions and blocks unsafe agency", () => {
@@ -45,7 +45,9 @@ describe("@signal/decision", () => {
 
     expect(coherence.actionAllowed).toBe(false);
     expect(coherence.status).toBe("blocked");
-    expect(coherence.contradictions.map((item) => item.conflictId)).toContain("high-agency-weak-purpose");
+    expect(coherence.contradictions.map((item) => item.conflictId)).toContain(
+      "high-agency-weak-purpose",
+    );
     expect(coherence.actionScale).toBe(0);
     expect(coherence.confidenceAdjustment).toBeLessThan(0);
   });
@@ -101,7 +103,10 @@ describe("@signal/decision", () => {
         "uncertainty expands",
       ],
     });
-    const simulation = simulateDecisionPaths({ decisionId: "decision:2", scenarios });
+    const simulation = simulateDecisionPaths({
+      decisionId: "decision:2",
+      scenarios,
+    });
     const wisdom = assessWisdom({
       expectedReward: 88,
       downsideRisk: 92,
@@ -110,13 +115,12 @@ describe("@signal/decision", () => {
     });
 
     expect(scenarios).toHaveLength(4);
-    expect(simulation.pathComparisons.map((path) => path.actionVariant)).toEqual([
-      "act normally",
-      "act smaller",
-      "wait",
-      "block action",
-    ]);
-    expect(["act", "reduce", "wait", "block", "escalate"]).toContain(simulation.recommendedAction);
+    expect(
+      simulation.pathComparisons.map((path) => path.actionVariant),
+    ).toEqual(["act normally", "act smaller", "wait", "block action"]);
+    expect(["act", "reduce", "wait", "block", "escalate"]).toContain(
+      simulation.recommendedAction,
+    );
     expect(wisdom.decision).toBe("avoid");
   });
 
@@ -151,7 +155,10 @@ describe("@signal/decision", () => {
       purpose: 30,
       recovery: 30,
     });
-    const report = createAccountabilityReport({ record, currentCoherence: weaker });
+    const report = createAccountabilityReport({
+      record,
+      currentCoherence: weaker,
+    });
     const replay = replayDecision({ record, currentCoherence: weaker });
     const guide = buildHumanDecisionGuide(record);
     const store = createInMemoryDecisionRecordStore();
@@ -173,7 +180,9 @@ describe("@signal/decision", () => {
     ]);
     expect(store.get("decision:3")?.decisionId).toBe("decision:3");
     expect(store.audit("decision:3")?.decisionId).toBe("decision:3");
-    expect(store.replay("decision:3", weaker)?.replayResult).toBe("changed-decision");
+    expect(store.replay("decision:3", weaker)?.replayResult).toBe(
+      "changed-decision",
+    );
   });
 
   it("runs the full decision pipeline and exposes versioned operations", () => {
@@ -217,11 +226,15 @@ describe("@signal/decision", () => {
 
     expect(result.record.accountability?.decisionId).toBe("decision:4");
     expect(result.record.realitySnapshotId).toBe("reality:decision:4");
-    expect(result.record.realitySnapshot?.payload).toMatchObject({ source: "test" });
+    expect(result.record.realitySnapshot?.payload).toMatchObject({
+      source: "test",
+    });
     expect(result.predictionScenarios.length).toBe(3);
     expect(result.outcomeAccuracy).toBeGreaterThan(80);
     expect(result.decisionReplayAvailable).toBe(true);
-    expect(listDecisionOperations().map((definition) => definition.name)).toContain("decision.evaluate.v1");
+    expect(
+      listDecisionOperations().map((definition) => definition.name),
+    ).toContain("decision.evaluate.v1");
     expect(registry.queries).toContain("decision.scenarios.predict.v1");
     expect(registry.mutations).toContain("decision.outcome.record.v1");
     expect(registry.events).toContain("decision.blocked.v1");
@@ -258,10 +271,26 @@ describe("@signal/decision", () => {
           strength: 68,
         },
       ],
-      known: [{ label: "Current state is observable", evidenceIds: ["evidence:primary"] }],
+      known: [
+        {
+          label: "Current state is observable",
+          evidenceIds: ["evidence:primary"],
+        },
+      ],
       unknowns: ["Whether the condition persists"],
-      assumptions: [{ label: "The observation remains relevant", evidenceIds: ["evidence:primary"], reviewAfter: "outcome" }],
-      contradicted: [{ label: "All evidence points the same way", evidenceIds: ["evidence:challenge"] }],
+      assumptions: [
+        {
+          label: "The observation remains relevant",
+          evidenceIds: ["evidence:primary"],
+          reviewAfter: "outcome",
+        },
+      ],
+      contradicted: [
+        {
+          label: "All evidence points the same way",
+          evidenceIds: ["evidence:challenge"],
+        },
+      ],
       desiredConfidence: 92,
       importance: 84,
       threats: [{ label: "Loss of optionality", severity: 75, likelihood: 60 }],
@@ -271,12 +300,20 @@ describe("@signal/decision", () => {
     });
 
     expect(assessment.evidenceQuality.quality).toBeGreaterThan(40);
-    expect(assessment.confidence.capped).toBeLessThanOrEqual(assessment.evidenceQuality.quality);
+    expect(assessment.confidence.capped).toBeLessThanOrEqual(
+      assessment.evidenceQuality.quality,
+    );
     expect(assessment.governance.contradictionVisibility).toBe(100);
-    expect(assessment.journal.assumptionsUsed).toEqual(["The observation remains relevant"]);
-    expect(assessment.journal.contradictionsPresent).toContain("All evidence points the same way");
+    expect(assessment.journal.assumptionsUsed).toEqual([
+      "The observation remains relevant",
+    ]);
+    expect(assessment.journal.contradictionsPresent).toContain(
+      "All evidence points the same way",
+    );
     expect(assessment.stewardship.reversibility.level).toBe("high");
-    expect(assessment.nextBestEvidence.question).toMatch(/contradictory evidence/i);
+    expect(assessment.nextBestEvidence.question).toMatch(
+      /contradictory evidence/i,
+    );
   });
 
   it("does not count missing evidence references as traceable coverage", () => {
@@ -291,14 +328,34 @@ describe("@signal/decision", () => {
           traceability: 90,
         },
       ],
-      known: [{ factId: "known:linked", label: "Known fact", evidenceIds: ["evidence:present"] }],
-      assumptions: [{ factId: "assumption:broken", label: "Broken assumption", evidenceIds: ["evidence:missing"] }],
-      contradicted: [{
-        factId: "contradiction:partial",
-        label: "Partially traceable contradiction",
-        evidenceIds: ["evidence:present", "evidence:missing"],
-      }],
-      threats: [{ threatId: "threat:broken", label: "Threat with missing evidence", evidenceIds: ["evidence:threat-missing"] }],
+      known: [
+        {
+          factId: "known:linked",
+          label: "Known fact",
+          evidenceIds: ["evidence:present"],
+        },
+      ],
+      assumptions: [
+        {
+          factId: "assumption:broken",
+          label: "Broken assumption",
+          evidenceIds: ["evidence:missing"],
+        },
+      ],
+      contradicted: [
+        {
+          factId: "contradiction:partial",
+          label: "Partially traceable contradiction",
+          evidenceIds: ["evidence:present", "evidence:missing"],
+        },
+      ],
+      threats: [
+        {
+          threatId: "threat:broken",
+          label: "Threat with missing evidence",
+          evidenceIds: ["evidence:threat-missing"],
+        },
+      ],
       reversibility: "medium",
     });
 
@@ -313,12 +370,18 @@ describe("@signal/decision", () => {
       "evidence:missing",
       "evidence:threat-missing",
     ]);
-    expect(assessment.journal.traceRefs?.find((trace) => trace.refId === "assumption:broken")).toMatchObject({
+    expect(
+      assessment.journal.traceRefs?.find(
+        (trace) => trace.refId === "assumption:broken",
+      ),
+    ).toMatchObject({
       refType: "assumption",
       linkedEvidenceIds: [],
       missingEvidenceIds: ["evidence:missing"],
     });
-    expect(assessment.governance.warnings.join(" ")).toContain("evidence:threat-missing");
+    expect(assessment.governance.warnings.join(" ")).toContain(
+      "evidence:threat-missing",
+    );
   });
 
   it("exposes an evidence-centered core entrypoint for new consumers", () => {
@@ -368,10 +431,14 @@ describe("@signal/decision", () => {
     });
 
     expect(result.record.assessment?.confidence.capped).toBeLessThan(95);
-    expect(Math.max(...result.predictionScenarios.map((scenario) => scenario.confidence))).toBeLessThanOrEqual(
-      result.record.assessment?.confidence.cap ?? 100,
+    expect(
+      Math.max(
+        ...result.predictionScenarios.map((scenario) => scenario.confidence),
+      ),
+    ).toBeLessThanOrEqual(result.record.assessment?.confidence.cap ?? 100);
+    expect(result.record.accountability?.modulesInvolved).toContain(
+      "assessment",
     );
-    expect(result.record.accountability?.modulesInvolved).toContain("assessment");
     expect(result.actionScale).toBeLessThanOrEqual(0.45);
   });
 
@@ -379,15 +446,28 @@ describe("@signal/decision", () => {
     const review = reviewDecisionOutcome({
       reviewId: "review:1",
       decisionId: "decision:review",
-      whatHappened: "The action worked initially, then failed when conditions changed.",
+      whatHappened:
+        "The action worked initially, then failed when conditions changed.",
       why: "A freshness assumption failed.",
       assumptions: [
-        { assumptionId: "assumption:fresh", label: "Evidence stays fresh", status: "failed" },
-        { assumptionId: "assumption:reversible", label: "Action remains reversible", status: "survived" },
+        {
+          assumptionId: "assumption:fresh",
+          label: "Evidence stays fresh",
+          status: "failed",
+        },
+        {
+          assumptionId: "assumption:reversible",
+          label: "Action remains reversible",
+          status: "survived",
+        },
       ],
       evidence: [
         { evidenceId: "evidence:1", label: "Opening signal", role: "mattered" },
-        { evidenceId: "evidence:2", label: "Old comparison", role: "misleading" },
+        {
+          evidenceId: "evidence:2",
+          label: "Old comparison",
+          role: "misleading",
+        },
       ],
       whatShouldChange: "Require freshness checks before repeating.",
     });
@@ -399,7 +479,13 @@ describe("@signal/decision", () => {
         decisionId: "decision:review",
         whatHappened: "The outcome was weaker than the decision expected.",
         why: "Contradictory evidence arrived late.",
-        assumptions: [{ assumptionId: "assumption:fresh", label: "Evidence stays fresh", status: "failed" }],
+        assumptions: [
+          {
+            assumptionId: "assumption:fresh",
+            label: "Evidence stays fresh",
+            status: "failed",
+          },
+        ],
         whatShouldChange: "Require freshness checks before repeating.",
       },
     });
@@ -413,9 +499,15 @@ describe("@signal/decision", () => {
       },
     ]);
 
-    expect(review.assumptionFailures.map((item) => item.label)).toEqual(["Evidence stays fresh"]);
-    expect(review.evidenceThatMisled.map((item) => item.label)).toEqual(["Old comparison"]);
-    expect(review.learning.whatShouldChange).toBe("Require freshness checks before repeating.");
+    expect(review.assumptionFailures.map((item) => item.label)).toEqual([
+      "Evidence stays fresh",
+    ]);
+    expect(review.evidenceThatMisled.map((item) => item.label)).toEqual([
+      "Old comparison",
+    ]);
+    expect(review.learning.whatShouldChange).toBe(
+      "Require freshness checks before repeating.",
+    );
     expect(outcome.review?.learning.outcome).toBe("contradicted");
     expect(patterns[0]?.frequency).toBe(3);
     expect(patterns[0]?.confirmations).toBe(1);
@@ -466,7 +558,9 @@ describe("@signal/decision", () => {
           type: "Lesson",
           label: "Keep reversible changes small until evidence repeats",
           traceRefs: [{ refId: "review:past-capacity", refType: "Review" }],
-          reviewRefs: [{ reviewId: "review:past-capacity", outcome: "survived" }],
+          reviewRefs: [
+            { reviewId: "review:past-capacity", outcome: "survived" },
+          ],
           explanation: ["Repeatedly survived review."],
           reviewCount: 3,
           survivalCount: 3,
@@ -487,8 +581,12 @@ describe("@signal/decision", () => {
           targetType: "Judgment",
           targetId: "judgment:objective:capacity",
           traceRefs: [{ refId: "review:past-capacity", refType: "Review" }],
-          reviewRefs: [{ reviewId: "review:past-capacity", outcome: "survived" }],
-          explanation: ["The same reversible pressure pattern was reviewed before."],
+          reviewRefs: [
+            { reviewId: "review:past-capacity", outcome: "survived" },
+          ],
+          explanation: [
+            "The same reversible pressure pattern was reviewed before.",
+          ],
           strength: 82,
           confidence: 78,
           createdAt: "2026-06-06T00:00:00.000Z",
@@ -498,12 +596,18 @@ describe("@signal/decision", () => {
     });
 
     expect(SIGNAL_UNIVERSAL_LIFECYCLE).toContain("Reviewed History");
-    expect(result.similarityMatches[0]?.situation.id).toBe("situation:reviewed-capacity");
-    expect(result.reviewedHistory.lessonRefs).toContain("lesson:keep-reversible");
+    expect(result.similarityMatches[0]?.situation.id).toBe(
+      "situation:reviewed-capacity",
+    );
+    expect(result.reviewedHistory.lessonRefs).toContain(
+      "lesson:keep-reversible",
+    );
     expect(result.judgment.futureOutcomeRequired).toBe(false);
     expect(result.judgment.lessonRefs).toContain("lesson:keep-reversible");
     expect(result.strategies[0]?.quality).toBeGreaterThan(40);
-    expect(result.rationale.join(" ")).toMatch(/Previously reviewed situations suggest/i);
+    expect(result.rationale.join(" ")).toMatch(
+      /Previously reviewed situations suggest/i,
+    );
   });
 
   it("traces relationship memory from review to lesson to judgment", () => {
@@ -519,7 +623,9 @@ describe("@signal/decision", () => {
         targetId: "lesson:1",
         traceRefs: [{ refId: "outcome:1", refType: "Outcome" }],
         reviewRefs: [{ reviewId: "review:1", outcome: "survived" }],
-        explanation: ["The review converted an outcome into a reusable lesson."],
+        explanation: [
+          "The review converted an outcome into a reusable lesson.",
+        ],
         strength: 90,
         confidence: 84,
         createdAt: "2026-06-06T00:00:00.000Z",
@@ -562,10 +668,16 @@ describe("@signal/decision", () => {
     ]);
 
     expect(memory.lookup({ relationType: "applies_to" })).toHaveLength(1);
-    expect(memory.explain({ sourceId: "lesson:1" })[0]?.explanation).toMatch(/constrains/);
-    expect(memory.lineage("lesson:1").reviewRefs.map((ref) => ref.reviewId)).toEqual(["review:1"]);
+    expect(memory.explain({ sourceId: "lesson:1" })[0]?.explanation).toMatch(
+      /constrains/,
+    );
+    expect(
+      memory.lineage("lesson:1").reviewRefs.map((ref) => ref.reviewId),
+    ).toEqual(["review:1"]);
     expect(memory.lineage("judgment:1").lessonRefs).toEqual(["lesson:1"]);
-    expect(memory.lineage("similarity:1").similarityRefs).toEqual(["similarity:1"]);
+    expect(memory.lineage("similarity:1").similarityRefs).toEqual([
+      "similarity:1",
+    ]);
   });
 
   it("tracks lesson survival and keeps review, verification, outcome, lesson, strategy, and execution separate", () => {
@@ -610,8 +722,12 @@ describe("@signal/decision", () => {
 
     expect(lessons[0]?.lessonId).toBe("lesson:repeat");
     expect(lessons[0]?.survivalRate).toBe(80);
-    expect(new Set(concepts.map((concept) => concept.type)).size).toBe(concepts.length);
-    expect(concepts.find((concept) => concept.type === "Strategy")?.quality).not.toBe(
+    expect(new Set(concepts.map((concept) => concept.type)).size).toBe(
+      concepts.length,
+    );
+    expect(
+      concepts.find((concept) => concept.type === "Strategy")?.quality,
+    ).not.toBe(
       concepts.find((concept) => concept.type === "Execution")?.quality,
     );
   });
@@ -645,12 +761,18 @@ describe("@signal/decision", () => {
               label: "Adapter translated current holding context",
               traceRefs: [],
               reviewRefs: [],
-              explanation: [`Mapped value ${input.currentValue} and units ${input.unitCount} outside core.`],
+              explanation: [
+                `Mapped value ${input.currentValue} and units ${input.unitCount} outside core.`,
+              ],
               strength: 68,
               confidence: 66,
             },
           ],
-          currentTags: ["allocation-pressure", "uncertainty", "reversible-action"],
+          currentTags: [
+            "allocation-pressure",
+            "uncertainty",
+            "reversible-action",
+          ],
           threats: [
             {
               id: `threat:${input.subjectId}:risk`,
@@ -668,7 +790,10 @@ describe("@signal/decision", () => {
               id: "situation:reviewed-allocation",
               label: "reviewed allocation adjustment",
               tags: ["allocation-pressure", "uncertainty"],
-              reviewRef: { reviewId: "review:allocation", outcome: "survived" as const },
+              reviewRef: {
+                reviewId: "review:allocation",
+                outcome: "survived" as const,
+              },
               lessonRefs: ["lesson:allocation-discipline"],
             },
           ],
@@ -678,8 +803,12 @@ describe("@signal/decision", () => {
               type: "Lesson" as const,
               label: input.reviewedLesson,
               traceRefs: [],
-              reviewRefs: [{ reviewId: "review:allocation", outcome: "survived" as const }],
-              explanation: ["Adapter supplied reviewed domain learning as a generic lesson."],
+              reviewRefs: [
+                { reviewId: "review:allocation", outcome: "survived" as const },
+              ],
+              explanation: [
+                "Adapter supplied reviewed domain learning as a generic lesson.",
+              ],
               reviewCount: 4,
               survivalCount: 3,
               failureCount: 1,
@@ -692,16 +821,20 @@ describe("@signal/decision", () => {
         };
       },
     };
-    const result = evaluateLearningJudgment(productAdapter.toSignalInput({
-      subjectId: "subject:alpha",
-      currentValue: 42,
-      unitCount: 10,
-      totalExposure: 18,
-      variation: 62,
-      domainRisk: 58,
-      rationale: "Position remains useful only while the rationale is reviewable.",
-      reviewedLesson: "Keep allocation changes reversible when uncertainty is visible.",
-    }));
+    const result = evaluateLearningJudgment(
+      productAdapter.toSignalInput({
+        subjectId: "subject:alpha",
+        currentValue: 42,
+        unitCount: 10,
+        totalExposure: 18,
+        variation: 62,
+        domainRisk: 58,
+        rationale:
+          "Position remains useful only while the rationale is reviewable.",
+        reviewedLesson:
+          "Keep allocation changes reversible when uncertainty is visible.",
+      }),
+    );
     const productionSource = productionDecisionSource();
     const forbiddenTerms = [
       joinFragments("ti", "cker"),
@@ -713,8 +846,12 @@ describe("@signal/decision", () => {
     ];
 
     expect(result.judgment.futureOutcomeRequired).toBe(false);
-    expect(result.reviewedHistory.lessonRefs).toContain("lesson:allocation-discipline");
-    expect(result.strategies[0]?.label).not.toMatch(forbiddenPattern(forbiddenTerms));
+    expect(result.reviewedHistory.lessonRefs).toContain(
+      "lesson:allocation-discipline",
+    );
+    expect(result.strategies[0]?.label).not.toMatch(
+      forbiddenPattern(forbiddenTerms),
+    );
     expect(productionSource).not.toMatch(forbiddenPattern(forbiddenTerms));
   });
 });

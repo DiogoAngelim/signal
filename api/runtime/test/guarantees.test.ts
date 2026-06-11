@@ -33,18 +33,18 @@ describe("runtime guarantees", () => {
             status: "published" as const,
           };
         },
-      })
+      }),
     );
 
     const first = await runtime.mutation(
       "post.publish.v1",
       { postId: "post_1001" },
-      { idempotencyKey: "publish-post_1001-001" }
+      { idempotencyKey: "publish-post_1001-001" },
     );
     const replay = await runtime.mutation(
       "post.publish.v1",
       { postId: "post_1001" },
-      { idempotencyKey: "publish-post_1001-001" }
+      { idempotencyKey: "publish-post_1001-001" },
     );
 
     expect(first.ok).toBe(true);
@@ -64,7 +64,7 @@ describe("runtime guarantees", () => {
         inputSchema: z.object({ noteId: z.string() }),
         resultSchema: z.object({ noteId: z.string() }),
         handler: (input) => input,
-      })
+      }),
     );
 
     const expired = await runtime.query(
@@ -72,7 +72,7 @@ describe("runtime guarantees", () => {
       { noteId: "note_1001" },
       {
         deadlineAt: "2020-01-01T00:00:00.000Z",
-      }
+      },
     );
     const abortController = new AbortController();
     abortController.abort("caller-requested");
@@ -81,11 +81,13 @@ describe("runtime guarantees", () => {
       { noteId: "note_1001" },
       {
         abortSignal: abortController.signal,
-      }
+      },
     );
 
     expect(expired.ok).toBe(false);
-    expect(expired.ok === false && expired.error.code).toBe("DEADLINE_EXCEEDED");
+    expect(expired.ok === false && expired.error.code).toBe(
+      "DEADLINE_EXCEEDED",
+    );
     expect(cancelled.ok).toBe(false);
     expect(cancelled.ok === false && cancelled.error.code).toBe("CANCELLED");
   });
@@ -106,17 +108,20 @@ describe("runtime guarantees", () => {
           postId: z.string(),
         }),
         handler: (payload) => payload,
-      })
+      }),
     );
 
     runtime.subscribe(
       "post.published.v1",
-      createReplaySafeSubscriber(async (event) => {
-        seen.push(event.messageId);
-      }, {
-        consumerId: "projection-a",
-        deduper,
-      })
+      createReplaySafeSubscriber(
+        async (event) => {
+          seen.push(event.messageId);
+        },
+        {
+          consumerId: "projection-a",
+          deduper,
+        },
+      ),
     );
 
     const event = await runtime.publish("post.published.v1", {

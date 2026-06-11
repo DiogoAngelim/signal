@@ -15,7 +15,7 @@
  * }
  */
 
-import { mkdirSync, writeFileSync, existsSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { deterministicStringify, hashValue } from "../core/hashChain.js";
 
@@ -112,7 +112,7 @@ export function writeProof(
   const filename = `${proofHash}.json`;
   const filePath = join(dir, filename);
 
-  writeFileSync(filePath, deterministicStringify(proof) + "\n", "utf8");
+  writeFileSync(filePath, `${deterministicStringify(proof)}\n`, "utf8");
 
   return filePath;
 }
@@ -135,10 +135,10 @@ export function writeFailureProof(
   };
 
   if (expected !== undefined) {
-    details["expected"] = expected;
+    details.expected = expected;
   }
   if (actual !== undefined) {
-    details["actual"] = actual;
+    details.actual = actual;
   }
 
   return writeProof(
@@ -154,7 +154,10 @@ export function writeFailureProof(
 /**
  * List all proof files of a given type.
  */
-export function listProofs(type: string, root: string = process.cwd()): string[] {
+export function listProofs(
+  type: string,
+  root: string = process.cwd(),
+): string[] {
   const dir = getProofTypeDir(root, type);
   if (!existsSync(dir)) {
     return [];

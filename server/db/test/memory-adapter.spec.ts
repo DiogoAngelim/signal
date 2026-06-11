@@ -25,10 +25,17 @@ describe("@signal/db memory adapter", () => {
       _version: 1,
     });
     expect(await db.find("decisions", { source: "signal" })).toHaveLength(1);
-    expect(await db.find("decisions", { status: ["open", "paused"] })).toHaveLength(1);
+    expect(
+      await db.find("decisions", { status: ["open", "paused"] }),
+    ).toHaveLength(1);
     expect(await db.count("decisions", { source: "signal" })).toBe(1);
 
-    await db.update("decisions", id, { status: "closed" }, { expectedVersion: 1 });
+    await db.update(
+      "decisions",
+      id,
+      { status: "closed" },
+      { expectedVersion: 1 },
+    );
     expect(await db.findOne("decisions", { status: "closed" })).toMatchObject({
       _version: 2,
     });
@@ -41,15 +48,20 @@ describe("@signal/db memory adapter", () => {
     const db = new MemoryAdapter();
     await db.insert("decisions", { _id: "decision-1" });
 
-    await expect(db.insert("decisions", { _id: "decision-1" })).rejects.toBeInstanceOf(
-      SignalConflictError,
-    );
     await expect(
-      db.update("decisions", "decision-1", { status: "closed" }, { expectedVersion: 3 }),
+      db.insert("decisions", { _id: "decision-1" }),
+    ).rejects.toBeInstanceOf(SignalConflictError);
+    await expect(
+      db.update(
+        "decisions",
+        "decision-1",
+        { status: "closed" },
+        { expectedVersion: 3 },
+      ),
     ).rejects.toBeInstanceOf(SignalVersionMismatchError);
-    await expect(db.update("decisions", "missing", { status: "closed" })).rejects.toThrow(
-      /not found/i,
-    );
+    await expect(
+      db.update("decisions", "missing", { status: "closed" }),
+    ).rejects.toThrow(/not found/i);
   });
 
   it("treats null queries as null-or-missing and exposes test helpers", async () => {

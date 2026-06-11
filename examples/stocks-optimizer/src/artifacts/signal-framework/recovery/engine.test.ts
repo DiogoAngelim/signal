@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   DEFAULT_RECOVERY_THRESHOLDS,
-  evaluateRecovery,
   type RecoveryInput,
+  evaluateRecovery,
 } from "./engine";
 
 const dashboardLike: RecoveryInput = {
@@ -47,7 +47,11 @@ test("recovery keeps the dashboard-like scar profile recovering and review gated
   assert.ok(recovery.recommendedExposureCap >= 1.5);
   assert.equal(recovery.canRestoreSizing, false);
   assert.equal(recovery.shouldEscalateHumanReview, true);
-  assert.ok(recovery.blockers.includes("Blocked agency actions require human review before restoration."));
+  assert.ok(
+    recovery.blockers.includes(
+      "Blocked agency actions require human review before restoration.",
+    ),
+  );
   assert.ok(recovery.audit.positiveOutcomeRatio > 0.95);
 });
 
@@ -78,7 +82,8 @@ test("recovery restores normal mode after survival, trust, calibration, agency, 
 test("recovery does not fully restore sizing below the survival confidence threshold", () => {
   const recovery = evaluateRecovery({
     ...dashboardLike,
-    survivalConfidence: DEFAULT_RECOVERY_THRESHOLDS.minSurvivalConfidenceForRestore - 1,
+    survivalConfidence:
+      DEFAULT_RECOVERY_THRESHOLDS.minSurvivalConfidenceForRestore - 1,
     trustScore: 90,
     calibratedConfidence: 88,
     blockedAgencyActionCount: 0,
@@ -90,7 +95,11 @@ test("recovery does not fully restore sizing below the survival confidence thres
   assert.equal(recovery.status, "recovering");
   assert.notEqual(recovery.mode, "normal");
   assert.equal(recovery.canRestoreSizing, false);
-  assert.ok(recovery.blockers.includes("Survival confidence has not cleared the normal-sizing threshold."));
+  assert.ok(
+    recovery.blockers.includes(
+      "Survival confidence has not cleared the normal-sizing threshold.",
+    ),
+  );
 });
 
 test("recovery stays gradual when survival clears but trust has not restored", () => {
@@ -113,20 +122,48 @@ test("recovery stays gradual when survival clears but trust has not restored", (
   assert.equal(recovery.canRestoreSizing, false);
   assert.ok(recovery.trustedCapacity > 0);
   assert.ok(recovery.trustedCapacity < 100);
-  assert.ok(recovery.blockers.includes("Trust score has not cleared the restoration threshold."));
+  assert.ok(
+    recovery.blockers.includes(
+      "Trust score has not cleared the restoration threshold.",
+    ),
+  );
 });
 
 test("recovery locks and regresses on hard safety blockers", () => {
-  const lowSurvival = evaluateRecovery({ ...dashboardLike, survivalConfidence: 31, blockedAgencyActionCount: 0 });
-  const poorData = evaluateRecovery({ ...dashboardLike, dataReliability: 52, blockedAgencyActionCount: 0 });
-  const lockedOverfit = evaluateRecovery({ ...dashboardLike, overfitRisk: 42, blockedAgencyActionCount: 0 });
-  const regressed = evaluateRecovery({ ...dashboardLike, overfitRisk: 58, blockedAgencyActionCount: 0 });
+  const lowSurvival = evaluateRecovery({
+    ...dashboardLike,
+    survivalConfidence: 31,
+    blockedAgencyActionCount: 0,
+  });
+  const poorData = evaluateRecovery({
+    ...dashboardLike,
+    dataReliability: 52,
+    blockedAgencyActionCount: 0,
+  });
+  const lockedOverfit = evaluateRecovery({
+    ...dashboardLike,
+    overfitRisk: 42,
+    blockedAgencyActionCount: 0,
+  });
+  const regressed = evaluateRecovery({
+    ...dashboardLike,
+    overfitRisk: 58,
+    blockedAgencyActionCount: 0,
+  });
 
   assert.equal(lowSurvival.status, "locked");
   assert.equal(lowSurvival.recommendedExposureCap, 0);
-  assert.ok(lowSurvival.blockers.includes("Survival confidence is too low to start recovery."));
+  assert.ok(
+    lowSurvival.blockers.includes(
+      "Survival confidence is too low to start recovery.",
+    ),
+  );
   assert.equal(poorData.status, "locked");
-  assert.ok(poorData.unlockConditions.includes("Restore data reliability to at least 70/100."));
+  assert.ok(
+    poorData.unlockConditions.includes(
+      "Restore data reliability to at least 70/100.",
+    ),
+  );
   assert.equal(lockedOverfit.status, "locked");
   assert.equal(regressed.status, "regressed");
   assert.equal(regressed.trustedCapacity, 0);
@@ -143,7 +180,12 @@ test("recovery supports configurable agency review behavior", () => {
   });
 
   assert.equal(recovery.shouldEscalateHumanReview, false);
-  assert.equal(recovery.blockers.includes("Blocked agency actions require human review before restoration."), false);
+  assert.equal(
+    recovery.blockers.includes(
+      "Blocked agency actions require human review before restoration.",
+    ),
+    false,
+  );
   assert.equal(recovery.audit.thresholds.agencyReviewBlocksRestore, false);
 });
 
@@ -201,6 +243,10 @@ test("recovery reports score-only blockers when thresholds leave no other blocke
   });
 
   assert.equal(recovery.status, "locked");
-  assert.deepEqual(recovery.blockers, ["Recovery score is still below the recovery threshold."]);
-  assert.deepEqual(recovery.unlockConditions, ["Keep collecting stable positive outcomes until recovery score improves."]);
+  assert.deepEqual(recovery.blockers, [
+    "Recovery score is still below the recovery threshold.",
+  ]);
+  assert.deepEqual(recovery.unlockConditions, [
+    "Keep collecting stable positive outcomes until recovery score improves.",
+  ]);
 });

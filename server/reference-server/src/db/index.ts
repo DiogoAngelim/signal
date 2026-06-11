@@ -1,8 +1,9 @@
-import { createMemoryIdempotencyStore } from "@signal/runtime";
 import { createPostgresIdempotencyStore } from "@signal/idempotency-postgres";
+import type { StoragePort } from "@signal/ports";
+import { createMemoryIdempotencyStore } from "@signal/sdk-node";
 
-export function createReferenceIdempotencyStore() {
-  const connectionString = process.env["DATABASE_URL"];
+export function createReferenceIdempotencyStore(): StoragePort {
+  const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
     return createMemoryIdempotencyStore();

@@ -45,7 +45,11 @@ type ForwardShadowEvidence = {
   averageReturnPct: number | null;
   latestObservationAt: string | null;
   oldestOpenObservationAt: string | null;
-  collectionStatus: "not_started" | "collecting" | "insufficient_evidence" | "passed";
+  collectionStatus:
+    | "not_started"
+    | "collecting"
+    | "insufficient_evidence"
+    | "passed";
   storage: "postgres" | "memory";
   warnings: string[];
   passed: boolean;
@@ -106,8 +110,12 @@ function normalizeConfirmedSignal(
   config: MarketBacktestConfig,
   signal: ForwardShadowSignal,
 ): ShadowObservation | null {
-  const symbol = String(signal.symbol ?? signal.ticker ?? "").trim().toUpperCase();
-  const signalAction = String(signal.signalAction ?? signal.allocationAction ?? "").trim();
+  const symbol = String(signal.symbol ?? signal.ticker ?? "")
+    .trim()
+    .toUpperCase();
+  const signalAction = String(
+    signal.signalAction ?? signal.allocationAction ?? "",
+  ).trim();
   const entryPrice =
     finiteNumber(signal.entryPrice) ??
     finiteNumber(signal.price) ??
@@ -155,7 +163,9 @@ function currentPriceBySymbol(signals: ForwardShadowSignal[]) {
   const prices = new Map<string, number>();
 
   for (const signal of signals) {
-    const symbol = String(signal.symbol ?? signal.ticker ?? "").trim().toUpperCase();
+    const symbol = String(signal.symbol ?? signal.ticker ?? "")
+      .trim()
+      .toUpperCase();
     const price =
       finiteNumber(signal.price) ??
       finiteNumber(signal.entryPrice) ??
@@ -190,7 +200,8 @@ function evaluateOpenObservations(
 
     observation.exitPrice = exitPrice;
     observation.evaluatedAt = nowIso;
-    observation.forwardReturnPct = ((exitPrice / observation.entryPrice) - 1) * 100;
+    observation.forwardReturnPct =
+      (exitPrice / observation.entryPrice - 1) * 100;
     updates.push(observation);
   }
 
@@ -204,27 +215,34 @@ function summarizeEvidence(input: {
   storage: "postgres" | "memory";
   warnings: string[];
 }): ForwardShadowEvidence {
-  const evaluated = input.observations.filter((observation) =>
-    observation.evaluatedAt != null &&
-    observation.forwardReturnPct != null &&
-    Number.isFinite(Number(observation.forwardReturnPct)),
+  const evaluated = input.observations.filter(
+    (observation) =>
+      observation.evaluatedAt != null &&
+      observation.forwardReturnPct != null &&
+      Number.isFinite(Number(observation.forwardReturnPct)),
   );
-  const returns = evaluated.map((observation) => Number(observation.forwardReturnPct));
-  const open = input.observations.filter((observation) => !observation.evaluatedAt);
+  const returns = evaluated.map((observation) =>
+    Number(observation.forwardReturnPct),
+  );
+  const open = input.observations.filter(
+    (observation) => !observation.evaluatedAt,
+  );
   const hitRatePct = returns.length
     ? (returns.filter((value) => value > 0).length / returns.length) * 100
     : null;
   const averageReturnPct = returns.length
     ? returns.reduce((sum, value) => sum + value, 0) / returns.length
     : null;
-  const latestObservationAt = input.observations
-    .map((observation) => observation.observedAt)
-    .filter(Boolean)
-    .sort((a, b) => b.localeCompare(a))[0] ?? null;
-  const oldestOpenObservationAt = open
-    .map((observation) => observation.observedAt)
-    .filter(Boolean)
-    .sort((a, b) => a.localeCompare(b))[0] ?? null;
+  const latestObservationAt =
+    input.observations
+      .map((observation) => observation.observedAt)
+      .filter(Boolean)
+      .sort((a, b) => b.localeCompare(a))[0] ?? null;
+  const oldestOpenObservationAt =
+    open
+      .map((observation) => observation.observedAt)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b))[0] ?? null;
   const passed =
     evaluated.length >= input.requiredSignals &&
     (hitRatePct ?? 0) >= 45 &&
@@ -243,7 +261,8 @@ function summarizeEvidence(input: {
     observedSignalCount: input.observations.length,
     openSignalCount: open.length,
     evaluatedSignalCount: evaluated.length,
-    maturedUnevaluatedCount: open.filter((observation) => isMature(observation)).length,
+    maturedUnevaluatedCount: open.filter((observation) => isMature(observation))
+      .length,
     hitRatePct,
     averageReturnPct,
     latestObservationAt,
@@ -265,7 +284,9 @@ async function ensureSchema() {
 
     try {
       await client.query("BEGIN");
-      await client.query("SELECT pg_advisory_xact_lock(hashtext('stock_forward_shadow_observations_schema'))");
+      await client.query(
+        "SELECT pg_advisory_xact_lock(hashtext('stock_forward_shadow_observations_schema'))",
+      );
       await client.query(`
         CREATE TABLE IF NOT EXISTS stock_forward_shadow_observations (
           id TEXT PRIMARY KEY,
@@ -306,7 +327,9 @@ async function ensureSchema() {
 
     if (
       error instanceof Error &&
-      /duplicate key value|already exists|pg_type_typname_nsp_index/i.test(error.message)
+      /duplicate key value|already exists|pg_type_typname_nsp_index/i.test(
+        error.message,
+      )
     ) {
       await new Promise((resolve) => setTimeout(resolve, 250));
       return;
@@ -440,7 +463,10 @@ function collectWithMemory(
   }
 
   const stored = Array.from(MEMORY_OBSERVATIONS.values())
-    .filter((observation) => observation.market === market && observation.configId === config.id)
+    .filter(
+      (observation) =>
+        observation.market === market && observation.configId === config.id,
+    )
     .sort((a, b) => b.observedAt.localeCompare(a.observedAt));
   evaluateOpenObservations(stored, prices);
 
@@ -452,11 +478,15 @@ export async function collectForwardShadowEvidence(
   signals: ForwardShadowSignal[],
   config: MarketBacktestConfig,
 ): Promise<ForwardShadowEvidence> {
-  const market = String(marketInput || "ADX").trim().toUpperCase();
+  const market = String(marketInput || "ADX")
+    .trim()
+    .toUpperCase();
   const signalList = Array.isArray(signals) ? signals : [];
   const observations = signalList
     .map((signal) => normalizeConfirmedSignal(market, config, signal))
-    .filter((observation): observation is ShadowObservation => observation != null);
+    .filter(
+      (observation): observation is ShadowObservation => observation != null,
+    );
   const prices = currentPriceBySymbol(signalList);
   const warnings: string[] = [];
   let stored: ShadowObservation[];
@@ -467,13 +497,18 @@ export async function collectForwardShadowEvidence(
       stored = await collectWithPostgres(market, config, observations, prices);
       storage = "postgres";
     } catch (error) {
-      postgresUnavailableReason = error instanceof Error ? error.message : String(error);
-      warnings.push(`Forward-shadow persistence fell back to memory: ${postgresUnavailableReason}`);
+      postgresUnavailableReason =
+        error instanceof Error ? error.message : String(error);
+      warnings.push(
+        `Forward-shadow persistence fell back to memory: ${postgresUnavailableReason}`,
+      );
       stored = collectWithMemory(market, config, observations, prices);
     }
   } else {
     if (postgresUnavailableReason) {
-      warnings.push(`Forward-shadow persistence fell back to memory: ${postgresUnavailableReason}`);
+      warnings.push(
+        `Forward-shadow persistence fell back to memory: ${postgresUnavailableReason}`,
+      );
     }
     stored = collectWithMemory(market, config, observations, prices);
   }

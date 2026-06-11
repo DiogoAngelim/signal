@@ -37,13 +37,15 @@
     "release": "pnpm build && pnpm test && pnpm lint",
     "release:library": "pnpm verify:exports && pnpm typecheck:library && pnpm test:library && pnpm lint:library",
     "publish:all": "pnpm -r --sort --filter ./api/** --filter ./packages/** publish --access public",
-    "verify": "signal verify"
+    "verify": "signal verify",
+    "dag:check": "node scripts/validate-dag-ts.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^20.17.16",
     "@vitest/coverage-v8": "^2.1.9",
     "dependency-cruiser": "^16.0.0",
+    "ts-morph": "^28.0.0",
     "typescript": "^5.7.3",
     "vite": "^8.0.10",
     "vitest": "^2.1.9"

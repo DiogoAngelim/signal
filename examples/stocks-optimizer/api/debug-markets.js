@@ -7,7 +7,7 @@ function findPublicDir() {
     path.join(process.cwd(), "src/artifacts/signal-markets/public"),
     path.join(process.cwd(), "src/artifacts/signal-markets/dist/public"),
     path.join(process.cwd(), "src/public"),
-    path.join(process.cwd(), "public")
+    path.join(process.cwd(), "public"),
   ].filter(Boolean);
 
   for (const candidate of candidates) {
@@ -31,9 +31,13 @@ module.exports = function handler(_req, res) {
 
   const counts = {};
 
-  for (const file of fs.readdirSync(publicDir).filter((f) => f.startsWith("stocks_list_"))) {
+  for (const file of fs
+    .readdirSync(publicDir)
+    .filter((f) => f.startsWith("stocks_list_"))) {
     const raw = JSON.parse(fs.readFileSync(path.join(publicDir, file), "utf8"));
-    const list = Array.isArray(raw) ? raw : raw.data || raw.items || raw.stocks || raw.symbols || [];
+    const list = Array.isArray(raw)
+      ? raw
+      : raw.data || raw.items || raw.stocks || raw.symbols || [];
 
     for (const item of list) {
       const market = String(item?.market || "").trim();
@@ -47,6 +51,6 @@ module.exports = function handler(_req, res) {
     publicDir,
     markets: Object.entries(counts)
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([market, count]) => ({ market, count }))
+      .map(([market, count]) => ({ market, count })),
   });
 };

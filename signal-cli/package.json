@@ -13,13 +13,7 @@
     "test": "node dist/cli/index.js test",
     "prepublishOnly": "npm run build"
   },
-  "keywords": [
-    "signal",
-    "verification",
-    "deterministic",
-    "hash-chain",
-    "cli"
-  ],
+  "keywords": ["signal", "verification", "deterministic", "hash-chain", "cli"],
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"

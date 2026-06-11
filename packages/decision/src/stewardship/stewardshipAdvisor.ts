@@ -2,7 +2,6 @@ import { uniqueStrings } from "../utils";
 import { evaluateStewardshipGovernance } from "./governanceEvaluator";
 import { consumeStewardshipMemory } from "./memoryConsumer";
 import { interpretStewardshipOutcomes } from "./outcomeInterpreter";
-import { createStewardshipLedger } from "./stewardshipLedger";
 import {
   actionSummary,
   defaultDisclaimers,
@@ -12,6 +11,7 @@ import {
   recommendationConfidence,
   reviewTrigger,
 } from "./stewardshipCopy";
+import { createStewardshipLedger } from "./stewardshipLedger";
 import { selectStewardshipAction } from "./stewardshipPolicy";
 import type {
   StewardshipAssessment,
@@ -22,15 +22,22 @@ import type {
   StewardshipUncertainty,
 } from "./types";
 
-export function assessStewardship(input: StewardshipInput = {}): StewardshipAssessment {
+export function assessStewardship(
+  input: StewardshipInput = {},
+): StewardshipAssessment {
   const subject = normalizeSubject(input.subject);
   const memory = consumeStewardshipMemory(input.memory);
-  const outcomeInterpretation = interpretStewardshipOutcomes(input.outcomeReviews);
+  const outcomeInterpretation = interpretStewardshipOutcomes(
+    input.outcomeReviews,
+  );
   const evidence = [...memory.evidence, ...(input.evidence ?? [])];
   const lessons = [...memory.lessons, ...outcomeInterpretation.lessons];
   const threats = normalizeThreats(input.threats);
   const protections = normalizeProtections(input.protections);
-  const uncertainties = normalizeUncertainties([...(input.uncertainties ?? []), ...outcomeInterpretation.uncertainties]);
+  const uncertainties = normalizeUncertainties([
+    ...(input.uncertainties ?? []),
+    ...outcomeInterpretation.uncertainties,
+  ]);
   const ledger = createStewardshipLedger({
     subject,
     context: input.context,
@@ -73,8 +80,12 @@ export function assessStewardship(input: StewardshipInput = {}): StewardshipAsse
     subject,
     whatMatters: uniqueStrings([
       `${subject.label} should remain ${subject.desiredState}.`,
-      subject.importance === "critical" ? "The subject is critical, so protection outranks maximum action." : "",
-      ...(input.context?.constraints ?? []).map((constraint) => `Constraint: ${constraint}`),
+      subject.importance === "critical"
+        ? "The subject is critical, so protection outranks maximum action."
+        : "",
+      ...(input.context?.constraints ?? []).map(
+        (constraint) => `Constraint: ${constraint}`,
+      ),
     ]),
     threats,
     protections,
@@ -89,13 +100,18 @@ export function assessStewardship(input: StewardshipInput = {}): StewardshipAsse
       reversible: action !== "stop" && action !== "intervene",
     },
     monitoringPlan: buildMonitoringPlan(input, threats, uncertainties),
-    uncertaintySummary: buildUncertaintySummary(uncertainties, memory.missingMemory),
+    uncertaintySummary: buildUncertaintySummary(
+      uncertainties,
+      memory.missingMemory,
+    ),
     rationale: recommendation.rationale,
     disclaimers: defaultDisclaimers(),
   };
 }
 
-function normalizeThreats(threats: StewardshipThreat[] | undefined): StewardshipThreat[] {
+function normalizeThreats(
+  threats: StewardshipThreat[] | undefined,
+): StewardshipThreat[] {
   if (threats?.length) return threats;
   return [
     {
@@ -108,7 +124,9 @@ function normalizeThreats(threats: StewardshipThreat[] | undefined): Stewardship
   ];
 }
 
-function normalizeProtections(protections: StewardshipProtection[] | undefined): StewardshipProtection[] {
+function normalizeProtections(
+  protections: StewardshipProtection[] | undefined,
+): StewardshipProtection[] {
   if (protections?.length) return protections;
   return [
     {
@@ -121,14 +139,17 @@ function normalizeProtections(protections: StewardshipProtection[] | undefined):
   ];
 }
 
-function normalizeUncertainties(uncertainties: StewardshipUncertainty[]): StewardshipUncertainty[] {
+function normalizeUncertainties(
+  uncertainties: StewardshipUncertainty[],
+): StewardshipUncertainty[] {
   return uncertainties.length
     ? uncertainties
     : [
         {
           id: "uncertainty:default",
           label: "Uncertainty remains",
-          description: "The review should keep uncertainty visible instead of treating the answer as certain.",
+          description:
+            "The review should keep uncertainty visible instead of treating the answer as certain.",
           severity: "medium",
           visibility: "explicit",
         },
@@ -145,29 +166,47 @@ function dominantLessonRationale(lessons: StewardshipLesson[]): string[] {
 
 function threatRationale(threats: StewardshipThreat[]): string[] {
   return threats
-    .filter((threat) => threat.severity === "high" || threat.severity === "critical")
+    .filter(
+      (threat) => threat.severity === "high" || threat.severity === "critical",
+    )
     .map((threat) => `Threat to monitor: ${threat.label}.`);
 }
 
 function protectionRationale(protections: StewardshipProtection[]): string[] {
   return protections
-    .filter((protection) => protection.strength === "adequate" || protection.strength === "strong")
+    .filter(
+      (protection) =>
+        protection.strength === "adequate" || protection.strength === "strong",
+    )
     .map((protection) => `Protection in place: ${protection.label}.`);
 }
 
-function buildMonitoringPlan(input: StewardshipInput, threats: StewardshipThreat[], uncertainties: StewardshipUncertainty[]): string[] {
+function buildMonitoringPlan(
+  input: StewardshipInput,
+  threats: StewardshipThreat[],
+  uncertainties: StewardshipUncertainty[],
+): string[] {
   const cadence = input.context?.monitoringCadence?.replace(/[.]+$/g, "");
   return uniqueStrings([
-    cadence ? `Use cadence: ${cadence}.` : "Review after the next material change.",
+    cadence
+      ? `Use cadence: ${cadence}.`
+      : "Review after the next material change.",
     ...threats.map((threat) => `Watch ${threat.label}.`),
-    ...uncertainties.map((uncertainty) => `Keep visible: ${uncertainty.label}.`),
+    ...uncertainties.map(
+      (uncertainty) => `Keep visible: ${uncertainty.label}.`,
+    ),
   ]);
 }
 
-function buildUncertaintySummary(uncertainties: StewardshipUncertainty[], missingMemory: boolean): string[] {
+function buildUncertaintySummary(
+  uncertainties: StewardshipUncertainty[],
+  missingMemory: boolean,
+): string[] {
   return uniqueStrings([
     missingMemory ? "Decision memory is missing or not yet useful." : "",
-    ...uncertainties.map((uncertainty) => uncertainty.description ?? uncertainty.label),
+    ...uncertainties.map(
+      (uncertainty) => uncertainty.description ?? uncertainty.label,
+    ),
     "This assessment should be updated when new evidence is reviewed.",
   ]);
 }

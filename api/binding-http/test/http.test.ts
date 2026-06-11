@@ -1,12 +1,22 @@
+import {
+  SignalRuntime,
+  createMemoryIdempotencyStore,
+  defineMutation,
+  defineQuery,
+} from "@signal/sdk-node";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { SignalRuntime, createMemoryIdempotencyStore } from "../../runtime/src";
-import { defineMutation, defineQuery } from "../../sdk-node/src";
 import { createSignalHttpServer } from "../src";
+
+const noopEventPort = {
+  dispatch: async () => {},
+  subscribe: () => () => {},
+};
 
 describe("http binding", () => {
   it("executes queries and mutations", async () => {
     const runtime = new SignalRuntime({
+      eventPort: noopEventPort,
       idempotencyStore: createMemoryIdempotencyStore(),
     });
 
@@ -132,7 +142,7 @@ describe("http binding", () => {
   });
 
   it("returns structured failures for malformed request bodies", async () => {
-    const runtime = new SignalRuntime();
+    const runtime = new SignalRuntime({ eventPort: noopEventPort });
 
     runtime.registerQuery(
       defineQuery({

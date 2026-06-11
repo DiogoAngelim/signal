@@ -9,8 +9,20 @@
     "policy": "conservative",
     "resource": { "available": 1000 },
     "decisions": [
-      { "id": "steady", "confidence": 0.82, "trust": 0.86, "risk": 0.25, "outcomeSeries": [0.01, 0.009, 0.011, 0.008, 0.01, 0.009] },
-      { "id": "wild", "confidence": 0.86, "trust": 0.82, "risk": 0.8, "outcomeSeries": [0.08, -0.11, 0.12, -0.09, 0.1, -0.12] }
+      {
+        "id": "steady",
+        "confidence": 0.82,
+        "trust": 0.86,
+        "risk": 0.25,
+        "outcomeSeries": [0.01, 0.009, 0.011, 0.008, 0.01, 0.009]
+      },
+      {
+        "id": "wild",
+        "confidence": 0.86,
+        "trust": 0.82,
+        "risk": 0.8,
+        "outcomeSeries": [0.08, -0.11, 0.12, -0.09, 0.1, -0.12]
+      }
     ],
     "seed": "extreme-volatility",
     "now": "2026-06-01T00:00:00Z"
@@ -23,8 +35,20 @@
     "limitedBy": [],
     "cappedBy": [],
     "recommendations": [
-      { "targetId": "steady", "amount": 162.80572, "normalizedCommitment": 0.162806, "weight": 1, "mode": "limited" },
-      { "targetId": "wild", "amount": 0, "normalizedCommitment": 0, "weight": 0, "mode": "none" }
+      {
+        "targetId": "steady",
+        "amount": 162.80572,
+        "normalizedCommitment": 0.162806,
+        "weight": 1,
+        "mode": "limited"
+      },
+      {
+        "targetId": "wild",
+        "amount": 0,
+        "normalizedCommitment": 0,
+        "weight": 0,
+        "mode": "none"
+      }
     ]
   }
 }

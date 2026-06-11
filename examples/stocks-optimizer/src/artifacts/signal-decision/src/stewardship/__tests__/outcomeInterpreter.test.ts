@@ -15,7 +15,9 @@ describe("interpretStewardshipOutcomes", () => {
 
     expect(result.lessons[0]?.outcome).toBe("unknown");
     expect(result.uncertainties[0]?.visibility).toBe("explicit");
-    expect(result.uncertainties[0]?.description).toContain("outcome is not known");
+    expect(result.uncertainties[0]?.description).toContain(
+      "outcome is not known",
+    );
   });
 
   it("keeps too-early outcomes visible as uncertainty", () => {
@@ -30,10 +32,14 @@ describe("interpretStewardshipOutcomes", () => {
     ]);
 
     expect(result.lessons).toHaveLength(1);
-    expect(result.lessons[0]?.summary).toBe("The early result should not be over-weighted.");
+    expect(result.lessons[0]?.summary).toBe(
+      "The early result should not be over-weighted.",
+    );
     expect(result.lessons[0]?.sourceOutcomeReviewId).toBe("review:early");
     expect(result.lessons[0]?.evidenceIds).toEqual(["evidence:early-review"]);
-    expect(result.uncertainties[0]?.description).toBe("Too early to judge durability.");
+    expect(result.uncertainties[0]?.description).toBe(
+      "Too early to judge durability.",
+    );
   });
 
   it("maps repeated confirmed and contradicted reviews into lessons", () => {
@@ -52,7 +58,10 @@ describe("interpretStewardshipOutcomes", () => {
       },
     ]);
 
-    expect(result.lessons.map((lesson) => lesson.outcome)).toEqual(["confirmed", "contradicted"]);
+    expect(result.lessons.map((lesson) => lesson.outcome)).toEqual([
+      "confirmed",
+      "contradicted",
+    ]);
     expect(result.lessons.map((lesson) => lesson.repetition)).toEqual([3, 2]);
   });
 });

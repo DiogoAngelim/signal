@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { SignalRobustnessEngine, type RobustnessObservation } from "./engine";
+import { type RobustnessObservation, SignalRobustnessEngine } from "./engine";
 
 function durableObservations(): RobustnessObservation[] {
   const regimes = [
@@ -14,7 +14,11 @@ function durableObservations(): RobustnessObservation[] {
 
   return Array.from({ length: 72 }, (_, index) => {
     const cycle = index % regimes.length;
-    const actual = 1.8 + Math.sin(index / 3) * 0.55 + (cycle === 3 ? -0.35 : 0) + (cycle === 4 ? 0.45 : 0);
+    const actual =
+      1.8 +
+      Math.sin(index / 3) * 0.55 +
+      (cycle === 3 ? -0.35 : 0) +
+      (cycle === 4 ? 0.45 : 0);
     return {
       id: `obs-${index}`,
       index,
@@ -46,10 +50,34 @@ test("durable diagnostics reduce overfit risk below production threshold", () =>
     observedForwardSamples: 72,
     dataQualityScore: 100,
     parameterVariants: [
-      { id: "base", score: 100, baselineScore: 100, benchmarkScore: 35, passed: true },
-      { id: "lookback-down", score: 92, baselineScore: 100, benchmarkScore: 34, passed: true },
-      { id: "lookback-up", score: 96, baselineScore: 100, benchmarkScore: 36, passed: true },
-      { id: "risk-up", score: 90, baselineScore: 100, benchmarkScore: 33, passed: true },
+      {
+        id: "base",
+        score: 100,
+        baselineScore: 100,
+        benchmarkScore: 35,
+        passed: true,
+      },
+      {
+        id: "lookback-down",
+        score: 92,
+        baselineScore: 100,
+        benchmarkScore: 34,
+        passed: true,
+      },
+      {
+        id: "lookback-up",
+        score: 96,
+        baselineScore: 100,
+        benchmarkScore: 36,
+        passed: true,
+      },
+      {
+        id: "risk-up",
+        score: 90,
+        baselineScore: 100,
+        benchmarkScore: 33,
+        passed: true,
+      },
     ],
     adversarialScenarios: [
       { id: "spread-widening", score: 94, baselineScore: 100, severity: 12 },
@@ -63,7 +91,13 @@ test("durable diagnostics reduce overfit risk below production threshold", () =>
       { id: "volatility", direction: -1, confidence: 36, weight: 0.65 },
     ],
     leakageChecks: [
-      { id: "wf-1", trainEndIndex: 17, validationStartIndex: 18, featureTimestampIndex: 17, labelTimestampIndex: 18 },
+      {
+        id: "wf-1",
+        trainEndIndex: 17,
+        validationStartIndex: 18,
+        featureTimestampIndex: 17,
+        labelTimestampIndex: 18,
+      },
     ],
     seed: 99,
   });
@@ -73,9 +107,13 @@ test("durable diagnostics reduce overfit risk below production threshold", () =>
   assert.ok(result.overfitRisk <= 30);
   assert.ok(result.walkForward.windows.length > 0);
   assert.ok(result.regimes.regimes.length >= 4);
-  assert.ok(result.calibration.reliabilityCurve.some((bucket) => bucket.samples > 0));
+  assert.ok(
+    result.calibration.reliabilityCurve.some((bucket) => bucket.samples > 0),
+  );
   assert.ok(result.parameterSensitivity.heatmap.every((cell) => cell.passed));
-  assert.deepEqual(result.reasons, ["Robustness diagnostics are within production tolerance."]);
+  assert.deepEqual(result.reasons, [
+    "Robustness diagnostics are within production tolerance.",
+  ]);
 });
 
 test("long-history diversity scores reduce false overfit confidence without hiding weak coverage", () => {
@@ -90,8 +128,20 @@ test("long-history diversity scores reduce false overfit confidence without hidi
     observedForwardSamples: 72,
     dataQualityScore: 92,
     parameterVariants: [
-      { id: "base", score: 100, baselineScore: 100, benchmarkScore: 35, passed: true },
-      { id: "nearby", score: 90, baselineScore: 100, benchmarkScore: 34, passed: true },
+      {
+        id: "base",
+        score: 100,
+        baselineScore: 100,
+        benchmarkScore: 35,
+        passed: true,
+      },
+      {
+        id: "nearby",
+        score: 90,
+        baselineScore: 100,
+        benchmarkScore: 34,
+        passed: true,
+      },
     ],
     adversarialScenarios: [
       { id: "spread-widening", score: 90, baselineScore: 100, severity: 12 },
@@ -119,24 +169,31 @@ test("long-history diversity scores reduce false overfit confidence without hidi
   assert.ok(broad.overfitRisk < shallow.overfitRisk);
   assert.equal(broad.historyDepthScore, 96);
   assert.equal(broad.regimeDiversityScore, 90);
-  assert.ok(shallow.reasons.some((reason) => reason.includes("Historical depth")));
-  assert.ok(shallow.reasons.some((reason) => reason.includes("Regime coverage")));
+  assert.ok(
+    shallow.reasons.some((reason) => reason.includes("Historical depth")),
+  );
+  assert.ok(
+    shallow.reasons.some((reason) => reason.includes("Regime coverage")),
+  );
 });
 
 test("fragile synchronized history is reduced or blocked instead of promoted", () => {
-  const observations: RobustnessObservation[] = Array.from({ length: 22 }, (_, index) => ({
-    index,
-    timestamp: index,
-    actual: index < 18 ? 2.5 : -8 - index,
-    confidence: 94,
-    regime: index < 18 ? "trending" : "panic",
-    participated: index < 4,
-    features: {
-      synchronized: 1,
-      volatility: index < 18 ? 18 : 92,
-      liquidity: index < 18 ? 80 : 20,
-    },
-  }));
+  const observations: RobustnessObservation[] = Array.from(
+    { length: 22 },
+    (_, index) => ({
+      index,
+      timestamp: index,
+      actual: index < 18 ? 2.5 : -8 - index,
+      confidence: 94,
+      regime: index < 18 ? "trending" : "panic",
+      participated: index < 4,
+      features: {
+        synchronized: 1,
+        volatility: index < 18 ? 18 : 92,
+        liquidity: index < 18 ? 80 : 20,
+      },
+    }),
+  );
 
   const result = new SignalRobustnessEngine().evaluate({
     observations,
@@ -148,8 +205,20 @@ test("fragile synchronized history is reduced or blocked instead of promoted", (
     observedForwardSamples: 4,
     dataQualityScore: 78,
     parameterVariants: [
-      { id: "base", score: 100, baselineScore: 100, benchmarkScore: 50, passed: true },
-      { id: "nearby", score: 8, baselineScore: 100, benchmarkScore: 50, passed: false },
+      {
+        id: "base",
+        score: 100,
+        baselineScore: 100,
+        benchmarkScore: 50,
+        passed: true,
+      },
+      {
+        id: "nearby",
+        score: 8,
+        baselineScore: 100,
+        benchmarkScore: 50,
+        passed: false,
+      },
     ],
     adversarialScenarios: [
       { id: "slippage", score: -12, baselineScore: 100, severity: 35 },
@@ -159,7 +228,14 @@ test("fragile synchronized history is reduced or blocked instead of promoted", (
       { id: "minority", direction: -1, confidence: 10, weight: 0.1 },
     ],
     leakageChecks: [
-      { id: "leak", trainEndIndex: 12, validationStartIndex: 12, normalizedWithFuture: true, featureTimestampIndex: 13, labelTimestampIndex: 13 },
+      {
+        id: "leak",
+        trainEndIndex: 12,
+        validationStartIndex: 12,
+        normalizedWithFuture: true,
+        featureTimestampIndex: 13,
+        labelTimestampIndex: 13,
+      },
     ],
   });
 
@@ -168,8 +244,16 @@ test("fragile synchronized history is reduced or blocked instead of promoted", (
   assert.ok(result.overfitRisk > 60);
   assert.ok(result.parameterSensitivity.fragilityScore > 50);
   assert.ok(result.participation.participationScore < 35);
-  assert.ok(result.reasons.some((reason) => reason.includes("validation overlaps training")));
-  assert.ok(result.reasons.some((reason) => reason.includes("normalization used future data")));
+  assert.ok(
+    result.reasons.some((reason) =>
+      reason.includes("validation overlaps training"),
+    ),
+  );
+  assert.ok(
+    result.reasons.some((reason) =>
+      reason.includes("normalization used future data"),
+    ),
+  );
 });
 
 test("diagnostics are reproducible for identical seeds and inputs", () => {
@@ -177,7 +261,13 @@ test("diagnostics are reproducible for identical seeds and inputs", () => {
     observations: durableObservations().slice(0, 40),
     minimumSamples: 20,
     parameterVariants: [
-      { id: "a", score: 30, baselineScore: 35, benchmarkScore: 20, passed: true },
+      {
+        id: "a",
+        score: 30,
+        baselineScore: 35,
+        benchmarkScore: 20,
+        passed: true,
+      },
     ],
     adversarialScenarios: [
       { id: "noise", score: 28, baselineScore: 35, severity: 5 },
@@ -233,7 +323,13 @@ test("fallback branches handle sparse participation and inferred regimes", () =>
     validationWindowSize: 2,
     stepSize: 0,
     parameterVariants: [
-      { id: "zero-baseline", score: 0, baselineScore: 0, benchmarkScore: 0, passed: true },
+      {
+        id: "zero-baseline",
+        score: 0,
+        baselineScore: 0,
+        benchmarkScore: 0,
+        passed: true,
+      },
       { id: "fallback-baseline", score: 2 },
     ],
     adversarialScenarios: [
@@ -247,9 +343,17 @@ test("fallback branches handle sparse participation and inferred regimes", () =>
     seed: 0,
   });
 
-  assert.ok(inferred.regimes.regimes.some((item) => item.regime === "trending"));
-  assert.ok(inferred.regimes.regimes.some((item) => item.regime === "expansion"));
-  assert.ok(inferred.regimes.regimes.some((item) => item.regime === "liquidity-compression"));
+  assert.ok(
+    inferred.regimes.regimes.some((item) => item.regime === "trending"),
+  );
+  assert.ok(
+    inferred.regimes.regimes.some((item) => item.regime === "expansion"),
+  );
+  assert.ok(
+    inferred.regimes.regimes.some(
+      (item) => item.regime === "liquidity-compression",
+    ),
+  );
   assert.equal(inferred.parameterSensitivity.heatmap[0].degradationPct, 0);
   assert.equal(inferred.adversarial.scenarios[0].degradationPct, 0);
 
@@ -263,15 +367,16 @@ test("fallback branches handle sparse participation and inferred regimes", () =>
     ],
     trainWindowSize: 2,
     validationWindowSize: 1,
-    parameterVariants: [
-      { id: "no-baseline", score: 3 },
-    ],
+    parameterVariants: [{ id: "no-baseline", score: 3 }],
     ensembleVotes: [
       { id: "zero-a", direction: 1, confidence: 50, weight: 0 },
       { id: "zero-b", direction: -1, confidence: 50, weight: 0 },
     ],
   });
-  assert.equal(fallbackVariant.parameterSensitivity.heatmap[0].degradationPct, 0);
+  assert.equal(
+    fallbackVariant.parameterSensitivity.heatmap[0].degradationPct,
+    0,
+  );
   assert.equal(Number.isFinite(fallbackVariant.ensemble.consensusScore), true);
 
   const empty = engine.evaluate({
@@ -295,8 +400,14 @@ test("fallback branches handle sparse participation and inferred regimes", () =>
     trainWindowSize: 2,
     validationWindowSize: 1,
   });
-  assert.ok(featureEdges.featureTrust.features.some((item) => item.key === "sparse" && item.trust === 45));
-  assert.ok(featureEdges.featureTrust.features.some((item) => item.key === "inverse"));
+  assert.ok(
+    featureEdges.featureTrust.features.some(
+      (item) => item.key === "sparse" && item.trust === 45,
+    ),
+  );
+  assert.ok(
+    featureEdges.featureTrust.features.some((item) => item.key === "inverse"),
+  );
 
   const zeroTrust = engine.evaluate({
     observations: [

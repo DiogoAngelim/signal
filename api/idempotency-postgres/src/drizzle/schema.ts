@@ -34,7 +34,7 @@ export const signalIdempotencyRecords = pgTable(
   (table) => ({
     uniqueOperationKey: uniqueIndex("signal_idempotency_operation_key").on(
       table.operationName,
-      table.idempotencyKey
+      table.idempotencyKey,
     ),
-  })
+  }),
 );

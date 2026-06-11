@@ -1,11 +1,12 @@
+import type { Position } from "../portfolio-risk/types";
 import { AccountSync } from "./account-sync";
+import { CircuitBreaker } from "./circuit-breaker";
 import { BinanceHttpClient } from "./client";
 import { allSymbolsAllowed, loadBinanceExecutionConfig } from "./config";
-import { CircuitBreaker } from "./circuit-breaker";
+import { BinanceApiError, BinanceRateLimitError, errorMessage } from "./errors";
 import { ExchangeInfoCache } from "./exchange-cache";
 import { ExecutionStateStore } from "./execution-state";
 import { KillSwitch } from "./kill-switch";
-import { BinanceApiError, BinanceRateLimitError, errorMessage } from "./errors";
 import { binanceExecutionLogger } from "./logger";
 import { ExecutionMetrics } from "./metrics";
 import { OrderRouter } from "./order-router";
@@ -13,16 +14,18 @@ import { minNotionalFor } from "./order-validator";
 import { PositionReconciler } from "./position-reconciler";
 import { RateLimiter } from "./rate-limit";
 import { RiskGuard } from "./risk-guard";
-import { allocateProportionalNotional, computeAvailableStrategyEquity } from "./sizing-adapter";
+import {
+  allocateProportionalNotional,
+  computeAvailableStrategyEquity,
+} from "./sizing-adapter";
 import type {
   AccountState,
+  BinanceExchangeInfo,
   BinanceExecutionConfigInput,
   BinanceExecutionDecision,
-  BinanceExchangeInfo,
   BinanceSymbolInfo,
   ExecutionResult,
 } from "./types";
-import type { Position } from "../portfolio-risk/types";
 
 export * from "./types";
 export * from "./config";
@@ -38,7 +41,9 @@ export * from "./metrics";
 export * from "./errors";
 export * from "./position-reconciler";
 
-export function createBinanceExecutionModule(configInput: BinanceExecutionConfigInput = {}) {
+export function createBinanceExecutionModule(
+  configInput: BinanceExecutionConfigInput = {},
+) {
   return new BinanceExecutionModule(configInput);
 }
 
@@ -74,16 +79,24 @@ export class BinanceExecutionModule {
         this.enableKillSwitch(`binance_418:${reason}`);
       },
     });
-    this.client = this.config.mode === "dry_run"
-      ? undefined
-      : new BinanceHttpClient(this.config, this.rateLimiter);
+    this.client =
+      this.config.mode === "dry_run"
+        ? undefined
+        : new BinanceHttpClient(this.config, this.rateLimiter);
     this.accountSync = new AccountSync(this.config, this.store, this.client);
     this.reconciler = new PositionReconciler(this.store, this.metrics);
     this.riskGuard = new RiskGuard(this.config, this.store, this.killSwitch);
-    this.orderRouter = new OrderRouter(this.config, this.store, this.metrics, this.client);
+    this.orderRouter = new OrderRouter(
+      this.config,
+      this.store,
+      this.metrics,
+      this.client,
+    );
 
     if (this.config.validationErrors.length > 0) {
-      this.enableKillSwitch(`config_invalid:${this.config.validationErrors.join(",")}`);
+      this.enableKillSwitch(
+        `config_invalid:${this.config.validationErrors.join(",")}`,
+      );
     }
   }
 
@@ -93,30 +106,42 @@ export class BinanceExecutionModule {
    * Executing a single decision bypasses the Portfolio & Risk layer.
    * The canonical path is: Signal → RiskEngine → Position → executePositions()
    */
-  async executeDecision(decision: BinanceExecutionDecision): Promise<ExecutionResult> {
+  async executeDecision(
+    decision: BinanceExecutionDecision,
+  ): Promise<ExecutionResult> {
     const [result] = await this.executeDecisions([decision]);
     return result;
   }
 
-  async executeDecisions(decisions: BinanceExecutionDecision[]): Promise<ExecutionResult[]> {
+  async executeDecisions(
+    decisions: BinanceExecutionDecision[],
+  ): Promise<ExecutionResult[]> {
     const normalizedDecisions = decisions.map(normalizeDecision);
-    for (const decision of normalizedDecisions) this.metrics.increment("decisions_received");
+    for (const decision of normalizedDecisions)
+      this.metrics.increment("decisions_received");
 
     const account = await this.syncAccountState();
     const exchangeInfo = await this.loadExchangeInfo();
     const positionSnapshot = this.reconciler.reconcile(account);
     if (positionSnapshot.driftDetected) {
-      this.enableKillSwitch(`reconciliation_drift:${positionSnapshot.driftReasons.join(",")}`);
+      this.enableKillSwitch(
+        `reconciliation_drift:${positionSnapshot.driftReasons.join(",")}`,
+      );
     }
 
     const availableEquity = computeAvailableStrategyEquity({
       accountEquity: account.equity,
       availableEquity: account.availableEquity,
       strategyEquityCap: this.config.strategyEquityCap,
-      reservedCapital: this.store.activeReservations().reduce((sum, reservation) => sum + reservation.amount, 0),
+      reservedCapital: this.store
+        .activeReservations()
+        .reduce((sum, reservation) => sum + reservation.amount, 0),
     });
     const minNotionalBySymbol = Object.fromEntries(
-      exchangeInfo.symbols.map((symbol) => [symbol.symbol, minNotionalFor(symbol)]),
+      exchangeInfo.symbols.map((symbol) => [
+        symbol.symbol,
+        minNotionalFor(symbol),
+      ]),
     );
     const allocations = allocateProportionalNotional({
       decisions: normalizedDecisions,
@@ -124,21 +149,24 @@ export class BinanceExecutionModule {
       strategyEquityCap: this.config.strategyEquityCap,
       maxDailyNotional: this.config.maxDailyNotional,
       maxOrderNotional: this.config.maxNotionalPerOrder,
-      useFullAvailableEquity: this.config.allocationMode === "system_proportional",
+      useFullAvailableEquity:
+        this.config.allocationMode === "system_proportional",
       usedDailyNotional: this.riskGuard.dailyNotional(),
       minNotionalBySymbol,
     });
 
     const results: ExecutionResult[] = [];
     for (const allocation of allocations) {
-      results.push(await this.executeAllocatedDecision({
-        decision: allocation.decision,
-        notional: allocation.notional,
-        allocationRejected: allocation.rejected,
-        allocationReasons: allocation.reasons,
-        account,
-        positionSnapshot,
-      }));
+      results.push(
+        await this.executeAllocatedDecision({
+          decision: allocation.decision,
+          notional: allocation.notional,
+          allocationRejected: allocation.rejected,
+          allocationReasons: allocation.reasons,
+          account,
+          positionSnapshot,
+        }),
+      );
     }
 
     this.persistRuntime();
@@ -212,7 +240,9 @@ export class BinanceExecutionModule {
     const reasons: string[] = [];
     const account = this.store.getAccountState();
     const lastSyncAt = account.syncedAt;
-    const staleState = !lastSyncAt || Date.now() - Date.parse(lastSyncAt) > this.config.staleSyncMs;
+    const staleState =
+      !lastSyncAt ||
+      Date.now() - Date.parse(lastSyncAt) > this.config.staleSyncMs;
     const positions = this.getExecutionState().positions;
     const exchangeReachable = await this.exchangeReachable();
     const killSwitchActive = this.killSwitch.isActive();
@@ -224,7 +254,8 @@ export class BinanceExecutionModule {
     if (!reconciliationHealthy) reasons.push("reconciliation_drift");
     if (killSwitchActive) reasons.push("kill_switch_active");
     if (staleState) reasons.push("stale_state");
-    for (const error of this.config.validationErrors) reasons.push(`config:${error}`);
+    for (const error of this.config.validationErrors)
+      reasons.push(`config:${error}`);
 
     return {
       ok: reasons.length === 0,
@@ -268,11 +299,14 @@ export class BinanceExecutionModule {
       return this.rejectDecision(decision, input.allocationReasons, now);
     }
 
-    const symbolInfo = this.exchangeCache.symbol(decision.symbol) ??
-      (this.config.mode === "dry_run" && allSymbolsAllowed(this.config.allowedSymbols)
+    const symbolInfo =
+      this.exchangeCache.symbol(decision.symbol) ??
+      (this.config.mode === "dry_run" &&
+      allSymbolsAllowed(this.config.allowedSymbols)
         ? dryRunSymbolInfo(decision.symbol)
         : null);
-    if (!symbolInfo) return this.rejectDecision(decision, ["symbol_not_found"], now);
+    if (!symbolInfo)
+      return this.rejectDecision(decision, ["symbol_not_found"], now);
 
     const order = this.orderRouter.buildOrder({
       decision,
@@ -280,7 +314,11 @@ export class BinanceExecutionModule {
       symbolInfo,
       account: input.account,
     });
-    const exchangeValidation = this.orderRouter.validateOrder(order, symbolInfo, input.account);
+    const exchangeValidation = this.orderRouter.validateOrder(
+      order,
+      symbolInfo,
+      input.account,
+    );
     const risk = this.riskGuard.evaluate({
       decision,
       order: exchangeValidation.normalized ?? order,
@@ -290,7 +328,11 @@ export class BinanceExecutionModule {
     });
 
     if (!risk.ok) {
-      return this.rejectDecision(decision, risk.reasons.map((reason) => reason.code), now);
+      return this.rejectDecision(
+        decision,
+        risk.reasons.map((reason) => reason.code),
+        now,
+      );
     }
 
     this.metrics.increment("decisions_approved");
@@ -304,11 +346,18 @@ export class BinanceExecutionModule {
       updatedAt: now,
     });
 
-    const result = await this.orderRouter.placeOrder(exchangeValidation.normalized ?? order);
+    const result = await this.orderRouter.placeOrder(
+      exchangeValidation.normalized ?? order,
+    );
     this.store.saveDecisionExecution({
       decisionId: decision.id,
       clientOrderId: order.clientOrderId,
-      status: result.status === "failed" ? "failed" : result.status === "rejected" ? "rejected" : "accepted",
+      status:
+        result.status === "failed"
+          ? "failed"
+          : result.status === "rejected"
+            ? "rejected"
+            : "accepted",
       reasons: result.reasons,
       decision,
       createdAt: now,
@@ -317,7 +366,11 @@ export class BinanceExecutionModule {
     return result;
   }
 
-  private rejectDecision(decision: BinanceExecutionDecision, reasons: string[], now = new Date().toISOString()): ExecutionResult {
+  private rejectDecision(
+    decision: BinanceExecutionDecision,
+    reasons: string[],
+    now = new Date().toISOString(),
+  ): ExecutionResult {
     this.metrics.increment("decisions_rejected");
     this.store.saveDecisionExecution({
       decisionId: decision.id,
@@ -336,10 +389,12 @@ export class BinanceExecutionModule {
   }
 
   private async loadExchangeInfo() {
-    if (this.exchangeCache.fresh && this.exchangeCache.get()) return this.exchangeCache.get() as BinanceExchangeInfo;
-    const exchangeInfo = this.config.mode === "dry_run"
-      ? dryRunExchangeInfo(this.config.allowedSymbols)
-      : await this.client!.exchangeInfo();
+    if (this.exchangeCache.fresh && this.exchangeCache.get())
+      return this.exchangeCache.get() as BinanceExchangeInfo;
+    const exchangeInfo =
+      this.config.mode === "dry_run"
+        ? dryRunExchangeInfo(this.config.allowedSymbols)
+        : await this.client?.exchangeInfo();
     this.exchangeCache.set(exchangeInfo);
     return exchangeInfo;
   }
@@ -348,7 +403,7 @@ export class BinanceExecutionModule {
     if (this.config.mode === "dry_run") return true;
     if (!this.circuitBreaker.canAttempt()) return false;
     try {
-      await this.client!.syncTime();
+      await this.client?.syncTime();
       this.circuitBreaker.recordSuccess();
       return true;
     } catch (error) {
@@ -378,19 +433,33 @@ export class BinanceExecutionModule {
   }
 }
 
-function normalizeDecision(decision: BinanceExecutionDecision): BinanceExecutionDecision {
+function normalizeDecision(
+  decision: BinanceExecutionDecision,
+): BinanceExecutionDecision {
   return {
     ...decision,
     id: String(decision.id ?? "").trim(),
-    symbol: String(decision.symbol ?? "").trim().toUpperCase(),
-    action: String(decision.action ?? "HOLD").trim().toUpperCase() as BinanceExecutionDecision["action"],
+    symbol: String(decision.symbol ?? "")
+      .trim()
+      .toUpperCase(),
+    action: String(decision.action ?? "HOLD")
+      .trim()
+      .toUpperCase() as BinanceExecutionDecision["action"],
     confidence: Number(decision.confidence),
     trust: Number(decision.trust),
     appSizePct: Number(decision.appSizePct),
-    expectedMovePct: Number.isFinite(Number(decision.expectedMovePct)) ? Number(decision.expectedMovePct) : undefined,
-    price: Number.isFinite(Number(decision.price)) ? Number(decision.price) : undefined,
-    limitPrice: Number.isFinite(Number(decision.limitPrice)) ? Number(decision.limitPrice) : undefined,
-    exitQuantity: Number.isFinite(Number(decision.exitQuantity)) ? Number(decision.exitQuantity) : undefined,
+    expectedMovePct: Number.isFinite(Number(decision.expectedMovePct))
+      ? Number(decision.expectedMovePct)
+      : undefined,
+    price: Number.isFinite(Number(decision.price))
+      ? Number(decision.price)
+      : undefined,
+    limitPrice: Number.isFinite(Number(decision.limitPrice))
+      ? Number(decision.limitPrice)
+      : undefined,
+    exitQuantity: Number.isFinite(Number(decision.exitQuantity))
+      ? Number(decision.exitQuantity)
+      : undefined,
     timestamp: decision.timestamp || new Date(0).toISOString(),
   };
 }
@@ -404,16 +473,35 @@ function dryRunExchangeInfo(symbols: string[]): BinanceExchangeInfo {
 }
 
 function dryRunSymbolInfo(symbol: string): BinanceSymbolInfo {
-  const quoteAsset = symbol.endsWith("USDT") ? "USDT" : symbol.endsWith("USDC") ? "USDC" : "USDT";
+  const quoteAsset = symbol.endsWith("USDT")
+    ? "USDT"
+    : symbol.endsWith("USDC")
+      ? "USDC"
+      : "USDT";
   return {
     symbol,
     status: "TRADING",
     baseAsset: symbol.slice(0, -quoteAsset.length),
     quoteAsset,
     filters: [
-      { filterType: "LOT_SIZE", minQty: "0.00001", maxQty: "100000", stepSize: "0.00001" },
-      { filterType: "MARKET_LOT_SIZE", minQty: "0.00001", maxQty: "100000", stepSize: "0.00001" },
-      { filterType: "PRICE_FILTER", minPrice: "0.00001", maxPrice: "10000000", tickSize: "0.00001" },
+      {
+        filterType: "LOT_SIZE",
+        minQty: "0.00001",
+        maxQty: "100000",
+        stepSize: "0.00001",
+      },
+      {
+        filterType: "MARKET_LOT_SIZE",
+        minQty: "0.00001",
+        maxQty: "100000",
+        stepSize: "0.00001",
+      },
+      {
+        filterType: "PRICE_FILTER",
+        minPrice: "0.00001",
+        maxPrice: "10000000",
+        tickSize: "0.00001",
+      },
       { filterType: "MIN_NOTIONAL", minNotional: "5", applyToMarket: true },
       { filterType: "NOTIONAL", minNotional: "5", maxNotional: "10000000" },
       { filterType: "MAX_NUM_ORDERS", maxNumOrders: 200 },
@@ -432,26 +520,38 @@ function dryRunSymbolInfo(symbol: string): BinanceSymbolInfo {
  * This function is retained for backward compatibility only.
  * New code MUST route through the Portfolio & Risk layer.
  */
-export function mapStrategySignalToBinanceDecision(signal: Record<string, unknown>, strategyId = "stocks-optimizer"): BinanceExecutionDecision {
-  const symbol = String(signal.symbol ?? signal.ticker ?? "").trim().toUpperCase();
-  const actionText = String(signal.allocationAction ?? signal.signalAction ?? "Hold").trim().toUpperCase();
+export function mapStrategySignalToBinanceDecision(
+  signal: Record<string, unknown>,
+  strategyId = "stocks-optimizer",
+): BinanceExecutionDecision {
+  const symbol = String(signal.symbol ?? signal.ticker ?? "")
+    .trim()
+    .toUpperCase();
+  const actionText = String(
+    signal.allocationAction ?? signal.signalAction ?? "Hold",
+  )
+    .trim()
+    .toUpperCase();
   const riskState = String(signal.riskState ?? signal.signalStatus ?? "");
-  const action = actionText === "BUY"
-    ? "BUY"
-    : actionText === "SELL" || actionText === "EXIT" || riskState.toLowerCase() === "risk-exit"
-      ? "EXIT"
-      : "HOLD";
+  const action =
+    actionText === "BUY"
+      ? "BUY"
+      : actionText === "SELL" ||
+          actionText === "EXIT" ||
+          riskState.toLowerCase() === "risk-exit"
+        ? "EXIT"
+        : "HOLD";
   const suggestedExposure = Number(signal.suggestedExposure ?? 0);
   const maxPositionPct = Number(signal.maxPositionPct ?? suggestedExposure);
   const normalizedSize = Number.isFinite(Number(signal.appSizePct))
     ? Number(signal.appSizePct)
     : action === "EXIT"
       ? 1
-    : maxPositionPct > 0
-      ? suggestedExposure / maxPositionPct
-      : suggestedExposure > 0
-      ? 1
-      : 0;
+      : maxPositionPct > 0
+        ? suggestedExposure / maxPositionPct
+        : suggestedExposure > 0
+          ? 1
+          : 0;
   const expectedMovePct = firstFiniteNumber([
     signal.expectedMovePct,
     signal.expectedMove,
@@ -460,20 +560,33 @@ export function mapStrategySignalToBinanceDecision(signal: Record<string, unknow
     signal.targetMovePct,
   ]);
   return {
-    id: String(signal.decisionId ?? `${strategyId}:${symbol}:${action}:${signal.timestamp ?? signal.updatedAt ?? Date.now()}`),
+    id: String(
+      signal.decisionId ??
+        `${strategyId}:${symbol}:${action}:${signal.timestamp ?? signal.updatedAt ?? Date.now()}`,
+    ),
     symbol,
     action,
-    confidence: Number(signal.signalConfidence ?? signal.confidence ?? signal.setupQuality ?? 0),
+    confidence: Number(
+      signal.signalConfidence ?? signal.confidence ?? signal.setupQuality ?? 0,
+    ),
     trust: Number(signal.trustworthiness ?? signal.trust ?? 0),
-    calibratedConfidence: Number(signal.calibratedConfidence ?? signal.signalConfidence ?? 0),
+    calibratedConfidence: Number(
+      signal.calibratedConfidence ?? signal.signalConfidence ?? 0,
+    ),
     appSizePct: normalizedSize,
-    suggestedNotional: Number.isFinite(Number(signal.suggestedNotional)) ? Number(signal.suggestedNotional) : undefined,
+    suggestedNotional: Number.isFinite(Number(signal.suggestedNotional))
+      ? Number(signal.suggestedNotional)
+      : undefined,
     expectedMovePct,
     riskState,
     sizingMode: String(signal.sizingMode ?? ""),
     strategyId,
-    timestamp: String(signal.timestamp ?? signal.updatedAt ?? new Date().toISOString()),
-    ...(Number.isFinite(Number(signal.price)) ? { price: Number(signal.price) } : {}),
+    timestamp: String(
+      signal.timestamp ?? signal.updatedAt ?? new Date().toISOString(),
+    ),
+    ...(Number.isFinite(Number(signal.price))
+      ? { price: Number(signal.price) }
+      : {}),
   } as BinanceExecutionDecision;
 }
 
@@ -493,7 +606,12 @@ function firstFiniteNumber(values: unknown[]) {
  * Position → Order and submits.
  */
 function positionToDecision(position: Position): BinanceExecutionDecision {
-  const action = position.direction === "long" ? "BUY" : position.direction === "short" ? "EXIT" : "HOLD";
+  const action =
+    position.direction === "long"
+      ? "BUY"
+      : position.direction === "short"
+        ? "EXIT"
+        : "HOLD";
   return {
     id: `position:${position.asset}:${action}:${Date.now()}`,
     symbol: position.asset.toUpperCase(),

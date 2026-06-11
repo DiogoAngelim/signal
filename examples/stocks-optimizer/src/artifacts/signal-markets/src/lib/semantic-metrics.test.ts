@@ -4,7 +4,9 @@ import { buildDashboardSemanticMetrics } from "./semantic-metrics";
 
 describe("dashboard semantic metrics", () => {
   it("maps dashboard metrics into words from the generic Signal semantic lexicon", () => {
-    const words = new Set(loadBundledSemanticLexicon().entries.map((entry) => entry.word));
+    const words = new Set(
+      loadBundledSemanticLexicon().entries.map((entry) => entry.word),
+    );
     const result = buildDashboardSemanticMetrics({
       marketHealthPct: 72,
       opportunityDensityPct: 18,

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { authorize } from "../agency/engine";
 import {
   buildStocksPurposeViewModel,
   evaluateStocksPurpose,
 } from "../adapters/stocks-optimizer";
+import { authorize } from "../agency/engine";
 import { SignalFrameworkEngine } from "../core/engine";
 import { MetricRegistry } from "../metrics/registry";
 import { evaluatePruning } from "../pruning/engine";
@@ -191,14 +191,19 @@ describe("purpose decision rules", () => {
         uncertainty: 100 - purpose.purposeConfidence,
       },
       authority: "autonomous",
-      reviewPolicy: { mode: "review-when-confidence-low", confidenceThreshold: 65 },
+      reviewPolicy: {
+        mode: "review-when-confidence-low",
+        confidenceThreshold: 65,
+      },
     });
 
     expect(purpose.warnings).toContain(
       "Pruning found evidence that could create false confidence.",
     );
     expect(wisdom.sourceModules).toContain("pruning");
-    expect(["requires-review", "approved", "deferred"]).toContain(agency.status);
+    expect(["requires-review", "approved", "deferred"]).toContain(
+      agency.status,
+    );
   });
 });
 
@@ -210,8 +215,16 @@ describe("purpose framework and stocks integration", () => {
       timestamp: 1_800_000_000_000,
       metrics: metrics(),
       purpose: { ambition: 65 },
-      decision: { id: "decision", confidence: 76, uncertainty: 18, expectedValue: 70 },
-      agency: { authority: "autonomous", reviewPolicy: { mode: "fully-autonomous" } },
+      decision: {
+        id: "decision",
+        confidence: 76,
+        uncertainty: 18,
+        expectedValue: 70,
+      },
+      agency: {
+        authority: "autonomous",
+        reviewPolicy: { mode: "fully-autonomous" },
+      },
     });
 
     expect(snapshot.purpose?.purposeStatement).toContain("I am willing");

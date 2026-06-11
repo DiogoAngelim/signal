@@ -9,11 +9,11 @@
  * Exit: 0 = valid, 1 = invalid
  */
 
-import { readState, stateExists } from "../state/stateStore.js";
-import { verifyState } from "../verifier/verifier.js";
 import { recomputePhaseHash } from "../core/hashChain.js";
-import { writeProof, PROOF_TYPES } from "../proofs/proofWriter.js";
+import { PROOF_TYPES, writeProof } from "../proofs/proofWriter.js";
+import { readState, stateExists } from "../state/stateStore.js";
 import type { SignalError } from "../state/types.js";
+import { verifyState } from "../verifier/verifier.js";
 
 /**
  * Execute the `signal verify` command.
@@ -23,7 +23,9 @@ import type { SignalError } from "../state/types.js";
  */
 export function executeVerify(root: string = process.cwd()): boolean {
   if (!stateExists(root)) {
-    console.error("SIGNAL: No .signal/state.json found. Run `signal init` first.");
+    console.error(
+      "SIGNAL: No .signal/state.json found. Run `signal init` first.",
+    );
     writeProof(
       PROOF_TYPES.PHASE_CHAIN_PROOF,
       "FAIL",
@@ -59,7 +61,9 @@ export function executeVerify(root: string = process.cwd()): boolean {
   const recomputedHashes = state.phases.map((p) => recomputePhaseHash(p));
 
   if (result.valid) {
-    console.log(`SIGNAL: ✓ All ${state.phases.length} phase(s) verified successfully.`);
+    console.log(
+      `SIGNAL: ✓ All ${state.phases.length} phase(s) verified successfully.`,
+    );
 
     // Write PHASE_CHAIN_PROOF
     const proofPath = writeProof(

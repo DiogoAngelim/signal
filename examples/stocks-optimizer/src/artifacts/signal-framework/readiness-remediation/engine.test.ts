@@ -33,18 +33,26 @@ describe("Readiness Remediation Planner", () => {
           severity: "good" as any,
         },
       ],
-      failureFlags: ["ROBUSTNESS_OVERFIT_RISK", "BENCHMARK_FAILED", "WEAK_BENCHMARK_MARGIN"],
+      failureFlags: [
+        "ROBUSTNESS_OVERFIT_RISK",
+        "BENCHMARK_FAILED",
+        "WEAK_BENCHMARK_MARGIN",
+      ],
       trust: {
         trustScore: 35,
         confidenceCap: 35,
         participationMode: "exits_only",
         primaryBlocker: "robustness_overfit_risk",
-        blockers: [{
-          id: "robustness_overfit_risk",
-          severity: "high",
-          reason: "Robustness overfit risk is above the execution threshold.",
-          unlockCriteria: ["Retest on independent periods before allowing exposure."],
-        }],
+        blockers: [
+          {
+            id: "robustness_overfit_risk",
+            severity: "high",
+            reason: "Robustness overfit risk is above the execution threshold.",
+            unlockCriteria: [
+              "Retest on independent periods before allowing exposure.",
+            ],
+          },
+        ],
       },
       robustness: {
         overfitRisk: 48,
@@ -64,9 +72,15 @@ describe("Readiness Remediation Planner", () => {
     assert.equal(result.status, "review");
     assert.equal(result.targetStage, "Limited live");
     assert.equal(result.steps[0]?.category, "robustness");
-    assert.equal(result.steps.filter((step) => step.category === "robustness").length, 1);
+    assert.equal(
+      result.steps.filter((step) => step.category === "robustness").length,
+      1,
+    );
     assert.match(result.steps[0]?.reason ?? "", /execution threshold/i);
-    assert.match(result.steps[0]?.unlocks.join(" ") ?? "", /independent periods/i);
+    assert.match(
+      result.steps[0]?.unlocks.join(" ") ?? "",
+      /independent periods/i,
+    );
     assert.ok(result.blockers.length > 0);
     assert.ok(result.totalExpectedTrustLift > 0);
     assert.deepEqual(
@@ -105,9 +119,14 @@ describe("Readiness Remediation Planner", () => {
 
     assert.equal(result.executionGate, "blocked");
     assert.equal(result.status, "blocked");
-    assert.ok(result.steps.map((step) => step.category).includes("calibration"));
+    assert.ok(
+      result.steps.map((step) => step.category).includes("calibration"),
+    );
     assert.ok(result.steps.map((step) => step.category).includes("capacity"));
-    assert.equal(result.steps.find((step) => step.category === "calibration")?.severity, "high");
+    assert.equal(
+      result.steps.find((step) => step.category === "calibration")?.severity,
+      "high",
+    );
   });
 
   it("separates unstable and poor calibration remediation reasons", () => {
@@ -148,8 +167,12 @@ describe("Readiness Remediation Planner", () => {
       },
     });
 
-    const calibration = result.steps.find((step) => step.category === "calibration");
-    const robustness = result.steps.find((step) => step.category === "robustness");
+    const calibration = result.steps.find(
+      (step) => step.category === "calibration",
+    );
+    const robustness = result.steps.find(
+      (step) => step.category === "robustness",
+    );
 
     assert.ok(calibration?.sourceIds.includes("calibration"));
     assert.equal(calibration?.metrics.currentScore, 50);
@@ -180,13 +203,21 @@ describe("Readiness Remediation Planner", () => {
     });
 
     assert.equal(result.steps[0]?.category, "robustness");
-    assert.equal(result.steps[0]?.expectedTrustLift, result.steps[1]?.expectedTrustLift);
+    assert.equal(
+      result.steps[0]?.expectedTrustLift,
+      result.steps[1]?.expectedTrustLift,
+    );
   });
 
   it("returns a ready plan when all inputs are clear", () => {
     const result = planReadinessRemediation({
       gates: [
-        { id: "liveSignal", label: "Live signal match", passed: true, score: 91 },
+        {
+          id: "liveSignal",
+          label: "Live signal match",
+          passed: true,
+          score: 91,
+        },
         { id: "riskControl", label: "Risk control", passed: true, score: 88 },
       ],
       calibration: {
@@ -229,9 +260,30 @@ describe("Readiness Remediation Planner", () => {
   it("keeps low-severity remediation in watch mode when execution stays open", () => {
     const result = planReadinessRemediation({
       gates: [
-        { id: "agency", label: "Agency review", category: "agency", passed: false, score: 75, targetScore: 70 },
-        { id: "judgement", label: "Judgement review", category: "judgement", passed: false, score: 65, targetScore: 70 },
-        { id: "capacity", label: "Capacity", category: "capacity", passed: false, score: 51, targetScore: 70 },
+        {
+          id: "agency",
+          label: "Agency review",
+          category: "agency",
+          passed: false,
+          score: 75,
+          targetScore: 70,
+        },
+        {
+          id: "judgement",
+          label: "Judgement review",
+          category: "judgement",
+          passed: false,
+          score: 65,
+          targetScore: 70,
+        },
+        {
+          id: "capacity",
+          label: "Capacity",
+          category: "capacity",
+          passed: false,
+          score: 51,
+          targetScore: 70,
+        },
       ],
       trust: { participationMode: "normal", blockers: [] },
       context: { allowsNewExposure: true },
@@ -239,9 +291,18 @@ describe("Readiness Remediation Planner", () => {
 
     assert.equal(result.executionGate, "open");
     assert.equal(result.status, "watch");
-    assert.equal(result.steps.find((step) => step.category === "agency")?.status, "watch");
-    assert.equal(result.steps.find((step) => step.category === "judgement")?.status, "review");
-    assert.equal(result.steps.find((step) => step.category === "capacity")?.status, "review");
+    assert.equal(
+      result.steps.find((step) => step.category === "agency")?.status,
+      "watch",
+    );
+    assert.equal(
+      result.steps.find((step) => step.category === "judgement")?.status,
+      "review",
+    );
+    assert.equal(
+      result.steps.find((step) => step.category === "capacity")?.status,
+      "review",
+    );
   });
 
   it("normalizes unknown, critical, and low-score inputs deterministically", () => {
@@ -276,11 +337,13 @@ describe("Readiness Remediation Planner", () => {
       ],
       trust: {
         participationMode: "blocked",
-        blockers: [{
-          id: "data_reliability_unusable",
-          severity: "critical",
-          label: "Data reliability unusable",
-        }],
+        blockers: [
+          {
+            id: "data_reliability_unusable",
+            severity: "critical",
+            label: "Data reliability unusable",
+          },
+        ],
       },
       calibration: {
         status: "insufficient-history",
@@ -310,16 +373,35 @@ describe("Readiness Remediation Planner", () => {
     assert.ok(categories.includes("judgement"));
     assert.ok(categories.includes("agency"));
     assert.ok(categories.includes("other"));
-    assert.equal(result.steps.find((step) => step.category === "other")?.metrics.currentScore, 10);
-    assert.equal(result.steps.find((step) => step.category === "capacity")?.severity, "low");
+    assert.equal(
+      result.steps.find((step) => step.category === "other")?.metrics
+        .currentScore,
+      10,
+    );
+    assert.equal(
+      result.steps.find((step) => step.category === "capacity")?.severity,
+      "low",
+    );
   });
 
   it("classifies alternate remediation vocabulary and missing scores", () => {
     const result = planReadinessRemediation({
       gates: [
-        { id: "manual", label: "Manual review", category: "other", passed: false },
+        {
+          id: "manual",
+          label: "Manual review",
+          category: "other",
+          passed: false,
+        },
         { id: "benchmark", passed: false, score: 50 },
-        { id: "exposure", label: "Exposure cap", category: "capacity", passed: false, score: 50, targetScore: 70 },
+        {
+          id: "exposure",
+          label: "Exposure cap",
+          category: "capacity",
+          passed: false,
+          score: 50,
+          targetScore: 70,
+        },
       ],
       failureFlags: [
         "LOW_SHARPE",
@@ -347,8 +429,14 @@ describe("Readiness Remediation Planner", () => {
     assert.ok(categories.includes("data_reliability"));
     assert.ok(categories.includes("live_signal"));
     assert.ok(categories.includes("judgement"));
-    assert.equal(result.steps.find((step) => step.category === "other")?.severity, "medium");
-    assert.equal(result.steps.find((step) => step.category === "capacity")?.severity, "high");
+    assert.equal(
+      result.steps.find((step) => step.category === "other")?.severity,
+      "medium",
+    );
+    assert.equal(
+      result.steps.find((step) => step.category === "capacity")?.severity,
+      "high",
+    );
   });
 
   it("falls back cleanly for sparse optional diagnostics", () => {
@@ -363,7 +451,10 @@ describe("Readiness Remediation Planner", () => {
 
     assert.equal(result.steps.length, 1);
     assert.equal(result.steps[0]?.category, "other");
-    assert.equal(result.steps[0]?.reason, "Trust Governor blocks increased participation.");
+    assert.equal(
+      result.steps[0]?.reason,
+      "Trust Governor blocks increased participation.",
+    );
     assert.equal(result.steps[0]?.severity, "medium");
     assert.deepEqual(result.steps[0]?.sourceIds, ["trust-0"]);
   });

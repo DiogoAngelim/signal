@@ -4,7 +4,7 @@ import {
   calculateScenarioSnapshot,
   createPurchaseDecision,
   createSampleFinancialDataset,
-  normalizeRawTransactions
+  normalizeRawTransactions,
 } from "../src/index.js";
 import type { CashflowProfile, NormalizedTransaction } from "../src/models.js";
 
@@ -14,10 +14,15 @@ describe("purchase decision engine", () => {
   it("approves a purchase that preserves runway", () => {
     const { profile, normalized } = sampleProfile();
     const decision = createPurchaseDecision({
-      input: { userId: "u1", amount: 160, paymentMethod: "cash", necessity: "necessary" },
+      input: {
+        userId: "u1",
+        amount: 160,
+        paymentMethod: "cash",
+        necessity: "necessary",
+      },
       profile,
       transactions: normalized,
-      now: NOW
+      now: NOW,
     });
 
     expect(decision.verdict).toBe("approved");
@@ -28,10 +33,15 @@ describe("purchase decision engine", () => {
   it("marks a purchase that slightly weakens the buffer as acceptable or delay", () => {
     const { profile, normalized } = sampleProfile();
     const decision = createPurchaseDecision({
-      input: { userId: "u1", amount: 2600, paymentMethod: "cash", necessity: "optional" },
+      input: {
+        userId: "u1",
+        amount: 2600,
+        paymentMethod: "cash",
+        necessity: "optional",
+      },
       profile,
       transactions: normalized,
-      now: NOW
+      now: NOW,
     });
 
     expect(["acceptable", "delay"]).toContain(decision.verdict);
@@ -42,10 +52,15 @@ describe("purchase decision engine", () => {
   it("caps purchases that drop runway below 8 weeks", () => {
     const { profile, normalized } = sampleProfile();
     const decision = createPurchaseDecision({
-      input: { userId: "u1", amount: 13000, paymentMethod: "cash", necessity: "optional" },
+      input: {
+        userId: "u1",
+        amount: 13000,
+        paymentMethod: "cash",
+        necessity: "optional",
+      },
       profile,
       transactions: normalized,
-      now: NOW
+      now: NOW,
     });
 
     expect(decision.after.runwayWeeks).toBeLessThan(8);
@@ -56,10 +71,15 @@ describe("purchase decision engine", () => {
   it("caps purchases that drop runway below 4 weeks harder", () => {
     const { profile, normalized } = sampleProfile();
     const decision = createPurchaseDecision({
-      input: { userId: "u1", amount: 19000, paymentMethod: "cash", necessity: "optional" },
+      input: {
+        userId: "u1",
+        amount: 19000,
+        paymentMethod: "cash",
+        necessity: "optional",
+      },
       profile,
       transactions: normalized,
-      now: NOW
+      now: NOW,
     });
 
     expect(decision.after.runwayWeeks).toBeLessThan(4);
@@ -68,18 +88,34 @@ describe("purchase decision engine", () => {
   });
 
   it("caps purchases that increase shortfall risk by 5+ and 10+ points", () => {
-    const profile = syntheticProfile({ currentBalance: 5400, income: 5200, expenses: 4800, coverage: 120, count: 80 });
+    const profile = syntheticProfile({
+      currentBalance: 5400,
+      income: 5200,
+      expenses: 4800,
+      coverage: 120,
+      count: 80,
+    });
     const moderate = createPurchaseDecision({
-      input: { userId: "u1", amount: 700, paymentMethod: "cash", necessity: "necessary" },
+      input: {
+        userId: "u1",
+        amount: 700,
+        paymentMethod: "cash",
+        necessity: "necessary",
+      },
       profile,
       transactions: [],
-      now: NOW
+      now: NOW,
     });
     const severe = createPurchaseDecision({
-      input: { userId: "u1", amount: 1600, paymentMethod: "cash", necessity: "necessary" },
+      input: {
+        userId: "u1",
+        amount: 1600,
+        paymentMethod: "cash",
+        necessity: "necessary",
+      },
       profile,
       transactions: [],
-      now: NOW
+      now: NOW,
     });
 
     expect(riskIncrease(moderate)).toBeGreaterThanOrEqual(0.05);
@@ -91,16 +127,26 @@ describe("purchase decision engine", () => {
   it("gives income-generating purchases more tolerance than optional purchases", () => {
     const { profile, normalized } = sampleProfile();
     const optional = createPurchaseDecision({
-      input: { userId: "u1", amount: 1800, paymentMethod: "cash", necessity: "optional" },
+      input: {
+        userId: "u1",
+        amount: 1800,
+        paymentMethod: "cash",
+        necessity: "optional",
+      },
       profile,
       transactions: normalized,
-      now: NOW
+      now: NOW,
     });
     const incomeGenerating = createPurchaseDecision({
-      input: { userId: "u1", amount: 1800, paymentMethod: "cash", necessity: "income_generating" },
+      input: {
+        userId: "u1",
+        amount: 1800,
+        paymentMethod: "cash",
+        necessity: "income_generating",
+      },
       profile,
       transactions: normalized,
-      now: NOW
+      now: NOW,
     });
 
     expect(incomeGenerating.score).toBeGreaterThan(optional.score);
@@ -109,23 +155,36 @@ describe("purchase decision engine", () => {
   it("accounts for installment payments in future cashflow", () => {
     const { profile, normalized } = sampleProfile();
     const decision = createPurchaseDecision({
-      input: { userId: "u1", amount: 9800, paymentMethod: "installments", installments: 2, necessity: "optional" },
+      input: {
+        userId: "u1",
+        amount: 9800,
+        paymentMethod: "installments",
+        installments: 2,
+        necessity: "optional",
+      },
       profile,
       transactions: normalized,
-      now: NOW
+      now: NOW,
     });
 
-    expect(decision.after.runwayWeeks).toBeLessThan(decision.before.runwayWeeks);
+    expect(decision.after.runwayWeeks).toBeLessThan(
+      decision.before.runwayWeeks,
+    );
     expect(decision.score).toBeLessThanOrEqual(59);
   });
 
   it("caps cash payments above available balance", () => {
     const { profile, normalized } = sampleProfile();
     const decision = createPurchaseDecision({
-      input: { userId: "u1", amount: profile.currentBalance + 1, paymentMethod: "cash", necessity: "necessary" },
+      input: {
+        userId: "u1",
+        amount: profile.currentBalance + 1,
+        paymentMethod: "cash",
+        necessity: "necessary",
+      },
       profile,
       transactions: normalized,
-      now: NOW
+      now: NOW,
     });
 
     expect(decision.score).toBeLessThanOrEqual(49);
@@ -133,12 +192,23 @@ describe("purchase decision engine", () => {
   });
 
   it("keeps score and confidence separate when history is thin", () => {
-    const profile = syntheticProfile({ currentBalance: 60000, income: 11000, expenses: 2400, coverage: 24, count: 12 });
+    const profile = syntheticProfile({
+      currentBalance: 60000,
+      income: 11000,
+      expenses: 2400,
+      coverage: 24,
+      count: 12,
+    });
     const decision = createPurchaseDecision({
-      input: { userId: "u1", amount: 500, paymentMethod: "cash", necessity: "necessary" },
+      input: {
+        userId: "u1",
+        amount: 500,
+        paymentMethod: "cash",
+        necessity: "necessary",
+      },
       profile,
       transactions: [],
-      now: NOW
+      now: NOW,
     });
 
     expect(decision.score).toBeGreaterThanOrEqual(85);
@@ -149,10 +219,15 @@ describe("purchase decision engine", () => {
   it("returns safer alternatives for weak verdicts", () => {
     const { profile, normalized } = sampleProfile();
     const decision = createPurchaseDecision({
-      input: { userId: "u1", amount: 14000, paymentMethod: "cash", necessity: "optional" },
+      input: {
+        userId: "u1",
+        amount: 14000,
+        paymentMethod: "cash",
+        necessity: "optional",
+      },
       profile,
       transactions: normalized,
-      now: NOW
+      now: NOW,
     });
 
     expect(decision.saferAlternative).toBeTruthy();
@@ -160,18 +235,25 @@ describe("purchase decision engine", () => {
   });
 });
 
-function sampleProfile(): { profile: CashflowProfile; normalized: NormalizedTransaction[] } {
-  const dataset = createSampleFinancialDataset({ userId: "u1", connectionId: "sample-1", now: NOW });
+function sampleProfile(): {
+  profile: CashflowProfile;
+  normalized: NormalizedTransaction[];
+} {
+  const dataset = createSampleFinancialDataset({
+    userId: "u1",
+    connectionId: "sample-1",
+    now: NOW,
+  });
   const normalized = normalizeRawTransactions({
     rawTransactions: dataset.transactions,
     userId: "u1",
-    connectionId: "sample-1"
+    connectionId: "sample-1",
   });
   const profile = calculateCashflowProfile({
     userId: "u1",
     transactions: normalized,
     balances: dataset.balances,
-    now: NOW
+    now: NOW,
   });
   return { profile, normalized };
 }
@@ -181,7 +263,7 @@ function syntheticProfile({
   income,
   expenses,
   coverage,
-  count
+  count,
 }: {
   currentBalance: number;
   income: number;
@@ -194,7 +276,7 @@ function syntheticProfile({
     averageMonthlyIncome: income,
     averageMonthlyExpenses: expenses,
     incomeVolatility: 0.08,
-    expenseVolatility: 0.08
+    expenseVolatility: 0.08,
   });
   return {
     id: "synthetic-profile",
@@ -212,7 +294,7 @@ function syntheticProfile({
     shortfallRisk90d: snapshot.shortfallRisk90d,
     dataCoverageDays: coverage,
     transactionCount: count,
-    updatedAt: NOW
+    updatedAt: NOW,
   };
 }
 
@@ -221,7 +303,7 @@ function riskIncrease(decision: PurchaseDecisionOutputLike): number {
     decision.after.shortfallRisk30d - decision.before.shortfallRisk30d,
     decision.after.shortfallRisk60d - decision.before.shortfallRisk60d,
     decision.after.shortfallRisk90d - decision.before.shortfallRisk90d,
-    0
+    0,
   );
 }
 

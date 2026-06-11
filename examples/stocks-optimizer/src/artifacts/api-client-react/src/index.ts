@@ -1,12 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+export async function apiFetch<T>(
+  path: string,
+  init?: RequestInit,
+): Promise<T> {
   const response = await fetch(path, {
     headers: {
       "Content-Type": "application/json",
-      ...(init?.headers ?? {})
+      ...(init?.headers ?? {}),
     },
-    ...init
+    ...init,
   });
 
   if (!response.ok) {

@@ -27,7 +27,12 @@ export function average(values: readonly number[], fallback = 50): number {
 export function standardDeviation(values: readonly number[]): number {
   if (values.length < 2) return 0;
   const avg = average(values);
-  return Math.sqrt(average(values.map((value) => (value - avg) ** 2), 0));
+  return Math.sqrt(
+    average(
+      values.map((value) => (value - avg) ** 2),
+      0,
+    ),
+  );
 }
 
 export function uniqueStrings(values: readonly unknown[]): string[] {
@@ -49,8 +54,11 @@ export function severityWeight(severity: CoherenceConflictSeverity): number {
   return 5;
 }
 
-export function normalizeModuleInputs(input: DecisionModuleInputs): Partial<Record<DecisionModuleName, NormalizedModuleState>> {
-  const normalized: Partial<Record<DecisionModuleName, NormalizedModuleState>> = {};
+export function normalizeModuleInputs(
+  input: DecisionModuleInputs,
+): Partial<Record<DecisionModuleName, NormalizedModuleState>> {
+  const normalized: Partial<Record<DecisionModuleName, NormalizedModuleState>> =
+    {};
 
   for (const module of DECISION_MODULES) {
     const raw = input[module];
@@ -61,7 +69,10 @@ export function normalizeModuleInputs(input: DecisionModuleInputs): Partial<Reco
   return normalized;
 }
 
-export function normalizeModule(module: DecisionModuleName, raw: ModuleStateInput): NormalizedModuleState {
+export function normalizeModule(
+  module: DecisionModuleName,
+  raw: ModuleStateInput,
+): NormalizedModuleState {
   if (typeof raw === "number") {
     const score = asScore(raw);
     return {

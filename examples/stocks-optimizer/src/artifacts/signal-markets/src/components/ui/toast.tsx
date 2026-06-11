@@ -1,7 +1,7 @@
-import * as React from "react";
 import * as ToastPrimitives from "@radix-ui/react-toast";
-import { cva, type VariantProps } from "class-variance-authority";
+import { type VariantProps, cva } from "class-variance-authority";
 import { X } from "lucide-react";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -105,7 +105,10 @@ const ToastDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
-    className={cn("text-sm leading-5 text-slate-400 group-[.destructive]:text-rose-100/85", className)}
+    className={cn(
+      "text-sm leading-5 text-slate-400 group-[.destructive]:text-rose-100/85",
+      className,
+    )}
     {...props}
   />
 ));

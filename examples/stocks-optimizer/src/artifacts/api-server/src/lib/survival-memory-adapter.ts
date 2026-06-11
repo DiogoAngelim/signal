@@ -1,10 +1,10 @@
 import {
-  buildSurvivalMemoryRecord,
-  evaluateSurvivalMemory,
-  fingerprintSurvivalState,
   type SurvivalMemoryAnalysis,
   type SurvivalMemoryRecord,
   type SurvivalOutcomeClass,
+  buildSurvivalMemoryRecord,
+  evaluateSurvivalMemory,
+  fingerprintSurvivalState,
 } from "../../../signal-framework/survival-memory/engine";
 
 export type StockSurvivalMemoryInput = {
@@ -49,7 +49,9 @@ export type SurvivalEnrichedTrade<T> = T & {
   survivalNotes?: string[];
 };
 
-export function buildStockSurvivalMemory(input: StockSurvivalMemoryInput): StockSurvivalMemoryDiagnostic {
+export function buildStockSurvivalMemory(
+  input: StockSurvivalMemoryInput,
+): StockSurvivalMemoryDiagnostic {
   const currentState = stockSurvivalState(input);
   const stateFingerprint = fingerprintSurvivalState(currentState);
   const records = [
@@ -62,7 +64,14 @@ export function buildStockSurvivalMemory(input: StockSurvivalMemoryInput): Stock
     stateFingerprint,
     similarityThreshold: 0.3,
   });
-  const baseMaxExposure = clamp(firstNumber(input.maxPositionPct, input.readiness?.maxPositionPct, input.rawSuggestedExposurePct, 0));
+  const baseMaxExposure = clamp(
+    firstNumber(
+      input.maxPositionPct,
+      input.readiness?.maxPositionPct,
+      input.rawSuggestedExposurePct,
+      0,
+    ),
+  );
   const maxExposurePct = round(baseMaxExposure * analysis.exposureMultiplier);
 
   return {
@@ -75,7 +84,10 @@ export function buildStockSurvivalMemory(input: StockSurvivalMemoryInput): Stock
   };
 }
 
-export function enrichTradesWithSurvivalMemory<T>(trades: T[], input: StockSurvivalMemoryInput = {}): Array<SurvivalEnrichedTrade<T>> {
+export function enrichTradesWithSurvivalMemory<T>(
+  trades: T[],
+  input: StockSurvivalMemoryInput = {},
+): Array<SurvivalEnrichedTrade<T>> {
   return trades.map((trade, index) => {
     const record = survivalRecordFromObject(trade, index, input, "trade");
 
@@ -101,26 +113,58 @@ export function enrichTradesWithSurvivalMemory<T>(trades: T[], input: StockSurvi
 
 function recordsFromTrades(trades: unknown[], input: StockSurvivalMemoryInput) {
   return trades.flatMap((trade, index) => {
-    if (input.requireExplicitSurvivalFields && !hasExplicitSurvivalFields(trade)) return [];
+    if (
+      input.requireExplicitSurvivalFields &&
+      !hasExplicitSurvivalFields(trade)
+    )
+      return [];
     return [survivalRecordFromObject(trade, index, input, "trade")];
   });
 }
 
-function recordsFromHistory(history: unknown[], input: StockSurvivalMemoryInput) {
+function recordsFromHistory(
+  history: unknown[],
+  input: StockSurvivalMemoryInput,
+) {
   return history.flatMap((entry, index) => {
     const record = objectOrEmpty(entry);
-    if (input.requireExplicitSurvivalFields && !hasExplicitSurvivalFields(record)) return [];
-    const returnPct = firstNumber(record.returnPct, record.return_pct, record.portfolioReturnPct, record.changePct);
+    if (
+      input.requireExplicitSurvivalFields &&
+      !hasExplicitSurvivalFields(record)
+    )
+      return [];
+    const returnPct = firstNumber(
+      record.returnPct,
+      record.return_pct,
+      record.portfolioReturnPct,
+      record.changePct,
+    );
     if (returnPct == null) return [];
 
-    return survivalRecordFromObject({
-      ...record,
-      returnPct,
-      symbol: input.symbol,
-      market: input.market,
-      entryExposure: firstNumber(record.deployedPct, input.rawSuggestedExposurePct, input.maxPositionPct, 0),
-      riskPressure: firstNumber(record.riskPressure, input.riskPressure, record.drawdownPct, record.maxDrawdownPct, 0),
-    }, index, input, "history");
+    return survivalRecordFromObject(
+      {
+        ...record,
+        returnPct,
+        symbol: input.symbol,
+        market: input.market,
+        entryExposure: firstNumber(
+          record.deployedPct,
+          input.rawSuggestedExposurePct,
+          input.maxPositionPct,
+          0,
+        ),
+        riskPressure: firstNumber(
+          record.riskPressure,
+          input.riskPressure,
+          record.drawdownPct,
+          record.maxDrawdownPct,
+          0,
+        ),
+      },
+      index,
+      input,
+      "history",
+    );
   });
 }
 
@@ -139,18 +183,55 @@ function hasExplicitSurvivalFields(value: unknown) {
     "tailRisk",
     "liquidityStress",
     "structuralDanger",
-  ].some((key) => record[key] !== null && record[key] !== undefined && record[key] !== "");
+  ].some(
+    (key) =>
+      record[key] !== null && record[key] !== undefined && record[key] !== "",
+  );
 }
 
-function survivalRecordFromObject(value: unknown, index: number, input: StockSurvivalMemoryInput, source: "trade" | "history"): SurvivalMemoryRecord {
+function survivalRecordFromObject(
+  value: unknown,
+  index: number,
+  input: StockSurvivalMemoryInput,
+  source: "trade" | "history",
+): SurvivalMemoryRecord {
   const record = objectOrEmpty(value);
-  const symbol = String(record.symbol ?? record.ticker ?? input.symbol ?? `${source}-${index + 1}`).toUpperCase();
-  const market = String(record.market ?? input.market ?? "").toUpperCase() || undefined;
-  const realizedReturn = firstNumber(record.realizedReturn, record.returnPct, record.return_pct, record.profitPct, record.pnlPct, 0)!;
-  const maxExposure = firstNumber(record.maxExposure, record.entryExposure, record.exposurePct, input.rawSuggestedExposurePct, input.maxPositionPct, 0)!;
-  const riskPressure = clamp(firstNumber(record.riskPressure, input.riskPressure, 0)!);
-  const volatilityPct = Math.max(0, firstNumber(record.volatilityPct, input.volatilityPct, riskPressure / 12, 0)!);
-  const liquidityScore = clamp(firstNumber(record.liquidityScore, input.liquidityScore, 70)!);
+  const symbol = String(
+    record.symbol ?? record.ticker ?? input.symbol ?? `${source}-${index + 1}`,
+  ).toUpperCase();
+  const market =
+    String(record.market ?? input.market ?? "").toUpperCase() || undefined;
+  const realizedReturn = firstNumber(
+    record.realizedReturn,
+    record.returnPct,
+    record.return_pct,
+    record.profitPct,
+    record.pnlPct,
+    0,
+  )!;
+  const maxExposure = firstNumber(
+    record.maxExposure,
+    record.entryExposure,
+    record.exposurePct,
+    input.rawSuggestedExposurePct,
+    input.maxPositionPct,
+    0,
+  )!;
+  const riskPressure = clamp(
+    firstNumber(record.riskPressure, input.riskPressure, 0)!,
+  );
+  const volatilityPct = Math.max(
+    0,
+    firstNumber(
+      record.volatilityPct,
+      input.volatilityPct,
+      riskPressure / 12,
+      0,
+    )!,
+  );
+  const liquidityScore = clamp(
+    firstNumber(record.liquidityScore, input.liquidityScore, 70)!,
+  );
   const maxDrawdown = firstNumber(
     record.maxDrawdown,
     record.maxDrawdownPct,
@@ -168,8 +249,13 @@ function survivalRecordFromObject(value: unknown, index: number, input: StockSur
     realizedReturn < 0 ? Math.abs(realizedReturn) : riskPressure * 0.2,
     0,
   )!;
-  const explicitStructuralDanger = firstNumber(record.structuralDanger, record.structuralRisk);
-  const structuralDanger = explicitStructuralDanger ?? (source === "history" ? structuralDangerFor(input.readiness) : 0);
+  const explicitStructuralDanger = firstNumber(
+    record.structuralDanger,
+    record.structuralRisk,
+  );
+  const structuralDanger =
+    explicitStructuralDanger ??
+    (source === "history" ? structuralDangerFor(input.readiness) : 0);
   const recoveryTimeBars = firstNumber(
     record.recoveryTimeBars,
     record.recoveryBars,
@@ -180,7 +266,9 @@ function survivalRecordFromObject(value: unknown, index: number, input: StockSur
     ...input,
     symbol,
     market,
-    rawAction: String(record.signalAction ?? record.action ?? input.rawAction ?? "Buy"),
+    rawAction: String(
+      record.signalAction ?? record.action ?? input.rawAction ?? "Buy",
+    ),
     setupQuality: firstNumber(record.setupQuality, input.setupQuality, 50)!,
     riskPressure,
     volatilityPct,
@@ -191,26 +279,61 @@ function survivalRecordFromObject(value: unknown, index: number, input: StockSur
 
   return buildSurvivalMemoryRecord({
     id: String(record.id ?? `${source}-${symbol}-${index + 1}`),
-    timestamp: String(record.exitDate ?? record.date ?? record.timestamp ?? record.entryDate ?? ""),
+    timestamp: String(
+      record.exitDate ??
+        record.date ??
+        record.timestamp ??
+        record.entryDate ??
+        "",
+    ),
     asset: symbol,
     venue: market,
-    regime: String(record.regime ?? input.readiness?.stage ?? input.readiness?.readinessStage ?? "unknown"),
+    regime: String(
+      record.regime ??
+        input.readiness?.stage ??
+        input.readiness?.readinessStage ??
+        "unknown",
+    ),
     state,
-    stateFingerprint: typeof record.stateFingerprint === "string" ? record.stateFingerprint : undefined,
-    action: String(record.signalAction ?? record.action ?? input.rawAction ?? "Buy"),
+    stateFingerprint:
+      typeof record.stateFingerprint === "string"
+        ? record.stateFingerprint
+        : undefined,
+    action: String(
+      record.signalAction ?? record.action ?? input.rawAction ?? "Buy",
+    ),
     maxExposure,
     realizedReturn,
     maxDrawdown,
     maxAdverseExcursion,
     recoveryTimeBars,
-    volatilityExpansion: firstNumber(record.volatilityExpansion, record.volatilityShock, riskPressure, volatilityPct * 12, 0)!,
-    tailRisk: firstNumber(record.tailRisk, record.tailPressure, Math.max(riskPressure, maxAdverseExcursion * 2), 0)!,
-    liquidityStress: firstNumber(record.liquidityStress, record.liquidityPressure, 100 - liquidityScore, riskPressure * 0.45, 0)!,
+    volatilityExpansion: firstNumber(
+      record.volatilityExpansion,
+      record.volatilityShock,
+      riskPressure,
+      volatilityPct * 12,
+      0,
+    )!,
+    tailRisk: firstNumber(
+      record.tailRisk,
+      record.tailPressure,
+      Math.max(riskPressure, maxAdverseExcursion * 2),
+      0,
+    )!,
+    liquidityStress: firstNumber(
+      record.liquidityStress,
+      record.liquidityPressure,
+      100 - liquidityScore,
+      riskPressure * 0.45,
+      0,
+    )!,
     structuralDanger,
     novelty: firstNumber(record.novelty, noveltyFor(input.readiness), 0)!,
     opportunityDensity: firstNumber(
       record.opportunityDensity,
-      input.maxPositionPct && input.maxPositionPct > 0 ? maxExposure / input.maxPositionPct * 100 : undefined,
+      input.maxPositionPct && input.maxPositionPct > 0
+        ? (maxExposure / input.maxPositionPct) * 100
+        : undefined,
       input.setupQuality,
       0,
     )!,
@@ -221,26 +344,43 @@ function stockSurvivalState(input: StockSurvivalMemoryInput) {
   const readiness = input.readiness ?? {};
   const structuralDanger = structuralDangerFor(readiness);
   const liquidityStress = 100 - clamp(firstNumber(input.liquidityScore, 70)!);
-  const riskPressure = clamp(firstNumber(input.riskPressure, input.volatilityPct != null ? input.volatilityPct * 12 : undefined, 0)!);
+  const riskPressure = clamp(
+    firstNumber(
+      input.riskPressure,
+      input.volatilityPct != null ? input.volatilityPct * 12 : undefined,
+      0,
+    )!,
+  );
 
   return {
     venue: input.market,
-    regime: readiness.stage ?? readiness.readinessStage ?? readiness.lifecycleStage,
+    regime:
+      readiness.stage ?? readiness.readinessStage ?? readiness.lifecycleStage,
     action: input.rawAction ?? "Buy",
     setupQuality: input.setupQuality,
     riskPressure,
-    volatilityExpansion: firstNumber(input.volatilityPct != null ? input.volatilityPct * 12 : undefined, riskPressure, 0),
+    volatilityExpansion: firstNumber(
+      input.volatilityPct != null ? input.volatilityPct * 12 : undefined,
+      riskPressure,
+      0,
+    ),
     liquidityStress,
-    tailRisk: Math.max(riskPressure, Math.max(0, -number(input.expectedEdgePct)) * 5),
+    tailRisk: Math.max(
+      riskPressure,
+      Math.max(0, -number(input.expectedEdgePct)) * 5,
+    ),
     structuralDanger,
     novelty: noveltyFor(readiness),
-    opportunityDensity: input.maxPositionPct && input.maxPositionPct > 0
-      ? number(input.rawSuggestedExposurePct) / input.maxPositionPct * 100
-      : input.setupQuality,
+    opportunityDensity:
+      input.maxPositionPct && input.maxPositionPct > 0
+        ? (number(input.rawSuggestedExposurePct) / input.maxPositionPct) * 100
+        : input.setupQuality,
   };
 }
 
-function structuralDangerFor(readiness: Record<string, any> | null | undefined) {
+function structuralDangerFor(
+  readiness: Record<string, any> | null | undefined,
+) {
   const concentration = readiness?.concentration?.outlierDependent
     ? Math.max(
         firstNumber(readiness.concentration.top1TradeContributionPct, 0)!,
@@ -248,29 +388,40 @@ function structuralDangerFor(readiness: Record<string, any> | null | undefined) 
       )
     : 0;
 
-  return clamp(Math.max(
-    firstNumber(readiness?.robustnessDiagnostics?.overfitRisk, readiness?.robustnessDiagnostics?.overfitRiskPct, 0)!,
-    concentration,
-    readiness?.walkForward?.stable === false ? 70 : 0,
-    readiness?.parameterStability?.stable === false ? 65 : 0,
-  ));
+  return clamp(
+    Math.max(
+      firstNumber(
+        readiness?.robustnessDiagnostics?.overfitRisk,
+        readiness?.robustnessDiagnostics?.overfitRiskPct,
+        0,
+      )!,
+      concentration,
+      readiness?.walkForward?.stable === false ? 70 : 0,
+      readiness?.parameterStability?.stable === false ? 65 : 0,
+    ),
+  );
 }
 
 function noveltyFor(readiness: Record<string, any> | null | undefined) {
-  const sampleSize = firstNumber(readiness?.calibration?.sampleSize, readiness?.similarSampleSize, 0)!;
+  const sampleSize = firstNumber(
+    readiness?.calibration?.sampleSize,
+    readiness?.similarSampleSize,
+    0,
+  )!;
   return clamp(100 - Math.min(100, sampleSize * 4));
 }
 
 function durationBars(start: unknown, end: unknown) {
   const startMs = Date.parse(String(start ?? ""));
   const endMs = Date.parse(String(end ?? ""));
-  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs < startMs) return undefined;
+  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs < startMs)
+    return undefined;
   return Math.max(1, Math.round((endMs - startMs) / 86_400_000));
 }
 
 function objectOrEmpty(value: unknown) {
   return value && typeof value === "object" && !Array.isArray(value)
-    ? value as Record<string, any>
+    ? (value as Record<string, any>)
     : {};
 }
 
@@ -289,7 +440,6 @@ function number(value: unknown) {
 }
 
 function clamp(value: number, min = 0, max = 100) {
-  
   if (!Number.isFinite(value)) return min;
   return Math.min(max, Math.max(min, value));
 }

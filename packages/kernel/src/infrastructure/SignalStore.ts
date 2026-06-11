@@ -5,7 +5,7 @@
  */
 
 import type { SignalPackage, SignalPackageId } from "../model/SignalPackage";
-import { EventBus } from "./EventBus";
+import type { EventBus } from "./EventBus";
 
 export class SignalStore {
   private readonly packages: Map<SignalPackageId, SignalPackage> = new Map();
@@ -17,7 +17,11 @@ export class SignalStore {
 
   async store(pkg: SignalPackage): Promise<void> {
     this.packages.set(pkg.id, pkg);
-    this.eventBus.emit("signal:stored", { packageId: pkg.id, domain: pkg.meta.domain }, "SignalStore");
+    this.eventBus.emit(
+      "signal:stored",
+      { packageId: pkg.id, domain: pkg.meta.domain },
+      "SignalStore",
+    );
   }
 
   async get(id: SignalPackageId): Promise<SignalPackage | undefined> {

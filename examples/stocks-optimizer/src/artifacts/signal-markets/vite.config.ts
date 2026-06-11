@@ -1,7 +1,7 @@
 import path from "node:path";
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
 const API_TARGET = "http://localhost:4010";
 const localNodeModules = path.resolve(process.cwd(), "node_modules");
@@ -16,7 +16,12 @@ export default defineConfig({
       react: path.resolve(localNodeModules, "react"),
       "react-dom": path.resolve(localNodeModules, "react-dom"),
       ...(isVitest
-        ? { "lucide-react": path.resolve(process.cwd(), "src/test/lucide-react.tsx") }
+        ? {
+            "lucide-react": path.resolve(
+              process.cwd(),
+              "src/test/lucide-react.tsx",
+            ),
+          }
         : {}),
     },
   },
@@ -31,7 +36,11 @@ export default defineConfig({
             console.log("[vite proxy] /api/strategy ->", API_TARGET, req.url);
           });
           proxy.on("error", (err, req) => {
-            console.error("[vite proxy error] /api/strategy", req.url, err.message);
+            console.error(
+              "[vite proxy error] /api/strategy",
+              req.url,
+              err.message,
+            );
           });
         },
       },

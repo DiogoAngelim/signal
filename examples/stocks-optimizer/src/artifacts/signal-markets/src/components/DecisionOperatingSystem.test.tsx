@@ -1,13 +1,11 @@
-
-
-import type { DashboardViewState } from "@/lib/dashboard-state";
 import {
   parseDashboardMarketOptions,
   parseDashboardQuoteBatchResponse,
   parseDashboardStockListResponse,
 } from "@/lib/dashboard-data-adapter";
-import { act, type ReactElement } from "react";
-import { createRoot, type Root } from "react-dom/client";
+import type { DashboardViewState } from "@/lib/dashboard-state";
+import { type ReactElement, act } from "react";
+import { type Root, createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import DecisionOperatingSystem, {
@@ -81,12 +79,15 @@ function props(
         learning: {
           thesis: {
             title: "AAPL Review thesis",
-            description: "AAPL is being evaluated because evidence supports a measured review.",
+            description:
+              "AAPL is being evaluated because evidence supports a measured review.",
             status: "strengthening",
             confidence: 74,
           },
           evidence: {
-            supporting: [{ description: "Trend quality supports continued review." }],
+            supporting: [
+              { description: "Trend quality supports continued review." },
+            ],
             contradicting: [],
             missing: ["fresh confirmation"],
             invalidationConditions: ["Invalidate if breadth collapses."],
@@ -107,26 +108,45 @@ function props(
           readiness: {
             readiness: 74,
             actionLanguage: "act-small",
-            explanation: "Readiness, not confidence alone, drives action language.",
+            explanation:
+              "Readiness, not confidence alone, drives action language.",
           },
           horizons: [
-            { horizon: "short-term", view: "constructive", action: "Review", confidence: 72 },
-            { horizon: "medium-term", view: "neutral", action: "Track", confidence: 70 },
-            { horizon: "long-term", view: "cautious", action: "Stay measured", confidence: 68 },
+            {
+              horizon: "short-term",
+              view: "constructive",
+              action: "Review",
+              confidence: 72,
+            },
+            {
+              horizon: "medium-term",
+              view: "neutral",
+              action: "Track",
+              confidence: 70,
+            },
+            {
+              horizon: "long-term",
+              view: "cautious",
+              action: "Stay measured",
+              confidence: 68,
+            },
           ],
           opportunityRanking: {
             bestOpportunity: { label: "AAPL" },
             otherOpportunities: [],
             notReadyYet: [],
-            explanation: "AAPL ranks above alternatives because readiness is strongest.",
+            explanation:
+              "AAPL ranks above alternatives because readiness is strongest.",
           },
           portfolioContext: {
-            summary: "Portfolio context is unavailable; Signal is evaluating standalone evidence only.",
+            summary:
+              "Portfolio context is unavailable; Signal is evaluating standalone evidence only.",
             warnings: [],
           },
           narrative: {
             action: "Review; readiness says act small.",
-            whatChanged: "Similar regimes will appear after more snapshots are collected.",
+            whatChanged:
+              "Similar regimes will appear after more snapshots are collected.",
             whatIsHappening: "AAPL has the clearest current thesis.",
             whyItMatters: "AAPL ranks above alternatives.",
             uncertainty: "fresh confirmation",
@@ -224,9 +244,10 @@ function props(
   };
 }
 
-function renderInteractive(
-  component: ReactElement,
-): { container: HTMLElement; cleanup: () => void } {
+function renderInteractive(component: ReactElement): {
+  container: HTMLElement;
+  cleanup: () => void;
+} {
   const container = document.createElement("div");
   document.body.appendChild(container);
   let root: Root | null = null;
@@ -298,7 +319,9 @@ describe("DecisionOperatingSystem states", () => {
     expect(html).toContain(
       "We&#x27;re still gathering enough reviewed decisions to identify meaningful patterns.",
     );
-    expect(html).toContain("This insight has not yet been turned into a LinkedIn reflection.");
+    expect(html).toContain(
+      "This insight has not yet been turned into a LinkedIn reflection.",
+    );
     expect(html).toContain("The range is mixed, so keep the action measured.");
     expect(html).toContain("Lead instrument");
   });
@@ -409,12 +432,18 @@ describe("DecisionOperatingSystem states", () => {
         })}
       />,
     );
-    expect(legacy).toContain("No instrument strengthens the selected resource yet.");
+    expect(legacy).toContain(
+      "No instrument strengthens the selected resource yet.",
+    );
     expect(legacy).toContain("32%-54%");
     expect(legacy).toContain("Observe");
 
-    const enhanced = renderToStaticMarkup(<DecisionOperatingSystem {...props()} />);
-    expect(enhanced).toContain("AAPL is the clearest stewardship option to review.");
+    const enhanced = renderToStaticMarkup(
+      <DecisionOperatingSystem {...props()} />,
+    );
+    expect(enhanced).toContain(
+      "AAPL is the clearest stewardship option to review.",
+    );
     expect(enhanced).toContain("Trend quality supports continued review.");
 
     const degraded = renderToStaticMarkup(
@@ -714,7 +743,9 @@ describe("DecisionOperatingSystem states", () => {
       />,
     );
     expect(empty).toContain('data-testid="decision-step-screen"');
-    expect(empty).toContain("No instrument strengthens the selected resource yet.");
+    expect(empty).toContain(
+      "No instrument strengthens the selected resource yet.",
+    );
     expect(empty).toContain("Translate to Actions");
 
     const error = renderToStaticMarkup(
@@ -813,7 +844,9 @@ describe("DecisionOperatingSystem states", () => {
     );
 
     try {
-      expect(stepButton(container, "choose-market").dataset.active).toBe("true");
+      expect(stepButton(container, "choose-market").dataset.active).toBe(
+        "true",
+      );
       expect(stepPanel(container, "choose-market").hidden).toBe(false);
       expect(stepPanel(container, "review-current-conditions").hidden).toBe(
         true,
@@ -827,13 +860,15 @@ describe("DecisionOperatingSystem states", () => {
         stepButton(container, "review-current-conditions").click();
       });
 
-      expect(stepButton(container, "choose-market").dataset.active).toBe("false");
-      expect(stepButton(container, "review-current-conditions").dataset.active).toBe(
-        "true",
+      expect(stepButton(container, "choose-market").dataset.active).toBe(
+        "false",
       );
-      expect(stepButton(container, "review-current-conditions").dataset.status).toBe(
-        "inProgress",
-      );
+      expect(
+        stepButton(container, "review-current-conditions").dataset.active,
+      ).toBe("true");
+      expect(
+        stepButton(container, "review-current-conditions").dataset.status,
+      ).toBe("inProgress");
       expect(stepPanel(container, "choose-market").hidden).toBe(true);
       expect(stepPanel(container, "review-current-conditions").hidden).toBe(
         false,
@@ -882,7 +917,9 @@ describe("DecisionOperatingSystem states", () => {
   });
 
   it("renders status indicators and updates market completion state", () => {
-    const selected = renderToStaticMarkup(<DecisionOperatingSystem {...props()} />);
+    const selected = renderToStaticMarkup(
+      <DecisionOperatingSystem {...props()} />,
+    );
     expect(selected).toContain(
       'data-testid="workflow-step-status-choose-market"',
     );

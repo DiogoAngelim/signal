@@ -1,4 +1,4 @@
-import type { SignalExecutionResult } from "@signal/runtime";
+import type { SignalExecutionResult } from "@signal/sdk-node";
 import { createReferenceRuntime } from "./lib/runtime";
 import type {
   PaymentCaptureInput,
@@ -290,7 +290,10 @@ export async function runReferenceProof(): Promise<ReferenceProofResult> {
       "observe emitted events: the capture must create an outbox event envelope.",
     );
   }
-  await runtime.dispatcher.dispatch(outboxMessage.envelope);
+  await runtime.publish(
+    outboxMessage.envelope.name,
+    outboxMessage.envelope.payload,
+  );
   assertCondition(
     operations.highRiskPayment.store
       .listSubscriberDeliveries()
@@ -334,7 +337,7 @@ export async function runReferenceProof(): Promise<ReferenceProofResult> {
 }
 
 export async function runReferencePostgresProof(): Promise<ReferenceProofResult> {
-  if (!process.env["DATABASE_URL"]) {
+  if (!process.env.DATABASE_URL) {
     throw new Error(
       "DATABASE_URL is required for the durable Postgres reference proof.",
     );
@@ -350,11 +353,9 @@ async function main() {
   console.log(JSON.stringify(proof, null, 2));
 }
 
-
 if (require.main === module) {
   main().catch((error) => {
     console.error(error instanceof Error ? error.message : error);
     process.exit(1);
   });
 }
-

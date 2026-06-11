@@ -1,3 +1,9 @@
+import type {
+  AttentionLevel,
+  AuthenticatedUser,
+  LearningRecommendation,
+  StudentLearningSummary,
+} from "@/api/types";
 import {
   AlertCircle,
   BookMarked,
@@ -6,7 +12,7 @@ import {
   ChevronRight,
   ClipboardList,
   HeartHandshake,
-  Home,
+  type Home,
   Lightbulb,
   LogOut,
   MessageCircle,
@@ -15,16 +21,10 @@ import {
   RefreshCw,
   ShieldCheck,
   Sparkles,
+  UserRound,
   UsersRound,
-  UserRound
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import type {
-  AttentionLevel,
-  AuthenticatedUser,
-  LearningRecommendation,
-  StudentLearningSummary
-} from "@/api/types";
 
 export interface ParentDashboardProps {
   dashboards: StudentLearningSummary[];
@@ -52,57 +52,57 @@ const sections: Array<{
     id: "overview",
     label: "Student overview",
     description: "Current context",
-    icon: UserRound
+    icon: UserRound,
   },
   {
     id: "strengths",
     label: "What is going well",
     description: "Encourage",
-    icon: Sparkles
+    icon: Sparkles,
   },
   {
     id: "practice",
     label: "What needs practice",
     description: "Repeat gently",
-    icon: BookMarked
+    icon: BookMarked,
   },
   {
     id: "monitor",
     label: "What to monitor",
     description: "Watch calmly",
-    icon: AlertCircle
+    icon: AlertCircle,
   },
   {
     id: "discuss",
     label: "What to discuss",
     description: "Conversation",
-    icon: MessageCircle
+    icon: MessageCircle,
   },
   {
     id: "support",
     label: "Where to give support",
     description: "Home plan",
-    icon: HeartHandshake
+    icon: HeartHandshake,
   },
   {
     id: "review",
     label: "Learning review",
     description: "What changed",
-    icon: ClipboardList
+    icon: ClipboardList,
   },
   {
     id: "next-step",
     label: "Recommended next step",
     description: "One action",
-    icon: CheckCircle2
-  }
+    icon: CheckCircle2,
+  },
 ];
 
 function formatDate(isoDate: string): string {
   return new Intl.DateTimeFormat("en", {
     month: "short",
     day: "numeric",
-    year: "numeric"
+    year: "numeric",
   }).format(new Date(isoDate));
 }
 
@@ -139,7 +139,9 @@ function RecommendationList({ items }: { items: LearningRecommendation[] }) {
   );
 }
 
-export function StudentOverview({ dashboard }: { dashboard: StudentLearningSummary }) {
+export function StudentOverview({
+  dashboard,
+}: { dashboard: StudentLearningSummary }) {
   const { student } = dashboard;
   return (
     <section className="dashboard-section">
@@ -157,7 +159,9 @@ export function StudentOverview({ dashboard }: { dashboard: StudentLearningSumma
       <div className="overview-grid">
         <div className="overview-item">
           <span>Grade and class</span>
-          <strong>{student.grade} - {student.className}</strong>
+          <strong>
+            {student.grade} - {student.className}
+          </strong>
         </div>
         <div className="overview-item">
           <span>Teacher</span>
@@ -196,7 +200,9 @@ export function StudentOverview({ dashboard }: { dashboard: StudentLearningSumma
   );
 }
 
-export function LearningStrengths({ dashboard }: { dashboard: StudentLearningSummary }) {
+export function LearningStrengths({
+  dashboard,
+}: { dashboard: StudentLearningSummary }) {
   return (
     <section className="dashboard-section">
       <div className="section-heading">
@@ -210,7 +216,9 @@ export function LearningStrengths({ dashboard }: { dashboard: StudentLearningSum
   );
 }
 
-export function PracticeNeeds({ dashboard }: { dashboard: StudentLearningSummary }) {
+export function PracticeNeeds({
+  dashboard,
+}: { dashboard: StudentLearningSummary }) {
   return (
     <section className="dashboard-section">
       <div className="section-heading">
@@ -224,7 +232,9 @@ export function PracticeNeeds({ dashboard }: { dashboard: StudentLearningSummary
   );
 }
 
-export function MonitorAreas({ dashboard }: { dashboard: StudentLearningSummary }) {
+export function MonitorAreas({
+  dashboard,
+}: { dashboard: StudentLearningSummary }) {
   return (
     <section className="dashboard-section">
       <div className="section-heading">
@@ -238,7 +248,9 @@ export function MonitorAreas({ dashboard }: { dashboard: StudentLearningSummary 
   );
 }
 
-export function DiscussionPrompts({ dashboard }: { dashboard: StudentLearningSummary }) {
+export function DiscussionPrompts({
+  dashboard,
+}: { dashboard: StudentLearningSummary }) {
   return (
     <section className="dashboard-section">
       <div className="section-heading">
@@ -269,7 +281,9 @@ export function DiscussionPrompts({ dashboard }: { dashboard: StudentLearningSum
   );
 }
 
-export function SupportPlan({ dashboard }: { dashboard: StudentLearningSummary }) {
+export function SupportPlan({
+  dashboard,
+}: { dashboard: StudentLearningSummary }) {
   return (
     <section className="dashboard-section">
       <div className="section-heading">
@@ -283,20 +297,25 @@ export function SupportPlan({ dashboard }: { dashboard: StudentLearningSummary }
   );
 }
 
-export function LearningReview({ dashboard }: { dashboard: StudentLearningSummary }) {
+export function LearningReview({
+  dashboard,
+}: { dashboard: StudentLearningSummary }) {
   const groups = [
     ["What changed", dashboard.learningReview.changed],
     ["What improved", dashboard.learningReview.improved],
     ["What stayed stable", dashboard.learningReview.stable],
-    ["Still needs more evidence", dashboard.learningReview.stillNeedsProof]
+    ["Still needs more evidence", dashboard.learningReview.stillNeedsProof],
   ] as const;
   const qualityGroups = [
     ["Supporting evidence", dashboard.decisionQuality.supportingEvidence],
     ["Assumptions", dashboard.decisionQuality.assumptions],
-    ["Contradictory indicators", dashboard.decisionQuality.contradictoryIndicators],
+    [
+      "Contradictory indicators",
+      dashboard.decisionQuality.contradictoryIndicators,
+    ],
     ["Unknowns", dashboard.decisionQuality.unknowns],
     ["Lessons", dashboard.decisionQuality.lessons],
-    ["Next actions", dashboard.decisionQuality.nextActions]
+    ["Next actions", dashboard.decisionQuality.nextActions],
   ] as const;
 
   return (
@@ -343,7 +362,9 @@ export function LearningReview({ dashboard }: { dashboard: StudentLearningSummar
         <div className="next-evidence">
           <strong>Next best evidence</strong>
           <p>{dashboard.decisionQuality.nextBestEvidence.whyItMatters}</p>
-          <span>{dashboard.decisionQuality.nextBestEvidence.expectedImpact}</span>
+          <span>
+            {dashboard.decisionQuality.nextBestEvidence.expectedImpact}
+          </span>
         </div>
       </div>
 
@@ -368,7 +389,9 @@ export function LearningReview({ dashboard }: { dashboard: StudentLearningSummar
   );
 }
 
-export function RecommendedNextStep({ dashboard }: { dashboard: StudentLearningSummary }) {
+export function RecommendedNextStep({
+  dashboard,
+}: { dashboard: StudentLearningSummary }) {
   return (
     <section className="dashboard-section">
       <div className="next-step-panel">
@@ -384,27 +407,37 @@ export function RecommendedNextStep({ dashboard }: { dashboard: StudentLearningS
   );
 }
 
-export function ParentDashboard({ dashboards, user, onSignOut }: ParentDashboardProps) {
+export function ParentDashboard({
+  dashboards,
+  user,
+  onSignOut,
+}: ParentDashboardProps) {
   const [activeSection, setActiveSection] = useState<SectionId>("overview");
   const [railCollapsed, setRailCollapsed] = useState(false);
-  const [activeStudentId, setActiveStudentId] = useState(dashboards[0]?.student.id ?? "");
+  const [activeStudentId, setActiveStudentId] = useState(
+    dashboards[0]?.student.id ?? "",
+  );
   const dashboard = useMemo(
     () =>
       dashboards.find((item) => item.student.id === activeStudentId) ??
       dashboards[0],
-    [activeStudentId, dashboards]
+    [activeStudentId, dashboards],
   );
 
   const activeIndex = useMemo(
     () => sections.findIndex((section) => section.id === activeSection),
-    [activeSection]
+    [activeSection],
   );
 
   if (!dashboard) {
     return (
       <main className="access-shell">
         <section className="access-panel access-panel--compact">
-          <img src="/logo.png" alt="AlgAI" className="access-mark access-mark--logo" />
+          <img
+            src="/logo.png"
+            alt="AlgAI"
+            className="access-mark access-mark--logo"
+          />
           <p>No parent dashboard data is available for this AlgAI login.</p>
         </section>
       </main>
@@ -413,7 +446,13 @@ export function ParentDashboard({ dashboards, user, onSignOut }: ParentDashboard
 
   return (
     <div className="dashboard-shell">
-      <aside className={railCollapsed ? "section-rail section-rail--collapsed" : "section-rail"}>
+      <aside
+        className={
+          railCollapsed
+            ? "section-rail section-rail--collapsed"
+            : "section-rail"
+        }
+      >
         <div className="rail-brand">
           <img src="/logo.png" alt="AlgAI" />
           {!railCollapsed ? (
@@ -426,9 +465,15 @@ export function ParentDashboard({ dashboards, user, onSignOut }: ParentDashboard
         <button
           className="rail-toggle"
           onClick={() => setRailCollapsed((value) => !value)}
-          aria-label={railCollapsed ? "Expand section rail" : "Collapse section rail"}
+          aria-label={
+            railCollapsed ? "Expand section rail" : "Collapse section rail"
+          }
         >
-          {railCollapsed ? <PanelLeftOpen aria-hidden="true" /> : <PanelLeftClose aria-hidden="true" />}
+          {railCollapsed ? (
+            <PanelLeftOpen aria-hidden="true" />
+          ) : (
+            <PanelLeftClose aria-hidden="true" />
+          )}
         </button>
         <nav aria-label="Parent dashboard sections">
           {sections.map((section, index) => {
@@ -438,7 +483,9 @@ export function ParentDashboard({ dashboards, user, onSignOut }: ParentDashboard
             return (
               <button
                 key={section.id}
-                className={selected ? "rail-item rail-item--active" : "rail-item"}
+                className={
+                  selected ? "rail-item rail-item--active" : "rail-item"
+                }
                 onClick={() => setActiveSection(section.id)}
                 aria-current={selected ? "step" : undefined}
               >
@@ -449,7 +496,11 @@ export function ParentDashboard({ dashboards, user, onSignOut }: ParentDashboard
                       <strong>{section.label}</strong>
                       <small>{section.description}</small>
                     </span>
-                    {complete ? <CheckCircle2 aria-hidden="true" className="rail-done" /> : <ChevronRight aria-hidden="true" />}
+                    {complete ? (
+                      <CheckCircle2 aria-hidden="true" className="rail-done" />
+                    ) : (
+                      <ChevronRight aria-hidden="true" />
+                    )}
                   </>
                 ) : null}
               </button>
@@ -464,15 +515,26 @@ export function ParentDashboard({ dashboards, user, onSignOut }: ParentDashboard
             <p className="eyebrow">Parent dashboard</p>
             <h1>{dashboard.student.childName}'s learning summary</h1>
             <p>
-              Live AlgAI learning data for the students connected to this parent email.
+              Live AlgAI learning data for the students connected to this parent
+              email.
             </p>
           </div>
           <div className="header-actions">
-            <span className="user-pill">{user?.email ?? dashboard.dashboardPermissions.validatedParentEmail}</span>
-            <button className="icon-button" aria-label="Refresh learning summary">
+            <span className="user-pill">
+              {user?.email ??
+                dashboard.dashboardPermissions.validatedParentEmail}
+            </span>
+            <button
+              className="icon-button"
+              aria-label="Refresh learning summary"
+            >
               <RefreshCw aria-hidden="true" />
             </button>
-            <button className="icon-button" onClick={onSignOut} aria-label="Sign out">
+            <button
+              className="icon-button"
+              onClick={onSignOut}
+              aria-label="Sign out"
+            >
               <LogOut aria-hidden="true" />
             </button>
           </div>
@@ -490,7 +552,11 @@ export function ParentDashboard({ dashboards, user, onSignOut }: ParentDashboard
                 return (
                   <button
                     key={item.student.id}
-                    className={selected ? "student-tab student-tab--active" : "student-tab"}
+                    className={
+                      selected
+                        ? "student-tab student-tab--active"
+                        : "student-tab"
+                    }
                     onClick={() => {
                       setActiveStudentId(item.student.id);
                       setActiveSection("overview");
@@ -512,20 +578,39 @@ export function ParentDashboard({ dashboards, user, onSignOut }: ParentDashboard
             <h2>{dashboard.recommendedNextStep.title}</h2>
             <p>{dashboard.recommendedNextStep.whyNow}</p>
           </div>
-          <button className="primary-button" onClick={() => setActiveSection("next-step")}>
+          <button
+            className="primary-button"
+            onClick={() => setActiveSection("next-step")}
+          >
             <CheckCircle2 aria-hidden="true" />
             View action
           </button>
         </div>
 
-        {activeSection === "overview" ? <StudentOverview dashboard={dashboard} /> : null}
-        {activeSection === "strengths" ? <LearningStrengths dashboard={dashboard} /> : null}
-        {activeSection === "practice" ? <PracticeNeeds dashboard={dashboard} /> : null}
-        {activeSection === "monitor" ? <MonitorAreas dashboard={dashboard} /> : null}
-        {activeSection === "discuss" ? <DiscussionPrompts dashboard={dashboard} /> : null}
-        {activeSection === "support" ? <SupportPlan dashboard={dashboard} /> : null}
-        {activeSection === "review" ? <LearningReview dashboard={dashboard} /> : null}
-        {activeSection === "next-step" ? <RecommendedNextStep dashboard={dashboard} /> : null}
+        {activeSection === "overview" ? (
+          <StudentOverview dashboard={dashboard} />
+        ) : null}
+        {activeSection === "strengths" ? (
+          <LearningStrengths dashboard={dashboard} />
+        ) : null}
+        {activeSection === "practice" ? (
+          <PracticeNeeds dashboard={dashboard} />
+        ) : null}
+        {activeSection === "monitor" ? (
+          <MonitorAreas dashboard={dashboard} />
+        ) : null}
+        {activeSection === "discuss" ? (
+          <DiscussionPrompts dashboard={dashboard} />
+        ) : null}
+        {activeSection === "support" ? (
+          <SupportPlan dashboard={dashboard} />
+        ) : null}
+        {activeSection === "review" ? (
+          <LearningReview dashboard={dashboard} />
+        ) : null}
+        {activeSection === "next-step" ? (
+          <RecommendedNextStep dashboard={dashboard} />
+        ) : null}
       </main>
     </div>
   );

@@ -1,4 +1,10 @@
-export const attentionLevels = ["normal", "notice", "warning", "urgency", "emergency"] as const;
+export const attentionLevels = [
+  "normal",
+  "notice",
+  "warning",
+  "urgency",
+  "emergency",
+] as const;
 export type AttentionLevel = (typeof attentionLevels)[number];
 
 export const attentionLabels: Record<AttentionLevel, string> = {
@@ -6,7 +12,7 @@ export const attentionLabels: Record<AttentionLevel, string> = {
   notice: "Notice",
   warning: "Warning",
   urgency: "Urgency",
-  emergency: "Emergency"
+  emergency: "Emergency",
 };
 
 export const safetyActions = [
@@ -18,14 +24,19 @@ export const safetyActions = [
   "Protect",
   "Shelter",
   "Relocate",
-  "Seek Assistance"
+  "Seek Assistance",
 ] as const;
 export type SafetyAction = (typeof safetyActions)[number];
 
 export const sourceReliabilityLevels = ["high", "medium", "limited"] as const;
 export type SourceReliability = (typeof sourceReliabilityLevels)[number];
 
-export const freshnessStatuses = ["fresh", "recent", "stale", "missing"] as const;
+export const freshnessStatuses = [
+  "fresh",
+  "recent",
+  "stale",
+  "missing",
+] as const;
 export type FreshnessStatus = (typeof freshnessStatuses)[number];
 
 export type EvidenceSource = {

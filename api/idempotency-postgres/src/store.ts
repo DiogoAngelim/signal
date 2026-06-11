@@ -1,19 +1,21 @@
-import { eq, and } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
 import type { SignalErrorEnvelope, SignalResultMeta } from "@signal/protocol";
 import type {
-  SignalIdempotencyRecord,
-  SignalIdempotencyReservation,
-  SignalIdempotencyStore,
-} from "@signal/runtime";
+  IdempotencyRecord,
+  IdempotencyReservation,
+  StoragePort,
+} from "@signal/ports";
+import { and, eq } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { signalIdempotencyRecords } from "./drizzle/schema";
 
 export interface CreateSignalPostgresIdempotencyStoreOptions {
   connectionString: string;
 }
 
-function toRecord(row: typeof signalIdempotencyRecords.$inferSelect): SignalIdempotencyRecord {
+function toRecord(
+  row: typeof signalIdempotencyRecords.$inferSelect,
+): IdempotencyRecord {
   return {
     operationName: row.operationName,
     idempotencyKey: row.idempotencyKey,
@@ -31,21 +33,21 @@ function toRecord(row: typeof signalIdempotencyRecords.$inferSelect): SignalIdem
 }
 
 export function createPostgresIdempotencyStore(
-  options: CreateSignalPostgresIdempotencyStoreOptions
-): SignalIdempotencyStore {
+  options: CreateSignalPostgresIdempotencyStoreOptions,
+): StoragePort {
   const pool = new Pool({ connectionString: options.connectionString });
   const db = drizzle(pool);
 
   return {
-    async reserve(input): Promise<SignalIdempotencyReservation> {
+    async reserve(input): Promise<IdempotencyReservation> {
       const existing = await db
         .select()
         .from(signalIdempotencyRecords)
         .where(
           and(
             eq(signalIdempotencyRecords.operationName, input.operationName),
-            eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey)
-          )
+            eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey),
+          ),
         )
         .limit(1);
 
@@ -89,8 +91,8 @@ export function createPostgresIdempotencyStore(
           .where(
             and(
               eq(signalIdempotencyRecords.operationName, input.operationName),
-              eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey)
-            )
+              eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey),
+            ),
           )
           .limit(1);
 
@@ -116,7 +118,7 @@ export function createPostgresIdempotencyStore(
           status: "completed",
           result: input.result as unknown,
           resultMeta: input.resultMeta as unknown,
-          
+
           messageId: input.messageId ?? null,
           updatedAt: new Date(),
         })
@@ -124,8 +126,11 @@ export function createPostgresIdempotencyStore(
           and(
             eq(signalIdempotencyRecords.operationName, input.operationName),
             eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey),
-            eq(signalIdempotencyRecords.payloadFingerprint, input.payloadFingerprint)
-          )
+            eq(
+              signalIdempotencyRecords.payloadFingerprint,
+              input.payloadFingerprint,
+            ),
+          ),
         );
     },
     async fail(input): Promise<void> {
@@ -140,8 +145,11 @@ export function createPostgresIdempotencyStore(
           and(
             eq(signalIdempotencyRecords.operationName, input.operationName),
             eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey),
-            eq(signalIdempotencyRecords.payloadFingerprint, input.payloadFingerprint)
-          )
+            eq(
+              signalIdempotencyRecords.payloadFingerprint,
+              input.payloadFingerprint,
+            ),
+          ),
         );
     },
   };

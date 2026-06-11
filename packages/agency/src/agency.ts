@@ -13,7 +13,9 @@ import type {
   SelfDiagnosisResult,
 } from "./types";
 
-export function createAgencyPipeline(config: AgencyPipelineConfig = {}): AgencyPipeline {
+export function createAgencyPipeline(
+  config: AgencyPipelineConfig = {},
+): AgencyPipeline {
   const memory = config.memory ?? createInMemoryAgencyMemory();
   let sequence = 0;
 

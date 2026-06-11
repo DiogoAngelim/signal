@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [awareApiPlugin(), react()],
   build: {
     outDir: "dist/web",
-    sourcemap: true
+    sourcemap: true,
   },
   test: {
     environment: "node",
@@ -22,9 +22,9 @@ export default defineConfig({
         "dist/**",
         ".vercel/**",
         "test/**",
-        "vite.config.ts"
+        "vite.config.ts",
       ],
-      reporter: ["text", "lcov"]
-    }
-  }
+      reporter: ["text", "lcov"],
+    },
+  },
 });

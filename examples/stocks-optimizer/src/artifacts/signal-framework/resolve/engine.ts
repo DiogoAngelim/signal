@@ -199,7 +199,11 @@ export function resolveCommitment(input: ResolveInput = {}): ResolveOutput {
   const requiredScore = roundScore(clamp(thresholds.minCommitScore));
   const missingEvidence = missingEvidenceFor(input, normalized, thresholds);
   const unlockConditions = unlockConditionsFor(input, normalized, thresholds);
-  const invalidationConditions = invalidationConditionsFor(input, normalized, thresholds);
+  const invalidationConditions = invalidationConditionsFor(
+    input,
+    normalized,
+    thresholds,
+  );
   const humanReviewRequired = humanReviewRequiredFor(input, normalized);
   const context: ResolveContext = {
     input,
@@ -214,7 +218,12 @@ export function resolveCommitment(input: ResolveInput = {}): ResolveOutput {
     humanReviewRequired,
   };
   const decision = decisionFor(context);
-  const commitmentLevel = commitmentLevelFor(input, decision, resolveScore, requiredScore);
+  const commitmentLevel = commitmentLevelFor(
+    input,
+    decision,
+    resolveScore,
+    requiredScore,
+  );
 
   return {
     decision,
@@ -238,33 +247,144 @@ export function resolveCommitment(input: ResolveInput = {}): ResolveOutput {
 export const evaluateResolve = resolveCommitment;
 export const resolveActionCommitment = resolveCommitment;
 
-function buildTraces(input: NormalizedResolveInput, thresholds: ResolveThresholds): ResolveTrace[] {
-  const recommendationScore = recommendationScoreFor(input.agencyRecommendation);
+function buildTraces(
+  input: NormalizedResolveInput,
+  thresholds: ResolveThresholds,
+): ResolveTrace[] {
+  const recommendationScore = recommendationScoreFor(
+    input.agencyRecommendation,
+  );
   const agencyTrust = valueOrFallback(input.agencyTrust, 40);
   const agencyScore = Math.min(agencyTrust, recommendationScore);
-  const overfitSafety = 100 - valueOrFallback(input.overfitRisk, thresholds.maxOverfitRisk);
-  const riskSafety = 100 - valueOrFallback(input.riskScore, thresholds.maxRiskScore);
-  const beliefStability = 100 - valueOrFallback(input.beliefFragility, thresholds.maxBeliefFragility);
+  const overfitSafety =
+    100 - valueOrFallback(input.overfitRisk, thresholds.maxOverfitRisk);
+  const riskSafety =
+    100 - valueOrFallback(input.riskScore, thresholds.maxRiskScore);
+  const beliefStability =
+    100 - valueOrFallback(input.beliefFragility, thresholds.maxBeliefFragility);
 
   const traces = [
-    trace("agency", "Agency approval", input.agencyTrust, agencyScore, TRACE_WEIGHTS.agency, thresholds.minAgencyTrust, agencyScore >= thresholds.minAgencyTrust, input.agencyRecommendation || "missing"),
-    trace("trust", "Trust score", input.trustScore, valueOrFallback(input.trustScore, 40), TRACE_WEIGHTS.trust, thresholds.minTrustScore, valueOrFallback(input.trustScore, 0) >= thresholds.minTrustScore, "Trust must already permit commitment."),
-    trace("confidence", "Calibrated confidence", input.calibratedConfidence, confidenceScore(input), TRACE_WEIGHTS.confidence, thresholds.minCalibratedConfidence, valueOrFallback(input.calibratedConfidence, 0) >= thresholds.minCalibratedConfidence, "Raw confidence cannot outrun calibrated confidence."),
-    trace("judgement", "Judgement reliability", input.judgementReliability, valueOrFallback(input.judgementReliability, 40), TRACE_WEIGHTS.judgement, thresholds.minJudgementReliability, valueOrFallback(input.judgementReliability, 0) >= thresholds.minJudgementReliability, "Similar states must justify the action."),
-    trace("stability", "Outcome stability", input.outcomeStability, valueOrFallback(input.outcomeStability, 40), TRACE_WEIGHTS.stability, 60, valueOrFallback(input.outcomeStability, 0) >= 60, "Outcomes should be stable enough to rely on."),
-    trace("data", "Data reliability", input.dataReliability, valueOrFallback(input.dataReliability, 40), TRACE_WEIGHTS.data, thresholds.minDataReliability, valueOrFallback(input.dataReliability, 0) >= thresholds.minDataReliability, "Weak data cannot support commitment."),
-    trace("risk", "Risk safety", input.riskScore, riskSafety, TRACE_WEIGHTS.risk, 100 - thresholds.maxRiskScore, valueOrFallback(input.riskScore, 100) <= thresholds.maxRiskScore, "Risk must stay inside the commitment boundary."),
-    trace("overfit", "Overfit safety", input.overfitRisk, overfitSafety, TRACE_WEIGHTS.overfit, 100 - thresholds.maxOverfitRisk, valueOrFallback(input.overfitRisk, 100) <= thresholds.maxOverfitRisk, "Overfit risk must stay below the policy cap."),
-    trace("belief", "Belief stability", input.beliefFragility, beliefStability, TRACE_WEIGHTS.belief, 100 - thresholds.maxBeliefFragility, valueOrFallback(input.beliefFragility, 100) <= thresholds.maxBeliefFragility, "Fragile belief should not be treated as commitment."),
+    trace(
+      "agency",
+      "Agency approval",
+      input.agencyTrust,
+      agencyScore,
+      TRACE_WEIGHTS.agency,
+      thresholds.minAgencyTrust,
+      agencyScore >= thresholds.minAgencyTrust,
+      input.agencyRecommendation || "missing",
+    ),
+    trace(
+      "trust",
+      "Trust score",
+      input.trustScore,
+      valueOrFallback(input.trustScore, 40),
+      TRACE_WEIGHTS.trust,
+      thresholds.minTrustScore,
+      valueOrFallback(input.trustScore, 0) >= thresholds.minTrustScore,
+      "Trust must already permit commitment.",
+    ),
+    trace(
+      "confidence",
+      "Calibrated confidence",
+      input.calibratedConfidence,
+      confidenceScore(input),
+      TRACE_WEIGHTS.confidence,
+      thresholds.minCalibratedConfidence,
+      valueOrFallback(input.calibratedConfidence, 0) >=
+        thresholds.minCalibratedConfidence,
+      "Raw confidence cannot outrun calibrated confidence.",
+    ),
+    trace(
+      "judgement",
+      "Judgement reliability",
+      input.judgementReliability,
+      valueOrFallback(input.judgementReliability, 40),
+      TRACE_WEIGHTS.judgement,
+      thresholds.minJudgementReliability,
+      valueOrFallback(input.judgementReliability, 0) >=
+        thresholds.minJudgementReliability,
+      "Similar states must justify the action.",
+    ),
+    trace(
+      "stability",
+      "Outcome stability",
+      input.outcomeStability,
+      valueOrFallback(input.outcomeStability, 40),
+      TRACE_WEIGHTS.stability,
+      60,
+      valueOrFallback(input.outcomeStability, 0) >= 60,
+      "Outcomes should be stable enough to rely on.",
+    ),
+    trace(
+      "data",
+      "Data reliability",
+      input.dataReliability,
+      valueOrFallback(input.dataReliability, 40),
+      TRACE_WEIGHTS.data,
+      thresholds.minDataReliability,
+      valueOrFallback(input.dataReliability, 0) >=
+        thresholds.minDataReliability,
+      "Weak data cannot support commitment.",
+    ),
+    trace(
+      "risk",
+      "Risk safety",
+      input.riskScore,
+      riskSafety,
+      TRACE_WEIGHTS.risk,
+      100 - thresholds.maxRiskScore,
+      valueOrFallback(input.riskScore, 100) <= thresholds.maxRiskScore,
+      "Risk must stay inside the commitment boundary.",
+    ),
+    trace(
+      "overfit",
+      "Overfit safety",
+      input.overfitRisk,
+      overfitSafety,
+      TRACE_WEIGHTS.overfit,
+      100 - thresholds.maxOverfitRisk,
+      valueOrFallback(input.overfitRisk, 100) <= thresholds.maxOverfitRisk,
+      "Overfit risk must stay below the policy cap.",
+    ),
+    trace(
+      "belief",
+      "Belief stability",
+      input.beliefFragility,
+      beliefStability,
+      TRACE_WEIGHTS.belief,
+      100 - thresholds.maxBeliefFragility,
+      valueOrFallback(input.beliefFragility, 100) <=
+        thresholds.maxBeliefFragility,
+      "Fragile belief should not be treated as commitment.",
+    ),
   ];
 
-  if (input.wisdomScore != null || input.decisionQuality != null || input.restrictionValue != null) {
-    const wisdomScore = valueOrFallback(input.wisdomScore, mean([
-      valueOrFallback(input.decisionQuality, 50),
-      valueOrFallback(input.restrictionValue, 50),
-      Math.max(0, 100 - valueOrFallback(input.opportunityCost, 0)),
-    ]));
-    traces.push(trace("wisdom", "Wisdom quality", input.wisdomScore, wisdomScore, TRACE_WEIGHTS.wisdom, 60, wisdomScore >= 60, "Wisdom checks decision quality, restriction value, and opportunity cost before Resolve commits."));
+  if (
+    input.wisdomScore != null ||
+    input.decisionQuality != null ||
+    input.restrictionValue != null
+  ) {
+    const wisdomScore = valueOrFallback(
+      input.wisdomScore,
+      mean([
+        valueOrFallback(input.decisionQuality, 50),
+        valueOrFallback(input.restrictionValue, 50),
+        Math.max(0, 100 - valueOrFallback(input.opportunityCost, 0)),
+      ]),
+    );
+    traces.push(
+      trace(
+        "wisdom",
+        "Wisdom quality",
+        input.wisdomScore,
+        wisdomScore,
+        TRACE_WEIGHTS.wisdom,
+        60,
+        wisdomScore >= 60,
+        "Wisdom checks decision quality, restriction value, and opportunity cost before Resolve commits.",
+      ),
+    );
   }
 
   return traces;
@@ -290,11 +410,23 @@ function normalizeInput(input: ResolveInput): NormalizedResolveInput {
     restrictionValue: optionalScore(input.restrictionValue),
     suggestedExposure: optionalNonNegative(input.suggestedExposure),
     maxTrustedExposure: optionalNonNegative(input.maxTrustedExposure),
-    blockedActions: Math.max(0, Math.round(optionalNonNegative(input.blockedActions) ?? 0)),
-    missingOutcomes: Math.max(0, Math.round(optionalNonNegative(input.missingOutcomes) ?? 0)),
+    blockedActions: Math.max(
+      0,
+      Math.round(optionalNonNegative(input.blockedActions) ?? 0),
+    ),
+    missingOutcomes: Math.max(
+      0,
+      Math.round(optionalNonNegative(input.missingOutcomes) ?? 0),
+    ),
     similarSamples: optionalNonNegative(input.similarSamples),
-    positiveOutcomes: Math.max(0, Math.round(optionalNonNegative(input.positiveOutcomes) ?? 0)),
-    negativeOutcomes: Math.max(0, Math.round(optionalNonNegative(input.negativeOutcomes) ?? 0)),
+    positiveOutcomes: Math.max(
+      0,
+      Math.round(optionalNonNegative(input.positiveOutcomes) ?? 0),
+    ),
+    negativeOutcomes: Math.max(
+      0,
+      Math.round(optionalNonNegative(input.negativeOutcomes) ?? 0),
+    ),
   };
 }
 
@@ -313,48 +445,137 @@ function recommendationScoreFor(recommendation: string) {
   return 50;
 }
 
-function missingEvidenceFor(input: ResolveInput, normalized: NormalizedResolveInput, thresholds: ResolveThresholds) {
+function missingEvidenceFor(
+  input: ResolveInput,
+  normalized: NormalizedResolveInput,
+  thresholds: ResolveThresholds,
+) {
   const missing: string[] = [];
 
-  if (normalized.agencyRecommendation === "") missing.push("Agency recommendation");
-  if (normalized.agencyTrust == null || normalized.agencyTrust < thresholds.minAgencyTrust) missing.push("Agency trust");
+  if (normalized.agencyRecommendation === "")
+    missing.push("Agency recommendation");
+  if (
+    normalized.agencyTrust == null ||
+    normalized.agencyTrust < thresholds.minAgencyTrust
+  )
+    missing.push("Agency trust");
   if (normalized.trustScore == null) missing.push("Trust score");
-  if (normalized.calibratedConfidence == null) missing.push("Calibrated confidence");
-  if (normalized.judgementReliability == null) missing.push("Judgement reliability");
+  if (normalized.calibratedConfidence == null)
+    missing.push("Calibrated confidence");
+  if (normalized.judgementReliability == null)
+    missing.push("Judgement reliability");
   if (normalized.outcomeStability == null) missing.push("Outcome stability");
   if (normalized.dataReliability == null) missing.push("Data reliability");
-  if (normalized.similarSamples == null || normalized.similarSamples < thresholds.minSimilarSamples) {
+  if (
+    normalized.similarSamples == null ||
+    normalized.similarSamples < thresholds.minSimilarSamples
+  ) {
     missing.push("Similar outcome sample");
   }
   if (normalized.missingOutcomes > 0) missing.push("Closed outcomes");
   if (normalized.blockedActions > 0) missing.push("Unblocked agency action");
-  if (sizingBlocksCommitment(input, normalized)) missing.push("Trusted sizing capacity");
+  if (sizingBlocksCommitment(input, normalized))
+    missing.push("Trusted sizing capacity");
 
   return unique([...missing, ...stringArray(input.evidence?.missingEvidence)]);
 }
 
-function unlockConditionsFor(input: ResolveInput, normalized: NormalizedResolveInput, thresholds: ResolveThresholds) {
+function unlockConditionsFor(
+  input: ResolveInput,
+  normalized: NormalizedResolveInput,
+  thresholds: ResolveThresholds,
+) {
   const conditions: string[] = [];
 
-  if (humanReviewRequiredFor(input, normalized)) conditions.push("Resolve the human review requirement before commitment.");
-  if (normalized.agencyTrust == null || normalized.agencyTrust < thresholds.minAgencyTrust) conditions.push(`Raise agency trust to at least ${formatScore(thresholds.minAgencyTrust)}.`);
-  if (normalized.trustScore == null || normalized.trustScore < thresholds.minTrustScore) conditions.push(`Raise trust score to at least ${formatScore(thresholds.minTrustScore)}.`);
-  if (normalized.calibratedConfidence == null || normalized.calibratedConfidence < thresholds.minCalibratedConfidence) conditions.push(`Raise calibrated confidence to at least ${formatScore(thresholds.minCalibratedConfidence)}.`);
-  if (normalized.judgementReliability == null || normalized.judgementReliability < thresholds.minJudgementReliability) conditions.push(`Raise judgement reliability to at least ${formatScore(thresholds.minJudgementReliability)}.`);
-  if (normalized.dataReliability == null || normalized.dataReliability < thresholds.minDataReliability) conditions.push(`Restore data reliability to at least ${formatScore(thresholds.minDataReliability)}.`);
-  if (normalized.riskScore != null && normalized.riskScore > thresholds.maxRiskScore) conditions.push(`Reduce risk score to ${formatScore(thresholds.maxRiskScore)} or lower.`);
-  if (normalized.overfitRisk != null && normalized.overfitRisk > thresholds.maxOverfitRisk) conditions.push(`Reduce overfit risk to ${formatScore(thresholds.maxOverfitRisk)} or lower.`);
-  if (normalized.beliefFragility != null && normalized.beliefFragility > thresholds.maxBeliefFragility) conditions.push(`Reduce belief fragility to ${formatScore(thresholds.maxBeliefFragility)} or lower.`);
-  if (normalized.wisdomScore != null && normalized.wisdomScore < 45) conditions.push("Improve Wisdom decision quality, restriction value, or opportunity cost before commitment.");
-  if (normalized.similarSamples == null || normalized.similarSamples < thresholds.minSimilarSamples) conditions.push(`Observe at least ${thresholds.minSimilarSamples} similar outcome samples.`);
-  if (normalized.missingOutcomes > 0) conditions.push("Close or evaluate missing outcomes before raising commitment.");
-  if (normalized.blockedActions > 0) conditions.push("Clear blocked agency actions before commitment.");
-  if (sizingBlocksCommitment(input, normalized)) conditions.push("Restore positive trusted sizing capacity.");
+  if (humanReviewRequiredFor(input, normalized))
+    conditions.push("Resolve the human review requirement before commitment.");
+  if (
+    normalized.agencyTrust == null ||
+    normalized.agencyTrust < thresholds.minAgencyTrust
+  )
+    conditions.push(
+      `Raise agency trust to at least ${formatScore(thresholds.minAgencyTrust)}.`,
+    );
+  if (
+    normalized.trustScore == null ||
+    normalized.trustScore < thresholds.minTrustScore
+  )
+    conditions.push(
+      `Raise trust score to at least ${formatScore(thresholds.minTrustScore)}.`,
+    );
+  if (
+    normalized.calibratedConfidence == null ||
+    normalized.calibratedConfidence < thresholds.minCalibratedConfidence
+  )
+    conditions.push(
+      `Raise calibrated confidence to at least ${formatScore(thresholds.minCalibratedConfidence)}.`,
+    );
+  if (
+    normalized.judgementReliability == null ||
+    normalized.judgementReliability < thresholds.minJudgementReliability
+  )
+    conditions.push(
+      `Raise judgement reliability to at least ${formatScore(thresholds.minJudgementReliability)}.`,
+    );
+  if (
+    normalized.dataReliability == null ||
+    normalized.dataReliability < thresholds.minDataReliability
+  )
+    conditions.push(
+      `Restore data reliability to at least ${formatScore(thresholds.minDataReliability)}.`,
+    );
+  if (
+    normalized.riskScore != null &&
+    normalized.riskScore > thresholds.maxRiskScore
+  )
+    conditions.push(
+      `Reduce risk score to ${formatScore(thresholds.maxRiskScore)} or lower.`,
+    );
+  if (
+    normalized.overfitRisk != null &&
+    normalized.overfitRisk > thresholds.maxOverfitRisk
+  )
+    conditions.push(
+      `Reduce overfit risk to ${formatScore(thresholds.maxOverfitRisk)} or lower.`,
+    );
+  if (
+    normalized.beliefFragility != null &&
+    normalized.beliefFragility > thresholds.maxBeliefFragility
+  )
+    conditions.push(
+      `Reduce belief fragility to ${formatScore(thresholds.maxBeliefFragility)} or lower.`,
+    );
+  if (normalized.wisdomScore != null && normalized.wisdomScore < 45)
+    conditions.push(
+      "Improve Wisdom decision quality, restriction value, or opportunity cost before commitment.",
+    );
+  if (
+    normalized.similarSamples == null ||
+    normalized.similarSamples < thresholds.minSimilarSamples
+  )
+    conditions.push(
+      `Observe at least ${thresholds.minSimilarSamples} similar outcome samples.`,
+    );
+  if (normalized.missingOutcomes > 0)
+    conditions.push(
+      "Close or evaluate missing outcomes before raising commitment.",
+    );
+  if (normalized.blockedActions > 0)
+    conditions.push("Clear blocked agency actions before commitment.");
+  if (sizingBlocksCommitment(input, normalized))
+    conditions.push("Restore positive trusted sizing capacity.");
 
-  return unique([...conditions, ...stringArray(input.evidence?.unlockConditions)]);
+  return unique([
+    ...conditions,
+    ...stringArray(input.evidence?.unlockConditions),
+  ]);
 }
 
-function invalidationConditionsFor(input: ResolveInput, normalized: NormalizedResolveInput, thresholds: ResolveThresholds) {
+function invalidationConditionsFor(
+  input: ResolveInput,
+  normalized: NormalizedResolveInput,
+  thresholds: ResolveThresholds,
+) {
   const conditions = [
     `Invalidate if data reliability falls below ${formatScore(thresholds.minDataReliability)}.`,
     `Invalidate if overfit risk rises above ${formatScore(thresholds.maxOverfitRisk)}.`,
@@ -363,17 +584,24 @@ function invalidationConditionsFor(input: ResolveInput, normalized: NormalizedRe
     "Invalidate if Trust or Judgement falls below the commitment threshold.",
   ];
 
-  if (normalized.positiveOutcomes + normalized.negativeOutcomes >= thresholds.minSimilarSamples) {
+  if (
+    normalized.positiveOutcomes + normalized.negativeOutcomes >=
+    thresholds.minSimilarSamples
+  ) {
     conditions.push("Invalidate if similar outcomes turn net negative.");
   }
 
-  return unique([...conditions, ...stringArray(input.evidence?.invalidationConditions)]);
+  return unique([
+    ...conditions,
+    ...stringArray(input.evidence?.invalidationConditions),
+  ]);
 }
 
 function decisionFor(context: ResolveContext): ResolveDecision {
   const input = context.normalized;
 
-  if (isInvalidated(context.input, input, context.thresholds)) return "invalidate";
+  if (isInvalidated(context.input, input, context.thresholds))
+    return "invalidate";
   if (isRejected(input, context)) return "reject";
   if (context.humanReviewRequired) return "escalate";
   if (shouldEscalate(input, context)) return "escalate";
@@ -381,76 +609,131 @@ function decisionFor(context: ResolveContext): ResolveDecision {
   return "wait";
 }
 
-function isInvalidated(input: ResolveInput, normalized: NormalizedResolveInput, thresholds: ResolveThresholds) {
-  if (booleanEvidence(input.evidence?.invalidated) || normalized.agencyRecommendation === "invalidate") return true;
-  const totalOutcomes = normalized.positiveOutcomes + normalized.negativeOutcomes;
-  return totalOutcomes >= thresholds.minSimilarSamples &&
+function isInvalidated(
+  input: ResolveInput,
+  normalized: NormalizedResolveInput,
+  thresholds: ResolveThresholds,
+) {
+  if (
+    booleanEvidence(input.evidence?.invalidated) ||
+    normalized.agencyRecommendation === "invalidate"
+  )
+    return true;
+  const totalOutcomes =
+    normalized.positiveOutcomes + normalized.negativeOutcomes;
+  return (
+    totalOutcomes >= thresholds.minSimilarSamples &&
     normalized.negativeOutcomes > normalized.positiveOutcomes &&
-    valueOrFallback(normalized.outcomeStability, 100) < 40;
+    valueOrFallback(normalized.outcomeStability, 100) < 40
+  );
 }
 
-function isRejected(normalized: NormalizedResolveInput, context: ResolveContext) {
+function isRejected(
+  normalized: NormalizedResolveInput,
+  context: ResolveContext,
+) {
   if (REJECT_RECOMMENDATIONS.has(normalized.agencyRecommendation)) return true;
 
   const trustProvided = normalized.trustScore != null;
   const confidenceProvided = normalized.calibratedConfidence != null;
-  return trustProvided &&
+  return (
+    trustProvided &&
     confidenceProvided &&
     valueOrFallback(normalized.trustScore, 0) < 25 &&
     valueOrFallback(normalized.calibratedConfidence, 0) < 40 &&
-    context.resolveScore < context.requiredScore;
+    context.resolveScore < context.requiredScore
+  );
 }
 
-function shouldEscalate(normalized: NormalizedResolveInput, context: ResolveContext) {
+function shouldEscalate(
+  normalized: NormalizedResolveInput,
+  context: ResolveContext,
+) {
   const thresholds = context.thresholds;
-  const dataReliability = valueOrFallback(normalized.dataReliability, thresholds.minDataReliability);
+  const dataReliability = valueOrFallback(
+    normalized.dataReliability,
+    thresholds.minDataReliability,
+  );
   const overfitRisk = valueOrFallback(normalized.overfitRisk, 0);
   const beliefFragility = valueOrFallback(normalized.beliefFragility, 0);
   const wisdomScore = valueOrFallback(normalized.wisdomScore, 100);
   const strongJudgementWeakAgency =
-    valueOrFallback(normalized.judgementReliability, 0) >= thresholds.minJudgementReliability &&
+    valueOrFallback(normalized.judgementReliability, 0) >=
+      thresholds.minJudgementReliability &&
     valueOrFallback(normalized.outcomeStability, 0) >= 60 &&
     valueOrFallback(normalized.agencyTrust, 0) < thresholds.minAgencyTrust;
 
-  return dataReliability < thresholds.minDataReliability - 20 ||
+  return (
+    dataReliability < thresholds.minDataReliability - 20 ||
     overfitRisk > thresholds.maxOverfitRisk + 25 ||
     beliefFragility > thresholds.maxBeliefFragility + 25 ||
     wisdomScore < 25 ||
-    strongJudgementWeakAgency;
+    strongJudgementWeakAgency
+  );
 }
 
-function canCommit(normalized: NormalizedResolveInput, context: ResolveContext) {
+function canCommit(
+  normalized: NormalizedResolveInput,
+  context: ResolveContext,
+) {
   const thresholds = context.thresholds;
-  return context.resolveScore >= context.requiredScore &&
+  return (
+    context.resolveScore >= context.requiredScore &&
     context.missingEvidence.length === 0 &&
     COMMIT_RECOMMENDATIONS.has(normalized.agencyRecommendation) &&
     valueOrFallback(normalized.agencyTrust, 0) >= thresholds.minAgencyTrust &&
     valueOrFallback(normalized.trustScore, 0) >= thresholds.minTrustScore &&
-    valueOrFallback(normalized.calibratedConfidence, 0) >= thresholds.minCalibratedConfidence &&
-    valueOrFallback(normalized.judgementReliability, 0) >= thresholds.minJudgementReliability &&
-    valueOrFallback(normalized.dataReliability, 0) >= thresholds.minDataReliability &&
+    valueOrFallback(normalized.calibratedConfidence, 0) >=
+      thresholds.minCalibratedConfidence &&
+    valueOrFallback(normalized.judgementReliability, 0) >=
+      thresholds.minJudgementReliability &&
+    valueOrFallback(normalized.dataReliability, 0) >=
+      thresholds.minDataReliability &&
     valueOrFallback(normalized.riskScore, 100) <= thresholds.maxRiskScore &&
     valueOrFallback(normalized.overfitRisk, 100) <= thresholds.maxOverfitRisk &&
-    valueOrFallback(normalized.beliefFragility, 100) <= thresholds.maxBeliefFragility &&
+    valueOrFallback(normalized.beliefFragility, 100) <=
+      thresholds.maxBeliefFragility &&
     valueOrFallback(normalized.wisdomScore, 60) >= 45 &&
-    valueOrFallback(normalized.similarSamples, 0) >= thresholds.minSimilarSamples &&
+    valueOrFallback(normalized.similarSamples, 0) >=
+      thresholds.minSimilarSamples &&
     normalized.blockedActions === 0 &&
-    !sizingBlocksCommitment(context.input, normalized);
+    !sizingBlocksCommitment(context.input, normalized)
+  );
 }
 
-function humanReviewRequiredFor(input: ResolveInput, normalized: NormalizedResolveInput) {
+function humanReviewRequiredFor(
+  input: ResolveInput,
+  normalized: NormalizedResolveInput,
+) {
   if (booleanEvidence(input.evidence?.humanReviewRequired)) return true;
   if (REVIEW_RECOMMENDATIONS.has(normalized.agencyRecommendation)) return true;
-  return normalized.blockedActions > 0 && !COMMIT_RECOMMENDATIONS.has(normalized.agencyRecommendation);
+  return (
+    normalized.blockedActions > 0 &&
+    !COMMIT_RECOMMENDATIONS.has(normalized.agencyRecommendation)
+  );
 }
 
-function commitmentLevelFor(input: ResolveInput, decision: ResolveDecision, resolveScore: number, requiredScore: number): CommitmentLevel {
-  if (decision === "reject" || decision === "invalidate" || decision === "escalate") return "none";
+function commitmentLevelFor(
+  input: ResolveInput,
+  decision: ResolveDecision,
+  resolveScore: number,
+  requiredScore: number,
+): CommitmentLevel {
+  if (
+    decision === "reject" ||
+    decision === "invalidate" ||
+    decision === "escalate"
+  )
+    return "none";
   if (decision === "wait") return "watch";
 
   const sizingMode = normalizeToken(input.sizingMode);
   if (["micro", "limited"].includes(sizingMode)) return "limited";
-  if (resolveScore >= 90 && ["full", "normal", "large", "maxsafe", "max-safe"].includes(sizingMode)) return "full";
+  if (
+    resolveScore >= 90 &&
+    ["full", "normal", "large", "maxsafe", "max-safe"].includes(sizingMode)
+  )
+    return "full";
   if (resolveScore >= Math.max(82, requiredScore + 5)) return "graduated";
   return "limited";
 }
@@ -484,11 +767,19 @@ function explanationFor(
   return `Resolve waits on ${action} because ${primaryMissing ?? "more evidence"} is still needed. ${primaryUnlock ?? "Keep observing until commitment thresholds are met."}`;
 }
 
-function sizingBlocksCommitment(input: ResolveInput, normalized: NormalizedResolveInput) {
+function sizingBlocksCommitment(
+  input: ResolveInput,
+  normalized: NormalizedResolveInput,
+) {
   const sizingMode = normalizeToken(input.sizingMode);
   if (["none", "blocked", "deferred"].includes(sizingMode)) return true;
-  if (normalized.suggestedExposure != null && normalized.suggestedExposure <= 0) return true;
-  if (normalized.maxTrustedExposure != null && normalized.maxTrustedExposure <= 0) return true;
+  if (normalized.suggestedExposure != null && normalized.suggestedExposure <= 0)
+    return true;
+  if (
+    normalized.maxTrustedExposure != null &&
+    normalized.maxTrustedExposure <= 0
+  )
+    return true;
   return false;
 }
 
@@ -516,12 +807,15 @@ function trace(
 
 function weightedScore(traces: ResolveTrace[]) {
   const totalWeight = traces.reduce((sum, item) => sum + item.weight, 0);
-  return traces.reduce((sum, item) => sum + item.score * item.weight, 0) / totalWeight;
+  return (
+    traces.reduce((sum, item) => sum + item.score * item.weight, 0) /
+    totalWeight
+  );
 }
 
 function mean(values: number[]) {
   const usable = values.filter(Number.isFinite);
-  
+
   if (!usable.length) return 0;
   return usable.reduce((sum, value) => sum + value, 0) / usable.length;
 }
@@ -564,8 +858,13 @@ function unique(values: string[]) {
 }
 
 function createdAtFor(input: ResolveInput) {
-  const candidate = input.createdAt ?? (typeof input.evidence?.createdAt === "string" ? input.evidence.createdAt : undefined);
-  if (candidate && !Number.isNaN(Date.parse(candidate))) return new Date(candidate).toISOString();
+  const candidate =
+    input.createdAt ??
+    (typeof input.evidence?.createdAt === "string"
+      ? input.evidence.createdAt
+      : undefined);
+  if (candidate && !Number.isNaN(Date.parse(candidate)))
+    return new Date(candidate).toISOString();
   return "1970-01-01T00:00:00.000Z";
 }
 

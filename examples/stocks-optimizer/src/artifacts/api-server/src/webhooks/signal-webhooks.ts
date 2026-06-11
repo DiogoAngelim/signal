@@ -1,12 +1,21 @@
 import crypto from "node:crypto";
 import dns from "node:dns/promises";
 import net from "node:net";
-import { positiveInt, validateSignalEnvironment } from "../config/signal-environment.js";
+import {
+  positiveInt,
+  validateSignalEnvironment,
+} from "../config/signal-environment.js";
+import { logger } from "../lib/logger.js";
+import { ApiProblem } from "../observability/signal-http.js";
+import {
+  incrementSignalCounter,
+  observeSignalLatency,
+  sanitizeForLog,
+} from "../observability/signal-metrics.js";
 import {
   CreateWebhookSchema,
   RotateWebhookSecretSchema,
 } from "../schemas/signal-api.js";
-import { loadSignalSecurityConfig } from "../security/signal-security.js";
 import {
   decryptSecret,
   encryptSecret,
@@ -14,20 +23,14 @@ import {
   secretPreview,
   signWebhookPayload,
 } from "../security/signal-secrets.js";
+import { loadSignalSecurityConfig } from "../security/signal-security.js";
 import {
-  signalMatchesFilters,
   type QueueJobRecord,
   type SignalRecord,
   type SignalStorageAdapter,
   type WebhookSubscription,
+  signalMatchesFilters,
 } from "../storage/signal-store.js";
-import { ApiProblem } from "../observability/signal-http.js";
-import {
-  incrementSignalCounter,
-  observeSignalLatency,
-  sanitizeForLog,
-} from "../observability/signal-metrics.js";
-import { logger } from "../lib/logger.js";
 
 type FetchLike = typeof fetch;
 
@@ -43,7 +46,8 @@ type WebhookQueuePayload = {
 const WEBHOOK_QUEUE = "signal-webhooks";
 
 export class SignalWebhookDispatcher {
-  private readonly workerId = `webhook-inline-${process.pid}-${crypto.randomUUID()}`;
+  private readonly workerId =
+    `webhook-inline-${process.pid}-${crypto.randomUUID()}`;
   private processing = false;
 
   constructor(
@@ -51,7 +55,14 @@ export class SignalWebhookDispatcher {
     private readonly fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
   ) {}
 
-  async register(rawInput: unknown, actor?: string): Promise<{ webhook: PublicWebhook; secret: string; generatedSecret: boolean }> {
+  async register(
+    rawInput: unknown,
+    actor?: string,
+  ): Promise<{
+    webhook: PublicWebhook;
+    secret: string;
+    generatedSecret: boolean;
+  }> {
     const input = CreateWebhookSchema.parse(rawInput);
     await validateWebhookUrl(input.url);
     const generatedSecret = !input.secret;
@@ -75,7 +86,11 @@ export class SignalWebhookDispatcher {
     await this.store.appendAudit({
       action: "webhook.created",
       actor,
-      metadata: { webhookId: webhook.id, url: webhook.url, filters: webhook.filters },
+      metadata: {
+        webhookId: webhook.id,
+        url: webhook.url,
+        filters: webhook.filters,
+      },
     });
 
     return {
@@ -106,18 +121,29 @@ export class SignalWebhookDispatcher {
     const input = RotateWebhookSecretSchema.parse(rawInput ?? {});
     const webhook = await this.store.getWebhook(id);
     if (!webhook || !webhook.active) {
-      throw new ApiProblem(404, "webhook_not_found", "Webhook subscription was not found.");
+      throw new ApiProblem(
+        404,
+        "webhook_not_found",
+        "Webhook subscription was not found.",
+      );
     }
 
     const secret = generateDisplaySecret();
-    const graceExpiresAt = new Date(Date.now() + input.graceSeconds * 1000).toISOString();
+    const graceExpiresAt = new Date(
+      Date.now() + input.graceSeconds * 1000,
+    ).toISOString();
     const updated = await this.store.rotateWebhookSecret(id, {
       secretCiphertext: encryptSecret(secret),
       secretPreview: secretPreview(secret),
       previousSecretCiphertext: webhook.secretCiphertext,
       previousSecretExpiresAt: graceExpiresAt,
     });
-    if (!updated) throw new ApiProblem(404, "webhook_not_found", "Webhook subscription was not found.");
+    if (!updated)
+      throw new ApiProblem(
+        404,
+        "webhook_not_found",
+        "Webhook subscription was not found.",
+      );
 
     await this.store.appendSecretRotation({
       subjectType: "webhook",
@@ -142,7 +168,11 @@ export class SignalWebhookDispatcher {
   async sendTest(id: string) {
     const webhook = await this.store.getWebhook(id);
     if (!webhook || !webhook.active) {
-      throw new ApiProblem(404, "webhook_not_found", "Webhook subscription was not found.");
+      throw new ApiProblem(
+        404,
+        "webhook_not_found",
+        "Webhook subscription was not found.",
+      );
     }
 
     const deliveryId = crypto.randomUUID();
@@ -207,13 +237,19 @@ export class SignalWebhookDispatcher {
     }
   }
 
-  async processDueJobsOnce(limit = positiveInt(process.env.SIGNAL_QUEUE_WORKER_BATCH_SIZE, 10)) {
+  async processDueJobsOnce(
+    limit = positiveInt(process.env.SIGNAL_QUEUE_WORKER_BATCH_SIZE, 10),
+  ) {
     if (this.processing) return 0;
     this.processing = true;
     let processed = 0;
 
     try {
-      const jobs = await this.store.claimQueueJobs(WEBHOOK_QUEUE, this.workerId, limit);
+      const jobs = await this.store.claimQueueJobs(
+        WEBHOOK_QUEUE,
+        this.workerId,
+        limit,
+      );
       for (const job of jobs) {
         await this.processJob(job);
         processed += 1;
@@ -254,7 +290,9 @@ export class SignalWebhookDispatcher {
   }
 
   private scheduleProcess(delayMs: number) {
-    const fastRetry = process.env.NODE_ENV === "test" || process.env.SIGNAL_TEST_FAST_RETRY === "true";
+    const fastRetry =
+      process.env.NODE_ENV === "test" ||
+      process.env.SIGNAL_TEST_FAST_RETRY === "true";
     const effectiveDelay = fastRetry ? 0 : delayMs;
 
     if (effectiveDelay <= 0) {
@@ -281,7 +319,10 @@ export class SignalWebhookDispatcher {
   private async processJob(job: QueueJobRecord) {
     const payload = job.payload as WebhookQueuePayload;
     if (payload.type !== "webhook.delivery") {
-      await this.store.failQueueJob(job.id, { error: "Unsupported queue payload.", deadLetter: true });
+      await this.store.failQueueJob(job.id, {
+        error: "Unsupported queue payload.",
+        deadLetter: true,
+      });
       return;
     }
 
@@ -307,7 +348,9 @@ export class SignalWebhookDispatcher {
         statusCode: result.statusCode,
       });
       await this.store.completeQueueJob(job.id);
-      incrementSignalCounter("signal.webhook.delivered", { event: payload.event });
+      incrementSignalCounter("signal.webhook.delivered", {
+        event: payload.event,
+      });
       await this.store.appendAudit({
         signalId: payload.signalId,
         action: "webhook.delivered",
@@ -319,13 +362,24 @@ export class SignalWebhookDispatcher {
         },
       });
     } catch (error) {
-      const statusCode = error instanceof WebhookDeliveryError ? error.statusCode : undefined;
-      const safeMessage = error instanceof Error ? error.message : String(error);
-      await this.retryOrDeadLetter(job, payload, attempt.id, safeMessage, statusCode);
+      const statusCode =
+        error instanceof WebhookDeliveryError ? error.statusCode : undefined;
+      const safeMessage =
+        error instanceof Error ? error.message : String(error);
+      await this.retryOrDeadLetter(
+        job,
+        payload,
+        attempt.id,
+        safeMessage,
+        statusCode,
+      );
     }
   }
 
-  private async deliver(webhook: WebhookSubscription, delivery: WebhookQueuePayload) {
+  private async deliver(
+    webhook: WebhookSubscription,
+    delivery: WebhookQueuePayload,
+  ) {
     const body = JSON.stringify(delivery.body);
     const timestamp = new Date().toISOString();
     const signature = signWebhookPayload({
@@ -351,7 +405,10 @@ export class SignalWebhookDispatcher {
     observeSignalLatency("webhook.delivery", performance.now() - startedAt);
 
     if (!response.ok) {
-      throw new WebhookDeliveryError(`HTTP ${response.status}`, response.status);
+      throw new WebhookDeliveryError(
+        `HTTP ${response.status}`,
+        response.status,
+      );
     }
 
     return { statusCode: response.status };
@@ -365,10 +422,17 @@ export class SignalWebhookDispatcher {
     statusCode?: number,
   ) {
     const maxAttempts = job.maxAttempts;
-    const baseDelay = positiveInt(process.env.SIGNAL_WEBHOOK_RETRY_BASE_MS, 500);
+    const baseDelay = positiveInt(
+      process.env.SIGNAL_WEBHOOK_RETRY_BASE_MS,
+      500,
+    );
     const deadLetter = job.attempts >= maxAttempts;
-    const fastRetry = process.env.NODE_ENV === "test" || process.env.SIGNAL_TEST_FAST_RETRY === "true";
-    const delayMs = fastRetry ? 0 : baseDelay * 2 ** Math.max(0, job.attempts - 1);
+    const fastRetry =
+      process.env.NODE_ENV === "test" ||
+      process.env.SIGNAL_TEST_FAST_RETRY === "true";
+    const delayMs = fastRetry
+      ? 0
+      : baseDelay * 2 ** Math.max(0, job.attempts - 1);
     const nextAttemptAt = new Date(Date.now() + delayMs).toISOString();
 
     await this.store.updateDeliveryAttempt(attemptId, {
@@ -384,10 +448,13 @@ export class SignalWebhookDispatcher {
       ...(deadLetter ? {} : { nextRunAt: nextAttemptAt }),
     });
 
-    incrementSignalCounter(deadLetter ? "signal.webhook.dead_letter" : "signal.webhook.retry", {
-      event: payload.event,
-      statusCode: statusCode ?? "network",
-    });
+    incrementSignalCounter(
+      deadLetter ? "signal.webhook.dead_letter" : "signal.webhook.retry",
+      {
+        event: payload.event,
+        statusCode: statusCode ?? "network",
+      },
+    );
     await this.store.appendAudit({
       signalId: payload.signalId,
       action: deadLetter ? "webhook.dead_lettered" : "webhook.retry_scheduled",
@@ -419,33 +486,60 @@ export async function validateWebhookUrl(rawUrl: string) {
   try {
     parsed = new URL(rawUrl);
   } catch {
-    throw new ApiProblem(400, "invalid_webhook_url", "Webhook URL must be a valid absolute URL.");
+    throw new ApiProblem(
+      400,
+      "invalid_webhook_url",
+      "Webhook URL must be a valid absolute URL.",
+    );
   }
 
   if (!["https:", "http:"].includes(parsed.protocol)) {
-    throw new ApiProblem(400, "invalid_webhook_url", "Webhook URL must use http or https.");
+    throw new ApiProblem(
+      400,
+      "invalid_webhook_url",
+      "Webhook URL must use http or https.",
+    );
   }
 
   if (parsed.protocol !== "https:" && process.env.NODE_ENV === "production") {
-    throw new ApiProblem(400, "insecure_webhook_url", "Production webhook URLs must use https.");
+    throw new ApiProblem(
+      400,
+      "insecure_webhook_url",
+      "Production webhook URLs must use https.",
+    );
   }
 
   if (config.allowPrivateWebhookTargets) return;
 
   if (isPrivateHostname(parsed.hostname)) {
-    throw new ApiProblem(400, "webhook_ssrf_blocked", "Webhook URL points to localhost or a private network.");
+    throw new ApiProblem(
+      400,
+      "webhook_ssrf_blocked",
+      "Webhook URL points to localhost or a private network.",
+    );
   }
 
   const addresses = await resolveWebhookAddresses(parsed.hostname);
   if (addresses.some((address) => isPrivateAddress(address))) {
-    throw new ApiProblem(400, "webhook_ssrf_blocked", "Webhook URL resolved to localhost or a private network.");
+    throw new ApiProblem(
+      400,
+      "webhook_ssrf_blocked",
+      "Webhook URL resolved to localhost or a private network.",
+    );
   }
 }
 
-async function fetchWebhookWithLimits(fetchImpl: FetchLike, rawUrl: string, init: RequestInit, remainingRedirects = validateSignalEnvironment().settings.webhookRedirectLimit): Promise<Response> {
+async function fetchWebhookWithLimits(
+  fetchImpl: FetchLike,
+  rawUrl: string,
+  init: RequestInit,
+  remainingRedirects = validateSignalEnvironment().settings
+    .webhookRedirectLimit,
+): Promise<Response> {
   await validateWebhookUrl(rawUrl);
   const timeoutMs = validateSignalEnvironment().settings.webhookTimeoutMs;
-  const responseLimit = validateSignalEnvironment().settings.webhookResponseMaxBytes;
+  const responseLimit =
+    validateSignalEnvironment().settings.webhookResponseMaxBytes;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -456,22 +550,43 @@ async function fetchWebhookWithLimits(fetchImpl: FetchLike, rawUrl: string, init
       signal: controller.signal,
     });
 
-    if (response.status >= 300 && response.status < 400 && response.headers.get("location")) {
+    if (
+      response.status >= 300 &&
+      response.status < 400 &&
+      response.headers.get("location")
+    ) {
       if (remainingRedirects <= 0) {
-        throw new WebhookDeliveryError("Webhook redirect limit exceeded.", response.status);
+        throw new WebhookDeliveryError(
+          "Webhook redirect limit exceeded.",
+          response.status,
+        );
       }
-      const redirected = new URL(response.headers.get("location")!, rawUrl).toString();
-      return fetchWebhookWithLimits(fetchImpl, redirected, init, remainingRedirects - 1);
+      const redirected = new URL(
+        response.headers.get("location")!,
+        rawUrl,
+      ).toString();
+      return fetchWebhookWithLimits(
+        fetchImpl,
+        redirected,
+        init,
+        remainingRedirects - 1,
+      );
     }
 
     const contentLength = Number(response.headers.get("content-length") ?? 0);
     if (contentLength > responseLimit) {
-      throw new WebhookDeliveryError("Webhook response exceeded the configured size limit.", response.status);
+      throw new WebhookDeliveryError(
+        "Webhook response exceeded the configured size limit.",
+        response.status,
+      );
     }
 
     const body = await response.arrayBuffer();
     if (body.byteLength > responseLimit) {
-      throw new WebhookDeliveryError("Webhook response exceeded the configured size limit.", response.status);
+      throw new WebhookDeliveryError(
+        "Webhook response exceeded the configured size limit.",
+        response.status,
+      );
     }
 
     return response;
@@ -497,7 +612,11 @@ async function resolveWebhookAddresses(hostname: string): Promise<string[]> {
     const records = await dns.lookup(hostname, { all: true, verbatim: true });
     return records.map((record) => record.address);
   } catch {
-    throw new ApiProblem(400, "webhook_dns_failed", "Webhook URL hostname could not be resolved.");
+    throw new ApiProblem(
+      400,
+      "webhook_dns_failed",
+      "Webhook URL hostname could not be resolved.",
+    );
   }
 }
 
@@ -515,7 +634,10 @@ function isPrivateAddress(address: string) {
 
 function isPrivateIpv4(address: string) {
   const parts = address.split(".").map(Number);
-  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) {
+  if (
+    parts.length !== 4 ||
+    parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)
+  ) {
     return true;
   }
 
@@ -550,7 +672,10 @@ function safeError(error: string) {
 }
 
 class WebhookDeliveryError extends Error {
-  constructor(message: string, readonly statusCode?: number) {
+  constructor(
+    message: string,
+    readonly statusCode?: number,
+  ) {
     super(message);
     this.name = "WebhookDeliveryError";
   }

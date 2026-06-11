@@ -15,18 +15,26 @@ export function defaultSubject(): StewardshipSubject {
   };
 }
 
-export function normalizeSubject(subject?: Partial<StewardshipSubject>): StewardshipSubject {
+export function normalizeSubject(
+  subject?: Partial<StewardshipSubject>,
+): StewardshipSubject {
   return {
     ...defaultSubject(),
     ...removeUndefined(subject ?? {}),
     id: nonEmpty(subject?.id, "subject:unknown"),
     label: nonEmpty(subject?.label, "Important subject"),
     importance: subject?.importance ?? "medium",
-    desiredState: nonEmpty(subject?.desiredState, "healthy, useful, and available"),
+    desiredState: nonEmpty(
+      subject?.desiredState,
+      "healthy, useful, and available",
+    ),
   };
 }
 
-export function actionSummary(action: StewardshipRecommendationAction, subject: StewardshipSubject): string {
+export function actionSummary(
+  action: StewardshipRecommendationAction,
+  subject: StewardshipSubject,
+): string {
   const target = subject.label;
   switch (action) {
     case "observe":
@@ -42,15 +50,18 @@ export function actionSummary(action: StewardshipRecommendationAction, subject: 
     case "intervene":
       return `Intervene to protect ${target} before the threat compounds.`;
     case "pause":
-      return `Pause until the decision process is trustworthy enough to continue.`;
+      return "Pause until the decision process is trustworthy enough to continue.";
     case "stop":
-      return `Stop this path because it fails stewardship requirements.`;
+      return "Stop this path because it fails stewardship requirements.";
     case "review_again":
-      return `Review again before increasing commitment.`;
+      return "Review again before increasing commitment.";
   }
 }
 
-export function nextStepDescription(action: StewardshipRecommendationAction, subject: StewardshipSubject): string {
+export function nextStepDescription(
+  action: StewardshipRecommendationAction,
+  subject: StewardshipSubject,
+): string {
   switch (action) {
     case "observe":
       return `Name the next evidence needed for ${subject.label} and do not expand commitment yet.`;
@@ -61,15 +72,15 @@ export function nextStepDescription(action: StewardshipRecommendationAction, sub
     case "proceed_gradually":
       return `Take only the smallest reversible step that keeps ${subject.label} protected.`;
     case "reduce_exposure":
-      return `Lower the exposed commitment before adding any new dependency.`;
+      return "Lower the exposed commitment before adding any new dependency.";
     case "intervene":
-      return `Apply the nearest protective control and assign follow-up review.`;
+      return "Apply the nearest protective control and assign follow-up review.";
     case "pause":
-      return `Pause action and resolve the governance gap first.`;
+      return "Pause action and resolve the governance gap first.";
     case "stop":
-      return `End this path unless a future review removes the blocker.`;
+      return "End this path unless a future review removes the blocker.";
     case "review_again":
-      return `Run another review after the contradiction or missing information is resolved.`;
+      return "Run another review after the contradiction or missing information is resolved.";
   }
 }
 
@@ -96,10 +107,15 @@ export function reviewTrigger(action: StewardshipRecommendationAction): string {
   }
 }
 
-export function governanceSentence(governance: StewardshipGovernanceAssessment): string {
-  if (governance.status === "blocked") return "The process is not trustworthy enough to continue.";
-  if (governance.status === "weak") return "The process has material gaps that need protection before action expands.";
-  if (governance.status === "caution") return "The process is usable only with explicit uncertainty and a small next step.";
+export function governanceSentence(
+  governance: StewardshipGovernanceAssessment,
+): string {
+  if (governance.status === "blocked")
+    return "The process is not trustworthy enough to continue.";
+  if (governance.status === "weak")
+    return "The process has material gaps that need protection before action expands.";
+  if (governance.status === "caution")
+    return "The process is usable only with explicit uncertainty and a small next step.";
   return "The process is acceptable, but it still should not be treated as certainty.";
 }
 
@@ -111,9 +127,19 @@ export function qualityLabel(score: number): StewardshipEvidenceQuality {
   return "absent";
 }
 
-export function recommendationConfidence(governance: StewardshipGovernanceAssessment): StewardshipRecommendation["confidence"] {
-  if (governance.status === "acceptable" && governance.evidenceQuality === "strong") return "high";
-  if (governance.status === "blocked" || governance.evidenceQuality === "absent") return "low";
+export function recommendationConfidence(
+  governance: StewardshipGovernanceAssessment,
+): StewardshipRecommendation["confidence"] {
+  if (
+    governance.status === "acceptable" &&
+    governance.evidenceQuality === "strong"
+  )
+    return "high";
+  if (
+    governance.status === "blocked" ||
+    governance.evidenceQuality === "absent"
+  )
+    return "low";
   return "medium";
 }
 
@@ -129,6 +155,10 @@ function nonEmpty(value: unknown, fallback: string): string {
   return text || fallback;
 }
 
-function removeUndefined<T extends Record<string, unknown>>(value: T): Partial<T> {
-  return Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined)) as Partial<T>;
+function removeUndefined<T extends Record<string, unknown>>(
+  value: T,
+): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, item]) => item !== undefined),
+  ) as Partial<T>;
 }

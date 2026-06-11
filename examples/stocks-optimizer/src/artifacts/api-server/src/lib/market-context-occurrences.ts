@@ -1,15 +1,13 @@
-import { randomUUID, createHash } from "crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { pool } from "@workspace/db";
-import {
-  type MarketDailyCandle,
-  type StockQuote,
-  type TradeSignal,
-} from "./stock-data";
 import { logger } from "./logger";
 import type { SignalScope } from "./signal-backend";
+import type { MarketDailyCandle, StockQuote, TradeSignal } from "./stock-data";
 
 function shouldSkipLocalQuoteSymbol(symbol: string) {
-  const value = String(symbol ?? "").trim().toUpperCase();
+  const value = String(symbol ?? "")
+    .trim()
+    .toUpperCase();
 
   return (
     !value ||
@@ -19,8 +17,6 @@ function shouldSkipLocalQuoteSymbol(symbol: string) {
     value.includes("DUMMY")
   );
 }
-
-
 
 export type OccurrenceOrigin = "historical_backfill" | "live_runtime";
 
@@ -163,8 +159,7 @@ type HistoryBackfillResult = {
 const MARKET_OCCURRENCES_TABLE = "market_occurrences";
 const MARKET_STATE_SNAPSHOTS_TABLE = "market_state_snapshots";
 const MARKET_MONTHLY_VOLATILITY_TABLE = "market_monthly_volatility";
-const MARKET_MONTHLY_ASSET_VOLATILITY_TABLE =
-  "market_monthly_asset_volatility";
+const MARKET_MONTHLY_ASSET_VOLATILITY_TABLE = "market_monthly_asset_volatility";
 const SIGNAL_OCCURRENCES_TABLE = "signal_occurrences";
 const REGIME_TRANSITIONS_TABLE = "regime_transitions";
 const ALLOCATION_STATE_OCCURRENCES_TABLE = "allocation_state_occurrences";
@@ -336,11 +331,12 @@ function transitionMagnitude(
     Math.abs(toFiniteNumber(previous.participation) - current.participation) *
       0.1 +
     Math.abs(
-      toFiniteNumber(previous.volatility_pressure) -
-        current.volatilityPressure,
+      toFiniteNumber(previous.volatility_pressure) - current.volatilityPressure,
     ) *
       0.2 +
-    Math.abs(toFiniteNumber(previous.regime_confidence) - current.regimeConfidence) *
+    Math.abs(
+      toFiniteNumber(previous.regime_confidence) - current.regimeConfidence,
+    ) *
       0.12 +
     Math.abs(toFiniteNumber(previous.risk_pressure) - current.riskPressure) *
       0.14;
@@ -352,12 +348,11 @@ function transitionMagnitude(
 }
 
 function diagnoseRegime(input: MarketContextInput) {
-  const history =
-    input.history?.length
-      ? input.history
-      : [input.open, input.high, input.low, input.close ?? input.price]
-          .map((value) => toFiniteNumber(value, Number.NaN))
-          .filter((value) => Number.isFinite(value));
+  const history = input.history?.length
+    ? input.history
+    : [input.open, input.high, input.low, input.close ?? input.price]
+        .map((value) => toFiniteNumber(value, Number.NaN))
+        .filter((value) => Number.isFinite(value));
   const returns = returnsFromHistory(history);
   const first = history[0] ?? input.price;
   const last = history[history.length - 1] ?? input.price;
@@ -368,13 +363,17 @@ function diagnoseRegime(input: MarketContextInput) {
       : Math.abs(input.quote?.changePercent ?? trendPct);
   const volatility = standardDeviation(returns) * 100;
   const realizedMove = Math.abs(input.quote?.changePercent ?? trendPct);
-  const volatilityPressure = clamp(volatility * 10 + rangePct * 1.6 + realizedMove * 2.2);
+  const volatilityPressure = clamp(
+    volatility * 10 + rangePct * 1.6 + realizedMove * 2.2,
+  );
   const trendQuality = clamp(50 + trendPct * 5.4 - volatilityPressure * 0.22);
   const breadth = clamp(50 + (input.quote?.changePercent ?? trendPct) * 3.2);
   const participation = clamp(
     input.volume && input.volume > 0 ? 56 + Math.log10(input.volume) * 4 : 50,
   );
-  const riskPressure = clamp(volatilityPressure * 0.72 + (trendPct < 0 ? Math.abs(trendPct) * 3.4 : 0));
+  const riskPressure = clamp(
+    volatilityPressure * 0.72 + (trendPct < 0 ? Math.abs(trendPct) * 3.4 : 0),
+  );
   const regimeState =
     riskPressure >= 76
       ? "PANIC"
@@ -394,7 +393,9 @@ function diagnoseRegime(input: MarketContextInput) {
     15,
     99,
   );
-  const regimeStability = clamp(100 - volatilityPressure * 0.68 - riskPressure * 0.18);
+  const regimeStability = clamp(
+    100 - volatilityPressure * 0.68 - riskPressure * 0.18,
+  );
   const exposureDurability = clamp(
     trendQuality * 0.44 + regimeStability * 0.38 + participation * 0.18,
   );
@@ -402,7 +403,9 @@ function diagnoseRegime(input: MarketContextInput) {
     exposureDurability * 0.64 + (input.quote?.signalReturnPercent ?? 0) * 3,
   );
   const calibration = clamp(
-    (input.quote?.confidence ?? input.quote?.signalConfidence ?? regimeConfidence) *
+    (input.quote?.confidence ??
+      input.quote?.signalConfidence ??
+      regimeConfidence) *
       0.7 +
       regimeStability * 0.3,
   );
@@ -432,9 +435,7 @@ function diagnoseRegime(input: MarketContextInput) {
 }
 
 function hashState(value: unknown) {
-  return createHash("sha256")
-    .update(JSON.stringify(value))
-    .digest("hex");
+  return createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
 
 function buildStateLabels(
@@ -465,16 +466,16 @@ function buildStateLabels(
   if (
     previous &&
     Math.abs(
-      toFiniteNumber(previous.volatility_pressure) -
-        context.volatilityPressure,
+      toFiniteNumber(previous.volatility_pressure) - context.volatilityPressure,
     ) >= 10
   ) {
     labels.push("volatility_transition");
   }
   if (
     previous &&
-    Math.abs(toFiniteNumber(previous.regime_confidence) - context.regimeConfidence) >=
-      15
+    Math.abs(
+      toFiniteNumber(previous.regime_confidence) - context.regimeConfidence,
+    ) >= 15
   ) {
     labels.push("confidence_shift");
   }
@@ -507,7 +508,10 @@ function quoteToContextInput(
     timestampUtc,
     occurrenceOrigin: origin,
     market: normalizeIdentifierValue(scope.scopeCode, "GLOBAL"),
-    venue: scope.scopeType === "market" ? normalizeIdentifierValue(scope.scopeCode, "GLOBAL") : "EXCHANGE",
+    venue:
+      scope.scopeType === "market"
+        ? normalizeIdentifierValue(scope.scopeCode, "GLOBAL")
+        : "EXCHANGE",
     asset: normalizeAsset(quote.symbol),
     timeframe: "live",
     price: quote.price,
@@ -578,7 +582,9 @@ async function diagnoseContext(
     metrics.regimeState.toLowerCase(),
     metrics.allocationPosture.toLowerCase(),
     metrics.riskPressure >= 70 ? "risk_pressure_high" : "risk_pressure_normal",
-    metrics.participation >= 60 ? "participation_confirmed" : "participation_muted",
+    metrics.participation >= 60
+      ? "participation_confirmed"
+      : "participation_muted",
   ];
   const stateHash = hashState({
     market: input.market,
@@ -652,7 +658,10 @@ function quoteIdent(identifier: string) {
 }
 
 function quoteQualifiedIdentifier(value: string) {
-  const parts = value.split(".").map((part) => part.trim()).filter(Boolean);
+  const parts = value
+    .split(".")
+    .map((part) => part.trim())
+    .filter(Boolean);
   if (!parts.length || parts.length > 2) {
     throw new Error(`Invalid table identifier: ${value}`);
   }
@@ -984,13 +993,34 @@ export async function ensureMarketContextSchema(): Promise<void> {
         `);
       }
 
-      await addCompatibilityColumnIfTableExists("trades", "market_occurrence_id");
-      await addCompatibilityColumnIfTableExists("executions", "market_occurrence_id");
-      await addCompatibilityColumnIfTableExists("executions", "signal_occurrence_id");
-      await addCompatibilityColumnIfTableExists("positions", "market_occurrence_id");
-      await addCompatibilityColumnIfTableExists("portfolio_activity", "market_occurrence_id");
-      await addCompatibilityColumnIfTableExists("portfolio_actions", "market_occurrence_id");
-      await addCompatibilityColumnIfTableExists("signals", "market_occurrence_id");
+      await addCompatibilityColumnIfTableExists(
+        "trades",
+        "market_occurrence_id",
+      );
+      await addCompatibilityColumnIfTableExists(
+        "executions",
+        "market_occurrence_id",
+      );
+      await addCompatibilityColumnIfTableExists(
+        "executions",
+        "signal_occurrence_id",
+      );
+      await addCompatibilityColumnIfTableExists(
+        "positions",
+        "market_occurrence_id",
+      );
+      await addCompatibilityColumnIfTableExists(
+        "portfolio_activity",
+        "market_occurrence_id",
+      );
+      await addCompatibilityColumnIfTableExists(
+        "portfolio_actions",
+        "market_occurrence_id",
+      );
+      await addCompatibilityColumnIfTableExists(
+        "signals",
+        "market_occurrence_id",
+      );
 
       await tryEnableTimescale(MARKET_OCCURRENCES_TABLE);
       await pool.query("CREATE EXTENSION IF NOT EXISTS pgcrypto").catch(() => {
@@ -1486,7 +1516,11 @@ function snapshotHistoryRowToInputs(
 ): MarketContextInput[] {
   const history = parseHistoryValues(row.history);
   const fallbackPrice = toOptionalFiniteNumber(row.price);
-  const prices = history.length ? history : fallbackPrice ? [fallbackPrice] : [];
+  const prices = history.length
+    ? history
+    : fallbackPrice
+      ? [fallbackPrice]
+      : [];
   if (!prices.length) return [];
 
   const endTimestampUtc = toIsoString(
@@ -1494,11 +1528,16 @@ function snapshotHistoryRowToInputs(
     new Date(),
   );
   const scopeType = String(row.scope_type ?? "").toLowerCase();
-  const scopeCode = normalizeIdentifierValue(String(row.scope_code ?? ""), "GLOBAL");
-  const market = normalizeIdentifierValue(request.market ?? scopeCode, scopeCode);
+  const scopeCode = normalizeIdentifierValue(
+    String(row.scope_code ?? ""),
+    "GLOBAL",
+  );
+  const market = normalizeIdentifierValue(
+    request.market ?? scopeCode,
+    scopeCode,
+  );
   const venue =
-    request.venue ??
-    (scopeType === "market" ? scopeCode : "EXCHANGE");
+    request.venue ?? (scopeType === "market" ? scopeCode : "EXCHANGE");
   const asset = normalizeAsset(String(request.asset ?? row.symbol ?? ""));
   const timeframe = normalizeIdentifierValue(request.timeframe ?? "1D", "1D");
 
@@ -1513,7 +1552,12 @@ function snapshotHistoryRowToInputs(
     const trailingHistory = prices.slice(Math.max(0, index - 29), index + 1);
     const high = Math.max(...trailingHistory, price);
     const low = Math.min(...trailingHistory, price);
-    const quote = snapshotHistoryToQuote(row, price, trailingHistory, timestampUtc);
+    const quote = snapshotHistoryToQuote(
+      row,
+      price,
+      trailingHistory,
+      timestampUtc,
+    );
 
     return {
       timestampUtc,
@@ -1991,17 +2035,15 @@ export async function storeMarketMonthlyVolatilityFromCandles(input: {
         if (Number.isFinite(returnPct)) {
           const monthStart = utcMonthStart(candle.timestamp);
           const key = `${asset}:${monthStart.toISOString()}`;
-          const bucket =
-            buckets.get(key) ??
-            {
-              market,
-              venue,
-              asset,
-              monthStart,
-              returns: [],
-              sourceMin: candle.timestamp,
-              sourceMax: candle.timestamp,
-            };
+          const bucket = buckets.get(key) ?? {
+            market,
+            venue,
+            asset,
+            monthStart,
+            returns: [],
+            sourceMin: candle.timestamp,
+            sourceMax: candle.timestamp,
+          };
 
           bucket.returns.push(returnPct);
           if (candle.timestamp < bucket.sourceMin) {
@@ -2021,7 +2063,9 @@ export async function storeMarketMonthlyVolatilityFromCandles(input: {
     .filter((bucket) => bucket.returns.length)
     .map((bucket) => {
       const returnVolatility = standardDeviation(bucket.returns);
-      const averageAbsReturn = mean(bucket.returns.map((value) => Math.abs(value)));
+      const averageAbsReturn = mean(
+        bucket.returns.map((value) => Math.abs(value)),
+      );
       const volatilityPressure = clamp(
         returnVolatility * 14 + averageAbsReturn * 4,
       );
@@ -2280,7 +2324,11 @@ async function replayHistoricalMarketContextInternal(
     "date",
   ]);
   const assetColumn = firstColumn(columns, ["asset", "symbol", "ticker"]);
-  const marketColumn = firstColumn(columns, ["market", "exchange", "scope_code"]);
+  const marketColumn = firstColumn(columns, [
+    "market",
+    "exchange",
+    "scope_code",
+  ]);
   const venueColumn = firstColumn(columns, ["venue", "exchange", "market"]);
   const timeframeColumn = firstColumn(columns, ["timeframe", "interval"]);
   const openColumn = firstColumn(columns, ["open", "open_price"]);
@@ -2542,10 +2590,12 @@ export async function hydrateMarketContextFromAvailableHistory(
   await ensureMarketContextSchema();
   const jobId = randomUUID();
   const candleResult = await replayHistoricalMarketContextInternal(request);
-  const snapshotResult = await backfillMarketContextFromSignalSnapshots(request);
+  const snapshotResult =
+    await backfillMarketContextFromSignalSnapshots(request);
   await backfillOccurrenceDetailRowsFromExistingOccurrences();
 
-  const processedRows = candleResult.processedRows + snapshotResult.processedRows;
+  const processedRows =
+    candleResult.processedRows + snapshotResult.processedRows;
   const emittedOccurrences =
     candleResult.emittedOccurrences + snapshotResult.emittedOccurrences;
   const status =
@@ -2562,7 +2612,7 @@ export async function hydrateMarketContextFromAvailableHistory(
     emittedOccurrences,
     message:
       status === "skipped"
-        ? candleResult.message ?? "No historical source rows were available."
+        ? (candleResult.message ?? "No historical source rows were available.")
         : undefined,
   };
 }

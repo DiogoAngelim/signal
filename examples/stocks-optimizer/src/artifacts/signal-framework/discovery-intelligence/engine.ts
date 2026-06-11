@@ -261,7 +261,8 @@ export function evaluateDiscoveryIntelligence(
     completeInput.outcomes.length > 0 ||
     completeInput.restrictions.length > 0 ||
     completeInput.traces.length > 0;
-  const regimeCoverageSignal = regimeCoverageScore > 0 ? regimeCoverageScore : hasAnyRecords ? 50 : 0;
+  const regimeCoverageSignal =
+    regimeCoverageScore > 0 ? regimeCoverageScore : hasAnyRecords ? 50 : 0;
   const score = roundScore(
     weightedMean([
       [maturity.maturityScore, 0.2],
@@ -334,9 +335,15 @@ export function evaluateDiscoveryMaturity(
     if (STAGE_INDEX[stage] > STAGE_INDEX[previousStage]) promotions += 1;
     if (discovery.abandoned === true) abandoned += 1;
     if (isFalseDiscovery(discovery)) falseDiscoveries += 1;
-    if (finiteNumber(discovery.novelty) != null && Number(discovery.novelty) >= 70) {
+    if (
+      finiteNumber(discovery.novelty) != null &&
+      Number(discovery.novelty) >= 70
+    ) {
       novelDiscoveries += 1;
-      if (STAGE_INDEX[stage] >= STAGE_INDEX.CONFIRMED || discovery.converted === true) {
+      if (
+        STAGE_INDEX[stage] >= STAGE_INDEX.CONFIRMED ||
+        discovery.converted === true
+      ) {
         novelConversions += 1;
       }
     }
@@ -348,10 +355,8 @@ export function evaluateDiscoveryMaturity(
   const stageScore =
     discoveryCount === 0
       ? 0
-      : sum(
-          STAGE_ORDER.map((stage) => counts[stage] * STAGE_INDEX[stage]),
-        ) /
-        (discoveryCount * (STAGE_ORDER.length - 1)) *
+      : (sum(STAGE_ORDER.map((stage) => counts[stage] * STAGE_INDEX[stage])) /
+          (discoveryCount * (STAGE_ORDER.length - 1))) *
         100;
   const promotionRate = percentage(promotions, discoveryCount);
   const abandonmentRate = percentage(abandoned, discoveryCount);
@@ -400,9 +405,7 @@ export function evaluateOpportunityEconomics(
 
   for (const decision of decisions) {
     const outcome = findOutcomeForDecision(decision, outcomes);
-    const action = normalizeDecisionAction(
-      outcome?.action ?? decision.action,
-    );
+    const action = normalizeDecisionAction(outcome?.action ?? decision.action);
     const values = scenarioValues(decision, outcome, action);
     const actual = values[action];
     const best = Math.max(...ACTIONS.map((candidate) => values[candidate]));
@@ -448,8 +451,12 @@ export function evaluateGovernanceEffectiveness(
   const audits = restrictions.map((restriction) =>
     auditRestriction(restriction, decisions, outcomes),
   );
-  const helpfulRestrictions = audits.filter((audit) => audit.effectiveness > 0).length;
-  const harmfulRestrictions = audits.filter((audit) => audit.effectiveness < 0).length;
+  const helpfulRestrictions = audits.filter(
+    (audit) => audit.effectiveness > 0,
+  ).length;
+  const harmfulRestrictions = audits.filter(
+    (audit) => audit.effectiveness < 0,
+  ).length;
   const meanEffectiveness =
     audits.length === 0
       ? 0
@@ -499,7 +506,9 @@ export function evaluateInstitutionalKnowledge(
     standardCount,
     institutionalCount,
     institutionalizationScore: roundScore(
-      discoveries.length === 0 ? 0 : clamp((scoreTotal / discoveries.length) * 100),
+      discoveries.length === 0
+        ? 0
+        : clamp((scoreTotal / discoveries.length) * 100),
     ),
   };
 }
@@ -525,11 +534,27 @@ export function evaluateMetaLearning(
   }
 
   for (const outcome of outcomes) {
-    pushOutcomeMetric(series.calibration, outcome.calibrationScore, outcome.timestamp);
+    pushOutcomeMetric(
+      series.calibration,
+      outcome.calibrationScore,
+      outcome.timestamp,
+    );
     pushOutcomeMetric(series.trust, outcome.trustScore, outcome.timestamp);
-    pushOutcomeMetric(series.survival, outcome.survivalScore, outcome.timestamp);
-    pushOutcomeMetric(series.decisionQuality, outcome.decisionQuality, outcome.timestamp);
-    pushOutcomeMetric(series.governance, outcome.governanceScore, outcome.timestamp);
+    pushOutcomeMetric(
+      series.survival,
+      outcome.survivalScore,
+      outcome.timestamp,
+    );
+    pushOutcomeMetric(
+      series.decisionQuality,
+      outcome.decisionQuality,
+      outcome.timestamp,
+    );
+    pushOutcomeMetric(
+      series.governance,
+      outcome.governanceScore,
+      outcome.timestamp,
+    );
   }
 
   const calibrationTrend = trendFor(series.calibration);
@@ -621,7 +646,8 @@ function scenarioValues(
   action: DecisionAction,
 ): Record<DecisionAction, number> {
   const expected = finiteNumber(decision.expectedValue) ?? 0;
-  const actual = finiteNumber(outcomeValue(outcome)) ?? finiteNumber(decision.actualValue);
+  const actual =
+    finiteNumber(outcomeValue(outcome)) ?? finiteNumber(decision.actualValue);
   const values = {
     ACT: finiteNumber(decision.alternatives?.ACT) ?? expected,
     WAIT: finiteNumber(decision.alternatives?.WAIT) ?? expected * 0.45,
@@ -661,7 +687,8 @@ function isLinked(
   source: RestrictionRecord,
   target: DecisionRecord | OutcomeRecord,
 ) {
-  const targetDecisionId = "decisionId" in target ? target.decisionId : target.id;
+  const targetDecisionId =
+    "decisionId" in target ? target.decisionId : target.id;
   return (
     nonEmptyMatch(source.decisionId, targetDecisionId) ||
     nonEmptyMatch(source.opportunityId, target.opportunityId) ||
@@ -707,12 +734,24 @@ function normalizeInstitutionalStage(
 
 function normalizeDecisionAction(value: unknown): DecisionAction {
   const text = normalizeText(value);
-  if (text === "act" || text === "action" || text === "execute" || text === "buy" || text === "sell") {
+  if (
+    text === "act" ||
+    text === "action" ||
+    text === "execute" ||
+    text === "buy" ||
+    text === "sell"
+  ) {
     return "ACT";
   }
   if (text === "wait" || text === "watch" || text === "hold") return "WAIT";
-  if (text === "reject" || text === "avoid" || text === "block") return "REJECT";
-  if (text === "restrict" || text === "scale" || text === "limit" || text === "limited") {
+  if (text === "reject" || text === "avoid" || text === "block")
+    return "REJECT";
+  if (
+    text === "restrict" ||
+    text === "scale" ||
+    text === "limit" ||
+    text === "limited"
+  ) {
     return "RESTRICT";
   }
   return "WAIT";
@@ -757,8 +796,10 @@ function trendFor(values: TimedValue[]) {
   const midpoint = Math.floor(sorted.length / 2);
   const early = sorted.slice(0, midpoint);
   const recent = sorted.slice(midpoint);
-  return mean(recent.map((item) => item.value)) -
-    mean(early.map((item) => item.value));
+  return (
+    mean(recent.map((item) => item.value)) -
+    mean(early.map((item) => item.value))
+  );
 }
 
 function buildRecommendations(parts: {
@@ -784,10 +825,13 @@ function buildRecommendations(parts: {
       id: "reduce-caution-cost",
       category: "economics",
       priority: "high",
-      message: "Use smaller probes or cheaper waits when caution is too expensive.",
+      message:
+        "Use smaller probes or cheaper waits when caution is too expensive.",
     });
   }
-  if (parts.governance.harmfulRestrictions > parts.governance.helpfulRestrictions) {
+  if (
+    parts.governance.harmfulRestrictions > parts.governance.helpfulRestrictions
+  ) {
     recommendations.push({
       id: "review-harmful-restrictions",
       category: "governance",
@@ -803,7 +847,8 @@ function buildRecommendations(parts: {
       id: "institutionalize-trusted-knowledge",
       category: "institutionalization",
       priority: "medium",
-      message: "Convert trusted discoveries into policies, standards, or reusable knowledge assets.",
+      message:
+        "Convert trusted discoveries into policies, standards, or reusable knowledge assets.",
     });
   }
   if (parts.metaLearning.score > 0 && parts.metaLearning.score < 50) {
@@ -811,7 +856,8 @@ function buildRecommendations(parts: {
       id: "repair-meta-learning",
       category: "meta-learning",
       priority: "medium",
-      message: "Investigate why calibration, trust, survival, decision quality, or governance trends are weakening.",
+      message:
+        "Investigate why calibration, trust, survival, decision quality, or governance trends are weakening.",
     });
   }
   if (parts.regimeCoverageScore > 0 && parts.regimeCoverageScore < 55) {
@@ -819,7 +865,8 @@ function buildRecommendations(parts: {
       id: "expand-regime-coverage",
       category: "maturity",
       priority: "medium",
-      message: "Broaden long-history coverage across bull, bear, crash, recovery, and volatility transition regimes.",
+      message:
+        "Broaden long-history coverage across bull, bear, crash, recovery, and volatility transition regimes.",
     });
   }
   if (recommendations.length === 0) {
@@ -827,7 +874,8 @@ function buildRecommendations(parts: {
       id: "maintain-learning-loop",
       category: "meta-learning",
       priority: "low",
-      message: "Continue recording discoveries, decisions, restrictions, traces, and outcomes.",
+      message:
+        "Continue recording discoveries, decisions, restrictions, traces, and outcomes.",
     });
   }
 
@@ -852,13 +900,12 @@ function percentage(numerator: number, denominator: number) {
 
 function weightedMean(values: Array<[number, number]>) {
   const totalWeight = sum(values.map(([, weight]) => weight));
-  
+
   if (totalWeight <= 0) return 0;
   return sum(values.map(([value, weight]) => value * weight)) / totalWeight;
 }
 
 function mean(values: readonly number[]) {
-  
   return values.length === 0 ? 0 : sum(values) / values.length;
 }
 
@@ -867,7 +914,6 @@ function sum(values: readonly number[]) {
 }
 
 function clamp(value: number, min = 0, max = 100) {
-  
   if (!Number.isFinite(value)) return min;
   return Math.min(max, Math.max(min, value));
 }

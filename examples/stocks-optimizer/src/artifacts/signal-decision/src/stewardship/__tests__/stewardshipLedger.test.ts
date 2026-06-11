@@ -40,15 +40,31 @@ describe("createStewardshipLedger", () => {
           evidenceIds: ["evidence:inspection"],
         },
       ],
-      threats: [{ id: "threat:demand", label: "Demand spike", severity: "medium", evidenceIds: ["evidence:inspection"] }],
-      protections: [{ id: "protection:buffer", label: "Capacity buffer", strength: "strong", evidenceIds: ["evidence:inspection"] }],
+      threats: [
+        {
+          id: "threat:demand",
+          label: "Demand spike",
+          severity: "medium",
+          evidenceIds: ["evidence:inspection"],
+        },
+      ],
+      protections: [
+        {
+          id: "protection:buffer",
+          label: "Capacity buffer",
+          strength: "strong",
+          evidenceIds: ["evidence:inspection"],
+        },
+      ],
     });
 
     expect(ledger.traceability.complete).toBe(true);
     expect(ledger.traceability.score).toBe(100);
     expect(ledger.gaps).toEqual([]);
     expect(ledger.outcomes[0]?.lessonIds).toEqual(["lesson:review:water:1:0"]);
-    expect(ledger.lessons[0]?.linkedEvidenceIds).toEqual(["evidence:inspection"]);
+    expect(ledger.lessons[0]?.linkedEvidenceIds).toEqual([
+      "evidence:inspection",
+    ]);
     expect(ledger.evidence[0]?.orphaned).toBe(false);
   });
 
@@ -75,9 +91,13 @@ describe("createStewardshipLedger", () => {
 
     expect(ledger.traceability.complete).toBe(false);
     expect(ledger.traceability.decisionLinked).toBe(false);
-    expect(ledger.traceability.missingEvidenceReferences).toEqual(["evidence:missing"]);
+    expect(ledger.traceability.missingEvidenceReferences).toEqual([
+      "evidence:missing",
+    ]);
     expect(ledger.gaps.join(" ")).toContain("Decision id is missing");
     expect(ledger.gaps.join(" ")).toContain("Outcome review is missing");
-    expect(ledger.gaps.join(" ")).toContain("Referenced evidence evidence:missing is missing");
+    expect(ledger.gaps.join(" ")).toContain(
+      "Referenced evidence evidence:missing is missing",
+    );
   });
 });

@@ -1,12 +1,18 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { createAwareApiService } from "./service.js";
 import { handleAwareApiRequest } from "./handler.js";
+import { createAwareApiService } from "./service.js";
 
 type ViteLikePlugin = {
   name: string;
   configureServer(server: {
     middlewares: {
-      use(handler: (req: IncomingMessage, res: ServerResponse, next: () => void) => void | Promise<void>): void;
+      use(
+        handler: (
+          req: IncomingMessage,
+          res: ServerResponse,
+          next: () => void,
+        ) => void | Promise<void>,
+      ): void;
     };
   }): void;
 };
@@ -28,16 +34,21 @@ export function awareApiPlugin(): ViteLikePlugin {
         } catch (error) {
           res.statusCode = 500;
           res.setHeader("Content-Type", "application/json; charset=utf-8");
-          res.end(JSON.stringify({
-            ok: false,
-            error: {
-              code: "REQUEST_FAILED",
-              message: error instanceof Error ? error.message : "Aware API middleware failed."
-            }
-          }));
+          res.end(
+            JSON.stringify({
+              ok: false,
+              error: {
+                code: "REQUEST_FAILED",
+                message:
+                  error instanceof Error
+                    ? error.message
+                    : "Aware API middleware failed.",
+              },
+            }),
+          );
         }
       });
-    }
+    },
   };
 }
 
@@ -51,11 +62,14 @@ async function toRequest(req: IncomingMessage): Promise<Request> {
       headers.set(key, value);
     }
   }
-  const body = req.method === "GET" || req.method === "HEAD" ? undefined : (await readBody(req)).toString();
+  const body =
+    req.method === "GET" || req.method === "HEAD"
+      ? undefined
+      : (await readBody(req)).toString();
   return new Request(`${origin}${req.url ?? "/"}`, {
     method: req.method,
     headers,
-    body
+    body,
   });
 }
 
@@ -68,7 +82,10 @@ function readBody(req: IncomingMessage): Promise<Buffer> {
   });
 }
 
-async function writeResponse(res: ServerResponse, response: Response): Promise<void> {
+async function writeResponse(
+  res: ServerResponse,
+  response: Response,
+): Promise<void> {
   res.statusCode = response.status;
   response.headers.forEach((value, key) => {
     res.setHeader(key, value);

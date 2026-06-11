@@ -12,9 +12,27 @@ test("agency diagnostics enrich signals with complete traces and state", () => {
       survivalScore: 76,
     },
     trades: [
-      { symbol: "AAA", entryDate: "2026-01-01", exitDate: "2026-01-03", returnPct: 4.25, entryExposure: 2 },
-      { symbol: "AAA", entryDate: "2025-12-01", exitDate: "2025-12-05", returnPct: -3, entryExposure: 2 },
-      { symbol: "BBB", entryDate: "2026-01-02", exitDate: "2026-01-04", returnPct: -1.5, entryExposure: 1 },
+      {
+        symbol: "AAA",
+        entryDate: "2026-01-01",
+        exitDate: "2026-01-03",
+        returnPct: 4.25,
+        entryExposure: 2,
+      },
+      {
+        symbol: "AAA",
+        entryDate: "2025-12-01",
+        exitDate: "2025-12-05",
+        returnPct: -3,
+        entryExposure: 2,
+      },
+      {
+        symbol: "BBB",
+        entryDate: "2026-01-02",
+        exitDate: "2026-01-04",
+        returnPct: -1.5,
+        entryExposure: 1,
+      },
       { returnPct: 7 },
     ],
     signals: [
@@ -153,7 +171,10 @@ test("agency diagnostics records readiness, approval, size, and missing-size blo
   assert.equal(blocked?.agency?.requiresApproval, false);
   assert.equal(blocked?.agency?.outcomeLabel, "negative");
   assert.equal(blocked?.agencyTrace?.outcome?.durationMs, undefined);
-  assert.equal(blocked?.agencyTrace?.sizing?.rationale, "Sizing translated from the current strategy decision.");
+  assert.equal(
+    blocked?.agencyTrace?.sizing?.rationale,
+    "Sizing translated from the current strategy decision.",
+  );
   assert.deepEqual(blocked?.agency?.violations, [
     "confidence_below_minimum",
     "blocked:strategy_readiness_blocked",
@@ -171,7 +192,12 @@ test("agency diagnostics handles approval requirements, neutral outcomes, and fa
       productionEligible: false,
     },
     trades: [
-      { symbol: "X/Y", entryDate: "2026-01-05", exitDate: "2026-01-01", returnPct: 0 },
+      {
+        symbol: "X/Y",
+        entryDate: "2026-01-05",
+        exitDate: "2026-01-01",
+        returnPct: 0,
+      },
     ],
     signals: [
       {
@@ -218,7 +244,8 @@ test("agency diagnostics permits limited-live participation when trust gates all
         id: "raw_calibrated_confidence_gap",
         label: "Raw/calibrated gap",
         severity: "medium",
-        reason: "Raw confidence is materially higher than calibrated confidence.",
+        reason:
+          "Raw confidence is materially higher than calibrated confidence.",
         unlockCriteria: ["Reduce the confidence gap."],
       },
     ],
@@ -256,7 +283,10 @@ test("agency diagnostics permits limited-live participation when trust gates all
   assert.equal(signal?.agency?.requiresApproval, false);
   assert.equal(signal?.agency?.allowed, true);
   assert.equal(signal?.agencyTrace?.policy.maxSize, 1.25);
-  assert.equal(signal?.agency?.violations.includes("human_approval_required"), false);
+  assert.equal(
+    signal?.agency?.violations.includes("human_approval_required"),
+    false,
+  );
 });
 
 test("agency diagnostics downgrades participation when Survival Memory says to wait", () => {
@@ -267,49 +297,59 @@ test("agency diagnostics downgrades participation when Survival Memory says to w
       productionEligible: true,
       maxPositionPct: 5,
     },
-    signals: [{
-      symbol: "SCAR",
-      signalAction: "Buy",
-      allocationAction: "Buy",
-      suggestedExposure: 1,
-      maxPositionPct: 5,
-      signalConfidence: 88,
-      rawConfidence: 88,
-      calibratedConfidence: 82,
-      riskPressure: 24,
-      survivalMemory: {
-        module: "stocks.survival-memory",
-        name: "Survival Memory",
-        status: "near_ruin",
-        recommendation: "wait",
-        recordCount: 6,
-        matchedCount: 6,
-        scarCount: 4,
-        nearRuinCount: 2,
-        averageSurvivalCost: 72,
-        recoveryBurden: 66,
-        survivalConfidence: 28,
-        currentStateSimilarity: 82,
-        exposureMultiplier: 0,
-        confidencePenalty: 55,
-        maxExposurePct: 0,
-        stateFingerprint: "venue:nasdaq|action:buy",
-        mainWarnings: ["Similar states include near-ruin survival patterns."],
-        reasons: ["Wait because similar states had unacceptable survival cost."],
-        missingEvidence: ["Survival memory clearance"],
-        unlockConditions: ["Wait until similar states show survival cost below 35/100 and no near-ruin match."],
-        invalidationConditions: ["Invalidate if liquidity or tail pressure remains elevated in the current state."],
-        fragileMatches: [],
-        records: [],
+    signals: [
+      {
+        symbol: "SCAR",
+        signalAction: "Buy",
+        allocationAction: "Buy",
+        suggestedExposure: 1,
+        maxPositionPct: 5,
+        signalConfidence: 88,
+        rawConfidence: 88,
+        calibratedConfidence: 82,
+        riskPressure: 24,
+        survivalMemory: {
+          module: "stocks.survival-memory",
+          name: "Survival Memory",
+          status: "near_ruin",
+          recommendation: "wait",
+          recordCount: 6,
+          matchedCount: 6,
+          scarCount: 4,
+          nearRuinCount: 2,
+          averageSurvivalCost: 72,
+          recoveryBurden: 66,
+          survivalConfidence: 28,
+          currentStateSimilarity: 82,
+          exposureMultiplier: 0,
+          confidencePenalty: 55,
+          maxExposurePct: 0,
+          stateFingerprint: "venue:nasdaq|action:buy",
+          mainWarnings: ["Similar states include near-ruin survival patterns."],
+          reasons: [
+            "Wait because similar states had unacceptable survival cost.",
+          ],
+          missingEvidence: ["Survival memory clearance"],
+          unlockConditions: [
+            "Wait until similar states show survival cost below 35/100 and no near-ruin match.",
+          ],
+          invalidationConditions: [
+            "Invalidate if liquidity or tail pressure remains elevated in the current state.",
+          ],
+          fragileMatches: [],
+          records: [],
+        },
       },
-    }],
+    ],
   });
 
   const signal = result.signals[0];
   assert.equal(signal?.agency?.allowed, false);
   assert.equal(signal?.agency?.requiresApproval, true);
   assert.equal(signal?.agencyTrace?.policy.maxSize, 0);
-  assert.ok(signal?.agency?.violations.includes("blocked:survival_memory_wait"));
+  assert.ok(
+    signal?.agency?.violations.includes("blocked:survival_memory_wait"),
+  );
   assert.equal(signal?.agency?.survivalRecommendation, "wait");
   assert.equal(signal?.agency?.calibratedConfidence, 28);
 });
@@ -321,48 +361,61 @@ test("agency diagnostics records reduced-size Survival Memory constraints", () =
       productionEligible: true,
       maxPositionPct: 5,
     },
-    signals: [{
-      symbol: "SCAR",
-      signalAction: "Buy",
-      allocationAction: "Buy",
-      suggestedExposure: 1,
-      maxPositionPct: 5,
-      signalConfidence: 88,
-      rawConfidence: 88,
-      calibratedConfidence: 82,
-      riskPressure: 24,
-      survivalMemory: {
-        module: "stocks.survival-memory",
-        name: "Survival Memory",
-        status: "scarred",
-        recommendation: "act_with_reduced_size",
-        recordCount: 5,
-        matchedCount: 5,
-        scarCount: 3,
-        nearRuinCount: 0,
-        averageSurvivalCost: 48,
-        recoveryBurden: 32,
-        survivalConfidence: 58,
-        currentStateSimilarity: 62,
-        exposureMultiplier: 0.4,
-        confidencePenalty: 32,
-        maxExposurePct: 1.2,
-        stateFingerprint: "venue:nasdaq|action:buy",
-        mainWarnings: ["Similar states were profitable but carried unacceptable drawdown or stress."],
-        reasons: ["Cap exposure to 40% of the normal limit before opportunity sizing expands it."],
-        missingEvidence: ["Reduced-size survival review"],
-        unlockConditions: ["Raise survival confidence above 70/100 before normal sizing is restored."],
-        invalidationConditions: ["Invalidate if similar states repeat max adverse excursion above the survival boundary."],
-        fragileMatches: [],
-        records: [],
+    signals: [
+      {
+        symbol: "SCAR",
+        signalAction: "Buy",
+        allocationAction: "Buy",
+        suggestedExposure: 1,
+        maxPositionPct: 5,
+        signalConfidence: 88,
+        rawConfidence: 88,
+        calibratedConfidence: 82,
+        riskPressure: 24,
+        survivalMemory: {
+          module: "stocks.survival-memory",
+          name: "Survival Memory",
+          status: "scarred",
+          recommendation: "act_with_reduced_size",
+          recordCount: 5,
+          matchedCount: 5,
+          scarCount: 3,
+          nearRuinCount: 0,
+          averageSurvivalCost: 48,
+          recoveryBurden: 32,
+          survivalConfidence: 58,
+          currentStateSimilarity: 62,
+          exposureMultiplier: 0.4,
+          confidencePenalty: 32,
+          maxExposurePct: 1.2,
+          stateFingerprint: "venue:nasdaq|action:buy",
+          mainWarnings: [
+            "Similar states were profitable but carried unacceptable drawdown or stress.",
+          ],
+          reasons: [
+            "Cap exposure to 40% of the normal limit before opportunity sizing expands it.",
+          ],
+          missingEvidence: ["Reduced-size survival review"],
+          unlockConditions: [
+            "Raise survival confidence above 70/100 before normal sizing is restored.",
+          ],
+          invalidationConditions: [
+            "Invalidate if similar states repeat max adverse excursion above the survival boundary.",
+          ],
+          fragileMatches: [],
+          records: [],
+        },
       },
-    }],
+    ],
   });
 
   const signal = result.signals[0];
   assert.equal(signal?.agency?.allowed, true);
   assert.equal(signal?.agencyTrace?.policy.maxSize, 1.2);
-  assert.equal(signal?.agency?.violations.includes("blocked:survival_memory_reduced_size"), false);
+  assert.equal(
+    signal?.agency?.violations.includes("blocked:survival_memory_reduced_size"),
+    false,
+  );
   assert.equal(signal?.agency?.survivalRecommendation, "act_with_reduced_size");
   assert.deepEqual(signal?.agency?.survivalWarnings, [
     "Similar states were profitable but carried unacceptable drawdown or stress.",
@@ -387,11 +440,17 @@ test("agency diagnostics credits only clean reduced-size outcome traces", () => 
     confidencePenalty: 18,
     maxExposurePct: 1.2,
     stateFingerprint: "venue:binance|action:buy",
-    mainWarnings: ["Similar states were profitable but carried unacceptable drawdown or stress."],
+    mainWarnings: [
+      "Similar states were profitable but carried unacceptable drawdown or stress.",
+    ],
     reasons: ["Act with reduced size while recovery evidence matures."],
     missingEvidence: ["Reduced-size survival review"],
-    unlockConditions: ["Raise survival confidence above 70/100 before normal sizing is restored."],
-    invalidationConditions: ["Invalidate if similar states repeat max adverse excursion above the survival boundary."],
+    unlockConditions: [
+      "Raise survival confidence above 70/100 before normal sizing is restored.",
+    ],
+    invalidationConditions: [
+      "Invalidate if similar states repeat max adverse excursion above the survival boundary.",
+    ],
     fragileMatches: [],
     records: [],
   } as any;
@@ -412,37 +471,70 @@ test("agency diagnostics credits only clean reduced-size outcome traces", () => 
   const clean = applyStockAgencyDiagnostics({
     market: "BINANCE",
     summary: { productionEligible: true, maxPositionPct: 5 },
-    trades: [{ symbol: "SCAR", entryDate: "2026-01-01", exitDate: "2026-01-05", returnPct: 2.4 }],
+    trades: [
+      {
+        symbol: "SCAR",
+        entryDate: "2026-01-01",
+        exitDate: "2026-01-05",
+        returnPct: 2.4,
+      },
+    ],
     signals: [baseSignal],
   });
   const failed = applyStockAgencyDiagnostics({
     market: "BINANCE",
     summary: { productionEligible: true, maxPositionPct: 5 },
-    trades: [{ symbol: "SCAR", entryDate: "2026-01-01", exitDate: "2026-01-05", returnPct: -2.4 }],
+    trades: [
+      {
+        symbol: "SCAR",
+        entryDate: "2026-01-01",
+        exitDate: "2026-01-05",
+        returnPct: -2.4,
+      },
+    ],
     signals: [baseSignal],
   });
   const nonRequestAction = applyStockAgencyDiagnostics({
     market: "BINANCE",
     summary: { productionEligible: true, maxPositionPct: 5 },
-    trades: [{ symbol: "SCAR", entryDate: "2026-01-01", exitDate: "2026-01-05", returnPct: 2.4 }],
-    signals: [{
-      ...baseSignal,
-      signalAction: "Sell",
-      allocationAction: "Sell",
-      suggestedExposure: 0,
-      expectedMove: -1,
-    }],
+    trades: [
+      {
+        symbol: "SCAR",
+        entryDate: "2026-01-01",
+        exitDate: "2026-01-05",
+        returnPct: 2.4,
+      },
+    ],
+    signals: [
+      {
+        ...baseSignal,
+        signalAction: "Sell",
+        allocationAction: "Sell",
+        suggestedExposure: 0,
+        expectedMove: -1,
+      },
+    ],
   });
 
   const cleanAudit = clean.signals[0]?.agency;
   const failedAudit = failed.signals[0]?.agency;
   const nonRequestAudit = nonRequestAction.signals[0]?.agency;
   assert.ok((cleanAudit?.trustAdjustment ?? 0) > 0);
-  assert.ok((cleanAudit?.trust ?? 0) > (clean.signals[0]?.agencyTrace?.selfDiagnosis.trust ?? 1));
-  assert.ok(cleanAudit?.reasons.some((reason) => reason.includes("Clean reduced-size outcome evidence")));
+  assert.ok(
+    (cleanAudit?.trust ?? 0) >
+      (clean.signals[0]?.agencyTrace?.selfDiagnosis.trust ?? 1),
+  );
+  assert.ok(
+    cleanAudit?.reasons.some((reason) =>
+      reason.includes("Clean reduced-size outcome evidence"),
+    ),
+  );
   assert.ok((clean.agencyDiagnostics.summary.trustAdjustment ?? 0) > 0);
   assert.ok((nonRequestAudit?.trustAdjustment ?? 0) > 0);
-  assert.ok((nonRequestAudit?.trustAdjustment ?? 0) < (cleanAudit?.trustAdjustment ?? 0));
+  assert.ok(
+    (nonRequestAudit?.trustAdjustment ?? 0) <
+      (cleanAudit?.trustAdjustment ?? 0),
+  );
   assert.equal(failedAudit?.trustAdjustment, undefined);
   assert.equal(failed.agencyDiagnostics.summary.trustAdjustment, undefined);
 });
@@ -481,7 +573,9 @@ test("agency diagnostics keeps positive participation review-gated when readines
   assert.equal(signal?.agency?.requiresApproval, true);
   assert.equal(signal?.agency?.allowed, false);
   assert.ok(signal?.agency?.violations.includes("human_approval_required"));
-  assert.ok(signal?.agency?.violations.includes("blocked:system_readiness_blocked"));
+  assert.ok(
+    signal?.agency?.violations.includes("blocked:system_readiness_blocked"),
+  );
 });
 
 test("agency diagnostics carries Belief metadata and blocks unresolved belief", () => {
@@ -516,7 +610,10 @@ test("agency diagnostics carries Belief metadata and blocks unresolved belief", 
 
   const signal = result.signals[0];
   assert.equal(signal?.agencyTrace?.decision.confidence, 0.62);
-  assert.deepEqual((signal?.agencyTrace?.decision.metadata as any).belief, belief);
+  assert.deepEqual(
+    (signal?.agencyTrace?.decision.metadata as any).belief,
+    belief,
+  );
   assert.deepEqual(signal?.agency?.violations, ["blocked:belief_weak"]);
   assert.equal(signal?.agency?.allowed, false);
 });
@@ -576,10 +673,15 @@ test("agency diagnostics carries Judgement metadata and gates review or blocked 
   const review = result.signals[0];
   const blocked = result.signals[1];
   assert.equal(review?.agencyTrace?.decision.confidence, 0.42);
-  assert.deepEqual((review?.agencyTrace?.decision.metadata as any).judgement, reviewJudgement);
+  assert.deepEqual(
+    (review?.agencyTrace?.decision.metadata as any).judgement,
+    reviewJudgement,
+  );
   assert.equal(review?.agencyTrace?.policy.maxSize, 0);
   assert.equal(review?.agency?.requiresApproval, true);
-  assert.ok(review?.agency?.violations.includes("blocked:judgement_review_required"));
+  assert.ok(
+    review?.agency?.violations.includes("blocked:judgement_review_required"),
+  );
   assert.equal(blocked?.agencyTrace?.policy.maxSize, 0);
   assert.ok(blocked?.agency?.violations.includes("blocked:judgement_blocked"));
 });
@@ -595,7 +697,11 @@ test("agency diagnostics carries Signal Trust Governor metadata and blocks gated
     allowsNewExposure: false,
     requiresReview: true,
     allowedActions: ["observe" as const, "risk_reducing_exits" as const],
-    blockedActions: ["paper_trade" as const, "new_exposure" as const, "increase_position" as const],
+    blockedActions: [
+      "paper_trade" as const,
+      "new_exposure" as const,
+      "increase_position" as const,
+    ],
     primaryBlocker: "calibration_unstable_outcomes",
     blockers: [
       {
@@ -607,7 +713,9 @@ test("agency diagnostics carries Signal Trust Governor metadata and blocks gated
       },
     ],
     unlockCriteria: ["Observe more closed outcomes in similar states."],
-    contradictions: ["Judgement finds similar history usable, but calibration still requires review."],
+    contradictions: [
+      "Judgement finds similar history usable, but calibration still requires review.",
+    ],
     reasons: ["Signal Trust Governor selected exits only mode."],
     audit: {
       componentScores: {},
@@ -640,8 +748,15 @@ test("agency diagnostics carries Signal Trust Governor metadata and blocks gated
   const signal = result.signals[0];
   assert.equal(signal?.agencyTrace?.policy.maxSize, 0);
   assert.equal(signal?.agencyTrace?.decision.confidence, 0.66);
-  assert.deepEqual((signal?.agencyTrace?.decision.metadata as any).trustGovernor, trustGovernor);
-  assert.ok(signal?.agency?.violations.includes("blocked:trust_calibration_unstable_outcomes"));
+  assert.deepEqual(
+    (signal?.agencyTrace?.decision.metadata as any).trustGovernor,
+    trustGovernor,
+  );
+  assert.ok(
+    signal?.agency?.violations.includes(
+      "blocked:trust_calibration_unstable_outcomes",
+    ),
+  );
   assert.equal(signal?.agency?.allowed, false);
   assert.equal(signal?.agency?.requiresApproval, true);
 });
@@ -748,7 +863,10 @@ test("agency diagnostics handles empty inputs and fallback sizing and confidence
       },
     ],
   });
-  assert.equal(survivalFallback.signals[0]?.agencyTrace?.decision.confidence, 0.71);
+  assert.equal(
+    survivalFallback.signals[0]?.agencyTrace?.decision.confidence,
+    0.71,
+  );
 
   const defaultFallback = applyStockAgencyDiagnostics({
     market: "DEFAULT",
@@ -761,7 +879,10 @@ test("agency diagnostics handles empty inputs and fallback sizing and confidence
       },
     ],
   });
-  assert.equal(defaultFallback.signals[0]?.agencyTrace?.decision.confidence, 0.5);
+  assert.equal(
+    defaultFallback.signals[0]?.agencyTrace?.decision.confidence,
+    0.5,
+  );
   assert.deepEqual(defaultFallback.signals[0]?.agencyTrace?.decision.metadata, {
     symbol: "DEF",
     signalAction: "Hold",
@@ -786,7 +907,10 @@ test("agency diagnostics handles empty inputs and fallback sizing and confidence
       },
     ],
   });
-  assert.deepEqual(malformedCalibrationWarnings.signals[0]?.agency?.calibrationWarnings, []);
+  assert.deepEqual(
+    malformedCalibrationWarnings.signals[0]?.agency?.calibrationWarnings,
+    [],
+  );
 
   const missingExitFallback = applyStockAgencyDiagnostics({
     market: "NOEXIT",
@@ -805,5 +929,8 @@ test("agency diagnostics handles empty inputs and fallback sizing and confidence
       },
     ],
   });
-  assert.equal(missingExitFallback.signals[0]?.agencyTrace?.outcome?.durationMs, undefined);
+  assert.equal(
+    missingExitFallback.signals[0]?.agencyTrace?.outcome?.durationMs,
+    undefined,
+  );
 });

@@ -27,6 +27,7 @@
   "dependencies": {
     "@signal/binding-http": "workspace:*",
     "@signal/idempotency-postgres": "workspace:*",
+    "@signal/ports": "workspace:*",
     "@signal/protocol": "workspace:*",
     "@signal/runtime": "workspace:*",
     "@signal/sdk-node": "workspace:*",

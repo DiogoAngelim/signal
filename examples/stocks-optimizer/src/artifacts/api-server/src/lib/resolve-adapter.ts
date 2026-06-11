@@ -1,10 +1,10 @@
-import {
-  resolveCommitment,
-  type ResolveInput,
-  type ResolveOutput,
-} from "../../../signal-framework/resolve/engine";
 import type { DiscoveryResult } from "../../../signal-framework/discovery/engine";
 import type { RecognitionResult } from "../../../signal-framework/recognition/engine";
+import {
+  type ResolveInput,
+  type ResolveOutput,
+  resolveCommitment,
+} from "../../../signal-framework/resolve/engine";
 import type {
   StockAgencyDiagnostics,
   StockAgencySignal,
@@ -58,7 +58,8 @@ export function mapStockSignalToResolveInput(input: {
   const trustGovernor = signal.trustGovernor ?? summary.trustGovernor;
   const survivalMemory = signal.survivalMemory ?? summary.survivalMemory;
   const strategyReadiness = summary.strategyReadiness ?? {};
-  const opensNewExposure = signal.signalAction === "Buy" && numeric(signal.suggestedExposure) > 0;
+  const opensNewExposure =
+    signal.signalAction === "Buy" && numeric(signal.suggestedExposure) > 0;
   const survivalMaxExposure = opensNewExposure
     ? finiteNumber(survivalMemory?.maxExposurePct)
     : undefined;
@@ -81,31 +82,54 @@ export function mapStockSignalToResolveInput(input: {
     "Invalidate if the app-specific opportunity thesis loses its leading evidence cluster.",
   ];
   const discovery = input.discovery;
-  const recognition = signal.recognition ?? input.recognition ?? summary.recognitionDiagnostics?.primary ?? null;
+  const recognition =
+    signal.recognition ??
+    input.recognition ??
+    summary.recognitionDiagnostics?.primary ??
+    null;
   const wisdom = signal.wisdom ?? summary.wisdom ?? null;
-  const recognitionClearsDiscovery = recognitionClearsDiscoveryReview(recognition);
+  const recognitionClearsDiscovery =
+    recognitionClearsDiscoveryReview(recognition);
 
-  if (opensNewExposure && opportunityDensity != null && opportunityDensity < 50) {
-    domainMissingEvidence.push("Broader opportunity density across independent candidates");
-    domainUnlockConditions.push("Increase opportunity density above the app review threshold.");
+  if (
+    opensNewExposure &&
+    opportunityDensity != null &&
+    opportunityDensity < 50
+  ) {
+    domainMissingEvidence.push(
+      "Broader opportunity density across independent candidates",
+    );
+    domainUnlockConditions.push(
+      "Increase opportunity density above the app review threshold.",
+    );
   }
 
   if (discovery) {
     domainMissingEvidence.push(...discovery.missingEvidence.slice(0, 3));
-    domainUnlockConditions.push(...discovery.foresight.unlockConditions.slice(0, 3));
-    domainInvalidationConditions.push(...discovery.invalidationConditions.slice(0, 3));
+    domainUnlockConditions.push(
+      ...discovery.foresight.unlockConditions.slice(0, 3),
+    );
+    domainInvalidationConditions.push(
+      ...discovery.invalidationConditions.slice(0, 3),
+    );
 
     if (discovery.confidence < 50 && !recognitionClearsDiscovery) {
-      domainMissingEvidence.push("Discovery confidence above the app review threshold");
+      domainMissingEvidence.push(
+        "Discovery confidence above the app review threshold",
+      );
       domainUnlockConditions.push(discovery.recommendedNextStep);
     } else if (discovery.confidence < 50 && recognitionClearsDiscovery) {
-      domainUnlockConditions.push("Recognition recurrence evidence clears the Discovery confidence review item.");
+      domainUnlockConditions.push(
+        "Recognition recurrence evidence clears the Discovery confidence review item.",
+      );
     }
   }
 
   if (audit?.requiresApproval === true) {
     domainMissingEvidence.push("Agency approval for this action");
-    domainUnlockConditions.push("Clear the Agency approval requirement for this action.");
+    domainUnlockConditions.push(
+      "Clear the Agency approval requirement for this action.",
+    );
   }
 
   if (opensNewExposure && survivalMemory?.recommendation === "wait") {
@@ -118,7 +142,10 @@ export function mapStockSignalToResolveInput(input: {
       survivalMemory.invalidationConditions?.[0] ??
         "Invalidate if similar states repeat unacceptable adverse excursion.",
     );
-  } else if (opensNewExposure && survivalMemory?.recommendation === "act_with_reduced_size") {
+  } else if (
+    opensNewExposure &&
+    survivalMemory?.recommendation === "act_with_reduced_size"
+  ) {
     domainMissingEvidence.push("Reduced-size survival review");
     domainUnlockConditions.push(
       survivalMemory.unlockConditions?.[0] ??
@@ -141,38 +168,48 @@ export function mapStockSignalToResolveInput(input: {
     agencyRecommendation,
     agencyTrust: audit?.trust ?? input.agencyDiagnostics?.summary?.averageTrust,
     trustScore: trustGovernor?.trustScore,
-    calibratedConfidence: finiteNumber(signal.calibratedConfidence) ??
+    calibratedConfidence:
+      finiteNumber(signal.calibratedConfidence) ??
       finiteNumber(summary.calibratedConfidence) ??
       finiteNumber((strategyReadiness as any).calibratedConfidence),
-    rawConfidence: finiteNumber(signal.rawConfidence) ??
+    rawConfidence:
+      finiteNumber(signal.rawConfidence) ??
       finiteNumber(summary.rawConfidence) ??
       finiteNumber((strategyReadiness as any).rawConfidence),
     judgementReliability: judgement?.reliability,
     outcomeStability: judgement?.outcomeStability,
-    overfitRisk: judgement?.overfitRisk ??
+    overfitRisk:
+      judgement?.overfitRisk ??
       finiteNumber(robustness.overfitRisk) ??
       finiteNumber(robustness.overfitRiskPct),
     riskScore: Math.max(
       finiteNumber(signal.riskPressure) ?? 0,
-      opensNewExposure ? finiteNumber(survivalMemory?.averageSurvivalCost) ?? 0 : 0,
+      opensNewExposure
+        ? (finiteNumber(survivalMemory?.averageSurvivalCost) ?? 0)
+        : 0,
     ),
-    dataReliability: finiteNumber(strategyComponents.dataReliability?.score) ??
+    dataReliability:
+      finiteNumber(strategyComponents.dataReliability?.score) ??
       finiteNumber((summary as any).dataReliability?.score) ??
       finiteNumber((summary as any).dataQualityReport?.coveragePct),
     beliefConfidence: signal.belief?.confidence,
     beliefFragility: signal.belief?.fragility,
     wisdomScore: finiteNumber(wisdom?.wisdomScore),
     decisionQuality: finiteNumber(wisdom?.decisionQuality),
-    opportunityCost: finiteNumber(wisdom?.opportunityEconomics?.opportunityCost),
+    opportunityCost: finiteNumber(
+      wisdom?.opportunityEconomics?.opportunityCost,
+    ),
     restrictionValue: finiteNumber(wisdom?.counterfactuals?.restrictionValue),
     sizingMode: signal.sizingMode,
     suggestedExposure: signal.suggestedExposure,
-    maxTrustedExposure: survivalMaxExposure == null
-      ? trustedExposure
-      : Math.min(trustedExposure ?? survivalMaxExposure, survivalMaxExposure),
+    maxTrustedExposure:
+      survivalMaxExposure == null
+        ? trustedExposure
+        : Math.min(trustedExposure ?? survivalMaxExposure, survivalMaxExposure),
     blockedActions: audit?.allowed === false ? 1 : 0,
     missingOutcomes: input.agencyDiagnostics?.summary?.missingOutcomes,
-    similarSamples: judgement?.similarSampleSize ?? finiteNumber(calibration.sampleSize),
+    similarSamples:
+      judgement?.similarSampleSize ?? finiteNumber(calibration.sampleSize),
     positiveOutcomes: judgement?.evidence?.positiveOutcomes,
     negativeOutcomes: judgement?.evidence?.negativeOutcomes,
     evidence: {
@@ -186,39 +223,48 @@ export function mapStockSignalToResolveInput(input: {
   };
 }
 
-export function recognitionClearsDiscoveryReview(recognition?: RecognitionResult | null) {
+export function recognitionClearsDiscoveryReview(
+  recognition?: RecognitionResult | null,
+) {
   if (!recognition) return false;
-  return recognition.verdict === "recognized" &&
+  return (
+    recognition.verdict === "recognized" &&
     recognition.recurrenceConfidence >= 70 &&
     recognition.recognitionScore >= 65 &&
     recognition.outcomeStability >= 60 &&
     recognition.discoveryNoveltyJustified === false &&
-    (recognition.matchedSamples >= 5 || recognition.archetypeConfidence >= 70);
+    (recognition.matchedSamples >= 5 || recognition.archetypeConfidence >= 70)
+  );
 }
 
 function recognizedArchetypeLabel(recognition: RecognitionResult) {
   return String(recognition.archetype).replace(/_/g, " ");
 }
 
-export function applyStockResolveDiagnostics<T extends StockResolveSignal>(input: {
+export function applyStockResolveDiagnostics<
+  T extends StockResolveSignal,
+>(input: {
   market: string;
   signals: T[];
   summary?: StockAgencySummary & Record<string, any>;
   agencyDiagnostics?: StockAgencyDiagnostics | null;
   opportunityDiscovery?: any;
 }): StockResolveApplicationResult<T> {
-  const opportunityDensity = finiteNumber(input.opportunityDiscovery?.density?.density) ??
+  const opportunityDensity =
+    finiteNumber(input.opportunityDiscovery?.density?.density) ??
     finiteNumber(input.opportunityDiscovery?.density?.futureDensity) ??
     finiteNumber(input.opportunityDiscovery?.density?.confidence);
   const discovery = input.opportunityDiscovery?.discovery ?? null;
   const signals = input.signals.map((signal) => {
-    const resolve = resolveCommitment(mapStockSignalToResolveInput({
-      signal,
-      summary: input.summary,
-      agencyDiagnostics: input.agencyDiagnostics,
-      opportunityDensity,
-      discovery,
-    }));
+    const resolve = resolveCommitment(
+      mapStockSignalToResolveInput({
+        signal,
+        summary: input.summary,
+        agencyDiagnostics: input.agencyDiagnostics,
+        opportunityDensity,
+        discovery,
+      }),
+    );
 
     return {
       ...signal,
@@ -232,7 +278,9 @@ export function applyStockResolveDiagnostics<T extends StockResolveSignal>(input
   };
 }
 
-function summarizeResolveDiagnostics(signals: Array<StockResolveSignal & { resolve: ResolveOutput }>): StockResolveDiagnostics {
+function summarizeResolveDiagnostics(
+  signals: Array<StockResolveSignal & { resolve: ResolveOutput }>,
+): StockResolveDiagnostics {
   const decisionCounts: Record<ResolveOutput["decision"], number> = {
     commit: 0,
     wait: 0,
@@ -245,9 +293,11 @@ function summarizeResolveDiagnostics(signals: Array<StockResolveSignal & { resol
     decisionCounts[signal.resolve.decision] += 1;
   }
 
-  const primarySignal = [...signals].sort((left, right) =>
-    priorityFor(right.resolve.decision) - priorityFor(left.resolve.decision) ||
-    right.resolve.resolveScore - left.resolve.resolveScore,
+  const primarySignal = [...signals].sort(
+    (left, right) =>
+      priorityFor(right.resolve.decision) -
+        priorityFor(left.resolve.decision) ||
+      right.resolve.resolveScore - left.resolve.resolveScore,
   )[0];
 
   return {
@@ -280,7 +330,9 @@ function actionNameFor(signal: StockResolveSignal) {
 }
 
 function symbolOf(signal: StockResolveSignal) {
-  return String(signal.symbol ?? signal.ticker ?? "").trim().toUpperCase();
+  return String(signal.symbol ?? signal.ticker ?? "")
+    .trim()
+    .toUpperCase();
 }
 
 function numeric(value: unknown) {

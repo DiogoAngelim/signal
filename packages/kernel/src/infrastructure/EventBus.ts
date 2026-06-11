@@ -20,7 +20,7 @@ export class EventBus {
     if (!this.listeners.has(eventType)) {
       this.listeners.set(eventType, new Set());
     }
-    this.listeners.get(eventType)!.add(listener);
+    this.listeners.get(eventType)?.add(listener);
 
     return () => {
       this.off(eventType, listener);
@@ -38,7 +38,11 @@ export class EventBus {
     this.listeners.get(eventType)?.delete(listener);
   }
 
-  emit(eventType: string, payload: Record<string, unknown>, source: string): void {
+  emit(
+    eventType: string,
+    payload: Record<string, unknown>,
+    source: string,
+  ): void {
     const event: KernelEvent = {
       type: eventType,
       timestamp: Date.now(),

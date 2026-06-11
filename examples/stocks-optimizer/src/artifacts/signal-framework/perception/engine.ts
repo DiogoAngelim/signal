@@ -1,8 +1,21 @@
 import { clamp, mean, numeric, stdev } from "../math/statistics";
-import { normalizeMetric, type NormalizationMemory } from "../metrics/normalization";
-import type { MetricInput, MetricState, PerceptionLayerKey, PerceptionLayerState, TimeframeState } from "../types";
-import { classifyPerceptionLayer, PERCEPTION_LAYER_DEFINITIONS, PERCEPTION_LAYER_ORDER } from "./layers";
-import { MetricRegistry } from "../metrics/registry";
+import {
+  type NormalizationMemory,
+  normalizeMetric,
+} from "../metrics/normalization";
+import type { MetricRegistry } from "../metrics/registry";
+import type {
+  MetricInput,
+  MetricState,
+  PerceptionLayerKey,
+  PerceptionLayerState,
+  TimeframeState,
+} from "../types";
+import {
+  PERCEPTION_LAYER_DEFINITIONS,
+  PERCEPTION_LAYER_ORDER,
+  classifyPerceptionLayer,
+} from "./layers";
 
 export type PerceptionEngineOptions = {
   maxMetricHistory?: number;
@@ -13,7 +26,10 @@ export class PerceptionEngine {
   private readonly previousLayers = new Map<PerceptionLayerKey, number>();
   private readonly maxMetricHistory: number;
 
-  constructor(private readonly registry: MetricRegistry, options: PerceptionEngineOptions = {}) {
+  constructor(
+    private readonly registry: MetricRegistry,
+    options: PerceptionEngineOptions = {},
+  ) {
     this.maxMetricHistory = options.maxMetricHistory ?? 180;
   }
 
@@ -62,7 +78,10 @@ export class PerceptionEngine {
             .filter((mapping) => mapping.layer === layerKey)
             .map((mapping) => {
               const polarity = mapping.polarity ?? "direct";
-              const contribution = polarity === "inverse" ? 100 - metricState.score : metricState.score;
+              const contribution =
+                polarity === "inverse"
+                  ? 100 - metricState.score
+                  : metricState.score;
               return {
                 metricKey: metricState.key,
                 label: metricState.label,
@@ -78,10 +97,19 @@ export class PerceptionEngine {
         )
         .sort((a, b) => b.weight * b.contribution - a.weight * a.contribution);
 
-      const weightTotal = contributors.reduce((sum, item) => sum + item.weight, 0) || 1;
-      const score = clamp(contributors.reduce((sum, item) => sum + item.contribution * item.weight, 0) / weightTotal);
+      const weightTotal =
+        contributors.reduce((sum, item) => sum + item.weight, 0) || 1;
+      const score = clamp(
+        contributors.reduce(
+          (sum, item) => sum + item.contribution * item.weight,
+          0,
+        ) / weightTotal,
+      );
       const confidence = clamp(
-        contributors.reduce((sum, item) => sum + metrics[item.metricKey].confidence * item.weight, 0) / weightTotal,
+        contributors.reduce(
+          (sum, item) => sum + metrics[item.metricKey].confidence * item.weight,
+          0,
+        ) / weightTotal,
       );
       const previousScore = this.previousLayers.get(layerKey) ?? score;
       this.previousLayers.set(layerKey, score);
@@ -99,7 +127,9 @@ export class PerceptionEngine {
 
     const layerScores = PERCEPTION_LAYER_ORDER.map((key) => layers[key].score);
     const compositeScore = clamp(mean(layerScores));
-    const confidence = clamp(mean(PERCEPTION_LAYER_ORDER.map((key) => layers[key].confidence)));
+    const confidence = clamp(
+      mean(PERCEPTION_LAYER_ORDER.map((key) => layers[key].confidence)),
+    );
     const dominantLayer = PERCEPTION_LAYER_ORDER.reduce(
       (best, key) => (layers[key].score > layers[best].score ? key : best),
       "survival",
@@ -107,9 +137,24 @@ export class PerceptionEngine {
     const agreement = clamp(100 - stdev(layerScores) * 1.35);
 
     const timeframes: Record<"intraday" | "swing" | "macro", TimeframeState> = {
-      intraday: timeframe("intraday", "Intraday", [layers.survival.score, layers.emotion.score, layers.information.score, layers.selfAwareness.score]),
-      swing: timeframe("swing", "Swing", [layers.conviction.score, layers.harmony.score, layers.intuition.score, layers.selfAwareness.score]),
-      macro: timeframe("macro", "Macro", [layers.macroContext.score, layers.survival.score, layers.harmony.score, layers.selfAwareness.score]),
+      intraday: timeframe("intraday", "Intraday", [
+        layers.survival.score,
+        layers.emotion.score,
+        layers.information.score,
+        layers.selfAwareness.score,
+      ]),
+      swing: timeframe("swing", "Swing", [
+        layers.conviction.score,
+        layers.harmony.score,
+        layers.intuition.score,
+        layers.selfAwareness.score,
+      ]),
+      macro: timeframe("macro", "Macro", [
+        layers.macroContext.score,
+        layers.survival.score,
+        layers.harmony.score,
+        layers.selfAwareness.score,
+      ]),
     };
 
     return {
@@ -124,7 +169,11 @@ export class PerceptionEngine {
   }
 }
 
-function timeframe(key: "intraday" | "swing" | "macro", label: string, values: number[]): TimeframeState {
+function timeframe(
+  key: "intraday" | "swing" | "macro",
+  label: string,
+  values: number[],
+): TimeframeState {
   return {
     key,
     label,

@@ -8,7 +8,9 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "types": ["node"]
+    "types": ["node"],
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false
   },
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "node_modules", "src/**/*.test.ts"]

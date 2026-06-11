@@ -3,11 +3,7 @@
   "$id": "https://signal.dev/schemas/error.schema.json",
   "title": "Signal Error",
   "type": "object",
-  "required": [
-    "code",
-    "category",
-    "message"
-  ],
+  "required": ["code", "category", "message"],
   "properties": {
     "code": {
       "enum": [

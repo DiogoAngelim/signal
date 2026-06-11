@@ -1,7 +1,7 @@
 import { createMockAlgaiDataSource } from "@/api/algaiParentAccess";
 import {
   handleParentDashboardRequest,
-  handleTeacherParentAccessUpdate
+  handleTeacherParentAccessUpdate,
 } from "./parentDashboardApi";
 
 describe("parent dashboard server boundary", () => {
@@ -9,10 +9,10 @@ describe("parent dashboard server boundary", () => {
     const source = createMockAlgaiDataSource();
 
     await expect(
-      handleParentDashboardRequest({ authenticatedEmail: null, source })
+      handleParentDashboardRequest({ authenticatedEmail: null, source }),
     ).resolves.toMatchObject({
       status: 401,
-      body: { message: "Google login is required." }
+      body: { message: "Google login is required." },
     });
   });
 
@@ -22,7 +22,7 @@ describe("parent dashboard server boundary", () => {
     const response = await handleParentDashboardRequest({
       authenticatedEmail: "parent.rivera@example.com",
       studentId: "student-mia-rivera",
-      source
+      source,
     });
 
     expect(response.status).toBe(200);
@@ -38,16 +38,17 @@ describe("parent dashboard server boundary", () => {
 
     const response = await handleParentDashboardRequest({
       authenticatedEmail: "parent.rivera@example.com",
-      source
+      source,
     });
 
     expect(response.status).toBe(200);
     expect("dashboards" in response.body).toBe(true);
     if ("dashboards" in response.body) {
-      expect(response.body.dashboards.map((dashboard) => dashboard.student.childName)).toEqual([
-        "Mia Rivera",
-        "Noah Patel"
-      ]);
+      expect(
+        response.body.dashboards.map(
+          (dashboard) => dashboard.student.childName,
+        ),
+      ).toEqual(["Mia Rivera", "Noah Patel"]);
     }
   });
 
@@ -57,7 +58,7 @@ describe("parent dashboard server boundary", () => {
     const response = await handleParentDashboardRequest({
       authenticatedEmail: "parent.patel@example.com",
       studentId: "student-mia-rivera",
-      source
+      source,
     });
 
     expect(response.status).toBe(403);
@@ -69,7 +70,7 @@ describe("parent dashboard server boundary", () => {
 
     const response = await handleParentDashboardRequest({
       authenticatedEmail: "mia.rivera@student.algai.test",
-      source
+      source,
     });
 
     expect(response.status).toBe(303);
@@ -83,7 +84,7 @@ describe("parent dashboard server boundary", () => {
       authenticatedTeacherEmail: "other.teacher@algai.school",
       studentId: "student-mia-rivera",
       parentEmails: ["new.parent@example.com"],
-      source
+      source,
     });
     expect(blocked.status).toBe(403);
 
@@ -91,12 +92,12 @@ describe("parent dashboard server boundary", () => {
       authenticatedTeacherEmail: "ana.martins@algai.school",
       studentId: "student-mia-rivera",
       parentEmails: ["New.Parent@Example.com"],
-      source
+      source,
     });
     expect(allowed.status).toBe(200);
     expect(allowed.body).toMatchObject({
       studentId: "student-mia-rivera",
-      parentEmails: ["new.parent@example.com"]
+      parentEmails: ["new.parent@example.com"],
     });
   });
 });

@@ -2,16 +2,25 @@ import { describe, expect, it } from "vitest";
 import { diagnoseAgencyState } from ".";
 import type { AgencyTrace, CalibrationResult, LearningResult } from "../types";
 
-function calibration(reliability: CalibrationResult["reliability"]): CalibrationResult {
+function calibration(
+  reliability: CalibrationResult["reliability"],
+): CalibrationResult {
   return {
     calibratedConfidence: 0.7,
-    calibrationError: reliability === "overconfident" ? 0.3 : reliability === "underconfident" ? -0.3 : 0,
+    calibrationError:
+      reliability === "overconfident"
+        ? 0.3
+        : reliability === "underconfident"
+          ? -0.3
+          : 0,
     reliability,
     sampleSize: 4,
   };
 }
 
-function learning(patterns: string[] = ["A reusable lesson is available."]): LearningResult {
+function learning(
+  patterns: string[] = ["A reusable lesson is available."],
+): LearningResult {
   return {
     learnedPatterns: patterns,
     confidenceAdjustment: 0,
@@ -36,10 +45,21 @@ function trace(input: {
     policy: {
       allowed: input.allowed ?? true,
       requiresApproval: false,
-      reason: input.allowed === false ? "Policy blocked action: test." : "Policy allowed action.",
+      reason:
+        input.allowed === false
+          ? "Policy blocked action: test."
+          : "Policy allowed action.",
       violations: input.allowed === false ? ["test"] : [],
     },
-    outcome: { success, outcomeLabel: success === true ? "positive" : success === false ? "negative" : "unknown" },
+    outcome: {
+      success,
+      outcomeLabel:
+        success === true
+          ? "positive"
+          : success === false
+            ? "negative"
+            : "unknown",
+    },
     selfDiagnosis: {
       trust: 0.5,
       dataReliability: 0.5,
@@ -65,8 +85,12 @@ describe("self-diagnosis", () => {
 
     expect(result.recommendation).toBe("requires_human_review");
     expect(result.dataReliability).toBeLessThan(0.6);
-    expect(result.reasons).toContain("Outcome coverage or context capture is incomplete.");
-    expect(result.reasons).toContain("No reusable lessons have been learned yet.");
+    expect(result.reasons).toContain(
+      "Outcome coverage or context capture is incomplete.",
+    );
+    expect(result.reasons).toContain(
+      "No reusable lessons have been learned yet.",
+    );
   });
 
   it("recommends action when trust inputs are healthy", () => {
@@ -93,9 +117,24 @@ describe("self-diagnosis", () => {
   it("recommends reduced size for middling trust", () => {
     const result = diagnoseAgencyState({
       history: [
-        trace({ id: "1", kind: "prepare_response", success: true, withContext: false }),
-        trace({ id: "2", kind: "prepare_response", success: true, withContext: false }),
-        trace({ id: "3", kind: "prepare_response", success: false, withContext: false }),
+        trace({
+          id: "1",
+          kind: "prepare_response",
+          success: true,
+          withContext: false,
+        }),
+        trace({
+          id: "2",
+          kind: "prepare_response",
+          success: true,
+          withContext: false,
+        }),
+        trace({
+          id: "3",
+          kind: "prepare_response",
+          success: false,
+          withContext: false,
+        }),
       ],
       calibration: calibration("underconfident"),
       learning: learning(),
@@ -104,15 +143,33 @@ describe("self-diagnosis", () => {
     expect(result.recommendation).toBe("act_with_reduced_size");
     expect(result.calibrationHealth).toBe(0.75);
     expect(result.overfitRisk).toBe(0.6);
-    expect(result.reasons).toContain("Observed outcomes are stronger than predicted confidence.");
+    expect(result.reasons).toContain(
+      "Observed outcomes are stronger than predicted confidence.",
+    );
   });
 
   it("waits when trust is low but review thresholds are not crossed", () => {
     const result = diagnoseAgencyState({
       history: [
-        trace({ id: "1", kind: "prepare_response", success: false, allowed: false, withContext: false }),
-        trace({ id: "2", kind: "prepare_response", success: false, withContext: false }),
-        trace({ id: "3", kind: "prepare_response", success: true, withContext: false }),
+        trace({
+          id: "1",
+          kind: "prepare_response",
+          success: false,
+          allowed: false,
+          withContext: false,
+        }),
+        trace({
+          id: "2",
+          kind: "prepare_response",
+          success: false,
+          withContext: false,
+        }),
+        trace({
+          id: "3",
+          kind: "prepare_response",
+          success: true,
+          withContext: false,
+        }),
       ],
       calibration: calibration("insufficient_data"),
       learning: learning(),
@@ -147,29 +204,37 @@ describe("self-diagnosis", () => {
 
     expect(frequentViolations.recommendation).toBe("requires_human_review");
     expect(lowTrustOverconfidence.recommendation).toBe("requires_human_review");
-    expect(lowTrustOverconfidence.reasons).toContain("Confidence is higher than observed outcomes support.");
+    expect(lowTrustOverconfidence.reasons).toContain(
+      "Confidence is higher than observed outcomes support.",
+    );
   });
 
   it("handles empty history and validates configuration", () => {
-    expect(diagnoseAgencyState({
-      history: [],
-      calibration: calibration("insufficient_data"),
-    })).toMatchObject({
+    expect(
+      diagnoseAgencyState({
+        history: [],
+        calibration: calibration("insufficient_data"),
+      }),
+    ).toMatchObject({
       trust: 0.49,
       dataReliability: 0.5,
       recommendation: "requires_human_review",
     });
 
-    expect(() => diagnoseAgencyState({
-      history: [],
-      calibration: calibration("aligned"),
-      config: { recentWindow: 0 },
-    })).toThrow("recentWindow must be a positive integer.");
+    expect(() =>
+      diagnoseAgencyState({
+        history: [],
+        calibration: calibration("aligned"),
+        config: { recentWindow: 0 },
+      }),
+    ).toThrow("recentWindow must be a positive integer.");
 
-    expect(() => diagnoseAgencyState({
-      history: [],
-      calibration: calibration("aligned"),
-      config: { minimumTraceCount: 0 },
-    })).toThrow("minimumTraceCount must be a positive integer.");
+    expect(() =>
+      diagnoseAgencyState({
+        history: [],
+        calibration: calibration("aligned"),
+        config: { minimumTraceCount: 0 },
+      }),
+    ).toThrow("minimumTraceCount must be a positive integer.");
   });
 });

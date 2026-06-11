@@ -5,5 +5,12 @@
     "emitDeclarationOnly": false,
     "rootDir": "src"
   },
-  "include": ["src/api/**/*.ts", "src/adapters/**/*.ts", "src/contracts/**/*.ts", "src/fixtures/**/*.ts", "src/signal/**/*.ts", "src/index.ts"]
+  "include": [
+    "src/api/**/*.ts",
+    "src/adapters/**/*.ts",
+    "src/contracts/**/*.ts",
+    "src/fixtures/**/*.ts",
+    "src/signal/**/*.ts",
+    "src/index.ts"
+  ]
 }

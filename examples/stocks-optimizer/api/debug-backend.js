@@ -7,14 +7,14 @@ module.exports = function handler(_req, res) {
       ok: true,
       keys: Object.keys(mod),
       hasDefault: Boolean(mod.default),
-      appType: typeof app
+      appType: typeof app,
     });
   } catch (error) {
     res.status(500).json({
       ok: false,
       name: error?.name,
       message: error?.message,
-      stack: error?.stack
+      stack: error?.stack,
     });
   }
 };

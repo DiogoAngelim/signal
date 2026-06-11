@@ -10,10 +10,10 @@
  */
 
 import { execSync } from "node:child_process";
-import { executeVerify } from "./verify.js";
-import { readState } from "../state/stateStore.js";
-import { writeProof, PROOF_TYPES } from "../proofs/proofWriter.js";
 import { DEFAULT_TEST_COMMAND, GENESIS_HASH } from "../core/constants.js";
+import { PROOF_TYPES, writeProof } from "../proofs/proofWriter.js";
+import { readState } from "../state/stateStore.js";
+import { executeVerify } from "./verify.js";
 
 /**
  * Execute the `signal test` command.
@@ -46,9 +46,10 @@ export function executeTest(
 
   // Capture pre-test state hash
   const preState = readState(root);
-  const preLastHash = preState.phases.length > 0
-    ? preState.phases[preState.phases.length - 1]!.hash
-    : GENESIS_HASH;
+  const preLastHash =
+    preState.phases.length > 0
+      ? preState.phases[preState.phases.length - 1]?.hash
+      : GENESIS_HASH;
 
   // Step 2: Run test command
   console.log(`SIGNAL: [2/3] Running test command: ${testCommand}`);
@@ -81,7 +82,11 @@ export function executeTest(
       "FAIL",
       [],
       false,
-      { errorCode: "TEST_FAILED", phase: -1, message: "Test command exited with non-zero code" },
+      {
+        errorCode: "TEST_FAILED",
+        phase: -1,
+        message: "Test command exited with non-zero code",
+      },
       root,
     );
     return false;
@@ -91,7 +96,9 @@ export function executeTest(
   console.log("SIGNAL: [3/3] Running post-test verification...");
   const postVerify = executeVerify(root);
   if (!postVerify) {
-    console.error("SIGNAL: ✗ Post-test verification failed. State drift detected!");
+    console.error(
+      "SIGNAL: ✗ Post-test verification failed. State drift detected!",
+    );
     writeProof(
       PROOF_TYPES.TEST_PROOF,
       "FAIL",
@@ -105,9 +112,10 @@ export function executeTest(
 
   // Verify state hasn't drifted
   const postState = readState(root);
-  const postLastHash = postState.phases.length > 0
-    ? postState.phases[postState.phases.length - 1]!.hash
-    : GENESIS_HASH;
+  const postLastHash =
+    postState.phases.length > 0
+      ? postState.phases[postState.phases.length - 1]?.hash
+      : GENESIS_HASH;
 
   if (preLastHash !== postLastHash) {
     console.error("SIGNAL: ✗ State drift detected after test execution!");

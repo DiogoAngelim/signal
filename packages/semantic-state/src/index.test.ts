@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+  type SemanticLexicon,
   loadBundledSemanticLexicon,
   resolveSemanticState,
   validateSemanticLexicon,
-  type SemanticLexicon,
 } from "./index";
 
-function lexicon(entries: SemanticLexicon["entries"], version = "test.v1"): SemanticLexicon {
+function lexicon(
+  entries: SemanticLexicon["entries"],
+  version = "test.v1",
+): SemanticLexicon {
   return { version, entries };
 }
 
@@ -37,7 +40,9 @@ describe("semantic-state", () => {
     const input = { dimensions: { coherence: 0.4 } };
     const config = { lexicon: custom, secondaryLimit: 1 };
 
-    expect(resolveSemanticState(input, config)).toEqual(resolveSemanticState(input, config));
+    expect(resolveSemanticState(input, config)).toEqual(
+      resolveSemanticState(input, config),
+    );
   });
 
   it("returns ranked secondary candidates with categories", () => {
@@ -94,11 +99,13 @@ describe("semantic-state", () => {
   it("rejects invalid input dimensions", () => {
     expect(() =>
       resolveSemanticState({ dimensions: { stability: 1.1 } }),
-    ).toThrow("Semantic state input dimensions.stability must be a number between 0 and 1.");
+    ).toThrow(
+      "Semantic state input dimensions.stability must be a number between 0 and 1.",
+    );
 
-    expect(() =>
-      resolveSemanticState({ dimensions: {} }),
-    ).toThrow("Semantic state input dimensions must include at least one dimension.");
+    expect(() => resolveSemanticState({ dimensions: {} })).toThrow(
+      "Semantic state input dimensions must include at least one dimension.",
+    );
   });
 
   it("rejects duplicate words unless validation explicitly allows them", () => {
@@ -107,17 +114,21 @@ describe("semantic-state", () => {
       { word: "echo", dimensions: { coherence: 0 } },
     ]);
 
-    expect(() => validateSemanticLexicon(duplicate)).toThrow('Duplicate semantic lexicon word "echo" is not allowed.');
-    expect(validateSemanticLexicon(duplicate, { allowDuplicateWords: true })).toBe(duplicate);
+    expect(() => validateSemanticLexicon(duplicate)).toThrow(
+      'Duplicate semantic lexicon word "echo" is not allowed.',
+    );
+    expect(
+      validateSemanticLexicon(duplicate, { allowDuplicateWords: true }),
+    ).toBe(duplicate);
   });
 
   it("rejects empty or malformed lexicons with clear errors", () => {
-    expect(() => validateSemanticLexicon({ version: "empty.v1", entries: [] })).toThrow(
-      "Semantic lexicon must include at least one entry.",
-    );
-    expect(() => validateSemanticLexicon(null as unknown as SemanticLexicon)).toThrow(
-      "Semantic lexicon must be an object.",
-    );
+    expect(() =>
+      validateSemanticLexicon({ version: "empty.v1", entries: [] }),
+    ).toThrow("Semantic lexicon must include at least one entry.");
+    expect(() =>
+      validateSemanticLexicon(null as unknown as SemanticLexicon),
+    ).toThrow("Semantic lexicon must be an object.");
     expect(() => validateSemanticLexicon({ version: "", entries: [] })).toThrow(
       "Semantic lexicon must include a non-empty version.",
     );
@@ -191,7 +202,11 @@ describe("semantic-state", () => {
         direction: 0.62,
       },
     });
-    const words = new Set(loadBundledSemanticLexicon("generic-state").entries.map((entry) => entry.word));
+    const words = new Set(
+      loadBundledSemanticLexicon("generic-state").entries.map(
+        (entry) => entry.word,
+      ),
+    );
 
     expect(words.has(result.word)).toBe(true);
     expect(result.score).toBeGreaterThan(0);
@@ -204,76 +219,147 @@ describe("semantic-state", () => {
       { word: "Middle", dimensions: { coherence: 0.5 } },
     ]);
 
-    expect(resolveSemanticState({ dimensions: { coherence: 0.5 } }, { lexicon: custom }).word).toBe("Alpha");
-    expect(resolveSemanticState({ dimensions: { coherence: 0.5 } }, { lexicon: custom, priority: ["Zulu"] }).word).toBe("Zulu");
-    expect(resolveSemanticState({ dimensions: { coherence: 0.5 } }, { lexicon: custom, priority: { Middle: 10 } }).word).toBe("Middle");
+    expect(
+      resolveSemanticState(
+        { dimensions: { coherence: 0.5 } },
+        { lexicon: custom },
+      ).word,
+    ).toBe("Alpha");
+    expect(
+      resolveSemanticState(
+        { dimensions: { coherence: 0.5 } },
+        { lexicon: custom, priority: ["Zulu"] },
+      ).word,
+    ).toBe("Zulu");
+    expect(
+      resolveSemanticState(
+        { dimensions: { coherence: 0.5 } },
+        { lexicon: custom, priority: { Middle: 10 } },
+      ).word,
+    ).toBe("Middle");
   });
 
   it("validates optional lexicon metadata", () => {
     expect(() =>
-      validateSemanticLexicon(lexicon([{ word: "Bad", dimensions: { stability: 1 }, polarity: "mixed" as never }])),
+      validateSemanticLexicon(
+        lexicon([
+          {
+            word: "Bad",
+            dimensions: { stability: 1 },
+            polarity: "mixed" as never,
+          },
+        ]),
+      ),
     ).toThrow('Semantic lexicon entry "Bad" has an invalid polarity.');
 
     expect(() =>
-      validateSemanticLexicon(lexicon([{ word: "Bad", dimensions: { stability: 1 }, intensity: 2 }])),
-    ).toThrow('Semantic lexicon entry "Bad" intensity must be a number between 0 and 1.');
+      validateSemanticLexicon(
+        lexicon([{ word: "Bad", dimensions: { stability: 1 }, intensity: 2 }]),
+      ),
+    ).toThrow(
+      'Semantic lexicon entry "Bad" intensity must be a number between 0 and 1.',
+    );
 
     expect(() =>
-      validateSemanticLexicon(lexicon([{ word: "Bad", dimensions: { stability: 1 }, aliases: [""] }])),
-    ).toThrow('Semantic lexicon entry "Bad" aliases must be non-empty strings.');
+      validateSemanticLexicon(
+        lexicon([{ word: "Bad", dimensions: { stability: 1 }, aliases: [""] }]),
+      ),
+    ).toThrow(
+      'Semantic lexicon entry "Bad" aliases must be non-empty strings.',
+    );
   });
 
   it("validates malformed lexicon entries and dimensions", () => {
     expect(() =>
-      validateSemanticLexicon(lexicon([null as unknown as SemanticLexicon["entries"][number]])),
+      validateSemanticLexicon(
+        lexicon([null as unknown as SemanticLexicon["entries"][number]]),
+      ),
     ).toThrow("Semantic lexicon entry at index 0 must be an object.");
 
     expect(() =>
-      validateSemanticLexicon(lexicon([{ word: "", dimensions: { stability: 1 } }])),
+      validateSemanticLexicon(
+        lexicon([{ word: "", dimensions: { stability: 1 } }]),
+      ),
     ).toThrow("Semantic lexicon entry at index 0 must include a valid word.");
 
     expect(() =>
-      validateSemanticLexicon(lexicon([{ word: "Bad", dimensions: [] as unknown as Record<string, number> }])),
+      validateSemanticLexicon(
+        lexicon([
+          { word: "Bad", dimensions: [] as unknown as Record<string, number> },
+        ]),
+      ),
     ).toThrow('Semantic lexicon entry "Bad" dimensions must be an object.');
 
     expect(() =>
-      validateSemanticLexicon(lexicon([{ word: "Bad", dimensions: { "": 1 } }])),
-    ).toThrow('Semantic lexicon entry "Bad" dimensions contains an invalid dimension name.');
+      validateSemanticLexicon(
+        lexicon([{ word: "Bad", dimensions: { "": 1 } }]),
+      ),
+    ).toThrow(
+      'Semantic lexicon entry "Bad" dimensions contains an invalid dimension name.',
+    );
   });
 
   it("validates weights, priority, confidence, and secondary limits", () => {
     const custom = lexicon([{ word: "Only", dimensions: { stability: 1 } }]);
 
     expect(() =>
-      resolveSemanticState({ dimensions: { stability: 1 } }, { lexicon: custom, weights: { stability: -1 } }),
-    ).toThrow('Semantic state weight for "stability" must be a non-negative number.');
+      resolveSemanticState(
+        { dimensions: { stability: 1 } },
+        { lexicon: custom, weights: { stability: -1 } },
+      ),
+    ).toThrow(
+      'Semantic state weight for "stability" must be a non-negative number.',
+    );
 
     expect(() =>
-      resolveSemanticState({ dimensions: { stability: 1 } }, { lexicon: custom, weights: { "": 1 } }),
+      resolveSemanticState(
+        { dimensions: { stability: 1 } },
+        { lexicon: custom, weights: { "": 1 } },
+      ),
     ).toThrow("Semantic state weights contain an invalid dimension name.");
 
     expect(() =>
-      resolveSemanticState({ dimensions: { stability: 1 } }, { lexicon: custom, weights: { stability: 0 } }),
-    ).toThrow("Semantic state scoring requires at least one positive dimension weight.");
+      resolveSemanticState(
+        { dimensions: { stability: 1 } },
+        { lexicon: custom, weights: { stability: 0 } },
+      ),
+    ).toThrow(
+      "Semantic state scoring requires at least one positive dimension weight.",
+    );
 
     expect(() =>
-      resolveSemanticState({ dimensions: { stability: 1 } }, { lexicon: custom, minConfidence: 2 }),
+      resolveSemanticState(
+        { dimensions: { stability: 1 } },
+        { lexicon: custom, minConfidence: 2 },
+      ),
     ).toThrow("minConfidence must be a number between 0 and 1.");
 
     expect(() =>
-      resolveSemanticState({ dimensions: { stability: 1 } }, { lexicon: custom, secondaryLimit: -1 }),
+      resolveSemanticState(
+        { dimensions: { stability: 1 } },
+        { lexicon: custom, secondaryLimit: -1 },
+      ),
     ).toThrow("secondaryLimit must be a non-negative integer.");
 
     expect(() =>
-      resolveSemanticState({ dimensions: { stability: 1 } }, { lexicon: custom, priority: [""] }),
+      resolveSemanticState(
+        { dimensions: { stability: 1 } },
+        { lexicon: custom, priority: [""] },
+      ),
     ).toThrow("Semantic state priority words must be non-empty strings.");
 
     expect(() =>
-      resolveSemanticState({ dimensions: { stability: 1 } }, { lexicon: custom, priority: { Only: Number.NaN } }),
+      resolveSemanticState(
+        { dimensions: { stability: 1 } },
+        { lexicon: custom, priority: { Only: Number.NaN } },
+      ),
     ).toThrow('Semantic state priority for "Only" must be numeric.');
 
     expect(() =>
-      resolveSemanticState({ dimensions: { stability: 1 } }, { lexicon: custom, priority: { "": 1 } }),
+      resolveSemanticState(
+        { dimensions: { stability: 1 } },
+        { lexicon: custom, priority: { "": 1 } },
+      ),
     ).toThrow("Semantic state priority contains an invalid word.");
   });
 
@@ -288,6 +374,8 @@ describe("semantic-state", () => {
     );
 
     expect(result.secondary).toEqual([]);
-    expect(() => loadBundledSemanticLexicon("missing")).toThrow('Bundled semantic lexicon "missing" was not found.');
+    expect(() => loadBundledSemanticLexicon("missing")).toThrow(
+      'Bundled semantic lexicon "missing" was not found.',
+    );
   });
 });

@@ -1,4 +1,8 @@
-export type FinancialDataProvider = "sample" | "nubank" | "manual_upload" | "open_finance";
+export type FinancialDataProvider =
+  | "sample"
+  | "nubank"
+  | "manual_upload"
+  | "open_finance";
 
 export type ConnectionMode =
   | "sample_data"
@@ -6,7 +10,12 @@ export type ConnectionMode =
   | "manual_import"
   | "open_finance_placeholder";
 
-export type ConnectionStatus = "connected" | "failed" | "expired" | "revoked" | "pending";
+export type ConnectionStatus =
+  | "connected"
+  | "failed"
+  | "expired"
+  | "revoked"
+  | "pending";
 
 export type PaymentMethod = "cash" | "credit" | "installments";
 
@@ -140,7 +149,7 @@ export interface FinancialDataConnector {
     params?: {
       from?: Date;
       to?: Date;
-    }
+    },
   ): Promise<RawTransaction[]>;
 
   disconnect(connectionId: string): Promise<void>;

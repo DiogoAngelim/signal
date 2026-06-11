@@ -1,18 +1,12 @@
+import type { EventPort, StoragePort } from "@signal/ports";
 import {
-  createSignalEnvelope,
-  createSignalError,
   type SignalEnvelope,
   type SignalErrorEnvelope,
+  createSignalEnvelope,
+  createSignalError,
 } from "@signal/protocol";
-import type { EventPort, StoragePort } from "@signal/ports";
-import { fingerprint } from "./hash";
-import { dispatchEvent } from "./event";
 import { ZodError } from "zod";
-import type {
-  SignalExecutionContext,
-  SignalExecutionResult,
-} from "./types";
-import type { SignalRegistry } from "./registry";
+import { dispatchEvent } from "./event";
 import {
   createExecutionSuccessMeta,
   createNestedExecutionContext,
@@ -21,8 +15,13 @@ import {
   toEnvelopeDelivery,
   toSignalFailure,
 } from "./execution";
+import { fingerprint } from "./hash";
+import type { SignalRegistry } from "./registry";
+import type { SignalExecutionContext, SignalExecutionResult } from "./types";
 
-function toFailure<TResult>(error: SignalErrorEnvelope): SignalExecutionResult<TResult> {
+function toFailure<TResult>(
+  error: SignalErrorEnvelope,
+): SignalExecutionResult<TResult> {
   return { ok: false, error } as SignalExecutionResult<TResult>;
 }
 
@@ -33,7 +32,7 @@ export async function executeMutation<TInput, TResult>(
   name: string,
   input: TInput,
   context: SignalExecutionContext,
-  idempotencyKey?: string
+  idempotencyKey?: string,
 ): Promise<SignalExecutionResult<TResult>> {
   let definition: ReturnType<SignalRegistry["getMutation"]> | undefined;
   let payloadFingerprint = "";
@@ -77,11 +76,19 @@ export async function executeMutation<TInput, TResult>(
 
     if (definition.idempotency === "required" && !idempotencyKey) {
       return toFailure<TResult>(
-        createSignalError("BAD_REQUEST", "An idempotency key is required for this mutation")
+        createSignalError(
+          "BAD_REQUEST",
+          "An idempotency key is required for this mutation",
+        ),
       );
     }
 
-    if (storagePort && idempotencyKey && definition && definition.idempotency !== "none") {
+    if (
+      storagePort &&
+      idempotencyKey &&
+      definition &&
+      definition.idempotency !== "none"
+    ) {
       const reservation = await storagePort.reserve({
         operationName: name,
         idempotencyKey,
@@ -90,18 +97,25 @@ export async function executeMutation<TInput, TResult>(
 
       if (reservation.state === "conflict") {
         return toFailure<TResult>(
-          createSignalError("IDEMPOTENCY_CONFLICT", "The idempotency key was reused with different input")
+          createSignalError(
+            "IDEMPOTENCY_CONFLICT",
+            "The idempotency key was reused with different input",
+          ),
         );
       }
 
       if (reservation.state === "inflight") {
         return toFailure<TResult>(
-          createSignalError("RETRYABLE_ERROR", "The same mutation is already in flight", {
-            details: {
-              idempotencyKey,
-              operationName: name,
+          createSignalError(
+            "RETRYABLE_ERROR",
+            "The same mutation is already in flight",
+            {
+              details: {
+                idempotencyKey,
+                operationName: name,
+              },
             },
-          })
+          ),
         );
       }
 
@@ -130,7 +144,10 @@ export async function executeMutation<TInput, TResult>(
           };
         }
 
-        if (reservation.record.status === "failed" && reservation.record.error) {
+        if (
+          reservation.record.status === "failed" &&
+          reservation.record.error
+        ) {
           return toFailure<TResult>(reservation.record.error);
         }
       }
@@ -146,7 +163,7 @@ export async function executeMutation<TInput, TResult>(
       emit: async <TPayload>(
         eventName: string,
         payload: TPayload,
-        meta?: Record<string, unknown>
+        meta?: Record<string, unknown>,
       ) => {
         const eventEnvelope = await dispatchEvent(
           registry,
@@ -154,7 +171,7 @@ export async function executeMutation<TInput, TResult>(
           eventName,
           payload,
           createNestedExecutionContext(context, envelope),
-          meta
+          meta,
         );
         emittedEvents.push(eventEnvelope);
         return eventEnvelope;
@@ -168,7 +185,12 @@ export async function executeMutation<TInput, TResult>(
       await eventPort.dispatch(eventEnvelope);
     }
 
-    if (storagePort && idempotencyKey && definition && definition.idempotency !== "none") {
+    if (
+      storagePort &&
+      idempotencyKey &&
+      definition &&
+      definition.idempotency !== "none"
+    ) {
       const meta = createExecutionSuccessMeta({
         outcome: "completed",
         envelope,

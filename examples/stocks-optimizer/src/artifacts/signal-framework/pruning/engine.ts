@@ -154,7 +154,9 @@ export interface PruningStore {
 }
 
 export interface SignalUtilityStore {
-  utilityFor(candidateId: string): MaybePromise<Partial<PruningCandidateInput> | null>;
+  utilityFor(
+    candidateId: string,
+  ): MaybePromise<Partial<PruningCandidateInput> | null>;
 }
 
 export interface CandidateHistoryStore {
@@ -162,7 +164,10 @@ export interface CandidateHistoryStore {
 }
 
 export interface PruningTraceStore {
-  recordTrace(candidateId: string, trace: PruningTraceEntry[]): MaybePromise<void>;
+  recordTrace(
+    candidateId: string,
+    trace: PruningTraceEntry[],
+  ): MaybePromise<void>;
 }
 
 export class InMemoryPruningStore implements PruningStore {
@@ -299,7 +304,9 @@ export class PruningValidationError extends Error {
   readonly issues: PruningValidationIssue[];
 
   constructor(issues: PruningValidationIssue[]) {
-    super(`Invalid pruning input: ${issues.map((issue) => `${issue.field} ${issue.reason}`).join("; ")}`);
+    super(
+      `Invalid pruning input: ${issues.map((issue) => `${issue.field} ${issue.reason}`).join("; ")}`,
+    );
     this.name = "PruningValidationError";
     this.issues = issues;
   }
@@ -309,9 +316,12 @@ export function evaluatePruning(input: PruningInput = {}): PruningResult {
   const timestamp = toIsoTimestamp(input.now);
   const meaningCandidates = meaningPruningCandidates(input.meaning, timestamp);
   const baseCandidates = normalizeCandidates(input);
-  const candidates = meaningCandidates.length && baseCandidates.length === 1 && baseCandidates[0]?.candidateId === "no-candidates"
-    ? meaningCandidates
-    : [...meaningCandidates, ...baseCandidates];
+  const candidates =
+    meaningCandidates.length &&
+    baseCandidates.length === 1 &&
+    baseCandidates[0]?.candidateId === "no-candidates"
+      ? meaningCandidates
+      : [...meaningCandidates, ...baseCandidates];
   const assessments = candidates.map((candidate, index) =>
     evaluateCandidate(candidate, {
       index,
@@ -330,41 +340,74 @@ export function evaluatePruning(input: PruningInput = {}): PruningResult {
     reducedSignals: idsFor(assessments, "reduce"),
     quarantinedSignals: idsFor(assessments, "quarantine"),
     preservedSignals: assessments
-      .filter((item) => item.recommendedAction === "keep" && item.survivalContribution >= 70)
+      .filter(
+        (item) =>
+          item.recommendedAction === "keep" && item.survivalContribution >= 70,
+      )
       .map((item) => item.candidateId),
     survivalCriticalSignals: assessments
-      .filter((item) => item.survivalContribution >= 80 || item.evidenceUsed.governanceFlagsIncludesSurvivalCritical === true)
+      .filter(
+        (item) =>
+          item.survivalContribution >= 80 ||
+          item.evidenceUsed.governanceFlagsIncludesSurvivalCritical === true,
+      )
       .map((item) => item.candidateId),
-    frontendHiddenSignals: assessments.filter((item) => item.frontendHidden).map((item) => item.candidateId),
+    frontendHiddenSignals: assessments
+      .filter((item) => item.frontendHidden)
+      .map((item) => item.candidateId),
   };
 }
 
 export const prune = evaluatePruning;
 export const evaluateIgnoranceEffectiveness = evaluatePruning;
 
-export function validatePruningCandidate(candidate: PruningCandidateInput): PruningValidationIssue[] {
+export function validatePruningCandidate(
+  candidate: PruningCandidateInput,
+): PruningValidationIssue[] {
   const issues: PruningValidationIssue[] = [];
   for (const field of PRUNING_CANDIDATE_SCHEMA.requiredIdentity) {
     if (!isPresent(candidate[field])) {
-      issues.push({ field, severity: "error", reason: "is required for auditable pruning." });
+      issues.push({
+        field,
+        severity: "error",
+        reason: "is required for auditable pruning.",
+      });
     }
   }
   for (const field of PRUNING_CANDIDATE_SCHEMA.scoreFields) {
     const value = candidate[field];
     if (value == null) continue;
     if (!Number.isFinite(Number(value))) {
-      issues.push({ field, severity: "error", reason: "must be numeric when provided." });
+      issues.push({
+        field,
+        severity: "error",
+        reason: "must be numeric when provided.",
+      });
     } else if (!isPctLike(Number(value))) {
-      issues.push({ field, severity: "warning", reason: "is outside the expected 0-100 score range and will be clamped." });
+      issues.push({
+        field,
+        severity: "warning",
+        reason:
+          "is outside the expected 0-100 score range and will be clamped.",
+      });
     }
   }
   for (const field of PRUNING_CANDIDATE_SCHEMA.signedImpactFields) {
     const value = candidate[field];
     if (value == null) continue;
     if (!Number.isFinite(Number(value))) {
-      issues.push({ field, severity: "error", reason: "must be numeric when provided." });
+      issues.push({
+        field,
+        severity: "error",
+        reason: "must be numeric when provided.",
+      });
     } else if (Number(value) < -100 || Number(value) > 100) {
-      issues.push({ field, severity: "warning", reason: "is outside the expected -100 to 100 impact range and will be clamped." });
+      issues.push({
+        field,
+        severity: "warning",
+        reason:
+          "is outside the expected -100 to 100 impact range and will be clamped.",
+      });
     }
   }
   return issues;
@@ -375,47 +418,110 @@ function evaluateCandidate(
   options: { index: number; timestamp: string; strictValidation: boolean },
 ): PruningCandidateAssessment {
   const validationIssues = validatePruningCandidate(candidate);
-  if (options.strictValidation && validationIssues.some((issue) => issue.severity === "error")) {
+  if (
+    options.strictValidation &&
+    validationIssues.some((issue) => issue.severity === "error")
+  ) {
     throw new PruningValidationError(validationIssues);
   }
 
   const missingInputs = missingInputsFor(candidate);
   const identityMissing = validationIssues.some(
-    (issue) => issue.severity === "error" && PRUNING_CANDIDATE_SCHEMA.requiredIdentity.includes(issue.field as never),
+    (issue) =>
+      issue.severity === "error" &&
+      PRUNING_CANDIDATE_SCHEMA.requiredIdentity.includes(issue.field as never),
   );
-  const candidateId = normalizedId(candidate.candidateId, `unknown-candidate-${options.index + 1}`);
+  const candidateId = normalizedId(
+    candidate.candidateId,
+    `unknown-candidate-${options.index + 1}`,
+  );
   const candidateType = candidate.candidateType ?? "raw-signal";
   const sourceModule = normalizedId(candidate.sourceModule, "unknown-module");
   const governanceFlags = safeStrings(candidate.governanceFlags);
   const selfModelWarnings = safeStrings(candidate.selfModelWarnings);
   const score = scoreReader(candidate);
   const sampleAdequacy = sampleScore(candidate.sampleSize);
-  const staleDataRisk = score("staleDataRisk", missingInputs.includes("staleDataRisk") ? 35 : 0);
+  const staleDataRisk = score(
+    "staleDataRisk",
+    missingInputs.includes("staleDataRisk") ? 35 : 0,
+  );
   const freshness = clamp(100 - staleDataRisk);
   const evidenceConfidence = roundScore(
     weightedMean([
-      weighted("evidenceQuality", score("evidenceQuality", 35), PRUNING_SCORING_WEIGHTS.evidenceConfidence.evidenceQuality),
-      weighted("sampleAdequacy", sampleAdequacy, PRUNING_SCORING_WEIGHTS.evidenceConfidence.sampleAdequacy),
-      weighted("regimeStability", score("regimeStability", 50), PRUNING_SCORING_WEIGHTS.evidenceConfidence.regimeStability),
-      weighted("freshness", freshness, PRUNING_SCORING_WEIGHTS.evidenceConfidence.freshness),
-    ]) - missingInputs.length * 1.2,
+      weighted(
+        "evidenceQuality",
+        score("evidenceQuality", 35),
+        PRUNING_SCORING_WEIGHTS.evidenceConfidence.evidenceQuality,
+      ),
+      weighted(
+        "sampleAdequacy",
+        sampleAdequacy,
+        PRUNING_SCORING_WEIGHTS.evidenceConfidence.sampleAdequacy,
+      ),
+      weighted(
+        "regimeStability",
+        score("regimeStability", 50),
+        PRUNING_SCORING_WEIGHTS.evidenceConfidence.regimeStability,
+      ),
+      weighted(
+        "freshness",
+        freshness,
+        PRUNING_SCORING_WEIGHTS.evidenceConfidence.freshness,
+      ),
+    ]) -
+      missingInputs.length * 1.2,
   );
-  const survivalCritical = governanceFlags.includes("survival-critical") || governanceFlags.includes("do-not-ignore");
+  const survivalCritical =
+    governanceFlags.includes("survival-critical") ||
+    governanceFlags.includes("do-not-ignore");
   const survivalContribution = roundScore(
-    Math.max(score("survivalValue", survivalCritical ? 88 : 35), survivalCritical ? 88 : 0),
+    Math.max(
+      score("survivalValue", survivalCritical ? 88 : 35),
+      survivalCritical ? 88 : 0,
+    ),
   );
   const utilityContribution = roundScore(
     weightedMean([
-      weighted("historicalUtility", score("historicalUtility", 35), PRUNING_SCORING_WEIGHTS.utility.historicalUtility),
-      weighted("predictiveContribution", score("predictiveContribution", 35), PRUNING_SCORING_WEIGHTS.utility.predictiveContribution),
-      weighted("decisionContribution", score("decisionContribution", 35), PRUNING_SCORING_WEIGHTS.utility.decisionContribution),
-      weighted("recentOutcomeImpact", signedImpact(candidate.recentOutcomeImpact, 50), PRUNING_SCORING_WEIGHTS.utility.recentOutcomeImpact),
-      weighted("counterfactualImpact", signedImpact(candidate.counterfactualImpact, 50), PRUNING_SCORING_WEIGHTS.utility.counterfactualImpact),
-      weighted("confidenceImpact", signedImpact(candidate.confidenceImpact, 50), PRUNING_SCORING_WEIGHTS.utility.confidenceImpact),
-      weighted("trustImpact", signedImpact(candidate.trustImpact, 50), PRUNING_SCORING_WEIGHTS.utility.trustImpact),
+      weighted(
+        "historicalUtility",
+        score("historicalUtility", 35),
+        PRUNING_SCORING_WEIGHTS.utility.historicalUtility,
+      ),
+      weighted(
+        "predictiveContribution",
+        score("predictiveContribution", 35),
+        PRUNING_SCORING_WEIGHTS.utility.predictiveContribution,
+      ),
+      weighted(
+        "decisionContribution",
+        score("decisionContribution", 35),
+        PRUNING_SCORING_WEIGHTS.utility.decisionContribution,
+      ),
+      weighted(
+        "recentOutcomeImpact",
+        signedImpact(candidate.recentOutcomeImpact, 50),
+        PRUNING_SCORING_WEIGHTS.utility.recentOutcomeImpact,
+      ),
+      weighted(
+        "counterfactualImpact",
+        signedImpact(candidate.counterfactualImpact, 50),
+        PRUNING_SCORING_WEIGHTS.utility.counterfactualImpact,
+      ),
+      weighted(
+        "confidenceImpact",
+        signedImpact(candidate.confidenceImpact, 50),
+        PRUNING_SCORING_WEIGHTS.utility.confidenceImpact,
+      ),
+      weighted(
+        "trustImpact",
+        signedImpact(candidate.trustImpact, 50),
+        PRUNING_SCORING_WEIGHTS.utility.trustImpact,
+      ),
     ]),
   );
-  const redundancyPenalty = roundScore(score("redundancyScore", 0) * evidenceScale(evidenceConfidence, 0.7));
+  const redundancyPenalty = roundScore(
+    score("redundancyScore", 0) * evidenceScale(evidenceConfidence, 0.7),
+  );
   const complexityPenalty = roundScore(
     mean([
       score("complexityCost", 0),
@@ -423,24 +529,62 @@ function evaluateCandidate(
       score("latencyCost", 0),
     ]),
   );
-  const overfitPenalty = roundScore(score("overfitRisk", 0) * evidenceScale(evidenceConfidence, 0.78));
-  const noisePenalty = roundScore(score("noiseScore", 0) * evidenceScale(evidenceConfidence, 0.82));
+  const overfitPenalty = roundScore(
+    score("overfitRisk", 0) * evidenceScale(evidenceConfidence, 0.78),
+  );
+  const noisePenalty = roundScore(
+    score("noiseScore", 0) * evidenceScale(evidenceConfidence, 0.82),
+  );
   const clarityPenalty = roundScore(score("userClarityCost", 0));
-  const contradictionPenalty = roundScore(score("contradictionRate", 0) * evidenceScale(evidenceConfidence, 0.8));
-  const falseOutcomePenalty = roundScore(mean([score("falsePositiveRate", 0), score("falseNegativeRate", 0)]));
+  const contradictionPenalty = roundScore(
+    score("contradictionRate", 0) * evidenceScale(evidenceConfidence, 0.8),
+  );
+  const falseOutcomePenalty = roundScore(
+    mean([score("falsePositiveRate", 0), score("falseNegativeRate", 0)]),
+  );
   const volatilityPenalty = roundScore(score("volatilitySensitivity", 0));
-  const uncertaintyPenalty = roundScore(score("uncertainty", Math.max(0, 100 - evidenceConfidence)));
+  const uncertaintyPenalty = roundScore(
+    score("uncertainty", Math.max(0, 100 - evidenceConfidence)),
+  );
   const weakEvidence = clamp(100 - evidenceConfidence);
   const harmPressure = roundScore(
     weightedMean([
       weighted("noise", noisePenalty, PRUNING_SCORING_WEIGHTS.pressure.noise),
-      weighted("overfit", overfitPenalty, PRUNING_SCORING_WEIGHTS.pressure.overfit),
-      weighted("redundancy", redundancyPenalty, PRUNING_SCORING_WEIGHTS.pressure.redundancy),
-      weighted("complexity", complexityPenalty, PRUNING_SCORING_WEIGHTS.pressure.complexity),
-      weighted("contradiction", contradictionPenalty, PRUNING_SCORING_WEIGHTS.pressure.contradiction),
-      weighted("volatility", volatilityPenalty, PRUNING_SCORING_WEIGHTS.pressure.volatility),
-      weighted("staleData", staleDataRisk, PRUNING_SCORING_WEIGHTS.pressure.staleData),
-      weighted("falseOutcomes", falseOutcomePenalty, PRUNING_SCORING_WEIGHTS.pressure.falseOutcomes),
+      weighted(
+        "overfit",
+        overfitPenalty,
+        PRUNING_SCORING_WEIGHTS.pressure.overfit,
+      ),
+      weighted(
+        "redundancy",
+        redundancyPenalty,
+        PRUNING_SCORING_WEIGHTS.pressure.redundancy,
+      ),
+      weighted(
+        "complexity",
+        complexityPenalty,
+        PRUNING_SCORING_WEIGHTS.pressure.complexity,
+      ),
+      weighted(
+        "contradiction",
+        contradictionPenalty,
+        PRUNING_SCORING_WEIGHTS.pressure.contradiction,
+      ),
+      weighted(
+        "volatility",
+        volatilityPenalty,
+        PRUNING_SCORING_WEIGHTS.pressure.volatility,
+      ),
+      weighted(
+        "staleData",
+        staleDataRisk,
+        PRUNING_SCORING_WEIGHTS.pressure.staleData,
+      ),
+      weighted(
+        "falseOutcomes",
+        falseOutcomePenalty,
+        PRUNING_SCORING_WEIGHTS.pressure.falseOutcomes,
+      ),
     ]),
   );
   const lowUtility = clamp(100 - utilityContribution);
@@ -457,10 +601,12 @@ function evaluateCandidate(
       utilityContribution * PRUNING_SCORING_WEIGHTS.decision.reduceUtility +
       noisePenalty * PRUNING_SCORING_WEIGHTS.decision.reduceNoise +
       complexityPenalty * PRUNING_SCORING_WEIGHTS.decision.reduceCost +
-      Math.max(survivalContribution, evidenceConfidence) * PRUNING_SCORING_WEIGHTS.decision.reduceSafety -
+      Math.max(survivalContribution, evidenceConfidence) *
+        PRUNING_SCORING_WEIGHTS.decision.reduceSafety -
       weakEvidence * 0.08,
   );
-  const ignoreEvidenceBonus = evidenceConfidence >= 50 ? evidenceConfidence : evidenceConfidence * 0.45;
+  const ignoreEvidenceBonus =
+    evidenceConfidence >= 50 ? evidenceConfidence : evidenceConfidence * 0.45;
   const rawIgnoreScore =
     harmPressure * PRUNING_SCORING_WEIGHTS.decision.ignoreHarm +
     lowUtility * PRUNING_SCORING_WEIGHTS.decision.ignoreLowUtility +
@@ -468,10 +614,13 @@ function evaluateCandidate(
     ignoreEvidenceBonus * PRUNING_SCORING_WEIGHTS.decision.ignoreEvidence -
     survivalContribution * 0.36 -
     utilityContribution * 0.18;
-  const ignoreScore = roundScore(evidenceConfidence < 35 ? Math.min(55, rawIgnoreScore) : rawIgnoreScore);
+  const ignoreScore = roundScore(
+    evidenceConfidence < 35 ? Math.min(55, rawIgnoreScore) : rawIgnoreScore,
+  );
   const quarantineScore = roundScore(
     overfitPenalty * PRUNING_SCORING_WEIGHTS.decision.quarantineOverfit +
-      contradictionPenalty * PRUNING_SCORING_WEIGHTS.decision.quarantineContradiction +
+      contradictionPenalty *
+        PRUNING_SCORING_WEIGHTS.decision.quarantineContradiction +
       staleDataRisk * PRUNING_SCORING_WEIGHTS.decision.quarantineStale +
       noisePenalty * PRUNING_SCORING_WEIGHTS.decision.quarantineNoise +
       weakEvidence * PRUNING_SCORING_WEIGHTS.decision.quarantineWeakEvidence -
@@ -520,7 +669,10 @@ function evaluateCandidate(
     }),
   );
   const markedRedundant = redundancyPenalty >= 65;
-  const backupEvidence = markedRedundant && utilityContribution >= 45 && recommendedAction === "reduce";
+  const backupEvidence =
+    markedRedundant &&
+    utilityContribution >= 45 &&
+    recommendedAction === "reduce";
   const frontendHidden =
     recommendedAction === "ignore" ||
     recommendedAction === "quarantine" ||
@@ -634,7 +786,9 @@ function evaluateCandidate(
       predictiveContribution: score("predictiveContribution", 35),
       decisionContribution: score("decisionContribution", 35),
       evidenceQuality: score("evidenceQuality", 35),
-      sampleSize: Number.isFinite(Number(candidate.sampleSize)) ? Number(candidate.sampleSize) : null,
+      sampleSize: Number.isFinite(Number(candidate.sampleSize))
+        ? Number(candidate.sampleSize)
+        : null,
       regimeStability: score("regimeStability", 50),
       staleDataRisk,
       contradictionRate: score("contradictionRate", 0),
@@ -672,7 +826,8 @@ function resolveRecommendedAction(input: {
   if (input.identityMissing) return "review";
   if (input.governanceFlags.includes("requires-review")) return "review";
   if (input.evidenceConfidence < 28) {
-    if (input.survivalContribution >= 70 || input.utilityContribution >= 55) return "isolate";
+    if (input.survivalContribution >= 70 || input.utilityContribution >= 55)
+      return "isolate";
     return "review";
   }
   if (input.survivalContribution >= 80) {
@@ -681,25 +836,42 @@ function resolveRecommendedAction(input: {
       input.overfitPenalty >= 92 &&
       (input.contradictionPenalty >= 85 || input.noisePenalty >= 90);
     if (extremeUnsafe) return "quarantine";
-    if (input.redundancyPenalty >= 75 || input.clarityPenalty >= 80) return "reduce";
+    if (input.redundancyPenalty >= 75 || input.clarityPenalty >= 80)
+      return "reduce";
     return "keep";
   }
-  if (input.utilityContribution >= 55 && input.redundancyPenalty >= 65 && input.evidenceConfidence >= 40) {
+  if (
+    input.utilityContribution >= 55 &&
+    input.redundancyPenalty >= 65 &&
+    input.evidenceConfidence >= 40
+  ) {
     return "reduce";
   }
-  if (input.overfitPenalty >= 75 && input.evidenceConfidence >= 45) return "quarantine";
+  if (input.overfitPenalty >= 75 && input.evidenceConfidence >= 45)
+    return "quarantine";
   if (input.contradictionPenalty >= 72 && input.evidenceConfidence >= 45) {
     return input.quarantineScore >= input.reduceScore ? "quarantine" : "reduce";
   }
-  if (input.noisePenalty >= 75 && input.utilityContribution <= 38 && input.evidenceConfidence >= 45) {
+  if (
+    input.noisePenalty >= 75 &&
+    input.utilityContribution <= 38 &&
+    input.evidenceConfidence >= 45
+  ) {
     return input.ignoreScore >= input.quarantineScore ? "ignore" : "quarantine";
   }
-  if (input.complexityPenalty >= 75 && input.utilityContribution <= 42 && input.evidenceConfidence >= 45) {
+  if (
+    input.complexityPenalty >= 75 &&
+    input.utilityContribution <= 42 &&
+    input.evidenceConfidence >= 45
+  ) {
     return input.ignoreScore >= input.reduceScore ? "ignore" : "reduce";
   }
-  if (input.clarityPenalty >= 75 && input.utilityContribution >= 45) return "isolate";
-  if (input.staleDataRisk >= 70) return input.utilityContribution >= 45 ? "reduce" : "review";
-  if (input.evidenceConfidence < 45) return input.utilityContribution >= 45 ? "isolate" : "review";
+  if (input.clarityPenalty >= 75 && input.utilityContribution >= 45)
+    return "isolate";
+  if (input.staleDataRisk >= 70)
+    return input.utilityContribution >= 45 ? "reduce" : "review";
+  if (input.evidenceConfidence < 45)
+    return input.utilityContribution >= 45 ? "isolate" : "review";
 
   const ranked = [
     ["keep", input.keepScore],
@@ -707,7 +879,10 @@ function resolveRecommendedAction(input: {
     ["quarantine", input.quarantineScore],
     ["ignore", input.ignoreScore],
   ] as const;
-  const [action] = [...ranked].sort((left, right) => right[1] - left[1])[0] ?? ["review", 0];
+  const [action] = [...ranked].sort((left, right) => right[1] - left[1])[0] ?? [
+    "review",
+    0,
+  ];
   return action;
 }
 
@@ -727,29 +902,45 @@ function ignoranceEffectivenessFor(input: {
 }) {
   let score = input.evidenceConfidence * 0.28;
   if (input.recommendedAction === "ignore") {
-    score += input.harmPressure * 0.52 + input.lowUtility * 0.32 + input.complexityPenalty * 0.18;
-    score -= input.utilityContribution * 0.16 + input.survivalContribution * 0.3;
+    score +=
+      input.harmPressure * 0.52 +
+      input.lowUtility * 0.32 +
+      input.complexityPenalty * 0.18;
+    score -=
+      input.utilityContribution * 0.16 + input.survivalContribution * 0.3;
   } else if (input.recommendedAction === "reduce") {
-    score += input.redundancyPenalty * 0.28 + input.complexityPenalty * 0.18 + input.harmPressure * 0.16;
-    score += input.utilityContribution * 0.12 + input.survivalContribution * 0.12;
+    score +=
+      input.redundancyPenalty * 0.28 +
+      input.complexityPenalty * 0.18 +
+      input.harmPressure * 0.16;
+    score +=
+      input.utilityContribution * 0.12 + input.survivalContribution * 0.12;
   } else if (input.recommendedAction === "quarantine") {
     score += input.overfitPenalty * 0.34 + input.harmPressure * 0.2;
     score -= input.survivalContribution * 0.18;
   } else if (input.recommendedAction === "isolate") {
-    score += input.clarityPenalty * 0.22 + input.weakEvidence * 0.18 + input.utilityContribution * 0.1;
+    score +=
+      input.clarityPenalty * 0.22 +
+      input.weakEvidence * 0.18 +
+      input.utilityContribution * 0.1;
   } else if (input.recommendedAction === "review") {
     score += input.weakEvidence * 0.22;
     score -= Math.max(0, input.harmPressure - input.evidenceConfidence) * 0.12;
   } else {
-    score += input.utilityContribution * 0.22 + input.survivalContribution * 0.28;
+    score +=
+      input.utilityContribution * 0.22 + input.survivalContribution * 0.28;
     score -= input.harmPressure * 0.18;
   }
   if (!input.traceable) score -= 18;
-  if (input.evidenceConfidence < 35 && input.recommendedAction === "ignore") score -= 24;
+  if (input.evidenceConfidence < 35 && input.recommendedAction === "ignore")
+    score -= 24;
   return score;
 }
 
-function aggregateAssessments(assessments: PruningCandidateAssessment[], timestamp: string): PruningCandidateAssessment {
+function aggregateAssessments(
+  assessments: PruningCandidateAssessment[],
+  timestamp: string,
+): PruningCandidateAssessment {
   if (assessments.length === 0) {
     return evaluateCandidate(
       {
@@ -764,35 +955,71 @@ function aggregateAssessments(assessments: PruningCandidateAssessment[], timesta
   const priority = [...assessments].sort(actionSeveritySort);
   const representative = priority[0] ?? assessments[0];
   const warnings = unique(assessments.flatMap((item) => item.warnings));
-  const missingInputs = unique(assessments.flatMap((item) => item.missingInputs));
+  const missingInputs = unique(
+    assessments.flatMap((item) => item.missingInputs),
+  );
   const contributingFactors = assessments
-    .flatMap((item) => item.contributingFactors.map((factor) => ({ ...factor, id: `${item.candidateId}:${factor.id}` })))
+    .flatMap((item) =>
+      item.contributingFactors.map((factor) => ({
+        ...factor,
+        id: `${item.candidateId}:${factor.id}`,
+      })),
+    )
     .sort((left, right) => right.score - left.score)
     .slice(0, 10);
   const opposingFactors = assessments
-    .flatMap((item) => item.opposingFactors.map((factor) => ({ ...factor, id: `${item.candidateId}:${factor.id}` })))
+    .flatMap((item) =>
+      item.opposingFactors.map((factor) => ({
+        ...factor,
+        id: `${item.candidateId}:${factor.id}`,
+      })),
+    )
     .sort((left, right) => right.score - left.score)
     .slice(0, 10);
   const recommendedAction = aggregateAction(assessments);
-  const actionCount = assessments.filter((item) => item.recommendedAction === recommendedAction).length;
+  const actionCount = assessments.filter(
+    (item) => item.recommendedAction === recommendedAction,
+  ).length;
   return {
     candidateId: "pruning:aggregate",
     candidateType: "module-output",
     sourceModule: "pruning",
-    pruningScore: roundScore(mean(assessments.map((item) => item.pruningScore))),
-    ignoranceEffectivenessScore: roundScore(mean(assessments.map((item) => item.ignoranceEffectivenessScore))),
+    pruningScore: roundScore(
+      mean(assessments.map((item) => item.pruningScore)),
+    ),
+    ignoranceEffectivenessScore: roundScore(
+      mean(assessments.map((item) => item.ignoranceEffectivenessScore)),
+    ),
     keepScore: roundScore(mean(assessments.map((item) => item.keepScore))),
     ignoreScore: roundScore(mean(assessments.map((item) => item.ignoreScore))),
     reduceScore: roundScore(mean(assessments.map((item) => item.reduceScore))),
-    quarantineScore: roundScore(mean(assessments.map((item) => item.quarantineScore))),
-    redundancyPenalty: roundScore(mean(assessments.map((item) => item.redundancyPenalty))),
-    complexityPenalty: roundScore(mean(assessments.map((item) => item.complexityPenalty))),
-    overfitPenalty: roundScore(mean(assessments.map((item) => item.overfitPenalty))),
-    noisePenalty: roundScore(mean(assessments.map((item) => item.noisePenalty))),
-    clarityPenalty: roundScore(mean(assessments.map((item) => item.clarityPenalty))),
-    survivalContribution: roundScore(Math.max(...assessments.map((item) => item.survivalContribution))),
-    utilityContribution: roundScore(mean(assessments.map((item) => item.utilityContribution))),
-    evidenceConfidence: roundScore(mean(assessments.map((item) => item.evidenceConfidence))),
+    quarantineScore: roundScore(
+      mean(assessments.map((item) => item.quarantineScore)),
+    ),
+    redundancyPenalty: roundScore(
+      mean(assessments.map((item) => item.redundancyPenalty)),
+    ),
+    complexityPenalty: roundScore(
+      mean(assessments.map((item) => item.complexityPenalty)),
+    ),
+    overfitPenalty: roundScore(
+      mean(assessments.map((item) => item.overfitPenalty)),
+    ),
+    noisePenalty: roundScore(
+      mean(assessments.map((item) => item.noisePenalty)),
+    ),
+    clarityPenalty: roundScore(
+      mean(assessments.map((item) => item.clarityPenalty)),
+    ),
+    survivalContribution: roundScore(
+      Math.max(...assessments.map((item) => item.survivalContribution)),
+    ),
+    utilityContribution: roundScore(
+      mean(assessments.map((item) => item.utilityContribution)),
+    ),
+    evidenceConfidence: roundScore(
+      mean(assessments.map((item) => item.evidenceConfidence)),
+    ),
     recommendedAction,
     reason: `${actionCount} of ${assessments.length} candidate(s) require ${recommendedAction}; highest-risk candidate is ${representative.candidateId}.`,
     explanation: `Pruning reviewed ${assessments.length} candidate(s). Recommended module action is ${recommendedAction}.`,
@@ -817,10 +1044,15 @@ function aggregateAssessments(assessments: PruningCandidateAssessment[], timesta
   };
 }
 
-function aggregateAction(assessments: PruningCandidateAssessment[]): PruningRecommendedAction {
+function aggregateAction(
+  assessments: PruningCandidateAssessment[],
+): PruningRecommendedAction {
   const counts = new Map<PruningRecommendedAction, number>();
   for (const assessment of assessments) {
-    counts.set(assessment.recommendedAction, (counts.get(assessment.recommendedAction) ?? 0) + 1);
+    counts.set(
+      assessment.recommendedAction,
+      (counts.get(assessment.recommendedAction) ?? 0) + 1,
+    );
   }
   const sorted = Array.from(counts.entries()).sort((left, right) => {
     const severityDelta = actionSeverity(right[0]) - actionSeverity(left[0]);
@@ -830,8 +1062,15 @@ function aggregateAction(assessments: PruningCandidateAssessment[]): PruningReco
   return sorted[0]?.[0] ?? "review";
 }
 
-function actionSeveritySort(left: PruningCandidateAssessment, right: PruningCandidateAssessment) {
-  return actionSeverity(right.recommendedAction) - actionSeverity(left.recommendedAction) || right.pruningScore - left.pruningScore;
+function actionSeveritySort(
+  left: PruningCandidateAssessment,
+  right: PruningCandidateAssessment,
+) {
+  return (
+    actionSeverity(right.recommendedAction) -
+      actionSeverity(left.recommendedAction) ||
+    right.pruningScore - left.pruningScore
+  );
 }
 
 function actionSeverity(action: PruningRecommendedAction) {
@@ -847,9 +1086,16 @@ function normalizeCandidates(input: PruningInput): PruningCandidateInput[] {
   if (Array.isArray(input.candidates) && input.candidates.length > 0) {
     return input.candidates;
   }
-  const hasCandidateFields = PRUNING_CANDIDATE_SCHEMA.requiredIdentity.some((field) => input[field] != null) ||
-    PRUNING_CANDIDATE_SCHEMA.scoreFields.some((field) => input[field] != null) ||
-    PRUNING_CANDIDATE_SCHEMA.signedImpactFields.some((field) => input[field] != null);
+  const hasCandidateFields =
+    PRUNING_CANDIDATE_SCHEMA.requiredIdentity.some(
+      (field) => input[field] != null,
+    ) ||
+    PRUNING_CANDIDATE_SCHEMA.scoreFields.some(
+      (field) => input[field] != null,
+    ) ||
+    PRUNING_CANDIDATE_SCHEMA.signedImpactFields.some(
+      (field) => input[field] != null,
+    );
   if (hasCandidateFields) return [input];
   return [
     {
@@ -868,10 +1114,28 @@ function meaningPruningCandidates(
   timestamp: string,
 ): PruningCandidateInput[] {
   if (!meaning || typeof meaning !== "object") return [];
-  const gravityScore = clamp(numeric(meaning.gravityScore, meaning.purposeInputs?.gravityScore ?? 0), -10, 10);
-  const needConfidence = clamp(numeric(meaning.needConfidence, meaning.purposeInputs?.needConfidence ?? 0.5), 0, 1);
-  const unsafe = Boolean(meaning.purposeInputs?.literalDesireUnsafe ?? gravityScore <= -5);
-  const safetyPriority = clamp(numeric(meaning.purposeInputs?.safetyPriority, 55 + Math.max(0, -gravityScore) * 5));
+  const gravityScore = clamp(
+    numeric(meaning.gravityScore, meaning.purposeInputs?.gravityScore ?? 0),
+    -10,
+    10,
+  );
+  const needConfidence = clamp(
+    numeric(
+      meaning.needConfidence,
+      meaning.purposeInputs?.needConfidence ?? 0.5,
+    ),
+    0,
+    1,
+  );
+  const unsafe = Boolean(
+    meaning.purposeInputs?.literalDesireUnsafe ?? gravityScore <= -5,
+  );
+  const safetyPriority = clamp(
+    numeric(
+      meaning.purposeInputs?.safetyPriority,
+      55 + Math.max(0, -gravityScore) * 5,
+    ),
+  );
   const pressure = clamp(Math.max(0, -gravityScore) * 10);
   const candidates: PruningCandidateInput[] = [];
 
@@ -909,7 +1173,11 @@ function meaningPruningCandidates(
       governanceFlags: unsafe ? ["requires-review"] : [],
       selfModelWarnings: [
         ...safeStrings(meaning.riskWarnings),
-        ...(needConfidence < 0.45 ? ["Meaning confidence is low; do not let literal desire dominate pruning."] : []),
+        ...(needConfidence < 0.45
+          ? [
+              "Meaning confidence is low; do not let literal desire dominate pruning.",
+            ]
+          : []),
       ],
       timestamp,
       metadata: {
@@ -919,7 +1187,10 @@ function meaningPruningCandidates(
     });
   }
 
-  if (safeStrings(meaning.safetyConstraints).length > 0 || safetyPriority >= 75) {
+  if (
+    safeStrings(meaning.safetyConstraints).length > 0 ||
+    safetyPriority >= 75
+  ) {
     candidates.push({
       candidateId: "meaning:safety-constraints",
       candidateType: "policy",
@@ -963,20 +1234,23 @@ function meaningPruningCandidates(
 }
 
 function scoreReader(candidate: PruningCandidateInput) {
-  return (field: ScoreField, fallback: number) => toScore(candidate[field], fallback);
+  return (field: ScoreField, fallback: number) =>
+    toScore(candidate[field], fallback);
 }
 
 function toScore(value: unknown, fallback: number) {
   if (value == null) return clamp(fallback);
   const numberValue = numeric(value, fallback);
-  if (numberValue >= 0 && numberValue <= 1) return roundScore(numberValue * 100);
+  if (numberValue >= 0 && numberValue <= 1)
+    return roundScore(numberValue * 100);
   return roundScore(numberValue);
 }
 
 function signedImpact(value: unknown, fallback: number) {
   if (value == null) return clamp(fallback);
   const numberValue = numeric(value, 0);
-  if (numberValue >= -1 && numberValue <= 1) return roundScore(50 + numberValue * 50);
+  if (numberValue >= -1 && numberValue <= 1)
+    return roundScore(50 + numberValue * 50);
   return roundScore(50 + clamp(numberValue, -100, 100) / 2);
 }
 
@@ -993,10 +1267,15 @@ function weighted(id: string, score: number, weight: number) {
   return { id, score, weight };
 }
 
-function weightedMean(values: Array<{ id: string; score: number; weight: number }>) {
+function weightedMean(
+  values: Array<{ id: string; score: number; weight: number }>,
+) {
   const totalWeight = values.reduce((sum, item) => sum + item.weight, 0);
   if (totalWeight <= 0) return 0;
-  return values.reduce((sum, item) => sum + item.score * item.weight, 0) / totalWeight;
+  return (
+    values.reduce((sum, item) => sum + item.score * item.weight, 0) /
+    totalWeight
+  );
 }
 
 function evidenceScale(evidenceConfidence: number, floor: number) {
@@ -1005,9 +1284,15 @@ function evidenceScale(evidenceConfidence: number, floor: number) {
 
 function missingInputsFor(candidate: PruningCandidateInput) {
   return [
-    ...PRUNING_CANDIDATE_SCHEMA.requiredIdentity.filter((field) => !isPresent(candidate[field])),
-    ...PRUNING_CANDIDATE_SCHEMA.scoreFields.filter((field) => candidate[field] == null),
-    ...PRUNING_CANDIDATE_SCHEMA.signedImpactFields.filter((field) => candidate[field] == null),
+    ...PRUNING_CANDIDATE_SCHEMA.requiredIdentity.filter(
+      (field) => !isPresent(candidate[field]),
+    ),
+    ...PRUNING_CANDIDATE_SCHEMA.scoreFields.filter(
+      (field) => candidate[field] == null,
+    ),
+    ...PRUNING_CANDIDATE_SCHEMA.signedImpactFields.filter(
+      (field) => candidate[field] == null,
+    ),
   ];
 }
 
@@ -1026,7 +1311,9 @@ function normalizedId(value: unknown, fallback: string) {
 
 function safeStrings(values: unknown): string[] {
   if (!Array.isArray(values)) return [];
-  return values.map((value) => String(value)).filter((value) => value.length > 0);
+  return values
+    .map((value) => String(value))
+    .filter((value) => value.length > 0);
 }
 
 function roundScore(value: number) {
@@ -1037,14 +1324,22 @@ function roundSigned(value: number) {
   return Math.round(clamp(value, -100, 100) * 100) / 100;
 }
 
-function toIsoTimestamp(value?: string | number | Date, fallback = "1970-01-01T00:00:00.000Z") {
+function toIsoTimestamp(
+  value?: string | number | Date,
+  fallback = "1970-01-01T00:00:00.000Z",
+) {
   if (value == null) return fallback;
   const date = value instanceof Date ? value : new Date(value);
   return Number.isFinite(date.getTime()) ? date.toISOString() : fallback;
 }
 
-function idsFor(assessments: PruningCandidateAssessment[], action: PruningRecommendedAction) {
-  return assessments.filter((item) => item.recommendedAction === action).map((item) => item.candidateId);
+function idsFor(
+  assessments: PruningCandidateAssessment[],
+  action: PruningRecommendedAction,
+) {
+  return assessments
+    .filter((item) => item.recommendedAction === action)
+    .map((item) => item.candidateId);
 }
 
 function unique(values: string[]) {
@@ -1064,15 +1359,30 @@ function warningMessages(input: {
   selfModelWarnings: string[];
 }) {
   const warnings = [...input.selfModelWarnings];
-  if (input.missingInputs.length > 0) warnings.push("Pruning ran in degraded mode because some inputs were missing.");
-  if (input.validationIssues.length > 0) warnings.push("Pruning sanitized invalid inputs before scoring.");
-  if (input.evidenceConfidence < 40) warnings.push("Evidence is weak; pruning must not increase confidence.");
-  if (input.overfitPenalty >= 70) warnings.push("High overfit risk requires cross-regime validation before restoration.");
-  if (input.noisePenalty >= 70) warnings.push("High noise is reducing decision trust.");
+  if (input.missingInputs.length > 0)
+    warnings.push(
+      "Pruning ran in degraded mode because some inputs were missing.",
+    );
+  if (input.validationIssues.length > 0)
+    warnings.push("Pruning sanitized invalid inputs before scoring.");
+  if (input.evidenceConfidence < 40)
+    warnings.push("Evidence is weak; pruning must not increase confidence.");
+  if (input.overfitPenalty >= 70)
+    warnings.push(
+      "High overfit risk requires cross-regime validation before restoration.",
+    );
+  if (input.noisePenalty >= 70)
+    warnings.push("High noise is reducing decision trust.");
   if (input.staleDataRisk >= 60) warnings.push("Stale data risk is high.");
-  if (input.contradictionPenalty >= 60) warnings.push("Candidate contradicts better-validated evidence.");
-  if (input.survivalContribution >= 80 && ["ignore", "quarantine"].includes(input.recommendedAction)) {
-    warnings.push("Survival-critical information is protected from irreversible pruning.");
+  if (input.contradictionPenalty >= 60)
+    warnings.push("Candidate contradicts better-validated evidence.");
+  if (
+    input.survivalContribution >= 80 &&
+    ["ignore", "quarantine"].includes(input.recommendedAction)
+  ) {
+    warnings.push(
+      "Survival-critical information is protected from irreversible pruning.",
+    );
   }
   return unique(warnings);
 }
@@ -1091,23 +1401,29 @@ function reasonFor(input: {
   staleDataRisk: number;
 }) {
   if (input.recommendedAction === "keep") {
-    if (input.survivalContribution >= 80) return "Kept because it protects survival.";
+    if (input.survivalContribution >= 80)
+      return "Kept because it protects survival.";
     return "Kept because useful evidence outweighs pruning pressure.";
   }
   if (input.recommendedAction === "reduce") {
-    if (input.redundancyPenalty >= 65) return "Reduced because it is too similar to stronger evidence while still useful as backup.";
+    if (input.redundancyPenalty >= 65)
+      return "Reduced because it is too similar to stronger evidence while still useful as backup.";
     return "Reduced because cost or noise should lower its weight without deleting it.";
   }
-  if (input.recommendedAction === "ignore") return "Ignored because it is too noisy or weak to improve decisions.";
+  if (input.recommendedAction === "ignore")
+    return "Ignored because it is too noisy or weak to improve decisions.";
   if (input.recommendedAction === "quarantine") {
-    if (input.overfitPenalty >= input.contradictionPenalty) return "Quarantined because it looks overfit and needs cross-regime validation.";
+    if (input.overfitPenalty >= input.contradictionPenalty)
+      return "Quarantined because it looks overfit and needs cross-regime validation.";
     return "Quarantined because it contradicts better-validated evidence.";
   }
   if (input.recommendedAction === "isolate") {
-    if (input.clarityPenalty >= 70) return "Hidden from the main view because it adds confusion without enough decision value.";
+    if (input.clarityPenalty >= 70)
+      return "Hidden from the main view because it adds confusion without enough decision value.";
     return "Isolated because evidence is incomplete and should not dominate decisions.";
   }
-  if (input.staleDataRisk >= 60) return "Needs review because stale evidence makes the value uncertain.";
+  if (input.staleDataRisk >= 60)
+    return "Needs review because stale evidence makes the value uncertain.";
   return "Needs review because Signal does not know enough to prune with confidence.";
 }
 
@@ -1130,26 +1446,128 @@ function buildTrace(scores: {
   quarantineScore: number;
 }) {
   return [
-    trace("utility", "Utility contribution", scores.utilityContribution, 0.2, "Decision value preserved by the candidate."),
-    trace("survival", "Survival contribution", scores.survivalContribution, 0.18, "Long-term protection supplied by the candidate."),
-    trace("evidence", "Evidence confidence", scores.evidenceConfidence, 0.18, "Quality, sample size, regime stability, and freshness."),
-    trace("redundancy", "Redundancy penalty", scores.redundancyPenalty, 0.1, "Duplicated value already supplied by stronger evidence."),
-    trace("complexity", "Complexity penalty", scores.complexityPenalty, 0.08, "Maintenance, latency, and complexity cost."),
-    trace("overfit", "Overfit penalty", scores.overfitPenalty, 0.1, "Narrow historical fit or regime fragility."),
-    trace("noise", "Noise penalty", scores.noisePenalty, 0.08, "Observed noise and false outcome pressure."),
-    trace("clarity", "Clarity penalty", scores.clarityPenalty, 0.05, "Frontend or explanation overload."),
-    trace("contradiction", "Contradiction penalty", scores.contradictionPenalty, 0.08, "Disagreement with better evidence."),
-    trace("staleness", "Stale data risk", scores.staleDataRisk, 0.05, "Age or degradation of the evidence."),
-    trace("false-outcomes", "False outcome penalty", scores.falseOutcomePenalty, 0.05, "False positive and false negative pressure."),
-    trace("pruning-score", "Pruning score", scores.pruningScore, 1, "Overall pressure to ignore, reduce, isolate, or quarantine."),
-    trace("keep-score", "Keep score", scores.keepScore, 1, "Pressure to preserve the candidate."),
-    trace("reduce-score", "Reduce score", scores.reduceScore, 1, "Pressure to lower weight while retaining backup evidence."),
-    trace("ignore-score", "Ignore score", scores.ignoreScore, 1, "Pressure to ignore."),
-    trace("quarantine-score", "Quarantine score", scores.quarantineScore, 1, "Pressure to quarantine pending validation."),
+    trace(
+      "utility",
+      "Utility contribution",
+      scores.utilityContribution,
+      0.2,
+      "Decision value preserved by the candidate.",
+    ),
+    trace(
+      "survival",
+      "Survival contribution",
+      scores.survivalContribution,
+      0.18,
+      "Long-term protection supplied by the candidate.",
+    ),
+    trace(
+      "evidence",
+      "Evidence confidence",
+      scores.evidenceConfidence,
+      0.18,
+      "Quality, sample size, regime stability, and freshness.",
+    ),
+    trace(
+      "redundancy",
+      "Redundancy penalty",
+      scores.redundancyPenalty,
+      0.1,
+      "Duplicated value already supplied by stronger evidence.",
+    ),
+    trace(
+      "complexity",
+      "Complexity penalty",
+      scores.complexityPenalty,
+      0.08,
+      "Maintenance, latency, and complexity cost.",
+    ),
+    trace(
+      "overfit",
+      "Overfit penalty",
+      scores.overfitPenalty,
+      0.1,
+      "Narrow historical fit or regime fragility.",
+    ),
+    trace(
+      "noise",
+      "Noise penalty",
+      scores.noisePenalty,
+      0.08,
+      "Observed noise and false outcome pressure.",
+    ),
+    trace(
+      "clarity",
+      "Clarity penalty",
+      scores.clarityPenalty,
+      0.05,
+      "Frontend or explanation overload.",
+    ),
+    trace(
+      "contradiction",
+      "Contradiction penalty",
+      scores.contradictionPenalty,
+      0.08,
+      "Disagreement with better evidence.",
+    ),
+    trace(
+      "staleness",
+      "Stale data risk",
+      scores.staleDataRisk,
+      0.05,
+      "Age or degradation of the evidence.",
+    ),
+    trace(
+      "false-outcomes",
+      "False outcome penalty",
+      scores.falseOutcomePenalty,
+      0.05,
+      "False positive and false negative pressure.",
+    ),
+    trace(
+      "pruning-score",
+      "Pruning score",
+      scores.pruningScore,
+      1,
+      "Overall pressure to ignore, reduce, isolate, or quarantine.",
+    ),
+    trace(
+      "keep-score",
+      "Keep score",
+      scores.keepScore,
+      1,
+      "Pressure to preserve the candidate.",
+    ),
+    trace(
+      "reduce-score",
+      "Reduce score",
+      scores.reduceScore,
+      1,
+      "Pressure to lower weight while retaining backup evidence.",
+    ),
+    trace(
+      "ignore-score",
+      "Ignore score",
+      scores.ignoreScore,
+      1,
+      "Pressure to ignore.",
+    ),
+    trace(
+      "quarantine-score",
+      "Quarantine score",
+      scores.quarantineScore,
+      1,
+      "Pressure to quarantine pending validation.",
+    ),
   ];
 }
 
-function trace(id: string, label: string, score: number, weight: number, reason: string): PruningTraceEntry {
+function trace(
+  id: string,
+  label: string,
+  score: number,
+  weight: number,
+  reason: string,
+): PruningTraceEntry {
   return {
     id,
     label,
@@ -1198,29 +1616,100 @@ function contributingFactorsFor(input: {
 }) {
   const factors: PruningContributingFactor[] = [];
   const add = (id: string, label: string, score: number, reason: string) => {
-    if (score >= 45) factors.push({ id, label, score: roundScore(score), reason });
+    if (score >= 45)
+      factors.push({ id, label, score: roundScore(score), reason });
   };
   if (input.recommendedAction === "keep") {
-    add("utility", "Useful", input.utilityContribution, "Useful evidence should be preserved.");
-    add("survival", "Survival protective", input.survivalContribution, "Survival-critical value resists pruning.");
-    add("evidence", "Well supported", input.evidenceConfidence, "Evidence quality supports preservation.");
+    add(
+      "utility",
+      "Useful",
+      input.utilityContribution,
+      "Useful evidence should be preserved.",
+    );
+    add(
+      "survival",
+      "Survival protective",
+      input.survivalContribution,
+      "Survival-critical value resists pruning.",
+    );
+    add(
+      "evidence",
+      "Well supported",
+      input.evidenceConfidence,
+      "Evidence quality supports preservation.",
+    );
   } else if (input.recommendedAction === "reduce") {
-    add("redundancy", "Too similar", input.redundancyPenalty, "Candidate is useful but overlaps stronger evidence.");
-    add("utility", "Backup value", input.utilityContribution, "Candidate still has enough value to keep as backup.");
-    add("complexity", "Complexity cost", input.complexityPenalty, "Lowering weight reduces cost.");
+    add(
+      "redundancy",
+      "Too similar",
+      input.redundancyPenalty,
+      "Candidate is useful but overlaps stronger evidence.",
+    );
+    add(
+      "utility",
+      "Backup value",
+      input.utilityContribution,
+      "Candidate still has enough value to keep as backup.",
+    );
+    add(
+      "complexity",
+      "Complexity cost",
+      input.complexityPenalty,
+      "Lowering weight reduces cost.",
+    );
   } else if (input.recommendedAction === "ignore") {
-    add("noise", "Too noisy", input.noisePenalty, "Noise overwhelms decision value.");
-    add("low-utility", "Too weak", input.weakEvidence, "Weak value cannot justify primary influence.");
-    add("complexity", "Complexity cost", input.complexityPenalty, "Complexity is not paying for itself.");
+    add(
+      "noise",
+      "Too noisy",
+      input.noisePenalty,
+      "Noise overwhelms decision value.",
+    );
+    add(
+      "low-utility",
+      "Too weak",
+      input.weakEvidence,
+      "Weak value cannot justify primary influence.",
+    );
+    add(
+      "complexity",
+      "Complexity cost",
+      input.complexityPenalty,
+      "Complexity is not paying for itself.",
+    );
   } else if (input.recommendedAction === "quarantine") {
-    add("overfit", "Overfit risk", input.overfitPenalty, "Candidate needs cross-regime validation.");
-    add("contradiction", "Contradictory", input.contradictionPenalty, "Candidate conflicts with better evidence.");
+    add(
+      "overfit",
+      "Overfit risk",
+      input.overfitPenalty,
+      "Candidate needs cross-regime validation.",
+    );
+    add(
+      "contradiction",
+      "Contradictory",
+      input.contradictionPenalty,
+      "Candidate conflicts with better evidence.",
+    );
     add("stale", "Stale", input.staleDataRisk, "Candidate may be stale.");
   } else if (input.recommendedAction === "isolate") {
-    add("clarity", "Hidden from main view", input.clarityPenalty, "Candidate adds frontend or explanation overload.");
-    add("weak-evidence", "Incomplete evidence", input.weakEvidence, "Candidate should not dominate decisions.");
+    add(
+      "clarity",
+      "Hidden from main view",
+      input.clarityPenalty,
+      "Candidate adds frontend or explanation overload.",
+    );
+    add(
+      "weak-evidence",
+      "Incomplete evidence",
+      input.weakEvidence,
+      "Candidate should not dominate decisions.",
+    );
   } else {
-    add("weak-evidence", "Needs evidence", input.weakEvidence, "Unknown value should be reviewed.");
+    add(
+      "weak-evidence",
+      "Needs evidence",
+      input.weakEvidence,
+      "Unknown value should be reviewed.",
+    );
   }
   return factors.sort((left, right) => right.score - left.score);
 }
@@ -1238,21 +1727,67 @@ function opposingFactorsFor(input: {
 }) {
   const factors: PruningContributingFactor[] = [];
   const add = (id: string, label: string, score: number, reason: string) => {
-    if (score >= 45) factors.push({ id, label, score: roundScore(score), reason });
+    if (score >= 45)
+      factors.push({ id, label, score: roundScore(score), reason });
   };
   if (["ignore", "quarantine"].includes(input.recommendedAction)) {
-    add("utility", "Useful evidence", input.utilityContribution, "Useful signals should not be removed casually.");
-    add("survival", "Survival value", input.survivalContribution, "Survival-critical evidence resists pruning.");
-    add("weak-evidence", "Weak evidence", input.weakEvidence, "Weak evidence cannot justify confident pruning.");
+    add(
+      "utility",
+      "Useful evidence",
+      input.utilityContribution,
+      "Useful signals should not be removed casually.",
+    );
+    add(
+      "survival",
+      "Survival value",
+      input.survivalContribution,
+      "Survival-critical evidence resists pruning.",
+    );
+    add(
+      "weak-evidence",
+      "Weak evidence",
+      input.weakEvidence,
+      "Weak evidence cannot justify confident pruning.",
+    );
   } else if (input.recommendedAction === "keep") {
-    add("noise", "Noise pressure", input.noisePenalty, "Kept signals can still be noisy.");
-    add("overfit", "Overfit pressure", input.overfitPenalty, "Kept signals may still need monitoring.");
-    add("redundancy", "Redundancy", input.redundancyPenalty, "Kept signals may duplicate stronger evidence.");
+    add(
+      "noise",
+      "Noise pressure",
+      input.noisePenalty,
+      "Kept signals can still be noisy.",
+    );
+    add(
+      "overfit",
+      "Overfit pressure",
+      input.overfitPenalty,
+      "Kept signals may still need monitoring.",
+    );
+    add(
+      "redundancy",
+      "Redundancy",
+      input.redundancyPenalty,
+      "Kept signals may duplicate stronger evidence.",
+    );
   } else if (input.recommendedAction === "reduce") {
-    add("survival", "Survival value", input.survivalContribution, "Reduction must not hide protective evidence.");
-    add("evidence", "Evidence support", input.evidenceConfidence, "Evidence may still justify stronger preservation.");
+    add(
+      "survival",
+      "Survival value",
+      input.survivalContribution,
+      "Reduction must not hide protective evidence.",
+    );
+    add(
+      "evidence",
+      "Evidence support",
+      input.evidenceConfidence,
+      "Evidence may still justify stronger preservation.",
+    );
   } else {
-    add("utility", "Possible value", input.utilityContribution, "There may be value that should be preserved.");
+    add(
+      "utility",
+      "Possible value",
+      input.utilityContribution,
+      "There may be value that should be preserved.",
+    );
   }
   return factors.sort((left, right) => right.score - left.score);
 }

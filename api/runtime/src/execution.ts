@@ -1,10 +1,10 @@
 import {
-  createProtocolError,
-  createSignalError,
   type SignalDelivery,
   type SignalEnvelope,
   type SignalErrorCode,
   type SignalResultMeta,
+  createProtocolError,
+  createSignalError,
 } from "@signal/protocol";
 import type { SignalExecutionContext, SignalRequestContext } from "./types";
 
@@ -40,12 +40,14 @@ function freezeValue<T>(value: T): T {
   return value;
 }
 
-export function freezeRequestContext<T extends SignalRequestContext>(request: T): Readonly<T> {
+export function freezeRequestContext<T extends SignalRequestContext>(
+  request: T,
+): Readonly<T> {
   return freezeValue(request) as Readonly<T>;
 }
 
 export function normalizeRequestContext(
-  request: Partial<SignalRequestContext> = {}
+  request: Partial<SignalRequestContext> = {},
 ): SignalRequestContext {
   return freezeRequestContext({
     correlationId: request.correlationId,
@@ -79,17 +81,23 @@ export function toEnvelopeContext(request: SignalRequestContext) {
   };
 }
 
-export function toEnvelopeDelivery(request: SignalRequestContext): SignalDelivery {
+export function toEnvelopeDelivery(
+  request: SignalRequestContext,
+): SignalDelivery {
   return request.delivery;
 }
 
 export function throwIfExecutionBlocked(request: SignalRequestContext): void {
   if (request.deadlineAt && Date.parse(request.deadlineAt) < Date.now()) {
-    throw createProtocolError("DEADLINE_EXCEEDED", "Execution deadline exceeded", {
-      details: {
-        deadlineAt: request.deadlineAt,
+    throw createProtocolError(
+      "DEADLINE_EXCEEDED",
+      "Execution deadline exceeded",
+      {
+        details: {
+          deadlineAt: request.deadlineAt,
+        },
       },
-    });
+    );
   }
 
   if (request.abortSignal?.aborted) {
@@ -123,7 +131,9 @@ export function createExecutionSuccessMeta(input: {
   return {
     outcome: input.outcome,
     durationMs:
-      input.startedAt === undefined ? undefined : Math.max(0, Date.now() - input.startedAt),
+      input.startedAt === undefined
+        ? undefined
+        : Math.max(0, Date.now() - input.startedAt),
     context: {
       messageId: input.envelope.messageId,
       correlationId: input.envelope.context?.correlationId,
@@ -150,7 +160,7 @@ export function createExecutionSuccessMeta(input: {
 export function toSignalFailure(
   error: unknown,
   fallbackCode: SignalErrorCode,
-  fallbackMessage: string
+  fallbackMessage: string,
 ) {
   if (
     typeof error === "object" &&
@@ -166,30 +176,36 @@ export function toSignalFailure(
       (error as { code: SignalErrorCode }).code,
       error instanceof Error ? error.message : fallbackMessage,
       {
-        category: typeof categoryValue === "string" ? (categoryValue as never) : undefined,
-        retryable: typeof retryableValue === "boolean" ? retryableValue : undefined,
+        category:
+          typeof categoryValue === "string"
+            ? (categoryValue as never)
+            : undefined,
+        retryable:
+          typeof retryableValue === "boolean" ? retryableValue : undefined,
         details:
           typeof detailsValue === "object" && detailsValue !== null
             ? (detailsValue as Record<string, unknown>)
             : undefined,
-      }
+      },
     );
   }
 
   if (error instanceof Error) {
     return createSignalError(fallbackCode, error.message, {
-      retryable: fallbackCode === "TRANSPORT_ERROR" || fallbackCode === "INTERNAL_ERROR",
+      retryable:
+        fallbackCode === "TRANSPORT_ERROR" || fallbackCode === "INTERNAL_ERROR",
     });
   }
 
   return createSignalError(fallbackCode, fallbackMessage, {
-    retryable: fallbackCode === "TRANSPORT_ERROR" || fallbackCode === "INTERNAL_ERROR",
+    retryable:
+      fallbackCode === "TRANSPORT_ERROR" || fallbackCode === "INTERNAL_ERROR",
   });
 }
 
 export function createNestedExecutionContext(
   context: SignalExecutionContext,
-  envelope: SignalEnvelope
+  envelope: SignalEnvelope,
 ): SignalExecutionContext {
   return {
     request: normalizeRequestContext({

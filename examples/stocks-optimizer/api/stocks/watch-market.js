@@ -2,7 +2,9 @@ const { getCache, setCache, acquireLock } = require("../_quote-cache.js");
 const { syncMarketQuotes } = require("../_quote-sync.js");
 
 function marketKey(value) {
-  return String(value || "").trim().toUpperCase();
+  return String(value || "")
+    .trim()
+    .toUpperCase();
 }
 
 function parseBody(req) {
@@ -35,9 +37,9 @@ module.exports = async function handler(req, res) {
       {
         market,
         symbols,
-        updatedAt: Date.now()
+        updatedAt: Date.now(),
       },
-      60 * 10
+      60 * 10,
     );
 
     let payload = await getCache(`quotes:${market}`);
@@ -61,13 +63,13 @@ module.exports = async function handler(req, res) {
       items: quotes,
       syncedAt: payload?.syncedAt || null,
       stale: !payload,
-      count: quotes.length
+      count: quotes.length,
     });
   } catch (error) {
     res.status(500).json({
       error: "WATCH_MARKET_FAILED",
       message: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
   }
 };

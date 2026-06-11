@@ -6,10 +6,10 @@ import type {
 } from "@/lib/api";
 import {
   DEFAULT_CAMPAIGN_RULES,
-  evaluateLegacy,
   type LegacyEvent,
   type LegacyHistory,
   type LegacyOutput,
+  evaluateLegacy,
 } from "../../../signal-framework/legacy/engine";
 
 export type CommandCenterTone = "good" | "warn" | "bad" | "neutral";
@@ -359,7 +359,9 @@ function firstText(...values: Array<string | null | undefined>) {
 function derivedScores(input: CommandCenterInput) {
   const restoration = input.restorationProgress;
   const survival = normalizePercent(
-    input.survivalConfidence ?? restoration?.gates?.find((gate) => gate.id === "survival-confidence")?.progressPct,
+    input.survivalConfidence ??
+      restoration?.gates?.find((gate) => gate.id === "survival-confidence")
+        ?.progressPct,
   );
   const readiness = normalizePercent(input.readinessScore);
   const historyDepth =
@@ -430,7 +432,9 @@ export function deriveLegacy(input: CommandCenterInput): LegacyOutput {
       ]);
   const cleanOutcomeCount =
     finiteNumber(input.cleanOutcomeCount) ??
-    finiteNumber(input.restorationProgress?.outcomeProof?.cleanReducedSizeOutcomeCount);
+    finiteNumber(
+      input.restorationProgress?.outcomeProof?.cleanReducedSizeOutcomeCount,
+    );
   const normalSizingRestored =
     Boolean(input.normalSizingRestored) ||
     input.recovery?.canRestoreSizing === true ||
@@ -479,7 +483,9 @@ export function deriveLegacy(input: CommandCenterInput): LegacyOutput {
   });
 }
 
-export function deriveOperatorLevel(input: CommandCenterInput): CommandCenterLevel {
+export function deriveOperatorLevel(
+  input: CommandCenterInput,
+): CommandCenterLevel {
   const scores = derivedScores(input);
   const maturityScore =
     averageScore([
@@ -546,7 +552,9 @@ export function deriveOperatorXp(input: CommandCenterInput): CommandCenterXp {
   const progressToNextPct =
     nextRankXp == null
       ? 100
-      : clamp(((current - previousRankXp) / (nextRankXp - previousRankXp)) * 100);
+      : clamp(
+          ((current - previousRankXp) / (nextRankXp - previousRankXp)) * 100,
+        );
 
   return {
     current,
@@ -557,7 +565,9 @@ export function deriveOperatorXp(input: CommandCenterInput): CommandCenterXp {
   };
 }
 
-export function deriveCampaign(input: CommandCenterInput): CommandCenterCampaign {
+export function deriveCampaign(
+  input: CommandCenterInput,
+): CommandCenterCampaign {
   const restoration = input.restorationProgress;
   const currentState =
     restoration?.restorationState ??
@@ -604,7 +614,9 @@ function missionProgressAtMost(current: number | null, target: number) {
     : clamp(((100 - current) / Math.max(1, 100 - target)) * 100);
 }
 
-export function deriveMissions(input: CommandCenterInput): CommandCenterMission[] {
+export function deriveMissions(
+  input: CommandCenterInput,
+): CommandCenterMission[] {
   const scores = derivedScores(input);
   const restoration = input.restorationProgress;
   const cleanCount =
@@ -785,7 +797,9 @@ export function deriveBosses(input: CommandCenterInput): CommandCenterBoss[] {
   return bosses.slice(0, 5);
 }
 
-export function deriveSkillTree(input: CommandCenterInput): CommandCenterSkill[] {
+export function deriveSkillTree(
+  input: CommandCenterInput,
+): CommandCenterSkill[] {
   const scores = derivedScores(input);
   const reflection = averageScore([
     scores.calibration,
@@ -811,7 +825,9 @@ export function deriveSkillTree(input: CommandCenterInput): CommandCenterSkill[]
   }));
 }
 
-export function deriveWorldMap(input: CommandCenterInput): CommandCenterRegion[] {
+export function deriveWorldMap(
+  input: CommandCenterInput,
+): CommandCenterRegion[] {
   const scores = derivedScores(input);
   const execution = averageScore([
     scores.readiness,
@@ -826,10 +842,22 @@ export function deriveWorldMap(input: CommandCenterInput): CommandCenterRegion[]
   const regions = [
     ["recovery", "Recovery Region", scores.recovery],
     ["trust", "Trust Region", scores.trust],
-    ["discovery", "Discovery Region", averageScore([scores.discovery, scores.regime, scores.knowledge])],
+    [
+      "discovery",
+      "Discovery Region",
+      averageScore([scores.discovery, scores.regime, scores.knowledge]),
+    ],
     ["execution", "Execution Region", execution],
     ["governance", "Governance Region", governance],
-    ["memory", "Institutional Memory Region", averageScore([scores.historyDepth, scores.memoryDepth, scores.sampleDiversity])],
+    [
+      "memory",
+      "Institutional Memory Region",
+      averageScore([
+        scores.historyDepth,
+        scores.memoryDepth,
+        scores.sampleDiversity,
+      ]),
+    ],
   ];
 
   return regions.map(([id, label, score]) => {
@@ -869,10 +897,14 @@ export function deriveAchievements(
 function deriveStreaks(input: CommandCenterInput): CommandCenterStreak[] {
   const cleanCount =
     finiteNumber(input.cleanOutcomeCount) ??
-    finiteNumber(input.restorationProgress?.outcomeProof?.cleanReducedSizeOutcomeCount);
+    finiteNumber(
+      input.restorationProgress?.outcomeProof?.cleanReducedSizeOutcomeCount,
+    );
   const activeBreaks =
     finiteNumber(input.activeBoundaryBreakCount) ??
-    finiteNumber(input.restorationProgress?.outcomeProof?.activeProofBoundaryBreakCount);
+    finiteNumber(
+      input.restorationProgress?.outcomeProof?.activeProofBoundaryBreakCount,
+    );
   const streaks: CommandCenterStreak[] = [];
 
   if (cleanCount != null) {
@@ -928,7 +960,9 @@ export function deriveOperatorIdentity(
   };
 }
 
-function deriveUnlockCards(input: CommandCenterInput): CommandCenterUnlockCard[] {
+function deriveUnlockCards(
+  input: CommandCenterInput,
+): CommandCenterUnlockCard[] {
   const scores = derivedScores(input);
   const cards: CommandCenterUnlockCard[] = [];
   const restoration = input.restorationProgress;
@@ -947,18 +981,17 @@ function deriveUnlockCards(input: CommandCenterInput): CommandCenterUnlockCard[]
   }
 
   if (input.trustGovernor?.blockers?.length || (scores.trust ?? 100) < 70) {
-    const requirements =
-      input.trustGovernor?.unlockCriteria?.length
-        ? input.trustGovernor.unlockCriteria.slice(0, 4).map((label) => ({
-            label,
-            passed: false,
-          }))
-        : [
-            {
-              label: "Trust >=70",
-              passed: (scores.trust ?? 0) >= 70,
-            },
-          ];
+    const requirements = input.trustGovernor?.unlockCriteria?.length
+      ? input.trustGovernor.unlockCriteria.slice(0, 4).map((label) => ({
+          label,
+          passed: false,
+        }))
+      : [
+          {
+            label: "Trust >=70",
+            passed: (scores.trust ?? 0) >= 70,
+          },
+        ];
 
     cards.push({
       id: "trust-governor",
@@ -981,11 +1014,8 @@ function deriveUnlockCards(input: CommandCenterInput): CommandCenterUnlockCard[]
           passed: false,
         },
       ],
-      progressPct: averageScore([
-        scores.trust,
-        scores.survival,
-        scores.readiness,
-      ]) ?? 0,
+      progressPct:
+        averageScore([scores.trust, scores.survival, scores.readiness]) ?? 0,
       reward: "Expanded operator access",
     });
   }
@@ -994,10 +1024,12 @@ function deriveUnlockCards(input: CommandCenterInput): CommandCenterUnlockCard[]
     cards.push({
       id: "readiness-remediation",
       currentLock: "Readiness Remediation",
-      requirements: input.readinessRemediation.steps.slice(0, 4).map((step) => ({
-        label: step.title,
-        passed: step.status === "done",
-      })),
+      requirements: input.readinessRemediation.steps
+        .slice(0, 4)
+        .map((step) => ({
+          label: step.title,
+          passed: step.status === "done",
+        })),
       progressPct: scores.readiness ?? 0,
       reward: "Production readiness lift",
     });
@@ -1038,9 +1070,15 @@ function derivePrestige(
   legacy = deriveLegacy(input),
 ): CommandCenterPrestige {
   const progressPct = legacy.prestige.requirements.length
-    ? Math.min(...legacy.prestige.requirements.map((requirement) => requirement.current))
+    ? Math.min(
+        ...legacy.prestige.requirements.map(
+          (requirement) => requirement.current,
+        ),
+      )
     : 0;
-  const title = legacy.prestige.titles[legacy.prestige.titles.length - 1]?.name ?? legacy.title.name;
+  const title =
+    legacy.prestige.titles[legacy.prestige.titles.length - 1]?.name ??
+    legacy.title.name;
 
   return {
     enabled: legacy.prestige.unlocked,

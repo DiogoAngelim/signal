@@ -1,4 +1,3 @@
-
 import { clamp, mean, stdev } from "../math/statistics";
 
 export type RecognitionVerdict =
@@ -218,28 +217,55 @@ const DEFAULT_THRESHOLDS: RecognitionThresholds = {
 const DEFAULT_CREATED_AT = "1970-01-01T00:00:00.000Z";
 const OUTCOME_EPSILON = 0.000001;
 
-export function recognizeState(input: RecognitionInput = {}): RecognitionResult {
+export function recognizeState(
+  input: RecognitionInput = {},
+): RecognitionResult {
   const thresholds = normalizeThresholds(input.thresholds);
   const evidence = summarizeEvidence(input, thresholds);
   const discoveryNovelty = optionalScore(input.discovery?.novelty);
   const discoveryConfidence = optionalScore(input.discovery?.confidence);
   const judgementSamples = sampleCountFromJudgement(input.judgement);
   const judgementReliability = optionalScore(input.judgement?.reliability);
-  const baseRecurrenceConfidence = recurrenceConfidenceFor(evidence, input, thresholds);
-  const historicalSimilarityConfidence = historicalSimilarityConfidenceFor(evidence, input);
-  const recurrenceConfidence = roundScore(Math.max(
-    baseRecurrenceConfidence,
-    Math.min(92, historicalSimilarityConfidence * 0.92),
-  ));
-  const noveltyScore = noveltyScoreFor(evidence, input, recurrenceConfidence, thresholds);
-  const recognitionScore = recognitionScoreFor(recurrenceConfidence, noveltyScore, evidence.archetype.confidence);
-  const discoverySaysNovel = discoveryNovelty >= thresholds.noveltyThreshold ||
-    (discoveryConfidence > 0 && discoveryConfidence < 50 && (input.discovery?.memory?.similarOutcomes ?? 0) === 0);
-  const judgementSaysSimilar = judgementSamples >= thresholds.minMatchedSamples && judgementReliability >= 50;
-  const strongRecurrence = recurrenceConfidence >= thresholds.strongRecurrence &&
+  const baseRecurrenceConfidence = recurrenceConfidenceFor(
+    evidence,
+    input,
+    thresholds,
+  );
+  const historicalSimilarityConfidence = historicalSimilarityConfidenceFor(
+    evidence,
+    input,
+  );
+  const recurrenceConfidence = roundScore(
+    Math.max(
+      baseRecurrenceConfidence,
+      Math.min(92, historicalSimilarityConfidence * 0.92),
+    ),
+  );
+  const noveltyScore = noveltyScoreFor(
+    evidence,
+    input,
+    recurrenceConfidence,
+    thresholds,
+  );
+  const recognitionScore = recognitionScoreFor(
+    recurrenceConfidence,
+    noveltyScore,
+    evidence.archetype.confidence,
+  );
+  const discoverySaysNovel =
+    discoveryNovelty >= thresholds.noveltyThreshold ||
+    (discoveryConfidence > 0 &&
+      discoveryConfidence < 50 &&
+      (input.discovery?.memory?.similarOutcomes ?? 0) === 0);
+  const judgementSaysSimilar =
+    judgementSamples >= thresholds.minMatchedSamples &&
+    judgementReliability >= 50;
+  const strongRecurrence =
+    recurrenceConfidence >= thresholds.strongRecurrence &&
     evidence.evidenceSampleCount >= thresholds.minMatchedSamples &&
     evidence.outcomeStability >= 60;
-  const partialRecurrence = recurrenceConfidence >= thresholds.partialRecurrence &&
+  const partialRecurrence =
+    recurrenceConfidence >= thresholds.partialRecurrence &&
     (evidence.evidenceSampleCount >= thresholds.minMatchedSamples ||
       evidence.looseMatches.length >= thresholds.minMatchedSamples ||
       evidence.archetype.confidence >= 55);
@@ -247,10 +273,12 @@ export function recognizeState(input: RecognitionInput = {}): RecognitionResult 
     evidence.comparable.length >= thresholds.minComparableSamples ||
     evidence.evidenceSampleCount >= thresholds.minMatchedSamples ||
     evidence.archetype.confidence >= 70;
-  const discoveryNoveltyJustified = noveltyScore >= thresholds.noveltyThreshold &&
+  const discoveryNoveltyJustified =
+    noveltyScore >= thresholds.noveltyThreshold &&
     enoughNoveltyMemory &&
     recurrenceConfidence < thresholds.partialRecurrence;
-  const judgementSimilarityJustified = strongRecurrence ||
+  const judgementSimilarityJustified =
+    strongRecurrence ||
     (judgementSaysSimilar &&
       recurrenceConfidence >= thresholds.strongRecurrence &&
       evidence.averageCoverage >= thresholds.minFeatureCoverage * 100);
@@ -324,25 +352,42 @@ export function recognizeState(input: RecognitionInput = {}): RecognitionResult 
 export const recognize = recognizeState;
 export const evaluateRecognition = recognizeState;
 
-function summarizeEvidence(input: RecognitionInput, thresholds: RecognitionThresholds): EvidenceSummary {
+function summarizeEvidence(
+  input: RecognitionInput,
+  thresholds: RecognitionThresholds,
+): EvidenceSummary {
   const currentProfile = profileFor({
     state: plainRecord(input.currentState) ? input.currentState : {},
-    features: plainRecord(input.normalizedFeatures) ? input.normalizedFeatures : {},
-    perception: plainRecord(input.perception) ? input.perception as Record<string, unknown> : {},
-    context: plainRecord(input.recovery) ? input.recovery as Record<string, unknown> : {},
+    features: plainRecord(input.normalizedFeatures)
+      ? input.normalizedFeatures
+      : {},
+    perception: plainRecord(input.perception)
+      ? (input.perception as Record<string, unknown>)
+      : {},
+    context: plainRecord(input.recovery)
+      ? (input.recovery as Record<string, unknown>)
+      : {},
   });
   const stateFingerprint = fingerprintFor(currentProfile);
   const samples = collectSamples(input);
   const comparable = samples
     .map((sample) => compareSample(currentProfile, stateFingerprint, sample))
     .filter((match) => match.score > 0 || match.coverage > 0)
-    .sort((left, right) => right.score - left.score || idFor(left.sample).localeCompare(idFor(right.sample)));
-  const matches = comparable.filter((match) =>
-    match.score >= thresholds.similarityThreshold &&
-    match.coverage >= thresholds.minFeatureCoverage);
-  const looseMatches = comparable.filter((match) =>
-    match.score >= thresholds.partialSimilarityThreshold &&
-    match.coverage >= thresholds.minFeatureCoverage);
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        idFor(left.sample).localeCompare(idFor(right.sample)),
+    );
+  const matches = comparable.filter(
+    (match) =>
+      match.score >= thresholds.similarityThreshold &&
+      match.coverage >= thresholds.minFeatureCoverage,
+  );
+  const looseMatches = comparable.filter(
+    (match) =>
+      match.score >= thresholds.partialSimilarityThreshold &&
+      match.coverage >= thresholds.minFeatureCoverage,
+  );
   const outcomes = matches
     .map((match) => match.outcome)
     .filter((value): value is number => Number.isFinite(value));
@@ -364,13 +409,26 @@ function summarizeEvidence(input: RecognitionInput, thresholds: RecognitionThres
     ? outcomes.length - matchedPositiveOutcomes - matchedNegativeOutcomes
     : archetype.neutralOutcomes;
   const evidenceSampleCount = Math.max(matches.length, archetype.sampleSize);
-  const evidenceOutcomeCount = outcomes.length ||
-    archetype.positiveOutcomes + archetype.negativeOutcomes + archetype.neutralOutcomes;
-  const averageSimilarity = roundScore(mean(matches.map((match) => match.score * 100)));
-  const averageCoverage = roundScore(mean(matches.map((match) => match.coverage * 100)));
+  const evidenceOutcomeCount =
+    outcomes.length ||
+    archetype.positiveOutcomes +
+      archetype.negativeOutcomes +
+      archetype.neutralOutcomes;
+  const averageSimilarity = roundScore(
+    mean(matches.map((match) => match.score * 100)),
+  );
+  const averageCoverage = roundScore(
+    mean(matches.map((match) => match.coverage * 100)),
+  );
   const outcomeStability = outcomes.length
-    ? stabilityFor(outcomes, matchedPositiveOutcomes, matchedNegativeOutcomes, matchedNeutralOutcomes)
-    : archetype.outcomeStability || optionalScore(input.judgement?.outcomeStability);
+    ? stabilityFor(
+        outcomes,
+        matchedPositiveOutcomes,
+        matchedNegativeOutcomes,
+        matchedNeutralOutcomes,
+      )
+    : archetype.outcomeStability ||
+      optionalScore(input.judgement?.outcomeStability);
 
   return {
     currentProfile,
@@ -408,25 +466,43 @@ function collectSamples(input: RecognitionInput) {
   });
 }
 
-function compareSample(current: Profile, fingerprint: string, sample: RecognitionSample): SimilarityMatch {
+function compareSample(
+  current: Profile,
+  fingerprint: string,
+  sample: RecognitionSample,
+): SimilarityMatch {
   const explicitSimilarity = optionalRatio(sample.similarity);
   const explicitCoverage = optionalRatio(sample.featureCoverage);
   const sampleFingerprint = stringValue(sample.fingerprint);
   const profile = profileFor({
-    state: firstRecord(sample.state, sample.currentState, recordFromMetadata(sample.metadata, "state")),
-    features: firstRecord(sample.features, recordFromMetadata(sample.metadata, "features")),
-    perception: firstRecord(sample.perception, recordFromMetadata(sample.metadata, "perception")),
-    context: firstRecord(sample.context, recordFromMetadata(sample.metadata, "context")),
+    state: firstRecord(
+      sample.state,
+      sample.currentState,
+      recordFromMetadata(sample.metadata, "state"),
+    ),
+    features: firstRecord(
+      sample.features,
+      recordFromMetadata(sample.metadata, "features"),
+    ),
+    perception: firstRecord(
+      sample.perception,
+      recordFromMetadata(sample.metadata, "perception"),
+    ),
+    context: firstRecord(
+      sample.context,
+      recordFromMetadata(sample.metadata, "context"),
+    ),
   });
-  const similarity = sampleFingerprint && sampleFingerprint === fingerprint
-    ? { similarity: 1, coverage: 1, score: 1 }
-    : profile.size
-      ? similarityBetween(current, profile)
-      : {
-          similarity: explicitSimilarity ?? 0,
-          coverage: explicitCoverage ?? 0,
-          score: (explicitSimilarity ?? 0) * Math.sqrt(explicitCoverage ?? 0),
-        };
+  const similarity =
+    sampleFingerprint && sampleFingerprint === fingerprint
+      ? { similarity: 1, coverage: 1, score: 1 }
+      : profile.size
+        ? similarityBetween(current, profile)
+        : {
+            similarity: explicitSimilarity ?? 0,
+            coverage: explicitCoverage ?? 0,
+            score: (explicitSimilarity ?? 0) * Math.sqrt(explicitCoverage ?? 0),
+          };
 
   return {
     sample,
@@ -461,17 +537,30 @@ function explicitArchetypeMatch(input: {
   const matches = array(input.input.archetypes)
     .map((archetype) => {
       const profile = profileFor({
-        state: firstRecord(archetype.state, recordFromMetadata(archetype.metadata, "state")),
-        features: firstRecord(archetype.features, recordFromMetadata(archetype.metadata, "features")),
-        perception: firstRecord(archetype.perception, recordFromMetadata(archetype.metadata, "perception")),
+        state: firstRecord(
+          archetype.state,
+          recordFromMetadata(archetype.metadata, "state"),
+        ),
+        features: firstRecord(
+          archetype.features,
+          recordFromMetadata(archetype.metadata, "features"),
+        ),
+        perception: firstRecord(
+          archetype.perception,
+          recordFromMetadata(archetype.metadata, "perception"),
+        ),
       });
       const fingerprint = stringValue(archetype.fingerprint);
-      const similarity = fingerprint && fingerprint === input.stateFingerprint
-        ? { similarity: 1, coverage: 1, score: 1 }
-        : profile.size
-          ? similarityBetween(profile, input.currentProfile)
-          : { similarity: 0, coverage: 0, score: 0 };
-      const sampleSize = Math.max(0, Math.round(numberValue(archetype.sampleSize)));
+      const similarity =
+        fingerprint && fingerprint === input.stateFingerprint
+          ? { similarity: 1, coverage: 1, score: 1 }
+          : profile.size
+            ? similarityBetween(profile, input.currentProfile)
+            : { similarity: 0, coverage: 0, score: 0 };
+      const sampleSize = Math.max(
+        0,
+        Math.round(numberValue(archetype.sampleSize)),
+      );
       const confidence = roundScore(
         similarity.score * 45 +
           similarity.coverage * 20 +
@@ -481,10 +570,18 @@ function explicitArchetypeMatch(input: {
 
       return { archetype, similarity, confidence, sampleSize };
     })
-    .filter((match) =>
-      match.confidence >= 50 &&
-      match.similarity.coverage >= input.thresholds.minFeatureCoverage)
-    .sort((left, right) => right.confidence - left.confidence || labelForArchetype(left.archetype).localeCompare(labelForArchetype(right.archetype)));
+    .filter(
+      (match) =>
+        match.confidence >= 50 &&
+        match.similarity.coverage >= input.thresholds.minFeatureCoverage,
+    )
+    .sort(
+      (left, right) =>
+        right.confidence - left.confidence ||
+        labelForArchetype(left.archetype).localeCompare(
+          labelForArchetype(right.archetype),
+        ),
+    );
 
   const best = matches[0];
   if (!best) return emptyArchetype();
@@ -493,59 +590,102 @@ function explicitArchetypeMatch(input: {
     label: labelForArchetype(best.archetype),
     confidence: best.confidence,
     sampleSize: best.sampleSize,
-    positiveOutcomes: Math.max(0, Math.round(numberValue(best.archetype.positiveOutcomes))),
-    negativeOutcomes: Math.max(0, Math.round(numberValue(best.archetype.negativeOutcomes))),
-    neutralOutcomes: Math.max(0, Math.round(numberValue(best.archetype.neutralOutcomes))),
+    positiveOutcomes: Math.max(
+      0,
+      Math.round(numberValue(best.archetype.positiveOutcomes)),
+    ),
+    negativeOutcomes: Math.max(
+      0,
+      Math.round(numberValue(best.archetype.negativeOutcomes)),
+    ),
+    neutralOutcomes: Math.max(
+      0,
+      Math.round(numberValue(best.archetype.neutralOutcomes)),
+    ),
     outcomeStability: optionalScore(best.archetype.outcomeStability),
   };
 }
 
-function groupedArchetypeMatch(matches: SimilarityMatch[], thresholds: RecognitionThresholds): ArchetypeMatch {
+function groupedArchetypeMatch(
+  matches: SimilarityMatch[],
+  thresholds: RecognitionThresholds,
+): ArchetypeMatch {
   const groups = new Map<string, SimilarityMatch[]>();
   for (const match of matches) {
-    const label = stringValue(match.sample.archetypeLabel ?? match.sample.archetype ?? match.sample.archetypeId);
+    const label = stringValue(
+      match.sample.archetypeLabel ??
+        match.sample.archetype ??
+        match.sample.archetypeId,
+    );
     if (!label) continue;
     groups.set(label, [...(groups.get(label) ?? []), match]);
   }
 
   const ranked = Array.from(groups.entries())
     .map(([label, group]) => {
-      const outcomes = group.map((match) => match.outcome).filter((value): value is number => Number.isFinite(value));
-      const positive = outcomes.filter((value) => value > OUTCOME_EPSILON).length;
-      const negative = outcomes.filter((value) => value < -OUTCOME_EPSILON).length;
+      const outcomes = group
+        .map((match) => match.outcome)
+        .filter((value): value is number => Number.isFinite(value));
+      const positive = outcomes.filter(
+        (value) => value > OUTCOME_EPSILON,
+      ).length;
+      const negative = outcomes.filter(
+        (value) => value < -OUTCOME_EPSILON,
+      ).length;
       const neutral = outcomes.length - positive - negative;
-      const stability = outcomes.length ? stabilityFor(outcomes, positive, negative, neutral) : 0;
+      const stability = outcomes.length
+        ? stabilityFor(outcomes, positive, negative, neutral)
+        : 0;
       const confidence = roundScore(
         mean(group.map((match) => match.score * 100)) * 0.45 +
           sampleScore(group.length, thresholds.strongSampleSize) * 0.25 +
           stability * 0.3,
       );
 
-      return { label, confidence, sampleSize: group.length, positiveOutcomes: positive, negativeOutcomes: negative, neutralOutcomes: neutral, outcomeStability: stability };
+      return {
+        label,
+        confidence,
+        sampleSize: group.length,
+        positiveOutcomes: positive,
+        negativeOutcomes: negative,
+        neutralOutcomes: neutral,
+        outcomeStability: stability,
+      };
     })
-    .sort((left, right) => right.confidence - left.confidence || left.label.localeCompare(right.label));
+    .sort(
+      (left, right) =>
+        right.confidence - left.confidence ||
+        left.label.localeCompare(right.label),
+    );
 
   return ranked[0] ?? emptyArchetype();
 }
 
-function derivedArchetypeMatch(matches: SimilarityMatch[], outcomes: number[], thresholds: RecognitionThresholds): ArchetypeMatch {
+function derivedArchetypeMatch(
+  matches: SimilarityMatch[],
+  outcomes: number[],
+  thresholds: RecognitionThresholds,
+): ArchetypeMatch {
   if (matches.length < thresholds.minMatchedSamples) return emptyArchetype();
 
   const positive = outcomes.filter((value) => value > OUTCOME_EPSILON).length;
   const negative = outcomes.filter((value) => value < -OUTCOME_EPSILON).length;
   const neutral = outcomes.length - positive - negative;
-  const stability = outcomes.length ? stabilityFor(outcomes, positive, negative, neutral) : 0;
+  const stability = outcomes.length
+    ? stabilityFor(outcomes, positive, negative, neutral)
+    : 0;
   const dominant = Math.max(positive, negative, neutral);
   const ratio = outcomes.length ? dominant / outcomes.length : 0;
-  const label = outcomes.length < thresholds.minOutcomeSamples
-    ? "recurring_state"
-    : stability < 50
-      ? "unstable_recurring_state"
-      : ratio >= 0.7 && positive === dominant
-        ? "stable_positive_state"
-        : ratio >= 0.7 && negative === dominant
-          ? "stable_negative_state"
-          : "mixed_recurring_state";
+  const label =
+    outcomes.length < thresholds.minOutcomeSamples
+      ? "recurring_state"
+      : stability < 50
+        ? "unstable_recurring_state"
+        : ratio >= 0.7 && positive === dominant
+          ? "stable_positive_state"
+          : ratio >= 0.7 && negative === dominant
+            ? "stable_negative_state"
+            : "mixed_recurring_state";
   const confidence = roundScore(
     mean(matches.map((match) => match.score * 100)) * 0.42 +
       sampleScore(matches.length, thresholds.strongSampleSize) * 0.28 +
@@ -563,13 +703,27 @@ function derivedArchetypeMatch(matches: SimilarityMatch[], outcomes: number[], t
   };
 }
 
-function recurrenceConfidenceFor(evidence: EvidenceSummary, input: RecognitionInput, thresholds: RecognitionThresholds) {
-  const sampleEvidence = sampleScore(evidence.evidenceSampleCount, thresholds.strongSampleSize);
-  const similarity = evidence.averageSimilarity || evidence.archetype.confidence * 0.85;
-  const coverage = evidence.averageCoverage || (evidence.archetype.confidence > 0 ? 70 : 0);
-  const broadPenalty = evidence.comparable.length > 0 && evidence.matches.length === 0
-    ? Math.max(0, thresholds.minFeatureCoverage * 100 - mean(evidence.comparable.map((match) => match.coverage * 100))) * 0.5
-    : 0;
+function recurrenceConfidenceFor(
+  evidence: EvidenceSummary,
+  input: RecognitionInput,
+  thresholds: RecognitionThresholds,
+) {
+  const sampleEvidence = sampleScore(
+    evidence.evidenceSampleCount,
+    thresholds.strongSampleSize,
+  );
+  const similarity =
+    evidence.averageSimilarity || evidence.archetype.confidence * 0.85;
+  const coverage =
+    evidence.averageCoverage || (evidence.archetype.confidence > 0 ? 70 : 0);
+  const broadPenalty =
+    evidence.comparable.length > 0 && evidence.matches.length === 0
+      ? Math.max(
+          0,
+          thresholds.minFeatureCoverage * 100 -
+            mean(evidence.comparable.map((match) => match.coverage * 100)),
+        ) * 0.5
+      : 0;
   const direct = roundScore(
     similarity * 0.38 +
       sampleEvidence * 0.24 +
@@ -587,27 +741,55 @@ function recurrenceConfidenceFor(evidence: EvidenceSummary, input: RecognitionIn
       optionalScore(input.survivalMemory?.survivalConfidence) * 0.1,
   );
 
-  if (evidence.evidenceSampleCount >= thresholds.minMatchedSamples || evidence.archetype.confidence >= 70) {
+  if (
+    evidence.evidenceSampleCount >= thresholds.minMatchedSamples ||
+    evidence.archetype.confidence >= 70
+  ) {
     return roundScore(Math.max(direct, Math.min(82, summary)));
   }
 
   return roundScore(Math.max(direct, Math.min(49, summary)));
 }
 
-function historicalSimilarityConfidenceFor(evidence: EvidenceSummary, input: RecognitionInput) {
+function historicalSimilarityConfidenceFor(
+  evidence: EvidenceSummary,
+  input: RecognitionInput,
+) {
   const diagnostics = input.historyDiagnostics;
   if (!diagnostics) return 0;
 
-  const regimeCounts = plainRecord(diagnostics.regimeCounts) ? diagnostics.regimeCounts : {};
-  const covered = new Set(array(diagnostics.keyRegimesCovered).map((regime) => String(regime)));
+  const regimeCounts = plainRecord(diagnostics.regimeCounts)
+    ? diagnostics.regimeCounts
+    : {};
+  const covered = new Set(
+    array(diagnostics.keyRegimesCovered).map((regime) => String(regime)),
+  );
   for (const [regime, count] of Object.entries(regimeCounts)) {
     if (Number(count) > 0) covered.add(regime);
   }
-  const keyRegimes = ["bull", "bear", "crash", "recovery", "volatility_transition"];
-  const keyRegimeCoverage = keyRegimes.filter((regime) => covered.has(regime)).length / keyRegimes.length * 100;
+  const keyRegimes = [
+    "bull",
+    "bear",
+    "crash",
+    "recovery",
+    "volatility_transition",
+  ];
+  const keyRegimeCoverage =
+    (keyRegimes.filter((regime) => covered.has(regime)).length /
+      keyRegimes.length) *
+    100;
   const currentRegime = stringValue(diagnostics.currentRegime);
-  const currentRegimeRepresented = currentRegime != null && covered.has(currentRegime) ? 100 : currentRegime ? 50 : 0;
-  const recurrenceAnchor = Math.max(evidence.averageSimilarity, evidence.archetype.confidence, evidence.outcomeStability);
+  const currentRegimeRepresented =
+    currentRegime != null && covered.has(currentRegime)
+      ? 100
+      : currentRegime
+        ? 50
+        : 0;
+  const recurrenceAnchor = Math.max(
+    evidence.averageSimilarity,
+    evidence.archetype.confidence,
+    evidence.outcomeStability,
+  );
   const scoreValue =
     optionalScore(diagnostics.historyDepthScore) * 0.22 +
     optionalScore(diagnostics.regimeCoverageScore) * 0.26 +
@@ -626,25 +808,45 @@ function noveltyScoreFor(
   recurrenceConfidence: number,
   thresholds: RecognitionThresholds,
 ) {
-  const archetypeSimilarity = evidence.archetype.confidence > 0 ? evidence.archetype.confidence / 100 : 0;
-  const bestSimilarity = evidence.matches[0]?.score ?? evidence.looseMatches[0]?.score ?? archetypeSimilarity;
-  const averageCoverage = evidence.averageCoverage ||
-    (evidence.archetype.confidence > 0 ? Math.min(100, Math.max(70, evidence.archetype.confidence)) : 0);
-  const samplePenalty = 100 - sampleScore(evidence.evidenceSampleCount, thresholds.strongSampleSize);
+  const archetypeSimilarity =
+    evidence.archetype.confidence > 0 ? evidence.archetype.confidence / 100 : 0;
+  const bestSimilarity =
+    evidence.matches[0]?.score ??
+    evidence.looseMatches[0]?.score ??
+    archetypeSimilarity;
+  const averageCoverage =
+    evidence.averageCoverage ||
+    (evidence.archetype.confidence > 0
+      ? Math.min(100, Math.max(70, evidence.archetype.confidence))
+      : 0);
+  const samplePenalty =
+    100 -
+    sampleScore(evidence.evidenceSampleCount, thresholds.strongSampleSize);
   const evidenceNovelty = roundScore(
     (100 - bestSimilarity * 100) * 0.62 +
       samplePenalty * 0.23 +
       (100 - averageCoverage) * 0.15,
   );
-  const discoveryNovelty = optionalScore(input.discovery?.novelty, evidenceNovelty);
-  const reconciled = evidence.evidenceSampleCount >= thresholds.minMatchedSamples || evidence.archetype.confidence >= 70
-    ? evidenceNovelty * 0.72 + discoveryNovelty * 0.28
-    : Math.max(evidenceNovelty, discoveryNovelty * 0.7);
+  const discoveryNovelty = optionalScore(
+    input.discovery?.novelty,
+    evidenceNovelty,
+  );
+  const reconciled =
+    evidence.evidenceSampleCount >= thresholds.minMatchedSamples ||
+    evidence.archetype.confidence >= 70
+      ? evidenceNovelty * 0.72 + discoveryNovelty * 0.28
+      : Math.max(evidenceNovelty, discoveryNovelty * 0.7);
 
-  return roundScore(Math.min(100, Math.max(0, reconciled - recurrenceConfidence * 0.12)));
+  return roundScore(
+    Math.min(100, Math.max(0, reconciled - recurrenceConfidence * 0.12)),
+  );
 }
 
-function recognitionScoreFor(recurrenceConfidence: number, noveltyScore: number, archetypeConfidence: number) {
+function recognitionScoreFor(
+  recurrenceConfidence: number,
+  noveltyScore: number,
+  archetypeConfidence: number,
+) {
   return roundScore(
     recurrenceConfidence * 0.55 +
       (100 - noveltyScore) * 0.25 +
@@ -681,7 +883,8 @@ function verdictFor(input: {
     return "insufficient_evidence";
   }
   if (input.discoveryNoveltyJustified) return "novel";
-  if (input.discoverySaysNovel || input.judgementSaysSimilar) return "conflicted";
+  if (input.discoverySaysNovel || input.judgementSaysSimilar)
+    return "conflicted";
   return "insufficient_evidence";
 }
 
@@ -697,7 +900,7 @@ function missingEvidenceFor(input: {
   const missing = [
     input.evidence.currentProfile.size === 0 ? "current state features" : "",
     input.evidence.samples.length < input.thresholds.minComparableSamples &&
-      input.evidence.archetype.confidence < 70
+    input.evidence.archetype.confidence < 70
       ? "historical state samples"
       : "",
     input.evidence.evidenceSampleCount < input.thresholds.minMatchedSamples
@@ -709,12 +912,15 @@ function missingEvidenceFor(input: {
     input.judgementSaysSimilar && !input.judgementSimilarityJustified
       ? "state-level evidence explaining Judgement similarity"
       : "",
-    input.discoverySaysNovel && !input.discoveryNoveltyJustified &&
-      !input.judgementSimilarityJustified &&
-      input.evidence.samples.length < input.thresholds.minComparableSamples
+    input.discoverySaysNovel &&
+    !input.discoveryNoveltyJustified &&
+    !input.judgementSimilarityJustified &&
+    input.evidence.samples.length < input.thresholds.minComparableSamples
       ? "memory depth sufficient to justify novelty"
       : "",
-    ...(input.judgementSimilarityJustified ? [] : array(input.input.discovery?.missingEvidence).slice(0, 3)),
+    ...(input.judgementSimilarityJustified
+      ? []
+      : array(input.input.discovery?.missingEvidence).slice(0, 3)),
     ...array(input.input.survivalMemory?.missingEvidence).slice(0, 2),
   ];
 
@@ -777,9 +983,10 @@ function reasonFor(input: {
     return `${base} Comparable memory is broad enough and recurrence evidence is weak, so Discovery novelty is justified.`;
   }
   if (input.verdict === "conflicted") {
-    const cause = input.judgementSaysSimilar && !input.judgementSimilarityJustified
-      ? "Judgement similarity is broader than Recognition can justify from state-level matches."
-      : "Discovery and Judgement point to different similarity definitions.";
+    const cause =
+      input.judgementSaysSimilar && !input.judgementSimilarityJustified
+        ? "Judgement similarity is broader than Recognition can justify from state-level matches."
+        : "Discovery and Judgement point to different similarity definitions.";
     return `${base} ${cause}`;
   }
 
@@ -800,10 +1007,16 @@ function profileFor(input: {
   return features;
 }
 
-function flattenInto(features: Map<string, FeatureValue>, prefix: string, value: unknown) {
+function flattenInto(
+  features: Map<string, FeatureValue>,
+  prefix: string,
+  value: unknown,
+) {
   if (!plainRecord(value)) return;
 
-  for (const [key, child] of Object.entries(value).sort(([left], [right]) => left.localeCompare(right))) {
+  for (const [key, child] of Object.entries(value).sort(([left], [right]) =>
+    left.localeCompare(right),
+  )) {
     const path = `${prefix}.${key}`;
     if (plainRecord(child)) {
       flattenInto(features, path, child);
@@ -816,7 +1029,8 @@ function flattenInto(features: Map<string, FeatureValue>, prefix: string, value:
 }
 
 function featureValue(value: unknown): FeatureValue | undefined {
-  if (typeof value === "number" && Number.isFinite(value)) return roundFeatureNumber(value);
+  if (typeof value === "number" && Number.isFinite(value))
+    return roundFeatureNumber(value);
   if (typeof value === "boolean") return value;
   if (typeof value === "string") {
     const normalized = value.trim().toLowerCase();
@@ -824,7 +1038,11 @@ function featureValue(value: unknown): FeatureValue | undefined {
   }
   if (Array.isArray(value)) {
     const values = value
-      .map((item) => String(item ?? "").trim().toLowerCase())
+      .map((item) =>
+        String(item ?? "")
+          .trim()
+          .toLowerCase(),
+      )
       .filter(Boolean)
       .sort();
     return values.length ? Array.from(new Set(values)) : undefined;
@@ -843,7 +1061,9 @@ function similarityBetween(current: Profile, historical: Profile) {
     if (!historical.has(key)) continue;
 
     matchedWeight += weight;
-    weightedSimilarity += valueSimilarity(currentValue, historical.get(key) as FeatureValue) * weight;
+    weightedSimilarity +=
+      valueSimilarity(currentValue, historical.get(key) as FeatureValue) *
+      weight;
   }
 
   const coverage = totalWeight > 0 ? matchedWeight / totalWeight : 0;
@@ -874,7 +1094,7 @@ function featureWeight(path: string) {
   if (path.startsWith("features.")) return 1.3;
   if (path.startsWith("state.")) return 1.2;
   if (path.startsWith("perception.")) return 1;
-  
+
   return 0.8;
 }
 
@@ -900,7 +1120,12 @@ function hashString(value: string) {
 }
 
 function outcomeValueFor(sample: RecognitionSample) {
-  const direct = firstFinite(sample.value, sample.score, recordNumber(sample.result, "value"), recordNumber(sample.outcome, "value"));
+  const direct = firstFinite(
+    sample.value,
+    sample.score,
+    recordNumber(sample.result, "value"),
+    recordNumber(sample.outcome, "value"),
+  );
   if (direct != null) return direct;
   if (sample.success === true) return 1;
   if (sample.success === false) return -1;
@@ -918,19 +1143,29 @@ function outcomeValueFor(sample: RecognitionSample) {
   return undefined;
 }
 
-function stabilityFor(outcomes: number[], positive: number, negative: number, neutral: number) {
-  
+function stabilityFor(
+  outcomes: number[],
+  positive: number,
+  negative: number,
+  neutral: number,
+) {
   if (!outcomes.length) return 0;
-  const consistency = Math.max(positive, negative, neutral) / outcomes.length * 100;
+  const consistency =
+    (Math.max(positive, negative, neutral) / outcomes.length) * 100;
   const dispersionSafety = clamp(100 - stdev(outcomes), 0, 100);
   return roundScore(consistency * 0.65 + dispersionSafety * 0.35);
 }
 
-function sampleCountFromJudgement(judgement?: RecognitionJudgementEvidence | null) {
+function sampleCountFromJudgement(
+  judgement?: RecognitionJudgementEvidence | null,
+) {
   return Math.max(
     0,
     Math.round(
-      firstFinite(judgement?.similarSampleSize, judgement?.evidence?.similarStates) ?? 0,
+      firstFinite(
+        judgement?.similarSampleSize,
+        judgement?.evidence?.similarStates,
+      ) ?? 0,
     ),
   );
 }
@@ -959,7 +1194,10 @@ function emptyArchetype(): ArchetypeMatch {
 }
 
 function labelForArchetype(archetype: RecognitionArchetype) {
-  return stringValue(archetype.label ?? archetype.name ?? archetype.id) ?? "known_state";
+  return (
+    stringValue(archetype.label ?? archetype.name ?? archetype.id) ??
+    "known_state"
+  );
 }
 
 function optionalScore(value: unknown, fallback = 0) {
@@ -1006,7 +1244,12 @@ function recordFromMetadata(metadata: unknown, key: string) {
 }
 
 function plainRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value && typeof value === "object" && !Array.isArray(value) && !(value instanceof Date));
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      !(value instanceof Date),
+  );
 }
 
 function array<T>(value: T[] | undefined | null): T[] {
@@ -1056,14 +1299,18 @@ function formatScore(value: number) {
 }
 
 function idFor(sample: RecognitionSample) {
-  return stringValue(sample.id ?? sample.label ?? sample.fingerprint) ?? "sample";
+  return (
+    stringValue(sample.id ?? sample.label ?? sample.fingerprint) ?? "sample"
+  );
 }
-
 
 function createdAtFor(value: string | Date | undefined) {
   let date: Date | null = null;
   if (typeof value === "string") date = new Date(value);
-  if (Object.prototype.toString.call(value) === "[object Date]") date = value as Date;
+  if (Object.prototype.toString.call(value) === "[object Date]")
+    date = value as Date;
 
-  return date != null && Number.isFinite(date.getTime()) ? date.toISOString() : DEFAULT_CREATED_AT;
+  return date != null && Number.isFinite(date.getTime())
+    ? date.toISOString()
+    : DEFAULT_CREATED_AT;
 }

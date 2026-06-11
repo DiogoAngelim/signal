@@ -1,17 +1,37 @@
-import type { DecisionModuleName, OutcomeEvaluation, OutcomeEvaluationInput, OutcomeFeedback } from "../types";
 import { reviewDecisionOutcome } from "../assessment";
+import type {
+  DecisionModuleName,
+  OutcomeEvaluation,
+  OutcomeEvaluationInput,
+  OutcomeFeedback,
+} from "../types";
 import { asScore, clamp, stableId, uniqueStrings } from "../utils";
 
-export function evaluateOutcome(input: OutcomeEvaluationInput): OutcomeEvaluation {
-  const successScore = asScore(input.actualSuccessScore ?? input.realizedReward, 50);
+export function evaluateOutcome(
+  input: OutcomeEvaluationInput,
+): OutcomeEvaluation {
+  const successScore = asScore(
+    input.actualSuccessScore ?? input.realizedReward,
+    50,
+  );
   const purposeAlignment = asScore(input.purposeAlignment, successScore);
   const needAlignment = asScore(input.needAlignment, successScore);
   const expectedRisk = asScore(input.expectedRisk, 50);
   const riskTaken = asScore(input.riskTaken, expectedRisk);
   const expectedConfidence = asScore(input.expectedConfidence, 50);
-  const riskEfficiency = clamp(successScore - Math.max(0, riskTaken - expectedRisk) + Math.max(0, 60 - riskTaken) * 0.15);
-  const confidenceAccuracy = clamp(100 - Math.abs(expectedConfidence - successScore));
-  const trustImpact = Math.round((successScore - 50) * 0.35 + (purposeAlignment - 50) * 0.2 + (riskEfficiency - 50) * 0.15);
+  const riskEfficiency = clamp(
+    successScore -
+      Math.max(0, riskTaken - expectedRisk) +
+      Math.max(0, 60 - riskTaken) * 0.15,
+  );
+  const confidenceAccuracy = clamp(
+    100 - Math.abs(expectedConfidence - successScore),
+  );
+  const trustImpact = Math.round(
+    (successScore - 50) * 0.35 +
+      (purposeAlignment - 50) * 0.2 +
+      (riskEfficiency - 50) * 0.15,
+  );
   const calibrationImpact = Math.round((confidenceAccuracy - 50) * 0.35);
   const review = input.review ? reviewDecisionOutcome(input.review) : undefined;
   const lessons = uniqueStrings([
@@ -25,9 +45,13 @@ export function evaluateOutcome(input: OutcomeEvaluationInput): OutcomeEvaluatio
     ...(input.appId === undefined ? {} : { appId: input.appId }),
     ...(input.domain === undefined ? {} : { domain: input.domain }),
     ...(input.timestamp === undefined ? {} : { timestamp: input.timestamp }),
-    ...(input.correlationId === undefined ? {} : { correlationId: input.correlationId }),
+    ...(input.correlationId === undefined
+      ? {}
+      : { correlationId: input.correlationId }),
     ...(input.version === undefined ? {} : { version: input.version }),
-    ...(input.originalDecisionId === undefined ? {} : { originalDecisionId: input.originalDecisionId }),
+    ...(input.originalDecisionId === undefined
+      ? {}
+      : { originalDecisionId: input.originalDecisionId }),
     category: classifyOutcome({
       successScore,
       purposeAlignment,
@@ -48,7 +72,9 @@ export function evaluateOutcome(input: OutcomeEvaluationInput): OutcomeEvaluatio
   };
 }
 
-export function applyOutcomeFeedback(outcome: OutcomeEvaluation): OutcomeFeedback {
+export function applyOutcomeFeedback(
+  outcome: OutcomeEvaluation,
+): OutcomeFeedback {
   const modules: Partial<Record<DecisionModuleName, number>> = {
     trust: outcome.trustImpact,
     calibration: outcome.calibrationImpact,
@@ -93,10 +119,19 @@ function lessonsFor(
   riskEfficiency: number,
 ): string[] {
   const lessons = uniqueStrings(input.lessons ?? []);
-  if (successScore >= 72) lessons.push("The decision satisfied enough of its intended outcome to increase trust cautiously.");
-  if (successScore <= 35) lessons.push("Future decisions should reduce trust until similar conditions improve.");
-  if (confidenceAccuracy < 55) lessons.push("Confidence was not well calibrated against reality.");
-  if (riskEfficiency < 50) lessons.push("Risk consumed too much of the outcome benefit.");
-  if (!lessons.length) lessons.push("Outcome evidence was mixed; keep the lesson provisional.");
+  if (successScore >= 72)
+    lessons.push(
+      "The decision satisfied enough of its intended outcome to increase trust cautiously.",
+    );
+  if (successScore <= 35)
+    lessons.push(
+      "Future decisions should reduce trust until similar conditions improve.",
+    );
+  if (confidenceAccuracy < 55)
+    lessons.push("Confidence was not well calibrated against reality.");
+  if (riskEfficiency < 50)
+    lessons.push("Risk consumed too much of the outcome benefit.");
+  if (!lessons.length)
+    lessons.push("Outcome evidence was mixed; keep the lesson provisional.");
   return lessons;
 }

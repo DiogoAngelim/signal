@@ -1,4 +1,4 @@
-import { useEffect, useState, type ComponentType } from "react";
+import { type ComponentType, useEffect, useState } from "react";
 
 import { modules as discoveredModules } from "./.generated/mockup-components";
 

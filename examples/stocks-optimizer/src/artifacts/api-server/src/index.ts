@@ -1,19 +1,25 @@
-import express from "express";
-import cors from "cors";
 import { createServer } from "node:http";
+import cors from "cors";
+import express from "express";
 import { WebSocketServer } from "ws";
-import binanceExecutionRouter from "./routes/binance-execution.js";
-import stocksRouter from "./routes/stocks.js";
 import { createSignalApiRouter } from "./api/signal-routes.js";
-import { setSignalBroadcast, startBackgroundSignalEngine } from "./lib/signal-backend.js";
 import { getOrCreateMarketBacktest } from "./lib/market-backtest.js";
-import { buildHealthPayload, buildReadinessPayload } from "./observability/signal-health.js";
+import {
+  setSignalBroadcast,
+  startBackgroundSignalEngine,
+} from "./lib/signal-backend.js";
+import {
+  buildHealthPayload,
+  buildReadinessPayload,
+} from "./observability/signal-health.js";
 import {
   apiErrorHandler,
   createSignalCorsOptions,
   requestIdMiddleware,
   secureHeadersMiddleware,
 } from "./observability/signal-http.js";
+import binanceExecutionRouter from "./routes/binance-execution.js";
+import stocksRouter from "./routes/stocks.js";
 
 const app = express();
 
@@ -21,8 +27,14 @@ app.disable("x-powered-by");
 app.use(requestIdMiddleware);
 app.use(secureHeadersMiddleware);
 app.use(cors(createSignalCorsOptions()));
-app.use(express.json({ limit: process.env.SIGNAL_API_BODY_LIMIT ?? process.env.REQUEST_BODY_LIMIT ?? "1mb" }));
-
+app.use(
+  express.json({
+    limit:
+      process.env.SIGNAL_API_BODY_LIMIT ??
+      process.env.REQUEST_BODY_LIMIT ??
+      "1mb",
+  }),
+);
 
 const logger = {
   info: (payload: unknown, message?: string) => {
@@ -52,11 +64,6 @@ if (rawPort && (Number.isNaN(port) || port <= 0)) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-
-
-
-
-
 app.get("/health", (_req, res) => {
   res.json(buildHealthPayload());
 });
@@ -80,7 +87,6 @@ app.use("/api", binanceExecutionRouter);
 const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
-
 function broadcastSignal(data: any) {
   const msg = JSON.stringify(data);
   wss.clients.forEach((client) => {
@@ -92,44 +98,57 @@ function broadcastSignal(data: any) {
 
 setSignalBroadcast(broadcastSignal);
 
-
-
-
 function localPortfolioBacktestHistory() {
   return Array.from({ length: 180 }, (_, index) => {
     const equity = 1000 + index * 1.25 + Math.sin(index / 8) * 18;
     const deployedPct = 35 + Math.sin(index / 10) * 12;
 
     return {
-      date: new Date(Date.now() - (179 - index) * 86400000).toISOString().slice(0, 10),
+      date: new Date(Date.now() - (179 - index) * 86400000)
+        .toISOString()
+        .slice(0, 10),
       equity,
-      returnPct: ((equity / 1000) - 1) * 100,
+      returnPct: (equity / 1000 - 1) * 100,
       dailyReturnPct: index === 0 ? 0 : 0.1 + Math.sin(index / 7) * 0.25,
       deployedPct,
       cashPct: Math.max(0, 100 - deployedPct),
       positionsCount: 5 + (index % 4),
-      regime: index % 4 === 0 ? "Selective Upside Participation" : "Constructive Trend Environment",
+      regime:
+        index % 4 === 0
+          ? "Selective Upside Participation"
+          : "Constructive Trend Environment",
     };
   });
 }
 
 function localPortfolioBacktestTrades() {
   const history = localPortfolioBacktestHistory();
-  const symbols = ["ADNOCGAS", "EAND", "ALDAR", "ADCB", "FAB", "TAQA", "ADNOCDRILL", "ADNOCDIST"];
+  const symbols = [
+    "ADNOCGAS",
+    "EAND",
+    "ALDAR",
+    "ADCB",
+    "FAB",
+    "TAQA",
+    "ADNOCDRILL",
+    "ADNOCDIST",
+  ];
 
   return symbols.flatMap((symbol, symbolIndex) =>
     Array.from({ length: 4 }, (_, tradeIndex) => {
       const entryPrice = 8 + symbolIndex * 1.6 + tradeIndex * 0.8;
-      const exitPrice = entryPrice * (1.015 + Math.sin(symbolIndex + tradeIndex) * 0.035);
+      const exitPrice =
+        entryPrice * (1.015 + Math.sin(symbolIndex + tradeIndex) * 0.035);
 
       return {
         symbol,
         entryDate: history[Math.max(0, tradeIndex * 34)]?.date,
-        exitDate: history[Math.min(history.length - 1, tradeIndex * 34 + 22)]?.date,
+        exitDate:
+          history[Math.min(history.length - 1, tradeIndex * 34 + 22)]?.date,
         entryPrice,
         exitPrice,
         entryExposure: 2.5 + symbolIndex * 0.25,
-        returnPct: ((exitPrice / entryPrice) - 1) * 100,
+        returnPct: (exitPrice / entryPrice - 1) * 100,
         setupQuality: 58 + symbolIndex + tradeIndex,
         riskPressure: 30 + tradeIndex * 5,
         regime: "Selective Upside Participation",
@@ -145,7 +164,9 @@ function localPortfolioBacktestSummary(market: string) {
   const winners = trades.filter((trade) => trade.returnPct > 0);
   const losers = trades.filter((trade) => trade.returnPct < 0);
   const grossProfit = winners.reduce((sum, trade) => sum + trade.returnPct, 0);
-  const grossLoss = Math.abs(losers.reduce((sum, trade) => sum + trade.returnPct, 0));
+  const grossLoss = Math.abs(
+    losers.reduce((sum, trade) => sum + trade.returnPct, 0),
+  );
 
   return {
     market,
@@ -173,14 +194,13 @@ function localPortfolioBacktestSummary(market: string) {
   };
 }
 
-
-
-
-
-
 const LOCAL_PORTFOLIO_STORE = new Map<string, any>();
 
-function portfolioSummaryValidationResponseGuard(req: any, res: any, next: any) {
+function portfolioSummaryValidationResponseGuard(
+  req: any,
+  res: any,
+  next: any,
+) {
   const isPortfolioSummary =
     req.path === "/api/portfolio" &&
     String(req.query?.action ?? "") === "summary";
@@ -199,10 +219,7 @@ function portfolioSummaryValidationResponseGuard(req: any, res: any, next: any) 
     );
 
     const tradeCount = Number(
-      nextBody.tradeCount ??
-        nextBody.trade_count ??
-        nextBody.trades ??
-        0,
+      nextBody.tradeCount ?? nextBody.trade_count ?? nextBody.trades ?? 0,
     );
 
     const sharpeReturnsCount = Number(
@@ -233,12 +250,6 @@ function portfolioSummaryValidationResponseGuard(req: any, res: any, next: any) 
     const extremeSharpe =
       Number.isFinite(annualizedSharpe) && Math.abs(annualizedSharpe) > 5;
 
-    
-
-
-
-
-
     if (
       tinySampleSharpe ||
       extremeSharpe ||
@@ -249,18 +260,13 @@ function portfolioSummaryValidationResponseGuard(req: any, res: any, next: any) 
     }
 
     const maxDrawdown = Number(
-      nextBody.maxDrawdownPct ??
-        nextBody.max_drawdown_pct,
+      nextBody.maxDrawdownPct ?? nextBody.max_drawdown_pct,
     );
 
     const drawdownUnavailable =
-      nextBody.maxDrawdownPct == null &&
-      nextBody.max_drawdown_pct == null;
+      nextBody.maxDrawdownPct == null && nextBody.max_drawdown_pct == null;
 
-    if (
-      tradeCount >= 30 &&
-      (drawdownUnavailable || maxDrawdown === 0)
-    ) {
+    if (tradeCount >= 30 && (drawdownUnavailable || maxDrawdown === 0)) {
       flags.add("ZERO_DRAWDOWN_WITH_TRADES");
       flags.delete("INVALID_DRAWDOWN");
     }
@@ -269,10 +275,13 @@ function portfolioSummaryValidationResponseGuard(req: any, res: any, next: any) 
 
     const labels: Record<string, string> = {
       INVALID_SHARPE: "Sharpe ratio is unavailable or invalid",
-      SUSPICIOUS_SHARPE: "Sharpe ratio is computable but statistically unreliable",
+      SUSPICIOUS_SHARPE:
+        "Sharpe ratio is computable but statistically unreliable",
       INVALID_DRAWDOWN: "Drawdown calculation is unavailable or invalid",
-      ZERO_DRAWDOWN_WITH_TRADES: "Drawdown is suspiciously zero despite many trades",
-      INSUFFICIENT_WALK_FORWARD_SEGMENTS: "Only 1 of 3 required walk-forward segments is available",
+      ZERO_DRAWDOWN_WITH_TRADES:
+        "Drawdown is suspiciously zero despite many trades",
+      INSUFFICIENT_WALK_FORWARD_SEGMENTS:
+        "Only 1 of 3 required walk-forward segments is available",
       BENCHMARK_UNDERPERFORMANCE: "Strategy underperformed the benchmark",
       SEVERE_BENCHMARK_UNDERPERFORMANCE: "Benchmark underperformance is severe",
       BENCHMARK_COMPARISON_FAILED: "Benchmark comparison failed",
@@ -288,8 +297,6 @@ function portfolioSummaryValidationResponseGuard(req: any, res: any, next: any) 
 
   return next();
 }
-
-
 
 app.use(portfolioSummaryValidationResponseGuard);
 
@@ -318,8 +325,12 @@ app.post("/api/stocks/watch-market", async (req, res) => {
 
 app.all("/api/portfolio", async (req, res) => {
   try {
-    const action = String(req.query.action ?? req.body?.action ?? "snapshot").trim();
-    const market = String(req.query.market ?? req.body?.market ?? "ADX").trim().toUpperCase();
+    const action = String(
+      req.query.action ?? req.body?.action ?? "snapshot",
+    ).trim();
+    const market = String(req.query.market ?? req.body?.market ?? "ADX")
+      .trim()
+      .toUpperCase();
     const force = action === "refresh-market";
 
     const payload = await getOrCreateMarketBacktest(market, { force });
@@ -335,7 +346,10 @@ app.all("/api/portfolio", async (req, res) => {
     }
 
     if (action === "trades") {
-      const limit = Math.max(1, Math.min(Number(req.query.limit ?? 5000), 20000));
+      const limit = Math.max(
+        1,
+        Math.min(Number(req.query.limit ?? 5000), 20000),
+      );
       res.json({ trades: payload.trades.slice(-limit) });
       return;
     }
@@ -362,7 +376,13 @@ app.all("/api/portfolio", async (req, res) => {
     res.status(400).json({
       error: "Unsupported portfolio action",
       action,
-      supportedActions: ["summary", "history", "trades", "snapshot", "refresh-market"],
+      supportedActions: [
+        "summary",
+        "history",
+        "trades",
+        "snapshot",
+        "refresh-market",
+      ],
     });
   } catch (error) {
     res.status(500).json({
@@ -373,21 +393,22 @@ app.all("/api/portfolio", async (req, res) => {
 
 app.use(apiErrorHandler);
 
-
-
 if (port && port > 0) {
   server.listen(port, () => {
     logger.info({ port }, "Server listening");
-    
+
     setInterval(() => {
       const mem = process.memoryUsage();
-      logger.info({
-        rss: mem.rss,
-        heapTotal: mem.heapTotal,
-        heapUsed: mem.heapUsed,
-        external: mem.external,
-        arrayBuffers: mem.arrayBuffers,
-      }, "Memory usage");
+      logger.info(
+        {
+          rss: mem.rss,
+          heapTotal: mem.heapTotal,
+          heapUsed: mem.heapUsed,
+          external: mem.external,
+          arrayBuffers: mem.arrayBuffers,
+        },
+        "Memory usage",
+      );
     }, 30000);
     void startBackgroundSignalEngine().catch((startupError) => {
       logger.error(
@@ -402,6 +423,5 @@ if (port && port > 0) {
     process.exit(1);
   });
 } else {
-  
   logger.info({ port }, "Module imported without PORT — server not started");
 }

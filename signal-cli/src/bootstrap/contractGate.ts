@@ -17,19 +17,16 @@
  */
 
 import { existsSync, readFileSync } from "node:fs";
-import { readState } from "../state/stateStore.js";
-import { verifyState } from "../verifier/verifier.js";
-import { replayPhases } from "../replay/replayEngine.js";
+import { getContractSnapshotPath, getStatePath } from "../core/constants.js";
 import {
   deterministicStringify,
-  sha256,
   recomputePhaseHash,
+  sha256,
 } from "../core/hashChain.js";
-import {
-  getStatePath,
-  getContractSnapshotPath,
-} from "../core/constants.js";
+import { replayPhases } from "../replay/replayEngine.js";
+import { readState } from "../state/stateStore.js";
 import type { PhaseState } from "../state/types.js";
+import { verifyState } from "../verifier/verifier.js";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -164,16 +161,16 @@ export function assertContractIntegrity(
 
   // Step 4: Version enforcement (early, before any computation)
   const rawRecord = snapshotRaw as Record<string, unknown>;
-  if (rawRecord["version"] !== 1) {
+  if (rawRecord.version !== 1) {
     return { ok: false, reason: "VERSION_MISMATCH" };
   }
 
   // Step 5: Schema validation (structure-level divergence)
   if (
-    rawRecord["hashChain"] == null ||
-    typeof rawRecord["hashChain"] !== "object" ||
-    rawRecord["verifyResult"] == null ||
-    typeof rawRecord["verifyResult"] !== "object"
+    rawRecord.hashChain == null ||
+    typeof rawRecord.hashChain !== "object" ||
+    rawRecord.verifyResult == null ||
+    typeof rawRecord.verifyResult !== "object"
   ) {
     return { ok: false, reason: "SCHEMA_MISMATCH" };
   }

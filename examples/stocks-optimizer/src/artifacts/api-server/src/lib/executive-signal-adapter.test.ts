@@ -53,16 +53,18 @@ function signalInput(overrides: Record<string, any> = {}) {
     volatilityPct: 3,
     liquidityScore: 84,
     signalConfidence: 80,
-    opportunityCandidates: [{
-      symbol: "AAPL",
-      candidateScore: 78,
-      confidence: 76,
-      maturity: 64,
-      novelty: 58,
-      expectedMove: 5,
-      lifecycle: { status: "emerging" },
-      discovery: { confidence: 76, maturity: 64, novelty: 58 },
-    }],
+    opportunityCandidates: [
+      {
+        symbol: "AAPL",
+        candidateScore: 78,
+        confidence: 76,
+        maturity: 64,
+        novelty: 58,
+        expectedMove: 5,
+        lifecycle: { status: "emerging" },
+        discovery: { confidence: 76, maturity: 64, novelty: 58 },
+      },
+    ],
     ...overrides,
   };
 }
@@ -141,13 +143,23 @@ describe("stock executive signal adapter", () => {
       decision: decision() as any,
     });
 
-    assert.equal(architecture.executionQuality.status === "good" || architecture.executionQuality.status === "excellent", true);
+    assert.equal(
+      architecture.executionQuality.status === "good" ||
+        architecture.executionQuality.status === "excellent",
+      true,
+    );
     assert.equal(architecture.executiveDecision.decision, "buy");
     assert.equal(architecture.executiveDecision.participationMode, "limited");
-    assert.equal(architecture.discoveryAccountability.accountabilityScore > 0, true);
+    assert.equal(
+      architecture.discoveryAccountability.accountabilityScore > 0,
+      true,
+    );
     assert.equal(architecture.counterfactual.scenarios.length >= 4, true);
     assert.equal(architecture.wisdom.wisdomScore > 0, true);
-    assert.equal(architecture.executiveDecision.audit.sourceModules.includes("wisdom"), true);
+    assert.equal(
+      architecture.executiveDecision.audit.sourceModules.includes("wisdom"),
+      true,
+    );
     assert.equal(architecture.decisionStates.trust.status, "trusted");
     assert.equal(architecture.decisionStates.permission.allowed, true);
     assert.equal(architecture.decisionStates.capacity.mode, "reduced");
@@ -176,7 +188,13 @@ describe("stock executive signal adapter", () => {
           requiresReview: true,
           allowedActions: [],
           blockedActions: ["new_exposure"],
-          blockers: [{ label: "Risk lock", severity: "high", reason: "Risk checks did not pass" }],
+          blockers: [
+            {
+              label: "Risk lock",
+              severity: "high",
+              reason: "Risk checks did not pass",
+            },
+          ],
           unlockCriteria: ["Lower risk pressure."],
           reasons: ["Risk lock."],
         },

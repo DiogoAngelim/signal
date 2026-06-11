@@ -1,21 +1,22 @@
 import { createHash } from "node:crypto";
 import { pool } from "@workspace/db";
+import { logger } from "./logger";
 import {
+  type EvaluationMetrics,
+  type ModelLifecycleState,
   calculateEvaluationMetrics,
   evaluatePromotionGates,
   evaluateRetirementRules,
   isAllowedTransition,
   loadModelLifecycleConfig,
-  type EvaluationMetrics,
-  type ModelLifecycleState,
 } from "./model-lifecycle";
-import {
-  type SignalDecision,
-  type SignalTrainingState,
-} from "./signal-training";
-import { logger } from "./logger";
+import type { SignalDecision, SignalTrainingState } from "./signal-training";
 
-type LifecycleAction = "Awaiting Decision" | "Careful" | "Trusted" | "Disregard";
+type LifecycleAction =
+  | "Awaiting Decision"
+  | "Careful"
+  | "Trusted"
+  | "Disregard";
 
 export interface SignalLifecycleDecision {
   modelId: string;
@@ -132,7 +133,11 @@ export async function governSignalDecision(
       live_expectancy_r: tradeResults.length ? undefined : 0,
       backtest_expectancy_r: BASELINE_BACKTEST_EXPECTANCY_R,
     });
-    const transitioned = await applyLifecycleGates(model, metrics, tradeResults.length);
+    const transitioned = await applyLifecycleGates(
+      model,
+      metrics,
+      tradeResults.length,
+    );
     return buildLifecycleDecision(transitioned, metrics, tradeResults.length);
   } catch (error) {
     logLifecycleWarning(error);
@@ -155,14 +160,20 @@ export function applyLifecycleToSignal<T extends SignalDecision>(
   if (lifecycle.modelLifecycleState === "REDUCED") {
     return {
       ...signal,
-      signalConfidence: Math.max(15, Math.round(signal.signalConfidence * 0.65)),
+      signalConfidence: Math.max(
+        15,
+        Math.round(signal.signalConfidence * 0.65),
+      ),
     };
   }
 
   if (lifecycle.modelLifecycleState === "SMALL_LIVE") {
     return {
       ...signal,
-      signalConfidence: Math.max(15, Math.round(signal.signalConfidence * 0.85)),
+      signalConfidence: Math.max(
+        15,
+        Math.round(signal.signalConfidence * 0.85),
+      ),
     };
   }
 
@@ -330,14 +341,20 @@ async function ensureRuntimeModel(market: string): Promise<ModelRow> {
   const active = await loadPreferredRuntimeModel(normalizedMarket);
   if (active) return active;
 
-  const baseline = await loadModelById(`stock-signal:${normalizedMarket}:baseline`);
+  const baseline = await loadModelById(
+    `stock-signal:${normalizedMarket}:baseline`,
+  );
   if (!baseline) {
-    throw new Error(`Lifecycle model for ${normalizedMarket} could not be loaded`);
+    throw new Error(
+      `Lifecycle model for ${normalizedMarket} could not be loaded`,
+    );
   }
   return baseline;
 }
 
-async function ensureBaselineModel(normalizedMarket: string): Promise<ModelRow> {
+async function ensureBaselineModel(
+  normalizedMarket: string,
+): Promise<ModelRow> {
   const now = new Date();
   const validationStart = new Date(now.getTime() - 30 * 86_400_000);
   const trainingStart = new Date(now.getTime() - 120 * 86_400_000);
@@ -391,7 +408,9 @@ async function ensureBaselineModel(normalizedMarket: string): Promise<ModelRow> 
   return model;
 }
 
-async function loadPreferredRuntimeModel(regimeScope: string): Promise<ModelRow | null> {
+async function loadPreferredRuntimeModel(
+  regimeScope: string,
+): Promise<ModelRow | null> {
   const result = await pool.query<ModelRow>(
     `
       SELECT *
@@ -431,7 +450,9 @@ async function loadModelParentsById(modelId: string): Promise<ModelRow[]> {
   return model ? [model] : [];
 }
 
-async function loadModelParentsByMarket(normalizedMarket: string): Promise<ModelRow[]> {
+async function loadModelParentsByMarket(
+  normalizedMarket: string,
+): Promise<ModelRow[]> {
   const result = await pool.query<ModelRow>(
     `
       WITH ranked AS (
@@ -473,8 +494,14 @@ async function createCandidateForParent(
   reason: string,
 ): Promise<ModelRow> {
   const now = new Date();
-  const timestamp = now.toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
-  const suffix = stableHash(`${parent.model_id}:${timestamp}:${reason}`).slice(0, 8);
+  const timestamp = now
+    .toISOString()
+    .replace(/[-:.TZ]/g, "")
+    .slice(0, 14);
+  const suffix = stableHash(`${parent.model_id}:${timestamp}:${reason}`).slice(
+    0,
+    8,
+  );
   const modelId = `stock-signal:${parent.regime_scope}:candidate:${timestamp}:${suffix}`;
   const trainingEnd = new Date(now.getTime() - 7 * 86_400_000);
   const trainingStart = new Date(now.getTime() - 127 * 86_400_000);
@@ -610,7 +637,10 @@ async function applyLifecycleGates(
   metrics: EvaluationMetrics,
   sampleSize: number,
 ): Promise<ModelRow> {
-  if (sampleSize < MIN_LIFECYCLE_SAMPLE || model.lifecycle_state === "RETIRED") {
+  if (
+    sampleSize < MIN_LIFECYCLE_SAMPLE ||
+    model.lifecycle_state === "RETIRED"
+  ) {
     return model;
   }
 
@@ -758,7 +788,8 @@ function buildLifecycleDecision(
       modelId: model.model_id,
       modelLifecycleState: state,
       modelLifecycleAction: "Disregard",
-      modelLifecycleReason: "Retired by lifecycle gates; new trades are blocked.",
+      modelLifecycleReason:
+        "Retired by lifecycle gates; new trades are blocked.",
       modelCanOpenNewTrades: false,
       modelAllocationMultiplier: 0,
       modelMetrics: metrics,
@@ -842,7 +873,12 @@ function resultRForAction(action: string, returnPercent: number): number {
 }
 
 function normalizeScope(value: string): string {
-  return value.trim().toUpperCase().replace(/[^A-Z0-9|:_-]+/g, "_") || "GLOBAL";
+  return (
+    value
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9|:_-]+/g, "_") || "GLOBAL"
+  );
 }
 
 function stableHash(value: string): string {

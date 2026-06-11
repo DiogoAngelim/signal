@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { resolveCommitment, type ResolveInput } from "./engine";
+import { type ResolveInput, resolveCommitment } from "./engine";
 
 const strongInput: ResolveInput = {
   actionName: "Open measured participation",
@@ -41,7 +41,11 @@ describe("Resolve", () => {
     assert.equal(result.decision, "wait");
     assert.equal(result.commitmentLevel, "watch");
     assert.ok(result.missingEvidence.includes("Agency trust"));
-    assert.ok(result.unlockConditions.some((condition) => condition.includes("trust score")));
+    assert.ok(
+      result.unlockConditions.some((condition) =>
+        condition.includes("trust score"),
+      ),
+    );
   });
 
   it("treats reduced-size Agency approval as a limited commitment", () => {
@@ -104,25 +108,50 @@ describe("Resolve", () => {
   });
 
   it("rejects, invalidates, and downgrades unsafe states", () => {
-    assert.equal(resolveCommitment({ ...strongInput, agencyRecommendation: "denied" }).decision, "reject");
-    assert.equal(resolveCommitment({ ...strongInput, evidence: { invalidated: true } }).decision, "invalidate");
-    assert.equal(resolveCommitment({ ...strongInput, dataReliability: 40 }).decision, "escalate");
-    assert.equal(resolveCommitment({ ...strongInput, overfitRisk: 45 }).decision, "wait");
-    assert.equal(resolveCommitment({ ...strongInput, beliefFragility: 90 }).decision, "escalate");
+    assert.equal(
+      resolveCommitment({ ...strongInput, agencyRecommendation: "denied" })
+        .decision,
+      "reject",
+    );
+    assert.equal(
+      resolveCommitment({ ...strongInput, evidence: { invalidated: true } })
+        .decision,
+      "invalidate",
+    );
+    assert.equal(
+      resolveCommitment({ ...strongInput, dataReliability: 40 }).decision,
+      "escalate",
+    );
+    assert.equal(
+      resolveCommitment({ ...strongInput, overfitRisk: 45 }).decision,
+      "wait",
+    );
+    assert.equal(
+      resolveCommitment({ ...strongInput, beliefFragility: 90 }).decision,
+      "escalate",
+    );
   });
 
   it("waits when app evidence names a missing commitment boundary", () => {
     const result = resolveCommitment({
       ...strongInput,
       evidence: {
-        missingEvidence: ["Independent confirmation from another evidence group"],
+        missingEvidence: [
+          "Independent confirmation from another evidence group",
+        ],
         unlockConditions: ["Add independent confirmation."],
       },
     });
 
     assert.equal(result.decision, "wait");
-    assert.ok(result.missingEvidence.includes("Independent confirmation from another evidence group"));
-    assert.ok(result.unlockConditions.includes("Add independent confirmation."));
+    assert.ok(
+      result.missingEvidence.includes(
+        "Independent confirmation from another evidence group",
+      ),
+    );
+    assert.ok(
+      result.unlockConditions.includes("Add independent confirmation."),
+    );
   });
 
   it("adds Wisdom quality to Resolve traces when long-term learning evidence is present", () => {

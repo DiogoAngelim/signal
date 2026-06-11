@@ -1,7 +1,10 @@
-import { clamp, mean } from "../math/statistics";
 import type { CalibrationResult } from "../calibration/engine";
+import { clamp, mean } from "../math/statistics";
 import type { MeaningResult } from "../meaning/engine";
-import type { PruningCandidateAssessment, PruningResult } from "../pruning/engine";
+import type {
+  PruningCandidateAssessment,
+  PruningResult,
+} from "../pruning/engine";
 import type { ReflectionResult } from "../reflection/engine";
 
 export type AgencyStatus =
@@ -237,10 +240,16 @@ const DEFAULT_WEIGHTS = {
 
 export function authorize(input: AgencyInput): AgencyResult {
   const rawDecision = normalizeDecision(input.decision);
-  const calibration = normalizeCalibration(input.calibration, rawDecision.confidence);
+  const calibration = normalizeCalibration(
+    input.calibration,
+    rawDecision.confidence,
+  );
   const decision = {
     ...rawDecision,
-    confidence: Math.min(rawDecision.confidence, calibration.calibratedConfidence),
+    confidence: Math.min(
+      rawDecision.confidence,
+      calibration.calibratedConfidence,
+    ),
   };
   const thresholds = normalizeThresholds(input.thresholds);
   const reflectionScore = normalizeReflectionScore(input.reflection);
@@ -667,12 +676,14 @@ function capReadiness(
   return clamp(capped);
 }
 
-function evaluatePruningGate(pruning: AgencyInput["pruning"]): PruningGateEvaluation {
+function evaluatePruningGate(
+  pruning: AgencyInput["pruning"],
+): PruningGateEvaluation {
   const candidates = Array.isArray(pruning)
     ? pruning
     : Array.isArray(pruning?.candidates)
       ? pruning.candidates
-      : pruning && pruning.candidateId
+      : pruning?.candidateId
         ? [pruning as PruningCandidateAssessment]
         : [];
   if (candidates.length === 0) {
@@ -693,39 +704,68 @@ function evaluatePruningGate(pruning: AgencyInput["pruning"]): PruningGateEvalua
   const reducedCandidateIds = idsForAction(candidates, "reduce");
   const quarantinedCandidateIds = idsForAction(candidates, "quarantine");
   const preservedCandidateIds = candidates
-    .filter((candidate) => candidate.recommendedAction === "keep" || candidate.survivalContribution >= 75)
+    .filter(
+      (candidate) =>
+        candidate.recommendedAction === "keep" ||
+        candidate.survivalContribution >= 75,
+    )
     .map((candidate) => candidate.candidateId);
   const nonPrunedEvidenceScore = clamp(
     mean(
       candidates
-        .filter((candidate) => !["ignore", "quarantine"].includes(candidate.recommendedAction))
-        .map((candidate) => mean([candidate.keepScore, candidate.evidenceConfidence, candidate.utilityContribution])),
+        .filter(
+          (candidate) =>
+            !["ignore", "quarantine"].includes(candidate.recommendedAction),
+        )
+        .map((candidate) =>
+          mean([
+            candidate.keepScore,
+            candidate.evidenceConfidence,
+            candidate.utilityContribution,
+          ]),
+        ),
     ),
   );
   const ignoredPressure = ignoredCandidateIds.length > 0 ? 18 : 0;
   const quarantinePressure = quarantinedCandidateIds.length > 0 ? 34 : 0;
   const reducedPressure = reducedCandidateIds.length > 0 ? 8 : 0;
-  const score = clamp(nonPrunedEvidenceScore - ignoredPressure - quarantinePressure - reducedPressure);
-  const safeToAct = quarantinedCandidateIds.length === 0 && !(ignoredCandidateIds.length > 0 && nonPrunedEvidenceScore < 65);
-  const executionCap = quarantinedCandidateIds.length > 0
-    ? 0
-    : ignoredCandidateIds.length > 0
-      ? Math.min(55, score)
-      : reducedCandidateIds.length > 0
-        ? Math.min(78, score)
-        : 100;
+  const score = clamp(
+    nonPrunedEvidenceScore -
+      ignoredPressure -
+      quarantinePressure -
+      reducedPressure,
+  );
+  const safeToAct =
+    quarantinedCandidateIds.length === 0 &&
+    !(ignoredCandidateIds.length > 0 && nonPrunedEvidenceScore < 65);
+  const executionCap =
+    quarantinedCandidateIds.length > 0
+      ? 0
+      : ignoredCandidateIds.length > 0
+        ? Math.min(55, score)
+        : reducedCandidateIds.length > 0
+          ? Math.min(78, score)
+          : 100;
   const reasons = [
     ...(quarantinedCandidateIds.length
-      ? [`Avoid acting on quarantined pruning candidate(s): ${quarantinedCandidateIds.join(", ")}.`]
+      ? [
+          `Avoid acting on quarantined pruning candidate(s): ${quarantinedCandidateIds.join(", ")}.`,
+        ]
       : []),
     ...(ignoredCandidateIds.length
-      ? [`Ignored pruning candidate(s) cannot carry the decision: ${ignoredCandidateIds.join(", ")}.`]
+      ? [
+          `Ignored pruning candidate(s) cannot carry the decision: ${ignoredCandidateIds.join(", ")}.`,
+        ]
       : []),
     ...(reducedCandidateIds.length
-      ? [`Reduced pruning candidate(s) lower execution size or confidence: ${reducedCandidateIds.join(", ")}.`]
+      ? [
+          `Reduced pruning candidate(s) lower execution size or confidence: ${reducedCandidateIds.join(", ")}.`,
+        ]
       : []),
     ...(preservedCandidateIds.length
-      ? [`Preserved candidate(s) remain available as non-pruned evidence: ${preservedCandidateIds.join(", ")}.`]
+      ? [
+          `Preserved candidate(s) remain available as non-pruned evidence: ${preservedCandidateIds.join(", ")}.`,
+        ]
       : []),
   ];
 
@@ -742,7 +782,9 @@ function evaluatePruningGate(pruning: AgencyInput["pruning"]): PruningGateEvalua
   };
 }
 
-function evaluateMeaningGate(meaning: AgencyInput["meaning"]): MeaningGateEvaluation {
+function evaluateMeaningGate(
+  meaning: AgencyInput["meaning"],
+): MeaningGateEvaluation {
   if (!meaning || typeof meaning !== "object") {
     return {
       score: 100,
@@ -761,37 +803,50 @@ function evaluateMeaningGate(meaning: AgencyInput["meaning"]): MeaningGateEvalua
     10,
   );
   const needConfidence = clamp(
-    numeric(meaning.needConfidence, meaning.purposeInputs?.needConfidence ?? 0.5),
+    numeric(
+      meaning.needConfidence,
+      meaning.purposeInputs?.needConfidence ?? 0.5,
+    ),
     0,
     1,
   );
-  const literalDesireUnsafe = Boolean(meaning.purposeInputs?.literalDesireUnsafe ?? gravityScore <= -5);
-  const action = gravityScore <= -9
-    ? "block"
-    : gravityScore <= -7 || needConfidence < 0.45
-      ? "review"
-      : gravityScore <= -5
-        ? "reduce"
-        : "allow";
+  const literalDesireUnsafe = Boolean(
+    meaning.purposeInputs?.literalDesireUnsafe ?? gravityScore <= -5,
+  );
+  const action =
+    gravityScore <= -9
+      ? "block"
+      : gravityScore <= -7 || needConfidence < 0.45
+        ? "review"
+        : gravityScore <= -5
+          ? "reduce"
+          : "allow";
   const score = clamp(
     100 -
       Math.max(0, -gravityScore) * 6 -
       Math.max(0, 0.6 - needConfidence) * 55 -
       (literalDesireUnsafe ? 12 : 0),
   );
-  const executionCap = action === "block"
-    ? 0
-    : action === "review"
-      ? Math.min(45, score)
-      : action === "reduce"
-        ? Math.min(70, score)
-        : 100;
+  const executionCap =
+    action === "block"
+      ? 0
+      : action === "review"
+        ? Math.min(45, score)
+        : action === "reduce"
+          ? Math.min(70, score)
+          : 100;
   const reasons = [
     `Meaning gravity is ${Math.round(gravityScore)}/10 with ${Math.round(needConfidence * 100)}% need confidence.`,
     ...(literalDesireUnsafe
-      ? ["Agency must act on the transformed positive goal, not the unsafe literal desire."]
-      : ["Meaning permits action on the positive goal with normal safety checks."]),
-    ...(meaning.transformedGoal ? [`Transformed goal: ${meaning.transformedGoal}`] : []),
+      ? [
+          "Agency must act on the transformed positive goal, not the unsafe literal desire.",
+        ]
+      : [
+          "Meaning permits action on the positive goal with normal safety checks.",
+        ]),
+    ...(meaning.transformedGoal
+      ? [`Transformed goal: ${meaning.transformedGoal}`]
+      : []),
   ];
 
   return {
@@ -805,7 +860,10 @@ function evaluateMeaningGate(meaning: AgencyInput["meaning"]): MeaningGateEvalua
   };
 }
 
-function idsForAction(candidates: Array<Partial<PruningCandidateAssessment>>, action: string) {
+function idsForAction(
+  candidates: Array<Partial<PruningCandidateAssessment>>,
+  action: string,
+) {
   return candidates
     .filter((candidate) => candidate.recommendedAction === action)
     .map((candidate) => String(candidate.candidateId ?? "unknown-candidate"));
@@ -837,7 +895,9 @@ function resolveStatus(input: {
   }
 
   if (input.meaningGate.action === "block") {
-    input.statusResolution.push("Meaning blocked the unsafe literal desire before action.");
+    input.statusResolution.push(
+      "Meaning blocked the unsafe literal desire before action.",
+    );
     return "denied";
   }
 
@@ -886,13 +946,19 @@ function resolveStatus(input: {
   }
 
   if (input.meaningGate.action === "review") {
-    input.statusResolution.push("Meaning requires review before acting on the transformed goal.");
+    input.statusResolution.push(
+      "Meaning requires review before acting on the transformed goal.",
+    );
     return "requires-review";
   }
 
   if (!input.pruningGate.safeToAct) {
-    input.statusResolution.push("Pruning blocked action because evidence depends on ignored or quarantined drivers.");
-    return input.pruningGate.quarantinedCandidateIds.length > 0 ? "denied" : "requires-review";
+    input.statusResolution.push(
+      "Pruning blocked action because evidence depends on ignored or quarantined drivers.",
+    );
+    return input.pruningGate.quarantinedCandidateIds.length > 0
+      ? "denied"
+      : "requires-review";
   }
 
   if (!input.constraintEvaluation.passed) {
@@ -903,7 +969,9 @@ function resolveStatus(input: {
   }
 
   if (input.meaningGate.action === "reduce") {
-    input.statusResolution.push("Meaning reduced action because the literal desire was risky.");
+    input.statusResolution.push(
+      "Meaning reduced action because the literal desire was risky.",
+    );
     return "limited";
   }
 

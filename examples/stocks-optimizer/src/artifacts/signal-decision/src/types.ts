@@ -44,7 +44,9 @@ export type ModuleStateInput =
       metadata?: Record<string, unknown>;
     };
 
-export type DecisionModuleInputs = Partial<Record<DecisionModuleName, ModuleStateInput>>;
+export type DecisionModuleInputs = Partial<
+  Record<DecisionModuleName, ModuleStateInput>
+>;
 
 export type NormalizedModuleState = {
   module: DecisionModuleName;
@@ -61,7 +63,14 @@ export type NormalizedModuleState = {
 export type RealitySource = {
   sourceId: string;
   name?: string;
-  sourceType?: "human" | "api" | "sensor" | "database" | "model" | "system" | "other";
+  sourceType?:
+    | "human"
+    | "api"
+    | "sensor"
+    | "database"
+    | "model"
+    | "system"
+    | "other";
   reliabilityScore?: number;
   freshnessWindowMs?: number;
   metadata?: Record<string, unknown>;
@@ -89,17 +98,34 @@ export type RealitySnapshotInput = {
   metadata?: Record<string, unknown>;
 };
 
-export type DecisionEvidenceDirection = "supporting" | "contradicting" | "neutral";
+export type DecisionEvidenceDirection =
+  | "supporting"
+  | "contradicting"
+  | "neutral";
 
-export type AssessmentFactStatus = "known" | "unknown" | "assumed" | "contradicted";
+export type AssessmentFactStatus =
+  | "known"
+  | "unknown"
+  | "assumed"
+  | "contradicted";
 
 export type DecisionReversibility = "unknown" | "low" | "medium" | "high";
 
-export type DecisionOutcomeReviewAssumptionStatus = "failed" | "survived" | "untested";
+export type DecisionOutcomeReviewAssumptionStatus =
+  | "failed"
+  | "survived"
+  | "untested";
 
-export type DecisionOutcomeReviewEvidenceRole = "mattered" | "misleading" | "neutral";
+export type DecisionOutcomeReviewEvidenceRole =
+  | "mattered"
+  | "misleading"
+  | "neutral";
 
-export type DecisionLearningOutcome = "confirmed" | "contradicted" | "mixed" | "unknown";
+export type DecisionLearningOutcome =
+  | "confirmed"
+  | "contradicted"
+  | "mixed"
+  | "unknown";
 
 export type DecisionEvidenceInput = {
   evidenceId?: string;
@@ -246,7 +272,12 @@ export type DecisionStewardshipAssessment = {
   optionality: number;
   resilience: number;
   reversibility: DecisionReversibilityAssessment;
-  recommendation: "proceed" | "proceed-reversibly" | "wait" | "reduce" | "avoid";
+  recommendation:
+    | "proceed"
+    | "proceed-reversibly"
+    | "wait"
+    | "reduce"
+    | "avoid";
   explanation: string[];
 };
 
@@ -499,7 +530,12 @@ export type PredictionInput = {
   assumptions?: string[];
 };
 
-export type SimulationRecommendation = "act" | "reduce" | "wait" | "block" | "escalate";
+export type SimulationRecommendation =
+  | "act"
+  | "reduce"
+  | "wait"
+  | "block"
+  | "escalate";
 
 export type SimulationPathResult = {
   actionVariant: string;
@@ -631,7 +667,10 @@ export type DecisionRecordStore = {
   get(decisionId: string): SignalDecisionRecord | undefined;
   list(): SignalDecisionRecord[];
   audit(decisionId: string): AccountabilityReport | undefined;
-  replay(decisionId: string, current: CoherenceAssessment): DecisionReplayComparison | undefined;
+  replay(
+    decisionId: string,
+    current: CoherenceAssessment,
+  ): DecisionReplayComparison | undefined;
   clear(): void;
 };
 

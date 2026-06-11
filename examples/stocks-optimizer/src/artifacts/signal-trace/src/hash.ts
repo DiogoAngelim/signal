@@ -5,8 +5,8 @@
  * by first canonicalizing it (deep sort + float normalization).
  */
 
-import { canonicalize } from "./canonicalize.js";
 import { createHash } from "node:crypto";
+import { canonicalize } from "./canonicalize.js";
 
 /**
  * Compute SHA256 hash of a canonicalized object (synchronous).

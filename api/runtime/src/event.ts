@@ -1,12 +1,12 @@
-import { createSignalEnvelope, type SignalEnvelope } from "@signal/protocol";
 import type { EventPort } from "@signal/ports";
-import type { SignalExecutionContext } from "./types";
-import type { SignalRegistry } from "./registry";
+import { type SignalEnvelope, createSignalEnvelope } from "@signal/protocol";
 import {
   throwIfExecutionBlocked,
   toEnvelopeContext,
   toEnvelopeDelivery,
 } from "./execution";
+import type { SignalRegistry } from "./registry";
+import type { SignalExecutionContext } from "./types";
 
 export async function dispatchEvent<TPayload>(
   registry: SignalRegistry,
@@ -14,7 +14,7 @@ export async function dispatchEvent<TPayload>(
   name: string,
   payload: TPayload,
   context: SignalExecutionContext,
-  meta?: Record<string, unknown>
+  meta?: Record<string, unknown>,
 ): Promise<SignalEnvelope<TPayload>> {
   throwIfExecutionBlocked(context.request);
 

@@ -1,4 +1,68 @@
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import CommandCenter from "@/components/CommandCenter";
+import DecisionOperatingSystem, {
+  type DecisionEvidenceStage,
+  type DecisionOpportunity,
+  type DecisionTone,
+  type DecisionWorkflowStep,
+} from "@/components/DecisionOperatingSystem";
+import MarketPerceptionEngine from "@/components/MarketPerceptionEngine";
+import {
+  type AllocationAction,
+  type BeliefDiagnostic,
+  type CounterfactualDiagnostic,
+  type DecisionStatesDiagnostic,
+  type DiscoveryAccountabilityDiagnostic,
+  type DiscoveryIntelligenceDiagnostic,
+  type ExecutionQualityDiagnostic,
+  type ExecutiveDecisionDiagnostic,
+  type HistoryDiagnostics,
+  type JudgementDiagnostic,
+  type MarketOption,
+  type ReadinessRemediationDiagnostic,
+  type RecognitionDiagnostic,
+  type RecoveryDiagnostic,
+  type ResolveDiagnostic,
+  type RestorationProgressDiagnostic,
+  type StockData,
+  type StockQuote,
+  type StockStatus,
+  type SurvivalMemoryDiagnostic,
+  type TradeSignal,
+  type TrustGovernorDiagnostic,
+  type WisdomDiagnostic,
+  fetchMarkets,
+  fetchStockList,
+  fetchStockQuoteBatch,
+  registerSignalWatchlist,
+} from "@/lib/api";
+import { buildCommandCenterViewModel } from "@/lib/command-center";
+import {
+  parseDashboardStrategyLiveMarket,
+  parseDashboardTimeSeriesResponse,
+} from "@/lib/dashboard-data-adapter";
+import { buildExecutiveDashboardIA } from "@/lib/dashboard-ia";
+import { resolveDashboardViewState } from "@/lib/dashboard-state";
+import {
+  MarketStateEngine,
+  type MarketStateSnapshot,
+  buildMarketPerceptionMetrics,
+  createDefaultMetricRegistry,
+} from "@/lib/market-perception";
+import {
+  capReliabilityConfidence,
+  capReliabilityExposure,
+  evaluateMarketReliability,
+  shouldUseDefensiveReliabilityPosture,
+} from "@/lib/market-reliability";
+import { buildDashboardSemanticMetrics } from "@/lib/semantic-metrics";
+import {
+  assetSizingLabel,
+  buildDashboardExposureSizing,
+  requestedExposureForAsset,
+  sizeAssetExposure,
+  sizingModeLabelForOperator,
+  sizingModeSentenceForOperator,
+} from "@/lib/sizing";
 import {
   Activity,
   AlertTriangle,
@@ -6,8 +70,8 @@ import {
   ArrowUpRight,
   BarChart3,
   Brain,
-  ChevronDown,
   CheckCircle2,
+  ChevronDown,
   CircleDollarSign,
   Clock,
   Compass,
@@ -19,6 +83,7 @@ import {
   Sparkles,
   TrendingUp,
 } from "lucide-react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -30,71 +95,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  fetchMarkets,
-  fetchStockList,
-  fetchStockQuoteBatch,
-  registerSignalWatchlist,
-  type AllocationAction,
-  type BeliefDiagnostic,
-  type CounterfactualDiagnostic,
-  type DecisionStatesDiagnostic,
-  type DiscoveryAccountabilityDiagnostic,
-  type DiscoveryIntelligenceDiagnostic,
-  type ExecutiveDecisionDiagnostic,
-  type ExecutionQualityDiagnostic,
-  type HistoryDiagnostics,
-  type JudgementDiagnostic,
-  type MarketOption,
-  type ReadinessRemediationDiagnostic,
-  type RecognitionDiagnostic,
-  type RecoveryDiagnostic,
-  type RestorationProgressDiagnostic,
-  type ResolveDiagnostic,
-  type StockData,
-  type StockQuote,
-  type StockStatus,
-  type SurvivalMemoryDiagnostic,
-  type TradeSignal,
-  type TrustGovernorDiagnostic,
-  type WisdomDiagnostic,
-} from "@/lib/api";
-import {
-  parseDashboardStrategyLiveMarket,
-  parseDashboardTimeSeriesResponse,
-} from "@/lib/dashboard-data-adapter";
-import CommandCenter from "@/components/CommandCenter";
-import DecisionOperatingSystem, {
-  type DecisionEvidenceStage,
-  type DecisionOpportunity,
-  type DecisionTone,
-  type DecisionWorkflowStep,
-} from "@/components/DecisionOperatingSystem";
-import MarketPerceptionEngine from "@/components/MarketPerceptionEngine";
-import { buildCommandCenterViewModel } from "@/lib/command-center";
-import { resolveDashboardViewState } from "@/lib/dashboard-state";
-import {
-  MarketStateEngine,
-  buildMarketPerceptionMetrics,
-  createDefaultMetricRegistry,
-  type MarketStateSnapshot,
-} from "@/lib/market-perception";
-import {
-  capReliabilityConfidence,
-  capReliabilityExposure,
-  evaluateMarketReliability,
-  shouldUseDefensiveReliabilityPosture,
-} from "@/lib/market-reliability";
-import {
-  assetSizingLabel,
-  buildDashboardExposureSizing,
-  requestedExposureForAsset,
-  sizeAssetExposure,
-  sizingModeLabelForOperator,
-  sizingModeSentenceForOperator,
-} from "@/lib/sizing";
-import { buildDashboardSemanticMetrics } from "@/lib/semantic-metrics";
-import { buildExecutiveDashboardIA } from "@/lib/dashboard-ia";
 
 const STOCK_LIST_PAGE_SIZE = 500;
 const INITIAL_QUOTE_SYMBOL_LIMIT = 140;
@@ -300,7 +300,10 @@ type MarketExecutionPreset = {
   shrinkage: number;
 };
 
-const MARKET_EXECUTION_PRESETS: Record<MarketExecutionProfileName, MarketExecutionPreset> = {
+const MARKET_EXECUTION_PRESETS: Record<
+  MarketExecutionProfileName,
+  MarketExecutionPreset
+> = {
   CRYPTO_LIQUID: {
     name: "Crypto liquid",
     profile: "CRYPTO_LIQUID",
@@ -709,7 +712,7 @@ function metricsFromCurve(curve: Array<any>) {
   const profitFactor =
     grossLoss === 0
       ? grossProfit > 0
-        ? Infinity
+        ? Number.POSITIVE_INFINITY
         : null
       : grossProfit / grossLoss;
   const winRatePct = returns.length
@@ -2421,7 +2424,9 @@ export function maximumExposureSubLabel(input: {
     !finiteNumber(input.suggestedMaximumExposurePct) ||
     numeric(input.suggestedMaximumExposurePct) <= 0
   ) {
-    return input.sizingMode === "none" ? "Sizing locked by governance" : undefined;
+    return input.sizingMode === "none"
+      ? "Sizing locked by governance"
+      : undefined;
   }
 
   if (input.sizingMode === "micro") return "reduced-size portfolio cap";
@@ -2494,11 +2499,14 @@ function assetRankReason(stock: IntelligenceStock) {
   }
 
   if (riskControl >= 70 && expectedMove >= 1) {
-    return `Rank is supported by controlled risk, improving trend quality, and a usable expected move.`;
+    return "Rank is supported by controlled risk, improving trend quality, and a usable expected move.";
   }
 
   if (stock.allocationAction === "Blocked") {
-    return stock.rejectionReason ?? "Rank is review-only because governance is still blocking allocation.";
+    return (
+      stock.rejectionReason ??
+      "Rank is review-only because governance is still blocking allocation."
+    );
   }
 
   return stock.sizingReasons?.[0] ?? stock.explanation;
@@ -2571,7 +2579,10 @@ function restorationProgressTone(
   progress?: RestorationProgressDiagnostic | null,
 ): "good" | "warn" | "bad" | "neutral" {
   if (!progress) return "neutral";
-  if (progress.status === "restored" || progress.status === "ready_for_restoration")
+  if (
+    progress.status === "restored" ||
+    progress.status === "ready_for_restoration"
+  )
     return "good";
   if (progress.status === "blocked") return "bad";
   return "warn";
@@ -2590,7 +2601,7 @@ function topBeliefEvidence(
   belief: BeliefDiagnostic | null,
   key: "supportingEvidence" | "contradictoryEvidence",
 ) {
-  return Array.isArray(belief?.[key]) ? belief[key]!.slice(0, 2) : [];
+  return Array.isArray(belief?.[key]) ? belief[key]?.slice(0, 2) : [];
 }
 
 function SectionShell({
@@ -3463,8 +3474,7 @@ export default function Dashboard() {
         simulationRecommendation:
           signal.simulationRecommendation ??
           (stock as any).simulationRecommendation,
-        wisdomDecision:
-          signal.wisdomDecision ?? (stock as any).wisdomDecision,
+        wisdomDecision: signal.wisdomDecision ?? (stock as any).wisdomDecision,
         outcomeAccuracy:
           signal.outcomeAccuracy ?? (stock as any).outcomeAccuracy,
         accountabilitySummary:
@@ -3472,9 +3482,11 @@ export default function Dashboard() {
         decisionReplayAvailable:
           signal.decisionReplayAvailable ??
           (stock as any).decisionReplayAvailable,
-        actionAllowed:
-          signal.actionAllowed ?? (stock as any).actionAllowed,
-        actionScale: numeric(signal.actionScale, numeric((stock as any).actionScale)),
+        actionAllowed: signal.actionAllowed ?? (stock as any).actionAllowed,
+        actionScale: numeric(
+          signal.actionScale,
+          numeric((stock as any).actionScale),
+        ),
         regime: signal.regime,
         quoteStatus: stock.quoteStatus ?? "available",
       } as DisplayStock;
@@ -3981,7 +3993,7 @@ export default function Dashboard() {
   const indicatorExcellenceLabel = indicatorExcellence
     ? indicatorExcellence.allTargetsSatisfied
       ? "Exceptional indicators"
-      : indicatorExcellence.status?.replace(/_/g, " ") ?? "Optimized"
+      : (indicatorExcellence.status?.replace(/_/g, " ") ?? "Optimized")
     : "Needs review";
   const trustGovernor: TrustGovernorDiagnostic | null =
     backtestSummary?.trustGovernor ?? strategyReadiness?.trustGovernor ?? null;
@@ -4232,15 +4244,14 @@ export default function Dashboard() {
   const maximumExposureMetricValue = hasProvidedSignals
     ? dashboardSizing.operatorState.portfolioCapLabel
     : "—";
-  const maximumExposureMetricSub =
-    hasProvidedSignals
-      ? maximumExposureSubLabel({
-          sizingMode: dashboardSizing.sizingMode,
-          suggestedMaximumExposurePct:
-            dashboardSizing.suggestedMaximumExposurePct,
-          semanticWord: semanticMetrics.maximumExposure.word,
-        })
-      : undefined;
+  const maximumExposureMetricSub = hasProvidedSignals
+    ? maximumExposureSubLabel({
+        sizingMode: dashboardSizing.sizingMode,
+        suggestedMaximumExposurePct:
+          dashboardSizing.suggestedMaximumExposurePct,
+        semanticWord: semanticMetrics.maximumExposure.word,
+      })
+    : undefined;
 
   const allocationContext = useMemo(
     () => ({
@@ -4299,8 +4310,6 @@ export default function Dashboard() {
     if (refreshedPortfolioMarkets.current.has(refreshKey)) return;
 
     const timeout = window.setTimeout(() => {
-      
-      
       setPortfolioRefreshing(false);
     }, 1_250);
 
@@ -4538,7 +4547,8 @@ export default function Dashboard() {
   const executionQualityDiagnostic: ExecutionQualityDiagnostic | null =
     selectedAllocationStock?.executionQuality ??
     displayedTopOpportunities[0]?.executionQuality ??
-    allocationUniverse.find((stock) => stock.executionQuality)?.executionQuality ??
+    allocationUniverse.find((stock) => stock.executionQuality)
+      ?.executionQuality ??
     backtestSummary?.executionQuality ??
     null;
   const counterfactualDiagnostic: CounterfactualDiagnostic | null =
@@ -4855,9 +4865,9 @@ export default function Dashboard() {
 
     const durations = active.map((stock) => {
       const explicitDuration =
-        numeric((stock as any).averageDurationDays, NaN) ||
-        numeric((stock as any).holdingPeriodDays, NaN) ||
-        numeric((stock as any).durationDays, NaN);
+        numeric((stock as any).averageDurationDays, Number.NaN) ||
+        numeric((stock as any).holdingPeriodDays, Number.NaN) ||
+        numeric((stock as any).durationDays, Number.NaN);
 
       if (Number.isFinite(explicitDuration) && explicitDuration > 0) {
         return explicitDuration;
@@ -4888,7 +4898,8 @@ export default function Dashboard() {
         .reduce((sum, value) => sum + value, 0),
     );
 
-    if (grossLoss === 0) return grossProfit > 0 ? Infinity : null;
+    if (grossLoss === 0)
+      return grossProfit > 0 ? Number.POSITIVE_INFINITY : null;
 
     return grossProfit / grossLoss;
   }, [portfolioReturns]);
@@ -5367,7 +5378,7 @@ export default function Dashboard() {
         displayedBacktestProfitFactor == null
           ? "—"
           : Number(displayedBacktestProfitFactor) >= 999 ||
-              displayedBacktestProfitFactor === Infinity
+              displayedBacktestProfitFactor === Number.POSITIVE_INFINITY
             ? "∞"
             : Number(displayedBacktestProfitFactor).toFixed(2),
       reason: "Winning trades should outweigh losing trades by a clear margin.",
@@ -5967,8 +5978,9 @@ export default function Dashboard() {
   const governanceEvolution = executiveIA.governanceEvolution;
   const governanceCommand = governanceEvolution.command;
   const activeExposureState =
-    governanceEvolution.exposureStates.find((state) => state.status === "active") ??
-    governanceEvolution.exposureStates[0];
+    governanceEvolution.exposureStates.find(
+      (state) => state.status === "active",
+    ) ?? governanceEvolution.exposureStates[0];
   const dashboardDecisionStates = executiveIA.decisionStates;
   const trustStateTone =
     dashboardDecisionStates.trust.score >= 72
@@ -6027,7 +6039,8 @@ export default function Dashboard() {
   const wisdomTone =
     wisdomDiagnostic?.wisdomScore != null && wisdomDiagnostic.wisdomScore >= 70
       ? "good"
-      : wisdomDiagnostic?.wisdomScore != null && wisdomDiagnostic.wisdomScore < 45
+      : wisdomDiagnostic?.wisdomScore != null &&
+          wisdomDiagnostic.wisdomScore < 45
         ? "bad"
         : wisdomDiagnostic
           ? "warn"
@@ -6163,12 +6176,13 @@ export default function Dashboard() {
       : restorationProgressDiagnostic?.status === "ready_for_restoration"
         ? "Ready for restoration review"
         : survivalConfidenceValue == null
-      ? "Waiting for survival score"
-      : restorationProgressDiagnostic == null && recoveryDiagnostic?.canRestoreSizing
-        ? "Normal sizing restored"
-        : survivalConfidenceValue >= survivalUnlockThreshold
-          ? "Score passed; needs clean confirmation"
-          : `${Math.ceil(survivalUnlockThreshold - survivalConfidenceValue)} pts short`;
+          ? "Waiting for survival score"
+          : restorationProgressDiagnostic == null &&
+              recoveryDiagnostic?.canRestoreSizing
+            ? "Normal sizing restored"
+            : survivalConfidenceValue >= survivalUnlockThreshold
+              ? "Score passed; needs clean confirmation"
+              : `${Math.ceil(survivalUnlockThreshold - survivalConfidenceValue)} pts short`;
   const unlockProgressTone =
     restorationProgressDiagnostic != null
       ? restorationProgressTone(restorationProgressDiagnostic)
@@ -6185,22 +6199,20 @@ export default function Dashboard() {
   const restorationOutcomeProof = restorationProgressDiagnostic?.outcomeProof;
   const restorationLedger = restorationProgressDiagnostic?.ledger;
   const restorationActionPlan = restorationProgressDiagnostic?.actionPlan;
-  const restorationLedgerEntries =
-    restorationLedger?.entries?.length
-      ? restorationLedger.entries.slice(-3).reverse()
-      : [];
+  const restorationLedgerEntries = restorationLedger?.entries?.length
+    ? restorationLedger.entries.slice(-3).reverse()
+    : [];
   const restorationLedgerStateLabel =
     restorationLedger?.state?.replace(/_/g, " ") ??
     restorationProgressDiagnostic?.status?.replace(/_/g, " ") ??
     survivalUnlockStatus;
-  const restorationGatePreview =
-    restorationProgressDiagnostic?.gates?.length
-      ? restorationProgressDiagnostic.gates.slice(0, 4)
-      : [];
-  const restorationNextActions =
-    restorationProgressDiagnostic?.nextActions?.length
-      ? restorationProgressDiagnostic.nextActions
-      : [primaryUnlockCondition];
+  const restorationGatePreview = restorationProgressDiagnostic?.gates?.length
+    ? restorationProgressDiagnostic.gates.slice(0, 4)
+    : [];
+  const restorationNextActions = restorationProgressDiagnostic?.nextActions
+    ?.length
+    ? restorationProgressDiagnostic.nextActions
+    : [primaryUnlockCondition];
   const restorationActionInstruction =
     restorationActionPlan?.activeInstruction ??
     restorationNextActions[0] ??
@@ -6469,7 +6481,8 @@ export default function Dashboard() {
         finiteNumber((stock.discovery as any)?.score) ??
         qualityPct;
       const decisionIntelligence = (stock as any).decisionIntelligence ?? {};
-      const learning = (stock as any).learning ?? decisionIntelligence?.learning ?? null;
+      const learning =
+        (stock as any).learning ?? decisionIntelligence?.learning ?? null;
       const coherencePct =
         finiteNumber((stock as any).coherenceScore) ??
         finiteNumber(decisionIntelligence?.coherenceScore);
@@ -6514,7 +6527,9 @@ export default function Dashboard() {
         ? decisionIntelligence.guide
         : [];
       const plainGuide = (step: number) =>
-        String(guide.find((item: any) => item?.step === step)?.text ?? "").trim();
+        String(
+          guide.find((item: any) => item?.step === step)?.text ?? "",
+        ).trim();
       const readinessPct = clamp(
         qualityPct * 0.24 +
           (coherencePct ?? qualityPct) * 0.2 +
@@ -6576,7 +6591,9 @@ export default function Dashboard() {
         support: compactDecisionLines(
           [
             Array.isArray(learning?.evidence?.supporting)
-              ? learning.evidence.supporting.map((item: any) => item?.description)
+              ? learning.evidence.supporting.map(
+                  (item: any) => item?.description,
+                )
               : [],
             decisionIntelligence?.humanSummary,
             plainGuide(1),
@@ -6595,7 +6612,9 @@ export default function Dashboard() {
         contradictions: compactDecisionLines(
           [
             Array.isArray(learning?.evidence?.contradicting)
-              ? learning.evidence.contradicting.map((item: any) => item?.description)
+              ? learning.evidence.contradicting.map(
+                  (item: any) => item?.description,
+                )
               : [],
             plainGuide(2),
             highestDownside != null && highestDownside >= 70
@@ -6626,7 +6645,11 @@ export default function Dashboard() {
           primaryUnlockCondition,
         ),
         invalidations: compactDecisionLines(
-          [learning?.evidence?.invalidationConditions, discoveryInvalidations, primaryInvalidationCondition],
+          [
+            learning?.evidence?.invalidationConditions,
+            discoveryInvalidations,
+            primaryInvalidationCondition,
+          ],
           primaryInvalidationCondition,
         ),
         drivers: compactDecisionLines(
@@ -6670,9 +6693,11 @@ export default function Dashboard() {
     });
   const selectedDecisionOpportunityId =
     selectedTicker &&
-    decisionOpportunities.some((opportunity) => opportunity.id === selectedTicker)
+    decisionOpportunities.some(
+      (opportunity) => opportunity.id === selectedTicker,
+    )
       ? selectedTicker
-      : decisionOpportunities[0]?.id ?? null;
+      : (decisionOpportunities[0]?.id ?? null);
   const primaryDecisionOpportunity =
     decisionOpportunities.find(
       (opportunity) => opportunity.id === selectedDecisionOpportunityId,
@@ -6742,27 +6767,26 @@ export default function Dashboard() {
     (showingBlockedReviewIdeas ? "Review candidates" : "Pending");
   const mainRiskLabel = !hasMarketData
     ? "Data unavailable"
-    : topCanonicalRestriction?.label ?? "No active limiter";
+    : (topCanonicalRestriction?.label ?? "No active limiter");
   const missingEvidenceLabel = !hasMarketData
     ? "Market data synchronization"
-    : primaryDecisionOpportunity?.missing[0] ??
+    : (primaryDecisionOpportunity?.missing[0] ??
       primaryUnlockCondition ??
-      "Market confirmation";
+      "Market confirmation");
   const readinessWhy = hasMarketData
-    ? (executiveIA.executiveReasoning as any).summary ?? executiveDecisionSentence
+    ? ((executiveIA.executiveReasoning as any).summary ??
+      executiveDecisionSentence)
     : "Prices, signals, and governance evidence are still synchronizing.";
-  const readinessImprover =
-    !hasMarketData
-      ? "Restore market and strategy data sync."
-      : increaseExposureTriggers[0] ??
-        primaryDecisionOpportunity?.support[0] ??
-        "Improve market confirmation and sizing permission.";
-  const readinessBlocker =
-    !hasMarketData
-      ? "No market data has cleared the briefing gate."
-      : reduceOrInvalidateTriggers[0] ??
-        topCanonicalRestriction?.explanation ??
-        "No hard blocker is currently promoted.";
+  const readinessImprover = !hasMarketData
+    ? "Restore market and strategy data sync."
+    : (increaseExposureTriggers[0] ??
+      primaryDecisionOpportunity?.support[0] ??
+      "Improve market confirmation and sizing permission.");
+  const readinessBlocker = !hasMarketData
+    ? "No market data has cleared the briefing gate."
+    : (reduceOrInvalidateTriggers[0] ??
+      topCanonicalRestriction?.explanation ??
+      "No hard blocker is currently promoted.");
   const executionStatus = String(executionQualityDiagnostic?.status ?? "");
   const executionStatusPct =
     executionStatus === "excellent" || executionStatus === "good"
@@ -6829,7 +6853,7 @@ export default function Dashboard() {
       explanation:
         calibrationTrustworthinessDisplay == null
           ? "Calibration trustworthiness is pending."
-        : `Calibration trustworthiness is ${fmtPlainPct(calibrationTrustworthinessDisplay, 0)} across ${calibrationSampleSize ?? 0} samples.`,
+          : `Calibration trustworthiness is ${fmtPlainPct(calibrationTrustworthinessDisplay, 0)} across ${calibrationSampleSize ?? 0} samples.`,
     },
     {
       id: "prediction-simulation",
@@ -6899,17 +6923,15 @@ export default function Dashboard() {
     asset: primaryDecisionOpportunity?.ticker ?? "Pending",
     direction: operatorAction,
     exposure: primaryDecisionOpportunity?.exposureLabel ?? canonicalStarterSize,
-    entryLogic:
-      !hasMarketData
-        ? "Wait for market data synchronization before changing exposure."
-        : primaryDecisionOpportunity?.support[0] ??
-          "Wait for market confirmation before changing exposure.",
-    riskConstraints:
-      !hasMarketData
-        ? "No new exposure while the market feed is unavailable."
-        : primaryDecisionOpportunity?.contradictions[0] ??
-          topCanonicalRestriction?.explanation ??
-          "Respect current portfolio and per-asset caps.",
+    entryLogic: !hasMarketData
+      ? "Wait for market data synchronization before changing exposure."
+      : (primaryDecisionOpportunity?.support[0] ??
+        "Wait for market confirmation before changing exposure."),
+    riskConstraints: !hasMarketData
+      ? "No new exposure while the market feed is unavailable."
+      : (primaryDecisionOpportunity?.contradictions[0] ??
+        topCanonicalRestriction?.explanation ??
+        "Respect current portfolio and per-asset caps."),
     exitConditions:
       reduceOrInvalidateTriggers[0] ??
       primaryDecisionOpportunity?.invalidations[0] ??
@@ -6931,7 +6953,9 @@ export default function Dashboard() {
       detail:
         primaryDecisionOpportunity?.context ??
         "The system is waiting for enough context to explain the opportunity.",
-      status: hasMarketData ? `${decisionOpportunities.length} ranked` : "Waiting for data",
+      status: hasMarketData
+        ? `${decisionOpportunities.length} ranked`
+        : "Waiting for data",
     },
     {
       id: "trust",
@@ -6967,24 +6991,71 @@ export default function Dashboard() {
     { label: "Consensus", value: fmtPlainPct(primaryConsensusLevel, 0) },
     { label: "Confidence", value: fmtPlainPct(executiveConfidencePct, 0) },
     { label: "Trust", value: fmtPlainPct(executiveTrustPct, 0) },
-    { label: "Conviction", value: fmtPlainPct(primaryDecisionOpportunity?.learning?.conviction?.conviction, 0) },
-    { label: "Market Health", value: fmtPlainPct(dashboardSizing.marketHealthPct, 0) },
-    { label: "Simulation", value: primarySimulationRecommendation || "Pending" },
+    {
+      label: "Conviction",
+      value: fmtPlainPct(
+        primaryDecisionOpportunity?.learning?.conviction?.conviction,
+        0,
+      ),
+    },
+    {
+      label: "Market Health",
+      value: fmtPlainPct(dashboardSizing.marketHealthPct, 0),
+    },
+    {
+      label: "Simulation",
+      value: primarySimulationRecommendation || "Pending",
+    },
     { label: "Wisdom", value: primaryWisdomDecision || "Pending" },
     { label: "Action Scale", value: fmtPlainPct(primaryActionScalePct, 0) },
-    { label: "Outcome Accuracy", value: fmtPlainPct(primaryOutcomeAccuracy, 0) },
-    { label: "Opportunity Density", value: fmtPlainPct(adaptiveOpportunityDensityPct, 0) },
+    {
+      label: "Outcome Accuracy",
+      value: fmtPlainPct(primaryOutcomeAccuracy, 0),
+    },
+    {
+      label: "Opportunity Density",
+      value: fmtPlainPct(adaptiveOpportunityDensityPct, 0),
+    },
     { label: "Risk Pressure", value: fmtPlainPct(avgRisk, 0) },
     { label: "Readiness", value: fmtPlainPct(decisionReadinessPct, 0) },
-    { label: "Decision Readiness", value: fmtPlainPct(primaryDecisionOpportunity?.learning?.readiness?.readiness, 0) },
+    {
+      label: "Decision Readiness",
+      value: fmtPlainPct(
+        primaryDecisionOpportunity?.learning?.readiness?.readiness,
+        0,
+      ),
+    },
     { label: "Portfolio Cap", value: canonicalPortfolioCap },
-    { label: "Portfolio Contribution", value: fmtPlainPct(primaryDecisionOpportunity?.learning?.portfolioContext?.expectedRiskAdjustedContribution, 0) },
-    { label: "Similar Regimes", value: String(primaryDecisionOpportunity?.learning?.similarRegimes?.length ?? 0) },
+    {
+      label: "Portfolio Contribution",
+      value: fmtPlainPct(
+        primaryDecisionOpportunity?.learning?.portfolioContext
+          ?.expectedRiskAdjustedContribution,
+        0,
+      ),
+    },
+    {
+      label: "Similar Regimes",
+      value: String(
+        primaryDecisionOpportunity?.learning?.similarRegimes?.length ?? 0,
+      ),
+    },
     { label: "Starter Size", value: canonicalStarterSize },
     { label: "Survival", value: fmtPlainPct(survivalConfidenceValue, 0) },
-    { label: "Calibration", value: fmtPlainPct(calibrationTrustworthinessDisplay, 0) },
-    { label: "History Depth", value: historyDepthScore == null ? "—" : fmtPlainPct(historyDepthScore, 0) },
-    { label: "Regime Coverage", value: regimeCoverageScore == null ? "—" : fmtPlainPct(regimeCoverageScore, 0) },
+    {
+      label: "Calibration",
+      value: fmtPlainPct(calibrationTrustworthinessDisplay, 0),
+    },
+    {
+      label: "History Depth",
+      value:
+        historyDepthScore == null ? "—" : fmtPlainPct(historyDepthScore, 0),
+    },
+    {
+      label: "Regime Coverage",
+      value:
+        regimeCoverageScore == null ? "—" : fmtPlainPct(regimeCoverageScore, 0),
+    },
   ];
   const trustAnalysisUnavailable =
     hasMarketData &&
@@ -7007,7 +7078,8 @@ export default function Dashboard() {
       decisionOpportunities.length ||
       topOpportunities.length ||
       reviewOpportunities.length,
-    cachedMarketItemCount: marketUniverse.length || stocks.length || totalStocks,
+    cachedMarketItemCount:
+      marketUniverse.length || stocks.length || totalStocks,
     cachedMarketLabel: marketFilter || "No market selected",
     lastSuccessfulUpdateLabel,
     missingTrustAnalysis: trustAnalysisUnavailable,
@@ -7088,7 +7160,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!refreshingQuotes) {
-      executiveSummaryMetricSnapshotRef.current = currentExecutiveSummaryMetrics;
+      executiveSummaryMetricSnapshotRef.current =
+        currentExecutiveSummaryMetrics;
     }
   });
 
@@ -7244,7 +7317,9 @@ export default function Dashboard() {
                 </div>
                 <div className="w-full shrink-0 md:w-[280px]">
                   <div className="mb-2 flex items-center justify-between text-xs text-zinc-500">
-                    <span>{purposeView?.primaryFocus ?? "Building momentum"}</span>
+                    <span>
+                      {purposeView?.primaryFocus ?? "Building momentum"}
+                    </span>
                     <span className="font-semibold text-zinc-200">
                       {Math.round(ambition)}/100
                     </span>
@@ -7312,8 +7387,7 @@ export default function Dashboard() {
                 <MiniMetric
                   label="Why we adjusted it"
                   value={
-                    meaningView?.whyAdjusted ??
-                    "No goal text was supplied"
+                    meaningView?.whyAdjusted ?? "No goal text was supplied"
                   }
                   emphasis="quiet"
                 />
@@ -7462,7 +7536,11 @@ export default function Dashboard() {
                     <MiniMetric
                       label="Assets"
                       value={actionableTickersLabel}
-                      sub={showingBlockedReviewIdeas ? reviewIdeasMessage : undefined}
+                      sub={
+                        showingBlockedReviewIdeas
+                          ? reviewIdeasMessage
+                          : undefined
+                      }
                       emphasis="quiet"
                     />
                     <MiniMetric
@@ -7506,261 +7584,261 @@ export default function Dashboard() {
                           : `${Math.round(survivalConfidenceValue)}/100`}
                       </span>
                     </div>
-	                    <div className="h-2 rounded-full bg-zinc-800">
-	                      <div
-	                        className="h-2 rounded-full bg-[#FDD000]"
-	                        style={{ width: `${restorationProgressPct}%` }}
-	                      />
-	                    </div>
+                    <div className="h-2 rounded-full bg-zinc-800">
+                      <div
+                        className="h-2 rounded-full bg-[#FDD000]"
+                        style={{ width: `${restorationProgressPct}%` }}
+                      />
+                    </div>
                   </div>
                   <div className="mt-4 rounded-lg bg-black/25 px-3 py-2 text-xs leading-5 text-zinc-500 ring-1 ring-white/[0.05]">
                     Invalidate: {primaryInvalidationCondition}
                   </div>
-	                </div>
-	              </div>
+                </div>
+              </div>
 
-	              <div className="mt-4 rounded-lg border border-white/10 bg-[#101010] px-4 py-4">
-	                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-	                    <div className="min-w-0">
-	                    <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#FDD000]">
-	                      Survival Memory Restoration Ledger
-	                    </div>
-	                    <div className="mt-2 text-lg font-semibold text-white">
-	                      {restorationLedger?.exactUnlockCondition ??
-	                        restorationProgressDiagnostic?.summary ??
-	                        restorationPrimaryBlocker}
-	                    </div>
-	                  </div>
-	                  <StatusPill tone={unlockProgressTone}>
-	                    {restorationLedgerStateLabel}
-	                  </StatusPill>
-	                </div>
-	                {restorationLedger?.boundarySummary ? (
-	                  <p className="mt-3 text-sm leading-6 text-zinc-500">
-	                    {restorationLedger.boundarySummary}
-	                  </p>
-	                ) : null}
-	                <div className="mt-4">
-	                  <QualityBar
-	                    value={restorationProgressPct}
-	                    label="Normal sizing restoration"
-	                  />
-	                </div>
-	                <div className="mt-4 grid gap-3 md:grid-cols-4">
-	                  <MiniMetric
-	                    label="Clean proof"
-	                    value={cleanReducedSizeOutcomeValue}
-	                    sub={reducedSizeOutcomeSub}
-	                    tone={
-	                      restorationOutcomeProof &&
-	                      restorationOutcomeProof.cleanReducedSizeOutcomeCount >=
-	                        restorationOutcomeProof.requiredCleanOutcomes
-	                        ? "good"
-	                        : "warn"
-	                    }
-	                  />
-	                  <MiniMetric
-	                    label="Ledger state"
-	                    value={restorationLedgerStateLabel}
-	                    sub="scarred -> watch -> limited -> clear"
-	                    tone={unlockProgressTone}
-	                  />
-	                  <MiniMetric
-	                    label="Current cap"
-	                    value={restorationCurrentCapValue}
-	                    sub="reduced-size proof lane"
-	                  />
-	                  <MiniMetric
-	                    label="Normal target"
-	                    value={restorationNormalTargetValue}
-	                    sub="restoration destination"
-	                  />
-	                </div>
-	                <div className="mt-4 rounded-lg border border-[#FDD000]/20 bg-[#FDD000]/10 px-4 py-3">
-	                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-	                    <div className="min-w-0">
-	                      <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#FDD000]">
-	                        Restoration action plan
-	                      </div>
-	                      <div className="mt-2 text-base font-semibold text-white">
-	                        {restorationActionInstruction}
-	                      </div>
-	                      <p className="mt-2 text-sm leading-6 text-zinc-300">
-	                        {restorationExposureInstruction}
-	                      </p>
-	                    </div>
-	                    <StatusPill tone={restorationActionPlanTone}>
-	                      {restorationActionPlanStatus}
-	                    </StatusPill>
-	                  </div>
-	                  <div className="mt-4 grid gap-3 md:grid-cols-3">
-	                    <MiniMetric
-	                      label="Remaining clean outcomes"
-	                      value={
-	                        restorationRemainingCleanOutcomes == null
-	                          ? "Pending"
-	                          : String(restorationRemainingCleanOutcomes)
-	                      }
-	                      sub="current reduced-size streak"
-	                      emphasis="quiet"
-	                    />
-	                    <MiniMetric
-	                      label="Active lane breaks"
-	                      value={
-	                        restorationActiveBoundaryBreaks == null
-	                          ? "Pending"
-	                          : String(restorationActiveBoundaryBreaks)
-	                      }
-	                      sub="resets proof if above zero"
-	                      tone={
-	                        restorationActiveBoundaryBreaks && restorationActiveBoundaryBreaks > 0
-	                          ? "bad"
-	                          : "good"
-	                      }
-	                      emphasis="quiet"
-	                    />
-	                    <MiniMetric
-	                      label="Normal sizing"
-	                      value={
-	                        restorationProgressDiagnostic?.canRestoreSizing
-	                          ? "Review"
-	                          : "Locked"
-	                      }
-	                      sub="until proof lane clears"
-	                      tone={
-	                        restorationProgressDiagnostic?.canRestoreSizing
-	                          ? "good"
-	                          : "warn"
-	                      }
-	                      emphasis="quiet"
-	                    />
-	                  </div>
-	                  {restorationActionPlan?.steps?.length ? (
-	                    <div className="mt-4 grid gap-2 md:grid-cols-3">
-	                      {restorationActionPlan.steps.map((step) => (
-	                        <div
-	                          key={step.id}
-	                          className="rounded-lg border border-white/10 bg-black/20 px-3 py-2"
-	                        >
-	                          <div className="flex items-start justify-between gap-3">
-	                            <div className="min-w-0 text-sm font-medium text-zinc-100">
-	                              {step.label}
-	                            </div>
-	                            <StatusPill
-	                              tone={
-	                                step.status === "done"
-	                                  ? "good"
-	                                  : step.status === "blocked"
-	                                    ? "neutral"
-	                                    : "warn"
-	                              }
-	                            >
-	                              {step.status}
-	                            </StatusPill>
-	                          </div>
-	                          <div className="mt-2 line-clamp-3 text-xs leading-5 text-zinc-400">
-	                            {step.detail}
-	                          </div>
-	                        </div>
-	                      ))}
-	                    </div>
-	                  ) : null}
-	                </div>
-	                {restorationLedger?.statePath?.length ? (
-	                  <div className="mt-4 grid gap-2 md:grid-cols-4">
-	                    {restorationLedger.statePath.map((step) => (
-	                      <div
-	                        key={step.state}
-	                        className="rounded-lg border border-white/10 bg-black/20 px-3 py-2"
-	                      >
-	                        <div className="flex items-center justify-between gap-2">
-	                          <div className="min-w-0 text-sm font-medium text-zinc-200">
-	                            {step.label}
-	                          </div>
-	                          <StatusPill tone={step.passed ? "good" : "neutral"}>
-	                            {step.passed ? "clear" : "open"}
-	                          </StatusPill>
-	                        </div>
-	                        <div className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
-	                          {step.detail}
-	                        </div>
-	                      </div>
-	                    ))}
-	                  </div>
-	                ) : null}
-	                <div className="mt-4 grid gap-3 md:grid-cols-1">
-	                  <MiniMetric
-	                    label="Next gate"
-	                    value={actionableRestorationGate?.label ?? "Clear"}
-	                    sub={restorationActionInstruction}
-	                    tone={
-	                      actionableRestorationGate
-	                        ? "warn"
-	                        : "good"
-	                    }
-	                  />
-	                </div>
-	                {restorationLedgerEntries.length ? (
-	                  <div className="mt-4 overflow-hidden rounded-lg border border-white/10 bg-black/20">
-	                    <div className="grid grid-cols-[minmax(0,1fr)_80px_100px_110px] gap-3 border-b border-white/10 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-	                      <span>Reduced-size trade</span>
-	                      <span>Clean</span>
-	                      <span>MAE</span>
-	                      <span>Cost</span>
-	                    </div>
-	                    {restorationLedgerEntries.map((entry) => (
-	                      <div
-	                        key={entry.id}
-	                        className="grid grid-cols-[minmax(0,1fr)_80px_100px_110px] gap-3 border-b border-white/[0.06] px-3 py-2 text-xs last:border-b-0"
-	                      >
-	                        <div className="min-w-0">
-	                          <div className="truncate font-medium text-zinc-200">
-	                            {entry.asset ?? entry.id}
-	                          </div>
-	                          <div className="truncate text-zinc-600">
-	                            {fmtPlainPct(entry.maxExposure)} cap · {fmtPlainPct(entry.realizedReturn)} result
-	                          </div>
-	                        </div>
-	                        <StatusPill tone={entry.clean ? "good" : "bad"}>
-	                          {entry.clean ? "yes" : "no"}
-	                        </StatusPill>
-	                        <div className="text-zinc-400">
-	                          {Math.round(entry.maxAdverseExcursion)} / {entry.maxAdverseExcursionBoundary}
-	                        </div>
-	                        <div className="truncate text-zinc-400">
-	                          {Math.round(entry.survivalCost)} / {entry.survivalCostBoundary}
-	                        </div>
-	                      </div>
-	                    ))}
-	                  </div>
-	                ) : null}
-	                {restorationGatePreview.length ? (
-	                  <div className="mt-4 grid gap-2 md:grid-cols-2">
-	                    {restorationGatePreview.map((gate) => (
-	                      <div
-	                        key={gate.id}
-	                        className="rounded-lg border border-white/10 bg-black/20 px-3 py-2"
-	                      >
-	                        <div className="flex items-start justify-between gap-3">
-	                          <div className="min-w-0 text-sm font-medium text-zinc-200">
-	                            {gate.id === "trust-score"
-	                              ? "Restoration trust"
-	                              : gate.label}
-	                          </div>
-	                          <StatusPill tone={gate.passed ? "good" : "warn"}>
-	                            {gate.passed ? "clear" : "open"}
-	                          </StatusPill>
-	                        </div>
-	                        <div className="mt-2 text-xs leading-5 text-zinc-500">
-	                          {gate.current} / target {gate.target}
-	                        </div>
-	                      </div>
-	                    ))}
-	                  </div>
-	                ) : null}
-	              </div>
+              <div className="mt-4 rounded-lg border border-white/10 bg-[#101010] px-4 py-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#FDD000]">
+                      Survival Memory Restoration Ledger
+                    </div>
+                    <div className="mt-2 text-lg font-semibold text-white">
+                      {restorationLedger?.exactUnlockCondition ??
+                        restorationProgressDiagnostic?.summary ??
+                        restorationPrimaryBlocker}
+                    </div>
+                  </div>
+                  <StatusPill tone={unlockProgressTone}>
+                    {restorationLedgerStateLabel}
+                  </StatusPill>
+                </div>
+                {restorationLedger?.boundarySummary ? (
+                  <p className="mt-3 text-sm leading-6 text-zinc-500">
+                    {restorationLedger.boundarySummary}
+                  </p>
+                ) : null}
+                <div className="mt-4">
+                  <QualityBar
+                    value={restorationProgressPct}
+                    label="Normal sizing restoration"
+                  />
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-4">
+                  <MiniMetric
+                    label="Clean proof"
+                    value={cleanReducedSizeOutcomeValue}
+                    sub={reducedSizeOutcomeSub}
+                    tone={
+                      restorationOutcomeProof &&
+                      restorationOutcomeProof.cleanReducedSizeOutcomeCount >=
+                        restorationOutcomeProof.requiredCleanOutcomes
+                        ? "good"
+                        : "warn"
+                    }
+                  />
+                  <MiniMetric
+                    label="Ledger state"
+                    value={restorationLedgerStateLabel}
+                    sub="scarred -> watch -> limited -> clear"
+                    tone={unlockProgressTone}
+                  />
+                  <MiniMetric
+                    label="Current cap"
+                    value={restorationCurrentCapValue}
+                    sub="reduced-size proof lane"
+                  />
+                  <MiniMetric
+                    label="Normal target"
+                    value={restorationNormalTargetValue}
+                    sub="restoration destination"
+                  />
+                </div>
+                <div className="mt-4 rounded-lg border border-[#FDD000]/20 bg-[#FDD000]/10 px-4 py-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#FDD000]">
+                        Restoration action plan
+                      </div>
+                      <div className="mt-2 text-base font-semibold text-white">
+                        {restorationActionInstruction}
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-zinc-300">
+                        {restorationExposureInstruction}
+                      </p>
+                    </div>
+                    <StatusPill tone={restorationActionPlanTone}>
+                      {restorationActionPlanStatus}
+                    </StatusPill>
+                  </div>
+                  <div className="mt-4 grid gap-3 md:grid-cols-3">
+                    <MiniMetric
+                      label="Remaining clean outcomes"
+                      value={
+                        restorationRemainingCleanOutcomes == null
+                          ? "Pending"
+                          : String(restorationRemainingCleanOutcomes)
+                      }
+                      sub="current reduced-size streak"
+                      emphasis="quiet"
+                    />
+                    <MiniMetric
+                      label="Active lane breaks"
+                      value={
+                        restorationActiveBoundaryBreaks == null
+                          ? "Pending"
+                          : String(restorationActiveBoundaryBreaks)
+                      }
+                      sub="resets proof if above zero"
+                      tone={
+                        restorationActiveBoundaryBreaks &&
+                        restorationActiveBoundaryBreaks > 0
+                          ? "bad"
+                          : "good"
+                      }
+                      emphasis="quiet"
+                    />
+                    <MiniMetric
+                      label="Normal sizing"
+                      value={
+                        restorationProgressDiagnostic?.canRestoreSizing
+                          ? "Review"
+                          : "Locked"
+                      }
+                      sub="until proof lane clears"
+                      tone={
+                        restorationProgressDiagnostic?.canRestoreSizing
+                          ? "good"
+                          : "warn"
+                      }
+                      emphasis="quiet"
+                    />
+                  </div>
+                  {restorationActionPlan?.steps?.length ? (
+                    <div className="mt-4 grid gap-2 md:grid-cols-3">
+                      {restorationActionPlan.steps.map((step) => (
+                        <div
+                          key={step.id}
+                          className="rounded-lg border border-white/10 bg-black/20 px-3 py-2"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 text-sm font-medium text-zinc-100">
+                              {step.label}
+                            </div>
+                            <StatusPill
+                              tone={
+                                step.status === "done"
+                                  ? "good"
+                                  : step.status === "blocked"
+                                    ? "neutral"
+                                    : "warn"
+                              }
+                            >
+                              {step.status}
+                            </StatusPill>
+                          </div>
+                          <div className="mt-2 line-clamp-3 text-xs leading-5 text-zinc-400">
+                            {step.detail}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+                {restorationLedger?.statePath?.length ? (
+                  <div className="mt-4 grid gap-2 md:grid-cols-4">
+                    {restorationLedger.statePath.map((step) => (
+                      <div
+                        key={step.state}
+                        className="rounded-lg border border-white/10 bg-black/20 px-3 py-2"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0 text-sm font-medium text-zinc-200">
+                            {step.label}
+                          </div>
+                          <StatusPill tone={step.passed ? "good" : "neutral"}>
+                            {step.passed ? "clear" : "open"}
+                          </StatusPill>
+                        </div>
+                        <div className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
+                          {step.detail}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+                <div className="mt-4 grid gap-3 md:grid-cols-1">
+                  <MiniMetric
+                    label="Next gate"
+                    value={actionableRestorationGate?.label ?? "Clear"}
+                    sub={restorationActionInstruction}
+                    tone={actionableRestorationGate ? "warn" : "good"}
+                  />
+                </div>
+                {restorationLedgerEntries.length ? (
+                  <div className="mt-4 overflow-hidden rounded-lg border border-white/10 bg-black/20">
+                    <div className="grid grid-cols-[minmax(0,1fr)_80px_100px_110px] gap-3 border-b border-white/10 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+                      <span>Reduced-size trade</span>
+                      <span>Clean</span>
+                      <span>MAE</span>
+                      <span>Cost</span>
+                    </div>
+                    {restorationLedgerEntries.map((entry) => (
+                      <div
+                        key={entry.id}
+                        className="grid grid-cols-[minmax(0,1fr)_80px_100px_110px] gap-3 border-b border-white/[0.06] px-3 py-2 text-xs last:border-b-0"
+                      >
+                        <div className="min-w-0">
+                          <div className="truncate font-medium text-zinc-200">
+                            {entry.asset ?? entry.id}
+                          </div>
+                          <div className="truncate text-zinc-600">
+                            {fmtPlainPct(entry.maxExposure)} cap ·{" "}
+                            {fmtPlainPct(entry.realizedReturn)} result
+                          </div>
+                        </div>
+                        <StatusPill tone={entry.clean ? "good" : "bad"}>
+                          {entry.clean ? "yes" : "no"}
+                        </StatusPill>
+                        <div className="text-zinc-400">
+                          {Math.round(entry.maxAdverseExcursion)} /{" "}
+                          {entry.maxAdverseExcursionBoundary}
+                        </div>
+                        <div className="truncate text-zinc-400">
+                          {Math.round(entry.survivalCost)} /{" "}
+                          {entry.survivalCostBoundary}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+                {restorationGatePreview.length ? (
+                  <div className="mt-4 grid gap-2 md:grid-cols-2">
+                    {restorationGatePreview.map((gate) => (
+                      <div
+                        key={gate.id}
+                        className="rounded-lg border border-white/10 bg-black/20 px-3 py-2"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 text-sm font-medium text-zinc-200">
+                            {gate.id === "trust-score"
+                              ? "Restoration trust"
+                              : gate.label}
+                          </div>
+                          <StatusPill tone={gate.passed ? "good" : "warn"}>
+                            {gate.passed ? "clear" : "open"}
+                          </StatusPill>
+                        </div>
+                        <div className="mt-2 text-xs leading-5 text-zinc-500">
+                          {gate.current} / target {gate.target}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
 
-	              <div className="mt-4 grid gap-3 md:grid-cols-4">
+              <div className="mt-4 grid gap-3 md:grid-cols-4">
                 <MiniMetric
                   label="Per-asset cap"
                   value={canonicalPerAssetCap}
@@ -7826,7 +7904,10 @@ export default function Dashboard() {
                   />
                   <MiniMetric
                     label="Learning"
-                    value={fmtPlainPct(discoveryIntelligenceDiagnostic?.score, 0)}
+                    value={fmtPlainPct(
+                      discoveryIntelligenceDiagnostic?.score,
+                      0,
+                    )}
                     sub="Discovery Intelligence"
                     emphasis="quiet"
                   />
@@ -7834,695 +7915,1179 @@ export default function Dashboard() {
               }
             >
               <div className="grid gap-5">
-            <SectionShell
-              eyebrow="Governance Evolution"
-              title="Decision authority and learning loop"
-              action={
-                <StatusPill tone={governanceCommand.tone}>
-                  {governanceCommand.label}
-                </StatusPill>
-              }
-            >
-              <div className="grid gap-3 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                        Operator command
-                      </div>
-                      <div className="mt-2 text-2xl font-semibold tracking-tight text-white">
-                        {governanceCommand.label}
-                      </div>
-                    </div>
+                <SectionShell
+                  eyebrow="Governance Evolution"
+                  title="Decision authority and learning loop"
+                  action={
                     <StatusPill tone={governanceCommand.tone}>
-                      {governanceCommand.action}
+                      {governanceCommand.label}
                     </StatusPill>
-                  </div>
-                  <p className="mt-3 text-sm leading-6 text-zinc-400">
-                    {governanceCommand.reason}
-                  </p>
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <MiniMetric
-                      label="Authority"
-                      value={governanceEvolution.arbitration.authority}
-                      sub={`${governanceEvolution.arbitration.vetoes.length} vetoes`}
-                      emphasis="quiet"
-                    />
-                    <MiniMetric
-                      label="Exposure state"
-                      value={activeExposureState?.label ?? "Observe"}
-                      sub={`${governanceCommand.maxExposure} max`}
-                      tone={governanceCommand.tone}
-                      emphasis="quiet"
-                    />
-                  </div>
-                  <p className="mt-3 text-xs leading-5 text-zinc-500">
-                    Next audit: {governanceCommand.nextAudit}
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="mb-3 flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                        Arbitration
-                      </div>
-                      <div className="mt-2 text-lg font-semibold text-white">
-                        {governanceEvolution.arbitration.reason}
-                      </div>
-                    </div>
-                    <StatusPill
-                      tone={
-                        governanceEvolution.arbitration.conflicts.length
-                          ? "warn"
-                          : "good"
-                      }
-                    >
-                      {governanceEvolution.arbitration.conflicts.length} conflicts
-                    </StatusPill>
-                  </div>
-                  <div className="grid gap-2 md:grid-cols-2">
-                    {(governanceEvolution.arbitration.conflicts.length
-                      ? governanceEvolution.arbitration.conflicts
-                      : [{
-                          id: "clear",
-                          label: "No active contradiction",
-                          severity: "good" as const,
-                          detail: "Executive, Wisdom, Survival, and Trust do not currently disagree.",
-                          resolution: "Continue normal governance monitoring.",
-                        }]
-                    ).slice(0, 4).map((conflict) => (
-                      <div
-                        key={conflict.id}
-                        className="rounded-lg bg-black/25 px-3 py-2 ring-1 ring-white/[0.05]"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="text-xs font-semibold text-zinc-200">
-                            {conflict.label}
+                  }
+                >
+                  <div className="grid gap-3 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                            Operator command
                           </div>
-                          <StatusPill tone={conflict.severity}>
-                            {conflict.severity}
-                          </StatusPill>
+                          <div className="mt-2 text-2xl font-semibold tracking-tight text-white">
+                            {governanceCommand.label}
+                          </div>
                         </div>
-                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
-                          {conflict.detail}
-                        </p>
-                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-400">
-                          {conflict.resolution}
-                        </p>
+                        <StatusPill tone={governanceCommand.tone}>
+                          {governanceCommand.action}
+                        </StatusPill>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-3 grid gap-3 xl:grid-cols-5">
-                {governanceEvolution.exposureStates.map((state) => (
-                  <div
-                    key={state.state}
-                    className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                          {state.label}
-                        </div>
-                        <div className="mt-2 text-xl font-semibold text-white">
-                          {fmtPlainPct(state.capPct, state.capPct < 1 ? 2 : 0)}
-                        </div>
+                      <p className="mt-3 text-sm leading-6 text-zinc-400">
+                        {governanceCommand.reason}
+                      </p>
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        <MiniMetric
+                          label="Authority"
+                          value={governanceEvolution.arbitration.authority}
+                          sub={`${governanceEvolution.arbitration.vetoes.length} vetoes`}
+                          emphasis="quiet"
+                        />
+                        <MiniMetric
+                          label="Exposure state"
+                          value={activeExposureState?.label ?? "Observe"}
+                          sub={`${governanceCommand.maxExposure} max`}
+                          tone={governanceCommand.tone}
+                          emphasis="quiet"
+                        />
                       </div>
-                      <StatusPill
-                        tone={
-                          state.status === "active"
-                            ? "warn"
-                            : state.status === "available"
-                              ? "good"
-                              : "neutral"
-                        }
-                      >
-                        {state.status}
-                      </StatusPill>
+                      <p className="mt-3 text-xs leading-5 text-zinc-500">
+                        Next audit: {governanceCommand.nextAudit}
+                      </p>
                     </div>
-                    <p className="mt-3 line-clamp-2 text-xs leading-5 text-zinc-500">
-                      {state.entryRule}
-                    </p>
-                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-400">
-                      Unlock: {state.unlockCondition}
-                    </p>
-                  </div>
-                ))}
-              </div>
 
-              <div className="mt-3 grid gap-3 xl:grid-cols-2">
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Confidence ledger
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="mb-3 flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                            Arbitration
+                          </div>
+                          <div className="mt-2 text-lg font-semibold text-white">
+                            {governanceEvolution.arbitration.reason}
+                          </div>
+                        </div>
+                        <StatusPill
+                          tone={
+                            governanceEvolution.arbitration.conflicts.length
+                              ? "warn"
+                              : "good"
+                          }
+                        >
+                          {governanceEvolution.arbitration.conflicts.length}{" "}
+                          conflicts
+                        </StatusPill>
+                      </div>
+                      <div className="grid gap-2 md:grid-cols-2">
+                        {(governanceEvolution.arbitration.conflicts.length
+                          ? governanceEvolution.arbitration.conflicts
+                          : [
+                              {
+                                id: "clear",
+                                label: "No active contradiction",
+                                severity: "good" as const,
+                                detail:
+                                  "Executive, Wisdom, Survival, and Trust do not currently disagree.",
+                                resolution:
+                                  "Continue normal governance monitoring.",
+                              },
+                            ]
+                        )
+                          .slice(0, 4)
+                          .map((conflict) => (
+                            <div
+                              key={conflict.id}
+                              className="rounded-lg bg-black/25 px-3 py-2 ring-1 ring-white/[0.05]"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="text-xs font-semibold text-zinc-200">
+                                  {conflict.label}
+                                </div>
+                                <StatusPill tone={conflict.severity}>
+                                  {conflict.severity}
+                                </StatusPill>
+                              </div>
+                              <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
+                                {conflict.detail}
+                              </p>
+                              <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-400">
+                                {conflict.resolution}
+                              </p>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
                   </div>
-                  <div className="mt-3 grid gap-2 md:grid-cols-2">
-                    {governanceEvolution.confidenceLedger.map((item) => (
+
+                  <div className="mt-3 grid gap-3 xl:grid-cols-5">
+                    {governanceEvolution.exposureStates.map((state) => (
                       <div
-                        key={item.kind}
-                        className="rounded-lg bg-black/25 px-3 py-2 ring-1 ring-white/[0.05]"
+                        key={state.state}
+                        className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <div className="text-xs font-semibold text-zinc-200">
-                              {item.label}
+                            <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                              {state.label}
                             </div>
-                            <div className="mt-1 text-lg font-semibold text-white">
-                              {fmtPlainPct(item.score, 0)}
+                            <div className="mt-2 text-xl font-semibold text-white">
+                              {fmtPlainPct(
+                                state.capPct,
+                                state.capPct < 1 ? 2 : 0,
+                              )}
                             </div>
                           </div>
                           <StatusPill
                             tone={
-                              item.status === "trusted"
-                                ? "good"
-                                : item.status === "blocked"
-                                  ? "bad"
-                                  : "warn"
+                              state.status === "active"
+                                ? "warn"
+                                : state.status === "available"
+                                  ? "good"
+                                  : "neutral"
                             }
                           >
-                            {item.status}
+                            {state.status}
                           </StatusPill>
                         </div>
-                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
-                          {item.question}
+                        <p className="mt-3 line-clamp-2 text-xs leading-5 text-zinc-500">
+                          {state.entryRule}
                         </p>
-                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-400">
-                          {item.interpretation}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Restriction accountability
-                  </div>
-                  <div className="mt-3 space-y-2">
-                    {(governanceEvolution.restrictionBets.length
-                      ? governanceEvolution.restrictionBets
-                      : [{
-                          code: "reduced_size",
-                          label: "No active restriction",
-                          status: "pending",
-                          avoidedLoss: null,
-                          missedUpside: null,
-                          falseBlockRate: null,
-                          timeToRecovery: null,
-                          interpretation: "Restriction economics are pending.",
-                          nextAudit: "Keep monitoring governance economics.",
-                        }]
-                    ).slice(0, 4).map((bet) => (
-                      <div
-                        key={`${bet.code}-${bet.label}`}
-                        className="rounded-lg bg-black/25 px-3 py-2 ring-1 ring-white/[0.05]"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="text-xs font-semibold text-zinc-200">
-                            {bet.label}
-                          </div>
-                          <StatusPill
-                            tone={
-                              bet.status === "helpful"
-                                ? "good"
-                                : bet.status === "harmful"
-                                  ? "bad"
-                                  : "warn"
-                            }
-                          >
-                            {bet.status}
-                          </StatusPill>
-                        </div>
-                        <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                          <div>Avoided {fmtPlainNumber(bet.avoidedLoss)}</div>
-                          <div>Missed {fmtPlainNumber(bet.missedUpside)}</div>
-                          <div>False blocks {fmtPlainPct(bet.falseBlockRate, 0)}</div>
-                          <div>Recovery {fmtPlainNumber(bet.timeToRecovery)}</div>
-                        </div>
                         <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-400">
-                          {bet.interpretation}
+                          Unlock: {state.unlockCondition}
                         </p>
                       </div>
                     ))}
                   </div>
-                </div>
-              </div>
 
-              <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Discovery institutionalization
-                  </div>
-                  <div className="mt-2 text-2xl font-semibold text-white">
-                    {governanceEvolution.discoveryInstitutionalization.currentStage}
-                  </div>
-                  <p className="mt-2 text-xs leading-5 text-zinc-500">
-                    {governanceEvolution.discoveryInstitutionalization.allowedInfluence}
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {Object.entries(
-                      governanceEvolution.discoveryInstitutionalization.stageCounts,
-                    ).map(([stage, count]) => (
-                      <span
-                        key={stage}
-                        className="rounded-md border border-white/10 px-2 py-1 text-[11px] text-zinc-400"
-                      >
-                        {stage} {count}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="mt-3 text-xs leading-5 text-zinc-400">
-                    Next: {governanceEvolution.discoveryInstitutionalization.nextStage}
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Accountability loop
-                  </div>
-                  <div className="mt-3 grid gap-2 md:grid-cols-2">
-                    {governanceEvolution.accountabilityLoop.map((step) => (
-                      <div
-                        key={step.id}
-                        className="rounded-lg bg-black/25 px-3 py-2 ring-1 ring-white/[0.05]"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="text-xs font-semibold text-zinc-200">
-                            {step.label}
-                          </div>
-                          <StatusPill
-                            tone={
-                              step.status === "complete"
-                                ? "good"
-                                : step.status === "blocked"
-                                  ? "bad"
-                                  : step.status === "review"
-                                    ? "warn"
-                                    : "neutral"
-                            }
+                  <div className="mt-3 grid gap-3 xl:grid-cols-2">
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Confidence ledger
+                      </div>
+                      <div className="mt-3 grid gap-2 md:grid-cols-2">
+                        {governanceEvolution.confidenceLedger.map((item) => (
+                          <div
+                            key={item.kind}
+                            className="rounded-lg bg-black/25 px-3 py-2 ring-1 ring-white/[0.05]"
                           >
-                            {step.status}
-                          </StatusPill>
-                        </div>
-                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
-                          {step.evidenceRequired}
-                        </p>
-                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-400">
-                          {step.nextAction}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </SectionShell>
-
-            <SectionShell
-              eyebrow="Execution, Learning & Accountability"
-              title="Action quality and feedback loops"
-              action={
-                <StatusPill tone={executionQualityTone}>
-                  {executionQualityDiagnostic?.recommendedExecutionMode?.replace(
-                    /_/g,
-                    " ",
-                  ) ?? "Pending"}
-                </StatusPill>
-              }
-            >
-              <div className="grid gap-3 lg:grid-cols-3">
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                        Execution Quality
-                      </div>
-                      <div className="mt-2 text-2xl font-semibold text-white">
-                        {executionQualityDiagnostic
-                          ? `${Math.round(executionQualityDiagnostic.score)}/100`
-                          : "Pending"}
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <div className="text-xs font-semibold text-zinc-200">
+                                  {item.label}
+                                </div>
+                                <div className="mt-1 text-lg font-semibold text-white">
+                                  {fmtPlainPct(item.score, 0)}
+                                </div>
+                              </div>
+                              <StatusPill
+                                tone={
+                                  item.status === "trusted"
+                                    ? "good"
+                                    : item.status === "blocked"
+                                      ? "bad"
+                                      : "warn"
+                                }
+                              >
+                                {item.status}
+                              </StatusPill>
+                            </div>
+                            <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
+                              {item.question}
+                            </p>
+                            <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-400">
+                              {item.interpretation}
+                            </p>
+                          </div>
+                        ))}
                       </div>
                     </div>
+
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Restriction accountability
+                      </div>
+                      <div className="mt-3 space-y-2">
+                        {(governanceEvolution.restrictionBets.length
+                          ? governanceEvolution.restrictionBets
+                          : [
+                              {
+                                code: "reduced_size",
+                                label: "No active restriction",
+                                status: "pending",
+                                avoidedLoss: null,
+                                missedUpside: null,
+                                falseBlockRate: null,
+                                timeToRecovery: null,
+                                interpretation:
+                                  "Restriction economics are pending.",
+                                nextAudit:
+                                  "Keep monitoring governance economics.",
+                              },
+                            ]
+                        )
+                          .slice(0, 4)
+                          .map((bet) => (
+                            <div
+                              key={`${bet.code}-${bet.label}`}
+                              className="rounded-lg bg-black/25 px-3 py-2 ring-1 ring-white/[0.05]"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="text-xs font-semibold text-zinc-200">
+                                  {bet.label}
+                                </div>
+                                <StatusPill
+                                  tone={
+                                    bet.status === "helpful"
+                                      ? "good"
+                                      : bet.status === "harmful"
+                                        ? "bad"
+                                        : "warn"
+                                  }
+                                >
+                                  {bet.status}
+                                </StatusPill>
+                              </div>
+                              <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                                <div>
+                                  Avoided {fmtPlainNumber(bet.avoidedLoss)}
+                                </div>
+                                <div>
+                                  Missed {fmtPlainNumber(bet.missedUpside)}
+                                </div>
+                                <div>
+                                  False blocks{" "}
+                                  {fmtPlainPct(bet.falseBlockRate, 0)}
+                                </div>
+                                <div>
+                                  Recovery {fmtPlainNumber(bet.timeToRecovery)}
+                                </div>
+                              </div>
+                              <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-400">
+                                {bet.interpretation}
+                              </p>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Discovery institutionalization
+                      </div>
+                      <div className="mt-2 text-2xl font-semibold text-white">
+                        {
+                          governanceEvolution.discoveryInstitutionalization
+                            .currentStage
+                        }
+                      </div>
+                      <p className="mt-2 text-xs leading-5 text-zinc-500">
+                        {
+                          governanceEvolution.discoveryInstitutionalization
+                            .allowedInfluence
+                        }
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {Object.entries(
+                          governanceEvolution.discoveryInstitutionalization
+                            .stageCounts,
+                        ).map(([stage, count]) => (
+                          <span
+                            key={stage}
+                            className="rounded-md border border-white/10 px-2 py-1 text-[11px] text-zinc-400"
+                          >
+                            {stage} {count}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="mt-3 text-xs leading-5 text-zinc-400">
+                        Next:{" "}
+                        {
+                          governanceEvolution.discoveryInstitutionalization
+                            .nextStage
+                        }
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Accountability loop
+                      </div>
+                      <div className="mt-3 grid gap-2 md:grid-cols-2">
+                        {governanceEvolution.accountabilityLoop.map((step) => (
+                          <div
+                            key={step.id}
+                            className="rounded-lg bg-black/25 px-3 py-2 ring-1 ring-white/[0.05]"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="text-xs font-semibold text-zinc-200">
+                                {step.label}
+                              </div>
+                              <StatusPill
+                                tone={
+                                  step.status === "complete"
+                                    ? "good"
+                                    : step.status === "blocked"
+                                      ? "bad"
+                                      : step.status === "review"
+                                        ? "warn"
+                                        : "neutral"
+                                }
+                              >
+                                {step.status}
+                              </StatusPill>
+                            </div>
+                            <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
+                              {step.evidenceRequired}
+                            </p>
+                            <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-400">
+                              {step.nextAction}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </SectionShell>
+
+                <SectionShell
+                  eyebrow="Execution, Learning & Accountability"
+                  title="Action quality and feedback loops"
+                  action={
                     <StatusPill tone={executionQualityTone}>
-                      {executionQualityDiagnostic?.status ?? "pending"}
+                      {executionQualityDiagnostic?.recommendedExecutionMode?.replace(
+                        /_/g,
+                        " ",
+                      ) ?? "Pending"}
                     </StatusPill>
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Entry {fmtPlainPct(executionQualityDiagnostic?.entryQuality, 0)}</div>
-                    <div>Exit {fmtPlainPct(executionQualityDiagnostic?.exitQuality, 0)}</div>
-                    <div>Liquidity {fmtPlainPct(executionQualityDiagnostic?.liquidityQuality, 0)}</div>
-                    <div>Slippage {fmtPlainPct(executionQualityDiagnostic?.slippageRisk, 0)}</div>
-                    <div>Timing {fmtPlainPct(executionQualityDiagnostic?.timingUrgency, 0)}</div>
-                    <div>Invalidation {fmtPlainPct(executionQualityDiagnostic?.invalidationClarity, 0)}</div>
-                  </div>
-                  <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
-                    {executionQualityDiagnostic?.blockers?.[0] ??
-                      executionQualityDiagnostic?.warnings?.[0] ??
-                      executionQualityDiagnostic?.explanation ??
-                      "Execution quality will appear when a selected signal carries execution diagnostics."}
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                        Counterfactual
-                      </div>
-                      <div className="mt-2 text-2xl font-semibold text-white">
-                        {counterfactualDiagnostic
-                          ? `${Math.round(counterfactualDiagnostic.restrictionValueScore)}/100`
-                          : "Pending"}
-                      </div>
-                    </div>
-                    <StatusPill tone={counterfactualTone}>
-                      {counterfactualDiagnostic?.shouldAdjustSizingPolicy ||
-                      counterfactualDiagnostic?.shouldAdjustDiscoveryPolicy ||
-                      counterfactualDiagnostic?.shouldAdjustRestrictionPolicy
-                        ? "adjust"
-                        : "observe"}
-                    </StatusPill>
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Avoided loss {fmtPlainPct(counterfactualDiagnostic?.avoidedLossScore, 0)}</div>
-                    <div>Missed upside {fmtPlainPct(counterfactualDiagnostic?.missedUpsideScore, 0)}</div>
-                    <div>Restriction value {fmtPlainPct(counterfactualDiagnostic?.restrictionValueScore, 0)}</div>
-                    <div>Caution cost {fmtPlainPct(counterfactualDiagnostic?.cautionCostScore, 0)}</div>
-                  </div>
-                  <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
-                    {counterfactualDiagnostic?.scenarios?.[0]?.summary ??
-                      counterfactualDiagnostic?.explanation ??
-                      "Counterfactual learning will compare acted, waited, normal-size, and ignored-restriction scenarios."}
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                        Discovery Accountability
-                      </div>
-                      <div className="mt-2 text-2xl font-semibold text-white">
-                        {discoveryAccountabilityDiagnostic
-                          ? `${Math.round(discoveryAccountabilityDiagnostic.accountabilityScore)}/100`
-                          : "Pending"}
-                      </div>
-                    </div>
-                    <StatusPill tone={discoveryAccountabilityTone}>
-                      {discoveryAccountabilityDiagnostic?.status ?? "pending"}
-                    </StatusPill>
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Maturity {fmtPlainPct(discoveryAccountabilityDiagnostic?.maturity, 0)}</div>
-                    <div>False discoveries {fmtPlainPct(discoveryAccountabilityDiagnostic?.falseDiscoveryRate, 0)}</div>
-                    <div>Missed opportunities {fmtPlainPct(discoveryAccountabilityDiagnostic?.missedOpportunityRate, 0)}</div>
-                    <div>Novelty conversion {fmtPlainPct(discoveryAccountabilityDiagnostic?.noveltyToProfitConversion, 0)}</div>
-                  </div>
-                  <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
-                    {discoveryAccountabilityDiagnostic?.blockers?.[0] ??
-                      discoveryAccountabilityDiagnostic?.explanation ??
-                      "Discovery accountability will mature as accepted, rejected, and missed opportunities collect outcomes."}
-                  </p>
-                </div>
-              </div>
-            </SectionShell>
-
-            <SectionShell
-              eyebrow="Discovery Intelligence"
-              title="Learning value and institutional trust"
-              action={
-                <StatusPill
-                  tone={
-                    numeric(discoveryIntelligenceDiagnostic?.score) >= 70
-                      ? "good"
-                      : numeric(discoveryIntelligenceDiagnostic?.score) >= 45
-                        ? "warn"
-                        : "neutral"
                   }
                 >
-                  {discoveryIntelligenceDiagnostic
-                    ? `${Math.round(discoveryIntelligenceDiagnostic.score)}/100`
-                    : "Pending"}
-                </StatusPill>
-              }
-            >
-              <div className="grid gap-3 xl:grid-cols-4">
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Discovery Intelligence
-                  </div>
-                  <div className="mt-2 text-2xl font-semibold text-white">
-                    {fmtPlainPct(discoveryIntelligenceDiagnostic?.score, 0)}
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Maturity {fmtPlainPct(discoveryIntelligenceDiagnostic?.maturity.maturityScore, 0)}</div>
-                    <div>Economics {fmtPlainPct(discoveryIntelligenceDiagnostic?.economics.economicsScore, 0)}</div>
-                    <div>Governance {fmtPlainPct(discoveryIntelligenceDiagnostic?.governance.score, 0)}</div>
-                    <div>Learning {fmtPlainPct(discoveryIntelligenceDiagnostic?.metaLearning.score, 0)}</div>
-                  </div>
-                  <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
-                    {discoveryIntelligenceDiagnostic?.recommendations?.[0]?.message ??
-                      "Discovery Intelligence is waiting for lifecycle, outcome, restriction, and trace records."}
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Discovery Maturity
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Emerging {discoveryIntelligenceDiagnostic?.maturity.emerging ?? 0}</div>
-                    <div>Detected {discoveryIntelligenceDiagnostic?.maturity.detected ?? 0}</div>
-                    <div>Observed {discoveryIntelligenceDiagnostic?.maturity.observed ?? 0}</div>
-                    <div>Confirmed {discoveryIntelligenceDiagnostic?.maturity.confirmed ?? 0}</div>
-                    <div>Repeatable {discoveryIntelligenceDiagnostic?.maturity.repeatable ?? 0}</div>
-                    <div>Trusted {discoveryIntelligenceDiagnostic?.maturity.trusted ?? 0}</div>
-                    <div>Institutional {discoveryIntelligenceDiagnostic?.maturity.institutional ?? 0}</div>
-                    <div>False {fmtPlainPct(discoveryIntelligenceDiagnostic?.maturity.falseDiscoveryRate, 0)}</div>
-                  </div>
-                </div>
-
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Opportunity Economics
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Act {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.actValue)}</div>
-                    <div>Wait {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.waitValue)}</div>
-                    <div>Reject {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.rejectValue)}</div>
-                    <div>Restrict {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.restrictValue)}</div>
-                    <div>Avoided Loss {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.avoidedLoss)}</div>
-                    <div>Missed Upside {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.missedUpside)}</div>
-                  </div>
-                  <div className="mt-3 text-sm font-semibold text-white">
-                    Cost {fmtPlainNumber(discoveryIntelligenceDiagnostic?.economics.opportunityCost)}
-                  </div>
-                </div>
-
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Governance Effectiveness
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Helpful Restrictions {discoveryIntelligenceDiagnostic?.governance.helpfulRestrictions ?? 0}</div>
-                    <div>Harmful Restrictions {discoveryIntelligenceDiagnostic?.governance.harmfulRestrictions ?? 0}</div>
-                    <div>Score {fmtPlainPct(discoveryIntelligenceDiagnostic?.governance.score, 0)}</div>
-                    <div>Audits {discoveryIntelligenceDiagnostic?.governance.restrictions.length ?? 0}</div>
-                  </div>
-                  <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
-                    {discoveryIntelligenceDiagnostic?.governance.restrictions[0]?.recommendation ??
-                      "Restriction audits are pending."}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-3 grid gap-3 xl:grid-cols-3">
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Institutional Knowledge
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Knowledge {discoveryIntelligenceDiagnostic?.institutionalization.knowledgeCount ?? 0}</div>
-                    <div>Policies {discoveryIntelligenceDiagnostic?.institutionalization.policyCount ?? 0}</div>
-                    <div>Standards {discoveryIntelligenceDiagnostic?.institutionalization.standardCount ?? 0}</div>
-                    <div>Institutional Assets {discoveryIntelligenceDiagnostic?.institutionalization.institutionalCount ?? 0}</div>
-                  </div>
-                  <div className="mt-3 text-2xl font-semibold text-white">
-                    {fmtPlainPct(discoveryIntelligenceDiagnostic?.institutionalization.institutionalizationScore, 0)}
-                  </div>
-                </div>
-
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Meta-Learning
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Calibration Trend {fmtPlainNumber(discoveryIntelligenceDiagnostic?.metaLearning.calibrationTrend)}</div>
-                    <div>Trust Trend {fmtPlainNumber(discoveryIntelligenceDiagnostic?.metaLearning.trustTrend)}</div>
-                    <div>Survival Trend {fmtPlainNumber(discoveryIntelligenceDiagnostic?.metaLearning.survivalTrend)}</div>
-                    <div>Decision Quality Trend {fmtPlainNumber(discoveryIntelligenceDiagnostic?.metaLearning.decisionQualityTrend)}</div>
-                    <div>Governance Trend {fmtPlainNumber(discoveryIntelligenceDiagnostic?.metaLearning.governanceTrend)}</div>
-                    <div>Score {fmtPlainPct(discoveryIntelligenceDiagnostic?.metaLearning.score, 0)}</div>
-                  </div>
-                </div>
-
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Recommendations
-                  </div>
-                  <div className="mt-3 space-y-2">
-                    {(discoveryIntelligenceDiagnostic?.recommendations?.length
-                      ? discoveryIntelligenceDiagnostic.recommendations
-                      : [{ id: "pending", priority: "low", message: "No Discovery Intelligence recommendation is available yet." }]
-                    ).slice(0, 4).map((item) => (
-                      <div
-                        key={item.id}
-                        className="rounded-md bg-black/25 px-3 py-2 text-xs leading-5 text-zinc-400 ring-1 ring-white/[0.05]"
-                      >
-                        <span className="font-semibold text-zinc-300">
-                          {item.priority}
-                        </span>{" "}
-                        {item.message}
+                  <div className="grid gap-3 lg:grid-cols-3">
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                            Execution Quality
+                          </div>
+                          <div className="mt-2 text-2xl font-semibold text-white">
+                            {executionQualityDiagnostic
+                              ? `${Math.round(executionQualityDiagnostic.score)}/100`
+                              : "Pending"}
+                          </div>
+                        </div>
+                        <StatusPill tone={executionQualityTone}>
+                          {executionQualityDiagnostic?.status ?? "pending"}
+                        </StatusPill>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </SectionShell>
+                      <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Entry{" "}
+                          {fmtPlainPct(
+                            executionQualityDiagnostic?.entryQuality,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Exit{" "}
+                          {fmtPlainPct(
+                            executionQualityDiagnostic?.exitQuality,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Liquidity{" "}
+                          {fmtPlainPct(
+                            executionQualityDiagnostic?.liquidityQuality,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Slippage{" "}
+                          {fmtPlainPct(
+                            executionQualityDiagnostic?.slippageRisk,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Timing{" "}
+                          {fmtPlainPct(
+                            executionQualityDiagnostic?.timingUrgency,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Invalidation{" "}
+                          {fmtPlainPct(
+                            executionQualityDiagnostic?.invalidationClarity,
+                            0,
+                          )}
+                        </div>
+                      </div>
+                      <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
+                        {executionQualityDiagnostic?.blockers?.[0] ??
+                          executionQualityDiagnostic?.warnings?.[0] ??
+                          executionQualityDiagnostic?.explanation ??
+                          "Execution quality will appear when a selected signal carries execution diagnostics."}
+                      </p>
+                    </div>
 
-            <SectionShell
-              eyebrow="Wisdom"
-              title="Decision quality and capital learning"
-              action={
-                <StatusPill tone={wisdomTone}>
-                  {wisdomDiagnostic
-                    ? `${Math.round(wisdomDiagnostic.wisdomScore)}/100`
-                    : "Pending"}
-                </StatusPill>
-              }
-            >
-              <div className="grid gap-3 xl:grid-cols-3">
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                            Counterfactual
+                          </div>
+                          <div className="mt-2 text-2xl font-semibold text-white">
+                            {counterfactualDiagnostic
+                              ? `${Math.round(counterfactualDiagnostic.restrictionValueScore)}/100`
+                              : "Pending"}
+                          </div>
+                        </div>
+                        <StatusPill tone={counterfactualTone}>
+                          {counterfactualDiagnostic?.shouldAdjustSizingPolicy ||
+                          counterfactualDiagnostic?.shouldAdjustDiscoveryPolicy ||
+                          counterfactualDiagnostic?.shouldAdjustRestrictionPolicy
+                            ? "adjust"
+                            : "observe"}
+                        </StatusPill>
+                      </div>
+                      <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Avoided loss{" "}
+                          {fmtPlainPct(
+                            counterfactualDiagnostic?.avoidedLossScore,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Missed upside{" "}
+                          {fmtPlainPct(
+                            counterfactualDiagnostic?.missedUpsideScore,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Restriction value{" "}
+                          {fmtPlainPct(
+                            counterfactualDiagnostic?.restrictionValueScore,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Caution cost{" "}
+                          {fmtPlainPct(
+                            counterfactualDiagnostic?.cautionCostScore,
+                            0,
+                          )}
+                        </div>
+                      </div>
+                      <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
+                        {counterfactualDiagnostic?.scenarios?.[0]?.summary ??
+                          counterfactualDiagnostic?.explanation ??
+                          "Counterfactual learning will compare acted, waited, normal-size, and ignored-restriction scenarios."}
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                            Discovery Accountability
+                          </div>
+                          <div className="mt-2 text-2xl font-semibold text-white">
+                            {discoveryAccountabilityDiagnostic
+                              ? `${Math.round(discoveryAccountabilityDiagnostic.accountabilityScore)}/100`
+                              : "Pending"}
+                          </div>
+                        </div>
+                        <StatusPill tone={discoveryAccountabilityTone}>
+                          {discoveryAccountabilityDiagnostic?.status ??
+                            "pending"}
+                        </StatusPill>
+                      </div>
+                      <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Maturity{" "}
+                          {fmtPlainPct(
+                            discoveryAccountabilityDiagnostic?.maturity,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          False discoveries{" "}
+                          {fmtPlainPct(
+                            discoveryAccountabilityDiagnostic?.falseDiscoveryRate,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Missed opportunities{" "}
+                          {fmtPlainPct(
+                            discoveryAccountabilityDiagnostic?.missedOpportunityRate,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Novelty conversion{" "}
+                          {fmtPlainPct(
+                            discoveryAccountabilityDiagnostic?.noveltyToProfitConversion,
+                            0,
+                          )}
+                        </div>
+                      </div>
+                      <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
+                        {discoveryAccountabilityDiagnostic?.blockers?.[0] ??
+                          discoveryAccountabilityDiagnostic?.explanation ??
+                          "Discovery accountability will mature as accepted, rejected, and missed opportunities collect outcomes."}
+                      </p>
+                    </div>
+                  </div>
+                </SectionShell>
+
+                <SectionShell
+                  eyebrow="Discovery Intelligence"
+                  title="Learning value and institutional trust"
+                  action={
+                    <StatusPill
+                      tone={
+                        numeric(discoveryIntelligenceDiagnostic?.score) >= 70
+                          ? "good"
+                          : numeric(discoveryIntelligenceDiagnostic?.score) >=
+                              45
+                            ? "warn"
+                            : "neutral"
+                      }
+                    >
+                      {discoveryIntelligenceDiagnostic
+                        ? `${Math.round(discoveryIntelligenceDiagnostic.score)}/100`
+                        : "Pending"}
+                    </StatusPill>
+                  }
+                >
+                  <div className="grid gap-3 xl:grid-cols-4">
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
                       <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                        Wisdom Summary
+                        Discovery Intelligence
                       </div>
                       <div className="mt-2 text-2xl font-semibold text-white">
-                        {fmtPlainPct(wisdomDiagnostic?.decisionQuality, 0)}
+                        {fmtPlainPct(discoveryIntelligenceDiagnostic?.score, 0)}
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Maturity{" "}
+                          {fmtPlainPct(
+                            discoveryIntelligenceDiagnostic?.maturity
+                              .maturityScore,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Economics{" "}
+                          {fmtPlainPct(
+                            discoveryIntelligenceDiagnostic?.economics
+                              .economicsScore,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Governance{" "}
+                          {fmtPlainPct(
+                            discoveryIntelligenceDiagnostic?.governance.score,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Learning{" "}
+                          {fmtPlainPct(
+                            discoveryIntelligenceDiagnostic?.metaLearning.score,
+                            0,
+                          )}
+                        </div>
+                      </div>
+                      <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
+                        {discoveryIntelligenceDiagnostic?.recommendations?.[0]
+                          ?.message ??
+                          "Discovery Intelligence is waiting for lifecycle, outcome, restriction, and trace records."}
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Discovery Maturity
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Emerging{" "}
+                          {discoveryIntelligenceDiagnostic?.maturity.emerging ??
+                            0}
+                        </div>
+                        <div>
+                          Detected{" "}
+                          {discoveryIntelligenceDiagnostic?.maturity.detected ??
+                            0}
+                        </div>
+                        <div>
+                          Observed{" "}
+                          {discoveryIntelligenceDiagnostic?.maturity.observed ??
+                            0}
+                        </div>
+                        <div>
+                          Confirmed{" "}
+                          {discoveryIntelligenceDiagnostic?.maturity
+                            .confirmed ?? 0}
+                        </div>
+                        <div>
+                          Repeatable{" "}
+                          {discoveryIntelligenceDiagnostic?.maturity
+                            .repeatable ?? 0}
+                        </div>
+                        <div>
+                          Trusted{" "}
+                          {discoveryIntelligenceDiagnostic?.maturity.trusted ??
+                            0}
+                        </div>
+                        <div>
+                          Institutional{" "}
+                          {discoveryIntelligenceDiagnostic?.maturity
+                            .institutional ?? 0}
+                        </div>
+                        <div>
+                          False{" "}
+                          {fmtPlainPct(
+                            discoveryIntelligenceDiagnostic?.maturity
+                              .falseDiscoveryRate,
+                            0,
+                          )}
+                        </div>
                       </div>
                     </div>
+
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Opportunity Economics
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Act{" "}
+                          {fmtPlainNumber(
+                            discoveryIntelligenceDiagnostic?.economics.actValue,
+                          )}
+                        </div>
+                        <div>
+                          Wait{" "}
+                          {fmtPlainNumber(
+                            discoveryIntelligenceDiagnostic?.economics
+                              .waitValue,
+                          )}
+                        </div>
+                        <div>
+                          Reject{" "}
+                          {fmtPlainNumber(
+                            discoveryIntelligenceDiagnostic?.economics
+                              .rejectValue,
+                          )}
+                        </div>
+                        <div>
+                          Restrict{" "}
+                          {fmtPlainNumber(
+                            discoveryIntelligenceDiagnostic?.economics
+                              .restrictValue,
+                          )}
+                        </div>
+                        <div>
+                          Avoided Loss{" "}
+                          {fmtPlainNumber(
+                            discoveryIntelligenceDiagnostic?.economics
+                              .avoidedLoss,
+                          )}
+                        </div>
+                        <div>
+                          Missed Upside{" "}
+                          {fmtPlainNumber(
+                            discoveryIntelligenceDiagnostic?.economics
+                              .missedUpside,
+                          )}
+                        </div>
+                      </div>
+                      <div className="mt-3 text-sm font-semibold text-white">
+                        Cost{" "}
+                        {fmtPlainNumber(
+                          discoveryIntelligenceDiagnostic?.economics
+                            .opportunityCost,
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Governance Effectiveness
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Helpful Restrictions{" "}
+                          {discoveryIntelligenceDiagnostic?.governance
+                            .helpfulRestrictions ?? 0}
+                        </div>
+                        <div>
+                          Harmful Restrictions{" "}
+                          {discoveryIntelligenceDiagnostic?.governance
+                            .harmfulRestrictions ?? 0}
+                        </div>
+                        <div>
+                          Score{" "}
+                          {fmtPlainPct(
+                            discoveryIntelligenceDiagnostic?.governance.score,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Audits{" "}
+                          {discoveryIntelligenceDiagnostic?.governance
+                            .restrictions.length ?? 0}
+                        </div>
+                      </div>
+                      <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
+                        {discoveryIntelligenceDiagnostic?.governance
+                          .restrictions[0]?.recommendation ??
+                          "Restriction audits are pending."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid gap-3 xl:grid-cols-3">
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Institutional Knowledge
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Knowledge{" "}
+                          {discoveryIntelligenceDiagnostic?.institutionalization
+                            .knowledgeCount ?? 0}
+                        </div>
+                        <div>
+                          Policies{" "}
+                          {discoveryIntelligenceDiagnostic?.institutionalization
+                            .policyCount ?? 0}
+                        </div>
+                        <div>
+                          Standards{" "}
+                          {discoveryIntelligenceDiagnostic?.institutionalization
+                            .standardCount ?? 0}
+                        </div>
+                        <div>
+                          Institutional Assets{" "}
+                          {discoveryIntelligenceDiagnostic?.institutionalization
+                            .institutionalCount ?? 0}
+                        </div>
+                      </div>
+                      <div className="mt-3 text-2xl font-semibold text-white">
+                        {fmtPlainPct(
+                          discoveryIntelligenceDiagnostic?.institutionalization
+                            .institutionalizationScore,
+                          0,
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Meta-Learning
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Calibration Trend{" "}
+                          {fmtPlainNumber(
+                            discoveryIntelligenceDiagnostic?.metaLearning
+                              .calibrationTrend,
+                          )}
+                        </div>
+                        <div>
+                          Trust Trend{" "}
+                          {fmtPlainNumber(
+                            discoveryIntelligenceDiagnostic?.metaLearning
+                              .trustTrend,
+                          )}
+                        </div>
+                        <div>
+                          Survival Trend{" "}
+                          {fmtPlainNumber(
+                            discoveryIntelligenceDiagnostic?.metaLearning
+                              .survivalTrend,
+                          )}
+                        </div>
+                        <div>
+                          Decision Quality Trend{" "}
+                          {fmtPlainNumber(
+                            discoveryIntelligenceDiagnostic?.metaLearning
+                              .decisionQualityTrend,
+                          )}
+                        </div>
+                        <div>
+                          Governance Trend{" "}
+                          {fmtPlainNumber(
+                            discoveryIntelligenceDiagnostic?.metaLearning
+                              .governanceTrend,
+                          )}
+                        </div>
+                        <div>
+                          Score{" "}
+                          {fmtPlainPct(
+                            discoveryIntelligenceDiagnostic?.metaLearning.score,
+                            0,
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Recommendations
+                      </div>
+                      <div className="mt-3 space-y-2">
+                        {(discoveryIntelligenceDiagnostic?.recommendations
+                          ?.length
+                          ? discoveryIntelligenceDiagnostic.recommendations
+                          : [
+                              {
+                                id: "pending",
+                                priority: "low",
+                                message:
+                                  "No Discovery Intelligence recommendation is available yet.",
+                              },
+                            ]
+                        )
+                          .slice(0, 4)
+                          .map((item) => (
+                            <div
+                              key={item.id}
+                              className="rounded-md bg-black/25 px-3 py-2 text-xs leading-5 text-zinc-400 ring-1 ring-white/[0.05]"
+                            >
+                              <span className="font-semibold text-zinc-300">
+                                {item.priority}
+                              </span>{" "}
+                              {item.message}
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </div>
+                </SectionShell>
+
+                <SectionShell
+                  eyebrow="Wisdom"
+                  title="Decision quality and capital learning"
+                  action={
                     <StatusPill tone={wisdomTone}>
-                      {fmtPlainPct(wisdomDiagnostic?.learningConfidence, 0)}
+                      {wisdomDiagnostic
+                        ? `${Math.round(wisdomDiagnostic.wisdomScore)}/100`
+                        : "Pending"}
                     </StatusPill>
-                  </div>
-                  <p className="mt-3 line-clamp-4 text-xs leading-5 text-zinc-500">
-                    {wisdomDiagnostic?.explanation ??
-                      "Wisdom will appear after decisions include alternatives and outcome memory."}
-                  </p>
-                </div>
+                  }
+                >
+                  <div className="grid gap-3 xl:grid-cols-3">
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                            Wisdom Summary
+                          </div>
+                          <div className="mt-2 text-2xl font-semibold text-white">
+                            {fmtPlainPct(wisdomDiagnostic?.decisionQuality, 0)}
+                          </div>
+                        </div>
+                        <StatusPill tone={wisdomTone}>
+                          {fmtPlainPct(wisdomDiagnostic?.learningConfidence, 0)}
+                        </StatusPill>
+                      </div>
+                      <p className="mt-3 line-clamp-4 text-xs leading-5 text-zinc-500">
+                        {wisdomDiagnostic?.explanation ??
+                          "Wisdom will appear after decisions include alternatives and outcome memory."}
+                      </p>
+                    </div>
 
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Counterfactual Review
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Actual {fmtPlainPct(wisdomDiagnostic?.counterfactuals?.actualOutcome?.utility, 0)}</div>
-                    <div>Best {fmtPlainPct(wisdomDiagnostic?.counterfactuals?.bestAlternative?.utility, 0)}</div>
-                    <div>Worst {fmtPlainPct(wisdomDiagnostic?.counterfactuals?.worstAlternative?.utility, 0)}</div>
-                    <div>Quality {fmtPlainPct(wisdomDiagnostic?.counterfactuals?.decisionQuality, 0)}</div>
-                    <div>Avoided {fmtPlainPct(wisdomDiagnostic?.counterfactuals?.avoidedLoss, 0)}</div>
-                    <div>Missed {fmtPlainPct(wisdomDiagnostic?.counterfactuals?.missedUpside, 0)}</div>
-                  </div>
-                  <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
-                    {wisdomDiagnostic?.counterfactuals?.explanation ??
-                      "Actual, best alternative, worst alternative, and restriction value are pending."}
-                  </p>
-                </div>
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Counterfactual Review
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Actual{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.counterfactuals?.actualOutcome
+                              ?.utility,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Best{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.counterfactuals?.bestAlternative
+                              ?.utility,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Worst{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.counterfactuals?.worstAlternative
+                              ?.utility,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Quality{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.counterfactuals?.decisionQuality,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Avoided{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.counterfactuals?.avoidedLoss,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Missed{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.counterfactuals?.missedUpside,
+                            0,
+                          )}
+                        </div>
+                      </div>
+                      <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-500">
+                        {wisdomDiagnostic?.counterfactuals?.explanation ??
+                          "Actual, best alternative, worst alternative, and restriction value are pending."}
+                      </p>
+                    </div>
 
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Opportunity Economics
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Act {fmtPlainPct(wisdomDiagnostic?.opportunityEconomics?.actionValue, 0)}</div>
-                    <div>Wait {fmtPlainPct(wisdomDiagnostic?.opportunityEconomics?.waitValue, 0)}</div>
-                    <div>Reject {fmtPlainPct(wisdomDiagnostic?.opportunityEconomics?.rejectValue, 0)}</div>
-                    <div>Scale {fmtPlainPct(wisdomDiagnostic?.opportunityEconomics?.scaleValue, 0)}</div>
-                    <div>Urgency {fmtPlainPct(wisdomDiagnostic?.opportunityEconomics?.urgencyCost, 0)}</div>
-                    <div>Cost {fmtPlainPct(wisdomDiagnostic?.opportunityEconomics?.opportunityCost, 0)}</div>
-                  </div>
-                  <p className="mt-3 text-xs leading-5 text-zinc-500">
-                    Best option:{" "}
-                    <span className="font-semibold text-zinc-300">
-                      {wisdomDiagnostic?.opportunityEconomics?.bestOption ?? "Pending"}
-                    </span>
-                  </p>
-                </div>
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Opportunity Economics
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Act{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.opportunityEconomics?.actionValue,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Wait{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.opportunityEconomics?.waitValue,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Reject{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.opportunityEconomics?.rejectValue,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Scale{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.opportunityEconomics?.scaleValue,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Urgency{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.opportunityEconomics?.urgencyCost,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Cost{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.opportunityEconomics
+                              ?.opportunityCost,
+                            0,
+                          )}
+                        </div>
+                      </div>
+                      <p className="mt-3 text-xs leading-5 text-zinc-500">
+                        Best option:{" "}
+                        <span className="font-semibold text-zinc-300">
+                          {wisdomDiagnostic?.opportunityEconomics?.bestOption ??
+                            "Pending"}
+                        </span>
+                      </p>
+                    </div>
 
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Discovery Maturity
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {(wisdomDiagnostic?.discoveryMaturity?.lifecycle?.length
-                      ? wisdomDiagnostic.discoveryMaturity.lifecycle
-                      : [
-                          { stage: "Detected", count: 0 },
-                          { stage: "Observed", count: 0 },
-                          { stage: "Confirmed", count: 0 },
-                          { stage: "Repeatable", count: 0 },
-                          { stage: "Trusted", count: 0 },
-                          { stage: "Institutional", count: 0 },
-                        ]
-                    ).map((item) => (
-                      <span
-                        key={item.stage}
-                        className="rounded-md border border-white/10 px-2 py-1 text-[11px] text-zinc-400"
-                      >
-                        {item.stage} {item.count}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Maturity {fmtPlainPct(wisdomDiagnostic?.discoveryMaturity?.maturityScore, 0)}</div>
-                    <div>Recurrence {fmtPlainPct(wisdomDiagnostic?.discoveryMaturity?.recurrenceRate, 0)}</div>
-                    <div>Novelty {fmtPlainPct(wisdomDiagnostic?.discoveryMaturity?.noveltyPersistence, 0)}</div>
-                    <div>Conversion {fmtPlainPct(wisdomDiagnostic?.discoveryMaturity?.conversionRate, 0)}</div>
-                  </div>
-                </div>
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Discovery Maturity
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {(wisdomDiagnostic?.discoveryMaturity?.lifecycle?.length
+                          ? wisdomDiagnostic.discoveryMaturity.lifecycle
+                          : [
+                              { stage: "Detected", count: 0 },
+                              { stage: "Observed", count: 0 },
+                              { stage: "Confirmed", count: 0 },
+                              { stage: "Repeatable", count: 0 },
+                              { stage: "Trusted", count: 0 },
+                              { stage: "Institutional", count: 0 },
+                            ]
+                        ).map((item) => (
+                          <span
+                            key={item.stage}
+                            className="rounded-md border border-white/10 px-2 py-1 text-[11px] text-zinc-400"
+                          >
+                            {item.stage} {item.count}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Maturity{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.discoveryMaturity?.maturityScore,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Recurrence{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.discoveryMaturity?.recurrenceRate,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Novelty{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.discoveryMaturity
+                              ?.noveltyPersistence,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Conversion{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.discoveryMaturity?.conversionRate,
+                            0,
+                          )}
+                        </div>
+                      </div>
+                    </div>
 
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Agency Effectiveness
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Accuracy {fmtPlainPct(wisdomDiagnostic?.agencyEffectiveness?.agencyAccuracy, 0)}</div>
-                    <div>Intervention {fmtPlainPct(wisdomDiagnostic?.agencyEffectiveness?.interventionValue, 0)}</div>
-                    <div>Approval {fmtPlainPct(wisdomDiagnostic?.agencyEffectiveness?.approvalQuality, 0)}</div>
-                    <div>Rejection {fmtPlainPct(wisdomDiagnostic?.agencyEffectiveness?.rejectionQuality, 0)}</div>
-                  </div>
-                  <div className="mt-3 text-2xl font-semibold text-white">
-                    {fmtPlainPct(wisdomDiagnostic?.agencyEffectiveness?.governanceEffectiveness, 0)}
-                  </div>
-                </div>
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Agency Effectiveness
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Accuracy{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.agencyEffectiveness
+                              ?.agencyAccuracy,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Intervention{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.agencyEffectiveness
+                              ?.interventionValue,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Approval{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.agencyEffectiveness
+                              ?.approvalQuality,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Rejection{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.agencyEffectiveness
+                              ?.rejectionQuality,
+                            0,
+                          )}
+                        </div>
+                      </div>
+                      <div className="mt-3 text-2xl font-semibold text-white">
+                        {fmtPlainPct(
+                          wisdomDiagnostic?.agencyEffectiveness
+                            ?.governanceEffectiveness,
+                          0,
+                        )}
+                      </div>
+                    </div>
 
-                <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                    Portfolio Intelligence
+                    <div className="rounded-lg border border-white/10 bg-[#151515] px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                        Portfolio Intelligence
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
+                        <div>
+                          Concentration{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.portfolioIntelligence
+                              ?.concentrationRisk,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Diversification{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.portfolioIntelligence
+                              ?.diversificationQuality,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Capital{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.portfolioIntelligence
+                              ?.capitalEfficiency,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Coverage{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.portfolioIntelligence
+                              ?.opportunityCoverage,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Convexity{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.portfolioIntelligence
+                              ?.portfolioConvexity,
+                            0,
+                          )}
+                        </div>
+                        <div>
+                          Allocation{" "}
+                          {fmtPlainPct(
+                            wisdomDiagnostic?.portfolioIntelligence
+                              ?.allocationQuality,
+                            0,
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                    <div>Concentration {fmtPlainPct(wisdomDiagnostic?.portfolioIntelligence?.concentrationRisk, 0)}</div>
-                    <div>Diversification {fmtPlainPct(wisdomDiagnostic?.portfolioIntelligence?.diversificationQuality, 0)}</div>
-                    <div>Capital {fmtPlainPct(wisdomDiagnostic?.portfolioIntelligence?.capitalEfficiency, 0)}</div>
-                    <div>Coverage {fmtPlainPct(wisdomDiagnostic?.portfolioIntelligence?.opportunityCoverage, 0)}</div>
-                    <div>Convexity {fmtPlainPct(wisdomDiagnostic?.portfolioIntelligence?.portfolioConvexity, 0)}</div>
-                    <div>Allocation {fmtPlainPct(wisdomDiagnostic?.portfolioIntelligence?.allocationQuality, 0)}</div>
-                  </div>
-                </div>
-              </div>
-            </SectionShell>
+                </SectionShell>
               </div>
             </AdvancedDisclosure>
 
@@ -8682,8 +9247,8 @@ export default function Dashboard() {
                   >
                     {executiveIA.whyNotFullSize.mode}
                   </StatusPill>
-              }
-            >
+                }
+              >
                 <div className="space-y-3">
                   {restrictionImpactRows.map((factor) => (
                     <div
@@ -10434,7 +10999,9 @@ export default function Dashboard() {
                                   label="Trend"
                                 />
                                 <QualityBar
-                                  value={clamp(100 - numeric(stock.riskPressure))}
+                                  value={clamp(
+                                    100 - numeric(stock.riskPressure),
+                                  )}
                                   label="Risk control"
                                 />
                                 <QualityBar
@@ -11412,24 +11979,34 @@ export default function Dashboard() {
                 <div className="grid gap-3 sm:grid-cols-3">
                   <MiniMetric
                     label="Score"
-                    value={fmtPlainPct(discoveryIntelligenceDiagnostic?.score, 0)}
+                    value={fmtPlainPct(
+                      discoveryIntelligenceDiagnostic?.score,
+                      0,
+                    )}
                     emphasis="quiet"
                   />
                   <MiniMetric
                     label="Regime coverage"
-                    value={fmtPlainPct(discoveryIntelligenceDiagnostic?.regimeCoverageScore, 0)}
+                    value={fmtPlainPct(
+                      discoveryIntelligenceDiagnostic?.regimeCoverageScore,
+                      0,
+                    )}
                     emphasis="quiet"
                   />
                   <MiniMetric
                     label="Restriction audits"
-                    value={String(discoveryIntelligenceDiagnostic?.governance.restrictions.length ?? 0)}
+                    value={String(
+                      discoveryIntelligenceDiagnostic?.governance.restrictions
+                        .length ?? 0,
+                    )}
                     emphasis="quiet"
                   />
                 </div>
               }
             >
               <div className="space-y-3 text-sm leading-6 text-zinc-400">
-                {(discoveryIntelligenceDiagnostic?.governance.restrictions.length
+                {(discoveryIntelligenceDiagnostic?.governance.restrictions
+                  .length
                   ? discoveryIntelligenceDiagnostic.governance.restrictions
                   : []
                 )
@@ -11448,7 +12025,8 @@ export default function Dashboard() {
                         </StatusPill>
                       </div>
                       <div className="mt-1 text-xs text-zinc-500">
-                        Avoided {fmtPlainNumber(restriction.avoidedLoss)} · Missed {fmtPlainNumber(restriction.missedUpside)}
+                        Avoided {fmtPlainNumber(restriction.avoidedLoss)} ·
+                        Missed {fmtPlainNumber(restriction.missedUpside)}
                       </div>
                     </div>
                   ))}

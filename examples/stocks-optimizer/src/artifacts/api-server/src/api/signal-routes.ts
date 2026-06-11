@@ -1,8 +1,15 @@
-import { Router, type Request, type Response } from "express";
+import { type Request, type Response, Router } from "express";
 import { z } from "zod";
 import { assertSignalProductionReady } from "../config/signal-environment.js";
-import { buildHealthPayload, buildReadinessPayload } from "../observability/signal-health.js";
-import { ApiProblem, getRequestId, sendApiError } from "../observability/signal-http.js";
+import {
+  buildHealthPayload,
+  buildReadinessPayload,
+} from "../observability/signal-health.js";
+import {
+  ApiProblem,
+  getRequestId,
+  sendApiError,
+} from "../observability/signal-http.js";
 import {
   CreateApiKeySchema,
   RedriveQueueSchema,
@@ -18,9 +25,13 @@ import {
   signalRateLimit,
   verifySignedIngestionRequest,
 } from "../security/signal-security.js";
-import { getSignalDistributionService, getSignalStreamHub, getSignalWebhookDispatcher } from "../services/signal-distribution.js";
-import { responseForSignal } from "../streams/signal-stream.js";
+import {
+  getSignalDistributionService,
+  getSignalStreamHub,
+  getSignalWebhookDispatcher,
+} from "../services/signal-distribution.js";
 import { getSignalStore, publicApiKey } from "../storage/signal-store.js";
+import { responseForSignal } from "../streams/signal-stream.js";
 
 export function createSignalApiRouter() {
   const router = Router();
@@ -72,7 +83,9 @@ function mountSignalRoutes(router: Router, prefix: string) {
     signalRateLimit("stream"),
     async (req, res, next) => {
       try {
-        const filters = parseSignalFilters(req.query as Record<string, unknown>);
+        const filters = parseSignalFilters(
+          req.query as Record<string, unknown>,
+        );
         await getSignalStreamHub().subscribe(req, res, filters);
       } catch (error) {
         next(error);
@@ -86,11 +99,19 @@ function mountSignalRoutes(router: Router, prefix: string) {
     signalRateLimit("signals-read"),
     async (req, res, next) => {
       try {
-        const filters = parseSignalFilters(req.query as Record<string, unknown>);
+        const filters = parseSignalFilters(
+          req.query as Record<string, unknown>,
+        );
         const record = await getSignalDistributionService().latest(filters);
 
         if (!record) {
-          sendApiError(req, res, 404, "signal_not_found", "No matching signal is available.");
+          sendApiError(
+            req,
+            res,
+            404,
+            "signal_not_found",
+            "No matching signal is available.",
+          );
           return;
         }
 
@@ -107,7 +128,9 @@ function mountSignalRoutes(router: Router, prefix: string) {
     signalRateLimit("signals-read"),
     async (req, res, next) => {
       try {
-        const filters = parseSignalFilters(req.query as Record<string, unknown>);
+        const filters = parseSignalFilters(
+          req.query as Record<string, unknown>,
+        );
         const records = await getSignalDistributionService().list(filters);
         res.json({
           data: records.map(responseForSignal),
@@ -125,10 +148,18 @@ function mountSignalRoutes(router: Router, prefix: string) {
     signalRateLimit("signals-read"),
     async (req, res, next) => {
       try {
-        const record = await getSignalDistributionService().get(String(req.params.id));
+        const record = await getSignalDistributionService().get(
+          String(req.params.id),
+        );
 
         if (!record) {
-          sendApiError(req, res, 404, "signal_not_found", "Signal was not found.");
+          sendApiError(
+            req,
+            res,
+            404,
+            "signal_not_found",
+            "Signal was not found.",
+          );
           return;
         }
 
@@ -147,7 +178,9 @@ function mountSignalRoutes(router: Router, prefix: string) {
       try {
         assertProductionAuthReady();
         assertSignalProductionReady();
-        const canonicalBody = JSON.stringify(req.body?.signal ?? req.body ?? {});
+        const canonicalBody = JSON.stringify(
+          req.body?.signal ?? req.body ?? {},
+        );
         const signed = await verifySignedIngestionRequest({
           headers: req.headers,
           body: canonicalBody,
@@ -182,10 +215,19 @@ function mountSignalRoutes(router: Router, prefix: string) {
     signalRateLimit("webhooks"),
     async (req, res, next) => {
       try {
-        const result = await getSignalWebhookDispatcher().register(req.body, (req as any).signalAuth?.keyId);
+        const result = await getSignalWebhookDispatcher().register(
+          req.body,
+          (req as any).signalAuth?.keyId,
+        );
         res.status(201).json(result);
       } catch (error) {
-        next(normalizeZodError(error, "invalid_webhook", "Webhook registration failed validation."));
+        next(
+          normalizeZodError(
+            error,
+            "invalid_webhook",
+            "Webhook registration failed validation.",
+          ),
+        );
       }
     },
   );
@@ -209,9 +251,18 @@ function mountSignalRoutes(router: Router, prefix: string) {
     signalRateLimit("webhooks"),
     async (req, res, next) => {
       try {
-        const deleted = await getSignalWebhookDispatcher().remove(String(req.params.id), (req as any).signalAuth?.keyId);
+        const deleted = await getSignalWebhookDispatcher().remove(
+          String(req.params.id),
+          (req as any).signalAuth?.keyId,
+        );
         if (!deleted) {
-          sendApiError(req, res, 404, "webhook_not_found", "Webhook subscription was not found.");
+          sendApiError(
+            req,
+            res,
+            404,
+            "webhook_not_found",
+            "Webhook subscription was not found.",
+          );
           return;
         }
         res.status(204).end();
@@ -227,7 +278,9 @@ function mountSignalRoutes(router: Router, prefix: string) {
     signalRateLimit("webhooks"),
     async (req, res, next) => {
       try {
-        res.json(await getSignalWebhookDispatcher().sendTest(String(req.params.id)));
+        res.json(
+          await getSignalWebhookDispatcher().sendTest(String(req.params.id)),
+        );
       } catch (error) {
         next(error);
       }
@@ -240,13 +293,21 @@ function mountSignalRoutes(router: Router, prefix: string) {
     signalRateLimit("webhooks"),
     async (req, res, next) => {
       try {
-        res.json(await getSignalWebhookDispatcher().rotateSecret(
-          String(req.params.id),
-          req.body,
-          (req as any).signalAuth?.keyId,
-        ));
+        res.json(
+          await getSignalWebhookDispatcher().rotateSecret(
+            String(req.params.id),
+            req.body,
+            (req as any).signalAuth?.keyId,
+          ),
+        );
       } catch (error) {
-        next(normalizeZodError(error, "invalid_webhook_rotation", "Webhook secret rotation failed validation."));
+        next(
+          normalizeZodError(
+            error,
+            "invalid_webhook_rotation",
+            "Webhook secret rotation failed validation.",
+          ),
+        );
       }
     },
   );
@@ -257,7 +318,13 @@ function mountSignalRoutes(router: Router, prefix: string) {
     signalRateLimit("audit"),
     async (req, res, next) => {
       try {
-        const limit = z.coerce.number().int().min(1).max(500).default(100).parse(req.query.limit);
+        const limit = z.coerce
+          .number()
+          .int()
+          .min(1)
+          .max(500)
+          .default(100)
+          .parse(req.query.limit);
         res.json({ data: await getSignalDistributionService().audit(limit) });
       } catch (error) {
         next(error);
@@ -286,9 +353,19 @@ function mountSignalRoutes(router: Router, prefix: string) {
     async (req, res, next) => {
       try {
         const input = CreateApiKeySchema.parse(req.body);
-        res.status(201).json(await createManagedApiKey(input, (req as any).signalAuth?.keyId));
+        res
+          .status(201)
+          .json(
+            await createManagedApiKey(input, (req as any).signalAuth?.keyId),
+          );
       } catch (error) {
-        next(normalizeZodError(error, "invalid_api_key_request", "API key creation failed validation."));
+        next(
+          normalizeZodError(
+            error,
+            "invalid_api_key_request",
+            "API key creation failed validation.",
+          ),
+        );
       }
     },
   );
@@ -300,9 +377,21 @@ function mountSignalRoutes(router: Router, prefix: string) {
     async (req, res, next) => {
       try {
         const input = RotateApiKeySchema.parse(req.body ?? {});
-        res.json(await rotateManagedApiKey(String(req.params.id), input, (req as any).signalAuth?.keyId));
+        res.json(
+          await rotateManagedApiKey(
+            String(req.params.id),
+            input,
+            (req as any).signalAuth?.keyId,
+          ),
+        );
       } catch (error) {
-        next(normalizeZodError(error, "invalid_api_key_rotation", "API key rotation failed validation."));
+        next(
+          normalizeZodError(
+            error,
+            "invalid_api_key_rotation",
+            "API key rotation failed validation.",
+          ),
+        );
       }
     },
   );
@@ -313,7 +402,12 @@ function mountSignalRoutes(router: Router, prefix: string) {
     signalRateLimit("admin-api-keys"),
     async (req, res, next) => {
       try {
-        res.json(await revokeManagedApiKey(String(req.params.id), (req as any).signalAuth?.keyId));
+        res.json(
+          await revokeManagedApiKey(
+            String(req.params.id),
+            (req as any).signalAuth?.keyId,
+          ),
+        );
       } catch (error) {
         next(error);
       }
@@ -327,10 +421,19 @@ function mountSignalRoutes(router: Router, prefix: string) {
     async (req, res, next) => {
       try {
         const input = RedriveQueueSchema.parse(req.body ?? {});
-        const redriven = await getSignalStore().redriveDeadLetterJobs(input.queue, input.ids);
+        const redriven = await getSignalStore().redriveDeadLetterJobs(
+          input.queue,
+          input.ids,
+        );
         res.json({ redriven });
       } catch (error) {
-        next(normalizeZodError(error, "invalid_redrive_request", "Queue redrive failed validation."));
+        next(
+          normalizeZodError(
+            error,
+            "invalid_redrive_request",
+            "Queue redrive failed validation.",
+          ),
+        );
       }
     },
   );

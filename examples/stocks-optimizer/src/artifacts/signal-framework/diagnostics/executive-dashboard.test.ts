@@ -72,33 +72,44 @@ const state = {
     resolveScore: 66,
     missingEvidence: ["Agency trust", "Reduced-size survival review"],
     unlockConditions: ["Raise agency trust to at least 70/100."],
-    invalidationConditions: ["Invalidate if Trust or Judgement falls below the commitment threshold."],
+    invalidationConditions: [
+      "Invalidate if Trust or Judgement falls below the commitment threshold.",
+    ],
     explanation: "Resolve waits because Agency trust remains unresolved.",
   },
   survivalMemory: {
     status: "scarred",
     mainWarnings: ["Survival memory remains scarred."],
-    unlockConditions: ["Raise survival confidence to at least 70/100 for normal sizing."],
-    invalidationConditions: ["Invalidate if similar-state survival cost rises."],
+    unlockConditions: [
+      "Raise survival confidence to at least 70/100 for normal sizing.",
+    ],
+    invalidationConditions: [
+      "Invalidate if similar-state survival cost rises.",
+    ],
   },
   recovery: {
     status: "recovering",
     blockers: ["Recovery incomplete until clean outcomes close."],
-    unlockConditions: ["Close reduced-size outcomes for the stable positive state archetype."],
+    unlockConditions: [
+      "Close reduced-size outcomes for the stable positive state archetype.",
+    ],
   },
   trustGovernor: {
     trustScore: 64,
     participationMode: "micro",
     maxExposure: 2,
-    blockers: [{
-      reason: "Trust score has not cleared the restoration threshold.",
-      unlockCriteria: ["Raise trust score to at least 70/100."],
-    }],
+    blockers: [
+      {
+        reason: "Trust score has not cleared the restoration threshold.",
+        unlockCriteria: ["Raise trust score to at least 70/100."],
+      },
+    ],
   },
   sizing: {
     sizingMode: "micro",
     suggestedMaximumExposurePct: 2,
-    limitedReason: "Reduced size because survival scar and trust below threshold.",
+    limitedReason:
+      "Reduced size because survival scar and trust below threshold.",
   },
   calibration: {
     status: "unstable-outcomes",
@@ -129,8 +140,12 @@ describe("executive dashboard IA integration", () => {
 
     expect(ia.executiveReasoning.finalDecision).toBe("Wait");
     expect(ia.executiveReasoning.recommendedParticipationMode).toBe("Micro");
-    expect(ia.executiveReasoning.mainReasonForRestriction?.code).toBe("survival_scar");
-    expect(ia.evidenceSummary.find((item) => item.id === "similar-samples")?.value).toBe("1313");
+    expect(ia.executiveReasoning.mainReasonForRestriction?.code).toBe(
+      "survival_scar",
+    );
+    expect(
+      ia.evidenceSummary.find((item) => item.id === "similar-samples")?.value,
+    ).toBe("1313");
     expect(ia.whyNotFullSize.factors[0]?.code).toBe("survival_scar");
     expect(ia.traceability.preservedModules.resolve).toBe(state.resolve);
   });
@@ -139,8 +154,14 @@ describe("executive dashboard IA integration", () => {
     const reasons = resolveCanonicalExplanations(state);
     const pipeline = buildDecisionPipeline(state);
 
-    expect(reasons.map((reason) => reason.code).filter((code) => code === "survival_scar")).toHaveLength(1);
-    expect(reasons.map((reason) => reason.code)).toContain("trust_below_threshold");
+    expect(
+      reasons
+        .map((reason) => reason.code)
+        .filter((code) => code === "survival_scar"),
+    ).toHaveLength(1);
+    expect(reasons.map((reason) => reason.code)).toContain(
+      "trust_below_threshold",
+    );
     expect(pipeline.map((step) => step.stage)).toEqual([
       "Discovery",
       "Recognition",
@@ -152,17 +173,25 @@ describe("executive dashboard IA integration", () => {
       "Survival",
       "Discovery Intelligence",
     ]);
-    expect(pipeline.find((step) => step.stage === "Agency")?.outcome).toBe("escalated");
+    expect(pipeline.find((step) => step.stage === "Agency")?.outcome).toBe(
+      "escalated",
+    );
   });
 
   it("extracts unlock and invalidation conditions and tolerates empty input", () => {
     const extracted = extractUnlockInvalidationConditions(state);
     const empty = buildExecutiveDashboardIA({});
 
-    expect(extracted.unlockConditions).toContain("Raise trust score to at least 70/100.");
-    expect(extracted.invalidationConditions).toContain("Invalidate if Trust or Judgement falls below the commitment threshold.");
+    expect(extracted.unlockConditions).toContain(
+      "Raise trust score to at least 70/100.",
+    );
+    expect(extracted.invalidationConditions).toContain(
+      "Invalidate if Trust or Judgement falls below the commitment threshold.",
+    );
     expect(empty.executiveReasoning.finalDecision).toBe("Pending");
-    expect(empty.evidenceSummary.every((item) => item.value === "Pending")).toBe(true);
+    expect(
+      empty.evidenceSummary.every((item) => item.value === "Pending"),
+    ).toBe(true);
   });
 
   it("builds governance evolution with arbitration, exposure states, and accountability", () => {
@@ -223,11 +252,24 @@ describe("executive dashboard IA integration", () => {
 
     expect(evolution.command.action).toBe("review");
     expect(evolution.command.allowedExposureState).toBe("micro");
-    expect(evolution.arbitration.conflicts.map((conflict) => conflict.id)).toContain("executive-wisdom-conflict");
-    expect(evolution.arbitration.conflicts.map((conflict) => conflict.id)).toContain("survival-threshold-status-conflict");
-    expect(evolution.exposureStates.find((item) => item.status === "active")?.state).toBe("micro");
-    expect(evolution.confidenceLedger.find((item) => item.kind === "survival")?.status).toBe("scarred");
-    expect(evolution.restrictionBets[0]?.evidenceRequired).toContain("max adverse excursion");
-    expect(evolution.accountabilityLoop.map((step) => step.id)).toContain("restriction-bet");
+    expect(
+      evolution.arbitration.conflicts.map((conflict) => conflict.id),
+    ).toContain("executive-wisdom-conflict");
+    expect(
+      evolution.arbitration.conflicts.map((conflict) => conflict.id),
+    ).toContain("survival-threshold-status-conflict");
+    expect(
+      evolution.exposureStates.find((item) => item.status === "active")?.state,
+    ).toBe("micro");
+    expect(
+      evolution.confidenceLedger.find((item) => item.kind === "survival")
+        ?.status,
+    ).toBe("scarred");
+    expect(evolution.restrictionBets[0]?.evidenceRequired).toContain(
+      "max adverse excursion",
+    );
+    expect(evolution.accountabilityLoop.map((step) => step.id)).toContain(
+      "restriction-bet",
+    );
   });
 });

@@ -44,7 +44,9 @@ function normalize(value: string): string {
 function rankRegion(region: Region, query: string): number {
   const q = normalize(query);
   if (!q) return 0;
-  const label = normalize(`${region.name} ${region.adminArea} ${region.country}`);
+  const label = normalize(
+    `${region.name} ${region.adminArea} ${region.country}`,
+  );
   if (normalize(region.name) === q) return 100;
   if (normalize(region.name).startsWith(q)) return 90;
   if (label.includes(q)) return 70;
@@ -53,8 +55,12 @@ function rankRegion(region: Region, query: string): number {
   return 0;
 }
 
-export function createRegionService(options: readonly Region[] | RegionServiceOptions = fixtureRegions): RegionService {
-  const config: RegionServiceOptions = isRegionArray(options) ? { regions: options } : options;
+export function createRegionService(
+  options: readonly Region[] | RegionServiceOptions = fixtureRegions,
+): RegionService {
+  const config: RegionServiceOptions = isRegionArray(options)
+    ? { regions: options }
+    : options;
   const fetcher = config.fetcher ?? globalThis.fetch;
   const addressLookup = config.addressLookup ?? true;
   const regions = config.regions ?? fixtureRegions;
@@ -67,48 +73,64 @@ export function createRegionService(options: readonly Region[] | RegionServiceOp
       const catalogResults = ordered
         .map((region) => ({ region, rank: rankRegion(region, q) }))
         .filter((entry) => entry.rank > 0)
-        .sort((left, right) => right.rank - left.rank || left.region.name.localeCompare(right.region.name))
+        .sort(
+          (left, right) =>
+            right.rank - left.rank ||
+            left.region.name.localeCompare(right.region.name),
+        )
         .slice(0, limit)
         .map((entry) => entry.region);
       if (!addressLookup || catalogResults.length > 0 || !fetcher) {
         return catalogResults;
       }
-      const addressResults = await searchAddressApi(q, limit, fetcher).catch(() => []);
+      const addressResults = await searchAddressApi(q, limit, fetcher).catch(
+        () => [],
+      );
       for (const region of addressResults) {
         dynamicRegions.set(region.id, region);
       }
       return dedupeRegions(addressResults).slice(0, limit);
     },
     get(regionId: string): Region | undefined {
-      return ordered.find((region) => region.id === regionId) ?? dynamicRegions.get(regionId) ?? regionFromAddressId(regionId);
+      return (
+        ordered.find((region) => region.id === regionId) ??
+        dynamicRegions.get(regionId) ??
+        regionFromAddressId(regionId)
+      );
     },
     all(): Region[] {
       return [...ordered, ...dynamicRegions.values()];
-    }
+    },
   };
 }
 
-function isRegionArray(value: readonly Region[] | RegionServiceOptions): value is readonly Region[] {
+function isRegionArray(
+  value: readonly Region[] | RegionServiceOptions,
+): value is readonly Region[] {
   return Array.isArray(value);
 }
 
-async function searchAddressApi(query: string, limit: number, fetcher: typeof fetch): Promise<Region[]> {
+async function searchAddressApi(
+  query: string,
+  limit: number,
+  fetcher: typeof fetch,
+): Promise<Region[]> {
   if (limit <= 0) return [];
   const params = new URLSearchParams({
     q: query,
     format: "jsonv2",
     addressdetails: "1",
-    limit: String(Math.min(limit, 8))
+    limit: String(Math.min(limit, 8)),
   });
   const response = await fetchWithTimeout(
     `https://nominatim.openstreetmap.org/search?${params.toString()}`,
     {
       headers: {
-        "Accept": "application/json",
-        "User-Agent": "Signal Aware Example address lookup"
-      }
+        Accept: "application/json",
+        "User-Agent": "Signal Aware Example address lookup",
+      },
     },
-    fetcher
+    fetcher,
   );
   if (!response.ok) return [];
   const payload = (await response.json()) as NominatimResult[];
@@ -117,13 +139,17 @@ async function searchAddressApi(query: string, limit: number, fetcher: typeof fe
     .filter((region): region is Region => Boolean(region));
 }
 
-async function fetchWithTimeout(url: string, init: RequestInit, fetcher: typeof fetch): Promise<Response> {
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  fetcher: typeof fetch,
+): Promise<Response> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 4500);
   try {
     return await fetcher(url, {
       ...init,
-      signal: controller.signal
+      signal: controller.signal,
     });
   } finally {
     clearTimeout(timeout);
@@ -133,12 +159,20 @@ async function fetchWithTimeout(url: string, init: RequestInit, fetcher: typeof 
 function toRegion(result: NominatimResult): Region | undefined {
   const latitude = Number(result.lat);
   const longitude = Number(result.lon);
-  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return undefined;
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude))
+    return undefined;
   const address = result.address ?? {};
-  const locality = address.city ?? address.town ?? address.village ?? address.municipality ?? address.county;
-  const adminArea = address.state ?? address.region ?? address.county ?? "Nearby area";
+  const locality =
+    address.city ??
+    address.town ??
+    address.village ??
+    address.municipality ??
+    address.county;
+  const adminArea =
+    address.state ?? address.region ?? address.county ?? "Nearby area";
   const country = address.country ?? "Unknown country";
-  const name = locality ?? firstDisplayPart(result.display_name) ?? "Selected area";
+  const name =
+    locality ?? firstDisplayPart(result.display_name) ?? "Selected area";
   const idBasis = `${result.place_id ?? result.osm_id ?? result.display_name ?? `${latitude},${longitude}`}`;
   const fixtureId = fixtureForAddress(address, latitude);
   const regionBase = {
@@ -148,7 +182,7 @@ function toRegion(result: NominatimResult): Region | undefined {
     latitude,
     longitude,
     timezone: "auto",
-    defaultFixtureId: fixtureId
+    defaultFixtureId: fixtureId,
   };
   return {
     id: addressRegionId(regionBase, idBasis),
@@ -164,32 +198,41 @@ function toRegion(result: NominatimResult): Region | undefined {
       adminArea,
       country,
       address.road ?? "",
-      address.house_number ?? ""
+      address.house_number ?? "",
     ].filter(Boolean),
-    defaultFixtureId: fixtureId
+    defaultFixtureId: fixtureId,
   };
 }
 
-function addressRegionId(region: Omit<Region, "id" | "searchTerms">, idBasis: string): string {
-  const encoded = Buffer.from(JSON.stringify({
-    n: region.name,
-    a: region.adminArea,
-    c: region.country,
-    lat: roundCoordinate(region.latitude),
-    lon: roundCoordinate(region.longitude),
-    tz: region.timezone,
-    fx: region.defaultFixtureId,
-    h: smallHash(idBasis)
-  }), "utf8").toString("base64url");
+function addressRegionId(
+  region: Omit<Region, "id" | "searchTerms">,
+  idBasis: string,
+): string {
+  const encoded = Buffer.from(
+    JSON.stringify({
+      n: region.name,
+      a: region.adminArea,
+      c: region.country,
+      lat: roundCoordinate(region.latitude),
+      lon: roundCoordinate(region.longitude),
+      tz: region.timezone,
+      fx: region.defaultFixtureId,
+      h: smallHash(idBasis),
+    }),
+    "utf8",
+  ).toString("base64url");
   return `address-${slug(region.name)}--${encoded}`;
 }
 
 function regionFromAddressId(regionId: string): Region | undefined {
   const marker = "--";
-  if (!regionId.startsWith("address-") || !regionId.includes(marker)) return undefined;
+  if (!regionId.startsWith("address-") || !regionId.includes(marker))
+    return undefined;
   const encoded = regionId.slice(regionId.indexOf(marker) + marker.length);
   try {
-    const payload = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8")) as {
+    const payload = JSON.parse(
+      Buffer.from(encoded, "base64url").toString("utf8"),
+    ) as {
       n?: string;
       a?: string;
       c?: string;
@@ -198,7 +241,13 @@ function regionFromAddressId(regionId: string): Region | undefined {
       tz?: string;
       fx?: Region["defaultFixtureId"];
     };
-    if (!payload.n || !payload.a || !payload.c || typeof payload.lat !== "number" || typeof payload.lon !== "number") {
+    if (
+      !payload.n ||
+      !payload.a ||
+      !payload.c ||
+      typeof payload.lat !== "number" ||
+      typeof payload.lon !== "number"
+    ) {
       return undefined;
     }
     return {
@@ -210,7 +259,7 @@ function regionFromAddressId(regionId: string): Region | undefined {
       longitude: payload.lon,
       timezone: payload.tz ?? "auto",
       searchTerms: [payload.n, payload.a, payload.c],
-      defaultFixtureId: payload.fx ?? "normal-day"
+      defaultFixtureId: payload.fx ?? "normal-day",
     };
   } catch {
     return undefined;
@@ -218,13 +267,21 @@ function regionFromAddressId(regionId: string): Region | undefined {
 }
 
 function firstDisplayPart(value?: string): string | undefined {
-  return value?.split(",").map((part) => part.trim()).find(Boolean);
+  return value
+    ?.split(",")
+    .map((part) => part.trim())
+    .find(Boolean);
 }
 
-function fixtureForAddress(address: NominatimAddress, latitude: number): Region["defaultFixtureId"] {
-  const text = `${address.state ?? ""} ${address.region ?? ""} ${address.country ?? ""}`.toLowerCase();
+function fixtureForAddress(
+  address: NominatimAddress,
+  latitude: number,
+): Region["defaultFixtureId"] {
+  const text =
+    `${address.state ?? ""} ${address.region ?? ""} ${address.country ?? ""}`.toLowerCase();
   if (/arizona|nevada|desert/.test(text)) return "heat-warning-day";
-  if (/florida|puerto rico|caribbean/.test(text)) return "multiple-simultaneous-risks";
+  if (/florida|puerto rico|caribbean/.test(text))
+    return "multiple-simultaneous-risks";
   if (/texas|louisiana|gulf/.test(text)) return "heavy-rain-flood-risk-day";
   if (/new york|new jersey/.test(text)) return "poor-air-quality-day";
   if (Math.abs(latitude) < 24) return "mosquito-activity-warning";
@@ -244,10 +301,12 @@ function dedupeRegions(regions: readonly Region[]): Region[] {
 }
 
 function slug(value: string): string {
-  return normalize(value)
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 48) || "region";
+  return (
+    normalize(value)
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 48) || "region"
+  );
 }
 
 function smallHash(value: string): string {

@@ -1,3 +1,4 @@
+import { mostDangerousScenario, mostLikelyScenario } from "../prediction";
 import type {
   AccountabilityReport,
   CoherenceAssessment,
@@ -6,7 +7,6 @@ import type {
   SimulationResult,
   WisdomAssessment,
 } from "../types";
-import { mostDangerousScenario, mostLikelyScenario } from "../prediction";
 
 export type HumanDecisionGuideStep = {
   step: number;
@@ -15,7 +15,9 @@ export type HumanDecisionGuideStep = {
   why?: string[];
 };
 
-export function createHumanDecisionSummary(record: SignalDecisionRecord): string {
+export function createHumanDecisionSummary(
+  record: SignalDecisionRecord,
+): string {
   const coherence = record.coherence;
   const wisdom = record.wisdom;
   const simulation = record.simulation;
@@ -34,7 +36,9 @@ export function createHumanDecisionSummary(record: SignalDecisionRecord): string
   return "Signal sees enough agreement to proceed while continuing to track the result.";
 }
 
-export function buildHumanDecisionGuide(record: SignalDecisionRecord): HumanDecisionGuideStep[] {
+export function buildHumanDecisionGuide(
+  record: SignalDecisionRecord,
+): HumanDecisionGuideStep[] {
   const prediction = record.prediction ?? [];
   return [
     {
@@ -47,7 +51,9 @@ export function buildHumanDecisionGuide(record: SignalDecisionRecord): HumanDeci
       step: 2,
       title: "What matters?",
       text: mattersText(record.coherence, record.wisdom),
-      why: record.coherence.contradictions.map((conflict) => conflict.description),
+      why: record.coherence.contradictions.map(
+        (conflict) => conflict.description,
+      ),
     },
     {
       step: 3,
@@ -59,7 +65,9 @@ export function buildHumanDecisionGuide(record: SignalDecisionRecord): HumanDeci
       step: 4,
       title: "What did Signal test?",
       text: simulationText(record.simulation),
-      why: record.simulation?.pathComparisons.map((path) => path.explanation[0] ?? path.actionVariant).slice(0, 4),
+      why: record.simulation?.pathComparisons
+        .map((path) => path.explanation[0] ?? path.actionVariant)
+        .slice(0, 4),
     },
     {
       step: 5,
@@ -71,8 +79,12 @@ export function buildHumanDecisionGuide(record: SignalDecisionRecord): HumanDeci
       title: "Why?",
       text: whyText(record),
       why: [
-        ...(record.assessment?.journal.assumptionsUsed.map((item) => `Assumption: ${item}`) ?? []),
-        ...(record.assessment?.journal.unknownsPresent.map((item) => `Unknown: ${item}`) ?? []),
+        ...(record.assessment?.journal.assumptionsUsed.map(
+          (item) => `Assumption: ${item}`,
+        ) ?? []),
+        ...(record.assessment?.journal.unknownsPresent.map(
+          (item) => `Unknown: ${item}`,
+        ) ?? []),
         ...(record.wisdom?.reason ?? []),
       ],
     },
@@ -83,30 +95,44 @@ export function buildHumanDecisionGuide(record: SignalDecisionRecord): HumanDeci
         ? `This decision will update trust by ${record.outcome.trustImpact} and calibration by ${record.outcome.calibrationImpact}.`
         : record.assessment
           ? `Next best evidence: ${record.assessment.nextBestEvidence.question}`
-        : "This decision will be tracked so future confidence can improve.",
+          : "This decision will be tracked so future confidence can improve.",
     },
   ];
 }
 
-export function accountabilityHumanSummary(report: AccountabilityReport): string {
-  return report.humanExplanation || `${report.decisionSummary} Replay result: ${report.replayResult}.`;
+export function accountabilityHumanSummary(
+  report: AccountabilityReport,
+): string {
+  return (
+    report.humanExplanation ||
+    `${report.decisionSummary} Replay result: ${report.replayResult}.`
+  );
 }
 
 function happeningText(coherence: CoherenceAssessment): string {
-  if (coherence.status === "blocked") return "Signal is not ready to act because important parts disagree.";
-  if (coherence.status === "contradictory") return "The opportunity looks promising, but not all parts of Signal agree yet.";
-  if (coherence.status === "tension") return "Signal sees a possible path, but the evidence is still uneven.";
+  if (coherence.status === "blocked")
+    return "Signal is not ready to act because important parts disagree.";
+  if (coherence.status === "contradictory")
+    return "The opportunity looks promising, but not all parts of Signal agree yet.";
+  if (coherence.status === "tension")
+    return "Signal sees a possible path, but the evidence is still uneven.";
   return "Signal sees enough agreement to continue evaluating the decision.";
 }
 
-function mattersText(coherence: CoherenceAssessment, wisdom: WisdomAssessment | undefined): string {
-  if (wisdom?.decision === "avoid") return "Survival matters more than the attractive upside.";
-  if (coherence.actionScale < 1) return "The safest choice is to reduce size until agreement improves.";
+function mattersText(
+  coherence: CoherenceAssessment,
+  wisdom: WisdomAssessment | undefined,
+): string {
+  if (wisdom?.decision === "avoid")
+    return "Survival matters more than the attractive upside.";
+  if (coherence.actionScale < 1)
+    return "The safest choice is to reduce size until agreement improves.";
   return "The important question is whether the action still satisfies purpose, need, and survivability.";
 }
 
 function predictionText(scenarios: PredictionScenario[]): string {
-  if (!scenarios.length) return "Signal does not have enough future scenarios yet.";
+  if (!scenarios.length)
+    return "Signal does not have enough future scenarios yet.";
   const likely = mostLikelyScenario(scenarios);
   const dangerous = mostDangerousScenario(scenarios);
   return `The most likely path is "${likely?.label ?? "mixed"}"; the path to watch is "${dangerous?.label ?? "stress"}".`;
@@ -114,9 +140,12 @@ function predictionText(scenarios: PredictionScenario[]): string {
 
 function simulationText(simulation: SimulationResult | undefined): string {
   if (!simulation) return "Signal has not compared action paths yet.";
-  if (simulation.recommendedAction === "reduce") return "Signal tested acting fully, acting smaller, waiting, and blocking. Acting smaller is safer than acting fully.";
-  if (simulation.recommendedAction === "wait") return "Signal tested several paths. Waiting preserves more options right now.";
-  if (simulation.recommendedAction === "block") return "Signal tested the paths and found the downside too large to act.";
+  if (simulation.recommendedAction === "reduce")
+    return "Signal tested acting fully, acting smaller, waiting, and blocking. Acting smaller is safer than acting fully.";
+  if (simulation.recommendedAction === "wait")
+    return "Signal tested several paths. Waiting preserves more options right now.";
+  if (simulation.recommendedAction === "block")
+    return "Signal tested the paths and found the downside too large to act.";
   return `Signal tested several paths and prefers ${simulation.actionVariant}.`;
 }
 
@@ -125,21 +154,41 @@ function nextActionText(
   simulation: SimulationResult | undefined,
   wisdom: WisdomAssessment | undefined,
 ): string {
-  if (!coherence.actionAllowed || wisdom?.decision === "avoid" || simulation?.recommendedAction === "block") return "Do not act yet.";
-  if (wisdom?.decision === "wait" || simulation?.recommendedAction === "wait") return "Wait for better confirmation.";
-  if (wisdom?.decision === "proceed-small" || simulation?.recommendedAction === "reduce" || coherence.actionScale < 1) {
+  if (
+    !coherence.actionAllowed ||
+    wisdom?.decision === "avoid" ||
+    simulation?.recommendedAction === "block"
+  )
+    return "Do not act yet.";
+  if (wisdom?.decision === "wait" || simulation?.recommendedAction === "wait")
+    return "Wait for better confirmation.";
+  if (
+    wisdom?.decision === "proceed-small" ||
+    simulation?.recommendedAction === "reduce" ||
+    coherence.actionScale < 1
+  ) {
     return "Act smaller, not because the idea is weak, but because the system is still uncertain.";
   }
   return "Proceed only within the plan and keep tracking the outcome.";
 }
 
 function whyText(record: SignalDecisionRecord): string {
-  if (record.assessment?.confidence.capped !== undefined && record.assessment.confidence.capped < record.assessment.confidence.requested) {
-    return record.assessment.confidence.explanation.at(-1) ?? "Confidence was capped by evidence quality.";
+  if (
+    record.assessment?.confidence.capped !== undefined &&
+    record.assessment.confidence.capped < record.assessment.confidence.requested
+  ) {
+    return (
+      record.assessment.confidence.explanation.at(-1) ??
+      "Confidence was capped by evidence quality."
+    );
   }
   if (record.coherence.contradictions.length) {
-    return record.coherence.contradictions[0]?.recommendation ?? "Signal is reducing action because the evidence is mixed.";
+    return (
+      record.coherence.contradictions[0]?.recommendation ??
+      "Signal is reducing action because the evidence is mixed."
+    );
   }
-  if (record.wisdom?.reason.length) return record.wisdom.reason[0] ?? "The decision is tied to survivability.";
+  if (record.wisdom?.reason.length)
+    return record.wisdom.reason[0] ?? "The decision is tied to survivability.";
   return record.humanSummary;
 }

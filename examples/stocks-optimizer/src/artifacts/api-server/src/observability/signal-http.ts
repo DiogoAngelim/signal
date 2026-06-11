@@ -1,6 +1,11 @@
 import crypto from "node:crypto";
-import type { ErrorRequestHandler, NextFunction, Request, Response } from "express";
 import type { CorsOptions } from "cors";
+import type {
+  ErrorRequestHandler,
+  NextFunction,
+  Request,
+  Response,
+} from "express";
 import { incrementSignalCounter } from "./signal-metrics.js";
 
 export class ApiProblem extends Error {
@@ -8,7 +13,12 @@ export class ApiProblem extends Error {
   readonly code: string;
   readonly details?: unknown;
 
-  constructor(status: number, code: string, message: string, details?: unknown) {
+  constructor(
+    status: number,
+    code: string,
+    message: string,
+    details?: unknown,
+  ) {
     super(message);
     this.name = "ApiProblem";
     this.status = status;
@@ -25,20 +35,35 @@ export function requestIdFor(req: Request): string {
 }
 
 export function getRequestId(req: Request): string {
-  return String((req as any).requestId ?? req.headers["x-request-id"] ?? crypto.randomUUID());
+  return String(
+    (req as any).requestId ??
+      req.headers["x-request-id"] ??
+      crypto.randomUUID(),
+  );
 }
 
-export function requestIdMiddleware(req: Request, res: Response, next: NextFunction) {
+export function requestIdMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const requestId = requestIdFor(req);
   res.setHeader("X-Request-Id", requestId);
   next();
 }
 
-export function secureHeadersMiddleware(_req: Request, res: Response, next: NextFunction) {
+export function secureHeadersMiddleware(
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Referrer-Policy", "no-referrer");
-  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.setHeader(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=()",
+  );
   res.setHeader("Cross-Origin-Resource-Policy", "same-site");
   next();
 }
@@ -62,13 +87,25 @@ export function sendApiError(
   });
 }
 
-export const apiErrorHandler: ErrorRequestHandler = (error, req, res, _next) => {
+export const apiErrorHandler: ErrorRequestHandler = (
+  error,
+  req,
+  res,
+  _next,
+) => {
   if (res.headersSent) {
     return;
   }
 
   if (error instanceof ApiProblem) {
-    sendApiError(req, res, error.status, error.code, error.message, error.details);
+    sendApiError(
+      req,
+      res,
+      error.status,
+      error.code,
+      error.message,
+      error.details,
+    );
     return;
   }
 
@@ -79,12 +116,16 @@ export const apiErrorHandler: ErrorRequestHandler = (error, req, res, _next) => 
     500,
     "internal_error",
     "The signal API could not complete the request.",
-    isProduction ? undefined : { message: error instanceof Error ? error.message : String(error) },
+    isProduction
+      ? undefined
+      : { message: error instanceof Error ? error.message : String(error) },
   );
 };
 
 export function createSignalCorsOptions(): CorsOptions {
-  const rawOrigins = String(process.env.SIGNAL_API_CORS_ORIGINS ?? process.env.CORS_ORIGINS ?? "")
+  const rawOrigins = String(
+    process.env.SIGNAL_API_CORS_ORIGINS ?? process.env.CORS_ORIGINS ?? "",
+  )
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);

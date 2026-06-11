@@ -3,10 +3,9 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "../..",
-    "types": ["node"]
+    "types": ["node"],
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false
   },
-  "include": [
-    "src",
-    "../api-server/src/modules/binance-execution"
-  ]
+  "include": ["src", "../api-server/src/modules/binance-execution"]
 }

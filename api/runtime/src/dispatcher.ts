@@ -1,5 +1,5 @@
-import { createSignalEnvelope, type SignalEnvelope } from "@signal/protocol";
 import type { EventPort } from "@signal/ports";
+import { type SignalEnvelope, createSignalEnvelope } from "@signal/protocol";
 import type { SignalConsumerDeduper } from "./types";
 
 export function createInProcessDispatcher(): EventPort {
@@ -21,7 +21,7 @@ export function createInProcessDispatcher(): EventPort {
     },
     subscribe(
       name: string,
-      handler: (envelope: SignalEnvelope) => void | Promise<void>
+      handler: (envelope: SignalEnvelope) => void | Promise<void>,
     ): () => void {
       const handlers = subscribers.get(name) ?? new Set();
       handlers.add(handler);
@@ -38,7 +38,7 @@ export function createReplaySafeSubscriber(
   options: {
     consumerId?: string;
     deduper?: SignalConsumerDeduper;
-  } = {}
+  } = {},
 ): (envelope: SignalEnvelope) => Promise<void> {
   const consumerId = options.consumerId ?? "signal-replay-safe-consumer";
   const deduper = options.deduper ?? createInMemoryConsumerDeduper();
@@ -75,7 +75,7 @@ export function createInMemoryConsumerDeduper(): SignalConsumerDeduper {
 }
 
 export function ensureEnvelope(
-  input: Omit<SignalEnvelope, "protocol" | "messageId" | "timestamp">
+  input: Omit<SignalEnvelope, "protocol" | "messageId" | "timestamp">,
 ): SignalEnvelope {
   return createSignalEnvelope(input);
 }

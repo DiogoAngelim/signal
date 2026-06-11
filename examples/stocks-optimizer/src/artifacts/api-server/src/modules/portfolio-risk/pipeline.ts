@@ -8,17 +8,17 @@
  * It is pure orchestration: validate signals, evaluate risk, execute positions.
  */
 
-import { adaptStrategySignals } from "./signal-adapter";
+import type { BinanceExecutionModule } from "../binance-execution/index";
+import type { ExecutionResult } from "../binance-execution/types";
 import { evaluatePortfolioRisk } from "./engine";
 import { monitoringStore } from "./monitoring";
+import { adaptStrategySignals } from "./signal-adapter";
 import type {
-  ValidatedSignal,
   PortfolioRiskConfig,
   PortfolioRiskResult,
   Position,
+  ValidatedSignal,
 } from "./types";
-import type { BinanceExecutionModule } from "../binance-execution/index";
-import type { ExecutionResult } from "../binance-execution/types";
 
 // ── Pipeline Input ──────────────────────────────────────────────────
 

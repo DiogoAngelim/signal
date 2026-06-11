@@ -6,7 +6,11 @@
  * The base class handles tracing, timing, and error reporting.
  */
 
-import type { SignalGenerator, SignalGeneratorInput, SignalGeneratorOutput } from "../interfaces/SignalGenerator";
+import type {
+  SignalGenerator,
+  SignalGeneratorInput,
+  SignalGeneratorOutput,
+} from "../interfaces/SignalGenerator";
 
 export abstract class BaseSignalGenerator implements SignalGenerator {
   abstract readonly id: string;
@@ -20,5 +24,7 @@ export abstract class BaseSignalGenerator implements SignalGenerator {
    * Override this method to wrap an existing signal generation module.
    * The input is the raw data; the output must be a feature record.
    */
-  protected abstract doGenerate(input: SignalGeneratorInput): Promise<SignalGeneratorOutput>;
+  protected abstract doGenerate(
+    input: SignalGeneratorInput,
+  ): Promise<SignalGeneratorOutput>;
 }

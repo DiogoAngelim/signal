@@ -1,6 +1,13 @@
-import type { SignalExecutionContext, SignalOperationDefinition } from "@signal/runtime";
+import type {
+  SignalExecutionContext,
+  SignalOperationDefinition,
+} from "@signal/sdk-node";
 import { z } from "zod";
-import { collectSafetyObservations, type RegionService, type SafetyDataAdapter } from "../adapters.js";
+import {
+  type RegionService,
+  type SafetyDataAdapter,
+  collectSafetyObservations,
+} from "../adapters.js";
 import type {
   Briefing,
   BriefingReviewInput,
@@ -8,7 +15,7 @@ import type {
   FeedbackInput,
   FeedbackResult,
   FixtureScenarioId,
-  Region
+  Region,
 } from "../contracts.js";
 import { AWARE_FIXTURE_IDS } from "../fixtures.js";
 import { createBriefingFromObservations } from "./interpreter.js";
@@ -19,18 +26,15 @@ export const AWARE_OPERATION_NAMES = {
     "aware.region.search.v1",
     "aware.briefing.get.v1",
     "aware.briefing.details.v1",
-    "aware.sources.list.v1"
+    "aware.sources.list.v1",
   ],
-  mutations: [
-    "aware.feedback.submit.v1",
-    "aware.briefing.review.v1"
-  ],
+  mutations: ["aware.feedback.submit.v1", "aware.briefing.review.v1"],
   events: [
     "aware.briefing.generated.v1",
     "aware.risk.escalated.v1",
     "aware.feedback.received.v1",
-    "aware.source.degraded.v1"
-  ]
+    "aware.source.degraded.v1",
+  ],
 } as const;
 
 export type AwareOperationContract = {
@@ -70,22 +74,22 @@ const fixtureIdSchema = z.enum([
   "poor-air-quality-day",
   "mosquito-activity-warning",
   "multiple-simultaneous-risks",
-  "source-unavailable"
+  "source-unavailable",
 ] satisfies [FixtureScenarioId, ...FixtureScenarioId[]]);
 
 const regionSearchInputSchema = z.object({
   q: z.string().min(1),
-  limit: z.number().int().min(1).max(20).optional()
+  limit: z.number().int().min(1).max(20).optional(),
 });
 
 const briefingGetInputSchema = z.object({
   regionId: z.string().min(1),
-  fixtureId: fixtureIdSchema.optional()
+  fixtureId: fixtureIdSchema.optional(),
 });
 
 const briefingDetailsInputSchema = z.object({
   briefingId: z.string().min(1),
-  itemId: z.string().optional()
+  itemId: z.string().optional(),
 });
 
 const feedbackInputSchema = z.object({
@@ -93,15 +97,17 @@ const feedbackInputSchema = z.object({
   itemId: z.string().optional(),
   helpful: z.boolean(),
   comment: z.string().max(1000).optional(),
-  idempotencyKey: z.string().optional()
+  idempotencyKey: z.string().optional(),
 });
 
 const reviewInputSchema = z.object({
   briefingId: z.string().min(1),
-  classification: z.enum(["correct", "wrong", "early", "late", "inconclusive"]).optional(),
+  classification: z
+    .enum(["correct", "wrong", "early", "late", "inconclusive"])
+    .optional(),
   whatHappened: z.string().max(1200).optional(),
   lesson: z.string().max(1200).optional(),
-  idempotencyKey: z.string().optional()
+  idempotencyKey: z.string().optional(),
 });
 
 const eventPayloadSchema = z.record(z.string(), z.unknown());
@@ -111,106 +117,148 @@ export function listAwareOperationContracts(): AwareOperationContract[] {
     {
       name: "aware.region.search.v1",
       kind: "query",
-      description: "Search supported demo regions by plain-language city or region text."
+      description:
+        "Search supported demo regions by plain-language city or region text.",
     },
     {
       name: "aware.briefing.get.v1",
       kind: "query",
-      description: "Fetch normalized safety observations and interpret them into a daily briefing.",
-      emits: ["aware.briefing.generated.v1", "aware.risk.escalated.v1", "aware.source.degraded.v1"]
+      description:
+        "Fetch normalized safety observations and interpret them into a daily briefing.",
+      emits: [
+        "aware.briefing.generated.v1",
+        "aware.risk.escalated.v1",
+        "aware.source.degraded.v1",
+      ],
     },
     {
       name: "aware.briefing.details.v1",
       kind: "query",
-      description: "Read UI-ready details for a generated briefing or one briefing item."
+      description:
+        "Read UI-ready details for a generated briefing or one briefing item.",
     },
     {
       name: "aware.sources.list.v1",
       kind: "query",
-      description: "List source reliability, freshness, and degradation details for a briefing."
+      description:
+        "List source reliability, freshness, and degradation details for a briefing.",
     },
     {
       name: "aware.feedback.submit.v1",
       kind: "mutation",
       description: "Record lightweight user feedback about a briefing.",
       idempotency: "required",
-      emits: ["aware.feedback.received.v1"]
+      emits: ["aware.feedback.received.v1"],
     },
     {
       name: "aware.briefing.review.v1",
       kind: "mutation",
-      description: "Record a scoped review into the example decision-memory store.",
-      idempotency: "required"
+      description:
+        "Record a scoped review into the example decision-memory store.",
+      idempotency: "required",
     },
     ...AWARE_OPERATION_NAMES.events.map((name) => ({
       name,
       kind: "event" as const,
       description: eventDescription(name),
-      replaySafe: true
-    }))
+      replaySafe: true,
+    })),
   ];
 }
 
-export function createAwareOperations(deps: AwareOperationsDependencies): SignalOperationDefinition[] {
+export function createAwareOperations(
+  deps: AwareOperationsDependencies,
+): SignalOperationDefinition[] {
   const now = deps.now ?? (() => new Date());
   return [
     {
       name: "aware.region.search.v1",
       kind: "query",
-      description: "Search supported demo regions by plain-language city or region text.",
+      description:
+        "Search supported demo regions by plain-language city or region text.",
       inputSchema: regionSearchInputSchema,
       resultSchema: z.object({ regions: z.array(z.custom<Region>()) }),
       async handler(input: z.infer<typeof regionSearchInputSchema>) {
         return {
-          regions: await deps.regions.search(input.q, input.limit)
+          regions: await deps.regions.search(input.q, input.limit),
         };
-      }
+      },
     },
     {
       name: "aware.briefing.get.v1",
       kind: "query",
-      description: "Fetch normalized safety observations and interpret them into a daily briefing.",
+      description:
+        "Fetch normalized safety observations and interpret them into a daily briefing.",
       inputSchema: briefingGetInputSchema,
       resultSchema: z.custom<Briefing>(),
       inputSchemaId: "examples/aware/contracts/briefing-get-input.v1",
       resultSchemaId: "examples/aware/contracts/briefing.v1",
-      emits: ["aware.briefing.generated.v1", "aware.risk.escalated.v1", "aware.source.degraded.v1"],
+      emits: [
+        "aware.briefing.generated.v1",
+        "aware.risk.escalated.v1",
+        "aware.source.degraded.v1",
+      ],
       async handler(input: z.infer<typeof briefingGetInputSchema>) {
         const region = deps.regions.get(input.regionId);
         if (!region) {
           throw new Error(`Unknown region: ${input.regionId}`);
         }
-        const adapters = input.fixtureId ? await import("../adapters.js").then((mod) => mod.createFixtureAwareAdapters(input.fixtureId)) : deps.adapters;
-        return generateAndSaveBriefing({ deps, region, adapters, generatedAt: now().toISOString() });
-      }
+        const adapters = input.fixtureId
+          ? await import("../adapters.js").then((mod) =>
+              mod.createFixtureAwareAdapters(input.fixtureId),
+            )
+          : deps.adapters;
+        return generateAndSaveBriefing({
+          deps,
+          region,
+          adapters,
+          generatedAt: now().toISOString(),
+        });
+      },
     },
     {
       name: "aware.briefing.details.v1",
       kind: "query",
-      description: "Read UI-ready details for a generated briefing or one briefing item.",
+      description:
+        "Read UI-ready details for a generated briefing or one briefing item.",
       inputSchema: briefingDetailsInputSchema,
       resultSchema: z.record(z.string(), z.unknown()),
       async handler(input: z.infer<typeof briefingDetailsInputSchema>) {
-        const briefing = deps.briefings.get(input.briefingId) ?? await regenerateBriefingFromId(deps, input.briefingId, now().toISOString());
+        const briefing =
+          deps.briefings.get(input.briefingId) ??
+          (await regenerateBriefingFromId(
+            deps,
+            input.briefingId,
+            now().toISOString(),
+          ));
         if (!briefing) return { found: false, briefing: null, item: null };
-        const item = input.itemId ? briefing.items.find((entry) => entry.id === input.itemId) ?? null : null;
+        const item = input.itemId
+          ? (briefing.items.find((entry) => entry.id === input.itemId) ?? null)
+          : null;
         return { found: true, briefing, item };
-      }
+      },
     },
     {
       name: "aware.sources.list.v1",
       kind: "query",
-      description: "List source reliability, freshness, and degradation details for a briefing.",
+      description:
+        "List source reliability, freshness, and degradation details for a briefing.",
       inputSchema: z.object({ briefingId: z.string().min(1) }),
       resultSchema: z.record(z.string(), z.unknown()),
       async handler(input: { briefingId: string }) {
-        const briefing = deps.briefings.get(input.briefingId) ?? await regenerateBriefingFromId(deps, input.briefingId, now().toISOString());
+        const briefing =
+          deps.briefings.get(input.briefingId) ??
+          (await regenerateBriefingFromId(
+            deps,
+            input.briefingId,
+            now().toISOString(),
+          ));
         return {
           found: Boolean(briefing),
           briefingId: input.briefingId,
-          sources: briefing?.sources ?? []
+          sources: briefing?.sources ?? [],
         };
-      }
+      },
     },
     {
       name: "aware.feedback.submit.v1",
@@ -225,7 +273,7 @@ export function createAwareOperations(deps: AwareOperationsDependencies): Signal
         await context.emit("aware.feedback.received.v1", {
           feedbackId: result.feedbackId,
           briefingId: result.briefingId,
-          receivedAt: result.receivedAt
+          receivedAt: result.receivedAt,
         });
         return result;
       },
@@ -234,14 +282,15 @@ export function createAwareOperations(deps: AwareOperationsDependencies): Signal
           briefingId: input.briefingId,
           itemId: input.itemId,
           helpful: input.helpful,
-          comment: input.comment
+          comment: input.comment,
         };
-      }
+      },
     },
     {
       name: "aware.briefing.review.v1",
       kind: "mutation",
-      description: "Record a scoped review into the example decision-memory store.",
+      description:
+        "Record a scoped review into the example decision-memory store.",
       idempotency: "required",
       inputSchema: reviewInputSchema,
       resultSchema: z.custom<BriefingReviewResult>(),
@@ -252,7 +301,7 @@ export function createAwareOperations(deps: AwareOperationsDependencies): Signal
             briefingId: input.briefingId,
             recordedAt: now().toISOString(),
             status: "recorded",
-            memoryRecordId: "decision-memory-disabled"
+            memoryRecordId: "decision-memory-disabled",
           };
         }
         return deps.memory.recordReview(input);
@@ -262,9 +311,9 @@ export function createAwareOperations(deps: AwareOperationsDependencies): Signal
           briefingId: input.briefingId,
           classification: input.classification,
           whatHappened: input.whatHappened,
-          lesson: input.lesson
+          lesson: input.lesson,
         };
-      }
+      },
     },
     ...AWARE_OPERATION_NAMES.events.map((name) => ({
       name,
@@ -274,8 +323,8 @@ export function createAwareOperations(deps: AwareOperationsDependencies): Signal
       resultSchema: eventPayloadSchema,
       handler(payload: Record<string, unknown>) {
         return payload;
-      }
-    }))
+      },
+    })),
   ];
 }
 
@@ -287,19 +336,22 @@ async function generateAndSaveBriefing(input: {
 }): Promise<Briefing> {
   const collection = await collectSafetyObservations({
     region: input.region,
-    adapters: input.adapters
+    adapters: input.adapters,
   });
   const initial = createBriefingFromObservations({
     collection,
-    generatedAt: input.generatedAt
+    generatedAt: input.generatedAt,
   });
   const memoryRecordId = input.deps.memory
-    ? await input.deps.memory.recordBriefing({ briefing: initial, observations: collection.observations })
+    ? await input.deps.memory.recordBriefing({
+        briefing: initial,
+        observations: collection.observations,
+      })
     : undefined;
   const briefing = createBriefingFromObservations({
     collection,
     generatedAt: initial.generatedAt,
-    memoryRecordId
+    memoryRecordId,
   });
   input.deps.briefings.save(briefing);
   return briefing;
@@ -308,7 +360,7 @@ async function generateAndSaveBriefing(input: {
 async function regenerateBriefingFromId(
   deps: AwareOperationsDependencies,
   briefingId: string,
-  generatedAt: string
+  generatedAt: string,
 ): Promise<Briefing | undefined> {
   const regionId = regionIdFromBriefingId(briefingId);
   if (!regionId) return undefined;
@@ -318,7 +370,7 @@ async function regenerateBriefingFromId(
     deps,
     region,
     adapters: deps.adapters,
-    generatedAt
+    generatedAt,
   });
 }
 
@@ -337,8 +389,10 @@ export function createBriefingRepository(): BriefingRepository {
       return briefings.get(briefingId);
     },
     list() {
-      return [...briefings.values()].sort((left, right) => right.generatedAt.localeCompare(left.generatedAt));
-    }
+      return [...briefings.values()].sort((left, right) =>
+        right.generatedAt.localeCompare(left.generatedAt),
+      );
+    },
   };
 }
 
@@ -352,21 +406,26 @@ export function createFeedbackRepository(): FeedbackRepository {
         briefingId: input.briefingId,
         receivedAt,
         status: "recorded",
-        message: "Thanks. Your feedback was recorded for this example."
+        message: "Thanks. Your feedback was recorded for this example.",
       };
       feedback.set(feedbackId, result);
       return result;
     },
     list() {
-      return [...feedback.values()].sort((left, right) => right.receivedAt.localeCompare(left.receivedAt));
-    }
+      return [...feedback.values()].sort((left, right) =>
+        right.receivedAt.localeCompare(left.receivedAt),
+      );
+    },
   };
 }
 
 function eventDescription(name: string): string {
-  if (name === "aware.briefing.generated.v1") return "A regional briefing was generated.";
-  if (name === "aware.risk.escalated.v1") return "A generated briefing reached urgency or emergency attention.";
-  if (name === "aware.feedback.received.v1") return "Feedback was recorded for a briefing.";
+  if (name === "aware.briefing.generated.v1")
+    return "A regional briefing was generated.";
+  if (name === "aware.risk.escalated.v1")
+    return "A generated briefing reached urgency or emergency attention.";
+  if (name === "aware.feedback.received.v1")
+    return "Feedback was recorded for a briefing.";
   return "A source used by the briefing was degraded or unavailable.";
 }
 

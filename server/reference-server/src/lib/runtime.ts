@@ -8,7 +8,7 @@ import { registerReferenceSubscribers } from "../subscribers/register";
 export function createReferenceRuntime() {
   const highRiskPaymentStore = createHighRiskPaymentStore();
   const runtime = createSignalRuntime({
-    idempotencyStore: createReferenceIdempotencyStore(),
+    storagePort: createReferenceIdempotencyStore(),
     runtimeName: "signal-reference-server",
   });
 

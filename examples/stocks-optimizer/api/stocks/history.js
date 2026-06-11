@@ -1,5 +1,7 @@
 function marketKey(value) {
-  return String(value || "").trim().toUpperCase();
+  return String(value || "")
+    .trim()
+    .toUpperCase();
 }
 
 function normalizeTradingViewSymbol(symbol, market) {
@@ -53,7 +55,7 @@ function parseTradingViewCsv(csv) {
       low: Number.isFinite(low) ? low : null,
       close: Number.isFinite(close) ? close : null,
       price: Number.isFinite(close) ? close : null,
-      volume: Number.isFinite(volume) ? volume : null
+      volume: Number.isFinite(volume) ? volume : null,
     };
   });
 }
@@ -64,12 +66,15 @@ module.exports = async function handler(req, res) {
 
     const symbol = String(url.searchParams.get("symbol") || "").trim();
     const market = marketKey(url.searchParams.get("market") || "");
-    const bars = Math.min(500, Math.max(2, Number(url.searchParams.get("bars") || 80)));
+    const bars = Math.min(
+      500,
+      Math.max(2, Number(url.searchParams.get("bars") || 80)),
+    );
 
     if (!symbol) {
       res.status(400).json({
         error: "SYMBOL_REQUIRED",
-        message: "Query parameter symbol is required."
+        message: "Query parameter symbol is required.",
       });
       return;
     }
@@ -87,8 +92,8 @@ module.exports = async function handler(req, res) {
 
     const response = await fetch(chartUrl.toString(), {
       headers: {
-        "User-Agent": "Mozilla/5.0 stocks-optimizer"
-      }
+        "User-Agent": "Mozilla/5.0 stocks-optimizer",
+      },
     });
 
     if (!response.ok) {
@@ -100,13 +105,15 @@ module.exports = async function handler(req, res) {
         items: [],
         total: 0,
         source: `tradingview-unavailable:${response.status}`,
-        unavailable: true
+        unavailable: true,
       });
       return;
     }
 
     const csv = await response.text();
-    const points = parseTradingViewCsv(csv).filter((point) => point.price !== null);
+    const points = parseTradingViewCsv(csv).filter(
+      (point) => point.price !== null,
+    );
 
     res.status(200).json({
       symbol,
@@ -115,12 +122,12 @@ module.exports = async function handler(req, res) {
       data: points,
       items: points,
       total: points.length,
-      source: "tradingview-data"
+      source: "tradingview-data",
     });
   } catch (error) {
     res.status(500).json({
       error: "HISTORY_LOAD_FAILED",
-      message: error.message
+      message: error.message,
     });
   }
 };

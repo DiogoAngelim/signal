@@ -127,7 +127,9 @@ function metric(value: number | undefined, fallback = 50) {
 }
 
 function mean(values: number[]) {
-  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+  return values.length
+    ? values.reduce((sum, value) => sum + value, 0) / values.length
+    : 0;
 }
 
 function normalizeProbability(value: number) {
@@ -138,8 +140,10 @@ function normalizeProbability(value: number) {
 function normalizeOutcome(outcome: RealizedOutcome | number) {
   if (typeof outcome === "number") return normalizeProbability(outcome);
   if (typeof outcome.success === "boolean") return outcome.success ? 1 : 0;
-  if (outcome.outcomeQuality != null) return normalizeProbability(outcome.outcomeQuality);
-  if (outcome.realizedReturn != null) return clampUnit(0.5 + outcome.realizedReturn / 12);
+  if (outcome.outcomeQuality != null)
+    return normalizeProbability(outcome.outcomeQuality);
+  if (outcome.realizedReturn != null)
+    return clampUnit(0.5 + outcome.realizedReturn / 12);
   return 0.5;
 }
 
@@ -162,7 +166,10 @@ export class RollingCalibrationTracker {
 
   constructor(private readonly windowSize = 200) {}
 
-  updateCalibration(prediction: CalibrationPrediction | number, realizedOutcome: RealizedOutcome | number) {
+  updateCalibration(
+    prediction: CalibrationPrediction | number,
+    realizedOutcome: RealizedOutcome | number,
+  ) {
     const predictedProbability =
       typeof prediction === "number"
         ? normalizeProbability(prediction)
@@ -195,36 +202,62 @@ export function getCalibrationState() {
 }
 
 export function buildCalibrationState(
-  observations: Array<CalibrationObservation | { predictedProbability: number; realizedOutcomeQuality: number }>,
+  observations: Array<
+    | CalibrationObservation
+    | { predictedProbability: number; realizedOutcomeQuality: number }
+  >,
 ): CalibrationState {
   const clean = observations
     .map((item) => ({
       predictedProbability: normalizeProbability(item.predictedProbability),
       realizedOutcomeQuality: normalizeOutcome(item.realizedOutcomeQuality),
     }))
-    .filter((item) => Number.isFinite(item.predictedProbability) && Number.isFinite(item.realizedOutcomeQuality));
+    .filter(
+      (item) =>
+        Number.isFinite(item.predictedProbability) &&
+        Number.isFinite(item.realizedOutcomeQuality),
+    );
 
   if (!clean.length) return DEFAULT_CALIBRATION_STATE;
 
-  const brierScores = clean.map((item) => (item.predictedProbability - item.realizedOutcomeQuality) ** 2);
-  const calibrationError = mean(clean.map((item) => Math.abs(item.predictedProbability - item.realizedOutcomeQuality)));
+  const brierScores = clean.map(
+    (item) => (item.predictedProbability - item.realizedOutcomeQuality) ** 2,
+  );
+  const calibrationError = mean(
+    clean.map((item) =>
+      Math.abs(item.predictedProbability - item.realizedOutcomeQuality),
+    ),
+  );
   const predictedMean = mean(clean.map((item) => item.predictedProbability));
   const realizedMean = mean(clean.map((item) => item.realizedOutcomeQuality));
   const biasDelta = predictedMean - realizedMean;
   const recent = clean.slice(-Math.max(8, Math.ceil(clean.length / 3)));
   const previous = clean.slice(0, Math.max(0, clean.length - recent.length));
-  const recentError = mean(recent.map((item) => Math.abs(item.predictedProbability - item.realizedOutcomeQuality)));
+  const recentError = mean(
+    recent.map((item) =>
+      Math.abs(item.predictedProbability - item.realizedOutcomeQuality),
+    ),
+  );
   const previousError = previous.length
-    ? mean(previous.map((item) => Math.abs(item.predictedProbability - item.realizedOutcomeQuality)))
+    ? mean(
+        previous.map((item) =>
+          Math.abs(item.predictedProbability - item.realizedOutcomeQuality),
+        ),
+      )
     : calibrationError;
-  const drift = clamp(Math.abs(recentError - previousError) * 220 + Math.max(0, recentError - previousError) * 120);
+  const drift = clamp(
+    Math.abs(recentError - previousError) * 220 +
+      Math.max(0, recentError - previousError) * 120,
+  );
 
   const buckets = [0, 0.2, 0.4, 0.6, 0.8].map((lower) => {
     const upper = lower + 0.2;
     const items = clean.filter((item) =>
       lower === 0.8
-        ? item.predictedProbability >= lower && item.predictedProbability <= upper
-        : item.predictedProbability >= lower && item.predictedProbability < upper,
+        ? item.predictedProbability >= lower &&
+          item.predictedProbability <= upper
+        : item.predictedProbability >= lower &&
+          item.predictedProbability < upper,
     );
     return {
       lower,
@@ -251,12 +284,22 @@ export function buildCalibrationState(
     bucketAccuracy: buckets,
     bias,
     drift,
-    confidenceMultiplier: clampUnit(1 - calibrationError * 0.9 - (bias === "overconfident" ? 0.08 : 0) - drift / 500),
+    confidenceMultiplier: clampUnit(
+      1 -
+        calibrationError * 0.9 -
+        (bias === "overconfident" ? 0.08 : 0) -
+        drift / 500,
+    ),
   };
 }
 
-export function classifyMarketRegime(diagnostics: DiagnosticInputs): RegimeClassificationResult {
-  const volatilityPressure = metric(diagnostics.volatilityPressure ?? diagnostics.drift, 58);
+export function classifyMarketRegime(
+  diagnostics: DiagnosticInputs,
+): RegimeClassificationResult {
+  const volatilityPressure = metric(
+    diagnostics.volatilityPressure ?? diagnostics.drift,
+    58,
+  );
   const entropy = metric(diagnostics.entropy ?? diagnostics.clarity, 58);
   const drift = metric(diagnostics.drift, 55);
   const residualInstability = metric(diagnostics.residualInstability, 52);
@@ -274,12 +317,19 @@ export function classifyMarketRegime(diagnostics: DiagnosticInputs): RegimeClass
   } else if (regimeStability < 38 && drift > 58) {
     regime = "unstable_chop";
     reasons.push("Regime stability is weak while drift is rising.");
-  } else if (breadth >= 64 && regimeStability >= 64 && entropy < 56 && drift < 45) {
+  } else if (
+    breadth >= 64 &&
+    regimeStability >= 64 &&
+    entropy < 56 &&
+    drift < 45
+  ) {
     regime = "orderly_trend";
     reasons.push("Breadth and regime stability support an orderly trend.");
   } else if (breadth >= 52 && volatilityPressure <= 66) {
     regime = "noisy_trend";
-    reasons.push("Trend evidence exists, but noise still requires sizing discipline.");
+    reasons.push(
+      "Trend evidence exists, but noise still requires sizing discipline.",
+    );
   } else {
     reasons.push("Market state is transitional; keep governors conservative.");
   }
@@ -297,21 +347,50 @@ export function classifyMarketRegime(diagnostics: DiagnosticInputs): RegimeClass
     regime,
     risk,
     allocationCapMultiplier:
-      regime === "orderly_trend" ? 1.08 : regime === "noisy_trend" ? 0.92 : regime === "transition" ? 0.78 : 0.55,
+      regime === "orderly_trend"
+        ? 1.08
+        : regime === "noisy_trend"
+          ? 0.92
+          : regime === "transition"
+            ? 0.78
+            : 0.55,
     confidenceThreshold:
-      regime === "orderly_trend" ? 56 : regime === "noisy_trend" ? 62 : regime === "transition" ? 66 : 72,
+      regime === "orderly_trend"
+        ? 56
+        : regime === "noisy_trend"
+          ? 62
+          : regime === "transition"
+            ? 66
+            : 72,
     holdingPeriodMultiplier:
-      regime === "orderly_trend" ? 1.18 : regime === "noisy_trend" ? 0.96 : regime === "transition" ? 0.82 : 0.58,
+      regime === "orderly_trend"
+        ? 1.18
+        : regime === "noisy_trend"
+          ? 0.96
+          : regime === "transition"
+            ? 0.82
+            : 0.58,
     reasons,
   };
 }
 
-export function forecastSignalSurvival(input: SurvivalForecastInput): SurvivalForecast {
+export function forecastSignalSurvival(
+  input: SurvivalForecastInput,
+): SurvivalForecast {
   const diagnostics = input.diagnostics;
-  const holdingQuality = metric(diagnostics.holdingQuality ?? diagnostics.survivalProbability, 44);
+  const holdingQuality = metric(
+    diagnostics.holdingQuality ?? diagnostics.survivalProbability,
+    44,
+  );
   const modelDurability = metric(diagnostics.modelDurability, 45);
-  const trendConsistency = metric(input.trendConsistency ?? diagnostics.trendQuality, 48);
-  const volatilityPressure = metric(diagnostics.volatilityPressure ?? diagnostics.drift, 58);
+  const trendConsistency = metric(
+    input.trendConsistency ?? diagnostics.trendQuality,
+    48,
+  );
+  const volatilityPressure = metric(
+    diagnostics.volatilityPressure ?? diagnostics.drift,
+    58,
+  );
   const residualInstability = metric(diagnostics.residualInstability, 52);
   const signalAgeMinutes = Math.max(0, input.signalAgeMinutes ?? 0);
   const recentSignalReversals = Math.max(0, input.recentSignalReversals ?? 0);
@@ -330,8 +409,28 @@ export function forecastSignalSurvival(input: SurvivalForecastInput): SurvivalFo
       reversalPenalty +
       18,
   );
-  const estimatedHalfLifeMinutes = Math.round(clamp(20 + survivalProbability * 1.9 - volatilityPressure * 0.45 - recentSignalReversals * 8, 15, 240));
-  const recommendedHoldingMinutes = Math.round(clamp(estimatedHalfLifeMinutes * (survivalProbability >= 68 ? 1.25 : survivalProbability >= 45 ? 0.86 : 0.55), 10, 300));
+  const estimatedHalfLifeMinutes = Math.round(
+    clamp(
+      20 +
+        survivalProbability * 1.9 -
+        volatilityPressure * 0.45 -
+        recentSignalReversals * 8,
+      15,
+      240,
+    ),
+  );
+  const recommendedHoldingMinutes = Math.round(
+    clamp(
+      estimatedHalfLifeMinutes *
+        (survivalProbability >= 68
+          ? 1.25
+          : survivalProbability >= 45
+            ? 0.86
+            : 0.55),
+      10,
+      300,
+    ),
+  );
   const breakdownRisk: RegimeRisk =
     survivalProbability < 34 || residualInstability > 76
       ? "unstable"
@@ -341,10 +440,14 @@ export function forecastSignalSurvival(input: SurvivalForecastInput): SurvivalFo
           ? "moderate"
           : "low";
   const reasons: string[] = [];
-  if (survivalProbability < 45) reasons.push("Survival forecast is weak; shorten the holding horizon.");
-  if (volatilityPressure > 65) reasons.push("Volatility pressure reduces expected signal half-life.");
-  if (residualInstability > 62) reasons.push("Residual instability raises breakdown risk.");
-  if (survivalProbability >= 66) reasons.push("Durability evidence supports a longer holding window.");
+  if (survivalProbability < 45)
+    reasons.push("Survival forecast is weak; shorten the holding horizon.");
+  if (volatilityPressure > 65)
+    reasons.push("Volatility pressure reduces expected signal half-life.");
+  if (residualInstability > 62)
+    reasons.push("Residual instability raises breakdown risk.");
+  if (survivalProbability >= 66)
+    reasons.push("Durability evidence supports a longer holding window.");
 
   return {
     survivalProbability,
@@ -355,7 +458,9 @@ export function forecastSignalSurvival(input: SurvivalForecastInput): SurvivalFo
   };
 }
 
-export function decideMetaAllocation(input: MetaAllocationInput): MetaAllocationDecision {
+export function decideMetaAllocation(
+  input: MetaAllocationInput,
+): MetaAllocationDecision {
   const diagnostics = input.diagnostics;
   const calibrationState = input.calibrationState ?? DEFAULT_CALIBRATION_STATE;
   const regime = input.regime ?? classifyMarketRegime(diagnostics);
@@ -372,19 +477,38 @@ export function decideMetaAllocation(input: MetaAllocationInput): MetaAllocation
   const driftPenalty = clamp((drift - 42) / 100, 0, 0.22);
   const breadthPenalty = clamp((52 - breadth) / 100, 0, 0.18);
   const residualPenalty = clamp((residualInstability - 48) / 100, 0, 0.24);
-  const calibrationPenalty = clamp(calibrationState.calibrationError * 0.6 + calibrationState.drift / 450, 0, 0.24);
-  const survivalBoost = clamp((survival.survivalProbability - 55) / 220, -0.14, 0.14);
+  const calibrationPenalty = clamp(
+    calibrationState.calibrationError * 0.6 + calibrationState.drift / 450,
+    0,
+    0.24,
+  );
+  const survivalBoost = clamp(
+    (survival.survivalProbability - 55) / 220,
+    -0.14,
+    0.14,
+  );
   const stabilityBoost = clamp((regimeStability - 58) / 260, -0.08, 0.1);
 
-  if (calibrationState.bias === "overconfident") reasons.push("Recent predictions are overconfident; discount confidence.");
+  if (calibrationState.bias === "overconfident")
+    reasons.push("Recent predictions are overconfident; discount confidence.");
   if (entropy > 64) reasons.push("High entropy reduces allocation.");
   if (drift > 62) reasons.push("Feature drift shortens the holding horizon.");
   if (breadth < 45) reasons.push("Weak breadth reduces conviction.");
-  if (residualInstability > 64) reasons.push("Residual instability caps exposure.");
-  if (missingDiagnosticsCount(diagnostics) > 0) reasons.push("Missing diagnostics trigger conservative defaults.");
+  if (residualInstability > 64)
+    reasons.push("Residual instability caps exposure.");
+  if (missingDiagnosticsCount(diagnostics) > 0)
+    reasons.push("Missing diagnostics trigger conservative defaults.");
 
   const rawExposureMultiplier =
-    (1 - entropyPenalty - driftPenalty - breadthPenalty - residualPenalty - calibrationPenalty - missingPenalty + survivalBoost + stabilityBoost) *
+    (1 -
+      entropyPenalty -
+      driftPenalty -
+      breadthPenalty -
+      residualPenalty -
+      calibrationPenalty -
+      missingPenalty +
+      survivalBoost +
+      stabilityBoost) *
     regime.allocationCapMultiplier;
   const exposureMultiplier = clamp(rawExposureMultiplier, 0.25, 1.18);
   const confidenceDiscount = clampUnit(
@@ -396,12 +520,17 @@ export function decideMetaAllocation(input: MetaAllocationInput): MetaAllocation
   );
   const rawHoldingPeriodMultiplier =
     regime.holdingPeriodMultiplier *
-      (survival.recommendedHoldingMinutes / Math.max(30, survival.estimatedHalfLifeMinutes)) *
-      (1 - clamp((drift - 50) / 160, 0, 0.28)) *
+    (survival.recommendedHoldingMinutes /
+      Math.max(30, survival.estimatedHalfLifeMinutes)) *
+    (1 - clamp((drift - 50) / 160, 0, 0.28)) *
     (1 + clamp((regimeStability - 62) / 260, 0, 0.12));
   const holdingPeriodMultiplier = clamp(rawHoldingPeriodMultiplier, 0.38, 1.32);
   const allocationCap = clamp(
-    5.2 * regime.allocationCapMultiplier * (1 - residualPenalty) * (survival.survivalProbability < 42 ? 0.62 : 1) * (1 - missingPenalty),
+    5.2 *
+      regime.allocationCapMultiplier *
+      (1 - residualPenalty) *
+      (survival.survivalProbability < 42 ? 0.62 : 1) *
+      (1 - missingPenalty),
     0.8,
     6.2,
   );

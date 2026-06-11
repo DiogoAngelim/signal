@@ -1,4 +1,4 @@
-import { Router, type IRouter, type Request } from "express";
+import { type IRouter, type Request, Router } from "express";
 import { getOrCreateMarketBacktest } from "../lib/market-backtest.js";
 import {
   createBinanceExecutionModule,
@@ -11,12 +11,18 @@ const executionModule = createBinanceExecutionModule();
 function parseBoolean(value: unknown, fallback = false) {
   if (value == null || value === "") return fallback;
   if (typeof value === "boolean") return value;
-  return ["1", "true", "yes", "on"].includes(String(value).trim().toLowerCase());
+  return ["1", "true", "yes", "on"].includes(
+    String(value).trim().toLowerCase(),
+  );
 }
 
 function hasExecutionAccess(req: Request) {
-  const mode = String(process.env.BINANCE_MODE ?? "dry_run").trim().toLowerCase();
-  const secret = process.env.BINANCE_EXECUTION_ADMIN_SECRET?.trim() || process.env.ADMIN_SECRET?.trim();
+  const mode = String(process.env.BINANCE_MODE ?? "dry_run")
+    .trim()
+    .toLowerCase();
+  const secret =
+    process.env.BINANCE_EXECUTION_ADMIN_SECRET?.trim() ||
+    process.env.ADMIN_SECRET?.trim();
   if (!secret) return mode === "dry_run";
 
   const authorization = String(req.headers.authorization ?? "");
@@ -38,7 +44,8 @@ function requireExecutionAccess(req: Request, res: any) {
   if (hasExecutionAccess(req)) return true;
   res.status(401).json({
     error: "Unauthorized",
-    message: "Binance execution endpoints require BINANCE_EXECUTION_ADMIN_SECRET or ADMIN_SECRET outside dry_run.",
+    message:
+      "Binance execution endpoints require BINANCE_EXECUTION_ADMIN_SECRET or ADMIN_SECRET outside dry_run.",
   });
   return false;
 }
@@ -47,7 +54,8 @@ function requireAutomationAccess(req: Request, res: any) {
   if (hasExecutionAccess(req) || hasCronAccess(req)) return true;
   res.status(401).json({
     error: "Unauthorized",
-    message: "Automatic Binance execution requires BINANCE_EXECUTION_ADMIN_SECRET, ADMIN_SECRET, or CRON_SECRET.",
+    message:
+      "Automatic Binance execution requires BINANCE_EXECUTION_ADMIN_SECRET, ADMIN_SECRET, or CRON_SECRET.",
   });
   return false;
 }
@@ -55,20 +63,47 @@ function requireAutomationAccess(req: Request, res: any) {
 async function buildStrategyDecisions(req: Request) {
   const query = req.query as Record<string, unknown>;
   const body = (req.body ?? {}) as Record<string, unknown>;
-  const market = String(body.market ?? query.market ?? process.env.BINANCE_AUTO_EXECUTE_MARKET ?? "BINANCE")
+  const market = String(
+    body.market ??
+      query.market ??
+      process.env.BINANCE_AUTO_EXECUTE_MARKET ??
+      "BINANCE",
+  )
     .trim()
     .toUpperCase();
-  const strategyId = String(body.strategyId ?? query.strategyId ?? process.env.BINANCE_AUTO_EXECUTE_STRATEGY_ID ?? "stocks-optimizer")
-    .trim();
-  const limit = Math.max(1, Math.min(Number(body.limit ?? query.limit ?? process.env.BINANCE_AUTO_EXECUTE_LIMIT ?? 20), 100));
+  const strategyId = String(
+    body.strategyId ??
+      query.strategyId ??
+      process.env.BINANCE_AUTO_EXECUTE_STRATEGY_ID ??
+      "stocks-optimizer",
+  ).trim();
+  const limit = Math.max(
+    1,
+    Math.min(
+      Number(
+        body.limit ??
+          query.limit ??
+          process.env.BINANCE_AUTO_EXECUTE_LIMIT ??
+          20,
+      ),
+      100,
+    ),
+  );
   const payload = await getOrCreateMarketBacktest(market, {
     force: body.force === true || query.force === "true",
-    runtimeMode: String(body.runtimeMode ?? query.runtimeMode ?? process.env.BINANCE_AUTO_EXECUTE_RUNTIME_MODE ?? ""),
+    runtimeMode: String(
+      body.runtimeMode ??
+        query.runtimeMode ??
+        process.env.BINANCE_AUTO_EXECUTE_RUNTIME_MODE ??
+        "",
+    ),
   });
   const signals = Array.isArray(payload?.signals) ? payload.signals : [];
   const decisions = signals
     .slice(0, limit)
-    .map((signal: Record<string, unknown>) => mapStrategySignalToBinanceDecision(signal, strategyId));
+    .map((signal: Record<string, unknown>) =>
+      mapStrategySignalToBinanceDecision(signal, strategyId),
+    );
 
   return {
     market,
@@ -84,7 +119,9 @@ async function executeStrategySignals(req: Request) {
   const results = await executionModule.executeDecisions(payload.decisions);
 
   return {
-    ok: results.every((result) => result.status !== "failed" && result.status !== "rejected"),
+    ok: results.every(
+      (result) => result.status !== "failed" && result.status !== "rejected",
+    ),
     market: payload.market,
     strategyId: payload.strategyId,
     decisions: payload.decisions,
@@ -121,7 +158,9 @@ router.post("/binance-execution/execute", async (req, res) => {
 
   const results = await executionModule.executeDecisions(decisions);
   res.json({
-    ok: results.every((result) => result.status !== "failed" && result.status !== "rejected"),
+    ok: results.every(
+      (result) => result.status !== "failed" && result.status !== "rejected",
+    ),
     results,
   });
 });
@@ -133,12 +172,12 @@ router.post("/binance-execution/execute-strategy", async (req, res) => {
 
 router.get("/binance-execution/decisions", async (req, res) => {
   if (!requireAutomationAccess(req, res)) return;
-  res.json({ ok: true, ...await buildStrategyDecisions(req) });
+  res.json({ ok: true, ...(await buildStrategyDecisions(req)) });
 });
 
 router.post("/binance-execution/decisions", async (req, res) => {
   if (!requireAutomationAccess(req, res)) return;
-  res.json({ ok: true, ...await buildStrategyDecisions(req) });
+  res.json({ ok: true, ...(await buildStrategyDecisions(req)) });
 });
 
 router.get("/binance-execution/auto-execute", async (req, res) => {
@@ -158,11 +197,16 @@ router.get("/binance-execution/auto-execute", async (req, res) => {
 
 router.post("/binance-execution/kill-switch", async (req, res) => {
   if (!requireExecutionAccess(req, res)) return;
-  const action = String(req.body?.action ?? req.query.action ?? "enable").trim().toLowerCase();
-  const reason = String(req.body?.reason ?? req.query.reason ?? "operator_request");
-  const killSwitch = action === "disable"
-    ? executionModule.disableKillSwitch(reason)
-    : executionModule.enableKillSwitch(reason);
+  const action = String(req.body?.action ?? req.query.action ?? "enable")
+    .trim()
+    .toLowerCase();
+  const reason = String(
+    req.body?.reason ?? req.query.reason ?? "operator_request",
+  );
+  const killSwitch =
+    action === "disable"
+      ? executionModule.disableKillSwitch(reason)
+      : executionModule.enableKillSwitch(reason);
   res.json({ ok: true, killSwitch });
 });
 
@@ -173,7 +217,9 @@ router.delete("/binance-execution/orders/:orderId", async (req, res) => {
 
 router.delete("/binance-execution/orders", async (req, res) => {
   if (!requireExecutionAccess(req, res)) return;
-  const symbol = req.query.symbol ? String(req.query.symbol).trim().toUpperCase() : undefined;
+  const symbol = req.query.symbol
+    ? String(req.query.symbol).trim().toUpperCase()
+    : undefined;
   res.json({ cancelled: await executionModule.cancelAll(symbol) });
 });
 

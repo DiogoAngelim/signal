@@ -18,23 +18,29 @@ function apiUrl(path: string) {
 }
 
 import {
-  backtestCacheKey,
-  recoverBacktestPayload,
-  rememberBacktestPayload,
-  shouldProtectBacktestUrl,
-} from "./persistent-backtest-cache";
-import { sanitizePromotionState } from "./promotion-sanity";
-import {
   type DashboardQuoteBatchResponse,
   type DashboardStockListResponse,
   parseDashboardMarketOptions,
   parseDashboardQuoteBatchResponse,
   parseDashboardStockListResponse,
 } from "./dashboard-data-adapter";
+import {
+  backtestCacheKey,
+  recoverBacktestPayload,
+  rememberBacktestPayload,
+  shouldProtectBacktestUrl,
+} from "./persistent-backtest-cache";
+import { sanitizePromotionState } from "./promotion-sanity";
 export type StockStatus = "Stable" | "Rising" | "Watch" | "Dip";
 export type TradeSignal = "Hold" | "Buy" | "Sell";
 export type AllocationAction = TradeSignal | "Watch" | "Blocked";
-export type SizingMode = "none" | "micro" | "small" | "normal" | "large" | "maxSafe";
+export type SizingMode =
+  | "none"
+  | "micro"
+  | "small"
+  | "normal"
+  | "large"
+  | "maxSafe";
 export type AdaptiveRegime =
   | "TRENDING"
   | "MEAN_REVERTING"
@@ -90,7 +96,11 @@ export interface BeliefDiagnostic {
   contradictoryEvidence?: BeliefEvidenceSummary[];
 }
 
-export type JudgementStatus = "trusted" | "cautious" | "review_required" | "blocked";
+export type JudgementStatus =
+  | "trusted"
+  | "cautious"
+  | "review_required"
+  | "blocked";
 export type RecognitionVerdict =
   | "recognized"
   | "partially_recognized"
@@ -129,8 +139,16 @@ export type SurvivalOutcomeClass =
   | "barely_survived"
   | "failed_survival";
 
-export type SurvivalMemoryStatus = "empty" | "clear" | "watch" | "scarred" | "near_ruin";
-export type SurvivalMemoryRecommendation = "act" | "act_with_reduced_size" | "wait";
+export type SurvivalMemoryStatus =
+  | "empty"
+  | "clear"
+  | "watch"
+  | "scarred"
+  | "near_ruin";
+export type SurvivalMemoryRecommendation =
+  | "act"
+  | "act_with_reduced_size"
+  | "wait";
 
 export interface SurvivalMemoryRecord {
   id: string;
@@ -220,7 +238,13 @@ export interface TrustGovernorDiagnostic {
   name: "Signal Trust Governor";
   trustScore: number;
   confidenceCap: number;
-  participationMode: "blocked" | "exits_only" | "paper" | "micro" | "limited" | "normal";
+  participationMode:
+    | "blocked"
+    | "exits_only"
+    | "paper"
+    | "micro"
+    | "limited"
+    | "normal";
   maxExposure: number;
   allowsNewExposure: boolean;
   requiresReview: boolean;
@@ -283,7 +307,13 @@ export interface ExecutionQualityDiagnostic {
   invalidationClarity: number;
   blockers: string[];
   warnings: string[];
-  recommendedExecutionMode: "do_not_execute" | "wait" | "limit_only" | "small_probe" | "scale_in" | "normal";
+  recommendedExecutionMode:
+    | "do_not_execute"
+    | "wait"
+    | "limit_only"
+    | "small_probe"
+    | "scale_in"
+    | "normal";
   explanation: string;
   audit?: Record<string, any>;
 }
@@ -473,7 +503,11 @@ export interface WisdomDiagnostic {
     recurrenceRate: number;
     noveltyPersistence: number;
     conversionRate: number;
-    trustedDiscoveries: Array<{ id: string; stage: string; maturityScore: number }>;
+    trustedDiscoveries: Array<{
+      id: string;
+      stage: string;
+      maturityScore: number;
+    }>;
     lifecycle: Array<{ stage: string; count: number }>;
   };
   agencyEffectiveness: {
@@ -491,19 +525,30 @@ export interface WisdomDiagnostic {
     portfolioConvexity: number;
     allocationQuality: number;
   };
-  contributors?: Record<string, Array<{
-    id: string;
-    label: string;
-    value: number;
-    weight: number;
-    contribution: number;
-    reason: string;
-  }>>;
+  contributors?: Record<
+    string,
+    Array<{
+      id: string;
+      label: string;
+      value: number;
+      weight: number;
+      contribution: number;
+      reason: string;
+    }>
+  >;
   explanation: string;
 }
 
 export interface ExecutiveDecisionDiagnostic {
-  decision: "buy" | "sell" | "hold" | "watch" | "avoid" | "escalate" | "deescalate" | "review";
+  decision:
+    | "buy"
+    | "sell"
+    | "hold"
+    | "watch"
+    | "avoid"
+    | "escalate"
+    | "deescalate"
+    | "review";
   participationMode: "none" | "watch" | "limited" | "normal" | "aggressive";
   confidence: number;
   trust: number;
@@ -514,9 +559,18 @@ export interface ExecutiveDecisionDiagnostic {
   primaryReason: string;
   primaryLimiter?: string;
   strongestEvidence: string[];
-  restrictions: Array<{ id: string; label: string; reason: string; severity?: string }>;
+  restrictions: Array<{
+    id: string;
+    label: string;
+    reason: string;
+    severity?: string;
+  }>;
   unlockConditions: Array<{ id: string; description: string; source?: string }>;
-  invalidationConditions: Array<{ id: string; description: string; source?: string }>;
+  invalidationConditions: Array<{
+    id: string;
+    description: string;
+    source?: string;
+  }>;
   nextReviewCondition?: string;
   explanation: string;
   audit?: Record<string, any>;
@@ -549,7 +603,11 @@ export type RestorationProgressStatus =
   | "ready_for_restoration"
   | "restored";
 
-export type SurvivalMemoryRestorationState = "scarred" | "watch" | "limited" | "clear";
+export type SurvivalMemoryRestorationState =
+  | "scarred"
+  | "watch"
+  | "limited"
+  | "clear";
 
 export interface RestorationLedgerEntry {
   id: string;
@@ -624,7 +682,11 @@ export interface RestorationProgressDiagnostic {
   };
   actionPlan?: {
     title: "Survival Memory Restoration Plan";
-    status: "collecting_evidence" | "reset_required" | "ready_for_review" | "restored";
+    status:
+      | "collecting_evidence"
+      | "reset_required"
+      | "ready_for_review"
+      | "restored";
     activeInstruction: string;
     exposureInstruction: string;
     remainingCleanOutcomes: number;
@@ -758,7 +820,12 @@ export interface StockQuote {
   signalReturnPercent?: number;
   sizingMode?: SizingMode;
   sizingReasons?: string[];
-  sizingConstraints?: Array<{ id: string; label?: string; passed: boolean; reason?: string }>;
+  sizingConstraints?: Array<{
+    id: string;
+    label?: string;
+    passed: boolean;
+    reason?: string;
+  }>;
   viabilityVerdict?: "viable" | "marginal" | "not-viable" | "blocked";
   viabilityReason?: string;
   viabilityWarnings?: string[];
@@ -837,7 +904,12 @@ export type StockData = StockListItem & {
   signalReturnPercent?: number;
   sizingMode?: SizingMode;
   sizingReasons?: string[];
-  sizingConstraints?: Array<{ id: string; label?: string; passed: boolean; reason?: string }>;
+  sizingConstraints?: Array<{
+    id: string;
+    label?: string;
+    passed: boolean;
+    reason?: string;
+  }>;
   viabilityVerdict?: "viable" | "marginal" | "not-viable" | "blocked";
   viabilityReason?: string;
   viabilityWarnings?: string[];
@@ -1013,7 +1085,6 @@ export interface StockQuoteBatchResponse {
   quotes: StockQuote[];
 }
 
-
 const DEFAULT_REQUEST_TIMEOUT_MS = 12_000;
 const DEFAULT_RETRY_COUNT = 1;
 const RETRYABLE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
@@ -1111,7 +1182,11 @@ function sanitizeBacktestApiPayload<T>(url: string, payload: T): T {
   return payload;
 }
 
-function protectBacktestApiPayload<T>(url: string, method: string, payload: T): T {
+function protectBacktestApiPayload<T>(
+  url: string,
+  method: string,
+  payload: T,
+): T {
   if (!shouldProtectBacktestUrl(url)) return payload;
 
   const key = backtestCacheKey(url, method);
@@ -1141,13 +1216,12 @@ function shouldSkipLocalPortfolioRoute(path: string) {
   );
 }
 
-
-
-
 async function request<T>(
   path: string,
   options?: RequestInit & {
- timeoutMs?: number; retryCount?: number },
+    timeoutMs?: number;
+    retryCount?: number;
+  },
 ): Promise<T> {
   const {
     timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
@@ -1174,18 +1248,18 @@ async function request<T>(
     }
 
     try {
-        const rawPath = typeof path === "string" ? path : String(path);
+      const rawPath = typeof path === "string" ? path : String(path);
 
-  if (shouldSkipLocalPortfolioRoute(rawPath)) {
-    console.info("[api] Skipping /api/stocks/watch-market locally");
-    return {
-      ok: true,
-      skipped: true,
-      reason: "portfolio API disabled locally",
-    } as any;
-  }
+      if (shouldSkipLocalPortfolioRoute(rawPath)) {
+        console.info("[api] Skipping /api/stocks/watch-market locally");
+        return {
+          ok: true,
+          skipped: true,
+          reason: "portfolio API disabled locally",
+        } as any;
+      }
 
-  const response = await fetch(apiUrl(path), {
+      const response = await fetch(apiUrl(path), {
         headers: { "Content-Type": "application/json" },
         ...fetchOptions,
         signal: controller.signal,
@@ -1211,13 +1285,13 @@ async function request<T>(
           ? error
           : timedOut
             ? new ApiRequestError("Request timed out", {
-              retryable: true,
-              timedOut: true,
-            })
+                retryable: true,
+                timedOut: true,
+              })
             : new ApiRequestError(
-              error instanceof Error ? error.message : "Request failed",
-              { retryable: true },
-            );
+                error instanceof Error ? error.message : "Request failed",
+                { retryable: true },
+              );
 
       if (attempt < retryCount && normalized.retryable) {
         await delay(500 * (attempt + 1));

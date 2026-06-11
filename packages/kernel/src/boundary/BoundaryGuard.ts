@@ -11,8 +11,8 @@
  * 6. Plugins cannot access the execution controller
  */
 
-import type { SignalPlugin, PluginCapability } from "../plugin/SignalPlugin";
-import { EventBus } from "../infrastructure/EventBus";
+import type { EventBus } from "../infrastructure/EventBus";
+import type { PluginCapability, SignalPlugin } from "../plugin/SignalPlugin";
 
 export type BoundaryViolation = {
   readonly pluginId: string;
@@ -29,7 +29,12 @@ export type BoundaryRule =
   | "no-unregistered-capability"
   | "signal-package-only-contract";
 
-const VALID_CAPABILITIES: Set<string> = new Set(["generate", "analyze", "score", "aggregate"]);
+const VALID_CAPABILITIES: Set<string> = new Set([
+  "generate",
+  "analyze",
+  "score",
+  "aggregate",
+]);
 
 export class BoundaryGuard {
   private readonly violations: BoundaryViolation[] = [];
@@ -50,32 +55,64 @@ export class BoundaryGuard {
     // Rule: capabilities must be from the valid set
     for (const cap of plugin.capabilities) {
       if (!VALID_CAPABILITIES.has(cap)) {
-        this.recordViolation(pluginId, "no-unregistered-capability", `Plugin claims unknown capability: ${cap}`);
+        this.recordViolation(
+          pluginId,
+          "no-unregistered-capability",
+          `Plugin claims unknown capability: ${cap}`,
+        );
         valid = false;
       }
     }
 
     // Rule: if plugin claims "generate", it must implement getGenerator
-    if (plugin.capabilities.includes("generate" as PluginCapability) && !plugin.getGenerator) {
-      this.recordViolation(pluginId, "no-unregistered-capability", `Plugin claims "generate" but does not implement getGenerator()`);
+    if (
+      plugin.capabilities.includes("generate" as PluginCapability) &&
+      !plugin.getGenerator
+    ) {
+      this.recordViolation(
+        pluginId,
+        "no-unregistered-capability",
+        `Plugin claims "generate" but does not implement getGenerator()`,
+      );
       valid = false;
     }
 
     // Rule: if plugin claims "analyze", it must implement getAnalyzer
-    if (plugin.capabilities.includes("analyze" as PluginCapability) && !plugin.getAnalyzer) {
-      this.recordViolation(pluginId, "no-unregistered-capability", `Plugin claims "analyze" but does not implement getAnalyzer()`);
+    if (
+      plugin.capabilities.includes("analyze" as PluginCapability) &&
+      !plugin.getAnalyzer
+    ) {
+      this.recordViolation(
+        pluginId,
+        "no-unregistered-capability",
+        `Plugin claims "analyze" but does not implement getAnalyzer()`,
+      );
       valid = false;
     }
 
     // Rule: if plugin claims "score", it must implement getScorer
-    if (plugin.capabilities.includes("score" as PluginCapability) && !plugin.getScorer) {
-      this.recordViolation(pluginId, "no-unregistered-capability", `Plugin claims "score" but does not implement getScorer()`);
+    if (
+      plugin.capabilities.includes("score" as PluginCapability) &&
+      !plugin.getScorer
+    ) {
+      this.recordViolation(
+        pluginId,
+        "no-unregistered-capability",
+        `Plugin claims "score" but does not implement getScorer()`,
+      );
       valid = false;
     }
 
     // Rule: if plugin claims "aggregate", it must implement getAggregator
-    if (plugin.capabilities.includes("aggregate" as PluginCapability) && !plugin.getAggregator) {
-      this.recordViolation(pluginId, "no-unregistered-capability", `Plugin claims "aggregate" but does not implement getAggregator()`);
+    if (
+      plugin.capabilities.includes("aggregate" as PluginCapability) &&
+      !plugin.getAggregator
+    ) {
+      this.recordViolation(
+        pluginId,
+        "no-unregistered-capability",
+        `Plugin claims "aggregate" but does not implement getAggregator()`,
+      );
       valid = false;
     }
 
@@ -85,7 +122,10 @@ export class BoundaryGuard {
   /**
    * Record a plugin as registered. Used to enforce cross-plugin access rules.
    */
-  markRegistered(pluginId: string, capabilities: ReadonlyArray<PluginCapability>): void {
+  markRegistered(
+    pluginId: string,
+    capabilities: ReadonlyArray<PluginCapability>,
+  ): void {
     this.registeredPluginIds.add(pluginId);
     this.pluginCapabilities.set(pluginId, new Set(capabilities));
   }
@@ -101,10 +141,17 @@ export class BoundaryGuard {
   /**
    * Enforce that a plugin cannot access another plugin's internals.
    */
-  enforceNoCrossPluginAccess(callerPluginId: string, targetPluginId: string): boolean {
+  enforceNoCrossPluginAccess(
+    callerPluginId: string,
+    targetPluginId: string,
+  ): boolean {
     if (callerPluginId === targetPluginId) return true; // self-access is fine
 
-    this.recordViolation(callerPluginId, "no-cross-plugin-access", `Plugin ${callerPluginId} attempted to access plugin ${targetPluginId}`);
+    this.recordViolation(
+      callerPluginId,
+      "no-cross-plugin-access",
+      `Plugin ${callerPluginId} attempted to access plugin ${targetPluginId}`,
+    );
     return false;
   }
 
@@ -113,7 +160,11 @@ export class BoundaryGuard {
    * The execution controller is kernel-only.
    */
   enforceNoExecutionControl(pluginId: string): boolean {
-    this.recordViolation(pluginId, "no-execution-control", `Plugin ${pluginId} attempted to control execution`);
+    this.recordViolation(
+      pluginId,
+      "no-execution-control",
+      `Plugin ${pluginId} attempted to control execution`,
+    );
     return false;
   }
 
@@ -122,7 +173,11 @@ export class BoundaryGuard {
    * State mutations must go through the kernel's own methods.
    */
   enforceNoStateMutation(pluginId: string, key: string): boolean {
-    this.recordViolation(pluginId, "no-state-mutation", `Plugin ${pluginId} attempted to mutate kernel state: ${key}`);
+    this.recordViolation(
+      pluginId,
+      "no-state-mutation",
+      `Plugin ${pluginId} attempted to mutate kernel state: ${key}`,
+    );
     return false;
   }
 
@@ -131,7 +186,11 @@ export class BoundaryGuard {
    * Events must be emitted through PluginContext.events.emit().
    */
   enforceNoDirectEventBus(pluginId: string): boolean {
-    this.recordViolation(pluginId, "no-direct-event-bus", `Plugin ${pluginId} attempted to access EventBus directly`);
+    this.recordViolation(
+      pluginId,
+      "no-direct-event-bus",
+      `Plugin ${pluginId} attempted to access EventBus directly`,
+    );
     return false;
   }
 
@@ -145,7 +204,11 @@ export class BoundaryGuard {
     // Data flowing through the pipeline must be plain records
     // (not class instances, functions, etc.)
     if (typeof data === "function") {
-      this.recordViolation(pluginId, "signal-package-only-contract", `Plugin ${pluginId} passed a function through the pipeline`);
+      this.recordViolation(
+        pluginId,
+        "signal-package-only-contract",
+        `Plugin ${pluginId} passed a function through the pipeline`,
+      );
       return false;
     }
 
@@ -168,7 +231,11 @@ export class BoundaryGuard {
     this.violations.length = 0;
   }
 
-  private recordViolation(pluginId: string, rule: BoundaryRule, message: string): void {
+  private recordViolation(
+    pluginId: string,
+    rule: BoundaryRule,
+    message: string,
+  ): void {
     const violation: BoundaryViolation = {
       pluginId,
       rule,
@@ -176,6 +243,10 @@ export class BoundaryGuard {
       timestamp: Date.now(),
     };
     this.violations.push(violation);
-    this.eventBus.emit("boundary:violation", { pluginId, rule, message }, "BoundaryGuard");
+    this.eventBus.emit(
+      "boundary:violation",
+      { pluginId, rule, message },
+      "BoundaryGuard",
+    );
   }
 }

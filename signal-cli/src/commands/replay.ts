@@ -6,9 +6,9 @@
  * Writes FAILURE_PROOF on any mismatch.
  */
 
-import { readState, stateExists } from "../state/stateStore.js";
+import { PROOF_TYPES, writeProof } from "../proofs/proofWriter.js";
 import { replayPhases } from "../replay/replayEngine.js";
-import { writeProof, PROOF_TYPES } from "../proofs/proofWriter.js";
+import { readState, stateExists } from "../state/stateStore.js";
 
 export interface ReplayOptions {
   from: number;
@@ -25,7 +25,9 @@ export function executeReplay(
   root: string = process.cwd(),
 ): boolean {
   if (!stateExists(root)) {
-    console.error("SIGNAL: No .signal/state.json found. Run `signal init` first.");
+    console.error(
+      "SIGNAL: No .signal/state.json found. Run `signal init` first.",
+    );
     writeProof(
       PROOF_TYPES.REPLAY_PROOF,
       "FAIL",

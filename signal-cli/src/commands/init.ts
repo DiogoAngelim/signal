@@ -7,12 +7,26 @@
 
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
-import type { HardeningCheckpoint, PhaseState, ExecutionTrace } from "../state/types.js";
+import { GENESIS_HASH, getHardeningDir } from "../core/constants.js";
+import {
+  createPhaseState,
+  getPreviousHash,
+  hashFile,
+  hashValue,
+} from "../core/hashChain.js";
+import { PROOF_TYPES, writeProof } from "../proofs/proofWriter.js";
+import {
+  getPhases,
+  initSignalDir,
+  readState,
+  writeState,
+} from "../state/stateStore.js";
+import type {
+  ExecutionTrace,
+  HardeningCheckpoint,
+  PhaseState,
+} from "../state/types.js";
 import { SignalError, SignalErrorCode } from "../state/types.js";
-import { initSignalDir, readState, writeState, getPhases } from "../state/stateStore.js";
-import { createPhaseState, hashFile, hashValue, getPreviousHash } from "../core/hashChain.js";
-import { getHardeningDir, GENESIS_HASH } from "../core/constants.js";
-import { writeProof, PROOF_TYPES } from "../proofs/proofWriter.js";
 
 /**
  * Validate a hardening checkpoint per v17 #5.
@@ -33,32 +47,34 @@ function validateCheckpoint(
   const cp = raw as Record<string, unknown>;
 
   // Required: phase (number)
-  if (typeof cp["phase"] !== "number") {
+  if (typeof cp.phase !== "number") {
     return { valid: false, error: `Missing or invalid 'phase' in ${dirName}` };
   }
 
   // Required: status === "COMPLETE"
-  if (cp["status"] !== "COMPLETE") {
+  if (cp.status !== "COMPLETE") {
     return {
       valid: false,
-      error: `Status is '${String(cp["status"])}', expected 'COMPLETE' in ${dirName}`,
+      error: `Status is '${String(cp.status)}', expected 'COMPLETE' in ${dirName}`,
     };
   }
 
   // Required: artifacts (array)
-  if (!Array.isArray(cp["artifacts"])) {
+  if (!Array.isArray(cp.artifacts)) {
     return { valid: false, error: `Missing 'artifacts' array in ${dirName}` };
   }
 
   return {
     valid: true,
     checkpoint: {
-      phase: cp["phase"] as number,
-      status: cp["status"] as string,
-      validation: cp["validation"] as HardeningCheckpoint["validation"],
-      artifacts: cp["artifacts"] as string[],
-      blockingIssues: Array.isArray(cp["blockingIssues"]) ? cp["blockingIssues"] as unknown[] : [],
-      evidence: Array.isArray(cp["evidence"]) ? cp["evidence"] as string[] : [],
+      phase: cp.phase as number,
+      status: cp.status as string,
+      validation: cp.validation as HardeningCheckpoint["validation"],
+      artifacts: cp.artifacts as string[],
+      blockingIssues: Array.isArray(cp.blockingIssues)
+        ? (cp.blockingIssues as unknown[])
+        : [],
+      evidence: Array.isArray(cp.evidence) ? (cp.evidence as string[]) : [],
     },
   };
 }
@@ -101,9 +117,7 @@ function importHardeningCheckpoints(root: string): {
 
   // Find all phase directories
   const entries = readdirSync(hardeningDir).sort();
-  const phaseDirs = entries.filter((e) =>
-    /^phase-\d+$/.test(e),
-  );
+  const phaseDirs = entries.filter((e) => /^phase-\d+$/.test(e));
 
   for (const dirName of phaseDirs) {
     const checkpointPath = join(hardeningDir, dirName, "PHASE_CHECKPOINT.json");
@@ -140,7 +154,8 @@ function importHardeningCheckpoints(root: string): {
       const trace = buildImportTrace(checkpoint, artifactHashes);
 
       // Compute previous hash
-      const previousHash = phases.length === 0 ? GENESIS_HASH : phases[phases.length - 1]!.hash;
+      const previousHash =
+        phases.length === 0 ? GENESIS_HASH : phases[phases.length - 1]?.hash;
 
       // Compute input state hash from checkpoint data
       const inputStateHash = hashValue({
@@ -180,7 +195,7 @@ export function executeInit(root: string = process.cwd()): void {
   // Create .signal/ directory structure
   initSignalDir(root);
 
-  console.log(`  Created .signal/ directory`);
+  console.log("  Created .signal/ directory");
 
   // Import hardening checkpoints
   const result = importHardeningCheckpoints(root);
@@ -202,7 +217,9 @@ export function executeInit(root: string = process.cwd()): void {
       writeState({ ...state, phases: allPhases }, root);
       console.log(`  Imported ${result.imported} hardening checkpoints`);
     } else {
-      console.log(`  No new checkpoints to import (state already has ${existingPhases.length} phases)`);
+      console.log(
+        `  No new checkpoints to import (state already has ${existingPhases.length} phases)`,
+      );
     }
   } else {
     console.log("  No hardening checkpoints found to import");

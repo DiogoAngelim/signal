@@ -1,4 +1,9 @@
-import { createRealitySnapshotForDecision, type OutcomeEvaluation, type RealitySnapshot, type SignalDecisionRecord } from "@signal/decision";
+import {
+  type OutcomeEvaluation,
+  type RealitySnapshot,
+  type SignalDecisionRecord,
+  createRealitySnapshotForDecision,
+} from "@signal/decision";
 import { matchesMemoryScope } from "./contracts";
 import type {
   CalibrationRecord,
@@ -26,7 +31,10 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
   private readonly decisions = new Map<string, SignalDecisionRecord>();
   private readonly outcomes = new Map<string, OutcomeEvaluation>();
   private readonly replaySnapshots = new Map<string, ReplaySnapshot>();
-  private readonly calibrationHistory = new Map<string, CalibrationHistoryEntry>();
+  private readonly calibrationHistory = new Map<
+    string,
+    CalibrationHistoryEntry
+  >();
   private readonly trustHistory = new Map<string, TrustHistoryEntry>();
   private readonly summaries = new Map<string, MemorySummary>();
   private readonly evidence = new Map<string, Evidence>();
@@ -35,19 +43,28 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
   private readonly decisionReviews = new Map<string, DecisionReview>();
   private readonly learningRecords = new Map<string, LearningRecord>();
   private readonly calibrationRecords = new Map<string, CalibrationRecord>();
-  private readonly processQualityRecords = new Map<string, ProcessQualityRecord>();
+  private readonly processQualityRecords = new Map<
+    string,
+    ProcessQualityRecord
+  >();
   private readonly retentionJobs = new Map<string, RetentionJobRecord>();
 
-  async saveRealitySnapshot(snapshot: RealitySnapshot): Promise<RealitySnapshot> {
+  async saveRealitySnapshot(
+    snapshot: RealitySnapshot,
+  ): Promise<RealitySnapshot> {
     this.realitySnapshots.set(snapshot.snapshotId, snapshot);
     return snapshot;
   }
 
-  async getRealitySnapshot(snapshotId: string): Promise<RealitySnapshot | undefined> {
+  async getRealitySnapshot(
+    snapshotId: string,
+  ): Promise<RealitySnapshot | undefined> {
     return this.realitySnapshots.get(snapshotId);
   }
 
-  async listRealitySnapshots(filter: RealitySnapshotFilter = {}): Promise<RealitySnapshot[]> {
+  async listRealitySnapshots(
+    filter: RealitySnapshotFilter = {},
+  ): Promise<RealitySnapshot[]> {
     const limit = clampLimit(filter.limit);
     const snapshots = [...this.realitySnapshots.values()]
       .filter((snapshot) => matchesRealityFilter(snapshot, filter))
@@ -55,8 +72,11 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return snapshots.slice(0, limit);
   }
 
-  async saveDecisionRecord(record: SignalDecisionRecord): Promise<SignalDecisionRecord> {
-    const realitySnapshot = record.realitySnapshot ?? createRealitySnapshotForDecision(record);
+  async saveDecisionRecord(
+    record: SignalDecisionRecord,
+  ): Promise<SignalDecisionRecord> {
+    const realitySnapshot =
+      record.realitySnapshot ?? createRealitySnapshotForDecision(record);
     const normalized = {
       ...record,
       realitySnapshotId: realitySnapshot.snapshotId,
@@ -67,11 +87,15 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return normalized;
   }
 
-  async getDecisionRecord(decisionId: string): Promise<SignalDecisionRecord | undefined> {
+  async getDecisionRecord(
+    decisionId: string,
+  ): Promise<SignalDecisionRecord | undefined> {
     return this.decisions.get(decisionId);
   }
 
-  async listDecisionRecords(filter: DecisionRecordFilter = {}): Promise<SignalDecisionRecord[]> {
+  async listDecisionRecords(
+    filter: DecisionRecordFilter = {},
+  ): Promise<SignalDecisionRecord[]> {
     const limit = clampLimit(filter.limit);
     const records = [...this.decisions.values()]
       .filter((record) => matchesFilter(record, filter))
@@ -109,7 +133,9 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
-  async recordCalibration(entry: CalibrationHistoryEntry): Promise<CalibrationHistoryEntry> {
+  async recordCalibration(
+    entry: CalibrationHistoryEntry,
+  ): Promise<CalibrationHistoryEntry> {
     this.calibrationHistory.set(entry.calibrationId, entry);
     return entry;
   }
@@ -119,7 +145,9 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return entry;
   }
 
-  async listCalibrationHistory(decisionId?: string): Promise<CalibrationHistoryEntry[]> {
+  async listCalibrationHistory(
+    decisionId?: string,
+  ): Promise<CalibrationHistoryEntry[]> {
     return [...this.calibrationHistory.values()]
       .filter((entry) => !decisionId || entry.decisionId === decisionId)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -136,12 +164,20 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return summary;
   }
 
-  async listSummaries(filter: { appId?: string; domain?: string; source?: string; limit?: number } = {}): Promise<MemorySummary[]> {
+  async listSummaries(
+    filter: {
+      appId?: string;
+      domain?: string;
+      source?: string;
+      limit?: number;
+    } = {},
+  ): Promise<MemorySummary[]> {
     return [...this.summaries.values()]
-      .filter((summary) =>
-        (!filter.source || summary.source === filter.source) &&
-        (!filter.appId || summary.appId === filter.appId) &&
-        (!filter.domain || summary.domain === filter.domain),
+      .filter(
+        (summary) =>
+          (!filter.source || summary.source === filter.source) &&
+          (!filter.appId || summary.appId === filter.appId) &&
+          (!filter.domain || summary.domain === filter.domain),
       )
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .slice(0, clampLimit(filter.limit));
@@ -154,15 +190,20 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
 
   async listEvidence(filter: LearningRecordFilter = {}): Promise<Evidence[]> {
     return [...this.evidence.values()]
-      .filter((evidence) => matchesLearningFilter({
-        source: evidence.source,
-        appId: evidence.appId,
-        domain: evidence.domain,
-        decisionId: evidence.decisionId,
-        thesisId: evidence.thesisId,
-        regimeSnapshotId: evidence.regimeSnapshotId,
-        createdAt: evidence.observedAt,
-      }, filter))
+      .filter((evidence) =>
+        matchesLearningFilter(
+          {
+            source: evidence.source,
+            appId: evidence.appId,
+            domain: evidence.domain,
+            decisionId: evidence.decisionId,
+            thesisId: evidence.thesisId,
+            regimeSnapshotId: evidence.regimeSnapshotId,
+            createdAt: evidence.observedAt,
+          },
+          filter,
+        ),
+      )
       .sort((a, b) => b.observedAt.localeCompare(a.observedAt))
       .slice(0, clampLimit(filter.limit));
   }
@@ -178,13 +219,18 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
 
   async listTheses(filter: LearningRecordFilter = {}): Promise<Thesis[]> {
     return [...this.theses.values()]
-      .filter((thesis) => matchesLearningFilter({
-        source: thesis.source,
-        appId: thesis.appId,
-        domain: thesis.domain,
-        thesisId: thesis.thesisId,
-        createdAt: thesis.createdAt,
-      }, filter))
+      .filter((thesis) =>
+        matchesLearningFilter(
+          {
+            source: thesis.source,
+            appId: thesis.appId,
+            domain: thesis.domain,
+            thesisId: thesis.thesisId,
+            createdAt: thesis.createdAt,
+          },
+          filter,
+        ),
+      )
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
       .slice(0, clampLimit(filter.limit));
   }
@@ -194,21 +240,30 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return snapshot;
   }
 
-  async getRegimeSnapshot(regimeSnapshotId: string): Promise<RegimeSnapshot | undefined> {
+  async getRegimeSnapshot(
+    regimeSnapshotId: string,
+  ): Promise<RegimeSnapshot | undefined> {
     return this.regimeSnapshots.get(regimeSnapshotId);
   }
 
-  async listRegimeSnapshots(filter: LearningRecordFilter = {}): Promise<RegimeSnapshot[]> {
+  async listRegimeSnapshots(
+    filter: LearningRecordFilter = {},
+  ): Promise<RegimeSnapshot[]> {
     return [...this.regimeSnapshots.values()]
-      .filter((snapshot) => matchesLearningFilter({
-        source: snapshot.source,
-        appId: snapshot.appId,
-        domain: snapshot.domain,
-        decisionId: snapshot.decisionId,
-        regimeSnapshotId: snapshot.regimeSnapshotId,
-        venue: snapshot.venue,
-        createdAt: snapshot.timestamp,
-      }, filter))
+      .filter((snapshot) =>
+        matchesLearningFilter(
+          {
+            source: snapshot.source,
+            appId: snapshot.appId,
+            domain: snapshot.domain,
+            decisionId: snapshot.decisionId,
+            regimeSnapshotId: snapshot.regimeSnapshotId,
+            venue: snapshot.venue,
+            createdAt: snapshot.timestamp,
+          },
+          filter,
+        ),
+      )
       .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
       .slice(0, clampLimit(filter.limit));
   }
@@ -218,15 +273,22 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return review;
   }
 
-  async listDecisionReviews(filter: LearningRecordFilter = {}): Promise<DecisionReview[]> {
+  async listDecisionReviews(
+    filter: LearningRecordFilter = {},
+  ): Promise<DecisionReview[]> {
     return [...this.decisionReviews.values()]
-      .filter((review) => matchesLearningFilter({
-        source: review.source,
-        appId: review.appId,
-        domain: review.domain,
-        decisionId: review.decisionId,
-        createdAt: review.reviewedAt,
-      }, filter))
+      .filter((review) =>
+        matchesLearningFilter(
+          {
+            source: review.source,
+            appId: review.appId,
+            domain: review.domain,
+            decisionId: review.decisionId,
+            createdAt: review.reviewedAt,
+          },
+          filter,
+        ),
+      )
       .sort((a, b) => b.reviewedAt.localeCompare(a.reviewedAt))
       .slice(0, clampLimit(filter.limit));
   }
@@ -236,53 +298,78 @@ export class InMemoryDecisionMemoryStore implements DecisionMemoryStore {
     return record;
   }
 
-  async listLearningRecords(filter: LearningRecordFilter = {}): Promise<LearningRecord[]> {
+  async listLearningRecords(
+    filter: LearningRecordFilter = {},
+  ): Promise<LearningRecord[]> {
     return [...this.learningRecords.values()]
-      .filter((record) => matchesLearningFilter({
-        source: record.source,
-        appId: record.appId,
-        domain: record.domain,
-        decisionId: record.decisionId,
-        thesisId: record.thesisId,
-        regimeSnapshotId: record.regimeSnapshotId,
-        createdAt: record.createdAt,
-      }, filter))
+      .filter((record) =>
+        matchesLearningFilter(
+          {
+            source: record.source,
+            appId: record.appId,
+            domain: record.domain,
+            decisionId: record.decisionId,
+            thesisId: record.thesisId,
+            regimeSnapshotId: record.regimeSnapshotId,
+            createdAt: record.createdAt,
+          },
+          filter,
+        ),
+      )
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .slice(0, clampLimit(filter.limit));
   }
 
-  async saveCalibrationRecord(record: CalibrationRecord): Promise<CalibrationRecord> {
+  async saveCalibrationRecord(
+    record: CalibrationRecord,
+  ): Promise<CalibrationRecord> {
     this.calibrationRecords.set(record.calibrationRecordId, record);
     return record;
   }
 
-  async listCalibrationRecords(filter: LearningRecordFilter = {}): Promise<CalibrationRecord[]> {
+  async listCalibrationRecords(
+    filter: LearningRecordFilter = {},
+  ): Promise<CalibrationRecord[]> {
     return [...this.calibrationRecords.values()]
-      .filter((record) => matchesLearningFilter({
-        source: record.source,
-        appId: record.appId,
-        domain: record.domain,
-        decisionId: record.decisionId,
-        createdAt: record.createdAt,
-      }, filter))
+      .filter((record) =>
+        matchesLearningFilter(
+          {
+            source: record.source,
+            appId: record.appId,
+            domain: record.domain,
+            decisionId: record.decisionId,
+            createdAt: record.createdAt,
+          },
+          filter,
+        ),
+      )
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .slice(0, clampLimit(filter.limit));
   }
 
-  async saveProcessQualityRecord(record: ProcessQualityRecord): Promise<ProcessQualityRecord> {
+  async saveProcessQualityRecord(
+    record: ProcessQualityRecord,
+  ): Promise<ProcessQualityRecord> {
     this.processQualityRecords.set(record.processQualityId, record);
     return record;
   }
 
-  async listProcessQualityRecords(filter: LearningRecordFilter = {}): Promise<ProcessQualityRecord[]> {
+  async listProcessQualityRecords(
+    filter: LearningRecordFilter = {},
+  ): Promise<ProcessQualityRecord[]> {
     return [...this.processQualityRecords.values()]
-      .filter((record) => matchesLearningFilter({
-        source: record.source,
-        appId: record.appId,
-        domain: record.domain,
-        decisionId: record.decisionId,
-        createdAt: record.createdAt,
-      }, filter))
+      .filter((record) =>
+        matchesLearningFilter(
+          {
+            source: record.source,
+            appId: record.appId,
+            domain: record.domain,
+            decisionId: record.decisionId,
+            createdAt: record.createdAt,
+          },
+          filter,
+        ),
+      )
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .slice(0, clampLimit(filter.limit));
   }
@@ -326,26 +413,39 @@ export function createInMemoryDecisionMemoryStore(): InMemoryDecisionMemoryStore
   return new InMemoryDecisionMemoryStore();
 }
 
-function matchesRealityFilter(snapshot: RealitySnapshot, filter: RealitySnapshotFilter): boolean {
+function matchesRealityFilter(
+  snapshot: RealitySnapshot,
+  filter: RealitySnapshotFilter,
+): boolean {
   if (!matchesMemoryScope(snapshot, filter)) return false;
-  if (filter.snapshotId && snapshot.snapshotId !== filter.snapshotId) return false;
+  if (filter.snapshotId && snapshot.snapshotId !== filter.snapshotId)
+    return false;
   if (filter.source && snapshot.source !== filter.source) return false;
-  if (filter.createdBefore && snapshot.createdAt >= filter.createdBefore) return false;
-  if (filter.createdAfter && snapshot.createdAt <= filter.createdAfter) return false;
+  if (filter.createdBefore && snapshot.createdAt >= filter.createdBefore)
+    return false;
+  if (filter.createdAfter && snapshot.createdAt <= filter.createdAfter)
+    return false;
   return true;
 }
 
-function matchesFilter(record: SignalDecisionRecord, filter: DecisionRecordFilter): boolean {
+function matchesFilter(
+  record: SignalDecisionRecord,
+  filter: DecisionRecordFilter,
+): boolean {
   if (!matchesMemoryScope(record, filter)) return false;
   if (
     filter.decisionId &&
     record.decisionId !== filter.decisionId &&
     !matchesMemoryScope(record, { decisionId: filter.decisionId })
-  ) return false;
+  )
+    return false;
   if (filter.source && record.source !== filter.source) return false;
-  if (filter.retentionTier && record.retentionTier !== filter.retentionTier) return false;
-  if (filter.createdBefore && record.createdAt >= filter.createdBefore) return false;
-  if (filter.createdAfter && record.createdAt <= filter.createdAfter) return false;
+  if (filter.retentionTier && record.retentionTier !== filter.retentionTier)
+    return false;
+  if (filter.createdBefore && record.createdAt >= filter.createdBefore)
+    return false;
+  if (filter.createdAfter && record.createdAt <= filter.createdAfter)
+    return false;
   return true;
 }
 
@@ -365,12 +465,19 @@ function matchesLearningFilter(
   if (filter.appId && record.appId !== filter.appId) return false;
   if (filter.domain && record.domain !== filter.domain) return false;
   if (filter.source && record.source !== filter.source) return false;
-  if (filter.decisionId && record.decisionId !== filter.decisionId) return false;
+  if (filter.decisionId && record.decisionId !== filter.decisionId)
+    return false;
   if (filter.thesisId && record.thesisId !== filter.thesisId) return false;
-  if (filter.regimeSnapshotId && record.regimeSnapshotId !== filter.regimeSnapshotId) return false;
+  if (
+    filter.regimeSnapshotId &&
+    record.regimeSnapshotId !== filter.regimeSnapshotId
+  )
+    return false;
   if (filter.venue && record.venue !== filter.venue) return false;
-  if (filter.createdBefore && (record.createdAt ?? "") >= filter.createdBefore) return false;
-  if (filter.createdAfter && (record.createdAt ?? "") <= filter.createdAfter) return false;
+  if (filter.createdBefore && (record.createdAt ?? "") >= filter.createdBefore)
+    return false;
+  if (filter.createdAfter && (record.createdAt ?? "") <= filter.createdAfter)
+    return false;
   return true;
 }
 

@@ -25,7 +25,11 @@ export interface TraceResult {
 /**
  * Trace a single step: canonicalize input and output, hash both.
  */
-function traceStep(stepName: string, input: unknown, output: unknown): StepTrace {
+function traceStep(
+  stepName: string,
+  input: unknown,
+  output: unknown,
+): StepTrace {
   const inputHash = hashSync(input);
   const outputHash = hashSync(output);
   return { step: stepName, inputHash, outputHash };
@@ -50,7 +54,10 @@ export interface StepDef {
  * Each step's input → output is canonicalized and hashed.
  * Returns the full trace with all step hashes.
  */
-export function traceExecution(steps: StepDef[], initialInput: unknown): TraceResult {
+export function traceExecution(
+  steps: StepDef[],
+  initialInput: unknown,
+): TraceResult {
   const stepTraces: StepTrace[] = [];
   let currentInput = initialInput;
 
@@ -61,8 +68,12 @@ export function traceExecution(steps: StepDef[], initialInput: unknown): TraceRe
     currentInput = output;
   }
 
-  const inputHash = stepTraces.length > 0 ? stepTraces[0].inputHash : hashSync(initialInput);
-  const outputHash = stepTraces.length > 0 ? stepTraces[stepTraces.length - 1].outputHash : hashSync(null);
+  const inputHash =
+    stepTraces.length > 0 ? stepTraces[0].inputHash : hashSync(initialInput);
+  const outputHash =
+    stepTraces.length > 0
+      ? stepTraces[stepTraces.length - 1].outputHash
+      : hashSync(null);
   const fingerprint = hashSync(stepTraces);
 
   return {

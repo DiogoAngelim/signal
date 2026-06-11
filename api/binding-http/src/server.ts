@@ -1,6 +1,6 @@
+import type { SignalRuntime } from "@signal/sdk-node";
 import fastify, { type FastifyInstance } from "fastify";
 import { registerSignalHttpRoutes } from "./routes";
-import type { SignalRuntime } from "@signal/runtime";
 
 export interface CreateSignalHttpServerOptions {
   logger?: boolean;
@@ -9,7 +9,7 @@ export interface CreateSignalHttpServerOptions {
 
 export function createSignalHttpServer(
   runtime: SignalRuntime,
-  options: CreateSignalHttpServerOptions = {}
+  options: CreateSignalHttpServerOptions = {},
 ): FastifyInstance {
   const app = fastify({ logger: options.logger ?? false });
   registerSignalHttpRoutes(app, runtime, { basePath: options.basePath });

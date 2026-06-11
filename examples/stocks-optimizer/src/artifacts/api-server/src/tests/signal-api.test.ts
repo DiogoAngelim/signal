@@ -1,21 +1,24 @@
 import assert from "node:assert/strict";
-import { createServer, type Server } from "node:http";
+import { type Server, createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import test from "node:test";
+import { validateSignalEnvironment } from "../config/signal-environment.js";
 import {
-  SignalEnvelopeSchema,
   type SignalEnvelope,
+  SignalEnvelopeSchema,
 } from "../schemas/signal-api.js";
+import { verifyWebhookSignatureWithSecrets } from "../security/signal-secrets.js";
 import {
+  resetSignalRateLimitersForTests,
   signIngestionPayload,
   signWebhookPayload,
-  resetSignalRateLimitersForTests,
 } from "../security/signal-security.js";
-import { verifyWebhookSignatureWithSecrets } from "../security/signal-secrets.js";
 import { buildSignalTrustMetadata } from "../services/signal-distribution.js";
 import { resetSignalServicesForTests } from "../services/signal-distribution.js";
-import { getSignalStore, resetSignalStoreForTests } from "../storage/signal-store.js";
-import { validateSignalEnvironment } from "../config/signal-environment.js";
+import {
+  getSignalStore,
+  resetSignalStoreForTests,
+} from "../storage/signal-store.js";
 
 process.env.NODE_ENV = "test";
 process.env.SIGNAL_API_KEYS = "test-key:reader|emitter|webhook_admin|auditor";
@@ -34,8 +37,8 @@ test.beforeEach(async () => {
   process.env.SIGNAL_API_RATE_LIMIT_MAX = "1000";
   process.env.SIGNAL_API_RATE_LIMIT_WINDOW_MS = "60000";
   process.env.SIGNAL_WEBHOOK_ALLOW_PRIVATE_TARGETS = "true";
-  delete process.env.SIGNAL_INGESTION_SIGNING_SECRET;
-  delete process.env.SIGNAL_REQUIRE_EMIT_SIGNATURE;
+  process.env.SIGNAL_INGESTION_SIGNING_SECRET = undefined;
+  process.env.SIGNAL_REQUIRE_EMIT_SIGNATURE = undefined;
   await resetSignalStoreForTests();
   resetSignalServicesForTests();
   resetSignalRateLimitersForTests();
@@ -51,12 +54,14 @@ test("signal schema strictly rejects unexpected fields", () => {
 });
 
 test("trust metadata makes confidence, risk, exposure, and actionability explicit", () => {
-  const trust = buildSignalTrustMetadata(sampleSignal({
-    kind: "risk_off",
-    status: "rejected",
-    risk: 91,
-    metrics: { calibratedConfidence: 52, dataFreshnessMs: 240_000 },
-  }));
+  const trust = buildSignalTrustMetadata(
+    sampleSignal({
+      kind: "risk_off",
+      status: "rejected",
+      risk: 91,
+      metrics: { calibratedConfidence: 52, dataFreshnessMs: 240_000 },
+    }),
+  );
 
   assert.equal(trust.rawConfidence, 74);
   assert.equal(trust.calibratedConfidence, 52);
@@ -70,7 +75,7 @@ test("trust metadata makes confidence, risk, exposure, and actionability explici
 test("REST signal routes require API key auth", async () => {
   await withServer(async (baseUrl) => {
     const response = await fetch(`${baseUrl}/api/v1/signals`);
-    const body = await response.json() as any;
+    const body = (await response.json()) as any;
 
     assert.equal(response.status, 401);
     assert.equal(body.error.code, "missing_api_key");
@@ -100,12 +105,19 @@ test("scoped API keys can be created, used, expired, and revoked without exposin
     assert.deepEqual(created.body.apiKey.scopes, ["signals:read"]);
     assert.equal(JSON.stringify(created.body).includes("secretHash"), false);
 
-    const listed = await apiFetch(baseUrl, "/api/v1/admin/api-keys", { apiKey: "admin-test" });
+    const listed = await apiFetch(baseUrl, "/api/v1/admin/api-keys", {
+      apiKey: "admin-test",
+    });
     assert.equal(listed.status, 200);
     assert.equal(listed.body.data.length, 1);
-    assert.equal(JSON.stringify(listed.body).includes(created.body.secret), false);
+    assert.equal(
+      JSON.stringify(listed.body).includes(created.body.secret),
+      false,
+    );
 
-    const read = await apiFetch(baseUrl, "/api/v1/signals", { apiKey: created.body.secret });
+    const read = await apiFetch(baseUrl, "/api/v1/signals", {
+      apiKey: created.body.secret,
+    });
     assert.equal(read.status, 200);
 
     const forbidden = await apiFetch(baseUrl, "/api/v1/signals/emit", {
@@ -126,17 +138,25 @@ test("scoped API keys can be created, used, expired, and revoked without exposin
       },
     });
     assert.equal(expired.status, 201);
-    const expiredRead = await apiFetch(baseUrl, "/api/v1/signals", { apiKey: expired.body.secret });
+    const expiredRead = await apiFetch(baseUrl, "/api/v1/signals", {
+      apiKey: expired.body.secret,
+    });
     assert.equal(expiredRead.status, 401);
 
-    const revoked = await apiFetch(baseUrl, `/api/v1/admin/api-keys/${created.body.apiKey.id}/revoke`, {
-      apiKey: "admin-test",
-      method: "POST",
-    });
+    const revoked = await apiFetch(
+      baseUrl,
+      `/api/v1/admin/api-keys/${created.body.apiKey.id}/revoke`,
+      {
+        apiKey: "admin-test",
+        method: "POST",
+      },
+    );
     assert.equal(revoked.status, 200);
     assert.ok(revoked.body.revokedAt);
 
-    const revokedRead = await apiFetch(baseUrl, "/api/v1/signals", { apiKey: created.body.secret });
+    const revokedRead = await apiFetch(baseUrl, "/api/v1/signals", {
+      apiKey: created.body.secret,
+    });
     assert.equal(revokedRead.status, 401);
   });
 });
@@ -155,7 +175,10 @@ test("REST emit, list, latest, get, audit, and idempotency duplicate handling wo
     assert.equal(emitted.body.signal.id, signal.id);
     assert.equal(emitted.body.trust.actionability, "actionable");
 
-    const latest = await apiFetch(baseUrl, "/api/v1/signals/latest?symbol=MSFT");
+    const latest = await apiFetch(
+      baseUrl,
+      "/api/v1/signals/latest?symbol=MSFT",
+    );
     assert.equal(latest.status, 200);
     assert.equal(latest.body.signal.symbol, "MSFT");
 
@@ -177,8 +200,12 @@ test("REST emit, list, latest, get, audit, and idempotency duplicate handling wo
 
     const audit = await apiFetch(baseUrl, "/api/v1/audit/signals");
     assert.equal(audit.status, 200);
-    assert.ok(audit.body.data.some((entry: any) => entry.action === "signal.emitted"));
-    assert.ok(audit.body.data.some((entry: any) => entry.action === "signal.duplicate"));
+    assert.ok(
+      audit.body.data.some((entry: any) => entry.action === "signal.emitted"),
+    );
+    assert.ok(
+      audit.body.data.some((entry: any) => entry.action === "signal.duplicate"),
+    );
   });
 });
 
@@ -246,14 +273,17 @@ test("rate limiting protects authenticated routes", async () => {
 test("SSE streams authenticated signal updates with filters", async () => {
   await withServer(async (baseUrl) => {
     const controller = new AbortController();
-    const stream = await fetch(`${baseUrl}/api/v1/signals/stream?apiKey=test-key&symbol=TSLA`, {
-      signal: controller.signal,
-    });
+    const stream = await fetch(
+      `${baseUrl}/api/v1/signals/stream?apiKey=test-key&symbol=TSLA`,
+      {
+        signal: controller.signal,
+      },
+    );
     assert.equal(stream.status, 200);
     assert.ok(stream.body);
 
     const reader = stream.body.getReader();
-    const readPromise = readUntil(reader, "\"symbol\":\"TSLA\"");
+    const readPromise = readUntil(reader, '"symbol":"TSLA"');
 
     await apiFetch(baseUrl, "/api/v1/signals/emit", {
       method: "POST",
@@ -286,7 +316,10 @@ test("webhooks block SSRF destinations unless explicitly enabled for development
 });
 
 test("webhooks send signed payloads and retry failed deliveries", async () => {
-  const received: Array<{ body: string; headers: Record<string, string | string[] | undefined> }> = [];
+  const received: Array<{
+    body: string;
+    headers: Record<string, string | string[] | undefined>;
+  }> = [];
   const hookServer = createServer((req, res) => {
     const chunks: Buffer[] = [];
     req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
@@ -324,7 +357,9 @@ test("webhooks send signed payloads and retry failed deliveries", async () => {
       const second = received[1];
       const timestamp = String(second.headers["x-stocks-optimizer-timestamp"]);
       const event = String(second.headers["x-stocks-optimizer-event"]);
-      const deliveryId = String(second.headers["x-stocks-optimizer-delivery-id"]);
+      const deliveryId = String(
+        second.headers["x-stocks-optimizer-delivery-id"],
+      );
       const expected = signWebhookPayload({
         secret: "webhook-secret",
         timestamp,
@@ -362,10 +397,14 @@ test("webhook secrets rotate with a previous-secret grace period", async () => {
       });
       assert.equal(created.status, 201);
 
-      const rotated = await apiFetch(baseUrl, `/api/v1/webhooks/${created.body.webhook.id}/rotate-secret`, {
-        method: "POST",
-        body: { graceSeconds: 60 },
-      });
+      const rotated = await apiFetch(
+        baseUrl,
+        `/api/v1/webhooks/${created.body.webhook.id}/rotate-secret`,
+        {
+          method: "POST",
+          body: { graceSeconds: 60 },
+        },
+      );
       assert.equal(rotated.status, 200);
       assert.notEqual(rotated.body.secret, "old-webhook-secret");
       assert.ok(rotated.body.previousSecretGraceExpiresAt);
@@ -389,34 +428,43 @@ test("webhook secrets rotate with a previous-secret grace period", async () => {
         body,
       });
 
-      assert.equal(verifyWebhookSignatureWithSecrets({
-        currentSecret: rotated.body.secret,
-        previousSecret: "old-webhook-secret",
-        previousSecretExpiresAt: rotated.body.previousSecretGraceExpiresAt,
-        timestamp,
-        event,
-        deliveryId,
-        body,
-        signature: oldSignature,
-      }), true);
-      assert.equal(verifyWebhookSignatureWithSecrets({
-        currentSecret: rotated.body.secret,
-        previousSecret: "old-webhook-secret",
-        previousSecretExpiresAt: new Date(Date.now() - 1_000).toISOString(),
-        timestamp,
-        event,
-        deliveryId,
-        body,
-        signature: oldSignature,
-      }), false);
-      assert.equal(verifyWebhookSignatureWithSecrets({
-        currentSecret: rotated.body.secret,
-        timestamp,
-        event,
-        deliveryId,
-        body,
-        signature: newSignature,
-      }), true);
+      assert.equal(
+        verifyWebhookSignatureWithSecrets({
+          currentSecret: rotated.body.secret,
+          previousSecret: "old-webhook-secret",
+          previousSecretExpiresAt: rotated.body.previousSecretGraceExpiresAt,
+          timestamp,
+          event,
+          deliveryId,
+          body,
+          signature: oldSignature,
+        }),
+        true,
+      );
+      assert.equal(
+        verifyWebhookSignatureWithSecrets({
+          currentSecret: rotated.body.secret,
+          previousSecret: "old-webhook-secret",
+          previousSecretExpiresAt: new Date(Date.now() - 1_000).toISOString(),
+          timestamp,
+          event,
+          deliveryId,
+          body,
+          signature: oldSignature,
+        }),
+        false,
+      );
+      assert.equal(
+        verifyWebhookSignatureWithSecrets({
+          currentSecret: rotated.body.secret,
+          timestamp,
+          event,
+          deliveryId,
+          body,
+          signature: newSignature,
+        }),
+        true,
+      );
     });
   } finally {
     await closeServer(hookServer);
@@ -452,7 +500,12 @@ test("webhook queue dead-letters exhausted jobs and supports redrive", async () 
       });
       assert.equal(emitted.status, 202);
 
-      await waitFor(async () => (await getSignalStore().queueStats("signal-webhooks")).deadLetter === 1, 2_000);
+      await waitFor(
+        async () =>
+          (await getSignalStore().queueStats("signal-webhooks")).deadLetter ===
+          1,
+        2_000,
+      );
       const stats = await getSignalStore().queueStats("signal-webhooks");
       assert.equal(stats.deadLetter, 1);
 
@@ -497,14 +550,26 @@ test("unsafe production signal API config is rejected by environment validation"
     process.env.NODE_ENV = "production";
     process.env.SIGNAL_STORAGE_DRIVER = "memory";
     process.env.SIGNAL_API_ALLOW_DEV_KEY = "true";
-    delete process.env.SIGNAL_SECRET_ENCRYPTION_KEY;
+    process.env.SIGNAL_SECRET_ENCRYPTION_KEY = undefined;
     process.env.SIGNAL_API_KEYS = "plain:admin";
 
     const report = validateSignalEnvironment();
     assert.equal(report.ok, false);
-    assert.ok(report.errors.some((error) => error.includes("SIGNAL_STORAGE_DRIVER=postgres")));
-    assert.ok(report.errors.some((error) => error.includes("SIGNAL_SECRET_ENCRYPTION_KEY")));
-    assert.ok(report.errors.some((error) => error.includes("plaintext SIGNAL_API_KEYS")));
+    assert.ok(
+      report.errors.some((error) =>
+        error.includes("SIGNAL_STORAGE_DRIVER=postgres"),
+      ),
+    );
+    assert.ok(
+      report.errors.some((error) =>
+        error.includes("SIGNAL_SECRET_ENCRYPTION_KEY"),
+      ),
+    );
+    assert.ok(
+      report.errors.some((error) =>
+        error.includes("plaintext SIGNAL_API_KEYS"),
+      ),
+    );
   } finally {
     process.env.NODE_ENV = previousNodeEnv;
     restoreEnv("SIGNAL_STORAGE_DRIVER", previousStorageDriver);
@@ -596,11 +661,14 @@ function serverBaseUrl(server: Server) {
 
 async function closeServer(server: Server) {
   await new Promise<void>((resolve, reject) => {
-    server.close((error) => error ? reject(error) : resolve());
+    server.close((error) => (error ? reject(error) : resolve()));
   });
 }
 
-async function readUntil(reader: ReadableStreamDefaultReader<Uint8Array>, needle: string) {
+async function readUntil(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  needle: string,
+) {
   const decoder = new TextDecoder();
   let text = "";
   const deadline = Date.now() + 3000;
@@ -620,7 +688,10 @@ async function readUntil(reader: ReadableStreamDefaultReader<Uint8Array>, needle
   throw new Error(`Timed out waiting for ${needle}. Received: ${text}`);
 }
 
-async function waitFor(predicate: () => boolean | Promise<boolean>, timeoutMs: number) {
+async function waitFor(
+  predicate: () => boolean | Promise<boolean>,
+  timeoutMs: number,
+) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (await predicate()) return;
@@ -658,7 +729,8 @@ function sampleSignal(overrides: Partial<SignalEnvelope> = {}): SignalEnvelope {
     sizingMode: "micro",
     maxExposure: 6,
     reason: "Breakout confirmed with controlled risk.",
-    explanation: "The breakout has aligned confidence, trust, and fresh market data.",
+    explanation:
+      "The breakout has aligned confidence, trust, and fresh market data.",
     metrics: { calibratedConfidence: 78, dataFreshnessMs: 10 },
     modules: {
       discovery: { score: 82 },

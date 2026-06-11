@@ -217,7 +217,13 @@ export type ExecutionOrderRecord = {
 export type DecisionExecutionRecord = {
   decisionId: string;
   clientOrderId?: string;
-  status: "approved" | "rejected" | "attempted" | "accepted" | "failed" | "cancelled";
+  status:
+    | "approved"
+    | "rejected"
+    | "attempted"
+    | "accepted"
+    | "failed"
+    | "cancelled";
   reasons: string[];
   decision: BinanceExecutionDecision;
   createdAt: string;

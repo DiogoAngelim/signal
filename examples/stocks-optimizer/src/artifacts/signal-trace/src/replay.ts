@@ -7,7 +7,12 @@
  * or different ordering. No fallback.
  */
 
-import { type StepTrace, type TraceResult, type StepDef, traceExecution } from "./trace.js";
+import {
+  type StepDef,
+  type StepTrace,
+  type TraceResult,
+  traceExecution,
+} from "./trace.js";
 
 export interface ReplayResult {
   pass: boolean;
@@ -31,7 +36,10 @@ export interface StepComparison {
  * Compare two traces step-by-step.
  * Hard stop on any mismatch — no fallback, no partial pass.
  */
-export function compareTraces(original: TraceResult, replay: TraceResult): ReplayResult {
+export function compareTraces(
+  original: TraceResult,
+  replay: TraceResult,
+): ReplayResult {
   const stepComparisons: StepComparison[] = [];
 
   // Check step count

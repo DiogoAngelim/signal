@@ -75,9 +75,13 @@ function applyQuery(records: CalibrationInput[], query: CalibrationQuery) {
   const from = dateValue(query.from);
   const to = dateValue(query.to);
   const minConfidence =
-    query.minConfidence == null ? undefined : normalizeConfidence(query.minConfidence);
+    query.minConfidence == null
+      ? undefined
+      : normalizeConfidence(query.minConfidence);
   const maxConfidence =
-    query.maxConfidence == null ? undefined : normalizeConfidence(query.maxConfidence);
+    query.maxConfidence == null
+      ? undefined
+      : normalizeConfidence(query.maxConfidence);
   const limit = positiveLimit(query.limit);
   const filtered = records.filter((record) => {
     const timestamp = dateValue(record.timestamp);
@@ -88,7 +92,10 @@ function applyQuery(records: CalibrationInput[], query: CalibrationQuery) {
     const confidenceMatches =
       (minConfidence == null || confidence >= minConfidence) &&
       (maxConfidence == null || confidence <= maxConfidence);
-    const metadataMatches = metadataMatchesQuery(record.metadata, query.metadata);
+    const metadataMatches = metadataMatchesQuery(
+      record.metadata,
+      query.metadata,
+    );
     return timestampMatches && confidenceMatches && metadataMatches;
   });
   return limit == null ? filtered : filtered.slice(0, limit);
@@ -118,7 +125,9 @@ function positiveLimit(value: number | undefined) {
 
 function normalizeConfidence(value: number) {
   if (!Number.isFinite(value)) return 0;
-  return value <= 1 ? Math.min(100, Math.max(0, value * 100)) : Math.min(100, Math.max(0, value));
+  return value <= 1
+    ? Math.min(100, Math.max(0, value * 100))
+    : Math.min(100, Math.max(0, value));
 }
 
 function cloneInput(input: CalibrationInput) {

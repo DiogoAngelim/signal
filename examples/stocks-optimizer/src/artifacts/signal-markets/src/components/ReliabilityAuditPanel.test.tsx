@@ -1,9 +1,11 @@
+import type { MarketReliabilityResult } from "@/lib/market-reliability";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import ReliabilityAuditPanel from "./ReliabilityAuditPanel";
-import type { MarketReliabilityResult } from "@/lib/market-reliability";
 
-function reliability(overrides: Partial<MarketReliabilityResult> = {}): MarketReliabilityResult {
+function reliability(
+  overrides: Partial<MarketReliabilityResult> = {},
+): MarketReliabilityResult {
   return {
     score: 37,
     status: "degraded",
@@ -40,7 +42,11 @@ function reliability(overrides: Partial<MarketReliabilityResult> = {}): MarketRe
       syntheticDataDetected: false,
       lastSuccessfulSync: "2026-05-28T14:00:00.000Z",
       defensiveMode: true,
-      primaryIssues: ["Venue closed", "Low ticker coverage", "Missing synchronized samples"],
+      primaryIssues: [
+        "Venue closed",
+        "Low ticker coverage",
+        "Missing synchronized samples",
+      ],
       explanation: "Market data is incomplete or stale.",
     },
     ...overrides,
@@ -49,7 +55,9 @@ function reliability(overrides: Partial<MarketReliabilityResult> = {}): MarketRe
 
 describe("ReliabilityAuditPanel", () => {
   it("renders degraded reliability diagnostics", () => {
-    const html = renderToStaticMarkup(<ReliabilityAuditPanel reliability={reliability()} />);
+    const html = renderToStaticMarkup(
+      <ReliabilityAuditPanel reliability={reliability()} />,
+    );
 
     expect(html).toContain("Data reliability audit");
     expect(html).toContain("37 / 100");
@@ -85,9 +93,17 @@ describe("ReliabilityAuditPanel", () => {
       />,
     );
     const invalid = renderToStaticMarkup(
-      <ReliabilityAuditPanel reliability={reliability({ status: "invalid", score: 0, confidenceCap: 20 })} />,
+      <ReliabilityAuditPanel
+        reliability={reliability({
+          status: "invalid",
+          score: 0,
+          confidenceCap: 20,
+        })}
+      />,
     );
-    const empty = renderToStaticMarkup(<ReliabilityAuditPanel reliability={null} />);
+    const empty = renderToStaticMarkup(
+      <ReliabilityAuditPanel reliability={null} />,
+    );
     const partial = renderToStaticMarkup(
       <ReliabilityAuditPanel
         reliability={reliability({

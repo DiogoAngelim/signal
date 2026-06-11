@@ -1,12 +1,9 @@
 import type {
-  SignalErrorEnvelope,
-  SignalResultMeta,
-} from "@signal/protocol";
-import type {
   IdempotencyRecord,
   IdempotencyReservation,
   StoragePort,
 } from "@signal/ports";
+import type { SignalErrorEnvelope, SignalResultMeta } from "@signal/protocol";
 
 export function createMemoryIdempotencyStore(): StoragePort {
   const records = new Map<string, IdempotencyRecord>();
@@ -43,7 +40,9 @@ export function createMemoryIdempotencyStore(): StoragePort {
       return { state: "reserved", record };
     },
     async complete(input): Promise<void> {
-      const record = records.get(keyFor(input.operationName, input.idempotencyKey));
+      const record = records.get(
+        keyFor(input.operationName, input.idempotencyKey),
+      );
       if (!record || record.payloadFingerprint !== input.payloadFingerprint) {
         return;
       }
@@ -55,7 +54,9 @@ export function createMemoryIdempotencyStore(): StoragePort {
       record.updatedAt = new Date().toISOString();
     },
     async fail(input): Promise<void> {
-      const record = records.get(keyFor(input.operationName, input.idempotencyKey));
+      const record = records.get(
+        keyFor(input.operationName, input.idempotencyKey),
+      );
       if (!record || record.payloadFingerprint !== input.payloadFingerprint) {
         return;
       }

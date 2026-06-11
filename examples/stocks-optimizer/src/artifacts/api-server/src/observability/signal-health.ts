@@ -21,7 +21,10 @@ export async function buildReadinessPayload() {
   const storageHealth = await store.healthCheck();
   const queue = await store.queueStats();
   const production = process.env.NODE_ENV === "production";
-  const authReady = !production || Boolean(process.env.SIGNAL_BOOTSTRAP_ADMIN_KEY_HASH) || stats.apiKeys > 0;
+  const authReady =
+    !production ||
+    Boolean(process.env.SIGNAL_BOOTSTRAP_ADMIN_KEY_HASH) ||
+    stats.apiKeys > 0;
   const queueReady = queue.queued < environment.settings.queueMaxDepth;
   const ready = environment.ok && storageHealth.ok && authReady && queueReady;
 
@@ -36,7 +39,8 @@ export async function buildReadinessPayload() {
       queueWithinThreshold: queueReady,
       productionSafeDefaults: environment.ok,
       environment,
-      ingestionSignatureConfigured: !config.requireEmitSignature || Boolean(config.signatureSecret),
+      ingestionSignatureConfigured:
+        !config.requireEmitSignature || Boolean(config.signatureSecret),
     },
     stats,
   };

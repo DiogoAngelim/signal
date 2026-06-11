@@ -1,4 +1,3 @@
-
 export type DiscoveryStatus =
   | "none"
   | "detected"
@@ -8,7 +7,6 @@ export type DiscoveryStatus =
   | "sized"
   | "active"
   | "closed";
-
 
 export type DiscoveryEvidenceDirection = "support" | "contradict" | "neutral";
 
@@ -334,13 +332,6 @@ const STATUS_RANK: Record<DiscoveryStatus, number> = {
 
 const DEFAULT_CREATED_AT = "1970-01-01T00:00:00.000Z";
 
-
-
-
-
-
-
-
 export function discover(input: DiscoveryInput): DiscoveryResult {
   const source = (input ?? { state: {} }) as DiscoveryInput;
   const computation = compute(source);
@@ -379,8 +370,12 @@ function compute(input: DiscoveryInput): DiscoveryComputation {
   const state = plainRecord(input.state) ? input.state : {};
   const candidates = normalizeCandidates(input.candidates);
   const evidence = normalizeEvidence(input.evidence);
-  const support = evidence.filter((item) => item.direction === "support" && item.observed && !item.missing);
-  const contradiction = evidence.filter((item) => item.direction === "contradict" && item.observed && !item.missing);
+  const support = evidence.filter(
+    (item) => item.direction === "support" && item.observed && !item.missing,
+  );
+  const contradiction = evidence.filter(
+    (item) => item.direction === "contradict" && item.observed && !item.missing,
+  );
   const missingEvidence = unique([
     ...missingEvidenceForState(state),
     ...missingEvidenceForCandidates(candidates),
@@ -389,47 +384,69 @@ function compute(input: DiscoveryInput): DiscoveryComputation {
   ]);
   const contextMatch = compareContext(state, input.historicalStates);
   const novelty = noveltyFromContext(contextMatch, input.historicalStates);
-  const outcomeRecords = normalizeOutcomes(input.priorOutcomes, profileForState(state), candidates, evidence);
+  const outcomeRecords = normalizeOutcomes(
+    input.priorOutcomes,
+    profileForState(state),
+    candidates,
+    evidence,
+  );
   const memory = summarizeMemory(outcomeRecords);
-  const candidateStrength = candidates.length ? average(candidates.map((candidate) => candidate.scoreValue)) : 0;
-  const evidenceScore = support.length ? weightedAverage(support.map((item) => [item.contribution, item.weight])) : 0;
-  const contradictionScore = contradiction.length ? weightedAverage(contradiction.map((item) => [item.contribution, item.weight])) : 0;
+  const candidateStrength = candidates.length
+    ? average(candidates.map((candidate) => candidate.scoreValue))
+    : 0;
+  const evidenceScore = support.length
+    ? weightedAverage(support.map((item) => [item.contribution, item.weight]))
+    : 0;
+  const contradictionScore = contradiction.length
+    ? weightedAverage(
+        contradiction.map((item) => [item.contribution, item.weight]),
+      )
+    : 0;
   const constraintScore = constraintsScore(input.constraints);
   const missingPenalty = clamp(missingEvidence.length * 7);
   const noveltyPenalty = novelty > 70 ? (novelty - 70) * 0.6 : 0;
-  const memoryPenalty = memory.sampleSize > 0 && memory.failureRatio > memory.successRatio
-    ? (memory.failureRatio - memory.successRatio) * 0.35
-    : 0;
+  const memoryPenalty =
+    memory.sampleSize > 0 && memory.failureRatio > memory.successRatio
+      ? (memory.failureRatio - memory.successRatio) * 0.35
+      : 0;
   const regimeCoverage = regimeCoverageFor(state, input.historicalStates);
-  const regimeCoverageSignal = regimeCoverage.hasSignal ? regimeCoverage.score : 50;
-  const confidence = roundScore(clamp(
-    candidateStrength * 0.28 +
-      evidenceScore * 0.34 +
-      memory.reliability * 0.16 +
-      (100 - novelty) * 0.12 +
-      constraintScore * 0.1 -
-      contradictionScore * 0.28 -
-      missingPenalty -
-      noveltyPenalty -
-      memoryPenalty +
-      (regimeCoverageSignal - 50) * 0.06,
-  ));
-  const trust = roundScore(clamp(
-    memory.reliability * 0.34 +
-      constraintScore * 0.24 +
-      (100 - novelty) * 0.18 +
-      evidenceScore * 0.24 -
-      contradictionScore * 0.16 -
-      missingPenalty * 0.45 +
-      (regimeCoverageSignal - 50) * 0.05,
-  ));
-  const fragility = roundScore(clamp(
-    contradictionScore * 0.34 +
-      novelty * 0.24 +
-      missingPenalty * 0.22 +
-      (100 - constraintScore) * 0.2 +
-      Math.max(0, 50 - regimeCoverageSignal) * 0.12,
-  ));
+  const regimeCoverageSignal = regimeCoverage.hasSignal
+    ? regimeCoverage.score
+    : 50;
+  const confidence = roundScore(
+    clamp(
+      candidateStrength * 0.28 +
+        evidenceScore * 0.34 +
+        memory.reliability * 0.16 +
+        (100 - novelty) * 0.12 +
+        constraintScore * 0.1 -
+        contradictionScore * 0.28 -
+        missingPenalty -
+        noveltyPenalty -
+        memoryPenalty +
+        (regimeCoverageSignal - 50) * 0.06,
+    ),
+  );
+  const trust = roundScore(
+    clamp(
+      memory.reliability * 0.34 +
+        constraintScore * 0.24 +
+        (100 - novelty) * 0.18 +
+        evidenceScore * 0.24 -
+        contradictionScore * 0.16 -
+        missingPenalty * 0.45 +
+        (regimeCoverageSignal - 50) * 0.05,
+    ),
+  );
+  const fragility = roundScore(
+    clamp(
+      contradictionScore * 0.34 +
+        novelty * 0.24 +
+        missingPenalty * 0.22 +
+        (100 - constraintScore) * 0.2 +
+        Math.max(0, 50 - regimeCoverageSignal) * 0.12,
+    ),
+  );
   const lifecycle = lifecycleFor({
     candidates,
     confidence,
@@ -497,7 +514,9 @@ function compute(input: DiscoveryInput): DiscoveryComputation {
   };
 }
 
-function buildOpportunities(computation: DiscoveryComputation): DiscoveredOpportunity[] {
+function buildOpportunities(
+  computation: DiscoveryComputation,
+): DiscoveredOpportunity[] {
   if (computation.lifecycle.status === "none") return [];
 
   const candidates = computation.candidates.length
@@ -506,7 +525,10 @@ function buildOpportunities(computation: DiscoveryComputation): DiscoveredOpport
 
   return candidates
     .map((candidate) => opportunityFromCandidate(candidate, computation))
-    .sort((left, right) => right.confidence - left.confidence || left.id.localeCompare(right.id));
+    .sort(
+      (left, right) =>
+        right.confidence - left.confidence || left.id.localeCompare(right.id),
+    );
 }
 
 function opportunityFromCandidate(
@@ -514,14 +536,24 @@ function opportunityFromCandidate(
   computation: DiscoveryComputation,
 ): DiscoveredOpportunity {
   const support = evidenceForCandidate(computation.support, candidate);
-  const contradiction = evidenceForCandidate(computation.contradiction, candidate);
-  const strength = roundScore(clamp((candidate.scoreValue + computation.evidenceScore) / 2));
-  const confidence = roundScore(clamp(
-    computation.confidence * 0.72 + candidate.confidenceValue * 0.18 + strength * 0.1,
-  ));
-  const status = candidate.statusValue && candidate.statusValue !== "none"
-    ? candidate.statusValue
-    : computation.lifecycle.status;
+  const contradiction = evidenceForCandidate(
+    computation.contradiction,
+    candidate,
+  );
+  const strength = roundScore(
+    clamp((candidate.scoreValue + computation.evidenceScore) / 2),
+  );
+  const confidence = roundScore(
+    clamp(
+      computation.confidence * 0.72 +
+        candidate.confidenceValue * 0.18 +
+        strength * 0.1,
+    ),
+  );
+  const status =
+    candidate.statusValue && candidate.statusValue !== "none"
+      ? candidate.statusValue
+      : computation.lifecycle.status;
 
   return {
     id: candidate.id,
@@ -555,7 +587,9 @@ function opportunityFromCandidate(
   };
 }
 
-function syntheticCandidate(computation: DiscoveryComputation): NormalizedCandidate {
+function syntheticCandidate(
+  computation: DiscoveryComputation,
+): NormalizedCandidate {
   return {
     id: computation.input.subjectId ?? "discovery:aggregate",
     label: computation.input.subjectId ?? "Aggregate opportunity",
@@ -568,71 +602,110 @@ function syntheticCandidate(computation: DiscoveryComputation): NormalizedCandid
   };
 }
 
-function normalizeCandidates(candidates: DiscoveryCandidate[] | undefined): NormalizedCandidate[] {
+function normalizeCandidates(
+  candidates: DiscoveryCandidate[] | undefined,
+): NormalizedCandidate[] {
   return array(candidates).map((candidate, index) => {
-    const id = stringValue(candidate.id ?? candidate.candidateId ?? candidate.subjectId) ?? `candidate:${index + 1}`;
-    const scoreValue = score(firstNumber(
-      candidate.score,
-      candidate.strength,
-      candidate.maturity,
-      candidate.readiness,
-      candidate.confidence,
-    ), 0);
-    const confidenceValue = score(firstNumber(candidate.confidence, candidate.trust, scoreValue), scoreValue);
+    const id =
+      stringValue(
+        candidate.id ?? candidate.candidateId ?? candidate.subjectId,
+      ) ?? `candidate:${index + 1}`;
+    const scoreValue = score(
+      firstNumber(
+        candidate.score,
+        candidate.strength,
+        candidate.maturity,
+        candidate.readiness,
+        candidate.confidence,
+      ),
+      0,
+    );
+    const confidenceValue = score(
+      firstNumber(candidate.confidence, candidate.trust, scoreValue),
+      scoreValue,
+    );
     const previousScoreValue = optionalScore(candidate.previousScore);
-    const velocityValue = score(firstNumber(
-      candidate.velocity,
-      previousScoreValue == null ? undefined : scoreValue - previousScoreValue,
-    ), 0);
-    const persistenceValue = score(candidate.persistence, candidate.status === "active" ? 80 : 50);
+    const velocityValue = score(
+      firstNumber(
+        candidate.velocity,
+        previousScoreValue == null
+          ? undefined
+          : scoreValue - previousScoreValue,
+      ),
+      0,
+    );
+    const persistenceValue = score(
+      candidate.persistence,
+      candidate.status === "active" ? 80 : 50,
+    );
 
     return {
       ...candidate,
       id,
-      
+
       label: stringValue(candidate.label ?? candidate.kind ?? id) ?? id,
       scoreValue,
       confidenceValue,
       previousScoreValue,
       velocityValue,
       persistenceValue,
-      statusValue: normalizeStatus(candidate.lifecycleStatus ?? candidate.status),
+      statusValue: normalizeStatus(
+        candidate.lifecycleStatus ?? candidate.status,
+      ),
     };
   });
 }
 
-function normalizeEvidence(evidence: DiscoveryEvidence[] | undefined): NormalizedEvidence[] {
-  return array(evidence).map((item, index) => {
-    const id = stringValue(item.id) ?? `evidence:${index + 1}`;
-    
-    const label = stringValue(item.label ?? item.name ?? item.description ?? id) ?? id;
-    const strength = score(firstNumber(item.strength, item.score, item.confidence), 50);
-    const confidence = score(item.confidence, 60);
-    const weight = score(item.weight, 1) / 100 || 0.01;
-    const direction = directionFor(item);
-    const contribution = roundScore(clamp(strength * 0.7 + confidence * 0.3));
+function normalizeEvidence(
+  evidence: DiscoveryEvidence[] | undefined,
+): NormalizedEvidence[] {
+  return array(evidence)
+    .map((item, index) => {
+      const id = stringValue(item.id) ?? `evidence:${index + 1}`;
 
-    return {
-      id,
-      label,
-      direction,
-      group: stringValue(item.group ?? item.source) ?? "evidence",
-      strength,
-      confidence,
-      weight,
-      contribution,
-      reason: stringValue(item.description) ?? `${label} contributes ${contribution}/100 as ${direction} evidence.`,
-      candidateId: stringValue(item.candidateId),
-      observed: item.observed !== false,
-      missing: item.missing === true || item.observed === false,
-      predictive: item.predictive === true,
-      misleading: item.misleading === true,
-    };
-  }).sort((left, right) => right.contribution - left.contribution || left.id.localeCompare(right.id));
+      const label =
+        stringValue(item.label ?? item.name ?? item.description ?? id) ?? id;
+      const strength = score(
+        firstNumber(item.strength, item.score, item.confidence),
+        50,
+      );
+      const confidence = score(item.confidence, 60);
+      const weight = score(item.weight, 1) / 100 || 0.01;
+      const direction = directionFor(item);
+      const contribution = roundScore(clamp(strength * 0.7 + confidence * 0.3));
+
+      return {
+        id,
+        label,
+        direction,
+        group: stringValue(item.group ?? item.source) ?? "evidence",
+        strength,
+        confidence,
+        weight,
+        contribution,
+        reason:
+          stringValue(item.description) ??
+          `${label} contributes ${contribution}/100 as ${direction} evidence.`,
+        candidateId: stringValue(item.candidateId),
+        observed: item.observed !== false,
+        missing: item.missing === true || item.observed === false,
+        predictive: item.predictive === true,
+        misleading: item.misleading === true,
+      };
+    })
+    .sort(
+      (left, right) =>
+        right.contribution - left.contribution ||
+        left.id.localeCompare(right.id),
+    );
 }
 
 function directionFor(item: DiscoveryEvidence): DiscoveryEvidenceDirection {
-  if (item.direction === "support" || item.direction === "contradict" || item.direction === "neutral") {
+  if (
+    item.direction === "support" ||
+    item.direction === "contradict" ||
+    item.direction === "neutral"
+  ) {
     return item.direction;
   }
   const strength = Number(item.strength ?? item.score);
@@ -647,18 +720,26 @@ function compareContext(
   const current = profileForState(state);
   return array(historicalStates)
     .map((item, index) => {
-      const similarity = roundScore(similarityBetween(current, profileForState(item.state ?? {})));
+      const similarity = roundScore(
+        similarityBetween(current, profileForState(item.state ?? {})),
+      );
       return {
         id: stringValue(item.id) ?? `context:${index + 1}`,
-        label: stringValue(item.label ?? item.domain ?? item.id) ?? `Context ${index + 1}`,
+        label:
+          stringValue(item.label ?? item.domain ?? item.id) ??
+          `Context ${index + 1}`,
         similarity,
         novelty: roundScore(100 - similarity),
-        reason: similarity >= 70
-          ? "Current state is well represented by this prior context."
-          : "Current state only partially matches this prior context.",
+        reason:
+          similarity >= 70
+            ? "Current state is well represented by this prior context."
+            : "Current state only partially matches this prior context.",
       };
     })
-    .sort((left, right) => right.similarity - left.similarity || left.id.localeCompare(right.id))
+    .sort(
+      (left, right) =>
+        right.similarity - left.similarity || left.id.localeCompare(right.id),
+    )
     .slice(0, 5);
 }
 
@@ -667,7 +748,7 @@ function noveltyFromContext(
   historicalStates: DiscoveryHistoricalState[] | undefined,
 ) {
   if (!array(historicalStates).length) return 100;
-  
+
   return roundScore(100 - (matches[0]?.similarity ?? 0));
 }
 
@@ -684,31 +765,49 @@ function normalizeOutcomes(
     .map((outcome, index) => {
       const profile = profileForState(outcome.state ?? {});
       for (const item of array(outcome.evidence)) {
-        profile.set(`evidence:${stringValue(item.label ?? item.name ?? item.id) ?? "unknown"}`, true);
+        profile.set(
+          `evidence:${stringValue(item.label ?? item.name ?? item.id) ?? "unknown"}`,
+          true,
+        );
       }
       if (outcome.candidateId && candidateIds.has(outcome.candidateId)) {
         profile.set(`candidate:${outcome.candidateId}`, true);
       }
       for (const label of evidenceLabels) {
-        if (array(outcome.evidence).some((item) => stringValue(item.label ?? item.name ?? item.id) === label)) {
+        if (
+          array(outcome.evidence).some(
+            (item) => stringValue(item.label ?? item.name ?? item.id) === label,
+          )
+        ) {
           profile.set(`current-evidence:${label}`, true);
         }
       }
 
       return {
-        id: stringValue(outcome.id ?? outcome.candidateId) ?? `outcome:${index + 1}`,
+        id:
+          stringValue(outcome.id ?? outcome.candidateId) ??
+          `outcome:${index + 1}`,
         profile,
         label: outcomeLabel(outcome),
-        evidenceLabels: array(outcome.evidence).map((item) => stringValue(item.label ?? item.name ?? item.id) ?? "Unnamed evidence"),
+        evidenceLabels: array(outcome.evidence).map(
+          (item) =>
+            stringValue(item.label ?? item.name ?? item.id) ??
+            "Unnamed evidence",
+        ),
         predictiveEvidence: array(outcome.predictiveEvidence).map(String),
         misleadingEvidence: array(outcome.misleadingEvidence).map(String),
         failureModes: array(outcome.failureModes).map(String),
-        invalidationConditions: array(outcome.invalidationConditions).map(String),
+        invalidationConditions: array(outcome.invalidationConditions).map(
+          String,
+        ),
         similarity: roundScore(similarityBetween(currentProfile, profile)),
       };
     })
     .filter((record) => record.similarity >= 35)
-    .sort((left, right) => right.similarity - left.similarity || left.id.localeCompare(right.id));
+    .sort(
+      (left, right) =>
+        right.similarity - left.similarity || left.id.localeCompare(right.id),
+    );
 }
 
 function outcomeLabel(outcome: DiscoveryOutcome): OutcomeRecord["label"] {
@@ -716,8 +815,19 @@ function outcomeLabel(outcome: DiscoveryOutcome): OutcomeRecord["label"] {
   if (outcome.success === false) return "negative";
 
   const value = String(outcome.outcome ?? outcome.result ?? "").toLowerCase();
-  if (["positive", "success", "succeeded", "helped", "valid"].includes(value)) return "positive";
-  if (["negative", "failure", "failed", "invalidated", "hurt", "blocked"].includes(value)) return "negative";
+  if (["positive", "success", "succeeded", "helped", "valid"].includes(value))
+    return "positive";
+  if (
+    [
+      "negative",
+      "failure",
+      "failed",
+      "invalidated",
+      "hurt",
+      "blocked",
+    ].includes(value)
+  )
+    return "negative";
 
   const numeric = firstNumber(outcome.score, outcome.value);
   if (numeric != null && numeric > 0) return "positive";
@@ -727,23 +837,38 @@ function outcomeLabel(outcome: DiscoveryOutcome): OutcomeRecord["label"] {
 
 function summarizeMemory(records: OutcomeRecord[]): DiscoveryMemorySummary {
   const sampleSize = records.length;
-  const positiveOutcomes = records.filter((record) => record.label === "positive").length;
-  const negativeOutcomes = records.filter((record) => record.label === "negative").length;
-  const neutralOutcomes = records.filter((record) => record.label === "neutral").length;
+  const positiveOutcomes = records.filter(
+    (record) => record.label === "positive",
+  ).length;
+  const negativeOutcomes = records.filter(
+    (record) => record.label === "negative",
+  ).length;
+  const neutralOutcomes = records.filter(
+    (record) => record.label === "neutral",
+  ).length;
   const successRatio = ratio(positiveOutcomes, sampleSize);
   const failureRatio = ratio(negativeOutcomes, sampleSize);
   const neutralRatio = ratio(neutralOutcomes, sampleSize);
   const sampleCoverage = clamp(sampleSize * 12.5);
-  const consistency = sampleSize ? Math.max(successRatio, failureRatio, neutralRatio) : 0;
-  const reliability = roundScore(clamp(sampleCoverage * 0.5 + consistency * 0.5));
-  const successPatterns = rankedTerms(records.filter((record) => record.label === "positive").flatMap((record) => [
-    ...record.evidenceLabels,
-    ...record.predictiveEvidence,
-  ]));
-  const failurePatterns = rankedTerms(records.filter((record) => record.label === "negative").flatMap((record) => [
-    ...record.evidenceLabels,
-    ...record.failureModes,
-  ]));
+  const consistency = sampleSize
+    ? Math.max(successRatio, failureRatio, neutralRatio)
+    : 0;
+  const reliability = roundScore(
+    clamp(sampleCoverage * 0.5 + consistency * 0.5),
+  );
+  const successPatterns = rankedTerms(
+    records
+      .filter((record) => record.label === "positive")
+      .flatMap((record) => [
+        ...record.evidenceLabels,
+        ...record.predictiveEvidence,
+      ]),
+  );
+  const failurePatterns = rankedTerms(
+    records
+      .filter((record) => record.label === "negative")
+      .flatMap((record) => [...record.evidenceLabels, ...record.failureModes]),
+  );
 
   return {
     sampleSize,
@@ -757,8 +882,12 @@ function summarizeMemory(records: OutcomeRecord[]): DiscoveryMemorySummary {
     reliability,
     recurringSuccessPatterns: successPatterns.slice(0, 4),
     recurringFailurePatterns: failurePatterns.slice(0, 4),
-    mostPredictiveEvidence: rankedTerms(records.flatMap((record) => record.predictiveEvidence)).slice(0, 4),
-    mostMisleadingEvidence: rankedTerms(records.flatMap((record) => record.misleadingEvidence)).slice(0, 4),
+    mostPredictiveEvidence: rankedTerms(
+      records.flatMap((record) => record.predictiveEvidence),
+    ).slice(0, 4),
+    mostMisleadingEvidence: rankedTerms(
+      records.flatMap((record) => record.misleadingEvidence),
+    ).slice(0, 4),
   };
 }
 
@@ -772,27 +901,59 @@ function lifecycleFor(args: {
   contradictionScore: number;
   missingEvidence: string[];
 }): DiscoveryLifecycleSummary {
-  const explicit = args.candidates.map((candidate) => candidate.statusValue).find(Boolean);
+  const explicit = args.candidates
+    .map((candidate) => candidate.statusValue)
+    .find(Boolean);
   const previous = previousStatus(args.candidates);
-  const persistence = roundScore(args.candidates.length ? average(args.candidates.map((candidate) => candidate.persistenceValue)) : 30);
-  const velocity = roundScore(clamp(50 + average(args.candidates.map((candidate) => candidate.velocityValue))));
-  const readiness = roundScore(clamp(args.confidence * 0.38 + args.trust * 0.24 + (100 - args.fragility) * 0.22 + persistence * 0.16));
-  const status = explicit ?? statusForScores({
-    confidence: args.confidence,
-    evidenceScore: args.evidenceScore,
-    contradictionScore: args.contradictionScore,
-    missingCount: args.missingEvidence.length,
-    velocity,
-    readiness,
-    candidateCount: args.candidates.length,
-  });
-  const maturity = roundScore(clamp(STATUS_RANK[status] * 0.65 + readiness * 0.35));
-  const decayRisk = roundScore(clamp(args.fragility * 0.48 + (100 - persistence) * 0.28 + args.contradictionScore * 0.24));
+  const persistence = roundScore(
+    args.candidates.length
+      ? average(args.candidates.map((candidate) => candidate.persistenceValue))
+      : 30,
+  );
+  const velocity = roundScore(
+    clamp(
+      50 + average(args.candidates.map((candidate) => candidate.velocityValue)),
+    ),
+  );
+  const readiness = roundScore(
+    clamp(
+      args.confidence * 0.38 +
+        args.trust * 0.24 +
+        (100 - args.fragility) * 0.22 +
+        persistence * 0.16,
+    ),
+  );
+  const status =
+    explicit ??
+    statusForScores({
+      confidence: args.confidence,
+      evidenceScore: args.evidenceScore,
+      contradictionScore: args.contradictionScore,
+      missingCount: args.missingEvidence.length,
+      velocity,
+      readiness,
+      candidateCount: args.candidates.length,
+    });
+  const maturity = roundScore(
+    clamp(STATUS_RANK[status] * 0.65 + readiness * 0.35),
+  );
+  const decayRisk = roundScore(
+    clamp(
+      args.fragility * 0.48 +
+        (100 - persistence) * 0.28 +
+        args.contradictionScore * 0.24,
+    ),
+  );
 
   return {
     status,
     ...(previous ? { previousStatus: previous } : {}),
-    transitionReason: transitionReason(status, previous, args.confidence, args.missingEvidence.length),
+    transitionReason: transitionReason(
+      status,
+      previous,
+      args.confidence,
+      args.missingEvidence.length,
+    ),
     maturity,
     persistence,
     velocity,
@@ -813,13 +974,21 @@ function statusForScores(args: {
 }): DiscoveryStatus {
   if (args.candidateCount === 0 && args.evidenceScore < 35) return "none";
   if (args.confidence < 25 || args.contradictionScore >= 80) return "none";
-  if (args.confidence >= 78 && args.readiness >= 78 && args.missingCount === 0) return "eligible";
-  if (args.confidence >= 66 && args.evidenceScore >= 62 && args.contradictionScore < 45) return "strengthening";
+  if (args.confidence >= 78 && args.readiness >= 78 && args.missingCount === 0)
+    return "eligible";
+  if (
+    args.confidence >= 66 &&
+    args.evidenceScore >= 62 &&
+    args.contradictionScore < 45
+  )
+    return "strengthening";
   if (args.confidence >= 42 && args.velocity >= 52) return "emerging";
   return "detected";
 }
 
-function previousStatus(candidates: NormalizedCandidate[]): DiscoveryStatus | undefined {
+function previousStatus(
+  candidates: NormalizedCandidate[],
+): DiscoveryStatus | undefined {
   const scoreValue = candidates
     .map((candidate) => candidate.previousScoreValue)
     .find((value): value is number => value != null);
@@ -837,12 +1006,17 @@ function transitionReason(
   missingCount: number,
 ) {
   if (status === "none") return "Evidence does not yet support an opportunity.";
-  if (previous && previous !== status) return `Lifecycle moved from ${previous} to ${status} as confidence reached ${roundScore(confidence)}/100.`;
-  if (missingCount > 0) return `${status} is held back by ${missingCount} missing evidence item${missingCount === 1 ? "" : "s"}.`;
+  if (previous && previous !== status)
+    return `Lifecycle moved from ${previous} to ${status} as confidence reached ${roundScore(confidence)}/100.`;
+  if (missingCount > 0)
+    return `${status} is held back by ${missingCount} missing evidence item${missingCount === 1 ? "" : "s"}.`;
   return `${status} is supported by the current evidence, memory, context, and foresight checks.`;
 }
 
-function stageScoresFor(confidence: number, readiness: number): Record<DiscoveryStatus, number> {
+function stageScoresFor(
+  confidence: number,
+  readiness: number,
+): Record<DiscoveryStatus, number> {
   return {
     none: roundScore(clamp(100 - confidence)),
     detected: roundScore(clamp(confidence * 0.55)),
@@ -866,16 +1040,36 @@ function foresightFor(args: {
   fragility: number;
 }): DiscoveryForesightSummary {
   const invalidationConditions = unique([
-    ...args.contradiction.slice(0, 3).map((item) => `${item.label} strengthens beyond the current support case.`),
-    ...array(args.constraints).flatMap((constraint) => stringList(constraint.invalidationCondition)),
-    ...(args.memory.failureRatio > args.memory.successRatio ? ["Similar prior outcomes continue to fail more often than they succeed."] : []),
-    ...(args.novelty > 75 ? ["The current context remains too novel to compare with known states."] : []),
+    ...args.contradiction
+      .slice(0, 3)
+      .map(
+        (item) => `${item.label} strengthens beyond the current support case.`,
+      ),
+    ...array(args.constraints).flatMap((constraint) =>
+      stringList(constraint.invalidationCondition),
+    ),
+    ...(args.memory.failureRatio > args.memory.successRatio
+      ? [
+          "Similar prior outcomes continue to fail more often than they succeed.",
+        ]
+      : []),
+    ...(args.novelty > 75
+      ? ["The current context remains too novel to compare with known states."]
+      : []),
   ]);
   const unlockConditions = unique([
-    ...args.missingEvidence.slice(0, 4).map((item) => `Collect or validate ${item}.`),
-    ...array(args.constraints).flatMap((constraint) => stringList(constraint.unlockCondition)),
-    ...(args.memory.sampleSize < 3 ? ["Add comparable outcomes to improve memory reliability."] : []),
-    ...(args.novelty > 75 ? ["Add historical states that resemble the current context."] : []),
+    ...args.missingEvidence
+      .slice(0, 4)
+      .map((item) => `Collect or validate ${item}.`),
+    ...array(args.constraints).flatMap((constraint) =>
+      stringList(constraint.unlockCondition),
+    ),
+    ...(args.memory.sampleSize < 3
+      ? ["Add comparable outcomes to improve memory reliability."]
+      : []),
+    ...(args.novelty > 75
+      ? ["Add historical states that resemble the current context."]
+      : []),
   ]);
   const fragilityDrivers = unique([
     ...args.contradiction.slice(0, 3).map((item) => item.label),
@@ -884,7 +1078,10 @@ function foresightFor(args: {
   ]);
   const safetyDrivers = unique([
     ...args.support.slice(0, 3).map((item) => item.label),
-    ...(args.memory.successRatio >= args.memory.failureRatio && args.memory.sampleSize ? ["Similar outcomes are not net negative"] : []),
+    ...(args.memory.successRatio >= args.memory.failureRatio &&
+    args.memory.sampleSize
+      ? ["Similar outcomes are not net negative"]
+      : []),
   ]);
   const counterfactuals: DiscoveryCounterfactual[] = [
     ...invalidationConditions.slice(0, 3).map((condition) => ({
@@ -901,13 +1098,15 @@ function foresightFor(args: {
     })),
     {
       type: "fragile",
-      condition: "Contradictions grow while missing evidence remains unresolved.",
+      condition:
+        "Contradictions grow while missing evidence remains unresolved.",
       impact: roundScore(args.fragility),
       confidence: roundScore(args.confidence),
     },
     {
       type: "safer",
-      condition: "Independent support persists and context similarity improves.",
+      condition:
+        "Independent support persists and context similarity improves.",
       impact: roundScore(100 - args.fragility),
       confidence: roundScore(args.confidence),
     },
@@ -967,19 +1166,79 @@ function tracesFor(args: {
   confidence: number;
 }): DiscoveryTrace[] {
   return [
-    trace("candidate", "Candidate strength", args.candidateStrength, 0.28, "Candidate quality contributes to discovery confidence."),
-    trace("evidence", "Supporting evidence", args.evidenceScore, 0.34, "Observed support explains why the opportunity may exist."),
-    trace("memory", "Memory reliability", args.memory.reliability, 0.16, "Similar outcomes determine how much prior memory can be trusted."),
-    trace("context", "Context familiarity", 100 - args.novelty, 0.12, "Known contexts reduce uncertainty."),
-    trace("regime-coverage", "Regime coverage", args.regimeCoverageScore, 0.06, "Broader regime history improves discovery confidence without changing sizing authority."),
-    trace("constraints", "Constraint health", args.constraintScore, 0.1, "Passed constraints increase readiness before action."),
-    trace("contradiction", "Contradiction penalty", args.contradictionScore, -0.28, "Contradictory evidence reduces confidence."),
-    trace("missing", "Missing evidence penalty", args.missingPenalty, -0.07, "Incomplete evidence lowers confidence instead of throwing."),
-    trace("final", "Final confidence", args.confidence, 1, "Final normalized confidence after all discovery layers."),
+    trace(
+      "candidate",
+      "Candidate strength",
+      args.candidateStrength,
+      0.28,
+      "Candidate quality contributes to discovery confidence.",
+    ),
+    trace(
+      "evidence",
+      "Supporting evidence",
+      args.evidenceScore,
+      0.34,
+      "Observed support explains why the opportunity may exist.",
+    ),
+    trace(
+      "memory",
+      "Memory reliability",
+      args.memory.reliability,
+      0.16,
+      "Similar outcomes determine how much prior memory can be trusted.",
+    ),
+    trace(
+      "context",
+      "Context familiarity",
+      100 - args.novelty,
+      0.12,
+      "Known contexts reduce uncertainty.",
+    ),
+    trace(
+      "regime-coverage",
+      "Regime coverage",
+      args.regimeCoverageScore,
+      0.06,
+      "Broader regime history improves discovery confidence without changing sizing authority.",
+    ),
+    trace(
+      "constraints",
+      "Constraint health",
+      args.constraintScore,
+      0.1,
+      "Passed constraints increase readiness before action.",
+    ),
+    trace(
+      "contradiction",
+      "Contradiction penalty",
+      args.contradictionScore,
+      -0.28,
+      "Contradictory evidence reduces confidence.",
+    ),
+    trace(
+      "missing",
+      "Missing evidence penalty",
+      args.missingPenalty,
+      -0.07,
+      "Incomplete evidence lowers confidence instead of throwing.",
+    ),
+    trace(
+      "final",
+      "Final confidence",
+      args.confidence,
+      1,
+      "Final normalized confidence after all discovery layers.",
+    ),
   ];
 }
 
-function trace(id: string, label: string, scoreValue: number, weight: number, reason: string): DiscoveryTrace {
+function trace(
+  id: string,
+  label: string,
+  scoreValue: number,
+  weight: number,
+  reason: string,
+): DiscoveryTrace {
   return {
     id,
     label,
@@ -995,17 +1254,31 @@ function evidenceForCandidate(
   evidence: NormalizedEvidence[],
   candidate: NormalizedCandidate,
 ): DiscoveryRankedEvidence[] {
-  const ids = new Set([candidate.id, candidate.candidateId, ...array(candidate.evidenceIds)].filter(Boolean).map(String));
-  const scoped = evidence.filter((item) => !item.candidateId || ids.has(item.candidateId));
+  const ids = new Set(
+    [candidate.id, candidate.candidateId, ...array(candidate.evidenceIds)]
+      .filter(Boolean)
+      .map(String),
+  );
+  const scoped = evidence.filter(
+    (item) => !item.candidateId || ids.has(item.candidateId),
+  );
   return (scoped.length ? scoped : evidence).slice(0, 6);
 }
 
-function recommendedNextStep(status: DiscoveryStatus, computation: DiscoveryComputation): string {
-  if (status === "none") return "Wait for stronger support before treating this as an opportunity.";
-  if (computation.missingEvidence.length) return `Resolve missing evidence: ${computation.missingEvidence[0]}.`;
-  if (computation.fragility >= 70) return "Reduce fragility by addressing contradictions and context uncertainty.";
-  if (status === "eligible") return "Prepare the opportunity for the next commitment boundary.";
-  if (status === "strengthening") return "Keep tracking persistence and confirm the leading evidence cluster.";
+function recommendedNextStep(
+  status: DiscoveryStatus,
+  computation: DiscoveryComputation,
+): string {
+  if (status === "none")
+    return "Wait for stronger support before treating this as an opportunity.";
+  if (computation.missingEvidence.length)
+    return `Resolve missing evidence: ${computation.missingEvidence[0]}.`;
+  if (computation.fragility >= 70)
+    return "Reduce fragility by addressing contradictions and context uncertainty.";
+  if (status === "eligible")
+    return "Prepare the opportunity for the next commitment boundary.";
+  if (status === "strengthening")
+    return "Keep tracking persistence and confirm the leading evidence cluster.";
   return "Continue observing until maturity and confidence improve.";
 }
 
@@ -1013,8 +1286,13 @@ function regimeCoverageFor(
   state: Record<string, unknown>,
   historicalStates: DiscoveryHistoricalState[] | undefined,
 ) {
-  const diagnostics = plainRecord(state.historyDiagnostics) ? state.historyDiagnostics : {};
-  const explicit = firstNumber(state.regimeCoverageScore, diagnostics.regimeCoverageScore);
+  const diagnostics = plainRecord(state.historyDiagnostics)
+    ? state.historyDiagnostics
+    : {};
+  const explicit = firstNumber(
+    state.regimeCoverageScore,
+    diagnostics.regimeCoverageScore,
+  );
   if (explicit != null) return { score: score(explicit, 0), hasSignal: true };
 
   const regimes = new Set<string>();
@@ -1030,24 +1308,39 @@ function regimeCoverageFor(
   for (const item of array(historicalStates)) {
     const sampleState = plainRecord(item.state) ? item.state : {};
     const metadata = plainRecord(item.metadata) ? item.metadata : {};
-    const regime = stringValue(sampleState.regime ?? sampleState.regimeType ?? metadata.regime ?? metadata.regimeType);
+    const regime = stringValue(
+      sampleState.regime ??
+        sampleState.regimeType ??
+        metadata.regime ??
+        metadata.regimeType,
+    );
     if (regime) regimes.add(regime);
   }
 
   if (regimes.size > 0) {
-    return { score: roundScore(clamp((regimes.size / 5) * 100)), hasSignal: true };
+    return {
+      score: roundScore(clamp((regimes.size / 5) * 100)),
+      hasSignal: true,
+    };
   }
   return { score: 0, hasSignal: false };
 }
 
-function constraintsScore(constraints: DiscoveryConstraint[] | undefined): number {
+function constraintsScore(
+  constraints: DiscoveryConstraint[] | undefined,
+): number {
   const items = array(constraints);
   if (!items.length) return 70;
-  return roundScore(average(items.map((constraint) => {
-    if (constraint.passed === true) return 100;
-    if (constraint.passed === false) return severityPenaltyScore(constraint.severity);
-    return score(constraint.score, 60);
-  })));
+  return roundScore(
+    average(
+      items.map((constraint) => {
+        if (constraint.passed === true) return 100;
+        if (constraint.passed === false)
+          return severityPenaltyScore(constraint.severity);
+        return score(constraint.score, 60);
+      }),
+    ),
+  );
 }
 
 function severityPenaltyScore(severity: DiscoveryConstraint["severity"]) {
@@ -1067,16 +1360,23 @@ function missingEvidenceForCandidates(candidates: NormalizedCandidate[]) {
 }
 
 function missingEvidenceFromEvidence(evidence: NormalizedEvidence[]) {
-  const missing = evidence.filter((item) => item.missing).map((item) => item.label);
-  const hasSupport = evidence.some((item) => item.direction === "support" && item.observed && !item.missing);
-  return unique([
-    ...missing,
-    ...(hasSupport ? [] : ["supporting evidence"]),
-  ]);
+  const missing = evidence
+    .filter((item) => item.missing)
+    .map((item) => item.label);
+  const hasSupport = evidence.some(
+    (item) => item.direction === "support" && item.observed && !item.missing,
+  );
+  return unique([...missing, ...(hasSupport ? [] : ["supporting evidence"])]);
 }
 
-function missingEvidenceFromConstraints(constraints: DiscoveryConstraint[] | undefined) {
-  return unique(array(constraints).flatMap((constraint) => stringList(constraint.missingEvidence)));
+function missingEvidenceFromConstraints(
+  constraints: DiscoveryConstraint[] | undefined,
+) {
+  return unique(
+    array(constraints).flatMap((constraint) =>
+      stringList(constraint.missingEvidence),
+    ),
+  );
 }
 
 function profileForState(state: Record<string, unknown>) {
@@ -1109,8 +1409,10 @@ function similarityBetween(
 }
 
 function profileValue(value: unknown): number | string | boolean | null {
-  if (typeof value === "number" && Number.isFinite(value)) return roundScore(clamp(value));
-  if (typeof value === "string" && value.trim()) return value.trim().toLowerCase();
+  if (typeof value === "number" && Number.isFinite(value))
+    return roundScore(clamp(value));
+  if (typeof value === "string" && value.trim())
+    return value.trim().toLowerCase();
   if (typeof value === "boolean") return value;
   return null;
 }
@@ -1121,7 +1423,9 @@ function rankedTerms(values: string[]) {
     counts.set(value, (counts.get(value) ?? 0) + 1);
   }
   return Array.from(counts.entries())
-    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+    .sort(
+      (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
+    )
     .map(([value]) => value);
 }
 
@@ -1169,15 +1473,25 @@ function score(value: unknown, fallback: number) {
 }
 
 function weightedAverage(values: Array<[number, number]>) {
-  const totalWeight = values.reduce((sum, [, weight]) => sum + Math.max(0, weight), 0);
-  
+  const totalWeight = values.reduce(
+    (sum, [, weight]) => sum + Math.max(0, weight),
+    0,
+  );
+
   if (totalWeight <= 0) return 0;
-  return values.reduce((sum, [value, weight]) => sum + value * Math.max(0, weight), 0) / totalWeight;
+  return (
+    values.reduce(
+      (sum, [value, weight]) => sum + value * Math.max(0, weight),
+      0,
+    ) / totalWeight
+  );
 }
 
 function average(values: number[]) {
   const usable = values.filter(Number.isFinite);
-  return usable.length ? usable.reduce((sum, value) => sum + value, 0) / usable.length : 0;
+  return usable.length
+    ? usable.reduce((sum, value) => sum + value, 0) / usable.length
+    : 0;
 }
 
 function ratio(value: number, total: number) {
@@ -1197,7 +1511,6 @@ function unique<T>(values: T[]) {
 }
 
 function clamp(value: number, min = 0, max = 100) {
-  
   return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
 }
 
@@ -1205,8 +1518,6 @@ function roundScore(value: number) {
   return Number(clamp(value).toFixed(2));
 }
 
-
 function roundSigned(value: number) {
   return Number(value.toFixed(2));
 }
-

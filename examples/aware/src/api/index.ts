@@ -1,6 +1,4 @@
-export {
-  handleAwareApiRequest
-} from "./handler.js";
+export { handleAwareApiRequest } from "./handler.js";
 export {
   createAwareApiService,
   getBriefingDetails,
@@ -8,12 +6,10 @@ export {
   listBriefingSources,
   reviewBriefing,
   searchRegions,
-  submitFeedback
+  submitFeedback,
 } from "./service.js";
-export type {
-  AwareApiResponse
-} from "./handler.js";
+export type { AwareApiResponse } from "./handler.js";
 export type {
   AwareApiService,
-  AwareApiServiceOptions
+  AwareApiServiceOptions,
 } from "./service.js";

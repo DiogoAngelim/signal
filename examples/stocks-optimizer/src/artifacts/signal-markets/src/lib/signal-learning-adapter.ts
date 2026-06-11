@@ -1,5 +1,4 @@
 import {
-  evaluateLearningJudgment,
   type SignalAssumption,
   type SignalConstraint,
   type SignalEvaluation,
@@ -15,9 +14,15 @@ import {
   type SignalReviewedSituation,
   type SignalState,
   type SignalThreat,
-} from "@signal/decision/core";
+  evaluateLearningJudgment,
+} from "@signal/decision";
 
-export type AllocationAdjustment = "increase" | "hold" | "reduce" | "exit" | "watch";
+export type AllocationAdjustment =
+  | "increase"
+  | "hold"
+  | "reduce"
+  | "exit"
+  | "watch";
 
 export type StockAllocationSituation = {
   ticker: string;
@@ -86,20 +91,30 @@ function baseTrace(refId: string, role: string) {
   return [{ refId, refType: "Evidence", role }];
 }
 
-function reviewRefFor(reviewId: string, reviewedAt: string, outcome: ReviewedInvestmentSituation["investmentOutcome"]): SignalReviewRef {
+function reviewRefFor(
+  reviewId: string,
+  reviewedAt: string,
+  outcome: ReviewedInvestmentSituation["investmentOutcome"],
+): SignalReviewRef {
   return {
     reviewId,
     reviewedAt,
     reviewer: APP_SOURCE,
     outcome,
-    explanation: "Reviewed investment outcome translated at the Stocks Optimizer boundary.",
+    explanation:
+      "Reviewed investment outcome translated at the Stocks Optimizer boundary.",
   };
 }
 
 function currentTagsFor(situation: StockAllocationSituation) {
-  const riskTag = situation.marketRiskPct >= 70 ? "risk-pressure" : "normal-risk";
-  const volatilityTag = situation.volatilityPct >= 60 ? "high-volatility" : "ordinary-volatility";
-  const concentrationTag = situation.concentrationPct >= 50 ? "concentrated-exposure" : "diversified-exposure";
+  const riskTag =
+    situation.marketRiskPct >= 70 ? "risk-pressure" : "normal-risk";
+  const volatilityTag =
+    situation.volatilityPct >= 60 ? "high-volatility" : "ordinary-volatility";
+  const concentrationTag =
+    situation.concentrationPct >= 50
+      ? "concentrated-exposure"
+      : "diversified-exposure";
 
   return [
     "capital-allocation",
@@ -107,13 +122,15 @@ function currentTagsFor(situation: StockAllocationSituation) {
     riskTag,
     volatilityTag,
     concentrationTag,
-    ...((situation.tags ?? []).map((tag) => tag.toLowerCase())),
+    ...(situation.tags ?? []).map((tag) => tag.toLowerCase()),
   ];
 }
 
 export function mapStockAllocationToSignalInput(
   situation: StockAllocationSituation,
-  reviewedSituations: readonly ReviewedInvestmentSituation[] = defaultReviewedInvestmentHistory(situation),
+  reviewedSituations: readonly ReviewedInvestmentSituation[] = defaultReviewedInvestmentHistory(
+    situation,
+  ),
 ): SignalLearningRuntimeInput {
   const ticker = keyForTicker(situation.ticker);
   const observedAt = nowFrom(situation);
@@ -125,13 +142,15 @@ export function mapStockAllocationToSignalInput(
   const evaluationId = `evaluation:${ticker}`;
   const thesisId = `assumption:thesis:${ticker}`;
   const totalExposure = situation.price * situation.shares;
-  const riskPressure = clampPct(mean([
-    situation.marketRiskPct,
-    situation.liquidityRiskPct,
-    situation.volatilityPct,
-    situation.concentrationPct,
-    situation.drawdownPct,
-  ]));
+  const riskPressure = clampPct(
+    mean([
+      situation.marketRiskPct,
+      situation.liquidityRiskPct,
+      situation.volatilityPct,
+      situation.concentrationPct,
+      situation.drawdownPct,
+    ]),
+  );
   const quality = Math.round(clampPct(100 - riskPressure * 0.7));
   const uncertainty = Math.round(clampPct(riskPressure));
 
@@ -142,7 +161,9 @@ export function mapStockAllocationToSignalInput(
     desiredState: "A reviewable allocation decision with explicit uncertainty.",
     priority: 75,
     createdAt: observedAt,
-    traceRefs: [{ refId: instrumentId, refType: "Position", role: "domain-identifier" }],
+    traceRefs: [
+      { refId: instrumentId, refType: "Position", role: "domain-identifier" },
+    ],
     reviewRefs: [],
     explanation: [
       "Ticker is mapped to a domain identifier at the Stocks Optimizer adapter boundary.",
@@ -186,24 +207,32 @@ export function mapStockAllocationToSignalInput(
     },
   ];
 
-  const positions: SignalPosition[] = [{
-    id: positionId,
-    type: "Position",
-    label: `${ticker} position`,
-    createdAt: observedAt,
-    resourceId: instrumentId,
-    quantity: situation.shares,
-    traceRefs: [{ refId: evidence[0].id, refType: "Evidence", role: "position-evidence" }],
-    reviewRefs: [],
-    explanation: [
-      "Price plus shares are represented as a generic Signal position.",
-    ],
-    metadata: {
-      price: situation.price,
-      totalExposure,
-      portfolioExposurePct: situation.portfolioExposurePct,
+  const positions: SignalPosition[] = [
+    {
+      id: positionId,
+      type: "Position",
+      label: `${ticker} position`,
+      createdAt: observedAt,
+      resourceId: instrumentId,
+      quantity: situation.shares,
+      traceRefs: [
+        {
+          refId: evidence[0].id,
+          refType: "Evidence",
+          role: "position-evidence",
+        },
+      ],
+      reviewRefs: [],
+      explanation: [
+        "Price plus shares are represented as a generic Signal position.",
+      ],
+      metadata: {
+        price: situation.price,
+        totalExposure,
+        portfolioExposurePct: situation.portfolioExposurePct,
+      },
     },
-  }];
+  ];
 
   const state: SignalState = {
     id: stateId,
@@ -213,7 +242,9 @@ export function mapStockAllocationToSignalInput(
     positionIds: [positionId],
     quality,
     uncertainty,
-    traceRefs: [{ refId: positionId, refType: "Position", role: "position-state" }],
+    traceRefs: [
+      { refId: positionId, refType: "Position", role: "position-state" },
+    ],
     reviewRefs: [],
     explanation: [
       "Portfolio exposure is mapped into Signal state quality and uncertainty.",
@@ -243,19 +274,22 @@ export function mapStockAllocationToSignalInput(
     },
   };
 
-  const constraints: SignalConstraint[] = [{
-    id: `constraint:reviewability:${ticker}`,
-    type: "Constraint",
-    label: "Keep allocation reviewable",
-    createdAt: observedAt,
-    severity: 68,
-    binding: situation.portfolioExposurePct > 35 || situation.drawdownPct > 22,
-    traceRefs: [{ refId: stateId, refType: "State", role: "reviewability" }],
-    reviewRefs: [],
-    explanation: [
-      "Allocation posture must stay reversible enough to review after outcomes are known.",
-    ],
-  }];
+  const constraints: SignalConstraint[] = [
+    {
+      id: `constraint:reviewability:${ticker}`,
+      type: "Constraint",
+      label: "Keep allocation reviewable",
+      createdAt: observedAt,
+      severity: 68,
+      binding:
+        situation.portfolioExposurePct > 35 || situation.drawdownPct > 22,
+      traceRefs: [{ refId: stateId, refType: "State", role: "reviewability" }],
+      reviewRefs: [],
+      explanation: [
+        "Allocation posture must stay reversible enough to review after outcomes are known.",
+      ],
+    },
+  ];
 
   const threats: SignalThreat[] = [
     {
@@ -275,27 +309,33 @@ export function mapStockAllocationToSignalInput(
       label: "Liquidity risk pressure",
       createdAt: observedAt,
       severity: clampPct(situation.liquidityRiskPct),
-      likelihood: clampPct(mean([situation.liquidityRiskPct, situation.concentrationPct])),
+      likelihood: clampPct(
+        mean([situation.liquidityRiskPct, situation.concentrationPct]),
+      ),
       traceRefs: [{ refId: evaluationId, refType: "Evaluation", role: "risk" }],
       reviewRefs: [],
       explanation: ["Liquidity risk is mapped to a Signal threat."],
     },
   ];
 
-  const assumptions: SignalAssumption[] = [{
-    id: thesisId,
-    type: "Assumption",
-    label: `${ticker} investment thesis`,
-    createdAt: observedAt,
-    confidence: Math.round(clampPct(100 - uncertainty * 0.35)),
-    status: "untested",
-    traceRefs: [{ refId: evidence[1].id, refType: "Evidence", role: "thesis-evidence" }],
-    reviewRefs: [],
-    explanation: [
-      "Investment thesis is mapped to a generic Signal assumption.",
-      situation.investmentThesis,
-    ],
-  }];
+  const assumptions: SignalAssumption[] = [
+    {
+      id: thesisId,
+      type: "Assumption",
+      label: `${ticker} investment thesis`,
+      createdAt: observedAt,
+      confidence: Math.round(clampPct(100 - uncertainty * 0.35)),
+      status: "untested",
+      traceRefs: [
+        { refId: evidence[1].id, refType: "Evidence", role: "thesis-evidence" },
+      ],
+      reviewRefs: [],
+      explanation: [
+        "Investment thesis is mapped to a generic Signal assumption.",
+        situation.investmentThesis,
+      ],
+    },
+  ];
 
   const reviews = reviewedSituations.map(toSignalReview);
   const lessons = reviewedSituations.map(toSignalLesson);
@@ -326,11 +366,16 @@ export function evaluateStocksLearningJudgment(
   situation: StockAllocationSituation,
   reviewedSituations?: readonly ReviewedInvestmentSituation[],
 ): StocksSignalLearningJudgment {
-  const signalInput = mapStockAllocationToSignalInput(situation, reviewedSituations);
+  const signalInput = mapStockAllocationToSignalInput(
+    situation,
+    reviewedSituations,
+  );
   const signalResult = evaluateLearningJudgment(signalInput);
   const strongestSimilarity = signalResult.similarityMatches[0];
   const strongestLesson = signalResult.judgment.lessonRefs[0];
-  const allocationPosture = postureToAllocationLanguage(signalResult.judgment.posture);
+  const allocationPosture = postureToAllocationLanguage(
+    signalResult.judgment.posture,
+  );
   const lessonLine = strongestLesson
     ? `The strongest surviving lesson is ${strongestLesson}.`
     : "The strongest surviving lesson is still forming.";
@@ -363,7 +408,8 @@ export function createReviewedLearningDemo() {
     drawdownPct: 11,
     marketRiskPct: 66,
     liquidityRiskPct: 35,
-    investmentThesis: "Momentum improved, but exposure should stay bounded until the thesis survives review.",
+    investmentThesis:
+      "Momentum improved, but exposure should stay bounded until the thesis survives review.",
     allocationAdjustment: "hold",
     tags: ["momentum-rebound", "post-drawdown"],
   });
@@ -384,8 +430,16 @@ function toSignalReview(input: ReviewedInvestmentSituation): SignalReview {
     assumptionRefs: [`assumption:${input.id}`],
     lessonRefs: [lessonId],
     whatShouldChange: input.investmentLesson,
-    traceRefs: [{ refId: `outcome:${input.id}`, refType: "Outcome", role: "reviewed-outcome" }],
-    reviewRefs: [reviewRefFor(reviewId, input.reviewedAt, input.investmentOutcome)],
+    traceRefs: [
+      {
+        refId: `outcome:${input.id}`,
+        refType: "Outcome",
+        role: "reviewed-outcome",
+      },
+    ],
+    reviewRefs: [
+      reviewRefFor(reviewId, input.reviewedAt, input.investmentOutcome),
+    ],
     explanation: [input.postmortem],
     metadata: {
       app: APP_SOURCE,
@@ -409,7 +463,9 @@ function toSignalLesson(input: ReviewedInvestmentSituation): SignalLesson {
     applicability: input.tags,
     domainCoverage: ["capital-allocation", "risk-sizing"],
     traceRefs: [{ refId: reviewId, refType: "Review", role: "review-source" }],
-    reviewRefs: [reviewRefFor(reviewId, input.reviewedAt, input.investmentOutcome)],
+    reviewRefs: [
+      reviewRefFor(reviewId, input.reviewedAt, input.investmentOutcome),
+    ],
     explanation: [input.investmentLesson],
     metadata: {
       app: APP_SOURCE,
@@ -418,7 +474,9 @@ function toSignalLesson(input: ReviewedInvestmentSituation): SignalLesson {
   };
 }
 
-function toSignalReviewedSituation(input: ReviewedInvestmentSituation): SignalReviewedSituation {
+function toSignalReviewedSituation(
+  input: ReviewedInvestmentSituation,
+): SignalReviewedSituation {
   const reviewId = `review:${input.id}`;
 
   return {
@@ -427,7 +485,11 @@ function toSignalReviewedSituation(input: ReviewedInvestmentSituation): SignalRe
     tags: input.tags,
     decisionRef: `decision:${input.id}`,
     outcomeRef: `outcome:${input.id}`,
-    reviewRef: reviewRefFor(reviewId, input.reviewedAt, input.investmentOutcome),
+    reviewRef: reviewRefFor(
+      reviewId,
+      input.reviewedAt,
+      input.investmentOutcome,
+    ),
     assumptionRefs: [`assumption:${input.id}`],
     lessonRefs: [`lesson:${input.id}`],
     relationshipRefs: [
@@ -493,7 +555,9 @@ function relationshipsForReviewedSituation(
   ];
 }
 
-function postureToAllocationLanguage(posture: SignalLearningRuntimeResult["judgment"]["posture"]) {
+function postureToAllocationLanguage(
+  posture: SignalLearningRuntimeResult["judgment"]["posture"],
+) {
   if (posture === "proceed") return "a measured allocation";
   if (posture === "proceed-reversibly") return "a reversible allocation";
   if (posture === "reduce") return "a reduced allocation";
@@ -506,18 +570,27 @@ function defaultReviewedInvestmentHistory(
 ): ReviewedInvestmentSituation[] {
   const ticker = keyForTicker(situation.ticker);
 
-  return [{
-    id: `${ticker.toLowerCase()}:post-drawdown-review`,
-    ticker,
-    label: `${ticker} post-drawdown allocation review`,
-    investmentOutcome: "survived",
-    postmortem: "A prior allocation held up when exposure stayed capped during volatile recovery conditions.",
-    investmentLesson: "Cap exposure until momentum and liquidity both survive review.",
-    tags: ["capital-allocation", "reviewable-allocation", "high-volatility", "post-drawdown"],
-    reviewCount: 3,
-    survivalCount: 3,
-    failureCount: 0,
-    confidence: 82,
-    reviewedAt: "2026-05-20T12:00:00.000Z",
-  }];
+  return [
+    {
+      id: `${ticker.toLowerCase()}:post-drawdown-review`,
+      ticker,
+      label: `${ticker} post-drawdown allocation review`,
+      investmentOutcome: "survived",
+      postmortem:
+        "A prior allocation held up when exposure stayed capped during volatile recovery conditions.",
+      investmentLesson:
+        "Cap exposure until momentum and liquidity both survive review.",
+      tags: [
+        "capital-allocation",
+        "reviewable-allocation",
+        "high-volatility",
+        "post-drawdown",
+      ],
+      reviewCount: 3,
+      survivalCount: 3,
+      failureCount: 0,
+      confidence: 82,
+      reviewedAt: "2026-05-20T12:00:00.000Z",
+    },
+  ];
 }

@@ -1,16 +1,19 @@
-import express, { type Express } from "express";
-import path from "path";
+import path from "node:path";
 import cors from "cors";
+import express, { type Express } from "express";
 import pinoHttp from "pino-http";
-import router from "./routes";
 import { logger } from "./lib/logger";
-import { buildHealthPayload, buildReadinessPayload } from "./observability/signal-health.js";
+import {
+  buildHealthPayload,
+  buildReadinessPayload,
+} from "./observability/signal-health.js";
 import {
   apiErrorHandler,
   createSignalCorsOptions,
   requestIdMiddleware,
   secureHeadersMiddleware,
 } from "./observability/signal-http.js";
+import router from "./routes";
 
 const app: Express = express();
 
@@ -37,8 +40,23 @@ app.use(
   }),
 );
 app.use(cors(createSignalCorsOptions()));
-app.use(express.json({ limit: process.env.SIGNAL_API_BODY_LIMIT ?? process.env.REQUEST_BODY_LIMIT ?? "1mb" }));
-app.use(express.urlencoded({ extended: true, limit: process.env.SIGNAL_API_BODY_LIMIT ?? process.env.REQUEST_BODY_LIMIT ?? "1mb" }));
+app.use(
+  express.json({
+    limit:
+      process.env.SIGNAL_API_BODY_LIMIT ??
+      process.env.REQUEST_BODY_LIMIT ??
+      "1mb",
+  }),
+);
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit:
+      process.env.SIGNAL_API_BODY_LIMIT ??
+      process.env.REQUEST_BODY_LIMIT ??
+      "1mb",
+  }),
+);
 
 app.get("/health", (_req, res) => {
   res.json(buildHealthPayload());
@@ -55,7 +73,6 @@ app.get("/ready", async (_req, res, next) => {
 
 app.use("/api", router);
 
-
 if (
   !process.env.VERCEL &&
   (process.env.NODE_ENV === "production" ||
@@ -66,7 +83,7 @@ if (
     "../../signal-markets/dist/public",
   );
   app.use(express.static(frontendPath));
-  
+
   app.get("/{*splat}", (req, res) => {
     res.sendFile(path.join(frontendPath, "index.html"));
   });

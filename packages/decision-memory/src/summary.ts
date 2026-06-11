@@ -31,16 +31,32 @@ export function summarizeDecisionRecords(input: {
     ...records.map((record) => record.humanSummary),
     ...records.flatMap((record) => record.coherence?.explanation ?? []),
   ]).slice(0, 12);
-  const averageCoherence = average(records.map((record) => Number(record.coherence?.score)).filter(Number.isFinite));
+  const averageCoherence = average(
+    records
+      .map((record) => Number(record.coherence?.score))
+      .filter(Number.isFinite),
+  );
   const averageOutcomeAccuracy = average(
-    outcomes.map((outcome) => Number(outcome.confidenceAccuracy)).filter(Number.isFinite),
+    outcomes
+      .map((outcome) => Number(outcome.confidenceAccuracy))
+      .filter(Number.isFinite),
   );
   const trustChange = sum(outcomes.map((outcome) => outcome.trustImpact));
-  const calibrationChange = sum(outcomes.map((outcome) => outcome.calibrationImpact));
-  const retentionTier = normalizeRetentionTier(input.retentionTier, records[0]?.retentionTier ?? "warm");
+  const calibrationChange = sum(
+    outcomes.map((outcome) => outcome.calibrationImpact),
+  );
+  const retentionTier = normalizeRetentionTier(
+    input.retentionTier,
+    records[0]?.retentionTier ?? "warm",
+  );
 
   return {
-    summaryId: stableSummaryId(source, windowStart ?? now.toISOString(), windowEnd ?? now.toISOString(), retentionTier),
+    summaryId: stableSummaryId(
+      source,
+      windowStart ?? now.toISOString(),
+      windowEnd ?? now.toISOString(),
+      retentionTier,
+    ),
     source,
     createdAt: now.toISOString(),
     ...(windowStart ? { windowStart } : {}),
@@ -51,7 +67,9 @@ export function summarizeDecisionRecords(input: {
       decisions: records.length,
       outcomes: outcomes.length,
       ...(averageCoherence === undefined ? {} : { averageCoherence }),
-      ...(averageOutcomeAccuracy === undefined ? {} : { averageOutcomeAccuracy }),
+      ...(averageOutcomeAccuracy === undefined
+        ? {}
+        : { averageOutcomeAccuracy }),
       trustChange,
       calibrationChange,
       lessons,
@@ -115,7 +133,9 @@ export function compactDecisionRecord(
   };
 }
 
-export function anonymizeExpiredRecord(record: SignalDecisionRecord): SignalDecisionRecord {
+export function anonymizeExpiredRecord(
+  record: SignalDecisionRecord,
+): SignalDecisionRecord {
   return {
     decisionId: record.decisionId,
     source: record.source,
@@ -129,15 +149,27 @@ export function anonymizeExpiredRecord(record: SignalDecisionRecord): SignalDeci
     coherence: record.coherence,
     outcome: record.outcome,
     accountability: record.accountability,
-    humanSummary: record.humanSummary || "Expired raw decision inputs were removed; the lesson remains in summaries.",
+    humanSummary:
+      record.humanSummary ||
+      "Expired raw decision inputs were removed; the lesson remains in summaries.",
     retentionTier: "expired",
   };
 }
 
-function humanSummaryFor(records: readonly SignalDecisionRecord[], lessons: readonly string[], averageCoherence?: number): string {
-  if (!records.length) return "No decisions were available for this memory summary.";
-  const coherence = averageCoherence === undefined ? "unknown" : `${Math.round(averageCoherence)}/100`;
-  const lesson = lessons[0] ?? "Signal should keep comparing decisions with outcomes before increasing confidence.";
+function humanSummaryFor(
+  records: readonly SignalDecisionRecord[],
+  lessons: readonly string[],
+  averageCoherence?: number,
+): string {
+  if (!records.length)
+    return "No decisions were available for this memory summary.";
+  const coherence =
+    averageCoherence === undefined
+      ? "unknown"
+      : `${Math.round(averageCoherence)}/100`;
+  const lesson =
+    lessons[0] ??
+    "Signal should keep comparing decisions with outcomes before increasing confidence.";
   return `Signal summarized ${records.length} decisions at ${coherence} average coherence. ${lesson}`;
 }
 
@@ -165,10 +197,22 @@ function compactObject(value: unknown): unknown {
   if (Array.isArray(value)) return value.slice(0, 12);
   const input = value as Record<string, unknown>;
   const output: Record<string, unknown> = {};
-  for (const key of ["score", "confidence", "trust", "risk", "status", "allowed", "reason", "reasons", "explanation"]) {
+  for (const key of [
+    "score",
+    "confidence",
+    "trust",
+    "risk",
+    "status",
+    "allowed",
+    "reason",
+    "reasons",
+    "explanation",
+  ]) {
     if (input[key] !== undefined) output[key] = input[key];
   }
-  return Object.keys(output).length ? output : { compacted: true, kind: objectKind(value) };
+  return Object.keys(output).length
+    ? output
+    : { compacted: true, kind: objectKind(value) };
 }
 
 function objectKind(value: unknown): string {
@@ -192,26 +236,41 @@ function uniqueStrings(values: readonly unknown[]): string[] {
 
 function average(values: readonly number[]): number | undefined {
   if (!values.length) return undefined;
-  return Math.round((values.reduce((total, value) => total + value, 0) / values.length) * 100) / 100;
+  return (
+    Math.round(
+      (values.reduce((total, value) => total + value, 0) / values.length) * 100,
+    ) / 100
+  );
 }
 
 function sum(values: readonly number[]): number {
-  return Math.round(values.reduce((total, value) => total + value, 0) * 100) / 100;
+  return (
+    Math.round(values.reduce((total, value) => total + value, 0) * 100) / 100
+  );
 }
 
 function minIso(values: readonly string[]): string | undefined {
-  const times = values.map((value) => new Date(value).getTime()).filter(Number.isFinite);
+  const times = values
+    .map((value) => new Date(value).getTime())
+    .filter(Number.isFinite);
   if (!times.length) return undefined;
   return new Date(Math.min(...times)).toISOString();
 }
 
 function maxIso(values: readonly string[]): string | undefined {
-  const times = values.map((value) => new Date(value).getTime()).filter(Number.isFinite);
+  const times = values
+    .map((value) => new Date(value).getTime())
+    .filter(Number.isFinite);
   if (!times.length) return undefined;
   return new Date(Math.max(...times)).toISOString();
 }
 
-function stableSummaryId(source: string, start: string, end: string, tier: RetentionTier): string {
+function stableSummaryId(
+  source: string,
+  start: string,
+  end: string,
+  tier: RetentionTier,
+): string {
   const seed = `${source}:${start}:${end}:${tier}`;
   let hash = 0;
   for (let index = 0; index < seed.length; index += 1) {

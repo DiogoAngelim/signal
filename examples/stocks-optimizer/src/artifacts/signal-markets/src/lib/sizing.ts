@@ -1,13 +1,13 @@
 import {
-  createViabilityReason,
-  evaluateViability,
-  sizeDecision,
   type SizingConstraint,
   type SizingDecision,
   type SizingMode,
   type SizingResult,
   type ViabilityResult,
   type ViabilityVerdict,
+  createViabilityReason,
+  evaluateViability,
+  sizeDecision,
 } from "../../../signal-framework";
 import { sizeAdaptiveOpportunity } from "../../../signal-framework/sizing/adaptive";
 
@@ -89,34 +89,67 @@ export type AssetExposureRequestInput = {
   maxExposurePct: number;
 };
 
-export function financialExposureBandForSizingMode(mode: SizingMode, strategyCapPct: number): FinancialExposureBand {
+export function financialExposureBandForSizingMode(
+  mode: SizingMode,
+  strategyCapPct: number,
+): FinancialExposureBand {
   const cap = clamp(strategyCapPct);
   if (mode === "none") return { minPct: 0, maxPct: 0, label: "0%" };
-  if (mode === "micro") return { minPct: 0, maxPct: Math.min(5, cap), label: "0-5%" };
-  if (mode === "small") return { minPct: Math.min(5, cap), maxPct: Math.min(15, cap), label: "5-15%" };
-  if (mode === "normal") return { minPct: Math.min(15, cap), maxPct: Math.min(40, cap), label: "15-40%" };
-  if (mode === "large") return { minPct: Math.min(40, cap), maxPct: Math.min(70, cap), label: "40-70%" };
+  if (mode === "micro")
+    return { minPct: 0, maxPct: Math.min(5, cap), label: "0-5%" };
+  if (mode === "small")
+    return {
+      minPct: Math.min(5, cap),
+      maxPct: Math.min(15, cap),
+      label: "5-15%",
+    };
+  if (mode === "normal")
+    return {
+      minPct: Math.min(15, cap),
+      maxPct: Math.min(40, cap),
+      label: "15-40%",
+    };
+  if (mode === "large")
+    return {
+      minPct: Math.min(40, cap),
+      maxPct: Math.min(70, cap),
+      label: "40-70%",
+    };
   return { minPct: Math.min(70, cap), maxPct: cap, label: "strategy cap" };
 }
 
 export function interpretSizingAsExposure(
   sizingResult: SizingResult,
   strategyCapPct: number,
-): Omit<FinancialSizingView, "sizingResult" | "sizingReasons" | "sizingConstraints"> {
-  const exposureBand = financialExposureBandForSizingMode(sizingResult.mode, strategyCapPct);
+): Omit<
+  FinancialSizingView,
+  "sizingResult" | "sizingReasons" | "sizingConstraints"
+> {
+  const exposureBand = financialExposureBandForSizingMode(
+    sizingResult.mode,
+    strategyCapPct,
+  );
   return {
     sizingDecision: sizingResult.decision,
     sizingMode: sizingResult.mode,
     exposureBand,
-    suggestedExposurePct: round(Math.min(sizingResult.size, exposureBand.maxPct, clamp(strategyCapPct))),
+    suggestedExposurePct: round(
+      Math.min(sizingResult.size, exposureBand.maxPct, clamp(strategyCapPct)),
+    ),
   };
 }
 
-export function buildDashboardExposureSizing(input: DashboardExposureSizingInput): DashboardExposureSizingView {
+export function buildDashboardExposureSizing(
+  input: DashboardExposureSizingInput,
+): DashboardExposureSizingView {
   const marketHealthPct = clamp(input.marketHealthPct);
   const opportunityDensityPct = clamp(input.opportunityDensityPct);
   const strategyCapPct = clamp(input.strategyCapPct);
-  const constraints = dashboardConstraints(input, marketHealthPct, opportunityDensityPct);
+  const constraints = dashboardConstraints(
+    input,
+    marketHealthPct,
+    opportunityDensityPct,
+  );
   const sizingResult = sizeAdaptiveOpportunity({
     targetRef: input.marketRef,
     actionRef: "market-exposure",
@@ -136,18 +169,35 @@ export function buildDashboardExposureSizing(input: DashboardExposureSizingInput
   const viabilityResult = evaluateViability({
     targetRef: input.marketRef,
     actionRef: "market-exposure",
-    expectedBenefit: clamp(marketHealthPct * 0.35 + opportunityDensityPct * 0.45 + input.confidencePct * 0.2),
+    expectedBenefit: clamp(
+      marketHealthPct * 0.35 +
+        opportunityDensityPct * 0.45 +
+        input.confidencePct * 0.2,
+    ),
     expectedCost: clamp(input.riskPct * 0.45),
     expectedRisk: input.riskPct,
     uncertainty: 100 - input.confidencePct,
     confidence: input.confidencePct,
     minMarginOfSafety: 0,
-    thresholds: { minConfidence: 35, maxRisk: 72, maxUncertainty: 70, maxCost: 85 },
+    thresholds: {
+      minConfidence: 35,
+      maxRisk: 72,
+      maxUncertainty: 70,
+      maxCost: 85,
+    },
     constraints: viabilityConstraintsFromSizing(constraints),
   });
-  const effectiveSizingResult = applyViabilityToSizing(sizingResult, viabilityResult);
-  const exposureView = interpretSizingAsExposure(effectiveSizingResult, strategyCapPct);
-  const suggestedMaximumExposurePct = input.hasProvidedSignals ? exposureView.suggestedExposurePct : 0;
+  const effectiveSizingResult = applyViabilityToSizing(
+    sizingResult,
+    viabilityResult,
+  );
+  const exposureView = interpretSizingAsExposure(
+    effectiveSizingResult,
+    strategyCapPct,
+  );
+  const suggestedMaximumExposurePct = input.hasProvidedSignals
+    ? exposureView.suggestedExposurePct
+    : 0;
   const limitedReason = exposureLimitReason({
     marketHealthPct,
     confidencePct: clamp(input.confidencePct),
@@ -177,23 +227,33 @@ export function buildDashboardExposureSizing(input: DashboardExposureSizingInput
 
 export function requestedExposureForAsset(input: AssetExposureRequestInput) {
   const maxExposurePct = clamp(input.maxExposurePct);
-  const allocationAction = input.allocationAction == null ? undefined : String(input.allocationAction);
+  const allocationAction =
+    input.allocationAction == null ? undefined : String(input.allocationAction);
 
   if (input.signalAction !== "Buy") return 0;
   if (allocationAction && allocationAction !== "Buy") return 0;
 
   const explicitExposure = positiveFinite(input.suggestedExposurePct);
-  if (explicitExposure != null) return round(clamp(explicitExposure, 0, maxExposurePct));
+  if (explicitExposure != null)
+    return round(clamp(explicitExposure, 0, maxExposurePct));
 
   const setupQuality = clamp(input.setupQuality);
   const riskPressure = clamp(input.riskPressure);
-  return round(clamp((setupQuality - riskPressure * 0.35) / 15, 0, maxExposurePct));
+  return round(
+    clamp((setupQuality - riskPressure * 0.35) / 15, 0, maxExposurePct),
+  );
 }
 
-export function sizeAssetExposure(input: AssetExposureSizingInput): FinancialSizingView {
+export function sizeAssetExposure(
+  input: AssetExposureSizingInput,
+): FinancialSizingView {
   const maxExposurePct = clamp(input.maxExposurePct);
   const constraints = assetConstraints(input);
-  const confidencePct = clamp(input.setupQuality * 0.48 + input.trendQuality * 0.32 + input.timingQuality * 0.2);
+  const confidencePct = clamp(
+    input.setupQuality * 0.48 +
+      input.trendQuality * 0.32 +
+      input.timingQuality * 0.2,
+  );
   const sizingResult = sizeAdaptiveOpportunity({
     targetRef: input.targetRef,
     actionRef: input.signalAction,
@@ -203,7 +263,9 @@ export function sizeAssetExposure(input: AssetExposureSizingInput): FinancialSiz
     riskControl: 100 - input.riskPressure,
     perceptionAlignment: clamp((input.trendQuality + input.timingQuality) / 2),
     systemTrust: confidencePct,
-    discoveryStrength: clamp(input.setupQuality * 0.55 + input.trendQuality * 0.45),
+    discoveryStrength: clamp(
+      input.setupQuality * 0.55 + input.trendQuality * 0.45,
+    ),
     risk: input.riskPressure,
     availableCapacity: maxExposurePct,
     requestedCapacity: clamp(input.requestedExposurePct, 0, maxExposurePct),
@@ -224,11 +286,22 @@ export function sizeAssetExposure(input: AssetExposureSizingInput): FinancialSiz
     uncertainty: 100 - confidencePct,
     confidence: confidencePct,
     minMarginOfSafety: 0,
-    thresholds: { minConfidence: 35, maxRisk: 72, maxUncertainty: 70, maxCost: 85 },
+    thresholds: {
+      minConfidence: 35,
+      maxRisk: 72,
+      maxUncertainty: 70,
+      maxCost: 85,
+    },
     constraints: viabilityConstraintsFromSizing(constraints),
   });
-  const effectiveSizingResult = applyViabilityToSizing(sizingResult, viabilityResult);
-  const exposureView = interpretSizingAsExposure(effectiveSizingResult, maxExposurePct);
+  const effectiveSizingResult = applyViabilityToSizing(
+    sizingResult,
+    viabilityResult,
+  );
+  const exposureView = interpretSizingAsExposure(
+    effectiveSizingResult,
+    maxExposurePct,
+  );
 
   return {
     ...exposureView,
@@ -247,21 +320,29 @@ export function assetSizingLabel(input: {
   sizingMode?: SizingMode;
 }) {
   if (input.allocationAction === "Sell") return "Risk exit";
-  if (input.allocationAction === "Blocked" || input.sizingMode === "none") return "Blocked";
-  if (input.allocationAction === "Buy" && Number(input.suggestedExposure ?? 0) > 0) {
+  if (input.allocationAction === "Blocked" || input.sizingMode === "none")
+    return "Blocked";
+  if (
+    input.allocationAction === "Buy" &&
+    Number(input.suggestedExposure ?? 0) > 0
+  ) {
     return Number(input.setupQuality ?? 0) >= 72 ? "Mature" : "Candidate";
   }
   return "Watch";
 }
 
-export function sizingModeLabelForOperator(mode: SizingMode | string | undefined) {
+export function sizingModeLabelForOperator(
+  mode: SizingMode | string | undefined,
+) {
   if (!mode || mode === "none") return "Sizing locked";
   if (mode === "micro") return "Micro";
   if (mode === "maxSafe") return "Max safe";
   return mode.charAt(0).toUpperCase() + mode.slice(1);
 }
 
-export function sizingModeSentenceForOperator(mode: SizingMode | string | undefined) {
+export function sizingModeSentenceForOperator(
+  mode: SizingMode | string | undefined,
+) {
   if (!mode || mode === "none") return "locked";
   if (mode === "maxSafe") return "max safe";
   return sizingModeLabelForOperator(mode).toLowerCase();
@@ -311,7 +392,9 @@ function dashboardConstraints(
       type: "hard",
       passed: input.strategyBlocked !== true,
       severity: "critical",
-      reason: input.strategyBlockedReason ?? "Strategy readiness gates block new exposure.",
+      reason:
+        input.strategyBlockedReason ??
+        "Strategy readiness gates block new exposure.",
     },
   ];
 }
@@ -322,7 +405,8 @@ function assetConstraints(input: AssetExposureSizingInput): SizingConstraint[] {
       id: "signal-persistence",
       label: "Signal persistence",
       type: "soft",
-      passed: input.signalStatus === "provided" || input.signalStatus === "confirmed",
+      passed:
+        input.signalStatus === "provided" || input.signalStatus === "confirmed",
       severity: "medium",
       reason: "Signal persistence is not confirmed.",
     },
@@ -362,7 +446,10 @@ function assetConstraints(input: AssetExposureSizingInput): SizingConstraint[] {
       id: "opportunity-density",
       label: "Opportunity density",
       type: "hard",
-      passed: input.signalAction === "Buy" && input.requestedExposurePct > 0 && input.expectedMove >= -0.5,
+      passed:
+        input.signalAction === "Buy" &&
+        input.requestedExposurePct > 0 &&
+        input.expectedMove >= -0.5,
       severity: "high",
       reason: "Actionable opportunity density is too low.",
     },
@@ -378,7 +465,8 @@ function assetConstraints(input: AssetExposureSizingInput): SizingConstraint[] {
       id: "strategy-readiness",
       label: "Strategy readiness",
       type: "hard",
-      passed: input.strategyBlocked !== true && maxPositive(input.maxExposurePct),
+      passed:
+        input.strategyBlocked !== true && maxPositive(input.maxExposurePct),
       severity: "critical",
       reason: "Strategy readiness gates block new exposure.",
     },
@@ -392,23 +480,37 @@ function exposureLimitReason(input: {
   sizingResult: SizingResult;
 }) {
   const strategyReadinessFailure = input.sizingResult.constraints.find(
-    (constraint) => constraint.id === "strategy-readiness" && !constraint.passed,
+    (constraint) =>
+      constraint.id === "strategy-readiness" && !constraint.passed,
   );
   if (strategyReadinessFailure?.reason) return strategyReadinessFailure.reason;
 
-  if (input.marketHealthPct >= 60 && input.confidencePct >= 60 && input.suggestedMaximumExposurePct === 0) {
+  if (
+    input.marketHealthPct >= 60 &&
+    input.confidencePct >= 60 &&
+    input.suggestedMaximumExposurePct === 0
+  ) {
     return "Market structure is healthy, but sizing is blocked because actionable opportunity density is too low or risk gates prevent position sizing.";
   }
 
-  const failedConstraint = input.sizingResult.constraints.find((constraint) => !constraint.passed);
+  const failedConstraint = input.sizingResult.constraints.find(
+    (constraint) => !constraint.passed,
+  );
   if (failedConstraint?.reason) return failedConstraint.reason;
-  const capReason = input.sizingResult.reasons.find((reason) => reason.startsWith("Capped by"));
+  const capReason = input.sizingResult.reasons.find((reason) =>
+    reason.startsWith("Capped by"),
+  );
   if (capReason) return normalizeCapacityReason(capReason);
-  return input.sizingResult.reasons[0] ?? "Sizing is limited by the current confidence, risk, and capacity inputs.";
+  return (
+    input.sizingResult.reasons[0] ??
+    "Sizing is limited by the current confidence, risk, and capacity inputs."
+  );
 }
 
 function normalizeCapacityReason(reason: string) {
-  const requestedCapacity = reason.match(/^Capped by requestedCapacity at ([\d.]+)/i);
+  const requestedCapacity = reason.match(
+    /^Capped by requestedCapacity at ([\d.]+)/i,
+  );
   if (requestedCapacity) {
     return `Portfolio exposure is capped by requested capacity at ${Number(requestedCapacity[1]).toFixed(1)}%.`;
   }
@@ -460,13 +562,20 @@ function applyViabilityToSizing(
     ...viabilityResult.warnings,
   ]);
 
-  if (viabilityResult.verdict === "viable" || viabilityResult.verdict === "marginal") {
+  if (
+    viabilityResult.verdict === "viable" ||
+    viabilityResult.verdict === "marginal"
+  ) {
     return { ...sizingResult, reasons };
   }
 
   return {
     ...sizingResult,
-    decision: sizingResult.decision === "blocked" || viabilityResult.verdict === "blocked" ? "blocked" : "deferred",
+    decision:
+      sizingResult.decision === "blocked" ||
+      viabilityResult.verdict === "blocked"
+        ? "blocked"
+        : "deferred",
     mode: "none",
     size: 0,
     normalizedSize: 0,

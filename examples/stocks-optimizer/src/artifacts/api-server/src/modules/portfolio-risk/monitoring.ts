@@ -14,7 +14,7 @@
  * - DAG tracing systems
  */
 
-import type { SignalOutcomeLog, ExecutionLog, PnlRecord } from "./types";
+import type { ExecutionLog, PnlRecord, SignalOutcomeLog } from "./types";
 
 /**
  * In-memory monitoring store for the current process.
@@ -84,14 +84,21 @@ export class MonitoringStore {
 
   // ── Slippage Tracking ─────────────────────────────────────────────
 
-  getSlippageStats(): { avgSlippageBps: number; maxSlippageBps: number; count: number } {
-    const withSlippage = this.executionLogs.filter((log) => log.slippageBps != null);
+  getSlippageStats(): {
+    avgSlippageBps: number;
+    maxSlippageBps: number;
+    count: number;
+  } {
+    const withSlippage = this.executionLogs.filter(
+      (log) => log.slippageBps != null,
+    );
     if (!withSlippage.length) {
       return { avgSlippageBps: 0, maxSlippageBps: 0, count: 0 };
     }
     const slippages = withSlippage.map((log) => log.slippageBps!);
     return {
-      avgSlippageBps: slippages.reduce((sum, s) => sum + s, 0) / slippages.length,
+      avgSlippageBps:
+        slippages.reduce((sum, s) => sum + s, 0) / slippages.length,
       maxSlippageBps: Math.max(...slippages),
       count: slippages.length,
     };

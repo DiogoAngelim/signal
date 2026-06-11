@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { selectStewardshipAction } from "../stewardshipPolicy";
-import type { StewardshipGovernanceAssessment, StewardshipLesson } from "../types";
+import type {
+  StewardshipGovernanceAssessment,
+  StewardshipLesson,
+} from "../types";
 
-function governance(overrides: Partial<StewardshipGovernanceAssessment> = {}): StewardshipGovernanceAssessment {
+function governance(
+  overrides: Partial<StewardshipGovernanceAssessment> = {},
+): StewardshipGovernanceAssessment {
   return {
     trustworthyEnough: true,
     status: "acceptable",
@@ -25,7 +30,10 @@ function governance(overrides: Partial<StewardshipGovernanceAssessment> = {}): S
   };
 }
 
-function lesson(outcome: StewardshipLesson["outcome"], repetition = 1): StewardshipLesson {
+function lesson(
+  outcome: StewardshipLesson["outcome"],
+  repetition = 1,
+): StewardshipLesson {
   return {
     id: `lesson:${outcome}:${repetition}`,
     label: "Lesson",
@@ -61,7 +69,10 @@ describe("selectStewardshipAction", () => {
 
     expect(
       selectStewardshipAction({
-        governance: governance({ concentrationRisk: "high", warnings: ["Concentration risk is elevated."] }),
+        governance: governance({
+          concentrationRisk: "high",
+          warnings: ["Concentration risk is elevated."],
+        }),
         lessons: [],
         threats: [],
         uncertainties: [],
@@ -73,7 +84,10 @@ describe("selectStewardshipAction", () => {
   it("reviews again for conflicting lessons", () => {
     expect(
       selectStewardshipAction({
-        governance: governance({ contradictionLevel: "high", warnings: ["Contradictory evidence needs review."] }),
+        governance: governance({
+          contradictionLevel: "high",
+          warnings: ["Contradictory evidence needs review."],
+        }),
         lessons: [lesson("confirmed", 2), lesson("mixed", 3)],
         threats: [],
         uncertainties: [],
@@ -97,7 +111,11 @@ describe("selectStewardshipAction", () => {
   it("pauses for missing accountability and stops for policy violations", () => {
     expect(
       selectStewardshipAction({
-        governance: governance({ accountabilityClarity: "weak", status: "weak", trustworthyEnough: false }),
+        governance: governance({
+          accountabilityClarity: "weak",
+          status: "weak",
+          trustworthyEnough: false,
+        }),
         lessons: [],
         threats: [],
         uncertainties: [],
@@ -107,7 +125,11 @@ describe("selectStewardshipAction", () => {
 
     expect(
       selectStewardshipAction({
-        governance: governance({ policyCompliance: "violated", status: "blocked", blockers: ["Policy compliance is violated."] }),
+        governance: governance({
+          policyCompliance: "violated",
+          status: "blocked",
+          blockers: ["Policy compliance is violated."],
+        }),
         lessons: [],
         threats: [],
         uncertainties: [],

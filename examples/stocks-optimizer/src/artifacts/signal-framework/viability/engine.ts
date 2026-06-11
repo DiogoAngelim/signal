@@ -153,10 +153,16 @@ export function evaluateViability(input: ViabilityInput): ViabilityResult {
     DEFAULT_THRESHOLDS.minMarginOfSafety,
   );
   const thresholds = {
-    minConfidence: ratio(input.thresholds?.minConfidence, DEFAULT_THRESHOLDS.minConfidence),
+    minConfidence: ratio(
+      input.thresholds?.minConfidence,
+      DEFAULT_THRESHOLDS.minConfidence,
+    ),
     maxCost: ratio(input.thresholds?.maxCost, DEFAULT_THRESHOLDS.maxCost),
     maxRisk: ratio(input.thresholds?.maxRisk, DEFAULT_THRESHOLDS.maxRisk),
-    maxUncertainty: ratio(input.thresholds?.maxUncertainty, DEFAULT_THRESHOLDS.maxUncertainty),
+    maxUncertainty: ratio(
+      input.thresholds?.maxUncertainty,
+      DEFAULT_THRESHOLDS.maxUncertainty,
+    ),
     minMarginOfSafety: requiredMarginOfSafety,
   };
   const marginOfSafety = calculateMarginOfSafety(input);
@@ -264,7 +270,10 @@ export function evaluateViabilityConstraint(
     score: evaluation.passed ? 100 : FAILED_CONSTRAINT_SCORE[severity],
     weight: positive(input.weight, 1),
     reason,
-    warning: !evaluation.passed && !blocker ? input.warning ?? reason : input.warning,
+    warning:
+      !evaluation.passed && !blocker
+        ? (input.warning ?? reason)
+        : input.warning,
     blocker,
     metadata: input.metadata,
   };
@@ -321,7 +330,10 @@ function normalizeViability(input: ViabilityInput): NormalizedViability {
       benefit: positive(input.weights?.benefit, DEFAULT_WEIGHTS.benefit),
       cost: positive(input.weights?.cost, DEFAULT_WEIGHTS.cost),
       risk: positive(input.weights?.risk, DEFAULT_WEIGHTS.risk),
-      uncertainty: positive(input.weights?.uncertainty, DEFAULT_WEIGHTS.uncertainty),
+      uncertainty: positive(
+        input.weights?.uncertainty,
+        DEFAULT_WEIGHTS.uncertainty,
+      ),
     },
   };
 }
@@ -366,7 +378,8 @@ function evaluateConstraintPass(input: ViabilityConstraintInput): {
 
   return {
     passed: true,
-    reason: "Constraint supplied without an evaluable rule; treated as informational.",
+    reason:
+      "Constraint supplied without an evaluable rule; treated as informational.",
   };
 }
 
@@ -485,12 +498,18 @@ function resolveVerdict(args: {
 
 function weightedConstraintScore(constraints: ViabilityConstraintResult[]) {
   if (!constraints.length) return 100;
-  const totalWeight = constraints.reduce((sum, constraint) => sum + constraint.weight, 0);
-  if (totalWeight <= 0) return mean(constraints.map((constraint) => constraint.score));
-  return constraints.reduce(
-    (sum, constraint) => sum + constraint.score * constraint.weight,
+  const totalWeight = constraints.reduce(
+    (sum, constraint) => sum + constraint.weight,
     0,
-  ) / totalWeight;
+  );
+  if (totalWeight <= 0)
+    return mean(constraints.map((constraint) => constraint.score));
+  return (
+    constraints.reduce(
+      (sum, constraint) => sum + constraint.score * constraint.weight,
+      0,
+    ) / totalWeight
+  );
 }
 
 function capScoreByVerdict(score: number, verdict: ViabilityVerdict) {
@@ -500,7 +519,9 @@ function capScoreByVerdict(score: number, verdict: ViabilityVerdict) {
   return score;
 }
 
-function normalizeSeverity(severity: ViabilityConstraintInput["severity"]): ViabilitySeverity {
+function normalizeSeverity(
+  severity: ViabilityConstraintInput["severity"],
+): ViabilitySeverity {
   return severity === "low" ||
     severity === "medium" ||
     severity === "high" ||
@@ -555,7 +576,9 @@ function formatSignedPercent(value: number) {
 }
 
 function formatNumber(value: number) {
-  return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+  return Number.isInteger(value)
+    ? String(value)
+    : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
 }
 
 function formatBoundary(value: number | undefined, fallback: string) {

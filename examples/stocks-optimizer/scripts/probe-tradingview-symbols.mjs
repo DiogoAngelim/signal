@@ -1,7 +1,9 @@
 const symbols = process.argv.slice(2);
 
 if (!symbols.length) {
-  console.error("Usage: node scripts/probe-tradingview-symbols.mjs 'EURONEXT OSLO:ASA' ASA ASA.OL EURONEXT:ASA OSL:ASA");
+  console.error(
+    "Usage: node scripts/probe-tradingview-symbols.mjs 'EURONEXT OSLO:ASA' ASA ASA.OL EURONEXT:ASA OSL:ASA",
+  );
   process.exit(1);
 }
 
@@ -124,7 +126,9 @@ for (const raw of symbols) {
   for (const candidate of variants(raw)) {
     const [yahoo, tvSearch] = await Promise.all([
       fetchYahooChart(candidate),
-      fetchTradingViewSymbolSearch(candidate.includes(":") ? candidate.split(":").at(-1) : candidate),
+      fetchTradingViewSymbolSearch(
+        candidate.includes(":") ? candidate.split(":").at(-1) : candidate,
+      ),
     ]);
 
     console.log(candidate, {

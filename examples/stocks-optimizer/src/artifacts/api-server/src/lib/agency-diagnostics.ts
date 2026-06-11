@@ -1,13 +1,13 @@
 import {
-  createAgencyPipeline,
-  createInMemoryAgencyMemory,
-  evaluateAgencyState,
   type AgencyAction,
   type AgencyCycleInput,
   type AgencyDecision,
   type AgencyTrace,
   type OutcomeInput,
   type SelfDiagnosisRecommendation,
+  createAgencyPipeline,
+  createInMemoryAgencyMemory,
+  evaluateAgencyState,
 } from "@signal/agency";
 import type { JudgementResult } from "../../../signal-framework";
 import type { TrustGovernorResult } from "../../../signal-framework/trust/engine";
@@ -141,14 +141,18 @@ export type StockAgencyDiagnostics = {
 };
 
 export type StockAgencyApplicationResult = {
-  signals: Array<StockAgencySignal & {
-    agencyTrace?: AgencyTrace;
-    agency?: StockAgencySignalAudit;
-  }>;
+  signals: Array<
+    StockAgencySignal & {
+      agencyTrace?: AgencyTrace;
+      agency?: StockAgencySignalAudit;
+    }
+  >;
   agencyDiagnostics: StockAgencyDiagnostics;
 };
 
-export function applyStockAgencyDiagnostics(input: StockAgencyDiagnosticsInput): StockAgencyApplicationResult {
+export function applyStockAgencyDiagnostics(
+  input: StockAgencyDiagnosticsInput,
+): StockAgencyApplicationResult {
   const signals = input.signals.filter((signal) => symbolOf(signal));
   const memory = createInMemoryAgencyMemory();
   const baseTimestamp = resolveBaseTimestamp(input.summary, signals);
@@ -197,11 +201,15 @@ export function applyStockAgencyDiagnostics(input: StockAgencyDiagnosticsInput):
       summary: summaryFor(
         traces,
         state.selfDiagnosis.recommendation,
-        enrichedSignals.map((signal) => signal.agency as StockAgencySignalAudit),
+        enrichedSignals.map(
+          (signal) => signal.agency as StockAgencySignalAudit,
+        ),
       ),
       state,
       traces,
-      signalAudits: enrichedSignals.map((signal) => signal.agency as StockAgencySignalAudit),
+      signalAudits: enrichedSignals.map(
+        (signal) => signal.agency as StockAgencySignalAudit,
+      ),
     },
   };
 }
@@ -224,11 +232,14 @@ function cycleInputForSignal(input: {
       price: numberOrNull(input.signal.price),
       setupQuality: numeric(input.signal.setupQuality),
       riskPressure: numeric(input.signal.riskPressure),
-      opportunityScore: numeric(input.signal.opportunityDiscovery?.candidateScore),
+      opportunityScore: numeric(
+        input.signal.opportunityDiscovery?.candidateScore,
+      ),
     },
     intelligence: {
       signalAction: input.signal.signalAction ?? "Hold",
-      allocationAction: input.signal.allocationAction ?? input.signal.signalAction ?? "Hold",
+      allocationAction:
+        input.signal.allocationAction ?? input.signal.signalAction ?? "Hold",
       expectedMove: numeric(input.signal.expectedMove),
       trendQuality: numeric(input.signal.trendQuality),
       timingQuality: numeric(input.signal.timingQuality),
@@ -246,28 +257,39 @@ function cycleInputForSignal(input: {
   };
 }
 
-function decisionFor(signal: StockAgencySignal, confidence: number, symbol: string): AgencyDecision {
+function decisionFor(
+  signal: StockAgencySignal,
+  confidence: number,
+  symbol: string,
+): AgencyDecision {
   const rawConfidence = rawConfidenceFor(signal);
   const calibratedConfidence = calibratedConfidenceFor(signal, undefined);
   return {
     decisionId: `${symbol}:${signal.signalAction ?? "Hold"}`,
     kind: decisionKindFor(signal),
     confidence,
-    rationale: signal.explanation ?? signal.rejectionReason ?? "Signal decision translated into an agency trace.",
+    rationale:
+      signal.explanation ??
+      signal.rejectionReason ??
+      "Signal decision translated into an agency trace.",
     expectedOutcome: expectedOutcomeFor(signal),
     metadata: {
       symbol,
       signalAction: signal.signalAction ?? "Hold",
-      allocationAction: signal.allocationAction ?? signal.signalAction ?? "Hold",
+      allocationAction:
+        signal.allocationAction ?? signal.signalAction ?? "Hold",
       sizingMode: signal.sizingMode ?? "none",
       rawConfidence,
       calibratedConfidence,
-      trustworthiness: finiteNumber(signal.trustworthiness) ?? calibratedConfidence,
+      trustworthiness:
+        finiteNumber(signal.trustworthiness) ?? calibratedConfidence,
       calibrationWarnings: signal.calibrationWarnings ?? [],
       ...(signal.judgement ? { judgement: signal.judgement } : {}),
       ...(signal.trustGovernor ? { trustGovernor: signal.trustGovernor } : {}),
       ...(signal.belief ? { belief: signal.belief } : {}),
-      ...(signal.survivalMemory ? { survivalMemory: signal.survivalMemory } : {}),
+      ...(signal.survivalMemory
+        ? { survivalMemory: signal.survivalMemory }
+        : {}),
     },
   };
 }
@@ -307,11 +329,17 @@ function outcomeFor(trade?: StockAgencyTrade): OutcomeInput {
   };
 }
 
-function blockReasonsFor(signal: StockAgencySignal, summary?: StockAgencySummary) {
+function blockReasonsFor(
+  signal: StockAgencySignal,
+  summary?: StockAgencySummary,
+) {
   const reasons: string[] = [];
   const riskPressure = numeric(signal.riskPressure);
 
-  if (signal.allocationAction === "Blocked" || signal.signalStatus === "blocked") {
+  if (
+    signal.allocationAction === "Blocked" ||
+    signal.signalStatus === "blocked"
+  ) {
     reasons.push("strategy_readiness_blocked");
   }
 
@@ -326,36 +354,63 @@ function blockReasonsFor(signal: StockAgencySignal, summary?: StockAgencySummary
   if (
     signal.belief &&
     signal.belief.verdict !== "justified" &&
-    (signal.allocationAction === "Blocked" || signal.signalStatus === "blocked" || signal.allocationAction === "Watch")
+    (signal.allocationAction === "Blocked" ||
+      signal.signalStatus === "blocked" ||
+      signal.allocationAction === "Watch")
   ) {
-    reasons.push(`belief_${String(signal.belief.verdict).replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`);
+    reasons.push(
+      `belief_${String(signal.belief.verdict)
+        .replace(/[^a-z0-9]+/gi, "_")
+        .toLowerCase()}`,
+    );
   }
 
-  if (signal.judgement?.status === "blocked" || signal.judgement?.status === "review_required") {
+  if (
+    signal.judgement?.status === "blocked" ||
+    signal.judgement?.status === "review_required"
+  ) {
     reasons.push(`judgement_${signal.judgement.status}`);
   }
 
-  if (isParticipationAction(signal) && signal.survivalMemory?.recommendation === "wait") {
+  if (
+    isParticipationAction(signal) &&
+    signal.survivalMemory?.recommendation === "wait"
+  ) {
     reasons.push("survival_memory_wait");
   }
 
-  if (signal.trustGovernor && !signal.trustGovernor.allowsNewExposure && isParticipationAction(signal)) {
-    reasons.push(`trust_${signal.trustGovernor.primaryBlocker ?? signal.trustGovernor.participationMode}`);
+  if (
+    signal.trustGovernor &&
+    !signal.trustGovernor.allowsNewExposure &&
+    isParticipationAction(signal)
+  ) {
+    reasons.push(
+      `trust_${signal.trustGovernor.primaryBlocker ?? signal.trustGovernor.participationMode}`,
+    );
   }
 
-  if (summary?.promotionBlocked === true || summary?.strategyReadiness?.blocked === true) {
+  if (
+    summary?.promotionBlocked === true ||
+    summary?.strategyReadiness?.blocked === true
+  ) {
     reasons.push("system_readiness_blocked");
   }
 
   return reasons;
 }
 
-function auditForTrace(symbol: string, trace: AgencyTrace): StockAgencySignalAudit {
+function auditForTrace(
+  symbol: string,
+  trace: AgencyTrace,
+): StockAgencySignalAudit {
   const trustAdjustment = reducedSizeOutcomeTrustAdjustment(trace);
-  const trustAdjustmentReason = trustAdjustment > 0
-    ? "Clean reduced-size outcome evidence improves Agency trust without restoring normal sizing."
-    : undefined;
-  const adjustedTrust = round(clamp(trace.selfDiagnosis.trust + trustAdjustment, 0, 1));
+  const trustAdjustmentReason =
+    trustAdjustment > 0
+      ? "Clean reduced-size outcome evidence improves Agency trust without restoring normal sizing."
+      : undefined;
+  const adjustedTrust = round(
+    clamp(trace.selfDiagnosis.trust + trustAdjustment, 0, 1),
+  );
   const reasons = unique([
     ...trace.selfDiagnosis.reasons,
     ...(trustAdjustmentReason ? [trustAdjustmentReason] : []),
@@ -368,16 +423,23 @@ function auditForTrace(symbol: string, trace: AgencyTrace): StockAgencySignalAud
     allowed: trace.policy.allowed,
     requiresApproval: trace.policy.requiresApproval,
     actionKind: trace.action?.kind ?? null,
-    outcomeLabel: trace.outcome!.outcomeLabel,
+    outcomeLabel: trace.outcome?.outcomeLabel,
     trust: adjustedTrust,
     rawConfidence: numeric((trace.decision.metadata as any)?.rawConfidence),
-    calibratedConfidence: numeric((trace.decision.metadata as any)?.calibratedConfidence),
+    calibratedConfidence: numeric(
+      (trace.decision.metadata as any)?.calibratedConfidence,
+    ),
     trustworthiness: numeric((trace.decision.metadata as any)?.trustworthiness),
-    calibrationWarnings: Array.isArray((trace.decision.metadata as any)?.calibrationWarnings)
+    calibrationWarnings: Array.isArray(
+      (trace.decision.metadata as any)?.calibrationWarnings,
+    )
       ? (trace.decision.metadata as any).calibrationWarnings
       : [],
-    survivalRecommendation: (trace.decision.metadata as any)?.survivalMemory?.recommendation,
-    survivalWarnings: Array.isArray((trace.decision.metadata as any)?.survivalMemory?.mainWarnings)
+    survivalRecommendation: (trace.decision.metadata as any)?.survivalMemory
+      ?.recommendation,
+    survivalWarnings: Array.isArray(
+      (trace.decision.metadata as any)?.survivalMemory?.mainWarnings,
+    )
       ? (trace.decision.metadata as any).survivalMemory.mainWarnings
       : [],
     recommendation: trace.selfDiagnosis.recommendation,
@@ -395,9 +457,14 @@ function summaryFor(
   const traceCount = traces.length;
   const allowedActions = traces.filter((trace) => trace.policy.allowed).length;
   const blockedActions = traceCount - allowedActions;
-  const missingOutcomes = traces.filter((trace) => trace.outcome?.success === null).length;
+  const missingOutcomes = traces.filter(
+    (trace) => trace.outcome?.success === null,
+  ).length;
   const baseAverageTrust = traceCount
-    ? round(traces.reduce((sum, trace) => sum + trace.selfDiagnosis.trust, 0) / traceCount)
+    ? round(
+        traces.reduce((sum, trace) => sum + trace.selfDiagnosis.trust, 0) /
+          traceCount,
+      )
     : 0;
   const averageTrust = audits.length
     ? round(audits.reduce((sum, audit) => sum + audit.trust, 0) / audits.length)
@@ -410,18 +477,23 @@ function summaryFor(
     blockedActions,
     missingOutcomes,
     averageTrust,
-    ...(trustAdjustment > 0 ? {
-      baseAverageTrust,
-      trustAdjustment,
-      trustAdjustmentReason: "Clean reduced-size outcomes are improving Agency trust while normal sizing remains gated.",
-    } : {}),
+    ...(trustAdjustment > 0
+      ? {
+          baseAverageTrust,
+          trustAdjustment,
+          trustAdjustmentReason:
+            "Clean reduced-size outcomes are improving Agency trust while normal sizing remains gated.",
+        }
+      : {}),
     recommendation,
   };
 }
 
 function reducedSizeOutcomeTrustAdjustment(trace: AgencyTrace) {
   const metadata = trace.decision.metadata as Record<string, any>;
-  const survivalMemory = metadata.survivalMemory as Record<string, any> | undefined;
+  const survivalMemory = metadata.survivalMemory as
+    | Record<string, any>
+    | undefined;
   const calibratedConfidence = numeric(metadata.calibratedConfidence);
   const trustworthiness = numeric(metadata.trustworthiness);
   const survivalConfidence = numeric(survivalMemory?.survivalConfidence);
@@ -438,12 +510,30 @@ function reducedSizeOutcomeTrustAdjustment(trace: AgencyTrace) {
 
   if (!isCleanReducedSizeTrace) return 0;
 
-  const requestExposureCredit = trace.action?.kind === "request_exposure" ? 0.025 : 0.01;
-  const survivalCredit = Math.min(0.025, Math.max(0, (survivalConfidence - 55) / 600));
-  const calibrationCredit = Math.min(0.02, Math.max(0, (calibratedConfidence - 60) / 1_000));
-  const trustworthinessCredit = Math.min(0.015, Math.max(0, (trustworthiness - 70) / 1_000));
+  const requestExposureCredit =
+    trace.action?.kind === "request_exposure" ? 0.025 : 0.01;
+  const survivalCredit = Math.min(
+    0.025,
+    Math.max(0, (survivalConfidence - 55) / 600),
+  );
+  const calibrationCredit = Math.min(
+    0.02,
+    Math.max(0, (calibratedConfidence - 60) / 1_000),
+  );
+  const trustworthinessCredit = Math.min(
+    0.015,
+    Math.max(0, (trustworthiness - 70) / 1_000),
+  );
 
-  return round(Math.min(0.08, requestExposureCredit + survivalCredit + calibrationCredit + trustworthinessCredit));
+  return round(
+    Math.min(
+      0.08,
+      requestExposureCredit +
+        survivalCredit +
+        calibrationCredit +
+        trustworthinessCredit,
+    ),
+  );
 }
 
 function latestTradesBySymbol(trades: StockAgencyTrade[]) {
@@ -454,7 +544,10 @@ function latestTradesBySymbol(trades: StockAgencyTrade[]) {
     if (!symbol) continue;
 
     const current = bySymbol.get(symbol);
-    if (current === undefined || String(trade.exitDate ?? "") >= String(current.exitDate ?? "")) {
+    if (
+      current === undefined ||
+      String(trade.exitDate ?? "") >= String(current.exitDate ?? "")
+    ) {
       bySymbol.set(symbol, trade);
     }
   }
@@ -462,33 +555,48 @@ function latestTradesBySymbol(trades: StockAgencyTrade[]) {
   return bySymbol;
 }
 
-function resolveBaseTimestamp(summary: StockAgencySummary | undefined, signals: StockAgencySignal[]) {
+function resolveBaseTimestamp(
+  summary: StockAgencySummary | undefined,
+  signals: StockAgencySignal[],
+) {
   const candidates = [
     summary?.updatedAt,
     ...signals.map((signal) => signal.observedAt),
     ...signals.map((signal) => signal.signalDate),
     "1970-01-01T00:00:00.000Z",
   ];
-  const candidate = candidates.find((value) => typeof value === "string" && !Number.isNaN(Date.parse(value)));
+  const candidate = candidates.find(
+    (value) => typeof value === "string" && !Number.isNaN(Date.parse(value)),
+  );
   return new Date(candidate as string).toISOString();
 }
 
-function requiresHumanApproval(signal: StockAgencySignal, summary?: StockAgencySummary) {
-  return isParticipationAction(signal) && (
-    signal.survivalMemory?.recommendation === "wait" ||
-    !readinessAllowsParticipation(signal, summary) ||
-    signal.judgement?.status === "review_required" ||
-    trustRequiresHumanApproval(signal.trustGovernor) ||
-    trustRequiresHumanApproval(summary?.trustGovernor)
+function requiresHumanApproval(
+  signal: StockAgencySignal,
+  summary?: StockAgencySummary,
+) {
+  return (
+    isParticipationAction(signal) &&
+    (signal.survivalMemory?.recommendation === "wait" ||
+      !readinessAllowsParticipation(signal, summary) ||
+      signal.judgement?.status === "review_required" ||
+      trustRequiresHumanApproval(signal.trustGovernor) ||
+      trustRequiresHumanApproval(summary?.trustGovernor))
   );
 }
 
-function readinessAllowsParticipation(signal: StockAgencySignal, summary?: StockAgencySummary) {
+function readinessAllowsParticipation(
+  signal: StockAgencySignal,
+  summary?: StockAgencySummary,
+) {
   if (summary?.productionEligible === true) {
     return true;
   }
 
-  if (summary?.promotionBlocked === true || summary?.strategyReadiness?.blocked === true) {
+  if (
+    summary?.promotionBlocked === true ||
+    summary?.strategyReadiness?.blocked === true
+  ) {
     return false;
   }
 
@@ -501,23 +609,38 @@ function readinessAllowsParticipation(signal: StockAgencySignal, summary?: Stock
     trustGovernor?.allowsNewExposure === true &&
     !trustRequiresHumanApproval(trustGovernor);
 
-  return (stage === "limited-live" || stage === "production-eligible") && trustAllowsLimitedLive;
+  return (
+    (stage === "limited-live" || stage === "production-eligible") &&
+    trustAllowsLimitedLive
+  );
 }
 
-function trustRequiresHumanApproval(trustGovernor?: TrustGovernorResult | null) {
+function trustRequiresHumanApproval(
+  trustGovernor?: TrustGovernorResult | null,
+) {
   if (!trustGovernor) {
     return false;
   }
 
   const hardBlocker = Array.isArray(trustGovernor.blockers)
-    ? trustGovernor.blockers.some((blocker) => blocker.severity === "high" || blocker.severity === "critical")
+    ? trustGovernor.blockers.some(
+        (blocker) =>
+          blocker.severity === "high" || blocker.severity === "critical",
+      )
     : false;
 
-  return hardBlocker || (trustGovernor.requiresReview === true && trustGovernor.allowsNewExposure !== true);
+  return (
+    hardBlocker ||
+    (trustGovernor.requiresReview === true &&
+      trustGovernor.allowsNewExposure !== true)
+  );
 }
 
 function maxSizeFor(signal: StockAgencySignal, summary?: StockAgencySummary) {
-  if (isParticipationAction(signal) && signal.survivalMemory?.recommendation === "wait") {
+  if (
+    isParticipationAction(signal) &&
+    signal.survivalMemory?.recommendation === "wait"
+  ) {
     return 0;
   }
 
@@ -525,7 +648,10 @@ function maxSizeFor(signal: StockAgencySignal, summary?: StockAgencySummary) {
     return 0;
   }
 
-  if (signal.judgement?.status === "blocked" || signal.judgement?.status === "review_required") {
+  if (
+    signal.judgement?.status === "blocked" ||
+    signal.judgement?.status === "review_required"
+  ) {
     return 0;
   }
 
@@ -536,14 +662,26 @@ function maxSizeFor(signal: StockAgencySignal, summary?: StockAgencySummary) {
     finiteNumber(summary?.maxPositionPct) ??
     finiteNumber(summary?.strategyReadiness?.maxPositionPct);
   const survivalCap = finiteNumber(signal.survivalMemory?.maxExposurePct);
-  return Math.max(0, Math.min(configuredCap ?? numeric(signal.suggestedExposure), survivalCap ?? Number.POSITIVE_INFINITY));
+  return Math.max(
+    0,
+    Math.min(
+      configuredCap ?? numeric(signal.suggestedExposure),
+      survivalCap ?? Number.POSITIVE_INFINITY,
+    ),
+  );
 }
 
-function confidenceFor(signal: StockAgencySignal, summary?: StockAgencySummary) {
+function confidenceFor(
+  signal: StockAgencySignal,
+  summary?: StockAgencySummary,
+) {
   return round(clamp(calibratedConfidenceFor(signal, summary) / 100, 0, 1));
 }
 
-function rawConfidenceFor(signal: StockAgencySignal, summary?: StockAgencySummary) {
+function rawConfidenceFor(
+  signal: StockAgencySignal,
+  summary?: StockAgencySummary,
+) {
   return (
     finiteNumber(signal.rawConfidence) ??
     finiteNumber(signal.signalConfidence) ??
@@ -557,14 +695,17 @@ function rawConfidenceFor(signal: StockAgencySignal, summary?: StockAgencySummar
   );
 }
 
-function calibratedConfidenceFor(signal: StockAgencySignal, summary?: StockAgencySummary) {
+function calibratedConfidenceFor(
+  signal: StockAgencySignal,
+  summary?: StockAgencySummary,
+) {
   return Math.min(
     rawConfidenceFor(signal, summary),
     finiteNumber(signal.calibratedConfidence) ??
       finiteNumber(summary?.calibratedConfidence) ??
-    finiteNumber(summary?.strategyReadiness?.calibratedConfidence) ??
-    finiteNumber(summary?.strategyReadiness?.maxConfidence) ??
-    rawConfidenceFor(signal, summary),
+      finiteNumber(summary?.strategyReadiness?.calibratedConfidence) ??
+      finiteNumber(summary?.strategyReadiness?.maxConfidence) ??
+      rawConfidenceFor(signal, summary),
     finiteNumber(signal.trustGovernor?.confidenceCap) ?? 100,
     finiteNumber(signal.trustGovernor?.trustScore) ?? 100,
     finiteNumber(summary?.trustGovernor?.confidenceCap) ?? 100,
@@ -583,13 +724,17 @@ function decisionKindFor(signal: StockAgencySignal) {
 }
 
 function expectedOutcomeFor(signal: StockAgencySignal) {
-  if (isParticipationAction(signal)) return "Positive measured follow-through after sized participation.";
-  if (signal.signalAction === "Sell") return "Lower exposure while risk remains elevated.";
+  if (isParticipationAction(signal))
+    return "Positive measured follow-through after sized participation.";
+  if (signal.signalAction === "Sell")
+    return "Lower exposure while risk remains elevated.";
   return "More evidence before taking a sized action.";
 }
 
 function sizingRationaleFor(signal: StockAgencySignal) {
-  const reasons = Array.isArray(signal.sizingReasons) ? signal.sizingReasons.filter(Boolean) : [];
+  const reasons = Array.isArray(signal.sizingReasons)
+    ? signal.sizingReasons.filter(Boolean)
+    : [];
   return reasons[0] ?? "Sizing translated from the current strategy decision.";
 }
 
@@ -612,7 +757,9 @@ function durationMs(start?: string, end?: string) {
 }
 
 function symbolOf(value: { symbol?: string; ticker?: string }) {
-  return String(value.symbol ?? value.ticker ?? "").trim().toUpperCase();
+  return String(value.symbol ?? value.ticker ?? "")
+    .trim()
+    .toUpperCase();
 }
 
 function numberOrNull(value: unknown) {
@@ -638,7 +785,12 @@ function clamp(value: number, min: number, max: number) {
 }
 
 function cleanId(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "unknown";
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "unknown"
+  );
 }
 
 function normalizeToken(value: unknown) {

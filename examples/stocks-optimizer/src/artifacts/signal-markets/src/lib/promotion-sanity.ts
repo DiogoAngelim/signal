@@ -14,7 +14,9 @@ export function sanitizePromotionState(input: any) {
     summary.maxDrawdownPct == null ||
     !Number.isFinite(Number(summary.maxDrawdownPct));
 
-  const excessReturn = Number(summary.excessReturnPct ?? summary.excessReturn ?? 0);
+  const excessReturn = Number(
+    summary.excessReturnPct ?? summary.excessReturn ?? 0,
+  );
 
   const benchmarkFailed =
     summary.benchmarkStatus === "Failed" ||
@@ -23,7 +25,8 @@ export function sanitizePromotionState(input: any) {
     excessReturn < 0;
 
   const insufficientSegments =
-    Number(summary.segmentCount ?? 0) < Number(summary.minimumRequiredSegments ?? 3);
+    Number(summary.segmentCount ?? 0) <
+    Number(summary.minimumRequiredSegments ?? 3);
 
   if (sharpeInvalid) flags.add("INVALID_SHARPE");
   if (drawdownInvalid) flags.add("INVALID_DRAWDOWN");

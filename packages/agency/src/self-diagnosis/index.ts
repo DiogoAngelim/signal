@@ -17,26 +17,33 @@ export type SelfDiagnosisInput = {
   config?: SelfDiagnosisConfig;
 };
 
-export function diagnoseAgencyState(input: SelfDiagnosisInput): SelfDiagnosisResult {
+export function diagnoseAgencyState(
+  input: SelfDiagnosisInput,
+): SelfDiagnosisResult {
   const history = input.history;
   const total = history.length;
-  const recentWindow = positiveInteger(input.config?.recentWindow ?? DEFAULT_RECENT_WINDOW, "recentWindow");
+  const recentWindow = positiveInteger(
+    input.config?.recentWindow ?? DEFAULT_RECENT_WINDOW,
+    "recentWindow",
+  );
   const minimumTraceCount = positiveInteger(
     input.config?.minimumTraceCount ?? DEFAULT_MINIMUM_TRACE_COUNT,
     "minimumTraceCount",
   );
-  const missingOutcomeRatio = total === 0 ? 1 : countMissingOutcomes(history) / total;
-  const policyViolationRatio = total === 0 ? 0 : countPolicyViolations(history) / total;
+  const missingOutcomeRatio =
+    total === 0 ? 1 : countMissingOutcomes(history) / total;
+  const policyViolationRatio =
+    total === 0 ? 0 : countPolicyViolations(history) / total;
   const dataReliability = calculateDataReliability(history);
   const calibrationHealth = calibrationHealthScore(input.calibration);
   const overfitRisk = calculateOverfitRisk(history, minimumTraceCount);
   const recentSuccessRate = calculateRecentSuccessRate(history, recentWindow);
   const trust = round(
-    dataReliability * 0.25
-      + calibrationHealth * 0.25
-      + (1 - overfitRisk) * 0.2
-      + recentSuccessRate * 0.2
-      + (1 - policyViolationRatio) * 0.1,
+    dataReliability * 0.25 +
+      calibrationHealth * 0.25 +
+      (1 - overfitRisk) * 0.2 +
+      recentSuccessRate * 0.2 +
+      (1 - policyViolationRatio) * 0.1,
   );
 
   return {
@@ -44,7 +51,12 @@ export function diagnoseAgencyState(input: SelfDiagnosisInput): SelfDiagnosisRes
     dataReliability,
     calibrationHealth,
     overfitRisk,
-    recommendation: recommendationFor(trust, missingOutcomeRatio, policyViolationRatio, input.calibration),
+    recommendation: recommendationFor(
+      trust,
+      missingOutcomeRatio,
+      policyViolationRatio,
+      input.calibration,
+    ),
     reasons: reasonsFor({
       dataReliability,
       calibration: input.calibration,
@@ -61,16 +73,22 @@ function calculateDataReliability(history: readonly AgencyTrace[]) {
     return 0.5;
   }
 
-  const contextCompleteness = average(history.map((trace) => {
-    const perceptionScore = trace.perception === undefined ? 0 : 1;
-    const intelligenceScore = trace.intelligence === undefined ? 0 : 1;
-    return (perceptionScore + intelligenceScore + 2) / 4;
-  }));
-  const outcomeCompleteness = 1 - countMissingOutcomes(history) / history.length;
+  const contextCompleteness = average(
+    history.map((trace) => {
+      const perceptionScore = trace.perception === undefined ? 0 : 1;
+      const intelligenceScore = trace.intelligence === undefined ? 0 : 1;
+      return (perceptionScore + intelligenceScore + 2) / 4;
+    }),
+  );
+  const outcomeCompleteness =
+    1 - countMissingOutcomes(history) / history.length;
   return round(contextCompleteness * 0.5 + outcomeCompleteness * 0.5);
 }
 
-function calculateOverfitRisk(history: readonly AgencyTrace[], minimumTraceCount: number) {
+function calculateOverfitRisk(
+  history: readonly AgencyTrace[],
+  minimumTraceCount: number,
+) {
   if (history.length < minimumTraceCount) {
     return 0.8;
   }
@@ -83,7 +101,10 @@ function calculateOverfitRisk(history: readonly AgencyTrace[], minimumTraceCount
   return round(Math.max(0, Math.min(1, 1 - uniqueKinds / history.length)));
 }
 
-function calculateRecentSuccessRate(history: readonly AgencyTrace[], recentWindow: number) {
+function calculateRecentSuccessRate(
+  history: readonly AgencyTrace[],
+  recentWindow: number,
+) {
   const known = history
     .filter((trace) => typeof trace.outcome?.success === "boolean")
     .slice(-recentWindow);
@@ -92,7 +113,10 @@ function calculateRecentSuccessRate(history: readonly AgencyTrace[], recentWindo
     return 0.5;
   }
 
-  return round(known.filter((trace) => trace.outcome?.success === true).length / known.length);
+  return round(
+    known.filter((trace) => trace.outcome?.success === true).length /
+      known.length,
+  );
 }
 
 function calibrationHealthScore(calibration: CalibrationResult) {
@@ -182,7 +206,9 @@ function reasonsFor(input: {
 }
 
 function countMissingOutcomes(history: readonly AgencyTrace[]) {
-  return history.filter((trace) => trace.outcome === undefined || trace.outcome.success === null).length;
+  return history.filter(
+    (trace) => trace.outcome === undefined || trace.outcome.success === null,
+  ).length;
 }
 
 function countPolicyViolations(history: readonly AgencyTrace[]) {

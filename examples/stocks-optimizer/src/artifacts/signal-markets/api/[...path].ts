@@ -31,7 +31,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       method: req.method,
       headers: {
         accept: String(req.headers.accept ?? "application/json"),
-        "content-type": String(req.headers["content-type"] ?? "application/json"),
+        "content-type": String(
+          req.headers["content-type"] ?? "application/json",
+        ),
       },
       body:
         req.method && ["POST", "PUT", "PATCH", "DELETE"].includes(req.method)
@@ -39,7 +41,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           : undefined,
     });
 
-    const contentType = upstream.headers.get("content-type") ?? "application/json";
+    const contentType =
+      upstream.headers.get("content-type") ?? "application/json";
     const text = await upstream.text();
 
     res.status(upstream.status);

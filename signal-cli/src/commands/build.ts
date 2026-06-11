@@ -13,17 +13,17 @@
 import { execSync } from "node:child_process";
 import { existsSync, statSync } from "node:fs";
 import { resolve } from "node:path";
-import { executeVerify } from "./verify.js";
-import { readState, addPhase } from "../state/stateStore.js";
+import { DEFAULT_BUILD_COMMAND, GENESIS_HASH } from "../core/constants.js";
 import {
   createPhaseState,
-  hashValue,
-  hashDirectory,
   getPreviousHash,
+  hashDirectory,
+  hashValue,
 } from "../core/hashChain.js";
-import { DEFAULT_BUILD_COMMAND, GENESIS_HASH } from "../core/constants.js";
-import { writeProof, PROOF_TYPES } from "../proofs/proofWriter.js";
+import { PROOF_TYPES, writeProof } from "../proofs/proofWriter.js";
+import { addPhase, readState } from "../state/stateStore.js";
 import type { ExecutionTrace } from "../state/types.js";
+import { executeVerify } from "./verify.js";
 
 /**
  * Execute the `signal build` command.
@@ -33,7 +33,7 @@ import type { ExecutionTrace } from "../state/types.js";
  */
 export function executeBuild(
   buildCommand: string = DEFAULT_BUILD_COMMAND,
-  outputDir: string = "dist",
+  outputDir = "dist",
   root: string = process.cwd(),
 ): boolean {
   console.log("SIGNAL: Running build wrapper...");
@@ -58,9 +58,10 @@ export function executeBuild(
 
   // Capture pre-build state
   const preState = readState(root);
-  const preLastHash = preState.phases.length > 0
-    ? preState.phases[preState.phases.length - 1]!.hash
-    : GENESIS_HASH;
+  const preLastHash =
+    preState.phases.length > 0
+      ? preState.phases[preState.phases.length - 1]?.hash
+      : GENESIS_HASH;
 
   // Step 2: Run build command
   console.log(`SIGNAL: [2/4] Running build command: ${buildCommand}`);
@@ -93,7 +94,11 @@ export function executeBuild(
       "FAIL",
       [],
       false,
-      { errorCode: "BUILD_FAILED", phase: -1, message: "Build command exited with non-zero code" },
+      {
+        errorCode: "BUILD_FAILED",
+        phase: -1,
+        message: "Build command exited with non-zero code",
+      },
       root,
     );
     return false;
@@ -144,7 +149,9 @@ export function executeBuild(
   console.log("SIGNAL: [4/4] Running post-build verification...");
   const postVerify = executeVerify(root);
   if (!postVerify) {
-    console.error("SIGNAL: ✗ Post-build verification failed. State drift detected!");
+    console.error(
+      "SIGNAL: ✗ Post-build verification failed. State drift detected!",
+    );
     writeProof(
       PROOF_TYPES.BUILD_PROOF,
       "FAIL",

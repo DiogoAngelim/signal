@@ -1,21 +1,21 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   createProtocolError,
+  createSignalCapabilities,
   createSignalEnvelope,
   createSignalError,
   createSignalName,
-  createSignalCapabilities,
   fail,
   isSignalEnvelope,
   isSignalName,
   looksPastTense,
-  parseSignalName,
   ok,
-  validateSignalEnvelope,
+  parseSignalName,
   signalCapabilitiesSchema,
   signalErrorSchema,
   signalNameSchema,
   signalResultSchema,
+  validateSignalEnvelope,
 } from "../src";
 
 describe("protocol", () => {
@@ -73,7 +73,9 @@ describe("protocol", () => {
     const parseSpy = vi
       .spyOn(signalNameSchema, "parse")
       .mockReturnValueOnce("broken" as never);
-    expect(() => parseSignalName("broken")).toThrow("Invalid Signal name: broken");
+    expect(() => parseSignalName("broken")).toThrow(
+      "Invalid Signal name: broken",
+    );
     parseSpy.mockRestore();
     expect(createSignalName("payment", "captured")).toBe("payment.captured.v1");
     expect(looksPastTense("captured")).toBe(true);
@@ -85,10 +87,14 @@ describe("protocol", () => {
   it("creates results, errors, and capabilities", () => {
     const success = ok({ accepted: true }, { requestId: "req-1" });
     const failure = fail(createSignalError("CONFLICT", "Conflict"));
-    const protocolError = createProtocolError("RETRYABLE_ERROR", "Retry later", {
-      retryable: true,
-      details: { retryAfter: 10 },
-    });
+    const protocolError = createProtocolError(
+      "RETRYABLE_ERROR",
+      "Retry later",
+      {
+        retryable: true,
+        details: { retryAfter: 10 },
+      },
+    );
 
     const capabilities = createSignalCapabilities({
       protocol: "signal.v1",

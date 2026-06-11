@@ -1,10 +1,17 @@
-import type { Request, Response } from "express";
 import { performance } from "node:perf_hooks";
+import type { Request, Response } from "express";
 import { positiveInt } from "../config/signal-environment.js";
 import { ApiProblem } from "../observability/signal-http.js";
-import { incrementSignalCounter, observeSignalLatency } from "../observability/signal-metrics.js";
+import {
+  incrementSignalCounter,
+  observeSignalLatency,
+} from "../observability/signal-metrics.js";
 import type { SignalFilters } from "../schemas/signal-api.js";
-import { signalMatchesFilters, type SignalRecord, type SignalStorageAdapter } from "../storage/signal-store.js";
+import {
+  type SignalRecord,
+  type SignalStorageAdapter,
+  signalMatchesFilters,
+} from "../storage/signal-store.js";
 
 type StreamClient = {
   id: string;
@@ -19,15 +26,31 @@ export class SignalStreamHub {
 
   constructor(private readonly store: SignalStorageAdapter) {}
 
-  async subscribe(req: Request, res: Response, filters: Partial<SignalFilters>) {
-    const maxClients = positiveInt(process.env.SIGNAL_STREAM_MAX_CLIENTS, 1_000);
+  async subscribe(
+    req: Request,
+    res: Response,
+    filters: Partial<SignalFilters>,
+  ) {
+    const maxClients = positiveInt(
+      process.env.SIGNAL_STREAM_MAX_CLIENTS,
+      1_000,
+    );
     if (this.clients.size >= maxClients) {
-      incrementSignalCounter("signal.stream.rejected", { reason: "max_clients" });
-      throw new ApiProblem(503, "stream_overloaded", "Signal stream is at its configured client limit.");
+      incrementSignalCounter("signal.stream.rejected", {
+        reason: "max_clients",
+      });
+      throw new ApiProblem(
+        503,
+        "stream_overloaded",
+        "Signal stream is at its configured client limit.",
+      );
     }
 
     const clientId = cryptoRandomId();
-    const heartbeatMs = positiveInt(process.env.SIGNAL_STREAM_HEARTBEAT_MS, 15_000);
+    const heartbeatMs = positiveInt(
+      process.env.SIGNAL_STREAM_HEARTBEAT_MS,
+      15_000,
+    );
 
     res.status(200);
     res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
@@ -66,7 +89,9 @@ export class SignalStreamHub {
       },
     });
 
-    const lastEventId = String(req.headers["last-event-id"] ?? req.query.lastEventId ?? "").trim();
+    const lastEventId = String(
+      req.headers["last-event-id"] ?? req.query.lastEventId ?? "",
+    ).trim();
     if (lastEventId) {
       await this.replay(client, lastEventId);
     }
@@ -78,11 +103,13 @@ export class SignalStreamHub {
 
     for (const client of this.clients.values()) {
       if (!signalMatchesFilters(record, client.filters)) continue;
-      writes.push(writeSse(client.response, {
-        id: String(record.sequence),
-        event: "signal",
-        data: responseForSignal(record),
-      }));
+      writes.push(
+        writeSse(client.response, {
+          id: String(record.sequence),
+          event: "signal",
+          data: responseForSignal(record),
+        }),
+      );
     }
 
     await Promise.allSettled(writes);
@@ -138,7 +165,10 @@ async function writeSse(
 
   if (res.write(payload)) return;
 
-  const timeoutMs = positiveInt(process.env.SIGNAL_STREAM_WRITE_TIMEOUT_MS, 2_000);
+  const timeoutMs = positiveInt(
+    process.env.SIGNAL_STREAM_WRITE_TIMEOUT_MS,
+    2_000,
+  );
   await new Promise<void>((resolve) => {
     const timer = setTimeout(() => {
       incrementSignalCounter("signal.stream.slow_consumer");

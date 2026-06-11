@@ -14,8 +14,15 @@ export class BinanceRateLimitError extends BinanceExecutionError {
   readonly retryAfterMs?: number;
   readonly banned: boolean;
 
-  constructor(message: string, options: { retryAfterMs?: number; banned?: boolean } = {}) {
-    super(options.banned ? "BINANCE_IP_BANNED" : "BINANCE_RATE_LIMIT", message, options);
+  constructor(
+    message: string,
+    options: { retryAfterMs?: number; banned?: boolean } = {},
+  ) {
+    super(
+      options.banned ? "BINANCE_IP_BANNED" : "BINANCE_RATE_LIMIT",
+      message,
+      options,
+    );
     this.name = "BinanceRateLimitError";
     this.retryAfterMs = options.retryAfterMs;
     this.banned = options.banned === true;

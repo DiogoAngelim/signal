@@ -1,4 +1,3 @@
-
 export function hasValidBacktestPayload(payload: any): boolean {
   if (!payload) return false;
 

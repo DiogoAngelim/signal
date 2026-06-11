@@ -23,8 +23,20 @@
     "limitedBy": ["strategy_fallback"],
     "cappedBy": [],
     "recommendations": [
-      { "targetId": "new-a", "amount": 5.008047, "normalizedCommitment": 0.005008, "weight": 0.5, "mode": "observe" },
-      { "targetId": "new-b", "amount": 5.008047, "normalizedCommitment": 0.005008, "weight": 0.5, "mode": "observe" }
+      {
+        "targetId": "new-a",
+        "amount": 5.008047,
+        "normalizedCommitment": 0.005008,
+        "weight": 0.5,
+        "mode": "observe"
+      },
+      {
+        "targetId": "new-b",
+        "amount": 5.008047,
+        "normalizedCommitment": 0.005008,
+        "weight": 0.5,
+        "mode": "observe"
+      }
     ]
   }
 }

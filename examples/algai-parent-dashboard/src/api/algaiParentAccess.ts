@@ -4,11 +4,11 @@ import type {
   AlgaiStudentDataSource,
   AuthenticatedUser,
   DemoAlgaiStudentDataSource,
-  ParentDashboardAccessPayload,
   ParentAccessUpdateInput,
   ParentAccessUpdateResult,
+  ParentDashboardAccessPayload,
   StudentAccessRecord,
-  StudentLearningSummary
+  StudentLearningSummary,
 } from "./types";
 
 const PARENT_TOKEN_STORAGE_KEY = "algai.parent-dashboard.parent-token";
@@ -39,11 +39,16 @@ export function normalizeParentEmails(emails: string[]): string[] {
 }
 
 export function getAlgaiApiBaseUrl(): string {
-  return (import.meta.env["VITE_ALGAI_API_BASE_URL"] as string | undefined) ?? "/api";
+  return (
+    (import.meta.env.VITE_ALGAI_API_BASE_URL as string | undefined) ?? "/api"
+  );
 }
 
 export function getAlgaiStudentAppUrl(): string {
-  return (import.meta.env["VITE_ALGAI_STUDENT_APP_URL"] as string | undefined) ?? "http://localhost:3000";
+  return (
+    (import.meta.env.VITE_ALGAI_STUDENT_APP_URL as string | undefined) ??
+    "http://localhost:3000"
+  );
 }
 
 function joinApiPath(baseUrl: string, path: string): string {
@@ -122,15 +127,15 @@ export function createMockAlgaiDataSource(input?: {
         ...record,
         parentEmails: normalizeParentEmails(record.parentEmails),
         childEmail: normalizeEmail(record.childEmail),
-        teacherEmail: normalizeEmail(record.teacherEmail)
-      }
-    ])
+        teacherEmail: normalizeEmail(record.teacherEmail),
+      },
+    ]),
   );
   const learningSummaries = new Map(
     (input?.learningSummaries ?? demoLearningSummaries).map((summary) => [
       summary.student.id,
-      summary
-    ])
+      summary,
+    ]),
   );
   let currentUser = input?.initialUser ?? null;
 
@@ -148,18 +153,20 @@ export function createMockAlgaiDataSource(input?: {
 
       const parentEmail = normalizeEmail(currentUser.email);
       const studentRecords = [...accessRecords.values()].filter((record) =>
-        record.parentEmails.includes(parentEmail)
+        record.parentEmails.includes(parentEmail),
       );
       const students = studentRecords
         .map((record) => learningSummaries.get(record.studentId))
-        .filter((summary): summary is StudentLearningSummary => Boolean(summary))
+        .filter((summary): summary is StudentLearningSummary =>
+          Boolean(summary),
+        )
         .map((summary) => ({
           ...summary,
           dashboardPermissions: {
             ...summary.dashboardPermissions,
             validatedParentEmail: parentEmail,
-            validatedAt: new Date().toISOString()
-          }
+            validatedAt: new Date().toISOString(),
+          },
         }));
 
       if (students.length === 0) {
@@ -170,7 +177,7 @@ export function createMockAlgaiDataSource(input?: {
         user: currentUser,
         parentEmail,
         students,
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
       };
     },
     async getStudentAccessForEmail(email) {
@@ -179,7 +186,7 @@ export function createMockAlgaiDataSource(input?: {
         [...accessRecords.values()].find(
           (record) =>
             record.childEmail === normalized ||
-            record.parentEmails.includes(normalized)
+            record.parentEmails.includes(normalized),
         ) ?? null
       );
     },
@@ -188,7 +195,7 @@ export function createMockAlgaiDataSource(input?: {
       return [...accessRecords.values()].filter(
         (record) =>
           record.childEmail === normalized ||
-          record.parentEmails.includes(normalized)
+          record.parentEmails.includes(normalized),
       );
     },
     async getStudentAccessRecord(studentId) {
@@ -205,15 +212,16 @@ export function createMockAlgaiDataSource(input?: {
         ...summary,
         dashboardPermissions: {
           ...summary.dashboardPermissions,
-          validatedAt: new Date().toISOString()
-        }
+          validatedAt: new Date().toISOString(),
+        },
       };
     },
     async isTeacherAuthorizedForStudent(teacherEmail, studentId) {
       const accessRecord = accessRecords.get(studentId);
       return Boolean(
         accessRecord &&
-          normalizeEmail(accessRecord.teacherEmail) === normalizeEmail(teacherEmail)
+          normalizeEmail(accessRecord.teacherEmail) ===
+            normalizeEmail(teacherEmail),
       );
     },
     async updateParentEmailsForStudent(input: ParentAccessUpdateInput) {
@@ -224,7 +232,7 @@ export function createMockAlgaiDataSource(input?: {
 
       const teacherAuthorized = await this.isTeacherAuthorizedForStudent(
         input.teacherEmail,
-        input.studentId
+        input.studentId,
       );
       if (!teacherAuthorized) {
         throw new Error("Teacher is not authorized to manage this student");
@@ -234,16 +242,16 @@ export function createMockAlgaiDataSource(input?: {
       const updated: StudentAccessRecord = {
         ...accessRecord,
         parentEmails,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
       accessRecords.set(input.studentId, updated);
 
       return {
         studentId: input.studentId,
         parentEmails,
-        updatedAt: updated.updatedAt
+        updatedAt: updated.updatedAt,
       };
-    }
+    },
   };
 }
 
@@ -264,8 +272,10 @@ async function parseApiResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     throw new AlgaiApiError(
       response.status,
-      typeof body?.message === "string" ? body.message : "AlgAI access validation failed.",
-      Array.isArray(body?.nextSteps) ? body.nextSteps.map(String) : undefined
+      typeof body?.message === "string"
+        ? body.message
+        : "AlgAI access validation failed.",
+      Array.isArray(body?.nextSteps) ? body.nextSteps.map(String) : undefined,
     );
   }
   return body as T;
@@ -284,10 +294,13 @@ export function createAlgaiApiDataSource(input?: {
 
   async function getAccessPayload(): Promise<ParentDashboardAccessPayload | null> {
     try {
-      const response = await fetch(joinApiPath(apiBaseUrl, "/public/parent-dashboard/access"), {
-        credentials: "include",
-        headers: authHeaders()
-      });
+      const response = await fetch(
+        joinApiPath(apiBaseUrl, "/public/parent-dashboard/access"),
+        {
+          credentials: "include",
+          headers: authHeaders(),
+        },
+      );
       return parseApiResponse<ParentDashboardAccessPayload>(response);
     } catch (error) {
       if (error instanceof AlgaiApiError && error.status === 401) {
@@ -309,7 +322,8 @@ export function createAlgaiApiDataSource(input?: {
       const access = await getAccessPayload();
       const dashboard = access?.students.find(
         (student) =>
-          student.dashboardPermissions.validatedParentEmail === normalizeEmail(email)
+          student.dashboardPermissions.validatedParentEmail ===
+          normalizeEmail(email),
       );
       return dashboard
         ? {
@@ -317,13 +331,16 @@ export function createAlgaiApiDataSource(input?: {
             parentEmails: [normalizeEmail(email)],
             childEmail: dashboard.student.childEmail,
             teacherEmail: dashboard.student.teacher.email,
-            updatedAt: dashboard.dashboardPermissions.validatedAt
+            updatedAt: dashboard.dashboardPermissions.validatedAt,
           }
         : null;
     },
     async getStudentAccessRecordsForEmail(email) {
       const access = await getAccessPayload();
-      if (!access || normalizeEmail(access.parentEmail) !== normalizeEmail(email)) {
+      if (
+        !access ||
+        normalizeEmail(access.parentEmail) !== normalizeEmail(email)
+      ) {
         return [];
       }
       return access.students.map((student) => ({
@@ -331,56 +348,66 @@ export function createAlgaiApiDataSource(input?: {
         parentEmails: [normalizeEmail(email)],
         childEmail: student.student.childEmail,
         teacherEmail: student.student.teacher.email,
-        updatedAt: student.dashboardPermissions.validatedAt
+        updatedAt: student.dashboardPermissions.validatedAt,
       }));
     },
     async getStudentAccessRecord(studentId) {
       const access = await getAccessPayload();
-      const dashboard = access?.students.find((student) => student.student.id === studentId);
+      const dashboard = access?.students.find(
+        (student) => student.student.id === studentId,
+      );
       return dashboard
         ? {
             studentId: dashboard.student.id,
             parentEmails: [dashboard.dashboardPermissions.validatedParentEmail],
             childEmail: dashboard.student.childEmail,
             teacherEmail: dashboard.student.teacher.email,
-            updatedAt: dashboard.dashboardPermissions.validatedAt
+            updatedAt: dashboard.dashboardPermissions.validatedAt,
           }
         : null;
     },
     async getLearningSummary(studentId) {
       const access = await getAccessPayload();
-      return access?.students.find((student) => student.student.id === studentId) ?? null;
+      return (
+        access?.students.find((student) => student.student.id === studentId) ??
+        null
+      );
     },
     async isTeacherAuthorizedForStudent() {
       return false;
     },
     async updateParentEmailsForStudent() {
-      throw new Error("Parent access updates must be saved from the AlgAI teacher app.");
-    }
+      throw new Error(
+        "Parent access updates must be saved from the AlgAI teacher app.",
+      );
+    },
   };
 }
 
-let defaultDataSource: AlgaiStudentDataSource = typeof window === "undefined"
-  ? createMockAlgaiDataSource()
-  : createAlgaiApiDataSource();
+let defaultDataSource: AlgaiStudentDataSource =
+  typeof window === "undefined"
+    ? createMockAlgaiDataSource()
+    : createAlgaiApiDataSource();
 
 export function getDefaultAlgaiDataSource(): AlgaiStudentDataSource {
   return defaultDataSource;
 }
 
-export function setDefaultAlgaiDataSource(source: AlgaiStudentDataSource): void {
+export function setDefaultAlgaiDataSource(
+  source: AlgaiStudentDataSource,
+): void {
   defaultDataSource = source;
 }
 
 export async function getAuthenticatedUser(
-  source = getDefaultAlgaiDataSource()
+  source = getDefaultAlgaiDataSource(),
 ): Promise<AuthenticatedUser | null> {
   return source.getAuthenticatedUser();
 }
 
 export async function getStudentAccessForEmail(
   email: string,
-  source = getDefaultAlgaiDataSource()
+  source = getDefaultAlgaiDataSource(),
 ): Promise<StudentAccessRecord | null> {
   if (!isValidEmail(email)) {
     return null;
@@ -390,7 +417,7 @@ export async function getStudentAccessForEmail(
 
 export async function getStudentAccessRecordsForEmail(
   email: string,
-  source = getDefaultAlgaiDataSource()
+  source = getDefaultAlgaiDataSource(),
 ): Promise<StudentAccessRecord[]> {
   if (!isValidEmail(email)) {
     return [];
@@ -401,25 +428,29 @@ export async function getStudentAccessRecordsForEmail(
 export async function isParentForStudent(
   parentEmail: string,
   studentId: string,
-  source = getDefaultAlgaiDataSource()
+  source = getDefaultAlgaiDataSource(),
 ): Promise<boolean> {
   const record = await source.getStudentAccessRecord(studentId);
   return Boolean(
-    record?.parentEmails.map(normalizeEmail).includes(normalizeEmail(parentEmail))
+    record?.parentEmails
+      .map(normalizeEmail)
+      .includes(normalizeEmail(parentEmail)),
   );
 }
 
 export async function isChildEmail(
   email: string,
-  source = getDefaultAlgaiDataSource()
+  source = getDefaultAlgaiDataSource(),
 ): Promise<boolean> {
   const record = await getStudentAccessForEmail(email, source);
-  return Boolean(record && normalizeEmail(record.childEmail) === normalizeEmail(email));
+  return Boolean(
+    record && normalizeEmail(record.childEmail) === normalizeEmail(email),
+  );
 }
 
 export async function resolveAlgaiAccess(
   email?: string | null,
-  source = getDefaultAlgaiDataSource()
+  source = getDefaultAlgaiDataSource(),
 ): Promise<AlgaiAccessResolution> {
   if (!email) {
     try {
@@ -428,7 +459,7 @@ export async function resolveAlgaiAccess(
         return {
           kind: "unauthenticated",
           message: "Open AlgAI and sign in with Google to continue.",
-          loginUrl: buildAlgaiLoginUrl()
+          loginUrl: buildAlgaiLoginUrl(),
         };
       }
 
@@ -436,7 +467,7 @@ export async function resolveAlgaiAccess(
         kind: "parent",
         email: normalizeEmail(access.parentEmail),
         dashboards: access.students,
-        generatedAt: access.generatedAt
+        generatedAt: access.generatedAt,
       };
     } catch (error) {
       if (error instanceof AlgaiApiError) {
@@ -444,7 +475,7 @@ export async function resolveAlgaiAccess(
           return {
             kind: "unauthenticated",
             message: error.message,
-            loginUrl: buildAlgaiLoginUrl()
+            loginUrl: buildAlgaiLoginUrl(),
           };
         }
 
@@ -454,8 +485,8 @@ export async function resolveAlgaiAccess(
           message: error.message,
           nextSteps: error.nextSteps ?? [
             "Use the parent email registered by the teacher.",
-            "Open AlgAI and sign in again if your session has expired."
-          ]
+            "Open AlgAI and sign in again if your session has expired.",
+          ],
         };
       }
 
@@ -471,21 +502,25 @@ export async function resolveAlgaiAccess(
     return {
       kind: "unauthenticated",
       message: "Open AlgAI and sign in with Google to continue.",
-      loginUrl: buildAlgaiLoginUrl()
+      loginUrl: buildAlgaiLoginUrl(),
     };
   }
 
-  const accessRecords = await getStudentAccessRecordsForEmail(authenticatedEmail, source);
+  const accessRecords = await getStudentAccessRecordsForEmail(
+    authenticatedEmail,
+    source,
+  );
   if (accessRecords.length === 0) {
     return {
       kind: "denied",
       email: authenticatedEmail,
-      message: "We could not find a parent or student record for this Google email.",
+      message:
+        "We could not find a parent or student record for this Google email.",
       nextSteps: [
         "Check that you used the email shared with the school.",
         "Ask the teacher to add your parent email for the student.",
-        "Contact AlgAI support if the record was recently updated."
-      ]
+        "Contact AlgAI support if the record was recently updated.",
+      ],
     };
   }
 
@@ -496,37 +531,44 @@ export async function resolveAlgaiAccess(
       email: authenticatedEmail,
       studentId: accessRecord.studentId,
       childAccessPath: "/child",
-      message: "This email belongs to the student account."
+      message: "This email belongs to the student account.",
     };
   }
 
   const parentRecords = accessRecords.filter((record) =>
-    record.parentEmails.includes(authenticatedEmail)
+    record.parentEmails.includes(authenticatedEmail),
   );
 
   if (parentRecords.length > 0) {
     const dashboards = (
-      await Promise.all(parentRecords.map((record) => source.getLearningSummary(record.studentId)))
+      await Promise.all(
+        parentRecords.map((record) =>
+          source.getLearningSummary(record.studentId),
+        ),
+      )
     )
-      .filter((dashboard): dashboard is StudentLearningSummary => Boolean(dashboard))
+      .filter((dashboard): dashboard is StudentLearningSummary =>
+        Boolean(dashboard),
+      )
       .map((dashboard) => ({
         ...dashboard,
         dashboardPermissions: {
           ...dashboard.dashboardPermissions,
           validatedParentEmail: authenticatedEmail,
-          canViewParentDashboard: true
-        }
+          canViewParentDashboard: true,
+        },
       }));
 
     if (dashboards.length === 0) {
       return {
         kind: "denied",
         email: authenticatedEmail,
-        message: "Your parent access is valid, but the student summary is not ready yet.",
+        message:
+          "Your parent access is valid, but the student summary is not ready yet.",
         nextSteps: [
           "Try again after the next teacher update.",
-          "Ask the teacher whether the learning summary has been published."
-        ]
+          "Ask the teacher whether the learning summary has been published.",
+        ],
       };
     }
 
@@ -534,24 +576,25 @@ export async function resolveAlgaiAccess(
       kind: "parent",
       email: authenticatedEmail,
       dashboards,
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     };
   }
 
   return {
     kind: "denied",
     email: authenticatedEmail,
-    message: "This email is connected to the student, but not as an approved parent email.",
+    message:
+      "This email is connected to the student, but not as an approved parent email.",
     nextSteps: [
       "Use the parent email registered by the teacher.",
-      "Ask the teacher to update Parent Access for this student."
-    ]
+      "Ask the teacher to update Parent Access for this student.",
+    ],
   };
 }
 
 export async function getParentDashboardForEmail(
   email: string,
-  source = getDefaultAlgaiDataSource()
+  source = getDefaultAlgaiDataSource(),
 ): Promise<StudentLearningSummary[]> {
   const resolution = await resolveAlgaiAccess(email, source);
   return resolution.kind === "parent" ? resolution.dashboards : [];
@@ -559,11 +602,11 @@ export async function getParentDashboardForEmail(
 
 export async function updateParentAccessForStudent(
   input: ParentAccessUpdateInput,
-  source = getDefaultAlgaiDataSource()
+  source = getDefaultAlgaiDataSource(),
 ): Promise<ParentAccessUpdateResult> {
   return source.updateParentEmailsForStudent({
     teacherEmail: normalizeEmail(input.teacherEmail),
     studentId: input.studentId,
-    parentEmails: normalizeParentEmails(input.parentEmails)
+    parentEmails: normalizeParentEmails(input.parentEmails),
   });
 }

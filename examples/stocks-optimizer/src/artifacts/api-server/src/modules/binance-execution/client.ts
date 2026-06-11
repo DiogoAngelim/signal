@@ -1,11 +1,11 @@
 import { BinanceApiError, BinanceRateLimitError } from "./errors";
-import { RateLimiter } from "./rate-limit";
+import type { RateLimiter } from "./rate-limit";
 import { canonicalQuery, signedQuery } from "./signer";
 import type {
   BinanceAccountSnapshot,
   BinanceClientResponse,
-  BinanceExecutionConfig,
   BinanceExchangeInfo,
+  BinanceExecutionConfig,
   BinanceOpenOrder,
   BinanceTrade,
   NormalizedOrderRequest,
@@ -26,11 +26,16 @@ export class BinanceHttpClient {
   ) {}
 
   get baseUrl() {
-    return this.config.mode === "testnet" ? this.config.testnetBaseUrl : this.config.baseUrl;
+    return this.config.mode === "testnet"
+      ? this.config.testnetBaseUrl
+      : this.config.baseUrl;
   }
 
   async syncTime() {
-    const response = await this.request<{ serverTime: number }>("/api/v3/time", { signed: false });
+    const response = await this.request<{ serverTime: number }>(
+      "/api/v3/time",
+      { signed: false },
+    );
     this.timeOffsetMs = Number(response.data.serverTime) - Date.now();
     return response.data;
   }
@@ -45,7 +50,11 @@ export class BinanceHttpClient {
     });
   }
 
-  async order(params: { symbol: string; orderId?: number | string; origClientOrderId?: string }) {
+  async order(params: {
+    symbol: string;
+    orderId?: number | string;
+    origClientOrderId?: string;
+  }) {
     return this.signedData<BinanceOpenOrder>("/api/v3/order", params);
   }
 
@@ -75,12 +84,20 @@ export class BinanceHttpClient {
     return this.signedData<BinanceOpenOrder>("/api/v3/order", params, "POST");
   }
 
-  async cancelOrder(input: { symbol: string; orderId?: string | number; origClientOrderId?: string }) {
+  async cancelOrder(input: {
+    symbol: string;
+    orderId?: string | number;
+    origClientOrderId?: string;
+  }) {
     return this.signedData<BinanceOpenOrder>("/api/v3/order", input, "DELETE");
   }
 
   async cancelAll(symbol?: string) {
-    return this.signedData<BinanceOpenOrder[]>("/api/v3/openOrders", { symbol }, "DELETE");
+    return this.signedData<BinanceOpenOrder[]>(
+      "/api/v3/openOrders",
+      { symbol },
+      "DELETE",
+    );
   }
 
   private async signedData<T>(
@@ -88,10 +105,15 @@ export class BinanceHttpClient {
     params: Record<string, string | number | boolean | undefined | null> = {},
     method: "GET" | "POST" | "DELETE" = "GET",
   ) {
-    return this.request<T>(path, { signed: true, params, method }).then((response) => response.data);
+    return this.request<T>(path, { signed: true, params, method }).then(
+      (response) => response.data,
+    );
   }
 
-  private async request<T>(path: string, options: RequestOptions = {}): Promise<BinanceClientResponse<T>> {
+  private async request<T>(
+    path: string,
+    options: RequestOptions = {},
+  ): Promise<BinanceClientResponse<T>> {
     return this.rateLimiter.schedule(async () => {
       const url = new URL(path, this.baseUrl);
       const headers: Record<string, string> = {};
@@ -99,7 +121,10 @@ export class BinanceHttpClient {
 
       if (options.signed) {
         if (!this.config.apiKey || !this.config.apiSecret) {
-          throw new BinanceApiError(401, "Binance API credentials are required for signed requests");
+          throw new BinanceApiError(
+            401,
+            "Binance API credentials are required for signed requests",
+          );
         }
         headers["X-MBX-APIKEY"] = this.config.apiKey;
         query = signedQuery(
@@ -117,7 +142,10 @@ export class BinanceHttpClient {
       if (query) url.search = query;
 
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), this.config.requestTimeoutMs);
+      const timer = setTimeout(
+        () => controller.abort(),
+        this.config.requestTimeoutMs,
+      );
       let response: Response;
       try {
         response = await this.config.fetch(url, {
@@ -144,7 +172,11 @@ export class BinanceHttpClient {
       }
 
       if (!response.ok) {
-        throw new BinanceApiError(response.status, apiErrorMessage(data, response.status), data);
+        throw new BinanceApiError(
+          response.status,
+          apiErrorMessage(data, response.status),
+          data,
+        );
       }
 
       return {
@@ -168,7 +200,9 @@ async function parseResponse(response: Response) {
 
 function apiErrorMessage(data: unknown, status: number) {
   if (data && typeof data === "object") {
-    const message = (data as { msg?: string; message?: string }).msg ?? (data as { message?: string }).message;
+    const message =
+      (data as { msg?: string; message?: string }).msg ??
+      (data as { message?: string }).message;
     if (message) return message;
   }
   return `Binance API request failed with HTTP ${status}`;

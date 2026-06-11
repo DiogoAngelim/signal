@@ -12,8 +12,18 @@ export type ReputationRank =
 export type LegacyComparisonOperator = ">=" | ">" | "<=" | "<" | "==" | "!=";
 
 export type LegacyCondition =
-  | { kind: "score"; metric: string; operator: LegacyComparisonOperator; value: number }
-  | { kind: "counter"; counter: string; operator: LegacyComparisonOperator; value: number }
+  | {
+      kind: "score";
+      metric: string;
+      operator: LegacyComparisonOperator;
+      value: number;
+    }
+  | {
+      kind: "counter";
+      counter: string;
+      operator: LegacyComparisonOperator;
+      value: number;
+    }
   | { kind: "flag"; flag: string; equals?: unknown }
   | { kind: "achievement"; id: string; unlocked?: boolean }
   | { kind: "campaign"; id: string; status: CampaignStatus }
@@ -307,8 +317,14 @@ export const DEFAULT_ACHIEVEMENT_RULES: AchievementRule[] = [
     description: "Record one clean outcome without a boundary break.",
     rarity: "common",
     category: "outcome",
-    condition: { kind: "counter", counter: "cleanOutcomeCount", operator: ">=", value: 1 },
-    progress: (context) => progressAtLeast(context.counters.cleanOutcomeCount, 1),
+    condition: {
+      kind: "counter",
+      counter: "cleanOutcomeCount",
+      operator: ">=",
+      value: 1,
+    },
+    progress: (context) =>
+      progressAtLeast(context.counters.cleanOutcomeCount, 1),
   },
   {
     id: "three-clean-outcomes",
@@ -316,13 +332,20 @@ export const DEFAULT_ACHIEVEMENT_RULES: AchievementRule[] = [
     description: "Record three clean outcomes without a boundary break.",
     rarity: "rare",
     category: "outcome",
-    condition: { kind: "counter", counter: "cleanOutcomeCount", operator: ">=", value: 3 },
-    progress: (context) => progressAtLeast(context.counters.cleanOutcomeCount, 3),
+    condition: {
+      kind: "counter",
+      counter: "cleanOutcomeCount",
+      operator: ">=",
+      value: 3,
+    },
+    progress: (context) =>
+      progressAtLeast(context.counters.cleanOutcomeCount, 3),
   },
   {
     id: "recovery-complete",
     name: "Recovery Complete",
-    description: "Recovery evidence has cleared the configured accomplishment threshold.",
+    description:
+      "Recovery evidence has cleared the configured accomplishment threshold.",
     rarity: "rare",
     category: "recovery",
     condition: {
@@ -333,7 +356,12 @@ export const DEFAULT_ACHIEVEMENT_RULES: AchievementRule[] = [
         { kind: "flag", flag: "normalSizingRestored", equals: true },
       ],
     },
-    progress: (context) => maxProgress(progressAtLeast(context.scores.recovery, 80), flagProgress(context.flags.recoveryComplete), flagProgress(context.flags.normalSizingRestored)),
+    progress: (context) =>
+      maxProgress(
+        progressAtLeast(context.scores.recovery, 80),
+        flagProgress(context.flags.recoveryComplete),
+        flagProgress(context.flags.normalSizingRestored),
+      ),
   },
   {
     id: "governance-approved",
@@ -348,7 +376,11 @@ export const DEFAULT_ACHIEVEMENT_RULES: AchievementRule[] = [
         { kind: "flag", flag: "governanceApproved", equals: true },
       ],
     },
-    progress: (context) => maxProgress(progressAtLeast(context.scores.governance, 80), flagProgress(context.flags.governanceApproved)),
+    progress: (context) =>
+      maxProgress(
+        progressAtLeast(context.scores.governance, 80),
+        flagProgress(context.flags.governanceApproved),
+      ),
   },
   {
     id: "trust-architect",
@@ -362,10 +394,16 @@ export const DEFAULT_ACHIEVEMENT_RULES: AchievementRule[] = [
   {
     id: "discovery-master",
     name: "Discovery Master",
-    description: "Discovery maturity became durable enough to count as earned progress.",
+    description:
+      "Discovery maturity became durable enough to count as earned progress.",
     rarity: "epic",
     category: "discovery",
-    condition: { kind: "score", metric: "discovery", operator: ">=", value: 80 },
+    condition: {
+      kind: "score",
+      metric: "discovery",
+      operator: ">=",
+      value: 80,
+    },
     progress: (context) => progressAtLeast(context.scores.discovery, 80),
   },
   {
@@ -380,19 +418,27 @@ export const DEFAULT_ACHIEVEMENT_RULES: AchievementRule[] = [
   {
     id: "institutional-operator",
     name: "Institutional Operator",
-    description: "Trust, recovery, governance, agency, and wisdom are all institutionally ready.",
+    description:
+      "Trust, recovery, governance, agency, and wisdom are all institutionally ready.",
     rarity: "legendary",
     category: "institutional",
     condition: {
       kind: "all",
-      conditions: Object.entries(DEFAULT_PRESTIGE_REQUIREMENTS).map(([metric, value]) => ({
-        kind: "score",
-        metric,
-        operator: ">=",
-        value,
-      })),
+      conditions: Object.entries(DEFAULT_PRESTIGE_REQUIREMENTS).map(
+        ([metric, value]) => ({
+          kind: "score",
+          metric,
+          operator: ">=",
+          value,
+        }),
+      ),
     },
-    progress: (context) => mean(Object.entries(DEFAULT_PRESTIGE_REQUIREMENTS).map(([metric, value]) => progressAtLeast(context.scores[metric], value))),
+    progress: (context) =>
+      mean(
+        Object.entries(DEFAULT_PRESTIGE_REQUIREMENTS).map(([metric, value]) =>
+          progressAtLeast(context.scores[metric], value),
+        ),
+      ),
   },
 ];
 
@@ -407,31 +453,55 @@ export const DEFAULT_BADGE_RULES: BadgeRule[] = [
     id: "capital-guardian",
     name: "Capital Guardian",
     tier: "Epic",
-    condition: { kind: "score", metric: "riskControl", operator: ">=", value: 85 },
+    condition: {
+      kind: "score",
+      metric: "riskControl",
+      operator: ">=",
+      value: 85,
+    },
   },
   {
     id: "risk-master",
     name: "Risk Master",
     tier: "Epic",
-    condition: { kind: "score", metric: "riskControl", operator: ">=", value: 90 },
+    condition: {
+      kind: "score",
+      metric: "riskControl",
+      operator: ">=",
+      value: 90,
+    },
   },
   {
     id: "discovery-hunter",
     name: "Discovery Hunter",
     tier: "Rare",
-    condition: { kind: "score", metric: "discovery", operator: ">=", value: 70 },
+    condition: {
+      kind: "score",
+      metric: "discovery",
+      operator: ">=",
+      value: 70,
+    },
   },
   {
     id: "governance-champion",
     name: "Governance Champion",
     tier: "Epic",
-    condition: { kind: "score", metric: "governance", operator: ">=", value: 80 },
+    condition: {
+      kind: "score",
+      metric: "governance",
+      operator: ">=",
+      value: 80,
+    },
   },
   {
     id: "institutional-operator",
     name: "Institutional Operator",
     tier: "Legendary",
-    condition: { kind: "achievement", id: "institutional-operator", unlocked: true },
+    condition: {
+      kind: "achievement",
+      id: "institutional-operator",
+      unlocked: true,
+    },
   },
 ];
 
@@ -464,7 +534,8 @@ export const DEFAULT_MILESTONE_RULES: MilestoneRule[] = [
         { kind: "flag", flag: "governanceApproved", equals: true },
       ],
     },
-    value: (context) => context.scores.governance ?? flagValue(context.flags.governanceApproved),
+    value: (context) =>
+      context.scores.governance ?? flagValue(context.flags.governanceApproved),
   },
   {
     id: "recovery-cleared",
@@ -478,7 +549,8 @@ export const DEFAULT_MILESTONE_RULES: MilestoneRule[] = [
         { kind: "flag", flag: "recoveryComplete", equals: true },
       ],
     },
-    value: (context) => context.scores.recovery ?? flagValue(context.flags.recoveryComplete),
+    value: (context) =>
+      context.scores.recovery ?? flagValue(context.flags.recoveryComplete),
   },
   {
     id: "normal-sizing-restored",
@@ -547,12 +619,14 @@ export const DEFAULT_UNLOCK_RULES: UnlockRule[] = [
     source: "legacy",
     condition: {
       kind: "all",
-      conditions: Object.entries(DEFAULT_PRESTIGE_REQUIREMENTS).map(([metric, value]) => ({
-        kind: "score",
-        metric,
-        operator: ">=",
-        value,
-      })),
+      conditions: Object.entries(DEFAULT_PRESTIGE_REQUIREMENTS).map(
+        ([metric, value]) => ({
+          kind: "score",
+          metric,
+          operator: ">=",
+          value,
+        }),
+      ),
     },
   },
 ];
@@ -581,7 +655,12 @@ export const DEFAULT_CAMPAIGN_RULES: CampaignRule[] = [
     id: "trust-restoration",
     name: "Trust Restoration",
     startCondition: { kind: "score", metric: "trust", operator: ">", value: 0 },
-    completeCondition: { kind: "score", metric: "trust", operator: ">=", value: 80 },
+    completeCondition: {
+      kind: "score",
+      metric: "trust",
+      operator: ">=",
+      value: 80,
+    },
   },
   {
     id: "governance-clearance",
@@ -604,8 +683,18 @@ export const DEFAULT_CAMPAIGN_RULES: CampaignRule[] = [
   {
     id: "recovery-program",
     name: "Recovery Program",
-    startCondition: { kind: "score", metric: "recovery", operator: ">", value: 0 },
-    completeCondition: { kind: "score", metric: "recovery", operator: ">=", value: 80 },
+    startCondition: {
+      kind: "score",
+      metric: "recovery",
+      operator: ">",
+      value: 0,
+    },
+    completeCondition: {
+      kind: "score",
+      metric: "recovery",
+      operator: ">=",
+      value: 80,
+    },
   },
 ];
 
@@ -615,7 +704,11 @@ export const DEFAULT_TITLE_RULES: OperatorTitleRule[] = [
     name: "Institutional Operator",
     priority: 900,
     reason: "Prestige-level requirements are satisfied.",
-    condition: { kind: "achievement", id: "institutional-operator", unlocked: true },
+    condition: {
+      kind: "achievement",
+      id: "institutional-operator",
+      unlocked: true,
+    },
   },
   {
     id: "wisdom-keeper",
@@ -629,7 +722,12 @@ export const DEFAULT_TITLE_RULES: OperatorTitleRule[] = [
     name: "Governance Steward",
     priority: 650,
     reason: "Governance has become a durable source of authority.",
-    condition: { kind: "score", metric: "governance", operator: ">=", value: 85 },
+    condition: {
+      kind: "score",
+      metric: "governance",
+      operator: ">=",
+      value: 85,
+    },
   },
   {
     id: "trust-architect",
@@ -650,13 +748,19 @@ export const DEFAULT_TITLE_RULES: OperatorTitleRule[] = [
     name: "Discovery Hunter",
     priority: 525,
     reason: "Discovery progress is the strongest earned capability.",
-    condition: { kind: "score", metric: "discovery", operator: ">=", value: 75 },
+    condition: {
+      kind: "score",
+      metric: "discovery",
+      operator: ">=",
+      value: 75,
+    },
   },
   {
     id: "probe-operator",
     name: "Probe Operator",
     priority: 100,
-    reason: "Operator authority is still being earned through constrained participation.",
+    reason:
+      "Operator authority is still being earned through constrained participation.",
     condition: { kind: "reputation", operator: ">=", value: 20 },
   },
   {
@@ -673,7 +777,8 @@ export const DEFAULT_VICTORY_RULES: VictoryRule[] = [
     id: "recovery-cleared",
     type: "recovery-cleared",
     title: "Recovery cleared",
-    description: "Recovery evidence has crossed the permanent accomplishment threshold.",
+    description:
+      "Recovery evidence has crossed the permanent accomplishment threshold.",
     rarity: "rare",
     condition: {
       kind: "any",
@@ -695,7 +800,8 @@ export const DEFAULT_VICTORY_RULES: VictoryRule[] = [
     id: "survival-memory-cleared",
     type: "survival-memory-cleared",
     title: "Survival memory cleared",
-    description: "Survival has recovered enough to stop being a temporary state.",
+    description:
+      "Survival has recovered enough to stop being a temporary state.",
     rarity: "epic",
     condition: { kind: "score", metric: "survival", operator: ">=", value: 80 },
   },
@@ -724,13 +830,21 @@ export function evaluateLegacy(input: LegacyInput = {}): LegacyOutput {
   const reputationWeights = config.reputationWeights
     ? { ...config.reputationWeights }
     : { ...DEFAULT_REPUTATION_WEIGHTS };
-  const reputationThresholds = normalizeThresholds(config.reputationThresholds ?? DEFAULT_REPUTATION_THRESHOLDS);
+  const reputationThresholds = normalizeThresholds(
+    config.reputationThresholds ?? DEFAULT_REPUTATION_THRESHOLDS,
+  );
   const baseHistory = normalizeHistory(input.history);
   const previous = replayLegacyEvents(input.eventLog ?? [], baseHistory);
-  const existingEventKeys = new Set(previous.events.map((event) => event.idempotencyKey));
+  const existingEventKeys = new Set(
+    previous.events.map((event) => event.idempotencyKey),
+  );
   const events: LegacyEvent[] = [];
 
-  const reputation = calculateReputation(scores, reputationWeights, reputationThresholds);
+  const reputation = calculateReputation(
+    scores,
+    reputationWeights,
+    reputationThresholds,
+  );
   const emptyContext: LegacyRuleContext = {
     input,
     scores,
@@ -738,7 +852,9 @@ export function evaluateLegacy(input: LegacyInput = {}): LegacyOutput {
     flags,
     history: previous,
     reputation,
-    unlockedAchievementIds: new Set(previous.achievements.map((achievement) => achievement.id)),
+    unlockedAchievementIds: new Set(
+      previous.achievements.map((achievement) => achievement.id),
+    ),
     campaigns: previous.campaigns,
   };
 
@@ -757,7 +873,9 @@ export function evaluateLegacy(input: LegacyInput = {}): LegacyOutput {
   });
   const unlockedAchievementIds = new Set([
     ...previous.achievements.map((achievement) => achievement.id),
-    ...achievements.filter((achievement) => achievement.unlocked).map((achievement) => achievement.id),
+    ...achievements
+      .filter((achievement) => achievement.unlocked)
+      .map((achievement) => achievement.id),
   ]);
   const context: LegacyRuleContext = {
     ...contextWithCampaigns,
@@ -804,58 +922,134 @@ export function evaluateLegacy(input: LegacyInput = {}): LegacyOutput {
   });
 
   for (const achievement of achievements) {
-    if (achievement.unlocked && !previous.achievements.some((item) => item.id === achievement.id)) {
-      emitLegacyEvent(events, existingEventKeys, "legacy.achievement.unlocked", now, achievement.id, { achievement });
+    if (
+      achievement.unlocked &&
+      !previous.achievements.some((item) => item.id === achievement.id)
+    ) {
+      emitLegacyEvent(
+        events,
+        existingEventKeys,
+        "legacy.achievement.unlocked",
+        now,
+        achievement.id,
+        { achievement },
+      );
     }
   }
   for (const badge of badges) {
     if (!previous.badges.some((item) => item.id === badge.id)) {
-      emitLegacyEvent(events, existingEventKeys, "legacy.badge.earned", now, badge.id, { badge });
+      emitLegacyEvent(
+        events,
+        existingEventKeys,
+        "legacy.badge.earned",
+        now,
+        badge.id,
+        { badge },
+      );
     }
   }
   for (const milestone of milestones) {
     if (!previous.milestones.some((item) => item.id === milestone.id)) {
-      emitLegacyEvent(events, existingEventKeys, "legacy.milestone.reached", now, milestone.id, { milestone });
+      emitLegacyEvent(
+        events,
+        existingEventKeys,
+        "legacy.milestone.reached",
+        now,
+        milestone.id,
+        { milestone },
+      );
     }
   }
   for (const unlock of unlocks) {
     if (!previous.unlocks.some((item) => item.id === unlock.id)) {
-      emitLegacyEvent(events, existingEventKeys, "legacy.unlock.granted", now, unlock.id, { unlock });
+      emitLegacyEvent(
+        events,
+        existingEventKeys,
+        "legacy.unlock.granted",
+        now,
+        unlock.id,
+        { unlock },
+      );
     }
   }
   for (const campaign of campaigns) {
     const earlier = previous.campaigns.find((item) => item.id === campaign.id);
     if (campaign.status === "completed" && earlier?.status !== "completed") {
-      emitLegacyEvent(events, existingEventKeys, "legacy.campaign.completed", now, campaign.id, { campaign });
+      emitLegacyEvent(
+        events,
+        existingEventKeys,
+        "legacy.campaign.completed",
+        now,
+        campaign.id,
+        { campaign },
+      );
     }
   }
-  const previousReputation = previous.reputation[previous.reputation.length - 1] ?? null;
-  if (!previousReputation || previousReputation.rank !== reputation.rank || previousReputation.score !== reputation.score) {
-    emitLegacyEvent(events, existingEventKeys, "legacy.reputation.updated", now, `${previousReputation?.rank ?? "none"}:${reputation.rank}:${reputation.score}`, {
-      reputation,
-      previous: previousReputation,
-    });
+  const previousReputation =
+    previous.reputation[previous.reputation.length - 1] ?? null;
+  if (
+    !previousReputation ||
+    previousReputation.rank !== reputation.rank ||
+    previousReputation.score !== reputation.score
+  ) {
+    emitLegacyEvent(
+      events,
+      existingEventKeys,
+      "legacy.reputation.updated",
+      now,
+      `${previousReputation?.rank ?? "none"}:${reputation.rank}:${reputation.score}`,
+      {
+        reputation,
+        previous: previousReputation,
+      },
+    );
   }
   const previousTitle = previous.titles[previous.titles.length - 1] ?? null;
   if (!previousTitle || previousTitle.id !== title.id) {
-    emitLegacyEvent(events, existingEventKeys, "legacy.title.changed", now, `${previousTitle?.id ?? "none"}:${title.id}`, {
-      title,
-      previous: previousTitle,
-    });
+    emitLegacyEvent(
+      events,
+      existingEventKeys,
+      "legacy.title.changed",
+      now,
+      `${previousTitle?.id ?? "none"}:${title.id}`,
+      {
+        title,
+        previous: previousTitle,
+      },
+    );
   }
   if (prestige.unlocked && previous.prestige?.unlocked !== true) {
-    emitLegacyEvent(events, existingEventKeys, "legacy.prestige.unlocked", now, "prestige", { prestige });
+    emitLegacyEvent(
+      events,
+      existingEventKeys,
+      "legacy.prestige.unlocked",
+      now,
+      "prestige",
+      { prestige },
+    );
   }
   for (const victory of victories) {
     if (!previous.victories.some((item) => item.id === victory.id)) {
-      emitLegacyEvent(events, existingEventKeys, "legacy.victory.detected", now, victory.id, { victory });
+      emitLegacyEvent(
+        events,
+        existingEventKeys,
+        "legacy.victory.detected",
+        now,
+        victory.id,
+        { victory },
+      );
     }
   }
 
-  const reputationHistory = previousReputation?.rank === reputation.rank && previousReputation.score === reputation.score
-    ? previous.reputation
-    : [...previous.reputation, { ...reputation, updatedAt: now }];
-  const titleHistory = previousTitle?.id === title.id ? previous.titles : [...previous.titles, title];
+  const reputationHistory =
+    previousReputation?.rank === reputation.rank &&
+    previousReputation.score === reputation.score
+      ? previous.reputation
+      : [...previous.reputation, { ...reputation, updatedAt: now }];
+  const titleHistory =
+    previousTitle?.id === title.id
+      ? previous.titles
+      : [...previous.titles, title];
   const allEvents = [...previous.events, ...events];
   const history = normalizeHistory({
     achievements: achievements.filter((achievement) => achievement.unlocked),
@@ -870,18 +1064,36 @@ export function evaluateLegacy(input: LegacyInput = {}): LegacyOutput {
     events: allEvents,
   });
   const achievementCompletionPct = achievements.length
-    ? round(mean(achievements.map((achievement) => (achievement.unlocked ? 100 : achievement.progressPct))))
+    ? round(
+        mean(
+          achievements.map((achievement) =>
+            achievement.unlocked ? 100 : achievement.progressPct,
+          ),
+        ),
+      )
     : 0;
   const campaignCompletionPct = campaigns.length
-    ? round(mean(campaigns.map((campaign) => (campaign.status === "completed" ? 100 : campaign.status === "active" ? 50 : 0))))
+    ? round(
+        mean(
+          campaigns.map((campaign) =>
+            campaign.status === "completed"
+              ? 100
+              : campaign.status === "active"
+                ? 50
+                : 0,
+          ),
+        ),
+      )
     : 0;
-  const score = round(clamp(
-    reputation.score * 0.65 +
-      achievementCompletionPct * 0.15 +
-      campaignCompletionPct * 0.1 +
-      clamp(milestones.length / 8 * 100) * 0.05 +
-      clamp(unlocks.length / 6 * 100) * 0.05,
-  ));
+  const score = round(
+    clamp(
+      reputation.score * 0.65 +
+        achievementCompletionPct * 0.15 +
+        campaignCompletionPct * 0.1 +
+        clamp((milestones.length / 8) * 100) * 0.05 +
+        clamp((unlocks.length / 6) * 100) * 0.05,
+    ),
+  );
 
   return {
     module: "signal.legacy",
@@ -913,7 +1125,10 @@ export function evaluateLegacy(input: LegacyInput = {}): LegacyOutput {
   };
 }
 
-export function replayLegacyEvents(events: LegacyEvent[], baseHistory: Partial<LegacyHistory> | null = null): LegacyHistory {
+export function replayLegacyEvents(
+  events: LegacyEvent[],
+  baseHistory: Partial<LegacyHistory> | null = null,
+): LegacyHistory {
   let history = normalizeHistory(baseHistory);
   const seen = new Set(history.events.map((event) => event.idempotencyKey));
 
@@ -958,7 +1173,9 @@ export class LegacyMemoryStore {
   }
 }
 
-export function createLegacyHistory(history: Partial<LegacyHistory> | null = null): LegacyHistory {
+export function createLegacyHistory(
+  history: Partial<LegacyHistory> | null = null,
+): LegacyHistory {
   return normalizeHistory(history);
 }
 
@@ -968,11 +1185,21 @@ function deriveAchievements(args: {
   context: LegacyRuleContext;
   now: string;
 }) {
-  const previousById = new Map(args.previous.achievements.map((achievement) => [achievement.id, achievement]));
+  const previousById = new Map(
+    args.previous.achievements.map((achievement) => [
+      achievement.id,
+      achievement,
+    ]),
+  );
   const achievements = args.rules.map((rule) => {
     const previous = previousById.get(rule.id);
     const unlocked = Boolean(previous) || ruleMatches(rule, args.context);
-    const progressPct = unlocked ? 100 : clamp(rule.progress?.(args.context) ?? progressFromCondition(rule.condition, args.context));
+    const progressPct = unlocked
+      ? 100
+      : clamp(
+          rule.progress?.(args.context) ??
+            progressFromCondition(rule.condition, args.context),
+        );
     return {
       id: rule.id,
       name: previous?.name ?? rule.name,
@@ -985,7 +1212,12 @@ function deriveAchievements(args: {
     };
   });
   const ruleIds = new Set(args.rules.map((rule) => rule.id));
-  return [...achievements, ...args.previous.achievements.filter((achievement) => !ruleIds.has(achievement.id))];
+  return [
+    ...achievements,
+    ...args.previous.achievements.filter(
+      (achievement) => !ruleIds.has(achievement.id),
+    ),
+  ];
 }
 
 function deriveBadges(args: {
@@ -1025,7 +1257,12 @@ function deriveMilestones(args: {
         reachedAt: args.now,
         source: rule.source ?? rule.id,
         category: rule.category ?? "progression",
-        value: round(clamp(rule.value?.(args.context) ?? progressFromCondition(rule.condition, args.context))),
+        value: round(
+          clamp(
+            rule.value?.(args.context) ??
+              progressFromCondition(rule.condition, args.context),
+          ),
+        ),
       });
     }
   }
@@ -1064,20 +1301,33 @@ function deriveCampaigns(args: {
     const existing = campaigns.find((campaign) => campaign.id === rule.id);
     if (existing?.status === "completed") continue;
 
-    const started = Boolean(existing) || ruleMatches({
-      condition: rule.startCondition,
-      evaluate: rule.evaluateStart,
-    }, args.context);
+    const started =
+      Boolean(existing) ||
+      ruleMatches(
+        {
+          condition: rule.startCondition,
+          evaluate: rule.evaluateStart,
+        },
+        args.context,
+      );
     if (!started) continue;
 
-    const failed = ruleMatches({
-      condition: rule.failCondition,
-      evaluate: rule.evaluateFail,
-    }, args.context);
-    const completed = !failed && ruleMatches({
-      condition: rule.completeCondition,
-      evaluate: rule.evaluateComplete,
-    }, args.context);
+    const failed = ruleMatches(
+      {
+        condition: rule.failCondition,
+        evaluate: rule.evaluateFail,
+      },
+      args.context,
+    );
+    const completed =
+      !failed &&
+      ruleMatches(
+        {
+          condition: rule.completeCondition,
+          evaluate: rule.evaluateComplete,
+        },
+        args.context,
+      );
     const next: Campaign = {
       id: rule.id,
       name: existing?.name ?? rule.name,
@@ -1103,15 +1353,17 @@ function derivePrestige(args: {
   reputation: Reputation;
   requirements: Record<string, number>;
 }) {
-  const requirements = Object.entries(args.requirements).map(([metric, threshold]) => {
-    const current = round(clamp(args.scores[metric] ?? 0));
-    return {
-      metric,
-      threshold,
-      current,
-      passed: current >= threshold,
-    };
-  });
+  const requirements = Object.entries(args.requirements).map(
+    ([metric, threshold]) => {
+      const current = round(clamp(args.scores[metric] ?? 0));
+      return {
+        metric,
+        threshold,
+        current,
+        passed: current >= threshold,
+      };
+    },
+  );
   const eligible = requirements.every((requirement) => requirement.passed);
   const minimumRequirementScore = requirements.length
     ? Math.min(...requirements.map((requirement) => requirement.current))
@@ -1124,8 +1376,11 @@ function derivePrestige(args: {
         : 1
     : 0;
   const unlocked = args.previous.prestige?.unlocked === true || eligible;
-  const level = unlocked ? Math.max(earnedLevel, args.previous.prestige?.level ?? 0, 1) : 0;
-  const unlockedAt = args.previous.prestige?.unlockedAt ?? (unlocked ? args.now : undefined);
+  const level = unlocked
+    ? Math.max(earnedLevel, args.previous.prestige?.level ?? 0, 1)
+    : 0;
+  const unlockedAt =
+    args.previous.prestige?.unlockedAt ?? (unlocked ? args.now : undefined);
   const prestigeBadge: Badge = {
     id: "prestige-operator",
     name: "Prestige Operator",
@@ -1146,8 +1401,12 @@ function derivePrestige(args: {
     unlocked,
     level,
     ...(unlockedAt ? { unlockedAt } : {}),
-    badges: unlocked ? uniqueById([...(args.previous.prestige?.badges ?? []), prestigeBadge]) : args.previous.prestige?.badges ?? [],
-    titles: unlocked ? uniqueById([...(args.previous.prestige?.titles ?? []), prestigeTitle]) : args.previous.prestige?.titles ?? [],
+    badges: unlocked
+      ? uniqueById([...(args.previous.prestige?.badges ?? []), prestigeBadge])
+      : (args.previous.prestige?.badges ?? []),
+    titles: unlocked
+      ? uniqueById([...(args.previous.prestige?.titles ?? []), prestigeTitle])
+      : (args.previous.prestige?.titles ?? []),
     requirements,
   };
 }
@@ -1162,7 +1421,8 @@ function selectTitle(args: {
   const matched = [...args.rules]
     .sort((left, right) => right.priority - left.priority)
     .find((rule) => ruleMatches(rule, args.context));
-  const selected = matched ?? DEFAULT_TITLE_RULES[DEFAULT_TITLE_RULES.length - 1];
+  const selected =
+    matched ?? DEFAULT_TITLE_RULES[DEFAULT_TITLE_RULES.length - 1];
   const previous = args.previous.titles[args.previous.titles.length - 1];
 
   if (previous?.id === selected.id) return previous;
@@ -1205,9 +1465,14 @@ function calculateReputation(
   weights: Record<string, number>,
   thresholds: ReputationThreshold[],
 ): Reputation {
-  const totalWeight = Object.values(weights).reduce((sum, weight) => sum + Math.max(0, weight), 0) || 1;
+  const totalWeight =
+    Object.values(weights).reduce(
+      (sum, weight) => sum + Math.max(0, weight),
+      0,
+    ) || 1;
   const weighted = Object.entries(weights).reduce(
-    (sum, [metric, weight]) => sum + clamp(scores[metric] ?? 0) * Math.max(0, weight),
+    (sum, [metric, weight]) =>
+      sum + clamp(scores[metric] ?? 0) * Math.max(0, weight),
     0,
   );
   const score = round(clamp(weighted / totalWeight));
@@ -1224,14 +1489,25 @@ function rankFor(score: number, thresholds: ReputationThreshold[]) {
   );
 }
 
-function conditionMatches(condition: LegacyCondition | undefined, context: LegacyRuleContext): boolean {
+function conditionMatches(
+  condition: LegacyCondition | undefined,
+  context: LegacyRuleContext,
+): boolean {
   if (!condition) return false;
 
   switch (condition.kind) {
     case "score":
-      return compare(context.scores[condition.metric] ?? 0, condition.operator, condition.value);
+      return compare(
+        context.scores[condition.metric] ?? 0,
+        condition.operator,
+        condition.value,
+      );
     case "counter":
-      return compare(context.counters[condition.counter] ?? 0, condition.operator, condition.value);
+      return compare(
+        context.counters[condition.counter] ?? 0,
+        condition.operator,
+        condition.value,
+      );
     case "flag":
       return condition.equals === undefined
         ? Boolean(context.flags[condition.flag])
@@ -1241,19 +1517,32 @@ function conditionMatches(condition: LegacyCondition | undefined, context: Legac
       return condition.unlocked === false ? !unlocked : unlocked;
     }
     case "campaign":
-      return context.campaigns.some((campaign) => campaign.id === condition.id && campaign.status === condition.status);
+      return context.campaigns.some(
+        (campaign) =>
+          campaign.id === condition.id && campaign.status === condition.status,
+      );
     case "event": {
-      const count = context.history.events.filter((event) => event.type === condition.type).length;
+      const count = context.history.events.filter(
+        (event) => event.type === condition.type,
+      ).length;
       return count >= (condition.count ?? 1);
     }
     case "reputation":
-      return compare(context.reputation.score, condition.operator, condition.value);
+      return compare(
+        context.reputation.score,
+        condition.operator,
+        condition.value,
+      );
     case "rank":
       return context.reputation.rank === condition.rank;
     case "all":
-      return condition.conditions.every((child) => conditionMatches(child, context));
+      return condition.conditions.every((child) =>
+        conditionMatches(child, context),
+      );
     case "any":
-      return condition.conditions.some((child) => conditionMatches(child, context));
+      return condition.conditions.some((child) =>
+        conditionMatches(child, context),
+      );
     case "not":
       return !conditionMatches(condition.condition, context);
     default:
@@ -1265,29 +1554,65 @@ function ruleMatches(
   rule: { condition?: LegacyCondition; evaluate?: LegacyRulePredicate },
   context: LegacyRuleContext,
 ) {
-  return Boolean(rule.evaluate?.(context) || conditionMatches(rule.condition, context));
+  return Boolean(
+    rule.evaluate?.(context) || conditionMatches(rule.condition, context),
+  );
 }
 
-function progressFromCondition(condition: LegacyCondition | undefined, context: LegacyRuleContext): number {
+function progressFromCondition(
+  condition: LegacyCondition | undefined,
+  context: LegacyRuleContext,
+): number {
   if (!condition) return 0;
-  if (condition.kind === "score") return progressAtLeast(context.scores[condition.metric], condition.value);
-  if (condition.kind === "counter") return progressAtLeast(context.counters[condition.counter], condition.value);
-  if (condition.kind === "flag") return flagProgress(context.flags[condition.flag]);
-  if (condition.kind === "achievement") return context.unlockedAchievementIds.has(condition.id) ? 100 : 0;
-  if (condition.kind === "campaign") return context.campaigns.some((campaign) => campaign.id === condition.id && campaign.status === condition.status) ? 100 : 0;
+  if (condition.kind === "score")
+    return progressAtLeast(context.scores[condition.metric], condition.value);
+  if (condition.kind === "counter")
+    return progressAtLeast(
+      context.counters[condition.counter],
+      condition.value,
+    );
+  if (condition.kind === "flag")
+    return flagProgress(context.flags[condition.flag]);
+  if (condition.kind === "achievement")
+    return context.unlockedAchievementIds.has(condition.id) ? 100 : 0;
+  if (condition.kind === "campaign")
+    return context.campaigns.some(
+      (campaign) =>
+        campaign.id === condition.id && campaign.status === condition.status,
+    )
+      ? 100
+      : 0;
   if (condition.kind === "event") {
-    const count = context.history.events.filter((event) => event.type === condition.type).length;
+    const count = context.history.events.filter(
+      (event) => event.type === condition.type,
+    ).length;
     return progressAtLeast(count, condition.count ?? 1);
   }
-  if (condition.kind === "reputation") return progressAtLeast(context.reputation.score, condition.value);
-  if (condition.kind === "rank") return context.reputation.rank === condition.rank ? 100 : 0;
-  if (condition.kind === "all") return mean(condition.conditions.map((child) => progressFromCondition(child, context)));
-  if (condition.kind === "any") return maxProgress(...condition.conditions.map((child) => progressFromCondition(child, context)));
-  if (condition.kind === "not") return conditionMatches(condition.condition, context) ? 0 : 100;
+  if (condition.kind === "reputation")
+    return progressAtLeast(context.reputation.score, condition.value);
+  if (condition.kind === "rank")
+    return context.reputation.rank === condition.rank ? 100 : 0;
+  if (condition.kind === "all")
+    return mean(
+      condition.conditions.map((child) =>
+        progressFromCondition(child, context),
+      ),
+    );
+  if (condition.kind === "any")
+    return maxProgress(
+      ...condition.conditions.map((child) =>
+        progressFromCondition(child, context),
+      ),
+    );
+  if (condition.kind === "not")
+    return conditionMatches(condition.condition, context) ? 0 : 100;
   return 0;
 }
 
-function applyLegacyEvent(history: LegacyHistory, event: LegacyEvent): LegacyHistory {
+function applyLegacyEvent(
+  history: LegacyHistory,
+  event: LegacyEvent,
+): LegacyHistory {
   const next = normalizeHistory({
     ...history,
     events: [...history.events, event],
@@ -1295,7 +1620,8 @@ function applyLegacyEvent(history: LegacyHistory, event: LegacyEvent): LegacyHis
 
   if (event.type === "legacy.achievement.unlocked") {
     const achievement = event.payload.achievement as Achievement | undefined;
-    if (achievement) next.achievements = uniqueById([...next.achievements, achievement]);
+    if (achievement)
+      next.achievements = uniqueById([...next.achievements, achievement]);
   }
   if (event.type === "legacy.badge.earned") {
     const badge = event.payload.badge as Badge | undefined;
@@ -1303,7 +1629,8 @@ function applyLegacyEvent(history: LegacyHistory, event: LegacyEvent): LegacyHis
   }
   if (event.type === "legacy.milestone.reached") {
     const milestone = event.payload.milestone as Milestone | undefined;
-    if (milestone) next.milestones = uniqueById([...next.milestones, milestone]);
+    if (milestone)
+      next.milestones = uniqueById([...next.milestones, milestone]);
   }
   if (event.type === "legacy.unlock.granted") {
     const unlock = event.payload.unlock as Unlock | undefined;
@@ -1315,11 +1642,19 @@ function applyLegacyEvent(history: LegacyHistory, event: LegacyEvent): LegacyHis
   }
   if (event.type === "legacy.title.changed") {
     const title = event.payload.title as OperatorTitle | undefined;
-    if (title) next.titles = [...next.titles.filter((item) => item.id !== title.id), title];
+    if (title)
+      next.titles = [
+        ...next.titles.filter((item) => item.id !== title.id),
+        title,
+      ];
   }
   if (event.type === "legacy.reputation.updated") {
     const reputation = event.payload.reputation as Reputation | undefined;
-    if (reputation) next.reputation = [...next.reputation, { ...reputation, updatedAt: event.timestamp }];
+    if (reputation)
+      next.reputation = [
+        ...next.reputation,
+        { ...reputation, updatedAt: event.timestamp },
+      ];
   }
   if (event.type === "legacy.prestige.unlocked") {
     const prestige = event.payload.prestige as PrestigeState | undefined;
@@ -1352,10 +1687,14 @@ function emitLegacyEvent(
   });
 }
 
-function normalizeHistory(history: Partial<LegacyHistory> | null | undefined): LegacyHistory {
+function normalizeHistory(
+  history: Partial<LegacyHistory> | null | undefined,
+): LegacyHistory {
   const base = history ?? {};
   return {
-    achievements: uniqueById((base.achievements ?? []).filter((achievement) => achievement.unlocked)),
+    achievements: uniqueById(
+      (base.achievements ?? []).filter((achievement) => achievement.unlocked),
+    ),
     badges: uniqueById(base.badges ?? []),
     milestones: uniqueById(base.milestones ?? []),
     unlocks: uniqueById(base.unlocks ?? []),
@@ -1420,14 +1759,20 @@ function uniqueById<T extends { id: string }>(items: T[]): T[] {
 function uniqueByEventKey(events: LegacyEvent[]): LegacyEvent[] {
   const byKey = new Map<string, LegacyEvent>();
   for (const event of events) {
-    if (!byKey.has(event.idempotencyKey)) byKey.set(event.idempotencyKey, event);
+    if (!byKey.has(event.idempotencyKey))
+      byKey.set(event.idempotencyKey, event);
   }
   return Array.from(byKey.values());
 }
 
-function normalizeNumberRecord(record: Record<string, number | null | undefined> | undefined): Record<string, number> {
+function normalizeNumberRecord(
+  record: Record<string, number | null | undefined> | undefined,
+): Record<string, number> {
   return Object.fromEntries(
-    Object.entries(record ?? {}).map(([key, value]) => [key, clamp(numeric(value, 0))]),
+    Object.entries(record ?? {}).map(([key, value]) => [
+      key,
+      clamp(numeric(value, 0)),
+    ]),
   );
 }
 
@@ -1435,7 +1780,11 @@ function normalizeThresholds(thresholds: ReputationThreshold[]) {
   return [...thresholds].sort((left, right) => left.minScore - right.minScore);
 }
 
-function compare(left: number, operator: LegacyComparisonOperator, right: number) {
+function compare(
+  left: number,
+  operator: LegacyComparisonOperator,
+  right: number,
+) {
   if (operator === ">=") return left >= right;
   if (operator === ">") return left > right;
   if (operator === "<=") return left <= right;
@@ -1445,7 +1794,7 @@ function compare(left: number, operator: LegacyComparisonOperator, right: number
 }
 
 function progressAtLeast(value: unknown, target: number) {
-  return clamp(numeric(value, 0) / Math.max(1, target) * 100);
+  return clamp((numeric(value, 0) / Math.max(1, target)) * 100);
 }
 
 function flagProgress(value: unknown) {
@@ -1463,7 +1812,8 @@ function maxProgress(...values: number[]) {
 function toIsoTimestamp(value: string | number | Date | undefined) {
   if (value instanceof Date) return value.toISOString();
   if (typeof value === "number") return new Date(value).toISOString();
-  if (typeof value === "string" && value.trim()) return new Date(value).toISOString();
+  if (typeof value === "string" && value.trim())
+    return new Date(value).toISOString();
   return new Date().toISOString();
 }
 

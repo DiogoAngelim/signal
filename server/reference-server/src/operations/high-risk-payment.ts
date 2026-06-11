@@ -1,13 +1,13 @@
 import {
-  createProtocolError,
   type SignalAuth,
   type SignalEnvelope,
+  createProtocolError,
 } from "@signal/protocol";
 import type {
   SignalExecutionContext,
   SignalRuntime,
   SignalSchema,
-} from "@signal/runtime";
+} from "@signal/sdk-node";
 
 export type PaymentRiskDeclaration = {
   declared: true;
@@ -178,12 +178,12 @@ function requireCurrency(value: unknown): string {
 
 function requireRiskDeclaration(value: unknown): PaymentRiskDeclaration {
   const risk = requireRecord(value, "risk");
-  if (risk["declared"] !== true) {
+  if (risk.declared !== true) {
     return validationError("risk.declared must be true");
   }
 
   const classification = requireString(
-    risk["classification"],
+    risk.classification,
     "risk.classification",
   );
   if (classification !== "high" && classification !== "critical") {
@@ -193,8 +193,8 @@ function requireRiskDeclaration(value: unknown): PaymentRiskDeclaration {
   return {
     declared: true,
     classification,
-    reason: requireString(risk["reason"], "risk.reason"),
-    approvedBy: requireString(risk["approvedBy"], "risk.approvedBy"),
+    reason: requireString(risk.reason, "risk.reason"),
+    approvedBy: requireString(risk.approvedBy, "risk.approvedBy"),
   };
 }
 
@@ -202,13 +202,13 @@ function requirePaymentMethod(
   value: unknown,
 ): PaymentCaptureInput["paymentMethod"] {
   const paymentMethod = requireRecord(value, "paymentMethod");
-  const last4 = optionalString(paymentMethod["last4"]);
+  const last4 = optionalString(paymentMethod.last4);
   if (last4 !== undefined && !/^[0-9]{4}$/.test(last4)) {
     return validationError("paymentMethod.last4 must contain four digits");
   }
 
   return {
-    token: requireString(paymentMethod["token"], "paymentMethod.token"),
+    token: requireString(paymentMethod.token, "paymentMethod.token"),
     ...(last4 ? { last4 } : {}),
   };
 }
@@ -420,12 +420,12 @@ export type HighRiskPaymentStore = ReturnType<
 const paymentCaptureInputSchema = schema<PaymentCaptureInput>((value) => {
   const input = requireRecord(value, "payment.capture.v1 input");
   return {
-    tenantId: requireString(input["tenantId"], "tenantId"),
-    authorizationId: requireString(input["authorizationId"], "authorizationId"),
-    amountCents: requirePositiveInteger(input["amountCents"], "amountCents"),
-    currency: requireCurrency(input["currency"]),
-    paymentMethod: requirePaymentMethod(input["paymentMethod"]),
-    risk: requireRiskDeclaration(input["risk"]),
+    tenantId: requireString(input.tenantId, "tenantId"),
+    authorizationId: requireString(input.authorizationId, "authorizationId"),
+    amountCents: requirePositiveInteger(input.amountCents, "amountCents"),
+    currency: requireCurrency(input.currency),
+    paymentMethod: requirePaymentMethod(input.paymentMethod),
+    risk: requireRiskDeclaration(input.risk),
   };
 });
 
@@ -436,25 +436,25 @@ const paymentCaptureResultSchema = schema<PaymentCaptureResult>(
 const paymentCapturedEventSchema = schema<PaymentCapturedEvent>((value) => {
   const event = requireRecord(value, "payment.captured.v1 payload");
   return {
-    captureId: requireString(event["captureId"], "captureId"),
-    tenantId: requireString(event["tenantId"], "tenantId"),
-    authorizationId: requireString(event["authorizationId"], "authorizationId"),
-    amountCents: requirePositiveInteger(event["amountCents"], "amountCents"),
-    currency: requireCurrency(event["currency"]),
+    captureId: requireString(event.captureId, "captureId"),
+    tenantId: requireString(event.tenantId, "tenantId"),
+    authorizationId: requireString(event.authorizationId, "authorizationId"),
+    amountCents: requirePositiveInteger(event.amountCents, "amountCents"),
+    currency: requireCurrency(event.currency),
     status:
-      event["status"] === "captured"
+      event.status === "captured"
         ? "captured"
         : validationError("status must be captured"),
-    capturedAt: requireString(event["capturedAt"], "capturedAt"),
-    auditId: requireString(event["auditId"], "auditId"),
+    capturedAt: requireString(event.capturedAt, "capturedAt"),
+    auditId: requireString(event.auditId, "auditId"),
   };
 });
 
 const paymentCaptureGetInputSchema = schema<PaymentCaptureGetInput>((value) => {
   const input = requireRecord(value, "payment.capture.get.v1 input");
   return {
-    tenantId: requireString(input["tenantId"], "tenantId"),
-    captureId: requireString(input["captureId"], "captureId"),
+    tenantId: requireString(input.tenantId, "tenantId"),
+    captureId: requireString(input.captureId, "captureId"),
   };
 });
 
@@ -533,7 +533,7 @@ function rejectsWithCode(run: () => unknown, code: string): boolean {
   try {
     run();
   } catch (error) {
-    return isRecord(error) && error["code"] === code;
+    return isRecord(error) && error.code === code;
   }
 
   return false;
@@ -582,10 +582,12 @@ async function certifyIsolatedCapture(): Promise<{
   };
 }
 
-export async function buildReferenceCertification(input: {
-  runtime?: SignalRuntime;
-  store?: HighRiskPaymentStore;
-} = {}): Promise<ReferenceCertificationResult> {
+export async function buildReferenceCertification(
+  input: {
+    runtime?: SignalRuntime;
+    store?: HighRiskPaymentStore;
+  } = {},
+): Promise<ReferenceCertificationResult> {
   const capabilities = input.runtime?.capabilities();
   const paymentMutation = capabilities?.mutations.find(
     (entry) => entry.name === "payment.capture.v1",

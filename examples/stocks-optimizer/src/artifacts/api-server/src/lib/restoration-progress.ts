@@ -12,7 +12,11 @@ export type RestorationProgressStatus =
   | "ready_for_restoration"
   | "restored";
 
-export type SurvivalMemoryRestorationState = "scarred" | "watch" | "limited" | "clear";
+export type SurvivalMemoryRestorationState =
+  | "scarred"
+  | "watch"
+  | "limited"
+  | "clear";
 
 export type RestorationProgressGate = {
   id: string;
@@ -88,7 +92,11 @@ export type RestorationActionPlanStep = {
 
 export type RestorationActionPlan = {
   title: "Survival Memory Restoration Plan";
-  status: "collecting_evidence" | "reset_required" | "ready_for_review" | "restored";
+  status:
+    | "collecting_evidence"
+    | "reset_required"
+    | "ready_for_review"
+    | "restored";
   activeInstruction: string;
   exposureInstruction: string;
   remainingCleanOutcomes: number;
@@ -134,14 +142,17 @@ const MAX_DRAWDOWN_BOUNDARY = 30;
 const MAX_ADVERSE_EXCURSION_BOUNDARY = 35;
 const REQUIRED_CLEAN_REDUCED_SIZE_OUTCOMES = 3;
 
-export function buildRestorationProgress(input: RestorationProgressInput): RestorationProgressDiagnostic {
+export function buildRestorationProgress(
+  input: RestorationProgressInput,
+): RestorationProgressDiagnostic {
   const recovery = input.recovery ?? null;
   const survivalMemory = input.survivalMemory ?? null;
   const thresholds = {
     ...DEFAULT_RECOVERY_THRESHOLDS,
     ...(objectOrNull(recovery?.audit)?.thresholds ?? {}),
   } as RecoveryThresholds;
-  const normalized = objectOrNull(objectOrNull(recovery?.audit)?.normalized) ?? {};
+  const normalized =
+    objectOrNull(objectOrNull(recovery?.audit)?.normalized) ?? {};
   const survivalConfidence = numberOr(
     survivalMemory?.survivalConfidence,
     normalized.survivalConfidence,
@@ -163,11 +174,21 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     normalized.discoveryMaturity,
     0,
   );
-  const dataReliability = numberOr(input.dataReliability, normalized.dataReliability, 0);
+  const dataReliability = numberOr(
+    input.dataReliability,
+    normalized.dataReliability,
+    0,
+  );
   const overfitRisk = numberOr(input.overfitRisk, normalized.overfitRisk, 100);
   const blockedAgencyActionCount = Math.max(
     0,
-    Math.round(numberOr(input.blockedAgencyActionCount, normalized.blockedAgencyActionCount, 0)),
+    Math.round(
+      numberOr(
+        input.blockedAgencyActionCount,
+        normalized.blockedAgencyActionCount,
+        0,
+      ),
+    ),
   );
   const currentExposureCapPct = round(
     numberOr(
@@ -203,19 +224,18 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
   const outcomeStability = numberOr(normalized.outcomeStability, 0);
   const evidenceAgreement = numberOr(normalized.evidenceAgreement, 0);
   const cleanOutcomeGatePassed =
-    outcomeProof.cleanReducedSizeOutcomeCount >= outcomeProof.requiredCleanOutcomes &&
+    outcomeProof.cleanReducedSizeOutcomeCount >=
+      outcomeProof.requiredCleanOutcomes &&
     outcomeProof.activeProofBoundaryBreakCount === 0;
-  const survivalConfidencePassed = survivalConfidence >= thresholds.minSurvivalConfidenceForRestore;
+  const survivalConfidencePassed =
+    survivalConfidence >= thresholds.minSurvivalConfidenceForRestore;
   const promotableSurvivalStatus =
-    survivalMemory?.status === "scarred" ||
-    survivalMemory?.status === "watch";
+    survivalMemory?.status === "scarred" || survivalMemory?.status === "watch";
   const survivalMemoryClear =
     survivalMemory?.status === "clear" ||
-    (
-      promotableSurvivalStatus &&
+    (promotableSurvivalStatus &&
       survivalConfidencePassed &&
-      cleanOutcomeGatePassed
-    );
+      cleanOutcomeGatePassed);
   const survivalStatusLabel = survivalMemoryClear
     ? "clear"
     : readableStatus(survivalMemory?.status);
@@ -239,8 +259,10 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
       targetValue: 100,
       current: survivalStatusLabel,
       target: "clear",
-      detail: "Survival Memory must move out of scarred/watch before normal sizing returns.",
-      unlockCondition: "Clear scarred/watch Survival Memory with clean reduced-size proof.",
+      detail:
+        "Survival Memory must move out of scarred/watch before normal sizing returns.",
+      unlockCondition:
+        "Clear scarred/watch Survival Memory with clean reduced-size proof.",
     }),
     gate({
       id: "clean-reduced-size-outcomes",
@@ -250,8 +272,10 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
       targetValue: outcomeProof.requiredCleanOutcomes,
       current: `${outcomeProof.cleanReducedSizeOutcomeCount}/${outcomeProof.requiredCleanOutcomes}`,
       target: `${outcomeProof.requiredCleanOutcomes} clean`,
-      detail: "Reduced-size outcomes need acceptable drawdown, adverse excursion, and survival cost.",
-      unlockCondition: "Close clean reduced-size outcomes without breaching survival boundaries.",
+      detail:
+        "Reduced-size outcomes need acceptable drawdown, adverse excursion, and survival cost.",
+      unlockCondition:
+        "Close clean reduced-size outcomes without breaching survival boundaries.",
     }),
     gate({
       id: "trust-score",
@@ -267,7 +291,8 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
     gate({
       id: "calibrated-confidence",
       label: "Calibrated confidence",
-      passed: calibratedConfidence >= thresholds.minCalibratedConfidenceForRestore,
+      passed:
+        calibratedConfidence >= thresholds.minCalibratedConfidenceForRestore,
       currentValue: calibratedConfidence,
       targetValue: thresholds.minCalibratedConfidenceForRestore,
       current: `${Math.round(calibratedConfidence)}/100`,
@@ -285,14 +310,19 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
         outcomeStability >= thresholds.minOutcomeStabilityForRestore &&
         evidenceAgreement >= thresholds.minEvidenceAgreementForRestore,
       currentValue: Math.min(
-        sampleCount / Math.max(1, thresholds.minSimilarSamplesForRestore) * 100,
-        positiveOutcomeRatio / Math.max(0.01, thresholds.minPositiveOutcomeRatioForRestore) * 100,
+        (sampleCount / Math.max(1, thresholds.minSimilarSamplesForRestore)) *
+          100,
+        (positiveOutcomeRatio /
+          Math.max(0.01, thresholds.minPositiveOutcomeRatioForRestore)) *
+          100,
       ),
       targetValue: 100,
       current: `${sampleCount} samples / ${Math.round(positiveOutcomeRatio * 100)}% positive`,
       target: `${thresholds.minSimilarSamplesForRestore} samples / ${Math.round(thresholds.minPositiveOutcomeRatioForRestore * 100)}% positive`,
-      detail: "Similar outcomes must be numerous, positive, stable, and agreed with judgement evidence.",
-      unlockCondition: "Collect more stable positive outcomes for this comparable state.",
+      detail:
+        "Similar outcomes must be numerous, positive, stable, and agreed with judgement evidence.",
+      unlockCondition:
+        "Collect more stable positive outcomes for this comparable state.",
     }),
     gate({
       id: "discovery-maturity",
@@ -307,8 +337,10 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
       ),
       current: `${Math.round(discoveryConfidence)}/${Math.round(discoveryMaturity)}`,
       target: `${thresholds.minDiscoveryConfidenceForRestore}/${thresholds.minDiscoveryMaturityForRestore}`,
-      detail: "Discovery confidence and maturity must improve before normal sizing.",
-      unlockCondition: "Let discovery confidence and maturity improve before restoring normal sizing.",
+      detail:
+        "Discovery confidence and maturity must improve before normal sizing.",
+      unlockCondition:
+        "Let discovery confidence and maturity improve before restoring normal sizing.",
     }),
     gate({
       id: "risk-and-agency",
@@ -326,11 +358,13 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
       current: `data ${Math.round(dataReliability)}, overfit ${Math.round(overfitRisk)}, blocked ${blockedAgencyActionCount}`,
       target: `data ${thresholds.minDataReliability}+, overfit <=${thresholds.maxOverfitRisk}, blocked 0`,
       detail: "Data, overfit, and agency gates must remain clean.",
-      unlockCondition: "Keep data reliable, overfit contained, and agency actions unblocked.",
+      unlockCondition:
+        "Keep data reliable, overfit contained, and agency actions unblocked.",
     }),
   ];
   const failedGates = gates.filter((item) => !item.passed);
-  const canRestoreSizing = recovery?.canRestoreSizing === true && failedGates.length === 0;
+  const canRestoreSizing =
+    recovery?.canRestoreSizing === true && failedGates.length === 0;
   const status = statusFor(canRestoreSizing, recovery?.status, failedGates);
   const restorationState = restorationStateFor({
     canRestoreSizing,
@@ -361,8 +395,12 @@ export function buildRestorationProgress(input: RestorationProgressInput): Resto
   });
   const progressPct = canRestoreSizing
     ? 100
-    : round(gates.reduce((total, item) => total + item.progressPct, 0) / Math.max(1, gates.length));
-  const primaryBlocker = failedGates[0]?.detail ?? ledger.exactUnlockCondition ?? null;
+    : round(
+        gates.reduce((total, item) => total + item.progressPct, 0) /
+          Math.max(1, gates.length),
+      );
+  const primaryBlocker =
+    failedGates[0]?.detail ?? ledger.exactUnlockCondition ?? null;
 
   return {
     module: "stocks.restoration-progress",
@@ -398,11 +436,8 @@ function buildOutcomeProof(input: {
 }): RestorationOutcomeProof {
   const cap = Math.max(0, input.currentExposureCapPct);
   const normalCap = Math.max(cap, input.targetNormalExposurePct);
-  const reducedSizeLimit = cap > 0
-    ? cap * 1.05
-    : normalCap > 0
-      ? normalCap * 0.65
-      : 0;
+  const reducedSizeLimit =
+    cap > 0 ? cap * 1.05 : normalCap > 0 ? normalCap * 0.65 : 0;
   const reducedSizeOutcomes = input.records.filter((record) => {
     const exposure = numberOr(record.maxExposure, 0);
     return reducedSizeLimit > 0 && exposure <= reducedSizeLimit;
@@ -411,10 +446,16 @@ function buildOutcomeProof(input: {
   const failedOutcomes = reducedSizeOutcomes.filter(isFailedOutcome);
   const ledgerEntries = reducedSizeOutcomes.map(ledgerEntryForRecord);
   const cleanStreakCount = cleanReducedSizeStreakCount(reducedSizeOutcomes);
-  const lastBoundaryBreak = [...ledgerEntries].reverse().find((entry) => entry.boundaryBreaches.length > 0);
+  const lastBoundaryBreak = [...ledgerEntries]
+    .reverse()
+    .find((entry) => entry.boundaryBreaches.length > 0);
   const latestEntry = ledgerEntries[ledgerEntries.length - 1];
   const activeProofBoundaryBreakCount =
-    cleanStreakCount > 0 || !latestEntry ? 0 : latestEntry.boundaryBreaches.length > 0 ? 1 : 0;
+    cleanStreakCount > 0 || !latestEntry
+      ? 0
+      : latestEntry.boundaryBreaches.length > 0
+        ? 1
+        : 0;
 
   return {
     requiredCleanOutcomes: REQUIRED_CLEAN_REDUCED_SIZE_OUTCOMES,
@@ -429,7 +470,9 @@ function buildOutcomeProof(input: {
     activeProofBoundaryBreakCount,
     lastBoundaryBreakId: lastBoundaryBreak?.id,
     cleanOutcomeRatio: round(
-      reducedSizeOutcomes.length ? cleanOutcomes.length / reducedSizeOutcomes.length * 100 : 0,
+      reducedSizeOutcomes.length
+        ? (cleanOutcomes.length / reducedSizeOutcomes.length) * 100
+        : 0,
     ),
     survivalCostBoundary: SURVIVAL_COST_BOUNDARY,
     maxDrawdownBoundary: MAX_DRAWDOWN_BOUNDARY,
@@ -439,7 +482,9 @@ function buildOutcomeProof(input: {
   };
 }
 
-function cleanReducedSizeStreakCount(records: StockSurvivalMemoryDiagnostic["records"]) {
+function cleanReducedSizeStreakCount(
+  records: StockSurvivalMemoryDiagnostic["records"],
+) {
   let count = 0;
 
   for (let index = records.length - 1; index >= 0; index -= 1) {
@@ -460,15 +505,18 @@ function buildRestorationLedger(input: {
   canRestoreSizing: boolean;
 }): SurvivalMemoryRestorationLedger {
   const cleanProofPassed =
-    input.outcomeProof.cleanReducedSizeOutcomeCount >= input.outcomeProof.requiredCleanOutcomes &&
+    input.outcomeProof.cleanReducedSizeOutcomeCount >=
+      input.outcomeProof.requiredCleanOutcomes &&
     input.outcomeProof.activeProofBoundaryBreakCount === 0;
-  const confidencePassed = input.survivalConfidence >= input.survivalConfidenceThreshold;
+  const confidencePassed =
+    input.survivalConfidence >= input.survivalConfidenceThreshold;
   const statusClear = input.survivalMemoryClear;
   const entries = input.outcomeProof.ledgerEntries;
   const latestEntry = entries[entries.length - 1];
   const remainingClean = Math.max(
     0,
-    input.outcomeProof.requiredCleanOutcomes - input.outcomeProof.cleanReducedSizeOutcomeCount,
+    input.outcomeProof.requiredCleanOutcomes -
+      input.outcomeProof.cleanReducedSizeOutcomeCount,
   );
 
   return {
@@ -478,8 +526,12 @@ function buildRestorationLedger(input: {
       {
         state: "scarred",
         label: "Scar recorded",
-        passed: input.outcomeProof.reducedSizeOutcomeCount > 0 || confidencePassed || statusClear,
-        detail: "Prior survival cost has been identified and reduced-size proof is being collected.",
+        passed:
+          input.outcomeProof.reducedSizeOutcomeCount > 0 ||
+          confidencePassed ||
+          statusClear,
+        detail:
+          "Prior survival cost has been identified and reduced-size proof is being collected.",
       },
       {
         state: "watch",
@@ -497,7 +549,8 @@ function buildRestorationLedger(input: {
         state: "clear",
         label: "Clear",
         passed: statusClear && cleanProofPassed,
-        detail: "Survival Memory is clear and clean reduced-size proof is intact.",
+        detail:
+          "Survival Memory is clear and clean reduced-size proof is intact.",
       },
     ],
     entries,
@@ -506,12 +559,16 @@ function buildRestorationLedger(input: {
       remainingClean,
       survivalConfidence: input.survivalConfidence,
       survivalConfidenceThreshold: input.survivalConfidenceThreshold,
-      latestOutcomeFailed: latestEntry ? !latestEntry.clean && latestEntry.boundaryBreaches.length > 0 : false,
+      latestOutcomeFailed: latestEntry
+        ? !latestEntry.clean && latestEntry.boundaryBreaches.length > 0
+        : false,
     }),
     boundarySummary: `Clean means survival cost < ${SURVIVAL_COST_BOUNDARY}/100, drawdown < ${MAX_DRAWDOWN_BOUNDARY}%, and MAE < ${MAX_ADVERSE_EXCURSION_BOUNDARY}%.`,
     requiredCleanOutcomes: input.outcomeProof.requiredCleanOutcomes,
-    cleanReducedSizeOutcomeCount: input.outcomeProof.cleanReducedSizeOutcomeCount,
-    failedReducedSizeOutcomeCount: input.outcomeProof.failedReducedSizeOutcomeCount,
+    cleanReducedSizeOutcomeCount:
+      input.outcomeProof.cleanReducedSizeOutcomeCount,
+    failedReducedSizeOutcomeCount:
+      input.outcomeProof.failedReducedSizeOutcomeCount,
   };
 }
 
@@ -526,12 +583,15 @@ function buildRestorationActionPlan(input: {
   canRestoreSizing: boolean;
 }): RestorationActionPlan {
   const remainingClean = input.outcomeProof.remainingCleanReducedSizeOutcomes;
-  const confidencePassed = input.survivalConfidence >= input.survivalConfidenceThreshold;
+  const confidencePassed =
+    input.survivalConfidence >= input.survivalConfidenceThreshold;
   const cleanProofPassed =
-    remainingClean === 0 && input.outcomeProof.activeProofBoundaryBreakCount === 0;
+    remainingClean === 0 &&
+    input.outcomeProof.activeProofBoundaryBreakCount === 0;
   const statusClear = input.survivalMemoryClear;
   const resetRequired = input.outcomeProof.activeProofBoundaryBreakCount > 0;
-  const proofLaneOpen = input.canRestoreSizing || input.currentExposureCapPct > 0;
+  const proofLaneOpen =
+    input.canRestoreSizing || input.currentExposureCapPct > 0;
   const planStatus: RestorationActionPlan["status"] = input.canRestoreSizing
     ? "restored"
     : resetRequired
@@ -575,7 +635,7 @@ function buildRestorationActionPlan(input: {
       ? `Normal sizing can be reviewed against the ${formatPct(input.targetNormalExposurePct)} target.`
       : !proofLaneOpen
         ? "Stay exits-only until readiness, trust, and robustness gates reopen reduced-size proof lane capacity."
-      : `Keep exposure capped at ${formatPct(input.currentExposureCapPct)} until the proof lane and Survival Memory status clear.`,
+        : `Keep exposure capped at ${formatPct(input.currentExposureCapPct)} until the proof lane and Survival Memory status clear.`,
     remainingCleanOutcomes: remainingClean,
     activeBoundaryBreaks: input.outcomeProof.activeProofBoundaryBreakCount,
     steps: [
@@ -584,7 +644,11 @@ function buildRestorationActionPlan(input: {
       {
         id: "clear-survival-memory",
         label: "Clear Survival Memory",
-        status: statusClear ? "done" : cleanProofPassed && confidencePassed ? "active" : "blocked",
+        status: statusClear
+          ? "done"
+          : cleanProofPassed && confidencePassed
+            ? "active"
+            : "blocked",
         detail: statusClear
           ? "Survival Memory status is clear."
           : "Promote scarred/watch status only after the clean streak and survival confidence stay intact.",
@@ -686,7 +750,8 @@ function collectCleanOutcomesActionPlanStep(input: {
       id: "collect-clean-outcomes",
       label: "Collect clean outcomes",
       status: "active",
-      detail: "Restart the clean reduced-size streak after the latest survival-boundary break.",
+      detail:
+        "Restart the clean reduced-size streak after the latest survival-boundary break.",
     };
   }
 
@@ -698,7 +763,9 @@ function collectCleanOutcomesActionPlanStep(input: {
   };
 }
 
-function ledgerEntryForRecord(record: StockSurvivalMemoryDiagnostic["records"][number]): RestorationLedgerEntry {
+function ledgerEntryForRecord(
+  record: StockSurvivalMemoryDiagnostic["records"][number],
+): RestorationLedgerEntry {
   const maxAdverseExcursion = round(numberOr(record.maxAdverseExcursion, 0));
   const survivalCost = round(numberOr(record.survivalCost, 0));
 
@@ -715,24 +782,29 @@ function ledgerEntryForRecord(record: StockSurvivalMemoryDiagnostic["records"][n
     clean: isCleanOutcome(record),
     boundaryBreaches: boundaryBreachesFor(record),
     maxAdverseExcursionBoundary: MAX_ADVERSE_EXCURSION_BOUNDARY,
-    maxAdverseExcursionRemaining: round(MAX_ADVERSE_EXCURSION_BOUNDARY - maxAdverseExcursion),
+    maxAdverseExcursionRemaining: round(
+      MAX_ADVERSE_EXCURSION_BOUNDARY - maxAdverseExcursion,
+    ),
     survivalCostBoundary: SURVIVAL_COST_BOUNDARY,
     survivalCostRemaining: round(SURVIVAL_COST_BOUNDARY - survivalCost),
   };
 }
 
-function isCleanOutcome(record: StockSurvivalMemoryDiagnostic["records"][number]) {
+function isCleanOutcome(
+  record: StockSurvivalMemoryDiagnostic["records"][number],
+) {
   return (
     record.outcomeClass === "comfortable_survival" ||
-    (
-      numberOr(record.survivalCost, 100) < SURVIVAL_COST_BOUNDARY &&
+    (numberOr(record.survivalCost, 100) < SURVIVAL_COST_BOUNDARY &&
       numberOr(record.maxDrawdown, 100) < MAX_DRAWDOWN_BOUNDARY &&
-      numberOr(record.maxAdverseExcursion, 100) < MAX_ADVERSE_EXCURSION_BOUNDARY
-    )
+      numberOr(record.maxAdverseExcursion, 100) <
+        MAX_ADVERSE_EXCURSION_BOUNDARY)
   );
 }
 
-function isFailedOutcome(record: StockSurvivalMemoryDiagnostic["records"][number]) {
+function isFailedOutcome(
+  record: StockSurvivalMemoryDiagnostic["records"][number],
+) {
   return (
     record.outcomeClass === "failed_survival" ||
     numberOr(record.survivalCost, 0) >= 65 ||
@@ -741,13 +813,19 @@ function isFailedOutcome(record: StockSurvivalMemoryDiagnostic["records"][number
   );
 }
 
-function boundaryBreachesFor(record: StockSurvivalMemoryDiagnostic["records"][number]) {
+function boundaryBreachesFor(
+  record: StockSurvivalMemoryDiagnostic["records"][number],
+) {
   const breaches: string[] = [];
 
-  if (record.outcomeClass === "failed_survival") breaches.push("failed survival");
-  if (numberOr(record.survivalCost, 0) >= SURVIVAL_COST_BOUNDARY) breaches.push("survival cost");
-  if (numberOr(record.maxDrawdown, 0) >= MAX_DRAWDOWN_BOUNDARY) breaches.push("drawdown");
-  if (numberOr(record.maxAdverseExcursion, 0) >= MAX_ADVERSE_EXCURSION_BOUNDARY) breaches.push("MAE");
+  if (record.outcomeClass === "failed_survival")
+    breaches.push("failed survival");
+  if (numberOr(record.survivalCost, 0) >= SURVIVAL_COST_BOUNDARY)
+    breaches.push("survival cost");
+  if (numberOr(record.maxDrawdown, 0) >= MAX_DRAWDOWN_BOUNDARY)
+    breaches.push("drawdown");
+  if (numberOr(record.maxAdverseExcursion, 0) >= MAX_ADVERSE_EXCURSION_BOUNDARY)
+    breaches.push("MAE");
 
   return unique(breaches);
 }
@@ -771,7 +849,7 @@ function gate(input: {
     target: input.target,
     progressPct: input.passed
       ? 100
-      : clamp(input.currentValue / Math.max(1, input.targetValue) * 100),
+      : clamp((input.currentValue / Math.max(1, input.targetValue)) * 100),
     detail: input.detail,
     unlockCondition: input.unlockCondition,
   };
@@ -789,7 +867,10 @@ function restorationStateFor(input: {
   if (input.canRestoreSizing) return "clear";
   if (input.survivalStatus === "near_ruin") return "scarred";
   if (input.survivalMemoryClear && input.cleanOutcomeGatePassed) return "clear";
-  if (input.survivalConfidence >= input.threshold || input.cleanReducedSizeOutcomeCount > 0) {
+  if (
+    input.survivalConfidence >= input.threshold ||
+    input.cleanReducedSizeOutcomeCount > 0
+  ) {
     return "watch";
   }
   return "scarred";
@@ -823,12 +904,16 @@ function statusFor(
   failedGates: RestorationProgressGate[],
 ): RestorationProgressStatus {
   if (canRestoreSizing) return "restored";
-  if (recoveryStatus === "locked" || recoveryStatus === "regressed") return "blocked";
+  if (recoveryStatus === "locked" || recoveryStatus === "regressed")
+    return "blocked";
   if (!failedGates.length) return "ready_for_restoration";
   return "collecting_evidence";
 }
 
-function summaryFor(status: RestorationProgressStatus, primaryBlocker: string | null) {
+function summaryFor(
+  status: RestorationProgressStatus,
+  primaryBlocker: string | null,
+) {
   if (status === "restored") {
     return "Recovery evidence supports normal sizing subject to downstream execution gates.";
   }
@@ -879,9 +964,16 @@ function normalizedSimilarSampleCount(recovery: RecoveryResult | null) {
   const normalized = objectOrNull(audit?.normalized);
   const sampleConfidence = numberOr(audit?.sampleConfidence, 0);
   const thresholds = objectOrNull(audit?.thresholds);
-  const required = numberOr(thresholds?.minSimilarSamplesForRestore, DEFAULT_RECOVERY_THRESHOLDS.minSimilarSamplesForRestore);
+  const required = numberOr(
+    thresholds?.minSimilarSamplesForRestore,
+    DEFAULT_RECOVERY_THRESHOLDS.minSimilarSamplesForRestore,
+  );
 
-  return numberOr(normalized?.similarSampleCount, sampleConfidence / 100 * required, 0);
+  return numberOr(
+    normalized?.similarSampleCount,
+    (sampleConfidence / 100) * required,
+    0,
+  );
 }
 
 function readableStatus(value: unknown) {
@@ -898,7 +990,9 @@ function numberOr(...values: unknown[]) {
 }
 
 function objectOrNull(value: unknown): Record<string, any> | null {
-  return value && typeof value === "object" ? value as Record<string, any> : null;
+  return value && typeof value === "object"
+    ? (value as Record<string, any>)
+    : null;
 }
 
 function isString(value: unknown): value is string {

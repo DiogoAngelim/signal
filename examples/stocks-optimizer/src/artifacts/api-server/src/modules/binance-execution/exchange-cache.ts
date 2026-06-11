@@ -21,7 +21,11 @@ export class ExchangeInfoCache {
 
   symbol(symbol: string): BinanceSymbolInfo | null {
     const normalized = symbol.toUpperCase();
-    return this.value?.symbols.find((entry) => entry.symbol.toUpperCase() === normalized) ?? null;
+    return (
+      this.value?.symbols.find(
+        (entry) => entry.symbol.toUpperCase() === normalized,
+      ) ?? null
+    );
   }
 
   clear() {

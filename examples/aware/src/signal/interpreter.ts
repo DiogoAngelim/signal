@@ -10,7 +10,7 @@ import type {
   SafetyObservation,
   SafetyRisk,
   SourceReliability,
-  WeatherSignal
+  WeatherSignal,
 } from "../contracts.js";
 import { attentionLabels } from "../contracts.js";
 
@@ -19,7 +19,7 @@ const attentionRank: Record<AttentionLevel, number> = {
   notice: 1,
   warning: 2,
   urgency: 3,
-  emergency: 4
+  emergency: 4,
 };
 
 const categoryPriority: Record<ObservationCategory, number> = {
@@ -28,7 +28,7 @@ const categoryPriority: Record<ObservationCategory, number> = {
   air_quality: 70,
   mosquito: 55,
   pollen: 45,
-  source_status: 20
+  source_status: 20,
 };
 
 export function createBriefingFromObservations(input: {
@@ -40,21 +40,35 @@ export function createBriefingFromObservations(input: {
 }): Briefing {
   const generatedAt = input.generatedAt ?? new Date().toISOString();
   const risks = interpretRisks(input.collection.observations);
-  const items = risks.map((risk, index) => itemFromRisk(risk, input.collection.sources, index + 1));
-  const weatherSignals = weatherSignalsFromObservations(input.collection.observations);
+  const items = risks.map((risk, index) =>
+    itemFromRisk(risk, input.collection.sources, index + 1),
+  );
+  const weatherSignals = weatherSignalsFromObservations(
+    input.collection.observations,
+  );
   const attentionLevel = items.reduce<AttentionLevel>(
-    (highest, item) => attentionRank[item.attentionLevel] > attentionRank[highest] ? item.attentionLevel : highest,
-    "normal"
+    (highest, item) =>
+      attentionRank[item.attentionLevel] > attentionRank[highest]
+        ? item.attentionLevel
+        : highest,
+    "normal",
   );
   const id = createBriefingId(input.collection.region.id, generatedAt, items);
-  const degraded = input.collection.degraded || input.collection.sources.some((source) => source.status !== "available");
+  const degraded =
+    input.collection.degraded ||
+    input.collection.sources.some((source) => source.status !== "available");
   return {
     id,
     region: input.collection.region,
     generatedAt,
     attentionLevel,
     attentionLabel: attentionLabels[attentionLevel],
-    summary: summaryFor(input.collection.region.name, attentionLevel, items.length, degraded),
+    summary: summaryFor(
+      input.collection.region.name,
+      attentionLevel,
+      items.length,
+      degraded,
+    ),
     itemCountText: itemCountText(items.length),
     items,
     weatherSignals,
@@ -66,7 +80,7 @@ export function createBriefingFromObservations(input: {
     operation: {
       name: "aware.briefing.get.v1",
       envelopeId: input.envelopeId,
-      generatedEventId: input.generatedEventId
+      generatedEventId: input.generatedEventId,
     },
     decisionMemory: {
       scope: "examples/aware",
@@ -74,15 +88,24 @@ export function createBriefingFromObservations(input: {
       recordId: input.memoryRecordId,
       note: input.memoryRecordId
         ? "Briefing interpretation was recorded in the example-scoped decision memory store."
-        : "Decision memory is scoped to examples/aware and can be enabled by the runtime."
-    }
+        : "Decision memory is scoped to examples/aware and can be enabled by the runtime.",
+    },
   };
 }
 
-function weatherSignalsFromObservations(observations: readonly SafetyObservation[]): WeatherSignal[] {
-  const order: WeatherSignal["signal"][] = ["weather.heat", "weather.heavy_rain", "weather.uv"];
-  const weather = observations.filter((observation): observation is SafetyObservation & { signal: WeatherSignal["signal"] } =>
-    order.includes(observation.signal as WeatherSignal["signal"])
+function weatherSignalsFromObservations(
+  observations: readonly SafetyObservation[],
+): WeatherSignal[] {
+  const order: WeatherSignal["signal"][] = [
+    "weather.heat",
+    "weather.heavy_rain",
+    "weather.uv",
+  ];
+  const weather = observations.filter(
+    (
+      observation,
+    ): observation is SafetyObservation & { signal: WeatherSignal["signal"] } =>
+      order.includes(observation.signal as WeatherSignal["signal"]),
   );
   return weather
     .map((observation) => ({
@@ -94,26 +117,37 @@ function weatherSignalsFromObservations(observations: readonly SafetyObservation
       severity: observation.severity,
       meaning: observation.plainLanguage,
       updatedAt: observation.source.updatedAt || observation.observedAt,
-      sourceIds: [observation.source.id]
+      sourceIds: [observation.source.id],
     }))
-    .sort((left, right) => order.indexOf(left.signal) - order.indexOf(right.signal));
+    .sort(
+      (left, right) => order.indexOf(left.signal) - order.indexOf(right.signal),
+    );
 }
 
-function weatherSignalLabel(signal: WeatherSignal["signal"]): WeatherSignal["label"] {
+function weatherSignalLabel(
+  signal: WeatherSignal["signal"],
+): WeatherSignal["label"] {
   if (signal === "weather.heat") return "Heat";
   if (signal === "weather.heavy_rain") return "Rain";
   return "UV";
 }
 
-export function interpretRisks(observations: readonly SafetyObservation[]): SafetyRisk[] {
-  const actionable = observations.filter((observation) => observation.severity > 0 || observation.missing || observation.degraded);
+export function interpretRisks(
+  observations: readonly SafetyObservation[],
+): SafetyRisk[] {
+  const actionable = observations.filter(
+    (observation) =>
+      observation.severity > 0 || observation.missing || observation.degraded,
+  );
   return actionable
     .map((observation) => riskFromObservation(observation))
-    .sort((left, right) =>
-      attentionRank[right.attentionLevel] - attentionRank[left.attentionLevel]
-      || right.score - left.score
-      || categoryPriority[right.category] - categoryPriority[left.category]
-      || left.title.localeCompare(right.title)
+    .sort(
+      (left, right) =>
+        attentionRank[right.attentionLevel] -
+          attentionRank[left.attentionLevel] ||
+        right.score - left.score ||
+        categoryPriority[right.category] - categoryPriority[left.category] ||
+        left.title.localeCompare(right.title),
     );
 }
 
@@ -124,7 +158,8 @@ function riskFromObservation(observation: SafetyObservation): SafetyRisk {
     category: observation.category,
     title: copy.title,
     attentionLevel: observation.attentionHint,
-    score: observation.severity * 25 + categoryPriority[observation.category] / 10,
+    score:
+      observation.severity * 25 + categoryPriority[observation.category] / 10,
     meaning: copy.meaning,
     primaryAction: copy.action,
     reasons: copy.reasons,
@@ -132,14 +167,21 @@ function riskFromObservation(observation: SafetyObservation): SafetyRisk {
     sourceIds: [observation.source.id],
     reliability: reliabilityFor([observation.source]),
     freshness: freshnessFor([observation.source]),
-    fallbackBehavior: observation.missing || observation.degraded
-      ? "Evidence is limited, so this guidance is cautious."
-      : "If this source becomes unavailable, Aware keeps the item cautious and asks people to check official local guidance."
+    fallbackBehavior:
+      observation.missing || observation.degraded
+        ? "Evidence is limited, so this guidance is cautious."
+        : "If this source becomes unavailable, Aware keeps the item cautious and asks people to check official local guidance.",
   };
 }
 
-function itemFromRisk(risk: SafetyRisk, allSources: readonly EvidenceSource[], rank: number): BriefingItem {
-  const sources = allSources.filter((source) => risk.sourceIds.includes(source.id));
+function itemFromRisk(
+  risk: SafetyRisk,
+  allSources: readonly EvidenceSource[],
+  rank: number,
+): BriefingItem {
+  const sources = allSources.filter((source) =>
+    risk.sourceIds.includes(source.id),
+  );
   const observation = risk.observations[0];
   const copy = detailCopy(risk, observation);
   return {
@@ -160,7 +202,7 @@ function itemFromRisk(risk: SafetyRisk, allSources: readonly EvidenceSource[], r
     updatedAt: latestUpdatedAt(sources),
     sources,
     technicalDetails: technicalDetailsFor(risk.observations),
-    rank
+    rank,
   };
 }
 
@@ -175,34 +217,60 @@ function copyForObservation(observation: SafetyObservation): {
       title: "Some evidence is limited",
       meaning: "Evidence is limited, so this guidance is cautious.",
       action: "Monitor",
-      reasons: [observation.plainLanguage]
+      reasons: [observation.plainLanguage],
     };
   }
 
   if (observation.signal === "official_alert.weather") {
     return {
-      title: observation.severity >= 4 ? "Official alert needs immediate attention" : "Official alert may affect plans",
-      meaning: observation.severity >= 3 ? "Taking action soon is recommended." : "May affect outdoor plans today.",
-      action: observation.severity >= 4 ? "Shelter" : observation.severity >= 3 ? "Protect" : "Monitor",
-      reasons: [observation.plainLanguage, "Official alert feeds are treated as high-priority evidence."]
+      title:
+        observation.severity >= 4
+          ? "Official alert needs immediate attention"
+          : "Official alert may affect plans",
+      meaning:
+        observation.severity >= 3
+          ? "Taking action soon is recommended."
+          : "May affect outdoor plans today.",
+      action:
+        observation.severity >= 4
+          ? "Shelter"
+          : observation.severity >= 3
+            ? "Protect"
+            : "Monitor",
+      reasons: [
+        observation.plainLanguage,
+        "Official alert feeds are treated as high-priority evidence.",
+      ],
     };
   }
 
   if (observation.signal === "weather.heavy_rain") {
     return {
       title: "Heavy rain may affect routes",
-      meaning: observation.severity >= 3 ? "Taking action soon is recommended." : "May affect outdoor plans today.",
+      meaning:
+        observation.severity >= 3
+          ? "Taking action soon is recommended."
+          : "May affect outdoor plans today.",
       action: observation.severity >= 3 ? "Delay Activity" : "Prepare",
-      reasons: [observation.plainLanguage, "Low-lying roads and outdoor plans can change quickly during heavy rain."]
+      reasons: [
+        observation.plainLanguage,
+        "Low-lying roads and outdoor plans can change quickly during heavy rain.",
+      ],
     };
   }
 
   if (observation.signal === "weather.heat") {
     return {
       title: "Heat may affect the day",
-      meaning: observation.severity >= 3 ? "Taking action soon is recommended." : "May affect outdoor plans today.",
+      meaning:
+        observation.severity >= 3
+          ? "Taking action soon is recommended."
+          : "May affect outdoor plans today.",
       action: observation.severity >= 3 ? "Reduce Exposure" : "Prepare",
-      reasons: [observation.plainLanguage, "Heat can make errands, travel, and outdoor work harder."]
+      reasons: [
+        observation.plainLanguage,
+        "Heat can make errands, travel, and outdoor work harder.",
+      ],
     };
   }
 
@@ -211,16 +279,25 @@ function copyForObservation(observation: SafetyObservation): {
       title: "Sun exposure may be strong",
       meaning: "Worth knowing, no major action needed.",
       action: "Reduce Exposure",
-      reasons: [observation.plainLanguage, "Short outdoor plans can still add up when sun exposure is strong."]
+      reasons: [
+        observation.plainLanguage,
+        "Short outdoor plans can still add up when sun exposure is strong.",
+      ],
     };
   }
 
   if (observation.signal === "air_quality.particles") {
     return {
       title: "Air may be harder to breathe",
-      meaning: observation.severity >= 3 ? "Taking action soon is recommended." : "May affect outdoor plans today.",
+      meaning:
+        observation.severity >= 3
+          ? "Taking action soon is recommended."
+          : "May affect outdoor plans today.",
       action: "Reduce Exposure",
-      reasons: [observation.plainLanguage, "Reducing exposure may be reasonable, especially for sensitive groups."]
+      reasons: [
+        observation.plainLanguage,
+        "Reducing exposure may be reasonable, especially for sensitive groups.",
+      ],
     };
   }
 
@@ -229,16 +306,25 @@ function copyForObservation(observation: SafetyObservation): {
       title: "Pollen or irritants may be noticeable",
       meaning: "Worth knowing, no major action needed.",
       action: "Monitor",
-      reasons: [observation.plainLanguage, "Exposure conditions can affect comfort during outdoor time."]
+      reasons: [
+        observation.plainLanguage,
+        "Exposure conditions can affect comfort during outdoor time.",
+      ],
     };
   }
 
   if (observation.signal === "mosquito.placeholder_activity") {
     return {
       title: "Mosquito activity may be worth noticing",
-      meaning: observation.severity >= 2 ? "May affect outdoor plans today." : "Worth knowing, no major action needed.",
+      meaning:
+        observation.severity >= 2
+          ? "May affect outdoor plans today."
+          : "Worth knowing, no major action needed.",
       action: observation.severity >= 2 ? "Protect" : "Monitor",
-      reasons: [observation.plainLanguage, "This is a regional placeholder, not an individual medical prediction."]
+      reasons: [
+        observation.plainLanguage,
+        "This is a regional placeholder, not an individual medical prediction.",
+      ],
     };
   }
 
@@ -246,86 +332,127 @@ function copyForObservation(observation: SafetyObservation): {
     title: "Conditions may affect plans",
     meaning: observation.plainLanguage,
     action: "Observe",
-    reasons: [observation.plainLanguage]
+    reasons: [observation.plainLanguage],
   };
 }
 
-function detailCopy(risk: SafetyRisk, observation?: SafetyObservation): {
+function detailCopy(
+  risk: SafetyRisk,
+  observation?: SafetyObservation,
+): {
   why: string[];
   actions: string[];
   when: string;
   explanation: string;
 } {
-  const followGuidance = "Follow local official guidance if it differs from this briefing.";
+  const followGuidance =
+    "Follow local official guidance if it differs from this briefing.";
   if (!observation || risk.category === "source_status") {
     return {
       why: ["A missing source can reduce confidence in the full picture."],
       actions: ["Check again later.", followGuidance],
       when: "Until the source is available again.",
-      explanation: "Some sources are unavailable right now. Aware is showing only what can still be supported."
+      explanation:
+        "Some sources are unavailable right now. Aware is showing only what can still be supported.",
     };
   }
   if (observation.signal === "official_alert.weather") {
     return {
       why: risk.reasons,
-      actions: ["Keep plans flexible.", "Check local official instructions.", followGuidance],
-      when: observation.validUntil ? "While the official alert is active." : "Until the alert source updates.",
-      explanation: "Official alerts are prioritized because they may contain protective guidance for the region."
+      actions: [
+        "Keep plans flexible.",
+        "Check local official instructions.",
+        followGuidance,
+      ],
+      when: observation.validUntil
+        ? "While the official alert is active."
+        : "Until the alert source updates.",
+      explanation:
+        "Official alerts are prioritized because they may contain protective guidance for the region.",
     };
   }
   if (observation.signal === "weather.heavy_rain") {
     return {
       why: risk.reasons,
-      actions: ["Avoid optional travel through low-lying areas.", "Delay outdoor activity if conditions worsen.", followGuidance],
+      actions: [
+        "Avoid optional travel through low-lying areas.",
+        "Delay outdoor activity if conditions worsen.",
+        followGuidance,
+      ],
       when: "Most relevant for outdoor plans and travel today.",
-      explanation: "Heavy rain can change road and outdoor conditions quickly."
+      explanation: "Heavy rain can change road and outdoor conditions quickly.",
     };
   }
   if (observation.signal === "weather.heat") {
     return {
       why: risk.reasons,
-      actions: ["Move harder outdoor activity to cooler parts of the day.", "Plan shade and water breaks.", followGuidance],
+      actions: [
+        "Move harder outdoor activity to cooler parts of the day.",
+        "Plan shade and water breaks.",
+        followGuidance,
+      ],
       when: "Most relevant during the warmest part of the day.",
-      explanation: "Heat guidance is cautious because people and neighborhoods experience heat differently."
+      explanation:
+        "Heat guidance is cautious because people and neighborhoods experience heat differently.",
     };
   }
   if (observation.signal === "weather.uv") {
     return {
       why: risk.reasons,
-      actions: ["Use shade for longer outdoor time.", "Consider protective clothing or sunscreen.", followGuidance],
+      actions: [
+        "Use shade for longer outdoor time.",
+        "Consider protective clothing or sunscreen.",
+        followGuidance,
+      ],
       when: "Most relevant around midday and early afternoon.",
-      explanation: "Sun exposure guidance is about reducing exposure, not making a promise about outdoor time."
+      explanation:
+        "Sun exposure guidance is about reducing exposure, not making a promise about outdoor time.",
     };
   }
   if (observation.signal === "air_quality.particles") {
     return {
       why: risk.reasons,
-      actions: ["Consider shorter outdoor exertion.", "Keep windows closed if local conditions worsen.", followGuidance],
+      actions: [
+        "Consider shorter outdoor exertion.",
+        "Keep windows closed if local conditions worsen.",
+        followGuidance,
+      ],
       when: "Most relevant during outdoor exertion today.",
-      explanation: "Air guidance is regional and does not predict any individual health outcome."
+      explanation:
+        "Air guidance is regional and does not predict any individual health outcome.",
     };
   }
   if (observation.signal === "environmental_exposure.pollen") {
     return {
       why: risk.reasons,
-      actions: ["Monitor how conditions change.", "Reducing exposure may be reasonable if you are sensitive.", followGuidance],
+      actions: [
+        "Monitor how conditions change.",
+        "Reducing exposure may be reasonable if you are sensitive.",
+        followGuidance,
+      ],
       when: "Most relevant for outdoor time today.",
-      explanation: "Environmental exposure evidence is limited and should be treated as a comfort signal."
+      explanation:
+        "Environmental exposure evidence is limited and should be treated as a comfort signal.",
     };
   }
   if (observation.signal === "mosquito.placeholder_activity") {
     return {
       why: risk.reasons,
-      actions: ["Avoid standing water where practical.", "Use locally recommended bite prevention.", followGuidance],
+      actions: [
+        "Avoid standing water where practical.",
+        "Use locally recommended bite prevention.",
+        followGuidance,
+      ],
       when: "Most relevant around dawn, dusk, and standing water.",
-      explanation: "This placeholder describes regional conditions only and does not diagnose or predict illness."
+      explanation:
+        "This placeholder describes regional conditions only and does not diagnose or predict illness.",
     };
   }
   return {
     why: risk.reasons,
     actions: ["Observe conditions.", followGuidance],
     when: "Today.",
-    explanation: risk.meaning
+    explanation: risk.meaning,
   };
 }
 
@@ -344,39 +471,56 @@ function technicalDetailsFor(observations: readonly SafetyObservation[]) {
   return observations.flatMap((observation) =>
     Object.entries(observation.details).map(([label, value]) => ({
       label,
-      value: value == null ? "not available" : String(value)
-    }))
+      value: value == null ? "not available" : String(value),
+    })),
   );
 }
 
 function reliabilityFor(sources: readonly EvidenceSource[]): SourceReliability {
   if (!sources.length) return "limited";
-  if (sources.some((source) => source.reliability === "limited" || source.status !== "available")) return "limited";
-  if (sources.some((source) => source.reliability === "medium")) return "medium";
+  if (
+    sources.some(
+      (source) =>
+        source.reliability === "limited" || source.status !== "available",
+    )
+  )
+    return "limited";
+  if (sources.some((source) => source.reliability === "medium"))
+    return "medium";
   return "high";
 }
 
 function freshnessFor(sources: readonly EvidenceSource[]): FreshnessStatus {
   if (!sources.length) return "missing";
-  if (sources.some((source) => source.freshness === "missing")) return "missing";
+  if (sources.some((source) => source.freshness === "missing"))
+    return "missing";
   if (sources.some((source) => source.freshness === "stale")) return "stale";
   if (sources.some((source) => source.freshness === "recent")) return "recent";
   return "fresh";
 }
 
 function latestUpdatedAt(sources: readonly EvidenceSource[]): string {
-  const latest = [...sources].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))[0];
+  const latest = [...sources].sort((left, right) =>
+    right.updatedAt.localeCompare(left.updatedAt),
+  )[0];
   return latest?.updatedAt ?? new Date(0).toISOString();
 }
 
-function summaryFor(regionName: string, level: AttentionLevel, itemCount: number, degraded: boolean): string {
+function summaryFor(
+  regionName: string,
+  level: AttentionLevel,
+  itemCount: number,
+  degraded: boolean,
+): string {
   if (degraded && itemCount > 0) {
     return "Evidence is limited, so this guidance is cautious.";
   }
-  if (level === "emergency") return "Immediate protective action may be needed. Follow local official guidance.";
+  if (level === "emergency")
+    return "Immediate protective action may be needed. Follow local official guidance.";
   if (level === "urgency") return "Taking action soon is recommended.";
   if (level === "warning") return "Some conditions may affect plans today.";
-  if (level === "notice") return `Today there ${itemCount === 1 ? "is 1 thing" : `are ${itemCount} things`} worth knowing.`;
+  if (level === "notice")
+    return `Today there ${itemCount === 1 ? "is 1 thing" : `are ${itemCount} things`} worth knowing.`;
   return `Nothing unusual requires attention in ${regionName} right now.`;
 }
 
@@ -390,9 +534,15 @@ function riskId(observation: SafetyObservation): string {
   return observation.id.replaceAll(":", "-");
 }
 
-function createBriefingId(regionId: string, generatedAt: string, items: readonly BriefingItem[]): string {
+function createBriefingId(
+  regionId: string,
+  generatedAt: string,
+  items: readonly BriefingItem[],
+): string {
   const day = generatedAt.slice(0, 10);
-  const signals = items.map((item) => `${item.id}:${item.attentionLevel}`).join("|");
+  const signals = items
+    .map((item) => `${item.id}:${item.attentionLevel}`)
+    .join("|");
   return `aware-${regionId}-${day}-${smallHash(signals || "normal")}`;
 }
 

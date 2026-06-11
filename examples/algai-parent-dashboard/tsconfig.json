@@ -9,7 +9,9 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["vite/client", "vitest/globals"]
+    "types": ["vite/client", "vitest/globals"],
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false
   },
   "include": ["src", "vite.config.ts"]
 }

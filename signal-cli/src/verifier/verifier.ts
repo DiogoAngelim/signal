@@ -11,10 +11,19 @@
  * Error taxonomy per v17 #6.
  */
 
-import type { PhaseState, SignalState, VerifyResult, SignalError as ISignalError } from "../state/types.js";
-import { SignalError, SignalErrorCode } from "../state/types.js";
-import { recomputePhaseHash, computePhaseHash, hashValue } from "../core/hashChain.js";
 import { GENESIS_HASH } from "../core/constants.js";
+import {
+  computePhaseHash,
+  hashValue,
+  recomputePhaseHash,
+} from "../core/hashChain.js";
+import type {
+  SignalError as ISignalError,
+  PhaseState,
+  SignalState,
+  VerifyResult,
+} from "../state/types.js";
+import { SignalError, SignalErrorCode } from "../state/types.js";
 
 // ─── Single Phase Validation ────────────────────────────────────────────────
 
@@ -71,9 +80,16 @@ function validateChainIntegrity(
   phases: readonly PhaseState[],
   index: number,
 ): SignalError | null {
-  const phase = phases[index]!;
+  const phase = phases[index];
+  if (!phase) {
+    return new SignalError(
+      SignalErrorCode.CHAIN_BREAK,
+      index,
+      "Phase at index is missing",
+    );
+  }
   const expectedPreviousHash =
-    index === 0 ? GENESIS_HASH : phases[index - 1]!.hash;
+    index === 0 ? GENESIS_HASH : phases[index - 1]?.hash;
 
   if (phase.previousHash !== expectedPreviousHash) {
     return new SignalError(
@@ -92,7 +108,9 @@ function validateChainIntegrity(
  * Condition 4: executionTrace is deterministic (no timestamps, no randomness).
  * v17 #4: MUST NOT include timestamps, random values, non-deterministic ordering.
  */
-function validateExecutionTraceDeterminism(phase: PhaseState): SignalError | null {
+function validateExecutionTraceDeterminism(
+  phase: PhaseState,
+): SignalError | null {
   const trace = phase.executionTrace;
 
   if (!trace) {
@@ -176,7 +194,14 @@ function validatePhaseOrder(
   phases: readonly PhaseState[],
   index: number,
 ): SignalError | null {
-  const phase = phases[index]!;
+  const phase = phases[index];
+  if (!phase) {
+    return new SignalError(
+      SignalErrorCode.PHASE_OUT_OF_ORDER,
+      index,
+      "Phase at index is missing",
+    );
+  }
   if (phase.phase !== index) {
     return new SignalError(
       SignalErrorCode.PHASE_OUT_OF_ORDER,
@@ -206,7 +231,8 @@ export function verifyState(state: SignalState): VerifyResult {
   }
 
   for (let i = 0; i < phases.length; i++) {
-    const phase = phases[i]!;
+    const phase = phases[i];
+    if (!phase) continue;
 
     // Condition: phase ordering
     const orderErr = validatePhaseOrder(phases, i);
@@ -251,7 +277,8 @@ function validateReplayConsistency(
   const errors: SignalError[] = [];
 
   for (let i = 0; i < phases.length; i++) {
-    const phase = phases[i]!;
+    const phase = phases[i];
+    if (!phase) continue;
 
     // Recompute the phase hash from its stored data
     const recomputed = recomputePhaseHash(phase);

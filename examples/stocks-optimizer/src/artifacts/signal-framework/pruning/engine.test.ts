@@ -1,19 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { authorize } from "../agency/engine";
-import { SignalFrameworkEngine } from "../core/engine";
-import { MetricRegistry } from "../metrics/registry";
 import {
   adjustStocksExposureForPruning,
   buildStocksPruningViewModel,
   evaluateStocksPruning,
 } from "../adapters/stocks-optimizer";
+import { authorize } from "../agency/engine";
+import { SignalFrameworkEngine } from "../core/engine";
+import { MetricRegistry } from "../metrics/registry";
 import type { MetricInput, PerceptionLayerKey } from "../types";
 import { evaluateDecisionQuality } from "../wisdom/engine";
 import {
   InMemoryPruningStore,
+  type PruningCandidateInput,
   PruningValidationError,
   evaluatePruning,
-  type PruningCandidateInput,
 } from "./engine";
 
 const baseCandidate: PruningCandidateInput = {
@@ -83,8 +83,18 @@ describe("pruning scoring", () => {
   });
 
   it("quarantines overfit and contradictory signals", () => {
-    const overfit = evaluatePruning({ ...baseCandidate, overfitRisk: 92, evidenceQuality: 85, sampleSize: 90 });
-    const contradictory = evaluatePruning({ ...baseCandidate, contradictionRate: 88, evidenceQuality: 80, sampleSize: 60 });
+    const overfit = evaluatePruning({
+      ...baseCandidate,
+      overfitRisk: 92,
+      evidenceQuality: 85,
+      sampleSize: 90,
+    });
+    const contradictory = evaluatePruning({
+      ...baseCandidate,
+      contradictionRate: 88,
+      evidenceQuality: 80,
+      sampleSize: 60,
+    });
 
     expect(overfit.recommendedAction).toBe("quarantine");
     expect(contradictory.recommendedAction).toMatch(/quarantine|reduce/);
@@ -166,15 +176,46 @@ describe("pruning scoring", () => {
   });
 
   it("does not let more noise, overfit, or weak evidence increase keep confidence", () => {
-    const clean = evaluatePruning({ ...baseCandidate, noiseScore: 5, overfitRisk: 5, evidenceQuality: 90, sampleSize: 90 });
-    const noisy = evaluatePruning({ ...baseCandidate, noiseScore: 95, overfitRisk: 5, evidenceQuality: 90, sampleSize: 90 });
-    const overfit = evaluatePruning({ ...baseCandidate, noiseScore: 5, overfitRisk: 95, evidenceQuality: 90, sampleSize: 90 });
-    const weakEvidence = evaluatePruning({ ...baseCandidate, noiseScore: 5, overfitRisk: 5, evidenceQuality: 10, sampleSize: 0 });
-    const survival = evaluatePruning({ ...baseCandidate, survivalValue: 95, governanceFlags: ["survival-critical"], noiseScore: 70 });
+    const clean = evaluatePruning({
+      ...baseCandidate,
+      noiseScore: 5,
+      overfitRisk: 5,
+      evidenceQuality: 90,
+      sampleSize: 90,
+    });
+    const noisy = evaluatePruning({
+      ...baseCandidate,
+      noiseScore: 95,
+      overfitRisk: 5,
+      evidenceQuality: 90,
+      sampleSize: 90,
+    });
+    const overfit = evaluatePruning({
+      ...baseCandidate,
+      noiseScore: 5,
+      overfitRisk: 95,
+      evidenceQuality: 90,
+      sampleSize: 90,
+    });
+    const weakEvidence = evaluatePruning({
+      ...baseCandidate,
+      noiseScore: 5,
+      overfitRisk: 5,
+      evidenceQuality: 10,
+      sampleSize: 0,
+    });
+    const survival = evaluatePruning({
+      ...baseCandidate,
+      survivalValue: 95,
+      governanceFlags: ["survival-critical"],
+      noiseScore: 70,
+    });
 
     expect(noisy.keepScore).toBeLessThanOrEqual(clean.keepScore);
     expect(overfit.keepScore).toBeLessThanOrEqual(clean.keepScore);
-    expect(weakEvidence.evidenceConfidence).toBeLessThan(clean.evidenceConfidence);
+    expect(weakEvidence.evidenceConfidence).toBeLessThan(
+      clean.evidenceConfidence,
+    );
     expect(survival.recommendedAction).not.toBe("ignore");
   });
 
@@ -187,9 +228,13 @@ describe("pruning scoring", () => {
 
     expect(degraded.validationIssues.length).toBeGreaterThan(0);
     expect(degraded.degradedMode).toBe(true);
-    expect(() => evaluatePruning({ ...baseCandidate, candidateId: undefined, strictValidation: true })).toThrow(
-      PruningValidationError,
-    );
+    expect(() =>
+      evaluatePruning({
+        ...baseCandidate,
+        candidateId: undefined,
+        strictValidation: true,
+      }),
+    ).toThrow(PruningValidationError);
   });
 
   it("can persist auditable pruning records through the generic store interface", () => {
@@ -209,16 +254,34 @@ describe("pruning integration", () => {
       id: "cycle-pruning",
       timestamp: 1_800_000_000_000,
       metrics: metrics(),
-      decision: { id: "decision-1", type: "generic", confidence: 80, uncertainty: 10 },
-      agency: { authority: "autonomous", reviewPolicy: { mode: "fully-autonomous" } },
+      decision: {
+        id: "decision-1",
+        type: "generic",
+        confidence: 80,
+        uncertainty: 10,
+      },
+      agency: {
+        authority: "autonomous",
+        reviewPolicy: { mode: "fully-autonomous" },
+      },
       pruning: {
-        candidates: [{ ...baseCandidate, candidateId: "driver-1", overfitRisk: 94, evidenceQuality: 90, sampleSize: 90 }],
+        candidates: [
+          {
+            ...baseCandidate,
+            candidateId: "driver-1",
+            overfitRisk: 94,
+            evidenceQuality: 90,
+            sampleSize: 90,
+          },
+        ],
       },
     });
 
     expect(snapshot.pruning?.recommendedAction).toBe("quarantine");
     expect(snapshot.agency?.status).toBe("denied");
-    expect(snapshot.events.map((event) => event.type)).toContain("pruning.quarantine");
+    expect(snapshot.events.map((event) => event.type)).toContain(
+      "pruning.quarantine",
+    );
   });
 
   it("lets Wisdom lower confidence and escalate review when pruning finds unsafe evidence", () => {
@@ -232,7 +295,9 @@ describe("pruning integration", () => {
     const withPruning = evaluateDecisionQuality({ pruning });
     const withoutPruning = evaluateDecisionQuality();
 
-    expect(withPruning.falseConfidenceRisk).toBeGreaterThan(withoutPruning.falseConfidenceRisk);
+    expect(withPruning.falseConfidenceRisk).toBeGreaterThan(
+      withoutPruning.falseConfidenceRisk,
+    );
     expect(withPruning.recommendedAction).toBe("review");
     expect(withPruning.sourceModules).toContain("pruning");
   });
@@ -252,7 +317,9 @@ describe("pruning integration", () => {
       pruning,
     });
 
-    expect(result.pruningGate.quarantinedCandidateIds).toContain("unsafe-driver");
+    expect(result.pruningGate.quarantinedCandidateIds).toContain(
+      "unsafe-driver",
+    );
     expect(result.status).toBe("denied");
   });
 
@@ -314,7 +381,9 @@ describe("pruning integration", () => {
     expect(enhanced.survivalCriticalSignals.length).toBeGreaterThan(0);
     expect(enhanced.explanation).toContain("Pruning");
     expect(legacy.mode).toBe("legacy");
-    expect(adjustStocksExposureForPruning(80, { recommendedAction: "reduce" })).toBe(40);
+    expect(
+      adjustStocksExposureForPruning(80, { recommendedAction: "reduce" }),
+    ).toBe(40);
   });
 });
 

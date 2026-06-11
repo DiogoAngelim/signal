@@ -7,7 +7,10 @@ export function encryptSecret(plaintext: string): string {
   const key = encryptionKey();
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
-  const encrypted = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+  const encrypted = Buffer.concat([
+    cipher.update(plaintext, "utf8"),
+    cipher.final(),
+  ]);
   const tag = cipher.getAuthTag();
   return [
     CIPHER_VERSION,
@@ -20,10 +23,18 @@ export function encryptSecret(plaintext: string): string {
 export function decryptSecret(ciphertext: string): string {
   const [version, iv, tag, encrypted] = ciphertext.split(".");
   if (version !== CIPHER_VERSION || !iv || !tag || !encrypted) {
-    throw new ApiProblem(500, "secret_decryption_failed", "Stored signal secret has an unsupported format.");
+    throw new ApiProblem(
+      500,
+      "secret_decryption_failed",
+      "Stored signal secret has an unsupported format.",
+    );
   }
 
-  const decipher = crypto.createDecipheriv("aes-256-gcm", encryptionKey(), Buffer.from(iv, "base64url"));
+  const decipher = crypto.createDecipheriv(
+    "aes-256-gcm",
+    encryptionKey(),
+    Buffer.from(iv, "base64url"),
+  );
   decipher.setAuthTag(Buffer.from(tag, "base64url"));
   return Buffer.concat([
     decipher.update(Buffer.from(encrypted, "base64url")),
@@ -122,7 +133,10 @@ function encryptionKey() {
         "Production requires SIGNAL_SECRET_ENCRYPTION_KEY.",
       );
     }
-    return crypto.createHash("sha256").update("stocks-optimizer-local-secret-key").digest();
+    return crypto
+      .createHash("sha256")
+      .update("stocks-optimizer-local-secret-key")
+      .digest();
   }
 
   if (/^[a-f0-9]{64}$/i.test(configured)) {
@@ -132,9 +146,7 @@ function encryptionKey() {
   try {
     const decoded = Buffer.from(configured, "base64");
     if (decoded.length === 32) return decoded;
-  } catch {
-    
-  }
+  } catch {}
 
   return crypto.createHash("sha256").update(configured).digest();
 }

@@ -1,8 +1,17 @@
 {
   "phase": 12,
   "status": "COMPLETE",
-  "validation": { "schemaValid": true, "filesPresent": true, "criteriaSatisfied": true },
-  "artifacts": ["hardening/phase-12/ADRS.md", "hardening/phase-12/PHASE_CHECKPOINT.json"],
+  "validation": {
+    "schemaValid": true,
+    "filesPresent": true,
+    "criteriaSatisfied": true
+  },
+  "artifacts": [
+    "hardening/phase-12/ADRS.md",
+    "hardening/phase-12/PHASE_CHECKPOINT.json"
+  ],
   "blockingIssues": [],
-  "evidence": ["6 ADRs documented: idempotency-first, SHA-256 fingerprint, zero-trust auth, immutable audit, event-from-mutation-only, protocol-first architecture"]
+  "evidence": [
+    "6 ADRs documented: idempotency-first, SHA-256 fingerprint, zero-trust auth, immutable audit, event-from-mutation-only, protocol-first architecture"
+  ]
 }

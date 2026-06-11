@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
 import fastify from "fastify";
+import { describe, expect, it } from "vitest";
 import { createReferenceRuntime, createReferenceServer } from "../src/lib";
-import { registerHealthRoute } from "../src/routes/health";
-import { registerObservedEventsRoute } from "../src/routes/observed-events";
 import * as operations from "../src/operations";
 import * as routes from "../src/routes";
+import { registerHealthRoute } from "../src/routes/health";
+import { registerObservedEventsRoute } from "../src/routes/observed-events";
 import * as subscribers from "../src/subscribers";
 
 describe("reference runtime", () => {

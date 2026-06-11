@@ -1,5 +1,10 @@
-
-export type SizingMode = "none" | "micro" | "small" | "normal" | "large" | "maxSafe";
+export type SizingMode =
+  | "none"
+  | "micro"
+  | "small"
+  | "normal"
+  | "large"
+  | "maxSafe";
 
 export type SizingDecision = "blocked" | "deferred" | "allowed";
 
@@ -53,15 +58,20 @@ type NormalizedCapacity = {
   specified: boolean;
 };
 
-
-const CONSTRAINT_REDUCTION: Record<NonNullable<SizingConstraint["severity"]>, number> = {
+const CONSTRAINT_REDUCTION: Record<
+  NonNullable<SizingConstraint["severity"]>,
+  number
+> = {
   low: 0.9,
   medium: 0.75,
   high: 0.55,
   critical: 0.35,
 };
 
-const HARD_NON_BLOCKING_REDUCTION: Record<NonNullable<SizingConstraint["severity"]>, number> = {
+const HARD_NON_BLOCKING_REDUCTION: Record<
+  NonNullable<SizingConstraint["severity"]>,
+  number
+> = {
   low: 0.8,
   medium: 0.6,
   high: 0,
@@ -75,12 +85,35 @@ export function sizeDecision(input: SizingInput): SizingResult {
   const constraints = normalizeConstraints(input.constraints);
   const confidence = normalizeRatio(input.confidence, "Confidence", 0, reasons);
   const risk = normalizeRatio(input.risk, "Risk", 1, reasons);
-  const utility = input.utility == null ? undefined : normalizeRatio(input.utility, "Utility", 0.5, reasons);
-  const requestedCapacity = normalizeCapacity(input.requestedCapacity, "Requested capacity", reasons);
-  const availableCapacity = normalizeCapacity(input.availableCapacity, "Available capacity", reasons);
-  const minCapacity = normalizeCapacity(input.minCapacity, "Minimum capacity", reasons);
-  const maxCapacity = normalizeCapacity(input.maxCapacity, "Maximum capacity", reasons);
-  const audit = buildAudit(requestedCapacity.value, availableCapacity.value, maxCapacity.value);
+  const utility =
+    input.utility == null
+      ? undefined
+      : normalizeRatio(input.utility, "Utility", 0.5, reasons);
+  const requestedCapacity = normalizeCapacity(
+    input.requestedCapacity,
+    "Requested capacity",
+    reasons,
+  );
+  const availableCapacity = normalizeCapacity(
+    input.availableCapacity,
+    "Available capacity",
+    reasons,
+  );
+  const minCapacity = normalizeCapacity(
+    input.minCapacity,
+    "Minimum capacity",
+    reasons,
+  );
+  const maxCapacity = normalizeCapacity(
+    input.maxCapacity,
+    "Maximum capacity",
+    reasons,
+  );
+  const audit = buildAudit(
+    requestedCapacity.value,
+    availableCapacity.value,
+    maxCapacity.value,
+  );
   const blockingConstraints = constraints.filter(
     (constraint) =>
       constraint.type === "hard" &&
@@ -116,9 +149,13 @@ export function sizeDecision(input: SizingInput): SizingResult {
   if (confidence <= 0) {
     reasons.push("Confidence is zero; sizing starts at zero.");
   } else if (confidence < 0.35) {
-    reasons.push(`Confidence ${formatPercent(confidence)} is low; sizing is conservative.`);
+    reasons.push(
+      `Confidence ${formatPercent(confidence)} is low; sizing is conservative.`,
+    );
   } else if (confidence < 0.6) {
-    reasons.push(`Confidence ${formatPercent(confidence)} is moderate; sizing remains limited.`);
+    reasons.push(
+      `Confidence ${formatPercent(confidence)} is moderate; sizing remains limited.`,
+    );
   } else {
     reasons.push(`Confidence ${formatPercent(confidence)} supports sizing.`);
   }
@@ -128,7 +165,9 @@ export function sizeDecision(input: SizingInput): SizingResult {
   } else if (risk > 0.75) {
     reasons.push(`Risk ${formatPercent(risk)} is high; sizing is reduced.`);
   } else if (risk > 0.45) {
-    reasons.push(`Risk ${formatPercent(risk)} is moderate; sizing is controlled.`);
+    reasons.push(
+      `Risk ${formatPercent(risk)} is moderate; sizing is controlled.`,
+    );
   } else {
     reasons.push(`Risk ${formatPercent(risk)} is controlled.`);
   }
@@ -136,19 +175,27 @@ export function sizeDecision(input: SizingInput): SizingResult {
   if (utility != null) {
     const utilityMultiplier = 0.8 + utility * 0.4;
     normalizedSize *= utilityMultiplier;
-    if (utility < 0.4) reasons.push(`Utility ${formatPercent(utility)} reduces sizing.`);
-    if (utility > 0.7) reasons.push(`Utility ${formatPercent(utility)} supports sizing.`);
+    if (utility < 0.4)
+      reasons.push(`Utility ${formatPercent(utility)} reduces sizing.`);
+    if (utility > 0.7)
+      reasons.push(`Utility ${formatPercent(utility)} supports sizing.`);
   }
 
-  const failedNonBlocking = constraints.filter((constraint) => !constraint.passed);
+  const failedNonBlocking = constraints.filter(
+    (constraint) => !constraint.passed,
+  );
   for (const constraint of failedNonBlocking) {
-    const severity = constraint.severity as NonNullable<SizingConstraint["severity"]>;
+    const severity = constraint.severity as NonNullable<
+      SizingConstraint["severity"]
+    >;
     const factor =
       constraint.type === "hard"
         ? HARD_NON_BLOCKING_REDUCTION[severity]
         : CONSTRAINT_REDUCTION[severity];
     normalizedSize *= factor;
-    reasons.push(`${constraintName(constraint)} failed with ${severity} severity; sizing reduced.`);
+    reasons.push(
+      `${constraintName(constraint)} failed with ${severity} severity; sizing reduced.`,
+    );
     if (constraint.reason) reasons.push(constraint.reason);
   }
 
@@ -158,12 +205,18 @@ export function sizeDecision(input: SizingInput): SizingResult {
 
   if (confidence >= 0.75 && risk <= 0.35 && failedNonBlocking.length === 0) {
     normalizedSize *= 1.15;
-    reasons.push("Strong confidence and controlled risk support increased sizing.");
+    reasons.push(
+      "Strong confidence and controlled risk support increased sizing.",
+    );
   }
 
   normalizedSize = clampUnit(normalizedSize);
 
-  const basis = capacityBasis(availableCapacity, requestedCapacity, maxCapacity);
+  const basis = capacityBasis(
+    availableCapacity,
+    requestedCapacity,
+    maxCapacity,
+  );
   if (basis <= 0) {
     reasons.push("Available sizing capacity is zero.");
     return finalize({
@@ -180,17 +233,43 @@ export function sizeDecision(input: SizingInput): SizingResult {
   }
 
   let size = normalizedSize * basis;
-  size = applyCap("requestedCapacity", requestedCapacity.value, size, cappedBy, reasons);
+  size = applyCap(
+    "requestedCapacity",
+    requestedCapacity.value,
+    size,
+    cappedBy,
+    reasons,
+  );
   size = applyCap("maxCapacity", maxCapacity.value, size, cappedBy, reasons);
-  size = applyCap("availableCapacity", availableCapacity.value, size, cappedBy, reasons);
+  size = applyCap(
+    "availableCapacity",
+    availableCapacity.value,
+    size,
+    cappedBy,
+    reasons,
+  );
 
-  if (minCapacity.value != null && minCapacity.value > 0 && normalizedSize > 0 && size > 0 && size < minCapacity.value) {
-    const upperCap = smallestDefined(requestedCapacity.value, maxCapacity.value, availableCapacity.value);
+  if (
+    minCapacity.value != null &&
+    minCapacity.value > 0 &&
+    normalizedSize > 0 &&
+    size > 0 &&
+    size < minCapacity.value
+  ) {
+    const upperCap = smallestDefined(
+      requestedCapacity.value,
+      maxCapacity.value,
+      availableCapacity.value,
+    );
     if (minCapacity.value <= upperCap) {
       size = minCapacity.value;
-      reasons.push(`Raised to minimum capacity ${formatNumber(minCapacity.value)}.`);
+      reasons.push(
+        `Raised to minimum capacity ${formatNumber(minCapacity.value)}.`,
+      );
     } else {
-      reasons.push(`Minimum capacity ${formatNumber(minCapacity.value)} could not be met within caps.`);
+      reasons.push(
+        `Minimum capacity ${formatNumber(minCapacity.value)} could not be met within caps.`,
+      );
     }
   }
 
@@ -198,7 +277,9 @@ export function sizeDecision(input: SizingInput): SizingResult {
   const finalNormalizedSize = clampUnit(size / basis);
 
   if (finalNormalizedSize === 0) {
-    reasons.push("No capacity committed after confidence, risk, constraints, and caps.");
+    reasons.push(
+      "No capacity committed after confidence, risk, constraints, and caps.",
+    );
   }
 
   return finalize({
@@ -211,7 +292,7 @@ export function sizeDecision(input: SizingInput): SizingResult {
     constraints,
     audit,
     cappedBy,
-    });
+  });
 }
 
 function finalize(args: {
@@ -241,7 +322,9 @@ function finalize(args: {
   };
 }
 
-function normalizeConstraints(constraints: SizingInput["constraints"]): SizingConstraint[] {
+function normalizeConstraints(
+  constraints: SizingInput["constraints"],
+): SizingConstraint[] {
   if (!Array.isArray(constraints)) return [];
   return constraints.map((constraint, index) => ({
     id: String(constraint.id || `constraint-${index + 1}`),
@@ -253,29 +336,47 @@ function normalizeConstraints(constraints: SizingInput["constraints"]): SizingCo
   }));
 }
 
-function normalizeSeverity(severity: SizingConstraint["severity"]): NonNullable<SizingConstraint["severity"]> {
-  return severity === "low" || severity === "medium" || severity === "high" || severity === "critical"
+function normalizeSeverity(
+  severity: SizingConstraint["severity"],
+): NonNullable<SizingConstraint["severity"]> {
+  return severity === "low" ||
+    severity === "medium" ||
+    severity === "high" ||
+    severity === "critical"
     ? severity
     : "medium";
 }
 
-function normalizeRatio(value: unknown, label: string, fallback: number, reasons: string[]) {
+function normalizeRatio(
+  value: unknown,
+  label: string,
+  fallback: number,
+  reasons: string[],
+) {
   const numberValue = Number(value);
   if (!Number.isFinite(numberValue)) {
-    reasons.push(`${label} was missing or invalid; using ${formatPercent(fallback)}.`);
+    reasons.push(
+      `${label} was missing or invalid; using ${formatPercent(fallback)}.`,
+    );
     return fallback;
   }
 
   const scaled = Math.abs(numberValue) > 1 ? numberValue / 100 : numberValue;
   const clamped = clampUnit(scaled);
   if (clamped !== scaled) {
-    reasons.push(`${label} was outside 0-100%; clamped to ${formatPercent(clamped)}.`);
+    reasons.push(
+      `${label} was outside 0-100%; clamped to ${formatPercent(clamped)}.`,
+    );
   }
 
   return clamped;
 }
 
-function normalizeCapacity(value: unknown, label: string, reasons: string[]): NormalizedCapacity {
+function normalizeCapacity(
+  value: unknown,
+  label: string,
+  reasons: string[],
+): NormalizedCapacity {
   if (value == null) return { value: undefined, specified: false };
   const numberValue = Number(value);
   if (!Number.isFinite(numberValue)) {
@@ -332,7 +433,9 @@ function smallestDefined(...values: Array<number | undefined>) {
 }
 
 function constraintName(constraint: SizingConstraint) {
-  return constraint.label ? `${constraint.label} (${constraint.id})` : constraint.id;
+  return constraint.label
+    ? `${constraint.label} (${constraint.id})`
+    : constraint.id;
 }
 
 function modeFor(normalizedSize: number): SizingMode {
@@ -345,7 +448,6 @@ function modeFor(normalizedSize: number): SizingMode {
 }
 
 function clampUnit(value: number) {
-  
   if (!Number.isFinite(value)) return 0;
   return Math.min(1, Math.max(0, value));
 }
@@ -359,9 +461,10 @@ function formatPercent(value: number) {
 }
 
 function formatNumber(value: number) {
-  return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+  return Number.isInteger(value)
+    ? String(value)
+    : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
 }
-
 
 function unique(values: string[]) {
   return Array.from(new Set(values));

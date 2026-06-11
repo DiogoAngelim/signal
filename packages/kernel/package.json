@@ -12,9 +12,7 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
