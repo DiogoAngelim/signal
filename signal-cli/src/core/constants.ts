@@ -32,6 +32,15 @@ export function getSnapshotsDir(root: string = process.cwd()): string {
   return resolve(getSignalDir(root), "snapshots");
 }
 
+// Contract snapshot paths
+export function getContractSnapshotsDir(root: string = process.cwd()): string {
+  return resolve(getSignalDir(root), "contract-snapshots");
+}
+
+export function getContractSnapshotPath(root: string = process.cwd()): string {
+  return resolve(getContractSnapshotsDir(root), "v1.json");
+}
+
 // Hardening directory
 export const HARDENING_DIR_NAME = "hardening";
 
