@@ -64,7 +64,7 @@ function changePctOf(item: MarketItem, index: number) {
 
   if (Number.isFinite(parsed)) return parsed;
 
-  // Deterministic local fallback so the dashboard has stable simulated history.
+  
   return Math.sin(index * 0.73) * 1.8 + Math.cos(index * 0.37) * 0.9;
 }
 
@@ -106,7 +106,7 @@ function generateSyntheticBars(item: MarketItem, index: number, days = 360) {
     });
   }
 
-  // Anchor final close to current observable price.
+  
   const scale = currentPrice / Math.max(0.01, bars[bars.length - 1]?.close ?? currentPrice);
 
   return bars.map((bar) => ({

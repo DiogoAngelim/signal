@@ -1,4 +1,4 @@
-/* c8 ignore next: tsx sourcemaps emit a phantom branch for this import binding. */
+
 import { clamp, numeric } from "../math/statistics";
 
 export type ReadinessRemediationCategory =
@@ -676,5 +676,5 @@ function unique(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)));
 }
 
-/* c8 ignore next: tsx sourcemaps emit a phantom branch for this helper binding. */
+
 const round = (value: number) => Number(value.toFixed(2));

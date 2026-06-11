@@ -1,4 +1,4 @@
-/* c8 ignore next */
+
 export type SurvivalOutcomeClass =
   | "comfortable_survival"
   | "stressed_survival"
@@ -622,7 +622,7 @@ function normalizeScore(value: unknown) {
 }
 
 function clampScore(value: number) {
-  /* c8 ignore next 1 */
+  
   if (!Number.isFinite(value)) return 0;
   return Math.min(100, Math.max(0, value));
 }
@@ -670,7 +670,7 @@ function roundScore(value: number) {
   return Math.round(clampScore(value) * 100) / 100;
 }
 
-/* c8 ignore next */
+
 function roundRatio(value: number) {
   return Math.round(clampRatio(value) * 100) / 100;
 }

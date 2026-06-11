@@ -1,4 +1,4 @@
-/* c8 ignore next */
+
 import { clamp, mean, numeric } from "../math/statistics";
 import type {
   DetectedNeed,
@@ -40,14 +40,14 @@ const RECOMMENDATIONS: Record<NeedCategory, string[]> = {
   ],
 };
 
-/**
- * Need Detection turns an intelligence snapshot into explicit operational needs.
- *
- * The detector is intentionally generic: it only reads reliability, alignment,
- * uncertainty, risk pressure, and participation proxies. Domain adapters can
- * map those needs to concrete actions, but the core Signal layer never assumes
- * that an opportunity is a trade, a task, or any other domain object.
- */
+
+
+
+
+
+
+
+
 export function detectNeeds(input: NeedDetectionInput, options: NeedDetectionOptions = {}): DetectedNeed[] {
   const settings = { ...DEFAULT_OPTIONS, ...options };
   const perceptionScore = score(input.perception?.compositeScore, 50);
@@ -60,7 +60,7 @@ export function detectNeeds(input: NeedDetectionInput, options: NeedDetectionOpt
   const executionSuitability = score(input.executionReadiness?.executionSuitability, readiness);
   const riskSuggestion = score(input.executionReadiness?.riskAdjustedExposureSuggestion, executionSuitability);
   const contradictionDensity = score(input.diagnostics?.contradictionDensity, 0);
-  /* c8 ignore next */
+  
   const contradictionCount = input.diagnostics?.contradictions?.length ?? 0;
   const rankingCount = input.rankings?.length ?? 0;
   const emergingCount = input.rankings?.filter((ranking) => ranking.emerging).length ?? 0;
@@ -156,8 +156,8 @@ function score(value: unknown, fallback: number) {
   return clamp(numeric(value, fallback));
 }
 
-/* c8 ignore start */
+
 function round(value: number) {
   return Number(value.toFixed(2));
 }
-/* c8 ignore stop */
+

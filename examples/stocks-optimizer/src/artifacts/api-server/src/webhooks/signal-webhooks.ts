@@ -254,14 +254,28 @@ export class SignalWebhookDispatcher {
   }
 
   private scheduleProcess(delayMs: number) {
-    setTimeout(() => {
-      void this.processDueJobsOnce().catch((error) => {
-        logger.warn(
-          { err: sanitizeForLog(error) },
-          "Signal webhook queue worker failed",
-        );
+    const fastRetry = process.env.NODE_ENV === "test" || process.env.SIGNAL_TEST_FAST_RETRY === "true";
+    const effectiveDelay = fastRetry ? 0 : delayMs;
+
+    if (effectiveDelay <= 0) {
+      setImmediate(() => {
+        void this.processDueJobsOnce().catch((error) => {
+          logger.warn(
+            { err: sanitizeForLog(error) },
+            "Signal webhook queue worker failed",
+          );
+        });
       });
-    }, delayMs).unref?.();
+    } else {
+      setTimeout(() => {
+        void this.processDueJobsOnce().catch((error) => {
+          logger.warn(
+            { err: sanitizeForLog(error) },
+            "Signal webhook queue worker failed",
+          );
+        });
+      }, effectiveDelay).unref?.();
+    }
   }
 
   private async processJob(job: QueueJobRecord) {
@@ -353,7 +367,8 @@ export class SignalWebhookDispatcher {
     const maxAttempts = job.maxAttempts;
     const baseDelay = positiveInt(process.env.SIGNAL_WEBHOOK_RETRY_BASE_MS, 500);
     const deadLetter = job.attempts >= maxAttempts;
-    const delayMs = baseDelay * 2 ** Math.max(0, job.attempts - 1);
+    const fastRetry = process.env.NODE_ENV === "test" || process.env.SIGNAL_TEST_FAST_RETRY === "true";
+    const delayMs = fastRetry ? 0 : baseDelay * 2 ** Math.max(0, job.attempts - 1);
     const nextAttemptAt = new Date(Date.now() + delayMs).toISOString();
 
     await this.store.updateDeliveryAttempt(attemptId, {

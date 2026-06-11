@@ -48,7 +48,7 @@ export function createOfficialAlertsAdapter(context: AdapterContext): SafetyData
           const live = await collectLiveAlerts(region, context);
           if (live) return live;
         } catch {
-          // Fall back to fixture data.
+          
         }
       }
       return collectFixtureAlerts(region, context);

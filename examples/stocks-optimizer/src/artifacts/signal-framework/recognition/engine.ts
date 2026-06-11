@@ -1,4 +1,4 @@
-/* c8 ignore next */
+
 import { clamp, mean, stdev } from "../math/statistics";
 
 export type RecognitionVerdict =
@@ -874,7 +874,7 @@ function featureWeight(path: string) {
   if (path.startsWith("features.")) return 1.3;
   if (path.startsWith("state.")) return 1.2;
   if (path.startsWith("perception.")) return 1;
-  /* c8 ignore next */
+  
   return 0.8;
 }
 
@@ -919,7 +919,7 @@ function outcomeValueFor(sample: RecognitionSample) {
 }
 
 function stabilityFor(outcomes: number[], positive: number, negative: number, neutral: number) {
-  /* c8 ignore next */
+  
   if (!outcomes.length) return 0;
   const consistency = Math.max(positive, negative, neutral) / outcomes.length * 100;
   const dispersionSafety = clamp(100 - stdev(outcomes), 0, 100);
@@ -1059,7 +1059,7 @@ function idFor(sample: RecognitionSample) {
   return stringValue(sample.id ?? sample.label ?? sample.fingerprint) ?? "sample";
 }
 
-/* c8 ignore next */
+
 function createdAtFor(value: string | Date | undefined) {
   let date: Date | null = null;
   if (typeof value === "string") date = new Date(value);

@@ -1,4 +1,4 @@
-/* c8 ignore next */
+
 import { evaluateOpportunityDensity } from "../../../signal-framework/opportunity-discovery/density";
 import { analyzeOpportunityOutcomes } from "../../../signal-framework/opportunity-explorer/engine";
 import {
@@ -63,7 +63,7 @@ export type StockOpportunityFactors = {
   crossAssetLeadership: number;
 };
 
-/* c8 ignore start */
+
 export type StockOpportunityLifecycle =
   | "Detected"
   | "Emerging"
@@ -72,7 +72,7 @@ export type StockOpportunityLifecycle =
   | "Sized"
   | "Active"
   | "Closed";
-/* c8 ignore stop */
+
 
 export type StockOpportunityProgressionPoint = {
   stage: StockOpportunityLifecycle;
@@ -124,16 +124,16 @@ export type StockOpportunityDiscoveryResult = {
   };
 };
 
-/**
- * Stocks opportunity discovery observes assets before they become final buy
- * decisions.
- *
- * The engine scores market-specific evidence such as trend emergence,
- * momentum acceleration, volatility compression, relative strength, volume,
- * breakout preparation, regime transitions, breadth, and leadership. It keeps
- * these interpretations outside generic Signal while emitting generic
- * opportunity candidates that Signal diagnostics can still understand.
- */
+
+
+
+
+
+
+
+
+
+
 export function discoverStockOpportunities(input: StockOpportunityDiscoveryInput): StockOpportunityDiscoveryResult {
   const signals = input.signals.filter((signal) => symbolOf(signal));
   const marketContext = buildMarketContext(signals, input.historyDiagnostics);
@@ -170,12 +170,12 @@ export function discoverStockOpportunities(input: StockOpportunityDiscoveryInput
         discovery: matchedDiscovery,
       };
     }
-    /* c8 ignore start */
+    
     return {
       ...candidate,
       discovery: null,
     };
-    /* c8 ignore stop */
+    
   });
 
   return {
@@ -212,10 +212,10 @@ function buildCandidate(
   const genericOpportunity = genericCandidate(symbol, factors, candidateScore, eligible);
   const adaptiveSizing = sizeAdaptiveOpportunity({
     targetRef: symbol,
-    /* c8 ignore next */
+    
     actionRef: String(signal.signalAction ?? "Hold"),
     opportunityQuality: candidateScore,
-    /* c8 ignore next */
+    
     signalConfidence: number(signal.signalConfidence, signal.setupQuality ?? candidateScore),
     marketParticipation: factors.breadthImprovement,
     riskControl: 100 - clamp(number(signal.riskPressure, 50)),
@@ -281,13 +281,13 @@ function factorScores(
   const previousTrendSpread = pctMove(previousLongAverage, previousShortAverage);
   const recentVolatility = stdev(returns(closes.slice(-12))) * 100;
   const baselineVolatility = stdev(returns(closes.slice(-36))) * 100;
-  /* c8 ignore next */
+  
   const latestClose = closes.at(-1) ?? number(signal.price, 0);
-  /* c8 ignore next */
+  
   const high = Math.max(...closes, number(signal.high52, latestClose));
-  /* c8 ignore next */
+  
   const low = Math.min(...closes, number(signal.low52, latestClose));
-  /* c8 ignore next */
+  
   const latestVolume = volumes.at(-1) ?? number(signal.volume, 0);
   const averageVolume = mean(volumes.slice(-20));
   const setupQuality = clamp(number(signal.setupQuality, 50));
@@ -383,13 +383,13 @@ function dominantOpportunityType(factors: StockOpportunityFactors): [Opportunity
 }
 
 function evidenceFor(factors: StockOpportunityFactors, signal: StockOpportunitySignal, velocity: number) {
-  /* c8 ignore next */
+  
   const evidence = [
     `Trend emergence ${round(factors.trendEmergence)} and momentum acceleration ${round(factors.momentumAcceleration)}.`,
     `Volatility compression ${round(factors.volatilityCompression)} with breakout preparation ${round(factors.breakoutPreparation)}.`,
     `Relative strength improvement ${round(factors.relativeStrengthImprovement)} and leadership ${round(factors.crossAssetLeadership)}.`,
   ];
-  /* c8 ignore next */
+  
   if (factors.volumeExpansion >= 58) evidence.push(`Volume expansion confirms participation at ${round(factors.volumeExpansion)}.`);
   if (velocity > 0) evidence.push(`Candidate score improved by ${round(velocity)} points.`);
   if (signal.signalAction === "Buy") evidence.push("The current strategy signal is already eligible for allocation review.");
@@ -397,7 +397,7 @@ function evidenceFor(factors: StockOpportunityFactors, signal: StockOpportunityS
 }
 
 function explanationFor(symbol: string, score: number, velocity: number, factors: StockOpportunityFactors) {
-  /* c8 ignore next */
+  
   const direction = velocity > 0 ? "improving" : velocity < 0 ? "cooling" : "stable";
   const strongest = dominantOpportunityType(factors)[0];
   return `${symbol} is ${direction}; ${strongest} is the strongest evidence cluster and the candidate score is ${round(score)}.`;
@@ -425,9 +425,9 @@ function progressionFor(
 
 function lifecycleFor(signal: StockOpportunitySignal, score: number): StockOpportunityLifecycle {
   const exposure = number(signal.suggestedExposure, 0);
-  /* c8 ignore next */
+  
   if (String(signal.signalStatus ?? "").toLowerCase() === "closed") return "Closed";
-  /* c8 ignore next */
+  
   if (String(signal.signalStatus ?? "").toLowerCase() === "active") return "Active";
   if (score >= 72 && signal.signalAction === "Buy" && exposure > 0) return "Eligible";
   if (score >= 60) return "Strengthening";
@@ -439,17 +439,17 @@ function buildExplorerRecords(
   candidates: StockOpportunityCandidate[],
   trades: Array<Record<string, unknown>>,
 ): OpportunityOutcomeRecord[] {
-  /* c8 ignore next */
+  
   const tradeBySymbol = new Map(trades.map((trade) => [String(trade.symbol ?? "").toUpperCase(), trade]));
   return candidates.map((candidate) => {
     const trade = tradeBySymbol.get(candidate.symbol);
-    /* c8 ignore next */
+    
     const returnPct = number(trade?.returnPct ?? trade?.profitPct, 0);
-    /* c8 ignore start */
+    
     const outcome: OpportunityOutcomeRecord["outcome"] = trade
       ? returnPct >= 0 ? "winning" : "losing"
       : candidate.lifecycle === "Detected" ? "blocked" : "almost-qualified";
-    /* c8 ignore stop */
+    
     return {
       opportunityId: candidate.genericOpportunity.opportunityId,
       outcome,
@@ -715,7 +715,7 @@ function evidenceForGenericDiscovery(candidate: StockOpportunityCandidate): Disc
           misleading: true,
         }
       : null,
-    /* c8 ignore start */
+    
     candidate.factors.regimeTransition < 45
       ? {
           id: `${candidate.symbol}:transition-contradiction`,
@@ -758,14 +758,14 @@ function lifecycleMaturity(lifecycle: StockOpportunityLifecycle) {
 
 function discoveryCandidateKey(opportunity: DiscoveredOpportunity) {
   if (opportunity.candidateId) return opportunity.candidateId;
-  /* c8 ignore next */
+  
   return opportunity.id;
 }
 
 function constraintEvidenceLabel(constraint: AdaptiveSizingResult["constraints"][number]) {
   if (constraint.reason) return constraint.reason;
   if (constraint.label) return constraint.label;
-  /* c8 ignore next */
+  
   return constraint.id;
 }
 
@@ -778,13 +778,13 @@ function barsFor(
   barsBySymbol: StockOpportunityDiscoveryInput["barsBySymbol"],
 ): StockBar[] {
   const symbol = symbolOf(signal);
-  /* c8 ignore next */
+  
   if (barsBySymbol instanceof Map) return barsBySymbol.get(symbol) ?? [];
   return barsBySymbol?.[symbol] ?? [];
 }
 
 function closeSeries(signal: StockOpportunitySignal, bars: StockBar[]) {
-  /* c8 ignore next */
+  
   const barCloses = bars.map((bar) => number(bar.close ?? bar.price, Number.NaN)).filter(Number.isFinite);
   const history = (signal.history ?? []).map((value) => number(value, Number.NaN)).filter(Number.isFinite);
   const merged = barCloses.length >= 6 ? barCloses : history;
@@ -801,7 +801,7 @@ function volumeSeries(signal: StockOpportunitySignal, bars: StockBar[]) {
 function requestedCapacity(signal: StockOpportunitySignal, score: number) {
   const explicit = number(signal.suggestedExposure, 0);
   if (explicit > 0) return Math.min(explicit, maxCapacity(signal));
-  /* c8 ignore next */
+  
   if (score >= 72) return Math.min(5, maxCapacity(signal));
   if (score >= 60) return Math.min(2, maxCapacity(signal));
   if (score >= 45) return Math.min(1, maxCapacity(signal));
@@ -819,7 +819,7 @@ function densityFromPrevious(previousCandidates: StockOpportunityCandidate[] | u
 }
 
 function symbolOf(signal: StockOpportunitySignal) {
-  /* c8 ignore next */
+  
   return String(signal.symbol ?? signal.ticker ?? "").trim().toUpperCase();
 }
 
@@ -851,7 +851,7 @@ function proximityToHigh(price: number, high: number, low: number) {
 }
 
 function stdev(values: number[]) {
-  /* c8 ignore next */
+  
   if (values.length < 2) return 0;
   const average = mean(values);
   return Math.sqrt(mean(values.map((value) => (value - average) ** 2)));
@@ -872,7 +872,7 @@ function historyScore(value: unknown, fallback = 0) {
 }
 
 function clamp(value: number, min = 0, max = 100) {
-  /* c8 ignore next */
+  
   return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
 }
 

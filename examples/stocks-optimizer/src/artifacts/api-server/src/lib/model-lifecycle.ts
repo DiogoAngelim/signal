@@ -162,7 +162,7 @@ const PROMOTION_TARGET_STATES = new Set<ModelLifecycleState>([
   "PRODUCTION",
 ]);
 
-/* node:coverage ignore next 55 */
+
 export const DEFAULT_MODEL_LIFECYCLE_CONFIG: ModelLifecycleConfig =
   deepFreeze({
     state_machine: {
@@ -274,7 +274,7 @@ export class ModelLifecycleRegistry {
       updated_at: now,
     });
     this.store.register(record);
-    /* node:coverage ignore next */
+    
     return record;
   }
 
@@ -493,7 +493,7 @@ export function loadModelLifecycleConfig(
     return DEFAULT_MODEL_LIFECYCLE_CONFIG;
   }
 
-  /* node:coverage ignore next 3 */
+  
   const parsed = parseYaml(fs.readFileSync(configPath, "utf8")) as {
     model_lifecycle?: Partial<ModelLifecycleConfig>;
   } | null;

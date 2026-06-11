@@ -852,13 +852,13 @@ function percentage(numerator: number, denominator: number) {
 
 function weightedMean(values: Array<[number, number]>) {
   const totalWeight = sum(values.map(([, weight]) => weight));
-  /* c8 ignore next */
+  
   if (totalWeight <= 0) return 0;
   return sum(values.map(([value, weight]) => value * weight)) / totalWeight;
 }
 
 function mean(values: readonly number[]) {
-  /* c8 ignore next */
+  
   return values.length === 0 ? 0 : sum(values) / values.length;
 }
 
@@ -867,7 +867,7 @@ function sum(values: readonly number[]) {
 }
 
 function clamp(value: number, min = 0, max = 100) {
-  /* c8 ignore next */
+  
   if (!Number.isFinite(value)) return min;
   return Math.min(max, Math.max(min, value));
 }

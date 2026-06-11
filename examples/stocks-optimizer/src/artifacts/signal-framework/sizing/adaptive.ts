@@ -1,4 +1,4 @@
-/* c8 ignore next */
+
 import { clamp, mean, numeric } from "../math/statistics";
 import type { DetectedNeed } from "../types";
 import { sizeDecision, type SizingConstraint, type SizingInput, type SizingResult } from "./engine";
@@ -33,14 +33,14 @@ export type AdaptiveSizingResult = SizingResult & {
   sizingRationale: string[];
 };
 
-/**
- * Adaptive sizing wraps the generic risk gate with an explainable ladder.
- *
- * The base `sizeDecision` remains responsible for hard constraints, caps, and
- * risk normalization. This adapter only chooses the largest graduated step that
- * fits inside the allowed capacity, keeping exploratory allocations possible
- * without bypassing existing safety checks.
- */
+
+
+
+
+
+
+
+
 export function sizeAdaptiveOpportunity(input: AdaptiveSizingInput): AdaptiveSizingResult {
   const ladder = normalizeLadder(input.ladder ?? ADAPTIVE_SIZING_LADDER);
   const quality = ratio(input.opportunityQuality);
@@ -73,7 +73,7 @@ export function sizeAdaptiveOpportunity(input: AdaptiveSizingInput): AdaptiveSiz
   const allowedCapacity = base.decision === "allowed" ? base.size : 0;
   const selectedLadderPct = selectLadderStep(ladder, allowedCapacity);
   const finalSize = selectedLadderPct;
-  /* c8 ignore next */
+  
   const normalizedSize = normalizeByCapacity(finalSize, input.maxCapacity ?? input.availableCapacity ?? input.requestedCapacity);
   const sizingRationale = [
     `Opportunity quality ${formatPct(quality)} and discovery strength ${formatPct(discovery)} set the opportunity tier.`,
@@ -148,7 +148,7 @@ function needParticipationBoost(needs: DetectedNeed[]) {
 function selectLadderStep(ladder: number[], allowedCapacity: number) {
   const selected = ladder.reduce((stepSelected, step) => (step <= allowedCapacity ? step : stepSelected), 0);
   if (selected > 0 || allowedCapacity <= 0) return selected;
-  /* c8 ignore next */
+  
   return ladder.find((step) => step > 0) ?? 0;
 }
 
@@ -179,8 +179,8 @@ function formatPct(value: number) {
   return `${Math.round(value * 100)}%`;
 }
 
-/* c8 ignore start */
+
 function formatNumber(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
 }
-/* c8 ignore stop */
+

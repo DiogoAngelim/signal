@@ -97,7 +97,7 @@ export class SignalDistributionService {
       },
     });
 
-    // Hot path: persistence and SSE fanout happen before return; webhooks are queued without blocking acceptance.
+    
     await this.streamHub.publish(nextRecord);
     void this.webhookDispatcher.enqueueSignal(nextRecord).catch((error) => {
       logger.warn({ err: error, signalId: signal.id }, "Failed to enqueue signal webhooks");

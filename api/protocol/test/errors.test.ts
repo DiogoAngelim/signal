@@ -28,7 +28,7 @@ describe("errors module full coverage", () => {
       expect(err.code).toBe(code);
       expect(signalErrorCategories).toContain(err.category);
       expect(typeof err.message).toBe("string");
-      // With all options
+      
       const custom = createSignalError(code, "custom", {
         category: signalErrorCategories[0],
         retryable: true,
@@ -46,7 +46,7 @@ describe("errors module full coverage", () => {
       expect(err.code).toBe(code);
       expect(signalErrorCategories).toContain(err.category);
       expect(typeof err.message).toBe("string");
-      // With all options
+      
       const custom = createProtocolError(code, "custom", {
         category: signalErrorCategories[0],
         retryable: true,
@@ -82,10 +82,10 @@ describe("errors module full coverage", () => {
       };
       expect(signalErrorHttpStatus(env)).toBe(codeToStatus[code]);
     }
-    // Default branch: unknown code/category
-    // @ts-expect-error purposely wrong
+    
+    
     expect(signalErrorHttpStatus({ code: "UNKNOWN", category: "capability" })).toBe(404);
-    // @ts-expect-error purposely wrong
+    
     expect(signalErrorHttpStatus({ code: "UNKNOWN", category: "runtime" })).toBe(500);
   });
 });

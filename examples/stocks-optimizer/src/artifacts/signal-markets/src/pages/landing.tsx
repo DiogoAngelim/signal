@@ -19,7 +19,7 @@ export default function Landing() {
       <Navbar />
 
       <main>
-        {/* Hero Section */}
+        {}
         <section className="relative overflow-hidden border-b border-white/10 bg-black pt-24 pb-28 lg:pt-32 lg:pb-32">
           <div className="container relative z-10 mx-auto px-4 text-center">
             <motion.div
@@ -64,7 +64,7 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Feature UI Preview Section */}
+        {}
         <section className="bg-black py-12 pb-24">
           <div className="container mx-auto px-4">
             <motion.div

@@ -51,16 +51,16 @@ export type DiscoveryAccountabilityResult = {
   audit: Record<string, unknown>;
 };
 
-/**
- * Makes Discovery statistically accountable instead of merely descriptive.
- *
- * @example
- * const accountability = evaluateDiscoveryAccountability({
- *   discovery: { status: "emerging", confidence: 54, maturity: 38 },
- *   events: [{ wasEarly: true, outcome: "positive", profitScore: 72 }],
- * });
- * accountability.status; // usually "immature" or "developing"
- */
+
+
+
+
+
+
+
+
+
+
 export function evaluateDiscoveryAccountability(
   input: DiscoveryAccountabilityInput = {},
 ): DiscoveryAccountabilityResult {

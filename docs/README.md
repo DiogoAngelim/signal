@@ -43,6 +43,49 @@ the change are too complicated:
 Signal makes dangerous backend operations explicit, replay-safe, and auditable.
 ```
 
+## What Signal Makes Possible
+
+Signal makes judgment representable as system state. Decisions can carry
+evidence, uncertainty, execution history, outcome review, and learning across
+time.
+
+### Structural Shift
+
+| Without Signal | With Signal |
+| --- | --- |
+| Implicit decisions | Explicit decision objects |
+| Execution logs | Decision lifecycle history |
+| Stateless systems | Outcome-aware systems |
+| Reactive logic | Learning systems |
+| Opaque behavior | Auditable judgment |
+
+### System Capability Classes
+
+- **Decision-tracking systems** preserve decisions, evidence, constraints, and
+  review state as software state.
+- **Outcome-learning systems** connect outcomes back to prior judgment so later
+  decisions can use reviewed history.
+- **Audit-first execution systems** make risk, authorization, replay, and result
+  evidence part of the execution record.
+- **Stewardship-aware systems** represent responsibility, policy, constraints,
+  and review obligations in the decision lifecycle.
+- **Uncertainty-aware systems** keep unknowns, assumptions, contradictions,
+  confidence, and evidence limits visible.
+
+### Newly Possible Properties
+
+- Decisions persist across time and teams.
+- Reasoning is traceable.
+- Execution is reviewable and reversible in record.
+- Systems improve from outcomes.
+- Uncertainty becomes first-class state.
+
+### Mental Model Shift
+
+```txt
+software executes logic -> software manages evolving judgment
+```
+
 ## Index
 
 - Repository Map
@@ -52,6 +95,7 @@ Signal makes dangerous backend operations explicit, replay-safe, and auditable.
   - [Architecture](#architecture)
   - [Focused Audits](#focused-audits)
 - Core Concepts
+  - [What Signal Makes Possible](#what-signal-makes-possible)
   - [Decision Quality](#decision-quality)
   - [Learning-Informed Judgment](#learning-informed-judgment)
   - [Decision Operation Catalog](#decision-operation-catalog)
@@ -314,6 +358,13 @@ The assessment returns:
   decision.
 - `journal`: evidence, assumptions, contradictions, unknowns, and reasoning
   captured before the outcome is known.
+
+Generated journals also include `traceRefs` and `traceability`. These fields
+map evidence, known facts, unknowns, assumptions, contradictions, and threats to
+the evidence IDs they cite. `traceability.missingEvidenceReferences` lists any
+declared evidence IDs that were not supplied with the assessment. Evidence
+coverage only counts references that resolve to supplied evidence, so a broken
+ID cannot inflate confidence or auditability.
 
 Confidence must not exceed evidence quality. Contradictions, exposed
 assumptions, and unresolved unknowns can lower the cap further. This protects

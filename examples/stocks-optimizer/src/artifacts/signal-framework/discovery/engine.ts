@@ -1,4 +1,4 @@
-/* c8 ignore start */
+
 export type DiscoveryStatus =
   | "none"
   | "detected"
@@ -8,7 +8,7 @@ export type DiscoveryStatus =
   | "sized"
   | "active"
   | "closed";
-/* c8 ignore stop */
+
 
 export type DiscoveryEvidenceDirection = "support" | "contradict" | "neutral";
 
@@ -334,13 +334,13 @@ const STATUS_RANK: Record<DiscoveryStatus, number> = {
 
 const DEFAULT_CREATED_AT = "1970-01-01T00:00:00.000Z";
 
-/**
- * Discovery is a single bundled decision-intelligence pass.
- *
- * It combines memory, foresight, context comparison, explanation, and lifecycle
- * tracking while staying deterministic and domain-agnostic. Incomplete inputs
- * become missing-evidence notes and confidence penalties instead of exceptions.
- */
+
+
+
+
+
+
+
 export function discover(input: DiscoveryInput): DiscoveryResult {
   const source = (input ?? { state: {} }) as DiscoveryInput;
   const computation = compute(source);
@@ -589,7 +589,7 @@ function normalizeCandidates(candidates: DiscoveryCandidate[] | undefined): Norm
     return {
       ...candidate,
       id,
-      /* c8 ignore next */
+      
       label: stringValue(candidate.label ?? candidate.kind ?? id) ?? id,
       scoreValue,
       confidenceValue,
@@ -604,7 +604,7 @@ function normalizeCandidates(candidates: DiscoveryCandidate[] | undefined): Norm
 function normalizeEvidence(evidence: DiscoveryEvidence[] | undefined): NormalizedEvidence[] {
   return array(evidence).map((item, index) => {
     const id = stringValue(item.id) ?? `evidence:${index + 1}`;
-    /* c8 ignore next */
+    
     const label = stringValue(item.label ?? item.name ?? item.description ?? id) ?? id;
     const strength = score(firstNumber(item.strength, item.score, item.confidence), 50);
     const confidence = score(item.confidence, 60);
@@ -667,7 +667,7 @@ function noveltyFromContext(
   historicalStates: DiscoveryHistoricalState[] | undefined,
 ) {
   if (!array(historicalStates).length) return 100;
-  /* c8 ignore next */
+  
   return roundScore(100 - (matches[0]?.similarity ?? 0));
 }
 
@@ -1170,7 +1170,7 @@ function score(value: unknown, fallback: number) {
 
 function weightedAverage(values: Array<[number, number]>) {
   const totalWeight = values.reduce((sum, [, weight]) => sum + Math.max(0, weight), 0);
-  /* c8 ignore next */
+  
   if (totalWeight <= 0) return 0;
   return values.reduce((sum, [value, weight]) => sum + value * Math.max(0, weight), 0) / totalWeight;
 }
@@ -1197,7 +1197,7 @@ function unique<T>(values: T[]) {
 }
 
 function clamp(value: number, min = 0, max = 100) {
-  /* c8 ignore next */
+  
   return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
 }
 
@@ -1205,8 +1205,8 @@ function roundScore(value: number) {
   return Number(clamp(value).toFixed(2));
 }
 
-/* c8 ignore start */
+
 function roundSigned(value: number) {
   return Number(value.toFixed(2));
 }
-/* c8 ignore stop */
+

@@ -429,9 +429,9 @@ type SimulatedPosition = StockData & {
 type SimulatedPortfolio = {
   cash: number;
   positions: Record<string, SimulatedPosition>;
-  startedAt: number | null;   // epoch ms when this portfolio was first opened; null if not yet started
-  startValue: number;  // initial capital (used as cumulative baseline)
-  valueHistory: Array<{ t: number; v: number }>; // cumulative value over time
+  startedAt: number | null;   
+  startValue: number;  
+  valueHistory: Array<{ t: number; v: number }>; 
   closedPositions: Array<{ ticker: string; name?: string; quantity: number; entryPrice: number; exitPrice: number; investedAmount: number; proceeds: number; openedAt: number; closedAt: number; entrySignalKey?: string }>;
 };
 type ClosedPosition = SimulatedPortfolio["closedPositions"][number];
@@ -640,7 +640,7 @@ function maxSharpeWeights(stocks: StockData[]): number[] {
   );
 }
 
-// StatusBadge and SignalBadge components
+
 function StatusBadge({ status }: { status: StockStatus }) {
   let variant: any = "default";
   if (status === "Rising") variant = "secondary";
@@ -1735,7 +1735,7 @@ export default function Dashboard() {
   const [updateMsg, setUpdateMsg] = useState<string>("Loading market data...");
   const [loading, setLoading] = useState(true);
   const [marketClock, setMarketClock] = useState(() => Date.now());
-  // v10: fractional sizing, signal emission de-dupe, and closed-market pause.
+  
   const PORTFOLIO_SCHEMA_VERSION = 10;
   const [simulatedPortfolios, setSimulatedPortfolios] = useState<
     Record<string, SimulatedPortfolio>
@@ -1782,7 +1782,7 @@ export default function Dashboard() {
   const selectedMarketStatus = marketFilter ? getMarketStatus(marketFilter) : "Closed";
   const isSelectedMarketOpen = selectedMarketStatus === "Open";
 
-  // --- WebSocket integration for real-time signals ---
+  
   const WS_URLS = (() => {
     const envUrl = (import.meta as any).env?.VITE_WS_URL;
     if (envUrl === "none" || envUrl === "disabled") return [];
@@ -1876,7 +1876,7 @@ export default function Dashboard() {
 
       ws.onclose = () => {
         if (alive) {
-          // Try to reconnect after a delay
+          
           const nextIndex = opened ? urlIndex : Math.min(urlIndex + 1, WS_URLS.length - 1);
           setTimeout(() => connect(nextIndex), 2000);
         }
@@ -2025,7 +2025,7 @@ export default function Dashboard() {
     };
   }, []);
 
-  // --- Stocks List Cache ---
+  
   const stocksListCacheRef = useRef<{ [market: string]: { items: StockData[]; total: number } }>({});
 
   useEffect(() => {
@@ -2037,7 +2037,7 @@ export default function Dashboard() {
         return;
       }
 
-      // Check cache first
+      
       const cached = stocksListCacheRef.current[marketFilter];
       if (cached && cached.items.length > 0) {
         setTotalStocks(cached.total);
@@ -2107,7 +2107,7 @@ export default function Dashboard() {
         setTotalStocks(total);
         setStocks(items);
         setLoading(false);
-        // Cache the result
+        
         stocksListCacheRef.current[marketFilter] = { items, total };
         const watchKey = `${marketFilter}:${items.length}`;
         if (!watchlistRegisteredRef.current.has(watchKey)) {
@@ -2234,7 +2234,7 @@ export default function Dashboard() {
     setSimulatedPortfolios((current) => {
       const existing = current[marketFilter];
       const now = Date.now();
-      // Helper to compute bid price for a live stock
+      
       function liveBidFor(stock: StockData): number {
         const price = Number(stock.price) || 0;
         return Number.isFinite(stock.bid) && stock.bid! > 0
@@ -2263,7 +2263,7 @@ export default function Dashboard() {
         return fallbackBidForPosition(pos);
       }
 
-      // ── First visit for this market: open initial Buy+Rising positions ──
+      
       if (!existing) {
         const eligible = stocks.filter((s) => {
           const price = Number(s.price);
@@ -2327,7 +2327,7 @@ export default function Dashboard() {
         };
       }
 
-      // ── Subsequent refreshes: sell exits, buy new entries, update values ──
+      
       const buyRisingSet = new Set(
         stocks
           .filter((s) => {
@@ -2341,12 +2341,12 @@ export default function Dashboard() {
       const positions: Record<string, SimulatedPosition> = {};
       const closedPositions = [...(existing.closedPositions ?? [])];
 
-      // Step 1 – Update held positions and sell those that are no longer Buy+Rising
+      
       for (const [ticker, pos] of Object.entries(existing.positions)) {
         const liveStock = stocks.find((s) => s.ticker === ticker);
 
         if (!buyRisingSet.has(ticker)) {
-          // SELL: position exited — crystallise proceeds at current bid
+          
           const bid = resolvedBidForPosition(liveStock, pos);
           const proceeds = pos.quantity * bid;
           cash += proceeds;
@@ -2375,7 +2375,7 @@ export default function Dashboard() {
           continue;
         }
 
-        // Still Buy+Rising — update live fields, preserve entry/quantity
+        
         if (!liveStock) {
           positions[ticker] = pos;
           continue;
@@ -2402,14 +2402,14 @@ export default function Dashboard() {
         };
       }
 
-      // Recovery guard for legacy corrupted state: no positions + no cash.
+      
       if (Object.keys(positions).length === 0 && cash <= 0) {
         cash = existing.startValue ?? STARTING_PORTFOLIO_VALUE;
       }
 
-      // Step 2 – Open new Buy+Rising entries with available cash.
-      // Existing positions are NEVER disturbed — each position lives and dies
-      // on its own signal. No forced rebalancing.
+      
+      
+      
       const heldTickers = new Set(Object.keys(positions));
       const closedSignalKeys = new Set(
         closedPositions
@@ -2454,13 +2454,13 @@ export default function Dashboard() {
         }
       }
 
-      // Step 3 – Recompute target weights across all positions
+      
       const totalMV = Object.values(positions).reduce((s, p) => s + p.marketValue, 0);
       Object.values(positions).forEach((p) => {
         p.targetWeight = totalMV > 0 ? p.marketValue / totalMV : 0;
       });
 
-      // Step 4 – Record value snapshot (positions + cash)
+      
       const portfolioValue = totalMV + cash;
       const prevHistory = existing.valueHistory ?? [];
       const valueHistory: Array<{ t: number; v: number }> = [
@@ -3346,7 +3346,7 @@ export default function Dashboard() {
               const closed = (activeSimulatedPortfolio?.closedPositions ?? []).filter((c) => c.quantity > 0);
               const vh = valueHistory;
 
-              // --- Closed-trade metrics ---
+              
               const wins = closed.filter((c) => c.proceeds - c.investedAmount > 0);
               const losses = closed.filter((c) => c.proceeds - c.investedAmount <= 0);
               const grossProfit = wins.reduce((s, c) => s + (c.proceeds - c.investedAmount), 0);
@@ -3354,12 +3354,12 @@ export default function Dashboard() {
               const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? Infinity : null;
               const totalTrades = closed.length;
               const winRate = totalTrades > 0 ? (wins.length / totalTrades) * 100 : null;
-              // --- Value-history metrics ---
+              
               const startValue = activeSimulatedPortfolio?.startValue ?? STARTING_PORTFOLIO_VALUE;
               const currentValue = (activeSimulatedPortfolio?.cash ?? 0) +
                 Object.values(activeSimulatedPortfolio?.positions ?? {}).reduce((s, p) => s + p.marketValue, 0);
 
-              // Max drawdown from valueHistory
+              
               let maxDrawdown = 0;
               let peak = vh[0]?.v ?? 0;
               for (const pt of vh) {
@@ -3368,7 +3368,7 @@ export default function Dashboard() {
                 if (dd > maxDrawdown) maxDrawdown = dd;
               }
 
-              // Monthly return: compounded from total elapsed time
+              
               const firstT = vh[0]?.t;
               const lastT = vh[vh.length - 1]?.t;
               const elapsedMs = firstT && lastT ? lastT - firstT : 0;
@@ -3378,7 +3378,7 @@ export default function Dashboard() {
                 ? (Math.pow(1 + totalReturn, 1 / elapsedMonths) - 1) * 100
                 : null;
 
-              // Risk-adjusted performance with minimum-window weighting and a volatility floor.
+              
               let sharpe: number | null = null;
               if (vh.length >= 12) {
                 const periodReturns: number[] = [];

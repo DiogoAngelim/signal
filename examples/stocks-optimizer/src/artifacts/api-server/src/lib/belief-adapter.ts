@@ -246,7 +246,7 @@ function firstNumber(...values: unknown[]) {
     const n = Number(value);
     if (Number.isFinite(n)) return n;
   }
-  /* c8 ignore next */
+  
   return 0;
 }
 
@@ -318,7 +318,7 @@ function formatNumber(value: unknown) {
 }
 
 function clamp(value: number, min = 0, max = 100) {
-  /* c8 ignore next */
+  
   const safeValue = Number.isFinite(value) ? value : min;
   return Math.min(max, Math.max(min, safeValue));
 }

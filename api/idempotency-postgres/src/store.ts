@@ -116,7 +116,7 @@ export function createPostgresIdempotencyStore(
           status: "completed",
           result: input.result as unknown,
           resultMeta: input.resultMeta as unknown,
-          /* c8 ignore next */
+          
           messageId: input.messageId ?? null,
           updatedAt: new Date(),
         })

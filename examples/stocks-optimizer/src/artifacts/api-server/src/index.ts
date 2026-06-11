@@ -80,7 +80,7 @@ app.use("/api", binanceExecutionRouter);
 const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
-// Broadcast helper
+
 function broadcastSignal(data: any) {
   const msg = JSON.stringify(data);
   wss.clients.forEach((client) => {
@@ -233,12 +233,12 @@ function portfolioSummaryValidationResponseGuard(req: any, res: any, next: any) 
     const extremeSharpe =
       Number.isFinite(annualizedSharpe) && Math.abs(annualizedSharpe) > 5;
 
-    /*
-      Last-mile rule:
-      If Sharpe is intentionally withheld/null for a heavily traded validation
-      summary, or if the known return sample is tiny/extreme, this is suspicious
-      rather than invalid.
-    */
+    
+
+
+
+
+
     if (
       tinySampleSharpe ||
       extremeSharpe ||
@@ -378,7 +378,7 @@ app.use(apiErrorHandler);
 if (port && port > 0) {
   server.listen(port, () => {
     logger.info({ port }, "Server listening");
-    // Log memory usage every 30 seconds
+    
     setInterval(() => {
       const mem = process.memoryUsage();
       logger.info({
@@ -402,6 +402,6 @@ if (port && port > 0) {
     process.exit(1);
   });
 } else {
-  // When imported (e.g., dynamic import from a route), do not start the server.
+  
   logger.info({ port }, "Module imported without PORT — server not started");
 }

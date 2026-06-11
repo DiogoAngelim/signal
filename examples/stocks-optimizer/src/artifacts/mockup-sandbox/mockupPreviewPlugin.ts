@@ -40,7 +40,7 @@ export function mockupPreviewPlugin(): Plugin {
   }
 
   async function discoverComponents(): Promise<Array<DiscoveredComponent>> {
-    const files = await glob(`${MOCKUPS_DIR}/**/*.tsx`, {
+    const files = await glob(`${MOCKUPS_DIR}*.tsx`, {
       cwd: root,
       ignore: ["**/_*/**", "**/_*.tsx"],
     });

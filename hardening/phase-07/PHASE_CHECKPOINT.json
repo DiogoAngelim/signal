@@ -1,0 +1,8 @@
+{
+  "phase": 7,
+  "status": "COMPLETE",
+  "validation": { "schemaValid": true, "filesPresent": true, "criteriaSatisfied": true },
+  "artifacts": ["hardening/phase-07/INVARIANTS.md", "hardening/phase-07/PHASE_CHECKPOINT.json"],
+  "blockingIssues": [],
+  "evidence": ["12 runtime invariants listed", "8 CI-style local test categories defined"]
+}

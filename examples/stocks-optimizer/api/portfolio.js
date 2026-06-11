@@ -81,12 +81,12 @@ function parseCsv(csv) {
 function routeName(req) {
   const url = new URL(req.url, "https://stocks-optimizer.vercel.app");
 
-  // Stable single-function routing:
-  // /api/portfolio?action=summary
-  // /api/portfolio?action=history
-  // /api/portfolio?action=snapshot
-  // /api/portfolio?action=rebuild
-  // /api/portfolio?action=history-sync
+  
+  
+  
+  
+  
+  
   return String(url.searchParams.get("action") || "").trim();
 }
 

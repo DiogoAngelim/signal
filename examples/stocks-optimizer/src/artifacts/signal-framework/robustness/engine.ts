@@ -1,4 +1,4 @@
-/* c8 ignore next */
+
 import { clamp, mean, stdev } from "../math/statistics";
 
 export type RobustnessRegime =
@@ -652,9 +652,9 @@ function seeded(seed: number) {
 }
 
 function weightedMean(values: number[], weights: number[]) {
-  /* c8 ignore next */
+  
   const totalWeight = values.reduce((sum, _value, index) => sum + (weights[index] ?? 1), 0) || 1;
-  /* c8 ignore next */
+  
   return values.reduce((sum, value, index) => sum + clamp(value) * (weights[index] ?? 1), 0) / totalWeight;
 }
 
@@ -667,10 +667,10 @@ function finite(value: unknown, fallback = 0) {
   return Number.isFinite(numberValue) ? numberValue : fallback;
 }
 
-/* c8 ignore next */
+
 function correlation(left: number[], right: number[]) {
   const count = Math.min(left.length, right.length);
-  /* c8 ignore next */
+  
   if (count < 2) return 0;
   const leftValues = left.slice(0, count);
   const rightValues = right.slice(0, count);

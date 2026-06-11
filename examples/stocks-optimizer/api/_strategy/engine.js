@@ -759,7 +759,7 @@ function optimizeMptAllocation({
   weights = weights.map((weight) => Math.min(weight, maxPositionWeight));
   weights = normalizeWeights(weights, maxTotalExposure);
 
-  // Simple coordinate-style refinement to reduce covariance concentration.
+  
   for (let iteration = 0; iteration < 30; iteration += 1) {
     const currentVariance = portfolioVariance(weights, cov);
 
