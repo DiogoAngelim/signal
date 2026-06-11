@@ -13,6 +13,7 @@ import { executeTest } from "../commands/test.js";
 import { executeBuild } from "../commands/build.js";
 import { executeAudit } from "../commands/audit.js";
 import { executeInstallHooks } from "../commands/installHooks.js";
+import { pushCommand } from "../commands/push.js";
 
 // ─── Argument Parsing ───────────────────────────────────────────────────────
 
@@ -74,6 +75,7 @@ Commands:
   test              Wrap test execution with pre/post verification
   build             Wrap build execution with verification and output hashing
   audit             Full verification suite: verify + replay + invariants + proof generation
+  push              Run full deterministic verification + git release pipeline
   install-hooks     Inject signal scripts into package.json
 
 Options:
@@ -92,6 +94,7 @@ Examples:
   signal build
   signal build --command "pnpm build:library" --output lib
   signal audit
+  signal push
   signal install-hooks
 
 Exit Codes:
@@ -150,6 +153,11 @@ function main(): void {
     case "audit": {
       const valid = executeAudit();
       process.exit(valid ? 0 : 1);
+    }
+
+    case "push": {
+      pushCommand();
+      process.exit(0);
     }
 
     case "install-hooks": {
