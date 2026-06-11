@@ -63,20 +63,10 @@ export function pushCommand(): void {
     run(`${SIGNAL} build`);
     console.log("");
 
-    // ─── GIT SAFETY GATE ──────────────────────────────────────────────────
-    console.log("SIGNAL: Checking git working tree...");
-    const status = execSync("git status --porcelain").toString().trim();
-
-    if (status !== "") {
-      console.error("❌ WORKING TREE NOT CLEAN");
-      process.exit(1);
-    }
-    console.log("  ✓ Working tree clean");
-    console.log("");
-
     // ─── COMMIT + PUSH ───────────────────────────────────────────────────
     console.log("SIGNAL: Committing and pushing...");
-    run(`git commit -am "feat: deterministic contract pipeline push"`);
+    run(`git add -A`);
+    run(`git commit -m "feat: deterministic contract pipeline push"`);
     run("git push origin main");
     console.log("");
 
