@@ -643,9 +643,6 @@ importers:
       '@signal/protocol':
         specifier: workspace:*
         version: link:../../api/protocol
-      '@signal/runtime':
-        specifier: workspace:*
-        version: link:../../api/runtime
       '@signal/sdk-node':
         specifier: workspace:*
         version: link:../../api/sdk-node

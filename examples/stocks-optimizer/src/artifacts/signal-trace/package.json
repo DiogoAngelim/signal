@@ -8,7 +8,9 @@
     "build": "tsc",
     "test": "node --loader ts-node/esm src/adapter.ts"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@signal/sdk-node": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "^5.0.0",
     "@types/node": "^20.0.0"

@@ -1,12 +1,12 @@
 # Signal Developer Documentation
 
-Signal makes dangerous backend operations explicit, replay-safe, and
-auditable.
+Signal is a reusable decision-processing platform for events, evidence,
+assessment, decisions, learning, memory, replay, and audit.
 
-It is a production correctness standard for versioned Queries, Mutations, and
-Events. The decision-quality packages still help applications reason under
-uncertainty, but the adoption-critical surface is the correctness layer around
-dangerous backend operations.
+It makes dangerous backend operations explicit, replay-safe, and auditable.
+It also provides a protocol-governed, domain-agnostic architecture for
+building systems that reason under uncertainty. The decision-quality packages
+are first-class platform capabilities, not secondary features.
 
 Signal also provides explicit operational contracts:
 
@@ -271,10 +271,10 @@ The system enforces strict unidirectional dependency boundaries:
 
 | Layer | Packages | Role | Forbidden Dependencies |
 |-------|----------|------|------------------------|
-| **Signal** | `packages/kernel`, `api/protocol` | Pure market logic, type definitions | ❌ → Optimizer/Execution/Post-Trade |
+| **Signal** | `packages/kernel`, `api/protocol` | Pure contracts, type definitions | ❌ → Domain/Execution/Post-Trade |
 | **Ports** | `api/ports` | Pure interfaces only | ❌ → runtime/domain/interface |
-| **Optimizer** | `packages/agency`, `packages/commitment`, `packages/decision`, `packages/decision-memory`, `packages/semantic-state` | Financial authority: risk, calibration, commitment, decision-making | ❌ → Signal/Execution/Post-Trade |
-| **Execution** | `api/runtime`, `api/sdk-node`, `api/binding-http`, `server/db` | Infrastructure: runtime dispatch, HTTP binding, database | ❌ → Signal/Optimizer |
+| **Domain** | `packages/agency`, `packages/commitment`, `packages/decision`, `packages/decision-memory`, `packages/semantic-state` | Decision reasoning: evidence, assessment, commitment, learning | ❌ → Signal/Execution/Post-Trade |
+| **Execution** | `api/runtime`, `api/sdk-node`, `api/binding-http`, `server/db` | Infrastructure: runtime dispatch, HTTP binding, database | ❌ → Signal/Domain |
 | **Post-Trade** | `signal-cli` | Read-only audit, verification, replay | ❌ → any upstream |
 
 ### Runtime Purity Rules
@@ -304,6 +304,12 @@ architecture evidence, add a focused audit document and link it here.
 | Document | Purpose |
 | --- | --- |
 | [Constitution](constitution.md) | Signal's correctness rules, category boundaries, and evidence rule. |
+| [What Signal Is](what-signal-is.md) | Platform definition: what Signal is, what it is not, and the decision processing model. |
+| [Architecture](architecture.md) | Architectural patterns, Signal Kernel, domain packages, and how to build a new domain. |
+| [Dependency Rules](dependency-rules.md) | Package boundary rules, allowed and forbidden dependencies, and enforcement. |
+| [Replay and Auditability](replay-auditability.md) | Replay model, determinism expectations, audit guarantees, and trace reconstruction. |
+| [Governance](governance.md) | Protocol evolution, RFCs, schemas, fixtures, and contract management. |
+| [Multi-Domain Examples](multi-domain-examples.md) | How Signal's decision-processing model applies across domains. |
 | [Stewardship Evolution Audit](stewardship-evolution-audit.md) | Assessment of the decision stewardship ledger batch, remaining persistence/UI boundaries, and validation evidence. |
 
 ## Decision Quality

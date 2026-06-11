@@ -1,4 +1,6 @@
 /**
+ * @deprecated This module reimplements Signal canonicalization semantics.
+ * Use @signal/sdk-node for canonicalization instead.
  * canonicalize.ts — Deterministic JSON canonicalization
  *
  * Deep-sorts objects by key, normalizes floats to 10 decimal places,

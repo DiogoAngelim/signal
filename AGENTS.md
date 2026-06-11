@@ -5,8 +5,8 @@
 This system enforces a strict unidirectional dependency DAG:
 
 ```
-Signal (pure market logic)
-  → Optimizer (sole financial authority)
+Signal (pure contracts and types)
+  → Domain (decision reasoning)
     → Execution (infra only)
       → Post-Trade (read-only audit)
 ```
@@ -15,24 +15,24 @@ Signal (pure market logic)
 
 | Layer | Packages | Role |
 |-------|----------|------|
-| **Signal** | `packages/kernel`, `api/protocol` | Pure market logic, type definitions, pipeline interfaces |
-| **Optimizer** | `packages/agency`, `packages/commitment`, `packages/decision`, `packages/decision-memory`, `packages/semantic-state` | Financial authority: risk, calibration, commitment, decision-making |
+| **Signal** | `packages/kernel`, `api/protocol` | Pure contracts, type definitions, pipeline interfaces |
+| **Domain** | `packages/agency`, `packages/commitment`, `packages/decision`, `packages/decision-memory`, `packages/semantic-state` | Decision reasoning: evidence, assessment, commitment, learning |
 | **Execution** | `api/runtime`, `api/sdk-node`, `api/binding-http`, `server/db` | Infrastructure: runtime dispatch, HTTP binding, database |
 | **Post-Trade** | `signal-cli` | Read-only audit, verification, replay |
 
 ### Forbidden Dependencies (Backward Edges)
 
-1. **Signal → Optimizer/Execution/Post-Trade**: Signal must not import from any downstream layer
-2. **Optimizer → Signal**: Optimizer must not import from Signal (it receives data via function args, not imports)
-3. **Optimizer → Execution/Post-Trade**: Optimizer must not import from downstream layers
-4. **Execution → Signal/Optimizer**: Execution must not import from upstream layers
-5. **Post-Trade → any upstream**: Post-Trade must not import from Signal, Optimizer, or Execution
+1. **Signal → Domain/Execution/Post-Trade**: Signal must not import from any downstream layer
+2. **Domain → Signal**: Domain must not import from Signal (it receives data via function args, not imports)
+3. **Domain → Execution/Post-Trade**: Domain must not import from downstream layers
+4. **Execution → Signal/Domain**: Execution must not import from upstream layers
+5. **Post-Trade → any upstream**: Post-Trade must not import from Signal, Domain, or Execution
 6. **Circular dependencies**: No circular imports between any modules
 
 ### Allowed Dependencies (Forward Edges)
 
-- `Optimizer → Signal`: type-only imports from `@signal/protocol` are allowed (shared contracts)
-- `Execution → Optimizer`: `@signal/runtime` may import from `@signal/protocol` (shared contracts)
+- `Domain → Signal`: type-only imports from `@signal/protocol` are allowed (shared contracts)
+- `Execution → Domain`: `@signal/runtime` may import from `@signal/protocol` (shared contracts)
 - `Execution → Signal`: `@signal/sdk-node` may import from `@signal/runtime` and `@signal/protocol`
 - `Post-Trade`: fully independent, no upstream imports
 

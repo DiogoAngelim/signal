@@ -1,4 +1,6 @@
 /**
+ * @deprecated This module reimplements Signal hash chain semantics.
+ * Use @signal/sdk-node for hashing instead.
  * hash.ts — SHA256 hashing over canonicalized JSON
  *
  * Produces a deterministic SHA256 hex digest from any object

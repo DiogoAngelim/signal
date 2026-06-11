@@ -29,7 +29,6 @@
     "@signal/idempotency-postgres": "workspace:*",
     "@signal/ports": "workspace:*",
     "@signal/protocol": "workspace:*",
-    "@signal/runtime": "workspace:*",
     "@signal/sdk-node": "workspace:*",
     "fastify": "^5.2.1"
   },

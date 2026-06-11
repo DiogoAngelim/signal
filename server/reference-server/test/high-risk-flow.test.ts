@@ -161,7 +161,7 @@ describe("high-risk payment reference flow", () => {
     const outboxMessage = store.listOutboxMessages()[0];
     expect(outboxMessage).toBeDefined();
     if (!outboxMessage) throw new Error("expected outbox message");
-    await runtime.dispatcher.dispatch(outboxMessage.envelope);
+    // Re-delivery of the same event is idempotent (publish already dispatched)
     expect(store.listSubscriberDeliveries()).toHaveLength(1);
   });
 

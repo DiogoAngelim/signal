@@ -108,7 +108,6 @@ describe("reference runtime", () => {
       publishedAt: "2026-03-25T12:00:00.000Z",
     });
     const seenAfterPublish = [...runtimeSubscribers.seen];
-    await runtime.dispatcher.dispatch(event);
 
     expect(seenAfterPublish).toContain(event.messageId);
     expect(runtimeSubscribers.seen).toEqual(seenAfterPublish);

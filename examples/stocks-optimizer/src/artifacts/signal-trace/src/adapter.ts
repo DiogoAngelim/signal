@@ -1,4 +1,6 @@
 /**
+ * @deprecated This module reimplements Signal verify/replay/audit semantics.
+ * Use @signal/sdk-node for verification, replay, and audit instead.
  * adapter.ts — Public API for SIGNAL Trace Wrapper
  *
  * Exposes:

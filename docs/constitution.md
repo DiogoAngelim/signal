@@ -1,10 +1,12 @@
 # Signal Constitution
 
-Signal is a production correctness standard.
+Signal is a reusable decision-processing platform.
 
 Signal makes dangerous backend operations explicit, replay-safe, and
-auditable. Every protocol, runtime, server, package, example, and document
-should strengthen that sentence.
+auditable. Signal also provides a protocol-governed, domain-agnostic
+architecture for building systems that reason under uncertainty. Every
+protocol, runtime, server, package, example, and document should strengthen
+that identity.
 
 ## Adoption Test
 
@@ -17,16 +19,18 @@ If a change does not make that path easier to trust, reject the change.
 
 ## Principles
 
-1. Signal is a correctness layer.
-2. Signal is protocol-first.
-3. Signal is transport-independent.
-4. Queries, Mutations, and Events are explicit contracts.
-5. Dangerous mutations must declare risk.
-6. Versioned operations are immutable contracts.
-7. Events are immutable facts.
-8. Production guarantees require evidence.
-9. Unsafe high-risk configurations fail loudly.
-10. Simplicity beats flexibility.
+1. Signal is a decision-processing platform.
+2. Signal is a correctness layer.
+3. Signal is protocol-first.
+4. Signal is transport-independent.
+5. Signal is domain-agnostic.
+6. Queries, Mutations, and Events are explicit contracts.
+7. Dangerous mutations must declare risk.
+8. Versioned operations are immutable contracts.
+9. Events are immutable facts.
+10. Production guarantees require evidence.
+11. Unsafe high-risk configurations fail loudly.
+12. Simplicity beats flexibility.
 
 ## Category Boundaries
 

@@ -1,4 +1,6 @@
 /**
+ * @deprecated This module reimplements Signal replay semantics.
+ * Use @signal/sdk-node for replay validation instead.
  * replay.ts — Deterministic replay validation
  *
  * Reruns the same input through the engine, rebuilds the trace,
