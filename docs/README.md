@@ -251,17 +251,18 @@ flowchart TB
   Backend --> Http
   Backend --> Sdk
   Backend --> Decision
-  Http --> Ports
-  Sdk --> Ports
   Http --> Runtime
   Sdk --> Runtime
+  Http --> Ports
+  Sdk --> Ports
   Runtime --> Ports
   Runtime --> Protocol
-  Schemas --> Protocol
-  Rfcs --> Protocol
-  Constitution --> Protocol
-  Memory --> Decision
-  Support --> Decision
+  Decision --> Protocol
+  Memory --> Protocol
+  Support --> Protocol
+  Schemas -.-> Protocol
+  Rfcs -.-> Protocol
+  Constitution -.-> Protocol
 ```
 
 ### Dependency Rules (Enforced in CI)
