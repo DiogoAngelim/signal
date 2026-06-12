@@ -15,6 +15,40 @@ import {
   recordSignalSnapshot,
 } from "./signal-training";
 
+// Import shared types from types.ts (re-exported for backward compatibility)
+import type {
+  TradeSignal,
+  AdaptiveRegime,
+  SignalLifecycle,
+  StockListItem,
+  StockQuote,
+  MarketDailyCandle,
+  QuoteFetchOptions,
+  SignalAttachOptions,
+  SignalDecision,
+  SignalSnapshot,
+} from "./types";
+
+// Re-export shared types for backward compatibility
+export type {
+  TradeSignal,
+  AdaptiveRegime,
+  SignalLifecycle,
+  StockListItem,
+  StockQuote,
+  MarketDailyCandle,
+  QuoteFetchOptions,
+  SignalAttachOptions,
+  SignalDecision,
+  SignalSnapshot,
+  SignalOpportunity,
+  PortfolioConfig,
+  RiskConstraints,
+  PositionDecision,
+  ExecutionAssessment,
+  DiagnosticsSnapshot,
+} from "./types";
+
 function shouldUseBinanceFallbackProvider(market: unknown, symbol: unknown) {
   const marketValue = String(market ?? "")
     .trim()
@@ -546,103 +580,6 @@ function markUnavailableQuoteSymbol(key: string) {
   UNAVAILABLE_QUOTE_SYMBOLS.set(key, Date.now() + UNAVAILABLE_QUOTE_TTL_MS);
 }
 
-export interface StockListItem {
-  symbol: string;
-  name: string;
-  market?: string;
-  sector?: string;
-  image?: string;
-  exchange: string;
-  country: string;
-}
-
-export interface StockQuote {
-  symbol: string;
-  price: number;
-  bid?: number;
-  ask?: number;
-  changePercent: number;
-  status: "Stable" | "Rising" | "Watch" | "Dip";
-  high52: number;
-  low52: number;
-  history: number[];
-  summary: string;
-  impact: string;
-  cap?: string;
-  peRatio?: number;
-  signalAction?: TradeSignal;
-  signalConfidence?: number;
-  signalSource?: "node-ecu" | "heuristic";
-  signalEmittedAt?: string;
-  signalEntryPrice?: number;
-  signalReturnPercent?: number;
-  modelId?: string;
-  modelLifecycleState?: SignalLifecycleDecision["modelLifecycleState"];
-  modelLifecycleAction?: SignalLifecycleDecision["modelLifecycleAction"];
-  modelLifecycleReason?: string;
-  modelCanOpenNewTrades?: boolean;
-  modelAllocationMultiplier?: number;
-  quoteSource?: "binance-spot" | "binance-futures" | "tradingview";
-  regime?: AdaptiveRegime;
-  confidence?: number;
-  uncertainty?: number;
-  driftScore?: number;
-  stabilityScore?: number;
-  expectedMovePct?: number;
-  featureConsensus?: number;
-  ensembleAgreement?: number;
-  lifecycleState?: SignalLifecycle;
-  liveMetrics?: {
-    rollingSharpe: number;
-    rollingSortino: number;
-    hitRate: number;
-    expectancy: number;
-    profitFactor: number;
-    maxDrawdown: number;
-  };
-  diagnostics?: {
-    entropy: number;
-    featureDrift: number;
-    predictionResidual: number;
-    volatilityShift: number;
-  };
-}
-
-export type TradeSignal = "Buy" | "Hold" | "Sell";
-export type AdaptiveRegime =
-  | "TRENDING"
-  | "MEAN_REVERTING"
-  | "HIGH_VOL"
-  | "LOW_VOL"
-  | "BREAKOUT"
-  | "PANIC"
-  | "COMPRESSION";
-export type SignalLifecycle =
-  | "EMITTED"
-  | "ACTIVE"
-  | "DECAYING"
-  | "INVALIDATED"
-  | "COMPLETED";
-export interface QuoteFetchOptions {
-  bypassCache?: boolean;
-  deadlineAt?: number;
-  minRemainingMs?: number;
-}
-
-export interface SignalAttachOptions {
-  bypassSignalCache?: boolean;
-  deadlineAt?: number;
-  minRemainingMs?: number;
-  recordSignalSnapshots?: boolean;
-}
-
-export interface MarketDailyCandle {
-  market: string;
-  venue: string;
-  asset: string;
-  timestampUtc: string | Date;
-  close: number;
-}
 
 const currentDirname = process.cwd();
 
@@ -842,27 +779,6 @@ const tradingViewResolvedSymbolCache = new Map<
   { expiresAt: number; tvSymbol: string }
 >();
 const tradingViewRowsInFlight = new Map<string, Promise<TradingViewRow[]>>();
-type SignalSnapshot = Pick<
-  StockQuote,
-  | "signalAction"
-  | "signalConfidence"
-  | "signalSource"
-  | "signalEmittedAt"
-  | "signalEntryPrice"
-  | "signalReturnPercent"
-  | "modelId"
-  | "modelLifecycleState"
-  | "modelLifecycleAction"
-  | "modelLifecycleReason"
-  | "modelCanOpenNewTrades"
-  | "modelAllocationMultiplier"
->;
-
-type SignalDecision = {
-  signalAction: TradeSignal;
-  signalConfidence: number;
-  signalSource: "node-ecu" | "heuristic";
-};
 
 const signalCache = new Map<
   string,
@@ -1007,7 +923,7 @@ function trainingMarketScope(market: string | undefined, quote: StockQuote) {
   return `${base}|${deriveTrainingMarketCondition(quote)}`;
 }
 
-function deriveLifecycleState(quote: StockQuote): SignalLifecycle {
+export function deriveLifecycleState(quote: StockQuote): SignalLifecycle {
   const emittedAt = Date.parse(quote.signalEmittedAt ?? "");
   const ageMs = Number.isFinite(emittedAt) ? Date.now() - emittedAt : 0;
   const returnPercent = Number(quote.signalReturnPercent ?? 0);
@@ -2765,7 +2681,7 @@ function findField(
   return undefined;
 }
 
-function statusFromChange(changePercent: number): StockQuote["status"] {
+export function statusFromChange(changePercent: number): StockQuote["status"] {
   const absChange = Math.abs(changePercent);
   if (absChange >= 4) return "Watch";
   if (changePercent >= 1) return "Rising";
@@ -2784,7 +2700,7 @@ function statusFromChange(changePercent: number): StockQuote["status"] {
  *   price >= 1    → base 0.15% + volatility component
  *   price < 1     → base 0.50% + volatility component
  */
-function estimateSpread(
+export function estimateSpread(
   price: number,
   history: number[],
 ): { bid: number; ask: number } {
@@ -2825,7 +2741,7 @@ function estimateSpread(
   return { bid, ask };
 }
 
-function buildSummary(
+export function buildSummary(
   symbol: string,
   changePercent: number,
   status: StockQuote["status"],
@@ -2838,7 +2754,7 @@ function buildSummary(
   return `${symbol} is ${direction} ${magnitude}% today.`;
 }
 
-function buildImpact(
+export function buildImpact(
   status: StockQuote["status"],
   changePercent: number,
 ): string {
