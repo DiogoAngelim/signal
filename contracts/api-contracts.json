@@ -1,0 +1,192 @@
+{
+  "$schema": "ApiContractsV1",
+  "protocol": "signal.v1",
+  "contracts": {
+    "NoteGetInput": {
+      "type": "object",
+      "required": ["noteId"],
+      "properties": { "noteId": { "type": "string" } }
+    },
+    "NoteGetResult": {
+      "type": "object",
+      "required": ["found"],
+      "properties": {
+        "found": { "type": "boolean" },
+        "note": { "$ref": "Note", "nullable": true }
+      }
+    },
+    "Note": {
+      "type": "object",
+      "required": ["noteId", "title", "body", "updatedAt"],
+      "properties": {
+        "noteId": { "type": "string" },
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "PostGetInput": {
+      "type": "object",
+      "required": ["postId"],
+      "properties": { "postId": { "type": "string" } }
+    },
+    "PostGetResult": {
+      "type": "object",
+      "required": ["found"],
+      "properties": {
+        "found": { "type": "boolean" },
+        "post": { "$ref": "Post", "nullable": true }
+      }
+    },
+    "Post": {
+      "type": "object",
+      "required": ["postId", "title", "publishedAt"],
+      "properties": {
+        "postId": { "type": "string" },
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "publishedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "PostPublishInput": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "postId": { "type": "string" },
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "publishedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "PostPublishResult": {
+      "type": "object",
+      "required": ["post", "event"],
+      "properties": {
+        "post": { "$ref": "Post" },
+        "event": { "type": "string", "const": "post.published.v1" }
+      }
+    },
+    "PaymentCaptureInput": {
+      "type": "object",
+      "required": ["tenantId", "authorizationId", "amountCents", "currency", "paymentMethod", "risk"],
+      "properties": {
+        "tenantId": { "type": "string" },
+        "authorizationId": { "type": "string" },
+        "amountCents": { "type": "integer", "minimum": 1 },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "paymentMethod": { "$ref": "PaymentMethodInput" },
+        "risk": { "$ref": "PaymentRiskDeclaration" }
+      }
+    },
+    "PaymentMethodInput": {
+      "type": "object",
+      "required": ["token"],
+      "properties": {
+        "token": { "type": "string" },
+        "last4": { "type": "string", "pattern": "^[0-9]{4}$" }
+      }
+    },
+    "PaymentRiskDeclaration": {
+      "type": "object",
+      "required": ["declared", "classification", "reason", "approvedBy"],
+      "properties": {
+        "declared": { "type": "boolean", "const": true },
+        "classification": { "type": "string", "enum": ["high", "critical"] },
+        "reason": { "type": "string" },
+        "approvedBy": { "type": "string" }
+      }
+    },
+    "PaymentCaptureResult": {
+      "type": "object",
+      "required": ["captureId", "tenantId", "authorizationId", "amountCents", "currency", "status", "capturedAt", "auditId", "outboxId", "risk"],
+      "properties": {
+        "captureId": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "authorizationId": { "type": "string" },
+        "amountCents": { "type": "integer" },
+        "currency": { "type": "string" },
+        "status": { "type": "string", "const": "captured" },
+        "capturedAt": { "type": "string", "format": "date-time" },
+        "auditId": { "type": "string" },
+        "outboxId": { "type": "string" },
+        "risk": { "type": "object", "required": ["declared", "classification"], "properties": { "declared": { "type": "boolean" }, "classification": { "type": "string" } } }
+      }
+    },
+    "PaymentCaptureGetInput": {
+      "type": "object",
+      "required": ["tenantId", "captureId"],
+      "properties": { "tenantId": { "type": "string" }, "captureId": { "type": "string" } }
+    },
+    "PaymentCaptureGetResult": {
+      "type": "object",
+      "required": ["found"],
+      "properties": {
+        "found": { "type": "boolean" },
+        "capture": { "$ref": "PaymentCaptureResult", "nullable": true },
+        "audit": { "type": "array", "items": {} },
+        "outbox": { "type": "array", "items": {} },
+        "subscriberDeliveries": { "type": "array", "items": {} }
+      }
+    },
+    "PaymentCapturedEvent": {
+      "type": "object",
+      "required": ["captureId", "tenantId", "authorizationId", "amountCents", "currency", "status", "capturedAt", "auditId"],
+      "properties": {
+        "captureId": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "authorizationId": { "type": "string" },
+        "amountCents": { "type": "integer" },
+        "currency": { "type": "string" },
+        "status": { "type": "string", "const": "captured" },
+        "capturedAt": { "type": "string", "format": "date-time" },
+        "auditId": { "type": "string" }
+      }
+    },
+    "ReferenceCertificationResult": {
+      "type": "object",
+      "required": ["name", "passed", "checks"],
+      "properties": {
+        "name": { "type": "string" },
+        "passed": { "type": "boolean" },
+        "checks": { "type": "array", "items": { "$ref": "ReferenceCertificationCheck" } }
+      }
+    },
+    "ReferenceCertificationCheck": {
+      "type": "object",
+      "required": ["name", "passed", "evidence"],
+      "properties": {
+        "name": { "type": "string" },
+        "passed": { "type": "boolean" },
+        "evidence": { "type": "string" }
+      }
+    },
+    "SignalError": {
+      "type": "object",
+      "required": ["code", "category", "message"],
+      "properties": {
+        "code": { "type": "string", "enum": ["BAD_REQUEST", "VALIDATION_ERROR", "UNAUTHORIZED", "FORBIDDEN", "NOT_FOUND", "CONFLICT", "BUSINESS_REJECTION", "IDEMPOTENCY_CONFLICT", "DEADLINE_EXCEEDED", "CANCELLED", "TRANSPORT_ERROR", "INTERNAL_ERROR", "RETRYABLE_ERROR", "UNSUPPORTED_OPERATION"] },
+        "category": { "type": "string", "enum": ["validation", "authorization", "business", "idempotency", "deadline", "cancellation", "transport", "runtime", "capability"] },
+        "message": { "type": "string" },
+        "retryable": { "type": "boolean" },
+        "details": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "SignalSuccess": {
+      "type": "object",
+      "required": ["ok", "result"],
+      "properties": {
+        "ok": { "type": "boolean", "const": true },
+        "result": {},
+        "meta": { "type": "object" }
+      }
+    },
+    "SignalFailure": {
+      "type": "object",
+      "required": ["ok", "error"],
+      "properties": {
+        "ok": { "type": "boolean", "const": false },
+        "error": { "$ref": "SignalError" }
+      }
+    }
+  }
+}

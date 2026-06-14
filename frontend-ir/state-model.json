@@ -1,0 +1,47 @@
+{
+  "$schema": "StateModelIR",
+  "strategy": "react-hooks-with-context",
+  "partitions": {
+    "capabilities": {
+      "description": "Runtime capabilities cache",
+      "source": "GET /signal/capabilities",
+      "shape": "SignalCapabilities",
+      "refreshPolicy": "on-mount",
+      "hooks": ["useCapabilities"]
+    },
+    "queryResults": {
+      "description": "Query result cache keyed by operation name + input hash",
+      "source": "POST /signal/query/:name",
+      "shape": "Map<string, SignalResult>",
+      "refreshPolicy": "on-demand",
+      "hooks": ["useSignalQuery"]
+    },
+    "mutationResults": {
+      "description": "Mutation result cache keyed by operation name + input hash",
+      "source": "POST /signal/mutation/:name",
+      "shape": "Map<string, SignalResult>",
+      "refreshPolicy": "on-demand",
+      "hooks": ["useSignalMutation"]
+    },
+    "ui": {
+      "description": "UI state: loading, errors, form state",
+      "source": "local",
+      "shape": "{ loading: boolean; error: SignalError | null; formValues: Record<string, unknown> }",
+      "refreshPolicy": "never",
+      "hooks": ["useLocalState"]
+    }
+  },
+  "dataFlow": {
+    "rule": "all_domain_data_must_flow_through_api_client",
+    "layers": [
+      { "layer": "UI Components", "reads": ["hooks"], "writes": ["hooks (via mutations)"], "forbidden": ["direct fetch", "hardcoded domain data"] },
+      { "layer": "Hooks", "reads": ["api client"], "writes": ["react state"], "forbidden": ["direct fetch"] },
+      { "layer": "API Client", "reads": ["mock layer OR http binding"], "writes": ["hook callbacks"], "forbidden": ["UI imports"] },
+      { "layer": "Mock Layer", "reads": ["mock data"], "writes": ["simulated responses"], "forbidden": ["external calls", "UI imports"] }
+    ],
+    "swapGuarantee": {
+      "description": "Replacing the mock layer with the real HTTP binding requires only changing the api client adapter. No UI changes required.",
+      "mechanism": "The api client exposes the same function signatures regardless of whether it uses mocks or HTTP."
+    }
+  }
+}

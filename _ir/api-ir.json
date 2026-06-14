@@ -1,0 +1,291 @@
+{
+  "$schema": "ApiIRV1",
+  "protocol": "signal.v1",
+  "basePath": "/signal",
+  "endpoints": [
+    {
+      "id": "ep-capabilities",
+      "method": "GET",
+      "path": "/signal/capabilities",
+      "operationName": null,
+      "operationKind": null,
+      "description": "Returns runtime capabilities document",
+      "request": { "type": "none" },
+      "response": { "$ref": "SignalCapabilities" },
+      "statusCodes": { "200": "SignalCapabilities" }
+    },
+    {
+      "id": "ep-query",
+      "method": "POST",
+      "path": "/signal/query/:name",
+      "operationName": ":name",
+      "operationKind": "query",
+      "description": "Execute a registered query by name",
+      "request": { "$ref": "SignalHttpBody" },
+      "response": { "$ref": "SignalExecutionResult" },
+      "statusCodes": { "200": "SignalExecutionResult (ok or error)", "400": "SignalFailure (validation)" }
+    },
+    {
+      "id": "ep-mutation",
+      "method": "POST",
+      "path": "/signal/mutation/:name",
+      "operationName": ":name",
+      "operationKind": "mutation",
+      "description": "Execute a registered mutation by name",
+      "request": { "$ref": "SignalHttpBody" },
+      "response": { "$ref": "SignalExecutionResult" },
+      "statusCodes": { "200": "SignalExecutionResult (ok or error)", "400": "SignalFailure (validation)", "401": "SignalFailure (unauthorized)", "403": "SignalFailure (forbidden)", "409": "SignalFailure (conflict)" }
+    },
+    {
+      "id": "ep-health",
+      "method": "GET",
+      "path": "/health",
+      "operationName": null,
+      "operationKind": null,
+      "description": "Health check",
+      "request": { "type": "none" },
+      "response": { "type": "object", "properties": { "ok": { "type": "boolean", "const": true } } },
+      "statusCodes": { "200": "{ ok: true }" }
+    }
+  ],
+  "operations": {
+    "queries": [
+      {
+        "name": "note.get.v1",
+        "domain": "note",
+        "endpoint": "ep-query",
+        "input": { "$ref": "NoteGetInput" },
+        "result": { "$ref": "NoteGetResult" },
+        "idempotency": null,
+        "replaySafe": true
+      },
+      {
+        "name": "post.get.v1",
+        "domain": "post",
+        "endpoint": "ep-query",
+        "input": { "$ref": "PostGetInput" },
+        "result": { "$ref": "PostGetResult" },
+        "idempotency": null,
+        "replaySafe": true
+      },
+      {
+        "name": "payment.capture.get.v1",
+        "domain": "payment.capture",
+        "endpoint": "ep-query",
+        "input": { "$ref": "PaymentCaptureGetInput" },
+        "result": { "$ref": "PaymentCaptureGetResult" },
+        "idempotency": null,
+        "replaySafe": true
+      },
+      {
+        "name": "reference.certification.v1",
+        "domain": "reference",
+        "endpoint": "ep-query",
+        "input": { "$ref": "EmptyInput" },
+        "result": { "$ref": "ReferenceCertificationResult" },
+        "idempotency": null,
+        "replaySafe": true
+      },
+      {
+        "name": "decision.get.v1",
+        "domain": "decision",
+        "endpoint": "ep-query",
+        "input": { "$ref": "DecisionGetInput" },
+        "result": { "$ref": "DecisionRecordResult" },
+        "idempotency": null,
+        "replaySafe": true
+      },
+      {
+        "name": "decision.list.v1",
+        "domain": "decision",
+        "endpoint": "ep-query",
+        "input": { "$ref": "DecisionListInput" },
+        "result": { "$ref": "DecisionListResult" },
+        "idempotency": null,
+        "replaySafe": true
+      },
+      {
+        "name": "decision.evaluate.v1",
+        "domain": "decision",
+        "endpoint": "ep-query",
+        "input": { "$ref": "DecisionPipelineInput" },
+        "result": { "$ref": "DecisionPipelineResult" },
+        "idempotency": null,
+        "replaySafe": true
+      },
+      {
+        "name": "decision.replay.v1",
+        "domain": "decision",
+        "endpoint": "ep-query",
+        "input": { "$ref": "DecisionReplayInput" },
+        "result": { "$ref": "DecisionReplayResult" },
+        "idempotency": null,
+        "replaySafe": true
+      },
+      {
+        "name": "decision.memory.summary.v1",
+        "domain": "decision.memory",
+        "endpoint": "ep-query",
+        "input": { "$ref": "DecisionMemorySummaryInput" },
+        "result": { "$ref": "DecisionMemorySummaryResult" },
+        "idempotency": null,
+        "replaySafe": true
+      },
+      {
+        "name": "decision.accountability.get.v1",
+        "domain": "decision.accountability",
+        "endpoint": "ep-query",
+        "input": { "$ref": "DecisionAccountabilityInput" },
+        "result": { "$ref": "AccountabilityReport" },
+        "idempotency": null,
+        "replaySafe": true
+      },
+      {
+        "name": "decision.scenarios.predict.v1",
+        "domain": "decision.scenarios",
+        "endpoint": "ep-query",
+        "input": { "$ref": "PredictionInput" },
+        "result": { "$ref": "PredictionResult" },
+        "idempotency": null,
+        "replaySafe": true
+      },
+      {
+        "name": "decision.simulate.v1",
+        "domain": "decision",
+        "endpoint": "ep-query",
+        "input": { "$ref": "SimulationInput" },
+        "result": { "$ref": "SimulationResult" },
+        "idempotency": null,
+        "replaySafe": true
+      },
+      {
+        "name": "commitment.evaluate.v1",
+        "domain": "commitment",
+        "endpoint": "ep-query",
+        "input": { "$ref": "CommitmentEvaluateInput" },
+        "result": { "$ref": "CommitmentResult" },
+        "idempotency": null,
+        "replaySafe": true
+      }
+    ],
+    "mutations": [
+      {
+        "name": "post.publish.v1",
+        "domain": "post",
+        "endpoint": "ep-mutation",
+        "input": { "$ref": "PostPublishInput" },
+        "result": { "$ref": "PostPublishResult" },
+        "idempotency": "optional",
+        "emits": ["post.published.v1"],
+        "replaySafe": true
+      },
+      {
+        "name": "payment.capture.v1",
+        "domain": "payment",
+        "endpoint": "ep-mutation",
+        "input": { "$ref": "PaymentCaptureInput" },
+        "result": { "$ref": "PaymentCaptureResult" },
+        "idempotency": "required",
+        "emits": ["payment.captured.v1"],
+        "authorize": true,
+        "replaySafe": true
+      },
+      {
+        "name": "decision.record.v1",
+        "domain": "decision",
+        "endpoint": "ep-mutation",
+        "input": { "$ref": "DecisionRecordInput" },
+        "result": { "$ref": "DecisionRecordResult" },
+        "idempotency": "optional",
+        "emits": ["decision.recorded.v1"],
+        "replaySafe": true
+      },
+      {
+        "name": "decision.outcome.record.v1",
+        "domain": "decision.outcome",
+        "endpoint": "ep-mutation",
+        "input": { "$ref": "OutcomeFeedbackInput" },
+        "result": { "$ref": "OutcomeResult" },
+        "idempotency": "optional",
+        "emits": ["decision.outcome_recorded.v1"],
+        "replaySafe": true
+      },
+      {
+        "name": "decision.memory.compact.v1",
+        "domain": "decision.memory",
+        "endpoint": "ep-mutation",
+        "input": { "$ref": "DecisionMemoryCompactInput" },
+        "result": { "$ref": "DecisionMemoryCompactResult" },
+        "idempotency": "optional",
+        "emits": ["decision.compacted.v1"],
+        "replaySafe": true
+      },
+      {
+        "name": "decision.calibration.update.v1",
+        "domain": "decision.calibration",
+        "endpoint": "ep-mutation",
+        "input": { "$ref": "DecisionCalibrationUpdateInput" },
+        "result": { "$ref": "DecisionCalibrationUpdateResult" },
+        "idempotency": "optional",
+        "emits": ["decision.calibration_updated.v1"],
+        "replaySafe": true
+      }
+    ],
+    "events": [
+      {
+        "name": "post.published.v1",
+        "domain": "post",
+        "payload": { "$ref": "Post" },
+        "replaySafe": true
+      },
+      {
+        "name": "payment.captured.v1",
+        "domain": "payment",
+        "payload": { "$ref": "PaymentCapturedEvent" },
+        "replaySafe": true
+      },
+      {
+        "name": "decision.recorded.v1",
+        "domain": "decision",
+        "payload": { "$ref": "DecisionRecordPayload" },
+        "replaySafe": true
+      },
+      {
+        "name": "decision.evaluated.v1",
+        "domain": "decision",
+        "payload": { "$ref": "DecisionEvaluatedPayload" },
+        "replaySafe": true
+      },
+      {
+        "name": "decision.blocked.v1",
+        "domain": "decision",
+        "payload": { "$ref": "DecisionBlockedPayload" },
+        "replaySafe": true
+      },
+      {
+        "name": "decision.outcome_recorded.v1",
+        "domain": "decision",
+        "payload": { "$ref": "DecisionOutcomeRecordedPayload" },
+        "replaySafe": true
+      },
+      {
+        "name": "decision.compacted.v1",
+        "domain": "decision",
+        "payload": { "$ref": "DecisionCompactedPayload" },
+        "replaySafe": true
+      },
+      {
+        "name": "decision.calibration_updated.v1",
+        "domain": "decision",
+        "payload": { "$ref": "DecisionCalibrationUpdatedPayload" },
+        "replaySafe": true
+      },
+      {
+        "name": "decision.replayed.v1",
+        "domain": "decision",
+        "payload": { "$ref": "DecisionReplayedPayload" },
+        "replaySafe": true
+      }
+    ]
+  }
+}

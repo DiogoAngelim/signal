@@ -709,7 +709,7 @@ function buildGenericDiscoveryInput(args: {
       score: candidate.candidateScore,
       strength: candidate.genericOpportunity.strength,
       confidence: candidate.genericOpportunity.confidence,
-      maturity: lifecycleMaturity(candidate.lifecycle),
+      maturity: lifecycleMaturity(candidate.lifecycle, args.candidates.filter(c => c.lifecycle === "Detected").length),
       readiness: candidate.eligible
         ? 78
         : Math.min(70, candidate.candidateScore),
@@ -750,7 +750,7 @@ function buildGenericDiscoveryInput(args: {
         state: {
           market: args.input.market ?? "unknown",
           score: candidate.candidateScore,
-          lifecycleMaturity: lifecycleMaturity(candidate.lifecycle),
+          lifecycleMaturity: lifecycleMaturity(candidate.lifecycle, args.candidates.filter(c => c.lifecycle === "Detected").length),
           eligible: candidate.eligible,
         },
       })),
@@ -760,7 +760,7 @@ function buildGenericDiscoveryInput(args: {
         state: {
           market: args.input.market ?? "unknown",
           score: candidate.candidateScore,
-          lifecycleMaturity: lifecycleMaturity(candidate.lifecycle),
+          lifecycleMaturity: lifecycleMaturity(candidate.lifecycle, args.candidates.filter(c => c.lifecycle === "Detected").length),
           eligible: candidate.eligible,
         },
       })),
@@ -968,9 +968,9 @@ function genericLifecycle(lifecycle: StockOpportunityLifecycle) {
   return lifecycle.toLowerCase() as Lowercase<StockOpportunityLifecycle>;
 }
 
-function lifecycleMaturity(lifecycle: StockOpportunityLifecycle) {
+function lifecycleMaturity(lifecycle: StockOpportunityLifecycle, detectedCount = 0) {
   const rank: Record<StockOpportunityLifecycle, number> = {
-    Detected: 22,
+    Detected: Math.max(1, detectedCount),
     Emerging: 40,
     Strengthening: 58,
     Eligible: 72,

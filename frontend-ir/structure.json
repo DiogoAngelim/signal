@@ -1,0 +1,68 @@
+{
+  "$schema": "FrontendStructureIR",
+  "framework": "react",
+  "language": "typescript",
+  "buildTool": "vite",
+  "features": [
+    {
+      "name": "dashboard",
+      "domain": "overview",
+      "description": "System overview dashboard showing capabilities, health, and certification status",
+      "pages": ["DashboardPage"],
+      "components": ["CapabilitiesCard", "HealthIndicator", "CertificationBadge"]
+    },
+    {
+      "name": "notes",
+      "domain": "note",
+      "description": "Note viewing feature",
+      "pages": ["NoteDetailPage"],
+      "components": ["NoteCard", "NoteSearchForm"]
+    },
+    {
+      "name": "posts",
+      "domain": "post",
+      "description": "Post publishing and viewing feature",
+      "pages": ["PostDetailPage", "PostPublishPage"],
+      "components": ["PostCard", "PostPublishForm", "PostList"]
+    },
+    {
+      "name": "payments",
+      "domain": "payment",
+      "description": "High-risk payment capture with audit trail",
+      "pages": ["PaymentCapturePage", "PaymentDetailPage"],
+      "components": ["PaymentCaptureForm", "PaymentStatusCard", "AuditTrailList", "OutboxList"]
+    },
+    {
+      "name": "decisions",
+      "domain": "decision",
+      "description": "Decision records, evaluation, replay, and memory management",
+      "pages": ["DecisionsPage", "DecisionDetailPage", "DecisionEvaluatePage", "DecisionReplayPage"],
+      "components": ["DecisionRecordForm", "DecisionCard", "EvidenceList", "DecisionMemoryPanel", "AccountabilityReport"]
+    },
+    {
+      "name": "commitment",
+      "domain": "commitment",
+      "description": "Commitment evaluation feature",
+      "pages": ["CommitmentEvaluatePage"],
+      "components": ["CommitmentForm", "CommitmentResultCard", "ConstraintList", "ResourceList"]
+    }
+  ],
+  "directoryStructure": {
+    "src/": {
+      "api/": ["client.ts", "mocks/"],
+      "features/": {
+        "dashboard/": ["DashboardPage.tsx", "components/"],
+        "notes/": ["NoteDetailPage.tsx", "components/"],
+        "posts/": ["PostDetailPage.tsx", "PostPublishPage.tsx", "components/"],
+        "payments/": ["PaymentCapturePage.tsx", "PaymentDetailPage.tsx", "components/"],
+        "decisions/": ["DecisionsPage.tsx", "DecisionDetailPage.tsx", "DecisionEvaluatePage.tsx", "DecisionReplayPage.tsx", "components/"],
+        "commitment/": ["CommitmentEvaluatePage.tsx", "components/"]
+      },
+      "hooks/": ["useQuery.ts", "useMutation.ts", "useCapabilities.ts"],
+      "components/": ["Layout.tsx", "Sidebar.tsx", "ErrorBoundary.tsx", "LoadingSpinner.tsx"],
+      "types/": ["index.ts"],
+      "App.tsx": null,
+      "main.tsx": null
+    }
+  }
+}

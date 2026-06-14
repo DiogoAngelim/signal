@@ -30,7 +30,7 @@ import {
   sendSignalNotificationEmails,
   sendSignalNotificationTestEmail,
 } from "../lib/signal-email.js";
-import { attachSignalsToQuotes, fetchMarketQuotes } from "../lib/stock-data.js";
+import { attachSignalsToQuotes, fetchMarketQuotes, loadSymbolsForMarket } from "../lib/stock-data.js";
 import { loadTradingViewHistoricalBars } from "../lib/tradingview-history.js";
 
 function shouldSkipLocalQuoteSymbol(symbol: string) {
@@ -277,6 +277,21 @@ function loadMarketList(market: string, limit = 80) {
     .trim()
     .toUpperCase();
 
+  // Dynamic: load from JSON data files (thousands of assets across markets)
+  const dynamicSymbols = loadSymbolsForMarket(normalizedMarket);
+  if (dynamicSymbols.length) {
+    return dynamicSymbols.slice(0, limit).map((symbol, index) => ({
+      symbol,
+      ticker: symbol,
+      name: symbol,
+      market: normalizedMarket,
+      price: 10 + index * 2.5,
+      regularMarketPrice: 10 + index * 2.5,
+      close: 10 + index * 2.5,
+    }));
+  }
+
+  // Minimal emergency fallback when JSON files are unavailable
   const fallbackByMarket: Record<string, string[]> = {
     ADX: [
       "ADNOCGAS",
@@ -831,7 +846,7 @@ async function handleStocksMarketsRoute(_req: any, res: any) {
         label?: string;
         name: string;
         displayName?: string;
-        symbolCount: number;
+        symbols: string[];
         sourceFiles: string[];
       }
     >();
@@ -906,7 +921,7 @@ async function handleStocksMarketsRoute(_req: any, res: any) {
         const existing = markets.get(code);
 
         if (existing) {
-          existing.symbolCount += 1;
+          existing.symbols.push(String(row?.symbol ?? row?.ticker ?? "").trim().toUpperCase());
           existing.value = existing.value ?? existing.code;
           existing.market = existing.market ?? existing.code;
           existing.label = existing.label ?? existing.name ?? existing.code;
@@ -924,7 +939,7 @@ async function handleStocksMarketsRoute(_req: any, res: any) {
             label: name || code,
             name: name || code,
             displayName: name || code,
-            symbolCount: 1,
+            symbols: [String(row?.symbol ?? row?.ticker ?? "").trim().toUpperCase()].filter(Boolean),
             sourceFiles: [filename],
           });
         }
@@ -934,13 +949,15 @@ async function handleStocksMarketsRoute(_req: any, res: any) {
     const data = Array.from(markets.values())
       .filter((market) => market.code)
       .map((market) => ({
-        ...market,
+        code: market.code,
         value: market.value ?? market.code,
         market: market.market ?? market.code,
         label: market.label ?? market.name ?? market.code,
         name: market.name ?? market.label ?? market.code,
         displayName:
           market.displayName ?? market.name ?? market.label ?? market.code,
+        symbolCount: market.symbols.length,
+        sourceFiles: market.sourceFiles,
       }))
       .sort((a, b) => a.code.localeCompare(b.code));
 

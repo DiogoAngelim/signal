@@ -23,7 +23,7 @@ import {
   SuppressionCascadeInspector,
 } from "./pipeline-diagnostics";
 import { applyStockResolveDiagnostics } from "./resolve-adapter";
-import { loadMarketList } from "./stock-data";
+import { loadMarketList, loadSymbolsForMarket } from "./stock-data";
 import { applyStockRecognitionDiagnostics } from "./stock-recognition";
 import {
   StrategyReadinessEvaluator,
@@ -143,6 +143,24 @@ async function persistMarketBacktest(marketInput: string, payload: any) {
 }
 
 function localBacktestSymbolsFromRows(market: string, rows: any[]) {
+  // Dynamic: load from JSON data files (thousands of assets across markets)
+  const dynamicSymbols = loadSymbolsForMarket(market);
+  if (dynamicSymbols.length) {
+    return dynamicSymbols.slice(0, 80);
+  }
+
+  // Fallback: extract from rows if available
+  const symbols = rows
+    .map((row: any) =>
+      String(row?.symbol ?? row?.ticker ?? row?.code ?? row?.name ?? "")
+        .trim()
+        .toUpperCase(),
+    )
+    .filter(Boolean);
+
+  if (symbols.length) return symbols.slice(0, 24);
+
+  // Minimal emergency fallback when JSON files are unavailable
   const fallbackByMarket: Record<string, string[]> = {
     ADX: [
       "ADNOCGAS",
@@ -178,17 +196,7 @@ function localBacktestSymbolsFromRows(market: string, rows: any[]) {
     return fallbackByMarket.BINANCE;
   }
 
-  const symbols = rows
-    .map((row: any) =>
-      String(row?.symbol ?? row?.ticker ?? row?.code ?? row?.name ?? "")
-        .trim()
-        .toUpperCase(),
-    )
-    .filter(Boolean);
-
-  return symbols.length
-    ? symbols.slice(0, 24)
-    : (fallbackByMarket[market] ?? fallbackByMarket.ADX);
+  return fallbackByMarket[market] ?? fallbackByMarket.ADX;
 }
 
 async function loadHistoricalDatasetForSymbol(market: string, symbol: string) {

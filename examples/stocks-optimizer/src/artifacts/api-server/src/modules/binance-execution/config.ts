@@ -5,6 +5,7 @@ import type {
   BinanceExecutionConfigInput,
   ExecutionMode,
 } from "./types";
+import { loadSymbolsForMarket } from "../../lib/stock-data.js";
 
 const DEFAULT_ALLOWED_SYMBOLS = [
   "BTCUSDT",
@@ -56,7 +57,7 @@ export function parseAllocationMode(
 
 export function parseAllowedSymbols(
   value: unknown,
-  fallback = DEFAULT_ALLOWED_SYMBOLS,
+  fallback?: string[],
 ) {
   const symbols = String(value ?? "")
     .split(",")
@@ -64,7 +65,11 @@ export function parseAllowedSymbols(
     .filter(Boolean);
   if (symbols.some((symbol) => symbol === "*" || symbol === "ALL"))
     return ["*"];
-  return symbols.length ? Array.from(new Set(symbols)) : fallback.slice();
+  if (symbols.length) return Array.from(new Set(symbols));
+  if (fallback) return fallback.slice();
+  // Dynamic fallback: load from JSON data files (thousands of Binance assets)
+  const dynamicSymbols = loadSymbolsForMarket("BINANCE");
+  return dynamicSymbols.length > 0 ? dynamicSymbols : DEFAULT_ALLOWED_SYMBOLS;
 }
 
 export function allSymbolsAllowed(symbols: readonly string[]) {

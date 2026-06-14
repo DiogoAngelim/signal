@@ -1,0 +1,167 @@
+{
+  "$schema": "DomainModelV1",
+  "entities": {
+    "Note": {
+      "domain": "note",
+      "properties": {
+        "noteId": { "type": "string", "required": true, "identity": true },
+        "title": { "type": "string", "required": true },
+        "body": { "type": "string", "required": true },
+        "updatedAt": { "type": "string (datetime)", "required": true }
+      },
+      "operations": ["note.get.v1"]
+    },
+    "Post": {
+      "domain": "post",
+      "properties": {
+        "postId": { "type": "string", "required": true, "identity": true },
+        "title": { "type": "string", "required": true },
+        "body": { "type": "string", "required": false },
+        "publishedAt": { "type": "string (datetime)", "required": true }
+      },
+      "operations": ["post.get.v1", "post.publish.v1"],
+      "events": ["post.published.v1"]
+    },
+    "PaymentCapture": {
+      "domain": "payment",
+      "properties": {
+        "captureId": { "type": "string", "required": true, "identity": true },
+        "tenantId": { "type": "string", "required": true },
+        "authorizationId": { "type": "string", "required": true },
+        "amountCents": { "type": "number", "required": true },
+        "currency": { "type": "string (ISO 4217)", "required": true },
+        "status": { "type": "\"captured\"", "required": true },
+        "capturedAt": { "type": "string (datetime)", "required": true },
+        "auditId": { "type": "string", "required": true },
+        "outboxId": { "type": "string", "required": true },
+        "risk": { "type": "PaymentRiskDeclaration", "required": true }
+      },
+      "operations": ["payment.capture.v1", "payment.capture.get.v1"],
+      "events": ["payment.captured.v1"]
+    },
+    "PaymentRiskDeclaration": {
+      "domain": "payment",
+      "properties": {
+        "declared": { "type": "true", "required": true },
+        "classification": { "type": "\"high\" | \"critical\"", "required": true },
+        "reason": { "type": "string", "required": true },
+        "approvedBy": { "type": "string", "required": true }
+      }
+    },
+    "PaymentAuditEntry": {
+      "domain": "payment",
+      "properties": {
+        "auditId": { "type": "string", "required": true, "identity": true },
+        "operation": { "type": "\"payment.capture.v1\"", "required": true },
+        "tenantId": { "type": "string", "required": true },
+        "actorId": { "type": "string", "required": true },
+        "recordedAt": { "type": "string (datetime)", "required": true },
+        "redactedInput": { "type": "RedactedPaymentCaptureInput", "required": true },
+        "result": { "type": "PaymentCaptureResult", "required": true }
+      }
+    },
+    "DecisionRecord": {
+      "domain": "decision",
+      "properties": {
+        "id": { "type": "string", "required": true, "identity": true },
+        "evidence": { "type": "DecisionEvidence[]", "required": false },
+        "assessment": { "type": "DecisionAssessment", "required": false },
+        "journal": { "type": "DecisionJournal", "required": false },
+        "outcome": { "type": "OutcomeEvaluation", "required": false },
+        "replay": { "type": "DecisionReplayComparison", "required": false }
+      },
+      "operations": ["decision.record.v1", "decision.get.v1", "decision.list.v1", "decision.evaluate.v1", "decision.replay.v1"],
+      "events": ["decision.recorded.v1", "decision.evaluated.v1", "decision.replayed.v1"]
+    },
+    "DecisionMemory": {
+      "domain": "decision",
+      "properties": {
+        "lessons": { "type": "SignalLesson[]", "required": false },
+        "patterns": { "type": "DecisionLearningPattern[]", "required": false },
+        "survival": { "type": "SignalLessonSurvival", "required": false }
+      },
+      "operations": ["decision.memory.summary.v1", "decision.memory.compact.v1"],
+      "events": ["decision.compacted.v1"]
+    },
+    "DecisionCalibration": {
+      "domain": "decision",
+      "properties": {
+        "reliability": { "type": "CalibrationReliability", "required": false },
+        "trust": { "type": "CommitmentTrust", "required": false }
+      },
+      "operations": ["decision.calibration.update.v1"],
+      "events": ["decision.calibration_updated.v1"]
+    },
+    "DecisionAccountability": {
+      "domain": "decision",
+      "properties": {
+        "report": { "type": "AccountabilityReport", "required": true }
+      },
+      "operations": ["decision.accountability.get.v1"]
+    },
+    "DecisionSimulation": {
+      "domain": "decision",
+      "properties": {
+        "scenarios": { "type": "PredictionScenario[]", "required": false },
+        "paths": { "type": "SimulationPathResult[]", "required": false }
+      },
+      "operations": ["decision.scenarios.predict.v1", "decision.simulate.v1"]
+    },
+    "CommitmentEvaluation": {
+      "domain": "commitment",
+      "properties": {
+        "module": { "type": "\"signal.commitment\"", "required": true },
+        "operation": { "type": "\"commitment.evaluate.v1\"", "required": true },
+        "version": { "type": "\"v1\"", "required": true },
+        "decision": { "type": "CommitmentDecision", "required": true },
+        "status": { "type": "CommitmentStatus", "required": true },
+        "score": { "type": "CommitmentScoreBreakdown", "required": false },
+        "recommendation": { "type": "CommitmentRecommendation", "required": false },
+        "constraints": { "type": "CommitmentConstraint[]", "required": false },
+        "resources": { "type": "CommitmentResource[]", "required": false },
+        "trust": { "type": "CommitmentTrust", "required": false }
+      },
+      "operations": ["commitment.evaluate.v1"]
+    },
+    "AgencyState": {
+      "domain": "agency",
+      "properties": {
+        "action": { "type": "AgencyAction", "required": false },
+        "sizing": { "type": "AgencySizing", "required": false },
+        "calibration": { "type": "CalibrationResult", "required": false },
+        "learning": { "type": "LearningResult", "required": false },
+        "outcome": { "type": "OutcomeResult", "required": false },
+        "policy": { "type": "PolicyResult", "required": false }
+      }
+    },
+    "SignalPackage": {
+      "domain": "kernel",
+      "properties": {
+        "id": { "type": "string", "required": true, "identity": true },
+        "meta": { "type": "SignalPackageMeta", "required": true },
+        "features": { "type": "TFeatures", "required": false },
+        "analysis": { "type": "TAnalysis", "required": false },
+        "decision": { "type": "TDecision", "required": false },
+        "result": { "type": "TResult", "required": false },
+        "trace": { "type": "SignalPackageTraceEntry[]", "required": true }
+      }
+    },
+    "ReferenceCertification": {
+      "domain": "reference",
+      "properties": {
+        "name": { "type": "string", "required": true },
+        "passed": { "type": "boolean", "required": true },
+        "checks": { "type": "ReferenceCertificationCheck[]", "required": true }
+      },
+      "operations": ["reference.certification.v1"]
+    }
+  },
+  "relationships": [
+    { "from": "Post", "to": "PaymentCapture", "type": "none" },
+    { "from": "PaymentCapture", "to": "PaymentAuditEntry", "type": "has-many", "via": "captureId" },
+    { "from": "DecisionRecord", "to": "DecisionMemory", "type": "has-one", "via": "id" },
+    { "from": "DecisionRecord", "to": "DecisionCalibration", "type": "has-one", "via": "id" },
+    { "from": "DecisionRecord", "to": "DecisionAccountability", "type": "has-one", "via": "id" },
+    { "from": "CommitmentEvaluation", "to": "DecisionRecord", "type": "evaluates" }
+  ]
+}

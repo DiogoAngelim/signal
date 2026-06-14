@@ -1,0 +1,200 @@
+{
+  "$schema": "RawApiExtractionV1",
+  "httpBinding": {
+    "basePath": "/signal",
+    "routes": [
+      {
+        "method": "GET",
+        "path": "/signal/capabilities",
+        "handler": "handleCapabilitiesRequest",
+        "requestType": "none",
+        "responseType": "SignalCapabilities",
+        "description": "Returns the runtime capabilities document listing all registered queries, mutations, events, features, and bindings."
+      },
+      {
+        "method": "POST",
+        "path": "/signal/query/:name",
+        "handler": "handleQueryRequest",
+        "requestType": "SignalHttpBody",
+        "responseType": "SignalExecutionResult",
+        "description": "Execute a registered query by name. Body contains payload and optional context/delivery/auth."
+      },
+      {
+        "method": "POST",
+        "path": "/signal/mutation/:name",
+        "handler": "handleMutationRequest",
+        "requestType": "SignalHttpBody",
+        "responseType": "SignalExecutionResult",
+        "description": "Execute a registered mutation by name. Body contains payload, optional context/delivery/auth, and idempotencyKey."
+      },
+      {
+        "method": "GET",
+        "path": "/health",
+        "handler": "inline",
+        "requestType": "none",
+        "responseType": "{ ok: true }",
+        "description": "Health check endpoint."
+      }
+    ]
+  },
+  "httpBodySchema": {
+    "type": "SignalHttpBody",
+    "fields": {
+      "payload": { "type": "unknown", "required": true, "description": "The operation input payload" },
+      "context": {
+        "type": "object",
+        "required": false,
+        "fields": {
+          "correlationId": { "type": "string", "required": false },
+          "causationId": { "type": "string", "required": false },
+          "idempotencyKey": { "type": "string", "required": false },
+          "deadlineAt": { "type": "string (datetime)", "required": false },
+          "traceId": { "type": "string", "required": false },
+          "trace": { "type": "object", "required": false, "fields": { "traceId": "string", "spanId": "string", "parentSpanId": "string", "state": "string" } },
+          "auth": { "type": "object", "required": false },
+          "source": { "type": "object", "required": false, "fields": { "system": "string", "transport": "string", "runtime": "string" } },
+          "meta": { "type": "Record<string, unknown>", "required": false }
+        }
+      },
+      "delivery": {
+        "type": "object",
+        "required": false,
+        "fields": {
+          "mode": { "type": "\"in-process\" | \"at-least-once\" | \"exactly-once\"", "required": false },
+          "attempt": { "type": "number", "required": false },
+          "consumerId": { "type": "string", "required": false },
+          "replayed": { "type": "boolean", "required": false },
+          "subscription": { "type": "string", "required": false },
+          "transportMessageId": { "type": "string", "required": false }
+        }
+      },
+      "auth": { "type": "object", "required": false, "fields": { "actor": "object | string", "subject": "string", "scopes": "string[]" } },
+      "meta": { "type": "Record<string, unknown>", "required": false },
+      "idempotencyKey": { "type": "string", "required": false }
+    }
+  },
+  "registeredOperations": {
+    "referenceServer": {
+      "queries": [
+        {
+          "name": "note.get.v1",
+          "domain": "note",
+          "action": "get",
+          "version": "v1",
+          "inputType": "NoteGetInput",
+          "resultType": "NoteGetResult",
+          "description": "Get a note by ID"
+        },
+        {
+          "name": "post.get.v1",
+          "domain": "post",
+          "action": "get",
+          "version": "v1",
+          "inputType": "PostGetInput",
+          "resultType": "PostGetResult",
+          "description": "Get a post by ID"
+        },
+        {
+          "name": "payment.capture.get.v1",
+          "domain": "payment.capture",
+          "action": "get",
+          "version": "v1",
+          "inputType": "PaymentCaptureGetInput",
+          "resultType": "PaymentCaptureGetResult",
+          "description": "Inspect the redacted audit and outbox evidence for a captured payment"
+        },
+        {
+          "name": "reference.certification.v1",
+          "domain": "reference",
+          "action": "certification",
+          "version": "v1",
+          "inputType": "Record<string, never>",
+          "resultType": "ReferenceCertificationResult",
+          "description": "Return the reference-server certification checklist"
+        }
+      ],
+      "mutations": [
+        {
+          "name": "post.publish.v1",
+          "domain": "post",
+          "action": "publish",
+          "version": "v1",
+          "inputType": "PostPublishInput",
+          "resultType": "PostPublishResult",
+          "idempotency": "optional",
+          "emits": ["post.published.v1"],
+          "description": "Publish a post"
+        },
+        {
+          "name": "payment.capture.v1",
+          "domain": "payment",
+          "action": "capture",
+          "version": "v1",
+          "inputType": "PaymentCaptureInput",
+          "resultType": "PaymentCaptureResult",
+          "idempotency": "required",
+          "emits": ["payment.captured.v1"],
+          "authorize": true,
+          "description": "High-risk reference mutation for tenant-scoped, replay-safe payment capture"
+        }
+      ],
+      "events": [
+        {
+          "name": "post.published.v1",
+          "domain": "post",
+          "action": "published",
+          "version": "v1",
+          "inputType": "Post",
+          "resultType": "Post",
+          "description": "Event emitted when a post is published"
+        },
+        {
+          "name": "payment.captured.v1",
+          "domain": "payment",
+          "action": "captured",
+          "version": "v1",
+          "inputType": "PaymentCapturedEvent",
+          "resultType": "PaymentCapturedEvent",
+          "description": "Redacted event emitted after a high-risk payment capture"
+        }
+      ]
+    },
+    "decisionDomain": {
+      "queries": [
+        { "name": "decision.get.v1", "domain": "decision", "action": "get", "version": "v1", "description": "Read a durable shared decision record" },
+        { "name": "decision.list.v1", "domain": "decision", "action": "list", "version": "v1", "description": "List durable shared decision records" },
+        { "name": "decision.evaluate.v1", "domain": "decision", "action": "evaluate", "version": "v1", "description": "Evaluate observation and module evidence into a decision record" },
+        { "name": "decision.replay.v1", "domain": "decision", "action": "replay", "version": "v1", "description": "Replay a previous decision with original or current knowledge" },
+        { "name": "decision.memory.summary.v1", "domain": "decision.memory", "action": "summary", "version": "v1", "description": "Return decision memory summaries and lessons" },
+        { "name": "decision.accountability.get.v1", "domain": "decision.accountability", "action": "get", "version": "v1", "description": "Return the accountability report for a stored decision" },
+        { "name": "decision.scenarios.predict.v1", "domain": "decision.scenarios", "action": "predict", "version": "v1", "description": "Generate domain-agnostic future scenarios" },
+        { "name": "decision.simulate.v1", "domain": "decision", "action": "simulate", "version": "v1", "description": "Compare action paths against scenarios" }
+      ],
+      "mutations": [
+        { "name": "decision.record.v1", "domain": "decision", "action": "record", "version": "v1", "description": "Record a durable shared decision record" },
+        { "name": "decision.outcome.record.v1", "domain": "decision.outcome", "action": "record", "version": "v1", "description": "Record an outcome and derive trust and calibration feedback" },
+        { "name": "decision.memory.compact.v1", "domain": "decision.memory", "action": "compact", "version": "v1", "description": "Compact old detailed decision memory into durable lessons" },
+        { "name": "decision.calibration.update.v1", "domain": "decision.calibration", "action": "update", "version": "v1", "description": "Record calibration and trust changes from outcomes" }
+      ],
+      "events": [
+        { "name": "decision.recorded.v1", "domain": "decision", "action": "recorded", "version": "v1", "description": "Emitted after a decision record is saved" },
+        { "name": "decision.evaluated.v1", "domain": "decision", "action": "evaluated", "version": "v1", "description": "Emitted after a decision has been evaluated" },
+        { "name": "decision.blocked.v1", "domain": "decision", "action": "blocked", "version": "v1", "description": "Emitted when coherence, simulation, or wisdom blocks action" },
+        { "name": "decision.action_scaled.v1", "domain": "decision", "action": "action_scaled", "version": "v1", "description": "Emitted when agency is reduced instead of fully allowed" },
+        { "name": "decision.outcome_recorded.v1", "domain": "decision", "action": "outcome_recorded", "version": "v1", "description": "Emitted after an outcome closes the loop with reality" },
+        { "name": "decision.compacted.v1", "domain": "decision", "action": "compacted", "version": "v1", "description": "Emitted when decision memory is compacted" },
+        { "name": "decision.calibration_updated.v1", "domain": "decision", "action": "calibration_updated", "version": "v1", "description": "Emitted when calibration or trust history is updated" },
+        { "name": "decision.replayed.v1", "domain": "decision", "action": "replayed", "version": "v1", "description": "Emitted when a decision replay comparison is produced" }
+      ]
+    },
+    "commitmentDomain": {
+      "queries": [
+        { "name": "commitment.evaluate.v1", "domain": "commitment", "action": "evaluate", "version": "v1", "description": "Evaluate generic decision trust, constraints, resources, and policy into a recommended commitment" }
+      ]
+    }
+  },
+  "resultSchema": {
+    "success": { "ok": true, "result": "T", "meta": "SignalResultMeta?" },
+    "failure": { "ok": false, "error": { "code": "SignalErrorCode", "category": "SignalErrorCategory", "message": "string", "retryable": "boolean?", "details": "Record<string, unknown>?" } }
+  }
+}

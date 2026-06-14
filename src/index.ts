@@ -3,7 +3,7 @@
  *
  * Single entrypoint. No alternative entrypoints.
  */
-export { decide } from "./src/decision/decide";
+export { decide } from "./decision/decide";
 export type {
   ConstraintViolation,
   DecideInput,
@@ -20,4 +20,4 @@ export type {
   OptionCategory,
   ResourceConstraint,
   ResourceConstraintType,
-} from "./src/decision/types";
+} from "./decision/types";

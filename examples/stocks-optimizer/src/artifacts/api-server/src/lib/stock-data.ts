@@ -1177,6 +1177,49 @@ export function loadMarketList(market: string): StockListItem[] {
   return items;
 }
 
+/**
+ * Load raw symbol strings for a given market from JSON data files.
+ * Returns thousands of assets across markets when data files are present.
+ * Falls back to minimal emergency lists only when files are unavailable.
+ */
+export function loadSymbolsForMarket(market: string): string[] {
+  const normalized = market.trim().toUpperCase();
+
+  try {
+    const items = loadMarketList(normalized);
+    const symbols = items
+      .map((item) => (item.symbol ?? item.ticker ?? "").trim())
+      .filter(Boolean);
+    if (symbols.length) return [...new Set(symbols)];
+  } catch {
+    // Fall through to exchange-based fallback
+  }
+
+  try {
+    const exchangeCodes = listExchangeCodes();
+    const allItems = exchangeCodes.flatMap((code) => loadStockList(code));
+    const symbols = allItems
+      .filter((item) => (item.market ?? "").trim().toUpperCase() === normalized)
+      .map((item) => (item.symbol ?? item.ticker ?? "").trim())
+      .filter(Boolean);
+    if (symbols.length) return [...new Set(symbols)];
+  } catch {
+    // Fall through to minimal fallback
+  }
+
+  // Minimal emergency fallback when JSON files are unavailable
+  if (/BINANCE|CRYPTO/.test(normalized)) {
+    return ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT", "DOTUSDT", "AVAXUSDT", "MATICUSDT", "LINKUSDT", "AAVEUSDT"];
+  }
+  if (normalized === "B3") {
+    return ["PETR4", "VALE3", "ITUB4", "BBDC4", "ABEV3", "WEGE3", "BBAS3", "RENT3", "MGLU3", "B3SA3", "ELET3", "SUZB3", "JBSS3", "CSAN3", "RADL3", "HYPE3"];
+  }
+  if (normalized === "ADX") {
+    return ["ADNOCGAS", "EAND", "ALDAR", "ADCB", "FAB", "TAQA", "ADNOCDRILL", "ADNOCDIST", "ETISALAT", "ADNOC", "FERTIGLB", "ADIB", "RAKBANK", "EMIRATESNBD", "DANA", "GULFNAV"];
+  }
+  return ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA", "JPM", "V", "WMT", "UNH", "JNJ", "PG", "HD", "MA", "BAC"];
+}
+
 export async function fetchQuotes(
   exchange: string,
   symbols: string[],

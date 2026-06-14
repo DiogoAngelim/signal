@@ -19,5 +19,6 @@ out
 repo.txt
 .signal-example-training
 docs/build
+docs/.tmp
 docs/.docusaurus
 .vercel

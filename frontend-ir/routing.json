@@ -1,0 +1,34 @@
+{
+  "$schema": "RoutingIR",
+  "router": "react-router-dom v6",
+  "routes": [
+    { "path": "/", "element": "DashboardPage", "feature": "dashboard", "description": "System overview with capabilities and health" },
+    { "path": "/notes/:noteId", "element": "NoteDetailPage", "feature": "notes", "description": "View a single note" },
+    { "path": "/posts/:postId", "element": "PostDetailPage", "feature": "posts", "description": "View a single post" },
+    { "path": "/posts/new", "element": "PostPublishPage", "feature": "posts", "description": "Publish a new post" },
+    { "path": "/payments/capture", "element": "PaymentCapturePage", "feature": "payments", "description": "Capture a high-risk payment" },
+    { "path": "/payments/:captureId", "element": "PaymentDetailPage", "feature": "payments", "description": "View payment capture details with audit trail" },
+    { "path": "/decisions", "element": "DecisionsPage", "feature": "decisions", "description": "List decision records" },
+    { "path": "/decisions/:id", "element": "DecisionDetailPage", "feature": "decisions", "description": "View a decision record" },
+    { "path": "/decisions/evaluate", "element": "DecisionEvaluatePage", "feature": "decisions", "description": "Evaluate a new decision" },
+    { "path": "/decisions/:id/replay", "element": "DecisionReplayPage", "feature": "decisions", "description": "Replay a decision with current knowledge" },
+    { "path": "/commitment/evaluate", "element": "CommitmentEvaluatePage", "feature": "commitment", "description": "Evaluate commitment level" }
+  ],
+  "navigation": {
+    "sidebar": [
+      { "label": "Dashboard", "path": "/", "icon": "home" },
+      { "label": "Notes", "path": "/notes/:noteId", "icon": "note", "parametric": true },
+      { "label": "Posts", "path": "/posts/new", "icon": "post", "children": [
+        { "label": "New Post", "path": "/posts/new" }
+      ]},
+      { "label": "Payments", "path": "/payments/capture", "icon": "payment", "children": [
+        { "label": "Capture", "path": "/payments/capture" }
+      ]},
+      { "label": "Decisions", "path": "/decisions", "icon": "decision", "children": [
+        { "label": "All Decisions", "path": "/decisions" },
+        { "label": "Evaluate", "path": "/decisions/evaluate" }
+      ]},
+      { "label": "Commitment", "path": "/commitment/evaluate", "icon": "commitment" }
+    ]
+  }
+}

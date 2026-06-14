@@ -1,0 +1,74 @@
+{
+  "$schema": "SystemIntentV1",
+  "name": "signal-protocol-platform",
+  "version": "1.0.0",
+  "description": "Signal is a deterministic decision-protocol platform that provides a runtime for executing queries, mutations, and events through a typed, schema-validated envelope protocol. The system enforces idempotency, replay-safety, and auditability across all operations.",
+  "coreDomains": [
+    {
+      "name": "protocol",
+      "description": "Pure contracts, type definitions, envelope schema, naming conventions, result/error models, and capability declarations.",
+      "packages": ["@signal/protocol"],
+      "intent": "Define the wire contract that all operations must conform to."
+    },
+    {
+      "name": "runtime",
+      "description": "Execution engine that dispatches queries, mutations, and events through a registry with idempotency, observability, and replay support.",
+      "packages": ["@signal/runtime", "@signal/sdk-node", "@signal/binding-http", "@signal/ports"],
+      "intent": "Provide the deterministic execution kernel for Signal operations."
+    },
+    {
+      "name": "decision",
+      "description": "Decision reasoning module: evidence assessment, journaling, coherence checking, outcome feedback, learning, prediction, simulation, and stewardship governance.",
+      "packages": ["@signal/decision", "@signal/decision-memory"],
+      "intent": "Enable structured, accountable decision-making with learning and governance."
+    },
+    {
+      "name": "commitment",
+      "description": "Commitment evaluation module: trust scoring, constraint checking, resource allocation, and policy-based commitment recommendations.",
+      "packages": ["@signal/commitment"],
+      "intent": "Evaluate and recommend commitment levels for decisions."
+    },
+    {
+      "name": "agency",
+      "description": "Agency pipeline: action sizing, calibration, learning from traces, outcome resolution, policy evaluation, and self-diagnosis.",
+      "packages": ["@signal/agency"],
+      "intent": "Manage autonomous agency cycles with calibrated confidence."
+    },
+    {
+      "name": "kernel",
+      "description": "Plugin architecture and pipeline orchestration: SignalPackage envelope, 4-stage pipeline (generate → analyze → decide → execute), event bus, state stores.",
+      "packages": ["@signal/kernel"],
+      "intent": "Provide the immutable package contract and pipeline orchestration for signal processing."
+    }
+  ],
+  "transportBindings": [
+    {
+      "type": "http",
+      "package": "@signal/binding-http",
+      "framework": "fastify",
+      "basePath": "/signal",
+      "routes": [
+        "GET /signal/capabilities",
+        "POST /signal/query/:name",
+        "POST /signal/mutation/:name",
+        "GET /health"
+      ]
+    },
+    {
+      "type": "in-process",
+      "package": "@signal/runtime",
+      "framework": "internal",
+      "description": "In-process dispatcher for event pub/sub within the same Node.js process."
+    }
+  ],
+  "executionModes": ["live", "replay", "audit"],
+  "keyInvariants": [
+    "All operations conform to the signal.v1 envelope protocol",
+    "Queries are read-only and retry-safe",
+    "Mutations declare idempotency mode (required/optional/none)",
+    "Events are immutable facts safe to consume more than once",
+    "Results follow { ok: true, result } | { ok: false, error } pattern",
+    "Names follow <domain>.<action>.<version> convention",
+    "No backward dependencies in the layer DAG"
+  ]
+}

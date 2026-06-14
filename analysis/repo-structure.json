@@ -1,0 +1,107 @@
+{
+  "$schema": "RepoStructureV1",
+  "workspace": "signal-workspace",
+  "packageManager": "pnpm@10.12.4",
+  "monorepo": true,
+  "layers": {
+    "signal": {
+      "description": "Pure contracts and type definitions",
+      "packages": {
+        "@signal/protocol": {
+          "path": "api/protocol",
+          "version": "0.1.0",
+          "entry": "src/index.ts",
+          "exports": ["signalKinds", "SignalKind", "signalNamePattern", "signalNameSchema", "SignalNameParts", "isSignalName", "parseSignalName", "createSignalName", "signalProtocolVersion", "signalProtocolSchema", "signalEnvelopeSchema", "SignalEnvelope", "SignalContext", "SignalDelivery", "SignalAuth", "SignalEnvelopeInput", "createSignalEnvelope", "validateSignalEnvelope", "isSignalEnvelope", "signalErrorCodes", "SignalErrorCode", "signalErrorSchema", "SignalErrorEnvelope", "createSignalError", "createProtocolError", "signalErrorHttpStatus", "signalOutcomeSchema", "signalSuccessSchema", "signalFailureSchema", "signalResultSchema", "SignalSuccess", "SignalFailure", "SignalResult", "SignalOutcome", "SignalResultMeta", "ok", "fail", "signalOperationCapabilitySchema", "signalCapabilitiesSchema", "SignalOperationCapability", "SignalCapabilities", "createSignalCapabilities"],
+          "dependencies": ["zod"]
+        },
+        "@signal/kernel": {
+          "path": "packages/kernel",
+          "exports": ["SignalPackage", "SignalPackageBuilder", "SignalPackageMeta", "SignalPackageTraceEntry", "createSignalPackage", "SignalGenerator", "Analyzer", "Scorer", "Aggregator", "EventBus", "StateStore", "SignalStore", "DecisionStore", "SignalOrchestrator", "PipelineRunner", "ExecutionController"],
+          "dependencies": []
+        }
+      }
+    },
+    "domain": {
+      "description": "Decision reasoning: evidence, assessment, commitment, learning",
+      "packages": {
+        "@signal/decision": {
+          "path": "packages/decision",
+          "exports": ["assessDecisionEvidence", "createDecisionJournal", "deriveLearningPatterns", "generateDecisionLearning", "reviewDecisionOutcome", "createAccountabilityReport", "replayDecision", "assessCoherence", "detectCoherenceConflicts", "createDecisionRecord", "createInMemoryDecisionRecordStore", "evaluateDecision", "DECISION_OPERATION_DEFINITIONS", "listDecisionOperations", "registerDecisionOperations"],
+          "dependencies": []
+        },
+        "@signal/decision-memory": {
+          "path": "packages/decision-memory",
+          "exports": ["createInMemoryDecisionMemoryStore", "createDecisionMemoryStoreFromEnv"],
+          "dependencies": ["@signal/decision"]
+        },
+        "@signal/commitment": {
+          "path": "packages/commitment",
+          "exports": ["evaluateCommitment", "COMMITMENT_OPERATION_DEFINITIONS", "commitmentEvaluateInputSchema", "commitmentEvaluateResultSchema", "listCommitmentOperations", "registerCommitmentOperations"],
+          "dependencies": []
+        },
+        "@signal/agency": {
+          "path": "packages/agency",
+          "exports": ["createAgencyPipeline", "evaluateAgencyState", "runAgencyCycle", "calibrateConfidence", "learnFromTraces", "createInMemoryAgencyMemory", "toCausalChain", "resolveOutcome", "evaluatePolicy", "diagnoseAgencyState"],
+          "dependencies": []
+        },
+        "@signal/semantic-state": {
+          "path": "packages/semantic-state",
+          "exports": [],
+          "dependencies": []
+        }
+      }
+    },
+    "execution": {
+      "description": "Infrastructure: runtime dispatch, HTTP binding, database",
+      "packages": {
+        "@signal/ports": {
+          "path": "api/ports",
+          "exports": ["DecisionPort", "DecisionInput", "DecisionOutput", "EventPort", "ObservabilityPort", "ObservabilityContext", "RuntimeLifecycleEvent", "RuntimePort", "RuntimePortConfig", "RuntimeMode", "StoragePort", "IdempotencyRecord", "IdempotencyReservation"],
+          "dependencies": ["@signal/protocol"]
+        },
+        "@signal/runtime": {
+          "path": "api/runtime",
+          "version": "0.1.0",
+          "exports": ["SignalRuntime", "SignalRuntimeOptions", "SignalRegistry", "createInProcessDispatcher", "createMemoryIdempotencyStore", "SignalOperationDefinition", "SignalQueryDefinition", "SignalMutationDefinition", "SignalEventDefinition", "SignalExecutionContext", "SignalRequestContext", "SignalExecuteInput", "SignalExecuteResult", "SignalExecutionResult", "SignalBinding", "SignalCapabilityProvider"],
+          "dependencies": ["@signal/protocol", "@signal/ports", "zod"]
+        },
+        "@signal/sdk-node": {
+          "path": "api/sdk-node",
+          "exports": ["createSignalRuntime", "defineQuery", "defineMutation", "defineEvent"],
+          "dependencies": ["@signal/runtime", "@signal/protocol", "@signal/decision", "@signal/decision-memory", "zod"]
+        },
+        "@signal/binding-http": {
+          "path": "api/binding-http",
+          "exports": ["createSignalHttpServer", "registerSignalHttpRoutes", "handleQueryRequest", "handleMutationRequest", "handleCapabilitiesRequest", "SignalHttpBody"],
+          "dependencies": ["@signal/sdk-node", "@signal/protocol", "fastify", "zod"]
+        }
+      }
+    },
+    "post-trade": {
+      "description": "Read-only audit, verification, replay",
+      "packages": {
+        "signal-cli": {
+          "path": "signal-cli",
+          "exports": ["hashChain", "stateStore", "verifier", "replayEngine", "proofWriter", "audit", "verify", "replay"],
+          "dependencies": []
+        }
+      }
+    }
+  },
+  "referenceServer": {
+    "path": "server/reference-server",
+    "framework": "fastify",
+    "port": 3001,
+    "operations": [
+      "note.get.v1",
+      "post.get.v1",
+      "post.publish.v1",
+      "post.published.v1",
+      "payment.capture.v1",
+      "payment.captured.v1",
+      "payment.capture.get.v1",
+      "reference.certification.v1"
+    ]
+  },
+  "ignoredPaths": ["**/examples/**", "**/example/**", "**/sample/**", "**/samples/**", "**/demo/**", "**/demos/**"]
+}
