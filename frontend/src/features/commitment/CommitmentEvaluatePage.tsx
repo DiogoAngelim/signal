@@ -17,24 +17,24 @@ export function CommitmentEvaluatePage() {
   }
 
   return (
-    <div>
-      <h1 style={{ margin: "0 0 1.5rem", fontSize: "1.5rem" }}>Commitment Evaluation</h1>
-      <div style={{ background: "#fff", borderRadius: 8, padding: "1.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", maxWidth: 600 }}>
-        <p style={{ color: "#666", fontSize: "0.9rem", marginBottom: 16 }}>
+    <div style={{ maxWidth: "65ch" }}>
+      <h1 style={{ margin: "0 0 2rem", fontSize: "2.25rem", fontWeight: 700, lineHeight: 1.25, letterSpacing: "0.04em", color: "#1a1a2e" }}>Commitment Evaluation</h1>
+      <div style={{ background: "#fff", borderRadius: 8, padding: "1.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+        <p style={{ color: "#595959", fontSize: "1rem", lineHeight: 1.65, letterSpacing: "0.02em", margin: "0 0 1.5rem" }}>
           Evaluate the current commitment state of the Signal system. Checks whether all invariants hold and operations are permitted.
         </p>
         <button onClick={handleEvaluate} disabled={loading}
-          style={{ background: "#1a1a2e", color: "#fff", border: "none", padding: "0.6rem 1.5rem", borderRadius: 6, cursor: "pointer", fontSize: "0.875rem" }}>
+          style={{ background: "#1a1a2e", color: "#fff", border: "none", padding: "0.75rem 1.5rem", borderRadius: 6, cursor: "pointer", fontSize: "1rem", fontWeight: 600, letterSpacing: "0.02em" }}>
           {loading ? "Evaluating…" : "Evaluate Commitment"}
         </button>
-        {error && <div style={{ marginTop: 12, color: "#dc2626", fontSize: "0.85rem" }}>{error}</div>}
+        {error && <div style={{ marginTop: "1rem", color: "#dc2626", fontSize: "1rem", lineHeight: 1.5, letterSpacing: "0.02em" }}><span aria-hidden="true">✗ </span>{error}</div>}
         {result && (
-          <div style={{ marginTop: 16, padding: "1rem", background: "#f9f9f9", borderRadius: 6, fontSize: "0.85rem" }}>
-            <div style={{ marginBottom: 4 }}><strong>Module:</strong> {result.module}</div>
-            <div style={{ marginBottom: 4 }}><strong>Operation:</strong> {result.operation}</div>
-            <div style={{ marginBottom: 4 }}><strong>Version:</strong> {result.version}</div>
-            <div style={{ marginBottom: 4 }}><strong>Decision:</strong> <span style={{ color: result.decision === "commit" ? "#16a34a" : "#dc2626" }}>{result.decision}</span></div>
-            <div><strong>Status:</strong> <span style={{ color: result.status === "allowed" ? "#16a34a" : "#dc2626" }}>{result.status}</span></div>
+          <div style={{ marginTop: "1.5rem", padding: "1.25rem", background: "#f8f9fa", borderRadius: 6, fontSize: "1rem", lineHeight: 1.65, letterSpacing: "0.02em", color: "#444444" }}>
+            <div style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#1a1a2e" }}>Module:</strong> {result.module}</div>
+            <div style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#1a1a2e" }}>Operation:</strong> {result.operation}</div>
+            <div style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#1a1a2e" }}>Version:</strong> {result.version}</div>
+            <div style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#1a1a2e" }}>Decision:</strong> <span style={{ color: result.decision === "commit" ? "#16a34a" : "#dc2626", fontWeight: 600 }}><span aria-hidden="true">{result.decision === "commit" ? "✓ " : "✗ "}</span>{result.decision}</span></div>
+            <div><strong style={{ color: "#1a1a2e" }}>Status:</strong> <span style={{ color: result.status === "allowed" ? "#16a34a" : "#dc2626", fontWeight: 600 }}><span aria-hidden="true">{result.status === "allowed" ? "✓ " : "✗ "}</span>{result.status}</span></div>
           </div>
         )}
       </div>

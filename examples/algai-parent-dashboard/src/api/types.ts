@@ -114,7 +114,7 @@ export interface StudentLearningSummary {
     detail: string;
     whyNow: string;
   };
-  decisionQuality: LearningDecisionQuality;
+  decisionQuality?: LearningDecisionQuality;
   evidenceHistory: EvidenceItem[];
   dashboardPermissions: {
     studentId: string;
@@ -141,6 +141,7 @@ export type AlgaiAccessResolution =
   | {
       kind: "parent";
       email: string;
+      user?: AuthenticatedUser;
       dashboards: StudentLearningSummary[];
       generatedAt: string;
     }

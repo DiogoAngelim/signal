@@ -32,30 +32,30 @@ export function DecisionEvaluatePage() {
   }
 
   return (
-    <div>
-      <h1 style={{ margin: "0 0 1.5rem", fontSize: "1.5rem" }}>Evaluate Decision</h1>
-      <div style={{ background: "#fff", borderRadius: 8, padding: "1.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", maxWidth: 600 }}>
-        <div style={{ marginBottom: 12 }}>
-          <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: 4, color: "#333" }}>Domain</label>
+    <div style={{ maxWidth: "65ch" }}>
+      <h1 style={{ margin: "0 0 2rem", fontSize: "2.25rem", fontWeight: 700, lineHeight: 1.25, letterSpacing: "0.04em", color: "#1a1a2e" }}>Evaluate Decision</h1>
+      <div style={{ background: "#fff", borderRadius: 8, padding: "1.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+        <div style={{ marginBottom: "1.5rem" }}>
+          <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: 6, color: "#1a1a2e", letterSpacing: "0.02em" }}>Domain</label>
           <input value={domain} onChange={(e) => setDomain(e.target.value)}
-            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #ddd", borderRadius: 6, fontSize: "0.9rem" }} />
+            style={{ width: "100%", padding: "0.6rem 0.75rem", border: "1px solid #d1d5db", borderRadius: 6, fontSize: "1rem", lineHeight: 1.5, letterSpacing: "0.02em" }} />
         </div>
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: 4, color: "#333" }}>Context (JSON)</label>
+        <div style={{ marginBottom: "1.5rem" }}>
+          <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: 6, color: "#1a1a2e", letterSpacing: "0.02em" }}>Context (JSON)</label>
           <textarea value={context} onChange={(e) => setContext(e.target.value)} rows={6}
-            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #ddd", borderRadius: 6, fontSize: "0.85rem", fontFamily: "monospace", resize: "vertical" }} />
+            style={{ width: "100%", padding: "0.6rem 0.75rem", border: "1px solid #d1d5db", borderRadius: 6, fontSize: "0.9375rem", lineHeight: 1.65, fontFamily: "monospace", letterSpacing: "0.02em", resize: "vertical" }} />
         </div>
         <button onClick={handleEvaluate} disabled={loading}
-          style={{ background: "#1a1a2e", color: "#fff", border: "none", padding: "0.6rem 1.5rem", borderRadius: 6, cursor: "pointer", fontSize: "0.875rem" }}>
+          style={{ background: "#1a1a2e", color: "#fff", border: "none", padding: "0.75rem 1.5rem", borderRadius: 6, cursor: "pointer", fontSize: "1rem", fontWeight: 600, letterSpacing: "0.02em" }}>
           {loading ? "Evaluating…" : "Evaluate"}
         </button>
-        {error && <div style={{ marginTop: 12, color: "#dc2626", fontSize: "0.85rem" }}>{error}</div>}
+        {error && <div style={{ marginTop: "1rem", color: "#dc2626", fontSize: "1rem", lineHeight: 1.5, letterSpacing: "0.02em" }}><span aria-hidden="true">✗ </span>{error}</div>}
         {result && (
-          <div style={{ marginTop: 16, padding: "1rem", background: "#f9f9f9", borderRadius: 6, fontSize: "0.85rem" }}>
-            <div><strong>Decision ID:</strong> {result.decisionId}</div>
-            <div><strong>Domain:</strong> {result.domain}</div>
-            <div><strong>Decision:</strong> {result.decision}</div>
-            <div><strong>Status:</strong> {result.status}</div>
+          <div style={{ marginTop: "1.5rem", padding: "1.25rem", background: "#f8f9fa", borderRadius: 6, fontSize: "1rem", lineHeight: 1.65, letterSpacing: "0.02em", color: "#444444" }}>
+            <div style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#1a1a2e" }}>Decision ID:</strong> {result.decisionId}</div>
+            <div style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#1a1a2e" }}>Domain:</strong> {result.domain}</div>
+            <div style={{ marginBottom: "0.5rem" }}><strong style={{ color: "#1a1a2e" }}>Decision:</strong> {result.decision}</div>
+            <div><strong style={{ color: "#1a1a2e" }}>Status:</strong> {result.status}</div>
           </div>
         )}
       </div>

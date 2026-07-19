@@ -2,10 +2,12 @@ import type {
   AttentionLevel,
   AuthenticatedUser,
   LearningRecommendation,
+  SubjectLearningRecord,
   StudentLearningSummary,
 } from "@/api/types";
 import {
   AlertCircle,
+  ArrowRight,
   BookMarked,
   CalendarCheck,
   CheckCircle2,
@@ -116,10 +118,78 @@ function attentionClass(level: AttentionLevel): string {
   return `attention attention--${level}`;
 }
 
+function uniqueBy<T>(items: T[], keyFor: (item: T) => string): T[] {
+  const seen = new Set<string>();
+  const uniqueItems: T[] = [];
+
+  for (const item of items) {
+    const key = keyFor(item).trim().toLowerCase();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    uniqueItems.push(item);
+  }
+
+  return uniqueItems;
+}
+
+function uniqueStrings(items: string[]): string[] {
+  return uniqueBy(
+    items.filter((item) => item.trim()),
+    (item) => item,
+  );
+}
+
+function uniqueRecommendations(
+  items: LearningRecommendation[],
+): LearningRecommendation[] {
+  return uniqueBy(
+    items.filter((item) => item.title.trim() && item.explanation.trim()),
+    (item) => `${item.area}:${item.title}:${item.explanation}`,
+  );
+}
+
+function uniqueSubjects(items: SubjectLearningRecord[]): SubjectLearningRecord[] {
+  return uniqueBy(
+    items
+      .filter((item) => item.subject.trim())
+      .map((item) => ({
+        ...item,
+        evidence: uniqueStrings(item.evidence),
+      })),
+    (item) => item.subject,
+  );
+}
+
+function uniqueDashboards(
+  dashboards: StudentLearningSummary[],
+): StudentLearningSummary[] {
+  return uniqueBy(dashboards, (dashboard) => dashboard.student.id);
+}
+
+function EvidenceText({ text }: { text: string }) {
+  const [before, after] = text.split(/\s+->\s+/u);
+  if (!before || !after) {
+    return <>{text}</>;
+  }
+
+  return (
+    <span className="evidence-transition">
+      <span>{before}</span>
+      <ArrowRight aria-hidden="true" />
+      <span>{after}</span>
+    </span>
+  );
+}
+
 function RecommendationList({ items }: { items: LearningRecommendation[] }) {
+  const uniqueItems = uniqueRecommendations(items);
+  if (uniqueItems.length === 0) {
+    return <p className="empty-state">No current AlgAI items for this area.</p>;
+  }
+
   return (
     <div className="recommendation-grid">
-      {items.map((item) => (
+      {uniqueItems.map((item) => (
         <article className="recommendation-card" key={item.id}>
           <div className="recommendation-header">
             <span className={attentionClass(item.attentionLevel)}>
@@ -143,6 +213,7 @@ export function StudentOverview({
   dashboard,
 }: { dashboard: StudentLearningSummary }) {
   const { student } = dashboard;
+  const subjects = uniqueSubjects(dashboard.subjects);
   return (
     <section className="dashboard-section">
       <div className="section-heading">
@@ -177,25 +248,37 @@ export function StudentOverview({
         </div>
       </div>
 
-      <div className="subject-grid">
-        {dashboard.subjects.map((subject) => (
-          <article key={subject.subject} className="subject-card">
-            <div className="subject-card__top">
-              <h3>{subject.subject}</h3>
-              <span className={`confidence confidence--${subject.confidence}`}>
-                {subject.confidence.replace("-", " ")}
-              </span>
-            </div>
-            <p className="subject-focus">{subject.currentFocus}</p>
-            <p>{subject.progressNote}</p>
-            <ul>
-              {subject.evidence.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </article>
-        ))}
-      </div>
+      {subjects.length > 0 ? (
+        <div className="subject-grid">
+          {subjects.map((subject) => (
+            <article key={subject.subject} className="subject-card">
+              <div className="subject-card__top">
+                <h3>{subject.subject}</h3>
+                <span
+                  className={`confidence confidence--${subject.confidence}`}
+                >
+                  {subject.confidence.replace("-", " ")}
+                </span>
+              </div>
+              <p className="subject-focus">{subject.currentFocus}</p>
+              <p>{subject.progressNote}</p>
+              {subject.evidence.length > 0 ? (
+                <ul>
+                  {subject.evidence.map((item) => (
+                    <li key={item}>
+                      <EvidenceText text={item} />
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p className="empty-state">
+          No AlgAI learning evidence has been recorded for this student yet.
+        </p>
+      )}
     </section>
   );
 }
@@ -251,6 +334,8 @@ export function MonitorAreas({
 export function DiscussionPrompts({
   dashboard,
 }: { dashboard: StudentLearningSummary }) {
+  const childPrompts = uniqueStrings(dashboard.discussionPrompts.child);
+  const teacherPrompts = uniqueStrings(dashboard.discussionPrompts.teacher);
   return (
     <section className="dashboard-section">
       <div className="section-heading">
@@ -262,19 +347,27 @@ export function DiscussionPrompts({
       <div className="two-column">
         <div className="prompt-panel">
           <h3>With your child</h3>
-          <ul>
-            {dashboard.discussionPrompts.child.map((prompt) => (
-              <li key={prompt}>{prompt}</li>
-            ))}
-          </ul>
+          {childPrompts.length > 0 ? (
+            <ul>
+              {childPrompts.map((prompt) => (
+                <li key={prompt}>{prompt}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="empty-state">No child prompts yet.</p>
+          )}
         </div>
         <div className="prompt-panel">
           <h3>With the teacher</h3>
-          <ul>
-            {dashboard.discussionPrompts.teacher.map((prompt) => (
-              <li key={prompt}>{prompt}</li>
-            ))}
-          </ul>
+          {teacherPrompts.length > 0 ? (
+            <ul>
+              {teacherPrompts.map((prompt) => (
+                <li key={prompt}>{prompt}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="empty-state">No teacher prompts yet.</p>
+          )}
         </div>
       </div>
     </section>
@@ -300,23 +393,61 @@ export function SupportPlan({
 export function LearningReview({
   dashboard,
 }: { dashboard: StudentLearningSummary }) {
-  const groups = [
-    ["What changed", dashboard.learningReview.changed],
-    ["What improved", dashboard.learningReview.improved],
-    ["What stayed stable", dashboard.learningReview.stable],
-    ["Still needs more evidence", dashboard.learningReview.stillNeedsProof],
-  ] as const;
-  const qualityGroups = [
-    ["Supporting evidence", dashboard.decisionQuality.supportingEvidence],
-    ["Assumptions", dashboard.decisionQuality.assumptions],
+  const decisionQuality = dashboard.decisionQuality;
+  const reviewGroups: Array<[string, string[]]> = [
+    ["What changed", uniqueStrings(dashboard.learningReview.changed)],
+    ["What improved", uniqueStrings(dashboard.learningReview.improved)],
+    ["What stayed stable", uniqueStrings(dashboard.learningReview.stable)],
     [
-      "Contradictory indicators",
-      dashboard.decisionQuality.contradictoryIndicators,
+      "Still needs more evidence",
+      uniqueStrings(dashboard.learningReview.stillNeedsProof),
     ],
-    ["Unknowns", dashboard.decisionQuality.unknowns],
-    ["Lessons", dashboard.decisionQuality.lessons],
-    ["Next actions", dashboard.decisionQuality.nextActions],
-  ] as const;
+  ];
+  const groups = reviewGroups.filter(([, items]) => items.length > 0);
+  const qualityGroups = decisionQuality
+    ? ([
+        [
+          "Supporting evidence",
+          uniqueStrings(decisionQuality.supportingEvidence),
+        ],
+        ["Assumptions", uniqueStrings(decisionQuality.assumptions)],
+        [
+          "Contradictory indicators",
+          uniqueStrings(decisionQuality.contradictoryIndicators),
+        ],
+        ["Unknowns", uniqueStrings(decisionQuality.unknowns)],
+        ["Lessons", uniqueStrings(decisionQuality.lessons)],
+        ["Next actions", uniqueStrings(decisionQuality.nextActions)],
+      ] as Array<[string, string[]]>).filter(([, items]) => items.length > 0)
+    : [];
+  const recentChanges = uniqueBy(
+    dashboard.recentChanges,
+    (change) => `${change.date}:${change.label}:${change.detail}`,
+  );
+
+  const hasDecisionQuality =
+    decisionQuality &&
+    (qualityGroups.length > 0 || decisionQuality.nextBestEvidence.title.trim());
+
+  const hasReviewData = groups.length > 0 || recentChanges.length > 0;
+
+  if (!hasReviewData && !hasDecisionQuality) {
+    return (
+      <section className="dashboard-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Learning review</p>
+            <h2>What the evidence says</h2>
+          </div>
+        </div>
+        <p className="empty-state">
+          No AlgAI review evidence has been recorded for this student yet.
+        </p>
+      </section>
+    );
+  }
+
+  const nextBestEvidence = decisionQuality?.nextBestEvidence;
 
   return (
     <section className="dashboard-section">
@@ -326,31 +457,11 @@ export function LearningReview({
           <h2>What the evidence says</h2>
         </div>
       </div>
-      <div className="review-grid">
-        {groups.map(([title, items]) => (
-          <article className="review-panel" key={title}>
-            <h3>{title}</h3>
-            <ul>
-              {items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </article>
-        ))}
-      </div>
-
-      <div className="decision-quality-panel">
-        <div className="decision-quality-panel__header">
-          <div>
-            <p className="eyebrow">Decision quality</p>
-            <h3>What AlgAI knows and still needs to check</h3>
-          </div>
-          <span>{dashboard.decisionQuality.nextBestEvidence.title}</span>
-        </div>
-        <div className="decision-quality-grid">
-          {qualityGroups.map(([title, items]) => (
-            <article className="quality-column" key={title}>
-              <h4>{title}</h4>
+      {groups.length > 0 ? (
+        <div className="review-grid">
+          {groups.map(([title, items]) => (
+            <article className="review-panel" key={title}>
+              <h3>{title}</h3>
               <ul>
                 {items.map((item) => (
                   <li key={item}>{item}</li>
@@ -359,32 +470,70 @@ export function LearningReview({
             </article>
           ))}
         </div>
-        <div className="next-evidence">
-          <strong>Next best evidence</strong>
-          <p>{dashboard.decisionQuality.nextBestEvidence.whyItMatters}</p>
-          <span>
-            {dashboard.decisionQuality.nextBestEvidence.expectedImpact}
-          </span>
-        </div>
-      </div>
+      ) : null}
 
-      <div className="timeline">
-        {dashboard.recentChanges.map((change) => (
-          <article key={change.id} className="timeline-item">
-            <CalendarCheck aria-hidden="true" />
+      {hasDecisionQuality ? (
+        <div className="decision-quality-panel">
+          <div className="decision-quality-panel__header">
             <div>
-              <div className="timeline-meta">
-                <span>{formatDate(change.date)}</span>
-                <span className={attentionClass(change.attentionLevel)}>
-                  {attentionLabel(change.attentionLevel)}
+              <p className="eyebrow">Decision quality</p>
+              <h3>What AlgAI knows and still needs to check</h3>
+            </div>
+            {nextBestEvidence?.title.trim() ? (
+              <div className="decision-quality-panel__header-meta">
+                <span className="next-evidence-callout">
+                  {nextBestEvidence.title}
                 </span>
               </div>
-              <h3>{change.label}</h3>
-              <p>{change.detail}</p>
+            ) : null}
+          </div>
+          {qualityGroups.length > 0 ? (
+            <div className="decision-quality-grid">
+              {qualityGroups.map(([title, items]) => (
+                <article className="quality-column" key={title}>
+                  <h4>{title}</h4>
+                  <ul>
+                    {items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
             </div>
-          </article>
-        ))}
-      </div>
+          ) : null}
+          {nextBestEvidence ? (
+            <div className="next-evidence">
+              <strong>Next best evidence</strong>
+              {nextBestEvidence.whyItMatters.trim() ? (
+                <p>{nextBestEvidence.whyItMatters}</p>
+              ) : null}
+              {nextBestEvidence.expectedImpact.trim() ? (
+                <span>{nextBestEvidence.expectedImpact}</span>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {recentChanges.length > 0 ? (
+        <div className="timeline">
+          {recentChanges.map((change) => (
+            <article key={change.id} className="timeline-item">
+              <CalendarCheck aria-hidden="true" />
+              <div>
+                <div className="timeline-meta">
+                  <span>{formatDate(change.date)}</span>
+                  <span className={attentionClass(change.attentionLevel)}>
+                    {attentionLabel(change.attentionLevel)}
+                  </span>
+                </div>
+                <h3>{change.label}</h3>
+                <p>{change.detail}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -412,16 +561,20 @@ export function ParentDashboard({
   user,
   onSignOut,
 }: ParentDashboardProps) {
+  const uniqueDashboardItems = useMemo(
+    () => uniqueDashboards(dashboards),
+    [dashboards],
+  );
   const [activeSection, setActiveSection] = useState<SectionId>("overview");
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [activeStudentId, setActiveStudentId] = useState(
-    dashboards[0]?.student.id ?? "",
+    uniqueDashboardItems[0]?.student.id ?? "",
   );
   const dashboard = useMemo(
     () =>
-      dashboards.find((item) => item.student.id === activeStudentId) ??
-      dashboards[0],
-    [activeStudentId, dashboards],
+      uniqueDashboardItems.find((item) => item.student.id === activeStudentId) ??
+      uniqueDashboardItems[0],
+    [activeStudentId, uniqueDashboardItems],
   );
 
   const activeIndex = useMemo(
@@ -521,7 +674,8 @@ export function ParentDashboard({
           </div>
           <div className="header-actions">
             <span className="user-pill">
-              {user?.email ??
+              {user?.name ||
+                user?.email ||
                 dashboard.dashboardPermissions.validatedParentEmail}
             </span>
             <button
@@ -540,14 +694,14 @@ export function ParentDashboard({
           </div>
         </header>
 
-        {dashboards.length > 1 ? (
+        {uniqueDashboardItems.length > 1 ? (
           <div className="student-switcher" aria-label="Associated students">
             <div className="student-switcher__label">
               <UsersRound aria-hidden="true" />
-              <span>{dashboards.length} associated students</span>
+              <span>{uniqueDashboardItems.length} associated students</span>
             </div>
             <div className="student-switcher__buttons">
-              {dashboards.map((item) => {
+              {uniqueDashboardItems.map((item) => {
                 const selected = item.student.id === dashboard.student.id;
                 return (
                   <button

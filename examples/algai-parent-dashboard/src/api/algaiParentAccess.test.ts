@@ -1,4 +1,5 @@
 import {
+  buildAlgaiLoginUrl,
   createMockAlgaiDataSource,
   getStudentAccessForEmail,
   isChildEmail,
@@ -9,6 +10,15 @@ import {
 } from "./algaiParentAccess";
 
 describe("AlgAI parent access validation", () => {
+  it("asks AlgAI login to return through the parent dashboard handoff", () => {
+    const url = new URL(buildAlgaiLoginUrl());
+
+    expect(url.pathname).toBe("/login");
+    expect(url.searchParams.get("from")).toBe(
+      "/api/public/parent-dashboard/redirect",
+    );
+  });
+
   it("normalizes, validates, and removes duplicate parent emails", () => {
     expect(
       normalizeParentEmails([
@@ -58,6 +68,38 @@ describe("AlgAI parent access validation", () => {
         resolution.dashboards.map((dashboard) => dashboard.student.childName),
       ).toEqual(["Mia Rivera", "Noah Patel"]);
     }
+  });
+
+  it("uses the authenticated user email when the parent dashboard payload omits parentEmail", async () => {
+    const source = createMockAlgaiDataSource({
+      initialUser: {
+        id: "parent-rivera",
+        email: "parent.rivera@example.com",
+        name: "Parent Rivera",
+        provider: "google",
+      },
+    });
+    const payload = await source.getParentDashboardAccess();
+
+    const resolution = await resolveAlgaiAccess(undefined, {
+      ...source,
+      async getParentDashboardAccess() {
+        return payload
+          ? {
+              ...payload,
+              parentEmail: undefined as unknown as string,
+            }
+          : null;
+      },
+    });
+
+    expect(resolution).toMatchObject({
+      kind: "parent",
+      email: "parent.rivera@example.com",
+      user: {
+        name: "Parent Rivera",
+      },
+    });
   });
 
   it("routes a student email away from the parent dashboard", async () => {

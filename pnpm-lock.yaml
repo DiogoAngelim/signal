@@ -279,9 +279,6 @@ importers:
       pino-pretty:
         specifier: ^13.0.0
         version: 13.1.3
-      stripe:
-        specifier: ^22.2.0
-        version: 22.2.0(@types/node@22.19.19)
       ulid:
         specifier: ^2.3.0
         version: 2.4.0
@@ -4466,15 +4463,6 @@ packages:
   strip-json-comments@5.0.3:
     resolution: {integrity: sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw==}
     engines: {node: '>=14.16'}
-
-  stripe@22.2.0:
-    resolution: {integrity: sha512-WFGpMOom9QZqso1kcnSwJsCdC1QHDlMoCOxBZRf3JraMzhkfw7dgSdD2a1CFZrqC+mzAfqeEtYILrZhWKIDruA==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      '@types/node': '>=18'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
 
   superagent@10.3.0:
     resolution: {integrity: sha512-B+4Ik7ROgVKrQsXTV0Jwp2u+PXYLSlqtDAhYnkkD+zn3yg8s/zjA2MeGayPoY/KICrbitwneDHrjSotxKL+0XQ==}
@@ -8691,10 +8679,6 @@ snapshots:
   strip-json-comments@3.1.1: {}
 
   strip-json-comments@5.0.3: {}
-
-  stripe@22.2.0(@types/node@22.19.19):
-    optionalDependencies:
-      '@types/node': 22.19.19
 
   superagent@10.3.0:
     dependencies:

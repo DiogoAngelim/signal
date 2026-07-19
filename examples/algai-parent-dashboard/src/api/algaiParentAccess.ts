@@ -57,7 +57,9 @@ function joinApiPath(baseUrl: string, path: string): string {
 
 export function buildAlgaiLoginUrl(): string {
   const appUrl = getAlgaiStudentAppUrl().replace(/\/$/u, "");
-  return `${appUrl}/login`;
+  const loginUrl = new URL("/login", appUrl);
+  loginUrl.searchParams.set("from", "/api/public/parent-dashboard/redirect");
+  return loginUrl.toString();
 }
 
 function readStoredParentToken(): string | null {
@@ -301,7 +303,15 @@ export function createAlgaiApiDataSource(input?: {
           headers: authHeaders(),
         },
       );
-      return parseApiResponse<ParentDashboardAccessPayload>(response);
+      const payload = await parseApiResponse<ParentDashboardAccessPayload>(
+        response,
+      );
+
+      if (!Array.isArray(payload.students)) {
+        return null;
+      }
+
+      return payload;
     } catch (error) {
       if (error instanceof AlgaiApiError && error.status === 401) {
         return null;
@@ -463,9 +473,25 @@ export async function resolveAlgaiAccess(
         };
       }
 
+      const parentEmail = normalizeEmail(
+        access.parentEmail ||
+          access.user?.email ||
+          access.students[0]?.dashboardPermissions.validatedParentEmail ||
+          "",
+      );
+
+      if (!parentEmail) {
+        return {
+          kind: "unauthenticated",
+          message: "Open AlgAI and sign in with Google to continue.",
+          loginUrl: buildAlgaiLoginUrl(),
+        };
+      }
+
       return {
         kind: "parent",
-        email: normalizeEmail(access.parentEmail),
+        email: parentEmail,
+        user: access.user,
         dashboards: access.students,
         generatedAt: access.generatedAt,
       };

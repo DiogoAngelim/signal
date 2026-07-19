@@ -274,7 +274,7 @@ button:focus-visible {
 .rail-brand img {
   border: 1px solid var(--line);
   border-radius: 8px;
-  height: 46px;
+  height: 66px;
   object-fit: cover;
   width: 58px;
 }
@@ -420,6 +420,29 @@ button:focus-visible {
 .verified-pill svg {
   height: 16px;
   width: 16px;
+}
+
+.empty-state {
+  background: color-mix(in oklch, var(--paper) 88%, white);
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  margin: 0;
+  padding: 14px;
+}
+
+.evidence-transition {
+  align-items: center;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.evidence-transition svg {
+  color: var(--blue);
+  flex: 0 0 auto;
+  height: 15px;
+  width: 15px;
 }
 
 .icon-button {
@@ -735,7 +758,14 @@ button:focus-visible {
   font-size: 1.12rem;
 }
 
-.decision-quality-panel__header > span {
+.decision-quality-panel__header-meta {
+  align-items: flex-end;
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+.next-evidence-callout {
   background: var(--blue-soft);
   border-radius: 8px;
   color: var(--blue);
@@ -956,6 +986,11 @@ button:focus-visible {
 
   .student-switcher__buttons {
     justify-content: stretch;
+  }
+
+  .decision-quality-panel__header-meta {
+    align-items: flex-start;
+    justify-items: start;
   }
 
   .student-tab {

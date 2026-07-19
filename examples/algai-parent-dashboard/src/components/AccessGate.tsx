@@ -22,6 +22,19 @@ type GateState =
       access: AlgaiAccessResolution;
     };
 
+function buildParentUser(
+  access: Extract<AlgaiAccessResolution, { kind: "parent" }>,
+): AuthenticatedUser {
+  return (
+    access.user ?? {
+      id: `parent-${access.email}`,
+      email: access.email,
+      name: access.email,
+      provider: "google" as const,
+    }
+  );
+}
+
 export function AccessGate() {
   const [state, setState] = useState<GateState>({ kind: "checking" });
 
@@ -29,34 +42,13 @@ export function AccessGate() {
     setState({ kind: "checking" });
     consumeParentHandoffTokenFromUrl();
     const access = await resolveAlgaiAccess();
-    const user =
-      access.kind === "parent"
-        ? {
-            id: `parent-${access.email}`,
-            email: access.email,
-            name: access.email.split("@")[0] ?? access.email,
-            provider: "google" as const,
-          }
-        : null;
+    const user = access.kind === "parent" ? buildParentUser(access) : null;
     setState({ kind: "ready", user, access });
   }, []);
 
   useEffect(() => {
     void refreshAccess();
   }, [refreshAccess]);
-
-  useEffect(() => {
-    if (state.kind !== "ready" || state.access.kind !== "unauthenticated") {
-      return;
-    }
-
-    const { loginUrl } = state.access;
-    const timer = window.setTimeout(() => {
-      window.location.replace(loginUrl);
-    }, 600);
-
-    return () => window.clearTimeout(timer);
-  }, [state]);
 
   const handleSignOut = async () => {
     clearParentHandoffToken();
@@ -122,8 +114,8 @@ export function AccessGate() {
           <>
             <p className="access-copy">
               Parent dashboards open from AlgAI after Google login confirms that
-              your email is connected to a registered student. Sending you there
-              now.
+              your email is connected to a registered student. Open AlgAI when
+              you are ready to sign in.
             </p>
             <a className="primary-button" href={state.access.loginUrl}>
               <ExternalLink aria-hidden="true" />
