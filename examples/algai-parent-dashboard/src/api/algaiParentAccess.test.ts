@@ -9,14 +9,43 @@ import {
   updateParentAccessForStudent,
 } from "./algaiParentAccess";
 
+const originalWindowDescriptor = Object.getOwnPropertyDescriptor(
+  globalThis,
+  "window",
+);
+
+afterEach(() => {
+  if (originalWindowDescriptor) {
+    Object.defineProperty(globalThis, "window", originalWindowDescriptor);
+  } else {
+    Reflect.deleteProperty(globalThis, "window");
+  }
+});
+
 describe("AlgAI parent access validation", () => {
   it("asks AlgAI login to return through the parent dashboard handoff", () => {
     const url = new URL(buildAlgaiLoginUrl());
 
+    expect(url.origin).toBe("https://algai.vercel.app");
     expect(url.pathname).toBe("/login");
     expect(url.searchParams.get("from")).toBe(
       "/api/public/parent-dashboard/redirect",
     );
+  });
+
+  it("keeps local dashboard development pointed at the local AlgAI app", () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        location: {
+          hostname: "localhost",
+        },
+      },
+    });
+
+    const url = new URL(buildAlgaiLoginUrl());
+
+    expect(url.origin).toBe("http://localhost:3000");
   });
 
   it("normalizes, validates, and removes duplicate parent emails", () => {

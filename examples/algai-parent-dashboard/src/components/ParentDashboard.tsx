@@ -615,19 +615,6 @@ export function ParentDashboard({
             </div>
           ) : null}
         </div>
-        <button
-          className="rail-toggle"
-          onClick={() => setRailCollapsed((value) => !value)}
-          aria-label={
-            railCollapsed ? "Expand section rail" : "Collapse section rail"
-          }
-        >
-          {railCollapsed ? (
-            <PanelLeftOpen aria-hidden="true" />
-          ) : (
-            <PanelLeftClose aria-hidden="true" />
-          )}
-        </button>
         <nav aria-label="Parent dashboard sections">
           {sections.map((section, index) => {
             const Icon = section.icon;

@@ -13,6 +13,8 @@ import type {
 
 const PARENT_TOKEN_STORAGE_KEY = "algai.parent-dashboard.parent-token";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
+const DEFAULT_ALGAI_STUDENT_APP_URL = "https://algai.vercel.app";
+const LOCAL_ALGAI_STUDENT_APP_URL = "http://localhost:3000";
 
 export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -44,11 +46,28 @@ export function getAlgaiApiBaseUrl(): string {
   );
 }
 
-export function getAlgaiStudentAppUrl(): string {
-  return (
-    (import.meta.env.VITE_ALGAI_STUDENT_APP_URL as string | undefined) ??
-    "http://localhost:3000"
+function isLocalDashboardHost(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return ["localhost", "127.0.0.1", "::1"].includes(
+    window.location.hostname,
   );
+}
+
+export function getAlgaiStudentAppUrl(): string {
+  const configuredUrl = (
+    import.meta.env.VITE_ALGAI_STUDENT_APP_URL as string | undefined
+  )?.trim();
+
+  if (configuredUrl) {
+    return configuredUrl;
+  }
+
+  return isLocalDashboardHost()
+    ? LOCAL_ALGAI_STUDENT_APP_URL
+    : DEFAULT_ALGAI_STUDENT_APP_URL;
 }
 
 function joinApiPath(baseUrl: string, path: string): string {

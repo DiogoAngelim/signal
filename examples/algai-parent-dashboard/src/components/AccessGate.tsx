@@ -1,4 +1,5 @@
 import {
+  buildAlgaiLoginUrl,
   clearParentHandoffToken,
   consumeParentHandoffTokenFromUrl,
   getAlgaiApiBaseUrl,
@@ -35,15 +36,48 @@ function buildParentUser(
   );
 }
 
+function buildUnauthenticatedAccess(message: string): AlgaiAccessResolution {
+  return {
+    kind: "unauthenticated",
+    message,
+    loginUrl: buildAlgaiLoginUrl(),
+  };
+}
+
 export function AccessGate() {
   const [state, setState] = useState<GateState>({ kind: "checking" });
 
   const refreshAccess = useCallback(async () => {
     setState({ kind: "checking" });
-    consumeParentHandoffTokenFromUrl();
-    const access = await resolveAlgaiAccess();
-    const user = access.kind === "parent" ? buildParentUser(access) : null;
-    setState({ kind: "ready", user, access });
+    try {
+      const parentToken = consumeParentHandoffTokenFromUrl();
+      if (!parentToken) {
+        setState({
+          kind: "ready",
+          user: null,
+          access: buildUnauthenticatedAccess(
+            "Open AlgAI and sign in with Google to continue.",
+          ),
+        });
+        return;
+      }
+
+      const access = await resolveAlgaiAccess();
+      if (access.kind === "unauthenticated") {
+        clearParentHandoffToken();
+      }
+      const user = access.kind === "parent" ? buildParentUser(access) : null;
+      setState({ kind: "ready", user, access });
+    } catch {
+      clearParentHandoffToken();
+      setState({
+        kind: "ready",
+        user: null,
+        access: buildUnauthenticatedAccess(
+          "We could not validate this parent dashboard session. Open AlgAI and sign in again.",
+        ),
+      });
+    }
   }, []);
 
   useEffect(() => {

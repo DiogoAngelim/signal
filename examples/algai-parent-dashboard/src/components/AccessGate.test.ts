@@ -11,6 +11,8 @@ describe("AccessGate login handoff", () => {
 
     expect(accessGateSource).toContain("Open AlgAI login");
     expect(accessGateSource).toContain("Open AlgAI when");
+    expect(accessGateSource).toContain("We could not validate this parent");
+    expect(accessGateSource).toContain("clearParentHandoffToken();");
     expect(accessGateSource).not.toContain("window.location.replace");
     expect(accessGateSource).not.toContain("split(\"@\")");
   });

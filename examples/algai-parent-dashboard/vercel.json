@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://algai.vercel.app/api/:path*"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/logo.png"
+    }
+  ]
+}
