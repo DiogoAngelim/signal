@@ -224,7 +224,7 @@ pnpm verify:exports
 ## Example App Links
 
 - Aware: <https://aware-guide.vercel.app>
-- Stocks Optimizer: <https://stocks-optimizer.vercel.app>
+- Stocks Optimizer: <https://stock-optimizer-iota.vercel.app/>
 
 ## License
 
