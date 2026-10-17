@@ -1,0 +1,7 @@
+{
+  "extends": "../../packages/decision/tsconfig.json",
+  "compilerOptions": {
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["node"]
+  }
+}

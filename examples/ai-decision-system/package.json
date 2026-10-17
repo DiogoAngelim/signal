@@ -1,0 +1,19 @@
+{
+  "name": "@signal/ai-decision-system",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc -p tsconfig.signal-decision.json && tsc -p tsconfig.json",
+    "start": "pnpm run build && node dist/index.js",
+    "test": "pnpm run build && tsc -p tsconfig.test.json --noEmit false --outDir dist/test-run && node --test dist/test-run/test/triage.test.js",
+    "typecheck": "pnpm run build && tsc -p tsconfig.test.json --noEmit"
+  },
+  "dependencies": {
+    "@signal/decision": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.16",
+    "typescript": "^5.7.3"
+  }
+}

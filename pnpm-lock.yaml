@@ -214,6 +214,19 @@ importers:
         specifier: ^2.1.9
         version: 2.1.9(@types/node@20.19.39)(happy-dom@20.9.0)(lightningcss@1.32.0)(terser@5.46.1)
 
+  examples/ai-decision-system:
+    dependencies:
+      '@signal/decision':
+        specifier: workspace:*
+        version: link:../../packages/decision
+    devDependencies:
+      '@types/node':
+        specifier: ^20.17.16
+        version: 20.19.39
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
   examples/algai:
     dependencies:
       '@fastify/cookie':
