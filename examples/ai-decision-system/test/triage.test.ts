@@ -100,6 +100,27 @@ describe("AI-assisted security alert triage example", () => {
     assert.match(decision.rationale, /only 1 qualified/i);
   });
 
+  it("requires every evidence dimension to pass before a source qualifies", () => {
+    const base = EXAMPLE_ALERTS[0];
+    for (const dimension of [
+      "quality",
+      "reliability",
+      "freshness",
+      "independence",
+      "traceability",
+    ] as const) {
+      const degraded: SecurityAlert = {
+        ...base,
+        signals: base.signals.map((signal, index) =>
+          index === 0 ? { ...signal, [dimension]: 0 } : signal,
+        ),
+      };
+      const decision = evaluateAlert(degraded, decisionAt);
+      assert.equal(decision.priority, "analyst-review", dimension);
+      assert.match(decision.rationale, /only 1 qualified/i);
+    }
+  });
+
   it("never lets a high heuristic score alone trigger escalation", () => {
     const alert = structuredClone(EXAMPLE_ALERTS[1]);
     const decision = evaluateAlert(alert, decisionAt);
