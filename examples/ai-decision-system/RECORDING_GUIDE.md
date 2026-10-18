@@ -108,6 +108,8 @@ Run the clean-checkout gate. Expected fixture outcomes to verify from actual out
 
 The student changes the actual application policy from two qualified source labels to three. Add a test first and capture the failing result. Then change the policy constant, add a third distinctly labeled synthetic supporting signal, and update fixture-dependent assertions deliberately. A failed old assertion is a contract conflict to resolve—not a test to delete casually. The solution is not covered by the baseline CI run until build, test, typecheck, and start have been run against the changed code.
 
+**Instructor answer key:** `POLICY_EXERCISE_SOLUTION.md` is on the separate solution branch. This is an exercise variant, not the baseline release; synchronize the slide deck and narration before adopting the stricter policy in a release.
+
 ## Closing narration (slide 27)
 
 “We made a small decision process explicit: validate input, assess evidence, apply a separate policy, record the result, replay selected fields, and review later outcomes. The fixtures and thresholds are synthetic. The estimator is not calibrated, source independence is not independently verified, storage is volatile, and replay is not tamper-proof. A real deployment needs domain validation, access controls, durable storage, monitoring, calibration, failure handling, and an approved operational policy. Evidence before action, policy before automation, and tests before trust.”
