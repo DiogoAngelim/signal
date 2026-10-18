@@ -1,0 +1,40 @@
+name: AI decision system course validation
+
+on:
+  pull_request:
+    paths:
+      - 'examples/ai-decision-system/**'
+      - 'packages/decision/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/ai-decision-course.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enable pinned pnpm via Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.12.4 --activate
+          node --version
+          pnpm --version
+      - name: Install focused workspace dependencies
+        run: pnpm install --filter @signal/ai-decision-system --filter '!signal-workspace' --frozen-lockfile
+      - name: Build real Signal example
+        run: pnpm --filter @signal/ai-decision-system build
+      - name: Test real Signal example
+        run: pnpm --filter @signal/ai-decision-system test
+      - name: Typecheck real Signal example
+        run: pnpm --filter @signal/ai-decision-system typecheck
+      - name: Run synthetic fixtures
+        run: pnpm --filter @signal/ai-decision-system start
