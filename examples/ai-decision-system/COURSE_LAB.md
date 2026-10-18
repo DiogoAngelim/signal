@@ -198,6 +198,8 @@ corepack pnpm --filter @signal/ai-decision-system start
 5. Keep the duplicate-source test and contradiction test meaningful. Do not delete an existing assertion merely to get green.
 6. Run build, test, typecheck, and start. This optional exercise solution is not covered by the baseline CI run until it is executed on the changed source.
 
+**Instructor answer key:** see `POLICY_EXERCISE_SOLUTION.md` on the separate solution branch. Do not merge the three-source solution into the baseline release without synchronizing the slides and narration.
+
 The supplied `source` labels and independence scores do not establish actual organizational or technical independence. Explain that limitation aloud.
 
 ## Source-of-truth map
