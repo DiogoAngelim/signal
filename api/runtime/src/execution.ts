@@ -1,3 +1,4 @@
+import { ZodError } from "zod";
 import {
   type SignalDelivery,
   type SignalEnvelope,
@@ -7,6 +8,26 @@ import {
   createSignalError,
 } from "@signal/protocol";
 import type { SignalExecutionContext, SignalRequestContext } from "./types";
+
+/**
+ * Detect Zod validation failures across package boundaries. With pnpm workspaces,
+ * a consumer may receive a ZodError instance from a different installed copy of
+ * Zod, for which instanceof against this package's constructor is false.
+ */
+export function isZodError(
+  error: unknown,
+): error is Error & { issues: unknown[] } {
+  if (error instanceof ZodError) {
+    return true;
+  }
+
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { name?: unknown }).name === "ZodError" &&
+    Array.isArray((error as { issues?: unknown }).issues)
+  );
+}
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   if (value === null || typeof value !== "object") {
