@@ -4,6 +4,7 @@ import { z } from "zod";
 import { defineEvent, defineQuery } from "../../sdk-node/src";
 import {
   PerceptionLayer,
+  createInProcessDispatcher,
   type PerceptionObservation,
   type PerceptionSnapshot,
   SignalRuntime,
@@ -197,20 +198,10 @@ describe("perception layer", () => {
   });
 
   it("is event-aware inside SignalRuntime without coupling consumers to perception", async () => {
-    const runtime = new SignalRuntime();
+    const eventPort = createInProcessDispatcher();
+    const runtime = new SignalRuntime({ eventPort });
+    const perception = new PerceptionLayer();
 
-    runtime.registerQuery(
-      defineQuery({
-        name: "market.snapshot.v1",
-        kind: "query",
-        inputSchema: z.object({ symbol: z.string() }),
-        resultSchema: z.object({
-          price: z.number(),
-          changePercent: z.number(),
-        }),
-        handler: () => ({ price: 101, changePercent: 1.4 }),
-      }),
-    );
     runtime.registerEvent(
       defineEvent({
         name: "market.updated.v1",
@@ -226,24 +217,27 @@ describe("perception layer", () => {
         handler: (payload) => payload,
       }),
     );
+    runtime.subscribe("market.updated.v1", (envelope) => {
+      perception.observe(signalEnvelopeToPerceptionObservation(envelope));
+    });
 
-    const query = await runtime.query("market.snapshot.v1", { symbol: "BTC" });
     await runtime.publish("market.updated.v1", {
       pressure: 0.86,
       volatility: 0.73,
     });
 
-    expect(query.ok).toBe(true);
-    expect(runtime.capabilities().features?.perception).toBe(true);
-    expect(runtime.perception?.getSnapshot("market.snapshot")).toBeDefined();
-    expect(runtime.perception?.getSnapshot("market.updated")).toBeDefined();
+    expect(perception.getSnapshot("market.updated")).toBeDefined();
+    expect(runtime.capabilities().features?.perception).toBeUndefined();
   });
 
   it("can be disabled for runtimes that do not need active perception", () => {
-    const runtime = new SignalRuntime({ perception: false });
+    const runtime = new SignalRuntime({
+      eventPort: createInProcessDispatcher(),
+    });
+    const perception = new PerceptionLayer();
 
-    expect(runtime.perception).toBeUndefined();
-    expect(runtime.capabilities().features?.perception).toBe(false);
+    expect(perception.getSnapshot("optional.subject")).toBeUndefined();
+    expect(runtime.capabilities().features?.perception).toBeUndefined();
   });
 
   it("covers empty, event-only, filtered, and cleared perception histories", async () => {
