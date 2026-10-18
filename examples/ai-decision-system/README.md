@@ -2,7 +2,7 @@
 
 **Course promise:** Follow a synthetic security alert from validated input through evidence assessment, an explicit triage decision, recording, deterministic re-evaluation, and later outcome review. Learn why a high heuristic score is evidence—not a verdict—and where Signal's guarantees stop.
 
-The instructor's recording guide is in [RECORDING_GUIDE.md](./RECORDING_GUIDE.md). For the repository-first hands-on course, follow [COURSE_LAB.md](./COURSE_LAB.md), which teaches the actual Signal APIs and includes a test-first policy challenge.
+The instructor's recording guide is in [RECORDING_GUIDE.md](./RECORDING_GUIDE.md). For the repository-first hands-on course, follow [COURSE_LAB.md](./COURSE_LAB.md), which uses eight compiling verification checkpoints against the complete canonical source and includes a test-first policy challenge.
 
 ## Audience and prerequisites
 
