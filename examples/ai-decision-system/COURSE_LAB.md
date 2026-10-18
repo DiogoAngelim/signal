@@ -10,6 +10,32 @@
 
 **Boundaries:** no trained ML model, no provider calls, no automated security response, no immutable or durable audit log. The heuristic score is advisory, and two distinct source labels do not prove actual source independence.
 
+## Architecture at a glance
+
+This diagram reflects the checked-in example—not a generic production architecture. The five evidence dimensions are quality, reliability, freshness, independence, and traceability. The store is in-memory; replay compares selected fields; later outcome review does not rewrite the original record.
+
+```mermaid
+flowchart TD
+    A["Synthetic security alert<br/>captured timestamp"] --> B["validateAlert<br/>strict input contract"]
+    B --> C["estimateRiskLocally<br/>advisory 0–100 heuristic"]
+    B --> D["Alert signals<br/>direction + five quality dimensions"]
+    C --> E["assessDecisionEvidence<br/>Signal API"]
+    D --> E
+    E --> F{"Explicit application policy"}
+    F -->|"Critical + ≥2 distinct qualified source labels<br/>+ no contradictions"| G["escalate"]
+    F -->|"Low/medium + score ≤30<br/>+ no supplied signals"| H["monitor"]
+    F -->|"Otherwise"| I["analyst-review"]
+    G --> J["createDecisionRecord<br/>rationale + accountability"]
+    H --> J
+    I --> J
+    J --> K["Signal in-memory store<br/>volatile, not durable"]
+    J --> L["replayCapturedDecision<br/>selected-field comparison"]
+    J --> M["reviewLaterOutcome<br/>separate retrospective record"]
+    M -. "does not mutate" .-> J
+```
+
+**Key teaching point:** Signal assesses evidence and provides record/replay primitives. The application's explicit policy selects the triage priority. The local score is neutral evidence and cannot trigger escalation by itself.
+
 ## Start here: reproducible baseline
 
 Open the repository root in VS Code. Use Node.js 20+ and pnpm 10.12.4 (the package-manager version declared by the repository). Prefer `corepack pnpm` if pnpm is not installed globally.
