@@ -2,7 +2,7 @@
 
 **Course promise:** Follow a synthetic security alert from validated input through evidence assessment, an explicit triage decision, recording, deterministic re-evaluation, and later outcome review. Learn why a high heuristic score is evidence—not a verdict—and where Signal's guarantees stop.
 
-The instructor's word-for-word recording guide is in [RECORDING_GUIDE.md](./RECORDING_GUIDE.md).
+The instructor's recording guide is in [RECORDING_GUIDE.md](./RECORDING_GUIDE.md). For the repository-first hands-on course, follow [COURSE_LAB.md](./COURSE_LAB.md), which teaches the actual Signal APIs and includes a test-first policy challenge.
 
 ## Audience and prerequisites
 
@@ -26,7 +26,7 @@ pnpm --filter @signal/ai-decision-system typecheck
 pnpm --filter @signal/ai-decision-system start
 ```
 
-The filtered install selects the example and its workspace dependency while excluding the unrelated root importer named `signal-workspace`. The example compiles the actual `packages/decision` source with its own TypeScript compiler and Node type definitions; it does not require that package's Vitest test runner and does not replace Signal APIs with mocks. The test script uses Node's built-in test runner and includes nine tests.
+The filtered install selects the example and its workspace dependency while excluding the unrelated root importer named `signal-workspace`. The example compiles the actual `packages/decision` source with its own TypeScript compiler and Node type definitions; it does not require that package's Vitest test runner and does not replace Signal APIs with mocks. The test script uses Node's built-in test runner and includes ten tests on this teaching branch (nine original cases plus a five-dimension evidence-gate regression case).
 
 Expected demo priorities:
 
