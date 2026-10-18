@@ -140,7 +140,7 @@ describe("runtime", () => {
   it("dispatches events emitted from a mutation handler", async () => {
     const dispatcher = createInProcessDispatcher();
     const runtime = new SignalRuntime({
-      dispatcher,
+      eventPort: dispatcher,
       storagePort: createMemoryIdempotencyStore(),
     });
     const seen: string[] = [];
