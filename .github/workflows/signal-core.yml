@@ -47,6 +47,9 @@ jobs:
 
       - run: pnpm arch:check
 
+      # Build workspace packages first: their exports resolve to dist/ entrypoints.
+      - run: pnpm build:library
+
       - run: pnpm --filter "@digelim/*" test
 
       - run: pnpm --filter @signal/protocol test
