@@ -174,7 +174,7 @@ corepack pnpm --filter @signal/ai-decision-system test
 
 **Inspect:** `reviewLaterOutcome`, `reviewDecisionOutcome`, the outcome-separation test, and the test catalogue.
 
-**Verify:** later outcome review does not rewrite the original record or become an input to replay/estimation. The current suite has 10 top-level test definitions.
+**Verify:** later outcome review does not rewrite the original record or become an input to replay/estimation. The baseline suite has 10 top-level test definitions; the separate three-source solution variant adds an eleventh policy regression.
 
 **Checkpoint commands:**
 
