@@ -138,9 +138,9 @@ describe("runtime", () => {
   });
 
   it("dispatches events emitted from a mutation handler", async () => {
-    const dispatcher = createInProcessDispatcher();
+    const eventPort = createInProcessDispatcher();
     const runtime = new SignalRuntime({
-      eventPort: dispatcher,
+      eventPort,
       storagePort: createMemoryIdempotencyStore(),
     });
     const seen: string[] = [];
@@ -172,7 +172,7 @@ describe("runtime", () => {
       }),
     );
 
-    dispatcher.subscribe("audit.emitted.v1", async (event) => {
+    runtime.subscribe("audit.emitted.v1", async (event) => {
       seen.push(event.context?.causationId ?? "missing");
     });
 
