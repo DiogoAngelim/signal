@@ -1,7 +1,7 @@
 import { createSignalEnvelope, createSignalError } from "@signal/protocol";
-import { ZodError } from "zod";
 import {
   createExecutionSuccessMeta,
+  isZodError,
   throwIfExecutionBlocked,
   toEnvelopeContext,
   toEnvelopeDelivery,
@@ -51,7 +51,7 @@ export async function executeQuery<TInput, TResult>(
       envelope,
     } as SignalExecutionResult<TResult>;
   } catch (error) {
-    if (error instanceof ZodError) {
+    if (isZodError(error)) {
       return {
         ok: false,
         error: createSignalError("VALIDATION_ERROR", error.message, {
