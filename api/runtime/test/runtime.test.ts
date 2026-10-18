@@ -32,7 +32,7 @@ describe("runtime", () => {
       }),
     );
 
-    const runtime = new SignalRuntime({ dispatcher });
+    const runtime = new SignalRuntime({ eventPort: dispatcher });
     runtime.registerEvent(
       defineEvent({
         name: "audit.event.v1",
@@ -111,7 +111,7 @@ describe("runtime", () => {
     );
 
     const runtime = new SignalRuntime({
-      dispatcher: createInProcessDispatcher(),
+      eventPort: createInProcessDispatcher(),
     });
 
     runtime.registerQuery(
@@ -141,7 +141,7 @@ describe("runtime", () => {
     const dispatcher = createInProcessDispatcher();
     const runtime = new SignalRuntime({
       dispatcher,
-      idempotencyStore: createMemoryIdempotencyStore(),
+      storagePort: createMemoryIdempotencyStore(),
     });
     const seen: string[] = [];
 
@@ -188,7 +188,7 @@ describe("runtime", () => {
 
   it("allows mutations without idempotency tracking", async () => {
     const runtime = new SignalRuntime({
-      dispatcher: createInProcessDispatcher(),
+      eventPort: createInProcessDispatcher(),
     });
 
     runtime.registerMutation(
@@ -209,10 +209,8 @@ describe("runtime", () => {
 
   it("covers mutation result recording without a parent envelope and plain object failures", async () => {
     const store = createMemoryIdempotencyStore();
-    const runtime = new SignalRuntime({
-      dispatcher: createInProcessDispatcher(),
-      idempotencyStore: store,
-    });
+    const eventPort = createInProcessDispatcher();
+    const runtime = new SignalRuntime({ eventPort, storagePort: store });
 
     runtime.registerMutation(
       defineMutation({
@@ -243,7 +241,7 @@ describe("runtime", () => {
 
     const recorded = await executeMutation(
       runtime.registry,
-      runtime.dispatcher,
+      eventPort,
       store,
       "audit.record.v1",
       { value: "ok" },
@@ -269,8 +267,8 @@ describe("runtime", () => {
 
   it("replays completed mutations and conflicts on payload mismatch", async () => {
     const runtime = new SignalRuntime({
-      dispatcher: createInProcessDispatcher(),
-      idempotencyStore: createMemoryIdempotencyStore(),
+      eventPort: createInProcessDispatcher(),
+      storagePort: createMemoryIdempotencyStore(),
     });
 
     const state = { count: 0 };
@@ -316,8 +314,8 @@ describe("runtime", () => {
 
   it("handles validation errors, custom errors, and replayed failures", async () => {
     const runtime = new SignalRuntime({
-      dispatcher: createInProcessDispatcher(),
-      idempotencyStore: createMemoryIdempotencyStore(),
+      eventPort: createInProcessDispatcher(),
+      storagePort: createMemoryIdempotencyStore(),
     });
 
     runtime.registerQuery(
@@ -471,8 +469,8 @@ describe("runtime", () => {
 
   it("treats invalid inputs and missing operations as protocol errors", async () => {
     const runtime = new SignalRuntime({
-      dispatcher: createInProcessDispatcher(),
-      idempotencyStore: createMemoryIdempotencyStore(),
+      eventPort: createInProcessDispatcher(),
+      storagePort: createMemoryIdempotencyStore(),
     });
 
     runtime.registerEvent(
@@ -520,8 +518,8 @@ describe("runtime", () => {
 
   it("handles replayed mutation results, inflight conflicts, and lock state", async () => {
     const runtime = new SignalRuntime({
-      dispatcher: createInProcessDispatcher(),
-      idempotencyStore: {
+      eventPort: createInProcessDispatcher(),
+      storagePort: {
         reserve: async () => ({
           state: "inflight",
           record: {
@@ -556,8 +554,8 @@ describe("runtime", () => {
     );
 
     const replayRuntime = new SignalRuntime({
-      dispatcher: createInProcessDispatcher(),
-      idempotencyStore: {
+      eventPort: createInProcessDispatcher(),
+      storagePort: {
         reserve: async () => ({
           state: "replayed",
           record: {
@@ -671,7 +669,7 @@ describe("runtime", () => {
   });
 
   it("generates capabilities from registered operations", () => {
-    const runtime = new SignalRuntime();
+    const runtime = new SignalRuntime({ eventPort: createInProcessDispatcher() });
 
     runtime.registerQuery(
       defineQuery({
@@ -762,7 +760,7 @@ describe("runtime", () => {
     expect(retryable.retryable).toBe(true);
     expect(defaultRetryability.retryable).toBe(false);
 
-    const runtime = new SignalRuntime();
+    const runtime = new SignalRuntime({ eventPort: createInProcessDispatcher() });
     const seen: string[] = [];
     runtime.registerEvent(
       defineEvent({
@@ -805,7 +803,7 @@ describe("runtime", () => {
       },
     );
     const event = await runtime.publish("meta.changed.v1", { value: "one" });
-    await runtime.dispatcher.dispatch(event);
+    await eventPort.dispatch(event);
 
     const nested = createNestedExecutionContext(
       {
@@ -837,7 +835,8 @@ describe("runtime", () => {
   it("covers normalized idempotency and reserved validation failure cleanup", async () => {
     const failed: string[] = [];
     const runtime = new SignalRuntime({
-      idempotencyStore: {
+      eventPort: createInProcessDispatcher(),
+      storagePort: {
         reserve: async () => ({
           state: "reserved",
         }),
@@ -891,31 +890,38 @@ describe("runtime", () => {
     expect(failed).toContain("invalid.result.v1");
   });
 
-  it("accepts an existing perception layer instance", async () => {
+  it("composes Signal event subscriptions with a separate perception layer", async () => {
+    const eventPort = createInProcessDispatcher();
+    const runtime = new SignalRuntime({ eventPort });
     const perception = new PerceptionLayer();
-    const runtime = new SignalRuntime({ perception });
 
-    runtime.registerQuery(
-      defineQuery({
-        name: "perceived.get.v1",
-        kind: "query",
+    runtime.registerEvent(
+      defineEvent({
+        name: "perceived.changed.v1",
+        kind: "event",
         inputSchema: z.object({ value: z.number() }),
         resultSchema: z.object({ value: z.number() }),
-        handler: (input) => input,
+        handler: (payload) => payload,
       }),
     );
+    runtime.subscribe("perceived.changed.v1", (envelope) => {
+      perception.observe({
+        subject: "perceived.changed",
+        observedAt: envelope.timestamp,
+        source: "signal-event",
+        signals: { value: envelope.payload.value },
+      });
+    });
 
-    const result = await runtime.query("perceived.get.v1", { value: 1 });
+    await runtime.publish("perceived.changed.v1", { value: 1 });
 
-    expect(result.ok).toBe(true);
-    expect(runtime.perception).toBe(perception);
-    expect(perception.getSnapshot("perceived.get")).toBeDefined();
+    expect(perception.getSnapshot("perceived.changed")).toBeDefined();
+    expect(runtime.capabilities().features?.perception).toBeUndefined();
   });
 
   it("publishes events with causation and custom context", async () => {
-    const runtime = new SignalRuntime({
-      dispatcher: createInProcessDispatcher(),
-    });
+    const eventPort = createInProcessDispatcher();
+    const runtime = new SignalRuntime({ eventPort });
 
     runtime.registerEvent(
       defineEvent({
@@ -949,8 +955,8 @@ describe("runtime", () => {
 
   it("executes explicit protocol operations with normalized data results", async () => {
     const runtime = new SignalRuntime({
-      dispatcher: createInProcessDispatcher(),
-      idempotencyStore: createMemoryIdempotencyStore(),
+      eventPort: createInProcessDispatcher(),
+      storagePort: createMemoryIdempotencyStore(),
     });
     const seen: string[] = [];
 
@@ -1100,8 +1106,8 @@ describe("runtime", () => {
 
   it("runs inferred operations and fails safely when inference is ambiguous", async () => {
     const runtime = new SignalRuntime({
-      dispatcher: createInProcessDispatcher(),
-      idempotencyStore: createMemoryIdempotencyStore(),
+      eventPort: createInProcessDispatcher(),
+      storagePort: createMemoryIdempotencyStore(),
     });
 
     runtime.registerQuery(
@@ -1173,7 +1179,7 @@ describe("runtime", () => {
   });
 
   it("locks via the runtime API", () => {
-    const runtime = new SignalRuntime();
+    const runtime = new SignalRuntime({ eventPort: createInProcessDispatcher() });
     runtime.lock();
 
     expect(() =>
