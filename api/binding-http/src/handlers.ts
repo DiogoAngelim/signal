@@ -1,4 +1,5 @@
 import {
+  createSignalError,
   signalAuthSchema,
   signalContextSchema,
   signalDeliverySchema,
@@ -52,7 +53,17 @@ const signalHttpBodySchema = z
     meta: z.record(z.unknown()).optional(),
     idempotencyKey: z.string().min(1).optional(),
   })
-  .passthrough();
+  .passthrough()
+  .superRefine((body, context) => {
+    // z.unknown() accepts undefined, so explicitly require the payload key.
+    if (!Object.prototype.hasOwnProperty.call(body, "payload")) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["payload"],
+        message: "payload is required",
+      });
+    }
+  });
 
 function toRequestContext(body: SignalHttpBody) {
   return {
@@ -78,32 +89,39 @@ export async function handleQueryRequest(
   request: FastifyRequest<{ Params: { name: string }; Body: SignalHttpBody }>,
   reply: FastifyReply,
 ) {
+  let body: SignalHttpBody;
   try {
-    const body = parseBody(request.body);
+    body = parseBody(request.body);
+  } catch (error) {
+    const failure = {
+      ok: false as const,
+      error: createSignalError(
+        "BAD_REQUEST",
+        error instanceof Error ? error.message : "Invalid Signal HTTP request body",
+      ),
+    };
+    return reply.code(400).send(failure);
+  }
+
+  try {
     const result = await runtime.query(
       request.params.name,
       body.payload,
       toRequestContext(body),
     );
-
     return reply
       .code(result.ok ? 200 : signalErrorHttpStatus(result.error))
       .send(result);
-  } catch (error) {
+  } catch {
     const failure = {
       ok: false as const,
-      error: {
-        code: "BAD_REQUEST" as const,
-        category: "validation" as const,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Invalid Signal HTTP request body",
-        retryable: false,
-      },
+      error: createSignalError(
+        "INTERNAL_ERROR",
+        "Signal query execution failed",
+        { retryable: true },
+      ),
     };
-
-    return reply.code(400).send(failure);
+    return reply.code(500).send(failure);
   }
 }
 
@@ -112,31 +130,38 @@ export async function handleMutationRequest(
   request: FastifyRequest<{ Params: { name: string }; Body: SignalHttpBody }>,
   reply: FastifyReply,
 ) {
+  let body: SignalHttpBody;
   try {
-    const body = parseBody(request.body);
+    body = parseBody(request.body);
+  } catch (error) {
+    const failure = {
+      ok: false as const,
+      error: createSignalError(
+        "BAD_REQUEST",
+        error instanceof Error ? error.message : "Invalid Signal HTTP request body",
+      ),
+    };
+    return reply.code(400).send(failure);
+  }
+
+  try {
     const result = await runtime.mutation(
       request.params.name,
       body.payload,
       toRequestContext(body),
     );
-
     return reply
       .code(result.ok ? 200 : signalErrorHttpStatus(result.error))
       .send(result);
-  } catch (error) {
+  } catch {
     const failure = {
       ok: false as const,
-      error: {
-        code: "BAD_REQUEST" as const,
-        category: "validation" as const,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Invalid Signal HTTP request body",
-        retryable: false,
-      },
+      error: createSignalError(
+        "INTERNAL_ERROR",
+        "Signal mutation execution failed",
+        { retryable: true },
+      ),
     };
-
-    return reply.code(400).send(failure);
+    return reply.code(500).send(failure);
   }
 }
