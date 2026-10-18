@@ -98,11 +98,11 @@ Run the clean-checkout gate. Expected fixture outcomes to verify from actual out
 
 ### Checkpoint 8 — Separate later outcomes and close (slides 23–27)
 
-**On screen:** `reviewLaterOutcome`, its test, and the ten-test catalogue.
+**On screen:** `reviewLaterOutcome`, its test, and the baseline ten-test catalogue (the separate solution branch adds one policy regression).
 
 **Say:** “An outcome is new knowledge. We record it separately instead of rewriting the original decision-time snapshot. It does not silently train the heuristic or change replay inputs.”
 
-**Verify:** run build, test, typecheck, and start; save actual output. The baseline suite has ten top-level test definitions, including the five-dimension regression loop.
+**Verify:** run build, test, typecheck, and start; save actual output. The baseline suite has ten top-level test definitions, including the five-dimension regression loop; the separate three-source solution variant adds an eleventh policy regression.
 
 ## Independent policy exercise — test first (additional 45–60 minutes; slides 25–26)
 
