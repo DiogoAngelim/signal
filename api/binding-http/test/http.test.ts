@@ -17,7 +17,7 @@ describe("http binding", () => {
   it("executes queries and mutations", async () => {
     const runtime = new SignalRuntime({
       eventPort: noopEventPort,
-      idempotencyStore: createMemoryIdempotencyStore(),
+      storagePort: createMemoryIdempotencyStore(),
     });
 
     let value = 0;
@@ -164,9 +164,17 @@ describe("http binding", () => {
       method: "POST",
       url: "/signal/query/note.get.v1",
       payload: {
+        payload: { noteId: "" },
         context: {
           correlationId: "corr-invalid",
         },
+      },
+    });
+    const missingPayloadResponse = await app.inject({
+      method: "POST",
+      url: "/signal/query/note.get.v1",
+      payload: {
+        context: { correlationId: "corr-missing-payload" },
       },
     });
     const queryParseResponse = await app.inject({
@@ -208,19 +216,23 @@ describe("http binding", () => {
         category: "validation",
       },
     });
+    expect(missingPayloadResponse.statusCode).toBe(400);
+    expect(JSON.parse(missingPayloadResponse.body).error.code).toBe("BAD_REQUEST");
     expect(queryParseResponse.statusCode).toBe(400);
     expect(JSON.parse(queryParseResponse.body).error.code).toBe("BAD_REQUEST");
     expect(mutationParseResponse.statusCode).toBe(400);
     expect(JSON.parse(mutationParseResponse.body).error.code).toBe(
       "BAD_REQUEST",
     );
-    expect(thrownQueryResponse.statusCode).toBe(400);
-    expect(JSON.parse(thrownQueryResponse.body).error.message).toBe(
-      "Invalid Signal HTTP request body",
-    );
-    expect(thrownMutationResponse.statusCode).toBe(400);
-    expect(JSON.parse(thrownMutationResponse.body).error.message).toBe(
-      "Invalid Signal HTTP request body",
-    );
+    expect(thrownQueryResponse.statusCode).toBe(500);
+    expect(JSON.parse(thrownQueryResponse.body).error).toMatchObject({
+      code: "INTERNAL_ERROR",
+      message: "Signal query execution failed",
+    });
+    expect(thrownMutationResponse.statusCode).toBe(500);
+    expect(JSON.parse(thrownMutationResponse.body).error).toMatchObject({
+      code: "INTERNAL_ERROR",
+      message: "Signal mutation execution failed",
+    });
   });
 });

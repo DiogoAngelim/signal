@@ -4,6 +4,7 @@ import { defineEvent, defineMutation, defineQuery } from "../../sdk-node/src";
 import {
   SignalRuntime,
   createInMemoryConsumerDeduper,
+  createInProcessDispatcher,
   createMemoryIdempotencyStore,
   createReplaySafeSubscriber,
 } from "../src";
@@ -11,7 +12,8 @@ import {
 describe("runtime guarantees", () => {
   it("freezes request-scoped context and surfaces replay metadata", async () => {
     const runtime = new SignalRuntime({
-      idempotencyStore: createMemoryIdempotencyStore(),
+      eventPort: createInProcessDispatcher(),
+      storagePort: createMemoryIdempotencyStore(),
     });
 
     runtime.registerMutation(
@@ -55,7 +57,7 @@ describe("runtime guarantees", () => {
   });
 
   it("classifies deadline and cancellation failures", async () => {
-    const runtime = new SignalRuntime();
+    const runtime = new SignalRuntime({ eventPort: createInProcessDispatcher() });
 
     runtime.registerQuery(
       defineQuery({
@@ -93,7 +95,8 @@ describe("runtime guarantees", () => {
   });
 
   it("supports per-consumer dedupe helpers", async () => {
-    const runtime = new SignalRuntime();
+    const eventPort = createInProcessDispatcher();
+    const runtime = new SignalRuntime({ eventPort });
     const seen: string[] = [];
     const deduper = createInMemoryConsumerDeduper();
 
@@ -128,8 +131,8 @@ describe("runtime guarantees", () => {
       postId: "post_1001",
     });
 
-    await runtime.dispatcher.dispatch(event);
-    await runtime.dispatcher.dispatch(event);
+    await eventPort.dispatch(event);
+    await eventPort.dispatch(event);
 
     expect(seen).toEqual([event.messageId]);
   });

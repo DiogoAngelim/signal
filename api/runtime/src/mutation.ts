@@ -5,11 +5,11 @@ import {
   createSignalEnvelope,
   createSignalError,
 } from "@signal/protocol";
-import { ZodError } from "zod";
 import { dispatchEvent } from "./event";
 import {
   createExecutionSuccessMeta,
   createNestedExecutionContext,
+  isZodError,
   throwIfExecutionBlocked,
   toEnvelopeContext,
   toEnvelopeDelivery,
@@ -241,7 +241,7 @@ export async function executeMutation<TInput, TResult>(
       envelope,
     };
   } catch (error) {
-    if (error instanceof ZodError) {
+    if (isZodError(error)) {
       const failure = createSignalError("VALIDATION_ERROR", error.message, {
         details: { issues: error.issues },
       });
