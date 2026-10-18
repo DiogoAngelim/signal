@@ -132,7 +132,7 @@ describe("AI-assisted security alert triage example", () => {
       };
       const decision = evaluateAlert(degraded, decisionAt);
       assert.equal(decision.priority, "analyst-review", dimension);
-      assert.match(decision.rationale, /only 1 qualified/i);
+      assert.match(decision.rationale, /only 2 qualified/i);
     }
   });
 
@@ -173,7 +173,7 @@ describe("AI-assisted security alert triage example", () => {
     };
     const weak = evaluateAlert(weakAlert, decisionAt);
     assert.equal(weak.priority, "analyst-review");
-    assert.match(weak.rationale, /only 1 qualified/i);
+    assert.match(weak.rationale, /only 2 qualified/i);
 
     const baseConflicting = EXAMPLE_ALERTS[0];
     const conflictingAlert: SecurityAlert = {
