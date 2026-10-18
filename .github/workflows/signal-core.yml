@@ -47,6 +47,12 @@ jobs:
 
       - run: pnpm arch:check
 
+      # Workspace packages export their compiled dist/ entrypoints. Build them
+      # before package-level tests import @signal/runtime and @signal/protocol.
+      - run: pnpm build:library
+
+      - run: pnpm verify:exports
+
       - run: pnpm --filter "@digelim/*" test
 
       - run: pnpm --filter @signal/protocol test
