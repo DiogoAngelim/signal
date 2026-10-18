@@ -760,7 +760,8 @@ describe("runtime", () => {
     expect(retryable.retryable).toBe(true);
     expect(defaultRetryability.retryable).toBe(false);
 
-    const runtime = new SignalRuntime({ eventPort: createInProcessDispatcher() });
+    const eventPort = createInProcessDispatcher();
+    const runtime = new SignalRuntime({ eventPort });
     const seen: string[] = [];
     runtime.registerEvent(
       defineEvent({
