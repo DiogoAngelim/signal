@@ -1,44 +1,52 @@
 # Repository-first course lab — Build AI Decision Systems with Signal
 
-> **Status:** teaching branch; not a production security system. This lab uses the **real** `@signal/decision/core` APIs and the checked-in TypeScript application. No standalone imitation of Signal is used.
+> **Status:** teaching example, not a production security system. This lab uses the checked-in TypeScript application and the real `@signal/decision/core` APIs. It does not substitute a companion implementation for Signal.
+
+## Teaching contract
+
+This is a **repository-first, compiling-checkpoint walkthrough**, not a from-zero file-construction exercise. The complete canonical implementation is present from the start. Each checkpoint inspects one bounded region of that implementation, checks a corresponding behavior, and runs verification against the complete project. Do not delete later declarations or append partial fragments to the canonical source: a partially assembled TypeScript file is not a valid checkpoint.
+
+- Canonical implementation: `examples/ai-decision-system/src/index.ts`
+- Canonical tests: `examples/ai-decision-system/test/triage.test.ts`
+- Real Signal API: `@signal/decision/core`
+- Baseline branch at the time of the course release: `course/repository-first-decision-system`, commit `3c9e122484ab7134eddf51452503afdb1fc0a4a4`
+- Current baseline: 10 top-level tests; the five evidence dimensions are exercised by one parameterized loop.
 
 ## The engineering contract
 
 **Input:** a validated synthetic security alert and an explicit capture timestamp.
 
-**Output:** a triage recommendation (`escalate`, `analyst-review`, or `monitor`), a rationale, a Signal assessment, and a reviewable Signal decision record.
+**Output:** a triage recommendation (`escalate`, `analyst-review`, or `monitor`), rationale, Signal evidence assessment, and reviewable Signal decision record.
 
-**Boundaries:** no trained ML model, no provider calls, no automated security response, no immutable or durable audit log. The heuristic score is advisory, and two distinct source labels do not prove actual source independence.
+**Boundaries:** no trained ML model, provider calls, automated security response, durable audit log, or tamper-proof replay. The local heuristic is advisory. Distinct source labels and independence scores are supplied claims; this example does not independently verify real-world source independence.
 
 ## Architecture at a glance
 
-This diagram reflects the checked-in example—not a generic production architecture. The five evidence dimensions are quality, reliability, freshness, independence, and traceability. The store is in-memory; replay compares selected fields; later outcome review does not rewrite the original record.
-
 ```mermaid
 flowchart TD
-    A["Synthetic security alert<br/>captured timestamp"] --> B["validateAlert<br/>strict input contract"]
-    B --> C["estimateRiskLocally<br/>advisory 0–100 heuristic"]
-    B --> D["Alert signals<br/>direction + five quality dimensions"]
-    C --> E["assessDecisionEvidence<br/>Signal API"]
+    A["Synthetic alert + captured timestamp"] --> B["validateAlert: strict input contract"]
+    B --> C["estimateRiskLocally: advisory heuristic"]
+    B --> D["Signals + five supplied evidence dimensions"]
+    C --> E["assessDecisionEvidence: real Signal API"]
     D --> E
-    E --> F{"Explicit application policy"}
-    F -->|"Critical + ≥2 distinct qualified source labels<br/>+ no contradictions"| G["escalate"]
-    F -->|"Low/medium + score ≤30<br/>+ no supplied signals"| H["monitor"]
+    E --> F{"Application-owned policy"}
+    F -->|"Critical + 2 distinct qualified source labels + no contradictions"| G["escalate"]
+    F -->|"Low/medium + score <= 30 + no signals"| H["monitor"]
     F -->|"Otherwise"| I["analyst-review"]
-    G --> J["createDecisionRecord<br/>rationale + accountability"]
+    G --> J["createDecisionRecord + accountability"]
     H --> J
     I --> J
-    J --> K["Signal in-memory store<br/>volatile, not durable"]
-    J --> L["replayCapturedDecision<br/>selected-field comparison"]
-    J --> M["reviewLaterOutcome<br/>separate retrospective record"]
+    J --> K["Volatile in-memory store"]
+    J --> L["Selected-field replay comparison"]
+    J --> M["Separate later-outcome review"]
     M -. "does not mutate" .-> J
 ```
 
-**Key teaching point:** Signal assesses evidence and provides record/replay primitives. The application's explicit policy selects the triage priority. The local score is neutral evidence and cannot trigger escalation by itself.
+**Key distinction:** Signal assesses and records evidence; application policy chooses the triage priority. The local heuristic score cannot independently trigger escalation.
 
-## Start here: reproducible baseline
+## Start from a clean checkout
 
-Open the repository root in VS Code. Use Node.js 20+ and pnpm 10.12.4 (the package-manager version declared by the repository). Prefer `corepack pnpm` if pnpm is not installed globally.
+Use Node.js 20+ and pnpm 10.12.4. Run from the Signal repository root:
 
 ```bash
 node --version
@@ -50,173 +58,164 @@ corepack pnpm --filter @signal/ai-decision-system typecheck
 corepack pnpm --filter @signal/ai-decision-system start
 ```
 
-These are **commands to run**, not claims of successful execution. The expected checked-in fixture decisions, according to the source and README, are:
+The commands above are instructions, not evidence of success. Save actual output during recording. If a command fails, stop and diagnose it rather than narrating a pass.
+
+Expected baseline fixture outcomes to compare with real terminal output:
 
 | Fixture | Advisory estimate | Priority |
 | --- | ---: | --- |
-| `confirmed-critical` | 100 | `escalate` |
-| `high-score-unconfirmed` | 94 | `analyst-review` |
-| `low-background` | 14 | `monitor` |
+| `confirmed-critical` | 100/100 | `escalate` |
+| `high-score-unconfirmed` | 94/100 | `analyst-review` |
+| `low-background` | 14/100 | `monitor` |
 
-Capture the real terminal output during recording. Stop and diagnose failures; do not narrate a pass that did not occur.
+## Eight individually verifiable compiling checkpoints
 
-## The eight progressive checkpoints
+**Checkpoint protocol:** at each checkpoint, keep the full source tree intact, inspect the indicated code and test, then run the listed command(s). The `build` command compiles the application; `test` compiles the test TypeScript before running it. These are verified states of the complete project, not claims that a fragment can compile on its own. Run `typecheck` at each checkpoint if the environment permits; the final gate must include all checks plus fixture execution.
 
-Each checkpoint starts from the real application in `examples/ai-decision-system/src/index.ts`. For a code-building recording, create a **temporary scratch copy** of that file in VS Code, then progressively reveal/implement the indicated regions in the order below; restore the authoritative checked-in file before running the complete suite. This avoids pretending that partially implemented exports will typecheck. An alternative is to prepare eight separately compiled teaching commits before filming.
+### 1. Define the decision-time boundary — slides 1–6
 
-### 1. Model the boundary (slides 1–6)
+**Inspect:** `Severity`, `EvidenceDirection`, `TriagePriority`, `AlertSignal`, `SecurityAlert`, `DecisionTimeSnapshot`, and `EvaluatedDecision` near the top of `src/index.ts`.
 
-**Build:** `Severity`, `EvidenceDirection`, `TriagePriority`, `AlertSignal`, `SecurityAlert`, `DecisionTimeSnapshot`, `EvaluatedDecision`.
+**Verify:** the snapshot captures the alert, timestamp, and versioned estimator but has no later-outcome field. Confirm the five evidence dimensions are explicit inputs.
 
-**Say:** “We are not asking an AI model to decide what happens to an alert. We are defining a contract for evidence and an explicit policy for the recommendation. A later outcome is intentionally absent from the decision-time snapshot.”
+**Checkpoint command:**
 
-**Check:** the snapshot has `alert`, `capturedAt`, and versioned `estimator`, but no `outcome`.
-
-### 2. Validate the input (slides 7–10)
-
-**Build:** `validateAlert`, `asRecord`, `requiredString`, `requiredTimestamp`, `boundedScore`, `isSeverity`, and `isDirection`.
-
-**Show:** invalid severity, NaN, impossible date `2025-02-30T09:14:00Z`, and duplicate signal ID all throw `TypeError`.
-
-**Say:** “Validation is not cosmetic cleanup. It prevents the decision record from looking authoritative when the underlying facts were malformed.”
-
-**Check:** the test named “validates a complete alert and rejects malformed or out-of-range input”.
-
-### 3. Add the advisory heuristic (slides 11–12)
-
-**Build:** `SEVERITY_BASE` and `estimateRiskLocally`.
-
-```ts
-const estimate =
-  SEVERITY_BASE[alert.severity] +
-  Math.round(alert.assetCriticality * 0.2) +
-  Math.min(16, supporting * 4) -
-  Math.min(12, contradicting * 4);
-return Math.max(0, Math.min(100, estimate));
+```bash
+corepack pnpm --filter @signal/ai-decision-system build
 ```
 
-**Say:** “This number is neither a calibrated probability nor an authorization. We will explicitly represent it as neutral evidence.”
+**Exit condition:** compilation succeeds and the types make the decision-time boundary inspectable.
 
-**Check:** the 94-point critical alert without telemetry must remain `analyst-review`.
+### 2. Validate before reasoning — slides 7–10
 
-### 4. Call Signal's real evidence API (slides 13–14)
+**Inspect:** `validateAlert`, `requiredTimestamp`, `boundedScore`, and the validation test in `test/triage.test.ts`.
 
-**Build:** the `evaluateAlert` mapping from `AlertSignal` to `DecisionEvidence`; call `assessDecisionEvidence` imported from `@signal/decision/core`.
+**Demonstrate:** invalid severity, NaN/out-of-range scores, an impossible date such as `2025-02-30T09:14:00Z`, and duplicate signal IDs.
 
-```ts
-const assessment = assessDecisionEvidence({
-  decisionId,
-  createdAt: decisionAt,
-  evidence: [severityEvidence, ...signalEvidence, modelEvidence],
-  known,
-  unknowns,
-  assumptions,
-  contradicted,
-  desiredConfidence: 90,
-  importance: alert.assetCriticality,
-  reasoningSummary,
-});
+**Checkpoint command:**
+
+```bash
+corepack pnpm --filter @signal/ai-decision-system test
 ```
 
-The snippet above is **structural pseudocode**: the actual source in `src/index.ts` contains the full literal evidence, known/unknown, and assumptions objects. Use that source for the executable implementation.
+**Exit condition:** the validation test passes; malformed inputs are rejected rather than silently defaulted.
 
-**Say:** “Signal describes the evidence and captures its limits. It does not select the application’s triage priority.”
+### 3. Keep the heuristic advisory — slides 11–12
 
-**Check:** `model:risk-estimate` has `direction: "neutral"`; the assessment journal references the evidence IDs.
+**Inspect:** `SEVERITY_BASE`, `estimateRiskLocally`, and the `high-score-unconfirmed` fixture.
 
-### 5. Write application policy (slides 15–18)
+**Verify:** the deterministic estimate is not described as a trained model or calibrated probability. A score of 94/100 with no telemetry remains `analyst-review`.
 
-**Build:** `TRIAGE_RULES`, `meetsStrongEvidenceThresholds`, `buildRationale`, and the priority gates inside `evaluateAlert`.
+**Checkpoint command:**
 
-```ts
-const canEscalate =
-  alert.severity === "critical" &&
-  strongSupportingSources.size >=
-    TRIAGE_RULES.minimumStrongSourcesToEscalate &&
-  contradictorySignals.length === 0;
-
-const canMonitor =
-  modelScore <= TRIAGE_RULES.monitorMaximumScore &&
-  (alert.severity === "low" || alert.severity === "medium") &&
-  alert.signals.length === 0;
+```bash
+corepack pnpm --filter @signal/ai-decision-system test
 ```
 
-**Say:** “Two indicators from one source are not corroboration. Every strong supporting signal must pass all five thresholds. A contradiction blocks escalation even if two qualified supporting sources remain.”
+**Exit condition:** the high-score regression passes; score alone cannot escalate.
 
-**Check:** run the tests for duplicate source labels, conflicting evidence, and the five-dimension qualification matrix added on this branch.
+### 4. Call Signal's actual evidence API — slides 13–14
 
-### 6. Create a reviewable record (slide 19)
+**Inspect:** the `DecisionEvidence` mapping and `assessDecisionEvidence` call inside `evaluateAlert`.
 
-**Build:** `assessCoherence`, `createDecisionRecord`, `createAccountabilityReport`, `attachAccountability`, `createExampleStore`, and `storeDecision`.
+**Verify:** signal direction and five quality dimensions are preserved; the heuristic is mapped as neutral evidence; knowns, unknowns, assumptions, contradictions, and journal references are recorded.
 
-**Say:** “The policy chooses priority. Coherence is recorded for comparison; `coherence.actionAllowed` does not choose our security priority. Accountability says that no response action was taken.”
+**Checkpoint command:**
 
-**Check:** journal references match evidence IDs, `humanSummary` matches rationale, and `accountability.actionTaken` is false.
-
-### 7. Replay captured inputs (slides 20–22)
-
-**Build:** `replayCapturedDecision`. Re-run `evaluateAlert(original.snapshot.alert, original.snapshot.capturedAt)`, compare priority, heuristic score, and selected journal fields, and call Signal’s `replayDecision` for coherence comparison.
-
-**Say:** “A same-result replay is a bounded comparison of defined fields under this code and policy. It is not proof of tamper resistance or complete environmental identity.”
-
-**Check:** `result === "same-result"` and `signalComparison.replayResult === "same-decision"` for unchanged captured inputs.
-
-### 8. Review later outcomes and extend the policy (slides 23–27)
-
-**Build:** `reviewLaterOutcome` using `reviewDecisionOutcome`, and demonstrate that the original record and replay are unchanged.
-
-**Say:** “The later outcome is new knowledge. We preserve it as a separate review instead of rewriting what the system knew when it made the original recommendation.”
-
-**Check:** the outcome-review test verifies non-mutation and rejects a mismatched decision ID.
-
-## Independent challenge — change the *actual* Signal example
-
-**Goal:** make the escalation source-count requirement more conservative, using test-driven development. This is an intentionally changed policy, not a claim that three sources are universally appropriate.
-
-1. In `test/triage.test.ts`, add the test below. Do **not** edit the policy yet.
-2. Run the focused test suite and observe the new test fail because the current rule accepts two qualified sources.
-3. In `src/index.ts`, change `minimumStrongSourcesToEscalate: 2` to `3`.
-4. Re-run the focused test. It should pass. The existing test that expects the two-source fixture to escalate will now fail; this is an expected **contract conflict**, not a reason to ignore the suite.
-5. Resolve the conflict deliberately: either revise the synthetic `confirmed-critical` fixture to contain a third genuinely distinct qualified source and update expectations, or revert the policy after demonstrating the impact. Document which contract you chose.
-6. Run build, test, and typecheck. Record real results.
-
-```ts
-it("requires three qualified sources under the stricter policy", () => {
-  const base = EXAMPLE_ALERTS[0];
-  const decision = evaluateAlert(base, decisionAt);
-  assert.equal(decision.priority, "analyst-review");
-  assert.match(decision.rationale, /requires 3 independent/i);
-});
+```bash
+corepack pnpm --filter @signal/ai-decision-system build
 ```
 
-**Instructor note:** the phrase “independent” in the current rationale refers to distinct *supplied source labels*; it does not establish verified organizational or technical independence. Explain this limitation aloud.
+**Exit condition:** the actual `@signal/decision/core` types compile without a substitute/mock Signal implementation.
+
+### 5. Apply explicit policy gates — slides 15–18
+
+**Inspect:** `TRIAGE_RULES`, `meetsStrongEvidenceThresholds`, `canEscalate`, `canMonitor`, and `buildRationale`.
+
+**Verify:** escalation requires critical severity, two distinct qualified source labels, and no contradiction. Every supporting source must pass quality >=70, reliability >=70, freshness >=60, independence >=70, and traceability >=60. A failed dimension disqualifies that source.
+
+**Checkpoint command:**
+
+```bash
+corepack pnpm --filter @signal/ai-decision-system test
+```
+
+**Exit condition:** duplicate source labels do not count twice, all five dimension regressions withhold escalation, contradictions block escalation, and a high score alone cannot escalate.
+
+### 6. Record rationale and accountability — slide 19
+
+**Inspect:** `createDecisionRecord`, `createAccountabilityReport`, `attachAccountability`, `createExampleStore`, and `storeDecision`.
+
+**Verify:** the rationale is carried into the record, journal evidence IDs correspond to captured evidence, and `accountability.actionTaken` is false.
+
+**Checkpoint command:**
+
+```bash
+corepack pnpm --filter @signal/ai-decision-system test
+```
+
+**Exit condition:** the record/accountability test passes. Do not call the in-memory store durable, immutable, or tamper-proof.
+
+### 7. Replay only what is defined — slides 20–22
+
+**Inspect:** `replayCapturedDecision` and its test.
+
+**Verify:** replay re-evaluates the captured alert and timestamp, compares selected application fields, and calls Signal's `replayDecision` for coherence comparison. It does not prove tamper resistance, replay side effects, or verify a runtime audit history.
+
+**Checkpoint command:**
+
+```bash
+corepack pnpm --filter @signal/ai-decision-system test
+```
+
+**Exit condition:** unchanged captured inputs produce the expected `same-result` and Signal `same-decision` results.
+
+### 8. Keep later outcomes separate; run the release gate — slides 23–27
+
+**Inspect:** `reviewLaterOutcome`, `reviewDecisionOutcome`, the outcome-separation test, and the test catalogue.
+
+**Verify:** later outcome review does not rewrite the original record or become an input to replay/estimation. The current suite has 10 top-level test definitions.
+
+**Checkpoint commands:**
+
+```bash
+corepack pnpm --filter @signal/ai-decision-system build
+corepack pnpm --filter @signal/ai-decision-system test
+corepack pnpm --filter @signal/ai-decision-system typecheck
+corepack pnpm --filter @signal/ai-decision-system start
+```
+
+**Exit condition:** all four commands succeed in the recording environment and actual fixture output matches the expected table above.
+
+## Independent challenge — change the actual policy test-first
+
+**Goal:** demonstrate a stricter escalation rule that requires three qualified source labels instead of two. This is a teaching policy change, not a universal security recommendation.
+
+1. Add a test to `test/triage.test.ts` for a two-source copy of `EXAMPLE_ALERTS[0]`; expect `analyst-review` and rationale stating that three qualified sources are required.
+2. Run `corepack pnpm --filter @signal/ai-decision-system test`. The new assertion should fail under the current two-source rule. Capture the real output.
+3. Change `minimumStrongSourcesToEscalate` from `2` to `3` in `src/index.ts` and rerun tests.
+4. Resolve the existing fixture contract conflict deliberately. The canonical confirmed fixture must contain three distinct qualified synthetic source labels for escalation under the new rule. Update the five-dimension regression expectation to reflect that degrading one of three sources leaves two qualified sources, still below the threshold.
+5. Keep the duplicate-source test and contradiction test meaningful. Do not delete an existing assertion merely to get green.
+6. Run build, test, typecheck, and start. This optional exercise solution is not covered by the baseline CI run until it is executed on the changed source.
+
+The supplied `source` labels and independence scores do not establish actual organizational or technical independence. Explain that limitation aloud.
 
 ## Source-of-truth map
 
 | Slides | Implementation | Verification |
 | --- | --- | --- |
-| 1–6 | Type contracts, `evaluateAlert` | Three fixtures |
-| 7–10 | `validateAlert` | Invalid inputs |
-| 11–14 | `estimateRiskLocally`, `assessDecisionEvidence` | High score remains advisory |
-| 15–18 | `TRIAGE_RULES`, `buildRationale` | Source labels, weak evidence, contradictions |
-| 19 | `createDecisionRecord`, accountability | Journal/rationale consistency |
-| 20–22 | `replayCapturedDecision` | Deterministic comparison |
-| 23–25 | `reviewLaterOutcome` | Later knowledge separate |
-| 26–27 | Policy extension | Test-first change + complete checks |
+| 1–6 | Types and `DecisionTimeSnapshot` | Build checkpoint |
+| 7–10 | `validateAlert` and timestamp helpers | Validation test |
+| 11–12 | `estimateRiskLocally` | High score remains advisory |
+| 13–14 | `assessDecisionEvidence` mapping | Build and evidence assertions |
+| 15–18 | `TRIAGE_RULES` and `buildRationale` | Source, dimension, contradiction tests |
+| 19 | Decision record and accountability | Record consistency test |
+| 20–22 | `replayCapturedDecision` | Replay test |
+| 23–27 | Later outcome review and course close | Outcome test + full release gate |
 
-## Recording and verification gate
+## Verification boundaries
 
-- Pin the branch to a Git commit before recording.
-- Run the six baseline commands on a clean checkout and save output.
-- Record one real failure and its diagnosis rather than editing it out.
-- Use the **actual** `src/index.ts` and `test/triage.test.ts` as the canonical complete implementation; do not silently replace Signal with a companion implementation.
-- Verify each narrated slide number and claim against the 27-slide deck.
-- Show the distinct outcomes and the high-score-no-escalation boundary.
-- Clearly identify source-label independence as an unverified input claim.
-- Never call the in-memory store immutable, durable, tamper-proof, or production-ready.
-- Re-run the complete suite after restoring or updating all policy fixtures.
-- Do not claim this branch passed tests until CI or a local environment actually ran them.
-
-## Technical provenance
-
-Repository: `DiogoAngelim/signal`. This teaching branch adds an explicit regression test covering all five evidence dimensions. It does **not** replace the original example or its APIs. Its baseline README, source, and tests were inspected through GitHub. No build, typecheck, or test execution of this branch is claimed here.
+- The focused course workflow passed on commit `3c9e122484ab7134eddf51452503afdb1fc0a4a4`: frozen-lockfile install, build, 10 tests, typecheck, and fixture execution succeeded.
+- Separate Signal core workflow run #101 failed in `@signal/runtime` because Vite could not resolve `@signal/runtime` and `@signal/protocol` package entrypoints before test collection. Do not claim the entire repository is green.
+- The optional three-source exercise has not been executed in the cited baseline CI run.
+- The example uses synthetic fixtures, a deterministic heuristic, volatile in-memory storage, and selected-field replay. It is not a production security control.
