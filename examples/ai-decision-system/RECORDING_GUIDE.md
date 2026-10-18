@@ -27,7 +27,7 @@ corepack pnpm --filter @signal/ai-decision-system start
 
 ## 0–7 minutes — Welcome, scope, and the contract (slides 1–6)
 
-**On screen:** title slide, then repository in VS Code.
+**On screen:** title slide, then repository in VS Code. Open the source-accurate Mermaid architecture diagram near the top of `COURSE_LAB.md`; use it to preview the five main transitions before following the code. Keep the diagram's boundaries visible: the heuristic is advisory, policy is application-owned, storage is volatile, replay compares selected fields, and outcome review is separate.
 
 **Say:**  
 “Welcome. In this course we will follow a synthetic security alert through validation, evidence assessment, an explicit application policy, a decision record, replay, and later outcome review. Our goal is not to make an AI score look authoritative. Our goal is to make the decision process inspectable, bounded, and testable.
