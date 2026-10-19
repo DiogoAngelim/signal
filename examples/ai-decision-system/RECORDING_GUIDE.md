@@ -98,15 +98,17 @@ Run the clean-checkout gate. Expected fixture outcomes to verify from actual out
 
 ### Checkpoint 8 — Separate later outcomes and close (slides 23–27)
 
-**On screen:** `reviewLaterOutcome`, its test, and the ten-test catalogue.
+**On screen:** `reviewLaterOutcome`, its test, and the baseline ten-test catalogue (the separate solution branch adds one policy regression).
 
 **Say:** “An outcome is new knowledge. We record it separately instead of rewriting the original decision-time snapshot. It does not silently train the heuristic or change replay inputs.”
 
-**Verify:** run build, test, typecheck, and start; save actual output. The baseline suite has ten top-level test definitions, including the five-dimension regression loop.
+**Verify:** run build, test, typecheck, and start; save actual output. The baseline suite has ten top-level test definitions, including the five-dimension regression loop; the separate three-source solution variant adds an eleventh policy regression.
 
 ## Independent policy exercise — test first (additional 45–60 minutes; slides 25–26)
 
 The student changes the actual application policy from two qualified source labels to three. Add a test first and capture the failing result. Then change the policy constant, add a third distinctly labeled synthetic supporting signal, and update fixture-dependent assertions deliberately. A failed old assertion is a contract conflict to resolve—not a test to delete casually. The solution is not covered by the baseline CI run until build, test, typecheck, and start have been run against the changed code.
+
+**Instructor answer key:** `POLICY_EXERCISE_SOLUTION.md` is on the separate solution branch. This is an exercise variant, not the baseline release; synchronize the slide deck and narration before adopting the stricter policy in a release.
 
 ## Closing narration (slide 27)
 

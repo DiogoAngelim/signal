@@ -82,7 +82,7 @@ export interface OutcomeReview extends Omit<
 
 export const TRIAGE_RULES = {
   monitorMaximumScore: 30,
-  minimumStrongSourcesToEscalate: 2,
+  minimumStrongSourcesToEscalate: 3,
   minimumQuality: 70,
   minimumReliability: 70,
   minimumFreshness: 60,
@@ -486,6 +486,19 @@ export const EXAMPLE_ALERTS: readonly SecurityAlert[] = [
         freshness: 96,
         independence: 90,
         traceability: 100,
+      },
+      {
+        id: "network-connection",
+        observedAt: "2025-02-10T09:14:45.000Z",
+        source: "network-sensor-west",
+        summary:
+          "Network telemetry observed a connection to a known command-and-control endpoint.",
+        direction: "supporting",
+        quality: 86,
+        reliability: 84,
+        freshness: 94,
+        independence: 82,
+        traceability: 98,
       },
     ],
   },

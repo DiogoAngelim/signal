@@ -174,7 +174,7 @@ corepack pnpm --filter @signal/ai-decision-system test
 
 **Inspect:** `reviewLaterOutcome`, `reviewDecisionOutcome`, the outcome-separation test, and the test catalogue.
 
-**Verify:** later outcome review does not rewrite the original record or become an input to replay/estimation. The current suite has 10 top-level test definitions.
+**Verify:** later outcome review does not rewrite the original record or become an input to replay/estimation. The baseline suite has 10 top-level test definitions; the separate three-source solution variant adds an eleventh policy regression.
 
 **Checkpoint commands:**
 
@@ -197,6 +197,8 @@ corepack pnpm --filter @signal/ai-decision-system start
 4. Resolve the existing fixture contract conflict deliberately. The canonical confirmed fixture must contain three distinct qualified synthetic source labels for escalation under the new rule. Update the five-dimension regression expectation to reflect that degrading one of three sources leaves two qualified sources, still below the threshold.
 5. Keep the duplicate-source test and contradiction test meaningful. Do not delete an existing assertion merely to get green.
 6. Run build, test, typecheck, and start. This optional exercise solution is not covered by the baseline CI run until it is executed on the changed source.
+
+**Instructor answer key:** see `POLICY_EXERCISE_SOLUTION.md` on the separate solution branch. Do not merge the three-source solution into the baseline release without synchronizing the slides and narration.
 
 The supplied `source` labels and independence scores do not establish actual organizational or technical independence. Explain that limitation aloud.
 

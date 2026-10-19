@@ -84,6 +84,21 @@ describe("AI-assisted security alert triage example", () => {
     assert.equal(confirmed.record.action, undefined);
   });
 
+  it("requires three distinct qualified sources under the stricter policy", () => {
+    const twoSourceAlert: SecurityAlert = {
+      ...EXAMPLE_ALERTS[0],
+      signals: EXAMPLE_ALERTS[0].signals.slice(0, 2),
+    };
+
+    const decision = evaluateAlert(twoSourceAlert, decisionAt);
+
+    assert.equal(decision.priority, "analyst-review");
+    assert.match(
+      decision.rationale,
+      /requires 3 independent high-quality supporting sources/i,
+    );
+  });
+
   it("does not count two indicators from the same source as corroboration", () => {
     const base = EXAMPLE_ALERTS[0];
     const sameSourceAlert: SecurityAlert = {
@@ -117,7 +132,7 @@ describe("AI-assisted security alert triage example", () => {
       };
       const decision = evaluateAlert(degraded, decisionAt);
       assert.equal(decision.priority, "analyst-review", dimension);
-      assert.match(decision.rationale, /only 1 qualified/i);
+      assert.match(decision.rationale, /only 2 qualified/i);
     }
   });
 
@@ -158,7 +173,7 @@ describe("AI-assisted security alert triage example", () => {
     };
     const weak = evaluateAlert(weakAlert, decisionAt);
     assert.equal(weak.priority, "analyst-review");
-    assert.match(weak.rationale, /only 1 qualified/i);
+    assert.match(weak.rationale, /only 2 qualified/i);
 
     const baseConflicting = EXAMPLE_ALERTS[0];
     const conflictingAlert: SecurityAlert = {
