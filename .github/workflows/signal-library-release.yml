@@ -45,7 +45,9 @@ jobs:
           cache: pnpm
       - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
-      - name: Build, test, typecheck, and lint publishable library
+      - name: Build workspace packages before validating entrypoints
+        run: pnpm run build:library
+      - name: Test, typecheck, lint, and verify publishable library
         run: pnpm run release:library
       - name: Verify all package entrypoints
         run: pnpm run verify:exports
