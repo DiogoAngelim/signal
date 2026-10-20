@@ -10,6 +10,7 @@ on:
       - "pnpm-workspace.yaml"
       - "package.json"
       - "scripts/verify-package-entrypoints.mjs"
+      - "scripts/verify-packed-decision-package.mjs"
       - ".github/workflows/signal-library-release.yml"
   workflow_dispatch:
     inputs:
@@ -64,6 +65,8 @@ jobs:
           echo "Packed artifacts:"
           ls -lh "$RUNNER_TEMP/signal-tarballs"
           (cd "$RUNNER_TEMP/signal-tarballs" && sha256sum *.tgz > SHA256SUMS.txt)
+      - name: Verify packed decision package metadata and dependency closure
+        run: node scripts/verify-packed-decision-package.mjs "$RUNNER_TEMP/signal-tarballs"
       - name: Install packed decision package in isolated npm consumer
         env:
           TARBALL_DIR: ${{ runner.temp }}/signal-tarballs
