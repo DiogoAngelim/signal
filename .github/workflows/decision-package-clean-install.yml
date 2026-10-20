@@ -1,21 +1,9 @@
 name: Decision package clean-install
 
 on:
-  pull_request:
-    paths:
-      - "packages/decision/**"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - "package.json"
-      - ".github/workflows/decision-package-clean-install.yml"
-  push:
-    branches: [main]
-    paths:
-      - "packages/decision/**"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - "package.json"
-      - ".github/workflows/decision-package-clean-install.yml"
+  # The comprehensive Signal library release workflow already builds, tests,
+  # packs, and clean-installs this package on relevant pull requests.
+  # Keep this focused workflow available for deliberate manual diagnostics.
   workflow_dispatch:
 
 permissions:
