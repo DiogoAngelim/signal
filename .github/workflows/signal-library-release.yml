@@ -5,6 +5,7 @@ on:
     paths:
       - "api/**"
       - "packages/**"
+      - "server/reference-server/**"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - "package.json"
