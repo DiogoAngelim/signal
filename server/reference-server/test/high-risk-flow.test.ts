@@ -233,7 +233,7 @@ describe("high-risk payment reference flow", () => {
 
   it("fails fast when the durable Postgres proof has no database url", async () => {
     const previousDatabaseUrl = process.env.DATABASE_URL;
-    process.env.DATABASE_URL = undefined;
+    delete process.env.DATABASE_URL;
 
     try {
       await expect(runReferencePostgresProof()).rejects.toThrow(
@@ -241,7 +241,7 @@ describe("high-risk payment reference flow", () => {
       );
     } finally {
       if (previousDatabaseUrl === undefined) {
-        process.env.DATABASE_URL = undefined;
+        delete process.env.DATABASE_URL;
       } else {
         process.env.DATABASE_URL = previousDatabaseUrl;
       }
