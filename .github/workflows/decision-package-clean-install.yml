@@ -1,0 +1,84 @@
+name: Decision package clean-install
+
+on:
+  pull_request:
+    paths:
+      - "packages/decision/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - ".github/workflows/decision-package-clean-install.yml"
+  push:
+    branches: [main]
+    paths:
+      - "packages/decision/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - ".github/workflows/decision-package-clean-install.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  clean-install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build decision package
+        run: pnpm --filter @signal/decision build
+      - name: Run decision package tests and typecheck
+        run: |
+          pnpm --filter @signal/decision typecheck
+          pnpm --filter @signal/decision test
+      - name: Pack distributable
+        working-directory: packages/decision
+        run: npm pack --pack-destination "$RUNNER_TEMP"
+      - name: Install packed tarball in isolated npm project
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          PACKAGE_TARBALL="$(find "$RUNNER_TEMP" -maxdepth 1 -name 'signal-decision-*.tgz' -print -quit)"
+          test -n "$PACKAGE_TARBALL"
+          mkdir -p "$RUNNER_TEMP/consumer"
+          cd "$RUNNER_TEMP/consumer"
+          npm init -y
+          npm install "$PACKAGE_TARBALL"
+          node -e "const api = require('@signal/decision'); if (typeof api.assessDecisionEvidence !== 'function') throw new Error('CommonJS export missing'); const result = api.assessDecisionEvidence({ evidence: [] }); if (!result || !result.evidenceQuality) throw new Error('Smoke test failed'); console.log('Clean-install CommonJS smoke test passed')"
+          node --input-type=module -e "import { assessDecisionEvidence } from '@signal/decision'; const result = assessDecisionEvidence({ evidence: [] }); if (!result || !result.evidenceQuality) throw new Error('ESM smoke test failed'); console.log('Clean-install ESM smoke test passed')"
+          node -e "require('@signal/decision/core'); console.log('Clean-install core subpath passed')"
+          npm install --no-save typescript@5.7.3
+          cat > consumer.ts <<'EOF'
+          import { assessDecisionEvidence } from "@signal/decision";
+
+          const result = assessDecisionEvidence({ evidence: [] });
+          if (!result.evidenceQuality) {
+            throw new Error("Expected evidence quality in the public TypeScript result");
+          }
+          EOF
+          cat > tsconfig.json <<'EOF'
+          {
+            "compilerOptions": {
+              "target": "ES2022",
+              "module": "NodeNext",
+              "moduleResolution": "NodeNext",
+              "strict": true,
+              "noEmit": true,
+              "skipLibCheck": false
+            },
+            "include": ["consumer.ts"]
+          }
+          EOF
+          npx tsc --project tsconfig.json
+          echo "Clean-install TypeScript consumer compile passed"
