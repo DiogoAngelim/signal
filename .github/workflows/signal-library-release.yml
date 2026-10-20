@@ -45,8 +45,11 @@ jobs:
           cache: pnpm
       - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
-      - name: Build all workspace packages before validating entrypoints
-        run: pnpm run build
+      - name: Build library and example packages before validating entrypoints
+        run: |
+          pnpm run build:library
+          pnpm --filter @signal/aware build
+          pnpm --filter @signal/liquidity-manager build
       - name: Test, typecheck, lint, and verify publishable library
         run: pnpm run release:library
       - name: Verify all package entrypoints
