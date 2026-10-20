@@ -12,11 +12,16 @@ on:
       - ".github/workflows/signal-library-release.yml"
   workflow_dispatch:
     inputs:
-      publish:
-        description: "Publish all eligible @signal library packages to public npm (requires NPM_TOKEN secret)"
+      create_release:
+        description: "Create a GitHub Release with the validated library tarballs (no npm publication)"
         type: boolean
         required: true
         default: false
+      release_tag:
+        description: "Tag for the GitHub Release, e.g. signal-library-v0.1.0"
+        type: string
+        required: true
+        default: "signal-library-v0.1.0"
 
 permissions:
   contents: read
@@ -40,7 +45,12 @@ jobs:
           cache: pnpm
       - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
-      - name: Build, test, typecheck, and lint publishable library
+      - name: Build library and example packages before validating entrypoints
+        run: |
+          pnpm run build:library
+          pnpm --filter @signal/aware build
+          pnpm --filter @signal/liquidity-manager build
+      - name: Test, typecheck, lint, and verify publishable library
         run: pnpm run release:library
       - name: Verify all package entrypoints
         run: pnpm run verify:exports
@@ -52,104 +62,70 @@ jobs:
           test "$(find "$RUNNER_TEMP/signal-tarballs" -maxdepth 1 -name '*.tgz' | wc -l)" -gt 0
           echo "Packed artifacts:"
           ls -lh "$RUNNER_TEMP/signal-tarballs"
-      - name: Install packed packages in isolated npm consumer
+          (cd "$RUNNER_TEMP/signal-tarballs" && sha256sum *.tgz > SHA256SUMS.txt)
+      - name: Install packed decision package in isolated npm consumer
         env:
           TARBALL_DIR: ${{ runner.temp }}/signal-tarballs
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/signal-consumer"
-          cd "$RUNNER_TEMP/signal-consumer"
+          DECISION_TARBALL="$(find "$TARBALL_DIR" -maxdepth 1 -name 'signal-decision-*.tgz' -print -quit)"
+          test -n "$DECISION_TARBALL"
+          mkdir -p "$RUNNER_TEMP/signal-decision-consumer"
+          cd "$RUNNER_TEMP/signal-decision-consumer"
           npm init -y
-          npm install "$TARBALL_DIR"/*.tgz
-          node --input-type=module <<'EOF'
-          import { createRequire } from "node:module";
-          const require = createRequire(import.meta.url);
-          const packages = [
-            "@signal/decision",
-            "@signal/decision-memory",
-            "@signal/agency",
-            "@signal/commitment",
-            "@signal/kernel",
-            "@signal/semantic-state",
-            "@signal/protocol",
-            "@signal/ports",
-            "@signal/runtime",
-            "@signal/sdk-node",
-            "@signal/binding-http"
-          ];
-          for (const name of packages) {
-            const resolved = require.resolve(name);
-            console.log(`Resolved ${name}: ${resolved}`);
+          npm install "$DECISION_TARBALL"
+          node -e "const api = require('@signal/decision'); if (typeof api.assessDecisionEvidence !== 'function') throw new Error('CommonJS export missing'); const result = api.assessDecisionEvidence({ evidence: [] }); if (!result || !result.evidenceQuality) throw new Error('Smoke test failed'); console.log('Decision package clean-install passed')"
+          node --input-type=module -e "import { assessDecisionEvidence } from '@signal/decision'; const result = assessDecisionEvidence({ evidence: [] }); if (!result || !result.evidenceQuality) throw new Error('ESM smoke test failed'); console.log('Decision package ESM import passed')"
+          npm install --no-save typescript@5.7.3
+          cat > consumer.ts <<'EOF'
+          import { assessDecisionEvidence } from "@signal/decision";
+          const result = assessDecisionEvidence({ evidence: [] });
+          if (!result.evidenceQuality) throw new Error("Missing evidence quality");
+          EOF
+          cat > tsconfig.json <<'EOF'
+          {
+            "compilerOptions": {
+              "target": "ES2022",
+              "module": "NodeNext",
+              "moduleResolution": "NodeNext",
+              "strict": true,
+              "noEmit": true,
+              "skipLibCheck": false
+            },
+            "include": ["consumer.ts"]
           }
           EOF
-      - name: Upload package tarballs and release manifest
+          npx tsc --project tsconfig.json
+          echo "Decision package TypeScript consumer compile passed"
+      - name: Upload release tarballs and checksums
         uses: actions/upload-artifact@v4
         with:
           name: signal-library-tarballs
-          path: ${{ runner.temp }}/signal-tarballs/*.tgz
+          path: ${{ runner.temp }}/signal-tarballs/*
           if-no-files-found: error
           retention-days: 30
 
-  publish:
-    name: Publish all library packages to npm
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish == true }}
+  github-release:
+    name: Attach library artifacts to GitHub Release
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.create_release == true }}
     needs: validate
     runs-on: ubuntu-latest
-    environment: npm-publication
     permissions:
-      contents: read
+      contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Download validated tarballs
+        uses: actions/download-artifact@v4
         with:
-          version: 10.12.4
-      - uses: actions/setup-node@v4
+          name: signal-library-tarballs
+          path: release-assets
+      - name: Create GitHub Release with tarballs
+        uses: softprops/action-gh-release@v2
         with:
-          node-version: 22
-          registry-url: "https://registry.npmjs.org"
-          cache: pnpm
-      - name: Install workspace dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Check all target versions before publishing
-        run: |
-          set -euo pipefail
-          node <<'EOF'
-          const fs = require("node:fs");
-          const path = require("node:path");
-          const { execFileSync, spawnSync } = require("node:child_process");
-          const roots = ["api", "packages"];
-          const manifests = [];
-          for (const root of roots) {
-            for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
-              if (!entry.isDirectory()) continue;
-              const file = path.join(root, entry.name, "package.json");
-              if (!fs.existsSync(file)) continue;
-              const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
-              if (pkg.private === true) continue;
-              if (!pkg.name || !pkg.version) throw new Error(`Missing name/version: ${file}`);
-              manifests.push({ name: pkg.name, version: pkg.version, file });
-            }
-          }
-          if (manifests.length === 0) throw new Error("No publishable packages discovered");
-          const conflicts = [];
-          for (const pkg of manifests) {
-            const result = spawnSync("npm", ["view", `${pkg.name}@${pkg.version}`, "version"], { encoding: "utf8" });
-            if (result.status === 0) conflicts.push(`${pkg.name}@${pkg.version} already exists on npm`);
-            else if (!/E404|404 Not Found|No match found/i.test(result.stderr + result.stdout)) {
-              throw new Error(`Could not verify registry status for ${pkg.name}@${pkg.version}: ${result.stderr}`);
-            }
-          }
-          if (conflicts.length) {
-            console.error("Refusing to partially publish; bump versions for existing package versions first:");
-            console.error(conflicts.join("\n"));
-            process.exit(1);
-          }
-          console.log(`Registry preflight passed for ${manifests.length} packages:`);
-          for (const pkg of manifests) console.log(`- ${pkg.name}@${pkg.version}`);
-          EOF
-      - name: Publish packages in dependency order
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          test -n "$NODE_AUTH_TOKEN" || (echo "Missing repository secret NPM_TOKEN" && exit 1)
-          pnpm -r --sort --filter "./api/**" --filter "./packages/**" publish --access public --no-git-checks
+          tag_name: ${{ inputs.release_tag }}
+          name: Signal library ${{ inputs.release_tag }}
+          body: |
+            Versioned Signal library package tarballs generated by the validated GitHub Actions workflow.
+            No npm publication was performed. See SHA256SUMS.txt to verify downloaded artifacts.
+          files: release-assets/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
