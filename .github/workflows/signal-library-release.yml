@@ -5,6 +5,7 @@ on:
     paths:
       - "api/**"
       - "packages/**"
+      - "server/reference-server/**"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - "package.json"
@@ -58,7 +59,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/signal-tarballs"
-          pnpm -r --sort --filter "./api/**" --filter "./packages/**" pack --pack-destination "$RUNNER_TEMP/signal-tarballs"
+          pnpm -r --filter "./api/**" --filter "./packages/**" pack --pack-destination "$RUNNER_TEMP/signal-tarballs"
           test "$(find "$RUNNER_TEMP/signal-tarballs" -maxdepth 1 -name '*.tgz' | wc -l)" -gt 0
           echo "Packed artifacts:"
           ls -lh "$RUNNER_TEMP/signal-tarballs"

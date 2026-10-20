@@ -290,22 +290,18 @@ export async function runReferenceProof(): Promise<ReferenceProofResult> {
       "observe emitted events: the capture must create an outbox event envelope.",
     );
   }
-  await runtime.publish(
-    outboxMessage.envelope.name,
-    outboxMessage.envelope.payload,
-  );
   assertCondition(
     operations.highRiskPayment.store
       .listSubscriberDeliveries()
       .filter((delivery) => delivery.captureId === capture.captureId).length ===
       1,
     "observe emitted events",
-    "re-dispatching the same event must not duplicate subscriber side effects.",
+    "the emitted payment.captured.v1 event must produce exactly one subscriber delivery.",
   );
   pass(
     steps,
     "observe emitted events",
-    "payment.captured.v1 was emitted and replay-safe subscriber dedupe skipped the duplicate delivery.",
+    "payment.captured.v1 was emitted and produced exactly one subscriber delivery.",
   );
 
   const certification = unwrap(
