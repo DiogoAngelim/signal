@@ -79,12 +79,15 @@ jobs:
           npm init -y
           npm install "$DECISION_TARBALL"
           node -e "const api = require('@signal/decision'); if (typeof api.assessDecisionEvidence !== 'function') throw new Error('CommonJS export missing'); const result = api.assessDecisionEvidence({ evidence: [] }); if (!result || !result.evidenceQuality) throw new Error('Smoke test failed'); console.log('Decision package clean-install passed')"
-          node --input-type=module -e "import { assessDecisionEvidence } from '@signal/decision'; const result = assessDecisionEvidence({ evidence: [] }); if (!result || !result.evidenceQuality) throw new Error('ESM smoke test failed'); console.log('Decision package ESM import passed')"
+          node -e "const api = require('@signal/decision/core'); if (typeof api.assessDecisionEvidence !== 'function') throw new Error('CommonJS core export missing'); console.log('Decision package CommonJS core subpath passed')"
+          node --input-type=module -e "import { assessDecisionEvidence } from '@signal/decision/core'; const result = assessDecisionEvidence({ evidence: [] }); if (!result || !result.evidenceQuality) throw new Error('ESM core smoke test failed'); console.log('Decision package ESM core subpath passed')"
           npm install --no-save typescript@5.7.3
           cat > consumer.ts <<'EOF'
           import { assessDecisionEvidence } from "@signal/decision";
+          import { assessDecisionEvidence as assessDecisionEvidenceCore } from "@signal/decision/core";
           const result = assessDecisionEvidence({ evidence: [] });
-          if (!result.evidenceQuality) throw new Error("Missing evidence quality");
+          const coreResult = assessDecisionEvidenceCore({ evidence: [] });
+          if (!result.evidenceQuality || !coreResult.evidenceQuality) throw new Error("Missing decision evidence quality");
           EOF
           cat > tsconfig.json <<'EOF'
           {
