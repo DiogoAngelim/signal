@@ -238,6 +238,9 @@ describe("calibration", () => {
       evaluateCalibrationDrift(history, { windowCount: 1 }),
     ).toThrow("windowCount must be at least 2.");
     expect(() =>
+      evaluateCalibrationDrift(history, { windowCount: 101 }),
+    ).toThrow("windowCount must not exceed 100.");
+    expect(() =>
       evaluateCalibrationDrift(history, { driftTolerance: 2 }),
     ).toThrow("confidence values must be numbers between 0 and 1.");
   });
