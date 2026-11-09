@@ -25,6 +25,8 @@ export type {
   AgencyStateEvaluation,
   AgencyTrace,
   CalibrationBucket,
+  CalibrationInterval,
+  CalibrationSignificance,
   CalibrationDriftConfig,
   CalibrationDriftResult,
   CalibrationDriftWindow,
