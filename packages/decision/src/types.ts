@@ -658,6 +658,7 @@ export type DecisionRobustnessConfig = {
 export type DecisionRobustnessCase = {
   factor: DecisionRobustnessFactor;
   direction: "lower" | "higher";
+  actionVariant: string;
   recommendedAction: SimulationRecommendation;
   changed: boolean;
 };
@@ -665,6 +666,7 @@ export type DecisionRobustnessCase = {
 export type DecisionRobustnessResult = {
   status: "robust" | "sensitive" | "insufficient_data";
   baselineRecommendation: SimulationRecommendation;
+  baselineActionVariant: string;
   perturbationPoints: number;
   stabilityRate: number | null;
   perturbations: DecisionRobustnessCase[];
