@@ -635,6 +635,7 @@ describe("runtime", () => {
       operationName: "payment.capture.v1",
       idempotencyKey: "capture-1",
       payloadFingerprint: "fingerprint-a",
+      reservationToken: first.record!.reservationToken!,
       result: { count: 1 },
       messageId: "msg-1",
     });
@@ -645,22 +646,24 @@ describe("runtime", () => {
       payloadFingerprint: "fingerprint-a",
     });
 
-    await store.complete({
+    await expect(store.complete({
       operationName: "payment.capture.v1",
       idempotencyKey: "missing",
       payloadFingerprint: "fingerprint-x",
+      reservationToken: "missing-token",
       result: { count: 0 },
-    });
+    })).rejects.toThrow("missing, expired, or fenced");
 
-    await store.fail({
+    await expect(store.fail({
       operationName: "payment.capture.v1",
       idempotencyKey: "missing",
       payloadFingerprint: "fingerprint-x",
+      reservationToken: "missing-token",
       error: {
         code: "INTERNAL_ERROR",
         message: "ignored",
       },
-    });
+    })).rejects.toThrow("expired or fenced");
 
     expect(first.state).toBe("reserved");
     expect(inflight.state).toBe("inflight");
@@ -838,9 +841,18 @@ describe("runtime", () => {
     const runtime = new SignalRuntime({
       eventPort: createInProcessDispatcher(),
       storagePort: {
-        reserve: async () => ({
+        reserve: async (input) => ({
           state: "reserved",
+          record: {
+            ...input,
+            status: "pending" as const,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            reservationToken: `reservation-${input.operationName}`,
+            reservationExpiresAt: new Date(Date.now() + 300_000).toISOString(),
+          },
         }),
+        renewReservation: async () => true,
         complete: async () => undefined,
         fail: async (input) => {
           failed.push(input.operationName);
