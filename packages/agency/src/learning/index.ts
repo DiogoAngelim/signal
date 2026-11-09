@@ -13,21 +13,23 @@ export function learnFromTraces(
   calibration?: CalibrationResult,
   config: LearningConfig = {},
 ): LearningResult {
+  const selection = uniqueTraces(history);
+  const traces = selection.traces;
   const highConfidenceThreshold =
     config.highConfidenceThreshold ?? DEFAULT_HIGH_CONFIDENCE;
   const similarSuccessThreshold =
     config.similarSuccessThreshold ?? DEFAULT_SIMILAR_SUCCESS_THRESHOLD;
-  const highConfidencePoor = history.filter(
+  const highConfidencePoor = traces.filter(
     (trace) =>
       trace.decision.confidence >= highConfidenceThreshold &&
       trace.outcome?.success === false,
   );
-  const blocked = history.filter((trace) => !trace.policy.allowed);
-  const missingOutcomes = history.filter(
+  const blocked = traces.filter((trace) => !trace.policy.allowed);
+  const missingOutcomes = traces.filter(
     (trace) => trace.outcome === undefined || trace.outcome.success === null,
   );
   const successfulKinds = successfulDecisionKinds(
-    history,
+    traces,
     similarSuccessThreshold,
   );
   const learnedPatterns: string[] = [];
@@ -67,6 +69,12 @@ export function learnFromTraces(
   }
 
   return {
+    ...(selection.excludedDuplicateTraceCount > 0
+      ? { excludedDuplicateTraceCount: selection.excludedDuplicateTraceCount }
+      : {}),
+    ...(selection.excludedMissingTraceIdCount > 0
+      ? { excludedMissingTraceIdCount: selection.excludedMissingTraceIdCount }
+      : {}),
     learnedPatterns,
     confidenceAdjustment: confidenceAdjustment(
       calibration,
@@ -75,6 +83,29 @@ export function learnFromTraces(
     ),
     policySuggestions,
   };
+}
+
+function uniqueTraces(history: readonly AgencyTrace[]) {
+  const seen = new Set<string>();
+  const traces: AgencyTrace[] = [];
+  let excludedDuplicateTraceCount = 0;
+  let excludedMissingTraceIdCount = 0;
+
+  for (const trace of history) {
+    const traceId = typeof trace.traceId === "string" ? trace.traceId.trim() : "";
+    if (!traceId) {
+      excludedMissingTraceIdCount += 1;
+      continue;
+    }
+    if (seen.has(traceId)) {
+      excludedDuplicateTraceCount += 1;
+      continue;
+    }
+    seen.add(traceId);
+    traces.push(trace);
+  }
+
+  return { traces, excludedDuplicateTraceCount, excludedMissingTraceIdCount };
 }
 
 function successfulDecisionKinds(
