@@ -49,10 +49,6 @@ integration("broker and consumer crash-boundary simulation", () => {
       method: "PUT",
       body: JSON.stringify({ durable: true, auto_delete: false, arguments: {} }),
     });
-    await brokerRequest(`api/bindings/%2F/e/amq.default/q/${queueName}`, {
-      method: "POST",
-      body: JSON.stringify({ routing_key: queueName, arguments: {} }),
-    });
   });
 
   afterAll(async () => {
@@ -83,7 +79,7 @@ integration("broker and consumer crash-boundary simulation", () => {
 
     const firstClaim = await store.claimBatch({
       workerId: `worker-before-crash-${suffix}`,
-      limit: 1,
+      limit: 100,
       leaseMs: 1000,
     });
     const event = firstClaim.find((item) => item.envelope.messageId === messageId);
