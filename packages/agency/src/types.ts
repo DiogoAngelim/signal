@@ -133,7 +133,6 @@ export type CalibrationDriftConfig = CalibrationConfig & {
   bootstrapIterations?: number;
   bootstrapBlockSize?: number;
   bootstrapSeed?: number;
-  confidenceLevel?: number;
 };
 
 export type CalibrationDriftWindow = {
