@@ -19,6 +19,7 @@ if (workspaceList.status !== 0) {
 }
 
 const workspacePackages = JSON.parse(workspaceList.stdout);
+const libraryOnly = process.argv.includes("--library");
 const missingTargets = [];
 let checkedTargets = 0;
 
@@ -58,6 +59,10 @@ function collectTargets(value, label, targets) {
 
 for (const workspacePackage of workspacePackages) {
   const packageDir = workspacePackage.path;
+  const relativeDir = path.relative(rootDir, packageDir).split(path.sep).join("/");
+  if (libraryOnly && !/^(api|packages|server)\//.test(relativeDir)) {
+    continue;
+  }
   const packageJsonPath = path.join(packageDir, "package.json");
 
   if (!existsSync(packageJsonPath)) {
