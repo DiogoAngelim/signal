@@ -72,7 +72,7 @@ jobs:
           TARBALL_DIR: ${{ runner.temp }}/signal-tarballs
         run: |
           set -euo pipefail
-          DECISION_TARBALL="$(find "$TARBALL_DIR" -maxdepth 1 -name 'signal-decision-*.tgz' -print -quit)"
+          DECISION_TARBALL="$(find "$TARBALL_DIR" -maxdepth 1 -type f -name 'signal-decision-[0-9]*.tgz' -print -quit)"
           test -n "$DECISION_TARBALL"
           mkdir -p "$RUNNER_TEMP/signal-decision-consumer"
           cd "$RUNNER_TEMP/signal-decision-consumer"
