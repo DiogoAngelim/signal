@@ -238,6 +238,7 @@ export function createPostgresTransactionalStore(
           envelope: SignalEnvelope;
           attempts: number;
           created_at: Date;
+          lease_token: string;
         }>(
           `WITH candidates AS (
              SELECT id FROM signal_outbox
@@ -250,10 +251,11 @@ export function createPostgresTransactionalStore(
            UPDATE signal_outbox AS outbox
            SET status = 'processing', locked_by = $2,
                locked_until = now() + ($3 * interval '1 millisecond'),
+               lease_token = gen_random_uuid(),
                attempts = outbox.attempts + 1
            FROM candidates
            WHERE outbox.id = candidates.id
-           RETURNING outbox.id, outbox.envelope, outbox.attempts, outbox.created_at`,
+           RETURNING outbox.id, outbox.envelope, outbox.attempts, outbox.created_at, outbox.lease_token`,
           [input.limit, input.workerId, input.leaseMs],
         );
         await client.query("COMMIT");
@@ -262,6 +264,7 @@ export function createPostgresTransactionalStore(
           envelope: row.envelope,
           attempts: row.attempts,
           createdAt: new Date(row.created_at).toISOString(),
+          leaseToken: row.lease_token,
         }));
       } catch (error) {
         await rollback(client);
@@ -275,9 +278,9 @@ export function createPostgresTransactionalStore(
       const result = await pool.query(
         `UPDATE signal_outbox
          SET status = 'delivered', delivered_at = now(),
-             locked_by = NULL, locked_until = NULL, last_error = NULL
-         WHERE id = $1 AND status = 'processing' AND locked_by = $2`,
-        [input.id, input.workerId],
+             locked_by = NULL, locked_until = NULL, lease_token = NULL, last_error = NULL
+         WHERE id = $1 AND status = 'processing' AND locked_by = $2 AND lease_token = $3`,
+        [input.id, input.workerId, input.leaseToken],
       );
       return result.rowCount === 1;
     },
@@ -285,12 +288,12 @@ export function createPostgresTransactionalStore(
     async retry(input) {
       const result = await pool.query<{ status: "pending" | "dead-letter" }>(
         `UPDATE signal_outbox
-         SET status = CASE WHEN attempts >= $5 THEN 'dead-letter' ELSE 'pending' END,
-             available_at = $3::timestamptz, last_error = $4,
-             locked_by = NULL, locked_until = NULL
-         WHERE id = $1 AND status = 'processing' AND locked_by = $2
+         SET status = CASE WHEN attempts >= $6 THEN 'dead-letter' ELSE 'pending' END,
+             available_at = $4::timestamptz, last_error = $5,
+             locked_by = NULL, locked_until = NULL, lease_token = NULL
+         WHERE id = $1 AND status = 'processing' AND locked_by = $2 AND lease_token = $3
          RETURNING status`,
-        [input.id, input.workerId, input.availableAt, input.error, input.maxAttempts],
+        [input.id, input.workerId, input.leaseToken, input.availableAt, input.error, input.maxAttempts],
       );
       const status = result.rows[0]?.status;
       if (!status) return "lease-lost";
