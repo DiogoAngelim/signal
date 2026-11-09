@@ -3,7 +3,10 @@ export {
   evaluateAgencyState,
   runAgencyCycle,
 } from "./agency";
-export { calibrateConfidence } from "./calibration";
+export {
+  calibrateConfidence,
+  evaluateCalibrationMetrics,
+} from "./calibration";
 export { learnFromTraces } from "./learning";
 export { createInMemoryAgencyMemory, toCausalChain } from "./memory";
 export { resolveOutcome } from "./outcome";
@@ -20,7 +23,9 @@ export type {
   AgencySizing,
   AgencyStateEvaluation,
   AgencyTrace,
+  CalibrationBucket,
   CalibrationConfig,
+  CalibrationMetrics,
   CalibrationReliability,
   CalibrationResult,
   LearningConfig,
