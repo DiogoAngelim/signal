@@ -76,7 +76,11 @@ export interface OutboxPort {
     leaseMs: number;
   }): Promise<OutboxRecord[]>;
   /** Acknowledge only when the caller still owns the lease. */
-  acknowledge(input: { id: string; workerId: string; leaseToken: string }): Promise<boolean>;
+  acknowledge(input: {
+    id: string;
+    workerId: string;
+    leaseToken: string;
+  }): Promise<boolean>;
   /** Reschedule or dead-letter a failed delivery, guarded by lease ownership. */
   retry(input: {
     id: string;
