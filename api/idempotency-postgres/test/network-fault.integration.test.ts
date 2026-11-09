@@ -54,6 +54,10 @@ integration("PostgreSQL network fault and recovery simulation", () => {
   it("rolls back an interrupted transaction and reconnects after network restoration", async () => {
     const id = randomUUID();
     const client = await proxied.connect();
+    let unexpectedClientError: Error | undefined;
+    client.on("error", (error: Error) => {
+      if (!error.message.includes("Connection terminated unexpectedly")) unexpectedClientError = error;
+    });
     try {
       await client.query("BEGIN");
       await client.query(
@@ -86,5 +90,6 @@ integration("PostgreSQL network fault and recovery simulation", () => {
       [id],
     );
     expect(persisted.rows[0].count).toBe(0);
+    expect(unexpectedClientError).toBeUndefined();
   });
 });
