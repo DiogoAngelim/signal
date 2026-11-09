@@ -31,12 +31,13 @@ export function createMemoryIdempotencyStore(): StoragePort &
     operationName: string;
     idempotencyKey: string;
     payloadFingerprint: string;
+    reservationToken: string;
     result: unknown;
     resultMeta?: import("@signal/protocol").SignalResultMeta;
     messageId?: string;
   }): Promise<void> => {
     const record = records.get(keyFor(input.operationName, input.idempotencyKey));
-    if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending") {
+    if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending" || record.reservationToken !== input.reservationToken || !record.reservationExpiresAt || Date.parse(record.reservationExpiresAt) <= Date.now()) {
       return;
     }
     record.status = "completed";
@@ -44,6 +45,8 @@ export function createMemoryIdempotencyStore(): StoragePort &
     record.resultMeta = input.resultMeta;
     record.messageId = input.messageId;
     record.updatedAt = new Date().toISOString();
+    record.reservationToken = undefined;
+    record.reservationExpiresAt = undefined;
   };
 
   return {
@@ -61,11 +64,23 @@ export function createMemoryIdempotencyStore(): StoragePort &
       };
     },
     async reserve(input): Promise<IdempotencyReservation> {
+      const leaseMs = input.leaseMs ?? 300_000;
+      if (!Number.isSafeInteger(leaseMs) || leaseMs < 1_000 || leaseMs > 86_400_000) {
+        throw new RangeError("Idempotency reservation lease must be between 1000 and 86400000 milliseconds.");
+      }
       const key = keyFor(input.operationName, input.idempotencyKey);
       const existing = records.get(key);
       if (existing) {
         if (existing.payloadFingerprint !== input.payloadFingerprint) return { state: "conflict", record: existing };
-        if (existing.status === "pending") return { state: "inflight", record: existing };
+        if (existing.status === "pending") {
+          if (!existing.reservationExpiresAt || Date.parse(existing.reservationExpiresAt) <= Date.now()) {
+            existing.reservationToken = randomUUID();
+            existing.reservationExpiresAt = new Date(Date.now() + leaseMs).toISOString();
+            existing.updatedAt = new Date().toISOString();
+            return { state: "reserved", record: existing };
+          }
+          return { state: "inflight", record: existing };
+        }
         return { state: "replayed", record: existing };
       }
       const now = new Date().toISOString();
@@ -76,17 +91,31 @@ export function createMemoryIdempotencyStore(): StoragePort &
         status: "pending",
         createdAt: now,
         updatedAt: now,
+        reservationToken: randomUUID(),
+        reservationExpiresAt: new Date(Date.now() + leaseMs).toISOString(),
       };
       records.set(key, record);
       return { state: "reserved", record };
+    },
+    async renewReservation(input) {
+      const record = records.get(keyFor(input.operationName, input.idempotencyKey));
+      if (!record || record.status !== "pending" || record.payloadFingerprint !== input.payloadFingerprint ||
+          record.reservationToken !== input.reservationToken || !record.reservationExpiresAt ||
+          Date.parse(record.reservationExpiresAt) <= Date.now()) return false;
+      if (!Number.isSafeInteger(input.leaseMs) || input.leaseMs < 1_000 || input.leaseMs > 86_400_000) {
+        throw new RangeError("Idempotency reservation lease must be between 1000 and 86400000 milliseconds.");
+      }
+      record.reservationExpiresAt = new Date(Date.now() + input.leaseMs).toISOString();
+      record.updatedAt = new Date().toISOString();
+      return true;
     },
     async complete(input) {
       await complete(input);
     },
     async completeWithEvents(input) {
       const record = records.get(keyFor(input.operationName, input.idempotencyKey));
-      if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending") {
-        throw new Error("Idempotency reservation is missing, stale, or no longer pending.");
+      if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending" || record.reservationToken !== input.reservationToken || !record.reservationExpiresAt || Date.parse(record.reservationExpiresAt) <= Date.now()) {
+        throw new Error("Idempotency reservation is missing, expired, or fenced.");
       }
       // Stage all records before mutating the idempotency record: no partial
       // in-memory commit can escape if event serialization/validation fails.
@@ -117,10 +146,12 @@ export function createMemoryIdempotencyStore(): StoragePort &
     },
     async fail(input) {
       const record = records.get(keyFor(input.operationName, input.idempotencyKey));
-      if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending") return;
+      if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending" || record.reservationToken !== input.reservationToken || !record.reservationExpiresAt || Date.parse(record.reservationExpiresAt) <= Date.now()) return;
       record.status = "failed";
       record.error = input.error as SignalErrorEnvelope;
       record.updatedAt = new Date().toISOString();
+      record.reservationToken = undefined;
+      record.reservationExpiresAt = undefined;
     },
     async claimBatch(input) {
       if (!Number.isSafeInteger(input.limit) || input.limit < 1 || !Number.isFinite(input.leaseMs) || input.leaseMs < 1) {
