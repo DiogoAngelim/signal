@@ -56,7 +56,17 @@ export interface OutboxRecord {
   createdAt: string;
 }
 
+export interface OutboxStats {
+  pending: number;
+  processing: number;
+  delivered: number;
+  deadLettered: number;
+  oldestPendingAgeMs: number | null;
+}
+
 export interface OutboxPort {
+  /** Return bounded-cardinality queue health counts and oldest pending age. */
+  getStats(): Promise<OutboxStats>;
   /** Claim a bounded batch, including expired leases, without double-claiming. */
   claimBatch(input: {
     workerId: string;
