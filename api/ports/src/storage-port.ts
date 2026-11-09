@@ -1,20 +1,16 @@
 /**
- * StoragePort — Abstraction for idempotency persistence and state storage.
+ * StoragePort — persistence contracts used by the Signal runtime.
  *
- * Handles:
- * - Idempotency record lifecycle (reserve → complete/fail)
- * - Replay-safe state persistence
- *
- * Rules:
- * - Implementations must be idempotent for the same key+fingerprint
- * - No business logic — pure storage
- * - Must support deterministic replay (same key → same result)
+ * Idempotency alone does not make event delivery durable. Mutations that emit
+ * events and require durable replay must use TransactionalStoragePort together
+ * with OutboxPort, implemented by the same transactional storage boundary.
  */
-import type { SignalErrorEnvelope, SignalResultMeta } from "@signal/protocol";
+import type {
+  SignalEnvelope,
+  SignalErrorEnvelope,
+  SignalResultMeta,
+} from "@signal/protocol";
 
-/**
- * Idempotency record for tracking operation execution state.
- */
 export interface IdempotencyRecord {
   operationName: string;
   idempotencyKey: string;
@@ -28,48 +24,64 @@ export interface IdempotencyRecord {
   messageId?: string;
 }
 
-/**
- * Result of attempting to reserve an idempotency slot.
- */
 export interface IdempotencyReservation {
   state: "reserved" | "replayed" | "conflict" | "inflight";
   record?: IdempotencyRecord;
 }
 
-/**
- * Storage port for idempotency enforcement and persistence.
- * Runtime enforces idempotency at the entry boundary via this port.
- */
-export interface StoragePort {
+export interface CompleteMutationInput {
+  operationName: string;
+  idempotencyKey: string;
+  payloadFingerprint: string;
+  result: unknown;
+  resultMeta?: SignalResultMeta;
+  messageId?: string;
+}
+
+export interface TransactionalStoragePort {
   /**
-   * Reserve an idempotency slot for the given operation.
-   * Returns the reservation state:
-   * - "reserved": first execution, proceed
-   * - "replayed": previously completed, return cached result
-   * - "conflict": fingerprint mismatch, reject
-   * - "inflight": currently executing, reject
+   * Atomically persist the completed idempotency result and every emitted
+   * event in the same durable transaction. Implementations must roll back
+   * both writes if either fails.
    */
+  completeWithEvents(
+    input: CompleteMutationInput & { events: readonly SignalEnvelope[] },
+  ): Promise<void>;
+}
+
+export interface OutboxRecord {
+  id: string;
+  envelope: SignalEnvelope;
+  attempts: number;
+  createdAt: string;
+}
+
+export interface OutboxPort {
+  /** Claim a bounded batch, including expired leases, without double-claiming. */
+  claimBatch(input: {
+    workerId: string;
+    limit: number;
+    leaseMs: number;
+  }): Promise<OutboxRecord[]>;
+  /** Acknowledge only when the caller still owns the lease. */
+  acknowledge(input: { id: string; workerId: string }): Promise<boolean>;
+  /** Reschedule or dead-letter a failed delivery, guarded by lease ownership. */
+  retry(input: {
+    id: string;
+    workerId: string;
+    availableAt: string;
+    error: string;
+    maxAttempts: number;
+  }): Promise<"scheduled" | "dead-lettered" | "lease-lost">;
+}
+
+export interface StoragePort {
   reserve(input: {
     operationName: string;
     idempotencyKey: string;
     payloadFingerprint: string;
   }): Promise<IdempotencyReservation>;
-
-  /**
-   * Mark an idempotency slot as successfully completed.
-   */
-  complete(input: {
-    operationName: string;
-    idempotencyKey: string;
-    payloadFingerprint: string;
-    result: unknown;
-    resultMeta?: SignalResultMeta;
-    messageId?: string;
-  }): Promise<void>;
-
-  /**
-   * Mark an idempotency slot as failed.
-   */
+  complete(input: CompleteMutationInput): Promise<void>;
   fail(input: {
     operationName: string;
     idempotencyKey: string;
