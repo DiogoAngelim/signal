@@ -20,7 +20,7 @@ The workflow runs on relevant pull requests, pushes to `main` and `codex/**`, a 
 | Atomic mutation and outbox persistence | PostgreSQL migration and transactional integration tests | Result and outbox writes commit or roll back together | Multi-region transactions or storage-provider behavior outside PostgreSQL |
 | Concurrent outbox claims | Competing PostgreSQL workers using `FOR UPDATE SKIP LOCKED` | One row is not concurrently claimed by two active leases | Global coordination across independent databases |
 | Stale outbox worker acknowledgement | Per-claim UUID fencing token, persisted in PostgreSQL and required by acknowledge/retry | A worker cannot acknowledge or reschedule a newer lease, even if its worker ID is reused | Fencing external side effects already performed before lease loss |
-| Broker publish / process-crash boundary | Real RabbitMQ management API; publish, expire lease, reclaim, and republish | At-least-once redelivery occurs after an ambiguous publish outcome | Exactly-once broker delivery |
+| Broker publish / worker-loss boundary | Real RabbitMQ management API; publish, abandon acknowledgement, expire lease, reclaim, and republish | At-least-once redelivery occurs after an ambiguous publish outcome | An OS-level worker kill at every instruction boundary or exactly-once broker delivery |
 | Consumer side-effect deduplication | Durable inbox primary key and side effect in one PostgreSQL transaction | Duplicate broker deliveries produce one simulated durable side effect | Correctness of every real consumer's own transaction or third-party API |
 | Broker unavailable | Failed network attempt, no acknowledgement, lease expiry, recovery publish | An unacknowledged event remains recoverable after a broker outage | Broker quorum loss, replication failure, or cloud network behavior |
 | PostgreSQL network interruption | Toxiproxy cuts a live connection during a transaction | Interrupted transaction is rolled back and a fresh connection succeeds after restoration | Every packet-loss, DNS, TLS, routing, and regional partition mode |
@@ -57,7 +57,7 @@ SIGNAL_TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/signal_si
   pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts
 ```
 
-The broker, Toxiproxy, crash-restart, backup/restore, and load gates are orchestrated by the workflow because they require disposable sibling containers and their service network.
+The broker, Toxiproxy, database crash-restart, backup/restore, and load gates are orchestrated by the workflow because they require disposable sibling containers and their service network. The broker scenario models worker loss by withholding acknowledgement and expiring the lease; it does not kill a worker process at the OS level.
 
 ## Evidence and provenance
 
