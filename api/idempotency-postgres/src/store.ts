@@ -4,7 +4,7 @@ import type {
   IdempotencyReservation,
   StoragePort,
 } from "@signal/ports";
-import { and, eq, gt, lte, sql } from "drizzle-orm";
+import { and, eq, gt, lte } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
