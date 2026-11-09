@@ -103,8 +103,21 @@ export function assessEvidenceTemporalValidity(
     }
   }
 
+  const freshnessAffectedIds = new Set([
+    ...expiredEvidenceIds,
+    ...notYetValidEvidenceIds,
+    ...staleEvidenceIds,
+    ...invalidEvidenceIds,
+  ]);
+  const freshnessCap = evidence.length
+    ? Math.round(
+        ((evidence.length - freshnessAffectedIds.size) / evidence.length) * 100,
+      )
+    : 0;
+
   const explanation = [
     `Temporal validity was evaluated as of ${asOf}.`,
+    `Temporal issues cap the evidence freshness score at ${freshnessCap}/100.`,
     `${currentEvidenceIds.length} evidence item(s) are within their declared validity interval.`,
     `${expiredEvidenceIds.length} evidence item(s) are expired and ${notYetValidEvidenceIds.length} are not yet valid.`,
     `${staleEvidenceIds.length} evidence item(s) exceed their source freshness window.`,
@@ -122,6 +135,7 @@ export function assessEvidenceTemporalValidity(
 
   return {
     asOf,
+    freshnessCap,
     currentEvidenceIds: currentEvidenceIds.sort(),
     expiredEvidenceIds: expiredEvidenceIds.sort(),
     notYetValidEvidenceIds: notYetValidEvidenceIds.sort(),
