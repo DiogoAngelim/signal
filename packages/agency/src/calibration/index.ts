@@ -1,6 +1,7 @@
 import type {
   AgencyTrace,
   CalibrationBucket,
+  CalibrationInterval,
   CalibrationConfig,
   CalibrationMetrics,
   CalibrationReliability,
@@ -57,9 +58,12 @@ export function evaluateCalibrationMetrics(
     return {
       sampleSize: 0,
       brierScore: null,
+      brierScoreInterval: null,
       expectedCalibrationError: null,
       maximumCalibrationError: null,
       calibrationBias: null,
+      calibrationBiasInterval: null,
+      calibrationBiasSignificance: "insufficient_data",
       status: "insufficient_data",
       reliabilityBuckets: [],
     };
@@ -74,6 +78,8 @@ export function evaluateCalibrationMetrics(
   let brierTotal = 0;
   let confidenceTotal = 0;
   let outcomeTotal = 0;
+  const brierLosses: number[] = [];
+  const calibrationDifferences: number[] = [];
 
   for (const sample of samples) {
     const bucketIndex = Math.min(
@@ -81,7 +87,11 @@ export function evaluateCalibrationMetrics(
       Math.floor(sample.confidence * bucketCount),
     );
     bins[bucketIndex].samples.push(sample);
-    brierTotal += (sample.confidence - sample.outcome) ** 2;
+    const difference = sample.confidence - sample.outcome;
+    const brierLoss = difference ** 2;
+    brierLosses.push(brierLoss);
+    calibrationDifferences.push(difference);
+    brierTotal += brierLoss;
     confidenceTotal += sample.confidence;
     outcomeTotal += sample.outcome;
   }
@@ -95,6 +105,10 @@ export function evaluateCalibrationMetrics(
       const observedRate = average(
         bin.samples.map((sample) => sample.outcome),
       );
+      const observedRateInterval = wilsonInterval(
+        bin.samples.filter((sample) => sample.outcome === 1).length,
+        bin.samples.length,
+      );
       return {
         lowerBound: round(bin.lowerBound),
         upperBound: round(bin.upperBound),
@@ -102,6 +116,13 @@ export function evaluateCalibrationMetrics(
         meanConfidence: round(meanConfidence),
         observedRate: round(observedRate),
         absoluteError: round(Math.abs(meanConfidence - observedRate)),
+        observedRateInterval,
+        calibrationErrorInterval: {
+          lowerBound: round(meanConfidence - observedRateInterval.upperBound),
+          upperBound: round(meanConfidence - observedRateInterval.lowerBound),
+          confidenceLevel: 0.95,
+          method: "wilson_score",
+        },
       };
     });
 
@@ -124,12 +145,25 @@ export function evaluateCalibrationMetrics(
         ? "calibrated"
         : "miscalibrated";
 
+  const brierScore = round(brierTotal / sampleSize);
+  const brierScoreInterval = normalMeanInterval(brierLosses, 0, 1);
+  const calibrationBiasInterval = normalMeanInterval(
+    calibrationDifferences,
+    -1,
+    1,
+  );
+
   return {
     sampleSize,
-    brierScore: round(brierTotal / sampleSize),
+    brierScore,
+    brierScoreInterval,
     expectedCalibrationError: round(expectedCalibrationError),
     maximumCalibrationError: round(maximumCalibrationError),
     calibrationBias: round(calibrationBias),
+    calibrationBiasInterval,
+    calibrationBiasSignificance: significanceFromInterval(
+      calibrationBiasInterval,
+    ),
     status,
     reliabilityBuckets,
   };
@@ -292,6 +326,59 @@ export function calibrateConfidence(
     sampleSize,
     metrics,
   };
+}
+
+
+function wilsonInterval(successes: number, sampleSize: number): CalibrationInterval {
+  const z = 1.96;
+  const proportion = successes / sampleSize;
+  const zSquared = z ** 2;
+  const denominator = 1 + zSquared / sampleSize;
+  const center =
+    (proportion + zSquared / (2 * sampleSize)) / denominator;
+  const margin =
+    (z *
+      Math.sqrt(
+        (proportion * (1 - proportion)) / sampleSize +
+          zSquared / (4 * sampleSize ** 2),
+      )) /
+    denominator;
+  return {
+    lowerBound: round(Math.max(0, center - margin)),
+    upperBound: round(Math.min(1, center + margin)),
+    confidenceLevel: 0.95,
+    method: "wilson_score",
+  };
+}
+
+function normalMeanInterval(
+  values: readonly number[],
+  minimum: number,
+  maximum: number,
+): CalibrationInterval | null {
+  if (values.length < 30) return null;
+  const mean = average([...values]);
+  const squaredDeviations = values.reduce(
+    (total, value) => total + (value - mean) ** 2,
+    0,
+  );
+  const sampleVariance = squaredDeviations / (values.length - 1);
+  const margin = 1.96 * Math.sqrt(sampleVariance / values.length);
+  return {
+    lowerBound: round(Math.max(minimum, mean - margin)),
+    upperBound: round(Math.min(maximum, mean + margin)),
+    confidenceLevel: 0.95,
+    method: "normal_approximation",
+  };
+}
+
+function significanceFromInterval(
+  interval: CalibrationInterval | null,
+): "positive" | "negative" | "not_significant" | "insufficient_data" {
+  if (!interval) return "insufficient_data";
+  if (interval.lowerBound > 0) return "positive";
+  if (interval.upperBound < 0) return "negative";
+  return "not_significant";
 }
 
 function calibrationSamples(
