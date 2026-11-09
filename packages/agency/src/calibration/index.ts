@@ -7,7 +7,7 @@ import type {
   CalibrationResult,
 } from "../types";
 
-const DEFAULT_MINIMUM_SAMPLES = 3;
+const DEFAULT_MINIMUM_SAMPLES = 30;
 const DEFAULT_MINIMUM_EVALUATION_SAMPLES = 30;
 const DEFAULT_BUCKET_COUNT = 10;
 const DEFAULT_ALIGNMENT_TOLERANCE = 0.1;
