@@ -21,6 +21,7 @@ import {
   createSignalRelationshipMemory,
   deriveLearningPatterns,
   evaluateDecision,
+  evaluateDecisionRobustness,
   evaluateLearningJudgment,
   evaluateOutcome,
   generatePredictionScenarios,
@@ -122,6 +123,46 @@ describe("@signal/decision", () => {
       simulation.recommendedAction,
     );
     expect(wisdom.decision).toBe("avoid");
+  });
+
+
+  it("stress-tests decision recommendations under bounded one-factor perturbations", () => {
+    const scenarios = generatePredictionScenarios({
+      currentScore: 68,
+      expectedReward: 72,
+      expectedRisk: 48,
+      uncertainty: 38,
+      confidence: 70,
+      labels: ["conditions improve", "conditions weaken", "conditions remain mixed"],
+    });
+    const input = { scenarios, currentExposure: 35 };
+    const first = evaluateDecisionRobustness(input, {
+      perturbationPoints: 5,
+      minimumStability: 0.8,
+    });
+    const second = evaluateDecisionRobustness(input, {
+      perturbationPoints: 5,
+      minimumStability: 0.8,
+    });
+
+    expect(first).toEqual(second);
+    expect(first.perturbations).toHaveLength(14);
+    expect(first.stabilityRate).toBeGreaterThanOrEqual(0);
+    expect(first.stabilityRate).toBeLessThanOrEqual(1);
+    expect(["robust", "sensitive"]).toContain(first.status);
+    expect(first.explanation.join(" ")).toMatch(/not a probability/i);
+  });
+
+  it("does not claim robustness without scenarios and rejects invalid bounds", () => {
+    const empty = evaluateDecisionRobustness({ scenarios: [] });
+    expect(empty.status).toBe("insufficient_data");
+    expect(empty.stabilityRate).toBeNull();
+    expect(() =>
+      evaluateDecisionRobustness({ scenarios: [] }, { perturbationPoints: 0 }),
+    ).toThrow("perturbationPoints must be greater than 0 and at most 100.");
+    expect(() =>
+      evaluateDecisionRobustness({ scenarios: [] }, { minimumStability: 2 }),
+    ).toThrow("minimumStability must be between 0 and 1.");
   });
 
   it("creates records, accountability reports, replay comparisons, and human guide steps", () => {
