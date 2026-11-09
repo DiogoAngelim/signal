@@ -42,6 +42,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     services:
+      rabbitmq:
+        image: rabbitmq:3-management
+        env:
+          RABBITMQ_DEFAULT_USER: signal
+          RABBITMQ_DEFAULT_PASS: signal-simulation-only
+        ports:
+          - 5672:5672
+          - 15672:15672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
       postgres:
         image: postgres:16
         env:
@@ -58,6 +71,9 @@ jobs:
     env:
       SIGNAL_TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/signal_simulation
       SIGNAL_SIMULATION_PROFILE: ${{ inputs.profile || 'standard' }}
+      SIGNAL_RABBITMQ_MANAGEMENT_URL: http://localhost:15672
+      SIGNAL_RABBITMQ_USER: signal
+      SIGNAL_RABBITMQ_PASSWORD: signal-simulation-only
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -107,6 +123,11 @@ jobs:
           set -o pipefail
           pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/postgres-integration.log
 
+      - name: Run broker and consumer crash-boundary integration
+        run: |
+          set -o pipefail
+          pnpm --filter @signal/idempotency-postgres exec vitest run test/broker-crash.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/broker-crash-integration.log
+
       - name: Run runtime resilience and audit tests
         run: |
           set -o pipefail
@@ -139,6 +160,7 @@ jobs:
             'postgres-integration.log',
             'runtime-tests.log',
             'postgres-adapter-tests.log',
+            'broker-crash-integration.log',
             'repeatability.log'
           ].filter((name) => existsSync(`simulation-evidence/${name}`));
           writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n');
