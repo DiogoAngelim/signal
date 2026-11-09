@@ -133,4 +133,31 @@ describe("PostgreSQL transactional storage", () => {
     expect(acknowledged).toBe(true);
     expect(mocks.poolQuery.mock.calls[0][0]).toContain("locked_by = $2");
   });
+
+  it("reports bounded-cardinality outbox queue health", async () => {
+    mocks.poolQuery.mockResolvedValueOnce({
+      rowCount: 1,
+      rows: [{
+        pending: "4",
+        processing: "2",
+        delivered: "19",
+        dead_lettered: "1",
+        oldest_pending_age_ms: "1250.5",
+      }],
+    });
+    const store = createPostgresTransactionalStore({
+      connectionString: "postgres://example",
+    });
+
+    await expect(store.getStats()).resolves.toEqual({
+      pending: 4,
+      processing: 2,
+      delivered: 19,
+      deadLettered: 1,
+      oldestPendingAgeMs: 1250.5,
+    });
+    expect(mocks.poolQuery.mock.calls[0][0]).toContain("oldest_pending_age_ms");
+    await store.close();
+  });
+
 });
