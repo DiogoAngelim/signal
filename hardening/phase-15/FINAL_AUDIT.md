@@ -1,157 +1,78 @@
-# Final Architecture Audit — Deterministic Event-Driven System
+# Architecture Audit — Historical Completion and Production Qualification
 
-**Date:** 2026-06-11  
-**Status:** ✅ ALL PHASES COMPLETE
+**Original audit date:** 2026-06-11  
+**Qualification updated:** 2026-11-09  
+**Status:** Architecture phases completed; production certification remains conditional.
 
 ## Executive Summary
 
-The Signal system has been successfully refactored into a deterministic, replayable, event-driven architecture with strict dependency inversion via Ports. All 8 implementation phases are complete with zero dependency violations.
+The original architecture phases established dependency inversion, runtime ports, protocol boundaries, idempotency interfaces, event ownership, and CI architecture checks. Those milestones remain valid as historical implementation results.
 
-## Architecture Overview
+They do **not** establish that Signal is fully deterministic under arbitrary external state, that event side effects are exactly-once, that audit storage is immutable, or that production SLOs have been demonstrated. Those are separate guarantees requiring durable infrastructure, trusted evidence, and workload-based validation.
 
-```
-Apps (Browser, examples, backend)
-  → depend only on Interface layer
+## Architecture
 
-Interface (Adapters)
-  → HTTP adapter, SDK adapter
-  → convert external input → runtime commands
-  → no business logic, depend ONLY on Ports
-
-Ports Layer (@signal/ports)
-  → PURE interfaces only
-  → RuntimePort, EventPort, StoragePort, DecisionPort, ObservabilityPort
-  → no implementations, no imports from runtime/domain/interface
-
-Runtime (@signal/runtime)
-  → Core correctness kernel
-  → deterministic execution, command dispatch, replay + audit
-  → idempotency enforcement, event lifecycle coordination
-  → depends ONLY on Ports + Protocol
-
-Protocol (@signal/protocol)
-  → Pure definitions: commands, events, envelopes, errors
-  → dependency-free, serializable
-
-Domain (@signal/decision, decision-memory)
-  → Pure logic: Decision Engine, State Model, Feedback Loop
-  → no runtime imports, no event emission, no side effects
-  → invoked ONLY via DecisionPort
-```
-
-## Phase Completion Status
-
-| Phase | Name | Status | Key Changes |
-|-------|------|--------|-------------|
-| 1 | Audit | ✅ | Baseline: 233 modules, 586 deps, 0 violations |
-| 2 | Ports Layer | ✅ | Created @signal/ports with 5 port interfaces |
-| 3 | Runtime Decoupling | ✅ | Runtime uses injected ports, no direct deps |
-| 4 | Domain Isolation | ✅ | Decision package is pure, DecisionPort defined |
-| 5 | Event Ownership | ✅ | Runtime is ONLY event authority |
-| 6 | Idempotency + Replay | ✅ | StoragePort with reserve/complete/fail lifecycle |
-| 7 | Observability | ✅ | ObservabilityPort wired, no direct logging |
-| 8 | CI Hardening | ✅ | Runtime purity rules added to dependency-cruiser |
-
-## Dependency Rules (Enforced in CI)
-
-### Forbidden Dependencies (Backward Edges)
-- ❌ Signal → Optimizer/Execution/Post-Trade
-- ❌ Optimizer → Signal
-- ❌ Optimizer → Execution/Post-Trade
-- ❌ Execution → Signal/Optimizer
-- ❌ Post-Trade → any upstream
-- ❌ Circular dependencies
-
-### Allowed Dependencies (Forward Edges)
-- ✅ Optimizer → Signal (type-only from @signal/protocol)
-- ✅ Execution → Optimizer (@signal/runtime may import @signal/protocol)
-- ✅ Execution → Signal (@signal/sdk-node may import @signal/runtime and @signal/protocol)
-- ✅ Post-Trade: fully independent
-
-### Runtime Purity Rules (NEW)
-- ❌ runtime → transport (HTTP, SDK)
-- ❌ runtime → domain logic
-- ❌ runtime → server/db
-
-## Key Architectural Properties
-
-### 1. Ports Injection
-Runtime is constructed with injected ports:
-```typescript
-const runtime = new SignalRuntime({
-  eventPort,      // required
-  storagePort,    // optional
-  decisionPort,   // optional
-  observabilityPort, // optional
-});
-```
-
-### 2. Event Ownership
-- Runtime is the ONLY event authority
-- Events created only inside runtime
-- Domain cannot emit events (emit() throws outside mutation handlers)
-
-### 3. Idempotency Model
-- idempotency key = hash(envelope + execution context)
-- Enforced at runtime entry boundary
-- StoragePort handles persistence with reserve/complete/fail lifecycle
-- Prevents duplicate execution under retry
-
-### 4. Replay Guarantees
-- Runtime supports: live execution, replay execution, audit reconstruction
-- No external side effects during replay
-- Deterministic outputs from stored events
-- createReplaySafeSubscriber ensures no duplicate processing
-
-### 5. Observability
-Lifecycle hooks via ObservabilityPort:
-- `command.received`
-- `execution.start`
-- `execution.end`
-- `event.emitted`
-- `replay.mode.active`
-- `idempotency.hit`
-
-## Verification Results
+The intended dependency direction remains:
 
 ```
-✔ TypeScript: PASS
-✔ arch:check: PASS (233 modules, 586 deps, 0 violations)
-✔ Runtime Purity: VERIFIED (3 new rules in dependency-cruiser)
-✔ Circular Detection: ENABLED
+Applications and adapters
+  → Runtime and ports
+    → Protocol contracts
+  → Domain packages
+  → Post-execution audit and verification
 ```
 
-## Files Modified
+The dependency rules and CI architecture checks are source-level controls. They do not replace security review of deployed infrastructure or operational configuration.
 
-### Core Runtime Files
-- `api/runtime/src/runtime.ts` — Ports injection, observability wiring
-- `api/runtime/src/mutation.ts` — Uses EventPort, StoragePort
-- `api/runtime/src/dispatcher.ts` — Returns EventPort type
-- `api/runtime/src/event.ts` — Accepts EventPort parameter
-- `api/runtime/src/idempotency.ts` — Returns StoragePort type
-- `api/runtime/src/types.ts` — Removed deprecated types
+## Historical phase completion
 
-### Ports Layer
-- `api/ports/src/index.ts` — Barrel exports
-- `api/ports/src/event-port.ts` — EventPort interface
-- `api/ports/src/storage-port.ts` — StoragePort interface
-- `api/ports/src/decision-port.ts` — DecisionPort interface
-- `api/ports/src/observability-port.ts` — ObservabilityPort interface
-- `api/ports/src/runtime-port.ts` — RuntimePort interface
+The eight original architecture phases were implemented:
 
-### CI Configuration
-- `.dependency-cruiser.js` — Added runtime purity rules
+| Phase | Historical result | Qualification |
+|---|---|---|
+| 1 | Dependency audit | Baseline count is historical, not a current inventory |
+| 2 | Ports layer | Interface separation implemented |
+| 3 | Runtime decoupling | Source dependency rules are CI-enforced |
+| 4 | Domain isolation | Import boundaries are CI-enforced |
+| 5 | Event ownership | Runtime creates and dispatches events |
+| 6 | Idempotency and replay | Depends on adapter durability and captured external inputs |
+| 7 | Observability | Ports exist; production exporter and alerting are deployment concerns |
+| 8 | CI hardening | Architecture checks run in GitHub Actions |
 
-## Success Criteria — ALL MET
+## Corrected guarantees
 
-- ✅ Runtime fully isolated from transport
-- ✅ Domain is pure and side-effect free
-- ✅ Events are single-owned (runtime)
-- ✅ Idempotency prevents duplicate execution
-- ✅ Replay == identical output
-- ✅ Strict dependency rules enforced in CI
-- ✅ No circular dependencies exist
+### Idempotency
 
-## Conclusion
+With a correctly implemented durable StoragePort, a completed operation can be returned for the same operation name, idempotency key, and payload fingerprint. This is not a global exactly-once guarantee. Pending-record recovery, transaction isolation, retention, and cross-region consistency depend on the adapter.
 
-The Signal system now implements a deterministic, replayable, event-driven architecture with strict dependency inversion. The runtime is a pure correctness kernel that depends only on port interfaces, enabling testability, replay, and clean separation of concerns. All architectural constraints are enforced in CI via dependency-cruiser.
+### Event delivery
+
+The runtime creates event envelopes and sends them through EventPort. The current mutation flow dispatches emitted events before persisting the completed idempotency result. A crash or partial subscriber failure can therefore create delivery ambiguity. This is not a transactional outbox and must not be described as exactly-once delivery.
+
+### Replay
+
+Replay can reproduce normalized domain results only when the operation implementation/version, canonical inputs, policy/configuration, and all external read snapshots are fixed and available. Replay does not reproduce arbitrary external state or safely repeat external side effects.
+
+### Audit chain
+
+Hash-chain verification detects changes to entries relative to the supplied chain. A hash chain alone is not immutable: an actor able to rewrite the entire chain and its only retained head can create a different internally consistent history. Production tamper evidence requires independently protected checkpoints or signatures and restrictive append-only storage controls.
+
+### Resilience
+
+The runtime provides retry and circuit-breaker primitives. The stateful controller added during production hardening limits half-open probes within one process only. It is not a distributed coordination mechanism. Retry budgets, total deadlines, idempotent side effects, and shared state remain deployment or caller responsibilities.
+
+### Statistical learning
+
+Calibration and drift outputs are descriptive evaluations of the supplied trace history. They do not establish representative sampling, independence, absence of leakage, causal attribution, or statistical significance of temporal drift. Automatic policy changes require separately validated domain governance.
+
+## Current source-level verification
+
+The repository CI workflows validate configured builds, tests, type checks, package release surfaces, and dependency architecture. Passing CI proves only that the tested source revision passed those configured checks.
+
+See [Production Validation Status](../../docs/production-validation-status.md) for the explicit evidence required before production certification, including transactional event delivery, replay completeness, trusted audit checkpoints, distributed resilience, statistical governance, observability/SLOs, load/chaos testing, and recovery validation.
+
+## Certification decision
+
+**Architecture implementation:** completed historically.
+
+**Production readiness:** not certified by this architecture audit alone. Production certification requires dated, reproducible evidence for each applicable release gate and explicit acceptance of any residual risk. Do not infer production readiness from phase completion, source-level tests, or a passing CI badge.
