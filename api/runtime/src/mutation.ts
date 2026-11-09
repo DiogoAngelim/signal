@@ -1,4 +1,4 @@
-import type { EventPort, StoragePort } from "@signal/ports";
+import type { EventPort, StoragePort, TransactionalStoragePort } from "@signal/ports";
 import {
   type SignalEnvelope,
   type SignalErrorEnvelope,
@@ -6,6 +6,7 @@ import {
   createSignalError,
 } from "@signal/protocol";
 import { dispatchEvent } from "./event";
+import { dispatchOutboxBatch, isOutboxPort } from "./outbox";
 import {
   createExecutionSuccessMeta,
   createNestedExecutionContext,
@@ -181,16 +182,12 @@ export async function executeMutation<TInput, TResult>(
     const result = await definition.handler(validatedInput, executionContext);
     const validatedResult = definition.resultSchema.parse(result);
 
-    for (const eventEnvelope of emittedEvents) {
-      await eventPort.dispatch(eventEnvelope);
-    }
+    const usesIdempotency =
+      !!storagePort &&
+      !!idempotencyKey &&
+      definition.idempotency !== "none";
 
-    if (
-      storagePort &&
-      idempotencyKey &&
-      definition &&
-      definition.idempotency !== "none"
-    ) {
+    if (usesIdempotency) {
       const meta = createExecutionSuccessMeta({
         outcome: "completed",
         envelope,
@@ -206,14 +203,46 @@ export async function executeMutation<TInput, TResult>(
         },
       });
 
-      await storagePort.complete({
-        operationName: name,
-        idempotencyKey,
-        payloadFingerprint,
-        result: validatedResult,
-        resultMeta: meta,
-        messageId: envelope.messageId,
-      });
+      if (emittedEvents.length > 0) {
+        const transactionalStore = storagePort as StoragePort &
+          Partial<TransactionalStoragePort>;
+        if (
+          typeof transactionalStore.completeWithEvents !== "function" ||
+          !isOutboxPort(storagePort)
+        ) {
+          throw new Error(
+            "This mutation emits events and requires a transactional storage adapter with a durable outbox.",
+          );
+        }
+
+        await transactionalStore.completeWithEvents({
+          operationName: name,
+          idempotencyKey,
+          payloadFingerprint,
+          result: validatedResult,
+          resultMeta: meta,
+          messageId: envelope.messageId,
+          events: emittedEvents,
+        });
+
+        // Delivery is opportunistic. A failed dispatch remains durably queued
+        // for a worker; it must never turn an already-committed mutation into
+        // a reported failure that could prompt callers to repeat the action.
+        try {
+          await dispatchOutboxBatch(storagePort, eventPort, { limit: 50 });
+        } catch {
+          // The committed outbox is the source of truth; a worker retries it.
+        }
+      } else {
+        await storagePort.complete({
+          operationName: name,
+          idempotencyKey,
+          payloadFingerprint,
+          result: validatedResult,
+          resultMeta: meta,
+          messageId: envelope.messageId,
+        });
+      }
 
       return {
         ok: true,
@@ -221,6 +250,10 @@ export async function executeMutation<TInput, TResult>(
         meta,
         envelope,
       };
+    }
+
+    for (const eventEnvelope of emittedEvents) {
+      await eventPort.dispatch(eventEnvelope);
     }
 
     return {
