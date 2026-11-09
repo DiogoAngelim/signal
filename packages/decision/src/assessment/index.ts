@@ -604,6 +604,12 @@ function assessGovernance(
   if (evidenceQuality.temporal?.expiredEvidenceIds.length) {
     warnings.push("Expired evidence is present in the assessment.");
   }
+  if (evidenceQuality.temporal?.notYetValidEvidenceIds.length) {
+    warnings.push("Evidence that is not yet valid is present in the assessment.");
+  }
+  if (evidenceQuality.temporal?.staleEvidenceIds.length) {
+    warnings.push("Evidence exceeds its declared source freshness window.");
+  }
   if (evidenceQuality.temporal?.invalidEvidenceIds.length) {
     blockers.push("Evidence contains invalid temporal metadata.");
   }
