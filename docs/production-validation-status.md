@@ -11,7 +11,7 @@ This document is the release gate for Signal itself. A passing package build or 
 - Ed25519 signed audit checkpoints can bind a chain sequence/head hash to a key ID; verification supports an externally managed trusted public key.
 - The runtime public entrypoint exports resilience, audit-chain, and outbox APIs.
 - The PostgreSQL transactional adapter atomically commits an idempotency result with emitted event envelopes in one database transaction.
-- The outbox uses leased claims with `FOR UPDATE SKIP LOCKED`, bounded batches, at-least-once delivery, retry backoff, acknowledgement ownership, and dead-letter state.
+- The outbox uses leased claims with `FOR UPDATE SKIP LOCKED`, bounded batches, at-least-once delivery, retry backoff, acknowledgement ownership, dead-letter state, and bounded-cardinality queue-health statistics.
 - The runtime refuses to dispatch emitted events for an idempotent mutation when the storage adapter lacks the transactional outbox capability.
 - The in-memory adapter implements the same contract for deterministic tests; it is not durable.
 
@@ -48,10 +48,11 @@ Do not label Signal production-certified until the following evidence exists:
    - Reject or explicitly mark replay as incomplete when required evidence is missing.
 
 3. **Trusted audit checkpoints**
-   - Persist audit entries append-only under restrictive database permissions.
-   - Anchor chain heads outside the mutable audit store (for example, signed checkpoints in a separately controlled system).
-   - Define key rotation, checkpoint retention, restore verification, and access audit.
-   - Test full-history rewrite and checkpoint substitution attacks.
+   - [x] Provide Ed25519 checkpoint signing and verification primitives binding sequence, chain-head hash, timestamp, and key ID.
+   - [ ] Persist audit entries append-only under restrictive database permissions.
+   - [ ] Anchor signed checkpoints outside the mutable audit store under independently controlled permissions.
+   - [ ] Define key custody, rotation, checkpoint retention, restore verification, and access audit.
+   - [ ] Test full-history rewrite and checkpoint substitution attacks against the deployed checkpoint store.
 
 4. **Distributed resilience**
    - Use a shared coordination mechanism if one circuit-breaker state must span replicas.
@@ -79,7 +80,7 @@ Do not label Signal production-certified until the following evidence exists:
 
 ## Current completion boundary
 
-The transactional outbox and source-level statistical safeguards are implemented in this branch. The PostgreSQL adapter is exercised by a disposable PostgreSQL service in CI. The transactional outbox is not active in any deployment merely because it exists in the repository. It is not active in any deployment merely because it exists in the repository. Operators must apply migration `0001_transactional_outbox.sql`, instantiate `createPostgresTransactionalStore`, and run a persistent worker calling `dispatchOutboxBatch`. The legacy `createPostgresIdempotencyStore` is not sufficient for idempotent mutations that emit events.
+The transactional outbox, source-level statistical safeguards, signed audit-checkpoint primitives, and queue-health metrics are implemented in this branch. The PostgreSQL adapter is exercised by a disposable PostgreSQL service in CI. The transactional outbox is not active in any deployment merely because it exists in the repository. It is not active in any deployment merely because it exists in the repository. Operators must apply migration `0001_transactional_outbox.sql`, instantiate `createPostgresTransactionalStore`, and run a persistent worker calling `dispatchOutboxBatch`. The legacy `createPostgresIdempotencyStore` is not sufficient for idempotent mutations that emit events.
 
 The remaining checklist items are intentionally marked incomplete where real infrastructure, representative production data, independently protected secrets/storage, or measured workloads are required. Source-only changes cannot truthfully certify those controls.
 
