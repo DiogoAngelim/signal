@@ -94,10 +94,10 @@ describe("calibration", () => {
 
   it("reports Brier score and calibration error across confidence buckets", () => {
     const perfectlyCalibrated = [
-      ...Array.from({ length: 3 }, () => trace(0.2, true)),
-      ...Array.from({ length: 12 }, () => trace(0.2, false)),
-      ...Array.from({ length: 12 }, () => trace(0.8, true)),
-      ...Array.from({ length: 3 }, () => trace(0.8, false)),
+      ...Array.from({ length: 10 }, () => trace(0.2, true)),
+      ...Array.from({ length: 40 }, () => trace(0.2, false)),
+      ...Array.from({ length: 40 }, () => trace(0.8, true)),
+      ...Array.from({ length: 10 }, () => trace(0.8, false)),
     ];
     const metrics = evaluateCalibrationMetrics(perfectlyCalibrated);
 
@@ -113,8 +113,8 @@ describe("calibration", () => {
   });
 
   it("detects bin-level miscalibration that a global bias can conceal", () => {
-    const overconfident = Array.from({ length: 30 }, (_, index) =>
-      trace(0.9, index < 15),
+    const overconfident = Array.from({ length: 100 }, (_, index) =>
+      trace(0.9, index < 50),
     );
     const metrics = evaluateCalibrationMetrics(overconfident);
 
@@ -154,7 +154,7 @@ describe("calibration", () => {
 
   it("places confidence 1 in the final bucket and bounds bucket count", () => {
     const metrics = evaluateCalibrationMetrics(
-      Array.from({ length: 30 }, () => trace(1, true)),
+      Array.from({ length: 100 }, () => trace(1, true)),
     );
 
     expect(metrics.reliabilityBuckets).toHaveLength(1);
@@ -167,6 +167,11 @@ describe("calibration", () => {
     expect(() =>
       evaluateCalibrationMetrics([trace(0.5, true)], { bucketCount: 101 }),
     ).toThrow("bucketCount must not exceed 100.");
+    expect(() =>
+      evaluateCalibrationMetrics([trace(0.5, true)], {
+        minimumBucketSamples: 0,
+      }),
+    ).toThrow("minimumBucketSamples must be a positive integer.");
   });
 
   it("honors calibration configuration and validates invalid values", () => {
