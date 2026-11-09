@@ -3,6 +3,7 @@ import type {
   IdempotencyReservation,
   OutboxPort,
   OutboxRecord,
+  OutboxStats,
   StoragePort,
   TransactionalStoragePort,
 } from "@signal/ports";
@@ -45,6 +46,19 @@ export function createMemoryIdempotencyStore(): StoragePort &
   };
 
   return {
+    async getStats(): Promise<OutboxStats> {
+      const items = [...outbox.values()];
+      const pending = items.filter((item) => item.status === "pending");
+      return {
+        pending: pending.length,
+        processing: items.filter((item) => item.status === "processing").length,
+        delivered: items.filter((item) => item.status === "delivered").length,
+        deadLettered: items.filter((item) => item.status === "dead-letter").length,
+        oldestPendingAgeMs: pending.length === 0
+          ? null
+          : Math.max(0, Date.now() - Math.min(...pending.map((item) => Date.parse(item.createdAt)))),
+      };
+    },
     async reserve(input): Promise<IdempotencyReservation> {
       const key = keyFor(input.operationName, input.idempotencyKey);
       const existing = records.get(key);
