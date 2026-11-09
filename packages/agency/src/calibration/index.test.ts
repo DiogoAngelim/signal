@@ -197,6 +197,15 @@ describe("calibration", () => {
     expect(result.windows).toHaveLength(2);
     expect(result.windows[0].expectedCalibrationError).toBe(0);
     expect(result.windows[1].expectedCalibrationError).toBe(0.9);
+
+    const sparse = evaluateCalibrationDrift(
+      Array.from({ length: 100 }, (_, index) =>
+        trace(0.5, index % 2 === 0, new Date(Date.UTC(2026, 0, 1, 0, index)).toISOString()),
+      ),
+      { windowCount: 2, minimumWindowSamples: 30, minimumBucketSamples: 60 },
+    );
+    expect(sparse.status).toBe("insufficient_data");
+    expect(sparse.errorDelta).toBeNull();
   });
 
   it("does not claim drift when the chronological cohort is too small", () => {
