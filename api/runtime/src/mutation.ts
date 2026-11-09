@@ -182,12 +182,11 @@ export async function executeMutation<TInput, TResult>(
     const result = await definition.handler(validatedInput, executionContext);
     const validatedResult = definition.resultSchema.parse(result);
 
-    const usesIdempotency =
-      !!storagePort &&
-      !!idempotencyKey &&
-      definition.idempotency !== "none";
-
-    if (usesIdempotency) {
+    if (
+      storagePort &&
+      idempotencyKey &&
+      definition.idempotency !== "none"
+    ) {
       const meta = createExecutionSuccessMeta({
         outcome: "completed",
         envelope,
