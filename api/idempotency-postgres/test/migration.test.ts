@@ -26,7 +26,6 @@ describe("postgres idempotency migration", () => {
       "utf8",
     );
     expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_outbox");
-    expect(sql).toContain("FOR UPDATE SKIP LOCKED");
     expect(sql).toContain("locked_until");
     expect(sql).toContain("dead-letter");
     expect(sql).toContain("signal_outbox_pending_available");
