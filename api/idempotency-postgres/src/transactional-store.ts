@@ -153,12 +153,20 @@ export function createPostgresTransactionalStore(
         await client.query("BEGIN");
         await updateCompleted(client, input);
         for (const event of input.events) {
-          await client.query(
+          const inserted = await client.query(
             `INSERT INTO signal_outbox (message_id, envelope)
              VALUES ($1, $2::jsonb)
-             ON CONFLICT (message_id) DO NOTHING`,
+             ON CONFLICT (message_id) DO UPDATE
+               SET message_id = EXCLUDED.message_id
+               WHERE signal_outbox.envelope = EXCLUDED.envelope
+             RETURNING message_id`,
             [event.messageId, JSON.stringify(event)],
           );
+          if (inserted.rowCount !== 1) {
+            throw new Error(
+              `Outbox message ID "${event.messageId}" already exists with a different envelope.`,
+            );
+          }
         }
         await client.query("COMMIT");
       } catch (error) {
