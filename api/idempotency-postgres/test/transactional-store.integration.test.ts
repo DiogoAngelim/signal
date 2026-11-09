@@ -38,6 +38,7 @@ integration("PostgreSQL transactional outbox integration", () => {
       operationName,
       idempotencyKey,
       payloadFingerprint: "fingerprint-atomic",
+      reservationToken: reservation.record!.reservationToken!,
       result: { value: 7 },
       messageId: `mutation-${idempotencyKey}`,
       events: [{
@@ -75,7 +76,7 @@ integration("PostgreSQL transactional outbox integration", () => {
   it("rolls back idempotency completion when outbox insertion fails", async () => {
     const operationName = "integration.rollback.v1";
     const idempotencyKey = `rollback-${Date.now()}`;
-    await store.reserve({
+    const reservation = await store.reserve({
       operationName,
       idempotencyKey,
       payloadFingerprint: "fingerprint-rollback",
@@ -92,6 +93,7 @@ integration("PostgreSQL transactional outbox integration", () => {
         operationName,
         idempotencyKey,
         payloadFingerprint: "fingerprint-rollback",
+        reservationToken: reservation.record!.reservationToken!,
         result: { committed: false },
         events: [{
           protocol: "signal.v1",
@@ -119,7 +121,7 @@ integration("PostgreSQL transactional outbox integration", () => {
   it("prevents concurrent workers from claiming the same outbox message", async () => {
     const operationName = "integration.concurrent-claim.v1";
     const idempotencyKey = `concurrent-${Date.now()}`;
-    await store.reserve({
+    const reservation = await store.reserve({
       operationName,
       idempotencyKey,
       payloadFingerprint: "fingerprint-concurrent",
@@ -128,6 +130,7 @@ integration("PostgreSQL transactional outbox integration", () => {
       operationName,
       idempotencyKey,
       payloadFingerprint: "fingerprint-concurrent",
+      reservationToken: reservation.record!.reservationToken!,
       result: { ok: true },
       events: [0, 1].map((index) => ({
         protocol: "signal.v1",
@@ -153,7 +156,7 @@ integration("PostgreSQL transactional outbox integration", () => {
   it("recovers expired leases and dead-letters after the attempt limit", async () => {
     const operationName = "integration.lease.v1";
     const idempotencyKey = `lease-${Date.now()}`;
-    await store.reserve({
+    const reservation = await store.reserve({
       operationName,
       idempotencyKey,
       payloadFingerprint: "fingerprint-lease",
@@ -162,6 +165,7 @@ integration("PostgreSQL transactional outbox integration", () => {
       operationName,
       idempotencyKey,
       payloadFingerprint: "fingerprint-lease",
+      reservationToken: reservation.record!.reservationToken!,
       result: { ok: true },
       events: [{
         protocol: "signal.v1",
