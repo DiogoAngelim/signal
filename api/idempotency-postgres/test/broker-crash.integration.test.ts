@@ -56,7 +56,7 @@ integration("broker and consumer crash-boundary simulation", () => {
     await admin.end();
   });
 
-  it("deduplicates consumer side effects when a worker dies after publish but before outbox acknowledgement", async () => {
+  it("deduplicates consumer side effects after publish confirmation and worker lease loss", async () => {
     const suffix = randomUUID();
     const operationName = "simulation.broker-crash-boundary.v1";
     const idempotencyKey = `broker-${suffix}`;
