@@ -3,6 +3,7 @@ import type {
   IdempotencyReservation,
   OutboxPort,
   OutboxRecord,
+  OutboxStats,
   StoragePort,
   TransactionalStoragePort,
 } from "@signal/ports";
@@ -105,6 +106,33 @@ export function createPostgresTransactionalStore(
   }
 
   return {
+    async getStats(): Promise<OutboxStats> {
+      const result = await pool.query<{
+        pending: string;
+        processing: string;
+        delivered: string;
+        dead_lettered: string;
+        oldest_pending_age_ms: string | null;
+      }>(
+        "SELECT " +
+          "count(*) FILTER (WHERE status = 'pending')::text AS pending, " +
+          "count(*) FILTER (WHERE status = 'processing')::text AS processing, " +
+          "count(*) FILTER (WHERE status = 'delivered')::text AS delivered, " +
+          "count(*) FILTER (WHERE status = 'dead-letter')::text AS dead_lettered, " +
+          "(extract(epoch FROM now() - min(created_at) FILTER (WHERE status = 'pending')) * 1000)::text AS oldest_pending_age_ms " +
+          "FROM signal_outbox",
+      );
+      const row = result.rows[0];
+      return {
+        pending: Number(row?.pending ?? 0),
+        processing: Number(row?.processing ?? 0),
+        delivered: Number(row?.delivered ?? 0),
+        deadLettered: Number(row?.dead_lettered ?? 0),
+        oldestPendingAgeMs: row?.oldest_pending_age_ms == null
+          ? null
+          : Math.max(0, Number(row.oldest_pending_age_ms)),
+      };
+    },
     async reserve(input): Promise<IdempotencyReservation> {
       const inserted = await pool.query<IdempotencyRow>(
         `INSERT INTO signal_idempotency_records
