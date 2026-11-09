@@ -23,37 +23,51 @@ assumed, what was unknown — is essential for:
   systems that cannot.
 
 Replay is not a debugging convenience. It is an architectural property that
-emerges from Signal's design: every operation produces deterministic evidence,
-every decision carries a journal, and every audit trail is hash-chained.
+emerges from Signal's design: operations preserve the evidence and execution
+context needed to reconstruct decisions, decision records carry journals, and
+audit records can be hash-chained. Determinism applies to normalized domain
+results only when the operation version, canonical inputs, policy, handler
+logic, and external dependency snapshots are fixed. Runtime metadata such as
+message identifiers, wall-clock timestamps, and durations can legitimately
+differ between executions.
 
 ## Replay Principles
 
 ### 1. Deterministic Evidence
 
-Every operation in Signal produces deterministic evidence. Given the same
-inputs, the same audit trail is produced. This is enforced by:
+Signal aims to reproduce normalized domain results when the operation
+version, canonical input, policy, handler logic, and captured external
+dependencies are unchanged. Execution metadata is not deterministic by
+default. The guarantees are enforced by:
 
-- **Idempotency keys** — Mutations are identified by logical request, not by
-  execution attempt. Retrying the same logical request produces the same
-  result.
-- **Schema-validated payloads** — Input normalization ensures that equivalent
-  payloads produce equivalent evidence, regardless of key ordering or
-  formatting differences.
-- **SHA-256 fingerprinting** — Payloads are fingerprinted with SHA-256 before
-  storage. The fingerprint is part of the audit trail, ensuring that payload
-  tampering is detectable.
+- **Idempotency keys** — When a mutation uses a configured idempotency store,
+  a retry of the same logical request can return the previously recorded
+  result instead of executing the handler again. Durable guarantees require a
+  durable store and a defined key scope.
+- **Schema-validated payloads** — Input validation and canonical
+  serialization make supported equivalent payload representations produce
+  equivalent fingerprints.
+- **SHA-256 fingerprinting** — Payloads are fingerprinted before storage.
+  Fingerprints allow comparison with previously recorded content; their
+  assurance depends on protecting the trusted fingerprint or record.
 
 ### 2. Hash-Chained Audit Trail
 
-Signal's audit trail is an append-only hash chain:
+Signal can represent audit records as a hash chain:
 
 - Each audit entry includes the SHA-256 hash of the previous entry.
-- The chain is immutable once written.
-- Tampering with any entry breaks the chain.
-- The chain can be verified from any point to the genesis entry.
+- Verification recomputes the chain and detects changes to linked records or
+  their ordering relative to a trusted chain head or checkpoint.
+- The chain can be checked from a retained checkpoint back through its
+  recorded predecessors.
 
-This provides cryptographic proof that the audit trail has not been modified
-since it was written.
+A hash chain alone does not make storage immutable. If an attacker can rewrite
+all records and replace the only retained chain head, the rewritten chain may
+still be internally consistent. A hash chain also does not prove who created
+the source evidence, whether a claim is true, or when the evidence existed.
+Stronger authenticity and tamper-resistance claims require protected
+checkpoints, signatures, trusted timestamps, and access controls as
+appropriate.
 
 ### 3. Journal Before Outcome
 
@@ -88,10 +102,13 @@ should change.
 
 - **Reconstruct the decision context** — What evidence was available, what
   was assumed, what was unknown, and what confidence was assigned.
-- **Verify the audit chain** — Confirm that the hash chain is intact and no
-  entries have been tampered with.
-- **Reproduce the execution path** — Given the same inputs and the same
-  handler logic, produce the same result.
+- **Verify audit-chain consistency** — Confirm that records link correctly
+  and match a trusted retained chain head or checkpoint. Without a trusted
+  checkpoint, verification establishes internal consistency, not proof that
+  the entire history was never rewritten.
+- **Reproduce deterministic domain results** — When the operation version,
+  canonical inputs, policy, handler logic, and captured external dependencies
+  are the same. Execution metadata may differ.
 - **Trace causation** — Follow correlation IDs, trace IDs, and causation IDs
   across nested operations.
 - **Identify idempotency conflicts** — Detect when a retried request changed
