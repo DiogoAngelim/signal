@@ -62,11 +62,12 @@ integration("broker and consumer crash-boundary simulation", () => {
     const operationName = "simulation.broker-crash-boundary.v1";
     const idempotencyKey = `broker-${suffix}`;
     const messageId = `broker-event-${suffix}`;
-    await store.reserve({ operationName, idempotencyKey, payloadFingerprint: suffix });
+    const reservation = await store.reserve({ operationName, idempotencyKey, payloadFingerprint: suffix });
     await store.completeWithEvents({
       operationName,
       idempotencyKey,
       payloadFingerprint: suffix,
+      reservationToken: reservation.record!.reservationToken!,
       result: { accepted: true },
       events: [{
         protocol: "signal.v1",
@@ -158,9 +159,11 @@ integration("broker and consumer crash-boundary simulation", () => {
     const operationName = "simulation.broker-unavailable.v1";
     const idempotencyKey = `unavailable-${suffix}`;
     const messageId = `unavailable-event-${suffix}`;
-    await store.reserve({ operationName, idempotencyKey, payloadFingerprint: suffix });
+    const reservation = await store.reserve({ operationName, idempotencyKey, payloadFingerprint: suffix });
     await store.completeWithEvents({
-      operationName, idempotencyKey, payloadFingerprint: suffix, result: {},
+      operationName, idempotencyKey, payloadFingerprint: suffix,
+      reservationToken: reservation.record!.reservationToken!,
+      result: {},
       events: [{
         protocol: "signal.v1", kind: "event", name: "simulation.broker-unavailable.v1",
         messageId, timestamp: new Date().toISOString(), payload: {},
