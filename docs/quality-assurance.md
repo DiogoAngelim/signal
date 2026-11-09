@@ -218,7 +218,7 @@ The `evaluateDecisionRobustness` API adds a deterministic one-factor
 sensitivity screen. It perturbs seven scenario dimensions (reward, risk,
 downside, uncertainty, purpose alignment, need alignment, and confidence) up
 and down by a configured number of points, reruns the same path comparison,
-and reports the fraction of perturbations that preserve the baseline action.
+and reports the fraction of perturbations that preserve both the selected action variant and recommendation.
 The default perturbation is five points and the default stability threshold is
 80%. This is a bounded diagnostic, not an exhaustive multivariate search; it
 does not test interactions between factors or changes outside the specified
