@@ -18,7 +18,7 @@ async function toxicRequest(path: string, init: RequestInit = {}) {
 
 integration("PostgreSQL network fault and recovery simulation", () => {
   const direct = new Pool({ connectionString });
-  const proxiedUrl = new URL(connectionString!);
+  const proxiedUrl = new URL(connectionString ?? "postgresql://postgres:postgres@localhost:5432/skip");
   proxiedUrl.hostname = "127.0.0.1";
   proxiedUrl.port = "8666";
   const proxied = new Pool({ connectionString: proxiedUrl.toString(), max: 2 });
