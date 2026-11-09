@@ -72,8 +72,29 @@ export type CalibrationReliability =
 
 export type CalibrationConfig = {
   minimumSamples?: number;
+  minimumEvaluationSamples?: number;
+  bucketCount?: number;
   alignmentTolerance?: number;
   adjustmentRate?: number;
+};
+
+export type CalibrationBucket = {
+  lowerBound: number;
+  upperBound: number;
+  sampleSize: number;
+  meanConfidence: number;
+  observedRate: number;
+  absoluteError: number;
+};
+
+export type CalibrationMetrics = {
+  sampleSize: number;
+  brierScore: number;
+  expectedCalibrationError: number;
+  maximumCalibrationError: number;
+  calibrationBias: number;
+  status: "calibrated" | "miscalibrated" | "insufficient_data";
+  reliabilityBuckets: CalibrationBucket[];
 };
 
 export type CalibrationResult = {
@@ -81,6 +102,7 @@ export type CalibrationResult = {
   calibrationError: number;
   reliability: CalibrationReliability;
   sampleSize: number;
+  metrics?: CalibrationMetrics;
 };
 
 export type LearningConfig = {
