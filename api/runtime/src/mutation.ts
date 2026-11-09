@@ -357,12 +357,15 @@ export async function executeMutation<TInput, TResult>(
       definition &&
       definition.idempotency !== "none"
     ) {
-      await storagePort.fail({
-        operationName: name,
-        idempotencyKey,
-        payloadFingerprint,
-        error: failure,
-      });
+      try {
+        await storagePort.fail({
+          operationName: name,
+          idempotencyKey,
+          payloadFingerprint,
+          reservationToken: reservationToken!,
+          error: failure,
+        });
+      } catch { /* A lost lease must not be overwritten by the stale owner. */ }
     }
 
     return toFailure<TResult>(failure);
