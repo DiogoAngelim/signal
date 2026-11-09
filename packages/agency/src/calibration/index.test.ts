@@ -314,4 +314,17 @@ describe("calibration", () => {
       "confidence values must be numbers between 0 and 1.",
     );
   });
+
+  it("excludes duplicate trace IDs from calibration sample counts", () => {
+    const repeated = trace(0.9, false);
+    const metrics = evaluateCalibrationMetrics([repeated, repeated], {
+      minimumEvaluationSamples: 1,
+      minimumBucketSamples: 1,
+    });
+
+    expect(metrics.sampleSize).toBe(1);
+    expect(metrics.excludedDuplicateTraceCount).toBe(1);
+    expect(metrics.brierScore).toBe(0.81);
+  });
+
 });
