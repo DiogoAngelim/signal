@@ -15,6 +15,7 @@ integration("PostgreSQL transactional outbox integration", () => {
     const migrationDirectory = join(__dirname, "../src/drizzle/migrations");
     await admin.query(readFileSync(join(migrationDirectory, "0000_initial.sql"), "utf8"));
     await admin.query(readFileSync(join(migrationDirectory, "0001_transactional_outbox.sql"), "utf8"));
+    await admin.query(readFileSync(join(migrationDirectory, "0002_outbox_lease_fencing.sql"), "utf8"));
     await admin.query("DELETE FROM signal_outbox");
     await admin.query("DELETE FROM signal_idempotency_records");
   });
@@ -68,6 +69,7 @@ integration("PostgreSQL transactional outbox integration", () => {
     expect(await store.acknowledge({
       id: event!.id,
       workerId: "integration-worker",
+      leaseToken: event!.leaseToken,
     })).toBe(true);
   });
 
@@ -172,31 +174,44 @@ integration("PostgreSQL transactional outbox integration", () => {
       }],
     });
 
-    const first = await store.claimBatch({
-      workerId: "crashed-worker",
-      limit: 1,
+    const firstBatch = await store.claimBatch({
+      workerId: "reused-worker",
+      limit: 100,
       leaseMs: 1000,
     });
-    expect(first).toHaveLength(1);
+    const first = firstBatch.find((item) => item.envelope.messageId === `lease-event-${idempotencyKey}`);
+    expect(first).toBeDefined();
     await admin.query(
       "UPDATE signal_outbox SET locked_until = now() - interval '1 second' WHERE message_id = $1",
       [`lease-event-${idempotencyKey}`],
     );
 
-    const recovered = await store.claimBatch({
-      workerId: "recovery-worker",
-      limit: 1,
+    const recoveredBatch = await store.claimBatch({
+      workerId: "reused-worker",
+      limit: 100,
       leaseMs: 30_000,
     });
-    expect(recovered[0]?.attempts).toBe(2);
+    const recovered = recoveredBatch.find((item) => item.envelope.messageId === `lease-event-${idempotencyKey}`);
+    expect(recovered?.attempts).toBe(2);
+    expect(recovered?.leaseToken).not.toBe(first!.leaseToken);
     expect(await store.acknowledge({
-      id: recovered[0].id,
-      workerId: "crashed-worker",
+      id: recovered!.id,
+      workerId: "reused-worker",
+      leaseToken: first!.leaseToken,
     })).toBe(false);
+    expect(await store.retry({
+      id: recovered!.id,
+      workerId: "reused-worker",
+      leaseToken: first!.leaseToken,
+      availableAt: new Date().toISOString(),
+      error: "stale worker must not reschedule",
+      maxAttempts: 2,
+    })).toBe("lease-lost");
 
     expect(await store.retry({
-      id: recovered[0].id,
-      workerId: "recovery-worker",
+      id: recovered!.id,
+      workerId: "reused-worker",
+      leaseToken: recovered!.leaseToken,
       availableAt: new Date().toISOString(),
       error: "permanent failure",
       maxAttempts: 2,
