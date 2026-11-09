@@ -80,9 +80,9 @@ The following are intentionally not claimed as solved by code-level simulation:
 2. **Production key custody:** the simulation validates Ed25519 verification and rotation mechanics only; it does not use a KMS/HSM or validate access policy.
 3. **Distributed circuit breaker product behavior:** the PostgreSQL row-lock test is a reference coordination contract, not a production implementation wired into Signal's runtime. The current runtime breaker is single-process.
 4. **Statistical validity:** synthetic and unit fixtures can validate calculations, invariants, and calibration-report behavior. They cannot establish representative sampling, absence of leakage in a real dataset, or generalization to a target population.
-6. **Performance and capacity:** GitHub-hosted runner results are smoke evidence only. They are noisy and cannot establish an SLO or production capacity.
-7. **Disaster recovery objectives:** logical restore is exercised, but no production backup system, offsite retention, point-in-time recovery, RTO, or RPO is certified.
-8. **External side effects:** consumer deduplication is simulated using a transactional inbox. A third-party API must provide idempotency or a reconciliation protocol; Signal cannot make arbitrary external side effects exactly once.
+5. **Performance and capacity:** GitHub-hosted runner results are smoke evidence only. They are noisy and cannot establish an SLO or production capacity.
+6. **Disaster recovery objectives:** logical restore is exercised, but no production backup system, offsite retention, point-in-time recovery, RTO, or RPO is certified.
+7. **External side effects:** consumer deduplication is simulated using a transactional inbox. A third-party API must provide idempotency or a reconciliation protocol; Signal cannot make arbitrary external side effects exactly once.
 
 These exclusions must remain visible in release notes and certification reports. Do not promote a code-level pass into a real-world production certification claim.
 
