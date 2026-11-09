@@ -34,6 +34,7 @@ integration("broker and consumer crash-boundary simulation", () => {
     await admin.query(await readFile(new URL("0000_initial.sql", migrationDirectory), "utf8"));
     await admin.query(await readFile(new URL("0001_transactional_outbox.sql", migrationDirectory), "utf8"));
     await admin.query(await readFile(new URL("0002_outbox_lease_fencing.sql", migrationDirectory), "utf8"));
+    await admin.query(await readFile(new URL("0003_idempotency_reservation_leases.sql", migrationDirectory), "utf8"));
     await admin.query(`
       CREATE TABLE IF NOT EXISTS signal_simulation_consumer_inbox (
         message_id text PRIMARY KEY,
