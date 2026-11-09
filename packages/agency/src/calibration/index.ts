@@ -198,14 +198,22 @@ export function evaluateCalibrationDrift(
     });
   }
 
-  if (windows.some((window) => window.expectedCalibrationError === null)) {
+  if (
+    windows.some(
+      (window) =>
+        window.expectedCalibrationError === null ||
+        window.status === "insufficient_data",
+    )
+  ) {
     return {
       status: "insufficient_data",
       sampleSize,
       excludedInvalidTimestampCount,
       errorDelta: null,
       windows,
-      explanation: ["Calibration error could not be calculated for every time window."],
+      explanation: [
+        "Every time window must meet its evaluation and bucket sample thresholds before drift is classified.",
+      ],
     };
   }
 
