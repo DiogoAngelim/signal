@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createMemoryIdempotencyStore } from "./idempotency";
 
 describe("createMemoryIdempotencyStore", () => {
@@ -53,27 +53,22 @@ describe("createMemoryIdempotencyStore", () => {
       idempotencyKey: "capture-expiring",
       payloadFingerprint: "fingerprint-expiring",
     };
-    vi.useFakeTimers();
-    try {
-      const first = await store.reserve({ ...input, leaseMs: 1_000 });
-      vi.setSystemTime(Date.now() + 1_500);
+    const first = await store.reserve({ ...input, leaseMs: 1_000 });
+    first.record!.reservationExpiresAt = new Date(Date.now() - 1_500).toISOString();
       const second = await store.reserve({ ...input, leaseMs: 5_000 });
-      expect(second.state).toBe("reserved");
-      expect(second.record?.reservationToken).not.toBe(first.record?.reservationToken);
-      await expect(store.complete({
+    expect(second.state).toBe("reserved");
+    expect(second.record?.reservationToken).not.toBe(first.record?.reservationToken);
+    await expect(store.complete({
         ...input,
         reservationToken: first.record!.reservationToken!,
         result: { stale: true },
-      })).rejects.toThrow("missing, expired, or fenced");
-      await expect(store.complete({
+    })).rejects.toThrow("missing, expired, or fenced");
+    await expect(store.complete({
         ...input,
         reservationToken: second.record!.reservationToken!,
         result: { current: true },
-      })).resolves.toBeUndefined();
-      expect((await store.reserve(input)).record?.result).toEqual({ current: true });
-    } finally {
-      vi.useRealTimers();
-    }
+    })).resolves.toBeUndefined();
+    expect((await store.reserve(input)).record?.result).toEqual({ current: true });
   });
 
   it("renews a reservation only while the caller owns an unexpired token", async () => {
