@@ -165,7 +165,7 @@ integration("broker and consumer crash-boundary simulation", () => {
       }],
     });
     const workerId = `broker-down-${suffix}`;
-    const [claimed] = await store.claimBatch({ workerId, limit: 1, leaseMs: 30_000 });
+    await store.claimBatch({ workerId, limit: 1, leaseMs: 30_000 });
     await expect(fetch("http://127.0.0.1:1/unavailable", { signal: AbortSignal.timeout(500) })).rejects.toThrow();
     const row = await admin.query("SELECT status FROM signal_outbox WHERE message_id = $1", [messageId]);
     expect(row.rows[0]?.status).toBe("processing");
