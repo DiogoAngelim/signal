@@ -53,6 +53,8 @@ describe("evidence temporal validity", () => {
     expect(result.evidenceQuality.temporal?.staleEvidenceIds).toContain(
       "evidence:stale",
     );
+    expect(result.evidenceQuality.temporal?.freshnessCap).toBe(40);
+    expect(result.evidenceQuality.freshness).toBe(40);
   });
 
   it("rejects malformed timestamps and inverted validity intervals", () => {
@@ -86,6 +88,8 @@ describe("evidence temporal validity", () => {
     expect(result.governance.blockers).toContain(
       "Evidence contains invalid temporal metadata.",
     );
+    expect(result.evidenceQuality.temporal?.freshnessCap).toBe(0);
+    expect(result.evidenceQuality.freshness).toBe(0);
   });
 
   it("produces identical temporal results for identical evidence and as-of time", () => {
