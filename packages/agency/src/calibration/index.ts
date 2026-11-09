@@ -33,7 +33,11 @@ export function evaluateCalibrationMetrics(
   history: readonly AgencyTrace[],
   config: CalibrationConfig = {},
 ): CalibrationMetrics {
-  const samples = calibrationSamples(history);
+  const selection = selectUniqueCompletedTraces(history);
+  const samples = selection.traces.map((trace) => ({
+    confidence: unitValue(trace.decision.confidence),
+    outcome: trace.outcome?.success === true ? 1 as const : 0 as const,
+  }));
   const sampleSize = samples.length;
   const minimumEvaluationSamples = positiveInteger(
     config.minimumEvaluationSamples ?? DEFAULT_MINIMUM_EVALUATION_SAMPLES,
@@ -57,6 +61,12 @@ export function evaluateCalibrationMetrics(
   if (sampleSize === 0) {
     return {
       sampleSize: 0,
+      ...(selection.excludedDuplicateTraceCount > 0
+        ? { excludedDuplicateTraceCount: selection.excludedDuplicateTraceCount }
+        : {}),
+      ...(selection.excludedMissingTraceIdCount > 0
+        ? { excludedMissingTraceIdCount: selection.excludedMissingTraceIdCount }
+        : {}),
       brierScore: null,
       brierScoreInterval: null,
       expectedCalibrationError: null,
@@ -155,6 +165,12 @@ export function evaluateCalibrationMetrics(
 
   return {
     sampleSize,
+    ...(selection.excludedDuplicateTraceCount > 0
+      ? { excludedDuplicateTraceCount: selection.excludedDuplicateTraceCount }
+      : {}),
+    ...(selection.excludedMissingTraceIdCount > 0
+      ? { excludedMissingTraceIdCount: selection.excludedMissingTraceIdCount }
+      : {}),
     brierScore,
     brierScoreInterval,
     expectedCalibrationError: round(expectedCalibrationError),
@@ -192,9 +208,8 @@ export function evaluateCalibrationDrift(
   const driftTolerance = unitValue(
     config.driftTolerance ?? DEFAULT_DRIFT_TOLERANCE,
   );
-  const completed = history.filter(
-    (trace) => typeof trace.outcome?.success === "boolean",
-  );
+  const selection = selectUniqueCompletedTraces(history);
+  const completed = selection.traces;
   const timestamped = completed
     .map((trace) => ({ trace, timestamp: Date.parse(trace.timestamp) }))
     .filter((entry) => Number.isFinite(entry.timestamp))
@@ -207,6 +222,12 @@ export function evaluateCalibrationDrift(
       status: "insufficient_data",
       sampleSize,
       excludedInvalidTimestampCount,
+      ...(selection.excludedDuplicateTraceCount > 0
+        ? { excludedDuplicateTraceCount: selection.excludedDuplicateTraceCount }
+        : {}),
+      ...(selection.excludedMissingTraceIdCount > 0
+        ? { excludedMissingTraceIdCount: selection.excludedMissingTraceIdCount }
+        : {}),
       errorDelta: null,
       windows: [],
       explanation: [
@@ -270,6 +291,12 @@ export function evaluateCalibrationDrift(
     status,
     sampleSize,
     excludedInvalidTimestampCount,
+    ...(selection.excludedDuplicateTraceCount > 0
+      ? { excludedDuplicateTraceCount: selection.excludedDuplicateTraceCount }
+      : {}),
+    ...(selection.excludedMissingTraceIdCount > 0
+      ? { excludedMissingTraceIdCount: selection.excludedMissingTraceIdCount }
+      : {}),
     errorDelta,
     windows,
     explanation: [
@@ -382,15 +409,39 @@ function significanceFromInterval(
   return "not_significant";
 }
 
-function calibrationSamples(
-  history: readonly AgencyTrace[],
-): CalibrationSample[] {
-  return history
-    .filter((trace) => typeof trace.outcome?.success === "boolean")
-    .map((trace) => ({
-      confidence: unitValue(trace.decision.confidence),
-      outcome: trace.outcome?.success === true ? 1 : 0,
-    }));
+function selectUniqueCompletedTraces(history: readonly AgencyTrace[]) {
+  const seen = new Set<string>();
+  const traces: AgencyTrace[] = [];
+  let excludedDuplicateTraceCount = 0;
+  let excludedMissingTraceIdCount = 0;
+
+  for (const trace of history) {
+    if (typeof trace.outcome?.success !== "boolean") continue;
+    const traceId = typeof trace.traceId === "string" ? trace.traceId.trim() : "";
+    if (!traceId) {
+      excludedMissingTraceIdCount += 1;
+      continue;
+    }
+    if (seen.has(traceId)) {
+      excludedDuplicateTraceCount += 1;
+      continue;
+    }
+    seen.add(traceId);
+    traces.push(trace);
+  }
+
+  return {
+    traces,
+    excludedDuplicateTraceCount,
+    excludedMissingTraceIdCount,
+  };
+}
+
+function calibrationSamples(history: readonly AgencyTrace[]): CalibrationSample[] {
+  return selectUniqueCompletedTraces(history).traces.map((trace) => ({
+    confidence: unitValue(trace.decision.confidence),
+    outcome: trace.outcome?.success === true ? 1 : 0,
+  }));
 }
 
 function reliabilityFromError(
