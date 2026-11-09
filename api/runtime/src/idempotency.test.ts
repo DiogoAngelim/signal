@@ -54,13 +54,14 @@ describe("createMemoryIdempotencyStore", () => {
       payloadFingerprint: "fingerprint-expiring",
     };
     const first = await store.reserve({ ...input, leaseMs: 1_000 });
+    const firstToken = first.record!.reservationToken!;
     first.record!.reservationExpiresAt = new Date(Date.now() - 1_500).toISOString();
-      const second = await store.reserve({ ...input, leaseMs: 5_000 });
+    const second = await store.reserve({ ...input, leaseMs: 5_000 });
     expect(second.state).toBe("reserved");
-    expect(second.record?.reservationToken).not.toBe(first.record?.reservationToken);
+    expect(second.record?.reservationToken).not.toBe(firstToken);
     await expect(store.complete({
         ...input,
-        reservationToken: first.record!.reservationToken!,
+        reservationToken: firstToken,
         result: { stale: true },
     })).rejects.toThrow("missing, expired, or fenced");
     await expect(store.complete({
