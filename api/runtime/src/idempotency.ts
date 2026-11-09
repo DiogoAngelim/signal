@@ -38,7 +38,7 @@ export function createMemoryIdempotencyStore(): StoragePort &
   }): Promise<void> => {
     const record = records.get(keyFor(input.operationName, input.idempotencyKey));
     if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending" || record.reservationToken !== input.reservationToken || !record.reservationExpiresAt || Date.parse(record.reservationExpiresAt) <= Date.now()) {
-      return;
+      throw new Error("Idempotency reservation is missing, expired, or fenced.");
     }
     record.status = "completed";
     record.result = input.result;
@@ -146,7 +146,9 @@ export function createMemoryIdempotencyStore(): StoragePort &
     },
     async fail(input) {
       const record = records.get(keyFor(input.operationName, input.idempotencyKey));
-      if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending" || record.reservationToken !== input.reservationToken || !record.reservationExpiresAt || Date.parse(record.reservationExpiresAt) <= Date.now()) return;
+      if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending" || record.reservationToken !== input.reservationToken || !record.reservationExpiresAt || Date.parse(record.reservationExpiresAt) <= Date.now()) {
+        throw new Error("Cannot fail an expired or fenced idempotency reservation.");
+      }
       record.status = "failed";
       record.error = input.error as SignalErrorEnvelope;
       record.updatedAt = new Date().toISOString();
