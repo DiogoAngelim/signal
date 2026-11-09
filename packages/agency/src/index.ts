@@ -5,6 +5,7 @@ export {
 } from "./agency";
 export {
   calibrateConfidence,
+  evaluateCalibrationDrift,
   evaluateCalibrationMetrics,
 } from "./calibration";
 export { learnFromTraces } from "./learning";
@@ -24,6 +25,9 @@ export type {
   AgencyStateEvaluation,
   AgencyTrace,
   CalibrationBucket,
+  CalibrationDriftConfig,
+  CalibrationDriftResult,
+  CalibrationDriftWindow,
   CalibrationConfig,
   CalibrationMetrics,
   CalibrationReliability,
