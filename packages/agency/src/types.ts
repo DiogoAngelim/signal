@@ -79,6 +79,19 @@ export type CalibrationConfig = {
   adjustmentRate?: number;
 };
 
+export type CalibrationInterval = {
+  lowerBound: number;
+  upperBound: number;
+  confidenceLevel: 0.95;
+  method: "normal_approximation" | "wilson_score";
+};
+
+export type CalibrationSignificance =
+  | "positive"
+  | "negative"
+  | "not_significant"
+  | "insufficient_data";
+
 export type CalibrationBucket = {
   lowerBound: number;
   upperBound: number;
@@ -86,14 +99,19 @@ export type CalibrationBucket = {
   meanConfidence: number;
   observedRate: number;
   absoluteError: number;
+  observedRateInterval: CalibrationInterval;
+  calibrationErrorInterval: CalibrationInterval;
 };
 
 export type CalibrationMetrics = {
   sampleSize: number;
   brierScore: number | null;
+  brierScoreInterval: CalibrationInterval | null;
   expectedCalibrationError: number | null;
   maximumCalibrationError: number | null;
   calibrationBias: number | null;
+  calibrationBiasInterval: CalibrationInterval | null;
+  calibrationBiasSignificance: CalibrationSignificance;
   status: "calibrated" | "miscalibrated" | "insufficient_data";
   reliabilityBuckets: CalibrationBucket[];
 };
