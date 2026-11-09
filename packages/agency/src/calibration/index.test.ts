@@ -110,6 +110,18 @@ describe("calibration", () => {
       status: "calibrated",
     });
     expect(metrics.reliabilityBuckets).toHaveLength(2);
+    expect(metrics.brierScoreInterval?.lowerBound).toBeLessThanOrEqual(0.16);
+    expect(metrics.brierScoreInterval?.upperBound).toBeGreaterThanOrEqual(0.16);
+    expect(metrics.calibrationBiasInterval?.lowerBound).toBeLessThanOrEqual(0);
+    expect(metrics.calibrationBiasInterval?.upperBound).toBeGreaterThanOrEqual(0);
+    expect(metrics.calibrationBiasSignificance).toBe("not_significant");
+    expect(metrics.reliabilityBuckets[0].observedRateInterval.method).toBe(
+      "wilson_score",
+    );
+    expect(metrics.reliabilityBuckets[0].calibrationErrorInterval).toMatchObject({
+      confidenceLevel: 0.95,
+      method: "wilson_score",
+    });
   });
 
   it("detects bin-level miscalibration that a global bias can conceal", () => {
@@ -125,7 +137,10 @@ describe("calibration", () => {
       maximumCalibrationError: 0.4,
       calibrationBias: 0.4,
       status: "miscalibrated",
+      calibrationBiasSignificance: "positive",
     });
+    expect(metrics.calibrationBiasInterval?.lowerBound).toBeGreaterThan(0);
+    expect(metrics.reliabilityBuckets[0].calibrationErrorInterval.lowerBound).toBeGreaterThan(0);
   });
 
 
@@ -153,6 +168,9 @@ describe("calibration", () => {
     expect(metrics.status).toBe("insufficient_data");
     expect(metrics.sampleSize).toBe(3);
     expect(metrics.brierScore).not.toBeNull();
+    expect(metrics.brierScoreInterval).toBeNull();
+    expect(metrics.calibrationBiasInterval).toBeNull();
+    expect(metrics.calibrationBiasSignificance).toBe("insufficient_data");
   });
 
   it("returns null metrics when there are no completed outcomes", () => {
