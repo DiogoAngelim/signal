@@ -141,7 +141,14 @@ export type DecisionEvidenceInput = {
   traceability?: number;
   strength?: number;
   source?: string;
+  sourceRef?: RealitySource;
+  derivedFromEvidenceIds?: string[];
+  eventAt?: string;
   observedAt?: string;
+  recordedAt?: string;
+  verifiedAt?: string;
+  validFrom?: string;
+  validUntil?: string;
   supports?: string[];
   contradicts?: string[];
   metadata?: Record<string, unknown>;
@@ -161,7 +168,14 @@ export type DecisionEvidence = {
   traceability: number;
   strength: number;
   source?: string;
+  sourceRef?: RealitySource;
+  derivedFromEvidenceIds?: string[];
+  eventAt?: string;
   observedAt?: string;
+  recordedAt?: string;
+  verifiedAt?: string;
+  validFrom?: string;
+  validUntil?: string;
   supports: string[];
   contradicts: string[];
   metadata?: Record<string, unknown>;
@@ -228,6 +242,33 @@ export type DecisionReversibilityAssessment = {
   notes: string[];
 };
 
+export type DecisionEvidenceLineageAssessment = {
+  status: "complete" | "incomplete" | "invalid";
+  sourceIdentityCoverage: number;
+  lineageCoverage: number;
+  sourceDiversityScore: number;
+  independentSourceCount: number;
+  derivedEvidenceCount: number;
+  missingDependencies: string[];
+  duplicateEvidenceIds: string[];
+  cycles: string[][];
+  sharedRootSourceGroups: Array<{ sourceId: string; evidenceIds: string[] }>;
+  rootSourceIdsByEvidence: Record<string, string[]>;
+  explanation: string[];
+};
+
+export type DecisionEvidenceTemporalAssessment = {
+  asOf: string;
+  freshnessCap: number;
+  currentEvidenceIds: string[];
+  expiredEvidenceIds: string[];
+  notYetValidEvidenceIds: string[];
+  staleEvidenceIds: string[];
+  unknownValidityEvidenceIds: string[];
+  invalidEvidenceIds: string[];
+  explanation: string[];
+};
+
 export type DecisionEvidenceQualityAssessment = {
   quality: number;
   reliability: number;
@@ -239,6 +280,9 @@ export type DecisionEvidenceQualityAssessment = {
   traceability: number;
   coverage: number;
   missingEvidenceReferences?: string[];
+  lineage?: DecisionEvidenceLineageAssessment;
+  temporal?: DecisionEvidenceTemporalAssessment;
+  sourceDiversityScore?: number;
   explanation: string[];
 };
 

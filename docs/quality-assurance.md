@@ -116,6 +116,36 @@ Temporal records should distinguish, where applicable:
 
 Authenticity, integrity, freshness, and truth are separate properties.
 
+
+### Evidence lineage and source independence
+
+Decision evidence may declare a `sourceRef.sourceId` and
+`derivedFromEvidenceIds`. Signal traces derived evidence back to root source
+identities, reports missing references and cycles, and identifies evidence
+items sharing the same root source. Copies and derivative reports therefore
+do not increase the independent root-source count.
+
+The reported `sourceDiversityScore` is a bounded descriptive ratio, not a
+probability or a claim that the source is truthful. When lineage metadata is
+provided, it conservatively caps the declared independence score. Without
+source identity or dependency metadata, independence remains unverified.
+
+### Temporal validity and freshness
+
+Evidence may distinguish `eventAt`, `observedAt`, `recordedAt`,
+`verifiedAt`, `validFrom`, and `validUntil`. Temporal assessment uses the
+assessment's explicit `createdAt` as its `asOf` reference, making the result
+reproducible. It classifies evidence as current, expired, not yet valid,
+unknown-validity, stale relative to a declared source freshness window, or
+invalid due to malformed/inconsistent temporal metadata.
+
+Unknown validity is not silently treated as current. Staleness and validity
+are separate dimensions: evidence can be within its validity interval but
+older than the source's freshness window. Expired, not-yet-valid, stale, and
+invalid evidence conservatively cap the aggregate freshness score by the
+proportion of unaffected evidence; this is a transparent heuristic, not a
+probability.
+
 ## 6. Statistical claims
 
 Any published confidence probability requires:
