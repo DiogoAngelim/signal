@@ -32,7 +32,7 @@ integration("PostgreSQL network fault and recovery simulation", () => {
       )
     `);
     await toxicRequest("proxies/signal-postgres", {
-      method: "PUT",
+      method: "POST",
       body: JSON.stringify({
         name: "signal-postgres",
         listen: "0.0.0.0:8666",
