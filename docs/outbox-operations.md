@@ -52,9 +52,11 @@ The dispatcher:
 - Retries failures with capped exponential backoff.
 - Moves records to `dead-letter` after the configured attempt limit.
 
-Monitor pending count, oldest pending age, processing leases, delivery latency,
-retry rate, and dead-letter count. Alert on sustained queue age or any dead
-letters. Define an operator-owned replay procedure before enabling delivery.
+Read `await storagePort.getStats()` for pending, processing, delivered,
+dead-lettered, and oldest-pending-age metrics. Export these values to a durable
+monitoring system and combine them with delivery latency and retry rate from
+the worker. Alert on sustained queue age or any dead letters. Define an
+operator-owned replay procedure before enabling delivery.
 
 ## Delivery semantics
 
