@@ -16,6 +16,7 @@ integration("PostgreSQL transactional outbox integration", () => {
     await admin.query(readFileSync(join(migrationDirectory, "0000_initial.sql"), "utf8"));
     await admin.query(readFileSync(join(migrationDirectory, "0001_transactional_outbox.sql"), "utf8"));
     await admin.query(readFileSync(join(migrationDirectory, "0002_outbox_lease_fencing.sql"), "utf8"));
+    await admin.query(readFileSync(join(migrationDirectory, "0003_idempotency_reservation_leases.sql"), "utf8"));
   });
 
   afterAll(async () => {
