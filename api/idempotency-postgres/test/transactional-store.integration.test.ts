@@ -15,6 +15,8 @@ integration("PostgreSQL transactional outbox integration", () => {
     const migrationDirectory = join(__dirname, "../src/drizzle/migrations");
     await admin.query(readFileSync(join(migrationDirectory, "0000_initial.sql"), "utf8"));
     await admin.query(readFileSync(join(migrationDirectory, "0001_transactional_outbox.sql"), "utf8"));
+    await admin.query("DELETE FROM signal_outbox");
+    await admin.query("DELETE FROM signal_idempotency_records");
   });
 
   afterAll(async () => {
@@ -61,7 +63,7 @@ integration("PostgreSQL transactional outbox integration", () => {
       limit: 10,
       leaseMs: 30_000,
     });
-    const event = claimed.find((item) => item.id === `event-${idempotencyKey}`);
+    const event = claimed.find((item) => item.envelope.messageId === `event-${idempotencyKey}`);
     expect(event?.envelope.payload).toEqual({ value: 7 });
     expect(await store.acknowledge({
       id: event!.id,
