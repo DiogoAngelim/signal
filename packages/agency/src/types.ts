@@ -105,6 +105,8 @@ export type CalibrationBucket = {
 
 export type CalibrationMetrics = {
   sampleSize: number;
+  excludedDuplicateTraceCount?: number;
+  excludedMissingTraceIdCount?: number;
   brierScore: number | null;
   brierScoreInterval: CalibrationInterval | null;
   expectedCalibrationError: number | null;
@@ -143,6 +145,8 @@ export type CalibrationDriftResult = {
   status: "stable" | "improving" | "degrading" | "insufficient_data";
   sampleSize: number;
   excludedInvalidTimestampCount: number;
+  excludedDuplicateTraceCount?: number;
+  excludedMissingTraceIdCount?: number;
   errorDelta: number | null;
   windows: CalibrationDriftWindow[];
   explanation: string[];
@@ -154,6 +158,8 @@ export type LearningConfig = {
 };
 
 export type LearningResult = {
+  excludedDuplicateTraceCount?: number;
+  excludedMissingTraceIdCount?: number;
   learnedPatterns: string[];
   confidenceAdjustment: number;
   policySuggestions: string[];
