@@ -165,6 +165,32 @@ describe("@signal/decision", () => {
     ).toThrow("minimumStability must be between 0 and 1.");
   });
 
+
+  it("rejects malformed and unbounded simulation inputs", () => {
+    const scenario = generatePredictionScenarios({ labels: ["conditions improve"] })[0];
+    expect(() =>
+      simulateDecisionPaths({
+        scenarios: [{ ...scenario, probability: -0.1 }],
+      }),
+    ).toThrow("scenario probabilities must be between 0 and 1.");
+    expect(() =>
+      simulateDecisionPaths({
+        scenarios: [{ ...scenario, expectedRisk: 101 }],
+      }),
+    ).toThrow("scenario expectedRisk must be between 0 and 100.");
+    expect(() =>
+      simulateDecisionPaths({
+        scenarios: Array.from({ length: 1_001 }, () => scenario),
+      }),
+    ).toThrow("scenarios must not exceed 1000.");
+    expect(() =>
+      simulateDecisionPaths({
+        scenarios: [scenario],
+        actionVariants: [""],
+      }),
+    ).toThrow("actionVariants must contain non-empty strings.");
+  });
+
   it("creates records, accountability reports, replay comparisons, and human guide steps", () => {
     const coherence = assessCoherence({
       discovery: 78,
