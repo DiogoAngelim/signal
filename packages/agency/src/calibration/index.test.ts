@@ -327,4 +327,45 @@ describe("calibration", () => {
     expect(metrics.brierScore).toBe(0.81);
   });
 
+
+  it("reports a deterministic moving-block bootstrap interval for temporal Brier drift", () => {
+    const history = [
+      ...Array.from({ length: 60 }, (_, index) =>
+        trace(0.9, true, new Date(Date.UTC(2026, 0, 1, 0, index)).toISOString()),
+      ),
+      ...Array.from({ length: 60 }, (_, index) =>
+        trace(0.9, false, new Date(Date.UTC(2026, 0, 2, 0, index)).toISOString()),
+      ),
+    ];
+    const config = {
+      windowCount: 2,
+      minimumWindowSamples: 30,
+      bootstrapIterations: 500,
+      bootstrapSeed: 42,
+      bootstrapBlockSize: 5,
+    };
+    const first = evaluateCalibrationDrift(history, config);
+    const second = evaluateCalibrationDrift(history, config);
+
+    expect(first).toEqual(second);
+    expect(first.brierScoreDelta).toBeGreaterThan(0);
+    expect(first.brierScoreDeltaInterval?.method).toBe("moving_block_bootstrap");
+    expect(first.inferentialStatus).toBe("degradation_supported");
+  });
+
+  it("rejects invalid bootstrap configuration", () => {
+    const history = Array.from({ length: 60 }, (_, index) =>
+      trace(0.5, index % 2 === 0, new Date(Date.UTC(2026, 0, 1, 0, index)).toISOString()),
+    );
+    expect(() => evaluateCalibrationDrift(history, { bootstrapIterations: 0 })).toThrow(
+      "bootstrapIterations must be a positive integer.",
+    );
+    expect(() => evaluateCalibrationDrift(history, { bootstrapIterations: 10_001 })).toThrow(
+      "bootstrapIterations must not exceed 10000.",
+    );
+    expect(() => evaluateCalibrationDrift(history, { bootstrapSeed: -1 })).toThrow(
+      "bootstrapSeed must be a non-negative safe integer.",
+    );
+  });
+
 });
