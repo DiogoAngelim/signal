@@ -392,7 +392,10 @@ function assessEvidenceQuality(
   temporal: DecisionEvidenceTemporalAssessment,
 ): DecisionEvidenceQualityAssessment {
   const reliability = averageEvidence(evidence, "reliability");
-  const freshness = averageEvidence(evidence, "freshness");
+  const freshness = Math.min(
+    averageEvidence(evidence, "freshness"),
+    temporal.freshnessCap,
+  );
   const declaredIndependence = averageEvidence(evidence, "independence");
   const hasLineageMetadata = evidence.some(
     (item) =>
