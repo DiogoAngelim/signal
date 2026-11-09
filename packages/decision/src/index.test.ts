@@ -147,6 +147,8 @@ describe("@signal/decision", () => {
 
     expect(first).toEqual(second);
     expect(first.perturbations).toHaveLength(14);
+    expect(first.baselineActionVariant).toBeTruthy();
+    expect(first.perturbations.every((item) => item.actionVariant.length > 0)).toBe(true);
     expect(first.stabilityRate).toBeGreaterThanOrEqual(0);
     expect(first.stabilityRate).toBeLessThanOrEqual(1);
     expect(["robust", "sensitive"]).toContain(first.status);
