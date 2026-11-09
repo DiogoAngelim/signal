@@ -2,7 +2,7 @@
 
 ## Overview
 
-Signal's observability stack provides structured logging, distributed tracing, and metrics recording. All telemetry is deterministic and locally verifiable.
+Signal's observability stack provides structured logging, distributed tracing, and metrics recording. Metric values and labels are recorded as supplied; wall-clock timestamps and execution metadata are observational, not deterministic domain outputs.
 
 ## Logs
 
@@ -90,7 +90,7 @@ Each mutation/query execution creates a `SignalTraceSpan`:
 
 ### Metrics Recorder
 
-`createInMemoryMetricsRecorder()` provides an in-memory implementation for testing and local verification. Production implementations should export to Prometheus/OTLP.
+`createInMemoryMetricsRecorder({ maxMetrics })` provides a bounded in-memory implementation for testing and local verification. It retains at most 10,000 samples by default, drops newer samples after reaching its limit, and exposes `droppedCount()` so truncation is visible. Configure a smaller or larger positive safe-integer limit when appropriate. `snapshot()` returns isolated sample and label copies; `clear()` resets the buffer and dropped count. Non-finite values and invalid limits are rejected. This recorder is not durable and is not a production telemetry backend; production implementations should export to Prometheus/OTLP and define their own backpressure, cardinality, and retention policies.
 
 ## Integration
 
