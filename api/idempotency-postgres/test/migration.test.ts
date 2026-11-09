@@ -19,4 +19,21 @@ describe("postgres idempotency migration", () => {
     expect(sql).toContain("error jsonb");
     expect(sql).toContain("message_id text");
   });
+
+  it("creates a durable leased outbox with bounded retry state", () => {
+    const sql = readFileSync(
+      join(__dirname, "../src/drizzle/migrations/0001_transactional_outbox.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_outbox");
+    expect(sql).toContain("FOR UPDATE SKIP LOCKED");
+    expect(sql).toContain("locked_until");
+    expect(sql).toContain("dead-letter");
+    expect(sql).toContain("signal_outbox_pending_available");
+  });
+});
+
+/* migration checks are intentionally source-level; production deployment must apply both migrations */
+/*
+  });
 });
