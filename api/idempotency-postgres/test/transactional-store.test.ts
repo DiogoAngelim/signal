@@ -34,6 +34,7 @@ const completion = {
   operationName: "invoice.issue.v1",
   idempotencyKey: "invoice-1",
   payloadFingerprint: "fingerprint",
+  reservationToken: "reservation-token",
   result: { invoiceId: "inv-1" },
   messageId: "mutation-1",
 };
