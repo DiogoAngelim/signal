@@ -19,7 +19,7 @@ The workflow runs on relevant pull requests, pushes to `main` and `codex/**`, a 
 |---|---|---|---|
 | Atomic mutation and outbox persistence | PostgreSQL migration and transactional integration tests | Result and outbox writes commit or roll back together | Multi-region transactions or storage-provider behavior outside PostgreSQL |
 | Concurrent outbox claims | Competing PostgreSQL workers using `FOR UPDATE SKIP LOCKED` | One row is not concurrently claimed by two active leases | Global coordination across independent databases |
-| Stale outbox worker acknowledgement | Per-claim UUID fencing token, persisted in PostgreSQL and required by acknowledge/retry | A worker cannot acknowledge or reschedule a newer lease, even if its worker ID is reused | Fencing external side effects already performed before lease loss |
+| Stale outbox worker acknowledgement | Per-claim UUID fencing token, persisted in PostgreSQL and required by acknowledge/retry | A worker cannot acknowledge or reschedule a newer lease, even if its worker ID is reused | Fencing external side effects already performed before lease loss |\n| Expired idempotency reservation and stale owner | Expiring reservation token, atomic reclaim, heartbeat renewal, and token-guarded completion/failure | A crashed or expired owner can be replaced; the stale owner cannot complete, fail, or renew the newer reservation | Preventing duplicate external side effects performed by a handler before its lease is lost; handlers still need idempotent side effects |
 | Broker publish / worker-loss boundary | Real RabbitMQ management API; publish, abandon acknowledgement, expire lease, reclaim, and republish | At-least-once redelivery occurs after an ambiguous publish outcome | An OS-level worker kill at every instruction boundary or exactly-once broker delivery |
 | Consumer side-effect deduplication | Durable inbox primary key and side effect in one PostgreSQL transaction | Duplicate broker deliveries produce one simulated durable side effect | Correctness of every real consumer's own transaction or third-party API |
 | Broker unavailable | Failed network attempt, no acknowledgement, lease expiry, recovery publish | An unacknowledged event remains recoverable after a broker outage | Broker quorum loss, replication failure, or cloud network behavior |
@@ -41,7 +41,7 @@ Outbox ownership is now represented by two independent values:
 
 Every successful claim creates a new UUID token. Acknowledge and retry operations must present both values. The database update is conditional on the current worker identity and token; stale operations affect zero rows and are reported as lease loss. Reusing a worker ID after restart does not restore authority from an earlier lease.
 
-The migration `0002_outbox_lease_fencing.sql` adds the token and a database constraint requiring it exactly while a row is processing. Consumers still must deduplicate on `envelope.messageId`: the outbox is at-least-once by design.
+The migration `0002_outbox_lease_fencing.sql` adds the outbox token and a database constraint requiring it exactly while a row is processing. The migration `0003_idempotency_reservation_leases.sql` adds a finite reservation expiry and a generation token. Runtime handlers renew their reservation every 60 seconds against a five-minute lease; completion and failure require the current token and an unexpired lease. Expired reservations are atomically reclaimed with a new token. Consumers still must deduplicate on `envelope.messageId`: the outbox is at-least-once by design.
 
 ## How to run it
 
