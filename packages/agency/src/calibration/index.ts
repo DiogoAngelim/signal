@@ -225,5 +225,6 @@ function clamp(value: number) {
 }
 
 function round(value: number) {
-  return Math.round(value * 1_000_000) / 1_000_000;
+  const rounded = Math.round(value * 1_000_000) / 1_000_000;
+  return Object.is(rounded, -0) ? 0 : rounded;
 }
