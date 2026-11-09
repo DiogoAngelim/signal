@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createMemoryIdempotencyStore } from "./idempotency";
 
 describe("createMemoryIdempotencyStore", () => {
@@ -28,7 +28,8 @@ describe("createMemoryIdempotencyStore", () => {
       payloadFingerprint: "fingerprint-1",
     };
 
-    expect((await store.reserve(input)).state).toBe("reserved");
+    const reservation = await store.reserve(input);
+    expect(reservation.state).toBe("reserved");
     expect((await store.reserve(input)).state).toBe("inflight");
     expect(
       (
@@ -39,10 +40,57 @@ describe("createMemoryIdempotencyStore", () => {
       ).state,
     ).toBe("conflict");
 
-    await store.complete({ ...input, result: { captured: true } });
+    await store.complete({ ...input, reservationToken: reservation.record!.reservationToken!, result: { captured: true } });
     const replay = await store.reserve(input);
 
     expect(replay.state).toBe("replayed");
     expect(replay.record?.result).toEqual({ captured: true });
   });
+  it("reclaims expired reservations and fences the previous owner", async () => {
+    const store = createMemoryIdempotencyStore();
+    const input = {
+      operationName: "payment.capture.v1",
+      idempotencyKey: "capture-expiring",
+      payloadFingerprint: "fingerprint-expiring",
+    };
+    vi.useFakeTimers();
+    try {
+      const first = await store.reserve({ ...input, leaseMs: 1_000 });
+      vi.setSystemTime(Date.now() + 1_500);
+      const second = await store.reserve({ ...input, leaseMs: 5_000 });
+      expect(second.state).toBe("reserved");
+      expect(second.record?.reservationToken).not.toBe(first.record?.reservationToken);
+      await expect(store.complete({
+        ...input,
+        reservationToken: first.record!.reservationToken!,
+        result: { stale: true },
+      })).rejects.toThrow("missing, expired, or fenced");
+      await expect(store.complete({
+        ...input,
+        reservationToken: second.record!.reservationToken!,
+        result: { current: true },
+      })).resolves.toBeUndefined();
+      expect((await store.reserve(input)).record?.result).toEqual({ current: true });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("renews a reservation only while the caller owns an unexpired token", async () => {
+    const store = createMemoryIdempotencyStore();
+    const input = {
+      operationName: "payment.capture.v1",
+      idempotencyKey: "capture-renew",
+      payloadFingerprint: "fingerprint-renew",
+    };
+    const reservation = await store.reserve(input);
+    const token = reservation.record!.reservationToken!;
+    await expect(store.renewReservation({
+      ...input, reservationToken: token, leaseMs: 10_000,
+    })).resolves.toBe(true);
+    await expect(store.renewReservation({
+      ...input, reservationToken: "stale-token", leaseMs: 10_000,
+    })).resolves.toBe(false);
+  });
+
 });
