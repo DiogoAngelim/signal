@@ -102,7 +102,7 @@ describe("calibration", () => {
     const metrics = evaluateCalibrationMetrics(perfectlyCalibrated);
 
     expect(metrics).toMatchObject({
-      sampleSize: 30,
+      sampleSize: 100,
       brierScore: 0.16,
       expectedCalibrationError: 0,
       maximumCalibrationError: 0,
@@ -119,7 +119,7 @@ describe("calibration", () => {
     const metrics = evaluateCalibrationMetrics(overconfident);
 
     expect(metrics).toMatchObject({
-      sampleSize: 30,
+      sampleSize: 100,
       brierScore: 0.41,
       expectedCalibrationError: 0.4,
       maximumCalibrationError: 0.4,
@@ -128,7 +128,7 @@ describe("calibration", () => {
     });
   });
 
-  it("keeps evaluation status insufficient until the minimum sample size is met", () => {
+  it("keeps calibration status insufficient below the default 100-sample floor", () => {
     const metrics = evaluateCalibrationMetrics([
       trace(0.9, true),
       trace(0.8, false),
