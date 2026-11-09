@@ -193,6 +193,30 @@ describe("@signal/decision", () => {
     ).toThrow("actionVariants must contain non-empty strings.");
   });
 
+
+  it("propagates scenario uncertainty into the evaluated action score", () => {
+    const scenario = generatePredictionScenarios({
+      currentScore: 70,
+      expectedReward: 80,
+      expectedRisk: 20,
+      uncertainty: 10,
+      confidence: 80,
+      labels: ["conditions remain stable"],
+    })[0];
+    const lowUncertainty = simulateDecisionPaths({
+      scenarios: [{ ...scenario, uncertainty: 0 }],
+      actionVariants: ["act normally"],
+    });
+    const highUncertainty = simulateDecisionPaths({
+      scenarios: [{ ...scenario, uncertainty: 100 }],
+      actionVariants: ["act normally"],
+    });
+
+    expect(highUncertainty.expectedOutcomeScore).toBeLessThan(
+      lowUncertainty.expectedOutcomeScore,
+    );
+  });
+
   it("creates records, accountability reports, replay comparisons, and human guide steps", () => {
     const coherence = assessCoherence({
       discovery: 78,
