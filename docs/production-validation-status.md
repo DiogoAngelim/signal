@@ -8,14 +8,14 @@ This document is the release gate for Signal itself. A passing package build or 
 - Retry and circuit-breaker configuration is validated.
 - The stateful circuit-breaker controller reserves one half-open probe per process.
 - Audit-chain verification checks contiguous zero-based sequence numbers, linkage, SHA-256 formatting, timestamps, identity fields, and entry hashes.
-- The runtime public entrypoint exports the resilience and audit-chain APIs.
+- The runtime public entrypoint exports resilience, audit-chain, and outbox APIs.\n- The PostgreSQL transactional adapter atomically commits an idempotency result with emitted event envelopes in one database transaction.\n- The outbox uses leased claims with `FOR UPDATE SKIP LOCKED`, bounded batches, at-least-once delivery, retry backoff, acknowledgement ownership, and dead-letter state.\n- The runtime refuses to dispatch emitted events for an idempotent mutation when the storage adapter lacks the transactional outbox capability.\n- The in-memory adapter implements the same contract for deterministic tests; it is not durable.
 
 ## Guarantees and non-guarantees
 
 | Concern | Current guarantee | Production limitation |
 |---|---|---|
 | Replay | Same idempotency key and fingerprint can return the stored result | External state and side effects are not recreated |
-| Event delivery | Runtime dispatches emitted events through EventPort | Mutation result and emitted events are not committed atomically |
+| Event delivery | PostgreSQL adapter atomically persists result + outbox records; dispatcher provides leased at-least-once delivery | Migration must be applied; worker must run continuously; consumer deduplication and external side-effect idempotency remain mandatory |
 | Idempotency | StoragePort can reserve, complete, and fail an operation | Pending-record lease expiry/recovery and cross-region consistency are adapter-specific |
 | Audit chain | Supplied entries can be checked for internal hash-chain consistency | A chain is not immutable if an attacker can rewrite the full history and trusted head |
 | Circuit breaker | One half-open probe per controller instance | Not a distributed lock across processes or regions |
@@ -70,6 +70,6 @@ Do not label Signal production-certified until the following evidence exists:
    - Set budgets from measured production requirements rather than inherited estimates.
    - Verify backup restore and disaster-recovery objectives.
 
-## Certification rule
+## Current completion boundary\n\nThe transactional outbox is implemented as source code and migration in `api/idempotency-postgres`. It is not active in any deployment merely because it exists in the repository. Operators must apply migration `0001_transactional_outbox.sql`, instantiate `createPostgresTransactionalStore`, and run a persistent worker calling `dispatchOutboxBatch`. The legacy `createPostgresIdempotencyStore` is not sufficient for idempotent mutations that emit events.\n\nThe remaining checklist items are intentionally marked incomplete where real infrastructure, representative production data, independently protected secrets/storage, or measured workloads are required. Source-only changes cannot truthfully certify those controls.\n\n## Certification rule
 
 CI passing means the tested source revision passed the configured automated checks. It does not imply that production infrastructure, operational controls, real-world data quality, or service-level objectives have been validated. Each release must attach dated evidence for the relevant gates above and explicitly record any accepted residual risk.
