@@ -172,6 +172,20 @@ completed labeled outcomes and at least 10 samples in each populated bucket;
 below either threshold, the status remains `insufficient_data`, even though
 descriptive metrics may be calculated.
 
+Calibration reports an approximate 95% confidence interval for mean Brier
+loss using a normal approximation when at least 30 completed observations
+are available. Aggregate and bucket-level observed outcome rates use Wilson
+score intervals; the corresponding calibration-bias intervals subtract the
+Wilson bounds from the relevant mean confidence. Directional bias is labeled
+positive or negative only when at least 30 observations are available and the
+bias interval excludes zero; otherwise it is reported as not significant or
+insufficient. These intervals assume independent Bernoulli outcomes and can
+be misleading for clustered, weighted, or temporally dependent samples.
+Bucket intervals are not adjusted for multiple comparisons. They do not
+establish that the evaluation sample is representative: callers must document
+sampling, selection, labeling, and population coverage, and must not infer
+absence of sampling bias from a narrow interval.
+
 The legacy `calibrationError` field is signed cohort-level confidence bias,
 not ECE. `calibratedConfidence` is a cohort-level adjustment, not a
 per-prediction calibrated probability. Neither should be presented as a
