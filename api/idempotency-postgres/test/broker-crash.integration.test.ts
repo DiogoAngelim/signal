@@ -169,6 +169,20 @@ integration("broker and consumer crash-boundary simulation", () => {
     await expect(fetch("http://127.0.0.1:1/unavailable", { signal: AbortSignal.timeout(500) })).rejects.toThrow();
     const row = await admin.query("SELECT status FROM signal_outbox WHERE message_id = $1", [messageId]);
     expect(row.rows[0]?.status).toBe("processing");
-    expect(await store.acknowledge({ id: claimed.id, workerId })).toBe(true);
+    await admin.query("UPDATE signal_outbox SET locked_until = now() - interval '1 second' WHERE message_id = $1", [messageId]);
+    const recoveryWorker = "broker-recovery-" + suffix;
+    const recovered = await store.claimBatch({ workerId: recoveryWorker, limit: 10, leaseMs: 30_000 });
+    const event = recovered.find((item) => item.envelope.messageId === messageId);
+    expect(event).toBeDefined();
+    expect(await brokerRequest("api/exchanges/%2F/amq.default/publish", {
+      method: "POST",
+      body: JSON.stringify({
+        properties: { delivery_mode: 2, message_id: messageId, content_type: "application/json" },
+        routing_key: queueName,
+        payload: JSON.stringify(event!.envelope),
+        payload_encoding: "string",
+      }),
+    })).toMatchObject({ routed: true });
+    expect(await store.acknowledge({ id: event!.id, workerId: recoveryWorker })).toBe(true);
   });
 });
