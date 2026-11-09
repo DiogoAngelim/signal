@@ -141,7 +141,10 @@ invalid due to malformed/inconsistent temporal metadata.
 
 Unknown validity is not silently treated as current. Staleness and validity
 are separate dimensions: evidence can be within its validity interval but
-older than the source's freshness window.
+older than the source's freshness window. Expired, not-yet-valid, stale, and
+invalid evidence conservatively cap the aggregate freshness score by the
+proportion of unaffected evidence; this is a transparent heuristic, not a
+probability.
 
 ## 6. Statistical claims
 
