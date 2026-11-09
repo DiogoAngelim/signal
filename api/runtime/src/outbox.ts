@@ -82,6 +82,7 @@ export function isOutboxPort(value: unknown): value is OutboxPort {
   if (!value || typeof value !== "object") return false;
   const candidate = value as Partial<OutboxPort>;
   return (
+    typeof candidate.getStats === "function" &&
     typeof candidate.claimBatch === "function" &&
     typeof candidate.acknowledge === "function" &&
     typeof candidate.retry === "function"
