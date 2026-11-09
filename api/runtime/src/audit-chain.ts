@@ -1,9 +1,10 @@
 /**
  * Immutable audit chain for Signal execution evidence.
- * Each entry is hash-chained to the previous entry, providing
- * tamper-evidence for the execution audit trail.
+ *
+ * A valid chain proves internal consistency against the supplied first entry;
+ * it does not prove that storage is immutable or that the supplied genesis is
+ * an independently trusted checkpoint.
  */
-
 import { createHash } from "node:crypto";
 import { stableStringify } from "./hash";
 
@@ -36,6 +37,7 @@ export function computeEntryHash(entry: Omit<AuditChainEntry, "hash">): string {
 }
 
 const GENESIS_HASH = "0".repeat(64);
+const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 
 export function createAuditChainEntry(
   previousEntry: AuditChainEntry | null,
@@ -50,7 +52,6 @@ export function createAuditChainEntry(
 ): AuditChainEntry {
   const sequence = previousEntry ? previousEntry.sequence + 1 : 0;
   const previousHash = previousEntry ? previousEntry.hash : GENESIS_HASH;
-
   const partial: Omit<AuditChainEntry, "hash"> = {
     sequence,
     timestamp: new Date().toISOString(),
@@ -62,34 +63,42 @@ export function createAuditChainEntry(
     payloadFingerprint: input.payloadFingerprint,
     previousHash,
   };
-
-  const hash = computeEntryHash(partial);
-  return { ...partial, hash };
+  return { ...partial, hash: computeEntryHash(partial) };
 }
 
-export function verifyChain(entries: AuditChainEntry[]): boolean {
+export function verifyChain(entries: readonly AuditChainEntry[]): boolean {
   if (entries.length === 0) return true;
 
-  for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i];
-    if (!entry) continue;
-    const expectedPreviousHash = i === 0 ? GENESIS_HASH : entries[i - 1]?.hash;
+  for (let index = 0; index < entries.length; index += 1) {
+    const entry = entries[index];
+    if (!entry) return false;
 
+    if (
+      !Number.isSafeInteger(entry.sequence) ||
+      entry.sequence !== index ||
+      typeof entry.timestamp !== "string" ||
+      !Number.isFinite(Date.parse(entry.timestamp)) ||
+      typeof entry.operationName !== "string" ||
+      entry.operationName.length === 0 ||
+      typeof entry.operationKind !== "string" ||
+      entry.operationKind.length === 0 ||
+      typeof entry.messageId !== "string" ||
+      entry.messageId.length === 0 ||
+      !["completed", "replayed", "failed"].includes(entry.outcome) ||
+      !SHA256_PATTERN.test(entry.previousHash) ||
+      !SHA256_PATTERN.test(entry.hash) ||
+      (entry.payloadFingerprint !== undefined &&
+        !SHA256_PATTERN.test(entry.payloadFingerprint))
+    ) {
+      return false;
+    }
+
+    const expectedPreviousHash =
+      index === 0 ? GENESIS_HASH : entries[index - 1]?.hash;
     if (entry.previousHash !== expectedPreviousHash) return false;
 
-    const expectedHash = computeEntryHash({
-      sequence: entry.sequence,
-      timestamp: entry.timestamp,
-      operationName: entry.operationName,
-      operationKind: entry.operationKind,
-      messageId: entry.messageId,
-      outcome: entry.outcome,
-      idempotencyKey: entry.idempotencyKey,
-      payloadFingerprint: entry.payloadFingerprint,
-      previousHash: entry.previousHash,
-    });
-
-    if (entry.hash !== expectedHash) return false;
+    const { hash: _hash, ...content } = entry;
+    if (entry.hash !== computeEntryHash(content)) return false;
   }
 
   return true;
