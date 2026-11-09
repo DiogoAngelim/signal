@@ -74,7 +74,7 @@ export function calculateJitteredBackoff(
   if (!Number.isFinite(sample) || sample < 0 || sample >= 1) {
     throw new RangeError("random must return a finite value in [0, 1).");
   }
-  return Math.floor(sample * (ceiling + 1));
+  return sample * ceiling;
 }
 
 export interface CircuitBreakerState {
