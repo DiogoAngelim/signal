@@ -17,6 +17,9 @@ const DEFAULT_VARIANTS = [
   "block action",
 ];
 
+const MAX_SCENARIOS = 1_000;
+const MAX_ACTION_VARIANTS = 100;
+
 const ROBUSTNESS_FACTORS: readonly DecisionRobustnessFactor[] = [
   "expectedReward",
   "expectedRisk",
@@ -30,6 +33,7 @@ const ROBUSTNESS_FACTORS: readonly DecisionRobustnessFactor[] = [
 export function simulateDecisionPaths(
   input: SimulationInput,
 ): SimulationResult {
+  validateSimulationInput(input);
   const scenarios = input.scenarios.length ? input.scenarios : [];
   const variants = input.actionVariants?.length
     ? input.actionVariants
@@ -129,6 +133,60 @@ export function evaluateDecisionRobustness(
       "This deterministic sensitivity screen tests the configured perturbation size; it is not a probability, confidence interval, exhaustive search, or guarantee outside the tested range.",
     ],
   };
+}
+
+
+function validateSimulationInput(input: SimulationInput): void {
+  if (input.scenarios.length > MAX_SCENARIOS) {
+    throw new Error(`scenarios must not exceed ${MAX_SCENARIOS}.`);
+  }
+  if ((input.actionVariants?.length ?? 0) > MAX_ACTION_VARIANTS) {
+    throw new Error(`actionVariants must not exceed ${MAX_ACTION_VARIANTS}.`);
+  }
+  if (
+    input.currentExposure !== undefined &&
+    (!Number.isFinite(input.currentExposure) ||
+      input.currentExposure < 0 ||
+      input.currentExposure > 100)
+  ) {
+    throw new Error("currentExposure must be between 0 and 100.");
+  }
+  if (
+    input.actionVariants?.some(
+      (variant) => typeof variant !== "string" || !variant.trim(),
+    )
+  ) {
+    throw new Error("actionVariants must contain non-empty strings.");
+  }
+
+  let totalProbability = 0;
+  for (const scenario of input.scenarios) {
+    if (
+      !Number.isFinite(scenario.probability) ||
+      scenario.probability < 0 ||
+      scenario.probability > 1
+    ) {
+      throw new Error("scenario probabilities must be between 0 and 1.");
+    }
+    totalProbability += scenario.probability;
+    for (const field of [
+      "expectedReward",
+      "expectedRisk",
+      "downsideRisk",
+      "uncertainty",
+      "purposeAlignment",
+      "needAlignment",
+      "confidence",
+    ] as const) {
+      const value = scenario[field];
+      if (!Number.isFinite(value) || value < 0 || value > 100) {
+        throw new Error(`scenario ${field} must be between 0 and 100.`);
+      }
+    }
+  }
+  if (input.scenarios.length > 0 && totalProbability <= 0) {
+    throw new Error("scenario probabilities must have a positive total.");
+  }
 }
 
 function comparePath(
