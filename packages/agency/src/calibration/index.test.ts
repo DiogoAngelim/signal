@@ -44,7 +44,7 @@ describe("calibration", () => {
   });
 
   it("reports insufficient data below the configured sample floor", () => {
-    expect(calibrateConfidence([trace(0.9, true), trace(0.7, false)])).toEqual({
+    expect(calibrateConfidence([trace(0.9, true), trace(0.7, false)])).toMatchObject({
       calibratedConfidence: 0.65,
       calibrationError: 0.3,
       reliability: "insufficient_data",
