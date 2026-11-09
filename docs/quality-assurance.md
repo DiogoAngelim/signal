@@ -206,8 +206,39 @@ report whether the selected action changes. When perturbation bounds or
 scenario probabilities are unsupported, Signal must preserve that uncertainty
 rather than manufacture precision.
 
+The `evaluateDecisionRobustness` API adds a deterministic one-factor
+sensitivity screen. It perturbs seven scenario dimensions (reward, risk,
+downside, uncertainty, purpose alignment, need alignment, and confidence) up
+and down by a configured number of points, reruns the same path comparison,
+and reports the fraction of perturbations that preserve the baseline action.
+The default perturbation is five points and the default stability threshold is
+80%. This is a bounded diagnostic, not an exhaustive multivariate search; it
+does not test interactions between factors or changes outside the specified
+range. Its status must be reported as `robust` only relative to the tested
+perturbations and threshold.
 
-## 8. Cryptographic assurance boundaries
+## 8. Reproducibility and operational reliability
+
+Decision records can retain the decision-time reality snapshot, assessment,
+scenario set, simulation result, coherence assessment, timestamps, and
+version metadata. Replay comparison can identify changes in action permission,
+scale, score, and status. Canonical serialization and fingerprints support
+stable identity and integrity checks when every participant uses the same
+versioned contract.
+
+Replay comparison is not, by itself, a complete deterministic re-execution of
+every historical dependency. The in-memory decision record store is
+process-local and is not a durable production store. Durable retention,
+transactional consistency, backup/restore, access control, and operational
+telemetry must be validated against the concrete storage and runtime adapter.
+Signal's package CI verifies builds, tests, architecture, package entrypoints,
+and consumer installation; it does not establish production latency,
+availability, recovery objectives, or resource limits. Those operational
+claims require environment-specific integration and load tests.
+
+
+
+## 9. Cryptographic assurance boundaries
 
 A SHA-256 fingerprint can show whether bytes match a previously recorded
 fingerprint. A hash chain can make changes to linked records detectable when
@@ -226,7 +257,7 @@ appropriate signatures, protected keys, trusted timestamps, access controls,
 or independently retained checkpoints. Documentation must state which
 mechanisms are actually implemented.
 
-## 9. Security, privacy, and adversarial assurance
+## 10. Security, privacy, and adversarial assurance
 
 The security test suite must include malformed and oversized inputs,
 authorization bypass attempts, tenant-boundary tests, replay attacks,
@@ -239,7 +270,7 @@ Retention, deletion, redaction, and audit requirements must be reconciled
 explicitly; immutable audit metadata does not automatically justify retaining
 sensitive source material indefinitely.
 
-## 10. Required validation layers
+## 11. Required validation layers
 
 A release candidate should pass all applicable layers:
 
@@ -256,7 +287,7 @@ A release candidate should pass all applicable layers:
 
 A skipped or unavailable layer must be reported as unvalidated, not passed.
 
-## 11. Release report
+## 12. Release report
 
 Each release report must include:
 
@@ -271,7 +302,7 @@ Each release report must include:
 - explicit distinction between tested, validated, and operationally observed
   guarantees.
 
-## 12. Change discipline
+## 13. Change discipline
 
 Before introducing a new abstraction, dependency, package, schema, or metric:
 
