@@ -116,7 +116,7 @@ export function assessEvidenceLineage(
     : 0;
   const independentSourceCount = allRootSources.size;
   const sourceDiversityScore = evidence.length
-    ? Math.round((independentSourceCount / evidence.length) * 100)
+    ? Math.min(100, Math.round((independentSourceCount / evidence.length) * 100))
     : 0;
   const duplicateIds = [...duplicateEvidenceIds].sort();
   const missing = [...missingDependencies].sort();
