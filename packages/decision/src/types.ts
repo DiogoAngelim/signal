@@ -259,6 +259,7 @@ export type DecisionEvidenceLineageAssessment = {
 
 export type DecisionEvidenceTemporalAssessment = {
   asOf: string;
+  freshnessCap: number;
   currentEvidenceIds: string[];
   expiredEvidenceIds: string[];
   notYetValidEvidenceIds: string[];
