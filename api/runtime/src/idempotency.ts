@@ -8,8 +8,10 @@ import type { SignalErrorEnvelope, SignalResultMeta } from "@signal/protocol";
 export function createMemoryIdempotencyStore(): StoragePort {
   const records = new Map<string, IdempotencyRecord>();
 
+  // Encode the tuple rather than concatenating delimiters: both components
+  // are caller-controlled strings and must retain unambiguous boundaries.
   const keyFor = (operationName: string, idempotencyKey: string) =>
-    `${operationName}:${idempotencyKey}`;
+    JSON.stringify([operationName, idempotencyKey]);
 
   return {
     async reserve(input): Promise<IdempotencyReservation> {
@@ -28,13 +30,14 @@ export function createMemoryIdempotencyStore(): StoragePort {
         return { state: "replayed", record: existing };
       }
 
+      const now = new Date().toISOString();
       const record: IdempotencyRecord = {
         operationName: input.operationName,
         idempotencyKey: input.idempotencyKey,
         payloadFingerprint: input.payloadFingerprint,
         status: "pending",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: now,
+        updatedAt: now,
       };
       records.set(key, record);
       return { state: "reserved", record };

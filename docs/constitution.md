@@ -88,3 +88,26 @@ high-trust path must prove:
 
 Documentation may explain guarantees, but tests and the reference proof must
 demonstrate them.
+
+
+## Evidence and Assurance Principles
+
+The following rules make the existing principles executable and prevent
+overstated guarantees:
+
+13. Evidence is not truth; provenance, integrity, authenticity, and validity
+    are distinct properties.
+14. Unknown is a valid assessment outcome and must not be converted into a
+    positive or negative conclusion without evidence.
+15. Repeated or copied evidence is not independent corroboration.
+16. Numerical confidence is not a probability unless its meaning and
+    calibration are empirically established.
+17. Replay reconstructs recorded evidence and deterministic results; it does
+    not imply that external side effects can safely be repeated.
+18. A hash or hash chain proves consistency only relative to a trusted
+    fingerprint or checkpoint; it does not independently prove source
+    authenticity or truth.
+19. Operational metadata such as timestamps, message identifiers, and
+    durations must be distinguished from deterministic domain results.
+20. High-trust claims must state whether they are specified, implemented,
+    tested, validated, or operationally observed.

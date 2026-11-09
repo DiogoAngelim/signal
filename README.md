@@ -219,6 +219,7 @@ pnpm verify:exports
 - [Governance](docs/governance.md) — protocol evolution, RFCs, contract management
 - [Multi-Domain Examples](docs/multi-domain-examples.md) — how Signal applies across domains
 - [Constitution](docs/constitution.md) — Signal's correctness rules and change principles
+- [Quality and Assurance Standard](docs/quality-assurance.md) — invariants, determinism, evidence, statistical claims, security, and release validation
 - [Developer Documentation](docs/README.md) — full developer-oriented source of truth
 
 ## Example App Links

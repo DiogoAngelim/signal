@@ -11,7 +11,7 @@ if (!artifactDir) {
 }
 
 const tarball = readdirSync(artifactDir)
-  .filter((name) => name.startsWith("signal-decision-") && name.endsWith(".tgz"))
+  .filter((name) => /^signal-decision-\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?\.tgz$/.test(name))
   .map((name) => join(artifactDir, name))[0];
 if (!tarball) throw new Error("Packed @signal/decision tarball not found");
 

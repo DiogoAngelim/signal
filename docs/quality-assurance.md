@@ -1,0 +1,213 @@
+# Signal Quality and Assurance Standard
+
+This document defines the assurance model for Signal itself. It complements the
+Signal Constitution, protocol RFCs, dependency rules, and replay/auditability
+specification. It does not define requirements for applications that consume
+Signal.
+
+## 1. Assurance vocabulary
+
+Signal documentation and release reports must distinguish:
+
+- **Specified** — a behavior or guarantee has a written, testable contract.
+- **Implemented** — production code implements that contract.
+- **Tested** — automated tests exercise the behavior.
+- **Validated** — results have been checked against an independent oracle,
+  fixture, or reproducible external procedure.
+- **Operationally observed** — the behavior has been observed in a running
+  environment under stated conditions.
+
+One level must never be presented as proof of a stronger level. In particular,
+a passing unit test does not prove production operation, and package
+installation does not prove semantic correctness.
+
+## 2. Core invariants
+
+The following invariants apply across Signal packages:
+
+1. Every public operation has an explicit, versioned contract.
+2. Published operation semantics are immutable; semantic changes require a
+   new version.
+3. Every state-changing operation has an explicit idempotency policy.
+4. Authorization and policy checks occur before protected handler execution
+   and before reserving durable execution state.
+5. An event represents a fact that has already happened.
+6. Replaying a request must not silently repeat an external side effect.
+7. Historical assessments retain the evidence and policy versions that
+   produced them.
+8. Unknown, assumed, contradicted, and missing information remain distinct.
+9. A conclusion must not claim stronger support than its traceable evidence.
+10. Repeated copies of one source are not independent corroboration.
+11. A numerical score is not a probability unless its probabilistic meaning
+    and calibration have been established.
+12. Cryptographic hashes establish content fingerprints; they do not establish
+    source truth or authenticity by themselves.
+
+These invariants should be expressed as executable tests wherever practical,
+including property-based, metamorphic, adversarial, and regression tests.
+
+## 3. Determinism contract
+
+Signal must distinguish deterministic domain results from operational metadata.
+
+### Deterministic behavior
+
+For a fixed operation version, canonical input, policy version, and explicit
+deterministic dependencies, Signal's normalized domain result must be stable.
+Canonicalization must be documented and versioned because changing it can
+change fingerprints and idempotency behavior.
+
+### Operational metadata
+
+Message identifiers, wall-clock timestamps, durations, delivery attempts,
+and externally observed state are not inherently deterministic. They must be
+captured as explicit execution metadata and must not be confused with the
+deterministic domain result.
+
+A replay guarantee must state which of the following it provides:
+
+- reconstruction of the recorded input and evidence;
+- verification of recorded hashes and links;
+- reproduction of a deterministic domain result;
+- re-delivery of an event;
+- execution of an external side effect.
+
+These are different guarantees. Signal must not imply that replaying an
+operation can safely repeat an external side effect.
+
+## 4. Canonical serialization and fingerprints
+
+Fingerprint inputs must be represented using a documented canonical JSON
+subset. The runtime serializer:
+
+- sorts object keys by code-unit order;
+- preserves array order;
+- omits undefined object properties;
+- represents undefined array entries and sparse slots as null;
+- serializes valid Date values as ISO-8601 strings;
+- rejects non-finite numbers, unsupported JavaScript values, invalid dates,
+  accessors, non-plain objects, symbol-keyed enumerable properties, and
+  circular references.
+
+Callers should pass plain, schema-validated data. A fingerprint is only
+meaningful when every participant uses the same canonicalization contract.
+
+Changing canonicalization is a compatibility-sensitive change. It requires
+regression fixtures and an explicit migration assessment before release.
+
+## 5. Evidence, lineage, and time
+
+Evidence quality is multidimensional. Source reliability, integrity,
+relevance, freshness, independence, replication, traceability, and coverage
+must not be collapsed into an unexplained universal score.
+
+Evidence relationships should preserve source lineage. Multiple documents
+derived from one original source must not be counted as independent
+corroboration. Circular support and copied claims must be detectable or
+explicitly marked as unresolved.
+
+Temporal records should distinguish, where applicable:
+
+- event time: when the described event occurred;
+- observation time: when the evidence was observed;
+- recording time: when Signal received or persisted it;
+- verification time: when the claim was checked;
+- validity interval: when the evidence is applicable.
+
+Authenticity, integrity, freshness, and truth are separate properties.
+
+## 6. Statistical claims
+
+Any published confidence probability requires:
+
+1. a precise definition of the event being assigned probability;
+2. an independently labeled evaluation dataset;
+3. a documented sampling and split methodology;
+4. calibration and discrimination metrics appropriate to the task;
+5. sample-size and uncertainty reporting;
+6. subgroup and drift analysis where relevant;
+7. versioned evaluation results.
+
+A heuristic score must be named and documented as a score, not presented as a
+probability. Accuracy alone is insufficient when abstention, class imbalance,
+or asymmetric error costs matter.
+
+## 7. Cryptographic assurance boundaries
+
+A SHA-256 fingerprint can show whether bytes match a previously recorded
+fingerprint. A hash chain can make changes to linked records detectable when
+a trusted chain head or checkpoint is retained independently.
+
+A hash chain alone does not prove:
+
+- who created the evidence;
+- whether the source was truthful;
+- when the evidence actually existed;
+- that an attacker with write access could not rewrite the entire chain;
+- that an external side effect occurred.
+
+Claims of authenticity, non-repudiation, or tamper resistance require the
+appropriate signatures, protected keys, trusted timestamps, access controls,
+or independently retained checkpoints. Documentation must state which
+mechanisms are actually implemented.
+
+## 8. Security, privacy, and adversarial assurance
+
+The security test suite must include malformed and oversized inputs,
+authorization bypass attempts, tenant-boundary tests, replay attacks,
+idempotency collisions, forged metadata, duplicate-source inflation,
+contradictory evidence, prompt-injection content in untrusted evidence, and
+resource-exhaustion cases.
+
+Logs and diagnostics must not expose secrets or unnecessary evidence content.
+Retention, deletion, redaction, and audit requirements must be reconciled
+explicitly; immutable audit metadata does not automatically justify retaining
+sensitive source material indefinitely.
+
+## 9. Required validation layers
+
+A release candidate should pass all applicable layers:
+
+1. Unit tests for pure functions and state transitions.
+2. Contract tests for public schemas, operation versions, and errors.
+3. Property-based tests for invariants and edge cases.
+4. Metamorphic tests for ordering, irrelevant inputs, and uncertainty behavior.
+5. Adversarial tests for untrusted inputs and abuse cases.
+6. Golden-fixture regression tests with independently reviewed expected results.
+7. Integration tests for storage, transactions, event delivery, and authorization.
+8. Isolated package-consumer tests for every declared module format.
+9. Reproducible build and artifact-integrity checks.
+10. Operational proof for guarantees that depend on real infrastructure.
+
+A skipped or unavailable layer must be reported as unvalidated, not passed.
+
+## 10. Release report
+
+Each release report must include:
+
+- source commit and package versions;
+- exact commands and environment versions;
+- tests executed and their results;
+- evaluation dataset version and metrics;
+- security scan results and unresolved findings;
+- supported runtime and module matrix;
+- artifact hashes and package contents;
+- known limitations and deferred risks;
+- explicit distinction between tested, validated, and operationally observed
+  guarantees.
+
+## 11. Change discipline
+
+Before introducing a new abstraction, dependency, package, schema, or metric:
+
+1. identify the concrete defect or unmet guarantee;
+2. show why existing Signal contracts cannot address it;
+3. define observable acceptance criteria;
+4. assess compatibility and migration consequences;
+5. add tests before or alongside implementation;
+6. update the relevant RFC or governance document;
+7. remove obsolete behavior rather than preserving accidental complexity.
+
+The Signal Constitution remains authoritative. If this document and the
+Constitution or a published RFC conflict, resolve the governance conflict
+before implementation.
