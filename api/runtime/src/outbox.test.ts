@@ -23,6 +23,7 @@ function createOutbox(records: OutboxRecord[]) {
   const acknowledged: string[] = [];
   const retried: Array<{ id: string; maxAttempts: number }> = [];
   const outbox: OutboxPort = {
+    getStats: vi.fn(async () => ({ pending: 0, processing: 0, delivered: 0, deadLettered: 0, oldestPendingAgeMs: null })),
     claimBatch: vi.fn(async () => records),
     acknowledge: vi.fn(async ({ id }) => {
       acknowledged.push(id);
