@@ -21,6 +21,7 @@ const MAX_BUCKET_COUNT = 100;
 const DEFAULT_DRIFT_WINDOW_COUNT = 4;
 const DEFAULT_MINIMUM_WINDOW_SAMPLES = 30;
 const DEFAULT_DRIFT_TOLERANCE = 0.1;
+const MAX_DRIFT_WINDOW_COUNT = 100;
 
 type CalibrationSample = {
   confidence: number;
@@ -145,6 +146,9 @@ export function evaluateCalibrationDrift(
   );
   if (windowCount < 2) {
     throw new Error("windowCount must be at least 2.");
+  }
+  if (windowCount > MAX_DRIFT_WINDOW_COUNT) {
+    throw new Error(`windowCount must not exceed ${MAX_DRIFT_WINDOW_COUNT}.`);
   }
   const minimumWindowSamples = positiveInteger(
     config.minimumWindowSamples ?? DEFAULT_MINIMUM_WINDOW_SAMPLES,
