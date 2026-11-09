@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type {
   IdempotencyRecord,
   IdempotencyReservation,
@@ -96,6 +97,7 @@ export function createMemoryIdempotencyStore(): StoragePort &
         createdAt: new Date().toISOString(),
         status: "pending" as const,
         availableAt: Date.now(),
+        leaseToken: "",
       }));
       const stagedIds = new Set<string>();
       for (const item of staged) {
@@ -134,26 +136,29 @@ export function createMemoryIdempotencyStore(): StoragePort &
         item.status = "processing";
         item.lockedBy = input.workerId;
         item.lockedUntil = now + input.leaseMs;
+        item.leaseToken = randomUUID();
         item.attempts += 1;
       }
       return eligible.map(({ id, envelope, attempts, createdAt }) => ({
-        id, envelope: structuredClone(envelope), attempts, createdAt,
+        id, envelope: structuredClone(envelope), attempts, createdAt, leaseToken: outbox.get(id)!.leaseToken,
       }));
     },
     async acknowledge(input) {
       const item = outbox.get(input.id);
-      if (!item || item.status !== "processing" || item.lockedBy !== input.workerId) return false;
+      if (!item || item.status !== "processing" || item.lockedBy !== input.workerId || item.leaseToken !== input.leaseToken) return false;
       item.status = "delivered";
       item.lockedBy = undefined;
       item.lockedUntil = undefined;
+      item.leaseToken = "";
       return true;
     },
     async retry(input) {
       const item = outbox.get(input.id);
-      if (!item || item.status !== "processing" || item.lockedBy !== input.workerId) return "lease-lost";
+      if (!item || item.status !== "processing" || item.lockedBy !== input.workerId || item.leaseToken !== input.leaseToken) return "lease-lost";
       item.lastError = input.error;
       item.lockedBy = undefined;
       item.lockedUntil = undefined;
+      item.leaseToken = "";
       if (item.attempts >= input.maxAttempts) {
         item.status = "dead-letter";
         return "dead-lettered";
