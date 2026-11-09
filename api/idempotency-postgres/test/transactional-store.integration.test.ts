@@ -73,6 +73,80 @@ integration("PostgreSQL transactional outbox integration", () => {
     })).toBe(true);
   });
 
+  it("reclaims expired idempotency reservations and fences stale owners", async () => {
+    const operationName = "integration.reservation-lease.v1";
+    const idempotencyKey = `reservation-${Date.now()}`;
+    const first = await store.reserve({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      leaseMs: 1_000,
+    });
+    expect(first.state).toBe("reserved");
+    const firstToken = first.record!.reservationToken!;
+
+    await admin.query(
+      "UPDATE signal_idempotency_records SET reservation_expires_at = now() - interval '1 second' WHERE operation_name = $1 AND idempotency_key = $2",
+      [operationName, idempotencyKey],
+    );
+
+    const second = await store.reserve({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      leaseMs: 30_000,
+    });
+    expect(second.state).toBe("reserved");
+    expect(second.record!.reservationToken).not.toBe(firstToken);
+
+    await expect(store.renewReservation({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      reservationToken: firstToken,
+      leaseMs: 30_000,
+    })).resolves.toBe(false);
+
+    await expect(store.complete({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      reservationToken: firstToken,
+      result: { stale: true },
+    })).rejects.toThrow(/reservation is missing|stale|no longer pending/i);
+
+    await expect(store.fail({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      reservationToken: firstToken,
+      error: { code: "INTERNAL_ERROR", message: "stale owner" },
+    })).rejects.toThrow(/not pending/i);
+
+    await expect(store.renewReservation({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      reservationToken: second.record!.reservationToken!,
+      leaseMs: 30_000,
+    })).resolves.toBe(true);
+
+    await store.complete({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      reservationToken: second.record!.reservationToken!,
+      result: { current: true },
+    });
+    const replay = await store.reserve({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+    });
+    expect(replay.state).toBe("replayed");
+    expect(replay.record?.result).toEqual({ current: true });
+  });
+
   it("rolls back idempotency completion when outbox insertion fails", async () => {
     const operationName = "integration.rollback.v1";
     const idempotencyKey = `rollback-${Date.now()}`;
