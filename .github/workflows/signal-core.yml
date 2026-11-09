@@ -71,6 +71,8 @@ jobs:
 
       - run: pnpm --filter @signal/runtime test
 
+      - run: pnpm --filter @signal/idempotency-postgres test
+
       - run: pnpm --filter @signal/sdk-node test
 
       - run: pnpm --filter @signal/binding-http test
