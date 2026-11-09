@@ -201,7 +201,7 @@ jobs:
       - name: Run complete PostgreSQL adapter test suite
         run: |
           set -o pipefail
-          pnpm --filter @signal/idempotency-postgres test 2>&1 | tee simulation-evidence/postgres-adapter-tests.log
+          pnpm --filter @signal/idempotency-postgres exec vitest run --fileParallelism=false 2>&1 | tee simulation-evidence/postgres-adapter-tests.log
 
       - name: Extended repeatability pass
         if: inputs.profile == 'extended' || github.event_name == 'schedule'
@@ -209,7 +209,7 @@ jobs:
           set -o pipefail
           for pass in 1 2 3; do
             echo "Repeatability pass ${pass}"
-            pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts test/broker-crash.integration.test.ts test/network-fault.integration.test.ts test/trust-boundary.integration.test.ts --reporter=dot
+            pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts test/broker-crash.integration.test.ts test/network-fault.integration.test.ts test/trust-boundary.integration.test.ts --fileParallelism=false --reporter=dot
           done 2>&1 | tee simulation-evidence/repeatability.log
 
       - name: Finalize evidence manifest
