@@ -106,6 +106,30 @@ export type CalibrationResult = {
   metrics?: CalibrationMetrics;
 };
 
+export type CalibrationDriftConfig = CalibrationConfig & {
+  windowCount?: number;
+  minimumWindowSamples?: number;
+  driftTolerance?: number;
+};
+
+export type CalibrationDriftWindow = {
+  startAt: string;
+  endAt: string;
+  sampleSize: number;
+  expectedCalibrationError: number | null;
+  calibrationBias: number | null;
+  status: CalibrationMetrics["status"];
+};
+
+export type CalibrationDriftResult = {
+  status: "stable" | "improving" | "degrading" | "insufficient_data";
+  sampleSize: number;
+  excludedInvalidTimestampCount: number;
+  errorDelta: number | null;
+  windows: CalibrationDriftWindow[];
+  explanation: string[];
+};
+
 export type LearningConfig = {
   highConfidenceThreshold?: number;
   similarSuccessThreshold?: number;
