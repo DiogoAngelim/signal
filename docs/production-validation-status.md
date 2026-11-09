@@ -7,7 +7,8 @@ This document is the release gate for Signal itself. A passing package build or 
 - Retry delay is capped exponential backoff; full jitter is available with an injectable random source.
 - Retry and circuit-breaker configuration is validated.
 - The stateful circuit-breaker controller reserves one half-open probe per process.
-- Audit-chain verification checks contiguous zero-based sequence numbers, linkage, SHA-256 formatting, timestamps, identity fields, and entry hashes.\n- Ed25519 signed audit checkpoints can bind a chain sequence/head hash to a key ID; verification supports an externally managed trusted public key.
+- Audit-chain verification checks contiguous zero-based sequence numbers, linkage, SHA-256 formatting, timestamps, identity fields, and entry hashes.
+- Ed25519 signed audit checkpoints can bind a chain sequence/head hash to a key ID; verification supports an externally managed trusted public key.
 - The runtime public entrypoint exports resilience, audit-chain, and outbox APIs.
 - The PostgreSQL transactional adapter atomically commits an idempotency result with emitted event envelopes in one database transaction.
 - The outbox uses leased claims with `FOR UPDATE SKIP LOCKED`, bounded batches, at-least-once delivery, retry backoff, acknowledgement ownership, and dead-letter state.
