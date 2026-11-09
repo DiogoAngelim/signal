@@ -61,12 +61,11 @@ describe("PostgreSQL transactional storage", () => {
     const statements = mocks.client.query.mock.calls.map(([sql]) =>
       String(sql).trim().split(/\s+/).slice(0, 3).join(" "),
     );
-    expect(statements).toEqual([
-      "BEGIN",
-      "UPDATE signal_idempotency_records",
-      "INSERT INTO signal_outbox",
-      "COMMIT",
-    ]);
+    expect(statements[0]).toBe("BEGIN");
+    expect(statements[1]).toBe("UPDATE signal_idempotency_records SET");
+    expect(statements[2]).toBe("INSERT INTO signal_outbox");
+    expect(statements[3]).toBe("COMMIT");
+    expect(statements).toHaveLength(4);
     expect(mocks.client.release).toHaveBeenCalledTimes(1);
     await store.close();
     expect(mocks.end).toHaveBeenCalledTimes(1);
