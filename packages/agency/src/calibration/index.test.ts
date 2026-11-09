@@ -179,7 +179,7 @@ describe("calibration", () => {
     expect(metrics.sampleSize).toBe(3);
     expect(metrics.brierScore).not.toBeNull();
     expect(metrics.brierScoreInterval).toBeNull();
-    expect(metrics.calibrationBiasInterval).toBeNull();
+    expect(metrics.calibrationBiasInterval).not.toBeNull();
     expect(metrics.calibrationBiasSignificance).toBe("insufficient_data");
   });
 
