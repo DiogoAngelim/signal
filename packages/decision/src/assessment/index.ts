@@ -7,7 +7,9 @@ import type {
   DecisionConfidenceDiscipline,
   DecisionEvidence,
   DecisionEvidenceInput,
+  DecisionEvidenceLineageAssessment,
   DecisionEvidenceQualityAssessment,
+  DecisionEvidenceTemporalAssessment,
   DecisionGovernanceAssessment,
   DecisionJournal,
   DecisionJournalTraceRef,
@@ -26,6 +28,8 @@ import type {
   DecisionThreat,
   DecisionThreatInput,
 } from "../types";
+import { assessEvidenceLineage } from "./lineage";
+import { assessEvidenceTemporalValidity } from "./temporal";
 import {
   asScore,
   average,
@@ -44,6 +48,8 @@ export function assessDecisionEvidence(
 ): DecisionAssessment {
   const createdAt = input.createdAt ?? nowIso();
   const evidence = normalizeEvidence(input.evidence ?? []);
+  const evidenceLineage = assessEvidenceLineage(evidence);
+  const evidenceTemporal = assessEvidenceTemporalValidity(evidence, createdAt);
   const known = normalizeFacts(input.known ?? [], "known", "known");
   const unknowns = normalizeFacts(input.unknowns ?? [], "unknown", "unknown");
   const assumptions = normalizeFacts(
@@ -66,6 +72,8 @@ export function assessDecisionEvidence(
     evidence,
     contradicted,
     referenceTraceability,
+    evidenceLineage,
+    evidenceTemporal,
   );
   const confidence = assessConfidence(
     input.desiredConfidence,
@@ -319,9 +327,18 @@ function normalizeEvidence(
       traceability,
       strength: asScore(value.strength, quality),
       ...(value.source === undefined ? {} : { source: value.source }),
-      ...(value.observedAt === undefined
+      ...(value.sourceRef === undefined
         ? {}
-        : { observedAt: value.observedAt }),
+        : { sourceRef: { ...value.sourceRef } }),
+      ...(value.derivedFromEvidenceIds === undefined
+        ? {}
+        : { derivedFromEvidenceIds: uniqueStrings(value.derivedFromEvidenceIds) }),
+      ...(value.eventAt === undefined ? {} : { eventAt: value.eventAt }),
+      ...(value.observedAt === undefined ? {} : { observedAt: value.observedAt }),
+      ...(value.recordedAt === undefined ? {} : { recordedAt: value.recordedAt }),
+      ...(value.verifiedAt === undefined ? {} : { verifiedAt: value.verifiedAt }),
+      ...(value.validFrom === undefined ? {} : { validFrom: value.validFrom }),
+      ...(value.validUntil === undefined ? {} : { validUntil: value.validUntil }),
       supports: [...(value.supports ?? [])],
       contradicts: [...(value.contradicts ?? [])],
       ...(value.metadata === undefined ? {} : { metadata: value.metadata }),
@@ -363,10 +380,20 @@ function assessEvidenceQuality(
   evidence: readonly DecisionEvidence[],
   contradicted: readonly AssessmentFact[],
   traceability: EvidenceReferenceTraceability,
+  lineage: DecisionEvidenceLineageAssessment,
+  temporal: DecisionEvidenceTemporalAssessment,
 ): DecisionEvidenceQualityAssessment {
   const reliability = averageEvidence(evidence, "reliability");
   const freshness = averageEvidence(evidence, "freshness");
-  const independence = averageEvidence(evidence, "independence");
+  const declaredIndependence = averageEvidence(evidence, "independence");
+  const hasLineageMetadata = evidence.some(
+    (item) =>
+      item.sourceRef !== undefined ||
+      (item.derivedFromEvidenceIds?.length ?? 0) > 0,
+  );
+  const independence = hasLineageMetadata
+    ? Math.min(declaredIndependence, lineage.sourceDiversityScore)
+    : declaredIndependence;
   const replication = averageEvidence(evidence, "replication");
   const calibration = averageEvidence(evidence, "calibration");
   const evidenceTraceabilityScore = averageEvidence(evidence, "traceability");
@@ -403,6 +430,8 @@ function assessEvidenceQuality(
       : "No contradictory evidence was declared.",
     `Traceability is ${Math.round(evidenceTraceabilityScore)}/100.`,
     ...traceability.explanation,
+    ...lineage.explanation,
+    ...temporal.explanation,
   ];
 
   return {
@@ -416,6 +445,9 @@ function assessEvidenceQuality(
     traceability: Math.round(evidenceTraceabilityScore),
     coverage: referenceCoverage,
     missingEvidenceReferences: traceability.missingEvidenceReferences,
+    lineage,
+    temporal,
+    sourceDiversityScore: lineage.sourceDiversityScore,
     explanation,
   };
 }
@@ -555,6 +587,17 @@ function assessGovernance(
     warnings.push(
       `Missing evidence references: ${evidenceQuality.missingEvidenceReferences.join(", ")}.`,
     );
+  }
+  if (evidenceQuality.lineage?.status === "invalid") {
+    blockers.push("Evidence lineage contains duplicate identifiers or cycles.");
+  } else if (evidenceQuality.lineage?.status === "incomplete") {
+    warnings.push("Evidence lineage is incomplete; source independence is not fully established.");
+  }
+  if (evidenceQuality.temporal?.expiredEvidenceIds.length) {
+    warnings.push("Expired evidence is present in the assessment.");
+  }
+  if (evidenceQuality.temporal?.invalidEvidenceIds.length) {
+    blockers.push("Evidence contains invalid temporal metadata.");
   }
   if (evidenceQuality.quality <= 20)
     blockers.push("Evidence quality is too weak to support confident action.");
