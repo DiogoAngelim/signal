@@ -178,7 +178,36 @@ per-prediction calibrated probability. Neither should be presented as a
 validated probability mapping. Empirical calibration claims still require
 representative, independently labeled data and ongoing drift evaluation.
 
-## 7. Cryptographic assurance boundaries
+The `evaluateCalibrationDrift` API compares chronological, equally sized
+windows of completed outcomes. It reports the change in ECE between the first
+and last window, excludes records with invalid timestamps, and returns
+`insufficient_data` until every window meets its configured sample floor.
+This is a descriptive monitoring signal only: it does not establish
+statistical significance, causation, or subgroup fairness. Cohorts should be
+segmented by domain and decision class by the caller before interpreting
+drift; aggregate metrics can conceal subgroup degradation.
+
+## 7. Uncertainty and decision robustness
+
+Decision assessment already distinguishes unknowns, assumptions,
+contradictions, evidence coverage, and confidence caps. Prediction scenarios
+carry explicit uncertainty, and simulation compares expected, worst-case,
+best-case, survival, and regret scores across action variants. These are
+complementary safeguards, not a formal probability distribution over all
+possible outcomes.
+
+The current simulation is a deterministic scenario comparison using
+documented heuristic weights. Its output is not a statistical confidence
+interval, a Monte Carlo estimate, or proof that a recommendation is robust to
+small changes in assumptions. A decision is not robust merely because one
+scenario produces a favorable score. Before describing a recommendation as
+robust, the caller must stress-test plausible ranges for material inputs and
+report whether the selected action changes. When perturbation bounds or
+scenario probabilities are unsupported, Signal must preserve that uncertainty
+rather than manufacture precision.
+
+
+## 8. Cryptographic assurance boundaries
 
 A SHA-256 fingerprint can show whether bytes match a previously recorded
 fingerprint. A hash chain can make changes to linked records detectable when
@@ -197,7 +226,7 @@ appropriate signatures, protected keys, trusted timestamps, access controls,
 or independently retained checkpoints. Documentation must state which
 mechanisms are actually implemented.
 
-## 8. Security, privacy, and adversarial assurance
+## 9. Security, privacy, and adversarial assurance
 
 The security test suite must include malformed and oversized inputs,
 authorization bypass attempts, tenant-boundary tests, replay attacks,
@@ -210,7 +239,7 @@ Retention, deletion, redaction, and audit requirements must be reconciled
 explicitly; immutable audit metadata does not automatically justify retaining
 sensitive source material indefinitely.
 
-## 9. Required validation layers
+## 10. Required validation layers
 
 A release candidate should pass all applicable layers:
 
@@ -227,7 +256,7 @@ A release candidate should pass all applicable layers:
 
 A skipped or unavailable layer must be reported as unvalidated, not passed.
 
-## 10. Release report
+## 11. Release report
 
 Each release report must include:
 
@@ -242,7 +271,7 @@ Each release report must include:
 - explicit distinction between tested, validated, and operationally observed
   guarantees.
 
-## 11. Change discipline
+## 12. Change discipline
 
 Before introducing a new abstraction, dependency, package, schema, or metric:
 
