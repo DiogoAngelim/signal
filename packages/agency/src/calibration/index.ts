@@ -7,8 +7,9 @@ import type {
   CalibrationResult,
 } from "../types";
 
-const DEFAULT_MINIMUM_SAMPLES = 30;
-const DEFAULT_MINIMUM_EVALUATION_SAMPLES = 30;
+const DEFAULT_MINIMUM_SAMPLES = 100;
+const DEFAULT_MINIMUM_EVALUATION_SAMPLES = 100;
+const DEFAULT_MINIMUM_BUCKET_SAMPLES = 10;
 const DEFAULT_BUCKET_COUNT = 10;
 const DEFAULT_ALIGNMENT_TOLERANCE = 0.1;
 const DEFAULT_ADJUSTMENT_RATE = 0.5;
@@ -28,6 +29,10 @@ export function evaluateCalibrationMetrics(
   const minimumEvaluationSamples = positiveInteger(
     config.minimumEvaluationSamples ?? DEFAULT_MINIMUM_EVALUATION_SAMPLES,
     "minimumEvaluationSamples",
+  );
+  const minimumBucketSamples = positiveInteger(
+    config.minimumBucketSamples ?? DEFAULT_MINIMUM_BUCKET_SAMPLES,
+    "minimumBucketSamples",
   );
   const bucketCount = positiveInteger(
     config.bucketCount ?? DEFAULT_BUCKET_COUNT,
@@ -101,8 +106,11 @@ export function evaluateCalibrationMetrics(
     ...reliabilityBuckets.map((bucket) => bucket.absoluteError),
   );
   const calibrationBias = confidenceTotal / sampleSize - outcomeTotal / sampleSize;
+  const hasSparseBuckets = reliabilityBuckets.some(
+    (bucket) => bucket.sampleSize < minimumBucketSamples,
+  );
   const status =
-    sampleSize < minimumEvaluationSamples
+    sampleSize < minimumEvaluationSamples || hasSparseBuckets
       ? "insufficient_data"
       : expectedCalibrationError <= alignmentTolerance
         ? "calibrated"
