@@ -162,7 +162,92 @@ A heuristic score must be named and documented as a score, not presented as a
 probability. Accuracy alone is insufficient when abstention, class imbalance,
 or asymmetric error costs matter.
 
-## 7. Cryptographic assurance boundaries
+
+### Calibration evaluation
+
+The `@signal/agency` calibration evaluator reports Brier score, expected
+calibration error (ECE), maximum calibration error, signed calibration bias,
+and confidence-bucket reliability data. The default evaluation minimum is 100
+completed labeled outcomes and at least 10 samples in each populated bucket;
+below either threshold, the status remains `insufficient_data`, even though
+descriptive metrics may be calculated.
+
+The legacy `calibrationError` field is signed cohort-level confidence bias,
+not ECE. `calibratedConfidence` is a cohort-level adjustment, not a
+per-prediction calibrated probability. Neither should be presented as a
+validated probability mapping. Empirical calibration claims still require
+representative, independently labeled data and ongoing drift evaluation.
+
+The `evaluateCalibrationDrift` API compares chronological, equally sized
+windows of completed outcomes. It reports the change in ECE between the first
+and last window, excludes records with invalid timestamps, and returns
+`insufficient_data` until every window meets its configured sample floor.
+This is a descriptive monitoring signal only: it does not establish
+statistical significance, causation, or subgroup fairness. Cohorts should be
+segmented by domain and decision class by the caller before interpreting
+drift; aggregate metrics can conceal subgroup degradation.
+
+## 7. Uncertainty and decision robustness
+
+Decision assessment already distinguishes unknowns, assumptions,
+contradictions, evidence coverage, and confidence caps. Prediction scenarios
+carry explicit uncertainty, and simulation applies a bounded heuristic
+uncertainty penalty to action scores while comparing expected, worst-case,
+best-case, survival, and regret scores across action variants. These are
+complementary safeguards, not a formal probability distribution over all
+possible outcomes or a variance decomposition.
+
+The current simulation is a deterministic scenario comparison using
+documented heuristic weights. Its output is not a statistical confidence
+interval, a Monte Carlo estimate, or proof that a recommendation is robust to
+small changes in assumptions. A decision is not robust merely because one
+scenario produces a favorable score. Before describing a recommendation as
+robust, the caller must stress-test plausible ranges for material inputs and
+report whether the selected action changes. When perturbation bounds or
+scenario probabilities are unsupported, Signal must preserve that uncertainty
+rather than manufacture precision.
+
+Simulation inputs are validated before scoring: scenario probabilities must be
+finite, bounded, and have a positive total; scenario score dimensions and
+current exposure must be within 0–100; scenario count is capped at 1,000 and
+action variants at 100. These bounds limit accidental or hostile resource
+amplification. They do not replace request-size limits at the transport layer.
+Scenario probabilities are caller-supplied weights and are normalized for
+comparison; they are not made empirically valid by normalization.
+
+The `evaluateDecisionRobustness` API adds a deterministic one-factor
+sensitivity screen. It perturbs seven scenario dimensions (reward, risk,
+downside, uncertainty, purpose alignment, need alignment, and confidence) up
+and down by a configured number of points, reruns the same path comparison,
+and reports the fraction of perturbations that preserve both the selected action variant and recommendation.
+The default perturbation is five points and the default stability threshold is
+80%. This is a bounded diagnostic, not an exhaustive multivariate search; it
+does not test interactions between factors or changes outside the specified
+range. Its status must be reported as `robust` only relative to the tested
+perturbations and threshold.
+
+## 8. Reproducibility and operational reliability
+
+Decision records can retain the decision-time reality snapshot, assessment,
+scenario set, simulation result, coherence assessment, timestamps, and
+version metadata. Replay comparison can identify changes in action permission,
+scale, score, and status. Canonical serialization and fingerprints support
+stable identity and integrity checks when every participant uses the same
+versioned contract.
+
+Replay comparison is not, by itself, a complete deterministic re-execution of
+every historical dependency. The in-memory decision record store is
+process-local and is not a durable production store. Durable retention,
+transactional consistency, backup/restore, access control, and operational
+telemetry must be validated against the concrete storage and runtime adapter.
+Signal's package CI verifies builds, tests, architecture, package entrypoints,
+and consumer installation; it does not establish production latency,
+availability, recovery objectives, or resource limits. Those operational
+claims require environment-specific integration and load tests.
+
+
+
+## 9. Cryptographic assurance boundaries
 
 A SHA-256 fingerprint can show whether bytes match a previously recorded
 fingerprint. A hash chain can make changes to linked records detectable when
@@ -181,7 +266,7 @@ appropriate signatures, protected keys, trusted timestamps, access controls,
 or independently retained checkpoints. Documentation must state which
 mechanisms are actually implemented.
 
-## 8. Security, privacy, and adversarial assurance
+## 10. Security, privacy, and adversarial assurance
 
 The security test suite must include malformed and oversized inputs,
 authorization bypass attempts, tenant-boundary tests, replay attacks,
@@ -194,7 +279,7 @@ Retention, deletion, redaction, and audit requirements must be reconciled
 explicitly; immutable audit metadata does not automatically justify retaining
 sensitive source material indefinitely.
 
-## 9. Required validation layers
+## 11. Required validation layers
 
 A release candidate should pass all applicable layers:
 
@@ -211,7 +296,7 @@ A release candidate should pass all applicable layers:
 
 A skipped or unavailable layer must be reported as unvalidated, not passed.
 
-## 10. Release report
+## 12. Release report
 
 Each release report must include:
 
@@ -226,7 +311,7 @@ Each release report must include:
 - explicit distinction between tested, validated, and operationally observed
   guarantees.
 
-## 11. Change discipline
+## 13. Change discipline
 
 Before introducing a new abstraction, dependency, package, schema, or metric:
 

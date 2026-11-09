@@ -641,6 +641,38 @@ export type SimulationInput = {
   currentExposure?: number;
 };
 
+export type DecisionRobustnessFactor =
+  | "expectedReward"
+  | "expectedRisk"
+  | "downsideRisk"
+  | "uncertainty"
+  | "purposeAlignment"
+  | "needAlignment"
+  | "confidence";
+
+export type DecisionRobustnessConfig = {
+  perturbationPoints?: number;
+  minimumStability?: number;
+};
+
+export type DecisionRobustnessCase = {
+  factor: DecisionRobustnessFactor;
+  direction: "lower" | "higher";
+  actionVariant: string;
+  recommendedAction: SimulationRecommendation;
+  changed: boolean;
+};
+
+export type DecisionRobustnessResult = {
+  status: "robust" | "sensitive" | "insufficient_data";
+  baselineRecommendation: SimulationRecommendation;
+  baselineActionVariant: string;
+  perturbationPoints: number;
+  stabilityRate: number | null;
+  perturbations: DecisionRobustnessCase[];
+  explanation: string[];
+};
+
 export interface WisdomAssessment {
   score: number;
   irreversibleRisk: number;

@@ -48,7 +48,7 @@ export {
   createRealitySnapshot,
   createRealitySnapshotForDecision,
 } from "./reality";
-export { simulateDecisionPaths } from "./simulation";
+export { evaluateDecisionRobustness, simulateDecisionPaths } from "./simulation";
 export {
   assessStewardship,
   consumeStewardshipMemory,
@@ -102,6 +102,10 @@ export type {
   CoherenceConflictSeverity,
   CoherenceStatus,
   DecisionAssessment,
+  DecisionRobustnessCase,
+  DecisionRobustnessConfig,
+  DecisionRobustnessFactor,
+  DecisionRobustnessResult,
   DecisionAssessmentInput,
   DecisionConfidenceDiscipline,
   DecisionEvidence,

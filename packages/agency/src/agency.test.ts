@@ -68,9 +68,12 @@ describe("agency pipeline", () => {
     });
     expect(trace.learning).toEqual({
       learnedPatterns: [],
-      confidenceAdjustment: 0.05,
+      confidenceAdjustment: 0,
       policySuggestions: [],
     });
+    expect(pipeline.evaluateAgencyState().calibration.reliability).toBe(
+      "insufficient_data",
+    );
     expect(trace.selfDiagnosis.recommendation).toBe("act");
     expect(pipeline.memory.list()).toEqual([trace]);
     expect(pipeline.memory.causalChain("trace-1")).toEqual({

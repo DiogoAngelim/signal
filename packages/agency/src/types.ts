@@ -72,8 +72,30 @@ export type CalibrationReliability =
 
 export type CalibrationConfig = {
   minimumSamples?: number;
+  minimumEvaluationSamples?: number;
+  minimumBucketSamples?: number;
+  bucketCount?: number;
   alignmentTolerance?: number;
   adjustmentRate?: number;
+};
+
+export type CalibrationBucket = {
+  lowerBound: number;
+  upperBound: number;
+  sampleSize: number;
+  meanConfidence: number;
+  observedRate: number;
+  absoluteError: number;
+};
+
+export type CalibrationMetrics = {
+  sampleSize: number;
+  brierScore: number | null;
+  expectedCalibrationError: number | null;
+  maximumCalibrationError: number | null;
+  calibrationBias: number | null;
+  status: "calibrated" | "miscalibrated" | "insufficient_data";
+  reliabilityBuckets: CalibrationBucket[];
 };
 
 export type CalibrationResult = {
@@ -81,6 +103,31 @@ export type CalibrationResult = {
   calibrationError: number;
   reliability: CalibrationReliability;
   sampleSize: number;
+  metrics?: CalibrationMetrics;
+};
+
+export type CalibrationDriftConfig = CalibrationConfig & {
+  windowCount?: number;
+  minimumWindowSamples?: number;
+  driftTolerance?: number;
+};
+
+export type CalibrationDriftWindow = {
+  startAt: string;
+  endAt: string;
+  sampleSize: number;
+  expectedCalibrationError: number | null;
+  calibrationBias: number | null;
+  status: CalibrationMetrics["status"];
+};
+
+export type CalibrationDriftResult = {
+  status: "stable" | "improving" | "degrading" | "insufficient_data";
+  sampleSize: number;
+  excludedInvalidTimestampCount: number;
+  errorDelta: number | null;
+  windows: CalibrationDriftWindow[];
+  explanation: string[];
 };
 
 export type LearningConfig = {

@@ -1,6 +1,9 @@
 import type {
   PredictionScenario,
   SimulationInput,
+  DecisionRobustnessConfig,
+  DecisionRobustnessFactor,
+  DecisionRobustnessResult,
   SimulationPathResult,
   SimulationRecommendation,
   SimulationResult,
@@ -14,9 +17,23 @@ const DEFAULT_VARIANTS = [
   "block action",
 ];
 
+const MAX_SCENARIOS = 1_000;
+const MAX_ACTION_VARIANTS = 100;
+
+const ROBUSTNESS_FACTORS: readonly DecisionRobustnessFactor[] = [
+  "expectedReward",
+  "expectedRisk",
+  "downsideRisk",
+  "uncertainty",
+  "purposeAlignment",
+  "needAlignment",
+  "confidence",
+];
+
 export function simulateDecisionPaths(
   input: SimulationInput,
 ): SimulationResult {
+  validateSimulationInput(input);
   const scenarios = input.scenarios.length ? input.scenarios : [];
   const variants = input.actionVariants?.length
     ? input.actionVariants
@@ -48,6 +65,136 @@ export function simulateDecisionPaths(
   };
 }
 
+
+export function evaluateDecisionRobustness(
+  input: SimulationInput,
+  config: DecisionRobustnessConfig = {},
+): DecisionRobustnessResult {
+  const perturbationPoints = config.perturbationPoints ?? 5;
+  const minimumStability = config.minimumStability ?? 0.8;
+  if (
+    !Number.isFinite(perturbationPoints) ||
+    perturbationPoints <= 0 ||
+    perturbationPoints > 100
+  ) {
+    throw new Error("perturbationPoints must be greater than 0 and at most 100.");
+  }
+  if (
+    !Number.isFinite(minimumStability) ||
+    minimumStability < 0 ||
+    minimumStability > 1
+  ) {
+    throw new Error("minimumStability must be between 0 and 1.");
+  }
+
+  const baseline = simulateDecisionPaths(input);
+  const baselineRecommendation = baseline.recommendedAction;
+  if (input.scenarios.length === 0) {
+    return {
+      status: "insufficient_data",
+      baselineRecommendation,
+      baselineActionVariant: baseline.actionVariant,
+      perturbationPoints,
+      stabilityRate: null,
+      perturbations: [],
+      explanation: ["No scenarios were supplied; robustness cannot be evaluated."],
+    };
+  }
+
+  const perturbations = ROBUSTNESS_FACTORS.flatMap((factor) =>
+    (["lower", "higher"] as const).map((direction) => {
+      const delta = direction === "higher" ? perturbationPoints : -perturbationPoints;
+      const scenarios = input.scenarios.map((scenario) => ({
+        ...scenario,
+        [factor]: clamp(scenario[factor] + delta),
+      }));
+      const perturbed = simulateDecisionPaths({
+        ...input,
+        scenarios,
+      });
+      return {
+        factor,
+        direction,
+        actionVariant: perturbed.actionVariant,
+        recommendedAction: perturbed.recommendedAction,
+        changed:
+          perturbed.actionVariant !== baseline.actionVariant ||
+          perturbed.recommendedAction !== baselineRecommendation,
+      };
+    }),
+  );
+  const stableCount = perturbations.filter((item) => !item.changed).length;
+  const stabilityRate = stableCount / perturbations.length;
+  const status = stabilityRate >= minimumStability ? "robust" : "sensitive";
+
+  return {
+    status,
+    baselineRecommendation,
+    baselineActionVariant: baseline.actionVariant,
+    perturbationPoints,
+    stabilityRate: Math.round(stabilityRate * 1_000_000) / 1_000_000,
+    perturbations,
+    explanation: [
+      `The recommendation remained unchanged in ${stableCount} of ${perturbations.length} one-factor perturbations.`,
+      "This deterministic sensitivity screen tests the configured perturbation size; it is not a probability, confidence interval, exhaustive search, or guarantee outside the tested range.",
+    ],
+  };
+}
+
+
+function validateSimulationInput(input: SimulationInput): void {
+  if (input.scenarios.length > MAX_SCENARIOS) {
+    throw new Error(`scenarios must not exceed ${MAX_SCENARIOS}.`);
+  }
+  if ((input.actionVariants?.length ?? 0) > MAX_ACTION_VARIANTS) {
+    throw new Error(`actionVariants must not exceed ${MAX_ACTION_VARIANTS}.`);
+  }
+  if (
+    input.currentExposure !== undefined &&
+    (!Number.isFinite(input.currentExposure) ||
+      input.currentExposure < 0 ||
+      input.currentExposure > 100)
+  ) {
+    throw new Error("currentExposure must be between 0 and 100.");
+  }
+  if (
+    input.actionVariants?.some(
+      (variant) => typeof variant !== "string" || !variant.trim(),
+    )
+  ) {
+    throw new Error("actionVariants must contain non-empty strings.");
+  }
+
+  let totalProbability = 0;
+  for (const scenario of input.scenarios) {
+    if (
+      !Number.isFinite(scenario.probability) ||
+      scenario.probability < 0 ||
+      scenario.probability > 1
+    ) {
+      throw new Error("scenario probabilities must be between 0 and 1.");
+    }
+    totalProbability += scenario.probability;
+    for (const field of [
+      "expectedReward",
+      "expectedRisk",
+      "downsideRisk",
+      "uncertainty",
+      "purposeAlignment",
+      "needAlignment",
+      "confidence",
+    ] as const) {
+      const value = scenario[field];
+      if (!Number.isFinite(value) || value < 0 || value > 100) {
+        throw new Error(`scenario ${field} must be between 0 and 100.`);
+      }
+    }
+  }
+  if (input.scenarios.length > 0 && totalProbability <= 0) {
+    throw new Error("scenario probabilities must have a positive total.");
+  }
+}
+
 function comparePath(
   actionVariant: string,
   scenarios: readonly PredictionScenario[],
@@ -64,7 +211,8 @@ function comparePath(
         alignment * 0.28 +
         (100 - risk) * 0.2 +
         scenario.confidence * 0.14 -
-        downside * 0.12,
+        downside * 0.12 -
+        scenario.uncertainty * 0.1 * exposureMultiplier,
     );
     return {
       probability: scenario.probability,
