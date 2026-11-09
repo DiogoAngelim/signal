@@ -73,6 +73,7 @@ export type CalibrationReliability =
 export type CalibrationConfig = {
   minimumSamples?: number;
   minimumEvaluationSamples?: number;
+  minimumBucketSamples?: number;
   bucketCount?: number;
   alignmentTolerance?: number;
   adjustmentRate?: number;
