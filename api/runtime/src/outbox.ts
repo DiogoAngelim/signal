@@ -56,6 +56,7 @@ export async function dispatchOutboxBatch(
       const acknowledged = await outbox.acknowledge({
         id: record.id,
         workerId,
+        leaseToken: record.leaseToken,
       });
       if (acknowledged) result.delivered += 1;
       else result.leaseLost += 1;
@@ -65,6 +66,7 @@ export async function dispatchOutboxBatch(
       const retry = await outbox.retry({
         id: record.id,
         workerId,
+        leaseToken: record.leaseToken,
         availableAt: new Date(now() + delayMs).toISOString(),
         error: error instanceof Error ? error.message : String(error),
         maxAttempts,
@@ -96,6 +98,7 @@ export function isOutboxRecord(value: unknown): value is OutboxRecord {
     typeof candidate.id === "string" &&
     typeof candidate.attempts === "number" &&
     typeof candidate.createdAt === "string" &&
+    typeof candidate.leaseToken === "string" &&
     !!candidate.envelope &&
     typeof candidate.envelope.messageId === "string"
   );
