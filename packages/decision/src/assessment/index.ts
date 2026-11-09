@@ -306,7 +306,10 @@ function normalizeEvidence(
 ): DecisionEvidence[] {
   return values.map((value, index) => {
     const quality = asScore(value.quality, 50);
-    const reliability = asScore(value.reliability, quality);
+    const reliability = asScore(
+      value.reliability,
+      asScore(value.sourceRef?.reliabilityScore, quality),
+    );
     const freshness = asScore(value.freshness, quality);
     const independence = asScore(value.independence, quality);
     const replication = asScore(value.replication, quality);
@@ -329,7 +332,12 @@ function normalizeEvidence(
       ...(value.source === undefined ? {} : { source: value.source }),
       ...(value.sourceRef === undefined
         ? {}
-        : { sourceRef: { ...value.sourceRef } }),
+        : {
+            sourceRef: {
+              ...value.sourceRef,
+              sourceId: value.sourceRef.sourceId.trim(),
+            },
+          }),
       ...(value.derivedFromEvidenceIds === undefined
         ? {}
         : { derivedFromEvidenceIds: uniqueStrings(value.derivedFromEvidenceIds) }),
