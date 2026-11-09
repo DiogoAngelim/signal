@@ -13,3 +13,5 @@ export * from "./registry";
 export * from "./resilience";
 export * from "./runtime";
 export * from "./types";
+
+export * from "./audit-checkpoint";
