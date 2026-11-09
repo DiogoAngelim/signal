@@ -22,6 +22,8 @@ export function createMemoryIdempotencyStore(): StoragePort &
   TransactionalStoragePort &
   OutboxPort {
   const records = new Map<string, IdempotencyRecord>();
+  let reservationSequence = 0;
+  const nextReservationToken = () => `memory-reservation-${++reservationSequence}`;
   const outbox = new Map<string, MemoryOutboxItem>();
 
   const keyFor = (operationName: string, idempotencyKey: string) =>
@@ -74,7 +76,7 @@ export function createMemoryIdempotencyStore(): StoragePort &
         if (existing.payloadFingerprint !== input.payloadFingerprint) return { state: "conflict", record: existing };
         if (existing.status === "pending") {
           if (!existing.reservationExpiresAt || Date.parse(existing.reservationExpiresAt) <= Date.now()) {
-            existing.reservationToken = randomUUID();
+            existing.reservationToken = nextReservationToken();
             existing.reservationExpiresAt = new Date(Date.now() + leaseMs).toISOString();
             existing.updatedAt = new Date().toISOString();
             return { state: "reserved", record: existing };
@@ -91,7 +93,7 @@ export function createMemoryIdempotencyStore(): StoragePort &
         status: "pending",
         createdAt: now,
         updatedAt: now,
-        reservationToken: randomUUID(),
+        reservationToken: nextReservationToken(),
         reservationExpiresAt: new Date(Date.now() + leaseMs).toISOString(),
       };
       records.set(key, record);
