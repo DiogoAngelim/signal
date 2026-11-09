@@ -102,8 +102,9 @@ integration("broker and consumer crash-boundary simulation", () => {
     );
 
     const secondWorkerId = `worker-after-restart-${suffix}`;
-    const secondClaim = await store.claimBatch({ workerId: secondWorkerId, limit: 1, leaseMs: 30_000 });
-    expect(secondClaim.map((item) => item.envelope.messageId)).toContain(messageId);
+    const secondClaim = await store.claimBatch({ workerId: secondWorkerId, limit: 10, leaseMs: 30_000 });
+    const recovered = secondClaim.find((item) => item.envelope.messageId === messageId);
+    expect(recovered).toBeDefined();
     // Recovery republishes because the first worker cannot know whether publish succeeded.
     expect(await publish()).toMatchObject({ routed: true });
 
@@ -146,8 +147,8 @@ integration("broker and consumer crash-boundary simulation", () => {
       [messageId],
     )).rows[0].count).toBe(1);
 
-    expect(await store.acknowledge({ id: event!.id, workerId: firstClaim[0].id === event!.id ? `worker-before-crash-${suffix}` : "wrong-worker" })).toBe(false);
-    expect(await store.acknowledge({ id: secondClaim[0].id, workerId: secondWorkerId })).toBe(true);
+    expect(await store.acknowledge({ id: event!.id, workerId: `worker-before-crash-${suffix}` })).toBe(false);
+    expect(await store.acknowledge({ id: recovered!.id, workerId: secondWorkerId })).toBe(true);
   });
 
   it("does not acknowledge an outbox event when broker publication fails", async () => {
