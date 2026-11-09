@@ -1,3 +1,4 @@
+export * from "./audit-chain";
 export * from "./capabilities";
 export * from "./dispatcher";
 export * from "./execution";
