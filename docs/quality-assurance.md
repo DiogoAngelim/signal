@@ -206,6 +206,14 @@ report whether the selected action changes. When perturbation bounds or
 scenario probabilities are unsupported, Signal must preserve that uncertainty
 rather than manufacture precision.
 
+Simulation inputs are validated before scoring: scenario probabilities must be
+finite, bounded, and have a positive total; scenario score dimensions and
+current exposure must be within 0–100; scenario count is capped at 1,000 and
+action variants at 100. These bounds limit accidental or hostile resource
+amplification. They do not replace request-size limits at the transport layer.
+Scenario probabilities are caller-supplied weights and are normalized for
+comparison; they are not made empirically valid by normalization.
+
 The `evaluateDecisionRobustness` API adds a deterministic one-factor
 sensitivity screen. It perturbs seven scenario dimensions (reward, risk,
 downside, uncertainty, purpose alignment, need alignment, and confidence) up
