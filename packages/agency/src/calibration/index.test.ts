@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calibrateConfidence } from ".";
+import { calibrateConfidence, evaluateCalibrationMetrics } from ".";
 import type { AgencyTrace } from "../types";
 
 function trace(confidence: number, success: boolean | null): AgencyTrace {
@@ -91,6 +91,84 @@ describe("calibration", () => {
       calibrationError: -0.1,
       reliability: "aligned",
     });
+  });
+
+
+  it("reports Brier score and calibration error across confidence buckets", () => {
+    const perfectlyCalibrated = [
+      ...Array.from({ length: 3 }, () => trace(0.2, true)),
+      ...Array.from({ length: 12 }, () => trace(0.2, false)),
+      ...Array.from({ length: 12 }, () => trace(0.8, true)),
+      ...Array.from({ length: 3 }, () => trace(0.8, false)),
+    ];
+    const metrics = evaluateCalibrationMetrics(perfectlyCalibrated);
+
+    expect(metrics).toMatchObject({
+      sampleSize: 30,
+      brierScore: 0.16,
+      expectedCalibrationError: 0,
+      maximumCalibrationError: 0,
+      calibrationBias: 0,
+      status: "calibrated",
+    });
+    expect(metrics.reliabilityBuckets).toHaveLength(2);
+  });
+
+  it("detects bin-level miscalibration that a global bias can conceal", () => {
+    const overconfident = Array.from({ length: 30 }, (_, index) =>
+      trace(0.9, index < 15),
+    );
+    const metrics = evaluateCalibrationMetrics(overconfident);
+
+    expect(metrics).toMatchObject({
+      sampleSize: 30,
+      brierScore: 0.41,
+      expectedCalibrationError: 0.4,
+      maximumCalibrationError: 0.4,
+      calibrationBias: 0.4,
+      status: "miscalibrated",
+    });
+  });
+
+  it("keeps evaluation status insufficient until the minimum sample size is met", () => {
+    const metrics = evaluateCalibrationMetrics([
+      trace(0.9, true),
+      trace(0.8, false),
+      trace(0.7, true),
+    ]);
+
+    expect(metrics.status).toBe("insufficient_data");
+    expect(metrics.sampleSize).toBe(3);
+    expect(metrics.brierScore).not.toBeNull();
+  });
+
+  it("returns null metrics when there are no completed outcomes", () => {
+    expect(evaluateCalibrationMetrics([trace(0.9, null)])).toMatchObject({
+      sampleSize: 0,
+      brierScore: null,
+      expectedCalibrationError: null,
+      maximumCalibrationError: null,
+      calibrationBias: null,
+      status: "insufficient_data",
+      reliabilityBuckets: [],
+    });
+  });
+
+  it("places confidence 1 in the final bucket and bounds bucket count", () => {
+    const metrics = evaluateCalibrationMetrics(
+      Array.from({ length: 30 }, () => trace(1, true)),
+    );
+
+    expect(metrics.reliabilityBuckets).toHaveLength(1);
+    expect(metrics.reliabilityBuckets[0]).toMatchObject({
+      lowerBound: 0.9,
+      upperBound: 1,
+      meanConfidence: 1,
+      observedRate: 1,
+    });
+    expect(() =>
+      evaluateCalibrationMetrics([trace(0.5, true)], { bucketCount: 101 }),
+    ).toThrow("bucketCount must not exceed 100.");
   });
 
   it("honors calibration configuration and validates invalid values", () => {
