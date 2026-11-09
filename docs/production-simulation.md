@@ -11,7 +11,7 @@ It is deliberately not a production deployment. The user-requested scope exclude
 - No SLO, capacity, RTO, RPO, exactly-once delivery, cloud immutability, or regulatory-compliance claim may be inferred from this workflow.
 - Simulation-only credentials and ephemeral signing keys are never production secrets.
 
-The workflow runs on relevant pull requests, pushes to `main` and `codex/**`, a weekly schedule, and manual dispatch. The `extended` profile and scheduled runs repeat the PostgreSQL integration suite three times. All evidence is tied to the exact source SHA and GitHub Actions run identity.
+The workflow runs on relevant pull requests, pushes to `main` and `codex/**`, a weekly schedule, and manual dispatch. The `extended` profile and scheduled runs repeat the PostgreSQL, broker, network-fault, and trust-boundary integration scenarios three times. All evidence is tied to the exact source SHA and GitHub Actions run identity.
 
 ## Implemented and exercised assurance gates
 
@@ -47,7 +47,7 @@ The migration `0002_outbox_lease_fencing.sql` adds the token and a database cons
 
 - Open **Actions → Signal production simulation → Run workflow**.
 - Choose `standard` for the complete default suite.
-- Choose `extended` for three additional PostgreSQL repeatability passes.
+- Choose `extended` for three additional infrastructure repeatability passes.
 - Scheduled weekly runs also execute the repeatability passes.
 
 Local PostgreSQL integration:
