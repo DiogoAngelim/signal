@@ -167,9 +167,10 @@ or asymmetric error costs matter.
 
 The `@signal/agency` calibration evaluator reports Brier score, expected
 calibration error (ECE), maximum calibration error, signed calibration bias,
-and confidence-bucket reliability data. The default evaluation minimum is 30
-completed labeled outcomes; below that threshold, the status remains
-`insufficient_data`, even though descriptive metrics may be calculated.
+and confidence-bucket reliability data. The default evaluation minimum is 100
+completed labeled outcomes and at least 10 samples in each populated bucket;
+below either threshold, the status remains `insufficient_data`, even though
+descriptive metrics may be calculated.
 
 The legacy `calibrationError` field is signed cohort-level confidence bias,
 not ECE. `calibratedConfidence` is a cohort-level adjustment, not a
