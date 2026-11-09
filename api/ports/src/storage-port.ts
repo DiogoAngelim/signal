@@ -22,6 +22,8 @@ export interface IdempotencyRecord {
   createdAt: string;
   updatedAt: string;
   messageId?: string;
+  reservationToken?: string;
+  reservationExpiresAt?: string;
 }
 
 export interface IdempotencyReservation {
@@ -33,6 +35,7 @@ export interface CompleteMutationInput {
   operationName: string;
   idempotencyKey: string;
   payloadFingerprint: string;
+  reservationToken: string;
   result: unknown;
   resultMeta?: SignalResultMeta;
   messageId?: string;
@@ -97,12 +100,21 @@ export interface StoragePort {
     operationName: string;
     idempotencyKey: string;
     payloadFingerprint: string;
+    leaseMs?: number;
   }): Promise<IdempotencyReservation>;
+  renewReservation(input: {
+    operationName: string;
+    idempotencyKey: string;
+    payloadFingerprint: string;
+    reservationToken: string;
+    leaseMs: number;
+  }): Promise<boolean>;
   complete(input: CompleteMutationInput): Promise<void>;
   fail(input: {
     operationName: string;
     idempotencyKey: string;
     payloadFingerprint: string;
+    reservationToken: string;
     error: SignalErrorEnvelope;
   }): Promise<void>;
 }
