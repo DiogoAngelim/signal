@@ -162,6 +162,21 @@ A heuristic score must be named and documented as a score, not presented as a
 probability. Accuracy alone is insufficient when abstention, class imbalance,
 or asymmetric error costs matter.
 
+
+### Calibration evaluation
+
+The `@signal/agency` calibration evaluator reports Brier score, expected
+calibration error (ECE), maximum calibration error, signed calibration bias,
+and confidence-bucket reliability data. The default evaluation minimum is 30
+completed labeled outcomes; below that threshold, the status remains
+`insufficient_data`, even though descriptive metrics may be calculated.
+
+The legacy `calibrationError` field is signed cohort-level confidence bias,
+not ECE. `calibratedConfidence` is a cohort-level adjustment, not a
+per-prediction calibrated probability. Neither should be presented as a
+validated probability mapping. Empirical calibration claims still require
+representative, independently labeled data and ongoing drift evaluation.
+
 ## 7. Cryptographic assurance boundaries
 
 A SHA-256 fingerprint can show whether bytes match a previously recorded
