@@ -211,7 +211,8 @@ function comparePath(
         alignment * 0.28 +
         (100 - risk) * 0.2 +
         scenario.confidence * 0.14 -
-        downside * 0.12,
+        downside * 0.12 -
+        scenario.uncertainty * 0.1 * exposureMultiplier,
     );
     return {
       probability: scenario.probability,
