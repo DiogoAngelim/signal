@@ -148,6 +148,11 @@ jobs:
           set -o pipefail
           pnpm --filter @signal/idempotency-postgres exec vitest run test/broker-crash.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/broker-crash-integration.log
 
+      - name: Run distributed coordination and audit trust-boundary simulations
+        run: |
+          set -o pipefail
+          pnpm --filter @signal/idempotency-postgres exec vitest run test/trust-boundary.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/trust-boundary-integration.log
+
       - name: Simulate PostgreSQL crash recovery, backup restore, and load
         run: |
           set -euo pipefail
@@ -224,6 +229,7 @@ jobs:
             'postgres-crash-recovery.log',
             'postgres-backup-restore.log',
             'postgres-load-smoke.log',
+            'trust-boundary-integration.log',
             'repeatability.log'
           ].filter((name) => existsSync(`simulation-evidence/${name}`));
           writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n');
