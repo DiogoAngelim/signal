@@ -33,7 +33,11 @@ export function evaluateCalibrationMetrics(
   history: readonly AgencyTrace[],
   config: CalibrationConfig = {},
 ): CalibrationMetrics {
-  const samples = calibrationSamples(history);
+  const selection = selectUniqueCompletedTraces(history);
+  const samples = selection.traces.map((trace) => ({
+    confidence: unitValue(trace.decision.confidence),
+    outcome: trace.outcome?.success === true ? 1 as const : 0 as const,
+  }));
   const sampleSize = samples.length;
   const minimumEvaluationSamples = positiveInteger(
     config.minimumEvaluationSamples ?? DEFAULT_MINIMUM_EVALUATION_SAMPLES,
@@ -57,6 +61,12 @@ export function evaluateCalibrationMetrics(
   if (sampleSize === 0) {
     return {
       sampleSize: 0,
+      ...(selection.excludedDuplicateTraceCount > 0
+        ? { excludedDuplicateTraceCount: selection.excludedDuplicateTraceCount }
+        : {}),
+      ...(selection.excludedMissingTraceIdCount > 0
+        ? { excludedMissingTraceIdCount: selection.excludedMissingTraceIdCount }
+        : {}),
       brierScore: null,
       brierScoreInterval: null,
       expectedCalibrationError: null,
@@ -155,6 +165,12 @@ export function evaluateCalibrationMetrics(
 
   return {
     sampleSize,
+    ...(selection.excludedDuplicateTraceCount > 0
+      ? { excludedDuplicateTraceCount: selection.excludedDuplicateTraceCount }
+      : {}),
+    ...(selection.excludedMissingTraceIdCount > 0
+      ? { excludedMissingTraceIdCount: selection.excludedMissingTraceIdCount }
+      : {}),
     brierScore,
     brierScoreInterval,
     expectedCalibrationError: round(expectedCalibrationError),
@@ -192,9 +208,22 @@ export function evaluateCalibrationDrift(
   const driftTolerance = unitValue(
     config.driftTolerance ?? DEFAULT_DRIFT_TOLERANCE,
   );
-  const completed = history.filter(
-    (trace) => typeof trace.outcome?.success === "boolean",
+  const bootstrapIterations = positiveInteger(
+    config.bootstrapIterations ?? 1000,
+    "bootstrapIterations",
   );
+  if (bootstrapIterations > 10_000) {
+    throw new Error("bootstrapIterations must not exceed 10000.");
+  }
+  const bootstrapBlockSize = config.bootstrapBlockSize === undefined
+    ? undefined
+    : positiveInteger(config.bootstrapBlockSize, "bootstrapBlockSize");
+  const bootstrapSeed = config.bootstrapSeed ?? 20261109;
+  if (!Number.isSafeInteger(bootstrapSeed) || bootstrapSeed < 0) {
+    throw new Error("bootstrapSeed must be a non-negative safe integer.");
+  }
+  const selection = selectUniqueCompletedTraces(history);
+  const completed = selection.traces;
   const timestamped = completed
     .map((trace) => ({ trace, timestamp: Date.parse(trace.timestamp) }))
     .filter((entry) => Number.isFinite(entry.timestamp))
@@ -207,7 +236,16 @@ export function evaluateCalibrationDrift(
       status: "insufficient_data",
       sampleSize,
       excludedInvalidTimestampCount,
+      ...(selection.excludedDuplicateTraceCount > 0
+        ? { excludedDuplicateTraceCount: selection.excludedDuplicateTraceCount }
+        : {}),
+      ...(selection.excludedMissingTraceIdCount > 0
+        ? { excludedMissingTraceIdCount: selection.excludedMissingTraceIdCount }
+        : {}),
       errorDelta: null,
+      brierScoreDelta: null,
+      brierScoreDeltaInterval: null,
+      inferentialStatus: "insufficient_data",
       windows: [],
       explanation: [
         `At least ${windowCount * minimumWindowSamples} timestamped completed outcomes are required.`,
@@ -249,6 +287,9 @@ export function evaluateCalibrationDrift(
       sampleSize,
       excludedInvalidTimestampCount,
       errorDelta: null,
+      brierScoreDelta: null,
+      brierScoreDeltaInterval: null,
+      inferentialStatus: "insufficient_data",
       windows,
       explanation: [
         "Every time window must meet its evaluation and bucket sample thresholds before drift is classified.",
@@ -266,15 +307,49 @@ export function evaluateCalibrationDrift(
         ? "improving"
         : "stable";
 
+  const firstEntries = timestamped.slice(0, baseWindowSize);
+  const lastEntries = timestamped.slice((windowCount - 1) * baseWindowSize);
+  const firstLosses = firstEntries.map(({ trace }) => brierLoss(trace));
+  const lastLosses = lastEntries.map(({ trace }) => brierLoss(trace));
+  const blockSize = bootstrapBlockSize ??
+    Math.max(1, Math.floor(Math.sqrt(Math.min(firstLosses.length, lastLosses.length))));
+  if (blockSize > Math.min(firstLosses.length, lastLosses.length)) {
+    throw new Error("bootstrapBlockSize cannot exceed the smallest comparison window.");
+  }
+  const brierScoreDelta = round(average(lastLosses) - average(firstLosses));
+  const brierScoreDeltaInterval = movingBlockBootstrapInterval(
+    firstLosses,
+    lastLosses,
+    bootstrapIterations,
+    blockSize,
+    bootstrapSeed,
+  );
+  const inferentialStatus =
+    brierScoreDeltaInterval.lowerBound > 0
+      ? "degradation_supported"
+      : brierScoreDeltaInterval.upperBound < 0
+        ? "improvement_supported"
+        : "no_clear_change";
+
   return {
     status,
     sampleSize,
     excludedInvalidTimestampCount,
+    ...(selection.excludedDuplicateTraceCount > 0
+      ? { excludedDuplicateTraceCount: selection.excludedDuplicateTraceCount }
+      : {}),
+    ...(selection.excludedMissingTraceIdCount > 0
+      ? { excludedMissingTraceIdCount: selection.excludedMissingTraceIdCount }
+      : {}),
     errorDelta,
+    brierScoreDelta,
+    brierScoreDeltaInterval,
+    inferentialStatus,
     windows,
     explanation: [
-      `ECE changed by ${errorDelta} from the earliest to latest time window.`,
-      "This is a descriptive drift signal, not a statistical significance test or causal diagnosis.",
+      `ECE changed by ${errorDelta} from the earliest to latest time window (descriptive).`,
+      `Brier loss changed by ${brierScoreDelta}; the 95% moving-block bootstrap interval is [${brierScoreDeltaInterval.lowerBound}, ${brierScoreDeltaInterval.upperBound}].`,
+      "The bootstrap preserves local temporal dependence within each window; it is not causal and does not correct unrepresentative sampling or repeated-monitoring multiplicity.",
       ...(excludedInvalidTimestampCount
         ? [`${excludedInvalidTimestampCount} completed outcomes with invalid timestamps were excluded.`]
         : []),
@@ -330,6 +405,48 @@ export function calibrateConfidence(
 }
 
 
+function brierLoss(trace: AgencyTrace): number {
+  const confidence = unitValue(trace.decision.confidence);
+  const outcome = trace.outcome?.success === true ? 1 : 0;
+  return (confidence - outcome) ** 2;
+}
+
+function movingBlockBootstrapInterval(
+  first: readonly number[],
+  last: readonly number[],
+  iterations: number,
+  blockSize: number,
+  seed: number,
+): CalibrationInterval {
+  let state = (seed >>> 0) || 1;
+  const random = () => {
+    state = (Math.imul(1664525, state) + 1013904223) >>> 0;
+    return state / 0x1_0000_0000;
+  };
+  const resampleMean = (values: readonly number[]) => {
+    const sample: number[] = [];
+    while (sample.length < values.length) {
+      const start = Math.floor(random() * values.length);
+      for (let offset = 0; offset < blockSize && sample.length < values.length; offset += 1) {
+        sample.push(values[(start + offset) % values.length]);
+      }
+    }
+    return average(sample);
+  };
+  const deltas = Array.from(
+    { length: iterations },
+    () => resampleMean(last) - resampleMean(first),
+  ).sort((a, b) => a - b);
+  const lowerIndex = Math.floor(0.025 * (iterations - 1));
+  const upperIndex = Math.ceil(0.975 * (iterations - 1));
+  return {
+    lowerBound: round(deltas[lowerIndex]),
+    upperBound: round(deltas[upperIndex]),
+    confidenceLevel: 0.95,
+    method: "moving_block_bootstrap",
+  };
+}
+
 function wilsonInterval(successes: number, sampleSize: number): CalibrationInterval {
   const z = 1.96;
   const proportion = successes / sampleSize;
@@ -382,15 +499,39 @@ function significanceFromInterval(
   return "not_significant";
 }
 
-function calibrationSamples(
-  history: readonly AgencyTrace[],
-): CalibrationSample[] {
-  return history
-    .filter((trace) => typeof trace.outcome?.success === "boolean")
-    .map((trace) => ({
-      confidence: unitValue(trace.decision.confidence),
-      outcome: trace.outcome?.success === true ? 1 : 0,
-    }));
+function selectUniqueCompletedTraces(history: readonly AgencyTrace[]) {
+  const seen = new Set<string>();
+  const traces: AgencyTrace[] = [];
+  let excludedDuplicateTraceCount = 0;
+  let excludedMissingTraceIdCount = 0;
+
+  for (const trace of history) {
+    if (typeof trace.outcome?.success !== "boolean") continue;
+    const traceId = typeof trace.traceId === "string" ? trace.traceId.trim() : "";
+    if (!traceId) {
+      excludedMissingTraceIdCount += 1;
+      continue;
+    }
+    if (seen.has(traceId)) {
+      excludedDuplicateTraceCount += 1;
+      continue;
+    }
+    seen.add(traceId);
+    traces.push(trace);
+  }
+
+  return {
+    traces,
+    excludedDuplicateTraceCount,
+    excludedMissingTraceIdCount,
+  };
+}
+
+function calibrationSamples(history: readonly AgencyTrace[]): CalibrationSample[] {
+  return selectUniqueCompletedTraces(history).traces.map((trace) => ({
+    confidence: unitValue(trace.decision.confidence),
+    outcome: trace.outcome?.success === true ? 1 : 0,
+  }));
 }
 
 function reliabilityFromError(

@@ -30,6 +30,23 @@ on:
 jobs:
   core:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      SIGNAL_TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/signal_test
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: signal_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d signal_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -53,6 +70,8 @@ jobs:
       - run: pnpm --filter @signal/protocol test
 
       - run: pnpm --filter @signal/runtime test
+
+      - run: pnpm --filter @signal/idempotency-postgres test
 
       - run: pnpm --filter @signal/sdk-node test
 

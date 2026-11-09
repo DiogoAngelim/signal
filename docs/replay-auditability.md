@@ -22,14 +22,15 @@ assumed, what was unknown — is essential for:
 - **Trust** — Systems that can explain their decisions earn more trust than
   systems that cannot.
 
-Replay is not a debugging convenience. It is an architectural property that
-emerges from Signal's design: operations preserve the evidence and execution
-context needed to reconstruct decisions, decision records carry journals, and
-audit records can be hash-chained. Determinism applies to normalized domain
-results only when the operation version, canonical inputs, policy, handler
-logic, and external dependency snapshots are fixed. Runtime metadata such as
-message identifiers, wall-clock timestamps, and durations can legitimately
-differ between executions.
+Replay is a design objective, not a blanket runtime guarantee. Signal currently supports
+idempotent result replay when a durable adapter has stored the completed result,
+and it provides evidence/journal and audit-chain primitives. It does not yet
+persist a complete, versioned replay envelope for every execution or provide a
+general-purpose deterministic re-execution engine. Deterministic reconstruction
+requires operation/version identifiers, canonical inputs, policy/configuration
+versions, handler artifact identity, and snapshots of all external reads. Runtime
+metadata such as message identifiers, wall-clock timestamps, and durations may
+legitimately differ.
 
 ## Replay Principles
 
@@ -110,7 +111,7 @@ should change.
   canonical inputs, policy, handler logic, and captured external dependencies
   are the same. Execution metadata may differ.
 - **Trace causation** — Follow correlation IDs, trace IDs, and causation IDs
-  across nested operations.
+  where the application/runtime has persisted them.
 - **Identify idempotency conflicts** — Detect when a retried request changed
   its intent (different payload, same idempotency key).
 
@@ -147,7 +148,9 @@ decision with the same inputs that were available at decision time.
 
 ### Evidence Collection
 
-Every operation in Signal collects evidence:
+Signal exposes evidence primitives. Whether an application records a complete
+evidence set depends on its integration; the runtime does not automatically
+capture arbitrary external reads or every handler dependency:
 
 - **Input evidence** — The normalized payload, idempotency key, and
   authorization context.
@@ -193,9 +196,10 @@ When investigating a decision, the following reconstruction path is available:
 6. **Check the memory** — If the lesson survived review, it may be in
    decision memory, influencing future decisions.
 
-This reconstruction path works for any domain — trading, healthcare,
-cybersecurity, education, or any other domain that uses Signal's
-decision-processing model.
+This reconstruction path is a target workflow. It is complete only when the
+application has persisted all required evidence and has an independently trusted
+audit checkpoint. Domain-specific validation and regulatory review remain
+necessary.
 
 ## Historical Decision Analysis
 

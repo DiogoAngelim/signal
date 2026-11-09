@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import { calibrateConfidence, evaluateCalibrationDrift, evaluateCalibrationMetrics } from ".";
 import type { AgencyTrace } from "../types";
 
+let traceSequence = 0;
+
 function trace(confidence: number, success: boolean | null, timestamp = "2026-01-01T00:00:00.000Z"): AgencyTrace {
   return {
-    traceId: `${confidence}-${success}`,
+    traceId: `${confidence}-${success}-${traceSequence++}`,
     timestamp,
     decision: { kind: "prepare_response", confidence },
     policy: {
@@ -312,4 +314,58 @@ describe("calibration", () => {
       "confidence values must be numbers between 0 and 1.",
     );
   });
+
+  it("excludes duplicate trace IDs from calibration sample counts", () => {
+    const repeated = trace(0.9, false);
+    const metrics = evaluateCalibrationMetrics([repeated, repeated], {
+      minimumEvaluationSamples: 1,
+      minimumBucketSamples: 1,
+    });
+
+    expect(metrics.sampleSize).toBe(1);
+    expect(metrics.excludedDuplicateTraceCount).toBe(1);
+    expect(metrics.brierScore).toBe(0.81);
+  });
+
+
+  it("reports a deterministic moving-block bootstrap interval for temporal Brier drift", () => {
+    const history = [
+      ...Array.from({ length: 60 }, (_, index) =>
+        trace(0.9, true, new Date(Date.UTC(2026, 0, 1, 0, index)).toISOString()),
+      ),
+      ...Array.from({ length: 60 }, (_, index) =>
+        trace(0.9, false, new Date(Date.UTC(2026, 0, 2, 0, index)).toISOString()),
+      ),
+    ];
+    const config = {
+      windowCount: 2,
+      minimumWindowSamples: 30,
+      bootstrapIterations: 500,
+      bootstrapSeed: 42,
+      bootstrapBlockSize: 5,
+    };
+    const first = evaluateCalibrationDrift(history, config);
+    const second = evaluateCalibrationDrift(history, config);
+
+    expect(first).toEqual(second);
+    expect(first.brierScoreDelta).toBeGreaterThan(0);
+    expect(first.brierScoreDeltaInterval?.method).toBe("moving_block_bootstrap");
+    expect(first.inferentialStatus).toBe("degradation_supported");
+  });
+
+  it("rejects invalid bootstrap configuration", () => {
+    const history = Array.from({ length: 60 }, (_, index) =>
+      trace(0.5, index % 2 === 0, new Date(Date.UTC(2026, 0, 1, 0, index)).toISOString()),
+    );
+    expect(() => evaluateCalibrationDrift(history, { bootstrapIterations: 0 })).toThrow(
+      "bootstrapIterations must be a positive integer.",
+    );
+    expect(() => evaluateCalibrationDrift(history, { bootstrapIterations: 10_001 })).toThrow(
+      "bootstrapIterations must not exceed 10000.",
+    );
+    expect(() => evaluateCalibrationDrift(history, { bootstrapSeed: -1 })).toThrow(
+      "bootstrapSeed must be a non-negative safe integer.",
+    );
+  });
+
 });

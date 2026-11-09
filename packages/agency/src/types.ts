@@ -83,7 +83,7 @@ export type CalibrationInterval = {
   lowerBound: number;
   upperBound: number;
   confidenceLevel: 0.95;
-  method: "normal_approximation" | "wilson_score";
+  method: "normal_approximation" | "wilson_score" | "moving_block_bootstrap";
 };
 
 export type CalibrationSignificance =
@@ -105,6 +105,8 @@ export type CalibrationBucket = {
 
 export type CalibrationMetrics = {
   sampleSize: number;
+  excludedDuplicateTraceCount?: number;
+  excludedMissingTraceIdCount?: number;
   brierScore: number | null;
   brierScoreInterval: CalibrationInterval | null;
   expectedCalibrationError: number | null;
@@ -128,6 +130,9 @@ export type CalibrationDriftConfig = CalibrationConfig & {
   windowCount?: number;
   minimumWindowSamples?: number;
   driftTolerance?: number;
+  bootstrapIterations?: number;
+  bootstrapBlockSize?: number;
+  bootstrapSeed?: number;
 };
 
 export type CalibrationDriftWindow = {
@@ -143,7 +148,16 @@ export type CalibrationDriftResult = {
   status: "stable" | "improving" | "degrading" | "insufficient_data";
   sampleSize: number;
   excludedInvalidTimestampCount: number;
+  excludedDuplicateTraceCount?: number;
+  excludedMissingTraceIdCount?: number;
   errorDelta: number | null;
+  brierScoreDelta: number | null;
+  brierScoreDeltaInterval: CalibrationInterval | null;
+  inferentialStatus:
+    | "degradation_supported"
+    | "improvement_supported"
+    | "no_clear_change"
+    | "insufficient_data";
   windows: CalibrationDriftWindow[];
   explanation: string[];
 };
@@ -154,6 +168,8 @@ export type LearningConfig = {
 };
 
 export type LearningResult = {
+  excludedDuplicateTraceCount?: number;
+  excludedMissingTraceIdCount?: number;
   learnedPatterns: string[];
   confidenceAdjustment: number;
   policySuggestions: string[];

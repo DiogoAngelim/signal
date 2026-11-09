@@ -34,6 +34,11 @@ export type {
 
 export type {
   StoragePort,
+  TransactionalStoragePort,
+  OutboxPort,
+  OutboxRecord,
+  OutboxStats,
+  CompleteMutationInput,
   IdempotencyRecord,
   IdempotencyReservation,
 } from "./storage-port";
