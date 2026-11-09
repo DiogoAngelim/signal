@@ -8,5 +8,6 @@ export * from "./mutation";
 export * from "./perception";
 export * from "./query";
 export * from "./registry";
+export * from "./resilience";
 export * from "./runtime";
 export * from "./types";
