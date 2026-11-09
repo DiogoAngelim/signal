@@ -83,8 +83,21 @@ export function createMemoryIdempotencyStore(): StoragePort &
         status: "pending" as const,
         availableAt: Date.now(),
       }));
-      for (const item of staged) outbox.set(item.id, item);
+      const stagedIds = new Set<string>();
+      for (const item of staged) {
+        if (stagedIds.has(item.id)) {
+          throw new Error(`Duplicate outbox message ID "${item.id}" in one mutation.`);
+        }
+        stagedIds.add(item.id);
+        const existing = outbox.get(item.id);
+        if (existing && JSON.stringify(existing.envelope) !== JSON.stringify(item.envelope)) {
+          throw new Error(`Outbox message ID "${item.id}" already exists with a different envelope.`);
+        }
+      }
       await complete(input);
+      for (const item of staged) {
+        if (!outbox.has(item.id)) outbox.set(item.id, item);
+      }
     },
     async fail(input) {
       const record = records.get(keyFor(input.operationName, input.idempotencyKey));
