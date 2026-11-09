@@ -37,6 +37,7 @@ export type {
   TransactionalStoragePort,
   OutboxPort,
   OutboxRecord,
+  OutboxStats,
   CompleteMutationInput,
   IdempotencyRecord,
   IdempotencyReservation,
