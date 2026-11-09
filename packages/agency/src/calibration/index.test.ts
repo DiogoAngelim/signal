@@ -144,6 +144,16 @@ describe("calibration", () => {
   });
 
 
+
+  it("identifies statistically supported underconfidence in a sufficiently large cohort", () => {
+    const metrics = evaluateCalibrationMetrics(
+      Array.from({ length: 100 }, () => trace(0.1, true)),
+    );
+
+    expect(metrics.calibrationBiasSignificance).toBe("negative");
+    expect(metrics.calibrationBiasInterval?.upperBound).toBeLessThan(0);
+  });
+
   it("does not label a cohort aligned when a populated reliability bucket is sparse", () => {
     const history = [
       ...Array.from({ length: 95 }, (_, index) =>
