@@ -133,6 +133,9 @@ export function createInMemoryMetricsRecorder(
     unit: SignalMetric["unit"],
     labels: Record<string, string>,
   ): void => {
+    if (!Number.isFinite(value)) {
+      throw new Error("Metric values must be finite numbers.");
+    }
     if (metrics.length >= maxMetrics) {
       dropped += 1;
       return;
