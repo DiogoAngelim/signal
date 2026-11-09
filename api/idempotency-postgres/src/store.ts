@@ -4,7 +4,8 @@ import type {
   IdempotencyReservation,
   StoragePort,
 } from "@signal/ports";
-import { and, eq } from "drizzle-orm";
+import { and, eq, gt, lte, sql } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { signalIdempotencyRecords } from "./drizzle/schema";
@@ -29,6 +30,8 @@ function toRecord(
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
     messageId: row.messageId ?? undefined,
+    reservationToken: row.reservationToken ?? undefined,
+    reservationExpiresAt: row.reservationExpiresAt?.toISOString(),
   };
 }
 
@@ -40,117 +43,119 @@ export function createPostgresIdempotencyStore(
 
   return {
     async reserve(input): Promise<IdempotencyReservation> {
-      const existing = await db
-        .select()
-        .from(signalIdempotencyRecords)
-        .where(
-          and(
-            eq(signalIdempotencyRecords.operationName, input.operationName),
-            eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey),
-          ),
-        )
-        .limit(1);
-
-      if (existing[0]) {
-        const record = toRecord(existing[0]);
-
-        if (record.payloadFingerprint !== input.payloadFingerprint) {
-          return { state: "conflict", record };
-        }
-
-        if (record.status === "pending") {
-          return { state: "inflight", record };
-        }
-
-        return { state: "replayed", record };
+      const leaseMs = input.leaseMs ?? 300_000;
+      if (!Number.isSafeInteger(leaseMs) || leaseMs < 1_000 || leaseMs > 86_400_000) {
+        throw new RangeError("Idempotency reservation lease must be between 1000 and 86400000 milliseconds.");
       }
-
-      try {
-        await db.insert(signalIdempotencyRecords).values({
+      const now = new Date();
+      const reservationToken = randomUUID();
+      const reservationExpiresAt = new Date(now.getTime() + leaseMs);
+      const inserted = await db
+        .insert(signalIdempotencyRecords)
+        .values({
           operationName: input.operationName,
           idempotencyKey: input.idempotencyKey,
           payloadFingerprint: input.payloadFingerprint,
           status: "pending",
-        });
+          reservationToken,
+          reservationExpiresAt,
+        })
+        .onConflictDoNothing()
+        .returning();
+      if (inserted[0]) return { state: "reserved", record: toRecord(inserted[0]) };
 
-        return {
-          state: "reserved",
-          record: {
-            operationName: input.operationName,
-            idempotencyKey: input.idempotencyKey,
-            payloadFingerprint: input.payloadFingerprint,
-            status: "pending",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-        };
-      } catch {
-        const retry = await db
-          .select()
-          .from(signalIdempotencyRecords)
-          .where(
-            and(
-              eq(signalIdempotencyRecords.operationName, input.operationName),
-              eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey),
-            ),
-          )
-          .limit(1);
+      const reclaimed = await db
+        .update(signalIdempotencyRecords)
+        .set({
+          reservationToken,
+          reservationExpiresAt,
+          updatedAt: now,
+        })
+        .where(and(
+          eq(signalIdempotencyRecords.operationName, input.operationName),
+          eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey),
+          eq(signalIdempotencyRecords.payloadFingerprint, input.payloadFingerprint),
+          eq(signalIdempotencyRecords.status, "pending"),
+          lte(signalIdempotencyRecords.reservationExpiresAt, now),
+        ))
+        .returning();
+      if (reclaimed[0]) return { state: "reserved", record: toRecord(reclaimed[0]) };
 
-        if (!retry[0]) {
-          return { state: "inflight" };
-        }
-
-        const record = toRecord(retry[0]);
-
-        if (record.payloadFingerprint !== input.payloadFingerprint) {
-          return { state: "conflict", record };
-        }
-
-        return record.status === "pending"
-          ? { state: "inflight", record }
-          : { state: "replayed", record };
+      const existing = await db
+        .select()
+        .from(signalIdempotencyRecords)
+        .where(and(
+          eq(signalIdempotencyRecords.operationName, input.operationName),
+          eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey),
+        ))
+        .limit(1);
+      if (!existing[0]) return { state: "inflight" };
+      const record = toRecord(existing[0]);
+      if (record.payloadFingerprint !== input.payloadFingerprint) return { state: "conflict", record };
+      return record.status === "pending" ? { state: "inflight", record } : { state: "replayed", record };
+    },
+    async renewReservation(input): Promise<boolean> {
+      if (!Number.isSafeInteger(input.leaseMs) || input.leaseMs < 1_000 || input.leaseMs > 86_400_000) {
+        throw new RangeError("Idempotency reservation lease must be between 1000 and 86400000 milliseconds.");
       }
+      const now = new Date();
+      const renewed = await db
+        .update(signalIdempotencyRecords)
+        .set({ reservationExpiresAt: new Date(now.getTime() + input.leaseMs), updatedAt: now })
+        .where(and(
+          eq(signalIdempotencyRecords.operationName, input.operationName),
+          eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey),
+          eq(signalIdempotencyRecords.payloadFingerprint, input.payloadFingerprint),
+          eq(signalIdempotencyRecords.reservationToken, input.reservationToken),
+          eq(signalIdempotencyRecords.status, "pending"),
+          gt(signalIdempotencyRecords.reservationExpiresAt, now),
+        ))
+        .returning({ operationName: signalIdempotencyRecords.operationName });
+      return renewed.length === 1;
     },
     async complete(input): Promise<void> {
-      await db
+      const updated = await db
         .update(signalIdempotencyRecords)
         .set({
           status: "completed",
           result: input.result as unknown,
           resultMeta: input.resultMeta as unknown,
-
           messageId: input.messageId ?? null,
           updatedAt: new Date(),
+          reservationToken: null,
+          reservationExpiresAt: null,
         })
-        .where(
-          and(
-            eq(signalIdempotencyRecords.operationName, input.operationName),
-            eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey),
-            eq(
-              signalIdempotencyRecords.payloadFingerprint,
-              input.payloadFingerprint,
-            ),
-          ),
-        );
+        .where(and(
+          eq(signalIdempotencyRecords.operationName, input.operationName),
+          eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey),
+          eq(signalIdempotencyRecords.payloadFingerprint, input.payloadFingerprint),
+          eq(signalIdempotencyRecords.reservationToken, input.reservationToken),
+          eq(signalIdempotencyRecords.status, "pending"),
+          gt(signalIdempotencyRecords.reservationExpiresAt, new Date()),
+        ))
+        .returning({ operationName: signalIdempotencyRecords.operationName });
+      if (updated.length !== 1) throw new Error("Idempotency reservation is missing, expired, or fenced.");
     },
     async fail(input): Promise<void> {
-      await db
+      const updated = await db
         .update(signalIdempotencyRecords)
         .set({
           status: "failed",
           error: input.error as unknown,
           updatedAt: new Date(),
+          reservationToken: null,
+          reservationExpiresAt: null,
         })
-        .where(
-          and(
-            eq(signalIdempotencyRecords.operationName, input.operationName),
-            eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey),
-            eq(
-              signalIdempotencyRecords.payloadFingerprint,
-              input.payloadFingerprint,
-            ),
-          ),
-        );
+        .where(and(
+          eq(signalIdempotencyRecords.operationName, input.operationName),
+          eq(signalIdempotencyRecords.idempotencyKey, input.idempotencyKey),
+          eq(signalIdempotencyRecords.payloadFingerprint, input.payloadFingerprint),
+          eq(signalIdempotencyRecords.reservationToken, input.reservationToken),
+          eq(signalIdempotencyRecords.status, "pending"),
+          gt(signalIdempotencyRecords.reservationExpiresAt, new Date()),
+        ))
+        .returning({ operationName: signalIdempotencyRecords.operationName });
+      if (updated.length !== 1) throw new Error("Cannot fail an expired or fenced idempotency reservation.");
     },
   };
 }
