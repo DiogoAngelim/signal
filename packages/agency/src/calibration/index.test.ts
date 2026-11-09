@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import { calibrateConfidence, evaluateCalibrationDrift, evaluateCalibrationMetrics } from ".";
 import type { AgencyTrace } from "../types";
 
+let traceSequence = 0;
+
 function trace(confidence: number, success: boolean | null, timestamp = "2026-01-01T00:00:00.000Z"): AgencyTrace {
   return {
-    traceId: `${confidence}-${success}`,
+    traceId: `${confidence}-${success}-${traceSequence++}`,
     timestamp,
     decision: { kind: "prepare_response", confidence },
     policy: {
