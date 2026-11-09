@@ -111,4 +111,16 @@ describe("learning", () => {
       policySuggestions: [],
     });
   });
+
+  it("does not let duplicate trace IDs inflate learned patterns or adjustments", () => {
+    const repeated = trace({ confidence: 0.95, success: false });
+    const result = learnFromTraces([repeated, repeated]);
+
+    expect(result.excludedDuplicateTraceCount).toBe(1);
+    expect(result.learnedPatterns).toEqual([
+      "1 high-confidence decision(s) had poor outcomes.",
+    ]);
+    expect(result.confidenceAdjustment).toBe(-0.05);
+  });
+
 });
