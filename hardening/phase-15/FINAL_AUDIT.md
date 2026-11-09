@@ -69,7 +69,7 @@ Calibration and drift outputs are descriptive evaluations of the supplied trace 
 
 The repository CI workflows validate configured builds, tests, type checks, package release surfaces, and dependency architecture. Passing CI proves only that the tested source revision passed those configured checks.
 
-See [Production Validation Status](../../docs/production-validation-status.md) for the explicit evidence required before production certification, including transactional event delivery, replay completeness, trusted audit checkpoints, distributed resilience, statistical governance, observability/SLOs, load/chaos testing, and recovery validation.
+See [Production Validation Status](../../docs/production-validation-status.md) for the explicit evidence required before production certification, including PostgreSQL outbox integration/chaos testing, replay completeness, trusted audit checkpoints, distributed resilience, statistical governance, observability/SLOs, load/chaos testing, and recovery validation.
 
 ## Certification decision
 
