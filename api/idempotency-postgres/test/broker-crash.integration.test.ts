@@ -29,6 +29,11 @@ integration("broker and consumer crash-boundary simulation", () => {
   const store = createPostgresTransactionalStore({ connectionString: connectionString! });
 
   beforeAll(async () => {
+    const migrationDirectory = new URL("../src/drizzle/migrations/", import.meta.url);
+    const { readFile } = await import("node:fs/promises");
+    await admin.query(await readFile(new URL("0000_initial.sql", migrationDirectory), "utf8"));
+    await admin.query(await readFile(new URL("0001_transactional_outbox.sql", migrationDirectory), "utf8"));
+    await admin.query(await readFile(new URL("0002_outbox_lease_fencing.sql", migrationDirectory), "utf8"));
     await admin.query(`
       CREATE TABLE IF NOT EXISTS signal_simulation_consumer_inbox (
         message_id text PRIMARY KEY,
