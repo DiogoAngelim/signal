@@ -87,11 +87,13 @@ export function evaluateDecisionRobustness(
     throw new Error("minimumStability must be between 0 and 1.");
   }
 
-  const baselineRecommendation = simulateDecisionPaths(input).recommendedAction;
+  const baseline = simulateDecisionPaths(input);
+  const baselineRecommendation = baseline.recommendedAction;
   if (input.scenarios.length === 0) {
     return {
       status: "insufficient_data",
       baselineRecommendation,
+      baselineActionVariant: baseline.actionVariant,
       perturbationPoints,
       stabilityRate: null,
       perturbations: [],
@@ -106,15 +108,18 @@ export function evaluateDecisionRobustness(
         ...scenario,
         [factor]: clamp(scenario[factor] + delta),
       }));
-      const recommendedAction = simulateDecisionPaths({
+      const perturbed = simulateDecisionPaths({
         ...input,
         scenarios,
-      }).recommendedAction;
+      });
       return {
         factor,
         direction,
-        recommendedAction,
-        changed: recommendedAction !== baselineRecommendation,
+        actionVariant: perturbed.actionVariant,
+        recommendedAction: perturbed.recommendedAction,
+        changed:
+          perturbed.actionVariant !== baseline.actionVariant ||
+          perturbed.recommendedAction !== baselineRecommendation,
       };
     }),
   );
@@ -125,6 +130,7 @@ export function evaluateDecisionRobustness(
   return {
     status,
     baselineRecommendation,
+    baselineActionVariant: baseline.actionVariant,
     perturbationPoints,
     stabilityRate: Math.round(stabilityRate * 1_000_000) / 1_000_000,
     perturbations,
