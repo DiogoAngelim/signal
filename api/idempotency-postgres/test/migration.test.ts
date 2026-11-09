@@ -33,7 +33,3 @@ describe("postgres idempotency migration", () => {
   });
 });
 
-/* migration checks are intentionally source-level; production deployment must apply both migrations */
-/*
-  });
-});
