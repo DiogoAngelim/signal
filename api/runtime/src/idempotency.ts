@@ -35,7 +35,7 @@ export function createMemoryIdempotencyStore(): StoragePort &
   }): Promise<void> => {
     const record = records.get(keyFor(input.operationName, input.idempotencyKey));
     if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending") {
-      throw new Error("Idempotency reservation is missing, stale, or no longer pending.");
+      return;
     }
     record.status = "completed";
     record.result = input.result;
