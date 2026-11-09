@@ -17,6 +17,7 @@ on:
     paths:
       - "api/idempotency-postgres/**"
       - "api/runtime/**"
+      - "api/ports/**"
       - "docs/production-simulation.md"
       - ".github/workflows/production-simulation.yml"
   push:
