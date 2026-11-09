@@ -5,6 +5,9 @@ import type {
   CalibrationMetrics,
   CalibrationReliability,
   CalibrationResult,
+  CalibrationDriftConfig,
+  CalibrationDriftResult,
+  CalibrationDriftWindow,
 } from "../types";
 
 const DEFAULT_MINIMUM_SAMPLES = 100;
@@ -14,6 +17,10 @@ const DEFAULT_BUCKET_COUNT = 10;
 const DEFAULT_ALIGNMENT_TOLERANCE = 0.1;
 const DEFAULT_ADJUSTMENT_RATE = 0.5;
 const MAX_BUCKET_COUNT = 100;
+
+const DEFAULT_DRIFT_WINDOW_COUNT = 4;
+const DEFAULT_MINIMUM_WINDOW_SAMPLES = 30;
+const DEFAULT_DRIFT_TOLERANCE = 0.1;
 
 type CalibrationSample = {
   confidence: number;
@@ -124,6 +131,107 @@ export function evaluateCalibrationMetrics(
     calibrationBias: round(calibrationBias),
     status,
     reliabilityBuckets,
+  };
+}
+
+
+export function evaluateCalibrationDrift(
+  history: readonly AgencyTrace[],
+  config: CalibrationDriftConfig = {},
+): CalibrationDriftResult {
+  const windowCount = positiveInteger(
+    config.windowCount ?? DEFAULT_DRIFT_WINDOW_COUNT,
+    "windowCount",
+  );
+  if (windowCount < 2) {
+    throw new Error("windowCount must be at least 2.");
+  }
+  const minimumWindowSamples = positiveInteger(
+    config.minimumWindowSamples ?? DEFAULT_MINIMUM_WINDOW_SAMPLES,
+    "minimumWindowSamples",
+  );
+  const driftTolerance = unitValue(
+    config.driftTolerance ?? DEFAULT_DRIFT_TOLERANCE,
+  );
+  const completed = history.filter(
+    (trace) => typeof trace.outcome?.success === "boolean",
+  );
+  const timestamped = completed
+    .map((trace) => ({ trace, timestamp: Date.parse(trace.timestamp) }))
+    .filter((entry) => Number.isFinite(entry.timestamp))
+    .sort((a, b) => a.timestamp - b.timestamp);
+  const excludedInvalidTimestampCount = completed.length - timestamped.length;
+  const sampleSize = timestamped.length;
+
+  if (sampleSize < windowCount * minimumWindowSamples) {
+    return {
+      status: "insufficient_data",
+      sampleSize,
+      excludedInvalidTimestampCount,
+      errorDelta: null,
+      windows: [],
+      explanation: [
+        `At least ${windowCount * minimumWindowSamples} timestamped completed outcomes are required.`,
+      ],
+    };
+  }
+
+  const baseWindowSize = Math.floor(sampleSize / windowCount);
+  const windows: CalibrationDriftWindow[] = [];
+  for (let index = 0; index < windowCount; index += 1) {
+    const start = index * baseWindowSize;
+    const end = index === windowCount - 1 ? sampleSize : start + baseWindowSize;
+    const entries = timestamped.slice(start, end);
+    const traces = entries.map((entry) => entry.trace);
+    const metrics = evaluateCalibrationMetrics(traces, {
+      ...config,
+      minimumEvaluationSamples: minimumWindowSamples,
+      minimumBucketSamples: config.minimumBucketSamples ?? 1,
+    });
+    windows.push({
+      startAt: new Date(entries[0].timestamp).toISOString(),
+      endAt: new Date(entries[entries.length - 1].timestamp).toISOString(),
+      sampleSize: entries.length,
+      expectedCalibrationError: metrics.expectedCalibrationError,
+      calibrationBias: metrics.calibrationBias,
+      status: metrics.status,
+    });
+  }
+
+  if (windows.some((window) => window.expectedCalibrationError === null)) {
+    return {
+      status: "insufficient_data",
+      sampleSize,
+      excludedInvalidTimestampCount,
+      errorDelta: null,
+      windows,
+      explanation: ["Calibration error could not be calculated for every time window."],
+    };
+  }
+
+  const firstError = windows[0].expectedCalibrationError as number;
+  const lastError = windows[windows.length - 1].expectedCalibrationError as number;
+  const errorDelta = round(lastError - firstError);
+  const status =
+    errorDelta > driftTolerance
+      ? "degrading"
+      : errorDelta < -driftTolerance
+        ? "improving"
+        : "stable";
+
+  return {
+    status,
+    sampleSize,
+    excludedInvalidTimestampCount,
+    errorDelta,
+    windows,
+    explanation: [
+      `ECE changed by ${errorDelta} from the earliest to latest time window.`,
+      "This is a descriptive drift signal, not a statistical significance test or causal diagnosis.",
+      ...(excludedInvalidTimestampCount
+        ? [`${excludedInvalidTimestampCount} completed outcomes with invalid timestamps were excluded.`]
+        : []),
+    ],
   };
 }
 
