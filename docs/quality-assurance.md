@@ -191,10 +191,11 @@ drift; aggregate metrics can conceal subgroup degradation.
 
 Decision assessment already distinguishes unknowns, assumptions,
 contradictions, evidence coverage, and confidence caps. Prediction scenarios
-carry explicit uncertainty, and simulation compares expected, worst-case,
+carry explicit uncertainty, and simulation applies a bounded heuristic
+uncertainty penalty to action scores while comparing expected, worst-case,
 best-case, survival, and regret scores across action variants. These are
 complementary safeguards, not a formal probability distribution over all
-possible outcomes.
+possible outcomes or a variance decomposition.
 
 The current simulation is a deterministic scenario comparison using
 documented heuristic weights. Its output is not a statistical confidence
