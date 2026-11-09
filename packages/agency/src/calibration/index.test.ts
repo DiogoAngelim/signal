@@ -54,11 +54,10 @@ describe("calibration", () => {
 
   it("detects overconfidence, underconfidence, and aligned confidence", () => {
     expect(
-      calibrateConfidence([
-        trace(0.9, false),
-        trace(0.8, false),
-        trace(0.7, true),
-      ]),
+      calibrateConfidence(
+        [trace(0.9, false), trace(0.8, false), trace(0.7, true)],
+        { minimumSamples: 3 },
+      ),
     ).toMatchObject({
       calibratedConfidence: 0.566667,
       calibrationError: 0.466667,
@@ -67,11 +66,10 @@ describe("calibration", () => {
     });
 
     expect(
-      calibrateConfidence([
-        trace(0.2, true),
-        trace(0.3, true),
-        trace(0.4, false),
-      ]),
+      calibrateConfidence(
+        [trace(0.2, true), trace(0.3, true), trace(0.4, false)],
+        { minimumSamples: 3 },
+      ),
     ).toMatchObject({
       calibrationError: -0.366667,
       reliability: "underconfident",
@@ -85,7 +83,7 @@ describe("calibration", () => {
           trace(0.2, false),
           trace(0.1, false),
         ],
-        { alignmentTolerance: 0.15 },
+        { alignmentTolerance: 0.15, minimumSamples: 3 },
       ),
     ).toMatchObject({
       calibrationError: -0.1,
