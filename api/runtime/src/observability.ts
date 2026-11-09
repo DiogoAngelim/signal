@@ -100,40 +100,74 @@ export interface SignalMetricsRecorder {
   ): void;
 }
 
-export function createInMemoryMetricsRecorder(): SignalMetricsRecorder & {
+export interface InMemoryMetricsRecorderOptions {
+  /** Maximum number of metric samples retained in memory. Defaults to 10,000. */
+  readonly maxMetrics?: number;
+}
+
+export interface InMemoryMetricsRecorder extends SignalMetricsRecorder {
+  /** Returns an isolated copy of the retained samples, oldest first. */
   snapshot(): SignalMetric[];
-} {
+  /** Number of samples rejected because the bounded buffer was full. */
+  droppedCount(): number;
+  /** Removes retained samples and resets the dropped-sample counter. */
+  clear(): void;
+}
+
+const DEFAULT_MAX_METRICS = 10_000;
+
+export function createInMemoryMetricsRecorder(
+  options: InMemoryMetricsRecorderOptions = {},
+): InMemoryMetricsRecorder {
+  const maxMetrics = options.maxMetrics ?? DEFAULT_MAX_METRICS;
+  if (!Number.isSafeInteger(maxMetrics) || maxMetrics < 1) {
+    throw new Error("maxMetrics must be a positive safe integer.");
+  }
+
   const metrics: SignalMetric[] = [];
+  let dropped = 0;
+
+  const record = (
+    name: string,
+    value: number,
+    unit: SignalMetric["unit"],
+    labels: Record<string, string>,
+  ): void => {
+    if (metrics.length >= maxMetrics) {
+      dropped += 1;
+      return;
+    }
+    metrics.push({
+      name,
+      value,
+      unit,
+      labels: { ...labels },
+      timestamp: new Date().toISOString(),
+    });
+  };
+
   return {
     increment(name, value = 1, labels = {}) {
-      metrics.push({
-        name,
-        value,
-        unit: "count",
-        labels,
-        timestamp: new Date().toISOString(),
-      });
+      record(name, value, "count", labels);
     },
     gauge(name, value, labels = {}) {
-      metrics.push({
-        name,
-        value,
-        unit: "gauge",
-        labels,
-        timestamp: new Date().toISOString(),
-      });
+      record(name, value, "gauge", labels);
     },
     timing(name, durationMs, labels = {}) {
-      metrics.push({
-        name,
-        value: durationMs,
-        unit: "ms",
-        labels,
-        timestamp: new Date().toISOString(),
-      });
+      record(name, durationMs, "ms", labels);
     },
     snapshot() {
-      return [...metrics];
+      return metrics.map((metric) => ({
+        ...metric,
+        labels: { ...metric.labels },
+      }));
+    },
+    droppedCount() {
+      return dropped;
+    },
+    clear() {
+      metrics.length = 0;
+      dropped = 0;
     },
   };
 }
