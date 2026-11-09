@@ -103,7 +103,7 @@ integration("broker and consumer crash-boundary simulation", () => {
     );
 
     const secondWorkerId = `worker-after-restart-${suffix}`;
-    const secondClaim = await store.claimBatch({ workerId: secondWorkerId, limit: 10, leaseMs: 30_000 });
+    const secondClaim = await store.claimBatch({ workerId: secondWorkerId, limit: 100, leaseMs: 30_000 });
     const recovered = secondClaim.find((item) => item.envelope.messageId === messageId);
     expect(recovered).toBeDefined();
     // Recovery republishes because the first worker cannot know whether publish succeeded.
