@@ -89,10 +89,10 @@ export type CalibrationBucket = {
 
 export type CalibrationMetrics = {
   sampleSize: number;
-  brierScore: number;
-  expectedCalibrationError: number;
-  maximumCalibrationError: number;
-  calibrationBias: number;
+  brierScore: number | null;
+  expectedCalibrationError: number | null;
+  maximumCalibrationError: number | null;
+  calibrationBias: number | null;
   status: "calibrated" | "miscalibrated" | "insufficient_data";
   reliabilityBuckets: CalibrationBucket[];
 };
