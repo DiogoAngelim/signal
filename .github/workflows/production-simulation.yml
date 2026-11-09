@@ -42,6 +42,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     services:
+      toxiproxy:
+        image: ghcr.io/shopify/toxiproxy:2.11.0
+        ports:
+          - 8474:8474
+          - 8666:8666
       rabbitmq:
         image: rabbitmq:3-management
         env:
@@ -74,6 +79,7 @@ jobs:
       SIGNAL_RABBITMQ_MANAGEMENT_URL: http://localhost:15672
       SIGNAL_RABBITMQ_USER: signal
       SIGNAL_RABBITMQ_PASSWORD: signal-simulation-only
+      SIGNAL_TOXIPROXY_URL: http://localhost:8474
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -123,6 +129,20 @@ jobs:
           set -o pipefail
           pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/postgres-integration.log
 
+      - name: Wait for network fault proxy
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://localhost:8474/version >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          echo 'Toxiproxy did not become ready' >&2
+          exit 1
+
+      - name: Run PostgreSQL network fault and recovery integration
+        run: |
+          set -o pipefail
+          pnpm --filter @signal/idempotency-postgres exec vitest run test/network-fault.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/network-fault-integration.log
+
       - name: Run broker and consumer crash-boundary integration
         run: |
           set -o pipefail
@@ -161,6 +181,7 @@ jobs:
             'runtime-tests.log',
             'postgres-adapter-tests.log',
             'broker-crash-integration.log',
+            'network-fault-integration.log',
             'repeatability.log'
           ].filter((name) => existsSync(`simulation-evidence/${name}`));
           writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n');
