@@ -272,7 +272,7 @@ export function calibrateConfidence(
     config.adjustmentRate ?? DEFAULT_ADJUSTMENT_RATE,
   );
   const reliability =
-    sampleSize < minimumSamples
+    sampleSize < minimumSamples || metrics.status === "insufficient_data"
       ? "insufficient_data"
       : reliabilityFromError(
           calibrationError,
