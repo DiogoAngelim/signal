@@ -147,8 +147,8 @@ integration("broker and consumer crash-boundary simulation", () => {
       [messageId],
     )).rows[0].count).toBe(1);
 
-    expect(await store.acknowledge({ id: event!.id, workerId: `worker-before-crash-${suffix}` })).toBe(false);
-    expect(await store.acknowledge({ id: recovered!.id, workerId: secondWorkerId })).toBe(true);
+    expect(await store.acknowledge({ id: event!.id, workerId: `worker-before-crash-${suffix}`, leaseToken: event!.leaseToken })).toBe(false);
+    expect(await store.acknowledge({ id: recovered!.id, workerId: secondWorkerId, leaseToken: recovered!.leaseToken })).toBe(true);
   });
 
   it("does not acknowledge an outbox event when broker publication fails", async () => {
@@ -183,6 +183,6 @@ integration("broker and consumer crash-boundary simulation", () => {
         payload_encoding: "string",
       }),
     })).toMatchObject({ routed: true });
-    expect(await store.acknowledge({ id: event!.id, workerId: recoveryWorker })).toBe(true);
+    expect(await store.acknowledge({ id: event!.id, workerId: recoveryWorker, leaseToken: event!.leaseToken })).toBe(true);
   });
 });
