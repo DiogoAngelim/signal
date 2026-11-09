@@ -1,6 +1,9 @@
 import type {
   PredictionScenario,
   SimulationInput,
+  DecisionRobustnessConfig,
+  DecisionRobustnessFactor,
+  DecisionRobustnessResult,
   SimulationPathResult,
   SimulationRecommendation,
   SimulationResult,
@@ -12,6 +15,16 @@ const DEFAULT_VARIANTS = [
   "act smaller",
   "wait",
   "block action",
+];
+
+const ROBUSTNESS_FACTORS: readonly DecisionRobustnessFactor[] = [
+  "expectedReward",
+  "expectedRisk",
+  "downsideRisk",
+  "uncertainty",
+  "purposeAlignment",
+  "needAlignment",
+  "confidence",
 ];
 
 export function simulateDecisionPaths(
@@ -45,6 +58,76 @@ export function simulateDecisionPaths(
         "The selected path had the best survival-adjusted score.",
     ],
     pathComparisons,
+  };
+}
+
+
+export function evaluateDecisionRobustness(
+  input: SimulationInput,
+  config: DecisionRobustnessConfig = {},
+): DecisionRobustnessResult {
+  const perturbationPoints = config.perturbationPoints ?? 5;
+  const minimumStability = config.minimumStability ?? 0.8;
+  if (
+    !Number.isFinite(perturbationPoints) ||
+    perturbationPoints <= 0 ||
+    perturbationPoints > 100
+  ) {
+    throw new Error("perturbationPoints must be greater than 0 and at most 100.");
+  }
+  if (
+    !Number.isFinite(minimumStability) ||
+    minimumStability < 0 ||
+    minimumStability > 1
+  ) {
+    throw new Error("minimumStability must be between 0 and 1.");
+  }
+
+  const baselineRecommendation = simulateDecisionPaths(input).recommendedAction;
+  if (input.scenarios.length === 0) {
+    return {
+      status: "insufficient_data",
+      baselineRecommendation,
+      perturbationPoints,
+      stabilityRate: null,
+      perturbations: [],
+      explanation: ["No scenarios were supplied; robustness cannot be evaluated."],
+    };
+  }
+
+  const perturbations = ROBUSTNESS_FACTORS.flatMap((factor) =>
+    (["lower", "higher"] as const).map((direction) => {
+      const delta = direction === "higher" ? perturbationPoints : -perturbationPoints;
+      const scenarios = input.scenarios.map((scenario) => ({
+        ...scenario,
+        [factor]: clamp(scenario[factor] + delta),
+      }));
+      const recommendedAction = simulateDecisionPaths({
+        ...input,
+        scenarios,
+      }).recommendedAction;
+      return {
+        factor,
+        direction,
+        recommendedAction,
+        changed: recommendedAction !== baselineRecommendation,
+      };
+    }),
+  );
+  const stableCount = perturbations.filter((item) => !item.changed).length;
+  const stabilityRate = stableCount / perturbations.length;
+  const status = stabilityRate >= minimumStability ? "robust" : "sensitive";
+
+  return {
+    status,
+    baselineRecommendation,
+    perturbationPoints,
+    stabilityRate: Math.round(stabilityRate * 1_000_000) / 1_000_000,
+    perturbations,
+    explanation: [
+      `The recommendation remained unchanged in ${stableCount} of ${perturbations.length} one-factor perturbations.`,
+      "This deterministic sensitivity screen tests the configured perturbation size; it is not a probability, confidence interval, exhaustive search, or guarantee outside the tested range.",
+    ],
   };
 }
 
