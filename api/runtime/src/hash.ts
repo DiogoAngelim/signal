@@ -46,11 +46,19 @@ function serializeCanonicalJson(
     if (Array.isArray(value)) {
       const entries: string[] = [];
       for (let index = 0; index < value.length; index += 1) {
-        if (!Object.prototype.hasOwnProperty.call(value, index) || value[index] === undefined) {
+        const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+        if (!descriptor) {
           entries.push("null");
-        } else {
-          entries.push(serializeCanonicalJson(value[index], ancestors));
+          continue;
         }
+        if (!("value" in descriptor)) {
+          throw new TypeError("Canonical JSON does not support accessor properties");
+        }
+        entries.push(
+          descriptor.value === undefined
+            ? "null"
+            : serializeCanonicalJson(descriptor.value, ancestors),
+        );
       }
       return `[${entries.join(",")}]`;
     }
@@ -68,17 +76,20 @@ function serializeCanonicalJson(
     }
 
     const record = value as Record<string, unknown>;
-    const keys = Object.keys(record)
-      .filter((key) => record[key] !== undefined)
-      .sort();
+    const keys = Object.keys(record).sort();
 
-    const entries = keys.map((key) => {
+    const entries: string[] = [];
+    for (const key of keys) {
       const descriptor = Object.getOwnPropertyDescriptor(record, key);
       if (!descriptor || !("value" in descriptor)) {
         throw new TypeError("Canonical JSON does not support accessor properties");
       }
-      return `${JSON.stringify(key)}:${serializeCanonicalJson(descriptor.value, ancestors)}`;
-    });
+      if (descriptor.value !== undefined) {
+        entries.push(
+          `${JSON.stringify(key)}:${serializeCanonicalJson(descriptor.value, ancestors)}`,
+        );
+      }
+    }
 
     return `{${entries.join(",")}}`;
   } finally {
