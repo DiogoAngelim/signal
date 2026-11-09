@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { calibrateConfidence, evaluateCalibrationMetrics } from ".";
+import { calibrateConfidence, evaluateCalibrationDrift, evaluateCalibrationMetrics } from ".";
 import type { AgencyTrace } from "../types";
 
-function trace(confidence: number, success: boolean | null): AgencyTrace {
+function trace(confidence: number, success: boolean | null, timestamp = "2026-01-01T00:00:00.000Z"): AgencyTrace {
   return {
     traceId: `${confidence}-${success}`,
-    timestamp: "2026-01-01T00:00:00.000Z",
+    timestamp,
     decision: { kind: "prepare_response", confidence },
     policy: {
       allowed: true,
@@ -172,6 +172,65 @@ describe("calibration", () => {
         minimumBucketSamples: 0,
       }),
     ).toThrow("minimumBucketSamples must be a positive integer.");
+  });
+
+
+  it("detects worsening calibration across chronological windows", () => {
+    const history = [
+      ...Array.from({ length: 50 }, (_, index) =>
+        trace(0.5, index < 25, new Date(Date.UTC(2026, 0, 1, 0, index)).toISOString()),
+      ),
+      ...Array.from({ length: 50 }, (_, index) =>
+        trace(0.9, false, new Date(Date.UTC(2026, 0, 2, 0, index)).toISOString()),
+      ),
+    ].reverse();
+
+    const result = evaluateCalibrationDrift(history, {
+      windowCount: 2,
+      minimumWindowSamples: 30,
+      driftTolerance: 0.1,
+    });
+
+    expect(result.status).toBe("degrading");
+    expect(result.sampleSize).toBe(100);
+    expect(result.errorDelta).toBe(0.9);
+    expect(result.windows).toHaveLength(2);
+    expect(result.windows[0].expectedCalibrationError).toBe(0);
+    expect(result.windows[1].expectedCalibrationError).toBe(0.9);
+  });
+
+  it("does not claim drift when the chronological cohort is too small", () => {
+    const result = evaluateCalibrationDrift(
+      Array.from({ length: 20 }, (_, index) =>
+        trace(0.5, index % 2 === 0, new Date(Date.UTC(2026, 0, 1, 0, index)).toISOString()),
+      ),
+      { windowCount: 2, minimumWindowSamples: 15 },
+    );
+
+    expect(result.status).toBe("insufficient_data");
+    expect(result.errorDelta).toBeNull();
+    expect(result.windows).toEqual([]);
+  });
+
+  it("excludes completed outcomes with invalid timestamps and validates drift configuration", () => {
+    const history = [
+      ...Array.from({ length: 60 }, (_, index) =>
+        trace(0.5, index % 2 === 0, new Date(Date.UTC(2026, 0, 1, 0, index)).toISOString()),
+      ),
+      trace(0.5, true, "not-a-date"),
+    ];
+    const result = evaluateCalibrationDrift(history, {
+      windowCount: 2,
+      minimumWindowSamples: 30,
+    });
+
+    expect(result.excludedInvalidTimestampCount).toBe(1);
+    expect(() =>
+      evaluateCalibrationDrift(history, { windowCount: 1 }),
+    ).toThrow("windowCount must be at least 2.");
+    expect(() =>
+      evaluateCalibrationDrift(history, { driftTolerance: 2 }),
+    ).toThrow("confidence values must be numbers between 0 and 1.");
   });
 
   it("honors calibration configuration and validates invalid values", () => {
