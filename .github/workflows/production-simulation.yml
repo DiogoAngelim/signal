@@ -1,0 +1,156 @@
+name: Signal production simulation
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Simulation profile
+        required: true
+        type: choice
+        options:
+          - standard
+          - extended
+        default: standard
+  schedule:
+    - cron: "23 4 * * 2"
+  pull_request:
+    paths:
+      - "api/idempotency-postgres/**"
+      - "api/runtime/**"
+      - "docs/production-simulation.md"
+      - ".github/workflows/production-simulation.yml"
+  push:
+    branches:
+      - main
+      - "codex/**"
+    paths:
+      - "api/idempotency-postgres/**"
+      - "api/runtime/**"
+      - "docs/production-simulation.md"
+      - ".github/workflows/production-simulation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-production-simulation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  postgres-resilience:
+    name: PostgreSQL correctness, contention, and recovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: signal_simulation
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d signal_simulation"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      SIGNAL_TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/signal_simulation
+      SIGNAL_SIMULATION_PROFILE: ${{ inputs.profile || 'standard' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Record simulation provenance
+        run: |
+          mkdir -p simulation-evidence
+          node --input-type=module <<'NODE'
+          import { writeFileSync } from 'node:fs';
+          writeFileSync('simulation-evidence/run-manifest.json', JSON.stringify({
+            classification: 'SIMULATION_ONLY_NOT_PRODUCTION_CERTIFICATION',
+            repository: process.env.GITHUB_REPOSITORY,
+            commit: process.env.GITHUB_SHA,
+            ref: process.env.GITHUB_REF,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            profile: process.env.SIGNAL_SIMULATION_PROFILE,
+            postgresImage: 'postgres:16',
+            node: process.version,
+            startedAt: new Date().toISOString()
+          }, null, 2) + '\n');
+          NODE
+
+      - name: Verify architecture boundaries
+        run: pnpm arch:check
+
+      - name: Build infrastructure and runtime packages
+        run: pnpm build:library
+
+      - name: Run real PostgreSQL transactional outbox integration
+        run: |
+          set -o pipefail
+          pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/postgres-integration.log
+
+      - name: Run runtime resilience and audit tests
+        run: |
+          set -o pipefail
+          pnpm --filter @signal/runtime test 2>&1 | tee simulation-evidence/runtime-tests.log
+
+      - name: Run complete PostgreSQL adapter test suite
+        run: |
+          set -o pipefail
+          pnpm --filter @signal/idempotency-postgres test 2>&1 | tee simulation-evidence/postgres-adapter-tests.log
+
+      - name: Extended repeatability pass
+        if: inputs.profile == 'extended' || github.event_name == 'schedule'
+        run: |
+          set -o pipefail
+          for pass in 1 2 3; do
+            echo "Repeatability pass ${pass}"
+            pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts --reporter=dot
+          done 2>&1 | tee simulation-evidence/repeatability.log
+
+      - name: Finalize evidence manifest
+        if: always()
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+          const path = 'simulation-evidence/run-manifest.json';
+          const manifest = existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : {};
+          manifest.completedAt = new Date().toISOString();
+          manifest.jobStatus = process.env.JOB_STATUS ?? 'see workflow job conclusion';
+          manifest.evidenceFiles = [
+            'postgres-integration.log',
+            'runtime-tests.log',
+            'postgres-adapter-tests.log',
+            'repeatability.log'
+          ].filter((name) => existsSync(`simulation-evidence/${name}`));
+          writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n');
+          NODE
+        env:
+          JOB_STATUS: ${{ job.status }}
+
+      - name: Upload simulation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signal-production-simulation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: simulation-evidence/
+          if-no-files-found: warn
+          retention-days: 30
