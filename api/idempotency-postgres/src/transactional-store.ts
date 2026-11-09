@@ -31,6 +31,8 @@ type IdempotencyRow = {
   message_id: string | null;
   created_at: Date;
   updated_at: Date;
+  reservation_token: string | null;
+  reservation_expires_at: Date | null;
 };
 
 function toRecord(row: IdempotencyRow): IdempotencyRecord {
@@ -47,6 +49,8 @@ function toRecord(row: IdempotencyRow): IdempotencyRecord {
     messageId: row.message_id ?? undefined,
     createdAt: new Date(row.created_at).toISOString(),
     updatedAt: new Date(row.updated_at).toISOString(),
+    reservationToken: row.reservation_token ?? undefined,
+    reservationExpiresAt: row.reservation_expires_at ? new Date(row.reservation_expires_at).toISOString() : undefined,
   };
 }
 
@@ -83,14 +87,17 @@ export function createPostgresTransactionalStore(
       result: unknown;
       resultMeta?: SignalResultMeta;
       messageId?: string;
+      reservationToken: string;
     },
   ): Promise<void> {
     const updated = await client.query(
       `UPDATE signal_idempotency_records
        SET status = 'completed', result = $4::jsonb,
-           result_meta = $5::jsonb, message_id = $6, updated_at = now()
+           result_meta = $5::jsonb, message_id = $6, updated_at = now(),
+           reservation_token = NULL, reservation_expires_at = NULL
        WHERE operation_name = $1 AND idempotency_key = $2
-         AND payload_fingerprint = $3 AND status = 'pending'`,
+         AND payload_fingerprint = $3 AND status = 'pending'
+         AND reservation_token = $7 AND reservation_expires_at > now()`,
       [
         input.operationName,
         input.idempotencyKey,
@@ -98,6 +105,7 @@ export function createPostgresTransactionalStore(
         JSON.stringify(input.result),
         input.resultMeta === undefined ? null : JSON.stringify(input.resultMeta),
         input.messageId ?? null,
+        input.reservationToken,
       ],
     );
     if (updated.rowCount !== 1) {
@@ -134,16 +142,35 @@ export function createPostgresTransactionalStore(
       };
     },
     async reserve(input): Promise<IdempotencyReservation> {
+      const leaseMs = input.leaseMs ?? 300_000;
+      if (!Number.isSafeInteger(leaseMs) || leaseMs < 1_000 || leaseMs > 86_400_000) {
+        throw new RangeError("Idempotency reservation lease must be between 1000 and 86400000 milliseconds.");
+      }
       const inserted = await pool.query<IdempotencyRow>(
         `INSERT INTO signal_idempotency_records
-          (operation_name, idempotency_key, payload_fingerprint, status)
-         VALUES ($1, $2, $3, 'pending')
+          (operation_name, idempotency_key, payload_fingerprint, status, reservation_token, reservation_expires_at)
+         VALUES ($1, $2, $3, 'pending', gen_random_uuid(), now() + ($4 * interval '1 millisecond'))
          ON CONFLICT (operation_name, idempotency_key) DO NOTHING
          RETURNING *`,
-        [input.operationName, input.idempotencyKey, input.payloadFingerprint],
+        [input.operationName, input.idempotencyKey, input.payloadFingerprint, leaseMs],
       );
       if (inserted.rows[0]) {
         return { state: "reserved", record: toRecord(inserted.rows[0]) };
+      }
+
+      const reclaimed = await pool.query<IdempotencyRow>(
+        `UPDATE signal_idempotency_records
+         SET reservation_token = gen_random_uuid(),
+             reservation_expires_at = now() + ($4 * interval '1 millisecond'),
+             updated_at = now()
+         WHERE operation_name = $1 AND idempotency_key = $2
+           AND payload_fingerprint = $3 AND status = 'pending'
+           AND reservation_expires_at <= now()
+         RETURNING *`,
+        [input.operationName, input.idempotencyKey, input.payloadFingerprint, leaseMs],
+      );
+      if (reclaimed.rows[0]) {
+        return { state: "reserved", record: toRecord(reclaimed.rows[0]) };
       }
 
       const existing = await pool.query<IdempotencyRow>(
@@ -159,6 +186,21 @@ export function createPostgresTransactionalStore(
       }
       if (record.status === "pending") return { state: "inflight", record };
       return { state: "replayed", record };
+    },
+
+    async renewReservation(input): Promise<boolean> {
+      if (!Number.isSafeInteger(input.leaseMs) || input.leaseMs < 1_000 || input.leaseMs > 86_400_000) {
+        throw new RangeError("Idempotency reservation lease must be between 1000 and 86400000 milliseconds.");
+      }
+      const renewed = await pool.query(
+        `UPDATE signal_idempotency_records
+         SET reservation_expires_at = now() + ($5 * interval '1 millisecond'), updated_at = now()
+         WHERE operation_name = $1 AND idempotency_key = $2
+           AND payload_fingerprint = $3 AND reservation_token = $4
+           AND status = 'pending' AND reservation_expires_at > now()`,
+        [input.operationName, input.idempotencyKey, input.payloadFingerprint, input.reservationToken, input.leaseMs],
+      );
+      return renewed.rowCount === 1;
     },
 
     async complete(input): Promise<void> {
@@ -208,14 +250,17 @@ export function createPostgresTransactionalStore(
     async fail(input): Promise<void> {
       const result = await pool.query(
         `UPDATE signal_idempotency_records
-         SET status = 'failed', error = $4::jsonb, updated_at = now()
+         SET status = 'failed', error = $4::jsonb, updated_at = now(),
+             reservation_token = NULL, reservation_expires_at = NULL
          WHERE operation_name = $1 AND idempotency_key = $2
-           AND payload_fingerprint = $3 AND status = 'pending'`,
+           AND payload_fingerprint = $3 AND status = 'pending'
+           AND reservation_token = $5 AND reservation_expires_at > now()`,
         [
           input.operationName,
           input.idempotencyKey,
           input.payloadFingerprint,
           JSON.stringify(input.error),
+          input.reservationToken,
         ],
       );
       if (result.rowCount !== 1) {
