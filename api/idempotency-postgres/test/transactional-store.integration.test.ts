@@ -114,6 +114,41 @@ integration("PostgreSQL transactional outbox integration", () => {
     }
   });
 
+
+  it("prevents concurrent workers from claiming the same outbox message", async () => {
+    const operationName = "integration.concurrent-claim.v1";
+    const idempotencyKey = `concurrent-${Date.now()}`;
+    await store.reserve({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-concurrent",
+    });
+    await store.completeWithEvents({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-concurrent",
+      result: { ok: true },
+      events: [0, 1].map((index) => ({
+        protocol: "signal.v1",
+        kind: "event" as const,
+        name: "integration.concurrent-claim.v1",
+        messageId: `concurrent-event-${idempotencyKey}-${index}`,
+        timestamp: new Date().toISOString(),
+        payload: { index },
+      })),
+    });
+
+    const [workerA, workerB] = await Promise.all([
+      store.claimBatch({ workerId: "concurrent-worker-a", limit: 1, leaseMs: 30_000 }),
+      store.claimBatch({ workerId: "concurrent-worker-b", limit: 1, leaseMs: 30_000 }),
+    ]);
+
+    expect(workerA).toHaveLength(1);
+    expect(workerB).toHaveLength(1);
+    expect(workerA[0].id).not.toBe(workerB[0].id);
+    expect(workerA[0].envelope.messageId).not.toBe(workerB[0].envelope.messageId);
+  });
+
   it("recovers expired leases and dead-letters after the attempt limit", async () => {
     const operationName = "integration.lease.v1";
     const idempotencyKey = `lease-${Date.now()}`;
