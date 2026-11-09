@@ -56,7 +56,7 @@ describe("calibration", () => {
     expect(
       calibrateConfidence(
         [trace(0.9, false), trace(0.8, false), trace(0.7, true)],
-        { minimumSamples: 3 },
+        { minimumSamples: 3, minimumEvaluationSamples: 3, minimumBucketSamples: 1 },
       ),
     ).toMatchObject({
       calibratedConfidence: 0.566667,
@@ -68,7 +68,7 @@ describe("calibration", () => {
     expect(
       calibrateConfidence(
         [trace(0.2, true), trace(0.3, true), trace(0.4, false)],
-        { minimumSamples: 3 },
+        { minimumSamples: 3, minimumEvaluationSamples: 3, minimumBucketSamples: 1 },
       ),
     ).toMatchObject({
       calibrationError: -0.366667,
@@ -83,7 +83,7 @@ describe("calibration", () => {
           trace(0.2, false),
           trace(0.1, false),
         ],
-        { alignmentTolerance: 0.15, minimumSamples: 3 },
+        { alignmentTolerance: 0.15, minimumSamples: 3, minimumEvaluationSamples: 3, minimumBucketSamples: 1 },
       ),
     ).toMatchObject({
       calibrationError: -0.1,
@@ -126,6 +126,21 @@ describe("calibration", () => {
       calibrationBias: 0.4,
       status: "miscalibrated",
     });
+  });
+
+
+  it("does not label a cohort aligned when a populated reliability bucket is sparse", () => {
+    const history = [
+      ...Array.from({ length: 95 }, (_, index) =>
+        trace(0.5, index < 48),
+      ),
+      ...Array.from({ length: 5 }, () => trace(0.9, true)),
+    ];
+    const result = calibrateConfidence(history);
+
+    expect(result.sampleSize).toBe(100);
+    expect(result.metrics?.status).toBe("insufficient_data");
+    expect(result.reliability).toBe("insufficient_data");
   });
 
   it("keeps calibration status insufficient below the default 100-sample floor", () => {
@@ -249,6 +264,8 @@ describe("calibration", () => {
     expect(
       calibrateConfidence([trace(0.9, false), trace(0.9, false)], {
         minimumSamples: 2,
+        minimumEvaluationSamples: 2,
+        minimumBucketSamples: 1,
         adjustmentRate: 1,
       }),
     ).toMatchObject({
