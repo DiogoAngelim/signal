@@ -24,22 +24,26 @@ integration("PostgreSQL network fault and recovery simulation", () => {
   const proxied = new Pool({ connectionString: proxiedUrl.toString(), max: 2 });
 
   beforeAll(async () => {
-    try { await toxicRequest("proxies/signal-postgres", { method: "DELETE" }); } catch { /* First run has no proxy to remove. */ }
     await direct.query(`
       CREATE TABLE IF NOT EXISTS signal_network_fault_probe (
         id text PRIMARY KEY,
         value text NOT NULL
       )
     `);
-    await toxicRequest("proxies/signal-postgres", {
-      method: "POST",
-      body: JSON.stringify({
-        name: "signal-postgres",
-        listen: "0.0.0.0:8666",
-        upstream: "postgres:5432",
-        enabled: true,
-      }),
-    });
+    const existingProxy = await fetch(new URL("proxies/signal-postgres", proxyUrl));
+    if (existingProxy.status === 404) {
+      await toxicRequest("proxies", {
+        method: "POST",
+        body: JSON.stringify({
+          name: "signal-postgres",
+          listen: "0.0.0.0:8666",
+          upstream: "postgres:5432",
+          enabled: true,
+        }),
+      });
+    } else if (!existingProxy.ok) {
+      throw new Error(`Toxiproxy proxy lookup failed: ${existingProxy.status}`);
+    }
   });
 
   afterAll(async () => {
