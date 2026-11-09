@@ -79,7 +79,6 @@ export function evaluateCalibrationMetrics(
   let confidenceTotal = 0;
   let outcomeTotal = 0;
   const brierLosses: number[] = [];
-  const calibrationDifferences: number[] = [];
 
   for (const sample of samples) {
     const bucketIndex = Math.min(
@@ -90,7 +89,6 @@ export function evaluateCalibrationMetrics(
     const difference = sample.confidence - sample.outcome;
     const brierLoss = difference ** 2;
     brierLosses.push(brierLoss);
-    calibrationDifferences.push(difference);
     brierTotal += brierLoss;
     confidenceTotal += sample.confidence;
     outcomeTotal += sample.outcome;
@@ -147,11 +145,13 @@ export function evaluateCalibrationMetrics(
 
   const brierScore = round(brierTotal / sampleSize);
   const brierScoreInterval = normalMeanInterval(brierLosses, 0, 1);
-  const calibrationBiasInterval = normalMeanInterval(
-    calibrationDifferences,
-    -1,
-    1,
-  );
+  const overallOutcomeInterval = wilsonInterval(outcomeTotal, sampleSize);
+  const calibrationBiasInterval: CalibrationInterval = {
+    lowerBound: round(confidenceTotal / sampleSize - overallOutcomeInterval.upperBound),
+    upperBound: round(confidenceTotal / sampleSize - overallOutcomeInterval.lowerBound),
+    confidenceLevel: 0.95,
+    method: "wilson_score",
+  };
 
   return {
     sampleSize,
@@ -161,9 +161,10 @@ export function evaluateCalibrationMetrics(
     maximumCalibrationError: round(maximumCalibrationError),
     calibrationBias: round(calibrationBias),
     calibrationBiasInterval,
-    calibrationBiasSignificance: significanceFromInterval(
-      calibrationBiasInterval,
-    ),
+    calibrationBiasSignificance:
+      sampleSize < 30
+        ? "insufficient_data"
+        : significanceFromInterval(calibrationBiasInterval),
     status,
     reliabilityBuckets,
   };
