@@ -81,7 +81,7 @@ Do not label Signal production-certified until the following evidence exists:
    - [x] Provide a bounded Prometheus text recorder with metric/label allowlists, histogram exposition, series limits, and a reusable Grafana runtime dashboard.
    - [ ] Connect and validate the deployed Prometheus scrape/remote-write backend, sampling, retention, alert routing, and backpressure.
    - [ ] Establish deployment-specific service-level objectives from measured baselines for availability, latency percentiles, error rate, queue age, replay rate, and delivery lag.
-   - [ ] Configure live alerts, dashboards, ownership, escalation, and incident runbooks.
+   - [ ] Provision the starter Grafana dashboard, configure live alerts, and assign deployment-specific ownership, escalation, and incident runbooks.
 
 7. **Load, chaos, and recovery validation**
    - [x] Publish reproducible benchmark scripts and commit-addressed raw CI artifacts for runtime dispatch, HTTP/rate limits, in-memory and distributed circuit breakers, PostgreSQL idempotency/outbox, RabbitMQ queue/recovery behavior, and sustained in-process runtime/memory trend measurement.
@@ -94,7 +94,8 @@ Do not label Signal production-certified until the following evidence exists:
 Signal now provides process-local and PostgreSQL-coordinated retry budgets, a
 transactional PostgreSQL consumer inbox, versioned replay-evidence records,
 immutable PostgreSQL replay persistence, deterministic replay validation,
-append-only PostgreSQL audit storage, signed checkpoint primitives, a bounded
+append-only PostgreSQL audit storage with monotonic signed checkpoints, a
+bounded Prometheus metrics recorder, a starter Grafana dashboard, a bounded
 observability exporter, and queue-health metrics. The core packages and
 PostgreSQL adapters are exercised by CI integration tests and simulations.
 The transactional outbox and replay evidence stores are not active in any
