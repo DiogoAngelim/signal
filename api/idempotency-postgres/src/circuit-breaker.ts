@@ -38,6 +38,7 @@ function toSnapshot(row: Record<string, unknown>): DistributedCircuitBreakerSnap
     state: row.state as DistributedCircuitBreakerSnapshot["state"],
     threshold: Number(row.threshold),
     resetTimeoutMs: Number(row.reset_timeout_ms),
+    probeLeaseMs: Number(row.probe_lease_ms),
   };
 }
 
