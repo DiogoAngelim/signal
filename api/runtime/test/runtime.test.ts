@@ -1209,6 +1209,53 @@ describe("runtime", () => {
     ).toThrow("Signal registry is locked");
   });
 
+
+  it("measures concurrent replay-safe deliveries as coalesced rather than deduped", async () => {
+    const observations: Array<{ event: string }> = [];
+    const eventPort = createInProcessDispatcher();
+    const runtime = new SignalRuntime({
+      eventPort,
+      observabilityPort: {
+        emit: (observation) => observations.push(observation),
+      },
+    });
+    let signalStarted!: () => void;
+    let releaseHandler!: () => void;
+    let handlerCalls = 0;
+    const started = new Promise<void>((resolve) => {
+      signalStarted = resolve;
+    });
+    const gate = new Promise<void>((resolve) => {
+      releaseHandler = resolve;
+    });
+
+    runtime.subscribe(
+      "observed.concurrent.v1",
+      async () => {
+        handlerCalls += 1;
+        signalStarted();
+        await gate;
+      },
+      { replaySafe: true, consumerId: "concurrent-observability-test" },
+    );
+
+    const envelope = ensureEnvelope({
+      kind: "event",
+      name: "observed.concurrent.v1",
+      payload: { value: "one" },
+    });
+    const first = eventPort.dispatch(envelope);
+    await started;
+    const second = eventPort.dispatch(envelope);
+    releaseHandler();
+    await Promise.all([first, second]);
+
+    expect(handlerCalls).toBe(1);
+    expect(observations.filter((item) => item.event === "subscriber.delivered")).toHaveLength(1);
+    expect(observations.filter((item) => item.event === "subscriber.coalesced")).toHaveLength(1);
+    expect(observations.some((item) => item.event === "subscriber.deduped")).toBe(false);
+  });
+
   it("emits completion and error observations for failed query, mutation, and event executions", async () => {
     const observations: Array<{
       event: string;
