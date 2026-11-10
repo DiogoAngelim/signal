@@ -82,10 +82,21 @@ export function createPostgresAuditLedger(
         await client.query("BEGIN");
         // Serialize appends even when the ledger is empty (there is no row to lock).
         await client.query("SELECT pg_advisory_xact_lock(731946201)");
-        const previous = await client.query<{ sequence: string; entry_hash: string }>(
-          "SELECT sequence::text, entry_hash FROM signal_audit_entries ORDER BY sequence DESC LIMIT 1",
+        const previous = await client.query<{
+          sequence: string;
+          entry_hash: string;
+          entry: SignalAuditLedgerEntry;
+        }>(
+          "SELECT sequence::text, entry_hash, entry FROM signal_audit_entries ORDER BY sequence DESC LIMIT 1",
         );
         const last = previous.rows[0];
+        if (last && (
+          !options.verifyEntry(last.entry) ||
+          last.entry.sequence !== Number(last.sequence) ||
+          last.entry.hash !== last.entry_hash.trim()
+        )) {
+          throw new Error("Persisted audit head failed integrity verification.");
+        }
         const expectedSequence = last ? Number(last.sequence) + 1 : 0;
         const expectedPreviousHash = last ? last.entry_hash.trim() : GENESIS_HASH;
         if (entry.sequence !== expectedSequence || entry.previousHash !== expectedPreviousHash) {
@@ -113,11 +124,41 @@ export function createPostgresAuditLedger(
       if (!Number.isSafeInteger(limit) || limit < 1 || limit > 10_000) {
         throw new RangeError("limit must be an integer between 1 and 10000.");
       }
-      const result = await pool.query<{ entry: SignalAuditLedgerEntry }>(
-        "SELECT entry FROM signal_audit_entries WHERE sequence > $1 ORDER BY sequence ASC LIMIT $2",
+      const previous = afterSequence >= 0
+        ? await pool.query<{ sequence: string; entry_hash: string; entry: SignalAuditLedgerEntry }>(
+          "SELECT sequence::text, entry_hash, entry FROM signal_audit_entries WHERE sequence <= $1 ORDER BY sequence DESC LIMIT 1",
+          [afterSequence],
+        )
+        : { rows: [] as { sequence: string; entry_hash: string; entry: SignalAuditLedgerEntry }[] };
+      let expectedSequence = previous.rows[0] ? Number(previous.rows[0].sequence) + 1 : 0;
+      let expectedPreviousHash = previous.rows[0]?.entry_hash.trim() ?? GENESIS_HASH;
+      if (previous.rows[0] && (
+        !options.verifyEntry(previous.rows[0].entry) ||
+        previous.rows[0].entry.sequence !== Number(previous.rows[0].sequence) ||
+        previous.rows[0].entry.hash !== expectedPreviousHash
+      )) {
+        throw new Error("Persisted audit predecessor failed integrity verification.");
+      }
+      const result = await pool.query<{ entry: SignalAuditLedgerEntry; sequence: string; entry_hash: string }>(
+        "SELECT sequence::text, entry_hash, entry FROM signal_audit_entries WHERE sequence > $1 ORDER BY sequence ASC LIMIT $2",
         [afterSequence, limit],
       );
-      return result.rows.map((row) => row.entry);
+      const entries = result.rows.map((row) => {
+        const entry = row.entry;
+        if (
+          Number(row.sequence) !== expectedSequence ||
+          entry.sequence !== expectedSequence ||
+          entry.previousHash !== expectedPreviousHash ||
+          entry.hash !== row.entry_hash.trim() ||
+          !options.verifyEntry(entry)
+        ) {
+          throw new Error("Persisted audit range failed sequence, linkage, or entry-hash verification.");
+        }
+        expectedSequence += 1;
+        expectedPreviousHash = entry.hash;
+        return entry;
+      });
+      return entries;
     },
 
     async appendCheckpoint(checkpoint) {
@@ -167,7 +208,7 @@ export function createPostgresAuditLedger(
       );
       const row = result.rows[0];
       if (!row) return null;
-      return {
+      const checkpoint: SignalSignedAuditCheckpoint = {
         version: 1,
         keyId: row.key_id,
         sequence: Number(row.sequence),
@@ -175,6 +216,10 @@ export function createPostgresAuditLedger(
         createdAt: new Date(row.created_at).toISOString(),
         signature: row.signature,
       };
+      if (!options.verifyCheckpoint(checkpoint)) {
+        throw new Error("Persisted audit checkpoint failed signature verification.");
+      }
+      return checkpoint;
     },
 
     async close() { await pool.end(); },
