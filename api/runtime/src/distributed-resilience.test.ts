@@ -22,6 +22,10 @@ describe("distributed runtime circuit breaker controller", () => {
         calls.push(["tryAcquire", key, config, now]);
         return permit;
       },
+      async renewProbe(key, token, leaseMs) {
+        calls.push(["renewProbe", key, token, leaseMs]);
+        return token === "probe-generation-1";
+      },
       async recordSuccess(key, token) {
         calls.push(["recordSuccess", key, token]);
         return token === "probe-generation-1";
@@ -35,6 +39,8 @@ describe("distributed runtime circuit breaker controller", () => {
     const controller = createDistributedCircuitBreakerController(port, "provider-a");
     expect((await controller.snapshot())?.state).toBe("half-open");
     expect(await controller.tryAcquire()).toBe(true);
+    expect(await controller.renewProbe()).toBe(true);
+    expect(calls.at(-1)).toEqual(["renewProbe", "provider-a", "probe-generation-1", 15000]);
     expect(await controller.recordSuccess()).toBe(true);
     expect(calls.at(-1)).toEqual(["recordSuccess", "provider-a", "probe-generation-1"]);
 
@@ -50,6 +56,7 @@ describe("distributed runtime circuit breaker controller", () => {
     const port: DistributedCircuitBreakerPort = {
       async snapshot() { return null; },
       async tryAcquire() { return { allowed: false }; },
+      async renewProbe(_key, token) { tokens.push(token); return false; },
       async recordSuccess(_key, token) { tokens.push(token); return false; },
       async recordFailure(_key, _config, token) { tokens.push(token); return false; },
     };
