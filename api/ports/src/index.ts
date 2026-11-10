@@ -49,3 +49,5 @@ export type {
   IdempotencyRecord,
   IdempotencyReservation,
 } from "./storage-port";
+
+export type { ReplayEvidencePort, ReplayEvidenceRecord, ReplayExternalReadSnapshot, ReplayJsonValue } from "./replay-evidence-port";
