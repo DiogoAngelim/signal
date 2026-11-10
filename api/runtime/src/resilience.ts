@@ -150,55 +150,156 @@ export function shouldAllowRequest(
   );
 }
 
+export interface CircuitBreakerPermit {
+  readonly id: number;
+  readonly generation: number;
+  readonly kind: "closed" | "probe";
+}
+
 export interface CircuitBreakerController {
   snapshot(): CircuitBreakerState;
-  /** Atomically reserves the single half-open probe when the cooldown expires. */
-  tryAcquire(now?: number): boolean;
-  recordSuccess(): void;
-  recordFailure(now?: number): void;
+  /** Returns an opaque permit, or null when the breaker denies the request. */
+  acquire(now?: number): CircuitBreakerPermit | null;
+  /** Renews the single half-open probe lease. Closed-state permits cannot renew. */
+  renewProbe(permit: CircuitBreakerPermit, now?: number): boolean;
+  /** Records an outcome only for a live permit from the current breaker generation. */
+  recordSuccess(permit: CircuitBreakerPermit, now?: number): boolean;
+  recordFailure(permit: CircuitBreakerPermit, now?: number): boolean;
 }
 
 /**
- * Stateful, single-process circuit breaker with one half-open probe at a time.
- * It is not a distributed lock: use a shared coordination primitive when
- * multiple processes must enforce one global probe.
+ * Stateful, single-process circuit breaker with permit-scoped outcomes.
+ *
+ * Each admitted operation receives an opaque permit. Outcomes from stale
+ * closed-state requests cannot close a breaker after another request opened
+ * it, and only the current half-open probe can close or reopen that generation.
+ * The probe lease can be renewed by long-running health checks. This is not a
+ * distributed lock: use createDistributedCircuitBreakerController when
+ * multiple processes must coordinate one global probe.
  */
 export function createCircuitBreakerController(
   threshold = 5,
   resetTimeoutMs = 30000,
   clock: () => number = Date.now,
+  probeLeaseMs = 15_000,
 ): CircuitBreakerController {
   validateCircuitBreaker(threshold, resetTimeoutMs);
-  let current: CircuitBreakerState = createCircuitBreaker(
-    threshold,
-    resetTimeoutMs,
-  );
-  let probeInFlight = false;
+  if (
+    !Number.isSafeInteger(probeLeaseMs) ||
+    probeLeaseMs < 1_000 ||
+    probeLeaseMs > 86_400_000
+  ) {
+    throw new RangeError("probeLeaseMs must be between 1000 and 86400000 milliseconds.");
+  }
+
+  let current: CircuitBreakerState = createCircuitBreaker(threshold, resetTimeoutMs);
+  let generation = 0;
+  let nextPermitId = 1;
+  const activePermits = new WeakMap<CircuitBreakerPermit, true>();
+  let activeProbe: CircuitBreakerPermit | undefined;
+  let probeExpiresAt: number | undefined;
+
+  function expireProbeIfNeeded(now: number): void {
+    if (
+      current.state !== "half-open" ||
+      !activeProbe ||
+      probeExpiresAt === undefined ||
+      now < probeExpiresAt
+    ) {
+      return;
+    }
+    activePermits.delete(activeProbe);
+    activeProbe = undefined;
+    probeExpiresAt = undefined;
+    current = { ...current, state: "open", lastFailureAt: now };
+    generation += 1;
+  }
+
+  function issuePermit(kind: CircuitBreakerPermit["kind"], now: number) {
+    const permit = Object.freeze({ id: nextPermitId++, generation, kind });
+    activePermits.set(permit, true);
+    if (kind === "probe") {
+      activeProbe = permit;
+      probeExpiresAt = now + probeLeaseMs;
+    }
+    return permit;
+  }
 
   return {
     snapshot: () => ({ ...current }),
-    tryAcquire(now = clock()) {
+    acquire(now = clock()) {
       if (!Number.isFinite(now)) throw new RangeError("now must be finite.");
-      if (current.state === "closed") return true;
-      if (current.state === "half-open") return false;
+      expireProbeIfNeeded(now);
+      if (current.state === "closed") return issuePermit("closed", now);
+      if (current.state === "half-open") return null;
       if (
         current.lastFailureAt === null ||
-        now - current.lastFailureAt < current.resetTimeoutMs ||
-        probeInFlight
+        now - current.lastFailureAt < current.resetTimeoutMs
+      ) {
+        return null;
+      }
+      current = { ...current, state: "half-open" };
+      return issuePermit("probe", now);
+    },
+    renewProbe(permit, now = clock()) {
+      if (!Number.isFinite(now)) throw new RangeError("now must be finite.");
+      expireProbeIfNeeded(now);
+      if (
+        permit.kind !== "probe" ||
+        permit.generation !== generation ||
+        activeProbe !== permit ||
+        !activePermits.has(permit)
       ) {
         return false;
       }
-      current = { ...current, state: "half-open" };
-      probeInFlight = true;
+      probeExpiresAt = now + probeLeaseMs;
       return true;
     },
-    recordSuccess() {
+    recordSuccess(permit, now = clock()) {
+      if (!Number.isFinite(now)) throw new RangeError("now must be finite.");
+      expireProbeIfNeeded(now);
+      if (
+        permit.generation !== generation ||
+        !activePermits.has(permit)
+      ) {
+        return false;
+      }
+      activePermits.delete(permit);
+      if (permit.kind === "probe") {
+        if (current.state !== "half-open" || activeProbe !== permit) return false;
+        activeProbe = undefined;
+        probeExpiresAt = undefined;
+        current = recordSuccess(current);
+        generation += 1;
+        return true;
+      }
+      if (current.state !== "closed") return false;
       current = recordSuccess(current);
-      probeInFlight = false;
+      return true;
     },
-    recordFailure(now = clock()) {
-      current = recordFailure(current, now);
-      if (current.state === "open") probeInFlight = false;
+    recordFailure(permit, now = clock()) {
+      if (!Number.isFinite(now)) throw new RangeError("now must be finite.");
+      expireProbeIfNeeded(now);
+      if (
+        permit.generation !== generation ||
+        !activePermits.has(permit)
+      ) {
+        return false;
+      }
+      activePermits.delete(permit);
+      if (permit.kind === "probe") {
+        if (current.state !== "half-open" || activeProbe !== permit) return false;
+        activeProbe = undefined;
+        probeExpiresAt = undefined;
+        current = recordFailure(current, now);
+        generation += 1;
+        return true;
+      }
+      if (current.state !== "closed") return false;
+      const next = recordFailure(current, now);
+      current = next;
+      if (next.state === "open") generation += 1;
+      return true;
     },
   };
 }
