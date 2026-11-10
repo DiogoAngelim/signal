@@ -45,7 +45,6 @@ npm run verify --prefix signal-cli
 export SIGNAL_CLI_READY=1
 pnpm --filter @signal/reference-lab build
 pnpm --filter @signal/reference-lab evaluate
-pnpm --filter @signal/reference-lab coverage:verify
 pnpm --filter @signal/reference-lab start
 pnpm --filter @signal/reference-lab benchmark
 ```
@@ -57,9 +56,10 @@ docker compose -f examples/signal-reference-lab/infrastructure/docker-compose.ym
 export DATABASE_URL=postgresql://signal:signal@localhost:54329/signal_reference_lab
 pnpm --filter @signal/reference-lab db:migrate
 pnpm --filter @signal/reference-lab evaluate
+pnpm --filter @signal/reference-lab coverage:verify
 ```
 
-Without `DATABASE_URL`, the PostgreSQL scenario is explicitly reported as **blocked**, not passed. CI provisions PostgreSQL 16, applies the same migrations, and requires that scenario to pass.
+Without `DATABASE_URL`, the PostgreSQL scenario is explicitly reported as **blocked**, not passed. `evaluate` still emits the partial report; the strict `coverage:verify` command exits non-zero while any gate is blocked. CI provisions PostgreSQL 16, applies the same migrations, and requires the scenario to pass.
 
 Or from this directory: `pnpm lab`, `pnpm evaluate`, `pnpm coverage:verify`, `pnpm start`, `pnpm benchmark`. The local web UI listens on `127.0.0.1:4179` by default. Set `PORT` to change it.
 
