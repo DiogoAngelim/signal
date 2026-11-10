@@ -6,7 +6,7 @@ import { compareBenchmarks } from "../src/comparison.js";
 
 test("reference lab executes lifecycle and safety scenarios", async () => {
   const report = await runEvaluation();
-  assert.equal(report.results.length, 11);
+  assert.equal(report.results.length, 12);
   assert.ok(report.results.every((item) => item.status === "passed"), JSON.stringify(report.results));
   assert.ok(report.score.overall > 0 && report.score.overall <= 10);
 });
