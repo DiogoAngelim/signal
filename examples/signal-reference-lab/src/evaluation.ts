@@ -20,11 +20,11 @@ const capabilities: Capability[] = [
   { id: "resilience.circuit-breakers", area: "Resilience", capability: "Circuit breaker state, half-open recovery and distributed coordination", status: "not-verified", scenarios: [], evidence: "No downstream provider or breaker integration is configured." },
   { id: "replay.evidence", area: "Replay", capability: "Replay evidence capture, deterministic reconstruction and compatibility", status: "not-verified", scenarios: [], evidence: "The process-local event journal is not a replay evidence store." },
   { id: "audit.chain-checkpoints", area: "Audit", capability: "Hash-chain integrity, checkpoints and tamper detection", status: "not-verified", scenarios: [], evidence: "No audit chain or checkpoint verifier is used." },
-  { id: "decision.assessment", area: "Decision", capability: "Evidence lineage, uncertainty assessment and hard-stop policy", status: "exercised", scenarios: ["lifecycle", "authorization"], evidence: "Verified evidence threshold, confidence and risk rationale" },
+  { id: "decision.assessment", area: "Decision", capability: "Evidence lineage, uncertainty assessment and hard-stop policy", status: "exercised", scenarios: ["lifecycle", "authorization"], evidence: "packages/decision assessDecisionEvidence is used to calculate evidence quality, confidence, governance and stewardship" },
   { id: "decision.accountability", area: "Decision", capability: "Decision rationale and accountable actor traceability", status: "exercised", scenarios: ["lifecycle"], evidence: "Decision record stores actor, rationale and timestamp" },
   { id: "decision.outcomes", area: "Outcomes", capability: "Outcome capture linked to a recorded decision", status: "exercised", scenarios: ["lifecycle"], evidence: "Outcome operation requires a prior decision", limitation: "No calibration or automated policy adaptation is claimed." },
   { id: "agency.calibration-learning", area: "Agency", capability: "Calibration, policy learning, self-diagnosis and agency cycle", status: "not-verified", scenarios: [], evidence: "@signal/agency is a workspace dependency candidate but not invoked by this app." },
-  { id: "memory.lifecycle", area: "Decision memory", capability: "Persistent decision memory, retrieval, review, compaction and retention", status: "not-verified", scenarios: [], evidence: "No decision-memory store is configured in this implementation." },
+  { id: "memory.lifecycle", area: "Decision memory", capability: "Decision record and review persistence, retrieval, compaction and retention", status: "partial", scenarios: ["lifecycle"], evidence: "Public SDK createInMemoryDecisionMemoryStore stores decision records and outcome reviews", limitation: "In-memory only; PostgreSQL persistence, scoped retrieval, compaction and retention jobs are not exercised." },
   { id: "commitment.constraints", area: "Commitment", capability: "Resource constraints, feasibility and allocation policy", status: "not-verified", scenarios: [], evidence: "@signal/commitment is not invoked by this app." },
   { id: "semantic-state.interpretation", area: "Semantic state", capability: "Generic state lexicon and semantic interpretation", status: "not-verified", scenarios: [], evidence: "@signal/semantic-state is not invoked by this app." },
   { id: "kernel.compatibility", area: "Kernel", capability: "Kernel compatibility adapters and legacy orchestration", status: "not-verified", scenarios: [], evidence: "No legacy adapter is used by the reference workflow." },
@@ -50,6 +50,8 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     a(decision.result === "approved", "decision should be recorded");
     const outcome = await app.recordOutcome({ requestId: request.id, tenantId: "tenant-a", result: "success", notes: "Temporary access expired as scheduled." });
     a(outcome.result === "success", "outcome should be linked to decision");
+    a(app.listDecisionRecords().length === 1, "Signal decision memory should persist a decision record");
+    a(app.listDecisionReviews().length === 1, "Signal decision memory should persist an outcome review");
     a(app.events.length >= 4, "lifecycle should emit request, assessment, decision and outcome events");
   });
   await run("authorization", "Insufficient evidence blocks approval", async (a) => {
