@@ -5,6 +5,7 @@ import {
   createInMemoryDecisionMemoryStore,
   createSignalRuntime,
   type SignalEventDefinition,
+  type SignalExecutionContext,
   type SignalMutationDefinition,
   type SignalQueryDefinition,
 } from "@signal/sdk-node";
@@ -67,6 +68,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
   const runtime = createSignalRuntime({
     runtimeName: "signal-reference-lab",
     bindings: { inProcess: true },
+    requireMutationAuthorization: true,
     observabilityPort: {
       emit(context) {
         telemetry.push(context);
@@ -112,6 +114,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     kind: "mutation" as const,
     idempotency: "required" as const,
     description: "Create a case request exactly once for a supplied idempotency key.",
+    authorize: authorizeMutation,
     inputSchema: requestInput,
     resultSchema: z.object({ request: z.any() }),
     async handler(input: z.infer<typeof requestInput>) {
@@ -140,6 +143,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     kind: "mutation" as const,
     idempotency: "required" as const,
     description: "Attach sourced evidence and run Signal's decision assessment.",
+    authorize: authorizeMutation,
     inputSchema: evidenceInput,
     resultSchema: z.object({ evidence: z.any(), assessment: z.any() }),
     async handler(input: z.infer<typeof evidenceInput>) {
@@ -170,6 +174,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     kind: "mutation" as const,
     idempotency: "required" as const,
     description: "Record an accountable decision after assessment.",
+    authorize: authorizeMutation,
     inputSchema: decisionInput,
     resultSchema: z.object({ decision: z.any() }),
     async handler(input: z.infer<typeof decisionInput>) {
@@ -258,6 +263,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     kind: "mutation" as const,
     idempotency: "required" as const,
     description: "Execute an explicitly approved case action exactly once.",
+    authorize: authorizeMutation,
     inputSchema: actionInput,
     resultSchema: z.object({ action: z.any() }),
     async handler(input: z.infer<typeof actionInput>) {
@@ -291,6 +297,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     kind: "mutation" as const,
     idempotency: "required" as const,
     description: "Record the observed outcome after an approved action.",
+    authorize: authorizeMutation,
     inputSchema: outcomeInput,
     resultSchema: z.object({ outcome: z.any() }),
     async handler(input: z.infer<typeof outcomeInput>) {
@@ -518,6 +525,7 @@ function requireTenant(
 
 function context(system: string, causationId?: string) {
   return {
+    auth: { subject: system, scopes: ["lab:write"] },
     causationId,
     source: {
       system,
@@ -526,6 +534,12 @@ function context(system: string, causationId?: string) {
     },
     meta: { scenario: "reference-lifecycle" },
   };
+}
+
+function authorizeMutation(_input: unknown, execution: SignalExecutionContext) {
+  if (!execution.request.auth?.subject || !execution.request.auth.scopes?.includes("lab:write")) {
+    throw new Error("Trusted lab:write authorization is required.");
+  }
 }
 
 function hash(value: string) {
