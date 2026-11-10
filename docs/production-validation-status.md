@@ -10,7 +10,7 @@ This document is the release gate for Signal itself. A passing package build or 
 - The PostgreSQL distributed circuit-breaker adapter coordinates a single half-open probe across independent adapter instances with expiring UUID fencing tokens.
 - Audit-chain verification checks contiguous zero-based sequence numbers, linkage, SHA-256 formatting, timestamps, identity fields, and entry hashes.
 - Ed25519 signed audit checkpoints can bind a chain sequence/head hash to a key ID; verification supports an externally managed trusted public key. The PostgreSQL audit-ledger adapter persists contiguous entries and checkpoints, serializes append operations, and uses append-only triggers plus default privilege revocation.
-- The runtime public entrypoint exports resilience, audit-chain, and outbox APIs.
+- The runtime public entrypoint exports resilience, audit-chain, outbox, and versioned replay-evidence primitives.
 - The PostgreSQL transactional adapter atomically commits an idempotency result with emitted event envelopes in one database transaction.
 - The outbox uses leased claims with `FOR UPDATE SKIP LOCKED`, bounded batches, at-least-once delivery, retry backoff, acknowledgement ownership, dead-letter state, and bounded-cardinality queue-health statistics.
 - The runtime refuses to dispatch emitted events for an idempotent mutation when the storage adapter lacks the transactional outbox capability.
