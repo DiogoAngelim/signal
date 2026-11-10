@@ -1,7 +1,7 @@
 import { generateKeyPairSync, randomUUID } from "node:crypto";
 import { resolve } from "node:path";
 import { execFileSync } from "node:child_process";
-import { createAuditChainEntry, verifyChain, signAuditCheckpoint, verifyAuditCheckpoint, verifyCheckpointAgainstChain, createReplayEvidenceRecord, verifyReplayEvidenceRecord, createCircuitBreakerController, createRetryBudget, executeWithRetry, createSignalRuntime, createInProcessDispatcher, createDistributedCircuitBreakerController, createPrometheusMetricsRecorder } from "@signal/sdk-node";
+import { createAuditChainEntry, verifyChain, verifyAuditChainEntry, signAuditCheckpoint, verifyAuditCheckpoint, verifyCheckpointAgainstChain, createReplayEvidenceRecord, verifyReplayEvidenceRecord, createCircuitBreakerController, createRetryBudget, executeWithRetry, createSignalRuntime, createInProcessDispatcher, createDistributedCircuitBreakerController, createPrometheusMetricsRecorder } from "@signal/sdk-node";
 import { z } from "zod";
 import { createSignalHttpServer } from "@signal/binding-http";
 import { createPostgresTransactionalStore, createPostgresConsumerInbox, createPostgresRetryBudget, createPostgresCircuitBreakerPort, createPostgresReplayEvidenceStore, createPostgresAuditLedger } from "@signal/idempotency-postgres";
@@ -216,11 +216,7 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
       let auditHistory: ReturnType<typeof createAuditChainEntry>[] = [];
       const auditLedger = createPostgresAuditLedger({
         connectionString,
-        verifyEntry(entry) {
-          const existing = auditHistory.find((item) => item.sequence === entry.sequence);
-          if (existing) return existing.hash === entry.hash && verifyChain(auditHistory.slice(0, entry.sequence + 1));
-          return verifyChain([...auditHistory, entry]);
-        },
+        verifyEntry: verifyAuditChainEntry,
         verifyCheckpoint(checkpoint) { return verifyAuditCheckpoint(checkpoint, publicKey, keyId); }
       });
       try {
