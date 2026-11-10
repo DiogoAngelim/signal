@@ -61,45 +61,48 @@ export function registerSignalHttpRoutes(
     throw new RangeError("Configure either a custom rate-limit store or Redis, not both.");
   }
 
-  // The plugin defaults to a process-local store. Supply a shared Redis client
-  // or custom store constructor when multiple instances must share counters.
-  app.register(rateLimit, {
-    global: false,
-    max: 1_000,
-    timeWindow: 60_000,
-    ...(options.rateLimits?.store ? { store: options.rateLimits.store } : {}),
-    ...(options.rateLimits?.redis ? { redis: options.rateLimits.redis } : {}),
-    ...(options.rateLimits?.nameSpace ? { nameSpace: options.rateLimits.nameSpace } : {}),
-    ...(options.rateLimits?.keyGenerator ? { keyGenerator: options.rateLimits.keyGenerator } : {}),
-    skipOnError: options.rateLimits?.skipOnError ?? false,
-    errorResponseBuilder: (_request, context) => ({
-      ok: false,
-      error: {
-        code: "RATE_LIMIT_EXCEEDED",
-        message: "Request rate limit exceeded.",
-        category: "rate_limit",
-        retryable: true,
-        details: { retryAfterSeconds: Math.ceil(context.ttl / 1000) },
-      },
-    }),
-  });
+  // Register the limiter before declaring the routes. Keeping the plugin and
+  // protected routes in one encapsulated scope ensures its onRoute hooks see
+  // each route's per-endpoint configuration.
+  app.register(async (scope) => {
+    await scope.register(rateLimit, {
+      global: false,
+      max: 1_000,
+      timeWindow: 60_000,
+      ...(options.rateLimits?.store ? { store: options.rateLimits.store } : {}),
+      ...(options.rateLimits?.redis ? { redis: options.rateLimits.redis } : {}),
+      ...(options.rateLimits?.nameSpace ? { nameSpace: options.rateLimits.nameSpace } : {}),
+      ...(options.rateLimits?.keyGenerator ? { keyGenerator: options.rateLimits.keyGenerator } : {}),
+      skipOnError: options.rateLimits?.skipOnError ?? false,
+      errorResponseBuilder: (_request, context) => ({
+        ok: false,
+        error: {
+          code: "RATE_LIMIT_EXCEEDED",
+          message: "Request rate limit exceeded.",
+          category: "rate_limit",
+          retryable: true,
+          details: { retryAfterSeconds: Math.ceil(context.ttl / 1000) },
+        },
+      }),
+    });
 
-  app.get(`${basePath}/capabilities`, async (request, reply) =>
-    handleCapabilitiesRequest(runtime, request, reply),
-  );
+    scope.get(`${basePath}/capabilities`, async (request, reply) =>
+      handleCapabilitiesRequest(runtime, request, reply),
+    );
 
-  app.post(`${basePath}/query/:name`, {
-    config: { rateLimit: queryRateLimit },
-  }, async (request, reply) => {
-    const trustedAuth = await options.resolveAuthContext?.(request);
-    return handleQueryRequest(runtime, request as never, reply, trustedAuth);
-  });
+    scope.post(`${basePath}/query/:name`, {
+      config: { rateLimit: queryRateLimit },
+    }, async (request, reply) => {
+      const trustedAuth = await options.resolveAuthContext?.(request);
+      return handleQueryRequest(runtime, request as never, reply, trustedAuth);
+    });
 
-  app.post(`${basePath}/mutation/:name`, {
-    config: { rateLimit: mutationRateLimit },
-  }, async (request, reply) => {
-    const trustedAuth = await options.resolveAuthContext?.(request);
-    return handleMutationRequest(runtime, request as never, reply, trustedAuth);
+    scope.post(`${basePath}/mutation/:name`, {
+      config: { rateLimit: mutationRateLimit },
+    }, async (request, reply) => {
+      const trustedAuth = await options.resolveAuthContext?.(request);
+      return handleMutationRequest(runtime, request as never, reply, trustedAuth);
+    });
   });
 
   return app;
