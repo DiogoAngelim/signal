@@ -30,7 +30,7 @@ This document is the release gate for Signal itself. A passing package build or 
 | Retry | Capped exponential backoff and optional full jitter | Retry ownership, retry budgets, deadline propagation, and idempotent side effects remain caller/adapter responsibilities |
 | Calibration | Metrics and uncertainty intervals are computed from supplied traces | No model is certified without representative, independent, leakage-free production outcomes |
 | Drift | Chronological window comparison is descriptive | It is not a hypothesis test, causal diagnosis, or automatic rollback signal |
-| Observability | Bounded in-memory metric recorder is available | It is not durable and does not provide alerting, aggregation, or retention guarantees |
+| Observability | Runtime emits start/completion/error lifecycle events; failed query, mutation, and event executions include duration and error code. A bounded in-memory recorder and bounded asynchronous exporter buffer expose dropped-event and export-failure counters. | The buffer is process-local and best-effort; it does not provide durable delivery, aggregation, cardinality enforcement, alerting, or retention guarantees. A deployment must supply and validate its exporter, backend, labels, sampling, retention, and alert policies. |
 | Performance | CI archives reproducible decision/replay, calibration/learning, audit-chain/checkpoint, runtime, HTTP/rate-limit, in-memory breaker, PostgreSQL outbox/idempotency, distributed-breaker, and RabbitMQ queue benchmarks with p50/p95/p99, throughput, queue age/backlog, CPU, and memory observations | CI runner and ephemeral PostgreSQL results are regression evidence, not production capacity or SLO certification |
 
 ## Release-blocking production evidence
