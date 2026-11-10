@@ -69,7 +69,7 @@ test("four-pillar scorecard scores performance only against a matched, integrity
   const environment = { node: "v22.0.0", platform: "linux", osRelease: "6.1", arch: "x64", cpuModel: "fixture CPU", cpus: 8, rssBefore: 1000, rssAfter: 2000, heapUsedBefore: 500, heapUsedAfter: 1000 };
   const workload = { operation: "lab.request.get.v1", iterations: 100, concurrency: 4, warmup: 10 };
   const timing = { totalMs: 100, throughputPerSecond: 1000, p50Ms: 1, p90Ms: 2, p95Ms: 3, p99Ms: 4, maxMs: 5, minMs: 0.5 };
-  const baseline = { timing: { ...timing, p95Ms: 4, p99Ms: 5, throughputPerSecond: 900 }, environment, workload };
+  const baseline = { timing: { ...timing, p95Ms: 4, p99Ms: 5, throughputPerSecond: 900 }, environment, workload, integrity: { valid: true, expectedSamples: 100, actualSamples: 100, invalidSamples: 0 } };
   const benchmark = { timing, environment, workload, integrity: { valid: true, expectedSamples: 100, actualSamples: 100, invalidSamples: 0 }, baseline };
   const report = scoreQuality(results, benchmark);
   assert.ok(report.overall !== null);
@@ -88,6 +88,7 @@ test("four-pillar scorecard rejects mismatched performance environments", () => 
       timing: { totalMs: 1, throughputPerSecond: 100, p50Ms: 1, p90Ms: 1, p95Ms: 1, p99Ms: 1, maxMs: 1, minMs: 1 },
       environment: { node: "v22", platform: "linux", osRelease: "6.1", arch: "x64", cpuModel: "different", cpus: 8, rssBefore: 1, rssAfter: 2, heapUsedBefore: 1, heapUsedAfter: 2 },
       workload: { operation: "query", iterations: 100, concurrency: 4, warmup: 10 },
+      integrity: { valid: true, expectedSamples: 100, actualSamples: 100, invalidSamples: 0 },
     },
   };
   const report = scoreQuality([], benchmark);
