@@ -1,3 +1,4 @@
+import { createSignalHttpServer } from "@signal/binding-http";
 import { createReferenceLab } from "./signal-app.js";
 import type { CaseRequest } from "./domain.js";
 
@@ -12,7 +13,7 @@ const capabilities: Capability[] = [
   { id: "runtime.authorization", area: "Runtime", capability: "Runtime-level mutation authorization policies", status: "not-verified", scenarios: [], evidence: "Business hard-stop is app-level; runtime authorization mode is not configured." },
   { id: "runtime.idempotency", area: "Idempotency", capability: "Reservation, replay, payload conflict and concurrent duplicate handling", status: "partial", scenarios: ["idempotency"], evidence: "Stable mutation keys are passed to the default memory storage port", limitation: "No distributed storage adapter or cross-process test." },
   { id: "events.publish-subscribe", area: "Events", capability: "Event publication and in-process subscriber delivery", status: "exercised", scenarios: ["lifecycle"], evidence: "Four domain lifecycle events are published and subscribed" },
-  { id: "binding.http", area: "HTTP binding", capability: "HTTP routes, transport auth context and error mapping", status: "not-verified", scenarios: [], evidence: "The example web server is a thin local UI adapter, not @signal/binding-http." },
+  { id: "binding.http", area: "HTTP binding", capability: "Signal HTTP query/mutation routes, validation and auth-claim rejection", status: "exercised", scenarios: ["http-binding"], evidence: "@signal/binding-http Fastify server is exercised through inject(); external verified identity middleware remains unconfigured." },
   { id: "postgres.transactions", area: "PostgreSQL", capability: "Database transactions, migrations, locks and persistence", status: "not-verified", scenarios: [], evidence: "No PostgreSQL adapter or database is configured." },
   { id: "outbox.durability", area: "Outbox", capability: "Durable outbox, leases, fencing and crash recovery", status: "not-verified", scenarios: [], evidence: "Default in-process dispatcher only; no durable worker is started." },
   { id: "inbox.transactionality", area: "Inbox", capability: "Transactional consumer inbox and effect deduplication", status: "not-verified", scenarios: [], evidence: "Subscriber callback deduplicates in process only." },
@@ -95,6 +96,21 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     const ids = attempts.flatMap((item) => item.status === "fulfilled" ? [item.value.id] : []);
     a(new Set(ids).size === 1, "all concurrent callers should receive the same request identity");
     a(app.events.filter((event) => event.name === "lab.request.received.v1").length === 1, "concurrent duplicate should emit one received event");
+  });
+  await run("http-binding", "Signal HTTP binding validates and dispatches a query", async (a) => {
+    const app = createReferenceLab();
+    const request = await app.submitRequest({ tenantId: "tenant-a", title: "Review HTTP access", description: "Exercise the Signal HTTP binding query endpoint." });
+    const server = createSignalHttpServer(app.runtime, { basePath: "/signal" });
+    await server.ready();
+    try {
+      const response = await server.inject({ method: "POST", url: "/signal/query/lab.request.get.v1", payload: { payload: { requestId: request.id, tenantId: "tenant-a" }, context: { source: { system: "reference-lab-test", transport: "http", runtime: "vitest" } } } });
+      a(response.statusCode === 200, "Signal HTTP query should return HTTP 200");
+      a(response.json().ok === true, "Signal HTTP response should preserve the runtime result envelope");
+      const rejected = await server.inject({ method: "POST", url: "/signal/query/lab.request.get.v1", payload: { payload: { requestId: request.id, tenantId: "tenant-a" }, auth: { subject: "forged-user" } } });
+      a(rejected.statusCode === 400, "caller-supplied authentication claims must be rejected");
+    } finally {
+      await server.close();
+    }
   });
   await run("invalid-input", "Malformed request is rejected by the Signal contract", async (a) => {
     const app = createReferenceLab(); let rejected = false;
