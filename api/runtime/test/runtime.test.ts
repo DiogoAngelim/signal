@@ -1249,15 +1249,24 @@ describe("runtime", () => {
         },
       }),
     );
-    runtime.registerEvent(
+    const eventRuntime = new SignalRuntime({
+      eventPort: {
+        dispatch: async () => {
+          throw new Error("broker unavailable");
+        },
+        subscribe: () => () => undefined,
+      },
+      observabilityPort: {
+        emit: (observation) => observations.push(observation),
+      },
+    });
+    eventRuntime.registerEvent(
       defineEvent({
         name: "observed.event.failure.v1",
         kind: "event",
         inputSchema: z.object({}),
         resultSchema: z.object({ ok: z.boolean() }),
-        handler: () => {
-          throw new Error("event failure");
-        },
+        handler: (payload) => payload,
       }),
     );
 
@@ -1267,7 +1276,7 @@ describe("runtime", () => {
       {},
       { idempotencyKey: "observed-failure-1" },
     );
-    const event = await runtime.execute({
+    const event = await eventRuntime.execute({
       kind: "event",
       name: "observed.event.failure.v1",
       payload: {},
