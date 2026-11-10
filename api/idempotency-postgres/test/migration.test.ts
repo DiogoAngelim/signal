@@ -41,6 +41,19 @@ describe("postgres idempotency migration", () => {
     expect(sql).toContain("signal_idempotency_expired_reservations");
   });
 
+  it("creates append-only audit entries and signed checkpoint storage", () => {
+    const sql = readFileSync(
+      join(__dirname, "../src/drizzle/migrations/0005_append_only_audit_ledger.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_audit_entries");
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_audit_checkpoints");
+    expect(sql).toContain("signal_audit_entries_no_update_delete");
+    expect(sql).toContain("signal_audit_entries_no_truncate");
+    expect(sql).toContain("signal_audit_checkpoints_no_update_delete");
+    expect(sql).toContain("REVOKE UPDATE, DELETE, TRUNCATE");
+  });
+
   it("creates durable cross-process circuit breaker state with fenced probe leases", () => {
     const sql = readFileSync(
       join(__dirname, "../src/drizzle/migrations/0004_distributed_circuit_breakers.sql"),
