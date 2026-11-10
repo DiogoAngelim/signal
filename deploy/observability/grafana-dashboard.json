@@ -1,0 +1,119 @@
+{
+  "uid": "signal-runtime",
+  "title": "Signal Runtime",
+  "tags": ["signal", "runtime", "slo"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Execution throughput",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (operation_kind, execution_mode) (rate(signal_execution_started_total[5m]))",
+          "legendFormat": "{{operation_kind}} / {{execution_mode}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Execution failure ratio",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(signal_execution_failed_total[5m])) / clamp_min(sum(rate(signal_execution_started_total[5m])), 1e-9)",
+          "legendFormat": "failed / started"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 }, "overrides": [] }
+    },
+    {
+      "id": 3,
+      "title": "Live execution p99 latency",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.99, sum by (le, operation_kind) (rate(signal_execution_duration_seconds_bucket{execution_mode=\"live\"}[5m])))",
+          "legendFormat": "{{operation_kind}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] }
+    },
+    {
+      "id": 4,
+      "title": "Subscriber delivery outcomes",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(signal_subscribers_delivered_total[5m]))",
+          "legendFormat": "delivered"
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(signal_subscribers_failed_total[5m]))",
+          "legendFormat": "failed"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Outbox backlog",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "signal_outbox_pending",
+          "legendFormat": "pending"
+        },
+        {
+          "refId": "B",
+          "expr": "signal_outbox_dead_lettered",
+          "legendFormat": "dead-lettered"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Runtime errors by bounded source",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (source) (rate(signal_errors_total[5m]))",
+          "legendFormat": "{{source}}"
+        }
+      ]
+    }
+  ]
+}
