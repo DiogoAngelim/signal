@@ -2,11 +2,6 @@
   "version": 2,
   "buildCommand": "pnpm --filter @signal/reference-lab build",
   "installCommand": "pnpm install --frozen-lockfile",
-  "functions": {
-    "api/[...path].ts": {
-      "maxDuration": 30
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
