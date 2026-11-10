@@ -105,6 +105,27 @@ describe("durable outbox dispatcher", () => {
     }
   });
 
+  it("does not acknowledge or retry after lease renewal is rejected", async () => {
+    vi.useFakeTimers();
+    try {
+      const harness = createOutbox([record("event-fenced")]);
+      harness.outbox.renewLease = vi.fn(async () => false);
+      let finish!: () => void;
+      const pending = dispatchOutboxBatch(
+        harness.outbox,
+        { dispatch: () => new Promise<void>((resolve) => { finish = resolve; }), subscribe: () => () => undefined },
+        { workerId: "worker-fenced", leaseMs: 1000 },
+      );
+      await vi.advanceTimersByTimeAsync(350);
+      finish();
+      await expect(pending).resolves.toMatchObject({ delivered: 0, scheduled: 0, leaseLost: 1 });
+      expect(harness.outbox.acknowledge).not.toHaveBeenCalled();
+      expect(harness.outbox.retry).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("does not report delivery when the lease was lost before acknowledgement", async () => {
     const harness = createOutbox([record("event-4")]);
     harness.outbox.acknowledge = vi.fn(async () => false);
