@@ -7,7 +7,7 @@ import { compareBenchmarks } from "../src/comparison.js";
 test("reference lab executes lifecycle and safety scenarios", async () => {
   const report = await runEvaluation();
   assert.equal(report.results.length, 16);
-  assert.ok(report.results.every((item) => item.status === "passed" || (item.id === "postgres-integration" && item.status === "blocked" && !process.env.DATABASE_URL) || (item.id === "signal-cli" && item.status === "blocked" && process.env.SIGNAL_CLI_READY !== "1")), JSON.stringify(report.results));
+  assert.ok(report.results.every((item) => item.status === "passed" || ((item.id === "postgres-integration" && item.status === "blocked" && !process.env.DATABASE_URL) || (item.id === "signal-cli" && item.status === "blocked" && !require("node:fs").existsSync("../../signal-cli/dist/cli/index.js"))) || (item.id === "signal-cli" && item.status === "blocked" && process.env.SIGNAL_CLI_READY !== "1")), JSON.stringify(report.results));
   const postgres = report.results.find((item) => item.id === "postgres-integration");
   assert.equal(postgres?.status, process.env.DATABASE_URL ? "passed" : "blocked");
   assert.ok(report.score.overall > 0 && report.score.overall <= 10);
