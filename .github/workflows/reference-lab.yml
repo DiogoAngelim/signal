@@ -69,7 +69,7 @@ jobs:
       - name: Build Reference Lab
         id: reference_lab_build
         run: pnpm --filter @signal/reference-lab build
-      - name: Semantic domain typecheck
+      - name: Semantic application typecheck
         run: pnpm --filter @signal/reference-lab typecheck
         env:
           NODE_OPTIONS: --max-old-space-size=3072
