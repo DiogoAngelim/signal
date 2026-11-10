@@ -118,3 +118,29 @@ Use these terms precisely:
 - **Production validated:** production controls, SLOs, recovery, security, and real workload evidence were established.
 
 The immediate credibility deliverable is one rigorously reported Reference Lab case study. The next external business case should be Workbench, but only after a real Signal platform integration and evidence-backed comparison.
+
+## Verified CI evidence: Reference Lab
+
+The existing Reference Lab workflow was inspected for run **[42853111860](https://github.com/DiogoAngelim/signal/actions/runs/42853111860)** on commit `7611e0e0fa61b1dd8299127f1754d631488fc089` (2026-11-10).
+
+Observed results from the completed GitHub Actions job:
+- Job conclusion: **success**.
+- PostgreSQL 16 service started and passed its health check.
+- Frozen pnpm workspace installation succeeded.
+- Signal workspace library build succeeded.
+- Reference Lab PostgreSQL migrations succeeded.
+- Signal CLI installation and build succeeded.
+- Reference Lab build and semantic typecheck succeeded.
+- Compiled Reference Lab test suite succeeded.
+- Coverage verification succeeded.
+- Evaluation and benchmark evidence artifacts were generated and uploaded.
+- **17/17 scenarios passed; 0 blocked; 0 failed.**
+- **12/12 Signal-targeted scenarios passed.**
+- **28/34 capabilities directly exercised; 6 partial.**
+- PostgreSQL integration reported **21 assertions passed**.
+
+The evaluation report itself labels the score provisional and explicitly says it is not certification or production-readiness evidence. The four-pillar composite score is withheld until each pillar has sufficient comparable evidence. Performance is neutral until production-like measurements are available.
+
+Artifact: `signal-reference-lab-42853111860-1` (GitHub Actions artifact ID `13782365395`; retained until 2026-12-10).
+
+This is a genuine, reproducible CI verification result for the Reference Lab at the stated commit. It is not a deployment validation, production validation, independent customer outcome, or evidence that the currently updated documentation PR commit has rerun the Reference Lab workflow.
