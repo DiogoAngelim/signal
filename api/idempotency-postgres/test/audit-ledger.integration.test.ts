@@ -70,6 +70,13 @@ integration("PostgreSQL append-only audit ledger", () => {
     );
     await ledger.appendCheckpoint(checkpoint);
     expect(await ledger.latestCheckpoint()).toMatchObject(checkpoint);
+    const staleCheckpoint = signAuditCheckpoint(
+      [],
+      { keyId, privateKey },
+      "2026-11-10T10:00:03.000Z",
+    );
+    await expect(ledger.appendCheckpoint(staleCheckpoint))
+      .rejects.toThrow("cannot move backward");
     await expect(ledger.appendCheckpoint({
       ...checkpoint,
       sequence: 1,
