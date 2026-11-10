@@ -73,5 +73,8 @@
     "typescript": "^5.7.3",
     "vite": "^8.0.10",
     "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "pg": "catalog:"
   }
 }
