@@ -31,7 +31,9 @@ integration("PostgreSQL immutable replay evidence store", () => {
 
   it("persists evidence idempotently and rejects mutation or conflicting reuse", async () => {
     const executionId = "replay-" + randomUUID();
+    const tenantId = "tenant-replay-test";
     const record = createReplayEvidenceRecord({
+      tenantId,
       executionId,
       operationName: "decision.assess.v1",
       operationVersion: "1",
@@ -49,14 +51,15 @@ integration("PostgreSQL immutable replay evidence store", () => {
 
     await store.save(record);
     await store.save(record);
-    expect(await store.get(executionId)).toEqual(record);
+    expect(await store.get({ tenantId, executionId })).toEqual(record);
 
     // A new adapter/pool instance models recovery after the original process exits.
     const restartedStore = createPostgresReplayEvidenceStore({
       connectionString: connectionString!,
       applicationName: "signal-replay-evidence-restart-test",
     });
-    expect(await restartedStore.get(executionId)).toEqual(record);
+    expect(await restartedStore.get({ tenantId, executionId })).toEqual(record);
+    expect(await restartedStore.get({ tenantId: "another-tenant", executionId })).toBeNull();
     await restartedStore.close();
 
     const conflicting = {
