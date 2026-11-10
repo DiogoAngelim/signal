@@ -28,7 +28,8 @@ Apply migrations in numeric order through 0005_append_only_audit_ledger.sql
 for the audit ledger. If using the replay evidence store, also apply
 0006_immutable_replay_evidence.sql before granting access to
 signal_replay_evidence. Apply 0007_shared_retry_budgets.sql before using the
-PostgreSQL retry-budget adapter. Run migrations as a dedicated schema owner, not as the
+PostgreSQL retry-budget adapter, and 0008_transactional_consumer_inbox.sql
+before using the transactional consumer inbox. Run migrations as a dedicated schema owner, not as the
 application runtime role. Do not let application processes execute DDL.
 
 ## Least-privilege application role
@@ -40,7 +41,7 @@ Create a non-owner role for the runtime and grant only required operations:
     GRANT USAGE ON SCHEMA public TO signal_audit_writer;
     GRANT SELECT, INSERT ON signal_audit_entries TO signal_audit_writer;
     GRANT SELECT, INSERT ON signal_audit_checkpoints TO signal_audit_writer;
-    GRANT SELECT, INSERT ON signal_replay_evidence TO signal_audit_writer;
+    GRANT SELECT, INSERT ON signal_replay_evidence TO signal_audit_writer;\n    GRANT SELECT, INSERT, UPDATE ON signal_retry_budgets TO signal_retry_budget;\n    GRANT INSERT ON signal_consumer_inbox TO signal_consumer;
     GRANT USAGE, SELECT ON SEQUENCE signal_audit_checkpoints_checkpoint_id_seq
       TO signal_audit_writer;
     REVOKE UPDATE, DELETE, TRUNCATE ON signal_audit_entries FROM signal_audit_writer;
