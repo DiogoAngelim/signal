@@ -139,6 +139,77 @@ describe("http binding", () => {
     );
   });
 
+  it("enforces independent query and mutation rate limits with structured 429 responses", async () => {
+    const runtime = new SignalRuntime({
+      eventPort: noopEventPort,
+      storagePort: createMemoryIdempotencyStore(),
+    });
+    runtime.registerQuery(
+      defineQuery({
+        name: "limited.read.v1",
+        kind: "query",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: () => ({ ok: true }),
+      }),
+    );
+    runtime.registerMutation(
+      defineMutation({
+        name: "limited.write.v1",
+        kind: "mutation",
+        idempotency: "required",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: () => ({ ok: true }),
+      }),
+    );
+
+    const app = createSignalHttpServer(runtime, {
+      rateLimits: {
+        query: { max: 1, timeWindow: 60_000 },
+        mutation: { max: 1, timeWindow: 60_000 },
+      },
+    });
+
+    const queryAllowed = await app.inject({
+      method: "POST",
+      url: "/signal/query/limited.read.v1",
+      payload: { payload: {} },
+    });
+    const queryLimited = await app.inject({
+      method: "POST",
+      url: "/signal/query/limited.read.v1",
+      payload: { payload: {} },
+    });
+    const mutationAllowed = await app.inject({
+      method: "POST",
+      url: "/signal/mutation/limited.write.v1",
+      payload: { payload: {}, idempotencyKey: "limited-1" },
+    });
+    const mutationLimited = await app.inject({
+      method: "POST",
+      url: "/signal/mutation/limited.write.v1",
+      payload: { payload: {}, idempotencyKey: "limited-2" },
+    });
+    const health = await app.inject({ method: "GET", url: "/health" });
+
+    expect(queryAllowed.statusCode).toBe(200);
+    expect(queryLimited.statusCode).toBe(429);
+    expect(queryLimited.headers["retry-after"]).toBeDefined();
+    expect(queryLimited.json()).toMatchObject({
+      ok: false,
+      error: {
+        code: "RATE_LIMIT_EXCEEDED",
+        category: "rate_limit",
+        retryable: true,
+      },
+    });
+    expect(mutationAllowed.statusCode).toBe(200);
+    expect(mutationLimited.statusCode).toBe(429);
+    expect(health.statusCode).toBe(200);
+    await app.close();
+  });
+
   it("rejects client authentication claims and uses only trusted server context", async () => {
     const runtime = new SignalRuntime({
       eventPort: noopEventPort,
