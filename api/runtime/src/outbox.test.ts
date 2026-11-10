@@ -143,6 +143,18 @@ describe("durable outbox dispatcher", () => {
     expect(result.leaseLost).toBe(1);
   });
 
+  it("rejects fractional and excessive lease durations before claiming", async () => {
+    const harness = createOutbox([]);
+    for (const leaseMs of [999.5, 1000.5, 86_400_001]) {
+      await expect(dispatchOutboxBatch(
+        harness.outbox,
+        { dispatch: vi.fn(), subscribe: () => () => undefined },
+        { leaseMs },
+      )).rejects.toThrow("leaseMs");
+    }
+    expect(harness.outbox.claimBatch).not.toHaveBeenCalled();
+  });
+
   it("rejects invalid batch bounds before claiming", async () => {
     const harness = createOutbox([]);
     await expect(
