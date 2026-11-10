@@ -96,6 +96,10 @@ describe("replay evidence", () => {
       }],
     };
     expect(verifyReplayEvidenceRecord(tampered)).toBe(false);
+    expect(verifyReplayEvidenceRecord({
+      ...record,
+      tenantId: "tenant-forged",
+    })).toBe(false);
     await expect(replayWithEvidence(tampered, identity, () => ({ converted: 4.5 })))
       .rejects.toThrow("failed structural or digest verification");
   });
