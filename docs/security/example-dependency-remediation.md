@@ -15,13 +15,17 @@ Affected package families:
 - `follow-redirects` 1.16.2 or newer
 - `body-parser` 2.4.0 or newer
 - `zod` 4.6.6 or newer
+- `uuid` 11.1.1 or newer
+- `qs` 6.16.1 or newer
 
 The Aware example declares Zod 4 directly. Keep the pnpm lockfile synchronized
 with root overrides and package manifests; frozen CI installs must remain
 mandatory.
 
-These overrides remediate the advisories reported for the audited dependency
-graph. They do not certify third-party financial integrations, validate
-provider credentials, or remove the need to monitor future advisories. When
+The structured pnpm audit artifact is retained with every security workflow
+run so advisory IDs, severity, affected versions, and dependency paths remain
+inspectable. These overrides remediate the advisories reported for the audited
+dependency graph. They do not certify third-party financial integrations,
+validate provider credentials, or remove the need to monitor future advisories. When
 upgrading an overridden package, run the complete example build, typecheck,
 test, and security-audit workflows before release.
