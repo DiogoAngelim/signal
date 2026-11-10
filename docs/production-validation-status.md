@@ -12,7 +12,7 @@ This document is the release gate for Signal itself. A passing package build or 
 - Ed25519 signed audit checkpoints can bind a chain sequence/head hash to a key ID; verification supports an externally managed trusted public key. The PostgreSQL audit-ledger adapter persists contiguous entries and checkpoints, serializes append operations, and uses append-only triggers plus default privilege revocation.
 - The runtime public entrypoint exports resilience, audit-chain, outbox, and versioned replay-evidence primitives.
 - The PostgreSQL transactional adapter atomically commits an idempotency result with emitted event envelopes in one database transaction. A separate PostgreSQL consumer inbox atomically deduplicates at-least-once deliveries with the consumer's own PostgreSQL side effects.
-- The outbox uses leased claims with `FOR UPDATE SKIP LOCKED`, bounded batches, at-least-once delivery, retry backoff, acknowledgement ownership, dead-letter state, and bounded-cardinality queue-health statistics.
+- The outbox uses leased claims with `FOR UPDATE SKIP LOCKED`, bounded batches, batch-wide lease heartbeat renewal, expiry-aware fencing for renewal/acknowledgement/retry, at-least-once delivery, retry backoff, dead-letter state, and bounded-cardinality queue-health statistics.
 - The runtime refuses to dispatch emitted events for an idempotent mutation when the storage adapter lacks the transactional outbox capability.
 - The in-memory adapter implements the same contract for deterministic tests; it is not durable.
 - Versioned replay-evidence records bind operation/version, handler artifact digest, policy version, canonical input, external-read snapshots, and result fingerprints. An immutable PostgreSQL store persists these records; the replay validator rejects identity mismatches and result divergence.
@@ -41,7 +41,7 @@ Do not label Signal production-certified until the following evidence exists:
 1. **Transactional event delivery**
    - [x] Define an outbox contract that atomically persists the mutation result and emitted event records.
    - [x] Provide a PostgreSQL dispatcher with lease/claim, retry, dead-letter, and acknowledgement semantics.
-   - [x] Add PostgreSQL integration tests for atomic commit/rollback, lease recovery, acknowledgement ownership, and dead-lettering (executed in CI when database service is available).
+   - [x] Add PostgreSQL integration tests for atomic commit/rollback, lease renewal and recovery, expiry-aware acknowledgement/retry fencing, acknowledgement ownership, and dead-lettering (executed in CI when database service is available).
    - [x] Run a real RabbitMQ child-process SIGKILL simulation after publish and before acknowledgement; reclaim the lease, republish, and verify consumer inbox deduplication in CI. This validates the tested boundary, not every possible instruction-level crash point.
    - [x] Provide a PostgreSQL transactional consumer inbox that commits the deduplication key with consumer database side effects; test rollback, redelivery, and concurrent independent adapters.\n   - [ ] Require destination idempotency or reconciliation for third-party side effects. Do not claim exactly-once external side effects.
 
