@@ -100,12 +100,12 @@ export function createReplayEvidenceRecord(input: ReplayEvidenceInput): ReplayEv
     if (!Number.isFinite(Date.parse(read.observedAt))) {
       throw new ReplayEvidenceIntegrityError("External read observedAt must be a valid timestamp.");
     }
-    return {
+    return cloneAndFreeze({
       key: read.key,
-      value: cloneAndFreeze(read.value),
+      value: read.value,
       valueFingerprint: fingerprint(read.value),
       observedAt: read.observedAt,
-    };
+    });
   });
 
   return Object.freeze({
