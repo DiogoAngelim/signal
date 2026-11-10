@@ -26,7 +26,24 @@ permissions:
 jobs:
   runtime-dispatch-benchmark:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+    env:
+      SIGNAL_TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/signal_test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/signal_test
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: signal_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d signal_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -39,13 +56,23 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm build:library
+      - name: Apply database migrations
+        run: pnpm db:migrate
       - name: Measure runtime event dispatch
         run: node benchmarks/runtime-dispatch.mjs --iterations 3000 --runs 3 --concurrency 1,16,64 --output benchmark-results/runtime-dispatch.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - name: Measure HTTP binding and authorization path
+        run: node benchmarks/http-binding.mjs --iterations 1500 --runs 3 --concurrency 1,16,64 --output benchmark-results/http-binding.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - name: Measure PostgreSQL idempotency and outbox
+        run: node benchmarks/postgres-outbox.mjs --iterations 500 --runs 3 --concurrency 1,8,32 --output benchmark-results/postgres-outbox.json
         env:
           GITHUB_SHA: ${{ github.sha }}
       - uses: actions/upload-artifact@v4
         with:
           name: signal-engineering-measurements-${{ github.sha }}
-          path: benchmark-results/runtime-dispatch.json
+          path: benchmark-results/*.json
           if-no-files-found: error
           retention-days: 90
