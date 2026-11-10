@@ -172,39 +172,65 @@ export function createPostgresAuditLedger(
       ) {
         throw new Error("Invalid signed audit checkpoint.");
       }
-      const latest = await pool.query<{ sequence: string; entry_hash: string }>(
-        "SELECT sequence::text, entry_hash FROM signal_audit_entries ORDER BY sequence DESC LIMIT 1",
-      );
-      if (checkpoint.sequence === -1) {
-        if (latest.rows.length > 0 || checkpoint.chainHeadHash !== GENESIS_HASH) {
-          throw new Error("Empty-chain checkpoint does not match the persisted audit ledger.");
-        }
-      } else {
-        const anchor = await pool.query<{
-          entry_hash: string;
-          entry: SignalAuditLedgerEntry;
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        await client.query("SELECT pg_advisory_xact_lock(731946202)");
+        const priorCheckpoint = await client.query<{
+          sequence: string;
+          chain_head_hash: string;
         }>(
-          "SELECT entry_hash, entry FROM signal_audit_entries WHERE sequence = $1",
-          [checkpoint.sequence],
+          "SELECT sequence::text, chain_head_hash FROM signal_audit_checkpoints ORDER BY sequence DESC, stored_at DESC LIMIT 1",
         );
-        const anchoredEntry = anchor.rows[0];
-        if (
-          !anchoredEntry ||
-          anchoredEntry.entry_hash.trim() !== checkpoint.chainHeadHash ||
-          anchoredEntry.entry.hash !== checkpoint.chainHeadHash ||
-          anchoredEntry.entry.sequence !== checkpoint.sequence ||
-          !options.verifyEntry(anchoredEntry.entry)
-        ) {
-          throw new Error("Checkpoint does not match a verified persisted audit chain head.");
+        const previous = priorCheckpoint.rows[0];
+        if (previous && (
+          checkpoint.sequence < Number(previous.sequence) ||
+          (checkpoint.sequence === Number(previous.sequence) &&
+            checkpoint.chainHeadHash !== previous.chain_head_hash.trim())
+        )) {
+          throw new Error("Audit checkpoint sequence cannot move backward or fork an existing checkpoint.");
         }
+
+        const latest = await client.query<{ sequence: string; entry_hash: string }>(
+          "SELECT sequence::text, entry_hash FROM signal_audit_entries ORDER BY sequence DESC LIMIT 1",
+        );
+        if (checkpoint.sequence === -1) {
+          if (latest.rows.length > 0 || checkpoint.chainHeadHash !== GENESIS_HASH) {
+            throw new Error("Empty-chain checkpoint does not match the persisted audit ledger.");
+          }
+        } else {
+          const anchor = await client.query<{
+            entry_hash: string;
+            entry: SignalAuditLedgerEntry;
+          }>(
+            "SELECT entry_hash, entry FROM signal_audit_entries WHERE sequence = $1",
+            [checkpoint.sequence],
+          );
+          const anchoredEntry = anchor.rows[0];
+          if (
+            !anchoredEntry ||
+            anchoredEntry.entry_hash.trim() !== checkpoint.chainHeadHash ||
+            anchoredEntry.entry.hash !== checkpoint.chainHeadHash ||
+            anchoredEntry.entry.sequence !== checkpoint.sequence ||
+            !options.verifyEntry(anchoredEntry.entry)
+          ) {
+            throw new Error("Checkpoint does not match a verified persisted audit chain head.");
+          }
+        }
+        await client.query(
+          `INSERT INTO signal_audit_checkpoints
+            (version, key_id, sequence, chain_head_hash, created_at, signature)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [checkpoint.version, checkpoint.keyId, checkpoint.sequence,
+            checkpoint.chainHeadHash, checkpoint.createdAt, checkpoint.signature],
+        );
+        await client.query("COMMIT");
+      } catch (error) {
+        await rollback(client);
+        throw error;
+      } finally {
+        client.release();
       }
-      await pool.query(
-        `INSERT INTO signal_audit_checkpoints
-          (version, key_id, sequence, chain_head_hash, created_at, signature)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [checkpoint.version, checkpoint.keyId, checkpoint.sequence,
-          checkpoint.chainHeadHash, checkpoint.createdAt, checkpoint.signature],
-      );
     },
 
     async latestCheckpoint() {
