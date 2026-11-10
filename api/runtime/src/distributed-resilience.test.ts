@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { DistributedCircuitBreakerPort } from "@signal/ports";
+import type { DistributedCircuitBreakerPermit, DistributedCircuitBreakerPort } from "@signal/ports";
 import { createDistributedCircuitBreakerController } from "./distributed-resilience";
 
 describe("distributed runtime circuit breaker controller", () => {
   it("delegates state and forwards the exact probe generation token", async () => {
     const calls: unknown[][] = [];
-    let permit = { allowed: true, probeToken: "probe-generation-1" };
+    let permit: DistributedCircuitBreakerPermit = { allowed: true, probeToken: "probe-generation-1" };
     const port: DistributedCircuitBreakerPort = {
       async snapshot(key) {
         calls.push(["snapshot", key]);
