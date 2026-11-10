@@ -42,7 +42,8 @@ Save a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then com
 | Mutation idempotency and concurrent duplicates | Partial: memory-backed runtime only; no distributed proof |
 | Tenant boundary | Exercised at application repository boundary; not an external identity/authentication certification |
 | Decision evidence assessment, governance, stewardship and rationale | Exercised through `@signal/decision` |
-| Decision record and outcome review storage | Partial: public SDK in-memory store; durable persistence and retention are not exercised |\n| Approved action execution | Exercised; action execution requires an approved decision and records the accountable operator |
+| Decision record and outcome review storage | Partial: public SDK in-memory store; durable persistence and retention are not exercised |
+| Approved action execution | Exercised; action execution requires an approved decision and records the accountable operator |
 | Commitment constraints and resource allocation | Exercised through `@signal/commitment` |
 | Semantic-state interpretation | Exercised through `@signal/semantic-state` |
 | Agency policy and decision/outcome cycles | Exercised through `@signal/agency`; calibration and statistical learning remain partial because the sample is intentionally small |
