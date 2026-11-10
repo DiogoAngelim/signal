@@ -178,9 +178,9 @@ export async function replayWithEvidence<TResult extends ReplayJsonValue>(
     );
   }
   const reads = new Map<string, ReplayJsonValue>(
-    record.externalReads.map((read) => [read.key, read.value]),
+    record.externalReads.map((read) => [read.key, cloneAndFreeze(read.value)]),
   );
-  const result = await execute(record.canonicalInput, reads);
+  const result = await execute(cloneAndFreeze(record.canonicalInput), reads);
   const actualFingerprint = fingerprint(result);
   if (actualFingerprint !== record.resultFingerprint) {
     throw new ReplayDivergenceError(record.resultFingerprint, actualFingerprint);
