@@ -127,7 +127,15 @@ export function createSignalMetricsObservabilityPort(
 
   return {
     emit(event) {
-      const labels = { operation_kind: operationKind(event.operationKind) };
+      const labels = {
+        operation_kind: operationKind(event.operationKind),
+        execution_mode:
+          event.isReplay === true
+            ? "replay"
+            : event.isReplay === false
+              ? "live"
+              : "unspecified",
+      };
       try {
         switch (event.event) {
           case "execution.start":
