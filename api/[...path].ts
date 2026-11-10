@@ -213,7 +213,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return json(res, 404, { error: "Route not found." });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected server error.";
-    const status = /not found/i.test(message) ? 404 : /approval|insufficient|verified|required/i.test(message) ? 409 : 400;
-    return json(res, status, { error: message });
+    const status = /route not found|request not found/i.test(message)
+      ? 404
+      : /approval|insufficient|verified|required|conflict|already exists|cannot be/i.test(message)
+        ? 409
+        : /request body|JSON|invalid|must be|exceeds/i.test(message)
+          ? 400
+          : 500;
+    return json(res, status, { error: status >= 500 ? "The service could not complete this request." : message });
   }
 }
