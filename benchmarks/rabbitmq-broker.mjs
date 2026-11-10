@@ -99,20 +99,14 @@ try {
   }
   publishWallTimeMs = performance.now() - publishStarted;
 
-  const queueReadyStarted = performance.now();
-  let queueAfterPublish;
-  for (let attempt = 0; attempt < 50; attempt += 1) {
-    queueAfterPublish = await request(`api/queues/%2F/${encodeURIComponent(queueName)}`);
-    queueDepthAtPublishCompletion = Number(queueAfterPublish.messages_ready ?? 0);
-    if (queueDepthAtPublishCompletion === messages) break;
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  const queueReadyWaitMs = performance.now() - queueReadyStarted;
-  if (queueDepthAtPublishCompletion !== messages) {
-    throw new Error(`Expected ${messages} ready messages, found ${queueDepthAtPublishCompletion}`);
-  }
+  // The management statistics database updates asynchronously. Take an
+  // immediate snapshot, but never wait for it before measuring message age.
+  const queueStatsAtPublishCompletion = await request(`api/queues/%2F/${encodeURIComponent(queueName)}`);
+  const queueDepthObservedAtPublishCompletion = Number(queueStatsAtPublishCompletion.messages_ready ?? 0);
+  queueDepthAtPublishCompletion = publishLatencies.length;
 
   const drainStarted = performance.now();
+  let emptyPolls = 0;
   while (consumed < messages) {
     const batchStarted = performance.now();
     const batch = await request(`api/queues/%2F/${encodeURIComponent(queueName)}/get`, {
@@ -125,7 +119,13 @@ try {
       }),
     });
     drainBatchLatencies.push(performance.now() - batchStarted);
-    if (!Array.isArray(batch) || batch.length === 0) break;
+    if (!Array.isArray(batch) || batch.length === 0) {
+      emptyPolls += 1;
+      if (emptyPolls > 500) throw new Error("RabbitMQ did not make the confirmed messages available for draining");
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      continue;
+    }
+    emptyPolls = 0;
     const retrievedAt = Date.now();
     for (const delivery of batch) {
       const envelope = JSON.parse(delivery.payload);
@@ -186,7 +186,8 @@ try {
       publishWallTimeMs,
       publishMessagesPerSecond: messages / (publishWallTimeMs / 1000),
       queueDepthAtPublishCompletion,
-      queueReadyWaitMs,
+      queueDepthObservedAtPublishCompletion,
+      queueStatsVisibilityLagMessages: Math.max(0, queueDepthAtPublishCompletion - queueDepthObservedAtPublishCompletion),
       consumedMessages: consumed,
       deliveryAge: stats(deliveryLatencies),
       backlogDrainMs,
