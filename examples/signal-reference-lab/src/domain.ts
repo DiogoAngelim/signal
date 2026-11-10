@@ -16,6 +16,10 @@ export function assess(request: CaseRequest, now = new Date()): Assessment {
     decisionId: `decision:${request.id}`,
     createdAt: now.toISOString(),
     desiredConfidence: 80,
+    importance: 60,
+    optionality: 75,
+    resilience: 75,
+    reversibility: "high",
     reasoningSummary: `Assessment for request ${request.id}: ${request.title}`,
     evidence: request.evidence.map((item) => ({
       evidenceId: item.id,
