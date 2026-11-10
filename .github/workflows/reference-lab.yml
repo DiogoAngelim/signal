@@ -65,3 +65,17 @@ jobs:
       - run: pnpm --filter @signal/reference-lab... build
       - run: pnpm --filter @signal/reference-lab test
       - run: pnpm --filter @signal/reference-lab coverage:verify
+      - name: Capture reproducible evaluation and benchmark artifacts
+        if: always()
+        run: |
+          mkdir -p reference-lab-evidence
+          pnpm --filter @signal/reference-lab evaluate -- --out ../../reference-lab-evidence/evaluation.json
+          pnpm --filter @signal/reference-lab benchmark -- --out ../../reference-lab-evidence/benchmark.json
+      - name: Upload reference lab evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signal-reference-lab-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reference-lab-evidence/
+          if-no-files-found: warn
+          retention-days: 30
