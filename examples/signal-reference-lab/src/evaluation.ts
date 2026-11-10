@@ -11,7 +11,7 @@ import { createReferenceLab } from "./signal-app.js";
 import type { CaseRequest } from "./domain.js";
 
 export type ScenarioStatus = "passed" | "failed" | "blocked" | "not-run";
-export type ScenarioResult = { id: string; title: string; status: ScenarioStatus; durationMs: number; assertions: number; failures: string[]; evidence: string[] };
+export type ScenarioResult = { id: string; title: string; status: ScenarioStatus; durationMs: number; assertions: number; failures: string[]; failureAttribution?: "infrastructure" | "harness" | "unclassified"; evidence: string[] };
 export type Capability = { id: string; area: string; capability: string; status: "exercised" | "partial" | "not-verified" | "not-applicable"; scenarios: string[]; evidence: string; limitation?: string };
 
 const capabilities: Capability[] = [
@@ -59,7 +59,12 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     const started = performance.now(), failures: string[] = []; let assertions = 0;
     const assert = (condition: unknown, message: string) => { assertions++; if (!condition) failures.push(message); };
     try { await fn(assert); } catch (error) { failures.push(error instanceof Error ? error.message : String(error)); }
-    results.push({ id, title, status: failures.length ? "failed" : "passed", durationMs: Number((performance.now() - started).toFixed(3)), assertions, failures, evidence: [`scenario:${id}`] });
+    const failureText = failures.join(" ").toLowerCase();
+    const failureAttribution = failures.length === 0 ? undefined
+      : id === "postgres-integration" && /(econnrefused|connection terminated|database .* unavailable|timeout|could not connect)/.test(failureText) ? "infrastructure" as const
+      : id === "benchmark-integrity" || /measurement integrity/.test(failureText) ? "harness" as const
+      : "unclassified" as const;
+    results.push({ id, title, status: failures.length ? "failed" : "passed", durationMs: Number((performance.now() - started).toFixed(3)), assertions, failures, failureAttribution, evidence: [`scenario:${id}`] });
   };
   await run("lifecycle", "Request → evidence → assessment → decision → authorized action → outcome", async (a) => {
     const app = createReferenceLab(); const request = await app.submitRequest({ tenantId: "tenant-a", title: "Review supplier access", description: "Assess whether a supplier should receive temporary access." });
