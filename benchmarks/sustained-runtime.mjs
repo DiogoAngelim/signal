@@ -60,6 +60,7 @@ const started = performance.now();
 let nextSampleAt = started + sampleIntervalMs;
 let submitted = 0;
 let completed = 0;
+let latencyObservations = 0;
 
 while (performance.now() - started < durationMs) {
   const batchSize = concurrency;
@@ -71,7 +72,7 @@ while (performance.now() - started < durationMs) {
       payload,
     }));
     const latency = performance.now() - operationStarted;
-    const seen = completed + 1;
+    const seen = ++latencyObservations;
     if (latencies.length < maxLatencySamples) latencies.push(latency);
     else {
       const replacementIndex = Math.floor(Math.random() * seen);
