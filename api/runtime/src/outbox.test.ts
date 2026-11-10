@@ -26,6 +26,7 @@ function createOutbox(records: OutboxRecord[]) {
   const outbox: OutboxPort = {
     getStats: vi.fn(async () => ({ pending: 0, processing: 0, delivered: 0, deadLettered: 0, oldestPendingAgeMs: null })),
     claimBatch: vi.fn(async () => records),
+    renewLease: vi.fn(async () => true),
     acknowledge: vi.fn(async ({ id }) => {
       acknowledged.push(id);
       return true;
@@ -80,6 +81,28 @@ describe("durable outbox dispatcher", () => {
         error: "broker unavailable",
       }),
     );
+  });
+
+  it("renews the lease while a slow handler is running", async () => {
+    vi.useFakeTimers();
+    try {
+      const harness = createOutbox([record("event-slow")]);
+      let finish!: () => void;
+      const dispatch = vi.fn(() => new Promise<void>((resolve) => { finish = resolve; }));
+      const pending = dispatchOutboxBatch(
+        harness.outbox,
+        { dispatch, subscribe: () => () => undefined },
+        { workerId: "worker-slow", leaseMs: 1000 },
+      );
+      await vi.advanceTimersByTimeAsync(350);
+      expect(harness.outbox.renewLease).toHaveBeenCalledWith({
+        id: "event-slow", workerId: "worker-slow", leaseToken: "lease-event-slow", leaseMs: 1000,
+      });
+      finish();
+      await expect(pending).resolves.toMatchObject({ delivered: 1, leaseLost: 0 });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("does not report delivery when the lease was lost before acknowledgement", async () => {
