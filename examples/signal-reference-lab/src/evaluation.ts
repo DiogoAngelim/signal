@@ -313,6 +313,16 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
       item.scenarios = postgresPassed ? ["postgres-integration"] : [];
       if (postgresPassed) item.evidence = "PostgreSQL integration scenario passed against the configured database."; 
     }
+    if (item.id === "outbox.durability") {
+      item.status = postgresPassed ? "partial" : "not-verified";
+      item.scenarios = postgresPassed ? ["postgres-integration"] : [];
+      item.evidence = postgresPassed ? "Transactional outbox commit and delivery acknowledgement are exercised; crash recovery and stale-worker fencing are not." : "Durable outbox adapter is not exercised without PostgreSQL."; 
+    }
+    if (item.id === "inbox.transactionality") {
+      item.status = postgresPassed ? "exercised" : "not-verified";
+      item.scenarios = postgresPassed ? ["postgres-integration"] : [];
+      item.evidence = postgresPassed ? "PostgreSQL transactional inbox commits one handler effect and deduplicates repeated delivery." : "Transactional inbox adapter is not exercised without PostgreSQL."; 
+    }
     if (item.id === "runtime.idempotency" && postgresPassed) {
       item.status = "exercised";
       item.scenarios = ["idempotency", "concurrency", "postgres-integration"];
