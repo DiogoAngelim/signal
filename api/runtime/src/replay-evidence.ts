@@ -19,6 +19,7 @@ function cloneAndFreeze<T extends ReplayJsonValue>(value: T): T {
 const DIGEST_PATTERN = /^[a-f0-9]{64}$/;
 
 export interface ReplayEvidenceInput {
+  readonly tenantId: string;
   readonly executionId: string;
   readonly operationName: string;
   readonly operationVersion: string;
@@ -80,6 +81,7 @@ function requireDigest(value: string, name: string): void {
 
 /** Build an immutable, content-addressed execution record from explicit inputs and captured reads. */
 export function createReplayEvidenceRecord(input: ReplayEvidenceInput): ReplayEvidenceRecord {
+  requireText(input.tenantId, "tenantId");
   requireText(input.executionId, "executionId");
   requireText(input.operationName, "operationName");
   requireText(input.operationVersion, "operationVersion");
@@ -110,6 +112,7 @@ export function createReplayEvidenceRecord(input: ReplayEvidenceInput): ReplayEv
 
   return Object.freeze({
     schemaVersion: 1,
+    tenantId: input.tenantId,
     executionId: input.executionId,
     operationName: input.operationName,
     operationVersion: input.operationVersion,
@@ -129,6 +132,7 @@ export function verifyReplayEvidenceRecord(record: ReplayEvidenceRecord): boolea
   try {
     if (
       record.schemaVersion !== 1 ||
+      !record.tenantId ||
       !record.executionId ||
       !record.operationName ||
       !record.operationVersion ||
