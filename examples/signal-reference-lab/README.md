@@ -120,3 +120,8 @@ The Vercel deployment uses the repository-root `vercel.json` and the catch-all N
 The hosted example is deliberately a single-tenant private lab. The tenant and operator are assigned by the server; browser-supplied identity fields are ignored. Authentication uses an eight-hour HMAC-signed, Secure, HttpOnly, SameSite=Strict cookie, same-origin POST checks, and a persistent per-IP login-attempt limit. Application case state and lifecycle events are rehydrated from and atomically written to Neon under a PostgreSQL advisory transaction lock. The example is not a multi-organization identity product: do not expose it as a public multi-tenant service without adding a real identity provider, per-user authorization, tenant-scoped storage and audit-key custody.
 
 The local `web.ts` server remains a development-only harness. The hosted deployment does not run that long-lived process; it uses the Vercel API function and the static web interface. The hosted application persists case requests and events as a JSONB snapshot. Signal's own PostgreSQL integration scenario separately tests its transactional idempotency, outbox/inbox, decision-memory and audit adapters; the example's UI state store is not a replacement for those domain-specific stores.
+
+
+### Static typecheck scope
+
+CI runs a bounded semantic typecheck over the example's domain and application source using local adapter-contract declarations. This avoids loading the full Signal workspace declaration graph into the TypeScript compiler (which exceeded the hosted runner's memory limit). The actual Signal adapters are still built and exercised by the integration and Reference Lab test suites against ephemeral PostgreSQL; the declarations are not runtime code and are never bundled into the application.
