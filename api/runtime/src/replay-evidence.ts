@@ -111,8 +111,8 @@ export function createReplayEvidenceRecord(input: ReplayEvidenceInput): ReplayEv
     });
   });
 
-  return Object.freeze({
-    schemaVersion: 1,
+  const record = {
+    schemaVersion: 1 as const,
     tenantId: input.tenantId,
     executionId: input.executionId,
     operationName: input.operationName,
@@ -125,6 +125,10 @@ export function createReplayEvidenceRecord(input: ReplayEvidenceInput): ReplayEv
     result: cloneAndFreeze(input.result),
     resultFingerprint: fingerprint(input.result),
     capturedAt,
+  };
+  return Object.freeze({
+    ...record,
+    recordFingerprint: fingerprint(record),
   });
 }
 
@@ -146,6 +150,7 @@ export function verifyReplayEvidenceRecord(record: ReplayEvidenceRecord): boolea
     requireDigest(record.handlerArtifactDigest, "handlerArtifactDigest");
     requireDigest(record.inputFingerprint, "inputFingerprint");
     requireDigest(record.resultFingerprint, "resultFingerprint");
+    requireDigest(record.recordFingerprint, "recordFingerprint");
     if (fingerprint(record.canonicalInput) !== record.inputFingerprint) return false;
     if (fingerprint(record.result) !== record.resultFingerprint) return false;
     const keys = new Set<string>();
@@ -162,6 +167,8 @@ export function verifyReplayEvidenceRecord(record: ReplayEvidenceRecord): boolea
       requireDigest(read.valueFingerprint, "external read fingerprint");
       if (fingerprint(read.value) !== read.valueFingerprint) return false;
     }
+    const { recordFingerprint, ...unsignedRecord } = record;
+    if (fingerprint(unsignedRecord) !== recordFingerprint) return false;
     return true;
   } catch {
     return false;
