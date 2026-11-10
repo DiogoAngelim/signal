@@ -341,6 +341,7 @@ export function scoreEngineering(results: ScenarioResult[], inventory: Capabilit
   };
   const reliabilityCoverage = areaCoverage(["Events", "PostgreSQL", "Outbox", "Inbox", "Resilience", "Idempotency"]);
   const securityCoverage = areaCoverage(["Runtime", "HTTP binding", "Security", "Audit", "Replay", "Ports"]);
+  const observabilityCoverage = areaCoverage(["Observability"]);
   const exercisedCount = inventory.filter((item) => item.status === "exercised").length;
   const partialCount = inventory.filter((item) => item.status === "partial").length;
   const unverifiedCount = inventory.filter((item) => item.status === "not-verified").length;
@@ -350,10 +351,10 @@ export function scoreEngineering(results: ScenarioResult[], inventory: Capabilit
     5,
     Math.min(10, 3 + coverage * 7),
     Math.min(10, 2 + securityCoverage * 6),
-    7,
+    Math.min(10, 2 + coverage * 4 + passRate * 4),
     Math.min(10, 2 + passRate * 8),
-    7,
-    4
+    Math.min(10, 2 + passRate * 3 + coverage * 3),
+    Math.min(10, 2 + observabilityCoverage * 6)
   ];
   const evidenceByDimension = [
     [...results.map((item) => `${item.id}:${item.status} (${item.assertions} assertions)`), `Capability coverage: ${exercisedCount} exercised, ${partialCount} partial, ${unverifiedCount} unverified.`],
