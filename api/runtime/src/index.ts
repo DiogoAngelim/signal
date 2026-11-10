@@ -1,6 +1,7 @@
 export * from "./audit-chain";
 export * from "./capabilities";
 export * from "./dispatcher";
+export * from "./distributed-resilience";
 export * from "./execution";
 export * from "./event";
 export * from "./hash";
