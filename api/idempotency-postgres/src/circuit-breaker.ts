@@ -62,14 +62,14 @@ export function createPostgresCircuitBreakerPort(
   ): Promise<Record<string, unknown>> {
     await pool.query(
       `INSERT INTO signal_circuit_breakers
-        (breaker_key, threshold, reset_timeout_ms)
-       VALUES ($1, $2, $3)
+        (breaker_key, threshold, reset_timeout_ms, probe_lease_ms)
+       VALUES ($1, $2, $3, $4)
        ON CONFLICT (breaker_key) DO NOTHING`,
-      [key, config.threshold, config.resetTimeoutMs],
+      [key, config.threshold, config.resetTimeoutMs, config.probeLeaseMs],
     );
     const result = await pool.query(
       `SELECT breaker_key, failure_count, last_failure_at, state,
-              threshold, reset_timeout_ms
+              threshold, reset_timeout_ms, probe_lease_ms
          FROM signal_circuit_breakers
         WHERE breaker_key = $1`,
       [key],
@@ -78,7 +78,8 @@ export function createPostgresCircuitBreakerPort(
     if (!row) throw new Error("Circuit breaker state could not be initialized.");
     if (
       Number(row.threshold) !== config.threshold ||
-      Number(row.reset_timeout_ms) !== config.resetTimeoutMs
+      Number(row.reset_timeout_ms) !== config.resetTimeoutMs ||
+      Number(row.probe_lease_ms) !== config.probeLeaseMs
     ) {
       throw new Error("Circuit breaker configuration differs across processes.");
     }
@@ -90,7 +91,7 @@ export function createPostgresCircuitBreakerPort(
       validateKey(key);
       const result = await pool.query(
         `SELECT breaker_key, failure_count, last_failure_at, state,
-                threshold, reset_timeout_ms
+                threshold, reset_timeout_ms, probe_lease_ms
            FROM signal_circuit_breakers
           WHERE breaker_key = $1`,
         [key],
