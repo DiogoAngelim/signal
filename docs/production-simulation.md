@@ -63,7 +63,7 @@ The adapter is intentionally a separate infrastructure package: applications con
 
 ## HTTP abuse controls
 
-The HTTP binding applies independent defaults of 120 query requests and 60 mutation requests per client IP per 60-second window. Both limits are configurable per route. Rejections return HTTP 429 with a stable `RATE_LIMIT_EXCEEDED` code and `Retry-After` metadata. The binding accepts either an ioredis-compatible client or a custom `@fastify/rate-limit` store constructor so deployments can share counters across instances. The default store remains process-local; multi-instance deployments must configure a shared store or enforce equivalent controls at a trusted ingress. Forwarded client IP headers must not be trusted unless Fastify is configured behind a known proxy boundary.
+The HTTP binding applies independent defaults of 120 query requests and 60 mutation requests per client IP per 60-second window. Both limits are configurable per route. Rejections return HTTP 429 with a stable `RATE_LIMIT_EXCEEDED` code and `Retry-After` metadata. The binding accepts either an ioredis-compatible client or a custom `@fastify/rate-limit` store constructor so deployments can share counters across instances. The default store remains process-local; multi-instance deployments must configure a shared store or enforce equivalent controls at a trusted ingress. Forwarded client IP headers must not be trusted unless Fastify is configured behind a known proxy boundary. The HTTP server exposes an explicit `trustProxy` option and defaults it to `false`; configure only the known proxy hops or CIDRs, never blanket-trust arbitrary forwarded headers.
 
 ## How to run it
 
