@@ -77,7 +77,11 @@ describe("postgres idempotency migration", () => {
       "utf8",
     );
     expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_consumer_inbox");
-    expect(sql).toContain("PRIMARY KEY (consumer_name, message_id)");
+    expect(sql).toContain("tenant_id text NOT NULL");
+    expect(sql).toContain("PRIMARY KEY (tenant_id, consumer_name, message_id)");
+    expect(sql).toContain("ENABLE ROW LEVEL SECURITY");
+    expect(sql).toContain("FORCE ROW LEVEL SECURITY");
+    expect(sql).toContain("current_setting('signal.tenant_id', true)");
     expect(sql).toContain("processed_at timestamptz");
   });
 
