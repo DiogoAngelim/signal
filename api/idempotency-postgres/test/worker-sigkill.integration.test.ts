@@ -100,7 +100,7 @@ integration("real worker process SIGKILL boundary", () => {
     });
 
     await admin.query(
-      "UPDATE signal_outbox SET available_at = now() - interval '100 years' WHERE message_id = $1",
+      "UPDATE signal_outbox SET available_at = now() - interval '1000 years', created_at = now() - interval '1000 years' WHERE message_id = $1",
       [messageId],
     );
 
