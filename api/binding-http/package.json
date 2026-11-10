@@ -27,7 +27,8 @@
     "@signal/runtime": "workspace:*",
     "@signal/sdk-node": "workspace:*",
     "fastify": "^5.2.1",
-    "zod": "^4.6.6"
+    "zod": "^4.6.6",
+    "@fastify/rate-limit": "^11.2.2"
   },
   "devDependencies": {
     "@types/node": "^20.17.16",
