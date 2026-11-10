@@ -227,6 +227,7 @@ pnpm verify:exports
 - [Production SLO and Alerting](docs/operations/slo-and-alerting.md) — deployment SLIs, SLOs, alerting, and incident runbooks
 - [Audit Ledger Operations](docs/security/audit-ledger-operations.md) — append-only PostgreSQL audit storage and checkpoint trust boundaries
 - [Developer Adoption Validation](docs/developer-adoption-validation.md) — independent first-use measurement protocol
+- [Application Integration Contract](docs/application-integration-contract.md) — mandatory application integration states, architecture, security, reliability, testing, and future assessment workflow
 
 ## Example App Links
 
