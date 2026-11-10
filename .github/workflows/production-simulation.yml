@@ -27,6 +27,7 @@ on:
       - main
       - "codex/**"
     paths:
+      - "examples/signal-reference-lab/**"
       - "api/idempotency-postgres/**"
       - "api/runtime/**"
       - "api/ports/**"
