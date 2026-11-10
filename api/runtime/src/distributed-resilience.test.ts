@@ -48,13 +48,16 @@ describe("distributed runtime circuit breaker controller", () => {
     const controller = createDistributedCircuitBreakerController(port, "provider-a");
     expect((await controller.snapshot())?.state).toBe("half-open");
     expect(await controller.tryAcquire()).toBe(true);
+    expect(await controller.renewProbe()).toBe(true);
+    expect(calls.at(-1)).toEqual(["renewProbe", "provider-a", "probe-generation-1", 15000]);
+    failNextSuccess = true;
+    await expect(controller.recordSuccess()).rejects.toThrow("temporary database failure");
+    expect(await controller.recordSuccess()).toBe(true);
+    expect(calls.at(-1)).toEqual(["recordSuccess", "provider-a", "probe-generation-1"]);
+
     permit = { allowed: false };
     expect(await controller.tryAcquire()).toBe(false);
     expect(await controller.renewProbe()).toBe(false);
-    failNextSuccess = true;
-    await expect(controller.recordSuccess()).rejects.toThrow("temporary database failure");
-    expect(await controller.recordSuccess()).toBe(false);
-    expect(calls.at(-1)).toEqual(["recordSuccess", "provider-a", undefined]);
 
     permit = { allowed: true, probeToken: "probe-generation-2" };
     expect(await controller.tryAcquire()).toBe(true);
