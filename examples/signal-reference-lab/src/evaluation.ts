@@ -376,16 +376,16 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
   if (process.env.SIGNAL_CLI_READY === "1") {
     await run("signal-cli", "Signal CLI verify, replay, test, build and audit commands preserve proof integrity", async (a) => {
       const cliDirectory = resolve(process.cwd(), "../../signal-cli");
-      const commands = [
-        ["verify"],
-        ["replay"],
-        ["test", "--command", "node -e \"process.exit(0)\""],
-        ["build", "--command", "node -e \"process.exit(0)\"", "--output", "reference-lab-no-output"],
-        ["audit"],
+      const commands: Array<{ args: string[]; expected: string }> = [
+        { args: ["verify"], expected: "verified successfully" },
+        { args: ["replay"], expected: "no mismatches detected" },
+        { args: ["test", "--command", "node -e \"process.exit(0)\""], expected: "Test wrapper completed successfully" },
+        { args: ["build", "--command", "node -e \"process.exit(0)\"", "--output", "reference-lab-no-output"], expected: "Build wrapper completed successfully" },
+        { args: ["audit"], expected: "Overall:            PASS" },
       ];
-      for (const args of commands) {
-        const output = execFileSync(process.execPath, ["dist/cli/index.js", ...args], { cwd: cliDirectory, encoding: "utf8" });
-        a(output.length >= 0, "Signal CLI command completed: " + args[0]);
+      for (const command of commands) {
+        const output = execFileSync(process.execPath, ["dist/cli/index.js", ...command.args], { cwd: cliDirectory, encoding: "utf8" });
+        a(output.includes(command.expected), "Signal CLI command should report success: " + command.args[0]);
       }
     });
   } else {
