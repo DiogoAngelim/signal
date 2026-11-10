@@ -158,7 +158,7 @@ export function createMemoryIdempotencyStore(): StoragePort &
       record.reservationExpiresAt = undefined;
     },
     async claimBatch(input) {
-      if (!Number.isSafeInteger(input.limit) || input.limit < 1 || !Number.isFinite(input.leaseMs) || input.leaseMs < 1) {
+      if (!Number.isSafeInteger(input.limit) || input.limit < 1 || input.limit > 1000 || !Number.isSafeInteger(input.leaseMs) || input.leaseMs < 1000 || input.leaseMs > 86_400_000) {
         throw new RangeError("Invalid outbox claim bounds.");
       }
       const now = Date.now();
