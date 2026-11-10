@@ -211,6 +211,9 @@ importers:
       '@signal/decision-memory':
         specifier: workspace:*
         version: link:../../packages/decision-memory
+      '@signal/decision-memory':
+        specifier: workspace:*
+        version: link:../../packages/decision-memory
       '@signal/protocol':
         specifier: workspace:*
         version: link:../protocol
