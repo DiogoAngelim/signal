@@ -9,7 +9,8 @@ deployment or external operator-controlled infrastructure.
 | Area | Measurement | Method | Evidence artifact |
 |---|---|---|---|
 | Runtime dispatch | p50/p95/p99 latency, throughput, CPU time, heap/RSS deltas | Three repeated runs across 256 B, 4 KiB, and 64 KiB payloads at concurrency 1/16/64 | `signal-engineering-measurements-<sha>` |
-| In-memory circuit breaker | Closed-state permit p50/p95/p99, throughput, CPU, sampled peak heap/RSS, half-open probe admission and denial latency | Three repeated runs at concurrency 1/16/64; controlled half-open burst verifies exactly one probe, lease renewal, and closed-state recovery | Same artifact |\n| HTTP binding | p50/p95/p99, throughput, CPU, heap/RSS | Fastify inject, request validation, trusted auth resolver, query authorization, serialization; three runs at concurrency 1/16/64 | Same artifact |
+| In-memory circuit breaker | Closed-state permit p50/p95/p99, throughput, CPU, sampled peak heap/RSS, half-open probe admission and denial latency | Three repeated runs at concurrency 1/16/64; controlled half-open burst verifies exactly one probe, lease renewal, and closed-state recovery | Same artifact |
+| HTTP binding | p50/p95/p99, throughput, CPU, heap/RSS | Fastify inject, request validation, trusted auth resolver, query authorization, serialization; three runs at concurrency 1/16/64 | Same artifact |
 | PostgreSQL idempotency/outbox | Commit latency/throughput, claim-batch latency, acknowledgement latency, CPU, heap/RSS, pool limit | PostgreSQL 16 service; three runs across 256 B/4 KiB payloads and concurrency 1/8/32; transactional completion plus outbox insert, batch claim, and ack | Same artifact |
 | Correctness | Failed-handler retry, concurrent duplicate coalescing, successful dedupe | Dispatcher regression tests | Vitest results |
 | HTTP identity | Spoofed body claims rejected; trusted resolver identity reaches authorization hook | Fastify integration tests | Vitest results |
