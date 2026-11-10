@@ -179,6 +179,8 @@ try {
         }
         const backlogDrainMs=performance.now()-drainStarted;
         if(claimedTotal!==iterations+warmup||acknowledged!==claimedTotal) throw new Error(`Outbox mismatch: claimed=${claimedTotal}, acked=${acknowledged}`);
+        // Allow PostgreSQL 16 backend statistics to flush before sampling shared counters.
+        await new Promise((resolve)=>setTimeout(resolve,1_000));
         const dbStatsAfter=await readDatabaseStats(cleanupPool);
         const cpuMs=(cpu.user+cpu.system)/1000;
         results.push({
@@ -281,7 +283,7 @@ const report={
   generatedAt:new Date().toISOString(),commit:process.env.GITHUB_SHA??process.env.SOURCE_COMMIT??"unrecorded-local-run",
   runtime:{node:process.version,platform:process.platform,arch:process.arch,cpuModel:os.cpus()[0]?.model??"unknown",logicalCpus:os.cpus().length},
   database:{engine:"PostgreSQL",version:"16",poolMaxConnections:10},
-  configuration:{iterations,runs,concurrency,payloadBytes:[256,4096]},results,deadLetterTransition,
+  configuration:{iterations,runs,concurrency,payloadBytes:[256,4096],postgresStatsFlushWaitMs:1_000},results,deadLetterTransition,
 };
 await mkdir(output.split("/").slice(0,-1).join("/")||".",{recursive:true});
 await writeFile(output,JSON.stringify(report,null,2));
