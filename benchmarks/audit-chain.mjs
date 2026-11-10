@@ -134,6 +134,16 @@ for (const size of sizes) {
     signatureVerification: stats(signatureVerifyRuns),
     checkpointAgainstChainVerification: stats(checkpointVerifyRuns),
     tamperDetectionPassed: appendRuns.every((run) => run.tamperRejected),
+    perRun: appendRuns.map((run, index) => ({
+      appendLatency: run.appendLatency,
+      appendWallTimeMs: run.appendWallTimeMs,
+      appendEntriesPerSecond: run.appendEntriesPerSecond,
+      fullChainVerificationMs: verifyRuns[index],
+      signedCheckpointCreationMs: signRuns[index],
+      signatureVerificationMs: signatureVerifyRuns[index],
+      checkpointAgainstChainVerificationMs: checkpointVerifyRuns[index],
+      tamperRejected: run.tamperRejected,
+    })),
   });
 }
 
