@@ -203,10 +203,15 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
       const connectionString = process.env.DATABASE_URL as string;
       const suffix = randomUUID();
       const store = createPostgresTransactionalStore({ connectionString, applicationName: "signal-reference-lab-test" });
+      const storePeer = createPostgresTransactionalStore({ connectionString, applicationName: "signal-reference-lab-peer" });
       const inbox = createPostgresConsumerInbox({ connectionString, applicationName: "signal-reference-lab-inbox" });
+      const inboxPeer = createPostgresConsumerInbox({ connectionString, applicationName: "signal-reference-lab-inbox-peer" });
       const retryBudget = createPostgresRetryBudget({ connectionString, budgetKey: `reference-lab:${suffix}`, capacity: 1 });
+      const retryBudgetPeer = createPostgresRetryBudget({ connectionString, budgetKey: `reference-lab:${suffix}`, capacity: 1 });
       const breakerPort = createPostgresCircuitBreakerPort({ connectionString });
+      const breakerPeerPort = createPostgresCircuitBreakerPort({ connectionString });
       const breaker = createDistributedCircuitBreakerController(breakerPort, `reference-lab:${suffix}`, { threshold: 1, resetTimeoutMs: 0, probeLeaseMs: 1000 });
+      const breakerPeer = createDistributedCircuitBreakerController(breakerPeerPort, `reference-lab:${suffix}`, { threshold: 1, resetTimeoutMs: 0, probeLeaseMs: 1000 });
       const replayStore = createPostgresReplayEvidenceStore({ connectionString, applicationName: "signal-reference-lab-replay" });
       const decisionMemory = new NeonPostgresAdapter({ connectionString, source: `reference-lab:${suffix}` });
       const keys = generateKeyPairSync("ed25519");
@@ -233,10 +238,17 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
         const first = await runtime.mutation<{ token: string }, { committed: boolean }>("lab.postgres.commit.v1", { token: suffix }, { idempotencyKey: `outbox:${suffix}` });
         a(first.ok && first.result.committed, "PostgreSQL-backed mutation should commit");
         a(deliveries === 1, "committed outbox event should reach the in-process subscriber");
-        const replayed = await runtime.mutation<{ token: string }, { committed: boolean }>("lab.postgres.commit.v1", { token: suffix }, { idempotencyKey: `outbox:${suffix}` });
-        a(replayed.ok && deliveries === 1, "idempotent replay must not redeliver the event");
-        const outboxStats = await store.getStats();
-        a(outboxStats.delivered >= 1, "outbox should retain durable delivery state");
+        const peerRuntime = createSignalRuntime({ runtimeName: "signal-reference-lab-postgres-peer", eventPort, storagePort: storePeer });
+        peerRuntime.registerEvent({ name: "lab.postgres.outbox.v1", kind: "event", inputSchema: z.object({ token: z.string() }), resultSchema: z.object({ accepted: z.boolean() }), handler: () => ({ accepted: true }) });
+        peerRuntime.registerMutation({
+          name: "lab.postgres.commit.v1", kind: "mutation", idempotency: "required",
+          inputSchema: z.object({ token: z.string() }), resultSchema: z.object({ committed: z.boolean() }),
+          async handler(input, context) { await context.emit("lab.postgres.outbox.v1", { token: input.token }); return { committed: true }; }
+        });
+        const replayed = await peerRuntime.mutation<{ token: string }, { committed: boolean }>("lab.postgres.commit.v1", { token: suffix }, { idempotencyKey: `outbox:${suffix}` });
+        a(replayed.ok && deliveries === 1, "a separately constructed runtime and PostgreSQL adapter must replay without redelivering the outbox event");
+        const outboxStats = await storePeer.getStats();
+        a(outboxStats.delivered >= 1, "outbox should retain durable delivery state across adapter instances");
 
         let effects = 0;
         const inboxInput = { tenantId: `tenant-${suffix}`, consumerName: "reference-lab", messageId: `message-${suffix}` };
@@ -247,7 +259,7 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
           const count = await client.query<{ count: string }>("SELECT count(*)::text AS count FROM signal_reference_lab_consumer_effects WHERE test_id = $1", [suffix]);
           return Number(count.rows[0]?.count ?? 0);
         });
-        const duplicate = await inbox.processOnce(inboxInput, async () => { effects += 1; return 99; });
+        const duplicate = await inboxPeer.processOnce(inboxInput, async () => { effects += 1; return 99; });
         a(processed.status === "processed" && processed.result === 1 && duplicate.status === "duplicate" && effects === 1, "transactional inbox should commit the consumer effect once and suppress duplicates");
         const rollbackInput = { ...inboxInput, messageId: `rollback-${suffix}` };
         let rollbackAttempts = 0;
@@ -267,13 +279,13 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
         a(recovered.status === "processed" && recovered.result === 1 && rollbackAttempts === 2, "failed consumer transaction must roll back both inbox claim and effect so retry can safely process once");
 
         a(await retryBudget.tryConsume(), "shared retry budget should grant its available token");
-        a(!(await retryBudget.tryConsume()), "shared retry budget should reject after exhaustion");
+        a(!(await retryBudgetPeer.tryConsume()), "a separate PostgreSQL retry-budget adapter must observe the shared exhausted allowance");
         a(await breaker.tryAcquire(), "distributed breaker should grant an initial permit");
         a(await breaker.recordFailure(), "distributed breaker should record failure");
-        a((await breaker.snapshot())?.state === "open", "distributed breaker should open at threshold");
-        a(await breaker.tryAcquire(new Date(Date.now() + 100)), "distributed breaker should admit a half-open probe after reset");
-        a(await breaker.recordSuccess(), "distributed breaker should record successful probe");
-        a((await breaker.snapshot())?.state === "closed", "successful distributed probe should close breaker");
+        a((await breakerPeer.snapshot())?.state === "open", "a separate breaker adapter must observe the shared open state");
+        a(await breakerPeer.tryAcquire(new Date(Date.now() + 100)), "a separate breaker adapter should acquire the half-open probe after reset");
+        a(await breakerPeer.recordSuccess(), "the peer breaker adapter should record successful probe");
+        a((await breaker.snapshot())?.state === "closed", "successful peer probe should close shared breaker state");
 
         const sampleApp = createReferenceLab();
         const sampleRequest = await sampleApp.submitRequest({ tenantId: `tenant-${suffix}`, title: "Persist decision memory", description: "Verify decision and outcome memory survives a PostgreSQL round trip." });
@@ -312,7 +324,7 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
         a(verifyChain(persistedAudit), "persisted audit chain should verify");
         a(Boolean(persistedCheckpoint) && verifyCheckpointAgainstChain(persistedCheckpoint!, persistedAudit), "persisted signed checkpoint should anchor the audit chain");
       } finally {
-        await Promise.all([store.close(), inbox.close(), retryBudget.close(), breakerPort.close(), replayStore.close(), auditLedger.close(), decisionMemory.close()]);
+        await Promise.all([store.close(), storePeer.close(), inbox.close(), inboxPeer.close(), retryBudget.close(), retryBudgetPeer.close(), breakerPort.close(), breakerPeerPort.close(), replayStore.close(), auditLedger.close(), decisionMemory.close()]);
       }
     });
   } else {
