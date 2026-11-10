@@ -61,6 +61,7 @@ describe("Prometheus metrics recorder", () => {
     });
     expect(recorder.seriesCount()).toBe(1);
     expect(recorder.droppedSeriesCount()).toBe(1);
+    expect(recorder.render()).toContain("signal_prometheus_recorder_dropped_series_total 1");
   });
 
   it("counts every rendered histogram series against the cardinality cap", () => {
