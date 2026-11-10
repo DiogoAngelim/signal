@@ -16,7 +16,7 @@ const {
 
 function arg(name, fallback) {
   const index = process.argv.indexOf(name);
-  return process.argv[index + 1] ?? fallback;
+  return index >= 0 ? process.argv[index + 1] ?? fallback : fallback;
 }
 function percentile(sorted, p) {
   return sorted[Math.max(0, Math.ceil(p * sorted.length) - 1)];
