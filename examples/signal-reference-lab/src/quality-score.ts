@@ -160,14 +160,15 @@ export function scoreQuality(
 ): QualityScorecard {
   const s = (id: string) => scenarioStatus(results, [id]);
   const correctness = makePillar("correctness", "Correctness", [
-    criterion("correctness.contracts", "Input contracts and invalid-input handling", 12, s("invalid-input"), ["Signal rejects malformed operation input."], undefined, true),
+    criterion("correctness.contracts", "Input contracts and invalid-input handling", 10, s("invalid-input"), ["Signal rejects malformed operation input."], undefined, true),
     criterion("correctness.lifecycle", "End-to-end operation and state transitions", 18, s("lifecycle"), ["Request, evidence, assessment, decision, action and outcome lifecycle."], undefined, true),
     criterion("correctness.tenant", "Tenant-scoped data access", 12, s("tenant-isolation"), ["Cross-tenant reads and writes are rejected or isolated."], undefined, true),
     criterion("correctness.idempotency", "Duplicate and concurrent request semantics", 14, combineStatus(s("idempotency"), s("concurrency")), ["Repeated and concurrent submissions preserve one logical result."], "Cross-host behavior requires a distributed contention test."),
     criterion("correctness.replay", "Deterministic replay and evidence integrity", 14, combineStatus(s("replay-evidence"), s("kernel-pipeline")), ["Replay evidence digest and deterministic pipeline replay."], "Cross-version replay compatibility remains a separate gate."),
     criterion("correctness.persistence", "Persistence and transactional semantics", 14, s("postgres-integration"), ["PostgreSQL transaction and persistence assertions."], "Blocked when DATABASE_URL is unavailable."),
-    criterion("correctness.compatibility", "Schema and cross-version compatibility", 8, "unverified", [], "Historical schema evolution and cross-version compatibility are not exercised by this suite."),
-    criterion("correctness.property-tests", "Property-based, fuzz and metamorphic verification", 8, "unverified", [], "Deterministic scenario tests do not replace fuzzing or property-based invariant exploration."),
+    criterion("correctness.type-safety", "Semantic TypeScript type checking", 6, "unverified", [], "The memory-bounded build transpiles files independently; a full semantic type-check is not currently part of this validation run."),
+    criterion("correctness.compatibility", "Schema and cross-version compatibility", 6, "unverified", [], "Historical schema evolution and cross-version compatibility are not exercised by this suite."),
+    criterion("correctness.property-tests", "Property-based, fuzz and metamorphic verification", 6, "unverified", [], "Deterministic scenario tests do not replace fuzzing or property-based invariant exploration."),
   ]);
   const security = makePillar("security", "Security", [
     criterion("security.authentication", "Runtime authentication enforcement", 12, combineStatus(s("runtime-authorization"), s("http-binding")), ["Unauthenticated and forged HTTP identity claims are rejected."], "External identity-provider integration is not certified.", true),
