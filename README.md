@@ -220,6 +220,7 @@ pnpm verify:exports
 - [Multi-Domain Examples](docs/multi-domain-examples.md) — how Signal applies across domains
 - [Constitution](docs/constitution.md) — Signal's correctness rules and change principles
 - [Quality and Assurance Standard](docs/quality-assurance.md) — invariants, determinism, evidence, statistical claims, security, and release validation
+- [Engineering and Architecture Score](docs/engineering-score-system.md) — weighted engineering scorecard, evidence levels, benchmarks, score caps, and assessment governance
 - [Developer Documentation](docs/README.md) — full developer-oriented source of truth
 
 ## Example App Links
