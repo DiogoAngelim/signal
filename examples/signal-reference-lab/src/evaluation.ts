@@ -87,8 +87,8 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     a(action.result === "completed", "approved action should execute under an accountable operator");
     const outcome = await app.recordOutcome({ requestId: request.id, tenantId: "tenant-a", result: "success", notes: "Temporary access expired as scheduled." });
     a(outcome.result === "success", "outcome should be linked to decision");
-    a(app.listDecisionRecords().length === 1, "Signal decision memory should persist a decision record");
-    a(app.listDecisionReviews().length === 1, "Signal decision memory should persist an outcome review");
+    a((await app.listDecisionRecords()).length === 1, "Signal decision memory should persist a decision record");
+    a((await app.listDecisionReviews()).length === 1, "Signal decision memory should persist an outcome review");
     a(app.listAgencyTraces().length === 2, "agency should record decision and outcome cycles");
     a(app.listTelemetry().some((item) => (item as { event?: string }).event === "execution.end"), "Signal runtime lifecycle telemetry should be collected");
     a(app.events.length >= 5, "lifecycle should emit request, assessment, decision, action and outcome events");
@@ -301,8 +301,8 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
         await sampleApp.decide({ requestId: sampleRequest.id, tenantId: sampleRequest.tenantId, actor: "operator-1", approve: true, rationale: "Evidence meets the approval threshold." });
         await sampleApp.executeAction({ requestId: sampleRequest.id, tenantId: sampleRequest.tenantId, actor: "operator-1", kind: "persist-memory-test" });
         await sampleApp.recordOutcome({ requestId: sampleRequest.id, tenantId: sampleRequest.tenantId, result: "success", notes: "Memory persistence test completed." });
-        const decisionRecord = sampleApp.listDecisionRecords()[0];
-        const decisionReview = sampleApp.listDecisionReviews()[0];
+        const decisionRecord = (await sampleApp.listDecisionRecords())[0];
+        const decisionReview = (await sampleApp.listDecisionReviews())[0];
         a(Boolean(decisionRecord && decisionReview), "reference lifecycle should produce decision and review records");
         if (decisionRecord && decisionReview) {
           await decisionMemory.saveDecisionRecord(decisionRecord);
