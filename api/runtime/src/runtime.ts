@@ -1,6 +1,7 @@
 import type {
   DecisionPort,
   EventPort,
+  ObservabilityContext,
   ObservabilityPort,
   RuntimeMode,
   StoragePort,
@@ -233,7 +234,7 @@ export class SignalRuntime implements SignalBinding {
   ): Promise<SignalExecutionResult<TResult>> {
     const startedAt = Date.now();
 
-    this.observabilityPort?.emit({
+    this.emitObservation({
       event: "execution.start",
       operationName: name,
       operationKind: "query",
@@ -263,7 +264,7 @@ export class SignalRuntime implements SignalBinding {
     const durationMs = Date.now() - startedAt;
 
     if (result.ok) {
-      this.observabilityPort?.emit({
+      this.emitObservation({
         event: "execution.end",
         operationName: name,
         operationKind: "query",
@@ -288,7 +289,7 @@ export class SignalRuntime implements SignalBinding {
   ): Promise<SignalExecutionResult<TResult>> {
     const startedAt = Date.now();
 
-    this.observabilityPort?.emit({
+    this.emitObservation({
       event: "execution.start",
       operationName: name,
       operationKind: "mutation",
@@ -323,7 +324,7 @@ export class SignalRuntime implements SignalBinding {
     const durationMs = Date.now() - startedAt;
 
     if (result.ok) {
-      this.observabilityPort?.emit({
+      this.emitObservation({
         event: "execution.end",
         operationName: name,
         operationKind: "mutation",
@@ -434,7 +435,7 @@ export class SignalRuntime implements SignalBinding {
             normalizedRequest,
           );
 
-          this.observabilityPort?.emit({
+          this.emitObservation({
             event: "event.emitted",
             operationName: input.name,
             operationKind: "event",
@@ -535,6 +536,15 @@ export class SignalRuntime implements SignalBinding {
 
   lock(): void {
     this.registry.lock();
+  }
+
+  private emitObservation(event: ObservabilityContext): void {
+    try {
+      this.observabilityPort?.emit(event);
+    } catch {
+      // Telemetry is best-effort: an exporter failure must never change the
+      // result or durability of a query, mutation, or event execution.
+    }
   }
 
   private findRegisteredKinds(name: string): SignalOperationKind[] {

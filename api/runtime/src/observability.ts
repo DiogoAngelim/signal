@@ -1,3 +1,5 @@
+import type { ObservabilityContext, ObservabilityPort } from "@signal/ports";
+
 /**
  * Observability primitives for Signal runtime.
  * Provides structured logging, trace context, and metric recording.
@@ -171,6 +173,109 @@ export function createInMemoryMetricsRecorder(
     clear() {
       metrics.length = 0;
       dropped = 0;
+    },
+  };
+}
+
+
+export interface BufferedObservabilityExporter {
+  export(events: readonly ObservabilityContext[]): Promise<void>;
+}
+
+export interface BufferedObservabilityPort extends ObservabilityPort {
+  /** Retry pending exports and wait for the current queue to drain. */
+  flush(): Promise<void>;
+  /** Stop accepting new events and attempt to export all queued events. */
+  close(): Promise<void>;
+  stats(): {
+    queued: number;
+    dropped: number;
+    exportFailures: number;
+  };
+}
+
+export interface BufferedObservabilityOptions {
+  /** Maximum pending events. Defaults to 5,000. */
+  capacity?: number;
+  /** Maximum events sent in one export call. Defaults to 100. */
+  batchSize?: number;
+}
+
+/**
+ * A bounded, non-blocking adapter between runtime lifecycle hooks and an
+ * application-owned exporter (for example, an OTLP collector or durable
+ * telemetry service). The adapter does not claim local disk durability.
+ *
+ * When capacity is exhausted, newest events are dropped and counted. Failed
+ * batches are retained for an explicit later flush; no retry loop can amplify
+ * an exporter outage. The exporter must provide the durability/retention
+ * guarantees required by the deployment.
+ */
+export function createBufferedObservabilityPort(
+  exporter: BufferedObservabilityExporter,
+  options: BufferedObservabilityOptions = {},
+): BufferedObservabilityPort {
+  if (!exporter || typeof exporter.export !== "function") {
+    throw new Error("A telemetry exporter with an export method is required.");
+  }
+  const capacity = options.capacity ?? 5_000;
+  const batchSize = options.batchSize ?? 100;
+  if (!Number.isSafeInteger(capacity) || capacity < 1) {
+    throw new RangeError("capacity must be a positive safe integer.");
+  }
+  if (!Number.isSafeInteger(batchSize) || batchSize < 1 || batchSize > capacity) {
+    throw new RangeError("batchSize must be between 1 and capacity.");
+  }
+
+  const queue: ObservabilityContext[] = [];
+  let dropped = 0;
+  let exportFailures = 0;
+  let closed = false;
+  let draining: Promise<void> | undefined;
+
+  const flush = async (): Promise<void> => {
+    if (draining) return draining;
+    draining = (async () => {
+      while (queue.length > 0) {
+        const batch = queue.splice(0, batchSize);
+        try {
+          await exporter.export(batch);
+        } catch (error) {
+          queue.unshift(...batch);
+          exportFailures += 1;
+          throw error;
+        }
+      }
+    })();
+
+    try {
+      await draining;
+    } finally {
+      draining = undefined;
+    }
+  };
+
+  return {
+    emit(event) {
+      if (closed || queue.length >= capacity) {
+        dropped += 1;
+        return;
+      }
+      queue.push({ ...event, meta: event.meta ? { ...event.meta } : undefined });
+      // Defer I/O so the synchronous runtime lifecycle hook remains bounded.
+      queueMicrotask(() => {
+        void flush().catch(() => {
+          // Failed batches remain queued and are visible through stats().
+        });
+      });
+    },
+    flush,
+    async close() {
+      closed = true;
+      await flush();
+    },
+    stats() {
+      return { queued: queue.length, dropped, exportFailures };
     },
   };
 }

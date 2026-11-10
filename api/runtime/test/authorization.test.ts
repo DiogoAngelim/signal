@@ -106,3 +106,42 @@ describe("authorization enforcement", () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 });
+
+
+it("keeps query and mutation results independent of telemetry exporter exceptions", async () => {
+  const runtime = new SignalRuntime({
+    eventPort: createInProcessDispatcher(),
+    storagePort: createMemoryIdempotencyStore(),
+    observabilityPort: {
+      emit() {
+        throw new Error("telemetry backend unavailable");
+      },
+    },
+  });
+  runtime.registerQuery(
+    defineQuery({
+      name: "resilient.read.v1",
+      kind: "query",
+      inputSchema: z.object({}),
+      resultSchema: z.object({ ok: z.boolean() }),
+      handler: () => ({ ok: true }),
+    }),
+  );
+  runtime.registerMutation(
+    defineMutation({
+      name: "resilient.write.v1",
+      kind: "mutation",
+      idempotency: "required",
+      inputSchema: z.object({}),
+      resultSchema: z.object({ ok: z.boolean() }),
+      handler: () => ({ ok: true }),
+    }),
+  );
+
+  expect((await runtime.query("resilient.read.v1", {})).ok).toBe(true);
+  expect((await runtime.mutation(
+    "resilient.write.v1",
+    {},
+    { idempotencyKey: "resilient-write" },
+  )).ok).toBe(true);
+});
