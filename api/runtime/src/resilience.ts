@@ -1,3 +1,5 @@
+import type { RetryBudgetPort } from "@signal/ports";
+
 /**
  * Resilience primitives for Signal runtime.
  *
@@ -321,15 +323,7 @@ export class RetryBudgetExhaustedError extends Error {
   }
 }
 
-export interface RetryBudget {
-  /** Atomically consumes one retry token, returning false when no token is available. */
-  tryConsume(): boolean;
-  snapshot(): {
-    readonly capacity: number;
-    readonly available: number;
-    readonly refillRatePerSecond: number;
-  };
-}
+export type RetryBudget = RetryBudgetPort;
 
 export interface RetryBudgetOptions {
   readonly capacity: number;
@@ -520,7 +514,7 @@ export async function executeWithRetry<T>(
         if (deadlineAt !== undefined && clock() + delayMs >= deadlineAt) {
           throw new RetryDeadlineExceededError();
         }
-        if (options.retryBudget && !options.retryBudget.tryConsume()) {
+        if (options.retryBudget && !(await options.retryBudget.tryConsume())) {
           throw new RetryBudgetExhaustedError(error);
         }
         options.onRetry?.({ attempt, delayMs, error });
