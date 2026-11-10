@@ -180,12 +180,22 @@ export function createPostgresAuditLedger(
           throw new Error("Empty-chain checkpoint does not match the persisted audit ledger.");
         }
       } else {
-        const anchor = await pool.query<{ entry_hash: string }>(
-          "SELECT entry_hash FROM signal_audit_entries WHERE sequence = $1",
+        const anchor = await pool.query<{
+          entry_hash: string;
+          entry: SignalAuditLedgerEntry;
+        }>(
+          "SELECT entry_hash, entry FROM signal_audit_entries WHERE sequence = $1",
           [checkpoint.sequence],
         );
-        if (anchor.rows[0]?.entry_hash.trim() !== checkpoint.chainHeadHash) {
-          throw new Error("Checkpoint does not match a persisted audit chain head.");
+        const anchoredEntry = anchor.rows[0];
+        if (
+          !anchoredEntry ||
+          anchoredEntry.entry_hash.trim() !== checkpoint.chainHeadHash ||
+          anchoredEntry.entry.hash !== checkpoint.chainHeadHash ||
+          anchoredEntry.entry.sequence !== checkpoint.sequence ||
+          !options.verifyEntry(anchoredEntry.entry)
+        ) {
+          throw new Error("Checkpoint does not match a verified persisted audit chain head.");
         }
       }
       await pool.query(
