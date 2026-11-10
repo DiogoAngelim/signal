@@ -16,6 +16,7 @@ describe("distributed runtime circuit breaker controller", () => {
           state: "half-open",
           threshold: 3,
           resetTimeoutMs: 1000,
+          probeLeaseMs: 15000,
         };
       },
       async tryAcquire(key, config, now) {
