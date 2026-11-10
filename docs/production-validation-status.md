@@ -6,7 +6,8 @@ This document is the release gate for Signal itself. A passing package build or 
 
 - Retry delay is capped exponential backoff; full jitter is available with an injectable random source.
 - Retry and circuit-breaker configuration is validated.
-- The in-memory circuit-breaker controller issues opaque, generation-scoped permits; stale outcomes cannot close a newer breaker generation, and half-open probe leases can be renewed or reclaimed after expiry.\n- The PostgreSQL distributed circuit-breaker adapter coordinates a single half-open probe across independent adapter instances with expiring UUID fencing tokens.
+- The in-memory circuit-breaker controller issues opaque, generation-scoped permits; stale outcomes cannot close a newer breaker generation, and half-open probe leases can be renewed or reclaimed after expiry.
+- The PostgreSQL distributed circuit-breaker adapter coordinates a single half-open probe across independent adapter instances with expiring UUID fencing tokens.
 - Audit-chain verification checks contiguous zero-based sequence numbers, linkage, SHA-256 formatting, timestamps, identity fields, and entry hashes.
 - Ed25519 signed audit checkpoints can bind a chain sequence/head hash to a key ID; verification supports an externally managed trusted public key.
 - The runtime public entrypoint exports resilience, audit-chain, and outbox APIs.
@@ -23,7 +24,9 @@ This document is the release gate for Signal itself. A passing package build or 
 | Event delivery | PostgreSQL adapter atomically persists result + outbox records; dispatcher provides leased at-least-once delivery | Migration must be applied; worker must run continuously; consumer deduplication and external side-effect idempotency remain mandatory |
 | Idempotency | StoragePort can reserve, complete, and fail an operation | Pending-record lease expiry/recovery and cross-region consistency are adapter-specific |
 | Audit chain | Supplied entries can be checked for internal hash-chain consistency | A chain is not immutable if an attacker can rewrite the full history and trusted head |
-| In-memory circuit breaker | Permit-scoped outcomes, one half-open probe, stale-generation fencing, and renewable probe lease per controller instance | Process-local only; not shared across replicas |\n| Distributed circuit breaker | PostgreSQL-backed shared state, atomic half-open lease, renewable UUID token, and stale-owner fencing | Multi-region database availability and coordination-database outage behavior are not certified |\n| HTTP abuse limits | Independent query/mutation quotas, structured HTTP 429 responses, configurable shared Redis/custom store | Default store is process-local; actual Redis/network failover and trusted proxy identity require deployment validation |
+| In-memory circuit breaker | Permit-scoped outcomes, one half-open probe, stale-generation fencing, and renewable probe lease per controller instance | Process-local only; not shared across replicas |
+| Distributed circuit breaker | PostgreSQL-backed shared state, atomic half-open lease, renewable UUID token, and stale-owner fencing | Multi-region database availability and coordination-database outage behavior are not certified |
+| HTTP abuse limits | Independent query/mutation quotas, structured HTTP 429 responses, configurable shared Redis/custom store | Default store is process-local; actual Redis/network failover and trusted proxy identity require deployment validation |
 | Retry | Capped exponential backoff and optional full jitter | Retry ownership, retry budgets, deadline propagation, and idempotent side effects remain caller/adapter responsibilities |
 | Calibration | Metrics and uncertainty intervals are computed from supplied traces | No model is certified without representative, independent, leakage-free production outcomes |
 | Drift | Chronological window comparison is descriptive | It is not a hypothesis test, causal diagnosis, or automatic rollback signal |
