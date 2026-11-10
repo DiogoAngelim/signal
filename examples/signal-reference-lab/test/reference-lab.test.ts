@@ -50,4 +50,5 @@ test("benchmark comparison rejects mismatched workload", async () => {
   const current = await runBenchmark({ iterations: 11, concurrency: 2, warmup: 1 });
   assert.throws(() => compareBenchmarks(current, baseline), /workload parameters differ/);
   assert.throws(() => compareBenchmarks({ ...baseline, integrity: { ...baseline.integrity, valid: false } }, baseline), /measurement integrity is invalid/);
+  assert.throws(() => compareBenchmarks({ ...baseline, samplesMs: [] }, baseline), /measurement integrity is invalid/);
 });
