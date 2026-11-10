@@ -1,5 +1,5 @@
 import { generateKeyPairSync, randomUUID } from "node:crypto";
-import { createAuditChainEntry, verifyChain, signAuditCheckpoint, verifyAuditCheckpoint, verifyCheckpointAgainstChain, createReplayEvidenceRecord, verifyReplayEvidenceRecord, createCircuitBreakerController, createRetryBudget, executeWithRetry, createSignalRuntime, createInProcessDispatcher, createDistributedCircuitBreakerController } from "@signal/sdk-node";
+import { createAuditChainEntry, verifyChain, signAuditCheckpoint, verifyAuditCheckpoint, verifyCheckpointAgainstChain, createReplayEvidenceRecord, verifyReplayEvidenceRecord, createCircuitBreakerController, createRetryBudget, executeWithRetry, createSignalRuntime, createInProcessDispatcher, createDistributedCircuitBreakerController, createPrometheusMetricsRecorder } from "@signal/sdk-node";
 import { z } from "zod";
 import { createSignalHttpServer } from "@signal/binding-http";
 import { createPostgresTransactionalStore, createPostgresConsumerInbox, createPostgresRetryBudget, createPostgresCircuitBreakerPort, createPostgresReplayEvidenceStore, createPostgresAuditLedger } from "@signal/idempotency-postgres";
@@ -28,9 +28,9 @@ const capabilities: Capability[] = [
   { id: "events.publish-subscribe", area: "Events", capability: "Event publication and in-process subscriber delivery", status: "exercised", scenarios: ["lifecycle"], evidence: "Four domain lifecycle events are published and subscribed" },
   { id: "binding.http", area: "HTTP binding", capability: "Signal HTTP query/mutation routes, validation and auth-claim rejection", status: "exercised", scenarios: ["http-binding"], evidence: "@signal/binding-http Fastify server is exercised through inject(); external verified identity middleware remains unconfigured." },
   { id: "postgres.transactions", area: "PostgreSQL", capability: "Database transactions, migrations, locks and persistence", status: "exercised", scenarios: ["postgres-integration"], evidence: "Ephemeral PostgreSQL integration validates transactional idempotency, outbox, consumer inbox, retry budget, distributed breaker, replay evidence and audit ledger." },
-  { id: "outbox.durability", area: "Outbox", capability: "Durable outbox, leases, fencing and crash recovery", status: "exercised", scenarios: ["postgres-integration"], evidence: "Transactional mutation emits to PostgreSQL outbox; runtime dispatch acknowledges durable delivery." },
+  { id: "outbox.durability", area: "Outbox", capability: "Durable outbox, leases, fencing and crash recovery", status: "partial", scenarios: ["postgres-integration"], evidence: "Transactional mutation emits to PostgreSQL outbox; runtime dispatch acknowledges durable delivery.", limitation: "Crash-after-claim recovery and stale-worker fencing are covered by package integration tests but not yet run as injected lab scenarios." },
   { id: "inbox.transactionality", area: "Inbox", capability: "Transactional consumer inbox and effect deduplication", status: "exercised", scenarios: ["postgres-integration"], evidence: "PostgreSQL inbox processOnce commits one handler execution and returns duplicate for repeated delivery." },
-  { id: "resilience.retry-budgets", area: "Resilience", capability: "Retry policies, budgets and bounded retry execution", status: "exercised", scenarios: ["resilience"], evidence: "executeWithRetry is exercised with a deterministic retry budget and transient failure." },
+  { id: "resilience.retry-budgets", area: "Resilience", capability: "Retry policies, budgets and bounded retry execution", status: "exercised", scenarios: ["resilience", "postgres-integration"], evidence: "executeWithRetry is exercised with a deterministic local retry budget and PostgreSQL shared retry-budget exhaustion." },
   { id: "resilience.circuit-breakers", area: "Resilience", capability: "Circuit breaker open/half-open probe and recovery", status: "exercised", scenarios: ["resilience", "postgres-integration"], evidence: "Local permit-scoped transitions and PostgreSQL distributed breaker coordination are exercised.", limitation: "Real provider failures and multi-region coordination remain unverified." },
   { id: "replay.evidence", area: "Replay", capability: "Content-addressed replay evidence creation and integrity verification", status: "partial", scenarios: ["replay-evidence"], evidence: "Replay evidence records and digest verification are exercised.", limitation: "A complete historical replay executor and cross-version compatibility workflow are not yet integrated." },
   { id: "audit.chain-checkpoints", area: "Audit", capability: "Hash-chain integrity, signed checkpoints and tamper detection", status: "exercised", scenarios: ["audit-integrity"], evidence: "Audit chain verification, Ed25519 checkpoint signing and chain anchoring are exercised." },
@@ -46,7 +46,7 @@ const capabilities: Capability[] = [
   { id: "kernel.compatibility", area: "Kernel", capability: "Kernel orchestration, plugin contracts, stores, execution controller and replay engine", status: "not-verified", scenarios: [], evidence: "@signal/kernel is a separate orchestration surface and is not integrated into this runtime-based workflow." },
   { id: "cli.signal-verification", area: "Signal CLI", capability: "Signal CLI verify, replay, test, build, audit and release commands", status: "not-verified", scenarios: [], evidence: "The lab's own runner is separate from the repository's @signal/cli." },
   { id: "observability.lifecycle", area: "Observability", capability: "Structured runtime lifecycle event emission", status: "exercised", scenarios: ["lifecycle"], evidence: "Signal ObservabilityPort collector captures runtime lifecycle hooks." },
-  { id: "observability.export", area: "Observability", capability: "Metrics backend, trace export, cardinality controls and telemetry overhead", status: "not-verified", scenarios: [], evidence: "Collector is in-memory only; no external telemetry backend or overhead study." },
+  { id: "observability.export", area: "Observability", capability: "Prometheus exposition, metric allowlists and cardinality controls", status: "partial", scenarios: ["observability-metrics"], evidence: "Prometheus recorder renders bounded counters and latency histograms.", limitation: "No external scrape target, trace exporter or telemetry overhead study." },
   { id: "cli.verification", area: "CLI", capability: "Repeatable local scenario and capability report commands", status: "exercised", scenarios: ["lifecycle"], evidence: "evaluate and coverage CLI commands emit JSON reports" }
 ];
 
@@ -290,6 +290,16 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
   } else {
     results.push({ id: "postgres-integration", title: "PostgreSQL adapter integration", status: "blocked", durationMs: 0, assertions: 0, failures: [], evidence: ["DATABASE_URL is not configured; durable persistence/outbox/inbox/distributed adapters were not exercised."] });
   }
+  await run("observability-metrics", "Prometheus metrics render bounded execution telemetry", async (a) => {
+    const metrics = createPrometheusMetricsRecorder({ maxSeries: 100 });
+    metrics.increment("signal.execution.started");
+    metrics.increment("signal.execution.completed");
+    metrics.timing("signal.execution.duration_ms", 12.5);
+    const exposition = metrics.render();
+    a(exposition.includes("signal_execution_started_total"), "Prometheus exposition should include execution counters");
+    a(exposition.includes("signal_execution_duration_seconds_bucket"), "Prometheus exposition should include latency histogram buckets");
+    a(metrics.seriesCount() > 0 && metrics.seriesCount() <= 100, "metric series should remain bounded by configured cardinality");
+  });
   await run("invalid-input", "Malformed request is rejected by the Signal contract", async (a) => {
     const app = createReferenceLab(); let rejected = false;
     try { await app.submitRequest({ tenantId: "", title: "x", description: "short" }); } catch { rejected = true; }
