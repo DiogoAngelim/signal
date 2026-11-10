@@ -254,7 +254,7 @@ export function getPreviousHash(phases: readonly PhaseState[]): string {
   if (phases.length === 0) {
     return GENESIS_HASH;
   }
-  return phases[phases.length - 1]?.hash;
+  return phases[phases.length - 1]?.hash ?? GENESIS_HASH;
 }
 
 /**
