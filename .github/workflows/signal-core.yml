@@ -7,7 +7,6 @@ on:
       - "client/**"
       - "server/**"
       - "docs/**"
-      - "examples/**"
       - "packages/**"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
@@ -77,8 +76,5 @@ jobs:
 
       - run: pnpm --filter @signal/binding-http test
 
-      - run: pnpm --filter @signal/examples test
-
       - run: pnpm --filter @signal/reference-server typecheck
 
-      - run: pnpm --filter @signal/emergency-awareness typecheck

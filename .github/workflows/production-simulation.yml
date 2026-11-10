@@ -19,6 +19,7 @@ on:
       - "api/runtime/**"
       - "api/ports/**"
       - "docs/production-simulation.md"
+      - "benchmarks/rabbitmq-broker.mjs"
       - ".github/workflows/production-simulation.yml"
   push:
     branches:
@@ -29,6 +30,7 @@ on:
       - "api/runtime/**"
       - "api/ports/**"
       - "docs/production-simulation.md"
+      - "benchmarks/rabbitmq-broker.mjs"
       - ".github/workflows/production-simulation.yml"
 
 permissions:
@@ -150,6 +152,8 @@ jobs:
           set -o pipefail
           pnpm --filter @signal/idempotency-postgres exec vitest run test/broker-crash.integration.test.ts test/worker-sigkill.integration.test.ts --fileParallelism=false --reporter=verbose 2>&1 | tee simulation-evidence/broker-crash-integration.log
 
+      - name: Measure RabbitMQ publish latency and backlog drain
+        run: node benchmarks/rabbitmq-broker.mjs --messages 500 --concurrency 32 --output simulation-evidence/rabbitmq-broker-benchmark.json
       - name: Run distributed coordination and audit trust-boundary simulations
         run: |
           set -o pipefail
@@ -169,6 +173,7 @@ jobs:
             sleep 1
           done
           test "$active" = "1"
+          recovery_started_ms="$(date +%s%3N)"
           echo "Killing PostgreSQL container to force crash recovery"
           docker kill --signal=KILL "$container_id"
           docker start "$container_id"
@@ -177,18 +182,35 @@ jobs:
             sleep 2
           done
           docker exec "$container_id" pg_isready -U postgres -d signal_simulation
+          recovery_finished_ms="$(date +%s%3N)"
+          postgres_crash_recovery_ms="$((recovery_finished_ms - recovery_started_ms))"
           committed="$(docker exec "$container_id" psql -U postgres -d signal_simulation -Atc "SELECT count(*) FROM signal_crash_durability WHERE id='committed-before-crash' AND committed")"
           uncommitted="$(docker exec "$container_id" psql -U postgres -d signal_simulation -Atc "SELECT count(*) FROM signal_crash_durability WHERE id='uncommitted-at-crash'")"
           test "$committed" = "1"
           test "$uncommitted" = "0"
           echo "Committed transaction survived; in-flight transaction rolled back" | tee simulation-evidence/postgres-crash-recovery.log
+          backup_started_ms="$(date +%s%3N)"
           docker exec "$container_id" pg_dump -U postgres -d signal_simulation -Fc -f /tmp/signal-simulation.dump
+          backup_finished_ms="$(date +%s%3N)"
+          backup_duration_ms="$((backup_finished_ms - backup_started_ms))"
           docker exec "$container_id" createdb -U postgres signal_restore
+          restore_started_ms="$(date +%s%3N)"
           docker exec "$container_id" pg_restore -U postgres -d signal_restore /tmp/signal-simulation.dump
+          restore_finished_ms="$(date +%s%3N)"
+          restore_duration_ms="$((restore_finished_ms - restore_started_ms))"
           source_count="$(docker exec "$container_id" psql -U postgres -d signal_simulation -Atc "SELECT count(*) FROM signal_outbox")"
           restored_count="$(docker exec "$container_id" psql -U postgres -d signal_restore -Atc "SELECT count(*) FROM signal_outbox")"
           test "$source_count" = "$restored_count"
           echo "Backup restore preserved outbox rows: $restored_count" | tee simulation-evidence/postgres-backup-restore.log
+          cat > simulation-evidence/recovery-metrics.json <<EOF
+          {
+            "postgresCrashRecoveryMs": $postgres_crash_recovery_ms,
+            "logicalBackupDurationMs": $backup_duration_ms,
+            "logicalRestoreDurationMs": $restore_duration_ms,
+            "sourceOutboxRows": $source_count,
+            "restoredOutboxRows": $restored_count
+          }
+          EOF
           docker exec "$container_id" createdb -U postgres signal_bench
           docker exec "$container_id" pgbench -U postgres -i -s 5 signal_bench
           docker exec "$container_id" pgbench -U postgres -c 8 -j 2 -T 20 signal_bench 2>&1 | tee simulation-evidence/postgres-load-smoke.log
@@ -217,9 +239,23 @@ jobs:
         if: always()
         run: |
           node --input-type=module <<'NODE'
-          import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-          const path = 'simulation-evidence/run-manifest.json';
-          const manifest = existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : {};
+          import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+          const directory = 'simulation-evidence';
+          mkdirSync(directory, { recursive: true });
+          const path = `${directory}/run-manifest.json`;
+          const manifest = existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : {
+            classification: 'SIMULATION_ONLY_NOT_PRODUCTION_CERTIFICATION',
+            repository: process.env.GITHUB_REPOSITORY,
+            commit: process.env.GITHUB_SHA,
+            ref: process.env.GITHUB_REF,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            profile: process.env.SIGNAL_SIMULATION_PROFILE,
+            postgresImage: 'postgres:16',
+            node: process.version,
+            startedAt: null,
+            initializationFailedBeforeManifest: true
+          };
           manifest.completedAt = new Date().toISOString();
           manifest.jobStatus = process.env.JOB_STATUS ?? 'see workflow job conclusion';
           manifest.evidenceFiles = [
@@ -227,9 +263,11 @@ jobs:
             'runtime-tests.log',
             'postgres-adapter-tests.log',
             'broker-crash-integration.log',
+            'rabbitmq-broker-benchmark.json',
             'network-fault-integration.log',
             'postgres-crash-recovery.log',
             'postgres-backup-restore.log',
+            'recovery-metrics.json',
             'postgres-load-smoke.log',
             'trust-boundary-integration.log',
             'repeatability.log'

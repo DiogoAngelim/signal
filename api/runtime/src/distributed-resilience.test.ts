@@ -1,6 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { DistributedCircuitBreakerPermit, DistributedCircuitBreakerPort } from "@signal/ports";
-import { createDistributedCircuitBreakerController } from "./distributed-resilience";
+import {
+  createDistributedCircuitBreakerController,
+  executeWithDistributedCircuitBreaker,
+} from "./distributed-resilience";
 
 describe("distributed runtime circuit breaker controller", () => {
   it("delegates state and forwards the exact probe generation token", async () => {
@@ -45,14 +48,16 @@ describe("distributed runtime circuit breaker controller", () => {
     const controller = createDistributedCircuitBreakerController(port, "provider-a");
     expect((await controller.snapshot())?.state).toBe("half-open");
     expect(await controller.tryAcquire()).toBe(true);
-    permit = { allowed: false };
-    expect(await controller.tryAcquire()).toBe(false);
     expect(await controller.renewProbe()).toBe(true);
     expect(calls.at(-1)).toEqual(["renewProbe", "provider-a", "probe-generation-1", 15000]);
     failNextSuccess = true;
     await expect(controller.recordSuccess()).rejects.toThrow("temporary database failure");
     expect(await controller.recordSuccess()).toBe(true);
     expect(calls.at(-1)).toEqual(["recordSuccess", "provider-a", "probe-generation-1"]);
+
+    permit = { allowed: false };
+    expect(await controller.tryAcquire()).toBe(false);
+    expect(await controller.renewProbe()).toBe(false);
 
     permit = { allowed: true, probeToken: "probe-generation-2" };
     expect(await controller.tryAcquire()).toBe(true);
@@ -61,18 +66,140 @@ describe("distributed runtime circuit breaker controller", () => {
     expect(calls.at(-1)?.[3]).toBe("probe-generation-2");
   });
 
-  it("does not retain a token when acquisition is denied", async () => {
-    const tokens: Array<string | undefined> = [];
+  it("preserves the active probe token when a concurrent acquisition is denied", async () => {
+    let attempts = 0;
+    const renewedTokens: Array<string | undefined> = [];
+    const successTokens: Array<string | undefined> = [];
+    const port: DistributedCircuitBreakerPort = {
+      async snapshot() { return null; },
+      async tryAcquire() {
+        attempts += 1;
+        return attempts === 1
+          ? { allowed: true, probeToken: "active-generation" }
+          : { allowed: false };
+      },
+      async renewProbe(_key, token) {
+        renewedTokens.push(token);
+        return token === "active-generation";
+      },
+      async recordSuccess(_key, token) {
+        successTokens.push(token);
+        return token === "active-generation";
+      },
+      async recordFailure(_key, _config, token) { return token === "active-generation"; },
+    };
+
+    const controller = createDistributedCircuitBreakerController(port, "provider-c");
+    expect(await controller.tryAcquire()).toBe(true);
+    expect(await controller.tryAcquire()).toBe(false);
+    expect(await controller.renewProbe()).toBe(true);
+    expect(await controller.recordSuccess()).toBe(true);
+    expect(renewedTokens).toEqual(["active-generation"]);
+    expect(successTokens).toEqual(["active-generation"]);
+  });
+
+  it("rejects invalid circuit breaker configuration", () => {
     const port: DistributedCircuitBreakerPort = {
       async snapshot() { return null; },
       async tryAcquire() { return { allowed: false }; },
-      async renewProbe(_key, token) { tokens.push(token); return false; },
-      async recordSuccess(_key, token) { tokens.push(token); return false; },
-      async recordFailure(_key, _config, token) { tokens.push(token); return false; },
+      async renewProbe() { return false; },
+      async recordSuccess() { return false; },
+      async recordFailure() { return false; },
     };
-    const controller = createDistributedCircuitBreakerController(port, "provider-b");
-    expect(await controller.tryAcquire()).toBe(false);
-    expect(await controller.recordSuccess()).toBe(false);
-    expect(tokens).toEqual([undefined]);
+    expect(() => createDistributedCircuitBreakerController(port, "provider", {
+      threshold: 0,
+      resetTimeoutMs: 1000,
+      probeLeaseMs: 1000,
+    })).toThrow("threshold must be a positive integer");
+  });
+});
+
+describe("executeWithDistributedCircuitBreaker", () => {
+  it("records success and returns the dependency result", async () => {
+    const controller = {
+      snapshot: vi.fn().mockResolvedValue(null),
+      tryAcquire: vi.fn().mockResolvedValue(true),
+      renewProbe: vi.fn().mockResolvedValue(true),
+      recordSuccess: vi.fn().mockResolvedValue(true),
+      recordFailure: vi.fn().mockResolvedValue(true),
+    };
+    await expect(executeWithDistributedCircuitBreaker(
+      controller,
+      async () => "ok",
+    )).resolves.toBe("ok");
+    expect(controller.tryAcquire).toHaveBeenCalledOnce();
+    expect(controller.recordSuccess).toHaveBeenCalledOnce();
+    expect(controller.recordFailure).not.toHaveBeenCalled();
+  });
+
+  it("records dependency failures and preserves the original error", async () => {
+    const failure = new Error("dependency unavailable");
+    const controller = {
+      snapshot: vi.fn().mockResolvedValue(null),
+      tryAcquire: vi.fn().mockResolvedValue(true),
+      renewProbe: vi.fn().mockResolvedValue(true),
+      recordSuccess: vi.fn().mockResolvedValue(true),
+      recordFailure: vi.fn().mockResolvedValue(true),
+    };
+    await expect(executeWithDistributedCircuitBreaker(
+      controller,
+      async () => { throw failure; },
+    )).rejects.toBe(failure);
+    expect(controller.recordFailure).toHaveBeenCalledOnce();
+  });
+
+  it("reports unrecorded outcomes without masking dependency results or observer failures", async () => {
+    const reported: unknown[] = [];
+    const controller = {
+      snapshot: vi.fn().mockResolvedValue(null),
+      tryAcquire: vi.fn().mockResolvedValue(true),
+      renewProbe: vi.fn().mockResolvedValue(false),
+      recordSuccess: vi.fn().mockResolvedValue(false),
+      recordFailure: vi.fn().mockResolvedValue(false),
+    };
+
+    await expect(executeWithDistributedCircuitBreaker(
+      controller,
+      async () => "dependency-result",
+      { onCoordinationError: (error) => { reported.push(error); } },
+    )).resolves.toBe("dependency-result");
+    expect(reported[0]).toMatchObject({
+      code: "CIRCUIT_BREAKER_OUTCOME_NOT_RECORDED",
+    });
+
+    const acquisitionFailure = new Error("coordination store unavailable");
+    const unavailableController = {
+      snapshot: vi.fn().mockResolvedValue(null),
+      tryAcquire: vi.fn().mockRejectedValue(acquisitionFailure),
+      renewProbe: vi.fn().mockResolvedValue(false),
+      recordSuccess: vi.fn().mockResolvedValue(false),
+      recordFailure: vi.fn().mockResolvedValue(false),
+    };
+    await expect(executeWithDistributedCircuitBreaker(
+      unavailableController,
+      async () => "must-not-run",
+      { onCoordinationError: () => { throw new Error("telemetry failed"); } },
+    )).rejects.toBe(acquisitionFailure);
+
+    const dependencyFailure = new Error("dependency failed");
+    await expect(executeWithDistributedCircuitBreaker(
+      controller,
+      async () => { throw dependencyFailure; },
+      { onCoordinationError: () => { throw new Error("telemetry failed"); } },
+    )).rejects.toBe(dependencyFailure);
+  });
+
+  it("rejects when the shared breaker denies a permit", async () => {
+    const controller = {
+      snapshot: vi.fn().mockResolvedValue(null),
+      tryAcquire: vi.fn().mockResolvedValue(false),
+      renewProbe: vi.fn().mockResolvedValue(false),
+      recordSuccess: vi.fn(),
+      recordFailure: vi.fn(),
+    };
+    await expect(executeWithDistributedCircuitBreaker(
+      controller,
+      async () => "never",
+    )).rejects.toMatchObject({ code: "CIRCUIT_BREAKER_OPEN" });
   });
 });

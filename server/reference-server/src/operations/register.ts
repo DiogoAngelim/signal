@@ -179,6 +179,14 @@ export function registerReferenceOperations(
     inputSchema: postPublishInputSchema,
     resultSchema: postPublishResultSchema,
     emits: ["post.published.v1"],
+    authorize(_input, context) {
+      if (!context.request.auth?.scopes?.includes("posts:publish")) {
+        throw Object.assign(new Error("Missing posts:publish scope"), {
+          code: "FORBIDDEN",
+          retryable: false,
+        });
+      }
+    },
     normalizeIdempotencyInput(input) {
       return {
         postId: input.postId,

@@ -34,6 +34,7 @@ export async function executeMutation<TInput, TResult>(
   input: TInput,
   context: SignalExecutionContext,
   idempotencyKey?: string,
+  requireAuthorization = false,
 ): Promise<SignalExecutionResult<TResult>> {
   let definition: ReturnType<SignalRegistry["getMutation"]> | undefined;
   let payloadFingerprint = "";
@@ -49,6 +50,14 @@ export async function executeMutation<TInput, TResult>(
 
     definition = registry.getMutation(name);
     const validatedInput = definition.inputSchema.parse(input);
+    if (requireAuthorization && (!context.request.auth || !definition.authorize)) {
+      return toFailure<TResult>(
+        createSignalError(
+          "UNAUTHORIZED",
+          "This runtime requires authenticated mutations with an authorization policy",
+        ),
+      );
+    }
     const normalizedIdempotencyInput = definition.normalizeIdempotencyInput
       ? definition.normalizeIdempotencyInput(validatedInput)
       : validatedInput;

@@ -4,6 +4,7 @@ import {
   signalContextSchema,
   signalDeliverySchema,
   signalErrorHttpStatus,
+  type SignalAuth,
 } from "@signal/protocol";
 import type { SignalRuntime } from "@signal/sdk-node";
 import type { FastifyReply, FastifyRequest } from "fastify";
@@ -23,6 +24,7 @@ export interface SignalHttpBody<TPayload = unknown> {
       parentSpanId?: string;
       state?: string;
     };
+    /** Untrusted client claims are rejected; auth is server-injected only. */
     auth?: Record<string, unknown>;
     source?: {
       system?: string;
@@ -39,6 +41,7 @@ export interface SignalHttpBody<TPayload = unknown> {
     subscription?: string;
     transportMessageId?: string;
   };
+  /** Untrusted client claims are rejected; auth is server-injected only. */
   auth?: Record<string, unknown>;
   meta?: Record<string, unknown>;
   idempotencyKey?: string;
@@ -50,7 +53,7 @@ const signalHttpBodySchema = z
     context: signalContextSchema,
     delivery: signalDeliverySchema,
     auth: signalAuthSchema,
-    meta: z.record(z.unknown()).optional(),
+    meta: z.record(z.string(), z.unknown()).optional(),
     idempotencyKey: z.string().min(1).optional(),
   })
   .passthrough()
@@ -63,9 +66,29 @@ const signalHttpBodySchema = z
         message: "payload is required",
       });
     }
+
+    // Authentication claims are assertions, not proof of identity. Reject
+    // them instead of silently accepting or trusting caller-controlled data.
+    if (body.auth !== undefined) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["auth"],
+        message: "Authentication context must be supplied by trusted server middleware",
+      });
+    }
+    if (
+      body.context &&
+      Object.prototype.hasOwnProperty.call(body.context, "auth")
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["context", "auth"],
+        message: "Authentication context must be supplied by trusted server middleware",
+      });
+    }
   });
 
-function toRequestContext(body: SignalHttpBody) {
+function toRequestContext(body: SignalHttpBody, trustedAuth?: SignalAuth) {
   return {
     correlationId: body.context?.correlationId,
     causationId: body.context?.causationId,
@@ -74,7 +97,7 @@ function toRequestContext(body: SignalHttpBody) {
     idempotencyKey: body.idempotencyKey ?? body.context?.idempotencyKey,
     deadlineAt: body.context?.deadlineAt,
     delivery: body.delivery,
-    auth: body.auth ?? body.context?.auth,
+    auth: trustedAuth,
     source: body.context?.source,
     meta: body.meta ?? body.context?.meta,
   };
@@ -88,6 +111,7 @@ export async function handleQueryRequest(
   runtime: SignalRuntime,
   request: FastifyRequest<{ Params: { name: string }; Body: SignalHttpBody }>,
   reply: FastifyReply,
+  trustedAuth?: SignalAuth,
 ) {
   let body: SignalHttpBody;
   try {
@@ -107,7 +131,7 @@ export async function handleQueryRequest(
     const result = await runtime.query(
       request.params.name,
       body.payload,
-      toRequestContext(body),
+      toRequestContext(body, trustedAuth),
     );
     return reply
       .code(result.ok ? 200 : signalErrorHttpStatus(result.error))
@@ -129,6 +153,7 @@ export async function handleMutationRequest(
   runtime: SignalRuntime,
   request: FastifyRequest<{ Params: { name: string }; Body: SignalHttpBody }>,
   reply: FastifyReply,
+  trustedAuth?: SignalAuth,
 ) {
   let body: SignalHttpBody;
   try {
@@ -148,7 +173,7 @@ export async function handleMutationRequest(
     const result = await runtime.mutation(
       request.params.name,
       body.payload,
-      toRequestContext(body),
+      toRequestContext(body, trustedAuth),
     );
     return reply
       .code(result.ok ? 200 : signalErrorHttpStatus(result.error))

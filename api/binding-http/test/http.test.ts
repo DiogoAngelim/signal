@@ -66,7 +66,6 @@ describe("http binding", () => {
           correlationId: "corr-1",
           causationId: "cause-1",
           traceId: "trace-1",
-          auth: { actor: "tester" },
           source: {
             system: "browser",
             transport: "http",
@@ -100,7 +99,6 @@ describe("http binding", () => {
           correlationId: "corr-2",
           causationId: "cause-2",
           traceId: "trace-2",
-          auth: { actor: "tester" },
           source: {
             system: "browser",
             transport: "http",
@@ -139,6 +137,192 @@ describe("http binding", () => {
     expect(JSON.parse(replayResponse.body).error.code).toBe(
       "IDEMPOTENCY_CONFLICT",
     );
+  });
+
+  it("enforces independent query and mutation rate limits with structured 429 responses", async () => {
+    const runtime = new SignalRuntime({
+      eventPort: noopEventPort,
+      storagePort: createMemoryIdempotencyStore(),
+    });
+    runtime.registerQuery(
+      defineQuery({
+        name: "limited.read.v1",
+        kind: "query",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: () => ({ ok: true }),
+      }),
+    );
+    runtime.registerMutation(
+      defineMutation({
+        name: "limited.write.v1",
+        kind: "mutation",
+        idempotency: "required",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: () => ({ ok: true }),
+      }),
+    );
+
+    const app = createSignalHttpServer(runtime, {
+      rateLimits: {
+        query: { max: 1, timeWindow: 60_000 },
+        mutation: { max: 1, timeWindow: 60_000 },
+      },
+    });
+
+    const queryAllowed = await app.inject({
+      method: "POST",
+      url: "/signal/query/limited.read.v1",
+      payload: { payload: {} },
+    });
+    const queryLimited = await app.inject({
+      method: "POST",
+      url: "/signal/query/limited.read.v1",
+      payload: { payload: {} },
+    });
+    const mutationAllowed = await app.inject({
+      method: "POST",
+      url: "/signal/mutation/limited.write.v1",
+      payload: { payload: {}, idempotencyKey: "limited-1" },
+    });
+    const mutationLimited = await app.inject({
+      method: "POST",
+      url: "/signal/mutation/limited.write.v1",
+      payload: { payload: {}, idempotencyKey: "limited-2" },
+    });
+    const health = await app.inject({ method: "GET", url: "/health" });
+
+    expect(queryAllowed.statusCode).toBe(200);
+    expect(queryLimited.statusCode).toBe(429);
+    expect(queryLimited.headers["retry-after"]).toBeDefined();
+    expect(queryLimited.json()).toMatchObject({
+      ok: false,
+      error: {
+        code: "RATE_LIMIT_EXCEEDED",
+        category: "rate_limit",
+        retryable: true,
+      },
+    });
+    expect(mutationAllowed.statusCode).toBe(200);
+    expect(mutationLimited.statusCode).toBe(429);
+    expect(health.statusCode).toBe(200);
+    await app.close();
+  });
+
+  it("shares rate-limit counters across independent HTTP server instances", async () => {
+    type Counter = { current: number; expiresAt: number };
+    class SharedRateLimitStore {
+      static counters = new Map<string, Counter>();
+
+      constructor(_options: unknown) {}
+
+      child(_routeOptions: unknown) {
+        return this;
+      }
+
+      incr(
+        key: string,
+        callback: (error: Error | null, result?: { current: number; ttl: number }) => void,
+        timeWindow: number,
+      ) {
+        const now = Date.now();
+        let counter = SharedRateLimitStore.counters.get(key);
+        if (!counter || counter.expiresAt <= now) {
+          counter = { current: 0, expiresAt: now + timeWindow };
+          SharedRateLimitStore.counters.set(key, counter);
+        }
+        counter.current += 1;
+        callback(null, {
+          current: counter.current,
+          ttl: Math.max(0, counter.expiresAt - now),
+        });
+      }
+    }
+
+    SharedRateLimitStore.counters.clear();
+    const runtime = new SignalRuntime({
+      eventPort: noopEventPort,
+      storagePort: createMemoryIdempotencyStore(),
+    });
+    runtime.registerQuery(
+      defineQuery({
+        name: "shared.read.v1",
+        kind: "query",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: () => ({ ok: true }),
+      }),
+    );
+
+    const options = {
+      rateLimits: {
+        query: { max: 1, timeWindow: 60_000 },
+        store: SharedRateLimitStore,
+      },
+    };
+    const appA = createSignalHttpServer(runtime, options);
+    const appB = createSignalHttpServer(runtime, options);
+    const request = {
+      method: "POST" as const,
+      url: "/signal/query/shared.read.v1",
+      payload: { payload: {} },
+    };
+
+    expect((await appA.inject(request)).statusCode).toBe(200);
+    const crossInstanceLimited = await appB.inject(request);
+    expect(crossInstanceLimited.statusCode).toBe(429);
+    expect(crossInstanceLimited.json().error.code).toBe("RATE_LIMIT_EXCEEDED");
+
+    await Promise.all([appA.close(), appB.close()]);
+  });
+
+  it("rejects client authentication claims and uses only trusted server context", async () => {
+    const runtime = new SignalRuntime({
+      eventPort: noopEventPort,
+      storagePort: createMemoryIdempotencyStore(),
+    });
+    let authorizedActor: unknown;
+
+    runtime.registerMutation(
+      defineMutation({
+        name: "secure.update.v1",
+        kind: "mutation",
+        idempotency: "required",
+        inputSchema: z.object({ value: z.string() }),
+        resultSchema: z.object({ ok: z.boolean() }),
+        authorize: (_input, context) => {
+          authorizedActor = context.request.auth?.actor;
+        },
+        handler: () => ({ ok: true }),
+      }),
+    );
+
+    const app = createSignalHttpServer(runtime, {
+      resolveAuthContext: () => ({ actor: { id: "verified-user" } }),
+    });
+
+    const spoofed = await app.inject({
+      method: "POST",
+      url: "/signal/mutation/secure.update.v1",
+      payload: {
+        payload: { value: "test" },
+        idempotencyKey: "secure-1",
+        context: { auth: { actor: { id: "attacker", roles: ["admin"] } } },
+      },
+    });
+    const valid = await app.inject({
+      method: "POST",
+      url: "/signal/mutation/secure.update.v1",
+      payload: {
+        payload: { value: "test" },
+        idempotencyKey: "secure-2",
+      },
+    });
+
+    expect(spoofed.statusCode).toBe(400);
+    expect(valid.statusCode).toBe(200);
+    expect(authorizedActor).toEqual({ id: "verified-user" });
   });
 
   it("returns structured failures for malformed request bodies", async () => {

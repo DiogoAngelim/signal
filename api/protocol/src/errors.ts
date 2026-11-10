@@ -62,7 +62,7 @@ export const signalErrorSchema = z.object({
   category: signalErrorCategorySchema,
   message: z.string().min(1),
   retryable: z.boolean().optional(),
-  details: z.record(z.unknown()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type SignalErrorEnvelope = z.infer<typeof signalErrorSchema>;

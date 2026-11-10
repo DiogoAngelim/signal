@@ -311,6 +311,7 @@ architecture evidence, add a focused audit document and link it here.
 | [Governance](governance.md) | Protocol evolution, RFCs, schemas, fixtures, and contract management. |
 | [Multi-Domain Examples](multi-domain-examples.md) | How Signal's decision-processing model applies across domains. |
 | [Stewardship Evolution Audit](stewardship-evolution-audit.md) | Assessment of the decision stewardship ledger batch, remaining persistence/UI boundaries, and validation evidence. |
+| [Engineering and Architecture Score](engineering-score-system.md) | Weighted engineering scorecard, evidence maturity, benchmark protocol, score caps, and assessment governance. |
 
 ## Decision Quality
 
@@ -999,7 +1000,7 @@ High-risk mutation example:
 ```bash
 curl -X POST http://127.0.0.1:3001/signal/mutation/payment.capture.v1 \
   -H 'content-type: application/json' \
-  -d '{"idempotencyKey":"tenant_acme:capture:docs","auth":{"actor":{"id":"ops_alice"},"subject":"tenant:tenant_acme","scopes":["payment:capture","tenant:tenant_acme"]},"payload":{"tenantId":"tenant_acme","authorizationId":"auth_docs","amountCents":12500,"currency":"USD","paymentMethod":{"token":"tok_live_secret","last4":"4242"},"risk":{"declared":true,"classification":"high","reason":"Customer-visible payment capture moves funds.","approvedBy":"ops_alice"}}}'
+  -d '{"idempotencyKey":"tenant_acme:capture:docs","payload":{"tenantId":"tenant_acme","authorizationId":"auth_docs","amountCents":12500,"currency":"USD","paymentMethod":{"token":"tok_live_secret","last4":"4242"},"risk":{"declared":true,"classification":"high","reason":"Customer-visible payment capture moves funds.","approvedBy":"ops_alice"}}}'
 ```
 
 Successful responses preserve the same envelope shape:

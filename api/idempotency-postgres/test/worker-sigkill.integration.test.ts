@@ -185,6 +185,7 @@ integration("real worker process SIGKILL boundary", () => {
     });
 
     const childLeaseToken = output.slice("PUBLISHED:".length);
+    const firstPublishConfirmedAt = Date.now();
     const exitPromise = once(child, "exit");
     expect(child.kill("SIGKILL")).toBe(true);
     const [exitCode, exitSignal] = await exitPromise as [number | null, NodeJS.Signals | null];
@@ -201,19 +202,24 @@ integration("real worker process SIGKILL boundary", () => {
       lease_token: childLeaseToken,
     });
 
+    const recoveryStartedAt = Date.now();
     await admin.query(
       "UPDATE signal_outbox SET locked_until = now() - interval '1 second' WHERE message_id = $1",
       [messageId],
     );
     const recoveryWorkerId = `worker-recovered-${suffix}`;
+    const recoveryClaimStartedAt = Date.now();
     const recovered = await store.claimBatch({
       workerId: recoveryWorkerId,
       limit: 1,
       leaseMs: 30_000,
     });
+    const recoveryClaimLatencyMs = Date.now() - recoveryClaimStartedAt;
     const recoveryEvent = recovered.find((item) => item.envelope.messageId === messageId);
     expect(recoveryEvent).toBeDefined();
+    const recoveryPublishStartedAt = Date.now();
     await publish(recoveryEvent!.envelope, messageId);
+    const recoveryPublishConfirmedAt = Date.now();
 
     const deliveries = await fetch(new URL(`api/queues/%2F/${queueName}/get`, brokerUrl), {
       method: "POST",
@@ -253,19 +259,33 @@ integration("real worker process SIGKILL boundary", () => {
       }
     }
 
-    expect((await admin.query(
+    const sideEffectCount = (await admin.query(
       "SELECT count(*)::int AS count FROM signal_simulation_side_effects WHERE message_id = $1",
       [messageId],
-    )).rows[0].count).toBe(1);
-    expect(await store.acknowledge({
+    )).rows[0].count;
+    expect(sideEffectCount).toBe(1);
+    const staleAckAccepted = await store.acknowledge({
       id: String(afterCrash.rows[0].id),
       workerId,
       leaseToken: childLeaseToken,
-    })).toBe(false);
-    expect(await store.acknowledge({
+    });
+    const recoveryAckAccepted = await store.acknowledge({
       id: recoveryEvent!.id,
       workerId: recoveryWorkerId,
       leaseToken: recoveryEvent!.leaseToken,
-    })).toBe(true);
+    });
+    expect(staleAckAccepted).toBe(false);
+    expect(recoveryAckAccepted).toBe(true);
+    console.info("SIGNAL_WORKER_SIGKILL_METRICS", JSON.stringify({
+      workerRecoveryDurationMs: recoveryPublishConfirmedAt - recoveryStartedAt,
+      recoveryClaimLatencyMs,
+      recoveryPublishLatencyMs: recoveryPublishConfirmedAt - recoveryPublishStartedAt,
+      elapsedSinceInitialPublishMs: recoveryPublishConfirmedAt - firstPublishConfirmedAt,
+      duplicateDeliveries: duplicates.length,
+      redeliveryAmplification: duplicates.length,
+      consumerSideEffects: sideEffectCount,
+      staleAcknowledgementRejected: !staleAckAccepted,
+      recoveryAcknowledgementAccepted: recoveryAckAccepted,
+    }));
   });
 });

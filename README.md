@@ -118,12 +118,14 @@ pnpm --filter @signal/reference-server... build
 pnpm --filter @signal/reference-server start
 ```
 
+Before starting the reference server, configure a demo bearer token with `SIGNAL_REFERENCE_AUTH_TOKEN` (use a high-entropy value; do not commit it). The reference server verifies this token server-side and maps it to the fixed `tenant_acme` demo identity. This is a single-tenant example, not a production identity provider.
+
 Then call the dangerous mutation:
 
 ```bash
 curl -X POST http://127.0.0.1:3001/signal/mutation/payment.capture.v1 \
   -H 'content-type: application/json' \
-  -d '{"idempotencyKey":"tenant_acme:capture:readme","auth":{"actor":{"id":"ops_alice"},"subject":"tenant:tenant_acme","scopes":["payment:capture","tenant:tenant_acme"]},"payload":{"tenantId":"tenant_acme","authorizationId":"auth_readme","amountCents":12500,"currency":"USD","paymentMethod":{"token":"tok_live_secret","last4":"4242"},"risk":{"declared":true,"classification":"high","reason":"Customer-visible payment capture moves funds.","approvedBy":"ops_alice"}}}'
+  -d '{"idempotencyKey":"tenant_acme:capture:readme","payload":{"tenantId":"tenant_acme","authorizationId":"auth_readme","amountCents":12500,"currency":"USD","paymentMethod":{"token":"tok_live_secret","last4":"4242"},"risk":{"declared":true,"classification":"high","reason":"Customer-visible payment capture moves funds.","approvedBy":"ops_alice"}}}'
 ```
 
 ## The Signal Kernel
@@ -220,6 +222,7 @@ pnpm verify:exports
 - [Multi-Domain Examples](docs/multi-domain-examples.md) — how Signal applies across domains
 - [Constitution](docs/constitution.md) — Signal's correctness rules and change principles
 - [Quality and Assurance Standard](docs/quality-assurance.md) — invariants, determinism, evidence, statistical claims, security, and release validation
+- [Engineering and Architecture Score](docs/engineering-score-system.md) — weighted engineering scorecard, evidence levels, benchmarks, score caps, and assessment governance
 - [Developer Documentation](docs/README.md) — full developer-oriented source of truth
 
 ## Example App Links

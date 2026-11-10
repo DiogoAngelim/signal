@@ -12,7 +12,9 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -23,7 +25,7 @@
   "dependencies": {
     "@signal/protocol": "workspace:*",
     "@signal/runtime": "workspace:*",
-    "zod": "^3.24.2",
+    "zod": "^4.6.6",
     "@signal/decision": "workspace:*",
     "@signal/decision-memory": "workspace:*"
   },

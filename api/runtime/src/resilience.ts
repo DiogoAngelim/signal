@@ -150,55 +150,315 @@ export function shouldAllowRequest(
   );
 }
 
+export interface CircuitBreakerPermit {
+  readonly id: number;
+  readonly generation: number;
+  readonly kind: "closed" | "probe";
+}
+
 export interface CircuitBreakerController {
   snapshot(): CircuitBreakerState;
-  /** Atomically reserves the single half-open probe when the cooldown expires. */
-  tryAcquire(now?: number): boolean;
-  recordSuccess(): void;
-  recordFailure(now?: number): void;
+  /** Returns an opaque permit, or null when the breaker denies the request. */
+  acquire(now?: number): CircuitBreakerPermit | null;
+  /** Renews the single half-open probe lease. Closed-state permits cannot renew. */
+  renewProbe(permit: CircuitBreakerPermit, now?: number): boolean;
+  /** Records an outcome only for a live permit from the current breaker generation. */
+  recordSuccess(permit: CircuitBreakerPermit, now?: number): boolean;
+  recordFailure(permit: CircuitBreakerPermit, now?: number): boolean;
 }
 
 /**
- * Stateful, single-process circuit breaker with one half-open probe at a time.
- * It is not a distributed lock: use a shared coordination primitive when
- * multiple processes must enforce one global probe.
+ * Stateful, single-process circuit breaker with permit-scoped outcomes.
+ *
+ * Each admitted operation receives an opaque permit. Outcomes from stale
+ * closed-state requests cannot close a breaker after another request opened
+ * it, and only the current half-open probe can close or reopen that generation.
+ * The probe lease can be renewed by long-running health checks. This is not a
+ * distributed lock: use createDistributedCircuitBreakerController when
+ * multiple processes must coordinate one global probe.
  */
 export function createCircuitBreakerController(
   threshold = 5,
   resetTimeoutMs = 30000,
   clock: () => number = Date.now,
+  probeLeaseMs = 15_000,
 ): CircuitBreakerController {
   validateCircuitBreaker(threshold, resetTimeoutMs);
-  let current: CircuitBreakerState = createCircuitBreaker(
-    threshold,
-    resetTimeoutMs,
-  );
-  let probeInFlight = false;
+  if (
+    !Number.isSafeInteger(probeLeaseMs) ||
+    probeLeaseMs < 1_000 ||
+    probeLeaseMs > 86_400_000
+  ) {
+    throw new RangeError("probeLeaseMs must be between 1000 and 86400000 milliseconds.");
+  }
+
+  let current: CircuitBreakerState = createCircuitBreaker(threshold, resetTimeoutMs);
+  let generation = 0;
+  let nextPermitId = 1;
+  const activePermits = new WeakMap<CircuitBreakerPermit, true>();
+  let activeProbe: CircuitBreakerPermit | undefined;
+  let probeExpiresAt: number | undefined;
+
+  function expireProbeIfNeeded(now: number): void {
+    if (
+      current.state !== "half-open" ||
+      !activeProbe ||
+      probeExpiresAt === undefined ||
+      now < probeExpiresAt
+    ) {
+      return;
+    }
+    activePermits.delete(activeProbe);
+    activeProbe = undefined;
+    probeExpiresAt = undefined;
+    current = { ...current, state: "open", lastFailureAt: now };
+    generation += 1;
+  }
+
+  function issuePermit(kind: CircuitBreakerPermit["kind"], now: number) {
+    const permit = Object.freeze({ id: nextPermitId++, generation, kind });
+    activePermits.set(permit, true);
+    if (kind === "probe") {
+      activeProbe = permit;
+      probeExpiresAt = now + probeLeaseMs;
+    }
+    return permit;
+  }
 
   return {
     snapshot: () => ({ ...current }),
-    tryAcquire(now = clock()) {
+    acquire(now = clock()) {
       if (!Number.isFinite(now)) throw new RangeError("now must be finite.");
-      if (current.state === "closed") return true;
-      if (current.state === "half-open") return false;
+      expireProbeIfNeeded(now);
+      if (current.state === "closed") return issuePermit("closed", now);
+      if (current.state === "half-open") return null;
       if (
         current.lastFailureAt === null ||
-        now - current.lastFailureAt < current.resetTimeoutMs ||
-        probeInFlight
+        now - current.lastFailureAt < current.resetTimeoutMs
+      ) {
+        return null;
+      }
+      current = { ...current, state: "half-open" };
+      return issuePermit("probe", now);
+    },
+    renewProbe(permit, now = clock()) {
+      if (!Number.isFinite(now)) throw new RangeError("now must be finite.");
+      expireProbeIfNeeded(now);
+      if (
+        permit.kind !== "probe" ||
+        permit.generation !== generation ||
+        activeProbe !== permit ||
+        !activePermits.has(permit)
       ) {
         return false;
       }
-      current = { ...current, state: "half-open" };
-      probeInFlight = true;
+      probeExpiresAt = now + probeLeaseMs;
       return true;
     },
-    recordSuccess() {
+    recordSuccess(permit, now = clock()) {
+      if (!Number.isFinite(now)) throw new RangeError("now must be finite.");
+      expireProbeIfNeeded(now);
+      if (
+        permit.generation !== generation ||
+        !activePermits.has(permit)
+      ) {
+        return false;
+      }
+      activePermits.delete(permit);
+      if (permit.kind === "probe") {
+        if (current.state !== "half-open" || activeProbe !== permit) return false;
+        activeProbe = undefined;
+        probeExpiresAt = undefined;
+        current = recordSuccess(current);
+        generation += 1;
+        return true;
+      }
+      if (current.state !== "closed") return false;
       current = recordSuccess(current);
-      probeInFlight = false;
+      return true;
     },
-    recordFailure(now = clock()) {
-      current = recordFailure(current, now);
-      if (current.state === "open") probeInFlight = false;
+    recordFailure(permit, now = clock()) {
+      if (!Number.isFinite(now)) throw new RangeError("now must be finite.");
+      expireProbeIfNeeded(now);
+      if (
+        permit.generation !== generation ||
+        !activePermits.has(permit)
+      ) {
+        return false;
+      }
+      activePermits.delete(permit);
+      if (permit.kind === "probe") {
+        if (current.state !== "half-open" || activeProbe !== permit) return false;
+        activeProbe = undefined;
+        probeExpiresAt = undefined;
+        current = recordFailure(current, now);
+        generation += 1;
+        return true;
+      }
+      if (current.state !== "closed") return false;
+      const next = recordFailure(current, now);
+      current = next;
+      if (next.state === "open") generation += 1;
+      return true;
     },
   };
+}
+
+
+export class RetryDeadlineExceededError extends Error {
+  readonly code = "RETRY_DEADLINE_EXCEEDED";
+  constructor() {
+    super("The retry execution deadline was exceeded.");
+    this.name = "RetryDeadlineExceededError";
+  }
+}
+
+export class RetryAbortedError extends Error {
+  readonly code = "RETRY_ABORTED";
+  constructor(cause?: unknown) {
+    super("The retry execution was aborted.", { cause });
+    this.name = "RetryAbortedError";
+  }
+}
+
+export interface RetryExecutionOptions extends RetryPolicy {
+  /** Absolute Unix epoch milliseconds or an ISO-8601 timestamp. */
+  readonly deadlineAt?: number | string;
+  readonly signal?: AbortSignal;
+  readonly random?: () => number;
+  readonly clock?: () => number;
+  readonly sleep?: (delayMs: number, signal: AbortSignal) => Promise<void>;
+  readonly onRetry?: (input: {
+    attempt: number;
+    delayMs: number;
+    error: unknown;
+  }) => void;
+}
+
+function retryErrorCode(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null || !("code" in error)) {
+    return undefined;
+  }
+  return typeof error.code === "string" ? error.code : undefined;
+}
+
+function abortReason(signal: AbortSignal): Error {
+  if (signal.reason instanceof RetryDeadlineExceededError) {
+    return signal.reason;
+  }
+  if (signal.reason instanceof Error) return signal.reason;
+  return new RetryAbortedError(signal.reason);
+}
+
+function abortableSleep(delayMs: number, signal: AbortSignal): Promise<void> {
+  if (signal.aborted) return Promise.reject(abortReason(signal));
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, delayMs);
+    const onAbort = () => {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", onAbort);
+      reject(abortReason(signal));
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+/**
+ * Execute an operation with a bounded attempt budget, capped exponential
+ * backoff, full jitter, an absolute deadline, and caller cancellation.
+ *
+ * The operation receives an AbortSignal and must honor it to stop in-flight
+ * I/O. A deadline cannot undo a side effect already committed by a dependency;
+ * use idempotency keys at the destination for retry-safe writes.
+ */
+export async function executeWithRetry<T>(
+  operation: (attempt: number, signal: AbortSignal) => Promise<T>,
+  options: RetryExecutionOptions = DEFAULT_RETRY_POLICY,
+): Promise<T> {
+  validateRetryPolicy(options);
+  const clock = options.clock ?? Date.now;
+  const random = options.random ?? Math.random;
+  const deadlineAt = options.deadlineAt === undefined
+    ? undefined
+    : typeof options.deadlineAt === "string"
+      ? Date.parse(options.deadlineAt)
+      : options.deadlineAt;
+  if (deadlineAt !== undefined && !Number.isFinite(deadlineAt)) {
+    throw new RangeError("deadlineAt must be a valid timestamp or epoch millisecond value.");
+  }
+
+  const controller = new AbortController();
+  const externalSignal = options.signal;
+  const relayAbort = () => controller.abort(externalSignal?.reason);
+  if (externalSignal?.aborted) relayAbort();
+  else externalSignal?.addEventListener("abort", relayAbort, { once: true });
+
+  let deadlineTimer: ReturnType<typeof setTimeout> | undefined;
+  if (deadlineAt !== undefined) {
+    const remaining = deadlineAt - clock();
+    if (remaining <= 0) {
+      controller.abort(new RetryDeadlineExceededError());
+    } else {
+      deadlineTimer = setTimeout(
+        () => controller.abort(new RetryDeadlineExceededError()),
+        remaining,
+      );
+    }
+  }
+
+  const sleep = options.sleep ?? abortableSleep;
+  const raceAbort = async <TResult>(promise: Promise<TResult>): Promise<TResult> => {
+    if (controller.signal.aborted) throw abortReason(controller.signal);
+    let onAbort: (() => void) | undefined;
+    const aborted = new Promise<never>((_resolve, reject) => {
+      onAbort = () => reject(abortReason(controller.signal));
+      controller.signal.addEventListener("abort", onAbort, { once: true });
+    });
+    try {
+      return await Promise.race([promise, aborted]);
+    } finally {
+      if (onAbort) controller.signal.removeEventListener("abort", onAbort);
+    }
+  };
+
+  try {
+    for (let attempt = 1; attempt <= options.maxAttempts; attempt += 1) {
+      if (controller.signal.aborted) throw abortReason(controller.signal);
+      if (deadlineAt !== undefined && clock() >= deadlineAt) {
+        throw new RetryDeadlineExceededError();
+      }
+
+      try {
+        const result = await raceAbort(operation(attempt, controller.signal));
+        if (deadlineAt !== undefined && clock() >= deadlineAt) {
+          throw new RetryDeadlineExceededError();
+        }
+        return result;
+      } catch (error) {
+        if (controller.signal.aborted) throw abortReason(controller.signal);
+        const code = retryErrorCode(error);
+        if (
+          attempt >= options.maxAttempts ||
+          code === undefined ||
+          !isRetryable(code, options)
+        ) {
+          throw error;
+        }
+
+        const delayMs = calculateJitteredBackoff(attempt - 1, options, random);
+        if (deadlineAt !== undefined && clock() + delayMs >= deadlineAt) {
+          throw new RetryDeadlineExceededError();
+        }
+        options.onRetry?.({ attempt, delayMs, error });
+        await raceAbort(sleep(delayMs, controller.signal));
+      }
+    }
+    throw new Error("Retry execution exhausted without a result.");
+  } finally {
+    if (deadlineTimer !== undefined) clearTimeout(deadlineTimer);
+    externalSignal?.removeEventListener("abort", relayAbort);
+  }
 }

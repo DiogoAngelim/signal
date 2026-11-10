@@ -1,0 +1,98 @@
+name: Signal engineering measurements
+
+on:
+  pull_request:
+    paths:
+      - "api/**"
+      - "benchmarks/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/engineering-measurements.yml"
+  push:
+    branches: [main]
+    paths:
+      - "api/**"
+      - "benchmarks/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/engineering-measurements.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-dispatch-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SIGNAL_TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/signal_test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/signal_test
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: signal_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d signal_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:library
+      - name: Apply PostgreSQL adapter migrations
+        run: node benchmarks/prepare-postgres.mjs
+      - name: Measure runtime event dispatch
+        run: node benchmarks/runtime-dispatch.mjs --iterations 3000 --runs 3 --concurrency 1,16,64 --output benchmark-results/runtime-dispatch.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - name: Measure core decision assessment, replay, and learning
+        run: node benchmarks/decision-pipeline.mjs --runs 3 --evidence-sizes 100,1000,5000 --learning-sizes 1000,10000,50000 --output benchmark-results/decision-pipeline.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - name: Measure calibration, uncertainty, drift, and learning primitives
+        run: node benchmarks/agency-statistics.mjs --runs 3 --sizes 1000,10000,50000 --bootstrap-iterations 1000 --output benchmark-results/agency-statistics.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - name: Measure audit-chain and signed-checkpoint performance
+        run: node benchmarks/audit-chain.mjs --runs 3 --sizes 1000,10000,50000 --output benchmark-results/audit-chain.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - name: Measure in-memory circuit-breaker throughput and probe contention
+        run: node benchmarks/in-memory-circuit-breaker.mjs --iterations 10000 --runs 3 --concurrency 1,16,64 --output benchmark-results/in-memory-circuit-breaker.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - name: Measure HTTP binding and authorization path
+        run: node benchmarks/http-binding.mjs --iterations 1500 --runs 3 --concurrency 1,16,64 --output benchmark-results/http-binding.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - name: Measure distributed circuit-breaker contention and fencing
+        run: node benchmarks/distributed-circuit-breaker.mjs --iterations 100 --runs 3 --concurrency 1,8,32 --output benchmark-results/distributed-circuit-breaker.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - name: Measure PostgreSQL idempotency and outbox
+        run: node benchmarks/postgres-outbox.mjs --iterations 500 --runs 3 --concurrency 1,8,32 --output benchmark-results/postgres-outbox.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signal-engineering-measurements-${{ github.sha }}
+          path: benchmark-results/*.json
+          if-no-files-found: error
+          retention-days: 90

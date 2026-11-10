@@ -1,6 +1,7 @@
 import type {
   DecisionPort,
   EventPort,
+  ObservabilityContext,
   ObservabilityPort,
   RuntimeMode,
   StoragePort,
@@ -124,6 +125,8 @@ export interface SignalRuntimeOptions {
   runtimeName?: string;
   /** Execution mode (live, replay, audit) */
   mode?: RuntimeMode;
+  /** Require a trusted auth context and an authorize policy on every mutation. */
+  requireMutationAuthorization?: boolean;
   /** Bindings configuration for capabilities */
   bindings?: SignalCapabilities["bindings"];
 }
@@ -154,6 +157,7 @@ export class SignalRuntime implements SignalBinding {
   readonly mode: RuntimeMode;
   readonly isReplay: boolean;
   private readonly bindings: SignalCapabilities["bindings"];
+  private readonly requireMutationAuthorization: boolean;
   private readonly subscriptions: Array<{
     name: string;
     consumerId?: string;
@@ -172,6 +176,7 @@ export class SignalRuntime implements SignalBinding {
     this.observabilityPort = options.observabilityPort;
     this.runtimeName = options.runtimeName ?? "signal-node-reference";
     this.mode = options.mode ?? "live";
+    this.requireMutationAuthorization = options.requireMutationAuthorization ?? false;
     this.isReplay = this.mode === "replay" || this.mode === "audit";
     this.bindings = options.bindings ?? {
       inProcess: true,
@@ -229,7 +234,7 @@ export class SignalRuntime implements SignalBinding {
   ): Promise<SignalExecutionResult<TResult>> {
     const startedAt = Date.now();
 
-    this.observabilityPort?.emit({
+    this.emitObservation({
       event: "execution.start",
       operationName: name,
       operationKind: "query",
@@ -259,7 +264,7 @@ export class SignalRuntime implements SignalBinding {
     const durationMs = Date.now() - startedAt;
 
     if (result.ok) {
-      this.observabilityPort?.emit({
+      this.emitObservation({
         event: "execution.end",
         operationName: name,
         operationKind: "query",
@@ -284,7 +289,7 @@ export class SignalRuntime implements SignalBinding {
   ): Promise<SignalExecutionResult<TResult>> {
     const startedAt = Date.now();
 
-    this.observabilityPort?.emit({
+    this.emitObservation({
       event: "execution.start",
       operationName: name,
       operationKind: "mutation",
@@ -313,12 +318,13 @@ export class SignalRuntime implements SignalBinding {
         meta: request.meta,
       }),
       request.idempotencyKey,
+      this.requireMutationAuthorization,
     );
 
     const durationMs = Date.now() - startedAt;
 
     if (result.ok) {
-      this.observabilityPort?.emit({
+      this.emitObservation({
         event: "execution.end",
         operationName: name,
         operationKind: "mutation",
@@ -429,7 +435,7 @@ export class SignalRuntime implements SignalBinding {
             normalizedRequest,
           );
 
-          this.observabilityPort?.emit({
+          this.emitObservation({
             event: "event.emitted",
             operationName: input.name,
             operationKind: "event",
@@ -530,6 +536,15 @@ export class SignalRuntime implements SignalBinding {
 
   lock(): void {
     this.registry.lock();
+  }
+
+  private emitObservation(event: ObservabilityContext): void {
+    try {
+      this.observabilityPort?.emit(event);
+    } catch {
+      // Telemetry is best-effort: an exporter failure must never change the
+      // result or durability of a query, mutation, or event execution.
+    }
   }
 
   private findRegisteredKinds(name: string): SignalOperationKind[] {

@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createInMemoryMetricsRecorder } from "./observability";
+import {
+  createBufferedObservabilityPort,
+  createInMemoryMetricsRecorder,
+} from "./observability";
 
 describe("in-memory metrics recorder", () => {
   it("retains a bounded number of samples and counts dropped samples", () => {
@@ -56,5 +59,48 @@ describe("in-memory metrics recorder", () => {
     expect(() => recorder.timing("invalid", Number.POSITIVE_INFINITY)).toThrow(
       "Metric values must be finite numbers.",
     );
+  });
+});
+
+
+describe("buffered observability port", () => {
+  it("batches events through an exporter and reports bounded-buffer drops", async () => {
+    const batches: number[] = [];
+    const port = createBufferedObservabilityPort({
+      export: async (events) => { batches.push(events.length); },
+    }, { capacity: 3, batchSize: 2 });
+
+    port.emit({ event: "execution.start" });
+    port.emit({ event: "execution.end" });
+    port.emit({ event: "error.occurred" });
+    port.emit({ event: "event.emitted" });
+    await port.flush();
+
+    expect(batches).toEqual([2, 1]);
+    expect(port.stats()).toEqual({ queued: 0, dropped: 1, exportFailures: 0 });
+  });
+
+  it("retains a failed batch for an explicit retry and closes the adapter", async () => {
+    let fail = true;
+    const exported: string[] = [];
+    const port = createBufferedObservabilityPort({
+      export: async (events) => {
+        if (fail) throw new Error("collector unavailable");
+        exported.push(...events.map((event) => event.event));
+      },
+    }, { capacity: 4, batchSize: 2, autoFlush: false });
+
+    port.emit({ event: "execution.start" });
+    await expect(port.flush()).rejects.toThrow("collector unavailable");
+    expect(port.stats().queued).toBe(1);
+    expect(port.stats().exportFailures).toBe(1);
+
+    fail = false;
+    await port.flush();
+    await port.close();
+    port.emit({ event: "execution.end" });
+
+    expect(exported).toEqual(["execution.start"]);
+    expect(port.stats()).toEqual({ queued: 0, dropped: 1, exportFailures: 1 });
   });
 });

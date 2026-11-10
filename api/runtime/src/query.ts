@@ -30,6 +30,9 @@ export async function executeQuery<TInput, TResult>(
       source: context.request.source,
       auth: context.request.auth,
     });
+    if (definition.authorize) {
+      await definition.authorize(validatedInput, { ...context, envelope });
+    }
     const result = await definition.handler(validatedInput, {
       ...context,
       envelope,

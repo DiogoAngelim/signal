@@ -32,7 +32,7 @@ export const signalResultMetaSchema = z
       .optional(),
     deadline: z
       .object({
-        deadlineAt: z.string().datetime(),
+        deadlineAt: z.iso.datetime(),
       })
       .optional(),
     delivery: z

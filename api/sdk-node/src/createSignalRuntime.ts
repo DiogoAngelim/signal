@@ -15,6 +15,7 @@ export function createSignalRuntime(
     observabilityPort: options.observabilityPort,
     runtimeName: options.runtimeName ?? "signal-node",
     mode: options.mode,
+    requireMutationAuthorization: options.requireMutationAuthorization,
     bindings: options.bindings,
   });
 }
