@@ -460,10 +460,10 @@ export function scoreEngineering(results: ScenarioResult[], inventory: Capabilit
     ["Local in-process query benchmark reports latency/throughput/RSS.", "No production or cross-host baseline is included; score is neutral and low-confidence."],
     [`Weighted capability coverage across ${inventory.length} registered surfaces: ${(coverage * 100).toFixed(0)}%.`, "Public SDK operations; separate domain/evaluation modules; no private package imports."],
     [`Security/integrity capability coverage: ${(securityCoverage * 100).toFixed(0)}%.`, "No external identity provider or full adversarial security certification."],
-    ["Small typed modules with explicit domain contracts and documentation.", "No long-term migration/evolution exercise."],
+    ["Maintainability score derives from demonstrated capability coverage and passing scenario ratio.", "Long-term migrations, multi-version compatibility and change-cost studies are not measured."],
     [`${results.filter((item) => item.status === "passed").length}/${results.length} scenarios passed.`, "Scenario assertions and capability evidence are independently reported."],
-    ["CLI evaluate/coverage/benchmark/compare commands.", "Local browser workflow and workspace package scripts."],
-    ["Dedicated CI workflow builds workspace dependency closure.", "No deployed environment, SLOs or operational telemetry."]
+    ["Documented setup, local UI, CLI workflows and reproducible scenario commands.", "External developer adoption and first-run usability have not been independently evaluated."],
+    [`Signal ObservabilityPort coverage: ${(observabilityCoverage * 100).toFixed(0)}%.`, "No deployed SLOs, on-call process or external telemetry backend is configured."]
   ];
   const dimensions = weights.map((dimension, index) => ({
     ...dimension,
