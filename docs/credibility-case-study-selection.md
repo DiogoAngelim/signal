@@ -66,17 +66,16 @@ The inspected test file `src/lib/decision-signals.test.ts` includes:
 - Filtering of model-invented finding codes.
 - Thirty reconciliation scenarios comparing the independent Signal-named calculation with Workbench economics.
 
-However, this is not yet proof of integration with the Signal platform. The implementation is local to Workbench and its package manifest does not import Signal's SDK/runtime. The name "Signal" in a local module or feature description must not be presented as evidence of platform integration.
+This original local feature is still not proof of Signal platform integration. Separately, Workbench PR #178 now adds a genuine package-level integration through the released `@signal/decision@0.1.0` artifact. That integration is source-implemented and CI-validated, but it is not the Signal SDK/runtime, a hosted service, a production deployment, or evidence of improved business outcomes. See [Workbench Application Integration Case Study](case-studies/workbench-integration.md).
 
-A future Workbench case study should:
+The completed package-level integration should be extended only through separately validated Signal releases and capabilities. A future Workbench business-outcome case study should:
 1. Preserve Workbench as the owner of commercial records and economic calculations.
-2. Integrate a real, supported Signal package/runtime only where it adds reusable decision lifecycle value.
-3. Use the same authorized opportunity scenarios for baseline and integrated comparisons.
-4. Validate economics against an independent calculation.
-5. Use genuine outcome-labeled opportunities only when sufficient authorized data exists.
-6. Measure decision consistency, evidence completeness, invalid-assumption detection, reconciliation, reproducibility, and latency.
-7. Avoid claims of revenue/conversion improvement until real observed outcomes support them.
-8. Keep human approval and all existing commercial write boundaries intact.
+2. Use the same authorized opportunity scenarios for baseline and integrated comparisons.
+3. Validate economics against an independent calculation.
+4. Use genuine outcome-labeled opportunities only when sufficient authorized data exists.
+5. Measure decision consistency, evidence completeness, invalid-assumption detection, reconciliation, reproducibility, and latency.
+6. Avoid claims of revenue/conversion improvement until real observed outcomes support them.
+7. Keep human approval and all existing commercial write boundaries intact.
 
 No Workbench code changes are authorized by this assessment alone.
 
