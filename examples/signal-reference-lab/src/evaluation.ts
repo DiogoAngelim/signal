@@ -94,8 +94,19 @@ export function scoreEngineering(results: ScenarioResult[], inventory: Capabilit
   const passRate = results.length ? results.filter((item) => item.status === "passed").length / results.length : 0;
   const exercised = inventory.filter((item) => item.status === "exercised").length / inventory.length;
   const unverified = inventory.filter((item) => item.status === "not-verified").length;
-  const scores = [Math.min(10, 5 + passRate * 5), 3.5, 2.5, 7, 6.5, 7, Math.min(10, 4 + passRate * 6), 7, 3.5];
-  const dimensions = weights.map((dimension, index) => ({ ...dimension, score: Number(scores[index].toFixed(1)), confidence: index === 2 || index === 8 ? "low" as const : "medium" as const, evidence: index === 0 || index === 6 ? results.map((item) => `${item.id}:${item.status}`) : [`${exercised.toFixed(2)} exercised capability ratio`, `${unverified} capability areas not verified`] }));
+  const scores = [Math.min(10, 5 + passRate * 5), 3.5, 5, 7, 6.5, 7, Math.min(10, 4 + passRate * 6), 7, 5];
+  const evidenceByDimension = [
+    results.map((item) => `${item.id}:${item.status} (${item.assertions} assertions)`),
+    ["In-process idempotency and subscriber delivery only", "PostgreSQL/outbox/inbox/recovery remain unverified"],
+    ["Local in-process query benchmark reports latency/throughput/RSS", "No production or cross-host baseline is included"],
+    ["Public SDK operations; separate domain/evaluation modules", "No private package imports"],
+    ["Tenant-scoped read/write tests and evidence hard-stop", "No external identity provider or adversarial security test"],
+    ["Small typed modules with explicit domain contracts and docs", "No long-term migration/evolution exercise"],
+    results.map((item) => `${item.id}:${item.status}`),
+    ["CLI evaluate/coverage/benchmark/compare commands", "Local browser workflow and workspace package scripts"],
+    ["Dedicated CI workflow builds workspace dependency closure", "No deployed environment, SLOs or operational telemetry"]
+  ];
+  const dimensions = weights.map((dimension, index) => ({ ...dimension, score: Number(scores[index].toFixed(1)), confidence: index === 1 || index === 2 || index === 4 || index === 8 ? "low" as const : "medium" as const, evidence: evidenceByDimension[index] }));
   const overall = Number((dimensions.reduce((sum, item) => sum + item.score * item.weight, 0) / 100).toFixed(2));
   return { overall, dimensions, interpretation: "Provisional reference-app integration score, not a certification or production score for Signal. Unverified database, resilience, replay, audit and telemetry capabilities are explicitly not credited. Performance is low-confidence until repeatable benchmark workloads and resource collectors are connected." };
 }
