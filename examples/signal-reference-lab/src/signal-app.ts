@@ -1,3 +1,4 @@
+import { reviewDecisionOutcome } from "@signal/decision";
 import { createSignalRuntime, type SignalEventDefinition, type SignalMutationDefinition, type SignalQueryDefinition } from "@signal/sdk-node";
 import { z } from "zod";
 import { assess, type Assessment, type CaseRequest, type Decision, type Evidence, type LabEvent, type Outcome } from "./domain.js";
@@ -73,7 +74,9 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     async handler(input: z.infer<typeof outcomeInput>) {
       const request = requireTenant(requests, input.requestId, input.tenantId);
       if (!request.decision) throw new Error("A decision is required before recording an outcome.");
-      const result: Outcome = { id: `outcome-${hash(`${request.id}:${input.result}:${input.notes}`)}`, result: input.result, notes: input.notes, recordedAt: now().toISOString() };
+      const recordedAt = now().toISOString();
+      const learningReview = reviewDecisionOutcome({ decisionId: request.decision.id, reviewId: `review-${hash(`${request.id}:${input.result}:${input.notes}`)}`, reviewedAt: recordedAt, whatHappened: input.notes, why: `Outcome classified as ${input.result} after the recorded decision.`, lessons: [`Review future comparable requests against this observed outcome: ${input.result}.`] });
+      const result: Outcome = { id: `outcome-${hash(`${request.id}:${input.result}:${input.notes}`)}`, result: input.result, notes: input.notes, recordedAt, learningReview };
       request.outcome = result; request.status = "reviewed";
       await publish("lab.outcome.recorded.v1", request, { outcomeId: result.id, result: result.result });
       return { outcome: result };
