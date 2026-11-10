@@ -102,7 +102,11 @@ describe("Signal metrics observability adapter", () => {
     port.emit({
       event: "error.occurred",
       operationKind: "unsupported-user-value",
-      meta: { errorCode: "PRIVATE_ERROR_CODE" },
+      durationMs: 6,
+      meta: {
+        errorCode: "PRIVATE_ERROR_CODE",
+        source: "command-dispatch",
+      },
     });
 
     const metrics = recorder.snapshot();
@@ -116,6 +120,10 @@ describe("Signal metrics observability adapter", () => {
     expect(names).toContain("signal.subscribers.deduplicated");
     expect(names).toContain("signal.subscribers.coalesced");
     expect(names).toContain("signal.errors");
+    expect(names).toContain("signal.errors.duration_ms");
+    expect(
+      metrics.find((metric) => metric.name === "signal.errors")?.labels.source,
+    ).toBe("command-dispatch");
     expect(metrics.every((metric) => metric.labels.operation_kind !== "unsupported-user-value")).toBe(true);
     expect(JSON.stringify(metrics)).not.toContain("private.operation.v1");
     expect(JSON.stringify(metrics)).not.toContain("private-correlation-id");
