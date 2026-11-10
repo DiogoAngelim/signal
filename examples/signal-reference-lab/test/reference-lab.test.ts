@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { runEvaluation, scoreEngineering } from "../src/evaluation.js";
 import { runBenchmark } from "../src/benchmark.js";
+import { compareBenchmarks } from "../src/comparison.js";
 
 test("reference lab executes lifecycle and safety scenarios", async () => {
   const report = await runEvaluation();
@@ -23,4 +24,10 @@ test("benchmark emits reproducible workload and percentile metadata", async () =
   assert.ok(report.timing.p95Ms >= 0);
   assert.ok(report.environment.rssAfter > 0);
   assert.ok(report.limitations.length >= 2);
+});
+
+test("benchmark comparison rejects mismatched workload", async () => {
+  const baseline = await runBenchmark({ iterations: 10, concurrency: 2, warmup: 1 });
+  const current = await runBenchmark({ iterations: 11, concurrency: 2, warmup: 1 });
+  assert.throws(() => compareBenchmarks(current, baseline), /workload parameters differ/);
 });
