@@ -73,6 +73,8 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     let blocked = false; try { await app.decide({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", approve: true, rationale: "Approve despite missing evidence." }); } catch { blocked = true; }
     a(blocked, "approval must be blocked when assessment recommends investigation");
     let actionBlocked = false; try { await app.executeAction({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", kind: "grant-access" }); } catch { actionBlocked = true; }
+    a(actionBlocked, "action execution must remain blocked without an approved decision");
+    let actionBlocked = false; try { await app.executeAction({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", kind: "grant-access" }); } catch { actionBlocked = true; }
     a(actionBlocked, "action execution must be blocked without an approved decision");
     const rejected = await app.decide({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", approve: false, rationale: "Reject pending independent evidence." });
     a(rejected.result === "rejected", "operator rejection should be recordable");
