@@ -3,7 +3,7 @@ import {
   createBufferedObservabilityPort,
   createInMemoryMetricsRecorder,
   createSignalMetricsObservabilityPort,
-} from "./observability";
+} from "./index";
 
 describe("in-memory metrics recorder", () => {
   it("retains a bounded number of samples and counts dropped samples", () => {
