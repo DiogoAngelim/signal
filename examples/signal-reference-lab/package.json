@@ -24,7 +24,8 @@
     "@signal/commitment": "workspace:*",
     "@signal/semantic-state": "workspace:*",
     "zod": "catalog:",
-    "@signal/idempotency-postgres": "workspace:*"
+    "@signal/idempotency-postgres": "workspace:*",
+    "@signal/kernel": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",
