@@ -73,6 +73,13 @@ describe("replay evidence", () => {
     }, () => ({ converted: 4.5 }))).rejects.toBeInstanceOf(ReplayEvidenceCompatibilityError);
   });
 
+  it("rejects replay under a different tenant identity", async () => {
+    await expect(replayWithEvidence(createRecord(), {
+      ...identity,
+      tenantId: "tenant-2",
+    }, () => ({ converted: 4.5 }))).rejects.toBeInstanceOf(ReplayEvidenceCompatibilityError);
+  });
+
   it("rejects result divergence", async () => {
     await expect(replayWithEvidence(createRecord(), identity, () => ({
       converted: 4.6,
