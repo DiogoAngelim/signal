@@ -1,0 +1,101 @@
+import { createSignalRuntime, type SignalEventDefinition, type SignalMutationDefinition, type SignalQueryDefinition } from "@signal/sdk-node";
+import { z } from "zod";
+import { assess, type Assessment, type CaseRequest, type Decision, type Evidence, type LabEvent, type Outcome } from "./domain.js";
+
+const requestInput = z.object({ tenantId: z.string().min(1), title: z.string().min(3).max(160), description: z.string().min(8).max(4000) });
+const evidenceInput = z.object({ requestId: z.string().min(1), tenantId: z.string().min(1), description: z.string().min(3), source: z.string().min(1), confidence: z.number().min(0).max(1), verified: z.boolean() });
+const decisionInput = z.object({ requestId: z.string().min(1), tenantId: z.string().min(1), actor: z.string().min(1), approve: z.boolean(), rationale: z.string().min(8) });
+const outcomeInput = z.object({ requestId: z.string().min(1), tenantId: z.string().min(1), result: z.enum(["success", "failure", "partial", "unknown"]), notes: z.string().max(2000) });
+
+export function createReferenceLab(options: { now?: () => Date } = {}) {
+  const now = options.now ?? (() => new Date());
+  const requests = new Map<string, CaseRequest>();
+  const events: LabEvent[] = [];
+  const seen = new Set<string>();
+  const runtime = createSignalRuntime({ runtimeName: "signal-reference-lab", bindings: { inProcess: true } });
+  const publish = async (name: string, request: CaseRequest, payload: Record<string, unknown>) => {
+    const event = { id: `${name}:${request.id}:${events.length + 1}`, name, requestId: request.id, tenantId: request.tenantId, occurredAt: now().toISOString(), payload };
+    events.push(event);
+    await runtime.publish(name, event, context("reference-lab", event.id));
+    return event;
+  };
+  const query = {
+    name: "lab.request.get.v1", kind: "query" as const, description: "Read a request within its tenant boundary.",
+    inputSchema: z.object({ requestId: z.string(), tenantId: z.string() }),
+    resultSchema: z.object({ request: z.any().nullable() }),
+    handler: (input: { requestId: string; tenantId: string }) => {
+      const item = requests.get(input.requestId);
+      return { request: item?.tenantId === input.tenantId ? structuredClone(item) : null };
+    }
+  };
+  const submit = {
+    name: "lab.request.submit.v1", kind: "mutation" as const, description: "Create a case request exactly once for a supplied idempotency key.",
+    inputSchema: requestInput, resultSchema: z.object({ request: z.any() }),
+    async handler(input: z.infer<typeof requestInput>) {
+      const id = `case-${hash(`${input.tenantId}:${input.title}:${input.description}`)}`;
+      const existing = requests.get(id);
+      if (existing) return { request: structuredClone(existing) };
+      const request: CaseRequest = { id, tenantId: input.tenantId, title: input.title, description: input.description, status: "received", createdAt: now().toISOString(), evidence: [] };
+      requests.set(id, request);
+      await publish("lab.request.received.v1", request, { title: request.title });
+      return { request: structuredClone(request) };
+    }
+  };
+  const addEvidence = {
+    name: "lab.evidence.add.v1", kind: "mutation" as const, description: "Attach sourced evidence to a request.",
+    inputSchema: evidenceInput, resultSchema: z.object({ evidence: z.any(), assessment: z.any() }),
+    async handler(input: z.infer<typeof evidenceInput>) {
+      const request = requireTenant(requests, input.requestId, input.tenantId);
+      const evidence: Evidence = { id: `evidence-${hash(`${input.requestId}:${input.source}:${input.description}`)}`, ...input, observedAt: now().toISOString() };
+      if (!request.evidence.some((item) => item.id === evidence.id)) request.evidence.push(evidence);
+      request.assessment = assess(request, now());
+      request.status = "assessed";
+      await publish("lab.request.assessed.v1", request, { evidenceCount: request.evidence.length, confidence: request.assessment.confidence });
+      return { evidence, assessment: request.assessment };
+    }
+  };
+  const decide = {
+    name: "lab.decision.record.v1", kind: "mutation" as const, description: "Record an accountable decision after assessment.",
+    inputSchema: decisionInput, resultSchema: z.object({ decision: z.any() }),
+    async handler(input: z.infer<typeof decisionInput>) {
+      const request = requireTenant(requests, input.requestId, input.tenantId);
+      if (!request.assessment) throw new Error("An assessment is required before a decision.");
+      if (request.assessment.recommendation === "investigate" && input.approve) throw new Error("Insufficient verified evidence: approval is blocked.");
+      const decision: Decision = { id: `decision-${hash(`${request.id}:${input.actor}:${input.rationale}`)}`, result: input.approve ? "approved" : "rejected", rationale: input.rationale, actor: input.actor, decidedAt: now().toISOString() };
+      request.decision = decision; request.status = input.approve ? "approved" : "rejected";
+      await publish("lab.decision.recorded.v1", request, { decisionId: decision.id, result: decision.result, actor: decision.actor });
+      return { decision };
+    }
+  };
+  const outcome = {
+    name: "lab.outcome.record.v1", kind: "mutation" as const, description: "Record the observed outcome for a completed decision.",
+    inputSchema: outcomeInput, resultSchema: z.object({ outcome: z.any() }),
+    async handler(input: z.infer<typeof outcomeInput>) {
+      const request = requireTenant(requests, input.requestId, input.tenantId);
+      if (!request.decision) throw new Error("A decision is required before recording an outcome.");
+      const result: Outcome = { id: `outcome-${hash(`${request.id}:${input.result}:${input.notes}`)}`, result: input.result, notes: input.notes, recordedAt: now().toISOString() };
+      request.outcome = result; request.status = "reviewed";
+      await publish("lab.outcome.recorded.v1", request, { outcomeId: result.id, result: result.result });
+      return { outcome: result };
+    }
+  };
+  for (const operation of [query, submit, addEvidence, decide, outcome]) {
+    if (operation.kind === "query") runtime.registerQuery(operation as SignalQueryDefinition);
+    else runtime.registerMutation(operation as SignalMutationDefinition);
+  }
+  for (const name of ["lab.request.received.v1", "lab.request.assessed.v1", "lab.decision.recorded.v1", "lab.outcome.recorded.v1"]) {
+    runtime.registerEvent({ name, kind: "event", description: `Reference Lab lifecycle event: ${name}`, inputSchema: z.record(z.string(), z.unknown()), resultSchema: z.object({ accepted: z.boolean() }), handler: () => ({ accepted: true }) } as SignalEventDefinition);
+    runtime.subscribe(name, (envelope) => { if (!seen.has(envelope.messageId)) seen.add(envelope.messageId); }, { consumerId: "reference-lab-journal", replaySafe: true });
+  }
+  return {
+    runtime, events,
+    async submitRequest(input: z.infer<typeof requestInput>) { const result = await runtime.mutation("lab.request.submit.v1", input, { ...context("lab-ui"), idempotencyKey: `submit:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result.request as CaseRequest; },
+    async addEvidence(input: z.infer<typeof evidenceInput>) { const result = await runtime.mutation("lab.evidence.add.v1", input, { ...context("lab-ui"), idempotencyKey: `evidence:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result as { evidence: Evidence; assessment: Assessment }; },
+    async decide(input: z.infer<typeof decisionInput>) { const result = await runtime.mutation("lab.decision.record.v1", input, { ...context("lab-ui"), idempotencyKey: `decision:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result.decision as Decision; },
+    async recordOutcome(input: z.infer<typeof outcomeInput>) { const result = await runtime.mutation("lab.outcome.record.v1", input, { ...context("lab-ui"), idempotencyKey: `outcome:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result.outcome as Outcome; },
+    async getRequest(requestId: string, tenantId: string) { const result = await runtime.query("lab.request.get.v1", { requestId, tenantId }, context("lab-ui")); if (!result.ok) throw new Error(result.error.message); return result.result.request as CaseRequest | null; }
+  };
+}
+function requireTenant(store: Map<string, CaseRequest>, id: string, tenantId: string): CaseRequest { const item = store.get(id); if (!item || item.tenantId !== tenantId) throw new Error("Request not found."); return item; }
+function context(system: string, causationId?: string) { return { causationId, source: { system, transport: "in-process", runtime: "signal-reference-lab" }, meta: { scenario: "reference-lifecycle" } }; }
+function hash(value: string) { let result = 2166136261; for (const char of value) result = Math.imul(result ^ char.charCodeAt(0), 16777619); return (result >>> 0).toString(36); }
