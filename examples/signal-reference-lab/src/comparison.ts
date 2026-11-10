@@ -3,7 +3,7 @@ import type { BenchmarkReport } from "./benchmark.js";
 export function compareBenchmarks(current: BenchmarkReport, baseline: BenchmarkReport) {
   const sameWorkload = JSON.stringify(current.workload) === JSON.stringify(baseline.workload);
   const sameEnvironment = current.environment.node === baseline.environment.node && current.environment.platform === baseline.environment.platform && current.environment.osRelease === baseline.environment.osRelease && current.environment.arch === baseline.environment.arch && current.environment.cpuModel === baseline.environment.cpuModel && current.environment.cpus === baseline.environment.cpus;
-  if (!current.integrity?.valid || !baseline.integrity?.valid || current.samplesMs.length !== current.workload.iterations || baseline.samplesMs.length !== baseline.workload.iterations) throw new Error("Benchmark comparison rejected: measurement integrity is invalid.");
+  if (!current.integrity?.valid || !baseline.integrity?.valid || !Array.isArray(current.samplesMs) || !Array.isArray(baseline.samplesMs) || current.samplesMs.length !== current.workload.iterations || baseline.samplesMs.length !== baseline.workload.iterations) throw new Error("Benchmark comparison rejected: measurement integrity is invalid.");
   if (!sameWorkload) throw new Error("Benchmark comparison rejected: workload parameters differ.");
   if (!sameEnvironment) throw new Error("Benchmark comparison rejected: runtime or host metadata differs.");
   const delta = (value: number, previous: number) => ({ absolute: Number((value - previous).toFixed(3)), percent: previous === 0 ? null : Number((((value - previous) / previous) * 100).toFixed(2)) });
