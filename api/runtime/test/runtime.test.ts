@@ -1211,6 +1211,38 @@ describe("runtime", () => {
 
 
 
+
+  it("measures unknown and unsupported runtime command rejections", async () => {
+    const observations: Array<{
+      event: string;
+      operationName?: string;
+      durationMs?: number;
+      meta?: Record<string, unknown>;
+    }> = [];
+    const runtime = new SignalRuntime({
+      eventPort: createInProcessDispatcher(),
+      observabilityPort: {
+        emit: (observation) => observations.push(observation),
+      },
+    });
+
+    const unknown = await runtime.run("observed.unknown.v1", {});
+    const unsupported = await runtime.execute({
+      kind: "unsupported" as never,
+      name: "observed.unsupported.v1",
+      payload: {},
+    });
+
+    expect(unknown.ok).toBe(false);
+    expect(unsupported.ok).toBe(false);
+    expect(observations.filter((item) => item.event === "error.occurred")).toHaveLength(2);
+    expect(observations.map((item) => item.meta?.errorCode)).toEqual([
+      "OPERATION_NOT_FOUND",
+      "UNSUPPORTED_OPERATION_KIND",
+    ]);
+    expect(observations.every((item) => (item.durationMs ?? -1) >= 0)).toBe(true);
+  });
+
   it("measures direct event publishing success and failure", async () => {
     const observations: Array<{
       event: string;
