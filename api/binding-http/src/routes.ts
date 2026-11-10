@@ -2,9 +2,10 @@ import type { SignalAuth } from "@signal/protocol";
 import rateLimit from "@fastify/rate-limit";
 import type { SignalRuntime } from "@signal/sdk-node";
 import type { FastifyInstance, FastifyRequest } from "fastify";
-type RateLimitPluginOptions = NonNullable<Parameters<typeof rateLimit>[1]>;
 import { handleCapabilitiesRequest } from "./capabilities-route";
 import { handleMutationRequest, handleQueryRequest } from "./handlers";
+
+type RateLimitPluginOptions = NonNullable<Parameters<typeof rateLimit>[1]>;
 
 export interface SignalHttpRateLimitOptions {
   max?: number;
