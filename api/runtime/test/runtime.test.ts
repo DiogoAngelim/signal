@@ -1315,4 +1315,56 @@ describe("runtime", () => {
       });
     }
   });
+
+  it("measures subscriber success, failure, retry, and replay deduplication", async () => {
+    const observations: Array<{
+      event: string;
+      operationName?: string;
+      durationMs?: number;
+      outcome?: string;
+      meta?: Record<string, unknown>;
+    }> = [];
+    const eventPort = createInProcessDispatcher();
+    const runtime = new SignalRuntime({
+      eventPort,
+      observabilityPort: {
+        emit: (observation) => observations.push(observation),
+      },
+    });
+    let attempts = 0;
+
+    runtime.subscribe(
+      "observed.subscriber.v1",
+      async () => {
+        attempts += 1;
+        if (attempts === 1) throw new Error("private subscriber detail");
+      },
+      { replaySafe: true, consumerId: "observability-test" },
+    );
+
+    const envelope = ensureEnvelope({
+      kind: "event",
+      name: "observed.subscriber.v1",
+      payload: { value: "one" },
+    });
+
+    await expect(eventPort.dispatch(envelope)).rejects.toThrow(
+      "private subscriber detail",
+    );
+    await eventPort.dispatch(envelope);
+    await eventPort.dispatch(envelope);
+
+    expect(attempts).toBe(2);
+    expect(observations.filter((item) => item.event === "subscriber.failed")).toHaveLength(1);
+    expect(observations.filter((item) => item.event === "subscriber.delivered")).toHaveLength(1);
+    expect(observations.filter((item) => item.event === "subscriber.deduped")).toHaveLength(1);
+    const failed = observations.find((item) => item.event === "subscriber.failed");
+    expect(failed).toMatchObject({
+      operationName: "observed.subscriber.v1",
+      outcome: "failed",
+      meta: { errorCode: expect.any(String) },
+    });
+    expect(failed?.durationMs).toEqual(expect.any(Number));
+    expect(JSON.stringify(observations)).not.toContain("private subscriber detail");
+  });
 });
