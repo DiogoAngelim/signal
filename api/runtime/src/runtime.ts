@@ -268,7 +268,7 @@ export class SignalRuntime implements SignalBinding {
             deduper: options.deduper,
             onDeduplicated: (envelope, reason) => {
               this.emitObservation({
-                event: "subscriber.deduped",
+                event: reason === "in-flight" ? "subscriber.coalesced" : "subscriber.deduped",
                 operationName: name,
                 operationKind: "event",
                 messageId: envelope.messageId,
