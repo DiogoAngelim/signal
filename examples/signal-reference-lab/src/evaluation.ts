@@ -11,7 +11,8 @@ import { createReferenceLab } from "./signal-app.js";
 import type { CaseRequest } from "./domain.js";
 
 export type ScenarioStatus = "passed" | "failed" | "blocked" | "not-run";
-export type ScenarioResult = { id: string; title: string; status: ScenarioStatus; durationMs: number; assertions: number; failures: string[]; failureAttribution?: "infrastructure" | "harness" | "unclassified"; evidence: string[] };
+export type ScenarioTarget = "signal" | "integration" | "reference-app";
+export type ScenarioResult = { id: string; title: string; target: ScenarioTarget; status: ScenarioStatus; durationMs: number; assertions: number; failures: string[]; failureAttribution?: "infrastructure" | "harness" | "unclassified"; evidence: string[] };
 export type Capability = { id: string; area: string; capability: string; status: "exercised" | "partial" | "not-verified" | "not-applicable"; scenarios: string[]; evidence: string; limitation?: string };
 
 const capabilities: Capability[] = [
@@ -52,7 +53,7 @@ const capabilities: Capability[] = [
   { id: "cli.verification", area: "CLI", capability: "Repeatable local scenario and capability report commands", status: "exercised", scenarios: ["lifecycle"], evidence: "evaluate and coverage CLI commands emit JSON reports" }
 ];
 
-export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capabilities: Capability[]; score: Scorecard; summary: string }> {
+export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capabilities: Capability[]; score: Scorecard; qualityGates: Record<ScenarioTarget, { total: number; passed: number; failed: number; blocked: number }>; summary: string }> {
   const results: ScenarioResult[] = [];
   const capabilityResults = capabilities.map((item) => ({ ...item, scenarios: [...item.scenarios] }));
   const run = async (id: string, title: string, fn: (assert: (condition: unknown, message: string) => void) => Promise<void>) => {
@@ -64,7 +65,8 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
       : id === "postgres-integration" && /(econnrefused|connection terminated|database .* unavailable|timeout|could not connect)/.test(failureText) ? "infrastructure" as const
       : id === "benchmark-integrity" || /measurement integrity/.test(failureText) ? "harness" as const
       : "unclassified" as const;
-    results.push({ id, title, status: failures.length ? "failed" : "passed", durationMs: Number((performance.now() - started).toFixed(3)), assertions, failures, failureAttribution, evidence: [`scenario:${id}`] });
+    const target: ScenarioTarget = ["lifecycle", "authorization", "tenant-isolation"].includes(id) ? "reference-app" : ["idempotency", "concurrency"].includes(id) ? "integration" : "signal";
+    results.push({ id, title, target, status: failures.length ? "failed" : "passed", durationMs: Number((performance.now() - started).toFixed(3)), assertions, failures, failureAttribution, evidence: [`scenario:${id}`] });
   };
   await run("lifecycle", "Request → evidence → assessment → decision → authorized action → outcome", async (a) => {
     const app = createReferenceLab(); const request = await app.submitRequest({ tenantId: "tenant-a", title: "Review supplier access", description: "Assess whether a supplier should receive temporary access." });
@@ -328,7 +330,7 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
       }
     });
   } else {
-    results.push({ id: "postgres-integration", title: "PostgreSQL adapter integration", status: "blocked", durationMs: 0, assertions: 0, failures: [], evidence: ["DATABASE_URL is not configured; durable persistence/outbox/inbox/distributed adapters were not exercised."] });
+    results.push({ id: "postgres-integration", title: "PostgreSQL adapter integration", target: "signal", status: "blocked", durationMs: 0, assertions: 0, failures: [], evidence: ["DATABASE_URL is not configured; durable persistence/outbox/inbox/distributed adapters were not exercised."] });
   }
   await run("kernel-pipeline", "Kernel plugin orchestration and replay reproduce the four-stage pipeline", async (a) => {
     const orchestrator = new SignalOrchestrator({ domain: "reference-lab", version: 1, maxConcurrentPipelines: 2 });
@@ -352,7 +354,7 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
       a(true, "Signal CLI verify exited successfully: " + output.slice(0, 240));
     });
   } else {
-    results.push({ id: "signal-cli", title: "Signal CLI verification", status: "blocked", durationMs: 0, assertions: 0, failures: [], evidence: ["SIGNAL_CLI_READY is not set; the separate Signal CLI build/verify gate was not run."] });
+    results.push({ id: "signal-cli", title: "Signal CLI verification", target: "signal", status: "blocked", durationMs: 0, assertions: 0, failures: [], evidence: ["SIGNAL_CLI_READY is not set; the separate Signal CLI build/verify gate was not run."] });
   }
   await run("observability-metrics", "Prometheus metrics render bounded execution telemetry", async (a) => {
     const metrics = createPrometheusMetricsRecorder({ maxSeries: 100 });
